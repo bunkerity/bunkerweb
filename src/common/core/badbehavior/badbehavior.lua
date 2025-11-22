@@ -6,12 +6,15 @@ local utils = require "bunkerweb.utils"
 local badbehavior = class("badbehavior", plugin)
 
 local ngx = ngx
+local var = ngx.var
 local ERR = ngx.ERR
 local WARN = ngx.WARN
 local NOTICE = ngx.NOTICE
 local worker = ngx.worker
 local add_ban = utils.add_ban
+local remove_ban = utils.remove_ban
 local is_whitelisted = utils.is_whitelisted
+local is_ip_whitelisted = utils.is_ip_whitelisted
 local is_banned = utils.is_banned
 local get_country = utils.get_country
 local get_security_mode = utils.get_security_mode
@@ -30,6 +33,17 @@ function badbehavior:log()
 	-- Check if we are whitelisted
 	if is_whitelisted(self.ctx) then
 		return self:ret(true, "client is whitelisted")
+	end
+	-- Fallback to whitelist lists/cache in case the request skipped the whitelist phase
+	local wl_ip, wl_info = is_ip_whitelisted(self.ctx.bw.remote_addr, self.ctx.bw.server_name)
+	if wl_ip == nil then
+		self.logger:log(ERR, "can't check whitelist for IP " .. self.ctx.bw.remote_addr .. " : " .. wl_info)
+	elseif wl_ip then
+		self.ctx.bw.is_whitelisted = "yes"
+		if var then
+			var.is_whitelisted = "yes"
+		end
+		return self:ret(true, "client is whitelisted (ip lookup : " .. wl_info .. ")")
 	end
 	-- Check if bad behavior is activated
 	if self.variables["USE_BAD_BEHAVIOR"] ~= "yes" then
@@ -87,10 +101,16 @@ function badbehavior:log()
 		date = self.ctx.bw.start_time,
 		id = self.ctx.bw.request_id,
 		ip = self.ctx.bw.remote_addr,
+		country = country,
 		server_name = self.ctx.bw.server_name,
 		status = status,
 		method = self.ctx.bw.request_method or "-",
 		url = request_uri,
+		security_mode = security_mode,
+		ban_scope = ban_scope,
+		ban_time = ban_time,
+		threshold = tonumber(self.variables["BAD_BEHAVIOR_THRESHOLD"]) or 0,
+		count_time = tonumber(self.variables["BAD_BEHAVIOR_COUNT_TIME"]) or 0,
 	})
 	return self:ret(true, "success")
 end
@@ -233,7 +253,25 @@ function badbehavior:timer()
 	-- Add bans if needed
 	for _, data in pairs(counters) do
 		if data.counter >= data.threshold then
-			if data.security_mode == "block" then
+			local wl_ip, wl_info = is_ip_whitelisted(data.ip, data.server_name)
+			if wl_ip == nil then
+				self.logger:log(ERR, "can't check whitelist for IP " .. data.ip .. " : " .. wl_info)
+			elseif wl_ip then
+				local rm_ok, rm_err = remove_ban(data.ip, data.server_name, data.ban_scope)
+				if rm_ok == false and rm_err then
+					self.logger:log(ERR, "can't remove ban for whitelisted IP " .. data.ip .. " : " .. rm_err)
+				end
+				self.logger:log(
+					NOTICE,
+					string.format(
+						"skipped badbehavior ban for whitelisted IP %s on server %s (scope %s, info %s)",
+						data.ip,
+						data.server_name,
+						data.ban_scope,
+						wl_info or "ip"
+					)
+				)
+			elseif data.security_mode == "block" then
 				local ban_time = tonumber(data.ban_time) or 0
 				local reason_data = self:get_metric("tables", "increments_" .. data.ip) or {}
 				local ok, err = add_ban(
@@ -306,7 +344,7 @@ function badbehavior:increase(
 
 	-- Redis case
 	if use_redis then
-		local redis_counter, err = self:redis_increase(ip, count_time, ban_time, server_name, ban_scope)
+		local redis_counter, err = self:redis_increase(ip, count_time, threshold, ban_time, server_name, ban_scope)
 		if not redis_counter then
 			self.logger:log(ERR, "(increase) redis_increase failed, falling back to local : " .. err)
 		else
@@ -325,7 +363,7 @@ function badbehavior:increase(
 		counter = local_counter + 1
 	end
 	-- Store local counter
-	local ok, err = self.datastore:set("plugin_badbehavior_count_" .. key_suffix, counter, count_time)
+	local ok, err = self.datastore:set_with_retries("plugin_badbehavior_count_" .. key_suffix, counter, count_time)
 	if not ok then
 		self.logger:log(ERR, "(increase) can't save counts to the datastore : " .. err)
 		return false, err
@@ -383,7 +421,7 @@ function badbehavior:decrease(ip, count_time, threshold, use_redis, server_name,
 		counter = 0
 		self.datastore:delete("plugin_badbehavior_count_" .. key_suffix)
 	else
-		local ok, err = self.datastore:set("plugin_badbehavior_count_" .. key_suffix, counter, count_time)
+		local ok, err = self.datastore:set_with_retries("plugin_badbehavior_count_" .. key_suffix, counter, count_time)
 		if not ok then
 			self.logger:log(ERR, "(decrease) can't save counts to the datastore : " .. err)
 			return false, err
@@ -408,7 +446,7 @@ function badbehavior:decrease(ip, count_time, threshold, use_redis, server_name,
 	return true, "success"
 end
 
-function badbehavior:redis_increase(ip, count_time, ban_time, server_name, ban_scope)
+function badbehavior:redis_increase(ip, count_time, threshold, ban_time, server_name, ban_scope)
 	-- Determine key based on ban scope
 	local counter_key = "plugin_bad_behavior_" .. ip
 	local ban_key = "bans_ip_" .. ip
@@ -429,16 +467,18 @@ function badbehavior:redis_increase(ip, count_time, ban_time, server_name, ban_s
 			redis.log(redis.LOG_WARNING, "Bad behavior increase EXPIRE error : " .. ret_expire["err"])
 			return ret_expire
 		end
-		if ret_incr > tonumber(ARGV[2]) then
+		local threshold = tonumber(ARGV[2])
+		local ban_time = tonumber(ARGV[3])
+		if ret_incr >= threshold then
 			-- For permanent bans (ban_time = 0), don't set an expiration
-			if tonumber(ARGV[2]) == 0 then
+			if ban_time == 0 then
 				local ret_set = redis.pcall("SET", KEYS[2], "bad behavior")
 				if type(ret_set) == "table" and ret_set["err"] ~= nil then
 					redis.log(redis.LOG_WARNING, "Bad behavior increase SET (permanent) error : " .. ret_set["err"])
 					return ret_set
 				end
 			else
-				local ret_set = redis.pcall("SET", KEYS[2], "bad behavior", "EX", ARGV[2])
+				local ret_set = redis.pcall("SET", KEYS[2], "bad behavior", "EX", ban_time)
 				if type(ret_set) == "table" and ret_set["err"] ~= nil then
 					redis.log(redis.LOG_WARNING, "Bad behavior increase SET error : " .. ret_set["err"])
 					return ret_set
@@ -453,7 +493,8 @@ function badbehavior:redis_increase(ip, count_time, ban_time, server_name, ban_s
 		return false, err
 	end
 	-- Execute LUA script
-	local counter, err = self.clusterstore:call("eval", redis_script, 2, counter_key, ban_key, count_time, ban_time)
+	local counter, err =
+		self.clusterstore:call("eval", redis_script, 2, counter_key, ban_key, count_time, threshold, ban_time)
 	if not counter then
 		self.clusterstore:close()
 		return false, err

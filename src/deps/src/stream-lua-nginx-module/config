@@ -278,6 +278,7 @@ STREAM_LUA_SRCS=" \
                 $ngx_addon_dir/src/ngx_stream_lua_semaphore.c \
                 $ngx_addon_dir/src/ngx_stream_lua_ssl_client_helloby.c \
                 $ngx_addon_dir/src/ngx_stream_lua_ssl_certby.c \
+                $ngx_addon_dir/src/ngx_stream_lua_proxy_ssl_verifyby.c \
                 $ngx_addon_dir/src/ngx_stream_lua_log_ringbuf.c \
                 $ngx_addon_dir/src/ngx_stream_lua_input_filters.c \
                 "
@@ -322,6 +323,7 @@ STREAM_LUA_DEPS=" \
                 $ngx_addon_dir/src/ngx_stream_lua_semaphore.h \
                 $ngx_addon_dir/src/ngx_stream_lua_ssl_client_helloby.h \
                 $ngx_addon_dir/src/ngx_stream_lua_ssl_certby.h \
+                $ngx_addon_dir/src/ngx_stream_lua_proxy_ssl_verifyby.h \
                 $ngx_addon_dir/src/ngx_stream_lua_log_ringbuf.h \
                 $ngx_addon_dir/src/ngx_stream_lua_input_filters.h \
                 "

@@ -44,6 +44,9 @@ static u_char *ngx_stream_lua_log_ssl_cert_error(ngx_log_t *log, u_char *buf,
     size_t len);
 static ngx_int_t ngx_stream_lua_ssl_cert_by_chunk(lua_State *L,
     ngx_stream_lua_request_t *r);
+#ifndef OPENSSL_IS_BORINGSSL
+static int ngx_stream_lua_is_grease_cipher(uint16_t cipher_id);
+#endif
 
 
 ngx_int_t
@@ -182,7 +185,8 @@ ngx_stream_lua_ssl_cert_by_lua(ngx_conf_t *cf, ngx_command_t *cmd,
 
         p = ngx_copy(p, "ssl_certificate_by_lua",
                      sizeof("ssl_certificate_by_lua") - 1);
-        p = ngx_copy(p, NGX_STREAM_LUA_INLINE_TAG, NGX_STREAM_LUA_INLINE_TAG_LEN);
+        p = ngx_copy(p, NGX_STREAM_LUA_INLINE_TAG,
+                     NGX_STREAM_LUA_INLINE_TAG_LEN);
         p = ngx_stream_lua_digest_hex(p, value[1].data, value[1].len);
         *p = '\0';
     }
@@ -220,7 +224,7 @@ ngx_stream_lua_ssl_cert_handler(ngx_ssl_conn_t *ssl_conn, void *data)
 
         if (cctx->done) {
             ngx_log_debug1(NGX_LOG_DEBUG_STREAM, c->log, 0,
-                           "stream lua_certificate_by_lua:"
+                           "stream ssl_certificate_by_lua:"
                            " cert cb exit code: %d",
                            cctx->exit_code);
 
@@ -305,15 +309,6 @@ ngx_stream_lua_ssl_cert_handler(ngx_ssl_conn_t *ssl_conn, void *data)
 
     c->log->action = "loading SSL certificate by lua";
 
-    if (lscf->srv.ssl_cert_handler == NULL) {
-
-        ngx_log_error(NGX_LOG_ALERT, c->log, 0,
-                      "no ssl_certificate_by_lua* defined in "
-                      "server %s:%ui", &cscf->file_name, &cscf->line);
-
-        goto failed;
-    }
-
     rc = lscf->srv.ssl_cert_handler(r, lscf, L);
 
     if (rc >= NGX_OK || rc == NGX_ERROR) {
@@ -324,7 +319,7 @@ ngx_stream_lua_ssl_cert_handler(ngx_ssl_conn_t *ssl_conn, void *data)
         }
 
         ngx_log_debug2(NGX_LOG_DEBUG_STREAM, c->log, 0,
-                       "stream lua_certificate_by_lua:"
+                       "stream ssl_certificate_by_lua:"
                        " handler return value: %i, "
                        "cert cb exit code: %d", rc, cctx->exit_code);
 
@@ -405,7 +400,7 @@ ngx_stream_lua_ssl_cert_aborted(void *data)
 {
     ngx_stream_lua_ssl_ctx_t            *cctx = data;
 
-    dd("lua ssl cert done");
+    dd("lua ssl cert aborted");
 
     if (cctx->done) {
         /* completed successfully already */
@@ -413,7 +408,7 @@ ngx_stream_lua_ssl_cert_aborted(void *data)
     }
 
     ngx_log_debug0(NGX_LOG_DEBUG_STREAM, cctx->connection->log, 0,
-                   "stream lua_certificate_by_lua: cert cb aborted");
+                   "stream ssl_certificate_by_lua: cert cb aborted");
 
     cctx->aborted = 1;
     cctx->request->connection->ssl = NULL;
@@ -982,6 +977,82 @@ ngx_stream_lua_ffi_ssl_raw_client_addr(ngx_stream_lua_request_t *r, char **addr,
     }
 
     return NGX_OK;
+}
+
+
+#ifndef OPENSSL_IS_BORINGSSL
+static int
+ngx_stream_lua_is_grease_cipher(uint16_t cipher_id)
+{
+    /* GREASE values follow pattern: 0x?A?A where ? can be any hex digit */
+    /* and both ? must be the same */
+    /* Check if both bytes follow ?A pattern and high nibbles match */
+    return (cipher_id & 0x0F0F) == 0x0A0A;
+}
+#endif
+
+
+int
+ngx_stream_lua_ffi_req_shared_ssl_ciphers(ngx_stream_lua_request_t *r,
+    uint16_t *ciphers, uint16_t *nciphers, int filter_grease, char **err)
+{
+#ifdef OPENSSL_IS_BORINGSSL
+
+    *err = "BoringSSL is not supported for SSL cipher operations";
+    return NGX_ERROR;
+
+#else
+    ngx_ssl_conn_t         *ssl_conn;
+    STACK_OF(SSL_CIPHER)   *sk, *ck;
+    int                     sn, cn, i, n;
+    uint16_t                cipher;
+
+    if (r == NULL || r->connection == NULL || r->connection->ssl == NULL) {
+        *err = "bad request";
+        return NGX_ERROR;
+    }
+
+    ssl_conn = r->connection->ssl->connection;
+    if (ssl_conn == NULL) {
+        *err = "bad ssl conn";
+        return NGX_ERROR;
+    }
+
+    sk = SSL_get1_supported_ciphers(ssl_conn);
+    ck = SSL_get_client_ciphers(ssl_conn);
+    sn = sk_SSL_CIPHER_num(sk);
+    cn = sk_SSL_CIPHER_num(ck);
+
+    if (sn > *nciphers) {
+        *err = "buffer too small";
+        *nciphers = 0;
+        sk_SSL_CIPHER_free(sk);
+        return NGX_ERROR;
+    }
+
+    for (*nciphers = 0, i = 0; i < sn; i++) {
+        cipher = SSL_CIPHER_get_protocol_id(sk_SSL_CIPHER_value(sk, i));
+
+        /* Skip GREASE ciphers if filtering is enabled */
+        if (filter_grease && ngx_stream_lua_is_grease_cipher(cipher)) {
+            continue;
+        }
+
+        for (n = 0; n < cn; n++) {
+            if (SSL_CIPHER_get_protocol_id(sk_SSL_CIPHER_value(ck, n))
+                == cipher)
+            {
+                ciphers[(*nciphers)++] = cipher;
+                break;
+            }
+        }
+    }
+
+    sk_SSL_CIPHER_free(sk);
+
+    return NGX_OK;
+#endif
+
 }
 
 
@@ -1626,6 +1697,24 @@ failed:
 
     return NGX_ERROR;
 #endif
+}
+
+
+ngx_ssl_conn_t *
+ngx_stream_lua_ffi_get_req_ssl_pointer(ngx_stream_lua_request_t *r,
+    const char **err)
+{
+    if (r->connection == NULL || r->connection->ssl == NULL) {
+        *err = "bad request";
+        return NULL;
+    }
+
+    if (r->connection->ssl->connection == NULL) {
+        *err = "bad ssl connection";
+        return NULL;
+    }
+
+    return r->connection->ssl->connection;
 }
 
 

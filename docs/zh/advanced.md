@@ -1,8 +1,8 @@
 # 高级用法
 
-GitHub 仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples) 文件夹中提供了许多真实世界的用例示例。
+GitHub 仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/examples) 文件夹中提供了许多真实世界的用例示例。
 
-我们还提供了许多样板文件，例如用于各种集成和数据库类型的 YAML 文件。这些都可以在 [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations) 文件夹中找到。
+我们还提供了许多样板文件，例如用于各种集成和数据库类型的 YAML 文件。这些都可以在 [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/misc/integrations) 文件夹中找到。
 
 本节仅关注高级用法和安全调整，请参阅文档的[功能部分](features.md)以查看所有可用的设置。
 
@@ -87,7 +87,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.5
+            bunkerity/bunkerweb-all-in-one:1.6.6
         ```
 
         请注意，如果您的容器已经创建，您需要删除并重新创建它，以便更新新的环境变量。
@@ -98,7 +98,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5
+          image: bunkerity/bunkerweb:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -106,7 +106,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5
+          image: bunkerity/bunkerweb-scheduler:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -123,7 +123,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5
+          image: bunkerity/bunkerweb:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -131,7 +131,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5
+          image: bunkerity/bunkerweb-scheduler:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -178,7 +178,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5
+          image: bunkerity/bunkerweb:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -186,7 +186,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5
+          image: bunkerity/bunkerweb-scheduler:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -251,7 +251,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.5
+            bunkerity/bunkerweb-all-in-one:1.6.6
         ```
 
         请注意，如果您的容器已经创建，您需要删除并重新创建它，以便更新新的环境变量。
@@ -262,7 +262,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5
+          image: bunkerity/bunkerweb:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -272,7 +272,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5
+          image: bunkerity/bunkerweb-scheduler:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -290,7 +290,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5
+          image: bunkerity/bunkerweb:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -300,7 +300,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5
+          image: bunkerity/bunkerweb-scheduler:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -352,7 +352,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5
+          image: bunkerity/bunkerweb:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -362,7 +362,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5
+          image: bunkerity/bunkerweb-scheduler:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -514,7 +514,7 @@ systemctl status systemd-resolved
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.5
+        bunkerity/bunkerweb-all-in-one:1.6.6
     ```
 
 === "Docker"
@@ -542,7 +542,7 @@ systemctl status systemd-resolved
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -553,7 +553,7 @@ systemctl status systemd-resolved
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5
+        image: bunkerity/bunkerweb-scheduler:1.6.6
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -667,7 +667,7 @@ systemctl status systemd-resolved
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.5
+        bunkerity/bunkerweb-all-in-one:1.6.6
     ```
 
     请注意，如果您的容器已经创建，您需要删除并重新创建它，以便应用新的环境变量。
@@ -707,7 +707,7 @@ systemctl status systemd-resolved
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.5
+        bunkerity/bunkerweb-all-in-one:1.6.6
     ```
 
 === "Docker"
@@ -730,7 +730,7 @@ systemctl status systemd-resolved
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.5
+      image: bunkerity/bunkerweb-scheduler:1.6.6
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -773,7 +773,7 @@ systemctl status systemd-resolved
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.5
+      image: bunkerity/bunkerweb-scheduler:1.6.6
       volumes:
         - ./bw-data:/data
       ...
@@ -843,7 +843,7 @@ systemctl status systemd-resolved
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.5
+      image: bunkerity/bunkerweb-scheduler:1.6.6
       volumes:
         - ./bw-data:/data
       ...
@@ -851,14 +851,17 @@ systemctl status systemd-resolved
 
 === "Kubernetes"
 
-    当使用 [Kubernetes 集成](integrations.md#kubernetes)时，自定义配置是使用 [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) 管理的。
+    当使用 [Kubernetes 集成](integrations.md#kubernetes)时，
+    自定义配置通过 [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) 管理。
 
-    为了简单起见，您甚至不需要将 ConfigMap 与 Pod 一起使用（例如作为环境变量或卷）：autoconf Pod 正在监听 ConfigMap 事件，并会在需要时更新自定义配置。
+    无需将 ConfigMap 挂载到 Pod（例如作为环境变量或卷）。
+    Autoconf Pod 会监听 ConfigMap 事件并在检测到更改时立即更新配置。
 
-    创建 ConfigMap 时，您需要添加特殊的标签：
+    请为需要由 Ingress 控制器管理的 ConfigMap 添加以下注解：
 
-    *   **bunkerweb.io/CONFIG_TYPE**：必须设置为有效的自定义配置类型（http、server-http、default-server-http、modsec、modsec-crs、crs-plugins-before、crs-plugins-after、stream 或 server-stream）
-    *   **bunkerweb.io/CONFIG_SITE**：设置为服务器名称以将配置应用于该特定服务器（可选，如果未设置则将全局应用）
+    - `bunkerweb.io/CONFIG_TYPE`：必填。请选择受支持的类型（`http`、`server-http`、`default-server-http`、`modsec`,
+      `modsec-crs`、`crs-plugins-before`、`crs-plugins-after`、`stream`、`server-stream` 或 `settings`）。
+    - `bunkerweb.io/CONFIG_SITE`：可选。设置为主要服务器名称（在 `Ingress` 中声明）以仅作用于该服务；不设置则表示全局生效。
 
     这是一个示例：
 
@@ -879,8 +882,22 @@ systemctl status systemd-resolved
       }
     ```
 
+    !!! info "同步方式"
+        - Ingress 控制器会持续监听带注解的 ConfigMap。
+        - 如果设置了 `NAMESPACES` 环境变量，则仅处理这些命名空间中的 ConfigMap。
+        - 创建或更新受管 ConfigMap 会立即触发配置重新加载。
+        - 删除 ConfigMap，或移除 `bunkerweb.io/CONFIG_TYPE` 注解，会清除对应的自定义配置。
+        - 当指定 `bunkerweb.io/CONFIG_SITE` 时，引用的服务必须已经存在；否则该 ConfigMap 会被忽略，直到服务出现。
+
     !!! tip "自定义额外配置"
-        自 `1.6.0` 版本起，您可以使用 `bunkerweb.io/CONFIG_TYPE=settings` 注解来添加/覆盖设置。这是一个示例：
+        自 `1.6.0` 版本起，您可以在 ConfigMap 上添加 `bunkerweb.io/CONFIG_TYPE=settings` 注解来新增或覆盖设置。
+        autoconf 的 Ingress 控制器会读取 `data` 下的每个键值对，并像处理环境变量一样应用它们：
+
+        - 未定义 `bunkerweb.io/CONFIG_SITE` 时，所有键都会全局生效。
+        - 定义了 `bunkerweb.io/CONFIG_SITE` 时，控制器会自动为尚未限定的键添加 `<服务器名称>_` 前缀（其中所有 `/` 会被替换为 `_`）。如果需要在同一份 ConfigMap 中混合全局键和特定键，请自行添加该前缀。
+        - 无效的键名或取值会被跳过，并在 autoconf 控制器日志中记录警告。
+
+        示例：
 
         ```yaml
         apiVersion: v1
@@ -908,7 +925,7 @@ systemctl status systemd-resolved
 
     创建配置时，您需要添加特殊的标签：
 
-    *   **bunkerweb.CONFIG_TYPE**：必须设置为有效的自定义配置类型（http、server-http、default-server-http、modsec、modsec-crs、crs-plugins-before、crs-plugins-after、stream 或 server-stream）
+    *   **bunkerweb.CONFIG_TYPE**：必须设置为有效的自定义配置类型（http、server-http、default-server-http、modsec、modsec-crs、crs-plugins-before、crs-plugins-after、stream、server-stream 或 settings）
     *   **bunkerweb.CONFIG_SITE**：设置为服务器名称以将配置应用于该特定服务器（可选，如果未设置则将全局应用）
 
     这是一个示例：
@@ -1055,7 +1072,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.5
+        bunkerity/bunkerweb-all-in-one:1.6.6
     ```
 
     请注意，如果您的容器已经创建，您需要删除并重新创建它，以便应用新的环境变量。
@@ -1078,7 +1095,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6
         ports:
           - "80:8080" # 如果您想在使用 http 挑战类型时使用 Let's Encrypt 自动化，请保留此项
           - "10000:10000" # app1
@@ -1093,7 +1110,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5
+        image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 此设置是指定 BunkerWeb 实例所必需的
@@ -1144,7 +1161,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6
         ports:
           - "80:8080" # 如果您想在使用 http 挑战类型时使用 Let's Encrypt 自动化，请保留此项
           - "10000:10000" # app1
@@ -1374,7 +1391,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6
         ports:
           # 如果您想在使用 http 挑战类型时使用 Let's Encrypt 自动化，请保留此项
           - published: 80
@@ -1504,7 +1521,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.5
+        bunkerity/bunkerweb-all-in-one:1.6.6
     ```
 
     请注意，如果您的容器已经创建，您需要删除并重新创建它，以便应用新的环境变量。
@@ -1548,7 +1565,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1563,7 +1580,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5
+        image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 此设置是指定 BunkerWeb 实例所必需的
@@ -1657,7 +1674,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -1670,7 +1687,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5
+        image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由 autoconf 服务自动检测
@@ -1685,7 +1702,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.5
+        image: bunkerity/bunkerweb-autoconf:1.6.6
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1925,7 +1942,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2024,7 +2041,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5
+        image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
           USE_IPv6: "yes"
 
@@ -2083,7 +2100,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
 ```yaml
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.5
+    image: bunkerity/bunkerweb:1.6.6
     logging:
       driver: "json-file"
       options:
@@ -2194,42 +2211,86 @@ Prometheus 导出器插件在您的 BunkerWeb 实例上添加了一个 [Promethe
 STREAM 支持 :x:
 
 !!! warning "需要监控插件"
-    此插件需要安装并启用监控专业版插件，并且 `USE_MONITORING` 设置为 `yes`。
+    只有在启用 Monitoring Pro 插件后（`USE_MONITORING=yes` 且各实例可访问）才能生成报告。
 
-报告插件提供了一个全面的解决方案，用于定期报告 BunkerWeb 的重要数据，包括全局统计、攻击、封禁、请求、原因和 AS 信息。它提供了广泛的功能，包括自动报告创建、自定义选项以及与监控专业版插件的无缝集成。使用报告插件，您可以轻松生成和管理报告，以监控应用程序的性能和安全性。
+报告插件将 Monitoring 数据转换为定期报告。每份报告包含实例/服务计数、攻击与封禁总数及环比变化、请求健康度，以及排名前 3 的 IP、ASN、原因和国家。输出格式：webhook 使用 Markdown（自动兼容 Discord/Slack），邮件使用 HTML。
 
-**功能列表**
+**你将得到什么**
 
-- 定期报告 BunkerWeb 的重要数据，包括全局统计、攻击、封禁、请求、原因和 AS 信息。
-- 与监控专业版插件集成，实现无缝集成和增强的报告功能。
-- 支持 webhooks（经典、Discord 和 Slack）以进行实时通知。
-- 支持 SMTP 以进行电子邮件通知。
-- 用于自定义和灵活性的配置选项。
+- 聚合来自所有响应实例的数据，并在实例无法响应监控 API 时给出警告。
+- 按周期（日/周/月）对比上一期的趋势变化。
+- 最高的 IP/ASN/国家/原因榜单，便于快速处置。
+- 双重投递：webhook 的 Markdown 负载与 SMTP 的富文本邮件。
+
+**前提条件与调度**
+
+- 必须启用且可访问 Monitoring。
+- 至少启用一种投递方式（`USE_REPORTING_WEBHOOK=yes` 和/或 `USE_REPORTING_SMTP=yes`）。
+- 任务每日运行，但每个周期仅发送一次。首次运行只记录时间戳，下一次才会发送第一份报告。
+
+**投递目标**
+
+- Webhook：支持通用 URL，并自动识别 Discord 与 Slack。设置 `USE_REPORTING_WEBHOOK=yes`，并在 `REPORTING_WEBHOOK_URLS` 中以空格列出 URL。负载为 Markdown；Slack 会自动使用 `mrkdwn`。
+- 邮件（SMTP）：设置 `USE_REPORTING_SMTP=yes`，并提供 SMTP 主机/端口、发件人邮箱及收件人列表。支持 SSL（`REPORTING_SMTP_SSL=SSL`）和 TLS（`REPORTING_SMTP_SSL=TLS`）；未提供凭据时将尝试无认证发送。
+
+**常见配置示例**
+
+=== "Linux"
+
+    ```conf
+    USE_MONITORING=yes
+    USE_REPORTING_WEBHOOK=yes
+    REPORTING_WEBHOOK_URLS=https://discord.com/api/webhooks/... https://hooks.slack.com/services/...
+    REPORTING_SCHEDULE=weekly
+    # 可选邮件发送
+    USE_REPORTING_SMTP=yes
+    REPORTING_SMTP_HOST=smtp.example.com
+    REPORTING_SMTP_PORT=587
+    REPORTING_SMTP_FROM_EMAIL=reports@example.com
+    REPORTING_SMTP_FROM_USER=reports@example.com
+    REPORTING_SMTP_FROM_PASSWORD=change-me
+    REPORTING_SMTP_EMAILS=secops@example.com sre@example.com
+    REPORTING_SMTP_SSL=TLS
+    ```
+
+=== "Docker / All-in-one"
+
+    ```yaml
+    environment:
+      USE_MONITORING: "yes"
+      USE_REPORTING_WEBHOOK: "yes"
+      REPORTING_WEBHOOK_URLS: "https://discord.com/api/webhooks/... https://hooks.slack.com/services/..."
+      REPORTING_SCHEDULE: "daily"
+      USE_REPORTING_SMTP: "yes"
+      REPORTING_SMTP_HOST: "smtp.example.com"
+      REPORTING_SMTP_PORT: "465"
+      REPORTING_SMTP_FROM_EMAIL: "reports@example.com"
+      REPORTING_SMTP_FROM_PASSWORD: "change-me"
+      REPORTING_SMTP_EMAILS: "alerts@example.com"
+      REPORTING_SMTP_SSL: "SSL"
+    ```
 
 **设置列表**
 
-| 设置                           | 默认               | 上下文 | 描述                                                                         |
-| ------------------------------ | ------------------ | ------ | ---------------------------------------------------------------------------- |
-| `USE_REPORTING_SMTP`           | `no`               | 全局   | 启用通过电子邮件发送报告。                                                   |
-| `USE_REPORTING_WEBHOOK`        | `no`               | 全局   | 启用通过 webhook 发送报告。                                                  |
-| `REPORTING_SCHEDULE`           | `weekly`           | 全局   | 发送报告的频率。                                                             |
-| `REPORTING_WEBHOOK_URLS`       |                    | 全局   | 用于接收 Markdown 格式报告的 webhook URL 列表（以空格分隔）。                |
-| `REPORTING_SMTP_EMAILS`        |                    | 全局   | 用于接收 HTML 格式报告的电子邮件地址列表（以空格分隔）。                     |
-| `REPORTING_SMTP_HOST`          |                    | 全局   | 用于 SMTP 发送的主机服务器。                                                 |
-| `REPORTING_SMTP_PORT`          | `465`              | 全局   | 用于 SMTP 的端口。请注意，根据连接类型有不同的标准（SSL = 465，TLS = 587）。 |
-| `REPORTING_SMTP_FROM_EMAIL`    |                    | 全局   | 用作发件人的电子邮件地址。请注意，此电子邮件地址必须禁用 2FA。               |
-| `REPORTING_SMTP_FROM_USER`     |                    | 全局   | 通过发件人电子邮件地址发送的用户身份验证值。                                 |
-| `REPORTING_SMTP_FROM_PASSWORD` |                    | 全局   | 通过发件人电子邮件地址发送的密码身份验证值。                                 |
-| `REPORTING_SMTP_SSL`           | `SSL`              | 全局   | 确定是否为 SMTP 使用安全连接。                                               |
-| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | 全局   | 电子邮件的主题行。                                                           |
+| 设置                           | 默认               | 上下文 | 描述                                                                                 |
+| ------------------------------ | ------------------ | ------ | ------------------------------------------------------------------------------------ |
+| `USE_REPORTING_SMTP`           | `no`               | 全局   | 启用通过邮件发送报告（HTML）。                                                       |
+| `USE_REPORTING_WEBHOOK`        | `no`               | 全局   | 启用通过 webhook 发送报告（Markdown）。                                              |
+| `REPORTING_SCHEDULE`           | `weekly`           | 全局   | 报告周期：`daily`、`weekly` 或 `monthly`。                                           |
+| `REPORTING_WEBHOOK_URLS`       |                    | 全局   | 以空格分隔的 webhook URL；可自动识别 Discord 与 Slack。                              |
+| `REPORTING_SMTP_EMAILS`        |                    | 全局   | 以空格分隔的收件人列表。                                                             |
+| `REPORTING_SMTP_HOST`          |                    | 全局   | SMTP 服务器主机名或 IP。                                                             |
+| `REPORTING_SMTP_PORT`          | `465`              | 全局   | SMTP 端口。SSL 用 `465`，TLS 用 `587`。                                              |
+| `REPORTING_SMTP_FROM_EMAIL`    |                    | 全局   | 发件人地址（如供应商要求请禁用 2FA）。                                               |
+| `REPORTING_SMTP_FROM_USER`     |                    | 全局   | SMTP 用户名（若只提供密码则回退为发件人地址）。                                      |
+| `REPORTING_SMTP_FROM_PASSWORD` |                    | 全局   | SMTP 密码。                                                                          |
+| `REPORTING_SMTP_SSL`           | `SSL`              | 全局   | 连接安全：`no`、`SSL` 或 `TLS`。                                                     |
+| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | 全局   | 邮件主题。                                                                           |
 
 !!! info "信息和行为"
-    - 如果 `USE_REPORTING_SMTP` 设置为 `yes`，则必须设置 `REPORTING_SMTP_EMAILS`。
-    - 如果 `USE_REPORTING_WEBHOOK` 设置为 `yes`，则必须设置 `REPORTING_WEBHOOK_URLS`。
-    - `REPORTING_SCHEDULE` 接受的值为 `daily`、`weekly` 和 `monthly`。
-    - 如果未设置 `REPORTING_SMTP_FROM_USER` 和 `REPORTING_SMTP_FROM_PASSWORD`，插件将尝试在没有身份验证的情况下发送电子邮件。
-    - 如果未设置 `REPORTING_SMTP_FROM_USER` 但设置了 `REPORTING_SMTP_FROM_PASSWORD`，插件将使用 `REPORTING_SMTP_FROM_EMAIL` 作为用户名。
-    - 如果作业失败，插件将在下一次执行中重试发送报告。
+    - 开启 SMTP 时必须填写 `REPORTING_SMTP_EMAILS`；开启 webhook 时必须填写 `REPORTING_WEBHOOK_URLS`。
+    - 若 webhook 和 SMTP 都失败，将在下一个计划任务重试。
+    - HTML 与 Markdown 模板位于 `reporting/files/`，修改时请保留占位符。
 
 ### 备份和恢复
 
@@ -2648,3 +2709,65 @@ STREAM 支持 :x:
   <figcaption>黑名单 - URI</figcaption>
 </figure>
 </div>
+
+## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag" title="Load Balancer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
+Load Balancer 插件将 BunkerWeb 转变为带有护栏的流量导向器。一次声明上游池，将您的反向代理指向它们，并让健康感知平衡将用户保持在响应式后端上。粘性 cookie 模式自动发出 `BWLBID` cookie，以便会话保持在您想要的地方。
+
+#### 功能
+
+- 每个上游块：命名池并在反向代理主机上重用。
+- 灵活平衡：默认 round-robin，或通过 IP 或签名 cookie 粘性。
+- 智能目标：可选 DNS 解析用于主机名后端加上 keepalive 调整。
+- 内置健康：HTTP/HTTPS 探测，具有自定义路径、间隔、状态代码和 SSL 检查。
+- 会话连续性：启用粘性 cookie 模式时自动 `BWLBID` cookie。
+
+#### 配置
+
+**上游定义**
+
+| 设置                                      | 默认          | 上下文 | 多个 | 描述                                                           |
+| ----------------------------------------- | ------------- | ------ | ---- | -------------------------------------------------------------- |
+| `LOADBALANCER_UPSTREAM_NAME`              |               | global | 是   | 上游标识符（由 `REVERSE_PROXY_HOST` 引用）。                   |
+| `LOADBALANCER_UPSTREAM_SERVERS`           |               | global | 是   | 后端地址的空格分隔列表（例如 `10.0.0.1:8080 10.0.0.2:8080`）。 |
+| `LOADBALANCER_UPSTREAM_MODE`              | `round-robin` | global | 是   | 平衡策略（`round-robin` 或 `sticky`）。                        |
+| `LOADBALANCER_UPSTREAM_STICKY_METHOD`     | `ip`          | global | 是   | 粘性方法（`ip` 或 `cookie`）。Cookie 模式发出 `BWLBID`。       |
+| `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`          | global | 是   | 通过 DNS 解析上游主机名。                                      |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE`         |               | global | 是   | 每个 worker 的 keepalive 连接。                                |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT` | `60s`         | global | 是   | Keepalive 连接的空闲超时。                                     |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`    | `1h`          | global | 是   | Keepalive 连接的最大寿命。                                     |
+
+**健康检查**
+
+| 设置                                      | 默认      | 上下文 | 多个 | 描述                                  |
+| ----------------------------------------- | --------- | ------ | ---- | ------------------------------------- |
+| `LOADBALANCER_HEALTHCHECK_DICT_SIZE`      | `10m`     | global | 否   | 健康检查状态的共享字典大小。          |
+| `LOADBALANCER_HEALTHCHECK_URL`            | `/status` | global | 是   | 在每个后端上探测的路径。              |
+| `LOADBALANCER_HEALTHCHECK_INTERVAL`       | `2000`    | global | 是   | 检查之间的间隔（ms）。                |
+| `LOADBALANCER_HEALTHCHECK_TIMEOUT`        | `1000`    | global | 是   | 每次检查的超时（ms）。                |
+| `LOADBALANCER_HEALTHCHECK_FALL`           | `3`       | global | 是   | 标记为 down 前的连续失败次数。        |
+| `LOADBALANCER_HEALTHCHECK_RISE`           | `1`       | global | 是   | 标记为 up 前的连续成功次数。          |
+| `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`     | global | 是   | 有效 HTTP 状态代码的空格分隔列表。    |
+| `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`      | global | 是   | 最大并发探测。                        |
+| `LOADBALANCER_HEALTHCHECK_TYPE`           | `http`    | global | 是   | 健康检查协议（`http` 或 `https`）。   |
+| `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`     | global | 是   | 使用 HTTPS 检查时验证 TLS 证书。      |
+| `LOADBALANCER_HEALTHCHECK_HOST`           |           | global | 是   | 检查期间覆盖 Host 头（对 SNI 有用）。 |
+
+#### 快速开始
+
+1. 定义您的池：设置 `LOADBALANCER_UPSTREAM_NAME=my-app` 并在 `LOADBALANCER_UPSTREAM_SERVERS` 中列出目标（例如 `10.0.0.1:8080 10.0.0.2:8080`）。
+2. 指向流量：设置 `REVERSE_PROXY_HOST=http://my-app` 以便反向代理使用命名的上游。
+3. 选择模式：保持默认 round-robin 或设置 `LOADBALANCER_UPSTREAM_MODE=sticky` 与 `LOADBALANCER_UPSTREAM_STICKY_METHOD=cookie` 或 `ip`。
+4. 添加健康：保持 `/status` 或调整 URL、间隔和有效状态以反映您的应用行为。
+5. 调整连接：配置 keepalive 值以重用后端连接并减少握手开销。
+
+#### 使用提示
+
+- 使用粘性 cookie 时，将 `REVERSE_PROXY_HOST` 与 `LOADBALANCER_UPSTREAM_NAME` 匹配，以便客户端固定到正确的池。
+- 保持健康检查间隔和超时平衡，以避免在慢速链路上波动。
+- 当指向可能通过 DNS 更改的主机名时启用 `LOADBALANCER_UPSTREAM_RESOLVE`。
+- 调整 keepalive 值以反映后端容量和连接重用目标。

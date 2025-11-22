@@ -10,12 +10,13 @@ local resolver = require "resty.dns.resolver"
 local session = require "resty.session"
 
 local logger = clogger:new("UTILS")
-local datastore = cdatastore:new()
 
 local var = ngx.var
 local ERR = ngx.ERR
 local INFO = ngx.INFO
 local WARN = ngx.WARN
+local HTTP_FORBIDDEN = ngx.HTTP_FORBIDDEN
+local HTTP_CLOSED = ngx.HTTP_CLOSED
 local null = ngx.null
 local re_match = ngx.re.match
 local subsystem = ngx.config.subsystem
@@ -33,6 +34,15 @@ local session_start = session.start
 local tonumber = tonumber
 local getenv = os.getenv
 
+local datastore = cdatastore:new()
+local internalstore
+
+if subsystem == "http" then
+	internalstore = cdatastore:new(ngx.shared.internalstore)
+else
+	internalstore = cdatastore:new(ngx.shared.internalstore_stream)
+end
+
 local utils = {}
 
 math.randomseed(os.time())
@@ -43,9 +53,9 @@ utils.get_variable = function(variable, site_search, ctx)
 		site_search = true
 	end
 	-- Get global value
-	local variables, err = datastore:get("variables", true)
+	local variables, err = internalstore:get("variables", true)
 	if not variables then
-		return nil, "can't access variables from datastore : " .. err
+		return nil, "can't access variables from internalstore : " .. err
 	end
 	local value = variables["global"][variable]
 	-- Site search case
@@ -65,9 +75,9 @@ end
 
 utils.has_variable = function(variable, value)
 	-- Get global variable
-	local variables, err = datastore:get("variables", true)
+	local variables, err = internalstore:get("variables", true)
 	if not variables then
-		return nil, "can't access variables " .. variable .. " from datastore : " .. err
+		return nil, "can't access variables " .. variable .. " from internalstore : " .. err
 	end
 	-- Multisite case
 	local multisite = variables["global"]["MULTISITE"] == "yes"
@@ -88,9 +98,9 @@ end
 
 utils.has_not_variable = function(variable, value)
 	-- Get global variable
-	local variables, err = datastore:get("variables", true)
+	local variables, err = internalstore:get("variables", true)
 	if not variables then
-		return nil, "can't access variables " .. variable .. " from datastore : " .. err
+		return nil, "can't access variables " .. variable .. " from internalstore : " .. err
 	end
 	-- Multisite case
 	local multisite = variables["global"]["MULTISITE"] == "yes"
@@ -110,9 +120,9 @@ utils.has_not_variable = function(variable, value)
 end
 
 utils.get_multiple_variables = function(vars)
-	local variables, err = datastore:get("variables", true)
+	local variables, err = internalstore:get("variables", true)
 	if not variables then
-		return nil, "can't access variables " .. vars .. " from datastore : " .. err
+		return nil, "can't access variables " .. vars .. " from internalstore : " .. err
 	end
 	local result = {}
 	-- Loop on scoped vars
@@ -204,14 +214,14 @@ utils.get_integration = function(ctx)
 	if ctx and ctx.bw.integration then
 		return ctx.bw.integration
 	end
-	-- Check if already in datastore
-	local integration, _ = datastore:get("misc_integration", true)
+	-- Check if already in internalstore
+	local integration, _ = internalstore:get("misc_integration", true)
 	if integration then
 		return integration
 	end
-	local variables, err = datastore:get("variables", true)
+	local variables, err = internalstore:get("variables", true)
 	if not variables then
-		logger:log(ERR, "can't get variables from datastore : " .. err)
+		logger:log(ERR, "can't get variables from internalstore : " .. err)
 		return "unknown"
 	end
 	-- Swarm
@@ -249,9 +259,9 @@ utils.get_integration = function(ctx)
 		end
 	end
 	-- Save integration
-	local ok, err = datastore:set("misc_integration", integration, nil, true)
+	local ok, err = internalstore:set("misc_integration", integration, nil, true)
 	if not ok then
-		logger:log(ERR, "can't cache integration to datastore : " .. err)
+		logger:log(ERR, "can't cache integration to internalstore : " .. err)
 	end
 	if ctx then
 		ctx.bw.integration = integration
@@ -264,8 +274,8 @@ utils.get_version = function(ctx)
 	if ctx and ctx.bw.version then
 		return ctx.bw.version
 	end
-	-- Check if already in datastore
-	local version, _ = datastore:get("misc_version", true)
+	-- Check if already in internalstore
+	local version, _ = internalstore:get("misc_version", true)
 	if version then
 		return version
 	end
@@ -278,9 +288,9 @@ utils.get_version = function(ctx)
 	version = f:read("*a"):gsub("[\n\r]", "")
 	f:close()
 	-- Save version
-	local ok, err = datastore:set("misc_version", version, nil, true)
+	local ok, err = internalstore:set("misc_version", version, nil, true)
 	if not ok then
-		logger:log(ERR, "can't cache version to datastore : " .. err)
+		logger:log(ERR, "can't cache version to internalstore : " .. err)
 	end
 	if ctx then
 		ctx.bw.version = version
@@ -412,16 +422,110 @@ utils.is_whitelisted = function(ctx)
 	return false
 end
 
+utils.is_ip_whitelisted = function(ip, server_name)
+	if not ip then
+		return nil, "ip is nil"
+	end
+	-- Allow caller to provide service name; otherwise use current server_name
+	if not server_name or server_name == "" then
+		server_name = var.server_name
+	end
+
+	-- Helper to check a specific service whitelist list
+	local function check_service(name)
+		if not name or name == "" then
+			return nil, "no service name"
+		end
+		-- Fast path: check whitelist cache for the service
+		local cache = require("bunkerweb.cachestore"):new(false)
+		local ok_cache, cached = cache:get("plugin_whitelist_" .. name .. "ip" .. ip)
+		if not ok_cache then
+			return nil, "can't check whitelist cache : " .. cached
+		end
+		if cached then
+			if cached ~= "ok" then
+				return true, cached
+			end
+			return false, "ok"
+		end
+
+		local lists, err = internalstore:get("plugin_whitelist_lists_" .. name, true)
+		if not lists then
+			return nil, "can't get whitelist lists : " .. err
+		end
+		if not lists["IP"] or #lists["IP"] == 0 then
+			return false, "ok"
+		end
+		local ipm, ipm_err = ipmatcher_new(lists["IP"])
+		if not ipm then
+			return nil, "can't instantiate ipmatcher : " .. ipm_err
+		end
+		local match, match_err = ipm:match(ip)
+		if match_err then
+			return nil, "can't check ip : " .. match_err
+		end
+		if match then
+			return true, "ip"
+		end
+		return false, "ok"
+	end
+
+	-- First try the current service (except default placeholder "_")
+	if server_name and server_name ~= "" and server_name ~= "_" then
+		local ok, info = check_service(server_name)
+		if ok ~= nil then
+			return ok, info
+		end
+	end
+
+	-- Fallback: iterate all configured services (covers default-server paths)
+	local variables, err = internalstore:get("variables", true)
+	if not variables then
+		return nil, "can't get variables : " .. err
+	end
+	local servers = variables["global"] and variables["global"]["SERVER_NAME"] or ""
+	for srv in servers:gmatch("%S+") do
+		local ok, info = check_service(srv)
+		if ok then
+			return true, info
+		end
+	end
+
+	-- Last resort: check global whitelist IPs directly (useful when no services matched)
+	local global_wl = variables["global"] and variables["global"]["WHITELIST_IP"] or ""
+	if global_wl ~= "" then
+		local networks = {}
+		for n in global_wl:gmatch("%S+") do
+			table.insert(networks, n)
+		end
+		if #networks > 0 then
+			local ipm, ipm_err = ipmatcher_new(networks)
+			if not ipm then
+				return nil, "can't instantiate ipmatcher : " .. (ipm_err or "unknown")
+			end
+			local match, match_err = ipm:match(ip)
+			if match_err then
+				return nil, "can't check ip : " .. match_err
+			end
+			if match then
+				return true, "ip"
+			end
+		end
+	end
+
+	return false, "ok"
+end
+
 utils.get_resolvers = function()
-	-- Get resolvers from datastore if existing
-	local resolvers, _ = datastore:get("misc_resolvers", true)
+	-- Get resolvers from internalstore if existing
+	local resolvers, _ = internalstore:get("misc_resolvers", true)
 	if resolvers then
 		return resolvers
 	end
 	-- Otherwise extract DNS_RESOLVERS variable
-	local variables, err = datastore:get("variables", true)
+	local variables, err = internalstore:get("variables", true)
 	if not variables then
-		logger:log(ERR, "can't get variables from datastore : " .. err)
+		logger:log(ERR, "can't get variables from internalstore : " .. err)
 		return "unknown"
 	end
 	-- Make table for resolver1 resolver2 ... string
@@ -429,10 +533,10 @@ utils.get_resolvers = function()
 	for str_resolver in variables["global"]["DNS_RESOLVERS"]:gmatch("%S+") do
 		table.insert(resolvers, str_resolver)
 	end
-	-- Add it to the datastore
-	local ok, err = datastore:set("misc_resolvers", resolvers, nil, true)
+	-- Add it to the internalstore
+	local ok, err = internalstore:set("misc_resolvers", resolvers, nil, true)
 	if not ok then
-		logger:log(ERR, "can't save misc_resolvers to datastore : " .. err)
+		logger:log(ERR, "can't save misc_resolvers to internalstore : " .. err)
 	end
 	return resolvers
 end
@@ -629,14 +733,14 @@ end
 
 utils.get_deny_status = function()
 	if subsystem == "http" then
-		local variables, err = datastore:get("variables", true)
+		local variables, err = internalstore:get("variables", true)
 		if not variables then
-			logger:log(ERR, "can't get variables from datastore : " .. err)
-			return 403
+			logger:log(ERR, "can't get variables from internalstore : " .. err)
+			return HTTP_FORBIDDEN
 		end
 		return tonumber(variables["global"]["DENY_HTTP_STATUS"])
 	end
-	return 444
+	return HTTP_CLOSED
 end
 
 utils.get_security_mode = function(ctx)
@@ -796,9 +900,9 @@ utils.is_banned = function(ip, server_name)
 			return nil, "redis script error: " .. data.err, nil, nil
 		elseif data[1] ~= null then
 			-- Update local cache with the full JSON payload
-			local ok_cache, cache_err = datastore:set(key, data[1], data[2])
+			local ok_cache, cache_err = datastore:set_with_retries(key, data[1], data[2])
 			if not ok_cache then
-				logger:log(WARN, "datastore:set() error: " .. cache_err)
+				logger:log(WARN, "datastore:set_with_retries() error: " .. cache_err)
 			end
 
 			-- Parse ban data to extract reason and optional reason_data
@@ -865,9 +969,9 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_da
 	-- Convert 0 TTL to nil for permanent bans in local datastore
 	local effective_ttl = (not ttl or ttl == 0) and nil or ttl
 
-	local ok, err = datastore:set(ban_key, ban_data, effective_ttl)
+	local ok, err = datastore:set_with_retries(ban_key, ban_data, effective_ttl)
 	if not ok then
-		return false, "datastore:set() error : " .. err
+		return false, "datastore:set_with_retries() error : " .. err
 	end
 
 	-- Set on redis

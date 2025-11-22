@@ -32,6 +32,7 @@ Table of Contents
     * [set_priv_key](#set_priv_key)
     * [verify_client](#verify_client)
     * [get_client_random](#get_client_random)
+    * [get_shared_ssl_ciphers](#get_shared_ssl_ciphers)
     * [get_req_ssl_pointer](#get_req_ssl_pointer)
 * [Community](#community)
     * [English Mailing List](#english-mailing-list)
@@ -269,7 +270,7 @@ server_port
 **context:** *any*
 
 Returns the server port. Returns `nil`
-when server dont have a port.
+when the server does not have a port.
 
 In case of failures, it returns `nil` *and* a string describing the error.
 
@@ -650,7 +651,6 @@ This function can be called in any context where downstream https is used, but i
 
 [Back to TOC](#table-of-contents)
 
-
 get_req_ssl_pointer
 ------------
 **syntax:** *ssl_ptr, err = ssl.get_req_ssl_pointer()*
@@ -665,6 +665,39 @@ If you need to retain the pointer beyond the current phase then you will need to
 If you do, ensure that your reference is released with `SSL_free`.
 
 This function was first added in version `0.1.16`.
+
+[Back to TOC](#table-of-contents)
+
+get_req_shared_ssl_ciphers
+-----------
+**syntax:** *ciphers = ssl.get_req_shared_ssl_ciphers(filter_grease?)*
+
+**context:** *any*
+
+Returns an array of cipher IDs that are supported by both the server and client for the current SSL connection.
+
+The optional argument `filter_grease` defaults to `true`. Set it to `false` explicitly if you want to include GREASE cipher values in the results.
+
+Example usage:
+
+```lua
+local ciphers, err = ssl.get_req_shared_ssl_ciphers()
+if ciphers then
+    for i, cipher in ipairs(ciphers) do
+        ngx.log(ngx.INFO, "Cipher: ", cipher)
+    end
+else
+    ngx.log(ngx.ERR, err)
+end
+```
+
+GREASE (Generate Random Extensions And Sustain Extensibility) cipher values are automatically filtered out from the results.
+
+Returns `nil` and an error string on failure.
+
+This function can be called in any context where downstream https is used.
+
+This function was first added in version `0.1.29`.
 
 [Back to TOC](#table-of-contents)
 

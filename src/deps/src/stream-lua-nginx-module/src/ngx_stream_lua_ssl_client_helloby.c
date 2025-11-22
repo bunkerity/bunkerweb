@@ -207,7 +207,7 @@ ngx_stream_lua_ssl_client_hello_handler(ngx_ssl_conn_t *ssl_conn,
 
         if (cctx->done) {
             ngx_log_debug1(NGX_LOG_DEBUG_STREAM, c->log, 0,
-                           "stream lua_client_hello_by_lua:"
+                           "stream ssl_client_hello_by_lua:"
                            " client hello cb exit code: %d",
                            cctx->exit_code);
 
@@ -217,6 +217,15 @@ ngx_stream_lua_ssl_client_hello_handler(ngx_ssl_conn_t *ssl_conn,
 
         return -1;
     }
+
+#if (nginx_version > 1029001)
+    /* see commit 0373fe5d98c1515640 for more details */
+    rc = ngx_ssl_client_hello_callback(ssl_conn, al, arg);
+
+    if (rc == 0) {
+        return rc;
+    }
+#endif
 
     dd("first time");
 
@@ -254,7 +263,7 @@ ngx_stream_lua_ssl_client_hello_handler(ngx_ssl_conn_t *ssl_conn,
 
     cscf = ngx_stream_get_module_srv_conf(fs, ngx_stream_core_module);
 
-#if defined(nginx_version) && nginx_version >= 1009000
+#if defined(nginx_version) && nginx_version >= 1019003
     ngx_set_connection_log(fc, cscf->error_log);
 
 #else
@@ -292,15 +301,6 @@ ngx_stream_lua_ssl_client_hello_handler(ngx_ssl_conn_t *ssl_conn,
 
     c->log->action = "loading SSL client hello by lua";
 
-    if (lscf->srv.ssl_client_hello_handler == NULL) {
-
-        ngx_log_error(NGX_LOG_ALERT, c->log, 0,
-                      "no ssl_client_hello_by_lua* defined in "
-                      "server %s:%ui", &cscf->file_name, &cscf->line);
-
-        goto failed;
-    }
-
     rc = lscf->srv.ssl_client_hello_handler(r, lscf, L);
 
     if (rc >= NGX_OK || rc == NGX_ERROR) {
@@ -311,7 +311,7 @@ ngx_stream_lua_ssl_client_hello_handler(ngx_ssl_conn_t *ssl_conn,
         }
 
         ngx_log_debug2(NGX_LOG_DEBUG_STREAM, c->log, 0,
-                       "stream lua_client_hello_by_lua:"
+                       "stream ssl_client_hello_by_lua:"
                        " handler return value: %i, "
                        "client hello cb exit code: %d", rc, cctx->exit_code);
 
@@ -392,7 +392,7 @@ ngx_stream_lua_ssl_client_hello_aborted(void *data)
 {
     ngx_stream_lua_ssl_ctx_t            *cctx = data;
 
-    dd("lua ssl client hello done");
+    dd("lua ssl client hello aborted");
 
     if (cctx->done) {
         /* completed successfully already */
@@ -400,7 +400,7 @@ ngx_stream_lua_ssl_client_hello_aborted(void *data)
     }
 
     ngx_log_debug0(NGX_LOG_DEBUG_STREAM, cctx->connection->log, 0,
-                   "stream lua_client_hello_by_lua: client hello cb aborted");
+                   "stream ssl_client_hello_by_lua: client hello cb aborted");
 
     cctx->aborted = 1;
     cctx->request->connection->ssl = NULL;

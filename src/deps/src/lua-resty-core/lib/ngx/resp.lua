@@ -10,6 +10,7 @@ local FFI_BAD_CONTEXT = base.FFI_BAD_CONTEXT
 local core_response = require "resty.core.response"
 local set_resp_header = core_response.set_resp_header
 local get_request = base.get_request
+local bypass_if_checks = core_response.bypass_if_checks
 
 ffi.cdef[[
     int ngx_http_lua_ffi_set_resp_status_and_reason(ngx_http_request_t *r,
@@ -41,6 +42,11 @@ function _M.set_status(status, reason)
     if rc == FFI_BAD_CONTEXT then
         error("API disabled in the current context", 2)
     end
+end
+
+
+function _M.bypass_if_checks()
+    return bypass_if_checks()
 end
 
 return _M

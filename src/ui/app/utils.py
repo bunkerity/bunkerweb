@@ -7,7 +7,7 @@ from pathlib import Path
 from string import printable
 from subprocess import PIPE, Popen, call
 from time import sleep
-from typing import Dict, Optional, Set, Union
+from typing import Dict, FrozenSet, Optional, Set, Union
 from urllib.parse import unquote
 
 from bcrypt import checkpw, gensalt, hashpw
@@ -129,6 +129,8 @@ PLUGINS_SPECIFICS = {
     "SELFSIGNED": {"GENERATE_SELF_SIGNED_SSL": "no"},
 }
 
+EDITABLE_METHODS: FrozenSet[str] = frozenset({"ui", "api"})
+
 
 def stop(status, _stop: bool = True):
     if _stop:
@@ -210,6 +212,22 @@ def get_multiples(settings: dict, config: dict) -> Dict[str, Dict[str, Dict[str,
         plugin_multiples[multiple] = dict(sorted(multiples.items(), key=lambda x: int(x[0])))
 
     return plugin_multiples
+
+
+def is_editable_method(method: Optional[str], *, allow_default: bool = False) -> bool:
+    """
+    Determine if a configuration method is editable from the UI.
+
+    Parameters
+    ----------
+    method : Optional[str]
+        The method associated with a configuration (for example "ui" or "api").
+    allow_default : bool, optional
+        When True, the "default" method is also considered editable.
+    """
+    if method == "default":
+        return allow_default
+    return method in EDITABLE_METHODS
 
 
 def get_filtered_settings(settings: dict, global_config: bool = False) -> Dict[str, dict]:

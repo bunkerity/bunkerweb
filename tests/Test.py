@@ -5,12 +5,12 @@ from traceback import format_exc
 from shutil import copytree
 from os.path import isdir, join
 from os import mkdir, walk, rename
-from re import compile as re_compile, sub, search, MULTILINE
+from re import compile as re_compile, escape, sub, search, MULTILINE
 from subprocess import run
 from logger import log
 from string import ascii_lowercase, digits
 from random import choice
-from ssl import SSLContext, create_connection
+from ssl import create_default_context, create_connection
 import OpenSSL.crypto as crypto
 from urllib.parse import urlparse
 
@@ -132,8 +132,9 @@ class Test(ABC):
             ok = False
             ex_url = test["url"]
             for ex_domain, test_domain in self._domains.items():
-                if search(ex_domain, ex_url):
-                    ex_url = sub(ex_domain, test_domain, ex_url)
+                escaped_domain = escape(ex_domain)
+                if search(escaped_domain, ex_url):
+                    ex_url = sub(escaped_domain, test_domain, ex_url)
                     break
             if test["type"] == "string":
                 r = get(ex_url, timeout=10, verify=False)
@@ -145,25 +146,55 @@ class Test(ABC):
                 ok = test["status"] == r.status_code
                 if not ok:
                     log("TEST", "⚠️", f"Wrong status code : {str(r.status_code)}")
-            if ok and "tls" in test:
+
+            if not ok:
+                return False
+
+            if "tls" in test:
                 ex_tls = test["tls"]
-                tls_edit = True
-                if "tls_edit" in test:
-                    tls_edit = test["tls_edit"]
+                tls_edit = test.get("tls_edit", True)
                 if tls_edit:
                     for ex_domain, test_domain in self._domains.items():
-                        if search(ex_domain, ex_tls):
-                            ex_tls = sub(ex_domain, test_domain, ex_tls)
-                connection = create_connection((urlparse(ex_url).netloc, 443))
-                context = SSLContext()
-                sock = context.wrap_socket(connection, server_hostname=urlparse(ex_url).netloc)
+                        escaped_domain = escape(ex_domain)
+                        if search(escaped_domain, ex_tls):
+                            ex_tls = sub(escaped_domain, test_domain, ex_tls)
+                            break
+
+                parsed_url = urlparse(ex_url)
+                hostname = parsed_url.netloc
+                port = 443
+                if ":" in hostname:
+                    hostname, port = hostname.rsplit(":", 1)
+                    port = int(port)
+
+                connection = create_connection((hostname, port))
+                context = create_default_context()
+                context.check_hostname = False
+                context.verify_mode = False
+                sock = context.wrap_socket(connection, server_hostname=hostname)
                 cert = sock.getpeercert(True)
                 sock.close()
                 x509 = crypto.load_certificate(crypto.FILETYPE_ASN1, cert)
-                if x509.get_subject().CN != ex_tls:
-                    ok = False
-                    log("TEST", "⚠️", f"wrong cert CN : {x509.get_subject().CN} != {ex_tls}")
-            return ok
+                cert_cn = x509.get_subject().CN
+                if not cert_cn:
+                    # Fallback to the first DNS entry from subjectAltName when CN is empty
+                    for idx in range(x509.get_extension_count()):
+                        extension = x509.get_extension(idx)
+                        if extension.get_short_name().decode() != "subjectAltName":
+                            continue
+                        subject_alt_names = str(extension).split(",")
+                        for name in subject_alt_names:
+                            name = name.strip()
+                            if name.startswith("DNS:"):
+                                cert_cn = name.split("DNS:", 1)[1].strip()
+                                break
+                        if cert_cn:
+                            break
+                if cert_cn != ex_tls:
+                    log("TEST", "⚠️", f"wrong cert CN : {cert_cn} != {ex_tls}")
+                    return False
+
+            return True
         except:
             log("TEST", "⚠️", f"Exception : {format_exc()}")
             return False

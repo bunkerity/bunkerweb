@@ -1,4 +1,4 @@
-FROM ubuntu:noble@sha256:7c06e91f61fa88c08cc74f7e1b7c69ae24910d745357e0dfe1d2c0322aaf20f9 AS builder
+FROM ubuntu:noble@sha256:c35e29c9450151419d9448b0fd75374fec4fff364a27f176fb458d472dfc9e54 AS builder
 
 # Install dependencies
 RUN apt update && \
@@ -72,13 +72,20 @@ WORKDIR /tmp
 COPY src/deps/package.json package.json
 COPY src/deps/package-lock.json package-lock.json
 
-RUN apt-get install -y nodejs npm parallel && \
+ARG SKIP_MINIFY=no
+ARG SKIP_MINIFY_JS=no
+ARG SKIP_MINIFY_CSS=no
+ARG SKIP_MINIFY_HTML=no
+RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ] || [ "$SKIP_MINIFY_HTML" != "yes" ]; }; then \
+    apt-get install -y nodejs npm parallel && \
     cd /tmp && \
-    npm ci --ignore-scripts
+    npm ci --ignore-scripts; \
+    fi
 
 # Minify JS files
+ARG SKIP_MINIFY=no
 ARG SKIP_MINIFY_JS=no
-RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_JS" != "yes" ]; then \
     find /usr/share/bunkerweb/ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
     | parallel -0 --no-run-if-empty 'npx uglify-js {} --compress --mangle --output {}'; \
     else \
@@ -87,7 +94,7 @@ RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
 
 # Minify CSS files
 ARG SKIP_MINIFY_CSS=no
-RUN if [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
     find /usr/share/bunkerweb/ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
     | parallel -0 --no-run-if-empty 'npx postcss {} --use cssnano --no-map -o {}'; \
     else \
@@ -96,7 +103,7 @@ RUN if [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
 
 # Minify HTML files
 ARG SKIP_MINIFY_HTML=no
-RUN if [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
     parallel 'npx html-minifier-terser \
     --collapse-whitespace \
@@ -112,7 +119,7 @@ RUN if [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM ubuntu:noble@sha256:7c06e91f61fa88c08cc74f7e1b7c69ae24910d745357e0dfe1d2c0322aaf20f9
+FROM ubuntu:noble@sha256:c35e29c9450151419d9448b0fd75374fec4fff364a27f176fb458d472dfc9e54
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

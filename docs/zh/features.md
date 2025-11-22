@@ -268,14 +268,20 @@ STREAM 支持 :x:
 
 BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑战。这对于将受信任的服务、内部网络或应始终无需挑战即可访问的特定页面列入白名单非常有用：
 
-| 设置                        | 默认值 | 上下文    | 多个 | 描述                                                                      |
-| --------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |        | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。        |
-| `ANTIBOT_IGNORE_IP`         |        | multisite | 否   | **排除的 IP：** 应绕过挑战的以空格分隔的 IP 地址或 CIDR 范围列表。        |
-| `ANTIBOT_IGNORE_RDNS`       |        | multisite | 否   | **排除的反向 DNS：** 应绕过挑战的以空格分隔的反向 DNS 后缀列表。          |
-| `ANTIBOT_RDNS_GLOBAL`       | `yes`  | multisite | 否   | **仅限全局 IP：** 如果设置为 `yes`，则仅对公共 IP 地址执行反向 DNS 检查。 |
-| `ANTIBOT_IGNORE_ASN`        |        | multisite | 否   | **排除的 ASN：** 应绕过挑战的以空格分隔的 ASN 编号列表。                  |
-| `ANTIBOT_IGNORE_USER_AGENT` |        | multisite | 否   | **排除的用户代理：** 应绕过挑战的以空格分隔的用户代理正则表达式模式列表。 |
+| 设置                        | 默认值 | 上下文    | 多个 | 描述                                                                                  |
+| --------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------- |
+| `ANTIBOT_IGNORE_URI`        |        | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。                    |
+| `ANTIBOT_IGNORE_IP`         |        | multisite | 否   | **排除的 IP：** 应绕过挑战的以空格分隔的 IP 地址或 CIDR 范围列表。                    |
+| `ANTIBOT_IGNORE_RDNS`       |        | multisite | 否   | **排除的反向 DNS：** 应绕过挑战的以空格分隔的反向 DNS 后缀列表。                      |
+| `ANTIBOT_RDNS_GLOBAL`       | `yes`  | multisite | 否   | **仅限全局 IP：** 如果设置为 `yes`，则仅对公共 IP 地址执行反向 DNS 检查。             |
+| `ANTIBOT_IGNORE_ASN`        |        | multisite | 否   | **排除的 ASN：** 应绕过挑战的以空格分隔的 ASN 编号列表。                              |
+| `ANTIBOT_IGNORE_USER_AGENT` |        | multisite | 否   | **排除的用户代理：** 应绕过挑战的以空格分隔的用户代理正则表达式模式列表。             |
+| `ANTIBOT_IGNORE_COUNTRY`    |        | multisite | 否   | **排除的国家：** 应绕过挑战的 ISO 3166-1 alpha-2 国家代码（用空格分隔）列表。         |
+| `ANTIBOT_ONLY_COUNTRY`      |        | multisite | 否   | **仅挑战的国家：** 必须完成挑战的 ISO 3166-1 alpha-2 国家代码列表，其他国家将被跳过。 |
+
+!!! note "国家设置的行为"
+      - 当同时设置 `ANTIBOT_IGNORE_COUNTRY` 和 `ANTIBOT_ONLY_COUNTRY` 时，忽略列表优先——同时出现在两个列表中的国家将绕过挑战。
+      - 当设置了 `ANTIBOT_ONLY_COUNTRY` 且 IP 为私有或无法解析的地址时，由于无法确定国家代码，请求会绕过挑战。
 
 **示例：**
 
@@ -293,6 +299,12 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
 
 - `ANTIBOT_IGNORE_USER_AGENT: "^Mozilla.+Chrome.+Safari"`
   这将从 antibot 挑战中排除用户代理与指定正则表达式模式匹配的请求。
+
+- `ANTIBOT_IGNORE_COUNTRY: "US CA"`
+  这将使来自美国或加拿大的访问者绕过 antibot 挑战。
+
+- `ANTIBOT_ONLY_COUNTRY: "CN RU"`
+  这将仅要求来自中国或俄罗斯的访问者完成挑战。来自其他国家（或私有 IP 范围）的请求将被跳过。
 
 ### 支持的挑战机制
 
@@ -578,7 +590,7 @@ Auth Basic 插件提供 HTTP 基本认证来保护您的网站或特定资源。
 | `USE_AUTH_BASIC`      | `no`              | multisite | 否   | **启用基本认证：** 设置为 `yes` 以启用基本身份验证。                                                    |
 | `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | 否   | **保护范围：** 设置为 `sitewide` 以保护整个站点，或指定一个 URL 路径（例如 `/admin`）以仅保护特定区域。 |
 | `AUTH_BASIC_USER`     | `changeme`        | multisite | 是   | **用户名：** 身份验证所需的用户名。您可以定义多个用户名/密码对。                                        |
-| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | 是   | **密码：** 身份验证所需的密码。每个密码对应一个用户名。                                                 |
+| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | 是   | **密码：** 身份验证所需的密码。密码使用 bcrypt 哈希以实现最大安全性。                                   |
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | 否   | **提示文本：** 显示给用户的身份验证提示中的消息。                                                       |
 
 !!! warning "安全注意事项"
@@ -1030,6 +1042,31 @@ STREAM 支持 :warning:
     BLACKLIST_USER_AGENT_URLS: "file:///path/to/user-agent-blacklist.txt"
     BLACKLIST_URI_URLS: "file:///path/to/uri-blacklist.txt"
     ```
+
+### 使用本地列表文件
+
+Whitelist、Greylist 和 Blacklist 插件提供的 `*_URLS` 设置共用同一个下载器。当你引用 `file:///` URL 时：
+
+- 路径会在 **scheduler** 容器内解析（Docker 部署通常为 `bunkerweb-scheduler`）。请将文件挂载到该容器，并确保 scheduler 用户拥有读取权限。
+- 每个文件都是 UTF-8 编码的纯文本，每行一个条目。空行会被忽略，注释行必须以 `#` 或 `;` 开头。不支持 `//` 注释。
+- 各类列表的条目要求：
+  - **IP 列表** 接受 IPv4/IPv6 地址或 CIDR 网段（例如 `192.0.2.10` 或 `2001:db8::/48`）。
+  - **rDNS 列表** 需要没有空格的后缀（例如 `.search.msn.com`），并会自动转换为小写。
+  - **ASN 列表** 可以仅包含编号（`32934`），或带 `AS` 前缀的编号（`AS15169`）。
+  - **User-Agent 列表** 视为 PCRE 模式，整行（包括空格）都会保留。请把注释放在独立行，避免被当成模式。
+  - **URI 列表** 必须以 `/` 开头，可以使用 `^`、`$` 等 PCRE 标记。
+
+符合格式的示例文件：
+
+```text
+# /etc/bunkerweb/lists/ip-blacklist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-blacklist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+```
 
 ## Brotli
 
@@ -1546,19 +1583,35 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
       3. **轻量级集成：** 对您的 BunkerWeb 实例的性能影响最小。
       4. **多层次保护：** 结合边界防御（IP 阻止）和应用程序安全，实现深度保护。
 
-### 设置
+### 前置条件
+
+- CrowdSec 本地 API，BunkerWeb 可以访问（通常为运行在同一主机或同一 Docker 网络中的代理）。
+- 访问 BunkerWeb 访问日志（默认路径 `/var/log/bunkerweb/access.log`），以便 CrowdSec 代理分析请求。
+- 在 CrowdSec 主机上可使用 `cscli`，用于注册 BunkerWeb 的 bouncer 密钥。
+
+### 集成流程
+
+1. 准备 CrowdSec 代理，使其能够摄取 BunkerWeb 日志。
+2. 配置 BunkerWeb，以便查询 CrowdSec 本地 API。
+3. 通过 `/crowdsec/ping` API 或管理界面中的 CrowdSec 卡片验证连接。
+
+以下各节将依次说明这些步骤。
+
+### 第&nbsp;1&nbsp;步 – 准备 CrowdSec 摄取 BunkerWeb 日志
 
 === "Docker"
     **采集文件**
 
-    您需要运行一个 CrowdSec 实例，并将其配置为解析 BunkerWeb 日志。由于 BunkerWeb 基于 NGINX，您可以在采集文件中为 `type` 参数使用 `nginx` 值（假设 BunkerWeb 日志按原样存储，没有附加数据）：
+    您需要运行一个 CrowdSec 实例，并将其配置为解析 BunkerWeb 日志。请在采集文件中将 `type` 参数设置为专用的 `bunkerweb` 值（假设 BunkerWeb 日志按原样存储，没有附加数据）：
 
     ```yaml
     filenames:
       - /var/log/bunkerweb.log
     labels:
-      type: nginx
+      type: bunkerweb
     ```
+
+    如果在 CrowdSec 容器内仍然看不到该集合，请运行 `docker exec -it <crowdsec-container> cscli hub update`，然后重启该容器（`docker restart <crowdsec-container>`），以加载新的资源。请将 `<crowdsec-container>` 替换为 CrowdSec 容器的实际名称。
 
     **应用程序安全组件（*可选*）**
 
@@ -1612,7 +1665,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     services:
       bunkerweb:
         # 这是将用于在调度器中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1629,7 +1682,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
             syslog-address: "udp://10.20.30.254:514" # syslog 服务的 IP 地址
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5
+        image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -1663,7 +1716,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.0 # 使用最新版本，但为了更好的稳定性和安全性，请始终固定版本
+        image: crowdsecurity/crowdsec:v1.7.3 # 使用最新版本，但为了更好的稳定性和安全性，请始终固定版本
         volumes:
           - cs-data:/var/lib/crowdsec/data # 持久化 CrowdSec 数据
           - bw-logs:/var/log:ro # BunkerWeb 的日志，供 CrowdSec 解析
@@ -1671,8 +1724,8 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
           - ./appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml # 如果您不想使用 AppSec 组件，请注释掉此行
         environment:
           BOUNCER_KEY_bunkerweb: "s3cr3tb0unc3rk3y" # 记得为 bouncer 设置一个更强的密钥
-          COLLECTIONS: "crowdsecurity/nginx crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
-          #   COLLECTIONS: "crowdsecurity/nginx" # 如果您不想使用 AppSec 组件，请改用此行
+          COLLECTIONS: "bunkerity/bunkerweb crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
+          #   COLLECTIONS: "bunkerity/bunkerweb" # 如果您不想使用 AppSec 组件，请改用此行
         networks:
           - bw-universe
 
@@ -1724,7 +1777,14 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
       - /var/log/bunkerweb/error.log
       - /var/log/bunkerweb/modsec_audit.log
     labels:
-        type: nginx
+        type: bunkerweb
+    ```
+
+    更新 CrowdSec hub 并安装 BunkerWeb 集合：
+
+    ```shell
+    sudo cscli hub update
+    sudo cscli collections install bunkerity/bunkerweb
     ```
 
     现在，使用 `cscli` 工具将您的自定义 bouncer 添加到 CrowdSec API：
@@ -1791,7 +1851,9 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 
     请参阅[一体化 (AIO) 镜像集成文档](integrations.md#crowdsec-integration)。
 
-### 配置设置
+### 第&nbsp;2&nbsp;步 – 配置 BunkerWeb 参数
+
+应用以下环境变量（或通过调度器设置的值），让 BunkerWeb 实例能够与 CrowdSec 本地 API 通信。至少需要设置 `USE_CROWDSEC`、`CROWDSEC_API` 以及通过 `cscli bouncers add` 生成的有效密钥。
 
 | 设置                        | 默认值                 | 上下文    | 多个 | 描述                                                                                                  |
 | --------------------------- | ---------------------- | --------- | ---- | ----------------------------------------------------------------------------------------------------- |
@@ -1850,6 +1912,12 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
     ```
+
+### 第&nbsp;3&nbsp;步 – 验证集成
+
+- 在调度器日志中查找 `CrowdSec configuration successfully generated` 和 `CrowdSec bouncer denied request` 条目，以确认插件处于活动状态。
+- 在 CrowdSec 端监控 `cscli metrics show` 或 CrowdSec Console，确保 BunkerWeb 的决策按预期显示。
+- 在 BunkerWeb UI 中打开 CrowdSec 插件页面查看集成状态。
 
 ## Custom SSL certificate
 
@@ -2341,6 +2409,31 @@ Greylist 插件提供了一种灵活的安全方法，允许访问者访问，�
     GREYLIST_IP: "203.0.113.0/24"  # 外部合作伙伴网络
     ```
 
+### 使用本地列表文件
+
+Whitelist、Greylist 和 Blacklist 插件提供的 `*_URLS` 设置共用同一个下载器。当你引用 `file:///` URL 时：
+
+- 路径会在 **scheduler** 容器内解析（Docker 部署通常为 `bunkerweb-scheduler`）。请将文件挂载到该容器，并确保 scheduler 用户拥有读取权限。
+- 每个文件都是 UTF-8 编码的纯文本，每行一个条目。空行会被忽略，注释行必须以 `#` 或 `;` 开头。不支持 `//` 注释。
+- 各类列表的条目要求：
+  - **IP 列表** 接受 IPv4/IPv6 地址或 CIDR 网段（例如 `192.0.2.10` 或 `2001:db8::/48`）。
+  - **rDNS 列表** 需要没有空格的后缀（例如 `.search.msn.com`），并会自动转换为小写。
+  - **ASN 列表** 可以仅包含编号（`32934`），或带 `AS` 前缀的编号（`AS15169`）。
+  - **User-Agent 列表** 视为 PCRE 模式，整行（包括空格）都会保留。请把注释放在独立行，避免被当成模式。
+  - **URI 列表** 必须以 `/` 开头，可以使用 `^`、`$` 等 PCRE 标记。
+
+符合格式的示例文件：
+
+```text
+# /etc/bunkerweb/lists/ip-greylist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-greylist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+```
+
 ## Gzip
 
 STREAM 支持 :x:
@@ -2675,7 +2768,7 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 请按照以下步骤配置和使用 Let's Encrypt 功能：
 
 1.  **启用该功能：** 将 `AUTO_LETS_ENCRYPT` 设置为 `yes` 以启用自动证书颁发和续订。
-2.  **提供联系电子邮件：** 使用 `EMAIL_LETS_ENCRYPT` 设置输入您的电子邮件地址，以接收有关证书的重要通知。
+2.  **提供联系电子邮件（建议填写）：** 使用 `EMAIL_LETS_ENCRYPT` 设置输入您的电子邮件地址，以便 Let's Encrypt 在证书即将过期时提醒您。如果留空，BunkerWeb 会在没有地址的情况下注册（使用 Certbot 的 `--register-unsafely-without-email` 选项），但您将不会收到任何提醒或恢复邮件。
 3.  **选择验证类型：** 使用 `LETS_ENCRYPT_CHALLENGE` 设置选择 `http` 或 `dns` 验证。
 4.  **配置 DNS 提供商：** 如果使用 DNS 验证，请指定您的 DNS 提供商和凭据。
 5.  **选择证书配置文件：** 使用 `LETS_ENCRYPT_PROFILE` 设置选择您偏好的证书配置文件（classic、tlsserver 或 shortlived）。
@@ -2689,21 +2782,21 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 
 ### 配置设置
 
-| 设置                               | 默认值                   | 上下文    | 多选 | 描述                                                                                                                                                  |
-| ---------------------------------- | ------------------------ | --------- | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AUTO_LETS_ENCRYPT`                | `no`                     | multisite | 否   | **启用 Let's Encrypt：** 设置为 `yes` 以启用自动证书颁发和续订。                                                                                      |
-| `LETS_ENCRYPT_PASSTHROUGH`         | `no`                     | multisite | 否   | **传递 Let's Encrypt 请求：** 设置为 `yes` 以将 Let's Encrypt 请求传递给 Web 服务器。当 BunkerWeb 位于处理 SSL 的另一个反向代理后面时，此功能很有用。 |
-| `EMAIL_LETS_ENCRYPT`               | `contact@{FIRST_SERVER}` | multisite | 否   | **联系电子邮件：** 用于 Let's Encrypt 通知的电子邮件地址，并包含在证书中。                                                                            |
-| `LETS_ENCRYPT_CHALLENGE`           | `http`                   | multisite | 否   | **验证类型：** 用于验证域名所有权的方法。选项：`http` 或 `dns`。                                                                                      |
-| `LETS_ENCRYPT_DNS_PROVIDER`        |                          | multisite | 否   | **DNS 提供商：** 使用 DNS 验证时，要使用的 DNS 提供商（例如 cloudflare、route53、digitalocean）。                                                     |
-| `LETS_ENCRYPT_DNS_PROPAGATION`     | `default`                | multisite | 否   | **DNS 传播：** 等待 DNS 传播的时间（秒）。如果未提供值，则使用提供商的默认传播时间。                                                                  |
-| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |                          | multisite | 是   | **凭证项：** 用于 DNS 提供商身份验证的配置项（例如 `cloudflare_api_token 123456`）。值可以是原始文本、base64 编码或 JSON 对象。                       |
-| `USE_LETS_ENCRYPT_WILDCARD`        | `no`                     | multisite | 否   | **通配符证书：** 设置为 `yes` 时，为所有域名创建通配符证书。仅适用于 DNS 验证。                                                                       |
-| `USE_LETS_ENCRYPT_STAGING`         | `no`                     | multisite | 否   | **使用测试环境：** 设置为 `yes` 时，使用 Let's Encrypt 的测试环境进行测试。测试环境的速率限制较高，但生成的证书不受浏览器信任。                       |
-| `LETS_ENCRYPT_CLEAR_OLD_CERTS`     | `no`                     | global    | 否   | **清除旧证书：** 设置为 `yes` 时，在续订期间删除不再需要的旧证书。                                                                                    |
-| `LETS_ENCRYPT_PROFILE`             | `classic`                | multisite | 否   | **证书配置文件：** 选择要使用的证书配置文件。选项：`classic`（通用）、`tlsserver`（针对 TLS 服务器优化）或 `shortlived`（7 天证书）。                 |
-| `LETS_ENCRYPT_CUSTOM_PROFILE`      |                          | multisite | 否   | **自定义证书配置文件：** 如果您的 ACME 服务器支持非标准配置文件，请输入自定义证书配置文件。如果设置了此项，它将覆盖 `LETS_ENCRYPT_PROFILE`。          |
-| `LETS_ENCRYPT_MAX_RETRIES`         | `3`                      | multisite | 否   | **最大重试次数：** 证书生成失败时重试的次数。设置为 `0` 以禁用重试。用于处理临时网络问题或 API 速率限制。                                             |
+| 设置                               | 默认值    | 上下文    | 多选 | 描述                                                                                                                                                                               |
+| ---------------------------------- | --------- | --------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AUTO_LETS_ENCRYPT`                | `no`      | multisite | 否   | **启用 Let's Encrypt：** 设置为 `yes` 以启用自动证书颁发和续订。                                                                                                                   |
+| `LETS_ENCRYPT_PASSTHROUGH`         | `no`      | multisite | 否   | **传递 Let's Encrypt 请求：** 设置为 `yes` 以将 Let's Encrypt 请求传递给 Web 服务器。当 BunkerWeb 位于处理 SSL 的另一个反向代理后面时，此功能很有用。                              |
+| `EMAIL_LETS_ENCRYPT`               | `-`       | multisite | 否   | **联系电子邮件：** 用于 Let's Encrypt 到期提醒的电子邮件地址。只有在接受不接收任何警报或恢复邮件的情况下才可留空（此时 Certbot 会使用 `--register-unsafely-without-email` 注册）。 |
+| `LETS_ENCRYPT_CHALLENGE`           | `http`    | multisite | 否   | **验证类型：** 用于验证域名所有权的方法。选项：`http` 或 `dns`。                                                                                                                   |
+| `LETS_ENCRYPT_DNS_PROVIDER`        |           | multisite | 否   | **DNS 提供商：** 使用 DNS 验证时，要使用的 DNS 提供商（例如 cloudflare、route53、digitalocean）。                                                                                  |
+| `LETS_ENCRYPT_DNS_PROPAGATION`     | `default` | multisite | 否   | **DNS 传播：** 等待 DNS 传播的时间（秒）。如果未提供值，则使用提供商的默认传播时间。                                                                                               |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |           | multisite | 是   | **凭证项：** 用于 DNS 提供商身份验证的配置项（例如 `cloudflare_api_token 123456`）。值可以是原始文本、base64 编码或 JSON 对象。                                                    |
+| `USE_LETS_ENCRYPT_WILDCARD`        | `no`      | multisite | 否   | **通配符证书：** 设置为 `yes` 时，为所有域名创建通配符证书。仅适用于 DNS 验证。                                                                                                    |
+| `USE_LETS_ENCRYPT_STAGING`         | `no`      | multisite | 否   | **使用测试环境：** 设置为 `yes` 时，使用 Let's Encrypt 的测试环境进行测试。测试环境的速率限制较高，但生成的证书不受浏览器信任。                                                    |
+| `LETS_ENCRYPT_CLEAR_OLD_CERTS`     | `no`      | global    | 否   | **清除旧证书：** 设置为 `yes` 时，在续订期间删除不再需要的旧证书。                                                                                                                 |
+| `LETS_ENCRYPT_PROFILE`             | `classic` | multisite | 否   | **证书配置文件：** 选择要使用的证书配置文件。选项：`classic`（通用）、`tlsserver`（针对 TLS 服务器优化）或 `shortlived`（7 天证书）。                                              |
+| `LETS_ENCRYPT_CUSTOM_PROFILE`      |           | multisite | 否   | **自定义证书配置文件：** 如果您的 ACME 服务器支持非标准配置文件，请输入自定义证书配置文件。如果设置了此项，它将覆盖 `LETS_ENCRYPT_PROFILE`。                                       |
+| `LETS_ENCRYPT_MAX_RETRIES`         | `3`       | multisite | 否   | **最大重试次数：** 证书生成失败时重试的次数。设置为 `0` 以禁用重试。用于处理临时网络问题或 API 速率限制。                                                                          |
 
 !!! info "信息和行为" - `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` 设置是一个多选设置，可用于为 DNS 提供商设置多个项目。这些项目将保存为缓存文件，Certbot 将从中读取凭据。- 如果未提供 `LETS_ENCRYPT_DNS_PROPAGATION` 设置，则使用提供商的默认传播时间。- 只要您从外部打开 `80/tcp` 端口，使用 `http` 验证的完全 Let's Encrypt 自动化就可以在流模式下工作。使用 `LISTEN_STREAM_PORT_SSL` 设置来选择您的侦听 SSL/TLS 端口。- 如果 `LETS_ENCRYPT_PASSTHROUGH` 设置为 `yes`，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。
 
@@ -2740,6 +2833,7 @@ Let's Encrypt 插件支持广泛的 DNS 提供商进行 DNS 验证。每个提�
 | `domainoffensive` | Domain-Offensive | `api_token`                                                                                                  |                                                                                                                                                                                                                                                              | [文档](https://github.com/domainoffensive/certbot-dns-domainoffensive/blob/master/README.md) |
 | `dnsimple`        | DNSimple         | `token`                                                                                                      |                                                                                                                                                                                                                                                              | [文档](https://certbot-dns-dnsimple.readthedocs.io/en/stable/)                               |
 | `dnsmadeeasy`     | DNS Made Easy    | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                              | [文档](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)                            |
+| `duckdns`         | DuckDNS          | `duckdns_token`                                                                                              |                                                                                                                                                                                                                                                              | [文档](https://github.com/infinityofspace/certbot_dns_duckdns/blob/main/Readme.md)           |
 | `dynu`            | Dynu             | `auth_token`                                                                                                 |                                                                                                                                                                                                                                                              | [文档](https://github.com/bikram990/certbot-dns-dynu/blob/main/README.md)                    |
 | `gehirn`          | Gehirn DNS       | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                              | [文档](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                                 |
 | `google`          | Google Cloud     | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (默认: `service_account`)<br>`auth_uri` (默认: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (默认: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (默认: `https://www.googleapis.com/oauth2/v1/certs`) | [文档](https://certbot-dns-google.readthedocs.io/en/stable/)                                 |
@@ -3539,7 +3633,7 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 选择一个 CRS 版本以最符合您的安全需求：
 
 - **`3`**：稳定版 [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7)。
-- **`4`**：稳定版 [v4.19.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.19.0) (**默认**)。
+- **`4`**：稳定版 [v4.20.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.20.0) (**默认**)。
 - **`nightly`**：[每日构建版](https://github.com/coreruleset/coreruleset/releases/tag/nightly)，提供最新的规则更新。
 
 !!! example "每日构建版"
@@ -3726,6 +3820,94 @@ BunkerWeb monitoring pro system. This plugin is a prerequisite for some other pl
 | `USE_MONITORING`               | `yes`  | global | 否     | Enable monitoring of BunkerWeb.                                             |
 | `MONITORING_METRICS_DICT_SIZE` | `10M`  | global | 否     | Size of the dict to store monitoring metrics.                               |
 | `MONITORING_IGNORE_URLS`       |        | global | 否     | List of URLs to ignore when monitoring separated with spaces (e.g. /health) |
+
+## Mutual TLS
+
+STREAM 支持 :white_check_mark:
+
+Mutual TLS（mTLS）插件可在关键站点上强制执行客户端证书认证，确保只有受信任实体才能访问敏感资源。启用后，BunkerWeb 会在请求进入业务前完成身份鉴别，从而保护内部工具与合作伙伴集成。
+
+BunkerWeb 会基于您配置的 CA 证书包和策略评估每一次 TLS 握手。未满足规则的客户端会被拦截，通过验证的连接则可以将证书细节传递给后端应用，以便执行更精细的授权控制。
+
+**工作原理：**
+
+1. 插件持续监控所选站点的 HTTPS 握手。
+2. 在 TLS 交换阶段，BunkerWeb 检查客户端证书，并与指定的受信任存储进行链路校验。
+3. 验证模式决定是否拒绝、宽松接受或仅用于诊断地放行未携带证书的客户端。
+4. （可选）BunkerWeb 通过 `X-SSL-Client-*` 请求头暴露验证结果，便于上游应用实现自定义的访问逻辑。
+
+!!! success "主要优势"
+
+      1. **强化边界防护：** 只有完成身份验证的机器与用户才能访问核心路径。
+      2. **灵活信任策略：** 可根据接入流程在严格与可选模式之间切换。
+      3. **应用层可见性：** 将证书指纹和身份信息传递给下游服务，便于审计。
+      4. **多层安全防护：** 将 mTLS 与 BunkerWeb 其他插件（如限流、黑白名单）组合使用，构建纵深防御。
+
+### 使用步骤
+
+遵循以下步骤安全部署 Mutual TLS：
+
+1. **启用功能：** 在目标站点将 `USE_MTLS` 设置为 `yes`。
+2. **提供 CA 证书包：** 使用 PEM 文件存放可信颁发者，并在 `MTLS_CA_CERTIFICATE` 中配置其绝对路径。
+3. **选择验证模式：** `on` 强制要求证书，`optional` 允许回退，`optional_no_ca` 仅用于短期诊断。
+4. **调节链路深度：** 若组织存在多级中间证书，可调整 `MTLS_VERIFY_DEPTH`。
+5. **转发验证结果（可选）：** 若后端需要检查证书信息，请保持 `MTLS_FORWARD_CLIENT_HEADERS` 为 `yes`。
+6. **维护吊销数据：** 若发布 CRL，请填写 `MTLS_CRL`，使 BunkerWeb 能拒绝已吊销的证书。
+
+### 配置设置
+
+| 设置                          | 默认值 | 上下文    | 多个 | 说明                                                                                                                                     |
+| ----------------------------- | ------ | --------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MTLS`                    | `no`   | multisite | 否   | **启用 mutual TLS：** 为当前站点启用客户端证书认证。                                                                                     |
+| `MTLS_CA_CERTIFICATE`         |        | multisite | 否   | **客户端 CA 证书包：** 指向受信任客户端 CA 证书包（PEM）的绝对路径。当 `MTLS_VERIFY_CLIENT` 为 `on` 或 `optional` 时必填；路径必须可读。 |
+| `MTLS_VERIFY_CLIENT`          | `on`   | multisite | 否   | **验证模式：** 选择是否强制要求证书（`on`）、允许可选证书（`optional`），或在不验证 CA 的情况下接受证书（`optional_no_ca`）。            |
+| `MTLS_VERIFY_DEPTH`           | `2`    | multisite | 否   | **验证深度：** 接受的客户端证书最大链深。                                                                                                |
+| `MTLS_FORWARD_CLIENT_HEADERS` | `yes`  | multisite | 否   | **转发客户端请求头：** 传播验证结果（状态、DN、签发者、序列号、指纹和有效期等 `X-SSL-Client-*` 请求头）。                                |
+| `MTLS_CRL`                    |        | multisite | 否   | **客户端 CRL 路径：** 指向 PEM 编码证书吊销列表的可选路径。仅在成功加载 CA 证书包时生效。                                                |
+
+!!! tip "保持证书最新"
+    将 CA 证书包和吊销列表存放在 Scheduler 可读取的挂载卷中，以便重启时自动加载最新的信任锚。
+
+!!! warning "严格模式需提供 CA 证书包"
+    当 `MTLS_VERIFY_CLIENT` 为 `on` 或 `optional` 时，运行时必须存在 CA 文件。如果缺失，BunkerWeb 会跳过生成 mTLS 指令，避免服务因路径无效而启动失败。`optional_no_ca` 仅建议用于排查问题，因为它会降低认证强度。
+
+!!! info "受信证书与验证"
+    BunkerWeb 使用同一份 CA 证书包完成链路校验与信任构建，确保吊销检查和握手验证保持一致。
+
+### 配置示例
+
+=== "严格访问控制"
+
+    要求客户端提供由您的私有 CA 签发的有效证书，并将验证信息转发给后端：
+
+    ```yaml
+    USE_MTLS: "yes"
+    MTLS_CA_CERTIFICATE: "/etc/bunkerweb/mtls/engineering-ca.pem"
+    MTLS_VERIFY_CLIENT: "on"
+    MTLS_VERIFY_DEPTH: "2"
+    MTLS_FORWARD_CLIENT_HEADERS: "yes"
+    ```
+
+=== "可选客户端认证"
+
+    允许匿名用户访问，但在客户端提供证书时转发证书详情：
+
+    ```yaml
+    USE_MTLS: "yes"
+    MTLS_CA_CERTIFICATE: "/etc/bunkerweb/mtls/partner-ca.pem"
+    MTLS_VERIFY_CLIENT: "optional"
+    MTLS_FORWARD_CLIENT_HEADERS: "yes"
+    ```
+
+=== "无 CA 的诊断"
+
+    即便证书无法链到受信任的 CA 证书包，也允许连接完成。仅用于排查问题：
+
+    ```yaml
+    USE_MTLS: "yes"
+    MTLS_VERIFY_CLIENT: "optional_no_ca"
+    MTLS_FORWARD_CLIENT_HEADERS: "no"
+    ```
 
 ## PHP
 
@@ -5346,3 +5528,28 @@ STREAM 支持 :warning:
     ```
 
     此配置允许合法的爬虫索引您的网站，而不会受到可能阻止它们的速率限制或其他安全措施的影响。rDNS 检查有助于验证爬虫是否确实来自其声称的公司。
+
+### 使用本地列表文件
+
+Whitelist、Greylist 和 Blacklist 插件提供的 `*_URLS` 设置共用同一个下载器。当你引用 `file:///` URL 时：
+
+- 路径会在 **scheduler** 容器内解析（Docker 部署通常为 `bunkerweb-scheduler`）。请将文件挂载到该容器，并确保 scheduler 用户拥有读取权限。
+- 每个文件都是 UTF-8 编码的纯文本，每行一个条目。空行会被忽略，注释行必须以 `#` 或 `;` 开头。不支持 `//` 注释。
+- 各类列表的条目要求：
+  - **IP 列表** 接受 IPv4/IPv6 地址或 CIDR 网段（例如 `192.0.2.10` 或 `2001:db8::/48`）。
+  - **rDNS 列表** 需要没有空格的后缀（例如 `.search.msn.com`），并会自动转换为小写。
+  - **ASN 列表** 可以仅包含编号（`32934`），或带 `AS` 前缀的编号（`AS15169`）。
+  - **User-Agent 列表** 视为 PCRE 模式，整行（包括空格）都会保留。请把注释放在独立行，避免被当成模式。
+  - **URI 列表** 必须以 `/` 开头，可以使用 `^`、`$` 等 PCRE 标记。
+
+符合格式的示例文件：
+
+```text
+# /etc/bunkerweb/lists/ip-whitelist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-whitelist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+```

@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Enforce a restrictive default umask for all operations
-umask 027
-
 # shellcheck disable=SC1091
 . /usr/share/bunkerweb/helpers/utils.sh
 
@@ -19,6 +16,7 @@ log "ENTRYPOINT" "ℹ️" "Starting BunkerWeb v$(cat /usr/share/bunkerweb/VERSIO
 handle_docker_secrets
 
 # trap SIGTERM and SIGINT
+# shellcheck disable=SC2329
 function trap_exit() {
 	# shellcheck disable=SC2317
 	log "ENTRYPOINT" "ℹ️" "Caught stop operation, stopping nginx ..."
@@ -28,6 +26,7 @@ function trap_exit() {
 trap "trap_exit" TERM INT QUIT
 
 # trap SIGHUP
+# shellcheck disable=SC2329
 function trap_reload() {
 	# shellcheck disable=SC2317
 	log "ENTRYPOINT" "ℹ️" "Caught reload operation"

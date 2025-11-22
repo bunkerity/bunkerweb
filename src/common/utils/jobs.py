@@ -36,19 +36,31 @@ def _write_atomic(target: Path, data: bytes) -> None:
     except FileNotFoundError:
         existing_mode = None
 
-    with NamedTemporaryFile(dir=target.parent, prefix=f".{target.name}.", delete=False) as tmp:
-        tmp.write(data)
-        tmp.flush()
-        tmp_path = Path(tmp.name)
+    attempt = 0
+    last_exc: Optional[BaseException] = None
+    while attempt < 3:
+        attempt += 1
+        with NamedTemporaryFile(dir=target.parent, prefix=f".{target.name}.", delete=False) as tmp:
+            tmp.write(data)
+            tmp.flush()
+            tmp_path = Path(tmp.name)
 
-    if existing_mode is not None:
-        tmp_path.chmod(S_IMODE(existing_mode))
+        if existing_mode is not None:
+            tmp_path.chmod(S_IMODE(existing_mode))
 
-    try:
-        replace(tmp_path, target)
-    except Exception:
-        tmp_path.unlink(missing_ok=True)
-        raise
+        try:
+            replace(tmp_path, target)
+            return
+        except FileNotFoundError as exc:
+            last_exc = exc
+            tmp_path.unlink(missing_ok=True)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            continue
+        except Exception:
+            tmp_path.unlink(missing_ok=True)
+            raise
+
+    raise last_exc or FileNotFoundError(f"Failed to write atomically to {target}")
 
 
 class Job:
@@ -81,6 +93,8 @@ class Job:
         # Additional validation for job_path
         if self.job_path == Path(sep, "var", "cache", "bunkerweb"):
             raise ValueError("Could not determine job path. Ensure passed_plugin_id is valid.")
+
+        self.job_path.mkdir(parents=True, exist_ok=True)
 
         self.db = db
         if not self.db:

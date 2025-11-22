@@ -105,7 +105,7 @@ Please note that multisite mode is implicit when using the web User Interface. Y
 
 !!! info "Going further"
 
-    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples) directory of the repository.
+    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/examples) directory of the repository.
 
 ## Custom configurations {#custom-configurations}
 
@@ -126,7 +126,7 @@ Managing custom configurations from the web User Interface is done through the *
 
 !!! info "Going further"
 
-    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples) directory of the repository.
+    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/examples) directory of the repository.
 
 ## Database
 
@@ -144,6 +144,9 @@ BunkerWeb securely stores its current configuration in a backend database, which
 
 Under the hood, whenever you edit a setting or add a new configuration, BunkerWeb automatically stores the changes in the database, ensuring data persistence and consistency. BunkerWeb supports multiple backend database options, including SQLite, MariaDB, MySQL, and PostgreSQL.
 
+!!! tip
+    When you rely on the web UI for day-to-day administration, we recommend switching to an external database engine (PostgreSQL or MySQL/MariaDB) instead of staying on SQLite. External engines handle concurrent requests and long-term growth more gracefully, especially in multi-user environments.
+
 Configuring the database is straightforward using the `DATABASE_URI` setting, which follows the specified formats for each supported database:
 
 !!! warning
@@ -157,6 +160,27 @@ Configuring the database is straightforward using the `DATABASE_URI` setting, wh
 - **PostgreSQL**: `postgresql://bunkerweb:changeme@bw-db:5432/db`
 
 By specifying the appropriate database URI in the configuration, you can seamlessly integrate BunkerWeb with your preferred database backend, ensuring efficient and reliable storage of your configuration data.
+
+### Database compatibility matrix
+
+| Integration        | PostgreSQL                    | MariaDB             | MySQL              | SQLite      |
+| :----------------- | :---------------------------- | :------------------ | :----------------- | :---------- |
+| **Docker**         | ✅ `v17` and earlier (❌ `v18`) | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Kubernetes**     | ✅ `v17` and earlier (❌ `v18`) | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Autoconf**       | ✅ `v17` and earlier (❌ `v18`) | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Linux packages** | See notes below               | See notes below     | See notes below    | ✅ Supported |
+
+!!! info "Notes"
+    - **PostgreSQL**: `v18` is unsupported because the Alpine base images we ship only include `v17` client packages.
+    - **Linux**: Support depends on your distribution's packages. If needed, you can install database clients manually from vendor repositories (RHEL typically requires this).
+    - **SQLite**: Ships with the packages and is ready to use.
+
+Helpful external resources for installing database clients:
+
+- [PostgreSQL download and repository guide](https://www.postgresql.org/download/)
+- [MariaDB repository configuration tool](https://mariadb.org/download/?t=repo-config)
+- [MySQL repository setup guide](https://dev.mysql.com/doc/mysql-yum-repo-quick-guide/en/)
+- [SQLite download page](https://www.sqlite.org/download.html)
 
 <figure markdown>
   ![Overview](assets/img/bunkerweb_db.svg){ align=center, width="800" }

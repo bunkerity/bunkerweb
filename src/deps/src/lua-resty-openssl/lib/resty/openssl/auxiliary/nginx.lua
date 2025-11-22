@@ -256,7 +256,7 @@ else
         ngx.config.ngx_lua_version and
         ngx.config.ngx_lua_version
 
-  if ngx_lua_version >= 10019 and ngx_lua_version <= 10027 then
+  if ngx_lua_version >= 10019 and ngx_lua_version <= 10028 then
     -- https://github.com/openresty/lua-nginx-module/blob/master/src/ngx_http_lua_socket_tcp.h
     ffi.cdef[[
       typedef struct {

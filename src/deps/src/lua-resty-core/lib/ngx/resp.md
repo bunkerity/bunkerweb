@@ -13,6 +13,7 @@ Table of Contents
 * [Methods](#methods)
     * [add_header](#add_header)
     * [set_status](#set_status)
+    * [bypass_if_checks](#bypass_if_checks)
 * [Community](#community)
     * [English Mailing List](#english-mailing-list)
     * [Chinese Mailing List](#chinese-mailing-list)
@@ -80,10 +81,27 @@ instead of appending it.
 
 set_status
 ----------
-**syntax:** *ngx_resp.status(status, reason?)*
+**syntax:** *ngx_resp.set_status(status, reason?)*
 
 Unlike `ngx.status` which only sets the status, this function sets the response
 status with an optional reason. The `reason` should be a string.
+
+[Back to TOC](#table-of-contents)
+
+bypass_if_checks
+------------------
+**syntax:** *ngx_resp.bypass_if_checks()*
+
+Bypasses the conditional header checks as defined in RFC 9110 for the current request.
+This method is useful when you need to skip validation of headers such as `If-Modified-Since`,
+`If-None-Match`, `If-Range`, `If-Unmodified-Since`, and `If-Match`, allowing the response to 
+proceed without evaluating these conditions.
+
+When Nginx's validation of a conditional request fails, it has a specific response.
+It will return a 412 error, as per the provisions of Section 13 of RFC 9110. If `error_page 412` is configured,
+it will result in an internal redirect to the error handling process, making it impossible to customize the exit status code.
+
+This configuration, designed to bypass Nginx's built-in validation of conditional requests, serves a specific purpose.
 
 [Back to TOC](#table-of-contents)
 

@@ -29,6 +29,11 @@ const translate = (key, fallback, options) => {
   return key;
 };
 
+const normalizeViewMode = (value) =>
+  typeof value === "string" && value.trim().toLowerCase() === "raw"
+    ? "raw"
+    : "easy";
+
 const dom = {
   form: document.getElementById("template-form"),
   fieldset: document.getElementById("template-form-fieldset"),
@@ -62,6 +67,32 @@ const dom = {
   deleteStepTitle: document.getElementById("delete-step-title"),
   deleteStepItems: document.getElementById("delete-step-items"),
   confirmDeleteStepBtn: document.getElementById("confirm-delete-step-btn"),
+  viewModeInput: document.getElementById("template-editor-view-mode"),
+  modeTabs: document.querySelectorAll(
+    '[data-bs-target="#navs-modes-easy"], [data-bs-target="#navs-modes-raw"]',
+  ),
+  rawTemplateEditor: document.getElementById("raw-template-editor"),
+  rawTemplateValue: document.getElementById("raw-template-value"),
+  rawTemplateUploadInput: document.getElementById("raw-template-upload"),
+  rawConfigsUploadInput: document.getElementById("raw-configs-upload"),
+  rawConfigsUploadList: document.getElementById("raw-configs-upload-list"),
+  rawConfigBrowseButton: document.getElementById("raw-config-browse"),
+  rawConfigsEmptyState: document.getElementById("raw-configs-empty"),
+  rawTemplateDropTarget: document.querySelector(".raw-template-drop-target"),
+  confirmTemplateImportBtn: document.getElementById("confirm-template-import"),
+  templateImportWarningModal: document.getElementById(
+    "template-import-warning-modal",
+  ),
+  missingConfigsModal: document.getElementById("missing-configs-modal"),
+  missingConfigsList: document.getElementById("missing-configs-list"),
+  missingConfigsDropzone: document.getElementById("missing-configs-dropzone"),
+  missingConfigsUploadInput: document.getElementById("missing-configs-upload"),
+  missingConfigsBrowseBtn: document.getElementById("missing-configs-browse"),
+  missingConfigsUploadFeedback: document.getElementById(
+    "missing-configs-upload-feedback",
+  ),
+  missingConfigsDoneBtn: document.getElementById("missing-configs-done"),
+  rawConfigDropzone: document.getElementById("raw-config-dropzone"),
 };
 
 const normalizeSettingKey = (value) =>
@@ -291,10 +322,324 @@ const state = {
   isSaving: false,
   stepToDelete: null,
   settingToRemove: null,
+  viewMode: normalizeViewMode(ctx.viewMode),
+  pendingTemplateImportFile: null,
+  currentMissingConfigs: [],
+  pendingTemplateData: null,
 };
 
 let deleteStepModalInstance = null;
 let settingRemoveModalInstance = null;
+let templateImportWarningModalInstance = null;
+let missingConfigsModalInstance = null;
+
+const toggleRawConfigEmptyState = (hasItems) => {
+  if (!dom.rawConfigsEmptyState) return;
+  dom.rawConfigsEmptyState.classList.toggle("d-none", Boolean(hasItems));
+};
+
+const preventDragDefaults = (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+};
+
+const setTemplateDropzoneActive = (active) => {
+  if (!dom.rawTemplateDropTarget) return;
+  dom.rawTemplateDropTarget.classList.toggle("is-dragover", Boolean(active));
+};
+
+const ensureTemplateImportModal = () => {
+  if (!dom.templateImportWarningModal) return null;
+  if (typeof bootstrap === "undefined" || !bootstrap.Modal) return null;
+  return bootstrap.Modal.getOrCreateInstance(dom.templateImportWarningModal, {
+    backdrop: "static",
+  });
+};
+
+const resetTemplateImportState = () => {
+  state.pendingTemplateImportFile = null;
+  setTemplateDropzoneActive(false);
+};
+
+const readTemplateFile = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = ({ target }) => {
+      resolve(typeof target?.result === "string" ? target.result : "");
+    };
+    reader.onerror = () => reject(new Error("read-error"));
+    reader.readAsText(file);
+  });
+
+const updateViewModeInput = () => {
+  if (dom.viewModeInput) {
+    dom.viewModeInput.value = state.viewMode;
+  }
+};
+
+const ensureMissingConfigsModal = () => {
+  if (!missingConfigsModalInstance && dom.missingConfigsModal) {
+    missingConfigsModalInstance = new bootstrap.Modal(dom.missingConfigsModal, {
+      backdrop: "static",
+    });
+  }
+  return missingConfigsModalInstance;
+};
+
+const showMissingConfigsModal = (missingConfigs, templateData = null) => {
+  if (!Array.isArray(missingConfigs) || missingConfigs.length === 0) {
+    return;
+  }
+
+  state.currentMissingConfigs = [...missingConfigs];
+  state.pendingTemplateData = templateData;
+  ensureMissingConfigsModal();
+
+  if (dom.missingConfigsList) {
+    dom.missingConfigsList.innerHTML = "";
+    missingConfigs.forEach((config) => {
+      const li = document.createElement("li");
+      li.className = "list-group-item d-flex align-items-center gap-2";
+      li.setAttribute("data-config-ref", config);
+      li.innerHTML = `
+        <i class="bx bx-file text-muted"></i>
+        <code class="flex-grow-1">${config}</code>
+        <span class="badge bg-warning text-dark">Missing</span>
+      `;
+      dom.missingConfigsList.appendChild(li);
+    });
+  }
+
+  // Clear upload feedback
+  if (dom.missingConfigsUploadFeedback) {
+    dom.missingConfigsUploadFeedback.textContent = "";
+    dom.missingConfigsUploadFeedback.className = "mt-2 small";
+  }
+
+  if (missingConfigsModalInstance) {
+    missingConfigsModalInstance.show();
+  }
+};
+
+const closeMissingConfigsModal = () => {
+  if (missingConfigsModalInstance) {
+    missingConfigsModalInstance.hide();
+  }
+  state.currentMissingConfigs = [];
+  state.pendingTemplateData = null;
+};
+
+const updateMissingConfigItem = (configRef, status) => {
+  if (!dom.missingConfigsList) return;
+
+  const item = dom.missingConfigsList.querySelector(
+    `[data-config-ref="${configRef}"]`,
+  );
+  if (!item) return;
+
+  const badge = item.querySelector(".badge");
+  if (!badge) return;
+
+  if (status === "uploaded") {
+    badge.className = "badge bg-success";
+    badge.textContent = "✓ Uploaded";
+  } else if (status === "missing") {
+    badge.className = "badge bg-warning text-dark";
+    badge.textContent = "Missing";
+  }
+};
+
+const setMissingConfigsFeedback = (message, type = "info") => {
+  if (!dom.missingConfigsUploadFeedback) return;
+
+  dom.missingConfigsUploadFeedback.textContent = message;
+  dom.missingConfigsUploadFeedback.className = `mt-2 small ${type}`;
+};
+
+const handleMissingConfigsUpload = async (files) => {
+  if (!files || files.length === 0) return;
+
+  setMissingConfigsFeedback("", "");
+
+  try {
+    // Build a map of expected filename -> type from missing configs
+    const expectedTypes = new Map();
+    state.currentMissingConfigs.forEach((missingRef) => {
+      // Parse the reference (e.g., "modsec/wordpress_false_positives.conf" or "wordpress_false_positives.conf")
+      const normalized = normalizeConfigReference(missingRef);
+      const parts = normalized.split("/");
+      let expectedType = "server_http"; // default
+      let expectedName = normalized;
+
+      if (parts.length === 2) {
+        expectedType = normalizeConfigType(parts[0]);
+        expectedName = parts[1];
+      } else {
+        expectedName = parts[0];
+      }
+
+      // Remove .conf extension if present
+      const baseName = expectedName.replace(/\.conf$/, "");
+      expectedTypes.set(baseName, expectedType);
+    });
+
+    // Read all files
+    const readers = Array.from(files).map((file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          resolve({ file, content: event.target.result });
+        };
+        reader.onerror = () => reject(new Error("read-error"));
+        reader.readAsText(file);
+      });
+    });
+
+    const results = await Promise.all(readers);
+    const baseResult = collectRawFormData({ validate: false });
+    if (!baseResult.payload) {
+      setMissingConfigsFeedback(
+        translate(
+          "template.editor.raw_configs_import_invalid",
+          "Unable to import configs because the current JSON is invalid.",
+        ),
+        "error",
+      );
+      return;
+    }
+
+    const payload = JSON.parse(JSON.stringify(baseResult.payload));
+    if (!Array.isArray(payload.configs)) payload.configs = [];
+    const added = [];
+
+    results.forEach(({ file, content }, index) => {
+      const baseName = deriveConfigNameFromFile(file.name);
+      if (!baseName) return;
+
+      // Use the expected type if we know it, otherwise default
+      const expectedType = expectedTypes.get(baseName);
+      const normalizedType = expectedType || normalizeConfigType("server_http");
+      const normalizedName = baseName;
+
+      const ref = buildConfigReference(normalizedType, normalizedName);
+      const existingIndex = payload.configs.findIndex(
+        (cfg) => buildConfigReference(cfg.type, cfg.name) === ref,
+      );
+
+      const configPayload = {
+        type: normalizedType,
+        name: normalizedName,
+        data: content,
+      };
+
+      if (existingIndex >= 0) {
+        payload.configs[existingIndex] = {
+          ...payload.configs[existingIndex],
+          ...configPayload,
+        };
+      } else {
+        configPayload.order = payload.configs.length + index;
+        payload.configs.push(configPayload);
+      }
+      added.push({ name: file.name, type: normalizedType });
+    });
+
+    if (added.length === 0) {
+      setMissingConfigsFeedback(
+        translate(
+          "template.editor.raw_configs_import_none",
+          "No configs were imported.",
+        ),
+        "error",
+      );
+      return;
+    }
+
+    // Update the editor with the new configs
+    loadTemplateIntoEditor(payload);
+    ensureRawEditor();
+    updateRawEditorContent(payload);
+    toggleRawConfigEmptyState(
+      Array.isArray(payload.configs) && payload.configs.length > 0,
+    );
+
+    // Add uploaded configs to the "Custom config imports" list display
+    if (dom.rawConfigsUploadList) {
+      toggleRawConfigEmptyState(true);
+      dom.rawConfigsUploadList.classList.remove("d-none");
+      added.forEach(({ name, type }) => {
+        const item = document.createElement("li");
+        item.className =
+          "list-group-item d-flex justify-content-between align-items-center";
+        item.innerHTML = `<span>${name}</span><span class="badge bg-label-primary text-uppercase">${type}</span>`;
+        dom.rawConfigsUploadList.prepend(item);
+      });
+    }
+
+    // Check which missing configs were resolved
+    const uploadedRefs = [];
+    const currentConfigs = payload.configs;
+
+    state.currentMissingConfigs.forEach((missingRef) => {
+      const found = currentConfigs.some((cfg) => {
+        const configRef = buildConfigReference(cfg.type, cfg.name);
+        return (
+          normalizeConfigReference(configRef) ===
+          normalizeConfigReference(missingRef)
+        );
+      });
+
+      if (found) {
+        uploadedRefs.push(missingRef);
+        updateMissingConfigItem(missingRef, "uploaded");
+      }
+    });
+
+    const stillMissing = state.currentMissingConfigs.filter(
+      (ref) => !uploadedRefs.includes(ref),
+    );
+
+    if (uploadedRefs.length === state.currentMissingConfigs.length) {
+      setMissingConfigsFeedback(
+        translate(
+          "template.editor.missing_configs_upload_success",
+          "{{count}} config file(s) uploaded successfully",
+          { count: uploadedRefs.length },
+        ),
+        "success",
+      );
+    } else if (uploadedRefs.length > 0) {
+      setMissingConfigsFeedback(
+        translate(
+          "template.editor.missing_configs_upload_partial",
+          "{{uploaded}} of {{total}} configs uploaded. Still missing: {{missing}}",
+          {
+            uploaded: uploadedRefs.length,
+            total: state.currentMissingConfigs.length,
+            missing: stillMissing.join(", "),
+          },
+        ),
+        "warning",
+      );
+    } else {
+      setMissingConfigsFeedback(
+        translate(
+          "template.editor.missing_configs_upload_failed",
+          "No matching configs found. Please check filenames.",
+        ),
+        "error",
+      );
+    }
+  } catch (error) {
+    setMissingConfigsFeedback(
+      translate(
+        "template.editor.missing_configs_upload_failed",
+        "Failed to upload config files",
+      ),
+      "error",
+    );
+  }
+};
 
 const buildDeleteStepModalHTML = () => {
   const title = translate("modal.title.delete_step", "Delete step");
@@ -458,6 +803,10 @@ const showDeleteStepModal = (stepCard) => {
   deleteStepModalInstance.show();
 };
 
+const rawEditorState = {
+  editor: null,
+};
+
 const configEditors = new Map();
 
 const getThemePreference = () =>
@@ -477,6 +826,9 @@ const refreshConfigEditorThemes = () => {
   configEditors.forEach(({ editor }) => {
     applyThemeToEditor(editor);
   });
+  if (rawEditorState.editor) {
+    applyThemeToEditor(rawEditorState.editor);
+  }
 };
 
 const setupThemeSync = () => {
@@ -549,6 +901,45 @@ const disposeConfigEditor = (wrapper) => {
     entry.container.innerHTML = "";
   }
   configEditors.delete(wrapper.dataset.configId);
+};
+
+const ensureRawEditor = () => {
+  if (
+    rawEditorState.editor ||
+    !dom.rawTemplateEditor ||
+    typeof window === "undefined" ||
+    typeof window.ace === "undefined"
+  ) {
+    if (rawEditorState.editor) return rawEditorState.editor;
+  }
+
+  if (!dom.rawTemplateEditor || typeof window.ace === "undefined") return null;
+
+  const editor = window.ace.edit(dom.rawTemplateEditor);
+  editor.setOptions({
+    fontSize: "14px",
+    showPrintMargin: false,
+    tabSize: 2,
+    useSoftTabs: true,
+    wrap: true,
+    minLines: 20,
+    maxLines: Infinity,
+    autoScrollEditorIntoView: true,
+  });
+  editor.renderer.setScrollMargin(10, 10);
+  editor.session.setMode("ace/mode/json");
+  editor.setValue(dom.rawTemplateValue?.value || "", -1);
+  applyThemeToEditor(editor);
+  editor.setReadOnly(!ctx.canEdit);
+
+  editor.session.on("change", () => {
+    if (dom.rawTemplateValue) {
+      dom.rawTemplateValue.value = editor.getValue();
+    }
+  });
+
+  rawEditorState.editor = editor;
+  return editor;
 };
 
 const settingAssignments = new Map();
@@ -1444,6 +1835,12 @@ const normalizeConfigName = (rawName) => {
   return trimmed.endsWith(".conf") ? trimmed.slice(0, -5) : trimmed;
 };
 
+const deriveConfigNameFromFile = (fileName) => {
+  if (typeof fileName !== "string") return "";
+  const withoutExtension = fileName.replace(/\.[^.]+$/, "");
+  return normalizeConfigName(withoutExtension);
+};
+
 const configTypeOptionsRaw = Array.isArray(ctx.multisiteConfigTypes)
   ? ctx.multisiteConfigTypes
   : [];
@@ -1595,6 +1992,19 @@ const buildConfigReference = (typeValue, nameValue) => {
   const name = normalizeConfigName(nameValue);
   if (!type || !name) return "";
   return `${type}/${name}.conf`;
+};
+
+const normalizeConfigReference = (value) => {
+  if (typeof value !== "string") return "";
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  const parts = trimmed.split("/");
+  if (parts.length < 2) return "";
+  const normalizedType = normalizeConfigType(parts[0]);
+  const namePart = parts.slice(1).join("/");
+  const normalizedName = normalizeConfigName(namePart);
+  if (!normalizedType || !normalizedName) return "";
+  return `${normalizedType}/${normalizedName}.conf`;
 };
 
 const getConfigDescriptors = () => {
@@ -2428,6 +2838,31 @@ const createSettingRow = ({
   return wrapper;
 };
 
+const updateConfigDisplayInUploadList = (configName, configType) => {
+  if (!dom.rawConfigsUploadList) return;
+
+  // Find the matching item in the upload list by config name
+  const items = Array.from(dom.rawConfigsUploadList.querySelectorAll("li"));
+  const matchingItem = items.find((item) => {
+    const nameSpan = item.querySelector("span:first-child");
+    if (!nameSpan) return false;
+    const displayedName = nameSpan.textContent.trim();
+    // Match either "name.conf" or just "name"
+    return (
+      displayedName === `${configName}.conf` ||
+      displayedName === configName ||
+      displayedName.replace(/\.conf$/, "") === configName
+    );
+  });
+
+  if (matchingItem) {
+    const badge = matchingItem.querySelector(".badge");
+    if (badge) {
+      badge.textContent = configType.toUpperCase();
+    }
+  }
+};
+
 const createConfigRow = ({
   type = "",
   name = "",
@@ -2615,6 +3050,11 @@ const createConfigRow = ({
       updateSummary();
     }
     applyTypeValidation();
+
+    // Update the display in the Custom config imports list
+    if (nameField?.value) {
+      updateConfigDisplayInUploadList(nameField.value, typeInput.value);
+    }
   };
 
   typeInput.addEventListener("input", handleTypeChange);
@@ -3118,62 +3558,82 @@ const initialiseCollections = () => {
   refreshSettingSelector({ maintainSelection: false });
 };
 
-const collectFormData = () => {
+const buildEasyPayload = ({ validate = true } = {}) => {
   const errors = [];
+  const registerError = (message, onError) => {
+    if (!validate) return;
+    if (typeof onError === "function") onError();
+    errors.push(message);
+  };
 
-  const templateId =
-    ctx.mode === "edit"
+  const templateIdSource =
+    ctx.editorMode === "edit"
       ? ctx.templateId
       : (dom.templateIdInput?.value || "").trim();
-  if (!templateId) {
-    errors.push(
-      translate(
-        "template.editor.validation_id_required",
-        "Template ID is required.",
-      ),
+  const templateId = (templateIdSource || ctx.templateId || "").trim();
+
+  if (!templateId && validate) {
+    const message = translate(
+      "template.editor.validation_id_required",
+      "Template ID is required.",
     );
+    registerError(message, () => {
+      if (dom.templateIdInput) dom.templateIdInput.classList.add("is-invalid");
+    });
+  } else if (dom.templateIdInput) {
+    dom.templateIdInput.classList.remove("is-invalid");
   }
 
   const templateName = (dom.templateNameInput?.value || "").trim();
 
   const settings = {};
-  const seenSettings = new Set();
+  const seenSettings = new Map();
   dom.settingsList.querySelectorAll(".setting-row").forEach((row) => {
     const keyInput = row.querySelector(".setting-key");
     if (!keyInput) return;
     const key = keyInput.value.trim();
     if (!key) {
-      keyInput.classList.add("is-invalid");
-      errors.push(
-        translate(
-          "template.editor.validation_setting_key",
-          "Each setting must have a key.",
-        ),
+      const message = translate(
+        "template.editor.validation_setting_key",
+        "Each setting must have a key.",
       );
+      registerError(message, () => keyInput.classList.add("is-invalid"));
       return;
     }
     if (seenSettings.has(key)) {
-      keyInput.classList.add("is-invalid");
-      errors.push(
-        translate(
-          "template.editor.validation_settings_unique",
-          "Each setting key must be unique.",
-        ),
+      const message = translate(
+        "template.editor.validation_settings_unique",
+        "Each setting key must be unique.",
       );
+      registerError(message, () => keyInput.classList.add("is-invalid"));
       return;
     }
-    seenSettings.add(key);
+    keyInput.classList.remove("is-invalid");
+    seenSettings.set(key, true);
     const control = row.settingControl;
     const value = control ? getSettingControlValue(control) : "";
     settings[key] = value;
   });
 
   const configs = [];
-  const seenConfigs = new Set();
+  const seenConfigs = new Map();
+  const configTypeRequiredMessage = translate(
+    "template.editor.validation_config_type_required",
+    "Config type is required when a config is defined.",
+  );
+  const configNameRequiredMessage = translate(
+    "template.editor.validation_config_name_required",
+    "Config name is required when a config is defined.",
+  );
+  const duplicateConfigMessage = translate(
+    "template.editor.validation_configs_unique",
+    "Each config name must be unique.",
+  );
   const invalidConfigTypeMessage = translate(
     "template.editor.validation_config_type_multisite",
     "Config type must be one of the multisite-compatible types.",
   );
+
   dom.configsList.querySelectorAll(".config-row").forEach((row) => {
     const typeInput = row.querySelector(".config-type");
     const nameInput = row.querySelector(".config-name");
@@ -3184,57 +3644,61 @@ const collectFormData = () => {
     const normalizedType = normalizeConfigType(rawType);
     const normalizedName = normalizeConfigName(rawName);
     const data = dataInput ? dataInput.value : "";
-    const reference = buildConfigReference(rawType, rawName);
 
-    if (!normalizedType && !normalizedName && !data) {
+    if (!normalizedType) {
+      registerError(configTypeRequiredMessage, () => {
+        if (typeInput) {
+          markConfigTypeInvalid(typeInput, configTypeRequiredMessage);
+        }
+      });
       return;
     }
 
-    if (!normalizedType) {
-      const message = translate(
-        "template.editor.validation_config_type_required",
-        "Config type is required when a config is defined.",
-      );
-      if (typeInput) markConfigTypeInvalid(typeInput, message);
-      errors.push(message);
-      return;
+    if (typeInput) {
+      markConfigTypeValid(typeInput);
     }
 
     if (
       allowedConfigTypeValues.size > 0 &&
       !allowedConfigTypeValues.has(normalizedType)
     ) {
-      if (typeInput) {
-        markConfigTypeInvalid(typeInput, invalidConfigTypeMessage);
-      }
-      if (!errors.includes(invalidConfigTypeMessage)) {
-        errors.push(invalidConfigTypeMessage);
-      }
+      registerError(invalidConfigTypeMessage, () => {
+        if (typeInput) {
+          markConfigTypeInvalid(typeInput, invalidConfigTypeMessage);
+        }
+      });
       return;
     }
 
     if (!normalizedName) {
-      if (nameInput) nameInput.classList.add("is-invalid");
-      errors.push(
-        translate(
-          "template.editor.validation_config_name_required",
-          "Config name is required when a config is defined.",
-        ),
-      );
+      registerError(configNameRequiredMessage, () => {
+        if (nameInput) nameInput.classList.add("is-invalid");
+      });
+      return;
+    }
+
+    if (nameInput) {
+      nameInput.classList.remove("is-invalid");
+    }
+
+    const reference = buildConfigReference(normalizedType, normalizedName);
+    if (!reference) {
+      registerError(invalidConfigTypeMessage, () => {
+        if (typeInput) {
+          markConfigTypeInvalid(typeInput, invalidConfigTypeMessage);
+        }
+      });
       return;
     }
 
     if (seenConfigs.has(reference)) {
-      if (nameInput) nameInput.classList.add("is-invalid");
-      errors.push(
-        translate(
-          "template.editor.validation_configs_unique",
-          "Each config name must be unique.",
-        ),
-      );
+      registerError(duplicateConfigMessage, () => {
+        if (nameInput) nameInput.classList.add("is-invalid");
+      });
       return;
     }
-    seenConfigs.add(reference);
+
+    seenConfigs.set(reference, true);
 
     const configPayload = { type: normalizedType, name: normalizedName };
     if (data) configPayload.data = data;
@@ -3278,14 +3742,14 @@ const submitForm = async (event) => {
   if (state.isSaving) return;
   clearFeedback();
 
-  const { isValid, errors, payload } = collectFormData();
+  const { isValid, errors, payload } = collectActivePayload({ validate: true });
   if (!isValid) {
     showFeedback("danger", errors);
     return;
   }
 
   const endpoint =
-    ctx.mode === "edit" ? ctx.routes?.update : ctx.routes?.create;
+    ctx.editorMode === "edit" ? ctx.routes?.update : ctx.routes?.create;
   if (!endpoint) {
     showFeedback(
       "danger",
@@ -3351,6 +3815,785 @@ const resetValidationStyles = () => {
   dom.configsList
     .querySelectorAll(".config-name")
     .forEach((input) => input.classList.remove("is-invalid"));
+};
+
+const updateRawEditorContent = (payload) => {
+  let jsonString = "";
+  if (payload) {
+    try {
+      jsonString = JSON.stringify(payload, null, 2);
+    } catch (error) {
+      jsonString = "";
+    }
+  }
+  if (dom.rawTemplateValue) {
+    dom.rawTemplateValue.value = jsonString;
+  }
+  if (rawEditorState.editor) {
+    rawEditorState.editor.setValue(jsonString, -1);
+  }
+};
+
+const resetTemplateCollections = () => {
+  dom.settingsList.querySelectorAll(".setting-row").forEach((row) => {
+    row.remove();
+  });
+  dom.stepsList.innerHTML = "";
+  dom.configsList.querySelectorAll(".config-row").forEach((row) => {
+    disposeConfigEditor(row);
+  });
+  dom.configsList.innerHTML = "";
+  configEditors.clear();
+  settingAssignments.clear();
+  configAssignments.clear();
+  state.settingCounter = 0;
+  state.configCounter = 0;
+  state.stepCounter = 0;
+  toggleEmptyState(dom.settingsList, dom.settingsEmpty);
+  toggleEmptyState(dom.stepsList, dom.stepsEmpty);
+  toggleEmptyState(dom.configsList, dom.configsEmpty);
+};
+
+const loadTemplateIntoEditor = (template) => {
+  if (!template || typeof template !== "object") {
+    return;
+  }
+  const safeTemplate = {
+    id: typeof template.id === "string" ? template.id.trim() : "",
+    name: typeof template.name === "string" ? template.name.trim() : "",
+    settings:
+      template.settings &&
+      typeof template.settings === "object" &&
+      !Array.isArray(template.settings)
+        ? { ...template.settings }
+        : {},
+    steps: Array.isArray(template.steps) ? template.steps : [],
+    configs: Array.isArray(template.configs) ? template.configs : [],
+  };
+  ctx.template = JSON.parse(JSON.stringify(safeTemplate));
+  if (dom.templateIdInput) {
+    dom.templateIdInput.value = safeTemplate.id;
+  }
+  if (dom.templateNameInput) {
+    dom.templateNameInput.value = safeTemplate.name || safeTemplate.id || "";
+  }
+  resetTemplateCollections();
+  initialiseCollections();
+  refreshConfigEditorThemes();
+  runTranslations();
+  updateSummary();
+  updateRawEditorContent(ctx.template);
+};
+
+const syncRawEditorFromEasy = ({ ensureEditor = false } = {}) => {
+  const result = buildEasyPayload({ validate: false });
+  const base =
+    (result && result.payload && typeof result.payload === "object"
+      ? result.payload
+      : ctx.template && typeof ctx.template === "object"
+        ? ctx.template
+        : {}) || {};
+  try {
+    const clone = JSON.parse(JSON.stringify(base));
+    ctx.template = JSON.parse(JSON.stringify(clone));
+    if (ensureEditor) ensureRawEditor();
+    updateRawEditorContent(clone);
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+const buildPayloadFromRawObject = (raw, { validate = true } = {}) => {
+  const errors = [];
+  const missingConfigs = [];
+  const registerError = (message) => {
+    if (validate) errors.push(message);
+  };
+
+  const payload = {
+    id: "",
+    name: "",
+    settings: {},
+    steps: [],
+    configs: [],
+  };
+
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    registerError(
+      translate(
+        "template.editor.raw_validation_object",
+        "Template payload must be a JSON object.",
+      ),
+    );
+    return { isValid: errors.length === 0, errors, payload };
+  }
+
+  const rawId = typeof raw.id === "string" ? raw.id.trim() : "";
+  if (rawId) {
+    payload.id = rawId;
+  } else if (ctx.editorMode === "edit") {
+    payload.id = ctx.templateId || "";
+  } else if (validate) {
+    registerError(
+      translate(
+        "template.editor.validation_id_required",
+        "Template ID is required.",
+      ),
+    );
+  }
+
+  const rawName = typeof raw.name === "string" ? raw.name.trim() : "";
+  payload.name = rawName || payload.id;
+
+  const rawSettings = raw.settings;
+  if (
+    rawSettings &&
+    typeof rawSettings === "object" &&
+    !Array.isArray(rawSettings)
+  ) {
+    Object.entries(rawSettings).forEach(([key, value]) => {
+      if (typeof key !== "string" || !key.trim()) {
+        registerError(
+          translate(
+            "template.editor.raw_validation_setting_key",
+            "Settings keys must be non-empty strings.",
+          ),
+        );
+        return;
+      }
+      const normalizedKey = key.trim();
+      payload.settings[normalizedKey] =
+        value === null || typeof value === "undefined"
+          ? ""
+          : typeof value === "string"
+            ? value
+            : JSON.stringify(value);
+    });
+  } else if (rawSettings && validate) {
+    registerError(
+      translate(
+        "template.editor.raw_validation_settings_object",
+        "Settings must be provided as an object.",
+      ),
+    );
+  }
+
+  const rawConfigs = Array.isArray(raw.configs) ? raw.configs : [];
+  const configEntries = [];
+  const configMap = new Map();
+  rawConfigs.forEach((cfg, index) => {
+    if (!cfg || typeof cfg !== "object") {
+      registerError(
+        translate(
+          "template.editor.raw_validation_config_object",
+          "Config entries must be objects.",
+        ),
+      );
+      return;
+    }
+    const normalizedType = normalizeConfigType(
+      typeof cfg.type === "string" ? cfg.type : "",
+    );
+    const normalizedName = normalizeConfigName(
+      typeof cfg.name === "string" ? cfg.name : "",
+    );
+    if (!normalizedType || !normalizedName) {
+      registerError(
+        translate(
+          "template.editor.raw_validation_config_definition",
+          "Invalid config definition.",
+        ),
+      );
+      return;
+    }
+    const ref = buildConfigReference(normalizedType, normalizedName);
+    if (!ref) {
+      registerError(
+        translate(
+          "template.editor.raw_validation_config_definition",
+          "Invalid config definition.",
+        ),
+      );
+      return;
+    }
+    if (configMap.has(ref)) {
+      registerError(
+        translate(
+          "template.editor.validation_configs_unique",
+          "Each config name must be unique.",
+        ),
+      );
+      return;
+    }
+    const dataRaw = cfg.data;
+    const data =
+      typeof dataRaw === "string"
+        ? dataRaw
+        : dataRaw === null || typeof dataRaw === "undefined"
+          ? ""
+          : JSON.stringify(dataRaw);
+    const order =
+      typeof cfg.order === "number" && Number.isFinite(cfg.order)
+        ? cfg.order
+        : index;
+    const configPayload = { type: normalizedType, name: normalizedName };
+    if (data) configPayload.data = data;
+    if (typeof cfg.order === "number" && Number.isFinite(cfg.order)) {
+      configPayload.order = cfg.order;
+    }
+    configMap.set(ref, configPayload);
+    configEntries.push({ ref, order, config: configPayload });
+  });
+  configEntries.sort((a, b) => {
+    if (a.order !== b.order) return a.order - b.order;
+    return 0;
+  });
+  payload.configs = configEntries.map((entry) => entry.config);
+
+  const steps = Array.isArray(raw.steps) ? raw.steps : [];
+  const settingAssignments = new Map();
+  const configAssignments = new Map();
+
+  steps.forEach((step, index) => {
+    if (!step || typeof step !== "object") {
+      registerError(
+        translate(
+          "template.editor.raw_validation_step_object",
+          "Step {{index}} must be an object.",
+          { index: index + 1 },
+        ),
+      );
+      return;
+    }
+    const title = typeof step.title === "string" ? step.title.trim() : "";
+    if (!title) {
+      registerError(
+        translate(
+          "template.editor.raw_validation_step_title",
+          "Step {{index}} must have a title.",
+          { index: index + 1 },
+        ),
+      );
+      return;
+    }
+    const subtitle =
+      typeof step.subtitle === "string" ? step.subtitle.trim() : "";
+    const stepSettingsRaw = Array.isArray(step.settings) ? step.settings : [];
+    const stepConfigsRaw = Array.isArray(step.configs) ? step.configs : [];
+
+    const stepSettings = [];
+    stepSettingsRaw.forEach((item) => {
+      if (typeof item !== "string") {
+        registerError(
+          translate(
+            "template.editor.raw_validation_step_setting_reference",
+            "Step {{index}} contains an invalid setting reference.",
+            { index: index + 1 },
+          ),
+        );
+        return;
+      }
+      const key = item.trim();
+      if (!key) return;
+      if (!Object.prototype.hasOwnProperty.call(payload.settings, key)) {
+        registerError(
+          translate(
+            "template.editor.raw_validation_step_setting_unknown",
+            "Step {{index}} references unknown setting {{setting}}.",
+            { index: index + 1, setting: key },
+          ),
+        );
+        return;
+      }
+      if (settingAssignments.has(key)) {
+        registerError(
+          translate(
+            "template.editor.raw_validation_step_setting_duplicate",
+            "Setting {{setting}} is assigned to multiple steps.",
+            { setting: key },
+          ),
+        );
+        return;
+      }
+      settingAssignments.set(key, index + 1);
+      stepSettings.push(key);
+    });
+
+    const stepConfigs = [];
+    stepConfigsRaw.forEach((item) => {
+      if (typeof item !== "string") {
+        registerError(
+          translate(
+            "template.editor.raw_validation_step_config_reference",
+            "Step {{index}} contains an invalid config reference.",
+            { index: index + 1 },
+          ),
+        );
+        return;
+      }
+      const ref = normalizeConfigReference(item);
+      if (!ref) {
+        registerError(
+          translate(
+            "template.editor.raw_validation_step_config_reference",
+            "Step {{index}} contains an invalid config reference.",
+            { index: index + 1 },
+          ),
+        );
+        return;
+      }
+      if (!configMap.has(ref)) {
+        missingConfigs.push(ref);
+        registerError(
+          translate(
+            "template.editor.raw_validation_step_config_unknown",
+            "Step {{index}} references unknown config {{config}}.",
+            { index: index + 1, config: ref },
+          ),
+        );
+        return;
+      }
+      if (configAssignments.has(ref)) {
+        registerError(
+          translate(
+            "template.editor.raw_validation_step_config_duplicate",
+            "Config {{config}} is assigned to multiple steps.",
+            { config: ref },
+          ),
+        );
+        return;
+      }
+      configAssignments.set(ref, index + 1);
+      stepConfigs.push(ref);
+    });
+
+    const stepPayload = {
+      title,
+      settings: stepSettings,
+      configs: stepConfigs,
+    };
+    if (subtitle) stepPayload.subtitle = subtitle;
+    payload.steps.push(stepPayload);
+  });
+
+  if (validate && payload.steps.length === 0) {
+    registerError(
+      translate(
+        "template.editor.raw_validation_steps_required",
+        "A template must contain at least one step.",
+      ),
+    );
+  }
+
+  if (validate) {
+    const missingSettings = Object.keys(payload.settings).filter(
+      (key) => !settingAssignments.has(key),
+    );
+    if (missingSettings.length > 0) {
+      registerError(
+        translate(
+          "template.editor.raw_validation_settings_unassigned",
+          "Settings {{settings}} are not assigned to any step.",
+          { settings: missingSettings.join(", ") },
+        ),
+      );
+    }
+
+    const unassignedConfigs = Array.from(configMap.keys()).filter(
+      (ref) => !configAssignments.has(ref),
+    );
+    if (unassignedConfigs.length > 0) {
+      registerError(
+        translate(
+          "template.editor.raw_validation_configs_unassigned",
+          "Configs {{configs}} are not assigned to any step.",
+          { configs: unassignedConfigs.join(", ") },
+        ),
+      );
+    }
+  }
+
+  payload.name = payload.name || payload.id;
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    payload,
+    missingConfigs: Array.from(new Set(missingConfigs)),
+  };
+};
+
+const collectRawFormData = ({ validate = true } = {}) => {
+  const source =
+    (rawEditorState.editor && rawEditorState.editor.getValue()) ||
+    dom.rawTemplateValue?.value ||
+    "";
+  const text = source.trim();
+  if (!text) {
+    const message = translate(
+      "template.editor.raw_validation_empty",
+      "Template JSON cannot be empty.",
+    );
+    return {
+      isValid: false,
+      errors: [message],
+      payload: null,
+      missingConfigs: [],
+    };
+  }
+  try {
+    const parsed = JSON.parse(text);
+    return buildPayloadFromRawObject(parsed, { validate });
+  } catch (error) {
+    const message = translate(
+      "template.editor.raw_validation_invalid_json",
+      "Invalid JSON payload: {{error}}",
+      { error: error.message },
+    );
+    return {
+      isValid: false,
+      errors: [message],
+      payload: null,
+      missingConfigs: [],
+    };
+  }
+};
+
+const collectActivePayload = ({ validate = true } = {}) =>
+  state.viewMode === "raw"
+    ? collectRawFormData({ validate })
+    : buildEasyPayload({ validate });
+
+const importTemplateFile = async (file) => {
+  if (!file) return false;
+
+  try {
+    const text = await readTemplateFile(file);
+    if (!text.trim()) {
+      showFeedback(
+        "danger",
+        translate(
+          "template.editor.raw_editor_upload_empty",
+          "Uploaded file is empty.",
+        ),
+      );
+      return false;
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch (error) {
+      showFeedback(
+        "danger",
+        translate(
+          "template.editor.raw_validation_invalid_json",
+          "Invalid JSON payload: {{error}}",
+          { error: error.message },
+        ),
+      );
+      return false;
+    }
+
+    const result = buildPayloadFromRawObject(parsed, { validate: true });
+    if (!result.isValid) {
+      // If there are missing configs, show the helpful modal
+      if (result.missingConfigs && result.missingConfigs.length > 0) {
+        showMissingConfigsModal(result.missingConfigs, parsed);
+        // Still show the regular errors too
+        showFeedback("danger", result.errors);
+      } else {
+        showFeedback("danger", result.errors);
+      }
+      return false;
+    }
+
+    clearFeedback();
+    loadTemplateIntoEditor(result.payload);
+    ensureRawEditor();
+    updateRawEditorContent(result.payload);
+    toggleRawConfigEmptyState(
+      Array.isArray(result.payload.configs) &&
+        result.payload.configs.length > 0,
+    );
+    showFeedback(
+      "success",
+      translate(
+        "template.editor.raw_editor_import_success",
+        "Template JSON imported successfully.",
+      ),
+    );
+    return true;
+  } catch (error) {
+    showFeedback(
+      "danger",
+      translate(
+        "template.editor.raw_editor_upload_failed",
+        "Unable to read the selected file.",
+      ),
+    );
+    return false;
+  }
+};
+
+const queueTemplateImport = (file) => {
+  if (!file || !ctx.canEdit) return;
+  state.pendingTemplateImportFile = file;
+  templateImportWarningModalInstance =
+    templateImportWarningModalInstance || ensureTemplateImportModal();
+  if (templateImportWarningModalInstance) {
+    templateImportWarningModalInstance.show();
+  } else {
+    importTemplateFile(file).finally(() => {
+      resetTemplateImportState();
+    });
+  }
+};
+
+const flushPendingTemplateImport = async () => {
+  const file = state.pendingTemplateImportFile;
+  if (!file) return;
+  const succeeded = await importTemplateFile(file);
+  if (succeeded) {
+    templateImportWarningModalInstance?.hide();
+  }
+  resetTemplateImportState();
+};
+
+const handleRawTemplateUpload = (event) => {
+  if (!ctx.canEdit) return;
+  const input = event?.target;
+  const file = input?.files?.[0];
+  if (file) {
+    queueTemplateImport(file);
+  }
+  if (input) input.value = "";
+};
+
+const importRawConfigFiles = (files) => {
+  if (!ctx.canEdit) return;
+  if (!files || files.length === 0) return;
+  const items = Array.from(files);
+
+  const readers = items.map(
+    (file) =>
+      new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = ({ target }) => {
+          resolve({
+            file,
+            content: typeof target?.result === "string" ? target.result : "",
+          });
+        };
+        reader.onerror = () => reject(new Error("read-error"));
+        reader.readAsText(file);
+      }),
+  );
+
+  Promise.all(readers)
+    .then((results) => {
+      const baseResult = collectRawFormData({ validate: false });
+      if (!baseResult.payload) {
+        showFeedback(
+          "danger",
+          translate(
+            "template.editor.raw_configs_import_invalid",
+            "Unable to import configs because the current JSON is invalid.",
+          ),
+        );
+        return;
+      }
+      const payload = JSON.parse(JSON.stringify(baseResult.payload));
+      if (!Array.isArray(payload.configs)) payload.configs = [];
+      const defaultType =
+        configTypeOptions.length > 0
+          ? configTypeOptions[0].value
+          : "server_http";
+      const added = [];
+
+      results.forEach(({ file, content }, index) => {
+        const normalizedType =
+          normalizeConfigType(defaultType) || "server_http";
+        const normalizedName = deriveConfigNameFromFile(file.name);
+        if (!normalizedName) return;
+        const ref = buildConfigReference(normalizedType, normalizedName);
+        const existingIndex = payload.configs.findIndex(
+          (cfg) => buildConfigReference(cfg.type, cfg.name) === ref,
+        );
+        const configPayload = {
+          type: normalizedType,
+          name: normalizedName,
+          data: content,
+        };
+        if (existingIndex >= 0) {
+          payload.configs[existingIndex] = {
+            ...payload.configs[existingIndex],
+            ...configPayload,
+          };
+        } else {
+          configPayload.order = payload.configs.length + index;
+          payload.configs.push(configPayload);
+        }
+        added.push({ name: file.name, type: normalizedType });
+      });
+
+      if (added.length === 0) {
+        showFeedback(
+          "warning",
+          translate(
+            "template.editor.raw_configs_import_none",
+            "No configs were imported.",
+          ),
+        );
+        return;
+      }
+
+      clearFeedback();
+      loadTemplateIntoEditor(payload);
+
+      if (dom.rawConfigsUploadList) {
+        toggleRawConfigEmptyState(true);
+        dom.rawConfigsUploadList.classList.remove("d-none");
+        added.forEach(({ name, type }) => {
+          const item = document.createElement("li");
+          item.className =
+            "list-group-item d-flex justify-content-between align-items-center";
+          item.innerHTML = `<span>${name}</span><span class="badge bg-label-primary text-uppercase">${type}</span>`;
+          dom.rawConfigsUploadList.prepend(item);
+        });
+      }
+
+      showFeedback(
+        "success",
+        translate(
+          "template.editor.raw_configs_import_success",
+          "{{count}} config file(s) imported.",
+          { count: added.length },
+        ),
+      );
+    })
+    .catch(() => {
+      showFeedback(
+        "danger",
+        translate(
+          "template.editor.raw_configs_upload_failed",
+          "Unable to read one of the selected files.",
+        ),
+      );
+    });
+};
+
+const handleRawConfigsUpload = (event) => {
+  if (!ctx.canEdit) return;
+  const input = event?.target;
+  const files = input?.files;
+  if (files && files.length) {
+    importRawConfigFiles(files);
+  }
+  if (input) input.value = "";
+};
+
+const setupViewModeTabs = () => {
+  if (!dom.modeTabs || dom.modeTabs.length === 0) return;
+  const resolveModeFromTarget = (target) => {
+    if (!target) return "easy";
+    const explicit = target.getAttribute
+      ? target.getAttribute("data-template-editor-mode")
+      : null;
+    if (explicit) return explicit;
+    const bsTarget =
+      (target.dataset && target.dataset.bsTarget) ||
+      (typeof target.getAttribute === "function"
+        ? target.getAttribute("data-bs-target")
+        : "");
+    if (
+      typeof bsTarget === "string" &&
+      bsTarget.toLowerCase().includes("raw")
+    ) {
+      return "raw";
+    }
+    return "easy";
+  };
+
+  dom.modeTabs.forEach((button) => {
+    button.addEventListener("show.bs.tab", (event) => {
+      const targetMode = normalizeViewMode(resolveModeFromTarget(event.target));
+      if (targetMode === state.viewMode) return;
+      if (targetMode === "easy") {
+        const result = collectRawFormData({ validate: false });
+        if (!result.payload) {
+          showFeedback("danger", result.errors || []);
+          event.preventDefault();
+          return;
+        }
+        // Check for missing configs even in non-validation mode
+        if (result.missingConfigs && result.missingConfigs.length > 0) {
+          // Get the raw template text for later re-import
+          const source =
+            (rawEditorState.editor && rawEditorState.editor.getValue()) ||
+            dom.rawTemplateValue?.value ||
+            "";
+          let parsedTemplate = null;
+          try {
+            parsedTemplate = JSON.parse(source.trim());
+          } catch (e) {
+            // Ignore parse errors, will be caught elsewhere
+          }
+          showMissingConfigsModal(result.missingConfigs, parsedTemplate);
+          showFeedback("danger", result.errors || []);
+          event.preventDefault();
+          return;
+        }
+        clearFeedback();
+        loadTemplateIntoEditor(result.payload);
+        syncRawEditorFromEasy();
+      } else if (targetMode === "raw") {
+        if (!syncRawEditorFromEasy({ ensureEditor: true })) {
+          event.preventDefault();
+          showFeedback(
+            "danger",
+            translate(
+              "template.editor.raw_validation_invalid_json",
+              "Invalid JSON payload.",
+            ),
+          );
+          return;
+        }
+        clearFeedback();
+      }
+    });
+
+    button.addEventListener("shown.bs.tab", (event) => {
+      const targetMode = normalizeViewMode(resolveModeFromTarget(event.target));
+      state.viewMode = targetMode;
+      ctx.viewMode = targetMode;
+      updateViewModeInput();
+      if (targetMode === "raw") {
+        const editor = ensureRawEditor();
+        if (editor) editor.setReadOnly(!ctx.canEdit);
+      }
+    });
+  });
+};
+
+const initializeViewMode = () => {
+  updateViewModeInput();
+  setupViewModeTabs();
+  toggleRawConfigEmptyState(
+    Boolean(
+      dom.rawConfigsUploadList && dom.rawConfigsUploadList.children.length > 0,
+    ),
+  );
+  if (state.viewMode === "raw") {
+    ensureRawEditor();
+    syncRawEditorFromEasy({ ensureEditor: true });
+    if (rawEditorState.editor) {
+      rawEditorState.editor.setReadOnly(!ctx.canEdit);
+    }
+  } else {
+    syncRawEditorFromEasy();
+  }
 };
 
 const initEventListeners = () => {
@@ -3506,6 +4749,267 @@ const initEventListeners = () => {
       if (dom.deleteStepItems) dom.deleteStepItems.textContent = "";
     });
   }
+
+  if (dom.rawTemplateUploadInput) {
+    dom.rawTemplateUploadInput.addEventListener(
+      "change",
+      handleRawTemplateUpload,
+    );
+  }
+
+  if (dom.rawConfigsUploadInput) {
+    dom.rawConfigsUploadInput.addEventListener(
+      "change",
+      handleRawConfigsUpload,
+    );
+  }
+
+  if (dom.rawConfigDropzone) {
+    const dropzone = dom.rawConfigDropzone;
+    const isDisabled = dropzone.classList.contains("is-disabled");
+
+    const handleDragEnter = (event) => {
+      preventDragDefaults(event);
+      if (!ctx.canEdit || isDisabled) return;
+      dropzone.classList.add("is-dragover");
+    };
+
+    const handleDragLeave = (event) => {
+      preventDragDefaults(event);
+      if (event.target === dropzone) {
+        dropzone.classList.remove("is-dragover");
+      }
+    };
+
+    ["dragenter", "dragover"].forEach((eventName) =>
+      dropzone.addEventListener(eventName, handleDragEnter),
+    );
+    ["dragleave", "dragend"].forEach((eventName) =>
+      dropzone.addEventListener(eventName, handleDragLeave),
+    );
+    dropzone.addEventListener("drop", (event) => {
+      preventDragDefaults(event);
+      dropzone.classList.remove("is-dragover");
+      if (!ctx.canEdit || isDisabled) return;
+      const files = event.dataTransfer?.files;
+      if (files && files.length) {
+        importRawConfigFiles(files);
+      }
+      if (dom.rawConfigsUploadInput) dom.rawConfigsUploadInput.value = "";
+    });
+    dropzone.addEventListener("click", (event) => {
+      if (!ctx.canEdit || isDisabled) return;
+      if (event.target && event.target.closest(".raw-config-browse-btn")) {
+        return;
+      }
+      dom.rawConfigsUploadInput?.click();
+    });
+    dropzone.addEventListener("keydown", (event) => {
+      if (!ctx.canEdit || isDisabled) return;
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        dom.rawConfigsUploadInput?.click();
+      }
+    });
+  }
+
+  if (dom.rawConfigBrowseButton && dom.rawConfigsUploadInput) {
+    dom.rawConfigBrowseButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!ctx.canEdit) return;
+      dom.rawConfigsUploadInput.click();
+    });
+  }
+
+  if (dom.rawTemplateDropTarget && ctx.canEdit) {
+    const container = dom.rawTemplateDropTarget.parentElement;
+    const handleDragEnter = (event) => {
+      preventDragDefaults(event);
+      if (!ctx.canEdit) return;
+      setTemplateDropzoneActive(true);
+    };
+    const handleDragLeave = (event) => {
+      preventDragDefaults(event);
+      if (
+        event.target === container ||
+        event.target === dom.rawTemplateDropTarget
+      ) {
+        setTemplateDropzoneActive(false);
+      }
+    };
+    if (container) {
+      ["dragenter", "dragover"].forEach((eventName) =>
+        container.addEventListener(eventName, handleDragEnter),
+      );
+      ["dragleave", "dragend"].forEach((eventName) =>
+        container.addEventListener(eventName, handleDragLeave),
+      );
+      container.addEventListener("drop", (event) => {
+        preventDragDefaults(event);
+        setTemplateDropzoneActive(false);
+        if (!ctx.canEdit) return;
+        const files = event.dataTransfer?.files;
+        if (files && files.length) {
+          queueTemplateImport(files[0]);
+        }
+      });
+    }
+  }
+
+  if (dom.templateImportWarningModal) {
+    const modalInstance = ensureTemplateImportModal();
+    if (modalInstance) {
+      templateImportWarningModalInstance = modalInstance;
+      dom.templateImportWarningModal.addEventListener("hidden.bs.modal", () => {
+        resetTemplateImportState();
+      });
+    }
+  }
+
+  if (dom.confirmTemplateImportBtn) {
+    dom.confirmTemplateImportBtn.addEventListener("click", () => {
+      flushPendingTemplateImport();
+    });
+  }
+
+  // Missing configs modal upload functionality
+  if (dom.missingConfigsUploadInput) {
+    dom.missingConfigsUploadInput.addEventListener("change", (event) => {
+      const files = event.target?.files;
+      if (files && files.length) {
+        handleMissingConfigsUpload(files);
+      }
+      // Reset input
+      if (dom.missingConfigsUploadInput) {
+        dom.missingConfigsUploadInput.value = "";
+      }
+    });
+  }
+
+  if (dom.missingConfigsBrowseBtn && dom.missingConfigsUploadInput) {
+    dom.missingConfigsBrowseBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      dom.missingConfigsUploadInput.click();
+    });
+  }
+
+  if (dom.missingConfigsDropzone) {
+    const dropzone = dom.missingConfigsDropzone;
+
+    const handleDragEnter = (event) => {
+      preventDragDefaults(event);
+      dropzone.classList.add("is-dragover");
+    };
+
+    const handleDragLeave = (event) => {
+      preventDragDefaults(event);
+      if (event.target === dropzone) {
+        dropzone.classList.remove("is-dragover");
+      }
+    };
+
+    ["dragenter", "dragover"].forEach((eventName) =>
+      dropzone.addEventListener(eventName, handleDragEnter),
+    );
+    ["dragleave", "dragend"].forEach((eventName) =>
+      dropzone.addEventListener(eventName, handleDragLeave),
+    );
+
+    dropzone.addEventListener("drop", (event) => {
+      preventDragDefaults(event);
+      dropzone.classList.remove("is-dragover");
+      const files = event.dataTransfer?.files;
+      if (files && files.length) {
+        handleMissingConfigsUpload(files);
+      }
+    });
+
+    dropzone.addEventListener("click", (event) => {
+      if (event.target && event.target.closest("button")) {
+        return; // Let button handle its own click
+      }
+      dom.missingConfigsUploadInput?.click();
+    });
+
+    dropzone.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        dom.missingConfigsUploadInput?.click();
+      }
+    });
+  }
+
+  if (dom.missingConfigsDoneBtn) {
+    dom.missingConfigsDoneBtn.addEventListener("click", () => {
+      const pendingTemplate = state.pendingTemplateData;
+
+      // Close both modals
+      closeMissingConfigsModal();
+      if (templateImportWarningModalInstance) {
+        templateImportWarningModalInstance.hide();
+      }
+
+      // If we have pending template data, re-import it now that configs are uploaded
+      if (pendingTemplate) {
+        // Get the currently uploaded configs with data from the editor
+        const easyPayload = buildEasyPayload({ validate: false });
+        const currentConfigs = easyPayload?.payload?.configs || [];
+
+        // Merge the configs into the pending template
+        const mergedTemplate = {
+          ...pendingTemplate,
+          configs: currentConfigs,
+        };
+
+        const result = buildPayloadFromRawObject(mergedTemplate, {
+          validate: true,
+        });
+
+        if (result.isValid) {
+          clearFeedback();
+          loadTemplateIntoEditor(result.payload);
+          ensureRawEditor();
+          updateRawEditorContent(result.payload);
+          toggleRawConfigEmptyState(
+            Array.isArray(result.payload.configs) &&
+              result.payload.configs.length > 0,
+          );
+          showFeedback(
+            "success",
+            translate(
+              "template.editor.missing_configs_resolved",
+              "All missing configs have been uploaded! Template imported successfully.",
+            ),
+          );
+        } else if (result.missingConfigs && result.missingConfigs.length > 0) {
+          // Still have missing configs - show the modal again
+          showMissingConfigsModal(result.missingConfigs, mergedTemplate);
+          showFeedback("warning", result.errors);
+        } else {
+          // Other validation errors
+          showFeedback("danger", result.errors);
+        }
+      } else {
+        // No pending template, just re-validate current state
+        const result = collectActivePayload({ validate: true });
+        if (result.isValid) {
+          clearFeedback();
+          showFeedback(
+            "success",
+            translate(
+              "template.editor.missing_configs_resolved",
+              "All missing configs have been uploaded!",
+            ),
+          );
+        } else if (result.missingConfigs && result.missingConfigs.length > 0) {
+          // Still have missing configs
+          showFeedback("warning", result.errors);
+        }
+      }
+    });
+  }
 };
 
 const initTemplateEditor = () => {
@@ -3515,6 +5019,7 @@ const initTemplateEditor = () => {
   initialiseCollections();
   refreshConfigEditorThemes();
   initEventListeners();
+  initializeViewMode();
 };
 
 initTemplateEditor();

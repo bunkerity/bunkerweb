@@ -45,6 +45,7 @@ Table of Contents
     * [Missing data on short circuited requests](#missing-data-on-short-circuited-requests)
 * [TODO](#todo)
 * [Changes](#changes)
+* [Build And Test](#build-and-test)
 * [Test Suite](#test-suite)
 * [Copyright and License](#copyright-and-license)
 * [See Also](#see-also)
@@ -63,8 +64,8 @@ Version
 =======
 
 This document describes ngx_lua
-[v0.10.25](https://github.com/openresty/lua-nginx-module/tags), which was released
-on 19 June 2023.
+[v0.10.28](https://github.com/openresty/lua-nginx-module/tags), which was released
+on 17 Jan, 2025.
 
 Videos
 ======
@@ -307,6 +308,8 @@ Nginx Compatibility
 
 The latest version of this module is compatible with the following versions of Nginx:
 
+* 1.29.x  (last tested: 1.29.2)
+* 1.27.x  (last tested: 1.27.1)
 * 1.25.x  (last tested: 1.25.1)
 * 1.21.x  (last tested: 1.21.4)
 * 1.19.x  (last tested: 1.19.3)
@@ -982,6 +985,23 @@ The changes made in every release of this module are listed in the change logs o
 
 [Back to TOC](#table-of-contents)
 
+Build And Test
+==============
+
+This module uses `.travis.yml` as the CI configuration.
+You can always check `.travis.yml` for the latest CI configuration.
+
+For developers, you need to run tests locally. You can use `util/run-ci.sh`
+to easily set up the environment and execute the test suite.
+
+To run the Test from the beginning:
+
+```shell
+git clone https://github.com/openresty/lua-nginx-module.git
+cd lua-nginx-module
+bash util/run-ci.sh
+```
+
 Test Suite
 ==========
 
@@ -1025,7 +1045,6 @@ To run the whole test suite in the default testing mode:
     cd /path/to/lua-nginx-module
     export PATH=/path/to/your/nginx/sbin:$PATH
     prove -I/path/to/test-nginx/lib -r t
-
 
 To run specific test files:
 
@@ -1153,6 +1172,8 @@ Directives
 * [ssl_session_fetch_by_lua_file](#ssl_session_fetch_by_lua_file)
 * [ssl_session_store_by_lua_block](#ssl_session_store_by_lua_block)
 * [ssl_session_store_by_lua_file](#ssl_session_store_by_lua_file)
+* [proxy_ssl_verify_by_lua_block](#proxy_ssl_verify_by_lua_block)
+* [proxy_ssl_verify_by_lua_file](#proxy_ssl_verify_by_lua_file)
 * [lua_shared_dict](#lua_shared_dict)
 * [lua_socket_connect_timeout](#lua_socket_connect_timeout)
 * [lua_socket_send_timeout](#lua_socket_send_timeout)
@@ -1169,7 +1190,9 @@ Directives
 * [lua_ssl_certificate_key](#lua_ssl_certificate_key)
 * [lua_ssl_trusted_certificate](#lua_ssl_trusted_certificate)
 * [lua_ssl_verify_depth](#lua_ssl_verify_depth)
+* [lua_ssl_key_log](#lua_ssl_key_log)
 * [lua_ssl_conf_command](#lua_ssl_conf_command)
+* [lua_upstream_skip_openssl_default_verify](#lua_upstream_skip_openssl_default_verify)
 * [lua_http10_buffering](#lua_http10_buffering)
 * [rewrite_by_lua_no_postpone](#rewrite_by_lua_no_postpone)
 * [access_by_lua_no_postpone](#access_by_lua_no_postpone)
@@ -2860,6 +2883,8 @@ patches to the standard Nginx core:
 
 <https://openresty.org/en/nginx-ssl-patches.html>
 
+**Note for HTTP/3 (QUIC) users**: When using this directive with HTTP/3 connections, certain yield operations may fail if the QUIC SSL Lua yield patch is not applied to your OpenSSL installation. OpenResty packages include this patch by default, but if you are building lua-nginx-module separately, you may need to apply the patch manually to ensure proper yield/resume functionality for HTTP/3 connections in SSL Lua phases. The patch can be found at: [nginx-1.27.1-quic_ssl_lua_yield.patch](https://github.com/openresty/openresty/blob/master/patches/nginx/1.27.1/nginx-1.27.1-quic_ssl_lua_yield.patch)
+
 This directive was first introduced in the `v0.10.21` release.
 
 [Back to TOC](#directives)
@@ -2876,6 +2901,8 @@ ssl_client_hello_by_lua_file
 Equivalent to [ssl_client_hello_by_lua_block](#ssl_client_hello_by_lua_block), except that the file specified by `<path-to-lua-script-file>` contains the Lua code, or, as from the `v0.5.0rc32` release, the [LuaJIT bytecode](#luajit-bytecode-support) to be executed.
 
 When a relative path like `foo/bar.lua` is given, they will be turned into the absolute path relative to the `server prefix` path determined by the `-p PATH` command-line option while starting the Nginx server.
+
+**Note for HTTP/3 (QUIC) users**: When using this directive with HTTP/3 connections, certain yield operations may fail if the QUIC SSL Lua yield patch is not applied to your OpenSSL installation. OpenResty packages include this patch by default, but if you are building lua-nginx-module separately, you may need to apply the patch manually to ensure proper yield/resume functionality for HTTP/3 connections in SSL Lua phases. The patch can be found at: [nginx-1.27.1-quic_ssl_lua_yield.patch](https://github.com/openresty/openresty/blob/master/patches/nginx/1.27.1/nginx-1.27.1-quic_ssl_lua_yield.patch)
 
 This directive was first introduced in the `v0.10.21` release.
 
@@ -2970,6 +2997,8 @@ patches to the standard Nginx core:
 
 <https://openresty.org/en/nginx-ssl-patches.html>
 
+**Note for HTTP/3 (QUIC) users**: When using this directive with HTTP/3 connections, certain yield operations may fail if the QUIC SSL Lua yield patch is not applied to your OpenSSL installation. OpenResty packages include this patch by default, but if you are building lua-nginx-module separately, you may need to apply the patch manually to ensure proper yield/resume functionality for HTTP/3 connections in SSL Lua phases. The patch can be found at: [nginx-1.27.1-quic_ssl_lua_yield.patch](https://github.com/openresty/openresty/blob/master/patches/nginx/1.27.1/nginx-1.27.1-quic_ssl_lua_yield.patch)
+
 This directive was first introduced in the `v0.10.0` release.
 
 [Back to TOC](#directives)
@@ -2986,6 +3015,8 @@ ssl_certificate_by_lua_file
 Equivalent to [ssl_certificate_by_lua_block](#ssl_certificate_by_lua_block), except that the file specified by `<path-to-lua-script-file>` contains the Lua code, or, as from the `v0.5.0rc32` release, the [LuaJIT bytecode](#luajit-bytecode-support) to be executed.
 
 When a relative path like `foo/bar.lua` is given, they will be turned into the absolute path relative to the `server prefix` path determined by the `-p PATH` command-line option while starting the Nginx server.
+
+**Note for HTTP/3 (QUIC) users**: When using this directive with HTTP/3 connections, certain yield operations may fail if the QUIC SSL Lua yield patch is not applied to your OpenSSL installation. OpenResty packages include this patch by default, but if you are building lua-nginx-module separately, you may need to apply the patch manually to ensure proper yield/resume functionality for HTTP/3 connections in SSL Lua phases. The patch can be found at: [nginx-1.27.1-quic_ssl_lua_yield.patch](https://github.com/openresty/openresty/blob/master/patches/nginx/1.27.1/nginx-1.27.1-quic_ssl_lua_yield.patch)
 
 This directive was first introduced in the `v0.10.0` release.
 
@@ -3135,6 +3166,84 @@ This directive was first introduced in the `v0.10.6` release.
 
 Note that: this directive is only allowed to used in **http context** from the `v0.10.7` release
 (because SSL session resumption happens before server name dispatch).
+
+[Back to TOC](#directives)
+
+proxy_ssl_verify_by_lua_block
+-----------------------------
+
+**syntax:** *proxy_ssl_verify_by_lua_block { lua-script }*
+
+**context:** *location*
+
+**phase:** *right-after-server-certificate-message-was-processed*
+
+This directive runs user Lua code when Nginx is about to post-process the SSL server certificate message for the upstream SSL (https) connections.
+
+It is particularly useful to parse upstream server certificate and do some custom operations in pure lua.
+
+The [ngx.ssl.proxysslverify](https://github.com/openresty/lua-resty-core/blob/master/lib/ngx/ssl/proxysslverify.md) Lua modules provided by the [lua-resty-core](https://github.com/openresty/lua-resty-core/#readme)
+library are particularly useful in this context.
+
+Below is a trivial example using the
+[ngx.ssl.proxysslverify](https://github.com/openresty/lua-resty-core/blob/master/lib/ngx/ssl/proxysslverify.md) module
+at the same time:
+
+```nginx
+
+ server {
+     listen 443 ssl;
+     server_name   test.com;
+     ssl_certificate /path/to/cert.crt;
+     ssl_certificate_key /path/to/key.key;
+
+     location /t {
+         proxy_ssl_certificate /path/to/cert.crt;
+         proxy_ssl_certificate_key /path/to/key.key;
+         proxy_pass https://upstream;
+
+         proxy_ssl_verify_by_lua_block {
+             local proxy_ssl_vfy = require "ngx.ssl.proxysslverify"
+             local cert = proxy_ssl_vfy.get_verify_cert()
+
+             -- ocsp to verify cert
+             -- check crl
+             proxy_ssl_vfy.set_verify_result()
+             ...
+         }
+     }
+     ...
+ }
+```
+
+See more information in the [ngx.ssl.proxysslverify](https://github.com/openresty/lua-resty-core/blob/master/lib/ngx/ssl/proxysslverify.md)
+Lua modules' official documentation.
+
+Uncaught Lua exceptions in the user Lua code immediately abort the current SSL session, so does the
+[ngx.exit](#ngxexit) call with an error code like `ngx.ERROR`.
+
+This Lua code execution context *does* support yielding, so Lua APIs that may yield
+(like cosockets, sleeping, and "light threads")
+are enabled in this context
+
+Note, `ngx.ctx` in proxy_ssl_verify_by_lua_block is belonging to upstream connection, not downstream connection, so it's different from `ngx.ctx` in contexts like ssl_certificate_by_lua etc.
+
+This directive requires OpenSSL 3.0.2 or greater.
+
+[Back to TOC](#directives)
+
+proxy_ssl_verify_by_lua_file
+----------------------------
+
+**syntax:** *proxy_ssl_verify_by_lua_file &lt;path-to-lua-script-file&gt;*
+
+**context:** *location*
+
+**phase:** *right-after-server-certificate-message-was-processed*
+
+Equivalent to [proxy_ssl_verify_by_lua_block](#proxy_ssl_verify_by_lua_block), except that the file specified by `<path-to-lua-script-file>` contains the Lua code, or, as from the `v0.5.0rc32` release, the [LuaJIT bytecode](#luajit-bytecode-support) to be executed.
+
+When a relative path like `foo/bar.lua` is given, they will be turned into the absolute path relative to the `server prefix` path determined by the `-p PATH` command-line option while starting the Nginx server.
 
 [Back to TOC](#directives)
 
@@ -3430,6 +3539,19 @@ See also [lua_ssl_certificate](#lua_ssl_certificate), [lua_ssl_certificate_key](
 
 [Back to TOC](#directives)
 
+lua_ssl_key_log
+---------------
+
+**syntax:** *lua_ssl_key_log &lt;file&gt;*
+
+**default:** *none*
+
+**context:** *http, server, location*
+
+Enables logging of client connection SSL keys in the [tcpsock:sslhandshake](#tcpsocksslhandshake) method and specifies the path to the key log file. Keys are logged in the SSLKEYLOGFILE format compatible with Wireshark.
+
+[Back to TOC](#directives)
+
 lua_ssl_conf_command
 --------------------
 
@@ -3458,6 +3580,21 @@ Note though that configuring OpenSSL directly with `lua_ssl_conf_command` might 
 This directive was first introduced in the `v0.10.21` release.
 
 
+
+[Back to TOC](#directives)
+
+lua_upstream_skip_openssl_default_verify
+--------------------
+
+**syntax:** *lua_upstream_skip_openssl_default_verify on|off*
+
+**default:** *lua_upstream_skip_openssl_default_verify off*
+
+**context:** *location, location-if*
+
+When using proxy_ssl_verify_by_lua directive, `lua_upstream_skip_openssl_default_verify` controls whether to skip default openssl's verify function, that means using pure Lua code to verify upstream server certificate.
+
+This directive is turned `off` by default.
 
 [Back to TOC](#directives)
 
@@ -3751,6 +3888,7 @@ Nginx API for Lua
 * [ngx.socket.tcp](#ngxsockettcp)
 * [tcpsock:bind](#tcpsockbind)
 * [tcpsock:connect](#tcpsockconnect)
+* [tcpsock:getfd](#getfd)
 * [tcpsock:setclientcert](#tcpsocksetclientcert)
 * [tcpsock:sslhandshake](#tcpsocksslhandshake)
 * [tcpsock:send](#tcpsocksend)
@@ -7854,13 +7992,14 @@ See also [ngx.socket.udp](#ngxsocketudp).
 
 tcpsock:bind
 ------------
-**syntax:** *ok, err = tcpsock:bind(address)*
+**syntax:** *ok, err = tcpsock:bind(address, port?)*
 
 **context:** *rewrite_by_lua&#42;, access_by_lua&#42;, content_by_lua&#42;, ngx.timer.&#42;, ssl_certificate_by_lua&#42;,ssl_session_fetch_by_lua&#42;,ssl_client_hello_by_lua&#42;*
 
 Just like the standard [proxy_bind](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_bind) directive, this api makes the outgoing connection to a upstream server originate from the specified local IP address.
 
-Only IP addresses can be specified as the `address` argument.
+IP addresses can be specified as the `address` argument.
+The optional `port` argument is usually used in the transparent proxy.
 
 Here is an example for connecting to a TCP server from the specified local IP address:
 
@@ -8009,6 +8148,21 @@ The support for the options table argument was first introduced in the `v0.5.7` 
 This method was first introduced in the `v0.5.0rc1` release.
 
 [Back to TOC](#nginx-api-for-lua)
+
+
+tcpsock:getfd
+--------------------
+
+**syntax:** *fd, err = tcpsock:getfd()*
+
+**context:** *rewrite_by_lua&#42;, access_by_lua&#42;, content_by_lua&#42;, ngx.timer.&#42;, ssl_certificate_by_lua&#42;, ssl_session_fetch_by_lua&#42;, ssl_client_hello_by_lua&#42;*
+
+Get the file descriptor of the current tcp socket.
+
+This method was first introduced in the `v0.10.29` release.
+
+[Back to TOC](#nginx-api-for-lua)
+
 
 tcpsock:setclientcert
 ---------------------

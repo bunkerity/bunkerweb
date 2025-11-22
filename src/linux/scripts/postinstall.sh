@@ -204,6 +204,11 @@ EOF
             echo ""
             echo "⚠️  Note: Make sure that your firewall settings allow access to this URL."
             echo ""
+        elif [ "$SERVICE_UI" = "yes" ]; then
+            echo "🚀 Enabling and starting the BunkerWeb UI service..."
+            do_and_check_cmd systemctl enable --now bunkerweb-ui
+        else
+            echo "ℹ️ BunkerWeb UI service is not enabled in the current configuration."
         fi
     # Upgrade scenario
     else
@@ -225,15 +230,11 @@ fi
 echo "Configuring BunkerWeb API service..."
 
 # Enable API only when explicitly requested (via env or flag)
-if [ "${SERVICE_API:-no}" = "yes" ] || [ -f /var/tmp/bunkerweb_enable_api ]; then
+if [ "${SERVICE_API:-no}" = "yes" ]; then
     # Fresh installation or explicit API enablement
     if [ ! -f /var/tmp/bunkerweb_upgrade ]; then
         echo "🚀 Enabling and starting the BunkerWeb API service..."
         do_and_check_cmd systemctl enable --now bunkerweb-api
-        # Clean up enable flag if present
-        if [ -f /var/tmp/bunkerweb_enable_api ]; then
-            rm -f /var/tmp/bunkerweb_enable_api
-        fi
     else
         # Restart API only if already running
         if systemctl is-active --quiet bunkerweb-api; then
@@ -250,7 +251,7 @@ fi
 
 # Fetch CrowdSec config from /var/tmp/crowdsec.env and merge into variables.env if present
 if [ -f /var/tmp/crowdsec.env ] && [ -f /etc/bunkerweb/variables.env ]; then
-    echo "Adding CrowdSec configuration from the easy-install script to /etc/bunkerweb/variables.env..."
+    echo "Adding CrowdSec configuration from the easy-install script to /etc/bunkerweb/variables.env ..."
     while IFS= read -r line; do
         key="${line%%=*}"
         value="${line#*=}"
@@ -262,22 +263,6 @@ if [ -f /var/tmp/crowdsec.env ] && [ -f /etc/bunkerweb/variables.env ]; then
     done < /var/tmp/crowdsec.env
     echo "✔️ CrowdSec configuration added to /etc/bunkerweb/variables.env"
     rm -f /var/tmp/crowdsec.env
-fi
-
-# Fetch BunkerWeb instances config from /var/tmp/bunkerweb_instances.env and merge into variables.env if present
-if [ -f /var/tmp/bunkerweb_instances.env ] && [ -f /etc/bunkerweb/variables.env ]; then
-    echo "Adding BunkerWeb instances configuration from the easy-install script to /etc/bunkerweb/variables.env..."
-    while IFS= read -r line; do
-        key="${line%%=*}"
-        value="${line#*=}"
-        if grep -q "^${key}=" /etc/bunkerweb/variables.env; then
-            sed -i "s|^${key}=.*|${key}=${value}|" /etc/bunkerweb/variables.env
-        else
-            echo "${key}=${value}" >> /etc/bunkerweb/variables.env
-        fi
-    done < /var/tmp/bunkerweb_instances.env
-    echo "✔️ BunkerWeb instances configuration added to /etc/bunkerweb/variables.env"
-    rm -f /var/tmp/bunkerweb_instances.env
 fi
 
 if [ -f /var/tmp/bunkerweb_upgrade ]; then

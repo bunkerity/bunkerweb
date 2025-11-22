@@ -1,3 +1,6 @@
+from collections import defaultdict
+from datetime import datetime
+from html import escape
 from os import getenv
 from subprocess import DEVNULL, PIPE, STDOUT, run
 from os.path import dirname, join, sep
@@ -33,6 +36,38 @@ WORK_DIR = join(sep, "var", "tmp", "bunkerweb", "ui", "letsencrypt", "lib")
 LOGS_DIR = join(sep, "var", "tmp", "bunkerweb", "letsencrypt", "log")
 
 DEPS_PATH = join(sep, "usr", "share", "bunkerweb", "deps", "python")
+
+DATATABLE_COLUMNS = (
+    None,
+    None,
+    "domain",
+    "common_name",
+    "issuer",
+    "valid_from",
+    "valid_to",
+    "preferred_profile",
+    "challenge",
+    "key_type",
+    "serial_number",
+    "fingerprint",
+    "version",
+)
+
+SEARCHABLE_FIELDS = (
+    "domain",
+    "common_name",
+    "issuer",
+    "issuer_server",
+    "serial_number",
+    "fingerprint",
+    "version",
+    "preferred_profile",
+    "challenge",
+    "authenticator",
+    "key_type",
+    "valid_from",
+    "valid_to",
+)
 
 
 def download_certificates():
@@ -140,6 +175,20 @@ def letsencrypt_page():
 def letsencrypt_fetch():
     cert_list = []
 
+    def _normalize(value):
+        if value is None:
+            return ""
+        return str(value)
+
+    def _pane_value(value):
+        normalized = _normalize(value)
+        return normalized or "N/A"
+
+    try:
+        draw = int(request.form.get("draw", 1))
+    except (TypeError, ValueError):
+        draw = 1
+
     try:
         certs = retrieve_certificates()
         LOGGER.debug(f"Certificates: {certs}")
@@ -165,12 +214,127 @@ def letsencrypt_fetch():
         LOGGER.debug(format_exc())
         LOGGER.error(f"Error while fetching certificates: {e}")
 
+    total_records = len(cert_list)
+
+    search_value = (request.form.get("search[value]", "") or "").strip().lower()
+
+    search_panes = defaultdict(list)
+    for key, value in request.form.items():
+        if key.startswith("searchPanes["):
+            field = key.split("[")[1].split("]")[0]
+            if value:
+                search_panes[field].append(value)
+
+    filtered_cert_list = list(cert_list)
+    if search_value:
+        filtered_cert_list = [
+            cert for cert in filtered_cert_list if any(search_value in _normalize(cert.get(field, "")).lower() for field in SEARCHABLE_FIELDS)
+        ]
+
+    # Column-specific search (e.g. search panes)
+    for idx, column_key in enumerate(DATATABLE_COLUMNS):
+        if not column_key:
+            continue
+        raw_value = (request.form.get(f"columns[{idx}][search][value]", "") or "").strip()
+        if not raw_value:
+            continue
+
+        search_terms = [term.strip().lower() for term in raw_value.split("|") if term.strip()]
+        if not search_terms:
+            continue
+
+        filtered_cert_list = [cert for cert in filtered_cert_list if any(term in _normalize(cert.get(column_key, "")).lower() for term in search_terms)]
+
+    # SearchPanes filtering
+    if search_panes:
+        for field, selected_values in search_panes.items():
+            normalized_values = {_pane_value(value).lower() for value in selected_values if value is not None}
+            if not normalized_values:
+                continue
+            filtered_cert_list = [cert for cert in filtered_cert_list if _pane_value(cert.get(field, "")).lower() in normalized_values]
+
+    records_filtered = len(filtered_cert_list)
+
+    # Prepare SearchPanes counts/options before pagination
+    pane_fields = ("issuer", "preferred_profile", "challenge", "key_type")
+    pane_counts = defaultdict(lambda: defaultdict(lambda: {"total": 0, "count": 0}))
+
+    for cert in cert_list:
+        for field in pane_fields:
+            value = _pane_value(cert.get(field, ""))
+            pane_counts[field][value]["total"] += 1
+
+    for cert in filtered_cert_list:
+        for field in pane_fields:
+            value = _pane_value(cert.get(field, ""))
+            pane_counts[field][value]["count"] += 1
+
+    # Ordering
+    try:
+        order_idx = int(request.form.get("order[0][column]", -1))
+    except (TypeError, ValueError):
+        order_idx = -1
+
+    if 0 <= order_idx < len(DATATABLE_COLUMNS):
+        order_key = DATATABLE_COLUMNS[order_idx]
+        if order_key:
+            order_dir = request.form.get("order[0][dir]", "asc")
+            reverse = order_dir == "desc"
+
+            def sort_value(cert):
+                value = cert.get(order_key)
+                if order_key in {"valid_from", "valid_to"}:
+                    try:
+                        return datetime.fromisoformat(_normalize(value))
+                    except (TypeError, ValueError):
+                        return _normalize(value)
+                return _normalize(value)
+
+            filtered_cert_list.sort(key=sort_value, reverse=reverse)
+
+    # Pagination
+    try:
+        start = int(request.form.get("start", 0))
+    except (TypeError, ValueError):
+        start = 0
+    try:
+        length = int(request.form.get("length", -1))
+    except (TypeError, ValueError):
+        length = -1
+
+    if start < 0:
+        start = 0
+    if length == -1:
+        paginated_cert_list = filtered_cert_list
+    else:
+        paginated_cert_list = filtered_cert_list[start : start + max(length, 0)]  # noqa: E203
+
+    # Build SearchPanes options
+    search_panes_options = {}
+    for field, values in pane_counts.items():
+        if not values:
+            continue
+        options = []
+        for value, counts in sorted(values.items(), key=lambda item: item[0].lower()):
+            label = escape(value)
+            options.append(
+                {
+                    "label": label,
+                    "value": value,
+                    "total": counts["total"],
+                    "count": counts["count"],
+                }
+            )
+        if options:
+            search_panes_options[field] = options
+
     return jsonify(
         {
-            "data": cert_list,
-            "recordsTotal": len(cert_list),
-            "recordsFiltered": len(cert_list),
-            "draw": int(request.form.get("draw", 1)),
+            "data": paginated_cert_list,
+            "recordsTotal": total_records,
+            "recordsFiltered": records_filtered,
+            "draw": draw,
+            "searchPanes": {"options": search_panes_options},
         }
     )
 

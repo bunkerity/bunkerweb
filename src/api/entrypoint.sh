@@ -1,13 +1,11 @@
 #!/bin/bash
 
-# Enforce a restrictive default umask for all operations
-umask 027
-
 # Load utility functions from a shared helper script.
 # shellcheck disable=SC1091
 . /usr/share/bunkerweb/helpers/utils.sh
 
 # Define a function to handle SIGTERM and SIGINT signals.
+# shellcheck disable=SC2329
 function trap_exit() {
 	# Log that the script caught a termination signal.
 	# shellcheck disable=SC2317

@@ -1,8 +1,8 @@
 # Utilisations avancées
 
-De nombreux exemples de cas d'utilisation concrets sont disponibles dans le dossier [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples) du dépôt GitHub.
+De nombreux exemples de cas d'utilisation concrets sont disponibles dans le dossier [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/examples) du dépôt GitHub.
 
-Nous fournissons également de nombreux modèles standard, tels que des fichiers YAML pour diverses intégrations et types de bases de données. Ceux-ci sont disponibles dans le dossier [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations).
+Nous fournissons également de nombreux modèles standard, tels que des fichiers YAML pour diverses intégrations et types de bases de données. Ceux-ci sont disponibles dans le dossier [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/misc/integrations).
 
 Cette section se concentre uniquement sur les utilisations avancées et le réglage de la sécurité, consultez la [section fonctionnalités](features.md) de la documentation pour voir tous les paramètres disponibles.
 
@@ -27,7 +27,7 @@ Cette section se concentre uniquement sur les utilisations avancées et le régl
 
 BunkerWeb prend en fait en charge deux méthodes pour récupérer l'adresse IP réelle du client :
 
-- À l'aide de l'icône `PROXY protocol`
+- À l'aide du `PROXY protocol`
 - À l'aide d'un en-tête HTTP tel que `X-Forwarded-For`
 
 Les paramètres suivants peuvent être utilisés :
@@ -43,8 +43,8 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
     Nous supposerons ce qui suit concernant les équilibreurs de charge ou les proxies inverses (vous devrez mettre à jour les paramètres en fonction de votre configuration) :
 
-    - Ils utilisent l' `X-Forwarded-For` en-tête pour définir l'adresse IP réelle
-    - Ils ont des adresses IP dans les `1.2.3.0/24` réseaux`100.64.0.0/10` et
+    - Ils utilisent l'en-tête `X-Forwarded-For` pour définir l'adresse IP réelle
+    - Ils ont des adresses IP dans les réseaux `1.2.3.0/24` et `100.64.0.0/10`
 
     === "Interface utilisateur Web"
 
@@ -87,7 +87,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.5
+            bunkerity/bunkerweb-all-in-one:1.6.6
         ```
 
         Veuillez noter que si votre conteneur existe déjà, vous devrez le supprimer et le recréer afin que les nouvelles variables d'environnement soient prises en compte.
@@ -98,7 +98,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5
+          image: bunkerity/bunkerweb:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -106,7 +106,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5
+          image: bunkerity/bunkerweb-scheduler:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -123,7 +123,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5
+          image: bunkerity/bunkerweb:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -131,7 +131,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5
+          image: bunkerity/bunkerweb-scheduler:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -178,7 +178,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5
+          image: bunkerity/bunkerweb:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -186,7 +186,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5
+          image: bunkerity/bunkerweb-scheduler:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -251,7 +251,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.5
+            bunkerity/bunkerweb-all-in-one:1.6.6
         ```
 
         Veuillez noter que si votre conteneur existe déjà, vous devrez le supprimer et le recréer afin que les nouvelles variables d'environnement soient prises en compte.
@@ -262,7 +262,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5
+          image: bunkerity/bunkerweb:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -272,7 +272,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5
+          image: bunkerity/bunkerweb-scheduler:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -290,7 +290,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5
+          image: bunkerity/bunkerweb:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -300,7 +300,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5
+          image: bunkerity/bunkerweb-scheduler:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -352,7 +352,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5
+          image: bunkerity/bunkerweb:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -362,7 +362,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5
+          image: bunkerity/bunkerweb-scheduler:1.6.6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -514,7 +514,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.5
+        bunkerity/bunkerweb-all-in-one:1.6.6
     ```
 
 === "Docker"
@@ -542,7 +542,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -553,7 +553,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5
+        image: bunkerity/bunkerweb-scheduler:1.6.6
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -667,7 +667,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.5
+        bunkerity/bunkerweb-all-in-one:1.6.6
     ```
 
     Veuillez noter que si votre conteneur est déjà créé, vous devrez le supprimer et le recréer pour que les nouvelles variables d'environnement soient appliquées.
@@ -707,7 +707,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.5
+        bunkerity/bunkerweb-all-in-one:1.6.6
     ```
 
 === "Docker"
@@ -730,7 +730,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.5
+      image: bunkerity/bunkerweb-scheduler:1.6.6
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -773,7 +773,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.5
+      image: bunkerity/bunkerweb-scheduler:1.6.6
       volumes:
         - ./bw-data:/data
       ...
@@ -843,7 +843,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.5
+      image: bunkerity/bunkerweb-scheduler:1.6.6
       volumes:
         - ./bw-data:/data
       ...
@@ -851,14 +851,18 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
 
 === "Kubernetes"
 
-    Lors de l'utilisation de l'[intégration Kubernetes](integrations.md#kubernetes), les configurations personnalisées sont gérées à l'aide de [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
+    Lors de l'utilisation de l'[intégration Kubernetes](integrations.md#kubernetes),
+    les configurations personnalisées sont gérées à l'aide de [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
 
-    Pour simplifier, vous n'avez même pas besoin d'attacher le ConfigMap à un Pod (par ex. comme variable d'environnement ou volume) : le Pod d'autoconf écoute les événements ConfigMap et mettra à jour les configurations personnalisées lorsque nécessaire.
+    Vous n'avez pas besoin de monter la ConfigMap dans un Pod (par exemple en variable d'environnement ou en volume).
+    Le pod autoconf surveille les événements ConfigMap et applique automatiquement la configuration dès qu'une modification est détectée.
 
-    Lors de la création d'un ConfigMap, vous devrez ajouter des labels spéciaux :
+    Annotez chaque ConfigMap que le contrôleur Ingress doit gérer :
 
-    * **bunkerweb.io/CONFIG_TYPE** : doit être défini sur un type de configuration personnalisé valide (http, server-http, default-server-http, modsec, modsec-crs, crs-plugins-before, crs-plugins-after, stream ou server-stream)
-    * **bunkerweb.io/CONFIG_SITE** : défini sur un nom de serveur pour appliquer la configuration à ce serveur spécifique (facultatif, sera appliqué globalement s'il n'est pas défini)
+    - `bunkerweb.io/CONFIG_TYPE` : obligatoire. Choisissez un type pris en charge (`http`, `server-http`, `default-server-http`, `modsec`,
+      `modsec-crs`, `crs-plugins-before`, `crs-plugins-after`, `stream`, `server-stream` ou `settings`).
+    - `bunkerweb.io/CONFIG_SITE` : optionnel. Indiquez le nom de serveur principal (tel qu'exposé via votre `Ingress`)
+      pour limiter la configuration à ce service ; laissez vide pour l'appliquer globalement.
 
     Voici l'exemple :
 
@@ -879,8 +883,22 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
       }
     ```
 
+    !!! info "Fonctionnement de la synchronisation"
+        - Le contrôleur Ingress surveille en continu les ConfigMap annotées.
+        - Si la variable d'environnement `NAMESPACES` est définie, seules les ConfigMap de ces espaces de noms sont prises en compte.
+        - La création ou la mise à jour d'une ConfigMap gérée déclenche immédiatement un rechargement de la configuration.
+        - La suppression de la ConfigMap – ou de l'annotation `bunkerweb.io/CONFIG_TYPE` – supprime la configuration personnalisée associée.
+        - Si vous définissez `bunkerweb.io/CONFIG_SITE`, le service référencé doit déjà exister ; sinon, la ConfigMap est ignorée jusqu'à son apparition.
+
     !!! tip "Custom Extra Config"
-        Depuis la version `1.6.0`, vous pouvez ajouter/remplacer des paramètres à l'aide de l'annotation `bunkerweb.io/CONFIG_TYPE=settings`. En voici un exemple :
+        Depuis la version `1.6.0`, vous pouvez ajouter ou remplacer des paramètres en annotant une ConfigMap avec `bunkerweb.io/CONFIG_TYPE=settings`.
+        Le contrôleur Ingress d'autoconf lit chaque entrée de `data` et l'applique comme une variable d'environnement :
+
+        - Sans `bunkerweb.io/CONFIG_SITE`, toutes les clés sont appliquées globalement.
+        - Lorsque `bunkerweb.io/CONFIG_SITE` est défini, le contrôleur ajoute automatiquement le préfixe `<nom-de-serveur>_` (chaque `/` est remplacé par `_`) aux clés qui ne sont pas déjà spécifiques. Ajoutez ce préfixe vous-même si vous devez mélanger des clés globales et spécifiques dans la même ConfigMap.
+        - Les noms ou valeurs invalides sont ignorés et un avertissement est enregistré dans les journaux du contrôleur autoconf.
+
+        Exemple :
 
         ```yaml
         apiVersion: v1
@@ -908,7 +926,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
 
     Lors de la création d'un Config, vous devrez ajouter des labels spéciaux :
 
-    * **bunkerweb.CONFIG_TYPE** : doit être défini sur un type de configuration personnalisé valide (http, server-http, default-server-http, modsec, modsec-crs, crs-plugins-before, crs-plugins-after, stream ou server-stream)
+    * **bunkerweb.CONFIG_TYPE** : doit être défini sur un type de configuration personnalisé valide (http, server-http, default-server-http, modsec, modsec-crs, crs-plugins-before, crs-plugins-after, stream, server-stream ou settings)
     * **bunkerweb.CONFIG_SITE** : défini sur un nom de serveur pour appliquer la configuration à ce serveur spécifique (facultatif, sera appliqué globalement s'il n'est pas défini)
 
     Voici l'exemple :
@@ -1055,7 +1073,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.5
+        bunkerity/bunkerweb-all-in-one:1.6.6
     ```
 
     Veuillez noter que si votre conteneur existe déjà, vous devrez le supprimer et le recréer afin que les nouvelles variables d'environnement soient prises en compte.
@@ -1078,7 +1096,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -1093,7 +1111,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5
+        image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1144,7 +1162,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -1374,7 +1392,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6
         ports:
           # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - published: 80
@@ -1504,7 +1522,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.5
+        bunkerity/bunkerweb-all-in-one:1.6.6
     ```
 
     Veuillez noter que si votre conteneur est déjà créé, vous devrez le supprimer et le recréer pour que les nouvelles variables d'environnement soient appliquées.
@@ -1548,7 +1566,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1563,7 +1581,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5
+        image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1657,7 +1675,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -1670,7 +1688,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5
+        image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -1685,7 +1703,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.5
+        image: bunkerity/bunkerweb-autoconf:1.6.6
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1925,7 +1943,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2024,7 +2042,7 @@ Par défaut, BunkerWeb n'écoutera que les adresses IPv4 et n'utilisera pas IPv6
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5
+        image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
           USE_IPv6: "yes"
 
@@ -2083,7 +2101,7 @@ Vous pouvez configurer le pilote de journalisation pour vos services dans votre 
 ```yaml
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.5
+    image: bunkerity/bunkerweb:1.6.6
     logging:
       driver: "json-file"
       options:
@@ -2208,28 +2226,25 @@ Le plugin Reporting fournit une solution complète pour la communication réguli
 
 **Liste des paramètres**
 
-| Réglage                        | Faire défaut       | Contexte | Description                                                                                                                     |
-| ------------------------------ | ------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_REPORTING_SMTP`           | `no`               | global   | Activez l'envoi du rapport par e-mail.                                                                                          |
-| `USE_REPORTING_WEBHOOK`        | `no`               | global   | Activez l'envoi du rapport via le webhook.                                                                                      |
-| `REPORTING_SCHEDULE`           | `weekly`           | global   | La fréquence à laquelle les rapports sont envoyés.                                                                              |
-| `REPORTING_WEBHOOK_URLS`       |                    | global   | Liste des URL de webhook pour recevoir le rapport en Markdown (séparées par des espaces).                                       |
-| `REPORTING_SMTP_EMAILS`        |                    | global   | Liste des adresses e-mail pour recevoir le rapport au format HTML (séparées par des espaces).                                   |
-| `REPORTING_SMTP_HOST`          |                    | global   | Serveur hôte utilisé pour l'envoi SMTP.                                                                                         |
-| `REPORTING_SMTP_PORT`          | `465`              | global   | Port utilisé pour SMTP. Veuillez noter qu'il existe différentes normes en fonction du type de connexion (SSL = 465, TLS = 587). |
-| `REPORTING_SMTP_FROM_EMAIL`    |                    | global   | L'adresse e-mail utilisée comme expéditeur. Notez que 2FA doit être désactivé pour cette adresse e-mail.                        |
-| `REPORTING_SMTP_FROM_USER`     |                    | global   | Valeur d'authentification de l'utilisateur pour l'envoi via l'adresse e-mail de l'expéditeur.                                   |
-| `REPORTING_SMTP_FROM_PASSWORD` |                    | global   | La valeur d'authentification par mot de passe pour l'envoi via l'adresse e-mail de l'expéditeur.                                |
-| `REPORTING_SMTP_SSL`           | `SSL`              | global   | Déterminez s'il faut ou non utiliser une connexion sécurisée pour SMTP.                                                         |
-| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global   | La ligne d'objet de l'e-mail.                                                                                                   |
+| Réglage                        | Par défaut         | Contexte | Description                                                                                                   |
+| ------------------------------ | ------------------ | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `USE_REPORTING_SMTP`           | `no`               | global   | Activer l'envoi du rapport par e-mail (HTML).                                                                 |
+| `USE_REPORTING_WEBHOOK`        | `no`               | global   | Activer l'envoi du rapport via webhook (Markdown).                                                            |
+| `REPORTING_SCHEDULE`           | `weekly`           | global   | Cadence du rapport : `daily`, `weekly` ou `monthly`.                                                          |
+| `REPORTING_WEBHOOK_URLS`       |                    | global   | URLs de webhook séparées par des espaces ; Discord et Slack sont détectés automatiquement.                    |
+| `REPORTING_SMTP_EMAILS`        |                    | global   | Destinataires e-mail séparés par des espaces.                                                                 |
+| `REPORTING_SMTP_HOST`          |                    | global   | Nom d'hôte ou IP du serveur SMTP.                                                                             |
+| `REPORTING_SMTP_PORT`          | `465`              | global   | Port SMTP. Utilisez `465` pour SSL, `587` pour TLS.                                                           |
+| `REPORTING_SMTP_FROM_EMAIL`    |                    | global   | Adresse de l'expéditeur (désactivez la 2FA si nécessaire).                                                    |
+| `REPORTING_SMTP_FROM_USER`     |                    | global   | Nom d'utilisateur SMTP (utilise l'adresse d'envoi si seul le mot de passe est fourni).                        |
+| `REPORTING_SMTP_FROM_PASSWORD` |                    | global   | Mot de passe SMTP.                                                                                            |
+| `REPORTING_SMTP_SSL`           | `SSL`              | global   | Sécurité de connexion : `no`, `SSL` ou `TLS`.                                                                 |
+| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global   | Objet des envois e-mail.                                                                                      |
 
 !!! info "Information et comportement"
-    - cas `USE_REPORTING_SMTP` est défini sur `yes`, le paramètre `REPORTING_SMTP_EMAILS` doit être défini.
-    - cas `USE_REPORTING_WEBHOOK` est défini sur `yes`, le paramètre `REPORTING_WEBHOOK_URLS` doit être défini.
-    - Les valeurs acceptées pour `REPORTING_SCHEDULE` sont `daily`, `weekly` et `monthly`.
-    - cas aucun `REPORTING_SMTP_FROM_USER` et `REPORTING_SMTP_FROM_PASSWORD` ne sont définis, le plugin essaiera d'envoyer l'e-mail sans authentification.
-    - cas `REPORTING_SMTP_FROM_USER` n'est pas défini mais `REPORTING_SMTP_FROM_PASSWORD` est défini, le plugin utilisera le `REPORTING_SMTP_FROM_EMAIL` comme nom d'utilisateur.
-    - En cas d'échec du travail, le plug-in réessaiera d'envoyer le rapport lors de la prochaine exécution.
+    - `REPORTING_SMTP_EMAILS` est requis quand l'envoi SMTP est activé ; `REPORTING_WEBHOOK_URLS` est requis quand les webhooks sont activés.
+    - Si les webhooks et SMTP échouent tous, une nouvelle tentative est effectuée lors de la prochaine exécution planifiée.
+    - Les modèles HTML et Markdown se trouvent dans `reporting/files/` ; personnalisez-les prudemment pour conserver les variables.
 
 ### Sauvegarde et restauration
 
@@ -2648,3 +2663,65 @@ Le plugin Easy Resolve vous permet de remédier rapidement aux faux positifs et 
   <figcaption>Blacklist - URI</figcaption>
 </figure>
 </div>
+
+## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag" title="Load Balancer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
+Le plugin Load Balancer transforme BunkerWeb en un directeur de trafic avec garde-fous. Déclarez des pools upstream une fois, pointez votre proxy inverse vers eux, et laissez le équilibrage conscient de la santé garder les utilisateurs sur des backends réactifs. Le mode sticky cookie émet automatiquement un cookie `BWLBID` pour que les sessions restent ancrées où vous le souhaitez.
+
+#### Fonctionnalités
+
+- Blocs par upstream : nommez les pools et réutilisez-les sur les hôtes proxy inverse.
+- Équilibrage flexible : round-robin par défaut, ou sticky via IP ou cookie signé.
+- Cibles intelligentes : résolution DNS optionnelle pour les backends hostname plus réglage keepalive.
+- Santé intégrée : sondes HTTP/HTTPS avec chemins personnalisés, intervalles, codes de statut et vérifications SSL.
+- Continuité de session : cookie `BWLBID` automatique lorsque le mode sticky-cookie est activé.
+
+#### Configuration
+
+**Définition upstream**
+
+| Paramètre                                 | Défaut        | Contexte | Multiple | Description                                                                       |
+| ----------------------------------------- | ------------- | -------- | -------- | --------------------------------------------------------------------------------- |
+| `LOADBALANCER_UPSTREAM_NAME`              |               | global   | oui      | Identifiant upstream (référencé par `REVERSE_PROXY_HOST`).                        |
+| `LOADBALANCER_UPSTREAM_SERVERS`           |               | global   | oui      | Liste séparée par espaces d'adresses backend (ex. `10.0.0.1:8080 10.0.0.2:8080`). |
+| `LOADBALANCER_UPSTREAM_MODE`              | `round-robin` | global   | oui      | Stratégie d'équilibrage (`round-robin` ou `sticky`).                              |
+| `LOADBALANCER_UPSTREAM_STICKY_METHOD`     | `ip`          | global   | oui      | Méthode sticky (`ip` ou `cookie`). Mode cookie émet `BWLBID`.                     |
+| `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`          | global   | oui      | Résoudre les hostnames upstream via DNS.                                          |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE`         |               | global   | oui      | Connexions keepalive par worker.                                                  |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT` | `60s`         | global   | oui      | Timeout inactif pour les connexions keepalive.                                    |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`    | `1h`          | global   | oui      | Durée de vie maximale pour les connexions keepalive.                              |
+
+**Vérifications de santé**
+
+| Paramètre                                 | Défaut    | Contexte | Multiple | Description                                                            |
+| ----------------------------------------- | --------- | -------- | -------- | ---------------------------------------------------------------------- |
+| `LOADBALANCER_HEALTHCHECK_DICT_SIZE`      | `10m`     | global   | non      | Taille du dictionnaire partagé pour l'état des vérifications de santé. |
+| `LOADBALANCER_HEALTHCHECK_URL`            | `/status` | global   | oui      | Chemin à sonder sur chaque backend.                                    |
+| `LOADBALANCER_HEALTHCHECK_INTERVAL`       | `2000`    | global   | oui      | Intervalle entre vérifications (ms).                                   |
+| `LOADBALANCER_HEALTHCHECK_TIMEOUT`        | `1000`    | global   | oui      | Timeout par vérification (ms).                                         |
+| `LOADBALANCER_HEALTHCHECK_FALL`           | `3`       | global   | oui      | Échecs consécutifs avant de marquer comme down.                        |
+| `LOADBALANCER_HEALTHCHECK_RISE`           | `1`       | global   | oui      | Succès consécutifs avant de marquer comme up.                          |
+| `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`     | global   | oui      | Liste séparée par espaces de codes de statut HTTP valides.             |
+| `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`      | global   | oui      | Maximum de sondes concurrentes.                                        |
+| `LOADBALANCER_HEALTHCHECK_TYPE`           | `http`    | global   | oui      | Protocole pour les vérifications de santé (`http` ou `https`).         |
+| `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`     | global   | oui      | Vérifier les certificats TLS lors des vérifications HTTPS.             |
+| `LOADBALANCER_HEALTHCHECK_HOST`           |           | global   | oui      | Remplacer l'en-tête Host pendant les vérifications (utile pour SNI).   |
+
+#### Démarrage rapide
+
+1. Définissez votre pool : définissez `LOADBALANCER_UPSTREAM_NAME=my-app` et listez les cibles dans `LOADBALANCER_UPSTREAM_SERVERS` (ex. `10.0.0.1:8080 10.0.0.2:8080`).
+2. Dirigez le trafic : définissez `REVERSE_PROXY_HOST=http://my-app` pour que le proxy inverse utilise l'upstream nommé.
+3. Choisissez un mode : gardez round-robin par défaut ou définissez `LOADBALANCER_UPSTREAM_MODE=sticky` avec `LOADBALANCER_UPSTREAM_STICKY_METHOD=cookie` ou `ip`.
+4. Ajoutez de la santé : gardez `/status` ou ajustez les URLs, intervalles et statuts valides pour refléter le comportement de votre app.
+5. Réglez les connexions : configurez les valeurs keepalive pour réutiliser les connexions backend et réduire la surcharge de handshake.
+
+#### Conseils d'utilisation
+
+- Faites correspondre `REVERSE_PROXY_HOST` à `LOADBALANCER_UPSTREAM_NAME` lors de l'utilisation de cookies sticky pour que les clients s'épinglent au bon pool.
+- Gardez les intervalles et timeouts des vérifications de santé équilibrés pour éviter les oscillations sur les liens lents.
+- Activez `LOADBALANCER_UPSTREAM_RESOLVE` lorsque vous pointez vers des hostnames qui peuvent changer via DNS.
+- Réglez les valeurs keepalive pour refléter la capacité backend et les objectifs de réutilisation des connexions.

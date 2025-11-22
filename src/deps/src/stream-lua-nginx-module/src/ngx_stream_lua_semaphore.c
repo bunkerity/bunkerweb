@@ -484,7 +484,8 @@ ngx_stream_lua_sema_handler(ngx_event_t *ev)
 
         sem->wait_count--;
 
-        wait_co_ctx = ngx_queue_data(q, ngx_stream_lua_co_ctx_t, sem_wait_queue);
+        wait_co_ctx = ngx_queue_data(q, ngx_stream_lua_co_ctx_t,
+                                     sem_wait_queue);
         wait_co_ctx->cleanup = NULL;
 
         if (wait_co_ctx->sleep.timer_set) {

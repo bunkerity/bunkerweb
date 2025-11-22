@@ -7,11 +7,13 @@ from contextlib import suppress
 from datetime import datetime
 from functools import partial
 from glob import glob
+from importlib import reload as importlib_reload
 from importlib.util import module_from_spec, spec_from_file_location
 from json import loads
 from logging import Logger
 from pathlib import Path
 from re import compile as re_compile
+from sys import modules as sys_modules
 from typing import Any, Dict, List, Optional
 import schedule
 from sys import path as sys_path
@@ -49,6 +51,9 @@ class JobScheduler(ApiCaller):
         self.__compiled_regexes = self.__compile_regexes()
         self.__module_paths = set()
         self.__module_paths_lock = Lock()  # Dedicated lock for module paths
+        self.__module_cache: Dict[str, Any] = {}  # Cache for loaded job modules
+        self.__module_cache_lock = Lock()  # Lock for module cache access
+        self.__cache_permissions_updated = False  # Track if permissions were updated
         self.update_jobs()
 
     def __compile_regexes(self):
@@ -154,10 +159,13 @@ class JobScheduler(ApiCaller):
         return False
 
     def __exec_plugin_module(self, path: str, name: str) -> None:
-        """Dynamically import a plugin module with thread-local environment."""
+        """Dynamically import a plugin module with caching to prevent memory leaks."""
         # Convert to absolute path using Path
         abs_path = Path(path).resolve()
         module_dir = abs_path.parent
+
+        # Create a unique module name based on path
+        module_key = abs_path.as_posix()
 
         # Validate path exists
         if not abs_path.exists():
@@ -169,11 +177,36 @@ class JobScheduler(ApiCaller):
                 self.__module_paths.add(module_dir.as_posix())
                 sys_path.insert(0, module_dir.as_posix())
 
+        # Check if module is already cached
+        with self.__module_cache_lock:
+            if module_key in self.__module_cache:
+                # Reload existing module to pick up any changes
+                cached_module = self.__module_cache[module_key]
+                try:
+                    importlib_reload(cached_module)
+                    return
+                except Exception as e:
+                    self.__logger.warning(f"Failed to reload cached module {name}, re-importing: {e}")
+                    # If reload fails, fall through to re-import
+                    del self.__module_cache[module_key]
+
+        # Load the module for the first time
         spec = spec_from_file_location(name, abs_path.as_posix())
-        if spec is None:
+        if spec is None or spec.loader is None:
             raise ImportError(f"Failed to create module spec for {abs_path}")
+
         module = module_from_spec(spec)
+
+        # Register in sys.modules to allow proper imports
+        qualified_name = f"bw_job_{name}_{hash(module_key) & 0x7FFFFFFF}"
+        sys_modules[qualified_name] = module
+
+        # Execute the module
         spec.loader.exec_module(module)
+
+        # Cache the module for reuse
+        with self.__module_cache_lock:
+            self.__module_cache[module_key] = module
 
     def __job_wrapper(self, path: str, plugin: str, name: str, file: str) -> int:
         self.__logger.info(f"Executing job '{name}' from plugin '{plugin}'...")
@@ -207,7 +240,7 @@ class JobScheduler(ApiCaller):
 
         return ret
 
-    def __add_job_run(self, name: str, success: bool, start_date: datetime, end_date: datetime = None):
+    def __add_job_run(self, name: str, success: bool, start_date: datetime, end_date: Optional[datetime] = None):
         with self.__thread_lock:
             err = self.db.add_job_run(name, success, start_date, end_date)
 
@@ -217,7 +250,10 @@ class JobScheduler(ApiCaller):
             self.__logger.warning(f"Failed to add job run for the job '{name}': {err}")
 
     def __update_cache_permissions(self):
-        """Update permissions for cache files and directories."""
+        """Update permissions for cache files and directories. Only runs once per batch."""
+        if self.__cache_permissions_updated:
+            return
+
         self.__logger.info("Updating /var/cache/bunkerweb permissions...")
         cache_path = Path(os.sep, "var", "cache", "bunkerweb")
 
@@ -232,6 +268,8 @@ class JobScheduler(ApiCaller):
 
                 if current_mode != target_mode:
                     item.chmod(target_mode)
+
+            self.__cache_permissions_updated = True
         except Exception as e:
             self.__logger.error(f"Error while updating cache permissions: {e}")
 
@@ -295,6 +333,9 @@ class JobScheduler(ApiCaller):
 
             return success
         finally:
+            # Reset flag for next batch
+            self.__cache_permissions_updated = False
+
             # Clean up module paths thread-safely
             with self.__module_paths_lock:
                 for module_path in self.__module_paths.copy():
@@ -344,6 +385,9 @@ class JobScheduler(ApiCaller):
 
             return self.__job_success
         finally:
+            # Reset flag for next batch
+            self.__cache_permissions_updated = False
+
             with self.__module_paths_lock:
                 for module_path in self.__module_paths.copy():
                     if module_path in sys_path:
@@ -392,6 +436,9 @@ class JobScheduler(ApiCaller):
 
             return self.__job_success
         finally:
+            # Reset flag for next batch
+            self.__cache_permissions_updated = False
+
             if self.__lock:
                 self.__lock.release()
 
@@ -402,10 +449,31 @@ class JobScheduler(ApiCaller):
     def clear(self):
         schedule.clear()
 
+    def cleanup_modules(self):
+        """Clean up cached modules to free memory."""
+        with self.__module_cache_lock:
+            for module_key, module in self.__module_cache.items():
+                # Try to get the qualified name from sys.modules and remove it
+                qualified_name = f"bw_job_{getattr(module, '__name__', 'unknown')}_{hash(module_key) & 0x7FFFFFFF}"
+                if qualified_name in sys_modules:
+                    del sys_modules[qualified_name]
+
+            self.__module_cache.clear()
+            self.__logger.info(f"Cleared {len(self.__module_cache)} cached job modules")
+
+    def __del__(self):
+        """Destructor to clean up resources."""
+        with suppress(Exception):
+            self.cleanup_modules()
+            self.__executor.shutdown(wait=False)
+
     def reload(
         self, env: Dict[str, Any], apis: Optional[list] = None, *, changed_plugins: Optional[List[str]] = None, ignore_plugins: Optional[List[str]] = None
     ) -> bool:
         try:
+            # Clear module cache on reload to pick up changes
+            self.cleanup_modules()
+
             os.environ = self.__base_env.copy()
             os.environ.update(env)  # Update with new environment
             super().__init__(apis or self.apis)

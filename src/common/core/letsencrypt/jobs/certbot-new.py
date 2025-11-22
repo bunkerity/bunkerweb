@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from base64 import b64decode
+from collections import defaultdict
 from datetime import datetime, timedelta
 from json import loads
 from os import environ, getenv, sep
@@ -12,7 +13,7 @@ from subprocess import DEVNULL, PIPE, STDOUT, Popen, run
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from traceback import format_exc
-from typing import Dict, List, Optional, Tuple, Type, Union
+from typing import Dict, List, Optional, Set, Tuple, Type, Union
 
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -34,6 +35,7 @@ from letsencrypt_providers import (
     DomainOffensiveProvider,
     DnsimpleProvider,
     DnsMadeEasyProvider,
+    DuckDnsProvider,
     DynuProvider,
     GehirnProvider,
     GoogleProvider,
@@ -45,6 +47,7 @@ from letsencrypt_providers import (
     NSOneProvider,
     OvhProvider,
     Provider,
+    PowerdnsProvider,
     Rfc2136Provider,
     Route53Provider,
     SakuraCloudProvider,
@@ -77,6 +80,7 @@ PROVIDERS: Dict[str, Type[Provider]] = {
     "domainoffensive": DomainOffensiveProvider,
     "dnsimple": DnsimpleProvider,
     "dnsmadeeasy": DnsMadeEasyProvider,
+    "duckdns": DuckDnsProvider,
     "dynu": DynuProvider,
     "gehirn": GehirnProvider,
     "google": GoogleProvider,
@@ -87,6 +91,7 @@ PROVIDERS: Dict[str, Type[Provider]] = {
     "njalla": NjallaProvider,
     "nsone": NSOneProvider,
     "ovh": OvhProvider,
+    "pdns": PowerdnsProvider,
     "rfc2136": Rfc2136Provider,
     "route53": Route53Provider,
     "sakuracloud": SakuraCloudProvider,
@@ -239,7 +244,7 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
 
     authenticator = env("LETS_ENCRYPT_DNS_PROVIDER", "").lower()
     server_names_val = env("SERVER_NAME", "www.example.com").strip() if IS_MULTISITE else getenv("SERVER_NAME", "www.example.com").strip()
-    email_val = env("EMAIL_LETS_ENCRYPT", "") or f"contact@{service}"
+    email_val = env("EMAIL_LETS_ENCRYPT", "").strip()
     retries_val = env("LETS_ENCRYPT_RETRIES", "0")
     challenge_val = env("LETS_ENCRYPT_CHALLENGE", "http").lower()
     profile_val = env("LETS_ENCRYPT_PROFILE", "classic").lower()
@@ -253,10 +258,13 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
         LOGGER.warning(f"[Service: {service}] SERVER_NAME is empty. Please set a valid server name, skipping generation.")
         activated = False
 
-    if "@" not in email_val:
-        if activated:
-            LOGGER.warning(f"[Service: {service}] EMAIL_LETS_ENCRYPT is missing or invalid. Using default: 'contact@{service}'")
-        email_val = f"contact@{service}"
+    if email_val:
+        if "@" not in email_val:
+            if activated:
+                LOGGER.warning(f"[Service: {service}] EMAIL_LETS_ENCRYPT is invalid. Ignoring the provided value and proceeding without a contact email.")
+            email_val = ""
+    elif activated:
+        LOGGER.warning(f"[Service: {service}] EMAIL_LETS_ENCRYPT is not set. Proceeding without a contact email.")
 
     try:
         retries_int = int(retries_val)
@@ -344,17 +352,70 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
 
 
 def extract_wildcards_from_domains(domains: List[str]) -> List[str]:
-    wildcards = set()
-    for domain in domains:
-        parts = domain.split(".")
-        if len(parts) > 2:
-            base_domain = ".".join(parts[1:])
-            wildcards.add(f"*.{base_domain}")
-            wildcards.add(base_domain)
-        else:
-            wildcards.add(domain)
+    cleaned_labels: List[List[str]] = []
 
-    return sorted(wildcards, key=lambda x: x[0] != "*")
+    for domain in domains:
+        cleaned = domain.strip().removeprefix("*.").lower()
+        if not cleaned:
+            continue
+        labels = [part for part in cleaned.split(".") if part]
+        if labels:
+            cleaned_labels.append(labels)
+
+    if not cleaned_labels:
+        return []
+
+    grouped: Dict[str, List[List[str]]] = defaultdict(list)
+    for labels in cleaned_labels:
+        key = ".".join(labels[-2:]) if len(labels) >= 2 else ".".join(labels)
+        grouped[key].append(labels)
+
+    bases: Set[str] = set()
+    for labels_list in grouped.values():
+        bases.update(_determine_wildcard_bases(labels_list))
+
+    results = set()
+    for base in bases:
+        base = base.strip(".")
+        if not base:
+            continue
+        results.add(f"*.{base}")
+        results.add(base)
+
+    return sorted(results, key=lambda value: (0 if value.startswith("*.") else 1, value))
+
+
+def _determine_wildcard_bases(labels_list: List[List[str]]) -> Set[str]:
+    if not labels_list:
+        return set()
+
+    if len(labels_list) == 1:
+        labels = labels_list[0]
+        if len(labels) > 2:
+            return {".".join(labels[1:])}
+        return {".".join(labels)}
+
+    min_len = min(len(labels) for labels in labels_list)
+    common_suffix: List[str] = []
+
+    for idx in range(1, min_len + 1):
+        label = labels_list[0][-idx]
+        if all(labels[-idx] == label for labels in labels_list):
+            common_suffix.insert(0, label)
+        else:
+            break
+
+    if len(common_suffix) >= 2 and len(common_suffix) >= (min_len - 1):
+        return {".".join(common_suffix)}
+
+    bases: Set[str] = set()
+    for labels in labels_list:
+        if len(labels) > 2:
+            bases.add(".".join(labels[1:]))
+        else:
+            bases.add(".".join(labels))
+
+    return bases
 
 
 def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
@@ -409,11 +470,14 @@ def certbot_new(config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_en
         WORK_DIR,
         "--logs-dir",
         LOGS_DIR,
-        "--email",
-        config["email"],
         "--break-my-certs",
         "--expand",
     ]
+
+    if config.get("email"):
+        command.extend(["--email", config["email"]])
+    else:
+        command.append("--register-unsafely-without-email")
 
     if LOG_LEVEL == "DEBUG":
         command.append("-v")
@@ -649,7 +713,7 @@ try:
             continue
 
         LOGGER.info(
-            f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email']}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile..."
+            f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email'] or 'not provided'}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile..."
         )
         LOGGER.debug(f"Service configuration: {config}")
 

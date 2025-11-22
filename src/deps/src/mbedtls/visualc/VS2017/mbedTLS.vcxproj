@@ -337,6 +337,7 @@
     <ClInclude Include="..\..\library\ssl_misc.h" />
     <ClInclude Include="..\..\library\ssl_tls13_invasive.h" />
     <ClInclude Include="..\..\library\ssl_tls13_keys.h" />
+    <ClInclude Include="..\..\library\threading_internal.h" />
     <ClInclude Include="..\..\library\x509_internal.h" />
     <ClInclude Include="..\..\framework\tests\programs\query_config.h" />
     <ClInclude Include="..\..\3rdparty\everest\include\everest\everest.h" />

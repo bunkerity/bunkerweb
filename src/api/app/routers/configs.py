@@ -13,7 +13,7 @@ from ..schemas import ConfigCreateRequest, ConfigUpdateRequest, ConfigsDeleteReq
 
 router = APIRouter(prefix="/configs", tags=["configs"])
 
-_NAME_RX = re_compile(r"^[\w_-]{1,64}$")
+_NAME_RX = re_compile(r"^[\w_-]{1,255}$")
 
 # Accepted config types (normalized form).
 _CONFIG_TYPES = {
@@ -39,7 +39,7 @@ def _normalize_type(t: str) -> str:
 
 def _validate_name(name: str) -> Optional[str]:
     if not name or not _NAME_RX.match(name):
-        return "Invalid name: must match ^[\\w_-]{1,64}$"
+        return "Invalid name: must match ^[\\w_-]{1,255}$"
     return None
 
 
@@ -47,8 +47,8 @@ def _sanitize_name_from_filename(filename: str) -> str:
     base = Path(filename).stem
     # Replace invalid chars with underscore and collapse repeats
     cleaned = re_sub(r"[^\w-]+", "_", base).strip("_-")
-    if len(cleaned) > 64:
-        cleaned = cleaned[:64]
+    if len(cleaned) > 255:
+        cleaned = cleaned[:255]
     return cleaned
 
 
@@ -113,7 +113,7 @@ async def upload_configs(
     """Create new custom configs from uploaded files (method="api").
 
     The config name is derived from each file's basename (without extension),
-    sanitized to `^[\\w_-]{1,64}$`.
+    sanitized to `^[\\w_-]{1,255}$`.
 
     Args:
         files: Config files to upload
@@ -206,7 +206,7 @@ def create_config(req: ConfigCreateRequest) -> JSONResponse:
     Body:
     - service: optional service id (use "global" or omit for global)
     - type: config type (e.g., http, server_http, modsec, ...)
-    - name: config name (^[\\w_-]{1,64}$)
+    - name: config name (^[\\w_-]{1,255}$)
     - data: content as UTF-8 string
     """
     service = req.service

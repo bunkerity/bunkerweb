@@ -51,7 +51,11 @@ markdown_extensions:
   - admonition
   - tables
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.emoji:
@@ -162,4 +166,3 @@ plugins:
         color: "white"
   - mike:
       canonical_version: latest
-  - print-site

@@ -40,9 +40,9 @@
         </div>
         <div class="justify-content-center d-none d-sm-flex">
             {% if current_endpoint != "global-config" %}
-                <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
+                <div {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
                     <button type="button"
-                            class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method != 'ui' %}disabled{% endif %}">
+                            class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}disabled{% endif %}">
                         <i class="bx bx-sm bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
                         <span class="d-none d-md-inline">&nbsp;
                             {% if is_draft == 'yes' %}
@@ -68,9 +68,9 @@
 <div class="d-flex justify-content-center position-fixed m-3 d-sm-none"
      id="floating-settings-button">
     {% if current_endpoint != "global-config" %}
-        <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
+        <div {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
             <button type="button"
-                    class="btn btn-sm btn-outline-secondary toggle-draft p-1_5 me-1 {% if current_endpoint != 'new' and service_method != 'ui' %}disabled{% endif %}">
+                    class="btn btn-sm btn-outline-secondary toggle-draft p-1_5 me-1 {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}disabled{% endif %}">
                 <i class="bx bx-xs bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
                 &nbsp;
                 {% if is_draft == 'yes' %}
@@ -218,7 +218,7 @@
                                 {% set setting_value = setting_config.get("value", setting_default) %}
                                 {% set setting_method = setting_config.get("method", "default") %}
                                 {% set setting_template = setting_config.get("template", "") %}
-                                {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
+                                {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
                                 {% if current_endpoint == "new" or clone %}
                                     {% set setting_method = "default" %}
                                     {% set disabled = false %}
@@ -263,6 +263,15 @@
                                                       data-bs-placement="top"
                                                       data-bs-original-title="From template: {{ setting_template }}">
                                                     <span class="bx bx-spreadsheet bx-xs"></span>
+                                                </span>
+                                            {% endif %}
+                                            {% if setting_method == "api" %}
+                                                <span class="badge badge-center rounded-pill bg-info-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                      data-bs-toggle="tooltip"
+                                                      data-bs-placement="top"
+                                                      data-bs-original-title="Managed via API"
+                                                      data-i18n="badge.managed_via_api">
+                                                    <span class="bx bx-code-curly bx-xs"></span>
                                                 </span>
                                             {% endif %}
                                             {% if setting_config.get("clone") %}
@@ -369,7 +378,7 @@
                                                             {% set setting_value = setting_config.get("value", setting_default) %}
                                                             {% set setting_method = setting_config.get("method", "default") %}
                                                             {% set setting_template = setting_config.get("template", "") %}
-                                                            {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
+                                                            {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
                                                             {% if current_endpoint == "new" or clone %}
                                                                 {% set setting_method = "default" %}
                                                                 {% set disabled = false %}
@@ -411,6 +420,15 @@
                                                                                   data-bs-placement="top"
                                                                                   data-bs-original-title="From template: {{ setting_template }}">
                                                                                 <span class="bx bx-spreadsheet bx-xs"></span>
+                                                                            </span>
+                                                                        {% endif %}
+                                                                        {% if setting_method == "api" %}
+                                                                            <span class="badge badge-center rounded-pill bg-info-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="Managed via API"
+                                                                                  data-i18n="badge.managed_via_api">
+                                                                                <span class="bx bx-code-curly bx-xs"></span>
                                                                             </span>
                                                                         {% endif %}
                                                                         {% if setting_config.get("clone") %}

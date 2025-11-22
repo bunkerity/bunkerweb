@@ -5,8 +5,12 @@ from operator import itemgetter
 from os import getenv
 from typing import Any, List, Literal, Optional, Tuple, Union
 
+from urllib.parse import quote
+
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
+
+from app.utils import LOGGER
 
 
 class Instance:
@@ -149,6 +153,29 @@ class Instance:
     def reports(self) -> Tuple[bool, dict[str, Any]]:
         return self.apiCaller.send_to_apis("GET", "/metrics/requests", response=True)
 
+    def reports_query(
+        self,
+        start: int = 0,
+        length: int = 10,
+        search: str = "",
+        order_column: str = "date",
+        order_dir: str = "desc",
+        search_panes: str = "",
+        count_only: bool = False,
+    ) -> Tuple[bool, dict[str, Any]]:
+        """Query reports with pagination and filtering support"""
+        params = {
+            "start": start,
+            "length": length,
+            "search": quote(search),
+            "order_column": order_column,
+            "order_dir": order_dir,
+            "search_panes": quote(search_panes),
+            "count_only": "true" if count_only else "false",
+        }
+        query_string = "&".join(f"{k}={v}" for k, v in params.items())
+        return self.apiCaller.send_to_apis("GET", f"/metrics/requests/query?{query_string}", response=True)
+
     def metrics(self, plugin_id) -> Tuple[bool, dict[str, Any]]:
         return self.apiCaller.send_to_apis("GET", f"/metrics/{plugin_id}", response=True)
 
@@ -267,6 +294,170 @@ class InstancesUtils:
                 reports.extend(get_instance_reports(instance))
 
         return sorted(reports, key=itemgetter("date"), reverse=True)
+
+    def get_reports_query(
+        self,
+        start: int = 0,
+        length: int = 10,
+        search: str = "",
+        order_column: str = "date",
+        order_dir: str = "desc",
+        search_panes: str = "",
+        count_only: bool = False,
+        hostname: Optional[str] = None,
+        *,
+        instances: Optional[List[Instance]] = None,
+    ) -> dict[str, Any]:
+        """Get paginated and filtered reports using optimized query endpoint"""
+        from app.routes.utils import get_redis_client
+
+        redis_client = get_redis_client()
+
+        # If Redis is available, use it for optimized queries
+        if redis_client and not hostname:
+            try:
+                # Get all requests from Redis
+                redis_reports_raw = redis_client.lrange("requests", 0, -1)
+                all_requests = []
+                for report_raw in redis_reports_raw:
+                    try:
+                        report = loads(report_raw.decode("utf-8", "replace"))
+                        all_requests.append(report)
+                    except Exception:
+                        continue
+
+                # Filter by status and security mode
+                valid_requests = [r for r in all_requests if (400 <= r.get("status", 0) < 500 or r.get("security_mode") == "detect")]
+
+                # Apply filters
+                filtered_requests = self._apply_report_filters(valid_requests, search, search_panes)
+
+                # If count only, return early
+                if count_only:
+                    return {"total": len(valid_requests), "filtered": len(filtered_requests), "data": [], "pane_counts": {}}
+
+                # Sort
+                filtered_requests = self._sort_reports(filtered_requests, order_column, order_dir)
+
+                # Paginate
+                if length == -1:
+                    paginated = filtered_requests
+                else:
+                    paginated = filtered_requests[start : start + length]  # noqa: E203
+
+                # Calculate pane counts
+                pane_counts = self._calculate_pane_counts(valid_requests, filtered_requests)
+
+                return {"total": len(valid_requests), "filtered": len(filtered_requests), "data": paginated, "pane_counts": pane_counts}
+            except Exception as e:
+                LOGGER.error(f"Error querying Redis for reports: {e}")
+                # Fall through to instance queries
+
+        # Query instances directly
+        result = {"total": 0, "filtered": 0, "data": [], "pane_counts": {}}
+
+        if hostname:
+            instance = Instance.from_hostname(hostname, self.__db)
+            if instance:
+                api_result = instance.reports_query(start, length, search, order_column, order_dir, search_panes, count_only)
+                if api_result[0] and isinstance(api_result[1], dict):
+                    instance_response = api_result[1].get(instance.hostname, {}).get("msg", {})
+                    if isinstance(instance_response, dict):
+                        result = instance_response
+        else:
+            # Aggregate from all instances
+            all_data = []
+            total_count = 0
+
+            for instance in instances or self.get_instances(status="up"):
+                api_result = instance.reports_query(0, -1, search, order_column, "desc", search_panes, False)
+                if api_result[0] and isinstance(api_result[1], dict):
+                    instance_response = api_result[1].get(instance.hostname, {}).get("msg", {})
+                    if isinstance(instance_response, dict) and "data" in instance_response:
+                        all_data.extend(instance_response["data"])
+                        total_count = max(total_count, instance_response.get("total", 0))
+
+            # Deduplicate by ID
+            seen_ids = set()
+            unique_data = []
+            for report in all_data:
+                if report.get("id") not in seen_ids:
+                    seen_ids.add(report.get("id"))
+                    unique_data.append(report)
+
+            if count_only:
+                result = {"total": total_count, "filtered": len(unique_data), "data": [], "pane_counts": {}}
+            else:
+                # Sort and paginate
+                sorted_data = self._sort_reports(unique_data, order_column, order_dir)
+                if length == -1:
+                    paginated = sorted_data
+                else:
+                    paginated = sorted_data[start : start + length]  # noqa: E203
+
+                pane_counts = self._calculate_pane_counts(unique_data, unique_data)
+
+                result = {"total": total_count, "filtered": len(unique_data), "data": paginated, "pane_counts": pane_counts}
+
+        return result
+
+    def _apply_report_filters(self, reports: List[dict], search: str, search_panes: str) -> List[dict]:
+        """Apply search and search panes filters to reports"""
+        filtered = reports
+
+        # Global search
+        if search:
+            search_lower = search.lower()
+            filtered = [
+                r
+                for r in filtered
+                if any(
+                    search_lower in str(r.get(field, "")).lower()
+                    for field in ("ip", "country", "method", "url", "status", "user_agent", "reason", "server_name")
+                )
+            ]
+
+        # Search panes filters (format: field1:value1,value2;field2:value3)
+        if search_panes:
+            pane_filters = {}
+            for field_filter in search_panes.split(";"):
+                if ":" in field_filter:
+                    field, values = field_filter.split(":", 1)
+                    pane_filters[field] = values.split(",")
+
+            for field, allowed_values in pane_filters.items():
+                filtered = [r for r in filtered if str(r.get(field, "N/A")) in allowed_values]
+
+        return filtered
+
+    def _sort_reports(self, reports: List[dict], order_column: str, order_dir: str) -> List[dict]:
+        """Sort reports by specified column and direction"""
+        reverse = order_dir == "desc"
+
+        if order_column == "date":
+            return sorted(reports, key=lambda x: float(x.get("date", 0)), reverse=reverse)
+        return sorted(reports, key=lambda x: x.get(order_column, ""), reverse=reverse)
+
+    def _calculate_pane_counts(self, all_reports: List[dict], filtered_reports: List[dict]) -> dict:
+        """Calculate search panes counts"""
+        pane_counts = {}
+        filtered_ids = {r.get("id") for r in filtered_reports}
+
+        pane_fields = ["ip", "country", "method", "url", "status", "reason", "server_name", "security_mode"]
+
+        for field in pane_fields:
+            pane_counts[field] = {}
+
+        for report in all_reports:
+            for field in pane_fields:
+                value = str(report.get(field, "N/A"))
+                if value not in pane_counts[field]:
+                    pane_counts[field][value] = {"total": 0, "count": 0}
+                pane_counts[field][value]["total"] += 1
+                if report.get("id") in filtered_ids:
+                    pane_counts[field][value]["count"] += 1
+
+        return pane_counts
 
     def get_metrics(self, plugin_id: str, hostname: Optional[str] = None, *, instances: Optional[List[Instance]] = None):
         """Get metrics from all instances or a specific instance, with Redis integration"""

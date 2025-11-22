@@ -1,6 +1,77 @@
 # Changelog
 
-## v1.6.5 - ????/??/??
+## v1.6.6 - ????/??/??
+
+- [FEATURE] Implement IP whitelisting checks in badbehavior module to avoid banning whitelisted IPs
+- [FEATURE] Enhance default server configuration: when IP is whitelisted, serve the "nothing to see here" page even if the default server is deactivated.
+- [BUGFIX] Fix default rate limit for POST /auth endpoint with API service
+- [BUGFIX] Fix instant ban when using bad behavior with redis if the ban time is set to 0 (permanent ban)
+- [LINUX] Enhance Easy Install script with manager and worker mode configurations
+- [UI] Enhance bad behavior logging and UI actions with additional fields and filtering capabilities
+- [UI] Optimize the reports page export functionality for large datasets by implementing server-side processing to handle data exports in manageable chunks, reducing memory usage and improving performance.
+- [CONTRIBUTION] Thank you @Marvo2011 for your contribution to the `Let's Encrypt` plugin by helping the implementation of the new `Powerdns` DNS provider
+
+## v1.6.6-rc3 - 2025/11/18
+
+- [BUGFIX] Fix `Let's Encrypt` wildcard certificate serving when using `wildcard` mode in multisite setups and the root domain is a part of the `SERVER_NAME` setting of the service.
+- [BUGFIX] Fix duplicated id error with ModSecurity rules when two services have the `USE_UI` setting enabled and the `USE_MODSECURITY_GLOBAL_CRS` setting enabled as well.
+- [BUGFIX] Ensure the `Limit` plugin ignores global rules when `USE_LIMIT_REQ` is disabled globally so service-specific configs do not get throttled unintentionally.
+- [BUGFIX] Ensure HTTP/3 works with the HTTP3 plugin by adding conditional reuseport to QUIC listen directives on the default HTTPS server.
+- [FEATURE] Start monitoring `405` and `400` http status codes in the requests to be able to see them in the reports page.
+- [FEATURE] Refactored `Auth Basic` authentication implementation to enhance security and maintainability by switching password hashing to bcrypt.
+- [UI] Update DataTable initialization to automatically enable state saving for improved user experience.
+- [LINUX] Support RHEL 9.7 instead of 9.6
+- [LINUX] Support RHEL 10.1 instead of 10.0
+- [DOCS] Add live status updates link to README and documentation in multiple languages.
+- [DOCS] Fix PDF generation to generate it in english.
+- [DOCS] Add documentation about how to setup BunkerWeb as a sidecar in Kubernetes.
+
+## v1.6.6-rc2 - 2025/11/05
+
+- [BUGFIX] Update logrotate config to use the right chown when creating the folders/files.
+- [FEATURE] Refactor `Let's Encrypt` mail handling: validate the configured email and warn if missing/invalid. Use normal registration when valid; otherwise add **--register-unsafely-without-email** to Certbot and log that choice.
+- [FEATURE] Add `DuckDNS` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add `AUTH_BASIC_ROUNDS` setting to the `authbasic` plugin to configure password hashing strength (default: 656000, range: 1000-999999999).
+- [FEATURE] Add new `API` template to easily protect the API service using BunkerWeb.
+- [FEATURE] Add new `ANTIBOT_IGNORE_COUNTRY` and `ANTIBOT_ONLY_COUNTRY` to the `Antibot` plugin for country-based challenge prompting/bypassing.
+- [FEATURE] Add new `mtls` plugin for mutual TLS client certificate authentication, allowing services to require and verify client certificates against trusted CA bundles with configurable verification modes, chain depth control, and optional header forwarding for downstream authorization.
+- [AUTOCONF] Implement event debouncing in Docker, Ingress, and Swarm controllers for improved configuration management
+- [UI] Fix confirmation message not showing the right value when removing cache files on the file cache page.
+- [UI] Fix filtering on the `Let's Encrypt` custom page
+- [UI] Update CSS to fix truncated text in specific lang on the menu
+- [MISC] Update regex for `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` setting to support human readable values.
+- [MISC] Update default value for Permissions-Policy header to include additional features (`private-state-token-issuance` and `private-state-token-redemption`).
+- [DEPS] Update coreruleset-v4 version to v4.20.0
+- [DEPS] Updated luajit2 version to v2.1-20251030
+- [DEPS] Updated lua-resty-core version to v0.1.32
+- [DEPS] Updated lua-nginx-module version to v0.10.29
+- [DEPS] Updated stream-lua-nginx-module version to v0.0.17
+- [DEPS] Update lua-resty-openssl version to v1.7.0
+
+## v1.6.6-rc1 - 2025/10/31
+
+- [BUGFIX] Update BunkerWeb integration to use dedicated CrowdSec collection so that CrowdSec now works with the log format used by BunkerWeb.
+- [FEATURE] Enhance plugin update process with per-plugin commit option and improved error handling
+- [FEATURE] Add retry operation in case of memory failure for metrics linked to the `METRICS_MEMORY_MAX_RETRIES`.
+- [FEATURE] Refactor wildcard certificate handling in certbot and letsencrypt plugin to improve reliability, performance and user experience
+- [FEATURE] Allow edition of API settings in the web UI and of UI settings from the API
+- [UI] Add [DB-IP](https://db-ip.com/) attribution in the web UI reports page footer
+- [UI] Add `RAW` mode when editing/creating templates
+- [UI] Enhanced the raw configuration editor with disabled settings highlighting and improved UI elements.
+- [UI] Implemented **Ctrl+S** / **Command+S** shortcuts for saving RAW global config / services / custom configurations.
+- [UI] Refactor threading to use a shared ThreadPoolExecutor for configuration tasks across routes, preventing gradual RAM growth over time
+- [UI] Fix UX issue when a flash message was too big we couldn't remove it.
+- [ALL-IN-ONE] Add Redis data directory creation in entrypoint script to fix redis not being able to start
+- [ALL-IN-ONE] Update CrowdSec version to 1.7.3
+- [API] fix API authorization to correctly handle root path prefixes in Biscuit guards
+- [AUTOCONF] Allow ConfigMap of type "settings" to be applied to services easier.
+- [AUTOCONF] Add the possibility to ignore services with a specific annotations when using the Kubernetes integration
+- [DOCS] Add documentation for persistent data storage in the all-in-one image
+- [DOCS] Add database compatibility matrix.
+- [DEPS] Updated lua-cjson version to v2.1.0.15
+- [DEPS] Update Mbed TLS version to v3.6.5
+
+## v1.6.5 - 2025/10/03
 
 - [BUGFIX] Fix wildcard certification handling when not using the MULTISITE mode in `Let's Encrypt` plugin
 - [BUGFIX] Fix suffix handling in `Database` module when dealing with template settings to ensure proper management of settings without suffixes

@@ -8,6 +8,7 @@ local utils = require "bunkerweb.utils"
 local metrics = class("metrics", plugin)
 local ngx = ngx
 local ERR = ngx.ERR
+local unescape_uri = ngx.unescape_uri
 
 local lru, err_lru = lrucache.new(100000)
 if not lru then
@@ -259,7 +260,13 @@ function metrics:timer()
 		if not ok then
 			-- Fallback to direct set with LRU eviction if needed
 			if err == "no memory" then
-				ok, err = self.metrics_datastore.dict:set(key .. "_" .. wid, value)
+				local max_retries = tonumber(self.variables["METRICS_MEMORY_MAX_RETRIES"]) or 5
+				for attempt = 1, max_retries do --luacheck:ignore 213
+					ok, err = self.metrics_datastore.dict:set(key .. "_" .. wid, value)
+					if ok or err ~= "no memory" then
+						break
+					end
+				end
 				if not ok then
 					ret = false
 					ret_err = err
@@ -288,6 +295,12 @@ function metrics:api()
 	end
 	-- Extract filter parameter
 	local filter = self.ctx.bw.uri:gsub("^/metrics/", "")
+
+	-- Handle special /metrics/requests/query endpoint for optimized queries
+	if filter == "requests/query" then
+		return self:api_requests_query()
+	end
+
 	-- Loop on keys
 	local metrics_data = {}
 	for _, key in ipairs(self.metrics_datastore:keys()) do
@@ -324,6 +337,167 @@ function metrics:api()
 		end
 	end
 	return self:ret(true, metrics_data, HTTP_OK)
+end
+
+function metrics:api_requests_query()
+	-- Parse query parameters from request args
+	local args = ngx.req.get_uri_args()
+	local start_idx = tonumber(args.start) or 0
+	local length = tonumber(args.length) or 10
+	local search = unescape_uri(args.search or "")
+	local order_column = args.order_column or "date"
+	local order_dir = args.order_dir or "desc"
+	local count_only = args.count_only == "true"
+
+	-- Parse search panes filters (format: field1:value1,value2;field2:value3)
+	local search_panes = {}
+	local search_panes_raw = unescape_uri(args.search_panes or "")
+	if search_panes_raw and search_panes_raw ~= "" then
+		for field_filter in search_panes_raw:gmatch("[^;]+") do
+			local field, values = field_filter:match("^([^:]+):(.+)$")
+			if field and values then
+				search_panes[field] = {}
+				for value in values:gmatch("[^,]+") do
+					table_insert(search_panes[field], value)
+				end
+			end
+		end
+	end
+
+	-- Collect all requests from all workers
+	local all_requests = {}
+	for _, key in ipairs(self.metrics_datastore:keys()) do
+		if key:match("^requests_[0-9]+$") then
+			local data, _ = self.metrics_datastore:get(key)
+			if data then
+				local ok, decoded = pcall(decode, data)
+				if ok and type(decoded) == "table" then
+					for _, request in ipairs(decoded) do
+						table_insert(all_requests, request)
+					end
+				end
+			end
+		end
+	end
+
+	-- Filter requests
+	local filtered_requests = {}
+	for _, request in ipairs(all_requests) do
+		-- Filter: status 400-499 or detect mode
+		if (request.status and request.status >= 400 and request.status < 500) or request.security_mode == "detect" then
+			local matches = true
+
+			-- Apply search filter
+			if search ~= "" then
+				local search_lower = search:lower()
+				matches = false
+				for _, value in pairs(request) do
+					if type(value) == "string" and value:lower():find(search_lower, 1, true) then
+						matches = true
+						break
+					elseif type(value) == "number" and tostring(value):find(search_lower, 1, true) then
+						matches = true
+						break
+					end
+				end
+			end
+
+			-- Apply search panes filters
+			if matches then
+				for field, allowed_values in pairs(search_panes) do
+					local field_value = tostring(request[field] or "N/A")
+					local field_matches = false
+					for _, allowed in ipairs(allowed_values) do
+						if field_value == allowed then
+							field_matches = true
+							break
+						end
+					end
+					if not field_matches then
+						matches = false
+						break
+					end
+				end
+			end
+
+			if matches then
+				table_insert(filtered_requests, request)
+			end
+		end
+	end
+
+	-- If only count is requested, return early
+	if count_only then
+		return self:ret(true, { total = #all_requests, filtered = #filtered_requests }, HTTP_OK)
+	end
+
+	-- Sort filtered requests
+	if order_column == "date" then
+		table.sort(filtered_requests, function(a, b)
+			local a_val = tonumber(a.date) or 0
+			local b_val = tonumber(b.date) or 0
+			if order_dir == "desc" then
+				return a_val > b_val
+			else
+				return a_val < b_val
+			end
+		end)
+	else
+		table.sort(filtered_requests, function(a, b)
+			local a_val = a[order_column] or ""
+			local b_val = b[order_column] or ""
+			if order_dir == "desc" then
+				return a_val > b_val
+			else
+				return a_val < b_val
+			end
+		end)
+	end
+
+	-- Paginate
+	local paginated = {}
+	local end_idx = start_idx + length
+	if length == -1 then
+		end_idx = #filtered_requests
+	end
+
+	for i = start_idx + 1, math.min(end_idx, #filtered_requests) do
+		table_insert(paginated, filtered_requests[i])
+	end
+
+	-- Calculate search panes options
+	local pane_counts = {}
+	local filtered_ids = {}
+	for _, req in ipairs(filtered_requests) do
+		filtered_ids[req.id] = true
+	end
+
+	local pane_fields = { "ip", "country", "method", "url", "status", "reason", "server_name", "security_mode" }
+	for _, field in ipairs(pane_fields) do
+		pane_counts[field] = {}
+	end
+
+	for _, request in ipairs(all_requests) do
+		if (request.status and request.status >= 400 and request.status < 500) or request.security_mode == "detect" then
+			for _, field in ipairs(pane_fields) do
+				local value = tostring(request[field] or "N/A")
+				if not pane_counts[field][value] then
+					pane_counts[field][value] = { total = 0, count = 0 }
+				end
+				pane_counts[field][value].total = pane_counts[field][value].total + 1
+				if filtered_ids[request.id] then
+					pane_counts[field][value].count = pane_counts[field][value].count + 1
+				end
+			end
+		end
+	end
+
+	return self:ret(true, {
+		total = #all_requests,
+		filtered = #filtered_requests,
+		data = paginated,
+		pane_counts = pane_counts,
+	}, HTTP_OK)
 end
 
 return metrics

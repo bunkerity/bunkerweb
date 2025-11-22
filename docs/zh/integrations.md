@@ -9,7 +9,7 @@
 
 BunkerWeb Cloud 将是开始使用 BunkerWeb 的最简单方式。它为您提供一个完全托管的 BunkerWeb 服务，无需任何麻烦。可以把它想象成一个 BunkerWeb 即服务！
 
-试试我们的 [BunkerWeb Cloud 服务](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc)，您将获得：
+试试我们的 [BunkerWeb Cloud 服务](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=doc)，您将获得：
 
 - 一个完全托管在我们云端的 BunkerWeb 实例
 - 所有 BunkerWeb 功能，包括 PRO 功能
@@ -36,7 +36,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.5
+  bunkerity/bunkerweb-all-in-one:1.6.6
 ```
 
 默认情况下，容器暴露：
@@ -47,6 +47,59 @@ docker run -d \
 - 7000/tcp 用于在没有 BunkerWeb 前置的情况下的 Web UI 访问（不建议在生产环境中使用）
 - 当 `SERVICE_API=yes` 时，8888/tcp 用于 API（内部使用；建议通过 BunkerWeb 作为反向代理暴露，而不是直接发布）
 
+需要一个命名卷（或绑定挂载）来持久化容器内 `/data` 目录下的 SQLite 数据库、缓存和备份：
+
+```yaml
+services:
+  bunkerweb-aio:
+    image: bunkerity/bunkerweb-all-in-one:1.6.6
+    volumes:
+      - bw-storage:/data
+...
+volumes:
+  bw-storage:
+```
+
+!!! warning "使用本地文件夹存储持久化数据"
+    一体化容器以内置的 **非特权用户（UID 101、GID 101）** 运行各项服务。这能够提升安全性：即便组件被攻破，也无法在宿主机上获得 root 权限（UID/GID 0）。
+
+    如果挂载了一个**本地文件夹**，请确保目录权限允许该非特权用户写入：
+
+    ```shell
+    mkdir bw-data && \
+    chown root:101 bw-data && \
+    chmod 770 bw-data
+    ```
+
+    如果目录已存在，可以执行：
+
+    ```shell
+    chown -R root:101 bw-data && \
+    chmod -R 770 bw-data
+    ```
+
+    在使用 [Docker 无根模式](https://docs.docker.com/engine/security/rootless) 或 [Podman](https://podman.io/) 时，容器内的 UID/GID 会被重新映射。请先检查自己的 `subuid` 与 `subgid` 范围：
+
+    ```shell
+    grep ^$(whoami): /etc/subuid && \
+    grep ^$(whoami): /etc/subgid
+    ```
+
+    例如，如果起始值是 **100000**，对应的映射 UID/GID 将是 **100100**（100000 + 100）：
+
+    ```shell
+    mkdir bw-data && \
+    sudo chgrp 100100 bw-data && \
+    chmod 770 bw-data
+    ```
+
+    或者，如果目录已存在：
+
+    ```shell
+    sudo chgrp -R 100100 bw-data && \
+    sudo chmod -R 770 bw-data
+    ```
+
 一体化镜像内置了几个服务，可以通过环境变量来控制：
 
 - `SERVICE_UI=yes` (默认) - 启用 Web UI 服务
@@ -55,6 +108,7 @@ docker run -d \
 - `AUTOCONF_MODE=no` (默认) - 启用自动配置服务
 - `USE_REDIS=yes` (默认) - 启用内置的 [Redis](#redis-integration) 实例
 - `USE_CROWDSEC=no` (默认) - [CrowdSec](#crowdsec-integration) 集成默认禁用
+- `HIDE_SERVICE_LOGS=`（可选）- 以逗号分隔的服务列表，用于在容器日志中静音这些服务。支持的值：`api`、`autoconf`、`bunkerweb`、`crowdsec`、`redis`、`scheduler`、`ui`、`nginx.access`、`nginx.error`、`modsec`。日志仍会写入 `/var/log/bunkerweb/<service>.log`。
 
 ### API 集成
 
@@ -71,39 +125,49 @@ docker run -d \
   -v bw-storage:/data \
   -e SERVICE_API=yes \
   -e API_WHITELIST_IPS="127.0.0.0/8" \
-  -e API_TOKEN="changeme" \
+  -e API_USERNAME=changeme \
+  -e API_PASSWORD=StrongP@ssw0rd \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
   -p 8888:8888/tcp \
-  bunkerity/bunkerweb-all-in-one:1.6.5
+  bunkerity/bunkerweb-all-in-one:1.6.6
 ```
 
 推荐（在 BunkerWeb 之后）— 不要发布 `8888`；而是反向代理它：
 
 ```yaml
 services:
-  bunkerweb:
-    image: bunkerity/bunkerweb:1.6.5
+  bunkerweb-aio:
+    image: bunkerity/bunkerweb-all-in-one:1.6.6
+    container_name: bunkerweb-aio
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
       - "443:8443/udp"
     environment:
-      SERVER_NAME: "www.example.com"
+      SERVER_NAME: "api.example.com"
       MULTISITE: "yes"
       DISABLE_DEFAULT_SERVER: "yes"
-      USE_REVERSE_PROXY: "yes"
-      REVERSE_PROXY_URL: "/api-<unguessable>"
-      REVERSE_PROXY_HOST: "http://bunkerweb-aio:8888"
+      api.example.com_USE_TEMPLATE: "bw-api"
+      api.example.com_USE_REVERSE_PROXY: "yes"
+      api.example.com_REVERSE_PROXY_URL: "/api-<unguessable>"
+      api.example.com_REVERSE_PROXY_HOST: "http://127.0.0.1:8888" # 内部 API 端点
 
-  bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.5
-    environment:
+      # API 设置
       SERVICE_API: "yes"
-      API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"
-      # 可选地设置一个管理员覆盖令牌
-      # API_TOKEN: "changeme"
+      # 设置强壮的凭据并且只允许可信的 IP/网络（详见下文）
+      API_USERNAME: "changeme"
+      API_PASSWORD: "StrongP@ssw0rd"
+      API_ROOT_PATH: "/api-<unguessable>" # 需与 REVERSE_PROXY_URL 保持一致
+
+      # 默认停用 UI；改为 "yes" 可启用
+      SERVICE_UI: "no"
+    volumes:
+      - bw-storage:/data
     networks:
       - bw-universe
+
+volumes:
+  bw-storage:
 
 networks:
   bw-universe:
@@ -123,9 +187,12 @@ networks:
 
 ### Redis 集成 {#redis-integration}
 
-BunkerWeb **一体化**镜像开箱即用地包含了 Redis，用于[持久化封禁和报告](advanced.md#persistence-of-bans-and-reports)。要管理 Redis：
+BunkerWeb **一体化**镜像开箱即用地包含了 Redis，用于[持久化封禁和报告](advanced.md#persistence-of-bans-and-reports)。请注意：
 
-- 要禁用 Redis，请设置 `USE_REDIS=no` 或将 `REDIS_HOST` 指向一个外部主机。
+- 只有在 `USE_REDIS=yes` **且** `REDIS_HOST` 保持默认值 (`127.0.0.1`/`localhost`) 时，内置 Redis 服务才会启动。
+- 它仅监听容器的回环接口，因此只能被容器内部的进程访问，其他容器或宿主机无法直接访问。
+- 仅当你已经准备好外部 Redis/Valkey 终端时才覆盖 `REDIS_HOST`，否则内置实例将不会启动。
+- 若要完全禁用 Redis，请设置 `USE_REDIS=no`。
 - Redis 日志在 Docker 日志和 `/var/log/bunkerweb/redis.log` 中以 `[REDIS]` 前缀出现。
 
 ### CrowdSec 集成 {#crowdsec-integration}
@@ -142,7 +209,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.5
+  bunkerity/bunkerweb-all-in-one:1.6.6
 ```
 
 *   当 `USE_CROWDSEC=yes` 时，入口点将：
@@ -159,7 +226,7 @@ docker run -d \
 
 | 类型       | 名称                                    | 目的                                                                                                                                                         |
 | ---------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **集合**   | `crowdsecurity/nginx`                   | 保护 Nginx 服务器免受各种基于 HTTP 的攻击，从暴力破解到注入尝试。                                                                                            |
+| **集合**   | `bunkerity/bunkerweb`                   | 保护 Nginx 服务器免受各种基于 HTTP 的攻击，从暴力破解到注入尝试。                                                                                            |
 | **集合**   | `crowdsecurity/appsec-virtual-patching` | 提供一个动态更新的 WAF 风格规则集，针对已知的 CVE，每日自动修补以保护 Web 应用程序免受新发现的漏洞影响。                                                     |
 | **集合**   | `crowdsecurity/appsec-generic-rules`    | 对 `crowdsecurity/appsec-virtual-patching` 进行补充，提供针对通用应用层攻击模式的启发式规则——例如枚举、路径遍历和自动化探测——填补了尚无 CVE 特定规则的空白。 |
 | **解析器** | `crowdsecurity/geoip-enrich`            | 用 GeoIP 上下文丰富事件                                                                                                                                      |
@@ -170,13 +237,17 @@ docker run -d \
 入口点脚本调用：
 
 ```bash
-cscli install collection crowdsecurity/nginx
+cscli hub update
+cscli install collection bunkerity/bunkerweb
 cscli install collection crowdsecurity/appsec-virtual-patching
 cscli install collection crowdsecurity/appsec-generic-rules
 cscli install parser     crowdsecurity/geoip-enrich
 ```
 
 </details>
+
+!!! info "Docker 中看不到集合？"
+    如果在容器内执行 `cscli collections list` 仍然看不到 `bunkerity/bunkerweb`，请运行 `docker exec -it bunkerweb-aio cscli hub update`，然后重启容器（`docker restart bunkerweb-aio`），以刷新本地 hub 缓存。
 
 ---
 
@@ -193,7 +264,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.5
+  bunkerity/bunkerweb-all-in-one:1.6.6
 ```
 
 !!! info "内部工作原理"
@@ -215,7 +286,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.5
+  bunkerity/bunkerweb-all-in-one:1.6.6
 ```
 
 注意：
@@ -251,7 +322,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.5
+  bunkerity/bunkerweb-all-in-one:1.6.6
 ```
 
 *   当 `CROWDSEC_API` 不是 `127.0.0.1` 或 `localhost` 时，将跳过**本地注册**。
@@ -285,13 +356,14 @@ docker run -d \
 无论您是进行测试、开发应用程序还是在生产中部署 BunkerWeb，Docker 容器化选项都提供了灵活性和易用性。采用这种方法使您能够充分利用 BunkerWeb 的功能，同时利用 Docker 技术的优势。
 
 ```shell
-docker pull bunkerity/bunkerweb:1.6.5
+docker pull bunkerity/bunkerweb:1.6.6
 ```
 
 Docker 镜像也可在 [GitHub packages](https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb) 上找到，可以使用 `ghcr.io` 仓库地址下载：
 
 ```shell
-docker pull ghcr.io/bunkerity/bunkerweb:1.6.5```
+docker pull ghcr.io/bunkerity/bunkerweb:1.6.6
+```
 
 Docker 集成的关键概念包括：
 
@@ -300,7 +372,7 @@ Docker 集成的关键概念包括：
 - **网络**：Docker 网络在 BunkerWeb 的集成中扮演着至关重要的角色。这些网络有两个主要目的：向客户端公开端口以及连接到上游 Web 服务。通过公开端口，BunkerWeb 可以接受来自客户端的传入请求，允许他们访问受保护的 Web 服务。此外，通过连接到上游 Web 服务，BunkerWeb 可以高效地路由和管理流量，提供增强的安全性和性能。
 
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 SQLite 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，也支持其他数据库后端。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 SQLite 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，也支持其他数据库后端。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/misc/integrations)中的 docker-compose 文件。
 
 ### 环境变量
 
@@ -310,7 +382,7 @@ Docker 集成的关键概念包括：
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.5
+    image: bunkerity/bunkerweb-scheduler:1.6.6
     environment:
       - MY_SETTING=value
       - ANOTHER_SETTING=another value
@@ -351,7 +423,7 @@ secrets:
 [调度器](concepts.md#scheduler) 在其自己的容器中运行，该容器也可在 Docker Hub 上找到：
 
 ```shell
-docker pull bunkerity/bunkerweb-scheduler:1.6.5
+docker pull bunkerity/bunkerweb-scheduler:1.6.6
 ```
 
 !!! info "BunkerWeb 设置"
@@ -372,7 +444,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.5
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6
         environment:
           # 这将为 BunkerWeb 容器设置 API
           <<: *bw-api-env
@@ -381,7 +453,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.5
           - bw-universe
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5
+        image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
           # 这将为调度器容器设置 API
           <<: *bw-api-env
@@ -399,7 +471,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.5
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.5
+    image: bunkerity/bunkerweb-scheduler:1.6.6
     volumes:
       - bw-storage:/data
 ...
@@ -485,7 +557,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.5
+    image: bunkerity/bunkerweb:1.6.6
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -498,7 +570,7 @@ services:
       - bw-universe
 ...
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.5
+    image: bunkerity/bunkerweb-scheduler:1.6.6
     environment:
       <<: *bw-api-env
       BUNKERWEB_INSTANCES: "bunkerweb" # 这个设置是强制性的，用来指定 BunkerWeb 实例
@@ -531,7 +603,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.5
+    image: bunkerity/bunkerweb:1.6.6
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -544,7 +616,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.5
+    image: bunkerity/bunkerweb-scheduler:1.6.6
     depends_on:
       - bunkerweb
     environment:
@@ -610,8 +682,8 @@ docker build -t bw-ui -f src/ui/Dockerfile .
 
 ```bash
 # 下载脚本及其校验和
-wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.5/install-bunkerweb.sh
-wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.5/install-bunkerweb.sh.sha256
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6/install-bunkerweb.sh
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6/install-bunkerweb.sh.sha256
 
 # 验证校验和
 sha256sum -c install-bunkerweb.sh.sha256
@@ -650,10 +722,11 @@ sudo ./install-bunkerweb.sh
     *   **工作节点**：仅安装 BunkerWeb 实例，可由远程管理器管理。
     *   **仅调度器**：仅安装调度器组件。
     *   **仅 Web UI**：仅安装 Web UI 组件。
+    *   **仅 API**：仅安装 API 服务以便进行编程访问。
 2.  **设置向导**：选择是否启用基于 Web 的配置向导。强烈建议初次使用的用户选择此项。
-3.  **CrowdSec 集成**：选择安装 CrowdSec 安全引擎，以获得先进的实时威胁防护。
+3.  **CrowdSec 集成**：选择安装 CrowdSec 安全引擎，以获得先进的实时威胁防护。仅适用于完整堆栈安装。
 4.  **CrowdSec AppSec**：如果您选择安装 CrowdSec，您还可以启用应用程序安全 (AppSec) 组件，它增加了 WAF 功能。
-5.  **API 服务**：选择是否启用可选的 BunkerWeb API 服务。在 Linux 安装中，它默认是禁用的。
+5.  **API 服务**：对于完整堆栈和管理器安装，选择是否启用可选的外部 API 服务。在 Linux 安装中，它默认是禁用的。
 
 !!! info "管理器和调度器安装"
     如果您选择**管理器**或**仅调度器**安装类型，系统还会提示您提供您的 BunkerWeb 工作节点实例的 IP 地址或主机名。
@@ -664,18 +737,18 @@ sudo ./install-bunkerweb.sh
 
 **通用选项：**
 
-| 选项                    | 描述                                             |
-| ----------------------- | ------------------------------------------------ |
-| `-v, --version VERSION` | 指定要安装的 BunkerWeb 版本（例如 `1.6.5`）。    |
-| `-w, --enable-wizard`   | 启用设置向导。                                   |
-| `-n, --no-wizard`       | 禁用设置向导。                                   |
-| `-y, --yes`             | 以非交互模式运行，对所有提示使用默认答案。       |
-| `-f, --force`           | 即使在不受支持的操作系统版本上，也强制继续安装。 |
-| `-q, --quiet`           | 静默安装（抑制输出）。                           |
-| `--api`, `--enable-api` | 启用 API (FastAPI) systemd 服务（默认禁用）。    |
-| `--no-api`              | 明确禁用 API 服务。                              |
-| `-h, --help`            | 显示包含所有可用选项的帮助信息。                 |
-| `--dry-run`             | 显示将要安装的内容，但不实际执行。               |
+| 选项                    | 描述                                              |
+| ----------------------- | ------------------------------------------------- |
+| `-v, --version VERSION` | 指定要安装的 BunkerWeb 版本（例如 `1.6.6`）。 |
+| `-w, --enable-wizard`   | 启用设置向导。                                    |
+| `-n, --no-wizard`       | 禁用设置向导。                                    |
+| `-y, --yes`             | 以非交互模式运行，对所有提示使用默认答案。        |
+| `-f, --force`           | 即使在不受支持的操作系统版本上，也强制继续安装。  |
+| `-q, --quiet`           | 静默安装（抑制输出）。                            |
+| `--api`, `--enable-api` | 启用 API (FastAPI) systemd 服务（默认禁用）。     |
+| `--no-api`              | 明确禁用 API 服务。                               |
+| `-h, --help`            | 显示包含所有可用选项的帮助信息。                  |
+| `--dry-run`             | 显示将要安装的内容，但不实际执行。                |
 
 **安装类型：**
 
@@ -686,6 +759,7 @@ sudo ./install-bunkerweb.sh
 | `--worker`         | 仅安装 BunkerWeb 实例。                               |
 | `--scheduler-only` | 仅安装调度器组件。                                    |
 | `--ui-only`        | 仅安装 Web UI 组件。                                  |
+| `--api-only`       | 仅安装 API 服务（端口 8000）。                        |
 
 **安全集成：**
 
@@ -714,7 +788,7 @@ sudo ./install-bunkerweb.sh --yes
 sudo ./install-bunkerweb.sh --worker --no-wizard
 
 # 安装一个特定版本
-sudo ./install-bunkerweb.sh --version 1.6.5
+sudo ./install-bunkerweb.sh --version 1.6.6
 
 # 带有远程工作实例的管理器设置（需要 instances）
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
@@ -741,8 +815,15 @@ sudo ./install-bunkerweb.sh --yes --api
 !!! warning "关于选项兼容性的重要说明"
 
     **CrowdSec 限制：**
-    - CrowdSec 选项（`--crowdsec`, `--crowdsec-appsec`）仅与 `--full`（默认）和 `--manager` 安装类型兼容
-    - 它们不能与 `--worker`, `--scheduler-only` 或 `--ui-only` 安装一起使用
+
+    - CrowdSec 选项（`--crowdsec`, `--crowdsec-appsec`）仅与 `--full`（默认）安装类型兼容
+    - 它们不能与 `--manager`, `--worker`, `--scheduler-only`, `--ui-only` 或 `--api-only` 安装一起使用
+
+    **API 服务可用性：**
+
+    - 外部 API 服务（端口 8000）适用于 `--full` 和 `--manager` 安装类型
+    - 它不适用于 `--worker`, `--scheduler-only` 或 `--ui-only` 安装
+    - 使用 `--api-only` 进行专用的 API 服务安装
 
     **Instances 要求：**
     - `--instances` 选项仅对 `--manager` 和 `--scheduler-only` 安装类型有效
@@ -759,7 +840,7 @@ sudo ./install-bunkerweb.sh --yes --api
 
 - 它会添加官方的 CrowdSec 仓库并安装代理。
 - 它会创建一个新的采集文件，让 CrowdSec 解析 BunkerWeb 的日志（`access.log`、`error.log` 和 `modsec_audit.log`）。
-- 它会安装必要的集合（`crowdsecurity/nginx`）和解析器（`crowdsecurity/geoip-enrich`）。
+- 它会安装必要的集合（`bunkerity/bunkerweb`）和解析器（`crowdsecurity/geoip-enrich`）。
 - 它会为 BunkerWeb 注册一个拦截器，并自动在 `/etc/bunkerweb/variables.env` 中配置 API 密钥。
 - 如果您还选择了**AppSec 组件**，它会安装 `appsec-virtual-patching` 和 `appsec-generic-rules` 集合，并为 BunkerWeb 配置 AppSec 端点。
 
@@ -837,12 +918,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.5：
+    最后安装 BunkerWeb 1.6.6：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.5
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.6
     ```
 
     要防止在执行 `apt upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -885,12 +966,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.5：
+    最后安装 BunkerWeb 1.6.6：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.5
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.6
     ```
 
     要防止在执行 `apt upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -921,12 +1002,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.5：
+    最后安装 BunkerWeb 1.6.6：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
   	sudo dnf makecache && \
-  	sudo -E dnf install -y --allowerasing bunkerweb-1.6.5
+  	sudo -E dnf install -y --allowerasing bunkerweb-1.6.6
     ```
 
     要防止在执行 `dnf upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -971,12 +1052,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.5：
+    最后安装 BunkerWeb 1.6.6：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
-    sudo -E dnf install -y --allowerasing bunkerweb-1.6.5
+    sudo -E dnf install -y --allowerasing bunkerweb-1.6.6
     ```
 
     要防止在执行 `dnf upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -1069,7 +1150,7 @@ export SERVICE_UI=yes
     Docker 自动配置集成意味着使用**多站点模式**。有关更多信息，请参阅文档的[多站点部分](concepts.md#multisite-mode)。
 
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/misc/integrations)中的 docker-compose 文件。
 
 要启用自动配置更新，请在堆栈中包含一个名为 `bw-autoconf` 的额外容器。此容器承载自动配置服务，该服务管理 BunkerWeb 的动态配置更改。
 
@@ -1083,7 +1164,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.5
+    image: bunkerity/bunkerweb:1.6.6
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -1098,7 +1179,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.5
+    image: bunkerity/bunkerweb-scheduler:1.6.6
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由自动配置服务自动检测
@@ -1113,7 +1194,7 @@ services:
       - bw-db
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.5
+    image: bunkerity/bunkerweb-autoconf:1.6.6
     depends_on:
       - bunkerweb
       - bw-docker
@@ -1227,13 +1308,13 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6
         labels:
           - "bunkerweb.INSTANCE=yes"
           - "bunkerweb.NAMESPACE=my-namespace" # 为 BunkerWeb 实例设置命名空间，以便自动配置服务可以检测到它
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.5
+        image: bunkerity/bunkerweb-autoconf:1.6.6
         environment:
           ...
           NAMESPACES: "my-namespace my-other-namespace" # 只监听这些命名空间
@@ -1255,14 +1336,23 @@ networks:
   <figcaption>Kubernetes 集成</figcaption>
 </figure>
 
-为了在 Kubernetes 环境中自动化 BunkerWeb 实例的配置，autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)。它根据 [Ingress 资源](https://kubernetes.io/docs/concepts/services-networking/ingress/)配置 BunkerWeb 实例，并监控其他 Kubernetes 对象，例如 [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/)，以获取自定义配置。
+为了在 Kubernetes 环境中自动化 BunkerWeb 实例的配置，
+autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)。
+它根据 [Ingress 资源](https://kubernetes.io/docs/concepts/services-networking/ingress/) 配置 BunkerWeb 实例，
+并监控其他 Kubernetes 对象，例如 [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/)，以获取自定义配置。
+
+!!! info "ConfigMap 同步"
+    - Ingress 控制器仅管理带有 `bunkerweb.io/CONFIG_TYPE` 注解的 ConfigMap。
+    - 如果需要将配置限定到单个服务（服务器名必须已存在），请添加 `bunkerweb.io/CONFIG_SITE`；
+      未设置时表示全局应用。
+    - 删除该注解或删除 ConfigMap 会移除对应的自定义配置。
 
 为了获得最佳设置，建议将 BunkerWeb 定义为一个 **[DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)**，这样可以确保在所有节点上都创建一个 pod，而将 **autoconf 和 scheduler** 定义为**单个副本的 [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)**。
 
 鉴于存在多个 BunkerWeb 实例，有必要建立一个共享数据存储，实现为一个 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 服务。这些实例将利用该服务来缓存和共享彼此之间的数据。有关 Redis/Valkey 设置的更多信息，请参见[此处](features.md#redis)。
 
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/misc/integrations)中的 docker-compose 文件。
 
     集群数据库后端的设置超出了本文档的范围。
 
@@ -1291,15 +1381,509 @@ helm install -f myvalues.yaml mybunkerweb bunkerweb/bunkerweb
 
 值的完整列表在 [bunkerity/bunkerweb-helm 仓库](https://github.com/bunkerity/bunkerweb-helm) 的 [charts/bunkerweb/values.yaml 文件](https://github.com/bunkerity/bunkerweb-helm/blob/main/charts/bunkerweb/values.yaml) 中列出。
 
+#### Sidecar Container + Helm
+
+This documentation explains how to deploy BunkerWeb as a sidecar to protect your Kubernetes applications. In this architecture, each application has its own BunkerWeb container acting as a security reverse proxy.
+
+##### Architecture
+
+```mermaid
+flowchart TB
+
+  %% ---------- 样式 ----------
+  classDef scheduler     fill:#eef2ff,stroke:#4c1d95,stroke-width:1px,rx:6px,ry:6px;
+  classDef podContainer  fill:none,stroke:#9ca3af,stroke-width:1px,stroke-dasharray:6 3,rx:6px,ry:6px;
+  classDef component     fill:#f9fafb,stroke:#6b7280,stroke-width:1px,rx:4px,ry:4px;
+  classDef lb            fill:#e0f2fe,stroke:#0369a1,stroke-width:1px,rx:6px,ry:6px;
+
+  %% ---------- 顶部：调度器 ----------
+  SCHED["BunkerWeb 调度器（集中式）<br/>+ UI + MariaDB + Redis"]:::scheduler
+
+  %% ---------- Pods 组 ----------
+  subgraph PODS["Pod 组"]
+    %% 应用 Pod 1 ----------
+    subgraph POD1["应用 Pod"]
+      BW1["BunkerWeb"]:::component
+      APP1["应用程序<br/>(端口 80)"]:::component
+      BW1 -->|合法请求| APP1
+    end
+    class POD1 podContainer
+
+    %% 应用 Pod 2 ----------
+    subgraph POD2["应用 Pod"]
+      BW2["BunkerWeb"]:::component
+      APP2["应用程序<br/>(端口 XX)"]:::component
+      BW2 -->|合法请求| APP2
+    end
+    class POD2 podContainer
+  end
+
+  %% ---------- 底部：负载均衡器 ----------
+  LB["负载均衡器"]:::lb
+
+  %% 调度器通过 API 控制 BunkerWeb 实例
+  %% The Scheduler controls the BunkerWeb instances (API)
+  SCHED -->|API 5000| BW1
+  SCHED -->|API 5000| BW2
+  %% 负载均衡器将流量发送到 BunkerWeb
+  %% The load balancer sends traffic to BunkerWeb
+  LB -->|HTTP/HTTPS| BW1
+  LB -->|HTTP/HTTPS| BW2
+  %% ---------- 布局辅助（隐藏） ----------
+  %% 将负载均衡器放置在整个 Pod 组之下
+  %% Place the load balancer under the entire PODS group
+  PODS --> LB
+  linkStyle 6 stroke-width:0px,stroke:transparent;
+```
+
+##### Prerequisites
+
+- A working Kubernetes cluster
+- Helm 3.x installed
+- BunkerWeb Helm chart deployed with:
+  - `scheduler` enabled
+  - `ui` enabled
+  - `mariadb` enabled (to store configurations)
+  - `redis` enabled (for synchronization)
+  - `controller` enabled (recommended for automatic sidecar discovery)
+  - `bunkerweb.replicas: 0` (no standalone deployment)
+
+##### Sidecar Discovery Modes
+
+BunkerWeb offers two modes for sidecar discovery:
+
+###### Mode 1: Automatic Discovery (Controller - Recommended)
+
+The **BunkerWeb controller** automatically discovers pods with BunkerWeb sidecars without manual configuration.
+
+**Advantages:**
+- ✅ Automatic discovery of new sidecars
+- ✅ No need to manually maintain `BUNKERWEB_INSTANCES`
+- ✅ Automatic scaling
+
+**Configuration:**
+
+1. Enable the controller in `values.yaml`:
+```yaml
+controller:
+  enabled: true
+  tag: "1.6.5"
+```
+
+2. For each sidecar, add:
+   - **Pod annotation**: `bunkerweb.io/INSTANCE: "yes"`
+   - **Environment variable**: `KUBERNETES_MODE: "yes"`
+
+  ```yaml
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: nginx-bunkerweb
+    namespace: bunkerweb
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: nginx-bw
+    template:
+      metadata:
+        labels:
+          app: nginx-bw
+        annotations:
+          # Mandatory annotation for auto-discovery when using bunkerweb-controller
+          bunkerweb.io/INSTANCE: "yes"
+      spec:
+        containers:
+          # Random WebApp you want to protect
+          - name: nginx
+            image: nginx:latest
+            ports:
+              - containerPort: 80
+          # Sidecar BunkerWeb
+          - name: bunkerweb
+            image: bunkerity/bunkerweb:latest
+            ports:
+              - containerPort: 8080
+                name: entrypoint
+              - containerPort: 5000
+                name: bwapi
+              - containerPort: 9113
+                name: metrics
+            env:
+              - name: API_WHITELIST_IP
+                value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+              - name: KUBERNETES_MODE
+                value: "yes"
+  ---
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: nginx-bunkerweb
+    namespace: bunkerweb
+  spec:
+    type: ClusterIP
+    selector:
+      app: nginx-bw
+    ports:
+      - name: http
+        port: 80
+        targetPort: 8080 # BunkerWeb exposed port
+  ```
+
+3. **No need for headless service** - the controller communicates directly with pods
+
+4. **No need** to manually configure the scheduler with `BUNKERWEB_INSTANCES` - the controller handles discovery
+
+###### Mode 2: Manual Configuration (BUNKERWEB_INSTANCES)
+
+Explicit configuration of each instance via the `BUNKERWEB_INSTANCES` environment variable.
+
+**Advantages:**
+- ✅ Precise control over managed instances
+- ✅ Useful for complex multi-namespace environments
+
+**Configuration:**
+
+See the following sections for details.
+
+##### Step 1: Scheduler Configuration
+
+The BunkerWeb scheduler is the central component that distributes configurations to all sidecars.
+
+###### Option A: With Controller (Recommended)
+
+If you're using the controller for automatic discovery, **no special configuration is needed** for the scheduler. The controller will automatically detect pods with the `bunkerweb.io/INSTANCE: "yes"` annotation.
+
+###### Option B: Manual Configuration with `BUNKERWEB_INSTANCES`
+
+In your BunkerWeb chart `values.yaml`, configure the `BUNKERWEB_INSTANCES` environment variable with the URLs of all your headless services:
+
+```yaml
+scheduler:
+  tag: "1.6.5"
+  extraEnvs:
+    - name: BUNKERWEB_INSTANCES
+      value: "http://app1-bunkerweb-workers.namespace.svc.cluster.local:5000 http://app2-bunkerweb-workers.namespace.svc.cluster.local:5000"
+```
+
+**Important:**
+- Separate URLs with spaces
+- Use port **5000** (BunkerWeb internal API)
+- Format: `http://<service-name>.<namespace>.svc.cluster.local:5000`
+
+##### Step 2: Creating the Deployment with Sidecar
+
+###### Deployment Structure with Controller (Automatic Mode - Recommended)
+
+**Recommended configuration** with automatic discovery:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-bunkerweb
+  namespace: your-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+      annotations:
+        bunkerweb.io/INSTANCE: "yes"  # Enable automatic discovery
+    spec:
+      containers:
+        # Your application
+        - name: my-app
+          image: my-image:latest
+          ports:
+            - containerPort: 80  # Port your app listens on
+
+        # BunkerWeb Sidecar
+        - name: bunkerweb
+          image: bunkerity/bunkerweb:1.6.6-rc2
+          ports:
+            - containerPort: 8080  # Exposed HTTP port
+            - containerPort: 5000  # Internal API (mandatory)
+          env:
+            - name: KUBERNETES_MODE
+              value: "yes"  # Enable Kubernetes mode
+            - name: API_WHITELIST_IP
+              value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+            - name: MULTISITE
+              value: "yes"
+            - name: USE_REVERSE_PROXY
+              value: "yes"
+            - name: LOG_LEVEL
+              value: "info"
+```
+
+**Key points for automatic mode:**
+- ✅ **Mandatory annotation**: `bunkerweb.io/INSTANCE: "yes"` at pod level
+- ✅ **Mandatory environment variable**: `KUBERNETES_MODE: "yes"`
+- ✅ **No headless service needed**: the controller communicates directly with pods via Kubernetes API
+- ✅ **No need to manually configure** `BUNKERWEB_INSTANCES`
+
+###### Deployment Structure without Controller (Manual Mode)
+
+If you're not using the controller:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-bunkerweb
+  namespace: your-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        # Your application
+        - name: my-app
+          image: my-image:latest
+          ports:
+            - containerPort: 80  # Port your app listens on
+
+        # BunkerWeb Sidecar
+        - name: bunkerweb
+          image: bunkerity/bunkerweb:1.6.5
+          ports:
+            - containerPort: 8080  # Exposed HTTP port
+            - containerPort: 5000  # Internal API (mandatory)
+          env:
+            - name: API_WHITELIST_IP
+              value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+```
+
+###### Important Environment Variables
+
+| Variable           | Value                                                 | Description                                              |
+| ------------------ | ----------------------------------------------------- | -------------------------------------------------------- |
+| `KUBERNETES_MODE`  | `yes`                                                 | **Mandatory** for automatic discovery via the controller |
+| `API_WHITELIST_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API                            |
+
+
+##### Step 3: Creating Services
+
+###### ClusterIP Service (external exposure)
+
+Service to expose your application through BunkerWeb:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-bunkerweb
+  namespace: your-namespace
+spec:
+  type: ClusterIP  # or LoadBalancer depending on your needs
+  selector:
+    app: my-app
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080  # BunkerWeb port
+```
+
+###### Headless Service (internal API) - Conditional
+
+**Only required in manual mode (without controller)**:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-bunkerweb-workers
+  namespace: your-namespace
+spec:
+  clusterIP: None  # Headless service
+  selector:
+    app: my-app
+  ports:
+    - name: bwapi
+      protocol: TCP
+      port: 5000
+      targetPort: 5000
+```
+
+**Important:**
+- ⚠️ **Not required with controller** - the controller communicates directly with pods via Kubernetes API
+- ✅ **Mandatory without controller** - this service name must be manually added to `BUNKERWEB_INSTANCES`
+- The `selector` must match your deployment labels
+
+##### Step 4: Reverse Proxy Configuration
+
+You have **two options** to configure the reverse proxy:
+
+###### Option A: Via Web Interface (UI)
+
+1. Access the BunkerWeb UI
+2. Go to the **"Services"**
+3. Create a new service with:
+   - **Server name**: `my-app.example.com`
+   - **Reverse proxy host**: `http://127.0.0.1:80` (or your app's port)
+   - **Use reverse proxy**: `yes`
+4. Save
+
+The scheduler will automatically send the configuration to the sidecar via the API (port 5000).
+
+###### Option B: Via Environment Variables
+
+Add these variables in the `bunkerweb` container:
+
+```yaml
+env:
+  - name: MULTISITE
+    value: "yes"
+  - name: SERVER_NAME
+    value: "my-app.example.com"
+  - name: my-app.example.com_USE_REVERSE_PROXY
+    value: "yes"
+  - name: my-app.example.com_REVERSE_PROXY_HOST
+    value: "http://127.0.0.1:80"
+  - name: my-app.example.com_REVERSE_PROXY_URL
+    value: "/"
+```
+
+**Note:** The UI option is recommended for centralized and dynamic management.
+
+##### Step 5: Deployment
+
+###### With Controller (Automatic Mode - Recommended)
+
+1. **Deploy your application with the sidecar**:
+   ```bash
+   kubectl apply -f my-app-deployment.yaml
+   ```
+
+   Make sure that:
+   - The annotation `bunkerweb.io/INSTANCE: "yes"` is present in `template.metadata.annotations`
+   - The variable `KUBERNETES_MODE: "yes"` is defined in the bunkerweb container
+
+2. **Verify that the controller detects the sidecar**:
+   ```bash
+   kubectl logs -n bunkerweb deployment/bunkerweb-controller -f
+   ```
+   You should see logs indicating the discovery of the new pod.
+
+3. **Create the reverse proxy configuration** via the BunkerWeb UI
+
+4. **Test your application**:
+   ```bash
+   curl -H "Host: my-app.example.com" http://<service-ip>
+   ```
+
+###### Without Controller (Manual Mode)
+
+1. **Deploy your application with the sidecar**:
+   ```bash
+   kubectl apply -f my-app-deployment.yaml
+   ```
+
+2. **Add the headless service to `BUNKERWEB_INSTANCES`**:
+   Update your `values.yaml` and upgrade the Helm chart:
+   ```bash
+   helm upgrade bunkerweb bunkerity/bunkerweb -n bunkerweb -f values.yaml
+   ```
+
+3. **Verify that the scheduler detects the sidecar**:
+   ```bash
+   kubectl logs -n bunkerweb deployment/bunkerweb-scheduler -f
+   ```
+   You should see logs indicating the connection to the new worker.
+
+4. **Create the reverse proxy configuration** via the BunkerWeb UI
+
+5. **Test your application**:
+   ```bash
+   curl -H "Host: my-app.example.com" http://<service-ip>
+   ```
+
+###### Common Issues
+
+| Issue                            | Cause                                     | Solution                                                   |
+| -------------------------------- | ----------------------------------------- | ---------------------------------------------------------- |
+| Scheduler can't find the sidecar | Missing or misconfigured headless service | Verify the service exists and is in `BUNKERWEB_INSTANCES`  |
+| 502 Bad Gateway error            | App is not accessible from BunkerWeb      | Verify the reverse proxy URL is correct (`127.0.0.1:port`) |
+| Configuration not applied        | Sidecar didn't receive the config         | Check scheduler and sidecar logs                           |
+| Port 5000 not accessible         | Port not exposed in the container         | Add `- containerPort: 5000` in the bunkerweb container     |
+
+##### Adding a New Application
+
+###### With Controller (Automatic Mode)
+
+To add a new application protected by BunkerWeb:
+
+1. **Create a new deployment** with the BunkerWeb sidecar with:
+   - Annotation `bunkerweb.io/INSTANCE: "yes"` in `template.metadata.annotations`
+   - Environment variable `KUBERNETES_MODE: "yes"` in the bunkerweb container
+
+2. **Create only the ClusterIP service** (no headless service needed!)
+
+3. **Apply the deployment**:
+   ```bash
+   kubectl apply -f new-app-deployment.yaml
+   ```
+
+4. **The controller automatically detects the new pod** - no chart redeployment needed!
+
+5. **Configure the reverse proxy** in the UI
+
+###### Without Controller (Manual Mode)
+
+To add a new application protected by BunkerWeb:
+
+1. **Create a new deployment** with the BunkerWeb sidecar (as described above)
+
+2. **Create both services** (ClusterIP + Headless)
+
+3. **Add the new headless service** to `BUNKERWEB_INSTANCES`:
+   ```yaml
+   extraEnvs:
+     - name: BUNKERWEB_INSTANCES
+       value: "http://app1-workers.ns.svc.cluster.local:5000 http://app2-workers.ns.svc.cluster.local:5000"
+   ```
+
+4. **Redeploy the chart**:
+   ```bash
+   helm upgrade bunkerweb bunkerity/bunkerweb -n bunkerweb -f values.yaml
+   ```
+
+5. **Configure the reverse proxy** in the UI or via env vars
+
+##### Best Practices
+
+✅ **Use the controller** for automatic sidecar discovery (simpler, no headless service needed)
+✅ **Use a single centralized scheduler** to manage all sidecars
+✅ **Always add the annotation** `bunkerweb.io/INSTANCE: "yes"` and environment variable `KUBERNETES_MODE: "yes"` when using controller mode
+✅ **No headless service needed with controller** - only ClusterIP service is sufficient
+✅ **Use the UI** to manage configurations (more flexible)
+✅ **Define resource limits** for containers
+✅ **Use Kubernetes secrets** for sensitive configurations
+✅ **Check logs** of scheduler and sidecars regularly
+
 #### 完整的 YAML 文件
 
-除了使用 helm chart，您还可以使用 GitHub 仓库中 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations)内的 YAML 样板文件。请注意，我们强烈建议您改用 helm chart。
+除了使用 helm chart，您还可以使用 GitHub 仓库中 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/misc/integrations)内的 YAML 样板文件。请注意，我们强烈建议您改用 helm chart。
 
 ### Ingress 资源
 
 一旦 BunkerWeb Kubernetes 堆栈成功设置并运行（有关详细信息，请参阅自动配置日志），您就可以继续在集群内部署 Web 应用程序并声明您的 Ingress 资源。
 
 需要注意的是，BunkerWeb 设置需要作为 Ingress 资源的注解来指定。对于域部分，请使用特殊值 **`bunkerweb.io`**。通过包含适当的注解，您可以相应地为 Ingress 资源配置 BunkerWeb。
+
+!!! tip "忽略嘈杂的注解"
+    当某些注解不应影响 autoconf 时，请在控制器部署中设置 `KUBERNETES_IGNORE_ANNOTATIONS`。提供以空格或逗号分隔的注解键列表（例如 `bunkerweb.io/EXTRA_FOO`）或仅后缀（`EXTRA_FOO`）。匹配的注解将从 ingress 派生的设置中剥离，并且在实例发现期间完全跳过携带它们的 pod。
 
 !!! info "TLS 支持"
     BunkerWeb ingress 控制器完全支持使用 tls 规范的自定义 HTTPS 证书，如示例所示。配置诸如 `cert-manager` 之类的解决方案以自动生成 tls secret 超出了本文档的范围。
@@ -1373,7 +1957,7 @@ metadata:
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.6.5
+              image: bunkerity/bunkerweb-autoconf:1.6.6
               imagePullPolicy: Always
               env:
                 - name: NAMESPACES
@@ -1517,11 +2101,11 @@ service:
 
 # BunkerWeb 设置
 bunkerweb:
-  tag: 1.6.5
+  tag: 1.6.6
 
 # 调度器设置
 scheduler:
-  tag: 1.6.5
+  tag: 1.6.6
   extraEnvs:
     # 启用 real IP 模块以获取客户端的真实 IP
     - name: USE_REAL_IP
@@ -1529,11 +2113,11 @@ scheduler:
 
 # 控制器设置
 controller:
-  tag: 1.6.5
+  tag: 1.6.6
 
 # UI 设置
 ui:
-  tag: 1.6.5
+  tag: 1.6.6
 ```
 
 使用自定义值安装 BunkerWeb：
@@ -1661,7 +2245,7 @@ spec:
 至于数据库卷，文档并未指定具体的方法。为数据库卷选择共享文件夹或特定驱动程序取决于您的独特用例，留给读者自行决定。
 
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/misc/integrations)中的 docker-compose 文件。
 
     集群数据库后端的设置超出了本文档的范围。
 
@@ -1675,7 +2259,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.5
+    image: bunkerity/bunkerweb:1.6.6
     ports:
       - published: 80
         target: 8080
@@ -1704,7 +2288,7 @@ services:
         - "bunkerweb.INSTANCE=yes" # autoconf 服务识别 BunkerWeb 实例的强制性标签
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.5
+    image: bunkerity/bunkerweb-scheduler:1.6.6
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由 autoconf 服务自动检测
@@ -1725,7 +2309,7 @@ services:
           - "node.role == worker"
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.5
+    image: bunkerity/bunkerweb-autoconf:1.6.6
     environment:
       SWARM_MODE: "yes"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
@@ -1874,7 +2458,7 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6
         ...
         deploy:
           mode: global
@@ -1886,7 +2470,7 @@ networks:
             - "bunkerweb.NAMESPACE=my-namespace" # 为 BunkerWeb 实例设置命名空间
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.5
+        image: bunkerity/bunkerweb-autoconf:1.6.6
         environment:
           NAMESPACES: "my-namespace my-other-namespace" # 只监听这些命名空间
           ...
