@@ -165,10 +165,11 @@ function antibot:header()
 		csp_directives["frame-src"] = self.variables["ANTIBOT_MCAPTCHA_URL"]
 	elseif self.session_data.type == "altcha" then
 		csp_directives["frame-src"] = self.variables["ANTIBOT_ALTCHA_URL"]
-		csp_directives["connect-src"] = self.variables["ANTIBOT_ALTCHA_URL"]
-		csp_directives["worker-src"] = self.variables["ANTIBOT_ALTCHA_URL"]
-		csp_directives["style-src"] = csp_directives["style-src"] .. " 'unsafe-hashes' " .. self.variables["ANTIBOT_ALTCHA_URL"]
-		csp_directives["script-src"] = csp_directives["script-src"] .. " https://cdn.jsdelivr.net " .. self.variables["ANTIBOT_ALTCHA_URL"]
+		csp_directives["connect-src"] = self.variables["ANTIBOT_ALTCHA_URL"] .. " https://cdn.jsdelivr.net"
+		csp_directives["worker-src"] = self.variables["ANTIBOT_ALTCHA_URL"] .. " blob:"
+		csp_directives["style-src"] = csp_directives["style-src"] .. " 'sha256-4UBTM7JzP/b0ZjmASKhJm4x0LC9P8qq6s5RA3rT5hqs=' 'sha256-pg+oQARqMq4wCazyrsMt8HY89BJkXkEFkwNWxg2iPdg=' " .. self.variables["ANTIBOT_ALTCHA_URL"]
+		csp_directives["script-src"] = csp_directives["script-src"] .. " https://cdn.jsdelivr.net " .. self.variables["ANTIBOT_ALTCHA_URL"] 
+		csp_directives["require-trusted-types-for"] = ""
 	end
 	local csp_content = ""
 	for directive, value in pairs(csp_directives) do
