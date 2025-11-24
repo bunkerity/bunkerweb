@@ -3420,85 +3420,82 @@ USE_IPV6=yes
 <td><code>USE_REPORTING_SMTP</code></td>
 <td><code>no</code></td>
 <td>global</td>
-<td>Enable sending the report via email.</td>
+<td>Enable sending the report via email (HTML).</td>
 </tr>
 <tr>
 <td><code>USE_REPORTING_WEBHOOK</code></td>
 <td><code>no</code></td>
 <td>global</td>
-<td>Enable sending the report via webhook.</td>
+<td>Enable sending the report via webhook (Markdown).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SCHEDULE</code></td>
 <td><code>weekly</code></td>
 <td>global</td>
-<td>The frequency at which reports are sent.</td>
+<td>Report cadence: <code>daily</code>, <code>weekly</code>, or <code>monthly</code>.</td>
 </tr>
 <tr>
 <td><code>REPORTING_WEBHOOK_URLS</code></td>
 <td></td>
 <td>global</td>
-<td>List of webhook URLs to receive the report in Markdown (separated by spaces).</td>
+<td>Space-separated webhook URLs; Discord and Slack are auto-detected.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_EMAILS</code></td>
 <td></td>
 <td>global</td>
-<td>List of email addresses to receive the report in HTML format (separated by spaces).</td>
+<td>Space-separated email recipients.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_HOST</code></td>
 <td></td>
 <td>global</td>
-<td>The host server used for SMTP sending.</td>
+<td>SMTP server hostname or IP.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_PORT</code></td>
 <td><code>465</code></td>
 <td>global</td>
-<td>The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).</td>
+<td>SMTP port. Use <code>465</code> for SSL, <code>587</code> for TLS.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_EMAIL</code></td>
 <td></td>
 <td>global</td>
-<td>The email address used as the sender. Note that 2FA must be disabled for this email address.</td>
+<td>Sender address (disable 2FA if required by your provider).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_USER</code></td>
 <td></td>
 <td>global</td>
-<td>The user authentication value for sending via the from email address.</td>
+<td>SMTP username (falls back to the sender email when omitted and a password is set).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_PASSWORD</code></td>
 <td></td>
 <td>global</td>
-<td>The password authentication value for sending via the from email address.</td>
+<td>SMTP password.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_SSL</code></td>
 <td><code>SSL</code></td>
 <td>global</td>
-<td>Determine whether or not to use a secure connection for SMTP.</td>
+<td>Connection security: <code>no</code>, <code>SSL</code>, or <code>TLS</code>.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_SUBJECT</code></td>
 <td><code>BunkerWeb Report</code></td>
 <td>global</td>
-<td>The subject line of the email.</td>
+<td>Subject line for email deliveries.</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition info">
-<p class="admonition-title">Information and behavior</p>
+<p class="admonition-title">Behavior notes</p>
 <ul>
-<li>case <code>USE_REPORTING_SMTP</code> is set to <code>yes</code>, the setting <code>REPORTING_SMTP_EMAILS</code> must be set.</li>
-<li>case <code>USE_REPORTING_WEBHOOK</code> is set to <code>yes</code>, the setting <code>REPORTING_WEBHOOK_URLS</code> must be set.</li>
-<li>Accepted values for <code>REPORTING_SCHEDULE</code> are <code>daily</code>, <code>weekly</code>and <code>monthly</code>.</li>
-<li>case no <code>REPORTING_SMTP_FROM_USER</code> and <code>REPORTING_SMTP_FROM_PASSWORD</code> are set, the plugin will try to send the email without authentication.</li>
-<li>case <code>REPORTING_SMTP_FROM_USER</code> isn't set but <code>REPORTING_SMTP_FROM_PASSWORD</code> is set, the plugin will use the <code>REPORTING_SMTP_FROM_EMAIL</code> as the username.</li>
-<li>case the job fails, the plugin will retry sending the report in the next execution.</li>
+<li><code>REPORTING_SMTP_EMAILS</code> is required when SMTP delivery is enabled; <code>REPORTING_WEBHOOK_URLS</code> is required when webhook delivery is enabled.</li>
+<li>If both webhooks and SMTP fail, delivery is retried on the next scheduled run.</li>
+<li>HTML and Markdown templates live in <code>reporting/files/</code>; customize with caution to keep placeholders intact.</li>
 </ul>
 </div>
 <h3 id="backup-and-restore">Backup and restore</h3>

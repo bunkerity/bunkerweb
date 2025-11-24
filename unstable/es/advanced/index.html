@@ -3394,15 +3394,15 @@ USE_IPV6=yes
 <h4 id="reportes-pro">Reportes <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h4>
 <p>Soporte STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <div class="admonition warning">
-<p class="admonition-title">Se necesita el plugin de Monitoreo</p>
-<p>Este plugin requiere que el plugin de Monitoreo Pro esté instalado y habilitado con la configuración <code>USE_MONITORING</code> establecida en <code>yes</code>.</p>
+<p class="admonition-title">Plugin de monitoreo necesario</p>
 </div>
-<p>El plugin de Reportes proporciona una solución integral para la generación de informes periódicos de datos importantes de BunkerWeb, incluidas estadísticas globales, ataques, prohibiciones, solicitudes, motivos e información de AS. Ofrece una amplia gama de funciones, que incluyen la creación automática de informes, opciones de personalización y una integración perfecta con el plugin de monitoreo pro. Con el plugin de Reportes, puedes generar y gestionar fácilmente informes para monitorear el rendimiento y la seguridad de tu aplicación.</p>
+<p>Este plugin requiere que el plugin de monitoreo Pro esté instalado y habilitado con la configuración <code>USE_MONITORING</code> establecida en <code>yes</code>.</p>
+<p>El plugin de Reportes proporciona una solución integral para reportes regulares de datos importantes de BunkerWeb, incluyendo estadísticas globales, ataques, bloqueos, solicitudes, razones e información de AS. Ofrece una amplia gama de características, incluyendo creación automática de reportes, opciones de personalización e integración perfecta con el plugin de monitoreo pro. Con el plugin de Reportes, puedes generar y gestionar fácilmente reportes para monitorear el rendimiento y la seguridad de tu aplicación.</p>
 <p><strong>Lista de características</strong></p>
 <ul>
-<li>Informes periódicos de datos importantes de BunkerWeb, incluidas estadísticas globales, ataques, prohibiciones, solicitudes, motivos e información de AS.</li>
-<li>Integración con el plugin Monitoring Pro para una integración perfecta y capacidades de generación de informes mejoradas.</li>
-<li>Soporte para webhooks (clásico, Discord y Slack) para notificaciones en tiempo real.</li>
+<li>Reportes regulares de datos importantes de BunkerWeb, incluyendo estadísticas globales, ataques, bloqueos, solicitudes, razones e información de AS.</li>
+<li>Integración con el plugin de monitoreo Pro para una integración perfecta y capacidades de reporte mejoradas.</li>
+<li>Soporte para webhooks (clásicos, Discord y Slack) para notificaciones en tiempo real.</li>
 <li>Soporte para SMTP para notificaciones por correo electrónico.</li>
 <li>Opciones de configuración para personalización y flexibilidad.</li>
 </ul>
@@ -3421,87 +3421,84 @@ USE_IPV6=yes
 <td><code>USE_REPORTING_SMTP</code></td>
 <td><code>no</code></td>
 <td>global</td>
-<td>Habilitar el envío del informe por correo electrónico.</td>
+<td>Habilitar el envío del reporte por correo electrónico (HTML).</td>
 </tr>
 <tr>
 <td><code>USE_REPORTING_WEBHOOK</code></td>
 <td><code>no</code></td>
 <td>global</td>
-<td>Habilitar el envío del informe a través de webhook.</td>
+<td>Habilitar el envío del reporte por webhook (Markdown).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SCHEDULE</code></td>
 <td><code>weekly</code></td>
 <td>global</td>
-<td>La frecuencia con la que se envían los informes.</td>
+<td>Cadencia del reporte: <code>daily</code>, <code>weekly</code> o <code>monthly</code>.</td>
 </tr>
 <tr>
 <td><code>REPORTING_WEBHOOK_URLS</code></td>
 <td></td>
 <td>global</td>
-<td>Lista de URLs de webhook para recibir el informe en Markdown (separadas por espacios).</td>
+<td>URLs de webhook separadas por espacios; Discord y Slack se detectan automáticamente.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_EMAILS</code></td>
 <td></td>
 <td>global</td>
-<td>Lista de direcciones de correo electrónico para recibir el informe en formato HTML (separadas por espacios).</td>
+<td>Destinatarios de correo electrónico separados por espacios.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_HOST</code></td>
 <td></td>
 <td>global</td>
-<td>El servidor anfitrión utilizado para el envío SMTP.</td>
+<td>Nombre de host o IP del servidor SMTP.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_PORT</code></td>
 <td><code>465</code></td>
 <td>global</td>
-<td>El puerto utilizado para SMTP. Ten en cuenta que existen diferentes estándares según el tipo de conexión (SSL = 465, TLS = 587).</td>
+<td>Puerto SMTP. Usa <code>465</code> para SSL, <code>587</code> para TLS.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_EMAIL</code></td>
 <td></td>
 <td>global</td>
-<td>La dirección de correo electrónico utilizada como remitente. Ten en cuenta que la 2FA debe estar deshabilitada para esta dirección de correo electrónico.</td>
+<td>Dirección del remitente (desactiva 2FA si es requerido por tu proveedor).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_USER</code></td>
 <td></td>
 <td>global</td>
-<td>El valor de autenticación del usuario para enviar a través de la dirección de correo electrónico del remitente.</td>
+<td>Nombre de usuario SMTP (recurre al correo del remitente cuando se omite y se establece una contraseña).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_PASSWORD</code></td>
 <td></td>
 <td>global</td>
-<td>El valor de autenticación de la contraseña para enviar a través de la dirección de correo electrónico del remitente.</td>
+<td>Contraseña SMTP.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_SSL</code></td>
 <td><code>SSL</code></td>
 <td>global</td>
-<td>Determinar si se debe utilizar o no una conexión segura para SMTP.</td>
+<td>Seguridad de conexión: <code>no</code>, <code>SSL</code> o <code>TLS</code>.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_SUBJECT</code></td>
 <td><code>BunkerWeb Report</code></td>
 <td>global</td>
-<td>La línea de asunto del correo electrónico.</td>
+<td>Línea de asunto para entregas por correo electrónico.</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition info">
-<p class="admonition-title">Información y comportamiento</p>
-<ul>
-<li>si <code>USE_REPORTING_SMTP</code> se establece en <code>yes</code>, se debe establecer la configuración <code>REPORTING_SMTP_EMAILS</code>.</li>
-<li>si <code>USE_REPORTING_WEBHOOK</code> se establece en <code>yes</code>, se debe establecer la configuración <code>REPORTING_WEBHOOK_URLS</code>.</li>
-<li>Los valores aceptados para <code>REPORTING_SCHEDULE</code> son <code>daily</code>, <code>weekly</code> y <code>monthly</code>.</li>
-<li>si no se establecen <code>REPORTING_SMTP_FROM_USER</code> y <code>REPORTING_SMTP_FROM_PASSWORD</code>, el plugin intentará enviar el correo electrónico sin autenticación.</li>
-<li>si <code>REPORTING_SMTP_FROM_USER</code> no está configurado pero <code>REPORTING_SMTP_FROM_PASSWORD</code> sí, el plugin utilizará <code>REPORTING_SMTP_FROM_EMAIL</code> como nombre de usuario.</li>
-<li>si el trabajo falla, el plugin volverá a intentar enviar el informe en la siguiente ejecución.</li>
-</ul>
+<p class="admonition-title">Notas de comportamiento</p>
 </div>
+<ul>
+<li><code>REPORTING_SMTP_EMAILS</code> es requerido cuando la entrega SMTP está habilitada; <code>REPORTING_WEBHOOK_URLS</code> es requerido cuando la entrega por webhook está habilitada.</li>
+<li>Si tanto los webhooks como SMTP fallan, la entrega se reintenta en la próxima ejecución programada.</li>
+<li>Las plantillas HTML y Markdown se encuentran en <code>reporting/files/</code>; personalízalas con precaución para mantener los marcadores de posición intactos.</li>
+</ul>
 <h3 id="copia-de-seguridad-y-restauracion">Copia de seguridad y restauración</h3>
 <h4 id="copia-de-seguridad-s3-pro">Copia de seguridad S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h4>
 <p>Soporte STREAM <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>

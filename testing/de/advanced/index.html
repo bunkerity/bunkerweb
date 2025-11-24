@@ -3421,85 +3421,82 @@ USE_IPV6=yes
 <td><code>USE_REPORTING_SMTP</code></td>
 <td><code>no</code></td>
 <td>global</td>
-<td>Aktiviert das Senden des Berichts per E-Mail.</td>
+<td>Versand des Berichts per E-Mail (HTML) aktivieren.</td>
 </tr>
 <tr>
 <td><code>USE_REPORTING_WEBHOOK</code></td>
 <td><code>no</code></td>
 <td>global</td>
-<td>Aktiviert das Senden des Berichts per Webhook.</td>
+<td>Versand des Berichts über Webhook (Markdown) aktivieren.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SCHEDULE</code></td>
 <td><code>weekly</code></td>
 <td>global</td>
-<td>Die Häufigkeit, mit der Berichte gesendet werden.</td>
+<td>Berichtszyklus: <code>daily</code>, <code>weekly</code> oder <code>monthly</code>.</td>
 </tr>
 <tr>
 <td><code>REPORTING_WEBHOOK_URLS</code></td>
 <td></td>
 <td>global</td>
-<td>Liste der Webhook-URLs, die den Bericht im Markdown-Format erhalten sollen (durch Leerzeichen getrennt).</td>
+<td>Mit Leerzeichen getrennte Webhook-URLs; Discord und Slack werden automatisch erkannt.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_EMAILS</code></td>
 <td></td>
 <td>global</td>
-<td>Liste der E-Mail-Adressen, die den Bericht im HTML-Format erhalten sollen (durch Leerzeichen getrennt).</td>
+<td>Mit Leerzeichen getrennte E-Mail-Empfänger.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_HOST</code></td>
 <td></td>
 <td>global</td>
-<td>Der Host-Server, der für den SMTP-Versand verwendet wird.</td>
+<td>SMTP-Servername oder IP.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_PORT</code></td>
 <td><code>465</code></td>
 <td>global</td>
-<td>Der für SMTP verwendete Port. Bitte beachten Sie, dass es je nach Verbindungstyp unterschiedliche Standards gibt (SSL = 465, TLS = 587).</td>
+<td>SMTP-Port. Verwende <code>465</code> für SSL, <code>587</code> für TLS.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_EMAIL</code></td>
 <td></td>
 <td>global</td>
-<td>Die als Absender verwendete E-Mail-Adresse. Beachten Sie, dass 2FA für diese E-Mail-Adresse deaktiviert sein muss.</td>
+<td>Absenderadresse (2FA falls nötig deaktivieren).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_USER</code></td>
 <td></td>
 <td>global</td>
-<td>Der Benutzerauthentifizierungswert für das Senden über die Absender-E-Mail-Adresse.</td>
+<td>SMTP-Benutzername (fällt auf die Absenderadresse zurück, wenn nur das Passwort gesetzt ist).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_PASSWORD</code></td>
 <td></td>
 <td>global</td>
-<td>Der Passwortauthentifizierungswert für das Senden über die Absender-E-Mail-Adresse.</td>
+<td>SMTP-Passwort.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_SSL</code></td>
 <td><code>SSL</code></td>
 <td>global</td>
-<td>Bestimmt, ob eine sichere Verbindung für SMTP verwendet werden soll oder nicht.</td>
+<td>Verbindungssicherheit: <code>no</code>, <code>SSL</code> oder <code>TLS</code>.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_SUBJECT</code></td>
 <td><code>BunkerWeb Report</code></td>
 <td>global</td>
-<td>Die Betreffzeile der E-Mail.</td>
+<td>Betreffzeile für den E-Mail-Versand.</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition info">
 <p class="admonition-title">Information und Verhalten</p>
 <ul>
-<li>wenn <code>USE_REPORTING_SMTP</code> auf <code>yes</code> gesetzt ist, muss die Einstellung <code>REPORTING_SMTP_EMAILS</code> gesetzt werden.</li>
-<li>wenn <code>USE_REPORTING_WEBHOOK</code> auf <code>yes</code> gesetzt ist, muss die Einstellung <code>REPORTING_WEBHOOK_URLS</code> gesetzt werden.</li>
-<li>Akzeptierte Werte für <code>REPORTING_SCHEDULE</code> sind <code>daily</code>, <code>weekly</code> und <code>monthly</code>.</li>
-<li>wenn keine <code>REPORTING_SMTP_FROM_USER</code> und <code>REPORTING_SMTP_FROM_PASSWORD</code> gesetzt sind, versucht das Plugin, die E-Mail ohne Authentifizierung zu senden.</li>
-<li>wenn <code>REPORTING_SMTP_FROM_USER</code> nicht gesetzt ist, aber <code>REPORTING_SMTP_FROM_PASSWORD</code> gesetzt ist, verwendet das Plugin die <code>REPORTING_SMTP_FROM_EMAIL</code> als Benutzernamen.</li>
-<li>wenn der Job fehlschlägt, versucht das Plugin, den Bericht bei der nächsten Ausführung erneut zu senden.</li>
+<li><code>REPORTING_SMTP_EMAILS</code> ist erforderlich, wenn SMTP aktiviert ist; <code>REPORTING_WEBHOOK_URLS</code> ist erforderlich, wenn Webhooks aktiviert sind.</li>
+<li>Wenn Webhooks und SMTP fehlschlagen, erfolgt der nächste Zustellversuch beim nächsten geplanten Lauf.</li>
+<li>Die HTML- und Markdown-Vorlagen liegen in <code>reporting/files/</code>; nur vorsichtig anpassen, damit Platzhalter erhalten bleiben.</li>
 </ul>
 </div>
 <h3 id="sicherung-und-wiederherstellung">Sicherung und Wiederherstellung</h3>

@@ -3393,23 +3393,23 @@ USE_IPV6=yes
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <div class="admonition warning">
 <p class="admonition-title">需要监控插件</p>
-<p>此插件需要安装并启用监控专业版插件，并且 <code>USE_MONITORING</code> 设置为 <code>yes</code>。</p>
 </div>
-<p>报告插件提供了一个全面的解决方案，用于定期报告 BunkerWeb 的重要数据，包括全局统计、攻击、封禁、请求、原因和 AS 信息。它提供了广泛的功能，包括自动报告创建、自定义选项以及与监控专业版插件的无缝集成。使用报告插件，您可以轻松生成和管理报告，以监控应用程序的性能和安全性。</p>
+<p>此插件需要安装并启用监控 Pro 插件，并将 <code>USE_MONITORING</code> 设置为 <code>yes</code>。</p>
+<p>报告插件为 BunkerWeb 的重要数据提供全面的定期报告解决方案，包括全局统计、攻击、封禁、请求、原因和 AS 信息。它提供广泛的功能，包括自动报告创建、自定义选项以及与监控 Pro 插件的无缝集成。通过报告插件，您可以轻松生成和管理报告，以监控应用程序的性能和安全性。</p>
 <p><strong>功能列表</strong></p>
 <ul>
 <li>定期报告 BunkerWeb 的重要数据，包括全局统计、攻击、封禁、请求、原因和 AS 信息。</li>
-<li>与监控专业版插件集成，实现无缝集成和增强的报告功能。</li>
-<li>支持 webhooks（经典、Discord 和 Slack）以进行实时通知。</li>
+<li>与监控 Pro 插件集成，实现无缝集成和增强的报告功能。</li>
+<li>支持 Webhook（经典、Discord 和 Slack）以实现实时通知。</li>
 <li>支持 SMTP 以进行电子邮件通知。</li>
-<li>用于自定义和灵活性的配置选项。</li>
+<li>配置选项以实现自定义和灵活性。</li>
 </ul>
 <p><strong>设置列表</strong></p>
 <table>
 <thead>
 <tr>
 <th>设置</th>
-<th>默认</th>
+<th>默认值</th>
 <th>上下文</th>
 <th>描述</th>
 </tr>
@@ -3419,87 +3419,84 @@ USE_IPV6=yes
 <td><code>USE_REPORTING_SMTP</code></td>
 <td><code>no</code></td>
 <td>全局</td>
-<td>启用通过电子邮件发送报告。</td>
+<td>启用通过电子邮件发送报告（HTML）。</td>
 </tr>
 <tr>
 <td><code>USE_REPORTING_WEBHOOK</code></td>
 <td><code>no</code></td>
 <td>全局</td>
-<td>启用通过 webhook 发送报告。</td>
+<td>启用通过 Webhook 发送报告（Markdown）。</td>
 </tr>
 <tr>
 <td><code>REPORTING_SCHEDULE</code></td>
 <td><code>weekly</code></td>
 <td>全局</td>
-<td>发送报告的频率。</td>
+<td>报告频率：<code>daily</code>、<code>weekly</code> 或 <code>monthly</code>。</td>
 </tr>
 <tr>
 <td><code>REPORTING_WEBHOOK_URLS</code></td>
 <td></td>
 <td>全局</td>
-<td>用于接收 Markdown 格式报告的 webhook URL 列表（以空格分隔）。</td>
+<td>以空格分隔的 Webhook URL；Discord 和 Slack 会自动检测。</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_EMAILS</code></td>
 <td></td>
 <td>全局</td>
-<td>用于接收 HTML 格式报告的电子邮件地址列表（以空格分隔）。</td>
+<td>以空格分隔的电子邮件收件人。</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_HOST</code></td>
 <td></td>
 <td>全局</td>
-<td>用于 SMTP 发送的主机服务器。</td>
+<td>SMTP 服务器主机名或 IP。</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_PORT</code></td>
 <td><code>465</code></td>
 <td>全局</td>
-<td>用于 SMTP 的端口。请注意，根据连接类型有不同的标准（SSL = 465，TLS = 587）。</td>
+<td>SMTP 端口。使用 <code>465</code> 表示 SSL，<code>587</code> 表示 TLS。</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_EMAIL</code></td>
 <td></td>
 <td>全局</td>
-<td>用作发件人的电子邮件地址。请注意，此电子邮件地址必须禁用 2FA。</td>
+<td>发送者地址（如果您的提供商要求，请禁用 2FA）。</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_USER</code></td>
 <td></td>
 <td>全局</td>
-<td>通过发件人电子邮件地址发送的用户身份验证值。</td>
+<td>SMTP 用户名（如果省略且设置了密码，则回退到发送者电子邮件）。</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_PASSWORD</code></td>
 <td></td>
 <td>全局</td>
-<td>通过发件人电子邮件地址发送的密码身份验证值。</td>
+<td>SMTP 密码。</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_SSL</code></td>
 <td><code>SSL</code></td>
 <td>全局</td>
-<td>确定是否为 SMTP 使用安全连接。</td>
+<td>连接安全性：<code>no</code>、<code>SSL</code> 或 <code>TLS</code>。</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_SUBJECT</code></td>
 <td><code>BunkerWeb Report</code></td>
 <td>全局</td>
-<td>电子邮件的主题行。</td>
+<td>电子邮件发送的主题行。</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition info">
-<p class="admonition-title">信息和行为</p>
-<ul>
-<li>如果 <code>USE_REPORTING_SMTP</code> 设置为 <code>yes</code>，则必须设置 <code>REPORTING_SMTP_EMAILS</code>。</li>
-<li>如果 <code>USE_REPORTING_WEBHOOK</code> 设置为 <code>yes</code>，则必须设置 <code>REPORTING_WEBHOOK_URLS</code>。</li>
-<li><code>REPORTING_SCHEDULE</code> 接受的值为 <code>daily</code>、<code>weekly</code> 和 <code>monthly</code>。</li>
-<li>如果未设置 <code>REPORTING_SMTP_FROM_USER</code> 和 <code>REPORTING_SMTP_FROM_PASSWORD</code>，插件将尝试在没有身份验证的情况下发送电子邮件。</li>
-<li>如果未设置 <code>REPORTING_SMTP_FROM_USER</code> 但设置了 <code>REPORTING_SMTP_FROM_PASSWORD</code>，插件将使用 <code>REPORTING_SMTP_FROM_EMAIL</code> 作为用户名。</li>
-<li>如果作业失败，插件将在下一次执行中重试发送报告。</li>
-</ul>
+<p class="admonition-title">行为说明</p>
 </div>
+<ul>
+<li>启用 SMTP 发送时需要 <code>REPORTING_SMTP_EMAILS</code>；启用 Webhook 发送时需要 <code>REPORTING_WEBHOOK_URLS</code>。</li>
+<li>如果 Webhook 和 SMTP 都失败，发送将在下一次计划运行时重试。</li>
+<li>HTML 和 Markdown 模板位于 <code>reporting/files/</code>；自定义时请谨慎保留占位符。</li>
+</ul>
 <h3 id="_5">备份和恢复</h3>
 <h4 id="s3-pro">S3 备份 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h4>
 <p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
