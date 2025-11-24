@@ -3394,64 +3394,18 @@ USE_IPV6=yes
 <h4 id="reportes-pro">Reportes <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h4>
 <p>Soporte STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <div class="admonition warning">
-<p class="admonition-title">Se necesita el plugin de Monitoreo</p>
-<p>El plugin de Reportes solo funciona cuando el plugin Monitoring Pro está habilitado (<code>USE_MONITORING=yes</code>) para que las métricas estén disponibles.</p>
+<p class="admonition-title">Plugin de monitoreo necesario</p>
 </div>
-<p>El plugin de Reportes convierte los datos de Monitoring en informes programados. Cada informe combina el conteo de instancias/servicios, totales de ataques y bloqueos con variaciones periodo contra periodo, estado de peticiones y los 3 principales IP, ASN, motivos y países. Los envíos son en Markdown para webhooks (Discord/Slack soportados automáticamente) y en HTML para correo.</p>
-<p><strong>Lo que obtienes</strong></p>
+<p>Este plugin requiere que el plugin de monitoreo Pro esté instalado y habilitado con la configuración <code>USE_MONITORING</code> establecida en <code>yes</code>.</p>
+<p>El plugin de Reportes proporciona una solución integral para reportes regulares de datos importantes de BunkerWeb, incluyendo estadísticas globales, ataques, bloqueos, solicitudes, razones e información de AS. Ofrece una amplia gama de características, incluyendo creación automática de reportes, opciones de personalización e integración perfecta con el plugin de monitoreo pro. Con el plugin de Reportes, puedes generar y gestionar fácilmente reportes para monitorear el rendimiento y la seguridad de tu aplicación.</p>
+<p><strong>Lista de características</strong></p>
 <ul>
-<li>Números agregados de todas las instancias que responden, con alerta si alguna no responde a la API de monitoring.</li>
-<li>Tendencias por periodo (diario/semanal/mensual) comparadas con el informe previo.</li>
-<li>Mayores ofensores por IP/ASN/país/motivo para triage rápido.</li>
-<li>Doble entrega: payload Markdown para webhooks y HTML enriquecido para SMTP.</li>
+<li>Reportes regulares de datos importantes de BunkerWeb, incluyendo estadísticas globales, ataques, bloqueos, solicitudes, razones e información de AS.</li>
+<li>Integración con el plugin de monitoreo Pro para una integración perfecta y capacidades de reporte mejoradas.</li>
+<li>Soporte para webhooks (clásicos, Discord y Slack) para notificaciones en tiempo real.</li>
+<li>Soporte para SMTP para notificaciones por correo electrónico.</li>
+<li>Opciones de configuración para personalización y flexibilidad.</li>
 </ul>
-<p><strong>Requisitos y programación</strong></p>
-<ul>
-<li>Monitoring habilitado y accesible en todas las instancias.</li>
-<li>Al menos un método de entrega activo (<code>USE_REPORTING_WEBHOOK=yes</code> y/o <code>USE_REPORTING_SMTP=yes</code>).</li>
-<li>El job corre a diario pero solo envía una vez por periodo elegido. La primera ejecución guarda la fecha; la siguiente envía el primer informe.</li>
-</ul>
-<p><strong>Destinos de entrega</strong></p>
-<ul>
-<li>Webhooks: funciona con endpoints genéricos y detecta Discord y Slack. Ajusta <code>USE_REPORTING_WEBHOOK=yes</code> y lista las URLs en <code>REPORTING_WEBHOOK_URLS</code> (separadas por espacios). Los payloads son Markdown; Slack usa formato <code>mrkdwn</code> automáticamente.</li>
-<li>Correo (SMTP): ajusta <code>USE_REPORTING_SMTP=yes</code> con host/puerto SMTP, correo remitente y destinatarios en <code>REPORTING_SMTP_EMAILS</code>. Se admite SSL (<code>REPORTING_SMTP_SSL=SSL</code>) y TLS (<code>REPORTING_SMTP_SSL=TLS</code>); si omites credenciales, se intenta enviar sin autenticación.</li>
-</ul>
-<p><strong>Ejemplos comunes de configuración</strong></p>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Linux</label><label for="__tabbed_12_2">Docker / All-in-one</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>USE_MONITORING=yes
-USE_REPORTING_WEBHOOK=yes
-REPORTING_WEBHOOK_URLS=https://discord.com/api/webhooks/... https://hooks.slack.com/services/...
-REPORTING_SCHEDULE=weekly
-# Envío opcional por correo
-USE_REPORTING_SMTP=yes
-REPORTING_SMTP_HOST=smtp.ejemplo.com
-REPORTING_SMTP_PORT=587
-REPORTING_SMTP_FROM_EMAIL=reportes@ejemplo.com
-REPORTING_SMTP_FROM_USER=reportes@ejemplo.com
-REPORTING_SMTP_FROM_PASSWORD=cámbiame
-REPORTING_SMTP_EMAILS=seguridad@ejemplo.com sre@ejemplo.com
-REPORTING_SMTP_SSL=TLS
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nt">environment</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">USE_MONITORING</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">  </span><span class="nt">USE_REPORTING_WEBHOOK</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">  </span><span class="nt">REPORTING_WEBHOOK_URLS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://discord.com/api/webhooks/...</span><span class="nv"> </span><span class="s">https://hooks.slack.com/services/...&quot;</span>
-<span class="w">  </span><span class="nt">REPORTING_SCHEDULE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;daily&quot;</span>
-<span class="w">  </span><span class="nt">USE_REPORTING_SMTP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">  </span><span class="nt">REPORTING_SMTP_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;smtp.ejemplo.com&quot;</span>
-<span class="w">  </span><span class="nt">REPORTING_SMTP_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;465&quot;</span>
-<span class="w">  </span><span class="nt">REPORTING_SMTP_FROM_EMAIL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;reportes@ejemplo.com&quot;</span>
-<span class="w">  </span><span class="nt">REPORTING_SMTP_FROM_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;cámbiame&quot;</span>
-<span class="w">  </span><span class="nt">REPORTING_SMTP_EMAILS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;alertas@ejemplo.com&quot;</span>
-<span class="w">  </span><span class="nt">REPORTING_SMTP_SSL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;SSL&quot;</span>
-</code></pre></div>
-</div>
-</div>
-</div>
 <p><strong>Lista de configuraciones</strong></p>
 <table>
 <thead>
@@ -3467,19 +3421,19 @@ REPORTING_SMTP_SSL=TLS
 <td><code>USE_REPORTING_SMTP</code></td>
 <td><code>no</code></td>
 <td>global</td>
-<td>Habilitar el envío del informe por correo (HTML).</td>
+<td>Habilitar el envío del reporte por correo electrónico (HTML).</td>
 </tr>
 <tr>
 <td><code>USE_REPORTING_WEBHOOK</code></td>
 <td><code>no</code></td>
 <td>global</td>
-<td>Habilitar el envío del informe vía webhook (Markdown).</td>
+<td>Habilitar el envío del reporte por webhook (Markdown).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SCHEDULE</code></td>
 <td><code>weekly</code></td>
 <td>global</td>
-<td>Cadencia del informe: <code>daily</code>, <code>weekly</code> o <code>monthly</code>.</td>
+<td>Cadencia del reporte: <code>daily</code>, <code>weekly</code> o <code>monthly</code>.</td>
 </tr>
 <tr>
 <td><code>REPORTING_WEBHOOK_URLS</code></td>
@@ -3491,7 +3445,7 @@ REPORTING_SMTP_SSL=TLS
 <td><code>REPORTING_SMTP_EMAILS</code></td>
 <td></td>
 <td>global</td>
-<td>Destinatarios de correo separados por espacios.</td>
+<td>Destinatarios de correo electrónico separados por espacios.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_HOST</code></td>
@@ -3509,13 +3463,13 @@ REPORTING_SMTP_SSL=TLS
 <td><code>REPORTING_SMTP_FROM_EMAIL</code></td>
 <td></td>
 <td>global</td>
-<td>Dirección del remitente (desactiva 2FA si tu proveedor lo exige).</td>
+<td>Dirección del remitente (desactiva 2FA si es requerido por tu proveedor).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_USER</code></td>
 <td></td>
 <td>global</td>
-<td>Usuario SMTP (usa la dirección de envío si solo se proporciona la contraseña).</td>
+<td>Nombre de usuario SMTP (recurre al correo del remitente cuando se omite y se establece una contraseña).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_PASSWORD</code></td>
@@ -3527,24 +3481,24 @@ REPORTING_SMTP_SSL=TLS
 <td><code>REPORTING_SMTP_SSL</code></td>
 <td><code>SSL</code></td>
 <td>global</td>
-<td>Seguridad de la conexión: <code>no</code>, <code>SSL</code> o <code>TLS</code>.</td>
+<td>Seguridad de conexión: <code>no</code>, <code>SSL</code> o <code>TLS</code>.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_SUBJECT</code></td>
 <td><code>BunkerWeb Report</code></td>
 <td>global</td>
-<td>Asunto de los envíos por correo.</td>
+<td>Línea de asunto para entregas por correo electrónico.</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition info">
-<p class="admonition-title">Información y comportamiento</p>
-<ul>
-<li><code>REPORTING_SMTP_EMAILS</code> es obligatorio cuando SMTP está habilitado; <code>REPORTING_WEBHOOK_URLS</code> es obligatorio cuando los webhooks están habilitados.</li>
-<li>Si fallan webhooks y SMTP, se vuelve a intentar en la siguiente ejecución programada.</li>
-<li>Las plantillas HTML y Markdown están en <code>reporting/files/</code>; personalízalas con cuidado para mantener los marcadores.</li>
-</ul>
+<p class="admonition-title">Notas de comportamiento</p>
 </div>
+<ul>
+<li><code>REPORTING_SMTP_EMAILS</code> es requerido cuando la entrega SMTP está habilitada; <code>REPORTING_WEBHOOK_URLS</code> es requerido cuando la entrega por webhook está habilitada.</li>
+<li>Si tanto los webhooks como SMTP fallan, la entrega se reintenta en la próxima ejecución programada.</li>
+<li>Las plantillas HTML y Markdown se encuentran en <code>reporting/files/</code>; personalízalas con precaución para mantener los marcadores de posición intactos.</li>
+</ul>
 <h3 id="copia-de-seguridad-y-restauracion">Copia de seguridad y restauración</h3>
 <h4 id="copia-de-seguridad-s3-pro">Copia de seguridad S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h4>
 <p>Soporte STREAM <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
@@ -3553,7 +3507,7 @@ REPORTING_SMTP_SSL=TLS
 <details class="warning">
 <summary>Información para usuarios de Red Hat Enterprise Linux (RHEL) 8.9</summary>
 <p>Si estás utilizando <strong>RHEL 8.9</strong> y planeas usar una <strong>base de datos externa</strong>, necesitarás instalar el paquete <code>mysql-community-client</code> para asegurar que el comando <code>mysqldump</code> esté disponible. Puedes instalar el paquete ejecutando los siguientes comandos:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">MySQL/MariaDB</label><label for="__tabbed_13_2">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">MySQL/MariaDB</label><label for="__tabbed_12_2">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -3673,7 +3627,7 @@ REPORTING_SMTP_SSL=TLS
 </table>
 <h5 id="copia-de-seguridad-manual">Copia de seguridad manual</h5>
 <p>Para iniciar manualmente una copia de seguridad, ejecuta el siguiente comando:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Linux</label><label for="__tabbed_14_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Linux</label><label for="__tabbed_13_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -3687,7 +3641,7 @@ REPORTING_SMTP_SSL=TLS
 </div>
 <p>Este comando creará una copia de seguridad de tu base de datos y la almacenará en el bucket S3 especificado en la configuración <code>BACKUP_S3_BUCKET</code>.</p>
 <p>También puedes especificar un bucket S3 personalizado para la copia de seguridad proporcionando la variable de entorno <code>BACKUP_S3_BUCKET</code> al ejecutar el comando:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Linux</label><label for="__tabbed_15_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Linux</label><label for="__tabbed_14_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nv">BACKUP_S3_BUCKET</span><span class="o">=</span>your-bucket-name<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -3708,7 +3662,7 @@ REPORTING_SMTP_SSL=TLS
 <div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="s1">&#39;yourusername&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span><span class="w"> </span><span class="n">IDENTIFIED</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">mysql_native_password</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="s1">&#39;youpassword&#39;</span><span class="p">;</span>
 </code></pre></div>
 <p>Si estás usando la integración de Docker, puedes agregar el siguiente comando al archivo <code>docker-compose.yml</code> para cambiar automáticamente el plugin de autenticación:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">MariaDB</label><label for="__tabbed_16_2">MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">MariaDB</label><label for="__tabbed_15_2">MySQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
@@ -3729,7 +3683,7 @@ REPORTING_SMTP_SSL=TLS
 </div>
 <h5 id="restauracion-manual">Restauración manual</h5>
 <p>Para iniciar manualmente una restauración, ejecuta el siguiente comando:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Linux</label><label for="__tabbed_17_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Linux</label><label for="__tabbed_16_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -3743,7 +3697,7 @@ REPORTING_SMTP_SSL=TLS
 </div>
 <p>Este comando creará una copia de seguridad temporal de tu base de datos en el bucket S3 especificado en la configuración <code>BACKUP_S3_BUCKET</code> y restaurará tu base de datos a la última copia de seguridad disponible en el bucket.</p>
 <p>También puedes especificar un archivo de copia de seguridad personalizado para la restauración proporcionando la ruta al mismo como argumento al ejecutar el comando:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Linux</label><label for="__tabbed_18_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Linux</label><label for="__tabbed_17_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore<span class="w"> </span>s3_backup_file.zip
@@ -3758,7 +3712,7 @@ REPORTING_SMTP_SSL=TLS
 <div class="admonition example">
 <p class="admonition-title">En caso de fallo</p>
 <p>No te preocupes si la restauración falla, siempre puedes restaurar tu base de datos al estado anterior ejecutando el comando de nuevo, ya que se crea una copia de seguridad antes de la restauración:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Linux</label><label for="__tabbed_18_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -3788,7 +3742,7 @@ REPORTING_SMTP_SSL=TLS
 </ul>
 <h4 id="crear-un-archivo-de-migracion">Crear un archivo de migración</h4>
 <p>Para crear manualmente un archivo de migración, ejecuta el siguiente comando:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Linux</label><label for="__tabbed_20_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>create<span class="w"> </span>/path/to/migration/file
@@ -3820,7 +3774,7 @@ REPORTING_SMTP_SSL=TLS
 <div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="s1">&#39;yourusername&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span><span class="w"> </span><span class="n">IDENTIFIED</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">mysql_native_password</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="s1">&#39;youpassword&#39;</span><span class="p">;</span>
 </code></pre></div>
 <p>Si estás usando la integración de Docker, puedes agregar el siguiente comando al archivo <code>docker-compose.yml</code> para cambiar automáticamente el plugin de autenticación:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">MariaDB</label><label for="__tabbed_21_2">MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">MariaDB</label><label for="__tabbed_20_2">MySQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
@@ -3841,7 +3795,7 @@ REPORTING_SMTP_SSL=TLS
 </div>
 <h4 id="iniciar-una-migracion">Iniciar una migración</h4>
 <p>Para iniciar manualmente una migración, ejecuta el siguiente comando:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="22:3"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Linux</label><label for="__tabbed_22_2">Docker</label><label for="__tabbed_22_3">Todo en uno</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:3"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Linux</label><label for="__tabbed_21_2">Docker</label><label for="__tabbed_21_3">Todo en uno</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>migrate<span class="w"> </span>/path/to/migration/file
