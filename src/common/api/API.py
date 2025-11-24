@@ -90,6 +90,7 @@ class API:
                     verify=False,
                     **deepcopy(kwargs),
                 )
+                self.__logger.debug(f"Response after retrying with HTTP: status={resp.status_code}, reason={resp.reason}, text={resp.text}")
             else:
                 return False, f"Connection error: {e}", None, None
         except Exception as e:
