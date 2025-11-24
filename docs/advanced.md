@@ -2226,28 +2226,25 @@ The Reporting plugin provides a comprehensive solution for regular reporting of 
 
 **List of settings**
 
-| Setting                        | Default            | Context | Description                                                                                                                        |
-| ------------------------------ | ------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_REPORTING_SMTP`           | `no`               | global  | Enable sending the report via email.                                                                                               |
-| `USE_REPORTING_WEBHOOK`        | `no`               | global  | Enable sending the report via webhook.                                                                                             |
-| `REPORTING_SCHEDULE`           | `weekly`           | global  | The frequency at which reports are sent.                                                                                           |
-| `REPORTING_WEBHOOK_URLS`       |                    | global  | List of webhook URLs to receive the report in Markdown (separated by spaces).                                                      |
-| `REPORTING_SMTP_EMAILS`        |                    | global  | List of email addresses to receive the report in HTML format (separated by spaces).                                                |
-| `REPORTING_SMTP_HOST`          |                    | global  | The host server used for SMTP sending.                                                                                             |
-| `REPORTING_SMTP_PORT`          | `465`              | global  | The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587). |
-| `REPORTING_SMTP_FROM_EMAIL`    |                    | global  | The email address used as the sender. Note that 2FA must be disabled for this email address.                                       |
-| `REPORTING_SMTP_FROM_USER`     |                    | global  | The user authentication value for sending via the from email address.                                                              |
-| `REPORTING_SMTP_FROM_PASSWORD` |                    | global  | The password authentication value for sending via the from email address.                                                          |
-| `REPORTING_SMTP_SSL`           | `SSL`              | global  | Determine whether or not to use a secure connection for SMTP.                                                                      |
-| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global  | The subject line of the email.                                                                                                     |
+| Setting                        | Default            | Context | Description                                                                        |
+| ------------------------------ | ------------------ | ------- | ---------------------------------------------------------------------------------- |
+| `USE_REPORTING_SMTP`           | `no`               | global  | Enable sending the report via email (HTML).                                        |
+| `USE_REPORTING_WEBHOOK`        | `no`               | global  | Enable sending the report via webhook (Markdown).                                  |
+| `REPORTING_SCHEDULE`           | `weekly`           | global  | Report cadence: `daily`, `weekly`, or `monthly`.                                   |
+| `REPORTING_WEBHOOK_URLS`       |                    | global  | Space-separated webhook URLs; Discord and Slack are auto-detected.                 |
+| `REPORTING_SMTP_EMAILS`        |                    | global  | Space-separated email recipients.                                                  |
+| `REPORTING_SMTP_HOST`          |                    | global  | SMTP server hostname or IP.                                                        |
+| `REPORTING_SMTP_PORT`          | `465`              | global  | SMTP port. Use `465` for SSL, `587` for TLS.                                       |
+| `REPORTING_SMTP_FROM_EMAIL`    |                    | global  | Sender address (disable 2FA if required by your provider).                         |
+| `REPORTING_SMTP_FROM_USER`     |                    | global  | SMTP username (falls back to the sender email when omitted and a password is set). |
+| `REPORTING_SMTP_FROM_PASSWORD` |                    | global  | SMTP password.                                                                     |
+| `REPORTING_SMTP_SSL`           | `SSL`              | global  | Connection security: `no`, `SSL`, or `TLS`.                                        |
+| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global  | Subject line for email deliveries.                                                 |
 
-!!! info "Information and behavior"
-    - case `USE_REPORTING_SMTP` is set to `yes`, the setting `REPORTING_SMTP_EMAILS` must be set.
-    - case `USE_REPORTING_WEBHOOK` is set to `yes`, the setting `REPORTING_WEBHOOK_URLS` must be set.
-    - Accepted values for `REPORTING_SCHEDULE` are `daily`, `weekly`and `monthly`.
-    - case no `REPORTING_SMTP_FROM_USER` and `REPORTING_SMTP_FROM_PASSWORD` are set, the plugin will try to send the email without authentication.
-    - case `REPORTING_SMTP_FROM_USER` isn't set but `REPORTING_SMTP_FROM_PASSWORD` is set, the plugin will use the `REPORTING_SMTP_FROM_EMAIL` as the username.
-    - case the job fails, the plugin will retry sending the report in the next execution.
+!!! info "Behavior notes"
+    - `REPORTING_SMTP_EMAILS` is required when SMTP delivery is enabled; `REPORTING_WEBHOOK_URLS` is required when webhook delivery is enabled.
+    - If both webhooks and SMTP fail, delivery is retried on the next scheduled run.
+    - HTML and Markdown templates live in `reporting/files/`; customize with caution to keep placeholders intact.
 
 ### Backup and restore
 

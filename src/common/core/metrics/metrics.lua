@@ -254,29 +254,13 @@ function metrics:timer()
 		if type(value) == "table" then
 			value = encode(value)
 		end
-		-- Push to dict
+		-- Push to dict (with LRU eviction if needed)
 		local ok
-		ok, err = self.metrics_datastore:set(key .. "_" .. wid, value)
+		ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, value)
 		if not ok then
-			-- Fallback to direct set with LRU eviction if needed
-			if err == "no memory" then
-				local max_retries = tonumber(self.variables["METRICS_MEMORY_MAX_RETRIES"]) or 5
-				for attempt = 1, max_retries do --luacheck:ignore 213
-					ok, err = self.metrics_datastore.dict:set(key .. "_" .. wid, value)
-					if ok or err ~= "no memory" then
-						break
-					end
-				end
-				if not ok then
-					ret = false
-					ret_err = err
-					self.logger:log(ERR, "can't set " .. key .. "_" .. wid .. " : " .. err)
-				end
-			else
-				ret = false
-				ret_err = err
-				self.logger:log(ERR, "can't (safe) set " .. key .. "_" .. wid .. " : " .. err)
-			end
+			ret = false
+			ret_err = err
+			self.logger:log(ERR, "can't (safe) set " .. key .. "_" .. wid .. " : " .. err)
 		end
 	end
 

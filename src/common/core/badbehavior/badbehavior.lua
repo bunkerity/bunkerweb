@@ -6,12 +6,15 @@ local utils = require "bunkerweb.utils"
 local badbehavior = class("badbehavior", plugin)
 
 local ngx = ngx
+local var = ngx.var
 local ERR = ngx.ERR
 local WARN = ngx.WARN
 local NOTICE = ngx.NOTICE
 local worker = ngx.worker
 local add_ban = utils.add_ban
+local remove_ban = utils.remove_ban
 local is_whitelisted = utils.is_whitelisted
+local is_ip_whitelisted = utils.is_ip_whitelisted
 local is_banned = utils.is_banned
 local get_country = utils.get_country
 local get_security_mode = utils.get_security_mode
@@ -30,6 +33,17 @@ function badbehavior:log()
 	-- Check if we are whitelisted
 	if is_whitelisted(self.ctx) then
 		return self:ret(true, "client is whitelisted")
+	end
+	-- Fallback to whitelist lists/cache in case the request skipped the whitelist phase
+	local wl_ip, wl_info = is_ip_whitelisted(self.ctx.bw.remote_addr, self.ctx.bw.server_name)
+	if wl_ip == nil then
+		self.logger:log(ERR, "can't check whitelist for IP " .. self.ctx.bw.remote_addr .. " : " .. wl_info)
+	elseif wl_ip then
+		self.ctx.bw.is_whitelisted = "yes"
+		if var then
+			var.is_whitelisted = "yes"
+		end
+		return self:ret(true, "client is whitelisted (ip lookup : " .. wl_info .. ")")
 	end
 	-- Check if bad behavior is activated
 	if self.variables["USE_BAD_BEHAVIOR"] ~= "yes" then
@@ -239,7 +253,25 @@ function badbehavior:timer()
 	-- Add bans if needed
 	for _, data in pairs(counters) do
 		if data.counter >= data.threshold then
-			if data.security_mode == "block" then
+			local wl_ip, wl_info = is_ip_whitelisted(data.ip, data.server_name)
+			if wl_ip == nil then
+				self.logger:log(ERR, "can't check whitelist for IP " .. data.ip .. " : " .. wl_info)
+			elseif wl_ip then
+				local rm_ok, rm_err = remove_ban(data.ip, data.server_name, data.ban_scope)
+				if rm_ok == false and rm_err then
+					self.logger:log(ERR, "can't remove ban for whitelisted IP " .. data.ip .. " : " .. rm_err)
+				end
+				self.logger:log(
+					NOTICE,
+					string.format(
+						"skipped badbehavior ban for whitelisted IP %s on server %s (scope %s, info %s)",
+						data.ip,
+						data.server_name,
+						data.ban_scope,
+						wl_info or "ip"
+					)
+				)
+			elseif data.security_mode == "block" then
 				local ban_time = tonumber(data.ban_time) or 0
 				local reason_data = self:get_metric("tables", "increments_" .. data.ip) or {}
 				local ok, err = add_ban(
