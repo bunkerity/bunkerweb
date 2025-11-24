@@ -167,7 +167,7 @@ function antibot:header()
 		csp_directives["frame-src"] = self.variables["ANTIBOT_ALTCHA_URL"]
 		csp_directives["connect-src"] = self.variables["ANTIBOT_ALTCHA_URL"]
 		csp_directives["worker-src"] = self.variables["ANTIBOT_ALTCHA_URL"]
-		csp_directives["style-src"] = csp_directives["style-src"] .. " https://cdn.jsdelivr.net " .. self.variables["ANTIBOT_ALTCHA_URL"]
+		csp_directives["style-src"] = csp_directives["style-src"] .. " 'unsafe-inline' " .. self.variables["ANTIBOT_ALTCHA_URL"]
 		csp_directives["script-src"] = csp_directives["script-src"] .. " https://cdn.jsdelivr.net " .. self.variables["ANTIBOT_ALTCHA_URL"]
 	end
 	local csp_content = ""
