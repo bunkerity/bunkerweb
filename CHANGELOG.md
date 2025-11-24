@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.6 - ????/??/??
+## v1.6.7-rc1 - ????/??/??
+
+- [BUGFIX] Fix issues with the Ingress controller regarding reverse proxy settings when using multiple paths per rule and a template by adjusting the indexing logic to be zero-based.
+
+## v1.6.6 - 2025/11/24
 
 - [FEATURE] Implement IP whitelisting checks in badbehavior module to avoid banning whitelisted IPs
 - [FEATURE] Enhance default server configuration: when IP is whitelisted, serve the "nothing to see here" page even if the default server is deactivated.

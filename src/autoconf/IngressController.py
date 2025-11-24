@@ -191,7 +191,7 @@ class IngressController(Controller):
                 services.append(service)
                 continue
 
-            for location, path in enumerate(rule.http.paths, start=1):
+            for location, path in enumerate(rule.http.paths, start=0):
                 if not path.path:
                     self._logger.warning("Ignoring unsupported ingress rule without path.")
                     continue
@@ -229,8 +229,8 @@ class IngressController(Controller):
                 service.update(
                     {
                         "USE_REVERSE_PROXY": "yes",
-                        f"REVERSE_PROXY_HOST_{location}": reverse_proxy_host,
-                        f"REVERSE_PROXY_URL_{location}": path.path,
+                        f"REVERSE_PROXY_HOST_{location}" if location else "REVERSE_PROXY_HOST": reverse_proxy_host,
+                        f"REVERSE_PROXY_URL_{location}" if location else "REVERSE_PROXY_URL": path.path,
                     }
                 )
             services.append(service)
@@ -260,12 +260,14 @@ class IngressController(Controller):
                         reverse_proxy_found = False
                         warned = False
                         for setting in service.copy():
-                            if setting.startswith(f"{server_name}_REVERSE_PROXY_HOST_"):
+                            if setting.startswith(f"{server_name}_REVERSE_PROXY_HOST"):
                                 if not reverse_proxy_found:
                                     reverse_proxy_found = True
-                                    suffix = setting.replace(f"{server_name}_REVERSE_PROXY_HOST_", "", 1)
+                                    suffix = setting.removeprefix(f"{server_name}_REVERSE_PROXY_HOST").removeprefix("_")
                                     service[f"{server_name}_REVERSE_PROXY_HOST"] = service.pop(setting).replace(f"{self.__service_protocol}://", "", 1)
-                                    service[f"{server_name}_REVERSE_PROXY_URL"] = service.pop(f"{server_name}_REVERSE_PROXY_URL_{suffix}", "/")
+                                    service[f"{server_name}_REVERSE_PROXY_URL"] = service.pop(
+                                        f"{server_name}_REVERSE_PROXY_URL_{suffix}" if suffix else f"{server_name}_REVERSE_PROXY_URL", "/"
+                                    )
                                     continue
 
                                 if not warned:
@@ -275,7 +277,7 @@ class IngressController(Controller):
                                     )
 
                                 del service[setting]
-                            elif setting.startswith(f"{server_name}_REVERSE_PROXY_URL_") and setting in service:
+                            elif setting.startswith(f"{server_name}_REVERSE_PROXY_URL") and setting in service:
                                 del service[setting]
 
         # parse tls
