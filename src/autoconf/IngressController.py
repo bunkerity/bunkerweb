@@ -74,6 +74,12 @@ class IngressController(Controller):
 
             self._logger.info("Ignoring annotations while collecting instances: " + ", ".join(sorted(self.__ignored_annotations_exact)))
 
+        self.__reverse_proxy_suffix_start = getenv("KUBERNETES_REVERSE_PROXY_SUFFIX_START", "1").strip()
+        if not self.__reverse_proxy_suffix_start.isdigit() or int(self.__reverse_proxy_suffix_start) < 0:
+            self._logger.warning(f"Invalid KUBERNETES_REVERSE_PROXY_SUFFIX_START value {self.__reverse_proxy_suffix_start}, defaulting to 1")
+            self.__reverse_proxy_suffix_start = "1"
+        self.__reverse_proxy_suffix_start = int(self.__reverse_proxy_suffix_start)
+
     def __should_ignore_annotation(self, annotation: str) -> bool:
         if annotation in self.__ignored_annotations_exact:
             return True
@@ -191,7 +197,7 @@ class IngressController(Controller):
                 services.append(service)
                 continue
 
-            for location, path in enumerate(rule.http.paths, start=0):
+            for location, path in enumerate(rule.http.paths, start=self.__reverse_proxy_suffix_start):  # type: ignore
                 if not path.path:
                     self._logger.warning("Ignoring unsupported ingress rule without path.")
                     continue
