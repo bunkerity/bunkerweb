@@ -58,7 +58,8 @@ start() {
             echo "# --- Logging & Runtime ---"
             echo "# LOG_LEVEL affects most components; CUSTOM_LOG_LEVEL overrides when provided."
             echo "# LOG_LEVEL=info"
-            echo "# CUSTOM_LOG_LEVEL=info"
+            echo "LOG_TYPES=file"
+            echo "# LOG_FILE_PATH=/var/log/bunkerweb/api.log"
             echo "# Number of workers/threads (auto if unset)."
             echo "# MAX_WORKERS=<auto>"
             echo "# MAX_THREADS=<auto>"
@@ -181,6 +182,12 @@ start() {
         API_WHITELIST_IPS=$(get_env_var "WHITELIST_IPS" "127.0.0.1")
     fi
     export API_WHITELIST_IPS
+
+    LOG_TYPES=$(get_env_var "LOG_TYPES" "file")
+    export LOG_TYPES
+
+    LOG_FILE_PATH=$(get_env_var "LOG_FILE_PATH" "/var/log/bunkerweb/api.log")
+    export LOG_FILE_PATH
 
     export CAPTURE_OUTPUT="yes"
 

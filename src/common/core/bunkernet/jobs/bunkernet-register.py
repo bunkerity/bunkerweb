@@ -10,10 +10,10 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from bunkernet import register
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
-LOGGER = setup_logger("BUNKERNET.register")
+LOGGER = getLogger("BUNKERNET.REGISTER")
 exit_status = 0
 
 try:

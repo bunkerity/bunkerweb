@@ -8,7 +8,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from common_utils import handle_docker_secrets  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger, env_log_types  # type: ignore
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 TMP_UI_DIR = TMP_DIR.joinpath("ui")
@@ -25,11 +25,21 @@ FORWARDED_ALLOW_IPS = getenv("UI_FORWARDED_ALLOW_IPS", getenv("FORWARDED_ALLOW_I
 CAPTURE_OUTPUT = getenv("CAPTURE_OUTPUT", "no").lower() == "yes"
 DEBUG = getenv("DEBUG", False)
 
+if CAPTURE_OUTPUT or "file" in env_log_types:
+    errorlog = getenv("LOG_FILE_PATH", join(sep, "var", "log", "bunkerweb", "tmp-ui.log"))
+    accesslog = f"{errorlog.rsplit('.', 1)[0]}-access.log"
+else:
+    errorlog = "-"
+    accesslog = "-"
+
+if "syslog" in env_log_types:
+    syslog = True
+    syslog_addr = getenv("LOG_SYSLOG_ADDRESS", "").strip()
+    syslog_prefix = getenv("LOG_SYSLOG_TAG", "bw-ui")
+
 wsgi_app = "temp:app"
 proc_name = "bunkerweb-tmp-ui"
-accesslog = join(sep, "var", "log", "bunkerweb", "tmp-ui-access.log") if CAPTURE_OUTPUT else "-"
 access_log_format = '%({x-forwarded-for}i)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
-errorlog = join(sep, "var", "log", "bunkerweb", "tmp-ui.log") if CAPTURE_OUTPUT else "-"
 capture_output = CAPTURE_OUTPUT
 limit_request_line = 0
 limit_request_fields = 32768
@@ -76,7 +86,7 @@ def on_starting(server):
     if docker_secrets:
         environ.update(docker_secrets)
 
-    LOGGER = setup_logger("TMP-UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+    LOGGER = getLogger("TMP-UI")
 
     if docker_secrets:
         LOGGER.info(f"Loaded {len(docker_secrets)} Docker secrets")

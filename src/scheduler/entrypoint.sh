@@ -58,9 +58,9 @@ import sqlalchemy as sa
 from traceback import format_exc
 
 from Database import Database
-from logger import setup_logger
+from logger import getLogger
 
-LOGGER = setup_logger('Scheduler', getenv('CUSTOM_LOG_LEVEL', getenv('LOG_LEVEL', 'INFO')))
+LOGGER = getLogger('SCHEDULER.ENTRYPOINT')
 
 db = None
 try:
@@ -132,9 +132,9 @@ import sqlalchemy as sa
 from os import getenv
 
 from Database import Database
-from logger import setup_logger
+from logger import getLogger
 
-LOGGER = setup_logger('Scheduler', getenv('CUSTOM_LOG_LEVEL', getenv('LOG_LEVEL', 'INFO')))
+LOGGER = getLogger('SCHEDULER')
 
 db = Database(LOGGER)
 with db.sql_engine.connect() as conn:

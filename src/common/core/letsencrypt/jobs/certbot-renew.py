@@ -11,15 +11,15 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
-LOGGER = setup_logger("LETS-ENCRYPT.renew")
+LOGGER = getLogger("LETS-ENCRYPT.RENEW")
 LIB_PATH = Path(sep, "var", "lib", "bunkerweb", "letsencrypt")
 CERTBOT_BIN = join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot")
 DEPS_PATH = join(sep, "usr", "share", "bunkerweb", "deps", "python")
 
-LOGGER_CERTBOT = setup_logger("LETS-ENCRYPT.renew.certbot")
+LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.RENEW.CERTBOT")
 status = 0
 
 CACHE_PATH = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")

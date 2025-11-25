@@ -15,10 +15,10 @@ from requests import post
 from requests.exceptions import ConnectionError
 
 from common_utils import bytes_hash  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job
 
-LOGGER = setup_logger("ROBOTSTXT.DarkVisitors")
+LOGGER = getLogger("ROBOTSTXT.DARKVISITORS")
 status = 0
 
 DARKVISITORS_API_URL = "https://api.darkvisitors.com/robots-txts"

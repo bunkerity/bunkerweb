@@ -2,18 +2,17 @@
 
 from contextlib import suppress
 from datetime import datetime
-from os import getenv
 from time import sleep
 from typing import Any, Dict, List, Literal, Optional, Union
 
 from Database import Database  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 
 
 class Config:
     def __init__(self, ctrl_type: Union[Literal["docker"], Literal["swarm"], Literal["kubernetes"]]):
         self._type = ctrl_type
-        self.__logger = setup_logger("Config", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+        self.__logger = getLogger("CONFIG")
         self._settings = {}
         self.__instances = []
         self.__services = []

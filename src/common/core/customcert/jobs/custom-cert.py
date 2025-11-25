@@ -16,9 +16,9 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from common_utils import bytes_hash  # type: ignore
 from jobs import Job  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 
-LOGGER = setup_logger("CUSTOM-CERT")
+LOGGER = getLogger("CUSTOM-CERT")
 JOB = Job(LOGGER, __file__)
 
 

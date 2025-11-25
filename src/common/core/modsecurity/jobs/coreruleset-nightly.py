@@ -19,10 +19,10 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from requests import RequestException, get
 from requests.exceptions import ConnectionError
 
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
-LOGGER = setup_logger("MODSECURITY.coreruleset-nightly")
+LOGGER = getLogger("MODSECURITY.CORERULESET.NIGHTLY")
 status = 0
 
 CRS_NIGHTLY_PATH = Path(sep, "var", "cache", "bunkerweb", "modsecurity", "crs", "nightly")

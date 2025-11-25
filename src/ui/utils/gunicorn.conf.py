@@ -19,7 +19,7 @@ from biscuit_auth import KeyPair, PublicKey, PrivateKey
 from passlib.totp import generate_secret
 
 from common_utils import handle_docker_secrets  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger, log_types  # type: ignore
 
 from app.models.ui_database import UIDatabase
 from app.dependencies import reload_plugins
@@ -55,11 +55,21 @@ LISTEN_PORT = getenv("UI_LISTEN_PORT", getenv("LISTEN_PORT", "7000"))
 FORWARDED_ALLOW_IPS = getenv("UI_FORWARDED_ALLOW_IPS", getenv("FORWARDED_ALLOW_IPS", "*"))
 CAPTURE_OUTPUT = getenv("CAPTURE_OUTPUT", "no").lower() == "yes"
 
+if CAPTURE_OUTPUT or "file" in log_types:
+    errorlog = getenv("LOG_FILE_PATH", join(sep, "var", "log", "bunkerweb", "ui.log"))
+    accesslog = f"{errorlog.rsplit('.', 1)[0]}-access.log"
+else:
+    errorlog = "-"
+    accesslog = "-"
+
+if "syslog" in log_types:
+    syslog = True
+    syslog_addr = getenv("LOG_SYSLOG_ADDRESS", "").strip()
+    syslog_prefix = getenv("LOG_SYSLOG_TAG", "bw-ui")
+
 wsgi_app = "main:app"
 proc_name = "bunkerweb-ui"
-accesslog = join(sep, "var", "log", "bunkerweb", "ui-access.log") if CAPTURE_OUTPUT else "-"
 access_log_format = '%({x-forwarded-for}i)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
-errorlog = join(sep, "var", "log", "bunkerweb", "ui.log") if CAPTURE_OUTPUT else "-"
 capture_output = CAPTURE_OUTPUT
 limit_request_line = 0
 limit_request_fields = 32768
@@ -109,7 +119,7 @@ def on_starting(server):
     if docker_secrets:
         environ.update(docker_secrets)
 
-    LOGGER = setup_logger("UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+    LOGGER = getLogger("UI")
 
     if docker_secrets:
         LOGGER.info(f"Loaded {len(docker_secrets)} Docker secrets")

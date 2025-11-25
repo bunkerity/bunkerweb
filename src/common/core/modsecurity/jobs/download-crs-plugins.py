@@ -34,7 +34,7 @@ from magic import Magic
 from requests import get, head
 from requests.exceptions import ConnectionError
 
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
 PLUGIN_NAME_RX = re_compile(r"^# Plugin name: (?P<name>.+)$", MULTILINE)
@@ -44,7 +44,7 @@ CRS_PLUGINS_DIR = Path(sep, "var", "cache", "bunkerweb", "modsecurity", "crs", "
 NEW_PLUGINS_DIR = Path(sep, "var", "tmp", "bunkerweb", "crs-new-plugins")
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb", "crs-plugins")
 PATCH_SCRIPT = Path(sep, "usr", "share", "bunkerweb", "core", "modsecurity", "misc", "patch.sh")
-LOGGER = setup_logger("modsecurity.download-crs-plugins")
+LOGGER = getLogger("MODSECURITY.DOWNLOAD.CRS_PLUGINS")
 status = 0
 
 

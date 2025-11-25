@@ -11,11 +11,11 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from bunkernet import data
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 from common_utils import bytes_hash  # type: ignore
 
-LOGGER = setup_logger("BUNKERNET.data")
+LOGGER = getLogger("BUNKERNET.DATA")
 exit_status = 0
 
 try:

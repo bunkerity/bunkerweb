@@ -16,7 +16,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from requests import get
 from requests.exceptions import ConnectionError
 
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from common_utils import bytes_hash  # type: ignore
 from jobs import Job  # type: ignore
 
@@ -32,7 +32,7 @@ def check_line(line):
     return False, b""
 
 
-LOGGER = setup_logger("REALIP")
+LOGGER = getLogger("REALIP")
 REALIP_CACHE_PATH = join(sep, "var", "cache", "bunkerweb", "realip")
 status = 0
 

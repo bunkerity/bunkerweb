@@ -5,7 +5,7 @@ from contextlib import suppress
 from importlib import import_module
 from glob import glob
 from math import ceil
-from os import cpu_count, getenv
+from os import cpu_count
 from os.path import basename, join, sep
 from pathlib import Path
 from random import choice
@@ -18,12 +18,12 @@ deps_path = join("usr", "share", "bunkerweb", "deps", "python")
 if deps_path not in sys_path:
     sys_path.append(deps_path)
 
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 
 from jinja2 import Environment, FileSystemBytecodeCache, FileSystemLoader, Undefined
 
 # Configure logging
-logger = setup_logger("Templator", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+logger = getLogger("TEMPLATOR")
 
 
 class ConfigurableCustomUndefined(Undefined):

@@ -19,10 +19,10 @@ from heapq import merge
 
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
-LOGGER = setup_logger("BUNKERNET.send")
+LOGGER = getLogger("BUNKERNET.SEND")
 exit_status = 0
 
 BATCH_SIZE = 100

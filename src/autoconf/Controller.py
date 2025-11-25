@@ -6,7 +6,7 @@ from time import sleep
 
 from Config import Config
 
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 
 
 class Controller(Config):
@@ -17,7 +17,7 @@ class Controller(Config):
         self._services = []
         self._configs = {config_type: {} for config_type in self._supported_config_types}
         self._extra_config = {}
-        self._logger = setup_logger(f"{self._type}-controller", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+        self._logger = getLogger(f"{self._type.upper()}-CONTROLLER")
         self._namespaces = None
         self._first_start = True
         namespaces = getenv("NAMESPACES")

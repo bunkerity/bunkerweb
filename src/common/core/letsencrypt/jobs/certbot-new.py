@@ -25,7 +25,7 @@ from requests import get
 
 from common_utils import bytes_hash, file_hash  # type: ignore
 from jobs import Job  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 
 from letsencrypt_providers import (
     BunnyNetProvider,
@@ -55,8 +55,8 @@ from letsencrypt_providers import (
 )
 
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper()
-LOGGER = setup_logger("LETS-ENCRYPT.new")
-LOGGER_CERTBOT = setup_logger("LETS-ENCRYPT.new.certbot")
+LOGGER = getLogger("LETS-ENCRYPT.NEW")
+LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.NEW.CERTBOT")
 
 CERTBOT_BIN = join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot")
 DEPS_PATH = join(sep, "usr", "share", "bunkerweb", "deps", "python")

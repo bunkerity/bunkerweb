@@ -25,7 +25,7 @@ from requests.exceptions import ConnectionError
 
 from common_utils import bytes_hash, get_os_info, get_integration, get_version, add_dir_to_tar_safely  # type: ignore
 from Database import Database  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 
 API_ENDPOINT = "https://api.bunkerweb.io"
 PREVIEW_ENDPOINT = "https://assets.bunkerity.com/bw-pro/preview"
@@ -36,7 +36,7 @@ STATUS_MESSAGES = {
     "expired": "has expired",
     "suspended": "has been suspended",
 }
-LOGGER = setup_logger("Jobs.download-pro-plugins")
+LOGGER = getLogger("PRO.DOWNLOAD-PLUGINS")
 status = 0
 existing_pro_plugin_ids = set()
 

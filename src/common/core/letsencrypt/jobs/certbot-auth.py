@@ -12,10 +12,10 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from Database import Database  # type: ignore
 from common_utils import get_integration  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from API import API  # type: ignore
 
-LOGGER = setup_logger("Lets-encrypt.auth")
+LOGGER = getLogger("LETS-ENCRYPT.AUTH")
 status = 0
 
 try:

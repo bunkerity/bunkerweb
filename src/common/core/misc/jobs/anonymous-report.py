@@ -13,12 +13,12 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from common_utils import get_os_info  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
 from requests import post
 
-LOGGER = setup_logger("ANONYMOUS-REPORT")
+LOGGER = getLogger("ANONYMOUS-REPORT")
 status = 0
 
 try:
