@@ -726,7 +726,9 @@ sudo ./install-bunkerweb.sh
 2.  **设置向导**：选择是否启用基于 Web 的配置向导。强烈建议初次使用的用户选择此项。
 3.  **CrowdSec 集成**：选择安装 CrowdSec 安全引擎，以获得先进的实时威胁防护。仅适用于完整堆栈安装。
 4.  **CrowdSec AppSec**：如果您选择安装 CrowdSec，您还可以启用应用程序安全 (AppSec) 组件，它增加了 WAF 功能。
-5.  **API 服务**：对于完整堆栈和管理器安装，选择是否启用可选的外部 API 服务。在 Linux 安装中，它默认是禁用的。
+5.  **DNS 解析器**：对于完整堆栈、管理器和工作节点安装，您可以选择指定自定义 DNS 解析器 IP。
+6.  **内部 API HTTPS**：对于完整堆栈、管理器和工作节点安装，选择是否为调度器/管理器与 BunkerWeb/工作节点实例之间的内部 API 通信启用 HTTPS（默认：仅 HTTP）。
+7.  **API 服务**：对于完整堆栈和管理器安装，选择是否启用可选的外部 API 服务。在 Linux 安装中，它默认是禁用的。
 
 !!! info "管理器和调度器安装"
     如果您选择**管理器**或**仅调度器**安装类型，系统还会提示您提供您的 BunkerWeb 工作节点实例的 IP 地址或主机名。
@@ -737,18 +739,18 @@ sudo ./install-bunkerweb.sh
 
 **通用选项：**
 
-| 选项                    | 描述                                              |
-| ----------------------- | ------------------------------------------------- |
-| `-v, --version VERSION` | 指定要安装的 BunkerWeb 版本（例如 `1.6.6`）。 |
-| `-w, --enable-wizard`   | 启用设置向导。                                    |
-| `-n, --no-wizard`       | 禁用设置向导。                                    |
-| `-y, --yes`             | 以非交互模式运行，对所有提示使用默认答案。        |
-| `-f, --force`           | 即使在不受支持的操作系统版本上，也强制继续安装。  |
-| `-q, --quiet`           | 静默安装（抑制输出）。                            |
-| `--api`, `--enable-api` | 启用 API (FastAPI) systemd 服务（默认禁用）。     |
-| `--no-api`              | 明确禁用 API 服务。                               |
-| `-h, --help`            | 显示包含所有可用选项的帮助信息。                  |
-| `--dry-run`             | 显示将要安装的内容，但不实际执行。                |
+| 选项                    | 描述                                             |
+| ----------------------- | ------------------------------------------------ |
+| `-v, --version VERSION` | 指定要安装的 BunkerWeb 版本（例如 `1.6.6`）。    |
+| `-w, --enable-wizard`   | 启用设置向导。                                   |
+| `-n, --no-wizard`       | 禁用设置向导。                                   |
+| `-y, --yes`             | 以非交互模式运行，对所有提示使用默认答案。       |
+| `-f, --force`           | 即使在不受支持的操作系统版本上，也强制继续安装。 |
+| `-q, --quiet`           | 静默安装（抑制输出）。                           |
+| `--api`, `--enable-api` | 启用 API (FastAPI) systemd 服务（默认禁用）。    |
+| `--no-api`              | 明确禁用 API 服务。                              |
+| `-h, --help`            | 显示包含所有可用选项的帮助信息。                 |
+| `--dry-run`             | 显示将要安装的内容，但不实际执行。               |
 
 **安装类型：**
 
@@ -771,9 +773,14 @@ sudo ./install-bunkerweb.sh
 
 **高级选项：**
 
-| 选项                    | 描述                                                             |
-| ----------------------- | ---------------------------------------------------------------- |
-| `--instances "IP1 IP2"` | 以空格分隔的 BunkerWeb 实例列表（在管理器/调度器模式下为必需）。 |
+| 选项                        | 描述                                                             |
+| --------------------------- | ---------------------------------------------------------------- |
+| `--instances "IP1 IP2"`     | 以空格分隔的 BunkerWeb 实例列表（在管理器/调度器模式下为必需）。 |
+| `--manager-ip IPs`          | 管理器/调度器 IP 白名单（在非交互模式下的工作节点中为必需）。    |
+| `--dns-resolvers "IP1 IP2"` | 自定义 DNS 解析器 IP（用于完整、管理器或工作节点安装）。         |
+| `--api-https`               | 为内部 API 通信启用 HTTPS（默认：仅 HTTP）。                     |
+| `--backup-dir PATH`         | 升级前存储自动备份的目录。                                       |
+| `--no-auto-backup`          | 跳过自动备份（您必须手动完成）。                                 |
 
 **用法示例：**
 
@@ -792,6 +799,12 @@ sudo ./install-bunkerweb.sh --version 1.6.6
 
 # 带有远程工作实例的管理器设置（需要 instances）
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
+
+# 具有内部 HTTPS API 通信的管理器
+sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --api-https
+
+# 具有自定义 DNS 解析器和内部 HTTPS API 的工作节点
+sudo ./install-bunkerweb.sh --worker --dns-resolvers "1.1.1.1 1.0.0.1" --api-https
 
 # 带有 CrowdSec 和 AppSec 的完整安装
 sudo ./install-bunkerweb.sh --crowdsec-appsec

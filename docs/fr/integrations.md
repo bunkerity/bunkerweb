@@ -740,7 +740,7 @@ Pour les configurations non interactives ou automatisées, le script peut être 
 
 | Option                  | Description                                                                                              |
 | ----------------------- | -------------------------------------------------------------------------------------------------------- |
-| `-v, --version VERSION` | Spécifie la version de BunkerWeb à installer (par exemple, `1.6.6`).                                 |
+| `-v, --version VERSION` | Spécifie la version de BunkerWeb à installer (par exemple, `1.6.6`).                                     |
 | `-w, --enable-wizard`   | Active l'assistant de configuration.                                                                     |
 | `-n, --no-wizard`       | Désactive l'assistant d'installation.                                                                    |
 | `--api`, `--enable-api` | Active le service API (FastAPI) systemd (désactivé par défaut).                                          |
@@ -772,9 +772,14 @@ Pour les configurations non interactives ou automatisées, le script peut être 
 
 **Options avancées :**
 
-| Option                  | Description                                                                                            |
-| ----------------------- | ------------------------------------------------------------------------------------------------------ |
-| `--instances "IP1 IP2"` | Liste séparée par des espaces des instances BunkerWeb (requise pour les modes gestionnaire/Scheduler). |
+| Option                      | Description                                                                                            |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `--instances "IP1 IP2"`     | Liste séparée par des espaces des instances BunkerWeb (requise pour les modes gestionnaire/Scheduler). |
+| `--manager-ip IPs`          | IPs du gestionnaire/Scheduler à mettre en liste blanche (requis pour worker en mode non-interactif).   |
+| `--dns-resolvers "IP1 IP2"` | IPs des résolveurs DNS personnalisés (pour les installations full, manager ou worker).                 |
+| `--api-https`               | Activer HTTPS pour la communication API interne (par défaut : HTTP uniquement).                        |
+| `--backup-dir PATH`         | Répertoire pour stocker la sauvegarde automatique avant la mise à jour.                                |
+| `--no-auto-backup`          | Ignorer la sauvegarde automatique (vous DEVEZ l'avoir fait manuellement).                              |
 
 **Exemple d'utilisation :**
 
@@ -793,6 +798,12 @@ sudo ./install-bunkerweb.sh --version 1.6.6
 
 # Manager setup with remote worker instances (instances required)
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
+
+# Manager avec communication API interne HTTPS
+sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --api-https
+
+# Worker avec résolveurs DNS personnalisés et API interne HTTPS
+sudo ./install-bunkerweb.sh --worker --dns-resolvers "1.1.1.1 1.0.0.1" --api-https
 
 # Full installation with CrowdSec and AppSec
 sudo ./install-bunkerweb.sh --crowdsec-appsec

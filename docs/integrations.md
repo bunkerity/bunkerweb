@@ -734,7 +734,9 @@ When run without any options, the script enters an interactive mode that guides 
 2.  **Setup Wizard**: Choose whether to enable the web-based configuration wizard. This is highly recommended for first-time users.
 3.  **CrowdSec Integration**: Opt-in to install the CrowdSec security engine for advanced, real-time threat protection. Available for Full Stack installations only.
 4.  **CrowdSec AppSec**: If you choose to install CrowdSec, you can also enable the Application Security (AppSec) component, which adds WAF capabilities.
-5.  **API Service**: For Full Stack and Manager installations, choose whether to enable the optional external API service. It is disabled by default on Linux installations.
+5.  **DNS Resolvers**: For Full Stack, Manager, and Worker installations, you can optionally specify custom DNS resolver IPs.
+6.  **Internal API HTTPS**: For Full Stack, Manager, and Worker installations, choose whether to enable HTTPS for internal API communication between the scheduler/manager and BunkerWeb/worker instances (default: HTTP only).
+7.  **API Service**: For Full Stack and Manager installations, choose whether to enable the optional external API service. It is disabled by default on Linux installations.
 
 !!! info "Manager and Scheduler installations"
     If you choose the **Manager** or **Scheduler Only** installation type, you will also be prompted to provide the IP addresses or hostnames of your BunkerWeb worker instances.
@@ -747,7 +749,7 @@ For non-interactive or automated setups, the script can be controlled with comma
 
 | Option                  | Description                                                           |
 | ----------------------- | --------------------------------------------------------------------- |
-| `-v, --version VERSION` | Specifies the BunkerWeb version to install (e.g., `1.6.6`).       |
+| `-v, --version VERSION` | Specifies the BunkerWeb version to install (e.g., `1.6.6`).           |
 | `-w, --enable-wizard`   | Enables the setup wizard.                                             |
 | `-n, --no-wizard`       | Disables the setup wizard.                                            |
 | `-y, --yes`             | Runs in non-interactive mode using default answers for all prompts.   |
@@ -779,9 +781,14 @@ For non-interactive or automated setups, the script can be controlled with comma
 
 **Advanced Options:**
 
-| Option                  | Description                                                                         |
-| ----------------------- | ----------------------------------------------------------------------------------- |
-| `--instances "IP1 IP2"` | Space-separated list of BunkerWeb instances (required for manager/scheduler modes). |
+| Option                      | Description                                                                         |
+| --------------------------- | ----------------------------------------------------------------------------------- |
+| `--instances "IP1 IP2"`     | Space-separated list of BunkerWeb instances (required for manager/scheduler modes). |
+| `--manager-ip IPs`          | Manager/Scheduler IPs to whitelist (required for worker in non-interactive mode).   |
+| `--dns-resolvers "IP1 IP2"` | Custom DNS resolver IPs (for full, manager, or worker installations).               |
+| `--api-https`               | Enable HTTPS for internal API communication (default: HTTP only).                   |
+| `--backup-dir PATH`         | Directory to store automatic backup before upgrade.                                 |
+| `--no-auto-backup`          | Skip automatic backup (you MUST have done it manually).                             |
 
 **Example Usage:**
 
@@ -800,6 +807,12 @@ sudo ./install-bunkerweb.sh --version 1.6.6
 
 # Manager setup with remote worker instances (instances required)
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
+
+# Manager with HTTPS internal API communication
+sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --api-https
+
+# Worker with custom DNS resolvers and HTTPS internal API
+sudo ./install-bunkerweb.sh --worker --dns-resolvers "1.1.1.1 1.0.0.1" --api-https
 
 # Full installation with CrowdSec and AppSec
 sudo ./install-bunkerweb.sh --crowdsec-appsec

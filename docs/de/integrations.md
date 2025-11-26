@@ -726,7 +726,9 @@ Wenn das Skript ohne Optionen ausgeführt wird, wechselt es in einen interaktive
 2.  **Einrichtungsassistent**: Wählen Sie, ob der webbasierte Konfigurationsassistent aktiviert werden soll. Dies wird für Erstanwender dringend empfohlen.
 3.  **CrowdSec-Integration**: Entscheiden Sie sich für die Installation der CrowdSec-Sicherheits-Engine für erweiterten Echtzeit-Bedrohungsschutz. Nur für Full Stack-Installationen verfügbar.
 4.  **CrowdSec AppSec**: Wenn Sie sich für die Installation von CrowdSec entscheiden, können Sie auch die Application Security (AppSec)-Komponente aktivieren, die WAF-Funktionen hinzufügt.
-5.  **API-Dienst**: Für Full Stack- und Manager-Installationen können Sie den optionalen externen API-Dienst aktivieren. Er ist bei Linux-Installationen standardmäßig deaktiviert.
+5.  **DNS-Resolver**: Für Full Stack-, Manager- und Worker-Installationen können Sie optional benutzerdefinierte DNS-Resolver-IPs angeben.
+6.  **Interne API HTTPS**: Für Full Stack-, Manager- und Worker-Installationen können Sie HTTPS für die interne API-Kommunikation zwischen Scheduler/Manager und BunkerWeb/Worker-Instanzen aktivieren (Standard: nur HTTP).
+7.  **API-Dienst**: Für Full Stack- und Manager-Installationen können Sie den optionalen externen API-Dienst aktivieren. Er ist bei Linux-Installationen standardmäßig deaktiviert.
 
 !!! info "Manager- und Scheduler-Installationen"
     Wenn Sie den Installationstyp **Manager** oder **Nur Scheduler** wählen, werden Sie auch aufgefordert, die IP-Adressen oder Hostnamen Ihrer BunkerWeb-Worker-Instanzen anzugeben.
@@ -739,7 +741,7 @@ Für nicht-interaktive oder automatisierte Setups kann das Skript mit Befehlszei
 
 | Option                  | Beschreibung                                                                                |
 | ----------------------- | ------------------------------------------------------------------------------------------- |
-| `-v, --version VERSION` | Gibt die zu installierende BunkerWeb-Version an (z. B. `1.6.6`).                        |
+| `-v, --version VERSION` | Gibt die zu installierende BunkerWeb-Version an (z. B. `1.6.6`).                            |
 | `-w, --enable-wizard`   | Aktiviert den Einrichtungsassistenten.                                                      |
 | `-n, --no-wizard`       | Deaktiviert den Einrichtungsassistenten.                                                    |
 | `-y, --yes`             | Führt im nicht-interaktiven Modus mit Standardantworten für alle Eingabeaufforderungen aus. |
@@ -771,9 +773,14 @@ Für nicht-interaktive oder automatisierte Setups kann das Skript mit Befehlszei
 
 **Erweiterte Optionen:**
 
-| Option                  | Beschreibung                                                                                          |
-| ----------------------- | ----------------------------------------------------------------------------------------------------- |
-| `--instances "IP1 IP2"` | Durch Leerzeichen getrennte Liste von BunkerWeb-Instanzen (erforderlich für Manager-/Scheduler-Modi). |
+| Option                      | Beschreibung                                                                                          |
+| --------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `--instances "IP1 IP2"`     | Durch Leerzeichen getrennte Liste von BunkerWeb-Instanzen (erforderlich für Manager-/Scheduler-Modi). |
+| `--manager-ip IPs`          | Manager-/Scheduler-IPs zur Whitelist (erforderlich für Worker im nicht-interaktiven Modus).           |
+| `--dns-resolvers "IP1 IP2"` | Benutzerdefinierte DNS-Resolver-IPs (für Full-, Manager- oder Worker-Installationen).                 |
+| `--api-https`               | HTTPS für interne API-Kommunikation aktivieren (Standard: nur HTTP).                                  |
+| `--backup-dir PATH`         | Verzeichnis zum Speichern der automatischen Sicherung vor dem Upgrade.                                |
+| `--no-auto-backup`          | Automatische Sicherung überspringen (Sie MÜSSEN es manuell getan haben).                              |
 
 **Beispielverwendung:**
 
@@ -792,6 +799,12 @@ sudo ./install-bunkerweb.sh --version 1.6.6
 
 # Manager-Setup mit entfernten Worker-Instanzen (Instanzen erforderlich)
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
+
+# Manager mit interner HTTPS-API-Kommunikation
+sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --api-https
+
+# Worker mit benutzerdefinierten DNS-Resolvern und interner HTTPS-API
+sudo ./install-bunkerweb.sh --worker --dns-resolvers "1.1.1.1 1.0.0.1" --api-https
 
 # Vollständige Installation mit CrowdSec und AppSec
 sudo ./install-bunkerweb.sh --crowdsec-appsec

@@ -725,7 +725,9 @@ Cuando se ejecuta sin ninguna opción, el script entra en un modo interactivo qu
 2.  **Asistente de configuración**: Elige si habilitar el asistente de configuración basado en la web. Esto es muy recomendable para los usuarios primerizos.
 3.  **Integración con CrowdSec**: Opta por instalar el motor de seguridad CrowdSec para una protección avanzada contra amenazas en tiempo real. Disponible solo para instalaciones de Pila completa.
 4.  **CrowdSec AppSec**: Si eliges instalar CrowdSec, también puedes habilitar el componente de Seguridad de Aplicaciones (AppSec), que añade capacidades de WAF.
-5.  **Servicio de API**: Para instalaciones de Pila completa y Gestor, elige si habilitar el servicio API externo opcional. Está deshabilitado por defecto en las instalaciones de Linux.
+5.  **Resolvers DNS**: Para instalaciones de Pila completa, Gestor y Trabajador, puede especificar opcionalmente IPs de resolvers DNS personalizados.
+6.  **API interna HTTPS**: Para instalaciones de Pila completa, Gestor y Trabajador, elija si habilitar HTTPS para la comunicación API interna entre el programador/gestor y las instancias BunkerWeb/trabajador (predeterminado: solo HTTP).
+7.  **Servicio de API**: Para instalaciones de Pila completa y Gestor, elige si habilitar el servicio API externo opcional. Está deshabilitado por defecto en las instalaciones de Linux.
 
 !!! info "Instalaciones de Gestor y Programador"
     Si eliges el tipo de instalación **Gestor** o **Solo Programador**, también se te pedirá que proporciones las direcciones IP o los nombres de host de tus instancias de trabajador de BunkerWeb.
@@ -738,7 +740,7 @@ Para configuraciones no interactivas o automatizadas, el script se puede control
 
 | Opción                  | Descripción                                                                                       |
 | :---------------------- | :------------------------------------------------------------------------------------------------ |
-| `-v, --version VERSION` | Especifica la versión de BunkerWeb a instalar (p. ej., `1.6.6`).                              |
+| `-v, --version VERSION` | Especifica la versión de BunkerWeb a instalar (p. ej., `1.6.6`).                                  |
 | `-w, --enable-wizard`   | Habilita el asistente de configuración.                                                           |
 | `-n, --no-wizard`       | Deshabilita el asistente de configuración.                                                        |
 | `-y, --yes`             | Se ejecuta en modo no interactivo usando las respuestas predeterminadas para todas las preguntas. |
@@ -770,9 +772,14 @@ Para configuraciones no interactivas o automatizadas, el script se puede control
 
 **Opciones avanzadas:**
 
-| Opción                  | Descripción                                                                                           |
-| :---------------------- | :---------------------------------------------------------------------------------------------------- |
-| `--instances "IP1 IP2"` | Lista de instancias de BunkerWeb separadas por espacios (requerido para los modos manager/scheduler). |
+| Opción                      | Descripción                                                                                           |
+| :-------------------------- | :---------------------------------------------------------------------------------------------------- |
+| `--instances "IP1 IP2"`     | Lista de instancias de BunkerWeb separadas por espacios (requerido para los modos manager/scheduler). |
+| `--manager-ip IPs`          | IPs del manager/scheduler para la lista blanca (requerido para worker en modo no interactivo).        |
+| `--dns-resolvers "IP1 IP2"` | IPs de resolvers DNS personalizados (para instalaciones full, manager o worker).                      |
+| `--api-https`               | Habilitar HTTPS para la comunicación API interna (predeterminado: solo HTTP).                         |
+| `--backup-dir PATH`         | Directorio para almacenar la copia de seguridad automática antes de la actualización.                 |
+| `--no-auto-backup`          | Omitir copia de seguridad automática (DEBE haberla hecho manualmente).                                |
 
 **Ejemplo de uso:**
 
@@ -791,6 +798,12 @@ sudo ./install-bunkerweb.sh --version 1.6.6
 
 # Configuración del Gestor con instancias de trabajador remotas (se requieren instancias)
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
+
+# Gestor con comunicación API interna HTTPS
+sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --api-https
+
+# Trabajador con resolvers DNS personalizados y API interna HTTPS
+sudo ./install-bunkerweb.sh --worker --dns-resolvers "1.1.1.1 1.0.0.1" --api-https
 
 # Instalación completa con CrowdSec y AppSec
 sudo ./install-bunkerweb.sh --crowdsec-appsec

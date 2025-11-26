@@ -27,6 +27,7 @@ INSTALL_TYPE=""
 BUNKERWEB_INSTANCES_INPUT=""
 MANAGER_IP_INPUT=""
 DNS_RESOLVERS_INPUT=""
+API_LISTEN_HTTPS_INPUT=""
 UPGRADE_SCENARIO="no"
 BACKUP_DIRECTORY=""
 AUTO_BACKUP="yes"
@@ -276,6 +277,35 @@ ask_user_preferences() {
             done
         fi
 
+        # Ask about internal API HTTPS communication for full, manager, or worker installations
+        if [[ "$INSTALL_TYPE" = "full" || "$INSTALL_TYPE" = "manager" || "$INSTALL_TYPE" = "worker" ]] && [ -z "$API_LISTEN_HTTPS_INPUT" ]; then
+            echo
+            echo -e "${BLUE}========================================${NC}"
+            echo -e "${BLUE}🔒 Internal API HTTPS Communication${NC}"
+            echo -e "${BLUE}========================================${NC}"
+            echo "The scheduler/manager can communicate with BunkerWeb/worker instances via HTTPS"
+            echo "for internal API communication (not the public API service)."
+            echo "Default: HTTP only (no HTTPS)"
+            echo
+            while true; do
+                echo -e "${YELLOW}Enable HTTPS for internal API communication? (y/N):${NC} "
+                read -p "" -r
+                case $REPLY in
+                    [Yy]*)
+                        API_LISTEN_HTTPS_INPUT="yes"
+                        break
+                        ;;
+                    [Nn]*|"")
+                        API_LISTEN_HTTPS_INPUT="no"
+                        break
+                        ;;
+                    *)
+                        echo "Please answer yes (y) or no (n)."
+                        ;;
+                esac
+            done
+        fi
+
         # Ask about setup wizard
         if [ "$INSTALL_TYPE" = "manager" ]; then
             echo
@@ -451,6 +481,9 @@ ask_user_preferences() {
         fi
         if [ -n "$DNS_RESOLVERS_INPUT" ]; then
             echo "  🔍 DNS resolvers: $DNS_RESOLVERS_INPUT"
+        fi
+        if [ -n "$API_LISTEN_HTTPS_INPUT" ] && [ "$API_LISTEN_HTTPS_INPUT" = "yes" ]; then
+            echo "  🔒 Internal API HTTPS: Enabled"
         fi
         if [ "$INSTALL_TYPE" = "manager" ]; then
             echo "  🖥 Web UI service: $([ "${SERVICE_UI:-yes}" = "no" ] && echo "Disabled" || echo "Enabled")"
@@ -756,6 +789,9 @@ configure_manager_api_defaults() {
         echo "HTTPS_PORT=443"
         echo "API_LISTEN_IP=0.0.0.0"
         echo "API_WHITELIST_IP=$whitelist_ip"
+        if [ -n "$API_LISTEN_HTTPS_INPUT" ] && [ "$API_LISTEN_HTTPS_INPUT" = "yes" ]; then
+            echo "API_LISTEN_HTTPS=yes"
+        fi
         echo "API_TOKEN="
         # Enable multisite mode when UI service is used
         if [ "${SERVICE_UI:-yes}" != "no" ]; then
@@ -765,7 +801,8 @@ configure_manager_api_defaults() {
     chown root:nginx "$config_file" 2>/dev/null || true
     chmod 660 "$config_file" 2>/dev/null || true
 
-    run_cmd systemctl restart bunkerweb-scheduler
+    print_status "Enabling and starting BunkerWeb Scheduler with configured settings..."
+    run_cmd systemctl enable --now bunkerweb-scheduler
     sleep 2
     systemctl status bunkerweb-scheduler --no-pager -l || print_warning "BunkerWeb Scheduler may not be running"
 }
@@ -818,20 +855,26 @@ configure_worker_api_whitelist() {
         fi
     fi
 
-    run_cmd systemctl restart bunkerweb
+    # Configure internal API HTTPS if enabled
+    if [ -n "$API_LISTEN_HTTPS_INPUT" ] && [ "$API_LISTEN_HTTPS_INPUT" = "yes" ]; then
+        print_status "Configuring internal API HTTPS communication"
+        if grep -q "^API_LISTEN_HTTPS=" "$config_file"; then
+            sed -i "s|^API_LISTEN_HTTPS=.*|API_LISTEN_HTTPS=yes|" "$config_file"
+        else
+            echo "API_LISTEN_HTTPS=yes" >> "$config_file"
+        fi
+    fi
+
+    print_status "Enabling and starting BunkerWeb with configured settings..."
+    run_cmd systemctl enable --now bunkerweb
     sleep 2
     systemctl status bunkerweb --no-pager -l || print_warning "BunkerWeb may not be running"
 }
 
-# Configure DNS resolvers for full installation
-configure_full_dns_resolvers() {
+# Configure full installation settings (DNS resolvers, API HTTPS, multisite)
+configure_full_config() {
     local config_file="/etc/bunkerweb/variables.env"
-
-    if [ -z "$DNS_RESOLVERS_INPUT" ]; then
-        return
-    fi
-
-    print_status "Configuring custom DNS resolvers: $DNS_RESOLVERS_INPUT"
+    local needs_reload=false
 
     if [ ! -d /etc/bunkerweb ]; then
         mkdir -p /etc/bunkerweb
@@ -844,10 +887,26 @@ configure_full_dns_resolvers() {
     chown root:nginx "$config_file" 2>/dev/null || true
     chmod 660 "$config_file" 2>/dev/null || true
 
-    if grep -q "^DNS_RESOLVERS=" "$config_file"; then
-        sed -i "s|^DNS_RESOLVERS=.*|DNS_RESOLVERS=$DNS_RESOLVERS_INPUT|" "$config_file"
-    else
-        echo "DNS_RESOLVERS=$DNS_RESOLVERS_INPUT" >> "$config_file"
+    # Configure custom DNS resolvers if provided
+    if [ -n "$DNS_RESOLVERS_INPUT" ]; then
+        print_status "Configuring custom DNS resolvers: $DNS_RESOLVERS_INPUT"
+        if grep -q "^DNS_RESOLVERS=" "$config_file"; then
+            sed -i "s|^DNS_RESOLVERS=.*|DNS_RESOLVERS=$DNS_RESOLVERS_INPUT|" "$config_file"
+        else
+            echo "DNS_RESOLVERS=$DNS_RESOLVERS_INPUT" >> "$config_file"
+        fi
+        needs_reload=true
+    fi
+
+    # Configure internal API HTTPS if enabled
+    if [ -n "$API_LISTEN_HTTPS_INPUT" ] && [ "$API_LISTEN_HTTPS_INPUT" = "yes" ]; then
+        print_status "Configuring internal API HTTPS communication"
+        if grep -q "^API_LISTEN_HTTPS=" "$config_file"; then
+            sed -i "s|^API_LISTEN_HTTPS=.*|API_LISTEN_HTTPS=yes|" "$config_file"
+        else
+            echo "API_LISTEN_HTTPS=yes" >> "$config_file"
+        fi
+        needs_reload=true
     fi
 
     # Enable multisite mode when UI service is used
@@ -857,9 +916,15 @@ configure_full_dns_resolvers() {
         else
             echo "MULTISITE=yes" >> "$config_file"
         fi
+        needs_reload=true
     fi
 
-    run_cmd systemctl reload bunkerweb-scheduler
+    # Start bunkerweb and the scheduler if any changes were made
+    if [ "$needs_reload" = true ]; then
+        print_status "Enabling and starting services with configured settings..."
+        run_cmd systemctl enable --now bunkerweb
+        run_cmd systemctl enable --now bunkerweb-scheduler
+    fi
 }
 
 # Function to install NGINX on Debian/Ubuntu
@@ -1306,6 +1371,7 @@ usage() {
     echo "                           (required for --manager and --scheduler-only)"
     echo "  --manager-ip IPs         Manager/Scheduler IPs to whitelist (required for --worker in non-interactive mode, overrides auto-detect for --manager)"
     echo "  --dns-resolvers \"IP1 IP2\"  Custom DNS resolver IPs (for --full, --manager, --worker)"
+    echo "  --api-https              Enable HTTPS for internal API communication (default: HTTP only)"
     echo "  --backup-dir PATH        Directory to store automatic backup before upgrade"
     echo "  --no-auto-backup         Skip automatic backup (you MUST have done it manually)"
     echo
@@ -1321,6 +1387,8 @@ usage() {
     echo "                           # Worker installation with manager IP"
     echo "  $0 --dns-resolvers \"1.1.1.1 1.0.0.1\""
     echo "                           # Use Cloudflare DNS resolvers"
+    echo "  $0 --manager --instances \"192.168.1.10 192.168.1.11\" --api-https"
+    echo "                           # Manager with workers over HTTPS"
     echo "  $0 --crowdsec-appsec     # Full installation with CrowdSec AppSec"
     echo "  $0 --quiet --yes         # Silent non-interactive installation"
     echo "  $0 --dry-run             # Preview installation without executing"
@@ -1409,6 +1477,10 @@ while [[ $# -gt 0 ]]; do
             DNS_RESOLVERS_INPUT="$2"
             shift 2
             ;;
+        --api-https)
+            API_LISTEN_HTTPS_INPUT="yes"
+            shift
+            ;;
         --api|--enable-api)
             SERVICE_API=yes
             shift
@@ -1440,6 +1512,9 @@ while [[ $# -gt 0 ]]; do
             fi
             if [ -n "$DNS_RESOLVERS_INPUT" ]; then
                 echo "DNS resolvers: $DNS_RESOLVERS_INPUT"
+            fi
+            if [ -n "$API_LISTEN_HTTPS_INPUT" ]; then
+                echo "API HTTPS: $API_LISTEN_HTTPS_INPUT"
             fi
             exit 0
             ;;
@@ -1759,6 +1834,19 @@ main() {
     fi
 
     # Install BunkerWeb based on distribution
+    # Set environment variables to prevent postinstall from starting services we'll configure
+    if [ "$INSTALL_TYPE" = "manager" ]; then
+        export SERVICE_SCHEDULER=no
+    elif [ "$INSTALL_TYPE" = "worker" ]; then
+        export SERVICE_BUNKERWEB=no
+    elif [ "$INSTALL_TYPE" = "full" ] || [ -z "$INSTALL_TYPE" ]; then
+        # Only prevent start if we have configuration to apply
+        if [ -n "$DNS_RESOLVERS_INPUT" ] || [ -n "$API_LISTEN_HTTPS_INPUT" ]; then
+            export SERVICE_BUNKERWEB=no
+            export SERVICE_SCHEDULER=no
+        fi
+    fi
+
     case "$DISTRO_ID" in
         "debian"|"ubuntu")
             install_bunkerweb_debian
@@ -1776,7 +1864,7 @@ main() {
     elif [ "$INSTALL_TYPE" = "worker" ]; then
         configure_worker_api_whitelist
     elif [ "$INSTALL_TYPE" = "full" ] || [ -z "$INSTALL_TYPE" ]; then
-        configure_full_dns_resolvers
+        configure_full_config
     fi
 
     if [ "$CROWDSEC_INSTALL" = "yes" ]; then
