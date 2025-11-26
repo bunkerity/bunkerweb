@@ -7,16 +7,1248 @@
   <figcaption>BunkerWeb 云</figcaption>
 </figure>
 
-BunkerWeb Cloud 将是开始使用 BunkerWeb 的最简单方式。它为您提供一个完全托管的 BunkerWeb 服务，无需任何麻烦。可以把它想象成一个 BunkerWeb 即服务！
+BunkerWeb Cloud 是一种托管的 Web 应用程序防火墙 (WAF) 和反向代理解决方案，使您无需在基础设施中安装 BunkerWeb 即可保护您的 Web 应用程序。通过订阅 BunkerWeb Cloud，您将受益于托管在云端的完整 BunkerWeb 堆栈，并拥有专用资源（8GB RAM，**每**实例 2 CPU，跨 2 个实例复制以实现高可用性，标准版）。
 
-试试我们的 [BunkerWeb Cloud 服务](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=doc)，您将获得：
+### 主要优势
 
-- 一个完全托管在我们云端的 BunkerWeb 实例
-- 所有 BunkerWeb 功能，包括 PRO 功能
-- 一个带有仪表板和警报的监控平台
-- 协助您进行配置的技术支持
+订购您的 [BunkerWeb Cloud 实例](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=doc)并获得：
+
+- **即时部署**：无需在您的基础设施中进行安装
+- **高可用性**：具有自动负载均衡的复制实例
+- **集成监控**：访问 Grafana 以进行日志和指标可视化
+- **可扩展性**：适应繁重工作负载的专用资源
+- **增强的安全性**：针对 Web 威胁的实时 WAF 保护
 
 如果您对 BunkerWeb Cloud 服务感兴趣，请随时[联系我们](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc)，以便我们讨论您的需求。
+
+### 架构概述
+
+#### 简单架构 - 单一服务
+
+```mermaid
+graph LR
+    A[客户端] -->|HTTPS| B[example.com]
+    B -->|DNS 解析| C[负载均衡器54984654.bunkerweb.cloud]
+    C -->|流量| D[BunkerWeb CloudWAF + 反向代理]
+    D -->|HTTPS/HTTP| E[服务器 example.com客户端基础设施]
+
+    style C fill:#e1f5fe,color:#222
+    style D fill:#f3e5f5,color:#222
+    style E fill:#e8f5e8,color:#222
+```
+
+#### 复杂架构 - 多服务
+
+```mermaid
+graph LR
+    A[客户端] -->|HTTPS| B[example.comother-example.coman-other-example.com]
+    B -->|DNS 解析| C[负载均衡器54984654.bunkerweb.cloud]
+    C -->|流量| D[BunkerWeb CloudWAF + 反向代理SSL SNI 已启用]
+    D -->|带 SNI 的 HTTPS| E[客户端网关反向代理/LB]
+    E -->|内部路由| F[服务 1]
+    E -->|内部路由| G[服务 2]
+    E -->|内部路由| H[服务 N]
+
+    style C fill:#e1f5fe,color:#222
+    style D fill:#f3e5f5,color:#222
+    style E fill:#fff3e0,color:#222
+    style F fill:#e8f5e8,color:#222
+    style G fill:#e8f5e8,color:#222
+    style H fill:#e8f5e8,color:#222
+```
+
+### 初始配置
+
+#### 1. 管理界面访问
+
+订阅 BunkerWeb Cloud 后，您将收到：
+
+- **BunkerWeb UI 访问 URL**：用于配置服务的界面
+- **负载均衡器端点**：格式为 `http://[ID].bunkerweb.cloud` 的唯一 URL
+- **Grafana 访问权限**：监控界面和指标可视化
+- **分配的资源**：2 个实例，每个实例 16GB RAM 和 4 CPU
+
+#### 2. 首次连接
+
+1. 连接到 BunkerWeb Cloud 界面
+2. 配置要保护的服务
+3. 访问 Grafana 以可视化您的 BunkerWeb 日志和指标
+
+### DNS 配置
+
+#### 流量重定向到 BunkerWeb Cloud
+
+为了使您的域流量由 BunkerWeb Cloud 处理，您必须配置 DNS 记录：
+
+**所需配置：**
+
+```dns
+example.com.        IN  CNAME  54984654.bunkerweb.cloud.
+www.example.com.    IN  CNAME  54984654.bunkerweb.cloud.
+```
+
+**重要提示：** 将 `54984654` 替换为您在订阅期间提供的负载均衡器标识符。
+
+#### 配置验证
+
+验证 DNS 解析：
+
+```bash
+dig example.com
+nslookup example.com
+```
+
+结果应指向您的 BunkerWeb Cloud 端点。
+
+### 服务配置
+
+#### 单一服务
+
+对于托管在您基础设施上的简单服务：
+
+**在 BunkerWeb UI 中的配置：**
+
+1. **Server Name**：`example.com`
+2. **Use Reverse Proxy**：`yes`
+3. **Reverse Proxy Host**：`185.87.1.100:443`（您的服务器 IP）
+
+您可以在[反向代理文档](https://docs.bunkerweb.io/latest/settings/#reverse-proxy)中找到所有配置选项
+
+#### 带 SNI 的多服务
+
+##### 为什么要启用 SNI？
+
+当出现以下情况时，服务器名称指示 (SNI) 是**必不可少**的：
+
+- 多个域指向同一个后端基础设施
+- 您的基础设施托管多个具有不同 SSL 证书的服务
+- 您在客户端使用了反向代理/网关
+
+##### SNI 配置
+
+**在 BunkerWeb UI 中，针对每个服务：**
+
+```yaml
+# 服务 1
+SERVICE_NAME: example-com
+SERVER_NAME: example.com
+REVERSE_PROXY_HOST: https://gateway.internal.domain.com
+REVERSE_PROXY_PORT: 443
+REVERSE_PROXY_SSL_SNI: yes
+REVERSE_PROXY_SSL_SNI_NAME: example.com
+
+# 服务 2
+SERVICE_NAME: other-example-com
+SERVER_NAME: other-example.com
+REVERSE_PROXY_HOST: https://gateway.internal.domain.com
+REVERSE_PROXY_PORT: 443
+REVERSE_PROXY_SSL_SNI: yes
+REVERSE_PROXY_SSL_SNI_NAME: other-example.com
+```
+
+您可以在[反向代理文档](https://docs.bunkerweb.io/latest/settings/#reverse-proxy)中找到所有配置选项
+
+##### SNI 技术细节
+
+SNI 允许 BunkerWeb Cloud：
+
+1. 在 TLS 连接期间**识别目标服务**
+2. **将正确的域名传输**到后端
+3. **允许客户端网关**选择正确的证书
+4. **正确路由**到适当的服务
+
+**未启用 SNI：**
+
+```mermaid
+graph LR
+    A[客户端] --> B[BunkerWeb]
+    B --> C["网关 (默认证书)"]
+    C --> D[SSL 错误]
+
+    style B fill:#f3e5f5,color:#222
+    style C fill:#fff3e0,color:#222
+    style D fill:#ff4d4d,color:#fff,stroke:#b30000,stroke-width:2px
+```
+
+**已启用 SNI：**
+
+```mermaid
+graph LR
+    A[客户端] --> B[BunkerWeb]
+    B --> C["网关 (example.com 特定证书)"]
+    C --> D[正确服务]
+
+    style B fill:#f3e5f5,color:#222
+    style C fill:#e8f5e8,color:#222
+    style D fill:#e8f5e8,color:#222
+```
+
+### SSL/TLS 和 SNI 管理
+
+#### SSL 证书
+
+##### BunkerWeb Cloud 侧
+
+BunkerWeb Cloud 自动管理：
+
+- 您的域的 Let's Encrypt 证书
+- 自动续订
+- 优化的 TLS 配置
+
+##### 客户端基础设施侧
+
+**重要建议：**
+
+1. **使用 HTTPS** 进行 BunkerWeb 与您的服务之间的通信
+2. **管理您自己的证书**在您的基础设施上
+3. **正确配置 SNI**在您的网关/反向代理上
+
+#### 详细的 SNI 配置
+
+##### 用例：带网关的基础设施
+
+如果您的架构如下所示：
+
+```mermaid
+graph LR
+    A[BunkerWeb Cloud] --> B[客户端网关]
+    B --> C[服务 1]
+    B --> D[服务 2]
+    B --> E[服务 3]
+
+    style A fill:#f3e5f5,color:#222
+    style B fill:#fff3e0,color:#222
+    style C fill:#e8f5e8,color:#222
+    style D fill:#e8f5e8,color:#222
+    style E fill:#e8f5e8,color:#222
+```
+
+**BunkerWeb 侧所需的配置：**
+
+```yaml
+# example.com 的配置
+REVERSE_PROXY_SSL_SNI: yes
+REVERSE_PROXY_SSL_SNI_NAME: example.com
+REVERSE_PROXY_SSL_VERIFY: no  # 如果客户端是自签名证书
+REVERSE_PROXY_HEADERS: Host $host
+
+# api.example.com 的配置
+REVERSE_PROXY_SSL_SNI: yes
+REVERSE_PROXY_SSL_SNI_NAME: api.example.com
+REVERSE_PROXY_SSL_VERIFY: no
+REVERSE_PROXY_HEADERS: Host $host
+```
+
+### 客户端网关配置
+
+#### 概述
+
+当您的架构使用客户端的网关/反向代理将流量路由到多个服务时，需要特定的配置来支持 SNI 并确保与 BunkerWeb Cloud 的安全通信。
+
+#### 按技术分类的配置
+
+##### Nginx
+
+<details>
+<summary>Nginx 配置</summary>
+
+```nginx
+# 支持多服务 SNI 的配置
+server {
+    listen 443 ssl http2;
+    server_name example.com;
+
+    ssl_certificate /path/to/example.com.crt;
+    ssl_certificate_key /path/to/example.com.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256;
+    ssl_prefer_server_ciphers off;
+
+    # 安全标头
+    add_header X-Frame-Options DENY;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+
+    location / {
+        proxy_pass http://service1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Server $host;
+
+        # 超时设置
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    server_name api.example.com;
+
+    ssl_certificate /path/to/api.example.com.crt;
+    ssl_certificate_key /path/to/api.example.com.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256;
+    ssl_prefer_server_ciphers off;
+
+    location / {
+        proxy_pass http://api-service:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # API 特定配置
+        proxy_buffering off;
+        proxy_request_buffering off;
+    }
+}
+```
+
+</details>
+
+##### Traefik
+
+<details>
+<summary>Traefik 配置</summary>
+
+**使用 Docker Compose：**
+
+```yaml
+services:
+  traefik:
+    image: traefik:v3.0
+    command:
+      - --api.dashboard=true
+      - --providers.docker=true
+      - --providers.file.filename=/etc/traefik/dynamic.yml
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.myresolver.acme.tlschallenge=true
+      - --certificatesresolvers.myresolver.acme.email=admin@example.com
+      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+    ports:
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+      - ./dynamic.yml:/etc/traefik/dynamic.yml:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.example.com`)"
+      - "traefik.http.routers.dashboard.tls.certresolver=myresolver"
+
+  service1:
+    image: your-app:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.service1.rule=Host(`example.com`)"
+      - "traefik.http.routers.service1.entrypoints=websecure"
+      - "traefik.http.routers.service1.tls.certresolver=myresolver"
+      - "traefik.http.services.service1.loadbalancer.server.port=8080"
+      - "traefik.http.routers.service1.middlewares=security-headers"
+
+  api-service:
+    image: your-api:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`api.example.com`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls.certresolver=myresolver"
+      - "traefik.http.services.api.loadbalancer.server.port=3000"
+      - "traefik.http.routers.api.middlewares=security-headers,rate-limit"
+```
+
+**动态配置 (dynamic.yml)：**
+
+```yaml
+http:
+  middlewares:
+    security-headers:
+      headers:
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 31536000
+        customRequestHeaders:
+          X-Forwarded-Proto: "https"
+
+    rate-limit:
+      rateLimit:
+        burst: 100
+        average: 50
+
+  routers:
+    service1:
+      rule: "Host(`example.com`)"
+      service: "service1"
+      tls:
+        certResolver: "myresolver"
+      middlewares:
+        - "security-headers"
+
+    api:
+      rule: "Host(`api.example.com`)"
+      service: "api-service"
+      tls:
+        certResolver: "myresolver"
+      middlewares:
+        - "security-headers"
+        - "rate-limit"
+
+  services:
+    service1:
+      loadBalancer:
+        servers:
+          - url: "http://service1:8080"
+        healthCheck:
+          path: "/health"
+          interval: "30s"
+
+    api-service:
+      loadBalancer:
+        servers:
+          - url: "http://api-service:3000"
+        healthCheck:
+          path: "/api/health"
+          interval: "30s"
+```
+
+</details>
+
+##### Apache
+
+<details>
+<summary>Apache 配置</summary>
+
+```apache
+# 带 SNI 的 Apache 配置
+<VirtualHost *:443>
+    ServerName example.com
+    DocumentRoot /var/www/html
+
+    # SSL 配置
+    SSLEngine on
+    SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
+    SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256
+    SSLHonorCipherOrder off
+    SSLCertificateFile /path/to/example.com.crt
+    SSLCertificateKeyFile /path/to/example.com.key
+
+    # 安全标头
+    Header always set X-Frame-Options DENY
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    # 反向代理配置
+    ProxyPass / http://service1:8080/
+    ProxyPassReverse / http://service1:8080/
+    ProxyPreserveHost On
+
+    # 自定义标头
+    ProxyPassReverse / http://service1:8080/
+    ProxyPassReverseInterpolateEnv On
+
+    <Proxy *>
+        Require all granted
+    </Proxy>
+
+    # 日志
+    ErrorLog ${APACHE_LOG_DIR}/example.com_error.log
+    CustomLog ${APACHE_LOG_DIR}/example.com_access.log combined
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName api.example.com
+
+    SSLEngine on
+    SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
+    SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256
+    SSLCertificateFile /path/to/api.example.com.crt
+    SSLCertificateKeyFile /path/to/api.example.com.key
+
+    ProxyPass / http://api-service:3000/
+    ProxyPassReverse / http://api-service:3000/
+    ProxyPreserveHost On
+
+    # API 特定配置
+    ProxyTimeout 300
+    ProxyBadHeader Ignore
+
+    ErrorLog ${APACHE_LOG_DIR}/api.example.com_error.log
+    CustomLog ${APACHE_LOG_DIR}/api.example.com_access.log combined
+</VirtualHost>
+
+# 所需模块配置
+LoadModule ssl_module modules/mod_ssl.so
+LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_http_module modules/mod_proxy_http.so
+LoadModule headers_module modules/mod_headers.so
+```
+
+</details>
+
+##### HAProxy
+
+<details>
+<summary>HAProxy 配置</summary>
+
+```haproxy
+global
+    maxconn 4096
+    log stdout local0
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+
+    # SSL 配置
+    ssl-default-bind-ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256
+    ssl-default-bind-options ssl-min-ver TLSv1.2 no-tls-tickets
+
+defaults
+    mode http
+    timeout connect 5000ms
+    timeout client 50000ms
+    timeout server 50000ms
+    option httplog
+    option dontlognull
+    option redispatch
+    retries 3
+    maxconn 2000
+
+frontend https_frontend
+    bind *:443 ssl crt /etc/ssl/certs/example.com.pem crt /etc/ssl/certs/api.example.com.pem
+
+    # 安全标头
+    http-response set-header X-Frame-Options DENY
+    http-response set-header X-Content-Type-Options nosniff
+    http-response set-header X-XSS-Protection "1; mode=block"
+    http-response set-header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    # 基于 SNI 的路由
+    acl is_example hdr(host) -i example.com
+    acl is_api hdr(host) -i api.example.com
+
+    use_backend service1_backend if is_example
+    use_backend api_backend if is_api
+
+    default_backend service1_backend
+
+backend service1_backend
+    balance roundrobin
+    option httpchk GET /health
+    http-check expect status 200
+
+    server service1-1 service1:8080 check
+    server service1-2 service1-backup:8080 check backup
+
+backend api_backend
+    balance roundrobin
+    option httpchk GET /api/health
+    http-check expect status 200
+
+    server api-1 api-service:3000 check
+    server api-2 api-service-backup:3000 check backup
+
+# 统计界面（可选）
+listen stats
+    bind *:8404
+    stats enable
+    stats uri /stats
+    stats refresh 30s
+    stats admin if TRUE
+```
+
+</details>
+
+#### SSL 配置验证
+
+测试 SSL 配置：
+
+```bash
+# SSL 连接测试
+openssl s_client -connect your-domain.com:443 -servername your-domain.com
+
+# 标头验证
+curl -I https://your-domain.com
+
+# SNI 测试
+curl -H "Host: example.com" https://54984654.bunkerweb.cloud
+```
+
+#### 网关最佳实践
+
+1. **运行状况检查**：为您的服务配置运行状况检查
+2. **负载均衡**：使用多个实例以实现高可用性
+3. **监控**：监控您的网关指标
+4. **安全标头**：添加适当的安全标头
+5. **超时**：配置适当的超时以避免阻塞
+
+### BunkerWeb Cloud IP 白名单
+
+#### 为什么要配置白名单？
+
+为了进一步保护您的基础设施，建议在客户端基础设施侧配置 BunkerWeb Cloud IP 地址的白名单。这确保只有来自 BunkerWeb Cloud 的流量才能到达您的后端服务。
+
+我们建议在防火墙级别（iptables 等）进行白名单设置。
+
+#### 要列入白名单的 BunkerWeb Cloud IP 地址
+
+**允许的 IP 地址列表：**
+
+更新的列表可在此处获得：https://repo.bunkerweb.io/cloud/ips
+
+```
+# BunkerWeb Cloud IP 地址
+4.233.128.18
+20.19.161.132
+```
+
+#### 按技术分类的白名单配置
+
+##### Nginx
+
+<details>
+<summary>Nginx 配置</summary>
+
+```nginx
+# 在您的服务器配置中
+server {
+    listen 443 ssl;
+    server_name example.com;
+
+    # BunkerWeb Cloud IP 白名单
+    allow 192.168.1.0/24;
+    allow 10.0.0.0/16;
+    allow 172.16.0.0/12;
+    deny all;
+
+    ssl_certificate /path/to/example.com.crt;
+    ssl_certificate_key /path/to/example.com.key;
+
+    location / {
+        proxy_pass http://service1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+
+# 使用 geo 模块进行更灵活的配置
+geo $bunkerweb_ip {
+    default 0;
+    192.168.1.0/24 1;
+    10.0.0.0/16 1;
+    172.16.0.0/12 1;
+}
+
+server {
+    listen 443 ssl;
+    server_name example.com;
+
+    if ($bunkerweb_ip = 0) {
+        return 403;
+    }
+
+    # ... 其余配置
+}
+```
+
+</details>
+
+##### Traefik
+
+<details>
+<summary>Traefik 配置</summary>
+
+```yaml
+# dynamic.yml 中的配置
+http:
+  middlewares:
+    bunkerweb-whitelist:
+      ipWhiteList:
+        sourceRange:
+          - "192.168.1.0/24"
+          - "10.0.0.0/16"
+          - "172.16.0.0/12"
+        ipStrategy:
+          depth: 1
+
+  routers:
+    example-router:
+      rule: "Host(`example.com`)"
+      service: "example-service"
+      middlewares:
+        - "bunkerweb-whitelist"
+        - "security-headers"
+      tls:
+        certResolver: "myresolver"
+
+    api-router:
+      rule: "Host(`api.example.com`)"
+      service: "api-service"
+      middlewares:
+        - "bunkerweb-whitelist"
+        - "security-headers"
+      tls:
+        certResolver: "myresolver"
+```
+
+**使用 Docker Compose 标签：**
+
+```yaml
+services:
+  service1:
+    image: your-app:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.service1.rule=Host(`example.com`)"
+      - "traefik.http.routers.service1.middlewares=bunkerweb-whitelist"
+      - "traefik.http.middlewares.bunkerweb-whitelist.ipwhitelist.sourcerange=192.168.1.0/24,10.0.0.0/16,172.16.0.0/12"
+```
+
+</details>
+
+##### Apache
+
+<details>
+<summary>Apache 配置</summary>
+
+```apache
+<VirtualHost *:443>
+    ServerName example.com
+
+    # BunkerWeb Cloud IP 白名单
+    <RequireAll>
+        Require ip 192.168.1.0/24
+        Require ip 10.0.0.0/16
+        Require ip 172.16.0.0/12
+    </RequireAll>
+
+    SSLEngine on
+    SSLCertificateFile /path/to/example.com.crt
+    SSLCertificateKeyFile /path/to/example.com.key
+
+    ProxyPass / http://service1:8080/
+    ProxyPassReverse / http://service1:8080/
+    ProxyPreserveHost On
+
+    # 拒绝访问日志配置
+    LogFormat "%h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" combined
+    CustomLog logs/access.log combined
+    ErrorLog logs/error.log
+</VirtualHost>
+
+# 使用 mod_authz_core 的替代配置
+<VirtualHost *:443>
+    ServerName api.example.com
+
+    <Directory />
+        <RequireAny>
+            Require ip 192.168.1.0/24
+            Require ip 10.0.0.0/16
+            Require ip 172.16.0.0/12
+        </RequireAny>
+    </Directory>
+
+    # ... 其余配置
+</VirtualHost>
+```
+
+</details>
+
+##### HAProxy
+
+<details>
+<summary>HAProxy 配置</summary>
+
+```haproxy
+# haproxy.cfg 中的配置
+frontend bunkerweb_frontend
+    bind *:443 ssl crt /path/to/certificates/
+
+    # BunkerWeb Cloud 白名单 ACL
+    acl bunkerweb_ips src 192.168.1.0/24 10.0.0.0/16 172.16.0.0/12
+
+    # 阻止除非是 BunkerWeb Cloud
+    http-request deny unless bunkerweb_ips
+
+    # 安全标头
+    http-response set-header X-Frame-Options DENY
+    http-response set-header X-Content-Type-Options nosniff
+
+    # 路由
+    acl is_example hdr(host) -i example.com
+    acl is_api hdr(host) -i api.example.com
+
+    use_backend app_servers if is_example
+    use_backend api_servers if is_api
+
+    default_backend app_servers
+
+backend app_servers
+    balance roundrobin
+    server app1 service1:8080 check
+    server app2 service2:8080 check
+
+backend api_servers
+    balance roundrobin
+    server api1 api-service:3000 check
+    server api2 api-service-backup:3000 check
+```
+
+</details>
+
+##### 系统防火墙 (iptables)
+
+<details>
+<summary>iptables 配置</summary>
+
+```bash
+#!/bin/bash
+# BunkerWeb Cloud 白名单的 iptables 配置脚本
+
+# 清除现有规则
+iptables -F
+iptables -X
+
+# 默认策略
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT ACCEPT
+
+# 允许环回
+iptables -A INPUT -i lo -j ACCEPT
+
+# 允许已建立的连接
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# HTTPS 允许 BunkerWeb Cloud IP
+iptables -A INPUT -p tcp --dport 443 -s 192.168.1.0/24 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -s 10.0.0.0/16 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -s 172.16.0.0/12 -j ACCEPT
+
+# 允许 HTTP 用于 Let's Encrypt（可选）
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+
+# 允许 SSH（适应您的需求）
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+
+# 调试日志
+iptables -A INPUT -j LOG --log-prefix "DROPPED: "
+
+# 保存规则
+iptables-save > /etc/iptables/rules.v4
+
+echo "iptables 配置已成功应用"
+```
+
+</details>
+
+#### 白名单最佳实践
+
+1. **监控拒绝**：监控被阻止的访问尝试
+2. **定期更新**：保持 IP 列表最新
+3. **定期测试**：验证白名单是否正常工作
+4. **文档**：记录 IP 更改
+5. **警报**：配置 BunkerWeb IP 更改的警报
+6. **备份**：保留备份配置以防万一
+
+### REAL_IP 配置和客户端地址恢复
+
+#### 为什么要配置 REAL_IP？
+
+当使用 BunkerWeb Cloud 作为反向代理时，您的后端应用程序看到的 IP 地址是 BunkerWeb Cloud 的 IP 地址，而不是真实客户端的 IP 地址。要检索真实的客户端 IP 地址，需要进行特定配置。
+
+#### BunkerWeb Cloud 侧配置
+
+在 BunkerWeb UI 中，配置 Real IP：
+
+```yaml
+USE_REAL_IP: yes # 默认为 no
+REAL_IP_FROM: 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8 # 默认
+REAL_IP_HEADER: X-Forwarded-For # 默认
+REAL_IP_RECURSIVE: yes # 默认
+# 如果在 BunkerWeb 前面还使用了 Cloudflare 代理的示例
+REAL_IP_FROM_URLS: https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/
+```
+
+您可以在[Real Ip 文档](https://docs.bunkerweb.io/latest/settings/#real-ip)中找到所有配置选项
+
+#### 客户端基础设施侧配置
+
+##### Nginx
+
+<details>
+<summary>Nginx REAL_IP 配置</summary>
+
+```nginx
+# 配置受信任的 IP 地址 (BunkerWeb Cloud)
+set_real_ip_from 4.233.128.18/32
+set_real_ip_from 20.19.161.132/32
+
+# 用于检索真实 IP 的标头
+real_ip_header X-Real-IP;
+
+# 使用 X-Forwarded-For 的替代方案
+# real_ip_header X-Forwarded-For;
+
+server {
+    listen 443 ssl http2;
+    server_name example.com;
+
+    # SSL 配置
+    ssl_certificate /path/to/example.com.crt;
+    ssl_certificate_key /path/to/example.com.key;
+
+    location / {
+        proxy_pass http://service1:8080;
+
+        # 将真实 IP 标头转发到后端
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # 使用真实客户端 IP 记录日志
+        access_log /var/log/nginx/access.log combined;
+    }
+}
+
+# 带真实 IP 的自定义日志格式
+log_format real_ip '$remote_addr - $remote_user [$time_local] '
+                   '"$request" $status $body_bytes_sent '
+                   '"$http_referer" "$http_user_agent" '
+                   'real_ip="$realip_remote_addr"';
+```
+
+</details>
+
+##### Apache
+
+<details>
+<summary>Apache REAL_IP 配置</summary>
+
+```apache
+# 加载 mod_remoteip 模块
+LoadModule remoteip_module modules/mod_remoteip.so
+
+<VirtualHost *:443>
+    ServerName example.com
+
+    # SSL 配置
+    SSLEngine on
+    SSLCertificateFile /path/to/example.com.crt
+    SSLCertificateKeyFile /path/to/example.com.key
+
+    # 配置受信任的 IP 地址
+    RemoteIPHeader X-Real-IP
+    RemoteIPTrustedProxy 4.233.128.18/32
+    RemoteIPTrustedProxy 20.19.161.132/32
+
+    # 使用 X-Forwarded-For 的替代方案
+    # RemoteIPHeader X-Forwarded-For
+
+    # 反向代理配置
+    ProxyPass / http://service1:8080/
+    ProxyPassReverse / http://service1:8080/
+    ProxyPreserveHost On
+
+    # 转发 IP 标头
+    ProxyPassReverse / http://service1:8080/
+    ProxyPassReverseInterpolateEnv On
+
+    # 带真实 IP 的日志
+    LogFormat "%a %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" combined_real_ip
+    CustomLog logs/access.log combined_real_ip
+    ErrorLog logs/error.log
+</VirtualHost>
+```
+
+</details>
+
+##### HAProxy
+
+<details>
+<summary>HAProxy REAL_IP 配置</summary>
+
+```haproxy
+global
+    maxconn 4096
+    log stdout local0
+
+defaults
+    mode http
+    option httplog
+    option dontlognull
+    option forwardfor
+
+    # 带真实 IP 的日志格式
+    log-format "%ci:%cp [%t] %ft %b/%s %Tq/%Tw/%Tc/%Tr/%Ta %ST %B %CC %CS %tsc %ac/%fc/%bc/%sc/%rc %sq/%bq %hr %hs %{+Q}r"
+
+frontend https_frontend
+    bind *:443 ssl crt /etc/ssl/certs/
+
+    # BunkerWeb Cloud IP 白名单
+    acl bunkerweb_ips src 4.233.128.18/32 20.19.161.132/32
+    http-request deny unless bunkerweb_ips
+
+    # 从标头捕获真实 IP
+    capture request header X-Real-IP len 15
+    capture request header X-Forwarded-For len 50
+
+    # 路由
+    acl is_example hdr(host) -i example.com
+    use_backend app_servers if is_example
+
+    default_backend app_servers
+
+backend app_servers
+    balance roundrobin
+
+    # 添加/保留真实 IP 标头
+    http-request set-header X-Original-Forwarded-For %[req.hdr(X-Forwarded-For)]
+    http-request set-header X-Client-IP %[req.hdr(X-Real-IP)]
+
+    server app1 service1:8080 check
+    server app2 service2:8080 check backup
+```
+
+</details>
+
+##### Traefik
+
+<details>
+<summary>Traefik REAL_IP 配置</summary>
+
+```yaml
+# dynamic.yml 中的配置
+http:
+  middlewares:
+    real-ip:
+      ipWhiteList:
+        sourceRange:
+          - "4.233.128.18/32"
+          - "20.19.161.132/32"
+        ipStrategy:
+          depth: 2  # 受信任代理的数量
+          excludedIPs:
+            - "127.0.0.1/32"
+
+  routers:
+    example-router:
+      rule: "Host(`example.com`)"
+      service: "example-service"
+      middlewares:
+        - "real-ip"
+      tls:
+        certResolver: "myresolver"
+
+  services:
+    example-service:
+      loadBalancer:
+        servers:
+          - url: "http://service1:8080"
+        passHostHeader: true
+```
+
+**traefik.yml (静态) 中的配置：**
+
+```yaml
+entryPoints:
+  websecure:
+    address: ":443"
+    forwardedHeaders:
+      trustedIPs:
+        - "4.233.128.18/32"
+        - "20.19.161.132/32"
+      insecure: false
+
+accessLog:
+  format: json
+  fields:
+    defaultMode: keep
+    names:
+      ClientUsername: drop
+    headers:
+      defaultMode: keep
+      names:
+        X-Real-IP: keep
+        X-Forwarded-For: keep
+```
+
+</details>
+
+#### 测试和验证
+
+##### 配置验证
+
+```bash
+# 测试 1：检查接收到的标头
+curl -H "X-Real-IP: 203.0.113.1" \
+     -H "X-Forwarded-For: 203.0.113.1, 192.168.1.100" \
+     https://example.com/test-ip
+
+# 测试 2：分析日志
+tail -f /var/log/nginx/access.log | grep "203.0.113.1"
+
+# 测试 3：从不同来源测试
+curl -v https://example.com/whatismyip
+```
+
+#### REAL_IP 最佳实践
+
+1. **安全**：仅信任来自已知来源 (BunkerWeb Cloud) 的 IP 标头
+2. **验证**：始终验证标头中接收到的 IP 地址
+3. **日志记录**：记录代理 IP 和真实 IP 以进行调试
+4. **回退**：如果缺少标头，始终有一个默认值
+5. **测试**：定期测试 IP 检测是否正常工作
+6. **监控**：监控 IP 模式以检测异常
+
+#### REAL_IP 故障排除
+
+##### 常见问题
+
+1. **IP 总是显示 BunkerWeb 的**：检查受信任代理配置
+2. **缺少标头**：检查 BunkerWeb Cloud 侧配置
+3. **无效 IP**：实施严格的 IP 验证
+4. **日志不正确**：检查日志格式和 real_ip 模块配置
+
+##### 诊断命令
+
+__测试 IP 检测__
+
+```bash
+curl -H "X-Real-IP: 1.2.3.4" https://your-domain.com/debug-headers
+```
+
+### 监控和可观测性
+
+#### Grafana 访问
+
+您的托管 Grafana 实例使您可以访问：
+
+##### 可用指标
+
+1. **流量概览**
+
+  - 每秒请求数
+  - HTTP 状态码
+  - 请求地理位置
+2. **安全**
+
+  - 被阻止的攻击尝试
+  - 检测到的威胁类型
+  - 触发的 WAF 规则
+3. **性能指标**
+
+  - 请求延迟
+  - 后端响应时间
+  - 资源利用率
+
+##### 可用日志
+
+1. **访问日志**：所有 HTTP/HTTPS 请求
+2. **安全日志**：安全事件和阻止
+3. **错误日志**：应用程序和系统错误
+
+##### 警报配置
+
+为以下情况配置 Grafana 警报：
+
+- 异常流量峰值
+- 5xx 错误增加
+- DDoS 攻击检测
+- 后端健康故障
+
+### 最佳实践
+
+#### 安全
+
+1. **使用 HTTPS** 进行所有后端通信
+2. **实施 IP 白名单**（如果可能）
+3. **配置适当的超时**
+4. **启用压缩**以优化性能
+
+#### 性能
+
+1. **优化缓存配置**
+2. **使用 HTTP/2** 在客户端
+3. **配置运行状况检查** 为您的后端
+4. **定期监控指标**
+
+### 故障排除
+
+#### 常见问题
+
+##### 1. SSL/TLS 错误
+
+**症状：** SSL 证书错误
+
+**解决方案：**
+
+```bash
+# 检查 SNI 配置
+openssl s_client -connect backend.com:443 -servername example.com
+
+# 检查后端证书
+openssl x509 -in certificate.crt -text -noout
+```
+
+##### 2. 后端超时
+
+**症状：** 504 Gateway Timeout 错误
+
+**解决方案：**
+
+- 增加 `REVERSE_PROXY_CONNECT_TIMEOUT` & `REVERSE_PROXY_SEND_TIMEOUT`
+- 检查后端健康状况
+- 优化应用程序性能
+
+##### 3. 路由问题
+
+**症状：** 提供错误的服务
+
+**解决方案：**
+
+- 检查 `SERVER_NAME` 配置
+- 验证 SNI 配置
+- 检查 `Host` 标头
+
+#### 诊断命令
+
+```bash
+# 连接测试
+curl -v https://your-domain.com
+
+# 使用自定义标头测试
+curl -H "Host: example.com" -v https://54984654.bunkerweb.cloud
+
+# DNS 验证
+dig +trace example.com
+
+# SSL 测试
+openssl s_client -connect example.com:443 -servername example.com
+```
+
+#### 技术支持
+
+如需任何技术帮助：
+
+1. **检查日志**在 Grafana 中
+2. **验证配置**在 BunkerWeb UI 中
+3. **联系支持**并提供配置详细信息和错误日志
 
 ## 一体化 (AIO) 镜像 {#all-in-one-aio-image}
 

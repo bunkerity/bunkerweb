@@ -80,7 +80,7 @@ BunkerWeb ofrece una [interfaz de usuario](web-ui.md) opcional para gestionar tu
 
 ¿No quieres autohospedar y gestionar tu(s) propia(s) instancia(s) de BunkerWeb? Podría interesarte BunkerWeb Cloud, nuestra oferta SaaS totalmente gestionada para BunkerWeb.
 
-Prueba nuestra [oferta de BunkerWeb Cloud](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) y obtén acceso a:
+Pide tu [instancia de BunkerWeb Cloud](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=doc) y obtén acceso a:
 
 - Una instancia de BunkerWeb totalmente gestionada alojada en nuestra nube
 - Todas las características de BunkerWeb, incluidas las PRO

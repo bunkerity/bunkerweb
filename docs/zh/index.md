@@ -71,7 +71,7 @@ BunkerWeb 的核心包含主要的[安全功能](advanced.md#security-tuning)，
 
 BunkerWeb 提供了一个可选的[用户界面](web-ui.md)来管理您的实例及其配置。一个在线的只读演示可在 [demo-ui.bunkerweb.io](https://demo-ui.bunkerweb.io/?utm_campaign=self&utm_source=doc) 访问。欢迎您亲自试用。
 
-## BunkerWeb 云
+## BunkerWeb Cloud
 
 <figure markdown>
   ![概述](assets/img/bunkerweb-cloud.webp){ align=center, width="600" }
@@ -80,7 +80,7 @@ BunkerWeb 提供了一个可选的[用户界面](web-ui.md)来管理您的实例
 
 不想自己托管和管理您的 BunkerWeb 实例吗？您可能会对 BunkerWeb Cloud 感兴趣，这是我们为 BunkerWeb 提供的完全托管的 SaaS 产品。
 
-试试我们的 [BunkerWeb Cloud 服务](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc)，您将获得：
+订购您的 [BunkerWeb Cloud 实例](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=doc)，您将获得：
 
 - 一个完全托管在我们云端的 BunkerWeb 实例
 - 所有 BunkerWeb 功能，包括 PRO 功能
