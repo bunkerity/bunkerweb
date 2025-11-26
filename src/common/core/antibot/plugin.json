@@ -11,7 +11,7 @@
       "help": "Activate antibot feature.",
       "id": "use-antibot",
       "label": "Antibot challenge",
-      "regex": "^(no|cookie|javascript|captcha|recaptcha|hcaptcha|turnstile|mcaptcha)$",
+      "regex": "^(no|cookie|javascript|captcha|recaptcha|hcaptcha|turnstile|mcaptcha|altcha)$",
       "type": "select",
       "select": [
         "no",
@@ -21,7 +21,8 @@
         "recaptcha",
         "hcaptcha",
         "turnstile",
-        "mcaptcha"
+        "mcaptcha",
+        "altcha"
       ]
     },
     "ANTIBOT_URI": {
@@ -271,6 +272,51 @@
       "help": "Domain to use for mCaptcha challenge.",
       "id": "antibot-mcaptcha-domain",
       "label": "mCaptcha domain",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "ANTIBOT_ALTCHA_APIKEY": {
+      "context": "multisite",
+      "default": "",
+      "help": "Apikey for ALTCHA challenge.",
+      "id": "antibot-altcha-apikey",
+      "label": "ALTCHA apikey",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "ANTIBOT_ALTCHA_URL": {
+      "context": "multisite",
+      "default": "https://sentinel.example.com",
+      "help": "Domain to use for ALTCHA challenge.",
+      "id": "antibot-altcha-domain",
+      "label": "ALTCHA domain",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "ANTIBOT_ALTCHA_JSSCRIPT": {
+      "context": "multisite",
+      "default": "https://cdn.jsdelivr.net/gh/altcha-org/altcha@2.2.4/dist/altcha.min.js",
+      "help": "Path for altcha.min.js script.",
+      "id": "antibot-altcha-jsscript",
+      "label": "ALTCHA JS Script",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "ANTIBOT_ALTCHA_CHALLANGE": {
+      "context": "multisite",
+      "default": "/v1/challenge",
+      "help": "Path for ALTCHA challengeurl.",
+      "id": "antibot-altcha-challange",
+      "label": "ALTCHA Challenge URL",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "ANTIBOT_ALTCHA_VERIFY": {
+      "context": "multisite",
+      "default": "/v1/verify/signature",
+      "help": "Path for ALTHCHA verify.",
+      "id": "antibot-altcha-verify",
+      "label": "ALTCHA Verify URL",
       "regex": "^.*$",
       "type": "text"
     }

@@ -163,6 +163,12 @@ function antibot:header()
 		end
 	elseif self.session_data.type == "mcaptcha" then
 		csp_directives["frame-src"] = self.variables["ANTIBOT_MCAPTCHA_URL"]
+	elseif self.session_data.type == "altcha" then
+		csp_directives["frame-src"] = self.variables["ANTIBOT_ALTCHA_URL"]
+		csp_directives["connect-src"] = self.variables["ANTIBOT_ALTCHA_URL"] .. " https://cdn.jsdelivr.net"
+		csp_directives["worker-src"] = self.variables["ANTIBOT_ALTCHA_URL"] .. " blob:"
+		csp_directives["style-src"] = csp_directives["style-src"] .. " 'sha256-pg+oQARqMq4wCazyrsMt8HY89BJkXkEFkwNWxg2iPdg='"
+		csp_directives["require-trusted-types-for"] = ""
 	end
 	local csp_content = ""
 	for directive, value in pairs(csp_directives) do
@@ -453,6 +459,14 @@ function antibot:display_challenge()
 		template_vars.mcaptcha_url = self.variables["ANTIBOT_MCAPTCHA_URL"]
 	end
 
+	-- ALTCHA case
+	if self.session_data.type == "altcha" then
+		template_vars.altcha_apikey = self.variables["ANTIBOT_ALTCHA_APIKEY"]
+		template_vars.altcha_url = self.variables["ANTIBOT_ALTCHA_URL"]
+		template_vars.altcha_jsscript = self.variables["ANTIBOT_ALTCHA_JSSCRIPT"]
+		template_vars.altcha_challange = self.variables["ANTIBOT_ALTCHA_CHALLANGE"]
+	end
+
 	-- Render content
 	render(self.session_data.type .. ".html", template_vars)
 
@@ -717,6 +731,45 @@ function antibot:check_challenge()
 		end
 		if not mdata.valid then
 			return false, "client failed challenge", nil
+		end
+		self.session_data.resolved = true
+		self.session_data.time_valid = now()
+		self:set_session_data()
+		return true, "resolved", self.session_data.original_uri
+	end
+
+	-- ALTCHA case
+	if self.session_data.type == "altcha" then
+		read_body()
+		local args, err = get_post_args(1)
+		if err == "truncated" or not args or not args["altcha"] then
+			return nil, "missing challenge arg", nil
+		end
+		local httpc, err = get_http_client()
+		if not httpc then
+			return nil, err, nil, nil
+		end
+		local payload = {
+			payload = args["altcha"]
+		}
+		local json_payload = encode(payload)
+		local res, err = httpc:request_uri(self.variables["ANTIBOT_ALTCHA_URL"] .. self.variables["ANTIBOT_ALTCHA_VERIFY"], {
+			method = "POST",
+			body = json_payload,
+			headers = {
+				["Content-Type"] = "application/json",
+			},
+		})
+		httpc:close()
+		if not res then
+			return nil, "can't send request to ALTCHA API : " .. err, nil
+		end
+		local ok, mdata = pcall(decode, res.body)
+		if not ok then
+			return nil, "error while decoding JSON from ALTCHA API : " .. mdata, nil
+		end
+		if not mdata.verified then
+			return false, "client failed challenge: " .. mdata, nil
 		end
 		self.session_data.resolved = true
 		self.session_data.time_valid = now()
