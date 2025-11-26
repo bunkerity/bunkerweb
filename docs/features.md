@@ -460,6 +460,26 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
     Refer to the [Common Settings](#common-settings) for additional configuration options.
 
+=== "ALTCHA"
+
+    ALTCHA is a self-hosted, privacy-first security solution that protects your websites, APIs, and online services from spam and abuse through an innovative proof-of-work mechanism. Unlike traditional CAPTCHAs that depend on intrusive methods like cookies or fingerprinting, ALTCHA delivers robust protection while respecting user privacy.
+
+    To integrate ALTCHA with BunkerWeb, you must obtain an own ALTCHA server, this can be an own implementation: [ALTCHA on Github](https://github.com/altcha-org/altcha) or an instance of [ALTCHA Sentinel](https://altcha.org/docs/v2/sentinel/).
+
+    **Configuration Settings:**
+
+    | Setting                    | Default                     | Context   | Multiple | Description                                                                 |
+    | -------------------------- | --------------------------- | --------- | -------- | --------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`              | `no`                        | multisite | no       | **Enable Antibot:** Set to `altcha` to enable the ALTCHA challenge.       |
+    | `ANTIBOT_ALTCHA_APIKEY`    |                             | multisite | no       | **ALTCHA Api Key:** Your ALTCHA api key (get this from ALTCHA Sentinel).    |
+    | `ANTIBOT_ALTCHA_URL`       | `https://sentinel.example.com`                                           | multisite | no       | **ALTCHA Domain:** The domain to use for the ALTCHA challenge.  |
+    | `ANTIBOT_ALTCHA_JSSCRIPT`  | `https://cdn.jsdelivr.net/gh/altcha-org/altcha@2.2.4/dist/altcha.min.js` | multisite | no       | **ALTCHA JS Widget:** The url to altcha widget js script. |
+    | `ANTIBOT_ALTCHA_CHALLANGE` | `/v1/challenge`             | multisite | no       | **ALTCHA Challange Url:** The challange url to use for the ALTCHA challenge.          |
+    | `ANTIBOT_ALTCHA_VERIFY`    | `/v1/verify/signature`      | multisite | no       | **ALTCHA Verify Url:** The verify url to use for the ALTCHA (serverside) verify.      |
+    
+
+    Refer to the [Common Settings](#common-settings) for additional configuration options.
+
 ### Example Configurations
 
 === "Cookie Challenge"
