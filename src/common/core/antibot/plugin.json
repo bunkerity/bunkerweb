@@ -292,6 +292,33 @@
       "label": "ALTCHA domain",
       "regex": "^.*$",
       "type": "text"
+    },
+    "ANTIBOT_ALTCHA_JSSCRIPT": {
+      "context": "multisite",
+      "default": "https://cdn.jsdelivr.net/gh/altcha-org/altcha@2.2.4/dist/altcha.min.js",
+      "help": "Path for altcha.min.js script.",
+      "id": "antibot-altcha-jsscript",
+      "label": "ALTCHA JS Script",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "ANTIBOT_ALTCHA_CHALLANGE": {
+      "context": "multisite",
+      "default": "/v1/challenge",
+      "help": "Path for ALTCHA challengeurl.",
+      "id": "antibot-altcha-challange",
+      "label": "ALTCHA JS Script",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "ANTIBOT_ALTCHA_VERIFY": {
+      "context": "multisite",
+      "default": "/v1/verify/signature",
+      "help": "Path for ALTHCHA verify.",
+      "id": "antibot-altcha-verify",
+      "label": "ALTCHA JS Script",
+      "regex": "^.*$",
+      "type": "text"
     }
   }
 }

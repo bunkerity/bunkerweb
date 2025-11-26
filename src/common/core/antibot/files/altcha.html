@@ -28,11 +28,10 @@
     />
     {-raw-}
     <script
-      src="https://cdn.jsdelivr.net/gh/altcha-org/altcha/dist/altcha.min.js"
+      src="{*altcha_jsscript*}"
       type="module"
       nonce="{*nonce_script*}"
     ></script>
-    {-raw-}
     <style nonce="{*nonce_style*}">
       :root {
         --color-primary: #fff;
@@ -258,12 +257,12 @@
         {-raw-}
         <form method="POST" action="{*antibot_uri*}" id="form">
           <altcha-widget 
-            challengeurl="{*altcha_url*}/v1/challenge?apiKey={*altcha_apikey*}"
+            challengeurl="{*altcha_url*}{*altcha_challange*}?apiKey={*altcha_apikey*}"
           ></altcha-widget>
-          <br />
+          {-raw-}
+          <div><br /></div>
           <button id="altcha-verify" type="submit">Submit</button>
         </form>
-        {-raw-}
         <p class="subtitle">
           This site is protected by&nbsp;<a
             href="https://altcha.org/"
@@ -314,7 +313,6 @@
         >
       </p>
     </footer>
-    {-raw-}
   </body>
 </html>
 {-raw-}

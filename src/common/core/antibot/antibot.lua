@@ -167,8 +167,7 @@ function antibot:header()
 		csp_directives["frame-src"] = self.variables["ANTIBOT_ALTCHA_URL"]
 		csp_directives["connect-src"] = self.variables["ANTIBOT_ALTCHA_URL"] .. " https://cdn.jsdelivr.net"
 		csp_directives["worker-src"] = self.variables["ANTIBOT_ALTCHA_URL"] .. " blob:"
-		csp_directives["style-src"] = csp_directives["style-src"] .. " 'sha256-4UBTM7JzP/b0ZjmASKhJm4x0LC9P8qq6s5RA3rT5hqs=' 'sha256-pg+oQARqMq4wCazyrsMt8HY89BJkXkEFkwNWxg2iPdg=' " .. self.variables["ANTIBOT_ALTCHA_URL"]
-		csp_directives["script-src"] = csp_directives["script-src"] .. " https://cdn.jsdelivr.net " .. self.variables["ANTIBOT_ALTCHA_URL"] 
+		csp_directives["style-src"] = csp_directives["style-src"] .. " 'sha256-pg+oQARqMq4wCazyrsMt8HY89BJkXkEFkwNWxg2iPdg='
 		csp_directives["require-trusted-types-for"] = ""
 	end
 	local csp_content = ""
@@ -464,6 +463,8 @@ function antibot:display_challenge()
 	if self.session_data.type == "altcha" then
 		template_vars.altcha_apikey = self.variables["ANTIBOT_ALTCHA_APIKEY"]
 		template_vars.altcha_url = self.variables["ANTIBOT_ALTCHA_URL"]
+		template_vars.altcha_jsscript = self.variables["ANTIBOT_ALTCHA_JSSCRIPT"]
+		template_vars.altcha_challange = self.variables["ANTIBOT_ALTCHA_CHALLANGE"]
 	end
 
 	-- Render content
@@ -752,7 +753,7 @@ function antibot:check_challenge()
 			payload = args["altcha"]
 		}
 		local json_payload = encode(payload)
-		local res, err = httpc:request_uri(self.variables["ANTIBOT_ALTCHA_URL"] .. "/v1/verify/signature", {
+		local res, err = httpc:request_uri(self.variables["ANTIBOT_ALTCHA_URL"] .. self.variables["ANTIBOT_ALTCHA_VERIFY"], {
 			method = "POST",
 			body = json_payload,
 			headers = {
@@ -768,7 +769,7 @@ function antibot:check_challenge()
 			return nil, "error while decoding JSON from ALTCHA API : " .. mdata, nil
 		end
 		if not mdata.verified then
-			return false, "client failed challenge", nil
+			return false, "client failed challenge: " .. mdata, nil
 		end
 		self.session_data.resolved = true
 		self.session_data.time_valid = now()
