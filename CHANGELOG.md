@@ -3,6 +3,7 @@
 ## v1.6.7-rc1 - ????/??/??
 
 - [FEATURE] Refactor logging setup across multiple modules to be able to send logs to a syslog server and have multiple handlers at the same time
+- [FEATURE] Allow configuration of whether Base64 decoding should be applied to DNS credentials via the new `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` setting in the `Let's Encrypt` plugin (default is `yes`)
 - [BUGFIX] Fix issues with the Ingress controller regarding reverse proxy settings when using multiple paths per rule and a template by adjusting the indexing logic to be configurable via the new `KUBERNETES_REVERSE_PROXY_SUFFIX_START` setting (default is `1` to keep backward compatibility)
 - [BUGFIX] Escape percentage signs in `DATABASE_URI` for Alembic when using the SQLAlchemy URL configuration to prevent formatting errors during migrations
 
