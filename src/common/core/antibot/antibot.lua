@@ -167,7 +167,7 @@ function antibot:header()
 		csp_directives["frame-src"] = self.variables["ANTIBOT_ALTCHA_URL"]
 		csp_directives["connect-src"] = self.variables["ANTIBOT_ALTCHA_URL"] .. " https://cdn.jsdelivr.net"
 		csp_directives["worker-src"] = self.variables["ANTIBOT_ALTCHA_URL"] .. " blob:"
-		csp_directives["style-src"] = csp_directives["style-src"] .. " 'sha256-pg+oQARqMq4wCazyrsMt8HY89BJkXkEFkwNWxg2iPdg='
+		csp_directives["style-src"] = csp_directives["style-src"] .. " 'sha256-pg+oQARqMq4wCazyrsMt8HY89BJkXkEFkwNWxg2iPdg='"
 		csp_directives["require-trusted-types-for"] = ""
 	end
 	local csp_content = ""
