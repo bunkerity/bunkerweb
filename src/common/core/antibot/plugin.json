@@ -307,7 +307,7 @@
       "default": "/v1/challenge",
       "help": "Path for ALTCHA challengeurl.",
       "id": "antibot-altcha-challange",
-      "label": "ALTCHA JS Script",
+      "label": "ALTCHA Challenge URL",
       "regex": "^.*$",
       "type": "text"
     },
@@ -316,7 +316,7 @@
       "default": "/v1/verify/signature",
       "help": "Path for ALTHCHA verify.",
       "id": "antibot-altcha-verify",
-      "label": "ALTCHA JS Script",
+      "label": "ALTCHA Verify URL",
       "regex": "^.*$",
       "type": "text"
     }
