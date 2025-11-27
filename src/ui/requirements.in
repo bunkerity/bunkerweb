@@ -1,4 +1,4 @@
-biscuit-python<0.4.0
+biscuit-python<0.5.0
 certbot==5.1.0
 Flask==3.1.2
 Flask-Login==0.6.3
