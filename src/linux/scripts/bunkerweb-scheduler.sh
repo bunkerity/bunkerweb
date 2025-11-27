@@ -94,6 +94,9 @@ function start() {
     LOG_FILE_PATH=$(get_env_var "LOG_FILE_PATH" "/var/log/bunkerweb/scheduler.log")
     export LOG_FILE_PATH
 
+    LOG_SYSLOG_TAG=$(get_env_var "LOG_SYSLOG_TAG" "bw-scheduler")
+    export LOG_SYSLOG_TAG
+
     # Extract DATABASE_URI with fallback
     DATABASE_URI=$(get_env_var "DATABASE_URI" "sqlite:////var/lib/bunkerweb/db.sqlite3")
     export DATABASE_URI

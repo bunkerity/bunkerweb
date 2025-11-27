@@ -37,6 +37,8 @@ elif [[ $(echo "$AUTOCONF_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
 	echo "Autoconf" > /usr/share/bunkerweb/INTEGRATION
 fi
 
+export LOG_SYSLOG_TAG="${LOG_SYSLOG_TAG:-bw-scheduler}"
+
 # Database migration section
 log "ENTRYPOINT" "ℹ️" "Checking database configuration..."
 cd /usr/share/bunkerweb/db/alembic || {

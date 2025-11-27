@@ -84,6 +84,9 @@ start() {
     LOG_FILE_PATH=$(get_env_var "LOG_FILE_PATH" "/var/log/bunkerweb/ui.log")
     export LOG_FILE_PATH
 
+    LOG_SYSLOG_TAG=$(get_env_var "LOG_SYSLOG_TAG" "bw-ui")
+    export LOG_SYSLOG_TAG
+
     export CAPTURE_OUTPUT="yes"
 
     # Export all variables from variables.env
