@@ -151,12 +151,6 @@ importlib-metadata==8.7.0 \
 packaging==25.0 \
     --hash=sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484 \
     --hash=sha256:d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f
-    # via importlib-metadata
-
-# The following packages are considered to be unsafe in a requirements file:
-pip==25.2 \
-    --hash=sha256:578283f006390f85bb6282dffb876454593d637f5d1be494b5202ce4877e71f2 \
-    --hash=sha256:6d67a2b4e7f14d8b31b8b52648866fa717f45a1eb70e83002f4331d07e953717
     # via
     #   build
     #   pip-upgrader
@@ -184,12 +178,6 @@ pyproject-hooks==1.2.0 \
 requests==2.32.5 \
     --hash=sha256:2462f94637a34fd532264295e186976db0f5d453d1cdd31473c85a6a161affb6 \
     --hash=sha256:dbba0bac56e100853db0ea71b82b4dfd5fe2bf6d3754a8893c3af500cec7d7cf
-    # via
-    #   -r requirements-deps.in
-    #   pip-tools
-setuptools==80.9.0 \
-    --hash=sha256:062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922 \
-    --hash=sha256:f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c
     # via pip-upgrader
 terminaltables==3.1.10 \
     --hash=sha256:ba6eca5cb5ba02bba4c9f4f985af80c54ec3dccf94cfcd190154386255e47543 \
@@ -261,6 +249,18 @@ wheel==0.46.1 \
 zipp==3.23.0 \
     --hash=sha256:071652d6115ed432f5ce1d34c336c0adfd6a884660d1e9712a256d3d3bd4b14e \
     --hash=sha256:a07157588a12518c9d4034df3fbbee09c814741a33ff63c05fa29d26a2404166
+    # via importlib-metadata
+
+# The following packages are considered to be unsafe in a requirements file:
+pip==25.3 \
+    --hash=sha256:8d0538dbbd7babbd207f261ed969c65de439f6bc9e5dbd3b3b9a77f25d95f343 \
+    --hash=sha256:9655943313a94722b7774661c21049070f6bbb0a1516bf02f7c8d5d9201514cd
+    # via
+    #   -r requirements-deps.in
+    #   pip-tools
+setuptools==80.9.0 \
+    --hash=sha256:062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922 \
+    --hash=sha256:f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c
     # via
     #   -r requirements-deps.in
     #   pip-tools
