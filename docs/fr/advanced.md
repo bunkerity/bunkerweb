@@ -584,7 +584,7 @@ Voici les types de configurations personnalisées disponibles :
 - **stream** : Configurations au niveau du flux de NGINX.
 - **server-stream** : Configurations au niveau Stream/Server de NGINX.
 
-Les configurations personnalisées peuvent être appliquées globalement ou spécifiquement pour un serveur particulier, en fonction du contexte applicable et de l'activation ou non du [mode multisite](concepts.md#multisite-mode) .
+Les configurations personnalisées peuvent être appliquées globalement ou spécifiquement pour un serveur particulier, en fonction du contexte applicable et de l'activation ou non du [mode multisite](features.md#multisite-mode) .
 
 La méthode d'application des configurations personnalisées dépend de l'intégration utilisée. Cependant, le processus sous-jacent implique l'ajout de fichiers avec le `.conf` suffixe à des dossiers spécifiques. Pour appliquer une configuration personnalisée à un serveur spécifique, le fichier doit être placé dans un sous-dossier nommé d'après le nom du serveur principal.
 
@@ -1478,7 +1478,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
     - Configurez un conteneur PHP-FPM pour votre application et montez le dossier contenant les fichiers PHP.
     - Utilisez les paramètres spécifiques `REMOTE_PHP` et `REMOTE_PHP_PATH` comme variables d'environnement lors de l'exécution de BunkerWeb.
 
-    Si vous activez le [mode multisite](concepts.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé à l'aide de la première valeur de `SERVER_NAME`. Voici un exemple fictif :
+    Si vous activez le [mode multisite](features.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé à l'aide de la première valeur de `SERVER_NAME`. Voici un exemple fictif :
 
     ```
     www
@@ -1535,7 +1535,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
     - Configurez un conteneur PHP-FPM pour votre application et montez le dossier contenant les fichiers PHP
     - Utilisez les paramètres spécifiques `REMOTE_PHP` et `REMOTE_PHP_PATH` comme variables d'environnement lors du démarrage de BunkerWeb
 
-    Si vous activez le [mode multisite](concepts.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé à l'aide de la première valeur de `SERVER_NAME`. Voici un exemple fictif :
+    Si vous activez le [mode multisite](features.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé à l'aide de la première valeur de `SERVER_NAME`. Voici un exemple fictif :
 
     ```
     www
@@ -1643,7 +1643,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
     - Configurez un conteneur PHP-FPM pour vos applications et montez le dossier contenant les applications PHP
     - Utilisez les paramètres spécifiques `REMOTE_PHP` et `REMOTE_PHP_PATH` comme étiquettes pour votre conteneur PHP-FPM
 
-    Comme l'autoconf de Docker implique d'utiliser le [mode multisite](concepts.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé à l'aide de la première valeur de `SERVER_NAME`. Voici un exemple fictif :
+    Comme l'autoconf de Docker implique d'utiliser le [mode multisite](features.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé à l'aide de la première valeur de `SERVER_NAME`. Voici un exemple fictif :
 
     ```
     www
@@ -1838,7 +1838,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
     systemctl restart php-fpm
     ```
 
-    Si vous activez le [mode multisite](concepts.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé en utilisant la première valeur de `SERVER_NAME`. Voici un exemple fictif :
+    Si vous activez le [mode multisite](features.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé en utilisant la première valeur de `SERVER_NAME`. Voici un exemple fictif :
 
     ```
     /var/www/html
@@ -1914,7 +1914,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
     - Configurez un conteneur PHP-FPM pour vos applications et montez le dossier contenant les applications PHP
     - Utilisez les paramètres spécifiques `REMOTE_PHP` et `REMOTE_PHP_PATH` comme étiquettes pour votre conteneur PHP-FPM
 
-    Étant donné que l'intégration de Swarm implique l'utilisation du [mode multisite](concepts.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé à l'aide de la première valeur de `SERVER_NAME`. Voici un exemple fictif :
+    Étant donné que l'intégration de Swarm implique l'utilisation du [mode multisite](features.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé à l'aide de la première valeur de `SERVER_NAME`. Voici un exemple fictif :
 
     ```
     www
@@ -2088,6 +2088,171 @@ Par défaut, BunkerWeb n'écoutera que les adresses IPv4 et n'utilisera pas IPv6
     systemctl start bunkerweb
     ```
 
+### Options de configuration de journalisation
+
+BunkerWeb offre une configuration de journalisation flexible, vous permettant d'envoyer les journaux vers plusieurs destinations (comme des fichiers, stdout/stderr ou syslog) simultanément. Cela est particulièrement utile pour l'intégration avec des collecteurs de journaux externes tout en conservant des journaux locaux pour l'interface Web.
+
+Il y a deux catégories principales de journaux à configurer :
+
+1. **Journaux de service** : Journaux générés par les composants BunkerWeb (Scheduler, UI, Autoconf, etc.). Contrôlés par service via `LOG_TYPES` (et optionnellement `LOG_FILE_PATH`, `LOG_SYSLOG_ADDRESS`, `LOG_SYSLOG_TAG`).
+2. **Journaux d'accès et d'erreur** : Journaux d'accès et d'erreur HTTP générés par NGINX. Seuls le service `bunkerweb` les utilise (`ACCESS_LOG` / `ERROR_LOG` / `LOG_LEVEL`).
+
+#### Journaux de service
+
+Les journaux de service sont contrôlés par le paramètre `LOG_TYPES`, qui peut accepter plusieurs valeurs séparées par des espaces (par exemple, `LOG_TYPES="stderr syslog"`).
+
+| Valeur   | Description                                                                                                |
+| :------- | :--------------------------------------------------------------------------------------------------------- |
+| `file`   | Écrit les journaux dans un fichier. Requis pour le visualiseur de journaux de l'interface Web.             |
+| `stderr` | Écrit les journaux vers l'erreur standard. Standard pour les environnements conteneurisés (`docker logs`). |
+| `syslog` | Envoie les journaux vers un serveur syslog. Nécessite que `LOG_SYSLOG_ADDRESS` soit défini.                |
+
+Lors de l'utilisation de `syslog`, vous devriez également configurer :
+
+- `LOG_SYSLOG_ADDRESS` : L'adresse du serveur syslog (par exemple, `udp://bw-syslog:514` ou `/dev/log`).
+- `LOG_SYSLOG_TAG` : Une étiquette unique pour le service (par exemple, `bw-scheduler`) pour distinguer ses entrées.
+- `LOG_FILE_PATH` : Chemin pour la sortie fichier lorsque `LOG_TYPES` inclut `file` (par exemple, `/var/log/bunkerweb/scheduler.log`).
+
+#### Journaux d'accès et d'erreur
+
+Ce sont des journaux NGINX standard, configurés via **le service `bunkerweb` uniquement**. Ils prennent en charge plusieurs destinations en suffixant le nom du paramètre (par exemple, `ACCESS_LOG`, `ACCESS_LOG_1` et le `LOG_FORMAT` correspondant, `LOG_FORMAT_1` ou `ERROR_LOG`, `ERROR_LOG_1` et leur `LOG_LEVEL` respectif, `LOG_LEVEL_1`).
+
+- `ACCESS_LOG` : Destination pour les journaux d'accès (par défaut : `/var/log/bunkerweb/access.log`). Accepte un chemin de fichier, `syslog:server=host[:port][,param=value]`, tampon partagé `memory:name:size`, ou `off` pour désactiver. Voir la [documentation NGINX access_log](https://nginx.org/en/docs/http/ngx_http_log_module.html#access_log) pour plus de détails.
+- `ERROR_LOG` : Destination pour les journaux d'erreur (par défaut : `/var/log/bunkerweb/error.log`). Accepte un chemin de fichier, `stderr`, `syslog:server=host[:port][,param=value]`, ou tampon partagé `memory:size`. Voir la [documentation NGINX error_log](https://nginx.org/en/docs/ngx_core_module.html#error_log) pour plus de détails.
+- `LOG_LEVEL` : Niveau de verbosité des journaux d'erreur (par défaut : `notice`).
+
+Ces paramètres acceptent des valeurs NGINX standard, y compris des chemins de fichiers, `stderr`, `syslog:server=...` (voir la [documentation NGINX syslog](https://nginx.org/en/docs/syslog.html)), ou des tampons de mémoire partagée. Ils prennent en charge plusieurs destinations via des suffixes numérotés (voir la [convention des paramètres multiples](concepts.md#multiple-settings)). Les autres services (Scheduler, UI, Autoconf, etc.) reposent uniquement sur `LOG_TYPES`/`LOG_FILE_PATH`/`LOG_SYSLOG_*`.
+
+**Exemple avec plusieurs journaux d'accès/erreur (bunkerweb uniquement, suffixes numérotés) :**
+
+```conf
+ACCESS_LOG=/var/log/bunkerweb/access.log
+ACCESS_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
+LOG_FORMAT=$host $remote_addr - $request_id $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"
+LOG_FORMAT_1=$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent
+ERROR_LOG=/var/log/bunkerweb/error.log
+ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
+LOG_LEVEL=notice
+LOG_LEVEL_1=error
+```
+
+#### Valeurs par défaut et exemples d'intégration
+
+=== "Linux"
+
+  **Comportement par défaut** : `LOG_TYPES="file"`. Les journaux sont écrits dans `/var/log/bunkerweb/*.log`.
+
+  **Exemple** : Garder les fichiers locaux (pour l'interface Web) et également refléter vers le syslog système.
+
+  ```conf
+  # Journaux de service (définis dans /etc/bunkerweb/variables.env ou fichiers env spécifiques au service)
+  LOG_TYPES="file syslog"
+  LOG_SYSLOG_ADDRESS=/dev/log
+  LOG_FILE_PATH=/var/log/bunkerweb/bunkerweb.log
+  # LOG_SYSLOG_TAG est automatiquement défini par service (remplacer par service si nécessaire)
+
+  # Journaux NGINX (service bunkerweb uniquement ; définis dans /etc/bunkerweb/variables.env)
+  ACCESS_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
+  ERROR_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
+  LOG_LEVEL=notice
+  ```
+
+=== "Docker / Autoconf / Swarm"
+
+  **Comportement par défaut** : `LOG_TYPES="stderr"`. Les journaux sont visibles via `docker logs`.
+
+  **Exemple** : Garder `docker logs` (stderr) ET envoyer vers un conteneur syslog central (nécessaire pour l'interface Web et CrowdSec).
+
+  ```yaml
+  services:
+    bunkerweb:
+    image: bunkerity/bunkerweb:1.6.6
+    environment:
+      # Journaux de service (bunkerweb)
+      LOG_TYPES: "stderr syslog"
+      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
+      LOG_SYSLOG_TAG: "bunkerweb"
+      LOG_FILE_PATH: "/var/log/bunkerweb/bunkerweb.log"
+      # Journaux NGINX : Envoyer vers Syslog (bunkerweb uniquement)
+      ACCESS_LOG: "syslog:server=udp://bw-syslog:514,tag=bunkerweb"
+      ERROR_LOG: "syslog:server=udp://bw-syslog:514,tag=bunkerweb"
+
+    bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.6
+    environment:
+      # Journaux de service (scheduler)
+      LOG_TYPES: "stderr syslog"
+      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
+      LOG_SYSLOG_TAG: "bw-scheduler"
+      LOG_FILE_PATH: "/var/log/bunkerweb/scheduler.log"
+
+    bw-ui:
+    image: bunkerity/bunkerweb-ui:1.6.6
+    environment:
+      # Journaux de service (UI)
+      LOG_TYPES: "stderr syslog"
+      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
+      LOG_SYSLOG_TAG: "bw-ui"
+      LOG_FILE_PATH: "/var/log/bunkerweb/ui.log"
+
+    # Conteneur Syslog central pour collecter les journaux et les écrire dans un volume partagé
+    bw-syslog:
+    image: balabit/syslog-ng:4.9.0
+    volumes:
+      - bw-logs:/var/log/bunkerweb # Volume partagé pour l'interface Web
+      - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf
+
+  volumes:
+    bw-logs:
+  ```
+
+#### Configuration de syslog-ng
+
+Voici un exemple de fichier `syslog-ng.conf` que vous pouvez utiliser pour rediriger les journaux vers un fichier :
+
+```conf
+@version: 4.10
+
+# Configuration de la source pour recevoir les journaux envoyés par les services BunkerWeb (ACCESS_LOG / ERROR_LOG et LOG_TYPES=syslog)
+source s_net {
+  udp(
+    ip("0.0.0.0")
+  );
+};
+
+# Modèle pour formater les messages de journalisation
+template t_imp {
+  template("$MSG\n");
+  template_escape(no);
+};
+
+# Destination : écrire les journaux dans des fichiers nommés dynamiquement
+destination d_dyna_file {
+  file(
+    "/var/log/bunkerweb/${PROGRAM}.log"
+    template(t_imp)
+    owner("101")
+    group("101")
+    dir_owner("root")
+    dir_group("101")
+    perm(0440)
+    dir_perm(0770)
+    create_dirs(yes)
+    logrotate(
+      enable(yes),
+      size(100MB),
+      rotations(7)
+    )
+  );
+};
+
+# Chemin de journalisation pour diriger les logs vers des fichiers nommés dynamiquement
+log {
+  source(s_net);
+  destination(d_dyna_file);
+};
+```
+
 ### Meilleures pratiques de journalisation Docker
 
 Lors de l'utilisation de Docker, il est important de gérer les journaux des conteneurs pour éviter qu'ils ne consomment un espace disque excessif. Par défaut, Docker utilise le pilote de journalisation `json-file`, ce qui peut entraîner des fichiers journaux très volumineux s'il n'est pas configuré.
@@ -2226,20 +2391,20 @@ Le plugin Reporting fournit une solution complète pour la communication réguli
 
 **Liste des paramètres**
 
-| Réglage                        | Par défaut         | Contexte | Description                                                                                                   |
-| ------------------------------ | ------------------ | -------- | ------------------------------------------------------------------------------------------------------------- |
-| `USE_REPORTING_SMTP`           | `no`               | global   | Activer l'envoi du rapport par e-mail (HTML).                                                                 |
-| `USE_REPORTING_WEBHOOK`        | `no`               | global   | Activer l'envoi du rapport via webhook (Markdown).                                                            |
-| `REPORTING_SCHEDULE`           | `weekly`           | global   | Cadence du rapport : `daily`, `weekly` ou `monthly`.                                                          |
-| `REPORTING_WEBHOOK_URLS`       |                    | global   | URLs de webhook séparées par des espaces ; Discord et Slack sont détectés automatiquement.                    |
-| `REPORTING_SMTP_EMAILS`        |                    | global   | Destinataires e-mail séparés par des espaces.                                                                 |
-| `REPORTING_SMTP_HOST`          |                    | global   | Nom d'hôte ou IP du serveur SMTP.                                                                             |
-| `REPORTING_SMTP_PORT`          | `465`              | global   | Port SMTP. Utilisez `465` pour SSL, `587` pour TLS.                                                           |
-| `REPORTING_SMTP_FROM_EMAIL`    |                    | global   | Adresse de l'expéditeur (désactivez la 2FA si nécessaire).                                                    |
-| `REPORTING_SMTP_FROM_USER`     |                    | global   | Nom d'utilisateur SMTP (utilise l'adresse d'envoi si seul le mot de passe est fourni).                        |
-| `REPORTING_SMTP_FROM_PASSWORD` |                    | global   | Mot de passe SMTP.                                                                                            |
-| `REPORTING_SMTP_SSL`           | `SSL`              | global   | Sécurité de connexion : `no`, `SSL` ou `TLS`.                                                                 |
-| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global   | Objet des envois e-mail.                                                                                      |
+| Réglage                        | Par défaut         | Contexte | Description                                                                                |
+| ------------------------------ | ------------------ | -------- | ------------------------------------------------------------------------------------------ |
+| `USE_REPORTING_SMTP`           | `no`               | global   | Activer l'envoi du rapport par e-mail (HTML).                                              |
+| `USE_REPORTING_WEBHOOK`        | `no`               | global   | Activer l'envoi du rapport via webhook (Markdown).                                         |
+| `REPORTING_SCHEDULE`           | `weekly`           | global   | Cadence du rapport : `daily`, `weekly` ou `monthly`.                                       |
+| `REPORTING_WEBHOOK_URLS`       |                    | global   | URLs de webhook séparées par des espaces ; Discord et Slack sont détectés automatiquement. |
+| `REPORTING_SMTP_EMAILS`        |                    | global   | Destinataires e-mail séparés par des espaces.                                              |
+| `REPORTING_SMTP_HOST`          |                    | global   | Nom d'hôte ou IP du serveur SMTP.                                                          |
+| `REPORTING_SMTP_PORT`          | `465`              | global   | Port SMTP. Utilisez `465` pour SSL, `587` pour TLS.                                        |
+| `REPORTING_SMTP_FROM_EMAIL`    |                    | global   | Adresse de l'expéditeur (désactivez la 2FA si nécessaire).                                 |
+| `REPORTING_SMTP_FROM_USER`     |                    | global   | Nom d'utilisateur SMTP (utilise l'adresse d'envoi si seul le mot de passe est fourni).     |
+| `REPORTING_SMTP_FROM_PASSWORD` |                    | global   | Mot de passe SMTP.                                                                         |
+| `REPORTING_SMTP_SSL`           | `SSL`              | global   | Sécurité de connexion : `no`, `SSL` ou `TLS`.                                              |
+| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global   | Objet des envois e-mail.                                                                   |
 
 !!! info "Information et comportement"
     - `REPORTING_SMTP_EMAILS` est requis quand l'envoi SMTP est activé ; `REPORTING_WEBHOOK_URLS` est requis quand les webhooks sont activés.

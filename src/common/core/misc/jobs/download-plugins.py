@@ -33,12 +33,12 @@ from requests.exceptions import ConnectionError
 
 from common_utils import bytes_hash, add_dir_to_tar_safely  # type: ignore
 from Database import Database  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 
 
 EXTERNAL_PLUGINS_DIR = Path(sep, "etc", "bunkerweb", "plugins")
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb", "plugins")
-LOGGER = setup_logger("Jobs.download-plugins")
+LOGGER = getLogger("DOWNLOAD-EXTERNAL-PLUGINS")
 status = 0
 
 

@@ -3,20 +3,1252 @@
 ## BunkerWeb Cloud
 
 <figure markdown>
-  ![Vue d'ensemble](assets/img/bunkerweb-cloud.webp){ align=center, width="600" }
+  ![Vue d'ensemble](assets/img/bunkerweb-cloud.png){ align=center, width="600" }
   <figcaption>BunkerWeb Cloud</figcaption>
 </figure>
 
-BunkerWeb Cloud sera le moyen le plus simple de commencer avec BunkerWeb. Il vous offre un service BunkerWeb entièrement géré sans tracas. Considérez-le comme un BunkerWeb-as-a-Service !
+BunkerWeb Cloud est une solution gérée de Web Application Firewall (WAF) et de reverse proxy qui vous permet de sécuriser vos applications web sans installer BunkerWeb dans votre infrastructure. En souscrivant à BunkerWeb Cloud, vous bénéficiez d'une pile BunkerWeb complète hébergée dans le cloud avec des ressources dédiées (8 Go de RAM, 2 CPU **par** instance, répliqué sur 2 instances pour la haute disponibilité, offre Standard).
 
-Essayez notre [offre BunkerWeb Cloud](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=doc) et accédez à :
+### Avantages clés
 
-- Une instance BunkerWeb entièrement gérée et hébergée dans notre cloud
-- Toutes les fonctionnalités de BunkerWeb, y compris les fonctionnalités PRO
-- Une plateforme de surveillance avec tableaux de bord et alertes
-- Support technique pour vous aider dans la configuration
+Commandez votre [instance BunkerWeb Cloud](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=doc) et accédez à :
 
-Si vous êtes intéressé par l'offre BunkerWeb Cloud, n'hésitez pas à [nous contacter](https://panel.bunkerweb.io/contact.php?language=french&utm_campaign=self&utm_source=doc) afin que nous puissions discuter de vos besoins.
+- **Déploiement instantané** : Aucune installation requise dans votre infrastructure
+- **Haute disponibilité** : Instances répliquées avec équilibrage de charge automatique
+- **Surveillance intégrée** : Accès à Grafana pour la visualisation des journaux et des métriques
+- **Scalabilité** : Ressources dédiées adaptées aux charges de travail importantes
+- **Sécurité renforcée** : Protection WAF en temps réel contre les menaces web
+
+Si vous êtes intéressé par l'offre BunkerWeb Cloud, n'hésitez pas à [nous contacter](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) afin que nous puissions discuter de vos besoins.
+
+### Vue d'ensemble de l'architecture
+
+#### Architecture simple - Service unique
+
+```mermaid
+graph LR
+    A[Client] -->|HTTPS| B[exemple.com]
+    B -->|Résolution DNS| C[Load Balancer54984654.bunkerweb.cloud]
+    C -->|Trafic| D[BunkerWeb CloudWAF + Reverse Proxy]
+    D -->|HTTPS/HTTP| E[Serveur exemple.comInfrastructure Client]
+
+    style C fill:#e1f5fe,color:#222
+    style D fill:#f3e5f5,color:#222
+    style E fill:#e8f5e8,color:#222
+```
+
+#### Architecture complexe - Multi-services
+
+```mermaid
+graph LR
+    A[Clients] -->|HTTPS| B[exemple.comautre-exemple.comun-autre-exemple.com]
+    B -->|Résolution DNS| C[Load Balancer54984654.bunkerweb.cloud]
+    C -->|Trafic| D[BunkerWeb CloudWAF + Reverse ProxySSL SNI Activé]
+    D -->|HTTPS avec SNI| E[Gateway ClientReverse Proxy/LB]
+    E -->|Routage interne| F[Service 1]
+    E -->|Routage interne| G[Service 2]
+    E -->|Routage interne| H[Service N]
+
+    style C fill:#e1f5fe,color:#222
+    style D fill:#f3e5f5,color:#222
+    style E fill:#fff3e0,color:#222
+    style F fill:#e8f5e8,color:#222
+    style G fill:#e8f5e8,color:#222
+    style H fill:#e8f5e8,color:#222
+```
+
+### Configuration initiale
+
+#### 1. Accès à l'interface de gestion
+
+Après avoir souscrit à BunkerWeb Cloud, vous recevrez :
+
+- **URL d'accès à l'UI BunkerWeb** : Interface pour configurer vos services
+- **Point de terminaison Load Balancer** : URL unique au format `http://[ID].bunkerweb.cloud`
+- **Accès Grafana** : Interface de surveillance et visualisation des métriques
+- **Ressources allouées** : 2 instances avec 16 Go de RAM et 4 CPU chacune
+
+#### 2. Première connexion
+
+1. Connectez-vous à l'interface BunkerWeb Cloud
+2. Configurez vos services à protéger
+3. Accédez à Grafana pour visualiser vos journaux et métriques BunkerWeb
+
+### Configuration DNS
+
+#### Redirection du trafic vers BunkerWeb Cloud
+
+Pour que le trafic de votre domaine soit traité par BunkerWeb Cloud, vous devez configurer vos enregistrements DNS :
+
+**Configuration requise :**
+
+```dns
+exemple.com.        IN  CNAME  54984654.bunkerweb.cloud.
+www.exemple.com.    IN  CNAME  54984654.bunkerweb.cloud.
+```
+
+**Important :** Remplacez `54984654` par votre identifiant de load balancer fourni lors de la souscription.
+
+#### Validation de la configuration
+
+Vérifiez la résolution DNS :
+
+```bash
+dig exemple.com
+nslookup exemple.com
+```
+
+Le résultat doit pointer vers votre point de terminaison BunkerWeb Cloud.
+
+### Configuration du service
+
+#### Service unique
+
+Pour un service simple hébergé sur votre infrastructure :
+
+**Configuration dans l'UI BunkerWeb :**
+
+1. **Server Name** : `exemple.com`
+2. **Use Reverse Proxy** : `yes`
+3. **Reverse Proxy Host** : `185.87.1.100:443` (IP de votre serveur)
+
+Vous pouvez trouver toutes les options de configuration dans la [Documentation Reverse Proxy](https://docs.bunkerweb.io/latest/settings/#reverse-proxy)
+
+#### Multi-services avec SNI
+
+##### Pourquoi activer le SNI ?
+
+Le Server Name Indication (SNI) est **essentiel** lorsque :
+
+- Plusieurs domaines pointent vers la même infrastructure backend
+- Votre infrastructure héberge plusieurs services avec des certificats SSL distincts
+- Vous utilisez un reverse proxy/gateway côté client
+
+##### Configuration SNI
+
+**Dans l'UI BunkerWeb, pour chaque service :**
+
+```yaml
+# Service 1
+SERVICE_NAME: exemple-com
+SERVER_NAME: exemple.com
+REVERSE_PROXY_HOST: https://gateway.interne.domaine.com
+REVERSE_PROXY_PORT: 443
+REVERSE_PROXY_SSL_SNI: yes
+REVERSE_PROXY_SSL_SNI_NAME: exemple.com
+
+# Service 2
+SERVICE_NAME: autre-exemple-com
+SERVER_NAME: autre-exemple.com
+REVERSE_PROXY_HOST: https://gateway.interne.domaine.com
+REVERSE_PROXY_PORT: 443
+REVERSE_PROXY_SSL_SNI: yes
+REVERSE_PROXY_SSL_SNI_NAME: autre-exemple.com
+```
+
+Vous pouvez trouver toutes les options de configuration dans la [Documentation Reverse Proxy](https://docs.bunkerweb.io/latest/settings/#reverse-proxy)
+
+##### Détails techniques SNI
+
+Le SNI permet à BunkerWeb Cloud de :
+
+1. **Identifier le service cible** lors de la connexion TLS
+2. **Transmettre le bon nom de domaine** au backend
+3. **Permettre au gateway client** de sélectionner le bon certificat
+4. **Router correctement** vers le service approprié
+
+**Sans SNI activé :**
+
+```mermaid
+graph LR
+    A[Client] --> B[BunkerWeb]
+    B --> C["Gateway (certificat par défaut)"]
+    C --> D[Erreur SSL]
+
+    style B fill:#f3e5f5,color:#222
+    style C fill:#fff3e0,color:#222
+    style D fill:#ff4d4d,color:#fff,stroke:#b30000,stroke-width:2px
+```
+
+**Avec SNI activé :**
+
+```mermaid
+graph LR
+    A[Client] --> B[BunkerWeb]
+    B --> C["Gateway (certificat spécifique exemple.com)"]
+    C --> D[Service Correct]
+
+    style B fill:#f3e5f5,color:#222
+    style C fill:#e8f5e8,color:#222
+    style D fill:#e8f5e8,color:#222
+```
+
+### Gestion SSL/TLS et SNI
+
+#### Certificats SSL
+
+##### Côté BunkerWeb Cloud
+
+BunkerWeb Cloud gère automatiquement :
+
+- Les certificats Let's Encrypt pour vos domaines
+- Le renouvellement automatique
+- La configuration TLS optimisée
+
+##### Côté Infrastructure Client
+
+**Recommandations importantes :**
+
+1. **Utilisez HTTPS** pour la communication entre BunkerWeb et vos services
+2. **Gérez vos propres certificats** sur votre infrastructure
+3. **Configurez correctement le SNI** sur votre gateway/reverse proxy
+
+#### Configuration SNI détaillée
+
+##### Cas d'usage : Infrastructure avec Gateway
+
+Si votre architecture ressemble à :
+
+```mermaid
+graph LR
+    A[BunkerWeb Cloud] --> B[Gateway Client]
+    B --> C[Service 1]
+    B --> D[Service 2]
+    B --> E[Service 3]
+
+    style A fill:#f3e5f5,color:#222
+    style B fill:#fff3e0,color:#222
+    style C fill:#e8f5e8,color:#222
+    style D fill:#e8f5e8,color:#222
+    style E fill:#e8f5e8,color:#222
+```
+
+**Configuration requise côté BunkerWeb :**
+
+```yaml
+# Configuration pour exemple.com
+REVERSE_PROXY_SSL_SNI: yes
+REVERSE_PROXY_SSL_SNI_NAME: exemple.com
+REVERSE_PROXY_SSL_VERIFY: no  # Si certificat auto-signé côté client
+REVERSE_PROXY_HEADERS: Host $host
+
+# Configuration pour api.exemple.com
+REVERSE_PROXY_SSL_SNI: yes
+REVERSE_PROXY_SSL_SNI_NAME: api.exemple.com
+REVERSE_PROXY_SSL_VERIFY: no
+REVERSE_PROXY_HEADERS: Host $host
+```
+
+### Configuration Gateway Client
+
+#### Vue d'ensemble
+
+Lorsque votre architecture utilise un gateway/reverse proxy côté client pour router le trafic vers plusieurs services, une configuration spécifique est nécessaire pour supporter le SNI et assurer une communication sécurisée avec BunkerWeb Cloud.
+
+#### Configurations par technologie
+
+##### Nginx
+
+<details>
+<summary>Configuration Nginx</summary>
+
+```nginx
+# Configuration pour supporter SNI avec plusieurs services
+server {
+    listen 443 ssl http2;
+    server_name exemple.com;
+
+    ssl_certificate /path/to/exemple.com.crt;
+    ssl_certificate_key /path/to/exemple.com.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256;
+    ssl_prefer_server_ciphers off;
+
+    # En-têtes de sécurité
+    add_header X-Frame-Options DENY;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+
+    location / {
+        proxy_pass http://service1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Server $host;
+
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    server_name api.exemple.com;
+
+    ssl_certificate /path/to/api.exemple.com.crt;
+    ssl_certificate_key /path/to/api.exemple.com.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256;
+    ssl_prefer_server_ciphers off;
+
+    location / {
+        proxy_pass http://api-service:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Configuration spécifique API
+        proxy_buffering off;
+        proxy_request_buffering off;
+    }
+}
+```
+
+</details>
+
+##### Traefik
+
+<details>
+<summary>Configuration Traefik</summary>
+
+**Avec Docker Compose :**
+
+```yaml
+services:
+  traefik:
+    image: traefik:v3.0
+    command:
+      - --api.dashboard=true
+      - --providers.docker=true
+      - --providers.file.filename=/etc/traefik/dynamic.yml
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.myresolver.acme.tlschallenge=true
+      - --certificatesresolvers.myresolver.acme.email=admin@exemple.com
+      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+    ports:
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+      - ./dynamic.yml:/etc/traefik/dynamic.yml:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.exemple.com`)"
+      - "traefik.http.routers.dashboard.tls.certresolver=myresolver"
+
+  service1:
+    image: your-app:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.service1.rule=Host(`exemple.com`)"
+      - "traefik.http.routers.service1.entrypoints=websecure"
+      - "traefik.http.routers.service1.tls.certresolver=myresolver"
+      - "traefik.http.services.service1.loadbalancer.server.port=8080"
+      - "traefik.http.routers.service1.middlewares=security-headers"
+
+  api-service:
+    image: your-api:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`api.exemple.com`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls.certresolver=myresolver"
+      - "traefik.http.services.api.loadbalancer.server.port=3000"
+      - "traefik.http.routers.api.middlewares=security-headers,rate-limit"
+```
+
+**Configuration dynamique (dynamic.yml) :**
+
+```yaml
+http:
+  middlewares:
+    security-headers:
+      headers:
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 31536000
+        customRequestHeaders:
+          X-Forwarded-Proto: "https"
+
+    rate-limit:
+      rateLimit:
+        burst: 100
+        average: 50
+
+  routers:
+    service1:
+      rule: "Host(`exemple.com`)"
+      service: "service1"
+      tls:
+        certResolver: "myresolver"
+      middlewares:
+        - "security-headers"
+
+    api:
+      rule: "Host(`api.exemple.com`)"
+      service: "api-service"
+      tls:
+        certResolver: "myresolver"
+      middlewares:
+        - "security-headers"
+        - "rate-limit"
+
+  services:
+    service1:
+      loadBalancer:
+        servers:
+          - url: "http://service1:8080"
+        healthCheck:
+          path: "/health"
+          interval: "30s"
+
+    api-service:
+      loadBalancer:
+        servers:
+          - url: "http://api-service:3000"
+        healthCheck:
+          path: "/api/health"
+          interval: "30s"
+```
+
+</details>
+
+##### Apache
+
+<details>
+<summary>Configuration Apache</summary>
+
+```apache
+# Configuration Apache avec SNI
+<VirtualHost *:443>
+    ServerName exemple.com
+    DocumentRoot /var/www/html
+
+    # Configuration SSL
+    SSLEngine on
+    SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
+    SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256
+    SSLHonorCipherOrder off
+    SSLCertificateFile /path/to/exemple.com.crt
+    SSLCertificateKeyFile /path/to/exemple.com.key
+
+    # En-têtes de sécurité
+    Header always set X-Frame-Options DENY
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    # Configuration reverse proxy
+    ProxyPass / http://service1:8080/
+    ProxyPassReverse / http://service1:8080/
+    ProxyPreserveHost On
+
+    # En-têtes personnalisés
+    ProxyPassReverse / http://service1:8080/
+    ProxyPassReverseInterpolateEnv On
+
+    <Proxy *>
+        Require all granted
+    </Proxy>
+
+    # Logs
+    ErrorLog ${APACHE_LOG_DIR}/exemple.com_error.log
+    CustomLog ${APACHE_LOG_DIR}/exemple.com_access.log combined
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName api.exemple.com
+
+    SSLEngine on
+    SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
+    SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256
+    SSLCertificateFile /path/to/api.exemple.com.crt
+    SSLCertificateKeyFile /path/to/api.exemple.com.key
+
+    ProxyPass / http://api-service:3000/
+    ProxyPassReverse / http://api-service:3000/
+    ProxyPreserveHost On
+
+    # Configuration spécifique API
+    ProxyTimeout 300
+    ProxyBadHeader Ignore
+
+    ErrorLog ${APACHE_LOG_DIR}/api.exemple.com_error.log
+    CustomLog ${APACHE_LOG_DIR}/api.exemple.com_access.log combined
+</VirtualHost>
+
+# Configuration des modules requis
+LoadModule ssl_module modules/mod_ssl.so
+LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_http_module modules/mod_proxy_http.so
+LoadModule headers_module modules/mod_headers.so
+```
+
+</details>
+
+##### HAProxy
+
+<details>
+<summary>Configuration HAProxy</summary>
+
+```haproxy
+global
+    maxconn 4096
+    log stdout local0
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+
+    # Configuration SSL
+    ssl-default-bind-ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256
+    ssl-default-bind-options ssl-min-ver TLSv1.2 no-tls-tickets
+
+defaults
+    mode http
+    timeout connect 5000ms
+    timeout client 50000ms
+    timeout server 50000ms
+    option httplog
+    option dontlognull
+    option redispatch
+    retries 3
+    maxconn 2000
+
+frontend https_frontend
+    bind *:443 ssl crt /etc/ssl/certs/exemple.com.pem crt /etc/ssl/certs/api.exemple.com.pem
+
+    # En-têtes de sécurité
+    http-response set-header X-Frame-Options DENY
+    http-response set-header X-Content-Type-Options nosniff
+    http-response set-header X-XSS-Protection "1; mode=block"
+    http-response set-header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    # Routage basé sur SNI
+    acl is_exemple hdr(host) -i exemple.com
+    acl is_api hdr(host) -i api.exemple.com
+
+    use_backend service1_backend if is_exemple
+    use_backend api_backend if is_api
+
+    default_backend service1_backend
+
+backend service1_backend
+    balance roundrobin
+    option httpchk GET /health
+    http-check expect status 200
+
+    server service1-1 service1:8080 check
+    server service1-2 service1-backup:8080 check backup
+
+backend api_backend
+    balance roundrobin
+    option httpchk GET /api/health
+    http-check expect status 200
+
+    server api-1 api-service:3000 check
+    server api-2 api-service-backup:3000 check backup
+
+# Interface de statistiques (optionnel)
+listen stats
+    bind *:8404
+    stats enable
+    stats uri /stats
+    stats refresh 30s
+    stats admin if TRUE
+```
+
+</details>
+
+#### Validation de la configuration SSL
+
+Tester la configuration SSL :
+
+```bash
+# Test de connectivité SSL
+openssl s_client -connect your-domain.com:443 -servername your-domain.com
+
+# Vérification des en-têtes
+curl -I https://your-domain.com
+
+# Test SNI
+curl -H "Host: exemple.com" https://54984654.bunkerweb.cloud
+```
+
+#### Bonnes pratiques Gateway
+
+1. **Health Checks** : Configurez des vérifications de santé pour vos services
+2. **Load Balancing** : Utilisez plusieurs instances pour la haute disponibilité
+3. **Surveillance** : Surveillez les métriques de votre gateway
+4. **En-têtes de sécurité** : Ajoutez les en-têtes de sécurité appropriés
+5. **Timeouts** : Configurez des timeouts appropriés pour éviter les blocages
+
+### Liste blanche d'IP BunkerWeb Cloud
+
+#### Pourquoi configurer une liste blanche ?
+
+Pour sécuriser davantage votre infrastructure, il est recommandé de configurer une liste blanche des adresses IP de BunkerWeb Cloud côté infrastructure client. Cela garantit que seul le trafic provenant de BunkerWeb Cloud peut atteindre vos services backend.
+
+Nous recommandons de configurer la liste blanche au niveau du pare-feu (iptables ..etc).
+
+#### Adresses IP BunkerWeb Cloud à autoriser
+
+**Liste des adresses IP à autoriser :**
+
+La liste mise à jour est disponible ici : https://repo.bunkerweb.io/cloud/ips
+
+```
+# Adresses IP BunkerWeb Cloud
+4.233.128.18
+20.19.161.132
+```
+
+#### Configuration de la liste blanche par technologie
+
+##### Nginx
+
+<details>
+<summary>Configuration Nginx</summary>
+
+```nginx
+# Dans votre configuration serveur
+server {
+    listen 443 ssl;
+    server_name exemple.com;
+
+    # Liste blanche IP BunkerWeb Cloud
+    allow 192.168.1.0/24;
+    allow 10.0.0.0/16;
+    allow 172.16.0.0/12;
+    deny all;
+
+    ssl_certificate /path/to/exemple.com.crt;
+    ssl_certificate_key /path/to/exemple.com.key;
+
+    location / {
+        proxy_pass http://service1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+
+# Configuration avec module geo pour plus de flexibilité
+geo $bunkerweb_ip {
+    default 0;
+    192.168.1.0/24 1;
+    10.0.0.0/16 1;
+    172.16.0.0/12 1;
+}
+
+server {
+    listen 443 ssl;
+    server_name exemple.com;
+
+    if ($bunkerweb_ip = 0) {
+        return 403;
+    }
+
+    # ... reste de la configuration
+}
+```
+
+</details>
+
+##### Traefik
+
+<details>
+<summary>Configuration Traefik</summary>
+
+```yaml
+# Configuration dans dynamic.yml
+http:
+  middlewares:
+    bunkerweb-whitelist:
+      ipWhiteList:
+        sourceRange:
+          - "192.168.1.0/24"
+          - "10.0.0.0/16"
+          - "172.16.0.0/12"
+        ipStrategy:
+          depth: 1
+
+  routers:
+    exemple-router:
+      rule: "Host(`exemple.com`)"
+      service: "exemple-service"
+      middlewares:
+        - "bunkerweb-whitelist"
+        - "security-headers"
+      tls:
+        certResolver: "myresolver"
+
+    api-router:
+      rule: "Host(`api.exemple.com`)"
+      service: "api-service"
+      middlewares:
+        - "bunkerweb-whitelist"
+        - "security-headers"
+      tls:
+        certResolver: "myresolver"
+```
+
+**Avec les labels Docker Compose :**
+
+```yaml
+services:
+  service1:
+    image: your-app:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.service1.rule=Host(`exemple.com`)"
+      - "traefik.http.routers.service1.middlewares=bunkerweb-whitelist"
+      - "traefik.http.middlewares.bunkerweb-whitelist.ipwhitelist.sourcerange=192.168.1.0/24,10.0.0.0/16,172.16.0.0/12"
+```
+
+</details>
+
+##### Apache
+
+<details>
+<summary>Configuration Apache</summary>
+
+```apache
+<VirtualHost *:443>
+    ServerName exemple.com
+
+    # Liste blanche IP BunkerWeb Cloud
+    <RequireAll>
+        Require ip 192.168.1.0/24
+        Require ip 10.0.0.0/16
+        Require ip 172.16.0.0/12
+    </RequireAll>
+
+    SSLEngine on
+    SSLCertificateFile /path/to/exemple.com.crt
+    SSLCertificateKeyFile /path/to/exemple.com.key
+
+    ProxyPass / http://service1:8080/
+    ProxyPassReverse / http://service1:8080/
+    ProxyPreserveHost On
+
+    # Configuration pour les logs d'accès refusés
+    LogFormat "%h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" combined
+    CustomLog logs/access.log combined
+    ErrorLog logs/error.log
+</VirtualHost>
+
+# Configuration alternative avec mod_authz_core
+<VirtualHost *:443>
+    ServerName api.exemple.com
+
+    <Directory />
+        <RequireAny>
+            Require ip 192.168.1.0/24
+            Require ip 10.0.0.0/16
+            Require ip 172.16.0.0/12
+        </RequireAny>
+    </Directory>
+
+    # ... reste de la configuration
+</VirtualHost>
+```
+
+</details>
+
+##### HAProxy
+
+<details>
+<summary>Configuration HAProxy</summary>
+
+```haproxy
+# Configuration dans haproxy.cfg
+frontend bunkerweb_frontend
+    bind *:443 ssl crt /path/to/certificates/
+
+    # ACL pour la liste blanche BunkerWeb Cloud
+    acl bunkerweb_ips src 192.168.1.0/24 10.0.0.0/16 172.16.0.0/12
+
+    # Bloquer tout sauf BunkerWeb Cloud
+    http-request deny unless bunkerweb_ips
+
+    # En-têtes de sécurité
+    http-response set-header X-Frame-Options DENY
+    http-response set-header X-Content-Type-Options nosniff
+
+    # Routage
+    acl is_exemple hdr(host) -i exemple.com
+    acl is_api hdr(host) -i api.exemple.com
+
+    use_backend app_servers if is_exemple
+    use_backend api_servers if is_api
+
+    default_backend app_servers
+
+backend app_servers
+    balance roundrobin
+    server app1 service1:8080 check
+    server app2 service2:8080 check
+
+backend api_servers
+    balance roundrobin
+    server api1 api-service:3000 check
+    server api2 api-service-backup:3000 check
+```
+
+</details>
+
+##### Pare-feu Système (iptables)
+
+<details>
+<summary>Configuration iptables</summary>
+
+```bash
+#!/bin/bash
+# Script de configuration iptables pour la liste blanche BunkerWeb Cloud
+
+# Effacer les règles existantes
+iptables -F
+iptables -X
+
+# Politiques par défaut
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT ACCEPT
+
+# Autoriser loopback
+iptables -A INPUT -i lo -j ACCEPT
+
+# Autoriser les connexions établies
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# Liste blanche IPs BunkerWeb Cloud pour HTTPS
+iptables -A INPUT -p tcp --dport 443 -s 192.168.1.0/24 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -s 10.0.0.0/16 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -s 172.16.0.0/12 -j ACCEPT
+
+# Autoriser HTTP pour Let's Encrypt (optionnel)
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+
+# Autoriser SSH (adapter selon vos besoins)
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+
+# Logs pour débogage
+iptables -A INPUT -j LOG --log-prefix "DROPPED: "
+
+# Sauvegarder les règles
+iptables-save > /etc/iptables/rules.v4
+
+echo "Configuration iptables appliquée avec succès"
+```
+
+</details>
+
+#### Bonnes pratiques Liste Blanche
+
+1. **Surveiller les rejets** : Surveillez les tentatives d'accès bloquées
+2. **Mises à jour régulières** : Gardez la liste des IP à jour
+3. **Tests réguliers** : Validez que la liste blanche fonctionne correctement
+4. **Documentation** : Documentez les changements d'IP
+5. **Alertes** : Configurez des alertes pour les changements d'IP BunkerWeb
+6. **Sauvegarde** : Gardez une configuration de sauvegarde en cas de problème
+
+### Configuration REAL_IP et Récupération de l'Adresse Client
+
+#### Pourquoi configurer REAL_IP ?
+
+Lorsque vous utilisez BunkerWeb Cloud comme reverse proxy, les adresses IP que vos applications backend voient sont celles de BunkerWeb Cloud, et non celles des clients réels. Pour récupérer les adresses IP réelles des clients, une configuration spécifique est requise.
+
+#### Configuration Côté BunkerWeb Cloud
+
+Dans l'UI BunkerWeb, configurez Real IP :
+
+```yaml
+USE_REAL_IP: yes # Défaut est no
+REAL_IP_FROM: 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8 # Défaut
+REAL_IP_HEADER: X-Forwarded-For # Défaut
+REAL_IP_RECURSIVE: yes # Défaut
+# Exemple si vous utilisez aussi Cloudflare Proxy devant BunkerWeb
+REAL_IP_FROM_URLS: https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/
+```
+
+Vous pouvez trouver toutes les options de configuration dans la [Documentation Real Ip](https://docs.bunkerweb.io/latest/settings/#real-ip)
+
+#### Configuration Côté Infrastructure Client
+
+##### Nginx
+
+<details>
+<summary>Configuration Nginx pour REAL_IP</summary>
+
+```nginx
+# Configurer les adresses IP de confiance (BunkerWeb Cloud)
+set_real_ip_from 4.233.128.18/32
+set_real_ip_from 20.19.161.132/32
+
+# En-tête à utiliser pour récupérer l'IP réelle
+real_ip_header X-Real-IP;
+
+# Alternative avec X-Forwarded-For
+# real_ip_header X-Forwarded-For;
+
+server {
+    listen 443 ssl http2;
+    server_name exemple.com;
+
+    # Configuration SSL
+    ssl_certificate /path/to/exemple.com.crt;
+    ssl_certificate_key /path/to/exemple.com.key;
+
+    location / {
+        proxy_pass http://service1:8080;
+
+        # Transmettre les en-têtes d'IP réelle au backend
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Log avec l'IP client réelle
+        access_log /var/log/nginx/access.log combined;
+    }
+}
+
+# Format de log personnalisé avec IP réelle
+log_format real_ip '$remote_addr - $remote_user [$time_local] '
+                   '"$request" $status $body_bytes_sent '
+                   '"$http_referer" "$http_user_agent" '
+                   'real_ip="$realip_remote_addr"';
+```
+
+</details>
+
+##### Apache
+
+<details>
+<summary>Configuration Apache pour REAL_IP</summary>
+
+```apache
+# Charger le module mod_remoteip
+LoadModule remoteip_module modules/mod_remoteip.so
+
+<VirtualHost *:443>
+    ServerName exemple.com
+
+    # Configuration SSL
+    SSLEngine on
+    SSLCertificateFile /path/to/exemple.com.crt
+    SSLCertificateKeyFile /path/to/exemple.com.key
+
+    # Configurer les adresses IP de confiance
+    RemoteIPHeader X-Real-IP
+    RemoteIPTrustedProxy 4.233.128.18/32
+    RemoteIPTrustedProxy 20.19.161.132/32
+
+    # Alternative avec X-Forwarded-For
+    # RemoteIPHeader X-Forwarded-For
+
+    # Configuration reverse proxy
+    ProxyPass / http://service1:8080/
+    ProxyPassReverse / http://service1:8080/
+    ProxyPreserveHost On
+
+    # Transmettre les en-têtes IP
+    ProxyPassReverse / http://service1:8080/
+    ProxyPassReverseInterpolateEnv On
+
+    # Logs avec IP réelle
+    LogFormat "%a %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" combined_real_ip
+    CustomLog logs/access.log combined_real_ip
+    ErrorLog logs/error.log
+</VirtualHost>
+```
+
+</details>
+
+##### HAProxy
+
+<details>
+<summary>Configuration HAProxy pour REAL_IP</summary>
+
+```haproxy
+global
+    maxconn 4096
+    log stdout local0
+
+defaults
+    mode http
+    option httplog
+    option dontlognull
+    option forwardfor
+
+    # Format de log avec IP réelle
+    log-format "%ci:%cp [%t] %ft %b/%s %Tq/%Tw/%Tc/%Tr/%Ta %ST %B %CC %CS %tsc %ac/%fc/%bc/%sc/%rc %sq/%bq %hr %hs %{+Q}r"
+
+frontend https_frontend
+    bind *:443 ssl crt /etc/ssl/certs/
+
+    # Liste blanche IP BunkerWeb Cloud
+    acl bunkerweb_ips src 4.233.128.18/32 20.19.161.132/32
+    http-request deny unless bunkerweb_ips
+
+    # Capturer l'IP réelle depuis les en-têtes
+    capture request header X-Real-IP len 15
+    capture request header X-Forwarded-For len 50
+
+    # Routage
+    acl is_exemple hdr(host) -i exemple.com
+    use_backend app_servers if is_exemple
+
+    default_backend app_servers
+
+backend app_servers
+    balance roundrobin
+
+    # Ajouter/préserver les en-têtes d'IP réelle
+    http-request set-header X-Original-Forwarded-For %[req.hdr(X-Forwarded-For)]
+    http-request set-header X-Client-IP %[req.hdr(X-Real-IP)]
+
+    server app1 service1:8080 check
+    server app2 service2:8080 check backup
+```
+
+</details>
+
+##### Traefik
+
+<details>
+<summary>Configuration Traefik pour REAL_IP</summary>
+
+```yaml
+# Configuration dans dynamic.yml
+http:
+  middlewares:
+    real-ip:
+      ipWhiteList:
+        sourceRange:
+          - "4.233.128.18/32"
+          - "20.19.161.132/32"
+        ipStrategy:
+          depth: 2  # Nombre de proxies de confiance
+          excludedIPs:
+            - "127.0.0.1/32"
+
+  routers:
+    exemple-router:
+      rule: "Host(`exemple.com`)"
+      service: "exemple-service"
+      middlewares:
+        - "real-ip"
+      tls:
+        certResolver: "myresolver"
+
+  services:
+    exemple-service:
+      loadBalancer:
+        servers:
+          - url: "http://service1:8080"
+        passHostHeader: true
+```
+
+**Configuration dans traefik.yml (static) :**
+
+```yaml
+entryPoints:
+  websecure:
+    address: ":443"
+    forwardedHeaders:
+      trustedIPs:
+        - "4.233.128.18/32"
+        - "20.19.161.132/32"
+      insecure: false
+
+accessLog:
+  format: json
+  fields:
+    defaultMode: keep
+    names:
+      ClientUsername: drop
+    headers:
+      defaultMode: keep
+      names:
+        X-Real-IP: keep
+        X-Forwarded-For: keep
+```
+
+</details>
+
+#### Tests et Validation
+
+##### Vérification de la configuration
+
+```bash
+# Test 1: Vérifier les en-têtes reçus
+curl -H "X-Real-IP: 203.0.113.1" \
+     -H "X-Forwarded-For: 203.0.113.1, 192.168.1.100" \
+     https://exemple.com/test-ip
+
+# Test 2: Analyser les logs
+tail -f /var/log/nginx/access.log | grep "203.0.113.1"
+
+# Test 3: Test depuis différentes sources
+curl -v https://exemple.com/whatismyip
+```
+
+#### Bonnes pratiques REAL_IP
+
+1. **Sécurité** : Ne faites confiance qu'aux en-têtes IP provenant de sources connues (BunkerWeb Cloud)
+2. **Validation** : Validez toujours les adresses IP reçues dans les en-têtes
+3. **Journalisation** : Loguez à la fois l'IP du proxy et l'IP réelle pour le débogage
+4. **Fallback** : Ayez toujours une valeur par défaut si les en-têtes sont manquants
+5. **Tests** : Testez régulièrement que la détection d'IP fonctionne correctement
+6. **Surveillance** : Surveillez les modèles d'IP pour détecter les anomalies
+
+#### Dépannage REAL_IP
+
+##### Problèmes courants
+
+1. **L'IP affichée est toujours celle de BunkerWeb** : Vérifiez la configuration des proxies de confiance
+2. **En-têtes manquants** : Vérifiez la configuration côté BunkerWeb Cloud
+3. **IPs invalides** : Implémentez une validation stricte des IPs
+4. **Logs incorrects** : Vérifiez le format des logs et la configuration du module real_ip
+
+##### Commandes de diagnostic
+
+__Tester la détection d'IP__
+
+```bash
+curl -H "X-Real-IP: 1.2.3.4" https://your-domain.com/debug-headers
+```
+
+### Surveillance et Observabilité
+
+#### Accès Grafana
+
+Votre instance Grafana gérée vous donne accès à :
+
+##### Métriques disponibles
+
+1. **Vue d'ensemble du trafic**
+
+  - Requêtes par seconde
+  - Codes de statut HTTP
+  - Géolocalisation des requêtes
+2. **Sécurité**
+
+  - Tentatives d'attaques bloquées
+  - Types de menaces détectés
+  - Règles WAF déclenchées
+3. **Métriques de performance**
+
+  - Latence des requêtes
+  - Temps de réponse backend
+  - Utilisation des ressources
+
+##### Journaux disponibles
+
+1. **Access Logs** : Toutes les requêtes HTTP/HTTPS
+2. **Security Logs** : Événements de sécurité et blocages
+3. **Error Logs** : Erreurs système et d'application
+
+##### Configuration des alertes
+
+Configurez des alertes Grafana pour :
+
+- Pics de trafic anormaux
+- Augmentation des erreurs 5xx
+- Détection d'attaques DDoS
+- Échecs de santé backend
+
+### Bonnes pratiques
+
+#### Sécurité
+
+1. **Utilisez HTTPS** pour toute communication backend
+2. **Implémentez une liste blanche d'IP** si possible
+3. **Configurez des timeouts appropriés**
+4. **Activez la compression** pour optimiser les performances
+
+#### Performance
+
+1. **Optimisez la configuration du cache**
+2. **Utilisez HTTP/2** côté client
+3. **Configurez des health checks** pour vos backends
+4. **Surveillez les métriques** régulièrement
+
+### Dépannage
+
+#### Problèmes courants
+
+##### 1. Erreur SSL/TLS
+
+**Symptôme :** Erreurs de certificat SSL
+
+**Solutions :**
+
+```bash
+# Vérifier la configuration SNI
+openssl s_client -connect backend.com:443 -servername exemple.com
+
+# Vérifier les certificats backend
+openssl x509 -in certificate.crt -text -noout
+```
+
+##### 2. Timeout Backend
+
+**Symptôme :** Erreurs 504 Gateway Timeout
+
+**Solutions :**
+
+- Augmenter `REVERSE_PROXY_CONNECT_TIMEOUT` & `REVERSE_PROXY_SEND_TIMEOUT`
+- Vérifier la santé du backend
+- Optimiser la performance de l'application
+
+##### 3. Problèmes de routage
+
+**Symptôme :** Mauvais service servi
+
+**Solutions :**
+
+- Vérifier la configuration `SERVER_NAME`
+- Valider la configuration SNI
+- Vérifier les en-têtes `Host`
+
+#### Commandes de diagnostic
+
+```bash
+# Test de connectivité
+curl -v https://your-domain.com
+
+# Test avec en-têtes personnalisés
+curl -H "Host: exemple.com" -v https://54984654.bunkerweb.cloud
+
+# Vérification DNS
+dig +trace exemple.com
+
+# Test SSL
+openssl s_client -connect exemple.com:443 -servername exemple.com
+```
+
+#### Support Technique
+
+Pour toute assistance technique :
+
+1. **Vérifiez les logs** dans Grafana
+2. **Vérifiez la configuration** dans l'UI BunkerWeb
+3. **Contactez le support** avec les détails de configuration et les logs d'erreur
 
 ## Image tout-en-un (AIO) {#all-in-one-aio-image}
 
@@ -740,7 +1972,7 @@ Pour les configurations non interactives ou automatisées, le script peut être 
 
 | Option                  | Description                                                                                              |
 | ----------------------- | -------------------------------------------------------------------------------------------------------- |
-| `-v, --version VERSION` | Spécifie la version de BunkerWeb à installer (par exemple, `1.6.6`).                                 |
+| `-v, --version VERSION` | Spécifie la version de BunkerWeb à installer (par exemple, `1.6.6`).                                     |
 | `-w, --enable-wizard`   | Active l'assistant de configuration.                                                                     |
 | `-n, --no-wizard`       | Désactive l'assistant d'installation.                                                                    |
 | `--api`, `--enable-api` | Active le service API (FastAPI) systemd (désactivé par défaut).                                          |
@@ -772,9 +2004,14 @@ Pour les configurations non interactives ou automatisées, le script peut être 
 
 **Options avancées :**
 
-| Option                  | Description                                                                                            |
-| ----------------------- | ------------------------------------------------------------------------------------------------------ |
-| `--instances "IP1 IP2"` | Liste séparée par des espaces des instances BunkerWeb (requise pour les modes gestionnaire/Scheduler). |
+| Option                      | Description                                                                                            |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `--instances "IP1 IP2"`     | Liste séparée par des espaces des instances BunkerWeb (requise pour les modes gestionnaire/Scheduler). |
+| `--manager-ip IPs`          | IPs du gestionnaire/Scheduler à mettre en liste blanche (requis pour worker en mode non-interactif).   |
+| `--dns-resolvers "IP1 IP2"` | IPs des résolveurs DNS personnalisés (pour les installations full, manager ou worker).                 |
+| `--api-https`               | Activer HTTPS pour la communication API interne (par défaut : HTTP uniquement).                        |
+| `--backup-dir PATH`         | Répertoire pour stocker la sauvegarde automatique avant la mise à jour.                                |
+| `--no-auto-backup`          | Ignorer la sauvegarde automatique (vous DEVEZ l'avoir fait manuellement).                              |
 
 **Exemple d'utilisation :**
 
@@ -793,6 +2030,12 @@ sudo ./install-bunkerweb.sh --version 1.6.6
 
 # Manager setup with remote worker instances (instances required)
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
+
+# Manager avec communication API interne HTTPS
+sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --api-https
+
+# Worker avec résolveurs DNS personnalisés et API interne HTTPS
+sudo ./install-bunkerweb.sh --worker --dns-resolvers "1.1.1.1 1.0.0.1" --api-https
 
 # Full installation with CrowdSec and AppSec
 sudo ./install-bunkerweb.sh --crowdsec-appsec

@@ -80,6 +80,8 @@ else
 	echo "Docker" > /usr/share/bunkerweb/INTEGRATION
 fi
 
+export LOG_SYSLOG_TAG="${LOG_SYSLOG_TAG:-bw-ui}"
+
 # Start a temporary Gunicorn process with a special logger configuration.
 python3 -m gunicorn --logger-class utils.logger.TmpUiLogger --config utils/tmp-gunicorn.conf.py &
 

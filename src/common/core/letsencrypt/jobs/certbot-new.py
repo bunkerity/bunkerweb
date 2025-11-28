@@ -25,7 +25,7 @@ from requests import get
 
 from common_utils import bytes_hash, file_hash  # type: ignore
 from jobs import Job  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 
 from letsencrypt_providers import (
     BunnyNetProvider,
@@ -55,8 +55,8 @@ from letsencrypt_providers import (
 )
 
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper()
-LOGGER = setup_logger("LETS-ENCRYPT.new")
-LOGGER_CERTBOT = setup_logger("LETS-ENCRYPT.new.certbot")
+LOGGER = getLogger("LETS-ENCRYPT.NEW")
+LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.NEW.CERTBOT")
 
 CERTBOT_BIN = join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot")
 DEPS_PATH = join(sep, "usr", "share", "bunkerweb", "deps", "python")
@@ -182,7 +182,7 @@ def check_psl_blacklist(domains: List[str], psl_rules: Dict, service_name: str) 
     return False
 
 
-def extract_provider(service: str, authenticator: str = "") -> Optional[Provider]:
+def extract_provider(service: str, authenticator: str = "", decode_base64: bool = True) -> Optional[Provider]:
     credential_key = f"{service}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
     credential_items = {}
 
@@ -201,7 +201,7 @@ def extract_provider(service: str, authenticator: str = "") -> Optional[Provider
     # Handle JSON data
     if "json_data" in credential_items:
         value = credential_items.pop("json_data")
-        if not credential_items and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
+        if decode_base64 and not credential_items and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
             try:
                 decoded = b64decode(value).decode("utf-8")
                 json_data = loads(decoded)
@@ -214,7 +214,7 @@ def extract_provider(service: str, authenticator: str = "") -> Optional[Provider
                 LOGGER.debug(format_exc())
 
     # Process base64 encoded credentials (except for rfc2136)
-    if credential_items:
+    if decode_base64 and credential_items:
         for key, value in credential_items.items():
             if authenticator != "rfc2136" and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
                 try:
@@ -250,6 +250,7 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
     profile_val = env("LETS_ENCRYPT_PROFILE", "classic").lower()
     custom_profile = env("LETS_ENCRYPT_CUSTOM_PROFILE", "").lower()
     dns_propagation_val = env("LETS_ENCRYPT_DNS_PROPAGATION", DNS_PROPAGATION_DEFAULT).lower()
+    decode_base64 = env("LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64", "yes").lower() == "yes"
     wildcard = env("USE_LETS_ENCRYPT_WILDCARD", "no").lower() == "yes"
     activated = env("AUTO_LETS_ENCRYPT", "no").lower() == "yes" and env("LETS_ENCRYPT_PASSTHROUGH", "no").lower() == "no"
 
@@ -318,7 +319,7 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
                 )
             activated = False
         else:
-            provider = extract_provider(service, authenticator)
+            provider = extract_provider(service, authenticator, decode_base64)
             if not provider:
                 activated = False
     else:

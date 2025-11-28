@@ -14,7 +14,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from common_utils import get_integration, get_version  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from Database import Database  # type: ignore
 from Configurator import Configurator
 from API import API  # type: ignore
@@ -24,7 +24,7 @@ CUSTOM_CONF_RX = re_compile(
 )
 BUNKERWEB_STATIC_INSTANCES_RX = re_compile(r"(https?://)?(?P<hostname>(?<![:])\b[^:\s]+\b)(:(?P<port>\d+))?")
 
-LOGGER = setup_logger("Generator.save_config", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+LOGGER = getLogger("GENERATOR.SAVE_CONFIG")
 
 
 if __name__ == "__main__":

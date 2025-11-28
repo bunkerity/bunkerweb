@@ -19,7 +19,7 @@ from requests import get
 from requests.exceptions import ConnectionError
 
 from common_utils import bytes_hash  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
 rdns_rx = re_compile(rb"^[^ ]+$")
@@ -53,7 +53,7 @@ def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
     return False, b""
 
 
-LOGGER = setup_logger("WHITELIST")
+LOGGER = getLogger("WHITELIST")
 status = 0
 
 KINDS = ("IP", "RDNS", "ASN", "USER_AGENT", "URI")

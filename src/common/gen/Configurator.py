@@ -85,6 +85,10 @@ class Configurator:
                 "CROWDSEC_DISABLE_PARSERS",
                 "CROWDSEC_EXTRA_COLLECTIONS",
                 "HIDE_SERVICE_LOGS",
+                "LOG_TYPES",
+                "LOG_FILE_PATH",
+                "LOG_SYSLOG_ADDRESS",
+                "LOG_SYSLOG_TAG",
             }
         )
 

@@ -23,7 +23,7 @@ In multisite mode, each site is identified by a unique `SERVER_NAME`. To apply s
 
 This approach ensures that settings are applied to the correct site in a multisite environment.
 
-### Multiple Settings
+### Multiple Settings {#multiple-settings}
 
 Some settings in BunkerWeb support multiple configurations for the same feature. To define multiple groups of settings, append a numeric suffix to the setting name. For example:
 
@@ -122,11 +122,13 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 === "Logging Settings"
 
-    | Setting            | Default                                                                                                                                    | Context | Multiple | Description                                                                                                                   |
-    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-    | `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global  | No       | **Log Format:** The format to use for access logs.                                                                            |
-    | `LOG_LEVEL`        | `notice`                                                                                                                                   | global  | No       | **Log Level:** Verbosity level for error logs. Options: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`. |
-    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global  | No       | **Timers Log Level:** Log level for timers. Options: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.      |
+    | Setting            | Default                                                                                                                                    | Context | Multiple | Description                                                                                                                                      |
+    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global  | No       | **Log Format:** The format to use for access logs.                                                                                               |
+    | `ACCESS_LOG`       | `/var/log/bunkerweb/access.log`                                                                                                            | global  | Yes      | **Access Log Path:** File path, `syslog:server=host[:port][,param=value]`, or shared buffer `memory:name:size`; set to `off` to disable logging. |
+    | `ERROR_LOG`        | `/var/log/bunkerweb/error.log`                                                                                                             | global  | Yes      | **Error Log Path:** File path, `stderr`, `syslog:server=host[:port][,param=value]`, or `memory:size`.                                            |
+    | `LOG_LEVEL`        | `notice`                                                                                                                                   | global  | Yes      | **Log Level:** Verbosity level for error logs. Options: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`.                    |
+    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global  | No       | **Timers Log Level:** Log level for timers. Options: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.                         |
 
     !!! tip "Logging Best Practices"
         - For production environments, use the `notice`, `warn`, or `error` log levels to minimize log volume.

@@ -17,7 +17,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from biscuit_auth import KeyPair, PublicKey, PrivateKey
 
 from common_utils import handle_docker_secrets  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 
 from app.models.api_database import APIDatabase
 from app.utils import BISCUIT_PRIVATE_KEY_FILE, BISCUIT_PUBLIC_KEY_FILE, USER_PASSWORD_RX, check_password, gen_password_hash
@@ -122,7 +122,7 @@ def on_starting(server):
     if docker_secrets:
         environ.update(docker_secrets)
 
-    LOGGER = setup_logger("API", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+    LOGGER = getLogger("API")
 
     if docker_secrets:
         LOGGER.info(f"Loaded {len(docker_secrets)} Docker secrets")

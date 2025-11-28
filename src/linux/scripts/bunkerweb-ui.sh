@@ -51,6 +51,9 @@ start() {
             echo "# LISTEN_PORT=7000"
             echo "FORWARDED_ALLOW_IPS=127.0.0.1"
             echo "# ENABLE_HEALTHCHECK=no"
+            echo "LOG_LEVEL=info"
+            echo "LOG_TYPES=file"
+            echo "# LOG_FILE_PATH=/var/log/bunkerweb/ui.log"
         } > /etc/bunkerweb/ui.env
         chown root:nginx /etc/bunkerweb/ui.env
         chmod 660 /etc/bunkerweb/ui.env
@@ -74,6 +77,15 @@ start() {
         FORWARDED_ALLOW_IPS=$(get_env_var "FORWARDED_ALLOW_IPS" "127.0.0.1")
     fi
     export FORWARDED_ALLOW_IPS
+
+    LOG_TYPES=$(get_env_var "LOG_TYPES" "file")
+    export LOG_TYPES
+
+    LOG_FILE_PATH=$(get_env_var "LOG_FILE_PATH" "/var/log/bunkerweb/ui.log")
+    export LOG_FILE_PATH
+
+    LOG_SYSLOG_TAG=$(get_env_var "LOG_SYSLOG_TAG" "bw-ui")
+    export LOG_SYSLOG_TAG
 
     export CAPTURE_OUTPUT="yes"
 

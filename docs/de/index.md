@@ -74,13 +74,13 @@ BunkerWeb bietet eine optionale [Benutzeroberfläche](web-ui.md) zur Verwaltung 
 ## BunkerWeb Cloud
 
 <figure markdown>
-  ![Übersicht](assets/img/bunkerweb-cloud.webp){ align=center, width="600" }
+  ![Übersicht](assets/img/bunkerweb-cloud.png){ align=center, width="600" }
   <figcaption>BunkerWeb Cloud</figcaption>
 </figure>
 
 Möchten Sie Ihre eigene(n) BunkerWeb-Instanz(en) nicht selbst hosten und verwalten? Dann könnte Sie BunkerWeb Cloud interessieren, unser vollständig verwaltetes SaaS-Angebot für BunkerWeb.
 
-Probieren Sie unser [BunkerWeb Cloud-Angebot](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) aus und erhalten Sie Zugang zu:
+Bestellen Sie Ihre [BunkerWeb Cloud-Instanz](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=doc) und erhalten Sie Zugang zu:
 
 - Eine vollständig verwaltete BunkerWeb-Instanz, die in unserer Cloud gehostet wird
 - Alle BunkerWeb-Funktionen, einschließlich der PRO-Funktionen

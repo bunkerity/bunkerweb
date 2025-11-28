@@ -12,7 +12,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from common_utils import handle_docker_secrets  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from SwarmController import SwarmController
 from IngressController import IngressController
 from DockerController import DockerController
@@ -24,7 +24,7 @@ if docker_secrets:
     # Update environment with secrets
     environ.update(docker_secrets)
 
-LOGGER = setup_logger("Autoconf", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+LOGGER = getLogger("AUTOCONF")
 
 if docker_secrets:
     LOGGER.info(f"Loaded {len(docker_secrets)} Docker secrets")

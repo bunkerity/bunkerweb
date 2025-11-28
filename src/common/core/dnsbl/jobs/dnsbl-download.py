@@ -18,7 +18,7 @@ from requests import get
 from requests.exceptions import ConnectionError
 
 from common_utils import bytes_hash  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
 
@@ -42,7 +42,7 @@ def check_ip_line(line: bytes) -> bytes | None:
     return None
 
 
-LOGGER = setup_logger("DNSBL")
+LOGGER = getLogger("DNSBL")
 status = 0
 
 try:

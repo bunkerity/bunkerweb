@@ -56,7 +56,8 @@ function start() {
     if [ ! -f /etc/bunkerweb/scheduler.env ]; then
         {
             echo "LOG_LEVEL=info"
-            echo "LOG_TO_FILE=yes"
+            echo "LOG_TYPES=file"
+            echo "# LOG_FILE_PATH=/var/log/bunkerweb/scheduler.log"
             echo "# in seconds"
             echo "HEALTHCHECK_INTERVAL=30"
             echo ""
@@ -87,11 +88,14 @@ function start() {
     CUSTOM_LOG_LEVEL=$(get_env_var "LOG_LEVEL" "INFO")
     export CUSTOM_LOG_LEVEL
 
-    SCHEDULER_LOG_TO_FILE=$(get_env_var "SCHEDULER_LOG_TO_FILE" "")
-    if [ -z "$SCHEDULER_LOG_TO_FILE" ]; then
-        SCHEDULER_LOG_TO_FILE=$(get_env_var "LOG_TO_FILE" "yes")
-    fi
-    export SCHEDULER_LOG_TO_FILE
+    LOG_TYPES=$(get_env_var "LOG_TYPES" "file")
+    export LOG_TYPES
+
+    LOG_FILE_PATH=$(get_env_var "LOG_FILE_PATH" "/var/log/bunkerweb/scheduler.log")
+    export LOG_FILE_PATH
+
+    LOG_SYSLOG_TAG=$(get_env_var "LOG_SYSLOG_TAG" "bw-scheduler")
+    export LOG_SYSLOG_TAG
 
     # Extract DATABASE_URI with fallback
     DATABASE_URI=$(get_env_var "DATABASE_URI" "sqlite:////var/lib/bunkerweb/db.sqlite3")
@@ -118,9 +122,9 @@ import sqlalchemy as sa
 from traceback import format_exc
 
 from Database import Database
-from logger import setup_logger
+from logger import getLogger
 
-LOGGER = setup_logger("Scheduler", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+LOGGER = getLogger("SCHEDULER.SYSTEMD")
 
 db = None
 try:
@@ -206,9 +210,9 @@ import sqlalchemy as sa
 from os import getenv
 
 from Database import Database
-from logger import setup_logger
+from logger import getLogger
 
-LOGGER = setup_logger('Scheduler', getenv('CUSTOM_LOG_LEVEL', getenv('LOG_LEVEL', 'INFO')))
+LOGGER = getLogger('SCHEDULER.SYSTEMD')
 
 db = Database(LOGGER)
 with db.sql_engine.connect() as conn:

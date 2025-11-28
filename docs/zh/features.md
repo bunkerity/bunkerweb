@@ -34,7 +34,7 @@ STREAM 支持 :warning:
 
 这种方法可确保在多站点环境中将设置应用于正确的站点。
 
-### 多个设置
+### 多个设置 {#multiple-settings}
 
 BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组设置，请在设置名称后附加一个数字后缀。例如：
 
@@ -133,11 +133,13 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 === "日志设置"
 
-    | 设置               | 默认值                                                                                                                                     | 上下文 | 多个 | 描述                                                                                                              |
-    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------ | ---- | ----------------------------------------------------------------------------------------------------------------- |
-    | `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global | 否   | **日志格式：** 用于访问日志的格式。                                                                               |
-    | `LOG_LEVEL`        | `notice`                                                                                                                                   | global | 否   | **日志级别：** 错误日志的详细程度。选项：`debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`。   |
-    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global | 否   | **计时器日志级别：** 计时器的日志级别。选项：`debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`。 |
+    | 设置               | 默认值                                                                                                                                     | 上下文 | 多个 | 描述                                                                                                                        |
+    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------ | ---- | --------------------------------------------------------------------------------------------------------------------------- |
+    | `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global | 否   | **日志格式：** 用于访问日志的格式。                                                                                         |
+    | `ACCESS_LOG`       | `/var/log/bunkerweb/access.log`                                                                                                            | global | 是   | **访问日志路径：** 文件路径、`syslog:server=地址[:端口][,参数=值]` 或共享缓冲 `memory:名称:大小`；设置为 `off` 可禁用日志。 |
+    | `ERROR_LOG`        | `/var/log/bunkerweb/error.log`                                                                                                             | global | 是   | **错误日志路径：** 文件路径、`stderr`、`syslog:server=地址[:端口][,参数=值]` 或 `memory:大小`。                             |
+    | `LOG_LEVEL`        | `notice`                                                                                                                                   | global | 是   | **日志级别：** 错误日志的详细程度。选项：`debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`。             |
+    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global | 否   | **计时器日志级别：** 计时器的日志级别。选项：`debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`。           |
 
     !!! tip "日志记录最佳实践"
         - 对于生产环境，请使用 `notice`、`warn` 或 `error` 日志级别以最小化日志量。
@@ -1630,7 +1632,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     对于基于容器的集成，我们建议将 BunkerWeb 容器的日志重定向到 syslog 服务，以便 CrowdSec 可以轻松访问它们。这是一个 syslog-ng 的示例配置，它会将来自 BunkerWeb 的原始日志存储到本地的 `/var/log/bunkerweb.log` 文件中：
 
     ```syslog
-    @version: 4.8
+    @version: 4.10
 
     source s_net {
         udp(
@@ -1644,7 +1646,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     };
 
     destination d_file {
-        file("/var/log/bunkerweb.log" template(t_imp));
+        file("/var/log/bunkerweb.log" template(t_imp) logrotate(enable(yes), size(100MB), rotations(7)));
     };
 
     log {
@@ -1730,7 +1732,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
           - bw-universe
 
       syslog:
-        image: balabit/syslog-ng:4.9.0
+        image: balabit/syslog-ng:4.10.2
         cap_add:
           - NET_BIND_SERVICE  # 绑定到低端口
           - NET_BROADCAST  # 发送广播
@@ -2782,23 +2784,28 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 
 ### 配置设置
 
-| 设置                               | 默认值    | 上下文    | 多选 | 描述                                                                                                                                                                               |
-| ---------------------------------- | --------- | --------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AUTO_LETS_ENCRYPT`                | `no`      | multisite | 否   | **启用 Let's Encrypt：** 设置为 `yes` 以启用自动证书颁发和续订。                                                                                                                   |
-| `LETS_ENCRYPT_PASSTHROUGH`         | `no`      | multisite | 否   | **传递 Let's Encrypt 请求：** 设置为 `yes` 以将 Let's Encrypt 请求传递给 Web 服务器。当 BunkerWeb 位于处理 SSL 的另一个反向代理后面时，此功能很有用。                              |
-| `EMAIL_LETS_ENCRYPT`               | `-`       | multisite | 否   | **联系电子邮件：** 用于 Let's Encrypt 到期提醒的电子邮件地址。只有在接受不接收任何警报或恢复邮件的情况下才可留空（此时 Certbot 会使用 `--register-unsafely-without-email` 注册）。 |
-| `LETS_ENCRYPT_CHALLENGE`           | `http`    | multisite | 否   | **验证类型：** 用于验证域名所有权的方法。选项：`http` 或 `dns`。                                                                                                                   |
-| `LETS_ENCRYPT_DNS_PROVIDER`        |           | multisite | 否   | **DNS 提供商：** 使用 DNS 验证时，要使用的 DNS 提供商（例如 cloudflare、route53、digitalocean）。                                                                                  |
-| `LETS_ENCRYPT_DNS_PROPAGATION`     | `default` | multisite | 否   | **DNS 传播：** 等待 DNS 传播的时间（秒）。如果未提供值，则使用提供商的默认传播时间。                                                                                               |
-| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |           | multisite | 是   | **凭证项：** 用于 DNS 提供商身份验证的配置项（例如 `cloudflare_api_token 123456`）。值可以是原始文本、base64 编码或 JSON 对象。                                                    |
-| `USE_LETS_ENCRYPT_WILDCARD`        | `no`      | multisite | 否   | **通配符证书：** 设置为 `yes` 时，为所有域名创建通配符证书。仅适用于 DNS 验证。                                                                                                    |
-| `USE_LETS_ENCRYPT_STAGING`         | `no`      | multisite | 否   | **使用测试环境：** 设置为 `yes` 时，使用 Let's Encrypt 的测试环境进行测试。测试环境的速率限制较高，但生成的证书不受浏览器信任。                                                    |
-| `LETS_ENCRYPT_CLEAR_OLD_CERTS`     | `no`      | global    | 否   | **清除旧证书：** 设置为 `yes` 时，在续订期间删除不再需要的旧证书。                                                                                                                 |
-| `LETS_ENCRYPT_PROFILE`             | `classic` | multisite | 否   | **证书配置文件：** 选择要使用的证书配置文件。选项：`classic`（通用）、`tlsserver`（针对 TLS 服务器优化）或 `shortlived`（7 天证书）。                                              |
-| `LETS_ENCRYPT_CUSTOM_PROFILE`      |           | multisite | 否   | **自定义证书配置文件：** 如果您的 ACME 服务器支持非标准配置文件，请输入自定义证书配置文件。如果设置了此项，它将覆盖 `LETS_ENCRYPT_PROFILE`。                                       |
-| `LETS_ENCRYPT_MAX_RETRIES`         | `3`       | multisite | 否   | **最大重试次数：** 证书生成失败时重试的次数。设置为 `0` 以禁用重试。用于处理临时网络问题或 API 速率限制。                                                                          |
+| 设置                                        | 默认值    | 上下文    | 多选 | 描述                                                                                                                                                                               |
+| ------------------------------------------- | --------- | --------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AUTO_LETS_ENCRYPT`                         | `no`      | multisite | 否   | **启用 Let's Encrypt：** 设置为 `yes` 以启用自动证书颁发和续订。                                                                                                                   |
+| `LETS_ENCRYPT_PASSTHROUGH`                  | `no`      | multisite | 否   | **传递 Let's Encrypt 请求：** 设置为 `yes` 以将 Let's Encrypt 请求传递给 Web 服务器。当 BunkerWeb 位于处理 SSL 的另一个反向代理后面时，此功能很有用。                              |
+| `EMAIL_LETS_ENCRYPT`                        | `-`       | multisite | 否   | **联系电子邮件：** 用于 Let's Encrypt 到期提醒的电子邮件地址。只有在接受不接收任何警报或恢复邮件的情况下才可留空（此时 Certbot 会使用 `--register-unsafely-without-email` 注册）。 |
+| `LETS_ENCRYPT_CHALLENGE`                    | `http`    | multisite | 否   | **验证类型：** 用于验证域名所有权的方法。选项：`http` 或 `dns`。                                                                                                                   |
+| `LETS_ENCRYPT_DNS_PROVIDER`                 |           | multisite | 否   | **DNS 提供商：** 使用 DNS 验证时，要使用的 DNS 提供商（例如 cloudflare、route53、digitalocean）。                                                                                  |
+| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default` | multisite | 否   | **DNS 传播：** 等待 DNS 传播的时间（秒）。如果未提供值，则使用提供商的默认传播时间。                                                                                               |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |           | multisite | 是   | **凭证项：** 用于 DNS 提供商身份验证的配置项（例如 `cloudflare_api_token 123456`）。值可以是原始文本、base64 编码或 JSON 对象。                                                    |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`     | multisite | 否   | **自动解码 Base64 DNS 凭据：** 启用后自动解码 base64 编码的 DNS 提供商凭据（`rfc2136` 提供商除外）。如果凭据故意为 base64，请设置为 `no`。                                         |
+| `USE_LETS_ENCRYPT_WILDCARD`                 | `no`      | multisite | 否   | **通配符证书：** 设置为 `yes` 时，为所有域名创建通配符证书。仅适用于 DNS 验证。                                                                                                    |
+| `USE_LETS_ENCRYPT_STAGING`                  | `no`      | multisite | 否   | **使用测试环境：** 设置为 `yes` 时，使用 Let's Encrypt 的测试环境进行测试。测试环境的速率限制较高，但生成的证书不受浏览器信任。                                                    |
+| `LETS_ENCRYPT_CLEAR_OLD_CERTS`              | `no`      | global    | 否   | **清除旧证书：** 设置为 `yes` 时，在续订期间删除不再需要的旧证书。                                                                                                                 |
+| `LETS_ENCRYPT_PROFILE`                      | `classic` | multisite | 否   | **证书配置文件：** 选择要使用的证书配置文件。选项：`classic`（通用）、`tlsserver`（针对 TLS 服务器优化）或 `shortlived`（7 天证书）。                                              |
+| `LETS_ENCRYPT_CUSTOM_PROFILE`               |           | multisite | 否   | **自定义证书配置文件：** 如果您的 ACME 服务器支持非标准配置文件，请输入自定义证书配置文件。如果设置了此项，它将覆盖 `LETS_ENCRYPT_PROFILE`。                                       |
+| `LETS_ENCRYPT_MAX_RETRIES`                  | `3`       | multisite | 否   | **最大重试次数：** 证书生成失败时重试的次数。设置为 `0` 以禁用重试。用于处理临时网络问题或 API 速率限制。                                                                          |
 
-!!! info "信息和行为" - `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` 设置是一个多选设置，可用于为 DNS 提供商设置多个项目。这些项目将保存为缓存文件，Certbot 将从中读取凭据。- 如果未提供 `LETS_ENCRYPT_DNS_PROPAGATION` 设置，则使用提供商的默认传播时间。- 只要您从外部打开 `80/tcp` 端口，使用 `http` 验证的完全 Let's Encrypt 自动化就可以在流模式下工作。使用 `LISTEN_STREAM_PORT_SSL` 设置来选择您的侦听 SSL/TLS 端口。- 如果 `LETS_ENCRYPT_PASSTHROUGH` 设置为 `yes`，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。
+!!! info "信息和行为"
+    - `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` 设置是一个多选设置，可用于为 DNS 提供商设置多个项目。这些项目将保存为缓存文件，Certbot 将从中读取凭据。
+    - 如果未提供 `LETS_ENCRYPT_DNS_PROPAGATION` 设置，则使用提供商的默认传播时间。
+    - 只要您从外部打开 `80/tcp` 端口，使用 `http` 验证的完全 Let's Encrypt 自动化就可以在流模式下工作。使用 `LISTEN_STREAM_PORT_SSL` 设置来选择您的侦听 SSL/TLS 端口。
+    - 如果 `LETS_ENCRYPT_PASSTHROUGH` 设置为 `yes`，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。
 
 !!! tip "HTTP 与 DNS 验证"
     **HTTP 验证** 更容易设置，并且适用于大多数网站：
@@ -2844,6 +2851,7 @@ Let's Encrypt 插件支持广泛的 DNS 提供商进行 DNS 验证。每个提�
 | `njalla`          | Njalla           | `token`                                                                                                      |                                                                                                                                                                                                                                                              | [文档](https://github.com/chaptergy/certbot-dns-njalla/blob/main/README.md)                  |
 | `nsone`           | NS1              | `api_key`                                                                                                    |                                                                                                                                                                                                                                                              | [文档](https://certbot-dns-nsone.readthedocs.io/en/stable/)                                  |
 | `ovh`             | OVH              | `application_key`<br>`application_secret`<br>`consumer_key`                                                  | `endpoint` (默认: `ovh-eu`)                                                                                                                                                                                                                                  | [文档](https://certbot-dns-ovh.readthedocs.io/en/stable/)                                    |
+| `pdns`            | PowerDNS         | `endpoint`<br>`api_key`<br>`server_id` (default: `localhost`)<br>`disable_notify` (default: `false`)         |                                                                                                                                                                                                                                                              | [Documentation](https://github.com/kaechele/certbot-dns-pdns/blob/main/README.md)            |
 | `rfc2136`         | RFC 2136         | `server`<br>`name`<br>`secret`                                                                               | `port` (默认: `53`)<br>`algorithm` (默认: `HMAC-SHA512`)<br>`sign_query` (默认: `false`)                                                                                                                                                                     | [文档](https://certbot-dns-rfc2136.readthedocs.io/en/stable/)                                |
 | `route53`         | Amazon Route 53  | `access_key_id`<br>`secret_access_key`                                                                       |                                                                                                                                                                                                                                                              | [文档](https://certbot-dns-route53.readthedocs.io/en/stable/)                                |
 | `sakuracloud`     | Sakura Cloud     | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                              | [文档](https://certbot-dns-sakuracloud.readthedocs.io/en/stable/)                            |

@@ -31,7 +31,7 @@ for deps_path in [BUNKERWEB_PATH.joinpath(*paths).as_posix() for paths in (("dep
 from schedule import every as schedule_every, run_pending
 
 from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets, add_dir_to_tar_safely, plugin_tar_exclude, plugin_tar_filter  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
 from jobs import Job, _write_atomic  # type: ignore
@@ -86,7 +86,7 @@ FAILOVER_PATH.mkdir(parents=True, exist_ok=True)
 HEALTHY_PATH = TMP_PATH.joinpath("scheduler.healthy")
 
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
-LOGGER = setup_logger("Scheduler", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+LOGGER = getLogger("SCHEDULER")
 
 HEALTHCHECK_INTERVAL = getenv("HEALTHCHECK_INTERVAL", "30")
 
@@ -96,7 +96,7 @@ if not HEALTHCHECK_INTERVAL.isdigit():
 
 HEALTHCHECK_INTERVAL = int(HEALTHCHECK_INTERVAL)
 HEALTHCHECK_EVENT = Event()
-HEALTHCHECK_LOGGER = setup_logger("Scheduler.Healthcheck", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+HEALTHCHECK_LOGGER = getLogger("SCHEDULER.HEALTHCHECK")
 
 # Shared executor to reuse worker threads across scheduler tasks
 SCHEDULER_TASKS_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-scheduler-tasks")

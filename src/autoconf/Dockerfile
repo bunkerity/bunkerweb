@@ -79,4 +79,6 @@ USER autoconf:autoconf
 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=60s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-autoconf.sh
 
+ENV PYTHONPATH="/usr/share/bunkerweb/deps/python"
+
 CMD [ "./entrypoint.sh" ]

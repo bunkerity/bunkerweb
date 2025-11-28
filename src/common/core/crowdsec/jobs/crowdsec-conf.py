@@ -12,10 +12,10 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from jinja2 import Environment, FileSystemLoader
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
-LOGGER = setup_logger("CROWDSEC", getenv("LOG_LEVEL", "INFO"))
+LOGGER = getLogger("CROWDSEC")
 PLUGIN_PATH = Path(sep, "usr", "share", "bunkerweb", "core", "crowdsec")
 status = 0
 

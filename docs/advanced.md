@@ -584,7 +584,7 @@ Here are the available types of custom configurations:
 - **stream**: Configurations at the Stream level of NGINX.
 - **server-stream**: Configurations at the Stream/Server level of NGINX.
 
-Custom configurations can be applied globally or specifically for a particular server, depending on the applicable context and whether the [multisite mode](concepts.md#multisite-mode) is enabled.
+Custom configurations can be applied globally or specifically for a particular server, depending on the applicable context and whether the [multisite mode](features.md#multisite-mode) is enabled.
 
 The method for applying custom configurations depends on the integration being used. However, the underlying process involves adding files with the `.conf` suffix to specific folders. To apply a custom configuration for a specific server, the file should be placed in a subfolder named after the primary server name.
 
@@ -1478,7 +1478,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     - Set up a PHP-FPM container for your application and mount the folder containing PHP files.
     - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as environment variables when running BunkerWeb.
 
-    If you enable the [multisite mode](concepts.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+    If you enable the [multisite mode](features.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
     ```
     www
@@ -1535,7 +1535,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     - Set up a PHP-FPM container for your application and mount the folder containing PHP files
     - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as environment variables when starting BunkerWeb
 
-    If you enable the [multisite mode](concepts.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+    If you enable the [multisite mode](features.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
     ```
     www
@@ -1643,7 +1643,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     - Set up a PHP-FPM containers for your applications and mount the folder containing PHP apps
     - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as labels for your PHP-FPM container
 
-    Since the Docker autoconf implies using the [multisite mode](concepts.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+    Since the Docker autoconf implies using the [multisite mode](features.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
     ```
     www
@@ -1838,7 +1838,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     systemctl restart php-fpm
     ```
 
-    If you enable the [multisite mode](concepts.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+    If you enable the [multisite mode](features.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
     ```
     /var/www/html
@@ -1914,7 +1914,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     - Set up a PHP-FPM containers for your applications and mount the folder containing PHP apps
     - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as labels for your PHP-FPM container
 
-    Since the Swarm integration implies using the [multisite mode](concepts.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+    Since the Swarm integration implies using the [multisite mode](features.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
     ```
     www
@@ -2087,6 +2087,171 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     ```shell
     systemctl start bunkerweb
     ```
+
+### Logging configuration options
+
+BunkerWeb offers flexible logging configuration, allowing you to send logs to multiple destinations (like files, stdout/stderr, or syslog) simultaneously. This is particularly useful for integrating with external log collectors while keeping local logs for the Web UI.
+
+There are two main categories of logs to configure:
+
+1. **Service Logs**: Logs generated by BunkerWeb components (Scheduler, UI, Autoconf, etc.). Controlled per service by `LOG_TYPES` (and optionally `LOG_FILE_PATH`, `LOG_SYSLOG_ADDRESS`, `LOG_SYSLOG_TAG`).
+2. **Access & Error Logs**: HTTP access and error logs generated by NGINX. Only the `bunkerweb` service uses these (`ACCESS_LOG` / `ERROR_LOG` / `LOG_LEVEL`).
+
+#### Service Logs
+
+Service logs are controlled by the `LOG_TYPES` setting, which can accept multiple values separated by spaces (e.g., `LOG_TYPES="stderr syslog"`).
+
+| Value    | Description                                                                             |
+| :------- | :-------------------------------------------------------------------------------------- |
+| `file`   | Writes logs to a file. Required for the Web UI log viewer.                              |
+| `stderr` | Writes logs to standard error. Standard for containerized environments (`docker logs`). |
+| `syslog` | Sends logs to a syslog server. Requires `LOG_SYSLOG_ADDRESS` to be set.                 |
+
+When using `syslog`, you should also configure:
+
+- `LOG_SYSLOG_ADDRESS`: The address of the syslog server (e.g., `udp://bw-syslog:514` or `/dev/log`).
+- `LOG_SYSLOG_TAG`: A unique tag for the service (e.g., `bw-scheduler`) to distinguish its entries.
+- `LOG_FILE_PATH`: Path for file output when `LOG_TYPES` includes `file` (for example, `/var/log/bunkerweb/scheduler.log`).
+
+#### Access and Error Logs
+
+These are standard NGINX logs, configured via **the `bunkerweb` service only**. They support multiple destinations by suffixing the setting name (e.g., `ACCESS_LOG`, `ACCESS_LOG_1` and matching `LOG_FORMAT`, `LOG_FORMAT_1` or `ERROR_LOG`, `ERROR_LOG_1` and their respective `LOG_LEVEL`, `LOG_LEVEL_1`).
+
+- `ACCESS_LOG`: Destination for access logs (default: `/var/log/bunkerweb/access.log`). Accepts file path, `syslog:server=host[:port][,param=value]`, shared buffer `memory:name:size`, or `off` to disable. See [NGINX access_log documentation](https://nginx.org/en/docs/http/ngx_http_log_module.html#access_log) for details.
+- `ERROR_LOG`: Destination for error logs (default: `/var/log/bunkerweb/error.log`). Accepts file path, `stderr`, `syslog:server=host[:port][,param=value]`, or shared buffer `memory:size`. See [NGINX error_log documentation](https://nginx.org/en/docs/ngx_core_module.html#error_log) for details.
+- `LOG_LEVEL`: Verbosity of error logs (default: `notice`).
+
+These settings accept standard NGINX values, including file paths, `stderr`, `syslog:server=...` (see [NGINX syslog documentation](https://nginx.org/en/docs/syslog.html)), or shared memory buffers. They support multiple destinations via numbered suffixes (see the [multiple settings convention](features.md#multiple-settings)). Other services (Scheduler, UI, Autoconf, etc.) rely solely on `LOG_TYPES`/`LOG_FILE_PATH`/`LOG_SYSLOG_*`.
+
+**Example with multiple access/error logs (bunkerweb only, numbered suffixes):**
+
+```conf
+ACCESS_LOG=/var/log/bunkerweb/access.log
+ACCESS_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
+LOG_FORMAT=$host $remote_addr - $request_id $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"
+LOG_FORMAT_1=$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent
+ERROR_LOG=/var/log/bunkerweb/error.log
+ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
+LOG_LEVEL=notice
+LOG_LEVEL_1=error
+```
+
+#### Integration Defaults & Examples
+
+=== "Linux"
+
+    **Default behavior**: `LOG_TYPES="file"`. Logs are written to `/var/log/bunkerweb/*.log`.
+
+    **Example**: Keep local files (for Web UI) and also mirror to the system syslog.
+
+    ```conf
+    # Service logs (set in /etc/bunkerweb/variables.env or specific service env files)
+    LOG_TYPES="file syslog"
+    LOG_SYSLOG_ADDRESS=/dev/log
+    LOG_FILE_PATH=/var/log/bunkerweb/bunkerweb.log
+    # LOG_SYSLOG_TAG is automatically set per service (override per-service if needed)
+
+    # NGINX logs (bunkerweb service only; set in /etc/bunkerweb/variables.env)
+    ACCESS_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
+    ERROR_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
+    LOG_LEVEL=notice
+    ```
+
+=== "Docker / Autoconf / Swarm"
+
+    **Default behavior**: `LOG_TYPES="stderr"`. Logs are visible via `docker logs`.
+
+    **Example**: Keep `docker logs` (stderr) AND send to a central syslog container (needed for Web UI and CrowdSec).
+
+    ```yaml
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.6.6
+        environment:
+          # Service Logs (bunkerweb)
+          LOG_TYPES: "stderr syslog"
+          LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
+          LOG_SYSLOG_TAG: "bunkerweb"
+          LOG_FILE_PATH: "/var/log/bunkerweb/bunkerweb.log"
+          # NGINX Logs: Send to Syslog (bunkerweb only)
+          ACCESS_LOG: "syslog:server=udp://bw-syslog:514,tag=bunkerweb"
+          ERROR_LOG: "syslog:server=udp://bw-syslog:514,tag=bunkerweb"
+
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.6
+        environment:
+          # Service Logs (scheduler)
+          LOG_TYPES: "stderr syslog"
+          LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
+          LOG_SYSLOG_TAG: "bw-scheduler"
+          LOG_FILE_PATH: "/var/log/bunkerweb/scheduler.log"
+
+      bw-ui:
+        image: bunkerity/bunkerweb-ui:1.6.6
+        environment:
+          # Service Logs (UI)
+          LOG_TYPES: "stderr syslog"
+          LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
+          LOG_SYSLOG_TAG: "bw-ui"
+          LOG_FILE_PATH: "/var/log/bunkerweb/ui.log"
+
+      # Central Syslog container to collect logs and write them to shared volume
+      bw-syslog:
+        image: balabit/syslog-ng:4.10.2
+        volumes:
+          - bw-logs:/var/log/bunkerweb # Shared volume for Web UI
+          - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf
+
+    volumes:
+      bw-logs:
+    ```
+
+#### Syslog-ng configuration
+
+Here is an example of a `syslog-ng.conf` file that you can use to forward the logs to a file:
+
+```conf
+@version: 4.10
+
+# Source configuration to receive logs sent by BunkerWeb services (ACCESS_LOG / ERROR_LOG and LOG_TYPES=syslog)
+source s_net {
+  udp(
+    ip("0.0.0.0")
+  );
+};
+
+# Template to format log messages
+template t_imp {
+  template("$MSG\n");
+  template_escape(no);
+};
+
+# Destination configuration to write logs to dynamically named files
+destination d_dyna_file {
+  file(
+    "/var/log/bunkerweb/${PROGRAM}.log"
+    template(t_imp)
+    owner("101")
+    group("101")
+    dir_owner("root")
+    dir_group("101")
+    perm(0440)
+    dir_perm(0770)
+    create_dirs(yes)
+    logrotate(
+      enable(yes),
+      size(100MB),
+      rotations(7)
+    )
+  );
+};
+
+# Log path to direct logs to dynamically named files
+log {
+  source(s_net);
+  destination(d_dyna_file);
+};
+```
 
 ### Docker logging best practices
 

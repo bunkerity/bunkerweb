@@ -21,10 +21,10 @@ from sqlalchemy.engine.url import make_url
 
 from common_utils import bytes_hash  # type: ignore
 from Database import Database  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from model import Base  # type: ignore
 
-LOGGER = setup_logger("BACKUP")
+LOGGER = getLogger("BACKUP")
 
 BACKUP_DIR = Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups"))
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")

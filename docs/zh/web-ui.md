@@ -105,14 +105,14 @@
 
 === "Docker"
 
-    要将日志正确转发到 Docker 集成的 `/var/log/bunkerweb` 目录，您需要使用 `syslog-ng` 将日志流式传输到文件中。这是一个如何执行此操作的示例：
+    要将日志正确转发到 Docker 集成的 `/var/log/bunkerweb` 目录，请通过 `ACCESS_LOG` / `ERROR_LOG` 发送 `bunkerweb` 服务的 NGINX 访问/错误日志，并通过 `LOG_TYPES` / `LOG_FILE_PATH` / `LOG_SYSLOG_ADDRESS` / `LOG_SYSLOG_TAG` 发送其他组件的服务日志。syslog 服务器会将所有内容写入共享卷。示例如下：
 
     ```yaml
-    x-bw-env: &bw-env
+    x-service-env: &service-env
       # 我们锚定环境变量以避免重复
-      API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
-      # 可选的 API 令牌，用于保护 API 访问
-      API_TOKEN: ""
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置更强的密码
+      LOG_TYPES: "stderr syslog" # 辅助组件的服务日志
+      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
 
     services:
       bunkerweb:
@@ -122,25 +122,26 @@
           - "443:8443/tcp"
           - "443:8443/udp" # QUIC
         environment:
-          <<: *bw-env
+          API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+          # 可选的 API 令牌，用于保护 API 访问
+          API_TOKEN: "" # 确保与 scheduler 中设置的保持一致
         restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-services
-        logging:
-          driver: syslog
-          options:
-            tag: "bunkerweb" # 这将是 syslog-ng 用来创建日志文件的标签
-            syslog-address: "udp://10.20.30.254:514" # 这是 syslog-ng 容器的地址
 
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
-          <<: *bw-env
+          <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
           SERVER_NAME: "www.example.com"
           MULTISITE: "yes"
-          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
+          API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+          # 可选的 API 令牌，用于保护 API 访问
+          API_TOKEN: "" # 确保与 bunkerweb 服务中设置的保持一致
+          ACCESS_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb_access"
+          ERROR_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb"
           SERVE_FILES: "no"
           DISABLE_DEFAULT_SERVER: "yes"
           USE_CLIENT_CACHE: "yes"
@@ -155,16 +156,11 @@
         networks:
           - bw-universe
           - bw-db
-        logging:
-          driver: syslog
-          options:
-            tag: "bw-scheduler" # 这将是 syslog-ng 用来创建日志文件的标签
-            syslog-address: "udp://10.20.30.254:514" # 这是 syslog-ng 容器的地址
 
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.6.6
         environment:
-          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
+          <<: *service-env
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # 记得为管理员用户设置一个更强的密码
           TOTP_ENCRYPTION_KEYS: "mysecret" # 记得设置一个更强的密钥（请参阅先决条件部分）
@@ -174,11 +170,6 @@
         networks:
           - bw-universe
           - bw-db
-        logging:
-          driver: syslog
-          options:
-            tag: "bw-ui" # 这将是 syslog-ng 用来创建日志文件的标签
-            syslog-address: "udp://10.20.30.254:514" # 这是 syslog-ng 容器的地址
 
       bw-db:
         image: mariadb:11
@@ -208,9 +199,9 @@
         volumes:
           - bw-logs:/var/log/bunkerweb # 这是用于存储日志的卷
           - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # 这是 syslog-ng 配置文件
+        restart: "unless-stopped"
         networks:
-          bw-universe:
-            ipv4_address: 10.20.30.254 # 确保设置正确的 IP 地址
+          - bw-universe
 
     volumes:
       bw-data:
@@ -232,13 +223,15 @@
 
 === "Docker Autoconf"
 
-    要将日志正确转发到 Autoconf 集成的 `/var/log/bunkerweb` 目录，您需要使用 `syslog-ng` 将日志流式传输到文件中。这是一个如何执行此操作的示例：
+    要将日志正确转发到 Autoconf 集成的 `/var/log/bunkerweb` 目录，请通过 `ACCESS_LOG` / `ERROR_LOG` 发送 `bunkerweb` 服务的 NGINX 访问/错误日志，并通过 `LOG_TYPES` / `LOG_FILE_PATH` / `LOG_SYSLOG_ADDRESS` / `LOG_SYSLOG_TAG` 发送其他组件的服务日志。syslog 服务器会将所有内容写入共享卷。示例如下：
 
     ```yaml
-    x-ui-env: &bw-ui-env
+    x-service-env: &service-env
       # 我们锚定环境变量以避免重复
       AUTOCONF_MODE: "yes"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
+      LOG_TYPES: "stderr syslog" # 辅助组件的服务日志
+      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
 
     services:
       bunkerweb:
@@ -250,35 +243,31 @@
         environment:
           AUTOCONF_MODE: "yes"
           API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+          # 可选的 API 令牌，用于保护 API 访问
+          API_TOKEN: "" # 确保与 scheduler 中设置的保持一致
         restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-services
-        logging:
-          driver: syslog
-          options:
-            tag: "bunkerweb" # 这将是 syslog-ng 用来创建日志文件的标签
-            syslog-address: "udp://10.20.30.254:514" # 这是 syslog-ng 容器的地址
 
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
-          <<: *bw-ui-env
-          BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由 autoconf 服务自动检测
+          <<: *service-env
+          BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为 autoconf 服务会自动检测
           SERVER_NAME: "" # 服务器名称将由服务标签填充
-          MULTISITE: "yes" # autoconf / ui 的强制设置
           API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+          # 可选的 API 令牌，用于保护 API 访问
+          API_TOKEN: "" # 确保与 bunkerweb 服务中设置的保持一致
+          ACCESS_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb_access"
+          ERROR_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb"
+          MULTISITE: "yes" # autoconf / ui 的强制设置
         volumes:
           - bw-storage:/data # 用于持久化缓存和备份等其他数据
         restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-db
-        logging:
-          driver: syslog
-          options:
-            tag: "bw-scheduler" # 这将是 syslog-ng 用来创建日志文件的标签
-            syslog-address: "udp://10.20.30.254:514" # 这是 syslog-ng 容器的地址
 
       bw-autoconf:
         image: bunkerity/bunkerweb-autoconf:1.6.6
@@ -286,23 +275,18 @@
           - bunkerweb
           - bw-docker
         environment:
-          <<: *bw-ui-env
+          <<: *service-env
           DOCKER_HOST: "tcp://bw-docker:2375" # 这是 Docker 套接字地址
         restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-docker
           - bw-db
-        logging:
-          driver: syslog
-          options:
-            tag: "bw-autoconf" # 这将是 syslog-ng 用来创建日志文件的标签
-            syslog-address: "udp://10.20.30.254:514" # 这是 syslog-ng 容器的地址
 
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.6.6
         environment:
-          <<: *bw-ui-env
+          <<: *service-env
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # 记得为管理员用户设置一个更强的密码
           TOTP_ENCRYPTION_KEYS: "mysecret" # 记得设置一个更强的密钥（请参阅先决条件部分）
@@ -316,13 +300,8 @@
           - "bunkerweb.SERVER_NAME=www.example.com"
           - "bunkerweb.USE_TEMPLATE=ui"
           - "bunkerweb.USE_REVERSE_PROXY=yes"
-          - "bunkerweb.REVERSE_PROXY_URL=/changeme" # 将其更改为一个难以猜测的 URI
+          - "bunkerweb.USE_REVERSE_PROXY_URL=/changeme" # 将其更改为一个难以猜测的 URI
           - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-        logging:
-          driver: syslog
-          options:
-            tag: "bw-ui" # 这将是 syslog-ng 用来创建日志文件的标签
-            syslog-address: "udp://10.20.30.254:514" # 这是 syslog-ng 容器的地址
 
       bw-db:
         image: mariadb:11
@@ -361,11 +340,11 @@
           - CHOWN  # 更改所有权
           - SYSLOG  # 写入系统日志
         volumes:
-          - bw-logs:/var/log/bunkerweb # 这是用于存储日志的卷
+          - bw-logs:/var/log/bunkerweb
           - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # 这是 syslog-ng 配置文件
+        restart: "unless-stopped"
         networks:
-          bw-universe:
-            ipv4_address: 10.20.30.254 # 确保设置正确的 IP 地址
+          - bw-universe
 
     volumes:
       bw-data:
@@ -383,10 +362,7 @@
         name: bw-services
       bw-db:
         name: bw-db
-      bw-docker:
-        name: bw-docker
     ```
-
 ### Syslog-ng 配置
 
 这是一个 `syslog-ng.conf` 文件的示例，您可以使用它将日志转发到文件中：
@@ -394,7 +370,7 @@
 ```conf
 @version: 4.8
 
-# 用于从 Docker 容器接收日志的源配置
+# 用于接收 BunkerWeb 服务发送的日志（ACCESS_LOG / ERROR_LOG 以及 LOG_TYPES=syslog）的源配置
 source s_net {
   udp(
     ip("0.0.0.0")
@@ -634,9 +610,10 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
     这是您可以使用的 docker-compose 样板（不要忘记编辑 `changeme` 数据）：
 
     ```yaml
-    x-ui-env: &ui-env
-      # 我们锚定环境变量以避免重复
+    x-service-env: &service-env
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
+      LOG_TYPES: "stderr syslog" # 辅助组件的服务日志
+      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
 
     services:
       bunkerweb:
@@ -644,10 +621,12 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
-          - "443:8443/udp" # 用于 QUIC / HTTP3 支持
+          - "443:8443/udp" # QUIC
         environment:
-          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # 确保设置正确的 IP 范围，以便调度器可以将配置发送到实例
-          API_TOKEN: "" # 如果使用，镜像 API_TOKEN
+          API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+          # 可选的 API 令牌，用于保护 API 访问
+          API_TOKEN: "" # 确保与 scheduler 中设置的保持一致
+        restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-services
@@ -655,22 +634,26 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
-          <<: *ui-env
+          <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
           SERVER_NAME: "www.example.com"
+          API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+          # 可选的 API 令牌，用于保护 API 访问
+          API_TOKEN: "" # 确保与 bunkerweb 服务中设置的保持一致
+          ACCESS_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb_access"
+          ERROR_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb"
           MULTISITE: "yes"
-          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # 我们从 bunkerweb 服务镜像 API_WHITELIST_IP
-          API_TOKEN: "" # 如果使用，镜像 API_TOKEN
           SERVE_FILES: "no"
           DISABLE_DEFAULT_SERVER: "yes"
           USE_CLIENT_CACHE: "yes"
           USE_GZIP: "yes"
           www.example.com_USE_TEMPLATE: "ui"
-          www.example.com_USE_REVERSE_PROXY: "yes"
-          www.example.com_REVERSE_PROXY_URL: "/changeme" # 记得设置一个更强的 URI
-          www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000" # Web UI 容器默认在 7000 端口监听
+          www.example.com_REVERSE_PROXY: "yes"
+          www.example.com_REVERSE_PROXY_URL: "/changeme" # 将其更改为一个难以猜测的 URI
+          www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000" # Web UI 容器默认监听 7000 端口
         volumes:
           - bw-storage:/data # 用于持久化缓存和备份等其他数据
+        restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-db
@@ -678,10 +661,13 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.6.6
         environment:
-          <<: *ui-env
+          <<: *service-env
           ADMIN_USERNAME: "changeme"
-          ADMIN_PASSWORD: "changeme" # 记得为 changeme 用户设置一个更强的密码
+          ADMIN_PASSWORD: "changeme" # 记得为管理员用户设置一个更强的密码
           TOTP_ENCRYPTION_KEYS: "mysecret" # 记得设置一个更强的密钥（请参阅先决条件部分）
+        volumes:
+          - bw-logs:/var/log/bunkerweb # 这是用于存储日志的卷
+        restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-db
@@ -697,12 +683,31 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
           MYSQL_PASSWORD: "changeme" # 记得为数据库设置一个更强的密码
         volumes:
           - bw-data:/var/lib/mysql
+        restart: "unless-stopped"
         networks:
           - bw-db
+
+      bw-syslog:
+        image: balabit/syslog-ng:4.9.0
+        cap_add:
+          - NET_BIND_SERVICE  # 绑定到低端口
+          - NET_BROADCAST  # 发送广播
+          - NET_RAW  # 使用原始套接字
+          - DAC_READ_SEARCH  # 绕过权限读取文件
+          - DAC_OVERRIDE  # 覆盖文件权限
+          - CHOWN  # 更改所有权
+          - SYSLOG  # 写入系统日志
+        volumes:
+          - bw-logs:/var/log/bunkerweb # 这是用于存储日志的卷
+          - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # 这是 syslog-ng 配置文件
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
 
     volumes:
       bw-data:
       bw-storage:
+      bw-logs:
 
     networks:
       bw-universe:
@@ -746,10 +751,12 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
     这是您可以使用的 docker-compose 样板（不要忘记编辑 `changeme` 数据）：
 
     ```yaml
-    x-ui-env: &ui-env
+    x-service-env: &service-env
       # 我们锚定环境变量以避免重复
       AUTOCONF_MODE: "yes"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
+      LOG_TYPES: "stderr syslog" # 辅助组件的服务日志
+      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
 
     services:
       bunkerweb:
@@ -757,12 +764,12 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
-          - "443:8443/udp" # 用于 QUIC / HTTP3 支持
-        labels:
-          - "bunkerweb.INSTANCE=yes" # 我们设置实例标签以允许 autoconf 检测实例
+          - "443:8443/udp" # QUIC
         environment:
-          AUTOCONF_MODE: "yes"
-          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+          API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+          # 可选的 API 令牌，用于保护 API 访问
+          API_TOKEN: "" # 确保与 scheduler 中设置的保持一致
+        restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-services
@@ -770,13 +777,18 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
-          <<: *ui-env
+          <<: *service-env
           BUNKERWEB_INSTANCES: ""
           SERVER_NAME: ""
-          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+          API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+          # 可选的 API 令牌，用于保护 API 访问
+          API_TOKEN: "" # 确保与 bunkerweb 服务中设置的保持一致
+          ACCESS_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb_access"
+          ERROR_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb"
           MULTISITE: "yes"
         volumes:
           - bw-storage:/data # 用于持久化缓存和备份等其他数据
+        restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-db
@@ -786,7 +798,7 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
         depends_on:
           - bw-docker
         environment:
-          <<: *ui-env
+          <<: *service-env
           DOCKER_HOST: "tcp://bw-docker:2375"
         networks:
           - bw-universe
@@ -803,6 +815,26 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
         networks:
           - bw-docker
 
+      bw-ui:
+        image: bunkerity/bunkerweb-ui:1.6.6
+        environment:
+          <<: *service-env
+          ADMIN_USERNAME: "changeme"
+          ADMIN_PASSWORD: "changeme" # 记得为管理员用户设置一个更强的密码
+          TOTP_ENCRYPTION_KEYS: "mysecret" # 记得设置一个更强的密钥（请参阅先决条件部分）
+        volumes:
+          - bw-logs:/var/log/bunkerweb
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-db
+        labels:
+          - "bunkerweb.SERVER_NAME=www.example.com"
+          - "bunkerweb.USE_TEMPLATE=ui"
+          - "bunkerweb.USE_REVERSE_PROXY=yes"
+          - "bunkerweb.REVERSE_PROXY_URL=/changeme"
+          - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
+
       bw-db:
         image: mariadb:11
         # 我们设置了最大允许的数据包大小以避免大查询的问题
@@ -814,29 +846,31 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
           MYSQL_PASSWORD: "changeme" # 记得为数据库设置一个更强的密码
         volumes:
           - bw-data:/var/lib/mysql
+        restart: "unless-stopped"
         networks:
           - bw-db
 
-      bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.6
-        environment:
-          <<: *ui-env
-          ADMIN_USERNAME: "changeme"
-          ADMIN_PASSWORD: "changeme" # 记得为 changeme 用户设置一个更强的密码
-          TOTP_ENCRYPTION_KEYS: "mysecret" # 记得设置一个更强的密钥（请参阅先决条件部分）
-        labels:
-          - "bunkerweb.SERVER_NAME=www.example.com"
-          - "bunkerweb.USE_TEMPLATE=ui"
-          - "bunkerweb.USE_REVERSE_PROXY=yes"
-          - "bunkerweb.REVERSE_PROXY_URL=/changeme"
-          - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
+      bw-syslog:
+        image: balabit/syslog-ng:4.9.0
+        cap_add:
+          - NET_BIND_SERVICE  # 绑定到低端口
+          - NET_BROADCAST  # 发送广播
+          - NET_RAW  # 使用原始套接字
+          - DAC_READ_SEARCH  # 绕过权限读取文件
+          - DAC_OVERRIDE  # 覆盖文件权限
+          - CHOWN  # 更改所有权
+          - SYSLOG  # 写入系统日志
+        volumes:
+          - bw-logs:/var/log/bunkerweb
+          - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # 这是 syslog-ng 配置文件
+        restart: "unless-stopped"
         networks:
           - bw-universe
-          - bw-db
 
     volumes:
       bw-data:
       bw-storage:
+      bw-logs:
 
     networks:
       bw-universe:
@@ -880,179 +914,6 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
         serverName: "www.example.com"
         serverPath: "/admin"
       overrideAdminCreds: "yes"
-    ```
-
-=== "Swarm"
-
-    !!! warning "已弃用"
-        Swarm 集成已弃用，并将在未来版本中删除。请考虑改用 [Kubernetes 集成](integrations.md#kubernetes)。
-
-        **更多信息可以在 [Swarm 集成文档](integrations.md#swarm)中找到。**
-
-    Web UI 可以使用一个专用的容器来部署，该容器可在 [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb-ui) 上找到：
-
-    ```shell
-    docker pull bunkerity/bunkerweb-ui
-    ```
-
-    或者，您也可以自己构建它：
-
-    ```shell
-    git clone https://github.com/bunkerity/bunkerweb.git && \
-    cd bunkerweb && \
-    docker build -t my-bunkerweb-ui -f src/ui/Dockerfile .
-    ```
-
-    通过 BunkerWeb 访问 Web UI 是一个经典的反向代理设置](quickstart-guide.md)。我们建议您使用一个专用网络（例如也由调度器和 autoconf 使用的 `bw-universe`）连接 BunkerWeb 和 Web UI，这样它就不会与您的 Web 服务在同一个网络上，出于明显的安全原因。请注意，Web UI 容器在 `7000` 端口上监听。
-
-    !!! info "数据库后端"
-
-        如果您想要一个除 MariaDB 之外的数据库后端，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/misc/integrations)中的堆栈文件。
-
-    这是您可以使用的堆栈样板（不要忘记编辑 `changeme` 数据）：
-
-    ```yaml
-    x-ui-env: &ui-env
-      # 我们锚定环境变量以避免重复
-      SWARM_MODE: "yes"
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
-
-    services:
-      bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6
-        ports:
-          - published: 80
-            target: 8080
-            mode: host
-            protocol: tcp
-          - published: 443
-            target: 8443
-            mode: host
-            protocol: tcp
-          - published: 443
-            target: 8443
-            mode: host
-            protocol: udp # 用于 QUIC / HTTP3 支持
-        environment:
-          SWARM_MODE: "yes"
-          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
-        networks:
-          - bw-universe
-          - bw-services
-        deploy:
-          mode: global
-          placement:
-            constraints:
-              - "node.role == worker"
-          labels:
-            - "bunkerweb.INSTANCE=yes"
-
-      bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6
-        environment:
-          <<: *ui-env
-          BUNKERWEB_INSTANCES: ""
-          SERVER_NAME: ""
-          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
-          MULTISITE: "yes"
-          USE_REDIS: "yes"
-          REDIS_HOST: "bw-redis"
-          UI_HOST: "http://bw-ui:7000" # 如果需要，请更改它
-        volumes:
-          - bw-storage:/data # 用于持久化缓存和备份等其他数据
-        networks:
-          - bw-universe
-          - bw-db
-
-      bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.6
-        environment:
-          <<: *ui-env
-          DOCKER_HOST: "tcp://bw-docker:2375"
-        networks:
-          - bw-universe
-          - bw-docker
-          - bw-db
-
-      bw-docker:
-        image: tecnativa/docker-socket-proxy:nightly
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock:ro
-        environment:
-          CONFIGS: "1"
-          CONTAINERS: "1"
-          SERVICES: "1"
-          SWARM: "1"
-          TASKS: "1"
-          LOG_LEVEL: "warning"
-        networks:
-          - bw-docker
-        deploy:
-          placement:
-            constraints:
-              - "node.role == manager"
-
-      bw-db:
-        image: mariadb:11
-        # 我们设置了最大允许的数据包大小以避免大查询的问题
-        command: --max-allowed-packet=67108864
-        environment:
-          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-          MYSQL_DATABASE: "db"
-          MYSQL_USER: "bunkerweb"
-          MYSQL_PASSWORD: "changeme" # 记得为数据库设置一个更强的密码
-        volumes:
-          - bw-data:/var/lib/mysql
-        networks:
-          - bw-db
-
-      bw-redis:
-        image: redis:7-alpine
-        networks:
-          - bw-universe
-
-      bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.6
-        environment:
-          <<: *ui-env
-          ADMIN_USERNAME: "changeme"
-          ADMIN_PASSWORD: "changeme" # 记得为 changeme 用户设置一个更强的密码
-          TOTP_ENCRYPTION_KEYS: "mysecret" # 记得设置一个更强的密钥（请参阅先决条件部分）
-        networks:
-          - bw-universe
-          - bw-db
-        deploy:
-          labels:
-            - "bunkerweb.SERVER_NAME=www.example.com"
-            - "bunkerweb.USE_TEMPLATE=ui"
-            - "bunkerweb.USE_REVERSE_PROXY=yes"
-            - "bunkerweb.REVERSE_PROXY_URL=/changeme"
-            - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-
-    volumes:
-      bw-data:
-      bw-storage:
-
-    networks:
-      bw-universe:
-        name: bw-universe
-        driver: overlay
-        attachable: true
-        ipam:
-          config:
-            - subnet: 10.20.30.0/24
-      bw-services:
-        name: bw-services
-        driver: overlay
-        attachable: true
-      bw-docker:
-        name: bw-docker
-        driver: overlay
-        attachable: true
-      bw-db:
-        name: bw-db
-        driver: overlay
-        attachable: true
     ```
 
 ## 语言支持与本地化

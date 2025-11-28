@@ -96,6 +96,16 @@
       "type": "password",
       "multiple": "lets-encrypt-dns-credential-item"
     },
+    "LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Automatically decode base64 encoded DNS provider credentials. When enabled, credentials matching base64 format are decoded before use (except for rfc2136 provider). Disable if your credentials are intentionally base64 strings.",
+      "id": "lets-encrypt-dns-credential-decode-base64",
+      "label": "Decode Base64 DNS Credentials",
+      "regex": "^(yes|no)$",
+      "type": "check",
+      "multiple": "lets-encrypt-dns-credential-item"
+    },
     "USE_LETS_ENCRYPT_WILDCARD": {
       "context": "multisite",
       "default": "no",

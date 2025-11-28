@@ -10,7 +10,7 @@ from requests.exceptions import ConnectionError
 from urllib3 import disable_warnings  # new
 from urllib3.exceptions import InsecureRequestWarning  # new
 
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 
 # Suppress urllib3 InsecureRequestWarning when verify=False (default: enabled)
 if getenv("API_SUPPRESS_INSECURE_WARNING", "1").lower() in ("1", "true", "yes", "on"):
@@ -35,7 +35,7 @@ class API:
         self.__host = host or getenv("API_SERVER_NAME", "bwapi")
         # Optional API token: if not provided, fallback to env var
         self.__token = token if token is not None else getenv("API_TOKEN")
-        self.__logger = setup_logger("Api", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+        self.__logger = getLogger("API")
 
     @property
     def endpoint(self) -> str:
@@ -90,6 +90,7 @@ class API:
                     verify=False,
                     **deepcopy(kwargs),
                 )
+                self.__logger.debug(f"Response after retrying with HTTP: status={resp.status_code}, reason={resp.reason}, text={resp.text}")
             else:
                 return False, f"Connection error: {e}", None, None
         except Exception as e:
