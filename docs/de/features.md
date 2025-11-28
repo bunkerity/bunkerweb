@@ -1595,7 +1595,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     Für containerbasierte Integrationen empfehlen wir, die Protokolle des BunkerWeb-Containers an einen Syslog-Dienst umzuleiten, damit CrowdSec leicht darauf zugreifen kann. Hier ist ein Beispiel für eine syslog-ng-Konfiguration, die die Rohprotokolle von BunkerWeb in einer lokalen Datei `/var/log/bunkerweb.log` speichert:
 
     ```syslog
-    @version: 4.8
+    @version: 4.10
 
     source s_net {
         udp(
@@ -1609,7 +1609,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     };
 
     destination d_file {
-        file("/var/log/bunkerweb.log" template(t_imp));
+        file("/var/log/bunkerweb.log" template(t_imp) logrotate(enable(yes), size(100MB), rotations(7)));
     };
 
     log {
@@ -1695,7 +1695,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
           - bw-universe
 
       syslog:
-        image: balabit/syslog-ng:4.9.0
+        image: balabit/syslog-ng:4.10.2
         cap_add:
           - NET_BIND_SERVICE  # An niedrige Ports binden
           - NET_BROADCAST  # Broadcasts senden

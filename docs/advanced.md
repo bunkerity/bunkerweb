@@ -2197,7 +2197,7 @@ LOG_LEVEL_1=error
 
       # Central Syslog container to collect logs and write them to shared volume
       bw-syslog:
-        image: balabit/syslog-ng:4.9.0
+        image: balabit/syslog-ng:4.10.2
         volumes:
           - bw-logs:/var/log/bunkerweb # Shared volume for Web UI
           - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf
@@ -2205,6 +2205,53 @@ LOG_LEVEL_1=error
     volumes:
       bw-logs:
     ```
+
+#### Syslog-ng configuration
+
+Here is an example of a `syslog-ng.conf` file that you can use to forward the logs to a file:
+
+```conf
+@version: 4.10
+
+# Source configuration to receive logs sent by BunkerWeb services (ACCESS_LOG / ERROR_LOG and LOG_TYPES=syslog)
+source s_net {
+  udp(
+    ip("0.0.0.0")
+  );
+};
+
+# Template to format log messages
+template t_imp {
+  template("$MSG\n");
+  template_escape(no);
+};
+
+# Destination configuration to write logs to dynamically named files
+destination d_dyna_file {
+  file(
+    "/var/log/bunkerweb/${PROGRAM}.log"
+    template(t_imp)
+    owner("101")
+    group("101")
+    dir_owner("root")
+    dir_group("101")
+    perm(0440)
+    dir_perm(0770)
+    create_dirs(yes)
+    logrotate(
+      enable(yes),
+      size(100MB),
+      rotations(7)
+    )
+  );
+};
+
+# Log path to direct logs to dynamically named files
+log {
+  source(s_net);
+  destination(d_dyna_file);
+};
+```
 
 ### Docker logging best practices
 

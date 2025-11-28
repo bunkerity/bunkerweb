@@ -2205,6 +2205,53 @@ LOG_LEVEL_1=error
     bw-logs:
   ```
 
+#### Syslog-ng 配置
+
+下面是一个可将日志转发到文件的 `syslog-ng.conf` 示例：
+
+```conf
+@version: 4.10
+
+# 源：接收 BunkerWeb 服务发送的日志（ACCESS_LOG / ERROR_LOG 且 LOG_TYPES=syslog）
+source s_net {
+  udp(
+    ip("0.0.0.0")
+  );
+};
+
+# 用于格式化日志消息的模板
+template t_imp {
+  template("$MSG\n");
+  template_escape(no);
+};
+
+# 目标：将日志写入按程序名动态命名的文件
+destination d_dyna_file {
+  file(
+    "/var/log/bunkerweb/${PROGRAM}.log"
+    template(t_imp)
+    owner("101")
+    group("101")
+    dir_owner("root")
+    dir_group("101")
+    perm(0440)
+    dir_perm(0770)
+    create_dirs(yes)
+    logrotate(
+      enable(yes),
+      size(100MB),
+      rotations(7)
+    )
+  );
+};
+
+# 日志路径：将日志定向到按程序名动态命名的文件
+log {
+  source(s_net);
+  destination(d_dyna_file);
+};
+```
+
 ### Docker 日志记录最佳实践
 
 使用 Docker 时，管理容器日志以防止其占用过多磁盘空间非常重要。默认情况下，Docker 使用 `json-file` 日志记录驱动程序，如果未进行配置，可能会导致日志文件非常大。

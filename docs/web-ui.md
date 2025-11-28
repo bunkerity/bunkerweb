@@ -187,7 +187,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
           - bw-db
 
       bw-syslog:
-        image: balabit/syslog-ng:4.9.0
+        image: balabit/syslog-ng:4.10.2
         cap_add:
           - NET_BIND_SERVICE  # Bind to low ports
           - NET_BROADCAST  # Send broadcasts
@@ -330,7 +330,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
           - bw-docker
 
       bw-syslog:
-        image: balabit/syslog-ng:4.9.0
+        image: balabit/syslog-ng:4.10.2
         cap_add:
           - NET_BIND_SERVICE  # Bind to low ports
           - NET_BROADCAST  # Send broadcasts
@@ -371,7 +371,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
 Here is an example of a `syslog-ng.conf` file that you can use to forward the logs to a file:
 
 ```conf
-@version: 4.8
+@version: 4.10
 
 # Source configuration to receive logs sent by BunkerWeb services (ACCESS_LOG / ERROR_LOG and LOG_TYPES=syslog)
 source s_net {
@@ -398,6 +398,11 @@ destination d_dyna_file {
     perm(0440)
     dir_perm(0770)
     create_dirs(yes)
+    logrotate(
+      enable(yes),
+      size(100MB),
+      rotations(7)
+    )
   );
 };
 
@@ -691,7 +696,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-db
 
       bw-syslog:
-        image: balabit/syslog-ng:4.9.0
+        image: balabit/syslog-ng:4.10.2
         cap_add:
           - NET_BIND_SERVICE  # Bind to low ports
           - NET_BROADCAST  # Send broadcasts
@@ -854,7 +859,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-db
 
       bw-syslog:
-        image: balabit/syslog-ng:4.9.0
+        image: balabit/syslog-ng:4.10.2
         cap_add:
           - NET_BIND_SERVICE  # Bind to low ports
           - NET_BROADCAST  # Send broadcasts

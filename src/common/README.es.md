@@ -23,7 +23,7 @@ En el modo multisitio, cada sitio se identifica por un `SERVER_NAME` único. Par
 
 Este enfoque asegura que los ajustes se apliquen al sitio correcto en un entorno multisitio.
 
-### Ajustes Múltiples
+### Ajustes Múltiples {#multiple-settings}
 
 Algunos ajustes en BunkerWeb admiten múltiples configuraciones para la misma característica. Para definir múltiples grupos de ajustes, añade un sufijo numérico al nombre del ajuste. Por ejemplo:
 

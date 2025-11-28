@@ -2207,6 +2207,53 @@ LOG_LEVEL_1=error
     bw-logs:
   ```
 
+#### Configuración de syslog-ng
+
+Aquí tienes un ejemplo de un archivo `syslog-ng.conf` que puedes usar para reenviar los registros a un archivo:
+
+```conf
+@version: 4.10
+
+# Configuración de la fuente para recibir registros enviados por los servicios de BunkerWeb (ACCESS_LOG / ERROR_LOG y LOG_TYPES=syslog)
+source s_net {
+  udp(
+    ip("0.0.0.0")
+  );
+};
+
+# Plantilla para formatear los mensajes de registro
+template t_imp {
+  template("$MSG\n");
+  template_escape(no);
+};
+
+# Configuración de destino para escribir registros en archivos con nombre dinámico
+destination d_dyna_file {
+  file(
+    "/var/log/bunkerweb/${PROGRAM}.log"
+    template(t_imp)
+    owner("101")
+    group("101")
+    dir_owner("root")
+    dir_group("101")
+    perm(0440)
+    dir_perm(0770)
+    create_dirs(yes)
+    logrotate(
+      enable(yes),
+      size(100MB),
+      rotations(7)
+    )
+  );
+};
+
+# Ruta de registro para dirigir los registros a archivos con nombre dinámico
+log {
+  source(s_net);
+  destination(d_dyna_file);
+};
+```
+
 ### Buenas prácticas de registro de Docker
 
 Cuando se utiliza Docker, es importante gestionar los registros de los contenedores para evitar que consuman un espacio excesivo en el disco. Por defecto, Docker utiliza el controlador de registro `json-file`, lo que puede dar lugar a archivos de registro muy grandes si no se configura.

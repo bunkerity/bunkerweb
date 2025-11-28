@@ -2207,6 +2207,53 @@ LOG_LEVEL_1=error
     bw-logs:
   ```
 
+#### Syslog-ng-Konfiguration
+
+Hier ein Beispiel für eine `syslog-ng.conf`-Datei, die Sie verwenden können, um die Protokolle in eine Datei weiterzuleiten:
+
+```conf
+@version: 4.10
+
+# Quelle konfigurieren, um Logs von BunkerWeb-Diensten zu empfangen (ACCESS_LOG / ERROR_LOG und LOG_TYPES=syslog)
+source s_net {
+  udp(
+    ip("0.0.0.0")
+  );
+};
+
+# Template zur Formatierung der Lognachrichten
+template t_imp {
+  template("$MSG\n");
+  template_escape(no);
+};
+
+# Zielkonfiguration, um Logs in dynamisch benannten Dateien zu schreiben
+destination d_dyna_file {
+  file(
+    "/var/log/bunkerweb/${PROGRAM}.log"
+    template(t_imp)
+    owner("101")
+    group("101")
+    dir_owner("root")
+    dir_group("101")
+    perm(0440)
+    dir_perm(0770)
+    create_dirs(yes)
+    logrotate(
+      enable(yes),
+      size(100MB),
+      rotations(7)
+    )
+  );
+};
+
+# Logpfad zur Weiterleitung der Logs in dynamisch benannte Dateien
+log {
+  source(s_net);
+  destination(d_dyna_file);
+};
+```
+
 ### Docker Logging Best Practices
 
 Bei der Verwendung von Docker ist es wichtig, die Container-Protokolle zu verwalten, um zu verhindern, dass sie übermäßig viel Speicherplatz beanspruchen. Standardmäßig verwendet Docker den `json-file`-Protokollierungstreiber, der bei fehlender Konfiguration zu sehr großen Protokolldateien führen kann.

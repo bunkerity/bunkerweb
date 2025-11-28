@@ -1636,7 +1636,7 @@ Las siguientes secciones desarrollan cada paso.
     **Syslog**
 
     ```syslog
-    @version: 4.8
+    @version: 4.10
 
     source s_net {
         udp(
@@ -1650,7 +1650,7 @@ Las siguientes secciones desarrollan cada paso.
     };
 
     destination d_file {
-        file("/var/log/bunkerweb.log" template(t_imp));
+        file("/var/log/bunkerweb.log" template(t_imp) logrotate(enable(yes), size(100MB), rotations(7)));
     };
 
     log {
@@ -1734,7 +1734,7 @@ Las siguientes secciones desarrollan cada paso.
           - bw-universe
 
       syslog:
-        image: balabit/syslog-ng:4.9.0
+        image: balabit/syslog-ng:4.10.2
         cap_add:
           - NET_BIND_SERVICE  # Vincular a puertos bajos
           - NET_BROADCAST  # Enviar difusiones

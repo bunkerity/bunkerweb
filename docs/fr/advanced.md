@@ -2206,6 +2206,53 @@ LOG_LEVEL_1=error
     bw-logs:
   ```
 
+#### Configuration de syslog-ng
+
+Voici un exemple de fichier `syslog-ng.conf` que vous pouvez utiliser pour rediriger les journaux vers un fichier :
+
+```conf
+@version: 4.10
+
+# Configuration de la source pour recevoir les journaux envoyés par les services BunkerWeb (ACCESS_LOG / ERROR_LOG et LOG_TYPES=syslog)
+source s_net {
+  udp(
+    ip("0.0.0.0")
+  );
+};
+
+# Modèle pour formater les messages de journalisation
+template t_imp {
+  template("$MSG\n");
+  template_escape(no);
+};
+
+# Destination : écrire les journaux dans des fichiers nommés dynamiquement
+destination d_dyna_file {
+  file(
+    "/var/log/bunkerweb/${PROGRAM}.log"
+    template(t_imp)
+    owner("101")
+    group("101")
+    dir_owner("root")
+    dir_group("101")
+    perm(0440)
+    dir_perm(0770)
+    create_dirs(yes)
+    logrotate(
+      enable(yes),
+      size(100MB),
+      rotations(7)
+    )
+  );
+};
+
+# Chemin de journalisation pour diriger les logs vers des fichiers nommés dynamiquement
+log {
+  source(s_net);
+  destination(d_dyna_file);
+};
+```
+
 ### Meilleures pratiques de journalisation Docker
 
 Lors de l'utilisation de Docker, il est important de gérer les journaux des conteneurs pour éviter qu'ils ne consomment un espace disque excessif. Par défaut, Docker utilise le pilote de journalisation `json-file`, ce qui peut entraîner des fichiers journaux très volumineux s'il n'est pas configuré.
