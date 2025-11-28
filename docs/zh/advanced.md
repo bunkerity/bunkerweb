@@ -584,7 +584,7 @@ systemctl status systemd-resolved
 - **stream**：NGINX 的 Stream 级别的配置。
 - **server-stream**：NGINX 的 Stream/服务器级别的配置。
 
-自定义配置可以全局应用，也可以针对特定服务器应用，具体取决于适用的上下文以及是否启用了[多站点模式](concepts.md#multisite-mode)。
+自定义配置可以全局应用，也可以针对特定服务器应用，具体取决于适用的上下文以及是否启用了[多站点模式](features.md#multisite-mode)。
 
 应用自定义配置的方法取决于所使用的集成。然而，其底层过程涉及将带有 `.conf` 后缀的文件添加到特定文件夹中。要为特定服务器应用自定义配置，该文件应放置在以主服务器名称命名的子文件夹中。
 
@@ -1477,7 +1477,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     - 为您的应用程序设置一个 PHP-FPM 容器，并挂载包含 PHP 文件的文件夹。
     - 在运行 BunkerWeb 时，使用特定的设置 `REMOTE_PHP` 和 `REMOTE_PHP_PATH` 作为环境变量。
 
-    如果您启用[多站点模式](concepts.md#multisite-mode)，您需要为每个应用程序创建单独的目录。每个子目录应使用 `SERVER_NAME` 的第一个值来命名。这是一个示例：
+    如果您启用[多站点模式](features.md#multisite-mode)，您需要为每个应用程序创建单独的目录。每个子目录应使用 `SERVER_NAME` 的第一个值来命名。这是一个示例：
 
     ```
     www
@@ -1534,7 +1534,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     - 为您的应用程序设置一个 PHP-FPM 容器，并挂载包含 PHP 文件的文件夹
     - 在启动 BunkerWeb 时，使用特定的设置 `REMOTE_PHP` 和 `REMOTE_PHP_PATH` 作为环境变量
 
-    如果您启用[多站点模式](concepts.md#multisite-mode)，您需要为每个应用程序创建单独的目录。每个子目录应使用 `SERVER_NAME` 的第一个值来命名。这是一个示例：
+    如果您启用[多站点模式](features.md#multisite-mode)，您需要为每个应用程序创建单独的目录。每个子目录应使用 `SERVER_NAME` 的第一个值来命名。这是一个示例：
 
     ```
     www
@@ -1642,7 +1642,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     - 为您的应用程序设置 PHP-FPM 容器，并挂载包含 PHP 应用程序的文件夹
     - 使用特定的设置 `REMOTE_PHP` 和 `REMOTE_PHP_PATH` 作为您的 PHP-FPM 容器的标签
 
-    由于 Docker autoconf 意味着使用[多站点模式](concepts.md#multisite-mode)，您需要为每个应用程序创建单独的目录。每个子目录应使用 `SERVER_NAME` 的第一个值来命名。这是一个示例：
+    由于 Docker autoconf 意味着使用[多站点模式](features.md#multisite-mode)，您需要为每个应用程序创建单独的目录。每个子目录应使用 `SERVER_NAME` 的第一个值来命名。这是一个示例：
 
     ```
     www
@@ -1837,7 +1837,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     systemctl restart php-fpm
     ```
 
-    如果您启用[多站点模式](concepts.md#multisite-mode)，您需要为每个应用程序创建单独的目录。每个子目录应使用 `SERVER_NAME` 的第一个值来命名。这是一个示例：
+    如果您启用[多站点模式](features.md#multisite-mode)，您需要为每个应用程序创建单独的目录。每个子目录应使用 `SERVER_NAME` 的第一个值来命名。这是一个示例：
 
     ```
     /var/www/html
@@ -1913,7 +1913,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     - 为您的应用程序设置 PHP-FPM 容器，并挂载包含 PHP 应用程序的文件夹
     - 使用特定的设置 `REMOTE_PHP` 和 `REMOTE_PHP_PATH` 作为您的 PHP-FPM 容器的标签
 
-    由于 Swarm 集成意味着使用[多站点模式](concepts.md#multisite-mode)，您需要为每个应用程序创建单独的目录。每个子目录应使用 `SERVER_NAME` 的第一个值来命名。这是一个示例：
+    由于 Swarm 集成意味着使用[多站点模式](features.md#multisite-mode)，您需要为每个应用程序创建单独的目录。每个子目录应使用 `SERVER_NAME` 的第一个值来命名。这是一个示例：
 
     ```
     www

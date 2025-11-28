@@ -32,7 +32,7 @@ In multisite mode, each site is identified by a unique `SERVER_NAME`. To apply s
 
 This approach ensures that settings are applied to the correct site in a multisite environment.
 
-### Multiple Settings
+### Multiple Settings {#multiple-settings}
 
 Some settings in BunkerWeb support multiple configurations for the same feature. To define multiple groups of settings, append a numeric suffix to the setting name. For example:
 

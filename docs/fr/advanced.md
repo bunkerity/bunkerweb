@@ -584,7 +584,7 @@ Voici les types de configurations personnalisées disponibles :
 - **stream** : Configurations au niveau du flux de NGINX.
 - **server-stream** : Configurations au niveau Stream/Server de NGINX.
 
-Les configurations personnalisées peuvent être appliquées globalement ou spécifiquement pour un serveur particulier, en fonction du contexte applicable et de l'activation ou non du [mode multisite](concepts.md#multisite-mode) .
+Les configurations personnalisées peuvent être appliquées globalement ou spécifiquement pour un serveur particulier, en fonction du contexte applicable et de l'activation ou non du [mode multisite](features.md#multisite-mode) .
 
 La méthode d'application des configurations personnalisées dépend de l'intégration utilisée. Cependant, le processus sous-jacent implique l'ajout de fichiers avec le `.conf` suffixe à des dossiers spécifiques. Pour appliquer une configuration personnalisée à un serveur spécifique, le fichier doit être placé dans un sous-dossier nommé d'après le nom du serveur principal.
 
@@ -1478,7 +1478,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
     - Configurez un conteneur PHP-FPM pour votre application et montez le dossier contenant les fichiers PHP.
     - Utilisez les paramètres spécifiques `REMOTE_PHP` et `REMOTE_PHP_PATH` comme variables d'environnement lors de l'exécution de BunkerWeb.
 
-    Si vous activez le [mode multisite](concepts.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé à l'aide de la première valeur de `SERVER_NAME`. Voici un exemple fictif :
+    Si vous activez le [mode multisite](features.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé à l'aide de la première valeur de `SERVER_NAME`. Voici un exemple fictif :
 
     ```
     www
@@ -1535,7 +1535,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
     - Configurez un conteneur PHP-FPM pour votre application et montez le dossier contenant les fichiers PHP
     - Utilisez les paramètres spécifiques `REMOTE_PHP` et `REMOTE_PHP_PATH` comme variables d'environnement lors du démarrage de BunkerWeb
 
-    Si vous activez le [mode multisite](concepts.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé à l'aide de la première valeur de `SERVER_NAME`. Voici un exemple fictif :
+    Si vous activez le [mode multisite](features.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé à l'aide de la première valeur de `SERVER_NAME`. Voici un exemple fictif :
 
     ```
     www
@@ -1643,7 +1643,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
     - Configurez un conteneur PHP-FPM pour vos applications et montez le dossier contenant les applications PHP
     - Utilisez les paramètres spécifiques `REMOTE_PHP` et `REMOTE_PHP_PATH` comme étiquettes pour votre conteneur PHP-FPM
 
-    Comme l'autoconf de Docker implique d'utiliser le [mode multisite](concepts.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé à l'aide de la première valeur de `SERVER_NAME`. Voici un exemple fictif :
+    Comme l'autoconf de Docker implique d'utiliser le [mode multisite](features.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé à l'aide de la première valeur de `SERVER_NAME`. Voici un exemple fictif :
 
     ```
     www
@@ -1838,7 +1838,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
     systemctl restart php-fpm
     ```
 
-    Si vous activez le [mode multisite](concepts.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé en utilisant la première valeur de `SERVER_NAME`. Voici un exemple fictif :
+    Si vous activez le [mode multisite](features.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé en utilisant la première valeur de `SERVER_NAME`. Voici un exemple fictif :
 
     ```
     /var/www/html
@@ -1914,7 +1914,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
     - Configurez un conteneur PHP-FPM pour vos applications et montez le dossier contenant les applications PHP
     - Utilisez les paramètres spécifiques `REMOTE_PHP` et `REMOTE_PHP_PATH` comme étiquettes pour votre conteneur PHP-FPM
 
-    Étant donné que l'intégration de Swarm implique l'utilisation du [mode multisite](concepts.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé à l'aide de la première valeur de `SERVER_NAME`. Voici un exemple fictif :
+    Étant donné que l'intégration de Swarm implique l'utilisation du [mode multisite](features.md#multisite-mode), vous devrez créer des répertoires distincts pour chacune de vos applications. Chaque sous-répertoire doit être nommé à l'aide de la première valeur de `SERVER_NAME`. Voici un exemple fictif :
 
     ```
     www

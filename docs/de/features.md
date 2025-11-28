@@ -32,7 +32,7 @@ Im Multisite-Modus wird jede Website durch einen eindeutigen `SERVER_NAME` ident
 
 Dieser Ansatz stellt sicher, dass die Einstellungen in einer Multisite-Umgebung der richtigen Website zugeordnet werden.
 
-### Mehrfacheinstellungen
+### Mehrfacheinstellungen {#multiple-settings}
 
 Einige Einstellungen in BunkerWeb unterstützen mehrere Konfigurationen für dieselbe Funktion. Um mehrere Einstellungsgruppen zu definieren, hängen Sie ein numerisches Suffix an den Einstellungsnamen an. Zum Beispiel:
 

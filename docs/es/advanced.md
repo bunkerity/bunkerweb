@@ -584,7 +584,7 @@ Estos son los tipos de configuraciones personalizadas disponibles:
 - **stream**: Configuraciones a nivel de Stream de NGINX.
 - **server-stream**: Configuraciones a nivel de Stream/Servidor de NGINX.
 
-Las configuraciones personalizadas se pueden aplicar globalmente o específicamente para un servidor en particular, dependiendo del contexto aplicable y de si el [modo multisitio](concepts.md#multisite-mode) está habilitado.
+Las configuraciones personalizadas se pueden aplicar globalmente o específicamente para un servidor en particular, dependiendo del contexto aplicable y de si el [modo multisitio](features.md#multisite-mode) está habilitado.
 
 El método para aplicar configuraciones personalizadas depende de la integración que se esté utilizando. Sin embargo, el proceso subyacente implica añadir archivos con el sufijo `.conf` a carpetas específicas. Para aplicar una configuración personalizada para un servidor específico, el archivo debe colocarse en una subcarpeta con el nombre del servidor principal.
 
@@ -1479,7 +1479,7 @@ Se pueden usar las siguientes configuraciones:
     - Configurar un contenedor PHP-FPM para tu aplicación y montar la carpeta que contiene los archivos PHP.
     - Usar las configuraciones específicas `REMOTE_PHP` y `REMOTE_PHP_PATH` como variables de entorno al ejecutar BunkerWeb.
 
-    Si habilitas el [modo multisitio](concepts.md#multisite-mode), necesitarás crear directorios separados para cada una de tus aplicaciones. Cada subdirectorio debe nombrarse usando el primer valor de `SERVER_NAME`. Aquí hay un ejemplo de prueba:
+    Si habilitas el [modo multisitio](features.md#multisite-mode), necesitarás crear directorios separados para cada una de tus aplicaciones. Cada subdirectorio debe nombrarse usando el primer valor de `SERVER_NAME`. Aquí hay un ejemplo de prueba:
 
     ```
     www
@@ -1536,7 +1536,7 @@ Se pueden usar las siguientes configuraciones:
     - Configurar un contenedor PHP-FPM para tu aplicación y montar la carpeta que contiene los archivos PHP
     - Usar las configuraciones específicas `REMOTE_PHP` y `REMOTE_PHP_PATH` como variables de entorno al iniciar BunkerWeb
 
-    Si habilitas el [modo multisitio](concepts.md#multisite-mode), necesitarás crear directorios separados para cada una de tus aplicaciones. Cada subdirectorio debe nombrarse utilizando el primer valor de `SERVER_NAME`. Aquí hay un ejemplo de prueba:
+    Si habilitas el [modo multisitio](features.md#multisite-mode), necesitarás crear directorios separados para cada una de tus aplicaciones. Cada subdirectorio debe nombrarse utilizando el primer valor de `SERVER_NAME`. Aquí hay un ejemplo de prueba:
 
     ```
     www
@@ -1644,7 +1644,7 @@ Se pueden usar las siguientes configuraciones:
     - Configurar contenedores PHP-FPM para tus aplicaciones y montar la carpeta que contiene las aplicaciones PHP
     - Usar las configuraciones específicas `REMOTE_PHP` y `REMOTE_PHP_PATH` como etiquetas para tu contenedor PHP-FPM
 
-    Dado que la autoconfiguración de Docker implica el uso del [modo multisitio](concepts.md#multisite-mode), necesitarás crear directorios separados para cada una de tus aplicaciones. Cada subdirectorio debe tener el nombre del primer valor de `SERVER_NAME`. Aquí hay un ejemplo de prueba:
+    Dado que la autoconfiguración de Docker implica el uso del [modo multisitio](features.md#multisite-mode), necesitarás crear directorios separados para cada una de tus aplicaciones. Cada subdirectorio debe tener el nombre del primer valor de `SERVER_NAME`. Aquí hay un ejemplo de prueba:
 
     ```
     www
@@ -1839,7 +1839,7 @@ Se pueden usar las siguientes configuraciones:
     systemctl restart php-fpm
     ```
 
-    Si habilitas el [modo multisitio](concepts.md#multisite-mode), necesitarás crear directorios separados para cada una de tus aplicaciones. Cada subdirectorio debe nombrarse utilizando el primer valor de `SERVER_NAME`. Aquí hay un ejemplo de prueba:
+    Si habilitas el [modo multisitio](features.md#multisite-mode), necesitarás crear directorios separados para cada una de tus aplicaciones. Cada subdirectorio debe nombrarse utilizando el primer valor de `SERVER_NAME`. Aquí hay un ejemplo de prueba:
 
     ```
     /var/www/html
@@ -1915,7 +1915,7 @@ Se pueden usar las siguientes configuraciones:
     - Configurar contenedores PHP-FPM para tus aplicaciones y montar la carpeta que contiene las aplicaciones PHP
     - Usar las configuraciones específicas `REMOTE_PHP` y `REMOTE_PHP_PATH` como etiquetas para tu contenedor PHP-FPM
 
-    Dado que la integración de Swarm implica el uso del [modo multisitio](concepts.md#multisite-mode), necesitarás crear directorios separados para cada una de tus aplicaciones. Cada subdirectorio debe tener el nombre del primer valor de `SERVER_NAME`. Aquí hay un ejemplo de prueba:
+    Dado que la integración de Swarm implica el uso del [modo multisitio](features.md#multisite-mode), necesitarás crear directorios separados para cada una de tus aplicaciones. Cada subdirectorio debe tener el nombre del primer valor de `SERVER_NAME`. Aquí hay un ejemplo de prueba:
 
     ```
     www

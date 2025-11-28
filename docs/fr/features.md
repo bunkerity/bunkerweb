@@ -32,7 +32,7 @@ En mode multisite, chaque site est identifié par un `SERVER_NAME` unique. Pour 
 
 Cette approche garantit que les paramètres sont appliqués au bon site dans un environnement multisite.
 
-### Paramètres multiples
+### Paramètres multiples {#multiple-settings}
 
 Certains paramètres de BunkerWeb supportent plusieurs configurations pour une même fonctionnalité. Pour définir plusieurs groupes de paramètres, ajoutez un suffixe numérique au nom du paramètre. Par exemple :
 

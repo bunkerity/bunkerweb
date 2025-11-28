@@ -584,7 +584,7 @@ Here are the available types of custom configurations:
 - **stream**: Configurations at the Stream level of NGINX.
 - **server-stream**: Configurations at the Stream/Server level of NGINX.
 
-Custom configurations can be applied globally or specifically for a particular server, depending on the applicable context and whether the [multisite mode](concepts.md#multisite-mode) is enabled.
+Custom configurations can be applied globally or specifically for a particular server, depending on the applicable context and whether the [multisite mode](features.md#multisite-mode) is enabled.
 
 The method for applying custom configurations depends on the integration being used. However, the underlying process involves adding files with the `.conf` suffix to specific folders. To apply a custom configuration for a specific server, the file should be placed in a subfolder named after the primary server name.
 
@@ -1478,7 +1478,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     - Set up a PHP-FPM container for your application and mount the folder containing PHP files.
     - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as environment variables when running BunkerWeb.
 
-    If you enable the [multisite mode](concepts.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+    If you enable the [multisite mode](features.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
     ```
     www
@@ -1535,7 +1535,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     - Set up a PHP-FPM container for your application and mount the folder containing PHP files
     - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as environment variables when starting BunkerWeb
 
-    If you enable the [multisite mode](concepts.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+    If you enable the [multisite mode](features.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
     ```
     www
@@ -1643,7 +1643,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     - Set up a PHP-FPM containers for your applications and mount the folder containing PHP apps
     - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as labels for your PHP-FPM container
 
-    Since the Docker autoconf implies using the [multisite mode](concepts.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+    Since the Docker autoconf implies using the [multisite mode](features.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
     ```
     www
@@ -1838,7 +1838,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     systemctl restart php-fpm
     ```
 
-    If you enable the [multisite mode](concepts.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+    If you enable the [multisite mode](features.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
     ```
     /var/www/html
@@ -1914,7 +1914,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     - Set up a PHP-FPM containers for your applications and mount the folder containing PHP apps
     - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as labels for your PHP-FPM container
 
-    Since the Swarm integration implies using the [multisite mode](concepts.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+    Since the Swarm integration implies using the [multisite mode](features.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
     ```
     www
@@ -2121,7 +2121,7 @@ These are standard NGINX logs, configured via **the `bunkerweb` service only**. 
 - `ERROR_LOG`: Destination for error logs (default: `/var/log/bunkerweb/error.log`). Accepts file path, `stderr`, `syslog:server=host[:port][,param=value]`, or shared buffer `memory:size`. See [NGINX error_log documentation](https://nginx.org/en/docs/ngx_core_module.html#error_log) for details.
 - `LOG_LEVEL`: Verbosity of error logs (default: `notice`).
 
-These settings accept standard NGINX values, including file paths, `stderr`, `syslog:server=...` (see [NGINX syslog documentation](https://nginx.org/en/docs/syslog.html)), or shared memory buffers. They support multiple destinations via numbered suffixes (see the [multiple settings convention](concepts.md#multiple-settings)). Other services (Scheduler, UI, Autoconf, etc.) rely solely on `LOG_TYPES`/`LOG_FILE_PATH`/`LOG_SYSLOG_*`.
+These settings accept standard NGINX values, including file paths, `stderr`, `syslog:server=...` (see [NGINX syslog documentation](https://nginx.org/en/docs/syslog.html)), or shared memory buffers. They support multiple destinations via numbered suffixes (see the [multiple settings convention](features.md#multiple-settings)). Other services (Scheduler, UI, Autoconf, etc.) rely solely on `LOG_TYPES`/`LOG_FILE_PATH`/`LOG_SYSLOG_*`.
 
 **Example with multiple access/error logs (bunkerweb only, numbered suffixes):**
 
