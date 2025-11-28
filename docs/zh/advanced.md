@@ -2087,6 +2087,124 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     systemctl start bunkerweb
     ```
 
+### 日志配置选项
+
+BunkerWeb 提供灵活的日志配置，允许您同时将日志发送到多个目标（例如文件、stdout/stderr 或 syslog）。这对于将日志集成到外部收集器并同时在 Web UI 中保留本地日志非常有用。
+
+可以配置的日志主要分为两类：
+
+1. **服务日志（Service Logs）**：由 BunkerWeb 的组件（Scheduler、UI、Autoconf 等）生成。每个服务按 `LOG_TYPES` 控制（可选地配合 `LOG_FILE_PATH`、`LOG_SYSLOG_ADDRESS`、`LOG_SYSLOG_TAG`）。
+2. **访问与错误日志（Access & Error Logs）**：由 NGINX 生成的 HTTP 访问日志和错误日志。仅由 `bunkerweb` 服务使用（`ACCESS_LOG` / `ERROR_LOG` / `LOG_LEVEL`）。
+
+#### 服务日志
+
+服务日志由 `LOG_TYPES` 设置控制，支持以空格分隔的多个值（例如 `LOG_TYPES="stderr syslog"`）。
+
+| 值       | 描述                                                                     |
+| :------- | :----------------------------------------------------------------------- |
+| `file`   | 将日志写入文件。Web UI 的日志查看器需要此项。                            |
+| `stderr` | 将日志写入标准错误（stderr）。容器化环境（如 `docker logs`）的标准做法。 |
+| `syslog` | 将日志发送到 syslog 服务器。使用此项时需要设置 `LOG_SYSLOG_ADDRESS`。    |
+
+在使用 `syslog` 时，您还应该配置：
+
+- `LOG_SYSLOG_ADDRESS`：syslog 服务器地址（例如 `udp://bw-syslog:514` 或 `/dev/log`）。
+- `LOG_SYSLOG_TAG`：用于区分服务条目的唯一标签（例如 `bw-scheduler`）。
+- `LOG_FILE_PATH`：当 `LOG_TYPES` 包含 `file` 时用于文件输出的路径（例如 `/var/log/bunkerweb/scheduler.log`）。
+
+#### 访问与错误日志
+
+这些是标准的 NGINX 日志，仅通过 **`bunkerweb` 服务** 配置。它们支持通过在设置名称后添加编号后缀来配置多个目标（例如 `ACCESS_LOG`、`ACCESS_LOG_1` 与匹配的 `LOG_FORMAT` / `LOG_FORMAT_1`，或 `ERROR_LOG`、`ERROR_LOG_1` 与对应的 `LOG_LEVEL` / `LOG_LEVEL_1`）。
+
+- `ACCESS_LOG`：访问日志目标（默认：`/var/log/bunkerweb/access.log`）。接受文件路径、`syslog:server=host[:port][,param=value]`、共享缓冲 `memory:name:size` 或 `off`（禁用）。详见 NGINX 的 [access_log 文档](https://nginx.org/en/docs/http/ngx_http_log_module.html#access_log)。
+- `ERROR_LOG`：错误日志目标（默认：`/var/log/bunkerweb/error.log`）。接受文件路径、`stderr`、`syslog:server=host[:port][,param=value]` 或共享缓冲 `memory:size`。详见 NGINX 的 [error_log 文档](https://nginx.org/en/docs/ngx_core_module.html#error_log)。
+- `LOG_LEVEL`：错误日志的详细级别（默认：`notice`）。
+
+这些设置接受标准的 NGINX 值，包括文件路径、`stderr`、`syslog:server=...`（参见 [NGINX syslog 文档](https://nginx.org/en/docs/syslog.html)）或共享内存缓冲。它们支持通过编号后缀配置多个目标（参见 [多设置约定](concepts.md#multiple-settings)）。其他服务（Scheduler、UI、Autoconf 等）仅依赖 `LOG_TYPES` / `LOG_FILE_PATH` / `LOG_SYSLOG_*`。
+
+**仅针对 bunkerweb（编号后缀示例，配置多个访问/错误日志）：**
+
+```conf
+ACCESS_LOG=/var/log/bunkerweb/access.log
+ACCESS_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
+LOG_FORMAT=$host $remote_addr - $request_id $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"
+LOG_FORMAT_1=$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent
+ERROR_LOG=/var/log/bunkerweb/error.log
+ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
+LOG_LEVEL=notice
+LOG_LEVEL_1=error
+```
+
+#### 集成默认值与示例
+
+=== "Linux"
+
+  **默认行为**：`LOG_TYPES="file"`。日志写入 `/var/log/bunkerweb/*.log`。
+
+  **示例**：保留本地文件（用于 Web UI），并将日志镜像到系统 syslog。
+
+  ```conf
+  # 服务日志（在 /etc/bunkerweb/variables.env 或各服务的 env 文件中设置）
+  LOG_TYPES="file syslog"
+  LOG_SYSLOG_ADDRESS=/dev/log
+  LOG_FILE_PATH=/var/log/bunkerweb/bunkerweb.log
+  # LOG_SYSLOG_TAG 默认会为每个服务自动设置（如有需要可覆盖）
+
+  # NGINX 日志（仅 bunkerweb 服务；在 /etc/bunkerweb/variables.env 中设置）
+  ACCESS_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
+  ERROR_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
+  LOG_LEVEL=notice
+  ```
+
+=== "Docker / Autoconf / Swarm"
+
+  **默认行为**：`LOG_TYPES="stderr"`。日志可通过 `docker logs` 查看。
+
+  **示例**：保留 `docker logs`（stderr）并同时发送到中央 syslog 容器（同时满足 Web UI 与 CrowdSec 的需求）。
+
+  ```yaml
+  services:
+    bunkerweb:
+    image: bunkerity/bunkerweb:1.6.6
+    environment:
+      # 服务日志（bunkerweb）
+      LOG_TYPES: "stderr syslog"
+      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
+      LOG_SYSLOG_TAG: "bunkerweb"
+      LOG_FILE_PATH: "/var/log/bunkerweb/bunkerweb.log"
+      # NGINX 日志：发送到 Syslog（仅 bunkerweb）
+      ACCESS_LOG: "syslog:server=udp://bw-syslog:514,tag=bunkerweb"
+      ERROR_LOG: "syslog:server=udp://bw-syslog:514,tag=bunkerweb"
+
+    bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.6
+    environment:
+      # 服务日志（scheduler）
+      LOG_TYPES: "stderr syslog"
+      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
+      LOG_SYSLOG_TAG: "bw-scheduler"
+      LOG_FILE_PATH: "/var/log/bunkerweb/scheduler.log"
+
+    bw-ui:
+    image: bunkerity/bunkerweb-ui:1.6.6
+    environment:
+      # 服务日志（UI）
+      LOG_TYPES: "stderr syslog"
+      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
+      LOG_SYSLOG_TAG: "bw-ui"
+      LOG_FILE_PATH: "/var/log/bunkerweb/ui.log"
+
+    # 收集日志并写入共享卷的中央 Syslog 容器
+    bw-syslog:
+    image: balabit/syslog-ng:4.9.0
+    volumes:
+      - bw-logs:/var/log/bunkerweb # 为 Web UI 提供共享卷
+      - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf
+
+  volumes:
+    bw-logs:
+  ```
+
 ### Docker 日志记录最佳实践
 
 使用 Docker 时，管理容器日志以防止其占用过多磁盘空间非常重要。默认情况下，Docker 使用 `json-file` 日志记录驱动程序，如果未进行配置，可能会导致日志文件非常大。

@@ -2089,6 +2089,124 @@ Por defecto, BunkerWeb solo escuchará en direcciones IPv4 y no usará IPv6 para
     systemctl start bunkerweb
     ```
 
+### Opciones de configuración de registros
+
+BunkerWeb ofrece una configuración de registros flexible que permite enviar registros a múltiples destinos (por ejemplo, archivos, stdout/stderr o syslog) simultáneamente. Esto es especialmente útil para integrarse con recopiladores externos de registros mientras se mantienen registros locales para la interfaz web.
+
+Hay dos categorías principales de registros para configurar:
+
+1. **Registros de servicio**: Logs generados por los componentes de BunkerWeb (Scheduler, UI, Autoconf, etc.). Se controlan por servicio mediante `LOG_TYPES` (y opcionalmente `LOG_FILE_PATH`, `LOG_SYSLOG_ADDRESS`, `LOG_SYSLOG_TAG`).
+2. **Registros de acceso y error**: Registros HTTP de acceso y errores generados por NGINX. Solo el servicio `bunkerweb` usa estos (`ACCESS_LOG` / `ERROR_LOG` / `LOG_LEVEL`).
+
+#### Registros de servicio
+
+Los registros de servicio se controlan con la configuración `LOG_TYPES`, que puede aceptar múltiples valores separados por espacios (por ejemplo, `LOG_TYPES="stderr syslog"`).
+
+| Valor    | Descripción                                                                                                  |
+| :------- | :----------------------------------------------------------------------------------------------------------- |
+| `file`   | Escribe los registros en un archivo. Requerido para el visor de registros de la interfaz UI.                 |
+| `stderr` | Escribe los registros en la salida de error estándar. Estándar en entornos con contenedores (`docker logs`). |
+| `syslog` | Envía los registros a un servidor syslog. Requiere definir `LOG_SYSLOG_ADDRESS`.                             |
+
+Al usar `syslog`, también debes configurar:
+
+- `LOG_SYSLOG_ADDRESS`: La dirección del servidor syslog (por ejemplo, `udp://bw-syslog:514` o `/dev/log`).
+- `LOG_SYSLOG_TAG`: Una etiqueta única para el servicio (por ejemplo, `bw-scheduler`) para distinguir sus entradas.
+- `LOG_FILE_PATH`: Ruta para la salida de archivo cuando `LOG_TYPES` incluye `file` (por ejemplo, `/var/log/bunkerweb/scheduler.log`).
+
+#### Registros de acceso y error
+
+Estos son registros estándar de NGINX, configurados únicamente mediante el **servicio `bunkerweb`**. Soportan múltiples destinos añadiendo sufijos numerados a la configuración (por ejemplo, `ACCESS_LOG`, `ACCESS_LOG_1` junto con `LOG_FORMAT`, `LOG_FORMAT_1`, o `ERROR_LOG`, `ERROR_LOG_1` con sus respectivos `LOG_LEVEL`, `LOG_LEVEL_1`).
+
+- `ACCESS_LOG`: Destino para los registros de acceso (por defecto: `/var/log/bunkerweb/access.log`). Acepta ruta de archivo, `syslog:server=host[:port][,param=value]`, buffer compartido `memory:name:size`, o `off` para desactivar. Consulta la [documentación de NGINX sobre access_log](https://nginx.org/en/docs/http/ngx_http_log_module.html#access_log) para más detalles.
+- `ERROR_LOG`: Destino para los registros de error (por defecto: `/var/log/bunkerweb/error.log`). Acepta ruta de archivo, `stderr`, `syslog:server=host[:port][,param=value]`, o buffer compartido `memory:size`. Consulta la [documentación de NGINX sobre error_log](https://nginx.org/en/docs/ngx_core_module.html#error_log) para más detalles.
+- `LOG_LEVEL`: Nivel de verbosidad de los registros de error (por defecto: `notice`).
+
+Estas configuraciones aceptan valores estándar de NGINX, incluyendo rutas de archivo, `stderr`, `syslog:server=...` (ver [documentación de syslog en NGINX](https://nginx.org/en/docs/syslog.html)), o buffers en memoria compartida. Soportan múltiples destinos mediante sufijos numerados (consulta la [convención de múltiples ajustes](concepts.md#multiple-settings)). Los demás servicios (Scheduler, UI, Autoconf, etc.) dependen únicamente de `LOG_TYPES`/`LOG_FILE_PATH`/`LOG_SYSLOG_*`.
+
+**Ejemplo con múltiples registros de acceso/errores (solo bunkerweb, sufijos numerados):**
+
+```conf
+ACCESS_LOG=/var/log/bunkerweb/access.log
+ACCESS_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
+LOG_FORMAT=$host $remote_addr - $request_id $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"
+LOG_FORMAT_1=$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent
+ERROR_LOG=/var/log/bunkerweb/error.log
+ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
+LOG_LEVEL=notice
+LOG_LEVEL_1=error
+```
+
+#### Valores por defecto e integración — Ejemplos
+
+=== "Linux"
+
+  **Comportamiento por defecto**: `LOG_TYPES="file"`. Los registros se escriben en `/var/log/bunkerweb/*.log`.
+
+  **Ejemplo**: Mantener archivos locales (para la interfaz Web UI) y también duplicarlos en el syslog del sistema.
+
+  ```conf
+  # Registros de servicio (configura en /etc/bunkerweb/variables.env o en los env de servicios específicos)
+  LOG_TYPES="file syslog"
+  LOG_SYSLOG_ADDRESS=/dev/log
+  LOG_FILE_PATH=/var/log/bunkerweb/bunkerweb.log
+  # LOG_SYSLOG_TAG se establece automáticamente por servicio (sobrescribe por servicio si es necesario)
+
+  # Registros de NGINX (solo bunkerweb; configurar en /etc/bunkerweb/variables.env)
+  ACCESS_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
+  ERROR_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
+  LOG_LEVEL=notice
+  ```
+
+=== "Docker / Autoconf / Swarm"
+
+  **Comportamiento por defecto**: `LOG_TYPES="stderr"`. Los registros son visibles con `docker logs`.
+
+  **Ejemplo**: Mantener `docker logs` (stderr) Y enviar a un contenedor central de syslog (necesario para Web UI y CrowdSec).
+
+  ```yaml
+  services:
+    bunkerweb:
+    image: bunkerity/bunkerweb:1.6.6
+    environment:
+      # Registros de servicio (bunkerweb)
+      LOG_TYPES: "stderr syslog"
+      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
+      LOG_SYSLOG_TAG: "bunkerweb"
+      LOG_FILE_PATH: "/var/log/bunkerweb/bunkerweb.log"
+      # Registros NGINX: Enviar a Syslog (solo bunkerweb)
+      ACCESS_LOG: "syslog:server=udp://bw-syslog:514,tag=bunkerweb"
+      ERROR_LOG: "syslog:server=udp://bw-syslog:514,tag=bunkerweb"
+
+    bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.6
+    environment:
+      # Registros de servicio (scheduler)
+      LOG_TYPES: "stderr syslog"
+      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
+      LOG_SYSLOG_TAG: "bw-scheduler"
+      LOG_FILE_PATH: "/var/log/bunkerweb/scheduler.log"
+
+    bw-ui:
+    image: bunkerity/bunkerweb-ui:1.6.6
+    environment:
+      # Registros de servicio (UI)
+      LOG_TYPES: "stderr syslog"
+      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
+      LOG_SYSLOG_TAG: "bw-ui"
+      LOG_FILE_PATH: "/var/log/bunkerweb/ui.log"
+
+    # Contenedor central de Syslog para recopilar registros y escribirlos en un volumen compartido
+    bw-syslog:
+    image: balabit/syslog-ng:4.9.0
+    volumes:
+      - bw-logs:/var/log/bunkerweb # Volumen compartido para la Web UI
+      - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf
+
+  volumes:
+    bw-logs:
+  ```
+
 ### Buenas prácticas de registro de Docker
 
 Cuando se utiliza Docker, es importante gestionar los registros de los contenedores para evitar que consuman un espacio excesivo en el disco. Por defecto, Docker utiliza el controlador de registro `json-file`, lo que puede dar lugar a archivos de registro muy grandes si no se configura.

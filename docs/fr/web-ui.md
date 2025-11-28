@@ -105,14 +105,14 @@ Pour que les journaux restent accessibles à partir de l'interface utilisateur W
 
 === "Docker"
 
-    Pour transférer correctement les journaux vers le répertoire `/var/log/bunkerweb` dans l'intégration Docker, vous devrez rediriger les journaux vers un fichier en utilisant `syslog-ng`. Voici un exemple de comment procéder :
+    Pour transférer correctement les journaux vers le répertoire `/var/log/bunkerweb` dans l'intégration Docker, envoyez les journaux d'accès/erreur NGINX du service `bunkerweb` via `ACCESS_LOG` / `ERROR_LOG`, et les journaux des autres composants via `LOG_TYPES` / `LOG_FILE_PATH` / `LOG_SYSLOG_ADDRESS` / `LOG_SYSLOG_TAG`. Un serveur syslog écrit tout dans le volume partagé. Voici un exemple de comment procéder :
 
     ```yaml
-    x-bw-env: &bw-env
+    x-service-env: &service-env
       # We anchor the environment variables to avoid duplication
-  API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
-  # Jeton API optionnel pour sécuriser l'accès à l'API
-  API_TOKEN: ""
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+      LOG_TYPES: "stderr syslog" # Service logs from supporting components
+      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
 
     services:
       bunkerweb:
@@ -122,25 +122,26 @@ Pour que les journaux restent accessibles à partir de l'interface utilisateur W
           - "443:8443/tcp"
           - "443:8443/udp" # QUIC
         environment:
-          <<: *bw-env
+          API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+          # Jeton API optionnel pour sécuriser l'accès à l'API
+          API_TOKEN: "" # Assurez-vous qu'il correspond à celui défini dans le scheduler
         restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-services
-        logging:
-          driver: syslog
-          options:
-            tag: "bunkerweb" # This will be the tag used by syslog-ng to create the log file
-            syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
-          <<: *bw-env
+          <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
           SERVER_NAME: "www.example.com"
           MULTISITE: "yes"
-          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+          # Jeton API optionnel pour sécuriser l'accès à l'API
+          API_TOKEN: "" # Assurez-vous qu'il correspond à celui défini dans le service bunkerweb
+          ACCESS_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb_access"
+          ERROR_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb"
           SERVE_FILES: "no"
           DISABLE_DEFAULT_SERVER: "yes"
           USE_CLIENT_CACHE: "yes"
@@ -155,16 +156,11 @@ Pour que les journaux restent accessibles à partir de l'interface utilisateur W
         networks:
           - bw-universe
           - bw-db
-        logging:
-          driver: syslog
-          options:
-            tag: "bw-scheduler" # This will be the tag used by syslog-ng to create the log file
-            syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.6.6
         environment:
-          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+          <<: *service-env
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the admin user
           TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
@@ -174,11 +170,6 @@ Pour que les journaux restent accessibles à partir de l'interface utilisateur W
         networks:
           - bw-universe
           - bw-db
-        logging:
-          driver: syslog
-          options:
-            tag: "bw-ui" # This will be the tag used by syslog-ng to create the log file
-            syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-db:
         image: mariadb:11
@@ -208,9 +199,9 @@ Pour que les journaux restent accessibles à partir de l'interface utilisateur W
         volumes:
           - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
           - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # This is the syslog-ng configuration file
+        restart: "unless-stopped"
         networks:
-          bw-universe:
-            ipv4_address: 10.20.30.254 # Make sure to set the correct IP address
+          - bw-universe
 
     volumes:
       bw-data:
@@ -232,13 +223,15 @@ Pour que les journaux restent accessibles à partir de l'interface utilisateur W
 
 === "Docker Autoconf"
 
-    Pour transférer correctement les journaux vers le répertoire `/var/log/bunkerweb` dans l'intégration Docker, vous devrez rediriger les journaux vers un fichier en utilisant `syslog-ng`. Voici un exemple de comment procéder :
+    Pour transférer correctement les journaux vers le répertoire `/var/log/bunkerweb` dans l'intégration Autoconf, envoyez les journaux d'accès/erreur NGINX du service `bunkerweb` via `ACCESS_LOG` / `ERROR_LOG`, et les journaux des autres composants via `LOG_TYPES` / `LOG_FILE_PATH` / `LOG_SYSLOG_ADDRESS` / `LOG_SYSLOG_TAG`. Un serveur syslog écrit tout dans le volume partagé. Voici un exemple de comment procéder :
 
     ```yaml
-    x-ui-env: &bw-ui-env
+    x-service-env: &service-env
       # We anchor the environment variables to avoid duplication
       AUTOCONF_MODE: "yes"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+      LOG_TYPES: "stderr syslog" # Service logs from supporting components
+      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
 
     services:
       bunkerweb:
@@ -250,35 +243,31 @@ Pour que les journaux restent accessibles à partir de l'interface utilisateur W
         environment:
           AUTOCONF_MODE: "yes"
           API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+          # Jeton API optionnel pour sécuriser l'accès à l'API
+          API_TOKEN: "" # Assurez-vous qu'il correspond à celui défini dans le scheduler
         restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-services
-        logging:
-          driver: syslog
-          options:
-            tag: "bunkerweb" # This will be the tag used by syslog-ng to create the log file
-            syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
-          <<: *bw-ui-env
+          <<: *service-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
           SERVER_NAME: "" # The server name will be filled with services labels
-          MULTISITE: "yes" # Mandatory setting for autoconf / ui
           API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+          # Jeton API optionnel pour sécuriser l'accès à l'API
+          API_TOKEN: "" # Assurez-vous qu'il correspond à celui défini dans le service bunkerweb
+          ACCESS_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb_access"
+          ERROR_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb"
+          MULTISITE: "yes" # Mandatory setting for autoconf / ui
         volumes:
           - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-db
-        logging:
-          driver: syslog
-          options:
-            tag: "bw-scheduler" # This will be the tag used by syslog-ng to create the log file
-            syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-autoconf:
         image: bunkerity/bunkerweb-autoconf:1.6.6
@@ -286,23 +275,18 @@ Pour que les journaux restent accessibles à partir de l'interface utilisateur W
           - bunkerweb
           - bw-docker
         environment:
-          <<: *bw-ui-env
+          <<: *service-env
           DOCKER_HOST: "tcp://bw-docker:2375" # This is the Docker socket address
         restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-docker
           - bw-db
-        logging:
-          driver: syslog
-          options:
-            tag: "bw-autoconf" # This will be the tag used by syslog-ng to create the log file
-            syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.6.6
         environment:
-          <<: *bw-ui-env
+          <<: *service-env
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the admin user
           TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
@@ -318,11 +302,6 @@ Pour que les journaux restent accessibles à partir de l'interface utilisateur W
           - "bunkerweb.USE_REVERSE_PROXY=yes"
           - "bunkerweb.REVERSE_PROXY_URL=/changeme" # Change it to a hard-to-guess URI
           - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-        logging:
-          driver: syslog
-          options:
-            tag: "bw-ui" # This will be the tag used by syslog-ng to create the log file
-            syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-db:
         image: mariadb:11
@@ -363,9 +342,9 @@ Pour que les journaux restent accessibles à partir de l'interface utilisateur W
         volumes:
           - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
           - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # This is the syslog-ng configuration file
+        restart: "unless-stopped"
         networks:
-          bw-universe:
-            ipv4_address: 10.20.30.254 # Make sure to set the correct IP address
+          - bw-universe
 
     volumes:
       bw-data:
@@ -394,7 +373,7 @@ Voici un exemple de `syslog-ng.conf` fichier que vous pouvez utiliser pour trans
 ```conf
 @version: 4.8
 
-# Source configuration to receive logs from Docker containers
+# Configuration de la source pour recevoir les journaux envoyés par les services BunkerWeb (ACCESS_LOG / ERROR_LOG et LOG_TYPES=syslog)
 source s_net {
   udp(
     ip("0.0.0.0")
@@ -634,9 +613,10 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
     Voici le modèle docker-compose que vous pouvez utiliser (n'oubliez pas de modifier les valeurs `changeme`) :
 
     ```yaml
-    x-ui-env: &ui-env
-      # We anchor the environment variables to avoid duplication
+    x-service-env: &service-env
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+      LOG_TYPES: "stderr syslog" # Service logs from supporting components
+      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
 
     services:
       bunkerweb:
@@ -644,9 +624,12 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
-          - "443:8443/udp" # For QUIC / HTTP3 support
+          - "443:8443/udp" # QUIC
         environment:
-          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
+          API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+          # Jeton API optionnel pour sécuriser l'accès à l'API
+          API_TOKEN: "" # Assurez-vous qu'il correspond à celui défini dans le scheduler
+        restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-services
@@ -654,22 +637,26 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
-          <<: *ui-env
+          <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
           SERVER_NAME: "www.example.com"
+          API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+          # Jeton API optionnel pour sécuriser l'accès à l'API
+          API_TOKEN: "" # Assurez-vous qu'il correspond à celui défini dans le service bunkerweb
+          ACCESS_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb_access"
+          ERROR_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb"
           MULTISITE: "yes"
-          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # We mirror the API_WHITELIST_IP from the bunkerweb service
-          API_TOKEN: "" # Miroir du API_TOKEN si vous l'utilisez
           SERVE_FILES: "no"
           DISABLE_DEFAULT_SERVER: "yes"
           USE_CLIENT_CACHE: "yes"
           USE_GZIP: "yes"
           www.example.com_USE_TEMPLATE: "ui"
           www.example.com_USE_REVERSE_PROXY: "yes"
-          www.example.com_REVERSE_PROXY_URL: "/changeme" # Remember to set a stronger URI
+          www.example.com_REVERSE_PROXY_URL: "/changeme" # Change it to a hard-to-guess URI
           www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000" # The web UI container is listening on the 7000 port by default
         volumes:
           - bw-storage:/data # This is used to persist the cache and other data like the backups
+        restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-db
@@ -677,10 +664,13 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.6.6
         environment:
-          <<: *ui-env
+          <<: *service-env
           ADMIN_USERNAME: "changeme"
-          ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the changeme user
+          ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the admin user
           TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+        volumes:
+          - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
+        restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-db
@@ -696,12 +686,31 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
           - bw-data:/var/lib/mysql
+        restart: "unless-stopped"
         networks:
           - bw-db
+
+      bw-syslog:
+        image: balabit/syslog-ng:4.9.0
+        cap_add:
+          - NET_BIND_SERVICE  # Bind to low ports
+          - NET_BROADCAST  # Send broadcasts
+          - NET_RAW  # Use raw sockets
+          - DAC_READ_SEARCH  # Read files bypassing permissions
+          - DAC_OVERRIDE  # Override file permissions
+          - CHOWN  # Change ownership
+          - SYSLOG  # Write to system logs
+        volumes:
+          - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
+          - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # This is the syslog-ng configuration file
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
 
     volumes:
       bw-data:
       bw-storage:
+      bw-logs:
 
     networks:
       bw-universe:
@@ -745,10 +754,12 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
     Voici le modèle docker-compose que vous pouvez utiliser (n'oubliez pas de modifier les valeurs `changeme`) :
 
     ```yaml
-    x-ui-env: &ui-env
+    x-service-env: &service-env
       # We anchor the environment variables to avoid duplication
       AUTOCONF_MODE: "yes"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+      LOG_TYPES: "stderr syslog" # Service logs from supporting components
+      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
 
     services:
       bunkerweb:
@@ -756,12 +767,12 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
-          - "443:8443/udp" # For QUIC / HTTP3 support
-        labels:
-          - "bunkerweb.INSTANCE=yes" # We set the instance label to allow the autoconf to detect the instance
+          - "443:8443/udp" # QUIC
         environment:
-          AUTOCONF_MODE: "yes"
-          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+          API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+          # Jeton API optionnel pour sécuriser l'accès à l'API
+          API_TOKEN: "" # Assurez-vous qu'il correspond à celui défini dans le scheduler
+        restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-services
@@ -769,13 +780,18 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
-          <<: *ui-env
+          <<: *service-env
           BUNKERWEB_INSTANCES: ""
           SERVER_NAME: ""
-          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+          API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+          # Jeton API optionnel pour sécuriser l'accès à l'API
+          API_TOKEN: "" # Assurez-vous qu'il correspond à celui défini dans le service bunkerweb
+          ACCESS_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb_access"
+          ERROR_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb"
           MULTISITE: "yes"
         volumes:
           - bw-storage:/data # This is used to persist the cache and other data like the backups
+        restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-db
@@ -785,7 +801,7 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
         depends_on:
           - bw-docker
         environment:
-          <<: *ui-env
+          <<: *service-env
           DOCKER_HOST: "tcp://bw-docker:2375"
         networks:
           - bw-universe
@@ -802,6 +818,26 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
         networks:
           - bw-docker
 
+      bw-ui:
+        image: bunkerity/bunkerweb-ui:1.6.6
+        environment:
+          <<: *service-env
+          ADMIN_USERNAME: "changeme"
+          ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the admin user
+          TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+        volumes:
+          - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-db
+        labels:
+          - "bunkerweb.SERVER_NAME=www.example.com"
+          - "bunkerweb.USE_TEMPLATE=ui"
+          - "bunkerweb.USE_REVERSE_PROXY=yes"
+          - "bunkerweb.REVERSE_PROXY_URL=/changeme"
+          - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
+
       bw-db:
         image: mariadb:11
         # We set the max allowed packet size to avoid issues with large queries
@@ -813,29 +849,31 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
           MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
           - bw-data:/var/lib/mysql
+        restart: "unless-stopped"
         networks:
           - bw-db
 
-      bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.6
-        environment:
-          <<: *ui-env
-          ADMIN_USERNAME: "changeme"
-          ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the changeme user
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
-        labels:
-          - "bunkerweb.SERVER_NAME=www.example.com"
-          - "bunkerweb.USE_TEMPLATE=ui"
-          - "bunkerweb.USE_REVERSE_PROXY=yes"
-          - "bunkerweb.REVERSE_PROXY_URL=/changeme"
-          - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
+      bw-syslog:
+        image: balabit/syslog-ng:4.9.0
+        cap_add:
+          - NET_BIND_SERVICE  # Bind to low ports
+          - NET_BROADCAST  # Send broadcasts
+          - NET_RAW  # Use raw sockets
+          - DAC_READ_SEARCH  # Read files bypassing permissions
+          - DAC_OVERRIDE  # Override file permissions
+          - CHOWN  # Change ownership
+          - SYSLOG  # Write to system logs
+        volumes:
+          - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
+          - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # This is the syslog-ng configuration file
+        restart: "unless-stopped"
         networks:
           - bw-universe
-          - bw-db
 
     volumes:
       bw-data:
       bw-storage:
+      bw-logs:
 
     networks:
       bw-universe:
@@ -879,178 +917,6 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
         serverName: "www.example.com"
         serverPath: "/admin"
       overrideAdminCreds: "yes"
-    ```
-
-=== "Swarm"
-
-    !!! warning "Obsolète"
-        L'intégration Swarm est obsolète et sera supprimée dans une future version. Veuillez envisager d'utiliser l'[intégration Kubernetes](integrations.md#kubernetes) à la place.
-
-        **Plus d'informations sont disponibles dans la [documentation de l'intégration Swarm](integrations.md#swarm).**
-
-    L'interface Web peut être déployée en utilisant un conteneur dédié disponible sur [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb-ui) :
-
-    ```shell
-    docker pull bunkerity/bunkerweb-ui
-    ```
-
-    Alternativement, vous pouvez aussi la construire vous‑même :
-
-    ```shell
-    git clone https://github.com/bunkerity/bunkerweb.git && \
-    cd bunkerweb && \
-    docker build -t my-bunkerweb-ui -f src/ui/Dockerfile .
-    ```
-
-    L'accès à l'interface Web via BunkerWeb se fait par une configuration classique de [proxy inverse](quickstart-guide.md). Nous vous recommandons de connecter BunkerWeb et l'interface Web via un réseau dédié (par exemple `bw-universe`, également utilisé par le planificateur et l'autoconf) afin qu'ils ne soient pas sur le même réseau que vos services Web, pour des raisons de sécurité évidentes. Notez que le conteneur de l'interface Web écoute sur le port `7000`.
-
-    !!! info "Backend de base de données"
-
-        Si vous souhaitez utiliser un backend de base de données autre que MariaDB, veuillez consulter les fichiers de stack dans le dossier [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/misc/integrations) du dépôt.
-
-    Voici le modèle de stack que vous pouvez utiliser (n'oubliez pas de modifier les valeurs `changeme`) :
-
-    ```yaml
-    x-ui-env: &ui-env
-      # We anchor the environment variables to avoid duplication
-      SWARM_MODE: "yes"
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
-
-    services:
-      bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6
-        ports:
-          - published: 80
-            target: 8080
-            mode: host
-            protocol: tcp
-          - published: 443
-            target: 8443
-            mode: host
-            protocol: tcp
-          - published: 443
-            target: 8443
-            mode: host
-            protocol: udp # For QUIC / HTTP3 support
-        environment:
-          SWARM_MODE: "yes"
-          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
-        networks:
-          - bw-universe
-          - bw-services
-        deploy:
-          mode: global
-          placement:
-            constraints:
-              - "node.role == worker"
-          labels:
-            - "bunkerweb.INSTANCE=yes"
-
-      bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6
-        environment:
-          <<: *ui-env
-          BUNKERWEB_INSTANCES: ""
-          SERVER_NAME: ""
-          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
-          MULTISITE: "yes"
-          USE_REDIS: "yes"
-          REDIS_HOST: "bw-redis"
-        volumes:
-          - bw-storage:/data # This is used to persist the cache and other data like the backups
-        networks:
-          - bw-universe
-          - bw-db
-
-      bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.6
-        environment:
-          <<: *ui-env
-          DOCKER_HOST: "tcp://bw-docker:2375"
-        networks:
-          - bw-universe
-          - bw-docker
-          - bw-db
-
-      bw-docker:
-        image: tecnativa/docker-socket-proxy:nightly
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock:ro
-        environment:
-          CONFIGS: "1"
-          CONTAINERS: "1"
-          SERVICES: "1"
-          SWARM: "1"
-          TASKS: "1"
-          LOG_LEVEL: "warning"
-        networks:
-          - bw-docker
-        deploy:
-          placement:
-            constraints:
-              - "node.role == manager"
-
-      bw-db:
-        image: mariadb:11
-        # We set the max allowed packet size to avoid issues with large queries
-        command: --max-allowed-packet=67108864
-        environment:
-          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-          MYSQL_DATABASE: "db"
-          MYSQL_USER: "bunkerweb"
-          MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
-        volumes:
-          - bw-data:/var/lib/mysql
-        networks:
-          - bw-db
-
-      bw-redis:
-        image: redis:7-alpine
-        networks:
-          - bw-universe
-
-      bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.6
-        environment:
-          <<: *ui-env
-          ADMIN_USERNAME: "changeme"
-          ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the changeme user
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
-        networks:
-          - bw-universe
-          - bw-db
-        deploy:
-          labels:
-            - "bunkerweb.SERVER_NAME=www.example.com"
-            - "bunkerweb.USE_TEMPLATE=ui"
-            - "bunkerweb.USE_REVERSE_PROXY=yes"
-            - "bunkerweb.REVERSE_PROXY_URL=/changeme"
-            - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-
-    volumes:
-      bw-data:
-      bw-storage:
-
-    networks:
-      bw-universe:
-        name: bw-universe
-        driver: overlay
-        attachable: true
-        ipam:
-          config:
-            - subnet: 10.20.30.0/24
-      bw-services:
-        name: bw-services
-        driver: overlay
-        attachable: true
-      bw-docker:
-        name: bw-docker
-        driver: overlay
-        attachable: true
-      bw-db:
-        name: bw-db
-        driver: overlay
-        attachable: true
     ```
 
 ## Prise en charge linguistique et localisation
