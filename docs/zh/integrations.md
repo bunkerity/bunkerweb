@@ -3,7 +3,7 @@
 ## BunkerWeb 云
 
 <figure markdown>
-  ![概述](assets/img/bunkerweb-cloud.webp){ align=center, width="600" }
+  ![概述](assets/img/bunkerweb-cloud.png){ align=center, width="600" }
   <figcaption>BunkerWeb 云</figcaption>
 </figure>
 

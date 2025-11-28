@@ -3,7 +3,7 @@
 ## BunkerWeb Cloud
 
 <figure markdown>
-  ![Übersicht](assets/img/bunkerweb-cloud.webp){ align=center, width="600" }
+  ![Übersicht](assets/img/bunkerweb-cloud.png){ align=center, width="600" }
   <figcaption>BunkerWeb Cloud</figcaption>
 </figure>
 

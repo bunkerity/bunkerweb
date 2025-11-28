@@ -74,7 +74,7 @@ BunkerWeb 提供了一个可选的[用户界面](web-ui.md)来管理您的实例
 ## BunkerWeb Cloud
 
 <figure markdown>
-  ![概述](assets/img/bunkerweb-cloud.webp){ align=center, width="600" }
+  ![概述](assets/img/bunkerweb-cloud.png){ align=center, width="600" }
   <figcaption>BunkerWeb 云</figcaption>
 </figure>
 

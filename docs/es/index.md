@@ -74,7 +74,7 @@ BunkerWeb ofrece una [interfaz de usuario](web-ui.md) opcional para gestionar tu
 ## BunkerWeb Cloud
 
 <figure markdown>
-  ![Descripción general](assets/img/bunkerweb-cloud.webp){ align=center, width="600" }
+  ![Descripción general](assets/img/bunkerweb-cloud.png){ align=center, width="600" }
   <figcaption>BunkerWeb Cloud</figcaption>
 </figure>
 
