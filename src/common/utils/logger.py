@@ -79,11 +79,23 @@ if "syslog" in env_log_types:
                 "socktype": socktype,
             }
         else:
-            log_types["syslog"] = {
-                "handler": SysLogHandler(address=address, socktype=socktype),
-                "address": address,
-                "socktype": socktype,
-            }
+            # If no port is given and it's a hostname (not a socket path), default to UDP port 514
+            if not address.startswith("/"):
+                host = address
+                default_port = 514
+                if socktype is None:
+                    socktype = SOCK_DGRAM  # Default to UDP
+                log_types["syslog"] = {
+                    "handler": SysLogHandler(address=(host, default_port), socktype=socktype),
+                    "address": (host, default_port),
+                    "socktype": socktype,
+                }
+            else:
+                log_types["syslog"] = {
+                    "handler": SysLogHandler(address=address, socktype=socktype),
+                    "address": address,
+                    "socktype": socktype,
+                }
 
         # Set syslog ident for service differentiation
         syslog_ident = getenv("LOG_SYSLOG_TAG", "app")
