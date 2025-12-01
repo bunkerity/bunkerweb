@@ -17,7 +17,7 @@ El plugin General proporciona el marco de configuración principal para BunkerWe
 4. Los parámetros de registro controlan qué información se graba y cómo se formatea.
 5. Estos ajustes crean la base sobre la que operan todos los demás plugins y funcionalidades de BunkerWeb.
 
-### Modo Multisite
+### Modo Multisite {#multisite-mode}
 
 Cuando `MULTISITE` se establece en `yes`, BunkerWeb puede alojar y proteger múltiples sitios web, cada uno con su propia configuración única. Esta característica es particularmente útil para escenarios como:
 

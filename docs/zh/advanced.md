@@ -2120,7 +2120,7 @@ BunkerWeb 提供灵活的日志配置，允许您同时将日志发送到多个�
 - `ERROR_LOG`：错误日志目标（默认：`/var/log/bunkerweb/error.log`）。接受文件路径、`stderr`、`syslog:server=host[:port][,param=value]` 或共享缓冲 `memory:size`。详见 NGINX 的 [error_log 文档](https://nginx.org/en/docs/ngx_core_module.html#error_log)。
 - `LOG_LEVEL`：错误日志的详细级别（默认：`notice`）。
 
-这些设置接受标准的 NGINX 值，包括文件路径、`stderr`、`syslog:server=...`（参见 [NGINX syslog 文档](https://nginx.org/en/docs/syslog.html)）或共享内存缓冲。它们支持通过编号后缀配置多个目标（参见 [多设置约定](concepts.md#multiple-settings)）。其他服务（Scheduler、UI、Autoconf 等）仅依赖 `LOG_TYPES` / `LOG_FILE_PATH` / `LOG_SYSLOG_*`。
+这些设置接受标准的 NGINX 值，包括文件路径、`stderr`、`syslog:server=...`（参见 [NGINX syslog 文档](https://nginx.org/en/docs/syslog.html)）或共享内存缓冲。它们支持通过编号后缀配置多个目标（参见 [多设置约定](features.md#multiple-settings)）。其他服务（Scheduler、UI、Autoconf 等）仅依赖 `LOG_TYPES` / `LOG_FILE_PATH` / `LOG_SYSLOG_*`。
 
 **仅针对 bunkerweb（编号后缀示例，配置多个访问/错误日志）：**
 
@@ -2139,71 +2139,151 @@ LOG_LEVEL_1=error
 
 === "Linux"
 
-  **默认行为**：`LOG_TYPES="file"`。日志写入 `/var/log/bunkerweb/*.log`。
+    **默认行为**：`LOG_TYPES="file"`。日志写入 `/var/log/bunkerweb/*.log`。
 
-  **示例**：保留本地文件（用于 Web UI），并将日志镜像到系统 syslog。
+    **示例**：保留本地文件（供 Web UI 使用），同时镜像到系统 syslog。
 
-  ```conf
-  # 服务日志（在 /etc/bunkerweb/variables.env 或各服务的 env 文件中设置）
-  LOG_TYPES="file syslog"
-  LOG_SYSLOG_ADDRESS=/dev/log
-  LOG_FILE_PATH=/var/log/bunkerweb/bunkerweb.log
-  # LOG_SYSLOG_TAG 默认会为每个服务自动设置（如有需要可覆盖）
+    ```conf
+      # 服务日志（在 /etc/bunkerweb/variables.env 或 特定服务的环境变量文件中设置）
+      LOG_TYPES="file syslog"
+      LOG_SYSLOG_ADDRESS=/dev/log
+      SCHEDULER_LOG_FILE_PATH=/var/log/bunkerweb/scheduler.log
+      UI_LOG_FILE_PATH=/var/log/bunkerweb/ui.log
+      # ...
+      # LOG_SYSLOG_TAG 将为每个服务自动设置（如需覆盖，可在每个服务中单独设置）
 
-  # NGINX 日志（仅 bunkerweb 服务；在 /etc/bunkerweb/variables.env 中设置）
-  ACCESS_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
-  ERROR_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
-  LOG_LEVEL=notice
-  ```
+      # NGINX 日志（仅 bunkerweb 服务；在 /etc/bunkerweb/variables.env 中设置）
+      ACCESS_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb_access
+      ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
+    ```
 
 === "Docker / Autoconf / Swarm"
 
-  **默认行为**：`LOG_TYPES="stderr"`。日志可通过 `docker logs` 查看。
+    **默认行为**：`LOG_TYPES="stderr"`。日志可通过 `docker logs` 查看。
 
-  **示例**：保留 `docker logs`（stderr）并同时发送到中央 syslog 容器（同时满足 Web UI 与 CrowdSec 的需求）。
+    **示例（改编自快速入门指南）**：保留 `docker logs`（stderr），并发送到中央 syslog 容器（Web UI 和 CrowdSec 所需）。
 
-  ```yaml
-  services:
-    bunkerweb:
-    image: bunkerity/bunkerweb:1.6.6
-    environment:
-      # 服务日志（bunkerweb）
+    ```yaml
+    x-bw-env: &bw-env # 使用锚点以避免为两个服务重复相同的设置
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # 确保设置正确的 IP 范围，以便调度程序可以将配置发送到实例
+      # 可选：设置 API 令牌并在两个容器中镜像它
+      API_TOKEN: ""
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置更强的密码
+      # 服务日志
       LOG_TYPES: "stderr syslog"
       LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
-      LOG_SYSLOG_TAG: "bunkerweb"
-      LOG_FILE_PATH: "/var/log/bunkerweb/bunkerweb.log"
+      # LOG_SYSLOG_TAG 将为每个服务自动设置（如需覆盖，可在每个服务中单独设置）
       # NGINX 日志：发送到 Syslog（仅 bunkerweb）
-      ACCESS_LOG: "syslog:server=udp://bw-syslog:514,tag=bunkerweb"
-      ERROR_LOG: "syslog:server=udp://bw-syslog:514,tag=bunkerweb"
+      ACCESS_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb_access"
+      ERROR_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb"
 
-    bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.6
-    environment:
-      # 服务日志（scheduler）
-      LOG_TYPES: "stderr syslog"
-      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
-      LOG_SYSLOG_TAG: "bw-scheduler"
-      LOG_FILE_PATH: "/var/log/bunkerweb/scheduler.log"
+    services:
+      bunkerweb:
+        # 这将是用于在调度程序中识别实例的名称
+        image: bunkerity/bunkerweb:1.6.6
+        ports:
+          - "80:8080/tcp"
+          - "443:8443/tcp"
+          - "443:8443/udp" # 用于 QUIC / HTTP3 支持
+        environment:
+          <<: *bw-env # 使用锚点以避免为所有服务重复相同的设置
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-services
 
-    bw-ui:
-    image: bunkerity/bunkerweb-ui:1.6.6
-    environment:
-      # 服务日志（UI）
-      LOG_TYPES: "stderr syslog"
-      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
-      LOG_SYSLOG_TAG: "bw-ui"
-      LOG_FILE_PATH: "/var/log/bunkerweb/ui.log"
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.6
+        environment:
+          <<: *bw-env
+          BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
+          SERVER_NAME: ""
+          MULTISITE: "yes"
+          UI_HOST: "http://bw-ui:7000" # 如需更改则修改此项
+          USE_REDIS: "yes"
+          REDIS_HOST: "redis"
+        volumes:
+          - bw-storage:/data # 用于持久化缓存和其他数据（例如备份）
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-db
 
-    # 收集日志并写入共享卷的中央 Syslog 容器
-    bw-syslog:
-    image: balabit/syslog-ng:4.9.0
+      bw-ui:
+        image: bunkerity/bunkerweb-ui:1.6.6
+        environment:
+          <<: *bw-env
+        volumes:
+          - bw-logs:/var/log/bunkerweb # 用于 Web UI 读取 syslog 日志
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-db:
+        image: mariadb:11
+        # 我们设置了最大允许的数据包大小以避免大查询的问题
+        command: --max-allowed-packet=67108864
+        environment:
+          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+          MYSQL_DATABASE: "db"
+          MYSQL_USER: "bunkerweb"
+          MYSQL_PASSWORD: "changeme" # 记得为数据库设置更强的密码
+        volumes:
+          - bw-data:/var/lib/mysql
+        restart: "unless-stopped"
+        networks:
+          - bw-db
+
+      redis: # Redis 服务，用于持久化报告/封禁/统计
+        image: redis:7-alpine
+        command: >
+          redis-server
+          --maxmemory 256mb
+          --maxmemory-policy allkeys-lru
+          --save 60 1000
+          --appendonly yes
+        volumes:
+          - redis-data:/data
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+
+      bw-syslog:
+        image: balabit/syslog-ng:4.10.2
+        cap_add:
+          - NET_BIND_SERVICE # 绑定低端口
+          - NET_BROADCAST # 发送广播
+          - NET_RAW # 使用原始套接字
+          - DAC_READ_SEARCH # 绕过权限读取文件
+          - DAC_OVERRIDE # 覆盖文件权限
+          - CHOWN # 更改所有者
+          - SYSLOG # 写入系统日志
+        volumes:
+          - bw-logs:/var/log/bunkerweb # 用于存储日志的卷
+          - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # syslog-ng 配置文件
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+
     volumes:
-      - bw-logs:/var/log/bunkerweb # 为 Web UI 提供共享卷
-      - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf
+      bw-data:
+      bw-storage:
+      redis-data:
+      bw-logs:
 
-  volumes:
-    bw-logs:
-  ```
+    networks:
+      bw-universe:
+        name: bw-universe
+      ipam:
+        driver: default
+        config:
+          - subnet: 10.20.30.0/24 # 确保设置正确的 IP 范围，以便调度程序可以将配置发送到实例
+      bw-services:
+        name: bw-services
+      bw-db:
+        name: bw-db
+    ```
 
 #### Syslog-ng 配置
 

@@ -19,7 +19,7 @@ Consulta el asistente de inicio rápido y la guía de arquitectura en la [guía 
 
 ## Despliegue recomendado (Contenedores dedicados)
 
-Para producción, despliega la API como su propio contenedor junto al plano de datos de BunkerWeb y el scheduler. Mantén la API unida a la red interna del plano de control y publícala únicamente a través de BunkerWeb como un proxy inverso. Esta disposición coincide con la [referencia de integración de Docker](integrations.md#networks) y garantiza que el scheduler, BunkerWeb y la API compartan la misma configuración.
+Para producción, despliega la API como su propio contenedor junto al plano de datos de BunkerWeb y el scheduler. Mantén la API unida a la red interna del plano de control y publícala únicamente a través de BunkerWeb como un proxy inverso. Esta disposición coincide con la [referencia de integración de Docker](integrations.md#docker) y garantiza que el scheduler, BunkerWeb y la API compartan la misma configuración.
 
 ```yaml
 x-bw-env: &bw-env

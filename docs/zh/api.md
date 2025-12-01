@@ -19,7 +19,7 @@ API 服务需要访问 BunkerWeb 数据库 (`DATABASE_URI`)。它通常与调度
 
 ## 推荐部署（独立容器）
 
-在生产环境中，将 API 作为独立容器部署在 BunkerWeb 数据平面和调度器旁边。让 API 仅绑定在内部控制平面网络上，并只通过 BunkerWeb 作为反向代理对外发布。该布局与 [Docker 集成参考](integrations.md#networks) 保持一致，并确保调度器、BunkerWeb 和 API 使用相同的设置。
+在生产环境中，将 API 作为独立容器部署在 BunkerWeb 数据平面和调度器旁边。让 API 仅绑定在内部控制平面网络上，并只通过 BunkerWeb 作为反向代理对外发布。该布局与 [Docker 集成参考](integrations.md#docker) 保持一致，并确保调度器、BunkerWeb 和 API 使用相同的设置。
 
 ```yaml
 x-bw-env: &bw-env

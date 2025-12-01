@@ -19,7 +19,7 @@ See the quickstart wizard and architecture guidance in the [quickstart guide](qu
 
 ## Recommended Deployment (Dedicated Containers)
 
-For production, deploy the API as its own container next to the BunkerWeb data plane and scheduler. Keep the API bound to the internal control-plane network and publish it only through BunkerWeb as a reverse proxy. This layout matches the [Docker integration reference](integrations.md#networks) and ensures the scheduler, BunkerWeb, and API share the same settings.
+For production, deploy the API as its own container next to the BunkerWeb data plane and scheduler. Keep the API bound to the internal control-plane network and publish it only through BunkerWeb as a reverse proxy. This layout matches the [Docker integration reference](integrations.md#docker) and ensures the scheduler, BunkerWeb, and API share the same settings.
 
 ```yaml
 x-bw-env: &bw-env

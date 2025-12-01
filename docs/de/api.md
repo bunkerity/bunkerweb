@@ -19,7 +19,7 @@ Siehe den Schnellstart-Assistenten und die Architekturhinweise im [Schnellstart-
 
 ## Empfohlenes Deployment (Dedizierte Container)
 
-Für Produktionsumgebungen führen Sie die API als eigenen Container neben dem BunkerWeb-Datenpfad und dem Scheduler aus. Binden Sie die API an das interne Control-Plane-Netz und veröffentlichen Sie sie ausschließlich über BunkerWeb als Reverse-Proxy. Dieses Setup entspricht der [Docker-Integrationsreferenz](integrations.md#networks) und stellt sicher, dass Scheduler, BunkerWeb und die API dieselben Einstellungen verwenden.
+Für Produktionsumgebungen führen Sie die API als eigenen Container neben dem BunkerWeb-Datenpfad und dem Scheduler aus. Binden Sie die API an das interne Control-Plane-Netz und veröffentlichen Sie sie ausschließlich über BunkerWeb als Reverse-Proxy. Dieses Setup entspricht der [Docker-Integrationsreferenz](integrations.md#docker) und stellt sicher, dass Scheduler, BunkerWeb und die API dieselben Einstellungen verwenden.
 
 ```yaml
 x-bw-env: &bw-env
