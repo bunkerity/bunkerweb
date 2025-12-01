@@ -202,13 +202,22 @@ start() {
     fi
     export API_WHITELIST_IPS
 
-    LOG_TYPES=$(get_env_var "LOG_TYPES" "file")
+    LOG_TYPES=$(get_env_var "API_LOG_TYPES" "")
+    if [ -z "$LOG_TYPES" ]; then
+        LOG_TYPES=$(get_env_var "LOG_TYPES" "file")
+    fi
     export LOG_TYPES
 
-    LOG_FILE_PATH=$(get_env_var "LOG_FILE_PATH" "/var/log/bunkerweb/api.log")
+    LOG_FILE_PATH=$(get_env_var "API_LOG_FILE_PATH" "")
+    if [ -z "$LOG_FILE_PATH" ]; then
+        LOG_FILE_PATH=$(get_env_var "LOG_FILE_PATH" "/var/log/bunkerweb/api.log")
+    fi
     export LOG_FILE_PATH
 
-    LOG_SYSLOG_TAG=$(get_env_var "LOG_SYSLOG_TAG" "bw-api")
+    LOG_SYSLOG_TAG=$(get_env_var "API_LOG_SYSLOG_TAG" "")
+    if [ -z "$LOG_SYSLOG_TAG" ]; then
+        LOG_SYSLOG_TAG=$(get_env_var "LOG_SYSLOG_TAG" "bw-api")
+    fi
     export LOG_SYSLOG_TAG
 
     export CAPTURE_OUTPUT="yes"

@@ -107,13 +107,22 @@ function start() {
     CUSTOM_LOG_LEVEL=$(get_env_var "LOG_LEVEL" "INFO")
     export CUSTOM_LOG_LEVEL
 
-    LOG_TYPES=$(get_env_var "LOG_TYPES" "file")
+    LOG_TYPES=$(get_env_var "SCHEDULER_LOG_TYPES" "")
+    if [ -z "$LOG_TYPES" ]; then
+        LOG_TYPES=$(get_env_var "LOG_TYPES" "file")
+    fi
     export LOG_TYPES
 
-    LOG_FILE_PATH=$(get_env_var "LOG_FILE_PATH" "/var/log/bunkerweb/scheduler.log")
+    LOG_FILE_PATH=$(get_env_var "SCHEDULER_LOG_FILE_PATH" "")
+    if [ -z "$LOG_FILE_PATH" ]; then
+        LOG_FILE_PATH=$(get_env_var "LOG_FILE_PATH" "/var/log/bunkerweb/scheduler.log")
+    fi
     export LOG_FILE_PATH
 
-    LOG_SYSLOG_TAG=$(get_env_var "LOG_SYSLOG_TAG" "bw-scheduler")
+    LOG_SYSLOG_TAG=$(get_env_var "SCHEDULER_LOG_SYSLOG_TAG" "")
+    if [ -z "$LOG_SYSLOG_TAG" ]; then
+        LOG_SYSLOG_TAG=$(get_env_var "LOG_SYSLOG_TAG" "bw-scheduler")
+    fi
     export LOG_SYSLOG_TAG
 
     # Extract DATABASE_URI with fallback
