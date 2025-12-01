@@ -843,7 +843,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#mehrfacheinstellungen" class="md-nav__link">
+  <a href="#multiple-settings" class="md-nav__link">
     <span class="md-ellipsis">
       Mehrfacheinstellungen
     </span>
@@ -3008,7 +3008,7 @@
 <li><code>myapp.example.com_USE_GZIP=yes</code> aktiviert die GZIP-Komprimierung für <code>myapp.example.com</code>.</li>
 </ul>
 <p>Dieser Ansatz stellt sicher, dass die Einstellungen in einer Multisite-Umgebung der richtigen Website zugeordnet werden.</p>
-<h3 id="mehrfacheinstellungen">Mehrfacheinstellungen</h3>
+<h3 id="multiple-settings">Mehrfacheinstellungen</h3>
 <p>Einige Einstellungen in BunkerWeb unterstützen mehrere Konfigurationen für dieselbe Funktion. Um mehrere Einstellungsgruppen zu definieren, hängen Sie ein numerisches Suffix an den Einstellungsnamen an. Zum Beispiel:</p>
 <ul>
 <li><code>REVERSE_PROXY_URL_1=/subdir</code> und <code>REVERSE_PROXY_HOST_1=http://myhost1</code> konfigurieren den ersten Reverse-Proxy.</li>
@@ -3370,10 +3370,24 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><strong>Protokollformat:</strong> Das Format, das für Zugriffsprotokolle verwendet werden soll.</td>
 </tr>
 <tr>
+<td><code>ACCESS_LOG</code></td>
+<td><code>/var/log/bunkerweb/access.log</code></td>
+<td>global</td>
+<td>Ja</td>
+<td><strong>Pfad Zugriff-Log:</strong> Datei, <code>syslog:server=Adresse[:Port][,Parameter=Wert]</code> oder Shared-Memory <code>memory:Name:Größe</code>; setze <code>off</code>, um die Protokollierung zu deaktivieren.</td>
+</tr>
+<tr>
+<td><code>ERROR_LOG</code></td>
+<td><code>/var/log/bunkerweb/error.log</code></td>
+<td>global</td>
+<td>Ja</td>
+<td><strong>Pfad Fehler-Log:</strong> Datei, <code>stderr</code>, <code>syslog:server=Adresse[:Port][,Parameter=Wert]</code> oder <code>memory:Größe</code>.</td>
+</tr>
+<tr>
 <td><code>LOG_LEVEL</code></td>
 <td><code>notice</code></td>
 <td>global</td>
-<td>Nein</td>
+<td>Ja</td>
 <td><strong>Protokollstufe:</strong> Ausführlichkeitsstufe für Fehlerprotokolle. Optionen: <code>debug</code>, <code>info</code>, <code>notice</code>, <code>warn</code>, <code>error</code>, <code>crit</code>, <code>alert</code>, <code>emerg</code>.</td>
 </tr>
 <tr>
@@ -5485,7 +5499,7 @@ TrustedMonitor/\d+\.\d+
 </code></pre></div>
 <p><strong>Syslog</strong></p>
 <p>Für containerbasierte Integrationen empfehlen wir, die Protokolle des BunkerWeb-Containers an einen Syslog-Dienst umzuleiten, damit CrowdSec leicht darauf zugreifen kann. Hier ist ein Beispiel für eine syslog-ng-Konfiguration, die die Rohprotokolle von BunkerWeb in einer lokalen Datei <code>/var/log/bunkerweb.log</code> speichert:</p>
-<div class="highlight"><pre><span></span><code>@version: 4.8
+<div class="highlight"><pre><span></span><code>@version: 4.10
 
 source s_net {
     udp(
@@ -5499,7 +5513,7 @@ template t_imp {
 };
 
 destination d_file {
-    file(&quot;/var/log/bunkerweb.log&quot; template(t_imp));
+    file(&quot;/var/log/bunkerweb.log&quot; template(t_imp) logrotate(enable(yes), size(100MB), rotations(7)));
 };
 
 log {
@@ -5581,7 +5595,7 @@ log {
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 
 <span class="w">  </span><span class="nt">syslog</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.9.0</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.10.2</span>
 <span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BIND_SERVICE</span><span class="w">  </span><span class="c1"># An niedrige Ports binden</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BROADCAST</span><span class="w">  </span><span class="c1"># Broadcasts senden</span>
@@ -7132,6 +7146,13 @@ TrustedMonitor/\d+\.\d+
 <td><strong>Anmeldeinformationselement:</strong> Konfigurationselemente für die Authentifizierung des DNS-Anbieters (z. B. <code>cloudflare_api_token 123456</code>). Werte können Rohtext, base64-kodiert oder ein JSON-Objekt sein.</td>
 </tr>
 <tr>
+<td><code>LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td><strong>DNS-Anmeldeinformationen Base64 dekodieren:</strong> Dekodiert automatisch base64-kodierte DNS-Anbieter-Anmeldeinformationen, wenn auf <code>yes</code> gesetzt. Wenn aktiviert, werden Werte, die dem Base64-Format entsprechen, vor der Verwendung dekodiert (außer beim <code>rfc2136</code>-Anbieter). Deaktivieren Sie dies, wenn Ihre Anmeldeinformationen absichtlich Base64-codiert sind.</td>
+</tr>
+<tr>
 <td><code>USE_LETS_ENCRYPT_WILDCARD</code></td>
 <td><code>no</code></td>
 <td>multisite</td>
@@ -7175,7 +7196,15 @@ TrustedMonitor/\d+\.\d+
 </tr>
 </tbody>
 </table>
-<p>!!! info "Informationen und Verhalten" - Die Einstellung <code>LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</code> ist eine Mehrfacheinstellung und kann verwendet werden, um mehrere Elemente für den DNS-Anbieter festzulegen. Die Elemente werden als Cache-Datei gespeichert, und Certbot liest die Anmeldeinformationen daraus. - Wenn keine <code>LETS_ENCRYPT_DNS_PROPAGATION</code>-Einstellung angegeben ist, wird die Standard-Propagationszeit des Anbieters verwendet. - Die vollständige Let's Encrypt-Automatisierung mit der <code>http</code>-Challenge funktioniert im Stream-Modus, solange Sie den Port <code>80/tcp</code> von außen öffnen. Verwenden Sie die Einstellung <code>LISTEN_STREAM_PORT_SSL</code>, um Ihren SSL/TLS-Listening-Port zu wählen. - Wenn <code>LETS_ENCRYPT_PASSTHROUGH</code> auf <code>yes</code> gesetzt ist, behandelt BunkerWeb die ACME-Challenge-Anfragen nicht selbst, sondern leitet sie an den Backend-Webserver weiter. Dies ist nützlich in Szenarien, in denen BunkerWeb als Reverse-Proxy vor einem anderen Server fungiert, der für die Verarbeitung von Let's Encrypt-Challenges konfiguriert ist.</p>
+<div class="admonition info">
+<p class="admonition-title">Informationen und Verhalten</p>
+<ul>
+<li>Die Einstellung <code>LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</code> ist eine Mehrfacheinstellung und kann verwendet werden, um mehrere Elemente für den DNS-Anbieter festzulegen. Die Elemente werden als Cache-Datei gespeichert, und Certbot liest die Anmeldeinformationen daraus.</li>
+<li>Wenn keine <code>LETS_ENCRYPT_DNS_PROPAGATION</code>-Einstellung angegeben ist, wird die Standard-Propagationszeit des Anbieters verwendet.</li>
+<li>Die vollständige Let's Encrypt-Automatisierung mit der <code>http</code>-Challenge funktioniert im Stream-Modus, solange Sie den Port <code>80/tcp</code> von außen öffnen. Verwenden Sie die Einstellung <code>LISTEN_STREAM_PORT_SSL</code>, um Ihren SSL/TLS-Listening-Port zu wählen.</li>
+<li>Wenn <code>LETS_ENCRYPT_PASSTHROUGH</code> auf <code>yes</code> gesetzt ist, behandelt BunkerWeb die ACME-Challenge-Anfragen nicht selbst, sondern leitet sie an den Backend-Webserver weiter. Dies ist nützlich in Szenarien, in denen BunkerWeb als Reverse-Proxy vor einem anderen Server fungiert, der für die Verarbeitung von Let's Encrypt-Challenges konfiguriert ist.</li>
+</ul>
+</div>
 <div class="admonition tip">
 <p class="admonition-title">HTTP- vs. DNS-Challenges</p>
 <p><strong>HTTP-Challenges</strong> sind einfacher einzurichten und funktionieren für die meisten Websites gut:</p>
@@ -7338,6 +7367,13 @@ TrustedMonitor/\d+\.\d+
 <td><code>application_key</code><br><code>application_secret</code><br><code>consumer_key</code></td>
 <td><code>endpoint</code> (Standard: <code>ovh-eu</code>)</td>
 <td><a href="https://certbot-dns-ovh.readthedocs.io/en/stable/">Dokumentation</a></td>
+</tr>
+<tr>
+<td><code>pdns</code></td>
+<td>PowerDNS</td>
+<td><code>endpoint</code><br><code>api_key</code><br><code>server_id</code> (default: <code>localhost</code>)<br><code>disable_notify</code> (default: <code>false</code>)</td>
+<td></td>
+<td><a href="https://github.com/kaechele/certbot-dns-pdns/blob/main/README.md">Documentation</a></td>
 </tr>
 <tr>
 <td><code>rfc2136</code></td>

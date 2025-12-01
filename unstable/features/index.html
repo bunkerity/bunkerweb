@@ -3421,10 +3421,24 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><strong>Log Format:</strong> The format to use for access logs.</td>
 </tr>
 <tr>
+<td><code>ACCESS_LOG</code></td>
+<td><code>/var/log/bunkerweb/access.log</code></td>
+<td>global</td>
+<td>Yes</td>
+<td><strong>Access Log Path:</strong> File path, <code>syslog:server=host[:port][,param=value]</code>, or shared buffer <code>memory:name:size</code>; set to <code>off</code> to disable logging.</td>
+</tr>
+<tr>
+<td><code>ERROR_LOG</code></td>
+<td><code>/var/log/bunkerweb/error.log</code></td>
+<td>global</td>
+<td>Yes</td>
+<td><strong>Error Log Path:</strong> File path, <code>stderr</code>, <code>syslog:server=host[:port][,param=value]</code>, or <code>memory:size</code>.</td>
+</tr>
+<tr>
 <td><code>LOG_LEVEL</code></td>
 <td><code>notice</code></td>
 <td>global</td>
-<td>No</td>
+<td>Yes</td>
 <td><strong>Log Level:</strong> Verbosity level for error logs. Options: <code>debug</code>, <code>info</code>, <code>notice</code>, <code>warn</code>, <code>error</code>, <code>crit</code>, <code>alert</code>, <code>emerg</code>.</td>
 </tr>
 <tr>
@@ -5748,7 +5762,7 @@ TrustedMonitor/\d+\.\d+
 </code></pre></div>
 <p><strong>Syslog</strong></p>
 <p>For container-based integrations, we recommend redirecting the logs of the BunkerWeb container to a syslog service so CrowdSec can access them easily. Here is an example configuration for syslog-ng that will store raw logs coming from BunkerWeb to a local <code>/var/log/bunkerweb.log</code> file:</p>
-<div class="highlight"><pre><span></span><code>@version: 4.8
+<div class="highlight"><pre><span></span><code>@version: 4.10
 
 source s_net {
     udp(
@@ -5762,7 +5776,7 @@ template t_imp {
 };
 
 destination d_file {
-    file(&quot;/var/log/bunkerweb.log&quot; template(t_imp));
+    file(&quot;/var/log/bunkerweb.log&quot; template(t_imp) logrotate(enable(yes), size(100MB), rotations(7)));
 };
 
 log {
@@ -5844,7 +5858,7 @@ log {
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 
 <span class="w">  </span><span class="nt">syslog</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.9.0</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.10.2</span>
 <span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BIND_SERVICE</span><span class="w">  </span><span class="c1"># Bind to low ports</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BROADCAST</span><span class="w">  </span><span class="c1"># Send broadcasts</span>
@@ -7453,6 +7467,13 @@ TrustedMonitor/\d+\.\d+
 <td><strong>Credential Item:</strong> Configuration items for DNS provider authentication (e.g., <code>cloudflare_api_token 123456</code>). Values can be raw text, base64 encoded, or a JSON object.</td>
 </tr>
 <tr>
+<td><code>LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Decode Base64 DNS credentials:</strong> Automatically decode base64-encoded DNS provider credentials when set to <code>yes</code>. Values matching base64 format are decoded before use (except for the <code>rfc2136</code> provider). Set to <code>no</code> if your credentials are intentionally base64 strings.</td>
+</tr>
+<tr>
 <td><code>USE_LETS_ENCRYPT_WILDCARD</code></td>
 <td><code>no</code></td>
 <td>multisite</td>
@@ -7673,7 +7694,7 @@ TrustedMonitor/\d+\.\d+
 <td>PowerDNS</td>
 <td><code>endpoint</code><br><code>api_key</code><br><code>server_id</code> (default: <code>localhost</code>)<br><code>disable_notify</code> (default: <code>false</code>)</td>
 <td></td>
-<td><a href="https://github.com/kaechele/certbot-dns-pdns">Documentation</a></td>
+<td><a href="https://github.com/kaechele/certbot-dns-pdns/blob/main/README.md">Documentation</a></td>
 </tr>
 <tr>
 <td><code>rfc2136</code></td>

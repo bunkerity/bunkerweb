@@ -843,7 +843,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#parametres-multiples" class="md-nav__link">
+  <a href="#multiple-settings" class="md-nav__link">
     <span class="md-ellipsis">
       Paramètres multiples
     </span>
@@ -2945,7 +2945,7 @@
 <li><code>myapp.example.com_USE_GZIP=yes</code> active la compression GZIP pour <code>myapp.example.com</code>.</li>
 </ul>
 <p>Cette approche garantit que les paramètres sont appliqués au bon site dans un environnement multisite.</p>
-<h3 id="parametres-multiples">Paramètres multiples</h3>
+<h3 id="multiple-settings">Paramètres multiples</h3>
 <p>Certains paramètres de BunkerWeb supportent plusieurs configurations pour une même fonctionnalité. Pour définir plusieurs groupes de paramètres, ajoutez un suffixe numérique au nom du paramètre. Par exemple :</p>
 <ul>
 <li><code>REVERSE_PROXY_URL_1=/subdir</code> et <code>REVERSE_PROXY_HOST_1=http://myhost1</code> définissent le premier reverse proxy.</li>
@@ -3307,10 +3307,24 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><strong>Format des logs :</strong> Format utilisé pour les logs d’accès.</td>
 </tr>
 <tr>
+<td><code>ACCESS_LOG</code></td>
+<td><code>/var/log/bunkerweb/access.log</code></td>
+<td>global</td>
+<td>Oui</td>
+<td><strong>Chemin du log d'accès :</strong> Fichier, <code>syslog:server=hôte[:port][,param=valeur]</code> ou tampon partagé <code>memory:nom:taille</code> ; mettez <code>off</code> pour désactiver les logs.</td>
+</tr>
+<tr>
+<td><code>ERROR_LOG</code></td>
+<td><code>/var/log/bunkerweb/error.log</code></td>
+<td>global</td>
+<td>Oui</td>
+<td><strong>Chemin du log d'erreur :</strong> Fichier, <code>stderr</code>, <code>syslog:server=hôte[:port][,param=valeur]</code> ou <code>memory:taille</code>.</td>
+</tr>
+<tr>
 <td><code>LOG_LEVEL</code></td>
 <td><code>notice</code></td>
 <td>global</td>
-<td>Non</td>
+<td>Oui</td>
 <td><strong>Niveau de logs :</strong> Verbosité des logs d’erreur. Options : <code>debug</code>, <code>info</code>, <code>notice</code>, <code>warn</code>, <code>error</code>, <code>crit</code>, <code>alert</code>, <code>emerg</code>.</td>
 </tr>
 <tr>
@@ -5452,7 +5466,7 @@ TrustedMonitor/\d+\.\d+
 </code></pre></div>
 <p><strong>Syslog</strong></p>
 <p>Pour les intégrations basées sur des conteneurs, nous recommandons de rediriger les journaux du conteneur BunkerWeb vers un service syslog afin que CrowdSec puisse y accéder facilement. Voici un exemple de configuration pour syslog-ng qui stockera les journaux bruts provenant de BunkerWeb dans un fichier local <code>/var/log/bunkerweb.log</code> :</p>
-<div class="highlight"><pre><span></span><code>@version: 4.8
+<div class="highlight"><pre><span></span><code>@version: 4.10
 
 source s_net {
     udp(
@@ -5466,7 +5480,7 @@ template t_imp {
 };
 
 destination d_file {
-    file(&quot;/var/log/bunkerweb.log&quot; template(t_imp));
+    file(&quot;/var/log/bunkerweb.log&quot; template(t_imp) logrotate(enable(yes), size(100MB), rotations(7)));
 };
 
 log {
@@ -5548,7 +5562,7 @@ log {
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 
 <span class="w">  </span><span class="nt">syslog</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.9.0</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.10.2</span>
 <span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BIND_SERVICE</span><span class="w">  </span><span class="c1"># Lier aux ports bas</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BROADCAST</span><span class="w">  </span><span class="c1"># Envoyer des diffusions</span>
@@ -7010,6 +7024,13 @@ TrustedMonitor/\d+\.\d+
 <td><strong>Élément d'identification :</strong> Éléments de configuration pour l'authentification du fournisseur DNS (ex. : <code>cloudflare_api_token 123456</code>). Les valeurs peuvent être du texte brut, encodées en base64 ou un objet JSON.</td>
 </tr>
 <tr>
+<td><code>LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Décoder les identifiants DNS Base64 :</strong> Décoder automatiquement les identifiants du fournisseur DNS encodés en base64 lorsqu'il est défini sur <code>yes</code>. Les valeurs au format base64 sont décodées avant utilisation (sauf pour le fournisseur <code>rfc2136</code>). Désactivez si vos identifiants sont intentionnellement en base64.</td>
+</tr>
+<tr>
 <td><code>USE_LETS_ENCRYPT_WILDCARD</code></td>
 <td><code>no</code></td>
 <td>multisite</td>
@@ -7053,7 +7074,15 @@ TrustedMonitor/\d+\.\d+
 </tr>
 </tbody>
 </table>
-<p>!!! info "Information et comportement" - Le paramètre <code>LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</code> est un paramètre multiple et peut être utilisé pour définir plusieurs éléments pour le fournisseur DNS. Les éléments seront enregistrés dans un fichier de cache, et Certbot lira les informations d'identification à partir de celui-ci. - Si aucun paramètre <code>LETS_ENCRYPT_DNS_PROPAGATION</code> n'est fourni, le temps de propagation par défaut du fournisseur est utilisé. - L'automatisation complète de Let's Encrypt avec le défi <code>http</code> fonctionne en mode stream tant que vous ouvrez le port <code>80/tcp</code> depuis l'extérieur. Utilisez le paramètre <code>LISTEN_STREAM_PORT_SSL</code> pour choisir votre port d'écoute SSL/TLS. - Si <code>LETS_ENCRYPT_PASSTHROUGH</code> est mis à <code>yes</code>, BunkerWeb ne gérera pas les requêtes de défi ACME lui-même mais les transmettra au serveur web backend. Ceci est utile dans les scénarios où BunkerWeb agit comme un reverse proxy devant un autre serveur configuré pour gérer les défis Let's Encrypt.</p>
+<div class="admonition info">
+<p class="admonition-title">Information et comportement</p>
+<ul>
+<li>Le paramètre <code>LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</code> est un paramètre multiple et peut être utilisé pour définir plusieurs éléments pour le fournisseur DNS. Les éléments seront enregistrés dans un fichier de cache, et Certbot lira les informations d'identification à partir de celui-ci.</li>
+<li>Si aucun paramètre <code>LETS_ENCRYPT_DNS_PROPAGATION</code> n'est fourni, le temps de propagation par défaut du fournisseur est utilisé.</li>
+<li>L'automatisation complète de Let's Encrypt avec le défi <code>http</code> fonctionne en mode stream tant que vous ouvrez le port <code>80/tcp</code> depuis l'extérieur. Utilisez le paramètre <code>LISTEN_STREAM_PORT_SSL</code> pour choisir votre port d'écoute SSL/TLS.</li>
+<li>Si <code>LETS_ENCRYPT_PASSTHROUGH</code> est mis à <code>yes</code>, BunkerWeb ne gérera pas les requêtes de défi ACME lui-même mais les transmettra au serveur web backend. Ceci est utile dans les scénarios où BunkerWeb agit comme un reverse proxy devant un autre serveur configuré pour gérer les défis Let's Encrypt.</li>
+</ul>
+</div>
 <div class="admonition tip">
 <p class="admonition-title">Défis HTTP vs. DNS</p>
 <p><strong>Les défis HTTP</strong> sont plus simples à configurer et fonctionnent bien pour la plupart des sites web :</p>
@@ -7216,6 +7245,13 @@ TrustedMonitor/\d+\.\d+
 <td><code>application_key</code><br><code>application_secret</code><br><code>consumer_key</code></td>
 <td><code>endpoint</code> (défaut : <code>ovh-eu</code>)</td>
 <td><a href="https://certbot-dns-ovh.readthedocs.io/en/stable/">Documentation</a></td>
+</tr>
+<tr>
+<td><code>pdns</code></td>
+<td>PowerDNS</td>
+<td><code>endpoint</code><br><code>api_key</code><br><code>server_id</code> (default: <code>localhost</code>)<br><code>disable_notify</code> (default: <code>false</code>)</td>
+<td></td>
+<td><a href="https://github.com/kaechele/certbot-dns-pdns/blob/main/README.md">Documentation</a></td>
 </tr>
 <tr>
 <td><code>rfc2136</code></td>

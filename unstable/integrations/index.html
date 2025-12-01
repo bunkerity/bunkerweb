@@ -786,6 +786,768 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="BunkerWeb Cloud">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-benefits" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Benefits
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architecture-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture Overview
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#simple-architecture-single-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simple Architecture - Single Service
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#complex-architecture-multi-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      Complex Architecture - Multi-services
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#initial-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Initial Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Initial Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-management-interface-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Management Interface Access
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-first-connection" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. First Connection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dns-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      DNS Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DNS Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#traffic-redirection-to-bunkerweb-cloud" class="md-nav__link">
+    <span class="md-ellipsis">
+      Traffic Redirection to BunkerWeb Cloud
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Validation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#service-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Service Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Service Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      Single Service
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-services-with-sni" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-services with SNI
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Multi-services with SNI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-enable-sni" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why Enable SNI?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sni-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      SNI Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sni-technical-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      SNI Technical Details
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssltls-and-sni-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      SSL/TLS and SNI Management
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SSL/TLS and SNI Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ssl-certificates" class="md-nav__link">
+    <span class="md-ellipsis">
+      SSL Certificates
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SSL Certificates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bunkerweb-cloud-side" class="md-nav__link">
+    <span class="md-ellipsis">
+      BunkerWeb Cloud Side
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#client-infrastructure-side" class="md-nav__link">
+    <span class="md-ellipsis">
+      Client Infrastructure Side
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#detailed-sni-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Detailed SNI Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Detailed SNI Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#use-case-infrastructure-with-gateway" class="md-nav__link">
+    <span class="md-ellipsis">
+      Use Case: Infrastructure with Gateway
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#client-gateway-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Client Gateway Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Client Gateway Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configurations-by-technology" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configurations by Technology
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configurations by Technology">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nginx" class="md-nav__link">
+    <span class="md-ellipsis">
+      Nginx
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#traefik" class="md-nav__link">
+    <span class="md-ellipsis">
+      Traefik
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apache" class="md-nav__link">
+    <span class="md-ellipsis">
+      Apache
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#haproxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      HAProxy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssl-configuration-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      SSL Configuration Validation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gateway-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Gateway Best Practices
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bunkerweb-cloud-ip-whitelist" class="md-nav__link">
+    <span class="md-ellipsis">
+      BunkerWeb Cloud IP Whitelist
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="BunkerWeb Cloud IP Whitelist">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-configure-a-whitelist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why Configure a Whitelist?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bunkerweb-cloud-ip-addresses-to-whitelist" class="md-nav__link">
+    <span class="md-ellipsis">
+      BunkerWeb Cloud IP Addresses to Whitelist
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whitelist-configuration-by-technology" class="md-nav__link">
+    <span class="md-ellipsis">
+      Whitelist Configuration by Technology
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Whitelist Configuration by Technology">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nginx_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Nginx
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#traefik_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Traefik
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apache_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Apache
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#haproxy_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      HAProxy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#system-firewall-iptables" class="md-nav__link">
+    <span class="md-ellipsis">
+      System Firewall (iptables)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whitelist-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Whitelist Best Practices
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real_ip-configuration-and-client-address-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      REAL_IP Configuration and Client Address Recovery
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="REAL_IP Configuration and Client Address Recovery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-configure-real_ip" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why Configure REAL_IP?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bunkerweb-cloud-side-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      BunkerWeb Cloud Side Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#client-infrastructure-side-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Client Infrastructure Side Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Client Infrastructure Side Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nginx_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Nginx
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apache_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Apache
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#haproxy_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      HAProxy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#traefik_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Traefik
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-and-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing and Validation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing and Validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Verification
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real_ip-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      REAL_IP Best Practices
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real_ip-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      REAL_IP Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="REAL_IP Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostic-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Diagnostic Commands
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitoring-and-observability" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitoring and Observability
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoring and Observability">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#grafana-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      Grafana Access
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Grafana Access">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Available Metrics
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#available-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Available Logs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alert-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Alert Configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#security" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-issues_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Issues
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ssltls-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. SSL/TLS Error
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-backend-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Backend Timeout
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-routing-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Routing Issues
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostic-commands_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Diagnostic Commands
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#technical-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Technical Support
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1414,7 +2176,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#common-issues" class="md-nav__link">
+  <a href="#common-issues_2" class="md-nav__link">
     <span class="md-ellipsis">
       Common Issues
     </span>
@@ -1461,7 +2223,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#best-practices" class="md-nav__link">
+  <a href="#best-practices_1" class="md-nav__link">
     <span class="md-ellipsis">
       Best Practices
     </span>
@@ -1845,19 +2607,1118 @@
 <h1 id="integrations">Integrations</h1>
 <h2 id="bunkerweb-cloud">BunkerWeb Cloud</h2>
 <figure>
-<p><img align="center," alt="Overview" src="../assets/img/bunkerweb-cloud.webp" width="600" />
+<p><img align="center," alt="Overview" src="../assets/img/bunkerweb-cloud.png" width="600" />
   </p>
 <figcaption>BunkerWeb Cloud</figcaption>
 </figure>
-<p>BunkerWeb Cloud will be the easiest way to get started with BunkerWeb. It offers you a fully managed BunkerWeb service with no hassle. Think of it as a BunkerWeb-as-a-Service!</p>
+<p>BunkerWeb Cloud is a managed Web Application Firewall (WAF) and reverse proxy solution that allows you to secure your web applications without installing BunkerWeb in your infrastructure. By subscribing to BunkerWeb Cloud, you benefit from a complete BunkerWeb stack hosted in the cloud with dedicated resources (8GB RAM, 2 CPU <strong>per</strong> instance, replicated across 2 instances for high availability, Standard offering).</p>
+<h3 id="key-benefits">Key Benefits</h3>
 <p>Order your <a href="https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&amp;utm_source=doc">BunkerWeb Cloud instance</a> and get access to:</p>
 <ul>
-<li>A fully managed BunkerWeb instance hosted in our cloud</li>
-<li>All BunkerWeb features, including PRO ones</li>
-<li>A monitoring platform with dashboards and alerts</li>
-<li>Technical support to assist you with configuration</li>
+<li><strong>Instant Deployment</strong>: No installation required in your infrastructure</li>
+<li><strong>High Availability</strong>: Replicated instances with automatic load balancing</li>
+<li><strong>Integrated Monitoring</strong>: Access to Grafana for logs and metrics visualization</li>
+<li><strong>Scalability</strong>: Dedicated resources adapted to heavy workloads</li>
+<li><strong>Enhanced Security</strong>: Real-time WAF protection against web threats</li>
 </ul>
 <p>If you are interested in the BunkerWeb Cloud offering, don't hesitate to <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">contact us</a> so we can discuss your needs.</p>
+<h3 id="architecture-overview">Architecture Overview</h3>
+<h4 id="simple-architecture-single-service">Simple Architecture - Single Service</h4>
+<pre class="mermaid"><code>graph LR
+    A[Client] --&gt;|HTTPS| B[example.com]
+    B --&gt;|DNS Resolution| C[Load Balancer54984654.bunkerweb.cloud]
+    C --&gt;|Traffic| D[BunkerWeb CloudWAF + Reverse Proxy]
+    D --&gt;|HTTPS/HTTP| E[Server example.comClient Infrastructure]
+
+    style C fill:#e1f5fe,color:#222
+    style D fill:#f3e5f5,color:#222
+    style E fill:#e8f5e8,color:#222</code></pre>
+<h4 id="complex-architecture-multi-services">Complex Architecture - Multi-services</h4>
+<pre class="mermaid"><code>graph LR
+    A[Clients] --&gt;|HTTPS| B[example.comother-example.coman-other-example.com]
+    B --&gt;|DNS Resolution| C[Load Balancer54984654.bunkerweb.cloud]
+    C --&gt;|Traffic| D[BunkerWeb CloudWAF + Reverse ProxySSL SNI Enabled]
+    D --&gt;|HTTPS with SNI| E[Client GatewayReverse Proxy/LB]
+    E --&gt;|Internal routing| F[Service 1]
+    E --&gt;|Internal routing| G[Service 2]
+    E --&gt;|Internal routing| H[Service N]
+
+    style C fill:#e1f5fe,color:#222
+    style D fill:#f3e5f5,color:#222
+    style E fill:#fff3e0,color:#222
+    style F fill:#e8f5e8,color:#222
+    style G fill:#e8f5e8,color:#222
+    style H fill:#e8f5e8,color:#222</code></pre>
+<h3 id="initial-configuration">Initial Configuration</h3>
+<h4 id="1-management-interface-access">1. Management Interface Access</h4>
+<p>After subscribing to BunkerWeb Cloud, you will receive:</p>
+<ul>
+<li><strong>BunkerWeb UI access URL</strong>: Interface for configuring your services</li>
+<li><strong>Load Balancer endpoint</strong>: Unique URL in the format <code>http://[ID].bunkerweb.cloud</code></li>
+<li><strong>Grafana Access</strong>: Monitoring interface and metrics visualization</li>
+<li><strong>Allocated Resources</strong>: 2 instances with 16GB RAM and 4 CPU each</li>
+</ul>
+<h4 id="2-first-connection">2. First Connection</h4>
+<ol>
+<li>Connect to the BunkerWeb Cloud interface</li>
+<li>Configure your services to protect</li>
+<li>Access Grafana to visualize your BunkerWeb logs and metrics</li>
+</ol>
+<h3 id="dns-configuration">DNS Configuration</h3>
+<h4 id="traffic-redirection-to-bunkerweb-cloud">Traffic Redirection to BunkerWeb Cloud</h4>
+<p>For your domain traffic to be processed by BunkerWeb Cloud, you must configure your DNS records:</p>
+<p><strong>Required Configuration:</strong></p>
+<div class="highlight"><pre><span></span><code>example.com.        IN  CNAME  54984654.bunkerweb.cloud.
+www.example.com.    IN  CNAME  54984654.bunkerweb.cloud.
+</code></pre></div>
+<p><strong>Important:</strong> Replace <code>54984654</code> with your load balancer identifier provided during subscription.</p>
+<h4 id="configuration-validation">Configuration Validation</h4>
+<p>Verify DNS resolution:</p>
+<div class="highlight"><pre><span></span><code>dig<span class="w"> </span>example.com
+nslookup<span class="w"> </span>example.com
+</code></pre></div>
+<p>The result should point to your BunkerWeb Cloud endpoint.</p>
+<h3 id="service-configuration">Service Configuration</h3>
+<h4 id="single-service">Single Service</h4>
+<p>For a simple service hosted on your infrastructure:</p>
+<p><strong>Configuration in BunkerWeb UI:</strong></p>
+<ol>
+<li><strong>Server Name</strong>: <code>example.com</code></li>
+<li><strong>Use Reverse Proxy</strong>: <code>yes</code></li>
+<li><strong>Reverse Proxy Host</strong>: <code>185.87.1.100:443</code> (your server IP)</li>
+</ol>
+<p>You can find all configuration options in the <a href="https://docs.bunkerweb.io/latest/settings/#reverse-proxy">Reverse Proxy Documentation</a></p>
+<h4 id="multi-services-with-sni">Multi-services with SNI</h4>
+<h5 id="why-enable-sni">Why Enable SNI?</h5>
+<p>Server Name Indication (SNI) is <strong>essential</strong> when:</p>
+<ul>
+<li>Multiple domains point to the same backend infrastructure</li>
+<li>Your infrastructure hosts multiple services with distinct SSL certificates</li>
+<li>You use a reverse proxy/gateway on the client side</li>
+</ul>
+<h5 id="sni-configuration">SNI Configuration</h5>
+<p><strong>In BunkerWeb UI, for each service:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Service 1</span>
+<span class="nt">SERVICE_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example-com</span>
+<span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example.com</span>
+<span class="nt">REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://gateway.internal.domain.com</span>
+<span class="nt">REVERSE_PROXY_PORT</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
+<span class="nt">REVERSE_PROXY_SSL_SNI</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yes</span>
+<span class="nt">REVERSE_PROXY_SSL_SNI_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example.com</span>
+
+<span class="c1"># Service 2</span>
+<span class="nt">SERVICE_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">other-example-com</span>
+<span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">other-example.com</span>
+<span class="nt">REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://gateway.internal.domain.com</span>
+<span class="nt">REVERSE_PROXY_PORT</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
+<span class="nt">REVERSE_PROXY_SSL_SNI</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yes</span>
+<span class="nt">REVERSE_PROXY_SSL_SNI_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">other-example.com</span>
+</code></pre></div>
+<p>You can find all configuration options in the <a href="https://docs.bunkerweb.io/latest/settings/#reverse-proxy">Reverse Proxy Documentation</a></p>
+<h5 id="sni-technical-details">SNI Technical Details</h5>
+<p>SNI allows BunkerWeb Cloud to:</p>
+<ol>
+<li><strong>Identify the target service</strong> during TLS connection</li>
+<li><strong>Transmit the correct domain name</strong> to the backend</li>
+<li><strong>Allow the client gateway</strong> to select the right certificate</li>
+<li><strong>Route correctly</strong> to the appropriate service</li>
+</ol>
+<p><strong>Without SNI enabled:</strong></p>
+<pre class="mermaid"><code>graph LR
+    A[Client] --&gt; B[BunkerWeb]
+    B --&gt; C["Gateway (default certificate)"]
+    C --&gt; D[SSL Error]
+
+    style B fill:#f3e5f5,color:#222
+    style C fill:#fff3e0,color:#222
+    style D fill:#ff4d4d,color:#fff,stroke:#b30000,stroke-width:2px</code></pre>
+<p><strong>With SNI enabled:</strong></p>
+<pre class="mermaid"><code>graph LR
+    A[Client] --&gt; B[BunkerWeb]
+    B --&gt; C["Gateway (example.com specific certificate)"]
+    C --&gt; D[Correct Service]
+
+    style B fill:#f3e5f5,color:#222
+    style C fill:#e8f5e8,color:#222
+    style D fill:#e8f5e8,color:#222</code></pre>
+<h3 id="ssltls-and-sni-management">SSL/TLS and SNI Management</h3>
+<h4 id="ssl-certificates">SSL Certificates</h4>
+<h5 id="bunkerweb-cloud-side">BunkerWeb Cloud Side</h5>
+<p>BunkerWeb Cloud automatically manages:</p>
+<ul>
+<li>Let's Encrypt certificates for your domains</li>
+<li>Automatic renewal</li>
+<li>Optimized TLS configuration</li>
+</ul>
+<h5 id="client-infrastructure-side">Client Infrastructure Side</h5>
+<p><strong>Important Recommendations:</strong></p>
+<ol>
+<li><strong>Use HTTPS</strong> for communication between BunkerWeb and your services</li>
+<li><strong>Manage your own certificates</strong> on your infrastructure</li>
+<li><strong>Properly configure SNI</strong> on your gateway/reverse proxy</li>
+</ol>
+<h4 id="detailed-sni-configuration">Detailed SNI Configuration</h4>
+<h5 id="use-case-infrastructure-with-gateway">Use Case: Infrastructure with Gateway</h5>
+<p>If your architecture looks like:</p>
+<pre class="mermaid"><code>graph LR
+    A[BunkerWeb Cloud] --&gt; B[Client Gateway]
+    B --&gt; C[Service 1]
+    B --&gt; D[Service 2]
+    B --&gt; E[Service 3]
+
+    style A fill:#f3e5f5,color:#222
+    style B fill:#fff3e0,color:#222
+    style C fill:#e8f5e8,color:#222
+    style D fill:#e8f5e8,color:#222
+    style E fill:#e8f5e8,color:#222</code></pre>
+<p><strong>Required configuration on BunkerWeb side:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Configuration for example.com</span>
+<span class="nt">REVERSE_PROXY_SSL_SNI</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yes</span>
+<span class="nt">REVERSE_PROXY_SSL_SNI_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example.com</span>
+<span class="nt">REVERSE_PROXY_SSL_VERIFY</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no</span><span class="w">  </span><span class="c1"># If self-signed certificate on client side</span>
+<span class="nt">REVERSE_PROXY_HEADERS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Host $host</span>
+
+<span class="c1"># Configuration for api.example.com</span>
+<span class="nt">REVERSE_PROXY_SSL_SNI</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yes</span>
+<span class="nt">REVERSE_PROXY_SSL_SNI_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api.example.com</span>
+<span class="nt">REVERSE_PROXY_SSL_VERIFY</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no</span>
+<span class="nt">REVERSE_PROXY_HEADERS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Host $host</span>
+</code></pre></div>
+<h3 id="client-gateway-configuration">Client Gateway Configuration</h3>
+<h4 id="overview">Overview</h4>
+<p>When your architecture uses a gateway/reverse proxy on the client side to route traffic to multiple services, specific configuration is needed to support SNI and ensure secure communication with BunkerWeb Cloud.</p>
+<h4 id="configurations-by-technology">Configurations by Technology</h4>
+<h5 id="nginx">Nginx</h5>
+<details>
+<summary>Nginx Configuration</summary>
+
+<div class="highlight"><pre><span></span><code><span class="c1"># Configuration to support SNI with multiple services</span>
+<span class="k">server</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kn">listen</span><span class="w"> </span><span class="mi">443</span><span class="w"> </span><span class="s">ssl</span><span class="w"> </span><span class="s">http2</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">server_name</span><span class="w"> </span><span class="s">example.com</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kn">ssl_certificate</span><span class="w"> </span><span class="s">/path/to/example.com.crt</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">ssl_certificate_key</span><span class="w"> </span><span class="s">/path/to/example.com.key</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">ssl_protocols</span><span class="w"> </span><span class="s">TLSv1.2</span><span class="w"> </span><span class="s">TLSv1.3</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">ssl_ciphers</span><span class="w"> </span><span class="s">ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">ssl_prefer_server_ciphers</span><span class="w"> </span><span class="no">off</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1"># Security headers</span>
+<span class="w">    </span><span class="kn">add_header</span><span class="w"> </span><span class="s">X-Frame-Options</span><span class="w"> </span><span class="s">DENY</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">add_header</span><span class="w"> </span><span class="s">X-Content-Type-Options</span><span class="w"> </span><span class="s">nosniff</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">add_header</span><span class="w"> </span><span class="s">X-XSS-Protection</span><span class="w"> </span><span class="s">&quot;1</span><span class="p">;</span><span class="w"> </span><span class="kn">mode=block&quot;</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="s">/</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://service1:8080</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Host</span><span class="w"> </span><span class="nv">$host</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Real-IP</span><span class="w"> </span><span class="nv">$remote_addr</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-For</span><span class="w"> </span><span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-Proto</span><span class="w"> </span><span class="nv">$scheme</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-Host</span><span class="w"> </span><span class="nv">$host</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-Server</span><span class="w"> </span><span class="nv">$host</span><span class="p">;</span>
+
+<span class="w">        </span><span class="c1"># Timeouts</span>
+<span class="w">        </span><span class="kn">proxy_connect_timeout</span><span class="w"> </span><span class="s">60s</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_send_timeout</span><span class="w"> </span><span class="s">60s</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_read_timeout</span><span class="w"> </span><span class="s">60s</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">server</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kn">listen</span><span class="w"> </span><span class="mi">443</span><span class="w"> </span><span class="s">ssl</span><span class="w"> </span><span class="s">http2</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">server_name</span><span class="w"> </span><span class="s">api.example.com</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kn">ssl_certificate</span><span class="w"> </span><span class="s">/path/to/api.example.com.crt</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">ssl_certificate_key</span><span class="w"> </span><span class="s">/path/to/api.example.com.key</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">ssl_protocols</span><span class="w"> </span><span class="s">TLSv1.2</span><span class="w"> </span><span class="s">TLSv1.3</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">ssl_ciphers</span><span class="w"> </span><span class="s">ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">ssl_prefer_server_ciphers</span><span class="w"> </span><span class="no">off</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="s">/</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://api-service:3000</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Host</span><span class="w"> </span><span class="nv">$host</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Real-IP</span><span class="w"> </span><span class="nv">$remote_addr</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-For</span><span class="w"> </span><span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-Proto</span><span class="w"> </span><span class="nv">$scheme</span><span class="p">;</span>
+
+<span class="w">        </span><span class="c1"># API-specific configuration</span>
+<span class="w">        </span><span class="kn">proxy_buffering</span><span class="w"> </span><span class="no">off</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_request_buffering</span><span class="w"> </span><span class="no">off</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+</details>
+
+<h5 id="traefik">Traefik</h5>
+<details>
+<summary>Traefik Configuration</summary>
+
+**With Docker Compose:**
+
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">traefik</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">traefik:v3.0</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--api.dashboard=true</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--providers.docker=true</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--providers.file.filename=/etc/traefik/dynamic.yml</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--entrypoints.websecure.address=:443</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--certificatesresolvers.myresolver.acme.tlschallenge=true</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--certificatesresolvers.myresolver.acme.email=admin@example.com</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:443&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;8080:8080&quot;</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/run/docker.sock:/var/run/docker.sock:ro</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./letsencrypt:/letsencrypt</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./dynamic.yml:/etc/traefik/dynamic.yml:ro</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.enable=true&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.routers.dashboard.rule=Host(`traefik.example.com`)&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.routers.dashboard.tls.certresolver=myresolver&quot;</span>
+
+<span class="w">  </span><span class="nt">service1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your-app:latest</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.enable=true&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.routers.service1.rule=Host(`example.com`)&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.routers.service1.entrypoints=websecure&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.routers.service1.tls.certresolver=myresolver&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.services.service1.loadbalancer.server.port=8080&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.routers.service1.middlewares=security-headers&quot;</span>
+
+<span class="w">  </span><span class="nt">api-service</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your-api:latest</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.enable=true&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.routers.api.rule=Host(`api.example.com`)&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.routers.api.entrypoints=websecure&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.routers.api.tls.certresolver=myresolver&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.services.api.loadbalancer.server.port=3000&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.routers.api.middlewares=security-headers,rate-limit&quot;</span>
+</code></pre></div>
+
+**Dynamic configuration (dynamic.yml):**
+
+<div class="highlight"><pre><span></span><code><span class="nt">http</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">middlewares</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">security-headers</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">headers</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">frameDeny</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">contentTypeNosniff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">browserXssFilter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">forceSTSHeader</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">stsIncludeSubdomains</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">stsPreload</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">stsSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">31536000</span>
+<span class="w">        </span><span class="nt">customRequestHeaders</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">X-Forwarded-Proto</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https&quot;</span>
+
+<span class="w">    </span><span class="nt">rate-limit</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">rateLimit</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">burst</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">        </span><span class="nt">average</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+
+<span class="w">  </span><span class="nt">routers</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">service1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">rule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Host(`example.com`)&quot;</span>
+<span class="w">      </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;service1&quot;</span>
+<span class="w">      </span><span class="nt">tls</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">certResolver</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;myresolver&quot;</span>
+<span class="w">      </span><span class="nt">middlewares</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;security-headers&quot;</span>
+
+<span class="w">    </span><span class="nt">api</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">rule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Host(`api.example.com`)&quot;</span>
+<span class="w">      </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;api-service&quot;</span>
+<span class="w">      </span><span class="nt">tls</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">certResolver</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;myresolver&quot;</span>
+<span class="w">      </span><span class="nt">middlewares</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;security-headers&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;rate-limit&quot;</span>
+
+<span class="w">  </span><span class="nt">services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">service1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">loadBalancer</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">servers</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://service1:8080&quot;</span>
+<span class="w">        </span><span class="nt">healthCheck</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/health&quot;</span>
+<span class="w">          </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;30s&quot;</span>
+
+<span class="w">    </span><span class="nt">api-service</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">loadBalancer</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">servers</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://api-service:3000&quot;</span>
+<span class="w">        </span><span class="nt">healthCheck</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/api/health&quot;</span>
+<span class="w">          </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;30s&quot;</span>
+</code></pre></div>
+
+</details>
+
+<h5 id="apache">Apache</h5>
+<details>
+<summary>Apache Configuration</summary>
+
+<div class="highlight"><pre><span></span><code><span class="c"># Apache configuration with SNI</span>
+<span class="nt">&lt;VirtualHost</span><span class="w"> </span><span class="s">*:443</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nb">ServerName</span><span class="w"> </span>example.com
+<span class="w">    </span><span class="nb">DocumentRoot</span><span class="w"> </span><span class="sx">/var/www/html</span>
+
+<span class="w">    </span><span class="c"># SSL configuration</span>
+<span class="w">    </span><span class="nb">SSLEngine</span><span class="w"> </span><span class="k">on</span>
+<span class="w">    </span><span class="nb">SSLProtocol</span><span class="w"> </span><span class="k">all</span><span class="w"> </span>-SSLv3<span class="w"> </span>-TLSv1<span class="w"> </span>-TLSv1.1
+<span class="w">    </span><span class="nb">SSLCipherSuite</span><span class="w"> </span>ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256
+<span class="w">    </span><span class="nb">SSLHonorCipherOrder</span><span class="w"> </span><span class="k">off</span>
+<span class="w">    </span><span class="nb">SSLCertificateFile</span><span class="w"> </span><span class="sx">/path/to/example.com.crt</span>
+<span class="w">    </span><span class="nb">SSLCertificateKeyFile</span><span class="w"> </span><span class="sx">/path/to/example.com.key</span>
+
+<span class="w">    </span><span class="c"># Security headers</span>
+<span class="w">    </span><span class="nb">Header</span><span class="w"> </span>always<span class="w"> </span>set<span class="w"> </span>X-Frame-Options<span class="w"> </span>DENY
+<span class="w">    </span><span class="nb">Header</span><span class="w"> </span>always<span class="w"> </span>set<span class="w"> </span>X-Content-Type-Options<span class="w"> </span>nosniff
+<span class="w">    </span><span class="nb">Header</span><span class="w"> </span>always<span class="w"> </span>set<span class="w"> </span>X-XSS-Protection<span class="w"> </span><span class="s2">&quot;1; mode=block&quot;</span>
+<span class="w">    </span><span class="nb">Header</span><span class="w"> </span>always<span class="w"> </span>set<span class="w"> </span>Strict-Transport-Security<span class="w"> </span><span class="s2">&quot;max-age=31536000; includeSubDomains&quot;</span>
+
+<span class="w">    </span><span class="c"># Reverse proxy configuration</span>
+<span class="w">    </span><span class="nb">ProxyPass</span><span class="w"> </span>/<span class="w"> </span>http://service1:8080/
+<span class="w">    </span><span class="nb">ProxyPassReverse</span><span class="w"> </span>/<span class="w"> </span>http://service1:8080/
+<span class="w">    </span><span class="nb">ProxyPreserveHost</span><span class="w"> </span><span class="k">On</span>
+
+<span class="w">    </span><span class="c"># Custom headers</span>
+<span class="w">    </span><span class="nb">ProxyPassReverse</span><span class="w"> </span>/<span class="w"> </span>http://service1:8080/
+<span class="w">    </span><span class="nb">ProxyPassReverseInterpolateEnv</span><span class="w"> </span><span class="k">On</span>
+
+<span class="w">    </span><span class="nt">&lt;Proxy</span><span class="w"> </span><span class="s">*</span><span class="nt">&gt;</span>
+<span class="w">        </span><span class="nb">Require</span><span class="w"> </span><span class="k">all</span><span class="w"> </span>granted
+<span class="w">    </span><span class="nt">&lt;/Proxy&gt;</span>
+
+<span class="w">    </span><span class="c"># Logs</span>
+<span class="w">    </span><span class="nb">ErrorLog</span><span class="w"> </span>${APACHE_LOG_DIR}/example.com_error.log
+<span class="w">    </span><span class="nb">CustomLog</span><span class="w"> </span>${APACHE_LOG_DIR}/example.com_access.log<span class="w"> </span>combined
+<span class="nt">&lt;/VirtualHost&gt;</span>
+
+<span class="nt">&lt;VirtualHost</span><span class="w"> </span><span class="s">*:443</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nb">ServerName</span><span class="w"> </span>api.example.com
+
+<span class="w">    </span><span class="nb">SSLEngine</span><span class="w"> </span><span class="k">on</span>
+<span class="w">    </span><span class="nb">SSLProtocol</span><span class="w"> </span><span class="k">all</span><span class="w"> </span>-SSLv3<span class="w"> </span>-TLSv1<span class="w"> </span>-TLSv1.1
+<span class="w">    </span><span class="nb">SSLCipherSuite</span><span class="w"> </span>ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256
+<span class="w">    </span><span class="nb">SSLCertificateFile</span><span class="w"> </span><span class="sx">/path/to/api.example.com.crt</span>
+<span class="w">    </span><span class="nb">SSLCertificateKeyFile</span><span class="w"> </span><span class="sx">/path/to/api.example.com.key</span>
+
+<span class="w">    </span><span class="nb">ProxyPass</span><span class="w"> </span>/<span class="w"> </span>http://api-service:3000/
+<span class="w">    </span><span class="nb">ProxyPassReverse</span><span class="w"> </span>/<span class="w"> </span>http://api-service:3000/
+<span class="w">    </span><span class="nb">ProxyPreserveHost</span><span class="w"> </span><span class="k">On</span>
+
+<span class="w">    </span><span class="c"># API-specific configuration</span>
+<span class="w">    </span><span class="nb">ProxyTimeout</span><span class="w"> </span><span class="m">300</span>
+<span class="w">    </span><span class="nb">ProxyBadHeader</span><span class="w"> </span>Ignore
+
+<span class="w">    </span><span class="nb">ErrorLog</span><span class="w"> </span>${APACHE_LOG_DIR}/api.example.com_error.log
+<span class="w">    </span><span class="nb">CustomLog</span><span class="w"> </span>${APACHE_LOG_DIR}/api.example.com_access.log<span class="w"> </span>combined
+<span class="nt">&lt;/VirtualHost&gt;</span>
+
+<span class="c"># Required modules configuration</span>
+<span class="nb">LoadModule</span><span class="w"> </span>ssl_module<span class="w"> </span>modules/mod_ssl.so
+<span class="nb">LoadModule</span><span class="w"> </span>proxy_module<span class="w"> </span>modules/mod_proxy.so
+<span class="nb">LoadModule</span><span class="w"> </span>proxy_http_module<span class="w"> </span>modules/mod_proxy_http.so
+<span class="nb">LoadModule</span><span class="w"> </span>headers_module<span class="w"> </span>modules/mod_headers.so
+</code></pre></div>
+
+</details>
+
+<h5 id="haproxy">HAProxy</h5>
+<details>
+<summary>HAProxy Configuration</summary>
+
+<div class="highlight"><pre><span></span><code>global
+    maxconn 4096
+    log stdout local0
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+
+    # SSL configuration
+    ssl-default-bind-ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256
+    ssl-default-bind-options ssl-min-ver TLSv1.2 no-tls-tickets
+
+defaults
+    mode http
+    timeout connect 5000ms
+    timeout client 50000ms
+    timeout server 50000ms
+    option httplog
+    option dontlognull
+    option redispatch
+    retries 3
+    maxconn 2000
+
+frontend https_frontend
+    bind *:443 ssl crt /etc/ssl/certs/example.com.pem crt /etc/ssl/certs/api.example.com.pem
+
+    # Security headers
+    http-response set-header X-Frame-Options DENY
+    http-response set-header X-Content-Type-Options nosniff
+    http-response set-header X-XSS-Protection &quot;1; mode=block&quot;
+    http-response set-header Strict-Transport-Security &quot;max-age=31536000; includeSubDomains&quot;
+
+    # SNI-based routing
+    acl is_example hdr(host) -i example.com
+    acl is_api hdr(host) -i api.example.com
+
+    use_backend service1_backend if is_example
+    use_backend api_backend if is_api
+
+    default_backend service1_backend
+
+backend service1_backend
+    balance roundrobin
+    option httpchk GET /health
+    http-check expect status 200
+
+    server service1-1 service1:8080 check
+    server service1-2 service1-backup:8080 check backup
+
+backend api_backend
+    balance roundrobin
+    option httpchk GET /api/health
+    http-check expect status 200
+
+    server api-1 api-service:3000 check
+    server api-2 api-service-backup:3000 check backup
+
+# Statistics interface (optional)
+listen stats
+    bind *:8404
+    stats enable
+    stats uri /stats
+    stats refresh 30s
+    stats admin if TRUE
+</code></pre></div>
+
+</details>
+
+<h4 id="ssl-configuration-validation">SSL Configuration Validation</h4>
+<p>Test SSL configuration:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># SSL connectivity test</span>
+openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>your-domain.com:443<span class="w"> </span>-servername<span class="w"> </span>your-domain.com
+
+<span class="c1"># Headers verification</span>
+curl<span class="w"> </span>-I<span class="w"> </span>https://your-domain.com
+
+<span class="c1"># SNI test</span>
+curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: example.com&quot;</span><span class="w"> </span>https://54984654.bunkerweb.cloud
+</code></pre></div>
+<h4 id="gateway-best-practices">Gateway Best Practices</h4>
+<ol>
+<li><strong>Health Checks</strong>: Configure health checks for your services</li>
+<li><strong>Load Balancing</strong>: Use multiple instances for high availability</li>
+<li><strong>Monitoring</strong>: Monitor your gateway metrics</li>
+<li><strong>Security Headers</strong>: Add appropriate security headers</li>
+<li><strong>Timeouts</strong>: Configure appropriate timeouts to avoid blocking</li>
+</ol>
+<h3 id="bunkerweb-cloud-ip-whitelist">BunkerWeb Cloud IP Whitelist</h3>
+<h4 id="why-configure-a-whitelist">Why Configure a Whitelist?</h4>
+<p>To further secure your infrastructure, it is recommended to configure a whitelist of BunkerWeb Cloud IP addresses on the client infrastructure side. This ensures that only traffic from BunkerWeb Cloud can reach your backend services.</p>
+<p>We recommend whitelisting at firewall level (iptables ..etc).</p>
+<h4 id="bunkerweb-cloud-ip-addresses-to-whitelist">BunkerWeb Cloud IP Addresses to Whitelist</h4>
+<p><strong>List of IP addresses to allow:</strong></p>
+<p>Updated list is available here: https://repo.bunkerweb.io/cloud/ips</p>
+<div class="highlight"><pre><span></span><code># BunkerWeb Cloud IP addresses
+4.233.128.18
+20.19.161.132
+</code></pre></div>
+<h4 id="whitelist-configuration-by-technology">Whitelist Configuration by Technology</h4>
+<h5 id="nginx_1">Nginx</h5>
+<details>
+<summary>Nginx Configuration</summary>
+
+<div class="highlight"><pre><span></span><code><span class="c1"># In your server configuration</span>
+<span class="k">server</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kn">listen</span><span class="w"> </span><span class="mi">443</span><span class="w"> </span><span class="s">ssl</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">server_name</span><span class="w"> </span><span class="s">example.com</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1"># BunkerWeb Cloud IP whitelist</span>
+<span class="w">    </span><span class="kn">allow</span><span class="w"> </span><span class="mi">192</span><span class="s">.168.1.0/24</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">allow</span><span class="w"> </span><span class="mi">10</span><span class="s">.0.0.0/16</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">allow</span><span class="w"> </span><span class="mi">172</span><span class="s">.16.0.0/12</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">deny</span><span class="w"> </span><span class="s">all</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kn">ssl_certificate</span><span class="w"> </span><span class="s">/path/to/example.com.crt</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">ssl_certificate_key</span><span class="w"> </span><span class="s">/path/to/example.com.key</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="s">/</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://service1:8080</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Host</span><span class="w"> </span><span class="nv">$host</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Real-IP</span><span class="w"> </span><span class="nv">$remote_addr</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-For</span><span class="w"> </span><span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1"># Configuration with geo module for more flexibility</span>
+<span class="k">geo</span><span class="w"> </span><span class="nv">$bunkerweb_ip</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kn">default</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">192.168.1.0/24</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">10.0.0.0/16</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">172.16.0.0/12</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">server</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kn">listen</span><span class="w"> </span><span class="mi">443</span><span class="w"> </span><span class="s">ssl</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">server_name</span><span class="w"> </span><span class="s">example.com</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kn">if</span><span class="w"> </span><span class="s">(</span><span class="nv">$bunkerweb_ip</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span><span class="s">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kn">return</span><span class="w"> </span><span class="mi">403</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1"># ... rest of configuration</span>
+<span class="p">}</span>
+</code></pre></div>
+
+</details>
+
+<h5 id="traefik_1">Traefik</h5>
+<details>
+<summary>Traefik Configuration</summary>
+
+<div class="highlight"><pre><span></span><code><span class="c1"># Configuration in dynamic.yml</span>
+<span class="nt">http</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">middlewares</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">bunkerweb-whitelist</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">ipWhiteList</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">sourceRange</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;192.168.1.0/24&quot;</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;10.0.0.0/16&quot;</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;172.16.0.0/12&quot;</span>
+<span class="w">        </span><span class="nt">ipStrategy</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">depth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+
+<span class="w">  </span><span class="nt">routers</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">example-router</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">rule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Host(`example.com`)&quot;</span>
+<span class="w">      </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example-service&quot;</span>
+<span class="w">      </span><span class="nt">middlewares</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb-whitelist&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;security-headers&quot;</span>
+<span class="w">      </span><span class="nt">tls</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">certResolver</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;myresolver&quot;</span>
+
+<span class="w">    </span><span class="nt">api-router</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">rule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Host(`api.example.com`)&quot;</span>
+<span class="w">      </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;api-service&quot;</span>
+<span class="w">      </span><span class="nt">middlewares</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb-whitelist&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;security-headers&quot;</span>
+<span class="w">      </span><span class="nt">tls</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">certResolver</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;myresolver&quot;</span>
+</code></pre></div>
+
+**With Docker Compose labels:**
+
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">service1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your-app:latest</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.enable=true&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.routers.service1.rule=Host(`example.com`)&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.routers.service1.middlewares=bunkerweb-whitelist&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.middlewares.bunkerweb-whitelist.ipwhitelist.sourcerange=192.168.1.0/24,10.0.0.0/16,172.16.0.0/12&quot;</span>
+</code></pre></div>
+
+</details>
+
+<h5 id="apache_1">Apache</h5>
+<details>
+<summary>Apache Configuration</summary>
+
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;VirtualHost</span><span class="w"> </span><span class="s">*:443</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nb">ServerName</span><span class="w"> </span>example.com
+
+<span class="w">    </span><span class="c"># BunkerWeb Cloud IP whitelist</span>
+<span class="w">    </span><span class="nt">&lt;RequireAll&gt;</span>
+<span class="w">        </span><span class="nb">Require</span><span class="w"> </span>ip<span class="w"> </span><span class="m">192.168.1.0/24</span>
+<span class="w">        </span><span class="nb">Require</span><span class="w"> </span>ip<span class="w"> </span><span class="m">10.0.0.0/16</span>
+<span class="w">        </span><span class="nb">Require</span><span class="w"> </span>ip<span class="w"> </span><span class="m">172.16.0.0/12</span>
+<span class="w">    </span><span class="nt">&lt;/RequireAll&gt;</span>
+
+<span class="w">    </span><span class="nb">SSLEngine</span><span class="w"> </span><span class="k">on</span>
+<span class="w">    </span><span class="nb">SSLCertificateFile</span><span class="w"> </span><span class="sx">/path/to/example.com.crt</span>
+<span class="w">    </span><span class="nb">SSLCertificateKeyFile</span><span class="w"> </span><span class="sx">/path/to/example.com.key</span>
+
+<span class="w">    </span><span class="nb">ProxyPass</span><span class="w"> </span>/<span class="w"> </span>http://service1:8080/
+<span class="w">    </span><span class="nb">ProxyPassReverse</span><span class="w"> </span>/<span class="w"> </span>http://service1:8080/
+<span class="w">    </span><span class="nb">ProxyPreserveHost</span><span class="w"> </span><span class="k">On</span>
+
+<span class="w">    </span><span class="c"># Configuration for denied access logs</span>
+<span class="w">    </span><span class="nb">LogFormat</span><span class="w"> </span><span class="s2">&quot;%h %l %u %t \&quot;%r\&quot; %&gt;s %O \&quot;%{Referer}i\&quot; \&quot;%{User-Agent}i\&quot;&quot;</span><span class="w"> </span>combined
+<span class="w">    </span><span class="nb">CustomLog</span><span class="w"> </span>logs/access.log<span class="w"> </span>combined
+<span class="w">    </span><span class="nb">ErrorLog</span><span class="w"> </span>logs/error.log
+<span class="nt">&lt;/VirtualHost&gt;</span>
+
+<span class="c"># Alternative configuration with mod_authz_core</span>
+<span class="nt">&lt;VirtualHost</span><span class="w"> </span><span class="s">*:443</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nb">ServerName</span><span class="w"> </span>api.example.com
+
+<span class="w">    </span><span class="nt">&lt;Directory</span><span class="w"> </span><span class="s">/</span><span class="nt">&gt;</span>
+<span class="w">        </span><span class="nt">&lt;RequireAny&gt;</span>
+<span class="w">            </span><span class="nb">Require</span><span class="w"> </span>ip<span class="w"> </span><span class="m">192.168.1.0/24</span>
+<span class="w">            </span><span class="nb">Require</span><span class="w"> </span>ip<span class="w"> </span><span class="m">10.0.0.0/16</span>
+<span class="w">            </span><span class="nb">Require</span><span class="w"> </span>ip<span class="w"> </span><span class="m">172.16.0.0/12</span>
+<span class="w">        </span><span class="nt">&lt;/RequireAny&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/Directory&gt;</span>
+
+<span class="w">    </span><span class="c"># ... rest of configuration</span>
+<span class="nt">&lt;/VirtualHost&gt;</span>
+</code></pre></div>
+
+</details>
+
+<h5 id="haproxy_1">HAProxy</h5>
+<details>
+<summary>HAProxy Configuration</summary>
+
+<div class="highlight"><pre><span></span><code># Configuration in haproxy.cfg
+frontend bunkerweb_frontend
+    bind *:443 ssl crt /path/to/certificates/
+
+    # ACL for BunkerWeb Cloud whitelist
+    acl bunkerweb_ips src 192.168.1.0/24 10.0.0.0/16 172.16.0.0/12
+
+    # Block everything except BunkerWeb Cloud
+    http-request deny unless bunkerweb_ips
+
+    # Security headers
+    http-response set-header X-Frame-Options DENY
+    http-response set-header X-Content-Type-Options nosniff
+
+    # Routing
+    acl is_example hdr(host) -i example.com
+    acl is_api hdr(host) -i api.example.com
+
+    use_backend app_servers if is_example
+    use_backend api_servers if is_api
+
+    default_backend app_servers
+
+backend app_servers
+    balance roundrobin
+    server app1 service1:8080 check
+    server app2 service2:8080 check
+
+backend api_servers
+    balance roundrobin
+    server api1 api-service:3000 check
+    server api2 api-service-backup:3000 check
+</code></pre></div>
+
+</details>
+
+<h5 id="system-firewall-iptables">System Firewall (iptables)</h5>
+<details>
+<summary>iptables Configuration</summary>
+
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># iptables configuration script for BunkerWeb Cloud whitelist</span>
+
+<span class="c1"># Clear existing rules</span>
+iptables<span class="w"> </span>-F
+iptables<span class="w"> </span>-X
+
+<span class="c1"># Default policies</span>
+iptables<span class="w"> </span>-P<span class="w"> </span>INPUT<span class="w"> </span>DROP
+iptables<span class="w"> </span>-P<span class="w"> </span>FORWARD<span class="w"> </span>DROP
+iptables<span class="w"> </span>-P<span class="w"> </span>OUTPUT<span class="w"> </span>ACCEPT
+
+<span class="c1"># Allow loopback</span>
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-i<span class="w"> </span>lo<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+
+<span class="c1"># Allow established connections</span>
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>ESTABLISHED,RELATED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+
+<span class="c1"># Whitelist BunkerWeb Cloud IPs for HTTPS</span>
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">443</span><span class="w"> </span>-s<span class="w"> </span><span class="m">192</span>.168.1.0/24<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">443</span><span class="w"> </span>-s<span class="w"> </span><span class="m">10</span>.0.0.0/16<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">443</span><span class="w"> </span>-s<span class="w"> </span><span class="m">172</span>.16.0.0/12<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+
+<span class="c1"># Allow HTTP for Let&#39;s Encrypt (optional)</span>
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">80</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
+
+<span class="c1"># Allow SSH (adapt to your needs)</span>
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">22</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
+
+<span class="c1"># Logs for debugging</span>
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-j<span class="w"> </span>LOG<span class="w"> </span>--log-prefix<span class="w"> </span><span class="s2">&quot;DROPPED: &quot;</span>
+
+<span class="c1"># Save rules</span>
+iptables-save<span class="w"> </span>&gt;<span class="w"> </span>/etc/iptables/rules.v4
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;iptables configuration applied successfully&quot;</span>
+</code></pre></div>
+
+</details>
+
+<h4 id="whitelist-best-practices">Whitelist Best Practices</h4>
+<ol>
+<li><strong>Monitor Rejections</strong>: Monitor blocked access attempts</li>
+<li><strong>Regular Updates</strong>: Keep the IP list up to date</li>
+<li><strong>Regular Testing</strong>: Validate that the whitelist works correctly</li>
+<li><strong>Documentation</strong>: Document IP changes</li>
+<li><strong>Alerting</strong>: Configure alerts for BunkerWeb IP changes</li>
+<li><strong>Backup</strong>: Keep a backup configuration in case of issues</li>
+</ol>
+<h3 id="real_ip-configuration-and-client-address-recovery">REAL_IP Configuration and Client Address Recovery</h3>
+<h4 id="why-configure-real_ip">Why Configure REAL_IP?</h4>
+<p>When using BunkerWeb Cloud as a reverse proxy, the IP addresses that your backend applications see are those of BunkerWeb Cloud, not those of the real clients. To retrieve the real client IP addresses, specific configuration is required.</p>
+<h4 id="bunkerweb-cloud-side-configuration">BunkerWeb Cloud Side Configuration</h4>
+<p>In the BunkerWeb UI, configure Real IP:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yes</span><span class="w"> </span><span class="c1"># Default is no</span>
+<span class="nt">REAL_IP_FROM</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.0.0/16 172.16.0.0/12 10.0.0.0/8</span><span class="w"> </span><span class="c1"># Default</span>
+<span class="nt">REAL_IP_HEADER</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">X-Forwarded-For</span><span class="w"> </span><span class="c1"># Default</span>
+<span class="nt">REAL_IP_RECURSIVE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yes</span><span class="w"> </span><span class="c1"># Default</span>
+<span class="c1"># Example if also using Cloudflare Proxy in front of BunkerWeb</span>
+<span class="nt">REAL_IP_FROM_URLS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/</span>
+</code></pre></div>
+<p>You can find all configuration options in the <a href="https://docs.bunkerweb.io/latest/settings/#real-ip">Documentation Real Ip</a></p>
+<h4 id="client-infrastructure-side-configuration">Client Infrastructure Side Configuration</h4>
+<h5 id="nginx_2">Nginx</h5>
+<details>
+<summary>Nginx Configuration for REAL_IP</summary>
+
+<div class="highlight"><pre><span></span><code><span class="c1"># Configure trusted IP addresses (BunkerWeb Cloud)</span>
+<span class="k">set_real_ip_from</span><span class="w"> </span><span class="mi">4</span><span class="s">.233.128.18/32</span>
+<span class="s">set_real_ip_from</span><span class="w"> </span><span class="mi">20</span><span class="s">.19.161.132/32</span>
+
+<span class="c1"># Header to use for retrieving real IP</span>
+<span class="s">real_ip_header</span><span class="w"> </span><span class="s">X-Real-IP</span><span class="p">;</span>
+
+<span class="c1"># Alternative with X-Forwarded-For</span>
+<span class="c1"># real_ip_header X-Forwarded-For;</span>
+
+<span class="k">server</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kn">listen</span><span class="w"> </span><span class="mi">443</span><span class="w"> </span><span class="s">ssl</span><span class="w"> </span><span class="s">http2</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">server_name</span><span class="w"> </span><span class="s">example.com</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1"># SSL configuration</span>
+<span class="w">    </span><span class="kn">ssl_certificate</span><span class="w"> </span><span class="s">/path/to/example.com.crt</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">ssl_certificate_key</span><span class="w"> </span><span class="s">/path/to/example.com.key</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="s">/</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://service1:8080</span><span class="p">;</span>
+
+<span class="w">        </span><span class="c1"># Forward real IP headers to backend</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Host</span><span class="w"> </span><span class="nv">$host</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Real-IP</span><span class="w"> </span><span class="nv">$remote_addr</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-For</span><span class="w"> </span><span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-Proto</span><span class="w"> </span><span class="nv">$scheme</span><span class="p">;</span>
+
+<span class="w">        </span><span class="c1"># Log with real client IP</span>
+<span class="w">        </span><span class="kn">access_log</span><span class="w"> </span><span class="s">/var/log/nginx/access.log</span><span class="w"> </span><span class="s">combined</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1"># Custom log format with real IP</span>
+<span class="k">log_format</span><span class="w"> </span><span class="s">real_ip</span><span class="w"> </span><span class="s">&#39;</span><span class="nv">$remote_addr</span><span class="w"> </span><span class="s">-</span><span class="w"> </span><span class="nv">$remote_user</span><span class="w"> </span><span class="s">[</span><span class="nv">$time_local]</span><span class="w"> </span><span class="s">&#39;</span>
+<span class="w">                   </span><span class="s">&#39;&quot;</span><span class="nv">$request&quot;</span><span class="w"> </span><span class="nv">$status</span><span class="w"> </span><span class="nv">$body_bytes_sent</span><span class="w"> </span><span class="s">&#39;</span>
+<span class="w">                   </span><span class="s">&#39;&quot;</span><span class="nv">$http_referer&quot;</span><span class="w"> </span><span class="s">&quot;</span><span class="nv">$http_user_agent&quot;</span><span class="w"> </span><span class="s">&#39;</span>
+<span class="w">                   </span><span class="s">&#39;real_ip=&quot;</span><span class="nv">$realip_remote_addr&quot;&#39;</span><span class="p">;</span>
+</code></pre></div>
+
+</details>
+
+<h5 id="apache_2">Apache</h5>
+<details>
+<summary>Apache Configuration for REAL_IP</summary>
+
+<div class="highlight"><pre><span></span><code><span class="c"># Load mod_remoteip module</span>
+<span class="nb">LoadModule</span><span class="w"> </span>remoteip_module<span class="w"> </span>modules/mod_remoteip.so
+
+<span class="nt">&lt;VirtualHost</span><span class="w"> </span><span class="s">*:443</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nb">ServerName</span><span class="w"> </span>example.com
+
+<span class="w">    </span><span class="c"># SSL configuration</span>
+<span class="w">    </span><span class="nb">SSLEngine</span><span class="w"> </span><span class="k">on</span>
+<span class="w">    </span><span class="nb">SSLCertificateFile</span><span class="w"> </span><span class="sx">/path/to/example.com.crt</span>
+<span class="w">    </span><span class="nb">SSLCertificateKeyFile</span><span class="w"> </span><span class="sx">/path/to/example.com.key</span>
+
+<span class="w">    </span><span class="c"># Configure trusted IP addresses</span>
+<span class="w">    </span><span class="nb">RemoteIPHeader</span><span class="w"> </span>X-Real-IP
+<span class="w">    </span><span class="nb">RemoteIPTrustedProxy</span><span class="w"> </span><span class="m">4.233.128.18/32</span>
+<span class="w">    </span><span class="nb">RemoteIPTrustedProxy</span><span class="w"> </span><span class="m">20.19.161.132/32</span>
+
+<span class="w">    </span><span class="c"># Alternative with X-Forwarded-For</span>
+<span class="w">    </span><span class="c"># RemoteIPHeader X-Forwarded-For</span>
+
+<span class="w">    </span><span class="c"># Reverse proxy configuration</span>
+<span class="w">    </span><span class="nb">ProxyPass</span><span class="w"> </span>/<span class="w"> </span>http://service1:8080/
+<span class="w">    </span><span class="nb">ProxyPassReverse</span><span class="w"> </span>/<span class="w"> </span>http://service1:8080/
+<span class="w">    </span><span class="nb">ProxyPreserveHost</span><span class="w"> </span><span class="k">On</span>
+
+<span class="w">    </span><span class="c"># Forward IP headers</span>
+<span class="w">    </span><span class="nb">ProxyPassReverse</span><span class="w"> </span>/<span class="w"> </span>http://service1:8080/
+<span class="w">    </span><span class="nb">ProxyPassReverseInterpolateEnv</span><span class="w"> </span><span class="k">On</span>
+
+<span class="w">    </span><span class="c"># Logs with real IP</span>
+<span class="w">    </span><span class="nb">LogFormat</span><span class="w"> </span><span class="s2">&quot;%a %l %u %t \&quot;%r\&quot; %&gt;s %O \&quot;%{Referer}i\&quot; \&quot;%{User-Agent}i\&quot;&quot;</span><span class="w"> </span>combined_real_ip
+<span class="w">    </span><span class="nb">CustomLog</span><span class="w"> </span>logs/access.log<span class="w"> </span>combined_real_ip
+<span class="w">    </span><span class="nb">ErrorLog</span><span class="w"> </span>logs/error.log
+<span class="nt">&lt;/VirtualHost&gt;</span>
+</code></pre></div>
+
+</details>
+
+<h5 id="haproxy_2">HAProxy</h5>
+<details>
+<summary>HAProxy Configuration for REAL_IP</summary>
+
+<div class="highlight"><pre><span></span><code>global
+    maxconn 4096
+    log stdout local0
+
+defaults
+    mode http
+    option httplog
+    option dontlognull
+    option forwardfor
+
+    # Log format with real IP
+    log-format &quot;%ci:%cp [%t] %ft %b/%s %Tq/%Tw/%Tc/%Tr/%Ta %ST %B %CC %CS %tsc %ac/%fc/%bc/%sc/%rc %sq/%bq %hr %hs %{+Q}r&quot;
+
+frontend https_frontend
+    bind *:443 ssl crt /etc/ssl/certs/
+
+    # BunkerWeb Cloud IP whitelist
+    acl bunkerweb_ips src 4.233.128.18/32 20.19.161.132/32
+    http-request deny unless bunkerweb_ips
+
+    # Capture real IP from headers
+    capture request header X-Real-IP len 15
+    capture request header X-Forwarded-For len 50
+
+    # Routing
+    acl is_example hdr(host) -i example.com
+    use_backend app_servers if is_example
+
+    default_backend app_servers
+
+backend app_servers
+    balance roundrobin
+
+    # Add/preserve real IP headers
+    http-request set-header X-Original-Forwarded-For %[req.hdr(X-Forwarded-For)]
+    http-request set-header X-Client-IP %[req.hdr(X-Real-IP)]
+
+    server app1 service1:8080 check
+    server app2 service2:8080 check backup
+</code></pre></div>
+
+</details>
+
+<h5 id="traefik_2">Traefik</h5>
+<details>
+<summary>Traefik Configuration for REAL_IP</summary>
+
+<div class="highlight"><pre><span></span><code><span class="c1"># Configuration in dynamic.yml</span>
+<span class="nt">http</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">middlewares</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">real-ip</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">ipWhiteList</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">sourceRange</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;4.233.128.18/32&quot;</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;20.19.161.132/32&quot;</span>
+<span class="w">        </span><span class="nt">ipStrategy</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">depth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w">  </span><span class="c1"># Number of trusted proxies</span>
+<span class="w">          </span><span class="nt">excludedIPs</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;127.0.0.1/32&quot;</span>
+
+<span class="w">  </span><span class="nt">routers</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">example-router</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">rule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Host(`example.com`)&quot;</span>
+<span class="w">      </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example-service&quot;</span>
+<span class="w">      </span><span class="nt">middlewares</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;real-ip&quot;</span>
+<span class="w">      </span><span class="nt">tls</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">certResolver</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;myresolver&quot;</span>
+
+<span class="w">  </span><span class="nt">services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">example-service</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">loadBalancer</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">servers</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://service1:8080&quot;</span>
+<span class="w">        </span><span class="nt">passHostHeader</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+
+**Configuration in traefik.yml (static):**
+
+<div class="highlight"><pre><span></span><code><span class="nt">entryPoints</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">websecure</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;:443&quot;</span>
+<span class="w">    </span><span class="nt">forwardedHeaders</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">trustedIPs</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;4.233.128.18/32&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;20.19.161.132/32&quot;</span>
+<span class="w">      </span><span class="nt">insecure</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+
+<span class="nt">accessLog</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
+<span class="w">  </span><span class="nt">fields</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">defaultMode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keep</span>
+<span class="w">    </span><span class="nt">names</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">ClientUsername</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">drop</span>
+<span class="w">    </span><span class="nt">headers</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">defaultMode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keep</span>
+<span class="w">      </span><span class="nt">names</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">X-Real-IP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keep</span>
+<span class="w">        </span><span class="nt">X-Forwarded-For</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keep</span>
+</code></pre></div>
+
+</details>
+
+<h4 id="testing-and-validation">Testing and Validation</h4>
+<h5 id="configuration-verification">Configuration Verification</h5>
+<div class="highlight"><pre><span></span><code><span class="c1"># Test 1: Check received headers</span>
+curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;X-Real-IP: 203.0.113.1&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-H<span class="w"> </span><span class="s2">&quot;X-Forwarded-For: 203.0.113.1, 192.168.1.100&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>https://example.com/test-ip
+
+<span class="c1"># Test 2: Analyze logs</span>
+tail<span class="w"> </span>-f<span class="w"> </span>/var/log/nginx/access.log<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;203.0.113.1&quot;</span>
+
+<span class="c1"># Test 3: Test from different sources</span>
+curl<span class="w"> </span>-v<span class="w"> </span>https://example.com/whatismyip
+</code></pre></div>
+<h4 id="real_ip-best-practices">REAL_IP Best Practices</h4>
+<ol>
+<li><strong>Security</strong>: Only trust IP headers from known sources (BunkerWeb Cloud)</li>
+<li><strong>Validation</strong>: Always validate IP addresses received in headers</li>
+<li><strong>Logging</strong>: Log both proxy IP and real IP for debugging</li>
+<li><strong>Fallback</strong>: Always have a default value if headers are missing</li>
+<li><strong>Testing</strong>: Regularly test that IP detection works correctly</li>
+<li><strong>Monitoring</strong>: Monitor IP patterns to detect anomalies</li>
+</ol>
+<h4 id="real_ip-troubleshooting">REAL_IP Troubleshooting</h4>
+<h5 id="common-issues">Common Issues</h5>
+<ol>
+<li><strong>IP always shows BunkerWeb's</strong>: Check trusted proxy configuration</li>
+<li><strong>Missing headers</strong>: Check BunkerWeb Cloud side configuration</li>
+<li><strong>Invalid IPs</strong>: Implement strict IP validation</li>
+<li><strong>Incorrect logs</strong>: Check log format and real_ip module configuration</li>
+</ol>
+<h5 id="diagnostic-commands">Diagnostic Commands</h5>
+<p><strong>Test IP detection</strong></p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;X-Real-IP: 1.2.3.4&quot;</span><span class="w"> </span>https://your-domain.com/debug-headers
+</code></pre></div>
+<h3 id="monitoring-and-observability">Monitoring and Observability</h3>
+<h4 id="grafana-access">Grafana Access</h4>
+<p>Your managed Grafana instance gives you access to:</p>
+<h5 id="available-metrics">Available Metrics</h5>
+<ol>
+<li>
+<p><strong>Traffic Overview</strong></p>
+</li>
+<li>
+<p>Requests per second</p>
+</li>
+<li>HTTP status codes</li>
+<li>Request geolocation</li>
+<li>
+<p><strong>Security</strong></p>
+</li>
+<li>
+<p>Blocked attack attempts</p>
+</li>
+<li>Detected threat types</li>
+<li>Triggered WAF rules</li>
+<li>
+<p><strong>Performance Metrics</strong></p>
+</li>
+<li>
+<p>Request latency</p>
+</li>
+<li>Backend response time</li>
+<li>Resource utilization</li>
+</ol>
+<h5 id="available-logs">Available Logs</h5>
+<ol>
+<li><strong>Access Logs</strong>: All HTTP/HTTPS requests</li>
+<li><strong>Security Logs</strong>: Security events and blocks</li>
+<li><strong>Error Logs</strong>: Application and system errors</li>
+</ol>
+<h5 id="alert-configuration">Alert Configuration</h5>
+<p>Configure Grafana alerts for:</p>
+<ul>
+<li>Abnormal traffic spikes</li>
+<li>Increase in 5xx errors</li>
+<li>DDoS attack detection</li>
+<li>Backend health failures</li>
+</ul>
+<h3 id="best-practices">Best Practices</h3>
+<h4 id="security">Security</h4>
+<ol>
+<li><strong>Use HTTPS</strong> for all backend communication</li>
+<li><strong>Implement an IP whitelist</strong> if possible</li>
+<li><strong>Configure appropriate timeouts</strong></li>
+<li><strong>Enable compression</strong> to optimize performance</li>
+</ol>
+<h4 id="performance">Performance</h4>
+<ol>
+<li><strong>Optimize cache configuration</strong></li>
+<li><strong>Use HTTP/2</strong> on client side</li>
+<li><strong>Configure health checks</strong> for your backends</li>
+<li><strong>Monitor metrics</strong> regularly</li>
+</ol>
+<h3 id="troubleshooting">Troubleshooting</h3>
+<h4 id="common-issues_1">Common Issues</h4>
+<h5 id="1-ssltls-error">1. SSL/TLS Error</h5>
+<p><strong>Symptom:</strong> SSL certificate errors</p>
+<p><strong>Solutions:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check SNI configuration</span>
+openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>backend.com:443<span class="w"> </span>-servername<span class="w"> </span>example.com
+
+<span class="c1"># Check backend certificates</span>
+openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> </span>certificate.crt<span class="w"> </span>-text<span class="w"> </span>-noout
+</code></pre></div>
+<h5 id="2-backend-timeout">2. Backend Timeout</h5>
+<p><strong>Symptom:</strong> 504 Gateway Timeout errors</p>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Increase <code>REVERSE_PROXY_CONNECT_TIMEOUT</code> &amp; <code>REVERSE_PROXY_SEND_TIMEOUT</code></li>
+<li>Check backend health</li>
+<li>Optimize application performance</li>
+</ul>
+<h5 id="3-routing-issues">3. Routing Issues</h5>
+<p><strong>Symptom:</strong> Wrong service being served</p>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Check <code>SERVER_NAME</code> configuration</li>
+<li>Validate SNI configuration</li>
+<li>Check <code>Host</code> headers</li>
+</ul>
+<h4 id="diagnostic-commands_1">Diagnostic Commands</h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Connectivity test</span>
+curl<span class="w"> </span>-v<span class="w"> </span>https://your-domain.com
+
+<span class="c1"># Test with custom headers</span>
+curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: example.com&quot;</span><span class="w"> </span>-v<span class="w"> </span>https://54984654.bunkerweb.cloud
+
+<span class="c1"># DNS verification</span>
+dig<span class="w"> </span>+trace<span class="w"> </span>example.com
+
+<span class="c1"># SSL test</span>
+openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>example.com:443<span class="w"> </span>-servername<span class="w"> </span>example.com
+</code></pre></div>
+<h4 id="technical-support">Technical Support</h4>
+<p>For any technical assistance:</p>
+<ol>
+<li><strong>Check logs</strong> in Grafana</li>
+<li><strong>Verify configuration</strong> in BunkerWeb UI</li>
+<li><strong>Contact support</strong> with configuration details and error logs</li>
+</ol>
 <h2 id="all-in-one-aio-image">All-In-One (AIO) Image</h2>
 <figure>
 <p><img align="center," alt="AIO Architecture Graph Placeholder" src="../assets/img/aio-graph-placeholder.png" width="600" />
@@ -2478,6 +4339,8 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <li><strong>Setup Wizard</strong>: Choose whether to enable the web-based configuration wizard. This is highly recommended for first-time users.</li>
 <li><strong>CrowdSec Integration</strong>: Opt-in to install the CrowdSec security engine for advanced, real-time threat protection. Available for Full Stack installations only.</li>
 <li><strong>CrowdSec AppSec</strong>: If you choose to install CrowdSec, you can also enable the Application Security (AppSec) component, which adds WAF capabilities.</li>
+<li><strong>DNS Resolvers</strong>: For Full Stack, Manager, and Worker installations, you can optionally specify custom DNS resolver IPs.</li>
+<li><strong>Internal API HTTPS</strong>: For Full Stack, Manager, and Worker installations, choose whether to enable HTTPS for internal API communication between the scheduler/manager and BunkerWeb/worker instances (default: HTTP only).</li>
 <li><strong>API Service</strong>: For Full Stack and Manager installations, choose whether to enable the optional external API service. It is disabled by default on Linux installations.</li>
 </ol>
 <div class="admonition info">
@@ -2608,6 +4471,26 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <td><code>--instances "IP1 IP2"</code></td>
 <td>Space-separated list of BunkerWeb instances (required for manager/scheduler modes).</td>
 </tr>
+<tr>
+<td><code>--manager-ip IPs</code></td>
+<td>Manager/Scheduler IPs to whitelist (required for worker in non-interactive mode).</td>
+</tr>
+<tr>
+<td><code>--dns-resolvers "IP1 IP2"</code></td>
+<td>Custom DNS resolver IPs (for full, manager, or worker installations).</td>
+</tr>
+<tr>
+<td><code>--api-https</code></td>
+<td>Enable HTTPS for internal API communication (default: HTTP only).</td>
+</tr>
+<tr>
+<td><code>--backup-dir PATH</code></td>
+<td>Directory to store automatic backup before upgrade.</td>
+</tr>
+<tr>
+<td><code>--no-auto-backup</code></td>
+<td>Skip automatic backup (you MUST have done it manually).</td>
+</tr>
 </tbody>
 </table>
 <p><strong>Example Usage:</strong></p>
@@ -2625,6 +4508,12 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--vers
 
 <span class="c1"># Manager setup with remote worker instances (instances required)</span>
 sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--manager<span class="w"> </span>--instances<span class="w"> </span><span class="s2">&quot;192.168.1.10 192.168.1.11&quot;</span>
+
+<span class="c1"># Manager with HTTPS internal API communication</span>
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--manager<span class="w"> </span>--instances<span class="w"> </span><span class="s2">&quot;192.168.1.10 192.168.1.11&quot;</span><span class="w"> </span>--api-https
+
+<span class="c1"># Worker with custom DNS resolvers and HTTPS internal API</span>
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--worker<span class="w"> </span>--dns-resolvers<span class="w"> </span><span class="s2">&quot;1.1.1.1 1.0.0.1&quot;</span><span class="w"> </span>--api-https
 
 <span class="c1"># Full installation with CrowdSec and AppSec</span>
 sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--crowdsec-appsec
@@ -3578,7 +5467,7 @@ It is recommended to utilize <a href="https://kubernetes.io/docs/reference/acces
 </code></pre></div></p>
 </li>
 </ol>
-<h6 id="common-issues">Common Issues</h6>
+<h6 id="common-issues_2">Common Issues</h6>
 <table>
 <thead>
 <tr>
@@ -3659,7 +5548,7 @@ It is recommended to utilize <a href="https://kubernetes.io/docs/reference/acces
 <p><strong>Configure the reverse proxy</strong> in the UI or via env vars</p>
 </li>
 </ol>
-<h5 id="best-practices">Best Practices</h5>
+<h5 id="best-practices_1">Best Practices</h5>
 <p>✅ <strong>Use the controller</strong> for automatic sidecar discovery (simpler, no headless service needed)
 ✅ <strong>Use a single centralized scheduler</strong> to manage all sidecars
 ✅ <strong>Always add the annotation</strong> <code>bunkerweb.io/INSTANCE: "yes"</code> and environment variable <code>KUBERNETES_MODE: "yes"</code> when using controller mode

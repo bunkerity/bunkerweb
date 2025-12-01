@@ -843,7 +843,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#ajustes-multiples" class="md-nav__link">
+  <a href="#multiple-settings" class="md-nav__link">
     <span class="md-ellipsis">
       Ajustes Múltiples
     </span>
@@ -3059,7 +3059,7 @@
 <li><code>myapp.example.com_USE_GZIP=yes</code> habilita la compresión GZIP para <code>myapp.example.com</code>.</li>
 </ul>
 <p>Este enfoque asegura que los ajustes se apliquen al sitio correcto en un entorno multisitio.</p>
-<h3 id="ajustes-multiples">Ajustes Múltiples</h3>
+<h3 id="multiple-settings">Ajustes Múltiples</h3>
 <p>Algunos ajustes en BunkerWeb admiten múltiples configuraciones para la misma característica. Para definir múltiples grupos de ajustes, añade un sufijo numérico al nombre del ajuste. Por ejemplo:</p>
 <ul>
 <li><code>REVERSE_PROXY_URL_1=/subdir</code> y <code>REVERSE_PROXY_HOST_1=http://myhost1</code> configuran el primer proxy inverso.</li>
@@ -3421,10 +3421,24 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><strong>Formato de Registro:</strong> El formato a usar para los registros de acceso.</td>
 </tr>
 <tr>
+<td><code>ACCESS_LOG</code></td>
+<td><code>/var/log/bunkerweb/access.log</code></td>
+<td>global</td>
+<td>Sí</td>
+<td><strong>Ruta de Registro de Acceso:</strong> Archivo, <code>syslog:server=host[:port][,param=valor]</code> o búfer compartido <code>memory:nombre:tamaño</code>; establezca <code>off</code> para desactivar el registro.</td>
+</tr>
+<tr>
+<td><code>ERROR_LOG</code></td>
+<td><code>/var/log/bunkerweb/error.log</code></td>
+<td>global</td>
+<td>Sí</td>
+<td><strong>Ruta de Registro de Errores:</strong> Archivo, <code>stderr</code>, <code>syslog:server=host[:port][,param=valor]</code> o <code>memory:tamaño</code>.</td>
+</tr>
+<tr>
 <td><code>LOG_LEVEL</code></td>
 <td><code>notice</code></td>
 <td>global</td>
-<td>No</td>
+<td>Sí</td>
 <td><strong>Nivel de Registro:</strong> Nivel de verbosidad para los registros de errores. Opciones: <code>debug</code>, <code>info</code>, <code>notice</code>, <code>warn</code>, <code>error</code>, <code>crit</code>, <code>alert</code>, <code>emerg</code>.</td>
 </tr>
 <tr>
@@ -5737,7 +5751,7 @@ TrustedMonitor/\d+\.\d+
 <span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">appsec</span>
 </code></pre></div>
 <p><strong>Syslog</strong></p>
-<div class="highlight"><pre><span></span><code>@version: 4.8
+<div class="highlight"><pre><span></span><code>@version: 4.10
 
 source s_net {
     udp(
@@ -5751,7 +5765,7 @@ template t_imp {
 };
 
 destination d_file {
-    file(&quot;/var/log/bunkerweb.log&quot; template(t_imp));
+    file(&quot;/var/log/bunkerweb.log&quot; template(t_imp) logrotate(enable(yes), size(100MB), rotations(7)));
 };
 
 log {
@@ -5832,7 +5846,7 @@ log {
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 
 <span class="w">  </span><span class="nt">syslog</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.9.0</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.10.2</span>
 <span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BIND_SERVICE</span><span class="w">  </span><span class="c1"># Vincular a puertos bajos</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BROADCAST</span><span class="w">  </span><span class="c1"># Enviar difusiones</span>
@@ -7411,6 +7425,13 @@ TrustedMonitor/\d+\.\d+
 <td><strong>Elemento de credencial:</strong> Elementos de configuración para la autenticación del proveedor de DNS (por ejemplo, <code>cloudflare_api_token 123456</code>). Los valores pueden ser texto sin formato, codificados en base64 o un objeto JSON.</td>
 </tr>
 <tr>
+<td><code>LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Decodificar credenciales DNS en Base64:</strong> Decodifica automáticamente las credenciales del proveedor DNS codificadas en base64 cuando se establece en <code>yes</code>. Cuando está habilitado, los valores que coinciden con el formato base64 se decodifican antes de su uso (excepto para el proveedor <code>rfc2136</code>). Desactive si sus credenciales están intencionalmente en base64.</td>
+</tr>
+<tr>
 <td><code>USE_LETS_ENCRYPT_WILDCARD</code></td>
 <td><code>no</code></td>
 <td>multisite</td>
@@ -7454,7 +7475,15 @@ TrustedMonitor/\d+\.\d+
 </tr>
 </tbody>
 </table>
-<p>!!! info "Información y comportamiento" - El ajuste <code>LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</code> es un ajuste múltiple y se puede utilizar para establecer varios elementos para el proveedor de DNS. Los elementos se guardarán como un archivo de caché, y Certbot leerá las credenciales de él. - Si no se proporciona ningún ajuste <code>LETS_ENCRYPT_DNS_PROPAGATION</code>, se utiliza el tiempo de propagación predeterminado del proveedor. - La automatización completa de Let's Encrypt utilizando el desafío <code>http</code> funciona en modo de flujo (stream) siempre que abra el puerto <code>80/tcp</code> desde el exterior. Utilice el ajuste <code>LISTEN_STREAM_PORT_SSL</code> para elegir su puerto de escucha SSL/TLS. - Si <code>LETS_ENCRYPT_PASSTHROUGH</code> se establece en <code>yes</code>, BunkerWeb no manejará las solicitudes de desafío ACME por sí mismo, sino que las pasará al servidor web de backend. Esto es útil en escenarios donde BunkerWeb actúa como un proxy inverso frente a otro servidor que está configurado para manejar los desafíos de Let's Encrypt.</p>
+<div class="admonition info">
+<p class="admonition-title">Información y comportamiento</p>
+<ul>
+<li>El ajuste <code>LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</code> es un ajuste múltiple y se puede utilizar para establecer varios elementos para el proveedor de DNS. Los elementos se guardarán como un archivo de caché, y Certbot leerá las credenciales de él.</li>
+<li>Si no se proporciona ningún ajuste <code>LETS_ENCRYPT_DNS_PROPAGATION</code>, se utiliza el tiempo de propagación predeterminado del proveedor.</li>
+<li>La automatización completa de Let's Encrypt utilizando el desafío <code>http</code> funciona en modo de flujo (stream) siempre que abra el puerto <code>80/tcp</code> desde el exterior. Utilice el ajuste <code>LISTEN_STREAM_PORT_SSL</code> para elegir su puerto de escucha SSL/TLS.</li>
+<li>Si <code>LETS_ENCRYPT_PASSTHROUGH</code> se establece en <code>yes</code>, BunkerWeb no manejará las solicitudes de desafío ACME por sí mismo, sino que las pasará al servidor web de backend. Esto es útil en escenarios donde BunkerWeb actúa como un proxy inverso frente a otro servidor que está configurado para manejar los desafíos de Let's Encrypt.</li>
+</ul>
+</div>
 <div class="admonition tip">
 <p class="admonition-title">Desafíos HTTP vs. DNS</p>
 <p><strong>Los desafíos HTTP</strong> son más fáciles de configurar y funcionan bien para la mayoría de los sitios web:</p>
@@ -7617,6 +7646,13 @@ TrustedMonitor/\d+\.\d+
 <td><code>application_key</code><br><code>application_secret</code><br><code>consumer_key</code></td>
 <td><code>endpoint</code> (predeterminado: <code>ovh-eu</code>)</td>
 <td><a href="https://certbot-dns-ovh.readthedocs.io/en/stable/">Documentación</a></td>
+</tr>
+<tr>
+<td><code>pdns</code></td>
+<td>PowerDNS</td>
+<td><code>endpoint</code><br><code>api_key</code><br><code>server_id</code> (default: <code>localhost</code>)<br><code>disable_notify</code> (default: <code>false</code>)</td>
+<td></td>
+<td><a href="https://github.com/kaechele/certbot-dns-pdns/blob/main/README.md">Documentation</a></td>
 </tr>
 <tr>
 <td><code>rfc2136</code></td>

@@ -976,6 +976,57 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#protokollierungsoptionen" class="md-nav__link">
+    <span class="md-ellipsis">
+      Protokollierungsoptionen
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Protokollierungsoptionen">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#service-protokolle" class="md-nav__link">
+    <span class="md-ellipsis">
+      Service-Protokolle
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zugriffs-und-fehlerprotokolle" class="md-nav__link">
+    <span class="md-ellipsis">
+      Zugriffs- und Fehlerprotokolle
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integrations-defaults-beispiele" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integrations-Defaults &amp; Beispiele
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#syslog-ng-konfiguration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Syslog-ng-Konfiguration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#docker-logging-best-practices" class="md-nav__link">
     <span class="md-ellipsis">
       Docker Logging Best Practices
@@ -1960,7 +2011,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <li><strong>stream</strong>: Konfigurationen auf der Stream-Ebene von NGINX.</li>
 <li><strong>server-stream</strong>: Konfigurationen auf der Stream/Server-Ebene von NGINX.</li>
 </ul>
-<p>Benutzerdefinierte Konfigurationen können global oder spezifisch für einen bestimmten Server angewendet werden, abhängig vom anwendbaren Kontext und ob der <a href="../concepts/#multisite-mode">Multisite-Modus</a> aktiviert ist.</p>
+<p>Benutzerdefinierte Konfigurationen können global oder spezifisch für einen bestimmten Server angewendet werden, abhängig vom anwendbaren Kontext und ob der <a href="../features/#multisite-mode">Multisite-Modus</a> aktiviert ist.</p>
 <p>Die Methode zum Anwenden benutzerdefinierter Konfigurationen hängt von der verwendeten Integration ab. Der zugrunde liegende Prozess besteht jedoch darin, Dateien mit der <code>.conf</code>-Endung zu bestimmten Ordnern hinzuzufügen. Um eine benutzerdefinierte Konfiguration für einen bestimmten Server anzuwenden, sollte die Datei in einem Unterordner platziert werden, der nach dem primären Servernamen benannt ist.</p>
 <p>Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurationen, wie z. B. die Verwendung von <a href="https://docs.docker.com/engine/swarm/configs/">Configs</a> in Docker Swarm oder <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a> in Kubernetes. Diese Optionen bieten einfachere Ansätze zur Verwaltung und Anwendung von Konfigurationen.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="8:7"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><input id="__tabbed_8_4" name="__tabbed_8" type="radio" /><input id="__tabbed_8_5" name="__tabbed_8" type="radio" /><input id="__tabbed_8_6" name="__tabbed_8" type="radio" /><input id="__tabbed_8_7" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Web-UI</label><label for="__tabbed_8_2">Linux</label><label for="__tabbed_8_3">All-in-one</label><label for="__tabbed_8_4">Docker</label><label for="__tabbed_8_5">Docker autoconf</label><label for="__tabbed_8_6">Kubernetes</label><label for="__tabbed_8_7">Swarm</label></div>
@@ -2714,7 +2765,7 @@ app2.example.com_LISTEN_STREAM_PORT=20000
 <li>Richten Sie einen PHP-FPM-Container für Ihre Anwendung ein und mounten Sie den Ordner mit den PHP-Dateien.</li>
 <li>Verwenden Sie die spezifischen Einstellungen <code>REMOTE_PHP</code> und <code>REMOTE_PHP_PATH</code> als Umgebungsvariablen beim Ausführen von BunkerWeb.</li>
 </ul>
-<p>Wenn Sie den <a href="../concepts/#multisite-mode">Multisite-Modus</a> aktivieren, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von <code>SERVER_NAME</code> benannt werden. Hier ist ein Dummy-Beispiel:</p>
+<p>Wenn Sie den <a href="../features/#multisite-mode">Multisite-Modus</a> aktivieren, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von <code>SERVER_NAME</code> benannt werden. Hier ist ein Dummy-Beispiel:</p>
 <div class="highlight"><pre><span></span><code>www
 ├── app1.example.com
 │   └── index.php
@@ -2761,7 +2812,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <li>Richten Sie einen PHP-FPM-Container für Ihre Anwendung ein und mounten Sie den Ordner mit den PHP-Dateien</li>
 <li>Verwenden Sie die spezifischen Einstellungen <code>REMOTE_PHP</code> und <code>REMOTE_PHP_PATH</code> als Umgebungsvariablen beim Starten von BunkerWeb</li>
 </ul>
-<p>Wenn Sie den <a href="../concepts/#multisite-mode">Multisite-Modus</a> aktivieren, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von <code>SERVER_NAME</code> benannt werden. Hier ist ein Dummy-Beispiel:</p>
+<p>Wenn Sie den <a href="../features/#multisite-mode">Multisite-Modus</a> aktivieren, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von <code>SERVER_NAME</code> benannt werden. Hier ist ein Dummy-Beispiel:</p>
 <div class="highlight"><pre><span></span><code>www
 ├── app1.example.com
 │   └── index.php
@@ -2861,7 +2912,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 <li>Richten Sie PHP-FPM-Container für Ihre Anwendungen ein und mounten Sie den Ordner mit den PHP-Apps</li>
 <li>Verwenden Sie die spezifischen Einstellungen <code>REMOTE_PHP</code> und <code>REMOTE_PHP_PATH</code> als Labels für Ihren PHP-FPM-Container</li>
 </ul>
-<p>Da die Docker-Autoconf die Verwendung des <a href="../concepts/#multisite-mode">Multisite-Modus</a> impliziert, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von <code>SERVER_NAME</code> benannt werden. Hier ist ein Dummy-Beispiel:</p>
+<p>Da die Docker-Autoconf die Verwendung des <a href="../features/#multisite-mode">Multisite-Modus</a> impliziert, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von <code>SERVER_NAME</code> benannt werden. Hier ist ein Dummy-Beispiel:</p>
 <div class="highlight"><pre><span></span><code>www
 ├── app1.example.com
 │   └── index.php
@@ -3037,7 +3088,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 <p>Vergessen Sie nicht, Ihren PHP-FPM-Dienst neu zu starten:</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>restart<span class="w"> </span>php-fpm
 </code></pre></div>
-<p>Wenn Sie den <a href="../concepts/#multisite-mode">Multisite-Modus</a> aktivieren, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von <code>SERVER_NAME</code> benannt werden. Hier ist ein Dummy-Beispiel:</p>
+<p>Wenn Sie den <a href="../features/#multisite-mode">Multisite-Modus</a> aktivieren, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von <code>SERVER_NAME</code> benannt werden. Hier ist ein Dummy-Beispiel:</p>
 <div class="highlight"><pre><span></span><code>/var/www/html
 ├── app1.example.com
 │   └── index.php
@@ -3097,7 +3148,7 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
 <li>Richten Sie PHP-FPM-Container für Ihre Anwendungen ein und mounten Sie den Ordner mit den PHP-Apps</li>
 <li>Verwenden Sie die spezifischen Einstellungen <code>REMOTE_PHP</code> und <code>REMOTE_PHP_PATH</code> als Labels für Ihren PHP-FPM-Container</li>
 </ul>
-<p>Da die Swarm-Integration die Verwendung des <a href="../concepts/#multisite-mode">Multisite-Modus</a> impliziert, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von <code>SERVER_NAME</code> benannt werden. Hier ist ein Dummy-Beispiel:</p>
+<p>Da die Swarm-Integration die Verwendung des <a href="../features/#multisite-mode">Multisite-Modus</a> impliziert, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von <code>SERVER_NAME</code> benannt werden. Hier ist ein Dummy-Beispiel:</p>
 <div class="highlight"><pre><span></span><code>www
 ├── app1.example.com
 │   └── index.php
@@ -3242,6 +3293,171 @@ USE_IPV6=yes
 </div>
 </div>
 </div>
+<h3 id="protokollierungsoptionen">Protokollierungsoptionen</h3>
+<p>BunkerWeb bietet flexible Protokollierungsoptionen, mit denen Sie Protokolle gleichzeitig an mehrere Ziele (z. B. Dateien, stdout/stderr oder Syslog) senden können. Dies ist besonders nützlich, um die Integration mit externen Log-Collector-Diensten zu ermöglichen und gleichzeitig lokale Protokolle für die Web-UI beizubehalten.</p>
+<p>Es gibt zwei Hauptkategorien von Protokollen, die konfiguriert werden können:</p>
+<ol>
+<li><strong>Service-Protokolle</strong>: Protokolle, die von BunkerWeb-Komponenten erzeugt werden (Scheduler, UI, Autoconf usw.). Pro Service steuerbar über <code>LOG_TYPES</code> (und optional <code>LOG_FILE_PATH</code>, <code>LOG_SYSLOG_ADDRESS</code>, <code>LOG_SYSLOG_TAG</code>).</li>
+<li><strong>Zugriffs- &amp; Fehlerprotokolle</strong>: HTTP-Zugriffs- und Fehlerprotokolle, die von NGINX erzeugt werden. Diese betreffen ausschließlich den <code>bunkerweb</code>-Dienst (<code>ACCESS_LOG</code> / <code>ERROR_LOG</code> / <code>LOG_LEVEL</code>).</li>
+</ol>
+<h4 id="service-protokolle">Service-Protokolle</h4>
+<p>Service-Protokolle werden durch die Einstellung <code>LOG_TYPES</code> gesteuert, die mehrere Werte mit Leerzeichen getrennt akzeptiert (z. B. <code>LOG_TYPES="stderr syslog"</code>).</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Wert</th>
+<th style="text-align: left;">Beschreibung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>file</code></td>
+<td style="text-align: left;">Schreibt Protokolle in eine Datei. Erforderlich für den Protokollanzeiger der Web-UI.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>stderr</code></td>
+<td style="text-align: left;">Schreibt Protokolle in Standardfehlerausgabe. Standard für containerisierte Umgebungen (<code>docker logs</code>).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>syslog</code></td>
+<td style="text-align: left;">Sendet Protokolle an einen Syslog-Server. Erfordert, dass <code>LOG_SYSLOG_ADDRESS</code> gesetzt ist.</td>
+</tr>
+</tbody>
+</table>
+<p>Wenn Sie <code>syslog</code> verwenden, sollten Sie zusätzlich konfigurieren:</p>
+<ul>
+<li><code>LOG_SYSLOG_ADDRESS</code>: Adresse des Syslog-Servers (z. B. <code>udp://bw-syslog:514</code> oder <code>/dev/log</code>).</li>
+<li><code>LOG_SYSLOG_TAG</code>: Ein eindeutiger Tag für den Dienst (z. B. <code>bw-scheduler</code>), damit Einträge unterschieden werden können.</li>
+<li><code>LOG_FILE_PATH</code>: Pfad für die Dateiausgabe, wenn <code>LOG_TYPES</code> <code>file</code> enthält (z. B. <code>/var/log/bunkerweb/scheduler.log</code>).</li>
+</ul>
+<h4 id="zugriffs-und-fehlerprotokolle">Zugriffs- und Fehlerprotokolle</h4>
+<p>Dies sind Standard-NGINX-Protokolle, die ausschließlich über den <code>bunkerweb</code>-Dienst konfiguriert werden. Sie unterstützen mehrere Ziele, indem Sie die Einstellung mit nummerierten Suffixen versehen (z. B. <code>ACCESS_LOG</code>, <code>ACCESS_LOG_1</code> und die passenden <code>LOG_FORMAT</code>, <code>LOG_FORMAT_1</code> bzw. <code>ERROR_LOG</code>, <code>ERROR_LOG_1</code> und die entsprechenden <code>LOG_LEVEL</code>, <code>LOG_LEVEL_1</code>).</p>
+<ul>
+<li><code>ACCESS_LOG</code>: Ziel für Zugriffsprotokolle (Standard: <code>/var/log/bunkerweb/access.log</code>). Akzeptiert Dateipfade, <code>syslog:server=host[:port][,param=value]</code>, Shared-Buffer <code>memory:name:size</code> oder <code>off</code>, um zu deaktivieren. Siehe <a href="https://nginx.org/en/docs/http/ngx_http_log_module.html#access_log">NGINX access_log Dokumentation</a> für Details.</li>
+<li><code>ERROR_LOG</code>: Ziel für Fehlerprotokolle (Standard: <code>/var/log/bunkerweb/error.log</code>). Akzeptiert Dateipfade, <code>stderr</code>, <code>syslog:server=host[:port][,param=value]</code> oder Shared-Buffer <code>memory:size</code>. Siehe <a href="https://nginx.org/en/docs/ngx_core_module.html#error_log">NGINX error_log Dokumentation</a> für Details.</li>
+<li><code>LOG_LEVEL</code>: Detailstufe der Fehlerprotokolle (Standard: <code>notice</code>).</li>
+</ul>
+<p>Diese Einstellungen akzeptieren die üblichen NGINX-Werte (Dateipfade, <code>stderr</code>, <code>syslog:server=...</code>, Shared-Memory-Puffer). Sie unterstützen mehrere Ziele über nummerierte Suffixe (siehe <a href="../concepts/#multiple-settings">Multiple-Settings-Konvention</a>). Andere Dienste (Scheduler, UI, Autoconf usw.) nutzen ausschließlich <code>LOG_TYPES</code>/<code>LOG_FILE_PATH</code>/<code>LOG_SYSLOG_*</code>.</p>
+<p><strong>Beispiel mit mehreren Access-/Error-Logs (nur <code>bunkerweb</code>, nummerierte Suffixe):</strong></p>
+<div class="highlight"><pre><span></span><code>ACCESS_LOG=/var/log/bunkerweb/access.log
+ACCESS_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
+LOG_FORMAT=$host $remote_addr - $request_id $remote_user [$time_local] &quot;$request&quot; $status $body_bytes_sent &quot;$http_referer&quot; &quot;$http_user_agent&quot;
+LOG_FORMAT_1=$remote_addr - $remote_user [$time_local] &quot;$request&quot; $status $body_bytes_sent
+ERROR_LOG=/var/log/bunkerweb/error.log
+ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
+LOG_LEVEL=notice
+LOG_LEVEL_1=error
+</code></pre></div>
+<h4 id="integrations-defaults-beispiele">Integrations-Defaults &amp; Beispiele</h4>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:1"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
+</div>
+</div>
+<p><strong>Standardverhalten</strong>: <code>LOG_TYPES="file"</code>. Protokolle werden unter <code>/var/log/bunkerweb/*.log</code> geschrieben.</p>
+<p><strong>Beispiel</strong>: Lokale Dateien beibehalten (für die Web-UI) und gleichzeitig an das systemweite Syslog spiegeln.</p>
+<div class="highlight"><pre><span></span><code># Service-Protokolle (in /etc/bunkerweb/variables.env oder service-spezifischen Umgebungsdateien festlegen)
+LOG_TYPES=&quot;file syslog&quot;
+LOG_SYSLOG_ADDRESS=/dev/log
+LOG_FILE_PATH=/var/log/bunkerweb/bunkerweb.log
+# LOG_SYSLOG_TAG wird pro Dienst automatisch gesetzt (bei Bedarf pro Dienst überschreiben)
+
+# NGINX-Protokolle (nur bunkerweb; in /etc/bunkerweb/variables.env setzen)
+ACCESS_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
+ERROR_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
+LOG_LEVEL=notice
+</code></pre></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:1"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Docker / Autoconf / Swarm</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
+</div>
+</div>
+<p><strong>Standardverhalten</strong>: <code>LOG_TYPES="stderr"</code>. Protokolle sind über <code>docker logs</code> sichtbar.</p>
+<p><strong>Beispiel</strong>: <code>docker logs</code> (stderr) behalten UND an einen zentralen Syslog-Container senden (wichtig für Web-UI und CrowdSec).</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
+<span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># Service-Protokolle (bunkerweb)</span>
+<span class="w">    </span><span class="nt">LOG_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;stderr</span><span class="nv"> </span><span class="s">syslog&quot;</span>
+<span class="w">    </span><span class="nt">LOG_SYSLOG_ADDRESS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://bw-syslog:514&quot;</span>
+<span class="w">    </span><span class="nt">LOG_SYSLOG_TAG</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
+<span class="w">    </span><span class="nt">LOG_FILE_PATH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/var/log/bunkerweb/bunkerweb.log&quot;</span>
+<span class="w">    </span><span class="c1"># NGINX-Protokolle: An Syslog senden (nur bunkerweb)</span>
+<span class="w">    </span><span class="nt">ACCESS_LOG</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;syslog:server=udp://bw-syslog:514,tag=bunkerweb&quot;</span>
+<span class="w">    </span><span class="nt">ERROR_LOG</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;syslog:server=udp://bw-syslog:514,tag=bunkerweb&quot;</span>
+
+<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># Service-Protokolle (scheduler)</span>
+<span class="w">    </span><span class="nt">LOG_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;stderr</span><span class="nv"> </span><span class="s">syslog&quot;</span>
+<span class="w">    </span><span class="nt">LOG_SYSLOG_ADDRESS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://bw-syslog:514&quot;</span>
+<span class="w">    </span><span class="nt">LOG_SYSLOG_TAG</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bw-scheduler&quot;</span>
+<span class="w">    </span><span class="nt">LOG_FILE_PATH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/var/log/bunkerweb/scheduler.log&quot;</span>
+
+<span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
+<span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># Service-Protokolle (UI)</span>
+<span class="w">    </span><span class="nt">LOG_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;stderr</span><span class="nv"> </span><span class="s">syslog&quot;</span>
+<span class="w">    </span><span class="nt">LOG_SYSLOG_ADDRESS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://bw-syslog:514&quot;</span>
+<span class="w">    </span><span class="nt">LOG_SYSLOG_TAG</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bw-ui&quot;</span>
+<span class="w">    </span><span class="nt">LOG_FILE_PATH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/var/log/bunkerweb/ui.log&quot;</span>
+
+<span class="w">  </span><span class="c1"># Zentraler Syslog-Container zur Sammlung der Protokolle und Schreiben in ein gemeinsames Volume</span>
+<span class="w">  </span><span class="nt">bw-syslog</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.9.0</span>
+<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># Gemeinsames Volume für Web UI</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf</span>
+
+<span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-logs</span><span class="p">:</span>
+</code></pre></div>
+<h4 id="syslog-ng-konfiguration">Syslog-ng-Konfiguration</h4>
+<p>Hier ein Beispiel für eine <code>syslog-ng.conf</code>-Datei, die Sie verwenden können, um die Protokolle in eine Datei weiterzuleiten:</p>
+<div class="highlight"><pre><span></span><code>@version: 4.10
+
+# Quelle konfigurieren, um Logs von BunkerWeb-Diensten zu empfangen (ACCESS_LOG / ERROR_LOG und LOG_TYPES=syslog)
+source s_net {
+  udp(
+    ip(&quot;0.0.0.0&quot;)
+  );
+};
+
+# Template zur Formatierung der Lognachrichten
+template t_imp {
+  template(&quot;$MSG\n&quot;);
+  template_escape(no);
+};
+
+# Zielkonfiguration, um Logs in dynamisch benannten Dateien zu schreiben
+destination d_dyna_file {
+  file(
+    &quot;/var/log/bunkerweb/${PROGRAM}.log&quot;
+    template(t_imp)
+    owner(&quot;101&quot;)
+    group(&quot;101&quot;)
+    dir_owner(&quot;root&quot;)
+    dir_group(&quot;101&quot;)
+    perm(0440)
+    dir_perm(0770)
+    create_dirs(yes)
+    logrotate(
+      enable(yes),
+      size(100MB),
+      rotations(7)
+    )
+  );
+};
+
+# Logpfad zur Weiterleitung der Logs in dynamisch benannte Dateien
+log {
+  source(s_net);
+  destination(d_dyna_file);
+};
+</code></pre></div>
 <h3 id="docker-logging-best-practices">Docker Logging Best Practices</h3>
 <p>Bei der Verwendung von Docker ist es wichtig, die Container-Protokolle zu verwalten, um zu verhindern, dass sie übermäßig viel Speicherplatz beanspruchen. Standardmäßig verwendet Docker den <code>json-file</code>-Protokollierungstreiber, der bei fehlender Konfiguration zu sehr großen Protokolldateien führen kann.</p>
 <p>Um dies zu vermeiden, können Sie die Protokollrotation konfigurieren. Dies kann für bestimmte Dienste in Ihrer <code>docker-compose.yml</code>-Datei oder global für den Docker-Daemon erfolgen.</p>
@@ -3507,7 +3723,7 @@ USE_IPV6=yes
 <details class="warning">
 <summary>Informationen für Benutzer von Red Hat Enterprise Linux (RHEL) 8.9</summary>
 <p>Wenn Sie <strong>RHEL 8.9</strong> verwenden und eine <strong>externe Datenbank</strong> nutzen möchten, müssen Sie das Paket <code>mysql-community-client</code> installieren, um sicherzustellen, dass der Befehl <code>mysqldump</code> verfügbar ist. Sie können das Paket mit den folgenden Befehlen installieren:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">MySQL/MariaDB</label><label for="__tabbed_12_2">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">MySQL/MariaDB</label><label for="__tabbed_14_2">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -3627,7 +3843,7 @@ USE_IPV6=yes
 </table>
 <h5 id="manuelle-sicherung">Manuelle Sicherung</h5>
 <p>Um eine Sicherung manuell zu starten, führen Sie den folgenden Befehl aus:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Linux</label><label for="__tabbed_13_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Linux</label><label for="__tabbed_15_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -3641,7 +3857,7 @@ USE_IPV6=yes
 </div>
 <p>Dieser Befehl erstellt eine Sicherung Ihrer Datenbank und speichert sie im S3-Bucket, der in der Einstellung <code>BACKUP_S3_BUCKET</code> angegeben ist.</p>
 <p>Sie können auch einen benutzerdefinierten S3-Bucket für die Sicherung angeben, indem Sie die Umgebungsvariable <code>BACKUP_S3_BUCKET</code> bei der Ausführung des Befehls bereitstellen:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Linux</label><label for="__tabbed_14_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Linux</label><label for="__tabbed_16_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nv">BACKUP_S3_BUCKET</span><span class="o">=</span>your-bucket-name<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -3662,7 +3878,7 @@ USE_IPV6=yes
 <div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="s1">&#39;yourusername&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span><span class="w"> </span><span class="n">IDENTIFIED</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">mysql_native_password</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="s1">&#39;youpassword&#39;</span><span class="p">;</span>
 </code></pre></div>
 <p>Wenn Sie die Docker-Integration verwenden, können Sie den folgenden Befehl zur <code>docker-compose.yml</code>-Datei hinzufügen, um das Authentifizierungs-Plugin automatisch zu ändern:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">MariaDB</label><label for="__tabbed_15_2">MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">MariaDB</label><label for="__tabbed_17_2">MySQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
@@ -3683,7 +3899,7 @@ USE_IPV6=yes
 </div>
 <h5 id="manuelle-wiederherstellung">Manuelle Wiederherstellung</h5>
 <p>Um eine Wiederherstellung manuell zu starten, führen Sie den folgenden Befehl aus:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Linux</label><label for="__tabbed_16_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Linux</label><label for="__tabbed_18_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -3697,7 +3913,7 @@ USE_IPV6=yes
 </div>
 <p>Dieser Befehl erstellt eine temporäre Sicherung Ihrer Datenbank im S3-Bucket, der in der Einstellung <code>BACKUP_S3_BUCKET</code> angegeben ist, und stellt Ihre Datenbank auf die neueste im Bucket verfügbare Sicherung wieder her.</p>
 <p>Sie können auch eine benutzerdefinierte Sicherungsdatei für die Wiederherstellung angeben, indem Sie den Pfad dazu als Argument bei der Ausführung des Befehls angeben:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Linux</label><label for="__tabbed_17_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore<span class="w"> </span>s3_backup_file.zip
@@ -3712,7 +3928,7 @@ USE_IPV6=yes
 <div class="admonition example">
 <p class="admonition-title">Im Falle eines Fehlers</p>
 <p>Machen Sie sich keine Sorgen, wenn die Wiederherstellung fehlschlägt, Sie können Ihre Datenbank jederzeit auf den vorherigen Zustand zurücksetzen, indem Sie den Befehl erneut ausführen, da vor der Wiederherstellung eine Sicherung erstellt wird:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Linux</label><label for="__tabbed_18_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Linux</label><label for="__tabbed_20_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -3742,7 +3958,7 @@ USE_IPV6=yes
 </ul>
 <h4 id="eine-migrationsdatei-erstellen">Eine Migrationsdatei erstellen</h4>
 <p>Um eine Migrationsdatei manuell zu erstellen, führen Sie den folgenden Befehl aus:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Linux</label><label for="__tabbed_21_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>create<span class="w"> </span>/pfad/zur/migrations/datei
@@ -3774,7 +3990,7 @@ USE_IPV6=yes
 <div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="s1">&#39;yourusername&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span><span class="w"> </span><span class="n">IDENTIFIED</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">mysql_native_password</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="s1">&#39;youpassword&#39;</span><span class="p">;</span>
 </code></pre></div>
 <p>Wenn Sie die Docker-Integration verwenden, können Sie den folgenden Befehl zur <code>docker-compose.yml</code>-Datei hinzufügen, um das Authentifizierungs-Plugin automatisch zu ändern:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">MariaDB</label><label for="__tabbed_20_2">MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:2"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">MariaDB</label><label for="__tabbed_22_2">MySQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
@@ -3795,7 +4011,7 @@ USE_IPV6=yes
 </div>
 <h4 id="eine-migration-initialisieren">Eine Migration initialisieren</h4>
 <p>Um eine Migration manuell zu initialisieren, führen Sie den folgenden Befehl aus:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:3"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Linux</label><label for="__tabbed_21_2">Docker</label><label for="__tabbed_21_3">All-in-one</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="23:3"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><input id="__tabbed_23_3" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">Linux</label><label for="__tabbed_23_2">Docker</label><label for="__tabbed_23_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>migrate<span class="w"> </span>/pfad/zur/migrations/datei
