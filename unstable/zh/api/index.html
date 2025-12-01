@@ -1297,7 +1297,7 @@
 <p>API 服务需要访问 BunkerWeb 数据库 (<code>DATABASE_URI</code>)。它通常与调度器和可选的 Web UI 一起部署。推荐的设置是在前端运行 BunkerWeb 作为反向代理，并将 API 隔离在内部网络上。</p>
 <p>请参阅<a href="../quickstart-guide/">快速入门指南</a>中的快速入门向导和架构指导。</p>
 <h2 id="_3">推荐部署（独立容器）</h2>
-<p>在生产环境中，将 API 作为独立容器部署在 BunkerWeb 数据平面和调度器旁边。让 API 仅绑定在内部控制平面网络上，并只通过 BunkerWeb 作为反向代理对外发布。该布局与 <a href="../integrations/#networks">Docker 集成参考</a> 保持一致，并确保调度器、BunkerWeb 和 API 使用相同的设置。</p>
+<p>在生产环境中，将 API 作为独立容器部署在 BunkerWeb 数据平面和调度器旁边。让 API 仅绑定在内部控制平面网络上，并只通过 BunkerWeb 作为反向代理对外发布。该布局与 <a href="../integrations/#docker">Docker 集成参考</a> 保持一致，并确保调度器、BunkerWeb 和 API 使用相同的设置。</p>
 <div class="highlight"><pre><span></span><code><span class="nt">x-bw-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-env</span>
 <span class="w">  </span><span class="c1"># 使用锚点避免在两个服务上重复相同的配置</span>
 <span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span><span class="w"> </span><span class="c1"># 请设置正确的 IP 段，确保调度器可以将配置发送到实例</span>

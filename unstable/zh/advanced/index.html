@@ -3335,7 +3335,7 @@ USE_IPV6=yes
 <li><code>ERROR_LOG</code>：错误日志目标（默认：<code>/var/log/bunkerweb/error.log</code>）。接受文件路径、<code>stderr</code>、<code>syslog:server=host[:port][,param=value]</code> 或共享缓冲 <code>memory:size</code>。详见 NGINX 的 <a href="https://nginx.org/en/docs/ngx_core_module.html#error_log">error_log 文档</a>。</li>
 <li><code>LOG_LEVEL</code>：错误日志的详细级别（默认：<code>notice</code>）。</li>
 </ul>
-<p>这些设置接受标准的 NGINX 值，包括文件路径、<code>stderr</code>、<code>syslog:server=...</code>（参见 <a href="https://nginx.org/en/docs/syslog.html">NGINX syslog 文档</a>）或共享内存缓冲。它们支持通过编号后缀配置多个目标（参见 <a href="../concepts/#multiple-settings">多设置约定</a>）。其他服务（Scheduler、UI、Autoconf 等）仅依赖 <code>LOG_TYPES</code> / <code>LOG_FILE_PATH</code> / <code>LOG_SYSLOG_*</code>。</p>
+<p>这些设置接受标准的 NGINX 值，包括文件路径、<code>stderr</code>、<code>syslog:server=...</code>（参见 <a href="https://nginx.org/en/docs/syslog.html">NGINX syslog 文档</a>）或共享内存缓冲。它们支持通过编号后缀配置多个目标（参见 <a href="../features/#multiple-settings">多设置约定</a>）。其他服务（Scheduler、UI、Autoconf 等）仅依赖 <code>LOG_TYPES</code> / <code>LOG_FILE_PATH</code> / <code>LOG_SYSLOG_*</code>。</p>
 <p><strong>仅针对 bunkerweb（编号后缀示例，配置多个访问/错误日志）：</strong></p>
 <div class="highlight"><pre><span></span><code>ACCESS_LOG=/var/log/bunkerweb/access.log
 ACCESS_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
@@ -3347,72 +3347,150 @@ LOG_LEVEL=notice
 LOG_LEVEL_1=error
 </code></pre></div>
 <h4 id="_7">集成默认值与示例</h4>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:1"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Linux</label><label for="__tabbed_12_2">Docker / Autoconf / Swarm</label></div>
 <div class="tabbed-content">
-<div class="tabbed-block"></div>
-</div>
-</div>
+<div class="tabbed-block">
 <p><strong>默认行为</strong>：<code>LOG_TYPES="file"</code>。日志写入 <code>/var/log/bunkerweb/*.log</code>。</p>
-<p><strong>示例</strong>：保留本地文件（用于 Web UI），并将日志镜像到系统 syslog。</p>
-<div class="highlight"><pre><span></span><code># 服务日志（在 /etc/bunkerweb/variables.env 或各服务的 env 文件中设置）
-LOG_TYPES=&quot;file syslog&quot;
-LOG_SYSLOG_ADDRESS=/dev/log
-LOG_FILE_PATH=/var/log/bunkerweb/bunkerweb.log
-# LOG_SYSLOG_TAG 默认会为每个服务自动设置（如有需要可覆盖）
+<p><strong>示例</strong>：保留本地文件（供 Web UI 使用），同时镜像到系统 syslog。</p>
+<div class="highlight"><pre><span></span><code>  # 服务日志（在 /etc/bunkerweb/variables.env 或 特定服务的环境变量文件中设置）
+  LOG_TYPES=&quot;file syslog&quot;
+  LOG_SYSLOG_ADDRESS=/dev/log
+  SCHEDULER_LOG_FILE_PATH=/var/log/bunkerweb/scheduler.log
+  UI_LOG_FILE_PATH=/var/log/bunkerweb/ui.log
+  # ...
+  # LOG_SYSLOG_TAG 将为每个服务自动设置（如需覆盖，可在每个服务中单独设置）
 
-# NGINX 日志（仅 bunkerweb 服务；在 /etc/bunkerweb/variables.env 中设置）
-ACCESS_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
-ERROR_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
-LOG_LEVEL=notice
+  # NGINX 日志（仅 bunkerweb 服务；在 /etc/bunkerweb/variables.env 中设置）
+  ACCESS_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb_access
+  ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
 </code></pre></div>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:1"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Docker / Autoconf / Swarm</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block"></div>
 </div>
-</div>
+<div class="tabbed-block">
 <p><strong>默认行为</strong>：<code>LOG_TYPES="stderr"</code>。日志可通过 <code>docker logs</code> 查看。</p>
-<p><strong>示例</strong>：保留 <code>docker logs</code>（stderr）并同时发送到中央 syslog 容器（同时满足 Web UI 与 CrowdSec 的需求）。</p>
-<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<p><strong>示例（改编自快速入门指南）</strong>：保留 <code>docker logs</code>（stderr），并发送到中央 syslog 容器（Web UI 和 CrowdSec 所需）。</p>
+<div class="highlight"><pre><span></span><code><span class="nt">x-bw-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-env</span><span class="w"> </span><span class="c1"># 使用锚点以避免为两个服务重复相同的设置</span>
+<span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span><span class="w"> </span><span class="c1"># 确保设置正确的 IP 范围，以便调度程序可以将配置发送到实例</span>
+<span class="w">  </span><span class="c1"># 可选：设置 API 令牌并在两个容器中镜像它</span>
+<span class="w">  </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+<span class="w">  </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># 记得为数据库设置更强的密码</span>
+<span class="w">  </span><span class="c1"># 服务日志</span>
+<span class="w">  </span><span class="nt">LOG_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;stderr</span><span class="nv"> </span><span class="s">syslog&quot;</span>
+<span class="w">  </span><span class="nt">LOG_SYSLOG_ADDRESS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://bw-syslog:514&quot;</span>
+<span class="w">  </span><span class="c1"># LOG_SYSLOG_TAG 将为每个服务自动设置（如需覆盖，可在每个服务中单独设置）</span>
+<span class="w">  </span><span class="c1"># NGINX 日志：发送到 Syslog（仅 bunkerweb）</span>
+<span class="w">  </span><span class="nt">ACCESS_LOG_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;syslog:server=bw-syslog:514,tag=bunkerweb_access&quot;</span>
+<span class="w">  </span><span class="nt">ERROR_LOG_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;syslog:server=bw-syslog:514,tag=bunkerweb&quot;</span>
+
+<span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
-<span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">    </span><span class="c1"># 服务日志（bunkerweb）</span>
-<span class="w">    </span><span class="nt">LOG_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;stderr</span><span class="nv"> </span><span class="s">syslog&quot;</span>
-<span class="w">    </span><span class="nt">LOG_SYSLOG_ADDRESS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://bw-syslog:514&quot;</span>
-<span class="w">    </span><span class="nt">LOG_SYSLOG_TAG</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
-<span class="w">    </span><span class="nt">LOG_FILE_PATH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/var/log/bunkerweb/bunkerweb.log&quot;</span>
-<span class="w">    </span><span class="c1"># NGINX 日志：发送到 Syslog（仅 bunkerweb）</span>
-<span class="w">    </span><span class="nt">ACCESS_LOG</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;syslog:server=udp://bw-syslog:514,tag=bunkerweb&quot;</span>
-<span class="w">    </span><span class="nt">ERROR_LOG</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;syslog:server=udp://bw-syslog:514,tag=bunkerweb&quot;</span>
+<span class="w">    </span><span class="c1"># 这将是用于在调度程序中识别实例的名称</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/udp&quot;</span><span class="w"> </span><span class="c1"># 用于 QUIC / HTTP3 支持</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span><span class="w"> </span><span class="c1"># 使用锚点以避免为所有服务重复相同的设置</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
-<span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">    </span><span class="c1"># 服务日志（scheduler）</span>
-<span class="w">    </span><span class="nt">LOG_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;stderr</span><span class="nv"> </span><span class="s">syslog&quot;</span>
-<span class="w">    </span><span class="nt">LOG_SYSLOG_ADDRESS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://bw-syslog:514&quot;</span>
-<span class="w">    </span><span class="nt">LOG_SYSLOG_TAG</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bw-scheduler&quot;</span>
-<span class="w">    </span><span class="nt">LOG_FILE_PATH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/var/log/bunkerweb/scheduler.log&quot;</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
+<span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># 确保设置正确的实例名称</span>
+<span class="w">      </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+<span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">UI_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://bw-ui:7000&quot;</span><span class="w"> </span><span class="c1"># 如需更改则修改此项</span>
+<span class="w">      </span><span class="nt">USE_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">REDIS_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;redis&quot;</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># 用于持久化缓存和其他数据（例如备份）</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
-<span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">    </span><span class="c1"># 服务日志（UI）</span>
-<span class="w">    </span><span class="nt">LOG_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;stderr</span><span class="nv"> </span><span class="s">syslog&quot;</span>
-<span class="w">    </span><span class="nt">LOG_SYSLOG_ADDRESS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://bw-syslog:514&quot;</span>
-<span class="w">    </span><span class="nt">LOG_SYSLOG_TAG</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bw-ui&quot;</span>
-<span class="w">    </span><span class="nt">LOG_FILE_PATH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/var/log/bunkerweb/ui.log&quot;</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># 用于 Web UI 读取 syslog 日志</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
-<span class="w">  </span><span class="c1"># 收集日志并写入共享卷的中央 Syslog 容器</span>
+<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="c1"># 我们设置了最大允许的数据包大小以避免大查询的问题</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># 记得为数据库设置更强的密码</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+
+<span class="w">  </span><span class="nt">redis</span><span class="p">:</span><span class="w"> </span><span class="c1"># Redis 服务，用于持久化报告/封禁/统计</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
+<span class="w">      </span><span class="no">redis-server</span>
+<span class="w">      </span><span class="no">--maxmemory 256mb</span>
+<span class="w">      </span><span class="no">--maxmemory-policy allkeys-lru</span>
+<span class="w">      </span><span class="no">--save 60 1000</span>
+<span class="w">      </span><span class="no">--appendonly yes</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis-data:/data</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+
 <span class="w">  </span><span class="nt">bw-syslog</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.9.0</span>
-<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># 为 Web UI 提供共享卷</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.10.2</span>
+<span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BIND_SERVICE</span><span class="w"> </span><span class="c1"># 绑定低端口</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BROADCAST</span><span class="w"> </span><span class="c1"># 发送广播</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_RAW</span><span class="w"> </span><span class="c1"># 使用原始套接字</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DAC_READ_SEARCH</span><span class="w"> </span><span class="c1"># 绕过权限读取文件</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DAC_OVERRIDE</span><span class="w"> </span><span class="c1"># 覆盖文件权限</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CHOWN</span><span class="w"> </span><span class="c1"># 更改所有者</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SYSLOG</span><span class="w"> </span><span class="c1"># 写入系统日志</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># 用于存储日志的卷</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf</span><span class="w"> </span><span class="c1"># syslog-ng 配置文件</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">redis-data</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-logs</span><span class="p">:</span>
+
+<span class="nt">networks</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">  </span><span class="nt">ipam</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">    </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.20.30.0/24</span><span class="w"> </span><span class="c1"># 确保设置正确的 IP 范围，以便调度程序可以将配置发送到实例</span>
+<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
+<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 </code></pre></div>
+</div>
+</div>
+</div>
 <h4 id="syslog-ng">Syslog-ng 配置</h4>
 <p>下面是一个可将日志转发到文件的 <code>syslog-ng.conf</code> 示例：</p>
 <div class="highlight"><pre><span></span><code>@version: 4.10
@@ -3721,7 +3799,7 @@ log {
 <details class="warning">
 <summary>给红帽企业 Linux (RHEL) 8.9 用户的信息</summary>
 <p>如果您正在使用 <strong>RHEL 8.9</strong> 并计划使用<strong>外部数据库</strong>，您需要安装 <code>mysql-community-client</code> 包以确保 <code>mysqldump</code> 命令可用。您可以通过执行以下命令来安装该包：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">MySQL/MariaDB</label><label for="__tabbed_14_2">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">MySQL/MariaDB</label><label for="__tabbed_13_2">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -3841,7 +3919,7 @@ log {
 </table>
 <h5 id="_10">手动备份</h5>
 <p>要手动启动备份，请执行以下命令：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Linux</label><label for="__tabbed_15_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Linux</label><label for="__tabbed_14_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -3855,7 +3933,7 @@ log {
 </div>
 <p>此命令将创建您的数据库备份，并将其存储在 <code>BACKUP_S3_BUCKET</code> 设置中指定的 S3 存储桶中。</p>
 <p>您还可以在执行命令时通过提供 <code>BACKUP_S3_BUCKET</code> 环境变量来为备份指定自定义 S3 存储桶：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Linux</label><label for="__tabbed_16_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Linux</label><label for="__tabbed_15_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nv">BACKUP_S3_BUCKET</span><span class="o">=</span>your-bucket-name<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -3876,7 +3954,7 @@ log {
 <div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="s1">&#39;yourusername&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span><span class="w"> </span><span class="n">IDENTIFIED</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">mysql_native_password</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="s1">&#39;youpassword&#39;</span><span class="p">;</span>
 </code></pre></div>
 <p>如果您正在使用 Docker 集成，可以将以下命令添加到 <code>docker-compose.yml</code> 文件中，以自动更改身份验证插件：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">MariaDB</label><label for="__tabbed_17_2">MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">MariaDB</label><label for="__tabbed_16_2">MySQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
@@ -3897,7 +3975,7 @@ log {
 </div>
 <h5 id="_11">手动恢复</h5>
 <p>要手动启动恢复，请执行以下命令：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Linux</label><label for="__tabbed_18_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Linux</label><label for="__tabbed_17_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -3911,7 +3989,7 @@ log {
 </div>
 <p>此命令将在 <code>BACKUP_S3_BUCKET</code> 设置中指定的 S3 存储桶中创建您数据库的临时备份，并将您的数据库恢复到存储桶中可用的最新备份。</p>
 <p>您还可以在执行命令时通过提供备份文件的路径作为参数来为恢复指定自定义备份文件：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Linux</label><label for="__tabbed_18_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore<span class="w"> </span>s3_backup_file.zip
@@ -3926,7 +4004,7 @@ log {
 <div class="admonition example">
 <p class="admonition-title">如果失败</p>
 <p>如果恢复失败，请不要担心，您可以随时通过再次执行命令将数据库恢复到先前的状态，因为在恢复之前会创建一个备份：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Linux</label><label for="__tabbed_20_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -3956,7 +4034,7 @@ log {
 </ul>
 <h4 id="_12">创建迁移文件</h4>
 <p>要手动创建迁移文件，请执行以下命令：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Linux</label><label for="__tabbed_21_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Linux</label><label for="__tabbed_20_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>create<span class="w"> </span>/path/to/migration/file
@@ -3988,7 +4066,7 @@ log {
 <div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="s1">&#39;yourusername&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span><span class="w"> </span><span class="n">IDENTIFIED</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">mysql_native_password</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="s1">&#39;youpassword&#39;</span><span class="p">;</span>
 </code></pre></div>
 <p>如果您正在使用 Docker 集成，可以将以下命令添加到 <code>docker-compose.yml</code> 文件中，以自动更改身份验证插件：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="22:2"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">MariaDB</label><label for="__tabbed_22_2">MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">MariaDB</label><label for="__tabbed_21_2">MySQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
@@ -4009,7 +4087,7 @@ log {
 </div>
 <h4 id="_13">初始化迁移</h4>
 <p>要手动初始化迁移，请执行以下命令：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="23:3"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><input id="__tabbed_23_3" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">Linux</label><label for="__tabbed_23_2">Docker</label><label for="__tabbed_23_3">All-in-one</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:3"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Linux</label><label for="__tabbed_22_2">Docker</label><label for="__tabbed_22_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>migrate<span class="w"> </span>/path/to/migration/file

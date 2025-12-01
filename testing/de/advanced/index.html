@@ -3337,7 +3337,7 @@ USE_IPV6=yes
 <li><code>ERROR_LOG</code>: Ziel für Fehlerprotokolle (Standard: <code>/var/log/bunkerweb/error.log</code>). Akzeptiert Dateipfade, <code>stderr</code>, <code>syslog:server=host[:port][,param=value]</code> oder Shared-Buffer <code>memory:size</code>. Siehe <a href="https://nginx.org/en/docs/ngx_core_module.html#error_log">NGINX error_log Dokumentation</a> für Details.</li>
 <li><code>LOG_LEVEL</code>: Detailstufe der Fehlerprotokolle (Standard: <code>notice</code>).</li>
 </ul>
-<p>Diese Einstellungen akzeptieren die üblichen NGINX-Werte (Dateipfade, <code>stderr</code>, <code>syslog:server=...</code>, Shared-Memory-Puffer). Sie unterstützen mehrere Ziele über nummerierte Suffixe (siehe <a href="../concepts/#multiple-settings">Multiple-Settings-Konvention</a>). Andere Dienste (Scheduler, UI, Autoconf usw.) nutzen ausschließlich <code>LOG_TYPES</code>/<code>LOG_FILE_PATH</code>/<code>LOG_SYSLOG_*</code>.</p>
+<p>Diese Einstellungen akzeptieren die üblichen NGINX-Werte (Dateipfade, <code>stderr</code>, <code>syslog:server=...</code>, Shared-Memory-Puffer). Sie unterstützen mehrere Ziele über nummerierte Suffixe (siehe <a href="../features/#multiple-settings">Multiple-Settings-Konvention</a>). Andere Dienste (Scheduler, UI, Autoconf usw.) nutzen ausschließlich <code>LOG_TYPES</code>/<code>LOG_FILE_PATH</code>/<code>LOG_SYSLOG_*</code>.</p>
 <p><strong>Beispiel mit mehreren Access-/Error-Logs (nur <code>bunkerweb</code>, nummerierte Suffixe):</strong></p>
 <div class="highlight"><pre><span></span><code>ACCESS_LOG=/var/log/bunkerweb/access.log
 ACCESS_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
@@ -3349,72 +3349,151 @@ LOG_LEVEL=notice
 LOG_LEVEL_1=error
 </code></pre></div>
 <h4 id="integrations-defaults-beispiele">Integrations-Defaults &amp; Beispiele</h4>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:1"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Linux</label><label for="__tabbed_12_2">Docker / Autoconf / Swarm</label></div>
 <div class="tabbed-content">
-<div class="tabbed-block"></div>
-</div>
-</div>
+<div class="tabbed-block">
 <p><strong>Standardverhalten</strong>: <code>LOG_TYPES="file"</code>. Protokolle werden unter <code>/var/log/bunkerweb/*.log</code> geschrieben.</p>
-<p><strong>Beispiel</strong>: Lokale Dateien beibehalten (für die Web-UI) und gleichzeitig an das systemweite Syslog spiegeln.</p>
-<div class="highlight"><pre><span></span><code># Service-Protokolle (in /etc/bunkerweb/variables.env oder service-spezifischen Umgebungsdateien festlegen)
-LOG_TYPES=&quot;file syslog&quot;
-LOG_SYSLOG_ADDRESS=/dev/log
-LOG_FILE_PATH=/var/log/bunkerweb/bunkerweb.log
-# LOG_SYSLOG_TAG wird pro Dienst automatisch gesetzt (bei Bedarf pro Dienst überschreiben)
+<p><strong>Beispiel</strong>: Lokale Dateien behalten (für die Web-UI) und zusätzlich an den System-Syslog spiegeln.</p>
+<div class="highlight"><pre><span></span><code>  # Service-Protokolle (in /etc/bunkerweb/variables.env oder in spezifischen Dienst-Umgebungsdateien setzen)
+  LOG_TYPES=&quot;file syslog&quot;
+  LOG_SYSLOG_ADDRESS=/dev/log
+  SCHEDULER_LOG_FILE_PATH=/var/log/bunkerweb/scheduler.log
+  UI_LOG_FILE_PATH=/var/log/bunkerweb/ui.log
+  # ...
+  # LOG_SYSLOG_TAG wird automatisch pro Dienst gesetzt (bei Bedarf dienstspezifisch überschreiben)
 
-# NGINX-Protokolle (nur bunkerweb; in /etc/bunkerweb/variables.env setzen)
-ACCESS_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
-ERROR_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
-LOG_LEVEL=notice
+  # NGINX-Protokolle (nur bunkerweb-Dienst; in /etc/bunkerweb/variables.env setzen)
+  ACCESS_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb_access
+  ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
 </code></pre></div>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:1"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Docker / Autoconf / Swarm</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block"></div>
 </div>
-</div>
+<div class="tabbed-block">
 <p><strong>Standardverhalten</strong>: <code>LOG_TYPES="stderr"</code>. Protokolle sind über <code>docker logs</code> sichtbar.</p>
-<p><strong>Beispiel</strong>: <code>docker logs</code> (stderr) behalten UND an einen zentralen Syslog-Container senden (wichtig für Web-UI und CrowdSec).</p>
-<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<p><strong>Beispiel (Adaptation aus dem Quickstart-Guide)</strong>: Behalten Sie <code>docker logs</code> (stderr) BEI und senden Sie zusätzlich an einen zentralen Syslog-Container (benötigt für Web UI und CrowdSec).</p>
+<div class="highlight"><pre><span></span><code><span class="nt">x-bw-env</span><span class="p">:</span>
+<span class="w">  </span><span class="nl">&amp;bw-env</span><span class="w"> </span><span class="c1"># Wir verwenden einen Anker, um die Wiederholung derselben Einstellungen für beide Dienste zu vermeiden</span>
+<span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span><span class="w"> </span><span class="c1"># Stellen Sie sicher, dass Sie den richtigen IP-Bereich setzen, damit der Scheduler die Konfiguration an die Instanz senden kann</span>
+<span class="w">  </span><span class="c1"># Optional: einen API-Token setzen und ihn in beiden Containern spiegeln</span>
+<span class="w">  </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+<span class="w">  </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Denken Sie daran, ein stärkeres Passwort für die Datenbank zu setzen</span>
+<span class="w">  </span><span class="c1"># Service-Protokolle</span>
+<span class="w">  </span><span class="nt">LOG_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;stderr</span><span class="nv"> </span><span class="s">syslog&quot;</span>
+<span class="w">  </span><span class="nt">LOG_SYSLOG_ADDRESS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://bw-syslog:514&quot;</span>
+<span class="w">  </span><span class="c1"># LOG_SYSLOG_TAG wird automatisch pro Dienst gesetzt (bei Bedarf dienstspezifisch überschreiben)</span>
+<span class="w">  </span><span class="c1"># NGINX-Protokolle: An Syslog senden (nur bunkerweb)</span>
+<span class="w">  </span><span class="nt">ACCESS_LOG_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;syslog:server=bw-syslog:514,tag=bunkerweb_access&quot;</span>
+<span class="w">  </span><span class="nt">ERROR_LOG_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;syslog:server=bw-syslog:514,tag=bunkerweb&quot;</span>
+
+<span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
-<span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">    </span><span class="c1"># Service-Protokolle (bunkerweb)</span>
-<span class="w">    </span><span class="nt">LOG_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;stderr</span><span class="nv"> </span><span class="s">syslog&quot;</span>
-<span class="w">    </span><span class="nt">LOG_SYSLOG_ADDRESS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://bw-syslog:514&quot;</span>
-<span class="w">    </span><span class="nt">LOG_SYSLOG_TAG</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
-<span class="w">    </span><span class="nt">LOG_FILE_PATH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/var/log/bunkerweb/bunkerweb.log&quot;</span>
-<span class="w">    </span><span class="c1"># NGINX-Protokolle: An Syslog senden (nur bunkerweb)</span>
-<span class="w">    </span><span class="nt">ACCESS_LOG</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;syslog:server=udp://bw-syslog:514,tag=bunkerweb&quot;</span>
-<span class="w">    </span><span class="nt">ERROR_LOG</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;syslog:server=udp://bw-syslog:514,tag=bunkerweb&quot;</span>
+<span class="w">    </span><span class="c1"># Dies ist der Name, der zur Identifikation der Instanz im Scheduler verwendet wird</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/udp&quot;</span><span class="w"> </span><span class="c1"># Für QUIC / HTTP3-Unterstützung</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span><span class="w"> </span><span class="c1"># Wir verwenden den Anker, um dieselben Einstellungen für alle Dienste zu vermeiden</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
-<span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">    </span><span class="c1"># Service-Protokolle (scheduler)</span>
-<span class="w">    </span><span class="nt">LOG_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;stderr</span><span class="nv"> </span><span class="s">syslog&quot;</span>
-<span class="w">    </span><span class="nt">LOG_SYSLOG_ADDRESS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://bw-syslog:514&quot;</span>
-<span class="w">    </span><span class="nt">LOG_SYSLOG_TAG</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bw-scheduler&quot;</span>
-<span class="w">    </span><span class="nt">LOG_FILE_PATH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/var/log/bunkerweb/scheduler.log&quot;</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
+<span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># Stellen Sie sicher, dass Sie den richtigen Instanznamen setzen</span>
+<span class="w">      </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+<span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">UI_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://bw-ui:7000&quot;</span><span class="w"> </span><span class="c1"># Bei Bedarf anpassen</span>
+<span class="w">      </span><span class="nt">USE_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">REDIS_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;redis&quot;</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># Wird verwendet, um den Cache und andere Daten wie Backups zu persistieren</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
-<span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">    </span><span class="c1"># Service-Protokolle (UI)</span>
-<span class="w">    </span><span class="nt">LOG_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;stderr</span><span class="nv"> </span><span class="s">syslog&quot;</span>
-<span class="w">    </span><span class="nt">LOG_SYSLOG_ADDRESS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://bw-syslog:514&quot;</span>
-<span class="w">    </span><span class="nt">LOG_SYSLOG_TAG</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bw-ui&quot;</span>
-<span class="w">    </span><span class="nt">LOG_FILE_PATH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/var/log/bunkerweb/ui.log&quot;</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># Wird verwendet, um die Syslog-Protokolle in der Web-UI zu lesen</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
-<span class="w">  </span><span class="c1"># Zentraler Syslog-Container zur Sammlung der Protokolle und Schreiben in ein gemeinsames Volume</span>
+<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="c1"># Wir setzen die max_allowed_packet-Größe, um Probleme mit großen Abfragen zu vermeiden</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Denken Sie daran, ein stärkeres Passwort für die Datenbank zu setzen</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+
+<span class="w">  </span><span class="nt">redis</span><span class="p">:</span><span class="w"> </span><span class="c1"># Redis-Dienst zur Persistenz von Reports/Sperren/Statistiken</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
+<span class="w">      </span><span class="no">redis-server</span>
+<span class="w">      </span><span class="no">--maxmemory 256mb</span>
+<span class="w">      </span><span class="no">--maxmemory-policy allkeys-lru</span>
+<span class="w">      </span><span class="no">--save 60 1000</span>
+<span class="w">      </span><span class="no">--appendonly yes</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis-data:/data</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+
 <span class="w">  </span><span class="nt">bw-syslog</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.9.0</span>
-<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># Gemeinsames Volume für Web UI</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.10.2</span>
+<span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BIND_SERVICE</span><span class="w"> </span><span class="c1"># Bind an niedrige Ports</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BROADCAST</span><span class="w"> </span><span class="c1"># Sende Broadcasts</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_RAW</span><span class="w"> </span><span class="c1"># Verwenden von Raw-Sockets</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DAC_READ_SEARCH</span><span class="w"> </span><span class="c1"># Dateien bypassen, um lesen zu können</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DAC_OVERRIDE</span><span class="w"> </span><span class="c1"># Dateirechte überschreiben</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CHOWN</span><span class="w"> </span><span class="c1"># Eigentümer ändern</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SYSLOG</span><span class="w"> </span><span class="c1"># Schreiben in Systemlogs</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># Laufwerk, das zur Speicherung der Protokolle genutzt wird</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf</span><span class="w"> </span><span class="c1"># Syslog-ng-Konfigurationsdatei</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">redis-data</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-logs</span><span class="p">:</span>
+
+<span class="nt">networks</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">  </span><span class="nt">ipam</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">    </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.20.30.0/24</span><span class="w"> </span><span class="c1"># Stellen Sie sicher, dass Sie den richtigen IP-Bereich setzen, damit der Scheduler die Konfiguration an die Instanz senden kann</span>
+<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
+<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 </code></pre></div>
+</div>
+</div>
+</div>
 <h4 id="syslog-ng-konfiguration">Syslog-ng-Konfiguration</h4>
 <p>Hier ein Beispiel für eine <code>syslog-ng.conf</code>-Datei, die Sie verwenden können, um die Protokolle in eine Datei weiterzuleiten:</p>
 <div class="highlight"><pre><span></span><code>@version: 4.10
@@ -3723,7 +3802,7 @@ log {
 <details class="warning">
 <summary>Informationen für Benutzer von Red Hat Enterprise Linux (RHEL) 8.9</summary>
 <p>Wenn Sie <strong>RHEL 8.9</strong> verwenden und eine <strong>externe Datenbank</strong> nutzen möchten, müssen Sie das Paket <code>mysql-community-client</code> installieren, um sicherzustellen, dass der Befehl <code>mysqldump</code> verfügbar ist. Sie können das Paket mit den folgenden Befehlen installieren:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">MySQL/MariaDB</label><label for="__tabbed_14_2">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">MySQL/MariaDB</label><label for="__tabbed_13_2">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -3843,7 +3922,7 @@ log {
 </table>
 <h5 id="manuelle-sicherung">Manuelle Sicherung</h5>
 <p>Um eine Sicherung manuell zu starten, führen Sie den folgenden Befehl aus:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Linux</label><label for="__tabbed_15_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Linux</label><label for="__tabbed_14_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -3857,7 +3936,7 @@ log {
 </div>
 <p>Dieser Befehl erstellt eine Sicherung Ihrer Datenbank und speichert sie im S3-Bucket, der in der Einstellung <code>BACKUP_S3_BUCKET</code> angegeben ist.</p>
 <p>Sie können auch einen benutzerdefinierten S3-Bucket für die Sicherung angeben, indem Sie die Umgebungsvariable <code>BACKUP_S3_BUCKET</code> bei der Ausführung des Befehls bereitstellen:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Linux</label><label for="__tabbed_16_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Linux</label><label for="__tabbed_15_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nv">BACKUP_S3_BUCKET</span><span class="o">=</span>your-bucket-name<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -3878,7 +3957,7 @@ log {
 <div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="s1">&#39;yourusername&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span><span class="w"> </span><span class="n">IDENTIFIED</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">mysql_native_password</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="s1">&#39;youpassword&#39;</span><span class="p">;</span>
 </code></pre></div>
 <p>Wenn Sie die Docker-Integration verwenden, können Sie den folgenden Befehl zur <code>docker-compose.yml</code>-Datei hinzufügen, um das Authentifizierungs-Plugin automatisch zu ändern:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">MariaDB</label><label for="__tabbed_17_2">MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">MariaDB</label><label for="__tabbed_16_2">MySQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
@@ -3899,7 +3978,7 @@ log {
 </div>
 <h5 id="manuelle-wiederherstellung">Manuelle Wiederherstellung</h5>
 <p>Um eine Wiederherstellung manuell zu starten, führen Sie den folgenden Befehl aus:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Linux</label><label for="__tabbed_18_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Linux</label><label for="__tabbed_17_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -3913,7 +3992,7 @@ log {
 </div>
 <p>Dieser Befehl erstellt eine temporäre Sicherung Ihrer Datenbank im S3-Bucket, der in der Einstellung <code>BACKUP_S3_BUCKET</code> angegeben ist, und stellt Ihre Datenbank auf die neueste im Bucket verfügbare Sicherung wieder her.</p>
 <p>Sie können auch eine benutzerdefinierte Sicherungsdatei für die Wiederherstellung angeben, indem Sie den Pfad dazu als Argument bei der Ausführung des Befehls angeben:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Linux</label><label for="__tabbed_18_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore<span class="w"> </span>s3_backup_file.zip
@@ -3928,7 +4007,7 @@ log {
 <div class="admonition example">
 <p class="admonition-title">Im Falle eines Fehlers</p>
 <p>Machen Sie sich keine Sorgen, wenn die Wiederherstellung fehlschlägt, Sie können Ihre Datenbank jederzeit auf den vorherigen Zustand zurücksetzen, indem Sie den Befehl erneut ausführen, da vor der Wiederherstellung eine Sicherung erstellt wird:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Linux</label><label for="__tabbed_20_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -3958,7 +4037,7 @@ log {
 </ul>
 <h4 id="eine-migrationsdatei-erstellen">Eine Migrationsdatei erstellen</h4>
 <p>Um eine Migrationsdatei manuell zu erstellen, führen Sie den folgenden Befehl aus:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Linux</label><label for="__tabbed_21_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Linux</label><label for="__tabbed_20_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>create<span class="w"> </span>/pfad/zur/migrations/datei
@@ -3990,7 +4069,7 @@ log {
 <div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="s1">&#39;yourusername&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span><span class="w"> </span><span class="n">IDENTIFIED</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">mysql_native_password</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="s1">&#39;youpassword&#39;</span><span class="p">;</span>
 </code></pre></div>
 <p>Wenn Sie die Docker-Integration verwenden, können Sie den folgenden Befehl zur <code>docker-compose.yml</code>-Datei hinzufügen, um das Authentifizierungs-Plugin automatisch zu ändern:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="22:2"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">MariaDB</label><label for="__tabbed_22_2">MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">MariaDB</label><label for="__tabbed_21_2">MySQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
@@ -4011,7 +4090,7 @@ log {
 </div>
 <h4 id="eine-migration-initialisieren">Eine Migration initialisieren</h4>
 <p>Um eine Migration manuell zu initialisieren, führen Sie den folgenden Befehl aus:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="23:3"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><input id="__tabbed_23_3" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">Linux</label><label for="__tabbed_23_2">Docker</label><label for="__tabbed_23_3">All-in-one</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:3"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Linux</label><label for="__tabbed_22_2">Docker</label><label for="__tabbed_22_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>migrate<span class="w"> </span>/pfad/zur/migrations/datei
