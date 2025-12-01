@@ -2148,62 +2148,143 @@ LOG_LEVEL_1=error
     # Service logs (set in /etc/bunkerweb/variables.env or specific service env files)
     LOG_TYPES="file syslog"
     LOG_SYSLOG_ADDRESS=/dev/log
-    LOG_FILE_PATH=/var/log/bunkerweb/bunkerweb.log
+    SCHEDULER_LOG_FILE_PATH=/var/log/bunkerweb/scheduler.log
+    UI_LOG_FILE_PATH=/var/log/bunkerweb/ui.log
+    # ...
     # LOG_SYSLOG_TAG is automatically set per service (override per-service if needed)
 
     # NGINX logs (bunkerweb service only; set in /etc/bunkerweb/variables.env)
-    ACCESS_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
-    ERROR_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
-    LOG_LEVEL=notice
+    ACCESS_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb_access
+    ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
     ```
 
 === "Docker / Autoconf / Swarm"
 
     **Default behavior**: `LOG_TYPES="stderr"`. Logs are visible via `docker logs`.
 
-    **Example**: Keep `docker logs` (stderr) AND send to a central syslog container (needed for Web UI and CrowdSec).
+    **Example (Adapted from the quickstart guide)**: Keep `docker logs` (stderr) AND send to a central syslog container (needed for Web UI and CrowdSec).
 
     ```yaml
+    x-bw-env: &bw-env
+      # We use an anchor to avoid repeating the same settings for both services
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
+      # Optional: set an API token and mirror it in both containers
+      API_TOKEN: ""
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+      # Service Logs
+      LOG_TYPES: "stderr syslog"
+      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
+      # LOG_SYSLOG_TAG will be automatically set per service (override per-service if needed)
+      # NGINX Logs: Send to Syslog (bunkerweb only)
+      ACCESS_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb_access"
+      ERROR_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb"
+
     services:
       bunkerweb:
+        # This is the name that will be used to identify the instance in the Scheduler
         image: bunkerity/bunkerweb:1.6.6
+        ports:
+          - "80:8080/tcp"
+          - "443:8443/tcp"
+          - "443:8443/udp" # For QUIC / HTTP3 support
         environment:
-          # Service Logs (bunkerweb)
-          LOG_TYPES: "stderr syslog"
-          LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
-          LOG_SYSLOG_TAG: "bunkerweb"
-          LOG_FILE_PATH: "/var/log/bunkerweb/bunkerweb.log"
-          # NGINX Logs: Send to Syslog (bunkerweb only)
-          ACCESS_LOG: "syslog:server=udp://bw-syslog:514,tag=bunkerweb"
-          ERROR_LOG: "syslog:server=udp://bw-syslog:514,tag=bunkerweb"
+          <<: *bw-env # We use the anchor to avoid repeating the same settings for all services
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-services
 
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
-          # Service Logs (scheduler)
-          LOG_TYPES: "stderr syslog"
-          LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
-          LOG_SYSLOG_TAG: "bw-scheduler"
-          LOG_FILE_PATH: "/var/log/bunkerweb/scheduler.log"
+          <<: *bw-env
+          BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
+          SERVER_NAME: ""
+          MULTISITE: "yes"
+          UI_HOST: "http://bw-ui:7000" # Change it if needed
+          USE_REDIS: "yes"
+          REDIS_HOST: "redis"
+        volumes:
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-db
 
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.6.6
         environment:
-          # Service Logs (UI)
-          LOG_TYPES: "stderr syslog"
-          LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
-          LOG_SYSLOG_TAG: "bw-ui"
-          LOG_FILE_PATH: "/var/log/bunkerweb/ui.log"
+          <<: *bw-env
+        volumes:
+          - bw-logs:/var/log/bunkerweb # This is used to read the syslog logs from the Web UI
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-db
 
-      # Central Syslog container to collect logs and write them to shared volume
+      bw-db:
+        image: mariadb:11
+        # We set the max allowed packet size to avoid issues with large queries
+        command: --max-allowed-packet=67108864
+        environment:
+          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+          MYSQL_DATABASE: "db"
+          MYSQL_USER: "bunkerweb"
+          MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
+        volumes:
+          - bw-data:/var/lib/mysql
+        restart: "unless-stopped"
+        networks:
+          - bw-db
+
+      redis: # Redis service for the persistence of reports/bans/stats
+        image: redis:7-alpine
+        command: >
+          redis-server
+          --maxmemory 256mb
+          --maxmemory-policy allkeys-lru
+          --save 60 1000
+          --appendonly yes
+        volumes:
+          - redis-data:/data
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+
       bw-syslog:
         image: balabit/syslog-ng:4.10.2
+        cap_add:
+          - NET_BIND_SERVICE  # Bind to low ports
+          - NET_BROADCAST  # Send broadcasts
+          - NET_RAW  # Use raw sockets
+          - DAC_READ_SEARCH  # Read files bypassing permissions
+          - DAC_OVERRIDE  # Override file permissions
+          - CHOWN  # Change ownership
+          - SYSLOG  # Write to system logs
         volumes:
-          - bw-logs:/var/log/bunkerweb # Shared volume for Web UI
-          - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf
+          - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
+          - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # This is the syslog-ng configuration file
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
 
     volumes:
+      bw-data:
+      bw-storage:
+      redis-data:
       bw-logs:
+
+    networks:
+      bw-universe:
+        name: bw-universe
+        ipam:
+          driver: default
+          config:
+            - subnet: 10.20.30.0/24 # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
+      bw-services:
+        name: bw-services
+      bw-db:
+        name: bw-db
     ```
 
 #### Syslog-ng configuration

@@ -17,7 +17,7 @@ Das Allgemein-Plugin stellt das zentrale Konfigurations-Framework für BunkerWeb
 4.  Protokollierungsparameter steuern, welche Informationen aufgezeichnet und wie sie formatiert werden.
 5.  Diese Einstellungen bilden die Grundlage, auf der alle anderen BunkerWeb-Plugins und -Funktionen aufbauen.
 
-### Multisite-Modus
+### Multisite-Modus {#multisite-mode}
 
 Wenn `MULTISITE` auf `yes` gesetzt ist, kann BunkerWeb mehrere Websites hosten und schützen, jede mit ihrer eigenen einzigartigen Konfiguration. Diese Funktion ist besonders nützlich für Szenarien wie:
 

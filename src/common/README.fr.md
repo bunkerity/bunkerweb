@@ -8,7 +8,7 @@ Comment ça marche :
 4. Les paramètres de journalisation contrôlent les informations enregistrées et leur format.
 5. Ces paramètres constituent la base sur laquelle s’appuient tous les autres plugins et fonctionnalités de BunkerWeb.
 
-### Mode multisite
+### Mode multisite {#multisite-mode}
 
 Lorsque `MULTISITE` vaut `yes`, BunkerWeb peut héberger et protéger plusieurs sites web, chacun avec sa propre configuration. Ce mode est utile notamment pour :
 

@@ -2121,7 +2121,7 @@ Ce sont des journaux NGINX standard, configurés via **le service `bunkerweb` un
 - `ERROR_LOG` : Destination pour les journaux d'erreur (par défaut : `/var/log/bunkerweb/error.log`). Accepte un chemin de fichier, `stderr`, `syslog:server=host[:port][,param=value]`, ou tampon partagé `memory:size`. Voir la [documentation NGINX error_log](https://nginx.org/en/docs/ngx_core_module.html#error_log) pour plus de détails.
 - `LOG_LEVEL` : Niveau de verbosité des journaux d'erreur (par défaut : `notice`).
 
-Ces paramètres acceptent des valeurs NGINX standard, y compris des chemins de fichiers, `stderr`, `syslog:server=...` (voir la [documentation NGINX syslog](https://nginx.org/en/docs/syslog.html)), ou des tampons de mémoire partagée. Ils prennent en charge plusieurs destinations via des suffixes numérotés (voir la [convention des paramètres multiples](concepts.md#multiple-settings)). Les autres services (Scheduler, UI, Autoconf, etc.) reposent uniquement sur `LOG_TYPES`/`LOG_FILE_PATH`/`LOG_SYSLOG_*`.
+Ces paramètres acceptent des valeurs NGINX standard, y compris des chemins de fichiers, `stderr`, `syslog:server=...` (voir la [documentation NGINX syslog](https://nginx.org/en/docs/syslog.html)), ou des tampons de mémoire partagée. Ils prennent en charge plusieurs destinations via des suffixes numérotés (voir la [convention des paramètres multiples](features.md#multiple-settings)). Les autres services (Scheduler, UI, Autoconf, etc.) reposent uniquement sur `LOG_TYPES`/`LOG_FILE_PATH`/`LOG_SYSLOG_*`.
 
 **Exemple avec plusieurs journaux d'accès/erreur (bunkerweb uniquement, suffixes numérotés) :**
 
@@ -2140,71 +2140,152 @@ LOG_LEVEL_1=error
 
 === "Linux"
 
-  **Comportement par défaut** : `LOG_TYPES="file"`. Les journaux sont écrits dans `/var/log/bunkerweb/*.log`.
+    **Comportement par défaut** : `LOG_TYPES="file"`. Les journaux sont écrits dans `/var/log/bunkerweb/*.log`.
 
-  **Exemple** : Garder les fichiers locaux (pour l'interface Web) et également refléter vers le syslog système.
+    **Exemple** : Conserver les fichiers locaux (pour l'interface Web) et les reproduire également vers le syslog système.
 
-  ```conf
-  # Journaux de service (définis dans /etc/bunkerweb/variables.env ou fichiers env spécifiques au service)
-  LOG_TYPES="file syslog"
-  LOG_SYSLOG_ADDRESS=/dev/log
-  LOG_FILE_PATH=/var/log/bunkerweb/bunkerweb.log
-  # LOG_SYSLOG_TAG est automatiquement défini par service (remplacer par service si nécessaire)
+    ```conf
+      # Logs de service (à définir dans /etc/bunkerweb/variables.env ou les fichiers d'environnement spécifiques aux services)
+      LOG_TYPES="file syslog"
+      LOG_SYSLOG_ADDRESS=/dev/log
+      SCHEDULER_LOG_FILE_PATH=/var/log/bunkerweb/scheduler.log
+      UI_LOG_FILE_PATH=/var/log/bunkerweb/ui.log
+      # ...
+      # LOG_SYSLOG_TAG est défini automatiquement par service (remplacez-le par service si nécessaire)
 
-  # Journaux NGINX (service bunkerweb uniquement ; définis dans /etc/bunkerweb/variables.env)
-  ACCESS_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
-  ERROR_LOG=syslog:server=unix:/dev/log,tag=bunkerweb
-  LOG_LEVEL=notice
-  ```
+      # Logs NGINX (service bunkerweb uniquement ; à définir dans /etc/bunkerweb/variables.env)
+      ACCESS_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb_access
+      ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
+    ```
 
 === "Docker / Autoconf / Swarm"
 
-  **Comportement par défaut** : `LOG_TYPES="stderr"`. Les journaux sont visibles via `docker logs`.
+    **Comportement par défaut** : `LOG_TYPES="stderr"`. Les journaux sont visibles via `docker logs`.
 
-  **Exemple** : Garder `docker logs` (stderr) ET envoyer vers un conteneur syslog central (nécessaire pour l'interface Web et CrowdSec).
+    **Exemple (Adapté du guide de démarrage rapide)** : Conserver `docker logs` (stderr) ET envoyer vers un conteneur syslog central (nécessaire pour l'interface Web et CrowdSec).
 
-  ```yaml
-  services:
-    bunkerweb:
-    image: bunkerity/bunkerweb:1.6.6
-    environment:
-      # Journaux de service (bunkerweb)
+    ```yaml
+    x-bw-env:
+      &bw-env # On utilise une ancre pour éviter de répéter les mêmes paramètres pour les deux services
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Assurez-vous de définir la plage IP correcte pour que le Scheduler puisse envoyer la configuration à l'instance
+      # Optionnel : définissez un token API et répliquez-le dans les deux conteneurs
+      API_TOKEN: ""
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # N'oubliez pas de définir un mot de passe plus fort pour la base de données
+      # Logs des services
       LOG_TYPES: "stderr syslog"
       LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
-      LOG_SYSLOG_TAG: "bunkerweb"
-      LOG_FILE_PATH: "/var/log/bunkerweb/bunkerweb.log"
-      # Journaux NGINX : Envoyer vers Syslog (bunkerweb uniquement)
-      ACCESS_LOG: "syslog:server=udp://bw-syslog:514,tag=bunkerweb"
-      ERROR_LOG: "syslog:server=udp://bw-syslog:514,tag=bunkerweb"
+      # LOG_SYSLOG_TAG sera défini automatiquement par service (remplacez-le par service si nécessaire)
+      # Logs NGINX : envoyer au syslog (bunkerweb uniquement)
+      ACCESS_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb_access"
+      ERROR_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb"
 
-    bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.6
-    environment:
-      # Journaux de service (scheduler)
-      LOG_TYPES: "stderr syslog"
-      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
-      LOG_SYSLOG_TAG: "bw-scheduler"
-      LOG_FILE_PATH: "/var/log/bunkerweb/scheduler.log"
+    services:
+      bunkerweb:
+        # Ceci est le nom qui sera utilisé pour identifier l'instance dans le Scheduler
+        image: bunkerity/bunkerweb:1.6.6
+        ports:
+          - "80:8080/tcp"
+          - "443:8443/tcp"
+          - "443:8443/udp" # Pour la prise en charge de QUIC / HTTP3
+        environment:
+          <<: *bw-env # Nous utilisons l'ancre pour éviter de répéter les mêmes paramètres pour tous les services
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-services
 
-    bw-ui:
-    image: bunkerity/bunkerweb-ui:1.6.6
-    environment:
-      # Journaux de service (UI)
-      LOG_TYPES: "stderr syslog"
-      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
-      LOG_SYSLOG_TAG: "bw-ui"
-      LOG_FILE_PATH: "/var/log/bunkerweb/ui.log"
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.6
+        environment:
+          <<: *bw-env
+          BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom d'instance correct
+          SERVER_NAME: ""
+          MULTISITE: "yes"
+          UI_HOST: "http://bw-ui:7000" # Modifiez si nécessaire
+          USE_REDIS: "yes"
+          REDIS_HOST: "redis"
+        volumes:
+          - bw-storage:/data # Utilisé pour persister le cache et d'autres données (sauvegardes, etc.)
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-db
 
-    # Conteneur Syslog central pour collecter les journaux et les écrire dans un volume partagé
-    bw-syslog:
-    image: balabit/syslog-ng:4.9.0
+      bw-ui:
+        image: bunkerity/bunkerweb-ui:1.6.6
+        environment:
+          <<: *bw-env
+        volumes:
+          - bw-logs:/var/log/bunkerweb # Permet à l'UI de lire les logs syslog
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-db:
+        image: mariadb:11
+        # Nous définissons max_allowed_packet pour éviter les problèmes avec de grandes requêtes
+        command: --max-allowed-packet=67108864
+        environment:
+          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+          MYSQL_DATABASE: "db"
+          MYSQL_USER: "bunkerweb"
+          MYSQL_PASSWORD: "changeme" # N'oubliez pas de définir un mot de passe plus fort pour la base de données
+        volumes:
+          - bw-data:/var/lib/mysql
+        restart: "unless-stopped"
+        networks:
+          - bw-db
+
+      redis: # Service Redis pour la persistance des rapports/bans/statistiques
+        image: redis:7-alpine
+        command: >
+          redis-server
+          --maxmemory 256mb
+          --maxmemory-policy allkeys-lru
+          --save 60 1000
+          --appendonly yes
+        volumes:
+          - redis-data:/data
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+
+      bw-syslog:
+        image: balabit/syslog-ng:4.10.2
+        cap_add:
+          - NET_BIND_SERVICE # Lier aux ports bas
+          - NET_BROADCAST # Envoyer des broadcasts
+          - NET_RAW # Utiliser des sockets bruts
+          - DAC_READ_SEARCH # Lire des fichiers en contournant les permissions
+          - DAC_OVERRIDE # Outrepasser les permissions de fichiers
+          - CHOWN # Changer les propriétaires
+          - SYSLOG # Écrire dans les journaux système
+        volumes:
+          - bw-logs:/var/log/bunkerweb # Volume utilisé pour stocker les logs
+          - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # Fichier de configuration syslog-ng
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+
     volumes:
-      - bw-logs:/var/log/bunkerweb # Volume partagé pour l'interface Web
-      - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf
+      bw-data:
+      bw-storage:
+      redis-data:
+      bw-logs:
 
-  volumes:
-    bw-logs:
-  ```
+    networks:
+      bw-universe:
+        name: bw-universe
+      ipam:
+        driver: default
+        config:
+          - subnet: 10.20.30.0/24 # Assurez-vous de définir la plage IP correcte pour que le Scheduler puisse envoyer la configuration à l'instance
+      bw-services:
+        name: bw-services
+      bw-db:
+        name: bw-db
+    ```
 
 #### Configuration de syslog-ng
 

@@ -17,7 +17,7 @@ The General plugin provides the core configuration framework for BunkerWeb, allo
 4. Logging parameters control what information is recorded and how it's formatted.
 5. These settings create the foundation upon which all other BunkerWeb plugins and functionality operate.
 
-### Multisite Mode
+### Multisite Mode {#multisite-mode}
 
 When `MULTISITE` is set to `yes`, BunkerWeb can host and protect multiple websites, each with its own unique configuration. This feature is particularly useful for scenarios such as:
 

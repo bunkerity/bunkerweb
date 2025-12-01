@@ -19,7 +19,7 @@ Consultez l'assistant et les conseils d'architecture dans le [guide de démarrag
 
 ## Déploiement recommandé (Conteneurs dédiés)
 
-En production, déployez l'API dans son propre conteneur aux côtés du plan de données et du scheduler BunkerWeb. Gardez l'API limitée au réseau interne du plan de contrôle et exposez-la uniquement via BunkerWeb en reverse proxy. Cette architecture s'aligne sur la [référence d'intégration Docker](integrations.md#networks) et garantit que le scheduler, BunkerWeb et l'API partagent les mêmes paramètres.
+En production, déployez l'API dans son propre conteneur aux côtés du plan de données et du scheduler BunkerWeb. Gardez l'API limitée au réseau interne du plan de contrôle et exposez-la uniquement via BunkerWeb en reverse proxy. Cette architecture s'aligne sur la [référence d'intégration Docker](integrations.md#docker) et garantit que le scheduler, BunkerWeb et l'API partagent les mêmes paramètres.
 
 ```yaml
 x-bw-env: &bw-env
