@@ -87,19 +87,21 @@ WORKDIR /usr/share/bunkerweb
 
 # Move bwcli, create data folders and set permissions
 RUN cp helpers/bwcli /usr/bin/ && \
+  echo "Docker" > INTEGRATION && \
   mkdir -p /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/www && \
   mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
   mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
   mkdir -p /data/www && ln -s /data/www /var/www/html && \
   for dir in $(echo "pro configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
   for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir "/data/${dir}" ; done && \
-  chown -R root:nginx /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
+  chown -R root:nginx INTEGRATION /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
   chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/log/bunkerweb /var/run/bunkerweb && \
   chmod 2770 /var/tmp/bunkerweb && \
   find . \( -path './cli' -o -path './lua' -o -path './core' -o -path './gen' -o -path './helpers' -o -path './utils' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
   find cli lua gen helpers utils deps -type f ! -path 'deps/bin/*' ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
   find core -type f ! -name '*.lua' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
   chmod 550 entrypoint.sh && \
+  chmod 660 INTEGRATION && \
   rm -f /var/log/bunkerweb/* && \
   ln -s /proc/1/fd/2 /var/log/bunkerweb/error.log && \
   ln -s /proc/1/fd/2 /var/log/bunkerweb/modsec_audit.log && \
