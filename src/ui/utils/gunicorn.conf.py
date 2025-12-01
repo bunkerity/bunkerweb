@@ -65,6 +65,8 @@ else:
 if "syslog" in log_types:
     syslog = True
     syslog_addr = getenv("LOG_SYSLOG_ADDRESS", "").strip()
+    if not syslog_addr.startswith(("/", "udp://", "tcp://")):
+        syslog_addr = f"udp://{syslog_addr}"
     syslog_prefix = getenv("LOG_SYSLOG_TAG", "bw-ui")
 
 wsgi_app = "main:app"
