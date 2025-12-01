@@ -82,56 +82,6 @@
     "regex": "^\\d+$",
     "type": "number"
   },
-  "LOG_FORMAT": {
-    "context": "global",
-    "default": "$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"",
-    "help": "The format to use for access logs.",
-    "id": "log-format",
-    "label": "Access log format",
-    "regex": "^.*$",
-    "type": "text",
-    "multiple": "access-logs"
-  },
-  "ACCESS_LOG": {
-    "context": "global",
-    "default": "/var/log/bunkerweb/access.log",
-    "help": "Path to use for NGINX access logs (file path, syslog:server=host[:port][,param=value], or memory:name:size; set to off to disable).",
-    "id": "access-log",
-    "label": "Access log path",
-    "regex": "^(off|syslog:[^\\s]+|memory:[^\\s]+|\\S+)$",
-    "type": "text",
-    "multiple": "access-logs"
-  },
-  "ERROR_LOG": {
-    "context": "global",
-    "default": "/var/log/bunkerweb/error.log",
-    "help": "Path to use for NGINX error logs (file path, stderr, syslog:server=host[:port][,param=value], or memory:size).",
-    "id": "error-log",
-    "label": "Error log path",
-    "regex": "^(stderr|syslog:[^\\s]+|memory:[^\\s]+|\\S+)$",
-    "type": "text",
-    "multiple": "error-logs"
-  },
-  "LOG_LEVEL": {
-    "context": "global",
-    "default": "notice",
-    "help": "The level to use for error logs.",
-    "id": "log-level",
-    "label": "Log level",
-    "regex": "^(debug|info|notice|warn|error|crit|alert|emerg)$",
-    "type": "select",
-    "select": [
-      "debug",
-      "info",
-      "notice",
-      "warn",
-      "error",
-      "crit",
-      "alert",
-      "emerg"
-    ],
-    "multiple": "error-logs"
-  },
   "DNS_RESOLVERS": {
     "context": "global",
     "default": "127.0.0.11",
@@ -445,5 +395,55 @@
     "label": "Server names hash bucket size",
     "regex": "^.*$",
     "type": "text"
+  },
+  "LOG_FORMAT": {
+    "context": "global",
+    "default": "$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"",
+    "help": "The format to use for access logs.",
+    "id": "log-format",
+    "label": "Access log format",
+    "regex": "^.*$",
+    "type": "text",
+    "multiple": "access-logs"
+  },
+  "ACCESS_LOG": {
+    "context": "global",
+    "default": "/var/log/bunkerweb/access.log",
+    "help": "Path to use for NGINX access logs (file path, syslog:server=host[:port][,param=value], or memory:name:size; set to off to disable).",
+    "id": "access-log",
+    "label": "Access log path",
+    "regex": "^(off|syslog:[^\\s]+|memory:[^\\s]+|\\S+)$",
+    "type": "text",
+    "multiple": "access-logs"
+  },
+  "ERROR_LOG": {
+    "context": "global",
+    "default": "/var/log/bunkerweb/error.log",
+    "help": "Path to use for NGINX error logs (file path, stderr, syslog:server=host[:port][,param=value], or memory:size).",
+    "id": "error-log",
+    "label": "Error log path",
+    "regex": "^(stderr|syslog:[^\\s]+|memory:[^\\s]+|\\S+)$",
+    "type": "text",
+    "multiple": "error-logs"
+  },
+  "LOG_LEVEL": {
+    "context": "global",
+    "default": "notice",
+    "help": "The level to use for error logs.",
+    "id": "log-level",
+    "label": "Log level",
+    "regex": "^(debug|info|notice|warn|error|crit|alert|emerg)$",
+    "type": "select",
+    "select": [
+      "debug",
+      "info",
+      "notice",
+      "warn",
+      "error",
+      "crit",
+      "alert",
+      "emerg"
+    ],
+    "multiple": "error-logs"
   }
 }
