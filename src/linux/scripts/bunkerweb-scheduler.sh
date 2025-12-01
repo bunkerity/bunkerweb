@@ -84,6 +84,25 @@ function start() {
         log "SYSTEMCTL" "ℹ️" "Created dummy variables.env file"
     fi
 
+    # Create PID folder
+    if [ ! -f /var/run/bunkerweb ] ; then
+        mkdir -p /var/run/bunkerweb
+        chown nginx:nginx /var/run/bunkerweb
+    fi
+
+    # Create TMP folder
+    if [ ! -f /var/tmp/bunkerweb ] ; then
+        mkdir -p /var/tmp/bunkerweb
+        chown nginx:nginx /var/tmp/bunkerweb
+        chmod 2770 /var/tmp/bunkerweb
+    fi
+
+    # Create LOG folder
+    if [ ! -f /var/log/bunkerweb ] ; then
+        mkdir -p /var/log/bunkerweb
+        chown nginx:nginx /var/log/bunkerweb
+    fi
+
     # Extract environment variables with fallback
     CUSTOM_LOG_LEVEL=$(get_env_var "LOG_LEVEL" "INFO")
     export CUSTOM_LOG_LEVEL

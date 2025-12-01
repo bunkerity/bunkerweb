@@ -158,6 +158,25 @@ start() {
         chmod 660 /etc/bunkerweb/api.yml
     fi
 
+    # Create PID folder
+    if [ ! -f /var/run/bunkerweb ] ; then
+        mkdir -p /var/run/bunkerweb
+        chown nginx:nginx /var/run/bunkerweb
+    fi
+
+    # Create TMP folder
+    if [ ! -f /var/tmp/bunkerweb ] ; then
+        mkdir -p /var/tmp/bunkerweb
+        chown nginx:nginx /var/tmp/bunkerweb
+        chmod 2770 /var/tmp/bunkerweb
+    fi
+
+    # Create LOG folder
+    if [ ! -f /var/log/bunkerweb ] ; then
+        mkdir -p /var/log/bunkerweb
+        chown nginx:nginx /var/log/bunkerweb
+    fi
+
     # Extract environment variables with fallback
     LISTEN_ADDR=$(get_env_var "API_LISTEN_ADDR" "")
     if [ -z "$LISTEN_ADDR" ]; then
