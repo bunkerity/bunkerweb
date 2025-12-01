@@ -17,7 +17,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from biscuit_auth import KeyPair, PublicKey, PrivateKey
 
 from common_utils import handle_docker_secrets  # type: ignore
-from logger import getLogger  # type: ignore
+from logger import getLogger, log_types  # type: ignore
 
 from app.models.api_database import APIDatabase
 from app.utils import BISCUIT_PRIVATE_KEY_FILE, BISCUIT_PUBLIC_KEY_FILE, USER_PASSWORD_RX, check_password, gen_password_hash
@@ -63,11 +63,23 @@ API_SSL_CA_CERTS = getenv("API_SSL_CA_CERTS", getenv("SSL_CA_CERTS", ""))
 
 CAPTURE_OUTPUT = getenv("CAPTURE_OUTPUT", "no").lower() == "yes"
 
+if CAPTURE_OUTPUT or "file" in log_types:
+    errorlog = getenv("LOG_FILE_PATH", join(sep, "var", "log", "bunkerweb", "api.log"))
+    accesslog = f"{errorlog.rsplit('.', 1)[0]}-access.log"
+else:
+    errorlog = "-"
+    accesslog = "-"
+
+if "syslog" in log_types:
+    syslog = True
+    syslog_addr = getenv("LOG_SYSLOG_ADDRESS", "").strip()
+    if not syslog_addr.startswith(("/", "udp://", "tcp://")):
+        syslog_addr = f"udp://{syslog_addr}"
+    syslog_prefix = getenv("LOG_SYSLOG_TAG", "bw-api")
+
 wsgi_app = "app.main:app"
 proc_name = "bunkerweb-api"
-accesslog = join(sep, "var", "log", "bunkerweb", "api-access.log") if CAPTURE_OUTPUT else "-"
 access_log_format = '%({x-forwarded-for}i)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
-errorlog = join(sep, "var", "log", "bunkerweb", "api.log") if CAPTURE_OUTPUT else "-"
 capture_output = CAPTURE_OUTPUT
 limit_request_line = 0
 limit_request_fields = 32768
