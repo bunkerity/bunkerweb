@@ -313,12 +313,12 @@ markupsafe==3.0.3 \
     --hash=sha256:f9e130248f4462aaa8e2552d547f36ddadbeaa573879158d721bbd33dfe4743a \
     --hash=sha256:fed51ac40f757d41b7c48425901843666a6677e3e8eb0abcff09e4ba6e664f50
     # via mako
-psycopg==3.2.12 \
-    --hash=sha256:85c08d6f6e2a897b16280e0ff6406bef29b1327c045db06d21f364d7cd5da90b \
-    --hash=sha256:8a1611a2d4c16ae37eada46438be9029a35bb959bb50b3d0e1e93c0f3d54c9ee
+psycopg==3.3.0 \
+    --hash=sha256:68950107fb8979d34bfc16b61560a26afe5d8dab96617881c87dfff58221df09 \
+    --hash=sha256:c9f070afeda682f6364f86cd77145f43feaf60648b2ce1f6e883e594d04cbea8
     # via -r requirements.arm.in
-psycopg-c==3.2.12 \
-    --hash=sha256:1c80042067d5df90d184c6fbd58661350b3620f99d87a01c882953c4d5dfa52b
+psycopg-c==3.3.0 \
+    --hash=sha256:07372de01bf18b3ebec726d6bbeed73be1af40b342c364695e80e11ff75607e3
     # via psycopg
 psycopg-pool==3.2.7 \
     --hash=sha256:4b47bb59d887ef5da522eb63746b9f70e2faf967d34aac4f56ffc65e9606728f \
