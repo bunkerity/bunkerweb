@@ -169,16 +169,14 @@ ask_user_preferences() {
                 echo "Please provide the list of BunkerWeb instances (workers) to manage."
                 echo "Format: a space-separated list of IP addresses or hostnames."
                 echo "Example: 192.168.1.10 192.168.1.11"
+                echo "Leave empty to add workers later."
                 echo
-                while true; do
-                    echo -e "${YELLOW}Enter BunkerWeb instances:${NC} "
-                    read -p "" -r BUNKERWEB_INSTANCES_INPUT
-                    if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
-                        break
-                    else
-                        print_warning "This field cannot be empty for Manager/Scheduler installations."
-                    fi
-                done
+                echo -e "${YELLOW}Enter BunkerWeb instances (or press Enter to skip):${NC} "
+                read -p "" -r BUNKERWEB_INSTANCES_INPUT
+                if [ -z "$BUNKERWEB_INSTANCES_INPUT" ]; then
+                    print_warning "No instances configured. You can add workers later."
+                    print_status "See: https://docs.bunkerweb.io/latest/advanced/#3-manage-workers"
+                fi
             fi
         fi
 
@@ -1368,7 +1366,7 @@ usage() {
     echo
     echo "Advanced options:"
     echo "  --instances \"IP1 IP2\"    Space-separated list of BunkerWeb instances"
-    echo "                           (required for --manager and --scheduler-only)"
+    echo "                           (optional for --manager and --scheduler-only)"
     echo "  --manager-ip IPs         Manager/Scheduler IPs to whitelist (required for --worker in non-interactive mode, overrides auto-detect for --manager)"
     echo "  --dns-resolvers \"IP1 IP2\"  Custom DNS resolver IPs (for --full, --manager, --worker)"
     echo "  --api-https              Enable HTTPS for internal API communication (default: HTTP only)"
@@ -1540,11 +1538,10 @@ if [ -n "$BUNKERWEB_INSTANCES_INPUT" ] && [[ "$INSTALL_TYPE" != "manager" && "$I
     exit 1
 fi
 
-# Validate required instances for manager/scheduler in non-interactive mode
+# Inform about missing instances for manager/scheduler in non-interactive mode
 if [ "$INTERACTIVE_MODE" = "no" ] && [[ "$INSTALL_TYPE" = "manager" || "$INSTALL_TYPE" = "scheduler" ]] && [ -z "$BUNKERWEB_INSTANCES_INPUT" ]; then
-    print_error "The --instances option is required when using --manager or --scheduler-only in non-interactive mode"
-    print_error "Example: --manager --instances \"192.168.1.10 192.168.1.11\""
-    exit 1
+    print_warning "No BunkerWeb instances configured. You can add workers later."
+    print_status "See: https://docs.bunkerweb.io/latest/integrations/#linux"
 fi
 
 if [ "$INTERACTIVE_MODE" = "no" ] && [ "$INSTALL_TYPE" = "worker" ] && [ -z "$MANAGER_IP_INPUT" ]; then
