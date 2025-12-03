@@ -4,6 +4,8 @@ x-env: &env
   AUTOCONF_MODE: "yes"
   LOG_LEVEL: "info"
   CUSTOM_LOG_LEVEL: "debug"
+  LOG_TYPES: "stderr syslog"
+  LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
 
 services:
   bunkerweb:
@@ -28,11 +30,6 @@ services:
       bw-services:
         aliases:
           - bunkerweb
-    logging:
-      driver: syslog
-      options:
-        tag: "bunkerweb"
-        syslog-address: "udp://10.20.30.254:514"
 
   bw-autoconf:
     build:
@@ -54,11 +51,6 @@ services:
       bw-docker:
         aliases:
           - bw-autoconf
-    logging:
-      driver: syslog
-      options:
-        tag: "bw-autoconf"
-        syslog-address: "udp://10.20.30.254:514"
 
   bw-scheduler:
     build:
@@ -74,6 +66,8 @@ services:
       SERVER_NAME: ""
       MULTISITE: "yes"
       API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+      ACCESS_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb_access"
+      ERROR_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb"
       USE_BUNKERNET: "no"
       USE_BLACKLIST: "no"
       USE_WHITELIST: "no"
@@ -93,11 +87,6 @@ services:
       bw-db:
         aliases:
           - bw-scheduler
-    logging:
-      driver: syslog
-      options:
-        tag: "bw-scheduler"
-        syslog-address: "udp://10.20.30.254:514"
 
   bw-ui:
     build:
@@ -127,11 +116,6 @@ services:
       bw-db:
         aliases:
           - bw-ui
-    logging:
-      driver: syslog
-      options:
-        tag: "bw-ui"
-        syslog-address: "udp://10.20.30.254:514"
 
   bw-db:
     image: mariadb:11
@@ -177,7 +161,8 @@ services:
       - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf
     networks:
       bw-universe:
-        ipv4_address: 10.20.30.254
+        aliases:
+          - bw-syslog
 
   app1:
     image: nginxdemos/nginx-hello

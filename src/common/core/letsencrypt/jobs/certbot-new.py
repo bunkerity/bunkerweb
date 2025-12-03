@@ -4,7 +4,7 @@ from base64 import b64decode
 from collections import defaultdict
 from datetime import datetime, timedelta
 from json import loads
-from os import environ, getenv, sep
+from os import W_OK, access, environ, getenv, sep, umask
 from os.path import join
 from pathlib import Path
 from re import MULTILINE, match, search
@@ -66,6 +66,46 @@ CACHE_PATH = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
 DATA_PATH = CACHE_PATH.joinpath("etc")
 WORK_DIR = join(sep, "var", "lib", "bunkerweb", "letsencrypt")
 LOGS_DIR = join(sep, "var", "log", "bunkerweb", "letsencrypt")
+
+
+def prepare_logs_dir() -> None:
+    """Ensure the Let's Encrypt logs directory is writable by the running user.
+
+    In some upgrades the existing letsencrypt.log could be left owned by root
+    with read-only group permissions, which prevents certbot from writing new
+    entries when the scheduler runs as a non-root user. We normalise the folder
+    permissions, relax the umask to keep group write access, and drop any
+    unwritable log files so certbot can recreate them.
+    """
+
+    try:
+        umask(0o007)
+    except BaseException:
+        LOGGER.debug("Failed to set umask to 007 for letsencrypt logs")
+
+    logs_path = Path(LOGS_DIR)
+
+    try:
+        logs_path.mkdir(parents=True, exist_ok=True)
+    except BaseException as e:
+        LOGGER.error(f"Failed to create Let's Encrypt logs directory {logs_path}: {e}")
+        return
+
+    try:
+        logs_path.chmod(0o2770)
+    except BaseException as e:
+        LOGGER.debug(f"Failed to set permissions on {logs_path}: {e}")
+
+    for log_file in logs_path.glob("*.log*"):
+        try:
+            if access(log_file, W_OK):
+                log_file.chmod(0o660)
+            else:
+                LOGGER.warning(f"Removing unwritable Let's Encrypt log file {log_file}")
+                log_file.unlink(missing_ok=True)
+        except BaseException as e:
+            LOGGER.debug(f"Failed to adjust permissions on log file {log_file}: {e}")
+
 
 IS_MULTISITE = getenv("MULTISITE", "no") == "yes"
 CHALLENGE_TYPES = ("http", "dns")
@@ -575,6 +615,8 @@ try:
     if not any(service["activated"] for service in services.values()):
         LOGGER.info("No services uses Let's Encrypt, skipping generation of new certificates...")
         sys_exit(0)
+
+    prepare_logs_dir()
 
     JOB = Job(LOGGER, __file__.replace("new", "renew"))
 

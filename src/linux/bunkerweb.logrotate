@@ -23,5 +23,5 @@
     missingok
     compress
     delaycompress
-    create 0640 nginx nginx
+    create 0660 nginx nginx
 }

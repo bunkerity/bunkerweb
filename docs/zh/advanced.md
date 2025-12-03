@@ -6,8 +6,6 @@ GitHub 仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/e
 
 本节仅关注高级用法和安全调整，请参阅文档的[功能部分](features.md)以查看所有可用的设置。
 
-## 用例
-
 !!! tip "测试"
     当启用多站点模式时（并且如果您没有为域设置正确的 DNS 条目），要执行快速测试，您可以使用 curl 并带上您选择的 HTTP 主机头：
     ```shell
@@ -19,7 +17,7 @@ GitHub 仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/e
     curl -H "Host: app1.example.com" --resolve example.com:443:ip-of-server https://example.com
     ```
 
-### 在负载均衡器或反向代理之后
+## 在负载均衡器或反向代理之后 {#behind-load-balancer-or-reverse-proxy}
 
 !!! info "真实 IP"
 
@@ -374,7 +372,487 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         请注意，如果您的服务已经创建，您需要删除并重新创建它，以便更新新的环境变量。
 
-### 使用自定义 DNS 解析机制
+## 高可用性和负载均衡
+
+为了确保即使某台服务器宕机，您的应用依然可用，可以将 BunkerWeb 部署成一个 **HA 集群**。该架构包含一个负责编排配置的 **Manager**（Scheduler）以及多个处理流量的 **Worker**（BunkerWeb 实例）。
+
+```mermaid
+flowchart LR
+
+  %% ================ Styles =================
+  classDef manager     fill:#eef2ff,stroke:#4c1d95,stroke-width:1px,rx:6px,ry:6px;
+  classDef component     fill:#f9fafb,stroke:#6b7280,stroke-width:1px,rx:4px,ry:4px;
+  classDef lb            fill:#e0f2fe,stroke:#0369a1,stroke-width:1px,rx:6px,ry:6px;
+  classDef database fill:#d1fae5,stroke:#059669,stroke-width:1px,rx:4px,ry:4px;
+  classDef datastore     fill:#fee2e2,stroke:#b91c1c,stroke-width:1px,rx:4px,ry:4px;
+  classDef backend       fill:#ede9fe,stroke:#7c3aed,stroke-width:1px,rx:4px,ry:4px;
+  classDef client        fill:#e5e7eb,stroke:#4b5563,stroke-width:1px,rx:4px,ry:4px;
+
+  %% Container styles
+  style CLUSTER fill:#f3f4f6,stroke:#d1d5db,stroke-width:1px,stroke-dasharray:6 3;
+  style WORKERS fill:none,stroke:#9ca3af,stroke-width:1px,stroke-dasharray:4 2;
+
+  %% ============== Outside left =============
+  Client["客户端"]:::client
+  LB["负载均衡器"]:::lb
+
+  %% ============== Cluster ==================
+  subgraph CLUSTER[" "]
+    direction TB
+
+    %% ---- Top row: Manager + Redis ----
+    subgraph TOP["Manager 与数据存储"]
+      direction LR
+      Manager["Manager<br/>(Scheduler)"]:::manager
+      BDD["数据库"]:::database
+      Redis["Redis/Valkey"]:::datastore
+      UI["Web 界面"]:::manager
+    end
+
+    %% ---- Middle: Workers ----
+    subgraph WORKERS["Workers (BunkerWeb)"]
+      direction TB
+      Worker1["Worker 1"]:::component
+      WorkerN["Worker N"]:::component
+    end
+
+    %% ---- Bottom: App ----
+    App["应用"]:::backend
+  end
+
+  %% ============ Outside right ============
+  Admin["管理员"]:::client
+
+  %% ============ Traffic & control ===========
+  %% Manager / control plane
+  Manager -->|API 5000| Worker1
+  Manager -->|API 5000| WorkerN
+  Manager -->|bwcli| Redis
+  Manager -->|配置| BDD
+
+  %% User interface (UI)
+  UI -->|配置| BDD
+  UI -->|报告 / 封禁| Redis
+  BDD --- UI
+  Redis --- UI
+  linkStyle 6 stroke-width:0px;
+  linkStyle 7 stroke-width:0px;
+
+  %% Workers <-> Redis
+  Worker1 -->|共享缓存| Redis
+  WorkerN -->|共享缓存| Redis
+
+  %% Workers -> App
+  Worker1 -->|合法流量| App
+  WorkerN -->|合法流量| App
+
+  %% Client (right side) -> Load balancer -> Workers -> App
+  Client -->|请求| LB
+  LB -->|HTTP/TCP| Worker1
+  LB -->|HTTP/TCP| WorkerN
+
+  %% Admin -> UI
+  UI --- Admin
+  Admin -->|HTTP| UI
+  linkStyle 15 stroke-width:0px;
+```
+
+!!! info "理解 BunkerWeb 的 API"
+    BunkerWeb 有两个不同的 API 概念：
+
+    - **内部 API**：自动连接 Manager 与 Worker 以完成编排。始终启用，无需手动配置。
+    - 可选的 **API 服务**（`bunkerweb-api`）：为自动化工具（bwcli、CI/CD 等）提供公开的 REST 接口。Linux 安装默认禁用，与内部 Manager↔Worker 通信无关。
+
+### 前提条件
+
+在搭建集群前，请确保：
+
+- **至少 2 台 Linux 主机**，可使用 root/sudo。
+- 主机之间 **网络互通**（尤其是内部 API 的 TCP 5000 端口）。
+- 需要保护的 **应用 IP 或主机名**。
+- *(可选)* **负载均衡器**（例如 HAProxy）用于在 Worker 之间分发流量。
+
+### 1. 安装 Manager
+
+Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界面。
+
+!!! warning "Web 界面的安全性"
+    Web 界面监听专用端口（默认 7000），应仅供管理员访问。如果要暴露到互联网，**强烈建议** 在前面加一层 BunkerWeb 进行保护。
+
+=== "Linux"
+
+    1. **在 Manager 主机下载并运行安装脚本**：
+
+        ```bash
+        # 下载脚本及校验文件
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6/install-bunkerweb.sh.sha256
+
+        # 校验完整性
+        sha256sum -c install-bunkerweb.sh.sha256
+
+        # 运行安装器
+        chmod +x install-bunkerweb.sh
+        sudo ./install-bunkerweb.sh
+        ```
+
+        !!! danger "安全提示"
+            在执行脚本前务必通过提供的校验值验证其完整性。
+
+    2. **选择 2) Manager** 并按提示操作：
+
+        | 提示                     | 操作                                                                                 |
+        | :----------------------- | :----------------------------------------------------------------------------------- |
+        | **BunkerWeb 实例**       | 输入 Worker 节点 IP，空格分隔（例如 `192.168.10.11 192.168.10.12`）。                 |
+        | **Whitelist IP**         | 接受检测到的 IP，或输入网段（例如 `192.168.10.0/24`）以允许访问内部 API。             |
+        | **DNS 解析器**           | 按 `N` 使用默认值，或指定自定义解析器。                                               |
+        | **内部 API 启用 HTTPS**  | **推荐：** 选择 `Y` 生成证书，保护 Manager-Worker 通信。                             |
+        | **Web UI 服务**          | 选择 `Y` 启用界面（强烈推荐）。                                                       |
+        | **API 服务**             | 除非需要公共 REST API，否则选择 `N`。                                                 |
+
+    #### 保护并暴露 UI
+
+    如果启用了 Web UI，需要妥善保护。可以部署在 Manager 上或单独的机器上。
+
+    === "部署在 Manager 上"
+
+        1. 编辑 `/etc/bunkerweb/ui.env`，设置强密码：
+
+        ```ini
+        # OVERRIDE_ADMIN_CREDS=no
+        ADMIN_USERNAME=admin
+        ADMIN_PASSWORD=changeme
+        # FLASK_SECRET=changeme
+        # TOTP_ENCRYPTION_KEYS=changeme
+        LISTEN_ADDR=0.0.0.0
+        # LISTEN_PORT=7000
+        FORWARDED_ALLOW_IPS=127.0.0.1
+        # ENABLE_HEALTHCHECK=no
+        ```
+
+        !!! warning "修改默认凭据"
+            在生产环境启动 UI 前，将 `admin` 和 `changeme` 替换为强凭据。
+
+        2. 重启 UI：
+
+        ```bash
+        sudo systemctl restart bunkerweb-ui
+        ```
+
+    === "独立主机"
+
+        为了更好的隔离，可在单独节点安装 UI。
+
+        1. 运行安装器并选择 **5) Web UI Only**。
+        2. 编辑 `/etc/bunkerweb/ui.env` 指向 Manager 的数据库：
+
+            ```ini
+            # 数据库配置（需与 Manager 数据库一致）
+            DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@db-host:3306/bunkerweb
+            # PostgreSQL: postgresql://bunkerweb:changeme@db-host:5432/bunkerweb
+            # MySQL: mysql+pymysql://bunkerweb:changeme@db-host:3306/bunkerweb
+
+            # Redis 配置（若使用 Redis/Valkey 持久化）
+            # 若未提供，将自动从数据库中获取
+            # REDIS_HOST=redis-host
+
+            # 安全凭据
+            ADMIN_USERNAME=admin
+            ADMIN_PASSWORD=changeme
+
+            # 网络设置
+            LISTEN_ADDR=0.0.0.0
+            # LISTEN_PORT=7000
+            ```
+
+        3. 重启服务：
+
+            ```bash
+            sudo systemctl restart bunkerweb-ui
+            ```
+
+        !!! tip "防火墙设置"
+            确保 UI 主机可以访问数据库和 Redis 端口。可能需要在 UI 主机以及数据库/Redis 主机上调整防火墙规则。
+
+=== "Docker"
+
+    在 Manager 主机创建 `docker-compose.yml`：
+
+    ```yaml title="docker-compose.yml"
+    x-ui-env: &bw-ui-env
+      # 通过锚点避免重复环境变量
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 请使用更强的数据库密码
+
+    services:
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.6
+        environment:
+          <<: *bw-ui-env
+          BUNKERWEB_INSTANCES: "192.168.1.11 192.168.1.12" # 替换为 Worker IP
+          API_WHITELIST_IP: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16" # 允许本地网段
+          # API_LISTEN_HTTPS: "yes" # 推荐启用 HTTPS 保护内部 API
+          # API_TOKEN: "my_secure_token" # 可选：额外的 Token
+          SERVER_NAME: ""
+          MULTISITE: "yes"
+          USE_REDIS: "yes"
+          REDIS_HOST: "redis"
+        volumes:
+          - bw-storage:/data # 持久化缓存和备份
+        restart: "unless-stopped"
+        networks:
+          - bw-db
+          - bw-redis
+
+      bw-ui:
+        image: bunkerity/bunkerweb-ui:1.6.6
+        ports:
+          - "7000:7000" # 暴露 UI 端口
+        environment:
+          <<: *bw-ui-env
+          ADMIN_USERNAME: "changeme"
+          ADMIN_PASSWORD: "changeme" # 请使用更强密码
+          TOTP_ENCRYPTION_KEYS: "mysecret" # 请使用更强密钥（见前提条件）
+        restart: "unless-stopped"
+        networks:
+          - bw-db
+          - bw-redis
+
+      bw-db:
+        image: mariadb:11
+        # 设置更大的 max_allowed_packet 以避免大查询问题
+        command: --max-allowed-packet=67108864
+        environment:
+          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+          MYSQL_DATABASE: "db"
+          MYSQL_USER: "bunkerweb"
+          MYSQL_PASSWORD: "changeme" # 请使用更强密码
+        volumes:
+          - bw-data:/var/lib/mysql
+        restart: "unless-stopped"
+        networks:
+          - bw-db
+
+      redis: # Redis 用于报告/封禁/统计的持久化
+        image: redis:7-alpine
+        command: >
+          redis-server
+          --maxmemory 256mb
+          --maxmemory-policy allkeys-lru
+          --save 60 1000
+          --appendonly yes
+        volumes:
+          - redis-data:/data
+        restart: "unless-stopped"
+        networks:
+          - bw-redis
+
+    volumes:
+      bw-data:
+      bw-storage:
+      redis-data:
+
+    networks:
+      bw-db:
+        name: bw-db
+      bw-redis:
+        name: bw-redis
+    ```
+
+    启动 Manager 组合：
+
+    ```bash
+    docker compose up -d
+    ```
+
+### 2. 安装 Worker
+
+Worker 负责处理进入的流量。
+
+=== "Linux"
+
+    1. **在每个 Worker 节点运行安装器**（与 Manager 相同的命令）。
+    2. **选择 3) Worker** 并配置：
+
+        | 提示                     | 操作                                                     |
+        | :----------------------- | :------------------------------------------------------- |
+        | **Manager IP**           | 输入 Manager IP（例如 `192.168.10.10`）。                 |
+        | **内部 API 启用 HTTPS**  | 必须与 Manager 保持一致（`Y` 或 `N`）。                    |
+
+    Worker 会自动向 Manager 注册。
+
+=== "Docker"
+
+    在每个 Worker 主机创建 `docker-compose.yml`：
+
+    ```yaml title="docker-compose.yml"
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.6.6
+        ports:
+          - "80:8080/tcp"
+          - "443:8443/tcp"
+          - "443:8443/udp" # 支持 QUIC / HTTP3
+          - "5000:5000/tcp" # 内部 API 端口
+        environment:
+          API_WHITELIST_IP: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+          # API_LISTEN_HTTPS: "yes" # 推荐开启（需与 Manager 一致）
+          # API_TOKEN: "my_secure_token" # 可选：额外 Token（需与 Manager 一致）
+        restart: "unless-stopped"
+    ```
+
+    启动 Worker：
+
+    ```bash
+    docker compose up -d
+    ```
+
+### 3. 管理 Worker
+
+可以通过 Web UI 或 CLI 随时添加更多 Worker。
+
+=== "通过 Web UI"
+
+    1. 打开 **Instances** 选项卡。
+    2. 点击 **Add instance**。
+    3. 输入 Worker 的 IP/主机名并保存。
+
+    <div class="grid grid-2" markdown style="display:grid; align-items:center;">
+    <figure markdown style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%;">
+      ![BunkerWeb UI - 创建实例](assets/img/ui-ha-create-instance.webp){ width="100%" }
+      <figcaption>BunkerWeb UI - 创建实例</figcaption>
+    </figure>
+    <figure markdown style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%;">
+      ![BunkerWeb UI - 创建实例表单](assets/img/ui-ha-create-instance-form.webp){ width="100%" }
+      <figcaption>BunkerWeb UI - 创建实例表单</figcaption>
+    </figure>
+    </div>
+
+=== "通过配置"
+
+    === "Linux"
+
+        1. 在 Manager 上修改 `/etc/bunkerweb/variables.env`：
+
+            ```bash
+            BUNKERWEB_INSTANCES=192.168.10.11 192.168.10.12 192.168.10.13
+            ```
+
+        2. 重启 Scheduler：
+
+            ```bash
+            sudo systemctl restart bunkerweb-scheduler
+            ```
+
+    === "Docker"
+
+        1. 编辑 Manager 上的 `docker-compose.yml` 更新 `BUNKERWEB_INSTANCES`。
+
+        2. 重新创建 Scheduler 容器：
+
+            ```bash
+            docker compose up -d bw-scheduler
+            ```
+
+### 4. 验证部署
+
+=== "Linux"
+
+    1. **检查状态**：登录 UI（`http://<manager-ip>:7000`）并打开 **Instances** 选项卡，所有 Worker 应显示 **Up**。
+    2. **测试故障转移**：停止某个 Worker 上的 BunkerWeb（`sudo systemctl stop bunkerweb`），确认流量仍然可达。
+
+=== "Docker"
+
+    1. **检查状态**：登录 UI（`http://<manager-ip>:7000`）并打开 **Instances** 选项卡，所有 Worker 应显示 **Up**。
+    2. **测试故障转移**：停止某个 Worker 上的 BunkerWeb（`docker compose stop bunkerweb`），确认流量仍然可达。
+
+### 5. 负载均衡
+
+要在 Worker 之间分发流量，使用负载均衡器。建议使用支持 **PROXY protocol** 的四层（TCP）负载均衡器以保留客户端 IP。
+
+=== "HAProxy - 第 4 层 (TCP)"
+
+    以下是一个 **HAProxy** TCP 模式示例，使用 **PROXY protocol** 传递客户端 IP。
+
+    ```cfg title="haproxy.cfg"
+    defaults
+        timeout connect 5s
+        timeout client 5s
+        timeout server 5s
+
+    frontend http_front
+        mode tcp
+        bind *:80
+        default_backend http_back
+
+    frontend https_front
+        mode tcp
+        bind *:443
+        default_backend https_back
+
+    backend http_back
+        mode tcp
+        balance roundrobin
+        server worker01 192.168.10.11:80 check send-proxy-v2
+        server worker02 192.168.10.12:80 check send-proxy-v2
+
+    backend https_back
+        mode tcp
+        balance roundrobin
+        server worker01 192.168.10.11:443 check send-proxy-v2
+        server worker02 192.168.10.12:443 check send-proxy-v2
+    ```
+
+=== "HAProxy - 第 7 层 (HTTP)"
+
+    以下是一个 **HAProxy** 七层（HTTP）示例。它会添加 `X-Forwarded-For` 头，便于 BunkerWeb 获取客户端 IP。
+
+    ```cfg title="haproxy.cfg"
+    defaults
+        timeout connect 5s
+        timeout client 5s
+        timeout server 5s
+
+    frontend http_front
+        mode http
+        bind *:80
+        default_backend http_back
+
+    frontend https_front
+        mode http
+        bind *:443
+        default_backend https_back
+
+    backend http_back
+        mode http
+        balance roundrobin
+        option forwardfor
+        server worker01 192.168.10.11:80 check
+        server worker02 192.168.10.12:80 check
+
+    backend https_back
+        mode http
+        balance roundrobin
+        option forwardfor
+        server worker01 192.168.10.11:443 check
+        server worker02 192.168.10.12:443 check
+    ```
+
+保存配置后重载 HAProxy：
+
+```bash
+sudo systemctl restart haproxy
+```
+
+更多信息请参阅 [HAProxy 官方文档](http://docs.haproxy.org/)。
+
+!!! tip "配置真实 IP"
+    别忘了在 BunkerWeb 中启用真实客户端 IP（使用 PROXY protocol 或 X-Forwarded-For 头）。
+
+    详见 [在负载均衡器或反向代理之后](#behind-load-balancer-or-reverse-proxy) 章节，确保获取到正确的客户端 IP。
+
+    在每个 Worker 上查看 `/var/log/bunkerweb/access.log`，确认请求来自 PROXY protocol 网段，且多个 Worker 分担流量。此时 BunkerWeb 集群即可以高可用方式保护生产业务。
+
+## 使用自定义 DNS 解析机制
 
 BunkerWeb 的 NGINX 配置可以根据您的需求定制，以使用不同的 DNS 解析器。这在各种场景中特别有用：
 
@@ -382,7 +860,7 @@ BunkerWeb 的 NGINX 配置可以根据您的需求定制，以使用不同的 DN
 2. 当您需要为某些域使用自定义 DNS 服务器时
 3. 为了与本地 DNS 缓存解决方案集成
 
-#### 使用 systemd-resolved
+### 使用 systemd-resolved
 
 许多现代 Linux 系统使用 `systemd-resolved` 进行 DNS 解析。如果您希望 BunkerWeb 遵循您 `/etc/hosts` 文件的内容并使用系统的 DNS 解析机制，您可以将其配置为使用本地的 systemd-resolved DNS 服务。
 
@@ -416,7 +894,7 @@ systemctl status systemd-resolved
     sudo systemctl reload bunkerweb-scheduler
     ```
 
-#### 使用 dnsmasq
+### 使用 dnsmasq
 
 [dnsmasq](http://www.thekelleys.org.uk/dnsmasq/doc.html) 是一个轻量级的 DNS、DHCP 和 TFTP 服务器，通常用于本地 DNS 缓存和定制。当您需要比 systemd-resolved 提供更多对 DNS 解析的控制时，它特别有用。
 
@@ -568,7 +1046,7 @@ systemctl status systemd-resolved
         name: bw-dns
     ```
 
-### 自定义配置 {#custom-configurations}
+## 自定义配置 {#custom-configurations}
 
 要自定义并向 BunkerWeb 添加自定义配置，您可以利用其 NGINX 基础。自定义 NGINX 配置可以添加到不同的 NGINX 上下文中，包括 ModSecurity Web 应用程序防火墙 (WAF) 的配置，这是 BunkerWeb 的核心组件。有关 ModSecurity 配置的更多详细信息，请参见[此处](features.md#custom-configurations)。
 
@@ -941,9 +1419,9 @@ systemctl status systemd-resolved
 
     没有更新机制：替代方法是使用 `docker config rm` 删除现有配置，然后重新创建它。
 
-### 在生产环境中运行大量服务 {#running-many-services-in-production}
+## 在生产环境中运行大量服务 {#running-many-services-in-production}
 
-#### 全局 CRS
+### 全局 CRS
 
 !!! warning "CRS 插件"
     当 CRS 全局加载时，**不支持 CRS 插件**。如果您需要使用它们，则需要为每个服务加载 CRS。
@@ -959,7 +1437,7 @@ SecRule REQUEST_HEADERS:Host "@rx ^app1\.example\.com$" "nolog"
 
 您可以通过将 `USE_MODSECURITY_GLOBAL_CRS` 设置为 `yes` 来启用全局 CRS 加载。
 
-#### 为 MariaDB/MySQL 调整 max_allowed_packet
+### 为 MariaDB/MySQL 调整 max_allowed_packet
 
 在使用 BunkerWeb 并有大量服务时，MariaDB 和 MySQL 数据库服务器中 `max_allowed_packet` 参数的默认值似乎不足。
 
@@ -971,7 +1449,7 @@ SecRule REQUEST_HEADERS:Host "@rx ^app1\.example\.com$" "nolog"
 
 您需要在您的数据库服务器上增加 `max_allowed_packet` 的值。
 
-### 封禁和报告的持久化 {#persistence-of-bans-and-reports}
+## 封禁和报告的持久化 {#persistence-of-bans-and-reports}
 
 默认情况下，BunkerWeb 将封禁和报告存储在本地的 Lua 数据存储中。虽然这种设置简单高效，但意味着当实例重启时数据会丢失。为了确保封禁和报告在重启后仍然存在，您可以将 BunkerWeb 配置为使用远程的 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 服务器。
 
@@ -1012,7 +1490,7 @@ REDIS_DATABASE=0
 
 如果您需要更高级的设置，例如身份验证、SSL/TLS 支持或 Sentinel 模式，请参阅 [Redis 插件设置文档](features.md#redis)以获取详细指导。
 
-### 保护 UDP/TCP 应用程序
+## 保护 UDP/TCP 应用程序
 
 !!! example "实验性功能"
 
@@ -1454,7 +1932,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
         name: bw-services
     ```
 
-### PHP
+## PHP
 
 !!! example "实验性功能"
       目前，BunkerWeb 对 PHP 的支持仍处于测试阶段，我们建议您如果可以的话，使用反向代理架构。顺便说一句，对于某些集成（如 Kubernetes），PHP 完全不受支持。
@@ -2009,7 +2487,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
         name: bw-services
     ```
 
-### IPv6
+## IPv6
 
 !!! example "实验性功能"
 
@@ -2087,7 +2565,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     systemctl start bunkerweb
     ```
 
-### 日志配置选项
+## 日志配置选项
 
 BunkerWeb 提供灵活的日志配置，允许您同时将日志发送到多个目标（例如文件、stdout/stderr 或 syslog）。这对于将日志集成到外部收集器并同时在 Web UI 中保留本地日志非常有用。
 
@@ -2096,7 +2574,7 @@ BunkerWeb 提供灵活的日志配置，允许您同时将日志发送到多个�
 1. **服务日志（Service Logs）**：由 BunkerWeb 的组件（Scheduler、UI、Autoconf 等）生成。每个服务按 `LOG_TYPES` 控制（可选地配合 `LOG_FILE_PATH`、`LOG_SYSLOG_ADDRESS`、`LOG_SYSLOG_TAG`）。
 2. **访问与错误日志（Access & Error Logs）**：由 NGINX 生成的 HTTP 访问日志和错误日志。仅由 `bunkerweb` 服务使用（`ACCESS_LOG` / `ERROR_LOG` / `LOG_LEVEL`）。
 
-#### 服务日志
+### 服务日志
 
 服务日志由 `LOG_TYPES` 设置控制，支持以空格分隔的多个值（例如 `LOG_TYPES="stderr syslog"`）。
 
@@ -2112,7 +2590,7 @@ BunkerWeb 提供灵活的日志配置，允许您同时将日志发送到多个�
 - `LOG_SYSLOG_TAG`：用于区分服务条目的唯一标签（例如 `bw-scheduler`）。
 - `LOG_FILE_PATH`：当 `LOG_TYPES` 包含 `file` 时用于文件输出的路径（例如 `/var/log/bunkerweb/scheduler.log`）。
 
-#### 访问与错误日志
+### 访问与错误日志
 
 这些是标准的 NGINX 日志，仅通过 **`bunkerweb` 服务** 配置。它们支持通过在设置名称后添加编号后缀来配置多个目标（例如 `ACCESS_LOG`、`ACCESS_LOG_1` 与匹配的 `LOG_FORMAT` / `LOG_FORMAT_1`，或 `ERROR_LOG`、`ERROR_LOG_1` 与对应的 `LOG_LEVEL` / `LOG_LEVEL_1`）。
 
@@ -2135,7 +2613,7 @@ LOG_LEVEL=notice
 LOG_LEVEL_1=error
 ```
 
-#### 集成默认值与示例
+### 集成默认值与示例
 
 === "Linux"
 
@@ -2285,7 +2763,7 @@ LOG_LEVEL_1=error
         name: bw-db
     ```
 
-#### Syslog-ng 配置
+### Syslog-ng 配置
 
 下面是一个可将日志转发到文件的 `syslog-ng.conf` 示例：
 
@@ -2332,7 +2810,7 @@ log {
 };
 ```
 
-### Docker 日志记录最佳实践
+## Docker 日志记录最佳实践
 
 使用 Docker 时，管理容器日志以防止其占用过多磁盘空间非常重要。默认情况下，Docker 使用 `json-file` 日志记录驱动程序，如果未进行配置，可能会导致日志文件非常大。
 
@@ -2405,7 +2883,7 @@ BunkerWeb 提供了许多安全功能，您可以通过[功能](features.md)进�
 
 ## 监控和报告
 
-#### 监控 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### 监控 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM 支持 :x:
 
@@ -2425,7 +2903,7 @@ STREAM 支持 :x:
 | `USE_MONITORING`               | `yes` | 全局   | 否   | 启用 BunkerWeb 的监控。      |
 | `MONITORING_METRICS_DICT_SIZE` | `10M` | 全局   | 否   | 用于存储监控指标的字典大小。 |
 
-#### Prometheus 导出器 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### Prometheus 导出器 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM 支持 :x:
 
@@ -2451,7 +2929,7 @@ Prometheus 导出器插件在您的 BunkerWeb 实例上添加了一个 [Promethe
 | `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | 全局   | 否   | Prometheus 导出器的 HTTP URL。                 |
 | `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | 全局   | 否   | 允许联系 Prometheus 导出器端点的 IP/网络列表。 |
 
-#### 报告 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### 报告 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM 支持 :x:
 
@@ -2490,9 +2968,9 @@ STREAM 支持 :x:
   - 如果 Webhook 和 SMTP 都失败，发送将在下一次计划运行时重试。
   - HTML 和 Markdown 模板位于 `reporting/files/`；自定义时请谨慎保留占位符。
 
-### 备份和恢复
+## 备份和恢复
 
-#### S3 备份 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### S3 备份 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM 支持 :white_check_mark:
 
@@ -2559,7 +3037,7 @@ S3 备份工具可以无缝地自动化数据保护，类似于社区备份插�
 | `BACKUP_S3_ACCESS_KEY_SECRET` |         | 全局   | S3 访问密钥 Secret      |
 | `BACKUP_S3_COMP_LEVEL`        | `6`     | 全局   | 备份 zip 文件的压缩级别 |
 
-##### 手动备份
+#### 手动备份
 
 要手动启动备份，请执行以下命令：
 
@@ -2625,7 +3103,7 @@ S3 备份工具可以无缝地自动化数据保护，类似于社区备份插�
             ...
         ```
 
-##### 手动恢复
+#### 手动恢复
 
 要手动启动恢复，请执行以下命令：
 
@@ -2673,7 +3151,7 @@ S3 备份工具可以无缝地自动化数据保护，类似于社区备份插�
         docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
         ```
 
-### 迁移 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## 迁移 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM 支持 :white_check_mark:
 
@@ -2687,7 +3165,7 @@ STREAM 支持 :white_check_mark:
 
 - **跨数据库兼容性：** 在各种数据库平台之间实现无缝迁移，包括 SQLite、MySQL、MariaDB 和 PostgreSQL，确保与您首选的数据库环境兼容。
 
-#### 创建迁移文件
+### 创建迁移文件
 
 要手动创建迁移文件，请执行以下命令：
 
@@ -2747,7 +3225,7 @@ STREAM 支持 :white_check_mark:
             ...
         ```
 
-#### 初始化迁移
+### 初始化迁移
 
 要手动初始化迁移，请执行以下命令：
 
@@ -2795,7 +3273,7 @@ STREAM 支持 :x:
 
 通过采用**滑动窗口机制**，该插件在内存中维护一个请求时间戳字典，以检测来自单个 IP 地址的异常流量峰值。根据配置的安全模式，它可以阻止违规连接或记录可疑活动以供进一步审查。
 
-#### 功能
+### 功能
 
 - **实时流量分析：** 持续监控传入请求以检测潜在的 DDoS 攻击。
 - **滑动窗口机制：** 在可配置的时间窗口内跟踪最近的请求活动。
@@ -2805,7 +3283,7 @@ STREAM 支持 :x:
 - **优化的内存数据存储：** 确保高速查找和高效的指标跟踪。
 - **自动清理：** 定期清除过时数据以保持最佳性能。
 
-#### 配置
+### 配置
 
 使用以下设置自定义插件行为：
 
@@ -2818,7 +3296,7 @@ STREAM 支持 :x:
 | `ANTIDDOS_STATUS_CODES`      | `429 403 444` | 全局   | 否   | 被认为是可疑并用于触发反 DDoS 操作的 HTTP 状态码。              |
 | `ANTIDDOS_DISTINCT_IP`       | `5`           | 全局   | 否   | 在强制执行阻止模式之前，必须超过阈值的最少不同 IP 数量。        |
 
-#### 最佳实践
+### 最佳实践
 
 - **阈值调整：** 根据您的典型流量模式调整 `ANTIDDOS_THRESHOLD` 和 `ANTIDDOS_WINDOW_TIME`。
 - **状态码审查：** 定期更新 `ANTIDDOS_STATUS_CODES` 以捕获新的或不断演变的可疑行为。
@@ -2834,7 +3312,7 @@ STREAM 支持 :x:
 
 借助此插件，管理员可以轻松创建、更新和禁用用户帐户，管理用户角色，切换双因素身份验证 (2FA)，并查看详细的用户信息，例如上次登录时间戳和帐户状态（活动或非活动）。该插件在设计时考虑了安全性和易用性，简化了常规的用户管理任务，同时确保了合规性和可审计性。
 
-#### 功能
+### 功能
 
 - **用户帐户操作：** 支持以 CSV/XSLX 格式导入，轻松创建、编辑和删除用户帐户。
 - **基于角色的访问控制：** 分配和修改用户角色以管理权限和访问级别。
@@ -2861,7 +3339,7 @@ STREAM 支持 :x:
 
 轻松解决插件让您可以直接从报告页面快速修复误报和重复出现的问题。它将引导式的“解决”操作转化为安全、范围受限的配置更新——无需手动编辑。
 
-#### 功能
+### 功能
 
 - 从报告和报告详情中一键操作。
 - 针对 ModSecurity、黑名单和 DNSBL 的上下文感知建议。
@@ -2916,7 +3394,7 @@ STREAM 支持 :x:
 
 Load Balancer 插件将 BunkerWeb 转变为带有护栏的流量导向器。一次声明上游池，将您的反向代理指向它们，并让健康感知平衡将用户保持在响应式后端上。粘性 cookie 模式自动发出 `BWLBID` cookie，以便会话保持在您想要的地方。
 
-#### 功能
+### 功能
 
 - 每个上游块：命名池并在反向代理主机上重用。
 - 灵活平衡：默认 round-robin，或通过 IP 或签名 cookie 粘性。
@@ -2924,7 +3402,7 @@ Load Balancer 插件将 BunkerWeb 转变为带有护栏的流量导向器。一�
 - 内置健康：HTTP/HTTPS 探测，具有自定义路径、间隔、状态代码和 SSL 检查。
 - 会话连续性：启用粘性 cookie 模式时自动 `BWLBID` cookie。
 
-#### 配置
+### 配置
 
 **上游定义**
 
@@ -2955,7 +3433,7 @@ Load Balancer 插件将 BunkerWeb 转变为带有护栏的流量导向器。一�
 | `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`     | global | 是   | 使用 HTTPS 检查时验证 TLS 证书。      |
 | `LOADBALANCER_HEALTHCHECK_HOST`           |           | global | 是   | 检查期间覆盖 Host 头（对 SNI 有用）。 |
 
-#### 快速开始
+### 快速开始
 
 1. 定义您的池：设置 `LOADBALANCER_UPSTREAM_NAME=my-app` 并在 `LOADBALANCER_UPSTREAM_SERVERS` 中列出目标（例如 `10.0.0.1:8080 10.0.0.2:8080`）。
 2. 指向流量：设置 `REVERSE_PROXY_HOST=http://my-app` 以便反向代理使用命名的上游。
@@ -2963,7 +3441,7 @@ Load Balancer 插件将 BunkerWeb 转变为带有护栏的流量导向器。一�
 4. 添加健康：保持 `/status` 或调整 URL、间隔和有效状态以反映您的应用行为。
 5. 调整连接：配置 keepalive 值以重用后端连接并减少握手开销。
 
-#### 使用提示
+### 使用提示
 
 - 使用粘性 cookie 时，将 `REVERSE_PROXY_HOST` 与 `LOADBALANCER_UPSTREAM_NAME` 匹配，以便客户端固定到正确的池。
 - 保持健康检查间隔和超时平衡，以避免在慢速链路上波动。

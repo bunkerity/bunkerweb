@@ -6,8 +6,6 @@ Nous fournissons également de nombreux modèles standard, tels que des fichiers
 
 Cette section se concentre uniquement sur les utilisations avancées et le réglage de la sécurité, consultez la [section fonctionnalités](features.md) de la documentation pour voir tous les paramètres disponibles.
 
-## Cas d'utilisation
-
 !!! tip "Tester"
     Pour effectuer des tests rapides lorsque le mode multisite est activé (et si vous n'avez pas les bonnes entrées DNS configurées pour les domaines), vous pouvez utiliser curl avec l'en-tête HTTP Host de votre choix :
     ```shell
@@ -19,7 +17,7 @@ Cette section se concentre uniquement sur les utilisations avancées et le régl
     curl -H "Host: app1.example.com" --resolve example.com:443:ip-of-server https://example.com
     ```
 
-### Derrière l'équilibreur de charge ou le proxy inverse
+## Derrière l'équilibreur de charge ou le proxy inverse {#behind-load-balancer-or-reverse-proxy}
 
 !!! info "Real IP"
 
@@ -374,7 +372,487 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         Veuillez noter que si votre conteneur existe déjà, vous devrez le supprimer et le recréer afin que les nouvelles variables d'environnement soient prises en compte.
 
-### Utilisation de mécanismes de résolution DNS personnalisés
+## Haute disponibilité et répartition de charge
+
+Pour garantir la disponibilité de vos applications même si un serveur tombe, vous pouvez déployer BunkerWeb en cluster **HA**. Cette architecture comporte un **Manager** (Scheduler) qui orchestre la configuration et plusieurs **Workers** (instances BunkerWeb) qui traitent le trafic.
+
+```mermaid
+flowchart LR
+
+  %% ================ Styles =================
+  classDef manager     fill:#eef2ff,stroke:#4c1d95,stroke-width:1px,rx:6px,ry:6px;
+  classDef component     fill:#f9fafb,stroke:#6b7280,stroke-width:1px,rx:4px,ry:4px;
+  classDef lb            fill:#e0f2fe,stroke:#0369a1,stroke-width:1px,rx:6px,ry:6px;
+  classDef database fill:#d1fae5,stroke:#059669,stroke-width:1px,rx:4px,ry:4px;
+  classDef datastore     fill:#fee2e2,stroke:#b91c1c,stroke-width:1px,rx:4px,ry:4px;
+  classDef backend       fill:#ede9fe,stroke:#7c3aed,stroke-width:1px,rx:4px,ry:4px;
+  classDef client        fill:#e5e7eb,stroke:#4b5563,stroke-width:1px,rx:4px,ry:4px;
+
+  %% Container styles
+  style CLUSTER fill:#f3f4f6,stroke:#d1d5db,stroke-width:1px,stroke-dasharray:6 3;
+  style WORKERS fill:none,stroke:#9ca3af,stroke-width:1px,stroke-dasharray:4 2;
+
+  %% ============== Outside left =============
+  Client["Client"]:::client
+  LB["Load Balancer"]:::lb
+
+  %% ============== Cluster ==================
+  subgraph CLUSTER[" "]
+    direction TB
+
+    %% ---- Top row: Manager + Redis ----
+    subgraph TOP["Manager & Data Stores"]
+      direction LR
+      Manager["Manager<br/>(Scheduler)"]:::manager
+      BDD["BDD"]:::database
+      Redis["Redis/Valkey"]:::datastore
+      UI["Interface Web"]:::manager
+    end
+
+    %% ---- Middle: Workers ----
+    subgraph WORKERS["Workers (BunkerWeb)"]
+      direction TB
+      Worker1["Worker 1"]:::component
+      WorkerN["Worker N"]:::component
+    end
+
+    %% ---- Bottom: App ----
+    App["App"]:::backend
+  end
+
+  %% ============ Outside right ============
+  Admin["Admin"]:::client
+
+  %% ============ Traffic & control ===========
+  %% Manager / control plane
+  Manager -->|API 5000| Worker1
+  Manager -->|API 5000| WorkerN
+  Manager -->|bwcli| Redis
+  Manager -->|Config| BDD
+
+  %% User interface (UI)
+  UI -->|Config| BDD
+  UI -->|Reports / Bans| Redis
+  BDD --- UI
+  Redis --- UI
+  linkStyle 6 stroke-width:0px;
+  linkStyle 7 stroke-width:0px;
+
+  %% Workers <-> Redis
+  Worker1 -->|Cache partagé| Redis
+  WorkerN -->|Cache partagé| Redis
+
+  %% Workers -> App
+  Worker1 -->|Trafic légitime| App
+  WorkerN -->|Trafic légitime| App
+
+  %% Client (right side) -> Load balancer -> Workers -> App
+  Client -->|Requête| LB
+  LB -->|HTTP/TCP| Worker1
+  LB -->|HTTP/TCP| WorkerN
+
+  %% Admin -> UI
+  UI --- Admin
+  Admin -->|HTTP| UI
+  linkStyle 15 stroke-width:0px;
+```
+
+!!! info "Comprendre les API BunkerWeb"
+    BunkerWeb s'appuie sur deux notions d'API différentes :
+
+    - Une **API interne** qui connecte automatiquement managers et workers pour l'orchestration. Elle est toujours activée et ne nécessite aucune configuration manuelle.
+    - Un **service API** optionnel (`bunkerweb-api`) qui expose une interface REST publique pour les outils d'automatisation (bwcli, CI/CD, etc.). Il est désactivé par défaut sur les installations Linux et est indépendant des communications internes manager↔worker.
+
+### Prérequis
+
+Avant de mettre en place un cluster, assurez-vous de disposer de :
+
+- **Au moins 2 hôtes Linux** avec accès root/sudo.
+- **Connectivité réseau** entre les hôtes (en particulier sur le port TCP 5000 pour l'API interne).
+- **L'IP ou le nom d'hôte** de l'application à protéger.
+- *(Optionnel)* **Équilibreur de charge** (par ex. HAProxy) pour répartir le trafic entre les workers.
+
+### 1. Installer le Manager
+
+Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de données et, optionnellement, l'interface Web.
+
+!!! warning "Sécurité de l'interface Web"
+    L'interface Web écoute sur un port dédié (7000 par défaut) et ne doit être accessible qu'aux administrateurs. Si vous prévoyez de l'exposer à Internet, nous **recommandons fortement** de la protéger avec une instance BunkerWeb en frontal.
+
+=== "Linux"
+
+    1. **Télécharger et lancer l'installateur** sur l'hôte manager :
+
+        ```bash
+        # Télécharger le script et sa somme
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6/install-bunkerweb.sh.sha256
+
+        # Vérifier l'empreinte
+        sha256sum -c install-bunkerweb.sh.sha256
+
+        # Exécuter l'installateur
+        chmod +x install-bunkerweb.sh
+        sudo ./install-bunkerweb.sh
+        ```
+
+        !!! danger "Avis de sécurité"
+            Vérifiez toujours l'intégrité du script avec la somme fournie avant de l'exécuter.
+
+    2. **Choisissez l'option 2) Manager** et suivez les invites :
+
+        | Invite                     | Action                                                                                        |
+        | :------------------------- | :-------------------------------------------------------------------------------------------- |
+        | **Instances BunkerWeb**    | Saisissez les IP de vos nœuds worker séparées par des espaces (ex : `192.168.10.11 192.168.10.12`). |
+        | **Whitelist IP**           | Acceptez l'IP détectée ou saisissez un sous-réseau (ex : `192.168.10.0/24`) pour autoriser l'accès à l'API. |
+        | **Résolveurs DNS**         | Appuyez sur `N` pour la valeur par défaut ou fournissez les vôtres.                           |
+        | **HTTPS pour l'API interne** | **Recommandé :** `Y` pour générer automatiquement des certificats et sécuriser les échanges manager-worker. |
+        | **Service Web UI**         | `Y` pour activer l'interface Web (fortement recommandé).                                      |
+        | **Service API**            | `N` sauf besoin d'API REST publique pour des outils externes.                                 |
+
+    #### Sécuriser et exposer l'UI
+
+    Si vous avez activé l'interface Web, vous devez la sécuriser. Elle peut être hébergée sur le Manager ou une machine dédiée.
+
+    === "Hébergée sur le Manager"
+
+        1. Éditez `/etc/bunkerweb/ui.env` pour définir des identifiants forts :
+
+        ```ini
+        # OVERRIDE_ADMIN_CREDS=no
+        ADMIN_USERNAME=admin
+        ADMIN_PASSWORD=changeme
+        # FLASK_SECRET=changeme
+        # TOTP_ENCRYPTION_KEYS=changeme
+        LISTEN_ADDR=0.0.0.0
+        # LISTEN_PORT=7000
+        FORWARDED_ALLOW_IPS=127.0.0.1
+        # ENABLE_HEALTHCHECK=no
+        ```
+
+        !!! warning "Changer les identifiants par défaut"
+            Remplacez `admin` et `changeme` par des identifiants forts avant de démarrer le service UI en production.
+
+        2. Redémarrez l'UI :
+
+        ```bash
+        sudo systemctl restart bunkerweb-ui
+        ```
+
+    === "Hôte externe"
+
+        Pour plus d'isolation, installez l'UI sur un nœud séparé.
+
+        1. Lancez l'installateur et choisissez **Option 5) Web UI Only**.
+        2. Éditez `/etc/bunkerweb/ui.env` pour pointer vers la base du Manager :
+
+            ```ini
+            # Configuration base de données (doit correspondre à celle du Manager)
+            DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@db-host:3306/bunkerweb
+            # Pour PostgreSQL : postgresql://bunkerweb:changeme@db-host:5432/bunkerweb
+            # Pour MySQL : mysql+pymysql://bunkerweb:changeme@db-host:3306/bunkerweb
+
+            # Configuration Redis (si Redis/Valkey est utilisé pour la persistance)
+            # Si non fourni, il est automatiquement pris depuis la base de données
+            # REDIS_HOST=redis-host
+
+            # Identifiants de sécurité
+            ADMIN_USERNAME=admin
+            ADMIN_PASSWORD=changeme
+
+            # Réglages réseau
+            LISTEN_ADDR=0.0.0.0
+            # LISTEN_PORT=7000
+            ```
+
+        3. Redémarrez le service :
+
+            ```bash
+            sudo systemctl restart bunkerweb-ui
+            ```
+
+        !!! tip "Configuration du pare-feu"
+            Assurez-vous que l'hôte UI peut joindre la base et Redis. Vous devrez peut-être ajuster les règles sur l'hôte UI ainsi que sur les hôtes base/Redis.
+
+=== "Docker"
+
+    Créez un fichier `docker-compose.yml` sur l'hôte manager :
+
+    ```yaml title="docker-compose.yml"
+    x-ui-env: &bw-ui-env
+      # Nous ancrons les variables d'environnement pour éviter les duplications
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Pensez à mettre un mot de passe plus fort
+
+    services:
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.6
+        environment:
+          <<: *bw-ui-env
+          BUNKERWEB_INSTANCES: "192.168.1.11 192.168.1.12" # Remplacez par les IPs de vos workers
+          API_WHITELIST_IP: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16" # Autoriser les réseaux locaux
+          # API_LISTEN_HTTPS: "yes" # Recommandé pour sécuriser l'API interne
+          # API_TOKEN: "my_secure_token" # Optionnel : définir un token supplémentaire
+          SERVER_NAME: ""
+          MULTISITE: "yes"
+          USE_REDIS: "yes"
+          REDIS_HOST: "redis"
+        volumes:
+          - bw-storage:/data # Persistance du cache et des sauvegardes
+        restart: "unless-stopped"
+        networks:
+          - bw-db
+          - bw-redis
+
+      bw-ui:
+        image: bunkerity/bunkerweb-ui:1.6.6
+        ports:
+          - "7000:7000" # Exposer le port de l'UI
+        environment:
+          <<: *bw-ui-env
+          ADMIN_USERNAME: "changeme"
+          ADMIN_PASSWORD: "changeme" # Remplacez par un mot de passe plus fort
+          TOTP_ENCRYPTION_KEYS: "mysecret" # Remplacez par une clé plus forte (voir la section Prérequis)
+        restart: "unless-stopped"
+        networks:
+          - bw-db
+          - bw-redis
+
+      bw-db:
+        image: mariadb:11
+        # Nous fixons la taille max des paquets pour éviter les soucis de grosses requêtes
+        command: --max-allowed-packet=67108864
+        environment:
+          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+          MYSQL_DATABASE: "db"
+          MYSQL_USER: "bunkerweb"
+          MYSQL_PASSWORD: "changeme" # Remplacez par un mot de passe plus fort
+        volumes:
+          - bw-data:/var/lib/mysql
+        restart: "unless-stopped"
+        networks:
+          - bw-db
+
+      redis: # Redis pour la persistance des rapports/bannissements/stats
+        image: redis:7-alpine
+        command: >
+          redis-server
+          --maxmemory 256mb
+          --maxmemory-policy allkeys-lru
+          --save 60 1000
+          --appendonly yes
+        volumes:
+          - redis-data:/data
+        restart: "unless-stopped"
+        networks:
+          - bw-redis
+
+    volumes:
+      bw-data:
+      bw-storage:
+      redis-data:
+
+    networks:
+      bw-db:
+        name: bw-db
+      bw-redis:
+        name: bw-redis
+    ```
+
+    Démarrez la pile manager :
+
+    ```bash
+    docker compose up -d
+    ```
+
+### 2. Installer les Workers
+
+Les workers sont les nœuds qui traitent le trafic entrant.
+
+=== "Linux"
+
+    1. **Lancez l'installateur** sur chaque worker (mêmes commandes que pour le Manager).
+    2. **Choisissez l'option 3) Worker** et répondez :
+
+        | Invite                     | Action                                                     |
+        | :------------------------- | :--------------------------------------------------------- |
+        | **IP du Manager**          | Saisissez l'IP du Manager (ex : `192.168.10.10`).          |
+        | **HTTPS pour l'API interne** | Doit correspondre au choix du Manager (`Y` ou `N`).        |
+
+    Le worker s'enregistrera automatiquement auprès du Manager.
+
+=== "Docker"
+
+    Créez un fichier `docker-compose.yml` sur chaque worker :
+
+    ```yaml title="docker-compose.yml"
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.6.6
+        ports:
+          - "80:8080/tcp"
+          - "443:8443/tcp"
+          - "443:8443/udp" # Support QUIC / HTTP3
+          - "5000:5000/tcp" # Port de l'API interne
+        environment:
+          API_WHITELIST_IP: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+          # API_LISTEN_HTTPS: "yes" # Recommandé pour sécuriser l'API interne (doit correspondre au Manager)
+          # API_TOKEN: "my_secure_token" # Optionnel : token supplémentaire (doit correspondre au Manager)
+        restart: "unless-stopped"
+    ```
+
+    Démarrez le worker :
+
+    ```bash
+    docker compose up -d
+    ```
+
+### 3. Gérer les Workers
+
+Vous pouvez ajouter d'autres workers plus tard via l'interface Web ou la CLI.
+
+=== "Via l'interface Web"
+
+    1. **Ouvrez l'onglet Instances**.
+    2. **Cliquez sur Add instance**.
+    3. **Renseignez l'IP/hostname du worker** puis enregistrez.
+
+    <div class="grid grid-2" markdown style="display:grid; align-items:center;">
+    <figure markdown style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%;">
+      ![BunkerWeb UI - Création d'instance](assets/img/ui-ha-create-instance.webp){ width="100%" }
+      <figcaption>BunkerWeb UI - Création d'instance</figcaption>
+    </figure>
+    <figure markdown style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%;">
+      ![BunkerWeb UI - Formulaire de création](assets/img/ui-ha-create-instance-form.webp){ width="100%" }
+      <figcaption>BunkerWeb UI - Formulaire de création</figcaption>
+    </figure>
+    </div>
+
+=== "Via la configuration"
+
+    === "Linux"
+
+        1. **Modifiez** `/etc/bunkerweb/variables.env` sur le Manager :
+
+            ```bash
+            BUNKERWEB_INSTANCES=192.168.10.11 192.168.10.12 192.168.10.13
+            ```
+
+        2. **Redémarrez le Scheduler** :
+
+            ```bash
+            sudo systemctl restart bunkerweb-scheduler
+            ```
+
+    === "Docker"
+
+        1. **Modifiez** le fichier `docker-compose.yml` sur le Manager pour mettre à jour `BUNKERWEB_INSTANCES`.
+
+        2. **Recréez le conteneur du Scheduler** :
+
+            ```bash
+            docker compose up -d bw-scheduler
+            ```
+
+### 4. Vérifier l'installation
+
+=== "Linux"
+
+    1. **Vérifier le statut** : connectez-vous à l'UI (`http://<ip-manager>:7000`) et ouvrez l'onglet **Instances**. Tous les workers doivent être **Up**.
+    2. **Tester le basculement** : arrêtez BunkerWeb sur un worker (`sudo systemctl stop bunkerweb`) et vérifiez que le trafic continue de passer.
+
+=== "Docker"
+
+    1. **Vérifier le statut** : connectez-vous à l'UI (`http://<ip-manager>:7000`) et ouvrez l'onglet **Instances**. Tous les workers doivent être **Up**.
+    2. **Tester le basculement** : arrêtez BunkerWeb sur un worker (`docker compose stop bunkerweb`) et vérifiez que le trafic continue de passer.
+
+### 5. Répartition de charge
+
+Pour répartir le trafic entre vos workers, utilisez un équilibreur de charge. Nous recommandons un équilibreur de couche 4 (TCP) qui supporte le **PROXY protocol** pour préserver l'IP client.
+
+=== "HAProxy - Couche 4 (TCP)"
+
+    Exemple de configuration **HAProxy** qui passe le trafic (mode TCP) tout en conservant l'IP client via le **PROXY protocol**.
+
+    ```cfg title="haproxy.cfg"
+    defaults
+        timeout connect 5s
+        timeout client 5s
+        timeout server 5s
+
+    frontend http_front
+        mode tcp
+        bind *:80
+        default_backend http_back
+
+    frontend https_front
+        mode tcp
+        bind *:443
+        default_backend https_back
+
+    backend http_back
+        mode tcp
+        balance roundrobin
+        server worker01 192.168.10.11:80 check send-proxy-v2
+        server worker02 192.168.10.12:80 check send-proxy-v2
+
+    backend https_back
+        mode tcp
+        balance roundrobin
+        server worker01 192.168.10.11:443 check send-proxy-v2
+        server worker02 192.168.10.12:443 check send-proxy-v2
+    ```
+
+=== "HAProxy - Couche 7 (HTTP)"
+
+    Exemple de configuration **HAProxy** pour la répartition en couche 7 (HTTP). Elle ajoute l'en-tête `X-Forwarded-For` pour que BunkerWeb récupère l'IP client.
+
+    ```cfg title="haproxy.cfg"
+    defaults
+        timeout connect 5s
+        timeout client 5s
+        timeout server 5s
+
+    frontend http_front
+        mode http
+        bind *:80
+        default_backend http_back
+
+    frontend https_front
+        mode http
+        bind *:443
+        default_backend https_back
+
+    backend http_back
+        mode http
+        balance roundrobin
+        option forwardfor
+        server worker01 192.168.10.11:80 check
+        server worker02 192.168.10.12:80 check
+
+    backend https_back
+        mode http
+        balance roundrobin
+        option forwardfor
+        server worker01 192.168.10.11:443 check
+        server worker02 192.168.10.12:443 check
+    ```
+
+Rechargez HAProxy une fois la configuration enregistrée :
+
+```bash
+sudo systemctl restart haproxy
+```
+
+Pour plus d'informations, consultez la [documentation officielle HAProxy](http://docs.haproxy.org/).
+
+!!! tip "Configurer l'IP réelle"
+    N'oubliez pas de configurer BunkerWeb pour récupérer la véritable IP client (via PROXY protocol ou l'en-tête X-Forwarded-For).
+
+    Reportez-vous à la section [Derrière l'équilibreur de charge ou le proxy inverse](#behind-load-balancer-or-reverse-proxy) pour vérifier que vous utilisez la bonne IP client.
+
+    Consultez `/var/log/bunkerweb/access.log` sur chaque worker pour confirmer que les requêtes proviennent du réseau PROXY protocol et que les deux workers se partagent la charge. Votre cluster BunkerWeb est maintenant prêt pour la production avec haute disponibilité.
+
+## Utilisation de mécanismes de résolution DNS personnalisés
 
 La configuration NGINX de BunkerWeb peut être personnalisée pour utiliser différents résolveurs DNS en fonction de vos besoins. Cela peut être particulièrement utile dans divers scénarios :
 
@@ -382,7 +860,7 @@ La configuration NGINX de BunkerWeb peut être personnalisée pour utiliser diff
 2. Lorsque vous devez utiliser des serveurs DNS personnalisés pour certains domaines
 3. Pour s'intégrer à des solutions de mise en cache DNS locales
 
-#### Utilisation de systemd-resolved
+### Utilisation de systemd-resolved
 
 De nombreux systèmes Linux modernes utilisent `systemd-resolved` la résolution DNS. Si vous souhaitez que BunkerWeb respecte le contenu de votre `/etc/hosts` fichier et utilise le mécanisme de résolution DNS du système, vous pouvez le configurer pour utiliser le service DNS local résolu par systemd.
 
@@ -416,7 +894,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
     sudo systemctl reload bunkerweb-scheduler
     ```
 
-#### Utilisation de dnsmasq
+### Utilisation de dnsmasq
 
 [dnsmasq](http://www.thekelleys.org.uk/dnsmasq/doc.html) est un serveur DNS, DHCP et TFTP léger qui est couramment utilisé pour la mise en cache et la personnalisation du DNS local. C'est particulièrement utile lorsque vous avez besoin de plus de contrôle sur votre résolution DNS que celui fourni par systemd-resolved.
 
@@ -568,7 +1046,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
         name: bw-dns
     ```
 
-### Configurations personnalisées {#custom-configurations}
+## Configurations personnalisées {#custom-configurations}
 
 Pour personnaliser et ajouter des configurations personnalisées à BunkerWeb, vous pouvez profiter de sa base NGINX. Des configurations NGINX personnalisées peuvent être ajoutées dans différents contextes NGINX, y compris des configurations pour le pare-feu d'applications Web (WAF) ModSecurity, qui est un composant central de BunkerWeb. Vous trouverez plus de détails sur les configurations de ModSecurity [ici](features.md#custom-configurations).
 
@@ -942,9 +1420,9 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
 
     Il n'y a pas de mécanisme de mise à jour : l'alternative est de supprimer une configuration existante à l'aide puis de `docker config rm` la recréer.
 
-### Exécution de nombreux services en production {#running-many-services-in-production}
+## Exécution de nombreux services en production {#running-many-services-in-production}
 
-#### CRS mondial
+### CRS mondial
 
 !!! warning "Plugins CRS"
     Lorsque le SCR est chargé globalement, les **plug-ins SCR ne sont pas pris en charge**. Si vous avez besoin de les utiliser, vous devrez charger le SCR par service.
@@ -960,7 +1438,7 @@ SecRule REQUEST_HEADERS:Host "@rx ^app1\.example\.com$" "nolog"
 
 Vous pouvez activer le chargement global du SCR en définissant `USE_MODSECURITY_GLOBAL_CRS` la valeur . `yes`
 
-#### Ajuster max_allowed_packet pour MariaDB/MySQL
+### Ajuster max_allowed_packet pour MariaDB/MySQL
 
 Il semble que la valeur par défaut du `max_allowed_packet` paramètre dans les serveurs de bases de données MariaDB et MySQL ne soit pas suffisante lors de l'utilisation de BunkerWeb avec un grand nombre de services.
 
@@ -972,7 +1450,7 @@ Si vous rencontrez des erreurs comme celle-ci, en particulier sur le Scheduler :
 
 Vous devrez augmenter le `max_allowed_packet` sur votre serveur de base de données.
 
-### Persistance des interdictions et des signalements {#persistence-of-bans-and-reports}
+## Persistance des interdictions et des signalements {#persistence-of-bans-and-reports}
 
 Par défaut, BunkerWeb stocke les bannissements et les rapports dans un magasin de données Lua local. Bien que simple et efficace, cette configuration signifie que des données sont perdues lors du redémarrage de l'instance. Pour vous assurer que les bannissements et les rapports persistent lors des redémarrages, vous pouvez configurer BunkerWeb pour utiliser un [ serveur Redis](https://redis.io/) ou [Valkey](https://valkey.io/) distant  .
 
@@ -1013,7 +1491,7 @@ REDIS_DATABASE=0
 
 Si vous avez besoin de paramètres plus avancés, tels que l'authentification, la prise en charge SSL/TLS ou le mode Sentinel, reportez-vous à la documentation sur les paramètres du [plug-in Redis](features.md#redis) pour obtenir des conseils détaillés.
 
-### Protéger les applications UDP/TCP
+## Protéger les applications UDP/TCP
 
 !!! example "Fonctionnalité expérimentale"
 
@@ -1455,7 +1933,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
         name: bw-services
     ```
 
-### Le PHP
+## Le PHP
 
 !!! example "Fonctionnalité expérimentale"
 	  Pour le moment, le support PHP avec BunkerWeb est encore en version bêta et nous vous recommandons d'utiliser une architecture de proxy inverse si vous le pouvez. D'ailleurs, PHP n'est pas du tout pris en charge pour certaines intégrations comme Kubernetes.
@@ -2010,7 +2488,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
         name: bw-services
     ```
 
-### IPv6
+## IPv6
 
 !!! example "Fonctionnalité expérimentale"
 
@@ -2088,7 +2566,7 @@ Par défaut, BunkerWeb n'écoutera que les adresses IPv4 et n'utilisera pas IPv6
     systemctl start bunkerweb
     ```
 
-### Options de configuration de journalisation
+## Options de configuration de journalisation
 
 BunkerWeb offre une configuration de journalisation flexible, vous permettant d'envoyer les journaux vers plusieurs destinations (comme des fichiers, stdout/stderr ou syslog) simultanément. Cela est particulièrement utile pour l'intégration avec des collecteurs de journaux externes tout en conservant des journaux locaux pour l'interface Web.
 
@@ -2097,7 +2575,7 @@ Il y a deux catégories principales de journaux à configurer :
 1. **Journaux de service** : Journaux générés par les composants BunkerWeb (Scheduler, UI, Autoconf, etc.). Contrôlés par service via `LOG_TYPES` (et optionnellement `LOG_FILE_PATH`, `LOG_SYSLOG_ADDRESS`, `LOG_SYSLOG_TAG`).
 2. **Journaux d'accès et d'erreur** : Journaux d'accès et d'erreur HTTP générés par NGINX. Seuls le service `bunkerweb` les utilise (`ACCESS_LOG` / `ERROR_LOG` / `LOG_LEVEL`).
 
-#### Journaux de service
+### Journaux de service
 
 Les journaux de service sont contrôlés par le paramètre `LOG_TYPES`, qui peut accepter plusieurs valeurs séparées par des espaces (par exemple, `LOG_TYPES="stderr syslog"`).
 
@@ -2113,7 +2591,7 @@ Lors de l'utilisation de `syslog`, vous devriez également configurer :
 - `LOG_SYSLOG_TAG` : Une étiquette unique pour le service (par exemple, `bw-scheduler`) pour distinguer ses entrées.
 - `LOG_FILE_PATH` : Chemin pour la sortie fichier lorsque `LOG_TYPES` inclut `file` (par exemple, `/var/log/bunkerweb/scheduler.log`).
 
-#### Journaux d'accès et d'erreur
+### Journaux d'accès et d'erreur
 
 Ce sont des journaux NGINX standard, configurés via **le service `bunkerweb` uniquement**. Ils prennent en charge plusieurs destinations en suffixant le nom du paramètre (par exemple, `ACCESS_LOG`, `ACCESS_LOG_1` et le `LOG_FORMAT` correspondant, `LOG_FORMAT_1` ou `ERROR_LOG`, `ERROR_LOG_1` et leur `LOG_LEVEL` respectif, `LOG_LEVEL_1`).
 
@@ -2136,7 +2614,7 @@ LOG_LEVEL=notice
 LOG_LEVEL_1=error
 ```
 
-#### Valeurs par défaut et exemples d'intégration
+### Valeurs par défaut et exemples d'intégration
 
 === "Linux"
 
@@ -2287,7 +2765,7 @@ LOG_LEVEL_1=error
         name: bw-db
     ```
 
-#### Configuration de syslog-ng
+### Configuration de syslog-ng
 
 Voici un exemple de fichier `syslog-ng.conf` que vous pouvez utiliser pour rediriger les journaux vers un fichier :
 
@@ -2334,7 +2812,7 @@ log {
 };
 ```
 
-### Meilleures pratiques de journalisation Docker
+## Meilleures pratiques de journalisation Docker
 
 Lors de l'utilisation de Docker, il est important de gérer les journaux des conteneurs pour éviter qu'ils ne consomment un espace disque excessif. Par défaut, Docker utilise le pilote de journalisation `json-file`, ce qui peut entraîner des fichiers journaux très volumineux s'il n'est pas configuré.
 
@@ -2407,7 +2885,7 @@ Conseil professionnel : Lorsque vous consultez vos alertes, cliquez sur l'option
 
 ## Surveillance et rapports
 
-#### Monitoring <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### Monitoring <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Prise en charge de STREAM :x:
 
@@ -2427,7 +2905,7 @@ Le plugin de surveillance vous permet de collecter et de récupérer des métriq
 | `USE_MONITORING`               | `yes`  | global   | Non      | Activez la surveillance de BunkerWeb.                              |
 | `MONITORING_METRICS_DICT_SIZE` | `10M`  | global   | Non      | Taille du dictionnaire pour stocker les métriques de surveillance. |
 
-#### Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Prise en charge de STREAM :x:
 
@@ -2453,7 +2931,7 @@ Nous fournissons également un [tableau de bord Grafana](https://grafana.com/gra
 | `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | global   | Non      | URL HTTP de l'exportateur Prometheus.                                                                    |
 | `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | global   | Non      | Liste des adresses IP/réseaux autorisés à contacter le point de terminaison de l'exportateur Prometheus. |
 
-#### Reporting <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### Reporting <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Prise en charge de STREAM :x:
 
@@ -2492,9 +2970,9 @@ Le plugin Reporting fournit une solution complète pour la communication réguli
     - Si les webhooks et SMTP échouent tous, une nouvelle tentative est effectuée lors de la prochaine exécution planifiée.
     - Les modèles HTML et Markdown se trouvent dans `reporting/files/` ; personnalisez-les prudemment pour conserver les variables.
 
-### Sauvegarde et restauration
+## Sauvegarde et restauration
 
-#### Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Prise en charge STREAM :white_check_mark:
 
@@ -2561,7 +3039,7 @@ En activant cette fonctionnalité, vous protégez de manière proactive **l'int�
 | `BACKUP_S3_ACCESS_KEY_SECRET` |              | global   | Le secret de la clé d'accès S3                        |
 | `BACKUP_S3_COMP_LEVEL`        | `6`          | global   | Le niveau de compression du fichier zip de sauvegarde |
 
-##### Sauvegarde manuelle
+#### Sauvegarde manuelle
 
 Pour lancer manuellement une sauvegarde, exécutez la commande suivante :
 
@@ -2627,7 +3105,7 @@ Vous pouvez également spécifier un compartiment S3 personnalisé pour la sauve
             ...
         ```
 
-##### Restauration manuelle
+#### Restauration manuelle
 
 Pour lancer manuellement une restauration, exécutez la commande suivante :
 
@@ -2675,7 +3153,7 @@ Vous pouvez également spécifier un fichier de sauvegarde personnalisé pour la
         docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
         ```
 
-### Migration <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Migration <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Prise en charge STREAM :white_check_mark:
 
@@ -2689,7 +3167,7 @@ Le plug-in de migration **révolutionne les transferts de** configuration Bunker
 
 - **Compatibilité entre bases de données :** profitez d'une migration transparente sur diverses plates-formes de bases de données, notamment SQLite, MySQL, MariaDB et PostgreSQL, garantissant la compatibilité avec votre environnement de base de données préféré.
 
-#### Créer un fichier de migration
+### Créer un fichier de migration
 
 Pour créer manuellement un fichier de migration, exécutez la commande suivante :
 
@@ -2749,7 +3227,7 @@ Cette commande créera une sauvegarde de votre base de données et la stockera d
             ...
         ```
 
-#### Initialiser une migration
+### Initialiser une migration
 
 Pour initialiser manuellement une migration, exécutez la commande suivante :
 
@@ -2797,7 +3275,7 @@ Le  plug-in **anti-DDoS** offre une protection avancée contre les attaques par 
 
 En utilisant un mécanisme de **fenêtre glissante**, le plugin maintient un dictionnaire en mémoire des horodatages des requêtes pour détecter les pics de trafic anormaux à partir d'adresses IP individuelles. En fonction du mode de sécurité configuré, il peut soit bloquer les connexions incriminées, soit consigner l'activité suspecte pour un examen plus approfondi.
 
-#### Fonctionnalités
+### Fonctionnalités
 
 - **Analyse du trafic en temps réel :** surveille en permanence les demandes entrantes pour détecter les attaques DDoS potentielles.
 - **Mécanisme de fenêtre glissante :** suit l'activité récente des demandes dans une fenêtre de temps configurable.
@@ -2807,7 +3285,7 @@ En utilisant un mécanisme de **fenêtre glissante**, le plugin maintient un dic
 - **Magasin de données en mémoire optimisé :** Garantit des recherches à grande vitesse et un suivi efficace des métriques.
 - **Entretien ménager automatique :** efface périodiquement les données obsolètes pour maintenir des performances optimales.
 
-#### Configuration
+### Configuration
 
 Personnalisez le comportement du plug-in à l'aide des paramètres suivants :
 
@@ -2820,7 +3298,7 @@ Personnalisez le comportement du plug-in à l'aide des paramètres suivants :
 | `ANTIDDOS_STATUS_CODES`      | `429 403 444` | global   | Non      | Codes d'état HTTP considérés comme suspects et utilisés pour déclencher des actions anti-DDoS.              |
 | `ANTIDDOS_DISTINCT_IP`       | `5`           | global   | Non      | Nombre minimum d'adresses IP distinctes qui doivent dépasser le seuil avant d'appliquer le mode de blocage. |
 
-#### Bonnes pratiques
+### Bonnes pratiques
 
 - **Réglage du seuil :** ajustez `ANTIDDOS_THRESHOLD` et `ANTIDDOS_WINDOW_TIME` en fonction de vos modèles de trafic typiques.
 - **Révision du code d'état :** mettez régulièrement à jour `ANTIDDOS_STATUS_CODES` pour capturer les comportements suspects nouveaux ou en évolution.
@@ -2836,7 +3314,7 @@ Le plug-in de gestion des utilisateurs offre une interface robuste pour l'admini
 
 Avec ce plugin, les administrateurs peuvent sans effort créer, mettre à jour et désactiver des comptes utilisateurs, gérer les rôles des utilisateurs, basculer l'authentification à deux facteurs (2FA) et afficher des informations détaillées sur les utilisateurs telles que les horodatages de la dernière connexion et les statuts des comptes (actif ou inactif). Conçu dans un souci de sécurité et de facilité d'utilisation, ce plug-in simplifie les tâches de gestion des utilisateurs tout en garantissant la conformité et l'auditabilité.
 
-#### Fonctionnalités
+### Fonctionnalités
 
 - **Opérations de compte d'utilisateur :** importez au format CSV/XSLX, créez, modifiez et supprimez des comptes d'utilisateur en toute simplicité.
 - **Contrôle d'accès basé sur les rôles :** Attribuez et modifiez les rôles d'utilisateur pour gérer les autorisations et les niveaux d'accès.
@@ -2863,7 +3341,7 @@ Avec ce plugin, les administrateurs peuvent sans effort créer, mettre à jour e
 
 Le plugin Easy Resolve vous permet de remédier rapidement aux faux positifs et aux problèmes récurrents directement depuis la page Rapports. Il transforme les actions guidées "Résoudre" en mises à jour de configuration sûres et étendues—sans édition manuelle.
 
-#### Fonctionnalités
+### Fonctionnalités
 
 - Actions en un clic depuis les Rapports et les détails des rapports.
 - Suggestions contextuelles pour ModSecurity, blacklist et DNSBL.
@@ -2918,7 +3396,7 @@ Le plugin Easy Resolve vous permet de remédier rapidement aux faux positifs et 
 
 Le plugin Load Balancer transforme BunkerWeb en un directeur de trafic avec garde-fous. Déclarez des pools upstream une fois, pointez votre proxy inverse vers eux, et laissez le équilibrage conscient de la santé garder les utilisateurs sur des backends réactifs. Le mode sticky cookie émet automatiquement un cookie `BWLBID` pour que les sessions restent ancrées où vous le souhaitez.
 
-#### Fonctionnalités
+### Fonctionnalités
 
 - Blocs par upstream : nommez les pools et réutilisez-les sur les hôtes proxy inverse.
 - Équilibrage flexible : round-robin par défaut, ou sticky via IP ou cookie signé.
@@ -2926,7 +3404,7 @@ Le plugin Load Balancer transforme BunkerWeb en un directeur de trafic avec gard
 - Santé intégrée : sondes HTTP/HTTPS avec chemins personnalisés, intervalles, codes de statut et vérifications SSL.
 - Continuité de session : cookie `BWLBID` automatique lorsque le mode sticky-cookie est activé.
 
-#### Configuration
+### Configuration
 
 **Définition upstream**
 
@@ -2957,7 +3435,7 @@ Le plugin Load Balancer transforme BunkerWeb en un directeur de trafic avec gard
 | `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`     | global   | oui      | Vérifier les certificats TLS lors des vérifications HTTPS.             |
 | `LOADBALANCER_HEALTHCHECK_HOST`           |           | global   | oui      | Remplacer l'en-tête Host pendant les vérifications (utile pour SNI).   |
 
-#### Démarrage rapide
+### Démarrage rapide
 
 1. Définissez votre pool : définissez `LOADBALANCER_UPSTREAM_NAME=my-app` et listez les cibles dans `LOADBALANCER_UPSTREAM_SERVERS` (ex. `10.0.0.1:8080 10.0.0.2:8080`).
 2. Dirigez le trafic : définissez `REVERSE_PROXY_HOST=http://my-app` pour que le proxy inverse utilise l'upstream nommé.
@@ -2965,7 +3443,7 @@ Le plugin Load Balancer transforme BunkerWeb en un directeur de trafic avec gard
 4. Ajoutez de la santé : gardez `/status` ou ajustez les URLs, intervalles et statuts valides pour refléter le comportement de votre app.
 5. Réglez les connexions : configurez les valeurs keepalive pour réutiliser les connexions backend et réduire la surcharge de handshake.
 
-#### Conseils d'utilisation
+### Conseils d'utilisation
 
 - Faites correspondre `REVERSE_PROXY_HOST` à `LOADBALANCER_UPSTREAM_NAME` lors de l'utilisation de cookies sticky pour que les clients s'épinglent au bon pool.
 - Gardez les intervalles et timeouts des vérifications de santé équilibrés pour éviter les oscillations sur les liens lents.
