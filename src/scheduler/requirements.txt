@@ -109,9 +109,9 @@ certbot-dns-domainoffensive==2.0.0 \
     --hash=sha256:bfe7cb33eee6bc48e62437c811d0605cf974f723e211ac27fc396615ff5a2a05 \
     --hash=sha256:e2da1d4f9bd46456578c15f3a30ac4f767871a7a671c6c0d25efd6502670b0ff
     # via -r requirements.in
-certbot-dns-duckdns==1.7.0 \
-    --hash=sha256:2f7efe5803354fca1f9c90e32b73fad42bd7cc4cae8f5948f73b12799d054bfe \
-    --hash=sha256:c019961bdc721d6cb1d67f3bac272d96d0b2ad8ae5c06714a2ffc681a9f25054
+certbot-dns-duckdns==1.7.1 \
+    --hash=sha256:223ab65600cbdd8b968b0559e45d315fe710912a863dfdcdc55d1fca7975eed7 \
+    --hash=sha256:c7e2ff7f2cdb5b46fa52f5753525c168ce107ef44c67f8097d6859f5165bf962
     # via -r requirements.in
 certbot-dns-dynu==0.0.6.post2502111739272536 \
     --hash=sha256:3bca6343a5e962bdc666301228dcc73c6b3ebef9f2921d8afe1a56f1450d9229
