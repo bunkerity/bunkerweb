@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from os import environ, getenv, sep
+from os import W_OK, access, environ, getenv, sep, umask
 from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, PIPE, Popen
@@ -27,6 +27,46 @@ DATA_PATH = CACHE_PATH.joinpath("etc")
 WORK_DIR = join(sep, "var", "lib", "bunkerweb", "letsencrypt")
 LOGS_DIR = join(sep, "var", "log", "bunkerweb", "letsencrypt")
 
+
+def prepare_logs_dir() -> None:
+    """Ensure the Let's Encrypt logs directory is writable by the running user.
+
+    Old installations could leave `letsencrypt.log` owned by root with 640
+    permissions, blocking renewals executed as a non-root user. We normalise the
+    directory permissions, drop the umask to keep group write access, and remove
+    any stale, non-writable log files so certbot can recreate them.
+    """
+
+    # Allow group write on newly created files
+    try:
+        umask(0o007)
+    except BaseException:
+        LOGGER.debug("Failed to set umask to 007 for letsencrypt logs")
+
+    logs_path = Path(LOGS_DIR)
+
+    try:
+        logs_path.mkdir(parents=True, exist_ok=True)
+    except BaseException as e:
+        LOGGER.error(f"Failed to create Let's Encrypt logs directory {logs_path}: {e}")
+        return
+
+    try:
+        logs_path.chmod(0o2770)
+    except BaseException as e:
+        LOGGER.debug(f"Failed to set permissions on {logs_path}: {e}")
+
+    for log_file in logs_path.glob("*.log*"):
+        try:
+            if access(log_file, W_OK):
+                log_file.chmod(0o660)
+            else:
+                LOGGER.warning(f"Removing unwritable Let's Encrypt log file {log_file}")
+                log_file.unlink(missing_ok=True)
+        except BaseException as e:
+            LOGGER.debug(f"Failed to adjust permissions on log file {log_file}: {e}")
+
+
 try:
     # Check if we're using let's encrypt
     use_letsencrypt = False
@@ -42,6 +82,8 @@ try:
     if not use_letsencrypt:
         LOGGER.info("Let's Encrypt is not activated, skipping renew...")
         sys_exit(0)
+
+    prepare_logs_dir()
 
     JOB = Job(LOGGER, __file__)
 
