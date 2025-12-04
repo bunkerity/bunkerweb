@@ -134,10 +134,9 @@ end
 -- @tparam[opt] string old_key old session id
 -- @tparam string stale_ttl stale ttl
 -- @tparam[opt] table metadata table of metadata
--- @tparam boolean remember whether storing persistent session or not
 -- @treturn true|nil ok
 -- @treturn string error message
-function metatable:set(name, key, value, ttl, current_time, old_key, stale_ttl, metadata, remember)
+function metatable:set(name, key, value, ttl, current_time, old_key, stale_ttl, metadata)
   local table = self.table
   local exp = ttl + current_time
 
@@ -148,12 +147,8 @@ function metatable:set(name, key, value, ttl, current_time, old_key, stale_ttl, 
   SQL:reset():putf(SET, table, key, name, value, exp)
 
   if old_key then
-    if remember then
-      SQL:put(STM_DELIM):putf(DELETE, table, old_key)
-    else
-      local stale_exp = stale_ttl + current_time
-      SQL:put(STM_DELIM):putf(EXPIRE, table, stale_exp, old_key, stale_exp)
-    end
+    local stale_exp = stale_ttl + current_time
+    SQL:put(STM_DELIM):putf(EXPIRE, table, stale_exp, old_key, stale_exp)
   end
 
   local table_meta = self.table_meta

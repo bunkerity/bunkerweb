@@ -9,6 +9,7 @@
 - [BUGFIX] Fix issues with the Ingress controller regarding reverse proxy settings when using multiple paths per rule and a template by adjusting the indexing logic to be configurable via the new `KUBERNETES_REVERSE_PROXY_SUFFIX_START` setting (default is `1` to keep backward compatibility)
 - [BUGFIX] Escape percentage signs in `DATABASE_URI` for Alembic when using the SQLAlchemy URL configuration to prevent formatting errors during migrations
 - [DOCS] Add documentation about the new logging settings and how to configure them
+- [DEPS] Update lua-resty-session version to v4.1.5
 
 ## v1.6.6 - 2025/11/24
 
