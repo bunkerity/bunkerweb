@@ -1434,7 +1434,7 @@ class Database:
             original key. For suffix values, if the base value (using key) is not default, the check passes;
             otherwise, the suffix value must also be default (using original_key).
             """
-            if not is_global and key == "SERVER_NAME":
+            if key == "SERVER_NAME":
                 return False
 
             return is_default_value(value, key, setting, template_default, suffix, is_global)
