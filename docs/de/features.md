@@ -576,13 +576,13 @@ Führen Sie die folgenden Schritte aus, um die Auth Basic-Authentifizierung zu a
 
 ### Konfigurationseinstellungen
 
-| Einstellung           | Standard          | Kontext   | Mehrfach | Beschreibung                                                                                                                                                     |
-| --------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_AUTH_BASIC`      | `no`              | multisite | nein     | **Auth Basic aktivieren:** Auf `yes` setzen, um die Basisauthentifizierung zu aktivieren.                                                                        |
-| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | nein     | **Schutzumfang:** Auf `sitewide` setzen, um die gesamte Website zu schützen, oder einen URL-Pfad angeben (z.B. `/admin`), um nur bestimmte Bereiche zu schützen. |
-| `AUTH_BASIC_USER`     | `changeme`        | multisite | ja       | **Benutzername:** Der für die Authentifizierung erforderliche Benutzername. Sie können mehrere Paare aus Benutzername und Passwort definieren.                   |
-| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | ja       | **Passwort:** Das für die Authentifizierung erforderliche Passwort. Passwörter werden mit bcrypt für maximale Sicherheit gehasht.                                |
-| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | nein     | **Aufforderungstext:** Die Nachricht, die in der dem Benutzer angezeigten Authentifizierungsaufforderung erscheint.                                              |
+| Einstellung           | Standard          | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                |
+| --------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_AUTH_BASIC`      | `no`              | multisite | nein     | **Auth Basic aktivieren:** Auf `yes` setzen, um die Basisauthentifizierung zu aktivieren.                                                                                                                                                   |
+| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | nein     | **Schutzumfang:** Auf `sitewide` setzen, um die gesamte Website zu schützen, oder einen URL-Pfad angeben (z.B. `/admin`), um nur bestimmte Bereiche zu schützen. Sie können auch Nginx-Stil Modifikatoren verwenden (`=`, `~`, `~*`, `^~`). |
+| `AUTH_BASIC_USER`     | `changeme`        | multisite | ja       | **Benutzername:** Der für die Authentifizierung erforderliche Benutzername. Sie können mehrere Paare aus Benutzername und Passwort definieren.                                                                                              |
+| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | ja       | **Passwort:** Das für die Authentifizierung erforderliche Passwort. Passwörter werden mit scrypt für maximale Sicherheit gehasht.                                                                                                           |
+| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | nein     | **Aufforderungstext:** Die Nachricht, die in der dem Benutzer angezeigten Authentifizierungsaufforderung erscheint.                                                                                                                         |
 
 !!! warning "Sicherheitshinweise"
     Die HTTP-Basisauthentifizierung überträgt Anmeldeinformationen, die in Base64 kodiert (nicht verschlüsselt) sind. Obwohl dies bei Verwendung über HTTPS akzeptabel ist, sollte es über reines HTTP nicht als sicher angesehen werden. Aktivieren Sie immer SSL/TLS, wenn Sie die Basisauthentifizierung verwenden.
@@ -3568,7 +3568,7 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
 Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entspricht:
 
 - **`3`**: Stabile [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`**: Stabile [v4.20.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.20.0) (**Standard**).
+- **`4`**: Stabile [v4.21.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.21.0) (**Standard**).
 - **`nightly`**: [Nightly-Build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) mit den neuesten Regel-Updates.
 
 !!! example "Nightly-Build"

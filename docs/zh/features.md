@@ -587,13 +587,13 @@ Auth Basic 插件提供 HTTP 基本认证来保护您的网站或特定资源。
 
 ### 配置设置
 
-| 设置                  | 默认值            | 上下文    | 多个 | 描述                                                                                                    |
-| --------------------- | ----------------- | --------- | ---- | ------------------------------------------------------------------------------------------------------- |
-| `USE_AUTH_BASIC`      | `no`              | multisite | 否   | **启用基本认证：** 设置为 `yes` 以启用基本身份验证。                                                    |
-| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | 否   | **保护范围：** 设置为 `sitewide` 以保护整个站点，或指定一个 URL 路径（例如 `/admin`）以仅保护特定区域。 |
-| `AUTH_BASIC_USER`     | `changeme`        | multisite | 是   | **用户名：** 身份验证所需的用户名。您可以定义多个用户名/密码对。                                        |
-| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | 是   | **密码：** 身份验证所需的密码。密码使用 bcrypt 哈希以实现最大安全性。                                   |
-| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | 否   | **提示文本：** 显示给用户的身份验证提示中的消息。                                                       |
+| 设置                  | 默认值            | 上下文    | 多个 | 描述                                                                                                                                                            |
+| --------------------- | ----------------- | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_AUTH_BASIC`      | `no`              | multisite | 否   | **启用基本认证：** 设置为 `yes` 以启用基本身份验证。                                                                                                            |
+| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | 否   | **保护范围：** 设置为 `sitewide` 以保护整个站点，或指定一个 URL 路径（例如 `/admin`）以仅保护特定区域。您还可以使用 Nginx 风格的修饰符 (`=`, `~`, `~*`, `^~`)。 |
+| `AUTH_BASIC_USER`     | `changeme`        | multisite | 是   | **用户名：** 身份验证所需的用户名。您可以定义多个用户名/密码对。                                                                                                |
+| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | 是   | **密码：** 身份验证所需的密码。密码使用 scrypt 哈希以实现最大安全性。                                                                                           |
+| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | 否   | **提示文本：** 显示给用户的身份验证提示中的消息。                                                                                                               |
 
 !!! warning "安全注意事项"
     HTTP 基本认证以 Base64 编码（非加密）传输凭据。虽然在通过 HTTPS 使用时这是可以接受的，但在普通 HTTP 上不应被认为是安全的。使用基本身份验证时，请务必启用 SSL/TLS。
@@ -3641,7 +3641,7 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 选择一个 CRS 版本以最符合您的安全需求：
 
 - **`3`**：稳定版 [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7)。
-- **`4`**：稳定版 [v4.20.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.20.0) (**默认**)。
+- **`4`**：稳定版 [v4.21.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.21.0) (**默认**)。
 - **`nightly`**：[每日构建版](https://github.com/coreruleset/coreruleset/releases/tag/nightly)，提供最新的规则更新。
 
 !!! example "每日构建版"
