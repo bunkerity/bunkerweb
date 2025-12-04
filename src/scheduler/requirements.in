@@ -1,4 +1,4 @@
-certbot==5.1.0
+certbot==5.2.1
 
 # Official certbot plugins
 certbot-dns-cloudflare==5.1.0
