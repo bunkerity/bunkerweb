@@ -8,6 +8,7 @@
 - [FEATURE] Refactor `Auth Basic` plugin so Lua now hashes credentials with salted scrypt (CSPRNG-only) and verifies them in constant time.
 - [BUGFIX] Fix issues with the Ingress controller regarding reverse proxy settings when using multiple paths per rule and a template by adjusting the indexing logic to be configurable via the new `KUBERNETES_REVERSE_PROXY_SUFFIX_START` setting (default is `1` to keep backward compatibility)
 - [BUGFIX] Escape percentage signs in `DATABASE_URI` for Alembic when using the SQLAlchemy URL configuration to prevent formatting errors during migrations
+- [UI] Enhance service configuration handling during edits and renames to ensure consistency and prevent data loss
 - [DOCS] Add documentation about the new logging settings and how to configure them
 - [DEPS] Update lua-resty-session version to v4.1.5
 - [DEPS] Update coreruleset-v4 version to v4.21.0
