@@ -846,25 +846,99 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#casos-de-uso" class="md-nav__link">
-    <span class="md-ellipsis">
-      Casos de uso
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Casos de uso">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#detras-de-un-balanceador-de-carga-o-proxy-inverso" class="md-nav__link">
+  <a href="#behind-load-balancer-or-reverse-proxy" class="md-nav__link">
     <span class="md-ellipsis">
       Detrás de un balanceador de carga o proxy inverso
     </span>
   </a>
   
 </li>
+      
+        <li class="md-nav__item">
+  <a href="#alta-disponibilidad-y-balanceo-de-carga" class="md-nav__link">
+    <span class="md-ellipsis">
+      Alta disponibilidad y balanceo de carga
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Alta disponibilidad y balanceo de carga">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#requisitos-previos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Requisitos previos
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-instalar-el-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Instalar el Manager
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Instalar el Manager">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#asegurar-y-exponer-la-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      Asegurar y exponer la UI
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-instalar-los-workers" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Instalar los Workers
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-gestionar-los-workers" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Gestionar los Workers
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-verificar-la-instalacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Verificar la instalación
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-balanceo-de-carga" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Balanceo de carga
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#usando-mecanismos-de-resolucion-dns-personalizados" class="md-nav__link">
     <span class="md-ellipsis">
       Usando mecanismos de resolución DNS personalizados
@@ -896,8 +970,8 @@
     </nav>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#custom-configurations" class="md-nav__link">
     <span class="md-ellipsis">
       Configuraciones personalizadas
@@ -905,8 +979,8 @@
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#running-many-services-in-production" class="md-nav__link">
     <span class="md-ellipsis">
       Ejecutando muchos servicios en producción
@@ -938,8 +1012,8 @@
     </nav>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#persistence-of-bans-and-reports" class="md-nav__link">
     <span class="md-ellipsis">
       Persistencia de bloqueos e informes
@@ -947,8 +1021,8 @@
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#proteger-aplicaciones-udptcp" class="md-nav__link">
     <span class="md-ellipsis">
       Proteger aplicaciones UDP/TCP
@@ -956,8 +1030,8 @@
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#php" class="md-nav__link">
     <span class="md-ellipsis">
       PHP
@@ -965,8 +1039,8 @@
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#ipv6" class="md-nav__link">
     <span class="md-ellipsis">
       IPv6
@@ -974,8 +1048,8 @@
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#opciones-de-configuracion-de-registros" class="md-nav__link">
     <span class="md-ellipsis">
       Opciones de configuración de registros
@@ -1025,18 +1099,13 @@
     </nav>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#buenas-practicas-de-registro-de-docker" class="md-nav__link">
     <span class="md-ellipsis">
       Buenas prácticas de registro de Docker
     </span>
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1095,7 +1164,12 @@
   
 </li>
         
-          <li class="md-nav__item">
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#copia-de-seguridad-y-restauracion" class="md-nav__link">
     <span class="md-ellipsis">
       Copia de seguridad y restauración
@@ -1142,8 +1216,8 @@
     </nav>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#migracion-pro" class="md-nav__link">
     <span class="md-ellipsis">
       Migración (PRO)
@@ -1168,11 +1242,6 @@
       Iniciar una migración
     </span>
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
         
@@ -1507,7 +1576,6 @@
 <p>Muchos ejemplos de casos de uso del mundo real están disponibles en la carpeta <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples</a> del repositorio de GitHub.</p>
 <p>También proporcionamos numerosos boilerplates, como archivos YAML para diversas integraciones y tipos de bases de datos. Estos están disponibles en la carpeta <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations</a>.</p>
 <p>Esta sección solo se enfoca en usos avanzados y ajustes de seguridad, consulta la <a href="../features/">sección de características</a> de la documentación para ver todas las configuraciones disponibles.</p>
-<h2 id="casos-de-uso">Casos de uso</h2>
 <div class="admonition tip">
 <p class="admonition-title">Pruebas</p>
 <p>Para realizar pruebas rápidas cuando el modo multisitio está habilitado (y si no tienes las entradas DNS adecuadas configuradas para los dominios) puedes usar curl con la cabecera HTTP Host de tu elección:
@@ -1517,7 +1585,7 @@
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: app1.example.com&quot;</span><span class="w"> </span>--resolve<span class="w"> </span>example.com:443:ip-del-servidor<span class="w"> </span>https://example.com
 </code></pre></div></p>
 </div>
-<h3 id="detras-de-un-balanceador-de-carga-o-proxy-inverso">Detrás de un balanceador de carga o proxy inverso</h3>
+<h2 id="behind-load-balancer-or-reverse-proxy">Detrás de un balanceador de carga o proxy inverso</h2>
 <div class="admonition info">
 <p class="admonition-title">IP real</p>
 <p>Cuando BunkerWeb está a su vez detrás de un balanceador de carga o un proxy inverso, necesitas configurarlo para que pueda obtener la dirección IP real de los clientes. <strong>Si no lo haces, las características de seguridad bloquearán la dirección IP del balanceador de carga o del proxy inverso en lugar de la del cliente</strong>.</p>
@@ -1824,20 +1892,524 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 </div>
 </div>
-<h3 id="usando-mecanismos-de-resolucion-dns-personalizados">Usando mecanismos de resolución DNS personalizados</h3>
+<h2 id="alta-disponibilidad-y-balanceo-de-carga">Alta disponibilidad y balanceo de carga</h2>
+<p>Para que tus aplicaciones sigan disponibles incluso si un servidor falla, puedes desplegar BunkerWeb en un clúster de <strong>Alta Disponibilidad (HA)</strong>. Esta arquitectura incluye un <strong>Manager</strong> (Scheduler) que orquesta la configuración y varios <strong>Workers</strong> (instancias BunkerWeb) que manejan el tráfico.</p>
+<pre class="mermaid"><code>flowchart LR
+
+  %% ================ Styles =================
+  classDef manager     fill:#eef2ff,stroke:#4c1d95,stroke-width:1px,rx:6px,ry:6px;
+  classDef component     fill:#f9fafb,stroke:#6b7280,stroke-width:1px,rx:4px,ry:4px;
+  classDef lb            fill:#e0f2fe,stroke:#0369a1,stroke-width:1px,rx:6px,ry:6px;
+  classDef database fill:#d1fae5,stroke:#059669,stroke-width:1px,rx:4px,ry:4px;
+  classDef datastore     fill:#fee2e2,stroke:#b91c1c,stroke-width:1px,rx:4px,ry:4px;
+  classDef backend       fill:#ede9fe,stroke:#7c3aed,stroke-width:1px,rx:4px,ry:4px;
+  classDef client        fill:#e5e7eb,stroke:#4b5563,stroke-width:1px,rx:4px,ry:4px;
+
+  %% Container styles
+  style CLUSTER fill:#f3f4f6,stroke:#d1d5db,stroke-width:1px,stroke-dasharray:6 3;
+  style WORKERS fill:none,stroke:#9ca3af,stroke-width:1px,stroke-dasharray:4 2;
+
+  %% ============== Outside left =============
+  Client["Cliente"]:::client
+  LB["Load Balancer"]:::lb
+
+  %% ============== Cluster ==================
+  subgraph CLUSTER[" "]
+    direction TB
+
+    %% ---- Top row: Manager + Redis ----
+    subgraph TOP["Manager &amp; Data Stores"]
+      direction LR
+      Manager["Manager&lt;br/&gt;(Scheduler)"]:::manager
+      BDD["BDD"]:::database
+      Redis["Redis/Valkey"]:::datastore
+      UI["Interfaz Web"]:::manager
+    end
+
+    %% ---- Middle: Workers ----
+    subgraph WORKERS["Workers (BunkerWeb)"]
+      direction TB
+      Worker1["Worker 1"]:::component
+      WorkerN["Worker N"]:::component
+    end
+
+    %% ---- Bottom: App ----
+    App["App"]:::backend
+  end
+
+  %% ============ Outside right ============
+  Admin["Admin"]:::client
+
+  %% ============ Traffic &amp; control ===========
+  %% Manager / control plane
+  Manager --&gt;|API 5000| Worker1
+  Manager --&gt;|API 5000| WorkerN
+  Manager --&gt;|bwcli| Redis
+  Manager --&gt;|Config| BDD
+
+  %% User interface (UI)
+  UI --&gt;|Config| BDD
+  UI --&gt;|Reports / Bans| Redis
+  BDD --- UI
+  Redis --- UI
+  linkStyle 6 stroke-width:0px;
+  linkStyle 7 stroke-width:0px;
+
+  %% Workers &lt;-&gt; Redis
+  Worker1 --&gt;|Caché compartida| Redis
+  WorkerN --&gt;|Caché compartida| Redis
+
+  %% Workers -&gt; App
+  Worker1 --&gt;|Tráfico legítimo| App
+  WorkerN --&gt;|Tráfico legítimo| App
+
+  %% Client (right side) -&gt; Load balancer -&gt; Workers -&gt; App
+  Client --&gt;|Petición| LB
+  LB --&gt;|HTTP/TCP| Worker1
+  LB --&gt;|HTTP/TCP| WorkerN
+
+  %% Admin -&gt; UI
+  UI --- Admin
+  Admin --&gt;|HTTP| UI
+  linkStyle 15 stroke-width:0px;</code></pre>
+<div class="admonition info">
+<p class="admonition-title">Cómo funcionan las API de BunkerWeb</p>
+<p>BunkerWeb maneja dos conceptos distintos de API:</p>
+<ul>
+<li>Una <strong>API interna</strong> que conecta automáticamente managers y workers para la orquestación. Siempre está habilitada y no requiere configuración manual.</li>
+<li>Un <strong>servicio API</strong> opcional (<code>bunkerweb-api</code>) que expone una interfaz REST pública para herramientas de automatización (bwcli, CI/CD, etc.). Está deshabilitada por defecto en instalaciones Linux y es independiente de las comunicaciones internas manager↔worker.</li>
+</ul>
+</div>
+<h3 id="requisitos-previos">Requisitos previos</h3>
+<p>Antes de configurar un clúster, asegúrate de contar con:</p>
+<ul>
+<li><strong>2 o más hosts Linux</strong> con acceso root/sudo.</li>
+<li><strong>Conectividad de red</strong> entre los hosts (especialmente en el puerto TCP 5000 para la API interna).</li>
+<li><strong>IP o hostname</strong> de la aplicación a proteger.</li>
+<li><em>(Opcional)</em> <strong>Load Balancer</strong> (p. ej. HAProxy) para repartir el tráfico entre los workers.</li>
+</ul>
+<h3 id="1-instalar-el-manager">1. Instalar el Manager</h3>
+<p>El Manager es el cerebro del clúster. Ejecuta el Scheduler, la base de datos y, opcionalmente, la interfaz web.</p>
+<div class="admonition warning">
+<p class="admonition-title">Seguridad de la interfaz web</p>
+<p>La interfaz web escucha en un puerto dedicado (7000 por defecto) y solo debería ser accesible por administradores. Si piensas exponerla a internet, <strong>recomendamos encarecidamente</strong> protegerla con una instancia de BunkerWeb delante.</p>
+</div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Linux</label><label for="__tabbed_4_2">Docker</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Descarga y ejecuta el instalador</strong> en el host del manager:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Descargar script y checksum</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh.sha256
+
+<span class="c1"># Verificar checksum</span>
+sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
+
+<span class="c1"># Ejecutar instalador</span>
+chmod<span class="w"> </span>+x<span class="w"> </span>install-bunkerweb.sh
+sudo<span class="w"> </span>./install-bunkerweb.sh
+</code></pre></div>
+<div class="admonition danger">
+<p class="admonition-title">Aviso de seguridad</p>
+<p>Comprueba siempre la integridad del script con el checksum proporcionado antes de ejecutarlo.</p>
+</div>
+</li>
+<li>
+<p><strong>Selecciona la opción 2) Manager</strong> y sigue las indicaciones:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Pregunta</th>
+<th style="text-align: left;">Acción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Instancias BunkerWeb</strong></td>
+<td style="text-align: left;">Introduce las IP de tus nodos worker separadas por espacios (ej.: <code>192.168.10.11 192.168.10.12</code>).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Whitelist IP</strong></td>
+<td style="text-align: left;">Acepta la IP detectada o introduce un subnet (ej.: <code>192.168.10.0/24</code>) para permitir el acceso a la API.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Resolutores DNS</strong></td>
+<td style="text-align: left;">Pulsa <code>N</code> para usar el valor por defecto o indica los tuyos.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>HTTPS para la API interna</strong></td>
+<td style="text-align: left;"><strong>Recomendado:</strong> <code>Y</code> para generar certificados y asegurar la comunicación manager-worker.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Servicio Web UI</strong></td>
+<td style="text-align: left;"><code>Y</code> para activar la interfaz web (muy recomendado).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Servicio API</strong></td>
+<td style="text-align: left;"><code>N</code> salvo que necesites la API REST pública para herramientas externas.</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ol>
+<h4 id="asegurar-y-exponer-la-ui">Asegurar y exponer la UI</h4>
+<p>Si activaste la interfaz web, debes asegurarla. Puedes alojarla en el Manager o en una máquina separada.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Alojada en el Manager</label><label for="__tabbed_5_2">Host externo</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>Edita <code>/etc/bunkerweb/ui.env</code> y define credenciales fuertes:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="c1"># OVERRIDE_ADMIN_CREDS=no</span>
+<span class="na">ADMIN_USERNAME</span><span class="o">=</span><span class="s">admin</span>
+<span class="na">ADMIN_PASSWORD</span><span class="o">=</span><span class="s">changeme</span>
+<span class="c1"># FLASK_SECRET=changeme</span>
+<span class="c1"># TOTP_ENCRYPTION_KEYS=changeme</span>
+<span class="na">LISTEN_ADDR</span><span class="o">=</span><span class="s">0.0.0.0</span>
+<span class="c1"># LISTEN_PORT=7000</span>
+<span class="na">FORWARDED_ALLOW_IPS</span><span class="o">=</span><span class="s">127.0.0.1</span>
+<span class="c1"># ENABLE_HEALTHCHECK=no</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Cambia las credenciales por defecto</p>
+<p>Sustituye <code>admin</code> y <code>changeme</code> por credenciales robustas antes de arrancar el servicio UI en producción.</p>
+</div>
+<ol>
+<li>Reinicia la UI:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>bunkerweb-ui
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Para más aislamiento, instala la UI en un nodo independiente.</p>
+<ol>
+<li>Ejecuta el instalador y elige <strong>Opción 5) Web UI Only</strong>.</li>
+<li>
+<p>Edita <code>/etc/bunkerweb/ui.env</code> para apuntar a la base de datos del Manager:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Configuración de base de datos (debe coincidir con la del Manager)</span>
+<span class="na">DATABASE_URI</span><span class="o">=</span><span class="s">mariadb+pymysql://bunkerweb:changeme@db-host:3306/bunkerweb</span>
+<span class="c1"># Para PostgreSQL: postgresql://bunkerweb:changeme@db-host:5432/bunkerweb</span>
+<span class="c1"># Para MySQL: mysql+pymysql://bunkerweb:changeme@db-host:3306/bunkerweb</span>
+
+<span class="c1"># Configuración de Redis (si usas Redis/Valkey para persistencia)</span>
+<span class="c1"># Si no se proporciona, se toma automáticamente de la base de datos</span>
+<span class="c1"># REDIS_HOST=redis-host</span>
+
+<span class="c1"># Credenciales de seguridad</span>
+<span class="na">ADMIN_USERNAME</span><span class="o">=</span><span class="s">admin</span>
+<span class="na">ADMIN_PASSWORD</span><span class="o">=</span><span class="s">changeme</span>
+
+<span class="c1"># Ajustes de red</span>
+<span class="na">LISTEN_ADDR</span><span class="o">=</span><span class="s">0.0.0.0</span>
+<span class="c1"># LISTEN_PORT=7000</span>
+</code></pre></div>
+</li>
+<li>
+<p>Reinicia el servicio:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>bunkerweb-ui
+</code></pre></div>
+</li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Configuración de firewall</p>
+<p>Asegúrate de que el host de la UI pueda llegar a los puertos de base de datos y Redis. Puede que debas ajustar las reglas de firewall tanto en el host de la UI como en los hosts de la base/Redis.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="tabbed-block">
+<p>Crea un archivo <code>docker-compose.yml</code> en el host del manager:</p>
+<div class="highlight"><span class="filename">docker-compose.yml</span><pre><span></span><code><span class="nt">x-ui-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-ui-env</span>
+<span class="w">  </span><span class="c1"># Anclamos las variables de entorno para evitar duplicaciones</span>
+<span class="w">  </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db\&quot;</span><span class="w"> </span><span class="c1"># Usa una contraseña más fuerte</span>
+
+<span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
+<span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;192.168.1.11 192.168.1.12\&quot;</span><span class="w"> </span><span class="c1"># Sustituye por las IP de tus workers</span>
+<span class="w">      </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16\&quot;</span><span class="w"> </span><span class="c1"># Permitir redes locales</span>
+<span class="w">      </span><span class="c1"># API_LISTEN_HTTPS: \&quot;yes\&quot; # Recomendado para asegurar la API interna</span>
+<span class="w">      </span><span class="c1"># API_TOKEN: \&quot;my_secure_token\&quot; # Opcional: token adicional</span>
+<span class="w">      </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;\&quot;</span>
+<span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;yes\&quot;</span>
+<span class="w">      </span><span class="nt">USE_REDIS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;yes\&quot;</span>
+<span class="w">      </span><span class="nt">REDIS_HOST</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;redis\&quot;</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># Persistencia del caché y backups</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;unless-stopped\&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-redis</span>
+
+<span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;7000:7000\&quot;</span><span class="w"> </span><span class="c1"># Exponer el puerto de la UI</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
+<span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;changeme\&quot;</span>
+<span class="w">      </span><span class="nt">ADMIN_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;changeme\&quot;</span><span class="w"> </span><span class="c1"># Usa una contraseña más fuerte</span>
+<span class="w">      </span><span class="nt">TOTP_ENCRYPTION_KEYS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;mysecret\&quot;</span><span class="w"> </span><span class="c1"># Usa una clave más fuerte (ver requisitos previos)</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;unless-stopped\&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-redis</span>
+
+<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="c1"># Establecemos el tamaño máximo de paquete para evitar problemas con consultas grandes</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;yes\&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;db\&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;bunkerweb\&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;changeme\&quot;</span><span class="w"> </span><span class="c1"># Usa una contraseña más fuerte</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;unless-stopped\&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+
+<span class="w">  </span><span class="nt">redis</span><span class="p">:</span><span class="w"> </span><span class="c1"># Redis para la persistencia de informes/prohibiciones/estadísticas</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
+<span class="w">      </span><span class="no">redis-server</span>
+<span class="w">      </span><span class="no">--maxmemory 256mb</span>
+<span class="w">      </span><span class="no">--maxmemory-policy allkeys-lru</span>
+<span class="w">      </span><span class="no">--save 60 1000</span>
+<span class="w">      </span><span class="no">--appendonly yes</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis-data:/data</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;unless-stopped\&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-redis</span>
+
+<span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">redis-data</span><span class="p">:</span>
+
+<span class="nt">networks</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+<span class="w">  </span><span class="nt">bw-redis</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-redis</span>
+</code></pre></div>
+<p>Arranca el stack del manager:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div>
+</div>
+</div>
+</div>
+<h3 id="2-instalar-los-workers">2. Instalar los Workers</h3>
+<p>Los workers son los nodos que procesan el tráfico entrante.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Linux</label><label for="__tabbed_6_2">Docker</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li><strong>Ejecuta el instalador</strong> en cada nodo worker (mismos comandos que para el Manager).</li>
+<li>
+<p><strong>Selecciona la opción 3) Worker</strong> y configura:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Pregunta</th>
+<th style="text-align: left;">Acción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>IP del Manager</strong></td>
+<td style="text-align: left;">Introduce la IP de tu Manager (ej.: <code>192.168.10.10</code>).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>HTTPS para la API interna</strong></td>
+<td style="text-align: left;">Debe coincidir con el ajuste del Manager (<code>Y</code> o <code>N</code>).</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ol>
+<p>El worker se registrará automáticamente en el Manager.</p>
+</div>
+<div class="tabbed-block">
+<p>Crea un archivo <code>docker-compose.yml</code> en cada worker:</p>
+<div class="highlight"><span class="filename">docker-compose.yml</span><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;80:8080/tcp\&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;443:8443/tcp\&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;443:8443/udp\&quot;</span><span class="w"> </span><span class="c1"># Compatibilidad QUIC / HTTP3</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;5000:5000/tcp\&quot;</span><span class="w"> </span><span class="c1"># Puerto de la API interna</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16\&quot;</span>
+<span class="w">      </span><span class="c1"># API_LISTEN_HTTPS: \&quot;yes\&quot; # Recomendado para asegurar la API interna (debe coincidir con el Manager)</span>
+<span class="w">      </span><span class="c1"># API_TOKEN: \&quot;my_secure_token\&quot; # Opcional: token adicional (debe coincidir con el Manager)</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\&quot;unless-stopped\&quot;</span>
+</code></pre></div>
+<p>Inicia el worker:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div>
+</div>
+</div>
+</div>
+<h3 id="3-gestionar-los-workers">3. Gestionar los Workers</h3>
+<p>Puedes añadir más workers más adelante usando la interfaz web o la CLI.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:1"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Vía interfaz web</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li><strong>Ve a la pestaña Instances</strong>.</li>
+<li><strong>Haz clic en Add instance</strong>.</li>
+<li><strong>Introduce la IP/hostname del worker</strong> y guarda.</li>
+</ol>
+<p><div class=\"grid grid-2\" markdown style=\"display:grid; align-items:center;\">
+<figure markdown style=\"display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%;\">
+  <img alt="BunkerWeb UI - Crear instancia" src="../../assets/img/ui-ha-create-instance.webp" width="\&quot;100%\&quot;" />
+  <figcaption>BunkerWeb UI - Crear instancia</figcaption>
+</figure>
+<figure markdown style=\"display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%;\">
+  <img alt="BunkerWeb UI - Formulario de instancia" src="../../assets/img/ui-ha-create-instance-form.webp" width="\&quot;100%\&quot;" />
+  <figcaption>BunkerWeb UI - Formulario de instancia</figcaption>
+</figure>
+</div></p>
+</div>
+</div>
+</div>
+<p>=== \"Vía configuración\"</p>
+<pre><code>=== \"Linux\"
+
+    1. **Edita** `/etc/bunkerweb/variables.env` en el Manager:
+
+        ```bash
+        BUNKERWEB_INSTANCES=192.168.10.11 192.168.10.12 192.168.10.13
+        ```
+
+    2. **Reinicia el Scheduler**:
+
+        ```bash
+        sudo systemctl restart bunkerweb-scheduler
+        ```
+
+=== \"Docker\"
+
+    1. **Edita** el archivo `docker-compose.yml` en el Manager para actualizar `BUNKERWEB_INSTANCES`.
+
+    2. **Recrea el contenedor del Scheduler**:
+
+        ```bash
+        docker compose up -d bw-scheduler
+        ```
+</code></pre>
+<h3 id="4-verificar-la-instalacion">4. Verificar la instalación</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Linux</label><label for="__tabbed_8_2">Docker</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li><strong>Comprobar estado</strong>: accede a la UI (<code>http://&lt;ip-manager&gt;:7000</code>) y abre la pestaña <strong>Instances</strong>. Todos los workers deben aparecer <strong>Up</strong>.</li>
+<li><strong>Probar conmutación</strong>: detén BunkerWeb en un worker (<code>sudo systemctl stop bunkerweb</code>) y verifica que el tráfico sigue fluyendo.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<ol>
+<li><strong>Comprobar estado</strong>: accede a la UI (<code>http://&lt;ip-manager&gt;:7000</code>) y abre la pestaña <strong>Instances</strong>. Todos los workers deben aparecer <strong>Up</strong>.</li>
+<li><strong>Probar conmutación</strong>: detén BunkerWeb en un worker (<code>docker compose stop bunkerweb</code>) y verifica que el tráfico sigue fluyendo.</li>
+</ol>
+</div>
+</div>
+</div>
+<h3 id="5-balanceo-de-carga">5. Balanceo de carga</h3>
+<p>Para repartir el tráfico entre tus workers, utiliza un Load Balancer. Recomendamos uno de capa 4 (TCP) que soporte <strong>PROXY protocol</strong> para preservar la IP del cliente.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">HAProxy - Capa 4 (TCP)</label><label for="__tabbed_9_2">HAProxy - Capa 7 (HTTP)</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Ejemplo de configuración <strong>HAProxy</strong> que pasa el tráfico (modo TCP) manteniendo la IP cliente mediante <strong>PROXY protocol</strong>.</p>
+<p>```cfg title=\"haproxy.cfg\"
+defaults
+    timeout connect 5s
+    timeout client 5s
+    timeout server 5s</p>
+<p>frontend http_front
+    mode tcp
+    bind *:80
+    default_backend http_back</p>
+<p>frontend https_front
+    mode tcp
+    bind *:443
+    default_backend https_back</p>
+<p>backend http_back
+    mode tcp
+    balance roundrobin
+    server worker01 192.168.10.11:80 check send-proxy-v2
+    server worker02 192.168.10.12:80 check send-proxy-v2</p>
+<p>backend https_back
+    mode tcp
+    balance roundrobin
+    server worker01 192.168.10.11:443 check send-proxy-v2
+    server worker02 192.168.10.12:443 check send-proxy-v2
+```</p>
+</div>
+<div class="tabbed-block">
+<p>Ejemplo de configuración <strong>HAProxy</strong> para balanceo en capa 7 (HTTP). Añade la cabecera <code>X-Forwarded-For</code> para que BunkerWeb obtenga la IP del cliente.</p>
+<p>```cfg title=\"haproxy.cfg\"
+defaults
+    timeout connect 5s
+    timeout client 5s
+    timeout server 5s</p>
+<p>frontend http_front
+    mode http
+    bind *:80
+    default_backend http_back</p>
+<p>frontend https_front
+    mode http
+    bind *:443
+    default_backend https_back</p>
+<p>backend http_back
+    mode http
+    balance roundrobin
+    option forwardfor
+    server worker01 192.168.10.11:80 check
+    server worker02 192.168.10.12:80 check</p>
+<p>backend https_back
+    mode http
+    balance roundrobin
+    option forwardfor
+    server worker01 192.168.10.11:443 check
+    server worker02 192.168.10.12:443 check
+```</p>
+</div>
+</div>
+</div>
+<p>Reinicia HAProxy una vez guardada la configuración:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>haproxy
+</code></pre></div>
+<p>Para más información, consulta la <a href="http://docs.haproxy.org/">documentación oficial de HAProxy</a>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Configurar IP real</p>
+<p>No olvides configurar BunkerWeb para recibir la IP real del cliente (usando PROXY protocol o la cabecera X-Forwarded-For).</p>
+<p>Consulta la sección <a href="#behind-load-balancer-or-reverse-proxy">Detrás de un balanceador de carga o proxy inverso</a> para asegurarte de que recibes la IP correcta del cliente.</p>
+<p>Revisa <code>/var/log/bunkerweb/access.log</code> en cada worker para confirmar que las solicitudes llegan desde la red del PROXY protocol y que los dos workers comparten la carga. Tu clúster BunkerWeb ya está listo para proteger cargas de producción con alta disponibilidad.</p>
+</div>
+<h2 id="usando-mecanismos-de-resolucion-dns-personalizados">Usando mecanismos de resolución DNS personalizados</h2>
 <p>La configuración de NGINX de BunkerWeb se puede personalizar para usar diferentes resolutores de DNS según tus necesidades. Esto puede ser particularmente útil en varios escenarios:</p>
 <ol>
 <li>Para respetar las entradas en tu archivo local <code>/etc/hosts</code></li>
 <li>Cuando necesitas usar servidores DNS personalizados para ciertos dominios</li>
 <li>Para integrarse con soluciones locales de caché de DNS</li>
 </ol>
-<h4 id="usando-systemd-resolved">Usando systemd-resolved</h4>
+<h3 id="usando-systemd-resolved">Usando systemd-resolved</h3>
 <p>Muchos sistemas Linux modernos usan <code>systemd-resolved</code> para la resolución de DNS. Si quieres que BunkerWeb respete el contenido de tu archivo <code>/etc/hosts</code> y use el mecanismo de resolución de DNS del sistema, puedes configurarlo para que use el servicio DNS local de systemd-resolved.</p>
 <p>Para verificar que systemd-resolved se está ejecutando en tu sistema, puedes usar:</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>systemd-resolved
 </code></pre></div>
 <p>Para habilitar systemd-resolved como tu resolutor de DNS en BunkerWeb, establece la configuración <code>DNS_RESOLVERS</code> a <code>127.0.0.53</code>, que es la dirección de escucha predeterminada para systemd-resolved:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Interfaz de usuario web</label><label for="__tabbed_4_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Interfaz de usuario web</label><label for="__tabbed_10_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Navega a la página de <strong>Configuración Global</strong> y establece los resolutores de DNS en <code>127.0.0.53</code></p>
@@ -1855,13 +2427,13 @@ DNS_RESOLVERS=127.0.0.53
 </div>
 </div>
 </div>
-<h4 id="usando-dnsmasq">Usando dnsmasq</h4>
+<h3 id="usando-dnsmasq">Usando dnsmasq</h3>
 <p><a href="http://www.thekelleys.org.uk/dnsmasq/doc.html">dnsmasq</a> es un servidor ligero de DNS, DHCP y TFTP que se usa comúnmente para el almacenamiento en caché y la personalización de DNS local. Es particularmente útil cuando necesitas más control sobre tu resolución de DNS del que proporciona systemd-resolved.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Linux</label><label for="__tabbed_5_2">Todo en uno</label><label for="__tabbed_5_3">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Linux</label><label for="__tabbed_11_2">Todo en uno</label><label for="__tabbed_11_3">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Primero, instala y configura dnsmasq en tu sistema Linux:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Debian/Ubuntu</label><label for="__tabbed_6_2">RHEL/Fedora</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Debian/Ubuntu</label><label for="__tabbed_12_2">RHEL/Fedora</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="c1"># Instalar dnsmasq</span>
@@ -1898,7 +2470,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">en
 </div>
 </div>
 <p>Luego configura BunkerWeb para que use dnsmasq estableciendo <code>DNS_RESOLVERS</code> en <code>127.0.0.1</code>:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Interfaz de usuario web</label><label for="__tabbed_7_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Interfaz de usuario web</label><label for="__tabbed_13_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Navega a la página de <strong>Configuración Global</strong>, selecciona el plugin <strong>NGINX</strong> y establece los resolutores de DNS en <code>127.0.0.1</code>.</p>
@@ -1997,7 +2569,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 </div>
 </div>
 </div>
-<h3 id="custom-configurations">Configuraciones personalizadas</h3>
+<h2 id="custom-configurations">Configuraciones personalizadas</h2>
 <p>Para personalizar y añadir configuraciones personalizadas a BunkerWeb, puedes aprovechar su base NGINX. Las configuraciones personalizadas de NGINX se pueden añadir en diferentes contextos de NGINX, incluidas las configuraciones para el Firewall de Aplicaciones Web (WAF) ModSecurity, que es un componente central de BunkerWeb. Se pueden encontrar más detalles sobre las configuraciones de ModSecurity <a href="../features/#custom-configurations">aquí</a>.</p>
 <p>Estos son los tipos de configuraciones personalizadas disponibles:</p>
 <ul>
@@ -2014,7 +2586,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <p>Las configuraciones personalizadas se pueden aplicar globalmente o específicamente para un servidor en particular, dependiendo del contexto aplicable y de si el <a href="../features/#multisite-mode">modo multisitio</a> está habilitado.</p>
 <p>El método para aplicar configuraciones personalizadas depende de la integración que se esté utilizando. Sin embargo, el proceso subyacente implica añadir archivos con el sufijo <code>.conf</code> a carpetas específicas. Para aplicar una configuración personalizada para un servidor específico, el archivo debe colocarse en una subcarpeta con el nombre del servidor principal.</p>
 <p>Algunas integraciones proporcionan formas más convenientes de aplicar configuraciones, como el uso de <a href="https://docs.docker.com/engine/swarm/configs/">Configs</a> en Docker Swarm o <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a> en Kubernetes. Estas opciones ofrecen enfoques más sencillos para gestionar y aplicar configuraciones.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:7"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><input id="__tabbed_8_4" name="__tabbed_8" type="radio" /><input id="__tabbed_8_5" name="__tabbed_8" type="radio" /><input id="__tabbed_8_6" name="__tabbed_8" type="radio" /><input id="__tabbed_8_7" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Interfaz de usuario web</label><label for="__tabbed_8_2">Linux</label><label for="__tabbed_8_3">Todo en uno</label><label for="__tabbed_8_4">Docker</label><label for="__tabbed_8_5">Docker autoconf</label><label for="__tabbed_8_6">Kubernetes</label><label for="__tabbed_8_7">Swarm</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:7"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><input id="__tabbed_14_4" name="__tabbed_14" type="radio" /><input id="__tabbed_14_5" name="__tabbed_14" type="radio" /><input id="__tabbed_14_6" name="__tabbed_14" type="radio" /><input id="__tabbed_14_7" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Interfaz de usuario web</label><label for="__tabbed_14_2">Linux</label><label for="__tabbed_14_3">Todo en uno</label><label for="__tabbed_14_4">Docker</label><label for="__tabbed_14_5">Docker autoconf</label><label for="__tabbed_14_6">Kubernetes</label><label for="__tabbed_14_7">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Navega a la página de <strong>Configuraciones</strong>, haz clic en <strong>Crear nueva configuración personalizada</strong>, luego puedes elegir si es global o específica para un servicio, el tipo de configuración y el nombre de la configuración:</p>
@@ -2292,8 +2864,8 @@ El controlador de Ingress de autoconf lee cada entrada de <code>data</code> y la
 </div>
 </div>
 </div>
-<h3 id="running-many-services-in-production">Ejecutando muchos servicios en producción</h3>
-<h4 id="crs-global">CRS Global</h4>
+<h2 id="running-many-services-in-production">Ejecutando muchos servicios en producción</h2>
+<h3 id="crs-global">CRS Global</h3>
 <div class="admonition warning">
 <p class="admonition-title">Plugins CRS</p>
 <p>Cuando el CRS se carga globalmente, <strong>los plugins CRS no son compatibles</strong>. Si necesitas usarlos, tendrás que cargar el CRS por servicio.</p>
@@ -2304,13 +2876,13 @@ El controlador de Ingress de autoconf lee cada entrada de <code>data</code> y la
 SecRule REQUEST_HEADERS:Host &quot;@rx ^app1\.example\.com$&quot; &quot;nolog&quot;
 </code></pre></div>
 <p>Puedes habilitar la carga global de CRS estableciendo <code>USE_MODSECURITY_GLOBAL_CRS</code> en <code>yes</code>.</p>
-<h4 id="ajustar-max_allowed_packet-para-mariadbmysql">Ajustar max_allowed_packet para MariaDB/MySQL</h4>
+<h3 id="ajustar-max_allowed_packet-para-mariadbmysql">Ajustar max_allowed_packet para MariaDB/MySQL</h3>
 <p>Parece que el valor predeterminado para el parámetro <code>max_allowed_packet</code> en los servidores de bases de datos MariaDB y MySQL no es suficiente cuando se utiliza BunkerWeb con un gran número de servicios.</p>
 <p>Si encuentras errores como este, especialmente en el programador:</p>
 <div class="highlight"><pre><span></span><code>[Warning] Aborted connection 5 to db: &#39;db&#39; user: &#39;bunkerweb&#39; host: &#39;172.20.0.4&#39; (Got a packet bigger than &#39;max_allowed_packet&#39; bytes)
 </code></pre></div>
 <p>Necesitarás aumentar el <code>max_allowed_packet</code> en tu servidor de base de datos.</p>
-<h3 id="persistence-of-bans-and-reports">Persistencia de bloqueos e informes</h3>
+<h2 id="persistence-of-bans-and-reports">Persistencia de bloqueos e informes</h2>
 <p>Por defecto, BunkerWeb almacena los bloqueos e informes en un almacén de datos Lua local. Aunque es simple y eficiente, esta configuración significa que los datos se pierden cuando se reinicia la instancia. Para asegurar que los bloqueos e informes persistan a través de los reinicios, puedes configurar BunkerWeb para que utilice un servidor remoto <a href="https://redis.io/">Redis</a> o <a href="https://valkey.io/">Valkey</a>.</p>
 <p><strong>¿Por qué usar Redis/Valkey?</strong></p>
 <p>Redis y Valkey son potentes almacenes de datos en memoria comúnmente utilizados como bases de datos, cachés y agentes de mensajes. Son altamente escalables y soportan una variedad de estructuras de datos, incluyendo:</p>
@@ -2343,7 +2915,7 @@ REDIS_DATABASE=0
 <li><strong><code>REDIS_DATABASE</code></strong>: Especifica el número de la base de datos de Redis/Valkey a utilizar. El valor predeterminado es <code>0</code>.</li>
 </ul>
 <p>Si necesitas configuraciones más avanzadas, como autenticación, soporte SSL/TLS o modo Sentinel, consulta la <a href="../features/#redis">documentación de configuración del plugin de Redis</a> para obtener una guía detallada.</p>
-<h3 id="proteger-aplicaciones-udptcp">Proteger aplicaciones UDP/TCP</h3>
+<h2 id="proteger-aplicaciones-udptcp">Proteger aplicaciones UDP/TCP</h2>
 <div class="admonition example">
 <p class="admonition-title">Característica experimental</p>
 <p>Esta característica no está lista para producción. Siéntete libre de probarla y reportarnos cualquier error usando los <a href="https://github.com/bunkerity/bunkerweb/issues">issues</a> en el repositorio de GitHub.</p>
@@ -2371,7 +2943,7 @@ LISTEN_STREAM_PORT_SSL_1=4344
 ...
 </code></pre></div>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:6"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><input id="__tabbed_9_4" name="__tabbed_9" type="radio" /><input id="__tabbed_9_5" name="__tabbed_9" type="radio" /><input id="__tabbed_9_6" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Todo en uno</label><label for="__tabbed_9_2">Docker</label><label for="__tabbed_9_3">Docker autoconf</label><label for="__tabbed_9_4">Kubernetes</label><label for="__tabbed_9_5">Linux</label><label for="__tabbed_9_6">Swarm</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:6"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><input id="__tabbed_15_4" name="__tabbed_15" type="radio" /><input id="__tabbed_15_5" name="__tabbed_15" type="radio" /><input id="__tabbed_15_6" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Todo en uno</label><label for="__tabbed_15_2">Docker</label><label for="__tabbed_15_3">Docker autoconf</label><label for="__tabbed_15_4">Kubernetes</label><label for="__tabbed_15_5">Linux</label><label for="__tabbed_15_6">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Necesitarás agregar la configuración a las variables de entorno al ejecutar el contenedor Todo en uno. También necesitarás exponer los puertos de stream.</p>
@@ -2742,7 +3314,7 @@ app2.example.com_LISTEN_STREAM_PORT=20000
 </div>
 </div>
 </div>
-<h3 id="php">PHP</h3>
+<h2 id="php">PHP</h2>
 <div class="admonition example">
 <p class="admonition-title">Característica experimental</p>
 <p>Por el momento, el soporte de PHP con BunkerWeb todavía está en beta y te recomendamos que utilices una arquitectura de proxy inverso si puedes. Por cierto, PHP no es compatible en absoluto con algunas integraciones como Kubernetes.</p>
@@ -2756,7 +3328,7 @@ app2.example.com_LISTEN_STREAM_PORT=20000
 <li><code>LOCAL_PHP</code>: Ruta al archivo de socket local de la instancia de PHP-FPM.</li>
 <li><code>LOCAL_PHP_PATH</code>: Carpeta raíz que contiene los archivos en la instancia local de PHP-FPM.</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:6"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><input id="__tabbed_10_4" name="__tabbed_10" type="radio" /><input id="__tabbed_10_5" name="__tabbed_10" type="radio" /><input id="__tabbed_10_6" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Todo en uno</label><label for="__tabbed_10_2">Docker</label><label for="__tabbed_10_3">Docker autoconf</label><label for="__tabbed_10_4">Kubernetes</label><label for="__tabbed_10_5">Linux</label><label for="__tabbed_10_6">Swarm</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:6"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><input id="__tabbed_16_3" name="__tabbed_16" type="radio" /><input id="__tabbed_16_4" name="__tabbed_16" type="radio" /><input id="__tabbed_16_5" name="__tabbed_16" type="radio" /><input id="__tabbed_16_6" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Todo en uno</label><label for="__tabbed_16_2">Docker</label><label for="__tabbed_16_3">Docker autoconf</label><label for="__tabbed_16_4">Kubernetes</label><label for="__tabbed_16_5">Linux</label><label for="__tabbed_16_6">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Cuando se utiliza la <a href="../integrations/#all-in-one-aio-image">imagen Todo en uno</a>, para soportar aplicaciones PHP, necesitarás:</p>
@@ -3234,13 +3806,13 @@ find<span class="w"> </span>/shared/www<span class="w"> </span>-type<span class=
 </div>
 </div>
 </div>
-<h3 id="ipv6">IPv6</h3>
+<h2 id="ipv6">IPv6</h2>
 <div class="admonition example">
 <p class="admonition-title">Característica experimental</p>
 <p>Esta característica no está lista para producción. Siéntete libre de probarla y reportarnos cualquier error usando los <a href="https://github.com/bunkerity/bunkerweb/issues">issues</a> en el repositorio de GitHub.</p>
 </div>
 <p>Por defecto, BunkerWeb solo escuchará en direcciones IPv4 y no usará IPv6 para las comunicaciones de red. Si quieres habilitar el soporte de IPv6, necesitas establecer <code>USE_IPV6=yes</code>. Ten en cuenta que la configuración de IPv6 de tu red y entorno está fuera del alcance de esta documentación.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Docker / Autoconf / Swarm</label><label for="__tabbed_11_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Docker / Autoconf / Swarm</label><label for="__tabbed_17_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>En primer lugar, necesitarás configurar tu demonio de Docker para habilitar el soporte de IPv6 para los contenedores y usar ip6tables si es necesario. Aquí hay una configuración de ejemplo para tu archivo <code>/etc/docker/daemon.json</code>:</p>
@@ -3293,14 +3865,14 @@ USE_IPV6=yes
 </div>
 </div>
 </div>
-<h3 id="opciones-de-configuracion-de-registros">Opciones de configuración de registros</h3>
+<h2 id="opciones-de-configuracion-de-registros">Opciones de configuración de registros</h2>
 <p>BunkerWeb ofrece una configuración de registros flexible que permite enviar registros a múltiples destinos (por ejemplo, archivos, stdout/stderr o syslog) simultáneamente. Esto es especialmente útil para integrarse con recopiladores externos de registros mientras se mantienen registros locales para la interfaz web.</p>
 <p>Hay dos categorías principales de registros para configurar:</p>
 <ol>
 <li><strong>Registros de servicio</strong>: Logs generados por los componentes de BunkerWeb (Scheduler, UI, Autoconf, etc.). Se controlan por servicio mediante <code>LOG_TYPES</code> (y opcionalmente <code>LOG_FILE_PATH</code>, <code>LOG_SYSLOG_ADDRESS</code>, <code>LOG_SYSLOG_TAG</code>).</li>
 <li><strong>Registros de acceso y error</strong>: Registros HTTP de acceso y errores generados por NGINX. Solo el servicio <code>bunkerweb</code> usa estos (<code>ACCESS_LOG</code> / <code>ERROR_LOG</code> / <code>LOG_LEVEL</code>).</li>
 </ol>
-<h4 id="registros-de-servicio">Registros de servicio</h4>
+<h3 id="registros-de-servicio">Registros de servicio</h3>
 <p>Los registros de servicio se controlan con la configuración <code>LOG_TYPES</code>, que puede aceptar múltiples valores separados por espacios (por ejemplo, <code>LOG_TYPES="stderr syslog"</code>).</p>
 <table>
 <thead>
@@ -3330,7 +3902,7 @@ USE_IPV6=yes
 <li><code>LOG_SYSLOG_TAG</code>: Una etiqueta única para el servicio (por ejemplo, <code>bw-scheduler</code>) para distinguir sus entradas.</li>
 <li><code>LOG_FILE_PATH</code>: Ruta para la salida de archivo cuando <code>LOG_TYPES</code> incluye <code>file</code> (por ejemplo, <code>/var/log/bunkerweb/scheduler.log</code>).</li>
 </ul>
-<h4 id="registros-de-acceso-y-error">Registros de acceso y error</h4>
+<h3 id="registros-de-acceso-y-error">Registros de acceso y error</h3>
 <p>Estos son registros estándar de NGINX, configurados únicamente mediante el <strong>servicio <code>bunkerweb</code></strong>. Soportan múltiples destinos añadiendo sufijos numerados a la configuración (por ejemplo, <code>ACCESS_LOG</code>, <code>ACCESS_LOG_1</code> junto con <code>LOG_FORMAT</code>, <code>LOG_FORMAT_1</code>, o <code>ERROR_LOG</code>, <code>ERROR_LOG_1</code> con sus respectivos <code>LOG_LEVEL</code>, <code>LOG_LEVEL_1</code>).</p>
 <ul>
 <li><code>ACCESS_LOG</code>: Destino para los registros de acceso (por defecto: <code>/var/log/bunkerweb/access.log</code>). Acepta ruta de archivo, <code>syslog:server=host[:port][,param=value]</code>, buffer compartido <code>memory:name:size</code>, o <code>off</code> para desactivar. Consulta la <a href="https://nginx.org/en/docs/http/ngx_http_log_module.html#access_log">documentación de NGINX sobre access_log</a> para más detalles.</li>
@@ -3348,8 +3920,8 @@ ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
 LOG_LEVEL=notice
 LOG_LEVEL_1=error
 </code></pre></div>
-<h4 id="valores-por-defecto-e-integracion-ejemplos">Valores por defecto e integración — Ejemplos</h4>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Linux</label><label for="__tabbed_12_2">Docker / Autoconf</label></div>
+<h3 id="valores-por-defecto-e-integracion-ejemplos">Valores por defecto e integración — Ejemplos</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Linux</label><label for="__tabbed_18_2">Docker / Autoconf</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Comportamiento predeterminado</strong>: <code>LOG_TYPES="file"</code>. Los registros se escriben en <code>/var/log/bunkerweb/*.log</code>.</p>
@@ -3494,7 +4066,7 @@ LOG_LEVEL_1=error
 </div>
 </div>
 </div>
-<h4 id="configuracion-de-syslog-ng">Configuración de syslog-ng</h4>
+<h3 id="configuracion-de-syslog-ng">Configuración de syslog-ng</h3>
 <p>Aquí tienes un ejemplo de un archivo <code>syslog-ng.conf</code> que puedes usar para reenviar los registros a un archivo:</p>
 <div class="highlight"><pre><span></span><code>@version: 4.10
 
@@ -3537,7 +4109,7 @@ log {
   destination(d_dyna_file);
 };
 </code></pre></div>
-<h3 id="buenas-practicas-de-registro-de-docker">Buenas prácticas de registro de Docker</h3>
+<h2 id="buenas-practicas-de-registro-de-docker">Buenas prácticas de registro de Docker</h2>
 <p>Cuando se utiliza Docker, es importante gestionar los registros de los contenedores para evitar que consuman un espacio excesivo en el disco. Por defecto, Docker utiliza el controlador de registro <code>json-file</code>, lo que puede dar lugar a archivos de registro muy grandes si no se configura.</p>
 <p>Para evitar esto, puede configurar la rotación de registros. Esto se puede hacer para servicios específicos en su archivo <code>docker-compose.yml</code>, o globalmente para el demonio de Docker.</p>
 <p><strong>Configuración por servicio</strong></p>
@@ -3588,7 +4160,7 @@ log {
 <figcaption>Datos de BunkerWeb mostrados en la columna de contexto</figcaption>
 </figure>
 <h2 id="monitoreo-y-reportes">Monitoreo y reportes</h2>
-<h4 id="monitoreo-pro">Monitoreo <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h4>
+<h3 id="monitoreo-pro">Monitoreo <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
 <p>Soporte STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>El plugin de monitoreo te permite recolectar y recuperar métricas sobre BunkerWeb. Al habilitarlo, tu(s) instancia(s) comenzará(n) a recolectar varios datos relacionados con ataques, solicitudes y rendimiento. Luego puedes recuperarlos llamando al punto final de la API <code>/monitoring</code> de forma regular o usando otros plugins como el exportador de Prometheus.</p>
 <p><strong>Lista de características</strong></p>
@@ -3626,7 +4198,7 @@ log {
 </tr>
 </tbody>
 </table>
-<h4 id="exportador-de-prometheus-pro">Exportador de Prometheus <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h4>
+<h3 id="exportador-de-prometheus-pro">Exportador de Prometheus <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
 <p>Soporte STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>El plugin exportador de Prometheus agrega un <a href="https://prometheus.io/docs/instrumenting/exporters/">exportador de Prometheus</a> en tu(s) instancia(s) de BunkerWeb. Cuando está habilitado, puedes configurar tu(s) instancia(s) de Prometheus para que extraigan datos de un punto final específico en BunkerWeb y recopilen métricas internas.</p>
 <p>También proporcionamos un <a href="https://grafana.com/grafana/dashboards/20755-bunkerweb/">panel de control de Grafana</a> que puedes importar en tu propia instancia y conectar a tu propia fuente de datos de Prometheus.</p>
@@ -3686,7 +4258,7 @@ log {
 </tr>
 </tbody>
 </table>
-<h4 id="reportes-pro">Reportes <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h4>
+<h3 id="reportes-pro">Reportes <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
 <p>Soporte STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <div class="admonition warning">
 <p class="admonition-title">Plugin de monitoreo necesario</p>
@@ -3794,15 +4366,15 @@ log {
 <li>Si tanto los webhooks como SMTP fallan, la entrega se reintenta en la próxima ejecución programada.</li>
 <li>Las plantillas HTML y Markdown se encuentran en <code>reporting/files/</code>; personalízalas con precaución para mantener los marcadores de posición intactos.</li>
 </ul>
-<h3 id="copia-de-seguridad-y-restauracion">Copia de seguridad y restauración</h3>
-<h4 id="copia-de-seguridad-s3-pro">Copia de seguridad S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h4>
+<h2 id="copia-de-seguridad-y-restauracion">Copia de seguridad y restauración</h2>
+<h3 id="copia-de-seguridad-s3-pro">Copia de seguridad S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
 <p>Soporte STREAM <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>La herramienta de Copia de seguridad S3 automatiza sin problemas la protección de datos, de forma similar al plugin de copia de seguridad de la comunidad. Sin embargo, se destaca por almacenar de forma segura las copias de seguridad directamente en un bucket S3.</p>
 <p>Al activar esta función, estás salvaguardando proactivamente la <strong>integridad de tus datos</strong>. Almacenar las copias de seguridad de forma <strong>remota</strong> protege la información crucial de amenazas como <strong>fallos de hardware</strong>, <strong>ciberataques</strong> o <strong>desastres naturales</strong>. Esto garantiza tanto la <strong>seguridad</strong> como la <strong>disponibilidad</strong>, permitiendo una rápida recuperación durante <strong>eventos inesperados</strong>, preservando la <strong>continuidad operativa</strong> y asegurando la <strong>tranquilidad</strong>.</p>
 <details class="warning">
 <summary>Información para usuarios de Red Hat Enterprise Linux (RHEL) 8.9</summary>
 <p>Si estás utilizando <strong>RHEL 8.9</strong> y planeas usar una <strong>base de datos externa</strong>, necesitarás instalar el paquete <code>mysql-community-client</code> para asegurar que el comando <code>mysqldump</code> esté disponible. Puedes instalar el paquete ejecutando los siguientes comandos:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">MySQL/MariaDB</label><label for="__tabbed_13_2">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">MySQL/MariaDB</label><label for="__tabbed_19_2">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -3920,9 +4492,9 @@ log {
 </tr>
 </tbody>
 </table>
-<h5 id="copia-de-seguridad-manual">Copia de seguridad manual</h5>
+<h4 id="copia-de-seguridad-manual">Copia de seguridad manual</h4>
 <p>Para iniciar manualmente una copia de seguridad, ejecuta el siguiente comando:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Linux</label><label for="__tabbed_14_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Linux</label><label for="__tabbed_20_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -3936,7 +4508,7 @@ log {
 </div>
 <p>Este comando creará una copia de seguridad de tu base de datos y la almacenará en el bucket S3 especificado en la configuración <code>BACKUP_S3_BUCKET</code>.</p>
 <p>También puedes especificar un bucket S3 personalizado para la copia de seguridad proporcionando la variable de entorno <code>BACKUP_S3_BUCKET</code> al ejecutar el comando:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Linux</label><label for="__tabbed_15_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Linux</label><label for="__tabbed_21_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nv">BACKUP_S3_BUCKET</span><span class="o">=</span>your-bucket-name<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -3957,7 +4529,7 @@ log {
 <div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="s1">&#39;yourusername&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span><span class="w"> </span><span class="n">IDENTIFIED</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">mysql_native_password</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="s1">&#39;youpassword&#39;</span><span class="p">;</span>
 </code></pre></div>
 <p>Si estás usando la integración de Docker, puedes agregar el siguiente comando al archivo <code>docker-compose.yml</code> para cambiar automáticamente el plugin de autenticación:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">MariaDB</label><label for="__tabbed_16_2">MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:2"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">MariaDB</label><label for="__tabbed_22_2">MySQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
@@ -3976,9 +4548,9 @@ log {
 </div>
 </div>
 </div>
-<h5 id="restauracion-manual">Restauración manual</h5>
+<h4 id="restauracion-manual">Restauración manual</h4>
 <p>Para iniciar manualmente una restauración, ejecuta el siguiente comando:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Linux</label><label for="__tabbed_17_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="23:2"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">Linux</label><label for="__tabbed_23_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -3992,7 +4564,7 @@ log {
 </div>
 <p>Este comando creará una copia de seguridad temporal de tu base de datos en el bucket S3 especificado en la configuración <code>BACKUP_S3_BUCKET</code> y restaurará tu base de datos a la última copia de seguridad disponible en el bucket.</p>
 <p>También puedes especificar un archivo de copia de seguridad personalizado para la restauración proporcionando la ruta al mismo como argumento al ejecutar el comando:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Linux</label><label for="__tabbed_18_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">Linux</label><label for="__tabbed_24_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore<span class="w"> </span>s3_backup_file.zip
@@ -4007,7 +4579,7 @@ log {
 <div class="admonition example">
 <p class="admonition-title">En caso de fallo</p>
 <p>No te preocupes si la restauración falla, siempre puedes restaurar tu base de datos al estado anterior ejecutando el comando de nuevo, ya que se crea una copia de seguridad antes de la restauración:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="25:2"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">Linux</label><label for="__tabbed_25_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -4020,7 +4592,7 @@ log {
 </div>
 </div>
 </div>
-<h3 id="migracion-pro">Migración <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
+<h2 id="migracion-pro">Migración <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
 <p>Soporte STREAM <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>El plugin de Migración <strong>revoluciona</strong> las transferencias de configuración de BunkerWeb entre instancias con su <strong>interfaz web fácil de usar</strong>, simplificando todo el proceso de migración. Ya sea que estés actualizando sistemas, escalando la infraestructura o haciendo la transición de entornos, esta herramienta te permite transferir sin esfuerzo <strong>configuraciones, preferencias y datos</strong> con una facilidad y confianza inigualables. Di adiós a los engorrosos procesos manuales y hola a una <strong>experiencia de migración fluida y sin complicaciones</strong>.</p>
 <p><strong>Lista de características</strong></p>
@@ -4035,9 +4607,9 @@ log {
 <p><strong>Compatibilidad entre bases de datos:</strong> Disfruta de una migración fluida a través de varias plataformas de bases de datos, incluidas SQLite, MySQL, MariaDB y PostgreSQL, lo que garantiza la compatibilidad con tu entorno de base de datos preferido.</p>
 </li>
 </ul>
-<h4 id="crear-un-archivo-de-migracion">Crear un archivo de migración</h4>
+<h3 id="crear-un-archivo-de-migracion">Crear un archivo de migración</h3>
 <p>Para crear manualmente un archivo de migración, ejecuta el siguiente comando:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Linux</label><label for="__tabbed_20_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="26:2"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Linux</label><label for="__tabbed_26_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>create<span class="w"> </span>/path/to/migration/file
@@ -4069,7 +4641,7 @@ log {
 <div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="s1">&#39;yourusername&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span><span class="w"> </span><span class="n">IDENTIFIED</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">mysql_native_password</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="s1">&#39;youpassword&#39;</span><span class="p">;</span>
 </code></pre></div>
 <p>Si estás usando la integración de Docker, puedes agregar el siguiente comando al archivo <code>docker-compose.yml</code> para cambiar automáticamente el plugin de autenticación:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">MariaDB</label><label for="__tabbed_21_2">MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="27:2"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><input id="__tabbed_27_2" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">MariaDB</label><label for="__tabbed_27_2">MySQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
@@ -4088,9 +4660,9 @@ log {
 </div>
 </div>
 </div>
-<h4 id="iniciar-una-migracion">Iniciar una migración</h4>
+<h3 id="iniciar-una-migracion">Iniciar una migración</h3>
 <p>Para iniciar manualmente una migración, ejecuta el siguiente comando:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="22:3"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Linux</label><label for="__tabbed_22_2">Docker</label><label for="__tabbed_22_3">Todo en uno</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="28:3"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><input id="__tabbed_28_3" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Linux</label><label for="__tabbed_28_2">Docker</label><label for="__tabbed_28_3">Todo en uno</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>migrate<span class="w"> </span>/path/to/migration/file
@@ -4131,7 +4703,7 @@ log {
 <p>Soporte STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>El plugin <strong>Anti DDoS</strong> proporciona protección avanzada contra ataques de denegación de servicio distribuido (DDoS) mediante el monitoreo, análisis y filtrado de tráfico sospechoso en tiempo real.</p>
 <p>Mediante el empleo de un <strong>mecanismo de ventana deslizante</strong>, el plugin mantiene un diccionario en memoria de las marcas de tiempo de las solicitudes para detectar picos de tráfico anormales de direcciones IP individuales. Según el modo de seguridad configurado, puede bloquear las conexiones ofensivas o registrar la actividad sospechosa para una revisión posterior.</p>
-<h4 id="caracteristicas">Características</h4>
+<h3 id="caracteristicas">Características</h3>
 <ul>
 <li><strong>Análisis de tráfico en tiempo real:</strong> Monitorea continuamente las solicitudes entrantes para detectar posibles ataques DDoS.</li>
 <li><strong>Mecanismo de ventana deslizante:</strong> Rastrea la actividad de solicitudes recientes dentro de una ventana de tiempo configurable.</li>
@@ -4141,7 +4713,7 @@ log {
 <li><strong>Almacén de datos en memoria optimizado:</strong> Garantiza búsquedas de alta velocidad y un seguimiento eficiente de las métricas.</li>
 <li><strong>Mantenimiento automático:</strong> Borra periódicamente los datos obsoletos para mantener un rendimiento óptimo.</li>
 </ul>
-<h4 id="configuracion">Configuración</h4>
+<h3 id="configuracion">Configuración</h3>
 <p>Personaliza el comportamiento del plugin usando las siguientes configuraciones:</p>
 <table>
 <thead>
@@ -4198,7 +4770,7 @@ log {
 </tr>
 </tbody>
 </table>
-<h4 id="mejores-practicas">Mejores prácticas</h4>
+<h3 id="mejores-practicas">Mejores prácticas</h3>
 <ul>
 <li><strong>Ajuste de umbrales:</strong> Ajusta <code>ANTIDDOS_THRESHOLD</code> y <code>ANTIDDOS_WINDOW_TIME</code> según tus patrones de tráfico típicos.</li>
 <li><strong>Revisión de códigos de estado:</strong> Actualiza regularmente <code>ANTIDDOS_STATUS_CODES</code> para capturar comportamientos sospechosos nuevos o en evolución.</li>
@@ -4211,7 +4783,7 @@ log {
 
 <p>El Plugin de gestión de usuarios ofrece una interfaz robusta para administrar cuentas de usuario dentro de tu sistema.</p>
 <p>Con este plugin, los administradores pueden crear, actualizar y deshabilitar cuentas de usuario sin esfuerzo, gestionar roles de usuario, activar o desactivar la autenticación de dos factores (2FA) y ver información detallada del usuario, como las marcas de tiempo del último inicio de sesión y los estados de la cuenta (activa o inactiva). Diseñado teniendo en cuenta la seguridad y la facilidad de uso, este plugin simplifica las tareas rutinarias de gestión de usuarios al tiempo que garantiza el cumplimiento y la auditabilidad.</p>
-<h4 id="caracteristicas_1">Características</h4>
+<h3 id="caracteristicas_1">Características</h3>
 <ul>
 <li><strong>Operaciones de cuenta de usuario:</strong> Importar en formato CSV/XSLX, crear, editar y eliminar cuentas de usuario con facilidad.</li>
 <li><strong>Control de acceso basado en roles:</strong> Asigna y modifica roles de usuario para gestionar permisos y niveles de acceso.</li>
@@ -4236,7 +4808,7 @@ log {
 </figure>
 <h2 id="easy-resolve-pro">Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
 <p>El plugin Easy Resolve te permite remediar rápidamente falsos positivos y problemas recurrentes directamente desde la página de Informes. Convierte las acciones guiadas de "Resolver" en actualizaciones de configuración seguras y acotadas, sin edición manual.</p>
-<h4 id="caracteristicas_2">Características</h4>
+<h3 id="caracteristicas_2">Características</h3>
 <ul>
 <li>Acciones con un solo clic desde Informes y detalles del informe.</li>
 <li>Sugerencias contextuales para ModSecurity, lista negra y DNSBL.</li>
@@ -4294,7 +4866,7 @@ log {
 </p>
 
 <p>El Plugin de Load Balancer convierte BunkerWeb en un director de tráfico con guardarraíles. Declare pools upstream una vez, apunte su proxy inverso a ellos, y deje que el balanceo consciente de salud mantenga a los usuarios en backends responsivos. El modo sticky cookie emite automáticamente una cookie <code>BWLBID</code> para que las sesiones se mantengan ancladas donde quiera.</p>
-<h4 id="caracteristicas_3">Características</h4>
+<h3 id="caracteristicas_3">Características</h3>
 <ul>
 <li>Bloques por upstream: nombre pools y reutilícelos en hosts de proxy inverso.</li>
 <li>Balanceo flexible: round-robin por defecto, o sticky vía IP o cookie firmado.</li>
@@ -4302,7 +4874,7 @@ log {
 <li>Salud integrada: sondas HTTP/HTTPS con rutas personalizadas, intervalos, códigos de estado y verificaciones SSL.</li>
 <li>Continuidad de sesión: cookie <code>BWLBID</code> automática cuando se habilita el modo sticky-cookie.</li>
 </ul>
-<h4 id="configuracion_1">Configuración</h4>
+<h3 id="configuracion_1">Configuración</h3>
 <p><strong>Definición de upstream</strong></p>
 <table>
 <thead>
@@ -4464,7 +5036,7 @@ log {
 </tr>
 </tbody>
 </table>
-<h4 id="inicio-rapido">Inicio rápido</h4>
+<h3 id="inicio-rapido">Inicio rápido</h3>
 <ol>
 <li>Defina su pool: configure <code>LOADBALANCER_UPSTREAM_NAME=my-app</code> y liste objetivos en <code>LOADBALANCER_UPSTREAM_SERVERS</code> (ej. <code>10.0.0.1:8080 10.0.0.2:8080</code>).</li>
 <li>Dirija tráfico: configure <code>REVERSE_PROXY_HOST=http://my-app</code> para que el proxy inverso use el upstream nombrado.</li>
@@ -4472,7 +5044,7 @@ log {
 <li>Agregue salud: mantenga <code>/status</code> o ajuste URLs, intervalos y estados válidos para reflejar el comportamiento de su app.</li>
 <li>Ajuste conexiones: configure valores keepalive para reutilizar conexiones backend y reducir sobrecarga de handshake.</li>
 </ol>
-<h4 id="consejos-de-uso">Consejos de uso</h4>
+<h3 id="consejos-de-uso">Consejos de uso</h3>
 <ul>
 <li>Haga coincidir <code>REVERSE_PROXY_HOST</code> con <code>LOADBALANCER_UPSTREAM_NAME</code> al usar cookies sticky para que los clientes se fijen al pool correcto.</li>
 <li>Mantenga intervalos y timeouts de verificación de salud balanceados para evitar fluctuaciones en enlaces lentos.</li>
