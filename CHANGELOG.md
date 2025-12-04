@@ -10,6 +10,7 @@
 - [BUGFIX] Escape percentage signs in `DATABASE_URI` for Alembic when using the SQLAlchemy URL configuration to prevent formatting errors during migrations
 - [DOCS] Add documentation about the new logging settings and how to configure them
 - [DEPS] Update lua-resty-session version to v4.1.5
+- [DEPS] Update coreruleset-v4 version to v4.21.0
 
 ## v1.6.6 - 2025/11/24
 

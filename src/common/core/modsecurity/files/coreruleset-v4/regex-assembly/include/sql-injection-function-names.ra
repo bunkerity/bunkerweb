@@ -19,8 +19,8 @@ bit_or
 bit_xor
 char_length
 character_length
-ciel
-cieling
+ceil
+ceiling
 coalesce
 coercibility
 collation
@@ -33,7 +33,7 @@ convert
 convert_tz
 cos
 cot
-cr32
+crc32
 curdate
 current_date
 current_setting
@@ -158,7 +158,7 @@ jsonb_to_recordset
 jsonb_typeof
 jsonpath
 last_day
-last_inser_id
+last_insert_id
 lcase
 least
 left
