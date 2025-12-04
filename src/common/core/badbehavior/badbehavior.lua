@@ -72,6 +72,10 @@ function badbehavior:log()
 	-- Add incr operation so timer can manage it
 	local status = tostring(ngx.status)
 	local ban_scope = self.variables["BAD_BEHAVIOR_BAN_SCOPE"]
+	-- The default server must propagate bans to every service, regardless of configured scope
+	if self.ctx.bw.server_name == "_" then
+		ban_scope = "global"
+	end
 	local ban_time = tonumber(self.variables["BAD_BEHAVIOR_BAN_TIME"]) or 0
 
 	local ok, err = self.datastore.dict:rpush(

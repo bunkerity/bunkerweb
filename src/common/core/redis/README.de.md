@@ -41,14 +41,23 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 
 !!! warning "Sicherheit"
 
-- Verwenden Sie starke Passwörter für Redis and Sentinel.
+- Verwenden Sie starke Passwörter für Redis und Sentinel.
 - Erwägen Sie die Verwendung von SSL/TLS.
 - Setzen Sie Redis nicht dem Internet aus.
 - Beschränken Sie den Zugriff auf den Redis-Port (Firewall, Segmentierung).
 
+!!! info "Cluster-Anforderungen"
+    Bei der Bereitstellung von BunkerWeb in einem Cluster:
+
+    - Alle BunkerWeb-Instanzen sollten sich mit demselben Redis- oder Valkey-Server oder Sentinel-Cluster verbinden
+    - Konfigurieren Sie dieselbe Datenbanknummer auf allen Instanzen
+    - Stellen Sie die Netzwerkkonnektivität zwischen allen BunkerWeb-Instanzen und den Redis-/Valkey-Servern sicher
+
 ### Beispiele
 
 === "Basiskonfiguration"
+
+    Eine einfache Konfiguration für die Verbindung zu einem Redis- oder Valkey-Server auf dem lokalen Computer:
 
     ```yaml
     USE_REDIS: "yes"
@@ -57,6 +66,8 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
     ```
 
 === "Sichere Konfiguration"
+
+    Konfiguration mit Passwortauthentifizierung und aktiviertem SSL:
 
     ```yaml
     USE_REDIS: "yes"
@@ -69,6 +80,8 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 
 === "Redis Sentinel"
 
+    Konfiguration für Hochverfügbarkeit mit Redis Sentinel:
+
     ```yaml
     USE_REDIS: "yes"
     REDIS_SENTINEL_HOSTS: "sentinel1:26379 sentinel2:26379 sentinel3:26379"
@@ -78,6 +91,8 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
     ```
 
 === "Erweitertes Tuning"
+
+    Konfiguration mit erweiterten Verbindungsparametern zur Leistungsoptimierung:
 
     ```yaml
     USE_REDIS: "yes"
@@ -89,3 +104,30 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
     REDIS_KEEPALIVE_IDLE: "60"
     REDIS_KEEPALIVE_POOL: "5"
     ```
+
+### Redis Best Practices
+
+Berücksichtigen Sie bei der Verwendung von Redis oder Valkey mit BunkerWeb diese Best Practices, um optimale Leistung, Sicherheit und Zuverlässigkeit zu gewährleisten:
+
+#### Speicherverwaltung
+- **Speichernutzung überwachen:** Konfigurieren Sie Redis mit geeigneten `maxmemory`-Einstellungen, um Fehler wegen unzureichendem Speicher zu vermeiden
+- **Verdrängungsrichtlinie festlegen:** Verwenden Sie eine für Ihren Anwendungsfall geeignete `maxmemory-policy` (z. B. `volatile-lru` oder `allkeys-lru`)
+- **Große Schlüssel vermeiden:** Stellen Sie sicher, dass einzelne Redis-Schlüssel eine angemessene Größe behalten, um Leistungseinbußen zu vermeiden
+
+#### Datenpersistenz
+- **RDB-Snapshots aktivieren:** Konfigurieren Sie regelmäßige Snapshots für die Datenpersistenz ohne signifikante Leistungseinbußen
+- **AOF in Betracht ziehen:** Aktivieren Sie für kritische Daten die AOF-Persistenz (Append-Only File) mit einer geeigneten fsync-Richtlinie
+- **Backup-Strategie:** Implementieren Sie regelmäßige Redis-Backups als Teil Ihres Disaster-Recovery-Plans
+
+#### Leistungsoptimierung
+- **Connection Pooling:** BunkerWeb implementiert dies bereits, aber stellen Sie sicher, dass andere Anwendungen dieser Praxis folgen
+- **Pipelining:** Verwenden Sie, wenn möglich, Pipelining für Massenoperationen, um den Netzwerk-Overhead zu reduzieren
+- **Teure Operationen vermeiden:** Seien Sie vorsichtig mit Befehlen wie KEYS in Produktionsumgebungen
+- **Benchmarken Sie Ihre Arbeitslast:** Verwenden Sie redis-benchmark, um Ihre spezifischen Arbeitslastmuster zu testen
+
+### Weitere Ressourcen
+
+- [Redis-Dokumentation](https://redis.io/documentation)
+- [Redis-Sicherheitsleitfaden](https://redis.io/topics/security)
+- [Redis-Hochverfügbarkeit](https://redis.io/topics/sentinel)
+- [Redis-Persistenz](https://redis.io/topics/persistence)

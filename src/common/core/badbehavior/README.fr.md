@@ -16,7 +16,7 @@ Comment ça marche :
 2. Codes à compter : `BAD_BEHAVIOR_STATUS_CODES`.
 3. Seuil : `BAD_BEHAVIOR_THRESHOLD`.
 4. Fenêtre et durée de ban : `BAD_BEHAVIOR_COUNT_TIME`, `BAD_BEHAVIOR_BAN_TIME`.
-5. Portée : `BAD_BEHAVIOR_BAN_SCOPE` (`service` ou `global`).
+5. Portée : `BAD_BEHAVIOR_BAN_SCOPE` (`service` ou `global`). Quand le trafic arrive sur le serveur par défaut (nom de serveur `_`), les bans sont toujours appliqués globalement pour bloquer l’IP partout.
 
 !!! tip "Mode stream"
     En mode stream, seul `444` est considéré comme « mauvais ».
@@ -30,7 +30,7 @@ Comment ça marche :
 | `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | non      | Seuil de réponses « mauvaises » avant bannissement.            |
 | `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | non      | Fenêtre de comptage (secondes).                                |
 | `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | non      | Durée du ban en secondes (`0` = permanent).                    |
-| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | non      | Portée du ban : site courant (`service`) ou global (`global`). |
+| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | non      | Portée du ban : site courant (`service`) ou global (`global`). Sur le serveur par défaut (`_`), les bans sont toujours globaux. |
 
 !!! warning "Faux positifs"
     Un seuil/fenêtre trop bas peut bannir des utilisateurs légitimes. Démarrez conservateur et ajustez.

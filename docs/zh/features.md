@@ -796,7 +796,7 @@ STREAM 支持 :white_check_mark:
 2.  **配置状态码：** 使用 `BAD_BEHAVIOR_STATUS_CODES` 设置定义哪些 HTTP 状态码应被视为“不良”。
 3.  **设置阈值：** 使用 `BAD_BEHAVIOR_THRESHOLD` 设置确定多少次“不良”响应会触发封禁。
 4.  **配置时间段：** 使用 `BAD_BEHAVIOR_COUNT_TIME` 和 `BAD_BEHAVIOR_BAN_TIME` 设置指定计算不良响应的持续时间和封禁持续时间。
-5.  **选择封禁范围：** 使用 `BAD_BEHAVIOR_BAN_SCOPE` 设置决定封禁是仅适用于当前服务还是全局适用于所有服务。
+5.  **选择封禁范围：** 使用 `BAD_BEHAVIOR_BAN_SCOPE` 设置决定封禁是仅适用于当前服务还是全局适用于所有服务。当流量命中默认服务器（服务器名 `_`）时，封禁始终为全局，以便该 IP 在所有服务中被阻断。
 
 !!! tip "流模式"
     在**流模式**下，只有 `444` 状态码被视为“不良”并会触发此行为。
@@ -810,7 +810,7 @@ STREAM 支持 :white_check_mark:
 | `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | 否   | **阈值：** 一个 IP 在计数周期内可以生成的“不良”状态码的数量，超过该数量将被封禁。                                                  |
 | `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | 否   | **计数周期：** 计算不良状态码以达到阈值的时间窗口（以秒为单位）。                                                                  |
 | `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | 否   | **封禁持续时间：** 一个 IP 超过阈值后将被封禁的时间（以秒为单位）。默认为 24 小时（86400 秒）。设置为 `0` 表示永不解封的永久封禁。 |
-| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | 否   | **封禁范围：** 决定封禁是仅适用于当前服务 (`service`) 还是所有服务 (`global`)。                                                    |
+| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | 否   | **封禁范围：** 决定封禁是仅适用于当前服务 (`service`) 还是所有服务 (`global`)。命中默认服务器（`_`）时，封禁始终为全局。           |
 
 !!! warning "误报"
     在设置阈值和计数时间时要小心。将这些值设置得太低可能会无意中封禁在浏览您网站时遇到错误的合法用户。
@@ -1407,6 +1407,32 @@ CORS 插件为您的网站启用跨源资源共享，允许从不同域受控地
     CORS_MAX_AGE: "86400"
     CORS_DENY_REQUEST: "yes"
     ```
+
+## Cache <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM 支持 :x:
+
+Provides caching functionality at the reverse proxy level.
+
+| 参数                        | 默认值                            | 上下文    | 可重复 | 描述                                                                           |
+| --------------------------- | --------------------------------- | --------- | ------ | ------------------------------------------------------------------------------ |
+| `CACHE_PATH`                |                                   | global    | 是     | Path and parameters for a cache.                                               |
+| `CACHE_ZONE`                |                                   | multisite | 否     | Name of cache zone to use (specified in a CACHE_PATH setting).                 |
+| `CACHE_HEADER`              | `X-Cache`                         | multisite | 否     | Add header about cache status.                                                 |
+| `CACHE_BACKGROUND_UPDATE`   | `no`                              | multisite | 否     | Enable or disable background update of the cache.                              |
+| `CACHE_BYPASS`              |                                   | multisite | 否     | List of variables to determine if the cache should be bypassed or not.         |
+| `CACHE_NO_CACHE`            | `$http_pragma$http_authorization` | multisite | 否     | Disable caching if variables are set.                                          |
+| `CACHE_KEY`                 | `$scheme$proxy_host$request_uri`  | multisite | 否     | Key used to identify cached elements.                                          |
+| `CACHE_CONVERT_HEAD_TO_GET` | `yes`                             | multisite | 否     | Convert HEAD requests to GET when caching.                                     |
+| `CACHE_LOCK`                | `no`                              | multisite | 否     | Lock concurrent requests when populating the cache.                            |
+| `CACHE_LOCK_AGE`            | `5s`                              | multisite | 否     | Pass request to upstream if cache is locked for that time (possible cache).    |
+| `CACHE_LOCK_TIMEOUT`        | `5s`                              | multisite | 否     | Pass request to upstream if cache is locked for that time (no cache).          |
+| `CACHE_METHODS`             | `GET HEAD`                        | multisite | 否     | Only cache response if corresponding method is present.                        |
+| `CACHE_MIN_USES`            | `1`                               | multisite | 否     | Number of requests before we put the corresponding response in cache.          |
+| `CACHE_REVALIDATE`          | `no`                              | multisite | 否     | Revalidate expired items using conditional requests to upstream.               |
+| `CACHE_USE_STALE`           | `off`                             | multisite | 否     | Determines the use of staled cache response (proxy_cache_use_stale directive). |
+| `CACHE_VALID`               | `10m`                             | multisite | 是     | Defines default caching with optional status code.                             |
 
 ## Client cache
 

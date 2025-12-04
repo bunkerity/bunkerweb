@@ -746,21 +746,21 @@ Comment ça marche :
 2. Codes à compter : `BAD_BEHAVIOR_STATUS_CODES`.
 3. Seuil : `BAD_BEHAVIOR_THRESHOLD`.
 4. Fenêtre et durée de ban : `BAD_BEHAVIOR_COUNT_TIME`, `BAD_BEHAVIOR_BAN_TIME`.
-5. Portée : `BAD_BEHAVIOR_BAN_SCOPE` (`service` ou `global`).
+5. Portée : `BAD_BEHAVIOR_BAN_SCOPE` (`service` ou `global`). Quand le trafic arrive sur le serveur par défaut (nom de serveur `_`), les bans sont toujours appliqués globalement pour bloquer l’IP partout.
 
 !!! tip "Mode stream"
     En mode stream, seul `444` est considéré comme « mauvais ».
 
 ### Paramètres
 
-| Paramètre                   | Défaut                        | Contexte  | Multiple | Description                                                    |
-| --------------------------- | ----------------------------- | --------- | -------- | -------------------------------------------------------------- |
-| `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | non      | Activer la détection et le bannissement.                       |
-| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | non      | Codes HTTP considérés « mauvais ».                             |
-| `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | non      | Seuil de réponses « mauvaises » avant bannissement.            |
-| `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | non      | Fenêtre de comptage (secondes).                                |
-| `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | non      | Durée du ban en secondes (`0` = permanent).                    |
-| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | non      | Portée du ban : site courant (`service`) ou global (`global`). |
+| Paramètre                   | Défaut                        | Contexte  | Multiple | Description                                                                                                                     |
+| --------------------------- | ----------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | non      | Activer la détection et le bannissement.                                                                                        |
+| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | non      | Codes HTTP considérés « mauvais ».                                                                                              |
+| `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | non      | Seuil de réponses « mauvaises » avant bannissement.                                                                             |
+| `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | non      | Fenêtre de comptage (secondes).                                                                                                 |
+| `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | non      | Durée du ban en secondes (`0` = permanent).                                                                                     |
+| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | non      | Portée du ban : site courant (`service`) ou global (`global`). Sur le serveur par défaut (`_`), les bans sont toujours globaux. |
 
 !!! warning "Faux positifs"
     Un seuil/fenêtre trop bas peut bannir des utilisateurs légitimes. Démarrez conservateur et ajustez.
@@ -1242,6 +1242,32 @@ Comment ça marche :
     CORS_MAX_AGE: "86400"
     CORS_DENY_REQUEST: "yes"
     ```
+
+## Cache <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+Prise en charge STREAM :x:
+
+Provides caching functionality at the reverse proxy level.
+
+| Paramètre                   | Valeur par défaut                 | Contexte  | Multiple | Description                                                                    |
+| --------------------------- | --------------------------------- | --------- | -------- | ------------------------------------------------------------------------------ |
+| `CACHE_PATH`                |                                   | global    | oui      | Path and parameters for a cache.                                               |
+| `CACHE_ZONE`                |                                   | multisite | non      | Name of cache zone to use (specified in a CACHE_PATH setting).                 |
+| `CACHE_HEADER`              | `X-Cache`                         | multisite | non      | Add header about cache status.                                                 |
+| `CACHE_BACKGROUND_UPDATE`   | `no`                              | multisite | non      | Enable or disable background update of the cache.                              |
+| `CACHE_BYPASS`              |                                   | multisite | non      | List of variables to determine if the cache should be bypassed or not.         |
+| `CACHE_NO_CACHE`            | `$http_pragma$http_authorization` | multisite | non      | Disable caching if variables are set.                                          |
+| `CACHE_KEY`                 | `$scheme$proxy_host$request_uri`  | multisite | non      | Key used to identify cached elements.                                          |
+| `CACHE_CONVERT_HEAD_TO_GET` | `yes`                             | multisite | non      | Convert HEAD requests to GET when caching.                                     |
+| `CACHE_LOCK`                | `no`                              | multisite | non      | Lock concurrent requests when populating the cache.                            |
+| `CACHE_LOCK_AGE`            | `5s`                              | multisite | non      | Pass request to upstream if cache is locked for that time (possible cache).    |
+| `CACHE_LOCK_TIMEOUT`        | `5s`                              | multisite | non      | Pass request to upstream if cache is locked for that time (no cache).          |
+| `CACHE_METHODS`             | `GET HEAD`                        | multisite | non      | Only cache response if corresponding method is present.                        |
+| `CACHE_MIN_USES`            | `1`                               | multisite | non      | Number of requests before we put the corresponding response in cache.          |
+| `CACHE_REVALIDATE`          | `no`                              | multisite | non      | Revalidate expired items using conditional requests to upstream.               |
+| `CACHE_USE_STALE`           | `off`                             | multisite | non      | Determines the use of staled cache response (proxy_cache_use_stale directive). |
+| `CACHE_VALID`               | `10m`                             | multisite | oui      | Defines default caching with optional status code.                             |
 
 ## Client cache
 
@@ -3845,11 +3871,24 @@ Comment ça marche :
 !!! tip "Haute disponibilité"
     Configurez Redis Sentinel pour un failover automatique en production.
 
-!!! warning "Sécurité" - Mots de passe forts pour Redis et Sentinel - Envisagez SSL/TLS - Ne pas exposer Redis sur Internet - Restreignez l’accès au port Redis (pare‑feu, segmentation)
+!!! warning "Sécurité"
+    - Mots de passe forts pour Redis et Sentinel
+    - Envisagez SSL/TLS
+    - Ne pas exposer Redis sur Internet
+    - Restreignez l’accès au port Redis (pare‑feu, segmentation)
+
+!!! info "Prérequis pour le clustering"
+    Lors du déploiement de BunkerWeb en cluster :
+
+    - Toutes les instances BunkerWeb doivent se connecter au même serveur Redis/Valkey ou cluster Sentinel
+    - Configurez le même numéro de base de données sur toutes les instances
+    - Assurez-vous de la connectivité réseau entre toutes les instances BunkerWeb et les serveurs Redis/Valkey
 
 ### Exemples
 
 === "Configuration basique"
+
+    Une configuration simple pour se connecter à un serveur Redis ou Valkey sur la machine locale :
 
     ```yaml
     USE_REDIS: "yes"
@@ -3858,6 +3897,8 @@ Comment ça marche :
     ```
 
 === "Configuration sécurisée"
+
+    Configuration avec authentification par mot de passe et SSL activé :
 
     ```yaml
     USE_REDIS: "yes"
@@ -3870,6 +3911,8 @@ Comment ça marche :
 
 === "Redis Sentinel"
 
+    Configuration pour la haute disponibilité utilisant Redis Sentinel :
+
     ```yaml
     USE_REDIS: "yes"
     REDIS_SENTINEL_HOSTS: "sentinel1:26379 sentinel2:26379 sentinel3:26379"
@@ -3879,6 +3922,8 @@ Comment ça marche :
     ```
 
 === "Tuning avancé"
+
+    Configuration avec des paramètres de connexion avancés pour l'optimisation des performances :
 
     ```yaml
     USE_REDIS: "yes"
@@ -3890,6 +3935,33 @@ Comment ça marche :
     REDIS_KEEPALIVE_IDLE: "60"
     REDIS_KEEPALIVE_POOL: "5"
     ```
+
+### Bonnes pratiques Redis
+
+Lorsque vous utilisez Redis ou Valkey avec BunkerWeb, prenez en compte ces bonnes pratiques pour garantir des performances, une sécurité et une fiabilité optimales :
+
+#### Gestion de la mémoire
+- **Surveillez l'utilisation de la mémoire :** Configurez Redis avec des paramètres `maxmemory` appropriés pour éviter les erreurs de mémoire insuffisante
+- **Définissez une politique d'éviction :** Utilisez une `maxmemory-policy` (par exemple, `volatile-lru` ou `allkeys-lru`) adaptée à votre cas d'utilisation
+- **Évitez les clés volumineuses :** Assurez-vous que les clés Redis individuelles restent d'une taille raisonnable pour éviter la dégradation des performances
+
+#### Persistance des données
+- **Activez les instantanés RDB :** Configurez des instantanés périodiques pour la persistance des données sans impact significatif sur les performances
+- **Envisagez AOF :** Pour les données critiques, activez la persistance AOF (Append-Only File) avec une politique fsync appropriée
+- **Stratégie de sauvegarde :** Mettez en œuvre des sauvegardes régulières de Redis dans le cadre de votre plan de reprise après sinistre
+
+#### Optimisation des performances
+- **Pooling de connexions :** BunkerWeb l'implémente déjà, mais assurez-vous que les autres applications suivent cette pratique
+- **Pipelining :** Lorsque c'est possible, utilisez le pipelining pour les opérations en masse afin de réduire la surcharge réseau
+- **Évitez les opérations coûteuses :** Soyez prudent avec les commandes comme KEYS dans les environnements de production
+- **Testez votre charge de travail :** Utilisez redis-benchmark pour tester vos modèles de charge de travail spécifiques
+
+### Ressources supplémentaires
+
+- [Documentation Redis](https://redis.io/documentation)
+- [Guide de sécurité Redis](https://redis.io/topics/security)
+- [Haute disponibilité Redis](https://redis.io/topics/sentinel)
+- [Persistance Redis](https://redis.io/topics/persistence)
 
 ## Reporting <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
