@@ -4,13 +4,13 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --strip-extras requirements-ansible.in
 #
-ansible==9.5.1 \
-    --hash=sha256:3c278bc9642b97fc953b2ba05b99cd80801e75bf3567dfaa1cb5131fe0ec1ecd \
-    --hash=sha256:aed2f4208a75836a27c13555ec5d8d942fe3b089a8b1fc44e8234fadd9e649fd
+ansible==12.2.0 \
+    --hash=sha256:0563dfd33ebd28caf6ccdc7a6d22a7fdafbd9c9c42fefcae5179616a53a35211 \
+    --hash=sha256:daafa5c528317f60f68033ad70c59733f4a7548b6255759183cfc7cf422c7fda
     # via -r requirements-ansible.in
-ansible-core==2.16.8 \
-    --hash=sha256:59e4aa40ed5acdb4ef9bbf3d058918fff93f66a149373d8159c8a29604410bda \
-    --hash=sha256:8fab9f08049e3cbc181f0566a17dfb896d9164ef5048c63e9e07fda4624686c7
+ansible-core==2.19.4 \
+    --hash=sha256:888db6593f2fd42cd05bdbe546704d9c969dce99e3373a54498f6dbefcfa1917 \
+    --hash=sha256:f218e2e8ce4cc95216c48c73badd9789f1dd6ea47e15667213491fb79589316c
     # via ansible
 cffi==1.16.0 \
     --hash=sha256:0c9ef6ff37e974b73c25eecc13952c55bceed9112be2d9d938ded8e856138bcc \
