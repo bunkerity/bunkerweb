@@ -66,7 +66,7 @@ graph LR
 - **BunkerWeb UI 访问 URL**：用于配置服务的界面
 - **负载均衡器端点**：格式为 `http://[ID].bunkerweb.cloud` 的唯一 URL
 - **Grafana 访问权限**：监控界面和指标可视化
-- **分配的资源**：2 个实例，每个实例 16GB RAM 和 4 CPU
+- **分配的资源**：2 个实例，每个实例 8GB RAM 和 2 CPU
 
 #### 2. 首次连接
 
