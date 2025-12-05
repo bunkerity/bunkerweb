@@ -77,6 +77,8 @@
     "close": "Close",
     "columns": "Columns",
     "convert_services": "Convert Services",
+    "convert_configs": "Convert Configs",
+    "convert_configs_to": "Convert to {{state}}",
     "copy": "Copy",
     "copy_codes": "Copy Codes",
     "copy_raw": "Copy Raw Data",
@@ -757,6 +759,8 @@
       "confirm_configs_deletion_alert": "Are you sure you want to delete the selected custom configuration?",
       "confirm_configs_deletion_alert_plural": "Are you sure you want to delete the selected custom configurations?",
       "confirm_conversion_confirmation": "Are you sure you want to convert the selected services?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "Are you sure you want to convert the selected custom configurations to {{state}}?",
       "confirm_next_step": "Are you sure you want to proceed to the next step?",
       "confirm_plugin_deletion": "Are you sure you want to delete the selected plugin?",
       "confirm_plugin_deletion_plural": "Are you sure you want to delete the selected plugins?",
@@ -1211,6 +1215,7 @@
       "server_name": "Server Name",
       "service": "Service",
       "service_name": "Service Name",
+      "status": "Status",
       "status_code": "Status Code",
       "stream": "Stream",
       "template": "Template",
@@ -1412,6 +1417,8 @@
     "button": {
       "convert_service_to_draft": "Convert Service {{name}} to Draft",
       "convert_service_to_online": "Convert Service {{name}} to Online",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "delete_config": "Delete Custom Config {{name}}",
       "delete_file": "Delete Cache File: {{filename}}",
       "delete_instance": "Delete Instance {{hostname}}",
@@ -1568,7 +1575,8 @@
         "select_all": "Select all Custom Configs",
         "service": "Service associated with the Custom Config (or Global)",
         "template": "Indicates if the Custom Config originates from a template",
-        "type": "Type or context of the Custom Config (e.g., HTTP, MODSEC)"
+        "type": "Type or context of the Custom Config (e.g., HTTP, MODSEC)",
+        "status": "Draft status of the Custom configuration"
       },
       "instances": {
         "actions": "Actions available for this Instance",

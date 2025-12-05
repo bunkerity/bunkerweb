@@ -171,7 +171,9 @@
                                         {% endif %}
                                         <div id="table-{{ key.replace('_', '-') }}-types" class="visually-hidden">{{ value.get('types', {}) |tojson }}</div>
                                         <div class="card table-responsive text-nowrap">
-                                            <table id="table-{{ key.replace('_', '-') }}" class="table w-100 d-none" data-table-key="{{ key }}">
+                                            <table id="table-{{ key.replace('_', '-') }}"
+                                                   class="table w-100 d-none"
+                                                   data-table-key="{{ key }}">
                                                 <thead>
                                                     <tr>
                                                         {% set ns_list = namespace(size=0) %}
@@ -188,13 +190,9 @@
                                                             {% for val_key, items in value['data'].items() %}
                                                                 {% set cell_value = items[n]|trim if n < items|length else '' %}
                                                                 {% if val_key|lower == 'date' %}
-                                                                    <td class="date-field" data-date-iso="{{ cell_value }}">
-                                                                        {{ cell_value }}
-                                                                    </td>
+                                                                    <td class="date-field" data-date-iso="{{ cell_value }}">{{ cell_value }}</td>
                                                                 {% else %}
-                                                                    <td>
-                                                                        {{ cell_value }}
-                                                                    </td>
+                                                                    <td>{{ cell_value }}</td>
                                                                 {% endif %}
                                                             {% endfor %}
                                                         </tr>

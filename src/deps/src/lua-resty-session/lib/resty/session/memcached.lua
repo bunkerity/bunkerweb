@@ -68,7 +68,7 @@ end
 
 
 -- TODO possible improvement: when available in the lib, use pipelines
-local function SET(self, memc, name, key, value, ttl, current_time, old_key, stale_ttl, metadata, remember)
+local function SET(self, memc, name, key, value, ttl, current_time, old_key, stale_ttl, metadata)
   local inferred_key = get_name(self, name, key)
 
   if not metadata and not old_key then
@@ -82,11 +82,7 @@ local function SET(self, memc, name, key, value, ttl, current_time, old_key, sta
 
   local old_name = old_key and get_name(self, name, old_key)
   if old_name then
-    if remember then
-      memc:delete(old_name)
-    else
-      memc:touch(old_name, stale_ttl)
-    end
+    memc:touch(old_name, stale_ttl)
   end
 
   if not metadata then
@@ -242,7 +238,6 @@ end
 -- @tparam[opt] string old_key old session id
 -- @tparam string stale_ttl stale ttl
 -- @tparam[opt] table metadata table of metadata
--- @tparam boolean remember whether storing persistent session or not
 -- @treturn true|nil ok
 -- @treturn string error message
 function metatable:set(...)

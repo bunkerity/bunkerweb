@@ -113,6 +113,7 @@ if __name__ == "__main__":
                             custom_conf.group("type"),
                             custom_conf.group("name").replace(".conf", ""),
                         ),
+                        "is_draft": False,
                     }
                 )
                 LOGGER.info(

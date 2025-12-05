@@ -77,6 +77,8 @@
     "close": "Fechar",
     "columns": "Colunas",
     "convert_services": "Converter Serviços",
+    "convert_configs": "Converter Configs",
+    "convert_configs_to": "Converter para {{state}}",
     "copy": "Copiar",
     "copy_codes": "Copiar Códigos",
     "copy_raw": "Copiar Dados Brutos",
@@ -757,6 +759,8 @@
       "confirm_configs_deletion_alert": "Tem certeza de que deseja excluir a configuração personalizada selecionada?",
       "confirm_configs_deletion_alert_plural": "Tem certeza de que deseja excluir as configurações personalizadas selecionadas?",
       "confirm_conversion_confirmation": "Tem certeza de que deseja converter os serviços selecionados?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "Tem certeza de que deseja converter as configurações personalizadas selecionadas para {{state}}?",
       "confirm_next_step": "Tem certeza de que deseja continuar para o próximo passo?",
       "confirm_plugin_deletion": "Tem certeza de que deseja excluir o plugin selecionado?",
       "confirm_plugin_deletion_plural": "Tem certeza de que deseja excluir os plugins selecionados?",
@@ -1217,7 +1221,8 @@
       "url": "URL",
       "user_agent": "User-Agent",
       "version": "Versão",
-      "templates": "Modelos"
+      "templates": "Modelos",
+      "status": "Status"
     }
   },
   "template": {
@@ -1410,6 +1415,8 @@
     "button": {
       "convert_service_to_draft": "Converter Serviço {{name}} para Rascunho",
       "convert_service_to_online": "Converter Serviço {{name}} para Online",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "delete_config": "Excluir Configuração Personalizada {{name}}",
       "delete_file": "Excluir Arquivo de Cache: {{filename}}",
       "delete_instance": "Excluir Instância {{hostname}}",
@@ -1566,7 +1573,8 @@
         "select_all": "Selecionar todas as Configuracões Personalizadas",
         "service": "Serviço associado à Configuração Personalizada (ou Global)",
         "template": "Indica se a Configuração Personalizada origina de um modelo",
-        "type": "Tipo ou contexto da Configuração Personalizada (ex. HTTP, MODSEC)"
+        "type": "Tipo ou contexto da Configuração Personalizada (ex. HTTP, MODSEC)",
+        "status": "Status de rascunho da configuração personalizada"
       },
       "instances": {
         "actions": "Ações disponíveis para esta Instância",

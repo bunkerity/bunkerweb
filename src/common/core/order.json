@@ -6,6 +6,7 @@
     "greylist",
     "bunkernet",
     "limit",
+    "authbasic",
     "securitytxt",
     "robotstxt"
   ],
@@ -37,6 +38,7 @@
     "bunkernet",
     "reversescan",
     "limit",
+    "authbasic",
     "misc",
     "cors",
     "securitytxt",

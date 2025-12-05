@@ -44,6 +44,48 @@ end
 
 local antibot = class("antibot", plugin)
 local CACHE_PREFIX = "plugin_antibot_"
+-- Asset-like extensions used to avoid redirecting clients back to static files after solving the challenge
+local STATIC_EXTENSIONS = {
+	["avif"] = true,
+	["css"] = true,
+	["gif"] = true,
+	["ico"] = true,
+	["jpeg"] = true,
+	["jpg"] = true,
+	["js"] = true,
+	["map"] = true,
+	["mjs"] = true,
+	["otf"] = true,
+	["png"] = true,
+	["svg"] = true,
+	["ttf"] = true,
+	["webm"] = true,
+	["webp"] = true,
+	["woff"] = true,
+	["woff2"] = true,
+}
+
+local function normalize_host(host)
+	if not host or host == "" then
+		return nil
+	end
+	return host:match("^([^:]+)")
+end
+
+local function is_static_like(uri)
+	if not uri or uri == "" then
+		return false
+	end
+	local path = uri:match("^[^?]+") or uri
+	if path == "/favicon.ico" then
+		return true
+	end
+	local ext = path:match("%.([%w]+)$")
+	if not ext then
+		return false
+	end
+	return STATIC_EXTENSIONS[ext:lower()] == true
+end
 
 local function get_http_client()
 	local httpc, err = http_new()
@@ -375,6 +417,7 @@ end
 
 function antibot:prepare_challenge()
 	if not self.session_data.prepared then
+		local original_uri = self:get_original_uri()
 		-- Set all session data at once instead of multiple individual assignments
 		local now_time = now()
 		local session_update = {
@@ -382,7 +425,7 @@ function antibot:prepare_challenge()
 			time_resolve = now_time,
 			type = self.variables["USE_ANTIBOT"],
 			resolved = false,
-			original_uri = self.ctx.bw.uri == self.variables["ANTIBOT_URI"] and "/" or self.ctx.bw.request_uri,
+			original_uri = original_uri,
 		}
 
 		-- Set type-specific fields
@@ -725,6 +768,46 @@ function antibot:check_challenge()
 	end
 
 	return nil, "unknown", nil
+end
+
+function antibot:get_referer_path()
+	local referer = self.ctx.bw.http_referer or ngx.var.http_referer
+	if not referer or referer == "" then
+		return nil
+	end
+	if referer:sub(1, 1) == "/" then
+		return referer
+	end
+	local host, path = referer:match("^https?://([^/]+)(/.*)$")
+	if not host or not path then
+		return nil
+	end
+	local current_host = normalize_host(self.ctx.bw.http_host or self.ctx.bw.server_name)
+	local referer_host = normalize_host(host)
+	if current_host and referer_host and current_host == referer_host then
+		return path
+	end
+	return nil
+end
+
+function antibot:get_original_uri()
+	local antibot_uri = self.variables["ANTIBOT_URI"]
+	if self.ctx.bw.uri == antibot_uri then
+		return "/"
+	end
+	local request_uri = self.ctx.bw.request_uri or "/"
+	local uri_path = self.ctx.bw.uri or request_uri
+
+	if not is_static_like(uri_path) then
+		return request_uri
+	end
+
+	local referer_path = self:get_referer_path()
+	if referer_path and referer_path ~= antibot_uri and not is_static_like(referer_path) then
+		return referer_path
+	end
+
+	return "/"
 end
 
 function antibot:kind_to_ele(kind)

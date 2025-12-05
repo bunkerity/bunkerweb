@@ -66,7 +66,7 @@ Nach dem Abonnement von BunkerWeb Cloud erhalten Sie:
 - **URL für BunkerWeb-UI-Zugriff**: Schnittstelle zur Konfiguration Ihrer Dienste
 - **Load Balancer-Endpunkt**: Eindeutige URL im Format `http://[ID].bunkerweb.cloud`
 - **Grafana-Zugang**: Überwachungsschnittstelle und Visualisierung von Metriken
-- **Zugewiesene Ressourcen**: 2 Instanzen mit je 16 GB RAM und 4 CPUs
+- **Zugewiesene Ressourcen**: 2 Instanzen mit je 8 GB RAM und 2 CPUs
 
 #### 2. Erste Verbindung
 

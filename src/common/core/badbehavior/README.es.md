@@ -26,7 +26,7 @@ Siga estos pasos para configurar y utilizar la función de Mal Comportamiento:
 2.  **Configure los códigos de estado:** Defina qué códigos de estado HTTP deben considerarse "malos" utilizando la configuración `BAD_BEHAVIOR_STATUS_CODES`.
 3.  **Establezca los valores de umbral:** Determine cuántas respuestas "malas" deben desencadenar un bloqueo utilizando la configuración `BAD_BEHAVIOR_THRESHOLD`.
 4.  **Configure los períodos de tiempo:** Especifique la duración para contar las respuestas malas y la duración del bloqueo utilizando las configuraciones `BAD_BEHAVIOR_COUNT_TIME` y `BAD_BEHAVIOR_BAN_TIME`.
-5.  **Elija el ámbito del bloqueo:** Decida si los bloqueos deben aplicarse solo al servicio actual o globalmente a todos los servicios utilizando la configuración `BAD_BEHAVIOR_BAN_SCOPE`.
+5.  **Elija el ámbito del bloqueo:** Decida si los bloqueos deben aplicarse solo al servicio actual o globalmente a todos los servicios utilizando la configuración `BAD_BEHAVIOR_BAN_SCOPE`. Cuando el tráfico llega al servidor predeterminado (nombre de servidor `_`), los bloqueos siempre son globales para que la IP quede bloqueada en todas partes.
 
 !!! tip "Modo Stream"
     En **modo stream**, solo el código de estado `444` se considera "malo" y activará este comportamiento.
@@ -40,7 +40,7 @@ Siga estos pasos para configurar y utilizar la función de Mal Comportamiento:
 | `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | no       | **Umbral:** El número de códigos de estado "malos" que una IP puede generar dentro del período de conteo antes de ser bloqueada.                                                                                                      |
 | `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | no       | **Período de conteo:** La ventana de tiempo (en segundos) durante la cual se cuentan los códigos de estado malos para alcanzar el umbral.                                                                                             |
 | `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | no       | **Duración del bloqueo:** Cuánto tiempo (en segundos) permanecerá bloqueada una IP después de exceder el umbral. El valor por defecto es de 24 horas (86400 segundos). Establezca en `0` para bloqueos permanentes que nunca expiran. |
-| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | no       | **Ámbito del bloqueo:** Determina si los bloqueos se aplican solo al servicio actual (`service`) o a todos los servicios (`global`).                                                                                                  |
+| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | no       | **Ámbito del bloqueo:** Determina si los bloqueos se aplican solo al servicio actual (`service`) o a todos los servicios (`global`). En el servidor predeterminado (`_`), los bloqueos son siempre globales.                                                              |
 
 !!! warning "Falsos positivos"
     Tenga cuidado al establecer el umbral y el tiempo de conteo. Establecer estos valores demasiado bajos puede bloquear inadvertidamente a usuarios legítimos que encuentren errores mientras navegan por su sitio.

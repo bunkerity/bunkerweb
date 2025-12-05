@@ -66,7 +66,7 @@ Après avoir souscrit à BunkerWeb Cloud, vous recevrez :
 - **URL d'accès à l'UI BunkerWeb** : Interface pour configurer vos services
 - **Point de terminaison Load Balancer** : URL unique au format `http://[ID].bunkerweb.cloud`
 - **Accès Grafana** : Interface de surveillance et visualisation des métriques
-- **Ressources allouées** : 2 instances avec 16 Go de RAM et 4 CPU chacune
+- **Ressources allouées** : 2 instances avec 8 Go de RAM et 2 CPU chacune
 
 #### 2. Première connexion
 

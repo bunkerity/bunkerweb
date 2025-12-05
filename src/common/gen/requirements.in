@@ -1,4 +1,3 @@
-bcrypt<5.0.0
 jinja2==3.1.6
 pytz==2025.2
 redis[hiredis]==7.1.0

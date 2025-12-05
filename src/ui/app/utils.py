@@ -50,7 +50,8 @@ COLUMNS_PREFERENCES_DEFAULTS = {
         "4": True,
         "5": True,
         "6": True,
-        "7": False,
+        "7": True,
+        "8": False,
     },
     "instances": {
         "3": False,

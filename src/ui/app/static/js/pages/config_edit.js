@@ -5,6 +5,9 @@ $(document).ready(function () {
   let selectedType = $("#selected-type").val().trim();
   const originalType = selectedType;
   const originalName = $("#config-name").val().trim();
+  let isDraft =
+    ($("#config-is-draft").val() || "no").trim().toLowerCase() === "yes";
+  const originalDraft = isDraft;
   const editorElement = $("#config-value");
   const initialContent = editorElement.text().trim();
   const editor = ace.edit(editorElement[0]);
@@ -194,19 +197,44 @@ $(document).ready(function () {
     // }
   });
 
+  const $draftToggle = $(".toggle-draft");
+  const syncDraftToggle = () => {
+    const icon = $draftToggle.find("i");
+    const label = $draftToggle.find("span[data-i18n]");
+    if (isDraft) {
+      icon.attr("class", "bx bx-sm bx-file-blank");
+      label.attr("data-i18n", "status.draft").text("Draft");
+    } else {
+      icon.attr("class", "bx bx-sm bx-globe");
+      label.attr("data-i18n", "status.online").text("Online");
+    }
+  };
+
+  syncDraftToggle();
+
+  $draftToggle.on("click", function () {
+    if ($(this).hasClass("disabled")) return;
+    isDraft = !isDraft;
+    $("#config-is-draft").val(isDraft ? "yes" : "no");
+    syncDraftToggle();
+    $(this).blur();
+  });
+
   $(".save-config").on("click", function () {
     if (isReadOnly) {
       alert("This action is not allowed in read-only mode.");
       return;
     }
     const value = editor.getValue().trim();
-    if (
-      value &&
+    $("#config-is-draft").val(isDraft ? "yes" : "no");
+    const noChanges =
       value === initialContent &&
       selectedService === originalService &&
       selectedType === originalType &&
-      $("#config-name").val().trim() === originalName
-    ) {
+      $("#config-name").val().trim() === originalName &&
+      isDraft === originalDraft;
+
+    if (noChanges) {
       alert("No changes detected.");
       return;
     }
@@ -271,6 +299,12 @@ $(document).ready(function () {
     form.append(
       $("<input>", {
         type: "hidden",
+        name: "is_draft",
+      }).val(isDraft ? "yes" : "no"),
+    );
+    form.append(
+      $("<input>", {
+        type: "hidden",
         name: "csrf_token",
       }).val($("#csrf_token").val()),
     );
@@ -301,7 +335,8 @@ $(document).ready(function () {
       value === initialContent &&
       selectedService === originalService &&
       selectedType === originalType &&
-      $("#config-name").val().trim() === originalName
+      $("#config-name").val().trim() === originalName &&
+      isDraft === originalDraft
     )
       return;
 

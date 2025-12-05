@@ -225,6 +225,7 @@ class Custom_configs(Base):
     data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
     checksum = Column(String(128), nullable=False)
     method = Column(METHODS_ENUM, nullable=False)
+    is_draft = Column(Boolean, nullable=False, default=False, server_default="0")
 
     service = relationship("Services", back_populates="custom_configs")
 

@@ -77,6 +77,8 @@
     "close": "বন্ধ করুন",
     "columns": "কলাম",
     "convert_services": "পরিষেবা রূপান্তর করুন",
+    "convert_configs": "কনফিগ রূপান্তর করুন",
+    "convert_configs_to": "{{state}} এ রূপান্তর করুন",
     "copy": "কপি করুন",
     "copy_codes": "কোড কপি করুন",
     "copy_raw": "কাঁচা ডেটা কপি করুন",
@@ -757,6 +759,8 @@
       "confirm_configs_deletion_alert": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত কাস্টম কনফিগারেশন মুছতে চান?",
       "confirm_configs_deletion_alert_plural": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত কাস্টম কনফিগারেশনগুলি মুছতে চান?",
       "confirm_conversion_confirmation": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত পরিষেবাগুলি রূপান্তর করতে চান?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "আপনি কি নির্বাচিত কাস্টম কনফিগারেশনগুলোকে {{state}} এ রূপান্তর করতে নিশ্চিত?",
       "confirm_next_step": "আপনি কি নিশ্চিত যে আপনি পরবর্তী ধাপে যেতে চান?",
       "confirm_plugin_deletion": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত প্লাগইন মুছতে চান?",
       "confirm_plugin_deletion_plural": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত প্লাগইনগুলি মুছতে চান?",
@@ -1220,7 +1224,8 @@
       "url": "URL",
       "user_agent": "ব্যবহারকারী এজেন্ট",
       "version": "সংস্করণ",
-      "templates": "টেমপ্লেটসমূহ"
+      "templates": "টেমপ্লেটসমূহ",
+      "status": "স্ট্যাটাস"
     }
   },
   "template": {
@@ -1413,6 +1418,8 @@
     "button": {
       "convert_service_to_draft": "পরিষেবা {{name}} কে খসড়াতে রূপান্তর করুন",
       "convert_service_to_online": "পরিষেবা {{name}} কে অনলাইনে রূপান্তর করুন",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "delete_config": "কাস্টম কনফিগারেশন {{name}} মুছুন",
       "delete_file": "ক্যাশ ফাইল মুছুন: {{filename}}",
       "delete_instance": "ইনস্ট্যান্স {{hostname}} মুছুন",
@@ -1569,7 +1576,8 @@
         "select_all": "সব কাস্টম কনফিগারেশন নির্বাচন করুন",
         "service": "কাস্টম কনফিগারেশনের সাথে সম্পর্কিত পরিষেবা (বা গ্লোবাল)",
         "template": "কাস্টম কনফিগারেশন একটি টেমপ্লেট থেকে উদ্ভূত কিনা তা নির্দেশ করে",
-        "type": "কাস্টম কনফিগারেশনের প্রকার বা প্রসঙ্গ (যেমন HTTP, MODSEC)"
+        "type": "কাস্টম কনফিগারেশনের প্রকার বা প্রসঙ্গ (যেমন HTTP, MODSEC)",
+        "status": "কাস্টম কনফিগারেশনের খসড়া অবস্থা"
       },
       "instances": {
         "actions": "এই ইনস্ট্যান্সের জন্য উপলব্ধ কার্যকলাপ",

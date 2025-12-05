@@ -64,7 +64,7 @@ local function READ_METADATA(self, dshmc, name, audience, subject, current_time)
 end
 
 
-local function SET(self, dshmc, name, key, value, ttl, current_time, old_key, stale_ttl, metadata, remember)
+local function SET(self, dshmc, name, key, value, ttl, current_time, old_key, stale_ttl, metadata)
   local inferred_key = get_name(self, name, key)
 
   if not metadata and not old_key then
@@ -78,11 +78,7 @@ local function SET(self, dshmc, name, key, value, ttl, current_time, old_key, st
 
   local old_name = old_key and get_name(self, name, old_key)
   if old_name then
-    if remember then
-      dshmc:delete(old_name)
-    else
-      dshmc:touch(old_name, stale_ttl)
-    end
+    dshmc:touch(old_name, stale_ttl)
   end
 
   if metadata then
@@ -98,6 +94,7 @@ local function SET(self, dshmc, name, key, value, ttl, current_time, old_key, st
       end
     end
   end
+
   return ok
 end
 
@@ -199,7 +196,6 @@ end
 -- @tparam[opt] string old_key old session id
 -- @tparam string stale_ttl stale ttl
 -- @tparam[opt] table metadata table of metadata
--- @tparam boolean remember whether storing persistent session or not
 -- @treturn true|nil ok
 -- @treturn string error message
 function metatable:set(...)

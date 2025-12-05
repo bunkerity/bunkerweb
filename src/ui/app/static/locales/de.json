@@ -77,6 +77,8 @@
     "close": "Schließen",
     "columns": "Spalten",
     "convert_services": "Dienste konvertieren",
+    "convert_configs": "Konfigurationen konvertieren",
+    "convert_configs_to": "In {{state}} konvertieren",
     "copy": "Kopieren",
     "copy_codes": "Codes kopieren",
     "copy_raw": "Rohdaten kopieren",
@@ -757,6 +759,8 @@
       "confirm_configs_deletion_alert": "Sind Sie sicher, dass Sie die ausgewählte benutzerdefinierte Konfiguration löschen möchten?",
       "confirm_configs_deletion_alert_plural": "Sind Sie sicher, dass Sie die ausgewählten benutzerdefinierten Konfigurationen löschen möchten?",
       "confirm_conversion_confirmation": "Sind Sie sicher, dass Sie die ausgewählten Dienste konvertieren möchten?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "Möchten Sie die ausgewählten benutzerdefinierten Konfigurationen in {{state}} konvertieren?",
       "confirm_next_step": "Sind Sie sicher, dass Sie zum nächsten Schritt fortfahren möchten?",
       "confirm_plugin_deletion": "Sind Sie sicher, dass Sie das ausgewählte Plugin löschen möchten?",
       "confirm_plugin_deletion_plural": "Sind Sie sicher, dass Sie die ausgewählten Plugins löschen möchten?",
@@ -1218,7 +1222,8 @@
       "url": "URL",
       "user_agent": "User-Agent",
       "version": "Version",
-      "templates": "Vorlagen"
+      "templates": "Vorlagen",
+      "status": "Status"
     }
   },
   "template": {
@@ -1411,6 +1416,8 @@
     "button": {
       "convert_service_to_draft": "Dienst {{name}} in Entwurf konvertieren",
       "convert_service_to_online": "Dienst {{name}} in Online konvertieren",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "delete_config": "Benutzerdefinierte Konfiguration {{name}} löschen",
       "delete_file": "Cache-Datei löschen: {{filename}}",
       "delete_instance": "Instanz {{hostname}} löschen",
@@ -1569,7 +1576,8 @@
         "select_all": "Alle benutzerdefinierten Konfigurationen auswählen",
         "service": "Dienst, der mit der benutzerdefinierten Konfiguration verbunden ist (oder Global)",
         "template": "Gibt an, ob die benutzerdefinierte Konfiguration aus einer Vorlage stammt",
-        "type": "Typ oder Kontext der benutzerdefinierten Konfiguration (z. B. HTTP, MODSEC)"
+        "type": "Typ oder Kontext der benutzerdefinierten Konfiguration (z. B. HTTP, MODSEC)",
+        "status": "Entwurfsstatus der benutzerdefinierten Konfiguration"
       },
       "instances": {
         "actions": "Für diese Instanz verfügbare Aktionen",

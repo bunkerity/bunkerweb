@@ -576,13 +576,13 @@ Führen Sie die folgenden Schritte aus, um die Auth Basic-Authentifizierung zu a
 
 ### Konfigurationseinstellungen
 
-| Einstellung           | Standard          | Kontext   | Mehrfach | Beschreibung                                                                                                                                                     |
-| --------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_AUTH_BASIC`      | `no`              | multisite | nein     | **Auth Basic aktivieren:** Auf `yes` setzen, um die Basisauthentifizierung zu aktivieren.                                                                        |
-| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | nein     | **Schutzumfang:** Auf `sitewide` setzen, um die gesamte Website zu schützen, oder einen URL-Pfad angeben (z.B. `/admin`), um nur bestimmte Bereiche zu schützen. |
-| `AUTH_BASIC_USER`     | `changeme`        | multisite | ja       | **Benutzername:** Der für die Authentifizierung erforderliche Benutzername. Sie können mehrere Paare aus Benutzername und Passwort definieren.                   |
-| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | ja       | **Passwort:** Das für die Authentifizierung erforderliche Passwort. Passwörter werden mit bcrypt für maximale Sicherheit gehasht.                                |
-| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | nein     | **Aufforderungstext:** Die Nachricht, die in der dem Benutzer angezeigten Authentifizierungsaufforderung erscheint.                                              |
+| Einstellung           | Standard          | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                |
+| --------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_AUTH_BASIC`      | `no`              | multisite | nein     | **Auth Basic aktivieren:** Auf `yes` setzen, um die Basisauthentifizierung zu aktivieren.                                                                                                                                                   |
+| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | nein     | **Schutzumfang:** Auf `sitewide` setzen, um die gesamte Website zu schützen, oder einen URL-Pfad angeben (z.B. `/admin`), um nur bestimmte Bereiche zu schützen. Sie können auch Nginx-Stil Modifikatoren verwenden (`=`, `~`, `~*`, `^~`). |
+| `AUTH_BASIC_USER`     | `changeme`        | multisite | ja       | **Benutzername:** Der für die Authentifizierung erforderliche Benutzername. Sie können mehrere Paare aus Benutzername und Passwort definieren.                                                                                              |
+| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | ja       | **Passwort:** Das für die Authentifizierung erforderliche Passwort. Passwörter werden mit scrypt für maximale Sicherheit gehasht.                                                                                                           |
+| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | nein     | **Aufforderungstext:** Die Nachricht, die in der dem Benutzer angezeigten Authentifizierungsaufforderung erscheint.                                                                                                                         |
 
 !!! warning "Sicherheitshinweise"
     Die HTTP-Basisauthentifizierung überträgt Anmeldeinformationen, die in Base64 kodiert (nicht verschlüsselt) sind. Obwohl dies bei Verwendung über HTTPS akzeptabel ist, sollte es über reines HTTP nicht als sicher angesehen werden. Aktivieren Sie immer SSL/TLS, wenn Sie die Basisauthentifizierung verwenden.
@@ -785,21 +785,21 @@ Führen Sie die folgenden Schritte aus, um die Bad Behavior-Funktion zu konfigur
 2.  **Statuscodes konfigurieren:** Definieren Sie mit der Einstellung `BAD_BEHAVIOR_STATUS_CODES`, welche HTTP-Statuscodes als „schlecht“ gelten sollen.
 3.  **Schwellenwerte festlegen:** Bestimmen Sie mit der Einstellung `BAD_BEHAVIOR_THRESHOLD`, wie viele „schlechte“ Antworten eine Sperre auslösen sollen.
 4.  **Zeiträume konfigurieren:** Geben Sie die Dauer für die Zählung schlechter Antworten und die Sperrdauer mit den Einstellungen `BAD_BEHAVIOR_COUNT_TIME` und `BAD_BEHAVIOR_BAN_TIME` an.
-5.  **Sperrbereich wählen:** Entscheiden Sie mit der Einstellung `BAD_BEHAVIOR_BAN_SCOPE`, ob die Sperren nur für den aktuellen Dienst oder global für alle Dienste gelten sollen.
+5.  **Sperrbereich wählen:** Entscheiden Sie mit der Einstellung `BAD_BEHAVIOR_BAN_SCOPE`, ob die Sperren nur für den aktuellen Dienst oder global für alle Dienste gelten sollen. Trifft der Traffic auf den Standardserver (Servername `_`), werden Sperren immer global gesetzt, damit die IP überall blockiert wird.
 
 !!! tip "Stream-Modus"
     Im **Stream-Modus** wird nur der Statuscode `444` als „schlecht“ angesehen und löst dieses Verhalten aus.
 
 ### Konfigurationseinstellungen
 
-| Einstellung                 | Standard                      | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                 |
-| --------------------------- | ----------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | nein     | **Bad Behavior aktivieren:** Auf `yes` setzen, um die Funktion zur Erkennung und Sperrung von schlechtem Verhalten zu aktivieren.                                            |
-| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | nein     | **Schlechte Statuscodes:** Liste der HTTP-Statuscodes, die als „schlechtes“ Verhalten gezählt werden, wenn sie an einen Client zurückgegeben werden.                         |
-| `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | nein     | **Schwellenwert:** Die Anzahl der „schlechten“ Statuscodes, die eine IP innerhalb des Zählzeitraums erzeugen kann, bevor sie gesperrt wird.                                  |
-| `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | nein     | **Zählzeitraum:** Das Zeitfenster (in Sekunden), in dem schlechte Statuscodes auf den Schwellenwert angerechnet werden.                                                      |
-| `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | nein     | **Sperrdauer:** Wie lange (in Sekunden) eine IP nach Überschreiten des Schwellenwerts gesperrt bleibt. Standard ist 24 Stunden (86400 Sekunden). `0` für permanente Sperren. |
-| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | nein     | **Sperrbereich:** Legt fest, ob Sperren nur für den aktuellen Dienst (`service`) oder für alle Dienste (`global`) gelten.                                                    |
+| Einstellung                 | Standard                      | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                      |
+| --------------------------- | ----------------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | nein     | **Bad Behavior aktivieren:** Auf `yes` setzen, um die Funktion zur Erkennung und Sperrung von schlechtem Verhalten zu aktivieren.                                                 |
+| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | nein     | **Schlechte Statuscodes:** Liste der HTTP-Statuscodes, die als „schlechtes“ Verhalten gezählt werden, wenn sie an einen Client zurückgegeben werden.                              |
+| `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | nein     | **Schwellenwert:** Die Anzahl der „schlechten“ Statuscodes, die eine IP innerhalb des Zählzeitraums erzeugen kann, bevor sie gesperrt wird.                                       |
+| `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | nein     | **Zählzeitraum:** Das Zeitfenster (in Sekunden), in dem schlechte Statuscodes auf den Schwellenwert angerechnet werden.                                                           |
+| `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | nein     | **Sperrdauer:** Wie lange (in Sekunden) eine IP nach Überschreiten des Schwellenwerts gesperrt bleibt. Standard ist 24 Stunden (86400 Sekunden). `0` für permanente Sperren.      |
+| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | nein     | **Sperrbereich:** Legt fest, ob Sperren nur für den aktuellen Dienst (`service`) oder für alle Dienste (`global`) gelten. Auf dem Standardserver (`_`) sind Sperren immer global. |
 
 !!! warning "Falsch-Positive"
     Seien Sie vorsichtig bei der Einstellung des Schwellenwerts und der Zählzeit. Zu niedrige Werte können versehentlich legitime Benutzer sperren, die beim Surfen auf Ihrer Website auf Fehler stoßen.
@@ -1383,6 +1383,32 @@ Hier sind Beispiele für mögliche Werte der Einstellung `CORS_ALLOW_ORIGIN` und
     CORS_MAX_AGE: "86400"
     CORS_DENY_REQUEST: "yes"
     ```
+
+## Cache <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM-Unterstützung :x:
+
+Provides caching functionality at the reverse proxy level.
+
+| Einstellung                 | Standardwert                      | Kontext   | Mehrfach | Beschreibung                                                                   |
+| --------------------------- | --------------------------------- | --------- | -------- | ------------------------------------------------------------------------------ |
+| `CACHE_PATH`                |                                   | global    | ja       | Path and parameters for a cache.                                               |
+| `CACHE_ZONE`                |                                   | multisite | nein     | Name of cache zone to use (specified in a CACHE_PATH setting).                 |
+| `CACHE_HEADER`              | `X-Cache`                         | multisite | nein     | Add header about cache status.                                                 |
+| `CACHE_BACKGROUND_UPDATE`   | `no`                              | multisite | nein     | Enable or disable background update of the cache.                              |
+| `CACHE_BYPASS`              |                                   | multisite | nein     | List of variables to determine if the cache should be bypassed or not.         |
+| `CACHE_NO_CACHE`            | `$http_pragma$http_authorization` | multisite | nein     | Disable caching if variables are set.                                          |
+| `CACHE_KEY`                 | `$scheme$proxy_host$request_uri`  | multisite | nein     | Key used to identify cached elements.                                          |
+| `CACHE_CONVERT_HEAD_TO_GET` | `yes`                             | multisite | nein     | Convert HEAD requests to GET when caching.                                     |
+| `CACHE_LOCK`                | `no`                              | multisite | nein     | Lock concurrent requests when populating the cache.                            |
+| `CACHE_LOCK_AGE`            | `5s`                              | multisite | nein     | Pass request to upstream if cache is locked for that time (possible cache).    |
+| `CACHE_LOCK_TIMEOUT`        | `5s`                              | multisite | nein     | Pass request to upstream if cache is locked for that time (no cache).          |
+| `CACHE_METHODS`             | `GET HEAD`                        | multisite | nein     | Only cache response if corresponding method is present.                        |
+| `CACHE_MIN_USES`            | `1`                               | multisite | nein     | Number of requests before we put the corresponding response in cache.          |
+| `CACHE_REVALIDATE`          | `no`                              | multisite | nein     | Revalidate expired items using conditional requests to upstream.               |
+| `CACHE_USE_STALE`           | `off`                             | multisite | nein     | Determines the use of staled cache response (proxy_cache_use_stale directive). |
+| `CACHE_VALID`               | `10m`                             | multisite | ja       | Defines default caching with optional status code.                             |
 
 ## Client cache
 
@@ -3568,7 +3594,7 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
 Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entspricht:
 
 - **`3`**: Stabile [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`**: Stabile [v4.20.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.20.0) (**Standard**).
+- **`4`**: Stabile [v4.21.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.21.0) (**Standard**).
 - **`nightly`**: [Nightly-Build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) mit den neuesten Regel-Updates.
 
 !!! example "Nightly-Build"
@@ -4220,14 +4246,23 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 
 !!! warning "Sicherheit"
 
-- Verwenden Sie starke Passwörter für Redis and Sentinel.
+- Verwenden Sie starke Passwörter für Redis und Sentinel.
 - Erwägen Sie die Verwendung von SSL/TLS.
 - Setzen Sie Redis nicht dem Internet aus.
 - Beschränken Sie den Zugriff auf den Redis-Port (Firewall, Segmentierung).
 
+!!! info "Cluster-Anforderungen"
+    Bei der Bereitstellung von BunkerWeb in einem Cluster:
+
+    - Alle BunkerWeb-Instanzen sollten sich mit demselben Redis- oder Valkey-Server oder Sentinel-Cluster verbinden
+    - Konfigurieren Sie dieselbe Datenbanknummer auf allen Instanzen
+    - Stellen Sie die Netzwerkkonnektivität zwischen allen BunkerWeb-Instanzen und den Redis-/Valkey-Servern sicher
+
 ### Beispiele
 
 === "Basiskonfiguration"
+
+    Eine einfache Konfiguration für die Verbindung zu einem Redis- oder Valkey-Server auf dem lokalen Computer:
 
     ```yaml
     USE_REDIS: "yes"
@@ -4236,6 +4271,8 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
     ```
 
 === "Sichere Konfiguration"
+
+    Konfiguration mit Passwortauthentifizierung und aktiviertem SSL:
 
     ```yaml
     USE_REDIS: "yes"
@@ -4248,6 +4285,8 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 
 === "Redis Sentinel"
 
+    Konfiguration für Hochverfügbarkeit mit Redis Sentinel:
+
     ```yaml
     USE_REDIS: "yes"
     REDIS_SENTINEL_HOSTS: "sentinel1:26379 sentinel2:26379 sentinel3:26379"
@@ -4257,6 +4296,8 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
     ```
 
 === "Erweitertes Tuning"
+
+    Konfiguration mit erweiterten Verbindungsparametern zur Leistungsoptimierung:
 
     ```yaml
     USE_REDIS: "yes"
@@ -4268,6 +4309,33 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
     REDIS_KEEPALIVE_IDLE: "60"
     REDIS_KEEPALIVE_POOL: "5"
     ```
+
+### Redis Best Practices
+
+Berücksichtigen Sie bei der Verwendung von Redis oder Valkey mit BunkerWeb diese Best Practices, um optimale Leistung, Sicherheit und Zuverlässigkeit zu gewährleisten:
+
+#### Speicherverwaltung
+- **Speichernutzung überwachen:** Konfigurieren Sie Redis mit geeigneten `maxmemory`-Einstellungen, um Fehler wegen unzureichendem Speicher zu vermeiden
+- **Verdrängungsrichtlinie festlegen:** Verwenden Sie eine für Ihren Anwendungsfall geeignete `maxmemory-policy` (z. B. `volatile-lru` oder `allkeys-lru`)
+- **Große Schlüssel vermeiden:** Stellen Sie sicher, dass einzelne Redis-Schlüssel eine angemessene Größe behalten, um Leistungseinbußen zu vermeiden
+
+#### Datenpersistenz
+- **RDB-Snapshots aktivieren:** Konfigurieren Sie regelmäßige Snapshots für die Datenpersistenz ohne signifikante Leistungseinbußen
+- **AOF in Betracht ziehen:** Aktivieren Sie für kritische Daten die AOF-Persistenz (Append-Only File) mit einer geeigneten fsync-Richtlinie
+- **Backup-Strategie:** Implementieren Sie regelmäßige Redis-Backups als Teil Ihres Disaster-Recovery-Plans
+
+#### Leistungsoptimierung
+- **Connection Pooling:** BunkerWeb implementiert dies bereits, aber stellen Sie sicher, dass andere Anwendungen dieser Praxis folgen
+- **Pipelining:** Verwenden Sie, wenn möglich, Pipelining für Massenoperationen, um den Netzwerk-Overhead zu reduzieren
+- **Teure Operationen vermeiden:** Seien Sie vorsichtig mit Befehlen wie KEYS in Produktionsumgebungen
+- **Benchmarken Sie Ihre Arbeitslast:** Verwenden Sie redis-benchmark, um Ihre spezifischen Arbeitslastmuster zu testen
+
+### Weitere Ressourcen
+
+- [Redis-Dokumentation](https://redis.io/documentation)
+- [Redis-Sicherheitsleitfaden](https://redis.io/topics/security)
+- [Redis-Hochverfügbarkeit](https://redis.io/topics/sentinel)
+- [Redis-Persistenz](https://redis.io/topics/persistence)
 
 ## Reporting <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

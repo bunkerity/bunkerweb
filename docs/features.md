@@ -599,13 +599,13 @@ Follow these steps to enable and configure Auth Basic authentication:
 
 ### Configuration Settings
 
-| Setting               | Default           | Context   | Multiple | Description                                                                                                                                |
-| --------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `USE_AUTH_BASIC`      | `no`              | multisite | no       | **Enable Auth Basic:** Set to `yes` to enable basic authentication.                                                                        |
-| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | no       | **Protection Scope:** Set to `sitewide` to protect the entire site, or specify a URL path (e.g., `/admin`) to protect only specific areas. |
-| `AUTH_BASIC_USER`     | `changeme`        | multisite | yes      | **Username:** The username required for authentication. You can define multiple username/password pairs.                                   |
-| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | yes      | **Password:** The password required for authentication. Passwords are hashed using bcrypt for maximum security.                            |
-| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | no       | **Prompt Text:** The message displayed in the authentication prompt shown to users.                                                        |
+| Setting               | Default           | Context   | Multiple | Description                                                                                                                                                                                               |
+| --------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_AUTH_BASIC`      | `no`              | multisite | no       | **Enable Auth Basic:** Set to `yes` to enable basic authentication.                                                                                                                                       |
+| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | no       | **Protection Scope:** Set to `sitewide` to protect the entire site, or specify a URL path (e.g., `/admin`) to protect only specific areas. You can also use Nginx-style modifiers (`=`, `~`, `~*`, `^~`). |
+| `AUTH_BASIC_USER`     | `changeme`        | multisite | yes      | **Username:** The username required for authentication. You can define multiple username/password pairs.                                                                                                  |
+| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | yes      | **Password:** The password required for authentication. Passwords are hashed using scrypt for maximum security.                                                                                           |
+| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | no       | **Prompt Text:** The message displayed in the authentication prompt shown to users.                                                                                                                       |
 
 !!! warning "Security Considerations"
     HTTP Basic Authentication transmits credentials encoded (not encrypted) in Base64. While this is acceptable when used over HTTPS, it should not be considered secure over plain HTTP. Always enable SSL/TLS when using basic authentication.
@@ -808,7 +808,7 @@ Follow these steps to configure and use the Bad Behavior feature:
 2. **Configure status codes:** Define which HTTP status codes should be considered "bad" using the `BAD_BEHAVIOR_STATUS_CODES` setting.
 3. **Set threshold values:** Determine how many "bad" responses should trigger a ban using the `BAD_BEHAVIOR_THRESHOLD` setting.
 4. **Configure time periods:** Specify the duration for counting bad responses and the ban duration using the `BAD_BEHAVIOR_COUNT_TIME` and `BAD_BEHAVIOR_BAN_TIME` settings.
-5. **Choose ban scope:** Decide whether the bans should apply only to the current service or globally across all services using the `BAD_BEHAVIOR_BAN_SCOPE` setting.
+5. **Choose ban scope:** Decide whether the bans should apply only to the current service or globally across all services using the `BAD_BEHAVIOR_BAN_SCOPE` setting. When traffic hits the default server (server name `_`), bans are always enforced globally so the offending IP is blocked everywhere.
 
 !!! tip "Stream Mode"
     In **stream mode**, only the `444` status code is considered "bad" and will trigger this behavior.
@@ -822,7 +822,7 @@ Follow these steps to configure and use the Bad Behavior feature:
 | `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | no       | **Threshold:** The number of "bad" status codes an IP can generate within the counting period before being banned.                                                                    |
 | `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | no       | **Count Period:** The time window (in seconds) during which bad status codes are counted toward the threshold.                                                                        |
 | `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | no       | **Ban Duration:** How long (in seconds) an IP will remain banned after exceeding the threshold. Default is 24 hours (86400 seconds). Set to `0` for permanent bans that never expire. |
-| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | no       | **Ban Scope:** Determines whether bans apply only to the current service (`service`) or to all services (`global`).                                                                   |
+| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | no       | **Ban Scope:** Determines whether bans apply only to the current service (`service`) or to all services (`global`). Bans triggered on the default server (`_`) are always global.     |
 
 !!! warning "False Positives"
     Be careful when setting the threshold and count time. Setting these values too low may inadvertently ban legitimate users who encounter errors while browsing your site.
@@ -1419,6 +1419,32 @@ Here are examples of possible values for the `CORS_ALLOW_ORIGIN` setting, along 
     CORS_MAX_AGE: "86400"
     CORS_DENY_REQUEST: "yes"
     ```
+
+## Cache <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :x:
+
+Provides caching functionality at the reverse proxy level.
+
+| Setting                     | Default                           | Context   | Multiple | Description                                                                    |
+| --------------------------- | --------------------------------- | --------- | -------- | ------------------------------------------------------------------------------ |
+| `CACHE_PATH`                |                                   | global    | yes      | Path and parameters for a cache.                                               |
+| `CACHE_ZONE`                |                                   | multisite | no       | Name of cache zone to use (specified in a CACHE_PATH setting).                 |
+| `CACHE_HEADER`              | `X-Cache`                         | multisite | no       | Add header about cache status.                                                 |
+| `CACHE_BACKGROUND_UPDATE`   | `no`                              | multisite | no       | Enable or disable background update of the cache.                              |
+| `CACHE_BYPASS`              |                                   | multisite | no       | List of variables to determine if the cache should be bypassed or not.         |
+| `CACHE_NO_CACHE`            | `$http_pragma$http_authorization` | multisite | no       | Disable caching if variables are set.                                          |
+| `CACHE_KEY`                 | `$scheme$proxy_host$request_uri`  | multisite | no       | Key used to identify cached elements.                                          |
+| `CACHE_CONVERT_HEAD_TO_GET` | `yes`                             | multisite | no       | Convert HEAD requests to GET when caching.                                     |
+| `CACHE_LOCK`                | `no`                              | multisite | no       | Lock concurrent requests when populating the cache.                            |
+| `CACHE_LOCK_AGE`            | `5s`                              | multisite | no       | Pass request to upstream if cache is locked for that time (possible cache).    |
+| `CACHE_LOCK_TIMEOUT`        | `5s`                              | multisite | no       | Pass request to upstream if cache is locked for that time (no cache).          |
+| `CACHE_METHODS`             | `GET HEAD`                        | multisite | no       | Only cache response if corresponding method is present.                        |
+| `CACHE_MIN_USES`            | `1`                               | multisite | no       | Number of requests before we put the corresponding response in cache.          |
+| `CACHE_REVALIDATE`          | `no`                              | multisite | no       | Revalidate expired items using conditional requests to upstream.               |
+| `CACHE_USE_STALE`           | `off`                             | multisite | no       | Determines the use of staled cache response (proxy_cache_use_stale directive). |
+| `CACHE_VALID`               | `10m`                             | multisite | yes      | Defines default caching with optional status code.                             |
 
 ## Client cache
 
@@ -3677,7 +3703,7 @@ Follow these steps to configure and use ModSecurity:
 Select a CRS version to best match your security needs:
 
 - **`3`**: Stable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`**: Stable [v4.20.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.20.0) (**default**).
+- **`4`**: Stable [v4.21.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.21.0) (**default**).
 - **`nightly`**: [Nightly build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) offering the latest rule updates.
 
 !!! example "Nightly Build"

@@ -595,13 +595,13 @@ Siga estos pasos para habilitar y configurar la autenticación básica:
 
 ### Ajustes de configuración
 
-| Ajuste                | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                            |
-| --------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_AUTH_BASIC`      | `no`              | multisite | no       | **Habilitar autenticación básica:** Establezca en `yes` para habilitar la autenticación básica.                                                                        |
-| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | no       | **Ámbito de protección:** Establezca en `sitewide` para proteger todo el sitio, o especifique una ruta de URL (p. ej., `/admin`) para proteger solo áreas específicas. |
-| `AUTH_BASIC_USER`     | `changeme`        | multisite | yes      | **Nombre de usuario:** El nombre de usuario requerido para la autenticación. Puede definir múltiples pares de nombre de usuario/contraseña.                            |
-| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | yes      | **Contraseña:** La contraseña requerida para la autenticación. Las contraseñas se hash con bcrypt para máxima seguridad.                                               |
-| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | no       | **Texto de la solicitud:** El mensaje que se muestra en la solicitud de autenticación mostrada a los usuarios.                                                         |
+| Ajuste                | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                         |
+| --------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_AUTH_BASIC`      | `no`              | multisite | no       | **Habilitar autenticación básica:** Establezca en `yes` para habilitar la autenticación básica.                                                                                                                                                     |
+| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | no       | **Ámbito de protección:** Establezca en `sitewide` para proteger todo el sitio, o especifique una ruta de URL (p. ej., `/admin`) para proteger solo áreas específicas. También puede utilizar modificadores de estilo Nginx (`=`, `~`, `~*`, `^~`). |
+| `AUTH_BASIC_USER`     | `changeme`        | multisite | yes      | **Nombre de usuario:** El nombre de usuario requerido para la autenticación. Puede definir múltiples pares de nombre de usuario/contraseña.                                                                                                         |
+| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | yes      | **Contraseña:** La contraseña requerida para la autenticación. Las contraseñas se hash con scrypt para máxima seguridad.                                                                                                                            |
+| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | no       | **Texto de la solicitud:** El mensaje que se muestra en la solicitud de autenticación mostrada a los usuarios.                                                                                                                                      |
 
 !!! warning "Consideraciones de seguridad"
     La autenticación básica HTTP transmite las credenciales codificadas (no cifradas) en Base64. Aunque esto es aceptable cuando se utiliza sobre HTTPS, no debe considerarse seguro sobre HTTP plano. Habilite siempre SSL/TLS cuando utilice la autenticación básica.
@@ -804,7 +804,7 @@ Siga estos pasos para configurar y utilizar la función de Mal Comportamiento:
 2.  **Configure los códigos de estado:** Defina qué códigos de estado HTTP deben considerarse "malos" utilizando la configuración `BAD_BEHAVIOR_STATUS_CODES`.
 3.  **Establezca los valores de umbral:** Determine cuántas respuestas "malas" deben desencadenar un bloqueo utilizando la configuración `BAD_BEHAVIOR_THRESHOLD`.
 4.  **Configure los períodos de tiempo:** Especifique la duración para contar las respuestas malas y la duración del bloqueo utilizando las configuraciones `BAD_BEHAVIOR_COUNT_TIME` y `BAD_BEHAVIOR_BAN_TIME`.
-5.  **Elija el ámbito del bloqueo:** Decida si los bloqueos deben aplicarse solo al servicio actual o globalmente a todos los servicios utilizando la configuración `BAD_BEHAVIOR_BAN_SCOPE`.
+5.  **Elija el ámbito del bloqueo:** Decida si los bloqueos deben aplicarse solo al servicio actual o globalmente a todos los servicios utilizando la configuración `BAD_BEHAVIOR_BAN_SCOPE`. Cuando el tráfico llega al servidor predeterminado (nombre de servidor `_`), los bloqueos siempre son globales para que la IP quede bloqueada en todas partes.
 
 !!! tip "Modo Stream"
     En **modo stream**, solo el código de estado `444` se considera "malo" y activará este comportamiento.
@@ -818,7 +818,7 @@ Siga estos pasos para configurar y utilizar la función de Mal Comportamiento:
 | `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | no       | **Umbral:** El número de códigos de estado "malos" que una IP puede generar dentro del período de conteo antes de ser bloqueada.                                                                                                      |
 | `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | no       | **Período de conteo:** La ventana de tiempo (en segundos) durante la cual se cuentan los códigos de estado malos para alcanzar el umbral.                                                                                             |
 | `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | no       | **Duración del bloqueo:** Cuánto tiempo (en segundos) permanecerá bloqueada una IP después de exceder el umbral. El valor por defecto es de 24 horas (86400 segundos). Establezca en `0` para bloqueos permanentes que nunca expiran. |
-| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | no       | **Ámbito del bloqueo:** Determina si los bloqueos se aplican solo al servicio actual (`service`) o a todos los servicios (`global`).                                                                                                  |
+| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | no       | **Ámbito del bloqueo:** Determina si los bloqueos se aplican solo al servicio actual (`service`) o a todos los servicios (`global`). En el servidor predeterminado (`_`), los bloqueos son siempre globales.                          |
 
 !!! warning "Falsos positivos"
     Tenga cuidado al establecer el umbral y el tiempo de conteo. Establecer estos valores demasiado bajos puede bloquear inadvertidamente a usuarios legítimos que encuentren errores mientras navegan por su sitio.
@@ -1415,6 +1415,32 @@ Aquí hay ejemplos de posibles valores para el ajuste `CORS_ALLOW_ORIGIN`, junto
     CORS_MAX_AGE: "86400"
     CORS_DENY_REQUEST: "yes"
     ```
+
+## Cache <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+Compatibilidad con STREAM :x:
+
+Provides caching functionality at the reverse proxy level.
+
+| Parámetro                   | Valor predeterminado              | Contexto  | Múltiple | Descripción                                                                    |
+| --------------------------- | --------------------------------- | --------- | -------- | ------------------------------------------------------------------------------ |
+| `CACHE_PATH`                |                                   | global    | sí       | Path and parameters for a cache.                                               |
+| `CACHE_ZONE`                |                                   | multisite | no       | Name of cache zone to use (specified in a CACHE_PATH setting).                 |
+| `CACHE_HEADER`              | `X-Cache`                         | multisite | no       | Add header about cache status.                                                 |
+| `CACHE_BACKGROUND_UPDATE`   | `no`                              | multisite | no       | Enable or disable background update of the cache.                              |
+| `CACHE_BYPASS`              |                                   | multisite | no       | List of variables to determine if the cache should be bypassed or not.         |
+| `CACHE_NO_CACHE`            | `$http_pragma$http_authorization` | multisite | no       | Disable caching if variables are set.                                          |
+| `CACHE_KEY`                 | `$scheme$proxy_host$request_uri`  | multisite | no       | Key used to identify cached elements.                                          |
+| `CACHE_CONVERT_HEAD_TO_GET` | `yes`                             | multisite | no       | Convert HEAD requests to GET when caching.                                     |
+| `CACHE_LOCK`                | `no`                              | multisite | no       | Lock concurrent requests when populating the cache.                            |
+| `CACHE_LOCK_AGE`            | `5s`                              | multisite | no       | Pass request to upstream if cache is locked for that time (possible cache).    |
+| `CACHE_LOCK_TIMEOUT`        | `5s`                              | multisite | no       | Pass request to upstream if cache is locked for that time (no cache).          |
+| `CACHE_METHODS`             | `GET HEAD`                        | multisite | no       | Only cache response if corresponding method is present.                        |
+| `CACHE_MIN_USES`            | `1`                               | multisite | no       | Number of requests before we put the corresponding response in cache.          |
+| `CACHE_REVALIDATE`          | `no`                              | multisite | no       | Revalidate expired items using conditional requests to upstream.               |
+| `CACHE_USE_STALE`           | `off`                             | multisite | no       | Determines the use of staled cache response (proxy_cache_use_stale directive). |
+| `CACHE_VALID`               | `10m`                             | multisite | sí       | Defines default caching with optional status code.                             |
 
 ## Client cache
 
@@ -3649,7 +3675,7 @@ Siga estos pasos para configurar y usar ModSecurity:
 Seleccione una versión de CRS que se ajuste mejor a sus necesidades de seguridad:
 
 - **`3`**: Estable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`**: Estable [v4.20.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.20.0) (**predeterminada**).
+- **`4`**: Estable [v4.21.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.21.0) (**predeterminada**).
 - **`nightly`**: [Compilación nocturna](https://github.com/coreruleset/coreruleset/releases/tag/nightly) que ofrece las últimas actualizaciones de reglas.
 
 !!! example "Compilación Nocturna"

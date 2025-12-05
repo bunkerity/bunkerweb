@@ -77,6 +77,8 @@
     "close": "Cerrar",
     "columns": "Columnas",
     "convert_services": "Convertir Servicios",
+    "convert_configs": "Convertir Configs",
+    "convert_configs_to": "Convertir a {{state}}",
     "copy": "Copiar",
     "copy_codes": "Copiar Códigos",
     "copy_raw": "Copiar Datos sin Procesar",
@@ -757,6 +759,8 @@
       "confirm_configs_deletion_alert": "¿Estás seguro de que quieres eliminar la configuración personalizada seleccionada?",
       "confirm_configs_deletion_alert_plural": "¿Estás seguro de que quieres eliminar las configuraciones personalizadas seleccionadas?",
       "confirm_conversion_confirmation": "¿Estás seguro de que quieres convertir los servicios seleccionados?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "¿Seguro que quieres convertir las configuraciones personalizadas seleccionadas a {{state}}?",
       "confirm_next_step": "¿Estás seguro de que quieres continuar al siguiente paso?",
       "confirm_plugin_deletion": "¿Estás seguro de que quieres eliminar el plugin seleccionado?",
       "confirm_plugin_deletion_plural": "¿Estás seguro de que quieres eliminar los plugins seleccionados?",
@@ -1219,7 +1223,8 @@
       "url": "URL",
       "user_agent": "User-Agent",
       "version": "Versión",
-      "templates": "Plantillas"
+      "templates": "Plantillas",
+      "status": "Estado"
     }
   },
   "template": {
@@ -1412,6 +1417,8 @@
     "button": {
       "convert_service_to_draft": "Convertir Servicio {{name}} a Borrador",
       "convert_service_to_online": "Convertir Servicio {{name}} a En Línea",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "delete_config": "Eliminar Configuración Personalizada {{name}}",
       "delete_file": "Eliminar archivo de caché: {{filename}}",
       "delete_instance": "Eliminar Instancia {{hostname}}",
@@ -1568,7 +1575,8 @@
         "select_all": "Seleccionar todas las Configuraciones Personalizadas",
         "service": "Servicio asociado a la Configuración Personalizada (o Global)",
         "template": "Indica si la Configuración Personalizada proviene de una plantilla",
-        "type": "Tipo o contexto de la Configuración Personalizada (ej. HTTP, MODSEC)"
+        "type": "Tipo o contexto de la Configuración Personalizada (ej. HTTP, MODSEC)",
+        "status": "Estado de borrador de la configuración personalizada"
       },
       "instances": {
         "actions": "Acciones disponibles para esta Instancia",

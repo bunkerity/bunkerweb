@@ -66,7 +66,7 @@ After subscribing to BunkerWeb Cloud, you will receive:
 - **BunkerWeb UI access URL**: Interface for configuring your services
 - **Load Balancer endpoint**: Unique URL in the format `http://[ID].bunkerweb.cloud`
 - **Grafana Access**: Monitoring interface and metrics visualization
-- **Allocated Resources**: 2 instances with 16GB RAM and 4 CPU each
+- **Allocated Resources**: 2 instances with 8GB RAM and 2 CPU each
 
 #### 2. First Connection
 

@@ -239,12 +239,14 @@ def services_service_page(service: str):
 
             old_server_name = variables.pop("OLD_SERVER_NAME", "")
             db_custom_configs = {}
+            all_custom_configs = DB.get_custom_configs(with_drafts=True, as_dict=True)
+            removed_custom_configs: set[str] = set()
             new_configs = set()
             configs_changed = False
 
             if mode == "easy":
                 db_templates = DB.get_templates()
-                db_custom_configs = DB.get_custom_configs(with_drafts=True, as_dict=True)
+                db_custom_configs = all_custom_configs.copy()
 
                 for variable, value in variables.copy().items():
                     conf_match = CUSTOM_CONF_RX.match(variable)
@@ -258,7 +260,7 @@ def services_service_page(service: str):
                         value = value.replace("\r\n", "\n").strip().encode("utf-8")
 
                         new_configs.add(key)
-                        db_custom_config = db_custom_configs.get(f"{service}_{key}", {"data": None, "method": override_method})
+                        db_custom_config = db_custom_configs.get(f"{service}_{key}", {"data": None, "method": override_method, "is_draft": False})
 
                         if not is_editable_method(db_custom_config["method"]) and db_custom_config["template"] != variables.get("USE_TEMPLATE", ""):
                             DATA["TO_FLASH"].append(
@@ -280,6 +282,7 @@ def services_service_page(service: str):
                             "name": conf_match["name"],
                             "data": value,
                             "method": override_method,
+                            "is_draft": db_custom_config.get("is_draft", False),
                         }
 
                 if service != "new":
@@ -290,12 +293,14 @@ def services_service_page(service: str):
                 for db_custom_config, data in db_custom_configs.copy().items():
                     if data["method"] == "default" and data["template"]:
                         LOGGER.debug(f"Removing default custom config {db_custom_config} because it is not used anymore.")
+                        removed_custom_configs.add(db_custom_config)
                         del db_custom_configs[db_custom_config]
                         continue
 
                     if db_custom_config.startswith(f"{service}_") and db_custom_config.replace(f"{service}_", "", 1) not in new_configs and data["template"]:
                         LOGGER.debug(f"Removing custom config {db_custom_config} because it is not used anymore.")
                         configs_changed = True
+                        removed_custom_configs.add(db_custom_config)
                         del db_custom_configs[db_custom_config]
                         continue
 
@@ -305,6 +310,7 @@ def services_service_page(service: str):
                         "name": data["name"],
                         "data": data["data"],
                         "method": data["method"],
+                        "is_draft": data.get("is_draft", False),
                     }
                     if "checksum" in data:
                         db_custom_configs[db_custom_config]["checksum"] = data["checksum"]
@@ -344,14 +350,35 @@ def services_service_page(service: str):
             operation = None
             error = None
 
-            if new_configs or configs_changed:
-                error = DB.save_custom_configs(
-                    db_custom_configs.values(),
-                    override_method,
-                    changed=service != "new" and (was_draft != is_draft or not is_draft),
-                )
-                if error:
-                    DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {error}", "type": "error"})
+            # Build the final custom config map taking into account removals and additions
+            new_server_name = variables.get("SERVER_NAME", "").split(" ")[0]
+            old_server_name_splitted = old_server_name.split(" ")
+            old_server_id = old_server_name_splitted[0] if old_server_name_splitted and old_server_name_splitted[0] else service
+            renamed_service = service != "new" and new_server_name and new_server_name != old_server_id
+
+            final_custom_configs: dict[str, dict] = {}
+            for key, data in all_custom_configs.items():
+                if key in removed_custom_configs:
+                    continue
+
+                # If this config belongs to the service being renamed, rewrite it
+                if renamed_service and key.startswith(f"{old_server_id}_"):
+                    new_key = key.replace(f"{old_server_id}_", f"{new_server_name}_", 1)
+                    final_custom_configs[new_key] = data | {"service_id": new_server_name}
+                    configs_changed = True
+                    continue
+
+                final_custom_configs[key] = data
+
+            # Apply changes from the current edit session (db_custom_configs overrides base)
+            for key, data in db_custom_configs.items():
+                target_key = key
+                target_data = data
+                if renamed_service and key.startswith(f"{service}_"):
+                    target_key = key.replace(f"{service}_", f"{new_server_name}_", 1)
+                    target_data = data | {"service_id": new_server_name}
+                    configs_changed = True
+                final_custom_configs[target_key] = target_data
 
             if service == "new":
                 old_server_name = variables["SERVER_NAME"]
@@ -364,6 +391,37 @@ def services_service_page(service: str):
                     is_draft=is_draft,
                     override_method=override_method,
                 )
+
+            # Save custom configs after the service edit so the new service id exists
+            if new_configs or configs_changed:
+                if renamed_service:
+                    # Use per-config upsert to avoid bulk delete when renaming services
+                    for custom_config in final_custom_configs.values():
+                        custom_conf_data = {
+                            "service_id": custom_config.get("service_id"),
+                            "type": custom_config.get("type"),
+                            "name": custom_config.get("name"),
+                            "data": custom_config.get("data"),
+                            "checksum": custom_config.get("checksum"),
+                            "method": custom_config.get("method"),
+                        }
+                        error = DB.upsert_custom_config(
+                            custom_conf_data["type"],
+                            custom_conf_data["name"],
+                            custom_conf_data,
+                            service_id=custom_conf_data["service_id"],
+                        )
+                        if error:
+                            DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {error}", "type": "error"})
+                            break
+                else:
+                    error = DB.save_custom_configs(
+                        final_custom_configs.values(),
+                        override_method,
+                        changed=service != "new" and (was_draft != is_draft or not is_draft),
+                    )
+                    if error:
+                        DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {error}", "type": "error"})
 
             if operation.endswith("already exists."):
                 DATA["TO_FLASH"].append({"content": operation, "type": "warning"})

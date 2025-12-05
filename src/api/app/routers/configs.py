@@ -99,6 +99,7 @@ def list_configs(service: Optional[str] = None, type: Optional[str] = None, with
             data["data"] = _decode_data(it.get("data"))
         # Normalize global service presentation
         data["service"] = data.pop("service_id", None) or "global"
+        data["is_draft"] = bool(it.get("is_draft", False))
         out.append(data)
 
     return JSONResponse(status_code=200, content={"status": "success", "configs": out})
@@ -109,6 +110,7 @@ async def upload_configs(
     files: List[UploadFile] = File(..., description="One or more config files to create"),
     service: Optional[str] = Form(None, description='Service id; use "global" or leave empty for global'),
     type: str = Form(..., description="Config type, e.g., http, server_http, modsec, ..."),  # noqa: A002
+    is_draft: bool = Form(False, description="Mark uploaded custom configs as draft"),
 ) -> JSONResponse:
     """Create new custom configs from uploaded files (method="api").
 
@@ -156,7 +158,7 @@ async def upload_configs(
             error = db.upsert_custom_config(
                 ctype,
                 name,
-                {"service_id": s_id, "type": ctype, "name": name, "data": config_content, "method": "api"},
+                {"service_id": s_id, "type": ctype, "name": name, "data": config_content, "method": "api", "is_draft": is_draft},
                 service_id=s_id,
                 new=True,
             )
@@ -196,6 +198,7 @@ def get_config(service: str, config_type: str, name: str, with_data: bool = True
     if with_data:
         data["data"] = _decode_data(item.get("data"))
     data["service"] = data.pop("service_id", None) or "global"
+    data["is_draft"] = bool(item.get("is_draft", False))
     return JSONResponse(status_code=200, content={"status": "success", "config": data})
 
 
@@ -213,13 +216,14 @@ def create_config(req: ConfigCreateRequest) -> JSONResponse:
     ctype = req.type
     name = req.name
     data = req.data
+    is_draft = req.is_draft
     if not _service_exists(service):
         return JSONResponse(status_code=404, content={"status": "error", "message": "Service not found"})
 
     error = get_db().upsert_custom_config(
         ctype,
         name,
-        {"service_id": service, "type": ctype, "name": name, "data": data, "method": "api"},
+        {"service_id": service, "type": ctype, "name": name, "data": data, "method": "api", "is_draft": is_draft},
         service_id=service,
         new=True,
     )
@@ -249,6 +253,7 @@ def update_config(service: str, config_type: str, name: str, req: ConfigUpdateRe
     type_new = req.type if req.type is not None else current.get("type")
     name_new = req.name if req.name is not None else current.get("name")
     data_new = req.data if req.data is not None else _decode_data(current.get("data"))
+    is_draft_new = req.is_draft if req.is_draft is not None else current.get("is_draft", False)
 
     # Disallow renaming (changing the name) for template-derived configs; content edits are allowed
     if current.get("template") and name_new != current.get("name"):
@@ -261,13 +266,14 @@ def update_config(service: str, config_type: str, name: str, req: ConfigUpdateRe
         and current.get("name") == name_new
         and current.get("service_id") == service_new
         and _decode_data(current.get("data")) == data_new
+        and bool(current.get("is_draft", False)) == bool(is_draft_new)
     ):
         return JSONResponse(status_code=400, content={"status": "error", "message": "No values were changed"})
 
     error = db.upsert_custom_config(
         ctype_orig,
         name_orig,
-        {"service_id": service_new, "type": type_new, "name": name_new, "data": data_new, "method": "api"},
+        {"service_id": service_new, "type": type_new, "name": name_new, "data": data_new, "method": "api", "is_draft": is_draft_new},
         service_id=s_orig,
     )
     if error:
@@ -285,6 +291,7 @@ async def update_config_upload(
     new_service: Optional[str] = Form(None),
     new_type: Optional[str] = Form(None),
     new_name: Optional[str] = Form(None),
+    new_is_draft: Optional[bool] = Form(None),
 ) -> JSONResponse:
     """Update an existing custom config using an uploaded file.
 
@@ -332,13 +339,26 @@ async def update_config_upload(
     except Exception:
         content = ""
 
-    if current.get("type") == t_new and current.get("name") == n_new and current.get("service_id") == s_new and _decode_data(current.get("data")) == content:
+    if (
+        current.get("type") == t_new
+        and current.get("name") == n_new
+        and current.get("service_id") == s_new
+        and _decode_data(current.get("data")) == content
+        and (new_is_draft is None or bool(current.get("is_draft", False)) == bool(new_is_draft))
+    ):
         return JSONResponse(status_code=400, content={"status": "error", "message": "No values were changed"})
 
     error = db.upsert_custom_config(
         ctype_orig,
         name_orig,
-        {"service_id": s_new, "type": t_new, "name": n_new, "data": content, "method": "api"},
+        {
+            "service_id": s_new,
+            "type": t_new,
+            "name": n_new,
+            "data": content,
+            "method": "api",
+            "is_draft": bool(new_is_draft) if new_is_draft is not None else current.get("is_draft", False),
+        },
         service_id=s_orig,
     )
     if error:

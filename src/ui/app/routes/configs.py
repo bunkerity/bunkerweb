@@ -1,7 +1,7 @@
 from json import JSONDecodeError, loads
 from re import match
 from time import time
-from typing import Dict, Literal, Optional
+from typing import Dict, List, Literal, Optional
 
 from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
@@ -46,6 +46,122 @@ def configs_page():
         db_templates=" ".join([template for template in DB.get_templates() if template != "ui"]),
         config_service=service,
         config_type=config_type,
+    )
+
+
+@configs.route("/configs/convert", methods=["POST"])
+@login_required
+def configs_convert():
+    if DB.readonly:
+        return handle_error("Database is in read-only mode", "configs")
+
+    verify_data_in_form(
+        data={"configs": None},
+        err_message="Missing configs parameter on /configs/convert.",
+        redirect_url="configs",
+        next=True,
+    )
+    verify_data_in_form(
+        data={"convert_to": None},
+        err_message="Missing convert_to parameter on /configs/convert.",
+        redirect_url="configs",
+        next=True,
+    )
+
+    raw_configs = request.form["configs"]
+    if not raw_configs:
+        return handle_error("No configs selected.", "configs", True)
+    try:
+        configs = loads(raw_configs)
+    except JSONDecodeError:
+        return handle_error("Invalid configs parameter on /configs/convert.", "configs", True)
+
+    convert_to = request.form["convert_to"]
+    if convert_to not in ("online", "draft"):
+        return handle_error("Invalid convert_to parameter.", "configs", True)
+    DATA.load_from_file()
+
+    def convert_configs(configs: List[Dict[str, str]], convert_to: str):
+        wait_applying()
+
+        db_configs = DB.get_custom_configs(with_drafts=True)
+        db_config_map = {(config.get("service_id"), config["type"], config["name"]): config for config in db_configs}
+
+        configs_to_convert = set()
+        non_ui_configs = set()
+        non_convertible_configs = set()
+        missing_configs = set()
+
+        for config in configs:
+            service_id = config.get("service") or None
+            service_id = None if service_id in ("global", "") else service_id
+            config_type = config.get("type", "").strip().replace("-", "_").lower()
+            name = config.get("name")
+            key = (service_id, config_type, name)
+            db_config = db_config_map.get(key)
+            config_label = f"{config_type}/{name}{f' for service {service_id}' if service_id else ''}"
+            if not db_config:
+                missing_configs.add(config_label)
+                continue
+            if db_config.get("template") or db_config.get("method") != "ui":
+                non_ui_configs.add(config_label)
+                continue
+            if db_config.get("is_draft", False) == (convert_to == "draft"):
+                non_convertible_configs.add(config_label)
+                continue
+            configs_to_convert.add(key)
+
+        for non_ui_config in non_ui_configs:
+            DATA["TO_FLASH"].append({"content": f"Custom config {non_ui_config} is not a UI custom config and will not be converted.", "type": "error"})
+
+        for non_convertible_config in non_convertible_configs:
+            DATA["TO_FLASH"].append(
+                {"content": f"Custom config {non_convertible_config} is already a {convert_to} config and will not be converted.", "type": "error"}
+            )
+
+        for missing_config in missing_configs:
+            DATA["TO_FLASH"].append({"content": f"Custom config {missing_config} could not be found.", "type": "error"})
+
+        if not configs_to_convert:
+            DATA["TO_FLASH"].append(
+                {"content": "All selected custom configs could not be found, are not UI custom configs or are already converted.", "type": "error"}
+            )
+            DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+            return
+
+        for key in configs_to_convert:
+            db_config = db_config_map[key]
+            error = DB.upsert_custom_config(
+                db_config["type"],
+                db_config["name"],
+                {
+                    "service_id": db_config.get("service_id"),
+                    "type": db_config["type"],
+                    "name": db_config["name"],
+                    "data": db_config["data"],
+                    "method": db_config["method"],
+                    "is_draft": convert_to == "draft",
+                },
+                service_id=db_config.get("service_id"),
+            )
+            if error:
+                DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {error}", "type": "error"})
+                DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+                return
+
+        converted_labels = [f"{config[1]}/{config[2]}{f' for service {config[0]}' if config[0] else ''}" for config in configs_to_convert]
+        DATA["TO_FLASH"].append({"content": f"Converted to \"{convert_to.title()}\" configs: {', '.join(converted_labels)}", "type": "success"})
+        DATA["RELOADING"] = False
+
+    DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
+    CONFIG_TASKS_EXECUTOR.submit(convert_configs, configs, convert_to)
+
+    return redirect(
+        url_for(
+            "loading",
+            next=url_for("configs.configs_page"),
+            message=f"Converting config{'s' if len(configs) > 1 else ''} to {convert_to}",
+        )
     )
 
 
@@ -173,6 +289,7 @@ def configs_new():
             next=True,
         )
         config_value = request.form["value"].replace("\r\n", "\n").strip()
+        is_draft = request.form.get("is_draft", "no") == "yes"
         DATA.load_from_file()
 
         def create_config(
@@ -182,6 +299,7 @@ def configs_new():
             ],
             config_name: str,
             config_value: str,
+            is_draft: bool,
         ):
             wait_applying()
             config_type = config_type.lower()
@@ -191,6 +309,7 @@ def configs_new():
                 "name": config_name,
                 "data": config_value,
                 "method": "ui",
+                "is_draft": is_draft,
             }
             if service != "global":
                 new_config["service_id"] = service
@@ -217,7 +336,7 @@ def configs_new():
             DATA["RELOADING"] = False
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        CONFIG_TASKS_EXECUTOR.submit(create_config, service if service != "global" else None, config_type, config_name, config_value)
+        CONFIG_TASKS_EXECUTOR.submit(create_config, service if service != "global" else None, config_type, config_name, config_value, is_draft)
 
         return redirect(
             url_for(
@@ -231,11 +350,14 @@ def configs_new():
     config_service = ""
     config_type = ""
     config_name = ""
+    is_draft = "no"
 
     if clone:
         config_service, config_type, config_name = clone.split("/")
         db_custom_config = DB.get_custom_config(config_type, config_name, service_id=config_service if config_service != "global" else None, with_data=True)
         clone = db_custom_config.get("data", b"").decode("utf-8")
+        is_draft = "yes" if db_custom_config.get("is_draft") else "no"
+
     return render_template(
         "config_edit.html",
         config_types=CONFIG_TYPES,
@@ -243,6 +365,7 @@ def configs_new():
         config_service=config_service,
         type=config_type.upper(),
         name=config_name,
+        is_draft=is_draft,
         services=BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split(" "),
     )
 
@@ -257,6 +380,7 @@ def configs_edit(service: str, config_type: str, name: str):
     db_config = DB.get_custom_config(config_type, name, service_id=service, with_data=True)
     if not db_config:
         return handle_error(f"Config {config_type}/{name}{' for service ' + service if service else ''} does not exist.", "configs", True)
+    is_draft = "yes" if db_config.get("is_draft") else "no"
 
     if request.method == "POST":
         if DB.readonly:
@@ -317,14 +441,17 @@ def configs_edit(service: str, config_type: str, name: str):
             next=True,
         )
         config_value = request.form["value"].replace("\r\n", "\n").strip()
+        new_is_draft = request.form.get("is_draft", "no") == "yes"
         DATA.load_from_file()
 
-        if (
+        no_changes = (
             db_config["type"] == new_type
             and db_config["name"] == new_name
             and db_config["service_id"] == new_service
             and db_config["data"].decode("utf-8") == config_value
-        ):
+            and db_config.get("is_draft", False) == new_is_draft
+        )
+        if no_changes:
             return handle_error("No values were changed.", "configs", True)
 
         error = DB.upsert_custom_config(
@@ -336,6 +463,7 @@ def configs_edit(service: str, config_type: str, name: str):
                 "name": new_name,
                 "data": config_value,
                 "method": "ui",
+                "is_draft": new_is_draft,
             },
             service_id=service,
         )
@@ -362,5 +490,6 @@ def configs_edit(service: str, config_type: str, name: str):
         name=db_config["name"],
         config_method=db_config["method"],
         config_template=db_config.get("template"),
+        is_draft=is_draft,
         services=BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split(" "),
     )

@@ -4,9 +4,9 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --strip-extras requirements.in
 #
-acme==5.1.0 \
-    --hash=sha256:7b97820857d9baffed98bca50ab82bb6a636e447865d7a013a7bdd7972f03cda \
-    --hash=sha256:80e9c315d82302bb97279f4516ff31230d29195ab9d4a6c9411ceec20481b61e
+acme==5.2.1 \
+    --hash=sha256:3d71d442a02112fbcf58e4760e8b7b409d37586dccaa76416251a774facd7845 \
+    --hash=sha256:5f905542b85a75a767dfb540ccfa78b9c758c6619338651755347ca7dd22a1fd
     # via
     #   certbot
     #   certbot-dns-bunny
@@ -35,17 +35,17 @@ attrs==25.4.0 \
     --hash=sha256:16d5969b87f0859ef33a48b35d55ac1be6e42ae49d5e853b597db70c35c57e11 \
     --hash=sha256:adcf7e2a1fb3b36ac48d97835bb6d8ade15b8dcce26aba8bf1d14847b57a3373
     # via jsonlines
-beautifulsoup4==4.14.2 \
-    --hash=sha256:2a98ab9f944a11acee9cc848508ec28d9228abfd522ef0fad6a02a72e0ded69e \
-    --hash=sha256:5ef6fa3a8cbece8488d66985560f97ed091e22bbc4e9c2338508a9d5de6d4515
+beautifulsoup4==4.14.3 \
+    --hash=sha256:0918bfe44902e6ad8d57732ba310582e98da931428d231a5ecb9e7c703a735bb \
+    --hash=sha256:6292b1c5186d356bba669ef9f7f051757099565ad9ada5dd630bd9de5fa7fb86
     # via dns-lexicon
-boto3==1.41.1 \
-    --hash=sha256:05009dadcb0c63a2a4a11780f615362a811aa85e7a6950f2793ecf8055fcd1f2 \
-    --hash=sha256:fdee48cff828cfe0fb66295ae4d5f47736ee35f11e1de6be6c6dcd910f0810a4
+boto3==1.42.2 \
+    --hash=sha256:2b403f503bfe8486fd273e41f0b5a033d0e8dad5d94c5a5c0669e92272bd4f17 \
+    --hash=sha256:e93c55fecfecc6f05de604288d216a49b06a3c2c53421848ca4afad55f0614b7
     # via certbot-dns-route53
-botocore==1.41.1 \
-    --hash=sha256:0db40b7dbddef56fe8cfa06b5eda73b327786db9d64c09c3a616fc9b5548120d \
-    --hash=sha256:e98095492ef8f18d0d6a02ba87d9135c663d4627322e049228143b3a4ef4c2a3
+botocore==1.42.2 \
+    --hash=sha256:3dbeba76168764219cbe392aa67cbc9265cfa05b09970ed5f2e0c786b8ac5010 \
+    --hash=sha256:8bb3f0ce39c6a7f63b404a2632ab1a5189187b27317c7b97fe45494677633b5d
     # via
     #   boto3
     #   s3transfer
@@ -53,9 +53,9 @@ cachetools==6.2.2 \
     --hash=sha256:6c09c98183bf58560c97b2abfcedcbaf6a896a490f534b031b661d3723b45ace \
     --hash=sha256:8e6d266b25e539df852251cfd6f990b4bc3a141db73b939058d809ebd2590fc6
     # via google-auth
-certbot==5.1.0 \
-    --hash=sha256:9f1aa341af342c676cd356ca082a8fa15bb1edcbb7ced09a975224427e5ec9c6 \
-    --hash=sha256:d652a598f67af78ecf122860e85cd2e9c19a2bbe79a71775eccf6e8d642a4fca
+certbot==5.2.1 \
+    --hash=sha256:5faed67634a3f8a62782655b5f739161804fc9999577b263ea7dd76eba62f406 \
+    --hash=sha256:fb494826590904dd2eb0883b83822d0437a3449bd45af87254489d0a9c8a2f67
     # via
     #   -r requirements.in
     #   certbot-dns-bunny
@@ -85,44 +85,44 @@ certbot-dns-bunny==3.0.0 \
     --hash=sha256:507fe45c3aa399c93c30fd68b06ba6e5646bb56e1d454a7f1ffac8c8677e5a21 \
     --hash=sha256:e58e450747e79fd9dad6cdf21d3685b23e7e3d2fea65c16aca3a4dfd8cd31397
     # via -r requirements.in
-certbot-dns-cloudflare==5.1.0 \
-    --hash=sha256:50d02c9388880f80fb5781e5e737d6598fca698abc2b57707a437c5eaa0b3c71 \
-    --hash=sha256:6fea3d5e2c3db018f83bc074315a48588fb680c900f7fef3349eae6a2cfc4c6c
+certbot-dns-cloudflare==5.2.1 \
+    --hash=sha256:3fa4789c3002e1ff6f1c869149137cb41597093761b197b4b1b9ff71c1b2cf16 \
+    --hash=sha256:914994cd4098cc4798589c946f9e96c472d4ab3810d9d52c5e15fb980d825bb2
     # via -r requirements.in
 certbot-dns-desec==1.3.2 \
     --hash=sha256:3b7aed97b808383874da4f8c3668d4142002c870d8e26cda3f7feb2a319a0964 \
     --hash=sha256:7dec89001609abbc9fe9bf67b9ccb893c6de9fe061c3530fa176b4cc00ac52bb
     # via -r requirements.in
-certbot-dns-digitalocean==5.1.0 \
-    --hash=sha256:2c0b90029bae068bb2a8aa20e1003c9ba993fc68c3c13e8510f67b7147a384b7 \
-    --hash=sha256:e624cccf7e8d6285c6a8d4206cf9b646b321b9be7677ec0cb4ce8e09bad0b3a9
+certbot-dns-digitalocean==5.2.1 \
+    --hash=sha256:1760856def8460fa47e08b2baa17e4514809869298952a128c61cd3472f1115d \
+    --hash=sha256:676eb40bf626dd14e306687fdfd3688ae4b36daf738f8c1383c10d9452752822
     # via -r requirements.in
-certbot-dns-dnsimple==5.1.0 \
-    --hash=sha256:711ca820227d766b3c69c02f6ba137b6f7653029f9b770225081f6728a48f00d \
-    --hash=sha256:e99e328d40f2153eef4b0312419e0ff074e2c7c637a7d48645982b2adac7d5ef
+certbot-dns-dnsimple==5.2.1 \
+    --hash=sha256:37dc1ff7d49a5267d724ca0b204baa10cfeb4b7851caddc05250a9e2cb50a453 \
+    --hash=sha256:66379c00a5ab832d67ef872aea8f7e49fe7bb22a032dfd3e4779d5feeef0a91a
     # via -r requirements.in
-certbot-dns-dnsmadeeasy==5.1.0 \
-    --hash=sha256:2dbd54b3b085a9bbcf370358b957d21b7f2ddc66dd920ca0544fe4af2c4fa315 \
-    --hash=sha256:edca329f00a0551257b6ef741cad1f20f7f7d017ff01421eb235ec158e44eccc
+certbot-dns-dnsmadeeasy==5.2.1 \
+    --hash=sha256:4edde6f2db9b2c90e13d9b7b9f9edd8362ddf13db3ac3f34ba70ed5b48fee442 \
+    --hash=sha256:bd43956ea7499462783be5cb2541fc9df0ad6b5dc695db5051488bb8fa339b6b
     # via -r requirements.in
 certbot-dns-domainoffensive==2.0.0 \
     --hash=sha256:bfe7cb33eee6bc48e62437c811d0605cf974f723e211ac27fc396615ff5a2a05 \
     --hash=sha256:e2da1d4f9bd46456578c15f3a30ac4f767871a7a671c6c0d25efd6502670b0ff
     # via -r requirements.in
-certbot-dns-duckdns==1.7.0 \
-    --hash=sha256:2f7efe5803354fca1f9c90e32b73fad42bd7cc4cae8f5948f73b12799d054bfe \
-    --hash=sha256:c019961bdc721d6cb1d67f3bac272d96d0b2ad8ae5c06714a2ffc681a9f25054
+certbot-dns-duckdns==1.7.1 \
+    --hash=sha256:223ab65600cbdd8b968b0559e45d315fe710912a863dfdcdc55d1fca7975eed7 \
+    --hash=sha256:c7e2ff7f2cdb5b46fa52f5753525c168ce107ef44c67f8097d6859f5165bf962
     # via -r requirements.in
 certbot-dns-dynu==0.0.6.post2502111739272536 \
     --hash=sha256:3bca6343a5e962bdc666301228dcc73c6b3ebef9f2921d8afe1a56f1450d9229
     # via -r requirements.in
-certbot-dns-gehirn==5.1.0 \
-    --hash=sha256:b4cfa49151118e28bb46c65207b5dc91a127053d8f28e39822417f9fcef6ff79 \
-    --hash=sha256:fb330d9065b01146d78fd2ac932afef08317bdf943f3c16ad80dc9abc18f945f
+certbot-dns-gehirn==5.2.1 \
+    --hash=sha256:ab7a26a6e1c58a93138c51d0cbaaa399148537b3724345a971718dce7a1ab00c \
+    --hash=sha256:aef63217c63a6138e342b4ef656f90e48aa682851948db5d15cc3f183346be73
     # via -r requirements.in
-certbot-dns-google==5.1.0 \
-    --hash=sha256:4a4af6d2889ea5204cb646b5e4dcd5401193664ee90aae8079ce8ab92410f519 \
-    --hash=sha256:d339312c3c6373037e2bc7cb54186a478f5a6a3dcb470a665119f8903291cdad
+certbot-dns-google==5.2.1 \
+    --hash=sha256:dcbcdb2334d04988520470484e4fc5602f11d0aaa84c983c6de10e41b73dc20a \
+    --hash=sha256:e767fd7592f66d6cab46bf2eeea271f5f03babe7af4f129b846f98a759d48e6f
     # via -r requirements.in
 certbot-dns-infomaniak==0.2.4 \
     --hash=sha256:45c2c8c49b7346dc66c7b59bfed46b07543e963d4bb028614cefd7337b171462 \
@@ -132,41 +132,41 @@ certbot-dns-ionos==2024.11.9 \
     --hash=sha256:333be82806ae28a02c979baa8eb0bbc4862ad26549f60685468fadbf1fe3609e \
     --hash=sha256:619aa7965272aef93d080094e0b7b79da0598d89567511cb683d44db6fa8c803
     # via -r requirements.in
-certbot-dns-linode==5.1.0 \
-    --hash=sha256:339c14b38f551d62496b3b727e64d97a1ca6f451b1ad4203be71a1c72e042c42 \
-    --hash=sha256:b0e93ad84882ab9c0bb023f036c4ba232b69be82f89ea7b0ae5e7beb09c37258
+certbot-dns-linode==5.2.1 \
+    --hash=sha256:14c87c08d6173149307963119735335caa4d991af9b849e4d209682ddeadcc4c \
+    --hash=sha256:9150ea7a843a28a37077803701102b36ba555d379ff248b4e5e3aed52c0ef179
     # via -r requirements.in
-certbot-dns-luadns==5.1.0 \
-    --hash=sha256:396824219cfc9fdb20d94b9f86a08e4386cc7fa6a064902a5ac4def82f6aef39 \
-    --hash=sha256:d6cab3d0c5e7133fc7178babf310f46f2638ca9d99746d575bac38eb0ff02af0
+certbot-dns-luadns==5.2.1 \
+    --hash=sha256:cc9ee1a27bdbd9421acb4c5b5e1aec818fd458cac69ac89e5bd2525e83b1ab9f \
+    --hash=sha256:e93d20de8ade1a6fea98e7f51edfd3df5e829b987b3e1ab04912d78e7e78634c
     # via -r requirements.in
 certbot-dns-njalla==2.0.2 \
     --hash=sha256:668f91f3027edd4c4cbca99095fd5ec66d4ccefcb4b9366367873e25e624e1bd \
     --hash=sha256:b771c6e55b6ecdaadd7a5dd88d3798aa39290414a8d2f916c89b8cb52b29eea8
     # via -r requirements.in
-certbot-dns-nsone==5.1.0 \
-    --hash=sha256:b78b39895cf63ea0d8ea33bd0753be8f549c57c14674127372f1d48cc8456ff0 \
-    --hash=sha256:eee65410df91a7358d4ee0f14cb71b050c3e8f73d020c4113f761b8247e45038
+certbot-dns-nsone==5.2.1 \
+    --hash=sha256:b6303637b11e9d9496ff53cd294f7219447ef60cfe91feb95f0eaa973c08ce2d \
+    --hash=sha256:f3a2d5fea1b49e4d26a214bec02d85b3c91aeb7a6cecbdae5b22b9c6a79eda39
     # via -r requirements.in
-certbot-dns-ovh==5.1.0 \
-    --hash=sha256:9a97ea3a158f2c0239b3b7fb1443cb464fafcbba4321cce194edc13a0cf45264 \
-    --hash=sha256:f3cb74f7de6326de87216e0ae816d047579a9bd80c5584d2aeb27c9e5a244ce4
+certbot-dns-ovh==5.2.1 \
+    --hash=sha256:91d0afc28cacedea6bf76e295997505e79ec02e78521a8ca87ba95145cf950ee \
+    --hash=sha256:9a629ec65e48b0b73988fbff401399e95768a9e1085dbfcda64edfbe63d0ad85
     # via -r requirements.in
 certbot-dns-pdns==0.1.1 \
     --hash=sha256:8e0bf82245323d33ca1c889c9facc24349c5f3ffc951136fe8bf88e1c82060fe \
     --hash=sha256:d059d1c1cc21eab259a24ee69c1d9d8fb077fd90f58cf8de904b0f5bd576986f
     # via -r requirements.in
-certbot-dns-rfc2136==5.1.0 \
-    --hash=sha256:06c6a1c4622fa906ada3a60ea499627fd6f2d84dfa611407392f818e63fa0956 \
-    --hash=sha256:f0afc9bc63ae8468813e5816eea132ecc92a690e18c5afb09c4802f85e2ae505
+certbot-dns-rfc2136==5.2.1 \
+    --hash=sha256:028687ba91328a4f1eda08342eecc9da824762487019fd44f64f97be6d2445b2 \
+    --hash=sha256:4e015d4690cb96e4b5fdeea844a8293f9f9b05513c0d8530b426f0aa855f481c
     # via -r requirements.in
-certbot-dns-route53==5.1.0 \
-    --hash=sha256:5d325c702077bc483717f2f989b6014b258032b28009b8ed9062f9c01d693282 \
-    --hash=sha256:64c0594b28cc8544559f5981cd3ea514c09f0911c54d045363573d2146247eba
+certbot-dns-route53==5.2.1 \
+    --hash=sha256:37536fb5ac544f7339454a61922ff294f56bcce1a9533b4d63907f75d4e74019 \
+    --hash=sha256:68483a5302328ae5064c6b724f0e54ea3e8af3e8a6be294b8757d362b837a3ce
     # via -r requirements.in
-certbot-dns-sakuracloud==5.1.0 \
-    --hash=sha256:4b0398d26771dbc89c31e457c4f62dc31a255a0969747f384c2a33aad2e8056a \
-    --hash=sha256:727034bd65f2f7c716d8a1164b7ac79fd7569c2da23dfd2133caf97fdc1fd52e
+certbot-dns-sakuracloud==5.2.1 \
+    --hash=sha256:56066874a7ea9279d61eec8b7a709a54d61d814a5e4134aaefc293671d04bcbc \
+    --hash=sha256:81914b7b09a4681dcee5f3759a70d4099946e5dd8bc5e379b02b517329cbc125
     # via -r requirements.in
 certbot-dns-scaleway==0.0.7 \
     --hash=sha256:999dda5b8689277facb77e1757b8a6b207baeecc0ded0c27aea2c51331affc92 \
@@ -667,9 +667,9 @@ pycparser==2.23 \
     --hash=sha256:78816d4f24add8f10a06d6f05b4d424ad9e96cfebf68a4ddc99c65c0720d00c2 \
     --hash=sha256:e5c6e8d3fbad53479cab09ac03729e0a9faf2bee3db8208a550daf5af81a5934
     # via cffi
-pydantic==2.12.4 \
-    --hash=sha256:0f8cb9555000a4b5b617f66bfd2566264c4984b27589d3b845685983e8ea85ac \
-    --hash=sha256:92d3d202a745d46f9be6df459ac5a064fdaa3c1c4cd8adcfa332ccf3c05f871e
+pydantic==2.12.5 \
+    --hash=sha256:4d351024c75c0f085a9febbb665ce8c0c6ec5d30e903bdb6394b7ede26aebb49 \
+    --hash=sha256:e561593fccf61e8a20fc46dfc2dfe075b8be7d0188df33f221ad1f0139180f9d
     # via -r requirements.in
 pydantic-core==2.41.5 \
     --hash=sha256:0177272f88ab8312479336e1d777f6b124537d47f2123f89cb37e0accea97f90 \
@@ -937,13 +937,19 @@ rsa==4.9.1 \
     --hash=sha256:68635866661c6836b8d39430f97a996acbd61bfa49406748ea243539fe239762 \
     --hash=sha256:e7bdbfdb5497da4c07dfd35530e1a902659db6ff241e39d9953cad06ebd0ae75
     # via google-auth
-s3transfer==0.15.0 \
-    --hash=sha256:6f8bf5caa31a0865c4081186689db1b2534cef721d104eb26101de4b9d6a5852 \
-    --hash=sha256:d36fac8d0e3603eff9b5bfa4282c7ce6feb0301a633566153cbd0b93d11d8379
+s3transfer==0.16.0 \
+    --hash=sha256:18e25d66fed509e3868dc1572b3f427ff947dd2c56f844a5bf09481ad3f3b2fe \
+    --hash=sha256:8e990f13268025792229cd52fa10cb7163744bf56e719e0b9cb925ab79abf920
     # via boto3
 schedule==1.2.2 \
     --hash=sha256:15fe9c75fe5fd9b9627f3f19cc0ef1420508f9f9a46f45cd0769ef75ede5f0b7 \
     --hash=sha256:5bef4a2a0183abf44046ae0d164cadcac21b1db011bdd8102e4a0c1e91e06a7d
+    # via certbot-dns-domainoffensive
+
+# The following packages are considered to be unsafe in a requirements file:
+setuptools==80.9.0 \
+    --hash=sha256:062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922 \
+    --hash=sha256:f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c
     # via -r requirements.in
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
@@ -1017,12 +1023,6 @@ zope-interface==8.1.1 \
     --hash=sha256:efef80ddec4d7d99618ef71bc93b88859248075ca2e1ae1c78636654d3d55533 \
     --hash=sha256:fc65f5633d5a9583ee8d88d1f5de6b46cd42c62e47757cfe86be36fb7c8c4c9b \
     --hash=sha256:ff8a92dc8c8a2c605074e464984e25b9b5a8ac9b2a0238dd73a0f374df59a77e
-    # via certbot-dns-domainoffensive
-
-# The following packages are considered to be unsafe in a requirements file:
-setuptools==80.9.0 \
-    --hash=sha256:062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922 \
-    --hash=sha256:f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c
     # via
     #   certbot-dns-bunny
     #   certbot-dns-desec

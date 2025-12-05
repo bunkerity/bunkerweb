@@ -77,6 +77,8 @@
     "close": "关闭",
     "columns": "列",
     "convert_services": "转换服务",
+    "convert_configs": "转换配置",
+    "convert_configs_to": "转换为 {{state}}",
     "copy": "复制",
     "copy_codes": "复制代码",
     "copy_raw": "复制原始数据",
@@ -748,6 +750,8 @@
       "confirm_configs_deletion_alert": "您确定要删除选定的自定义配置吗？",
       "confirm_configs_deletion_alert_plural": "您确定要删除选定的自定义配置吗？",
       "confirm_conversion_confirmation": "您确定要转换选定的服务吗？",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "确定将选定的自定义配置转换为 {{state}} 吗？",
       "confirm_next_step": "您确定要继续下一步吗？",
       "confirm_plugin_deletion": "您确定要删除选定的插件吗？",
       "confirm_plugin_deletion_plural": "您确定要删除选定的插件吗？",
@@ -1200,7 +1204,8 @@
       "type": "类型",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "版本"
+      "version": "版本",
+      "status": "状态"
     }
   },
   "template": {
@@ -1394,6 +1399,8 @@
       "clone_template": "克隆模板 {{template}}",
       "convert_service_to_draft": "将服务 {{name}} 转换为草稿",
       "convert_service_to_online": "将服务 {{name}} 转换为在线",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "delete_config": "删除自定义配置 {{name}}",
       "delete_file": "删除缓存文件：{{filename}}",
       "delete_instance": "删除实例 {{hostname}}",
@@ -1550,7 +1557,8 @@
         "select_all": "选择所有自定义配置",
         "service": "与自定义配置关联的服务（或全局）",
         "template": "指示自定义配置是否源自模板",
-        "type": "自定义配置的类型或上下文（例如，HTTP, MODSEC）"
+        "type": "自定义配置的类型或上下文（例如，HTTP, MODSEC）",
+        "status": "自定义配置的草稿状态"
       },
       "instances": {
         "actions": "此实例可用的操作",
