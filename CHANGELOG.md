@@ -8,6 +8,7 @@
 - [FEATURE] Refactor `Auth Basic` plugin so Lua now hashes credentials with salted scrypt (CSPRNG-only) and verifies them in constant time.
 - [FEATURE] Updated `Bad Behavior` plugin to automatically apply bans made by the default server globally across all services, enhancing security by ensuring that IPs exhibiting bad behavior are consistently blocked.
 - [FEATURE] Add the possibility to have **draft** custom configurations that are not applied to the service until they are explicitly published. Draft custom configurations are indicated in the web UI and can be toggled between draft and online status.
+- [FEATURE] Add new `SSL_SESSION_CACHE_SIZE` setting to the SSL plugin to allow configuration of the size of the SSL session cache (e.g., `10m`, `512k`). Setting it to `off` or `none` disables session caching (default is `10m`).
 - [BUGFIX] Fix issues with the Ingress controller regarding reverse proxy settings when using multiple paths per rule and a template by adjusting the indexing logic to be configurable via the new `KUBERNETES_REVERSE_PROXY_SUFFIX_START` setting (default is `1` to keep backward compatibility)
 - [BUGFIX] Escape percentage signs in `DATABASE_URI` for Alembic when using the SQLAlchemy URL configuration to prevent formatting errors during migrations
 - [UI] Enhance service configuration handling during edits and renames to ensure consistency and prevent data loss

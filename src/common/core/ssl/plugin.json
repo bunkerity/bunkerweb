@@ -51,6 +51,15 @@
       "label": "Custom SSL Ciphers",
       "regex": "^(?!:)(:?[A-Za-z0-9-]+)*$",
       "type": "text"
+    },
+    "SSL_SESSION_CACHE_SIZE": {
+      "context": "multisite",
+      "default": "10m",
+      "help": "Size of the SSL session cache (e.g., '10m' for 10 megabytes, '512k' for 512 kilobytes). Set to 'off' or 'none' to disable session caching.",
+      "id": "ssl-session-cache-size",
+      "label": "SSL Session Cache Size",
+      "regex": "^(off|none|[1-9][0-9]*[kKmMgG]?)$",
+      "type": "text"
     }
   }
 }
