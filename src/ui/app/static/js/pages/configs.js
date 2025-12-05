@@ -6,6 +6,7 @@ $(document).ready(function () {
       : (key, fallback) => fallback || key; // Fallback
 
   var actionLock = false;
+  let toastNum = 0;
   const configNumber = parseInt($("#configs_number").val());
   const services = ($("#services").val() || "").trim().split(" ");
   const templates = ($("#templates").val() || "").trim().split(" ");
@@ -32,7 +33,7 @@ $(document).ready(function () {
         "template.none",
         "no template",
       )}</span>`,
-      value: (rowData) => rowData[6].includes("template.none"),
+      value: (rowData) => rowData[7].includes("template.none"),
     },
   ];
 
@@ -48,17 +49,19 @@ $(document).ready(function () {
     if (template) {
       templatesSearchPanesOptions.push({
         label: template,
-        value: (rowData) => $(rowData[6]).text().trim() === template,
+        value: (rowData) => $(rowData[7]).text().trim() === template,
       });
     }
   });
 
-  const setupDeletionModal = (configs) => {
-    const delete_modal = $("#modal-delete-configs");
-    const $modalBody = $("#selected-configs-delete");
-    $modalBody.empty(); // Clear previous content
+  const getConfigId = (config) =>
+    `${(config.type || "").toLowerCase()}-${(config.service || "global").replaceAll(".", "_")}-${
+      config.name
+    }`;
 
-    // Create and append the header row with translated headers
+  const buildConfigsList = (configs, $container) => {
+    $container.empty();
+
     const $header = $(`
       <ul class="list-group list-group-horizontal w-100">
         <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
@@ -82,14 +85,12 @@ $(document).ready(function () {
           )}</div>
         </li>
       </ul>`);
-    $modalBody.append($header);
+    $container.append($header);
 
     configs.forEach((config) => {
       const list = $(
         `<ul class="list-group list-group-horizontal w-100"></ul>`,
       );
-
-      // Create the list item using template literals
       const listItem = $(`<li class="list-group-item" style="flex: 1 1 0;">
           <div class="ms-2 me-auto">
             <div class="fw-bold">${config.name}</div>
@@ -97,11 +98,8 @@ $(document).ready(function () {
         </li>`);
       list.append(listItem);
 
-      const id = `${config.type.toLowerCase()}-${(
-        config.service || "global"
-      ).replaceAll(".", "_")}-${config.name}`;
+      const id = getConfigId(config);
 
-      // Clone the type element and append it to the list item
       const typeClone = $(`#type-${id}`).clone();
       const typeListItem = $(
         `<li class="list-group-item" style="flex: 1 1 0;"></li>`,
@@ -109,7 +107,6 @@ $(document).ready(function () {
       typeListItem.append(typeClone.removeClass("highlight"));
       list.append(typeListItem);
 
-      // Clone the service element and append it to the list item
       const serviceClone = $(`#service-${id}`).clone();
       const serviceListItem = $(
         `<li class="list-group-item" style="flex: 1 1 0;"></li>`,
@@ -119,14 +116,49 @@ $(document).ready(function () {
       serviceClone
         .find('[data-bs-toggle="tooltip"]')
         .tooltip("dispose")
-        .tooltip(); // Reinitialize tooltip
+        .tooltip();
 
-      $modalBody.append(list);
+      $container.append(list);
     });
+  };
+
+  const setupConversionModal = (configs, conversionType = "draft") => {
+    const convertModal = $("#modal-convert-configs");
+    buildConfigsList(configs, $("#selected-configs-convert"));
+
+    const alertText = t(
+      "modal.body.confirm_configs_conversion_to",
+      `Are you sure you want to convert the selected config${
+        configs.length > 1 ? "s" : ""
+      } to ${conversionType}?`,
+      { state: conversionType },
+    );
+    convertModal.find(".alert").text(alertText);
+    const buttonLabel = t(
+      "button.convert_configs_to",
+      `Convert to ${conversionType}`,
+      { state: conversionType },
+    );
+    convertModal.find("button[type=submit]").text(buttonLabel);
+    $("#conversion-type").val(conversionType);
+
+    const configsToSubmit = configs.map((cfg) => ({
+      ...cfg,
+      type: (cfg.type || "").toLowerCase(),
+      service: cfg.service === t("scope.global", "global") ? null : cfg.service,
+    }));
+    $("#selected-configs-input-convert").val(JSON.stringify(configsToSubmit));
+
+    const modalInstance = new bootstrap.Modal(convertModal[0]);
+    modalInstance.show();
+  };
+
+  const setupDeletionModal = (configs) => {
+    const delete_modal = $("#modal-delete-configs");
+    buildConfigsList(configs, $("#selected-configs-delete"));
 
     const modalInstance = new bootstrap.Modal(delete_modal[0]);
 
-    // Update the alert text using i18next
     const alertTextKey =
       configs.length > 1
         ? "modal.body.delete_confirmation_alert_plural"
@@ -143,9 +175,6 @@ $(document).ready(function () {
       );
     modalInstance.show();
 
-    // Prepare data for submission
-    // - Normalize type to lowercase to match backend storage
-    // - Convert translated 'global' label to null
     const configsToSubmit = configs.map((cfg) => ({
       ...cfg,
       type: (cfg.type || "").toLowerCase(),
@@ -160,7 +189,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [3, 4, 5, 6],
+        columns: [3, 4, 5, 6, 7],
       },
     },
     topStart: {},
@@ -279,6 +308,16 @@ $(document).ready(function () {
       className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [
         {
+          extend: "convert_configs",
+          text: '<span class="tf-icons bx bx-globe bx-18px me-2"></span>Convert to<span class="d-none d-md-inline"> online</span>',
+          attr: { "data-convert-to": "online" },
+        },
+        {
+          extend: "convert_configs",
+          text: '<span class="tf-icons bx bx-file-blank bx-18px me-2"></span>Convert to<span class="d-none d-md-inline"> draft</span>',
+          attr: { "data-convert-to": "draft" },
+        },
+        {
           extend: "delete_configs",
           className: "text-danger",
         },
@@ -294,10 +333,16 @@ $(document).ready(function () {
     }
   });
 
-  $("#modal-delete-configs").on("hidden.bs.modal", function () {
-    $("#selected-configs-delete").empty();
-    $("#selected-configs-input-delete").val("");
-  });
+  $("#modal-delete-configs, #modal-convert-configs").on(
+    "hidden.bs.modal",
+    function () {
+      $("#selected-configs-delete, #selected-configs-convert").empty();
+      $("#selected-configs-input-delete, #selected-configs-input-convert").val(
+        "",
+      );
+      $("#conversion-type").val("draft");
+    },
+  );
 
   const getSelectedConfigs = () => {
     const configs = [];
@@ -317,7 +362,10 @@ $(document).ready(function () {
           : $serviceCell.text().trim();
       }
 
-      configs.push({ name: name, type: type, service: service });
+      const normalizedService =
+        service === t("scope.global", "global") ? "global" : service;
+
+      configs.push({ name: name, type: type, service: normalizedService });
     });
     return configs;
   };
@@ -341,6 +389,54 @@ $(document).ready(function () {
         return;
       }
       window.location.href = `${window.location.pathname}/new`;
+    },
+  };
+
+  $.fn.dataTable.ext.buttons.convert_configs = {
+    action: function (e, dt, node, config) {
+      if (isReadOnly) {
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
+        return;
+      }
+      if (actionLock) return;
+      actionLock = true;
+      $(".dt-button-background").click();
+
+      const conversionType =
+        $(node).data("convert-to") ||
+        $(node).text().trim().split(" ").pop().toLowerCase();
+      const configs = getSelectedConfigs();
+      if (configs.length === 0) {
+        actionLock = false;
+        return;
+      }
+
+      const filteredConfigs = configs.filter((cfg) => {
+        const statusValue = $(`#status-${getConfigId(cfg)}`).data("value");
+        return statusValue !== conversionType;
+      });
+
+      if (filteredConfigs.length === 0) {
+        const feedbackToast = $("#feedback-toast")
+          .clone()
+          .attr("id", `feedback-toast-${toastNum++}`)
+          .removeClass("d-none");
+        feedbackToast.find("span").text("Conversion failed");
+        feedbackToast
+          .find("div.toast-body")
+          .text("The selected configs are already in the desired state.");
+        feedbackToast.appendTo("#feedback-toast-container").toast("show");
+        actionLock = false;
+        return;
+      }
+
+      setupConversionModal(filteredConfigs, conversionType);
+      actionLock = false;
     },
   };
 
@@ -376,13 +472,13 @@ $(document).ready(function () {
   const configs_config = {
     tableSelector: "#configs",
     tableName: "configs",
-    columnVisibilityCondition: (column) => column > 2 && column < 8,
+    columnVisibilityCondition: (column) => column > 2 && column < 9,
     dataTableOptions: {
       columnDefs: [
         { orderable: false, className: "dtr-control", targets: 0 },
         { orderable: false, render: DataTable.render.select(), targets: 1 },
         { orderable: false, targets: -1 },
-        { visible: false, targets: 7 },
+        { visible: false, targets: 8 },
         {
           searchPanes: {
             show: true,
@@ -472,11 +568,38 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
+            header: t("searchpane.status", "Status"),
+            combiner: "or",
+            options: [
+              {
+                label: `<span data-i18n="status.online">${t("status.online", "Online")}</span>`,
+                value: function (rowData) {
+                  return (
+                    $(rowData[6]).find("[data-value]").data("value") ===
+                    "online"
+                  );
+                },
+              },
+              {
+                label: `<span data-i18n="status.draft">${t("status.draft", "Draft")}</span>`,
+                value: function (rowData) {
+                  return (
+                    $(rowData[6]).find("[data-value]").data("value") === "draft"
+                  );
+                },
+              },
+            ],
+          },
+          targets: 6,
+        },
+        {
+          searchPanes: {
+            show: true,
             header: t("searchpane.template", "Template"),
             combiner: "or",
             options: templatesSearchPanesOptions,
           },
-          targets: 6,
+          targets: 7,
         },
       ],
       order: [[2, "asc"]],
@@ -591,5 +714,25 @@ $(document).ready(function () {
       service: service === "global" ? null : service,
     };
     setupDeletionModal([config]);
+  });
+
+  $(document).on("click", ".convert-config", function () {
+    if (isReadOnly) {
+      alert(
+        t(
+          "alert.readonly_mode",
+          "This action is not allowed in read-only mode.",
+        ),
+      );
+      return;
+    }
+    const service = $(this).data("config-service");
+    const config = {
+      name: $(this).data("config-name"),
+      type: $(this).data("config-type"),
+      service: service || "global",
+    };
+    const conversionType = $(this).data("value");
+    setupConversionModal([config], conversionType);
   });
 });

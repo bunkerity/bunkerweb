@@ -260,7 +260,7 @@ def services_service_page(service: str):
                         value = value.replace("\r\n", "\n").strip().encode("utf-8")
 
                         new_configs.add(key)
-                        db_custom_config = db_custom_configs.get(f"{service}_{key}", {"data": None, "method": override_method})
+                        db_custom_config = db_custom_configs.get(f"{service}_{key}", {"data": None, "method": override_method, "is_draft": False})
 
                         if not is_editable_method(db_custom_config["method"]) and db_custom_config["template"] != variables.get("USE_TEMPLATE", ""):
                             DATA["TO_FLASH"].append(
@@ -282,6 +282,7 @@ def services_service_page(service: str):
                             "name": conf_match["name"],
                             "data": value,
                             "method": override_method,
+                            "is_draft": db_custom_config.get("is_draft", False),
                         }
 
                 if service != "new":
@@ -309,6 +310,7 @@ def services_service_page(service: str):
                         "name": data["name"],
                         "data": data["data"],
                         "method": data["method"],
+                        "is_draft": data.get("is_draft", False),
                     }
                     if "checksum" in data:
                         db_custom_configs[db_custom_config]["checksum"] = data["checksum"]

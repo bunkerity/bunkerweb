@@ -82,6 +82,8 @@
     "close": "關閉",
     "columns": "欄",
     "convert_services": "轉換服務",
+    "convert_configs": "轉換設定",
+    "convert_configs_to": "轉換為 {{state}}",
     "copy": "複製",
     "copy_codes": "複製代碼",
     "copy_raw": "複製原始資料",
@@ -753,6 +755,8 @@
       "confirm_configs_deletion_alert": "您確定要刪除選定的自訂設定嗎？",
       "confirm_configs_deletion_alert_plural": "您確定要刪除選定的自訂設定嗎？",
       "confirm_conversion_confirmation": "您確定要轉換選定的服務嗎？",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "確定將所選自訂設定轉換為 {{state}} 嗎？",
       "confirm_next_step": "您確定要繼續下一步嗎？",
       "confirm_plugin_deletion": "您確定要刪除選定的外掛程式嗎？",
       "confirm_plugin_deletion_plural": "您確定要刪除選定的外掛程式嗎？",
@@ -1204,7 +1208,8 @@
       "type": "類型",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "版本"
+      "version": "版本",
+      "status": "狀態"
     }
   },
   "template": {
@@ -1397,6 +1402,8 @@
     "button": {
       "convert_service_to_draft": "將服務 {{name}} 轉換為草稿",
       "convert_service_to_online": "將服務 {{name}} 轉換為線上",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "delete_config": "刪除自訂設定 {{name}}",
       "delete_file": "刪除快取檔案：{{filename}}",
       "delete_instance": "刪除執行個體 {{hostname}}",
@@ -1556,7 +1563,8 @@
         "select_all": "選取所有自訂設定",
         "service": "與自訂設定關聯的服務（或全域）",
         "template": "指示自訂設定是否源自範本",
-        "type": "自訂設定的類型或上下文（例如，HTTP, MODSEC）"
+        "type": "自訂設定的類型或上下文（例如，HTTP, MODSEC）",
+        "status": "自訂設定的草稿狀態"
       },
       "instances": {
         "actions": "此執行個體可用的操作",

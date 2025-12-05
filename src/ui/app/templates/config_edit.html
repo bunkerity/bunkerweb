@@ -10,6 +10,11 @@
            name="selected_type"
            value="{{ type if type else "HTTP" }}">
     <input type="hidden"
+           id="config-is-draft"
+           name="is_draft"
+           data-original="{{ is_draft }}"
+           value="{{ is_draft }}">
+    <input type="hidden"
            id="csrf_token"
            name="csrf_token"
            value="{{ csrf_token() }}">
@@ -128,14 +133,30 @@
                           id="config-name-suffix">.conf</span>
                 </div>
             </div>
-            {% set save_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if config_method and config_method != "ui" else '')) %}
-            {% set save_tooltip_options = '{"method": "' ~ config_method ~ '"}' if config_method and config_method != "ui" and not is_readonly else '{}' %}
-            <div {% if not config_template and config_method and config_method != "ui" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="..." data-i18n="{{ save_tooltip_key }}" data-i18n-options='{{ save_tooltip_options }}' {% endif %}>
-                <button type="button"
-                        class="btn btn-sm btn-bw-green save-config{% if not config_template and config_method and config_method != "ui" or is_readonly %} disabled{% endif %}">
-                    <i class="bx bx-save bx-sm"></i>
-                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
-                </button>
+            <div class="d-flex justify-content-center">
+                {% set draft_toggle_disabled = config_name and config_method not in ['ui', 'api'] %}
+                <div {% if draft_toggle_disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if draft_toggle_disabled %}disabled{% endif %}">
+                        <i class="bx bx-sm bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
+                        <span class="d-none d-md-inline">&nbsp;
+                        {% if is_draft == 'yes' %}
+                            <span data-i18n="status.draft">Draft</span>
+                        {% else %}
+                            <span data-i18n="status.online">Online</span>
+                        {% endif %}
+                        </span>
+                    </button>
+                    {% set save_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if config_method and config_method != "ui" else '')) %}
+                    {% set save_tooltip_options = '{"method": "' ~ config_method ~ '"}' if config_method and config_method != "ui" and not is_readonly else '{}' %}
+                </div>
+                <div {% if not config_template and config_method and config_method != "ui" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="..." data-i18n="{{ save_tooltip_key }}" data-i18n-options='{{ save_tooltip_options }}' {% endif %}>
+                    <button type="button"
+                            class="btn btn-sm btn-bw-green px-3 save-config{% if not config_template and config_method and config_method != "ui" or is_readonly %} disabled{% endif %}">
+                        <i class="bx bx-save bx-sm"></i>
+                        <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

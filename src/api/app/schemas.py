@@ -89,6 +89,7 @@ class ConfigCreateRequest(BaseModel):
     type: str = Field(..., description="Config type, e.g., http, server_http, modsec, ...")
     name: str = Field(..., description=r"Config name (^[\\w_-]{1,255}$)")
     data: str = Field(..., description="Config content as UTF-8 string")
+    is_draft: bool = Field(False, description="Mark custom config as draft")
 
     @field_validator("service")
     @classmethod
@@ -118,6 +119,7 @@ class ConfigUpdateRequest(BaseModel):
     type: Optional[str] = Field(None, description="New config type")
     name: Optional[str] = Field(None, description="New config name")
     data: Optional[str] = Field(None, description="New config content as UTF-8 string")
+    is_draft: Optional[bool] = Field(None, description="Update draft flag")
 
     @field_validator("service")
     @classmethod

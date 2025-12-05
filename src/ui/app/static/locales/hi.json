@@ -77,6 +77,8 @@
     "close": "बंद करें",
     "columns": "कॉलम",
     "convert_services": "सेवाएं बदलें",
+    "convert_configs": "कॉन्फ़िग रूपांतरित करें",
+    "convert_configs_to": "{{state}} में रूपांतरित करें",
     "copy": "कॉपी करें",
     "copy_codes": "कोड कॉपी करें",
     "copy_raw": "रॉ डेटा कॉपी करें",
@@ -748,6 +750,8 @@
       "confirm_configs_deletion_alert": "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन हटाना चाहते हैं?",
       "confirm_configs_deletion_alert_plural": "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन हटाना चाहते हैं?",
       "confirm_conversion_confirmation": "क्या आप वाकई चयनित सेवाओं को कनवर्ट करना चाहते हैं?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "क्या आप सुनिश्चित हैं कि चयनित कस्टम कॉन्फ़िगरेशन को {{state}} में रूपांतरित करना चाहते हैं?",
       "confirm_next_step": "क्या आप वाकई अगले चरण पर जाना चाहते हैं?",
       "confirm_plugin_deletion": "क्या आप वाकई चयनित प्लगइन हटाना चाहते हैं?",
       "confirm_plugin_deletion_plural": "क्या आप वाकई चयनित प्लगइन्स हटाना चाहते हैं?",
@@ -1197,7 +1201,8 @@
       "type": "प्रकार",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "संस्करण"
+      "version": "संस्करण",
+      "status": "स्थिति"
     }
   },
   "template": {
@@ -1390,6 +1395,8 @@
     "button": {
       "convert_service_to_draft": "सेवा {{name}} को ड्राफ्ट में बदलें",
       "convert_service_to_online": "सेवा {{name}} को ऑनलाइन में बदलें",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "delete_config": "कस्टम कॉन्फ़िगरेशन {{name}} हटाएं",
       "delete_file": "कैश फ़ाइल हटाएं: {{filename}}",
       "delete_instance": "इंस्टेंस {{hostname}} हटाएं",
@@ -1546,7 +1553,8 @@
         "select_all": "सभी कस्टम कॉन्फ़िगरेशन चुनें",
         "service": "कस्टम कॉन्फ़िगरेशन से जुड़ी सेवा (या वैश्विक)",
         "template": "इंगित करता है कि कस्टम कॉन्फ़िगरेशन एक टेम्पलेट से उत्पन्न हुआ है या नहीं",
-        "type": "कस्टम कॉन्फ़िगरेशन का प्रकार या संदर्भ (उदाहरण के लिए, HTTP, MODSEC)"
+        "type": "कस्टम कॉन्फ़िगरेशन का प्रकार या संदर्भ (उदाहरण के लिए, HTTP, MODSEC)",
+        "status": "कस्टम कॉन्फ़िगरेशन की ड्राफ़्ट स्थिति"
       },
       "instances": {
         "actions": "इस इंस्टेंस के लिए उपलब्ध कार्रवाइयाँ",

@@ -78,6 +78,8 @@
     "close": "Закрыть",
     "columns": "Столбцы",
     "convert_services": "Конвертировать сервисы",
+    "convert_configs": "Преобразовать конфиги",
+    "convert_configs_to": "Преобразовать в {{state}}",
     "copy": "Копировать",
     "copy_codes": "Копировать коды",
     "copy_raw": "Копировать необработанные данные",
@@ -749,6 +751,8 @@
       "confirm_configs_deletion_alert": "Вы уверены, что хотите удалить выбранную пользовательскую конфигурацию?",
       "confirm_configs_deletion_alert_plural": "Вы уверены, что хотите удалить выбранные пользовательские конфигурации?",
       "confirm_conversion_confirmation": "Вы уверены, что хотите конвертировать выбранные сервисы?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "Вы уверены, что хотите преобразовать выбранные пользовательские конфигурации в {{state}}?",
       "confirm_next_step": "Вы уверены, что хотите перейти к следующему шагу?",
       "confirm_plugin_deletion": "Вы уверены, что хотите удалить выбранный плагин?",
       "confirm_plugin_deletion_plural": "Вы уверены, что хотите удалить выбранные плагины?",
@@ -1199,7 +1203,8 @@
       "type": "Тип",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "Версия"
+      "version": "Версия",
+      "status": "Статус"
     }
   },
   "template": {
@@ -1392,6 +1397,8 @@
     "button": {
       "convert_service_to_draft": "Конвертировать сервис {{name}} в черновик",
       "convert_service_to_online": "Конвертировать сервис {{name}} в онлайн",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "delete_config": "Удалить кастомную конфигурацию {{name}}",
       "delete_file": "Удалить файл кэша: {{filename}}",
       "delete_instance": "Удалить экземпляр {{hostname}}",
@@ -1551,7 +1558,8 @@
         "select_all": "Выбрать все кастомные конфигурации",
         "service": "Сервис, связанный с кастомной конфигурацией (или Глобальный)",
         "template": "Указывает, происходит ли кастомная конфигурация из шаблона",
-        "type": "Тип или контекст кастомной конфигурации (например, HTTP, MODSEC)"
+        "type": "Тип или контекст кастомной конфигурации (например, HTTP, MODSEC)",
+        "status": "Статус черновика пользовательской конфигурации"
       },
       "instances": {
         "actions": "Действия, доступные для этого экземпляра",

@@ -77,6 +77,8 @@
     "close": "Zamknij",
     "columns": "Kolumny",
     "convert_services": "Konwersja usług",
+    "convert_configs": "Konwertuj konfiguracje",
+    "convert_configs_to": "Konwertuj na {{state}}",
     "copy": "Kopiuj",
     "copy_codes": "Skopiuj kody",
     "copy_raw": "Kopiuj ręczne dane",
@@ -763,6 +765,8 @@
       "unban_confirmation_alert": "Czy na pewno chcesz odblokować wybrany adres IP?",
       "unban_confirmation_alert_plural": "Czy na pewno chcesz odblokować wybrane adresy IP?",
       "confirm_conversion_confirmation": "Czy na pewno chcesz przekonwertować wybrane usługi?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "Czy na pewno chcesz przekonwertować wybrane konfiguracje niestandardowe na {{state}}?",
       "confirm_next_step": "Czy na pewno chcesz przejść do następnego kroku?",
       "confirm_template_deletion": "Czy na pewno chcesz usunąć szablon {{name}}?",
       "confirmation_instance_deletion": "Czy na pewno chcesz usunąć wybraną instancję?",
@@ -1219,7 +1223,8 @@
       "type": "Typ",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "Wersja"
+      "version": "Wersja",
+      "status": "Status"
     }
   },
   "template": {
@@ -1412,6 +1417,8 @@
     "button": {
       "convert_service_to_draft": "Konwertuj usługę {{name}} na wersję Szkicu",
       "convert_service_to_online": "Konwertuj usługę {{name}} na usługę online",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "delete_config": "Usuń konfigurację niestandardową {{name}}",
       "delete_file": "Usuń plik pamięci podręcznej: {{filename}}",
       "delete_instance": "Usuń instancję {{hostname}}",
@@ -1568,7 +1575,8 @@
         "select_all": "Wybierz wszystkie konfiguracje niestandardowe",
         "service": "Usługa powiązana z konfiguracją niestandardową (lub globalną)",
         "template": "Wskazuje, czy konfiguracja niestandardowa pochodzi z szablonu.",
-        "type": "Typ lub kontekst konfiguracji niestandardowej (np. HTTP, MODSEC)"
+        "type": "Typ lub kontekst konfiguracji niestandardowej (np. HTTP, MODSEC)",
+        "status": "Status wersji roboczej konfiguracji niestandardowej"
       },
       "instances": {
         "actions": "Dostępne działania dla tej instancji",

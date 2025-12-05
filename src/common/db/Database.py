@@ -1929,7 +1929,7 @@ class Database:
             endl = "\n"
             for custom_config in custom_configs:
                 if "exploded" in custom_config:
-                    config = {"data": custom_config["value"], "method": method}
+                    config = {"data": custom_config["value"], "method": method, "is_draft": bool(custom_config.get("is_draft", False))}
 
                     if custom_config["exploded"][0]:
                         if not session.query(Services).with_entities(Services.id).filter_by(id=custom_config["exploded"][0]).first():
@@ -1953,6 +1953,7 @@ class Database:
                     custom_config = config
 
                 custom_config["type"] = custom_config["type"].strip().replace("-", "_").lower()  # type: ignore
+                custom_config["is_draft"] = bool(custom_config.get("is_draft", False))
                 custom_config["data"] = custom_config["data"].encode("utf-8") if isinstance(custom_config["data"], str) else custom_config["data"]
                 custom_config["checksum"] = custom_config.get("checksum", bytes_hash(custom_config["data"], algorithm="sha256"))  # type: ignore
 
@@ -1963,14 +1964,24 @@ class Database:
                     "service_id": service_id,
                 }
 
-                custom_conf = session.query(Custom_configs).with_entities(Custom_configs.checksum, Custom_configs.method).filter_by(**filters).first()
+                custom_conf = (
+                    session.query(Custom_configs)
+                    .with_entities(Custom_configs.checksum, Custom_configs.method, Custom_configs.is_draft)
+                    .filter_by(**filters)
+                    .first()
+                )
 
                 if not custom_conf:
                     to_put.append(Custom_configs(**custom_config))
-                elif custom_config["checksum"] != custom_conf.checksum and self._methods_are_compatible(method, custom_conf.method):
-                    custom_conf.data = custom_config["data"]
-                    custom_conf.checksum = custom_config["checksum"]
-                    custom_conf.method = method
+                elif self._methods_are_compatible(method, custom_conf.method):
+                    should_update_data = custom_config["checksum"] != custom_conf.checksum
+                    if should_update_data:
+                        custom_conf.data = custom_config["data"]
+                        custom_conf.checksum = custom_config["checksum"]
+                    if custom_conf.is_draft != custom_config["is_draft"] or should_update_data:
+                        custom_conf.is_draft = custom_config["is_draft"]
+                        custom_conf.method = method
+                    custom_conf.is_draft = custom_config["is_draft"]
             if changed:
                 with suppress(ProgrammingError, OperationalError):
                     metadata = session.query(Metadata).get(1)
@@ -2327,12 +2338,27 @@ class Database:
         db_config = self.get_non_default_settings(with_drafts=with_drafts, filtered_settings=("USE_TEMPLATE",))
 
         with self._db_session() as session:
-            entities = [Custom_configs.service_id, Custom_configs.type, Custom_configs.name, Custom_configs.checksum, Custom_configs.method]
+            services = session.query(Services).with_entities(Services.id, Services.is_draft).all()
+            allowed_services = {srv.id for srv in services if with_drafts or not srv.is_draft}
+
+            entities = [
+                Custom_configs.service_id,
+                Custom_configs.type,
+                Custom_configs.name,
+                Custom_configs.checksum,
+                Custom_configs.method,
+                Custom_configs.is_draft,
+            ]
             if with_data:
                 entities.append(Custom_configs.data)
 
             custom_configs = []
             for custom_config in session.query(Custom_configs).with_entities(*entities):
+                if custom_config.service_id and custom_config.service_id not in allowed_services:
+                    continue
+                if custom_config.is_draft and not with_drafts:
+                    continue
+
                 data = {
                     "service_id": custom_config.service_id,
                     "type": custom_config.type,
@@ -2340,6 +2366,7 @@ class Database:
                     "checksum": custom_config.checksum,
                     "method": custom_config.method,
                     "template": None,
+                    "is_draft": custom_config.is_draft,
                 }
                 if with_data:
                     data["data"] = custom_config.data
@@ -2359,9 +2386,9 @@ class Database:
             if with_data:
                 template_entities.append(Template_custom_configs.data)
 
-            for service in session.query(Services).with_entities(Services.id).all():
+            for service_id in allowed_services:
                 for key, value in db_config.items():
-                    if key.startswith(f"{service.id}_"):
+                    if key.startswith(f"{service_id}_"):
                         for template_config in (
                             session.query(Template_custom_configs)
                             .with_entities(*template_entities)
@@ -2370,18 +2397,19 @@ class Database:
                         ):
                             config_type = template_config.type.replace("_", "-").replace(".conf", "").strip()
                             if not any(
-                                custom_config["service_id"] == service.id
+                                custom_config["service_id"] == service_id
                                 and custom_config["type"] == config_type
                                 and custom_config["name"] == template_config.name
                                 for custom_config in custom_configs
                             ):
                                 custom_config = {
-                                    "service_id": service.id,
+                                    "service_id": service_id,
                                     "type": config_type,
                                     "name": template_config.name,
                                     "checksum": template_config.checksum,
                                     "method": "default",
                                     "template": value,
+                                    "is_draft": False,
                                 }
                                 if with_data:
                                     custom_config["data"] = template_config.data
@@ -2400,7 +2428,14 @@ class Database:
         """Get a custom config from the database"""
         config_type = config_type.strip().replace("-", "_").lower()
         with self._db_session() as session:
-            entities = [Custom_configs.service_id, Custom_configs.type, Custom_configs.name, Custom_configs.checksum, Custom_configs.method]
+            entities = [
+                Custom_configs.service_id,
+                Custom_configs.type,
+                Custom_configs.name,
+                Custom_configs.checksum,
+                Custom_configs.method,
+                Custom_configs.is_draft,
+            ]
             if with_data:
                 entities.append(Custom_configs.data)
 
@@ -2424,6 +2459,7 @@ class Database:
                                 "checksum": template_config.checksum,
                                 "method": "default",
                                 "template": service_config.get(f"{service_id}_USE_TEMPLATE"),
+                                "is_draft": False,
                             }
                             if with_data:
                                 custom_config["data"] = template_config.data
@@ -2437,6 +2473,7 @@ class Database:
             "checksum": db_config.checksum,
             "method": db_config.method,
             "template": None,
+            "is_draft": getattr(db_config, "is_draft", False),
         }
         if with_data:
             custom_config["data"] = db_config.data
@@ -2459,6 +2496,7 @@ class Database:
 
             data = config["data"].encode("utf-8") if isinstance(config["data"], str) else config["data"]
             checksum = config.get("checksum", bytes_hash(data, algorithm="sha256"))
+            is_draft = bool(config.get("is_draft", False))
 
             if not custom_config:
                 session.add(
@@ -2469,6 +2507,7 @@ class Database:
                         data=data,
                         checksum=checksum,
                         method=config["method"],
+                        is_draft=is_draft,
                     )
                 )
             else:
@@ -2477,6 +2516,7 @@ class Database:
                 custom_config.service_id = config.get("service_id")
                 custom_config.data = data
                 custom_config.checksum = checksum
+                custom_config.is_draft = is_draft
                 for key in ("type", "name", "method"):
                     if key in config:
                         setattr(custom_config, key, config[key])

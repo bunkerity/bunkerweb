@@ -77,6 +77,8 @@
     "close": "Kapat",
     "columns": "Sütunlar",
     "convert_services": "Servisleri Dönüştür",
+    "convert_configs": "Yapılandırmaları dönüştür",
+    "convert_configs_to": "{{state}} durumuna dönüştür",
     "copy": "Kopyala",
     "copy_codes": "Kodları Kopyala",
     "copy_raw": "Ham Veriyi Kopyala",
@@ -748,6 +750,8 @@
       "confirm_configs_deletion_alert": "Seçili özel yapılandırmayı silmek istediğinizden emin misiniz?",
       "confirm_configs_deletion_alert_plural": "Seçili özel yapılandırmaları silmek istediğinizden emin misiniz?",
       "confirm_conversion_confirmation": "Seçili servisleri dönüştürmek istediğinizden emin misiniz?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "Seçili özel yapılandırmaları {{state}} olarak dönüştürmek istediğinizden emin misiniz?",
       "confirm_next_step": "Bir sonraki adıma geçmek istediğinizden emin misiniz?",
       "confirm_plugin_deletion": "Seçili eklentiyi silmek istediğinizden emin misiniz?",
       "confirm_plugin_deletion_plural": "Seçili eklentileri silmek istediğinizden emin misiniz?",
@@ -1198,7 +1202,8 @@
       "type": "Tür",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "Versiyon"
+      "version": "Versiyon",
+      "status": "Durum"
     }
   },
   "template": {
@@ -1379,6 +1384,8 @@
     "button": {
       "convert_service_to_draft": "Servisi Taslağa Dönüştür: {{name}}",
       "convert_service_to_online": "Servisi Çevrimiçine Dönüştür: {{name}}",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "delete_config": "Özel Yapılandırmayı Sil: {{name}}",
       "delete_file": "Önbellek Dosyasını Sil: {{filename}}",
       "delete_instance": "Örneği Sil: {{hostname}}",
@@ -1535,7 +1542,8 @@
         "select_all": "Tüm Özel Yapılandırmaları seç",
         "service": "Özel Yapılandırmayla ilişkili servis (veya Küresel)",
         "template": "Özel Yapılandırmanın bir şablondan gelip gelmediğini belirtir",
-        "type": "Özel Yapılandırmanın türü veya bağlamı (örn. HTTP, MODSEC)"
+        "type": "Özel Yapılandırmanın türü veya bağlamı (örn. HTTP, MODSEC)",
+        "status": "Özel yapılandırmanın taslak durumu"
       },
       "instances": {
         "actions": "Bu Örnek için mevcut aksiyonlar",

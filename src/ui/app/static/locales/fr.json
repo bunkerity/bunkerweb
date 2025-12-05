@@ -77,6 +77,8 @@
     "close": "Fermer",
     "columns": "Colonnes",
     "convert_services": "Convertir les Services",
+    "convert_configs": "Convertir les configurations",
+    "convert_configs_to": "Convertir en {{state}}",
     "copy": "Copier",
     "copy_codes": "Copier les Codes",
     "copy_raw": "Copier les données brutes",
@@ -757,6 +759,8 @@
       "confirm_configs_deletion_alert": "Êtes-vous sûr de vouloir supprimer la configuration personnalisée sélectionnée ?",
       "confirm_configs_deletion_alert_plural": "Êtes-vous sûr de vouloir supprimer les configurations personnalisées sélectionnées ?",
       "confirm_conversion_confirmation": "Êtes-vous sûr de vouloir convertir les services sélectionnés ?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "Êtes-vous sûr de vouloir convertir les configurations personnalisées sélectionnées en {{state}} ?",
       "confirm_next_step": "Êtes-vous sûr de vouloir passer à l'étape suivante ?",
       "confirm_plugin_deletion": "Êtes-vous sûr de vouloir supprimer le plugin sélectionné ?",
       "confirm_plugin_deletion_plural": "Êtes-vous sûr de vouloir supprimer les plugins sélectionnés ?",
@@ -1219,7 +1223,8 @@
       "url": "URL",
       "user_agent": "User-Agent",
       "version": "Version",
-      "templates": "Modèles"
+      "templates": "Modèles",
+      "status": "Statut"
     }
   },
   "template": {
@@ -1413,6 +1418,8 @@
       "clone_template": "Cloner le Modèle {{template}}",
       "convert_service_to_draft": "Convertir le Service {{name}} en Brouillon",
       "convert_service_to_online": "Convertir le Service {{name}} en En Ligne",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "delete_config": "Supprimer la Config Perso {{name}}",
       "delete_file": "Supprimer le fichier cache : {{filename}}",
       "delete_instance": "Supprimer l'Instance {{hostname}}",
@@ -1569,7 +1576,8 @@
         "select_all": "Sélectionner toutes les Configs Perso",
         "service": "Service associé à la Config Perso (ou Global)",
         "template": "Indique si la Config Perso provient d'un modèle",
-        "type": "Type ou contexte de la Config Perso (ex: HTTP, MODSEC)"
+        "type": "Type ou contexte de la Config Perso (ex: HTTP, MODSEC)",
+        "status": "Statut brouillon de la configuration personnalisée"
       },
       "instances": {
         "actions": "Actions disponibles pour cette Instance",

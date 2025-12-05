@@ -77,6 +77,8 @@
     "close": "إغلاق",
     "columns": "الأعمدة",
     "convert_services": "تحويل الخدمات",
+    "convert_configs": "تحويل الإعدادات",
+    "convert_configs_to": "التحويل إلى {{state}}",
     "copy": "نسخ",
     "copy_codes": "نسخ الرموز",
     "copy_raw": "نسخ البيانات الخام",
@@ -760,6 +762,8 @@
       "confirm_configs_deletion_alert": "هل أنت متأكد أنك تريد حذف التكوين المخصص المحدد؟",
       "confirm_configs_deletion_alert_plural": "هل أنت متأكد أنك تريد حذف التكوينات المخصصة المحددة؟",
       "confirm_conversion_confirmation": "هل أنت متأكد أنك تريد تحويل الخدمات المحددة؟",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "هل أنت متأكد أنك تريد تحويل الإعدادات المخصصة المحددة إلى {{state}}؟",
       "confirm_next_step": "هل أنت متأكد أنك تريد المتابعة إلى الخطوة التالية؟",
       "confirm_plugin_deletion": "هل أنت متأكد أنك تريد حذف الإضافة المحددة؟",
       "confirm_plugin_deletion_plural": "هل أنت متأكد أنك تريد حذف الإضافات المحددة؟",
@@ -1224,7 +1228,8 @@
       "type": "النوع",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "الإصدار"
+      "version": "الإصدار",
+      "status": "الحالة"
     }
   },
   "template": {
@@ -1417,6 +1422,8 @@
     "button": {
       "convert_service_to_draft": "تحويل الخدمة {{name}} إلى مسودة",
       "convert_service_to_online": "تحويل الخدمة {{name}} إلى متصل",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "delete_config": "حذف التكوين المخصص {{name}}",
       "delete_file": "حذف ملف الذاكرة المؤقتة: {{filename}}",
       "delete_instance": "حذف المثيل {{hostname}}",
@@ -1559,7 +1566,8 @@
         "select_all": "تحديد كل التكوينات المخصصة",
         "service": "الخدمة المرتبطة بالتكوين المخصص (أو عام)",
         "template": "يشير إلى ما إذا كان التكوين المخصص يأتي من قالب",
-        "type": "نوع أو سياق التكوين المخصص (مثل HTTP, MODSEC)"
+        "type": "نوع أو سياق التكوين المخصص (مثل HTTP, MODSEC)",
+        "status": "حالة مسودة التكوين المخصص"
       },
       "instances": {
         "actions": "الإجراءات المتاحة لهذا المثيل",

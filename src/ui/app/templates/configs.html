@@ -66,6 +66,12 @@
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
+                        data-bs-original-title="Draft status of the Custom configuration"
+                        data-i18n="tooltip.table.configs.status">
+                        <span data-i18n="table.header.status">Status</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
                         data-bs-original-title="Indication if the custom config is from a template or not"
                         data-i18n="tooltip.table.configs.template">
                         <span data-i18n="table.header.template">Template</span>
@@ -94,6 +100,7 @@
                 } %}
                 {% for config in configs %}
                     {% set service_id = config['service_id'] if config['service_id'] else 'global' %}
+                    {% set config_id = config['type']|lower ~ '-' ~ service_id.replace('.', '_') ~ '-' ~ config['name'] %}
                     {% if config['type'].startswith('crs') %}
                         {% set config_icon = "shield-alt" %}
                     {% elif config['type'] == 'modsec_crs' %}
@@ -117,14 +124,14 @@
                                data-i18n="{% if config['method'] != 'ui' and not config['template'] or is_readonly %}tooltip.link.view_config{% else %}tooltip.link.edit_config{% endif %}"
                                data-i18n-options='{"name": "{{ config['name'] }}"}'><i class="bx bx-{% if config['method'] != 'ui' and not config['template'] or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>&nbsp;{{ config["name"] }}</a>
                         </td>
-                        <td id="type-{{ config['type'] }}-{{ service_id.replace('.', '_') }}-{{ config['name'] }}">
+                        <td id="type-{{ config_id }}">
                             <div class="d-flex align-items-center">
                                 <i class="bx bx-{{ config_icon }} me-1"></i>
                                 {{ config["type"]|upper }}
                             </div>
                         </td>
                         <td>{{ config["method"] }}</td>
-                        <td id="service-{{ config['type'] }}-{{ service_id.replace('.', '_') }}-{{ config['name'] }}">
+                        <td id="service-{{ config_id }}">
                             {% if config["service_id"] %}
                                 <a href="{{ url_for("services") }}/{{ config['service_id'] }}"
                                    class="d-flex align-items-center"
@@ -136,6 +143,19 @@
                             {% else %}
                                 <span class="badge rounded-pill bg-label-secondary"
                                       data-i18n="scope.global">Global</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if config.get("is_draft") %}
+                                <span id="status-{{ config_id }}"
+                                      class="badge rounded-pill bg-label-secondary"
+                                      data-value="draft"
+                                      data-i18n="status.draft">Draft</span>
+                            {% else %}
+                                <span id="status-{{ config_id }}"
+                                      class="badge rounded-pill bg-label-primary"
+                                      data-value="online"
+                                      data-i18n="status.online">Online</span>
                             {% endif %}
                         </td>
                         <td>
@@ -177,6 +197,21 @@
                                 </div>
                                 {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if config['method'] != 'ui' else 'tooltip.button.delete_config')) %}
                                 {% set delete_tooltip_options = '{"method": "' ~ config['method'] ~ '"}' if config['method'] != 'ui' and not is_readonly else '{"name": "' ~ config['name'] ~ '"}' %}
+                                <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly" data-i18n="tooltip.disabled_readonly"{% endif %}>
+                                    <button type="button"
+                                            data-config-name="{{ config['name'] }}"
+                                            data-config-type="{{ config['type'] }}"
+                                            data-config-service="{{ config['service_id'] or 'global' }}"
+                                            data-value="{{ 'online' if config.get('is_draft') else 'draft' }}"
+                                            class="btn btn-outline-secondary btn-sm me-1 convert-config{% if is_readonly %} disabled{% endif %}"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="bottom"
+                                            data-bs-original-title="..."
+                                            data-i18n="tooltip.button.convert_config_to_{{ 'online' if config.get('is_draft') else 'draft' }}"
+                                            data-i18n-options='{"name": "{{ config['name'] }}"}'>
+                                        <i class="bx bx-transfer bx-xs"></i>
+                                    </button>
+                                </div>
                                 <div data-bs-toggle="tooltip"
                                      data-bs-placement="bottom"
                                      data-bs-original-title="..."
@@ -196,8 +231,70 @@
                 {% endfor %}
             </tbody>
         </table>
+        <div id="feedback-toast"
+             class="bs-toast toast fade bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border border-warning d-none"
+             role="alert"
+             aria-live="assertive"
+             aria-atomic="true"
+             data-bs-autohide="true">
+            <div class="toast-header d-flex align-items-center text-warning">
+                <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
+                <span class="fw-medium me-auto">BunkerWeb Forever</span>
+                <small class="text-body-secondary" data-i18n="flash.time.just_now">just now</small>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="toast"
+                        aria-label="Close"
+                        data-i18n="aria.label.close"></button>
+            </div>
+            <div class="toast-body" data-i18n="flash.easter_egg">If you read this, it means that you're curious 👀</div>
+        </div>
     </div>
     {% if not is_readonly %}
+        <div class="modal fade"
+             id="modal-convert-configs"
+             data-bs-backdrop="static"
+             tabindex="-1"
+             aria-hidden="true"
+             role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" data-i18n="modal.title.confirm_conversion">Confirm conversion</h5>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                                data-i18n="aria.label.close"></button>
+                    </div>
+                    <form action="{{ url_for("configs") }}/convert" method="POST">
+                        <div class="modal-body">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <input type="hidden" id="conversion-type" name="convert_to" value="draft" />
+                            <input type="hidden"
+                                   id="selected-configs-input-convert"
+                                   name="configs"
+                                   value="" />
+                            <div class="alert alert-danger text-center"
+                                 role="alert"
+                                 data-i18n="modal.body.confirm_configs_conversion">
+                                Are you sure you want to convert the selected configs?
+                            </div>
+                            <div id="selected-configs-convert" class="mb-3"></div>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="submit"
+                                    class="btn btn-outline-primary me-2"
+                                    data-i18n="button.convert_configs">Convert configs</button>
+                            <button type="reset"
+                                    class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal"
+                                    data-i18n="button.cancel">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
         <div class="modal modal-lg fade"
              id="modal-delete-configs"
              data-bs-backdrop="static"

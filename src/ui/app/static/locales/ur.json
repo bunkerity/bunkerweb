@@ -77,6 +77,8 @@
     "close": "بند کریں",
     "columns": "کالم",
     "convert_services": "خدمات تبدیل کریں",
+    "convert_configs": "کنفیگریشن تبدیل کریں",
+    "convert_configs_to": "{{state}} میں تبدیل کریں",
     "copy": "کاپی کریں",
     "copy_codes": "کوڈز کاپی کریں",
     "copy_raw": "خام ڈیٹا کاپی کریں",
@@ -748,6 +750,8 @@
       "confirm_configs_deletion_alert": "کیا آپ واقعی منتخب کردہ کسٹم کنفیگریشن حذف کرنا چاہتے ہیں؟",
       "confirm_configs_deletion_alert_plural": "کیا آپ واقعی منتخب کردہ کسٹم کنفیگریشنز حذف کرنا چاہتے ہیں؟",
       "confirm_conversion_confirmation": "کیا آپ واقعی منتخب کردہ خدمات کو تبدیل کرنا چاہتے ہیں؟",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "کیا آپ واقعی منتخب کردہ کسٹم کنفیگریشنز کو {{state}} میں تبدیل کرنا چاہتے ہیں؟",
       "confirm_next_step": "کیا آپ واقعی اگلے مرحلے پر جانا چاہتے ہیں؟",
       "confirm_plugin_deletion": "کیا آپ واقعی منتخب کردہ پلگ ان حذف کرنا چاہتے ہیں؟",
       "confirm_plugin_deletion_plural": "کیا آپ واقعی منتخب کردہ پلگ انز حذف کرنا چاہتے ہیں؟",
@@ -1198,7 +1202,8 @@
       "type": "قسم",
       "url": "URL",
       "user_agent": "صارف ایجنٹ",
-      "version": "ورژن"
+      "version": "ورژن",
+      "status": "حالت"
     }
   },
   "template": {
@@ -1391,6 +1396,8 @@
     "button": {
       "convert_service_to_draft": "سروس {{name}} کو ڈرافٹ میں تبدیل کریں",
       "convert_service_to_online": "سروس {{name}} کو آن لائن میں تبدیل کریں",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "delete_config": "کسٹم کنفیگریشن {{name}} حذف کریں",
       "delete_file": "کیشے فائل حذف کریں: {{filename}}",
       "delete_instance": "انسٹینس {{hostname}} حذف کریں",
@@ -1547,7 +1554,8 @@
         "select_all": "تمام کسٹم کنفیگریشنز منتخب کریں",
         "service": "کسٹم کنفیگریشن سے وابستہ سروس (یا عالمی)",
         "template": "ظاہر کرتا ہے کہ آیا کسٹم کنفیگریشن کسی ٹیمپلیٹ سے شروع ہوئی ہے",
-        "type": "کسٹم کنفیگریشن کی قسم یا سیاق و سباق (مثلاً HTTP, MODSEC)"
+        "type": "کسٹم کنفیگریشن کی قسم یا سیاق و سباق (مثلاً HTTP, MODSEC)",
+        "status": "کسٹم کنفیگریشن کی ڈرافٹ حالت"
       },
       "instances": {
         "actions": "اس انسٹینس کے لیے دستیاب اعمال",

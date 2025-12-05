@@ -272,6 +272,8 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
         original_path.mkdir(parents=True, exist_ok=True)
         for custom_config in configs:
             try:
+                if custom_config.get("is_draft"):
+                    continue
                 if custom_config["data"]:
                     tmp_path = original_path.joinpath(
                         custom_config["type"].replace("_", "-"),
@@ -780,7 +782,7 @@ if __name__ == "__main__":
                     changes = not from_template
 
                 if saving:
-                    custom_configs.append({"value": content, "exploded": (service_id, config_type, file.stem)})
+                    custom_configs.append({"value": content, "exploded": (service_id, config_type, file.stem), "is_draft": False})
 
             changes = changes or {hash(dict_to_frozenset(d)) for d in custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs}
 
