@@ -12,7 +12,16 @@ class LinuxTest(Test):
     def __init__(self, name, timeout, tests, distro, domains={}):
         super().__init__(name, "linux", timeout, tests, delay=20)
         self._domains = domains
-        if distro not in ("ubuntu", "debian-bookworm", "debian-trixie", "fedora-41", "fedora-42", "centos", "ubuntu-jammy") and not distro.startswith("rhel"):
+        if distro not in (
+            "ubuntu",
+            "debian-bookworm",
+            "debian-trixie",
+            "fedora-41",
+            "fedora-42",
+            "fedora-43",
+            "centos",
+            "ubuntu-jammy",
+        ) and not distro.startswith("rhel"):
             raise Exception(f"unknown distro {distro}")
         self.__distro = distro
 

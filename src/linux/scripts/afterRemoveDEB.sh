@@ -169,6 +169,9 @@ case "$1" in
         if [ -f /etc/bunkerweb/api.env ]; then
             do_and_check_cmd cp -f /etc/bunkerweb/api.env /var/tmp/api.env
         fi
+        if [ -f /etc/bunkerweb/api.yml ]; then
+            do_and_check_cmd cp -f /etc/bunkerweb/api.yml /var/tmp/api.yml
+        fi
         if [ -f /var/lib/bunkerweb/db.sqlite3 ]; then
             do_and_check_cmd cp -f /var/lib/bunkerweb/db.sqlite3 /var/tmp/db.sqlite3
         fi

@@ -1900,7 +1900,7 @@ Las distribuciones de Linux compatibles con BunkerWeb (arquitecturas amd64/x86_6
 - Debian 13 "Trixie"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
-- Fedora 41 y 42
+- Fedora 41, 42 y 43
 - Red Hat Enterprise Linux (RHEL) 8, 9 y 10
 
 ### Script de instalación fácil

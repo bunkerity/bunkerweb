@@ -1,0 +1,153 @@
+FROM fedora:43@sha256:6cd815d862109208adf6040ea13391fe6aeb87a9dc80735c2ab07083fdf5e03a AS builder
+
+ENV OS=fedora
+ENV NGINX_VERSION=1.28.0
+
+# Install Nginx, fpm and dependencies
+RUN dnf update -y && \
+    dnf install -y curl gnupg2 ca-certificates make gcc && \
+    dnf install -y --setopt=install_weak_deps=False python3 python3-devel python3-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ kernel-devel znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel && \
+    dnf install --enablerepo=updates-testing nginx-${NGINX_VERSION} -y
+
+WORKDIR /tmp/bunkerweb/deps
+
+# Copy dependencies sources folder
+COPY src/deps/misc misc
+COPY src/deps/src src
+COPY src/deps/deps.json deps.json
+COPY --chmod=644 src/deps/install.sh install.sh
+
+# Compile and install dependencies
+RUN bash install.sh
+
+# Copy dependencies sources folder
+COPY src/deps/requirements.txt /tmp/requirements-deps.txt
+COPY src/scheduler/requirements.txt /tmp/req/requirements-scheduler.txt
+COPY src/ui/requirements.txt /tmp/req/requirements-ui.txt
+COPY src/api/requirements.txt /tmp/req/requirements-api.txt
+COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
+COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
+
+WORKDIR /usr/share/bunkerweb
+
+# Compile and install dependencies
+RUN export MAKEFLAGS="-j$(nproc)" && \
+    mkdir -p deps/python && \
+    pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
+    pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
+
+RUN dnf install -y pigz && \
+    tar --use-compress-program="pigz -1 -p$(nproc)" -cf deps.tar.gz deps && \
+    rm -rf deps
+
+# Copy files
+# can't exclude deps from . so we are copying everything by hand
+COPY src/bw/loading loading
+COPY src/bw/lua lua
+COPY src/bw/misc misc
+COPY src/common/api api
+COPY src/common/cli cli
+COPY src/common/confs confs
+COPY src/common/core core
+COPY src/common/db db
+COPY src/common/gen gen
+COPY src/common/helpers helpers
+COPY src/common/settings.json settings.json
+COPY src/common/utils utils
+COPY src/scheduler scheduler
+COPY src/VERSION VERSION
+COPY src/ui ui
+COPY src/api api
+
+WORKDIR /tmp
+
+COPY src/deps/package.json package.json
+COPY src/deps/package-lock.json package-lock.json
+
+ARG SKIP_MINIFY=no
+ARG SKIP_MINIFY_JS=no
+ARG SKIP_MINIFY_CSS=no
+ARG SKIP_MINIFY_HTML=no
+RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ] || [ "$SKIP_MINIFY_HTML" != "yes" ]; }; then \
+    dnf install -y nodejs npm parallel && \
+    cd /tmp && \
+    npm ci --ignore-scripts; \
+    fi
+
+# Minify JS files
+ARG SKIP_MINIFY=no
+ARG SKIP_MINIFY_JS=no
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_JS" != "yes" ]; then \
+    find /usr/share/bunkerweb/ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
+    | parallel -0 --no-run-if-empty 'npx uglify-js {} --compress --mangle --output {}'; \
+    else \
+    echo "Skipping JS minification"; \
+    fi
+
+# Minify CSS files
+ARG SKIP_MINIFY_CSS=no
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
+    find /usr/share/bunkerweb/ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
+    | parallel -0 --no-run-if-empty 'npx postcss {} --use cssnano --no-map -o {}'; \
+    else \
+    echo "Skipping CSS minification"; \
+    fi
+
+# Minify HTML files
+ARG SKIP_MINIFY_HTML=no
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
+    find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
+    parallel 'npx html-minifier-terser \
+    --collapse-whitespace \
+    --remove-comments \
+    --remove-optional-tags \
+    --remove-redundant-attributes \
+    --remove-script-type-attributes \
+    --remove-style-link-type-attributes \
+    --minify-css true \
+    --minify-js true \
+    --output {} {}'; \
+    else \
+    echo "Skipping HTML minification"; \
+    fi
+
+FROM fedora:43@sha256:6cd815d862109208adf6040ea13391fe6aeb87a9dc80735c2ab07083fdf5e03a
+
+# Set default umask to prevent huge recursive chmod increasing the final image size
+RUN umask 027
+
+# Install fpm
+RUN dnf update -y && \
+    dnf install -y ruby ruby-devel redhat-rpm-config rpm-build gcc make && \
+    gem install -N fpm && \
+    dnf -y --setopt=install_weak_deps=False autoremove && \
+    dnf clean all && \
+    rm -rf /var/cache/dnf
+
+# Copy dependencies
+COPY --from=builder --chown=0:101 /etc/nginx /etc/nginx
+COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
+
+WORKDIR /usr/share/bunkerweb
+
+# Setup BunkerWeb
+RUN install -m 755 helpers/bwcli /usr/bin/bwcli && \
+    echo "Linux" > INTEGRATION && \
+    mkdir -p /etc/bunkerweb/configs /etc/bunkerweb/plugins /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/lib/bunkerweb /var/www/html && \
+    for dir in $(echo "plugins pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
+    touch /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log /var/log/bunkerweb/modsec_audit.log
+
+COPY --chmod=660 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
+COPY --chmod=660 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
+
+# Copy Linux files
+COPY --chmod=740 src/linux/scripts scripts
+COPY --chmod=740 src/linux/fpm.sh /usr/share/fpm.sh
+COPY src/linux/fpm-fedora-43 /usr/share/.fpm
+COPY --chmod=644 src/linux/*.service /lib/systemd/system/
+COPY --chmod=644 src/linux/bunkerweb.logrotate /etc/logrotate.d/bunkerweb
+
+# Generate RPM at startup
+VOLUME /data
+WORKDIR /usr/share/
+ENTRYPOINT [ "./fpm.sh", "rpm" ]

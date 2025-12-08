@@ -1901,7 +1901,7 @@ docker build -t bw-ui -f src/ui/Dockerfile .
 - Debian 13 "Trixie"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
-- Fedora 41 和 42
+- Fedora 41, 42 和 43
 - Red Hat Enterprise Linux (RHEL) 8, 9 和 10
 
 ### 简易安装脚本

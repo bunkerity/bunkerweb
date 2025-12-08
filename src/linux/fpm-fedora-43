@@ -1,0 +1,13 @@
+-s dir
+--name bunkerweb
+--license agpl3
+--version %VERSION%
+--architecture %ARCH%
+--depends bash --depends 'nginx = 2:1.28.0' --depends 'nginx-mod-stream = 2:1.28.0' --depends python3 --depends libcurl-devel --depends libxml2 --depends yajl --depends lmdb-libs --depends geoip-devel --depends gd --depends sudo --depends procps --depends lsof --depends pcre --depends libpq --depends libcap --depends openssl --depends logrotate --depends mysql --depends postgresql --depends sqlite3 --depends unzip --depends tar
+--description "BunkerWeb %VERSION% for Fedora 43"
+--url "https://www.bunkerweb.io"
+--maintainer "Bunkerity <contact at bunkerity dot com>"
+--before-install /usr/share/bunkerweb/scripts/beforeInstall.sh
+--after-install /usr/share/bunkerweb/scripts/postinstall.sh
+--after-remove /usr/share/bunkerweb/scripts/afterRemoveRPM.sh
+/usr/share/bunkerweb/=/usr/share/bunkerweb/ /usr/bin/bwcli=/usr/bin/bwcli /etc/bunkerweb/=/etc/bunkerweb /var/tmp/bunkerweb/=/var/tmp/bunkerweb /var/run/bunkerweb/=/var/run/bunkerweb /var/log/bunkerweb/=/var/log/bunkerweb /var/cache/bunkerweb/=/var/cache/bunkerweb /lib/systemd/system/bunkerweb.service=/lib/systemd/system/bunkerweb.service /lib/systemd/system/bunkerweb-ui.service=/lib/systemd/system/bunkerweb-ui.service /lib/systemd/system/bunkerweb-scheduler.service=/lib/systemd/system/bunkerweb-scheduler.service /lib/systemd/system/bunkerweb-api.service=/lib/systemd/system/bunkerweb-api.service /var/lib/bunkerweb/=/var/lib/bunkerweb /etc/logrotate.d/bunkerweb=/etc/logrotate.d/bunkerweb

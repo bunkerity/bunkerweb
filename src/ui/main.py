@@ -34,6 +34,8 @@ from flask_wtf.csrf import CSRFProtect, CSRFError
 from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.routing.exceptions import BuildError
 
+from common_utils import get_redis_client as get_common_redis_client  # type: ignore
+
 from app.models.biscuit import BiscuitMiddleware
 from app.models.reverse_proxied import ReverseProxied
 
@@ -539,6 +541,7 @@ with app.app_context():
     app.config["SESSION_COOKIE_PATH"] = "/"
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["SESSION_USE_SIGNER"] = True
 
     app.config["REMEMBER_COOKIE_PATH"] = "/"
     app.config["REMEMBER_COOKIE_HTTPONLY"] = True
@@ -549,10 +552,67 @@ with app.app_context():
     app.config["SCRIPT_NONCE"] = ""
 
     # Session management
-    app.config["SESSION_TYPE"] = "cachelib"
-    app.config["SESSION_PERMANENT"] = False
+    try:
+        session_lifetime_hours = float(getenv("SESSION_LIFETIME_HOURS", "12"))
+    except ValueError:
+        session_lifetime_hours = 12.0
+        LOGGER.warning("Invalid SESSION_LIFETIME_HOURS, defaulting to 12h")
+
+    app.config["SESSION_PERMANENT"] = True
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=session_lifetime_hours)
     app.config["SESSION_ID_LENGTH"] = 64
-    app.config["SESSION_CACHELIB"] = FileSystemCache(threshold=500, cache_dir=LIB_DIR.joinpath("ui_sessions_cache"))
+
+    session_cache_dir = LIB_DIR.joinpath("ui_sessions_cache")
+    session_timeout = int(app.config["PERMANENT_SESSION_LIFETIME"].total_seconds())
+
+    redis_settings = BW_CONFIG.get_config(
+        global_only=True,
+        methods=False,
+        filtered_settings=(
+            "USE_REDIS",
+            "REDIS_HOST",
+            "REDIS_PORT",
+            "REDIS_DB",
+            "REDIS_TIMEOUT",
+            "REDIS_KEEPALIVE_POOL",
+            "REDIS_SSL",
+            "REDIS_USERNAME",
+            "REDIS_PASSWORD",
+            "REDIS_SENTINEL_HOSTS",
+            "REDIS_SENTINEL_USERNAME",
+            "REDIS_SENTINEL_PASSWORD",
+            "REDIS_SENTINEL_MASTER",
+        ),
+    )
+
+    redis_client = None
+    if redis_settings.get("USE_REDIS", "no").lower() == "yes":
+        redis_client = get_common_redis_client(
+            use_redis=True,
+            redis_host=redis_settings.get("REDIS_HOST"),
+            redis_port=redis_settings.get("REDIS_PORT", "6379"),
+            redis_db=redis_settings.get("REDIS_DB", "0"),
+            redis_timeout=redis_settings.get("REDIS_TIMEOUT", "1000.0"),
+            redis_keepalive_pool=redis_settings.get("REDIS_KEEPALIVE_POOL", "10"),
+            redis_ssl=redis_settings.get("REDIS_SSL", "no") == "yes",
+            redis_username=redis_settings.get("REDIS_USERNAME") or None,
+            redis_password=redis_settings.get("REDIS_PASSWORD") or None,
+            redis_sentinel_hosts=redis_settings.get("REDIS_SENTINEL_HOSTS", []),
+            redis_sentinel_username=redis_settings.get("REDIS_SENTINEL_USERNAME") or None,
+            redis_sentinel_password=redis_settings.get("REDIS_SENTINEL_PASSWORD") or None,
+            redis_sentinel_master=redis_settings.get("REDIS_SENTINEL_MASTER", ""),
+        )
+        if redis_client:
+            LOGGER.debug("Using Redis as session backend")
+            app.config["SESSION_TYPE"] = "redis"
+            app.config["SESSION_REDIS"] = redis_client
+            app.config["SESSION_KEY_PREFIX"] = "bunkerweb_ui_session:"
+        else:
+            LOGGER.warning("Redis configured but unavailable for sessions, falling back to FileSystemCache")
+
+    if not redis_client:
+        app.config["SESSION_TYPE"] = "cachelib"
+        app.config["SESSION_CACHELIB"] = FileSystemCache(threshold=500, default_timeout=session_timeout, cache_dir=session_cache_dir)
     sess = Session()
     sess.init_app(app)
 
