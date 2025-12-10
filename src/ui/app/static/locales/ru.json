@@ -44,7 +44,7 @@
     "cache": "Кэш",
     "configs": "Конфигурации",
     "extra_pages": "Дополнительные страницы",
-    "global_config": "Глобальная конфигурация",
+    "global_settings": "Глобальные настройки",
     "home": "Главная",
     "instances": "Экземпляры",
     "jobs": "Задачи",
@@ -99,7 +99,7 @@
     "export_csv_visible": "CSV (Видимые)",
     "export_excel_all": "Excel (Все)",
     "export_excel_visible": "Excel (Видимые)",
-    "fetch_global": "Получить глобальную конфигурацию",
+    "fetch_global": "Получить глобальные настройки",
     "filters_suffix": " Фильтры",
     "follow": "Следить",
     "github_stars": "Звезды",
@@ -769,17 +769,17 @@
       "unban_confirmation_alert": "Вы уверены, что хотите разбанить выбранный IP-адрес?",
       "unban_confirmation_alert_plural": "Вы уверены, что хотите разбанить выбранные IP-адреса?",
       "update_duration_alert": "Выберите новую продолжительность для выбранных банов:",
-      "fetch_global_config_bold": "Это загрузит глобальную конфигурацию и применит её к текущему шаблону.",
-      "fetch_global_config_point_1": "Обновляются только параметры, присутствующие в этом шаблоне.",
-      "fetch_global_config_point_2": "Значения, совпадающие со значениями по умолчанию, игнорируются.",
-      "fetch_global_config_point_3": "SERVER_NAME никогда не перезаписывается.",
+      "fetch_global_settings_bold": "Это загрузит глобальные настройки и применит их к текущему шаблону.",
+      "fetch_global_settings_point_1": "Обновляются только параметры, присутствующие в этом шаблоне.",
+      "fetch_global_settings_point_2": "Значения, совпадающие со значениями по умолчанию, игнорируются.",
+      "fetch_global_settings_point_3": "SERVER_NAME никогда не перезаписывается.",
       "delete_step_confirmation": "Вы уверены, что хотите удалить этот шаг?",
       "delete_step_name_label": "Шаг",
       "delete_step_content_label": "Содержимое"
     },
     "button": {
       "reset_template_confirm": "Сбросить конфигурацию шаблона",
-      "fetch_global_config_confirm": "Применить глобальные настройки"
+      "fetch_global_settings_confirm": "Применить глобальные настройки"
     },
     "section": {
       "ban_details": "Детали бана",
@@ -802,7 +802,7 @@
       "job_history_count": "Последние {{count}} выполнений задачи",
       "recovery_codes": "Коды восстановления",
       "reset_template_config": "Сбросить конфигурацию шаблона?",
-      "fetch_global_config": "Применить глобальные настройки?",
+      "fetch_global_settings": "Применить глобальные настройки?",
       "server_name_not_unique": "Имя сервера не уникально",
       "update_duration": "Обновить срок бана",
       "delete_step": "Удалить шаг"
@@ -831,7 +831,7 @@
     "cache": "Кэш",
     "configs": "Конфигурации",
     "extra_pages": "Дополнительные страницы",
-    "global_config": "Глобальная конфигурация",
+    "global_settings": "Глобальные настройки",
     "home": "Главная",
     "instances": "Экземпляры",
     "jobs": "Задачи",
@@ -1390,7 +1390,7 @@
     "global_settings_applied_title": "Применены глобальные настройки",
     "global_settings_applied_body": "Глобальные параметры были успешно получены и применены к форме.",
     "global_settings_failed_title": "Не удалось получить глобальные настройки",
-    "global_settings_failed_body": "Произошла ошибка при получении глобальных параметров."
+    "global_settings_failed_body": "Произошла ошибка при получении глобальных настроек."
   },
   "tooltip": {
     "auto_lets_encrypt": "Автоматически запрашивать сертификат Let's Encrypt.",
@@ -1412,7 +1412,7 @@
       "view_template": "Просмотреть Шаблон {{template}}",
       "clone_template": "Клонировать Шаблон {{template}}",
       "reset_global": "Сбросить до глобального значения",
-      "value_from_global": "Значение из глобальной конфигурации",
+      "value_from_global": "Значение из глобальных настроек",
       "run_job": "Запустить задачу {{job}}",
       "stop_instance": "Остановить экземпляр {{hostname}}",
       "unban_ip": "Разбанить {{ip}}",
@@ -1460,7 +1460,7 @@
     "email_length": "Email должен содержать от 1 до 256 символов.",
     "follow_latest_page_only": "Режим слежения доступен только на последней странице",
     "fetch_global_settings": "Получить глобальные настройки и применить их к текущему шаблону",
-    "global_config_source": "Значение унаследовано из глобальной конфигурации.",
+    "global_settings_source": "Значение унаследовано от глобальных настроек.",
     "instance_not_up": "Экземпляр {{hostname}} в настоящее время не отвечает ('up').",
     "latest_version_installed": "Вы используете последнюю версию.",
     "lets_encrypt_custom_profile": "Пользовательский профиль, который будет использоваться для Let's Encrypt (например, 'my_custom_profile').",
@@ -1634,7 +1634,7 @@
     "use_proxy_protocol": "Включить связь по протоколу PROXY.",
     "use_real_ip": "Использовать реальный IP",
     "username_length": "Имя пользователя должно содержать от 1 до 256 символов.",
-    "value_from_global": "Значение из глобальной конфигурации",
+    "value_from_global": "Значение из глобальных настроек",
     "view_full_url": "Нажмите, чтобы просмотреть полный URL",
     "wildcard_certificates": "Генерировать wildcard-сертификаты (*.domain.com). Требуется DNS-вызов.",
     "wildcard_dns_only": "Wildcard-сертификаты поддерживаются только с типом вызова DNS."

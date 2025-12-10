@@ -56,7 +56,7 @@ def login_page():
             # Generate and add Biscuit token to session
             try:
                 if BISCUIT_PRIVATE_KEY_FILE.exists():
-                    private_key = PrivateKey.from_hex(BISCUIT_PRIVATE_KEY_FILE.read_text().strip())
+                    private_key = PrivateKey(BISCUIT_PRIVATE_KEY_FILE.read_text().strip())
                     token_factory = BiscuitTokenFactory(private_key)
                     role = "super_admin" if ui_user.admin else [role.role_name for role in ui_user.roles][0]  # For now we shall only have one role per user
                     session["biscuit_token"] = token_factory.create_token_for_role(role, ui_user.username).to_base64()

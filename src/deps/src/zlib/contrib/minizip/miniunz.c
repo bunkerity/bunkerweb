@@ -39,6 +39,9 @@
 #endif
 
 
+#ifndef _CRT_SECURE_NO_WARNINGS
+#  define _CRT_SECURE_NO_WARNINGS
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -83,6 +86,7 @@
     tmu_date : the SAME new date at the tm_unz format */
 static void change_file_date(const char *filename, uLong dosdate, tm_unz tmu_date) {
 #ifdef _WIN32
+  (void)tmu_date;
   HANDLE hFile;
   FILETIME ftm,ftLocal,ftCreate,ftLastAcc,ftLastWrite;
 
@@ -93,8 +97,7 @@ static void change_file_date(const char *filename, uLong dosdate, tm_unz tmu_dat
   LocalFileTimeToFileTime(&ftLocal,&ftm);
   SetFileTime(hFile,&ftm,&ftLastAcc,&ftm);
   CloseHandle(hFile);
-#else
-#if defined(unix) || defined(__APPLE__)
+#elif defined(__unix__) || defined(__unix) || defined(__APPLE__)
   (void)dosdate;
   struct utimbuf ut;
   struct tm newdate;
@@ -116,7 +119,6 @@ static void change_file_date(const char *filename, uLong dosdate, tm_unz tmu_dat
   (void)dosdate;
   (void)tmu_date;
 #endif
-#endif
 }
 
 
@@ -127,9 +129,7 @@ static int mymkdir(const char* dirname) {
     int ret=0;
 #ifdef _WIN32
     ret = _mkdir(dirname);
-#elif unix
-    ret = mkdir (dirname,0775);
-#elif __APPLE__
+#elif defined(__unix__) || defined(__unix) || defined(__APPLE__)
     ret = mkdir (dirname,0775);
 #else
     (void)dirname;
@@ -240,7 +240,7 @@ static int do_list(unzFile uf) {
     printf("  ------  ------     ---- -----   ----    ----   ------     ----\n");
     for (i=0;i<gi.number_entry;i++)
     {
-        char filename_inzip[256];
+        char filename_inzip[65536+1];
         unz_file_info64 file_info;
         uLong ratio=0;
         const char *string_method = "";
@@ -305,7 +305,7 @@ static int do_list(unzFile uf) {
 
 
 static int do_extract_currentfile(unzFile uf, const int* popt_extract_without_path, int* popt_overwrite, const char* password) {
-    char filename_inzip[256];
+    char filename_inzip[65536+1];
     char* filename_withoutpath;
     char* p;
     int err=UNZ_OK;

@@ -19,7 +19,7 @@ The latest zlib FAQ is at http://zlib.net/zlib_faq.html
  3. Where can I get a Visual Basic interface to zlib?
 
     See
-        * http://marknelson.us/1997/01/01/zlib-engine/
+        * https://marknelson.us/posts/1997/01/01/zlib-engine.html
         * win32/DLL_FAQ.txt in the zlib distribution
 
  4. compress() returns Z_BUF_ERROR.

@@ -12,7 +12,7 @@
         <!-- Buttons -->
         {% if current_endpoint == 'instances' %}
             {% set documentation_endpoint = "/integrations" %}
-        {% elif current_endpoint == 'global-config' or 'services' in request.path %}
+        {% elif current_endpoint == 'global-config' or current_endpoint == 'global-settings' or 'services' in request.path %}
             {% set documentation_endpoint = "/features" %}
         {% elif current_endpoint == 'configs' %}
             {% set documentation_endpoint = "/concepts" %}

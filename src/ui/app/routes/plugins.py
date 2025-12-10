@@ -198,14 +198,14 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
             rmtree(tmp_dir, ignore_errors=True)
             TMP_DIR.joinpath("ui").mkdir(parents=True, exist_ok=True)
 
-        if message:
-            LOGGER.error(message + (f": {exception}" if exception else ""))
-        if message or not isinstance(res, dict) and not res:
-            return {
-                "status": "ko",
-                "code": 500,
-                "message": message + ", see logs for more details" if message else "The plugin did not return a valid response",
-            }
+    if message:
+        LOGGER.error(message + (f": {exception}" if exception else ""))
+    if message or not isinstance(res, dict) and not res:
+        return {
+            "status": "ko",
+            "code": 500,
+            "message": message + ", see logs for more details" if message else "The plugin did not return a valid response",
+        }
 
     if isinstance(res, Response):
         return res

@@ -170,7 +170,11 @@ jobs:
         run: echo "version=$(cat src/VERSION | tr -d '\n')" >> "$GITHUB_OUTPUT"
       - name: Get VERSION (for RPM based)
         id: getversionrpm
-        run: echo "versionrpm=$(cat src/VERSION | tr -d '\n' | sed 's/-/_/g')" >> "$GITHUB_OUTPUT"
+        run: |
+          VERSION="$(tr -d '\n' < src/VERSION)"
+          # Fedora packaging: use ~ for RC so GA release wins the RPM sort order
+          RPM_VERSION="$(echo "$VERSION" | sed -E 's/-([Rr][Cc][0-9]*)/~\1/' | sed 's/-/_/g')"
+          echo "versionrpm=${RPM_VERSION}" >> "$GITHUB_OUTPUT"
 
   # Push Docker images
   push-images:

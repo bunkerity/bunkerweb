@@ -1587,7 +1587,7 @@ $(document).ready(() => {
       url: `${window.location.pathname
         .split("/")
         .slice(0, -2)
-        .join("/")}/global-config?as_json=true`,
+        .join("/")}/global-settings?as_json=true`,
       type: "GET",
       success: function (globalConfig) {
         const templateContainer = getTemplateContainer(currentTemplate);

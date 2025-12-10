@@ -547,7 +547,7 @@ Si vous avez oublié vos informations d'identification de l'interface utilisateu
     Utilisez la **page Support** de l’interface Web pour rassembler rapidement la configuration et les journaux pour le dépannage.
 
     - Ouvrez l’interface Web et allez à la page Support.
-    - Choisissez la portée : exporter la configuration Globale ou sélectionner un Service spécifique.
+    - Choisissez la portée : exporter les paramètres globaux ou sélectionner un Service spécifique.
     - Cliquez pour télécharger l’archive de configuration pour la portée choisie.
     - Vous pouvez également télécharger les journaux : les journaux exportés sont automatiquement anonymisés (toutes les adresses IP et les domaines sont masqués).
 

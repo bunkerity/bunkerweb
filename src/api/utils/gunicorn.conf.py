@@ -153,14 +153,14 @@ def on_starting(server):
         # * Step 1: Load Biscuit keys from files and validate
         if BISCUIT_PUBLIC_KEY_FILE.is_file() and BISCUIT_PRIVATE_KEY_FILE.is_file():
             try:
-                pub_hex = BISCUIT_PUBLIC_KEY_FILE.read_text(encoding="utf-8").strip()
-                priv_hex = BISCUIT_PRIVATE_KEY_FILE.read_text(encoding="utf-8").strip()
+                pub_hex = BISCUIT_PUBLIC_KEY_FILE.read_text().strip()
+                priv_hex = BISCUIT_PRIVATE_KEY_FILE.read_text().strip()
                 if not pub_hex or not priv_hex:
                     raise ValueError("One or both Biscuit key files are empty.")
 
                 # Validate by attempting to load
-                PublicKey.from_hex(pub_hex)
-                PrivateKey.from_hex(priv_hex)
+                PublicKey(pub_hex)
+                PrivateKey(priv_hex)
                 biscuit_public_key_hex = pub_hex
                 biscuit_private_key_hex = priv_hex
                 keys_loaded = True
@@ -177,8 +177,8 @@ def on_starting(server):
             if pub_hex_env and priv_hex_env:
                 try:
                     # Validate by attempting to load
-                    PublicKey.from_hex(pub_hex_env)
-                    PrivateKey.from_hex(priv_hex_env)
+                    PublicKey(pub_hex_env)
+                    PrivateKey(priv_hex_env)
                     biscuit_public_key_hex = pub_hex_env
                     biscuit_private_key_hex = priv_hex_env
                     keys_loaded = True
@@ -195,8 +195,8 @@ def on_starting(server):
             keypair = KeyPair()
             biscuit_private_key_obj = keypair.private_key
             biscuit_public_key_obj = keypair.public_key
-            biscuit_private_key_hex = biscuit_private_key_obj.to_hex()
-            biscuit_public_key_hex = biscuit_public_key_obj.to_hex()
+            biscuit_private_key_hex = repr(biscuit_private_key_obj)
+            biscuit_public_key_hex = repr(biscuit_public_key_obj)
             keys_generated = True
             LOGGER.info("Generated new Biscuit key pair.")
 

@@ -153,7 +153,7 @@ services:
           - bw-docker
 
   bw-syslog:
-    image: balabit/syslog-ng:4.9.0
+    image: balabit/syslog-ng:4.10.2
     cap_add:
       - NET_BIND_SERVICE # Bind to low ports
       - NET_BROADCAST # Send broadcasts

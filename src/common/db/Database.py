@@ -4757,7 +4757,7 @@ class Database:
 
             global_reference = session.query(Global_values.id).filter_by(setting_id="USE_TEMPLATE", value=template_id).first()
             if global_reference:
-                return "Template is currently used by the global configuration"
+                return "Template is currently used by the global settings"
 
             service_reference = session.query(Services_settings.id).filter_by(setting_id="USE_TEMPLATE", value=template_id).first()
             if service_reference:

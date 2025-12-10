@@ -26,7 +26,7 @@
 #endif
 
 
-// see Include/shared/winapifamily.h in the Windows Kit
+/* see Include/shared/winapifamily.h in the Windows Kit */
 #if defined(WINAPI_FAMILY_PARTITION) && (!(defined(IOWIN32_USING_WINRT_API)))
 
 #if !defined(WINAPI_FAMILY_ONE_PARTITION)
@@ -89,7 +89,7 @@ static voidpf win32_build_iowin(HANDLE hFile) {
 }
 
 voidpf ZCALLBACK win32_open64_file_func(voidpf opaque, const void* filename, int mode) {
-    const char* mode_fopen = NULL;
+    (void)opaque;
     DWORD dwDesiredAccess,dwCreationDisposition,dwShareMode,dwFlagsAndAttributes ;
     HANDLE hFile = NULL;
 
@@ -117,7 +117,7 @@ voidpf ZCALLBACK win32_open64_file_func(voidpf opaque, const void* filename, int
 
 
 voidpf ZCALLBACK win32_open64_file_funcA(voidpf opaque, const void* filename, int mode) {
-    const char* mode_fopen = NULL;
+    (void)opaque;
     DWORD dwDesiredAccess,dwCreationDisposition,dwShareMode,dwFlagsAndAttributes ;
     HANDLE hFile = NULL;
 
@@ -140,7 +140,7 @@ voidpf ZCALLBACK win32_open64_file_funcA(voidpf opaque, const void* filename, in
 
 
 voidpf ZCALLBACK win32_open64_file_funcW(voidpf opaque, const void* filename, int mode) {
-    const char* mode_fopen = NULL;
+    (void)opaque;
     DWORD dwDesiredAccess,dwCreationDisposition,dwShareMode,dwFlagsAndAttributes ;
     HANDLE hFile = NULL;
 
@@ -159,7 +159,7 @@ voidpf ZCALLBACK win32_open64_file_funcW(voidpf opaque, const void* filename, in
 
 
 voidpf ZCALLBACK win32_open_file_func(voidpf opaque, const char* filename, int mode) {
-    const char* mode_fopen = NULL;
+    (void)opaque;
     DWORD dwDesiredAccess,dwCreationDisposition,dwShareMode,dwFlagsAndAttributes ;
     HANDLE hFile = NULL;
 
@@ -187,6 +187,7 @@ voidpf ZCALLBACK win32_open_file_func(voidpf opaque, const char* filename, int m
 
 
 uLong ZCALLBACK win32_read_file_func(voidpf opaque, voidpf stream, void* buf,uLong size) {
+    (void)opaque;
     uLong ret=0;
     HANDLE hFile = NULL;
     if (stream!=NULL)
@@ -208,6 +209,7 @@ uLong ZCALLBACK win32_read_file_func(voidpf opaque, voidpf stream, void* buf,uLo
 
 
 uLong ZCALLBACK win32_write_file_func(voidpf opaque, voidpf stream, const void* buf, uLong size) {
+    (void)opaque;
     uLong ret=0;
     HANDLE hFile = NULL;
     if (stream!=NULL)
@@ -247,6 +249,7 @@ static BOOL MySetFilePointerEx(HANDLE hFile, LARGE_INTEGER pos, LARGE_INTEGER *n
 }
 
 long ZCALLBACK win32_tell_file_func(voidpf opaque, voidpf stream) {
+    (void)opaque;
     long ret=-1;
     HANDLE hFile = NULL;
     if (stream!=NULL)
@@ -269,6 +272,7 @@ long ZCALLBACK win32_tell_file_func(voidpf opaque, voidpf stream) {
 }
 
 ZPOS64_T ZCALLBACK win32_tell64_file_func(voidpf opaque, voidpf stream) {
+    (void)opaque;
     ZPOS64_T ret= (ZPOS64_T)-1;
     HANDLE hFile = NULL;
     if (stream!=NULL)
@@ -293,6 +297,7 @@ ZPOS64_T ZCALLBACK win32_tell64_file_func(voidpf opaque, voidpf stream) {
 
 
 long ZCALLBACK win32_seek_file_func(voidpf opaque, voidpf stream, uLong offset, int origin) {
+    (void)opaque;
     DWORD dwMoveMethod=0xFFFFFFFF;
     HANDLE hFile = NULL;
 
@@ -330,6 +335,7 @@ long ZCALLBACK win32_seek_file_func(voidpf opaque, voidpf stream, uLong offset, 
 }
 
 long ZCALLBACK win32_seek64_file_func(voidpf opaque, voidpf stream, ZPOS64_T offset, int origin) {
+    (void)opaque;
     DWORD dwMoveMethod=0xFFFFFFFF;
     HANDLE hFile = NULL;
     long ret=-1;
@@ -368,6 +374,7 @@ long ZCALLBACK win32_seek64_file_func(voidpf opaque, voidpf stream, ZPOS64_T off
 }
 
 int ZCALLBACK win32_close_file_func(voidpf opaque, voidpf stream) {
+    (void)opaque;
     int ret=-1;
 
     if (stream!=NULL)
@@ -385,6 +392,7 @@ int ZCALLBACK win32_close_file_func(voidpf opaque, voidpf stream) {
 }
 
 int ZCALLBACK win32_error_file_func(voidpf opaque, voidpf stream) {
+    (void)opaque;
     int ret=-1;
     if (stream!=NULL)
     {

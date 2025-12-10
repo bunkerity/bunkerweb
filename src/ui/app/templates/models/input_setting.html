@@ -18,7 +18,7 @@
         <span class="input-group-text cursor-pointer rounded-end"><i class="bx bx-hide"></i></span>
     {% endif %}
     {% if setting_config %}
-        {% if current_endpoint != 'global-config' and setting_config and setting_config.get('global') and setting_value != setting_default %}
+        {% if current_endpoint != 'global-config' and current_endpoint != 'global-settings' and setting_config and setting_config.get('global') and setting_value != setting_default %}
             {% set tooltip_key = "tooltip.button.reset_global" %}
             {% set tooltip_fallback = "Reset to global value" %}
         {% else %}

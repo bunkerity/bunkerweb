@@ -11,17 +11,18 @@ from app.utils import get_blacklisted_settings
 from app.routes.utils import handle_error, wait_applying
 
 
-global_config = Blueprint("global_config", __name__)
+global_settings = Blueprint("global_settings", __name__)
 
 
-@global_config.route("/global-config", methods=["GET", "POST"])
+@global_settings.route("/global-config", methods=["GET", "POST"])
+@global_settings.route("/global-settings", methods=["GET", "POST"])
 @login_required
-def global_config_page():
+def global_settings_page():
     global_config = DB.get_config(global_only=True, methods=True)
 
     if request.method == "POST":
         if DB.readonly:
-            return handle_error("Database is in read-only mode", "global_config")
+            return handle_error("Database is in read-only mode", "global_settings")
         DATA.load_from_file()
 
         # Check variables
@@ -51,7 +52,7 @@ def global_config_page():
                     break
 
             if no_removed_settings and not variables_to_check:
-                content = "The global configuration was not edited because no values were changed."
+                content = "The global settings were not edited because no values were changed."
                 DATA["TO_FLASH"].append({"content": content, "type": "warning"})
                 DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
                 return
@@ -72,7 +73,7 @@ def global_config_page():
             operation, error = BW_CONFIG.edit_global_conf(variables, check_changes=True)
 
             if not error:
-                operation = "Global configuration successfully saved."
+                operation = "Global settings successfully saved."
 
             if operation:
                 if operation.startswith(("Can't", "The database is read-only")):
@@ -95,8 +96,8 @@ def global_config_page():
         return redirect(
             url_for(
                 "loading",
-                next=url_for("global_config.global_config_page") + f"?{'&'.join([f'{k}={v}' for k, v in arguments.items()])}",
-                message="Saving global configuration",
+                next=url_for("global_settings.global_settings_page") + f"?{'&'.join([f'{k}={v}' for k, v in arguments.items()])}",
+                message="Saving global settings",
             )
         )
     elif request.args.get("as_json", "false").lower() == "true":
@@ -104,4 +105,4 @@ def global_config_page():
 
     mode = request.args.get("mode", "advanced")
     search_type = request.args.get("type", "all")
-    return render_template("global_config.html", mode=mode, type=search_type)
+    return render_template("global_settings.html", mode=mode, type=search_type)

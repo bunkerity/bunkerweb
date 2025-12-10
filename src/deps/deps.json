@@ -282,9 +282,9 @@
     },
     {
       "id": "zlib",
-      "name": "zlib v1.3.1",
+      "name": "zlib v1.3.1.2",
       "url": "https://github.com/madler/zlib.git",
-      "commit": "51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf",
+      "commit": "570720b0c24f9686c33f35a1b3165c1f568b96be",
       "post_install": "rm -r src/deps/src/zlib/doc src/deps/src/zlib/examples"
     }
   ]

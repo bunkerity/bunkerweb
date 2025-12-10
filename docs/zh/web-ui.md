@@ -509,6 +509,9 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
     -   `TOTP_ENCRYPTION_KEYS` (或 `TOTP_SECRETS`)：以空格分隔的 TOTP 加密密钥列表或一个字典（例如：`{"1": "mysecretkey"}` 或 `mysecretkey` 或 `mysecretkey mysecretkey1`）。**如果您想使用 2FA，我们强烈建议您设置此变量，因为它将用于加密 TOTP 密钥**（如果未设置，将生成一个随机数量的密钥）。有关更多信息，请查看 [passlib 文档](https://passlib.readthedocs.io/en/stable/narr/totp-tutorial.html#application-secrets)。
     -   `UI_LISTEN_ADDR` (首选)：Web UI 将监听的地址（**Docker 镜像**中默认为 `0.0.0.0`，**Linux 安装**中默认为 `127.0.0.1`）。如果未设置，则回退到 `LISTEN_ADDR`。
     -   `UI_LISTEN_PORT` (首选)：Web UI 将监听的端口（默认为 `7000`）。如果未设置，则回退到 `LISTEN_PORT`。
+    -   `UI_SSL_ENABLED`：将其设置为 `yes`/`true`/`on` 以在 UI 服务上启用 TLS（默认为 `no`）。如果未设置，则回退到 `SSL_ENABLED`。
+    -   `UI_SSL_CERTFILE` 和 `UI_SSL_KEYFILE`：启用 `UI_SSL_ENABLED` 时使用的证书和私钥路径。如果未设置，则回退到 `SSL_CERTFILE` 和 `SSL_KEYFILE`。
+    -   `UI_SSL_CA_CERTS`：如需加载中间证书时，可选的 CA/链文件路径。如果未设置，则回退到 `SSL_CA_CERTS`。
     -   `MAX_WORKERS`：Web UI 使用的工作进程数（默认为 CPU 数量）。
     -   `MAX_THREADS`：Web UI 使用的线程数（默认为 `MAX_WORKERS` * 2）。
     -   `FORWARDED_ALLOW_IPS`：允许在 `X-Forwarded-For` 标头中使用的 IP 地址或网络列表（**Docker 镜像**中默认为 `*`，**Linux 安装**中默认为 `127.0.0.1`）。

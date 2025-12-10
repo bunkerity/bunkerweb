@@ -5,6 +5,7 @@ from contextlib import suppress
 from importlib import import_module
 from glob import glob
 from math import ceil
+import multiprocessing as mp
 from os import cpu_count
 from os.path import basename, join, sep
 from pathlib import Path
@@ -177,6 +178,13 @@ def create_custom_undefined_class(default_config: Dict[str, Any]):
     return ConfigurableCustomUndefined
 
 
+def _ensure_fork_start_method() -> None:
+    """Force fork start method when available so child processes inherit globals."""
+    with suppress(RuntimeError):
+        if mp.get_start_method(allow_none=True) != "fork":
+            mp.set_start_method("fork")
+
+
 class Templator:
     """A class to render configuration files using Jinja2 templates."""
 
@@ -249,6 +257,7 @@ class Templator:
 
     def render(self) -> None:
         """Render the templates based on the provided configuration."""
+        _ensure_fork_start_method()
         self._render_global()
         servers = [self._config.get("SERVER_NAME", "www.example.com").strip()]
         if self._config.get("MULTISITE", "no") == "yes":

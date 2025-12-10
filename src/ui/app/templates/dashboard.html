@@ -13,7 +13,7 @@
                         <!-- prettier-ignore -->
                         <div class="d-flex justify-content-between align-items-center mb-5">
                             {% include "breadcrumb.html" %}
-                            {% if current_endpoint == "global-config" or (current_endpoint != "services" and "services" in request.path) or (current_endpoint != "templates" and "templates" in request.path) %}
+                            {% if current_endpoint == "global-config" or current_endpoint == "global-settings" or (current_endpoint != "services" and "services" in request.path) or (current_endpoint != "templates" and "templates" in request.path) %}
                                 <!-- Floating button to toggle the menu -->
                                 <div class="position-fixed bottom-0 start-0 m-3 d-lg-none"
                                      id="floating-modes-menu">
@@ -31,7 +31,7 @@
                                     <div class="collapse mt-2" id="mode-selection-floating">
                                         <ul class="nav nav-pills flex-column bg-{% if theme == 'light' %}white{% else %}dark{% endif %} p-2 rounded shadow-sm mode-selection-menu"
                                             role="tablist">
-                                            {% if current_endpoint != "global-config" %}
+                                            {% if current_endpoint != "global-config" and current_endpoint != "global-settings" %}
                                                 <li class="nav-item mb-1" role="presentation">
                                                     <button type="button"
                                                             class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'easy' %} active{% endif %}"
@@ -79,7 +79,7 @@
                                 </div>
                                 <ul class="nav nav-pills flex-column flex-md-row d-none d-lg-flex mode-selection-menu"
                                     role="tablist">
-                                    {% if current_endpoint != "global-config" %}
+                                    {% if current_endpoint != "global-config" and current_endpoint != "global-settings" %}
                                         <li class="nav-item me-0 me-sm-3" role="presentation">
                                             <button type="button"
                                                     class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'easy' %} active{% endif %}"

@@ -1267,7 +1267,7 @@ Algunas integraciones proporcionan formas más convenientes de aplicar configura
     **Usando etiquetas**
 
     !!! warning "Limitaciones al usar etiquetas"
-        Cuando usas etiquetas con la integración de autoconfiguración de Docker, solo puedes aplicar configuraciones personalizadas para el servicio web correspondiente. No es posible aplicar configuraciones **http**, **default-server-http**, **stream** o cualquier configuración global (como **server-http** o **server-stream** para todos los servicios): necesitarás montar archivos para ese propósito.
+        Cuando usas etiquetas con la integración de autoconfiguración de Docker, solo puedes aplicar configuraciones personalizadas para el servicio web correspondiente. No es posible aplicar configuraciones **http**, **default-server-http**, **stream** o cualquier ajuste global (como **server-http** o **server-stream** para todos los servicios): necesitarás montar archivos para ese propósito.
 
     Las etiquetas a usar deben seguir el patrón `bunkerweb.CUSTOM_CONF_<TYPE>_<NAME>`:
 
@@ -1388,7 +1388,7 @@ Algunas integraciones proporcionan formas más convenientes de aplicar configura
             bunkerweb.io/CONFIG_TYPE: "settings"
         data:
           USE_ANTIBOT: "captcha" # configuración multisitio que se aplicará a todos los servicios que no la sobrescriban
-          USE_REDIS: "yes" # configuración global que se aplicará globalmente
+          USE_REDIS: "yes" # ajuste global que se aplicará globalmente
           ...
         ```
 
@@ -2837,7 +2837,7 @@ services:
 
 Esta configuración asegura que los registros se roten, evitando que llenen su disco. Puede aplicar esto a cualquier servicio en su configuración de Docker Compose.
 
-**Configuración global (daemon.json)**
+**Ajustes globales (daemon.json)**
 
 Si desea aplicar esta configuración de registro a todos los contenedores en el host por defecto, puede configurar el demonio de Docker editando (o creando) el archivo `/etc/docker/daemon.json`:
 
@@ -2857,7 +2857,7 @@ Después de modificar `daemon.json`, debe reiniciar el demonio de Docker para qu
 sudo systemctl restart docker
 ```
 
-Esta configuración global será heredada por todos los contenedores. Sin embargo, cualquier configuración de registro definida por servicio en un archivo `docker-compose.yml` anulará la configuración global en `daemon.json`.
+Estos ajustes globales serán heredados por todos los contenedores. Sin embargo, cualquier configuración de registro definida por servicio en un archivo `docker-compose.yml` anulará los ajustes globales en `daemon.json`.
 
 ## Ajuste de seguridad {#security-tuning}
 

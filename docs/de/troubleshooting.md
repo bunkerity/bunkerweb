@@ -547,7 +547,7 @@ Falls Sie Ihre UI-Anmeldeinformationen vergessen haben oder Probleme mit 2FA hab
     Verwenden Sie die **Support-Seite** in der Web-UI, um schnell Konfigurationen und Protokolle zur Fehlerbehebung zu sammeln.
 
     - Öffnen Sie die Web-UI und gehen Sie zur Support-Seite.
-    - Wählen Sie den Geltungsbereich: Exportieren Sie die globale Konfiguration oder wählen Sie einen bestimmten Dienst aus.
+    - Wählen Sie den Geltungsbereich: Exportieren Sie die globalen Einstellungen oder wählen Sie einen bestimmten Dienst aus.
     - Klicken Sie, um das Konfigurationsarchiv für den ausgewählten Geltungsbereich herunterzuladen.
     - Laden Sie optional Protokolle herunter: Die exportierten Protokolle werden automatisch anonymisiert (alle IP-Adressen und Domains werden maskiert).
 

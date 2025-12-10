@@ -46,7 +46,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
     === "Web UI"
 
-        导航到**全局配置**页面，选择 **Real IP** 插件并填写以下设置：
+        导航到**全局设置**页面，选择 **Real IP** 插件并填写以下设置：
 
         <figure markdown>![使用 Web UI 的真实 IP 设置（HTTP 头）](assets/img/advanced-proxy1.png){ align=center }<figcaption>使用 Web UI 的真实 IP 设置（HTTP 头）</figcaption></figure>
 
@@ -208,7 +208,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
     === "Web UI"
 
-        导航到**全局配置**页面，选择 **Real IP** 插件并填写以下设置：
+        导航到**全局设置**页面，选择 **Real IP** 插件并填写以下设置：
 
         <figure markdown>![使用 Web UI 的真实 IP 设置（PROXY 协议）](assets/img/advanced-proxy2.png){ align=center }<figcaption>使用 Web UI 的真实 IP 设置（PROXY 协议）</figcaption></figure>
 
@@ -874,7 +874,7 @@ systemctl status systemd-resolved
 
 === "Web UI"
 
-    导航到**全局配置**页面，并将 DNS 解析器设置为 `127.0.0.53`
+    导航到**全局设置**页面，并将 DNS 解析器设置为 `127.0.0.53`
 
     <figure markdown>![使用 Web UI 设置 DNS 解析器](assets/img/advanced-dns-resolvers.png){ align=center }<figcaption>使用 Web UI 设置 DNS 解析器</figcaption></figure>
 
@@ -942,7 +942,7 @@ systemctl status systemd-resolved
 
     === "Web UI"
 
-        导航到**全局配置**页面，选择 **NGINX** 插件并将 DNS 解析器设置为 `127.0.0.1`。
+        导航到**全局设置**页面，选择 **NGINX** 插件并将 DNS 解析器设置为 `127.0.0.1`。
 
         <figure markdown>![使用 Web UI 设置 DNS 解析器](assets/img/advanced-dns-resolvers2.png){ align=center }<figcaption>使用 Web UI 设置 DNS 解析器</figcaption></figure>
 
@@ -1070,7 +1070,7 @@ systemctl status systemd-resolved
 
 === "Web UI"
 
-    导航到**配置**页面，点击**创建新的自定义配置**，然后您可以选择是全局配置还是特定于服务的配置，以及配置类型和配置名称：
+    导航到**配置**页面，点击**创建新的自定义配置**，然后您可以选择是全局设置还是特定于服务的配置，以及配置类型和配置名称：
 
     <figure markdown>![使用 Web UI 的自定义配置](assets/img/advanced-config.png){ align=center }<figcaption>使用 Web UI 的自定义配置</figcaption></figure>
 
@@ -1267,7 +1267,7 @@ systemctl status systemd-resolved
     **使用标签**
 
     !!! warning "使用标签的限制"
-        当使用 Docker autoconf 集成的标签时，您只能为相应的 Web 服务应用自定义配置。应用 **http**、**default-server-http**、**stream** 或任何全局配置（例如所有服务的 **server-http** 或 **server-stream**）是不可能的：您需要为此挂载文件。
+        当使用 Docker autoconf 集成的标签时，您只能为相应的 Web 服务应用自定义配置。应用 **http**、**default-server-http**、**stream** 或任何全局设置（例如所有服务的 **server-http** 或 **server-stream**）是不可能的：您需要为此挂载文件。
 
     要使用的标签必须遵循 `bunkerweb.CUSTOM_CONF_<TYPE>_<NAME>` 的模式：
 
@@ -2814,7 +2814,7 @@ log {
 
 使用 Docker 时，管理容器日志以防止其占用过多磁盘空间非常重要。默认情况下，Docker 使用 `json-file` 日志记录驱动程序，如果未进行配置，可能会导致日志文件非常大。
 
-为避免这种情况，您可以配置日志轮换。这可以在您的 `docker-compose.yml` 文件中为特定服务配置，也可以为 Docker 守护进程全局配置。
+为避免这种情况，您可以配置日志轮换。这可以在您的 `docker-compose.yml` 文件中为特定服务配置，也可以为 Docker 守护进程全局设置。
 
 **按服务配置**
 
@@ -2834,7 +2834,7 @@ services:
 
 此配置可确保日志轮换，防止它们占满您的磁盘。您可以将其应用于 Docker Compose 设置中的任何服务。
 
-**全局配置 (daemon.json)**
+**全局设置 (daemon.json)**
 
 如果您想默认将这些日志记录设置应用于主机上的所有容器，您可以通过编辑（或创建）`/etc/docker/daemon.json` 文件来配置 Docker 守护进程：
 
@@ -2854,7 +2854,7 @@ services:
 sudo systemctl restart docker
 ```
 
-此全局配置将由所有容器继承。但是，在 `docker-compose.yml` 文件中按服务定义的任何日志记录配置都将覆盖 `daemon.json` 中的全局设置。
+这些全局设置将由所有容器继承。但是，在 `docker-compose.yml` 文件中按服务定义的任何日志记录配置都将覆盖 `daemon.json` 中的全局设置。
 
 ## 安全性调整 {#security-tuning}
 

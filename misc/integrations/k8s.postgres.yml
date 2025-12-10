@@ -214,7 +214,7 @@ spec:
     spec:
       containers:
         - name: bunkerweb-db
-          image: postgres:17-alpine
+          image: postgres:18-alpine
           imagePullPolicy: Always
           env:
             - name: POSTGRES_DB

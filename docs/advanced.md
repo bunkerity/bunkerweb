@@ -46,7 +46,7 @@ You will find more settings about real IP in the [features section](features.md#
 
     === "Web UI"
 
-        Navigate to the **Global config** page, select the **Real IP** plugin and fill out the following settings :
+        Navigate to the **Global Settings** page, select the **Real IP** plugin and fill out the following settings :
 
         <figure markdown>![Real IP settings (header) using web UI](assets/img/advanced-proxy1.png){ align=center }<figcaption>Real IP settings (header) using web UI</figcaption></figure>
 
@@ -208,7 +208,7 @@ You will find more settings about real IP in the [features section](features.md#
 
     === "Web UI"
 
-        Navigate to the **Global config** page, select the **Real IP** plugin and fill out the following settings :
+        Navigate to the **Global Settings** page, select the **Real IP** plugin and fill out the following settings :
 
         <figure markdown>![Real IP settings (PROXY protocol) using web UI](assets/img/advanced-proxy2.png){ align=center }<figcaption>Real IP settings (PROXY protocol) using web UI</figcaption></figure>
 
@@ -874,7 +874,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
 
 === "Web UI"
 
-    Navigate to the **Global config** page and set the DNS resolvers to `127.0.0.53`
+    Navigate to the **Global Settings** page and set the DNS resolvers to `127.0.0.53`
 
     <figure markdown>![DNS resolvers setting using web UI](assets/img/advanced-dns-resolvers.png){ align=center }<figcaption>DNS resolvers setting using web UI</figcaption></figure>
 
@@ -942,7 +942,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
 
     === "Web UI"
 
-        Navigate to the **Global config** page, select the **NGINX** plugin and set the DNS resolvers to `127.0.0.1`.
+        Navigate to the **Global Settings** page, select the **NGINX** plugin and set the DNS resolvers to `127.0.0.1`.
 
         <figure markdown>![DNS resolvers setting using web UI](assets/img/advanced-dns-resolvers2.png){ align=center }<figcaption>DNS resolvers setting using web UI</figcaption></figure>
 
@@ -1267,7 +1267,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
     **Using labels**
 
     !!! warning "Limitations using labels"
-        When using labels with the Docker autoconf integration, you can only apply custom configurations for the corresponding web service. Applying **http**, **default-server-http**, **stream** or any global configurations (like **server-http** or **server-stream** for all services) is not possible : you will need to mount files for that purpose.
+        When using labels with the Docker autoconf integration, you can only apply custom configurations for the corresponding web service. Applying **http**, **default-server-http**, **stream** or any global settings (like **server-http** or **server-stream** for all services) is not possible : you will need to mount files for that purpose.
 
     The labels to use must follow the pattern `bunkerweb.CUSTOM_CONF_<TYPE>_<NAME>` :
 
@@ -2836,7 +2836,7 @@ services:
 
 This configuration ensures that logs are rotated, preventing them from filling up your disk. You can apply this to any service in your Docker Compose setup.
 
-**Global configuration (daemon.json)**
+**Global settings (daemon.json)**
 
 If you want to apply these logging settings to all containers on the host by default, you can configure the Docker daemon by editing (or creating) the `/etc/docker/daemon.json` file:
 
@@ -2856,7 +2856,7 @@ After modifying `daemon.json`, you need to restart the Docker daemon for the cha
 sudo systemctl restart docker
 ```
 
-This global configuration will be inherited by all containers. However, any logging configuration defined on a per-service basis in a `docker-compose.yml` file will override the global settings in `daemon.json`.
+These global settings will be inherited by all containers. However, any logging configuration defined on a per-service basis in a `docker-compose.yml` file will override the global settings in `daemon.json`.
 
 ## Security tuning {#security-tuning}
 

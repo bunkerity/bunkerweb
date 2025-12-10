@@ -223,11 +223,11 @@ class RunJobsRequest(BaseModel):
     jobs: List[JobItem] = Field(..., min_length=1)
 
 
-# Global config
+# Global settings
 Scalar = Union[str, int, float, bool, None]
 
 
-class GlobalConfigUpdate(RootModel[Dict[str, Scalar]]):
+class GlobalSettingsUpdate(RootModel[Dict[str, Scalar]]):
     @field_validator("root")
     @classmethod
     def _validate_scalars(cls, v: Dict[str, Scalar]) -> Dict[str, Scalar]:

@@ -64,7 +64,7 @@ from app.routes.about import about
 from app.routes.bans import bans
 from app.routes.cache import cache
 from app.routes.configs import configs
-from app.routes.global_config import global_config
+from app.routes.global_settings import global_settings
 from app.routes.home import home
 from app.routes.instances import instances
 from app.routes.jobs import jobs
@@ -92,7 +92,7 @@ BLUEPRINTS = (
     logout,
     instances,
     plugins,
-    global_config,
+    global_settings,
     pro,
     cache,
     logs,
@@ -917,8 +917,10 @@ def before_request():
         # Requests from other sources
         app.config["SESSION_COOKIE_NAME"] = "bw_ui_session"
         app.config["SESSION_COOKIE_SECURE"] = False
+        app.config["SESSION_COOKIE_DOMAIN"] = False
         app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_token"
         app.config["REMEMBER_COOKIE_SECURE"] = False
+        app.config["REMEMBER_COOKIE_DOMAIN"] = False
 
     metadata = None
     app.config["SCRIPT_NONCE"] = token_urlsafe(32)

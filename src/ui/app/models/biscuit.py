@@ -5,7 +5,18 @@ from traceback import format_exc
 from typing import Optional
 
 from flask import Flask, current_app, render_template, request, session
-from biscuit_auth import Biscuit, BiscuitBuilder, Check, Policy, PrivateKey, PublicKey, Authorizer, Fact, BiscuitValidationError, AuthorizationError
+from biscuit_auth import (
+    Biscuit,
+    BiscuitBuilder,
+    Check,
+    Policy,
+    PrivateKey,
+    PublicKey,
+    AuthorizerBuilder,
+    Fact,
+    BiscuitValidationError,
+    AuthorizationError,
+)
 from flask_login import current_user
 from flask import redirect, url_for
 
@@ -44,7 +55,7 @@ class BiscuitMiddleware:
 
             try:
                 if root_public_key_path.exists():
-                    self.root_public_key = PublicKey.from_hex(root_public_key_path.read_text().strip())
+                    self.root_public_key = PublicKey(root_public_key_path.read_text().strip())
             except BaseException as e:
                 raise ValueError(f"Failed to load public key from {root_public_key_path}: {e}")
         else:
@@ -80,8 +91,7 @@ class BiscuitMiddleware:
         max_retries = 3
         for attempt in range(max_retries):
             try:
-                authorizer = Authorizer()
-                authorizer.add_token(token)
+                authorizer = AuthorizerBuilder()
 
                 authorizer.add_check(Check(f'check if version("{get_version()}")'))
                 if current_app.config["CHECK_PRIVATE_IP"] or not ip_address(request.remote_addr).is_private:
@@ -90,7 +100,7 @@ class BiscuitMiddleware:
                 authorizer.add_policy(Policy("allow if true"))
 
                 current_app.logger.debug(str(authorizer))
-                authorizer.authorize()
+                authorizer.build(token).authorize()
                 break  # Success, exit retry loop
             except AuthorizationError as e:
                 if "Reached Datalog execution limits" in str(e) and attempt < max_retries - 1:
@@ -108,8 +118,7 @@ class BiscuitMiddleware:
 
         for attempt in range(max_retries):
             try:
-                authorizer = Authorizer()
-                authorizer.add_token(token)
+                authorizer = AuthorizerBuilder()
 
                 authorizer.add_fact(Fact(f'resource("{request.path}")'))
                 authorizer.add_fact(Fact(f'operation("{operation}")'))
@@ -122,7 +131,7 @@ class BiscuitMiddleware:
                 authorizer.add_policy(Policy("allow if role($role_name, $permissions), operation($operation_name), $permissions.contains($operation_name)"))
 
                 current_app.logger.debug(str(authorizer))
-                authorizer.authorize()
+                authorizer.build(token).authorize()
                 break  # Success, exit retry loop
             except AuthorizationError as e:
                 if "Reached Datalog execution limits" in str(e) and attempt < max_retries - 1:
@@ -230,7 +239,7 @@ class BiscuitTokenFactory:
             domain("{request.host}");
             version("{get_version()}");
             """
-        )  # Start with basic user fact
+        )  # Start with basic user facts
 
         self._apply_core_role_permissions(builder, role)  # Apply core role permissions
 

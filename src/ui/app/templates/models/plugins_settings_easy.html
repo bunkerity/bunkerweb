@@ -65,7 +65,7 @@
             <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.fetch_global">Fetch Global</span>
         </span>
     </button>
-    {% if current_endpoint != "global-config" %}
+    {% if current_endpoint != "global-config" and current_endpoint != 'global-settings' %}
         <div {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
             <button type="button"
                     class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}disabled{% endif %}">
@@ -193,7 +193,7 @@
                                                         {% set setting_value = setting_config.get("value", setting_default) %}
                                                         {% set setting_method = setting_config.get("method", "default") %}
                                                         {% set setting_template = setting_config.get("template", "") %}
-                                                        {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
+                                                        {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or current_endpoint == "global-settings" or not setting_config.get("global")) %}
                                                         {% set required = setting == "SERVER_NAME" %}
                                                         {% if current_endpoint == "new" %}
                                                             {% set disabled = false %}
@@ -214,7 +214,7 @@
                                                                     {{ setting_data["label"] }}
                                                                 </label>
                                                                 <div class="d-flex align-items-center">
-                                                                    {% if current_endpoint == "global-config" and setting_data["context"] == "multisite" %}
+                                                                    {% if (current_endpoint == "global-config" or current_endpoint == "global-settings") and setting_data["context"] == "multisite" %}
                                                                         <a role="badge"
                                                                            href='{{ docs_url("/concepts", "#multisite-mode") }}'
                                                                            class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1 docs-link"
@@ -244,18 +244,18 @@
                                                                               data-bs-original-title="Cloned from service {{ clone }}">
                                                                             <span class="bx bx-copy-alt bx-xs"></span>
                                                                         </span>
-                                                                    {% elif current_endpoint not in ("new", "global-config") and setting_config.get("global") and setting_value != setting_default %}
+                                                                    {% elif current_endpoint not in ("new", "global-config", "global-settings") and setting_config.get("global") and setting_value != setting_default %}
                                                                         <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
                                                                               data-bs-toggle="tooltip"
                                                                               data-bs-placement="top"
-                                                                              data-bs-original-title="From global configuration">
+                                                                              data-bs-original-title="From global settings">
                                                                             <span class="bx bx-globe bx-xs"></span>
                                                                         </span>
                                                                     {% endif %}
                                                                     <span class="badge badge-center rounded-pill bg-info-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1 visually-hidden global-override-badge"
                                                                           data-bs-toggle="tooltip"
                                                                           data-bs-placement="top"
-                                                                          data-bs-original-title="Value from global configuration"
+                                                                          data-bs-original-title="Value from global settings"
                                                                           data-i18n="tooltip.value_from_global">
                                                                         <i class="bx bx-download bx-xs"></i>
                                                                     </span>
@@ -399,7 +399,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" data-i18n="modal.title.fetch_global_config">Apply global settings?</h5>
+                <h5 class="modal-title" data-i18n="modal.title.fetch_global_settings">Apply global settings?</h5>
                 <button type="button"
                         class="btn-close"
                         data-bs-dismiss="modal"
@@ -408,13 +408,13 @@
             </div>
             <div class="modal-body">
                 <div class="alert alert-info" role="alert">
-                    <div class="fw-bold" data-i18n="modal.body.fetch_global_config_bold">
-                        This will fetch the global configuration and apply it to the current template.
+                    <div class="fw-bold" data-i18n="modal.body.fetch_global_settings_bold">
+                        This will fetch the global settings and apply them to the current template.
                     </div>
                     <ul class="mt-2 mb-0 ps-3">
-                        <li data-i18n="modal.body.fetch_global_config_point_1">Only settings present in this template are updated.</li>
-                        <li data-i18n="modal.body.fetch_global_config_point_2">Values identical to defaults are ignored.</li>
-                        <li data-i18n="modal.body.fetch_global_config_point_3">SERVER_NAME is never overridden.</li>
+                        <li data-i18n="modal.body.fetch_global_settings_point_1">Only settings present in this template are updated.</li>
+                        <li data-i18n="modal.body.fetch_global_settings_point_2">Values identical to defaults are ignored.</li>
+                        <li data-i18n="modal.body.fetch_global_settings_point_3">SERVER_NAME is never overridden.</li>
                     </ul>
                 </div>
             </div>
@@ -422,7 +422,7 @@
                 <button id="confirm-fetch-global-config"
                         class="btn btn-outline-info"
                         data-bs-dismiss="modal"
-                        data-i18n="modal.button.fetch_global_config_confirm">Apply global settings</button>
+                        data-i18n="modal.button.fetch_global_settings_confirm">Apply global settings</button>
             </div>
         </div>
     </div>

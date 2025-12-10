@@ -2712,7 +2712,7 @@ The **BunkerWeb controller** automatically discovers pods with BunkerWeb sidecar
 ```yaml
 controller:
   enabled: true
-  tag: "1.6.5"
+  tag: "1.6.6"
 ```
 
 2. For each sidecar, add:
@@ -2805,7 +2805,7 @@ In your BunkerWeb chart `values.yaml`, configure the `BUNKERWEB_INSTANCES` envir
 
 ```yaml
 scheduler:
-  tag: "1.6.5"
+  tag: "1.6.6"
   extraEnvs:
     - name: BUNKERWEB_INSTANCES
       value: "http://app1-bunkerweb-workers.namespace.svc.cluster.local:5000 http://app2-bunkerweb-workers.namespace.svc.cluster.local:5000"
@@ -2849,7 +2849,7 @@ spec:
 
         # BunkerWeb Sidecar
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.6-rc2
+          image: bunkerity/bunkerweb:1.6.6
           ports:
             - containerPort: 8080  # Exposed HTTP port
             - containerPort: 5000  # Internal API (mandatory)
@@ -3419,7 +3419,7 @@ Und Sie können nun zum Einrichtungsassistenten gehen, indem Sie zu `https://bun
 
 **Schutz einer bestehenden Anwendung**
 
-**Zuerst müssen Sie zu Global Config gehen, das SSL-Plugin auswählen und dann die automatische Weiterleitung von HTTP zu HTTPS deaktivieren. Bitte beachten Sie, dass Sie dies nur einmal tun müssen.**
+**Zuerst müssen Sie zu den Globalen Einstellungen gehen, das SSL-Plugin auswählen und dann die automatische Weiterleitung von HTTP zu HTTPS deaktivieren. Bitte beachten Sie, dass Sie dies nur einmal tun müssen.**
 
 Nehmen wir an, Sie haben eine Anwendung im Namespace `myapp`, die über den Dienst `myapp-service` auf Port `5000` zugänglich ist.
 

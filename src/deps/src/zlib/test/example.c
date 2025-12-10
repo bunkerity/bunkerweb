@@ -5,6 +5,10 @@
 
 /* @(#) $Id$ */
 
+#if defined(_WIN32) && !defined(_CRT_SECURE_NO_WARNINGS)
+#  define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include "zlib.h"
 #include <stdio.h>
 
@@ -13,8 +17,10 @@
 #  include <stdlib.h>
 #endif
 
-#if defined(VMS) || defined(RISCOS)
+#if defined(VMS)
 #  define TESTFILE "foo-gz"
+#elif defined(__riscos) && !defined(__TARGET_UNIXLIB__)
+#  define TESTFILE "foo/gz"
 #else
 #  define TESTFILE "foo.gz"
 #endif

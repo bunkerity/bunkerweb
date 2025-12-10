@@ -2712,7 +2712,7 @@ The **BunkerWeb controller** automatically discovers pods with BunkerWeb sidecar
 ```yaml
 controller:
   enabled: true
-  tag: "1.6.5"
+  tag: "1.6.6"
 ```
 
 2. For each sidecar, add:
@@ -2805,7 +2805,7 @@ In your BunkerWeb chart `values.yaml`, configure the `BUNKERWEB_INSTANCES` envir
 
 ```yaml
 scheduler:
-  tag: "1.6.5"
+  tag: "1.6.6"
   extraEnvs:
     - name: BUNKERWEB_INSTANCES
       value: "http://app1-bunkerweb-workers.namespace.svc.cluster.local:5000 http://app2-bunkerweb-workers.namespace.svc.cluster.local:5000"
@@ -2849,7 +2849,7 @@ spec:
 
         # BunkerWeb Sidecar
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.6-rc2
+          image: bunkerity/bunkerweb:1.6.6
           ports:
             - containerPort: 8080  # Exposed HTTP port
             - containerPort: 5000  # Internal API (mandatory)
@@ -3419,7 +3419,7 @@ spec:
 
 **保护现有应用程序**
 
-**首先，您需要进入全局配置，选择 SSL 插件，然后禁用自动将 HTTP 重定向到 HTTPS。请注意，您只需要执行一次。**
+**首先，您需要进入全局设置，选择 SSL 插件，然后禁用自动将 HTTP 重定向到 HTTPS。请注意，您只需要执行一次。**
 
 假设您在 `myapp` 命名空间中有一个应用程序，该应用程序可以通过 `myapp-service` 服务在端口 `5000` 上访问。
 

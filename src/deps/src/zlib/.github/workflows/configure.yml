@@ -26,7 +26,7 @@ jobs:
             compiler: arm-linux-gnueabi-gcc
             configure-args: --warn
             chost: arm-linux-gnueabi
-            packages: qemu qemu-user gcc-arm-linux-gnueabi libc-dev-armel-cross
+            packages: qemu-system qemu-user gcc-arm-linux-gnueabi libc-dev-armel-cross
             qemu-run: qemu-arm -L /usr/arm-linux-gnueabi
 
           - name: Ubuntu GCC ARM HF
@@ -34,7 +34,7 @@ jobs:
             compiler: arm-linux-gnueabihf-gcc
             configure-args: --warn
             chost: arm-linux-gnueabihf
-            packages: qemu qemu-user gcc-arm-linux-gnueabihf libc-dev-armhf-cross
+            packages: qemu-system qemu-user gcc-arm-linux-gnueabihf libc-dev-armhf-cross
             qemu-run: qemu-arm -L /usr/arm-linux-gnueabihf
 
           - name: Ubuntu GCC AARCH64
@@ -42,7 +42,7 @@ jobs:
             compiler: aarch64-linux-gnu-gcc
             configure-args: --warn
             chost: aarch64-linux-gnu
-            packages: qemu qemu-user gcc-aarch64-linux-gnu libc-dev-arm64-cross
+            packages: qemu-system qemu-user gcc-aarch64-linux-gnu libc-dev-arm64-cross
             qemu-run: qemu-aarch64 -L /usr/aarch64-linux-gnu
 
           - name: Ubuntu GCC PPC
@@ -50,7 +50,7 @@ jobs:
             compiler: powerpc-linux-gnu-gcc
             configure-args: --warn --static
             chost: powerpc-linux-gnu
-            packages: qemu qemu-user gcc-powerpc-linux-gnu libc-dev-powerpc-cross
+            packages: qemu-system qemu-user gcc-powerpc-linux-gnu libc-dev-powerpc-cross
             qemu-run: qemu-ppc -L /usr/powerpc-linux-gnu
             cflags: -static
             ldflags: -static
@@ -60,7 +60,7 @@ jobs:
             compiler: powerpc64-linux-gnu-gcc
             configure-args: --warn --static
             chost: powerpc-linux-gnu
-            packages: qemu qemu-user gcc-powerpc64-linux-gnu libc-dev-ppc64-cross
+            packages: qemu-system qemu-user gcc-powerpc64-linux-gnu libc-dev-ppc64-cross
             qemu-run: qemu-ppc64 -L /usr/powerpc64-linux-gnu
             cflags: -static
             ldflags: -static
@@ -70,7 +70,7 @@ jobs:
             compiler: powerpc64le-linux-gnu-gcc
             configure-args: --warn
             chost: powerpc64le-linux-gnu
-            packages: qemu qemu-user gcc-powerpc64le-linux-gnu libc-dev-ppc64el-cross
+            packages: qemu-system qemu-user gcc-powerpc64le-linux-gnu libc-dev-ppc64el-cross
             qemu-run: qemu-ppc64le -L /usr/powerpc64le-linux-gnu
 
           - name: Ubuntu GCC S390X
@@ -78,14 +78,24 @@ jobs:
             compiler: s390x-linux-gnu-gcc
             configure-args: --warn --static
             chost: s390x-linux-gnu
-            packages: qemu qemu-user gcc-s390x-linux-gnu libc-dev-s390x-cross
+            packages: qemu-system qemu-user gcc-s390x-linux-gnu libc-dev-s390x-cross
             qemu-run: qemu-s390x -L /usr/s390x-linux-gnu
             cflags: -static
             ldflags: -static
 
-          - name: macOS GCC
+          - name: macOS GCC 13
             os: macos-latest
-            compiler: gcc-11
+            compiler: gcc-13
+            configure-args: --warn
+
+          - name: macOS GCC 14
+            os: macos-latest
+            compiler: gcc-14
+            configure-args: --warn
+
+          - name: macOS GCC 15
+            os: macos-latest
+            compiler: gcc-15
             configure-args: --warn
 
           - name: macOS Clang
@@ -95,7 +105,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Install packages (Ubuntu)
       if: runner.os == 'Linux' && matrix.packages
@@ -127,7 +137,7 @@ jobs:
         QEMU_RUN: ${{ matrix.qemu-run }}
 
     - name: Upload build errors
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: failure()
       with:
         name: ${{ matrix.name }} (configure)

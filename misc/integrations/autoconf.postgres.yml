@@ -47,7 +47,7 @@ services:
       - bw-db
 
   bw-db:
-    image: postgres:17-alpine
+    image: postgres:18-alpine
     environment:
       POSTGRES_USER: "bunkerweb"
       POSTGRES_PASSWORD: "changeme" # Remember to set a stronger password for the database

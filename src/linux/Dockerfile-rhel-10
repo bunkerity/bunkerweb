@@ -19,7 +19,7 @@ RUN dnf install -y wget make yum-utils dnf-plugins-core && \
   dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm && \
   rpm -e --nodeps openssl-fips-provider-so || true && \
   dnf config-manager --set-enabled crb || true && \
-  dnf install -y --skip-broken --setopt=install_weak_deps=False openssl-libs openssl-devel readline-devel python3 python3-devel brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl libxslt bash gd gd-devel gcc-c++ gawk libtool pcre2 pcre2-devel automake autoconf gcc make git zlib-devel libxml2-devel pkgconf libcurl-devel libmaxminddb && \
+  dnf install -y --skip-broken --setopt=install_weak_deps=False openssl-libs openssl-devel readline-devel python3.12 python3.12-devel brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl libxslt bash gd gd-devel gcc-c++ gawk libtool pcre2 pcre2-devel automake autoconf gcc make git zlib-devel libxml2-devel pkgconf libcurl-devel libmaxminddb && \
   dnf install -y https://nginx.org/packages/rhel/10/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el10.ngx.$(uname -m).rpm
 
 WORKDIR /tmp/bunkerweb/deps
@@ -46,9 +46,9 @@ WORKDIR /usr/share/bunkerweb
 # Compile and install dependencies
 RUN export MAKEFLAGS="-j$(nproc)" && \
   mkdir -p deps/python && \
-  python3 -m ensurepip --upgrade && \
-  python3 -m pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
-  python3 -m pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
+  python3.12 -m ensurepip && \
+  python3.12 -m pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
+  python3.12 -m pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
 RUN dnf install -y pigz && \
   tar --use-compress-program="pigz -1 -p$(nproc)" -cf deps.tar.gz deps && \

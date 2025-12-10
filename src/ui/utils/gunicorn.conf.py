@@ -53,6 +53,16 @@ LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "info"))
 LISTEN_ADDR = getenv("UI_LISTEN_ADDR", getenv("LISTEN_ADDR", "0.0.0.0"))
 LISTEN_PORT = getenv("UI_LISTEN_PORT", getenv("LISTEN_PORT", "7000"))
 FORWARDED_ALLOW_IPS = getenv("UI_FORWARDED_ALLOW_IPS", getenv("FORWARDED_ALLOW_IPS", "*"))
+"""
+TLS/SSL support
+
+Enable TLS by setting UI_SSL_ENABLED to yes/true/1 and providing
+UI_SSL_CERTFILE and UI_SSL_KEYFILE. Optional: UI_SSL_CA_CERTS,
+"""
+UI_SSL_ENABLED = getenv("UI_SSL_ENABLED", getenv("SSL_ENABLED", "no")).lower() in ("1", "true", "yes", "on")
+UI_SSL_CERTFILE = getenv("UI_SSL_CERTFILE", getenv("SSL_CERTFILE", ""))
+UI_SSL_KEYFILE = getenv("UI_SSL_KEYFILE", getenv("SSL_KEYFILE", ""))
+UI_SSL_CA_CERTS = getenv("UI_SSL_CA_CERTS", getenv("SSL_CA_CERTS", ""))
 CAPTURE_OUTPUT = getenv("CAPTURE_OUTPUT", "no").lower() == "yes"
 
 if CAPTURE_OUTPUT or "file" in log_types:
@@ -106,6 +116,13 @@ if DEBUG:
         for file in Path(sep, "usr", "share", "bunkerweb", "ui", "app").rglob("*")
         if "__pycache__" not in file.parts and "static" not in file.parts
     ]
+
+# Configure TLS when enabled and files provided
+if UI_SSL_ENABLED and UI_SSL_CERTFILE and UI_SSL_KEYFILE:
+    certfile = UI_SSL_CERTFILE
+    keyfile = UI_SSL_KEYFILE
+    if UI_SSL_CA_CERTS:
+        ca_certs = UI_SSL_CA_CERTS
 
 
 def on_starting(server):
@@ -282,14 +299,14 @@ def on_starting(server):
         # * Step 1: Load Biscuit keys from files and validate
         if BISCUIT_PUBLIC_KEY_FILE.is_file() and BISCUIT_PRIVATE_KEY_FILE.is_file():
             try:
-                pub_hex = BISCUIT_PUBLIC_KEY_FILE.read_text(encoding="utf-8").strip()
-                priv_hex = BISCUIT_PRIVATE_KEY_FILE.read_text(encoding="utf-8").strip()
+                pub_hex = BISCUIT_PUBLIC_KEY_FILE.read_text().strip()
+                priv_hex = BISCUIT_PRIVATE_KEY_FILE.read_text().strip()
                 if not pub_hex or not priv_hex:
                     raise ValueError("One or both Biscuit key files are empty.")
 
                 # Validate by attempting to load
-                PublicKey.from_hex(pub_hex)
-                PrivateKey.from_hex(priv_hex)
+                PublicKey(pub_hex)
+                PrivateKey(priv_hex)
                 biscuit_public_key_hex = pub_hex
                 biscuit_private_key_hex = priv_hex
                 keys_loaded = True
@@ -306,8 +323,8 @@ def on_starting(server):
             if pub_hex_env and priv_hex_env:
                 try:
                     # Validate by attempting to load
-                    PublicKey.from_hex(pub_hex_env)
-                    PrivateKey.from_hex(priv_hex_env)
+                    PublicKey(pub_hex_env)
+                    PrivateKey(priv_hex_env)
                     biscuit_public_key_hex = pub_hex_env
                     biscuit_private_key_hex = priv_hex_env
                     keys_loaded = True
@@ -324,8 +341,8 @@ def on_starting(server):
             keypair = KeyPair()
             biscuit_private_key_obj = keypair.private_key
             biscuit_public_key_obj = keypair.public_key
-            biscuit_private_key_hex = biscuit_private_key_obj.to_hex()
-            biscuit_public_key_hex = biscuit_public_key_obj.to_hex()
+            biscuit_private_key_hex = repr(biscuit_private_key_obj)
+            biscuit_public_key_hex = repr(biscuit_public_key_obj)
             keys_generated = True
             LOGGER.info("Generated new Biscuit key pair.")
 

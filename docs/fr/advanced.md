@@ -1267,7 +1267,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
     **Utilisation des étiquettes**
 
     !!! warning "Limitations de l'utilisation des étiquettes"
-        Lorsque vous utilisez des étiquettes avec l'intégration Docker autoconf, vous ne pouvez appliquer des configurations personnalisées que pour le service web correspondant. L'application de **http**, **default-server-http**, **stream** ou de toute configuration globale (comme **server-http** ou **server-stream** pour tous les services) n'est pas possible : vous devrez monter des fichiers à cet effet.
+        Lorsque vous utilisez des étiquettes avec l'intégration Docker autoconf, vous ne pouvez appliquer des configurations personnalisées que pour le service web correspondant. L'application de **http**, **default-server-http**, **stream** ou de tout paramètre global (comme **server-http** ou **server-stream** pour tous les services) n'est pas possible : vous devrez monter des fichiers à cet effet.
 
     Les étiquettes à utiliser doivent suivre le modèle `bunkerweb.CUSTOM_CONF_<TYPE>_<NAME>` :
 
@@ -2836,7 +2836,7 @@ services:
 
 Cette configuration garantit la rotation des journaux, les empêchant de remplir votre disque. Vous pouvez l'appliquer à n'importe quel service de votre configuration Docker Compose.
 
-**Configuration globale (daemon.json)**
+**Paramètres globaux (daemon.json)**
 
 Si vous souhaitez appliquer ces paramètres de journalisation à tous les conteneurs de l'hôte par défaut, vous pouvez configurer le démon Docker en modifiant (ou en créant) le fichier `/etc/docker/daemon.json` :
 
@@ -2856,7 +2856,7 @@ Après avoir modifié `daemon.json`, vous devez redémarrer le démon Docker pou
 sudo systemctl restart docker
 ```
 
-Cette configuration globale sera héritée par tous les conteneurs. Cependant, toute configuration de journalisation définie par service dans un fichier `docker-compose.yml` remplacera les paramètres globaux dans `daemon.json`.
+Ces paramètres globaux seront hérités par tous les conteneurs. Cependant, toute configuration de journalisation définie par service dans un fichier `docker-compose.yml` remplacera les paramètres globaux dans `daemon.json`.
 
 ## Réglage de la sécurité {#security-tuning}
 

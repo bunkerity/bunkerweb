@@ -100,11 +100,11 @@ class IngressController(Controller):
                 continue
 
             if self._namespaces and metadata.namespace not in self._namespaces:
-                self._logger.info(f"Skipping pod {metadata.namespace}/{metadata.name} because its namespace is not in the allowed namespaces")
+                self._logger.debug(f"Skipping pod {metadata.namespace}/{metadata.name} because its namespace is not in the allowed namespaces")
                 continue
 
             if any(self.__should_ignore_annotation(annotation) for annotation in annotations):
-                self._logger.info(f"Skipping pod {metadata.namespace}/{metadata.name} because of ignored annotations")
+                self._logger.debug(f"Skipping pod {metadata.namespace}/{metadata.name} because of ignored annotations")
                 continue
 
             instances.append(pod)
@@ -118,18 +118,18 @@ class IngressController(Controller):
             if self.__ingress_class:
                 ingress_class_name = getattr(ingress.spec, "ingress_class_name", None)
                 if ingress_class_name != self.__ingress_class:
-                    self._logger.info(f"Skipping ingress {ingress.metadata.namespace}/{ingress.metadata.name} because its ingress class is not allowed")
+                    self._logger.debug(f"Skipping ingress {ingress.metadata.namespace}/{ingress.metadata.name} because its ingress class is not allowed")
                     continue
 
             # Skip if the namespace is not in the allowed namespaces (when specified)
             if self._namespaces and ingress.metadata.namespace not in self._namespaces:
-                self._logger.info(
+                self._logger.debug(
                     f"Skipping ingress {ingress.metadata.namespace}/{ingress.metadata.name} because its namespace is not in the allowed namespaces"
                 )
                 continue
 
             if ingress.metadata.annotations and any(self.__should_ignore_annotation(annotation) for annotation in ingress.metadata.annotations):
-                self._logger.info(f"Skipping ingress {ingress.metadata.namespace}/{ingress.metadata.name} because of ignored annotations")
+                self._logger.debug(f"Skipping ingress {ingress.metadata.namespace}/{ingress.metadata.name} because of ignored annotations")
                 continue
 
             # Add the ingress to services if it passes all checks
@@ -326,13 +326,13 @@ class IngressController(Controller):
                 continue
 
             if self._namespaces and configmap.metadata.namespace not in self._namespaces:
-                self._logger.info(
+                self._logger.debug(
                     f"Skipping ConfigMap {configmap.metadata.namespace}/{configmap.metadata.name} because its namespace is not in the allowed namespaces"
                 )
                 continue
 
             if any(self.__should_ignore_annotation(annotation) for annotation in configmap.metadata.annotations):
-                self._logger.info(f"Skipping ConfigMap {configmap.metadata.namespace}/{configmap.metadata.name} because of ignored annotations")
+                self._logger.debug(f"Skipping ConfigMap {configmap.metadata.namespace}/{configmap.metadata.name} because of ignored annotations")
                 continue
 
             config_type = configmap.metadata.annotations["bunkerweb.io/CONFIG_TYPE"]
@@ -388,14 +388,14 @@ class IngressController(Controller):
             return False
 
         if obj.metadata and self._namespaces and obj.metadata.namespace not in self._namespaces:
-            self._logger.info(f"Skipping {obj.kind} {obj.metadata.namespace}/{obj.metadata.name} because its namespace is not in the allowed namespaces")
+            self._logger.debug(f"Skipping {obj.kind} {obj.metadata.namespace}/{obj.metadata.name} because its namespace is not in the allowed namespaces")
             return False
 
         annotations = obj.metadata.annotations if obj.metadata else None
         data = getattr(obj, "data", None)
 
         if annotations and any(self.__should_ignore_annotation(annotation) for annotation in annotations):
-            self._logger.info(f"Skipping {obj.kind} {obj.metadata.namespace}/{obj.metadata.name} because of ignored annotations")
+            self._logger.debug(f"Skipping {obj.kind} {obj.metadata.namespace}/{obj.metadata.name} because of ignored annotations")
             return False
 
         ret = False

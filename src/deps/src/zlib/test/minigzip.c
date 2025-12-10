@@ -15,6 +15,17 @@
 
 /* @(#) $Id$ */
 
+#ifndef _POSIX_C_SOURCE
+#  define _POSIX_C_SOURCE 200112L
+#endif
+
+#if defined(_WIN32) && !defined(_CRT_SECURE_NO_WARNINGS)
+#  define _CRT_SECURE_NO_WARNINGS
+#endif
+#if defined(_WIN32) && !defined(_CRT_NONSTDC_NO_DEPRECATE)
+#  define _CRT_NONSTDC_NO_DEPRECATE
+#endif
+
 #include "zlib.h"
 #include <stdio.h>
 
@@ -40,18 +51,16 @@
 #  define SET_BINARY_MODE(file)
 #endif
 
-#if defined(_MSC_VER) && _MSC_VER < 1900
-#  define snprintf _snprintf
-#endif
-
 #ifdef VMS
 #  define unlink delete
 #  define GZ_SUFFIX "-gz"
 #endif
-#ifdef RISCOS
-#  define unlink remove
-#  define GZ_SUFFIX "-gz"
-#  define fileno(file) file->__file
+#if defined(__riscos) && !defined(__TARGET_UNIXLIB__)
+#  define GZ_SUFFIX "/gz"
+#  ifndef __GNUC__
+#    define unlink remove
+#    define fileno(file) file->__file
+#  endif
 #endif
 #if defined(__MWERKS__) && __dest_os != __be_os && __dest_os != __win32_os
 #  include <unix.h> /* for fileno */
@@ -141,6 +150,25 @@ static void pwinerror (s)
 #else
 #  define local
 #endif
+
+/* ===========================================================================
+ * Safe string copy. Copy up to len bytes from src to dst, if src terminates
+ * with a null by then. If not, copy len-1 bytes from src, terminating it with
+ * a null in dst[len-1], cutting src short. Return a pointer to the terminating
+ * null. If len is zero, nothing is written to *dst and NULL is returned.
+ */
+static char *string_copy(char *dst, char const *src, z_size_t len) {
+    if (len == 0)
+        return NULL;
+    while (--len) {
+        *dst = *src++;
+        if (*dst == 0)
+            return dst;
+        dst++;
+    }
+    *dst = 0;
+    return dst;
+}
 
 #ifdef Z_SOLO
 /* for Z_SOLO, create simplified gz* functions using deflate and inflate */
@@ -391,7 +419,7 @@ static void gz_uncompress(gzFile in, FILE *out) {
  * original.
  */
 static void file_compress(char *file, char *mode) {
-    local char outfile[MAX_NAME_LEN];
+    local char outfile[MAX_NAME_LEN+1], *end;
     FILE  *in;
     gzFile out;
 
@@ -400,12 +428,8 @@ static void file_compress(char *file, char *mode) {
         exit(1);
     }
 
-#if !defined(NO_snprintf) && !defined(NO_vsnprintf)
-    snprintf(outfile, sizeof(outfile), "%s%s", file, GZ_SUFFIX);
-#else
-    strcpy(outfile, file);
-    strcat(outfile, GZ_SUFFIX);
-#endif
+    end = string_copy(outfile, file, sizeof(outfile));
+    string_copy(end, GZ_SUFFIX, sizeof(outfile) - (z_size_t)(end - outfile));
 
     in = fopen(file, "rb");
     if (in == NULL) {
@@ -427,7 +451,7 @@ static void file_compress(char *file, char *mode) {
  * Uncompress the given file and remove the original.
  */
 static void file_uncompress(char *file) {
-    local char buf[MAX_NAME_LEN];
+    local char buf[MAX_NAME_LEN+1];
     char *infile, *outfile;
     FILE  *out;
     gzFile in;
@@ -438,11 +462,7 @@ static void file_uncompress(char *file) {
         exit(1);
     }
 
-#if !defined(NO_snprintf) && !defined(NO_vsnprintf)
-    snprintf(buf, sizeof(buf), "%s", file);
-#else
-    strcpy(buf, file);
-#endif
+    string_copy(buf, file, sizeof(buf));
 
     if (len > SUFFIX_LEN && strcmp(file+len-SUFFIX_LEN, GZ_SUFFIX) == 0) {
         infile = file;
@@ -451,11 +471,7 @@ static void file_uncompress(char *file) {
     } else {
         outfile = file;
         infile = buf;
-#if !defined(NO_snprintf) && !defined(NO_vsnprintf)
-        snprintf(buf + len, sizeof(buf) - len, "%s", GZ_SUFFIX);
-#else
-        strcat(infile, GZ_SUFFIX);
-#endif
+        string_copy(buf + len, GZ_SUFFIX, sizeof(buf) - len);
     }
     in = gzopen(infile, "rb");
     if (in == NULL) {
@@ -488,14 +504,9 @@ int main(int argc, char *argv[]) {
     int copyout = 0;
     int uncompr = 0;
     gzFile file;
-    char *bname, outmode[20];
+    char *bname, outmode[5];
 
-#if !defined(NO_snprintf) && !defined(NO_vsnprintf)
-    snprintf(outmode, sizeof(outmode), "%s", "wb6 ");
-#else
-    strcpy(outmode, "wb6 ");
-#endif
-
+    string_copy(outmode, "wb6 ", sizeof(outmode));
     prog = argv[0];
     bname = strrchr(argv[0], '/');
     if (bname)

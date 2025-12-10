@@ -271,7 +271,7 @@ class Config:
         ret = self.gen_conf(variables, self.get_services(methods=False, with_drafts=True), check_changes=check_changes, override_method=override_method)
         if isinstance(ret, str):
             return ret, 1
-        return "The global configuration has been edited.", 0
+        return "The global settings have been edited.", 0
 
     def delete_service(self, service_name: str, *, check_changes: bool = True, override_method: str = "ui") -> Tuple[str, int]:
         """Deletes a service

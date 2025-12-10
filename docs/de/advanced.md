@@ -46,7 +46,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
     === "Web-UI"
 
-        Navigieren Sie zur Seite **Globale Konfiguration**, wählen Sie das Plugin **Real IP** und füllen Sie die folgenden Einstellungen aus:
+        Navigieren Sie zur Seite **Globale Einstellungen**, wählen Sie das Plugin **Real IP** und füllen Sie die folgenden Einstellungen aus:
 
         <figure markdown>![Real IP Einstellungen (Header) mit Web-UI](assets/img/advanced-proxy1.png){ align=center }<figcaption>Real IP Einstellungen (Header) mit Web-UI</figcaption></figure>
 
@@ -208,7 +208,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
     === "Web-UI"
 
-        Navigieren Sie zur Seite **Globale Konfiguration**, wählen Sie das Plugin **Real IP** und füllen Sie die folgenden Einstellungen aus:
+        Navigieren Sie zur Seite **Globale Einstellungen**, wählen Sie das Plugin **Real IP** und füllen Sie die folgenden Einstellungen aus:
 
         <figure markdown>![Real IP Einstellungen (PROXY-Protokoll) mit Web-UI](assets/img/advanced-proxy2.png){ align=center }<figcaption>Real IP Einstellungen (PROXY-Protokoll) mit Web-UI</figcaption></figure>
 
@@ -874,7 +874,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
 
 === "Web-UI"
 
-    Navigieren Sie zur Seite **Globale Konfiguration** und setzen Sie die DNS-Resolver auf `127.0.0.53`
+    Navigieren Sie zur Seite **Globale Einstellungen** und setzen Sie die DNS-Resolver auf `127.0.0.53`
 
     <figure markdown>![DNS-Resolver-Einstellung mit Web-UI](assets/img/advanced-dns-resolvers.png){ align=center }<figcaption>DNS-Resolver-Einstellung mit Web-UI</figcaption></figure>
 
@@ -942,7 +942,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
 
     === "Web-UI"
 
-        Navigieren Sie zur Seite **Globale Konfiguration**, wählen Sie das **NGINX**-Plugin und setzen Sie die DNS-Resolver auf `127.0.0.1`.
+        Navigieren Sie zur Seite **Globale Einstellungen**, wählen Sie das **NGINX**-Plugin und setzen Sie die DNS-Resolver auf `127.0.0.1`.
 
         <figure markdown>![DNS-Resolver-Einstellung mit Web-UI](assets/img/advanced-dns-resolvers2.png){ align=center }<figcaption>DNS-Resolver-Einstellung mit Web-UI</figcaption></figure>
 
@@ -2837,7 +2837,7 @@ services:
 
 Diese Konfiguration stellt sicher, dass die Protokolle rotiert werden, und verhindert, dass sie Ihre Festplatte füllen. Sie können dies auf jeden Dienst in Ihrer Docker Compose-Einrichtung anwenden.
 
-**Globale Konfiguration (daemon.json)**
+**Globale Einstellungen (daemon.json)**
 
 Wenn Sie diese Protokollierungseinstellungen standardmäßig auf alle Container auf dem Host anwenden möchten, können Sie den Docker-Daemon konfigurieren, indem Sie die Datei `/etc/docker/daemon.json` bearbeiten (oder erstellen):
 
@@ -2857,7 +2857,7 @@ Nachdem Sie `daemon.json` geändert haben, müssen Sie den Docker-Daemon neu sta
 sudo systemctl restart docker
 ```
 
-Diese globale Konfiguration wird von allen Containern übernommen. Jede pro Dienst in einer `docker-compose.yml`-Datei definierte Protokollierungskonfiguration überschreibt jedoch die globalen Einstellungen in `daemon.json`.
+Diese globalen Einstellungen werden von allen Containern übernommen. Jede pro Dienst in einer `docker-compose.yml`-Datei definierte Protokollierungskonfiguration überschreibt jedoch die globalen Einstellungen in `daemon.json`.
 
 ## Sicherheits-Tuning {#security-tuning}
 

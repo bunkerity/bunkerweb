@@ -13,6 +13,8 @@
 #    make install prefix=$HOME
 
 CC=cc
+GCOV=GCOV
+LLVM_GCOV_FLAG=LLMV_GCOV_FLAG
 
 CFLAGS=-O
 #CFLAGS=-O -DMAX_WBITS=14 -DMAX_MEM_LEVEL=7
@@ -28,7 +30,7 @@ CPP=$(CC) -E
 
 STATICLIB=libz.a
 SHAREDLIB=libz.so
-SHAREDLIBV=libz.so.1.3.1
+SHAREDLIBV=libz.so.1.3.1.2
 SHAREDLIBM=libz.so.1
 LIBS=$(STATICLIB) $(SHAREDLIBV)
 
@@ -113,15 +115,19 @@ test64: all64
 	@rm -f tmp64_$$
 
 infcover.o: $(SRCDIR)test/infcover.c $(SRCDIR)zlib.h zconf.h
-	$(CC) $(CFLAGS) $(ZINCOUT) -c -o $@ $(SRCDIR)test/infcover.c
+	$(CC) $(CFLAGS) $(ZINCOUT) -c -coverage -o $@ $(SRCDIR)test/infcover.c
 
 infcover: infcover.o libz.a
-	$(CC) $(CFLAGS) -o $@ infcover.o libz.a
+	$(CC) $(CFLAGS) -coverage -o $@ infcover.o libz.a
 
 cover: infcover
+ifdef $(GCOV)
 	rm -f *.gcda
 	${QEMU_RUN} ./infcover
-	gcov inf*.c
+	${GCOV} ${LLVM_GCOV_FLAG} inf*.c -o ./infcover.gcda
+else
+	@echo 'cover disabled as no suitable gcov was found'
+endif
 
 libz.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $(OBJS)
@@ -176,7 +182,7 @@ inftrees.o: $(SRCDIR)inftrees.c
 trees.o: $(SRCDIR)trees.c
 	$(CC) $(CFLAGS) $(ZINC) -c -o $@ $(SRCDIR)trees.c
 
-zutil.o: $(SRCDIR)zutil.c
+zutil.o: $(SRCDIR)zutil.c $(SRCDIR)gzguts.h
 	$(CC) $(CFLAGS) $(ZINC) -c -o $@ $(SRCDIR)zutil.c
 
 compress.o: $(SRCDIR)compress.c
@@ -238,7 +244,7 @@ trees.lo: $(SRCDIR)trees.c
 	$(CC) $(SFLAGS) $(ZINC) -DPIC -c -o objs/trees.o $(SRCDIR)trees.c
 	-@mv objs/trees.o $@
 
-zutil.lo: $(SRCDIR)zutil.c
+zutil.lo: $(SRCDIR)zutil.c $(SRCDIR)gzguts.h
 	-@mkdir objs 2>/dev/null || test -d objs
 	$(CC) $(SFLAGS) $(ZINC) -DPIC -c -o objs/zutil.o $(SRCDIR)zutil.c
 	-@mv objs/zutil.o $@
@@ -349,12 +355,13 @@ docs: zlib.3.pdf
 zlib.3.pdf: $(SRCDIR)zlib.3
 	groff -mandoc -f H -T ps $(SRCDIR)zlib.3 | ps2pdf - $@
 
-zconf.h.cmakein: $(SRCDIR)zconf.h.in
-	-@ TEMPFILE=zconfh_$$; \
-	echo "/#define ZCONF_H/ a\\\\\n#cmakedefine Z_PREFIX\\\\\n#cmakedefine Z_HAVE_UNISTD_H\n" >> $$TEMPFILE &&\
-	sed -f $$TEMPFILE $(SRCDIR)zconf.h.in > $@ &&\
-	touch -r $(SRCDIR)zconf.h.in $@ &&\
-	rm $$TEMPFILE
+# zconf.h.cmakein: $(SRCDIR)zconf.h.in
+# 	-@ TEMPFILE=zconfh_$$; \
+# 	echo "/#define ZCONF_H/ a\\\\\n#cmakedefine Z_PREFIX\\\\\n#cmakedefine Z_HAVE_UNISTD_H\n" >> $$TEMPFILE &&\
+# 	sed -f $$TEMPFILE $(SRCDIR)zconf.h.in > $@ &&\
+# 	touch -r $(SRCDIR)zconf.h.in $@ &&\
+# 	rm $$TEMPFILE
+# 
 
 zconf: $(SRCDIR)zconf.h.in
 	cp -p $(SRCDIR)zconf.h.in zconf.h
@@ -378,7 +385,7 @@ clean: minizip-clean
 	rm -f contrib/infback9/*.gcda contrib/infback9/*.gcno contrib/infback9/*.gcov
 
 maintainer-clean: distclean
-distclean: clean zconf zconf.h.cmakein
+distclean: clean zconf # zconf.h.cmakein
 	rm -f Makefile zlib.pc configure.log
 	-@rm -f .DS_Store
 	@if [ -f Makefile.in ]; then \
@@ -389,7 +396,8 @@ distclean: clean zconf zconf.h.cmakein
 tags:
 	etags $(SRCDIR)*.[ch]
 
-adler32.o zutil.o: $(SRCDIR)zutil.h $(SRCDIR)zlib.h zconf.h
+adler32.o: $(SRCDIR)zutil.h $(SRCDIR)zlib.h zconf.h
+zutil.o: $(SRCDIR)zutil.h $(SRCDIR)zlib.h zconf.h $(SRCDIR)gzguts.h
 gzclose.o gzlib.o gzread.o gzwrite.o: $(SRCDIR)zlib.h zconf.h $(SRCDIR)gzguts.h
 compress.o example.o minigzip.o uncompr.o: $(SRCDIR)zlib.h zconf.h
 crc32.o: $(SRCDIR)zutil.h $(SRCDIR)zlib.h zconf.h $(SRCDIR)crc32.h
@@ -399,7 +407,8 @@ inffast.o: $(SRCDIR)zutil.h $(SRCDIR)zlib.h zconf.h $(SRCDIR)inftrees.h $(SRCDIR
 inftrees.o: $(SRCDIR)zutil.h $(SRCDIR)zlib.h zconf.h $(SRCDIR)inftrees.h
 trees.o: $(SRCDIR)deflate.h $(SRCDIR)zutil.h $(SRCDIR)zlib.h zconf.h $(SRCDIR)trees.h
 
-adler32.lo zutil.lo: $(SRCDIR)zutil.h $(SRCDIR)zlib.h zconf.h
+adler32.lo: $(SRCDIR)zutil.h $(SRCDIR)zlib.h zconf.h
+zutil.lo: $(SRCDIR)zutil.h $(SRCDIR)zlib.h zconf.h $(SRCDIR)gzguts.h
 gzclose.lo gzlib.lo gzread.lo gzwrite.lo: $(SRCDIR)zlib.h zconf.h $(SRCDIR)gzguts.h
 compress.lo example.lo minigzip.lo uncompr.lo: $(SRCDIR)zlib.h zconf.h
 crc32.lo: $(SRCDIR)zutil.h $(SRCDIR)zlib.h zconf.h $(SRCDIR)crc32.h

@@ -96,7 +96,7 @@ app2.example.com_WHITELIST_COUNTRY=FR
 app3.example.com_USE_BAD_BEHAVIOR=no
 ```
 
-Please note that multisite mode is implicit when using the web User Interface. You have the option to apply configurations directly to your services or to set a global configuration that will be applied to all your services (you can still apply exceptions directly to specific services):
+Please note that multisite mode is implicit when using the web User Interface. You have the option to apply configurations directly to your services or to set global settings that will be applied to all your services (you can still apply exceptions directly to specific services):
 
 <figure markdown>
   ![Overview](assets/img/ui-multisite.png){ align=center, width="600" }
@@ -163,15 +163,15 @@ By specifying the appropriate database URI in the configuration, you can seamles
 
 ### Database compatibility matrix
 
-| Integration        | PostgreSQL                    | MariaDB             | MySQL              | SQLite      |
-| :----------------- | :---------------------------- | :------------------ | :----------------- | :---------- |
-| **Docker**         | ✅ `v17` and earlier (❌ `v18`) | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Kubernetes**     | ✅ `v17` and earlier (❌ `v18`) | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Autoconf**       | ✅ `v17` and earlier (❌ `v18`) | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Linux packages** | See notes below               | See notes below     | See notes below    | ✅ Supported |
+| Integration        | PostgreSQL                                   | MariaDB             | MySQL              | SQLite      |
+| :----------------- | :------------------------------------------- | :------------------ | :----------------- | :---------- |
+| **Docker**         | ✅ `v18` and earlier (all-in-one: ✅ `v17`)   | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Kubernetes**     | ✅ `v18` and earlier                          | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Autoconf**       | ✅ `v18` and earlier                          | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Linux packages** | See notes below                              | See notes below     | See notes below    | ✅ Supported |
 
 !!! info "Notes"
-    - **PostgreSQL**: `v18` is unsupported because the Alpine base images we ship only include `v17` client packages.
+    - **PostgreSQL**: Alpine packages now ship with the `v18` client, so `v18` and earlier are supported out of the box; the all-in-one image still embeds `v17`, so `v18` is unsupported there.
     - **Linux**: Support depends on your distribution's packages. If needed, you can install database clients manually from vendor repositories (RHEL typically requires this).
     - **SQLite**: Ships with the packages and is ready to use.
 

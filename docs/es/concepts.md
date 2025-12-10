@@ -96,7 +96,7 @@ app2.example.com_WHITELIST_COUNTRY=FR
 app3.example.com_USE_BAD_BEHAVIOR=no
 ```
 
-Ten en cuenta que el modo multisitio es implícito cuando se utiliza la interfaz de usuario web. Tienes la opción de aplicar configuraciones directamente a tus servicios o de establecer una configuración global que se aplicará a todos tus servicios (aún puedes aplicar excepciones directamente a servicios específicos):
+Ten en cuenta que el modo multisitio es implícito cuando se utiliza la interfaz de usuario web. Tienes la opción de aplicar configuraciones directamente a tus servicios o de establecer ajustes globales que se aplicarán a todos tus servicios (aún puedes aplicar excepciones directamente a servicios específicos):
 
 <figure markdown>
   ![Descripción general](assets/img/ui-multisite.png){ align=center, width="600" }
@@ -163,15 +163,15 @@ Al especificar el URI de la base de datos apropiado en la configuración, puedes
 
 ### Matriz de compatibilidad de bases de datos
 
-| Integración        | PostgreSQL                     | MariaDB                  | MySQL                    | SQLite       |
-| :----------------- | :----------------------------- | :----------------------- | :----------------------- | :----------- |
-| **Docker**         | ✅ `v17` y anteriores (❌ `v18`) | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
-| **Kubernetes**     | ✅ `v17` y anteriores (❌ `v18`) | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
-| **Autoconf**       | ✅ `v17` y anteriores (❌ `v18`) | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
-| **Paquetes Linux** | Ver notas a continuación       | Ver notas a continuación | Ver notas a continuación | ✅ Compatible |
+| Integración        | PostgreSQL                                   | MariaDB                  | MySQL                    | SQLite       |
+| :----------------- | :------------------------------------------- | :----------------------- | :----------------------- | :----------- |
+| **Docker**         | ✅ `v18` y anteriores (all-in-one: ✅ `v17`)  | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
+| **Kubernetes**     | ✅ `v18` y anteriores                         | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
+| **Autoconf**       | ✅ `v18` y anteriores                         | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
+| **Paquetes Linux** | Ver notas a continuación                      | Ver notas a continuación | Ver notas a continuación | ✅ Compatible |
 
 !!! info "Notas"
-    - **PostgreSQL**: `v18` no es compatible porque las imágenes base de Alpine que distribuimos solo incluyen los paquetes del cliente `v17`.
+    - **PostgreSQL**: Los paquetes basados en Alpine ahora incluyen el cliente `v18`, por lo que `v18` y versiones anteriores son compatibles de forma predeterminada; la imagen all-in-one sigue usando el cliente `v17`, por lo que `v18` no es compatible allí.
     - **Linux**: La compatibilidad depende de los paquetes de tu distribución. Si es necesario, puedes instalar los clientes de la base de datos manualmente desde los repositorios del proveedor (esto suele ser necesario en RHEL).
     - **SQLite**: Se entrega con los paquetes y está listo para usar.
 
