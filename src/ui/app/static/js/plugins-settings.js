@@ -904,8 +904,14 @@ $(document).ready(() => {
 
     $pluginItems.each(function () {
       const $item = $(this);
+      const itemType = $item.data("type");
+
+      // Treat external and ui types as the same category
       const typeMatches =
-        currentType === "all" || $item.data("type") === currentType;
+        currentType === "all" ||
+        itemType === currentType ||
+        (currentType === "external" && itemType === "ui") ||
+        (currentType === "ui" && itemType === "external");
 
       const pluginId = $item.data("plugin");
       const pluginName = $item.find(".fw-bold").text().toLowerCase();
@@ -1749,7 +1755,7 @@ $(document).ready(() => {
   var hasProPlugins = false;
   $pluginItems.each(function () {
     const type = $(this).data("type");
-    if (type === "external") {
+    if (type === "external" || type === "ui") {
       hasExternalPlugins = true;
     } else if (type === "pro") {
       hasProPlugins = true;

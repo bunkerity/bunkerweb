@@ -10,7 +10,7 @@ from logging import (
     _nameToLevel,
     addLevelName,
     basicConfig,
-    getLogger,
+    getLogger as logging_getLogger,
     setLoggerClass,
 )
 from logging.handlers import SysLogHandler
@@ -122,7 +122,7 @@ sqlalchemy_loggers = (
     "sqlalchemy.engine.Engine",
 )
 for logger_name in sqlalchemy_loggers:
-    getLogger(logger_name).setLevel(database_default_level)
+    logging_getLogger(logger_name).setLevel(database_default_level)
 
 # Customize log level names with emojis
 addLevelName(CRITICAL, "🚨")
@@ -135,7 +135,7 @@ addLevelName(WARNING, "⚠️ ")
 def setup_logger(title: str, level: Optional[Union[str, int]] = None) -> Logger:
     """Set up and return a logger with the specified title and level."""
     title = title.upper()
-    logger = getLogger(title)
+    logger = logging_getLogger(title)
     level = level or default_level
 
     if isinstance(level, str):
@@ -146,6 +146,8 @@ def setup_logger(title: str, level: Optional[Union[str, int]] = None) -> Logger:
 
 
 if warnings:
-    logger = getLogger("LOGGER_SETUP")
+    logger = logging_getLogger("LOGGER_SETUP")
     for warn in warnings:
         logger.warning(warn)
+
+getLogger = setup_logger  # Alias for easier access
