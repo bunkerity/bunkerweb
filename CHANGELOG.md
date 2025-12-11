@@ -10,6 +10,7 @@
 - [FEATURE] Add the possibility to have **draft** custom configurations that are not applied to the service until they are explicitly published. Draft custom configurations are indicated in the web UI and can be toggled between draft and online status.
 - [FEATURE] Add new `SSL_SESSION_CACHE_SIZE` setting to the SSL plugin to allow configuration of the size of the SSL session cache (e.g., `10m`, `512k`). Setting it to `off` or `none` disables session caching (default is `10m`).
 - [FEATURE] Enhance the Antibot plugin to better handle redirection back to the original request path after a successful challenge by checking the `Referer` header, ensuring users are redirected to meaningful content rather than static files or other unintended destinations
+- [FEATURE] Add the possibility to tweak custom configurations created from the web UI or API manually
 - [BUGFIX] Fix issues with the Ingress controller regarding reverse proxy settings when using multiple paths per rule and a template by adjusting the indexing logic to be configurable via the new `KUBERNETES_REVERSE_PROXY_SUFFIX_START` setting (default is `1` to keep backward compatibility)
 - [BUGFIX] Escape percentage signs in `DATABASE_URI` for Alembic when using the SQLAlchemy URL configuration to prevent formatting errors during migrations
 - [BUGFIX] Fix issues with `Autoconf` controllers persisting old instances after they have been deleted from the orchestrator.

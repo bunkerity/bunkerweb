@@ -172,8 +172,8 @@ jobs:
         id: getversionrpm
         run: |
           VERSION="$(tr -d '\n' < src/VERSION)"
-          # Fedora packaging: use ~ for RC so GA release wins the RPM sort order
-          RPM_VERSION="$(echo "$VERSION" | sed -E 's/-([Rr][Cc][0-9]*)/~\1/' | sed 's/-/_/g')"
+          # RPM packaging: replace hyphens with underscores to avoid release parsing issues
+          RPM_VERSION="$(echo "$VERSION" | sed 's/-/_/g')"
           echo "versionrpm=${RPM_VERSION}" >> "$GITHUB_OUTPUT"
 
   # Push Docker images

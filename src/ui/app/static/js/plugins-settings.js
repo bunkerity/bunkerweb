@@ -23,6 +23,15 @@ $(document).ready(() => {
     }
   };
 
+  // Escapes a string so it can be safely embedded as an HTML attribute value
+  function escapeAttr(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
   const $templateInput = $("#used-template");
   let usedTemplate = "low";
   if ($templateInput.length) {
@@ -2642,8 +2651,9 @@ $(document).ready(() => {
     let $hiddenInput = $dropdown.find('input[type="hidden"]');
     if ($hiddenInput.length === 0) {
       const settingName = $toggle.find(".multiselect-text").text();
+      // Escape the settingName to prevent XSS in attribute context
       $hiddenInput = $(
-        `<input type="hidden" name="${settingName}" class="plugin-setting">`,
+        `<input type="hidden" name="${escapeAttr(settingName)}" class="plugin-setting">`,
       );
       $dropdown.append($hiddenInput);
     }

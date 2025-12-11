@@ -116,7 +116,7 @@ Pour que les journaux restent accessibles à partir de l'interface utilisateur W
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -131,7 +131,7 @@ Pour que les journaux restent accessibles à partir de l'interface utilisateur W
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -158,7 +158,7 @@ Pour que les journaux restent accessibles à partir de l'interface utilisateur W
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.6
+        image: bunkerity/bunkerweb-ui:1.6.7~rc1
         environment:
           <<: *service-env
           ADMIN_USERNAME: "changeme"
@@ -235,7 +235,7 @@ Pour que les journaux restent accessibles à partir de l'interface utilisateur W
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -251,7 +251,7 @@ Pour que les journaux restent accessibles à partir de l'interface utilisateur W
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -270,7 +270,7 @@ Pour que les journaux restent accessibles à partir de l'interface utilisateur W
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.6
+        image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
         depends_on:
           - bunkerweb
           - bw-docker
@@ -284,7 +284,7 @@ Pour que les journaux restent accessibles à partir de l'interface utilisateur W
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.6
+        image: bunkerity/bunkerweb-ui:1.6.7~rc1
         environment:
           <<: *service-env
           ADMIN_USERNAME: "changeme"
@@ -611,7 +611,7 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
 
     !!! info "Backend de base de données"
 
-        Si vous souhaitez utiliser un backend de base de données autre que MariaDB, consultez les fichiers docker-compose dans le dossier [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/misc/integrations) du dépôt.
+        Si vous souhaitez utiliser un backend de base de données autre que MariaDB, consultez les fichiers docker-compose dans le dossier [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations) du dépôt.
 
     Voici le modèle docker-compose que vous pouvez utiliser (n'oubliez pas de modifier les valeurs `changeme`) :
 
@@ -623,7 +623,7 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -638,7 +638,7 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -665,7 +665,7 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.6
+        image: bunkerity/bunkerweb-ui:1.6.7~rc1
         environment:
           <<: *service-env
           ADMIN_USERNAME: "changeme"
@@ -752,7 +752,7 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
 
     !!! info "Backend de base de données"
 
-        Si vous souhaitez utiliser un backend de base de données autre que MariaDB, consultez les fichiers docker-compose dans le dossier [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/misc/integrations) du dépôt.
+        Si vous souhaitez utiliser un backend de base de données autre que MariaDB, consultez les fichiers docker-compose dans le dossier [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations) du dépôt.
 
     Voici le modèle docker-compose que vous pouvez utiliser (n'oubliez pas de modifier les valeurs `changeme`) :
 
@@ -766,7 +766,7 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -781,7 +781,7 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: ""
@@ -800,7 +800,7 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.6
+        image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
         depends_on:
           - bw-docker
         environment:
@@ -822,7 +822,7 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.6
+        image: bunkerity/bunkerweb-ui:1.6.7~rc1
         environment:
           <<: *service-env
           ADMIN_USERNAME: "changeme"
@@ -901,7 +901,7 @@ L'interface utilisateur web peut être déployée et configurée sans passer par
 
     !!! info "Backend de base de données"
 
-        Si vous souhaitez utiliser un backend de base de données autre que MariaDB, consultez les fichiers YAML dans le dossier [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/misc/integrations) du dépôt.
+        Si vous souhaitez utiliser un backend de base de données autre que MariaDB, consultez les fichiers YAML dans le dossier [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations) du dépôt.
 
     Voici la partie correspondante de votre fichier values.yaml que vous pouvez utiliser :
 
@@ -939,7 +939,7 @@ L'interface utilisateur de BunkerWeb prend en charge plusieurs langues. Les trad
 - Allemand (de)
 - Italien (it)
 
-Consultez [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.6/src/ui/app/static/locales/README.md) pour plus de détails sur la provenance des traductions et l'état de la révision.
+Consultez [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.7~rc1/src/ui/app/static/locales/README.md) pour plus de détails sur la provenance des traductions et l'état de la révision.
 
 ### Traduction contributive
 
@@ -955,4 +955,4 @@ Nous accueillons les contributions pour améliorer ou ajouter de nouveaux fichie
 
 Pour les mises à jour, modifiez le fichier concerné et mettez à jour la table de provenance si nécessaire.
 
-Voir [le locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.6/src/ui/app/static/locales/README.md) pour les directives complètes.
+Voir [le locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.7~rc1/src/ui/app/static/locales/README.md) pour les directives complètes.

@@ -116,7 +116,7 @@
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -131,7 +131,7 @@
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -158,7 +158,7 @@
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.6
+        image: bunkerity/bunkerweb-ui:1.6.7~rc1
         environment:
           <<: *service-env
           ADMIN_USERNAME: "changeme"
@@ -235,7 +235,7 @@
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -251,7 +251,7 @@
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为 autoconf 服务会自动检测
@@ -270,7 +270,7 @@
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.6
+        image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
         depends_on:
           - bunkerweb
           - bw-docker
@@ -284,7 +284,7 @@
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.6
+        image: bunkerity/bunkerweb-ui:1.6.7~rc1
         environment:
           <<: *service-env
           ADMIN_USERNAME: "changeme"
@@ -608,7 +608,7 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
 
     !!! info "数据库后端"
 
-        如果您想要一个除 MariaDB 之外的数据库后端，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/misc/integrations)中的 docker-compose 文件。
+        如果您想要一个除 MariaDB 之外的数据库后端，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations)中的 docker-compose 文件。
 
     这是您可以使用的 docker-compose 样板（不要忘记编辑 `changeme` 数据）：
 
@@ -620,7 +620,7 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -635,7 +635,7 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -662,7 +662,7 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.6
+        image: bunkerity/bunkerweb-ui:1.6.7~rc1
         environment:
           <<: *service-env
           ADMIN_USERNAME: "changeme"
@@ -749,7 +749,7 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
 
     !!! info "数据库后端"
 
-        如果您想要一个除 MariaDB 之外的数据库后端，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/misc/integrations)中的 docker-compose 文件。
+        如果您想要一个除 MariaDB 之外的数据库后端，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations)中的 docker-compose 文件。
 
     这是您可以使用的 docker-compose 样板（不要忘记编辑 `changeme` 数据）：
 
@@ -763,7 +763,7 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -778,7 +778,7 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: ""
@@ -797,7 +797,7 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.6
+        image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
         depends_on:
           - bw-docker
         environment:
@@ -819,7 +819,7 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.6
+        image: bunkerity/bunkerweb-ui:1.6.7~rc1
         environment:
           <<: *service-env
           ADMIN_USERNAME: "changeme"
@@ -898,7 +898,7 @@ Web UI 可以不通过设置向导过程进行部署和配置：配置是通过�
 
     !!! info "数据库后端"
 
-        如果您想要一个除 MariaDB 之外的数据库后端，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/misc/integrations)中的 yaml 文件。
+        如果您想要一个除 MariaDB 之外的数据库后端，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations)中的 yaml 文件。
 
     这是您可以使用的 values.yaml 文件的相应部分：
 
@@ -936,7 +936,7 @@ BunkerWeb UI 支持多种语言。翻译文件在 `src/ui/app/static/locales` �
 - 德语 (de)
 - 意大利语 (it)
 
-有关翻译来源和审核状态的详细信息，请参阅 [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.6/src/ui/app/static/locales/README.md)。
+有关翻译来源和审核状态的详细信息，请参阅 [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.7~rc1/src/ui/app/static/locales/README.md)。
 
 ### 贡献翻译
 
@@ -952,4 +952,4 @@ BunkerWeb UI 支持多种语言。翻译文件在 `src/ui/app/static/locales` �
 
 对于更新，请编辑相关文件并根据需要更新来源表。
 
-有关完整指南，请参阅 [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.6/src/ui/app/static/locales/README.md)。
+有关完整指南，请参阅 [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.7~rc1/src/ui/app/static/locales/README.md)。

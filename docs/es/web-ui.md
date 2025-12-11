@@ -116,7 +116,7 @@ Para mantener los registros accesibles desde la interfaz de usuario web, te reco
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -131,7 +131,7 @@ Para mantener los registros accesibles desde la interfaz de usuario web, te reco
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrate de establecer el nombre de instancia correcto
@@ -158,7 +158,7 @@ Para mantener los registros accesibles desde la interfaz de usuario web, te reco
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.6
+        image: bunkerity/bunkerweb-ui:1.6.7~rc1
         environment:
           <<: *service-env
           ADMIN_USERNAME: "changeme"
@@ -235,7 +235,7 @@ Para mantener los registros accesibles desde la interfaz de usuario web, te reco
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -251,7 +251,7 @@ Para mantener los registros accesibles desde la interfaz de usuario web, te reco
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "" # No necesitamos especificar la instancia de BunkerWeb aquí, ya que son detectadas automáticamente por el servicio de autoconfiguración
@@ -270,7 +270,7 @@ Para mantener los registros accesibles desde la interfaz de usuario web, te reco
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.6
+        image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
         depends_on:
           - bunkerweb
           - bw-docker
@@ -284,7 +284,7 @@ Para mantener los registros accesibles desde la interfaz de usuario web, te reco
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.6
+        image: bunkerity/bunkerweb-ui:1.6.7~rc1
         environment:
           <<: *service-env
           ADMIN_USERNAME: "changeme"
@@ -608,7 +608,7 @@ La interfaz de usuario web se puede desplegar y configurar sin pasar por el proc
 
     !!! info "Backend de la base de datos"
 
-        Si quieres otro backend de base de datos que no sea MariaDB, consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/misc/integrations) del repositorio.
+        Si quieres otro backend de base de datos que no sea MariaDB, consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations) del repositorio.
 
     Aquí está la plantilla de docker-compose que puedes usar (no olvides editar los datos de `changeme`):
 
@@ -620,7 +620,7 @@ La interfaz de usuario web se puede desplegar y configurar sin pasar por el proc
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -635,7 +635,7 @@ La interfaz de usuario web se puede desplegar y configurar sin pasar por el proc
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrate de establecer el nombre de instancia correcto
@@ -662,7 +662,7 @@ La interfaz de usuario web se puede desplegar y configurar sin pasar por el proc
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.6
+        image: bunkerity/bunkerweb-ui:1.6.7~rc1
         environment:
           <<: *service-env
           ADMIN_USERNAME: "changeme"
@@ -749,7 +749,7 @@ La interfaz de usuario web se puede desplegar y configurar sin pasar por el proc
 
     !!! info "Backend de la base de datos"
 
-        Si quieres otro backend de base de datos que no sea MariaDB, consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/misc/integrations) del repositorio.
+        Si quieres otro backend de base de datos que no sea MariaDB, consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations) del repositorio.
 
     Aquí está la plantilla de docker-compose que puedes usar (no olvides editar los datos de `changeme`):
 
@@ -763,7 +763,7 @@ La interfaz de usuario web se puede desplegar y configurar sin pasar por el proc
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -778,7 +778,7 @@ La interfaz de usuario web se puede desplegar y configurar sin pasar por el proc
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: ""
@@ -797,7 +797,7 @@ La interfaz de usuario web se puede desplegar y configurar sin pasar por el proc
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.6
+        image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
         depends_on:
           - bw-docker
         environment:
@@ -819,7 +819,7 @@ La interfaz de usuario web se puede desplegar y configurar sin pasar por el proc
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.6
+        image: bunkerity/bunkerweb-ui:1.6.7~rc1
         environment:
           <<: *service-env
           ADMIN_USERNAME: "changeme"
@@ -898,7 +898,7 @@ La interfaz de usuario web se puede desplegar y configurar sin pasar por el proc
 
     !!! info "Backend de la base de datos"
 
-        Si quieres otro backend de base de datos que no sea MariaDB, consulta los archivos yaml en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.6/misc/integrations) del repositorio.
+        Si quieres otro backend de base de datos que no sea MariaDB, consulta los archivos yaml en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations) del repositorio.
 
     Aquí está la parte correspondiente de tu archivo values.yaml que puedes usar:
 
@@ -936,7 +936,7 @@ La interfaz de usuario de BunkerWeb admite varios idiomas. Las traducciones se g
 - Alemán (de)
 - Italiano (it)
 
-Consulta el [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.6/src/ui/app/static/locales/README.md) para obtener detalles sobre la procedencia de la traducción y el estado de la revisión.
+Consulta el [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.7~rc1/src/ui/app/static/locales/README.md) para obtener detalles sobre la procedencia de la traducción y el estado de la revisión.
 
 ### Contribuir con traducciones
 
@@ -952,5 +952,5 @@ Consulta el [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.
 
 Para las actualizaciones, edita el archivo correspondiente y actualiza la tabla de procedencia según sea necesario.
 
-Consulta el [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.6/src/ui/app/static/locales/README.md) para obtener las directrices completas.
+Consulta el [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.7~rc1/src/ui/app/static/locales/README.md) para obtener las directrices completas.
 Genera una traducción limpia de este archivo
