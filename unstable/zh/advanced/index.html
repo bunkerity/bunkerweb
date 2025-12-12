@@ -1391,6 +1391,126 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#custom-pages-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Pages (PRO)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom Pages (PRO)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_23" class="md-nav__link">
+    <span class="md-ellipsis">
+      功能
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_24" class="md-nav__link">
+    <span class="md-ellipsis">
+      工作原理
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_25" class="md-nav__link">
+    <span class="md-ellipsis">
+      配置设置
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_26" class="md-nav__link">
+    <span class="md-ellipsis">
+      模板变量参考
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="模板变量参考">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_27" class="md-nav__link">
+    <span class="md-ellipsis">
+      错误页面变量
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_28" class="md-nav__link">
+    <span class="md-ellipsis">
+      默认服务器页面变量
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_29" class="md-nav__link">
+    <span class="md-ellipsis">
+      反机器人挑战页面变量
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_30" class="md-nav__link">
+    <span class="md-ellipsis">
+      模板语法
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_31" class="md-nav__link">
+    <span class="md-ellipsis">
+      示例
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_32" class="md-nav__link">
+    <span class="md-ellipsis">
+      部署示例
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_33" class="md-nav__link">
+    <span class="md-ellipsis">
+      注意事项和故障排除
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -5060,6 +5180,704 @@ log {
 <li>保持健康检查间隔和超时平衡，以避免在慢速链路上波动。</li>
 <li>当指向可能通过 DNS 更改的主机名时启用 <code>LOADBALANCER_UPSTREAM_RESOLVE</code>。</li>
 <li>调整 keepalive 值以反映后端容量和连接重用目标。</li>
+</ul>
+<h2 id="custom-pages-pro">Custom Pages <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p>Custom Pages 插件允许您将 BunkerWeb 的内置页面（错误页面、默认服务器页面和反机器人挑战页面）替换为您自己的自定义 HTML 或 Lua 模板。这使您能够在 BunkerWeb 提供的所有面向用户的页面上保持一致的品牌形象。</p>
+<h3 id="_23">功能</h3>
+<ul>
+<li><strong>每个服务的自定义错误页面</strong>和<strong>反机器人挑战页面</strong>（验证码、JavaScript 检查、reCAPTCHA、hCaptcha、Turnstile、mCaptcha）。</li>
+<li><strong>全局自定义默认服务器页面</strong>用于回退/默认虚拟主机。</li>
+<li><strong>HTML 解析和 Lua 模板标签平衡检查</strong>在接受模板之前。</li>
+<li><strong>自动缓存</strong>到 <code>/var/cache/bunkerweb/custom_pages</code>，带有变更检测以触发重新加载。</li>
+<li><strong>每站点或全局配置</strong>通过设置/UI 或环境变量。</li>
+</ul>
+<h3 id="_24">工作原理</h3>
+<ol>
+<li>在启动时（或当设置更改时），<code>custom-pages.py</code> 作业读取配置的模板路径。</li>
+<li>每个文件必须存在且可被调度器读取；作业验证 HTML 结构和平衡的 Lua 模板标签（<code>{% %}</code>、<code>{{ }}</code>、<code>{* *}</code>）。</li>
+<li>接受的文件缓存在 <code>/var/cache/bunkerweb/custom_pages/&lt;type&gt;.html</code> 下；缺失/空设置会删除缓存文件。</li>
+<li>当至少存在一个缓存页面时，NGINX 通过 <code>$template_root</code> 指向缓存目录，因此您的模板将替代默认页面提供服务。</li>
+</ol>
+<h3 id="_25">配置设置</h3>
+<table>
+<thead>
+<tr>
+<th>设置</th>
+<th>默认</th>
+<th>上下文</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CUSTOM_ERROR_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>自定义错误页面模板的绝对路径。</td>
+</tr>
+<tr>
+<td><code>CUSTOM_DEFAULT_SERVER_PAGE</code></td>
+<td></td>
+<td>global</td>
+<td>自定义默认服务器页面模板的绝对路径。</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_CAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>自定义反机器人验证码挑战页面的绝对路径。</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_JAVASCRIPT_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>自定义反机器人 JavaScript 检查页面的绝对路径。</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_RECAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>自定义反机器人 reCAPTCHA 页面的绝对路径。</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_HCAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>自定义反机器人 hCaptcha 页面的绝对路径。</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_TURNSTILE_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>自定义反机器人 Turnstile 页面的绝对路径。</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_MCAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>自定义反机器人 mCaptcha 页面的绝对路径。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_26">模板变量参考</h3>
+<p>BunkerWeb 模板使用 <a href="https://github.com/bungle/lua-resty-template">lua-resty-template</a> 引擎。以下变量根据页面类型可用：</p>
+<h4 id="_27">错误页面变量</h4>
+<p>这些变量在自定义错误页面模板（<code>CUSTOM_ERROR_PAGE</code>）中可用：</p>
+<table>
+<thead>
+<tr>
+<th>变量</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>title</code></td>
+<td>string</td>
+<td>完整页面标题（例如 <code>403 - Forbidden</code>）</td>
+</tr>
+<tr>
+<td><code>error_title</code></td>
+<td>string</td>
+<td>错误标题文本（例如 <code>Forbidden</code>）</td>
+</tr>
+<tr>
+<td><code>error_code</code></td>
+<td>string</td>
+<td>HTTP 状态码（例如 <code>403</code>、<code>404</code>、<code>500</code>）</td>
+</tr>
+<tr>
+<td><code>error_text</code></td>
+<td>string</td>
+<td>描述性错误消息</td>
+</tr>
+<tr>
+<td><code>error_type</code></td>
+<td>string</td>
+<td>错误类别：<code>client</code>（4xx）或 <code>server</code>（5xx）</td>
+</tr>
+<tr>
+<td><code>error_solution</code></td>
+<td>string</td>
+<td>建议的解决方案文本</td>
+</tr>
+<tr>
+<td><code>nonce_script</code></td>
+<td>string</td>
+<td>内联 <code>&lt;script&gt;</code> 标签的 Nonce 值（CSP 合规）</td>
+</tr>
+<tr>
+<td><code>nonce_style</code></td>
+<td>string</td>
+<td>内联 <code>&lt;style&gt;</code> 标签的 Nonce 值（CSP 合规）</td>
+</tr>
+<tr>
+<td><code>request_id</code></td>
+<td>string</td>
+<td>用于调试的唯一请求标识符</td>
+</tr>
+<tr>
+<td><code>client_ip</code></td>
+<td>string</td>
+<td>客户端的 IP 地址</td>
+</tr>
+<tr>
+<td><code>request_time</code></td>
+<td>string</td>
+<td>请求的时间戳（格式：<code>YYYY-MM-DD HH:MM:SS UTC</code>）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_28">默认服务器页面变量</h4>
+<p>这些变量在自定义默认服务器页面模板（<code>CUSTOM_DEFAULT_SERVER_PAGE</code>）中可用：</p>
+<table>
+<thead>
+<tr>
+<th>变量</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nonce_style</code></td>
+<td>string</td>
+<td>内联 <code>&lt;style&gt;</code> 标签的 Nonce 值（CSP 合规）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_29">反机器人挑战页面变量</h4>
+<p>这些变量在反机器人挑战页面模板中可用：</p>
+<p><strong>通用变量（所有反机器人页面）：</strong></p>
+<table>
+<thead>
+<tr>
+<th>变量</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>antibot_uri</code></td>
+<td>string</td>
+<td>提交挑战的表单操作 URI</td>
+</tr>
+<tr>
+<td><code>nonce_script</code></td>
+<td>string</td>
+<td>内联 <code>&lt;script&gt;</code> 标签的 Nonce 值（CSP 合规）</td>
+</tr>
+<tr>
+<td><code>nonce_style</code></td>
+<td>string</td>
+<td>内联 <code>&lt;style&gt;</code> 标签的 Nonce 值（CSP 合规）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>JavaScript 挑战（<code>CUSTOM_ANTIBOT_JAVASCRIPT_PAGE</code>）：</strong></p>
+<table>
+<thead>
+<tr>
+<th>变量</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>random</code></td>
+<td>string</td>
+<td>用于工作量证明求解的随机字符串</td>
+</tr>
+</tbody>
+</table>
+<p><strong>验证码（<code>CUSTOM_ANTIBOT_CAPTCHA_PAGE</code>）：</strong></p>
+<table>
+<thead>
+<tr>
+<th>变量</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>captcha</code></td>
+<td>string</td>
+<td>Base64 编码的验证码图像（JPEG 格式）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>reCAPTCHA（<code>CUSTOM_ANTIBOT_RECAPTCHA_PAGE</code>）：</strong></p>
+<table>
+<thead>
+<tr>
+<th>变量</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>recaptcha_sitekey</code></td>
+<td>string</td>
+<td>您的 reCAPTCHA 站点密钥</td>
+</tr>
+<tr>
+<td><code>recaptcha_classic</code></td>
+<td>boolean</td>
+<td>如果使用经典 reCAPTCHA 则为 <code>true</code>，v3 为 <code>false</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>hCaptcha（<code>CUSTOM_ANTIBOT_HCAPTCHA_PAGE</code>）：</strong></p>
+<table>
+<thead>
+<tr>
+<th>变量</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hcaptcha_sitekey</code></td>
+<td>string</td>
+<td>您的 hCaptcha 站点密钥</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Turnstile（<code>CUSTOM_ANTIBOT_TURNSTILE_PAGE</code>）：</strong></p>
+<table>
+<thead>
+<tr>
+<th>变量</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>turnstile_sitekey</code></td>
+<td>string</td>
+<td>您的 Cloudflare Turnstile 站点密钥</td>
+</tr>
+</tbody>
+</table>
+<p><strong>mCaptcha（<code>CUSTOM_ANTIBOT_MCAPTCHA_PAGE</code>）：</strong></p>
+<table>
+<thead>
+<tr>
+<th>变量</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mcaptcha_sitekey</code></td>
+<td>string</td>
+<td>您的 mCaptcha 站点密钥</td>
+</tr>
+<tr>
+<td><code>mcaptcha_url</code></td>
+<td>string</td>
+<td>您的 mCaptcha URL</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_30">模板语法</h3>
+<p>模板使用 Lua 模板语法，具有以下分隔符：</p>
+<ul>
+<li><code>{{ variable }}</code> – 输出变量（HTML 转义）</li>
+<li><code>{* variable *}</code> – 输出变量（原始，未转义）</li>
+<li><code>{% lua_code %}</code> – 执行 Lua 代码（条件、循环等）</li>
+<li><code>{-raw-}</code> ... <code>{-raw-}</code> – 原始块（不处理）</li>
+</ul>
+<p><strong>重要</strong>：始终对内联脚本和样式使用 nonce 属性以符合内容安全策略（CSP）：</p>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">style</span> <span class="na">nonce</span><span class="o">=</span><span class="s">&quot;{*nonce_style*}&quot;</span><span class="p">&gt;</span>
+<span class="w">  </span><span class="c">/* 您的 CSS */</span>
+<span class="p">&lt;/</span><span class="nt">style</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">nonce</span><span class="o">=</span><span class="s">&quot;{*nonce_script*}&quot;</span><span class="p">&gt;</span>
+<span class="w">  </span><span class="c1">// 您的 JavaScript</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</code></pre></div>
+<h3 id="_31">示例</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="30:3"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">自定义错误页面</label><label for="__tabbed_30_2">自定义验证码页面</label><label for="__tabbed_30_3">自定义默认服务器页面</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>在 <code>/etc/bunkerweb/templates/error.html</code> 创建自定义错误页面模板：</p>
+<div class="highlight"><pre><span></span><code>{-raw-}<span class="cp">&lt;!doctype html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;zh&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;utf-8&quot;</span> <span class="p">/&gt;</span>
+    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content</span><span class="o">=</span><span class="s">&quot;width=device-width, initial-scale=1&quot;</span> <span class="p">/&gt;</span>
+    {-raw-}
+    <span class="p">&lt;</span><span class="nt">style</span> <span class="na">nonce</span><span class="o">=</span><span class="s">&quot;{*nonce_style*}&quot;</span><span class="p">&gt;</span>
+<span class="w">      </span><span class="nt">body</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">font-family</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="n">apple-system</span><span class="p">,</span><span class="w"> </span><span class="n">BlinkMacSystemFont</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Segoe UI&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">Roboto</span><span class="p">,</span><span class="w"> </span><span class="kc">sans-serif</span><span class="p">;</span>
+<span class="w">        </span><span class="k">display</span><span class="p">:</span><span class="w"> </span><span class="kc">flex</span><span class="p">;</span>
+<span class="w">        </span><span class="k">justify-content</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">        </span><span class="k">align-items</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">        </span><span class="k">min-height</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="kt">vh</span><span class="p">;</span>
+<span class="w">        </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">background</span><span class="p">:</span><span class="w"> </span><span class="mh">#f5f5f5</span><span class="p">;</span>
+<span class="w">        </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#333</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="p">.</span><span class="nc">container</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">text-align</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">        </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="p">.</span><span class="nc">error-code</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="kc">bold</span><span class="p">;</span>
+<span class="w">        </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="err">{</span><span class="o">%</span><span class="w"> </span><span class="n">if</span><span class="w"> </span><span class="n">error_type</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;server&quot;</span><span class="w"> </span><span class="o">%</span><span class="p">}#</span><span class="nn">dc3545</span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">else</span><span class="w"> </span><span class="err">%</span><span class="p">}#</span><span class="nn">ffc107</span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">end</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="o">;</span>
+<span class="w">        </span><span class="nt">margin</span><span class="o">:</span><span class="w"> </span><span class="nt">0</span><span class="o">;</span>
+<span class="w">      </span><span class="err">}</span>
+<span class="w">      </span><span class="p">.</span><span class="nc">error-title</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mf">1.5</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="p">.</span><span class="nc">error-text</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#666</span><span class="p">;</span>
+<span class="w">        </span><span class="k">margin-bottom</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="p">.</span><span class="nc">request-info</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mf">0.8</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#999</span><span class="p">;</span>
+<span class="w">        </span><span class="k">margin-top</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">&lt;/</span><span class="nt">style</span><span class="p">&gt;</span>
+    {-raw-}
+  <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;container&quot;</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;error-code&quot;</span><span class="p">&gt;</span>{{ error_code }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">h1</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;error-title&quot;</span><span class="p">&gt;</span>{{ error_title }}<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;error-text&quot;</span><span class="p">&gt;</span>{{ error_text }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;error-text&quot;</span><span class="p">&gt;</span>{{ error_solution }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;request-info&quot;</span><span class="p">&gt;</span>
+        {% if request_id %}
+        <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>请求 ID：<span class="p">&lt;</span><span class="nt">code</span><span class="p">&gt;</span>{{ request_id }}<span class="p">&lt;/</span><span class="nt">code</span><span class="p">&gt;&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+        {% end %}
+        {% if request_time %}
+        <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>时间：{{ request_time }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+        {% end %}
+      <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+{-raw-}
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>在 <code>/etc/bunkerweb/templates/captcha.html</code> 创建自定义验证码挑战页面：</p>
+<div class="highlight"><pre><span></span><code>{-raw-}<span class="cp">&lt;!doctype html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;zh&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;utf-8&quot;</span> <span class="p">/&gt;</span>
+    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>安全检查<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content</span><span class="o">=</span><span class="s">&quot;width=device-width, initial-scale=1&quot;</span> <span class="p">/&gt;</span>
+    {-raw-}
+    <span class="p">&lt;</span><span class="nt">style</span> <span class="na">nonce</span><span class="o">=</span><span class="s">&quot;{*nonce_style*}&quot;</span><span class="p">&gt;</span>
+<span class="w">      </span><span class="nt">body</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">font-family</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="n">apple-system</span><span class="p">,</span><span class="w"> </span><span class="n">BlinkMacSystemFont</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Segoe UI&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">Roboto</span><span class="p">,</span><span class="w"> </span><span class="kc">sans-serif</span><span class="p">;</span>
+<span class="w">        </span><span class="k">display</span><span class="p">:</span><span class="w"> </span><span class="kc">flex</span><span class="p">;</span>
+<span class="w">        </span><span class="k">justify-content</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">        </span><span class="k">align-items</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">        </span><span class="k">min-height</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="kt">vh</span><span class="p">;</span>
+<span class="w">        </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">background</span><span class="p">:</span><span class="w"> </span><span class="nb">linear-gradient</span><span class="p">(</span><span class="mi">135</span><span class="kt">deg</span><span class="p">,</span><span class="w"> </span><span class="mh">#667eea</span><span class="w"> </span><span class="mi">0</span><span class="kt">%</span><span class="p">,</span><span class="w"> </span><span class="mh">#764ba2</span><span class="w"> </span><span class="mi">100</span><span class="kt">%</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="p">.</span><span class="nc">card</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">background</span><span class="p">:</span><span class="w"> </span><span class="kc">white</span><span class="p">;</span>
+<span class="w">        </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">box-shadow</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="mi">10</span><span class="kt">px</span><span class="w"> </span><span class="mi">40</span><span class="kt">px</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.2</span><span class="p">);</span>
+<span class="w">        </span><span class="k">text-align</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">        </span><span class="k">max-width</span><span class="p">:</span><span class="w"> </span><span class="mi">400</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="nt">h1</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#333</span><span class="p">;</span>
+<span class="w">        </span><span class="k">margin-bottom</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="p">.</span><span class="nc">captcha-img</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="nt">input</span><span class="o">[</span><span class="nt">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">]</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">width</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="kt">%</span><span class="p">;</span>
+<span class="w">        </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mf">0.75</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mf">1.2</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">border</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="kt">px</span><span class="w"> </span><span class="kc">solid</span><span class="w"> </span><span class="mh">#ddd</span><span class="p">;</span>
+<span class="w">        </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">text-align</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">        </span><span class="k">box-sizing</span><span class="p">:</span><span class="w"> </span><span class="kc">border-box</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="nt">button</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">margin-top</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mf">0.75</span><span class="kt">rem</span><span class="w"> </span><span class="mi">2</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">background</span><span class="p">:</span><span class="w"> </span><span class="mh">#667eea</span><span class="p">;</span>
+<span class="w">        </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">white</span><span class="p">;</span>
+<span class="w">        </span><span class="k">border</span><span class="p">:</span><span class="w"> </span><span class="kc">none</span><span class="p">;</span>
+<span class="w">        </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">cursor</span><span class="p">:</span><span class="w"> </span><span class="kc">pointer</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="nt">button</span><span class="p">:</span><span class="nd">hover</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">background</span><span class="p">:</span><span class="w"> </span><span class="mh">#5a6fd6</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">&lt;/</span><span class="nt">style</span><span class="p">&gt;</span>
+    {-raw-}
+  <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;card&quot;</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>🔒 安全检查<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>请输入下方显示的文字以继续。<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+      {-raw-}
+      <span class="p">&lt;</span><span class="nt">form</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;POST&quot;</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;{*antibot_uri*}&quot;</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">img</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;captcha-img&quot;</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;data:image/jpeg;base64,{*captcha*}&quot;</span> <span class="na">alt</span><span class="o">=</span><span class="s">&quot;验证码&quot;</span> <span class="p">/&gt;</span>
+        {-raw-}
+        <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;captcha&quot;</span> <span class="na">placeholder</span><span class="o">=</span><span class="s">&quot;输入验证码&quot;</span> <span class="na">required</span> <span class="na">autocomplete</span><span class="o">=</span><span class="s">&quot;off&quot;</span> <span class="p">/&gt;</span>
+        <span class="p">&lt;</span><span class="nt">button</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;submit&quot;</span><span class="p">&gt;</span>验证<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+      <span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+{-raw-}
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>在 <code>/etc/bunkerweb/templates/default.html</code> 创建自定义默认服务器页面：</p>
+<div class="highlight"><pre><span></span><code>{-raw-}<span class="cp">&lt;!doctype html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;zh&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;utf-8&quot;</span> <span class="p">/&gt;</span>
+    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>欢迎<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content</span><span class="o">=</span><span class="s">&quot;width=device-width, initial-scale=1&quot;</span> <span class="p">/&gt;</span>
+    {-raw-}
+    <span class="p">&lt;</span><span class="nt">style</span> <span class="na">nonce</span><span class="o">=</span><span class="s">&quot;{*nonce_style*}&quot;</span><span class="p">&gt;</span>
+<span class="w">      </span><span class="nt">body</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">font-family</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="n">apple-system</span><span class="p">,</span><span class="w"> </span><span class="n">BlinkMacSystemFont</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Segoe UI&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">Roboto</span><span class="p">,</span><span class="w"> </span><span class="kc">sans-serif</span><span class="p">;</span>
+<span class="w">        </span><span class="k">display</span><span class="p">:</span><span class="w"> </span><span class="kc">flex</span><span class="p">;</span>
+<span class="w">        </span><span class="k">justify-content</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">        </span><span class="k">align-items</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">        </span><span class="k">min-height</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="kt">vh</span><span class="p">;</span>
+<span class="w">        </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">background</span><span class="p">:</span><span class="w"> </span><span class="mh">#1a1a2e</span><span class="p">;</span>
+<span class="w">        </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#eee</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="p">.</span><span class="nc">container</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">text-align</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="nt">h1</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">margin-bottom</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="nt">p</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#888</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">&lt;/</span><span class="nt">style</span><span class="p">&gt;</span>
+    {-raw-}
+  <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;container&quot;</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>🛡️ 受 BunkerWeb 保护<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>此服务器安全且已就绪。<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+{-raw-}
+</code></pre></div>
+</div>
+</div>
+</div>
+<h3 id="_32">部署示例</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="31:3"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">Linux</label><label for="__tabbed_31_2">Docker</label><label for="__tabbed_31_3">Kubernetes</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>
+<p>在您选择的目录中创建模板文件（例如 <code>/opt/bunkerweb/templates/</code>）：</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/bunkerweb/templates
+sudo<span class="w"> </span>nano<span class="w"> </span>/opt/bunkerweb/templates/error.html
+<span class="c1"># 粘贴您的自定义错误页面模板</span>
+</code></pre></div>
+</li>
+<li>
+<p>通过编辑 <code>/etc/bunkerweb/variables.env</code> 配置 BunkerWeb：</p>
+<div class="highlight"><pre><span></span><code># 所有服务的自定义错误页面（或使用前缀按服务配置）
+CUSTOM_ERROR_PAGE=/opt/bunkerweb/templates/error.html
+
+# 自定义默认服务器页面（仅全局）
+CUSTOM_DEFAULT_SERVER_PAGE=/opt/bunkerweb/templates/default.html
+
+# 自定义验证码页面（按服务或全局）
+CUSTOM_ANTIBOT_CAPTCHA_PAGE=/opt/bunkerweb/templates/captcha.html
+</code></pre></div>
+</li>
+<li>
+<p>重新加载 BunkerWeb：</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>reload<span class="w"> </span>bunkerweb
+</code></pre></div>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<p><strong>调度器</strong>负责读取、验证和缓存您的自定义模板。只有调度器需要访问模板文件—BunkerWeb 自动接收验证后的配置。</p>
+<ol>
+<li>
+<p>在本地目录中创建模板文件（例如 <code>./templates/</code>）并设置正确的权限：</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>templates<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chown<span class="w"> </span>root:101<span class="w"> </span>templates<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>templates
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">为什么是 UID/GID 101？</p>
+<p>调度器容器以<strong>UID 101 和 GID 101 的非特权用户</strong>运行。目录必须对此用户可读，以便调度器访问您的模板。</p>
+</div>
+<p>如果文件夹已存在：</p>
+<div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span>root:101<span class="w"> </span>templates<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>templates
+</code></pre></div>
+<p>使用 <a href="https://docs.docker.com/engine/security/rootless">Docker rootless 模式</a> 或 <a href="https://podman.io/">Podman</a> 时，容器 UID/GID 会被重新映射。检查您的 subuid/subgid 范围：</p>
+<div class="highlight"><pre><span></span><code>grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subuid<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subgid
+</code></pre></div>
+<p>例如，如果范围从 <strong>100000</strong> 开始，有效 GID 变为 <strong>100100</strong>（100000 + 100）：</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>templates<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>chgrp<span class="w"> </span><span class="m">100100</span><span class="w"> </span>templates<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>templates
+</code></pre></div>
+</li>
+<li>
+<p>将模板目录挂载到<strong>调度器</strong>并在调度器上配置设置（调度器充当管理器并将配置分发给 BunkerWeb 工作器）。您可以将模板挂载到容器内的任何路径：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
+<span class="w">    </span><span class="c1"># ... 其他设置（自定义页面无需在此处设置环境变量）</span>
+
+<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./templates:/custom_templates:ro</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CUSTOM_ERROR_PAGE=/custom_templates/error.html</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CUSTOM_DEFAULT_SERVER_PAGE=/custom_templates/default.html</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CUSTOM_ANTIBOT_CAPTCHA_PAGE=/custom_templates/captcha.html</span>
+<span class="w">      </span><span class="c1"># ... 其他设置</span>
+</code></pre></div>
+</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">需要调度器访问权限</p>
+<p>如果调度器无法读取模板文件（由于缺少挂载或权限不正确），模板将被静默忽略，将使用默认页面。检查调度器日志以了解验证错误。</p>
+</div>
+</div>
+<div class="tabbed-block">
+<p><strong>调度器</strong>负责读取、验证和缓存您的自定义模板。您需要将模板挂载到调度器 Pod。</p>
+<ol>
+<li>
+<p>创建包含模板的 ConfigMap：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ConfigMap</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-custom-templates</span>
+<span class="nt">data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">error.html</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">{-raw-}&lt;!doctype html&gt;</span>
+<span class="w">    </span><span class="no">&lt;html lang=&quot;zh&quot;&gt;</span>
+<span class="w">      </span><span class="no">&lt;head&gt;</span>
+<span class="w">        </span><span class="no">&lt;meta charset=&quot;utf-8&quot; /&gt;</span>
+<span class="w">        </span><span class="no">&lt;title&gt;{{ title }}&lt;/title&gt;</span>
+<span class="w">        </span><span class="no">{-raw-}</span>
+<span class="w">        </span><span class="no">&lt;style nonce=&quot;{*nonce_style*}&quot;&gt;</span>
+<span class="w">          </span><span class="no">body { font-family: sans-serif; text-align: center; padding: 2rem; }</span>
+<span class="w">          </span><span class="no">.error-code { font-size: 4rem; color: #dc3545; }</span>
+<span class="w">        </span><span class="no">&lt;/style&gt;</span>
+<span class="w">        </span><span class="no">{-raw-}</span>
+<span class="w">      </span><span class="no">&lt;/head&gt;</span>
+<span class="w">      </span><span class="no">&lt;body&gt;</span>
+<span class="w">        </span><span class="no">&lt;p class=&quot;error-code&quot;&gt;{{ error_code }}&lt;/p&gt;</span>
+<span class="w">        </span><span class="no">&lt;h1&gt;{{ error_title }}&lt;/h1&gt;</span>
+<span class="w">        </span><span class="no">&lt;p&gt;{{ error_text }}&lt;/p&gt;</span>
+<span class="w">      </span><span class="no">&lt;/body&gt;</span>
+<span class="w">    </span><span class="no">&lt;/html&gt;</span>
+<span class="w">    </span><span class="no">{-raw-}</span>
+<span class="w">  </span><span class="nt">captcha.html</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">{-raw-}&lt;!doctype html&gt;</span>
+<span class="w">    </span><span class="no">&lt;html lang=&quot;zh&quot;&gt;</span>
+<span class="w">      </span><span class="no">&lt;head&gt;</span>
+<span class="w">        </span><span class="no">&lt;meta charset=&quot;utf-8&quot; /&gt;</span>
+<span class="w">        </span><span class="no">&lt;title&gt;安全检查&lt;/title&gt;</span>
+<span class="w">        </span><span class="no">{-raw-}</span>
+<span class="w">        </span><span class="no">&lt;style nonce=&quot;{*nonce_style*}&quot;&gt;</span>
+<span class="w">          </span><span class="no">body { font-family: sans-serif; text-align: center; padding: 2rem; }</span>
+<span class="w">        </span><span class="no">&lt;/style&gt;</span>
+<span class="w">        </span><span class="no">{-raw-}</span>
+<span class="w">      </span><span class="no">&lt;/head&gt;</span>
+<span class="w">      </span><span class="no">&lt;body&gt;</span>
+<span class="w">        </span><span class="no">&lt;h1&gt;请验证您是人类&lt;/h1&gt;</span>
+<span class="w">        </span><span class="no">{-raw-}</span>
+<span class="w">        </span><span class="no">&lt;form method=&quot;POST&quot; action=&quot;{*antibot_uri*}&quot;&gt;</span>
+<span class="w">          </span><span class="no">&lt;img src=&quot;data:image/jpeg;base64,{*captcha*}&quot; alt=&quot;验证码&quot; /&gt;</span>
+<span class="w">          </span><span class="no">{-raw-}</span>
+<span class="w">          </span><span class="no">&lt;input type=&quot;text&quot; name=&quot;captcha&quot; placeholder=&quot;输入验证码&quot; required /&gt;</span>
+<span class="w">          </span><span class="no">&lt;button type=&quot;submit&quot;&gt;验证&lt;/button&gt;</span>
+<span class="w">        </span><span class="no">&lt;/form&gt;</span>
+<span class="w">      </span><span class="no">&lt;/body&gt;</span>
+<span class="w">    </span><span class="no">&lt;/html&gt;</span>
+<span class="w">    </span><span class="no">{-raw-}</span>
+</code></pre></div>
+</li>
+<li>
+<p>将模板 ConfigMap 挂载到<strong>调度器</strong> Pod 并将设置配置为环境变量：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">          </span><span class="nt">env</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CUSTOM_ERROR_PAGE</span>
+<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/custom_templates/error.html&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CUSTOM_ANTIBOT_CAPTCHA_PAGE</span>
+<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/custom_templates/captcha.html&quot;</span>
+<span class="w">            </span><span class="c1"># ... 其他设置</span>
+<span class="w">          </span><span class="nt">volumeMounts</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom-templates</span>
+<span class="w">              </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/custom_templates</span>
+<span class="w">              </span><span class="nt">readOnly</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">          </span><span class="c1"># ... 其他容器设置</span>
+<span class="w">      </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom-templates</span>
+<span class="w">          </span><span class="nt">configMap</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-custom-templates</span>
+<span class="w">      </span><span class="c1"># ... 其他 Pod 设置</span>
+</code></pre></div>
+</li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">使用 BunkerWeb Ingress Controller</p>
+<p>如果您使用 BunkerWeb Ingress Controller，调度器嵌入在控制器中。请将 ConfigMap 挂载到控制器 Pod。</p>
+</div>
+</div>
+</div>
+</div>
+<h3 id="_33">注意事项和故障排除</h3>
+<ul>
+<li><strong>路径必须是绝对路径</strong>并以文件名结尾；空值会禁用相应的自定义页面并删除其缓存。</li>
+<li><strong>如果验证失败</strong>（错误的 HTML 或不平衡的 Lua 标签），模板将被跳过，默认页面保持活动状态。检查调度器日志以获取详细信息。</li>
+<li><strong>缓存文件</strong>位于 <code>/var/cache/bunkerweb/custom_pages</code>；更新源文件就足够了—作业检测到新哈希并自动重新加载 NGINX。</li>
+<li><strong>CSP 合规</strong>：始终对内联脚本和样式使用 <code>nonce_script</code> 和 <code>nonce_style</code> 变量，以确保正确的内容安全策略处理。</li>
+<li><strong>测试模板</strong>：您可以在部署到 BunkerWeb 之前使用 Lua 模板引擎在本地渲染测试您的模板。</li>
 </ul>
 
 

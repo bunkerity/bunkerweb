@@ -1391,6 +1391,126 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#custom-pages-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Pages (PRO)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom Pages (PRO)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fonctionnalites_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fonctionnalités
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comment-ca-fonctionne" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comment ça fonctionne
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parametres-de-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Paramètres de configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reference-des-variables-de-modele" class="md-nav__link">
+    <span class="md-ellipsis">
+      Référence des variables de modèle
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Référence des variables de modèle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#variables-de-page-derreur" class="md-nav__link">
+    <span class="md-ellipsis">
+      Variables de page d'erreur
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#variables-de-page-du-serveur-par-defaut" class="md-nav__link">
+    <span class="md-ellipsis">
+      Variables de page du serveur par défaut
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#variables-de-page-de-defi-antibot" class="md-nav__link">
+    <span class="md-ellipsis">
+      Variables de page de défi antibot
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#syntaxe-de-modele" class="md-nav__link">
+    <span class="md-ellipsis">
+      Syntaxe de modèle
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exemples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exemples
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exemples-de-deploiement" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exemples de déploiement
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notes-et-depannage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes et dépannage
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -5058,6 +5178,704 @@ log {
 <li>Gardez les intervalles et timeouts des vérifications de santé équilibrés pour éviter les oscillations sur les liens lents.</li>
 <li>Activez <code>LOADBALANCER_UPSTREAM_RESOLVE</code> lorsque vous pointez vers des hostnames qui peuvent changer via DNS.</li>
 <li>Réglez les valeurs keepalive pour refléter la capacité backend et les objectifs de réutilisation des connexions.</li>
+</ul>
+<h2 id="custom-pages-pro">Custom Pages <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p>Le plugin Custom Pages vous permet de remplacer les pages intégrées de BunkerWeb (pages d'erreur, page du serveur par défaut et pages de défi antibot) par vos propres modèles HTML ou Lua personnalisés. Cela vous permet de maintenir une image de marque cohérente sur toutes les pages destinées aux utilisateurs servies par BunkerWeb.</p>
+<h3 id="fonctionnalites_4">Fonctionnalités</h3>
+<ul>
+<li><strong>Pages d'erreur personnalisées par service</strong> et <strong>pages de défi antibot</strong> (captcha, vérification JavaScript, reCAPTCHA, hCaptcha, Turnstile, mCaptcha).</li>
+<li><strong>Page du serveur par défaut personnalisée globale</strong> pour le vhost de repli/par défaut.</li>
+<li><strong>Analyse HTML et vérifications d'équilibre des balises de modèle Lua</strong> avant qu'un modèle soit accepté.</li>
+<li><strong>Mise en cache automatique</strong> vers <code>/var/cache/bunkerweb/custom_pages</code> avec détection des modifications pour déclencher les rechargements.</li>
+<li><strong>Configuration par site ou globale</strong> via les paramètres/UI ou les variables d'environnement.</li>
+</ul>
+<h3 id="comment-ca-fonctionne">Comment ça fonctionne</h3>
+<ol>
+<li>Au démarrage (ou lorsque les paramètres changent), le job <code>custom-pages.py</code> lit les chemins de modèles configurés.</li>
+<li>Chaque fichier doit exister et être lisible par le scheduler ; le job valide la structure HTML et l'équilibre des balises de modèle Lua (<code>{% %}</code>, <code>{{ }}</code>, <code>{* *}</code>).</li>
+<li>Les fichiers acceptés sont mis en cache sous <code>/var/cache/bunkerweb/custom_pages/&lt;type&gt;.html</code> ; les paramètres manquants/vides suppriment le fichier mis en cache.</li>
+<li>NGINX est dirigé vers le répertoire de cache via <code>$template_root</code> lorsqu'au moins une page mise en cache existe, de sorte que vos modèles sont servis à la place des pages par défaut.</li>
+</ol>
+<h3 id="parametres-de-configuration">Paramètres de configuration</h3>
+<table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Défaut</th>
+<th>Contexte</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CUSTOM_ERROR_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>Chemin absolu vers le modèle de page d'erreur personnalisé.</td>
+</tr>
+<tr>
+<td><code>CUSTOM_DEFAULT_SERVER_PAGE</code></td>
+<td></td>
+<td>global</td>
+<td>Chemin absolu vers le modèle de page du serveur par défaut personnalisé.</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_CAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>Chemin absolu vers la page de défi CAPTCHA antibot personnalisée.</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_JAVASCRIPT_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>Chemin absolu vers la page de vérification JavaScript antibot personnalisée.</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_RECAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>Chemin absolu vers la page reCAPTCHA antibot personnalisée.</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_HCAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>Chemin absolu vers la page hCaptcha antibot personnalisée.</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_TURNSTILE_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>Chemin absolu vers la page Turnstile antibot personnalisée.</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_MCAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>Chemin absolu vers la page mCaptcha antibot personnalisée.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="reference-des-variables-de-modele">Référence des variables de modèle</h3>
+<p>Les modèles BunkerWeb utilisent le moteur <a href="https://github.com/bungle/lua-resty-template">lua-resty-template</a>. Les variables suivantes sont disponibles selon le type de page :</p>
+<h4 id="variables-de-page-derreur">Variables de page d'erreur</h4>
+<p>Ces variables sont disponibles dans les modèles de page d'erreur personnalisés (<code>CUSTOM_ERROR_PAGE</code>) :</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>title</code></td>
+<td>string</td>
+<td>Titre complet de la page (ex. <code>403 - Forbidden</code>)</td>
+</tr>
+<tr>
+<td><code>error_title</code></td>
+<td>string</td>
+<td>Texte du titre d'erreur (ex. <code>Forbidden</code>)</td>
+</tr>
+<tr>
+<td><code>error_code</code></td>
+<td>string</td>
+<td>Code de statut HTTP (ex. <code>403</code>, <code>404</code>, <code>500</code>)</td>
+</tr>
+<tr>
+<td><code>error_text</code></td>
+<td>string</td>
+<td>Message d'erreur descriptif</td>
+</tr>
+<tr>
+<td><code>error_type</code></td>
+<td>string</td>
+<td>Catégorie d'erreur : <code>client</code> (4xx) ou <code>server</code> (5xx)</td>
+</tr>
+<tr>
+<td><code>error_solution</code></td>
+<td>string</td>
+<td>Texte de solution suggérée</td>
+</tr>
+<tr>
+<td><code>nonce_script</code></td>
+<td>string</td>
+<td>Valeur nonce pour les balises <code>&lt;script&gt;</code> inline (conformité CSP)</td>
+</tr>
+<tr>
+<td><code>nonce_style</code></td>
+<td>string</td>
+<td>Valeur nonce pour les balises <code>&lt;style&gt;</code> inline (conformité CSP)</td>
+</tr>
+<tr>
+<td><code>request_id</code></td>
+<td>string</td>
+<td>Identifiant de requête unique pour le débogage</td>
+</tr>
+<tr>
+<td><code>client_ip</code></td>
+<td>string</td>
+<td>Adresse IP du client</td>
+</tr>
+<tr>
+<td><code>request_time</code></td>
+<td>string</td>
+<td>Horodatage de la requête (format : <code>YYYY-MM-DD HH:MM:SS UTC</code>)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="variables-de-page-du-serveur-par-defaut">Variables de page du serveur par défaut</h4>
+<p>Ces variables sont disponibles dans les modèles de page du serveur par défaut personnalisés (<code>CUSTOM_DEFAULT_SERVER_PAGE</code>) :</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nonce_style</code></td>
+<td>string</td>
+<td>Valeur nonce pour les balises <code>&lt;style&gt;</code> inline (conformité CSP)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="variables-de-page-de-defi-antibot">Variables de page de défi antibot</h4>
+<p>Ces variables sont disponibles dans les modèles de page de défi antibot :</p>
+<p><strong>Variables communes (toutes les pages antibot) :</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>antibot_uri</code></td>
+<td>string</td>
+<td>URI d'action de formulaire pour soumettre le défi</td>
+</tr>
+<tr>
+<td><code>nonce_script</code></td>
+<td>string</td>
+<td>Valeur nonce pour les balises <code>&lt;script&gt;</code> inline (conformité CSP)</td>
+</tr>
+<tr>
+<td><code>nonce_style</code></td>
+<td>string</td>
+<td>Valeur nonce pour les balises <code>&lt;style&gt;</code> inline (conformité CSP)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Défi JavaScript (<code>CUSTOM_ANTIBOT_JAVASCRIPT_PAGE</code>) :</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>random</code></td>
+<td>string</td>
+<td>Chaîne aléatoire utilisée pour la preuve de travail</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Captcha (<code>CUSTOM_ANTIBOT_CAPTCHA_PAGE</code>) :</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>captcha</code></td>
+<td>string</td>
+<td>Image captcha encodée en Base64 (format JPEG)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>reCAPTCHA (<code>CUSTOM_ANTIBOT_RECAPTCHA_PAGE</code>) :</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>recaptcha_sitekey</code></td>
+<td>string</td>
+<td>Votre clé de site reCAPTCHA</td>
+</tr>
+<tr>
+<td><code>recaptcha_classic</code></td>
+<td>boolean</td>
+<td><code>true</code> si utilisant reCAPTCHA classique, <code>false</code> pour v3</td>
+</tr>
+</tbody>
+</table>
+<p><strong>hCaptcha (<code>CUSTOM_ANTIBOT_HCAPTCHA_PAGE</code>) :</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hcaptcha_sitekey</code></td>
+<td>string</td>
+<td>Votre clé de site hCaptcha</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Turnstile (<code>CUSTOM_ANTIBOT_TURNSTILE_PAGE</code>) :</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>turnstile_sitekey</code></td>
+<td>string</td>
+<td>Votre clé de site Cloudflare Turnstile</td>
+</tr>
+</tbody>
+</table>
+<p><strong>mCaptcha (<code>CUSTOM_ANTIBOT_MCAPTCHA_PAGE</code>) :</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mcaptcha_sitekey</code></td>
+<td>string</td>
+<td>Votre clé de site mCaptcha</td>
+</tr>
+<tr>
+<td><code>mcaptcha_url</code></td>
+<td>string</td>
+<td>Votre URL mCaptcha</td>
+</tr>
+</tbody>
+</table>
+<h3 id="syntaxe-de-modele">Syntaxe de modèle</h3>
+<p>Les modèles utilisent la syntaxe de modèle Lua avec les délimiteurs suivants :</p>
+<ul>
+<li><code>{{ variable }}</code> – Afficher une variable (échappée HTML)</li>
+<li><code>{* variable *}</code> – Afficher une variable (brut, non échappé)</li>
+<li><code>{% lua_code %}</code> – Exécuter du code Lua (conditions, boucles, etc.)</li>
+<li><code>{-raw-}</code> ... <code>{-raw-}</code> – Bloc brut (pas de traitement)</li>
+</ul>
+<p><strong>Important</strong> : Utilisez toujours les attributs nonce pour les scripts et styles inline pour respecter la Content Security Policy (CSP) :</p>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">style</span> <span class="na">nonce</span><span class="o">=</span><span class="s">&quot;{*nonce_style*}&quot;</span><span class="p">&gt;</span>
+<span class="w">  </span><span class="c">/* Votre CSS ici */</span>
+<span class="p">&lt;/</span><span class="nt">style</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">nonce</span><span class="o">=</span><span class="s">&quot;{*nonce_script*}&quot;</span><span class="p">&gt;</span>
+<span class="w">  </span><span class="c1">// Votre JavaScript ici</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</code></pre></div>
+<h3 id="exemples">Exemples</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="30:3"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">Page d'erreur personnalisée</label><label for="__tabbed_30_2">Page captcha personnalisée</label><label for="__tabbed_30_3">Page du serveur par défaut personnalisée</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Créez un modèle de page d'erreur personnalisé dans <code>/etc/bunkerweb/templates/error.html</code> :</p>
+<div class="highlight"><pre><span></span><code>{-raw-}<span class="cp">&lt;!doctype html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;fr&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;utf-8&quot;</span> <span class="p">/&gt;</span>
+    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content</span><span class="o">=</span><span class="s">&quot;width=device-width, initial-scale=1&quot;</span> <span class="p">/&gt;</span>
+    {-raw-}
+    <span class="p">&lt;</span><span class="nt">style</span> <span class="na">nonce</span><span class="o">=</span><span class="s">&quot;{*nonce_style*}&quot;</span><span class="p">&gt;</span>
+<span class="w">      </span><span class="nt">body</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">font-family</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="n">apple-system</span><span class="p">,</span><span class="w"> </span><span class="n">BlinkMacSystemFont</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Segoe UI&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">Roboto</span><span class="p">,</span><span class="w"> </span><span class="kc">sans-serif</span><span class="p">;</span>
+<span class="w">        </span><span class="k">display</span><span class="p">:</span><span class="w"> </span><span class="kc">flex</span><span class="p">;</span>
+<span class="w">        </span><span class="k">justify-content</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">        </span><span class="k">align-items</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">        </span><span class="k">min-height</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="kt">vh</span><span class="p">;</span>
+<span class="w">        </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">background</span><span class="p">:</span><span class="w"> </span><span class="mh">#f5f5f5</span><span class="p">;</span>
+<span class="w">        </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#333</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="p">.</span><span class="nc">container</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">text-align</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">        </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="p">.</span><span class="nc">error-code</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="kc">bold</span><span class="p">;</span>
+<span class="w">        </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="err">{</span><span class="o">%</span><span class="w"> </span><span class="n">if</span><span class="w"> </span><span class="n">error_type</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;server&quot;</span><span class="w"> </span><span class="o">%</span><span class="p">}#</span><span class="nn">dc3545</span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">else</span><span class="w"> </span><span class="err">%</span><span class="p">}#</span><span class="nn">ffc107</span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">end</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="o">;</span>
+<span class="w">        </span><span class="nt">margin</span><span class="o">:</span><span class="w"> </span><span class="nt">0</span><span class="o">;</span>
+<span class="w">      </span><span class="err">}</span>
+<span class="w">      </span><span class="p">.</span><span class="nc">error-title</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mf">1.5</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="p">.</span><span class="nc">error-text</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#666</span><span class="p">;</span>
+<span class="w">        </span><span class="k">margin-bottom</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="p">.</span><span class="nc">request-info</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mf">0.8</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#999</span><span class="p">;</span>
+<span class="w">        </span><span class="k">margin-top</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">&lt;/</span><span class="nt">style</span><span class="p">&gt;</span>
+    {-raw-}
+  <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;container&quot;</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;error-code&quot;</span><span class="p">&gt;</span>{{ error_code }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">h1</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;error-title&quot;</span><span class="p">&gt;</span>{{ error_title }}<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;error-text&quot;</span><span class="p">&gt;</span>{{ error_text }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;error-text&quot;</span><span class="p">&gt;</span>{{ error_solution }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;request-info&quot;</span><span class="p">&gt;</span>
+        {% if request_id %}
+        <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>ID de requête : <span class="p">&lt;</span><span class="nt">code</span><span class="p">&gt;</span>{{ request_id }}<span class="p">&lt;/</span><span class="nt">code</span><span class="p">&gt;&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+        {% end %}
+        {% if request_time %}
+        <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Heure : {{ request_time }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+        {% end %}
+      <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+{-raw-}
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Créez une page de défi captcha personnalisée dans <code>/etc/bunkerweb/templates/captcha.html</code> :</p>
+<div class="highlight"><pre><span></span><code>{-raw-}<span class="cp">&lt;!doctype html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;fr&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;utf-8&quot;</span> <span class="p">/&gt;</span>
+    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>Vérification de sécurité<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content</span><span class="o">=</span><span class="s">&quot;width=device-width, initial-scale=1&quot;</span> <span class="p">/&gt;</span>
+    {-raw-}
+    <span class="p">&lt;</span><span class="nt">style</span> <span class="na">nonce</span><span class="o">=</span><span class="s">&quot;{*nonce_style*}&quot;</span><span class="p">&gt;</span>
+<span class="w">      </span><span class="nt">body</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">font-family</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="n">apple-system</span><span class="p">,</span><span class="w"> </span><span class="n">BlinkMacSystemFont</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Segoe UI&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">Roboto</span><span class="p">,</span><span class="w"> </span><span class="kc">sans-serif</span><span class="p">;</span>
+<span class="w">        </span><span class="k">display</span><span class="p">:</span><span class="w"> </span><span class="kc">flex</span><span class="p">;</span>
+<span class="w">        </span><span class="k">justify-content</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">        </span><span class="k">align-items</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">        </span><span class="k">min-height</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="kt">vh</span><span class="p">;</span>
+<span class="w">        </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">background</span><span class="p">:</span><span class="w"> </span><span class="nb">linear-gradient</span><span class="p">(</span><span class="mi">135</span><span class="kt">deg</span><span class="p">,</span><span class="w"> </span><span class="mh">#667eea</span><span class="w"> </span><span class="mi">0</span><span class="kt">%</span><span class="p">,</span><span class="w"> </span><span class="mh">#764ba2</span><span class="w"> </span><span class="mi">100</span><span class="kt">%</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="p">.</span><span class="nc">card</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">background</span><span class="p">:</span><span class="w"> </span><span class="kc">white</span><span class="p">;</span>
+<span class="w">        </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">box-shadow</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="mi">10</span><span class="kt">px</span><span class="w"> </span><span class="mi">40</span><span class="kt">px</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.2</span><span class="p">);</span>
+<span class="w">        </span><span class="k">text-align</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">        </span><span class="k">max-width</span><span class="p">:</span><span class="w"> </span><span class="mi">400</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="nt">h1</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#333</span><span class="p">;</span>
+<span class="w">        </span><span class="k">margin-bottom</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="p">.</span><span class="nc">captcha-img</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="nt">input</span><span class="o">[</span><span class="nt">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">]</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">width</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="kt">%</span><span class="p">;</span>
+<span class="w">        </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mf">0.75</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mf">1.2</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">border</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="kt">px</span><span class="w"> </span><span class="kc">solid</span><span class="w"> </span><span class="mh">#ddd</span><span class="p">;</span>
+<span class="w">        </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">text-align</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">        </span><span class="k">box-sizing</span><span class="p">:</span><span class="w"> </span><span class="kc">border-box</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="nt">button</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">margin-top</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mf">0.75</span><span class="kt">rem</span><span class="w"> </span><span class="mi">2</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">background</span><span class="p">:</span><span class="w"> </span><span class="mh">#667eea</span><span class="p">;</span>
+<span class="w">        </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">white</span><span class="p">;</span>
+<span class="w">        </span><span class="k">border</span><span class="p">:</span><span class="w"> </span><span class="kc">none</span><span class="p">;</span>
+<span class="w">        </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">cursor</span><span class="p">:</span><span class="w"> </span><span class="kc">pointer</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="nt">button</span><span class="p">:</span><span class="nd">hover</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">background</span><span class="p">:</span><span class="w"> </span><span class="mh">#5a6fd6</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">&lt;/</span><span class="nt">style</span><span class="p">&gt;</span>
+    {-raw-}
+  <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;card&quot;</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>🔒 Vérification de sécurité<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Veuillez entrer le texte que vous voyez ci-dessous pour continuer.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+      {-raw-}
+      <span class="p">&lt;</span><span class="nt">form</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;POST&quot;</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;{*antibot_uri*}&quot;</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">img</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;captcha-img&quot;</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;data:image/jpeg;base64,{*captcha*}&quot;</span> <span class="na">alt</span><span class="o">=</span><span class="s">&quot;Captcha&quot;</span> <span class="p">/&gt;</span>
+        {-raw-}
+        <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;captcha&quot;</span> <span class="na">placeholder</span><span class="o">=</span><span class="s">&quot;Entrez le code&quot;</span> <span class="na">required</span> <span class="na">autocomplete</span><span class="o">=</span><span class="s">&quot;off&quot;</span> <span class="p">/&gt;</span>
+        <span class="p">&lt;</span><span class="nt">button</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;submit&quot;</span><span class="p">&gt;</span>Vérifier<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+      <span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+{-raw-}
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Créez une page du serveur par défaut personnalisée dans <code>/etc/bunkerweb/templates/default.html</code> :</p>
+<div class="highlight"><pre><span></span><code>{-raw-}<span class="cp">&lt;!doctype html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;fr&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;utf-8&quot;</span> <span class="p">/&gt;</span>
+    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>Bienvenue<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content</span><span class="o">=</span><span class="s">&quot;width=device-width, initial-scale=1&quot;</span> <span class="p">/&gt;</span>
+    {-raw-}
+    <span class="p">&lt;</span><span class="nt">style</span> <span class="na">nonce</span><span class="o">=</span><span class="s">&quot;{*nonce_style*}&quot;</span><span class="p">&gt;</span>
+<span class="w">      </span><span class="nt">body</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">font-family</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="n">apple-system</span><span class="p">,</span><span class="w"> </span><span class="n">BlinkMacSystemFont</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Segoe UI&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">Roboto</span><span class="p">,</span><span class="w"> </span><span class="kc">sans-serif</span><span class="p">;</span>
+<span class="w">        </span><span class="k">display</span><span class="p">:</span><span class="w"> </span><span class="kc">flex</span><span class="p">;</span>
+<span class="w">        </span><span class="k">justify-content</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">        </span><span class="k">align-items</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">        </span><span class="k">min-height</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="kt">vh</span><span class="p">;</span>
+<span class="w">        </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">background</span><span class="p">:</span><span class="w"> </span><span class="mh">#1a1a2e</span><span class="p">;</span>
+<span class="w">        </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#eee</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="p">.</span><span class="nc">container</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">text-align</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="nt">h1</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">margin-bottom</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="nt">p</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#888</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">&lt;/</span><span class="nt">style</span><span class="p">&gt;</span>
+    {-raw-}
+  <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;container&quot;</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>🛡️ Protégé par BunkerWeb<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Ce serveur est sécurisé et prêt.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+{-raw-}
+</code></pre></div>
+</div>
+</div>
+</div>
+<h3 id="exemples-de-deploiement">Exemples de déploiement</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="31:3"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">Linux</label><label for="__tabbed_31_2">Docker</label><label for="__tabbed_31_3">Kubernetes</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>
+<p>Créez vos fichiers de modèle dans un répertoire de votre choix (ex. <code>/opt/bunkerweb/templates/</code>) :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/bunkerweb/templates
+sudo<span class="w"> </span>nano<span class="w"> </span>/opt/bunkerweb/templates/error.html
+<span class="c1"># Collez votre modèle de page d&#39;erreur personnalisé</span>
+</code></pre></div>
+</li>
+<li>
+<p>Configurez BunkerWeb en éditant <code>/etc/bunkerweb/variables.env</code> :</p>
+<div class="highlight"><pre><span></span><code># Page d&#39;erreur personnalisée pour tous les services (ou utilisez par service avec préfixe)
+CUSTOM_ERROR_PAGE=/opt/bunkerweb/templates/error.html
+
+# Page du serveur par défaut personnalisée (global uniquement)
+CUSTOM_DEFAULT_SERVER_PAGE=/opt/bunkerweb/templates/default.html
+
+# Page captcha personnalisée (par service ou globale)
+CUSTOM_ANTIBOT_CAPTCHA_PAGE=/opt/bunkerweb/templates/captcha.html
+</code></pre></div>
+</li>
+<li>
+<p>Rechargez BunkerWeb :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>reload<span class="w"> </span>bunkerweb
+</code></pre></div>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<p>Le <strong>scheduler</strong> est responsable de la lecture, de la validation et de la mise en cache de vos modèles personnalisés. Seul le scheduler a besoin d'accéder aux fichiers de modèle—BunkerWeb reçoit automatiquement la configuration validée.</p>
+<ol>
+<li>
+<p>Créez vos fichiers de modèle dans un répertoire local (ex. <code>./templates/</code>) et définissez les bonnes permissions :</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>templates<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chown<span class="w"> </span>root:101<span class="w"> </span>templates<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>templates
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Pourquoi UID/GID 101 ?</p>
+<p>Le conteneur scheduler s'exécute en tant qu'<strong>utilisateur non privilégié avec UID 101 et GID 101</strong>. Le répertoire doit être lisible par cet utilisateur pour que le scheduler puisse accéder à vos modèles.</p>
+</div>
+<p>Si le dossier existe déjà :</p>
+<div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span>root:101<span class="w"> </span>templates<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>templates
+</code></pre></div>
+<p>Lors de l'utilisation de <a href="https://docs.docker.com/engine/security/rootless">Docker en mode rootless</a> ou <a href="https://podman.io/">Podman</a>, les UID/GID des conteneurs sont remappés. Vérifiez vos plages subuid/subgid :</p>
+<div class="highlight"><pre><span></span><code>grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subuid<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subgid
+</code></pre></div>
+<p>Par exemple, si la plage commence à <strong>100000</strong>, le GID effectif devient <strong>100100</strong> (100000 + 100) :</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>templates<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>chgrp<span class="w"> </span><span class="m">100100</span><span class="w"> </span>templates<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>templates
+</code></pre></div>
+</li>
+<li>
+<p>Montez le répertoire de modèles vers le <strong>scheduler</strong> et configurez les paramètres sur le scheduler (le scheduler agit comme manager et distribue la configuration aux workers BunkerWeb). Vous pouvez monter les modèles vers n'importe quel chemin dans le conteneur :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
+<span class="w">    </span><span class="c1"># ... autres paramètres (pas de variables d&#39;environnement nécessaires ici pour les pages personnalisées)</span>
+
+<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./templates:/custom_templates:ro</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CUSTOM_ERROR_PAGE=/custom_templates/error.html</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CUSTOM_DEFAULT_SERVER_PAGE=/custom_templates/default.html</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CUSTOM_ANTIBOT_CAPTCHA_PAGE=/custom_templates/captcha.html</span>
+<span class="w">      </span><span class="c1"># ... autres paramètres</span>
+</code></pre></div>
+</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Accès au scheduler requis</p>
+<p>Si le scheduler ne peut pas lire les fichiers de modèle (à cause d'un montage manquant ou de permissions incorrectes), les modèles seront silencieusement ignorés et les pages par défaut seront utilisées à la place. Vérifiez les logs du scheduler pour les erreurs de validation.</p>
+</div>
+</div>
+<div class="tabbed-block">
+<p>Le <strong>scheduler</strong> est responsable de la lecture, de la validation et de la mise en cache de vos modèles personnalisés. Vous devez monter les modèles vers le pod du scheduler.</p>
+<ol>
+<li>
+<p>Créez une ConfigMap avec vos modèles :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ConfigMap</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-custom-templates</span>
+<span class="nt">data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">error.html</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">{-raw-}&lt;!doctype html&gt;</span>
+<span class="w">    </span><span class="no">&lt;html lang=&quot;fr&quot;&gt;</span>
+<span class="w">      </span><span class="no">&lt;head&gt;</span>
+<span class="w">        </span><span class="no">&lt;meta charset=&quot;utf-8&quot; /&gt;</span>
+<span class="w">        </span><span class="no">&lt;title&gt;{{ title }}&lt;/title&gt;</span>
+<span class="w">        </span><span class="no">{-raw-}</span>
+<span class="w">        </span><span class="no">&lt;style nonce=&quot;{*nonce_style*}&quot;&gt;</span>
+<span class="w">          </span><span class="no">body { font-family: sans-serif; text-align: center; padding: 2rem; }</span>
+<span class="w">          </span><span class="no">.error-code { font-size: 4rem; color: #dc3545; }</span>
+<span class="w">        </span><span class="no">&lt;/style&gt;</span>
+<span class="w">        </span><span class="no">{-raw-}</span>
+<span class="w">      </span><span class="no">&lt;/head&gt;</span>
+<span class="w">      </span><span class="no">&lt;body&gt;</span>
+<span class="w">        </span><span class="no">&lt;p class=&quot;error-code&quot;&gt;{{ error_code }}&lt;/p&gt;</span>
+<span class="w">        </span><span class="no">&lt;h1&gt;{{ error_title }}&lt;/h1&gt;</span>
+<span class="w">        </span><span class="no">&lt;p&gt;{{ error_text }}&lt;/p&gt;</span>
+<span class="w">      </span><span class="no">&lt;/body&gt;</span>
+<span class="w">    </span><span class="no">&lt;/html&gt;</span>
+<span class="w">    </span><span class="no">{-raw-}</span>
+<span class="w">  </span><span class="nt">captcha.html</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">{-raw-}&lt;!doctype html&gt;</span>
+<span class="w">    </span><span class="no">&lt;html lang=&quot;fr&quot;&gt;</span>
+<span class="w">      </span><span class="no">&lt;head&gt;</span>
+<span class="w">        </span><span class="no">&lt;meta charset=&quot;utf-8&quot; /&gt;</span>
+<span class="w">        </span><span class="no">&lt;title&gt;Vérification de sécurité&lt;/title&gt;</span>
+<span class="w">        </span><span class="no">{-raw-}</span>
+<span class="w">        </span><span class="no">&lt;style nonce=&quot;{*nonce_style*}&quot;&gt;</span>
+<span class="w">          </span><span class="no">body { font-family: sans-serif; text-align: center; padding: 2rem; }</span>
+<span class="w">        </span><span class="no">&lt;/style&gt;</span>
+<span class="w">        </span><span class="no">{-raw-}</span>
+<span class="w">      </span><span class="no">&lt;/head&gt;</span>
+<span class="w">      </span><span class="no">&lt;body&gt;</span>
+<span class="w">        </span><span class="no">&lt;h1&gt;Veuillez vérifier que vous êtes humain&lt;/h1&gt;</span>
+<span class="w">        </span><span class="no">{-raw-}</span>
+<span class="w">        </span><span class="no">&lt;form method=&quot;POST&quot; action=&quot;{*antibot_uri*}&quot;&gt;</span>
+<span class="w">          </span><span class="no">&lt;img src=&quot;data:image/jpeg;base64,{*captcha*}&quot; alt=&quot;Captcha&quot; /&gt;</span>
+<span class="w">          </span><span class="no">{-raw-}</span>
+<span class="w">          </span><span class="no">&lt;input type=&quot;text&quot; name=&quot;captcha&quot; placeholder=&quot;Entrez le code&quot; required /&gt;</span>
+<span class="w">          </span><span class="no">&lt;button type=&quot;submit&quot;&gt;Vérifier&lt;/button&gt;</span>
+<span class="w">        </span><span class="no">&lt;/form&gt;</span>
+<span class="w">      </span><span class="no">&lt;/body&gt;</span>
+<span class="w">    </span><span class="no">&lt;/html&gt;</span>
+<span class="w">    </span><span class="no">{-raw-}</span>
+</code></pre></div>
+</li>
+<li>
+<p>Montez la ConfigMap de modèles vers le pod du <strong>scheduler</strong> et configurez les paramètres comme variables d'environnement :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">          </span><span class="nt">env</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CUSTOM_ERROR_PAGE</span>
+<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/custom_templates/error.html&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CUSTOM_ANTIBOT_CAPTCHA_PAGE</span>
+<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/custom_templates/captcha.html&quot;</span>
+<span class="w">            </span><span class="c1"># ... autres paramètres</span>
+<span class="w">          </span><span class="nt">volumeMounts</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom-templates</span>
+<span class="w">              </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/custom_templates</span>
+<span class="w">              </span><span class="nt">readOnly</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">          </span><span class="c1"># ... autres paramètres du conteneur</span>
+<span class="w">      </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom-templates</span>
+<span class="w">          </span><span class="nt">configMap</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-custom-templates</span>
+<span class="w">      </span><span class="c1"># ... autres paramètres du pod</span>
+</code></pre></div>
+</li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Utilisation du contrôleur Ingress BunkerWeb</p>
+<p>Si vous utilisez le contrôleur Ingress BunkerWeb, le scheduler est intégré au contrôleur. Montez la ConfigMap vers le pod du contrôleur à la place.</p>
+</div>
+</div>
+</div>
+</div>
+<h3 id="notes-et-depannage">Notes et dépannage</h3>
+<ul>
+<li><strong>Les chemins doivent être absolus</strong> et se terminer par un nom de fichier ; les valeurs vides désactivent la page personnalisée correspondante et suppriment son cache.</li>
+<li><strong>Si la validation échoue</strong> (HTML incorrect ou balises Lua déséquilibrées), le modèle est ignoré et la page par défaut reste active. Vérifiez les logs du scheduler pour les détails.</li>
+<li><strong>Les fichiers mis en cache</strong> se trouvent dans <code>/var/cache/bunkerweb/custom_pages</code> ; la mise à jour du fichier source suffit—le job détecte le nouveau hash et recharge NGINX automatiquement.</li>
+<li><strong>Conformité CSP</strong> : Utilisez toujours les variables <code>nonce_script</code> et <code>nonce_style</code> pour les scripts et styles inline afin d'assurer une bonne gestion de la Content Security Policy.</li>
+<li><strong>Test des modèles</strong> : Vous pouvez tester vos modèles localement en les rendant avec un moteur de modèle Lua avant de les déployer sur BunkerWeb.</li>
 </ul>
 
 
