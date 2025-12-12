@@ -2,7 +2,7 @@ from contextlib import suppress
 from csv import Sniffer, reader as csv_reader
 from ipaddress import IPv4Network, IPv6Network, ip_address, ip_network
 from json import dumps, loads
-from typing import List, Optional, Set, Tuple, Dict, Any, Union
+from typing import Iterable, List, Optional, Set, Tuple, Dict, Any, Union
 from io import StringIO
 from pathlib import Path
 
@@ -20,9 +20,12 @@ from .utils import LOGGER, get_db
 
 _enabled: bool = False
 _limiter: Optional[Limiter] = None
-_default_limits: List[str] = []
-_application_limits: List[str] = []
+_base_limits: List[str] = []
+_auth_limit: Optional[str] = None
 _exempt_networks: List[Union[IPv4Network, IPv6Network]] = []
+
+DEFAULT_RATE = (100, 60)  # 100 requests per minute
+DEFAULT_AUTH_RATE = (10, 60)
 
 
 class _Rule:
@@ -34,6 +37,10 @@ class _Rule:
         self.times = times
         self.seconds = seconds
         self.raw = raw
+
+    @property
+    def limit_string(self) -> str:
+        return _limit_string(self.times, self.seconds)
 
 
 _rules: List[_Rule] = []
@@ -60,7 +67,16 @@ def _parse_rate(rate: str) -> Tuple[int, int]:
 
     Examples:
       10/hour, 10 per hour, 100/day, 500/7days, 200 per 30 minutes, 100/60
+      NGINX-style: 3r/s, 40r/m, 200r/h
     """
+    compact = "".join(rate.strip().lower().split())
+    m_nginx = fullmatch(r"(\d+)r?/([smhd])", compact)
+    if m_nginx:
+        times = int(m_nginx.group(1))
+        unit = m_nginx.group(2)
+        unit_seconds_map = {"s": 1, "m": 60, "h": 3600, "d": 86400}
+        return times, unit_seconds_map[unit]
+
     r = rate.strip().lower().replace("per ", "/")
     if "/" not in r:
         raise ValueError("rate must be like '10/hour', '10 per hour', '10/60', '100/day', '500/7days'")
@@ -128,49 +144,80 @@ def _try_json(s: str):
         return None
 
 
-def _load_rules_from_env(env_val: Optional[str]) -> List[_Rule]:
-    if not env_val:
-        return []
-    raw = env_val.strip()
-    if raw.startswith(("[", "{")):
-        data = _try_json(raw)
-        rules: List[_Rule] = []
-        if isinstance(data, dict):
-            for k, v in data.items():
-                rate = str(v)
-                parts = str(k).split()
-                if len(parts) == 1:
-                    methods: Set[str] = set()
-                    path = parts[0]
-                else:
-                    methods = {_normalize_method(x) for x in parts[0].split("|") if x}
-                    path = " ".join(parts[1:])
-                times, seconds = _parse_rate(rate)
-                rules.append(_Rule(methods, _compile_pattern(path), times, seconds, f"{k}={v}"))
-        elif isinstance(data, list):
-            for it in data:
-                if not isinstance(it, dict):
-                    continue
-                path = str(it.get("path", "/"))
-                methods: Set[str] = set()
-                m = it.get("methods")
-                if isinstance(m, str):
-                    methods = {_normalize_method(x) for x in m.split("|") if x}
-                elif isinstance(m, list):
-                    methods = {_normalize_method(str(x)) for x in m if x}
-                times = int(it.get("times", api_config.rate_limit_times))
-                seconds = int(it.get("seconds", api_config.rate_limit_seconds))
-                rules.append(_Rule(methods, _compile_pattern(path), times, seconds, dumps(it)))
-        return rules
+def _parse_methods(value: Any) -> Set[str]:
+    if isinstance(value, str):
+        return {_normalize_method(x) for x in value.split("|") if x}
+    if isinstance(value, Iterable):
+        return {_normalize_method(str(x)) for x in value if str(x).strip()}
+    return set()
 
-    # Shorthand CSV: "POST /auth 10/60, /instances* 100/60"
+
+def _resolve_rate(raw: Optional[str], fallback_times: int, fallback_seconds: int, *, label: str, allow_disable: bool = False) -> Optional[Tuple[int, int]]:
+    if raw is None:
+        return fallback_times, fallback_seconds
+    val = str(raw).strip()
+    if not val:
+        return fallback_times, fallback_seconds
+    lowered = val.lower()
+    if allow_disable and lowered in ("off", "disabled", "none", "no", "false", "0"):
+        return None
+    try:
+        return _parse_rate(val)
+    except Exception as exc:
+        LOGGER.warning(f"Invalid {label} '{val}', falling back to {fallback_times}/{fallback_seconds}: {exc}")
+        return fallback_times, fallback_seconds
+
+
+def _rule_from_dict(it: Dict[str, Any]) -> Optional[_Rule]:
+    path = str(it.get("path", "/")).strip() or "/"
+    methods = _parse_methods(it.get("methods"))
+    rate_raw = it.get("rate")
+    if rate_raw is not None:
+        times, seconds = _parse_rate(str(rate_raw))
+    else:
+        times = int(it.get("times", DEFAULT_RATE[0]))
+        seconds = int(it.get("seconds", DEFAULT_RATE[1]))
+    try:
+        raw_repr = dumps(it)
+    except Exception:
+        raw_repr = str(it)
+    return _Rule(methods, _compile_pattern(path), times, seconds, raw_repr)
+
+
+def _rule_from_mapping_key(key: str, value: Any) -> Optional[_Rule]:
+    rate = str(value)
+    parts = key.split()
+    if len(parts) == 1:
+        methods: Set[str] = set()
+        path = parts[0]
+    else:
+        methods = {_normalize_method(x) for x in parts[0].split("|") if x}
+        path = " ".join(parts[1:])
+    times, seconds = _parse_rate(rate)
+    return _Rule(methods, _compile_pattern(path), times, seconds, f"{key}={value}")
+
+
+def _rules_from_sequence(data: Iterable[Any]) -> List[_Rule]:
+    rules: List[_Rule] = []
+    for it in data:
+        if not isinstance(it, dict):
+            continue
+        rule = _rule_from_dict(it)
+        if rule:
+            rules.append(rule)
+    return rules
+
+
+def _rules_from_string(raw: str) -> List[_Rule]:
     rules: List[_Rule] = []
     for chunk in _csv_items(raw):
         s = chunk.strip()
-        m = search(r"(\S+)$", s)
-        if not m:
+        if not s:
             continue
-        rate = m.group(1)
+        tail = search(r"(\S+)$", s)
+        if not tail:
+            continue
+        rate = tail.group(1)
         try:
             times, seconds = _parse_rate(rate)
         except Exception:
@@ -191,67 +238,46 @@ def _load_rules_from_env(env_val: Optional[str]) -> List[_Rule]:
     return rules
 
 
-def _load_rules_from_data(data) -> List[_Rule]:
-    """Load rules from a Python data structure (dict or list), e.g. parsed from YAML.
-
-    Supported forms mirror the JSON formats handled by _load_rules_from_env:
-    - Dict mapping "METHODS PATH" or "PATH" -> "times/seconds" (string)
-    - List of objects with keys: path, methods (string or list), times, seconds
-    """
-    rules: List[_Rule] = []
-    if isinstance(data, dict):
-        for k, v in data.items():
-            rate = str(v)
-            parts = str(k).split()
-            if len(parts) == 1:
-                methods: Set[str] = set()
-                path = parts[0]
-            else:
-                methods = {_normalize_method(x) for x in parts[0].split("|") if x}
-                path = " ".join(parts[1:])
-            times, seconds = _parse_rate(rate)
-            rules.append(_Rule(methods, _compile_pattern(path), times, seconds, f"{k}={v}"))
-    elif isinstance(data, list):
-        for it in data:
-            if not isinstance(it, dict):
-                continue
-            path = str(it.get("path", "/"))
-            methods: Set[str] = set()
-            m = it.get("methods")
-            if isinstance(m, str):
-                methods = {_normalize_method(x) for x in m.split("|") if x}
-            elif isinstance(m, list):
-                methods = {_normalize_method(str(x)) for x in m if x}
-            times = int(it.get("times", api_config.rate_limit_times))
-            seconds = int(it.get("seconds", api_config.rate_limit_seconds))
-            rules.append(_Rule(methods, _compile_pattern(path), times, seconds, dumps(it)))
-    return rules
-
-
-def _load_rules_from_file(path_str: str) -> List[_Rule]:
-    """Load rules from a file path.
-
-    Behavior:
-    - If content looks like JSON, delegate to JSON/string loader.
-    - Else try YAML via yaml.safe_load; if dict/list, parse accordingly.
-    - Else fallback to CSV-like parsing using the string loader.
-    """
-    try:
-        p = Path(path_str)
-        if not p.is_file():
-            return []
-        raw = p.read_text(encoding="utf-8").strip()
+def _load_rules(value: Optional[Union[str, Iterable[Any], Dict[str, Any]]]) -> List[_Rule]:
+    """Load rules from any supported source: inline string, path, JSON/YAML data."""
+    if value is None:
+        return []
+    if isinstance(value, str):
+        raw = value.strip()
         if not raw:
             return []
-        if raw.startswith(("[", "{")):
-            return _load_rules_from_env(raw)
+        path = Path(raw)
+        if path.is_file():
+            try:
+                file_content = path.read_text(encoding="utf-8").strip()
+            except Exception as exc:
+                LOGGER.warning(f"Cannot read rate limit rules file {path}: {exc}")
+                return []
+            if not file_content:
+                return []
+            # Allow JSON/YAML or CSV-like content inside the file
+            return _load_rules(file_content)
+        parsed = _try_json(raw)
+        if parsed is not None:
+            return _load_rules(parsed)
         with suppress(Exception):
-            data = safe_load(raw)
-            if isinstance(data, (list, dict)):
-                return _load_rules_from_data(data)
-        return _load_rules_from_env(raw)
-    except Exception:
-        return []
+            yaml_data = safe_load(raw)
+            if isinstance(yaml_data, (dict, list)):
+                return _load_rules(yaml_data)
+        return _rules_from_string(raw)
+
+    if isinstance(value, dict):
+        rules: List[_Rule] = []
+        for k, v in value.items():
+            rule = _rule_from_mapping_key(str(k), v)
+            if rule:
+                rules.append(rule)
+        return rules
+
+    if isinstance(value, Iterable):
+        return _rules_from_sequence(value)
+
+    return []
 
 
 def _client_identifier(request: Request) -> str:
@@ -273,22 +299,6 @@ def _limit_string(times: int, seconds: int) -> str:
             return f"{times}/{n}{plural}"
 
     return f"{times} per {seconds} seconds"
-
-
-def _parse_limits_list(env_val: Optional[str]) -> List[str]:
-    if not env_val:
-        return []
-    raw = env_val.strip()
-    if not raw:
-        return []
-    if raw.startswith("["):
-        try:
-            data = loads(raw)
-            return [str(x).strip() for x in data if str(x).strip()]
-        except Exception:
-            return []
-    # CSV (comma or semicolon), supports quoted items and newlines
-    return _csv_items(raw)
 
 
 def _csv_items(s: str) -> List[str]:
@@ -363,142 +373,24 @@ def is_enabled() -> bool:
     return _enabled
 
 
-def _path_variants(path: str) -> List[str]:
-    paths = [path]
-    rp = (api_config.API_ROOT_PATH or "").rstrip("/")
-    if rp and path.startswith(rp + "/"):
-        paths.append(path[len(rp) :])  # noqa: E203
-    return paths
+def _is_exempt(request: Request) -> bool:
+    with suppress(Exception):
+        cip = _client_identifier(request)
+        ipobj = ip_address(cip)
+        for net in _exempt_networks:
+            if ipobj in net:
+                return True
+    return False
 
 
-def _match_rule(method: str, path: str) -> Optional[Tuple[int, int]]:
-    if not _rules:
-        return None
-    m = _normalize_method(method)
-    paths = _path_variants(path)
-    for rule in _rules:
-        if rule.methods and m not in rule.methods and "*" not in rule.methods:
-            continue
-        for p in paths:
-            if rule.pattern.match(p):
-                return rule.times, rule.seconds
-    return None
-
-
-def _auth_default_limit(method: str, path: str) -> Optional[Tuple[int, int]]:
-    if _normalize_method(method) != "POST":
-        return None
-    try:
-        times = int(api_config.rate_limit_auth_times)
-        seconds = int(api_config.rate_limit_auth_seconds)
-    except Exception:
-        return None
-    if times <= 0 or seconds <= 0:
-        return None
-    for candidate in _path_variants(path):
-        if candidate.rstrip("/") == "/auth":
-            return times, seconds
-    return None
-
-
-def limiter_dep_dynamic():
-    async def _dep(request: Request):  # pragma: no cover
-        if not _enabled or _limiter is None:
-            return None
-        # Exempt IPs
-        with suppress(Exception):
-            cip = _client_identifier(request)
-            ipobj = ip_address(cip)
-            for net in _exempt_networks:
-                if ipobj in net:
-                    return None
-        method = request.method
-        path = request.scope.get("path", "/")
-        match = _match_rule(method, path)
-        if match is None:
-            match = _auth_default_limit(method, path)
-
-        async def _noop(request: Request, response: Response | None = None):
-            return None
-
-        for lstr in _application_limits:
-            try:
-                # Pass a dummy response so slowapi can inject headers without crashing
-                await _limiter.limit(lstr)(_noop)(request, response=Response())  # type: ignore[arg-type]
-            except RateLimitExceeded:
-                raise
-        limit_strings: List[str] = []
-        if match is None:
-            if _default_limits:
-                limit_strings = _default_limits.copy()
-            else:
-                limit_strings = [_limit_string(api_config.rate_limit_times, api_config.rate_limit_seconds)]
-        else:
-            t, s = match
-            if t <= 0:
-                return None
-            limit_strings = [_limit_string(t, s)]
-
-        for lstr in limit_strings:
-            try:
-                # Pass a dummy response so slowapi can inject headers without crashing
-                await _limiter.limit(lstr)(_noop)(request, response=Response())  # type: ignore[arg-type]
-            except RateLimitExceeded:
-                raise
-        return None
-
-    return Depends(_dep)
-
-
-def setup_rate_limiter(app) -> None:
-    if not api_config.rate_limit_enabled:
-        LOGGER.info("API rate limiting disabled by configuration")
-        return
-
-    global _limiter, _enabled, _rules, _default_limits, _application_limits, _exempt_networks
-
-    rules_val = getattr(api_config, "API_RATE_LIMIT_RULES", None)
-    if isinstance(rules_val, (list, dict)):
-        _rules = _load_rules_from_data(rules_val)
-    elif isinstance(rules_val, str):
-        # If the value is a path to a file, load from file; otherwise treat as inline string
-        _rules = _load_rules_from_file(rules_val) if Path(rules_val).is_file() else _load_rules_from_env(rules_val)
-    else:
-        _rules = _load_rules_from_env(None)
-
+def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
     # Optional storage options (JSON), can be augmented by Redis settings
     storage_options: Dict[str, Any] = {}
-    storage: Optional[str] = None
     so_raw = api_config.API_RATE_LIMIT_STORAGE_OPTIONS
     if so_raw:
         so = _try_json(so_raw)
         if isinstance(so, dict):
             storage_options = {str(k): v for k, v in so.items()}
-
-    # Auto-derive Redis settings, preferring environment variables first, then database
-    try:
-        cfg = get_db(log=False).get_config(
-            global_only=True,
-            methods=False,
-            filtered_settings=(
-                "USE_REDIS",
-                "REDIS_HOST",
-                "REDIS_PORT",
-                "REDIS_DATABASE",
-                "REDIS_TIMEOUT",
-                "REDIS_KEEPALIVE_POOL",
-                "REDIS_SSL",
-                "REDIS_SSL_VERIFY",
-                "REDIS_USERNAME",
-                "REDIS_PASSWORD",
-                "REDIS_SENTINEL_HOSTS",
-                "REDIS_SENTINEL_USERNAME",
-                "REDIS_SENTINEL_PASSWORD",
-                "REDIS_SENTINEL_MASTER",
-            ),
-        )
-    except Exception:
-        cfg = {}
 
     def _env_or_cfg(name: str, default: str | None = None) -> str | None:
         val = getenv(name)
@@ -506,7 +398,7 @@ def setup_rate_limiter(app) -> None:
             return val
         return cfg.get(name, default)  # type: ignore[return-value]
 
-    storage = None
+    storage: Optional[str] = None
     use_redis = str(_env_or_cfg("USE_REDIS", "no") or "no").lower() == "yes"
     if use_redis:
         sentinels = str(_env_or_cfg("REDIS_SENTINEL_HOSTS", "") or "").strip()
@@ -564,9 +456,114 @@ def setup_rate_limiter(app) -> None:
     if not storage:
         storage = "memory://"
 
-    # Parse lists from env
-    _default_limits = _parse_limits_list(api_config.API_RATE_LIMIT_DEFAULTS)
-    _application_limits = _parse_limits_list(api_config.API_RATE_LIMIT_APPLICATION_LIMITS)
+    return storage, storage_options
+
+
+def _path_variants(path: str) -> List[str]:
+    paths = [path]
+    rp = (api_config.API_ROOT_PATH or "").rstrip("/")
+    if rp and path.startswith(rp + "/"):
+        paths.append(path[len(rp) :])  # noqa: E203
+    return paths
+
+
+def _match_rule(method: str, path: str) -> Optional[str]:
+    if not _rules:
+        return None
+    m = _normalize_method(method)
+    paths = _path_variants(path)
+    for rule in _rules:
+        if rule.methods and m not in rule.methods and "*" not in rule.methods:
+            continue
+        for p in paths:
+            if rule.pattern.match(p):
+                return rule.limit_string
+    return None
+
+
+def _auth_default_limit(method: str, path: str) -> Optional[str]:
+    if _normalize_method(method) != "POST":
+        return None
+    if _auth_limit is None:
+        return None
+    for candidate in _path_variants(path):
+        if candidate.rstrip("/") == "/auth":
+            return _auth_limit
+    return None
+
+
+def limiter_dep_dynamic():
+    async def _dep(request: Request):  # pragma: no cover
+        if not _enabled or _limiter is None:
+            return None
+        if _is_exempt(request):
+            return None
+
+        match = _match_rule(request.method, request.scope.get("path", "/"))
+        if match is None:
+            match = _auth_default_limit(request.method, request.scope.get("path", "/"))
+
+        async def _noop(request: Request, response: Response | None = None):
+            return None
+
+        for lstr in _base_limits if match is None else [match]:
+            await _limiter.limit(lstr)(_noop)(request, response=Response())  # type: ignore[arg-type]
+        return None
+
+    return Depends(_dep)
+
+
+def setup_rate_limiter(app) -> None:
+    if not api_config.rate_limit_enabled:
+        LOGGER.info("API rate limiting disabled by configuration")
+        return
+
+    global _limiter, _enabled, _rules, _base_limits, _exempt_networks, _auth_limit
+
+    _rules = _load_rules(getattr(api_config, "API_RATE_LIMIT_RULES", None))
+
+    # Base/default limits (new simple string form wins over legacy split knobs)
+    _base_limits = []
+    default_rate = _resolve_rate(getattr(api_config, "API_RATE_LIMIT", None), DEFAULT_RATE[0], DEFAULT_RATE[1], label="API_RATE_LIMIT")
+    if default_rate:
+        _base_limits.append(_limit_string(*default_rate))
+
+    auth_rate = _resolve_rate(
+        getattr(api_config, "API_RATE_LIMIT_AUTH", None),
+        DEFAULT_AUTH_RATE[0],
+        DEFAULT_AUTH_RATE[1],
+        label="API_RATE_LIMIT_AUTH",
+        allow_disable=True,
+    )
+    _auth_limit = _limit_string(*auth_rate) if auth_rate else None
+
+    # Auto-derive Redis settings, preferring environment variables first, then database
+    try:
+        cfg = get_db(log=False).get_config(
+            global_only=True,
+            methods=False,
+            filtered_settings=(
+                "USE_REDIS",
+                "REDIS_HOST",
+                "REDIS_PORT",
+                "REDIS_DATABASE",
+                "REDIS_TIMEOUT",
+                "REDIS_KEEPALIVE_POOL",
+                "REDIS_SSL",
+                "REDIS_SSL_VERIFY",
+                "REDIS_USERNAME",
+                "REDIS_PASSWORD",
+                "REDIS_SENTINEL_HOSTS",
+                "REDIS_SENTINEL_USERNAME",
+                "REDIS_SENTINEL_PASSWORD",
+                "REDIS_SENTINEL_MASTER",
+            ),
+        )
+    except Exception:
+        cfg = {}
+
+    storage, storage_options = _build_storage(cfg)
+
     _exempt_networks = _parse_exempt_ips(api_config.API_RATE_LIMIT_EXEMPT_IPS)
 
     # Normalize strategy names to SlowAPI/limits canonical values
@@ -585,8 +582,7 @@ def setup_rate_limiter(app) -> None:
 
     _limiter = Limiter(
         key_func=_build_key_func(),
-        default_limits=_default_limits or [_limit_string(api_config.rate_limit_times, api_config.rate_limit_seconds)],  # type: ignore[arg-type]
-        application_limits=_application_limits,  # type: ignore[arg-type]
+        default_limits=_base_limits,  # type: ignore[arg-type]
         storage_uri=storage,
         storage_options=storage_options,
         strategy=strategy,
@@ -599,5 +595,5 @@ def setup_rate_limiter(app) -> None:
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
     _enabled = True
     LOGGER.info(
-        f"Rate limiting enabled with storage={storage}; strategy={api_config.API_RATE_LIMIT_STRATEGY}; headers={api_config.rate_limit_headers_enabled}; app_limits={len(_application_limits)}; defaults={len(_default_limits) if _default_limits else 1}; rules={len(_rules)}"
+        f"Rate limiting enabled with storage={storage}; strategy={api_config.API_RATE_LIMIT_STRATEGY}; headers={api_config.rate_limit_headers_enabled}; defaults={len(_base_limits)}; rules={len(_rules)}; auth_limit={'on' if _auth_limit else 'off'}"
     )

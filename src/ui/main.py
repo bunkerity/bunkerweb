@@ -980,8 +980,18 @@ def before_request():
                 return logout_page(), 403
 
     current_endpoint = request.path.split("/")[-1]
+    theme_value = current_user.theme if current_user.is_authenticated else "dark"
+    language_value = current_user.language if current_user.is_authenticated else "en"
+    base_env = dict(
+        current_endpoint=current_endpoint,
+        script_nonce=app.config["SCRIPT_NONCE"],
+        supported_languages=SUPPORTED_LANGUAGES,
+        theme=theme_value,
+        language=language_value,
+    )
+
     if request.path.startswith(("/check", "/setup", "/loading", "/login", "/totp")):
-        app.config["ENV"] = dict(current_endpoint=current_endpoint, script_nonce=app.config["SCRIPT_NONCE"], supported_languages=SUPPORTED_LANGUAGES)
+        app.config["ENV"] = base_env
     else:
         if not metadata:
             metadata = DB.get_metadata()
@@ -1042,8 +1052,8 @@ def before_request():
             is_readonly=DATA.get("READONLY_MODE", False) or ("write" not in current_user.list_permissions and not request.path.startswith("/profile")),
             db_readonly=DATA.get("READONLY_MODE", False),
             user_readonly="write" not in current_user.list_permissions,
-            theme=current_user.theme if current_user.is_authenticated else "dark",
-            language=current_user.language if current_user.is_authenticated else "en",
+            theme=theme_value,
+            language=language_value,
             supported_languages=SUPPORTED_LANGUAGES,
             columns_preferences_defaults=COLUMNS_PREFERENCES_DEFAULTS,
             extra_pages=app.config["EXTRA_PAGES"],

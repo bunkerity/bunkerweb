@@ -144,7 +144,7 @@
           - bw-db
 
       redis: # Redis 服务用于持久化报告/封禁/统计数据
-        image: redis:7-alpine
+        image: redis:8-alpine
         command: >
           redis-server
           --maxmemory 256mb
@@ -269,7 +269,7 @@
           - bw-db
 
       redis: # Redis 服务用于持久化报告/封禁/统计数据
-        image: redis:7-alpine
+        image: redis:8-alpine
         command: >
           redis-server
           --maxmemory 256mb
@@ -441,7 +441,7 @@
           - bw-db
 
       bw-redis:
-        image: redis:7-alpine
+        image: redis:8-alpine
         networks:
           - bw-universe
 

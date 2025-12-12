@@ -1757,6 +1757,24 @@ Appliquez les variables d’environnement suivantes (ou leurs équivalents via l
 - Côté CrowdSec, surveillez `cscli metrics show` ou la console CrowdSec pour vous assurer que les décisions BunkerWeb apparaissent comme prévu.
 - Dans l’interface BunkerWeb, ouvrez la page du plugin CrowdSec pour voir l’état de l’intégration.
 
+## Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+Prise en charge STREAM :x:
+
+Tweak BunkerWeb error/antibot/default pages with custom HTML.
+
+| Paramètre                        | Valeur par défaut | Contexte  | Multiple | Description                                                                                                        |
+| -------------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| `CUSTOM_ERROR_PAGE`              |                   | multisite | non      | Full path of the custom error page (must be readable by the scheduler) (Can be a lua template).                    |
+| `CUSTOM_DEFAULT_SERVER_PAGE`     |                   | global    | non      | Full path of the custom default server page (must be readable by the scheduler) (Can be a lua template).           |
+| `CUSTOM_ANTIBOT_CAPTCHA_PAGE`    |                   | multisite | non      | Full path of the custom antibot captcha page (must be readable by the scheduler) (Can be a lua template).          |
+| `CUSTOM_ANTIBOT_JAVASCRIPT_PAGE` |                   | multisite | non      | Full path of the custom antibot javascript check page (must be readable by the scheduler) (Can be a lua template). |
+| `CUSTOM_ANTIBOT_RECAPTCHA_PAGE`  |                   | multisite | non      | Full path of the custom antibot recaptcha page (must be readable by the scheduler) (Can be a lua template).        |
+| `CUSTOM_ANTIBOT_HCAPTCHA_PAGE`   |                   | multisite | non      | Full path of the custom antibot hcaptcha page (must be readable by the scheduler) (Can be a lua template).         |
+| `CUSTOM_ANTIBOT_TURNSTILE_PAGE`  |                   | multisite | non      | Full path of the custom antibot turnstile page (must be readable by the scheduler) (Can be a lua template).        |
+| `CUSTOM_ANTIBOT_MCAPTCHA_PAGE`   |                   | multisite | non      | Full path of the custom antibot mcaptcha page (must be readable by the scheduler) (Can be a lua template).         |
+
 ## Custom SSL certificate
 
 Prise en charge STREAM :white_check_mark:
@@ -3764,11 +3782,15 @@ Comment ça marche :
 | ------------------------- | ------ | --------- | -------- | ------------------------------------------------------------------- |
 | `REDIRECT_FROM`           | `/`    | multisite | oui      | Chemin source à rediriger.                                          |
 | `REDIRECT_TO`             |        | multisite | oui      | URL de destination. Laisser vide pour désactiver.                   |
-| `REDIRECT_TO_REQUEST_URI` | `no`   | multisite | oui      | Conserver le chemin d’origine en l’ajoutant à l’URL de destination. |
-| `REDIRECT_TO_STATUS_CODE` | `301`  | multisite | oui      | Code de statut HTTP : `301` (permanent) ou `302` (temporaire).      |
+| `REDIRECT_TO_REQUEST_URI` | `no`   | multisite | oui      | Conserver le chemin d'origine en l'ajoutant à l'URL de destination. |
+| `REDIRECT_TO_STATUS_CODE` | `301`  | multisite | oui      | Code HTTP : `301`, `302`, `303`, `307` ou `308`.                    |
 
 !!! tip "Choisir le bon code"
-    `301` pour une redirection permanente (migrations, canonicals). `302` pour temporaire.
+    - **`301` (Moved Permanently) :** Redirection permanente, mise en cache par les navigateurs. Peut changer POST en GET. Idéal pour migrations de domaine.
+    - **`302` (Found) :** Redirection temporaire. Peut changer POST en GET.
+    - **`303` (See Other) :** Redirige toujours en GET. Utile après soumission de formulaire.
+    - **`307` (Temporary Redirect) :** Redirection temporaire qui préserve la méthode HTTP. Idéal pour les APIs.
+    - **`308` (Permanent Redirect) :** Redirection permanente qui préserve la méthode HTTP. Pour migrations d'API permanentes.
 
 !!! info "Conservation du chemin"
     Avec `REDIRECT_TO_REQUEST_URI: yes`, `/blog/post-1` vers `https://new.com` devient `https://new.com/blog/post-1`.
@@ -3824,6 +3846,23 @@ Comment ça marche :
     REDIRECT_TO: "https://example.com/support"
     REDIRECT_TO_REQUEST_URI: "yes"
     REDIRECT_TO_STATUS_CODE: "301"
+    ```
+
+=== "Migration API"
+
+    ```yaml
+    REDIRECT_FROM: "/api/v1/"
+    REDIRECT_TO: "https://api.example.com/v2/"
+    REDIRECT_TO_REQUEST_URI: "yes"
+    REDIRECT_TO_STATUS_CODE: "308"
+    ```
+
+=== "Après soumission de formulaire"
+
+    ```yaml
+    REDIRECT_TO: "https://example.com/merci"
+    REDIRECT_TO_REQUEST_URI: "no"
+    REDIRECT_TO_STATUS_CODE: "303"
     ```
 
 ## Redis
@@ -4494,13 +4533,14 @@ Comment ça marche :
 
 ### Paramètres
 
-| Paramètre                     | Défaut            | Contexte  | Multiple | Description                                                             |
-| ----------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------- |
-| `REDIRECT_HTTP_TO_HTTPS`      | `no`              | multisite | non      | Rediriger tout HTTP vers HTTPS.                                         |
-| `AUTO_REDIRECT_HTTP_TO_HTTPS` | `yes`             | multisite | non      | Redirection auto si HTTPS détecté.                                      |
-| `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | multisite | non      | Protocoles SSL/TLS supportés (séparés par des espaces).                 |
-| `SSL_CIPHERS_LEVEL`           | `modern`          | multisite | non      | Niveau de sécurité des suites (`modern`, `intermediate`, `old`).        |
-| `SSL_CIPHERS_CUSTOM`          |                   | multisite | non      | Suites personnalisées (liste séparée par `:`) qui remplacent le niveau. |
+| Paramètre                     | Défaut            | Contexte  | Multiple | Description                                                                                    |
+| ----------------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------- |
+| `REDIRECT_HTTP_TO_HTTPS`      | `no`              | multisite | non      | Rediriger tout HTTP vers HTTPS.                                                                |
+| `AUTO_REDIRECT_HTTP_TO_HTTPS` | `yes`             | multisite | non      | Redirection auto si HTTPS détecté.                                                             |
+| `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | multisite | non      | Protocoles SSL/TLS supportés (séparés par des espaces).                                        |
+| `SSL_CIPHERS_LEVEL`           | `modern`          | multisite | non      | Niveau de sécurité des suites (`modern`, `intermediate`, `old`).                               |
+| `SSL_CIPHERS_CUSTOM`          |                   | multisite | non      | Suites personnalisées (liste séparée par `:`) qui remplacent le niveau.                        |
+| `SSL_SESSION_CACHE_SIZE`      | `10m`             | multisite | non      | Taille du cache de session SSL (ex. `10m`, `512k`). Définir à `off` ou `none` pour désactiver. |
 
 !!! tip "Test SSL Labs"
     Testez votre configuration via [Qualys SSL Labs](https://www.ssllabs.com/ssltest/). Une configuration BunkerWeb bien réglée atteint généralement A+.

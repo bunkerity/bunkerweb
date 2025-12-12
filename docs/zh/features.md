@@ -1947,6 +1947,24 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 - 在 CrowdSec 端监控 `cscli metrics show` 或 CrowdSec Console，确保 BunkerWeb 的决策按预期显示。
 - 在 BunkerWeb UI 中打开 CrowdSec 插件页面查看集成状态。
 
+## Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM 支持 :x:
+
+Tweak BunkerWeb error/antibot/default pages with custom HTML.
+
+| 参数                             | 默认值 | 上下文    | 可重复 | 描述                                                                                                               |
+| -------------------------------- | ------ | --------- | ------ | ------------------------------------------------------------------------------------------------------------------ |
+| `CUSTOM_ERROR_PAGE`              |        | multisite | 否     | Full path of the custom error page (must be readable by the scheduler) (Can be a lua template).                    |
+| `CUSTOM_DEFAULT_SERVER_PAGE`     |        | global    | 否     | Full path of the custom default server page (must be readable by the scheduler) (Can be a lua template).           |
+| `CUSTOM_ANTIBOT_CAPTCHA_PAGE`    |        | multisite | 否     | Full path of the custom antibot captcha page (must be readable by the scheduler) (Can be a lua template).          |
+| `CUSTOM_ANTIBOT_JAVASCRIPT_PAGE` |        | multisite | 否     | Full path of the custom antibot javascript check page (must be readable by the scheduler) (Can be a lua template). |
+| `CUSTOM_ANTIBOT_RECAPTCHA_PAGE`  |        | multisite | 否     | Full path of the custom antibot recaptcha page (must be readable by the scheduler) (Can be a lua template).        |
+| `CUSTOM_ANTIBOT_HCAPTCHA_PAGE`   |        | multisite | 否     | Full path of the custom antibot hcaptcha page (must be readable by the scheduler) (Can be a lua template).         |
+| `CUSTOM_ANTIBOT_TURNSTILE_PAGE`  |        | multisite | 否     | Full path of the custom antibot turnstile page (must be readable by the scheduler) (Can be a lua template).        |
+| `CUSTOM_ANTIBOT_MCAPTCHA_PAGE`   |        | multisite | 否     | Full path of the custom antibot mcaptcha page (must be readable by the scheduler) (Can be a lua template).         |
+
 ## Custom SSL certificate
 
 STREAM 支持 :white_check_mark:
@@ -4254,14 +4272,19 @@ STREAM 支持 :x:
 
 ### 配置设置
 
-| 设置                      | 默认值 | 上下文    | 多选 | 描述                                                                              |
-| ------------------------- | ------ | --------- | ---- | --------------------------------------------------------------------------------- |
-| `REDIRECT_FROM`           | `/`    | multisite | 是   | **要重定向的源路径：** 将被重定向的路径。                                         |
-| `REDIRECT_TO`             |        | multisite | 是   | **目标 URL：** 访问者将被重定向到的目标 URL。留空以禁用重定向。                   |
-| `REDIRECT_TO_REQUEST_URI` | `no`   | multisite | 是   | **保留路径：** 设置为 `yes` 时，将原始请求 URI 附加到目标 URL。                   |
-| `REDIRECT_TO_STATUS_CODE` | `301`  | multisite | 是   | **HTTP 状态码：** 用于重定向的 HTTP 状态码。选项：`301`（永久）或 `302`（临时）。 |
+| 设置                      | 默认值 | 上下文    | 多选 | 描述                                                                                    |
+| ------------------------- | ------ | --------- | ---- | --------------------------------------------------------------------------------------- |
+| `REDIRECT_FROM`           | `/`    | multisite | 是   | **要重定向的源路径：** 将被重定向的路径。                                               |
+| `REDIRECT_TO`             |        | multisite | 是   | **目标 URL：** 访问者将被重定向到的目标 URL。留空以禁用重定向。                         |
+| `REDIRECT_TO_REQUEST_URI` | `no`   | multisite | 是   | **保留路径：** 设置为 `yes` 时，将原始请求 URI 附加到目标 URL。                         |
+| `REDIRECT_TO_STATUS_CODE` | `301`  | multisite | 是   | **HTTP 状态码：** 用于重定向的 HTTP 状态码。选项：`301`、`302`、`303`、`307` 或 `308`。 |
 
-!!! tip "选择正确的状态码" - 当重定向是永久性的时，例如域名迁移或建立规范 URL，请使用 `301`（永久移动）。这有助于搜索引擎更新其索引。- 当重定向是临时性的，或者如果您将来可能想重新使用原始 URL，请使用 `302`（找到/临时重定向）。
+!!! tip "选择正确的状态码"
+    - **`301`（永久移动）：** 永久重定向，被浏览器缓存。可能将 POST 更改为 GET。适用于域名迁移。
+    - **`302`（找到）：** 临时重定向。可能将 POST 更改为 GET。
+    - **`303`（参见其他）：** 始终使用 GET 方法重定向。适用于表单提交后的重定向。
+    - **`307`（临时重定向）：** 保留 HTTP 方法的临时重定向。适用于 API 重定向。
+    - **`308`（永久重定向）：** 保留 HTTP 方法的永久重定向。适用于永久性 API 端点迁移。
 
 !!! info "路径保留"
     当 `REDIRECT_TO_REQUEST_URI` 设置为 `yes` 时，BunkerWeb 会保留原始请求路径。例如，如果用户访问 `https://old-domain.com/blog/post-1`，并且您已设置为重定向到 `https://new-domain.com`，他们将被重定向到 `https://new-domain.com/blog/post-1`。
@@ -4330,6 +4353,27 @@ STREAM 支持 :x:
     REDIRECT_TO: "https://example.com/support"
     REDIRECT_TO_REQUEST_URI: "yes"
     REDIRECT_TO_STATUS_CODE: "301"
+    ```
+
+=== "API 端点迁移"
+
+    永久重定向 API 端点并保留 HTTP 方法的配置：
+
+    ```yaml
+    REDIRECT_FROM: "/api/v1/"
+    REDIRECT_TO: "https://api.example.com/v2/"
+    REDIRECT_TO_REQUEST_URI: "yes"
+    REDIRECT_TO_STATUS_CODE: "308"
+    ```
+
+=== "表单提交后重定向"
+
+    使用 GET 方法在表单提交后重定向的配置：
+
+    ```yaml
+    REDIRECT_TO: "https://example.com/thank-you"
+    REDIRECT_TO_REQUEST_URI: "no"
+    REDIRECT_TO_STATUS_CODE: "303"
     ```
 
 ## Redis
@@ -5043,6 +5087,7 @@ SSL 插件为您的 BunkerWeb 保护的网站提供强大的 SSL/TLS 加密功�
 | `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | multisite | 否   | **SSL 协议：** 要支持的 SSL/TLS 协议的空格分隔列表。                                               |
 | `SSL_CIPHERS_LEVEL`           | `modern`          | multisite | 否   | **SSL 密码级别：** 密码套件的预设安全级别（`modern`、`intermediate` 或 `old`）。                   |
 | `SSL_CIPHERS_CUSTOM`          |                   | multisite | 否   | **自定义 SSL 密码：** 用于 SSL/TLS 连接的密码套件的冒号分隔列表（覆盖级别）。                      |
+| `SSL_SESSION_CACHE_SIZE`      | `10m`             | multisite | 否   | **SSL 会话缓存大小：** SSL 会话缓存的大小（例如 `10m`、`512k`）。设置为 `off` 或 `none` 以禁用。   |
 
 !!! tip "SSL Labs 测试"
     配置 SSL 设置后，请使用 [Qualys SSL Labs 服务器测试](https://www.ssllabs.com/ssltest/) 来验证您的配置并检查潜在的安全问题。一个正确的 BunkerWeb SSL 配置应该能获得 A+ 评级。

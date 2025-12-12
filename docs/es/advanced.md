@@ -633,7 +633,7 @@ El Manager es el cerebro del clúster. Ejecuta el Scheduler, la base de datos y,
           - bw-db
 
       redis: # Redis para la persistencia de informes/prohibiciones/estadísticas
-        image: redis:7-alpine
+        image: redis:8-alpine
         command: >
           redis-server
           --maxmemory 256mb
@@ -2717,7 +2717,7 @@ LOG_LEVEL_1=error
           - bw-db
 
       redis: # Servicio Redis para la persistencia de reportes/bloqueos/estadísticas
-        image: redis:7-alpine
+        image: redis:8-alpine
         command: >
           redis-server
           --maxmemory 256mb

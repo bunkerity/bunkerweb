@@ -144,7 +144,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1
           - bw-db
 
       redis: # Redis service for the persistence of reports/bans/stats
-        image: redis:7-alpine
+        image: redis:8-alpine
         command: >
           redis-server
           --maxmemory 256mb
@@ -269,7 +269,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1
           - bw-db
 
       redis: # Redis service for the persistence of reports/bans/stats
-        image: redis:7-alpine
+        image: redis:8-alpine
         command: >
           redis-server
           --maxmemory 256mb
@@ -441,7 +441,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1
           - bw-db
 
       bw-redis:
-        image: redis:7-alpine
+        image: redis:8-alpine
         networks:
           - bw-universe
 

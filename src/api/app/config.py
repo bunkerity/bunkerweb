@@ -47,16 +47,12 @@ class ApiConfig(YamlBaseSettings):
 
     # Rate limiting
     API_RATE_LIMIT_ENABLED: bool | str = "yes"
+    API_RATE_LIMIT: Optional[str] = "100r/m"
+    API_RATE_LIMIT_AUTH: Optional[str] = "10r/m"
     API_RATE_LIMIT_STORAGE_OPTIONS: Optional[str] = None
     API_RATE_LIMIT_STRATEGY: str = "fixed-window"
     API_RATE_LIMIT_HEADERS_ENABLED: bool | str = "yes"
-    API_RATE_LIMIT_TIMES: int | str = 100
-    API_RATE_LIMIT_SECONDS: int | str = 60
-    API_RATE_LIMIT_AUTH_TIMES: int | str = 10
-    API_RATE_LIMIT_AUTH_SECONDS: int | str = 60
     API_RATE_LIMIT_RULES: Optional[Union[str, object]] = None
-    API_RATE_LIMIT_DEFAULTS: Optional[str] = None
-    API_RATE_LIMIT_APPLICATION_LIMITS: Optional[str] = None
     API_RATE_LIMIT_KEY: str = "ip"
     API_RATE_LIMIT_EXEMPT_IPS: Optional[str] = None
 
@@ -120,22 +116,6 @@ class ApiConfig(YamlBaseSettings):
     def rate_limit_headers_enabled(self) -> bool:
         v = str(self.API_RATE_LIMIT_HEADERS_ENABLED).strip().lower()
         return v in ("1", "true", "yes", "on")
-
-    @property
-    def rate_limit_times(self) -> int:
-        return int(self.API_RATE_LIMIT_TIMES)  # type: ignore[arg-type]
-
-    @property
-    def rate_limit_seconds(self) -> int:
-        return int(self.API_RATE_LIMIT_SECONDS)  # type: ignore[arg-type]
-
-    @property
-    def rate_limit_auth_times(self) -> int:
-        return int(self.API_RATE_LIMIT_AUTH_TIMES)  # type: ignore[arg-type]
-
-    @property
-    def rate_limit_auth_seconds(self) -> int:
-        return int(self.API_RATE_LIMIT_AUTH_SECONDS)  # type: ignore[arg-type]
 
     # Internal API resolution, keeping DB-sourced fallbacks
     @property

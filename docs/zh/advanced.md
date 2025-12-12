@@ -633,7 +633,7 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
           - bw-db
 
       redis: # Redis 用于报告/封禁/统计的持久化
-        image: redis:7-alpine
+        image: redis:8-alpine
         command: >
           redis-server
           --maxmemory 256mb
@@ -2714,7 +2714,7 @@ LOG_LEVEL_1=error
           - bw-db
 
       redis: # Redis 服务，用于持久化报告/封禁/统计
-        image: redis:7-alpine
+        image: redis:8-alpine
         command: >
           redis-server
           --maxmemory 256mb

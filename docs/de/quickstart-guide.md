@@ -144,7 +144,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/examp
           - bw-db
 
       redis: # Redis-Dienst für die Persistenz von Berichten/Sperren/Statistiken
-        image: redis:7-alpine
+        image: redis:8-alpine
         command: >
           redis-server
           --maxmemory 256mb
@@ -269,7 +269,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/examp
           - bw-db
 
       redis: # Redis-Dienst für die Persistenz von Berichten/Sperren/Statistiken
-        image: redis:7-alpine
+        image: redis:8-alpine
         command: >
           redis-server
           --maxmemory 256mb
@@ -441,7 +441,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/examp
           - bw-db
 
       bw-redis:
-        image: redis:7-alpine
+        image: redis:8-alpine
         networks:
           - bw-universe
 

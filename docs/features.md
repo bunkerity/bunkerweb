@@ -1963,6 +1963,24 @@ Apply the following environment variables (or values via the scheduler UI/API) s
 - On the CrowdSec side, monitor `cscli metrics show` or the CrowdSec Console to ensure BunkerWeb decisions appear as expected.
 - In the BunkerWeb UI, open the CrowdSec plugin page to see the status of the integration.
 
+## Custom Pages <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :x:
+
+Tweak BunkerWeb error/antibot/default pages with custom HTML.
+
+| Setting                          | Default | Context   | Multiple | Description                                                                                                        |
+| -------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| `CUSTOM_ERROR_PAGE`              |         | multisite | no       | Full path of the custom error page (must be readable by the scheduler) (Can be a lua template).                    |
+| `CUSTOM_DEFAULT_SERVER_PAGE`     |         | global    | no       | Full path of the custom default server page (must be readable by the scheduler) (Can be a lua template).           |
+| `CUSTOM_ANTIBOT_CAPTCHA_PAGE`    |         | multisite | no       | Full path of the custom antibot captcha page (must be readable by the scheduler) (Can be a lua template).          |
+| `CUSTOM_ANTIBOT_JAVASCRIPT_PAGE` |         | multisite | no       | Full path of the custom antibot javascript check page (must be readable by the scheduler) (Can be a lua template). |
+| `CUSTOM_ANTIBOT_RECAPTCHA_PAGE`  |         | multisite | no       | Full path of the custom antibot recaptcha page (must be readable by the scheduler) (Can be a lua template).        |
+| `CUSTOM_ANTIBOT_HCAPTCHA_PAGE`   |         | multisite | no       | Full path of the custom antibot hcaptcha page (must be readable by the scheduler) (Can be a lua template).         |
+| `CUSTOM_ANTIBOT_TURNSTILE_PAGE`  |         | multisite | no       | Full path of the custom antibot turnstile page (must be readable by the scheduler) (Can be a lua template).        |
+| `CUSTOM_ANTIBOT_MCAPTCHA_PAGE`   |         | multisite | no       | Full path of the custom antibot mcaptcha page (must be readable by the scheduler) (Can be a lua template).         |
+
 ## Custom SSL certificate
 
 STREAM support :white_check_mark:
@@ -4290,16 +4308,19 @@ Follow these steps to configure and use the Redirect feature:
 
 ### Configuration Settings
 
-| Setting                   | Default | Context   | Multiple | Description                                                                                                         |
-| ------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
-| `REDIRECT_FROM`           | `/`     | multisite | yes      | **Path to redirect from:** The path that will be redirected.                                                        |
-| `REDIRECT_TO`             |         | multisite | yes      | **Destination URL:** The target URL where visitors will be redirected. Leave empty to disable redirection.          |
-| `REDIRECT_TO_REQUEST_URI` | `no`    | multisite | yes      | **Preserve Path:** When set to `yes`, appends the original request URI to the destination URL.                      |
-| `REDIRECT_TO_STATUS_CODE` | `301`   | multisite | yes      | **HTTP Status Code:** The HTTP status code to use for redirection. Options: `301` (permanent) or `302` (temporary). |
+| Setting                   | Default | Context   | Multiple | Description                                                                                                       |
+| ------------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `REDIRECT_FROM`           | `/`     | multisite | yes      | **Path to redirect from:** The path that will be redirected.                                                      |
+| `REDIRECT_TO`             |         | multisite | yes      | **Destination URL:** The target URL where visitors will be redirected. Leave empty to disable redirection.        |
+| `REDIRECT_TO_REQUEST_URI` | `no`    | multisite | yes      | **Preserve Path:** When set to `yes`, appends the original request URI to the destination URL.                    |
+| `REDIRECT_TO_STATUS_CODE` | `301`   | multisite | yes      | **HTTP Status Code:** The HTTP status code to use for redirection. Options: `301`, `302`, `303`, `307`, or `308`. |
 
 !!! tip "Choosing the Right Status Code"
-    - Use `301` (Moved Permanently) when the redirect is permanent, such as for domain migrations or establishing canonical URLs. This helps search engines update their indexes.
-    - Use `302` (Found/Temporary Redirect) when the redirect is temporary or if you may want to reuse the original URL in the future.
+    - **`301` (Moved Permanently):** The resource has permanently moved. Browsers cache this redirect. May change POST to GET. Ideal for domain migrations and canonical URLs.
+    - **`302` (Found):** Temporary redirect. May change POST to GET. Use when the redirect is temporary or you may reuse the original URL.
+    - **`303` (See Other):** Always redirects using GET method regardless of the original request method. Useful after form submissions to prevent resubmission on refresh.
+    - **`307` (Temporary Redirect):** Temporary redirect that preserves the HTTP method (POST stays POST). Ideal for API redirects or form handling.
+    - **`308` (Permanent Redirect):** Permanent redirect that preserves the HTTP method. Use for permanent API endpoint migrations where method preservation is critical.
 
 !!! info "Path Preservation"
     When `REDIRECT_TO_REQUEST_URI` is set to `yes`, BunkerWeb preserves the original request path. For example, if a user visits `https://old-domain.com/blog/post-1` and you've set up a redirect to `https://new-domain.com`, they'll be redirected to `https://new-domain.com/blog/post-1`.
@@ -4368,6 +4389,27 @@ Follow these steps to configure and use the Redirect feature:
     REDIRECT_TO: "https://example.com/support"
     REDIRECT_TO_REQUEST_URI: "yes"
     REDIRECT_TO_STATUS_CODE: "301"
+    ```
+
+=== "API Endpoint Migration"
+
+    A configuration for permanently redirecting an API endpoint while preserving the HTTP method:
+
+    ```yaml
+    REDIRECT_FROM: "/api/v1/"
+    REDIRECT_TO: "https://api.example.com/v2/"
+    REDIRECT_TO_REQUEST_URI: "yes"
+    REDIRECT_TO_STATUS_CODE: "308"
+    ```
+
+=== "Post-Form Submission Redirect"
+
+    A configuration to redirect after a form submission using GET method:
+
+    ```yaml
+    REDIRECT_TO: "https://example.com/thank-you"
+    REDIRECT_TO_REQUEST_URI: "no"
+    REDIRECT_TO_STATUS_CODE: "303"
     ```
 
 ## Redis
@@ -5076,14 +5118,14 @@ Follow these steps to configure and use the SSL feature:
 
 ### Configuration Settings
 
-| Setting                       | Default           | Context   | Multiple | Description                                                                                                     |
-| ----------------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------- |
-| `REDIRECT_HTTP_TO_HTTPS`      | `no`              | multisite | no       | **Redirect HTTP to HTTPS:** When set to `yes`, all HTTP requests are redirected to HTTPS.                       |
-| `AUTO_REDIRECT_HTTP_TO_HTTPS` | `yes`             | multisite | no       | **Auto Redirect HTTP to HTTPS:** When set to `yes`, automatically redirects HTTP to HTTPS if HTTPS is detected. |
-| `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | multisite | no       | **SSL Protocols:** Space-separated list of SSL/TLS protocols to support.                                        |
-| `SSL_CIPHERS_LEVEL`           | `modern`          | multisite | no       | **SSL Ciphers Level:** Preset security level for cipher suites (`modern`, `intermediate`, or `old`).            |
-| `SSL_CIPHERS_CUSTOM`          |                   | multisite | no       | **Custom SSL Ciphers:** Colon-separated list of cipher suites to use for SSL/TLS connections (overrides level). |
-
+| Setting                       | Default           | Context   | Multiple | Description                                                                                                         |
+| ----------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
+| `REDIRECT_HTTP_TO_HTTPS`      | `no`              | multisite | no       | **Redirect HTTP to HTTPS:** When set to `yes`, all HTTP requests are redirected to HTTPS.                           |
+| `AUTO_REDIRECT_HTTP_TO_HTTPS` | `yes`             | multisite | no       | **Auto Redirect HTTP to HTTPS:** When set to `yes`, automatically redirects HTTP to HTTPS if HTTPS is detected.     |
+| `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | multisite | no       | **SSL Protocols:** Space-separated list of SSL/TLS protocols to support.                                            |
+| `SSL_CIPHERS_LEVEL`           | `modern`          | multisite | no       | **SSL Ciphers Level:** Preset security level for cipher suites (`modern`, `intermediate`, or `old`).                |
+| `SSL_CIPHERS_CUSTOM`          |                   | multisite | no       | **Custom SSL Ciphers:** Colon-separated list of cipher suites to use for SSL/TLS connections (overrides level).     |
+| `SSL_SESSION_CACHE_SIZE`      | `10m`             | multisite | no       | **SSL Session Cache Size:** Size of the SSL session cache (e.g., `10m`, `512k`). Set to `off` or `none` to disable. |
 
 !!! tip "SSL Labs Testing"
     After configuring your SSL settings, use the [Qualys SSL Labs Server Test](https://www.ssllabs.com/ssltest/) to verify your configuration and check for potential security issues. A proper BunkerWeb SSL configuration should achieve an A+ rating.

@@ -19,10 +19,13 @@
 - [UI] Renamed "Global Configuration" to "Global Settings" in the web UI for clarity
 - [UI] Address CSRF token issues in the web UI when not connecting through BunkerWeb
 - [UI] Add the possibility to provide a certificate and a key so that the web UI can be served over HTTPS (without requiring a reverse proxy)
+- [UI] Fix occasional flash of the light mode on the loading page when using dark mode
+- [API] Refactor rate limiting to be more user-friendly and configurable via settings
 - [LINUX] Support Fedora 43
 - [LINUX] Update version retrieval for RPM packaging to ensure correct sorting for release candidates
 - [DOCS] Add documentation about the new logging settings and how to configure them
 - [DOCS] Update database compatibility matrix
+- [DOCS] Refactor API documentation to include new API features and improve clarity
 - [DEPS] Update lua-resty-session version to v4.1.5
 - [DEPS] Update coreruleset-v4 version to v4.21.0
 - [DEPS] Updated zlib version to v1.3.1.2

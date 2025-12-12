@@ -143,7 +143,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
           - bw-db
 
       redis: # Servicio de Redis para la persistencia de informes/baneos/estadísticas
-        image: redis:7-alpine
+        image: redis:8-alpine
         command: >
           redis-server
           --maxmemory 256mb
@@ -268,7 +268,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
           - bw-db
 
       redis: # Servicio de Redis para la persistencia de informes/baneos/estadísticas
-        image: redis:7-alpine
+        image: redis:8-alpine
         command: >
           redis-server
           --maxmemory 256mb
@@ -440,7 +440,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
           - bw-db
 
       bw-redis:
-        image: redis:7-alpine
+        image: redis:8-alpine
         networks:
           - bw-universe
 
