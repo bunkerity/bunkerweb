@@ -1626,6 +1626,9 @@ log {
 <li><code>TOTP_ENCRYPTION_KEYS</code> (或 <code>TOTP_SECRETS</code>)：以空格分隔的 TOTP 加密密钥列表或一个字典（例如：<code>{"1": "mysecretkey"}</code> 或 <code>mysecretkey</code> 或 <code>mysecretkey mysecretkey1</code>）。<strong>如果您想使用 2FA，我们强烈建议您设置此变量，因为它将用于加密 TOTP 密钥</strong>（如果未设置，将生成一个随机数量的密钥）。有关更多信息，请查看 <a href="https://passlib.readthedocs.io/en/stable/narr/totp-tutorial.html#application-secrets">passlib 文档</a>。</li>
 <li><code>UI_LISTEN_ADDR</code> (首选)：Web UI 将监听的地址（<strong>Docker 镜像</strong>中默认为 <code>0.0.0.0</code>，<strong>Linux 安装</strong>中默认为 <code>127.0.0.1</code>）。如果未设置，则回退到 <code>LISTEN_ADDR</code>。</li>
 <li><code>UI_LISTEN_PORT</code> (首选)：Web UI 将监听的端口（默认为 <code>7000</code>）。如果未设置，则回退到 <code>LISTEN_PORT</code>。</li>
+<li><code>UI_SSL_ENABLED</code>：将其设置为 <code>yes</code>/<code>true</code>/<code>on</code> 以在 UI 服务上启用 TLS（默认为 <code>no</code>）。如果未设置，则回退到 <code>SSL_ENABLED</code>。</li>
+<li><code>UI_SSL_CERTFILE</code> 和 <code>UI_SSL_KEYFILE</code>：启用 <code>UI_SSL_ENABLED</code> 时使用的证书和私钥路径。如果未设置，则回退到 <code>SSL_CERTFILE</code> 和 <code>SSL_KEYFILE</code>。</li>
+<li><code>UI_SSL_CA_CERTS</code>：如需加载中间证书时，可选的 CA/链文件路径。如果未设置，则回退到 <code>SSL_CA_CERTS</code>。</li>
 <li><code>MAX_WORKERS</code>：Web UI 使用的工作进程数（默认为 CPU 数量）。</li>
 <li><code>MAX_THREADS</code>：Web UI 使用的线程数（默认为 <code>MAX_WORKERS</code> * 2）。</li>
 <li><code>FORWARDED_ALLOW_IPS</code>：允许在 <code>X-Forwarded-For</code> 标头中使用的 IP 地址或网络列表（<strong>Docker 镜像</strong>中默认为 <code>*</code>，<strong>Linux 安装</strong>中默认为 <code>127.0.0.1</code>）。</li>

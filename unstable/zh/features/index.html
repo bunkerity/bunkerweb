@@ -1283,6 +1283,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#cache-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cache (PRO)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#client-cache" class="md-nav__link">
     <span class="md-ellipsis">
       Client cache
@@ -1447,6 +1456,15 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-pages-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Pages (PRO)
+    </span>
+  </a>
   
 </li>
       
@@ -4269,7 +4287,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><code>sitewide</code></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>保护范围：</strong> 设置为 <code>sitewide</code> 以保护整个站点，或指定一个 URL 路径（例如 <code>/admin</code>）以仅保护特定区域。</td>
+<td><strong>保护范围：</strong> 设置为 <code>sitewide</code> 以保护整个站点，或指定一个 URL 路径（例如 <code>/admin</code>）以仅保护特定区域。您还可以使用 Nginx 风格的修饰符 (<code>=</code>, <code>~</code>, <code>~*</code>, <code>^~</code>)。</td>
 </tr>
 <tr>
 <td><code>AUTH_BASIC_USER</code></td>
@@ -4283,7 +4301,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><code>changeme</code></td>
 <td>multisite</td>
 <td>是</td>
-<td><strong>密码：</strong> 身份验证所需的密码。密码使用 bcrypt 哈希以实现最大安全性。</td>
+<td><strong>密码：</strong> 身份验证所需的密码。密码使用 scrypt 哈希以实现最大安全性。</td>
 </tr>
 <tr>
 <td><code>AUTH_BASIC_TEXT</code></td>
@@ -4575,7 +4593,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <li><strong>配置状态码：</strong> 使用 <code>BAD_BEHAVIOR_STATUS_CODES</code> 设置定义哪些 HTTP 状态码应被视为“不良”。</li>
 <li><strong>设置阈值：</strong> 使用 <code>BAD_BEHAVIOR_THRESHOLD</code> 设置确定多少次“不良”响应会触发封禁。</li>
 <li><strong>配置时间段：</strong> 使用 <code>BAD_BEHAVIOR_COUNT_TIME</code> 和 <code>BAD_BEHAVIOR_BAN_TIME</code> 设置指定计算不良响应的持续时间和封禁持续时间。</li>
-<li><strong>选择封禁范围：</strong> 使用 <code>BAD_BEHAVIOR_BAN_SCOPE</code> 设置决定封禁是仅适用于当前服务还是全局适用于所有服务。</li>
+<li><strong>选择封禁范围：</strong> 使用 <code>BAD_BEHAVIOR_BAN_SCOPE</code> 设置决定封禁是仅适用于当前服务还是全局适用于所有服务。当流量命中默认服务器（服务器名 <code>_</code>）时，封禁始终为全局，以便该 IP 在所有服务中被阻断。</li>
 </ol>
 <div class="admonition tip">
 <p class="admonition-title">流模式</p>
@@ -4633,7 +4651,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <td><code>service</code></td>
 <td>global</td>
 <td>否</td>
-<td><strong>封禁范围：</strong> 决定封禁是仅适用于当前服务 (<code>service</code>) 还是所有服务 (<code>global</code>)。</td>
+<td><strong>封禁范围：</strong> 决定封禁是仅适用于当前服务 (<code>service</code>) 还是所有服务 (<code>global</code>)。命中默认服务器（<code>_</code>）时，封禁始终为全局。</td>
 </tr>
 </tbody>
 </table>
@@ -5510,6 +5528,134 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
+<h2 id="cache-pro">Cache <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
+<p>Provides caching functionality at the reverse proxy level.</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>默认值</th>
+<th>上下文</th>
+<th>可重复</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CACHE_PATH</code></td>
+<td></td>
+<td>global</td>
+<td>是</td>
+<td>Path and parameters for a cache.</td>
+</tr>
+<tr>
+<td><code>CACHE_ZONE</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>Name of cache zone to use (specified in a CACHE_PATH setting).</td>
+</tr>
+<tr>
+<td><code>CACHE_HEADER</code></td>
+<td><code>X-Cache</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Add header about cache status.</td>
+</tr>
+<tr>
+<td><code>CACHE_BACKGROUND_UPDATE</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Enable or disable background update of the cache.</td>
+</tr>
+<tr>
+<td><code>CACHE_BYPASS</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>List of variables to determine if the cache should be bypassed or not.</td>
+</tr>
+<tr>
+<td><code>CACHE_NO_CACHE</code></td>
+<td><code>$http_pragma$http_authorization</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Disable caching if variables are set.</td>
+</tr>
+<tr>
+<td><code>CACHE_KEY</code></td>
+<td><code>$scheme$proxy_host$request_uri</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Key used to identify cached elements.</td>
+</tr>
+<tr>
+<td><code>CACHE_CONVERT_HEAD_TO_GET</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Convert HEAD requests to GET when caching.</td>
+</tr>
+<tr>
+<td><code>CACHE_LOCK</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Lock concurrent requests when populating the cache.</td>
+</tr>
+<tr>
+<td><code>CACHE_LOCK_AGE</code></td>
+<td><code>5s</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Pass request to upstream if cache is locked for that time (possible cache).</td>
+</tr>
+<tr>
+<td><code>CACHE_LOCK_TIMEOUT</code></td>
+<td><code>5s</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Pass request to upstream if cache is locked for that time (no cache).</td>
+</tr>
+<tr>
+<td><code>CACHE_METHODS</code></td>
+<td><code>GET HEAD</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Only cache response if corresponding method is present.</td>
+</tr>
+<tr>
+<td><code>CACHE_MIN_USES</code></td>
+<td><code>1</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Number of requests before we put the corresponding response in cache.</td>
+</tr>
+<tr>
+<td><code>CACHE_REVALIDATE</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Revalidate expired items using conditional requests to upstream.</td>
+</tr>
+<tr>
+<td><code>CACHE_USE_STALE</code></td>
+<td><code>off</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Determines the use of staled cache response (proxy_cache_use_stale directive).</td>
+</tr>
+<tr>
+<td><code>CACHE_VALID</code></td>
+<td><code>10m</code></td>
+<td>multisite</td>
+<td>是</td>
+<td>Defines default caching with optional status code.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="client-cache">Client cache</h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>客户端缓存插件通过控制浏览器如何缓存静态内容来优化网站性能。它通过指示浏览器在本地存储和重用静态资产（例如图像、CSS 和 JavaScript 文件），而不是在每次页面访问时都请求它们，从而减少了带宽使用量，降低了服务器负载，并缩短了页面加载时间。</p>
@@ -6121,6 +6267,78 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li>在 CrowdSec 端监控 <code>cscli metrics show</code> 或 CrowdSec Console，确保 BunkerWeb 的决策按预期显示。</li>
 <li>在 BunkerWeb UI 中打开 CrowdSec 插件页面查看集成状态。</li>
 </ul>
+<h2 id="custom-pages-pro">Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
+<p>Tweak BunkerWeb error/antibot/default pages with custom HTML.</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>默认值</th>
+<th>上下文</th>
+<th>可重复</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CUSTOM_ERROR_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>Full path of the custom error page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_DEFAULT_SERVER_PAGE</code></td>
+<td></td>
+<td>global</td>
+<td>否</td>
+<td>Full path of the custom default server page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_CAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>Full path of the custom antibot captcha page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_JAVASCRIPT_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>Full path of the custom antibot javascript check page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_RECAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>Full path of the custom antibot recaptcha page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_HCAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>Full path of the custom antibot hcaptcha page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_TURNSTILE_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>Full path of the custom antibot turnstile page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_MCAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>Full path of the custom antibot mcaptcha page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+</tbody>
+</table>
 <h2 id="custom-ssl-certificate">Custom SSL certificate</h2>
 <p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>自定义 SSL 证书插件允许您在 BunkerWeb 中使用您自己的 SSL/TLS 证书，而不是自动生成的证书。如果您拥有来自受信任的证书颁发机构 (CA) 的现有证书、需要使用具有特定配置的证书，或者希望在整个基础设施中保持一致的证书管理，此功能特别有用。</p>
@@ -8931,7 +9149,7 @@ TrustedMonitor/\d+\.\d+
 <p>选择一个 CRS 版本以最符合您的安全需求：</p>
 <ul>
 <li><strong><code>3</code></strong>：稳定版 <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7">v3.3.7</a>。</li>
-<li><strong><code>4</code></strong>：稳定版 <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.20.0">v4.20.0</a> (<strong>默认</strong>)。</li>
+<li><strong><code>4</code></strong>：稳定版 <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.21.0">v4.21.0</a> (<strong>默认</strong>)。</li>
 <li><strong><code>nightly</code></strong>：<a href="https://github.com/coreruleset/coreruleset/releases/tag/nightly">每日构建版</a>，提供最新的规则更新。</li>
 </ul>
 <div class="admonition example">
@@ -9698,17 +9916,26 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><code>301</code></td>
 <td>multisite</td>
 <td>是</td>
-<td><strong>HTTP 状态码：</strong> 用于重定向的 HTTP 状态码。选项：<code>301</code>（永久）或 <code>302</code>（临时）。</td>
+<td><strong>HTTP 状态码：</strong> 用于重定向的 HTTP 状态码。选项：<code>301</code>、<code>302</code>、<code>303</code>、<code>307</code> 或 <code>308</code>。</td>
 </tr>
 </tbody>
 </table>
-<p>!!! tip "选择正确的状态码" - 当重定向是永久性的时，例如域名迁移或建立规范 URL，请使用 <code>301</code>（永久移动）。这有助于搜索引擎更新其索引。- 当重定向是临时性的，或者如果您将来可能想重新使用原始 URL，请使用 <code>302</code>（找到/临时重定向）。</p>
+<div class="admonition tip">
+<p class="admonition-title">选择正确的状态码</p>
+<ul>
+<li><strong><code>301</code>（永久移动）：</strong> 永久重定向，被浏览器缓存。可能将 POST 更改为 GET。适用于域名迁移。</li>
+<li><strong><code>302</code>（找到）：</strong> 临时重定向。可能将 POST 更改为 GET。</li>
+<li><strong><code>303</code>（参见其他）：</strong> 始终使用 GET 方法重定向。适用于表单提交后的重定向。</li>
+<li><strong><code>307</code>（临时重定向）：</strong> 保留 HTTP 方法的临时重定向。适用于 API 重定向。</li>
+<li><strong><code>308</code>（永久重定向）：</strong> 保留 HTTP 方法的永久重定向。适用于永久性 API 端点迁移。</li>
+</ul>
+</div>
 <div class="admonition info">
 <p class="admonition-title">路径保留</p>
 <p>当 <code>REDIRECT_TO_REQUEST_URI</code> 设置为 <code>yes</code> 时，BunkerWeb 会保留原始请求路径。例如，如果用户访问 <code>https://old-domain.com/blog/post-1</code>，并且您已设置为重定向到 <code>https://new-domain.com</code>，他们将被重定向到 <code>https://new-domain.com/blog/post-1</code>。</p>
 </div>
 <h3 id="_100">配置示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="36:5"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><input id="__tabbed_36_5" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">多路径重定向</label><label for="__tabbed_36_2">简单域名重定向</label><label for="__tabbed_36_3">保留路径的重定向</label><label for="__tabbed_36_4">临时重定向</label><label for="__tabbed_36_5">子域名整合</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="36:7"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><input id="__tabbed_36_5" name="__tabbed_36" type="radio" /><input id="__tabbed_36_6" name="__tabbed_36" type="radio" /><input id="__tabbed_36_7" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">多路径重定向</label><label for="__tabbed_36_2">简单域名重定向</label><label for="__tabbed_36_3">保留路径的重定向</label><label for="__tabbed_36_4">临时重定向</label><label for="__tabbed_36_5">子域名整合</label><label for="__tabbed_36_6">API 端点迁移</label><label for="__tabbed_36_7">表单提交后重定向</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>一个将多个路径重定向到不同目标的配置：</p>
@@ -9757,6 +9984,21 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <div class="highlight"><pre><span></span><code><span class="nt">REDIRECT_TO</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/support&quot;</span>
 <span class="nt">REDIRECT_TO_REQUEST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">REDIRECT_TO_STATUS_CODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;301&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>永久重定向 API 端点并保留 HTTP 方法的配置：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">REDIRECT_FROM</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/api/v1/&quot;</span>
+<span class="nt">REDIRECT_TO</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://api.example.com/v2/&quot;</span>
+<span class="nt">REDIRECT_TO_REQUEST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">REDIRECT_TO_STATUS_CODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;308&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>使用 GET 方法在表单提交后重定向的配置：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">REDIRECT_TO</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/thank-you&quot;</span>
+<span class="nt">REDIRECT_TO_REQUEST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
+<span class="nt">REDIRECT_TO_STATUS_CODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;303&quot;</span>
 </code></pre></div>
 </div>
 </div>
@@ -11043,6 +11285,13 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td>multisite</td>
 <td>否</td>
 <td><strong>自定义 SSL 密码：</strong> 用于 SSL/TLS 连接的密码套件的冒号分隔列表（覆盖级别）。</td>
+</tr>
+<tr>
+<td><code>SSL_SESSION_CACHE_SIZE</code></td>
+<td><code>10m</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>SSL 会话缓存大小：</strong> SSL 会话缓存的大小（例如 <code>10m</code>、<code>512k</code>）。设置为 <code>off</code> 或 <code>none</code> 以禁用。</td>
 </tr>
 </tbody>
 </table>

@@ -1201,7 +1201,7 @@ app2.example.com_USE_ANTIBOT=cookie
 app2.example.com_WHITELIST_COUNTRY=FR
 app3.example.com_USE_BAD_BEHAVIOR=no
 </code></pre></div>
-<p>Please note that multisite mode is implicit when using the web User Interface. You have the option to apply configurations directly to your services or to set a global configuration that will be applied to all your services (you can still apply exceptions directly to specific services):</p>
+<p>Please note that multisite mode is implicit when using the web User Interface. You have the option to apply configurations directly to your services or to set global settings that will be applied to all your services (you can still apply exceptions directly to specific services):</p>
 <figure>
 <p><img align="center," alt="Overview" src="../assets/img/ui-multisite.png" width="600" />
   </p>
@@ -1277,21 +1277,21 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <tbody>
 <tr>
 <td style="text-align: left;"><strong>Docker</strong></td>
-<td style="text-align: left;">✅ <code>v17</code> and earlier (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v18</code> and earlier (all-in-one: ✅ <code>v17</code>)</td>
 <td style="text-align: left;">✅ <code>v11</code> and earlier</td>
 <td style="text-align: left;">✅ <code>v9</code> and earlier</td>
 <td style="text-align: left;">✅ Supported</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Kubernetes</strong></td>
-<td style="text-align: left;">✅ <code>v17</code> and earlier (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v18</code> and earlier</td>
 <td style="text-align: left;">✅ <code>v11</code> and earlier</td>
 <td style="text-align: left;">✅ <code>v9</code> and earlier</td>
 <td style="text-align: left;">✅ Supported</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Autoconf</strong></td>
-<td style="text-align: left;">✅ <code>v17</code> and earlier (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v18</code> and earlier</td>
 <td style="text-align: left;">✅ <code>v11</code> and earlier</td>
 <td style="text-align: left;">✅ <code>v9</code> and earlier</td>
 <td style="text-align: left;">✅ Supported</td>
@@ -1308,7 +1308,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <div class="admonition info">
 <p class="admonition-title">Notes</p>
 <ul>
-<li><strong>PostgreSQL</strong>: <code>v18</code> is unsupported because the Alpine base images we ship only include <code>v17</code> client packages.</li>
+<li><strong>PostgreSQL</strong>: Alpine packages now ship with the <code>v18</code> client, so <code>v18</code> and earlier are supported out of the box; the all-in-one image still embeds <code>v17</code>, so <code>v18</code> is unsupported there.</li>
 <li><strong>Linux</strong>: Support depends on your distribution's packages. If needed, you can install database clients manually from vendor repositories (RHEL typically requires this).</li>
 <li><strong>SQLite</strong>: Ships with the packages and is ready to use.</li>
 </ul>

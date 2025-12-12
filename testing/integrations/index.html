@@ -2349,6 +2349,195 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#terraform" class="md-nav__link">
+    <span class="md-ellipsis">
+      Terraform
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Terraform">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      Introduction
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bearer-token-authentication-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bearer Token Authentication (recommended)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basic-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Authentication
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usage-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-a-web-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create a Web Service
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#register-an-instance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Register an Instance
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-a-global-setting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configure a Global Setting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ban-an-ip-address" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ban an IP Address
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#available-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Available Resources
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Sources
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ephemeral-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ephemeral Resources
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#complete-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Complete Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#additional-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Additional Resources
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#support-and-contribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Support and Contribution
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#microsoft-azure" class="md-nav__link">
     <span class="md-ellipsis">
       Microsoft Azure
@@ -2656,7 +2845,7 @@
 <li><strong>BunkerWeb UI access URL</strong>: Interface for configuring your services</li>
 <li><strong>Load Balancer endpoint</strong>: Unique URL in the format <code>http://[ID].bunkerweb.cloud</code></li>
 <li><strong>Grafana Access</strong>: Monitoring interface and metrics visualization</li>
-<li><strong>Allocated Resources</strong>: 2 instances with 16GB RAM and 4 CPU each</li>
+<li><strong>Allocated Resources</strong>: 2 instances with 8GB RAM and 2 CPU each</li>
 </ul>
 <h4 id="2-first-connection">2. First Connection</h4>
 <ol>
@@ -4289,7 +4478,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <li>Debian 13 "Trixie"</li>
 <li>Ubuntu 22.04 "Jammy"</li>
 <li>Ubuntu 24.04 "Noble"</li>
-<li>Fedora 41 and 42</li>
+<li>Fedora 41, 42 and 43</li>
 <li>Red Hat Enterprise Linux (RHEL) 8, 9 and 10</li>
 </ul>
 <h3 id="easy-installation-script">Easy installation script</h3>
@@ -5147,7 +5336,7 @@ It is recommended to utilize <a href="https://kubernetes.io/docs/reference/acces
 <p>Enable the controller in <code>values.yaml</code>:
 <div class="highlight"><pre><span></span><code><span class="nt">controller</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1.6.5&quot;</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;testing&quot;</span>
 </code></pre></div></p>
 </li>
 <li>
@@ -5232,7 +5421,7 @@ It is recommended to utilize <a href="https://kubernetes.io/docs/reference/acces
 <h6 id="option-b-manual-configuration-with-bunkerweb_instances">Option B: Manual Configuration with <code>BUNKERWEB_INSTANCES</code></h6>
 <p>In your BunkerWeb chart <code>values.yaml</code>, configure the <code>BUNKERWEB_INSTANCES</code> environment variable with the URLs of all your headless services:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1.6.5&quot;</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;testing&quot;</span>
 <span class="w">  </span><span class="nt">extraEnvs</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BUNKERWEB_INSTANCES</span>
 <span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://app1-bunkerweb-workers.namespace.svc.cluster.local:5000</span><span class="nv"> </span><span class="s">http://app2-bunkerweb-workers.namespace.svc.cluster.local:5000&quot;</span>
@@ -5270,7 +5459,7 @@ It is recommended to utilize <a href="https://kubernetes.io/docs/reference/acces
 
 <span class="w">        </span><span class="c1"># BunkerWeb Sidecar</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing-rc2</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
 <span class="w">          </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span><span class="w">  </span><span class="c1"># Exposed HTTP port</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5000</span><span class="w">  </span><span class="c1"># Internal API (mandatory)</span>
@@ -5806,7 +5995,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 </code></pre></div>
 <p>And you can now proceed to the setup wizard by browsing to <code>https://bunkerweb.example.com/setup</code>.</p>
 <p><strong>Protecting existing application</strong></p>
-<p><strong>First of all, you will need to go to Global Config, select the SSL plugin and then disable the Auto redirect HTTP to HTTPS. Please note that you only need to do it one time.</strong></p>
+<p><strong>First of all, you will need to go to Global Settings, select the SSL plugin and then disable the Auto redirect HTTP to HTTPS. Please note that you only need to do it one time.</strong></p>
 <p>Let's assume that you have an application in the <code>myapp</code> namespace which is accessible using the <code>myapp-service</code> service on port <code>5000</code>.</p>
 <p>You will need to add a new service on the web UI and fill the required information:</p>
 <ul>
@@ -5984,7 +6173,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">worker&quot;</span>
 
 <span class="w">  </span><span class="nt">bw-redis</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:8-alpine</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -6102,6 +6291,204 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <p>There can only be <strong>one database</strong> and <strong>one Scheduler</strong> per namespace. If you try to create multiple databases or Schedulers in the same namespace, the configurations will end up conflicting with each other.</p>
 <p>The Scheduler doesn't need the <code>NAMESPACE</code> label to work properly. It will only need the <code>DATABASE_URI</code> setting properly configured so that it can access the same database as the autoconf service.</p>
 </div>
+<h2 id="terraform">Terraform</h2>
+<h3 id="introduction">Introduction</h3>
+<p>The Terraform provider for BunkerWeb allows you to manage your BunkerWeb instances, services, and configurations through Infrastructure as Code (IaC). This provider interacts with the BunkerWeb API to automate the deployment and management of your security configurations.</p>
+<h3 id="prerequisites_1">Prerequisites</h3>
+<ul>
+<li><a href="https://developer.hashicorp.com/terraform/downloads">Terraform</a> &gt;= 1.12</li>
+<li>A BunkerWeb instance with API enabled</li>
+<li>An API token or basic authentication credentials</li>
+</ul>
+<h3 id="installation">Installation</h3>
+<p>The provider is available on the <a href="https://registry.terraform.io/providers/bunkerity/bunkerweb/latest">Terraform Registry</a>. Add it to your Terraform configuration:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">terraform</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nb">required_providers</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nb">bunkerweb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="na">source</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;bunkerity/bunkerweb&quot;</span>
+<span class="w">      </span><span class="na">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;~&gt; 0.0.2&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="configuration">Configuration</h3>
+<h4 id="bearer-token-authentication-recommended">Bearer Token Authentication (recommended)</h4>
+<div class="highlight"><pre><span></span><code><span class="kr">provider</span><span class="w"> </span><span class="nv">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">api_endpoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://bunkerweb.example.com:8888&quot;</span>
+<span class="w">  </span><span class="na">api_token</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nv">var.bunkerweb_token</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="basic-authentication">Basic Authentication</h4>
+<div class="highlight"><pre><span></span><code><span class="kr">provider</span><span class="w"> </span><span class="nv">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">api_endpoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://bunkerweb.example.com:8888&quot;</span>
+<span class="w">  </span><span class="na">api_username</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">var.bunkerweb_username</span>
+<span class="w">  </span><span class="na">api_password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">var.bunkerweb_password</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="usage-examples">Usage Examples</h3>
+<h4 id="create-a-web-service">Create a Web Service</h4>
+<div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;bunkerweb_service&quot;</span><span class="w"> </span><span class="nv">&quot;app&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">server_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;app.example.com&quot;</span>
+
+<span class="w">  </span><span class="nb">variables</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="na">upstream</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;10.0.0.12:8080&quot;</span>
+<span class="w">    </span><span class="na">mode</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;production&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="register-an-instance">Register an Instance</h4>
+<div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;bunkerweb_instance&quot;</span><span class="w"> </span><span class="nv">&quot;worker1&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">hostname</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;worker-1.internal&quot;</span>
+<span class="w">  </span><span class="na">name</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Worker 1&quot;</span>
+<span class="w">  </span><span class="na">port</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="m">8080</span>
+<span class="w">  </span><span class="na">listen_https</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">true</span>
+<span class="w">  </span><span class="na">https_port</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="m">8443</span>
+<span class="w">  </span><span class="na">server_name</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;worker-1.internal&quot;</span>
+<span class="w">  </span><span class="na">method</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;api&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="configure-a-global-setting">Configure a Global Setting</h4>
+<div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;bunkerweb_global_config_setting&quot;</span><span class="w"> </span><span class="nv">&quot;retry&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">key</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;retry_limit&quot;</span>
+<span class="w">  </span><span class="na">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;10&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="ban-an-ip-address">Ban an IP Address</h4>
+<div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;bunkerweb_ban&quot;</span><span class="w"> </span><span class="nv">&quot;suspicious_ip&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">ip</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;192.0.2.100&quot;</span>
+<span class="w">  </span><span class="na">reason</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Multiple failed login attempts&quot;</span>
+<span class="w">  </span><span class="na">duration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3600</span><span class="c1">  # 1 hour in seconds</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="custom-configuration">Custom Configuration</h4>
+<div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;bunkerweb_config&quot;</span><span class="w"> </span><span class="nv">&quot;custom_rules&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">service_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;app.example.com&quot;</span>
+<span class="w">  </span><span class="na">type</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;http&quot;</span>
+<span class="w">  </span><span class="na">name</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;custom-rules.conf&quot;</span>
+<span class="w">  </span><span class="na">content</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nf">file</span><span class="p">(</span><span class="s2">&quot;${path.module}/configs/custom-rules.conf&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="available-resources">Available Resources</h3>
+<p>The provider exposes the following resources:</p>
+<ul>
+<li><strong>bunkerweb_service</strong>: Web service management</li>
+<li><strong>bunkerweb_instance</strong>: Instance registration and management</li>
+<li><strong>bunkerweb_global_config_setting</strong>: Global configuration</li>
+<li><strong>bunkerweb_config</strong>: Custom configurations</li>
+<li><strong>bunkerweb_ban</strong>: IP banning management</li>
+<li><strong>bunkerweb_plugin</strong>: Plugin installation and management</li>
+</ul>
+<h3 id="data-sources">Data Sources</h3>
+<p>Data sources allow reading existing information:</p>
+<ul>
+<li><strong>bunkerweb_service</strong>: Read an existing service</li>
+<li><strong>bunkerweb_global_config</strong>: Read global configuration</li>
+<li><strong>bunkerweb_plugins</strong>: List available plugins</li>
+<li><strong>bunkerweb_cache</strong>: Cache information</li>
+<li><strong>bunkerweb_jobs</strong>: Scheduled jobs status</li>
+</ul>
+<h3 id="ephemeral-resources">Ephemeral Resources</h3>
+<p>For one-time operations:</p>
+<ul>
+<li><strong>bunkerweb_run_jobs</strong>: Trigger jobs on demand</li>
+<li><strong>bunkerweb_instance_action</strong>: Execute actions on instances (reload, stop, etc.)</li>
+<li><strong>bunkerweb_service_snapshot</strong>: Capture service state</li>
+<li><strong>bunkerweb_config_upload</strong>: Bulk configuration upload</li>
+</ul>
+<h3 id="complete-example">Complete Example</h3>
+<p>Here's an example of a complete infrastructure with BunkerWeb:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">terraform</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nb">required_providers</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nb">bunkerweb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="na">source</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;bunkerity/bunkerweb&quot;</span>
+<span class="w">      </span><span class="na">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;~&gt; 0.0.1&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kr">provider</span><span class="w"> </span><span class="nv">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">api_endpoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://bunkerweb.example.com:8888&quot;</span>
+<span class="w">  </span><span class="na">api_token</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nv">var.bunkerweb_token</span>
+<span class="p">}</span>
+
+<span class="c1"># Global configuration</span>
+<span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;bunkerweb_global_config_setting&quot;</span><span class="w"> </span><span class="nv">&quot;rate_limit&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">key</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;rate_limit&quot;</span>
+<span class="w">  </span><span class="na">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;10r/s&quot;</span>
+<span class="p">}</span>
+
+<span class="c1"># Main service</span>
+<span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;bunkerweb_service&quot;</span><span class="w"> </span><span class="nv">&quot;webapp&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">server_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;webapp.example.com&quot;</span>
+
+<span class="w">  </span><span class="nb">variables</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="na">upstream</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;10.0.1.10:8080&quot;</span>
+<span class="w">    </span><span class="na">mode</span><span class="w">              </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;production&quot;</span>
+<span class="w">    </span><span class="na">auto_lets_encrypt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;yes&quot;</span>
+<span class="w">    </span><span class="na">use_modsecurity</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;yes&quot;</span>
+<span class="w">    </span><span class="na">use_antibot</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;cookie&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1"># API service with different configuration</span>
+<span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;bunkerweb_service&quot;</span><span class="w"> </span><span class="nv">&quot;api&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">server_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;api.example.com&quot;</span>
+
+<span class="w">  </span><span class="nb">variables</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="na">upstream</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;10.0.1.20:3000&quot;</span>
+<span class="w">    </span><span class="na">mode</span><span class="w">            </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;production&quot;</span>
+<span class="w">    </span><span class="na">use_cors</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;yes&quot;</span>
+<span class="w">    </span><span class="na">cors_allow_origin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;*&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1"># Worker instance</span>
+<span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;bunkerweb_instance&quot;</span><span class="w"> </span><span class="nv">&quot;worker1&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">hostname</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;bw-worker-1.internal&quot;</span>
+<span class="w">  </span><span class="na">name</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Production Worker 1&quot;</span>
+<span class="w">  </span><span class="na">port</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="m">8080</span>
+<span class="w">  </span><span class="na">listen_https</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">true</span>
+<span class="w">  </span><span class="na">https_port</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="m">8443</span>
+<span class="w">  </span><span class="na">server_name</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;bw-worker-1.internal&quot;</span>
+<span class="w">  </span><span class="na">method</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;api&quot;</span>
+<span class="p">}</span>
+
+<span class="c1"># Custom configuration for webapp service</span>
+<span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;bunkerweb_config&quot;</span><span class="w"> </span><span class="nv">&quot;custom_security&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">service_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">bunkerweb_service.webapp.id</span>
+<span class="w">  </span><span class="na">type</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;http&quot;</span>
+<span class="w">  </span><span class="na">name</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;custom-security.conf&quot;</span>
+<span class="w">  </span><span class="na">content</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="o">&lt;&lt;-</span><span class="dl">EOT</span>
+<span class="sh">    # Custom security headers</span>
+<span class="sh">    add_header X-Frame-Options &quot;DENY&quot; always;</span>
+<span class="sh">    add_header X-Content-Type-Options &quot;nosniff&quot; always;</span>
+<span class="dl">  EOT</span>
+<span class="p">}</span>
+
+<span class="c1"># Ban a suspicious IP</span>
+<span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;bunkerweb_ban&quot;</span><span class="w"> </span><span class="nv">&quot;blocked_ip&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">ip</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;203.0.113.50&quot;</span>
+<span class="w">  </span><span class="na">reason</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Detected malicious activity&quot;</span>
+<span class="w">  </span><span class="na">duration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">86400</span><span class="c1">  # 24 hours</span>
+<span class="p">}</span>
+
+<span class="kr">output</span><span class="w"> </span><span class="nv">&quot;webapp_service_id&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">bunkerweb_service.webapp.id</span>
+<span class="p">}</span>
+
+<span class="kr">output</span><span class="w"> </span><span class="nv">&quot;api_service_id&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">bunkerweb_service.api.id</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="additional-resources">Additional Resources</h3>
+<ul>
+<li><a href="https://registry.terraform.io/providers/bunkerity/bunkerweb/latest/docs">Complete provider documentation</a></li>
+<li><a href="https://github.com/bunkerity/terraform-provider-bunkerweb">GitHub Repository</a></li>
+<li><a href="https://github.com/bunkerity/terraform-provider-bunkerweb/tree/main/examples">Usage Examples</a></li>
+<li><a href="https://docs.bunkerweb.io/latest/api/">BunkerWeb API Documentation</a></li>
+</ul>
+<h3 id="support-and-contribution">Support and Contribution</h3>
+<p>To report bugs or suggest improvements, visit the <a href="https://github.com/bunkerity/terraform-provider-bunkerweb/issues">provider's GitHub repository</a>.</p>
 <h2 id="microsoft-azure">Microsoft Azure</h2>
 <figure>
 <p><img align="center," alt="Overview" src="../assets/img/integration-azure.webp" width="600" />

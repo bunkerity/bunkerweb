@@ -1201,7 +1201,7 @@ app2.example.com_USE_ANTIBOT=cookie
 app2.example.com_WHITELIST_COUNTRY=FR
 app3.example.com_USE_BAD_BEHAVIOR=no
 </code></pre></div>
-<p>Ten en cuenta que el modo multisitio es implícito cuando se utiliza la interfaz de usuario web. Tienes la opción de aplicar configuraciones directamente a tus servicios o de establecer una configuración global que se aplicará a todos tus servicios (aún puedes aplicar excepciones directamente a servicios específicos):</p>
+<p>Ten en cuenta que el modo multisitio es implícito cuando se utiliza la interfaz de usuario web. Tienes la opción de aplicar configuraciones directamente a tus servicios o de establecer ajustes globales que se aplicarán a todos tus servicios (aún puedes aplicar excepciones directamente a servicios específicos):</p>
 <figure>
 <p><img align="center," alt="Descripción general" src="../../assets/img/ui-multisite.png" width="600" />
   </p>
@@ -1277,21 +1277,21 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <tbody>
 <tr>
 <td style="text-align: left;"><strong>Docker</strong></td>
-<td style="text-align: left;">✅ <code>v17</code> y anteriores (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v18</code> y anteriores (all-in-one: ✅ <code>v17</code>)</td>
 <td style="text-align: left;">✅ <code>v11</code> y anteriores</td>
 <td style="text-align: left;">✅ <code>v9</code> y anteriores</td>
 <td style="text-align: left;">✅ Compatible</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Kubernetes</strong></td>
-<td style="text-align: left;">✅ <code>v17</code> y anteriores (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v18</code> y anteriores</td>
 <td style="text-align: left;">✅ <code>v11</code> y anteriores</td>
 <td style="text-align: left;">✅ <code>v9</code> y anteriores</td>
 <td style="text-align: left;">✅ Compatible</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Autoconf</strong></td>
-<td style="text-align: left;">✅ <code>v17</code> y anteriores (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v18</code> y anteriores</td>
 <td style="text-align: left;">✅ <code>v11</code> y anteriores</td>
 <td style="text-align: left;">✅ <code>v9</code> y anteriores</td>
 <td style="text-align: left;">✅ Compatible</td>
@@ -1308,7 +1308,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <div class="admonition info">
 <p class="admonition-title">Notas</p>
 <ul>
-<li><strong>PostgreSQL</strong>: <code>v18</code> no es compatible porque las imágenes base de Alpine que distribuimos solo incluyen los paquetes del cliente <code>v17</code>.</li>
+<li><strong>PostgreSQL</strong>: Los paquetes basados en Alpine ahora incluyen el cliente <code>v18</code>, por lo que <code>v18</code> y versiones anteriores son compatibles de forma predeterminada; la imagen all-in-one sigue usando el cliente <code>v17</code>, por lo que <code>v18</code> no es compatible allí.</li>
 <li><strong>Linux</strong>: La compatibilidad depende de los paquetes de tu distribución. Si es necesario, puedes instalar los clientes de la base de datos manualmente desde los repositorios del proveedor (esto suele ser necesario en RHEL).</li>
 <li><strong>SQLite</strong>: Se entrega con los paquetes y está listo para usar.</li>
 </ul>

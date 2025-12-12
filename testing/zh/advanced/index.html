@@ -1614,7 +1614,7 @@
 <div class="tabbed-set tabbed-alternate" data-tabs="2:7"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><input id="__tabbed_2_6" name="__tabbed_2" type="radio" /><input id="__tabbed_2_7" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Web UI</label><label for="__tabbed_2_2">Linux</label><label for="__tabbed_2_3">All-in-one</label><label for="__tabbed_2_4">Docker</label><label for="__tabbed_2_5">Docker autoconf</label><label for="__tabbed_2_6">Kubernetes</label><label for="__tabbed_2_7">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>导航到<strong>全局配置</strong>页面，选择 <strong>Real IP</strong> 插件并填写以下设置：</p>
+<p>导航到<strong>全局设置</strong>页面，选择 <strong>Real IP</strong> 插件并填写以下设置：</p>
 <p><figure markdown><img align="center" alt="使用 Web UI 的真实 IP 设置（HTTP 头）" src="../../assets/img/advanced-proxy1.png" /><figcaption>使用 Web UI 的真实 IP 设置（HTTP 头）</figcaption></figure></p>
 <p>请注意，当您更改与真实 IP 相关的设置时，建议重新启动 BunkerWeb。</p>
 </div>
@@ -1751,7 +1751,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <div class="tabbed-set tabbed-alternate" data-tabs="3:7"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><input id="__tabbed_3_4" name="__tabbed_3" type="radio" /><input id="__tabbed_3_5" name="__tabbed_3" type="radio" /><input id="__tabbed_3_6" name="__tabbed_3" type="radio" /><input id="__tabbed_3_7" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Web UI</label><label for="__tabbed_3_2">Linux</label><label for="__tabbed_3_3">All-in-one</label><label for="__tabbed_3_4">Docker</label><label for="__tabbed_3_5">Docker autoconf</label><label for="__tabbed_3_6">Kubernetes</label><label for="__tabbed_3_7">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>导航到<strong>全局配置</strong>页面，选择 <strong>Real IP</strong> 插件并填写以下设置：</p>
+<p>导航到<strong>全局设置</strong>页面，选择 <strong>Real IP</strong> 插件并填写以下设置：</p>
 <p><figure markdown><img align="center" alt="使用 Web UI 的真实 IP 设置（PROXY 协议）" src="../../assets/img/advanced-proxy2.png" /><figcaption>使用 Web UI 的真实 IP 设置（PROXY 协议）</figcaption></figure></p>
 <p>请注意，当您更改与真实 IP 相关的设置时，建议重新启动 BunkerWeb。</p>
 </div>
@@ -2176,7 +2176,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">redis</span><span class="p">:</span><span class="w"> </span><span class="c1"># Redis 用于报告/封禁/统计的持久化</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:8-alpine</span>
 <span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
 <span class="w">      </span><span class="no">redis-server</span>
 <span class="w">      </span><span class="no">--maxmemory 256mb</span>
@@ -2425,7 +2425,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Web UI</label><label for="__tabbed_11_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>导航到<strong>全局配置</strong>页面，并将 DNS 解析器设置为 <code>127.0.0.53</code></p>
+<p>导航到<strong>全局设置</strong>页面，并将 DNS 解析器设置为 <code>127.0.0.53</code></p>
 <p><figure markdown><img align="center" alt="使用 Web UI 设置 DNS 解析器" src="../../assets/img/advanced-dns-resolvers.png" /><figcaption>使用 Web UI 设置 DNS 解析器</figcaption></figure></p>
 </div>
 <div class="tabbed-block">
@@ -2486,7 +2486,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">en
 <div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Web UI</label><label for="__tabbed_14_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>导航到<strong>全局配置</strong>页面，选择 <strong>NGINX</strong> 插件并将 DNS 解析器设置为 <code>127.0.0.1</code>。</p>
+<p>导航到<strong>全局设置</strong>页面，选择 <strong>NGINX</strong> 插件并将 DNS 解析器设置为 <code>127.0.0.1</code>。</p>
 <p><figure markdown><img align="center" alt="使用 Web UI 设置 DNS 解析器" src="../../assets/img/advanced-dns-resolvers2.png" /><figcaption>使用 Web UI 设置 DNS 解析器</figcaption></figure></p>
 </div>
 <div class="tabbed-block">
@@ -2602,7 +2602,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <div class="tabbed-set tabbed-alternate" data-tabs="15:7"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><input id="__tabbed_15_4" name="__tabbed_15" type="radio" /><input id="__tabbed_15_5" name="__tabbed_15" type="radio" /><input id="__tabbed_15_6" name="__tabbed_15" type="radio" /><input id="__tabbed_15_7" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Web UI</label><label for="__tabbed_15_2">Linux</label><label for="__tabbed_15_3">All-in-one</label><label for="__tabbed_15_4">Docker</label><label for="__tabbed_15_5">Docker autoconf</label><label for="__tabbed_15_6">Kubernetes</label><label for="__tabbed_15_7">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>导航到<strong>配置</strong>页面，点击<strong>创建新的自定义配置</strong>，然后您可以选择是全局配置还是特定于服务的配置，以及配置类型和配置名称：</p>
+<p>导航到<strong>配置</strong>页面，点击<strong>创建新的自定义配置</strong>，然后您可以选择是全局设置还是特定于服务的配置，以及配置类型和配置名称：</p>
 <p><figure markdown><img align="center" alt="使用 Web UI 的自定义配置" src="../../assets/img/advanced-config.png" /><figcaption>使用 Web UI 的自定义配置</figcaption></figure></p>
 <p>别忘了点击 <code>💾 保存</code> 按钮。</p>
 </div>
@@ -2745,7 +2745,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <p><strong>使用标签</strong></p>
 <div class="admonition warning">
 <p class="admonition-title">使用标签的限制</p>
-<p>当使用 Docker autoconf 集成的标签时，您只能为相应的 Web 服务应用自定义配置。应用 <strong>http</strong>、<strong>default-server-http</strong>、<strong>stream</strong> 或任何全局配置（例如所有服务的 <strong>server-http</strong> 或 <strong>server-stream</strong>）是不可能的：您需要为此挂载文件。</p>
+<p>当使用 Docker autoconf 集成的标签时，您只能为相应的 Web 服务应用自定义配置。应用 <strong>http</strong>、<strong>default-server-http</strong>、<strong>stream</strong> 或任何全局设置（例如所有服务的 <strong>server-http</strong> 或 <strong>server-stream</strong>）是不可能的：您需要为此挂载文件。</p>
 </div>
 <p>要使用的标签必须遵循 <code>bunkerweb.CUSTOM_CONF_&lt;TYPE&gt;_&lt;NAME&gt;</code> 的模式：</p>
 <ul>
@@ -4025,7 +4025,7 @@ LOG_LEVEL_1=error
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">redis</span><span class="p">:</span><span class="w"> </span><span class="c1"># Redis 服务，用于持久化报告/封禁/统计</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:8-alpine</span>
 <span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
 <span class="w">      </span><span class="no">redis-server</span>
 <span class="w">      </span><span class="no">--maxmemory 256mb</span>
@@ -4121,7 +4121,7 @@ log {
 </code></pre></div>
 <h2 id="docker">Docker 日志记录最佳实践</h2>
 <p>使用 Docker 时，管理容器日志以防止其占用过多磁盘空间非常重要。默认情况下，Docker 使用 <code>json-file</code> 日志记录驱动程序，如果未进行配置，可能会导致日志文件非常大。</p>
-<p>为避免这种情况，您可以配置日志轮换。这可以在您的 <code>docker-compose.yml</code> 文件中为特定服务配置，也可以为 Docker 守护进程全局配置。</p>
+<p>为避免这种情况，您可以配置日志轮换。这可以在您的 <code>docker-compose.yml</code> 文件中为特定服务配置，也可以为 Docker 守护进程全局设置。</p>
 <p><strong>按服务配置</strong></p>
 <p>您可以在 <code>docker-compose.yml</code> 文件中为您的服务配置日志记录驱动程序以自动轮换日志。以下是一个示例，最多保留 10 个每个 20MB 的日志文件：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
@@ -4135,7 +4135,7 @@ log {
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div>
 <p>此配置可确保日志轮换，防止它们占满您的磁盘。您可以将其应用于 Docker Compose 设置中的任何服务。</p>
-<p><strong>全局配置 (daemon.json)</strong></p>
+<p><strong>全局设置 (daemon.json)</strong></p>
 <p>如果您想默认将这些日志记录设置应用于主机上的所有容器，您可以通过编辑（或创建）<code>/etc/docker/daemon.json</code> 文件来配置 Docker 守护进程：</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;log-driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;json-file&quot;</span><span class="p">,</span>
@@ -4148,7 +4148,7 @@ log {
 <p>修改 <code>daemon.json</code> 后，您需要重新启动 Docker 守护进程才能使更改生效：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>docker
 </code></pre></div>
-<p>此全局配置将由所有容器继承。但是，在 <code>docker-compose.yml</code> 文件中按服务定义的任何日志记录配置都将覆盖 <code>daemon.json</code> 中的全局设置。</p>
+<p>这些全局设置将由所有容器继承。但是，在 <code>docker-compose.yml</code> 文件中按服务定义的任何日志记录配置都将覆盖 <code>daemon.json</code> 中的全局设置。</p>
 <h2 id="security-tuning">安全性调整</h2>
 <p>BunkerWeb 提供了许多安全功能，您可以通过<a href="../features/">功能</a>进行配置。尽管设置的默认值确保了最低限度的“默认安全”，我们强烈建议您对它们进行调整。这样做，您不仅能够确保您所选择的安全级别，还能管理误报。</p>
 <div class="admonition tip">

@@ -1614,7 +1614,7 @@
 <div class="tabbed-set tabbed-alternate" data-tabs="2:7"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><input id="__tabbed_2_6" name="__tabbed_2" type="radio" /><input id="__tabbed_2_7" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Web UI</label><label for="__tabbed_2_2">Linux</label><label for="__tabbed_2_3">All-in-one</label><label for="__tabbed_2_4">Docker</label><label for="__tabbed_2_5">Docker autoconf</label><label for="__tabbed_2_6">Kubernetes</label><label for="__tabbed_2_7">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>Navigate to the <strong>Global config</strong> page, select the <strong>Real IP</strong> plugin and fill out the following settings :</p>
+<p>Navigate to the <strong>Global Settings</strong> page, select the <strong>Real IP</strong> plugin and fill out the following settings :</p>
 <p><figure markdown><img align="center" alt="Real IP settings (header) using web UI" src="../assets/img/advanced-proxy1.png" /><figcaption>Real IP settings (header) using web UI</figcaption></figure></p>
 <p>Please note that it's recommended to restart BunkerWeb when you change settings related to real IP.</p>
 </div>
@@ -1751,7 +1751,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <div class="tabbed-set tabbed-alternate" data-tabs="3:7"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><input id="__tabbed_3_4" name="__tabbed_3" type="radio" /><input id="__tabbed_3_5" name="__tabbed_3" type="radio" /><input id="__tabbed_3_6" name="__tabbed_3" type="radio" /><input id="__tabbed_3_7" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Web UI</label><label for="__tabbed_3_2">Linux</label><label for="__tabbed_3_3">All-in-one</label><label for="__tabbed_3_4">Docker</label><label for="__tabbed_3_5">Docker autoconf</label><label for="__tabbed_3_6">Kubernetes</label><label for="__tabbed_3_7">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>Navigate to the <strong>Global config</strong> page, select the <strong>Real IP</strong> plugin and fill out the following settings :</p>
+<p>Navigate to the <strong>Global Settings</strong> page, select the <strong>Real IP</strong> plugin and fill out the following settings :</p>
 <p><figure markdown><img align="center" alt="Real IP settings (PROXY protocol) using web UI" src="../assets/img/advanced-proxy2.png" /><figcaption>Real IP settings (PROXY protocol) using web UI</figcaption></figure></p>
 <p>Please note that it's recommended to restart BunkerWeb when you change settings related to real IP.</p>
 </div>
@@ -2176,7 +2176,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">redis</span><span class="p">:</span><span class="w"> </span><span class="c1"># Redis service for the persistence of reports/bans/stats</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:8-alpine</span>
 <span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
 <span class="w">      </span><span class="no">redis-server</span>
 <span class="w">      </span><span class="no">--maxmemory 256mb</span>
@@ -2425,7 +2425,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Web UI</label><label for="__tabbed_11_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>Navigate to the <strong>Global config</strong> page and set the DNS resolvers to <code>127.0.0.53</code></p>
+<p>Navigate to the <strong>Global Settings</strong> page and set the DNS resolvers to <code>127.0.0.53</code></p>
 <p><figure markdown><img align="center" alt="DNS resolvers setting using web UI" src="../assets/img/advanced-dns-resolvers.png" /><figcaption>DNS resolvers setting using web UI</figcaption></figure></p>
 </div>
 <div class="tabbed-block">
@@ -2486,7 +2486,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">en
 <div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Web UI</label><label for="__tabbed_14_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>Navigate to the <strong>Global config</strong> page, select the <strong>NGINX</strong> plugin and set the DNS resolvers to <code>127.0.0.1</code>.</p>
+<p>Navigate to the <strong>Global Settings</strong> page, select the <strong>NGINX</strong> plugin and set the DNS resolvers to <code>127.0.0.1</code>.</p>
 <p><figure markdown><img align="center" alt="DNS resolvers setting using web UI" src="../assets/img/advanced-dns-resolvers2.png" /><figcaption>DNS resolvers setting using web UI</figcaption></figure></p>
 </div>
 <div class="tabbed-block">
@@ -2745,7 +2745,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <p><strong>Using labels</strong></p>
 <div class="admonition warning">
 <p class="admonition-title">Limitations using labels</p>
-<p>When using labels with the Docker autoconf integration, you can only apply custom configurations for the corresponding web service. Applying <strong>http</strong>, <strong>default-server-http</strong>, <strong>stream</strong> or any global configurations (like <strong>server-http</strong> or <strong>server-stream</strong> for all services) is not possible : you will need to mount files for that purpose.</p>
+<p>When using labels with the Docker autoconf integration, you can only apply custom configurations for the corresponding web service. Applying <strong>http</strong>, <strong>default-server-http</strong>, <strong>stream</strong> or any global settings (like <strong>server-http</strong> or <strong>server-stream</strong> for all services) is not possible : you will need to mount files for that purpose.</p>
 </div>
 <p>The labels to use must follow the pattern <code>bunkerweb.CUSTOM_CONF_&lt;TYPE&gt;_&lt;NAME&gt;</code> :</p>
 <ul>
@@ -4027,7 +4027,7 @@ ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">redis</span><span class="p">:</span><span class="w"> </span><span class="c1"># Redis service for the persistence of reports/bans/stats</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:8-alpine</span>
 <span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
 <span class="w">      </span><span class="no">redis-server</span>
 <span class="w">      </span><span class="no">--maxmemory 256mb</span>
@@ -4137,7 +4137,7 @@ log {
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div>
 <p>This configuration ensures that logs are rotated, preventing them from filling up your disk. You can apply this to any service in your Docker Compose setup.</p>
-<p><strong>Global configuration (daemon.json)</strong></p>
+<p><strong>Global settings (daemon.json)</strong></p>
 <p>If you want to apply these logging settings to all containers on the host by default, you can configure the Docker daemon by editing (or creating) the <code>/etc/docker/daemon.json</code> file:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;log-driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;json-file&quot;</span><span class="p">,</span>
@@ -4150,7 +4150,7 @@ log {
 <p>After modifying <code>daemon.json</code>, you need to restart the Docker daemon for the changes to take effect:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>docker
 </code></pre></div>
-<p>This global configuration will be inherited by all containers. However, any logging configuration defined on a per-service basis in a <code>docker-compose.yml</code> file will override the global settings in <code>daemon.json</code>.</p>
+<p>These global settings will be inherited by all containers. However, any logging configuration defined on a per-service basis in a <code>docker-compose.yml</code> file will override the global settings in <code>daemon.json</code>.</p>
 <h2 id="security-tuning">Security tuning</h2>
 <p>BunkerWeb offers many security features that you can configure with <a href="../features/">features</a>. Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.</p>
 <div class="admonition tip">

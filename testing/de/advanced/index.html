@@ -1614,7 +1614,7 @@
 <div class="tabbed-set tabbed-alternate" data-tabs="2:7"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><input id="__tabbed_2_6" name="__tabbed_2" type="radio" /><input id="__tabbed_2_7" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Web-UI</label><label for="__tabbed_2_2">Linux</label><label for="__tabbed_2_3">All-in-one</label><label for="__tabbed_2_4">Docker</label><label for="__tabbed_2_5">Docker autoconf</label><label for="__tabbed_2_6">Kubernetes</label><label for="__tabbed_2_7">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>Navigieren Sie zur Seite <strong>Globale Konfiguration</strong>, wählen Sie das Plugin <strong>Real IP</strong> und füllen Sie die folgenden Einstellungen aus:</p>
+<p>Navigieren Sie zur Seite <strong>Globale Einstellungen</strong>, wählen Sie das Plugin <strong>Real IP</strong> und füllen Sie die folgenden Einstellungen aus:</p>
 <p><figure markdown><img align="center" alt="Real IP Einstellungen (Header) mit Web-UI" src="../../assets/img/advanced-proxy1.png" /><figcaption>Real IP Einstellungen (Header) mit Web-UI</figcaption></figure></p>
 <p>Bitte beachten Sie, dass es empfohlen wird, BunkerWeb neu zu starten, wenn Sie Einstellungen im Zusammenhang mit der echten IP ändern.</p>
 </div>
@@ -1751,7 +1751,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <div class="tabbed-set tabbed-alternate" data-tabs="3:7"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><input id="__tabbed_3_4" name="__tabbed_3" type="radio" /><input id="__tabbed_3_5" name="__tabbed_3" type="radio" /><input id="__tabbed_3_6" name="__tabbed_3" type="radio" /><input id="__tabbed_3_7" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Web-UI</label><label for="__tabbed_3_2">Linux</label><label for="__tabbed_3_3">All-in-one</label><label for="__tabbed_3_4">Docker</label><label for="__tabbed_3_5">Docker autoconf</label><label for="__tabbed_3_6">Kubernetes</label><label for="__tabbed_3_7">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>Navigieren Sie zur Seite <strong>Globale Konfiguration</strong>, wählen Sie das Plugin <strong>Real IP</strong> und füllen Sie die folgenden Einstellungen aus:</p>
+<p>Navigieren Sie zur Seite <strong>Globale Einstellungen</strong>, wählen Sie das Plugin <strong>Real IP</strong> und füllen Sie die folgenden Einstellungen aus:</p>
 <p><figure markdown><img align="center" alt="Real IP Einstellungen (PROXY-Protokoll) mit Web-UI" src="../../assets/img/advanced-proxy2.png" /><figcaption>Real IP Einstellungen (PROXY-Protokoll) mit Web-UI</figcaption></figure></p>
 <p>Bitte beachten Sie, dass es empfohlen wird, BunkerWeb neu zu starten, wenn Sie Einstellungen im Zusammenhang mit der echten IP ändern.</p>
 </div>
@@ -2176,7 +2176,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">redis</span><span class="p">:</span><span class="w"> </span><span class="c1"># Redis zur Persistenz von Reports/Bans/Stats</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:8-alpine</span>
 <span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
 <span class="w">      </span><span class="no">redis-server</span>
 <span class="w">      </span><span class="no">--maxmemory 256mb</span>
@@ -2425,7 +2425,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Web-UI</label><label for="__tabbed_11_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>Navigieren Sie zur Seite <strong>Globale Konfiguration</strong> und setzen Sie die DNS-Resolver auf <code>127.0.0.53</code></p>
+<p>Navigieren Sie zur Seite <strong>Globale Einstellungen</strong> und setzen Sie die DNS-Resolver auf <code>127.0.0.53</code></p>
 <p><figure markdown><img align="center" alt="DNS-Resolver-Einstellung mit Web-UI" src="../../assets/img/advanced-dns-resolvers.png" /><figcaption>DNS-Resolver-Einstellung mit Web-UI</figcaption></figure></p>
 </div>
 <div class="tabbed-block">
@@ -2486,7 +2486,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">en
 <div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Web-UI</label><label for="__tabbed_14_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>Navigieren Sie zur Seite <strong>Globale Konfiguration</strong>, wählen Sie das <strong>NGINX</strong>-Plugin und setzen Sie die DNS-Resolver auf <code>127.0.0.1</code>.</p>
+<p>Navigieren Sie zur Seite <strong>Globale Einstellungen</strong>, wählen Sie das <strong>NGINX</strong>-Plugin und setzen Sie die DNS-Resolver auf <code>127.0.0.1</code>.</p>
 <p><figure markdown><img align="center" alt="DNS-Resolver-Einstellung mit Web-UI" src="../../assets/img/advanced-dns-resolvers2.png" /><figcaption>DNS-Resolver-Einstellung mit Web-UI</figcaption></figure></p>
 </div>
 <div class="tabbed-block">
@@ -4028,7 +4028,7 @@ LOG_LEVEL_1=error
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">redis</span><span class="p">:</span><span class="w"> </span><span class="c1"># Redis-Dienst zur Persistenz von Reports/Sperren/Statistiken</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:8-alpine</span>
 <span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
 <span class="w">      </span><span class="no">redis-server</span>
 <span class="w">      </span><span class="no">--maxmemory 256mb</span>
@@ -4138,7 +4138,7 @@ log {
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div>
 <p>Diese Konfiguration stellt sicher, dass die Protokolle rotiert werden, und verhindert, dass sie Ihre Festplatte füllen. Sie können dies auf jeden Dienst in Ihrer Docker Compose-Einrichtung anwenden.</p>
-<p><strong>Globale Konfiguration (daemon.json)</strong></p>
+<p><strong>Globale Einstellungen (daemon.json)</strong></p>
 <p>Wenn Sie diese Protokollierungseinstellungen standardmäßig auf alle Container auf dem Host anwenden möchten, können Sie den Docker-Daemon konfigurieren, indem Sie die Datei <code>/etc/docker/daemon.json</code> bearbeiten (oder erstellen):</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;log-driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;json-file&quot;</span><span class="p">,</span>
@@ -4151,7 +4151,7 @@ log {
 <p>Nachdem Sie <code>daemon.json</code> geändert haben, müssen Sie den Docker-Daemon neu starten, damit die Änderungen wirksam werden:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>docker
 </code></pre></div>
-<p>Diese globale Konfiguration wird von allen Containern übernommen. Jede pro Dienst in einer <code>docker-compose.yml</code>-Datei definierte Protokollierungskonfiguration überschreibt jedoch die globalen Einstellungen in <code>daemon.json</code>.</p>
+<p>Diese globalen Einstellungen werden von allen Containern übernommen. Jede pro Dienst in einer <code>docker-compose.yml</code>-Datei definierte Protokollierungskonfiguration überschreibt jedoch die globalen Einstellungen in <code>daemon.json</code>.</p>
 <h2 id="security-tuning">Sicherheits-Tuning</h2>
 <p>BunkerWeb bietet viele Sicherheitsfunktionen, die Sie mit <a href="../features/">Features</a> konfigurieren können. Auch wenn die Standardwerte der Einstellungen eine minimale "Sicherheit von Haus aus" gewährleisten, empfehlen wir dringend, sie anzupassen. Dadurch können Sie das Sicherheitsniveau Ihrer Wahl sicherstellen und auch Fehlalarme verwalten.</p>
 <div class="admonition tip">

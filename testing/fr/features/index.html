@@ -1283,6 +1283,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#cache-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cache (PRO)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#client-cache" class="md-nav__link">
     <span class="md-ellipsis">
       Client cache
@@ -1447,6 +1456,15 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-pages-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Pages (PRO)
+    </span>
+  </a>
   
 </li>
       
@@ -2343,6 +2361,57 @@
   <a href="#exemples_16" class="md-nav__link">
     <span class="md-ellipsis">
       Exemples
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bonnes-pratiques-redis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bonnes pratiques Redis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Bonnes pratiques Redis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gestion-de-la-memoire" class="md-nav__link">
+    <span class="md-ellipsis">
+      Gestion de la mémoire
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#persistance-des-donnees" class="md-nav__link">
+    <span class="md-ellipsis">
+      Persistance des données
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optimisation-des-performances" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optimisation des performances
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ressources-supplementaires" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ressources supplémentaires
     </span>
   </a>
   
@@ -4146,7 +4215,7 @@ Pour la nouvelle version, créez une clé reCAPTCHA dans votre projet Google Clo
 <td><code>sitewide</code></td>
 <td>multisite</td>
 <td>non</td>
-<td>Portée : <code>sitewide</code> ou un chemin (ex. <code>/admin</code>).</td>
+<td>Portée : <code>sitewide</code> ou un chemin (ex. <code>/admin</code>). Vous pouvez également utiliser des modificateurs de style Nginx (<code>=</code>, <code>~</code>, <code>~*</code>, <code>^~</code>).</td>
 </tr>
 <tr>
 <td><code>AUTH_BASIC_USER</code></td>
@@ -4160,7 +4229,7 @@ Pour la nouvelle version, créez une clé reCAPTCHA dans votre projet Google Clo
 <td><code>changeme</code></td>
 <td>multisite</td>
 <td>oui</td>
-<td>Mot de passe. Les mots de passe sont hachés avec bcrypt pour une sécurité maximale.</td>
+<td>Mot de passe. Les mots de passe sont hachés avec scrypt pour une sécurité maximale.</td>
 </tr>
 <tr>
 <td><code>AUTH_BASIC_TEXT</code></td>
@@ -4425,7 +4494,7 @@ BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
 <li>Codes à compter : <code>BAD_BEHAVIOR_STATUS_CODES</code>.</li>
 <li>Seuil : <code>BAD_BEHAVIOR_THRESHOLD</code>.</li>
 <li>Fenêtre et durée de ban : <code>BAD_BEHAVIOR_COUNT_TIME</code>, <code>BAD_BEHAVIOR_BAN_TIME</code>.</li>
-<li>Portée : <code>BAD_BEHAVIOR_BAN_SCOPE</code> (<code>service</code> ou <code>global</code>).</li>
+<li>Portée : <code>BAD_BEHAVIOR_BAN_SCOPE</code> (<code>service</code> ou <code>global</code>). Quand le trafic arrive sur le serveur par défaut (nom de serveur <code>_</code>), les bans sont toujours appliqués globalement pour bloquer l’IP partout.</li>
 </ol>
 <div class="admonition tip">
 <p class="admonition-title">Mode stream</p>
@@ -4483,7 +4552,7 @@ BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
 <td><code>service</code></td>
 <td>global</td>
 <td>non</td>
-<td>Portée du ban : site courant (<code>service</code>) ou global (<code>global</code>).</td>
+<td>Portée du ban : site courant (<code>service</code>) ou global (<code>global</code>). Sur le serveur par défaut (<code>_</code>), les bans sont toujours globaux.</td>
 </tr>
 </tbody>
 </table>
@@ -5273,6 +5342,134 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
+<h2 id="cache-pro">Cache <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p>Prise en charge STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
+<p>Provides caching functionality at the reverse proxy level.</p>
+<table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Valeur par défaut</th>
+<th>Contexte</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CACHE_PATH</code></td>
+<td></td>
+<td>global</td>
+<td>oui</td>
+<td>Path and parameters for a cache.</td>
+</tr>
+<tr>
+<td><code>CACHE_ZONE</code></td>
+<td></td>
+<td>multisite</td>
+<td>non</td>
+<td>Name of cache zone to use (specified in a CACHE_PATH setting).</td>
+</tr>
+<tr>
+<td><code>CACHE_HEADER</code></td>
+<td><code>X-Cache</code></td>
+<td>multisite</td>
+<td>non</td>
+<td>Add header about cache status.</td>
+</tr>
+<tr>
+<td><code>CACHE_BACKGROUND_UPDATE</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>non</td>
+<td>Enable or disable background update of the cache.</td>
+</tr>
+<tr>
+<td><code>CACHE_BYPASS</code></td>
+<td></td>
+<td>multisite</td>
+<td>non</td>
+<td>List of variables to determine if the cache should be bypassed or not.</td>
+</tr>
+<tr>
+<td><code>CACHE_NO_CACHE</code></td>
+<td><code>$http_pragma$http_authorization</code></td>
+<td>multisite</td>
+<td>non</td>
+<td>Disable caching if variables are set.</td>
+</tr>
+<tr>
+<td><code>CACHE_KEY</code></td>
+<td><code>$scheme$proxy_host$request_uri</code></td>
+<td>multisite</td>
+<td>non</td>
+<td>Key used to identify cached elements.</td>
+</tr>
+<tr>
+<td><code>CACHE_CONVERT_HEAD_TO_GET</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>non</td>
+<td>Convert HEAD requests to GET when caching.</td>
+</tr>
+<tr>
+<td><code>CACHE_LOCK</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>non</td>
+<td>Lock concurrent requests when populating the cache.</td>
+</tr>
+<tr>
+<td><code>CACHE_LOCK_AGE</code></td>
+<td><code>5s</code></td>
+<td>multisite</td>
+<td>non</td>
+<td>Pass request to upstream if cache is locked for that time (possible cache).</td>
+</tr>
+<tr>
+<td><code>CACHE_LOCK_TIMEOUT</code></td>
+<td><code>5s</code></td>
+<td>multisite</td>
+<td>non</td>
+<td>Pass request to upstream if cache is locked for that time (no cache).</td>
+</tr>
+<tr>
+<td><code>CACHE_METHODS</code></td>
+<td><code>GET HEAD</code></td>
+<td>multisite</td>
+<td>non</td>
+<td>Only cache response if corresponding method is present.</td>
+</tr>
+<tr>
+<td><code>CACHE_MIN_USES</code></td>
+<td><code>1</code></td>
+<td>multisite</td>
+<td>non</td>
+<td>Number of requests before we put the corresponding response in cache.</td>
+</tr>
+<tr>
+<td><code>CACHE_REVALIDATE</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>non</td>
+<td>Revalidate expired items using conditional requests to upstream.</td>
+</tr>
+<tr>
+<td><code>CACHE_USE_STALE</code></td>
+<td><code>off</code></td>
+<td>multisite</td>
+<td>non</td>
+<td>Determines the use of staled cache response (proxy_cache_use_stale directive).</td>
+</tr>
+<tr>
+<td><code>CACHE_VALID</code></td>
+<td><code>10m</code></td>
+<td>multisite</td>
+<td>oui</td>
+<td>Defines default caching with optional status code.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="client-cache">Client cache</h2>
 <p>Prise en charge STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Le plugin Client Cache optimise les performances en contrôlant la mise en cache des contenus statiques par les navigateurs. Il réduit la bande passante, la charge serveur et accélère les temps de chargement en instruisant les navigateurs à conserver localement images, CSS, JS, etc., plutôt que de les retélécharger à chaque visite.</p>
@@ -5831,6 +6028,78 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li>Côté CrowdSec, surveillez <code>cscli metrics show</code> ou la console CrowdSec pour vous assurer que les décisions BunkerWeb apparaissent comme prévu.</li>
 <li>Dans l’interface BunkerWeb, ouvrez la page du plugin CrowdSec pour voir l’état de l’intégration.</li>
 </ul>
+<h2 id="custom-pages-pro">Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p>Prise en charge STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
+<p>Tweak BunkerWeb error/antibot/default pages with custom HTML.</p>
+<table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Valeur par défaut</th>
+<th>Contexte</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CUSTOM_ERROR_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>non</td>
+<td>Full path of the custom error page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_DEFAULT_SERVER_PAGE</code></td>
+<td></td>
+<td>global</td>
+<td>non</td>
+<td>Full path of the custom default server page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_CAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>non</td>
+<td>Full path of the custom antibot captcha page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_JAVASCRIPT_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>non</td>
+<td>Full path of the custom antibot javascript check page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_RECAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>non</td>
+<td>Full path of the custom antibot recaptcha page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_HCAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>non</td>
+<td>Full path of the custom antibot hcaptcha page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_TURNSTILE_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>non</td>
+<td>Full path of the custom antibot turnstile page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_MCAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>non</td>
+<td>Full path of the custom antibot mcaptcha page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+</tbody>
+</table>
 <h2 id="custom-ssl-certificate">Custom SSL certificate</h2>
 <p>Prise en charge STREAM <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Le plugin Certificat SSL personnalisé permet d’utiliser vos propres certificats SSL/TLS avec BunkerWeb, au lieu de ceux générés automatiquement. Utile si vous possédez déjà des certificats d’une AC de confiance, avez des besoins spécifiques ou centralisez la gestion des certificats.</p>
@@ -8450,7 +8719,7 @@ OPEN_FILE_CACHE_VALID: "60s"</p>
 <p>Sélectionnez une version du CRS pour répondre au mieux à vos besoins de sécurité :</p>
 <ul>
 <li><strong><code>3</code></strong> : Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7">v3.3.7</a>.</li>
-<li><strong><code>4</code></strong> : Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.20.0">v4.20.0</a> (<strong>par défaut</strong>).</li>
+<li><strong><code>4</code></strong> : Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.21.0">v4.21.0</a> (<strong>par défaut</strong>).</li>
 <li><strong><code>nightly</code></strong> : <a href="https://github.com/coreruleset/coreruleset/releases/tag/nightly">Version de nuit</a> offrant les dernières mises à jour de règles.</li>
 </ul>
 <div class="admonition example">
@@ -9149,27 +9418,33 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><code>no</code></td>
 <td>multisite</td>
 <td>oui</td>
-<td>Conserver le chemin d’origine en l’ajoutant à l’URL de destination.</td>
+<td>Conserver le chemin d'origine en l'ajoutant à l'URL de destination.</td>
 </tr>
 <tr>
 <td><code>REDIRECT_TO_STATUS_CODE</code></td>
 <td><code>301</code></td>
 <td>multisite</td>
 <td>oui</td>
-<td>Code de statut HTTP : <code>301</code> (permanent) ou <code>302</code> (temporaire).</td>
+<td>Code HTTP : <code>301</code>, <code>302</code>, <code>303</code>, <code>307</code> ou <code>308</code>.</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition tip">
 <p class="admonition-title">Choisir le bon code</p>
-<p><code>301</code> pour une redirection permanente (migrations, canonicals). <code>302</code> pour temporaire.</p>
+<ul>
+<li><strong><code>301</code> (Moved Permanently) :</strong> Redirection permanente, mise en cache par les navigateurs. Peut changer POST en GET. Idéal pour migrations de domaine.</li>
+<li><strong><code>302</code> (Found) :</strong> Redirection temporaire. Peut changer POST en GET.</li>
+<li><strong><code>303</code> (See Other) :</strong> Redirige toujours en GET. Utile après soumission de formulaire.</li>
+<li><strong><code>307</code> (Temporary Redirect) :</strong> Redirection temporaire qui préserve la méthode HTTP. Idéal pour les APIs.</li>
+<li><strong><code>308</code> (Permanent Redirect) :</strong> Redirection permanente qui préserve la méthode HTTP. Pour migrations d'API permanentes.</li>
+</ul>
 </div>
 <div class="admonition info">
 <p class="admonition-title">Conservation du chemin</p>
 <p>Avec <code>REDIRECT_TO_REQUEST_URI: yes</code>, <code>/blog/post-1</code> vers <code>https://new.com</code> devient <code>https://new.com/blog/post-1</code>.</p>
 </div>
 <h3 id="exemples_15">Exemples</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="36:5"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><input id="__tabbed_36_5" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">Multiples chemins</label><label for="__tabbed_36_2">Domaine entier</label><label for="__tabbed_36_3">Conserver le chemin</label><label for="__tabbed_36_4">Temporaire</label><label for="__tabbed_36_5">Sous‑domaine → chemin</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="36:7"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><input id="__tabbed_36_5" name="__tabbed_36" type="radio" /><input id="__tabbed_36_6" name="__tabbed_36" type="radio" /><input id="__tabbed_36_7" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">Multiples chemins</label><label for="__tabbed_36_2">Domaine entier</label><label for="__tabbed_36_3">Conserver le chemin</label><label for="__tabbed_36_4">Temporaire</label><label for="__tabbed_36_5">Sous‑domaine → chemin</label><label for="__tabbed_36_6">Migration API</label><label for="__tabbed_36_7">Après soumission de formulaire</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">REDIRECT_FROM</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/blog/&quot;</span>
@@ -9210,6 +9485,19 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <div class="highlight"><pre><span></span><code><span class="nt">REDIRECT_TO</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/support&quot;</span>
 <span class="nt">REDIRECT_TO_REQUEST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">REDIRECT_TO_STATUS_CODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;301&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="nt">REDIRECT_FROM</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/api/v1/&quot;</span>
+<span class="nt">REDIRECT_TO</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://api.example.com/v2/&quot;</span>
+<span class="nt">REDIRECT_TO_REQUEST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">REDIRECT_TO_STATUS_CODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;308&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="nt">REDIRECT_TO</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/merci&quot;</span>
+<span class="nt">REDIRECT_TO_REQUEST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
+<span class="nt">REDIRECT_TO_STATUS_CODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;303&quot;</span>
 </code></pre></div>
 </div>
 </div>
@@ -9356,17 +9644,36 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">Haute disponibilité</p>
 <p>Configurez Redis Sentinel pour un failover automatique en production.</p>
 </div>
-<p>!!! warning "Sécurité" - Mots de passe forts pour Redis et Sentinel - Envisagez SSL/TLS - Ne pas exposer Redis sur Internet - Restreignez l’accès au port Redis (pare‑feu, segmentation)</p>
+<div class="admonition warning">
+<p class="admonition-title">Sécurité</p>
+<ul>
+<li>Mots de passe forts pour Redis et Sentinel</li>
+<li>Envisagez SSL/TLS</li>
+<li>Ne pas exposer Redis sur Internet</li>
+<li>Restreignez l’accès au port Redis (pare‑feu, segmentation)</li>
+</ul>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Prérequis pour le clustering</p>
+<p>Lors du déploiement de BunkerWeb en cluster :</p>
+<ul>
+<li>Toutes les instances BunkerWeb doivent se connecter au même serveur Redis/Valkey ou cluster Sentinel</li>
+<li>Configurez le même numéro de base de données sur toutes les instances</li>
+<li>Assurez-vous de la connectivité réseau entre toutes les instances BunkerWeb et les serveurs Redis/Valkey</li>
+</ul>
+</div>
 <h3 id="exemples_16">Exemples</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="37:4"><input checked="checked" id="__tabbed_37_1" name="__tabbed_37" type="radio" /><input id="__tabbed_37_2" name="__tabbed_37" type="radio" /><input id="__tabbed_37_3" name="__tabbed_37" type="radio" /><input id="__tabbed_37_4" name="__tabbed_37" type="radio" /><div class="tabbed-labels"><label for="__tabbed_37_1">Configuration basique</label><label for="__tabbed_37_2">Configuration sécurisée</label><label for="__tabbed_37_3">Redis Sentinel</label><label for="__tabbed_37_4">Tuning avancé</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
+<p>Une configuration simple pour se connecter à un serveur Redis ou Valkey sur la machine locale :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">REDIS_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;localhost&quot;</span>
 <span class="nt">REDIS_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;6379&quot;</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
+<p>Configuration avec authentification par mot de passe et SSL activé :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">REDIS_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;redis.example.com&quot;</span>
 <span class="nt">REDIS_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;6379&quot;</span>
@@ -9376,6 +9683,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </code></pre></div>
 </div>
 <div class="tabbed-block">
+<p>Configuration pour la haute disponibilité utilisant Redis Sentinel :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">REDIS_SENTINEL_HOSTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sentinel1:26379</span><span class="nv"> </span><span class="s">sentinel2:26379</span><span class="nv"> </span><span class="s">sentinel3:26379&quot;</span>
 <span class="nt">REDIS_SENTINEL_MASTER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mymaster&quot;</span>
@@ -9384,6 +9692,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </code></pre></div>
 </div>
 <div class="tabbed-block">
+<p>Configuration avec des paramètres de connexion avancés pour l'optimisation des performances :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">REDIS_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;redis.example.com&quot;</span>
 <span class="nt">REDIS_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;6379&quot;</span>
@@ -9396,6 +9705,34 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 </div>
+<h3 id="bonnes-pratiques-redis">Bonnes pratiques Redis</h3>
+<p>Lorsque vous utilisez Redis ou Valkey avec BunkerWeb, prenez en compte ces bonnes pratiques pour garantir des performances, une sécurité et une fiabilité optimales :</p>
+<h4 id="gestion-de-la-memoire">Gestion de la mémoire</h4>
+<ul>
+<li><strong>Surveillez l'utilisation de la mémoire :</strong> Configurez Redis avec des paramètres <code>maxmemory</code> appropriés pour éviter les erreurs de mémoire insuffisante</li>
+<li><strong>Définissez une politique d'éviction :</strong> Utilisez une <code>maxmemory-policy</code> (par exemple, <code>volatile-lru</code> ou <code>allkeys-lru</code>) adaptée à votre cas d'utilisation</li>
+<li><strong>Évitez les clés volumineuses :</strong> Assurez-vous que les clés Redis individuelles restent d'une taille raisonnable pour éviter la dégradation des performances</li>
+</ul>
+<h4 id="persistance-des-donnees">Persistance des données</h4>
+<ul>
+<li><strong>Activez les instantanés RDB :</strong> Configurez des instantanés périodiques pour la persistance des données sans impact significatif sur les performances</li>
+<li><strong>Envisagez AOF :</strong> Pour les données critiques, activez la persistance AOF (Append-Only File) avec une politique fsync appropriée</li>
+<li><strong>Stratégie de sauvegarde :</strong> Mettez en œuvre des sauvegardes régulières de Redis dans le cadre de votre plan de reprise après sinistre</li>
+</ul>
+<h4 id="optimisation-des-performances">Optimisation des performances</h4>
+<ul>
+<li><strong>Pooling de connexions :</strong> BunkerWeb l'implémente déjà, mais assurez-vous que les autres applications suivent cette pratique</li>
+<li><strong>Pipelining :</strong> Lorsque c'est possible, utilisez le pipelining pour les opérations en masse afin de réduire la surcharge réseau</li>
+<li><strong>Évitez les opérations coûteuses :</strong> Soyez prudent avec les commandes comme KEYS dans les environnements de production</li>
+<li><strong>Testez votre charge de travail :</strong> Utilisez redis-benchmark pour tester vos modèles de charge de travail spécifiques</li>
+</ul>
+<h3 id="ressources-supplementaires">Ressources supplémentaires</h3>
+<ul>
+<li><a href="https://redis.io/documentation">Documentation Redis</a></li>
+<li><a href="https://redis.io/topics/security">Guide de sécurité Redis</a></li>
+<li><a href="https://redis.io/topics/sentinel">Haute disponibilité Redis</a></li>
+<li><a href="https://redis.io/topics/persistence">Persistance Redis</a></li>
+</ul>
 <h2 id="reporting-pro">Reporting <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Prise en charge STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.</p>
@@ -10418,6 +10755,13 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td>multisite</td>
 <td>non</td>
 <td>Suites personnalisées (liste séparée par <code>:</code>) qui remplacent le niveau.</td>
+</tr>
+<tr>
+<td><code>SSL_SESSION_CACHE_SIZE</code></td>
+<td><code>10m</code></td>
+<td>multisite</td>
+<td>non</td>
+<td>Taille du cache de session SSL (ex. <code>10m</code>, <code>512k</code>). Définir à <code>off</code> ou <code>none</code> pour désactiver.</td>
 </tr>
 </tbody>
 </table>

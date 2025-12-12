@@ -2176,7 +2176,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">redis</span><span class="p">:</span><span class="w"> </span><span class="c1"># Redis para la persistencia de informes/prohibiciones/estadísticas</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:8-alpine</span>
 <span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
 <span class="w">      </span><span class="no">redis-server</span>
 <span class="w">      </span><span class="no">--maxmemory 256mb</span>
@@ -2732,7 +2732,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <p><strong>Usando etiquetas</strong></p>
 <div class="admonition warning">
 <p class="admonition-title">Limitaciones al usar etiquetas</p>
-<p>Cuando usas etiquetas con la integración de autoconfiguración de Docker, solo puedes aplicar configuraciones personalizadas para el servicio web correspondiente. No es posible aplicar configuraciones <strong>http</strong>, <strong>default-server-http</strong>, <strong>stream</strong> o cualquier configuración global (como <strong>server-http</strong> o <strong>server-stream</strong> para todos los servicios): necesitarás montar archivos para ese propósito.</p>
+<p>Cuando usas etiquetas con la integración de autoconfiguración de Docker, solo puedes aplicar configuraciones personalizadas para el servicio web correspondiente. No es posible aplicar configuraciones <strong>http</strong>, <strong>default-server-http</strong>, <strong>stream</strong> o cualquier ajuste global (como <strong>server-http</strong> o <strong>server-stream</strong> para todos los servicios): necesitarás montar archivos para ese propósito.</p>
 </div>
 <p>Las etiquetas a usar deben seguir el patrón <code>bunkerweb.CUSTOM_CONF_&lt;TYPE&gt;_&lt;NAME&gt;</code>:</p>
 <ul>
@@ -2834,7 +2834,7 @@ El controlador de Ingress de autoconf lee cada entrada de <code>data</code> y la
 <span class="w">    </span><span class="nt">bunkerweb.io/CONFIG_TYPE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;settings&quot;</span>
 <span class="nt">data</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">USE_ANTIBOT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;captcha&quot;</span><span class="w"> </span><span class="c1"># configuración multisitio que se aplicará a todos los servicios que no la sobrescriban</span>
-<span class="w">  </span><span class="nt">USE_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"> </span><span class="c1"># configuración global que se aplicará globalmente</span>
+<span class="w">  </span><span class="nt">USE_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w"> </span><span class="c1"># ajuste global que se aplicará globalmente</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div>
 </div>
@@ -4015,7 +4015,7 @@ LOG_LEVEL_1=error
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">redis</span><span class="p">:</span><span class="w"> </span><span class="c1"># Servicio Redis para la persistencia de reportes/bloqueos/estadísticas</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:8-alpine</span>
 <span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
 <span class="w">      </span><span class="no">redis-server</span>
 <span class="w">      </span><span class="no">--maxmemory 256mb</span>
@@ -4125,7 +4125,7 @@ log {
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div>
 <p>Esta configuración asegura que los registros se roten, evitando que llenen su disco. Puede aplicar esto a cualquier servicio en su configuración de Docker Compose.</p>
-<p><strong>Configuración global (daemon.json)</strong></p>
+<p><strong>Ajustes globales (daemon.json)</strong></p>
 <p>Si desea aplicar esta configuración de registro a todos los contenedores en el host por defecto, puede configurar el demonio de Docker editando (o creando) el archivo <code>/etc/docker/daemon.json</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;log-driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;json-file&quot;</span><span class="p">,</span>
@@ -4138,7 +4138,7 @@ log {
 <p>Después de modificar <code>daemon.json</code>, debe reiniciar el demonio de Docker para que los cambios surtan efecto:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>docker
 </code></pre></div>
-<p>Esta configuración global será heredada por todos los contenedores. Sin embargo, cualquier configuración de registro definida por servicio en un archivo <code>docker-compose.yml</code> anulará la configuración global en <code>daemon.json</code>.</p>
+<p>Estos ajustes globales serán heredados por todos los contenedores. Sin embargo, cualquier configuración de registro definida por servicio en un archivo <code>docker-compose.yml</code> anulará los ajustes globales en <code>daemon.json</code>.</p>
 <h2 id="security-tuning">Ajuste de seguridad</h2>
 <p>BunkerWeb ofrece muchas características de seguridad que puedes configurar con <a href="../features/">características</a>. Aunque los valores predeterminados de las configuraciones aseguran una "seguridad por defecto" mínima, te recomendamos encarecidamente que los ajustes. Al hacerlo, podrás asegurar el nivel de seguridad de tu elección y también gestionar los falsos positivos.</p>
 <div class="admonition tip">

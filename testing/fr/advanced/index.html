@@ -2176,7 +2176,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">redis</span><span class="p">:</span><span class="w"> </span><span class="c1"># Redis pour la persistance des rapports/bannissements/stats</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:8-alpine</span>
 <span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
 <span class="w">      </span><span class="no">redis-server</span>
 <span class="w">      </span><span class="no">--maxmemory 256mb</span>
@@ -2745,7 +2745,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <p><strong>Utilisation des étiquettes</strong></p>
 <div class="admonition warning">
 <p class="admonition-title">Limitations de l'utilisation des étiquettes</p>
-<p>Lorsque vous utilisez des étiquettes avec l'intégration Docker autoconf, vous ne pouvez appliquer des configurations personnalisées que pour le service web correspondant. L'application de <strong>http</strong>, <strong>default-server-http</strong>, <strong>stream</strong> ou de toute configuration globale (comme <strong>server-http</strong> ou <strong>server-stream</strong> pour tous les services) n'est pas possible : vous devrez monter des fichiers à cet effet.</p>
+<p>Lorsque vous utilisez des étiquettes avec l'intégration Docker autoconf, vous ne pouvez appliquer des configurations personnalisées que pour le service web correspondant. L'application de <strong>http</strong>, <strong>default-server-http</strong>, <strong>stream</strong> ou de tout paramètre global (comme <strong>server-http</strong> ou <strong>server-stream</strong> pour tous les services) n'est pas possible : vous devrez monter des fichiers à cet effet.</p>
 </div>
 <p>Les étiquettes à utiliser doivent suivre le modèle <code>bunkerweb.CUSTOM_CONF_&lt;TYPE&gt;_&lt;NAME&gt;</code> :</p>
 <ul>
@@ -4027,7 +4027,7 @@ LOG_LEVEL_1=error
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">redis</span><span class="p">:</span><span class="w"> </span><span class="c1"># Service Redis pour la persistance des rapports/bans/statistiques</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:8-alpine</span>
 <span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
 <span class="w">      </span><span class="no">redis-server</span>
 <span class="w">      </span><span class="no">--maxmemory 256mb</span>
@@ -4137,7 +4137,7 @@ log {
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div>
 <p>Cette configuration garantit la rotation des journaux, les empêchant de remplir votre disque. Vous pouvez l'appliquer à n'importe quel service de votre configuration Docker Compose.</p>
-<p><strong>Configuration globale (daemon.json)</strong></p>
+<p><strong>Paramètres globaux (daemon.json)</strong></p>
 <p>Si vous souhaitez appliquer ces paramètres de journalisation à tous les conteneurs de l'hôte par défaut, vous pouvez configurer le démon Docker en modifiant (ou en créant) le fichier <code>/etc/docker/daemon.json</code> :</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;log-driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;json-file&quot;</span><span class="p">,</span>
@@ -4150,7 +4150,7 @@ log {
 <p>Après avoir modifié <code>daemon.json</code>, vous devez redémarrer le démon Docker pour que les modifications prennent effet :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>docker
 </code></pre></div>
-<p>Cette configuration globale sera héritée par tous les conteneurs. Cependant, toute configuration de journalisation définie par service dans un fichier <code>docker-compose.yml</code> remplacera les paramètres globaux dans <code>daemon.json</code>.</p>
+<p>Ces paramètres globaux seront hérités par tous les conteneurs. Cependant, toute configuration de journalisation définie par service dans un fichier <code>docker-compose.yml</code> remplacera les paramètres globaux dans <code>daemon.json</code>.</p>
 <h2 id="security-tuning">Réglage de la sécurité</h2>
 <p>BunkerWeb offre de nombreuses fonctionnalités de sécurité que vous pouvez configurer avec les <a href="../features/">fonctionnalités</a>. Même si les valeurs par défaut des paramètres assurent une "sécurité par défaut" minimale, nous vous recommandons vivement de les régler. Ce faisant, vous serez en mesure de vous assurer du niveau de sécurité de votre choix, mais aussi de gérer les faux positifs.</p>
 <div class="admonition tip">

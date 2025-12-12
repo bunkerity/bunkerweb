@@ -1186,7 +1186,7 @@ app2.example.com_USE_ANTIBOT=cookie
 app2.example.com_WHITELIST_COUNTRY=FR
 app3.example.com_USE_BAD_BEHAVIOR=no
 </code></pre></div>
-<p>Veuillez noter que le mode multisite est implicite lors de l'utilisation de l'interface utilisateur Web. Vous avez la possibilité d'appliquer des configurations directement à vos services ou de définir une configuration globale qui sera appliquée à tous vos services (vous pouvez toujours appliquer des exceptions directement à des services spécifiques):</p>
+<p>Veuillez noter que le mode multisite est implicite lors de l'utilisation de l'interface utilisateur Web. Vous avez la possibilité d'appliquer des configurations directement à vos services ou de définir des paramètres globaux qui seront appliqués à tous vos services (vous pouvez toujours appliquer des exceptions directement à des services spécifiques):</p>
 <figure>
 <p><img align="center," alt="Vue d'ensemble" src="../../assets/img/ui-multisite.png" width="600" />
   </p>
@@ -1262,21 +1262,21 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <tbody>
 <tr>
 <td style="text-align: left;"><strong>Docker</strong></td>
-<td style="text-align: left;">✅ <code>v17</code> et antérieures (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v18</code> et antérieures (all-in-one : ✅ <code>v17</code>)</td>
 <td style="text-align: left;">✅ <code>v11</code> et antérieures</td>
 <td style="text-align: left;">✅ <code>v9</code> et antérieures</td>
 <td style="text-align: left;">✅ Pris en charge</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Kubernetes</strong></td>
-<td style="text-align: left;">✅ <code>v17</code> et antérieures (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v18</code> et antérieures</td>
 <td style="text-align: left;">✅ <code>v11</code> et antérieures</td>
 <td style="text-align: left;">✅ <code>v9</code> et antérieures</td>
 <td style="text-align: left;">✅ Pris en charge</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Autoconf</strong></td>
-<td style="text-align: left;">✅ <code>v17</code> et antérieures (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v18</code> et antérieures</td>
 <td style="text-align: left;">✅ <code>v11</code> et antérieures</td>
 <td style="text-align: left;">✅ <code>v9</code> et antérieures</td>
 <td style="text-align: left;">✅ Pris en charge</td>
@@ -1293,7 +1293,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <div class="admonition info">
 <p class="admonition-title">Remarques</p>
 <ul>
-<li><strong>PostgreSQL</strong> : <code>v18</code> n'est pas pris en charge car les images de base Alpine que nous livrons n'incluent que les paquets clients <code>v17</code>.</li>
+<li><strong>PostgreSQL</strong> : les paquets basés sur Alpine incluent désormais le client <code>v18</code>, donc <code>v18</code> et les versions antérieures sont pris en charge par défaut ; l'image all-in-one embarque toujours le client <code>v17</code>, donc <code>v18</code> n'y est pas pris en charge.</li>
 <li><strong>Linux</strong> : La prise en charge dépend des paquets de votre distribution. Si nécessaire, vous pouvez installer les clients de base de données manuellement à partir des dépôts des fournisseurs (cela est généralement nécessaire pour RHEL).</li>
 <li><strong>SQLite</strong> : Est livré avec les paquets et est prêt à l'emploi.</li>
 </ul>
