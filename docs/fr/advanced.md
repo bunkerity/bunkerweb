@@ -501,14 +501,14 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
 
     2. **Choisissez l'option 2) Manager** et suivez les invites :
 
-        | Invite                     | Action                                                                                        |
-        | :------------------------- | :-------------------------------------------------------------------------------------------- |
-        | **Instances BunkerWeb**    | Saisissez les IP de vos nœuds worker séparées par des espaces (ex : `192.168.10.11 192.168.10.12`). |
-        | **Whitelist IP**           | Acceptez l'IP détectée ou saisissez un sous-réseau (ex : `192.168.10.0/24`) pour autoriser l'accès à l'API. |
-        | **Résolveurs DNS**         | Appuyez sur `N` pour la valeur par défaut ou fournissez les vôtres.                           |
+        | Invite                       | Action                                                                                                      |
+        | :--------------------------- | :---------------------------------------------------------------------------------------------------------- |
+        | **Instances BunkerWeb**      | Saisissez les IP de vos nœuds worker séparées par des espaces (ex : `192.168.10.11 192.168.10.12`).         |
+        | **Whitelist IP**             | Acceptez l'IP détectée ou saisissez un sous-réseau (ex : `192.168.10.0/24`) pour autoriser l'accès à l'API. |
+        | **Résolveurs DNS**           | Appuyez sur `N` pour la valeur par défaut ou fournissez les vôtres.                                         |
         | **HTTPS pour l'API interne** | **Recommandé :** `Y` pour générer automatiquement des certificats et sécuriser les échanges manager-worker. |
-        | **Service Web UI**         | `Y` pour activer l'interface Web (fortement recommandé).                                      |
-        | **Service API**            | `N` sauf besoin d'API REST publique pour des outils externes.                                 |
+        | **Service Web UI**           | `Y` pour activer l'interface Web (fortement recommandé).                                                    |
+        | **Service API**              | `N` sauf besoin d'API REST publique pour des outils externes.                                               |
 
     #### Sécuriser et exposer l'UI
 
@@ -673,10 +673,10 @@ Les workers sont les nœuds qui traitent le trafic entrant.
     1. **Lancez l'installateur** sur chaque worker (mêmes commandes que pour le Manager).
     2. **Choisissez l'option 3) Worker** et répondez :
 
-        | Invite                     | Action                                                     |
-        | :------------------------- | :--------------------------------------------------------- |
-        | **IP du Manager**          | Saisissez l'IP du Manager (ex : `192.168.10.10`).          |
-        | **HTTPS pour l'API interne** | Doit correspondre au choix du Manager (`Y` ou `N`).        |
+        | Invite                       | Action                                              |
+        | :--------------------------- | :-------------------------------------------------- |
+        | **IP du Manager**            | Saisissez l'IP du Manager (ex : `192.168.10.10`).   |
+        | **HTTPS pour l'API interne** | Doit correspondre au choix du Manager (`Y` ou `N`). |
 
     Le worker s'enregistrera automatiquement auprès du Manager.
 
@@ -3449,3 +3449,522 @@ Le plugin Load Balancer transforme BunkerWeb en un directeur de trafic avec gard
 - Gardez les intervalles et timeouts des vérifications de santé équilibrés pour éviter les oscillations sur les liens lents.
 - Activez `LOADBALANCER_UPSTREAM_RESOLVE` lorsque vous pointez vers des hostnames qui peuvent changer via DNS.
 - Réglez les valeurs keepalive pour refléter la capacité backend et les objectifs de réutilisation des connexions.
+
+## Custom Pages <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+Le plugin Custom Pages vous permet de remplacer les pages intégrées de BunkerWeb (pages d'erreur, page du serveur par défaut et pages de défi antibot) par vos propres modèles HTML ou Lua personnalisés. Cela vous permet de maintenir une image de marque cohérente sur toutes les pages destinées aux utilisateurs servies par BunkerWeb.
+
+### Fonctionnalités
+
+- **Pages d'erreur personnalisées par service** et **pages de défi antibot** (captcha, vérification JavaScript, reCAPTCHA, hCaptcha, Turnstile, mCaptcha).
+- **Page du serveur par défaut personnalisée globale** pour le vhost de repli/par défaut.
+- **Analyse HTML et vérifications d'équilibre des balises de modèle Lua** avant qu'un modèle soit accepté.
+- **Mise en cache automatique** vers `/var/cache/bunkerweb/custom_pages` avec détection des modifications pour déclencher les rechargements.
+- **Configuration par site ou globale** via les paramètres/UI ou les variables d'environnement.
+
+### Comment ça fonctionne
+
+1. Au démarrage (ou lorsque les paramètres changent), le job `custom-pages.py` lit les chemins de modèles configurés.
+2. Chaque fichier doit exister et être lisible par le scheduler ; le job valide la structure HTML et l'équilibre des balises de modèle Lua (`{% %}`, `{{ }}`, `{* *}`).
+3. Les fichiers acceptés sont mis en cache sous `/var/cache/bunkerweb/custom_pages/<type>.html` ; les paramètres manquants/vides suppriment le fichier mis en cache.
+4. NGINX est dirigé vers le répertoire de cache via `$template_root` lorsqu'au moins une page mise en cache existe, de sorte que vos modèles sont servis à la place des pages par défaut.
+
+### Paramètres de configuration
+
+| Paramètre                        | Défaut | Contexte  | Description                                                                  |
+| -------------------------------- | ------ | --------- | ---------------------------------------------------------------------------- |
+| `CUSTOM_ERROR_PAGE`              |        | multisite | Chemin absolu vers le modèle de page d'erreur personnalisé.                  |
+| `CUSTOM_DEFAULT_SERVER_PAGE`     |        | global    | Chemin absolu vers le modèle de page du serveur par défaut personnalisé.     |
+| `CUSTOM_ANTIBOT_CAPTCHA_PAGE`    |        | multisite | Chemin absolu vers la page de défi CAPTCHA antibot personnalisée.            |
+| `CUSTOM_ANTIBOT_JAVASCRIPT_PAGE` |        | multisite | Chemin absolu vers la page de vérification JavaScript antibot personnalisée. |
+| `CUSTOM_ANTIBOT_RECAPTCHA_PAGE`  |        | multisite | Chemin absolu vers la page reCAPTCHA antibot personnalisée.                  |
+| `CUSTOM_ANTIBOT_HCAPTCHA_PAGE`   |        | multisite | Chemin absolu vers la page hCaptcha antibot personnalisée.                   |
+| `CUSTOM_ANTIBOT_TURNSTILE_PAGE`  |        | multisite | Chemin absolu vers la page Turnstile antibot personnalisée.                  |
+| `CUSTOM_ANTIBOT_MCAPTCHA_PAGE`   |        | multisite | Chemin absolu vers la page mCaptcha antibot personnalisée.                   |
+
+### Référence des variables de modèle
+
+Les modèles BunkerWeb utilisent le moteur [lua-resty-template](https://github.com/bungle/lua-resty-template). Les variables suivantes sont disponibles selon le type de page :
+
+#### Variables de page d'erreur
+
+Ces variables sont disponibles dans les modèles de page d'erreur personnalisés (`CUSTOM_ERROR_PAGE`) :
+
+| Variable         | Type   | Description                                                      |
+| ---------------- | ------ | ---------------------------------------------------------------- |
+| `title`          | string | Titre complet de la page (ex. `403 - Forbidden`)                 |
+| `error_title`    | string | Texte du titre d'erreur (ex. `Forbidden`)                        |
+| `error_code`     | string | Code de statut HTTP (ex. `403`, `404`, `500`)                    |
+| `error_text`     | string | Message d'erreur descriptif                                      |
+| `error_type`     | string | Catégorie d'erreur : `client` (4xx) ou `server` (5xx)            |
+| `error_solution` | string | Texte de solution suggérée                                       |
+| `nonce_script`   | string | Valeur nonce pour les balises `<script>` inline (conformité CSP) |
+| `nonce_style`    | string | Valeur nonce pour les balises `<style>` inline (conformité CSP)  |
+| `request_id`     | string | Identifiant de requête unique pour le débogage                   |
+| `client_ip`      | string | Adresse IP du client                                             |
+| `request_time`   | string | Horodatage de la requête (format : `YYYY-MM-DD HH:MM:SS UTC`)    |
+
+#### Variables de page du serveur par défaut
+
+Ces variables sont disponibles dans les modèles de page du serveur par défaut personnalisés (`CUSTOM_DEFAULT_SERVER_PAGE`) :
+
+| Variable      | Type   | Description                                                     |
+| ------------- | ------ | --------------------------------------------------------------- |
+| `nonce_style` | string | Valeur nonce pour les balises `<style>` inline (conformité CSP) |
+
+#### Variables de page de défi antibot
+
+Ces variables sont disponibles dans les modèles de page de défi antibot :
+
+**Variables communes (toutes les pages antibot) :**
+
+| Variable       | Type   | Description                                                      |
+| -------------- | ------ | ---------------------------------------------------------------- |
+| `antibot_uri`  | string | URI d'action de formulaire pour soumettre le défi                |
+| `nonce_script` | string | Valeur nonce pour les balises `<script>` inline (conformité CSP) |
+| `nonce_style`  | string | Valeur nonce pour les balises `<style>` inline (conformité CSP)  |
+
+**Défi JavaScript (`CUSTOM_ANTIBOT_JAVASCRIPT_PAGE`) :**
+
+| Variable | Type   | Description                                         |
+| -------- | ------ | --------------------------------------------------- |
+| `random` | string | Chaîne aléatoire utilisée pour la preuve de travail |
+
+**Captcha (`CUSTOM_ANTIBOT_CAPTCHA_PAGE`) :**
+
+| Variable  | Type   | Description                                   |
+| --------- | ------ | --------------------------------------------- |
+| `captcha` | string | Image captcha encodée en Base64 (format JPEG) |
+
+**reCAPTCHA (`CUSTOM_ANTIBOT_RECAPTCHA_PAGE`) :**
+
+| Variable            | Type    | Description                                              |
+| ------------------- | ------- | -------------------------------------------------------- |
+| `recaptcha_sitekey` | string  | Votre clé de site reCAPTCHA                              |
+| `recaptcha_classic` | boolean | `true` si utilisant reCAPTCHA classique, `false` pour v3 |
+
+**hCaptcha (`CUSTOM_ANTIBOT_HCAPTCHA_PAGE`) :**
+
+| Variable           | Type   | Description                |
+| ------------------ | ------ | -------------------------- |
+| `hcaptcha_sitekey` | string | Votre clé de site hCaptcha |
+
+**Turnstile (`CUSTOM_ANTIBOT_TURNSTILE_PAGE`) :**
+
+| Variable            | Type   | Description                            |
+| ------------------- | ------ | -------------------------------------- |
+| `turnstile_sitekey` | string | Votre clé de site Cloudflare Turnstile |
+
+**mCaptcha (`CUSTOM_ANTIBOT_MCAPTCHA_PAGE`) :**
+
+| Variable           | Type   | Description                |
+| ------------------ | ------ | -------------------------- |
+| `mcaptcha_sitekey` | string | Votre clé de site mCaptcha |
+| `mcaptcha_url`     | string | Votre URL mCaptcha         |
+
+### Syntaxe de modèle
+
+Les modèles utilisent la syntaxe de modèle Lua avec les délimiteurs suivants :
+
+- `{{ variable }}` – Afficher une variable (échappée HTML)
+- `{* variable *}` – Afficher une variable (brut, non échappé)
+- `{% lua_code %}` – Exécuter du code Lua (conditions, boucles, etc.)
+- `{-raw-}` ... `{-raw-}` – Bloc brut (pas de traitement)
+
+**Important** : Utilisez toujours les attributs nonce pour les scripts et styles inline pour respecter la Content Security Policy (CSP) :
+
+```html
+<style nonce="{*nonce_style*}">
+  /* Votre CSS ici */
+</style>
+<script nonce="{*nonce_script*}">
+  // Votre JavaScript ici
+</script>
+```
+
+### Exemples
+
+=== "Page d'erreur personnalisée"
+
+    Créez un modèle de page d'erreur personnalisé dans `/etc/bunkerweb/templates/error.html` :
+
+    ```html
+    {-raw-}<!doctype html>
+    <html lang="fr">
+      <head>
+        <meta charset="utf-8" />
+        <title>{{ title }}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {-raw-}
+        <style nonce="{*nonce_style*}">
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #f5f5f5;
+            color: #333;
+          }
+          .container {
+            text-align: center;
+            padding: 2rem;
+          }
+          .error-code {
+            font-size: 6rem;
+            font-weight: bold;
+            color: {% if error_type == "server" %}#dc3545{% else %}#ffc107{% end %};
+            margin: 0;
+          }
+          .error-title {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+          }
+          .error-text {
+            color: #666;
+            margin-bottom: 1rem;
+          }
+          .request-info {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 2rem;
+          }
+        </style>
+        {-raw-}
+      </head>
+      <body>
+        <div class="container">
+          <p class="error-code">{{ error_code }}</p>
+          <h1 class="error-title">{{ error_title }}</h1>
+          <p class="error-text">{{ error_text }}</p>
+          <p class="error-text">{{ error_solution }}</p>
+          <div class="request-info">
+            {% if request_id %}
+            <p>ID de requête : <code>{{ request_id }}</code></p>
+            {% end %}
+            {% if request_time %}
+            <p>Heure : {{ request_time }}</p>
+            {% end %}
+          </div>
+        </div>
+      </body>
+    </html>
+    {-raw-}
+    ```
+
+=== "Page captcha personnalisée"
+
+    Créez une page de défi captcha personnalisée dans `/etc/bunkerweb/templates/captcha.html` :
+
+    ```html
+    {-raw-}<!doctype html>
+    <html lang="fr">
+      <head>
+        <meta charset="utf-8" />
+        <title>Vérification de sécurité</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {-raw-}
+        <style nonce="{*nonce_style*}">
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          }
+          .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+          }
+          h1 {
+            color: #333;
+            margin-bottom: 1rem;
+          }
+          .captcha-img {
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+          }
+          input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1.2rem;
+            border: 2px solid #ddd;
+            border-radius: 0.5rem;
+            text-align: center;
+            box-sizing: border-box;
+          }
+          button {
+            margin-top: 1rem;
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+          }
+          button:hover {
+            background: #5a6fd6;
+          }
+        </style>
+        {-raw-}
+      </head>
+      <body>
+        <div class="card">
+          <h1>🔒 Vérification de sécurité</h1>
+          <p>Veuillez entrer le texte que vous voyez ci-dessous pour continuer.</p>
+          {-raw-}
+          <form method="POST" action="{*antibot_uri*}">
+            <img class="captcha-img" src="data:image/jpeg;base64,{*captcha*}" alt="Captcha" />
+            {-raw-}
+            <input type="text" name="captcha" placeholder="Entrez le code" required autocomplete="off" />
+            <button type="submit">Vérifier</button>
+          </form>
+        </div>
+      </body>
+    </html>
+    {-raw-}
+    ```
+
+=== "Page du serveur par défaut personnalisée"
+
+    Créez une page du serveur par défaut personnalisée dans `/etc/bunkerweb/templates/default.html` :
+
+    ```html
+    {-raw-}<!doctype html>
+    <html lang="fr">
+      <head>
+        <meta charset="utf-8" />
+        <title>Bienvenue</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {-raw-}
+        <style nonce="{*nonce_style*}">
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #1a1a2e;
+            color: #eee;
+          }
+          .container {
+            text-align: center;
+          }
+          h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+          }
+          p {
+            color: #888;
+          }
+        </style>
+        {-raw-}
+      </head>
+      <body>
+        <div class="container">
+          <h1>🛡️ Protégé par BunkerWeb</h1>
+          <p>Ce serveur est sécurisé et prêt.</p>
+        </div>
+      </body>
+    </html>
+    {-raw-}
+    ```
+
+### Exemples de déploiement
+
+=== "Linux"
+
+    1. Créez vos fichiers de modèle dans un répertoire de votre choix (ex. `/opt/bunkerweb/templates/`) :
+
+        ```bash
+        sudo mkdir -p /opt/bunkerweb/templates
+        sudo nano /opt/bunkerweb/templates/error.html
+        # Collez votre modèle de page d'erreur personnalisé
+        ```
+
+    2. Configurez BunkerWeb en éditant `/etc/bunkerweb/variables.env` :
+
+        ```conf
+        # Page d'erreur personnalisée pour tous les services (ou utilisez par service avec préfixe)
+        CUSTOM_ERROR_PAGE=/opt/bunkerweb/templates/error.html
+
+        # Page du serveur par défaut personnalisée (global uniquement)
+        CUSTOM_DEFAULT_SERVER_PAGE=/opt/bunkerweb/templates/default.html
+
+        # Page captcha personnalisée (par service ou globale)
+        CUSTOM_ANTIBOT_CAPTCHA_PAGE=/opt/bunkerweb/templates/captcha.html
+        ```
+
+    3. Rechargez BunkerWeb :
+
+        ```bash
+        sudo systemctl reload bunkerweb
+        ```
+
+=== "Docker"
+
+    Le **scheduler** est responsable de la lecture, de la validation et de la mise en cache de vos modèles personnalisés. Seul le scheduler a besoin d'accéder aux fichiers de modèle—BunkerWeb reçoit automatiquement la configuration validée.
+
+    1. Créez vos fichiers de modèle dans un répertoire local (ex. `./templates/`) et définissez les bonnes permissions :
+
+        ```bash
+        mkdir templates && \
+        chown root:101 templates && \
+        chmod 770 templates
+        ```
+
+        !!! info "Pourquoi UID/GID 101 ?"
+            Le conteneur scheduler s'exécute en tant qu'**utilisateur non privilégié avec UID 101 et GID 101**. Le répertoire doit être lisible par cet utilisateur pour que le scheduler puisse accéder à vos modèles.
+
+        Si le dossier existe déjà :
+
+        ```bash
+        chown -R root:101 templates && \
+        chmod -R 770 templates
+        ```
+
+        Lors de l'utilisation de [Docker en mode rootless](https://docs.docker.com/engine/security/rootless) ou [Podman](https://podman.io/), les UID/GID des conteneurs sont remappés. Vérifiez vos plages subuid/subgid :
+
+        ```bash
+        grep ^$(whoami): /etc/subuid && \
+        grep ^$(whoami): /etc/subgid
+        ```
+
+        Par exemple, si la plage commence à **100000**, le GID effectif devient **100100** (100000 + 100) :
+
+        ```bash
+        mkdir templates && \
+        sudo chgrp 100100 templates && \
+        chmod 770 templates
+        ```
+
+    2. Montez le répertoire de modèles vers le **scheduler** et configurez les paramètres sur le scheduler (le scheduler agit comme manager et distribue la configuration aux workers BunkerWeb). Vous pouvez monter les modèles vers n'importe quel chemin dans le conteneur :
+
+        ```yaml
+        services:
+          bunkerweb:
+            image: bunkerity/bunkerweb:1.6.7~rc1
+            # ... autres paramètres (pas de variables d'environnement nécessaires ici pour les pages personnalisées)
+
+          bw-scheduler:
+            image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+            volumes:
+              - ./templates:/custom_templates:ro
+            environment:
+              - CUSTOM_ERROR_PAGE=/custom_templates/error.html
+              - CUSTOM_DEFAULT_SERVER_PAGE=/custom_templates/default.html
+              - CUSTOM_ANTIBOT_CAPTCHA_PAGE=/custom_templates/captcha.html
+              # ... autres paramètres
+        ```
+
+    !!! warning "Accès au scheduler requis"
+        Si le scheduler ne peut pas lire les fichiers de modèle (à cause d'un montage manquant ou de permissions incorrectes), les modèles seront silencieusement ignorés et les pages par défaut seront utilisées à la place. Vérifiez les logs du scheduler pour les erreurs de validation.
+
+=== "Kubernetes"
+
+    Le **scheduler** est responsable de la lecture, de la validation et de la mise en cache de vos modèles personnalisés. Vous devez monter les modèles vers le pod du scheduler.
+
+    1. Créez une ConfigMap avec vos modèles :
+
+        ```yaml
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: bunkerweb-custom-templates
+        data:
+          error.html: |
+            {-raw-}<!doctype html>
+            <html lang="fr">
+              <head>
+                <meta charset="utf-8" />
+                <title>{{ title }}</title>
+                {-raw-}
+                <style nonce="{*nonce_style*}">
+                  body { font-family: sans-serif; text-align: center; padding: 2rem; }
+                  .error-code { font-size: 4rem; color: #dc3545; }
+                </style>
+                {-raw-}
+              </head>
+              <body>
+                <p class="error-code">{{ error_code }}</p>
+                <h1>{{ error_title }}</h1>
+                <p>{{ error_text }}</p>
+              </body>
+            </html>
+            {-raw-}
+          captcha.html: |
+            {-raw-}<!doctype html>
+            <html lang="fr">
+              <head>
+                <meta charset="utf-8" />
+                <title>Vérification de sécurité</title>
+                {-raw-}
+                <style nonce="{*nonce_style*}">
+                  body { font-family: sans-serif; text-align: center; padding: 2rem; }
+                </style>
+                {-raw-}
+              </head>
+              <body>
+                <h1>Veuillez vérifier que vous êtes humain</h1>
+                {-raw-}
+                <form method="POST" action="{*antibot_uri*}">
+                  <img src="data:image/jpeg;base64,{*captcha*}" alt="Captcha" />
+                  {-raw-}
+                  <input type="text" name="captcha" placeholder="Entrez le code" required />
+                  <button type="submit">Vérifier</button>
+                </form>
+              </body>
+            </html>
+            {-raw-}
+        ```
+
+    2. Montez la ConfigMap de modèles vers le pod du **scheduler** et configurez les paramètres comme variables d'environnement :
+
+        ```yaml
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: bunkerweb-scheduler
+        spec:
+          template:
+            spec:
+              containers:
+                - name: bunkerweb-scheduler
+                  image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+                  env:
+                    - name: CUSTOM_ERROR_PAGE
+                      value: "/custom_templates/error.html"
+                    - name: CUSTOM_ANTIBOT_CAPTCHA_PAGE
+                      value: "/custom_templates/captcha.html"
+                    # ... autres paramètres
+                  volumeMounts:
+                    - name: custom-templates
+                      mountPath: /custom_templates
+                      readOnly: true
+                  # ... autres paramètres du conteneur
+              volumes:
+                - name: custom-templates
+                  configMap:
+                    name: bunkerweb-custom-templates
+              # ... autres paramètres du pod
+        ```
+
+    !!! tip "Utilisation du contrôleur Ingress BunkerWeb"
+        Si vous utilisez le contrôleur Ingress BunkerWeb, le scheduler est intégré au contrôleur. Montez la ConfigMap vers le pod du contrôleur à la place.
+
+### Notes et dépannage
+
+- **Les chemins doivent être absolus** et se terminer par un nom de fichier ; les valeurs vides désactivent la page personnalisée correspondante et suppriment son cache.
+- **Si la validation échoue** (HTML incorrect ou balises Lua déséquilibrées), le modèle est ignoré et la page par défaut reste active. Vérifiez les logs du scheduler pour les détails.
+- **Les fichiers mis en cache** se trouvent dans `/var/cache/bunkerweb/custom_pages` ; la mise à jour du fichier source suffit—le job détecte le nouveau hash et recharge NGINX automatiquement.
+- **Conformité CSP** : Utilisez toujours les variables `nonce_script` et `nonce_style` pour les scripts et styles inline afin d'assurer une bonne gestion de la Content Security Policy.
+- **Test des modèles** : Vous pouvez tester vos modèles localement en les rendant avec un moteur de modèle Lua avant de les déployer sur BunkerWeb.

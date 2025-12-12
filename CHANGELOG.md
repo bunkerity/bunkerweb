@@ -26,6 +26,7 @@
 - [DOCS] Add documentation about the new logging settings and how to configure them
 - [DOCS] Update database compatibility matrix
 - [DOCS] Refactor API documentation to include new API features and improve clarity
+- [DOCS] Add documentation about the new "Custom Pages" PRO plugin
 - [DEPS] Update lua-resty-session version to v4.1.5
 - [DEPS] Update coreruleset-v4 version to v4.21.0
 - [DEPS] Updated zlib version to v1.3.1.2

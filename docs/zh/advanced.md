@@ -501,14 +501,14 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
 
     2. **选择 2) Manager** 并按提示操作：
 
-        | 提示                     | 操作                                                                                 |
-        | :----------------------- | :----------------------------------------------------------------------------------- |
-        | **BunkerWeb 实例**       | 输入 Worker 节点 IP，空格分隔（例如 `192.168.10.11 192.168.10.12`）。                 |
-        | **Whitelist IP**         | 接受检测到的 IP，或输入网段（例如 `192.168.10.0/24`）以允许访问内部 API。             |
-        | **DNS 解析器**           | 按 `N` 使用默认值，或指定自定义解析器。                                               |
-        | **内部 API 启用 HTTPS**  | **推荐：** 选择 `Y` 生成证书，保护 Manager-Worker 通信。                             |
-        | **Web UI 服务**          | 选择 `Y` 启用界面（强烈推荐）。                                                       |
-        | **API 服务**             | 除非需要公共 REST API，否则选择 `N`。                                                 |
+        | 提示                    | 操作                                                                      |
+        | :---------------------- | :------------------------------------------------------------------------ |
+        | **BunkerWeb 实例**      | 输入 Worker 节点 IP，空格分隔（例如 `192.168.10.11 192.168.10.12`）。     |
+        | **Whitelist IP**        | 接受检测到的 IP，或输入网段（例如 `192.168.10.0/24`）以允许访问内部 API。 |
+        | **DNS 解析器**          | 按 `N` 使用默认值，或指定自定义解析器。                                   |
+        | **内部 API 启用 HTTPS** | **推荐：** 选择 `Y` 生成证书，保护 Manager-Worker 通信。                  |
+        | **Web UI 服务**         | 选择 `Y` 启用界面（强烈推荐）。                                           |
+        | **API 服务**            | 除非需要公共 REST API，否则选择 `N`。                                     |
 
     #### 保护并暴露 UI
 
@@ -673,10 +673,10 @@ Worker 负责处理进入的流量。
     1. **在每个 Worker 节点运行安装器**（与 Manager 相同的命令）。
     2. **选择 3) Worker** 并配置：
 
-        | 提示                     | 操作                                                     |
-        | :----------------------- | :------------------------------------------------------- |
-        | **Manager IP**           | 输入 Manager IP（例如 `192.168.10.10`）。                 |
-        | **内部 API 启用 HTTPS**  | 必须与 Manager 保持一致（`Y` 或 `N`）。                    |
+        | 提示                    | 操作                                      |
+        | :---------------------- | :---------------------------------------- |
+        | **Manager IP**          | 输入 Manager IP（例如 `192.168.10.10`）。 |
+        | **内部 API 启用 HTTPS** | 必须与 Manager 保持一致（`Y` 或 `N`）。   |
 
     Worker 会自动向 Manager 注册。
 
@@ -3447,3 +3447,522 @@ Load Balancer 插件将 BunkerWeb 转变为带有护栏的流量导向器。一�
 - 保持健康检查间隔和超时平衡，以避免在慢速链路上波动。
 - 当指向可能通过 DNS 更改的主机名时启用 `LOADBALANCER_UPSTREAM_RESOLVE`。
 - 调整 keepalive 值以反映后端容量和连接重用目标。
+
+## Custom Pages <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+Custom Pages 插件允许您将 BunkerWeb 的内置页面（错误页面、默认服务器页面和反机器人挑战页面）替换为您自己的自定义 HTML 或 Lua 模板。这使您能够在 BunkerWeb 提供的所有面向用户的页面上保持一致的品牌形象。
+
+### 功能
+
+- **每个服务的自定义错误页面**和**反机器人挑战页面**（验证码、JavaScript 检查、reCAPTCHA、hCaptcha、Turnstile、mCaptcha）。
+- **全局自定义默认服务器页面**用于回退/默认虚拟主机。
+- **HTML 解析和 Lua 模板标签平衡检查**在接受模板之前。
+- **自动缓存**到 `/var/cache/bunkerweb/custom_pages`，带有变更检测以触发重新加载。
+- **每站点或全局配置**通过设置/UI 或环境变量。
+
+### 工作原理
+
+1. 在启动时（或当设置更改时），`custom-pages.py` 作业读取配置的模板路径。
+2. 每个文件必须存在且可被调度器读取；作业验证 HTML 结构和平衡的 Lua 模板标签（`{% %}`、`{{ }}`、`{* *}`）。
+3. 接受的文件缓存在 `/var/cache/bunkerweb/custom_pages/<type>.html` 下；缺失/空设置会删除缓存文件。
+4. 当至少存在一个缓存页面时，NGINX 通过 `$template_root` 指向缓存目录，因此您的模板将替代默认页面提供服务。
+
+### 配置设置
+
+| 设置                             | 默认 | 上下文    | 描述                                           |
+| -------------------------------- | ---- | --------- | ---------------------------------------------- |
+| `CUSTOM_ERROR_PAGE`              |      | multisite | 自定义错误页面模板的绝对路径。                 |
+| `CUSTOM_DEFAULT_SERVER_PAGE`     |      | global    | 自定义默认服务器页面模板的绝对路径。           |
+| `CUSTOM_ANTIBOT_CAPTCHA_PAGE`    |      | multisite | 自定义反机器人验证码挑战页面的绝对路径。       |
+| `CUSTOM_ANTIBOT_JAVASCRIPT_PAGE` |      | multisite | 自定义反机器人 JavaScript 检查页面的绝对路径。 |
+| `CUSTOM_ANTIBOT_RECAPTCHA_PAGE`  |      | multisite | 自定义反机器人 reCAPTCHA 页面的绝对路径。      |
+| `CUSTOM_ANTIBOT_HCAPTCHA_PAGE`   |      | multisite | 自定义反机器人 hCaptcha 页面的绝对路径。       |
+| `CUSTOM_ANTIBOT_TURNSTILE_PAGE`  |      | multisite | 自定义反机器人 Turnstile 页面的绝对路径。      |
+| `CUSTOM_ANTIBOT_MCAPTCHA_PAGE`   |      | multisite | 自定义反机器人 mCaptcha 页面的绝对路径。       |
+
+### 模板变量参考
+
+BunkerWeb 模板使用 [lua-resty-template](https://github.com/bungle/lua-resty-template) 引擎。以下变量根据页面类型可用：
+
+#### 错误页面变量
+
+这些变量在自定义错误页面模板（`CUSTOM_ERROR_PAGE`）中可用：
+
+| 变量             | 类型   | 描述                                            |
+| ---------------- | ------ | ----------------------------------------------- |
+| `title`          | string | 完整页面标题（例如 `403 - Forbidden`）          |
+| `error_title`    | string | 错误标题文本（例如 `Forbidden`）                |
+| `error_code`     | string | HTTP 状态码（例如 `403`、`404`、`500`）         |
+| `error_text`     | string | 描述性错误消息                                  |
+| `error_type`     | string | 错误类别：`client`（4xx）或 `server`（5xx）     |
+| `error_solution` | string | 建议的解决方案文本                              |
+| `nonce_script`   | string | 内联 `<script>` 标签的 Nonce 值（CSP 合规）     |
+| `nonce_style`    | string | 内联 `<style>` 标签的 Nonce 值（CSP 合规）      |
+| `request_id`     | string | 用于调试的唯一请求标识符                        |
+| `client_ip`      | string | 客户端的 IP 地址                                |
+| `request_time`   | string | 请求的时间戳（格式：`YYYY-MM-DD HH:MM:SS UTC`） |
+
+#### 默认服务器页面变量
+
+这些变量在自定义默认服务器页面模板（`CUSTOM_DEFAULT_SERVER_PAGE`）中可用：
+
+| 变量          | 类型   | 描述                                       |
+| ------------- | ------ | ------------------------------------------ |
+| `nonce_style` | string | 内联 `<style>` 标签的 Nonce 值（CSP 合规） |
+
+#### 反机器人挑战页面变量
+
+这些变量在反机器人挑战页面模板中可用：
+
+**通用变量（所有反机器人页面）：**
+
+| 变量           | 类型   | 描述                                        |
+| -------------- | ------ | ------------------------------------------- |
+| `antibot_uri`  | string | 提交挑战的表单操作 URI                      |
+| `nonce_script` | string | 内联 `<script>` 标签的 Nonce 值（CSP 合规） |
+| `nonce_style`  | string | 内联 `<style>` 标签的 Nonce 值（CSP 合规）  |
+
+**JavaScript 挑战（`CUSTOM_ANTIBOT_JAVASCRIPT_PAGE`）：**
+
+| 变量     | 类型   | 描述                           |
+| -------- | ------ | ------------------------------ |
+| `random` | string | 用于工作量证明求解的随机字符串 |
+
+**验证码（`CUSTOM_ANTIBOT_CAPTCHA_PAGE`）：**
+
+| 变量      | 类型   | 描述                                 |
+| --------- | ------ | ------------------------------------ |
+| `captcha` | string | Base64 编码的验证码图像（JPEG 格式） |
+
+**reCAPTCHA（`CUSTOM_ANTIBOT_RECAPTCHA_PAGE`）：**
+
+| 变量                | 类型    | 描述                                              |
+| ------------------- | ------- | ------------------------------------------------- |
+| `recaptcha_sitekey` | string  | 您的 reCAPTCHA 站点密钥                           |
+| `recaptcha_classic` | boolean | 如果使用经典 reCAPTCHA 则为 `true`，v3 为 `false` |
+
+**hCaptcha（`CUSTOM_ANTIBOT_HCAPTCHA_PAGE`）：**
+
+| 变量               | 类型   | 描述                   |
+| ------------------ | ------ | ---------------------- |
+| `hcaptcha_sitekey` | string | 您的 hCaptcha 站点密钥 |
+
+**Turnstile（`CUSTOM_ANTIBOT_TURNSTILE_PAGE`）：**
+
+| 变量                | 类型   | 描述                               |
+| ------------------- | ------ | ---------------------------------- |
+| `turnstile_sitekey` | string | 您的 Cloudflare Turnstile 站点密钥 |
+
+**mCaptcha（`CUSTOM_ANTIBOT_MCAPTCHA_PAGE`）：**
+
+| 变量               | 类型   | 描述                   |
+| ------------------ | ------ | ---------------------- |
+| `mcaptcha_sitekey` | string | 您的 mCaptcha 站点密钥 |
+| `mcaptcha_url`     | string | 您的 mCaptcha URL      |
+
+### 模板语法
+
+模板使用 Lua 模板语法，具有以下分隔符：
+
+- `{{ variable }}` – 输出变量（HTML 转义）
+- `{* variable *}` – 输出变量（原始，未转义）
+- `{% lua_code %}` – 执行 Lua 代码（条件、循环等）
+- `{-raw-}` ... `{-raw-}` – 原始块（不处理）
+
+**重要**：始终对内联脚本和样式使用 nonce 属性以符合内容安全策略（CSP）：
+
+```html
+<style nonce="{*nonce_style*}">
+  /* 您的 CSS */
+</style>
+<script nonce="{*nonce_script*}">
+  // 您的 JavaScript
+</script>
+```
+
+### 示例
+
+=== "自定义错误页面"
+
+    在 `/etc/bunkerweb/templates/error.html` 创建自定义错误页面模板：
+
+    ```html
+    {-raw-}<!doctype html>
+    <html lang="zh">
+      <head>
+        <meta charset="utf-8" />
+        <title>{{ title }}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {-raw-}
+        <style nonce="{*nonce_style*}">
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #f5f5f5;
+            color: #333;
+          }
+          .container {
+            text-align: center;
+            padding: 2rem;
+          }
+          .error-code {
+            font-size: 6rem;
+            font-weight: bold;
+            color: {% if error_type == "server" %}#dc3545{% else %}#ffc107{% end %};
+            margin: 0;
+          }
+          .error-title {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+          }
+          .error-text {
+            color: #666;
+            margin-bottom: 1rem;
+          }
+          .request-info {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 2rem;
+          }
+        </style>
+        {-raw-}
+      </head>
+      <body>
+        <div class="container">
+          <p class="error-code">{{ error_code }}</p>
+          <h1 class="error-title">{{ error_title }}</h1>
+          <p class="error-text">{{ error_text }}</p>
+          <p class="error-text">{{ error_solution }}</p>
+          <div class="request-info">
+            {% if request_id %}
+            <p>请求 ID：<code>{{ request_id }}</code></p>
+            {% end %}
+            {% if request_time %}
+            <p>时间：{{ request_time }}</p>
+            {% end %}
+          </div>
+        </div>
+      </body>
+    </html>
+    {-raw-}
+    ```
+
+=== "自定义验证码页面"
+
+    在 `/etc/bunkerweb/templates/captcha.html` 创建自定义验证码挑战页面：
+
+    ```html
+    {-raw-}<!doctype html>
+    <html lang="zh">
+      <head>
+        <meta charset="utf-8" />
+        <title>安全检查</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {-raw-}
+        <style nonce="{*nonce_style*}">
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          }
+          .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+          }
+          h1 {
+            color: #333;
+            margin-bottom: 1rem;
+          }
+          .captcha-img {
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+          }
+          input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1.2rem;
+            border: 2px solid #ddd;
+            border-radius: 0.5rem;
+            text-align: center;
+            box-sizing: border-box;
+          }
+          button {
+            margin-top: 1rem;
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+          }
+          button:hover {
+            background: #5a6fd6;
+          }
+        </style>
+        {-raw-}
+      </head>
+      <body>
+        <div class="card">
+          <h1>🔒 安全检查</h1>
+          <p>请输入下方显示的文字以继续。</p>
+          {-raw-}
+          <form method="POST" action="{*antibot_uri*}">
+            <img class="captcha-img" src="data:image/jpeg;base64,{*captcha*}" alt="验证码" />
+            {-raw-}
+            <input type="text" name="captcha" placeholder="输入验证码" required autocomplete="off" />
+            <button type="submit">验证</button>
+          </form>
+        </div>
+      </body>
+    </html>
+    {-raw-}
+    ```
+
+=== "自定义默认服务器页面"
+
+    在 `/etc/bunkerweb/templates/default.html` 创建自定义默认服务器页面：
+
+    ```html
+    {-raw-}<!doctype html>
+    <html lang="zh">
+      <head>
+        <meta charset="utf-8" />
+        <title>欢迎</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {-raw-}
+        <style nonce="{*nonce_style*}">
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #1a1a2e;
+            color: #eee;
+          }
+          .container {
+            text-align: center;
+          }
+          h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+          }
+          p {
+            color: #888;
+          }
+        </style>
+        {-raw-}
+      </head>
+      <body>
+        <div class="container">
+          <h1>🛡️ 受 BunkerWeb 保护</h1>
+          <p>此服务器安全且已就绪。</p>
+        </div>
+      </body>
+    </html>
+    {-raw-}
+    ```
+
+### 部署示例
+
+=== "Linux"
+
+    1. 在您选择的目录中创建模板文件（例如 `/opt/bunkerweb/templates/`）：
+
+        ```bash
+        sudo mkdir -p /opt/bunkerweb/templates
+        sudo nano /opt/bunkerweb/templates/error.html
+        # 粘贴您的自定义错误页面模板
+        ```
+
+    2. 通过编辑 `/etc/bunkerweb/variables.env` 配置 BunkerWeb：
+
+        ```conf
+        # 所有服务的自定义错误页面（或使用前缀按服务配置）
+        CUSTOM_ERROR_PAGE=/opt/bunkerweb/templates/error.html
+
+        # 自定义默认服务器页面（仅全局）
+        CUSTOM_DEFAULT_SERVER_PAGE=/opt/bunkerweb/templates/default.html
+
+        # 自定义验证码页面（按服务或全局）
+        CUSTOM_ANTIBOT_CAPTCHA_PAGE=/opt/bunkerweb/templates/captcha.html
+        ```
+
+    3. 重新加载 BunkerWeb：
+
+        ```bash
+        sudo systemctl reload bunkerweb
+        ```
+
+=== "Docker"
+
+    **调度器**负责读取、验证和缓存您的自定义模板。只有调度器需要访问模板文件—BunkerWeb 自动接收验证后的配置。
+
+    1. 在本地目录中创建模板文件（例如 `./templates/`）并设置正确的权限：
+
+        ```bash
+        mkdir templates && \
+        chown root:101 templates && \
+        chmod 770 templates
+        ```
+
+        !!! info "为什么是 UID/GID 101？"
+            调度器容器以**UID 101 和 GID 101 的非特权用户**运行。目录必须对此用户可读，以便调度器访问您的模板。
+
+        如果文件夹已存在：
+
+        ```bash
+        chown -R root:101 templates && \
+        chmod -R 770 templates
+        ```
+
+        使用 [Docker rootless 模式](https://docs.docker.com/engine/security/rootless) 或 [Podman](https://podman.io/) 时，容器 UID/GID 会被重新映射。检查您的 subuid/subgid 范围：
+
+        ```bash
+        grep ^$(whoami): /etc/subuid && \
+        grep ^$(whoami): /etc/subgid
+        ```
+
+        例如，如果范围从 **100000** 开始，有效 GID 变为 **100100**（100000 + 100）：
+
+        ```bash
+        mkdir templates && \
+        sudo chgrp 100100 templates && \
+        chmod 770 templates
+        ```
+
+    2. 将模板目录挂载到**调度器**并在调度器上配置设置（调度器充当管理器并将配置分发给 BunkerWeb 工作器）。您可以将模板挂载到容器内的任何路径：
+
+        ```yaml
+        services:
+          bunkerweb:
+            image: bunkerity/bunkerweb:1.6.7~rc1
+            # ... 其他设置（自定义页面无需在此处设置环境变量）
+
+          bw-scheduler:
+            image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+            volumes:
+              - ./templates:/custom_templates:ro
+            environment:
+              - CUSTOM_ERROR_PAGE=/custom_templates/error.html
+              - CUSTOM_DEFAULT_SERVER_PAGE=/custom_templates/default.html
+              - CUSTOM_ANTIBOT_CAPTCHA_PAGE=/custom_templates/captcha.html
+              # ... 其他设置
+        ```
+
+    !!! warning "需要调度器访问权限"
+        如果调度器无法读取模板文件（由于缺少挂载或权限不正确），模板将被静默忽略，将使用默认页面。检查调度器日志以了解验证错误。
+
+=== "Kubernetes"
+
+    **调度器**负责读取、验证和缓存您的自定义模板。您需要将模板挂载到调度器 Pod。
+
+    1. 创建包含模板的 ConfigMap：
+
+        ```yaml
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: bunkerweb-custom-templates
+        data:
+          error.html: |
+            {-raw-}<!doctype html>
+            <html lang="zh">
+              <head>
+                <meta charset="utf-8" />
+                <title>{{ title }}</title>
+                {-raw-}
+                <style nonce="{*nonce_style*}">
+                  body { font-family: sans-serif; text-align: center; padding: 2rem; }
+                  .error-code { font-size: 4rem; color: #dc3545; }
+                </style>
+                {-raw-}
+              </head>
+              <body>
+                <p class="error-code">{{ error_code }}</p>
+                <h1>{{ error_title }}</h1>
+                <p>{{ error_text }}</p>
+              </body>
+            </html>
+            {-raw-}
+          captcha.html: |
+            {-raw-}<!doctype html>
+            <html lang="zh">
+              <head>
+                <meta charset="utf-8" />
+                <title>安全检查</title>
+                {-raw-}
+                <style nonce="{*nonce_style*}">
+                  body { font-family: sans-serif; text-align: center; padding: 2rem; }
+                </style>
+                {-raw-}
+              </head>
+              <body>
+                <h1>请验证您是人类</h1>
+                {-raw-}
+                <form method="POST" action="{*antibot_uri*}">
+                  <img src="data:image/jpeg;base64,{*captcha*}" alt="验证码" />
+                  {-raw-}
+                  <input type="text" name="captcha" placeholder="输入验证码" required />
+                  <button type="submit">验证</button>
+                </form>
+              </body>
+            </html>
+            {-raw-}
+        ```
+
+    2. 将模板 ConfigMap 挂载到**调度器** Pod 并将设置配置为环境变量：
+
+        ```yaml
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: bunkerweb-scheduler
+        spec:
+          template:
+            spec:
+              containers:
+                - name: bunkerweb-scheduler
+                  image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+                  env:
+                    - name: CUSTOM_ERROR_PAGE
+                      value: "/custom_templates/error.html"
+                    - name: CUSTOM_ANTIBOT_CAPTCHA_PAGE
+                      value: "/custom_templates/captcha.html"
+                    # ... 其他设置
+                  volumeMounts:
+                    - name: custom-templates
+                      mountPath: /custom_templates
+                      readOnly: true
+                  # ... 其他容器设置
+              volumes:
+                - name: custom-templates
+                  configMap:
+                    name: bunkerweb-custom-templates
+              # ... 其他 Pod 设置
+        ```
+
+    !!! tip "使用 BunkerWeb Ingress Controller"
+        如果您使用 BunkerWeb Ingress Controller，调度器嵌入在控制器中。请将 ConfigMap 挂载到控制器 Pod。
+
+### 注意事项和故障排除
+
+- **路径必须是绝对路径**并以文件名结尾；空值会禁用相应的自定义页面并删除其缓存。
+- **如果验证失败**（错误的 HTML 或不平衡的 Lua 标签），模板将被跳过，默认页面保持活动状态。检查调度器日志以获取详细信息。
+- **缓存文件**位于 `/var/cache/bunkerweb/custom_pages`；更新源文件就足够了—作业检测到新哈希并自动重新加载 NGINX。
+- **CSP 合规**：始终对内联脚本和样式使用 `nonce_script` 和 `nonce_style` 变量，以确保正确的内容安全策略处理。
+- **测试模板**：您可以在部署到 BunkerWeb 之前使用 Lua 模板引擎在本地渲染测试您的模板。
