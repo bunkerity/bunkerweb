@@ -73,6 +73,12 @@ jobs:
           endpoint: ssh://root@arm
           platforms: linux/arm64,linux/arm/v7
           buildkitd-flags: --debug
+      # Sanitize tags (replace ~ with - for valid Docker/GHCR tag names)
+      - name: Sanitize tags
+        id: sanitize
+        run: |
+          TAGS="${{ inputs.TAGS }}"
+          echo "tags=${TAGS//\~/-}" >> "$GITHUB_OUTPUT"
       # Compute metadata
       - name: Extract metadata
         id: meta
@@ -87,7 +93,7 @@ jobs:
           file: ${{ inputs.DOCKERFILE }}
           platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
           push: true
-          tags: ${{ inputs.TAGS }}
+          tags: ${{ steps.sanitize.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: |
             type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-amd64
