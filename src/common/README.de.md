@@ -32,6 +32,14 @@ Einige Einstellungen in BunkerWeb unterstützen mehrere Konfigurationen für die
 
 Dieses Muster ermöglicht es Ihnen, mehrere Konfigurationen für Funktionen wie Reverse-Proxys, Ports oder andere Einstellungen zu verwalten, die für unterschiedliche Anwendungsfälle unterschiedliche Werte erfordern.
 
+### Ausführungsreihenfolge der Plugins {#plugin-order}
+
+Sie können die Reihenfolge mit durch Leerzeichen getrennten Listen steuern:
+
+- Globale Phasen: `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_TIMER`.
+- Seitenspezifische Phasen: `PLUGINS_ORDER_SET`, `PLUGINS_ORDER_ACCESS`, `PLUGINS_ORDER_SSL_CERTIFICATE`, `PLUGINS_ORDER_HEADER`, `PLUGINS_ORDER_LOG`, `PLUGINS_ORDER_PREREAD`, `PLUGINS_ORDER_LOG_STREAM`, `PLUGINS_ORDER_LOG_DEFAULT`.
+- Semantik: aufgelistete Plugins laufen zuerst in der Phase; alle übrigen laufen danach in ihrer normalen Reihenfolge. IDs nur mit Leerzeichen trennen.
+
 ### Sicherheitsmodi {#security-modes}
 
 Die Einstellung `SECURITY_MODE` bestimmt, wie BunkerWeb erkannte Bedrohungen behandelt. Diese flexible Funktion ermöglicht es Ihnen, je nach Ihren spezifischen Bedürfnissen zwischen der Überwachung oder dem aktiven Blockieren verdächtiger Aktivitäten zu wählen:

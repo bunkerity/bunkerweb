@@ -65,8 +65,21 @@ helpers.load_plugin = function(json)
 	return true, plugin
 end
 
-helpers.order_plugins = function(plugins)
-	-- Extract orders
+local function parse_override(value)
+	if type(value) ~= "string" or value == "" then
+		return {}
+	end
+
+	local ids = {}
+	for token in value:gmatch("%S+") do
+		table.insert(ids, token)
+	end
+
+	return ids
+end
+
+helpers.order_plugins = function(plugins, variables)
+	-- Extract default orders
 	local file, err, nb = open("/usr/share/bunkerweb/core/order.json", "r")
 	if not file then
 		return false, err .. " (nb = " .. tostring(nb) .. ")"
@@ -76,39 +89,130 @@ helpers.order_plugins = function(plugins)
 	if not ok then
 		return false, "invalid order.json : " .. err
 	end
+
+	-- Map legacy keys to phases
+	local phase_aliases = { headers = "header" }
+	local phases = get_phases()
+	local default_orders = {}
+	for _, phase in ipairs(phases) do
+		default_orders[phase] = {}
+	end
+	for phase, order in pairs(orders) do
+		local canonical_phase = phase_aliases[phase] or phase
+		if default_orders[canonical_phase] then
+			for _, id in ipairs(order) do
+				table.insert(default_orders[canonical_phase], id)
+			end
+		end
+	end
+
+	-- Utility
+	local function deep_copy_phases(phases_map)
+		local copy = {}
+		for id, phases_present in pairs(phases_map) do
+			copy[id] = {}
+			for phase, present in pairs(phases_present) do
+				copy[id][phase] = present
+			end
+		end
+		return copy
+	end
+
 	-- Compute plugins/id/phases table
 	local plugins_phases = {}
+	local plugin_lookup = {}
 	for _, plugin in ipairs(plugins) do
 		plugins_phases[plugin.id] = {}
+		plugin_lookup[plugin.id] = true
 		for _, phase in ipairs(plugin.phases) do
 			plugins_phases[plugin.id][phase] = true
 		end
 	end
+	local base_plugins_phases = deep_copy_phases(plugins_phases)
+
+	-- Collect overrides (global + per-site for multisite-aware phases)
+	local overrides = { global = {} }
+	local global_variables = variables and variables["global"] or variables or {}
+	for _, phase in ipairs(phases) do
+		local key = "PLUGINS_ORDER_" .. phase:upper()
+		overrides.global[phase] = parse_override(global_variables[key])
+	end
+
+	local per_site_overrides = {}
+	if variables then
+		for server_name, vars in pairs(variables) do
+			if server_name ~= "global" then
+				per_site_overrides[server_name] = {}
+				for _, phase in ipairs(phases) do
+					local key = "PLUGINS_ORDER_" .. phase:upper()
+					per_site_overrides[server_name][phase] = parse_override(vars[key])
+				end
+			end
+		end
+	end
+
 	-- Order result
+	local function build_order(override_set)
+		local build_orders = {}
+		local missing = {}
+		for _, phase in ipairs(phases) do
+			build_orders[phase] = {}
+			missing[phase] = {}
+
+			local seen = {}
+
+			for _, id in ipairs(override_set[phase] or {}) do
+				if not seen[id] and plugin_lookup[id] and plugins_phases[id] and plugins_phases[id][phase] then
+					table.insert(build_orders[phase], id)
+					seen[id] = true
+					plugins_phases[id][phase] = nil
+				elseif not seen[id] then
+					missing[phase][id] = true
+				end
+			end
+
+			for _, id in ipairs(default_orders[phase]) do
+				if plugins_phases[id] and plugins_phases[id][phase] and not seen[id] then
+					table.insert(build_orders[phase], id)
+					seen[id] = true
+					plugins_phases[id][phase] = nil
+				end
+			end
+
+			for id, plugin in pairs(plugins_phases) do
+				if plugin[phase] and not seen[id] then
+					table.insert(build_orders[phase], id)
+					plugin[phase] = nil
+				end
+			end
+		end
+		return build_orders, missing
+	end
+
+	-- Global order (backward compatible keys at root)
+	plugins_phases = deep_copy_phases(base_plugins_phases)
+	local global_orders, global_missing = build_order(overrides.global)
 	local result_orders = {}
-	for _, phase in ipairs(get_phases()) do
-		result_orders[phase] = {}
+	for phase, ids in pairs(global_orders) do
+		result_orders[phase] = ids
 	end
-	-- Fill order first
-	for phase, order in pairs(orders) do
-		for _, id in ipairs(order) do
-			local plugin = plugins_phases[id]
-			if plugin and plugin[phase] then
-				table.insert(result_orders[phase], id)
-				plugin[phase] = nil
-			end
-		end
+	result_orders.global = global_orders
+
+	-- Per-site orders (only if overrides exist)
+	local per_site_orders = {}
+	local per_site_missing = {}
+	for server_name, override_set in pairs(per_site_overrides) do
+		plugins_phases = deep_copy_phases(base_plugins_phases)
+		local server_name_orders, missing = build_order(override_set)
+		per_site_orders[server_name] = server_name_orders
+		per_site_missing[server_name] = missing
 	end
-	-- Then append missing plugins to the end
-	for _, phase in ipairs(get_phases()) do
-		for id, plugin in pairs(plugins_phases) do
-			if plugin[phase] then
-				table.insert(result_orders[phase], id)
-				plugin[phase] = nil
-			end
-		end
-	end
-	return true, result_orders
+	result_orders.per_site = per_site_orders
+
+	-- Merge missing maps for reporting (global + per-site)
+	local missing_plugins = { global = global_missing, per_site = per_site_missing }
+
+	return true, result_orders, missing_plugins
 end
 
 helpers.require_plugin = function(id)

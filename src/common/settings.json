@@ -426,6 +426,126 @@
     "type": "text",
     "multiple": "error-logs"
   },
+  "PLUGINS_ORDER_INIT": {
+    "context": "global",
+    "default": "sessions whitelist blacklist greylist bunkernet limit authbasic securitytxt robotstxt",
+    "help": "Plugins that should run first during the init phase (engine bootstrap, runs once). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-init",
+    "label": "Plugins order (init)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue",
+    "separator": " "
+  },
+  "PLUGINS_ORDER_INIT_WORKER": {
+    "context": "global",
+    "default": "redis bunkernet dnsbl customcert letsencrypt selfsigned",
+    "help": "Plugins that should run first during the init_worker phase (per-worker bootstrap). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-init-worker",
+    "label": "Plugins order (init_worker)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue",
+    "separator": " "
+  },
+  "PLUGINS_ORDER_SET": {
+    "context": "multisite",
+    "default": "sessions whitelist letsencrypt customcert selfsigned ui",
+    "help": "Plugins that should run first during the set phase for this site (variable setup before rewrite/access). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-set",
+    "label": "Plugins order (set)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue",
+    "separator": " "
+  },
+  "PLUGINS_ORDER_ACCESS": {
+    "context": "multisite",
+    "default": "ssl whitelist letsencrypt blacklist greylist country dnsbl bunkernet reversescan limit authbasic misc cors securitytxt robotstxt antibot",
+    "help": "Plugins that should run first during the access phase for this site (request admission/control). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-access",
+    "label": "Plugins order (access)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue",
+    "separator": " "
+  },
+  "PLUGINS_ORDER_SSL_CERTIFICATE": {
+    "context": "multisite",
+    "default": "customcert letsencrypt selfsigned",
+    "help": "Plugins that should run first during the ssl_certificate phase for this site (TLS certificate selection/issuance). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-ssl-certificate",
+    "label": "Plugins order (ssl_certificate)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue",
+    "separator": " "
+  },
+  "PLUGINS_ORDER_HEADER": {
+    "context": "multisite",
+    "default": "headers cors reverseproxy clientcache antibot misc",
+    "help": "Plugins that should run first during the header phase for this site (response header filtering). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-header",
+    "label": "Plugins order (header)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue",
+    "separator": " "
+  },
+  "PLUGINS_ORDER_LOG": {
+    "context": "multisite",
+    "default": "badbehavior bunkernet errors metrics",
+    "help": "Plugins that should run first during the log phase for this site (HTTP log processing after response). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-log",
+    "label": "Plugins order (log)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue",
+    "separator": " "
+  },
+  "PLUGINS_ORDER_PREREAD": {
+    "context": "multisite",
+    "default": "whitelist blacklist greylist country dnsbl reversescan",
+    "help": "Plugins that should run first during the preread phase for this site (TCP preread checks before proxying). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-preread",
+    "label": "Plugins order (preread)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue",
+    "separator": " "
+  },
+  "PLUGINS_ORDER_LOG_STREAM": {
+    "context": "multisite",
+    "default": "badbehavior bunkernet",
+    "help": "Plugins that should run first during the log_stream phase for this site (stream log processing). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-log-stream",
+    "label": "Plugins order (log_stream)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue",
+    "separator": " "
+  },
+  "PLUGINS_ORDER_LOG_DEFAULT": {
+    "context": "multisite",
+    "default": "badbehavior bunkernet errors misc metrics",
+    "help": "Plugins that should run first during the log_default phase for this site (default vhost log processing). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-log-default",
+    "label": "Plugins order (log_default)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue",
+    "separator": " "
+  },
+  "PLUGINS_ORDER_TIMER": {
+    "context": "global",
+    "default": "metrics badbehavior bunkernet sessions",
+    "help": "Plugins that should run first during the timer phase (background timers). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-timer",
+    "label": "Plugins order (timer)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue",
+    "separator": " "
+  },
+  "PLUGINS_ORDER_INIT_WORKERS": {
+    "context": "global",
+    "default": "",
+    "help": "Comma or space separated plugin IDs to run during the init_workers phase.",
+    "id": "plugins-order-init-workers",
+    "label": "Plugins order (init_workers)",
+    "regex": "^$|^[A-Za-z0-9._-]+([ ,]+[A-Za-z0-9._-]+)*$",
+    "type": "multivalue",
+    "separator": " "
+  },
   "LOG_LEVEL": {
     "context": "global",
     "default": "notice",

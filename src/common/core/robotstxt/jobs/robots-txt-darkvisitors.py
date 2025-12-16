@@ -33,7 +33,7 @@ try:
         LOGGER.warning("No services found, exiting...")
         sys_exit(0)
 
-    services = services.split(" ")
+    services = services.split()
     services_darkvisitors_configs = {}
 
     # Multisite case

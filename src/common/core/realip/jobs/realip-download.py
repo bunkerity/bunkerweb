@@ -49,7 +49,7 @@ try:
         LOGGER.warning("No services found, exiting...")
         sys_exit(0)
 
-    services = services.split(" ")
+    services = services.split()
     services_realip_urls = {}
 
     # Multisite case
@@ -60,18 +60,16 @@ try:
 
                 # Get service URLs
                 services_realip_urls[first_server] = set()
-                for url in getenv(f"{first_server}_REAL_IP_FROM_URLS", "").strip().split(" "):
-                    if url:
-                        services_realip_urls[first_server].add(url)
+                for url in getenv(f"{first_server}_REAL_IP_FROM_URLS", "").strip().split():
+                    services_realip_urls[first_server].add(url)
     # Singlesite case
     elif getenv("USE_REAL_IP", "no") == "yes":
         realip_activated = True
 
     # Get global URLs
     services_realip_urls["global"] = set()
-    for url in getenv("REAL_IP_FROM_URLS", "").strip().split(" "):
-        if url:
-            services_realip_urls["global"].add(url)
+    for url in getenv("REAL_IP_FROM_URLS", "").strip().split():
+        services_realip_urls["global"].add(url)
 
     if not realip_activated:
         LOGGER.info("RealIP is not activated, skipping download...")

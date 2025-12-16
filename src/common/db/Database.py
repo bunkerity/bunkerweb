@@ -1513,7 +1513,7 @@ class Database:
                 services = config.get("SERVER_NAME", [])
 
                 if isinstance(services, str):
-                    services = services.strip().split(" ")
+                    services = services.strip().split()
 
                 services = [service for service in services if service]  # Clean up empty strings
 
@@ -2115,7 +2115,7 @@ class Database:
                     value = self._empty_if_none(result.value)
 
                     if result.setting_id == "SERVER_NAME" and search(r"^" + escape(result.service_id) + r"( |$)", value) is None:
-                        split = set(value.split(" "))
+                        split = set(value.split())
                         split.discard(result.service_id)
                         value = result.service_id + " " + " ".join(split)
 
@@ -2235,7 +2235,7 @@ class Database:
                     }
 
             if not global_only and config["MULTISITE"]["value"] == "yes":
-                for service_id in config["SERVER_NAME"]["value"].split(" "):
+                for service_id in config["SERVER_NAME"]["value"].split():
                     service_template_used = config.get(f"{service_id}_USE_TEMPLATE", {"value": self._empty_if_none(template_used)})["value"]
                     if service_template_used:
                         templates[service_id] = service_template_used
@@ -2264,7 +2264,7 @@ class Database:
                             }
 
         multiple = {}
-        services = config["SERVER_NAME"]["value"].split(" ")
+        services = config["SERVER_NAME"]["value"].split()
         for key, data in config.copy().items():
             new_value = None
             if service:
@@ -2540,7 +2540,7 @@ class Database:
         """Get the services' configs from the database"""
         services = []
         config = self.get_config(methods=methods, with_drafts=with_drafts)
-        service_names = config["SERVER_NAME"]["value"].split(" ") if methods else config["SERVER_NAME"].split(" ")
+        service_names = config["SERVER_NAME"]["value"].split() if methods else config["SERVER_NAME"].split()
         for service in service_names:
             service_settings = []
             tmp_config = config.copy()

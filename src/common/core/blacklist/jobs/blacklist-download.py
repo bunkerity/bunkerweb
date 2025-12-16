@@ -75,7 +75,7 @@ try:
         LOGGER.warning("No services found, exiting...")
         sys_exit(0)
 
-    services = services.split(" ")
+    services = services.split()
     services_blacklist_urls = {}
 
     # Multisite case
@@ -88,13 +88,12 @@ try:
                 services_blacklist_urls[first_server] = {}
                 for kind in KINDS:
                     services_blacklist_urls[first_server][kind] = set()
-                    for url in getenv(f"{first_server}_BLACKLIST_{kind}_URLS", "").strip().split(" "):
-                        if url:
-                            services_blacklist_urls[first_server][kind].add(url)
+                    for url in getenv(f"{first_server}_BLACKLIST_{kind}_URLS", "").strip().split():
+                        services_blacklist_urls[first_server][kind].add(url)
 
                 # Add community blacklist URLs
                 community_lists = getenv(f"{first_server}_BLACKLIST_COMMUNITY_LISTS", "ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents").strip()
-                for community_id in community_lists.split(" "):
+                for community_id in community_lists.split():
                     if not community_id:
                         continue
 
@@ -125,16 +124,12 @@ try:
         services_blacklist_urls[services[0]] = {}
         for kind in KINDS:
             services_blacklist_urls[services[0]][kind] = set()
-            for url in getenv(f"BLACKLIST_{kind}_URLS", "").strip().split(" "):
-                if url:
-                    services_blacklist_urls[services[0]][kind].add(url)
+            for url in getenv(f"BLACKLIST_{kind}_URLS", "").strip().split():
+                services_blacklist_urls[services[0]][kind].add(url)
 
         # Add community blacklist URLs for singlesite
         community_lists = getenv("BLACKLIST_COMMUNITY_LISTS", "ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents").strip()
-        for community_id in community_lists.split(" "):
-            if not community_id:
-                continue
-
+        for community_id in community_lists.split():
             if community_id in COMMUNITY_LISTS:
                 url = COMMUNITY_LISTS[community_id]
                 # Determine kind from prefix

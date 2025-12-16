@@ -134,7 +134,7 @@ try:
     multisite = getenv("MULTISITE", "no") == "yes"
 
     if isinstance(all_domains, str):
-        all_domains = all_domains.split(" ")
+        all_domains = all_domains.split()
 
     if not all_domains:
         LOGGER.info("No services found, exiting ...")

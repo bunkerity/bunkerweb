@@ -540,7 +540,7 @@ def custom_plugin_page(plugin: str):
 
     if is_metrics_on and not is_used:
         # Check if at least one service is using metrics and/or the plugin
-        for service in db_config.get("SERVER_NAME", "").split(" "):
+        for service in db_config.get("SERVER_NAME", "www.example.com").split():
             if not is_metrics_on and db_config.get(f"{service}_USE_METRICS", "yes") != "no":
                 is_metrics_on = True
             elif not is_used and plugin_used(f"{service}_"):

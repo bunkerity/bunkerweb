@@ -183,7 +183,7 @@ try:
     servers = getenv("SERVER_NAME", "www.example.com") or []
 
     if isinstance(servers, str):
-        servers = servers.split(" ")
+        servers = servers.split()
 
     if not servers:
         LOGGER.info("No server found, skipping self-signed certificate generation ...")

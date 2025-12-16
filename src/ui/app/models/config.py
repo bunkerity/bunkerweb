@@ -199,7 +199,7 @@ class Config:
             raise this if the service already exists
         """
         services = self.get_services(methods=False, with_drafts=True)
-        server_name_splitted = variables["SERVER_NAME"].split(" ")
+        server_name_splitted = variables["SERVER_NAME"].split()
         for service in services:
             if service["SERVER_NAME"] == variables["SERVER_NAME"] or service["SERVER_NAME"] in server_name_splitted:
                 return f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.", 1
@@ -231,8 +231,8 @@ class Config:
         """
         services = self.get_services(methods=False, with_drafts=True)
         changed_server_name = old_server_name != variables["SERVER_NAME"]
-        server_name_splitted = variables["SERVER_NAME"].split(" ")
-        old_server_name_splitted = old_server_name.split(" ")
+        server_name_splitted = variables["SERVER_NAME"].split()
+        old_server_name_splitted = old_server_name.split()
         for i in range(len(services) - 1, -1, -1):
             service = services[i]
             if service["SERVER_NAME"] == variables["SERVER_NAME"] or service["SERVER_NAME"] in server_name_splitted:
@@ -306,7 +306,7 @@ class Config:
         if not found:
             return f"Can't delete missing {service_name} configuration.", 1
 
-        full_env["SERVER_NAME"] = " ".join([s for s in full_env["SERVER_NAME"].split(" ") if s != service_name])
+        full_env["SERVER_NAME"] = " ".join([s for s in full_env["SERVER_NAME"].split() if s != service_name])
 
         new_env = full_env.copy()
 

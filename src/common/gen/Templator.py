@@ -261,9 +261,9 @@ class Templator:
         self._render_global()
         servers = [self._config.get("SERVER_NAME", "www.example.com").strip()]
         if self._config.get("MULTISITE", "no") == "yes":
-            servers = self._config.get("SERVER_NAME", "www.example.com").strip().split(" ")
+            servers = self._config.get("SERVER_NAME", "www.example.com").strip().split()
 
-        max_workers = min(ceil(max(1, (cpu_count() or 1) * 0.75)), len(servers))
+        max_workers = min(ceil(max(1, (cpu_count() or 1) * 0.75)), len(servers)) or 1
         with ProcessPoolExecutor(max_workers=max_workers) as executor:
             futures = [executor.submit(self._render_server, server) for server in servers]
             for future in futures:
@@ -399,7 +399,7 @@ class Templator:
         template_vars["all"] = self._full_config
         template_vars.update(self._config)
 
-        max_workers = min(ceil(max(1, (cpu_count() or 1) * 0.75)), len(templates))
+        max_workers = min(ceil(max(1, (cpu_count() or 1) * 0.75)), len(templates)) or 1
         with ProcessPoolExecutor(max_workers=max_workers) as executor:
             futures = [executor.submit(self._render_template, template, template_vars) for template in templates]
             for future in futures:

@@ -24,7 +24,7 @@ jobs:
       # Get PDF doc
       - name: Get documentation
         if: inputs.VERSION != 'testing'
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
       # Create tag
@@ -50,8 +50,8 @@ jobs:
           # Extract the changelog content
           VERSION="${{ inputs.VERSION }}"
 
-          # Check if this is a stable release (no -rc or -beta suffix)
-          if [[ ! "$VERSION" =~ -(rc|beta) ]]; then
+          # Check if this is a stable release (no -rc/-beta or ~rc/~beta suffix)
+          if [[ ! "$VERSION" =~ [-~](rc|beta) ]]; then
             # For stable releases, extract the stable section and all related RC/beta sections
             # Extract major.minor.patch version (e.g., 1.6.5 from 1.6.5)
             BASE_VERSION=$(echo "$VERSION" | grep -oP '^\d+\.\d+\.\d+')
@@ -66,7 +66,7 @@ jobs:
                 ver = $0
                 sub(/^## v/, "", ver)
                 sub(/ .*$/, "", ver)
-                sub(/-.*$/, "", ver)
+                sub(/[-~].*$/, "", ver)
                 if (ver != base) {
                   print NR
                   exit

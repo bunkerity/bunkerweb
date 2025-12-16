@@ -43,6 +43,14 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 这种模式允许您为需要不同用例的不同值的功能（如反向代理、端口或其他设置）管理多个配置。
 
+### 插件执行顺序 {#plugin-order}
+
+可以使用空格分隔的列表调整顺序：
+
+- 全局阶段：`PLUGINS_ORDER_INIT`、`PLUGINS_ORDER_INIT_WORKER`、`PLUGINS_ORDER_TIMER`。
+- 按站点的阶段：`PLUGINS_ORDER_SET`、`PLUGINS_ORDER_ACCESS`、`PLUGINS_ORDER_SSL_CERTIFICATE`、`PLUGINS_ORDER_HEADER`、`PLUGINS_ORDER_LOG`、`PLUGINS_ORDER_PREREAD`、`PLUGINS_ORDER_LOG_STREAM`、`PLUGINS_ORDER_LOG_DEFAULT`。
+- 语义：列出的插件在该阶段优先执行；其余插件仍按正常顺序执行。仅使用空格分隔插件 ID。
+
 ### 安全模式 {#security-modes}
 
 `SECURITY_MODE` 设置决定了 BunkerWeb 如何处理检测到的威胁。这个灵活的功能允许您根据具体需求在监控或主动阻止可疑活动之间进行选择：

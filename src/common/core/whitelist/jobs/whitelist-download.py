@@ -68,7 +68,7 @@ try:
         LOGGER.warning("No services found, exiting...")
         sys_exit(0)
 
-    services = services.split(" ")
+    services = services.split()
     services_whitelist_urls = {}
 
     # Multisite case
@@ -81,9 +81,8 @@ try:
                 services_whitelist_urls[first_server] = {}
                 for kind in KINDS:
                     services_whitelist_urls[first_server][kind] = set()
-                    for url in getenv(f"{first_server}_WHITELIST_{kind}_URLS", "").strip().split(" "):
-                        if url:
-                            services_whitelist_urls[first_server][kind].add(url)
+                    for url in getenv(f"{first_server}_WHITELIST_{kind}_URLS", "").strip().split():
+                        services_whitelist_urls[first_server][kind].add(url)
     # Singlesite case
     elif getenv("USE_WHITELIST", "yes") == "yes":
         whitelist_activated = True
@@ -92,9 +91,8 @@ try:
         services_whitelist_urls[services[0]] = {}
         for kind in KINDS:
             services_whitelist_urls[services[0]][kind] = set()
-            for url in getenv(f"WHITELIST_{kind}_URLS", "").strip().split(" "):
-                if url:
-                    services_whitelist_urls[services[0]][kind].add(url)
+            for url in getenv(f"WHITELIST_{kind}_URLS", "").strip().split():
+                services_whitelist_urls[services[0]][kind].add(url)
 
     if not whitelist_activated:
         LOGGER.info("Whitelist is not activated, skipping downloads...")

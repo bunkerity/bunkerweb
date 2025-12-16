@@ -368,7 +368,7 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
             LOGGER.debug(f"[Service: {service}] Wildcard domains are not supported for HTTP challenges, deactivating wildcard support.")
             wildcard = False
 
-    server_names = server_names_val.split(" ")
+    server_names = server_names_val.split()
     server_name = service
     if wildcard:
         server_names = extract_wildcards_from_domains(server_names)
@@ -603,7 +603,7 @@ try:
         sys_exit(0)
 
     services = {}
-    for service in server_names.split(" "):
+    for service in server_names.split():
         if not service.strip():
             continue
 
@@ -667,7 +667,7 @@ try:
             if not certificate_lines:
                 continue
 
-            service = certificate_lines[0].split(" ")[0].strip()
+            service = certificate_lines[0].split()[0].strip()
             match_domains = search(r"Domains:\s+(.+)$", certificate_block, MULTILINE)
             domains = match_domains.group(1).strip().replace(" ", ",") if match_domains else ""
 

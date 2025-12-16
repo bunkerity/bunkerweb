@@ -8,9 +8,11 @@ from ..utils import get_db
 from ..schemas import GlobalSettingsUpdate
 
 
+config_router = APIRouter(prefix="/global_config", tags=["global_settings"])
 router = APIRouter(prefix="/global_settings", tags=["global_settings"])
 
 
+@config_router.get("", dependencies=[Depends(guard)])
 @router.get("", dependencies=[Depends(guard)])
 def read_global_settings(full: bool = False, methods: bool = False) -> JSONResponse:
     """Read the current global settings.
@@ -44,6 +46,7 @@ def _current_api_global_overrides() -> Dict[str, str]:
     return overrides
 
 
+@config_router.patch("", dependencies=[Depends(guard)])
 @router.patch("", dependencies=[Depends(guard)])
 def update_global_settings(payload: GlobalSettingsUpdate) -> JSONResponse:
     """Update global settings.

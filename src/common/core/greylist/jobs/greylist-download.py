@@ -68,7 +68,7 @@ try:
         LOGGER.warning("No services found, exiting...")
         sys_exit(0)
 
-    services = services.split(" ")
+    services = services.split()
     services_greylist_urls = {}
 
     # Multisite case
@@ -81,9 +81,8 @@ try:
                 services_greylist_urls[first_server] = {}
                 for kind in KINDS:
                     services_greylist_urls[first_server][kind] = set()
-                    for url in getenv(f"{first_server}_GREYLIST_{kind}_URLS", "").strip().split(" "):
-                        if url:
-                            services_greylist_urls[first_server][kind].add(url)
+                    for url in getenv(f"{first_server}_GREYLIST_{kind}_URLS", "").strip().split():
+                        services_greylist_urls[first_server][kind].add(url)
     # Singlesite case
     elif getenv("USE_GREYLIST", "no") == "yes":
         greylist_activated = True
@@ -92,9 +91,8 @@ try:
         services_greylist_urls[services[0]] = {}
         for kind in KINDS:
             services_greylist_urls[services[0]][kind] = set()
-            for url in getenv(f"GREYLIST_{kind}_URLS", "").strip().split(" "):
-                if url:
-                    services_greylist_urls[services[0]][kind].add(url)
+            for url in getenv(f"GREYLIST_{kind}_URLS", "").strip().split():
+                services_greylist_urls[services[0]][kind].add(url)
 
     if not greylist_activated:
         LOGGER.info("Greylist is not activated, skipping downloads...")

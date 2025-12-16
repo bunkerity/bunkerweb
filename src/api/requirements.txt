@@ -346,9 +346,9 @@ email-validator==2.3.0 \
     --hash=sha256:80f13f623413e6b197ae73bb10bf4eb0908faf509ad8362c5edeb0be7fd450b4 \
     --hash=sha256:9fc05c37f2f6cf439ff414f8fc46d917929974a82244c20eb10231ba60c54426
     # via -r requirements.in
-fastapi==0.124.2 \
-    --hash=sha256:6314385777a507bb19b34bd064829fddaea0eea54436deb632b5de587554055c \
-    --hash=sha256:72e188f01f360e2f59da51c8822cbe4bca210c35daaae6321b1b724109101c00
+fastapi==0.124.4 \
+    --hash=sha256:0e9422e8d6b797515f33f500309f6e1c98ee4e85563ba0f2debb282df6343763 \
+    --hash=sha256:6d1e703698443ccb89e50abe4893f3c84d9d6689c0cf1ca4fad6d3c15cf69f15
     # via -r requirements.in
 gunicorn==23.0.0 \
     --hash=sha256:ec400d38950de4dfd418cff8328b2c8faed0edb0d517d3394e457c317908ca4d \

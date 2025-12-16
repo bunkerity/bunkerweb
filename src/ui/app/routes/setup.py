@@ -63,7 +63,7 @@ def setup_page():
 
     ui_reverse_proxy = None
     ui_reverse_proxy_url = None
-    for server_name in db_config["SERVER_NAME"].split(" "):
+    for server_name in db_config["SERVER_NAME"].split():
         if server_name and db_config.get(f"{server_name}_USE_UI", db_config.get("USE_UI", "no")) == "yes":
             if admin_user:
                 return redirect(url_for("login.login_page"), 301)
@@ -151,12 +151,12 @@ def setup_page():
             flash("The admin user was created successfully")
 
         if not ui_reverse_proxy:
-            server_names = db_config["SERVER_NAME"].split(" ")
+            server_names = db_config["SERVER_NAME"].split()
             if request.form["server_name"] in server_names:
                 return handle_error(f"The hostname {request.form['server_name']} is already in use.", "setup")
             else:
                 for server_name in server_names:
-                    if request.form["server_name"] in db_config.get(f"{server_name}_SERVER_NAME", "").split(" "):
+                    if request.form["server_name"] in db_config.get(f"{server_name}_SERVER_NAME", "").split():
                         return handle_error(f"The hostname {request.form['server_name']} is already in use.", "setup")
 
             if not REVERSE_PROXY_PATH.match(request.form["ui_host"]):
@@ -303,7 +303,7 @@ def setup_loading():
     ui_admin = DB.get_ui_user(as_dict=True)
     admin_old_enough = ui_admin and ui_admin["creation_date"] < datetime.now().astimezone() - timedelta(minutes=5)
 
-    for server_name in db_config["SERVER_NAME"].split(" "):
+    for server_name in db_config["SERVER_NAME"].split():
         if server_name and db_config.get(f"{server_name}_USE_UI", "no") == "yes":
             if admin_old_enough:
                 return redirect(url_for("login.login_page"), 301)

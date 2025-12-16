@@ -41,7 +41,7 @@ setLoggerClass(BWLogger)
 # Set the default logging level based on environment variables
 default_level = _nameToLevel.get(getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper(), INFO)
 
-env_log_types = getenv("LOG_TYPES", "stderr").split(" ")
+env_log_types = getenv("LOG_TYPES", "stderr").split()
 log_types = {}
 warnings = []
 

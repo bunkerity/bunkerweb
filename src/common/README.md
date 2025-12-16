@@ -32,6 +32,14 @@ Some settings in BunkerWeb support multiple configurations for the same feature.
 
 This pattern allows you to manage multiple configurations for features like reverse proxies, ports, or other settings that require distinct values for different use cases.
 
+### Plugin Execution Order {#plugin-order}
+
+You can reorder plugin execution with space-separated lists:
+
+- Global phases: `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_TIMER`.
+- Per-site phases: `PLUGINS_ORDER_SET`, `PLUGINS_ORDER_ACCESS`, `PLUGINS_ORDER_SSL_CERTIFICATE`, `PLUGINS_ORDER_HEADER`, `PLUGINS_ORDER_LOG`, `PLUGINS_ORDER_PREREAD`, `PLUGINS_ORDER_LOG_STREAM`, `PLUGINS_ORDER_LOG_DEFAULT`.
+- Semantics: listed plugins run first for that phase; all remaining plugins still run afterward in their normal sequence. Separate IDs with spaces only.
+
 ### Security Modes {#security-modes}
 
 The `SECURITY_MODE` setting determines how BunkerWeb handles detected threats. This flexible feature allows you to choose between monitoring or actively blocking suspicious activity, depending on your specific needs:

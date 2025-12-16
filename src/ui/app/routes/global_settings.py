@@ -34,7 +34,7 @@ def global_settings_page():
 
             # Edit check fields and remove already existing ones
             config = DB.get_config(methods=True, with_drafts=True)
-            services = config["SERVER_NAME"]["value"].split(" ")
+            services = config["SERVER_NAME"]["value"].split()
             variables_to_check = variables.copy()
 
             for variable, value in variables.items():

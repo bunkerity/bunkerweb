@@ -16,7 +16,7 @@
             <span class="multiselect-text">{{ setting }}</span>
             <label for="{{ setting_id_prefix }}{{ setting_data.id }}{{ setting_id_suffix }}_toggle"
                    class="text-truncate small">
-                {% set selected_count = setting_value.split(" ") | length if setting_value else 0 %}
+                {% set selected_count = setting_value.split() | length if setting_value else 0 %}
                 ({{ selected_count }} selected)
             </label>
         </button>

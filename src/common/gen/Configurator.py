@@ -283,7 +283,7 @@ class Configurator:
 
         # Expand variables to each sites if MULTISITE=yes and if not present
         if config.get("MULTISITE", "no") == "yes":
-            for server_name in config["SERVER_NAME"].strip().split(" "):
+            for server_name in config["SERVER_NAME"].strip().split():
                 server_name = server_name.strip()
                 if not server_name:
                     continue

@@ -261,7 +261,7 @@ class IngressController(Controller):
                     service[setting] = value
 
                 # Handle stream services
-                for server_name in service["SERVER_NAME"].strip().split(" "):
+                for server_name in service["SERVER_NAME"].strip().split():
                     if service.get(f"{server_name}_SERVER_TYPE", service.get("SERVER_TYPE", "http")) == "stream":
                         reverse_proxy_found = False
                         warned = False
@@ -292,7 +292,7 @@ class IngressController(Controller):
                 if tls.hosts and tls.secret_name:
                     for host in tls.hosts:
                         for service in services:
-                            if host in service["SERVER_NAME"].split(" "):
+                            if host in service["SERVER_NAME"].split():
                                 secrets_tls = self.__corev1.list_namespaced_secret(
                                     namespace,
                                     watch=False,

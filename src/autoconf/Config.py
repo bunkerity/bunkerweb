@@ -70,7 +70,7 @@ class Config:
                     variable,
                     value=value,
                     multisite=True,
-                    extra_services=config["SERVER_NAME"].split(" ") + db_services,
+                    extra_services=config["SERVER_NAME"].split() + db_services,
                 )
                 if not success:
                     if self._type == "kubernetes":

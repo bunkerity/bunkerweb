@@ -10,14 +10,7 @@
     "securitytxt",
     "robotstxt"
   ],
-  "init_worker": [
-    "redis",
-    "bunkernet",
-    "dnsbl",
-    "customcert",
-    "letsencrypt",
-    "selfsigned"
-  ],
+  "init_worker": ["redis", "bunkernet", "dnsbl"],
   "set": [
     "sessions",
     "whitelist",
@@ -45,14 +38,7 @@
     "robotstxt",
     "antibot"
   ],
-  "headers": [
-    "headers",
-    "cors",
-    "reverseproxy",
-    "clientcache",
-    "antibot",
-    "misc"
-  ],
+  "headers": ["headers", "cors", "antibot", "misc"],
   "log": ["badbehavior", "bunkernet", "errors", "metrics"],
   "preread": [
     "whitelist",
@@ -63,7 +49,7 @@
     "reversescan"
   ],
   "log_stream": ["badbehavior", "bunkernet"],
-  "log_default": ["badbehavior", "bunkernet", "errors", "misc", "metrics"],
-  "timer": ["metrics", "badbehavior", "bunkernet", "sessions"],
+  "log_default": ["badbehavior", "bunkernet", "misc", "metrics"],
+  "timer": ["metrics", "badbehavior", "sessions"],
   "init_workers": []
 }

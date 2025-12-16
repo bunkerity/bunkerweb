@@ -258,7 +258,7 @@ def configs_new():
             next=True,
         )
         service = request.form["service"]
-        services = BW_CONFIG.get_config(global_only=True, with_drafts=True, methods=False, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split(" ")
+        services = BW_CONFIG.get_config(global_only=True, with_drafts=True, methods=False, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split()
         if service != "global" and service not in services:
             return handle_error(f"Service {service} does not exist.", "configs.configs_new", True)
 
@@ -366,7 +366,7 @@ def configs_new():
         type=config_type.upper(),
         name=config_name,
         is_draft=is_draft,
-        services=BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split(" "),
+        services=BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split(),
     )
 
 
@@ -398,7 +398,7 @@ def configs_edit(service: str, config_type: str, name: str):
             next=True,
         )
         new_service = request.form["service"]
-        services = BW_CONFIG.get_config(global_only=True, with_drafts=True, methods=False, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split(" ")
+        services = BW_CONFIG.get_config(global_only=True, with_drafts=True, methods=False, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split()
         if new_service != "global" and new_service not in services:
             return handle_error(f"Service {new_service} does not exist.", "configs.configs_new", True)
 
@@ -491,5 +491,5 @@ def configs_edit(service: str, config_type: str, name: str):
         config_method=db_config["method"],
         config_template=db_config.get("template"),
         is_draft=is_draft,
-        services=BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split(" "),
+        services=BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split(),
     )

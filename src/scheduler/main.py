@@ -170,6 +170,9 @@ def handle_reload(signum, frame):
                 "DATABASE_URI": getenv("DATABASE_URI", ""),
             }
 
+            if getenv("TZ"):
+                cmd_env["TZ"] = getenv("TZ")
+
             for key, value in environ.items():
                 if "CUSTOM_CONF" in key:
                     cmd_env[key] = value
@@ -443,6 +446,17 @@ def generate_caches():
 
 
 def generate_configs(logger: Logger = LOGGER) -> bool:
+    cmd_env = {
+        "PATH": getenv("PATH", ""),
+        "PYTHONPATH": getenv("PYTHONPATH", ""),
+        "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
+        "LOG_LEVEL": getenv("LOG_LEVEL", ""),
+        "DATABASE_URI": getenv("DATABASE_URI", ""),
+    }
+
+    if getenv("TZ"):
+        cmd_env["TZ"] = getenv("TZ")
+
     # run the generator
     proc = subprocess_run(
         [
@@ -457,13 +471,7 @@ def generate_configs(logger: Logger = LOGGER) -> bool:
         stdin=DEVNULL,
         stderr=STDOUT,
         check=False,
-        env={
-            "PATH": getenv("PATH", ""),
-            "PYTHONPATH": getenv("PYTHONPATH", ""),
-            "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-            "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-            "DATABASE_URI": getenv("DATABASE_URI", ""),
-        },
+        env=cmd_env,
     )
 
     if proc.returncode != 0:
@@ -588,7 +596,7 @@ def healthcheck_job():
                 if not api_caller.send_to_apis(
                     "POST",
                     f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
-                    timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split(" "))),
+                    timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split())),
                 )[0]:
                     HEALTHCHECK_LOGGER.error(f"Error while reloading instance {bw_instance.endpoint}")
                     ret = SCHEDULER.db.update_instance(db_instance["hostname"], "loading")
@@ -700,6 +708,9 @@ if __name__ == "__main__":
                 "LOG_LEVEL": getenv("LOG_LEVEL", ""),
                 "DATABASE_URI": getenv("DATABASE_URI", ""),
             }
+
+            if getenv("TZ"):
+                cmd_env["TZ"] = getenv("TZ")
 
             for key, value in environ.items():
                 if "CUSTOM_CONF" in key:
@@ -909,6 +920,9 @@ if __name__ == "__main__":
                     "DATABASE_URI": getenv("DATABASE_URI", ""),
                 }
 
+                if getenv("TZ"):
+                    cmd_env["TZ"] = getenv("TZ")
+
                 for key, value in environ.items():
                     if "CUSTOM_CONF" in key:
                         cmd_env[key] = value
@@ -993,7 +1007,7 @@ if __name__ == "__main__":
                     success, responses = SCHEDULER.send_to_apis(
                         "POST",
                         f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
-                        timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split(" "))),
+                        timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split())),
                         response=True,
                     )
                     if not success:
@@ -1098,7 +1112,7 @@ if __name__ == "__main__":
                         if not SCHEDULER.send_to_apis(
                             "POST",
                             f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
-                            timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split(" "))),
+                            timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split())),
                         )[0]:
                             LOGGER.error("Error while reloading bunkerweb with failover configuration, skipping ...")
                 elif not reachable:

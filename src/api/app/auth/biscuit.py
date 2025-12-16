@@ -326,7 +326,7 @@ def _resolve_resource_and_perm(path: str, method: str) -> tuple[Optional[str], O
     if first in {"instances", "reload", "stop"}:
         return _resolve_instances(p, method_u)
     # Global settings special cases (canonicalize hyphenated version)
-    if first in {"global_settings", "global-settings"}:
+    if first in {"global_settings", "global_config"}:
         return _resolve_global_settings(method_u)
     # Services special cases
     if first == "services":

@@ -36,7 +36,7 @@ try:
         LOGGER.warning("No services found, exiting...")
         sys_exit(0)
 
-    services = services.split(" ")
+    services = services.split()
     services_robotstxt_urls = {}
 
     # Multisite case
@@ -47,16 +47,12 @@ try:
 
                 # Get services URLs
                 services_robotstxt_urls[first_server] = set()
-                for url in getenv(f"{first_server}_ROBOTSTXT_URLS", "").strip().split(" "):
-                    if url:
-                        services_robotstxt_urls[first_server].add(url)
+                for url in getenv(f"{first_server}_ROBOTSTXT_URLS", "").strip().split():
+                    services_robotstxt_urls[first_server].add(url)
 
                 # Add community blacklist URLs
                 community_lists = getenv(f"{first_server}_ROBOTSTXT_COMMUNITY_LISTS", "").strip()
-                for community_id in community_lists.split(" "):
-                    if not community_id:
-                        continue
-
+                for community_id in community_lists.split():
                     if community_id in COMMUNITY_LISTS:
                         url = COMMUNITY_LISTS[community_id]
                         services_robotstxt_urls[first_server].add(url)
@@ -68,16 +64,12 @@ try:
 
         # Get global URLs
         services_robotstxt_urls[services[0]] = set()
-        for url in getenv("ROBOTSTXT_URLS", "").strip().split(" "):
-            if url:
-                services_robotstxt_urls[services[0]].add(url)
+        for url in getenv("ROBOTSTXT_URLS", "").strip().split():
+            services_robotstxt_urls[services[0]].add(url)
 
         # Add community blacklist URLs for singlesite
         community_lists = getenv("ROBOTSTXT_COMMUNITY_LISTS", "").strip()
-        for community_id in community_lists.split(" "):
-            if not community_id:
-                continue
-
+        for community_id in community_lists.split():
             if community_id in COMMUNITY_LISTS:
                 url = COMMUNITY_LISTS[community_id]
                 services_robotstxt_urls[services[0]].add(url)

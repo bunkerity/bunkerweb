@@ -46,7 +46,7 @@ try:
 
     # Retrieve non-default settings and additional configuration.
     db_config = JOB.db.get_non_default_settings(methods=True, with_drafts=True)
-    services = db_config.get("SERVER_NAME", {"value": ""})["value"].split(" ")
+    services = db_config.get("SERVER_NAME", {"value": ""})["value"].split()
     multisite = db_config.get("MULTISITE", {"value": "no"})["value"] == "yes"
 
     # Extract and simplify the database version using a regex.

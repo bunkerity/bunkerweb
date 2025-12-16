@@ -37,7 +37,7 @@ try:
     use_nightly_crs = False
 
     if getenv("MULTISITE", "no") == "yes":
-        for first_server in getenv("SERVER_NAME", "www.example.com").split(" "):
+        for first_server in getenv("SERVER_NAME", "www.example.com").split():
             if first_server and getenv(f"{first_server}_MODSECURITY_CRS_VERSION", "4") == "nightly":
                 use_nightly_crs = True
                 break

@@ -58,7 +58,7 @@ def _service_exists(service: Optional[str]) -> bool:
     db = get_db()
     try:
         conf = db.get_config(global_only=True, methods=False, with_drafts=True)
-        return service in (conf.get("SERVER_NAME", "") or "").split(" ")
+        return service in (conf.get("SERVER_NAME", "www.example.com") or "").split()
     except Exception:
         return False
 

@@ -51,7 +51,7 @@ try:
     if not services_raw:
         LOGGER.warning("No services found, exiting...")
         sys_exit(0)
-    services = services_raw.split(" ")
+    services = services_raw.split()
 
     # Determine activation per service
     dnsbl_activated = False
@@ -61,12 +61,12 @@ try:
         for svc in services:
             if getenv(f"{svc}_USE_DNSBL", "yes") == "yes":
                 dnsbl_activated = True
-                urls = set(u for u in getenv(f"{svc}_DNSBL_IGNORE_IP_URLS", "").strip().split(" ") if u)
+                urls = set(u for u in getenv(f"{svc}_DNSBL_IGNORE_IP_URLS", "").strip().split())
                 services_urls[svc] = urls
     else:
         if getenv("USE_DNSBL", "yes") == "yes":
             dnsbl_activated = True
-            urls = set(u for u in getenv("DNSBL_IGNORE_IP_URLS", "").strip().split(" ") if u)
+            urls = set(u for u in getenv("DNSBL_IGNORE_IP_URLS", "").strip().split())
             services_urls[services[0]] = urls
 
     if not dnsbl_activated:

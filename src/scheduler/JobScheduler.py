@@ -150,7 +150,7 @@ class JobScheduler(ApiCaller):
         reload_success = self.send_to_apis(
             "POST",
             f"/reload?test={'no' if self.env.get('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
-            timeout=max(int(reload_min_timeout), 3 * len(self.env.get("SERVER_NAME", "www.example.com").split(" "))),
+            timeout=max(int(reload_min_timeout), 3 * len(self.env.get("SERVER_NAME", "www.example.com").split())),
         )[0]
         if reload_success:
             self.__logger.info("Successfully reloaded nginx")

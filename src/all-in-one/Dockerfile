@@ -165,6 +165,7 @@ RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc+
 RUN apk add --no-cache "busybox>=1.37.0-r14" "busybox-binsh>=1.37.0-r14" "ssl_client>=1.37.0-r14" # CVE-2024-58251 CVE-2025-46394
 RUN apk add --no-cache "libpq>=17.7-r0" "postgresql17-client>=17.7-r0" # CVE-2025-12817 CVE-2025-12818
 RUN apk add --no-cache "libpng>=1.6.53-r0" # CVE-2025-64720 CVE-2025-65018 CVE-2025-66293 CVE-2025-64505 CVE-2025-64506
+RUN apk add --no-cache "c-ares>=1.34.6-r0" # CVE-2025-62408
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 

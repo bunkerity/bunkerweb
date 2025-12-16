@@ -184,7 +184,7 @@ def services_delete():
 @services.route("/services/<string:service>", methods=["GET", "POST"])
 @login_required
 def services_service_page(service: str):
-    services = BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split(" ")
+    services = BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split()
     service_exists = service in services
 
     if service != "new" and not service_exists:
@@ -352,7 +352,7 @@ def services_service_page(service: str):
 
             # Build the final custom config map taking into account removals and additions
             new_server_name = variables.get("SERVER_NAME", "").split(" ")[0]
-            old_server_name_splitted = old_server_name.split(" ")
+            old_server_name_splitted = old_server_name.split()
             old_server_id = old_server_name_splitted[0] if old_server_name_splitted and old_server_name_splitted[0] else service
             renamed_service = service != "new" and new_server_name and new_server_name != old_server_id
 
@@ -529,7 +529,7 @@ def services_service_export():
     db_config = BW_CONFIG.get_config(methods=False, with_drafts=True)
 
     def export_service(service: str) -> List[str]:
-        if service not in db_config["SERVER_NAME"].split(" "):
+        if service not in db_config["SERVER_NAME"].split():
             return [f"# Configuration for {service} not found\n\n"]
 
         lines = [f"# Configuration for {service}\n"]

@@ -167,10 +167,7 @@ if __name__ == "__main__":
         # Parse BunkerWeb instances from environment using centralized endpoint builder
         apis = []
         hostnames = set()
-        for bw_instance in settings.get("BUNKERWEB_INSTANCES", "").split(" "):
-            if not bw_instance:
-                continue
-
+        for bw_instance in settings.get("BUNKERWEB_INSTANCES", "").split():
             match = BUNKERWEB_STATIC_INSTANCES_RX.search(bw_instance)
             if match:
                 if match.group("hostname") in hostnames:

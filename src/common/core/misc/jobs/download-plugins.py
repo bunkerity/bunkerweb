@@ -105,7 +105,7 @@ try:
 
     # Loop on URLs
     LOGGER.info(f"Downloading external plugins from {plugin_urls}...")
-    for plugin_url in plugin_urls.split(" "):
+    for plugin_url in plugin_urls.split():
         with BytesIO() as content:
             # Download Plugin file
             try:
