@@ -852,6 +852,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#plugin-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      Plugin Execution Order
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#security-modes" class="md-nav__link">
     <span class="md-ellipsis">
       Security Modes
@@ -3084,6 +3093,13 @@
 <li><code>REVERSE_PROXY_URL_2=/anotherdir</code> and <code>REVERSE_PROXY_HOST_2=http://myhost2</code> configure the second reverse proxy.</li>
 </ul>
 <p>This pattern allows you to manage multiple configurations for features like reverse proxies, ports, or other settings that require distinct values for different use cases.</p>
+<h3 id="plugin-order">Plugin Execution Order</h3>
+<p>You can reorder plugin execution with space-separated lists:</p>
+<ul>
+<li>Global phases: <code>PLUGINS_ORDER_INIT</code>, <code>PLUGINS_ORDER_INIT_WORKER</code>, <code>PLUGINS_ORDER_TIMER</code>.</li>
+<li>Per-site phases: <code>PLUGINS_ORDER_SET</code>, <code>PLUGINS_ORDER_ACCESS</code>, <code>PLUGINS_ORDER_SSL_CERTIFICATE</code>, <code>PLUGINS_ORDER_HEADER</code>, <code>PLUGINS_ORDER_LOG</code>, <code>PLUGINS_ORDER_PREREAD</code>, <code>PLUGINS_ORDER_LOG_STREAM</code>, <code>PLUGINS_ORDER_LOG_DEFAULT</code>.</li>
+<li>Semantics: listed plugins run first for that phase; all remaining plugins still run afterward in their normal sequence. Separate IDs with spaces only.</li>
+</ul>
 <h3 id="security-modes">Security Modes</h3>
 <p>The <code>SECURITY_MODE</code> setting determines how BunkerWeb handles detected threats. This flexible feature allows you to choose between monitoring or actively blocking suspicious activity, depending on your specific needs:</p>
 <ul>

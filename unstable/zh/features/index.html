@@ -852,6 +852,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#plugin-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      插件执行顺序
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#security-modes" class="md-nav__link">
     <span class="md-ellipsis">
       安全模式
@@ -3086,6 +3095,13 @@
 <li><code>REVERSE_PROXY_URL_2=/anotherdir</code> 和 <code>REVERSE_PROXY_HOST_2=http://myhost2</code> 配置第二个反向代理。</li>
 </ul>
 <p>这种模式允许您为需要不同用例的不同值的功能（如反向代理、端口或其他设置）管理多个配置。</p>
+<h3 id="plugin-order">插件执行顺序</h3>
+<p>可以使用空格分隔的列表调整顺序：</p>
+<ul>
+<li>全局阶段：<code>PLUGINS_ORDER_INIT</code>、<code>PLUGINS_ORDER_INIT_WORKER</code>、<code>PLUGINS_ORDER_TIMER</code>。</li>
+<li>按站点的阶段：<code>PLUGINS_ORDER_SET</code>、<code>PLUGINS_ORDER_ACCESS</code>、<code>PLUGINS_ORDER_SSL_CERTIFICATE</code>、<code>PLUGINS_ORDER_HEADER</code>、<code>PLUGINS_ORDER_LOG</code>、<code>PLUGINS_ORDER_PREREAD</code>、<code>PLUGINS_ORDER_LOG_STREAM</code>、<code>PLUGINS_ORDER_LOG_DEFAULT</code>。</li>
+<li>语义：列出的插件在该阶段优先执行；其余插件仍按正常顺序执行。仅使用空格分隔插件 ID。</li>
+</ul>
 <h3 id="security-modes">安全模式</h3>
 <p><code>SECURITY_MODE</code> 设置决定了 BunkerWeb 如何处理检测到的威胁。这个灵活的功能允许您根据具体需求在监控或主动阻止可疑活动之间进行选择：</p>
 <ul>

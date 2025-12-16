@@ -852,6 +852,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#plugin-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      Orden de ejecución de plugins
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#security-modes" class="md-nav__link">
     <span class="md-ellipsis">
       Modos de Seguridad
@@ -3084,6 +3093,13 @@
 <li><code>REVERSE_PROXY_URL_2=/anotherdir</code> y <code>REVERSE_PROXY_HOST_2=http://myhost2</code> configuran el segundo proxy inverso.</li>
 </ul>
 <p>Este patrón te permite gestionar múltiples configuraciones para características como proxies inversos, puertos u otros ajustes que requieren valores distintos para diferentes casos de uso.</p>
+<h3 id="plugin-order">Orden de ejecución de plugins</h3>
+<p>Puede ajustar el orden con listas separadas por espacios:</p>
+<ul>
+<li>Fases globales: <code>PLUGINS_ORDER_INIT</code>, <code>PLUGINS_ORDER_INIT_WORKER</code>, <code>PLUGINS_ORDER_TIMER</code>.</li>
+<li>Fases por sitio: <code>PLUGINS_ORDER_SET</code>, <code>PLUGINS_ORDER_ACCESS</code>, <code>PLUGINS_ORDER_SSL_CERTIFICATE</code>, <code>PLUGINS_ORDER_HEADER</code>, <code>PLUGINS_ORDER_LOG</code>, <code>PLUGINS_ORDER_PREREAD</code>, <code>PLUGINS_ORDER_LOG_STREAM</code>, <code>PLUGINS_ORDER_LOG_DEFAULT</code>.</li>
+<li>Semántica: los plugins listados se ejecutan primero en esa fase; el resto se ejecuta después en su secuencia normal. Separe los IDs solo con espacios.</li>
+</ul>
 <h3 id="security-modes">Modos de Seguridad</h3>
 <p>El ajuste <code>SECURITY_MODE</code> determina cómo BunkerWeb maneja las amenazas detectadas. Esta característica flexible te permite elegir entre monitorizar o bloquear activamente la actividad sospechosa, dependiendo de tus necesidades específicas:</p>
 <ul>
