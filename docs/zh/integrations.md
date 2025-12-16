@@ -1268,7 +1268,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+  bunkerity/bunkerweb-all-in-one:1.6.7-rc1
 ```
 
 默认情况下，容器暴露：
@@ -1284,7 +1284,7 @@ docker run -d \
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+    image: bunkerity/bunkerweb-all-in-one:1.6.7-rc1
     volumes:
       - bw-storage:/data
 ...
@@ -1361,7 +1361,7 @@ docker run -d \
   -e API_PASSWORD=StrongP@ssw0rd \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
   -p 8888:8888/tcp \
-  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+  bunkerity/bunkerweb-all-in-one:1.6.7-rc1
 ```
 
 推荐（在 BunkerWeb 之后）— 不要发布 `8888`；而是反向代理它：
@@ -1369,7 +1369,7 @@ docker run -d \
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+    image: bunkerity/bunkerweb-all-in-one:1.6.7-rc1
     container_name: bunkerweb-aio
     ports:
       - "80:8080/tcp"
@@ -1441,7 +1441,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+  bunkerity/bunkerweb-all-in-one:1.6.7-rc1
 ```
 
 *   当 `USE_CROWDSEC=yes` 时，入口点将：
@@ -1496,7 +1496,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+  bunkerity/bunkerweb-all-in-one:1.6.7-rc1
 ```
 
 !!! info "内部工作原理"
@@ -1518,7 +1518,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+  bunkerity/bunkerweb-all-in-one:1.6.7-rc1
 ```
 
 注意：
@@ -1554,7 +1554,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+  bunkerity/bunkerweb-all-in-one:1.6.7-rc1
 ```
 
 *   当 `CROWDSEC_API` 不是 `127.0.0.1` 或 `localhost` 时，将跳过**本地注册**。
@@ -1588,13 +1588,13 @@ docker run -d \
 无论您是进行测试、开发应用程序还是在生产中部署 BunkerWeb，Docker 容器化选项都提供了灵活性和易用性。采用这种方法使您能够充分利用 BunkerWeb 的功能，同时利用 Docker 技术的优势。
 
 ```shell
-docker pull bunkerity/bunkerweb:1.6.7~rc1
+docker pull bunkerity/bunkerweb:1.6.7-rc1
 ```
 
 Docker 镜像也可在 [GitHub packages](https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb) 上找到，可以使用 `ghcr.io` 仓库地址下载：
 
 ```shell
-docker pull ghcr.io/bunkerity/bunkerweb:1.6.7~rc1
+docker pull ghcr.io/bunkerity/bunkerweb:1.6.7-rc1
 ```
 
 Docker 集成的关键概念包括：
@@ -1614,7 +1614,7 @@ Docker 集成的关键概念包括：
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
     environment:
       - MY_SETTING=value
       - ANOTHER_SETTING=another value
@@ -1655,7 +1655,7 @@ secrets:
 [调度器](concepts.md#scheduler) 在其自己的容器中运行，该容器也可在 Docker Hub 上找到：
 
 ```shell
-docker pull bunkerity/bunkerweb-scheduler:1.6.7~rc1
+docker pull bunkerity/bunkerweb-scheduler:1.6.7-rc1
 ```
 
 !!! info "BunkerWeb 设置"
@@ -1676,7 +1676,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.7~rc1
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7~rc1
+        image: bunkerity/bunkerweb:1.6.7-rc1
         environment:
           # 这将为 BunkerWeb 容器设置 API
           <<: *bw-api-env
@@ -1685,7 +1685,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.7~rc1
           - bw-universe
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
         environment:
           # 这将为调度器容器设置 API
           <<: *bw-api-env
@@ -1703,7 +1703,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.7~rc1
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
     volumes:
       - bw-storage:/data
 ...
@@ -1849,7 +1849,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.7~rc1
+    image: bunkerity/bunkerweb:1.6.7-rc1
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -1862,7 +1862,7 @@ services:
       - bw-universe
 ...
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
     environment:
       <<: *bw-api-env
       BUNKERWEB_INSTANCES: "bunkerweb" # 这个设置是强制性的，用来指定 BunkerWeb 实例
@@ -1895,7 +1895,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.7~rc1
+    image: bunkerity/bunkerweb:1.6.7-rc1
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -1908,7 +1908,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
     depends_on:
       - bunkerweb
     environment:
@@ -2469,7 +2469,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.7~rc1
+    image: bunkerity/bunkerweb:1.6.7-rc1
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -2484,7 +2484,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由自动配置服务自动检测
@@ -2499,7 +2499,7 @@ services:
       - bw-db
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
+    image: bunkerity/bunkerweb-autoconf:1.6.7-rc1
     depends_on:
       - bunkerweb
       - bw-docker
@@ -2678,13 +2678,13 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7~rc1
+        image: bunkerity/bunkerweb:1.6.7-rc1
         labels:
           - "bunkerweb.INSTANCE=yes"
           - "bunkerweb.NAMESPACE=my-namespace" # 为 BunkerWeb 实例设置命名空间，以便自动配置服务可以检测到它
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.7-rc1
         environment:
           ...
           NAMESPACES: "my-namespace my-other-namespace" # 只监听这些命名空间
@@ -2974,7 +2974,7 @@ spec:
 
         # BunkerWeb Sidecar
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.7~rc1
+          image: bunkerity/bunkerweb:1.6.7-rc1
           ports:
             - containerPort: 8080  # Exposed HTTP port
             - containerPort: 5000  # Internal API (mandatory)
@@ -3327,7 +3327,7 @@ metadata:
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
+              image: bunkerity/bunkerweb-autoconf:1.6.7-rc1
               imagePullPolicy: Always
               env:
                 - name: NAMESPACES
@@ -3629,7 +3629,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.7~rc1
+    image: bunkerity/bunkerweb:1.6.7-rc1
     ports:
       - published: 80
         target: 8080
@@ -3658,7 +3658,7 @@ services:
         - "bunkerweb.INSTANCE=yes" # autoconf 服务识别 BunkerWeb 实例的强制性标签
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由 autoconf 服务自动检测
@@ -3679,7 +3679,7 @@ services:
           - "node.role == worker"
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
+    image: bunkerity/bunkerweb-autoconf:1.6.7-rc1
     environment:
       SWARM_MODE: "yes"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
@@ -3828,7 +3828,7 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7~rc1
+        image: bunkerity/bunkerweb:1.6.7-rc1
         ...
         deploy:
           mode: global
@@ -3840,7 +3840,7 @@ networks:
             - "bunkerweb.NAMESPACE=my-namespace" # 为 BunkerWeb 实例设置命名空间
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.7-rc1
         environment:
           NAMESPACES: "my-namespace my-other-namespace" # 只监听这些命名空间
           ...

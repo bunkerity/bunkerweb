@@ -3,7 +3,7 @@ x-env: &env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.7~rc1
+    image: bunkerity/bunkerweb:1.6.7-rc1
     container_name: bunkerweb
     ports:
       - "80:8080/tcp"
@@ -17,7 +17,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
     container_name: bw-scheduler
     depends_on:
       - bunkerweb
@@ -43,7 +43,7 @@ services:
       - bw-db
 
   bw-ui:
-    image: bunkerity/bunkerweb-ui:1.6.7~rc1
+    image: bunkerity/bunkerweb-ui:1.6.7-rc1
     container_name: bw-ui
     environment:
       <<: *env

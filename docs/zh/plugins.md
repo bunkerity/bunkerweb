@@ -89,7 +89,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
         volumes:
           - ./bw-data:/data
     ...
@@ -125,7 +125,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
         volumes:
           - ./bw-data:/data
     ...
@@ -168,7 +168,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -215,7 +215,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+              image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE

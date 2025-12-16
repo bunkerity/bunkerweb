@@ -1,6 +1,6 @@
 services:
   bunkerweb-all-in-one:
-    image: bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+    image: bunkerity/bunkerweb-all-in-one:1.6.7-rc1
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"

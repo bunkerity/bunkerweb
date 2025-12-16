@@ -1268,7 +1268,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+  bunkerity/bunkerweb-all-in-one:1.6.7-rc1
 ```
 
 Par défaut, le conteneur expose :
@@ -1283,7 +1283,7 @@ Un volume nommé (ou un bind mount) est nécessaire pour conserver la base SQLit
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+    image: bunkerity/bunkerweb-all-in-one:1.6.7-rc1
     container_name: bunkerweb-aio
     volumes:
       - bw-storage:/data
@@ -1361,7 +1361,7 @@ docker run -d \
   -e API_PASSWORD=StrongP@ssw0rd \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
   -p 8888:8888/tcp \
-  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+  bunkerity/bunkerweb-all-in-one:1.6.7-rc1
 ```
 
 Configuration recommandée (derrière BunkerWeb) — ne publiez pas `8888` ; utilisez plutôt un proxy inverse :
@@ -1369,7 +1369,7 @@ Configuration recommandée (derrière BunkerWeb) — ne publiez pas `8888` ; u
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+    image: bunkerity/bunkerweb-all-in-one:1.6.7-rc1
     container_name: bunkerweb-aio
     ports:
       - "80:8080/tcp"
@@ -1441,7 +1441,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+  bunkerity/bunkerweb-all-in-one:1.6.7-rc1
 ```
 
 * Lorsque `USE_CROWDSEC=yes`, le point d'entrée :
@@ -1496,7 +1496,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+  bunkerity/bunkerweb-all-in-one:1.6.7-rc1
 ```
 
 !!! info "Comment ça marche en interne"
@@ -1517,7 +1517,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+  bunkerity/bunkerweb-all-in-one:1.6.7-rc1
 ```
 
 Notes :
@@ -1553,7 +1553,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+  bunkerity/bunkerweb-all-in-one:1.6.7-rc1
 ```
 
 * **L'enregistrement local** est ignoré lorsque n' `CROWDSEC_API` est pas `127.0.0.1` ou `localhost`.
@@ -1587,13 +1587,13 @@ En accédant à ces images prédéfinies à partir de Docker Hub, vous pouvez ra
 Que vous effectuiez des tests, développiez des applications ou déployiez BunkerWeb en production, l'option de conteneurisation Docker offre flexibilité et facilité d'utilisation. L'adoption de cette méthode vous permet de tirer pleinement parti des fonctionnalités de BunkerWeb tout en tirant parti des avantages de la technologie Docker.
 
 ```shell
-docker pull bunkerity/bunkerweb:1.6.7~rc1
+docker pull bunkerity/bunkerweb:1.6.7-rc1
 ```
 
 Les images Docker sont également disponibles sur [les packages GitHub](https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb) et peuvent être téléchargées à l'aide de l'adresse du `ghcr.io` dépôt :
 
 ```shell
-docker pull ghcr.io/bunkerity/bunkerweb:1.6.7~rc1
+docker pull ghcr.io/bunkerity/bunkerweb:1.6.7-rc1
 ```
 
 Les concepts clés de l'intégration Docker sont les suivants :
@@ -1613,7 +1613,7 @@ Les paramètres sont transmis au Scheduler à l'aide de variables d'environnemen
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
     environment:
       - MY_SETTING=value
       - ANOTHER_SETTING=another value
@@ -1657,7 +1657,7 @@ Cela garantit que les paramètres sensibles sont tenus à l'écart de l'environn
 Le [Scheduler](concepts.md#scheduler) s'exécute dans son propre conteneur, qui est également disponible sur Docker Hub :
 
 ```shell
-docker pull bunkerity/bunkerweb-scheduler:1.6.7~rc1
+docker pull bunkerity/bunkerweb-scheduler:1.6.7-rc1
 ```
 
 !!! info "Paramètres BunkerWeb"
@@ -1678,7 +1678,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.7~rc1
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7~rc1
+        image: bunkerity/bunkerweb:1.6.7-rc1
         environment:
           # Paramètres API pour le conteneur BunkerWeb
           <<: *bw-api-env
@@ -1687,7 +1687,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.7~rc1
           - bw-universe
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
         environment:
           # Paramètres API pour le conteneur Scheduler
           <<: *bw-api-env
@@ -1705,7 +1705,7 @@ Un volume est nécessaire pour stocker la base de données SQLite et les sauvega
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
     volumes:
       - bw-storage:/data
 ...
@@ -1851,7 +1851,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.7~rc1
+    image: bunkerity/bunkerweb:1.6.7-rc1
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -1864,7 +1864,7 @@ services:
       - bw-universe
 ...
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
     environment:
       <<: *bw-api-env
       BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1897,7 +1897,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.7~rc1
+    image: bunkerity/bunkerweb:1.6.7-rc1
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -1910,7 +1910,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
     depends_on:
       - bunkerweb
     environment:
@@ -2465,7 +2465,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.7~rc1
+    image: bunkerity/bunkerweb:1.6.7-rc1
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -2480,7 +2480,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -2495,7 +2495,7 @@ services:
       - bw-db
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
+    image: bunkerity/bunkerweb-autoconf:1.6.7-rc1
     depends_on:
       - bunkerweb
       - bw-docker
@@ -2674,13 +2674,13 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7~rc1
+        image: bunkerity/bunkerweb:1.6.7-rc1
         labels:
           - "bunkerweb.INSTANCE=yes"
           - "bunkerweb.NAMESPACE=my-namespace" # Set the namespace for the BunkerWeb instance so the autoconf service can detect it
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.7-rc1
         environment:
           ...
           NAMESPACES: "my-namespace my-other-namespace" # Only listen to these namespaces
@@ -2968,7 +2968,7 @@ spec:
 
         # Sidecar BunkerWeb
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.7~rc1
+          image: bunkerity/bunkerweb:1.6.7-rc1
           ports:
             - containerPort: 8080  # Port HTTP exposé
             - containerPort: 5000  # API interne (obligatoire)
@@ -3294,7 +3294,7 @@ metadata:
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
+              image: bunkerity/bunkerweb-autoconf:1.6.7-rc1
               imagePullPolicy: Always
               env:
                 - name: NAMESPACES
@@ -3596,7 +3596,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.7~rc1
+    image: bunkerity/bunkerweb:1.6.7-rc1
     ports:
       - published: 80
         target: 8080
@@ -3625,7 +3625,7 @@ services:
         - "bunkerweb.INSTANCE=yes" # Mandatory label for the autoconf service to identify the BunkerWeb instance
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -3646,7 +3646,7 @@ services:
           - "node.role == worker"
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
+    image: bunkerity/bunkerweb-autoconf:1.6.7-rc1
     environment:
       SWARM_MODE: "yes"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
@@ -3798,7 +3798,7 @@ networks:
     ...
     services:
       bunkerweb:
-      image: bunkerity/bunkerweb:1.6.7~rc1
+      image: bunkerity/bunkerweb:1.6.7-rc1
       ...
       deploy:
         mode: global
@@ -3810,7 +3810,7 @@ networks:
         - "bunkerweb.NAMESPACE=my-namespace" # Set the namespace for the BunkerWeb instance
       ...
       bw-autoconf:
-      image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
+      image: bunkerity/bunkerweb-autoconf:1.6.7-rc1
       environment:
         NAMESPACES: "my-namespace my-other-namespace" # Only listen to these namespaces
         ...

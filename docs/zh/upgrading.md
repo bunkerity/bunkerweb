@@ -25,16 +25,16 @@
             ```yaml
             services:
                 bunkerweb:
-                    image: bunkerity/bunkerweb:1.6.7~rc1
+                    image: bunkerity/bunkerweb:1.6.7-rc1
                     ...
                 bw-scheduler:
-                    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+                    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
                     ...
                 bw-autoconf:
-                    image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
+                    image: bunkerity/bunkerweb-autoconf:1.6.7-rc1
                     ...
                 bw-ui:
-                    image: bunkerity/bunkerweb-ui:1.6.7~rc1
+                    image: bunkerity/bunkerweb-ui:1.6.7-rc1
                     ...
             ```
 
@@ -657,16 +657,16 @@
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.7~rc1
+                        image: bunkerity/bunkerweb:1.6.7-rc1
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+                        image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
+                        image: bunkerity/bunkerweb-autoconf:1.6.7-rc1
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.7~rc1
+                        image: bunkerity/bunkerweb-ui:1.6.7-rc1
                         ...
                 ```
 

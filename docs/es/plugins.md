@@ -89,7 +89,7 @@ El primer paso es instalar el plugin colocando sus archivos dentro de la carpeta
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
         volumes:
           - ./bw-data:/data
     ...
@@ -125,7 +125,7 @@ El primer paso es instalar el plugin colocando sus archivos dentro de la carpeta
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
         volumes:
           - ./bw-data:/data
     ...
@@ -168,7 +168,7 @@ El primer paso es instalar el plugin colocando sus archivos dentro de la carpeta
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -215,7 +215,7 @@ El primer paso es instalar el plugin colocando sus archivos dentro de la carpeta
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+              image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE

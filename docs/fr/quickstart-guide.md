@@ -33,7 +33,7 @@ Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6
       -p 80:8080/tcp \
       -p 443:8443/tcp \
       -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+      bunkerity/bunkerweb-all-in-one:1.6.7-rc1
     ```
 
     Par défaut, le conteneur expose :
@@ -90,7 +90,7 @@ Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.7~rc1
+        image: bunkerity/bunkerweb:1.6.7-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -103,7 +103,7 @@ Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -120,7 +120,7 @@ Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.7~rc1
+        image: bunkerity/bunkerweb-ui:1.6.7-rc1
         environment:
           <<: *bw-env
         restart: "unless-stopped"
@@ -187,7 +187,7 @@ Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7~rc1
+        image: bunkerity/bunkerweb:1.6.7-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -203,7 +203,7 @@ Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -221,7 +221,7 @@ Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.7-rc1
         depends_on:
           - bw-docker
         environment:
@@ -244,7 +244,7 @@ Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.7~rc1
+        image: bunkerity/bunkerweb-ui:1.6.7-rc1
         environment:
           <<: *bw-ui-env
           TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
@@ -339,7 +339,7 @@ Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7~rc1
+        image: bunkerity/bunkerweb:1.6.7-rc1
         ports:
           - published: 80
             target: 8080
@@ -369,7 +369,7 @@ Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -387,7 +387,7 @@ Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.7-rc1
         environment:
           <<: *bw-ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -416,7 +416,7 @@ Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6
               - "node.role == manager"
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.7~rc1
+        image: bunkerity/bunkerweb-ui:1.6.7-rc1
         environment:
           <<: *bw-ui-env
           TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
@@ -638,7 +638,7 @@ Vous pouvez maintenant vous connecter avec le compte administrateur que vous ave
       -e "www.example.com_REVERSE_PROXY_HOST=http://myapp:8080" \
       -e "www.example.com_REVERSE_PROXY_URL=/" \
       # --- Include any other existing environment variables for UI, Redis, CrowdSec, etc. ---
-      bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+      bunkerity/bunkerweb-all-in-one:1.6.7-rc1
     ```
 
     Votre conteneur d'application (`myapp`) et le conteneur `bunkerweb-aio` doivent être sur le même réseau Docker pour que BunkerWeb puisse y accéder en utilisant le nom d'hôte `myapp`.
@@ -660,7 +660,7 @@ Vous pouvez maintenant vous connecter avec le compte administrateur que vous ave
       -p 443:8443/tcp \
       -p 443:8443/udp \
     #   ... (all other relevant environment variables as shown in the main example above) ...
-      bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+      bunkerity/bunkerweb-all-in-one:1.6.7-rc1
     ```
 
     Assurez-vous de remplacer `myapp` par le nom réel ou l'adresse IP de votre conteneur d'application et `http://myapp:8080` par son adresse et son port corrects.
