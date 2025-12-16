@@ -23,6 +23,15 @@ $(document).ready(() => {
     }
   };
 
+  // Escapes a string so it can be safely embedded as an HTML attribute value
+  function escapeAttr(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
   const $templateInput = $("#used-template");
   let usedTemplate = "low";
   if ($templateInput.length) {
@@ -904,8 +913,14 @@ $(document).ready(() => {
 
     $pluginItems.each(function () {
       const $item = $(this);
+      const itemType = $item.data("type");
+
+      // Treat external and ui types as the same category
       const typeMatches =
-        currentType === "all" || $item.data("type") === currentType;
+        currentType === "all" ||
+        itemType === currentType ||
+        (currentType === "external" && itemType === "ui") ||
+        (currentType === "ui" && itemType === "external");
 
       const pluginId = $item.data("plugin");
       const pluginName = $item.find(".fw-bold").text().toLowerCase();
@@ -1587,7 +1602,7 @@ $(document).ready(() => {
       url: `${window.location.pathname
         .split("/")
         .slice(0, -2)
-        .join("/")}/global-config?as_json=true`,
+        .join("/")}/global-settings?as_json=true`,
       type: "GET",
       success: function (globalConfig) {
         const templateContainer = getTemplateContainer(currentTemplate);
@@ -1749,7 +1764,7 @@ $(document).ready(() => {
   var hasProPlugins = false;
   $pluginItems.each(function () {
     const type = $(this).data("type");
-    if (type === "external") {
+    if (type === "external" || type === "ui") {
       hasExternalPlugins = true;
     } else if (type === "pro") {
       hasProPlugins = true;
@@ -2636,8 +2651,9 @@ $(document).ready(() => {
     let $hiddenInput = $dropdown.find('input[type="hidden"]');
     if ($hiddenInput.length === 0) {
       const settingName = $toggle.find(".multiselect-text").text();
+      // Escape the settingName to prevent XSS in attribute context
       $hiddenInput = $(
-        `<input type="hidden" name="${settingName}" class="plugin-setting">`,
+        `<input type="hidden" name="${escapeAttr(settingName)}" class="plugin-setting">`,
       );
       $dropdown.append($hiddenInput);
     }

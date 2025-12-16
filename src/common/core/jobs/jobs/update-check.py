@@ -17,10 +17,10 @@ from requests import get
 from requests.exceptions import ConnectionError, RequestException
 
 from common_utils import get_version  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
-LOGGER = setup_logger("UPDATE-CHECK")
+LOGGER = getLogger("UPDATE-CHECK")
 status = 0
 
 try:

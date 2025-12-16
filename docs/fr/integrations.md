@@ -3,20 +3,1252 @@
 ## BunkerWeb Cloud
 
 <figure markdown>
-  ![Vue d'ensemble](assets/img/bunkerweb-cloud.webp){ align=center, width="600" }
+  ![Vue d'ensemble](assets/img/bunkerweb-cloud.png){ align=center, width="600" }
   <figcaption>BunkerWeb Cloud</figcaption>
 </figure>
 
-BunkerWeb Cloud sera le moyen le plus simple de commencer avec BunkerWeb. Il vous offre un service BunkerWeb entièrement géré sans tracas. Considérez-le comme un BunkerWeb-as-a-Service !
+BunkerWeb Cloud est une solution gérée de Web Application Firewall (WAF) et de reverse proxy qui vous permet de sécuriser vos applications web sans installer BunkerWeb dans votre infrastructure. En souscrivant à BunkerWeb Cloud, vous bénéficiez d'une pile BunkerWeb complète hébergée dans le cloud avec des ressources dédiées (8 Go de RAM, 2 CPU **par** instance, répliqué sur 2 instances pour la haute disponibilité, offre Standard).
 
-Essayez notre [offre BunkerWeb Cloud](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=doc) et accédez à :
+### Avantages clés
 
-- Une instance BunkerWeb entièrement gérée et hébergée dans notre cloud
-- Toutes les fonctionnalités de BunkerWeb, y compris les fonctionnalités PRO
-- Une plateforme de surveillance avec tableaux de bord et alertes
-- Support technique pour vous aider dans la configuration
+Commandez votre [instance BunkerWeb Cloud](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=doc) et accédez à :
 
-Si vous êtes intéressé par l'offre BunkerWeb Cloud, n'hésitez pas à [nous contacter](https://panel.bunkerweb.io/contact.php?language=french&utm_campaign=self&utm_source=doc) afin que nous puissions discuter de vos besoins.
+- **Déploiement instantané** : Aucune installation requise dans votre infrastructure
+- **Haute disponibilité** : Instances répliquées avec équilibrage de charge automatique
+- **Surveillance intégrée** : Accès à Grafana pour la visualisation des journaux et des métriques
+- **Scalabilité** : Ressources dédiées adaptées aux charges de travail importantes
+- **Sécurité renforcée** : Protection WAF en temps réel contre les menaces web
+
+Si vous êtes intéressé par l'offre BunkerWeb Cloud, n'hésitez pas à [nous contacter](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) afin que nous puissions discuter de vos besoins.
+
+### Vue d'ensemble de l'architecture
+
+#### Architecture simple - Service unique
+
+```mermaid
+graph LR
+    A[Client] -->|HTTPS| B[exemple.com]
+    B -->|Résolution DNS| C[Load Balancer54984654.bunkerweb.cloud]
+    C -->|Trafic| D[BunkerWeb CloudWAF + Reverse Proxy]
+    D -->|HTTPS/HTTP| E[Serveur exemple.comInfrastructure Client]
+
+    style C fill:#e1f5fe,color:#222
+    style D fill:#f3e5f5,color:#222
+    style E fill:#e8f5e8,color:#222
+```
+
+#### Architecture complexe - Multi-services
+
+```mermaid
+graph LR
+    A[Clients] -->|HTTPS| B[exemple.comautre-exemple.comun-autre-exemple.com]
+    B -->|Résolution DNS| C[Load Balancer54984654.bunkerweb.cloud]
+    C -->|Trafic| D[BunkerWeb CloudWAF + Reverse ProxySSL SNI Activé]
+    D -->|HTTPS avec SNI| E[Gateway ClientReverse Proxy/LB]
+    E -->|Routage interne| F[Service 1]
+    E -->|Routage interne| G[Service 2]
+    E -->|Routage interne| H[Service N]
+
+    style C fill:#e1f5fe,color:#222
+    style D fill:#f3e5f5,color:#222
+    style E fill:#fff3e0,color:#222
+    style F fill:#e8f5e8,color:#222
+    style G fill:#e8f5e8,color:#222
+    style H fill:#e8f5e8,color:#222
+```
+
+### Configuration initiale
+
+#### 1. Accès à l'interface de gestion
+
+Après avoir souscrit à BunkerWeb Cloud, vous recevrez :
+
+- **URL d'accès à l'UI BunkerWeb** : Interface pour configurer vos services
+- **Point de terminaison Load Balancer** : URL unique au format `http://[ID].bunkerweb.cloud`
+- **Accès Grafana** : Interface de surveillance et visualisation des métriques
+- **Ressources allouées** : 2 instances avec 8 Go de RAM et 2 CPU chacune
+
+#### 2. Première connexion
+
+1. Connectez-vous à l'interface BunkerWeb Cloud
+2. Configurez vos services à protéger
+3. Accédez à Grafana pour visualiser vos journaux et métriques BunkerWeb
+
+### Configuration DNS
+
+#### Redirection du trafic vers BunkerWeb Cloud
+
+Pour que le trafic de votre domaine soit traité par BunkerWeb Cloud, vous devez configurer vos enregistrements DNS :
+
+**Configuration requise :**
+
+```dns
+exemple.com.        IN  CNAME  54984654.bunkerweb.cloud.
+www.exemple.com.    IN  CNAME  54984654.bunkerweb.cloud.
+```
+
+**Important :** Remplacez `54984654` par votre identifiant de load balancer fourni lors de la souscription.
+
+#### Validation de la configuration
+
+Vérifiez la résolution DNS :
+
+```bash
+dig exemple.com
+nslookup exemple.com
+```
+
+Le résultat doit pointer vers votre point de terminaison BunkerWeb Cloud.
+
+### Configuration du service
+
+#### Service unique
+
+Pour un service simple hébergé sur votre infrastructure :
+
+**Configuration dans l'UI BunkerWeb :**
+
+1. **Server Name** : `exemple.com`
+2. **Use Reverse Proxy** : `yes`
+3. **Reverse Proxy Host** : `185.87.1.100:443` (IP de votre serveur)
+
+Vous pouvez trouver toutes les options de configuration dans la [Documentation Reverse Proxy](https://docs.bunkerweb.io/latest/settings/#reverse-proxy)
+
+#### Multi-services avec SNI
+
+##### Pourquoi activer le SNI ?
+
+Le Server Name Indication (SNI) est **essentiel** lorsque :
+
+- Plusieurs domaines pointent vers la même infrastructure backend
+- Votre infrastructure héberge plusieurs services avec des certificats SSL distincts
+- Vous utilisez un reverse proxy/gateway côté client
+
+##### Configuration SNI
+
+**Dans l'UI BunkerWeb, pour chaque service :**
+
+```yaml
+# Service 1
+SERVICE_NAME: exemple-com
+SERVER_NAME: exemple.com
+REVERSE_PROXY_HOST: https://gateway.interne.domaine.com
+REVERSE_PROXY_PORT: 443
+REVERSE_PROXY_SSL_SNI: yes
+REVERSE_PROXY_SSL_SNI_NAME: exemple.com
+
+# Service 2
+SERVICE_NAME: autre-exemple-com
+SERVER_NAME: autre-exemple.com
+REVERSE_PROXY_HOST: https://gateway.interne.domaine.com
+REVERSE_PROXY_PORT: 443
+REVERSE_PROXY_SSL_SNI: yes
+REVERSE_PROXY_SSL_SNI_NAME: autre-exemple.com
+```
+
+Vous pouvez trouver toutes les options de configuration dans la [Documentation Reverse Proxy](https://docs.bunkerweb.io/latest/settings/#reverse-proxy)
+
+##### Détails techniques SNI
+
+Le SNI permet à BunkerWeb Cloud de :
+
+1. **Identifier le service cible** lors de la connexion TLS
+2. **Transmettre le bon nom de domaine** au backend
+3. **Permettre au gateway client** de sélectionner le bon certificat
+4. **Router correctement** vers le service approprié
+
+**Sans SNI activé :**
+
+```mermaid
+graph LR
+    A[Client] --> B[BunkerWeb]
+    B --> C["Gateway (certificat par défaut)"]
+    C --> D[Erreur SSL]
+
+    style B fill:#f3e5f5,color:#222
+    style C fill:#fff3e0,color:#222
+    style D fill:#ff4d4d,color:#fff,stroke:#b30000,stroke-width:2px
+```
+
+**Avec SNI activé :**
+
+```mermaid
+graph LR
+    A[Client] --> B[BunkerWeb]
+    B --> C["Gateway (certificat spécifique exemple.com)"]
+    C --> D[Service Correct]
+
+    style B fill:#f3e5f5,color:#222
+    style C fill:#e8f5e8,color:#222
+    style D fill:#e8f5e8,color:#222
+```
+
+### Gestion SSL/TLS et SNI
+
+#### Certificats SSL
+
+##### Côté BunkerWeb Cloud
+
+BunkerWeb Cloud gère automatiquement :
+
+- Les certificats Let's Encrypt pour vos domaines
+- Le renouvellement automatique
+- La configuration TLS optimisée
+
+##### Côté Infrastructure Client
+
+**Recommandations importantes :**
+
+1. **Utilisez HTTPS** pour la communication entre BunkerWeb et vos services
+2. **Gérez vos propres certificats** sur votre infrastructure
+3. **Configurez correctement le SNI** sur votre gateway/reverse proxy
+
+#### Configuration SNI détaillée
+
+##### Cas d'usage : Infrastructure avec Gateway
+
+Si votre architecture ressemble à :
+
+```mermaid
+graph LR
+    A[BunkerWeb Cloud] --> B[Gateway Client]
+    B --> C[Service 1]
+    B --> D[Service 2]
+    B --> E[Service 3]
+
+    style A fill:#f3e5f5,color:#222
+    style B fill:#fff3e0,color:#222
+    style C fill:#e8f5e8,color:#222
+    style D fill:#e8f5e8,color:#222
+    style E fill:#e8f5e8,color:#222
+```
+
+**Configuration requise côté BunkerWeb :**
+
+```yaml
+# Configuration pour exemple.com
+REVERSE_PROXY_SSL_SNI: yes
+REVERSE_PROXY_SSL_SNI_NAME: exemple.com
+REVERSE_PROXY_SSL_VERIFY: no  # Si certificat auto-signé côté client
+REVERSE_PROXY_HEADERS: Host $host
+
+# Configuration pour api.exemple.com
+REVERSE_PROXY_SSL_SNI: yes
+REVERSE_PROXY_SSL_SNI_NAME: api.exemple.com
+REVERSE_PROXY_SSL_VERIFY: no
+REVERSE_PROXY_HEADERS: Host $host
+```
+
+### Configuration Gateway Client
+
+#### Vue d'ensemble
+
+Lorsque votre architecture utilise un gateway/reverse proxy côté client pour router le trafic vers plusieurs services, une configuration spécifique est nécessaire pour supporter le SNI et assurer une communication sécurisée avec BunkerWeb Cloud.
+
+#### Configurations par technologie
+
+##### Nginx
+
+<details>
+<summary>Configuration Nginx</summary>
+
+```nginx
+# Configuration pour supporter SNI avec plusieurs services
+server {
+    listen 443 ssl http2;
+    server_name exemple.com;
+
+    ssl_certificate /path/to/exemple.com.crt;
+    ssl_certificate_key /path/to/exemple.com.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256;
+    ssl_prefer_server_ciphers off;
+
+    # En-têtes de sécurité
+    add_header X-Frame-Options DENY;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+
+    location / {
+        proxy_pass http://service1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Server $host;
+
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    server_name api.exemple.com;
+
+    ssl_certificate /path/to/api.exemple.com.crt;
+    ssl_certificate_key /path/to/api.exemple.com.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256;
+    ssl_prefer_server_ciphers off;
+
+    location / {
+        proxy_pass http://api-service:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Configuration spécifique API
+        proxy_buffering off;
+        proxy_request_buffering off;
+    }
+}
+```
+
+</details>
+
+##### Traefik
+
+<details>
+<summary>Configuration Traefik</summary>
+
+**Avec Docker Compose :**
+
+```yaml
+services:
+  traefik:
+    image: traefik:v3.0
+    command:
+      - --api.dashboard=true
+      - --providers.docker=true
+      - --providers.file.filename=/etc/traefik/dynamic.yml
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.myresolver.acme.tlschallenge=true
+      - --certificatesresolvers.myresolver.acme.email=admin@exemple.com
+      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+    ports:
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+      - ./dynamic.yml:/etc/traefik/dynamic.yml:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.exemple.com`)"
+      - "traefik.http.routers.dashboard.tls.certresolver=myresolver"
+
+  service1:
+    image: your-app:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.service1.rule=Host(`exemple.com`)"
+      - "traefik.http.routers.service1.entrypoints=websecure"
+      - "traefik.http.routers.service1.tls.certresolver=myresolver"
+      - "traefik.http.services.service1.loadbalancer.server.port=8080"
+      - "traefik.http.routers.service1.middlewares=security-headers"
+
+  api-service:
+    image: your-api:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`api.exemple.com`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls.certresolver=myresolver"
+      - "traefik.http.services.api.loadbalancer.server.port=3000"
+      - "traefik.http.routers.api.middlewares=security-headers,rate-limit"
+```
+
+**Configuration dynamique (dynamic.yml) :**
+
+```yaml
+http:
+  middlewares:
+    security-headers:
+      headers:
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 31536000
+        customRequestHeaders:
+          X-Forwarded-Proto: "https"
+
+    rate-limit:
+      rateLimit:
+        burst: 100
+        average: 50
+
+  routers:
+    service1:
+      rule: "Host(`exemple.com`)"
+      service: "service1"
+      tls:
+        certResolver: "myresolver"
+      middlewares:
+        - "security-headers"
+
+    api:
+      rule: "Host(`api.exemple.com`)"
+      service: "api-service"
+      tls:
+        certResolver: "myresolver"
+      middlewares:
+        - "security-headers"
+        - "rate-limit"
+
+  services:
+    service1:
+      loadBalancer:
+        servers:
+          - url: "http://service1:8080"
+        healthCheck:
+          path: "/health"
+          interval: "30s"
+
+    api-service:
+      loadBalancer:
+        servers:
+          - url: "http://api-service:3000"
+        healthCheck:
+          path: "/api/health"
+          interval: "30s"
+```
+
+</details>
+
+##### Apache
+
+<details>
+<summary>Configuration Apache</summary>
+
+```apache
+# Configuration Apache avec SNI
+<VirtualHost *:443>
+    ServerName exemple.com
+    DocumentRoot /var/www/html
+
+    # Configuration SSL
+    SSLEngine on
+    SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
+    SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256
+    SSLHonorCipherOrder off
+    SSLCertificateFile /path/to/exemple.com.crt
+    SSLCertificateKeyFile /path/to/exemple.com.key
+
+    # En-têtes de sécurité
+    Header always set X-Frame-Options DENY
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    # Configuration reverse proxy
+    ProxyPass / http://service1:8080/
+    ProxyPassReverse / http://service1:8080/
+    ProxyPreserveHost On
+
+    # En-têtes personnalisés
+    ProxyPassReverse / http://service1:8080/
+    ProxyPassReverseInterpolateEnv On
+
+    <Proxy *>
+        Require all granted
+    </Proxy>
+
+    # Logs
+    ErrorLog ${APACHE_LOG_DIR}/exemple.com_error.log
+    CustomLog ${APACHE_LOG_DIR}/exemple.com_access.log combined
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName api.exemple.com
+
+    SSLEngine on
+    SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
+    SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256
+    SSLCertificateFile /path/to/api.exemple.com.crt
+    SSLCertificateKeyFile /path/to/api.exemple.com.key
+
+    ProxyPass / http://api-service:3000/
+    ProxyPassReverse / http://api-service:3000/
+    ProxyPreserveHost On
+
+    # Configuration spécifique API
+    ProxyTimeout 300
+    ProxyBadHeader Ignore
+
+    ErrorLog ${APACHE_LOG_DIR}/api.exemple.com_error.log
+    CustomLog ${APACHE_LOG_DIR}/api.exemple.com_access.log combined
+</VirtualHost>
+
+# Configuration des modules requis
+LoadModule ssl_module modules/mod_ssl.so
+LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_http_module modules/mod_proxy_http.so
+LoadModule headers_module modules/mod_headers.so
+```
+
+</details>
+
+##### HAProxy
+
+<details>
+<summary>Configuration HAProxy</summary>
+
+```haproxy
+global
+    maxconn 4096
+    log stdout local0
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+
+    # Configuration SSL
+    ssl-default-bind-ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256
+    ssl-default-bind-options ssl-min-ver TLSv1.2 no-tls-tickets
+
+defaults
+    mode http
+    timeout connect 5000ms
+    timeout client 50000ms
+    timeout server 50000ms
+    option httplog
+    option dontlognull
+    option redispatch
+    retries 3
+    maxconn 2000
+
+frontend https_frontend
+    bind *:443 ssl crt /etc/ssl/certs/exemple.com.pem crt /etc/ssl/certs/api.exemple.com.pem
+
+    # En-têtes de sécurité
+    http-response set-header X-Frame-Options DENY
+    http-response set-header X-Content-Type-Options nosniff
+    http-response set-header X-XSS-Protection "1; mode=block"
+    http-response set-header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    # Routage basé sur SNI
+    acl is_exemple hdr(host) -i exemple.com
+    acl is_api hdr(host) -i api.exemple.com
+
+    use_backend service1_backend if is_exemple
+    use_backend api_backend if is_api
+
+    default_backend service1_backend
+
+backend service1_backend
+    balance roundrobin
+    option httpchk GET /health
+    http-check expect status 200
+
+    server service1-1 service1:8080 check
+    server service1-2 service1-backup:8080 check backup
+
+backend api_backend
+    balance roundrobin
+    option httpchk GET /api/health
+    http-check expect status 200
+
+    server api-1 api-service:3000 check
+    server api-2 api-service-backup:3000 check backup
+
+# Interface de statistiques (optionnel)
+listen stats
+    bind *:8404
+    stats enable
+    stats uri /stats
+    stats refresh 30s
+    stats admin if TRUE
+```
+
+</details>
+
+#### Validation de la configuration SSL
+
+Tester la configuration SSL :
+
+```bash
+# Test de connectivité SSL
+openssl s_client -connect your-domain.com:443 -servername your-domain.com
+
+# Vérification des en-têtes
+curl -I https://your-domain.com
+
+# Test SNI
+curl -H "Host: exemple.com" https://54984654.bunkerweb.cloud
+```
+
+#### Bonnes pratiques Gateway
+
+1. **Health Checks** : Configurez des vérifications de santé pour vos services
+2. **Load Balancing** : Utilisez plusieurs instances pour la haute disponibilité
+3. **Surveillance** : Surveillez les métriques de votre gateway
+4. **En-têtes de sécurité** : Ajoutez les en-têtes de sécurité appropriés
+5. **Timeouts** : Configurez des timeouts appropriés pour éviter les blocages
+
+### Liste blanche d'IP BunkerWeb Cloud
+
+#### Pourquoi configurer une liste blanche ?
+
+Pour sécuriser davantage votre infrastructure, il est recommandé de configurer une liste blanche des adresses IP de BunkerWeb Cloud côté infrastructure client. Cela garantit que seul le trafic provenant de BunkerWeb Cloud peut atteindre vos services backend.
+
+Nous recommandons de configurer la liste blanche au niveau du pare-feu (iptables ..etc).
+
+#### Adresses IP BunkerWeb Cloud à autoriser
+
+**Liste des adresses IP à autoriser :**
+
+La liste mise à jour est disponible ici : https://repo.bunkerweb.io/cloud/ips
+
+```
+# Adresses IP BunkerWeb Cloud
+4.233.128.18
+20.19.161.132
+```
+
+#### Configuration de la liste blanche par technologie
+
+##### Nginx
+
+<details>
+<summary>Configuration Nginx</summary>
+
+```nginx
+# Dans votre configuration serveur
+server {
+    listen 443 ssl;
+    server_name exemple.com;
+
+    # Liste blanche IP BunkerWeb Cloud
+    allow 192.168.1.0/24;
+    allow 10.0.0.0/16;
+    allow 172.16.0.0/12;
+    deny all;
+
+    ssl_certificate /path/to/exemple.com.crt;
+    ssl_certificate_key /path/to/exemple.com.key;
+
+    location / {
+        proxy_pass http://service1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+
+# Configuration avec module geo pour plus de flexibilité
+geo $bunkerweb_ip {
+    default 0;
+    192.168.1.0/24 1;
+    10.0.0.0/16 1;
+    172.16.0.0/12 1;
+}
+
+server {
+    listen 443 ssl;
+    server_name exemple.com;
+
+    if ($bunkerweb_ip = 0) {
+        return 403;
+    }
+
+    # ... reste de la configuration
+}
+```
+
+</details>
+
+##### Traefik
+
+<details>
+<summary>Configuration Traefik</summary>
+
+```yaml
+# Configuration dans dynamic.yml
+http:
+  middlewares:
+    bunkerweb-whitelist:
+      ipWhiteList:
+        sourceRange:
+          - "192.168.1.0/24"
+          - "10.0.0.0/16"
+          - "172.16.0.0/12"
+        ipStrategy:
+          depth: 1
+
+  routers:
+    exemple-router:
+      rule: "Host(`exemple.com`)"
+      service: "exemple-service"
+      middlewares:
+        - "bunkerweb-whitelist"
+        - "security-headers"
+      tls:
+        certResolver: "myresolver"
+
+    api-router:
+      rule: "Host(`api.exemple.com`)"
+      service: "api-service"
+      middlewares:
+        - "bunkerweb-whitelist"
+        - "security-headers"
+      tls:
+        certResolver: "myresolver"
+```
+
+**Avec les labels Docker Compose :**
+
+```yaml
+services:
+  service1:
+    image: your-app:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.service1.rule=Host(`exemple.com`)"
+      - "traefik.http.routers.service1.middlewares=bunkerweb-whitelist"
+      - "traefik.http.middlewares.bunkerweb-whitelist.ipwhitelist.sourcerange=192.168.1.0/24,10.0.0.0/16,172.16.0.0/12"
+```
+
+</details>
+
+##### Apache
+
+<details>
+<summary>Configuration Apache</summary>
+
+```apache
+<VirtualHost *:443>
+    ServerName exemple.com
+
+    # Liste blanche IP BunkerWeb Cloud
+    <RequireAll>
+        Require ip 192.168.1.0/24
+        Require ip 10.0.0.0/16
+        Require ip 172.16.0.0/12
+    </RequireAll>
+
+    SSLEngine on
+    SSLCertificateFile /path/to/exemple.com.crt
+    SSLCertificateKeyFile /path/to/exemple.com.key
+
+    ProxyPass / http://service1:8080/
+    ProxyPassReverse / http://service1:8080/
+    ProxyPreserveHost On
+
+    # Configuration pour les logs d'accès refusés
+    LogFormat "%h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" combined
+    CustomLog logs/access.log combined
+    ErrorLog logs/error.log
+</VirtualHost>
+
+# Configuration alternative avec mod_authz_core
+<VirtualHost *:443>
+    ServerName api.exemple.com
+
+    <Directory />
+        <RequireAny>
+            Require ip 192.168.1.0/24
+            Require ip 10.0.0.0/16
+            Require ip 172.16.0.0/12
+        </RequireAny>
+    </Directory>
+
+    # ... reste de la configuration
+</VirtualHost>
+```
+
+</details>
+
+##### HAProxy
+
+<details>
+<summary>Configuration HAProxy</summary>
+
+```haproxy
+# Configuration dans haproxy.cfg
+frontend bunkerweb_frontend
+    bind *:443 ssl crt /path/to/certificates/
+
+    # ACL pour la liste blanche BunkerWeb Cloud
+    acl bunkerweb_ips src 192.168.1.0/24 10.0.0.0/16 172.16.0.0/12
+
+    # Bloquer tout sauf BunkerWeb Cloud
+    http-request deny unless bunkerweb_ips
+
+    # En-têtes de sécurité
+    http-response set-header X-Frame-Options DENY
+    http-response set-header X-Content-Type-Options nosniff
+
+    # Routage
+    acl is_exemple hdr(host) -i exemple.com
+    acl is_api hdr(host) -i api.exemple.com
+
+    use_backend app_servers if is_exemple
+    use_backend api_servers if is_api
+
+    default_backend app_servers
+
+backend app_servers
+    balance roundrobin
+    server app1 service1:8080 check
+    server app2 service2:8080 check
+
+backend api_servers
+    balance roundrobin
+    server api1 api-service:3000 check
+    server api2 api-service-backup:3000 check
+```
+
+</details>
+
+##### Pare-feu Système (iptables)
+
+<details>
+<summary>Configuration iptables</summary>
+
+```bash
+#!/bin/bash
+# Script de configuration iptables pour la liste blanche BunkerWeb Cloud
+
+# Effacer les règles existantes
+iptables -F
+iptables -X
+
+# Politiques par défaut
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT ACCEPT
+
+# Autoriser loopback
+iptables -A INPUT -i lo -j ACCEPT
+
+# Autoriser les connexions établies
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# Liste blanche IPs BunkerWeb Cloud pour HTTPS
+iptables -A INPUT -p tcp --dport 443 -s 192.168.1.0/24 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -s 10.0.0.0/16 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -s 172.16.0.0/12 -j ACCEPT
+
+# Autoriser HTTP pour Let's Encrypt (optionnel)
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+
+# Autoriser SSH (adapter selon vos besoins)
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+
+# Logs pour débogage
+iptables -A INPUT -j LOG --log-prefix "DROPPED: "
+
+# Sauvegarder les règles
+iptables-save > /etc/iptables/rules.v4
+
+echo "Configuration iptables appliquée avec succès"
+```
+
+</details>
+
+#### Bonnes pratiques Liste Blanche
+
+1. **Surveiller les rejets** : Surveillez les tentatives d'accès bloquées
+2. **Mises à jour régulières** : Gardez la liste des IP à jour
+3. **Tests réguliers** : Validez que la liste blanche fonctionne correctement
+4. **Documentation** : Documentez les changements d'IP
+5. **Alertes** : Configurez des alertes pour les changements d'IP BunkerWeb
+6. **Sauvegarde** : Gardez une configuration de sauvegarde en cas de problème
+
+### Configuration REAL_IP et Récupération de l'Adresse Client
+
+#### Pourquoi configurer REAL_IP ?
+
+Lorsque vous utilisez BunkerWeb Cloud comme reverse proxy, les adresses IP que vos applications backend voient sont celles de BunkerWeb Cloud, et non celles des clients réels. Pour récupérer les adresses IP réelles des clients, une configuration spécifique est requise.
+
+#### Configuration Côté BunkerWeb Cloud
+
+Dans l'UI BunkerWeb, configurez Real IP :
+
+```yaml
+USE_REAL_IP: yes # Défaut est no
+REAL_IP_FROM: 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8 # Défaut
+REAL_IP_HEADER: X-Forwarded-For # Défaut
+REAL_IP_RECURSIVE: yes # Défaut
+# Exemple si vous utilisez aussi Cloudflare Proxy devant BunkerWeb
+REAL_IP_FROM_URLS: https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/
+```
+
+Vous pouvez trouver toutes les options de configuration dans la [Documentation Real Ip](https://docs.bunkerweb.io/latest/settings/#real-ip)
+
+#### Configuration Côté Infrastructure Client
+
+##### Nginx
+
+<details>
+<summary>Configuration Nginx pour REAL_IP</summary>
+
+```nginx
+# Configurer les adresses IP de confiance (BunkerWeb Cloud)
+set_real_ip_from 4.233.128.18/32
+set_real_ip_from 20.19.161.132/32
+
+# En-tête à utiliser pour récupérer l'IP réelle
+real_ip_header X-Real-IP;
+
+# Alternative avec X-Forwarded-For
+# real_ip_header X-Forwarded-For;
+
+server {
+    listen 443 ssl http2;
+    server_name exemple.com;
+
+    # Configuration SSL
+    ssl_certificate /path/to/exemple.com.crt;
+    ssl_certificate_key /path/to/exemple.com.key;
+
+    location / {
+        proxy_pass http://service1:8080;
+
+        # Transmettre les en-têtes d'IP réelle au backend
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Log avec l'IP client réelle
+        access_log /var/log/nginx/access.log combined;
+    }
+}
+
+# Format de log personnalisé avec IP réelle
+log_format real_ip '$remote_addr - $remote_user [$time_local] '
+                   '"$request" $status $body_bytes_sent '
+                   '"$http_referer" "$http_user_agent" '
+                   'real_ip="$realip_remote_addr"';
+```
+
+</details>
+
+##### Apache
+
+<details>
+<summary>Configuration Apache pour REAL_IP</summary>
+
+```apache
+# Charger le module mod_remoteip
+LoadModule remoteip_module modules/mod_remoteip.so
+
+<VirtualHost *:443>
+    ServerName exemple.com
+
+    # Configuration SSL
+    SSLEngine on
+    SSLCertificateFile /path/to/exemple.com.crt
+    SSLCertificateKeyFile /path/to/exemple.com.key
+
+    # Configurer les adresses IP de confiance
+    RemoteIPHeader X-Real-IP
+    RemoteIPTrustedProxy 4.233.128.18/32
+    RemoteIPTrustedProxy 20.19.161.132/32
+
+    # Alternative avec X-Forwarded-For
+    # RemoteIPHeader X-Forwarded-For
+
+    # Configuration reverse proxy
+    ProxyPass / http://service1:8080/
+    ProxyPassReverse / http://service1:8080/
+    ProxyPreserveHost On
+
+    # Transmettre les en-têtes IP
+    ProxyPassReverse / http://service1:8080/
+    ProxyPassReverseInterpolateEnv On
+
+    # Logs avec IP réelle
+    LogFormat "%a %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" combined_real_ip
+    CustomLog logs/access.log combined_real_ip
+    ErrorLog logs/error.log
+</VirtualHost>
+```
+
+</details>
+
+##### HAProxy
+
+<details>
+<summary>Configuration HAProxy pour REAL_IP</summary>
+
+```haproxy
+global
+    maxconn 4096
+    log stdout local0
+
+defaults
+    mode http
+    option httplog
+    option dontlognull
+    option forwardfor
+
+    # Format de log avec IP réelle
+    log-format "%ci:%cp [%t] %ft %b/%s %Tq/%Tw/%Tc/%Tr/%Ta %ST %B %CC %CS %tsc %ac/%fc/%bc/%sc/%rc %sq/%bq %hr %hs %{+Q}r"
+
+frontend https_frontend
+    bind *:443 ssl crt /etc/ssl/certs/
+
+    # Liste blanche IP BunkerWeb Cloud
+    acl bunkerweb_ips src 4.233.128.18/32 20.19.161.132/32
+    http-request deny unless bunkerweb_ips
+
+    # Capturer l'IP réelle depuis les en-têtes
+    capture request header X-Real-IP len 15
+    capture request header X-Forwarded-For len 50
+
+    # Routage
+    acl is_exemple hdr(host) -i exemple.com
+    use_backend app_servers if is_exemple
+
+    default_backend app_servers
+
+backend app_servers
+    balance roundrobin
+
+    # Ajouter/préserver les en-têtes d'IP réelle
+    http-request set-header X-Original-Forwarded-For %[req.hdr(X-Forwarded-For)]
+    http-request set-header X-Client-IP %[req.hdr(X-Real-IP)]
+
+    server app1 service1:8080 check
+    server app2 service2:8080 check backup
+```
+
+</details>
+
+##### Traefik
+
+<details>
+<summary>Configuration Traefik pour REAL_IP</summary>
+
+```yaml
+# Configuration dans dynamic.yml
+http:
+  middlewares:
+    real-ip:
+      ipWhiteList:
+        sourceRange:
+          - "4.233.128.18/32"
+          - "20.19.161.132/32"
+        ipStrategy:
+          depth: 2  # Nombre de proxies de confiance
+          excludedIPs:
+            - "127.0.0.1/32"
+
+  routers:
+    exemple-router:
+      rule: "Host(`exemple.com`)"
+      service: "exemple-service"
+      middlewares:
+        - "real-ip"
+      tls:
+        certResolver: "myresolver"
+
+  services:
+    exemple-service:
+      loadBalancer:
+        servers:
+          - url: "http://service1:8080"
+        passHostHeader: true
+```
+
+**Configuration dans traefik.yml (static) :**
+
+```yaml
+entryPoints:
+  websecure:
+    address: ":443"
+    forwardedHeaders:
+      trustedIPs:
+        - "4.233.128.18/32"
+        - "20.19.161.132/32"
+      insecure: false
+
+accessLog:
+  format: json
+  fields:
+    defaultMode: keep
+    names:
+      ClientUsername: drop
+    headers:
+      defaultMode: keep
+      names:
+        X-Real-IP: keep
+        X-Forwarded-For: keep
+```
+
+</details>
+
+#### Tests et Validation
+
+##### Vérification de la configuration
+
+```bash
+# Test 1: Vérifier les en-têtes reçus
+curl -H "X-Real-IP: 203.0.113.1" \
+     -H "X-Forwarded-For: 203.0.113.1, 192.168.1.100" \
+     https://exemple.com/test-ip
+
+# Test 2: Analyser les logs
+tail -f /var/log/nginx/access.log | grep "203.0.113.1"
+
+# Test 3: Test depuis différentes sources
+curl -v https://exemple.com/whatismyip
+```
+
+#### Bonnes pratiques REAL_IP
+
+1. **Sécurité** : Ne faites confiance qu'aux en-têtes IP provenant de sources connues (BunkerWeb Cloud)
+2. **Validation** : Validez toujours les adresses IP reçues dans les en-têtes
+3. **Journalisation** : Loguez à la fois l'IP du proxy et l'IP réelle pour le débogage
+4. **Fallback** : Ayez toujours une valeur par défaut si les en-têtes sont manquants
+5. **Tests** : Testez régulièrement que la détection d'IP fonctionne correctement
+6. **Surveillance** : Surveillez les modèles d'IP pour détecter les anomalies
+
+#### Dépannage REAL_IP
+
+##### Problèmes courants
+
+1. **L'IP affichée est toujours celle de BunkerWeb** : Vérifiez la configuration des proxies de confiance
+2. **En-têtes manquants** : Vérifiez la configuration côté BunkerWeb Cloud
+3. **IPs invalides** : Implémentez une validation stricte des IPs
+4. **Logs incorrects** : Vérifiez le format des logs et la configuration du module real_ip
+
+##### Commandes de diagnostic
+
+__Tester la détection d'IP__
+
+```bash
+curl -H "X-Real-IP: 1.2.3.4" https://your-domain.com/debug-headers
+```
+
+### Surveillance et Observabilité
+
+#### Accès Grafana
+
+Votre instance Grafana gérée vous donne accès à :
+
+##### Métriques disponibles
+
+1. **Vue d'ensemble du trafic**
+
+  - Requêtes par seconde
+  - Codes de statut HTTP
+  - Géolocalisation des requêtes
+2. **Sécurité**
+
+  - Tentatives d'attaques bloquées
+  - Types de menaces détectés
+  - Règles WAF déclenchées
+3. **Métriques de performance**
+
+  - Latence des requêtes
+  - Temps de réponse backend
+  - Utilisation des ressources
+
+##### Journaux disponibles
+
+1. **Access Logs** : Toutes les requêtes HTTP/HTTPS
+2. **Security Logs** : Événements de sécurité et blocages
+3. **Error Logs** : Erreurs système et d'application
+
+##### Configuration des alertes
+
+Configurez des alertes Grafana pour :
+
+- Pics de trafic anormaux
+- Augmentation des erreurs 5xx
+- Détection d'attaques DDoS
+- Échecs de santé backend
+
+### Bonnes pratiques
+
+#### Sécurité
+
+1. **Utilisez HTTPS** pour toute communication backend
+2. **Implémentez une liste blanche d'IP** si possible
+3. **Configurez des timeouts appropriés**
+4. **Activez la compression** pour optimiser les performances
+
+#### Performance
+
+1. **Optimisez la configuration du cache**
+2. **Utilisez HTTP/2** côté client
+3. **Configurez des health checks** pour vos backends
+4. **Surveillez les métriques** régulièrement
+
+### Dépannage
+
+#### Problèmes courants
+
+##### 1. Erreur SSL/TLS
+
+**Symptôme :** Erreurs de certificat SSL
+
+**Solutions :**
+
+```bash
+# Vérifier la configuration SNI
+openssl s_client -connect backend.com:443 -servername exemple.com
+
+# Vérifier les certificats backend
+openssl x509 -in certificate.crt -text -noout
+```
+
+##### 2. Timeout Backend
+
+**Symptôme :** Erreurs 504 Gateway Timeout
+
+**Solutions :**
+
+- Augmenter `REVERSE_PROXY_CONNECT_TIMEOUT` & `REVERSE_PROXY_SEND_TIMEOUT`
+- Vérifier la santé du backend
+- Optimiser la performance de l'application
+
+##### 3. Problèmes de routage
+
+**Symptôme :** Mauvais service servi
+
+**Solutions :**
+
+- Vérifier la configuration `SERVER_NAME`
+- Valider la configuration SNI
+- Vérifier les en-têtes `Host`
+
+#### Commandes de diagnostic
+
+```bash
+# Test de connectivité
+curl -v https://your-domain.com
+
+# Test avec en-têtes personnalisés
+curl -H "Host: exemple.com" -v https://54984654.bunkerweb.cloud
+
+# Vérification DNS
+dig +trace exemple.com
+
+# Test SSL
+openssl s_client -connect exemple.com:443 -servername exemple.com
+```
+
+#### Support Technique
+
+Pour toute assistance technique :
+
+1. **Vérifiez les logs** dans Grafana
+2. **Vérifiez la configuration** dans l'UI BunkerWeb
+3. **Contactez le support** avec les détails de configuration et les logs d'erreur
 
 ## Image tout-en-un (AIO) {#all-in-one-aio-image}
 
@@ -36,7 +1268,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
 ```
 
 Par défaut, le conteneur expose :
@@ -51,7 +1283,7 @@ Un volume nommé (ou un bind mount) est nécessaire pour conserver la base SQLit
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+    image: bunkerity/bunkerweb-all-in-one:1.6.7~rc1
     container_name: bunkerweb-aio
     volumes:
       - bw-storage:/data
@@ -129,7 +1361,7 @@ docker run -d \
   -e API_PASSWORD=StrongP@ssw0rd \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
   -p 8888:8888/tcp \
-  bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
 ```
 
 Configuration recommandée (derrière BunkerWeb) — ne publiez pas `8888` ; utilisez plutôt un proxy inverse :
@@ -137,7 +1369,7 @@ Configuration recommandée (derrière BunkerWeb) — ne publiez pas `8888` ; u
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+    image: bunkerity/bunkerweb-all-in-one:1.6.7~rc1
     container_name: bunkerweb-aio
     ports:
       - "80:8080/tcp"
@@ -209,7 +1441,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
 ```
 
 * Lorsque `USE_CROWDSEC=yes`, le point d'entrée :
@@ -264,7 +1496,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
 ```
 
 !!! info "Comment ça marche en interne"
@@ -285,7 +1517,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
 ```
 
 Notes :
@@ -321,7 +1553,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
 ```
 
 * **L'enregistrement local** est ignoré lorsque n' `CROWDSEC_API` est pas `127.0.0.1` ou `localhost`.
@@ -355,13 +1587,13 @@ En accédant à ces images prédéfinies à partir de Docker Hub, vous pouvez ra
 Que vous effectuiez des tests, développiez des applications ou déployiez BunkerWeb en production, l'option de conteneurisation Docker offre flexibilité et facilité d'utilisation. L'adoption de cette méthode vous permet de tirer pleinement parti des fonctionnalités de BunkerWeb tout en tirant parti des avantages de la technologie Docker.
 
 ```shell
-docker pull bunkerity/bunkerweb:1.6.6-rc3
+docker pull bunkerity/bunkerweb:1.6.7~rc1
 ```
 
 Les images Docker sont également disponibles sur [les packages GitHub](https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb) et peuvent être téléchargées à l'aide de l'adresse du `ghcr.io` dépôt :
 
 ```shell
-docker pull ghcr.io/bunkerity/bunkerweb:1.6.6-rc3
+docker pull ghcr.io/bunkerity/bunkerweb:1.6.7~rc1
 ```
 
 Les concepts clés de l'intégration Docker sont les suivants :
@@ -371,7 +1603,7 @@ Les concepts clés de l'intégration Docker sont les suivants :
 - **Réseaux**: Les réseaux Docker jouent un rôle essentiel dans l'intégration de BunkerWeb. Ces réseaux ont deux objectifs principaux : exposer les ports aux clients et se connecter aux services Web en amont. En exposant les ports, BunkerWeb peut accepter les demandes entrantes des clients, leur permettant d'accéder aux services Web protégés. De plus, en se connectant aux services Web en amont, BunkerWeb peut acheminer et gérer efficacement le trafic, offrant ainsi une sécurité et des performances améliorées.
 
 !!! info "Backend de base de données"
-    Veuillez noter que nos instructions supposent que vous utilisez SQLite comme backend de base de données par défaut, tel que configuré par le `DATABASE_URI` paramètre. Cependant, d'autres backends de base de données sont également pris en charge. Pour plus d'informations, consultez les fichiers docker-compose dans le [dossier misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/misc/integrations) du dépôt.
+    Veuillez noter que nos instructions supposent que vous utilisez SQLite comme backend de base de données par défaut, tel que configuré par le `DATABASE_URI` paramètre. Cependant, d'autres backends de base de données sont également pris en charge. Pour plus d'informations, consultez les fichiers docker-compose dans le [dossier misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations) du dépôt.
 
 ### Variables d'environnement
 
@@ -381,7 +1613,7 @@ Les paramètres sont transmis au Scheduler à l'aide de variables d'environnemen
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
     environment:
       - MY_SETTING=value
       - ANOTHER_SETTING=another value
@@ -425,42 +1657,42 @@ Cela garantit que les paramètres sensibles sont tenus à l'écart de l'environn
 Le [Scheduler](concepts.md#scheduler) s'exécute dans son propre conteneur, qui est également disponible sur Docker Hub :
 
 ```shell
-docker pull bunkerity/bunkerweb-scheduler:1.6.6-rc3
+docker pull bunkerity/bunkerweb-scheduler:1.6.7~rc1
 ```
 
 !!! info "Paramètres BunkerWeb"
 
-    Since version `1.6.0`, the Scheduler container is where you define the settings for BunkerWeb. The Scheduler then pushes the configuration to the BunkerWeb container.
+    Depuis la version `1.6.0`, le conteneur Scheduler est l’endroit où vous définissez les paramètres de BunkerWeb. Le Scheduler pousse ensuite la configuration vers le conteneur BunkerWeb.
 
     ⚠ **Important**: Tous les paramètres liés à l'API (comme `API_HTTP_PORT`, `API_LISTEN_IP`, `API_SERVER_NAME`, `API_WHITELIST_IP`, et `API_TOKEN` si vous l'utilisez) **doivent également être définis dans le conteneur BunkerWeb**. Les paramètres doivent être répliqués dans les deux conteneurs, sinon le conteneur BunkerWeb n'acceptera pas les requêtes API du Scheduler.
 
     ```yaml
     x-bw-api-env: &bw-api-env
-      # We use an anchor to avoid repeating the same settings for both containers
-      API_HTTP_PORT: "5000" # Default value
-      API_LISTEN_IP: "0.0.0.0" # Default value
-      API_SERVER_NAME: "bwapi" # Default value
-      API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24" # Set this according to your network settings
+      # Nous utilisons une ancre pour éviter de répéter les mêmes réglages pour les deux conteneurs
+      API_HTTP_PORT: "5000" # Valeur par défaut
+      API_LISTEN_IP: "0.0.0.0" # Valeur par défaut
+      API_SERVER_NAME: "bwapi" # Valeur par défaut
+      API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24" # Adaptez selon votre réseau
       # Jeton optionnel ; si défini, le Scheduler enverra Authorization: Bearer <token>
       API_TOKEN: ""
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.7~rc1
         environment:
-          # This will set the API settings for the BunkerWeb container
+          # Paramètres API pour le conteneur BunkerWeb
           <<: *bw-api-env
         restart: "unless-stopped"
         networks:
           - bw-universe
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
-          # This will set the API settings for the Scheduler container
+          # Paramètres API pour le conteneur Scheduler
           <<: *bw-api-env
         volumes:
-          - bw-storage:/data # This is used to persist the cache and other data like backups
+          - bw-storage:/data # Pour persister le cache et d'autres données comme les sauvegardes
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -473,7 +1705,7 @@ Un volume est nécessaire pour stocker la base de données SQLite et les sauvega
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
     volumes:
       - bw-storage:/data
 ...
@@ -521,9 +1753,69 @@ volumes:
     sudo chmod -R 770 bw-data
     ```
 
+### Paramètres du conteneur Scheduler
+
+Le Scheduler est le worker du plan de contrôle qui lit les paramètres, rend les configs et les pousse vers les instances BunkerWeb. Les réglages sont centralisés ici avec leurs valeurs par défaut et acceptées.
+
+#### Sources de configuration et priorité
+
+1. Variables d'environnement (y compris `environment:` Docker/Compose)
+2. Secrets dans `/run/secrets/<VAR>` (chargés automatiquement par l'entrypoint)
+3. Valeurs par défaut intégrées
+
+#### Référence de configuration (power users)
+
+##### Runtime & sécurité
+
+| Setting                         | Description                                                                      | Valeurs acceptées                                      | Défaut                                        |
+| ------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------- |
+| `HEALTHCHECK_INTERVAL`          | Secondes entre les healthchecks du Scheduler                                     | Secondes entières                                      | `30`                                          |
+| `RELOAD_MIN_TIMEOUT`            | Secondes minimales entre deux reloads successifs                                 | Secondes entières                                      | `5`                                           |
+| `DISABLE_CONFIGURATION_TESTING` | Sauter les tests de configuration avant application                              | `yes` ou `no`                                          | `no`                                          |
+| `IGNORE_FAIL_SENDING_CONFIG`    | Continuer même si certaines instances ne reçoivent pas la config                 | `yes` ou `no`                                          | `no`                                          |
+| `IGNORE_REGEX_CHECK`            | Ignorer la validation regex des paramètres (partagé avec autoconf)               | `yes` ou `no`                                          | `no`                                          |
+| `TZ`                            | Fuseau horaire pour les logs du Scheduler, tâches type cron, sauvegardes et dates | Nom de base TZ (ex. `UTC`, `Europe/Paris`)             | unset (défaut conteneur, généralement UTC)    |
+
+##### Base de données
+
+| Setting                 | Description                                                                                | Valeurs acceptées           | Défaut                                      |
+| ----------------------- | ------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------- |
+| `DATABASE_URI`          | DSN principal de base de données (partagé avec autoconf et les instances)                  | DSN SQLAlchemy              | `sqlite:////var/lib/bunkerweb/db.sqlite3`   |
+| `DATABASE_URI_READONLY` | DSN optionnel en lecture seule ; le Scheduler bascule en RO si c'est tout ce qui fonctionne | DSN SQLAlchemy ou vide      | unset                                       |
+
+##### Logging
+
+| Setting                         | Description                                                                    | Valeurs acceptées                                      | Défaut                                                                 |
+| ------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------ | ---------------------------------------------------------------------- |
+| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Niveau de log de base / override                                               | `debug`, `info`, `warning`, `error`, `critical`        | `info`                                                                 |
+| `LOG_TYPES`                     | Destinations                                                                   | `stderr`/`file`/`syslog` séparés par espaces            | `stderr`                                                               |
+| `SCHEDULER_LOG_TO_FILE`         | Activer le log fichier et définir le chemin par défaut                         | `yes` ou `no`                                          | `no`                                                                   |
+| `LOG_FILE_PATH`                 | Chemin de log personnalisé (utilisé quand `LOG_TYPES` inclut `file`)           | Chemin de fichier                                      | `/var/log/bunkerweb/scheduler.log` avec `SCHEDULER_LOG_TO_FILE=yes`, sinon unset |
+| `LOG_SYSLOG_ADDRESS`            | Cible syslog (`udp://host:514`, `tcp://host:514`, ou chemin de socket)         | Host:port, hôte préfixé protocole ou socket            | unset                                                                 |
+| `LOG_SYSLOG_TAG`                | Ident/tag syslog                                                               | Chaîne                                                 | `bw-scheduler`                                                         |
+
+### Paramètres du conteneur UI
+
+Le conteneur UI respecte aussi `TZ` pour localiser les logs et les tâches planifiées (ex. nettoyages lancés via l'UI).
+
+| Setting | Description                                   | Valeurs acceptées                              | Défaut                                       |
+| ------- | --------------------------------------------- | ---------------------------------------------- | -------------------------------------------- |
+| `TZ`    | Fuseau horaire pour les logs UI et actions planifiées | Nom dans la base TZ (ex. `UTC`, `Europe/Paris`) | unset (défaut conteneur, généralement UTC)   |
+
+#### Logging
+
+| Setting                         | Description                                                                       | Valeurs acceptées                                      | Défaut                                                             |
+| ------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------ |
+| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Niveau de base / override                                                         | `debug`, `info`, `warning`, `error`, `critical`        | `info`                                                             |
+| `LOG_TYPES`                     | Destinations                                                                      | `stderr`/`file`/`syslog` séparés par espaces            | `stderr`                                                           |
+| `LOG_FILE_PATH`                 | Chemin pour le log fichier (utilisé si `LOG_TYPES` inclut `file` ou `CAPTURE_OUTPUT=yes`) | Chemin de fichier                                      | `/var/log/bunkerweb/ui.log` quand file/capture, sinon unset       |
+| `LOG_SYSLOG_ADDRESS`            | Cible syslog (`udp://host:514`, `tcp://host:514`, socket)                        | Host:port, hôte préfixé protocole ou chemin            | unset                                                              |
+| `LOG_SYSLOG_TAG`                | Ident/tag syslog                                                                  | Chaîne                                                 | `bw-ui`                                                            |
+| `CAPTURE_OUTPUT`                | Envoyer stdout/stderr Gunicorn vers les sorties de log configurées               | `yes` ou `no`                                          | `no`                                                               |
+
 ### Réseau
 
-Par défaut, le conteneur BunkerWeb écoute (à l'intérieur du conteneur) les **fichiers 8080/tcp** pour **HTTP,** **8443/tcp** pour **HTTPS** et **8443/udp** pour **QUIC**.
+Par défaut, le conteneur BunkerWeb écoute (à l'intérieur du conteneur) sur **8080/tcp** pour **HTTP**, **8443/tcp** pour **HTTPS** et **8443/udp** pour **QUIC**.
 
 !! avertissement "Ports privilégiés en mode rootless ou lors de l'utilisation de Podman"
     Si vous utilisez [Docker en mode rootless](https://docs.docker.com/engine/security/rootless) et que vous souhaitez rediriger les ports privilégiés (< 1024) tels que 80 et 443 vers BunkerWeb, veuillez vous référer aux prérequis [ici](https://docs.docker.com/engine/security/rootless/#exposing-privileged-ports).
@@ -559,7 +1851,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.6-rc3
+    image: bunkerity/bunkerweb:1.6.7~rc1
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -572,7 +1864,7 @@ services:
       - bw-universe
 ...
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
     environment:
       <<: *bw-api-env
       BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -605,7 +1897,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.6-rc3
+    image: bunkerity/bunkerweb:1.6.7~rc1
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -618,7 +1910,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
     depends_on:
       - bunkerweb
     environment:
@@ -671,7 +1963,7 @@ Les distributions Linux prises en charge par BunkerWeb (architectures amd64/x86_
 - Debian 13 "Trixie"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
-- Fedora 41 et 42
+- Fedora 41, 42 et 43
 - Red Hat Enterprise Linux (RHEL) 8, 9 et 10
 
 ### Script d'installation facile
@@ -684,8 +1976,8 @@ Pour commencer, téléchargez le script d'installation et sa somme de contrôle,
 
 ```bash
 # Download the script and its checksum
-wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh
-wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh.sha256
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7~rc1/install-bunkerweb.sh
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7~rc1/install-bunkerweb.sh.sha256
 
 # Verify the checksum
 sha256sum -c install-bunkerweb.sh.sha256
@@ -740,7 +2032,7 @@ Pour les configurations non interactives ou automatisées, le script peut être 
 
 | Option                  | Description                                                                                              |
 | ----------------------- | -------------------------------------------------------------------------------------------------------- |
-| `-v, --version VERSION` | Spécifie la version de BunkerWeb à installer (par exemple, `1.6.6-rc3`).                                 |
+| `-v, --version VERSION` | Spécifie la version de BunkerWeb à installer (par exemple, `1.6.7~rc1`).                                     |
 | `-w, --enable-wizard`   | Active l'assistant de configuration.                                                                     |
 | `-n, --no-wizard`       | Désactive l'assistant d'installation.                                                                    |
 | `--api`, `--enable-api` | Active le service API (FastAPI) systemd (désactivé par défaut).                                          |
@@ -760,6 +2052,7 @@ Pour les configurations non interactives ou automatisées, le script peut être 
 | `--worker`         | Installe uniquement l'instance BunkerWeb.                                                      |
 | `--scheduler-only` | Installe uniquement le composant Scheduler.                                                    |
 | `--ui-only`        | Installe uniquement le composant Interface utilisateur Web.                                    |
+| `--api-only`       | Installe uniquement le service API (port 8000).                                                |
 
 **Intégrations de sécurité :**
 
@@ -771,9 +2064,14 @@ Pour les configurations non interactives ou automatisées, le script peut être 
 
 **Options avancées :**
 
-| Option                  | Description                                                                                            |
-| ----------------------- | ------------------------------------------------------------------------------------------------------ |
-| `--instances "IP1 IP2"` | Liste séparée par des espaces des instances BunkerWeb (requise pour les modes gestionnaire/Scheduler). |
+| Option                      | Description                                                                                            |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `--instances "IP1 IP2"`     | Liste séparée par des espaces des instances BunkerWeb (requise pour les modes gestionnaire/Scheduler). |
+| `--manager-ip IPs`          | IPs du gestionnaire/Scheduler à mettre en liste blanche (requis pour worker en mode non-interactif).   |
+| `--dns-resolvers "IP1 IP2"` | IPs des résolveurs DNS personnalisés (pour les installations full, manager ou worker).                 |
+| `--api-https`               | Activer HTTPS pour la communication API interne (par défaut : HTTP uniquement).                        |
+| `--backup-dir PATH`         | Répertoire pour stocker la sauvegarde automatique avant la mise à jour.                                |
+| `--no-auto-backup`          | Ignorer la sauvegarde automatique (vous DEVEZ l'avoir fait manuellement).                              |
 
 **Exemple d'utilisation :**
 
@@ -788,10 +2086,16 @@ sudo ./install-bunkerweb.sh --yes
 sudo ./install-bunkerweb.sh --worker --no-wizard
 
 # Install a specific version
-sudo ./install-bunkerweb.sh --version 1.6.6-rc3
+sudo ./install-bunkerweb.sh --version 1.6.7~rc1
 
 # Manager setup with remote worker instances (instances required)
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
+
+# Manager avec communication API interne HTTPS
+sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --api-https
+
+# Worker avec résolveurs DNS personnalisés et API interne HTTPS
+sudo ./install-bunkerweb.sh --worker --dns-resolvers "1.1.1.1 1.0.0.1" --api-https
 
 # Full installation with CrowdSec and AppSec
 sudo ./install-bunkerweb.sh --crowdsec-appsec
@@ -812,8 +2116,15 @@ sudo ./install-bunkerweb.sh --dry-run
 !!! warning "Remarques importantes sur la compatibilité des options"
 
     **CrowdSec Limitations:**
-    - Les options CrowdSec (`--crowdsec`, `--crowdsec-appsec`) ne sont compatibles qu'avec `--full` (par défaut) et `--manager` les types d'installation
-    - Ils ne peuvent pas être utilisés avec `--worker`des installations , `--scheduler-only`, ou `--ui-only`
+
+    - Les options CrowdSec (`--crowdsec`, `--crowdsec-appsec`) ne sont compatibles qu'avec le type d'installation `--full` (par défaut)
+    - Ils ne peuvent pas être utilisés avec les installations `--manager`, `--worker`, `--scheduler-only`, `--ui-only` ou `--api-only`
+
+    **Disponibilité du service API :**
+
+    - Le service API externe (port 8000) est disponible pour les types d'installation `--full` et `--manager`
+    - Il n'est pas disponible pour les installations `--worker`, `--scheduler-only` ou `--ui-only`
+    - Utilisez `--api-only` pour une installation dédiée du service API
 
     **Exigences relatives aux instances :**
     - L `--instances` 'option n'est valable qu'avec `--manager` les types d `--scheduler-only` 'installation et
@@ -908,12 +2219,12 @@ Veuillez vous assurer que **NGINX 1.28.0 est installé avant d'installer BunkerW
         export UI_WIZARD=no
         ```
 
-    Et enfin, installez BunkerWeb 1.6.6-rc3 :
+    Et enfin, installez BunkerWeb 1.6.7~rc1 :
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.6-rc3
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.7~rc1
     ```
 
     Pour empêcher la mise à jour des paquets NGINX et/ou BunkerWeb lors de l'exécution de `apt upgrade`, vous pouvez utiliser la commande suivante :
@@ -956,12 +2267,12 @@ Veuillez vous assurer que **NGINX 1.28.0 est installé avant d'installer BunkerW
         export UI_WIZARD=no
         ```
 
-    Et enfin, installez BunkerWeb 1.6.6-rc3 :
+    Et enfin, installez BunkerWeb 1.6.7~rc1 :
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.6-rc3
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.7~rc1
     ```
 
     Pour empêcher la mise à jour des paquets NGINX et/ou BunkerWeb lors de l'exécution de `apt upgrade`, vous pouvez utiliser la commande suivante :
@@ -992,12 +2303,12 @@ Veuillez vous assurer que **NGINX 1.28.0 est installé avant d'installer BunkerW
         export UI_WIZARD=no
         ```
 
-    Et enfin, installez BunkerWeb 1.6.6-rc3 :
+    Et enfin, installez BunkerWeb 1.6.7~rc1 :
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
     sudo dnf makecache && \
-    sudo -E dnf install -y --allowerasing bunkerweb-1.6.6-rc3
+    sudo -E dnf install -y --allowerasing bunkerweb-1.6.7~rc1
     ```
 
     Pour empêcher la mise à jour des paquets NGINX et/ou BunkerWeb lors de l'exécution de `dnf upgrade`, vous pouvez utiliser la commande suivante :
@@ -1042,12 +2353,12 @@ Veuillez vous assurer que **NGINX 1.28.0 est installé avant d'installer BunkerW
         export UI_WIZARD=no
         ```
 
-    Enfin, installez BunkerWeb 1.6.6-rc3 :
+    Enfin, installez BunkerWeb 1.6.7~rc1 :
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
-    sudo -E dnf install -y --allowerasing bunkerweb-1.6.6-rc3
+    sudo -E dnf install -y --allowerasing bunkerweb-1.6.7~rc1
     ```
 
     Pour empêcher la mise à jour des paquets NGINX et/ou BunkerWeb lors de l'exécution de `dnf upgrade`, vous pouvez utiliser la commande suivante :
@@ -1140,7 +2451,7 @@ En adoptant cette approche, vous pouvez profiter d'une reconfiguration en temps 
     L'intégration de Docker autoconf implique l'utilisation du **mode multisite**. Pour plus d'informations, reportez-vous à la [section multisite](concepts.md#multisite-mode) de la documentation.
 
 !!! info "Backend de base de données"
-    Veuillez noter que nos instructions supposent que vous utilisez MariaDB comme backend de base de données par défaut, tel que configuré par le `DATABASE_URI` paramètre. Cependant, nous comprenons que vous préférerez peut-être utiliser d'autres backends pour votre intégration Docker. Si c'est le cas, soyez assuré que d'autres backends de base de données sont toujours possibles. Pour plus d'informations, consultez les fichiers docker-compose dans le [dossier misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/misc/integrations) du dépôt.
+    Veuillez noter que nos instructions supposent que vous utilisez MariaDB comme backend de base de données par défaut, tel que configuré par le `DATABASE_URI` paramètre. Cependant, nous comprenons que vous préférerez peut-être utiliser d'autres backends pour votre intégration Docker. Si c'est le cas, soyez assuré que d'autres backends de base de données sont toujours possibles. Pour plus d'informations, consultez les fichiers docker-compose dans le [dossier misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations) du dépôt.
 
 Pour activer les mises à jour automatiques de la configuration, incluez un conteneur supplémentaire appelé `bw-autoconf` dans la pile. Ce conteneur héberge le service autoconf, qui gère les modifications de configuration dynamiques pour BunkerWeb.
 
@@ -1154,7 +2465,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.6-rc3
+    image: bunkerity/bunkerweb:1.6.7~rc1
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -1169,7 +2480,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -1184,7 +2495,7 @@ services:
       - bw-db
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
+    image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
     depends_on:
       - bunkerweb
       - bw-docker
@@ -1249,6 +2560,71 @@ networks:
 !!! warning "Utilisation de Docker en mode rootless"
     Si vous utilisez [Docker en mode rootless](https://docs.docker.com/engine/security/rootless), vous devrez remplacer le support du socket docker par la valeur suivante : `$XDG_RUNTIME_DIR/docker.sock:/var/run/docker.sock:ro`.
 
+### Paramètres du conteneur Autoconf
+
+Le contrôleur `bw-autoconf` surveille votre orchestrateur et écrit les changements dans la base de données partagée.
+
+#### Sources de configuration et priorité
+
+1. Variables d'environnement (y compris `environment:` Docker/Compose)
+2. Secrets dans `/run/secrets/<VAR>` (chargés automatiquement par l'entrypoint)
+3. Valeurs par défaut intégrées
+
+#### Référence de configuration (power users)
+
+##### Mode & runtime
+
+| Setting               | Description                                                     | Valeurs acceptées                        | Défaut                          |
+| --------------------- | --------------------------------------------------------------- | ---------------------------------------- | ------------------------------- |
+| `AUTOCONF_MODE`       | Activer le contrôleur autoconf                                  | `yes` ou `no`                            | `no`                            |
+| `SWARM_MODE`          | Surveiller les services Swarm au lieu des conteneurs Docker     | `yes` ou `no`                            | `no`                            |
+| `KUBERNETES_MODE`     | Surveiller les ingress/pods Kubernetes au lieu de Docker        | `yes` ou `no`                            | `no`                            |
+| `DOCKER_HOST`         | Socket Docker / URL API distante                                | ex. `unix:///var/run/docker.sock`        | `unix:///var/run/docker.sock`   |
+| `WAIT_RETRY_INTERVAL` | Secondes entre les vérifications de disponibilité des instances | Secondes entières                        | `5`                             |
+| `LOG_SYSLOG_TAG`      | Tag syslog pour les logs autoconf                               | Chaîne                                   | `bw-autoconf`                   |
+| `TZ`                  | Fuseau horaire pour les logs autoconf et les horodatages        | Nom de base TZ (ex. `Europe/Paris`)      | unset (défaut conteneur, souvent UTC) |
+
+##### Base de données & validation
+
+| Setting                 | Description                                                                               | Valeurs acceptées          | Défaut                                      |
+| ----------------------- | ----------------------------------------------------------------------------------------- | -------------------------- | ------------------------------------------- |
+| `DATABASE_URI`          | DSN principal de base de données (doit correspondre à la BD du Scheduler)                 | DSN SQLAlchemy             | `sqlite:////var/lib/bunkerweb/db.sqlite3`   |
+| `DATABASE_URI_READONLY` | DSN optionnel en lecture seule ; autoconf bascule en RO si c'est tout ce qui fonctionne   | DSN SQLAlchemy ou vide     | unset                                       |
+| `IGNORE_REGEX_CHECK`    | Ignorer la validation regex pour les paramètres issus des labels/annotations              | `yes` ou `no`              | `no`                                        |
+
+##### Logging
+
+| Setting                         | Description                                                   | Valeurs acceptées                                      | Défaut                                        |
+| ------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------- |
+| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Niveau de log de base / override                              | `debug`, `info`, `warning`, `error`, `critical`        | `info`                                        |
+| `LOG_TYPES`                     | Destinations                                                  | `stderr`/`file`/`syslog` séparés par espaces            | `stderr`                                      |
+| `LOG_FILE_PATH`                 | Chemin pour le log fichier (quand `LOG_TYPES` inclut `file`)  | Chemin de fichier                                      | unset (définissez le vôtre si vous activez `file`) |
+| `LOG_SYSLOG_ADDRESS`            | Cible syslog (`udp://host:514`, `tcp://host:514`, socket)     | Host:port, hôte préfixé protocole ou chemin            | unset                                         |
+| `LOG_SYSLOG_TAG`                | Ident/tag syslog                                              | Chaîne                                                 | `bw-autoconf`                                 |
+
+##### Portée & filtres de découverte
+
+| Setting                         | Description                                                                     | Valeurs acceptées                                    | Défaut |
+| ------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------- | ------ |
+| `NAMESPACES`                    | Liste d'espaces/ projets gérés (séparés par espaces) ; unset = tous            | Chaînes séparées par espaces                         | unset  |
+| `DOCKER_IGNORE_LABELS`          | Ignorer des conteneurs/labels lors de la collecte d'instances/services/configs | Clés complètes ou suffixes séparés espace/virgule    | unset  |
+| `SWARM_IGNORE_LABELS`           | Ignorer les services/configs Swarm avec labels correspondants                  | Clés complètes ou suffixes séparés espace/virgule    | unset  |
+| `KUBERNETES_IGNORE_ANNOTATIONS` | Ignorer des annotations d'ingress/pod pendant la découverte                    | Clés complètes ou suffixes séparés espace/virgule    | unset  |
+
+##### Spécifique Kubernetes
+
+| Setting                                 | Description                                                                                           | Valeurs acceptées         | Défaut            |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------- | ----------------- |
+| `KUBERNETES_VERIFY_SSL`                 | Vérifier le TLS de l'API Kubernetes                                                                   | `yes` ou `no`             | `yes`             |
+| `KUBERNETES_SSL_CA_CERT`                | Chemin vers un bundle CA personnalisé pour l'API Kubernetes                                          | Chemin de fichier         | unset             |
+| `USE_KUBERNETES_FQDN`                   | Utiliser `<pod>.<ns>.pod.<domain>` plutôt que l'IP du Pod comme hostname d'instance                   | `yes` ou `no`             | `yes`             |
+| `KUBERNETES_INGRESS_CLASS`              | Ne traiter que les ingress avec cette classe                                                         | Chaîne                    | unset (toutes)    |
+| `KUBERNETES_DOMAIN_NAME`                | Suffixe de domaine du cluster lors de la construction des hôtes upstream                             | Chaîne                    | `cluster.local`   |
+| `KUBERNETES_SERVICE_PROTOCOL`           | Schéma utilisé pour les hôtes de reverse proxy générés                                               | `http` ou `https`         | `http`            |
+| `BUNKERWEB_SERVICE_NAME`                | Nom du Service lu lors du patch du statut Ingress avec l'adresse du load balancer                    | Chaîne                    | `bunkerweb`       |
+| `BUNKERWEB_NAMESPACE`                   | Namespace de ce Service                                                                              | Chaîne                    | `bunkerweb`       |
+| `KUBERNETES_REVERSE_PROXY_SUFFIX_START` | Index de départ pour `REVERSE_PROXY_HOST_n`/`REVERSE_PROXY_URL_n` générés sur les ingress multi-path | Entier (>=0)              | `1`               |
+
 ### Les services d'Autoconf
 
 Une fois la pile configurée, vous pourrez créer le conteneur de l'application web et ajouter les paramètres sous forme d'étiquettes à l'aide du préfixe "bunkerweb." afin de configurer automatiquement BunkerWeb :
@@ -1298,13 +2674,13 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.7~rc1
         labels:
           - "bunkerweb.INSTANCE=yes"
           - "bunkerweb.NAMESPACE=my-namespace" # Set the namespace for the BunkerWeb instance so the autoconf service can detect it
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
+        image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
         environment:
           ...
           NAMESPACES: "my-namespace my-other-namespace" # Only listen to these namespaces
@@ -1342,7 +2718,7 @@ Pour une configuration optimale, il est recommandé de définir BunkerWeb en tan
 Compte tenu de la présence de plusieurs instances BunkerWeb, il est nécessaire d'établir un magasin de données partagé implémenté en tant que [ service Redis](https://redis.io/) ou [Valkey](https://valkey.io/). Ce service sera utilisé par les instances pour mettre en cache et partager des données entre elles. Vous trouverez de plus amples informations sur les paramètres Redis/Valkey [ici](features.md#redis).
 
 !!! info "Backend de base de données"
-    Veuillez noter que nos instructions supposent que vous utilisez MariaDB comme backend de base de données par défaut, tel que configuré par le `DATABASE_URI` paramètre. Cependant, nous comprenons que vous préférerez peut-être utiliser d'autres backends pour votre intégration Docker. Si c'est le cas, soyez assuré que d'autres backends de base de données sont toujours possibles. Pour plus d'informations, consultez les fichiers docker-compose dans le [dossier misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/misc/integrations) du dépôt.
+    Veuillez noter que nos instructions supposent que vous utilisez MariaDB comme backend de base de données par défaut, tel que configuré par le `DATABASE_URI` paramètre. Cependant, nous comprenons que vous préférerez peut-être utiliser d'autres backends pour votre intégration Docker. Si c'est le cas, soyez assuré que d'autres backends de base de données sont toujours possibles. Pour plus d'informations, consultez les fichiers docker-compose dans le [dossier misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations) du dépôt.
 
       La configuration des backends de base de données en cluster est hors du périmètre de cette documentation.
 
@@ -1377,28 +2753,53 @@ Cette documentation explique comment déployer BunkerWeb en tant que sidecar pou
 
 ##### Architecture
 
-```
-┌─────────────────────────────────────┐
-│   Scheduler BunkerWeb (centralisé)  │
-│   + UI + MariaDB + Redis            │
-└──────────────┬──────────────────────┘
-               │ (API port 5000)
-               │
-    ┏━━━━━━━━━━┻━━━━━━━━━━┓
-    ┃                     ┃
-┌───▼──────────────┐  ┌───▼──────────────┐
-│  Pod Application │  │  Pod Application │
-│  ┌─────────────┐ │  │  ┌─────────────┐ │
-│  │   App       │ │  │  │   App       │ │
-│  │  (port 80)  │ │  │  │  (port XX)  │ │
-│  └──────┬──────┘ │  │  └──────┬──────┘ │
-│         │        │  │         │        │
-│  ┌──────▼──────┐ │  │  ┌──────▼──────┐ │
-│  │  BunkerWeb  │ │  │  │  BunkerWeb  │ │
-│  │ (port 8080) │ │  │  │ (port 8080) │ │
-│  │ (API  5000) │ │  │  │ (API  5000) │ │
-│  └─────────────┘ │  │  └─────────────┘ │
-└──────────────────┘  └──────────────────┘
+```mermaid
+flowchart TB
+
+  %% ---------- Styles ----------
+  classDef scheduler     fill:#eef2ff,stroke:#4c1d95,stroke-width:1px,rx:6px,ry:6px;
+  classDef podContainer  fill:none,stroke:#9ca3af,stroke-width:1px,stroke-dasharray:6 3,rx:6px,ry:6px;
+  classDef component     fill:#f9fafb,stroke:#6b7280,stroke-width:1px,rx:4px,ry:4px;
+  classDef lb            fill:#e0f2fe,stroke:#0369a1,stroke-width:1px,rx:6px,ry:6px;
+
+  %% ---------- Haut : Scheduler ----------
+  SCHED["Scheduler BunkerWeb (centralisé)<br/>+ UI + MariaDB + Redis"]:::scheduler
+
+  %% ---------- Groupe de Pods ----------
+  subgraph PODS["Pods"]
+    %% Pod d'application 1 ----------
+    subgraph POD1["Pod d'application"]
+      BW1["BunkerWeb"]:::component
+      APP1["Application<br/>(port 80)"]:::component
+      BW1 -->|requêtes légitimes| APP1
+    end
+    class POD1 podContainer
+
+    %% Pod d'application 2 ----------
+    subgraph POD2["Pod d'application"]
+      BW2["BunkerWeb"]:::component
+      APP2["Application<br/>(port XX)"]:::component
+      BW2 -->|requêtes légitimes| APP2
+    end
+    class POD2 podContainer
+  end
+
+  %% ---------- Équilibreur de charge (en bas) ----------
+  LB["Équilibreur de charge"]:::lb
+
+  %% ---------- Câblage (visible, sémantique) ----------
+  %% Le Scheduler contrôle les instances BunkerWeb (API)
+  SCHED -->|API 5000| BW1
+  SCHED -->|API 5000| BW2
+
+  %% L'équilibreur de charge envoie le trafic vers BunkerWeb
+  LB -->|HTTP/HTTPS| BW1
+  LB -->|HTTP/HTTPS| BW2
+
+  %% ---------- Aide à la mise en page (caché) ----------
+  %% Place l'équilibreur de charge sous tout le groupe PODS
+  PODS --> LB
+  linkStyle 6 stroke-width:0px,stroke:transparent;
 ```
 
 ##### Prérequis
@@ -1432,7 +2833,7 @@ Le **controller BunkerWeb** découvre automatiquement les pods avec sidecars Bun
 ```yaml
 controller:
   enabled: true
-  tag: "1.6.5"
+  tag: "1.6.7~rc1"
 ```
 
 2. Pour chaque sidecar, ajoutez :
@@ -1525,7 +2926,7 @@ Dans votre fichier `values.yaml` du chart BunkerWeb, configurez la variable d'en
 
 ```yaml
 scheduler:
-  tag: "1.6.6-rc2"
+  tag: "1.6.7~rc1"
   extraEnvs:
     - name: BUNKERWEB_INSTANCES
       value: "http://app1-bunkerweb-workers.namespace.svc.cluster.local:5000 http://app2-bunkerweb-workers.namespace.svc.cluster.local:5000"
@@ -1567,7 +2968,7 @@ spec:
 
         # Sidecar BunkerWeb
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.6-rc2
+          image: bunkerity/bunkerweb:1.6.7~rc1
           ports:
             - containerPort: 8080  # Port HTTP exposé
             - containerPort: 5000  # API interne (obligatoire)
@@ -1810,7 +3211,7 @@ Pour ajouter une nouvelle application protégée par BunkerWeb :
 
 #### Fichiers YAML complets
 
-Au lieu d'utiliser la charte Helm, vous pouvez également utiliser les modèles YAML dans le [dossier misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/misc/integrations) du référentiel GitHub. Veuillez noter que nous vous recommandons vivement d'utiliser le tableau de barre à la place.
+Au lieu d'utiliser la charte Helm, vous pouvez également utiliser les modèles YAML dans le [dossier misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations) du référentiel GitHub. Veuillez noter que nous vous recommandons vivement d'utiliser le tableau de barre à la place.
 
 ### Ressources d'entrée
 
@@ -1893,7 +3294,7 @@ metadata:
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
+              image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
               imagePullPolicy: Always
               env:
                 - name: NAMESPACES
@@ -2037,11 +3438,11 @@ service:
 
 # BunkerWeb settings
 bunkerweb:
-  tag: 1.6.6-rc3
+  tag: 1.6.7~rc1
 
 # Scheduler settings
 scheduler:
-  tag: 1.6.6-rc3
+  tag: 1.6.7~rc1
   extraEnvs:
     # Enable real IP module to get real IP of clients
     - name: USE_REAL_IP
@@ -2049,11 +3450,11 @@ scheduler:
 
 # Controller settings
 controller:
-  tag: 1.6.6-rc3
+  tag: 1.6.7~rc1
 
 # UI settings
 ui:
-  tag: 1.6.6-rc3
+  tag: 1.6.7~rc1
 ```
 
 Installez BunkerWeb avec des valeurs personnalisées :
@@ -2110,7 +3511,7 @@ Et vous pouvez maintenant passer à l'assistant de configuration en accédant à
 
 **Protection de l'application existante**
 
-**Tout d'abord, vous devrez vous rendre dans Global Config, sélectionner le plugin SSL, puis désactiver la redirection automatique HTTP vers HTTPS. Veuillez noter que vous n'avez besoin de le faire qu'une seule fois.**
+**Tout d'abord, vous devrez vous rendre dans Paramètres globaux, sélectionner le plugin SSL, puis désactiver la redirection automatique HTTP vers HTTPS. Veuillez noter que vous n'avez besoin de le faire qu'une seule fois.**
 
 Supposons que vous ayez une application dans l'espace de `myapp` noms qui est accessible à l'aide du `myapp-service` service sur le port `5000`.
 
@@ -2181,7 +3582,7 @@ Pour une configuration optimale, il est recommandé de planifier le **service Bu
 En ce qui concerne le volume de la base de données, la documentation ne spécifie pas d'approche spécifique. Le choix d'un dossier partagé ou d'un pilote spécifique pour le volume de base de données dépend de votre cas d'utilisation unique et est laissé à la disposition du lecteur.
 
 !!! info "Backend de base de données"
-    Veuillez noter que nos instructions supposent que vous utilisez MariaDB comme backend de base de données par défaut, tel que configuré par le `DATABASE_URI` paramètre. Cependant, nous comprenons que vous préférerez peut-être utiliser d'autres backends pour votre intégration Docker. Si c'est le cas, soyez assuré que d'autres backends de base de données sont toujours possibles. Pour plus d'informations, consultez les fichiers docker-compose dans le [dossier misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/misc/integrations) du dépôt.
+    Veuillez noter que nos instructions supposent que vous utilisez MariaDB comme backend de base de données par défaut, tel que configuré par le `DATABASE_URI` paramètre. Cependant, nous comprenons que vous préférerez peut-être utiliser d'autres backends pour votre intégration Docker. Si c'est le cas, soyez assuré que d'autres backends de base de données sont toujours possibles. Pour plus d'informations, consultez les fichiers docker-compose dans le [dossier misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations) du dépôt.
 
       La configuration des backends de base de données en cluster est hors du périmètre de cette documentation.
 
@@ -2195,7 +3596,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.6-rc3
+    image: bunkerity/bunkerweb:1.6.7~rc1
     ports:
       - published: 80
         target: 8080
@@ -2224,7 +3625,7 @@ services:
         - "bunkerweb.INSTANCE=yes" # Mandatory label for the autoconf service to identify the BunkerWeb instance
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -2245,7 +3646,7 @@ services:
           - "node.role == worker"
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
+    image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
     environment:
       SWARM_MODE: "yes"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
@@ -2299,7 +3700,7 @@ services:
           - "node.role == worker"
 
   bw-redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -2397,7 +3798,7 @@ networks:
     ...
     services:
       bunkerweb:
-      image: bunkerity/bunkerweb:1.6.6-rc3
+      image: bunkerity/bunkerweb:1.6.7~rc1
       ...
       deploy:
         mode: global
@@ -2409,7 +3810,7 @@ networks:
         - "bunkerweb.NAMESPACE=my-namespace" # Set the namespace for the BunkerWeb instance
       ...
       bw-autoconf:
-      image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
+      image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
       environment:
         NAMESPACES: "my-namespace my-other-namespace" # Only listen to these namespaces
         ...
@@ -2427,6 +3828,243 @@ networks:
     Il ne peut y avoir **qu'une seule base de données** et **un seul Scheduler** par espace de noms. Si vous tentez de créer plusieurs bases de données ou plusieurs Schedulers dans le même espace de noms, les configurations entreront en conflit.
 
     Le Scheduler n'a pas besoin de l'étiquette `NAMESPACE` pour fonctionner correctement. Il a seulement besoin que le paramètre `DATABASE_URI` soit correctement configuré afin qu'il puisse accéder à la même base de données que le service autoconf.
+## Terraform Provider
+
+### Introduction
+
+Le provider Terraform pour BunkerWeb vous permet de gérer vos instances, services et configurations BunkerWeb via l'Infrastructure as Code (IaC). Ce provider interagit avec l'API BunkerWeb pour automatiser le déploiement et la gestion de vos configurations de sécurité.
+
+### Prérequis
+
+- [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.12
+- Une instance BunkerWeb avec l'API activée
+- Un token d'API ou des identifiants d'authentification basique
+
+### Installation
+
+Le provider est disponible sur le [Terraform Registry](https://registry.terraform.io/providers/bunkerity/bunkerweb/latest). Ajoutez-le à votre configuration Terraform :
+
+```terraform
+terraform {
+  required_providers {
+    bunkerweb = {
+      source  = "bunkerity/bunkerweb"
+      version = "~> 0.0.2"
+    }
+  }
+}
+```
+
+### Configuration
+
+#### Authentification par Bearer token (recommandée)
+
+```terraform
+provider "bunkerweb" {
+  api_endpoint = "https://bunkerweb.example.com:8888"
+  api_token    = var.bunkerweb_token
+}
+```
+
+#### Authentification basique
+
+```terraform
+provider "bunkerweb" {
+  api_endpoint = "https://bunkerweb.example.com:8888"
+  api_username = var.bunkerweb_username
+  api_password = var.bunkerweb_password
+}
+```
+
+### Exemples d'utilisation
+
+#### Créer un service web
+
+```terraform
+resource "bunkerweb_service" "app" {
+  server_name = "app.example.com"
+
+  variables = {
+    upstream = "10.0.0.12:8080"
+    mode     = "production"
+  }
+}
+```
+
+#### Enregistrer une instance
+
+```terraform
+resource "bunkerweb_instance" "worker1" {
+  hostname     = "worker-1.internal"
+  name         = "Worker 1"
+  port         = 8080
+  listen_https = true
+  https_port   = 8443
+  server_name  = "worker-1.internal"
+  method       = "api"
+}
+```
+
+#### Configurer un paramètre global
+
+```terraform
+resource "bunkerweb_global_config_setting" "retry" {
+  key   = "retry_limit"
+  value = "10"
+}
+```
+
+#### Bannir une adresse IP
+
+```terraform
+resource "bunkerweb_ban" "suspicious_ip" {
+  ip       = "192.0.2.100"
+  reason   = "Multiple failed login attempts"
+  duration = 3600  # 1 heure en secondes
+}
+```
+
+#### Configuration personnalisée
+
+```terraform
+resource "bunkerweb_config" "custom_rules" {
+  service_id = "app.example.com"
+  type       = "http"
+  name       = "custom-rules.conf"
+  content    = file("${path.module}/configs/custom-rules.conf")
+}
+```
+
+### Ressources disponibles
+
+Le provider expose les ressources suivantes :
+
+- **bunkerweb_service** : Gestion des services web
+- **bunkerweb_instance** : Enregistrement et gestion des instances
+- **bunkerweb_global_config_setting** : Configuration globale
+- **bunkerweb_config** : Configurations personnalisées
+- **bunkerweb_ban** : Gestion des bannissements IP
+- **bunkerweb_plugin** : Installation et gestion des plugins
+
+### Data sources
+
+Les data sources permettent de lire des informations existantes :
+
+- **bunkerweb_service** : Lecture d'un service existant
+- **bunkerweb_global_config** : Lecture de la configuration globale
+- **bunkerweb_plugins** : Liste des plugins disponibles
+- **bunkerweb_cache** : Informations sur le cache
+- **bunkerweb_jobs** : État des jobs planifiés
+
+### Ressources éphémères
+
+Pour des opérations ponctuelles :
+
+- **bunkerweb_run_jobs** : Déclencher des jobs à la demande
+- **bunkerweb_instance_action** : Exécuter des actions sur les instances (reload, stop, etc.)
+- **bunkerweb_service_snapshot** : Capturer l'état d'un service
+- **bunkerweb_config_upload** : Upload en masse de configurations
+
+### Exemple complet
+
+Voici un exemple d'infrastructure complète avec BunkerWeb :
+
+```terraform
+terraform {
+  required_providers {
+    bunkerweb = {
+      source  = "bunkerity/bunkerweb"
+      version = "~> 0.0.1"
+    }
+  }
+}
+
+provider "bunkerweb" {
+  api_endpoint = "https://bunkerweb.example.com:8888"
+  api_token    = var.bunkerweb_token
+}
+
+# Configuration globale
+resource "bunkerweb_global_config_setting" "rate_limit" {
+  key   = "rate_limit"
+  value = "10r/s"
+}
+
+# Service principal
+resource "bunkerweb_service" "webapp" {
+  server_name = "webapp.example.com"
+
+  variables = {
+    upstream          = "10.0.1.10:8080"
+    mode              = "production"
+    auto_lets_encrypt = "yes"
+    use_modsecurity   = "yes"
+    use_antibot       = "cookie"
+  }
+}
+
+# Service API avec configuration différente
+resource "bunkerweb_service" "api" {
+  server_name = "api.example.com"
+
+  variables = {
+    upstream        = "10.0.1.20:3000"
+    mode            = "production"
+    use_cors        = "yes"
+    cors_allow_origin = "*"
+  }
+}
+
+# Instance worker
+resource "bunkerweb_instance" "worker1" {
+  hostname     = "bw-worker-1.internal"
+  name         = "Production Worker 1"
+  port         = 8080
+  listen_https = true
+  https_port   = 8443
+  server_name  = "bw-worker-1.internal"
+  method       = "api"
+}
+
+# Configuration personnalisée pour le service webapp
+resource "bunkerweb_config" "custom_security" {
+  service_id = bunkerweb_service.webapp.id
+  type       = "http"
+  name       = "custom-security.conf"
+  content    = <<-EOT
+    # Custom security headers
+    add_header X-Frame-Options "DENY" always;
+    add_header X-Content-Type-Options "nosniff" always;
+  EOT
+}
+
+# Bannir une IP suspecte
+resource "bunkerweb_ban" "blocked_ip" {
+  ip       = "203.0.113.50"
+  reason   = "Detected malicious activity"
+  duration = 86400  # 24 heures
+}
+
+output "webapp_service_id" {
+  value = bunkerweb_service.webapp.id
+}
+
+output "api_service_id" {
+  value = bunkerweb_service.api.id
+}
+```
+
+### Ressources additionnelles
+
+- [Documentation complète du provider](https://registry.terraform.io/providers/bunkerity/bunkerweb/latest/docs)
+- [Dépôt GitHub](https://github.com/bunkerity/terraform-provider-bunkerweb)
+- [Exemples d'utilisation](https://github.com/bunkerity/terraform-provider-bunkerweb/tree/main/examples)
+- [Documentation de l'API BunkerWeb](https://docs.bunkerweb.io/latest/api/)
+
+### Support et contribution
+
+Pour signaler des bugs ou proposer des améliorations, rendez-vous sur le [dépôt GitHub du provider](https://github.com/bunkerity/terraform-provider-bunkerweb/issues).
+
 
 ## Microsoft Azure
 

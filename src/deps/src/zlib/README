@@ -1,10 +1,10 @@
 ZLIB DATA COMPRESSION LIBRARY
 
-zlib 1.3.1 is a general purpose data compression library.  All the code is
+zlib 1.3.1.2 is a general purpose data compression library.  All the code is
 thread safe.  The data format used by the zlib library is described by RFCs
-(Request for Comments) 1950 to 1952 in the files
-http://tools.ietf.org/html/rfc1950 (zlib format), rfc1951 (deflate format) and
-rfc1952 (gzip format).
+(Request for Comments) 1950 to 1952 at
+https://datatracker.ietf.org/doc/html/rfc1950 (zlib format), rfc1951 (deflate
+format) and rfc1952 (gzip format).
 
 All functions of the compression library are documented in the file zlib.h
 (volunteer to write man pages welcome, contact zlib@gzip.org).  A usage example
@@ -29,9 +29,9 @@ PLEASE read the zlib FAQ http://zlib.net/zlib_faq.html before asking for help.
 
 Mark Nelson <markn@ieee.org> wrote an article about zlib for the Jan.  1997
 issue of Dr.  Dobb's Journal; a copy of the article is available at
-https://marknelson.us/posts/1997/01/01/zlib-engine.html .
+https://web.archive.org/web/20241130054640/https://marknelson.us/posts/1997/01/01/zlib-engine.html .
 
-The changes made in version 1.3.1 are documented in the file ChangeLog.
+The changes made in version 1.3.1.2 are documented in the file ChangeLog.
 
 Unsupported third party contributions are provided in directory contrib/ .
 
@@ -69,8 +69,6 @@ Notes for some targets:
 - zlib doesn't work on HP-UX 9.05 with some versions of /bin/cc. It works with
   other compilers. Use "make test" to check your compiler.
 
-- gzdopen is not supported on RISCOS or BEOS.
-
 - For PalmOs, see http://palmzlib.sourceforge.net/
 
 
@@ -83,7 +81,7 @@ Acknowledgments:
 
 Copyright notice:
 
- (C) 1995-2024 Jean-loup Gailly and Mark Adler
+ (C) 1995-2025 Jean-loup Gailly and Mark Adler
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages

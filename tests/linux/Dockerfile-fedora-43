@@ -1,0 +1,31 @@
+FROM fedora:43@sha256:6cd815d862109208adf6040ea13391fe6aeb87a9dc80735c2ab07083fdf5e03a
+
+ENV container=docker
+ENV NGINX_VERSION=1.28.0
+
+RUN dnf -y update \
+    && dnf -y install systemd \
+    && dnf clean all
+
+RUN cd /lib/systemd/system/sysinit.target.wants/; \
+    for i in *; do [ $i = systemd-tmpfiles-setup.service ] || rm -f $i; done
+
+RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
+    /etc/systemd/system/*.wants/* \
+    /lib/systemd/system/local-fs.target.wants/* \
+    /lib/systemd/system/sockets.target.wants/*udev* \
+    /lib/systemd/system/sockets.target.wants/*initctl* \
+    /lib/systemd/system/basic.target.wants/* \
+    /lib/systemd/system/anaconda.target.wants/*
+
+# Nginx
+RUN dnf update -y && \
+    dnf install -y php-fpm curl gnupg2 ca-certificates python3-pip which && \
+    dnf config-manager setopt updates-testing.enabled=1 && \
+    dnf install nginx-${NGINX_VERSION} -y
+
+COPY ./package-fedora-43/*.rpm /opt
+
+VOLUME ["/sys/fs/cgroup"]
+
+CMD ["/usr/sbin/init"]

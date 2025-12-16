@@ -16,10 +16,10 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
-LOGGER = setup_logger("self-signed")
+LOGGER = getLogger("SELF-SIGNED")
 JOB = Job(LOGGER, __file__)
 status = 0
 
@@ -183,7 +183,7 @@ try:
     servers = getenv("SERVER_NAME", "www.example.com") or []
 
     if isinstance(servers, str):
-        servers = servers.split(" ")
+        servers = servers.split()
 
     if not servers:
         LOGGER.info("No server found, skipping self-signed certificate generation ...")

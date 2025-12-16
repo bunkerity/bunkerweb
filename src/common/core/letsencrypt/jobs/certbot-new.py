@@ -4,7 +4,7 @@ from base64 import b64decode
 from collections import defaultdict
 from datetime import datetime, timedelta
 from json import loads
-from os import environ, getenv, sep
+from os import W_OK, access, environ, getenv, sep, umask
 from os.path import join
 from pathlib import Path
 from re import MULTILINE, match, search
@@ -25,7 +25,7 @@ from requests import get
 
 from common_utils import bytes_hash, file_hash  # type: ignore
 from jobs import Job  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 
 from letsencrypt_providers import (
     BunnyNetProvider,
@@ -47,6 +47,7 @@ from letsencrypt_providers import (
     NSOneProvider,
     OvhProvider,
     Provider,
+    PowerdnsProvider,
     Rfc2136Provider,
     Route53Provider,
     SakuraCloudProvider,
@@ -54,8 +55,8 @@ from letsencrypt_providers import (
 )
 
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper()
-LOGGER = setup_logger("LETS-ENCRYPT.new")
-LOGGER_CERTBOT = setup_logger("LETS-ENCRYPT.new.certbot")
+LOGGER = getLogger("LETS-ENCRYPT.NEW")
+LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.NEW.CERTBOT")
 
 CERTBOT_BIN = join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot")
 DEPS_PATH = join(sep, "usr", "share", "bunkerweb", "deps", "python")
@@ -65,6 +66,46 @@ CACHE_PATH = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
 DATA_PATH = CACHE_PATH.joinpath("etc")
 WORK_DIR = join(sep, "var", "lib", "bunkerweb", "letsencrypt")
 LOGS_DIR = join(sep, "var", "log", "bunkerweb", "letsencrypt")
+
+
+def prepare_logs_dir() -> None:
+    """Ensure the Let's Encrypt logs directory is writable by the running user.
+
+    In some upgrades the existing letsencrypt.log could be left owned by root
+    with read-only group permissions, which prevents certbot from writing new
+    entries when the scheduler runs as a non-root user. We normalise the folder
+    permissions, relax the umask to keep group write access, and drop any
+    unwritable log files so certbot can recreate them.
+    """
+
+    try:
+        umask(0o007)
+    except BaseException:
+        LOGGER.debug("Failed to set umask to 007 for letsencrypt logs")
+
+    logs_path = Path(LOGS_DIR)
+
+    try:
+        logs_path.mkdir(parents=True, exist_ok=True)
+    except BaseException as e:
+        LOGGER.error(f"Failed to create Let's Encrypt logs directory {logs_path}: {e}")
+        return
+
+    try:
+        logs_path.chmod(0o2770)
+    except BaseException as e:
+        LOGGER.debug(f"Failed to set permissions on {logs_path}: {e}")
+
+    for log_file in logs_path.glob("*.log*"):
+        try:
+            if access(log_file, W_OK):
+                log_file.chmod(0o660)
+            else:
+                LOGGER.warning(f"Removing unwritable Let's Encrypt log file {log_file}")
+                log_file.unlink(missing_ok=True)
+        except BaseException as e:
+            LOGGER.debug(f"Failed to adjust permissions on log file {log_file}: {e}")
+
 
 IS_MULTISITE = getenv("MULTISITE", "no") == "yes"
 CHALLENGE_TYPES = ("http", "dns")
@@ -90,6 +131,7 @@ PROVIDERS: Dict[str, Type[Provider]] = {
     "njalla": NjallaProvider,
     "nsone": NSOneProvider,
     "ovh": OvhProvider,
+    "pdns": PowerdnsProvider,
     "rfc2136": Rfc2136Provider,
     "route53": Route53Provider,
     "sakuracloud": SakuraCloudProvider,
@@ -180,7 +222,7 @@ def check_psl_blacklist(domains: List[str], psl_rules: Dict, service_name: str) 
     return False
 
 
-def extract_provider(service: str, authenticator: str = "") -> Optional[Provider]:
+def extract_provider(service: str, authenticator: str = "", decode_base64: bool = True) -> Optional[Provider]:
     credential_key = f"{service}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
     credential_items = {}
 
@@ -199,7 +241,7 @@ def extract_provider(service: str, authenticator: str = "") -> Optional[Provider
     # Handle JSON data
     if "json_data" in credential_items:
         value = credential_items.pop("json_data")
-        if not credential_items and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
+        if decode_base64 and not credential_items and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
             try:
                 decoded = b64decode(value).decode("utf-8")
                 json_data = loads(decoded)
@@ -212,7 +254,7 @@ def extract_provider(service: str, authenticator: str = "") -> Optional[Provider
                 LOGGER.debug(format_exc())
 
     # Process base64 encoded credentials (except for rfc2136)
-    if credential_items:
+    if decode_base64 and credential_items:
         for key, value in credential_items.items():
             if authenticator != "rfc2136" and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
                 try:
@@ -248,6 +290,7 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
     profile_val = env("LETS_ENCRYPT_PROFILE", "classic").lower()
     custom_profile = env("LETS_ENCRYPT_CUSTOM_PROFILE", "").lower()
     dns_propagation_val = env("LETS_ENCRYPT_DNS_PROPAGATION", DNS_PROPAGATION_DEFAULT).lower()
+    decode_base64 = env("LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64", "yes").lower() == "yes"
     wildcard = env("USE_LETS_ENCRYPT_WILDCARD", "no").lower() == "yes"
     activated = env("AUTO_LETS_ENCRYPT", "no").lower() == "yes" and env("LETS_ENCRYPT_PASSTHROUGH", "no").lower() == "no"
 
@@ -316,7 +359,7 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
                 )
             activated = False
         else:
-            provider = extract_provider(service, authenticator)
+            provider = extract_provider(service, authenticator, decode_base64)
             if not provider:
                 activated = False
     else:
@@ -325,7 +368,7 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
             LOGGER.debug(f"[Service: {service}] Wildcard domains are not supported for HTTP challenges, deactivating wildcard support.")
             wildcard = False
 
-    server_names = server_names_val.split(" ")
+    server_names = server_names_val.split()
     server_name = service
     if wildcard:
         server_names = extract_wildcards_from_domains(server_names)
@@ -560,7 +603,7 @@ try:
         sys_exit(0)
 
     services = {}
-    for service in server_names.split(" "):
+    for service in server_names.split():
         if not service.strip():
             continue
 
@@ -572,6 +615,8 @@ try:
     if not any(service["activated"] for service in services.values()):
         LOGGER.info("No services uses Let's Encrypt, skipping generation of new certificates...")
         sys_exit(0)
+
+    prepare_logs_dir()
 
     JOB = Job(LOGGER, __file__.replace("new", "renew"))
 
@@ -622,7 +667,7 @@ try:
             if not certificate_lines:
                 continue
 
-            service = certificate_lines[0].split(" ")[0].strip()
+            service = certificate_lines[0].split()[0].strip()
             match_domains = search(r"Domains:\s+(.+)$", certificate_block, MULTILINE)
             domains = match_domains.group(1).strip().replace(" ", ",") if match_domains else ""
 

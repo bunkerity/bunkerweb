@@ -1386,10 +1386,9 @@ end
 -- @tparam[opt] string old_key old session id
 -- @tparam string stale_ttl stale ttl
 -- @tparam[opt] table metadata table of metadata
--- @tparam boolean remember whether storing persistent session or not
 -- @treturn true|nil ok
 -- @treturn string error message
-function metatable:set(name, key, value, ttl, current_time, old_key, stale_ttl, metadata, remember)
+function metatable:set(name, key, value, ttl, current_time, old_key, stale_ttl, metadata)
   -- NYI
 end
 

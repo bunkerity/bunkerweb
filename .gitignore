@@ -1,6 +1,8 @@
 site/
 .idea/
 .vscode/
+.kiro/
+.gemini/
 __pycache__
 env/
 tmp_venv/

@@ -3,20 +3,1252 @@
 ## BunkerWeb 云
 
 <figure markdown>
-  ![概述](assets/img/bunkerweb-cloud.webp){ align=center, width="600" }
+  ![概述](assets/img/bunkerweb-cloud.png){ align=center, width="600" }
   <figcaption>BunkerWeb 云</figcaption>
 </figure>
 
-BunkerWeb Cloud 将是开始使用 BunkerWeb 的最简单方式。它为您提供一个完全托管的 BunkerWeb 服务，无需任何麻烦。可以把它想象成一个 BunkerWeb 即服务！
+BunkerWeb Cloud 是一种托管的 Web 应用程序防火墙 (WAF) 和反向代理解决方案，使您无需在基础设施中安装 BunkerWeb 即可保护您的 Web 应用程序。通过订阅 BunkerWeb Cloud，您将受益于托管在云端的完整 BunkerWeb 堆栈，并拥有专用资源（8GB RAM，**每**实例 2 CPU，跨 2 个实例复制以实现高可用性，标准版）。
 
-试试我们的 [BunkerWeb Cloud 服务](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=doc)，您将获得：
+### 主要优势
 
-- 一个完全托管在我们云端的 BunkerWeb 实例
-- 所有 BunkerWeb 功能，包括 PRO 功能
-- 一个带有仪表板和警报的监控平台
-- 协助您进行配置的技术支持
+订购您的 [BunkerWeb Cloud 实例](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=doc)并获得：
+
+- **即时部署**：无需在您的基础设施中进行安装
+- **高可用性**：具有自动负载均衡的复制实例
+- **集成监控**：访问 Grafana 以进行日志和指标可视化
+- **可扩展性**：适应繁重工作负载的专用资源
+- **增强的安全性**：针对 Web 威胁的实时 WAF 保护
 
 如果您对 BunkerWeb Cloud 服务感兴趣，请随时[联系我们](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc)，以便我们讨论您的需求。
+
+### 架构概述
+
+#### 简单架构 - 单一服务
+
+```mermaid
+graph LR
+    A[客户端] -->|HTTPS| B[example.com]
+    B -->|DNS 解析| C[负载均衡器54984654.bunkerweb.cloud]
+    C -->|流量| D[BunkerWeb CloudWAF + 反向代理]
+    D -->|HTTPS/HTTP| E[服务器 example.com客户端基础设施]
+
+    style C fill:#e1f5fe,color:#222
+    style D fill:#f3e5f5,color:#222
+    style E fill:#e8f5e8,color:#222
+```
+
+#### 复杂架构 - 多服务
+
+```mermaid
+graph LR
+    A[客户端] -->|HTTPS| B[example.comother-example.coman-other-example.com]
+    B -->|DNS 解析| C[负载均衡器54984654.bunkerweb.cloud]
+    C -->|流量| D[BunkerWeb CloudWAF + 反向代理SSL SNI 已启用]
+    D -->|带 SNI 的 HTTPS| E[客户端网关反向代理/LB]
+    E -->|内部路由| F[服务 1]
+    E -->|内部路由| G[服务 2]
+    E -->|内部路由| H[服务 N]
+
+    style C fill:#e1f5fe,color:#222
+    style D fill:#f3e5f5,color:#222
+    style E fill:#fff3e0,color:#222
+    style F fill:#e8f5e8,color:#222
+    style G fill:#e8f5e8,color:#222
+    style H fill:#e8f5e8,color:#222
+```
+
+### 初始配置
+
+#### 1. 管理界面访问
+
+订阅 BunkerWeb Cloud 后，您将收到：
+
+- **BunkerWeb UI 访问 URL**：用于配置服务的界面
+- **负载均衡器端点**：格式为 `http://[ID].bunkerweb.cloud` 的唯一 URL
+- **Grafana 访问权限**：监控界面和指标可视化
+- **分配的资源**：2 个实例，每个实例 8GB RAM 和 2 CPU
+
+#### 2. 首次连接
+
+1. 连接到 BunkerWeb Cloud 界面
+2. 配置要保护的服务
+3. 访问 Grafana 以可视化您的 BunkerWeb 日志和指标
+
+### DNS 配置
+
+#### 流量重定向到 BunkerWeb Cloud
+
+为了使您的域流量由 BunkerWeb Cloud 处理，您必须配置 DNS 记录：
+
+**所需配置：**
+
+```dns
+example.com.        IN  CNAME  54984654.bunkerweb.cloud.
+www.example.com.    IN  CNAME  54984654.bunkerweb.cloud.
+```
+
+**重要提示：** 将 `54984654` 替换为您在订阅期间提供的负载均衡器标识符。
+
+#### 配置验证
+
+验证 DNS 解析：
+
+```bash
+dig example.com
+nslookup example.com
+```
+
+结果应指向您的 BunkerWeb Cloud 端点。
+
+### 服务配置
+
+#### 单一服务
+
+对于托管在您基础设施上的简单服务：
+
+**在 BunkerWeb UI 中的配置：**
+
+1. **Server Name**：`example.com`
+2. **Use Reverse Proxy**：`yes`
+3. **Reverse Proxy Host**：`185.87.1.100:443`（您的服务器 IP）
+
+您可以在[反向代理文档](https://docs.bunkerweb.io/latest/settings/#reverse-proxy)中找到所有配置选项
+
+#### 带 SNI 的多服务
+
+##### 为什么要启用 SNI？
+
+当出现以下情况时，服务器名称指示 (SNI) 是**必不可少**的：
+
+- 多个域指向同一个后端基础设施
+- 您的基础设施托管多个具有不同 SSL 证书的服务
+- 您在客户端使用了反向代理/网关
+
+##### SNI 配置
+
+**在 BunkerWeb UI 中，针对每个服务：**
+
+```yaml
+# 服务 1
+SERVICE_NAME: example-com
+SERVER_NAME: example.com
+REVERSE_PROXY_HOST: https://gateway.internal.domain.com
+REVERSE_PROXY_PORT: 443
+REVERSE_PROXY_SSL_SNI: yes
+REVERSE_PROXY_SSL_SNI_NAME: example.com
+
+# 服务 2
+SERVICE_NAME: other-example-com
+SERVER_NAME: other-example.com
+REVERSE_PROXY_HOST: https://gateway.internal.domain.com
+REVERSE_PROXY_PORT: 443
+REVERSE_PROXY_SSL_SNI: yes
+REVERSE_PROXY_SSL_SNI_NAME: other-example.com
+```
+
+您可以在[反向代理文档](https://docs.bunkerweb.io/latest/settings/#reverse-proxy)中找到所有配置选项
+
+##### SNI 技术细节
+
+SNI 允许 BunkerWeb Cloud：
+
+1. 在 TLS 连接期间**识别目标服务**
+2. **将正确的域名传输**到后端
+3. **允许客户端网关**选择正确的证书
+4. **正确路由**到适当的服务
+
+**未启用 SNI：**
+
+```mermaid
+graph LR
+    A[客户端] --> B[BunkerWeb]
+    B --> C["网关 (默认证书)"]
+    C --> D[SSL 错误]
+
+    style B fill:#f3e5f5,color:#222
+    style C fill:#fff3e0,color:#222
+    style D fill:#ff4d4d,color:#fff,stroke:#b30000,stroke-width:2px
+```
+
+**已启用 SNI：**
+
+```mermaid
+graph LR
+    A[客户端] --> B[BunkerWeb]
+    B --> C["网关 (example.com 特定证书)"]
+    C --> D[正确服务]
+
+    style B fill:#f3e5f5,color:#222
+    style C fill:#e8f5e8,color:#222
+    style D fill:#e8f5e8,color:#222
+```
+
+### SSL/TLS 和 SNI 管理
+
+#### SSL 证书
+
+##### BunkerWeb Cloud 侧
+
+BunkerWeb Cloud 自动管理：
+
+- 您的域的 Let's Encrypt 证书
+- 自动续订
+- 优化的 TLS 配置
+
+##### 客户端基础设施侧
+
+**重要建议：**
+
+1. **使用 HTTPS** 进行 BunkerWeb 与您的服务之间的通信
+2. **管理您自己的证书**在您的基础设施上
+3. **正确配置 SNI**在您的网关/反向代理上
+
+#### 详细的 SNI 配置
+
+##### 用例：带网关的基础设施
+
+如果您的架构如下所示：
+
+```mermaid
+graph LR
+    A[BunkerWeb Cloud] --> B[客户端网关]
+    B --> C[服务 1]
+    B --> D[服务 2]
+    B --> E[服务 3]
+
+    style A fill:#f3e5f5,color:#222
+    style B fill:#fff3e0,color:#222
+    style C fill:#e8f5e8,color:#222
+    style D fill:#e8f5e8,color:#222
+    style E fill:#e8f5e8,color:#222
+```
+
+**BunkerWeb 侧所需的配置：**
+
+```yaml
+# example.com 的配置
+REVERSE_PROXY_SSL_SNI: yes
+REVERSE_PROXY_SSL_SNI_NAME: example.com
+REVERSE_PROXY_SSL_VERIFY: no  # 如果客户端是自签名证书
+REVERSE_PROXY_HEADERS: Host $host
+
+# api.example.com 的配置
+REVERSE_PROXY_SSL_SNI: yes
+REVERSE_PROXY_SSL_SNI_NAME: api.example.com
+REVERSE_PROXY_SSL_VERIFY: no
+REVERSE_PROXY_HEADERS: Host $host
+```
+
+### 客户端网关配置
+
+#### 概述
+
+当您的架构使用客户端的网关/反向代理将流量路由到多个服务时，需要特定的配置来支持 SNI 并确保与 BunkerWeb Cloud 的安全通信。
+
+#### 按技术分类的配置
+
+##### Nginx
+
+<details>
+<summary>Nginx 配置</summary>
+
+```nginx
+# 支持多服务 SNI 的配置
+server {
+    listen 443 ssl http2;
+    server_name example.com;
+
+    ssl_certificate /path/to/example.com.crt;
+    ssl_certificate_key /path/to/example.com.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256;
+    ssl_prefer_server_ciphers off;
+
+    # 安全标头
+    add_header X-Frame-Options DENY;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+
+    location / {
+        proxy_pass http://service1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Server $host;
+
+        # 超时设置
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    server_name api.example.com;
+
+    ssl_certificate /path/to/api.example.com.crt;
+    ssl_certificate_key /path/to/api.example.com.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256;
+    ssl_prefer_server_ciphers off;
+
+    location / {
+        proxy_pass http://api-service:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # API 特定配置
+        proxy_buffering off;
+        proxy_request_buffering off;
+    }
+}
+```
+
+</details>
+
+##### Traefik
+
+<details>
+<summary>Traefik 配置</summary>
+
+**使用 Docker Compose：**
+
+```yaml
+services:
+  traefik:
+    image: traefik:v3.0
+    command:
+      - --api.dashboard=true
+      - --providers.docker=true
+      - --providers.file.filename=/etc/traefik/dynamic.yml
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.myresolver.acme.tlschallenge=true
+      - --certificatesresolvers.myresolver.acme.email=admin@example.com
+      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+    ports:
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+      - ./dynamic.yml:/etc/traefik/dynamic.yml:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.example.com`)"
+      - "traefik.http.routers.dashboard.tls.certresolver=myresolver"
+
+  service1:
+    image: your-app:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.service1.rule=Host(`example.com`)"
+      - "traefik.http.routers.service1.entrypoints=websecure"
+      - "traefik.http.routers.service1.tls.certresolver=myresolver"
+      - "traefik.http.services.service1.loadbalancer.server.port=8080"
+      - "traefik.http.routers.service1.middlewares=security-headers"
+
+  api-service:
+    image: your-api:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`api.example.com`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls.certresolver=myresolver"
+      - "traefik.http.services.api.loadbalancer.server.port=3000"
+      - "traefik.http.routers.api.middlewares=security-headers,rate-limit"
+```
+
+**动态配置 (dynamic.yml)：**
+
+```yaml
+http:
+  middlewares:
+    security-headers:
+      headers:
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 31536000
+        customRequestHeaders:
+          X-Forwarded-Proto: "https"
+
+    rate-limit:
+      rateLimit:
+        burst: 100
+        average: 50
+
+  routers:
+    service1:
+      rule: "Host(`example.com`)"
+      service: "service1"
+      tls:
+        certResolver: "myresolver"
+      middlewares:
+        - "security-headers"
+
+    api:
+      rule: "Host(`api.example.com`)"
+      service: "api-service"
+      tls:
+        certResolver: "myresolver"
+      middlewares:
+        - "security-headers"
+        - "rate-limit"
+
+  services:
+    service1:
+      loadBalancer:
+        servers:
+          - url: "http://service1:8080"
+        healthCheck:
+          path: "/health"
+          interval: "30s"
+
+    api-service:
+      loadBalancer:
+        servers:
+          - url: "http://api-service:3000"
+        healthCheck:
+          path: "/api/health"
+          interval: "30s"
+```
+
+</details>
+
+##### Apache
+
+<details>
+<summary>Apache 配置</summary>
+
+```apache
+# 带 SNI 的 Apache 配置
+<VirtualHost *:443>
+    ServerName example.com
+    DocumentRoot /var/www/html
+
+    # SSL 配置
+    SSLEngine on
+    SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
+    SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256
+    SSLHonorCipherOrder off
+    SSLCertificateFile /path/to/example.com.crt
+    SSLCertificateKeyFile /path/to/example.com.key
+
+    # 安全标头
+    Header always set X-Frame-Options DENY
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    # 反向代理配置
+    ProxyPass / http://service1:8080/
+    ProxyPassReverse / http://service1:8080/
+    ProxyPreserveHost On
+
+    # 自定义标头
+    ProxyPassReverse / http://service1:8080/
+    ProxyPassReverseInterpolateEnv On
+
+    <Proxy *>
+        Require all granted
+    </Proxy>
+
+    # 日志
+    ErrorLog ${APACHE_LOG_DIR}/example.com_error.log
+    CustomLog ${APACHE_LOG_DIR}/example.com_access.log combined
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName api.example.com
+
+    SSLEngine on
+    SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
+    SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256
+    SSLCertificateFile /path/to/api.example.com.crt
+    SSLCertificateKeyFile /path/to/api.example.com.key
+
+    ProxyPass / http://api-service:3000/
+    ProxyPassReverse / http://api-service:3000/
+    ProxyPreserveHost On
+
+    # API 特定配置
+    ProxyTimeout 300
+    ProxyBadHeader Ignore
+
+    ErrorLog ${APACHE_LOG_DIR}/api.example.com_error.log
+    CustomLog ${APACHE_LOG_DIR}/api.example.com_access.log combined
+</VirtualHost>
+
+# 所需模块配置
+LoadModule ssl_module modules/mod_ssl.so
+LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_http_module modules/mod_proxy_http.so
+LoadModule headers_module modules/mod_headers.so
+```
+
+</details>
+
+##### HAProxy
+
+<details>
+<summary>HAProxy 配置</summary>
+
+```haproxy
+global
+    maxconn 4096
+    log stdout local0
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+
+    # SSL 配置
+    ssl-default-bind-ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256
+    ssl-default-bind-options ssl-min-ver TLSv1.2 no-tls-tickets
+
+defaults
+    mode http
+    timeout connect 5000ms
+    timeout client 50000ms
+    timeout server 50000ms
+    option httplog
+    option dontlognull
+    option redispatch
+    retries 3
+    maxconn 2000
+
+frontend https_frontend
+    bind *:443 ssl crt /etc/ssl/certs/example.com.pem crt /etc/ssl/certs/api.example.com.pem
+
+    # 安全标头
+    http-response set-header X-Frame-Options DENY
+    http-response set-header X-Content-Type-Options nosniff
+    http-response set-header X-XSS-Protection "1; mode=block"
+    http-response set-header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    # 基于 SNI 的路由
+    acl is_example hdr(host) -i example.com
+    acl is_api hdr(host) -i api.example.com
+
+    use_backend service1_backend if is_example
+    use_backend api_backend if is_api
+
+    default_backend service1_backend
+
+backend service1_backend
+    balance roundrobin
+    option httpchk GET /health
+    http-check expect status 200
+
+    server service1-1 service1:8080 check
+    server service1-2 service1-backup:8080 check backup
+
+backend api_backend
+    balance roundrobin
+    option httpchk GET /api/health
+    http-check expect status 200
+
+    server api-1 api-service:3000 check
+    server api-2 api-service-backup:3000 check backup
+
+# 统计界面（可选）
+listen stats
+    bind *:8404
+    stats enable
+    stats uri /stats
+    stats refresh 30s
+    stats admin if TRUE
+```
+
+</details>
+
+#### SSL 配置验证
+
+测试 SSL 配置：
+
+```bash
+# SSL 连接测试
+openssl s_client -connect your-domain.com:443 -servername your-domain.com
+
+# 标头验证
+curl -I https://your-domain.com
+
+# SNI 测试
+curl -H "Host: example.com" https://54984654.bunkerweb.cloud
+```
+
+#### 网关最佳实践
+
+1. **运行状况检查**：为您的服务配置运行状况检查
+2. **负载均衡**：使用多个实例以实现高可用性
+3. **监控**：监控您的网关指标
+4. **安全标头**：添加适当的安全标头
+5. **超时**：配置适当的超时以避免阻塞
+
+### BunkerWeb Cloud IP 白名单
+
+#### 为什么要配置白名单？
+
+为了进一步保护您的基础设施，建议在客户端基础设施侧配置 BunkerWeb Cloud IP 地址的白名单。这确保只有来自 BunkerWeb Cloud 的流量才能到达您的后端服务。
+
+我们建议在防火墙级别（iptables 等）进行白名单设置。
+
+#### 要列入白名单的 BunkerWeb Cloud IP 地址
+
+**允许的 IP 地址列表：**
+
+更新的列表可在此处获得：https://repo.bunkerweb.io/cloud/ips
+
+```
+# BunkerWeb Cloud IP 地址
+4.233.128.18
+20.19.161.132
+```
+
+#### 按技术分类的白名单配置
+
+##### Nginx
+
+<details>
+<summary>Nginx 配置</summary>
+
+```nginx
+# 在您的服务器配置中
+server {
+    listen 443 ssl;
+    server_name example.com;
+
+    # BunkerWeb Cloud IP 白名单
+    allow 192.168.1.0/24;
+    allow 10.0.0.0/16;
+    allow 172.16.0.0/12;
+    deny all;
+
+    ssl_certificate /path/to/example.com.crt;
+    ssl_certificate_key /path/to/example.com.key;
+
+    location / {
+        proxy_pass http://service1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+
+# 使用 geo 模块进行更灵活的配置
+geo $bunkerweb_ip {
+    default 0;
+    192.168.1.0/24 1;
+    10.0.0.0/16 1;
+    172.16.0.0/12 1;
+}
+
+server {
+    listen 443 ssl;
+    server_name example.com;
+
+    if ($bunkerweb_ip = 0) {
+        return 403;
+    }
+
+    # ... 其余配置
+}
+```
+
+</details>
+
+##### Traefik
+
+<details>
+<summary>Traefik 配置</summary>
+
+```yaml
+# dynamic.yml 中的配置
+http:
+  middlewares:
+    bunkerweb-whitelist:
+      ipWhiteList:
+        sourceRange:
+          - "192.168.1.0/24"
+          - "10.0.0.0/16"
+          - "172.16.0.0/12"
+        ipStrategy:
+          depth: 1
+
+  routers:
+    example-router:
+      rule: "Host(`example.com`)"
+      service: "example-service"
+      middlewares:
+        - "bunkerweb-whitelist"
+        - "security-headers"
+      tls:
+        certResolver: "myresolver"
+
+    api-router:
+      rule: "Host(`api.example.com`)"
+      service: "api-service"
+      middlewares:
+        - "bunkerweb-whitelist"
+        - "security-headers"
+      tls:
+        certResolver: "myresolver"
+```
+
+**使用 Docker Compose 标签：**
+
+```yaml
+services:
+  service1:
+    image: your-app:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.service1.rule=Host(`example.com`)"
+      - "traefik.http.routers.service1.middlewares=bunkerweb-whitelist"
+      - "traefik.http.middlewares.bunkerweb-whitelist.ipwhitelist.sourcerange=192.168.1.0/24,10.0.0.0/16,172.16.0.0/12"
+```
+
+</details>
+
+##### Apache
+
+<details>
+<summary>Apache 配置</summary>
+
+```apache
+<VirtualHost *:443>
+    ServerName example.com
+
+    # BunkerWeb Cloud IP 白名单
+    <RequireAll>
+        Require ip 192.168.1.0/24
+        Require ip 10.0.0.0/16
+        Require ip 172.16.0.0/12
+    </RequireAll>
+
+    SSLEngine on
+    SSLCertificateFile /path/to/example.com.crt
+    SSLCertificateKeyFile /path/to/example.com.key
+
+    ProxyPass / http://service1:8080/
+    ProxyPassReverse / http://service1:8080/
+    ProxyPreserveHost On
+
+    # 拒绝访问日志配置
+    LogFormat "%h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" combined
+    CustomLog logs/access.log combined
+    ErrorLog logs/error.log
+</VirtualHost>
+
+# 使用 mod_authz_core 的替代配置
+<VirtualHost *:443>
+    ServerName api.example.com
+
+    <Directory />
+        <RequireAny>
+            Require ip 192.168.1.0/24
+            Require ip 10.0.0.0/16
+            Require ip 172.16.0.0/12
+        </RequireAny>
+    </Directory>
+
+    # ... 其余配置
+</VirtualHost>
+```
+
+</details>
+
+##### HAProxy
+
+<details>
+<summary>HAProxy 配置</summary>
+
+```haproxy
+# haproxy.cfg 中的配置
+frontend bunkerweb_frontend
+    bind *:443 ssl crt /path/to/certificates/
+
+    # BunkerWeb Cloud 白名单 ACL
+    acl bunkerweb_ips src 192.168.1.0/24 10.0.0.0/16 172.16.0.0/12
+
+    # 阻止除非是 BunkerWeb Cloud
+    http-request deny unless bunkerweb_ips
+
+    # 安全标头
+    http-response set-header X-Frame-Options DENY
+    http-response set-header X-Content-Type-Options nosniff
+
+    # 路由
+    acl is_example hdr(host) -i example.com
+    acl is_api hdr(host) -i api.example.com
+
+    use_backend app_servers if is_example
+    use_backend api_servers if is_api
+
+    default_backend app_servers
+
+backend app_servers
+    balance roundrobin
+    server app1 service1:8080 check
+    server app2 service2:8080 check
+
+backend api_servers
+    balance roundrobin
+    server api1 api-service:3000 check
+    server api2 api-service-backup:3000 check
+```
+
+</details>
+
+##### 系统防火墙 (iptables)
+
+<details>
+<summary>iptables 配置</summary>
+
+```bash
+#!/bin/bash
+# BunkerWeb Cloud 白名单的 iptables 配置脚本
+
+# 清除现有规则
+iptables -F
+iptables -X
+
+# 默认策略
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT ACCEPT
+
+# 允许环回
+iptables -A INPUT -i lo -j ACCEPT
+
+# 允许已建立的连接
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# HTTPS 允许 BunkerWeb Cloud IP
+iptables -A INPUT -p tcp --dport 443 -s 192.168.1.0/24 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -s 10.0.0.0/16 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -s 172.16.0.0/12 -j ACCEPT
+
+# 允许 HTTP 用于 Let's Encrypt（可选）
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+
+# 允许 SSH（适应您的需求）
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+
+# 调试日志
+iptables -A INPUT -j LOG --log-prefix "DROPPED: "
+
+# 保存规则
+iptables-save > /etc/iptables/rules.v4
+
+echo "iptables 配置已成功应用"
+```
+
+</details>
+
+#### 白名单最佳实践
+
+1. **监控拒绝**：监控被阻止的访问尝试
+2. **定期更新**：保持 IP 列表最新
+3. **定期测试**：验证白名单是否正常工作
+4. **文档**：记录 IP 更改
+5. **警报**：配置 BunkerWeb IP 更改的警报
+6. **备份**：保留备份配置以防万一
+
+### REAL_IP 配置和客户端地址恢复
+
+#### 为什么要配置 REAL_IP？
+
+当使用 BunkerWeb Cloud 作为反向代理时，您的后端应用程序看到的 IP 地址是 BunkerWeb Cloud 的 IP 地址，而不是真实客户端的 IP 地址。要检索真实的客户端 IP 地址，需要进行特定配置。
+
+#### BunkerWeb Cloud 侧配置
+
+在 BunkerWeb UI 中，配置 Real IP：
+
+```yaml
+USE_REAL_IP: yes # 默认为 no
+REAL_IP_FROM: 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8 # 默认
+REAL_IP_HEADER: X-Forwarded-For # 默认
+REAL_IP_RECURSIVE: yes # 默认
+# 如果在 BunkerWeb 前面还使用了 Cloudflare 代理的示例
+REAL_IP_FROM_URLS: https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/
+```
+
+您可以在[Real Ip 文档](https://docs.bunkerweb.io/latest/settings/#real-ip)中找到所有配置选项
+
+#### 客户端基础设施侧配置
+
+##### Nginx
+
+<details>
+<summary>Nginx REAL_IP 配置</summary>
+
+```nginx
+# 配置受信任的 IP 地址 (BunkerWeb Cloud)
+set_real_ip_from 4.233.128.18/32
+set_real_ip_from 20.19.161.132/32
+
+# 用于检索真实 IP 的标头
+real_ip_header X-Real-IP;
+
+# 使用 X-Forwarded-For 的替代方案
+# real_ip_header X-Forwarded-For;
+
+server {
+    listen 443 ssl http2;
+    server_name example.com;
+
+    # SSL 配置
+    ssl_certificate /path/to/example.com.crt;
+    ssl_certificate_key /path/to/example.com.key;
+
+    location / {
+        proxy_pass http://service1:8080;
+
+        # 将真实 IP 标头转发到后端
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # 使用真实客户端 IP 记录日志
+        access_log /var/log/nginx/access.log combined;
+    }
+}
+
+# 带真实 IP 的自定义日志格式
+log_format real_ip '$remote_addr - $remote_user [$time_local] '
+                   '"$request" $status $body_bytes_sent '
+                   '"$http_referer" "$http_user_agent" '
+                   'real_ip="$realip_remote_addr"';
+```
+
+</details>
+
+##### Apache
+
+<details>
+<summary>Apache REAL_IP 配置</summary>
+
+```apache
+# 加载 mod_remoteip 模块
+LoadModule remoteip_module modules/mod_remoteip.so
+
+<VirtualHost *:443>
+    ServerName example.com
+
+    # SSL 配置
+    SSLEngine on
+    SSLCertificateFile /path/to/example.com.crt
+    SSLCertificateKeyFile /path/to/example.com.key
+
+    # 配置受信任的 IP 地址
+    RemoteIPHeader X-Real-IP
+    RemoteIPTrustedProxy 4.233.128.18/32
+    RemoteIPTrustedProxy 20.19.161.132/32
+
+    # 使用 X-Forwarded-For 的替代方案
+    # RemoteIPHeader X-Forwarded-For
+
+    # 反向代理配置
+    ProxyPass / http://service1:8080/
+    ProxyPassReverse / http://service1:8080/
+    ProxyPreserveHost On
+
+    # 转发 IP 标头
+    ProxyPassReverse / http://service1:8080/
+    ProxyPassReverseInterpolateEnv On
+
+    # 带真实 IP 的日志
+    LogFormat "%a %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" combined_real_ip
+    CustomLog logs/access.log combined_real_ip
+    ErrorLog logs/error.log
+</VirtualHost>
+```
+
+</details>
+
+##### HAProxy
+
+<details>
+<summary>HAProxy REAL_IP 配置</summary>
+
+```haproxy
+global
+    maxconn 4096
+    log stdout local0
+
+defaults
+    mode http
+    option httplog
+    option dontlognull
+    option forwardfor
+
+    # 带真实 IP 的日志格式
+    log-format "%ci:%cp [%t] %ft %b/%s %Tq/%Tw/%Tc/%Tr/%Ta %ST %B %CC %CS %tsc %ac/%fc/%bc/%sc/%rc %sq/%bq %hr %hs %{+Q}r"
+
+frontend https_frontend
+    bind *:443 ssl crt /etc/ssl/certs/
+
+    # BunkerWeb Cloud IP 白名单
+    acl bunkerweb_ips src 4.233.128.18/32 20.19.161.132/32
+    http-request deny unless bunkerweb_ips
+
+    # 从标头捕获真实 IP
+    capture request header X-Real-IP len 15
+    capture request header X-Forwarded-For len 50
+
+    # 路由
+    acl is_example hdr(host) -i example.com
+    use_backend app_servers if is_example
+
+    default_backend app_servers
+
+backend app_servers
+    balance roundrobin
+
+    # 添加/保留真实 IP 标头
+    http-request set-header X-Original-Forwarded-For %[req.hdr(X-Forwarded-For)]
+    http-request set-header X-Client-IP %[req.hdr(X-Real-IP)]
+
+    server app1 service1:8080 check
+    server app2 service2:8080 check backup
+```
+
+</details>
+
+##### Traefik
+
+<details>
+<summary>Traefik REAL_IP 配置</summary>
+
+```yaml
+# dynamic.yml 中的配置
+http:
+  middlewares:
+    real-ip:
+      ipWhiteList:
+        sourceRange:
+          - "4.233.128.18/32"
+          - "20.19.161.132/32"
+        ipStrategy:
+          depth: 2  # 受信任代理的数量
+          excludedIPs:
+            - "127.0.0.1/32"
+
+  routers:
+    example-router:
+      rule: "Host(`example.com`)"
+      service: "example-service"
+      middlewares:
+        - "real-ip"
+      tls:
+        certResolver: "myresolver"
+
+  services:
+    example-service:
+      loadBalancer:
+        servers:
+          - url: "http://service1:8080"
+        passHostHeader: true
+```
+
+**traefik.yml (静态) 中的配置：**
+
+```yaml
+entryPoints:
+  websecure:
+    address: ":443"
+    forwardedHeaders:
+      trustedIPs:
+        - "4.233.128.18/32"
+        - "20.19.161.132/32"
+      insecure: false
+
+accessLog:
+  format: json
+  fields:
+    defaultMode: keep
+    names:
+      ClientUsername: drop
+    headers:
+      defaultMode: keep
+      names:
+        X-Real-IP: keep
+        X-Forwarded-For: keep
+```
+
+</details>
+
+#### 测试和验证
+
+##### 配置验证
+
+```bash
+# 测试 1：检查接收到的标头
+curl -H "X-Real-IP: 203.0.113.1" \
+     -H "X-Forwarded-For: 203.0.113.1, 192.168.1.100" \
+     https://example.com/test-ip
+
+# 测试 2：分析日志
+tail -f /var/log/nginx/access.log | grep "203.0.113.1"
+
+# 测试 3：从不同来源测试
+curl -v https://example.com/whatismyip
+```
+
+#### REAL_IP 最佳实践
+
+1. **安全**：仅信任来自已知来源 (BunkerWeb Cloud) 的 IP 标头
+2. **验证**：始终验证标头中接收到的 IP 地址
+3. **日志记录**：记录代理 IP 和真实 IP 以进行调试
+4. **回退**：如果缺少标头，始终有一个默认值
+5. **测试**：定期测试 IP 检测是否正常工作
+6. **监控**：监控 IP 模式以检测异常
+
+#### REAL_IP 故障排除
+
+##### 常见问题
+
+1. **IP 总是显示 BunkerWeb 的**：检查受信任代理配置
+2. **缺少标头**：检查 BunkerWeb Cloud 侧配置
+3. **无效 IP**：实施严格的 IP 验证
+4. **日志不正确**：检查日志格式和 real_ip 模块配置
+
+##### 诊断命令
+
+__测试 IP 检测__
+
+```bash
+curl -H "X-Real-IP: 1.2.3.4" https://your-domain.com/debug-headers
+```
+
+### 监控和可观测性
+
+#### Grafana 访问
+
+您的托管 Grafana 实例使您可以访问：
+
+##### 可用指标
+
+1. **流量概览**
+
+  - 每秒请求数
+  - HTTP 状态码
+  - 请求地理位置
+2. **安全**
+
+  - 被阻止的攻击尝试
+  - 检测到的威胁类型
+  - 触发的 WAF 规则
+3. **性能指标**
+
+  - 请求延迟
+  - 后端响应时间
+  - 资源利用率
+
+##### 可用日志
+
+1. **访问日志**：所有 HTTP/HTTPS 请求
+2. **安全日志**：安全事件和阻止
+3. **错误日志**：应用程序和系统错误
+
+##### 警报配置
+
+为以下情况配置 Grafana 警报：
+
+- 异常流量峰值
+- 5xx 错误增加
+- DDoS 攻击检测
+- 后端健康故障
+
+### 最佳实践
+
+#### 安全
+
+1. **使用 HTTPS** 进行所有后端通信
+2. **实施 IP 白名单**（如果可能）
+3. **配置适当的超时**
+4. **启用压缩**以优化性能
+
+#### 性能
+
+1. **优化缓存配置**
+2. **使用 HTTP/2** 在客户端
+3. **配置运行状况检查** 为您的后端
+4. **定期监控指标**
+
+### 故障排除
+
+#### 常见问题
+
+##### 1. SSL/TLS 错误
+
+**症状：** SSL 证书错误
+
+**解决方案：**
+
+```bash
+# 检查 SNI 配置
+openssl s_client -connect backend.com:443 -servername example.com
+
+# 检查后端证书
+openssl x509 -in certificate.crt -text -noout
+```
+
+##### 2. 后端超时
+
+**症状：** 504 Gateway Timeout 错误
+
+**解决方案：**
+
+- 增加 `REVERSE_PROXY_CONNECT_TIMEOUT` & `REVERSE_PROXY_SEND_TIMEOUT`
+- 检查后端健康状况
+- 优化应用程序性能
+
+##### 3. 路由问题
+
+**症状：** 提供错误的服务
+
+**解决方案：**
+
+- 检查 `SERVER_NAME` 配置
+- 验证 SNI 配置
+- 检查 `Host` 标头
+
+#### 诊断命令
+
+```bash
+# 连接测试
+curl -v https://your-domain.com
+
+# 使用自定义标头测试
+curl -H "Host: example.com" -v https://54984654.bunkerweb.cloud
+
+# DNS 验证
+dig +trace example.com
+
+# SSL 测试
+openssl s_client -connect example.com:443 -servername example.com
+```
+
+#### 技术支持
+
+如需任何技术帮助：
+
+1. **检查日志**在 Grafana 中
+2. **验证配置**在 BunkerWeb UI 中
+3. **联系支持**并提供配置详细信息和错误日志
 
 ## 一体化 (AIO) 镜像 {#all-in-one-aio-image}
 
@@ -36,7 +1268,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
 ```
 
 默认情况下，容器暴露：
@@ -52,7 +1284,7 @@ docker run -d \
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+    image: bunkerity/bunkerweb-all-in-one:1.6.7~rc1
     volumes:
       - bw-storage:/data
 ...
@@ -129,7 +1361,7 @@ docker run -d \
   -e API_PASSWORD=StrongP@ssw0rd \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
   -p 8888:8888/tcp \
-  bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
 ```
 
 推荐（在 BunkerWeb 之后）— 不要发布 `8888`；而是反向代理它：
@@ -137,7 +1369,7 @@ docker run -d \
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+    image: bunkerity/bunkerweb-all-in-one:1.6.7~rc1
     container_name: bunkerweb-aio
     ports:
       - "80:8080/tcp"
@@ -209,7 +1441,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
 ```
 
 *   当 `USE_CROWDSEC=yes` 时，入口点将：
@@ -264,7 +1496,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
 ```
 
 !!! info "内部工作原理"
@@ -286,7 +1518,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
 ```
 
 注意：
@@ -322,7 +1554,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.7~rc1
 ```
 
 *   当 `CROWDSEC_API` 不是 `127.0.0.1` 或 `localhost` 时，将跳过**本地注册**。
@@ -356,13 +1588,14 @@ docker run -d \
 无论您是进行测试、开发应用程序还是在生产中部署 BunkerWeb，Docker 容器化选项都提供了灵活性和易用性。采用这种方法使您能够充分利用 BunkerWeb 的功能，同时利用 Docker 技术的优势。
 
 ```shell
-docker pull bunkerity/bunkerweb:1.6.6-rc3
+docker pull bunkerity/bunkerweb:1.6.7~rc1
 ```
 
 Docker 镜像也可在 [GitHub packages](https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb) 上找到，可以使用 `ghcr.io` 仓库地址下载：
 
 ```shell
-docker pull ghcr.io/bunkerity/bunkerweb:1.6.6-rc3```
+docker pull ghcr.io/bunkerity/bunkerweb:1.6.7~rc1
+```
 
 Docker 集成的关键概念包括：
 
@@ -371,7 +1604,7 @@ Docker 集成的关键概念包括：
 - **网络**：Docker 网络在 BunkerWeb 的集成中扮演着至关重要的角色。这些网络有两个主要目的：向客户端公开端口以及连接到上游 Web 服务。通过公开端口，BunkerWeb 可以接受来自客户端的传入请求，允许他们访问受保护的 Web 服务。此外，通过连接到上游 Web 服务，BunkerWeb 可以高效地路由和管理流量，提供增强的安全性和性能。
 
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 SQLite 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，也支持其他数据库后端。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 SQLite 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，也支持其他数据库后端。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations)中的 docker-compose 文件。
 
 ### 环境变量
 
@@ -381,7 +1614,7 @@ Docker 集成的关键概念包括：
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
     environment:
       - MY_SETTING=value
       - ANOTHER_SETTING=another value
@@ -422,7 +1655,7 @@ secrets:
 [调度器](concepts.md#scheduler) 在其自己的容器中运行，该容器也可在 Docker Hub 上找到：
 
 ```shell
-docker pull bunkerity/bunkerweb-scheduler:1.6.6-rc3
+docker pull bunkerity/bunkerweb-scheduler:1.6.7~rc1
 ```
 
 !!! info "BunkerWeb 设置"
@@ -443,7 +1676,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.6-rc3
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.7~rc1
         environment:
           # 这将为 BunkerWeb 容器设置 API
           <<: *bw-api-env
@@ -452,7 +1685,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.6-rc3
           - bw-universe
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
           # 这将为调度器容器设置 API
           <<: *bw-api-env
@@ -470,7 +1703,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.6-rc3
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
     volumes:
       - bw-storage:/data
 ...
@@ -518,6 +1751,66 @@ volumes:
     sudo chmod -R 770 bw-data
     ```
 
+### 调度器容器设置
+
+调度器是控制面的 worker，会读取设置、渲染配置并推送到 BunkerWeb 实例。配置在此集中，包含默认值和可接受值。
+
+#### 配置来源与优先级
+
+1. 环境变量（包含 Docker/Compose `environment:`）
+2. `/run/secrets/<VAR>` 下的 secrets（由 entrypoint 自动加载）
+3. 内置默认值
+
+#### 配置参考（高级用户）
+
+##### 运行时与安全
+
+| Setting                         | 描述                                                   | 接受的值                                           | 默认值                                      |
+| ------------------------------- | ------------------------------------------------------ | -------------------------------------------------- | ------------------------------------------- |
+| `HEALTHCHECK_INTERVAL`          | 调度器健康检查的间隔秒数                               | 整秒                                               | `30`                                        |
+| `RELOAD_MIN_TIMEOUT`            | 连续两次 reload 之间的最小秒数                         | 整秒                                               | `5`                                         |
+| `DISABLE_CONFIGURATION_TESTING` | 应用前跳过配置测试                                     | `yes` 或 `no`                                      | `no`                                        |
+| `IGNORE_FAIL_SENDING_CONFIG`    | 即便部分实例未收到配置也继续                           | `yes` 或 `no`                                      | `no`                                        |
+| `IGNORE_REGEX_CHECK`            | 跳过设置的正则校验（与 autoconf 共享）                  | `yes` 或 `no`                                      | `no`                                        |
+| `TZ`                            | 调度器日志、类 cron 任务、备份和时间戳使用的时区        | TZ 数据库名（如 `UTC`、`Europe/Paris`）             | unset（容器默认，通常为 UTC）               |
+
+##### 数据库
+
+| Setting                 | 描述                                                                             | 接受的值                 | 默认值                                     |
+| ----------------------- | -------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------ |
+| `DATABASE_URI`          | 主数据库 DSN（与 autoconf 和实例共享）                                           | SQLAlchemy DSN           | `sqlite:////var/lib/bunkerweb/db.sqlite3`  |
+| `DATABASE_URI_READONLY` | 可选只读 DSN；若只有它可用，调度器会降级为只读                                   | SQLAlchemy DSN 或留空     | unset                                      |
+
+##### 日志
+
+| Setting                         | 描述                                                                    | 接受的值                                       | 默认值                                                                  |
+| ------------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------- | ----------------------------------------------------------------------- |
+| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | 基础/覆盖日志级别                                                       | `debug`, `info`, `warning`, `error`, `critical` | `info`                                                                  |
+| `LOG_TYPES`                     | 目标                                                                    | 空格分隔 `stderr`/`file`/`syslog`              | `stderr`                                                                |
+| `SCHEDULER_LOG_TO_FILE`         | 启用文件日志并设置默认路径                                              | `yes` 或 `no`                                  | `no`                                                                    |
+| `LOG_FILE_PATH`                 | 自定义日志路径（当 `LOG_TYPES` 包含 `file` 时使用）                    | 文件路径                                       | `SCHEDULER_LOG_TO_FILE=yes` 时为 `/var/log/bunkerweb/scheduler.log`，否则 unset |
+| `LOG_SYSLOG_ADDRESS`            | Syslog 目标（`udp://host:514`、`tcp://host:514` 或 socket 路径）        | Host:port、带协议前缀的主机或 socket           | unset                                                                   |
+| `LOG_SYSLOG_TAG`                | Syslog 标识/tag                                                         | 字符串                                          | `bw-scheduler`                                                          |
+
+### UI 容器设置
+
+UI 容器同样遵循 `TZ`，用于本地化日志和计划任务（例如 UI 发起的清理任务）。
+
+| Setting | 描述                                 | 接受的值                                       | 默认值                                      |
+| ------- | ------------------------------------ | ---------------------------------------------- | ------------------------------------------- |
+| `TZ`    | UI 日志和计划动作的时区              | TZ 数据库名（如 `UTC`、`Europe/Paris`）         | unset（容器默认，通常为 UTC）               |
+
+#### 日志
+
+| Setting                         | 描述                                                                        | 接受的值                                       | 默认值                                                             |
+| ------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------ |
+| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | 基础日志级别 / 覆盖                                                         | `debug`, `info`, `warning`, `error`, `critical` | `info`                                                             |
+| `LOG_TYPES`                     | 目标                                                                        | 空格分隔的 `stderr`/`file`/`syslog`             | `stderr`                                                           |
+| `LOG_FILE_PATH`                 | 文件日志路径（当 `LOG_TYPES` 含 `file` 或 `CAPTURE_OUTPUT=yes` 时使用）     | 文件路径                                        | 当启用 file/capture 时为 `/var/log/bunkerweb/ui.log`，否则 unset   |
+| `LOG_SYSLOG_ADDRESS`            | Syslog 目标（`udp://host:514`、`tcp://host:514`、socket）                   | Host:port、带协议前缀的主机或路径               | unset                                                              |
+| `LOG_SYSLOG_TAG`                | Syslog 标识/tag                                                             | 字符串                                          | `bw-ui`                                                            |
+| `CAPTURE_OUTPUT`                | 将 Gunicorn stdout/stderr 发送到配置的日志输出                              | `yes` 或 `no`                                   | `no`                                                               |
+
 ### 网络
 
 默认情况下，BunkerWeb 容器在（容器内部）**8080/tcp** 端口上监听 **HTTP**，在 **8443/tcp** 端口上监听 **HTTPS**，在 **8443/udp** 端口上监听 **QUIC**。
@@ -556,7 +1849,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.6-rc3
+    image: bunkerity/bunkerweb:1.6.7~rc1
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -569,7 +1862,7 @@ services:
       - bw-universe
 ...
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
     environment:
       <<: *bw-api-env
       BUNKERWEB_INSTANCES: "bunkerweb" # 这个设置是强制性的，用来指定 BunkerWeb 实例
@@ -602,7 +1895,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.6-rc3
+    image: bunkerity/bunkerweb:1.6.7~rc1
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -615,7 +1908,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
     depends_on:
       - bunkerweb
     environment:
@@ -668,7 +1961,7 @@ docker build -t bw-ui -f src/ui/Dockerfile .
 - Debian 13 "Trixie"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
-- Fedora 41 和 42
+- Fedora 41, 42 和 43
 - Red Hat Enterprise Linux (RHEL) 8, 9 和 10
 
 ### 简易安装脚本
@@ -681,8 +1974,8 @@ docker build -t bw-ui -f src/ui/Dockerfile .
 
 ```bash
 # 下载脚本及其校验和
-wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh
-wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh.sha256
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7~rc1/install-bunkerweb.sh
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7~rc1/install-bunkerweb.sh.sha256
 
 # 验证校验和
 sha256sum -c install-bunkerweb.sh.sha256
@@ -721,10 +2014,13 @@ sudo ./install-bunkerweb.sh
     *   **工作节点**：仅安装 BunkerWeb 实例，可由远程管理器管理。
     *   **仅调度器**：仅安装调度器组件。
     *   **仅 Web UI**：仅安装 Web UI 组件。
+    *   **仅 API**：仅安装 API 服务以便进行编程访问。
 2.  **设置向导**：选择是否启用基于 Web 的配置向导。强烈建议初次使用的用户选择此项。
-3.  **CrowdSec 集成**：选择安装 CrowdSec 安全引擎，以获得先进的实时威胁防护。
+3.  **CrowdSec 集成**：选择安装 CrowdSec 安全引擎，以获得先进的实时威胁防护。仅适用于完整堆栈安装。
 4.  **CrowdSec AppSec**：如果您选择安装 CrowdSec，您还可以启用应用程序安全 (AppSec) 组件，它增加了 WAF 功能。
-5.  **API 服务**：选择是否启用可选的 BunkerWeb API 服务。在 Linux 安装中，它默认是禁用的。
+5.  **DNS 解析器**：对于完整堆栈、管理器和工作节点安装，您可以选择指定自定义 DNS 解析器 IP。
+6.  **内部 API HTTPS**：对于完整堆栈、管理器和工作节点安装，选择是否为调度器/管理器与 BunkerWeb/工作节点实例之间的内部 API 通信启用 HTTPS（默认：仅 HTTP）。
+7.  **API 服务**：对于完整堆栈和管理器安装，选择是否启用可选的外部 API 服务。在 Linux 安装中，它默认是禁用的。
 
 !!! info "管理器和调度器安装"
     如果您选择**管理器**或**仅调度器**安装类型，系统还会提示您提供您的 BunkerWeb 工作节点实例的 IP 地址或主机名。
@@ -735,18 +2031,18 @@ sudo ./install-bunkerweb.sh
 
 **通用选项：**
 
-| 选项                    | 描述                                              |
-| ----------------------- | ------------------------------------------------- |
-| `-v, --version VERSION` | 指定要安装的 BunkerWeb 版本（例如 `1.6.6-rc3`）。 |
-| `-w, --enable-wizard`   | 启用设置向导。                                    |
-| `-n, --no-wizard`       | 禁用设置向导。                                    |
-| `-y, --yes`             | 以非交互模式运行，对所有提示使用默认答案。        |
-| `-f, --force`           | 即使在不受支持的操作系统版本上，也强制继续安装。  |
-| `-q, --quiet`           | 静默安装（抑制输出）。                            |
-| `--api`, `--enable-api` | 启用 API (FastAPI) systemd 服务（默认禁用）。     |
-| `--no-api`              | 明确禁用 API 服务。                               |
-| `-h, --help`            | 显示包含所有可用选项的帮助信息。                  |
-| `--dry-run`             | 显示将要安装的内容，但不实际执行。                |
+| 选项                    | 描述                                             |
+| ----------------------- | ------------------------------------------------ |
+| `-v, --version VERSION` | 指定要安装的 BunkerWeb 版本（例如 `1.6.7~rc1`）。    |
+| `-w, --enable-wizard`   | 启用设置向导。                                   |
+| `-n, --no-wizard`       | 禁用设置向导。                                   |
+| `-y, --yes`             | 以非交互模式运行，对所有提示使用默认答案。       |
+| `-f, --force`           | 即使在不受支持的操作系统版本上，也强制继续安装。 |
+| `-q, --quiet`           | 静默安装（抑制输出）。                           |
+| `--api`, `--enable-api` | 启用 API (FastAPI) systemd 服务（默认禁用）。    |
+| `--no-api`              | 明确禁用 API 服务。                              |
+| `-h, --help`            | 显示包含所有可用选项的帮助信息。                 |
+| `--dry-run`             | 显示将要安装的内容，但不实际执行。               |
 
 **安装类型：**
 
@@ -757,6 +2053,7 @@ sudo ./install-bunkerweb.sh
 | `--worker`         | 仅安装 BunkerWeb 实例。                               |
 | `--scheduler-only` | 仅安装调度器组件。                                    |
 | `--ui-only`        | 仅安装 Web UI 组件。                                  |
+| `--api-only`       | 仅安装 API 服务（端口 8000）。                        |
 
 **安全集成：**
 
@@ -768,9 +2065,14 @@ sudo ./install-bunkerweb.sh
 
 **高级选项：**
 
-| 选项                    | 描述                                                             |
-| ----------------------- | ---------------------------------------------------------------- |
-| `--instances "IP1 IP2"` | 以空格分隔的 BunkerWeb 实例列表（在管理器/调度器模式下为必需）。 |
+| 选项                        | 描述                                                             |
+| --------------------------- | ---------------------------------------------------------------- |
+| `--instances "IP1 IP2"`     | 以空格分隔的 BunkerWeb 实例列表（在管理器/调度器模式下为必需）。 |
+| `--manager-ip IPs`          | 管理器/调度器 IP 白名单（在非交互模式下的工作节点中为必需）。    |
+| `--dns-resolvers "IP1 IP2"` | 自定义 DNS 解析器 IP（用于完整、管理器或工作节点安装）。         |
+| `--api-https`               | 为内部 API 通信启用 HTTPS（默认：仅 HTTP）。                     |
+| `--backup-dir PATH`         | 升级前存储自动备份的目录。                                       |
+| `--no-auto-backup`          | 跳过自动备份（您必须手动完成）。                                 |
 
 **用法示例：**
 
@@ -785,10 +2087,16 @@ sudo ./install-bunkerweb.sh --yes
 sudo ./install-bunkerweb.sh --worker --no-wizard
 
 # 安装一个特定版本
-sudo ./install-bunkerweb.sh --version 1.6.6-rc3
+sudo ./install-bunkerweb.sh --version 1.6.7~rc1
 
 # 带有远程工作实例的管理器设置（需要 instances）
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
+
+# 具有内部 HTTPS API 通信的管理器
+sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --api-https
+
+# 具有自定义 DNS 解析器和内部 HTTPS API 的工作节点
+sudo ./install-bunkerweb.sh --worker --dns-resolvers "1.1.1.1 1.0.0.1" --api-https
 
 # 带有 CrowdSec 和 AppSec 的完整安装
 sudo ./install-bunkerweb.sh --crowdsec-appsec
@@ -812,8 +2120,15 @@ sudo ./install-bunkerweb.sh --yes --api
 !!! warning "关于选项兼容性的重要说明"
 
     **CrowdSec 限制：**
-    - CrowdSec 选项（`--crowdsec`, `--crowdsec-appsec`）仅与 `--full`（默认）和 `--manager` 安装类型兼容
-    - 它们不能与 `--worker`, `--scheduler-only` 或 `--ui-only` 安装一起使用
+
+    - CrowdSec 选项（`--crowdsec`, `--crowdsec-appsec`）仅与 `--full`（默认）安装类型兼容
+    - 它们不能与 `--manager`, `--worker`, `--scheduler-only`, `--ui-only` 或 `--api-only` 安装一起使用
+
+    **API 服务可用性：**
+
+    - 外部 API 服务（端口 8000）适用于 `--full` 和 `--manager` 安装类型
+    - 它不适用于 `--worker`, `--scheduler-only` 或 `--ui-only` 安装
+    - 使用 `--api-only` 进行专用的 API 服务安装
 
     **Instances 要求：**
     - `--instances` 选项仅对 `--manager` 和 `--scheduler-only` 安装类型有效
@@ -908,12 +2223,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.6-rc3：
+    最后安装 BunkerWeb 1.6.7~rc1：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.6-rc3
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.7~rc1
     ```
 
     要防止在执行 `apt upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -956,12 +2271,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.6-rc3：
+    最后安装 BunkerWeb 1.6.7~rc1：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.6-rc3
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.7~rc1
     ```
 
     要防止在执行 `apt upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -992,12 +2307,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.6-rc3：
+    最后安装 BunkerWeb 1.6.7~rc1：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
   	sudo dnf makecache && \
-  	sudo -E dnf install -y --allowerasing bunkerweb-1.6.6-rc3
+  	sudo -E dnf install -y --allowerasing bunkerweb-1.6.7~rc1
     ```
 
     要防止在执行 `dnf upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -1042,12 +2357,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.6-rc3：
+    最后安装 BunkerWeb 1.6.7~rc1：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
-    sudo -E dnf install -y --allowerasing bunkerweb-1.6.6-rc3
+    sudo -E dnf install -y --allowerasing bunkerweb-1.6.7~rc1
     ```
 
     要防止在执行 `dnf upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -1140,7 +2455,7 @@ export SERVICE_UI=yes
     Docker 自动配置集成意味着使用**多站点模式**。有关更多信息，请参阅文档的[多站点部分](concepts.md#multisite-mode)。
 
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations)中的 docker-compose 文件。
 
 要启用自动配置更新，请在堆栈中包含一个名为 `bw-autoconf` 的额外容器。此容器承载自动配置服务，该服务管理 BunkerWeb 的动态配置更改。
 
@@ -1154,7 +2469,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.6-rc3
+    image: bunkerity/bunkerweb:1.6.7~rc1
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -1169,7 +2484,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由自动配置服务自动检测
@@ -1184,7 +2499,7 @@ services:
       - bw-db
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
+    image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
     depends_on:
       - bunkerweb
       - bw-docker
@@ -1249,6 +2564,71 @@ networks:
 !!! warning "在无根模式下使用 Docker"
     如果您正在使用[无根模式的 Docker](https://docs.docker.com/engine/security/rootless)，您需要将 docker 套接字的挂载替换为以下值：`$XDG_RUNTIME_DIR/docker.sock:/var/run/docker.sock:ro`。
 
+### Autoconf 容器设置
+
+`bw-autoconf` 控制器监控编排器并将变更写入共享数据库。
+
+#### 配置来源与优先级
+
+1. 环境变量（包括 Docker/Compose 的 `environment:`）
+2. `/run/secrets/<VAR>` 下的 secrets（entrypoint 自动加载）
+3. 内置默认值
+
+#### 配置参考（高级）
+
+##### 模式与运行时
+
+| Setting               | 描述                                       | 接受的值                               | 默认值                            |
+| --------------------- | ------------------------------------------ | -------------------------------------- | --------------------------------- |
+| `AUTOCONF_MODE`       | 启用 autoconf 控制器                       | `yes` 或 `no`                          | `no`                              |
+| `SWARM_MODE`          | 监控 Swarm 服务而非 Docker 容器           | `yes` 或 `no`                          | `no`                              |
+| `KUBERNETES_MODE`     | 监控 Kubernetes ingress/pod 而非 Docker    | `yes` 或 `no`                          | `no`                              |
+| `DOCKER_HOST`         | Docker 套接字 / 远程 API URL               | 例如 `unix:///var/run/docker.sock`     | `unix:///var/run/docker.sock`     |
+| `WAIT_RETRY_INTERVAL` | 实例就绪检查之间的秒数                     | 整秒                                   | `5`                               |
+| `LOG_SYSLOG_TAG`      | Autoconf 日志的 syslog tag                 | 字符串                                 | `bw-autoconf`                     |
+| `TZ`                  | Autoconf 日志和时间戳使用的时区            | TZ 数据库名（如 `Europe/Paris`）        | unset（容器默认，通常为 UTC）     |
+
+##### 数据库与校验
+
+| Setting                 | 描述                                                                       | 接受的值                | 默认值                                     |
+| ----------------------- | -------------------------------------------------------------------------- | ----------------------- | ------------------------------------------ |
+| `DATABASE_URI`          | 主数据库 DSN（必须与调度器数据库匹配）                                     | SQLAlchemy DSN          | `sqlite:////var/lib/bunkerweb/db.sqlite3`  |
+| `DATABASE_URI_READONLY` | 可选只读 DSN；若只有它可用，autoconf 将退回只读模式                        | SQLAlchemy DSN 或留空    | unset                                      |
+| `IGNORE_REGEX_CHECK`    | 跳过来自标签/注解的设置的正则校验                                         | `yes` 或 `no`           | `no`                                       |
+
+##### 日志
+
+| Setting                         | 描述                                                     | 接受的值                                       | 默认值                                         |
+| ------------------------------- | -------------------------------------------------------- | ---------------------------------------------- | ---------------------------------------------- |
+| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | 基础日志级别 / 覆盖                                      | `debug`, `info`, `warning`, `error`, `critical` | `info`                                        |
+| `LOG_TYPES`                     | 目标                                                     | 空格分隔的 `stderr`/`file`/`syslog`             | `stderr`                                      |
+| `LOG_FILE_PATH`                 | 文件日志路径（当 `LOG_TYPES` 包含 `file` 时使用）        | 文件路径                                        | unset（启用 `file` 时自行设置）               |
+| `LOG_SYSLOG_ADDRESS`            | Syslog 目标（`udp://host:514`、`tcp://host:514`、socket）| Host:port、带协议前缀的主机或路径               | unset                                         |
+| `LOG_SYSLOG_TAG`                | Syslog 标识/tag                                          | 字符串                                          | `bw-autoconf`                                 |
+
+##### 作用域与发现过滤
+
+| Setting                         | 描述                                                                 | 接受的值                                    | 默认值 |
+| ------------------------------- | -------------------------------------------------------------------- | ------------------------------------------- | ------ |
+| `NAMESPACES`                    | 需管理的命名空间/项目（空格分隔）；空表示全部                        | 空格分隔字符串                               | unset  |
+| `DOCKER_IGNORE_LABELS`          | 收集实例/服务/配置时忽略这些容器/标签                                | 用空格或逗号分隔的完整键或后缀               | unset  |
+| `SWARM_IGNORE_LABELS`           | 忽略带匹配标签的 Swarm 服务/配置                                     | 用空格或逗号分隔的完整键或后缀               | unset  |
+| `KUBERNETES_IGNORE_ANNOTATIONS` | 发现时忽略 ingress/pod 注解                                         | 用空格或逗号分隔的完整键或后缀               | unset  |
+
+##### 仅 Kubernetes
+
+| Setting                                 | 描述                                                                                   | 接受的值         | 默认值            |
+| --------------------------------------- | -------------------------------------------------------------------------------------- | ---------------- | ----------------- |
+| `KUBERNETES_VERIFY_SSL`                 | 校验 Kubernetes API 的 TLS                                                             | `yes` 或 `no`    | `yes`             |
+| `KUBERNETES_SSL_CA_CERT`                | Kubernetes API 自定义 CA bundle 路径                                                   | 文件路径         | unset             |
+| `USE_KUBERNETES_FQDN`                   | 使用 `<pod>.<ns>.pod.<domain>` 而不是 Pod IP 作为实例主机名                            | `yes` 或 `no`    | `yes`             |
+| `KUBERNETES_INGRESS_CLASS`              | 仅处理该类的 ingress                                                                   | 字符串           | unset（全部）     |
+| `KUBERNETES_DOMAIN_NAME`                | 构建上游主机时使用的集群域名后缀                                                       | 字符串           | `cluster.local`   |
+| `KUBERNETES_SERVICE_PROTOCOL`           | 生成的反向代理主机所用的协议                                                           | `http` 或 `https` | `http`            |
+| `BUNKERWEB_SERVICE_NAME`                | 在补丁 Ingress 状态时读取的 Service 名称                                               | 字符串           | `bunkerweb`       |
+| `BUNKERWEB_NAMESPACE`                   | 该 Service 的命名空间                                                                  | 字符串           | `bunkerweb`       |
+| `KUBERNETES_REVERSE_PROXY_SUFFIX_START` | 多路径 ingress 生成 `REVERSE_PROXY_HOST_n`/`REVERSE_PROXY_URL_n` 的起始索引            | 整数 (>=0)       | `1`               |
+
 ### 自动配置服务
 
 一旦堆栈设置好，您将能够创建 Web 应用程序容器，并使用“bunkerweb.”前缀将设置添加为标签，以便自动设置 BunkerWeb：
@@ -1298,13 +2678,13 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.7~rc1
         labels:
           - "bunkerweb.INSTANCE=yes"
           - "bunkerweb.NAMESPACE=my-namespace" # 为 BunkerWeb 实例设置命名空间，以便自动配置服务可以检测到它
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
+        image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
         environment:
           ...
           NAMESPACES: "my-namespace my-other-namespace" # 只监听这些命名空间
@@ -1342,7 +2722,7 @@ autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/conce
 鉴于存在多个 BunkerWeb 实例，有必要建立一个共享数据存储，实现为一个 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 服务。这些实例将利用该服务来缓存和共享彼此之间的数据。有关 Redis/Valkey 设置的更多信息，请参见[此处](features.md#redis)。
 
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations)中的 docker-compose 文件。
 
     集群数据库后端的设置超出了本文档的范围。
 
@@ -1377,28 +2757,53 @@ This documentation explains how to deploy BunkerWeb as a sidecar to protect your
 
 ##### Architecture
 
-```
-┌─────────────────────────────────────┐
-│  BunkerWeb Scheduler (centralized)  │
-│   + UI + MariaDB + Redis            │
-└──────────────┬──────────────────────┘
-               │ (API port 5000)
-               │
-    ┏━━━━━━━━━━┻━━━━━━━━━━┓
-    ┃                     ┃
-┌───▼──────────────┐  ┌───▼──────────────┐
-│  Application Pod │  │  Application Pod │
-│  ┌─────────────┐ │  │  ┌─────────────┐ │
-│  │     App     │ │  │  │     App     │ │
-│  │  (port 80)  │ │  │  │  (port XX)  │ │
-│  └──────┬──────┘ │  │  └──────┬──────┘ │
-│         │        │  │         │        │
-│  ┌──────▼──────┐ │  │  ┌──────▼──────┐ │
-│  │  BunkerWeb  │ │  │  │  BunkerWeb  │ │
-│  │ (port 8080) │ │  │  │ (port 8080) │ │
-│  │ (API  5000) │ │  │  │ (API  5000) │ │
-│  └─────────────┘ │  │  └─────────────┘ │
-└──────────────────┘  └──────────────────┘
+```mermaid
+flowchart TB
+
+  %% ---------- 样式 ----------
+  classDef scheduler     fill:#eef2ff,stroke:#4c1d95,stroke-width:1px,rx:6px,ry:6px;
+  classDef podContainer  fill:none,stroke:#9ca3af,stroke-width:1px,stroke-dasharray:6 3,rx:6px,ry:6px;
+  classDef component     fill:#f9fafb,stroke:#6b7280,stroke-width:1px,rx:4px,ry:4px;
+  classDef lb            fill:#e0f2fe,stroke:#0369a1,stroke-width:1px,rx:6px,ry:6px;
+
+  %% ---------- 顶部：调度器 ----------
+  SCHED["BunkerWeb 调度器（集中式）<br/>+ UI + MariaDB + Redis"]:::scheduler
+
+  %% ---------- Pods 组 ----------
+  subgraph PODS["Pod 组"]
+    %% 应用 Pod 1 ----------
+    subgraph POD1["应用 Pod"]
+      BW1["BunkerWeb"]:::component
+      APP1["应用程序<br/>(端口 80)"]:::component
+      BW1 -->|合法请求| APP1
+    end
+    class POD1 podContainer
+
+    %% 应用 Pod 2 ----------
+    subgraph POD2["应用 Pod"]
+      BW2["BunkerWeb"]:::component
+      APP2["应用程序<br/>(端口 XX)"]:::component
+      BW2 -->|合法请求| APP2
+    end
+    class POD2 podContainer
+  end
+
+  %% ---------- 底部：负载均衡器 ----------
+  LB["负载均衡器"]:::lb
+
+  %% 调度器通过 API 控制 BunkerWeb 实例
+  %% The Scheduler controls the BunkerWeb instances (API)
+  SCHED -->|API 5000| BW1
+  SCHED -->|API 5000| BW2
+  %% 负载均衡器将流量发送到 BunkerWeb
+  %% The load balancer sends traffic to BunkerWeb
+  LB -->|HTTP/HTTPS| BW1
+  LB -->|HTTP/HTTPS| BW2
+  %% ---------- 布局辅助（隐藏） ----------
+  %% 将负载均衡器放置在整个 Pod 组之下
+  %% Place the load balancer under the entire PODS group
+  PODS --> LB
+  linkStyle 6 stroke-width:0px,stroke:transparent;
 ```
 
 ##### Prerequisites
@@ -1432,7 +2837,7 @@ The **BunkerWeb controller** automatically discovers pods with BunkerWeb sidecar
 ```yaml
 controller:
   enabled: true
-  tag: "1.6.5"
+  tag: "1.6.7~rc1"
 ```
 
 2. For each sidecar, add:
@@ -1525,7 +2930,7 @@ In your BunkerWeb chart `values.yaml`, configure the `BUNKERWEB_INSTANCES` envir
 
 ```yaml
 scheduler:
-  tag: "1.6.5"
+  tag: "1.6.7~rc1"
   extraEnvs:
     - name: BUNKERWEB_INSTANCES
       value: "http://app1-bunkerweb-workers.namespace.svc.cluster.local:5000 http://app2-bunkerweb-workers.namespace.svc.cluster.local:5000"
@@ -1569,7 +2974,7 @@ spec:
 
         # BunkerWeb Sidecar
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.6-rc2
+          image: bunkerity/bunkerweb:1.6.7~rc1
           ports:
             - containerPort: 8080  # Exposed HTTP port
             - containerPort: 5000  # Internal API (mandatory)
@@ -1839,7 +3244,7 @@ To add a new application protected by BunkerWeb:
 
 #### 完整的 YAML 文件
 
-除了使用 helm chart，您还可以使用 GitHub 仓库中 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/misc/integrations)内的 YAML 样板文件。请注意，我们强烈建议您改用 helm chart。
+除了使用 helm chart，您还可以使用 GitHub 仓库中 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations)内的 YAML 样板文件。请注意，我们强烈建议您改用 helm chart。
 
 ### Ingress 资源
 
@@ -1922,7 +3327,7 @@ metadata:
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
+              image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
               imagePullPolicy: Always
               env:
                 - name: NAMESPACES
@@ -2066,11 +3471,11 @@ service:
 
 # BunkerWeb 设置
 bunkerweb:
-  tag: 1.6.6-rc3
+  tag: 1.6.7~rc1
 
 # 调度器设置
 scheduler:
-  tag: 1.6.6-rc3
+  tag: 1.6.7~rc1
   extraEnvs:
     # 启用 real IP 模块以获取客户端的真实 IP
     - name: USE_REAL_IP
@@ -2078,11 +3483,11 @@ scheduler:
 
 # 控制器设置
 controller:
-  tag: 1.6.6-rc3
+  tag: 1.6.7~rc1
 
 # UI 设置
 ui:
-  tag: 1.6.6-rc3
+  tag: 1.6.7~rc1
 ```
 
 使用自定义值安装 BunkerWeb：
@@ -2139,7 +3544,7 @@ spec:
 
 **保护现有应用程序**
 
-**首先，您需要进入全局配置，选择 SSL 插件，然后禁用自动将 HTTP 重定向到 HTTPS。请注意，您只需要执行一次。**
+**首先，您需要进入全局设置，选择 SSL 插件，然后禁用自动将 HTTP 重定向到 HTTPS。请注意，您只需要执行一次。**
 
 假设您在 `myapp` 命名空间中有一个应用程序，该应用程序可以通过 `myapp-service` 服务在端口 `5000` 上访问。
 
@@ -2210,7 +3615,7 @@ spec:
 至于数据库卷，文档并未指定具体的方法。为数据库卷选择共享文件夹或特定驱动程序取决于您的独特用例，留给读者自行决定。
 
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations)中的 docker-compose 文件。
 
     集群数据库后端的设置超出了本文档的范围。
 
@@ -2224,7 +3629,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.6-rc3
+    image: bunkerity/bunkerweb:1.6.7~rc1
     ports:
       - published: 80
         target: 8080
@@ -2253,7 +3658,7 @@ services:
         - "bunkerweb.INSTANCE=yes" # autoconf 服务识别 BunkerWeb 实例的强制性标签
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由 autoconf 服务自动检测
@@ -2274,7 +3679,7 @@ services:
           - "node.role == worker"
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
+    image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
     environment:
       SWARM_MODE: "yes"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
@@ -2328,7 +3733,7 @@ services:
           - "node.role == worker"
 
   bw-redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -2423,7 +3828,7 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ...
         deploy:
           mode: global
@@ -2435,7 +3840,7 @@ networks:
             - "bunkerweb.NAMESPACE=my-namespace" # 为 BunkerWeb 实例设置命名空间
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
+        image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
         environment:
           NAMESPACES: "my-namespace my-other-namespace" # 只监听这些命名空间
           ...
@@ -2453,6 +3858,244 @@ networks:
     每个命名空间只能有**一个数据库**和**一个调度器**。如果您尝试在同一个命名空间中创建多个数据库或调度器，配置最终会相互冲突。
 
     调度器不需要 `NAMESPACE` 标签即可正常工作。它只需要正确配置 `DATABASE_URI` 设置，以便它可以访问与自动配置服务相同的数据库。
+
+## Terraform
+
+### 简介
+
+BunkerWeb 的 Terraform Provider 允许您通过基础设施即代码（IaC）管理 BunkerWeb 实例、服务和配置。该 Provider 与 BunkerWeb API 交互,自动化部署和管理您的安全配置。
+
+### 先决条件
+
+- [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.12
+- 已启用 API 的 BunkerWeb 实例
+- API 令牌或基本身份验证凭据
+
+### 安装
+
+该 Provider 可在 [Terraform Registry](https://registry.terraform.io/providers/bunkerity/bunkerweb/latest) 上获得。将其添加到您的 Terraform 配置中:
+
+```terraform
+terraform {
+  required_providers {
+    bunkerweb = {
+      source  = "bunkerity/bunkerweb"
+      version = "~> 0.0.2"
+    }
+  }
+}
+```
+
+### 配置
+
+#### Bearer Token 身份验证(推荐)
+
+```terraform
+provider "bunkerweb" {
+  api_endpoint = "https://bunkerweb.example.com:8888"
+  api_token    = var.bunkerweb_token
+}
+```
+
+#### 基本身份验证
+
+```terraform
+provider "bunkerweb" {
+  api_endpoint = "https://bunkerweb.example.com:8888"
+  api_username = var.bunkerweb_username
+  api_password = var.bunkerweb_password
+}
+```
+
+### 使用示例
+
+#### 创建 Web 服务
+
+```terraform
+resource "bunkerweb_service" "app" {
+  server_name = "app.example.com"
+
+  variables = {
+    upstream = "10.0.0.12:8080"
+    mode     = "production"
+  }
+}
+```
+
+#### 注册实例
+
+```terraform
+resource "bunkerweb_instance" "worker1" {
+  hostname     = "worker-1.internal"
+  name         = "Worker 1"
+  port         = 8080
+  listen_https = true
+  https_port   = 8443
+  server_name  = "worker-1.internal"
+  method       = "api"
+}
+```
+
+#### 配置全局设置
+
+```terraform
+resource "bunkerweb_global_config_setting" "retry" {
+  key   = "retry_limit"
+  value = "10"
+}
+```
+
+#### 封禁 IP 地址
+
+```terraform
+resource "bunkerweb_ban" "suspicious_ip" {
+  ip       = "192.0.2.100"
+  reason   = "Multiple failed login attempts"
+  duration = 3600  # 1小时(秒)
+}
+```
+
+#### 自定义配置
+
+```terraform
+resource "bunkerweb_config" "custom_rules" {
+  service_id = "app.example.com"
+  type       = "http"
+  name       = "custom-rules.conf"
+  content    = file("${path.module}/configs/custom-rules.conf")
+}
+```
+
+### 可用资源
+
+该 Provider 提供以下资源:
+
+- **bunkerweb_service**: Web 服务管理
+- **bunkerweb_instance**: 实例注册和管理
+- **bunkerweb_global_config_setting**: 全局配置
+- **bunkerweb_config**: 自定义配置
+- **bunkerweb_ban**: IP 封禁管理
+- **bunkerweb_plugin**: 插件安装和管理
+
+### 数据源
+
+数据源允许读取现有信息:
+
+- **bunkerweb_service**: 读取现有服务
+- **bunkerweb_global_config**: 读取全局配置
+- **bunkerweb_plugins**: 列出可用插件
+- **bunkerweb_cache**: 缓存信息
+- **bunkerweb_jobs**: 计划作业状态
+
+### 临时资源
+
+用于一次性操作:
+
+- **bunkerweb_run_jobs**: 按需触发作业
+- **bunkerweb_instance_action**: 在实例上执行操作(重新加载、停止等)
+- **bunkerweb_service_snapshot**: 捕获服务状态
+- **bunkerweb_config_upload**: 批量配置上传
+
+### 完整示例
+
+以下是使用 BunkerWeb 的完整基础设施示例:
+
+```terraform
+terraform {
+  required_providers {
+    bunkerweb = {
+      source  = "bunkerity/bunkerweb"
+      version = "~> 0.0.1"
+    }
+  }
+}
+
+provider "bunkerweb" {
+  api_endpoint = "https://bunkerweb.example.com:8888"
+  api_token    = var.bunkerweb_token
+}
+
+# 全局配置
+resource "bunkerweb_global_config_setting" "rate_limit" {
+  key   = "rate_limit"
+  value = "10r/s"
+}
+
+# 主服务
+resource "bunkerweb_service" "webapp" {
+  server_name = "webapp.example.com"
+
+  variables = {
+    upstream          = "10.0.1.10:8080"
+    mode              = "production"
+    auto_lets_encrypt = "yes"
+    use_modsecurity   = "yes"
+    use_antibot       = "cookie"
+  }
+}
+
+# 具有不同配置的 API 服务
+resource "bunkerweb_service" "api" {
+  server_name = "api.example.com"
+
+  variables = {
+    upstream        = "10.0.1.20:3000"
+    mode            = "production"
+    use_cors        = "yes"
+    cors_allow_origin = "*"
+  }
+}
+
+# Worker 实例
+resource "bunkerweb_instance" "worker1" {
+  hostname     = "bw-worker-1.internal"
+  name         = "Production Worker 1"
+  port         = 8080
+  listen_https = true
+  https_port   = 8443
+  server_name  = "bw-worker-1.internal"
+  method       = "api"
+}
+
+# webapp 服务的自定义配置
+resource "bunkerweb_config" "custom_security" {
+  service_id = bunkerweb_service.webapp.id
+  type       = "http"
+  name       = "custom-security.conf"
+  content    = <<-EOT
+    # Custom security headers
+    add_header X-Frame-Options "DENY" always;
+    add_header X-Content-Type-Options "nosniff" always;
+  EOT
+}
+
+# 封禁可疑 IP
+resource "bunkerweb_ban" "blocked_ip" {
+  ip       = "203.0.113.50"
+  reason   = "Detected malicious activity"
+  duration = 86400  # 24小时
+}
+
+output "webapp_service_id" {
+  value = bunkerweb_service.webapp.id
+}
+
+output "api_service_id" {
+  value = bunkerweb_service.api.id
+}
+```
+
+### 其他资源
+
+- [完整 Provider 文档](https://registry.terraform.io/providers/bunkerity/bunkerweb/latest/docs)
+- [GitHub 仓库](https://github.com/bunkerity/terraform-provider-bunkerweb)
+- [使用示例](https://github.com/bunkerity/terraform-provider-bunkerweb/tree/main/examples)
+- [BunkerWeb API 文档](https://docs.bunkerweb.io/latest/api/)
+
+### 支持和贡献
+
+要报告错误或提出改进建议,请访问 [Provider 的 GitHub 仓库](https://github.com/bunkerity/terraform-provider-bunkerweb/issues)。
+
 
 ## Microsoft Azure
 

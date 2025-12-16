@@ -22,7 +22,7 @@ target_metadata = Base.metadata
 
 # Override sqlalchemy.url with DATABASE_URI environment variable if present
 if "DATABASE_URI" in environ:
-    config.set_main_option("sqlalchemy.url", environ["DATABASE_URI"])
+    config.set_main_option("sqlalchemy.url", environ["DATABASE_URI"].replace("%", "%%"))
 
     # Extract the database type from the URI and set version_locations accordingly
     database_type = environ["DATABASE_URI"].split(":")[0].split("+")[0]

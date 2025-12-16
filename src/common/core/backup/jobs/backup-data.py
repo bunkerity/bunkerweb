@@ -13,11 +13,11 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from Database import Database  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 from backup import backup_database, update_cache_file, acquire_db_lock, DB_LOCK_FILE
 
-LOGGER = setup_logger("BACKUP")
+LOGGER = getLogger("BACKUP")
 status = 0
 
 try:

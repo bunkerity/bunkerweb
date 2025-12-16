@@ -39,7 +39,7 @@
             </div>
         </div>
         <div class="justify-content-center d-none d-sm-flex">
-            {% if current_endpoint != "global-config" %}
+            {% if current_endpoint != "global-config" and current_endpoint != "global-settings" %}
                 <div {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
                     <button type="button"
                             class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}disabled{% endif %}">
@@ -67,7 +67,7 @@
 </div>
 <div class="d-flex justify-content-center position-fixed m-3 d-sm-none"
      id="floating-settings-button">
-    {% if current_endpoint != "global-config" %}
+    {% if current_endpoint != "global-config" and current_endpoint != "global-settings" %}
         <div {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
             <button type="button"
                     class="btn btn-sm btn-outline-secondary toggle-draft p-1_5 me-1 {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}disabled{% endif %}">
@@ -108,7 +108,7 @@
                     style="display: none">
                     <span class="text-muted ms-2" data-i18n="status.no_item">No items found.</span>
                 </li>
-                {% for plugin, plugin_data in plugins.items() if get_filtered_settings(plugin_data["settings"], current_endpoint == "global-config") %}
+                {% for plugin, plugin_data in plugins.items() if get_filtered_settings(plugin_data["settings"], (current_endpoint == "global-config" or current_endpoint == "global-settings")) %}
                     <li class="list-group-item plugin-navigation-item border-0 d-flex align-items-center p-2 cursor-pointer{% if loop.index == 1 %} show active{% endif %}"
                         role="tab"
                         id="plugin-nav-{{ plugin }}"
@@ -149,7 +149,7 @@
     </div>
     <div class="card tab-content p-2 position-relative flex-grow-1 col-12 col-md-9 col-lg-10 h-100">
         {% for plugin, plugin_data in plugins.items() %}
-            {% set filtered_settings = get_filtered_settings(plugin_data["settings"], current_endpoint == "global-config") %}
+            {% set filtered_settings = get_filtered_settings(plugin_data["settings"], (current_endpoint == "global-config" or current_endpoint == "global-settings")) %}
             {% if filtered_settings %}
                 <div id="navs-plugins-{{ plugin }}"
                      class="tab-pane fade{% if loop.index == 1 %} show active{% endif %}"
@@ -218,7 +218,7 @@
                                 {% set setting_value = setting_config.get("value", setting_default) %}
                                 {% set setting_method = setting_config.get("method", "default") %}
                                 {% set setting_template = setting_config.get("template", "") %}
-                                {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
+                                {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or current_endpoint == "global-settings" or not setting_config.get("global")) %}
                                 {% if current_endpoint == "new" or clone %}
                                     {% set setting_method = "default" %}
                                     {% set disabled = false %}
@@ -243,7 +243,7 @@
                                             {{ setting_data["label"] }}
                                         </label>
                                         <div class="d-flex align-items-center">
-                                            {% if current_endpoint == "global-config" and setting_data["context"] == "multisite" %}
+                                            {% if (current_endpoint == "global-config" or current_endpoint == "global-settings") and setting_data["context"] == "multisite" %}
                                                 <a role="badge"
                                                    href='{{ docs_url("/concepts", "#multisite-mode") }}'
                                                    class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1 docs-link"
@@ -281,11 +281,11 @@
                                                       data-bs-original-title="Cloned from service {{ clone }}">
                                                     <span class="bx bx-copy-alt bx-xs"></span>
                                                 </span>
-                                            {% elif current_endpoint != "global-config" and setting_config.get("global") and setting_value != setting_default %}
+                                            {% elif current_endpoint != "global-config" and current_endpoint != "global-settings" and setting_config.get("global") and setting_value != setting_default %}
                                                 <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
                                                       data-bs-toggle="tooltip"
                                                       data-bs-placement="top"
-                                                      data-bs-original-title="From global configuration">
+                                                      data-bs-original-title="From global settings">
                                                     <span class="bx bx-globe bx-xs"></span>
                                                 </span>
                                             {% endif %}
@@ -306,7 +306,7 @@
                                     {% elif setting_data["type"] == "check" %}
                                         {% include "models/checkbox_setting.html" %}
                                     {% else %}
-                                        {% if setting == "SERVER_NAME" and current_endpoint != "global-config" %}
+                                        {% if setting == "SERVER_NAME" and current_endpoint != "global-config" and current_endpoint != "global-settings" %}
                                             <input type="hidden"
                                                    id="old-server-name"
                                                    name="OLD_SERVER_NAME"
@@ -378,7 +378,7 @@
                                                             {% set setting_value = setting_config.get("value", setting_default) %}
                                                             {% set setting_method = setting_config.get("method", "default") %}
                                                             {% set setting_template = setting_config.get("template", "") %}
-                                                            {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
+                                                            {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or current_endpoint == "global-settings" or not setting_config.get("global")) %}
                                                             {% if current_endpoint == "new" or clone %}
                                                                 {% set setting_method = "default" %}
                                                                 {% set disabled = false %}
@@ -400,7 +400,7 @@
                                                                         {{ setting_data["label"] }}
                                                                     </label>
                                                                     <div class="d-flex align-items-center">
-                                                                        {% if current_endpoint == "global-config" and setting_data["context"] == "multisite" %}
+                                                                        {% if (current_endpoint == "global-config" or current_endpoint == "global-settings") and setting_data["context"] == "multisite" %}
                                                                             <a role="badge"
                                                                                href='{{ docs_url("/concepts", "#multisite-mode") }}'
                                                                                class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1 docs-link"
@@ -438,11 +438,11 @@
                                                                                   data-bs-original-title="Cloned from service {{ clone }}">
                                                                                 <span class="bx bx-copy-alt bx-xs"></span>
                                                                             </span>
-                                                                        {% elif current_endpoint != "global-config" and setting_config.get("global") and setting_value != setting_default %}
+                                                                        {% elif current_endpoint != "global-config" and current_endpoint != "global-settings" and setting_config.get("global") and setting_value != setting_default %}
                                                                             <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
                                                                                   data-bs-toggle="tooltip"
                                                                                   data-bs-placement="top"
-                                                                                  data-bs-original-title="From global configuration">
+                                                                                  data-bs-original-title="From global settings">
                                                                                 <span class="bx bx-globe bx-xs"></span>
                                                                             </span>
                                                                         {% endif %}

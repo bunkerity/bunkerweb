@@ -25,7 +25,7 @@ jobs:
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Login to ghcr
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
         with:
@@ -43,7 +43,7 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         if: inputs.TYPE == 'k8s'
-      - uses: actions/download-artifact@v6.0.0
+      - uses: actions/download-artifact@v7.0.0
         with:
           name: tf-k8s
           path: /tmp
@@ -87,6 +87,9 @@ jobs:
       - name: Pull BW linux fedora 42 test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/fedora-42-tests:testing && docker tag ghcr.io/bunkerity/fedora-42-tests:testing local/fedora-42:latest
+      - name: Pull BW linux fedora 43 test image
+        if: inputs.TYPE == 'linux'
+        run: docker pull ghcr.io/bunkerity/fedora-43-tests:testing && docker tag ghcr.io/bunkerity/fedora-43-tests:testing local/fedora-43:latest
       - name: Pull BW linux rhel-8 test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/rhel-8-tests:testing && docker tag ghcr.io/bunkerity/rhel-8-tests:testing local/rhel-8:latest
@@ -148,6 +151,12 @@ jobs:
       - name: Run Linux fedora 42 tests
         if: inputs.TYPE == 'linux'
         run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "fedora-42"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux fedora 43 tests
+        if: inputs.TYPE == 'linux'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "fedora-43"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}

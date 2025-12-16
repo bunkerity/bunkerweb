@@ -19,10 +19,10 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from requests import RequestException, get
 from requests.exceptions import ConnectionError
 
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
-LOGGER = setup_logger("MODSECURITY.coreruleset-nightly")
+LOGGER = getLogger("MODSECURITY.CORERULESET.NIGHTLY")
 status = 0
 
 CRS_NIGHTLY_PATH = Path(sep, "var", "cache", "bunkerweb", "modsecurity", "crs", "nightly")
@@ -37,7 +37,7 @@ try:
     use_nightly_crs = False
 
     if getenv("MULTISITE", "no") == "yes":
-        for first_server in getenv("SERVER_NAME", "www.example.com").split(" "):
+        for first_server in getenv("SERVER_NAME", "www.example.com").split():
             if first_server and getenv(f"{first_server}_MODSECURITY_CRS_VERSION", "4") == "nightly":
                 use_nightly_crs = True
                 break

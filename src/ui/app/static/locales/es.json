@@ -43,7 +43,7 @@
     "cache": "Caché",
     "configs": "Configuraciones",
     "extra_pages": "Páginas Adicionales",
-    "global_config": "Configuración Global",
+    "global_settings": "Ajustes globales",
     "home": "Inicio",
     "instances": "Instancias",
     "jobs": "Tareas",
@@ -77,6 +77,8 @@
     "close": "Cerrar",
     "columns": "Columnas",
     "convert_services": "Convertir Servicios",
+    "convert_configs": "Convertir Configs",
+    "convert_configs_to": "Convertir a {{state}}",
     "copy": "Copiar",
     "copy_codes": "Copiar Códigos",
     "copy_raw": "Copiar Datos sin Procesar",
@@ -92,7 +94,11 @@
     "enable_totp": "Activar TOTP",
     "entire_config": "Configuración Completa",
     "export": "Exportar",
-    "fetch_global": "Obtener Configuración Global",
+    "export_csv_all": "CSV (Todos)",
+    "export_csv_visible": "CSV (Visible)",
+    "export_excel_all": "Excel (Todos)",
+    "export_excel_visible": "Excel (Visible)",
+    "fetch_global": "Obtener ajustes globales",
     "filters_suffix": " Filtros",
     "follow": "Seguir",
     "github_stars": "Estrellas",
@@ -753,6 +759,8 @@
       "confirm_configs_deletion_alert": "¿Estás seguro de que quieres eliminar la configuración personalizada seleccionada?",
       "confirm_configs_deletion_alert_plural": "¿Estás seguro de que quieres eliminar las configuraciones personalizadas seleccionadas?",
       "confirm_conversion_confirmation": "¿Estás seguro de que quieres convertir los servicios seleccionados?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "¿Seguro que quieres convertir las configuraciones personalizadas seleccionadas a {{state}}?",
       "confirm_next_step": "¿Estás seguro de que quieres continuar al siguiente paso?",
       "confirm_plugin_deletion": "¿Estás seguro de que quieres eliminar el plugin seleccionado?",
       "confirm_plugin_deletion_plural": "¿Estás seguro de que quieres eliminar los plugins seleccionados?",
@@ -769,19 +777,19 @@
       "unban_confirmation_alert": "¿Estás seguro de que quieres desbloquear la dirección IP seleccionada?",
       "unban_confirmation_alert_plural": "¿Estás seguro de que quieres desbloquear las direcciones IP seleccionadas?",
       "update_duration_alert": "Selecciona una nueva duración para los bloqueos seleccionados:",
-      "fetch_global_config_bold": "Esto obtendrá la configuración global y la aplicará a la plantilla actual.",
-      "fetch_global_config_point_1": "Solo se actualizan los ajustes presentes en esta plantilla.",
-      "fetch_global_config_point_2": "Se ignoran los valores idénticos a los predeterminados.",
-      "fetch_global_config_point_3": "SERVER_NAME nunca se sobrescribe.",
+      "fetch_global_settings_bold": "Esto obtendrá los ajustes globales y los aplicará a la plantilla actual.",
+      "fetch_global_settings_point_1": "Solo se actualizan los ajustes presentes en esta plantilla.",
+      "fetch_global_settings_point_2": "Se ignoran los valores idénticos a los predeterminados.",
+      "fetch_global_settings_point_3": "SERVER_NAME nunca se sobrescribe.",
       "delete_step_confirmation": "¿Estás seguro de que quieres eliminar este paso?",
       "delete_step_name_label": "Paso",
       "delete_step_content_label": "Contenido",
-      "delete_template_global_usage": "Usada por la configuración global",
+      "delete_template_global_usage": "Usada por los ajustes globales",
       "delete_template_services_list": "Usada por los servicios: {{services}}"
     },
     "button": {
       "reset_template_confirm": "Restablecer Configuración de Plantilla",
-      "fetch_global_config_confirm": "Aplicar configuración global"
+      "fetch_global_settings_confirm": "Aplicar ajustes globales"
     },
     "section": {
       "ban_details": "Detalles del Bloqueo",
@@ -804,7 +812,7 @@
       "job_history_count": "Últimas {{count}} ejecuciones de la Tarea",
       "recovery_codes": "Códigos de Recuperación",
       "reset_template_config": "¿Restablecer Configuración de Plantilla?",
-      "fetch_global_config": "¿Aplicar configuración global?",
+      "fetch_global_settings": "¿Aplicar ajustes globales?",
       "server_name_not_unique": "El Nombre del Servidor no es Único",
       "update_duration": "Actualizar Duración del Bloqueo",
       "delete_step": "Eliminar paso",
@@ -834,7 +842,7 @@
     "cache": "Caché",
     "configs": "Configuraciones",
     "extra_pages": "Páginas Adicionales",
-    "global_config": "Configuración Global",
+    "global_settings": "Ajustes globales",
     "home": "Inicio",
     "instances": "Instancias",
     "jobs": "Tareas",
@@ -1215,7 +1223,8 @@
       "url": "URL",
       "user_agent": "User-Agent",
       "version": "Versión",
-      "templates": "Plantillas"
+      "templates": "Plantillas",
+      "status": "Estado"
     }
   },
   "template": {
@@ -1399,15 +1408,17 @@
     },
     "ip_unbanned": "¡Dirección IP desbloqueada con éxito!",
     "global_settings_applied_title": "Configuración global aplicada",
-    "global_settings_applied_body": "La configuración global se ha obtenido y aplicado correctamente al formulario actual.",
-    "global_settings_failed_title": "Error al obtener la configuración global",
-    "global_settings_failed_body": "Se produjo un error al obtener la configuración global."
+    "global_settings_applied_body": "Los ajustes globales se han obtenido y aplicado correctamente al formulario actual.",
+    "global_settings_failed_title": "Error al obtener los ajustes globales",
+    "global_settings_failed_body": "Se produjo un error al obtener los ajustes globales."
   },
   "tooltip": {
     "auto_lets_encrypt": "Si se debe solicitar automáticamente un certificado Let's Encrypt.",
     "button": {
       "convert_service_to_draft": "Convertir Servicio {{name}} a Borrador",
       "convert_service_to_online": "Convertir Servicio {{name}} a En Línea",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "delete_config": "Eliminar Configuración Personalizada {{name}}",
       "delete_file": "Eliminar archivo de caché: {{filename}}",
       "delete_instance": "Eliminar Instancia {{hostname}}",
@@ -1418,7 +1429,7 @@
       "reload_instance": "Recargar Instancia {{hostname}}",
       "reset_default": "Restablecer al valor predeterminado",
       "reset_global": "Restablecer al valor global",
-      "value_from_global": "Valor de la configuración global",
+      "value_from_global": "Valor de los ajustes globales",
       "run_job": "Ejecutar Tarea {{job}}",
       "stop_instance": "Detener Instancia {{hostname}}",
       "unban_ip": "Desbloquear {{ip}}",
@@ -1466,7 +1477,7 @@
     "email_length": "El correo electrónico debe tener entre 1 y 256 caracteres.",
     "follow_latest_page_only": "El modo seguimiento solo está disponible en la última página",
     "fetch_global_settings": "Obtener configuraciones globales y aplicarlas a la plantilla actual",
-    "global_config_source": "Valor heredado de la configuración global.",
+    "global_settings_source": "Valor heredado de los ajustes globales.",
     "instance_not_up": "La instancia {{hostname}} no responde actualmente ('up').",
     "lets_encrypt_custom_profile": "El perfil personalizado a utilizar para Let's Encrypt (por ejemplo, 'mi_perfil_personalizado').",
     "lets_encrypt_disable_public_suffixes": "Deshabilita las solicitudes de certificados para dominios que coincidan con la Public Suffix List (recomendado).",
@@ -1564,7 +1575,8 @@
         "select_all": "Seleccionar todas las Configuraciones Personalizadas",
         "service": "Servicio asociado a la Configuración Personalizada (o Global)",
         "template": "Indica si la Configuración Personalizada proviene de una plantilla",
-        "type": "Tipo o contexto de la Configuración Personalizada (ej. HTTP, MODSEC)"
+        "type": "Tipo o contexto de la Configuración Personalizada (ej. HTTP, MODSEC)",
+        "status": "Estado de borrador de la configuración personalizada"
       },
       "instances": {
         "actions": "Acciones disponibles para esta Instancia",
@@ -1639,7 +1651,7 @@
     "use_proxy_protocol": "Habilitar la comunicación del protocolo PROXY.",
     "use_real_ip": "Usar IP Real",
     "username_length": "El nombre de usuario debe tener entre 1 y 256 caracteres.",
-    "value_from_global": "Valor de la configuración global",
+    "value_from_global": "Valor de los ajustes globales",
     "view_full_url": "Haz clic para ver la URL completa",
     "wildcard_certificates": "Generar certificados wildcard (*.dominio.com). Requiere desafío DNS.",
     "wildcard_dns_only": "Los certificados wildcard solo son compatibles con el tipo de desafío DNS."

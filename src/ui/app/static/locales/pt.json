@@ -43,7 +43,7 @@
     "cache": "Cache",
     "configs": "Configurações",
     "extra_pages": "Páginas Extras",
-    "global_config": "Configuração Global",
+    "global_settings": "Configurações Globais",
     "home": "Início",
     "instances": "Instâncias",
     "jobs": "Tarefas",
@@ -77,6 +77,8 @@
     "close": "Fechar",
     "columns": "Colunas",
     "convert_services": "Converter Serviços",
+    "convert_configs": "Converter Configs",
+    "convert_configs_to": "Converter para {{state}}",
     "copy": "Copiar",
     "copy_codes": "Copiar Códigos",
     "copy_raw": "Copiar Dados Brutos",
@@ -92,7 +94,11 @@
     "enable_totp": "Ativar TOTP",
     "entire_config": "Configuração Completa",
     "export": "Exportar",
-    "fetch_global": "Buscar Configuração Global",
+    "export_csv_all": "CSV (Todos)",
+    "export_csv_visible": "CSV (Visível)",
+    "export_excel_all": "Excel (Todos)",
+    "export_excel_visible": "Excel (Visível)",
+    "fetch_global": "Buscar configurações globais",
     "filters_suffix": " Filtros",
     "follow": "Seguir",
     "github_stars": "Estrelas",
@@ -744,6 +750,8 @@
       "confirm_configs_deletion_alert": "Tem certeza de que deseja eliminar a configuração personalizada selecionada?",
       "confirm_configs_deletion_alert_plural": "Tem certeza de que deseja eliminar as configurações personalizadas selecionadas?",
       "confirm_conversion_confirmation": "Tem certeza de que deseja converter os serviços selecionados?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "Tem a certeza de que quer converter as configurações personalizadas selecionadas para {{state}}?",
       "confirm_next_step": "Tem certeza de que deseja continuar para o próximo passo?",
       "confirm_plugin_deletion": "Tem certeza de que deseja eliminar o plugin selecionado?",
       "confirm_plugin_deletion_plural": "Tem certeza de que deseja eliminar os plugins selecionados?",
@@ -760,17 +768,17 @@
       "unban_confirmation_alert": "Tem certeza de que deseja desbloquear o endereço IP selecionado?",
       "unban_confirmation_alert_plural": "Tem certeza de que deseja desbloquear os endereços IP selecionados?",
       "update_duration_alert": "Selecione uma nova duração para os bloqueios selecionados:",
-      "fetch_global_config_bold": "Isso buscará a configuração global e a aplicará ao modelo atual.",
-      "fetch_global_config_point_1": "Apenas as definições presentes neste modelo são atualizadas.",
-      "fetch_global_config_point_2": "Valores idênticos aos padrões são ignorados.",
-      "fetch_global_config_point_3": "SERVER_NAME nunca é substituído.",
+      "fetch_global_settings_bold": "Isso buscará as configurações globais e as aplicará ao modelo atual.",
+      "fetch_global_settings_point_1": "Apenas as definições presentes neste modelo são atualizadas.",
+      "fetch_global_settings_point_2": "Valores idênticos aos padrões são ignorados.",
+      "fetch_global_settings_point_3": "SERVER_NAME nunca é substituído.",
       "delete_step_confirmation": "Tem certeza de que deseja eliminar este passo?",
       "delete_step_name_label": "Passo",
       "delete_step_content_label": "Conteúdo"
     },
     "button": {
       "reset_template_confirm": "Redefinir Configuração do Modelo",
-      "fetch_global_config_confirm": "Aplicar configurações globais"
+      "fetch_global_settings_confirm": "Aplicar configurações globais"
     },
     "section": {
       "ban_details": "Detalhes do Bloqueio",
@@ -793,7 +801,7 @@
       "job_history_count": "Últimas {{count}} execuções da Tarefa",
       "recovery_codes": "Códigos de Recuperação",
       "reset_template_config": "Redefinir Configuração do Modelo?",
-      "fetch_global_config": "Aplicar configurações globais?",
+      "fetch_global_settings": "Aplicar configurações globais?",
       "server_name_not_unique": "Nome do Servidor não é Único",
       "update_duration": "Atualizar Duração do Bloqueio",
       "delete_step": "Eliminar passo"
@@ -822,7 +830,7 @@
     "cache": "Cache",
     "configs": "Configurações",
     "extra_pages": "Páginas Extras",
-    "global_config": "Configuração Global",
+    "global_settings": "Configurações Globais",
     "home": "Início",
     "instances": "Instâncias",
     "jobs": "Tarefas",
@@ -1196,7 +1204,8 @@
       "type": "Tipo",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "Versão"
+      "version": "Versão",
+      "status": "Estado"
     }
   },
   "template": {
@@ -1389,6 +1398,8 @@
     "button": {
       "convert_service_to_draft": "Converter Serviço {{name}} para Rascunho",
       "convert_service_to_online": "Converter Serviço {{name}} para Online",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "delete_config": "Eliminar Configuração Personalizada {{name}}",
       "delete_file": "Eliminar Arquivo de Cache: {{filename}}",
       "delete_instance": "Eliminar Instância {{hostname}}",
@@ -1399,7 +1410,7 @@
       "reset_default": "Restabelecer valor padrão",
       "delete_template": "Eliminar Modelo {{name}}",
       "reset_global": "Restabelecer valor global",
-      "value_from_global": "Valor da configuração global",
+      "value_from_global": "Valor das configurações globais",
       "run_job": "Executar Tarefa {{job}}",
       "stop_instance": "Parar Instância {{hostname}}",
       "unban_ip": "Desbloquear {{ip}}",
@@ -1447,7 +1458,7 @@
     "email_length": "O email deve ter entre 1 e 256 caracteres.",
     "follow_latest_page_only": "O modo de seguir só está disponível na última página",
     "fetch_global_settings": "Buscar configurações globais e aplicá-las ao modelo atual",
-    "global_config_source": "Valor herdado da configuração global.",
+    "global_settings_source": "Valor herdado das configurações globais.",
     "instance_not_up": "A instância {{hostname}} não está respondendo atualmente ('up').",
     "latest_version_installed": "Você está executando a versão mais recente.",
     "lets_encrypt_custom_profile": "O perfil personalizado a ser usado para o Let's Encrypt (ex: 'meu_perfil_personalizado').",
@@ -1543,7 +1554,8 @@
         "select_all": "Selecionar todas as Configuracões Personalizadas",
         "service": "Serviço associado à Configuração Personalizada (ou Global)",
         "template": "Indica se a Configuração Personalizada origina de um modelo",
-        "type": "Tipo ou contexto da Configuração Personalizada (ex. HTTP, MODSEC)"
+        "type": "Tipo ou contexto da Configuração Personalizada (ex. HTTP, MODSEC)",
+        "status": "Estado de rascunho da configuração personalizada"
       },
       "instances": {
         "actions": "Ações disponíveis para esta Instância",
@@ -1618,7 +1630,7 @@
     "use_proxy_protocol": "Ativar comunicação via protocolo PROXY.",
     "use_real_ip": "Usar IP Real",
     "username_length": "O nome de usuário deve ter entre 1 e 256 caracteres.",
-    "value_from_global": "Valor da configuração global",
+    "value_from_global": "Valor das configurações globais",
     "view_full_url": "Clique para ver a URL completa",
     "wildcard_certificates": "Gerar certificados wildcard (*.dominio.com). Requer desafio DNS.",
     "wildcard_dns_only": "Certificados wildcard só são suportados com o tipo de desafio DNS."

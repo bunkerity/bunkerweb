@@ -1,6 +1,51 @@
 # Changelog
 
-## v1.6.6-rc3 - ????/??/??
+## v1.6.7~rc1 - ????/??/??
+
+- [FEATURE] Refactor logging setup across multiple modules to be able to send logs to a syslog server and have multiple handlers at the same time
+- [FEATURE] Allow configuration of whether Base64 decoding should be applied to DNS credentials via the new `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` setting in the `Let's Encrypt` plugin (default is `yes`)
+- [FEATURE] Add new `ACCESS_LOG` and `ERROR_LOG` settings to configure access and error log destinations for BunkerWeb's instance
+- [FEATURE] Refactor `Auth Basic` plugin so Lua now hashes credentials with salted scrypt (CSPRNG-only) and verifies them in constant time.
+- [FEATURE] Updated `Bad Behavior` plugin to automatically apply bans made by the default server globally across all services, enhancing security by ensuring that IPs exhibiting bad behavior are consistently blocked.
+- [FEATURE] Add the possibility to have **draft** custom configurations that are not applied to the service until they are explicitly published. Draft custom configurations are indicated in the web UI and can be toggled between draft and online status.
+- [FEATURE] Add new `SSL_SESSION_CACHE_SIZE` setting to the SSL plugin to allow configuration of the size of the SSL session cache (e.g., `10m`, `512k`). Setting it to `off` or `none` disables session caching (default is `10m`).
+- [FEATURE] Enhance the Antibot plugin to better handle redirection back to the original request path after a successful challenge by checking the `Referer` header, ensuring users are redirected to meaningful content rather than static files or other unintended destinations
+- [FEATURE] Add the possibility to tweak custom configurations created from the web UI or API manually
+- [FEATURE] Allow customizing plugin execution order via new `PLUGINS_ORDER_*` settings (space-separated plugin IDs; multisite-aware per phase)
+- [BUGFIX] Fix issues with the Ingress controller regarding reverse proxy settings when using multiple paths per rule and a template by adjusting the indexing logic to be configurable via the new `KUBERNETES_REVERSE_PROXY_SUFFIX_START` setting (default is `1` to keep backward compatibility)
+- [BUGFIX] Escape percentage signs in `DATABASE_URI` for Alembic when using the SQLAlchemy URL configuration to prevent formatting errors during migrations
+- [BUGFIX] Fix issues with `Autoconf` controllers persisting old instances after they have been deleted from the orchestrator.
+- [UI] Enhance service configuration handling during edits and renames to ensure consistency and prevent data loss
+- [UI] Enhance session management with Redis support and configurable session lifetime
+- [UI] Renamed "Global Configuration" to "Global Settings" in the web UI for clarity
+- [UI] Address CSRF token issues in the web UI when not connecting through BunkerWeb
+- [UI] Add the possibility to provide a certificate and a key so that the web UI can be served over HTTPS (without requiring a reverse proxy)
+- [UI] Fix occasional flash of the light mode on the loading page when using dark mode
+- [API] Refactor rate limiting to be more user-friendly and configurable via settings
+- [LINUX] Support Fedora 43
+- [LINUX] Update version retrieval for RPM packaging to ensure correct sorting for release candidates
+- [DOCS] Add documentation about the new logging settings and how to configure them
+- [DOCS] Update database compatibility matrix
+- [DOCS] Refactor API documentation to include new API features and improve clarity
+- [DOCS] Add documentation about the new "Custom Pages" PRO plugin
+- [DOCS] Refactor web UI documentation to improve clarity
+- [DEPS] Update lua-resty-session version to v4.1.5
+- [DEPS] Update coreruleset-v4 version to v4.21.0
+- [DEPS] Updated zlib version to v1.3.1.2
+
+## v1.6.6 - 2025/11/24
+
+- [FEATURE] Implement IP whitelisting checks in badbehavior module to avoid banning whitelisted IPs
+- [FEATURE] Enhance default server configuration: when IP is whitelisted, serve the "nothing to see here" page even if the default server is deactivated.
+- [BUGFIX] Fix default rate limit for POST /auth endpoint with API service
+- [BUGFIX] Fix instant ban when using bad behavior with redis if the ban time is set to 0 (permanent ban)
+- [BUGFIX] Fix "no memory" errors on metrics
+- [LINUX] Enhance Easy Install script with manager and worker mode configurations
+- [UI] Enhance bad behavior logging and UI actions with additional fields and filtering capabilities
+- [UI] Optimize the reports page export functionality for large datasets by implementing server-side processing to handle data exports in manageable chunks, reducing memory usage and improving performance.
+- [CONTRIBUTION] Thank you @Marvo2011 for your contribution to the `Let's Encrypt` plugin by helping the implementation of the new `Powerdns` DNS provider
+
+## v1.6.6-rc3 - 2025/11/18
 
 - [BUGFIX] Fix `Let's Encrypt` wildcard certificate serving when using `wildcard` mode in multisite setups and the root domain is a part of the `SERVER_NAME` setting of the service.
 - [BUGFIX] Fix duplicated id error with ModSecurity rules when two services have the `USE_UI` setting enabled and the `USE_MODSECURITY_GLOBAL_CRS` setting enabled as well.

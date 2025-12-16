@@ -6,7 +6,7 @@ from time import sleep
 
 from Config import Config
 
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 
 
 class Controller(Config):
@@ -17,12 +17,12 @@ class Controller(Config):
         self._services = []
         self._configs = {config_type: {} for config_type in self._supported_config_types}
         self._extra_config = {}
-        self._logger = setup_logger(f"{self._type}-controller", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+        self._logger = getLogger(f"{self._type.upper()}-CONTROLLER")
         self._namespaces = None
         self._first_start = True
         namespaces = getenv("NAMESPACES")
         if namespaces:
-            self._namespaces = namespaces.strip().split(" ")
+            self._namespaces = namespaces.strip().split()
             self._logger.info(
                 "Only instances and services in the "
                 + ", ".join(f"{namespace!r}" for namespace in self._namespaces)
@@ -65,7 +65,7 @@ class Controller(Config):
         for controller_instance in self._get_controller_instances():
             instances.extend(self._to_instances(controller_instance))
 
-        if not instances or not self._first_start:
+        if not instances and self._first_start:
             for db_instance in self._db.get_instances(autoconf=True):
                 if not any(db_instance["hostname"] == instance["hostname"] for instance in instances):
                     instances.append(db_instance)

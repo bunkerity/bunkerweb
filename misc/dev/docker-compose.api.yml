@@ -46,7 +46,7 @@ services:
       SERVE_FILES: "no"
       DISABLE_DEFAULT_SERVER: "yes"
       SESSIONS_CHECK_IP: "no"
-      api.example.com_USE_TEMPLATE: "bw-api"
+      api.example.com_USE_TEMPLATE: "api"
       api.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
       api.example.com_USE_REVERSE_PROXY: "yes"
       api.example.com_REVERSE_PROXY_URL: "/"
@@ -78,6 +78,7 @@ services:
       <<: *env
       API_USERNAME: "admin"
       API_PASSWORD: "P@ssw0rd"
+      FORWARDED_ALLOW_IPS: "*"
       DEBUG: "1"
     restart: "unless-stopped"
     networks:

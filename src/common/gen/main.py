@@ -14,13 +14,13 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from Configurator import Configurator
 from Templator import Templator
 
 DB_PATH = Path(sep, "usr", "share", "bunkerweb", "db")
 
-LOGGER = setup_logger("Generator", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+LOGGER = getLogger("GENERATOR")
 
 if __name__ == "__main__":
     try:

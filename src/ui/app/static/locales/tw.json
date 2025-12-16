@@ -48,7 +48,7 @@
     "cache": "快取",
     "configs": "設定",
     "extra_pages": "附加頁面",
-    "global_config": "全域設定",
+    "global_settings": "全域設定",
     "home": "首頁",
     "instances": "執行個體",
     "jobs": "任務",
@@ -82,6 +82,8 @@
     "close": "關閉",
     "columns": "欄",
     "convert_services": "轉換服務",
+    "convert_configs": "轉換設定",
+    "convert_configs_to": "轉換為 {{state}}",
     "copy": "複製",
     "copy_codes": "複製代碼",
     "copy_raw": "複製原始資料",
@@ -97,6 +99,10 @@
     "enable_totp": "啟用 TOTP",
     "entire_config": "完整設定",
     "export": "匯出",
+    "export_csv_all": "CSV（全部）",
+    "export_csv_visible": "CSV（可見）",
+    "export_excel_all": "Excel（全部）",
+    "export_excel_visible": "Excel（可見）",
     "fetch_global": "取得全域設定",
     "filters_suffix": " 過濾器",
     "follow": "追蹤",
@@ -749,6 +755,8 @@
       "confirm_configs_deletion_alert": "您確定要刪除選定的自訂設定嗎？",
       "confirm_configs_deletion_alert_plural": "您確定要刪除選定的自訂設定嗎？",
       "confirm_conversion_confirmation": "您確定要轉換選定的服務嗎？",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "確定將所選自訂設定轉換為 {{state}} 嗎？",
       "confirm_next_step": "您確定要繼續下一步嗎？",
       "confirm_plugin_deletion": "您確定要刪除選定的外掛程式嗎？",
       "confirm_plugin_deletion_plural": "您確定要刪除選定的外掛程式嗎？",
@@ -765,17 +773,17 @@
       "unban_confirmation_alert": "您確定要解除封鎖選定的 IP 位址嗎？",
       "unban_confirmation_alert_plural": "您確定要解除封鎖選定的 IP 位址嗎？",
       "update_duration_alert": "請為選定的封鎖選擇新的期限：",
-      "fetch_global_config_bold": "這將取得全域設定並套用到目前的樣板。",
-      "fetch_global_config_point_1": "只會更新此樣板中存在的設定。",
-      "fetch_global_config_point_2": "與預設值相同的數值會被忽略。",
-      "fetch_global_config_point_3": "SERVER_NAME 永不會被覆寫。",
+      "fetch_global_settings_bold": "這將取得全域設定並套用到目前的樣板。",
+      "fetch_global_settings_point_1": "只會更新此樣板中存在的設定。",
+      "fetch_global_settings_point_2": "與預設值相同的數值會被忽略。",
+      "fetch_global_settings_point_3": "SERVER_NAME 永不會被覆寫。",
       "delete_step_confirmation": "您確定要刪除此步驟嗎？",
       "delete_step_name_label": "步驟",
       "delete_step_content_label": "內容"
     },
     "button": {
       "reset_template_confirm": "重設範本設定",
-      "fetch_global_config_confirm": "套用全域設定"
+      "fetch_global_settings_confirm": "套用全域設定"
     },
     "section": {
       "ban_details": "封鎖詳情",
@@ -798,7 +806,7 @@
       "job_history_count": "任務 {{count}} 次執行",
       "recovery_codes": "恢復碼",
       "reset_template_config": "重設範本設定？",
-      "fetch_global_config": "要套用全域設定嗎？",
+      "fetch_global_settings": "要套用全域設定嗎？",
       "server_name_not_unique": "伺服器名稱不是唯一的",
       "update_duration": "更新封鎖期限",
       "delete_step": "刪除步驟"
@@ -827,7 +835,7 @@
     "cache": "快取",
     "configs": "設定",
     "extra_pages": "附加頁面",
-    "global_config": "全域設定",
+    "global_settings": "全域設定",
     "home": "首頁",
     "instances": "執行個體",
     "jobs": "任務",
@@ -1200,7 +1208,8 @@
       "type": "類型",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "版本"
+      "version": "版本",
+      "status": "狀態"
     }
   },
   "template": {
@@ -1393,6 +1402,8 @@
     "button": {
       "convert_service_to_draft": "將服務 {{name}} 轉換為草稿",
       "convert_service_to_online": "將服務 {{name}} 轉換為線上",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "delete_config": "刪除自訂設定 {{name}}",
       "delete_file": "刪除快取檔案：{{filename}}",
       "delete_instance": "刪除執行個體 {{hostname}}",
@@ -1454,7 +1465,7 @@
     "email_length": "電子郵件必須在 1 到 256 個字元之間。",
     "follow_latest_page_only": "追蹤模式僅在最新頁面可用",
     "fetch_global_settings": "取得全域設定並應用於當前範本",
-    "global_config_source": "值繼承自全域設定。",
+    "global_settings_source": "值繼承自全域設定。",
     "instance_not_up": "執行個體 {{hostname}} 目前未回應 ('up')。",
     "latest_version_installed": "您正在執行最新版本。",
     "lets_encrypt_custom_profile": "用於 Let's Encrypt 的自訂設定檔（例如 'my_custom_profile'）。",
@@ -1552,7 +1563,8 @@
         "select_all": "選取所有自訂設定",
         "service": "與自訂設定關聯的服務（或全域）",
         "template": "指示自訂設定是否源自範本",
-        "type": "自訂設定的類型或上下文（例如，HTTP, MODSEC）"
+        "type": "自訂設定的類型或上下文（例如，HTTP, MODSEC）",
+        "status": "自訂設定的草稿狀態"
       },
       "instances": {
         "actions": "此執行個體可用的操作",

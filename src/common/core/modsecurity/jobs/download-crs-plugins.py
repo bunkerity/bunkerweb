@@ -34,7 +34,7 @@ from magic import Magic
 from requests import get, head
 from requests.exceptions import ConnectionError
 
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
 PLUGIN_NAME_RX = re_compile(r"^# Plugin name: (?P<name>.+)$", MULTILINE)
@@ -44,7 +44,7 @@ CRS_PLUGINS_DIR = Path(sep, "var", "cache", "bunkerweb", "modsecurity", "crs", "
 NEW_PLUGINS_DIR = Path(sep, "var", "tmp", "bunkerweb", "crs-new-plugins")
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb", "crs-plugins")
 PATCH_SCRIPT = Path(sep, "usr", "share", "bunkerweb", "core", "modsecurity", "misc", "patch.sh")
-LOGGER = setup_logger("modsecurity.download-crs-plugins")
+LOGGER = getLogger("MODSECURITY.DOWNLOAD.CRS_PLUGINS")
 status = 0
 
 
@@ -131,7 +131,7 @@ try:
         LOGGER.warning("No services found, exiting...")
         sys_exit(0)
 
-    services = services.split(" ")
+    services = services.split()
     services_plugins = {}
 
     if getenv("MULTISITE", "no") == "yes":
@@ -144,7 +144,7 @@ try:
 
             service_plugins = getenv(f"{first_server}_MODSECURITY_CRS_PLUGINS", "").strip()
             if service_plugins:
-                services_plugins[first_server] = set(service_plugins.split(" "))
+                services_plugins[first_server] = set(service_plugins.split())
     else:
         if getenv("MODSECURITY_CRS_VERSION", "4") != "3":
             use_right_crs_version = True
@@ -154,7 +154,7 @@ try:
 
         plugins = getenv("MODSECURITY_CRS_PLUGINS", "").strip()
         if plugins:
-            services_plugins[services[0]] = set(plugins.split(" "))
+            services_plugins[services[0]] = set(plugins.split())
 
     if not use_modsecurity_crs_plugins:
         LOGGER.info("Core Rule Set (CRS) plugins are disabled, skipping download...")

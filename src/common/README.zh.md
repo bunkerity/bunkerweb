@@ -10,7 +10,7 @@
 4.  日志记录参数控制记录哪些信息以及如何格式化。
 5.  这些设置构成了所有其他 BunkerWeb 插件和功能运行的基础。
 
-### 多站点模式
+### 多站点模式 {#multisite-mode}
 
 当 `MULTISITE` 设置为 `yes` 时，BunkerWeb 可以托管和保护多个网站，每个网站都有其独特的配置。此功能在以下场景中特别有用：
 
@@ -25,7 +25,7 @@
 
 这种方法可确保在多站点环境中将设置应用于正确的站点。
 
-### 多个设置
+### 多个设置 {#multiple-settings}
 
 BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组设置，请在设置名称后附加一个数字后缀。例如：
 
@@ -33,6 +33,14 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 - `REVERSE_PROXY_URL_2=/anotherdir` 和 `REVERSE_PROXY_HOST_2=http://myhost2` 配置第二个反向代理。
 
 这种模式允许您为需要不同用例的不同值的功能（如反向代理、端口或其他设置）管理多个配置。
+
+### 插件执行顺序 {#plugin-order}
+
+可以使用空格分隔的列表调整顺序：
+
+- 全局阶段：`PLUGINS_ORDER_INIT`、`PLUGINS_ORDER_INIT_WORKER`、`PLUGINS_ORDER_TIMER`。
+- 按站点的阶段：`PLUGINS_ORDER_SET`、`PLUGINS_ORDER_ACCESS`、`PLUGINS_ORDER_SSL_CERTIFICATE`、`PLUGINS_ORDER_HEADER`、`PLUGINS_ORDER_LOG`、`PLUGINS_ORDER_PREREAD`、`PLUGINS_ORDER_LOG_STREAM`、`PLUGINS_ORDER_LOG_DEFAULT`。
+- 语义：列出的插件在该阶段优先执行；其余插件仍按正常顺序执行。仅使用空格分隔插件 ID。
 
 ### 安全模式 {#security-modes}
 
@@ -124,11 +132,13 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 === "日志设置"
 
-    | 设置               | 默认值                                                                                                                                     | 上下文 | 多个 | 描述                                                                                                              |
-    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------ | ---- | ----------------------------------------------------------------------------------------------------------------- |
-    | `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global | 否   | **日志格式：** 用于访问日志的格式。                                                                               |
-    | `LOG_LEVEL`        | `notice`                                                                                                                                   | global | 否   | **日志级别：** 错误日志的详细程度。选项：`debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`。   |
-    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global | 否   | **计时器日志级别：** 计时器的日志级别。选项：`debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`。 |
+    | 设置               | 默认值                                                                                                                                     | 上下文 | 多个 | 描述                                                                                                                        |
+    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------ | ---- | --------------------------------------------------------------------------------------------------------------------------- |
+    | `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global | 否   | **日志格式：** 用于访问日志的格式。                                                                                         |
+    | `ACCESS_LOG`       | `/var/log/bunkerweb/access.log`                                                                                                            | global | 是   | **访问日志路径：** 文件路径、`syslog:server=地址[:端口][,参数=值]` 或共享缓冲 `memory:名称:大小`；设置为 `off` 可禁用日志。 |
+    | `ERROR_LOG`        | `/var/log/bunkerweb/error.log`                                                                                                             | global | 是   | **错误日志路径：** 文件路径、`stderr`、`syslog:server=地址[:端口][,参数=值]` 或 `memory:大小`。                             |
+    | `LOG_LEVEL`        | `notice`                                                                                                                                   | global | 是   | **日志级别：** 错误日志的详细程度。选项：`debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`。             |
+    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global | 否   | **计时器日志级别：** 计时器的日志级别。选项：`debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`。           |
 
     !!! tip "日志记录最佳实践"
         - 对于生产环境，请使用 `notice`、`warn` 或 `error` 日志级别以最小化日志量。

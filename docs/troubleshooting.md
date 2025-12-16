@@ -547,7 +547,7 @@ In case you forgot your UI credentials or are experiencing 2FA issues, you can c
     Use the **Support page** in the Web UI to quickly gather configuration and logs for troubleshooting.
 
     - Open the Web UI and go to the Support page.
-    - Choose the scope: export the Global configuration or select a specific Service.
+    - Choose the scope: export the global settings or select a specific Service.
     - Click to download the configuration archive for the chosen scope.
     - Optionally download logs: the exported logs are automatically anonymized (all IP addresses and domains are masked).
 

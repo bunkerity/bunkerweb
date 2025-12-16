@@ -96,7 +96,7 @@ app2.example.com_WHITELIST_COUNTRY=FR
 app3.example.com_USE_BAD_BEHAVIOR=no
 ```
 
-Veuillez noter que le mode multisite est implicite lors de l'utilisation de l'interface utilisateur Web. Vous avez la possibilité d'appliquer des configurations directement à vos services ou de définir une configuration globale qui sera appliquée à tous vos services (vous pouvez toujours appliquer des exceptions directement à des services spécifiques):
+Veuillez noter que le mode multisite est implicite lors de l'utilisation de l'interface utilisateur Web. Vous avez la possibilité d'appliquer des configurations directement à vos services ou de définir des paramètres globaux qui seront appliqués à tous vos services (vous pouvez toujours appliquer des exceptions directement à des services spécifiques):
 
 <figure markdown>
   ![Vue d'ensemble](assets/img/ui-multisite.png){ align=center, width="600" }
@@ -105,7 +105,7 @@ Veuillez noter que le mode multisite est implicite lors de l'utilisation de l'in
 
 !!! info "Aller plus loin"
 
-    Vous trouverez des exemples concrets du mode multisite dans la section [Utilisations avancées](advanced.md) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/examples) du dépôt.
+    Vous trouverez des exemples concrets du mode multisite dans la section [Utilisations avancées](advanced.md) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/examples) du dépôt.
 
 ## Configurations personnalisées {#custom-configurations}
 
@@ -126,7 +126,7 @@ La gestion des configurations personnalisées à partir de l'interface utilisate
 
 !!! info "Aller plus loin"
 
-    Vous trouverez des exemples concrets de configurations personnalisées dans la section [Utilisations avancées](advanced.md#custom-configurations) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/examples) du dépôt.
+    Vous trouverez des exemples concrets de configurations personnalisées dans la section [Utilisations avancées](advanced.md#custom-configurations) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/examples) du dépôt.
 
 ## Base de données
 
@@ -163,15 +163,15 @@ En spécifiant l'URI de base de données appropriée dans la configuration, vous
 
 ### Matrice de compatibilité des bases de données
 
-| Integration       | PostgreSQL                       | MariaDB                   | MySQL                     | SQLite           |
-| :---------------- | :------------------------------- | :------------------------ | :------------------------ | :--------------- |
-| **Docker**        | ✅ `v17` et antérieures (❌ `v18`) | ✅ `v11` et antérieures    | ✅ `v9` et antérieures     | ✅ Pris en charge |
-| **Kubernetes**    | ✅ `v17` et antérieures (❌ `v18`) | ✅ `v11` et antérieures    | ✅ `v9` et antérieures     | ✅ Pris en charge |
-| **Autoconf**      | ✅ `v17` et antérieures (❌ `v18`) | ✅ `v11` et antérieures    | ✅ `v9` et antérieures     | ✅ Pris en charge |
-| **Paquets Linux** | Voir les notes ci-dessous        | Voir les notes ci-dessous | Voir les notes ci-dessous | ✅ Pris en charge |
+| Integration       | PostgreSQL                                   | MariaDB                   | MySQL                     | SQLite           |
+| :---------------- | :------------------------------------------- | :------------------------ | :------------------------ | :--------------- |
+| **Docker**        | ✅ `v18` et antérieures (all-in-one : ✅ `v17`) | ✅ `v11` et antérieures    | ✅ `v9` et antérieures     | ✅ Pris en charge |
+| **Kubernetes**    | ✅ `v18` et antérieures                        | ✅ `v11` et antérieures    | ✅ `v9` et antérieures     | ✅ Pris en charge |
+| **Autoconf**      | ✅ `v18` et antérieures                        | ✅ `v11` et antérieures    | ✅ `v9` et antérieures     | ✅ Pris en charge |
+| **Paquets Linux** | Voir les notes ci-dessous                      | Voir les notes ci-dessous | Voir les notes ci-dessous | ✅ Pris en charge |
 
 !!! info "Remarques"
-    - **PostgreSQL** : `v18` n'est pas pris en charge car les images de base Alpine que nous livrons n'incluent que les paquets clients `v17`.
+    - **PostgreSQL** : les paquets basés sur Alpine incluent désormais le client `v18`, donc `v18` et les versions antérieures sont pris en charge par défaut ; l'image all-in-one embarque toujours le client `v17`, donc `v18` n'y est pas pris en charge.
     - **Linux** : La prise en charge dépend des paquets de votre distribution. Si nécessaire, vous pouvez installer les clients de base de données manuellement à partir des dépôts des fournisseurs (cela est généralement nécessaire pour RHEL).
     - **SQLite** : Est livré avec les paquets et est prêt à l'emploi.
 

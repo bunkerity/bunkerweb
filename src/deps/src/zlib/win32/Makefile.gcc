@@ -50,7 +50,7 @@ AR = $(PREFIX)ar
 ARFLAGS = rcs
 
 RC = $(PREFIX)windres
-RCFLAGS = --define GCC_WINDRES
+RCFLAGS =
 
 STRIP = $(PREFIX)strip
 

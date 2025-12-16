@@ -1,12 +1,10 @@
 # Fortgeschrittene Nutzungen
 
-Viele Beispiele für reale Anwendungsfälle sind im Ordner [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/examples) des GitHub-Repositorys verfügbar.
+Viele Beispiele für reale Anwendungsfälle sind im Ordner [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/examples) des GitHub-Repositorys verfügbar.
 
-Wir stellen auch zahlreiche Boilerplates zur Verfügung, wie z. B. YAML-Dateien für verschiedene Integrationen und Datenbanktypen. Diese sind im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/misc/integrations) verfügbar.
+Wir stellen auch zahlreiche Boilerplates zur Verfügung, wie z. B. YAML-Dateien für verschiedene Integrationen und Datenbanktypen. Diese sind im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations) verfügbar.
 
 Dieser Abschnitt konzentriert sich nur auf fortgeschrittene Nutzungen und Sicherheits-Tuning. Informationen zu allen verfügbaren Einstellungen finden Sie im [Features-Abschnitt](features.md) der Dokumentation.
-
-## Anwendungsfälle
 
 !!! tip "Testen"
     Um schnelle Tests durchzuführen, wenn der Multisite-Modus aktiviert ist (und wenn Sie nicht die richtigen DNS-Einträge für die Domains eingerichtet haben), können Sie `curl` mit dem HTTP-Host-Header Ihrer Wahl verwenden:
@@ -19,7 +17,7 @@ Dieser Abschnitt konzentriert sich nur auf fortgeschrittene Nutzungen und Sicher
     curl -H "Host: app1.example.com" --resolve example.com:443:ip-des-servers https://example.com
     ```
 
-### Hinter einem Load Balancer oder Reverse Proxy
+## Hinter einem Load Balancer oder Reverse Proxy {#behind-load-balancer-or-reverse-proxy}
 
 !!! info "Echte IP"
 
@@ -48,7 +46,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
     === "Web-UI"
 
-        Navigieren Sie zur Seite **Globale Konfiguration**, wählen Sie das Plugin **Real IP** und füllen Sie die folgenden Einstellungen aus:
+        Navigieren Sie zur Seite **Globale Einstellungen**, wählen Sie das Plugin **Real IP** und füllen Sie die folgenden Einstellungen aus:
 
         <figure markdown>![Real IP Einstellungen (Header) mit Web-UI](assets/img/advanced-proxy1.png){ align=center }<figcaption>Real IP Einstellungen (Header) mit Web-UI</figcaption></figure>
 
@@ -87,7 +85,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+            bunkerity/bunkerweb-all-in-one:1.6.7~rc1
         ```
 
         Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen aktualisiert werden.
@@ -98,7 +96,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.6-rc3
+          image: bunkerity/bunkerweb:1.6.7~rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -106,7 +104,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -123,7 +121,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.6-rc3
+          image: bunkerity/bunkerweb:1.6.7~rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -131,7 +129,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -178,7 +176,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.6-rc3
+          image: bunkerity/bunkerweb:1.6.7~rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -186,7 +184,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -210,7 +208,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
     === "Web-UI"
 
-        Navigieren Sie zur Seite **Globale Konfiguration**, wählen Sie das Plugin **Real IP** und füllen Sie die folgenden Einstellungen aus:
+        Navigieren Sie zur Seite **Globale Einstellungen**, wählen Sie das Plugin **Real IP** und füllen Sie die folgenden Einstellungen aus:
 
         <figure markdown>![Real IP Einstellungen (PROXY-Protokoll) mit Web-UI](assets/img/advanced-proxy2.png){ align=center }<figcaption>Real IP Einstellungen (PROXY-Protokoll) mit Web-UI</figcaption></figure>
 
@@ -251,7 +249,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+            bunkerity/bunkerweb-all-in-one:1.6.7~rc1
         ```
 
         Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen aktualisiert werden.
@@ -262,7 +260,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.6-rc3
+          image: bunkerity/bunkerweb:1.6.7~rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -272,7 +270,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -290,7 +288,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.6-rc3
+          image: bunkerity/bunkerweb:1.6.7~rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -300,7 +298,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -352,7 +350,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.6-rc3
+          image: bunkerity/bunkerweb:1.6.7~rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -362,7 +360,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -374,7 +372,487 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         Bitte beachten Sie, dass Sie, wenn Ihr Dienst bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen aktualisiert werden.
 
-### Verwendung benutzerdefinierter DNS-Auflösungsmechanismen
+## Hochverfügbarkeit und Load Balancing
+
+Damit Ihre Anwendungen auch bei einem Serverausfall erreichbar bleiben, können Sie BunkerWeb als **HA-Cluster** bereitstellen. Die Architektur besteht aus einem **Manager** (Scheduler), der die Konfiguration orchestriert, und mehreren **Workern** (BunkerWeb-Instanzen), die den Verkehr verarbeiten.
+
+```mermaid
+flowchart LR
+
+  %% ================ Styles =================
+  classDef manager     fill:#eef2ff,stroke:#4c1d95,stroke-width:1px,rx:6px,ry:6px;
+  classDef component     fill:#f9fafb,stroke:#6b7280,stroke-width:1px,rx:4px,ry:4px;
+  classDef lb            fill:#e0f2fe,stroke:#0369a1,stroke-width:1px,rx:6px,ry:6px;
+  classDef database fill:#d1fae5,stroke:#059669,stroke-width:1px,rx:4px,ry:4px;
+  classDef datastore     fill:#fee2e2,stroke:#b91c1c,stroke-width:1px,rx:4px,ry:4px;
+  classDef backend       fill:#ede9fe,stroke:#7c3aed,stroke-width:1px,rx:4px,ry:4px;
+  classDef client        fill:#e5e7eb,stroke:#4b5563,stroke-width:1px,rx:4px,ry:4px;
+
+  %% Container styles
+  style CLUSTER fill:#f3f4f6,stroke:#d1d5db,stroke-width:1px,stroke-dasharray:6 3;
+  style WORKERS fill:none,stroke:#9ca3af,stroke-width:1px,stroke-dasharray:4 2;
+
+  %% ============== Outside left =============
+  Client["Client"]:::client
+  LB["Load Balancer"]:::lb
+
+  %% ============== Cluster ==================
+  subgraph CLUSTER[" "]
+    direction TB
+
+    %% ---- Top row: Manager + Redis ----
+    subgraph TOP["Manager & Data Stores"]
+      direction LR
+      Manager["Manager<br/>(Scheduler)"]:::manager
+      BDD["BDD"]:::database
+      Redis["Redis/Valkey"]:::datastore
+      UI["Weboberfläche"]:::manager
+    end
+
+    %% ---- Middle: Workers ----
+    subgraph WORKERS["Workers (BunkerWeb)"]
+      direction TB
+      Worker1["Worker 1"]:::component
+      WorkerN["Worker N"]:::component
+    end
+
+    %% ---- Bottom: App ----
+    App["App"]:::backend
+  end
+
+  %% ============ Outside right ============
+  Admin["Admin"]:::client
+
+  %% ============ Traffic & control ===========
+  %% Manager / control plane
+  Manager -->|API 5000| Worker1
+  Manager -->|API 5000| WorkerN
+  Manager -->|bwcli| Redis
+  Manager -->|Config| BDD
+
+  %% User interface (UI)
+  UI -->|Config| BDD
+  UI -->|Reports / Bans| Redis
+  BDD --- UI
+  Redis --- UI
+  linkStyle 6 stroke-width:0px;
+  linkStyle 7 stroke-width:0px;
+
+  %% Workers <-> Redis
+  Worker1 -->|Gemeinsamer Cache| Redis
+  WorkerN -->|Gemeinsamer Cache| Redis
+
+  %% Workers -> App
+  Worker1 -->|Legitimer Verkehr| App
+  WorkerN -->|Legitimer Verkehr| App
+
+  %% Client (right side) -> Load balancer -> Workers -> App
+  Client -->|Request| LB
+  LB -->|HTTP/TCP| Worker1
+  LB -->|HTTP/TCP| WorkerN
+
+  %% Admin -> UI
+  UI --- Admin
+  Admin -->|HTTP| UI
+  linkStyle 15 stroke-width:0px;
+```
+
+!!! info "BunkerWeb APIs verstehen"
+    BunkerWeb unterscheidet zwei API-Konzepte:
+
+    - Eine **interne API**, die Manager und Worker automatisch für die Orchestrierung verbindet. Sie ist immer aktiv und benötigt keine manuelle Konfiguration.
+    - Einen optionalen **API-Dienst** (`bunkerweb-api`), der eine öffentliche REST-Schnittstelle für Automatisierungstools (bwcli, CI/CD usw.) bereitstellt. Er ist auf Linux-Installationen standardmäßig deaktiviert und unabhängig von der internen Kommunikation zwischen Manager und Workern.
+
+### Voraussetzungen
+
+Stellen Sie vor dem Aufbau eines Clusters sicher, dass Sie Folgendes haben:
+
+- **Mindestens 2 Linux-Hosts** mit Root-/Sudo-Zugriff.
+- **Netzwerkkonnektivität** zwischen den Hosts (insbesondere TCP-Port 5000 für die interne API).
+- **IP oder Hostname** der zu schützenden Anwendung.
+- *(Optional)* **Load Balancer** (z. B. HAProxy), um den Verkehr auf die Worker zu verteilen.
+
+### 1. Manager installieren
+
+Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank und optional die Weboberfläche aus.
+
+!!! warning "Sicherheit der Weboberfläche"
+    Die Weboberfläche lauscht auf einem eigenen Port (Standard 7000) und sollte nur Administratoren zugänglich sein. Wenn Sie die UI ins Internet exponieren, **empfehlen wir dringend**, sie vor einen BunkerWeb zu stellen.
+
+=== "Linux"
+
+    1. **Installationsskript herunterladen und ausführen** auf dem Manager-Host:
+
+        ```bash
+        # Skript und Checksumme laden
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7~rc1/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7~rc1/install-bunkerweb.sh.sha256
+
+        # Prüfsumme verifizieren
+        sha256sum -c install-bunkerweb.sh.sha256
+
+        # Installer ausführen
+        chmod +x install-bunkerweb.sh
+        sudo ./install-bunkerweb.sh
+        ```
+
+        !!! danger "Sicherheitshinweis"
+            Überprüfen Sie immer die Integrität des Skripts mit der bereitgestellten Prüfsumme, bevor Sie es ausführen.
+
+    2. **Option 2) Manager** wählen und den Anweisungen folgen:
+
+        | Eingabe                   | Aktion                                                                                                               |
+        | :------------------------ | :------------------------------------------------------------------------------------------------------------------- |
+        | **BunkerWeb-Instanzen**   | Geben Sie die IPs Ihrer Worker-Knoten mit Leerzeichen getrennt an (z. B. `192.168.10.11 192.168.10.12`).             |
+        | **Whitelist IP**          | Übernehmen Sie die erkannte IP oder geben Sie ein Subnetz ein (z. B. `192.168.10.0/24`), um API-Zugriff zu erlauben. |
+        | **DNS-Resolver**          | Drücken Sie `N` für den Standardwert oder geben Sie eigene an.                                                       |
+        | **HTTPS für interne API** | **Empfohlen:** `Y`, um Zertifikate zu erzeugen und die Manager-Worker-Kommunikation zu sichern.                      |
+        | **Web-UI-Dienst**         | `Y`, um die Weboberfläche zu aktivieren (stark empfohlen).                                                           |
+        | **API-Dienst**            | `N`, sofern Sie die öffentliche REST-API nicht benötigen.                                                            |
+
+    #### UI absichern und bereitstellen
+
+    Wenn Sie die Weboberfläche aktiviert haben, sollten Sie sie absichern. Sie kann auf dem Manager oder auf einem separaten Host laufen.
+
+    === "Auf dem Manager gehostet"
+
+        1. Bearbeiten Sie `/etc/bunkerweb/ui.env`, um starke Zugangsdaten zu setzen:
+
+        ```ini
+        # OVERRIDE_ADMIN_CREDS=no
+        ADMIN_USERNAME=admin
+        ADMIN_PASSWORD=changeme
+        # FLASK_SECRET=changeme
+        # TOTP_ENCRYPTION_KEYS=changeme
+        LISTEN_ADDR=0.0.0.0
+        # LISTEN_PORT=7000
+        FORWARDED_ALLOW_IPS=127.0.0.1
+        # ENABLE_HEALTHCHECK=no
+        ```
+
+        !!! warning "Standardzugangsdaten ändern"
+            Ersetzen Sie `admin` und `changeme` durch starke Zugangsdaten, bevor Sie den UI-Dienst produktiv starten.
+
+        2. UI neu starten:
+
+        ```bash
+        sudo systemctl restart bunkerweb-ui
+        ```
+
+    === "Externer Host"
+
+        Für bessere Isolation können Sie die UI auf einem separaten Knoten installieren.
+
+        1. Führen Sie den Installer aus und wählen Sie **Option 5) Web UI Only**.
+        2. Bearbeiten Sie `/etc/bunkerweb/ui.env`, um die Verbindung zur Manager-Datenbank herzustellen:
+
+            ```ini
+            # Datenbank-Konfiguration (muss zur Manager-Datenbank passen)
+            DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@db-host:3306/bunkerweb
+            # Für PostgreSQL: postgresql://bunkerweb:changeme@db-host:5432/bunkerweb
+            # Für MySQL: mysql+pymysql://bunkerweb:changeme@db-host:3306/bunkerweb
+
+            # Redis-Konfiguration (falls Redis/Valkey für Persistenz genutzt wird)
+            # Wenn nicht angegeben, wird sie automatisch aus der Datenbank übernommen
+            # REDIS_HOST=redis-host
+
+            # Sicherheits-Zugangsdaten
+            ADMIN_USERNAME=admin
+            ADMIN_PASSWORD=changeme
+
+            # Netzwerk-Einstellungen
+            LISTEN_ADDR=0.0.0.0
+            # LISTEN_PORT=7000
+            ```
+
+        3. Dienst neu starten:
+
+            ```bash
+            sudo systemctl restart bunkerweb-ui
+            ```
+
+        !!! tip "Firewall-Konfiguration"
+            Stellen Sie sicher, dass der UI-Host die Datenbank- und Redis-Ports erreichen kann. Gegebenenfalls müssen Sie Firewall-Regeln auf UI- und DB/Redis-Hosts anpassen.
+
+=== "Docker"
+
+    Erstellen Sie eine `docker-compose.yml` auf dem Manager-Host:
+
+    ```yaml title="docker-compose.yml"
+    x-ui-env: &bw-ui-env
+      # Wir verwenden einen Anchor, um die Umgebungsvariablen nicht zu duplizieren
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Verwenden Sie ein stärkeres Passwort
+
+    services:
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+        environment:
+          <<: *bw-ui-env
+          BUNKERWEB_INSTANCES: "192.168.1.11 192.168.1.12" # Ersetzen durch die IPs Ihrer Worker
+          API_WHITELIST_IP: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16" # Lokale Netze erlauben
+          # API_LISTEN_HTTPS: "yes" # Empfohlen zur Absicherung der internen API
+          # API_TOKEN: "my_secure_token" # Optional: zusätzliches Token
+          SERVER_NAME: ""
+          MULTISITE: "yes"
+          USE_REDIS: "yes"
+          REDIS_HOST: "redis"
+        volumes:
+          - bw-storage:/data # Persistenz für Cache und Backups
+        restart: "unless-stopped"
+        networks:
+          - bw-db
+          - bw-redis
+
+      bw-ui:
+        image: bunkerity/bunkerweb-ui:1.6.7~rc1
+        ports:
+          - "7000:7000" # UI-Port veröffentlichen
+        environment:
+          <<: *bw-ui-env
+          ADMIN_USERNAME: "changeme"
+          ADMIN_PASSWORD: "changeme" # Bitte stärkeres Passwort setzen
+          TOTP_ENCRYPTION_KEYS: "mysecret" # Stärkeren Schlüssel setzen (siehe Voraussetzungen)
+        restart: "unless-stopped"
+        networks:
+          - bw-db
+          - bw-redis
+
+      bw-db:
+        image: mariadb:11
+        # Maximale Paketgröße setzen, um Probleme mit großen Queries zu vermeiden
+        command: --max-allowed-packet=67108864
+        environment:
+          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+          MYSQL_DATABASE: "db"
+          MYSQL_USER: "bunkerweb"
+          MYSQL_PASSWORD: "changeme" # Bitte stärkeres Passwort setzen
+        volumes:
+          - bw-data:/var/lib/mysql
+        restart: "unless-stopped"
+        networks:
+          - bw-db
+
+      redis: # Redis zur Persistenz von Reports/Bans/Stats
+        image: redis:8-alpine
+        command: >
+          redis-server
+          --maxmemory 256mb
+          --maxmemory-policy allkeys-lru
+          --save 60 1000
+          --appendonly yes
+        volumes:
+          - redis-data:/data
+        restart: "unless-stopped"
+        networks:
+          - bw-redis
+
+    volumes:
+      bw-data:
+      bw-storage:
+      redis-data:
+
+    networks:
+      bw-db:
+        name: bw-db
+      bw-redis:
+        name: bw-redis
+    ```
+
+    Manager-Stack starten:
+
+    ```bash
+    docker compose up -d
+    ```
+
+### 2. Worker installieren
+
+Worker sind die Knoten, die den eingehenden Verkehr verarbeiten.
+
+=== "Linux"
+
+    1. **Führen Sie den Installer** auf jedem Worker aus (gleiche Befehle wie beim Manager).
+    2. **Option 3) Worker** auswählen und konfigurieren:
+
+        | Eingabe                   | Aktion                                                   |
+        | :------------------------ | :------------------------------------------------------- |
+        | **Manager-IP**            | IP des Managers eingeben (z. B. `192.168.10.10`).        |
+        | **HTTPS für interne API** | Muss zur Einstellung des Managers passen (`Y` oder `N`). |
+
+    Der Worker registriert sich automatisch beim Manager.
+
+=== "Docker"
+
+    Erstellen Sie eine `docker-compose.yml` auf jedem Worker:
+
+    ```yaml title="docker-compose.yml"
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.6.7~rc1
+        ports:
+          - "80:8080/tcp"
+          - "443:8443/tcp"
+          - "443:8443/udp" # QUIC / HTTP3 Unterstützung
+          - "5000:5000/tcp" # Port der internen API
+        environment:
+          API_WHITELIST_IP: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+          # API_LISTEN_HTTPS: "yes" # Empfohlen, muss zur Manager-Einstellung passen
+          # API_TOKEN: "my_secure_token" # Optional: Token, muss zum Manager passen
+        restart: "unless-stopped"
+    ```
+
+    Worker starten:
+
+    ```bash
+    docker compose up -d
+    ```
+
+### 3. Worker verwalten
+
+Sie können später weitere Worker über die Weboberfläche oder CLI hinzufügen.
+
+=== "Über die Weboberfläche"
+
+    1. **Zum Reiter Instances gehen**.
+    2. **Auf Add instance klicken**.
+    3. **IP/Hostname des Workers eintragen** und speichern.
+
+    <div class="grid grid-2" markdown style="display:grid; align-items:center;">
+    <figure markdown style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%;">
+      ![BunkerWeb UI - Instanz anlegen](assets/img/ui-ha-create-instance.webp){ width="100%" }
+      <figcaption>BunkerWeb UI - Instanz anlegen</figcaption>
+    </figure>
+    <figure markdown style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%;">
+      ![BunkerWeb UI - Instanzformular](assets/img/ui-ha-create-instance-form.webp){ width="100%" }
+      <figcaption>BunkerWeb UI - Instanzformular</figcaption>
+    </figure>
+    </div>
+
+=== "Per Konfiguration"
+
+    === "Linux"
+
+        1. **Bearbeiten** Sie `/etc/bunkerweb/variables.env` auf dem Manager:
+
+            ```bash
+            BUNKERWEB_INSTANCES=192.168.10.11 192.168.10.12 192.168.10.13
+            ```
+
+        2. **Scheduler neu starten**:
+
+            ```bash
+            sudo systemctl restart bunkerweb-scheduler
+            ```
+
+    === "Docker"
+
+        1. **Bearbeiten** Sie die `docker-compose.yml` auf dem Manager und aktualisieren Sie `BUNKERWEB_INSTANCES`.
+
+        2. **Scheduler-Container neu erstellen**:
+
+            ```bash
+            docker compose up -d bw-scheduler
+            ```
+
+### 4. Einrichtung prüfen
+
+=== "Linux"
+
+    1. **Status prüfen**: Melden Sie sich an der UI an (`http://<manager-ip>:7000`) und öffnen Sie den Tab **Instances**. Alle Worker sollten **Up** sein.
+    2. **Failover testen**: Stoppen Sie BunkerWeb auf einem Worker (`sudo systemctl stop bunkerweb`) und prüfen Sie, ob der Verkehr weiterläuft.
+
+=== "Docker"
+
+    1. **Status prüfen**: Melden Sie sich an der UI an (`http://<manager-ip>:7000`) und öffnen Sie den Tab **Instances**. Alle Worker sollten **Up** sein.
+    2. **Failover testen**: Stoppen Sie BunkerWeb auf einem Worker (`docker compose stop bunkerweb`) und prüfen Sie, ob der Verkehr weiterläuft.
+
+### 5. Load Balancing
+
+Um den Verkehr über Ihre Worker zu verteilen, verwenden Sie einen Load Balancer. Empfohlen ist ein Layer-4-(TCP)-Load-Balancer mit **PROXY protocol**, um die Client-IP beizubehalten.
+
+=== "HAProxy - Layer 4 (TCP)"
+
+    Beispielkonfiguration für **HAProxy** im TCP-Modus mit **PROXY protocol** zur Weitergabe der Client-IP.
+
+    ```cfg title="haproxy.cfg"
+    defaults
+        timeout connect 5s
+        timeout client 5s
+        timeout server 5s
+
+    frontend http_front
+        mode tcp
+        bind *:80
+        default_backend http_back
+
+    frontend https_front
+        mode tcp
+        bind *:443
+        default_backend https_back
+
+    backend http_back
+        mode tcp
+        balance roundrobin
+        server worker01 192.168.10.11:80 check send-proxy-v2
+        server worker02 192.168.10.12:80 check send-proxy-v2
+
+    backend https_back
+        mode tcp
+        balance roundrobin
+        server worker01 192.168.10.11:443 check send-proxy-v2
+        server worker02 192.168.10.12:443 check send-proxy-v2
+    ```
+
+=== "HAProxy - Layer 7 (HTTP)"
+
+    Beispielkonfiguration für **HAProxy** im Layer-7-(HTTP)-Modus. Sie fügt den Header `X-Forwarded-For` hinzu, damit BunkerWeb die Client-IP erhält.
+
+    ```cfg title="haproxy.cfg"
+    defaults
+        timeout connect 5s
+        timeout client 5s
+        timeout server 5s
+
+    frontend http_front
+        mode http
+        bind *:80
+        default_backend http_back
+
+    frontend https_front
+        mode http
+        bind *:443
+        default_backend https_back
+
+    backend http_back
+        mode http
+        balance roundrobin
+        option forwardfor
+        server worker01 192.168.10.11:80 check
+        server worker02 192.168.10.12:80 check
+
+    backend https_back
+        mode http
+        balance roundrobin
+        option forwardfor
+        server worker01 192.168.10.11:443 check
+        server worker02 192.168.10.12:443 check
+    ```
+
+HAProxy neu laden, nachdem die Konfiguration gespeichert wurde:
+
+```bash
+sudo systemctl restart haproxy
+```
+
+Weitere Informationen finden Sie in der [offiziellen HAProxy-Dokumentation](http://docs.haproxy.org/).
+
+!!! tip "Echte IP konfigurieren"
+    Vergessen Sie nicht, BunkerWeb so zu konfigurieren, dass die echte Client-IP ankommt (PROXY protocol oder X-Forwarded-For).
+
+    Siehe Abschnitt [Hinter einem Load Balancer oder Reverse Proxy](#behind-load-balancer-or-reverse-proxy), um sicherzustellen, dass Sie die richtige Client-IP erhalten.
+
+    Prüfen Sie `/var/log/bunkerweb/access.log` auf jedem Worker, ob Anfragen aus dem PROXY-protocol-Netz kommen und beide Worker Last erhalten. Ihr BunkerWeb-Cluster ist nun bereit für produktive Hochverfügbarkeit.
+
+## Verwendung benutzerdefinierter DNS-Auflösungsmechanismen
 
 BunkerWebs NGINX-Konfiguration kann angepasst werden, um je nach Ihren Bedürfnissen unterschiedliche DNS-Resolver zu verwenden. Dies kann in verschiedenen Szenarien besonders nützlich sein:
 
@@ -382,7 +860,7 @@ BunkerWebs NGINX-Konfiguration kann angepasst werden, um je nach Ihren Bedürfni
 2.  Wenn Sie für bestimmte Domains benutzerdefinierte DNS-Server verwenden müssen
 3.  Zur Integration mit lokalen DNS-Caching-Lösungen
 
-#### Verwendung von systemd-resolved
+### Verwendung von systemd-resolved
 
 Viele moderne Linux-Systeme verwenden `systemd-resolved` für die DNS-Auflösung. Wenn Sie möchten, dass BunkerWeb den Inhalt Ihrer `/etc/hosts`-Datei respektiert und den DNS-Auflösungsmechanismus des Systems verwendet, können Sie es so konfigurieren, dass es den lokalen systemd-resolved DNS-Dienst verwendet.
 
@@ -396,7 +874,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
 
 === "Web-UI"
 
-    Navigieren Sie zur Seite **Globale Konfiguration** und setzen Sie die DNS-Resolver auf `127.0.0.53`
+    Navigieren Sie zur Seite **Globale Einstellungen** und setzen Sie die DNS-Resolver auf `127.0.0.53`
 
     <figure markdown>![DNS-Resolver-Einstellung mit Web-UI](assets/img/advanced-dns-resolvers.png){ align=center }<figcaption>DNS-Resolver-Einstellung mit Web-UI</figcaption></figure>
 
@@ -416,7 +894,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
     sudo systemctl reload bunkerweb-scheduler
     ```
 
-#### Verwendung von dnsmasq
+### Verwendung von dnsmasq
 
 [dnsmasq](http://www.thekelleys.org.uk/dnsmasq/doc.html) ist ein leichtgewichtiger DNS-, DHCP- und TFTP-Server, der häufig für lokales DNS-Caching und Anpassungen verwendet wird. Er ist besonders nützlich, wenn Sie mehr Kontrolle über Ihre DNS-Auflösung benötigen, als systemd-resolved bietet.
 
@@ -464,7 +942,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
 
     === "Web-UI"
 
-        Navigieren Sie zur Seite **Globale Konfiguration**, wählen Sie das **NGINX**-Plugin und setzen Sie die DNS-Resolver auf `127.0.0.1`.
+        Navigieren Sie zur Seite **Globale Einstellungen**, wählen Sie das **NGINX**-Plugin und setzen Sie die DNS-Resolver auf `127.0.0.1`.
 
         <figure markdown>![DNS-Resolver-Einstellung mit Web-UI](assets/img/advanced-dns-resolvers2.png){ align=center }<figcaption>DNS-Resolver-Einstellung mit Web-UI</figcaption></figure>
 
@@ -514,7 +992,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.7~rc1
     ```
 
 === "Docker"
@@ -542,7 +1020,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -553,7 +1031,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -568,7 +1046,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
         name: bw-dns
     ```
 
-### Benutzerdefinierte Konfigurationen {#custom-configurations}
+## Benutzerdefinierte Konfigurationen {#custom-configurations}
 
 Um benutzerdefinierte Konfigurationen zu BunkerWeb hinzuzufügen und anzupassen, können Sie die NGINX-Grundlage nutzen. Benutzerdefinierte NGINX-Konfigurationen können in verschiedenen NGINX-Kontexten hinzugefügt werden, einschließlich Konfigurationen für die ModSecurity Web Application Firewall (WAF), die eine Kernkomponente von BunkerWeb ist. Weitere Details zu ModSecurity-Konfigurationen finden Sie [hier](features.md#custom-configurations).
 
@@ -584,7 +1062,7 @@ Hier sind die verfügbaren Typen von benutzerdefinierten Konfigurationen:
 -   **stream**: Konfigurationen auf der Stream-Ebene von NGINX.
 -   **server-stream**: Konfigurationen auf der Stream/Server-Ebene von NGINX.
 
-Benutzerdefinierte Konfigurationen können global oder spezifisch für einen bestimmten Server angewendet werden, abhängig vom anwendbaren Kontext und ob der [Multisite-Modus](concepts.md#multisite-mode) aktiviert ist.
+Benutzerdefinierte Konfigurationen können global oder spezifisch für einen bestimmten Server angewendet werden, abhängig vom anwendbaren Kontext und ob der [Multisite-Modus](features.md#multisite-mode) aktiviert ist.
 
 Die Methode zum Anwenden benutzerdefinierter Konfigurationen hängt von der verwendeten Integration ab. Der zugrunde liegende Prozess besteht jedoch darin, Dateien mit der `.conf`-Endung zu bestimmten Ordnern hinzuzufügen. Um eine benutzerdefinierte Konfiguration für einen bestimmten Server anzuwenden, sollte die Datei in einem Unterordner platziert werden, der nach dem primären Servernamen benannt ist.
 
@@ -667,7 +1145,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.7~rc1
     ```
 
     Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen angewendet werden.
@@ -707,7 +1185,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.7~rc1
     ```
 
 === "Docker"
@@ -730,7 +1208,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -773,7 +1251,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
       volumes:
         - ./bw-data:/data
       ...
@@ -843,7 +1321,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
       volumes:
         - ./bw-data:/data
       ...
@@ -943,9 +1421,9 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
 
     Es gibt keinen Aktualisierungsmechanismus: Die Alternative besteht darin, eine vorhandene Konfiguration mit `docker config rm` zu entfernen und sie dann neu zu erstellen.
 
-### Viele Dienste in der Produktion betreiben {#running-many-services-in-production}
+## Viele Dienste in der Produktion betreiben {#running-many-services-in-production}
 
-#### Globales CRS
+### Globales CRS
 
 !!! warning "CRS-Plugins"
     Wenn das CRS global geladen wird, werden **CRS-Plugins nicht unterstützt**. Wenn Sie sie verwenden müssen, müssen Sie das CRS pro Dienst laden.
@@ -961,7 +1439,7 @@ SecRule REQUEST_HEADERS:Host "@rx ^app1\.example\.com$" "nolog"
 
 Sie können das globale Laden von CRS-Regeln aktivieren, indem Sie `USE_MODSECURITY_GLOBAL_CRS` auf `yes` setzen.
 
-#### `max_allowed_packet` für MariaDB/MySQL anpassen
+### `max_allowed_packet` für MariaDB/MySQL anpassen
 
 Es scheint, dass der Standardwert für den Parameter `max_allowed_packet` in MariaDB- und MySQL-Datenbankservern nicht ausreicht, wenn BunkerWeb mit einer großen Anzahl von Diensten verwendet wird.
 
@@ -973,7 +1451,7 @@ Wenn Sie Fehler wie diesen feststellen, insbesondere auf dem Scheduler:
 
 Sie müssen den `max_allowed_packet` auf Ihrem Datenbankserver erhöhen.
 
-### Persistenz von Sperren und Berichten {#persistence-of-bans-and-reports}
+## Persistenz von Sperren und Berichten {#persistence-of-bans-and-reports}
 
 Standardmäßig speichert BunkerWeb Sperren und Berichte in einem lokalen Lua-Datenspeicher. Obwohl dies einfach und effizient ist, bedeutet diese Einrichtung, dass Daten verloren gehen, wenn die Instanz neu gestartet wird. Um sicherzustellen, dass Sperren und Berichte über Neustarts hinweg bestehen bleiben, können Sie BunkerWeb so konfigurieren, dass ein entfernter [Redis](https://redis.io/)- oder [Valkey](https://valkey.io/)-Server verwendet wird.
 
@@ -1014,7 +1492,7 @@ REDIS_DATABASE=0
 
 Wenn Sie erweiterte Einstellungen wie Authentifizierung, SSL/TLS-Unterstützung oder den Sentinel-Modus benötigen, finden Sie detaillierte Anleitungen in der [Dokumentation zu den Redis-Plugin-Einstellungen](features.md#redis).
 
-### UDP/TCP-Anwendungen schützen
+## UDP/TCP-Anwendungen schützen
 
 !!! example "Experimentelles Feature"
 
@@ -1074,7 +1552,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.7~rc1
     ```
 
     Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen angewendet werden.
@@ -1097,7 +1575,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ports:
           - "80:8080" # Behalten, wenn Sie die Let's Encrypt-Automatisierung mit dem http-Challenge-Typ verwenden möchten
           - "10000:10000" # app1
@@ -1112,7 +1590,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Diese Einstellung ist obligatorisch, um die BunkerWeb-Instanz anzugeben
@@ -1163,7 +1641,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ports:
           - "80:8080" # Behalten, wenn Sie die Let's Encrypt-Automatisierung mit dem http-Challenge-Typ verwenden möchten
           - "10000:10000" # app1
@@ -1393,7 +1871,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ports:
           # Behalten, wenn Sie die Let's Encrypt-Automatisierung mit dem http-Challenge-Typ verwenden möchten
           - published: 80
@@ -1456,7 +1934,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
         name: bw-services
     ```
 
-### PHP
+## PHP
 
 !!! example "Experimentelles Feature"
 	  Im Moment ist die PHP-Unterstützung mit BunkerWeb noch in der Beta-Phase und wir empfehlen Ihnen, wenn möglich eine Reverse-Proxy-Architektur zu verwenden. Übrigens wird PHP für einige Integrationen wie Kubernetes überhaupt nicht unterstützt.
@@ -1479,7 +1957,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
     -   Richten Sie einen PHP-FPM-Container für Ihre Anwendung ein und mounten Sie den Ordner mit den PHP-Dateien.
     -   Verwenden Sie die spezifischen Einstellungen `REMOTE_PHP` und `REMOTE_PHP_PATH` als Umgebungsvariablen beim Ausführen von BunkerWeb.
 
-    Wenn Sie den [Multisite-Modus](concepts.md#multisite-mode) aktivieren, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von `SERVER_NAME` benannt werden. Hier ist ein Dummy-Beispiel:
+    Wenn Sie den [Multisite-Modus](features.md#multisite-mode) aktivieren, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von `SERVER_NAME` benannt werden. Hier ist ein Dummy-Beispiel:
 
     ```
     www
@@ -1523,7 +2001,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.7~rc1
     ```
 
     Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen angewendet werden.
@@ -1536,7 +2014,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
     -   Richten Sie einen PHP-FPM-Container für Ihre Anwendung ein und mounten Sie den Ordner mit den PHP-Dateien
     -   Verwenden Sie die spezifischen Einstellungen `REMOTE_PHP` und `REMOTE_PHP_PATH` als Umgebungsvariablen beim Starten von BunkerWeb
 
-    Wenn Sie den [Multisite-Modus](concepts.md#multisite-mode) aktivieren, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von `SERVER_NAME` benannt werden. Hier ist ein Dummy-Beispiel:
+    Wenn Sie den [Multisite-Modus](features.md#multisite-mode) aktivieren, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von `SERVER_NAME` benannt werden. Hier ist ein Dummy-Beispiel:
 
     ```
     www
@@ -1567,7 +2045,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1582,7 +2060,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Diese Einstellung ist obligatorisch, um die BunkerWeb-Instanz anzugeben
@@ -1644,7 +2122,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
     -   Richten Sie PHP-FPM-Container für Ihre Anwendungen ein und mounten Sie den Ordner mit den PHP-Apps
     -   Verwenden Sie die spezifischen Einstellungen `REMOTE_PHP` und `REMOTE_PHP_PATH` als Labels für Ihren PHP-FPM-Container
 
-    Da die Docker-Autoconf die Verwendung des [Multisite-Modus](concepts.md#multisite-mode) impliziert, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von `SERVER_NAME` benannt werden. Hier ist ein Dummy-Beispiel:
+    Da die Docker-Autoconf die Verwendung des [Multisite-Modus](features.md#multisite-mode) impliziert, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von `SERVER_NAME` benannt werden. Hier ist ein Dummy-Beispiel:
 
     ```
     www
@@ -1676,7 +2154,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.7~rc1
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -1689,7 +2167,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # Wir müssen die BunkerWeb-Instanz hier nicht angeben, da sie automatisch vom Autoconf-Dienst erkannt werden
@@ -1704,7 +2182,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
+        image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1839,7 +2317,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
     systemctl restart php-fpm
     ```
 
-    Wenn Sie den [Multisite-Modus](concepts.md#multisite-mode) aktivieren, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von `SERVER_NAME` benannt werden. Hier ist ein Dummy-Beispiel:
+    Wenn Sie den [Multisite-Modus](features.md#multisite-mode) aktivieren, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von `SERVER_NAME` benannt werden. Hier ist ein Dummy-Beispiel:
 
     ```
     /var/www/html
@@ -1915,7 +2393,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
     -   Richten Sie PHP-FPM-Container für Ihre Anwendungen ein und mounten Sie den Ordner mit den PHP-Apps
     -   Verwenden Sie die spezifischen Einstellungen `REMOTE_PHP` und `REMOTE_PHP_PATH` als Labels für Ihren PHP-FPM-Container
 
-    Da die Swarm-Integration die Verwendung des [Multisite-Modus](concepts.md#multisite-mode) impliziert, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von `SERVER_NAME` benannt werden. Hier ist ein Dummy-Beispiel:
+    Da die Swarm-Integration die Verwendung des [Multisite-Modus](features.md#multisite-mode) impliziert, müssen Sie separate Verzeichnisse für jede Ihrer Anwendungen erstellen. Jedes Unterverzeichnis sollte nach dem ersten Wert von `SERVER_NAME` benannt werden. Hier ist ein Dummy-Beispiel:
 
     ```
     www
@@ -1944,7 +2422,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.7~rc1
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2011,7 +2489,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
         name: bw-services
     ```
 
-### IPv6
+## IPv6
 
 !!! example "Experimentelles Feature"
 
@@ -2043,7 +2521,7 @@ Standardmäßig lauscht BunkerWeb nur auf IPv4-Adressen und verwendet kein IPv6 
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
           USE_IPv6: "yes"
 
@@ -2089,7 +2567,253 @@ Standardmäßig lauscht BunkerWeb nur auf IPv4-Adressen und verwendet kein IPv6 
     systemctl start bunkerweb
     ```
 
-### Docker Logging Best Practices
+## Protokollierungsoptionen
+
+BunkerWeb bietet flexible Protokollierungsoptionen, mit denen Sie Protokolle gleichzeitig an mehrere Ziele (z. B. Dateien, stdout/stderr oder Syslog) senden können. Dies ist besonders nützlich, um die Integration mit externen Log-Collector-Diensten zu ermöglichen und gleichzeitig lokale Protokolle für die Web-UI beizubehalten.
+
+Es gibt zwei Hauptkategorien von Protokollen, die konfiguriert werden können:
+
+1. **Service-Protokolle**: Protokolle, die von BunkerWeb-Komponenten erzeugt werden (Scheduler, UI, Autoconf usw.). Pro Service steuerbar über `LOG_TYPES` (und optional `LOG_FILE_PATH`, `LOG_SYSLOG_ADDRESS`, `LOG_SYSLOG_TAG`).
+2. **Zugriffs- & Fehlerprotokolle**: HTTP-Zugriffs- und Fehlerprotokolle, die von NGINX erzeugt werden. Diese betreffen ausschließlich den `bunkerweb`-Dienst (`ACCESS_LOG` / `ERROR_LOG` / `LOG_LEVEL`).
+
+### Service-Protokolle
+
+Service-Protokolle werden durch die Einstellung `LOG_TYPES` gesteuert, die mehrere Werte mit Leerzeichen getrennt akzeptiert (z. B. `LOG_TYPES="stderr syslog"`).
+
+| Wert     | Beschreibung                                                                                            |
+| :------- | :------------------------------------------------------------------------------------------------------ |
+| `file`   | Schreibt Protokolle in eine Datei. Erforderlich für den Protokollanzeiger der Web-UI.                   |
+| `stderr` | Schreibt Protokolle in Standardfehlerausgabe. Standard für containerisierte Umgebungen (`docker logs`). |
+| `syslog` | Sendet Protokolle an einen Syslog-Server. Erfordert, dass `LOG_SYSLOG_ADDRESS` gesetzt ist.             |
+
+Wenn Sie `syslog` verwenden, sollten Sie zusätzlich konfigurieren:
+
+- `LOG_SYSLOG_ADDRESS`: Adresse des Syslog-Servers (z. B. `udp://bw-syslog:514` oder `/dev/log`).
+- `LOG_SYSLOG_TAG`: Ein eindeutiger Tag für den Dienst (z. B. `bw-scheduler`), damit Einträge unterschieden werden können.
+- `LOG_FILE_PATH`: Pfad für die Dateiausgabe, wenn `LOG_TYPES` `file` enthält (z. B. `/var/log/bunkerweb/scheduler.log`).
+
+### Zugriffs- und Fehlerprotokolle
+
+Dies sind Standard-NGINX-Protokolle, die ausschließlich über den `bunkerweb`-Dienst konfiguriert werden. Sie unterstützen mehrere Ziele, indem Sie die Einstellung mit nummerierten Suffixen versehen (z. B. `ACCESS_LOG`, `ACCESS_LOG_1` und die passenden `LOG_FORMAT`, `LOG_FORMAT_1` bzw. `ERROR_LOG`, `ERROR_LOG_1` und die entsprechenden `LOG_LEVEL`, `LOG_LEVEL_1`).
+
+- `ACCESS_LOG`: Ziel für Zugriffsprotokolle (Standard: `/var/log/bunkerweb/access.log`). Akzeptiert Dateipfade, `syslog:server=host[:port][,param=value]`, Shared-Buffer `memory:name:size` oder `off`, um zu deaktivieren. Siehe [NGINX access_log Dokumentation](https://nginx.org/en/docs/http/ngx_http_log_module.html#access_log) für Details.
+- `ERROR_LOG`: Ziel für Fehlerprotokolle (Standard: `/var/log/bunkerweb/error.log`). Akzeptiert Dateipfade, `stderr`, `syslog:server=host[:port][,param=value]` oder Shared-Buffer `memory:size`. Siehe [NGINX error_log Dokumentation](https://nginx.org/en/docs/ngx_core_module.html#error_log) für Details.
+- `LOG_LEVEL`: Detailstufe der Fehlerprotokolle (Standard: `notice`).
+
+Diese Einstellungen akzeptieren die üblichen NGINX-Werte (Dateipfade, `stderr`, `syslog:server=...`, Shared-Memory-Puffer). Sie unterstützen mehrere Ziele über nummerierte Suffixe (siehe [Multiple-Settings-Konvention](features.md#multiple-settings)). Andere Dienste (Scheduler, UI, Autoconf usw.) nutzen ausschließlich `LOG_TYPES`/`LOG_FILE_PATH`/`LOG_SYSLOG_*`.
+
+**Beispiel mit mehreren Access-/Error-Logs (nur `bunkerweb`, nummerierte Suffixe):**
+
+```conf
+ACCESS_LOG=/var/log/bunkerweb/access.log
+ACCESS_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
+LOG_FORMAT=$host $remote_addr - $request_id $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"
+LOG_FORMAT_1=$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent
+ERROR_LOG=/var/log/bunkerweb/error.log
+ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
+LOG_LEVEL=notice
+LOG_LEVEL_1=error
+```
+
+### Integrations-Defaults & Beispiele
+
+=== "Linux"
+
+    **Standardverhalten**: `LOG_TYPES="file"`. Protokolle werden unter `/var/log/bunkerweb/*.log` geschrieben.
+
+    **Beispiel**: Lokale Dateien behalten (für die Web-UI) und zusätzlich an den System-Syslog spiegeln.
+
+    ```conf
+      # Service-Protokolle (in /etc/bunkerweb/variables.env oder in spezifischen Dienst-Umgebungsdateien setzen)
+      LOG_TYPES="file syslog"
+      LOG_SYSLOG_ADDRESS=/dev/log
+      SCHEDULER_LOG_FILE_PATH=/var/log/bunkerweb/scheduler.log
+      UI_LOG_FILE_PATH=/var/log/bunkerweb/ui.log
+      # ...
+      # LOG_SYSLOG_TAG wird automatisch pro Dienst gesetzt (bei Bedarf dienstspezifisch überschreiben)
+
+      # NGINX-Protokolle (nur bunkerweb-Dienst; in /etc/bunkerweb/variables.env setzen)
+      ACCESS_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb_access
+      ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
+    ```
+
+=== "Docker / Autoconf / Swarm"
+
+    **Standardverhalten**: `LOG_TYPES="stderr"`. Protokolle sind über `docker logs` sichtbar.
+
+    **Beispiel (Adaptation aus dem Quickstart-Guide)**: Behalten Sie `docker logs` (stderr) BEI und senden Sie zusätzlich an einen zentralen Syslog-Container (benötigt für Web UI und CrowdSec).
+
+    ```yaml
+    x-bw-env:
+      &bw-env # Wir verwenden einen Anker, um die Wiederholung derselben Einstellungen für beide Dienste zu vermeiden
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Stellen Sie sicher, dass Sie den richtigen IP-Bereich setzen, damit der Scheduler die Konfiguration an die Instanz senden kann
+      # Optional: einen API-Token setzen und ihn in beiden Containern spiegeln
+      API_TOKEN: ""
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Denken Sie daran, ein stärkeres Passwort für die Datenbank zu setzen
+      # Service-Protokolle
+      LOG_TYPES: "stderr syslog"
+      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
+      # LOG_SYSLOG_TAG wird automatisch pro Dienst gesetzt (bei Bedarf dienstspezifisch überschreiben)
+      # NGINX-Protokolle: An Syslog senden (nur bunkerweb)
+      ACCESS_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb_access"
+      ERROR_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb"
+
+    services:
+      bunkerweb:
+        # Dies ist der Name, der zur Identifikation der Instanz im Scheduler verwendet wird
+        image: bunkerity/bunkerweb:1.6.7~rc1
+        ports:
+          - "80:8080/tcp"
+          - "443:8443/tcp"
+          - "443:8443/udp" # Für QUIC / HTTP3-Unterstützung
+        environment:
+          <<: *bw-env # Wir verwenden den Anker, um dieselben Einstellungen für alle Dienste zu vermeiden
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-services
+
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+        environment:
+          <<: *bw-env
+          BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen setzen
+          SERVER_NAME: ""
+          MULTISITE: "yes"
+          UI_HOST: "http://bw-ui:7000" # Bei Bedarf anpassen
+          USE_REDIS: "yes"
+          REDIS_HOST: "redis"
+        volumes:
+          - bw-storage:/data # Wird verwendet, um den Cache und andere Daten wie Backups zu persistieren
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-ui:
+        image: bunkerity/bunkerweb-ui:1.6.7~rc1
+        environment:
+          <<: *bw-env
+        volumes:
+          - bw-logs:/var/log/bunkerweb # Wird verwendet, um die Syslog-Protokolle in der Web-UI zu lesen
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-db:
+        image: mariadb:11
+        # Wir setzen die max_allowed_packet-Größe, um Probleme mit großen Abfragen zu vermeiden
+        command: --max-allowed-packet=67108864
+        environment:
+          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+          MYSQL_DATABASE: "db"
+          MYSQL_USER: "bunkerweb"
+          MYSQL_PASSWORD: "changeme" # Denken Sie daran, ein stärkeres Passwort für die Datenbank zu setzen
+        volumes:
+          - bw-data:/var/lib/mysql
+        restart: "unless-stopped"
+        networks:
+          - bw-db
+
+      redis: # Redis-Dienst zur Persistenz von Reports/Sperren/Statistiken
+        image: redis:8-alpine
+        command: >
+          redis-server
+          --maxmemory 256mb
+          --maxmemory-policy allkeys-lru
+          --save 60 1000
+          --appendonly yes
+        volumes:
+          - redis-data:/data
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+
+      bw-syslog:
+        image: balabit/syslog-ng:4.10.2
+        cap_add:
+          - NET_BIND_SERVICE # Bind an niedrige Ports
+          - NET_BROADCAST # Sende Broadcasts
+          - NET_RAW # Verwenden von Raw-Sockets
+          - DAC_READ_SEARCH # Dateien bypassen, um lesen zu können
+          - DAC_OVERRIDE # Dateirechte überschreiben
+          - CHOWN # Eigentümer ändern
+          - SYSLOG # Schreiben in Systemlogs
+        volumes:
+          - bw-logs:/var/log/bunkerweb # Laufwerk, das zur Speicherung der Protokolle genutzt wird
+          - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # Syslog-ng-Konfigurationsdatei
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+
+    volumes:
+      bw-data:
+      bw-storage:
+      redis-data:
+      bw-logs:
+
+    networks:
+      bw-universe:
+        name: bw-universe
+      ipam:
+        driver: default
+        config:
+          - subnet: 10.20.30.0/24 # Stellen Sie sicher, dass Sie den richtigen IP-Bereich setzen, damit der Scheduler die Konfiguration an die Instanz senden kann
+      bw-services:
+        name: bw-services
+      bw-db:
+        name: bw-db
+    ```
+
+### Syslog-ng-Konfiguration
+
+Hier ein Beispiel für eine `syslog-ng.conf`-Datei, die Sie verwenden können, um die Protokolle in eine Datei weiterzuleiten:
+
+```conf
+@version: 4.10
+
+# Quelle konfigurieren, um Logs von BunkerWeb-Diensten zu empfangen (ACCESS_LOG / ERROR_LOG und LOG_TYPES=syslog)
+source s_net {
+  udp(
+    ip("0.0.0.0")
+  );
+};
+
+# Template zur Formatierung der Lognachrichten
+template t_imp {
+  template("$MSG\n");
+  template_escape(no);
+};
+
+# Zielkonfiguration, um Logs in dynamisch benannten Dateien zu schreiben
+destination d_dyna_file {
+  file(
+    "/var/log/bunkerweb/${PROGRAM}.log"
+    template(t_imp)
+    owner("101")
+    group("101")
+    dir_owner("root")
+    dir_group("101")
+    perm(0440)
+    dir_perm(0770)
+    create_dirs(yes)
+    logrotate(
+      enable(yes),
+      size(100MB),
+      rotations(7)
+    )
+  );
+};
+
+# Logpfad zur Weiterleitung der Logs in dynamisch benannte Dateien
+log {
+  source(s_net);
+  destination(d_dyna_file);
+};
+```
+
+## Docker Logging Best Practices
 
 Bei der Verwendung von Docker ist es wichtig, die Container-Protokolle zu verwalten, um zu verhindern, dass sie übermäßig viel Speicherplatz beanspruchen. Standardmäßig verwendet Docker den `json-file`-Protokollierungstreiber, der bei fehlender Konfiguration zu sehr großen Protokolldateien führen kann.
 
@@ -2102,7 +2826,7 @@ Sie können den Protokollierungstreiber für Ihre Dienste in Ihrer `docker-compo
 ```yaml
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.6-rc3
+    image: bunkerity/bunkerweb:1.6.7~rc1
     logging:
       driver: "json-file"
       options:
@@ -2113,7 +2837,7 @@ services:
 
 Diese Konfiguration stellt sicher, dass die Protokolle rotiert werden, und verhindert, dass sie Ihre Festplatte füllen. Sie können dies auf jeden Dienst in Ihrer Docker Compose-Einrichtung anwenden.
 
-**Globale Konfiguration (daemon.json)**
+**Globale Einstellungen (daemon.json)**
 
 Wenn Sie diese Protokollierungseinstellungen standardmäßig auf alle Container auf dem Host anwenden möchten, können Sie den Docker-Daemon konfigurieren, indem Sie die Datei `/etc/docker/daemon.json` bearbeiten (oder erstellen):
 
@@ -2133,7 +2857,7 @@ Nachdem Sie `daemon.json` geändert haben, müssen Sie den Docker-Daemon neu sta
 sudo systemctl restart docker
 ```
 
-Diese globale Konfiguration wird von allen Containern übernommen. Jede pro Dienst in einer `docker-compose.yml`-Datei definierte Protokollierungskonfiguration überschreibt jedoch die globalen Einstellungen in `daemon.json`.
+Diese globalen Einstellungen werden von allen Containern übernommen. Jede pro Dienst in einer `docker-compose.yml`-Datei definierte Protokollierungskonfiguration überschreibt jedoch die globalen Einstellungen in `daemon.json`.
 
 ## Sicherheits-Tuning {#security-tuning}
 
@@ -2162,7 +2886,7 @@ Pro-Tipp: Wenn Sie Ihre Warnungen anzeigen, klicken Sie auf die Option "Spalten"
 
 ## Überwachung und Berichterstattung
 
-#### Überwachung <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### Überwachung <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM-Unterstützung :x:
 
@@ -2182,7 +2906,7 @@ Das Überwachungs-Plugin ermöglicht es Ihnen, Metriken über BunkerWeb zu samme
 | `USE_MONITORING`               | `yes`    | global  | nein     | Aktiviert die Überwachung von BunkerWeb.                     |
 | `MONITORING_METRICS_DICT_SIZE` | `10M`    | global  | nein     | Größe des Diktionärs zum Speichern von Überwachungsmetriken. |
 
-#### Prometheus-Exporter <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### Prometheus-Exporter <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM-Unterstützung :x:
 
@@ -2208,7 +2932,7 @@ Wir stellen auch ein [Grafana-Dashboard](https://grafana.com/grafana/dashboards/
 | `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | global  | nein     | HTTP-URL des Prometheus-Exporters.                                                |
 | `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | global  | nein     | Liste der IP/Netzwerke, die den Prometheus-Exporter-Endpunkt kontaktieren dürfen. |
 
-#### Berichterstattung <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### Berichterstattung <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM-Unterstützung :x:
 
@@ -2227,32 +2951,29 @@ Das Reporting-Plugin bietet eine umfassende Lösung für die regelmäßige Beric
 
 **Liste der Einstellungen**
 
-| Einstellung                    | Standard           | Kontext | Beschreibung                                                                                                                             |
-| ------------------------------ | ------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_REPORTING_SMTP`           | `no`               | global  | Aktiviert das Senden des Berichts per E-Mail.                                                                                            |
-| `USE_REPORTING_WEBHOOK`        | `no`               | global  | Aktiviert das Senden des Berichts per Webhook.                                                                                           |
-| `REPORTING_SCHEDULE`           | `weekly`           | global  | Die Häufigkeit, mit der Berichte gesendet werden.                                                                                        |
-| `REPORTING_WEBHOOK_URLS`       |                    | global  | Liste der Webhook-URLs, die den Bericht im Markdown-Format erhalten sollen (durch Leerzeichen getrennt).                                 |
-| `REPORTING_SMTP_EMAILS`        |                    | global  | Liste der E-Mail-Adressen, die den Bericht im HTML-Format erhalten sollen (durch Leerzeichen getrennt).                                  |
-| `REPORTING_SMTP_HOST`          |                    | global  | Der Host-Server, der für den SMTP-Versand verwendet wird.                                                                                |
-| `REPORTING_SMTP_PORT`          | `465`              | global  | Der für SMTP verwendete Port. Bitte beachten Sie, dass es je nach Verbindungstyp unterschiedliche Standards gibt (SSL = 465, TLS = 587). |
-| `REPORTING_SMTP_FROM_EMAIL`    |                    | global  | Die als Absender verwendete E-Mail-Adresse. Beachten Sie, dass 2FA für diese E-Mail-Adresse deaktiviert sein muss.                       |
-| `REPORTING_SMTP_FROM_USER`     |                    | global  | Der Benutzerauthentifizierungswert für das Senden über die Absender-E-Mail-Adresse.                                                      |
-| `REPORTING_SMTP_FROM_PASSWORD` |                    | global  | Der Passwortauthentifizierungswert für das Senden über die Absender-E-Mail-Adresse.                                                      |
-| `REPORTING_SMTP_SSL`           | `SSL`              | global  | Bestimmt, ob eine sichere Verbindung für SMTP verwendet werden soll oder nicht.                                                          |
-| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global  | Die Betreffzeile der E-Mail.                                                                                                             |
+| Einstellung                    | Standard           | Kontext | Beschreibung                                                                                 |
+| ------------------------------ | ------------------ | ------- | -------------------------------------------------------------------------------------------- |
+| `USE_REPORTING_SMTP`           | `no`               | global  | Versand des Berichts per E-Mail (HTML) aktivieren.                                           |
+| `USE_REPORTING_WEBHOOK`        | `no`               | global  | Versand des Berichts über Webhook (Markdown) aktivieren.                                     |
+| `REPORTING_SCHEDULE`           | `weekly`           | global  | Berichtszyklus: `daily`, `weekly` oder `monthly`.                                            |
+| `REPORTING_WEBHOOK_URLS`       |                    | global  | Mit Leerzeichen getrennte Webhook-URLs; Discord und Slack werden automatisch erkannt.        |
+| `REPORTING_SMTP_EMAILS`        |                    | global  | Mit Leerzeichen getrennte E-Mail-Empfänger.                                                  |
+| `REPORTING_SMTP_HOST`          |                    | global  | SMTP-Servername oder IP.                                                                     |
+| `REPORTING_SMTP_PORT`          | `465`              | global  | SMTP-Port. Verwende `465` für SSL, `587` für TLS.                                            |
+| `REPORTING_SMTP_FROM_EMAIL`    |                    | global  | Absenderadresse (2FA falls nötig deaktivieren).                                              |
+| `REPORTING_SMTP_FROM_USER`     |                    | global  | SMTP-Benutzername (fällt auf die Absenderadresse zurück, wenn nur das Passwort gesetzt ist). |
+| `REPORTING_SMTP_FROM_PASSWORD` |                    | global  | SMTP-Passwort.                                                                               |
+| `REPORTING_SMTP_SSL`           | `SSL`              | global  | Verbindungssicherheit: `no`, `SSL` oder `TLS`.                                               |
+| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global  | Betreffzeile für den E-Mail-Versand.                                                         |
 
 !!! info "Information und Verhalten"
-    - wenn `USE_REPORTING_SMTP` auf `yes` gesetzt ist, muss die Einstellung `REPORTING_SMTP_EMAILS` gesetzt werden.
-    - wenn `USE_REPORTING_WEBHOOK` auf `yes` gesetzt ist, muss die Einstellung `REPORTING_WEBHOOK_URLS` gesetzt werden.
-    - Akzeptierte Werte für `REPORTING_SCHEDULE` sind `daily`, `weekly` und `monthly`.
-    - wenn keine `REPORTING_SMTP_FROM_USER` und `REPORTING_SMTP_FROM_PASSWORD` gesetzt sind, versucht das Plugin, die E-Mail ohne Authentifizierung zu senden.
-    - wenn `REPORTING_SMTP_FROM_USER` nicht gesetzt ist, aber `REPORTING_SMTP_FROM_PASSWORD` gesetzt ist, verwendet das Plugin die `REPORTING_SMTP_FROM_EMAIL` als Benutzernamen.
-    - wenn der Job fehlschlägt, versucht das Plugin, den Bericht bei der nächsten Ausführung erneut zu senden.
+    - `REPORTING_SMTP_EMAILS` ist erforderlich, wenn SMTP aktiviert ist; `REPORTING_WEBHOOK_URLS` ist erforderlich, wenn Webhooks aktiviert sind.
+    - Wenn Webhooks und SMTP fehlschlagen, erfolgt der nächste Zustellversuch beim nächsten geplanten Lauf.
+    - Die HTML- und Markdown-Vorlagen liegen in `reporting/files/`; nur vorsichtig anpassen, damit Platzhalter erhalten bleiben.
 
-### Sicherung und Wiederherstellung
+## Sicherung und Wiederherstellung
 
-#### Sicherung S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### Sicherung S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM-Unterstützung :white_check_mark:
 
@@ -2319,7 +3040,7 @@ Durch die Aktivierung dieser Funktion schützen Sie proaktiv die **Integrität I
 | `BACKUP_S3_ACCESS_KEY_SECRET` |          | global  | Das S3-Zugriffsschlüsselgeheimnis                 |
 | `BACKUP_S3_COMP_LEVEL`        | `6`      | global  | Der Komprimierungsgrad der Backup-Zip-Datei       |
 
-##### Manuelle Sicherung
+#### Manuelle Sicherung
 
 Um eine Sicherung manuell zu starten, führen Sie den folgenden Befehl aus:
 
@@ -2385,7 +3106,7 @@ Sie können auch einen benutzerdefinierten S3-Bucket für die Sicherung angeben,
             ...
         ```
 
-##### Manuelle Wiederherstellung
+#### Manuelle Wiederherstellung
 
 Um eine Wiederherstellung manuell zu starten, führen Sie den folgenden Befehl aus:
 
@@ -2433,7 +3154,7 @@ Sie können auch eine benutzerdefinierte Sicherungsdatei für die Wiederherstell
         docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
         ```
 
-### Migration <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Migration <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM-Unterstützung :white_check_mark:
 
@@ -2447,7 +3168,7 @@ Das Migrations-Plugin **revolutioniert** die Übertragung von BunkerWeb-Konfigur
 
 -   **Datenbankübergreifende Kompatibilität:** Genießen Sie eine nahtlose Migration über verschiedene Datenbankplattformen hinweg, einschließlich SQLite, MySQL, MariaDB und PostgreSQL, und gewährleisten Sie die Kompatibilität mit Ihrer bevorzugten Datenbankumgebung.
 
-#### Eine Migrationsdatei erstellen
+### Eine Migrationsdatei erstellen
 
 Um eine Migrationsdatei manuell zu erstellen, führen Sie den folgenden Befehl aus:
 
@@ -2507,7 +3228,7 @@ Dieser Befehl erstellt eine Sicherung Ihrer Datenbank und speichert sie im im Be
             ...
         ```
 
-#### Eine Migration initialisieren
+### Eine Migration initialisieren
 
 Um eine Migration manuell zu initialisieren, führen Sie den folgenden Befehl aus:
 
@@ -2555,7 +3276,7 @@ Das **Anti-DDoS**-Plugin bietet fortschrittlichen Schutz gegen Distributed Denia
 
 Durch die Verwendung eines **gleitenden Fenstermechanismus** unterhält das Plugin ein In-Memory-Wörterbuch mit Zeitstempeln von Anfragen, um anormale Verkehrsspitzen von einzelnen IP-Adressen zu erkennen. Basierend auf dem konfigurierten Sicherheitsmodus kann es entweder die beleidigenden Verbindungen blockieren oder die verdächtige Aktivität zur weiteren Überprüfung protokollieren.
 
-#### Funktionen
+### Funktionen
 
 -   **Echtzeit-Verkehrsanalyse:** Überwacht kontinuierlich eingehende Anfragen, um potenzielle DDoS-Angriffe zu erkennen.
 -   **Gleitender Fenstermechanismus:** Verfolgt die jüngsten Anforderungsaktivitäten innerhalb eines konfigurierbaren Zeitfensters.
@@ -2565,7 +3286,7 @@ Durch die Verwendung eines **gleitenden Fenstermechanismus** unterhält das Plug
 -   **Optimierter In-Memory-Datenspeicher:** Gewährleistet Hochgeschwindigkeits-Lookups und effizientes Metrik-Tracking.
 -   **Automatische Bereinigung:** Löscht regelmäßig veraltete Daten, um eine optimale Leistung zu gewährleisten.
 
-#### Konfiguration
+### Konfiguration
 
 Passen Sie das Verhalten des Plugins mit den folgenden Einstellungen an:
 
@@ -2578,7 +3299,7 @@ Passen Sie das Verhalten des Plugins mit den folgenden Einstellungen an:
 | `ANTIDDOS_STATUS_CODES`      | `429 403 444` | global  | nein     | HTTP-Statuscodes, die als verdächtig gelten und zur Auslösung von Anti-DDoS-Aktionen verwendet werden.                       |
 | `ANTIDDOS_DISTINCT_IP`       | `5`           | global  | nein     | Mindestanzahl unterschiedlicher IPs, die den Schwellenwert überschreiten müssen, bevor der Blockierungsmodus erzwungen wird. |
 
-#### Bewährte Verfahren
+### Bewährte Verfahren
 
 -   **Schwellenwert-Tuning:** Passen Sie `ANTIDDOS_THRESHOLD` und `ANTIDDOS_WINDOW_TIME` basierend auf Ihren typischen Verkehrsmustern an.
 -   **Statuscode-Überprüfung:** Aktualisieren Sie `ANTIDDOS_STATUS_CODES` regelmäßig, um neue oder sich entwickelnde verdächtige Verhaltensweisen zu erfassen.
@@ -2594,7 +3315,7 @@ Das Benutzerverwaltungs-Plugin bietet eine robuste Schnittstelle zur Verwaltung 
 
 Mit diesem Plugin können Administratoren mühelos Benutzerkonten erstellen, aktualisieren und deaktivieren, Benutzerrollen verwalten, die Zwei-Faktor-Authentifizierung (2FA) umschalten und detaillierte Benutzerinformationen wie letzte Anmeldezeitstempel und Kontostatus (aktiv oder inaktiv) anzeigen. Dieses Plugin wurde mit Blick auf Sicherheit und Benutzerfreundlichkeit entwickelt und vereinfacht routinemäßige Benutzerverwaltungsaufgaben, während es gleichzeitig die Einhaltung von Vorschriften und die Überprüfbarkeit gewährleistet.
 
-#### Funktionen
+### Funktionen
 
 -   **Benutzerkonto-Operationen:** Importieren im CSV/XSLX-Format, Erstellen, Bearbeiten und Löschen von Benutzerkonten mit Leichtigkeit.
 -   **Rollenbasierte Zugriffskontrolle:** Weisen Sie Benutzerrollen zu und ändern Sie sie, um Berechtigungen und Zugriffsebenen zu verwalten.
@@ -2621,7 +3342,7 @@ Mit diesem Plugin können Administratoren mühelos Benutzerkonten erstellen, akt
 
 Das Easy Resolve Plugin ermöglicht es Ihnen, Fehlalarme und wiederkehrende Probleme direkt von der Berichtsseite aus schnell zu beheben. Es wandelt geführte "Resolve"-Aktionen in sichere, bereichsbezogene Konfigurationsupdates um – ohne manuelle Bearbeitung.
 
-#### Funktionen
+### Funktionen
 
 -   Ein-Klick-Aktionen aus Berichten und Berichtsdetails.
 -   Kontextbezogene Vorschläge für ModSecurity, Blacklist und DNSBL.
@@ -2667,3 +3388,584 @@ Das Easy Resolve Plugin ermöglicht es Ihnen, Fehlalarme und wiederkehrende Prob
   <figcaption>Blacklist - URI</figcaption>
 </figure>
 </div>
+
+## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag" title="Load Balancer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
+Das Load Balancer Plugin verwandelt BunkerWeb in einen Traffic-Director mit Schutzvorrichtungen. Deklarieren Sie Upstream-Pools einmal, leiten Sie Ihren Reverse-Proxy darauf und lassen Sie das health-aware Balancing die Benutzer auf reaktionsfähigen Backends halten. Der Sticky-Cookie-Modus gibt automatisch einen `BWLBID`-Cookie aus, damit Sitzungen dort verankert bleiben, wo Sie möchten.
+
+### Features
+
+- Per-Upstream-Blöcke: Pools benennen und über Reverse-Proxy-Hosts wiederverwenden.
+- Flexibles Balancing: Round-Robin standardmäßig oder Sticky über IP oder signiertem Cookie.
+- Smarte Ziele: Optionale DNS-Auflösung für Hostname-Backends plus Keepalive-Tuning.
+- Eingebaute Gesundheit: HTTP/HTTPS-Probes mit benutzerdefinierten Pfaden, Intervallen, Statuscodes und SSL-Checks.
+- Sitzungskontinuität: Automatischer `BWLBID`-Cookie bei Aktivierung des Sticky-Cookie-Modus.
+
+### Konfiguration
+
+**Upstream-Definition**
+
+| Einstellung                               | Standard      | Kontext | Mehrfach | Beschreibung                                                                           |
+| ----------------------------------------- | ------------- | ------- | -------- | -------------------------------------------------------------------------------------- |
+| `LOADBALANCER_UPSTREAM_NAME`              |               | global  | ja       | Upstream-Bezeichner (referenziert von `REVERSE_PROXY_HOST`).                           |
+| `LOADBALANCER_UPSTREAM_SERVERS`           |               | global  | ja       | Leerzeichen-getrennte Liste von Backend-Adressen (z.B. `10.0.0.1:8080 10.0.0.2:8080`). |
+| `LOADBALANCER_UPSTREAM_MODE`              | `round-robin` | global  | ja       | Balancing-Strategie (`round-robin` oder `sticky`).                                     |
+| `LOADBALANCER_UPSTREAM_STICKY_METHOD`     | `ip`          | global  | ja       | Sticky-Methode (`ip` oder `cookie`). Cookie-Modus gibt `BWLBID` aus.                   |
+| `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`          | global  | ja       | Upstream-Hostnamen über DNS auflösen.                                                  |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE`         |               | global  | ja       | Keepalive-Verbindungen pro Worker.                                                     |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT` | `60s`         | global  | ja       | Idle-Timeout für Keepalive-Verbindungen.                                               |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`    | `1h`          | global  | ja       | Maximale Lebensdauer für Keepalive-Verbindungen.                                       |
+
+**Gesundheitsprüfungen**
+
+| Einstellung                               | Standard  | Kontext | Mehrfach | Beschreibung                                                    |
+| ----------------------------------------- | --------- | ------- | -------- | --------------------------------------------------------------- |
+| `LOADBALANCER_HEALTHCHECK_DICT_SIZE`      | `10m`     | global  | nein     | Shared Dictionary-Größe für Gesundheitsprüfungsstatus.          |
+| `LOADBALANCER_HEALTHCHECK_URL`            | `/status` | global  | ja       | Pfad zum Sondieren auf jedem Backend.                           |
+| `LOADBALANCER_HEALTHCHECK_INTERVAL`       | `2000`    | global  | ja       | Intervall zwischen Prüfungen (ms).                              |
+| `LOADBALANCER_HEALTHCHECK_TIMEOUT`        | `1000`    | global  | ja       | Timeout pro Prüfung (ms).                                       |
+| `LOADBALANCER_HEALTHCHECK_FALL`           | `3`       | global  | ja       | Aufeinanderfolgende Fehler vor dem Markieren als down.          |
+| `LOADBALANCER_HEALTHCHECK_RISE`           | `1`       | global  | ja       | Aufeinanderfolgende Erfolge vor dem Markieren als up.           |
+| `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`     | global  | ja       | Leerzeichen-getrennte Liste gültiger HTTP-Statuscodes.          |
+| `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`      | global  | ja       | Maximale gleichzeitige Sonden.                                  |
+| `LOADBALANCER_HEALTHCHECK_TYPE`           | `http`    | global  | ja       | Protokoll für Gesundheitsprüfungen (`http` oder `https`).       |
+| `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`     | global  | ja       | TLS-Zertifikate bei HTTPS-Prüfungen verifizieren.               |
+| `LOADBALANCER_HEALTHCHECK_HOST`           |           | global  | ja       | Host-Header während Prüfungen überschreiben (nützlich für SNI). |
+
+### Schnellstart
+
+1. Definieren Sie Ihren Pool: Setzen Sie `LOADBALANCER_UPSTREAM_NAME=my-app` und listen Sie Ziele in `LOADBALANCER_UPSTREAM_SERVERS` (z.B. `10.0.0.1:8080 10.0.0.2:8080`).
+2. Leiten Sie Traffic: Setzen Sie `REVERSE_PROXY_HOST=http://my-app`, damit der Reverse-Proxy den benannten Upstream verwendet.
+3. Wählen Sie einen Modus: Behalten Sie das Standard-Round-Robin bei oder setzen Sie `LOADBALANCER_UPSTREAM_MODE=sticky` mit `LOADBALANCER_UPSTREAM_STICKY_METHOD=cookie` oder `ip`.
+4. Fügen Sie Gesundheit hinzu: Behalten Sie `/status` bei oder passen Sie URLs, Intervalle und gültige Statuscodes an, um Ihr App-Verhalten widerzuspiegeln.
+5. Stimmen Sie Verbindungen ab: Konfigurieren Sie Keepalive-Werte, um Backend-Verbindungen wiederzuverwenden und Handshake-Overhead zu reduzieren.
+
+### Nutzungstipps
+
+- Passen Sie `REVERSE_PROXY_HOST` an `LOADBALANCER_UPSTREAM_NAME` an, wenn Sie Sticky-Cookies verwenden, damit Clients an den richtigen Pool gebunden werden.
+- Halten Sie Gesundheitsprüfungsintervalle und Timeouts ausgewogen, um Flattern auf langsamen Links zu vermeiden.
+- Aktivieren Sie `LOADBALANCER_UPSTREAM_RESOLVE`, wenn Sie auf Hostnamen zeigen, die sich über DNS ändern können.
+- Stimmen Sie Keepalive-Werte ab, um Backend-Kapazität und Ziele für die Wiederverwendung von Verbindungen widerzuspiegeln.
+
+## Custom Pages <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+Das Custom Pages Plugin ermöglicht es Ihnen, die eingebauten Seiten von BunkerWeb (Fehlerseiten, Standard-Server-Seite und Antibot-Challenge-Seiten) durch Ihre eigenen benutzerdefinierten HTML- oder Lua-Vorlagen zu ersetzen. Dies ermöglicht es Ihnen, ein einheitliches Branding auf allen benutzerseitigen Seiten von BunkerWeb beizubehalten.
+
+### Funktionen
+
+- **Benutzerdefinierte Fehlerseiten pro Service** und **Antibot-Challenge-Seiten** (Captcha, JavaScript-Prüfung, reCAPTCHA, hCaptcha, Turnstile, mCaptcha).
+- **Globale benutzerdefinierte Standard-Server-Seite** für den Fallback/Standard-vhost.
+- **HTML-Parsing und Lua-Vorlagen-Tag-Balanceprüfungen** bevor eine Vorlage akzeptiert wird.
+- **Automatisches Caching** nach `/var/cache/bunkerweb/custom_pages` mit Änderungserkennung für Neuladen.
+- **Pro-Site oder globale Konfiguration** über Einstellungen/UI oder Umgebungsvariablen.
+
+### Wie es funktioniert
+
+1. Beim Start (oder wenn sich Einstellungen ändern) liest der `custom-pages.py`-Job die konfigurierten Vorlagenpfade.
+2. Jede Datei muss existieren und vom Scheduler lesbar sein; der Job validiert HTML-Struktur und ausgeglichene Lua-Vorlagen-Tags (`{% %}`, `{{ }}`, `{* *}`).
+3. Akzeptierte Dateien werden unter `/var/cache/bunkerweb/custom_pages/<type>.html` zwischengespeichert; fehlende/leere Einstellungen entfernen die gecachte Datei.
+4. NGINX wird über `$template_root` auf das Cache-Verzeichnis verwiesen, wenn mindestens eine gecachte Seite existiert, sodass Ihre Vorlagen anstelle der Standardseiten ausgeliefert werden.
+
+### Konfigurationseinstellungen
+
+| Einstellung                      | Standard | Kontext   | Beschreibung                                                            |
+| -------------------------------- | -------- | --------- | ----------------------------------------------------------------------- |
+| `CUSTOM_ERROR_PAGE`              |          | multisite | Absoluter Pfad zur benutzerdefinierten Fehlerseiten-Vorlage.            |
+| `CUSTOM_DEFAULT_SERVER_PAGE`     |          | global    | Absoluter Pfad zur benutzerdefinierten Standard-Server-Seiten-Vorlage.  |
+| `CUSTOM_ANTIBOT_CAPTCHA_PAGE`    |          | multisite | Absoluter Pfad zur benutzerdefinierten Antibot-CAPTCHA-Challenge-Seite. |
+| `CUSTOM_ANTIBOT_JAVASCRIPT_PAGE` |          | multisite | Absoluter Pfad zur benutzerdefinierten Antibot-JavaScript-Prüfseite.    |
+| `CUSTOM_ANTIBOT_RECAPTCHA_PAGE`  |          | multisite | Absoluter Pfad zur benutzerdefinierten Antibot-reCAPTCHA-Seite.         |
+| `CUSTOM_ANTIBOT_HCAPTCHA_PAGE`   |          | multisite | Absoluter Pfad zur benutzerdefinierten Antibot-hCaptcha-Seite.          |
+| `CUSTOM_ANTIBOT_TURNSTILE_PAGE`  |          | multisite | Absoluter Pfad zur benutzerdefinierten Antibot-Turnstile-Seite.         |
+| `CUSTOM_ANTIBOT_MCAPTCHA_PAGE`   |          | multisite | Absoluter Pfad zur benutzerdefinierten Antibot-mCaptcha-Seite.          |
+
+### Vorlagenvariablen-Referenz
+
+BunkerWeb-Vorlagen verwenden die [lua-resty-template](https://github.com/bungle/lua-resty-template) Engine. Die folgenden Variablen sind je nach Seitentyp verfügbar:
+
+#### Fehlerseiten-Variablen
+
+Diese Variablen sind in benutzerdefinierten Fehlerseiten-Vorlagen (`CUSTOM_ERROR_PAGE`) verfügbar:
+
+| Variable         | Typ    | Beschreibung                                                |
+| ---------------- | ------ | ----------------------------------------------------------- |
+| `title`          | string | Vollständiger Seitentitel (z.B. `403                        | Forbidden`) |
+| `error_title`    | string | Fehlertiteltext (z.B. `Forbidden`)                          |
+| `error_code`     | string | HTTP-Statuscode (z.B. `403`, `404`, `500`)                  |
+| `error_text`     | string | Beschreibende Fehlermeldung                                 |
+| `error_type`     | string | Fehlerkategorie: `client` (4xx) oder `server` (5xx)         |
+| `error_solution` | string | Vorgeschlagener Lösungstext                                 |
+| `nonce_script`   | string | Nonce-Wert für Inline-`<script>`-Tags (CSP-Konformität)     |
+| `nonce_style`    | string | Nonce-Wert für Inline-`<style>`-Tags (CSP-Konformität)      |
+| `request_id`     | string | Eindeutige Request-ID für Debugging                         |
+| `client_ip`      | string | IP-Adresse des Clients                                      |
+| `request_time`   | string | Zeitstempel der Anfrage (Format: `YYYY-MM-DD HH:MM:SS UTC`) |
+
+#### Standard-Server-Seiten-Variablen
+
+Diese Variablen sind in benutzerdefinierten Standard-Server-Seiten-Vorlagen (`CUSTOM_DEFAULT_SERVER_PAGE`) verfügbar:
+
+| Variable      | Typ    | Beschreibung                                           |
+| ------------- | ------ | ------------------------------------------------------ |
+| `nonce_style` | string | Nonce-Wert für Inline-`<style>`-Tags (CSP-Konformität) |
+
+#### Antibot-Challenge-Seiten-Variablen
+
+Diese Variablen sind in Antibot-Challenge-Seiten-Vorlagen verfügbar:
+
+**Gemeinsame Variablen (alle Antibot-Seiten):**
+
+| Variable       | Typ    | Beschreibung                                            |
+| -------------- | ------ | ------------------------------------------------------- |
+| `antibot_uri`  | string | Formular-Action-URI zum Absenden der Challenge          |
+| `nonce_script` | string | Nonce-Wert für Inline-`<script>`-Tags (CSP-Konformität) |
+| `nonce_style`  | string | Nonce-Wert für Inline-`<style>`-Tags (CSP-Konformität)  |
+
+**JavaScript-Challenge (`CUSTOM_ANTIBOT_JAVASCRIPT_PAGE`):**
+
+| Variable | Typ    | Beschreibung                               |
+| -------- | ------ | ------------------------------------------ |
+| `random` | string | Zufälliger String für Proof-of-Work-Lösung |
+
+**Captcha (`CUSTOM_ANTIBOT_CAPTCHA_PAGE`):**
+
+| Variable  | Typ    | Beschreibung                                |
+| --------- | ------ | ------------------------------------------- |
+| `captcha` | string | Base64-kodiertes Captcha-Bild (JPEG-Format) |
+
+**reCAPTCHA (`CUSTOM_ANTIBOT_RECAPTCHA_PAGE`):**
+
+| Variable            | Typ     | Beschreibung                                     |
+| ------------------- | ------- | ------------------------------------------------ |
+| `recaptcha_sitekey` | string  | Ihr reCAPTCHA-Site-Key                           |
+| `recaptcha_classic` | boolean | `true` bei klassischem reCAPTCHA, `false` für v3 |
+
+**hCaptcha (`CUSTOM_ANTIBOT_HCAPTCHA_PAGE`):**
+
+| Variable           | Typ    | Beschreibung          |
+| ------------------ | ------ | --------------------- |
+| `hcaptcha_sitekey` | string | Ihr hCaptcha-Site-Key |
+
+**Turnstile (`CUSTOM_ANTIBOT_TURNSTILE_PAGE`):**
+
+| Variable            | Typ    | Beschreibung                      |
+| ------------------- | ------ | --------------------------------- |
+| `turnstile_sitekey` | string | Ihr Cloudflare Turnstile-Site-Key |
+
+**mCaptcha (`CUSTOM_ANTIBOT_MCAPTCHA_PAGE`):**
+
+| Variable           | Typ    | Beschreibung          |
+| ------------------ | ------ | --------------------- |
+| `mcaptcha_sitekey` | string | Ihr mCaptcha-Site-Key |
+| `mcaptcha_url`     | string | Ihre mCaptcha-URL     |
+
+### Vorlagensyntax
+
+Vorlagen verwenden Lua-Vorlagensyntax mit den folgenden Trennzeichen:
+
+- `{{ variable }}` – Variable ausgeben (HTML-escaped)
+- `{* variable *}` – Variable ausgeben (roh, nicht escaped)
+- `{% lua_code %}` – Lua-Code ausführen (Bedingungen, Schleifen, etc.)
+- `{-raw-}` ... `{-raw-}` – Rohblock (keine Verarbeitung)
+
+**Wichtig**: Verwenden Sie immer Nonce-Attribute für Inline-Skripte und Styles, um die Content Security Policy (CSP) einzuhalten:
+
+```html
+<style nonce="{*nonce_style*}">
+  /* Ihr CSS hier */
+</style>
+<script nonce="{*nonce_script*}">
+  // Ihr JavaScript hier
+</script>
+```
+
+### Beispiele
+
+=== "Benutzerdefinierte Fehlerseite"
+
+    Erstellen Sie eine benutzerdefinierte Fehlerseiten-Vorlage unter `/etc/bunkerweb/templates/error.html`:
+
+    ```html
+    {-raw-}<!doctype html>
+    <html lang="de">
+      <head>
+        <meta charset="utf-8" />
+        <title>{{ title }}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {-raw-}
+        <style nonce="{*nonce_style*}">
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #f5f5f5;
+            color: #333;
+          }
+          .container {
+            text-align: center;
+            padding: 2rem;
+          }
+          .error-code {
+            font-size: 6rem;
+            font-weight: bold;
+            color: {% if error_type == "server" %}#dc3545{% else %}#ffc107{% end %};
+            margin: 0;
+          }
+          .error-title {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+          }
+          .error-text {
+            color: #666;
+            margin-bottom: 1rem;
+          }
+          .request-info {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 2rem;
+          }
+        </style>
+        {-raw-}
+      </head>
+      <body>
+        <div class="container">
+          <p class="error-code">{{ error_code }}</p>
+          <h1 class="error-title">{{ error_title }}</h1>
+          <p class="error-text">{{ error_text }}</p>
+          <p class="error-text">{{ error_solution }}</p>
+          <div class="request-info">
+            {% if request_id %}
+            <p>Anfrage-ID: <code>{{ request_id }}</code></p>
+            {% end %}
+            {% if request_time %}
+            <p>Zeit: {{ request_time }}</p>
+            {% end %}
+          </div>
+        </div>
+      </body>
+    </html>
+    {-raw-}
+    ```
+
+=== "Benutzerdefinierte Captcha-Seite"
+
+    Erstellen Sie eine benutzerdefinierte Captcha-Challenge-Seite unter `/etc/bunkerweb/templates/captcha.html`:
+
+    ```html
+    {-raw-}<!doctype html>
+    <html lang="de">
+      <head>
+        <meta charset="utf-8" />
+        <title>Sicherheitsprüfung</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {-raw-}
+        <style nonce="{*nonce_style*}">
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          }
+          .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+          }
+          h1 {
+            color: #333;
+            margin-bottom: 1rem;
+          }
+          .captcha-img {
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+          }
+          input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1.2rem;
+            border: 2px solid #ddd;
+            border-radius: 0.5rem;
+            text-align: center;
+            box-sizing: border-box;
+          }
+          button {
+            margin-top: 1rem;
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+          }
+          button:hover {
+            background: #5a6fd6;
+          }
+        </style>
+        {-raw-}
+      </head>
+      <body>
+        <div class="card">
+          <h1>🔒 Sicherheitsprüfung</h1>
+          <p>Bitte geben Sie den Text ein, den Sie unten sehen, um fortzufahren.</p>
+          {-raw-}
+          <form method="POST" action="{*antibot_uri*}">
+            <img class="captcha-img" src="data:image/jpeg;base64,{*captcha*}" alt="Captcha" />
+            {-raw-}
+            <input type="text" name="captcha" placeholder="Code eingeben" required autocomplete="off" />
+            <button type="submit">Verifizieren</button>
+          </form>
+        </div>
+      </body>
+    </html>
+    {-raw-}
+    ```
+
+=== "Benutzerdefinierte Standard-Server-Seite"
+
+    Erstellen Sie eine benutzerdefinierte Standard-Server-Seite unter `/etc/bunkerweb/templates/default.html`:
+
+    ```html
+    {-raw-}<!doctype html>
+    <html lang="de">
+      <head>
+        <meta charset="utf-8" />
+        <title>Willkommen</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {-raw-}
+        <style nonce="{*nonce_style*}">
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #1a1a2e;
+            color: #eee;
+          }
+          .container {
+            text-align: center;
+          }
+          h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+          }
+          p {
+            color: #888;
+          }
+        </style>
+        {-raw-}
+      </head>
+      <body>
+        <div class="container">
+          <h1>🛡️ Geschützt durch BunkerWeb</h1>
+          <p>Dieser Server ist sicher und bereit.</p>
+        </div>
+      </body>
+    </html>
+    {-raw-}
+    ```
+
+### Bereitstellungsbeispiele
+
+=== "Linux"
+
+    1. Erstellen Sie Ihre Vorlagendateien in einem Verzeichnis Ihrer Wahl (z.B. `/opt/bunkerweb/templates/`):
+
+        ```bash
+        sudo mkdir -p /opt/bunkerweb/templates
+        sudo nano /opt/bunkerweb/templates/error.html
+        # Fügen Sie Ihre benutzerdefinierte Fehlerseiten-Vorlage ein
+        ```
+
+    2. Konfigurieren Sie BunkerWeb durch Bearbeiten von `/etc/bunkerweb/variables.env`:
+
+        ```conf
+        # Benutzerdefinierte Fehlerseite für alle Dienste (oder pro Dienst mit Präfix)
+        CUSTOM_ERROR_PAGE=/opt/bunkerweb/templates/error.html
+
+        # Benutzerdefinierte Standard-Server-Seite (nur global)
+        CUSTOM_DEFAULT_SERVER_PAGE=/opt/bunkerweb/templates/default.html
+
+        # Benutzerdefinierte Captcha-Seite (pro Dienst oder global)
+        CUSTOM_ANTIBOT_CAPTCHA_PAGE=/opt/bunkerweb/templates/captcha.html
+        ```
+
+    3. BunkerWeb neu laden:
+
+        ```bash
+        sudo systemctl reload bunkerweb
+        ```
+
+=== "Docker"
+
+    Der **Scheduler** ist für das Lesen, Validieren und Cachen Ihrer benutzerdefinierten Vorlagen verantwortlich. Nur der Scheduler benötigt Zugriff auf die Vorlagendateien—BunkerWeb erhält die validierte Konfiguration automatisch.
+
+    1. Erstellen Sie Ihre Vorlagendateien in einem lokalen Verzeichnis (z.B. `./templates/`) und setzen Sie die korrekten Berechtigungen:
+
+        ```bash
+        mkdir templates && \
+        chown root:101 templates && \
+        chmod 770 templates
+        ```
+
+        !!! info "Warum UID/GID 101?"
+            Der Scheduler-Container läuft als **unprivilegierter Benutzer mit UID 101 und GID 101**. Das Verzeichnis muss für diesen Benutzer lesbar sein, damit der Scheduler auf Ihre Vorlagen zugreifen kann.
+
+        Wenn der Ordner bereits existiert:
+
+        ```bash
+        chown -R root:101 templates && \
+        chmod -R 770 templates
+        ```
+
+        Bei Verwendung von [Docker im Rootless-Modus](https://docs.docker.com/engine/security/rootless) oder [Podman](https://podman.io/) werden Container-UIDs/GIDs neu zugeordnet. Überprüfen Sie Ihre subuid/subgid-Bereiche:
+
+        ```bash
+        grep ^$(whoami): /etc/subuid && \
+        grep ^$(whoami): /etc/subgid
+        ```
+
+        Wenn der Bereich beispielsweise bei **100000** beginnt, wird die effektive GID zu **100100** (100000 + 100):
+
+        ```bash
+        mkdir templates && \
+        sudo chgrp 100100 templates && \
+        chmod 770 templates
+        ```
+
+    2. Mounten Sie das Vorlagenverzeichnis zum **Scheduler** und konfigurieren Sie die Einstellungen am Scheduler (der Scheduler fungiert als Manager und verteilt die Konfiguration an BunkerWeb-Worker). Sie können die Vorlagen an jeden beliebigen Pfad im Container mounten:
+
+        ```yaml
+        services:
+          bunkerweb:
+            image: bunkerity/bunkerweb:1.6.7~rc1
+            # ... andere Einstellungen (keine Umgebungsvariablen für Custom Pages hier benötigt)
+
+          bw-scheduler:
+            image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+            volumes:
+              - ./templates:/custom_templates:ro
+            environment:
+              - CUSTOM_ERROR_PAGE=/custom_templates/error.html
+              - CUSTOM_DEFAULT_SERVER_PAGE=/custom_templates/default.html
+              - CUSTOM_ANTIBOT_CAPTCHA_PAGE=/custom_templates/captcha.html
+              # ... andere Einstellungen
+        ```
+
+    !!! warning "Scheduler-Zugriff erforderlich"
+        Wenn der Scheduler die Vorlagendateien nicht lesen kann (wegen fehlendem Mount oder falschen Berechtigungen), werden die Vorlagen stillschweigend ignoriert und die Standardseiten stattdessen verwendet. Überprüfen Sie die Scheduler-Logs auf Validierungsfehler.
+
+=== "Kubernetes"
+
+    Der **Scheduler** ist für das Lesen, Validieren und Cachen Ihrer benutzerdefinierten Vorlagen verantwortlich. Sie müssen die Vorlagen zum Scheduler-Pod mounten.
+
+    1. Erstellen Sie eine ConfigMap mit Ihren Vorlagen:
+
+        ```yaml
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: bunkerweb-custom-templates
+        data:
+          error.html: |
+            {-raw-}<!doctype html>
+            <html lang="de">
+              <head>
+                <meta charset="utf-8" />
+                <title>{{ title }}</title>
+                {-raw-}
+                <style nonce="{*nonce_style*}">
+                  body { font-family: sans-serif; text-align: center; padding: 2rem; }
+                  .error-code { font-size: 4rem; color: #dc3545; }
+                </style>
+                {-raw-}
+              </head>
+              <body>
+                <p class="error-code">{{ error_code }}</p>
+                <h1>{{ error_title }}</h1>
+                <p>{{ error_text }}</p>
+              </body>
+            </html>
+            {-raw-}
+          captcha.html: |
+            {-raw-}<!doctype html>
+            <html lang="de">
+              <head>
+                <meta charset="utf-8" />
+                <title>Sicherheitsprüfung</title>
+                {-raw-}
+                <style nonce="{*nonce_style*}">
+                  body { font-family: sans-serif; text-align: center; padding: 2rem; }
+                </style>
+                {-raw-}
+              </head>
+              <body>
+                <h1>Bitte bestätigen Sie, dass Sie ein Mensch sind</h1>
+                {-raw-}
+                <form method="POST" action="{*antibot_uri*}">
+                  <img src="data:image/jpeg;base64,{*captcha*}" alt="Captcha" />
+                  {-raw-}
+                  <input type="text" name="captcha" placeholder="Code eingeben" required />
+                  <button type="submit">Verifizieren</button>
+                </form>
+              </body>
+            </html>
+            {-raw-}
+        ```
+
+    2. Mounten Sie die Vorlagen-ConfigMap zum **Scheduler**-Pod und konfigurieren Sie die Einstellungen als Umgebungsvariablen:
+
+        ```yaml
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: bunkerweb-scheduler
+        spec:
+          template:
+            spec:
+              containers:
+                - name: bunkerweb-scheduler
+                  image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+                  env:
+                    - name: CUSTOM_ERROR_PAGE
+                      value: "/custom_templates/error.html"
+                    - name: CUSTOM_ANTIBOT_CAPTCHA_PAGE
+                      value: "/custom_templates/captcha.html"
+                    # ... andere Einstellungen
+                  volumeMounts:
+                    - name: custom-templates
+                      mountPath: /custom_templates
+                      readOnly: true
+                  # ... andere Container-Einstellungen
+              volumes:
+                - name: custom-templates
+                  configMap:
+                    name: bunkerweb-custom-templates
+              # ... andere Pod-Einstellungen
+        ```
+
+    !!! tip "Verwendung des BunkerWeb Ingress Controllers"
+        Wenn Sie den BunkerWeb Ingress Controller verwenden, ist der Scheduler im Controller eingebettet. Mounten Sie die ConfigMap stattdessen zum Controller-Pod.
+
+### Hinweise und Fehlerbehebung
+
+- **Pfade müssen absolut sein** und mit einem Dateinamen enden; leere Werte deaktivieren die entsprechende benutzerdefinierte Seite und entfernen ihren Cache.
+- **Wenn die Validierung fehlschlägt** (fehlerhaftes HTML oder unausgeglichene Lua-Tags), wird die Vorlage übersprungen und die Standardseite bleibt aktiv. Überprüfen Sie die Scheduler-Logs für Details.
+- **Gecachte Dateien** befinden sich in `/var/cache/bunkerweb/custom_pages`; das Aktualisieren der Quelldatei reicht aus—der Job erkennt den neuen Hash und lädt NGINX automatisch neu.
+- **CSP-Konformität**: Verwenden Sie immer die Variablen `nonce_script` und `nonce_style` für Inline-Skripte und Styles, um eine ordnungsgemäße Content Security Policy-Handhabung sicherzustellen.
+- **Vorlagen testen**: Sie können Ihre Vorlagen lokal mit einer Lua-Template-Engine rendern, bevor Sie sie in BunkerWeb bereitstellen.

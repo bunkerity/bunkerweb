@@ -68,7 +68,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     Für containerbasierte Integrationen empfehlen wir, die Protokolle des BunkerWeb-Containers an einen Syslog-Dienst umzuleiten, damit CrowdSec leicht darauf zugreifen kann. Hier ist ein Beispiel für eine syslog-ng-Konfiguration, die die Rohprotokolle von BunkerWeb in einer lokalen Datei `/var/log/bunkerweb.log` speichert:
 
     ```syslog
-    @version: 4.8
+    @version: 4.10
 
     source s_net {
         udp(
@@ -82,7 +82,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     };
 
     destination d_file {
-        file("/var/log/bunkerweb.log" template(t_imp));
+        file("/var/log/bunkerweb.log" template(t_imp) logrotate(enable(yes), size(100MB), rotations(7)));
     };
 
     log {
@@ -103,7 +103,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -120,7 +120,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
             syslog-address: "udp://10.20.30.254:514" # Die IP-Adresse des syslog-Dienstes
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -168,7 +168,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
           - bw-universe
 
       syslog:
-        image: balabit/syslog-ng:4.9.0
+        image: balabit/syslog-ng:4.10.2
         cap_add:
           - NET_BIND_SERVICE  # An niedrige Ports binden
           - NET_BROADCAST  # Broadcasts senden

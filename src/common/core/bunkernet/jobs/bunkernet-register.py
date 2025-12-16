@@ -10,10 +10,10 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from bunkernet import register
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
-LOGGER = setup_logger("BUNKERNET.register")
+LOGGER = getLogger("BUNKERNET.REGISTER")
 exit_status = 0
 
 try:
@@ -21,7 +21,7 @@ try:
     bunkernet_activated = False
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
-        for first_server in getenv("SERVER_NAME", "www.example.com").split(" "):
+        for first_server in getenv("SERVER_NAME", "www.example.com").split():
             if getenv(f"{first_server}_USE_BUNKERNET", "yes") == "yes":
                 bunkernet_activated = True
                 break

@@ -8,7 +8,7 @@ Comment ça marche :
 4. Les paramètres de journalisation contrôlent les informations enregistrées et leur format.
 5. Ces paramètres constituent la base sur laquelle s’appuient tous les autres plugins et fonctionnalités de BunkerWeb.
 
-### Mode multisite
+### Mode multisite {#multisite-mode}
 
 Lorsque `MULTISITE` vaut `yes`, BunkerWeb peut héberger et protéger plusieurs sites web, chacun avec sa propre configuration. Ce mode est utile notamment pour :
 
@@ -23,7 +23,7 @@ En mode multisite, chaque site est identifié par un `SERVER_NAME` unique. Pour 
 
 Cette approche garantit que les paramètres sont appliqués au bon site dans un environnement multisite.
 
-### Paramètres multiples
+### Paramètres multiples {#multiple-settings}
 
 Certains paramètres de BunkerWeb supportent plusieurs configurations pour une même fonctionnalité. Pour définir plusieurs groupes de paramètres, ajoutez un suffixe numérique au nom du paramètre. Par exemple :
 
@@ -31,6 +31,14 @@ Certains paramètres de BunkerWeb supportent plusieurs configurations pour une m
 - `REVERSE_PROXY_URL_2=/anotherdir` et `REVERSE_PROXY_HOST_2=http://myhost2` définissent le second reverse proxy.
 
 Ce modèle permet de gérer plusieurs configurations pour des fonctionnalités comme les reverse proxies, les ports, ou d’autres paramètres nécessitant des valeurs distinctes selon les cas d’usage.
+
+### Ordre d'exécution des plugins {#plugin-order}
+
+Vous pouvez définir l’ordre d’exécution via des listes séparées par des espaces :
+
+- Phases globales : `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_TIMER`.
+- Phases par site : `PLUGINS_ORDER_SET`, `PLUGINS_ORDER_ACCESS`, `PLUGINS_ORDER_SSL_CERTIFICATE`, `PLUGINS_ORDER_HEADER`, `PLUGINS_ORDER_LOG`, `PLUGINS_ORDER_PREREAD`, `PLUGINS_ORDER_LOG_STREAM`, `PLUGINS_ORDER_LOG_DEFAULT`.
+- Sémantique : les plugins listés s’exécutent en premier pour la phase ; les autres s’exécutent ensuite dans leur séquence normale. Séparez les IDs uniquement par des espaces.
 
 ### Modes de sécurité {#security-modes}
 
@@ -122,11 +130,13 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
 
 === "Paramètres de journalisation"
 
-    | Paramètre          | Valeur par défaut                                                                                                                          | Contexte | Multiple | Description                                                                                                                          |
-    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-    | `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global   | Non      | **Format des logs :** Format utilisé pour les logs d’accès.                                                                          |
-    | `LOG_LEVEL`        | `notice`                                                                                                                                   | global   | Non      | **Niveau de logs :** Verbosité des logs d’erreur. Options : `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`.    |
-    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global   | Non      | **Niveau des timers :** Niveau de log pour les timers. Options : `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`. |
+    | Paramètre          | Valeur par défaut                                                                                                                          | Contexte | Multiple | Description                                                                                                                                                    |
+    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global   | Non      | **Format des logs :** Format utilisé pour les logs d’accès.                                                                                                    |
+    | `ACCESS_LOG`       | `/var/log/bunkerweb/access.log`                                                                                                            | global   | Oui      | **Chemin du log d'accès :** Fichier, `syslog:server=hôte[:port][,param=valeur]` ou tampon partagé `memory:nom:taille` ; mettez `off` pour désactiver les logs. |
+    | `ERROR_LOG`        | `/var/log/bunkerweb/error.log`                                                                                                             | global   | Oui      | **Chemin du log d'erreur :** Fichier, `stderr`, `syslog:server=hôte[:port][,param=valeur]` ou `memory:taille`.                                                 |
+    | `LOG_LEVEL`        | `notice`                                                                                                                                   | global   | Oui      | **Niveau de logs :** Verbosité des logs d’erreur. Options : `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`.                              |
+    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global   | Non      | **Niveau des timers :** Niveau de log pour les timers. Options : `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.                           |
 
     !!! tip "Bonnes pratiques de journalisation"
         - En production, utilisez les niveaux `notice`, `warn` ou `error` pour limiter le volume de logs.

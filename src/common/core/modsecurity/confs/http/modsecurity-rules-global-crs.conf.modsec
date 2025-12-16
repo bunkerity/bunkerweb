@@ -88,7 +88,7 @@ SecAction \
   setvar:'tx.allowed_methods={{ ALLOWED_METHODS.replace("|", " ") }}'"
   {% else %}
     {%- set allowed_methods_list = [] -%}
-    {%- for server_name in SERVER_NAME.split(" ") -%}
+    {%- for server_name in SERVER_NAME.split() -%}
       {%- set server_allowed_methods = all[server_name + "_ALLOWED_METHODS"].split("|") -%}
       {%- for method in server_allowed_methods -%}
         {%- if method not in allowed_methods_list -%}

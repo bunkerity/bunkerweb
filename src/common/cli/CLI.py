@@ -18,7 +18,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 
 from common_utils import get_redis_client, handle_docker_secrets  # type: ignore
 
@@ -80,7 +80,7 @@ class CLI(ApiCaller):
     ICON_CLOCK = "⏱"
 
     def __init__(self):
-        self.__logger = setup_logger("CLI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+        self.__logger = getLogger("CLI")
 
         # Handle Docker secrets first
         docker_secrets = handle_docker_secrets()

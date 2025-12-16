@@ -126,7 +126,7 @@ for _, st in ipairs({
       end)
 
       it("SET: with metadata and remember works correctly", function()
-        local ok = storage:set(name, key, value, long_ttl, time(), nil, nil, metadata, true)
+        local ok = storage:set(name, key, value, long_ttl, time(), nil, nil, metadata)
         assert.is_not_nil(ok)
 
         sleep(1)
@@ -138,9 +138,9 @@ for _, st in ipairs({
       end)
 
       it("SET: with metadata (long ttl) correctly appends metadata to collection", function()
-        local ok = storage:set(name, key, value, long_ttl, current_time, nil, nil, metadata, true)
-        ok = ok and storage:set(name, key1, value, long_ttl, current_time, nil, nil, metadata, true)
-        ok = ok and storage:set(name, key2, value, long_ttl, current_time, nil, nil, metadata, true)
+        local ok = storage:set(name, key, value, long_ttl, current_time, nil, nil, metadata)
+        ok = ok and storage:set(name, key1, value, long_ttl, current_time, nil, nil, metadata)
+        ok = ok and storage:set(name, key2, value, long_ttl, current_time, nil, nil, metadata)
         assert.is_not_nil(ok)
 
         sleep(1)
@@ -155,11 +155,11 @@ for _, st in ipairs({
       end)
 
       it("SET: with metadata (short ttl) correctly expires metadata", function()
-        local ok = storage:set(name, key, value, short_ttl, current_time, nil, nil, metadata, true)
+        local ok = storage:set(name, key, value, short_ttl, current_time, nil, nil, metadata)
 
         sleep(short_ttl + 1)
 
-        ok = ok and storage:set(name, key1, value, long_ttl, time(), nil, nil, metadata, true)
+        ok = ok and storage:set(name, key1, value, long_ttl, time(), nil, nil, metadata)
         assert.is_not_nil(ok)
 
         sleep(1)
@@ -177,24 +177,12 @@ for _, st in ipairs({
         local ok = storage:set(name, old_key, value, long_ttl, current_time)
         assert.is_not_nil(ok)
 
-        ok = storage:set(name, key, value, long_ttl, current_time, old_key, stale_ttl, nil, false)
+        ok = storage:set(name, key, value, long_ttl, current_time, old_key, stale_ttl, nil)
         assert.is_not_nil(ok)
 
         sleep(3)
 
         local v = storage:get(name, old_key, time())
-        assert.is_nil(v)
-      end)
-
-      it("SET: remember deletes file in old_key", function()
-        local stale_ttl = long_ttl
-        local ok = storage:set(name, old_key, value, long_ttl, current_time)
-        assert.is_not_nil(ok)
-
-        ok = storage:set(name, key, value, long_ttl, current_time, old_key, stale_ttl, nil, true)
-        assert.is_not_nil(ok)
-
-        local v = storage:get(name, old_key, current_time)
         assert.is_nil(v)
       end)
 
@@ -229,7 +217,7 @@ for _, st in ipairs({
       end)
 
       it("with metadata correctly deletes metadata collection", function()
-        local ok = storage:set(name, key1, value, long_ttl, current_time, nil, nil, metadata, true)
+        local ok = storage:set(name, key1, value, long_ttl, current_time, nil, nil, metadata)
         assert.is_not_nil(ok)
 
         sleep(1)

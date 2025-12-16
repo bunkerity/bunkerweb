@@ -1,13 +1,13 @@
 from contextlib import suppress
 from os import sep
 from os.path import join
+from re import split
 from sys import path as sys_path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from traceback import format_exc
 from ipaddress import ip_address, ip_network, IPv4Network, IPv6Network
-import re
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -43,7 +43,7 @@ def create_app() -> FastAPI:
     if api_config.whitelist_enabled:
         raw_whitelist = api_config.API_WHITELIST_IPS.strip()
         if raw_whitelist:
-            for tok in re.split(r"[\s,]+", raw_whitelist):
+            for tok in split(r"[\s,]+", raw_whitelist):
                 if not tok:
                     continue
                 try:
@@ -120,7 +120,7 @@ This API is the internal control plane for BunkerWeb. It manages configuration, 
 - Core: `/ping` and `/health` offer lightweight liveness probes.
 - Auth: `POST /auth` exchanges Basic credentials or the admin override token for a Biscuit; admin users may also authenticate with HTTP Basic directly.
 - Instances: register, list, update, and remove instances or broadcast `/ping`, `/reload`, and `/stop` to all or specific hosts.
-- Global config: `GET`/`PATCH /global_config` read or update API-owned global settings without touching other sources.
+- Global settings: `GET`/`PATCH /global_settings` read or update API-owned global settings without touching other sources.
 - Services: create, rename, toggle draft/online modes, convert, and delete services while keeping prefixed variables consistent.
 - Custom configs: manage HTTP/stream/ModSecurity/CRS snippets via JSON payloads or uploads with `GET`/`POST`/`PATCH`/`DELETE /configs`.
 - Bans: aggregate current bans and orchestrate ban/unban operations across instances with flexible bulk payloads.
@@ -166,7 +166,7 @@ tags_metadata = [
     {"name": "auth", "description": "Authentication and Biscuit issuance"},
     {"name": "bans", "description": "Operations related to ban management"},
     {"name": "instances", "description": "Operations related to instance management"},
-    {"name": "global_config", "description": "Operations related to global configuration"},
+    {"name": "global_settings", "description": "Operations related to global settings"},
     {"name": "services", "description": "Operations related to service management"},
     {"name": "configs", "description": "Operations related to custom NGINX configs"},
     {"name": "plugins", "description": "Operations related to plugin management"},

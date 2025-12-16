@@ -16,13 +16,13 @@ Comment ça marche :
 
 ### Paramètres
 
-| Paramètre             | Défaut            | Contexte  | Multiple | Description                                                                         |
-| --------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------- |
-| `USE_AUTH_BASIC`      | `no`              | multisite | non      | Activer l’authentification Basic.                                                   |
-| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | non      | Portée : `sitewide` ou un chemin (ex. `/admin`).                                    |
-| `AUTH_BASIC_USER`     | `changeme`        | multisite | oui      | Nom d’utilisateur. Plusieurs paires peuvent être définies.                          |
-| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | oui      | Mot de passe. Les mots de passe sont hachés avec bcrypt pour une sécurité maximale. |
-| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | non      | Message affiché dans l'invite d'authentification.                                   |
+| Paramètre             | Défaut            | Contexte  | Multiple | Description                                                                                                                              |
+| --------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_AUTH_BASIC`      | `no`              | multisite | non      | Activer l’authentification Basic.                                                                                                        |
+| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | non      | Portée : `sitewide` ou un chemin (ex. `/admin`). Vous pouvez également utiliser des modificateurs de style Nginx (`=`, `~`, `~*`, `^~`). |
+| `AUTH_BASIC_USER`     | `changeme`        | multisite | oui      | Nom d’utilisateur. Plusieurs paires peuvent être définies.                                                                               |
+| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | oui      | Mot de passe. Les mots de passe sont hachés avec scrypt pour une sécurité maximale.                                                      |
+| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | non      | Message affiché dans l'invite d'authentification.                                                                                        |
 
 !!! warning "Sécurité"
     Les identifiants sont encodés Base64, pas chiffrés. Utilisez toujours HTTPS avec l’authentification Basic.

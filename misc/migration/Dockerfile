@@ -1,4 +1,4 @@
-FROM python:3.10-alpine@sha256:24cab748bf7bd8e3d2f9bb4e5771f17b628417527a4e1f2c59c370c2a8a27f1c
+FROM python:3.11-alpine@sha256:d174db33fa506083fbd941b265f7bae699e7c338c77c415f85dddff4f176d1de
 
 # Install python dependencies
 RUN apk add --no-cache --virtual .build-deps \
@@ -20,7 +20,7 @@ RUN apk add --no-cache bash sed curl mariadb-connector-c mariadb-client postgres
 
 # Cleanup
 RUN apk del .build-deps && \
-rm -rf /var/cache/apk/*
+  rm -rf /var/cache/apk/*
 
 # Copy files
 COPY src/common/db/alembic/alembic.ini alembic.ini

@@ -8,7 +8,7 @@ from bcrypt import checkpw, gensalt, hashpw
 from regex import compile as re_compile
 
 from app.models.api_database import APIDatabase
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 
 from Database import Database  # type: ignore
 
@@ -16,7 +16,7 @@ from Database import Database  # type: ignore
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
 
-LOGGER = setup_logger("API")
+LOGGER = getLogger("API")
 
 # Cached singletons for pooled DB engines
 _DB_INSTANCE: Optional[Database] = None  # type: ignore

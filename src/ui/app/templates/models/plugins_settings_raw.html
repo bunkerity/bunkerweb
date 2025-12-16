@@ -2,12 +2,12 @@
        id="csrf_token"
        name="csrf_token"
        value="{{ csrf_token() }}">
-{% set config_lines = ["IS_DRAFT=" + config.get('IS_DRAFT', {}).get('value', 'no')] if current_endpoint != "global-config" else [] %}
+{% set config_lines = ["IS_DRAFT=" + config.get('IS_DRAFT', {}).get('value', 'no')] if (current_endpoint != "global-config" and current_endpoint != "global-settings") else [] %}
 {% set entire_config = config_lines|list %}
-{% set default_settings = ["IS_DRAFT=no"] if current_endpoint != "global-config" else [] %}
+{% set default_settings = ["IS_DRAFT=no"] if (current_endpoint != "global-config" and current_endpoint != "global-settings") else [] %}
 {% set disabled_settings = namespace(items=[]) %}
 {% for plugin_data in plugins.values() %}
-    {% set filtered_settings = get_filtered_settings(plugin_data["settings"], current_endpoint == "global-config") %}
+    {% set filtered_settings = get_filtered_settings(plugin_data["settings"], (current_endpoint == "global-config" or current_endpoint == "global-settings")) %}
     {% if filtered_settings %}
         {% for setting, setting_data in filtered_settings.items() if not setting_data.get('multiple', false) and setting not in blacklisted_settings %}
             {% set setting_config = config.get(setting, {}) %}
@@ -21,7 +21,7 @@
                     {% set setting_value = "" %}
                 {% endif %}
             {% endif %}
-            {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
+            {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or current_endpoint == "global-settings" or not setting_config.get("global")) %}
             {% if disabled %}
                 {% set disabled_settings.items = disabled_settings.items + [setting ~ "::" ~ setting_method] %}
             {% endif %}
@@ -41,7 +41,7 @@
                     {% set setting_default = setting_data.get("default", "") %}
                     {% set setting_method = setting_config.get("method", "default") %}
                     {% set setting_value = setting_config.get("value", setting_default) %}
-                    {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
+                    {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or current_endpoint == "global-settings" or not setting_config.get("global")) %}
                     {% if disabled %}
                         {% set disabled_settings.items = disabled_settings.items + [setting ~ "::" ~ setting_method] %}
                     {% endif %}

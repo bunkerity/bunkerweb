@@ -56,11 +56,10 @@ end
 -- @tparam[opt] string old_key old session id
 -- @tparam string stale_ttl stale ttl
 -- @tparam[opt] table metadata table of metadata
--- @tparam table remember whether storing persistent session or not
 -- @treturn table|nil session metadata
 -- @treturn string error message
 local function set(path, prefix, suffix, name, key, value, ttl,
-                   current_time, old_key, stale_ttl, metadata, remember)
+                   current_time, old_key, stale_ttl, metadata)
   local file_path = get_path(path, prefix, suffix, name, key)
   if not metadata and not old_key then
     local ok, err = file_create(file_path, value)
@@ -77,11 +76,9 @@ local function set(path, prefix, suffix, name, key, value, ttl,
   local old_ttl, old_file_path
   if old_key then
     old_file_path = get_path(path, prefix, suffix, name, old_key)
-    if not remember then
-      local exp = get_modification(old_file_path)
-      if exp then
-        old_ttl = exp - current_time
-      end
+    local exp = get_modification(old_file_path)
+    if exp then
+      old_ttl = exp - current_time
     end
   end
 
@@ -90,13 +87,8 @@ local function set(path, prefix, suffix, name, key, value, ttl,
     file_touch(file_path, current_time + ttl)
   end
 
-  if old_file_path then
-    if remember then
-      file_delete(old_file_path)
-
-    elseif not old_ttl or old_ttl > stale_ttl then
-      file_touch(old_file_path, current_time + stale_ttl)
-    end
+  if old_file_path and (not old_ttl or old_ttl > stale_ttl) then
+    file_touch(old_file_path, current_time + stale_ttl)
   end
 
   if metadata then

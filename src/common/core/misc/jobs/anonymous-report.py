@@ -13,12 +13,12 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from common_utils import get_os_info  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
 from requests import post
 
-LOGGER = setup_logger("ANONYMOUS-REPORT")
+LOGGER = getLogger("ANONYMOUS-REPORT")
 status = 0
 
 try:
@@ -46,7 +46,7 @@ try:
 
     # Retrieve non-default settings and additional configuration.
     db_config = JOB.db.get_non_default_settings(methods=True, with_drafts=True)
-    services = db_config.get("SERVER_NAME", {"value": ""})["value"].split(" ")
+    services = db_config.get("SERVER_NAME", {"value": ""})["value"].split()
     multisite = db_config.get("MULTISITE", {"value": "no"})["value"] == "yes"
 
     # Extract and simplify the database version using a regex.

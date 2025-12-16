@@ -152,9 +152,9 @@
     },
     {
       "id": "lua-resty-session",
-      "name": "lua-resty-session v4.1.4",
+      "name": "lua-resty-session v4.1.5",
       "url": "https://github.com/bungle/lua-resty-session.git",
-      "commit": "f0aa06747e21055a18ed43ec83f8f333c5473010",
+      "commit": "505ff720957f61f2ecd2e6e9fe11c66530a42807",
       "post_install": "rm -r src/deps/src/lua-resty-session/t"
     },
     {
@@ -282,9 +282,9 @@
     },
     {
       "id": "zlib",
-      "name": "zlib v1.3.1",
+      "name": "zlib v1.3.1.2",
       "url": "https://github.com/madler/zlib.git",
-      "commit": "51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf",
+      "commit": "570720b0c24f9686c33f35a1b3165c1f568b96be",
       "post_install": "rm -r src/deps/src/zlib/doc src/deps/src/zlib/examples"
     }
   ]

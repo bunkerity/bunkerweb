@@ -225,6 +225,7 @@ class Custom_configs(Base):
     data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
     checksum = Column(String(128), nullable=False)
     method = Column(METHODS_ENUM, nullable=False)
+    is_draft = Column(Boolean, nullable=False, default=False, server_default="0")
 
     service = relationship("Services", back_populates="custom_configs")
 
@@ -351,7 +352,7 @@ class Metadata(Base):
     failover = Column(Boolean, default=None, nullable=True)
     failover_message = Column(Text, nullable=True, default="")
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.6-rc3", nullable=False)
+    version = Column(String(32), default="1.6.7~rc1", nullable=False)
 
 
 ## UI Models

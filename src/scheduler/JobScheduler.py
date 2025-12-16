@@ -25,7 +25,7 @@ for deps_path in [os.path.join(os.sep, "usr", "share", "bunkerweb", *paths) for 
         sys_path.append(deps_path)
 
 from Database import Database  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 
 
@@ -39,7 +39,7 @@ class JobScheduler(ApiCaller):
         apis: Optional[list] = None,
     ):
         super().__init__(apis or [])
-        self.__logger = logger or setup_logger("Scheduler", os.getenv("CUSTOM_LOG_LEVEL", os.getenv("LOG_LEVEL", "INFO")))
+        self.__logger = logger or getLogger("SCHEDULER.JOB_SCHEDULER")
         self.db = db or Database(self.__logger)
         # Store only essential environment variables to reduce memory usage
         self.__base_env = os.environ.copy()
@@ -150,7 +150,7 @@ class JobScheduler(ApiCaller):
         reload_success = self.send_to_apis(
             "POST",
             f"/reload?test={'no' if self.env.get('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
-            timeout=max(int(reload_min_timeout), 3 * len(self.env.get("SERVER_NAME", "www.example.com").split(" "))),
+            timeout=max(int(reload_min_timeout), 3 * len(self.env.get("SERVER_NAME", "www.example.com").split())),
         )[0]
         if reload_success:
             self.__logger.info("Successfully reloaded nginx")

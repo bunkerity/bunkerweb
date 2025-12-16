@@ -5,7 +5,7 @@ from typing import Optional
 from datetime import datetime, timezone, timedelta
 
 from fastapi import HTTPException, Request
-from biscuit_auth import Authorizer, Biscuit, BiscuitValidationError, Check, Policy, PublicKey, AuthorizationError, Fact
+from biscuit_auth import AuthorizerBuilder, Biscuit, BiscuitValidationError, Check, Policy, PublicKey, AuthorizationError, Fact
 
 from common_utils import get_version  # type: ignore
 
@@ -103,20 +103,20 @@ def _resolve_instances(path_normalized: str, method_u: str) -> tuple[Optional[st
     return rtype, None
 
 
-def _resolve_global_config(path_normalized: str, method_u: str) -> tuple[Optional[str], Optional[str]]:
-    """Resolve global_config endpoints to fine-grained permissions.
+def _resolve_global_settings(method_u: str) -> tuple[Optional[str], Optional[str]]:
+    """Resolve global_settings endpoints to fine-grained permissions.
 
     Supported endpoints:
-    - GET              /global_config       -> global_config_read
-    - POST|PUT|PATCH   /global_config       -> global_config_update
-    Also accepts hyphenated path prefix (global-config) but canonicalizes rtype to global_config.
+    - GET              /global_settings       -> global_settings_read
+    - POST|PUT|PATCH   /global_settings       -> global_settings_update
+    Also accepts hyphenated path prefix (global-settings) but canonicalizes rtype to global_settings.
     """
-    rtype = "global_config"
+    rtype = "global_settings"
     verb = PERM_VERB_BY_METHOD.get(method_u)
     if verb == "read":
-        return rtype, "global_config_read"
+        return rtype, "global_settings_read"
     if verb in {"create", "update"}:
-        return rtype, "global_config_update"
+        return rtype, "global_settings_update"
     # For DELETE or other methods, no fine-grained permission mapping
     return rtype, None
 
@@ -325,9 +325,9 @@ def _resolve_resource_and_perm(path: str, method: str) -> tuple[Optional[str], O
     # Instances special cases
     if first in {"instances", "reload", "stop"}:
         return _resolve_instances(p, method_u)
-    # Global config special cases (canonicalize hyphenated version)
-    if first in {"global_config", "global-config"}:
-        return _resolve_global_config(p, method_u)
+    # Global settings special cases (canonicalize hyphenated version)
+    if first in {"global_settings", "global_config"}:
+        return _resolve_global_settings(method_u)
     # Services special cases
     if first == "services":
         return _resolve_services(p, method_u)
@@ -366,7 +366,7 @@ def _extract_resource_id(path: str, rtype: Optional[str]) -> Optional[str]:
     if not parts:
         return None
     # Skip known action-like endpoints without IDs
-    if parts[0] in {"reload", "stop", "ban", "unban", "bans", "global_config", "global-config"}:
+    if parts[0] in {"reload", "stop", "ban", "unban", "bans", "global_settings", "global-settings"}:
         return None
     # Skip services action endpoints when extracting ID
     if parts[0] == "services" and len(parts) >= 2 and parts[1] in {"convert", "export"}:
@@ -396,10 +396,10 @@ class BiscuitGuard:
 
     def _load_public_key(self) -> None:
         try:
-            hex_key = BISCUIT_PUBLIC_KEY_FILE.read_text(encoding="utf-8").strip()
+            hex_key = BISCUIT_PUBLIC_KEY_FILE.read_text().strip()
             if not hex_key:
                 raise ValueError("Biscuit public key file is empty")
-            self._public_key = PublicKey.from_hex(hex_key)
+            self._public_key = PublicKey(hex_key)
             self._logger.debug("Biscuit public key loaded successfully")
         except Exception as e:
             with suppress(Exception):
@@ -439,8 +439,7 @@ class BiscuitGuard:
 
         # Phase 1: freshness and IP binding
         try:
-            az = Authorizer()
-            az.add_token(token)
+            az = AuthorizerBuilder()
             az.add_check(Check(f'check if version("{get_version()}")'))
             # Enforce token issuance time not older than configured TTL
             try:
@@ -462,7 +461,7 @@ class BiscuitGuard:
 
             az.add_policy(Policy("allow if true"))
             self._logger.debug("Biscuit phase1: authorizing freshness/IP checks")
-            az.authorize()
+            az.build(token).authorize()
             self._logger.debug("Biscuit phase1: authorization success")
         except AuthorizationError:
             self._logger.debug(f"Biscuit phase1: authorization failed (AuthorizationError):\n{format_exc()}")
@@ -473,8 +472,7 @@ class BiscuitGuard:
 
         # Phase 2: route authorization (coarse and fine-grained)
         try:
-            az = Authorizer()
-            az.add_token(token)
+            az = AuthorizerBuilder()
 
             # Always add operation fact for observability
             operation = OPERATION_BY_METHOD.get(request.method.upper(), "read")
@@ -504,7 +502,7 @@ class BiscuitGuard:
                 self._logger.debug("Biscuit phase2: fallback to coarse role-based authorization")
 
             self._logger.debug("Biscuit phase2: authorizing route access")
-            az.authorize()
+            az.build(token).authorize()
             self._logger.debug("Biscuit phase2: authorization success")
         except AuthorizationError:
             self._logger.debug(f"Biscuit phase2: authorization failed (AuthorizationError):\n{format_exc()}")

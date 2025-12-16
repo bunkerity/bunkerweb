@@ -58,7 +58,8 @@ start() {
             echo "# --- Logging & Runtime ---"
             echo "# LOG_LEVEL affects most components; CUSTOM_LOG_LEVEL overrides when provided."
             echo "# LOG_LEVEL=info"
-            echo "# CUSTOM_LOG_LEVEL=info"
+            echo "LOG_TYPES=file"
+            echo "# LOG_FILE_PATH=/var/log/bunkerweb/api.log"
             echo "# Number of workers/threads (auto if unset)."
             echo "# MAX_WORKERS=<auto>"
             echo "# MAX_THREADS=<auto>"
@@ -157,6 +158,25 @@ start() {
         chmod 660 /etc/bunkerweb/api.yml
     fi
 
+    # Create PID folder
+    if [ ! -f /var/run/bunkerweb ] ; then
+        mkdir -p /var/run/bunkerweb
+        chown nginx:nginx /var/run/bunkerweb
+    fi
+
+    # Create TMP folder
+    if [ ! -f /var/tmp/bunkerweb ] ; then
+        mkdir -p /var/tmp/bunkerweb
+        chown nginx:nginx /var/tmp/bunkerweb
+        chmod 2770 /var/tmp/bunkerweb
+    fi
+
+    # Create LOG folder
+    if [ ! -f /var/log/bunkerweb ] ; then
+        mkdir -p /var/log/bunkerweb
+        chown nginx:nginx /var/log/bunkerweb
+    fi
+
     # Extract environment variables with fallback
     LISTEN_ADDR=$(get_env_var "API_LISTEN_ADDR" "")
     if [ -z "$LISTEN_ADDR" ]; then
@@ -181,6 +201,24 @@ start() {
         API_WHITELIST_IPS=$(get_env_var "WHITELIST_IPS" "127.0.0.1")
     fi
     export API_WHITELIST_IPS
+
+    LOG_TYPES=$(get_env_var "API_LOG_TYPES" "")
+    if [ -z "$LOG_TYPES" ]; then
+        LOG_TYPES=$(get_env_var "LOG_TYPES" "file")
+    fi
+    export LOG_TYPES
+
+    LOG_FILE_PATH=$(get_env_var "API_LOG_FILE_PATH" "")
+    if [ -z "$LOG_FILE_PATH" ]; then
+        LOG_FILE_PATH=$(get_env_var "LOG_FILE_PATH" "/var/log/bunkerweb/api.log")
+    fi
+    export LOG_FILE_PATH
+
+    LOG_SYSLOG_TAG=$(get_env_var "API_LOG_SYSLOG_TAG" "")
+    if [ -z "$LOG_SYSLOG_TAG" ]; then
+        LOG_SYSLOG_TAG=$(get_env_var "LOG_SYSLOG_TAG" "bw-api")
+    fi
+    export LOG_SYSLOG_TAG
 
     export CAPTURE_OUTPUT="yes"
 

@@ -1,13 +1,13 @@
 {% if SERVER_NAME != "" %}
     {% set hosts = [] %}
     {% if MULTISITE == "no" %}
-        {% for host in SERVER_NAME.split(" ") %}
+        {% for host in SERVER_NAME.split() %}
             {% set _ = hosts.append(host | replace('.', '\\.') | replace('-', '\\-')) %}
         {% endfor %}
     {% else %}
-        {% for server_name in SERVER_NAME.split(" ") %}
+        {% for server_name in SERVER_NAME.split() %}
             {% if all[server_name + "_USE_ANTIBOT"] != "no" %}
-                {% for host in all[server_name + "_SERVER_NAME"].split(" ") %}
+                {% for host in all[server_name + "_SERVER_NAME"].split() %}
                     {% set _ = hosts.append(host | replace('.', '\\.') | replace('-', '\\-')) %}
                 {% endfor %}
             {% endif %}

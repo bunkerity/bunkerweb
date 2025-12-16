@@ -13,11 +13,11 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from flask import Flask, render_template, request
 
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 
 from app.models.reverse_proxied import ReverseProxied
 
-LOGGER = setup_logger("TMP-UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+LOGGER = getLogger("TMP-UI")
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 ERROR_FILE = TMP_DIR.joinpath("ui.error")

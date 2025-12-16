@@ -38,12 +38,12 @@
     "REDIRECT_TO_STATUS_CODE": {
       "context": "multisite",
       "default": "301",
-      "help": "Status code to send to client when redirecting.",
+      "help": "HTTP status code for the redirect: 301 (Moved Permanently - cached by browsers), 302 (Found - temporary, may change method), 303 (See Other - always uses GET), 307 (Temporary Redirect - preserves method), 308 (Permanent Redirect - preserves method, cached).",
       "id": "redirect-to-status-code",
       "label": "Redirect status code",
-      "regex": "^(301|302)$",
+      "regex": "^30[12378]$",
       "type": "select",
-      "select": ["301", "302"],
+      "select": ["301", "302", "303", "307", "308"],
       "multiple": "redirect"
     }
   }

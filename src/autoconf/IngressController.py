@@ -74,6 +74,12 @@ class IngressController(Controller):
 
             self._logger.info("Ignoring annotations while collecting instances: " + ", ".join(sorted(self.__ignored_annotations_exact)))
 
+        self.__reverse_proxy_suffix_start = getenv("KUBERNETES_REVERSE_PROXY_SUFFIX_START", "1").strip()
+        if not self.__reverse_proxy_suffix_start.isdigit() or int(self.__reverse_proxy_suffix_start) < 0:
+            self._logger.warning(f"Invalid KUBERNETES_REVERSE_PROXY_SUFFIX_START value {self.__reverse_proxy_suffix_start}, defaulting to 1")
+            self.__reverse_proxy_suffix_start = "1"
+        self.__reverse_proxy_suffix_start = int(self.__reverse_proxy_suffix_start)
+
     def __should_ignore_annotation(self, annotation: str) -> bool:
         if annotation in self.__ignored_annotations_exact:
             return True
@@ -94,11 +100,11 @@ class IngressController(Controller):
                 continue
 
             if self._namespaces and metadata.namespace not in self._namespaces:
-                self._logger.info(f"Skipping pod {metadata.namespace}/{metadata.name} because its namespace is not in the allowed namespaces")
+                self._logger.debug(f"Skipping pod {metadata.namespace}/{metadata.name} because its namespace is not in the allowed namespaces")
                 continue
 
             if any(self.__should_ignore_annotation(annotation) for annotation in annotations):
-                self._logger.info(f"Skipping pod {metadata.namespace}/{metadata.name} because of ignored annotations")
+                self._logger.debug(f"Skipping pod {metadata.namespace}/{metadata.name} because of ignored annotations")
                 continue
 
             instances.append(pod)
@@ -112,18 +118,18 @@ class IngressController(Controller):
             if self.__ingress_class:
                 ingress_class_name = getattr(ingress.spec, "ingress_class_name", None)
                 if ingress_class_name != self.__ingress_class:
-                    self._logger.info(f"Skipping ingress {ingress.metadata.namespace}/{ingress.metadata.name} because its ingress class is not allowed")
+                    self._logger.debug(f"Skipping ingress {ingress.metadata.namespace}/{ingress.metadata.name} because its ingress class is not allowed")
                     continue
 
             # Skip if the namespace is not in the allowed namespaces (when specified)
             if self._namespaces and ingress.metadata.namespace not in self._namespaces:
-                self._logger.info(
+                self._logger.debug(
                     f"Skipping ingress {ingress.metadata.namespace}/{ingress.metadata.name} because its namespace is not in the allowed namespaces"
                 )
                 continue
 
             if ingress.metadata.annotations and any(self.__should_ignore_annotation(annotation) for annotation in ingress.metadata.annotations):
-                self._logger.info(f"Skipping ingress {ingress.metadata.namespace}/{ingress.metadata.name} because of ignored annotations")
+                self._logger.debug(f"Skipping ingress {ingress.metadata.namespace}/{ingress.metadata.name} because of ignored annotations")
                 continue
 
             # Add the ingress to services if it passes all checks
@@ -191,7 +197,7 @@ class IngressController(Controller):
                 services.append(service)
                 continue
 
-            for location, path in enumerate(rule.http.paths, start=1):
+            for location, path in enumerate(rule.http.paths, start=self.__reverse_proxy_suffix_start):  # type: ignore
                 if not path.path:
                     self._logger.warning("Ignoring unsupported ingress rule without path.")
                     continue
@@ -229,8 +235,8 @@ class IngressController(Controller):
                 service.update(
                     {
                         "USE_REVERSE_PROXY": "yes",
-                        f"REVERSE_PROXY_HOST_{location}": reverse_proxy_host,
-                        f"REVERSE_PROXY_URL_{location}": path.path,
+                        f"REVERSE_PROXY_HOST_{location}" if location else "REVERSE_PROXY_HOST": reverse_proxy_host,
+                        f"REVERSE_PROXY_URL_{location}" if location else "REVERSE_PROXY_URL": path.path,
                     }
                 )
             services.append(service)
@@ -255,17 +261,19 @@ class IngressController(Controller):
                     service[setting] = value
 
                 # Handle stream services
-                for server_name in service["SERVER_NAME"].strip().split(" "):
+                for server_name in service["SERVER_NAME"].strip().split():
                     if service.get(f"{server_name}_SERVER_TYPE", service.get("SERVER_TYPE", "http")) == "stream":
                         reverse_proxy_found = False
                         warned = False
                         for setting in service.copy():
-                            if setting.startswith(f"{server_name}_REVERSE_PROXY_HOST_"):
+                            if setting.startswith(f"{server_name}_REVERSE_PROXY_HOST"):
                                 if not reverse_proxy_found:
                                     reverse_proxy_found = True
-                                    suffix = setting.replace(f"{server_name}_REVERSE_PROXY_HOST_", "", 1)
+                                    suffix = setting.removeprefix(f"{server_name}_REVERSE_PROXY_HOST").removeprefix("_")
                                     service[f"{server_name}_REVERSE_PROXY_HOST"] = service.pop(setting).replace(f"{self.__service_protocol}://", "", 1)
-                                    service[f"{server_name}_REVERSE_PROXY_URL"] = service.pop(f"{server_name}_REVERSE_PROXY_URL_{suffix}", "/")
+                                    service[f"{server_name}_REVERSE_PROXY_URL"] = service.pop(
+                                        f"{server_name}_REVERSE_PROXY_URL_{suffix}" if suffix else f"{server_name}_REVERSE_PROXY_URL", "/"
+                                    )
                                     continue
 
                                 if not warned:
@@ -275,7 +283,7 @@ class IngressController(Controller):
                                     )
 
                                 del service[setting]
-                            elif setting.startswith(f"{server_name}_REVERSE_PROXY_URL_") and setting in service:
+                            elif setting.startswith(f"{server_name}_REVERSE_PROXY_URL") and setting in service:
                                 del service[setting]
 
         # parse tls
@@ -284,7 +292,7 @@ class IngressController(Controller):
                 if tls.hosts and tls.secret_name:
                     for host in tls.hosts:
                         for service in services:
-                            if host in service["SERVER_NAME"].split(" "):
+                            if host in service["SERVER_NAME"].split():
                                 secrets_tls = self.__corev1.list_namespaced_secret(
                                     namespace,
                                     watch=False,
@@ -318,13 +326,13 @@ class IngressController(Controller):
                 continue
 
             if self._namespaces and configmap.metadata.namespace not in self._namespaces:
-                self._logger.info(
+                self._logger.debug(
                     f"Skipping ConfigMap {configmap.metadata.namespace}/{configmap.metadata.name} because its namespace is not in the allowed namespaces"
                 )
                 continue
 
             if any(self.__should_ignore_annotation(annotation) for annotation in configmap.metadata.annotations):
-                self._logger.info(f"Skipping ConfigMap {configmap.metadata.namespace}/{configmap.metadata.name} because of ignored annotations")
+                self._logger.debug(f"Skipping ConfigMap {configmap.metadata.namespace}/{configmap.metadata.name} because of ignored annotations")
                 continue
 
             config_type = configmap.metadata.annotations["bunkerweb.io/CONFIG_TYPE"]
@@ -380,14 +388,14 @@ class IngressController(Controller):
             return False
 
         if obj.metadata and self._namespaces and obj.metadata.namespace not in self._namespaces:
-            self._logger.info(f"Skipping {obj.kind} {obj.metadata.namespace}/{obj.metadata.name} because its namespace is not in the allowed namespaces")
+            self._logger.debug(f"Skipping {obj.kind} {obj.metadata.namespace}/{obj.metadata.name} because its namespace is not in the allowed namespaces")
             return False
 
         annotations = obj.metadata.annotations if obj.metadata else None
         data = getattr(obj, "data", None)
 
         if annotations and any(self.__should_ignore_annotation(annotation) for annotation in annotations):
-            self._logger.info(f"Skipping {obj.kind} {obj.metadata.namespace}/{obj.metadata.name} because of ignored annotations")
+            self._logger.debug(f"Skipping {obj.kind} {obj.metadata.namespace}/{obj.metadata.name} because of ignored annotations")
             return False
 
         ret = False

@@ -5,15 +5,17 @@ from fastapi.responses import JSONResponse
 
 from ..auth.guard import guard
 from ..utils import get_db
-from ..schemas import GlobalConfigUpdate
+from ..schemas import GlobalSettingsUpdate
 
 
-router = APIRouter(prefix="/global_config", tags=["global_config"])
+config_router = APIRouter(prefix="/global_config", tags=["global_settings"])
+router = APIRouter(prefix="/global_settings", tags=["global_settings"])
 
 
+@config_router.get("", dependencies=[Depends(guard)])
 @router.get("", dependencies=[Depends(guard)])
-def read_global_config(full: bool = False, methods: bool = False) -> JSONResponse:
-    """Read the current global configuration settings.
+def read_global_settings(full: bool = False, methods: bool = False) -> JSONResponse:
+    """Read the current global settings.
 
     Args:
         full: Include all settings, even those with default values
@@ -24,7 +26,7 @@ def read_global_config(full: bool = False, methods: bool = False) -> JSONRespons
         conf = db.get_config(global_only=True, methods=methods)
     else:
         conf = db.get_non_default_settings(global_only=True, methods=methods)
-    return JSONResponse(status_code=200, content={"status": "success", "config": conf})
+    return JSONResponse(status_code=200, content={"status": "success", "settings": conf})
 
 
 def _current_api_global_overrides() -> Dict[str, str]:
@@ -44,9 +46,10 @@ def _current_api_global_overrides() -> Dict[str, str]:
     return overrides
 
 
+@config_router.patch("", dependencies=[Depends(guard)])
 @router.patch("", dependencies=[Depends(guard)])
-def update_global_config(payload: GlobalConfigUpdate) -> JSONResponse:
-    """Update global configuration settings.
+def update_global_settings(payload: GlobalSettingsUpdate) -> JSONResponse:
+    """Update global settings.
 
     Args:
         payload: JSON object with setting key-value pairs to update

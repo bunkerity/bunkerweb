@@ -15,6 +15,16 @@ log "ENTRYPOINT" "ℹ️" "Starting BunkerWeb v$(cat /usr/share/bunkerweb/VERSIO
 
 handle_docker_secrets
 
+if [[ $(echo "$SWARM_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
+	echo "Swarm" > /usr/share/bunkerweb/INTEGRATION
+elif [[ $(echo "$KUBERNETES_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
+	echo "Kubernetes" > /usr/share/bunkerweb/INTEGRATION
+elif [[ $(echo "$AUTOCONF_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
+	echo "Autoconf" > /usr/share/bunkerweb/INTEGRATION
+fi
+
+export LOG_SYSLOG_TAG="${LOG_SYSLOG_TAG:-bunkerweb-entrypoint}"
+
 # trap SIGTERM and SIGINT
 # shellcheck disable=SC2329
 function trap_exit() {

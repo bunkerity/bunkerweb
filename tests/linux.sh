@@ -36,7 +36,7 @@ function build_image() {
 }
 
 if [ ! -d /opt/packages ] ; then
-    do_and_check_cmd sudo mkdir -p /opt/packages/{dev,prod}/{ubuntu,debian-bookworm,debian-trixie,fedora-40,fedora-41,rhel-8,rhel-9,rhel-10}
+    do_and_check_cmd sudo mkdir -p /opt/packages/{dev,prod}/{ubuntu,debian-bookworm,debian-trixie,fedora-41,fedora-42,fedora-43,rhel-8,rhel-9,rhel-10}
     do_and_check_cmd sudo chmod -R 777 /opt/packages/
 fi
 
@@ -59,6 +59,8 @@ echo "Building fedora 41 package ..."
 gen_package "$1" "fedora-41"
 echo "Building fedora 42 package ..."
 gen_package "$1" "fedora-42"
+echo "Building fedora 43 package ..."
+gen_package "$1" "fedora-43"
 echo "Building rhel-8 package ..."
 gen_package "$1" "rhel-8"
 echo "Building rhel-9 package ..."
@@ -80,6 +82,8 @@ echo "Building fedora 41 test image ..."
 build_image "fedora-41"
 echo "Building fedora 42 test image ..."
 build_image "fedora-42"
+echo "Building fedora 43 test image ..."
+build_image "fedora-43"
 echo "Building rhel-8 test image ..."
 build_image "rhel-8"
 echo "Building rhel-9 test image ..."

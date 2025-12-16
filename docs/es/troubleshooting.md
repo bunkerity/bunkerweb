@@ -547,7 +547,7 @@ En caso de que hayas olvidado tus credenciales de la interfaz de usuario o esté
     Usa la **página de Soporte** en la Interfaz de Usuario Web para recopilar rápidamente la configuración y los registros para la solución de problemas.
 
     - Abre la Interfaz de Usuario Web y ve a la página de Soporte.
-    - Elige el alcance: exporta la configuración Global o selecciona un Servicio específico.
+    - Elige el alcance: exporta los ajustes globales o selecciona un Servicio específico.
     - Haz clic para descargar el archivo de configuración para el alcance elegido.
     - Opcionalmente descarga los registros: los registros exportados se anonimizan automáticamente (todas las direcciones IP y dominios están enmascarados).
 

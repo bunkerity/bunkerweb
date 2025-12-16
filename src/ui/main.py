@@ -34,6 +34,8 @@ from flask_wtf.csrf import CSRFProtect, CSRFError
 from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.routing.exceptions import BuildError
 
+from common_utils import get_redis_client as get_common_redis_client  # type: ignore
+
 from app.models.biscuit import BiscuitMiddleware
 from app.models.reverse_proxied import ReverseProxied
 
@@ -62,7 +64,7 @@ from app.routes.about import about
 from app.routes.bans import bans
 from app.routes.cache import cache
 from app.routes.configs import configs
-from app.routes.global_config import global_config
+from app.routes.global_settings import global_settings
 from app.routes.home import home
 from app.routes.instances import instances
 from app.routes.jobs import jobs
@@ -90,7 +92,7 @@ BLUEPRINTS = (
     logout,
     instances,
     plugins,
-    global_config,
+    global_settings,
     pro,
     cache,
     logs,
@@ -539,6 +541,7 @@ with app.app_context():
     app.config["SESSION_COOKIE_PATH"] = "/"
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["SESSION_USE_SIGNER"] = True
 
     app.config["REMEMBER_COOKIE_PATH"] = "/"
     app.config["REMEMBER_COOKIE_HTTPONLY"] = True
@@ -549,10 +552,67 @@ with app.app_context():
     app.config["SCRIPT_NONCE"] = ""
 
     # Session management
-    app.config["SESSION_TYPE"] = "cachelib"
-    app.config["SESSION_PERMANENT"] = False
+    try:
+        session_lifetime_hours = float(getenv("SESSION_LIFETIME_HOURS", "12"))
+    except ValueError:
+        session_lifetime_hours = 12.0
+        LOGGER.warning("Invalid SESSION_LIFETIME_HOURS, defaulting to 12h")
+
+    app.config["SESSION_PERMANENT"] = True
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=session_lifetime_hours)
     app.config["SESSION_ID_LENGTH"] = 64
-    app.config["SESSION_CACHELIB"] = FileSystemCache(threshold=500, cache_dir=LIB_DIR.joinpath("ui_sessions_cache"))
+
+    session_cache_dir = LIB_DIR.joinpath("ui_sessions_cache")
+    session_timeout = int(app.config["PERMANENT_SESSION_LIFETIME"].total_seconds())
+
+    redis_settings = BW_CONFIG.get_config(
+        global_only=True,
+        methods=False,
+        filtered_settings=(
+            "USE_REDIS",
+            "REDIS_HOST",
+            "REDIS_PORT",
+            "REDIS_DB",
+            "REDIS_TIMEOUT",
+            "REDIS_KEEPALIVE_POOL",
+            "REDIS_SSL",
+            "REDIS_USERNAME",
+            "REDIS_PASSWORD",
+            "REDIS_SENTINEL_HOSTS",
+            "REDIS_SENTINEL_USERNAME",
+            "REDIS_SENTINEL_PASSWORD",
+            "REDIS_SENTINEL_MASTER",
+        ),
+    )
+
+    redis_client = None
+    if redis_settings.get("USE_REDIS", "no").lower() == "yes":
+        redis_client = get_common_redis_client(
+            use_redis=True,
+            redis_host=redis_settings.get("REDIS_HOST"),
+            redis_port=redis_settings.get("REDIS_PORT", "6379"),
+            redis_db=redis_settings.get("REDIS_DB", "0"),
+            redis_timeout=redis_settings.get("REDIS_TIMEOUT", "1000.0"),
+            redis_keepalive_pool=redis_settings.get("REDIS_KEEPALIVE_POOL", "10"),
+            redis_ssl=redis_settings.get("REDIS_SSL", "no") == "yes",
+            redis_username=redis_settings.get("REDIS_USERNAME") or None,
+            redis_password=redis_settings.get("REDIS_PASSWORD") or None,
+            redis_sentinel_hosts=redis_settings.get("REDIS_SENTINEL_HOSTS", []),
+            redis_sentinel_username=redis_settings.get("REDIS_SENTINEL_USERNAME") or None,
+            redis_sentinel_password=redis_settings.get("REDIS_SENTINEL_PASSWORD") or None,
+            redis_sentinel_master=redis_settings.get("REDIS_SENTINEL_MASTER", ""),
+        )
+        if redis_client:
+            LOGGER.debug("Using Redis as session backend")
+            app.config["SESSION_TYPE"] = "redis"
+            app.config["SESSION_REDIS"] = redis_client
+            app.config["SESSION_KEY_PREFIX"] = "bunkerweb_ui_session:"
+        else:
+            LOGGER.warning("Redis configured but unavailable for sessions, falling back to FileSystemCache")
+
+    if not redis_client:
+        app.config["SESSION_TYPE"] = "cachelib"
+        app.config["SESSION_CACHELIB"] = FileSystemCache(threshold=500, default_timeout=session_timeout, cache_dir=session_cache_dir)
     sess = Session()
     sess.init_app(app)
 
@@ -857,8 +917,10 @@ def before_request():
         # Requests from other sources
         app.config["SESSION_COOKIE_NAME"] = "bw_ui_session"
         app.config["SESSION_COOKIE_SECURE"] = False
+        app.config["SESSION_COOKIE_DOMAIN"] = False
         app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_token"
         app.config["REMEMBER_COOKIE_SECURE"] = False
+        app.config["REMEMBER_COOKIE_DOMAIN"] = False
 
     metadata = None
     app.config["SCRIPT_NONCE"] = token_urlsafe(32)
@@ -918,8 +980,18 @@ def before_request():
                 return logout_page(), 403
 
     current_endpoint = request.path.split("/")[-1]
+    theme_value = current_user.theme if current_user.is_authenticated else "dark"
+    language_value = current_user.language if current_user.is_authenticated else "en"
+    base_env = dict(
+        current_endpoint=current_endpoint,
+        script_nonce=app.config["SCRIPT_NONCE"],
+        supported_languages=SUPPORTED_LANGUAGES,
+        theme=theme_value,
+        language=language_value,
+    )
+
     if request.path.startswith(("/check", "/setup", "/loading", "/login", "/totp")):
-        app.config["ENV"] = dict(current_endpoint=current_endpoint, script_nonce=app.config["SCRIPT_NONCE"], supported_languages=SUPPORTED_LANGUAGES)
+        app.config["ENV"] = base_env
     else:
         if not metadata:
             metadata = DB.get_metadata()
@@ -980,8 +1052,8 @@ def before_request():
             is_readonly=DATA.get("READONLY_MODE", False) or ("write" not in current_user.list_permissions and not request.path.startswith("/profile")),
             db_readonly=DATA.get("READONLY_MODE", False),
             user_readonly="write" not in current_user.list_permissions,
-            theme=current_user.theme if current_user.is_authenticated else "dark",
-            language=current_user.language if current_user.is_authenticated else "en",
+            theme=theme_value,
+            language=language_value,
             supported_languages=SUPPORTED_LANGUAGES,
             columns_preferences_defaults=COLUMNS_PREFERENCES_DEFAULTS,
             extra_pages=app.config["EXTRA_PAGES"],

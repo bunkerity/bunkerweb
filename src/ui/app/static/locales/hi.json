@@ -43,7 +43,7 @@
     "cache": "कैश",
     "configs": "कॉन्फ़िगरेशन",
     "extra_pages": "अतिरिक्त पृष्ठ",
-    "global_config": "वैश्विक कॉन्फ़िगरेशन",
+    "global_settings": "ग्लोबल सेटिंग्स",
     "home": "होम",
     "instances": "इंस्टेंस",
     "jobs": "कार्य",
@@ -77,6 +77,8 @@
     "close": "बंद करें",
     "columns": "कॉलम",
     "convert_services": "सेवाएं बदलें",
+    "convert_configs": "कॉन्फ़िग रूपांतरित करें",
+    "convert_configs_to": "{{state}} में रूपांतरित करें",
     "copy": "कॉपी करें",
     "copy_codes": "कोड कॉपी करें",
     "copy_raw": "रॉ डेटा कॉपी करें",
@@ -92,7 +94,11 @@
     "enable_totp": "TOTP सक्षम करें",
     "entire_config": "संपूर्ण कॉन्फ़िगरेशन",
     "export": "निर्यात करें",
-    "fetch_global": "ग्लोबल कॉन्फ़िगरेशन लाएँ",
+    "export_csv_all": "CSV (सभी)",
+    "export_csv_visible": "CSV (दृश्यमान)",
+    "export_excel_all": "Excel (सभी)",
+    "export_excel_visible": "Excel (दृश्यमान)",
+    "fetch_global": "ग्लोबल सेटिंग्स लाएँ",
     "filters_suffix": " फ़िल्टर",
     "follow": "अनुसरण करें",
     "github_stars": "स्टार्स",
@@ -744,6 +750,8 @@
       "confirm_configs_deletion_alert": "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन हटाना चाहते हैं?",
       "confirm_configs_deletion_alert_plural": "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन हटाना चाहते हैं?",
       "confirm_conversion_confirmation": "क्या आप वाकई चयनित सेवाओं को कनवर्ट करना चाहते हैं?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "क्या आप सुनिश्चित हैं कि चयनित कस्टम कॉन्फ़िगरेशन को {{state}} में रूपांतरित करना चाहते हैं?",
       "confirm_next_step": "क्या आप वाकई अगले चरण पर जाना चाहते हैं?",
       "confirm_plugin_deletion": "क्या आप वाकई चयनित प्लगइन हटाना चाहते हैं?",
       "confirm_plugin_deletion_plural": "क्या आप वाकई चयनित प्लगइन्स हटाना चाहते हैं?",
@@ -760,17 +768,17 @@
       "unban_confirmation_alert": "क्या आप वाकई चयनित आईपी पते का प्रतिबंध हटाना चाहते हैं?",
       "unban_confirmation_alert_plural": "क्या आप वाकई चयनित आईपी पतों का प्रतिबंध हटाना चाहते हैं?",
       "update_duration_alert": "चयनित प्रतिबंधों के लिए एक नई अवधि का चयन करें:",
-      "fetch_global_config_bold": "यह वैश्विक कॉन्फ़िगरेशन को प्राप्त करेगा और वर्तमान टेम्पलेट पर लागू करेगा।",
-      "fetch_global_config_point_1": "केवल इस टेम्पलेट में मौजूद सेटिंग्स अपडेट होती हैं।",
-      "fetch_global_config_point_2": "जो मान डिफ़ॉल्ट के समान हैं उन्हें नज़रअंदाज़ किया जाता है।",
-      "fetch_global_config_point_3": "SERVER_NAME कभी ओवरराइट नहीं किया जाता है।",
+      "fetch_global_settings_bold": "यह ग्लोबल सेटिंग्स को प्राप्त करेगा और वर्तमान टेम्पलेट पर लागू करेगा।",
+      "fetch_global_settings_point_1": "केवल इस टेम्पलेट में मौजूद सेटिंग्स अपडेट होती हैं।",
+      "fetch_global_settings_point_2": "जो मान डिफ़ॉल्ट के समान हैं उन्हें नज़रअंदाज़ किया जाता है।",
+      "fetch_global_settings_point_3": "SERVER_NAME कभी ओवरराइट नहीं किया जाता है।",
       "delete_step_confirmation": "क्या आप वाकई इस चरण को हटाना चाहते हैं?",
       "delete_step_name_label": "चरण",
       "delete_step_content_label": "सामग्री"
     },
     "button": {
       "reset_template_confirm": "टेम्पलेट कॉन्फ़िगरेशन रीसेट करें",
-      "fetch_global_config_confirm": "ग्लोबल सेटिंग्स लागू करें"
+      "fetch_global_settings_confirm": "ग्लोबल सेटिंग्स लागू करें"
     },
     "section": {
       "ban_details": "प्रतिबंध विवरण",
@@ -793,7 +801,7 @@
       "job_history_count": "कार्य {{count}} निष्पादन",
       "recovery_codes": "पुनर्प्राप्ति कोड",
       "reset_template_config": "टेम्पलेट कॉन्फ़िगरेशन रीसेट करें?",
-      "fetch_global_config": "ग्लोबल सेटिंग्स लागू करें?",
+      "fetch_global_settings": "ग्लोबल सेटिंग्स लागू करें?",
       "server_name_not_unique": "सर्वर का नाम अद्वितीय नहीं है",
       "update_duration": "प्रतिबंध अवधि अपडेट करें",
       "delete_step": "चरण हटाएं"
@@ -822,7 +830,7 @@
     "cache": "कैश",
     "configs": "कॉन्फ़िगरेशन",
     "extra_pages": "अतिरिक्त पृष्ठ",
-    "global_config": "वैश्विक कॉन्फ़िगरेशन",
+    "global_settings": "ग्लोबल सेटिंग्स",
     "home": "होम",
     "instances": "इंस्टेंस",
     "jobs": "कार्य",
@@ -1193,7 +1201,8 @@
       "type": "प्रकार",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "संस्करण"
+      "version": "संस्करण",
+      "status": "स्थिति"
     }
   },
   "template": {
@@ -1386,6 +1395,8 @@
     "button": {
       "convert_service_to_draft": "सेवा {{name}} को ड्राफ्ट में बदलें",
       "convert_service_to_online": "सेवा {{name}} को ऑनलाइन में बदलें",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "delete_config": "कस्टम कॉन्फ़िगरेशन {{name}} हटाएं",
       "delete_file": "कैश फ़ाइल हटाएं: {{filename}}",
       "delete_instance": "इंस्टेंस {{hostname}} हटाएं",
@@ -1396,7 +1407,7 @@
       "reload_instance": "इंस्टेंस {{hostname}} पुनः लोड करें",
       "reset_default": "डिफ़ॉल्ट मान पर रीसेट करें",
       "reset_global": "वैश्विक मान पर रीसेट करें",
-      "value_from_global": "ग्लोबल कॉन्फ़िगरेशन से मान",
+      "value_from_global": "ग्लोबल सेटिंग्स से मान",
       "run_job": "कार्य {{job}} चलाएं",
       "stop_instance": "इंस्टेंस {{hostname}} रोकें",
       "unban_ip": "{{ip}} का प्रतिबंध हटाएं",
@@ -1444,7 +1455,7 @@
     "email_length": "ईमेल 1 और 256 वर्णों के बीच होना चाहिए।",
     "follow_latest_page_only": "फ़ॉलो मोड केवल नवीनतम पृष्ठ पर उपलब्ध है",
     "fetch_global_settings": "ग्लोबल सेटिंग्स लाएँ और उन्हें वर्तमान टेम्पलेट पर लागू करें",
-    "global_config_source": "मान वैश्विक कॉन्फ़िगरेशन से विरासत में मिला है।",
+    "global_settings_source": "मान ग्लोबल सेटिंग्स से विरासत में मिला है।",
     "instance_not_up": "इंस्टेंस {{hostname}} वर्तमान में प्रतिक्रिया नहीं दे रहा है ('up')।",
     "latest_version_installed": "आप नवीनतम संस्करण चला रहे हैं।",
     "lets_encrypt_custom_profile": "Let's Encrypt के लिए उपयोग करने हेतु कस्टम प्रोफ़ाइल (जैसे 'my_custom_profile')।",
@@ -1542,7 +1553,8 @@
         "select_all": "सभी कस्टम कॉन्फ़िगरेशन चुनें",
         "service": "कस्टम कॉन्फ़िगरेशन से जुड़ी सेवा (या वैश्विक)",
         "template": "इंगित करता है कि कस्टम कॉन्फ़िगरेशन एक टेम्पलेट से उत्पन्न हुआ है या नहीं",
-        "type": "कस्टम कॉन्फ़िगरेशन का प्रकार या संदर्भ (उदाहरण के लिए, HTTP, MODSEC)"
+        "type": "कस्टम कॉन्फ़िगरेशन का प्रकार या संदर्भ (उदाहरण के लिए, HTTP, MODSEC)",
+        "status": "कस्टम कॉन्फ़िगरेशन की ड्राफ़्ट स्थिति"
       },
       "instances": {
         "actions": "इस इंस्टेंस के लिए उपलब्ध कार्रवाइयाँ",
@@ -1617,7 +1629,7 @@
     "use_proxy_protocol": "PROXY प्रोटोकॉल संचार सक्षम करें।",
     "use_real_ip": "वास्तविक आईपी का उपयोग करें",
     "username_length": "उपयोगकर्ता नाम 1 और 256 वर्णों के बीच होना चाहिए।",
-    "value_from_global": "ग्लोबल कॉन्फ़िगरेशन से मान लाएँ",
+    "value_from_global": "ग्लोबल सेटिंग्स से मान लाएँ",
     "view_full_url": "पूर्ण URL देखने के लिए क्लिक करें",
     "wildcard_certificates": "वाइल्डकार्ड प्रमाणपत्र (*.domain.com) उत्पन्न करें। DNS चुनौती की आवश्यकता है।",
     "wildcard_dns_only": "वाइल्डकार्ड प्रमाणपत्र केवल DNS चुनौती प्रकार के साथ समर्थित हैं।"

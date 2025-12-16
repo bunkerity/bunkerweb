@@ -15,13 +15,13 @@ from flask import flash as flask_flash, session
 from regex import compile as re_compile, match
 from requests import get
 
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
 
-LOGGER = setup_logger("UI")
+LOGGER = getLogger("UI")
 
 USER_PASSWORD_RX = re_compile(r"^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*\P{Alnum}).{8,}$")
 PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}$")
@@ -50,7 +50,8 @@ COLUMNS_PREFERENCES_DEFAULTS = {
         "4": True,
         "5": True,
         "6": True,
-        "7": False,
+        "7": True,
+        "8": False,
     },
     "instances": {
         "3": False,

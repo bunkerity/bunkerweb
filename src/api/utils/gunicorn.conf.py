@@ -17,7 +17,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from biscuit_auth import KeyPair, PublicKey, PrivateKey
 
 from common_utils import handle_docker_secrets  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger, log_types  # type: ignore
 
 from app.models.api_database import APIDatabase
 from app.utils import BISCUIT_PRIVATE_KEY_FILE, BISCUIT_PUBLIC_KEY_FILE, USER_PASSWORD_RX, check_password, gen_password_hash
@@ -63,11 +63,23 @@ API_SSL_CA_CERTS = getenv("API_SSL_CA_CERTS", getenv("SSL_CA_CERTS", ""))
 
 CAPTURE_OUTPUT = getenv("CAPTURE_OUTPUT", "no").lower() == "yes"
 
+if CAPTURE_OUTPUT or "file" in log_types:
+    errorlog = getenv("LOG_FILE_PATH", join(sep, "var", "log", "bunkerweb", "api.log"))
+    accesslog = f"{errorlog.rsplit('.', 1)[0]}-access.log"
+else:
+    errorlog = "-"
+    accesslog = "-"
+
+if "syslog" in log_types:
+    syslog = True
+    syslog_addr = getenv("LOG_SYSLOG_ADDRESS", "").strip()
+    if not syslog_addr.startswith(("/", "udp://", "tcp://")):
+        syslog_addr = f"udp://{syslog_addr}"
+    syslog_prefix = getenv("LOG_SYSLOG_TAG", "bw-api")
+
 wsgi_app = "app.main:app"
 proc_name = "bunkerweb-api"
-accesslog = join(sep, "var", "log", "bunkerweb", "api-access.log") if CAPTURE_OUTPUT else "-"
 access_log_format = '%({x-forwarded-for}i)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
-errorlog = join(sep, "var", "log", "bunkerweb", "api.log") if CAPTURE_OUTPUT else "-"
 capture_output = CAPTURE_OUTPUT
 limit_request_line = 0
 limit_request_fields = 32768
@@ -122,7 +134,7 @@ def on_starting(server):
     if docker_secrets:
         environ.update(docker_secrets)
 
-    LOGGER = setup_logger("API", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+    LOGGER = getLogger("API")
 
     if docker_secrets:
         LOGGER.info(f"Loaded {len(docker_secrets)} Docker secrets")
@@ -141,14 +153,14 @@ def on_starting(server):
         # * Step 1: Load Biscuit keys from files and validate
         if BISCUIT_PUBLIC_KEY_FILE.is_file() and BISCUIT_PRIVATE_KEY_FILE.is_file():
             try:
-                pub_hex = BISCUIT_PUBLIC_KEY_FILE.read_text(encoding="utf-8").strip()
-                priv_hex = BISCUIT_PRIVATE_KEY_FILE.read_text(encoding="utf-8").strip()
+                pub_hex = BISCUIT_PUBLIC_KEY_FILE.read_text().strip()
+                priv_hex = BISCUIT_PRIVATE_KEY_FILE.read_text().strip()
                 if not pub_hex or not priv_hex:
                     raise ValueError("One or both Biscuit key files are empty.")
 
                 # Validate by attempting to load
-                PublicKey.from_hex(pub_hex)
-                PrivateKey.from_hex(priv_hex)
+                PublicKey(pub_hex)
+                PrivateKey(priv_hex)
                 biscuit_public_key_hex = pub_hex
                 biscuit_private_key_hex = priv_hex
                 keys_loaded = True
@@ -165,8 +177,8 @@ def on_starting(server):
             if pub_hex_env and priv_hex_env:
                 try:
                     # Validate by attempting to load
-                    PublicKey.from_hex(pub_hex_env)
-                    PrivateKey.from_hex(priv_hex_env)
+                    PublicKey(pub_hex_env)
+                    PrivateKey(priv_hex_env)
                     biscuit_public_key_hex = pub_hex_env
                     biscuit_private_key_hex = priv_hex_env
                     keys_loaded = True
@@ -183,8 +195,8 @@ def on_starting(server):
             keypair = KeyPair()
             biscuit_private_key_obj = keypair.private_key
             biscuit_public_key_obj = keypair.public_key
-            biscuit_private_key_hex = biscuit_private_key_obj.to_hex()
-            biscuit_public_key_hex = biscuit_public_key_obj.to_hex()
+            biscuit_private_key_hex = repr(biscuit_private_key_obj)
+            biscuit_public_key_hex = repr(biscuit_public_key_obj)
             keys_generated = True
             LOGGER.info("Generated new Biscuit key pair.")
 

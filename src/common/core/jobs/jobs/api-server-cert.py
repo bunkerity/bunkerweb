@@ -13,10 +13,10 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
-LOGGER = setup_logger("API-SERVER-CERT")
+LOGGER = getLogger("API-SERVER-CERT")
 status = 0
 
 try:

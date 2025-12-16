@@ -14,7 +14,7 @@
     </select>
     <label for="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}">{{ setting }}</label>
     {% if setting_config %}
-        {% if current_endpoint != 'global-config' and setting_config and setting_config.get('global') and setting_value != setting_default %}
+        {% if current_endpoint != 'global-config' and current_endpoint != 'global-settings' and setting_config and setting_config.get('global') and setting_value != setting_default %}
             {% set tooltip_key = "tooltip.button.reset_global" %}
             {% set tooltip_fallback = "Reset to global value" %}
         {% else %}

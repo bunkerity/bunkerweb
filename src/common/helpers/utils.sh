@@ -4,6 +4,26 @@
 function get_python_bin() {
 	local python_bin="python3"
 
+	# Prefer the interpreter version used to build bundled deps (deduced from compiled wheels)
+	local deps_path="/usr/share/bunkerweb/deps/python"
+	if [ -d "$deps_path" ]; then
+		local abi_tag
+		abi_tag=$(
+			find "$deps_path" -maxdepth 2 -type f -name "*cpython-3*.so" 2>/dev/null \
+			| sed -nE 's/.*cpython-(3[0-9]{2}).*/\1/p' \
+			| sort -r \
+			| head -n 1
+		)
+
+		if [ -n "$abi_tag" ]; then
+			local deps_version="3.${abi_tag:1}"
+			if command -v "python${deps_version}" >/dev/null 2>&1; then
+				echo "python${deps_version}"
+				return
+			fi
+		fi
+	fi
+
 	for version in 3.13 3.12 3.11 3.10 3.9; do
 		if command -v "python${version}" >/dev/null 2>&1; then
 			python_bin="python${version}"

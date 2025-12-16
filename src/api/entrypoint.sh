@@ -62,6 +62,8 @@ if [ ! -f /etc/bunkerweb/api.yml ]; then
 	touch /etc/bunkerweb/api.yml
 fi
 
+export LOG_SYSLOG_TAG="${LOG_SYSLOG_TAG:-bw-api}"
+
 # Start the main Gunicorn process with the standard logger configuration.
 python3 -m gunicorn --logger-class utils.logger.APILogger --config utils/gunicorn.conf.py &
 pid="$!"

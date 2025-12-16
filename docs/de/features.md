@@ -17,7 +17,7 @@ Das Allgemein-Plugin stellt das zentrale Konfigurations-Framework für BunkerWeb
 4.  Protokollierungsparameter steuern, welche Informationen aufgezeichnet und wie sie formatiert werden.
 5.  Diese Einstellungen bilden die Grundlage, auf der alle anderen BunkerWeb-Plugins und -Funktionen aufbauen.
 
-### Multisite-Modus
+### Multisite-Modus {#multisite-mode}
 
 Wenn `MULTISITE` auf `yes` gesetzt ist, kann BunkerWeb mehrere Websites hosten und schützen, jede mit ihrer eigenen einzigartigen Konfiguration. Diese Funktion ist besonders nützlich für Szenarien wie:
 
@@ -32,7 +32,7 @@ Im Multisite-Modus wird jede Website durch einen eindeutigen `SERVER_NAME` ident
 
 Dieser Ansatz stellt sicher, dass die Einstellungen in einer Multisite-Umgebung der richtigen Website zugeordnet werden.
 
-### Mehrfacheinstellungen
+### Mehrfacheinstellungen {#multiple-settings}
 
 Einige Einstellungen in BunkerWeb unterstützen mehrere Konfigurationen für dieselbe Funktion. Um mehrere Einstellungsgruppen zu definieren, hängen Sie ein numerisches Suffix an den Einstellungsnamen an. Zum Beispiel:
 
@@ -40,6 +40,14 @@ Einige Einstellungen in BunkerWeb unterstützen mehrere Konfigurationen für die
 - `REVERSE_PROXY_URL_2=/anotherdir` und `REVERSE_PROXY_HOST_2=http://myhost2` konfigurieren den zweiten Reverse-Proxy.
 
 Dieses Muster ermöglicht es Ihnen, mehrere Konfigurationen für Funktionen wie Reverse-Proxys, Ports oder andere Einstellungen zu verwalten, die für unterschiedliche Anwendungsfälle unterschiedliche Werte erfordern.
+
+### Ausführungsreihenfolge der Plugins {#plugin-order}
+
+Sie können die Reihenfolge mit durch Leerzeichen getrennten Listen steuern:
+
+- Globale Phasen: `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_TIMER`.
+- Seitenspezifische Phasen: `PLUGINS_ORDER_SET`, `PLUGINS_ORDER_ACCESS`, `PLUGINS_ORDER_SSL_CERTIFICATE`, `PLUGINS_ORDER_HEADER`, `PLUGINS_ORDER_LOG`, `PLUGINS_ORDER_PREREAD`, `PLUGINS_ORDER_LOG_STREAM`, `PLUGINS_ORDER_LOG_DEFAULT`.
+- Semantik: aufgelistete Plugins laufen zuerst in der Phase; alle übrigen laufen danach in ihrer normalen Reihenfolge. IDs nur mit Leerzeichen trennen.
 
 ### Sicherheitsmodi {#security-modes}
 
@@ -131,11 +139,13 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
 
 === "Protokollierungseinstellungen"
 
-    | Einstellung        | Standard                                                                                                                                   | Kontext | Mehrfach | Beschreibung                                                                                                                                    |
-    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global  | Nein     | **Protokollformat:** Das Format, das für Zugriffsprotokolle verwendet werden soll.                                                              |
-    | `LOG_LEVEL`        | `notice`                                                                                                                                   | global  | Nein     | **Protokollstufe:** Ausführlichkeitsstufe für Fehlerprotokolle. Optionen: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`. |
-    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global  | Nein     | **Timer-Protokollstufe:** Protokollstufe für Timer. Optionen: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.               |
+    | Einstellung        | Standard                                                                                                                                   | Kontext | Mehrfach | Beschreibung                                                                                                                                                              |
+    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global  | Nein     | **Protokollformat:** Das Format, das für Zugriffsprotokolle verwendet werden soll.                                                                                        |
+    | `ACCESS_LOG`       | `/var/log/bunkerweb/access.log`                                                                                                            | global  | Ja       | **Pfad Zugriff-Log:** Datei, `syslog:server=Adresse[:Port][,Parameter=Wert]` oder Shared-Memory `memory:Name:Größe`; setze `off`, um die Protokollierung zu deaktivieren. |
+    | `ERROR_LOG`        | `/var/log/bunkerweb/error.log`                                                                                                             | global  | Ja       | **Pfad Fehler-Log:** Datei, `stderr`, `syslog:server=Adresse[:Port][,Parameter=Wert]` oder `memory:Größe`.                                                                |
+    | `LOG_LEVEL`        | `notice`                                                                                                                                   | global  | Ja       | **Protokollstufe:** Ausführlichkeitsstufe für Fehlerprotokolle. Optionen: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`.                           |
+    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global  | Nein     | **Timer-Protokollstufe:** Protokollstufe für Timer. Optionen: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.                                         |
 
     !!! tip "Bewährte Praktiken bei der Protokollierung"
 
@@ -574,13 +584,13 @@ Führen Sie die folgenden Schritte aus, um die Auth Basic-Authentifizierung zu a
 
 ### Konfigurationseinstellungen
 
-| Einstellung           | Standard          | Kontext   | Mehrfach | Beschreibung                                                                                                                                                     |
-| --------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_AUTH_BASIC`      | `no`              | multisite | nein     | **Auth Basic aktivieren:** Auf `yes` setzen, um die Basisauthentifizierung zu aktivieren.                                                                        |
-| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | nein     | **Schutzumfang:** Auf `sitewide` setzen, um die gesamte Website zu schützen, oder einen URL-Pfad angeben (z.B. `/admin`), um nur bestimmte Bereiche zu schützen. |
-| `AUTH_BASIC_USER`     | `changeme`        | multisite | ja       | **Benutzername:** Der für die Authentifizierung erforderliche Benutzername. Sie können mehrere Paare aus Benutzername und Passwort definieren.                   |
-| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | ja       | **Passwort:** Das für die Authentifizierung erforderliche Passwort. Passwörter werden mit bcrypt für maximale Sicherheit gehasht.                                |
-| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | nein     | **Aufforderungstext:** Die Nachricht, die in der dem Benutzer angezeigten Authentifizierungsaufforderung erscheint.                                              |
+| Einstellung           | Standard          | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                |
+| --------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_AUTH_BASIC`      | `no`              | multisite | nein     | **Auth Basic aktivieren:** Auf `yes` setzen, um die Basisauthentifizierung zu aktivieren.                                                                                                                                                   |
+| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | nein     | **Schutzumfang:** Auf `sitewide` setzen, um die gesamte Website zu schützen, oder einen URL-Pfad angeben (z.B. `/admin`), um nur bestimmte Bereiche zu schützen. Sie können auch Nginx-Stil Modifikatoren verwenden (`=`, `~`, `~*`, `^~`). |
+| `AUTH_BASIC_USER`     | `changeme`        | multisite | ja       | **Benutzername:** Der für die Authentifizierung erforderliche Benutzername. Sie können mehrere Paare aus Benutzername und Passwort definieren.                                                                                              |
+| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | ja       | **Passwort:** Das für die Authentifizierung erforderliche Passwort. Passwörter werden mit scrypt für maximale Sicherheit gehasht.                                                                                                           |
+| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | nein     | **Aufforderungstext:** Die Nachricht, die in der dem Benutzer angezeigten Authentifizierungsaufforderung erscheint.                                                                                                                         |
 
 !!! warning "Sicherheitshinweise"
     Die HTTP-Basisauthentifizierung überträgt Anmeldeinformationen, die in Base64 kodiert (nicht verschlüsselt) sind. Obwohl dies bei Verwendung über HTTPS akzeptabel ist, sollte es über reines HTTP nicht als sicher angesehen werden. Aktivieren Sie immer SSL/TLS, wenn Sie die Basisauthentifizierung verwenden.
@@ -783,21 +793,21 @@ Führen Sie die folgenden Schritte aus, um die Bad Behavior-Funktion zu konfigur
 2.  **Statuscodes konfigurieren:** Definieren Sie mit der Einstellung `BAD_BEHAVIOR_STATUS_CODES`, welche HTTP-Statuscodes als „schlecht“ gelten sollen.
 3.  **Schwellenwerte festlegen:** Bestimmen Sie mit der Einstellung `BAD_BEHAVIOR_THRESHOLD`, wie viele „schlechte“ Antworten eine Sperre auslösen sollen.
 4.  **Zeiträume konfigurieren:** Geben Sie die Dauer für die Zählung schlechter Antworten und die Sperrdauer mit den Einstellungen `BAD_BEHAVIOR_COUNT_TIME` und `BAD_BEHAVIOR_BAN_TIME` an.
-5.  **Sperrbereich wählen:** Entscheiden Sie mit der Einstellung `BAD_BEHAVIOR_BAN_SCOPE`, ob die Sperren nur für den aktuellen Dienst oder global für alle Dienste gelten sollen.
+5.  **Sperrbereich wählen:** Entscheiden Sie mit der Einstellung `BAD_BEHAVIOR_BAN_SCOPE`, ob die Sperren nur für den aktuellen Dienst oder global für alle Dienste gelten sollen. Trifft der Traffic auf den Standardserver (Servername `_`), werden Sperren immer global gesetzt, damit die IP überall blockiert wird.
 
 !!! tip "Stream-Modus"
     Im **Stream-Modus** wird nur der Statuscode `444` als „schlecht“ angesehen und löst dieses Verhalten aus.
 
 ### Konfigurationseinstellungen
 
-| Einstellung                 | Standard                      | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                 |
-| --------------------------- | ----------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | nein     | **Bad Behavior aktivieren:** Auf `yes` setzen, um die Funktion zur Erkennung und Sperrung von schlechtem Verhalten zu aktivieren.                                            |
-| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | nein     | **Schlechte Statuscodes:** Liste der HTTP-Statuscodes, die als „schlechtes“ Verhalten gezählt werden, wenn sie an einen Client zurückgegeben werden.                         |
-| `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | nein     | **Schwellenwert:** Die Anzahl der „schlechten“ Statuscodes, die eine IP innerhalb des Zählzeitraums erzeugen kann, bevor sie gesperrt wird.                                  |
-| `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | nein     | **Zählzeitraum:** Das Zeitfenster (in Sekunden), in dem schlechte Statuscodes auf den Schwellenwert angerechnet werden.                                                      |
-| `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | nein     | **Sperrdauer:** Wie lange (in Sekunden) eine IP nach Überschreiten des Schwellenwerts gesperrt bleibt. Standard ist 24 Stunden (86400 Sekunden). `0` für permanente Sperren. |
-| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | nein     | **Sperrbereich:** Legt fest, ob Sperren nur für den aktuellen Dienst (`service`) oder für alle Dienste (`global`) gelten.                                                    |
+| Einstellung                 | Standard                      | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                      |
+| --------------------------- | ----------------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | nein     | **Bad Behavior aktivieren:** Auf `yes` setzen, um die Funktion zur Erkennung und Sperrung von schlechtem Verhalten zu aktivieren.                                                 |
+| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | nein     | **Schlechte Statuscodes:** Liste der HTTP-Statuscodes, die als „schlechtes“ Verhalten gezählt werden, wenn sie an einen Client zurückgegeben werden.                              |
+| `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | nein     | **Schwellenwert:** Die Anzahl der „schlechten“ Statuscodes, die eine IP innerhalb des Zählzeitraums erzeugen kann, bevor sie gesperrt wird.                                       |
+| `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | nein     | **Zählzeitraum:** Das Zeitfenster (in Sekunden), in dem schlechte Statuscodes auf den Schwellenwert angerechnet werden.                                                           |
+| `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | nein     | **Sperrdauer:** Wie lange (in Sekunden) eine IP nach Überschreiten des Schwellenwerts gesperrt bleibt. Standard ist 24 Stunden (86400 Sekunden). `0` für permanente Sperren.      |
+| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | nein     | **Sperrbereich:** Legt fest, ob Sperren nur für den aktuellen Dienst (`service`) oder für alle Dienste (`global`) gelten. Auf dem Standardserver (`_`) sind Sperren immer global. |
 
 !!! warning "Falsch-Positive"
     Seien Sie vorsichtig bei der Einstellung des Schwellenwerts und der Zählzeit. Zu niedrige Werte können versehentlich legitime Benutzer sperren, die beim Surfen auf Ihrer Website auf Fehler stoßen.
@@ -1382,6 +1392,32 @@ Hier sind Beispiele für mögliche Werte der Einstellung `CORS_ALLOW_ORIGIN` und
     CORS_DENY_REQUEST: "yes"
     ```
 
+## Cache <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM-Unterstützung :x:
+
+Provides caching functionality at the reverse proxy level.
+
+| Einstellung                 | Standardwert                      | Kontext   | Mehrfach | Beschreibung                                                                   |
+| --------------------------- | --------------------------------- | --------- | -------- | ------------------------------------------------------------------------------ |
+| `CACHE_PATH`                |                                   | global    | ja       | Path and parameters for a cache.                                               |
+| `CACHE_ZONE`                |                                   | multisite | nein     | Name of cache zone to use (specified in a CACHE_PATH setting).                 |
+| `CACHE_HEADER`              | `X-Cache`                         | multisite | nein     | Add header about cache status.                                                 |
+| `CACHE_BACKGROUND_UPDATE`   | `no`                              | multisite | nein     | Enable or disable background update of the cache.                              |
+| `CACHE_BYPASS`              |                                   | multisite | nein     | List of variables to determine if the cache should be bypassed or not.         |
+| `CACHE_NO_CACHE`            | `$http_pragma$http_authorization` | multisite | nein     | Disable caching if variables are set.                                          |
+| `CACHE_KEY`                 | `$scheme$proxy_host$request_uri`  | multisite | nein     | Key used to identify cached elements.                                          |
+| `CACHE_CONVERT_HEAD_TO_GET` | `yes`                             | multisite | nein     | Convert HEAD requests to GET when caching.                                     |
+| `CACHE_LOCK`                | `no`                              | multisite | nein     | Lock concurrent requests when populating the cache.                            |
+| `CACHE_LOCK_AGE`            | `5s`                              | multisite | nein     | Pass request to upstream if cache is locked for that time (possible cache).    |
+| `CACHE_LOCK_TIMEOUT`        | `5s`                              | multisite | nein     | Pass request to upstream if cache is locked for that time (no cache).          |
+| `CACHE_METHODS`             | `GET HEAD`                        | multisite | nein     | Only cache response if corresponding method is present.                        |
+| `CACHE_MIN_USES`            | `1`                               | multisite | nein     | Number of requests before we put the corresponding response in cache.          |
+| `CACHE_REVALIDATE`          | `no`                              | multisite | nein     | Revalidate expired items using conditional requests to upstream.               |
+| `CACHE_USE_STALE`           | `off`                             | multisite | nein     | Determines the use of staled cache response (proxy_cache_use_stale directive). |
+| `CACHE_VALID`               | `10m`                             | multisite | ja       | Defines default caching with optional status code.                             |
+
 ## Client cache
 
 STREAM-Unterstützung :x:
@@ -1593,7 +1629,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     Für containerbasierte Integrationen empfehlen wir, die Protokolle des BunkerWeb-Containers an einen Syslog-Dienst umzuleiten, damit CrowdSec leicht darauf zugreifen kann. Hier ist ein Beispiel für eine syslog-ng-Konfiguration, die die Rohprotokolle von BunkerWeb in einer lokalen Datei `/var/log/bunkerweb.log` speichert:
 
     ```syslog
-    @version: 4.8
+    @version: 4.10
 
     source s_net {
         udp(
@@ -1607,7 +1643,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     };
 
     destination d_file {
-        file("/var/log/bunkerweb.log" template(t_imp));
+        file("/var/log/bunkerweb.log" template(t_imp) logrotate(enable(yes), size(100MB), rotations(7)));
     };
 
     log {
@@ -1628,7 +1664,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.7~rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1645,7 +1681,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
             syslog-address: "udp://10.20.30.254:514" # Die IP-Adresse des syslog-Dienstes
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -1693,7 +1729,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
           - bw-universe
 
       syslog:
-        image: balabit/syslog-ng:4.9.0
+        image: balabit/syslog-ng:4.10.2
         cap_add:
           - NET_BIND_SERVICE  # An niedrige Ports binden
           - NET_BROADCAST  # Broadcasts senden
@@ -1884,6 +1920,24 @@ Wenden Sie die folgenden Umgebungsvariablen (oder Scheduler-Werte) an, damit die
     CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
     ```
+
+## Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM-Unterstützung :x:
+
+Tweak BunkerWeb error/antibot/default pages with custom HTML.
+
+| Einstellung                      | Standardwert | Kontext   | Mehrfach | Beschreibung                                                                                                       |
+| -------------------------------- | ------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| `CUSTOM_ERROR_PAGE`              |              | multisite | nein     | Full path of the custom error page (must be readable by the scheduler) (Can be a lua template).                    |
+| `CUSTOM_DEFAULT_SERVER_PAGE`     |              | global    | nein     | Full path of the custom default server page (must be readable by the scheduler) (Can be a lua template).           |
+| `CUSTOM_ANTIBOT_CAPTCHA_PAGE`    |              | multisite | nein     | Full path of the custom antibot captcha page (must be readable by the scheduler) (Can be a lua template).          |
+| `CUSTOM_ANTIBOT_JAVASCRIPT_PAGE` |              | multisite | nein     | Full path of the custom antibot javascript check page (must be readable by the scheduler) (Can be a lua template). |
+| `CUSTOM_ANTIBOT_RECAPTCHA_PAGE`  |              | multisite | nein     | Full path of the custom antibot recaptcha page (must be readable by the scheduler) (Can be a lua template).        |
+| `CUSTOM_ANTIBOT_HCAPTCHA_PAGE`   |              | multisite | nein     | Full path of the custom antibot hcaptcha page (must be readable by the scheduler) (Can be a lua template).         |
+| `CUSTOM_ANTIBOT_TURNSTILE_PAGE`  |              | multisite | nein     | Full path of the custom antibot turnstile page (must be readable by the scheduler) (Can be a lua template).        |
+| `CUSTOM_ANTIBOT_MCAPTCHA_PAGE`   |              | multisite | nein     | Full path of the custom antibot mcaptcha page (must be readable by the scheduler) (Can be a lua template).         |
 
 ## Custom SSL certificate
 
@@ -2706,23 +2760,28 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 
 ### Konfigurationseinstellungen
 
-| Einstellung                        | Standard  | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                               |
-| ---------------------------------- | --------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AUTO_LETS_ENCRYPT`                | `no`      | multisite | nein     | **Let's Encrypt aktivieren:** Auf `yes` setzen, um die automatische Ausstellung und Erneuerung von Zertifikaten zu aktivieren.                                                                                                                             |
-| `LETS_ENCRYPT_PASSTHROUGH`         | `no`      | multisite | nein     | **Let's Encrypt durchleiten:** Auf `yes` setzen, um Let's Encrypt-Anfragen an den Webserver weiterzuleiten. Dies ist nützlich, wenn BunkerWeb hinter einem anderen Reverse-Proxy mit SSL-Handling steht.                                                   |
-| `EMAIL_LETS_ENCRYPT`               | `-`       | multisite | nein     | **Kontakt-E-Mail:** E-Mail-Adresse für Let's-Encrypt-Erinnerungen. Lassen Sie das Feld nur leer, wenn Sie akzeptieren, dass keine Warnungen oder Wiederherstellungs-E-Mails gesendet werden (Certbot registriert mit `--register-unsafely-without-email`). |
-| `LETS_ENCRYPT_CHALLENGE`           | `http`    | multisite | nein     | **Challenge-Typ:** Methode zur Überprüfung des Domainbesitzes. Optionen: `http` oder `dns`.                                                                                                                                                                |
-| `LETS_ENCRYPT_DNS_PROVIDER`        |           | multisite | nein     | **DNS-Anbieter:** Bei Verwendung von DNS-Challenges der zu verwendende DNS-Anbieter (z.B. cloudflare, route53, digitalocean).                                                                                                                              |
-| `LETS_ENCRYPT_DNS_PROPAGATION`     | `default` | multisite | nein     | **DNS-Propagation:** Die Wartezeit für die DNS-Propagation in Sekunden. Wenn kein Wert angegeben wird, wird die Standard-Propagationszeit des Anbieters verwendet.                                                                                         |
-| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |           | multisite | ja       | **Anmeldeinformationselement:** Konfigurationselemente für die Authentifizierung des DNS-Anbieters (z. B. `cloudflare_api_token 123456`). Werte können Rohtext, base64-kodiert oder ein JSON-Objekt sein.                                                  |
-| `USE_LETS_ENCRYPT_WILDCARD`        | `no`      | multisite | nein     | **Wildcard-Zertifikate:** Wenn auf `yes` gesetzt, werden Wildcard-Zertifikate für alle Domains erstellt. Nur mit DNS-Challenges verfügbar.                                                                                                                 |
-| `USE_LETS_ENCRYPT_STAGING`         | `no`      | multisite | nein     | **Staging verwenden:** Wenn auf `yes` gesetzt, wird die Staging-Umgebung von Let's Encrypt zum Testen verwendet. Staging hat höhere Ratenbegrenzungen, aber die Zertifikate sind nicht vertrauenswürdig.                                                   |
-| `LETS_ENCRYPT_CLEAR_OLD_CERTS`     | `no`      | global    | nein     | **Alte Zertifikate löschen:** Wenn auf `yes` gesetzt, werden alte Zertifikate, die bei der Erneuerung nicht mehr benötigt werden, entfernt.                                                                                                                |
-| `LETS_ENCRYPT_PROFILE`             | `classic` | multisite | nein     | **Zertifikatsprofil:** Wählen Sie das zu verwendende Zertifikatsprofil aus. Optionen: `classic` (Allzweck), `tlsserver` (optimiert für TLS-Server) oder `shortlived` (7-Tage-Zertifikate).                                                                 |
-| `LETS_ENCRYPT_CUSTOM_PROFILE`      |           | multisite | nein     | **Benutzerdefiniertes Zertifikatsprofil:** Geben Sie ein benutzerdefiniertes Zertifikatsprofil ein, wenn Ihr ACME-Server nicht standardmäßige Profile unterstützt. Dies überschreibt `LETS_ENCRYPT_PROFILE`, falls gesetzt.                                |
-| `LETS_ENCRYPT_MAX_RETRIES`         | `3`       | multisite | nein     | **Maximale Wiederholungen:** Anzahl der Wiederholungsversuche bei der Zertifikatserstellung bei einem Fehler. Auf `0` setzen, um Wiederholungen zu deaktivieren. Nützlich bei temporären Netzwerkproblemen.                                                |
+| Einstellung                                 | Standard  | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------------------- | --------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AUTO_LETS_ENCRYPT`                         | `no`      | multisite | nein     | **Let's Encrypt aktivieren:** Auf `yes` setzen, um die automatische Ausstellung und Erneuerung von Zertifikaten zu aktivieren.                                                                                                                                                                                                                                         |
+| `LETS_ENCRYPT_PASSTHROUGH`                  | `no`      | multisite | nein     | **Let's Encrypt durchleiten:** Auf `yes` setzen, um Let's Encrypt-Anfragen an den Webserver weiterzuleiten. Dies ist nützlich, wenn BunkerWeb hinter einem anderen Reverse-Proxy mit SSL-Handling steht.                                                                                                                                                               |
+| `EMAIL_LETS_ENCRYPT`                        | `-`       | multisite | nein     | **Kontakt-E-Mail:** E-Mail-Adresse für Let's-Encrypt-Erinnerungen. Lassen Sie das Feld nur leer, wenn Sie akzeptieren, dass keine Warnungen oder Wiederherstellungs-E-Mails gesendet werden (Certbot registriert mit `--register-unsafely-without-email`).                                                                                                             |
+| `LETS_ENCRYPT_CHALLENGE`                    | `http`    | multisite | nein     | **Challenge-Typ:** Methode zur Überprüfung des Domainbesitzes. Optionen: `http` oder `dns`.                                                                                                                                                                                                                                                                            |
+| `LETS_ENCRYPT_DNS_PROVIDER`                 |           | multisite | nein     | **DNS-Anbieter:** Bei Verwendung von DNS-Challenges der zu verwendende DNS-Anbieter (z.B. cloudflare, route53, digitalocean).                                                                                                                                                                                                                                          |
+| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default` | multisite | nein     | **DNS-Propagation:** Die Wartezeit für die DNS-Propagation in Sekunden. Wenn kein Wert angegeben wird, wird die Standard-Propagationszeit des Anbieters verwendet.                                                                                                                                                                                                     |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |           | multisite | ja       | **Anmeldeinformationselement:** Konfigurationselemente für die Authentifizierung des DNS-Anbieters (z. B. `cloudflare_api_token 123456`). Werte können Rohtext, base64-kodiert oder ein JSON-Objekt sein.                                                                                                                                                              |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`     | multisite | nein     | **DNS-Anmeldeinformationen Base64 dekodieren:** Dekodiert automatisch base64-kodierte DNS-Anbieter-Anmeldeinformationen, wenn auf `yes` gesetzt. Wenn aktiviert, werden Werte, die dem Base64-Format entsprechen, vor der Verwendung dekodiert (außer beim `rfc2136`-Anbieter). Deaktivieren Sie dies, wenn Ihre Anmeldeinformationen absichtlich Base64-codiert sind. |
+| `USE_LETS_ENCRYPT_WILDCARD`                 | `no`      | multisite | nein     | **Wildcard-Zertifikate:** Wenn auf `yes` gesetzt, werden Wildcard-Zertifikate für alle Domains erstellt. Nur mit DNS-Challenges verfügbar.                                                                                                                                                                                                                             |
+| `USE_LETS_ENCRYPT_STAGING`                  | `no`      | multisite | nein     | **Staging verwenden:** Wenn auf `yes` gesetzt, wird die Staging-Umgebung von Let's Encrypt zum Testen verwendet. Staging hat höhere Ratenbegrenzungen, aber die Zertifikate sind nicht vertrauenswürdig.                                                                                                                                                               |
+| `LETS_ENCRYPT_CLEAR_OLD_CERTS`              | `no`      | global    | nein     | **Alte Zertifikate löschen:** Wenn auf `yes` gesetzt, werden alte Zertifikate, die bei der Erneuerung nicht mehr benötigt werden, entfernt.                                                                                                                                                                                                                            |
+| `LETS_ENCRYPT_PROFILE`                      | `classic` | multisite | nein     | **Zertifikatsprofil:** Wählen Sie das zu verwendende Zertifikatsprofil aus. Optionen: `classic` (Allzweck), `tlsserver` (optimiert für TLS-Server) oder `shortlived` (7-Tage-Zertifikate).                                                                                                                                                                             |
+| `LETS_ENCRYPT_CUSTOM_PROFILE`               |           | multisite | nein     | **Benutzerdefiniertes Zertifikatsprofil:** Geben Sie ein benutzerdefiniertes Zertifikatsprofil ein, wenn Ihr ACME-Server nicht standardmäßige Profile unterstützt. Dies überschreibt `LETS_ENCRYPT_PROFILE`, falls gesetzt.                                                                                                                                            |
+| `LETS_ENCRYPT_MAX_RETRIES`                  | `3`       | multisite | nein     | **Maximale Wiederholungen:** Anzahl der Wiederholungsversuche bei der Zertifikatserstellung bei einem Fehler. Auf `0` setzen, um Wiederholungen zu deaktivieren. Nützlich bei temporären Netzwerkproblemen.                                                                                                                                                            |
 
-!!! info "Informationen und Verhalten" - Die Einstellung `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` ist eine Mehrfacheinstellung und kann verwendet werden, um mehrere Elemente für den DNS-Anbieter festzulegen. Die Elemente werden als Cache-Datei gespeichert, und Certbot liest die Anmeldeinformationen daraus. - Wenn keine `LETS_ENCRYPT_DNS_PROPAGATION`-Einstellung angegeben ist, wird die Standard-Propagationszeit des Anbieters verwendet. - Die vollständige Let's Encrypt-Automatisierung mit der `http`-Challenge funktioniert im Stream-Modus, solange Sie den Port `80/tcp` von außen öffnen. Verwenden Sie die Einstellung `LISTEN_STREAM_PORT_SSL`, um Ihren SSL/TLS-Listening-Port zu wählen. - Wenn `LETS_ENCRYPT_PASSTHROUGH` auf `yes` gesetzt ist, behandelt BunkerWeb die ACME-Challenge-Anfragen nicht selbst, sondern leitet sie an den Backend-Webserver weiter. Dies ist nützlich in Szenarien, in denen BunkerWeb als Reverse-Proxy vor einem anderen Server fungiert, der für die Verarbeitung von Let's Encrypt-Challenges konfiguriert ist.
+!!! info "Informationen und Verhalten"
+    - Die Einstellung `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` ist eine Mehrfacheinstellung und kann verwendet werden, um mehrere Elemente für den DNS-Anbieter festzulegen. Die Elemente werden als Cache-Datei gespeichert, und Certbot liest die Anmeldeinformationen daraus.
+    - Wenn keine `LETS_ENCRYPT_DNS_PROPAGATION`-Einstellung angegeben ist, wird die Standard-Propagationszeit des Anbieters verwendet.
+    - Die vollständige Let's Encrypt-Automatisierung mit der `http`-Challenge funktioniert im Stream-Modus, solange Sie den Port `80/tcp` von außen öffnen. Verwenden Sie die Einstellung `LISTEN_STREAM_PORT_SSL`, um Ihren SSL/TLS-Listening-Port zu wählen.
+    - Wenn `LETS_ENCRYPT_PASSTHROUGH` auf `yes` gesetzt ist, behandelt BunkerWeb die ACME-Challenge-Anfragen nicht selbst, sondern leitet sie an den Backend-Webserver weiter. Dies ist nützlich in Szenarien, in denen BunkerWeb als Reverse-Proxy vor einem anderen Server fungiert, der für die Verarbeitung von Let's Encrypt-Challenges konfiguriert ist.
 
 !!! tip "HTTP- vs. DNS-Challenges"
     **HTTP-Challenges** sind einfacher einzurichten und funktionieren für die meisten Websites gut:
@@ -2768,6 +2827,7 @@ Das Let's Encrypt-Plugin unterstützt eine breite Palette von DNS-Anbietern für
 | `njalla`          | Njalla           | `token`                                                                                                      |                                                                                                                                                                                                                                                                              | [Dokumentation](https://github.com/chaptergy/certbot-dns-njalla/blob/main/README.md)                  |
 | `nsone`           | NS1              | `api_key`                                                                                                    |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-nsone.readthedocs.io/en/stable/)                                  |
 | `ovh`             | OVH              | `application_key`<br>`application_secret`<br>`consumer_key`                                                  | `endpoint` (Standard: `ovh-eu`)                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-ovh.readthedocs.io/en/stable/)                                    |
+| `pdns`            | PowerDNS         | `endpoint`<br>`api_key`<br>`server_id` (default: `localhost`)<br>`disable_notify` (default: `false`)         |                                                                                                                                                                                                                                                                              | [Documentation](https://github.com/kaechele/certbot-dns-pdns/blob/main/README.md)                     |
 | `rfc2136`         | RFC 2136         | `server`<br>`name`<br>`secret`                                                                               | `port` (Standard: `53`)<br>`algorithm` (Standard: `HMAC-SHA512`)<br>`sign_query` (Standard: `false`)                                                                                                                                                                         | [Dokumentation](https://certbot-dns-rfc2136.readthedocs.io/en/stable/)                                |
 | `route53`         | Amazon Route 53  | `access_key_id`<br>`secret_access_key`                                                                       |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-route53.readthedocs.io/en/stable/)                                |
 | `sakuracloud`     | Sakura Cloud     | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-sakuracloud.readthedocs.io/en/stable/)                            |
@@ -3560,7 +3620,7 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
 Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entspricht:
 
 - **`3`**: Stabile [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`**: Stabile [v4.20.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.20.0) (**Standard**).
+- **`4`**: Stabile [v4.21.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.21.0) (**Standard**).
 - **`nightly`**: [Nightly-Build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) mit den neuesten Regel-Updates.
 
 !!! example "Nightly-Build"
@@ -4084,17 +4144,19 @@ Führen Sie die folgenden Schritte aus, um die Umleitungsfunktion zu konfigurier
 
 ### Konfigurationseinstellungen
 
-| Einstellung               | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                  |
-| ------------------------- | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `REDIRECT_FROM`           | `/`      | multisite | ja       | **Pfad, von dem umgeleitet wird:** Der Pfad, der umgeleitet wird.                                                             |
-| `REDIRECT_TO`             |          | multisite | ja       | **Ziel-URL:** Die Ziel-URL, zu der Besucher umgeleitet werden. Leer lassen, um die Umleitung zu deaktivieren.                 |
-| `REDIRECT_TO_REQUEST_URI` | `no`     | multisite | ja       | **Pfad beibehalten:** Wenn auf `yes` gesetzt, wird die ursprüngliche Anfrage-URI an die Ziel-URL angehängt.                   |
-| `REDIRECT_TO_STATUS_CODE` | `301`    | multisite | ja       | **HTTP-Statuscode:** Der für die Umleitung zu verwendende HTTP-Statuscode. Optionen: `301` (permanent) oder `302` (temporär). |
+| Einstellung               | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                |
+| ------------------------- | -------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `REDIRECT_FROM`           | `/`      | multisite | ja       | **Pfad, von dem umgeleitet wird:** Der Pfad, der umgeleitet wird.                                                           |
+| `REDIRECT_TO`             |          | multisite | ja       | **Ziel-URL:** Die Ziel-URL, zu der Besucher umgeleitet werden. Leer lassen, um die Umleitung zu deaktivieren.               |
+| `REDIRECT_TO_REQUEST_URI` | `no`     | multisite | ja       | **Pfad beibehalten:** Wenn auf `yes` gesetzt, wird die ursprüngliche Anfrage-URI an die Ziel-URL angehängt.                 |
+| `REDIRECT_TO_STATUS_CODE` | `301`    | multisite | ja       | **HTTP-Statuscode:** Der für die Umleitung zu verwendende HTTP-Statuscode. Optionen: `301`, `302`, `303`, `307` oder `308`. |
 
 !!! tip "Wahl des richtigen Statuscodes"
-
-- Verwenden Sie `301` (Moved Permanently), wenn die Umleitung dauerhaft ist, z. B. bei Domain-Migrationen oder zur Einrichtung kanonischer URLs. Dies hilft Suchmaschinen, ihre Indizes zu aktualisieren.
-- Verwenden Sie `302` (Found/Temporary Redirect), wenn die Umleitung vorübergehend ist oder wenn Sie die ursprüngliche URL in Zukunft möglicherweise wiederverwenden möchten.
+    - **`301` (Moved Permanently):** Permanente Umleitung, wird von Browsern zwischengespeichert. Kann POST zu GET ändern. Ideal für Domain-Migrationen.
+    - **`302` (Found):** Temporäre Umleitung. Kann POST zu GET ändern.
+    - **`303` (See Other):** Leitet immer mit GET-Methode um. Nützlich nach Formularübermittlungen.
+    - **`307` (Temporary Redirect):** Temporäre Umleitung, die die HTTP-Methode beibehält. Ideal für API-Umleitungen.
+    - **`308` (Permanent Redirect):** Permanente Umleitung, die die HTTP-Methode beibehält. Für permanente API-Migrationen.
 
 !!! info "Beibehaltung des Pfades"
     Wenn `REDIRECT_TO_REQUEST_URI` auf `yes` gesetzt ist, behält BunkerWeb den ursprünglichen Anfragepfad bei. Wenn ein Benutzer beispielsweise `https://old-domain.com/blog/post-1` besucht und Sie eine Umleitung zu `https://new-domain.com` eingerichtet haben, wird er zu `https://new-domain.com/blog/post-1` umgeleitet.
@@ -4165,6 +4227,27 @@ Führen Sie die folgenden Schritte aus, um die Umleitungsfunktion zu konfigurier
     REDIRECT_TO_STATUS_CODE: "301"
     ```
 
+=== "API-Endpunkt-Migration"
+
+    Eine Konfiguration für die permanente Umleitung eines API-Endpunkts unter Beibehaltung der HTTP-Methode:
+
+    ```yaml
+    REDIRECT_FROM: "/api/v1/"
+    REDIRECT_TO: "https://api.example.com/v2/"
+    REDIRECT_TO_REQUEST_URI: "yes"
+    REDIRECT_TO_STATUS_CODE: "308"
+    ```
+
+=== "Nach Formularübermittlung"
+
+    Eine Konfiguration zur Umleitung nach einer Formularübermittlung mit GET-Methode:
+
+    ```yaml
+    REDIRECT_TO: "https://example.com/danke"
+    REDIRECT_TO_REQUEST_URI: "no"
+    REDIRECT_TO_STATUS_CODE: "303"
+    ```
+
 ## Redis
 
 STREAM-Unterstützung :white_check_mark:
@@ -4212,14 +4295,23 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 
 !!! warning "Sicherheit"
 
-- Verwenden Sie starke Passwörter für Redis and Sentinel.
+- Verwenden Sie starke Passwörter für Redis und Sentinel.
 - Erwägen Sie die Verwendung von SSL/TLS.
 - Setzen Sie Redis nicht dem Internet aus.
 - Beschränken Sie den Zugriff auf den Redis-Port (Firewall, Segmentierung).
 
+!!! info "Cluster-Anforderungen"
+    Bei der Bereitstellung von BunkerWeb in einem Cluster:
+
+    - Alle BunkerWeb-Instanzen sollten sich mit demselben Redis- oder Valkey-Server oder Sentinel-Cluster verbinden
+    - Konfigurieren Sie dieselbe Datenbanknummer auf allen Instanzen
+    - Stellen Sie die Netzwerkkonnektivität zwischen allen BunkerWeb-Instanzen und den Redis-/Valkey-Servern sicher
+
 ### Beispiele
 
 === "Basiskonfiguration"
+
+    Eine einfache Konfiguration für die Verbindung zu einem Redis- oder Valkey-Server auf dem lokalen Computer:
 
     ```yaml
     USE_REDIS: "yes"
@@ -4228,6 +4320,8 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
     ```
 
 === "Sichere Konfiguration"
+
+    Konfiguration mit Passwortauthentifizierung und aktiviertem SSL:
 
     ```yaml
     USE_REDIS: "yes"
@@ -4240,6 +4334,8 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 
 === "Redis Sentinel"
 
+    Konfiguration für Hochverfügbarkeit mit Redis Sentinel:
+
     ```yaml
     USE_REDIS: "yes"
     REDIS_SENTINEL_HOSTS: "sentinel1:26379 sentinel2:26379 sentinel3:26379"
@@ -4249,6 +4345,8 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
     ```
 
 === "Erweitertes Tuning"
+
+    Konfiguration mit erweiterten Verbindungsparametern zur Leistungsoptimierung:
 
     ```yaml
     USE_REDIS: "yes"
@@ -4260,6 +4358,33 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
     REDIS_KEEPALIVE_IDLE: "60"
     REDIS_KEEPALIVE_POOL: "5"
     ```
+
+### Redis Best Practices
+
+Berücksichtigen Sie bei der Verwendung von Redis oder Valkey mit BunkerWeb diese Best Practices, um optimale Leistung, Sicherheit und Zuverlässigkeit zu gewährleisten:
+
+#### Speicherverwaltung
+- **Speichernutzung überwachen:** Konfigurieren Sie Redis mit geeigneten `maxmemory`-Einstellungen, um Fehler wegen unzureichendem Speicher zu vermeiden
+- **Verdrängungsrichtlinie festlegen:** Verwenden Sie eine für Ihren Anwendungsfall geeignete `maxmemory-policy` (z. B. `volatile-lru` oder `allkeys-lru`)
+- **Große Schlüssel vermeiden:** Stellen Sie sicher, dass einzelne Redis-Schlüssel eine angemessene Größe behalten, um Leistungseinbußen zu vermeiden
+
+#### Datenpersistenz
+- **RDB-Snapshots aktivieren:** Konfigurieren Sie regelmäßige Snapshots für die Datenpersistenz ohne signifikante Leistungseinbußen
+- **AOF in Betracht ziehen:** Aktivieren Sie für kritische Daten die AOF-Persistenz (Append-Only File) mit einer geeigneten fsync-Richtlinie
+- **Backup-Strategie:** Implementieren Sie regelmäßige Redis-Backups als Teil Ihres Disaster-Recovery-Plans
+
+#### Leistungsoptimierung
+- **Connection Pooling:** BunkerWeb implementiert dies bereits, aber stellen Sie sicher, dass andere Anwendungen dieser Praxis folgen
+- **Pipelining:** Verwenden Sie, wenn möglich, Pipelining für Massenoperationen, um den Netzwerk-Overhead zu reduzieren
+- **Teure Operationen vermeiden:** Seien Sie vorsichtig mit Befehlen wie KEYS in Produktionsumgebungen
+- **Benchmarken Sie Ihre Arbeitslast:** Verwenden Sie redis-benchmark, um Ihre spezifischen Arbeitslastmuster zu testen
+
+### Weitere Ressourcen
+
+- [Redis-Dokumentation](https://redis.io/documentation)
+- [Redis-Sicherheitsleitfaden](https://redis.io/topics/security)
+- [Redis-Hochverfügbarkeit](https://redis.io/topics/sentinel)
+- [Redis-Persistenz](https://redis.io/topics/persistence)
 
 ## Reporting <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -4818,13 +4943,14 @@ So funktioniert's:
 
 ### Parameter
 
-| Parameter                     | Standard          | Kontext   | Mehrfach | Beschreibung                                                                    |
-| :---------------------------- | :---------------- | :-------- | :------- | :------------------------------------------------------------------------------ |
-| `REDIRECT_HTTP_TO_HTTPS`      | `no`              | Multisite | nein     | Leitet alle HTTP-Anfragen zu HTTPS um.                                          |
-| `AUTO_REDIRECT_HTTP_TO_HTTPS` | `yes`             | Multisite | nein     | Automatische Weiterleitung, wenn HTTPS erkannt wird.                            |
-| `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | Multisite | nein     | Unterstützte SSL/TLS-Protokolle (durch Leerzeichen getrennt).                   |
-| `SSL_CIPHERS_LEVEL`           | `modern`          | Multisite | nein     | Sicherheitsniveau der Suiten (`modern`, `intermediate`, `old`).                 |
-| `SSL_CIPHERS_CUSTOM`          |                   | Multisite | nein     | Benutzerdefinierte Suiten (durch `:` getrennte Liste), die das Niveau ersetzen. |
+| Parameter                     | Standard          | Kontext   | Mehrfach | Beschreibung                                                                                      |
+| :---------------------------- | :---------------- | :-------- | :------- | :------------------------------------------------------------------------------------------------ |
+| `REDIRECT_HTTP_TO_HTTPS`      | `no`              | Multisite | nein     | Leitet alle HTTP-Anfragen zu HTTPS um.                                                            |
+| `AUTO_REDIRECT_HTTP_TO_HTTPS` | `yes`             | Multisite | nein     | Automatische Weiterleitung, wenn HTTPS erkannt wird.                                              |
+| `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | Multisite | nein     | Unterstützte SSL/TLS-Protokolle (durch Leerzeichen getrennt).                                     |
+| `SSL_CIPHERS_LEVEL`           | `modern`          | Multisite | nein     | Sicherheitsniveau der Suiten (`modern`, `intermediate`, `old`).                                   |
+| `SSL_CIPHERS_CUSTOM`          |                   | Multisite | nein     | Benutzerdefinierte Suiten (durch `:` getrennte Liste), die das Niveau ersetzen.                   |
+| `SSL_SESSION_CACHE_SIZE`      | `10m`             | Multisite | nein     | Größe des SSL-Sitzungscaches (z.B. `10m`, `512k`). Auf `off` oder `none` setzen zum Deaktivieren. |
 
 !!! tip "SSL Labs Test"
     Testen Sie Ihre Konfiguration über [Qualys SSL Labs](https://www.ssllabs.com/ssltest/). Eine gut eingestellte BunkerWeb-Konfiguration erreicht in der Regel A+.

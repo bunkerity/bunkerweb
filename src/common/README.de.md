@@ -8,7 +8,7 @@ Das Allgemein-Plugin stellt das zentrale Konfigurations-Framework für BunkerWeb
 4.  Protokollierungsparameter steuern, welche Informationen aufgezeichnet und wie sie formatiert werden.
 5.  Diese Einstellungen bilden die Grundlage, auf der alle anderen BunkerWeb-Plugins und -Funktionen aufbauen.
 
-### Multisite-Modus
+### Multisite-Modus {#multisite-mode}
 
 Wenn `MULTISITE` auf `yes` gesetzt ist, kann BunkerWeb mehrere Websites hosten und schützen, jede mit ihrer eigenen einzigartigen Konfiguration. Diese Funktion ist besonders nützlich für Szenarien wie:
 
@@ -23,7 +23,7 @@ Im Multisite-Modus wird jede Website durch einen eindeutigen `SERVER_NAME` ident
 
 Dieser Ansatz stellt sicher, dass die Einstellungen in einer Multisite-Umgebung der richtigen Website zugeordnet werden.
 
-### Mehrfacheinstellungen
+### Mehrfacheinstellungen {#multiple-settings}
 
 Einige Einstellungen in BunkerWeb unterstützen mehrere Konfigurationen für dieselbe Funktion. Um mehrere Einstellungsgruppen zu definieren, hängen Sie ein numerisches Suffix an den Einstellungsnamen an. Zum Beispiel:
 
@@ -31,6 +31,14 @@ Einige Einstellungen in BunkerWeb unterstützen mehrere Konfigurationen für die
 - `REVERSE_PROXY_URL_2=/anotherdir` und `REVERSE_PROXY_HOST_2=http://myhost2` konfigurieren den zweiten Reverse-Proxy.
 
 Dieses Muster ermöglicht es Ihnen, mehrere Konfigurationen für Funktionen wie Reverse-Proxys, Ports oder andere Einstellungen zu verwalten, die für unterschiedliche Anwendungsfälle unterschiedliche Werte erfordern.
+
+### Ausführungsreihenfolge der Plugins {#plugin-order}
+
+Sie können die Reihenfolge mit durch Leerzeichen getrennten Listen steuern:
+
+- Globale Phasen: `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_TIMER`.
+- Seitenspezifische Phasen: `PLUGINS_ORDER_SET`, `PLUGINS_ORDER_ACCESS`, `PLUGINS_ORDER_SSL_CERTIFICATE`, `PLUGINS_ORDER_HEADER`, `PLUGINS_ORDER_LOG`, `PLUGINS_ORDER_PREREAD`, `PLUGINS_ORDER_LOG_STREAM`, `PLUGINS_ORDER_LOG_DEFAULT`.
+- Semantik: aufgelistete Plugins laufen zuerst in der Phase; alle übrigen laufen danach in ihrer normalen Reihenfolge. IDs nur mit Leerzeichen trennen.
 
 ### Sicherheitsmodi {#security-modes}
 
@@ -122,11 +130,13 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
 
 === "Protokollierungseinstellungen"
 
-    | Einstellung        | Standard                                                                                                                                   | Kontext | Mehrfach | Beschreibung                                                                                                                                    |
-    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global  | Nein     | **Protokollformat:** Das Format, das für Zugriffsprotokolle verwendet werden soll.                                                              |
-    | `LOG_LEVEL`        | `notice`                                                                                                                                   | global  | Nein     | **Protokollstufe:** Ausführlichkeitsstufe für Fehlerprotokolle. Optionen: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`. |
-    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global  | Nein     | **Timer-Protokollstufe:** Protokollstufe für Timer. Optionen: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.               |
+    | Einstellung        | Standard                                                                                                                                   | Kontext | Mehrfach | Beschreibung                                                                                                                                                              |
+    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global  | Nein     | **Protokollformat:** Das Format, das für Zugriffsprotokolle verwendet werden soll.                                                                                        |
+    | `ACCESS_LOG`       | `/var/log/bunkerweb/access.log`                                                                                                            | global  | Ja       | **Pfad Zugriff-Log:** Datei, `syslog:server=Adresse[:Port][,Parameter=Wert]` oder Shared-Memory `memory:Name:Größe`; setze `off`, um die Protokollierung zu deaktivieren. |
+    | `ERROR_LOG`        | `/var/log/bunkerweb/error.log`                                                                                                             | global  | Ja       | **Pfad Fehler-Log:** Datei, `stderr`, `syslog:server=Adresse[:Port][,Parameter=Wert]` oder `memory:Größe`.                                                                |
+    | `LOG_LEVEL`        | `notice`                                                                                                                                   | global  | Ja       | **Protokollstufe:** Ausführlichkeitsstufe für Fehlerprotokolle. Optionen: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`.                           |
+    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global  | Nein     | **Timer-Protokollstufe:** Protokollstufe für Timer. Optionen: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.                                         |
 
     !!! tip "Bewährte Praktiken bei der Protokollierung"
 
