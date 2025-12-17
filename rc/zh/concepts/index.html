@@ -1201,7 +1201,7 @@ app2.example.com_USE_ANTIBOT=cookie
 app2.example.com_WHITELIST_COUNTRY=FR
 app3.example.com_USE_BAD_BEHAVIOR=no
 </code></pre></div>
-<p>请注意，在使用 Web 用户界面时，多站点模式是隐式的。您可以选择直接将配置应用于您的服务，也可以设置一个全局配置，该配置将应用于所有服务（您仍然可以对特定服务直接应用例外）：</p>
+<p>请注意，在使用 Web 用户界面时，多站点模式是隐式的。您可以选择直接将配置应用于您的服务，也可以设置全局设置并将其应用于所有服务（您仍然可以对特定服务直接应用例外）：</p>
 <figure>
 <p><img align="center," alt="概述" src="../../assets/img/ui-multisite.png" width="600" />
   </p>
@@ -1209,7 +1209,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </figure>
 <div class="admonition info">
 <p class="admonition-title">更进一步</p>
-<p>您将在文档的<a href="../advanced/">高级用法</a>和仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/examples">examples</a> 目录中找到多站点模式的具体示例。</p>
+<p>您将在文档的<a href="../advanced/">高级用法</a>和仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc1/examples">examples</a> 目录中找到多站点模式的具体示例。</p>
 </div>
 <h2 id="custom-configurations">自定义配置</h2>
 <p>为了应对独特的挑战并满足特定的用例，BunkerWeb 提供了自定义配置的灵活性。虽然提供的设置和<a href="../plugins/">外部插件</a>涵盖了广泛的场景，但可能存在需要额外定制的情况。</p>
@@ -1224,7 +1224,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </figure>
 <div class="admonition info">
 <p class="admonition-title">更进一步</p>
-<p>您将在文档的<a href="../advanced/#custom-configurations">高级用法</a>和仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/examples">examples</a> 目录中找到自定义配置的具体示例。</p>
+<p>您将在文档的<a href="../advanced/#custom-configurations">高级用法</a>和仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc1/examples">examples</a> 目录中找到自定义配置的具体示例。</p>
 </div>
 <h2 id="_5">数据库</h2>
 <p>BunkerWeb 将其当前配置安全地存储在后端数据库中，该数据库包含平稳运行所需的基本数据。数据库中存储了以下信息：</p>
@@ -1277,21 +1277,21 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <tbody>
 <tr>
 <td style="text-align: left;"><strong>Docker</strong></td>
-<td style="text-align: left;">✅ <code>v17</code> 及更早版本 (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v18</code> 及更早版本（all-in-one：✅ <code>v17</code>）</td>
 <td style="text-align: left;">✅ <code>v11</code> 及更早版本</td>
 <td style="text-align: left;">✅ <code>v9</code> 及更早版本</td>
 <td style="text-align: left;">✅ 支持</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Kubernetes</strong></td>
-<td style="text-align: left;">✅ <code>v17</code> 及更早版本 (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v18</code> 及更早版本</td>
 <td style="text-align: left;">✅ <code>v11</code> 及更早版本</td>
 <td style="text-align: left;">✅ <code>v9</code> 及更早版本</td>
 <td style="text-align: left;">✅ 支持</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Autoconf</strong></td>
-<td style="text-align: left;">✅ <code>v17</code> 及更早版本 (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v18</code> 及更早版本</td>
 <td style="text-align: left;">✅ <code>v11</code> 及更早版本</td>
 <td style="text-align: left;">✅ <code>v9</code> 及更早版本</td>
 <td style="text-align: left;">✅ 支持</td>
@@ -1308,7 +1308,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <div class="admonition info">
 <p class="admonition-title">说明</p>
 <ul>
-<li><strong>PostgreSQL</strong>: 不支持 <code>v18</code>，因为我们提供的 Alpine 基础镜像仅包含 <code>v17</code> 客户端软件包。</li>
+<li><strong>PostgreSQL</strong>: 基于 Alpine 的软件包现在包含 <code>v18</code> 客户端，因此默认支持 <code>v18</code> 及更早版本；all-in-one 镜像仍然使用 <code>v17</code> 客户端，因此 <code>v18</code> 在该镜像中尚不受支持。</li>
 <li><strong>Linux</strong>: 支持情况取决于您的发行版软件包。如果需要，您可以从供应商仓库手动安装数据库客户端（RHEL 通常需要这样做）。</li>
 <li><strong>SQLite</strong>: 随软件包一起提供，可立即使用。</li>
 </ul>

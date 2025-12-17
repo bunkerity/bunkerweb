@@ -852,6 +852,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#plugin-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      Plugin Execution Order
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#security-modes" class="md-nav__link">
     <span class="md-ellipsis">
       Security Modes
@@ -1283,6 +1292,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#cache-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cache (PRO)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#client-cache" class="md-nav__link">
     <span class="md-ellipsis">
       Client cache
@@ -1447,6 +1465,15 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-pages-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Pages (PRO)
+    </span>
+  </a>
   
 </li>
       
@@ -3066,6 +3093,13 @@
 <li><code>REVERSE_PROXY_URL_2=/anotherdir</code> and <code>REVERSE_PROXY_HOST_2=http://myhost2</code> configure the second reverse proxy.</li>
 </ul>
 <p>This pattern allows you to manage multiple configurations for features like reverse proxies, ports, or other settings that require distinct values for different use cases.</p>
+<h3 id="plugin-order">Plugin Execution Order</h3>
+<p>You can reorder plugin execution with space-separated lists:</p>
+<ul>
+<li>Global phases: <code>PLUGINS_ORDER_INIT</code>, <code>PLUGINS_ORDER_INIT_WORKER</code>, <code>PLUGINS_ORDER_TIMER</code>.</li>
+<li>Per-site phases: <code>PLUGINS_ORDER_SET</code>, <code>PLUGINS_ORDER_ACCESS</code>, <code>PLUGINS_ORDER_SSL_CERTIFICATE</code>, <code>PLUGINS_ORDER_HEADER</code>, <code>PLUGINS_ORDER_LOG</code>, <code>PLUGINS_ORDER_PREREAD</code>, <code>PLUGINS_ORDER_LOG_STREAM</code>, <code>PLUGINS_ORDER_LOG_DEFAULT</code>.</li>
+<li>Semantics: listed plugins run first for that phase; all remaining plugins still run afterward in their normal sequence. Separate IDs with spaces only.</li>
+</ul>
 <h3 id="security-modes">Security Modes</h3>
 <p>The <code>SECURITY_MODE</code> setting determines how BunkerWeb handles detected threats. This flexible feature allows you to choose between monitoring or actively blocking suspicious activity, depending on your specific needs:</p>
 <ul>
@@ -3421,10 +3455,24 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><strong>Log Format:</strong> The format to use for access logs.</td>
 </tr>
 <tr>
+<td><code>ACCESS_LOG</code></td>
+<td><code>/var/log/bunkerweb/access.log</code></td>
+<td>global</td>
+<td>Yes</td>
+<td><strong>Access Log Path:</strong> File path, <code>syslog:server=host[:port][,param=value]</code>, or shared buffer <code>memory:name:size</code>; set to <code>off</code> to disable logging.</td>
+</tr>
+<tr>
+<td><code>ERROR_LOG</code></td>
+<td><code>/var/log/bunkerweb/error.log</code></td>
+<td>global</td>
+<td>Yes</td>
+<td><strong>Error Log Path:</strong> File path, <code>stderr</code>, <code>syslog:server=host[:port][,param=value]</code>, or <code>memory:size</code>.</td>
+</tr>
+<tr>
 <td><code>LOG_LEVEL</code></td>
 <td><code>notice</code></td>
 <td>global</td>
-<td>No</td>
+<td>Yes</td>
 <td><strong>Log Level:</strong> Verbosity level for error logs. Options: <code>debug</code>, <code>info</code>, <code>notice</code>, <code>warn</code>, <code>error</code>, <code>crit</code>, <code>alert</code>, <code>emerg</code>.</td>
 </tr>
 <tr>
@@ -4260,7 +4308,7 @@ For the new version, create a reCAPTCHA key in your Google Cloud project and use
 <td><code>sitewide</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Protection Scope:</strong> Set to <code>sitewide</code> to protect the entire site, or specify a URL path (e.g., <code>/admin</code>) to protect only specific areas.</td>
+<td><strong>Protection Scope:</strong> Set to <code>sitewide</code> to protect the entire site, or specify a URL path (e.g., <code>/admin</code>) to protect only specific areas. You can also use Nginx-style modifiers (<code>=</code>, <code>~</code>, <code>~*</code>, <code>^~</code>).</td>
 </tr>
 <tr>
 <td><code>AUTH_BASIC_USER</code></td>
@@ -4274,7 +4322,7 @@ For the new version, create a reCAPTCHA key in your Google Cloud project and use
 <td><code>changeme</code></td>
 <td>multisite</td>
 <td>yes</td>
-<td><strong>Password:</strong> The password required for authentication. Passwords are hashed using bcrypt for maximum security.</td>
+<td><strong>Password:</strong> The password required for authentication. Passwords are hashed using scrypt for maximum security.</td>
 </tr>
 <tr>
 <td><code>AUTH_BASIC_TEXT</code></td>
@@ -4566,7 +4614,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <li><strong>Configure status codes:</strong> Define which HTTP status codes should be considered "bad" using the <code>BAD_BEHAVIOR_STATUS_CODES</code> setting.</li>
 <li><strong>Set threshold values:</strong> Determine how many "bad" responses should trigger a ban using the <code>BAD_BEHAVIOR_THRESHOLD</code> setting.</li>
 <li><strong>Configure time periods:</strong> Specify the duration for counting bad responses and the ban duration using the <code>BAD_BEHAVIOR_COUNT_TIME</code> and <code>BAD_BEHAVIOR_BAN_TIME</code> settings.</li>
-<li><strong>Choose ban scope:</strong> Decide whether the bans should apply only to the current service or globally across all services using the <code>BAD_BEHAVIOR_BAN_SCOPE</code> setting.</li>
+<li><strong>Choose ban scope:</strong> Decide whether the bans should apply only to the current service or globally across all services using the <code>BAD_BEHAVIOR_BAN_SCOPE</code> setting. When traffic hits the default server (server name <code>_</code>), bans are always enforced globally so the offending IP is blocked everywhere.</li>
 </ol>
 <div class="admonition tip">
 <p class="admonition-title">Stream Mode</p>
@@ -4624,7 +4672,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <td><code>service</code></td>
 <td>global</td>
 <td>no</td>
-<td><strong>Ban Scope:</strong> Determines whether bans apply only to the current service (<code>service</code>) or to all services (<code>global</code>).</td>
+<td><strong>Ban Scope:</strong> Determines whether bans apply only to the current service (<code>service</code>) or to all services (<code>global</code>). Bans triggered on the default server (<code>_</code>) are always global.</td>
 </tr>
 </tbody>
 </table>
@@ -5501,6 +5549,134 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
+<h2 id="cache-pro">Cache <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
+<p>Provides caching functionality at the reverse proxy level.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CACHE_PATH</code></td>
+<td></td>
+<td>global</td>
+<td>yes</td>
+<td>Path and parameters for a cache.</td>
+</tr>
+<tr>
+<td><code>CACHE_ZONE</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Name of cache zone to use (specified in a CACHE_PATH setting).</td>
+</tr>
+<tr>
+<td><code>CACHE_HEADER</code></td>
+<td><code>X-Cache</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Add header about cache status.</td>
+</tr>
+<tr>
+<td><code>CACHE_BACKGROUND_UPDATE</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Enable or disable background update of the cache.</td>
+</tr>
+<tr>
+<td><code>CACHE_BYPASS</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>List of variables to determine if the cache should be bypassed or not.</td>
+</tr>
+<tr>
+<td><code>CACHE_NO_CACHE</code></td>
+<td><code>$http_pragma$http_authorization</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Disable caching if variables are set.</td>
+</tr>
+<tr>
+<td><code>CACHE_KEY</code></td>
+<td><code>$scheme$proxy_host$request_uri</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Key used to identify cached elements.</td>
+</tr>
+<tr>
+<td><code>CACHE_CONVERT_HEAD_TO_GET</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Convert HEAD requests to GET when caching.</td>
+</tr>
+<tr>
+<td><code>CACHE_LOCK</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Lock concurrent requests when populating the cache.</td>
+</tr>
+<tr>
+<td><code>CACHE_LOCK_AGE</code></td>
+<td><code>5s</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Pass request to upstream if cache is locked for that time (possible cache).</td>
+</tr>
+<tr>
+<td><code>CACHE_LOCK_TIMEOUT</code></td>
+<td><code>5s</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Pass request to upstream if cache is locked for that time (no cache).</td>
+</tr>
+<tr>
+<td><code>CACHE_METHODS</code></td>
+<td><code>GET HEAD</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Only cache response if corresponding method is present.</td>
+</tr>
+<tr>
+<td><code>CACHE_MIN_USES</code></td>
+<td><code>1</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Number of requests before we put the corresponding response in cache.</td>
+</tr>
+<tr>
+<td><code>CACHE_REVALIDATE</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Revalidate expired items using conditional requests to upstream.</td>
+</tr>
+<tr>
+<td><code>CACHE_USE_STALE</code></td>
+<td><code>off</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Determines the use of staled cache response (proxy_cache_use_stale directive).</td>
+</tr>
+<tr>
+<td><code>CACHE_VALID</code></td>
+<td><code>10m</code></td>
+<td>multisite</td>
+<td>yes</td>
+<td>Defines default caching with optional status code.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="client-cache">Client cache</h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>The Client Cache plugin optimizes website performance by controlling how browsers cache static content. It reduces bandwidth usage, lowers server load, and improves page load times by instructing browsers to store and reuse static assets—such as images, CSS, and JavaScript files—locally instead of requesting them on every page visit.</p>
@@ -5748,7 +5924,7 @@ TrustedMonitor/\d+\.\d+
 </code></pre></div>
 <p><strong>Syslog</strong></p>
 <p>For container-based integrations, we recommend redirecting the logs of the BunkerWeb container to a syslog service so CrowdSec can access them easily. Here is an example configuration for syslog-ng that will store raw logs coming from BunkerWeb to a local <code>/var/log/bunkerweb.log</code> file:</p>
-<div class="highlight"><pre><span></span><code>@version: 4.8
+<div class="highlight"><pre><span></span><code>@version: 4.10
 
 source s_net {
     udp(
@@ -5762,7 +5938,7 @@ template t_imp {
 };
 
 destination d_file {
-    file(&quot;/var/log/bunkerweb.log&quot; template(t_imp));
+    file(&quot;/var/log/bunkerweb.log&quot; template(t_imp) logrotate(enable(yes), size(100MB), rotations(7)));
 };
 
 log {
@@ -5779,7 +5955,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># This is the name that will be used to identify the instance in the Scheduler</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.6-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.7-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -5796,7 +5972,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># The IP address of the syslog service</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.6-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.7-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># Make sure to set the correct instance name</span>
@@ -5844,7 +6020,7 @@ log {
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 
 <span class="w">  </span><span class="nt">syslog</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.9.0</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.10.2</span>
 <span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BIND_SERVICE</span><span class="w">  </span><span class="c1"># Bind to low ports</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BROADCAST</span><span class="w">  </span><span class="c1"># Send broadcasts</span>
@@ -6119,6 +6295,78 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li>On the CrowdSec side, monitor <code>cscli metrics show</code> or the CrowdSec Console to ensure BunkerWeb decisions appear as expected.</li>
 <li>In the BunkerWeb UI, open the CrowdSec plugin page to see the status of the integration.</li>
 </ul>
+<h2 id="custom-pages-pro">Custom Pages <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
+<p>Tweak BunkerWeb error/antibot/default pages with custom HTML.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CUSTOM_ERROR_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Full path of the custom error page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_DEFAULT_SERVER_PAGE</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>Full path of the custom default server page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_CAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Full path of the custom antibot captcha page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_JAVASCRIPT_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Full path of the custom antibot javascript check page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_RECAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Full path of the custom antibot recaptcha page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_HCAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Full path of the custom antibot hcaptcha page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_TURNSTILE_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Full path of the custom antibot turnstile page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+<tr>
+<td><code>CUSTOM_ANTIBOT_MCAPTCHA_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Full path of the custom antibot mcaptcha page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
+</tbody>
+</table>
 <h2 id="custom-ssl-certificate">Custom SSL certificate</h2>
 <p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>The Custom SSL certificate plugin allows you to use your own SSL/TLS certificates with BunkerWeb instead of the automatically generated ones. This feature is particularly useful if you have existing certificates from a trusted Certificate Authority (CA), need to use certificates with specific configurations, or want to maintain consistent certificate management across your infrastructure.</p>
@@ -7453,6 +7701,13 @@ TrustedMonitor/\d+\.\d+
 <td><strong>Credential Item:</strong> Configuration items for DNS provider authentication (e.g., <code>cloudflare_api_token 123456</code>). Values can be raw text, base64 encoded, or a JSON object.</td>
 </tr>
 <tr>
+<td><code>LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Decode Base64 DNS credentials:</strong> Automatically decode base64-encoded DNS provider credentials when set to <code>yes</code>. Values matching base64 format are decoded before use (except for the <code>rfc2136</code> provider). Set to <code>no</code> if your credentials are intentionally base64 strings.</td>
+</tr>
+<tr>
 <td><code>USE_LETS_ENCRYPT_WILDCARD</code></td>
 <td><code>no</code></td>
 <td>multisite</td>
@@ -7667,6 +7922,13 @@ TrustedMonitor/\d+\.\d+
 <td><code>application_key</code><br><code>application_secret</code><br><code>consumer_key</code></td>
 <td><code>endpoint</code> (default: <code>ovh-eu</code>)</td>
 <td><a href="https://certbot-dns-ovh.readthedocs.io/en/stable/">Documentation</a></td>
+</tr>
+<tr>
+<td><code>pdns</code></td>
+<td>PowerDNS</td>
+<td><code>endpoint</code><br><code>api_key</code><br><code>server_id</code> (default: <code>localhost</code>)<br><code>disable_notify</code> (default: <code>false</code>)</td>
+<td></td>
+<td><a href="https://github.com/kaechele/certbot-dns-pdns/blob/main/README.md">Documentation</a></td>
 </tr>
 <tr>
 <td><code>rfc2136</code></td>
@@ -8378,7 +8640,7 @@ TrustedMonitor/\d+\.\d+
 </tbody>
 </table>
 <h3 id="configuration-guide_1">Configuration Guide</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="30:9"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><input id="__tabbed_30_4" name="__tabbed_30" type="radio" /><input id="__tabbed_30_5" name="__tabbed_30" type="radio" /><input id="__tabbed_30_6" name="__tabbed_30" type="radio" /><input id="__tabbed_30_7" name="__tabbed_30" type="radio" /><input id="__tabbed_30_8" name="__tabbed_30" type="radio" /><input id="__tabbed_30_9" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">Default Server Security</label><label for="__tabbed_30_2">Deny HTTP Status</label><label for="__tabbed_30_3">HTTP Methods</label><label for="__tabbed_30_4">Content Types</label><label for="__tabbed_30_5">Request Size Limits</label><label for="__tabbed_30_6">Protocol Support</label><label for="__tabbed_30_7">Static File Serving</label><label for="__tabbed_30_8">System Settings</label><label for="__tabbed_30_9">File Caching</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="30:8"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><input id="__tabbed_30_4" name="__tabbed_30" type="radio" /><input id="__tabbed_30_5" name="__tabbed_30" type="radio" /><input id="__tabbed_30_6" name="__tabbed_30" type="radio" /><input id="__tabbed_30_7" name="__tabbed_30" type="radio" /><input id="__tabbed_30_8" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">Default Server Security</label><label for="__tabbed_30_2">Deny HTTP Status</label><label for="__tabbed_30_3">HTTP Methods</label><label for="__tabbed_30_4">Request Size Limits</label><label for="__tabbed_30_5">Protocol Support</label><label for="__tabbed_30_6">Static File Serving</label><label for="__tabbed_30_7">System Settings</label><label for="__tabbed_30_8">File Caching</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Default Server Controls</strong></p>
@@ -8504,58 +8766,6 @@ TrustedMonitor/\d+\.\d+
 <li><strong>Avoid enabling <code>TRACE</code> or <code>CONNECT</code>:</strong> These methods are rarely needed and can introduce significant security risks, such as enabling Cross-Site Tracing (XST) or tunneling attacks.</li>
 <li><strong>Regularly review allowed methods:</strong> Periodically audit the <code>ALLOWED_METHODS</code> setting to ensure it aligns with your application's current requirements.</li>
 <li><strong>Test thoroughly before deployment:</strong> Changes to HTTP method restrictions can impact application functionality. Validate your configuration in a staging environment before applying it to production.</li>
-</ul>
-</div>
-</div>
-<div class="tabbed-block">
-<p><strong>Content Type Control</strong></p>
-<p>Restricting content types to only those required by your application is an important security measure that helps prevent exploitation through unexpected content types. By explicitly defining acceptable content types, you can minimize the risk of attacks that rely on unexpected or malicious content type headers.</p>
-<p>This feature is configured using the <code>ALLOWED_CONTENT_TYPES</code> setting, where content types are listed and separated by spaces (default: <code>application/x-www-form-urlencoded multipart/form-data text/xml application/xml application/soap+xml application/json application/reports+json application/csp-report</code>). If a client sends a request with a content type not in the list, the server will respond with a <strong>415 - Unsupported Media Type</strong> status.</p>
-<p>The default set of content types covers common web application needs, including form submissions, file uploads, XML/SOAP requests, and JSON APIs.</p>
-<div class="admonition success">
-<p class="admonition-title">Security Benefits</p>
-<ul>
-<li>Prevents exploitation through unexpected or malicious content types</li>
-<li>Reduces the attack surface by rejecting uncommon content types</li>
-<li>Blocks content type manipulation attacks</li>
-<li>Provides defense-in-depth alongside ModSecurity rules</li>
-</ul>
-</div>
-<table>
-<thead>
-<tr>
-<th>Setting</th>
-<th>Default</th>
-<th>Context</th>
-<th>Multiple</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>ALLOWED_CONTENT_TYPES</code></td>
-<td><code>application/x-www-form-urlencoded multipart/form-data text/xml application/xml application/soap+xml application/json application/reports+json application/csp-report</code></td>
-<td>multisite</td>
-<td>no</td>
-<td><strong>Content Types:</strong> List of content types that are allowed, separated by spaces.</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition info">
-<p class="admonition-title">Content Type Checking</p>
-<ul>
-<li>Content type checking only applies when a <code>Content-Type</code> header is present in the request</li>
-<li>The base content type is extracted (e.g., <code>application/json</code> from <code>application/json; charset=utf-8</code>)</li>
-<li>GET and HEAD requests typically do not include a Content-Type header and are not subject to this check</li>
-</ul>
-</div>
-<div class="admonition danger">
-<p class="admonition-title">Security Considerations</p>
-<ul>
-<li><strong>Review your application's needs:</strong> Ensure the allowed content types match your application's actual requirements</li>
-<li><strong>Be cautious with uncommon types:</strong> Only add content types that are genuinely needed by your application</li>
-<li><strong>Test thoroughly before deployment:</strong> Changes to content type restrictions can break application functionality. Validate your configuration in a staging environment before applying it to production</li>
-<li><strong>Consider ModSecurity integration:</strong> This check works alongside ModSecurity rules for comprehensive content type validation</li>
 </ul>
 </div>
 </div>
@@ -8829,7 +9039,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h3 id="example-configurations_22">Example Configurations</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="31:8"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><input id="__tabbed_31_4" name="__tabbed_31" type="radio" /><input id="__tabbed_31_5" name="__tabbed_31" type="radio" /><input id="__tabbed_31_6" name="__tabbed_31" type="radio" /><input id="__tabbed_31_7" name="__tabbed_31" type="radio" /><input id="__tabbed_31_8" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">Default Server Security</label><label for="__tabbed_31_2">Deny HTTP Status</label><label for="__tabbed_31_3">HTTP Methods</label><label for="__tabbed_31_4">Content Types</label><label for="__tabbed_31_5">Request Size Limits</label><label for="__tabbed_31_6">Protocol Support</label><label for="__tabbed_31_7">Static File Serving</label><label for="__tabbed_31_8">File Caching</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="31:7"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><input id="__tabbed_31_4" name="__tabbed_31" type="radio" /><input id="__tabbed_31_5" name="__tabbed_31" type="radio" /><input id="__tabbed_31_6" name="__tabbed_31" type="radio" /><input id="__tabbed_31_7" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">Default Server Security</label><label for="__tabbed_31_2">Deny HTTP Status</label><label for="__tabbed_31_3">HTTP Methods</label><label for="__tabbed_31_4">Request Size Limits</label><label for="__tabbed_31_5">Protocol Support</label><label for="__tabbed_31_6">Static File Serving</label><label for="__tabbed_31_7">File Caching</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Example configuration for disabling the default server and enforcing strict SNI:</p>
@@ -8845,14 +9055,6 @@ TrustedMonitor/\d+\.\d+
 <div class="tabbed-block">
 <p>Example configuration for restricting HTTP methods to only those required by a RESTful API:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">ALLOWED_METHODS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;GET|POST|PUT|DELETE&quot;</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<p>Example configuration for restricting content types to only JSON for an API:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">ALLOWED_CONTENT_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;application/json&quot;</span>
-</code></pre></div>
-<p>Example configuration for a standard web application with file uploads:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">ALLOWED_CONTENT_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;application/x-www-form-urlencoded</span><span class="nv"> </span><span class="s">multipart/form-data</span><span class="nv"> </span><span class="s">application/json&quot;</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -9006,7 +9208,7 @@ OPEN_FILE_CACHE_VALID: "60s"</p>
 <p>Select a CRS version to best match your security needs:</p>
 <ul>
 <li><strong><code>3</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7">v3.3.7</a>.</li>
-<li><strong><code>4</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.20.0">v4.20.0</a> (<strong>default</strong>).</li>
+<li><strong><code>4</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.21.0">v4.21.0</a> (<strong>default</strong>).</li>
 <li><strong><code>nightly</code></strong>: <a href="https://github.com/coreruleset/coreruleset/releases/tag/nightly">Nightly build</a> offering the latest rule updates.</li>
 </ul>
 <div class="admonition example">
@@ -9773,15 +9975,18 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><code>301</code></td>
 <td>multisite</td>
 <td>yes</td>
-<td><strong>HTTP Status Code:</strong> The HTTP status code to use for redirection. Options: <code>301</code> (permanent) or <code>302</code> (temporary).</td>
+<td><strong>HTTP Status Code:</strong> The HTTP status code to use for redirection. Options: <code>301</code>, <code>302</code>, <code>303</code>, <code>307</code>, or <code>308</code>.</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition tip">
 <p class="admonition-title">Choosing the Right Status Code</p>
 <ul>
-<li>Use <code>301</code> (Moved Permanently) when the redirect is permanent, such as for domain migrations or establishing canonical URLs. This helps search engines update their indexes.</li>
-<li>Use <code>302</code> (Found/Temporary Redirect) when the redirect is temporary or if you may want to reuse the original URL in the future.</li>
+<li><strong><code>301</code> (Moved Permanently):</strong> The resource has permanently moved. Browsers cache this redirect. May change POST to GET. Ideal for domain migrations and canonical URLs.</li>
+<li><strong><code>302</code> (Found):</strong> Temporary redirect. May change POST to GET. Use when the redirect is temporary or you may reuse the original URL.</li>
+<li><strong><code>303</code> (See Other):</strong> Always redirects using GET method regardless of the original request method. Useful after form submissions to prevent resubmission on refresh.</li>
+<li><strong><code>307</code> (Temporary Redirect):</strong> Temporary redirect that preserves the HTTP method (POST stays POST). Ideal for API redirects or form handling.</li>
+<li><strong><code>308</code> (Permanent Redirect):</strong> Permanent redirect that preserves the HTTP method. Use for permanent API endpoint migrations where method preservation is critical.</li>
 </ul>
 </div>
 <div class="admonition info">
@@ -9789,7 +9994,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>When <code>REDIRECT_TO_REQUEST_URI</code> is set to <code>yes</code>, BunkerWeb preserves the original request path. For example, if a user visits <code>https://old-domain.com/blog/post-1</code> and you've set up a redirect to <code>https://new-domain.com</code>, they'll be redirected to <code>https://new-domain.com/blog/post-1</code>.</p>
 </div>
 <h3 id="example-configurations_27">Example Configurations</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="36:5"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><input id="__tabbed_36_5" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">Multiple Paths Redirect</label><label for="__tabbed_36_2">Simple Domain Redirect</label><label for="__tabbed_36_3">Path-Preserving Redirect</label><label for="__tabbed_36_4">Temporary Redirect</label><label for="__tabbed_36_5">Subdomain Consolidation</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="36:7"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><input id="__tabbed_36_5" name="__tabbed_36" type="radio" /><input id="__tabbed_36_6" name="__tabbed_36" type="radio" /><input id="__tabbed_36_7" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">Multiple Paths Redirect</label><label for="__tabbed_36_2">Simple Domain Redirect</label><label for="__tabbed_36_3">Path-Preserving Redirect</label><label for="__tabbed_36_4">Temporary Redirect</label><label for="__tabbed_36_5">Subdomain Consolidation</label><label for="__tabbed_36_6">API Endpoint Migration</label><label for="__tabbed_36_7">Post-Form Submission Redirect</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>A configuration that redirects multiple paths to different destinations:</p>
@@ -9838,6 +10043,21 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <div class="highlight"><pre><span></span><code><span class="nt">REDIRECT_TO</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/support&quot;</span>
 <span class="nt">REDIRECT_TO_REQUEST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">REDIRECT_TO_STATUS_CODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;301&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>A configuration for permanently redirecting an API endpoint while preserving the HTTP method:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">REDIRECT_FROM</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/api/v1/&quot;</span>
+<span class="nt">REDIRECT_TO</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://api.example.com/v2/&quot;</span>
+<span class="nt">REDIRECT_TO_REQUEST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">REDIRECT_TO_STATUS_CODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;308&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>A configuration to redirect after a form submission using GET method:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">REDIRECT_TO</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/thank-you&quot;</span>
+<span class="nt">REDIRECT_TO_REQUEST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
+<span class="nt">REDIRECT_TO_STATUS_CODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;303&quot;</span>
 </code></pre></div>
 </div>
 </div>
@@ -11130,6 +11350,13 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td>multisite</td>
 <td>no</td>
 <td><strong>Custom SSL Ciphers:</strong> Colon-separated list of cipher suites to use for SSL/TLS connections (overrides level).</td>
+</tr>
+<tr>
+<td><code>SSL_SESSION_CACHE_SIZE</code></td>
+<td><code>10m</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>SSL Session Cache Size:</strong> Size of the SSL session cache (e.g., <code>10m</code>, <code>512k</code>). Set to <code>off</code> or <code>none</code> to disable.</td>
 </tr>
 </tbody>
 </table>

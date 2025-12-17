@@ -1202,16 +1202,16 @@
 <p><strong>Mettre à jour le fichier Docker Compose </strong>: Mettez à jour le fichier Docker Compose pour utiliser la nouvelle version de l'image BunkerWeb.
     <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.6-rc3</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.7-rc1</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.6-rc3</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.7-rc1</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.6-rc3</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.7-rc1</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.6-rc3</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.7-rc1</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div></p>
 </li>
@@ -1245,8 +1245,8 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <div class="highlight"><pre><span></span><code><span class="nv">LATEST_VERSION</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>https://api.github.com/repos/bunkerity/bunkerweb/releases/latest<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.tag_name<span class="k">)</span>
 
 <span class="c1"># Download the script and its checksum</span>
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh.sha256
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh.sha256
 
 <span class="c1"># Verify the checksum</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -1308,6 +1308,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <li>Le mode de mise à niveau évite intentionnellement de réinstaller ou de rétrograder NGINX en dehors de la version épinglée prise en charge déjà présente.</li>
 <li>Les journaux de dépannage restent dans <code>/var/log/bunkerweb/</code>.</li>
 </ul>
+</li>
+<li>
+<p><strong>Comportement selon le mode</strong> :</p>
+<ul>
+<li>Le programme d'installation réutilise la même logique de sélection de mode pendant une mise à jour : le mode manager garde l'assistant désactivé, attache l'API à <code>0.0.0.0</code> et exige une IP à placer sur liste blanche (à fournir avec <code>--manager-ip</code> pour les exécutions non interactives), tandis que le mode worker impose toujours la liste d'IP du manager.</li>
+<li>Les mises à jour Manager peuvent décider de démarrer ou non le service Web UI, et le récapitulatif mentionne explicitement l'état du service API afin de pouvoir le contrôler via <code>--api</code> / <code>--no-api</code>.</li>
+<li>Les options CrowdSec restent réservées aux mises à jour full stack et le script continue de valider le système d'exploitation et l'architecture CPU avant de toucher aux paquets, les combinaisons non prises en charge nécessitant toujours <code>--force</code>.</li>
+</ul>
 <p>Résumé du retour en arrière :</p>
 <ul>
 <li>Utilisez le répertoire de sauvegarde généré (ou votre sauvegarde manuelle) + les étapes de la section Rollback pour restaurer la base de données, puis réinstallez la version précédente de l'image/du paquet et verrouillez à nouveau les paquets.</li>
@@ -1355,20 +1363,20 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </tbody>
 </table>
 <p>Exemples:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Upgrade to 1.6.6-rc3 interactively (will prompt for backup)</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.6-rc3
+<div class="highlight"><pre><span></span><code><span class="c1"># Upgrade to 1.6.7~rc1 interactively (will prompt for backup)</span>
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.7~rc1
 
 <span class="c1"># Non-interactive upgrade with automatic backup to custom directory</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.6-rc3<span class="w"> </span>--backup-dir<span class="w"> </span>/var/backups/bw-2025-01<span class="w"> </span>-y
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.7~rc1<span class="w"> </span>--backup-dir<span class="w"> </span>/var/backups/bw-2025-01<span class="w"> </span>-y
 
 <span class="c1"># Silent unattended upgrade (logs suppressed) – relies on default auto-backup</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.6-rc3<span class="w"> </span>-y<span class="w"> </span>-q
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.7~rc1<span class="w"> </span>-y<span class="w"> </span>-q
 
 <span class="c1"># Perform a dry run (plan) without applying changes</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.6-rc3<span class="w"> </span>--dry-run
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.7~rc1<span class="w"> </span>--dry-run
 
 <span class="c1"># Upgrade skipping automatic backup (NOT recommended)</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.6-rc3<span class="w"> </span>--no-auto-backup<span class="w"> </span>-y
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.7~rc1<span class="w"> </span>--no-auto-backup<span class="w"> </span>-y
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Sauter les sauvegardes</p>
@@ -1453,7 +1461,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"
 </code></pre></div>
 <p>Ensuite, vous pouvez mettre à jour le paquet BunkerWeb :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.6-rc3
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.7~rc1
 </code></pre></div>
 <p>Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de <code>apt upgrade</code>, vous pouvez utiliser la commande suivante :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
@@ -1468,7 +1476,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 </code></pre></div>
 <p>Ensuite, vous pouvez mettre à jour le paquet BunkerWeb :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.6-rc3
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.7~rc1
 </code></pre></div>
 <p>Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de <code>dnf upgrade</code>, vous pouvez utiliser la commande suivante :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -1872,16 +1880,16 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <p><strong>Mettre à jour le fichier Docker Compose</strong> : Mettez à jour le fichier Docker Compose pour utiliser la nouvelle version de l'image BunkerWeb.
     <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.6-rc3</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.7-rc1</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.6-rc3</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.7-rc1</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.6-rc3</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.7-rc1</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.6-rc3</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.7-rc1</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div></p>
 </li>
@@ -1913,7 +1921,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"
 </code></pre></div>
 <p>Ensuite, vous pouvez mettre à jour le paquet BunkerWeb :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.6-rc3
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.7~rc1
 </code></pre></div>
 <p>Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de <code>apt upgrade</code>, vous pouvez utiliser la commande suivante :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
@@ -1928,7 +1936,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 </code></pre></div>
 <p>Ensuite, vous pouvez mettre à jour le paquet BunkerWeb :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.6-rc3
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.7~rc1
 </code></pre></div>
 <p>Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de <code>dnf upgrade</code>, vous pouvez utiliser la commande suivante :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>

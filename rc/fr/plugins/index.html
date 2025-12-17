@@ -1380,7 +1380,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.6-rc3</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.7-rc1</span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="nn">...</span>
@@ -1402,7 +1402,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.6-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.7-rc1</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="nn">...</span>
@@ -1433,7 +1433,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.6-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.7-rc1</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/shared/bw-plugins:/data/plugins</span>
 <span class="nn">...</span>
@@ -1473,7 +1473,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.6-rc3</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.7-rc1</span>
 <span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
 <span class="w">          </span><span class="nt">env</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
@@ -1510,7 +1510,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <h3 id="structure">Structure</h3>
 <div class="admonition tip">
 <p class="admonition-title">Plugins existants</p>
-<p>Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des <a href="https://github.com/bunkerity/bunkerweb-plugins">plugins officiels</a> et des <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/src/common/core">plugins core</a> (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).</p>
+<p>Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des <a href="https://github.com/bunkerity/bunkerweb-plugins">plugins officiels</a> et des <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc1/src/common/core">plugins core</a> (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).</p>
 </div>
 <p>À quoi ressemble la structure d'un plugin :
 <div class="highlight"><pre><span></span><code>plugin /
@@ -1945,7 +1945,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Plus d'exemples</p>
-<p>Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/src/bw/lua/bunkerweb">répertoire lua</a> du dépôt.</p>
+<p>Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc1/src/bw/lua/bunkerweb">répertoire lua</a> du dépôt.</p>
 </div>
 <h3 id="emplois">Emplois</h3>
 <p>BunkerWeb utilise un planificateur de tâches interne pour des tâches périodiques telles que le renouvellement des certificats avec certbot, le téléchargement de listes noires, le téléchargement de fichiers MMDB, ... Vous pouvez ajouter des tâches de votre choix en les plaçant dans un sous-dossier nommé <strong>tâches</strong> et en les répertoriant dans le  fichier de métadonnées <strong>plugin.json</strong>. N'oubliez pas d'ajouter les permissions d'exécution pour tout le monde afin d'éviter tout problème lorsqu'un utilisateur clone et installe votre plugin.</p>

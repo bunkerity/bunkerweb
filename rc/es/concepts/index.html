@@ -1201,7 +1201,7 @@ app2.example.com_USE_ANTIBOT=cookie
 app2.example.com_WHITELIST_COUNTRY=FR
 app3.example.com_USE_BAD_BEHAVIOR=no
 </code></pre></div>
-<p>Ten en cuenta que el modo multisitio es implícito cuando se utiliza la interfaz de usuario web. Tienes la opción de aplicar configuraciones directamente a tus servicios o de establecer una configuración global que se aplicará a todos tus servicios (aún puedes aplicar excepciones directamente a servicios específicos):</p>
+<p>Ten en cuenta que el modo multisitio es implícito cuando se utiliza la interfaz de usuario web. Tienes la opción de aplicar configuraciones directamente a tus servicios o de establecer ajustes globales que se aplicarán a todos tus servicios (aún puedes aplicar excepciones directamente a servicios específicos):</p>
 <figure>
 <p><img align="center," alt="Descripción general" src="../../assets/img/ui-multisite.png" width="600" />
   </p>
@@ -1209,7 +1209,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </figure>
 <div class="admonition info">
 <p class="admonition-title">Para saber más</p>
-<p>Encontrarás ejemplos concretos del modo multisitio en los <a href="../advanced/">usos avanzados</a> de la documentación y en el directorio de <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/examples">ejemplos</a> del repositorio.</p>
+<p>Encontrarás ejemplos concretos del modo multisitio en los <a href="../advanced/">usos avanzados</a> de la documentación y en el directorio de <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc1/examples">ejemplos</a> del repositorio.</p>
 </div>
 <h2 id="custom-configurations">Configuraciones personalizadas</h2>
 <p>Para abordar desafíos únicos y satisfacer casos de uso específicos, BunkerWeb ofrece la flexibilidad de las configuraciones personalizadas. Si bien las configuraciones proporcionadas y los <a href="../plugins/">plugins externos</a> cubren una amplia gama de escenarios, puede haber situaciones que requieran una personalización adicional.</p>
@@ -1224,7 +1224,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </figure>
 <div class="admonition info">
 <p class="admonition-title">Para saber más</p>
-<p>Encontrarás ejemplos concretos de configuraciones personalizadas en los <a href="../advanced/#custom-configurations">usos avanzados</a> de la documentación y en el directorio de <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/examples">ejemplos</a> del repositorio.</p>
+<p>Encontrarás ejemplos concretos de configuraciones personalizadas en los <a href="../advanced/#custom-configurations">usos avanzados</a> de la documentación y en el directorio de <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc1/examples">ejemplos</a> del repositorio.</p>
 </div>
 <h2 id="base-de-datos">Base de datos</h2>
 <p>BunkerWeb almacena de forma segura su configuración actual en una base de datos de backend, que contiene datos esenciales para un funcionamiento sin problemas. La siguiente información se almacena en la base de datos:</p>
@@ -1277,21 +1277,21 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <tbody>
 <tr>
 <td style="text-align: left;"><strong>Docker</strong></td>
-<td style="text-align: left;">✅ <code>v17</code> y anteriores (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v18</code> y anteriores (all-in-one: ✅ <code>v17</code>)</td>
 <td style="text-align: left;">✅ <code>v11</code> y anteriores</td>
 <td style="text-align: left;">✅ <code>v9</code> y anteriores</td>
 <td style="text-align: left;">✅ Compatible</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Kubernetes</strong></td>
-<td style="text-align: left;">✅ <code>v17</code> y anteriores (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v18</code> y anteriores</td>
 <td style="text-align: left;">✅ <code>v11</code> y anteriores</td>
 <td style="text-align: left;">✅ <code>v9</code> y anteriores</td>
 <td style="text-align: left;">✅ Compatible</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Autoconf</strong></td>
-<td style="text-align: left;">✅ <code>v17</code> y anteriores (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v18</code> y anteriores</td>
 <td style="text-align: left;">✅ <code>v11</code> y anteriores</td>
 <td style="text-align: left;">✅ <code>v9</code> y anteriores</td>
 <td style="text-align: left;">✅ Compatible</td>
@@ -1308,7 +1308,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <div class="admonition info">
 <p class="admonition-title">Notas</p>
 <ul>
-<li><strong>PostgreSQL</strong>: <code>v18</code> no es compatible porque las imágenes base de Alpine que distribuimos solo incluyen los paquetes del cliente <code>v17</code>.</li>
+<li><strong>PostgreSQL</strong>: Los paquetes basados en Alpine ahora incluyen el cliente <code>v18</code>, por lo que <code>v18</code> y versiones anteriores son compatibles de forma predeterminada; la imagen all-in-one sigue usando el cliente <code>v17</code>, por lo que <code>v18</code> no es compatible allí.</li>
 <li><strong>Linux</strong>: La compatibilidad depende de los paquetes de tu distribución. Si es necesario, puedes instalar los clientes de la base de datos manualmente desde los repositorios del proveedor (esto suele ser necesario en RHEL).</li>
 <li><strong>SQLite</strong>: Se entrega con los paquetes y está listo para usar.</li>
 </ul>
