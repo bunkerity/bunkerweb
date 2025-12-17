@@ -18,7 +18,7 @@ Esta guía de inicio rápido te ayudará a instalar rápidamente BunkerWeb y a p
 
 Proteger las aplicaciones web existentes que ya son accesibles con el protocolo HTTP(S) es el objetivo principal de BunkerWeb: actuará como un [proxy inverso](https://es.wikipedia.org/wiki/Proxy_inverso) clásico con características de seguridad adicionales.
 
-Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/examples) del repositorio para obtener ejemplos del mundo real.
+Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc1/examples) del repositorio para obtener ejemplos del mundo real.
 
 ## Configuración básica
 
@@ -52,8 +52,8 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
     ```bash
     ```bash
     # Download the script and its checksum
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7~rc1/install-bunkerweb.sh
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7~rc1/install-bunkerweb.sh.sha256
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7-rc1/install-bunkerweb.sh
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7-rc1/install-bunkerweb.sh.sha256
 
     # Verify the checksum
     sha256sum -c install-bunkerweb.sh.sha256    # Si la comprobación es exitosa, ejecuta el script

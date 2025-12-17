@@ -27,21 +27,27 @@ jobs:
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
+      # Sanitize version (replace ~ with - for valid Git tag names)
+      - name: Sanitize version
+        id: sanitize
+        run: |
+          VERSION="${{ inputs.VERSION }}"
+          echo "version=${VERSION//\~/-}" >> "$GITHUB_OUTPUT"
       # Create tag
       - uses: rickstaa/action-create-tag@a1c7777fcb2fee4f19b0f283ba888afa11678b72 # v1.7.2
         name: Create tag
         if: inputs.VERSION != 'testing'
         with:
-          tag: "v${{ inputs.VERSION }}"
-          message: "v${{ inputs.VERSION }}"
+          tag: "v${{ steps.sanitize.outputs.version }}"
+          message: "v${{ steps.sanitize.outputs.version }}"
           force_push_tag: true
       # Create tag
       - uses: rickstaa/action-create-tag@a1c7777fcb2fee4f19b0f283ba888afa11678b72 # v1.7.2
         name: Create tag
         if: inputs.VERSION == 'testing'
         with:
-          tag: "${{ inputs.VERSION }}"
-          message: "${{ inputs.VERSION }}"
+          tag: "${{ steps.sanitize.outputs.version }}"
+          message: "${{ steps.sanitize.outputs.version }}"
           force_push_tag: true
       # Extract and preserve changelog formatting
       - name: Extract changelog
@@ -119,8 +125,8 @@ jobs:
             ${{ env.DECODED_CHANGELOG }}
           draft: true
           prerelease: ${{ inputs.PRERELEASE }}
-          name: v${{ inputs.VERSION }}
-          tag_name: v${{ inputs.VERSION }}
+          name: v${{ steps.sanitize.outputs.version }}
+          tag_name: v${{ steps.sanitize.outputs.version }}
           discussion_category_name: Announcements
           files: |
             BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
@@ -148,7 +154,7 @@ jobs:
           draft: false
           prerelease: ${{ inputs.PRERELEASE }}
           name: Testing
-          tag_name: ${{ inputs.VERSION }}
+          tag_name: ${{ steps.sanitize.outputs.version }}
           files: |
             misc/install-bunkerweb.sh
             misc/install-bunkerweb.sh.sha256

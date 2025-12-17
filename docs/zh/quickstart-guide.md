@@ -18,7 +18,7 @@
 
 保护已经可以通过 HTTP(S) 协议访问的现有 Web 应用程序是 BunkerWeb 的主要目标：它将充当一个带有额外安全功能的经典[反向代理](https://en.wikipedia.org/wiki/Reverse_proxy)。
 
-有关真实世界的示例，请参阅仓库的 [examples 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/examples)。
+有关真实世界的示例，请参阅仓库的 [examples 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc1/examples)。
 
 ## 基本设置
 
@@ -51,8 +51,8 @@
 
     ```bash
     # 下载脚本及其校验和
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7~rc1/install-bunkerweb.sh
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7~rc1/install-bunkerweb.sh.sha256
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7-rc1/install-bunkerweb.sh
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7-rc1/install-bunkerweb.sh.sha256
 
     # 验证校验和
     sha256sum -c install-bunkerweb.sh.sha256

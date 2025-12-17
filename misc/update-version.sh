@@ -31,12 +31,30 @@ shopt -u globstar
 # docs - Docker image tags only (bunkerity/image:version pattern)
 sed -i "s@bunkerity/\([^:]*\):${OLD_DOCKER_VERSION}@bunkerity/\1:${NEW_DOCKER_VERSION}@g" docs/*.md
 sed -i "s@bunkerity/\([^:]*\):${OLD_DOCKER_VERSION}@bunkerity/\1:${NEW_DOCKER_VERSION}@g" docs/*/*.md
+# docs - GitHub repository links (tree/blob/releases/raw URLs must use - instead of ~)
+sed -i "s@github.com/bunkerity/bunkerweb/tree/v${OLD_DOCKER_VERSION}@github.com/bunkerity/bunkerweb/tree/v${NEW_DOCKER_VERSION}@g" docs/*.md
+sed -i "s@github.com/bunkerity/bunkerweb/tree/v${OLD_DOCKER_VERSION}@github.com/bunkerity/bunkerweb/tree/v${NEW_DOCKER_VERSION}@g" docs/*/*.md
+sed -i "s@github.com/bunkerity/bunkerweb/blob/v${OLD_DOCKER_VERSION}@github.com/bunkerity/bunkerweb/blob/v${NEW_DOCKER_VERSION}@g" docs/*.md
+sed -i "s@github.com/bunkerity/bunkerweb/blob/v${OLD_DOCKER_VERSION}@github.com/bunkerity/bunkerweb/blob/v${NEW_DOCKER_VERSION}@g" docs/*/*.md
+sed -i "s@github.com/bunkerity/bunkerweb/releases/download/v${OLD_DOCKER_VERSION}@github.com/bunkerity/bunkerweb/releases/download/v${NEW_DOCKER_VERSION}@g" docs/*.md
+sed -i "s@github.com/bunkerity/bunkerweb/releases/download/v${OLD_DOCKER_VERSION}@github.com/bunkerity/bunkerweb/releases/download/v${NEW_DOCKER_VERSION}@g" docs/*/*.md
+sed -i "s@github.com/bunkerity/bunkerweb/raw/v${OLD_DOCKER_VERSION}@github.com/bunkerity/bunkerweb/raw/v${NEW_DOCKER_VERSION}@g" docs/*.md
+sed -i "s@github.com/bunkerity/bunkerweb/raw/v${OLD_DOCKER_VERSION}@github.com/bunkerity/bunkerweb/raw/v${NEW_DOCKER_VERSION}@g" docs/*/*.md
 # docs - other version references keep ~
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" docs/*.md
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" docs/*/*.md
 # README - Docker image tags only
 sed -i "s@bunkerity/\([^:]*\):${OLD_DOCKER_VERSION}@bunkerity/\1:${NEW_DOCKER_VERSION}@g" README.md
 sed -i "s@bunkerity/\([^:]*\):${OLD_DOCKER_VERSION}@bunkerity/\1:${NEW_DOCKER_VERSION}@g" src/common/core/*/README*.md
+# README - GitHub repository links (tree/blob/releases/raw URLs must use - instead of ~)
+sed -i "s@github.com/bunkerity/bunkerweb/tree/v${OLD_DOCKER_VERSION}@github.com/bunkerity/bunkerweb/tree/v${NEW_DOCKER_VERSION}@g" README.md
+sed -i "s@github.com/bunkerity/bunkerweb/tree/v${OLD_DOCKER_VERSION}@github.com/bunkerity/bunkerweb/tree/v${NEW_DOCKER_VERSION}@g" src/common/core/*/README*.md
+sed -i "s@github.com/bunkerity/bunkerweb/blob/v${OLD_DOCKER_VERSION}@github.com/bunkerity/bunkerweb/blob/v${NEW_DOCKER_VERSION}@g" README.md
+sed -i "s@github.com/bunkerity/bunkerweb/blob/v${OLD_DOCKER_VERSION}@github.com/bunkerity/bunkerweb/blob/v${NEW_DOCKER_VERSION}@g" src/common/core/*/README*.md
+sed -i "s@github.com/bunkerity/bunkerweb/releases/download/v${OLD_DOCKER_VERSION}@github.com/bunkerity/bunkerweb/releases/download/v${NEW_DOCKER_VERSION}@g" README.md
+sed -i "s@github.com/bunkerity/bunkerweb/releases/download/v${OLD_DOCKER_VERSION}@github.com/bunkerity/bunkerweb/releases/download/v${NEW_DOCKER_VERSION}@g" src/common/core/*/README*.md
+sed -i "s@github.com/bunkerity/bunkerweb/raw/v${OLD_DOCKER_VERSION}@github.com/bunkerity/bunkerweb/raw/v${NEW_DOCKER_VERSION}@g" README.md
+sed -i "s@github.com/bunkerity/bunkerweb/raw/v${OLD_DOCKER_VERSION}@github.com/bunkerity/bunkerweb/raw/v${NEW_DOCKER_VERSION}@g" src/common/core/*/README*.md
 # README - other version references keep ~
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" README.md
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/core/*/README*.md
