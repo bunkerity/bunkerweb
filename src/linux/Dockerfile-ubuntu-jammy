@@ -3,7 +3,7 @@ FROM ubuntu:jammy@sha256:104ae83764a5119017b8e8d6218fa0832b09df65aae7d5a6de29a85
 # Install Nginx and dependencies
 RUN apt update && \
     apt install -y --no-install-recommends curl gnupg2 ca-certificates lsb-release ubuntu-keyring software-properties-common \
-    bash libssl-dev git zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre3-dev libgd-dev python3.11 python3.11-dev python3.11-venv python3-pip -y
+    bash libssl-dev git zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre2-dev libbrotli-dev libgd-dev liblmdb-dev libfuzzy-dev cargo coreutils python3.11 python3.11-dev python3.11-venv python3-pip -y
 
 ENV OS=ubuntu
 ENV NGINX_VERSION=1.28.0

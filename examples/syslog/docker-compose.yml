@@ -1,6 +1,6 @@
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.7~rc1
+    image: bunkerity/bunkerweb:1.6.7-rc1
     container_name: bunkerweb
     depends_on:
       - mysyslog
@@ -21,7 +21,7 @@ services:
         syslog-address: "udp://10.10.10.254:514"
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
     depends_on:
       - bunkerweb
       - mysyslog

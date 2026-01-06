@@ -338,42 +338,44 @@ pointer or type compatibility:
 <tr class="odd">
 <td class="convin">Integer</td><td class="convop">&rarr;<sup>round</sup></td><td class="convout"><tt>double</tt>, <tt>float</tt></td></tr>
 <tr class="even">
-<td class="convin"><tt>double</tt>, <tt>float</tt></td><td class="convop">&rarr;<sup>trunc</sup> <tt>int32_t</tt> &rarr;<sup>narrow</sup></td><td class="convout"><tt>(u)int8_t</tt>, <tt>(u)int16_t</tt></td></tr>
+<td class="convin"><tt>double</tt>, <tt>float</tt></td><td class="convop">&rarr;<sup>trunc</sup> <tt>int64_t</tt> &rarr;<sup>narrow</sup> <sup>*</sup></td><td class="convout"><tt>(u)int8_t</tt>, <tt>(u)int16_t</tt>, <tt>(u)int32_t</tt></td></tr>
 <tr class="odd">
-<td class="convin"><tt>double</tt>, <tt>float</tt></td><td class="convop">&rarr;<sup>trunc</sup></td><td class="convout"><tt>(u)int32_t</tt>, <tt>(u)int64_t</tt></td></tr>
+<td class="convin"><tt>double</tt>, <tt>float</tt></td><td class="convop">&rarr;<sup>trunc</sup></td><td class="convout"><tt>int64_t</tt></td></tr>
 <tr class="even">
+<td class="convin"><tt>double</tt>, <tt>float</tt></td><td class="convop">&rarr;<sup>trunc</sup> uint64_t &cup; int64_t &rarr;<sup>reinterpret</sup> <sup>*</sup></td><td class="convout"><tt>uint64_t</tt></td></tr>
+<tr class="odd">
 <td class="convin"><tt>double</tt>, <tt>float</tt></td><td class="convop">&rarr;<sup>round</sup></td><td class="convout"><tt>float</tt>, <tt>double</tt></td></tr>
-<tr class="odd separate">
+<tr class="even separate">
 <td class="convin">Number</td><td class="convop">n == 0 &rarr; 0, otherwise 1</td><td class="convout"><tt>bool</tt></td></tr>
-<tr class="even">
+<tr class="odd">
 <td class="convin"><tt>bool</tt></td><td class="convop"><tt>false</tt> &rarr; 0, <tt>true</tt> &rarr; 1</td><td class="convout">Number</td></tr>
-<tr class="odd separate">
+<tr class="even separate">
 <td class="convin">Complex number</td><td class="convop">convert real part</td><td class="convout">Number</td></tr>
-<tr class="even">
+<tr class="odd">
 <td class="convin">Number</td><td class="convop">convert real part, imag = 0</td><td class="convout">Complex number</td></tr>
-<tr class="odd">
+<tr class="even">
 <td class="convin">Complex number</td><td class="convop">convert real and imag part</td><td class="convout">Complex number</td></tr>
-<tr class="even separate">
+<tr class="odd separate">
 <td class="convin">Number</td><td class="convop">convert scalar and replicate</td><td class="convout">Vector</td></tr>
-<tr class="odd">
+<tr class="even">
 <td class="convin">Vector</td><td class="convop">copy (same size)</td><td class="convout">Vector</td></tr>
-<tr class="even separate">
+<tr class="odd separate">
 <td class="convin"><tt>struct</tt>/<tt>union</tt></td><td class="convop">take base address (compat)</td><td class="convout">Pointer</td></tr>
-<tr class="odd">
+<tr class="even">
 <td class="convin">Array</td><td class="convop">take base address (compat)</td><td class="convout">Pointer</td></tr>
-<tr class="even">
-<td class="convin">Function</td><td class="convop">take function address</td><td class="convout">Function pointer</td></tr>
-<tr class="odd separate">
-<td class="convin">Number</td><td class="convop">convert via <tt>uintptr_t</tt> (cast)</td><td class="convout">Pointer</td></tr>
-<tr class="even">
-<td class="convin">Pointer</td><td class="convop">convert address (compat/cast)</td><td class="convout">Pointer</td></tr>
 <tr class="odd">
+<td class="convin">Function</td><td class="convop">take function address</td><td class="convout">Function pointer</td></tr>
+<tr class="even separate">
+<td class="convin">Number</td><td class="convop">convert via <tt>uintptr_t</tt> (cast)</td><td class="convout">Pointer</td></tr>
+<tr class="odd">
+<td class="convin">Pointer</td><td class="convop">convert address (compat/cast)</td><td class="convout">Pointer</td></tr>
+<tr class="even">
 <td class="convin">Pointer</td><td class="convop">convert address (cast)</td><td class="convout">Integer</td></tr>
-<tr class="even">
+<tr class="odd">
 <td class="convin">Array</td><td class="convop">convert base address (cast)</td><td class="convout">Integer</td></tr>
-<tr class="odd separate">
+<tr class="even separate">
 <td class="convin">Array</td><td class="convop">copy (compat)</td><td class="convout">Array</td></tr>
-<tr class="even">
+<tr class="odd">
 <td class="convin"><tt>struct</tt>/<tt>union</tt></td><td class="convop">copy (identical type)</td><td class="convout"><tt>struct</tt>/<tt>union</tt></td></tr>
 </table>
 <p>
@@ -383,6 +385,24 @@ type.
 <p>
 Conversions not listed above will raise an error. E.g. it's not
 possible to convert a pointer to a complex number or vice versa.
+</p>
+<p>
+* Some conversions from <tt>double</tt> have a larger defined range to
+allow for mixed-signedness conversions, which are common in C code.
+E.g. initializing an <tt>int32_t</tt> field with <tt>0xffffffff</tt>
+or initializing an <tt>uint32_t</tt> or <tt>uint64_t</tt> field with
+<tt>-1</tt>. Under strict conversion rules, these assignments would
+give undefined results, since Lua numbers are doubles. The extended
+ranges make these conversions defined. Lua numbers that are even
+outside that range give an architecture-specific result.
+</p>
+<p>
+Please note that doubles do not have the precision to represent the
+whole signed or unsigned 64 bit integer range. Beware of large hex
+constants in particular: e.g. <tt>0xffffffffffffffff</tt> is a double
+rounded up to <tt>0x1p64</tt> during parsing. This will <em>not</em>
+convert to a defined 64 bit integer value. Use the 64 bit literal
+syntax instead, i.e. <tt>0xffffffffffffffffULL</tt>.
 </p>
 
 <h3 id="convert_vararg">Conversions for vararg C&nbsp;function arguments</h3>

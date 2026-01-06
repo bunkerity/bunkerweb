@@ -1,4 +1,4 @@
-FROM python:3.13-alpine@sha256:51b5354ed44df6e1a3b3faf6d3a3d40da129621046b6d5a707b7c1f44d258ed6 AS builder
+FROM python:3.13-alpine@sha256:e7e041128ffc3e3600509f508e44d34ab08ff432bdb62ec508d01dfc5ca459f7 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -66,7 +66,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
   echo "Skipping CSS minification"; \
   fi
 
-FROM python:3.13-alpine@sha256:51b5354ed44df6e1a3b3faf6d3a3d40da129621046b6d5a707b7c1f44d258ed6
+FROM python:3.13-alpine@sha256:e7e041128ffc3e3600509f508e44d34ab08ff432bdb62ec508d01dfc5ca459f7
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

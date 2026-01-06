@@ -207,7 +207,7 @@ EOL
             if sed -i "s|^version_locations =.*$|version_locations = ${DATABASE}_versions|" alembic.ini; then
                 # Find the corresponding Alembic revision by scanning migration files
                 MIGRATION_DIR="/usr/share/bunkerweb/db/alembic/${DATABASE}_versions"
-                NORMALIZED_VERSION=$(echo "$current_version" | tr '.' '_' | tr '-' '_')
+                NORMALIZED_VERSION=$(echo "$current_version" | tr '.' '_' | tr '-' '_' | tr '~' '_')
                 REVISION=$(find "$MIGRATION_DIR" -maxdepth 1 -type f -name "*_upgrade_to_version_${NORMALIZED_VERSION}.py" -exec basename {} \; | awk -F_ '{print $1}')
 
                 if [ -z "$REVISION" ]; then

@@ -570,7 +570,13 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.28.0"
+            # Note: Fedora 42 and 43 have removed NGINX 1.28.0 from their mirrors,
+            # so NGINX 1.28.1 is required for these versions. Fedora 41 still has 1.28.0.
+            if [ "$DISTRO_VERSION" != "41" ]; then
+                NGINX_VERSION="1.28.1"
+            else
+                NGINX_VERSION="1.28.0"
+            fi
             ;;
         "rhel"|"rocky"|"almalinux")
             major_version=$(echo "$DISTRO_VERSION" | cut -d. -f1)

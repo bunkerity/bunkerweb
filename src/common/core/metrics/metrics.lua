@@ -8,6 +8,8 @@ local utils = require "bunkerweb.utils"
 local metrics = class("metrics", plugin)
 local ngx = ngx
 local ERR = ngx.ERR
+local WARN = ngx.WARN
+local INFO = ngx.INFO
 local unescape_uri = ngx.unescape_uri
 
 local lru, err_lru = lrucache.new(100000)
@@ -258,9 +260,15 @@ function metrics:timer()
 		local ok
 		ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, value)
 		if not ok then
-			ret = false
-			ret_err = err
-			self.logger:log(ERR, "can't (safe) set " .. key .. "_" .. wid .. " : " .. err)
+			-- If there isn't enough memory : we fallback to delete everything
+			if err == "no memory" then
+				self.logger:log(INFO, "not enough memory in the metrics datastore, purging LRU key " .. key)
+				lru:delete(key)
+			else
+				ret = false
+				ret_err = err
+				self.logger:log(ERR, "can't set " .. key .. "_" .. wid .. " : " .. err)
+			end
 		end
 	end
 

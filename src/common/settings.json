@@ -438,7 +438,7 @@
   },
   "PLUGINS_ORDER_INIT_WORKER": {
     "context": "global",
-    "default": "redis bunkernet dnsbl customcert letsencrypt selfsigned",
+    "default": "redis bunkernet dnsbl",
     "help": "Plugins that should run first during the init_worker phase (per-worker bootstrap). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
     "id": "plugins-order-init-worker",
     "label": "Plugins order (init_worker)",
@@ -478,7 +478,7 @@
   },
   "PLUGINS_ORDER_HEADER": {
     "context": "multisite",
-    "default": "headers cors reverseproxy clientcache antibot misc",
+    "default": "headers cors antibot misc",
     "help": "Plugins that should run first during the header phase for this site (response header filtering). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
     "id": "plugins-order-header",
     "label": "Plugins order (header)",
@@ -518,7 +518,7 @@
   },
   "PLUGINS_ORDER_LOG_DEFAULT": {
     "context": "multisite",
-    "default": "badbehavior bunkernet errors misc metrics",
+    "default": "badbehavior bunkernet misc metrics",
     "help": "Plugins that should run first during the log_default phase for this site (default vhost log processing). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
     "id": "plugins-order-log-default",
     "label": "Plugins order (log_default)",
@@ -528,7 +528,7 @@
   },
   "PLUGINS_ORDER_TIMER": {
     "context": "global",
-    "default": "metrics badbehavior bunkernet sessions",
+    "default": "metrics badbehavior sessions",
     "help": "Plugins that should run first during the timer phase (background timers). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
     "id": "plugins-order-timer",
     "label": "Plugins order (timer)",

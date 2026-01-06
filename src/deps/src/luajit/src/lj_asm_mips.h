@@ -92,13 +92,23 @@ static MCode *asm_sparejump_use(MCode *mcarea, MCode tjump)
 /* Setup exit stub after the end of each trace. */
 static void asm_exitstub_setup(ASMState *as)
 {
+  uintptr_t target = (uintptr_t)(void *)lj_vm_exit_handler;
   MCode *mxp = as->mctop;
-  /* sw TMP, 0(sp); j ->vm_exit_handler; li TMP, traceno */
-  *--mxp = MIPSI_LI|MIPSF_T(RID_TMP)|as->T->traceno;
-  *--mxp = MIPSI_J|((((uintptr_t)(void *)lj_vm_exit_handler)>>2)&0x03ffffffu);
-  lj_assertA(((uintptr_t)mxp ^ (uintptr_t)(void *)lj_vm_exit_handler)>>28 == 0,
-	     "branch target out of range");
-  *--mxp = MIPSI_SW|MIPSF_T(RID_TMP)|MIPSF_S(RID_SP)|0;
+  *--mxp = MIPSI_LI | MIPSF_T(RID_TMP) | as->T->traceno;
+  if (((uintptr_t)(mxp-1) ^ target) >> 28 == 0) {
+    /* sw TMP, 0(sp); j ->vm_exit_handler; li TMP, traceno */
+    *--mxp = MIPSI_J | ((target >> 2) & 0x03ffffffu);
+  } else {
+    /* sw TMP, 0(sp); li TMP, K*_VXH(jgl); jr TMP ; li TMP, traceno */
+    *--mxp = MIPSI_JR | MIPSF_S(RID_TMP);
+    *--mxp = MIPSI_AL | MIPSF_T(RID_TMP) | MIPSF_S(RID_JGL) |
+#if LJ_64
+	     jglofs(as, &as->J->k64[LJ_K64_VM_EXIT_HANDLER]);
+#else
+	     jglofs(as, &as->J->k32[LJ_K32_VM_EXIT_HANDLER]);
+#endif
+  }
+  *--mxp = MIPSI_SW | MIPSF_T(RID_TMP) | MIPSF_S(RID_SP) | 0;
   as->mctop = mxp;
 }
 
@@ -428,7 +438,8 @@ static void asm_callround(ASMState *as, IRIns *ir, IRCallID id)
 {
   /* The modified regs must match with the *.dasc implementation. */
   RegSet drop = RID2RSET(RID_R1)|RID2RSET(RID_R12)|RID2RSET(RID_FPRET)|
-		RID2RSET(RID_F2)|RID2RSET(RID_F4)|RID2RSET(REGARG_FIRSTFPR)
+		RID2RSET(RID_F2)|RID2RSET(RID_F4)|RID2RSET(REGARG_FIRSTFPR)|
+		RID2RSET(RID_CFUNCADDR)
 #if LJ_TARGET_MIPSR6
 		|RID2RSET(RID_F21)
 #endif
@@ -514,7 +525,7 @@ static void asm_tointg(ASMState *as, IRIns *ir, Reg r)
 {
   /* The modified regs must match with the *.dasc implementation. */
   RegSet drop = RID2RSET(REGARG_FIRSTGPR)|RID2RSET(RID_RET)|RID2RSET(RID_RET+1)|
-		RID2RSET(RID_R1)|RID2RSET(RID_R12);
+		RID2RSET(RID_R1)|RID2RSET(RID_R12)|RID2RSET(RID_CFUNCADDR);
   if (ra_hasreg(ir->r)) rset_clear(drop, ir->r);
   ra_evictset(as, drop);
   /* Return values are in RID_RET (converted value) and RID_RET+1 (status). */
@@ -624,64 +635,38 @@ static void asm_conv(ASMState *as, IRIns *ir)
       Reg dest = ra_dest(as, ir, RSET_GPR);
       Reg left = ra_alloc1(as, lref, RSET_FPR);
       Reg tmp = ra_scratch(as, rset_exclude(RSET_FPR, left));
-      if (irt_isu32(ir->t)) {  /* FP to U32 conversion. */
-	/* y = (int)floor(x - 2147483648.0) ^ 0x80000000 */
-	emit_dst(as, MIPSI_XOR, dest, dest, RID_TMP);
-	emit_ti(as, MIPSI_LUI, RID_TMP, 0x8000);
-	emit_tg(as, MIPSI_MFC1, dest, tmp);
-	emit_fg(as, st == IRT_FLOAT ? MIPSI_FLOOR_W_S : MIPSI_FLOOR_W_D,
-		tmp, tmp);
-	emit_fgh(as, st == IRT_FLOAT ? MIPSI_SUB_S : MIPSI_SUB_D,
-		 tmp, left, tmp);
-	if (st == IRT_FLOAT)
-	  emit_lsptr(as, MIPSI_LWC1, (tmp & 31),
-		     (void *)&as->J->k32[LJ_K32_2P31], RSET_GPR);
-	else
-	  emit_lsptr(as, MIPSI_LDC1, (tmp & 31),
-		     (void *)&as->J->k64[LJ_K64_2P31], RSET_GPR);
+      lj_assertA(!irt_isu32(ir->t), "bad CONV u32.fp emitted");
 #if LJ_64
-      } else if (irt_isu64(ir->t)) {  /* FP to U64 conversion. */
-	MCLabel l_end;
+      if (irt_isu64(ir->t)) {  /* FP to U64 conversion. */
+	MCLabel l_end = emit_label(as);
 	emit_tg(as, MIPSI_DMFC1, dest, tmp);
-	l_end = emit_label(as);
-	/* For inputs >= 2^63 add -2^64 and convert again. */
+	/* For result == INT64_MAX add -2^64 and convert again. */
 	if (st == IRT_NUM) {
 	  emit_fg(as, MIPSI_TRUNC_L_D, tmp, tmp);
 	  emit_fgh(as, MIPSI_ADD_D, tmp, left, tmp);
 	  emit_lsptr(as, MIPSI_LDC1, (tmp & 31),
 		     (void *)&as->J->k64[LJ_K64_M2P64],
-		     rset_exclude(RSET_GPR, dest));
-	  emit_fg(as, MIPSI_TRUNC_L_D, tmp, left);  /* Delay slot. */
-#if !LJ_TARGET_MIPSR6
-	emit_branch(as, MIPSI_BC1T, 0, 0, l_end);
-	emit_fgh(as, MIPSI_C_OLT_D, 0, left, tmp);
-#else
-	emit_branch(as, MIPSI_BC1NEZ, 0, (tmp&31), l_end);
-	emit_fgh(as, MIPSI_CMP_LT_D, tmp, left, tmp);
-#endif
-	  emit_lsptr(as, MIPSI_LDC1, (tmp & 31),
-		     (void *)&as->J->k64[LJ_K64_2P63],
-		     rset_exclude(RSET_GPR, dest));
+		     rset_exclude(RSET_GPR, dest));  /* Delay slot. */
+	  emit_branch(as, MIPSI_BNE, RID_TMP, dest, l_end);  /* != INT64_MAX? */
+	  emit_dta(as, MIPSI_DSRL, RID_TMP, RID_TMP, 1);
+	  emit_ti(as, MIPSI_LI, RID_TMP, -1);
+	  emit_tg(as, MIPSI_DMFC1, dest, tmp);
+	  emit_fg(as, MIPSI_TRUNC_L_D, tmp, left);
 	} else {
 	  emit_fg(as, MIPSI_TRUNC_L_S, tmp, tmp);
 	  emit_fgh(as, MIPSI_ADD_S, tmp, left, tmp);
 	  emit_lsptr(as, MIPSI_LWC1, (tmp & 31),
 		     (void *)&as->J->k32[LJ_K32_M2P64],
-		     rset_exclude(RSET_GPR, dest));
-	  emit_fg(as, MIPSI_TRUNC_L_S, tmp, left);  /* Delay slot. */
-#if !LJ_TARGET_MIPSR6
-	emit_branch(as, MIPSI_BC1T, 0, 0, l_end);
-	emit_fgh(as, MIPSI_C_OLT_S, 0, left, tmp);
-#else
-	emit_branch(as, MIPSI_BC1NEZ, 0, (tmp&31), l_end);
-	emit_fgh(as, MIPSI_CMP_LT_S, tmp, left, tmp);
-#endif
-	  emit_lsptr(as, MIPSI_LWC1, (tmp & 31),
-		     (void *)&as->J->k32[LJ_K32_2P63],
-		     rset_exclude(RSET_GPR, dest));
+		     rset_exclude(RSET_GPR, dest));  /* Delay slot. */
+	  emit_branch(as, MIPSI_BNE, RID_TMP, dest, l_end);  /* != INT64_MAX? */
+	  emit_dta(as, MIPSI_DSRL, RID_TMP, RID_TMP, 1);
+	  emit_ti(as, MIPSI_LI, RID_TMP, -1);
+	  emit_tg(as, MIPSI_DMFC1, dest, tmp);
+	  emit_fg(as, MIPSI_TRUNC_L_S, tmp, left);
 	}
+      } else
 #endif
-      } else {
+      {
 #if LJ_32
 	emit_tg(as, MIPSI_MFC1, dest, tmp);
 	emit_fg(as, st == IRT_FLOAT ? MIPSI_TRUNC_W_S : MIPSI_TRUNC_W_D,
@@ -722,13 +707,11 @@ static void asm_conv(ASMState *as, IRIns *ir)
 		 "bad type for checked CONV");
       asm_tointg(as, ir, RID_NONE);
     } else {
-      IRCallID cid = irt_is64(ir->t) ?
-	((st == IRT_NUM) ?
-	 (irt_isi64(ir->t) ? IRCALL_fp64_d2l : IRCALL_fp64_d2ul) :
-	 (irt_isi64(ir->t) ? IRCALL_fp64_f2l : IRCALL_fp64_f2ul)) :
-	((st == IRT_NUM) ?
-	 (irt_isint(ir->t) ? IRCALL_softfp_d2i : IRCALL_softfp_d2ui) :
-	 (irt_isint(ir->t) ? IRCALL_softfp_f2i : IRCALL_softfp_f2ui));
+      IRCallID cid;
+      lj_assertA(!irt_isu32(ir->t), "bad CONV u32.fp emitted");
+      lj_assertA(!(irt_is64(ir->t) && st != IRT_NUM), "bad CONV *64.float emitted");
+      cid = irt_is64(ir->t) ? IRCALL_lj_vm_num2u64 :
+	    (st == IRT_NUM ? IRCALL_softfp_d2i : IRCALL_softfp_f2i);
       asm_callid(as, ir, cid);
     }
   } else
@@ -769,7 +752,10 @@ static void asm_conv(ASMState *as, IRIns *ir)
 	  }
 	}
       } else {
-	if (st64 && !(ir->op2 & IRCONV_NONE)) {
+	if (!irt_isu32(ir->t)) {  /* Implicit sign extension. */
+	  Reg left = ra_alloc1(as, lref, RSET_GPR);
+	  emit_dta(as, MIPSI_SLL, dest, left, 0);
+	} else if (st64 && !(ir->op2 & IRCONV_NONE)) {
 	  /* This is either a 32 bit reg/reg mov which zeroes the hiword
 	  ** or a load of the loword from a 64 bit address.
 	  */
@@ -2699,18 +2685,37 @@ static Reg asm_head_side_base(ASMState *as, IRIns *irp)
 /* Fixup the tail code. */
 static void asm_tail_fixup(ASMState *as, TraceNo lnk)
 {
-  MCode *target = lnk ? traceref(as->J,lnk)->mcode : (MCode *)lj_vm_exit_interp;
+  uintptr_t target = lnk ? (uintptr_t)traceref(as->J, lnk)->mcode : (uintptr_t)(void *)lj_vm_exit_interp;
+  MCode *mcp = as->mctail;
   int32_t spadj = as->T->spadjust;
-  MCode *p = as->mctop-1;
-  *p = spadj ? (MIPSI_AADDIU|MIPSF_T(RID_SP)|MIPSF_S(RID_SP)|spadj) : MIPSI_NOP;
-  p[-1] = MIPSI_J|(((uintptr_t)target>>2)&0x03ffffffu);
+  if (((uintptr_t)mcp ^ target) >> 28 == 0) {
+    *mcp++ = MIPSI_J | ((target >> 2) & 0x03ffffffu);
+  } else {
+    *mcp++ = MIPSI_AL | MIPSF_T(RID_TMP) | MIPSF_S(RID_JGL) |
+#if LJ_64
+	     jglofs(as, &as->J->k64[LJ_K64_VM_EXIT_INTERP]);
+#else
+	     jglofs(as, &as->J->k32[LJ_K32_VM_EXIT_INTERP]);
+#endif
+    *mcp++ = MIPSI_JR | MIPSF_S(RID_TMP);
+  }
+  *mcp++ = spadj ? (MIPSI_AADDIU|MIPSF_T(RID_SP)|MIPSF_S(RID_SP)|spadj) : MIPSI_NOP;
 }
 
 /* Prepare tail of code. */
-static void asm_tail_prep(ASMState *as)
+static void asm_tail_prep(ASMState *as, TraceNo lnk)
 {
-  as->mcp = as->mctop-2;  /* Leave room for branch plus nop or stack adj. */
-  as->invmcp = as->loopref ? as->mcp : NULL;
+  as->mcp = as->mctop - 2;  /* Leave room for branch plus nop or stack adj. */
+  if (as->loopref) {
+    as->invmcp = as->mcp;
+  } else {
+    if (!lnk) {
+      uintptr_t target = (uintptr_t)(void *)lj_vm_exit_interp;
+      if (((uintptr_t)as->mcp ^ target) >> 28 != 0) as->mcp--;
+    }
+    as->invmcp = NULL;
+  }
+  as->mctail = as->mcp;
 }
 
 /* -- Trace setup --------------------------------------------------------- */

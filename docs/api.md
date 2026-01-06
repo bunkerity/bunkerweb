@@ -41,7 +41,7 @@ Choose the flavor that matches your environment.
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.7~rc1
+        image: bunkerity/bunkerweb:1.6.7-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -54,7 +54,7 @@ Choose the flavor that matches your environment.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -76,7 +76,7 @@ Choose the flavor that matches your environment.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.7~rc1
+        image: bunkerity/bunkerweb-api:1.6.7-rc1
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -143,7 +143,7 @@ Choose the flavor that matches your environment.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.7~rc1
+      bunkerity/bunkerweb-all-in-one:1.6.7-rc1
     ```
 
 === "Linux"
@@ -250,6 +250,12 @@ More detail and trade-offs: [https://limits.readthedocs.io/en/stable/strategies.
 4. Env file at `/etc/bunkerweb/api.env`
 5. Built-in defaults
 
+### Runtime & time zone
+
+| Setting | Description                                                                                    | Accepted values                                | Default                                |
+| ------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------- | -------------------------------------- |
+| `TZ`    | Time zone for API logs and time-based claims (e.g., Biscuit TTL evaluation and log timestamps) | TZ database name (e.g., `UTC`, `Europe/Paris`) | unset (container default, usually UTC) |
+
 Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set `API_SSL_ENABLED=yes` with `API_SSL_CERTFILE` and `API_SSL_KEYFILE` to terminate TLS in the API. When reverse-proxying, set `API_FORWARDED_ALLOW_IPS` to the proxy IPs so Gunicorn trusts `X-Forwarded-*` headers.
 
 ### Configuration reference (power users)
@@ -323,14 +329,15 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
 
 #### Logging & runtime (package defaults)
 
-| Setting                         | Description               | Accepted values                              | Default                      |
-| ------------------------------- | ------------------------- | -------------------------------------------- | ---------------------------- |
-| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Base log level / override | `debug/info/warning/error/critical`          | `info`                       |
-| `LOG_TYPES`                     | Destinations              | `file`, `stdout`, `syslog` (comma-separated) | `file`                       |
-| `LOG_FILE_PATH`                 | Log file location         | Path                                         | `/var/log/bunkerweb/api.log` |
-| `LOG_SYSLOG_TAG`                | Syslog tag                | String                                       | `bw-api`                     |
-| `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn workers/threads  | Integer or unset for auto                    | unset                        |
-| `CAPTURE_OUTPUT`                | Capture stdout/stderr     | `yes/no/on/off/true/false/0/1`               | `yes`                        |
+| Setting                         | Description                                                                       | Accepted values                                 | Default                                                            |
+| ------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------ |
+| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Base log level / override                                                         | `debug`, `info`, `warning`, `error`, `critical` | `info`                                                             |
+| `LOG_TYPES`                     | Destinations                                                                      | Space-separated `stderr`/`file`/`syslog`        | `stderr`                                                           |
+| `LOG_FILE_PATH`                 | Log file location (used when `LOG_TYPES` includes `file` or `CAPTURE_OUTPUT=yes`) | File path                                       | `/var/log/bunkerweb/api.log` when file/capture enabled, else unset |
+| `LOG_SYSLOG_ADDRESS`            | Syslog target (`udp://host:514`, `tcp://host:514`, socket)                        | Host:port, proto-prefixed host, or socket path  | unset                                                              |
+| `LOG_SYSLOG_TAG`                | Syslog tag                                                                        | String                                          | `bw-api`                                                           |
+| `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn workers/threads                                                          | Integer or unset for auto                       | unset                                                              |
+| `CAPTURE_OUTPUT`                | Capture Gunicorn stdout/stderr into the configured handlers                       | `yes` or `no`                                   | `no`                                                               |
 
 ## API surface (capability map)
 

@@ -55,8 +55,8 @@ function plugin:initialize(id, ctx)
 		self.internalstore = datastore:new(subsystem == "http" and shared.internalstore or shared.internalstore_stream)
 		self.datastore = datastore:new()
 		self.cachestore = cachestore:new(use_redis == "yes")
-		self.clusterstore = clusterstore:new(false)
-		self.cachestore_local = cachestore:new(false)
+		self.clusterstore = clusterstore:new()
+		self.cachestore_local = cachestore:new()
 	end
 	-- Get metadata
 	local metadata, err = self.internalstore:get("plugin_" .. id, true)

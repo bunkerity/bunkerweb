@@ -105,7 +105,7 @@ Ten en cuenta que el modo multisitio es implícito cuando se utiliza la interfaz
 
 !!! info "Para saber más"
 
-    Encontrarás ejemplos concretos del modo multisitio en los [usos avanzados](advanced.md) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/examples) del repositorio.
+    Encontrarás ejemplos concretos del modo multisitio en los [usos avanzados](advanced.md) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc1/examples) del repositorio.
 
 ## Configuraciones personalizadas {#custom-configurations}
 
@@ -126,7 +126,7 @@ La gestión de configuraciones personalizadas desde la interfaz de usuario web s
 
 !!! info "Para saber más"
 
-    Encontrarás ejemplos concretos de configuraciones personalizadas en los [usos avanzados](advanced.md#custom-configurations) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/examples) del repositorio.
+    Encontrarás ejemplos concretos de configuraciones personalizadas en los [usos avanzados](advanced.md#custom-configurations) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc1/examples) del repositorio.
 
 ## Base de datos
 

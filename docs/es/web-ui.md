@@ -1,956 +1,274 @@
-# Interfaz de usuario web
+# Interfaz Web
 
-## Descripción general
+## Rol de la interfaz web
 
-<p align="center">
-    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/tGS3pzquEjY" title="Interfaz de usuario web de BunkerWeb" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</p>
+La interfaz web es el plano de control visual de BunkerWeb. Administra servicios, ajustes globales, bloqueos, plugins, trabajos, caché, registros y actualizaciones sin usar la CLI. Es una app Flask servida por Gunicorn y normalmente se coloca detrás de un reverse proxy BunkerWeb.
 
-La "Interfaz de usuario web" es una aplicación web que te ayuda a gestionar tu instancia de BunkerWeb utilizando una interfaz fácil de usar en lugar de depender únicamente de la línea de comandos.
+!!! warning "Manténla detrás de BunkerWeb"
+    La UI puede cambiar configuración, ejecutar trabajos y desplegar fragmentos personalizados. Ubícala en una red de confianza, enrútala mediante BunkerWeb y protégela con credenciales fuertes y 2FA.
 
-Aquí tienes una lista de las características que ofrece la interfaz de usuario web:
+!!! info "Datos rápidos"
+    - Escucha por defecto: `0.0.0.0:7000` en contenedores, `127.0.0.1:7000` en paquetes (cambia con `UI_LISTEN_ADDR`/`UI_LISTEN_PORT`)
+    - Consciente de reverse proxy: respeta `X-Forwarded-*` via `UI_FORWARDED_ALLOW_IPS`; ajusta `PROXY_NUMBERS` si varios proxies agregan cabeceras
+    - Auth: cuenta admin local (política de contraseña aplicada), roles opcionales, 2FA TOTP con `TOTP_ENCRYPTION_KEYS`
+    - Sesiones: firmadas con `FLASK_SECRET`, vida útil por defecto 12 h, fijadas a IP y User-Agent; `ALWAYS_REMEMBER` controla cookies persistentes
+    - Logs: `/var/log/bunkerweb/ui.log` (+ access log si se captura), UID/GID 101 dentro del contenedor
+    - Salud: `GET /healthcheck` opcional si `ENABLE_HEALTHCHECK=yes`
+    - Dependencias: comparte la base de datos de BunkerWeb y habla con la API para recargar, bloquear o consultar instancias
 
-- Obtén una vista completa de los ataques bloqueados
-- Inicia, detén, reinicia y recarga tu instancia de BunkerWeb
-- Añade, edita y elimina configuraciones para tus aplicaciones web
-- Añade, edita y elimina configuraciones personalizadas para NGINX y ModSecurity
-- Instala y desinstala plugins externos
-- Explora los archivos en caché
-- Supervisa la ejecución de los trabajos y reinícialos según sea necesario
-- Visualiza los registros y busca patrones
+## Checklist de seguridad
 
-## Requisitos previos {#prerequisites}
+- Ejecuta la UI detrás de BunkerWeb en una red interna; usa un `REVERSE_PROXY_URL` difícil de adivinar y limita IPs de origen.
+- Establece `ADMIN_USERNAME` / `ADMIN_PASSWORD` fuertes; usa `OVERRIDE_ADMIN_CREDS=yes` solo cuando quieras forzar un reseteo.
+- Proporciona `TOTP_ENCRYPTION_KEYS` y habilita TOTP en cuentas admin; guarda los códigos de recuperación.
+- Usa TLS (terminado en BunkerWeb o `UI_SSL_ENABLED=yes` con rutas de cert/clave); fija `UI_FORWARDED_ALLOW_IPS` a proxies de confianza.
+- Persiste secretos: monta `/var/lib/bunkerweb` para conservar `FLASK_SECRET`, llaves Biscuit y material TOTP entre reinicios.
+- Mantén `CHECK_PRIVATE_IP=yes` (por defecto) para ligar sesiones a la IP; deja `ALWAYS_REMEMBER=no` salvo que requieras cookies largas.
+- Asegura que `/var/log/bunkerweb` sea legible por UID/GID 101 (o el UID mapeado en rootless) para que la UI pueda leer logs.
 
-Dado que la interfaz de usuario web es una aplicación web, la arquitectura recomendada es ejecutar BunkerWeb delante de ella como un proxy inverso. El procedimiento de instalación recomendado es utilizar el asistente de configuración, que te guiará paso a paso como se describe en la [guía de inicio rápido](quickstart-guide.md).
+## Puesta en marcha
 
-!!! warning "Consideraciones de seguridad"
+La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 
-    La seguridad de la interfaz de usuario web es extremadamente importante. Si una persona no autorizada obtiene acceso a la aplicación, no solo podrá editar tus configuraciones, sino que también podría ejecutar código en el contexto de BunkerWeb (por ejemplo, a través de una configuración personalizada que contenga código LUA). Te recomendamos encarecidamente que sigas las mejores prácticas de seguridad mínimas, como:
+=== "Inicio rápido (asistente)"
 
-    * Elige una contraseña segura para el inicio de sesión (**al menos 8 caracteres, incluyendo 1 letra minúscula, 1 letra mayúscula, 1 dígito y 1 carácter especial**)
-    * Coloca la interfaz de usuario web bajo una URI "difícil de adivinar"
-    * Habilita la autenticación de dos factores (2FA)
-    * No expongas la interfaz de usuario web a Internet sin restricciones adicionales
-    * Aplica las mejores prácticas enumeradas en la [sección de usos avanzados](advanced.md#security-tuning) de la documentación según tu caso de uso
+    Usa las imágenes publicadas y el layout del [guía rápida](quickstart-guide.md#__tabbed_1_3) para levantar el stack, luego completa el asistente en el navegador.
 
-## Actualizar a PRO {#upgrade-to-pro}
-
-!!! tip "Prueba gratuita de BunkerWeb PRO"
-    ¿Quieres probar rápidamente BunkerWeb PRO durante un mes? Usa el código `freetrial` al realizar tu pedido en el [panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) o haciendo clic [aquí](https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=doc) para aplicar directamente el código de promoción (se hará efectivo al finalizar la compra).
-
-Una vez que tengas tu clave de licencia PRO del [panel de BunkerWeb](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc), puedes pegarla en la página PRO de la interfaz de usuario web.
-
-<figure markdown>
-  ![Actualización PRO](assets/img/pro-ui-upgrade.png){ align=center, width="700" }
-  <figcaption>Actualizar a PRO desde la interfaz de usuario web</figcaption>
-</figure>
-
-!!! warning "Tiempo de actualización"
-    La versión PRO se descarga en segundo plano por el programador, puede tardar un tiempo en actualizarse.
-
-Cuando tu instancia de BunkerWeb se haya actualizado a la versión PRO, verás la fecha de caducidad de tu licencia y el número máximo de servicios que puedes proteger.
-
-<figure markdown>
-  ![Actualización PRO](assets/img/ui-pro.png){ align=center, width="700" }
-  <figcaption>Información de la licencia PRO</figcaption>
-</figure>
-
-## Acceso a los registros
-
-A partir de la versión `1.6`, el método de acceso a los registros ha cambiado. Esta actualización afecta específicamente a las integraciones basadas en contenedores: la interfaz de usuario web ahora leerá los archivos de registro del directorio `/var/log/bunkerweb`.
-
-Para mantener los registros accesibles desde la interfaz de usuario web, te recomendamos que utilices un servidor de syslog, como `syslog-ng`, para leer los registros y crear los archivos correspondientes en el directorio `/var/log/bunkerweb`.
-
-!!! warning "Uso de una carpeta local para los registros"
-    La interfaz de usuario web se ejecuta como un **usuario sin privilegios con UID 101 y GID 101** dentro del contenedor por razones de seguridad: en caso de que se explote una vulnerabilidad, el atacante no tendrá privilegios completos de root (UID/GID 0).
-
-    Sin embargo, hay una desventaja: si utilizas una **carpeta local para los registros**, debes **establecer los permisos correctos** para que el usuario sin privilegios pueda leer los archivos de registro. Por ejemplo:
-
-    ```shell
-    mkdir bw-logs && \
-    chown root:101 bw-logs && \
-    chmod 770 bw-logs
+    ```bash
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.7-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
-    Alternativamente, si la carpeta ya existe:
+    Visita el hostname del scheduler (ej. `https://www.example.com/changeme`) y ejecuta el asistente `/setup` para configurar la UI, el scheduler y la instancia.
 
-    ```shell
-    chown -R root:101 bw-logs && \
-    chmod -R 770 bw-logs
-    ```
+=== "Avanzado (entorno presembrado)"
 
-    Si estás utilizando [Docker en modo sin raíz](https://docs.docker.com/engine/security/rootless) o [podman](https://podman.io/), los UID y GID en el contenedor se mapearán a diferentes en el host. Primero necesitarás verificar tu subuid y subgid iniciales:
-
-    ```shell
-    grep ^$(whoami): /etc/subuid && \
-    grep ^$(whoami): /etc/subgid
-    ```
-
-    Por ejemplo, si tienes un valor de **100000**, el UID/GID mapeado será **100100** (100000 + 100):
-
-    ```shell
-    mkdir bw-logs && \
-    sudo chgrp 100100 bw-logs && \
-    chmod 770 bw-logs
-    ```
-
-    O si la carpeta ya existe:
-
-    ```shell
-    sudo chgrp -R 100100 bw-logs && \
-    sudo chmod -R 770 bw-logs
-    ```
-
-### Plantillas de Compose
-
-=== "Docker"
-
-    Para reenviar los registros correctamente al directorio `/var/log/bunkerweb` en la integración de Docker, envía los registros de acceso/error de NGINX del servicio `bunkerweb` mediante `ACCESS_LOG` / `ERROR_LOG`, y los registros de servicio del resto de componentes mediante `LOG_TYPES` / `LOG_FILE_PATH` / `LOG_SYSLOG_ADDRESS` / `LOG_SYSLOG_TAG`. Un servidor syslog escribe todo en el volumen compartido. Aquí tienes un ejemplo de cómo hacerlo:
+    Omite el asistente precargando credenciales y red; ejemplo Compose con sidecar syslog:
 
     ```yaml
     x-service-env: &service-env
-      # Anclamos las variables de entorno para evitar la duplicación
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Recuerda establecer una contraseña más segura para la base de datos
-      LOG_TYPES: "stderr syslog" # Registros de servicio de los componentes auxiliares
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
+      LOG_TYPES: "stderr syslog"
       LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7~rc1
+        image: bunkerity/bunkerweb:1.6.7-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
-          - "443:8443/udp" # QUIC
+          - "443:8443/udp"
         environment:
           API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
-          # Token de API opcional al asegurar el acceso a la API
-          API_TOKEN: "" # Asegúrate de que coincida con el definido en el scheduler
         restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-services
+        networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
         environment:
           <<: *service-env
-          BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrate de establecer el nombre de instancia correcto
+          BUNKERWEB_INSTANCES: "bunkerweb"
           SERVER_NAME: "www.example.com"
           MULTISITE: "yes"
           API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
-          # Token de API opcional al asegurar el acceso a la API
-          API_TOKEN: "" # Asegúrate de que coincida con el definido en el servicio bunkerweb
           ACCESS_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb_access"
           ERROR_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb"
-          SERVE_FILES: "no"
           DISABLE_DEFAULT_SERVER: "yes"
-          USE_CLIENT_CACHE: "yes"
-          USE_GZIP: "yes"
           www.example.com_USE_TEMPLATE: "ui"
           www.example.com_USE_REVERSE_PROXY: "yes"
-          www.example.com_REVERSE_PROXY_URL: "/changeme" # Cámbialo a una URI difícil de adivinar
+          www.example.com_REVERSE_PROXY_URL: "/changeme"
           www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000"
         volumes:
-          - bw-storage:/data # Se utiliza para persistir la caché y otros datos como las copias de seguridad
+          - bw-storage:/data
         restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-db
+        networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.7~rc1
+        image: bunkerity/bunkerweb-ui:1.6.7-rc1
         environment:
           <<: *service-env
-          ADMIN_USERNAME: "changeme"
-          ADMIN_PASSWORD: "changeme" # Recuerda establecer una contraseña más segura para el usuario administrador
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Recuerda establecer una clave secreta más segura (consulta la sección de Requisitos previos)
+          ADMIN_USERNAME: "admin"
+          ADMIN_PASSWORD: "Str0ng&P@ss!"
+          TOTP_ENCRYPTION_KEYS: "set-me"
+          UI_FORWARDED_ALLOW_IPS: "10.20.30.0/24"
         volumes:
-          - bw-logs:/var/log/bunkerweb # Este es el volumen utilizado para almacenar los registros
+          - bw-logs:/var/log/bunkerweb
         restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-db
+        networks: [bw-universe, bw-db]
 
       bw-db:
         image: mariadb:11
-        # Establecemos el tamaño máximo de paquete permitido para evitar problemas con consultas grandes
         command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
           MYSQL_USER: "bunkerweb"
-          MYSQL_PASSWORD: "changeme" # Recuerda establecer una contraseña más segura para la base de datos
+          MYSQL_PASSWORD: "changeme"
         volumes:
           - bw-data:/var/lib/mysql
         restart: "unless-stopped"
-        networks:
-          - bw-db
+        networks: [bw-db]
 
       bw-syslog:
-        image: balabit/syslog-ng:4.9.0
-        cap_add:
-          - NET_BIND_SERVICE  # Enlazar a puertos bajos
-          - NET_BROADCAST  # Enviar broadcasts
-          - NET_RAW  # Usar sockets raw
-          - DAC_READ_SEARCH  # Leer archivos omitiendo permisos
-          - DAC_OVERRIDE  # Omitir permisos de archivo
-          - CHOWN  # Cambiar propietario
-          - SYSLOG  # Escribir en los registros del sistema
+        image: balabit/syslog-ng:4.10.2
         volumes:
-          - bw-logs:/var/log/bunkerweb # Este es el volumen utilizado para almacenar los registros
-          - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # Este es el archivo de configuración de syslog-ng
+          - bw-logs:/var/log/bunkerweb
+          - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf
         restart: "unless-stopped"
-        networks:
-          - bw-universe
+        networks: [bw-universe]
 
     volumes:
       bw-data:
       bw-storage:
       bw-logs:
+      bw-lib:
 
     networks:
       bw-universe:
-        name: bw-universe
         ipam:
-          driver: default
-          config:
-            - subnet: 10.20.30.0/24
+          config: [{ subnet: 10.20.30.0/24 }]
       bw-services:
-        name: bw-services
       bw-db:
-        name: bw-db
     ```
 
 === "Docker Autoconf"
 
-    Para reenviar los registros correctamente al directorio `/var/log/bunkerweb` en la integración de Autoconf, envía los registros de acceso/error de NGINX del servicio `bunkerweb` mediante `ACCESS_LOG` / `ERROR_LOG`, y los registros de servicio del resto de componentes mediante `LOG_TYPES` / `LOG_FILE_PATH` / `LOG_SYSLOG_ADDRESS` / `LOG_SYSLOG_TAG`. Un servidor syslog escribe todo en el volumen compartido. Aquí tienes un ejemplo de cómo hacerlo:
-
-    ```yaml
-    x-service-env: &service-env
-      # Anclamos las variables de entorno para evitar la duplicación
-      AUTOCONF_MODE: "yes"
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Recuerda establecer una contraseña más segura para la base de datos
-      LOG_TYPES: "stderr syslog" # Registros de servicio de los componentes auxiliares
-      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
-
-    services:
-      bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7~rc1
-        ports:
-          - "80:8080/tcp"
-          - "443:8443/tcp"
-          - "443:8443/udp" # QUIC
-        environment:
-          AUTOCONF_MODE: "yes"
-          API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
-          # Token de API opcional al asegurar el acceso a la API
-          API_TOKEN: "" # Asegúrate de que coincida con el definido en el scheduler
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-services
-
-      bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
-        environment:
-          <<: *service-env
-          BUNKERWEB_INSTANCES: "" # No necesitamos especificar la instancia de BunkerWeb aquí, ya que son detectadas automáticamente por el servicio de autoconfiguración
-          SERVER_NAME: "" # El nombre del servidor se rellenará con las etiquetas de los servicios
-          API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
-          # Token de API opcional al asegurar el acceso a la API
-          API_TOKEN: "" # Asegúrate de que coincida con el definido en el servicio bunkerweb
-          ACCESS_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb_access"
-          ERROR_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb"
-          MULTISITE: "yes" # Configuración obligatoria para autoconfiguración / ui
-        volumes:
-          - bw-storage:/data # Se utiliza para persistir la caché y otros datos como las copias de seguridad
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-db
-
-      bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
-        depends_on:
-          - bunkerweb
-          - bw-docker
-        environment:
-          <<: *service-env
-          DOCKER_HOST: "tcp://bw-docker:2375" # Esta es la dirección del socket de Docker
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-docker
-          - bw-db
-
-      bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.7~rc1
-        environment:
-          <<: *service-env
-          ADMIN_USERNAME: "changeme"
-          ADMIN_PASSWORD: "changeme" # Recuerda establecer una contraseña más segura para el usuario administrador
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Recuerda establecer una clave secreta más segura (consulta la sección de Requisitos previos)
-        volumes:
-          - bw-logs:/var/log/bunkerweb
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-db
-        labels:
-          - "bunkerweb.SERVER_NAME=www.example.com"
-          - "bunkerweb.USE_TEMPLATE=ui"
-          - "bunkerweb.USE_REVERSE_PROXY=yes"
-          - "bunkerweb.REVERSE_PROXY_URL=/changeme" # Cámbialo a una URI difícil de adivinar
-          - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-
-      bw-db:
-        image: mariadb:11
-        # Establecemos el tamaño máximo de paquete permitido para evitar problemas con consultas grandes
-        command: --max-allowed-packet=67108864
-        environment:
-          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-          MYSQL_DATABASE: "db"
-          MYSQL_USER: "bunkerweb"
-          MYSQL_PASSWORD: "changeme" # Recuerda establecer una contraseña más segura para la base de datos
-        volumes:
-          - bw-data:/var/lib/mysql
-        restart: "unless-stopped"
-        networks:
-          - bw-db
-
-      bw-docker:
-        image: tecnativa/docker-socket-proxy:nightly
-        environment:
-          CONTAINERS: "1"
-          LOG_LEVEL: "warning"
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock:ro
-        restart: "unless-stopped"
-        networks:
-          - bw-docker
-
-      bw-syslog:
-        image: balabit/syslog-ng:4.9.0
-        cap_add:
-          - NET_BIND_SERVICE  # Enlazar a puertos bajos
-          - NET_BROADCAST  # Enviar broadcasts
-          - NET_RAW  # Usar sockets raw
-          - DAC_READ_SEARCH  # Leer archivos omitiendo permisos
-          - DAC_OVERRIDE  # Omitir permisos de archivo
-          - CHOWN  # Cambiar propietario
-          - SYSLOG  # Escribir en los registros del sistema
-        volumes:
-          - bw-logs:/var/log/bunkerweb
-          - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # Este es el archivo de configuración de syslog-ng
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-
-    volumes:
-      bw-data:
-      bw-storage:
-      bw-logs:
-
-    networks:
-      bw-universe:
-        name: bw-universe
-        ipam:
-          driver: default
-          config:
-            - subnet: 10.20.30.0/24
-      bw-services:
-        name: bw-services
-      bw-db:
-        name: bw-db
-    ```
-### Configuración de Syslog-ng
-
-Aquí hay un ejemplo de un archivo `syslog-ng.conf` que puedes usar para reenviar los registros a un archivo:
-
-```conf
-@version: 4.8
-
-# Configuración de origen para recibir los registros enviados por los servicios de BunkerWeb (ACCESS_LOG / ERROR_LOG y LOG_TYPES=syslog)
-source s_net {
-  udp(
-    ip("0.0.0.0")
-  );
-};
-
-# Plantilla para formatear mensajes de registro
-template t_imp {
-  template("$MSG\n");
-  template_escape(no);
-};
-
-# Configuración de destino para escribir registros en archivos con nombres dinámicos
-destination d_dyna_file {
-  file(
-    "/var/log/bunkerweb/${PROGRAM}.log"
-    template(t_imp)
-    owner("101")
-    group("101")
-    dir_owner("root")
-    dir_group("101")
-    perm(0440)
-    dir_perm(0770)
-    create_dirs(yes)
-  );
-};
-
-# Ruta de registro para dirigir los registros a archivos con nombres dinámicos
-log {
-  source(s_net);
-  destination(d_dyna_file);
-};
-```
-
-## Gestión de la cuenta
-
-Puedes acceder a la página de gestión de la cuenta haciendo clic en la imagen de perfil en la esquina superior derecha:
-
-<figure markdown>
-  ![Descripción general](assets/img/manage-account.png){ align=center, width="400" }
-  <figcaption>Acceso a la página de la cuenta desde la esquina superior derecha</figcaption>
-</figure>
-
-### Nombre de usuario / Contraseña
-
-!!! warning "Contraseña/nombre de usuario perdido"
-
-    En caso de que hayas olvidado tus credenciales de la interfaz de usuario, puedes restablecerlas desde la CLI siguiendo [los pasos descritos en la sección de solución de problemas](troubleshooting.md#web-ui).
-
-Puedes actualizar tu nombre de usuario o contraseña rellenando los formularios dedicados en la pestaña **Seguridad**. Por razones de seguridad, debes introducir tu contraseña actual incluso si estás conectado.
-
-Ten en cuenta que cuando tu nombre de usuario o contraseña se actualice, se cerrará la sesión de la interfaz de usuario web para que vuelvas a iniciarla.
-
-<figure markdown>
-  ![Descripción general](assets/img/profile-username-password.png){ align=center }
-  <figcaption>Formulario de nombre de usuario / contraseña</figcaption>
-</figure>
-
-### Autenticación de dos factores
-
-!!! tip "Claves de cifrado obligatorias"
-
-    Al habilitar la 2FA, debes proporcionar al menos una clave de cifrado. Esta clave se utilizará para cifrar tus secretos TOTP.
-
-    La forma recomendada de generar una clave válida es usar el paquete `passlib`:
-
-    ```shell
-    python3 -c "from passlib import totp; print(totp.generate_secret())"
-    ```
-
-    Establece la clave generada en la variable de entorno `TOTP_ENCRYPTION_KEYS` de la interfaz de usuario web. También puedes establecer varias claves separadas por espacios o como un diccionario (por compatibilidad con versiones anteriores).
-
-!!! warning "Clave secreta perdida"
-
-    En caso de que hayas perdido tu clave secreta, hay dos opciones disponibles:
-
-    - Puedes recuperar tu cuenta usando uno de los códigos de recuperación proporcionados cuando habilitaste la 2FA (un código de recuperación solo se puede usar una vez).
-    - Puedes deshabilitar la 2FA desde la CLI siguiendo [los pasos descritos en la sección de solución de problemas](troubleshooting.md#web-ui).
-
-Puedes potenciar la seguridad de tu inicio de sesión añadiendo la **Autenticación de Dos Factores (2FA)** a tu cuenta. Al hacerlo, se necesitará un código extra además de tu contraseña.
-
-La interfaz de usuario web utiliza la [Contraseña de un Solo Uso Basada en el Tiempo (TOTP)](https://es.wikipedia.org/wiki/Contrase%C3%B1a_de_un_solo_uso_basada_en_tiempo) como implementación de 2FA: usando una **clave secreta**, el algoritmo generará **contraseñas de un solo uso solo válidas por un corto período de tiempo**.
-
-Cualquier cliente TOTP como Google Authenticator, Authy, FreeOTP, ... puede ser utilizado para almacenar la clave secreta y generar los códigos. Ten en cuenta que una vez que se habilita TOTP, **no podrás recuperarla desde la interfaz de usuario web**.
-
-Los siguientes pasos son necesarios para habilitar la función TOTP desde la interfaz de usuario web:
-
-- Copia la clave secreta o usa el código QR en tu aplicación de autenticación
-- Introduce el código TOTP actual en la entrada de 2FA
-- Introduce tu contraseña actual
-
-!!! info "Actualización de la clave secreta"
-    Se genera una nueva clave secreta **cada vez** que visitas la página o envías el formulario. En caso de que algo haya salido mal (p. ej.: código TOTP caducado), necesitarás copiar la nueva clave secreta en tu aplicación de autenticación hasta que la 2FA se habilite con éxito.
-
-!!! tip "Códigos de recuperación"
-
-    Cuando habilites la 2FA, se te proporcionarán **5 códigos de recuperación**. Estos códigos se pueden utilizar para recuperar tu cuenta en caso de que hayas perdido tu clave secreta TOTP. Cada código solo se puede usar una vez. **Estos códigos solo se mostrarán una vez, así que asegúrate de guardarlos en un lugar seguro**.
-
-    Si alguna vez pierdes tus códigos de recuperación, **puedes actualizarlos a través de la sección TOTP de la página de gestión de la cuenta**. Ten en cuenta que los antiguos códigos de recuperación se invalidarán.
-
-Puedes habilitar o deshabilitar la 2FA y también actualizar los códigos de recuperación en la pestaña **Seguridad**:
-
-<figure markdown>
-  ![Descripción general](assets/img/profile-totp.png){ align=center }
-  <figcaption>Formularios para habilitar / deshabilitar / actualizar los códigos de recuperación de TOTP</figcaption>
-</figure>
-
-Después de una combinación exitosa de inicio de sesión/contraseña, se te pedirá que introduzcas tu código TOTP:
-
-<figure markdown>
-  ![Descripción general](assets/img/profile-2fa.png){ align=center, width="400" }
-  <figcaption>2FA en la página de inicio de sesión</figcaption>
-</figure>
-
-### Sesiones actuales
-
-En la pestaña **Sesión**, podrás listar y revocar las sesiones actuales:
-
-<figure markdown>
-  ![Descripción general](assets/img/sessions.png){ align=center }
-  <figcaption>Gestionar sesiones</figcaption>
-</figure>
-
-## Instalación avanzada
-
-La interfaz de usuario web se puede desplegar y configurar sin pasar por el proceso del asistente de configuración: la configuración se realiza a través de variables de entorno, que se pueden añadir directamente a los contenedores o en el archivo `/etc/bunkerweb/ui.env` en el caso de una integración con Linux.
-
-!!! tip "Variables de entorno específicas de la interfaz de usuario web"
-
-    La interfaz de usuario web utiliza las siguientes variables de entorno:
-
-    - `OVERRIDE_ADMIN_CREDS`: establécelo en `yes` para habilitar la anulación incluso si las credenciales de administrador ya están configuradas (el valor predeterminado es `no`).
-    - `ADMIN_USERNAME`: nombre de usuario para acceder a la interfaz de usuario web.
-    - `ADMIN_PASSWORD`: contraseña para acceder a la interfaz de usuario web.
-    - `FLASK_SECRET`: una clave secreta utilizada para cifrar la cookie de sesión (si no se establece, se generará una clave aleatoria).
-    - `TOTP_ENCRYPTION_KEYS` (o `TOTP_SECRETS`): una lista de claves de cifrado TOTP separadas por espacios o un diccionario (p. ej.: `{"1": "miclavesecreta"}` o `miclavesecreta` o `miclavesecreta miclavesecreta1`). **Te recomendamos encarecidamente que establezcas esta variable si quieres usar 2FA, ya que se utilizará para cifrar las claves secretas de TOTP** (si no se establece, se generará un número aleatorio de claves secretas). Consulta la [documentación de passlib](https://passlib.readthedocs.io/en/stable/narr/totp-tutorial.html#application-secrets) para obtener más información.
-    - `UI_LISTEN_ADDR` (preferido): la dirección en la que escuchará la interfaz de usuario web (el valor predeterminado es `0.0.0.0` en **imágenes de Docker** y `127.0.0.1` en **instalaciones de Linux**). Vuelve a `LISTEN_ADDR` si no se establece.
-    - `UI_LISTEN_PORT` (preferido): el puerto en el que escuchará la interfaz de usuario web (el valor predeterminado es `7000`). Vuelve a `LISTEN_PORT` si no se establece.
-    - `UI_SSL_ENABLED`: establécelo en `yes`/`true`/`on` para habilitar TLS directamente en el servicio de la interfaz de usuario (el valor predeterminado es `no`). Recurre a `SSL_ENABLED` si no se define.
-    - `UI_SSL_CERTFILE` y `UI_SSL_KEYFILE`: rutas al certificado y a la clave privada que se utilizarán cuando `UI_SSL_ENABLED` esté habilitado. Recurre a `SSL_CERTFILE` y `SSL_KEYFILE` si no se definen.
-    - `UI_SSL_CA_CERTS`: ruta opcional a un paquete de CA/intermedio si necesitas cargar un archivo de cadena. Recurre a `SSL_CA_CERTS` si no se define.
-    - `MAX_WORKERS`: el número de trabajadores utilizados por la interfaz de usuario web (el valor predeterminado es el número de CPU).
-    - `MAX_THREADS`: el número de hilos utilizados por la interfaz de usuario web (el valor predeterminado es `MAX_WORKERS` * 2).
-    - `FORWARDED_ALLOW_IPS`: una lista de direcciones IP o redes que se pueden usar en la cabecera `X-Forwarded-For` (el valor predeterminado es `*` en **imágenes de Docker** y `127.0.0.1` en **instalaciones de Linux**).
-    - `CHECK_PRIVATE_IP`: establécelo en `yes` para no desconectar a los usuarios que hayan cambiado su dirección IP durante una sesión si están en una red privada (el valor predeterminado es `yes`). (Las direcciones IP no privadas siempre se comprueban).
-    - `ENABLE_HEALTHCHECK`: establécelo en `yes` para habilitar el punto final `/healthcheck` que devuelve una respuesta JSON simple con información de estado (el valor predeterminado es `no`).
-
-    La interfaz de usuario web utilizará estas variables para autenticarte y gestionar la función 2FA.
-
-!!! example "Generación de secretos recomendados"
-
-    Para generar una **ADMIN_PASSWORD** válida, te recomendamos que **utilices un gestor de contraseñas** o un **generador de contraseñas**.
-
-    Puedes generar una **FLASK_SECRET** válida usando el siguiente comando:
-
-    ```shell
-    python3 -c "import secrets; print(secrets.token_hex(64))"
-    ```
-
-    Puedes generar **TOTP_ENCRYPTION_KEYS** válidas separadas por espacios usando el siguiente comando (necesitarás el paquete `passlib`):
-
-    ```shell
-    python3 -c "from passlib import totp; print(totp.generate_secret())"
-    ```
+    Añade `bunkerweb-autoconf` y aplica labels al contenedor de la UI en vez de `BUNKERWEB_INSTANCES`. El scheduler sigue haciendo reverse proxy a la UI mediante la plantilla `ui` y un `REVERSE_PROXY_URL` secreto.
 
 === "Linux"
 
-    La instalación de la interfaz de usuario web utilizando la [integración de Linux](integrations.md#linux) es bastante sencilla porque se instala con BunkerWeb.
+    El paquete instala el servicio systemd `bunkerweb-ui`. Se activa automáticamente con easy-install (el asistente también se inicia por defecto). Para ajustar o reconfigurar, edita `/etc/bunkerweb/ui.env` y luego:
 
-    La interfaz de usuario web viene como un servicio systemd llamado `bunkerweb-ui`, asegúrate de que esté habilitado:
-
-    ```shell
-    sudo systemctl enable bunkerweb-ui && \
-    sudo systemctl status bunkerweb-ui
+    ```bash
+    sudo systemctl enable --now bunkerweb-ui
+    sudo systemctl restart bunkerweb-ui  # después de cambios
     ```
 
-    Un archivo de entorno dedicado ubicado en `/etc/bunkerweb/ui.env` se utiliza para configurar la interfaz de usuario web:
+    Publícalo detrás de BunkerWeb (plantilla `ui`, `REVERSE_PROXY_URL=/changeme`, upstream `http://127.0.0.1:7000`). Monta `/var/lib/bunkerweb` y `/var/log/bunkerweb` para persistir secretos y logs.
 
-    ```conf
-    ADMIN_USERNAME=changeme
-    ADMIN_PASSWORD=changeme
-    TOTP_ENCRYPTION_KEYS=mysecret
+### Específicos Linux vs Docker
+
+- Enlaces por defecto: imágenes Docker escuchan en `0.0.0.0:7000`; paquetes Linux en `127.0.0.1:7000`. Cambia con `UI_LISTEN_ADDR` / `UI_LISTEN_PORT`.
+- Cabeceras de proxy: `UI_FORWARDED_ALLOW_IPS` por defecto `*`; en Linux ajústalo a las IP de tu proxy para endurecer.
+- Secretos y estado: `/var/lib/bunkerweb` guarda `FLASK_SECRET`, llaves Biscuit y material TOTP. Móntalo en Docker; en Linux lo gestiona el paquete.
+- Logs: `/var/log/bunkerweb` debe ser legible por UID/GID 101 (o el UID mapeado en rootless). Los paquetes crean la ruta; los contenedores necesitan un volumen con permisos adecuados.
+- Asistente: easy-install en Linux arranca la UI y el asistente automáticamente; en Docker se accede al asistente vía la URL reverse-proxificada salvo que preselecciones variables de entorno.
+
+## Autenticación y sesiones
+
+- Cuenta admin: créala con el asistente o con `ADMIN_USERNAME` / `ADMIN_PASSWORD`. La contraseña debe incluir minúsculas, mayúsculas, dígito y carácter especial. `OVERRIDE_ADMIN_CREDS=yes` fuerza la resiembra aunque ya exista.
+- Roles: `admin`, `writer` y `reader` se crean automáticamente; las cuentas viven en la base de datos.
+- Secretos: `FLASK_SECRET` se guarda en `/var/lib/bunkerweb/.flask_secret`; las llaves Biscuit al lado, opcionalmente vía `BISCUIT_PUBLIC_KEY` / `BISCUIT_PRIVATE_KEY`.
+- 2FA: habilita TOTP con `TOTP_ENCRYPTION_KEYS` (separadas por espacios o JSON). Genera una llave:
+
+    ```bash
+    python3 -c "from passlib import totp; print(totp.generate_secret())"
     ```
 
-    Reemplaza los datos de `changeme` con tus propios valores.
+    Los códigos de recuperación se muestran una sola vez; si pierdes las llaves de cifrado, se eliminan los secretos TOTP almacenados.
+- Sesiones: duración por defecto 12 h (`SESSION_LIFETIME_HOURS`). Sesiones fijadas a IP y User-Agent; `CHECK_PRIVATE_IP=no` relaja el control de IP solo en rangos privados. `ALWAYS_REMEMBER=yes` fuerza cookies persistentes.
+- Ajusta `PROXY_NUMBERS` si varios proxies añaden `X-Forwarded-*`.
 
-    Recuerda establecer una clave secreta más segura para `TOTP_ENCRYPTION_KEYS`.
+## Fuentes de configuración y prioridad
 
-    Cada vez que edites el archivo `/etc/bunkerweb/ui.env`, necesitarás reiniciar el servicio:
+1. Variables de entorno (incl. `environment:` de Docker/Compose)
+2. Secrets en `/run/secrets/<VAR>` (Docker)
+3. Archivo env `/etc/bunkerweb/ui.env` (paquetes Linux)
+4. Valores por defecto integrados
 
-    ```shell
-    systemctl restart bunkerweb-ui
-    ```
+## Referencia de configuración
 
-    Acceder a la interfaz de usuario web a través de BunkerWeb es una [configuración de proxy inverso](quickstart-guide.md) clásica. Ten en cuenta que la interfaz de usuario web está escuchando en el puerto `7000` y solo en la interfaz de bucle invertido.
+### Tiempo de ejecución y zona horaria
 
-    Aquí está la plantilla de `/etc/bunkerweb/variables.env` que puedes usar:
+| Ajuste | Descripción | Valores aceptados | Predeterminado |
+| --- | --- | --- | --- |
+| `TZ` | Zona horaria para logs de la UI y acciones programadas | Nombre TZ (ej. `UTC`, `Europe/Madrid`) | sin definir (normalmente UTC en contenedor) |
 
-    ```conf
-    HTTP_PORT=80
-    HTTPS_PORT=443
-    DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
-    API_LISTEN_IP=127.0.0.1
-    SERVER_NAME=www.example.com
-    MULTISITE=yes
-    www.example.com_USE_TEMPLATE=ui
-    www.example.com_USE_REVERSE_PROXY=yes
-    www.example.com_REVERSE_PROXY_URL=/changeme
-    www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
-    ```
+### Listener y TLS
 
-    No olvides recargar el servicio `bunkerweb`:
+| Ajuste | Descripción | Valores aceptados | Predeterminado |
+| --- | --- | --- | --- |
+| `UI_LISTEN_ADDR` | Dirección de escucha de la UI | IP o hostname | `0.0.0.0` (Docker) / `127.0.0.1` (paquete) |
+| `UI_LISTEN_PORT` | Puerto de escucha de la UI | Entero | `7000` |
+| `LISTEN_ADDR`, `LISTEN_PORT` | Alternativas si faltan vars de UI | IP/hostname, entero | `0.0.0.0`, `7000` |
+| `UI_SSL_ENABLED` | Habilitar TLS en el contenedor UI | `yes` o `no` | `no` |
+| `UI_SSL_CERTFILE`, `UI_SSL_KEYFILE` | Rutas de cert/clave PEM con TLS | Rutas de archivo | sin definir |
+| `UI_SSL_CA_CERTS` | CA/cadena opcional | Ruta de archivo | sin definir |
+| `UI_FORWARDED_ALLOW_IPS` | Proxies de confianza para `X-Forwarded-*` | IPs/CIDRs separados por espacio/coma | `*` |
 
-    ```shell
-    systemctl reload bunkerweb
-    ```
+### Auth, sesiones y cookies
 
-=== "Docker"
+| Ajuste | Descripción | Valores aceptados | Predeterminado |
+| --- | --- | --- | --- |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD` | Inicializar cuenta admin (política de contraseña) | Cadenas | sin definir |
+| `OVERRIDE_ADMIN_CREDS` | Forzar actualización de credenciales admin desde env | `yes` o `no` | `no` |
+| `FLASK_SECRET` | Secreto de firma de sesión (persistido en `/var/lib/bunkerweb/.flask_secret`) | Cadena hex/base64/opaca | generado automáticamente |
+| `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`) | Claves para cifrar TOTP (espacio o JSON) | Cadenas / JSON | generadas si faltan |
+| `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Claves Biscuit (hex) para tokens de UI | Cadenas hex | autogeneradas y guardadas |
+| `SESSION_LIFETIME_HOURS` | Duración de sesión | Número (horas) | `12` |
+| `ALWAYS_REMEMBER` | Activar siempre “remember me” | `yes` o `no` | `no` |
+| `CHECK_PRIVATE_IP` | Ligar sesión a IP (relaja en redes privadas con `no`) | `yes` o `no` | `yes` |
+| `PROXY_NUMBERS` | Saltos de proxy confiables para `X-Forwarded-*` | Entero | `1` |
 
-    La interfaz de usuario web se puede desplegar utilizando un contenedor dedicado que está disponible en [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb-ui):
+### Logging
 
-    ```shell
-    docker pull bunkerity/bunkerweb-ui
-    ```
+| Ajuste | Descripción | Valores aceptados | Predeterminado |
+| --- | --- | --- | --- |
+| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Nivel base / override | `debug`, `info`, `warning`, `error`, `critical` | `info` |
+| `LOG_TYPES` | Destinos | `stderr`/`file`/`syslog` separados por espacio | `stderr` |
+| `LOG_FILE_PATH` | Ruta para logs a archivo (`file` o `CAPTURE_OUTPUT=yes`) | Ruta de archivo | `/var/log/bunkerweb/ui.log` si file/capture |
+| `CAPTURE_OUTPUT` | Enviar stdout/stderr de Gunicorn a handlers | `yes` o `no` | `no` |
+| `LOG_SYSLOG_ADDRESS` | Destino syslog (`udp://host:514`, `tcp://host:514`, socket) | Host:puerto / URL / socket | sin definir |
+| `LOG_SYSLOG_TAG` | Tag/ident syslog | Cadena | `bw-ui` |
 
-    Alternativamente, también puedes construirla tú mismo:
+### Runtime misceláneo
 
-    ```shell
-    git clone https://github.com/bunkerity/bunkerweb.git && \
-    cd bunkerweb && \
-    docker build -t my-bunkerweb-ui -f src/ui/Dockerfile .
-    ```
+| Ajuste | Descripción | Valores aceptados | Predeterminado |
+| --- | --- | --- | --- |
+| `MAX_WORKERS`, `MAX_THREADS` | Workers/hilos de Gunicorn | Entero | `cpu_count()-1` (mín 1), `workers*2` |
+| `ENABLE_HEALTHCHECK` | Exponer `GET /healthcheck` | `yes` o `no` | `no` |
+| `FORWARDED_ALLOW_IPS` | Alias obsoleto para lista de proxies | IPs/CIDRs | `*` |
+| `DISABLE_CONFIGURATION_TESTING` | Saltar reloads de prueba al aplicar config | `yes` o `no` | `no` |
+| `IGNORE_REGEX_CHECK` | Omitir validación regex de ajustes | `yes` o `no` | `no` |
 
-    Acceder a la interfaz de usuario web a través de BunkerWeb es una [configuración de proxy inverso](quickstart-guide.md) clásica. Te recomendamos que conectes BunkerWeb y la interfaz de usuario web utilizando una red dedicada (como `bw-universe`, también utilizada por el programador) para que no esté en la misma red que tus servicios web por razones de seguridad obvias. Ten en cuenta que el contenedor de la interfaz de usuario web está escuchando en el puerto `7000`.
+## Acceso a logs
 
-    !!! info "Backend de la base de datos"
+La UI lee logs de NGINX/servicios desde `/var/log/bunkerweb`. Alimenta ese directorio con un demonio syslog o un volumen:
 
-        Si quieres otro backend de base de datos que no sea MariaDB, consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations) del repositorio.
+- El UID/GID del contenedor es 101. En el host hazlos legibles: `chown root:101 bw-logs && chmod 770 bw-logs` (ajusta para rootless).
+- Envía access/error logs de BunkerWeb vía `ACCESS_LOG` / `ERROR_LOG` al sidecar syslog; logs de componentes con `LOG_TYPES=syslog`.
 
-    Aquí está la plantilla de docker-compose que puedes usar (no olvides editar los datos de `changeme`):
+Ejemplo de `syslog-ng.conf` para escribir logs por programa:
 
-    ```yaml
-    x-service-env: &service-env
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Recuerda establecer una contraseña más segura para la base de datos
-      LOG_TYPES: "stderr syslog" # Registros de servicio de los componentes auxiliares
-      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
+```conf
+@version: 4.10
+source s_net { udp(ip("0.0.0.0")); };
+template t_imp { template("$MSG\n"); template_escape(no); };
+destination d_dyna_file {
+  file("/var/log/bunkerweb/${PROGRAM}.log"
+       template(t_imp) owner("101") group("101")
+       dir_owner("root") dir_group("101")
+       perm(0440) dir_perm(0770) create_dirs(yes));
+};
+log { source(s_net); destination(d_dyna_file); };
+```
 
-    services:
-      bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7~rc1
-        ports:
-          - "80:8080/tcp"
-          - "443:8443/tcp"
-          - "443:8443/udp" # QUIC
-        environment:
-          API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
-          # Token de API opcional al asegurar el acceso a la API
-          API_TOKEN: "" # Asegúrate de que coincida con el definido en el scheduler
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-services
+## Capacidades
 
-      bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
-        environment:
-          <<: *service-env
-          BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrate de establecer el nombre de instancia correcto
-          SERVER_NAME: "www.example.com"
-          API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
-          # Token de API opcional al asegurar el acceso a la API
-          API_TOKEN: "" # Asegúrate de que coincida con el definido en el servicio bunkerweb
-          ACCESS_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb_access"
-          ERROR_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb"
-          MULTISITE: "yes"
-          SERVE_FILES: "no"
-          DISABLE_DEFAULT_SERVER: "yes"
-          USE_CLIENT_CACHE: "yes"
-          USE_GZIP: "yes"
-          www.example.com_USE_TEMPLATE: "ui"
-          www.example.com_USE_REVERSE_PROXY: "yes"
-          www.example.com_REVERSE_PROXY_URL: "/changeme" # Cámbialo a una URI difícil de adivinar
-          www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000" # El contenedor de la web UI escucha en el puerto 7000 por defecto
-        volumes:
-          - bw-storage:/data # Se utiliza para persistir la caché y otros datos como las copias de seguridad
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-db
+- Panel para solicitudes, bloqueos, caché y jobs; reinicio/recarga de instancias.
+- Crear/actualizar/eliminar servicios y ajustes globales con validación contra esquemas de plugins.
+- Subir y gestionar configs personalizadas (NGINX/ModSecurity) y plugins (externos o PRO).
+- Ver logs, buscar reportes e inspeccionar artefactos de caché.
+- Gestionar usuarios de UI, roles, sesiones y TOTP con códigos de recuperación.
+- Actualizar a BunkerWeb PRO y ver estado de licencia en la página dedicada.
 
-      bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.7~rc1
-        environment:
-          <<: *service-env
-          ADMIN_USERNAME: "changeme"
-          ADMIN_PASSWORD: "changeme" # Recuerda establecer una contraseña más segura para el usuario administrador
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Recuerda establecer una clave secreta más segura (consulta la sección de Requisitos previos)
-        volumes:
-          - bw-logs:/var/log/bunkerweb # Este es el volumen utilizado para almacenar los registros
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-db
+## Actualizar a PRO {#upgrade-to-pro}
 
-      bw-db:
-        image: mariadb:11
-        # Establecemos el tamaño máximo de paquete permitido para evitar problemas con consultas grandes
-        command: --max-allowed-packet=67108864
-        environment:
-          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-          MYSQL_DATABASE: "db"
-          MYSQL_USER: "bunkerweb"
-          MYSQL_PASSWORD: "changeme" # Recuerda establecer una contraseña más segura para la base de datos
-        volumes:
-          - bw-data:/var/lib/mysql
-        restart: "unless-stopped"
-        networks:
-          - bw-db
+!!! tip "Prueba gratis de BunkerWeb PRO"
+    Usa el código `freetrial` en el [Panel BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&utm_campaign=self&utm_source=doc) para un mes de prueba.
 
-      bw-syslog:
-        image: balabit/syslog-ng:4.9.0
-        cap_add:
-          - NET_BIND_SERVICE  # Enlazar a puertos bajos
-          - NET_BROADCAST  # Enviar broadcasts
-          - NET_RAW  # Usar sockets raw
-          - DAC_READ_SEARCH  # Leer archivos omitiendo permisos
-          - DAC_OVERRIDE  # Omitir permisos de archivo
-          - CHOWN  # Cambiar propietario
-          - SYSLOG  # Escribir en los registros del sistema
-        volumes:
-          - bw-logs:/var/log/bunkerweb # Este es el volumen utilizado para almacenar los registros
-          - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # Este es el archivo de configuración de syslog-ng
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
+Pega tu clave PRO en la página **PRO** de la UI (o precarga `PRO_LICENSE_KEY` para el asistente). Las actualizaciones se descargan en segundo plano por el scheduler; revisa en la UI la caducidad y los límites de servicios tras aplicarlas.
 
-    volumes:
-      bw-data:
-      bw-storage:
-      bw-logs:
-
-    networks:
-      bw-universe:
-        name: bw-universe
-        ipam:
-          driver: default
-          config:
-            - subnet: 10.20.30.0/24
-      bw-services:
-        name: bw-services
-      bw-db:
-        name: bw-db
-    ```
-
-=== "Docker autoconf"
-
-    La interfaz de usuario web se puede desplegar utilizando un contenedor dedicado que está disponible en [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb-ui):
-
-    ```shell
-    docker pull bunkerity/bunkerweb-ui
-    ```
-
-    Alternativamente, también puedes construirla tú mismo:
-
-    ```shell
-    git clone https://github.com/bunkerity/bunkerweb.git && \
-    cd bunkerweb && \
-    docker build -t my-bunkerweb-ui -f src/ui/Dockerfile .
-    ```
-
-    !!! tip "Variables de entorno"
-
-        Por favor, lee la sección de [Requisitos previos](#prerequisites) para ver todas las variables de entorno que puedes establecer para personalizar la interfaz de usuario web.
-
-    Acceder a la interfaz de usuario web a través de BunkerWeb es una [configuración de proxy inverso](quickstart-guide.md) clásica. Te recomendamos que conectes BunkerWeb y la interfaz de usuario web utilizando una red dedicada (como `bw-universe`, también utilizada por el programador y la autoconfiguración) para que no esté en la misma red que tus servicios web por razones de seguridad obvias. Ten en cuenta que el contenedor de la interfaz de usuario web está escuchando en el puerto `7000`.
-
-    !!! info "Backend de la base de datos"
-
-        Si quieres otro backend de base de datos que no sea MariaDB, consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations) del repositorio.
-
-    Aquí está la plantilla de docker-compose que puedes usar (no olvides editar los datos de `changeme`):
-
-    ```yaml
-    x-service-env: &service-env
-      # Anclamos las variables de entorno para evitar la duplicación
-      AUTOCONF_MODE: "yes"
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Recuerda establecer una contraseña más segura para la base de datos
-      LOG_TYPES: "stderr syslog" # Registros de servicio de los componentes auxiliares
-      LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
-
-    services:
-      bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7~rc1
-        ports:
-          - "80:8080/tcp"
-          - "443:8443/tcp"
-          - "443:8443/udp" # Para soporte de QUIC / HTTP3
-        environment:
-          API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
-          # Token de API opcional al asegurar el acceso a la API
-          API_TOKEN: "" # Asegúrate de que coincida con el definido en el scheduler
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-services
-
-      bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
-        environment:
-          <<: *service-env
-          BUNKERWEB_INSTANCES: ""
-          SERVER_NAME: ""
-          API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
-          # Token de API opcional al asegurar el acceso a la API
-          API_TOKEN: "" # Asegúrate de que coincida con el definido en el servicio bunkerweb
-          ACCESS_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb_access"
-          ERROR_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb"
-          MULTISITE: "yes"
-        volumes:
-          - bw-storage:/data # Se utiliza para persistir la caché y otros datos como las copias de seguridad
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-db
-
-      bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.7~rc1
-        depends_on:
-          - bw-docker
-        environment:
-          <<: *service-env
-          DOCKER_HOST: "tcp://bw-docker:2375"
-        networks:
-          - bw-universe
-          - bw-docker
-          - bw-db
-
-      bw-docker:
-        image: tecnativa/docker-socket-proxy:nightly
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock:ro
-        environment:
-          CONTAINERS: "1"
-          LOG_LEVEL: "warning"
-        networks:
-          - bw-docker
-
-      bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.7~rc1
-        environment:
-          <<: *service-env
-          ADMIN_USERNAME: "changeme"
-          ADMIN_PASSWORD: "changeme" # Recuerda establecer una contraseña más segura para el usuario administrador
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Recuerda establecer una clave secreta más segura (consulta la sección de Requisitos previos)
-        volumes:
-          - bw-logs:/var/log/bunkerweb
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-db
-        labels:
-          - "bunkerweb.SERVER_NAME=www.example.com"
-          - "bunkerweb.USE_TEMPLATE=ui"
-          - "bunkerweb.USE_REVERSE_PROXY=yes"
-          - "bunkerweb.REVERSE_PROXY_URL=/changeme"
-          - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-
-      bw-db:
-        image: mariadb:11
-        # Establecemos el tamaño máximo de paquete permitido para evitar problemas con consultas grandes
-        command: --max-allowed-packet=67108864
-        environment:
-          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-          MYSQL_DATABASE: "db"
-          MYSQL_USER: "bunkerweb"
-          MYSQL_PASSWORD: "changeme" # Recuerda establecer una contraseña más segura para la base de datos
-        volumes:
-          - bw-data:/var/lib/mysql
-        restart: "unless-stopped"
-        networks:
-          - bw-db
-
-      bw-syslog:
-        image: balabit/syslog-ng:4.9.0
-        cap_add:
-          - NET_BIND_SERVICE  # Enlazar a puertos bajos
-          - NET_BROADCAST  # Enviar broadcasts
-          - NET_RAW  # Usar sockets raw
-          - DAC_READ_SEARCH  # Leer archivos omitiendo permisos
-          - DAC_OVERRIDE  # Omitir permisos de archivo
-          - CHOWN  # Cambiar propietario
-          - SYSLOG  # Escribir en los registros del sistema
-        volumes:
-          - bw-logs:/var/log/bunkerweb # Este es el volumen utilizado para almacenar los registros
-          - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # Este es el archivo de configuración de syslog-ng
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-
-    volumes:
-      bw-data:
-      bw-storage:
-      bw-logs:
-
-    networks:
-      bw-universe:
-        name: bw-universe
-        ipam:
-          driver: default
-          config:
-            - subnet: 10.20.30.0/24
-      bw-services:
-        name: bw-services
-      bw-docker:
-        name: bw-docker
-      bw-db:
-        name: bw-db
-    ```
-
-=== "Kubernetes"
-
-    La interfaz de usuario web se puede desplegar utilizando un contenedor dedicado que está disponible en [Docker Hub](https://hub.docker.com/r/bunkerity/bunkerweb-ui) y se puede desplegar como un [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) estándar.
-
-    Acceder a la interfaz de usuario web a través de BunkerWeb es una [configuración de proxy inverso](quickstart-guide.md) clásica. La segmentación de la red entre la interfaz de usuario web y los servicios web no se cubre en esta documentación. Ten en cuenta que el contenedor de la interfaz de usuario web está escuchando en el puerto `7000`.
-
-    !!! info "Backend de la base de datos"
-
-        Si quieres otro backend de base de datos que no sea MariaDB, consulta los archivos yaml en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/misc/integrations) del repositorio.
-
-    Aquí está la parte correspondiente de tu archivo values.yaml que puedes usar:
-
-    ```yaml
-    settings:
-      # Usa un secreto existente llamado bunkerweb y que contenga los siguientes valores:
-      # - admin-username
-      # - admin-password
-      # - flask-secret
-      # - totp-secrets
-      existingSecret: "secret-bunkerweb"
-    ui:
-      wizard: false
-      ingress:
-        enabled: true
-        serverName: "www.example.com"
-        serverPath: "/admin"
-      overrideAdminCreds: "yes"
-    ```
-
-## Soporte de idiomas y localización
-
-La interfaz de usuario de BunkerWeb admite varios idiomas. Las traducciones se gestionan en el directorio `src/ui/app/static/locales`. Actualmente están disponibles los siguientes idiomas:
-
-- Inglés (en)
-- Francés (fr)
-- Árabe (ar)
-- Bengalí (bn)
-- Español (es)
-- Hindi (hi)
-- Portugués (pt)
-- Ruso (ru)
-- Urdu (ur)
-- Chino (zh)
-- Alemán (de)
-- Italiano (it)
-
-Consulta el [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.7~rc1/src/ui/app/static/locales/README.md) para obtener detalles sobre la procedencia de la traducción y el estado de la revisión.
-
-### Contribuir con traducciones
-
-¡Agradecemos las contribuciones para mejorar o añadir nuevos archivos de localización!
-
-**Cómo contribuir con una traducción:**
-
-1. Edita el archivo `src/ui/app/lang_config.py` para añadir tu idioma (código, nombre, bandera, nombre en inglés).
-2. Copia `en.json` como plantilla en `src/ui/app/static/locales/`, renómbralo con el código de tu idioma (p. ej., `de.json` para alemán).
-3. Traduce los valores de tu nuevo archivo.
-4. Actualiza la tabla en `locales/README.md` para añadir tu idioma e indicar quién lo creó/revisó.
-5. Envía una solicitud de extracción.
-
-Para las actualizaciones, edita el archivo correspondiente y actualiza la tabla de procedencia según sea necesario.
-
-Consulta el [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.7~rc1/src/ui/app/static/locales/README.md) para obtener las directrices completas.
-Genera una traducción limpia de este archivo
+<figure markdown>
+  ![PRO upgrade](assets/img/ui-pro.png){ align=center, width="700" }
+  <figcaption>Información de licencia PRO</figcaption>
+</figure>

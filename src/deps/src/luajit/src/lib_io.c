@@ -127,8 +127,9 @@ static int io_file_readnum(lua_State *L, FILE *fp)
   lua_Number d;
   if (fscanf(fp, LUA_NUMBER_SCAN, &d) == 1) {
     if (LJ_DUALNUM) {
-      int32_t i = lj_num2int(d);
-      if (d == (lua_Number)i && !tvismzero((cTValue *)&d)) {
+      int64_t i64;
+      int32_t i;
+      if (lj_num2int_check(d, i64, i) && !tvismzero((cTValue *)&d)) {
 	setintV(L->top++, i);
 	return 1;
       }
@@ -335,7 +336,7 @@ LJLIB_CF(io_method_seek)
     if (tvisint(o))
       ofs = (int64_t)intV(o);
     else if (tvisnum(o))
-      ofs = (int64_t)numV(o);
+      ofs = lj_num2i64(numV(o));
     else if (!tvisnil(o))
       lj_err_argt(L, 3, LUA_TNUMBER);
   }

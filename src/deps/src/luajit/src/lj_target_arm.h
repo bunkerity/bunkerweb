@@ -190,6 +190,7 @@ typedef enum ARMIns {
   ARMI_LDRSB = 0xe01000d0,
   ARMI_LDRSH = 0xe01000f0,
   ARMI_LDRD = 0xe00000d0,
+  ARMI_LDRL = 0xe51f0000,
   ARMI_STR = 0xe4000000,
   ARMI_STRB = 0xe4400000,
   ARMI_STRH = 0xe00000b0,
@@ -200,6 +201,7 @@ typedef enum ARMIns {
   ARMI_BL = 0xeb000000,
   ARMI_BLX = 0xfa000000,
   ARMI_BLXr = 0xe12fff30,
+  ARMI_BX = 0xe12fff10,
 
   /* ARMv6 */
   ARMI_REV = 0xe6bf0f30,

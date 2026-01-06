@@ -573,13 +573,9 @@ static void split_ir(jit_State *J)
       case IR_CONV: {  /* Conversion to 64 bit integer. Others handled below. */
 	IRType st = (IRType)(ir->op2 & IRCONV_SRCMASK);
 #if LJ_SOFTFP
+	lj_assertJ(st != IRT_FLOAT, "bad CONV *64.float emitted");
 	if (st == IRT_NUM) {  /* NUM to 64 bit int conv. */
-	  hi = split_call_l(J, hisubst, oir, ir,
-		 irt_isi64(ir->t) ? IRCALL_fp64_d2l : IRCALL_fp64_d2ul);
-	} else if (st == IRT_FLOAT) {  /* FLOAT to 64 bit int conv. */
-	  nir->o = IR_CALLN;
-	  nir->op2 = irt_isi64(ir->t) ? IRCALL_fp64_f2l : IRCALL_fp64_f2ul;
-	  hi = split_emit(J, IRTI(IR_HIOP), nref, nref);
+	  hi = split_call_l(J, hisubst, oir, ir, IRCALL_lj_vm_num2u64);
 	}
 #else
 	if (st == IRT_NUM || st == IRT_FLOAT) {  /* FP to 64 bit int conv. */
@@ -692,8 +688,9 @@ static void split_ir(jit_State *J)
 	  nir->op2 = st == IRT_INT ? IRCALL_softfp_i2f : IRCALL_softfp_ui2f;
 	}
       } else if (st == IRT_FLOAT) {
+	lj_assertJ(!irt_isu32(ir->t), "bad CONV u32.fp emitted");
 	nir->o = IR_CALLN;
-	nir->op2 = irt_isint(ir->t) ? IRCALL_softfp_f2i : IRCALL_softfp_f2ui;
+	nir->op2 = IRCALL_softfp_f2i;
       } else
 #endif
 #if LJ_SOFTFP
@@ -705,9 +702,7 @@ static void split_ir(jit_State *J)
 	} else {
 	  split_call_l(J, hisubst, oir, ir,
 #if LJ_32 && LJ_HASFFI
-	    st == IRT_NUM ?
-	      (irt_isint(ir->t) ? IRCALL_softfp_d2i : IRCALL_softfp_d2ui) :
-	      (irt_isint(ir->t) ? IRCALL_softfp_f2i : IRCALL_softfp_f2ui)
+	    st == IRT_NUM ? IRCALL_softfp_d2i : IRCALL_softfp_f2i
 #else
 	    IRCALL_softfp_d2i
 #endif

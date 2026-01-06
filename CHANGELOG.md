@@ -1,6 +1,13 @@
 # Changelog
 
-## v1.6.7~rc1 - ????/??/??
+## v1.6.7~rc2 - 2026/01/??
+
+- [BUGFIX] Fix wrong certificate name checks in Let's Encrypt
+- [LINUX] Updated NGINX version to v1.28.1 for Fedora 42 and 43 integration
+- [ALL-IN-ONE] Update CrowdSec version to 1.7.4
+- [DEPS] Updated luajit2 version to v2.1-20251229
+
+## v1.6.7~rc1 - 2025/12/17
 
 - [FEATURE] Refactor logging setup across multiple modules to be able to send logs to a syslog server and have multiple handlers at the same time
 - [FEATURE] Allow configuration of whether Base64 decoding should be applied to DNS credentials via the new `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` setting in the `Let's Encrypt` plugin (default is `yes`)
@@ -28,6 +35,7 @@
 - [DOCS] Update database compatibility matrix
 - [DOCS] Refactor API documentation to include new API features and improve clarity
 - [DOCS] Add documentation about the new "Custom Pages" PRO plugin
+- [DOCS] Refactor web UI documentation to improve clarity
 - [DEPS] Update lua-resty-session version to v4.1.5
 - [DEPS] Update coreruleset-v4 version to v4.21.0
 - [DEPS] Updated zlib version to v1.3.1.2

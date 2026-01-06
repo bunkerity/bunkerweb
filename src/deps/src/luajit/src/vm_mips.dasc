@@ -85,6 +85,7 @@
 |
 |.if FPU
 |.define FARG1,		f12
+|.define FARG1HI,	f13
 |.define FARG2,		f14
 |
 |.define FRET1,		f0
@@ -2560,7 +2561,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  mtc1 r0, f4
   |  mtc1 TMP0, f5
   |  abs.d FRET2, FARG1			// |x|
-  |    mfc1 AT, f13
+  |    mfc1 AT, FARG1HI
   |  c.olt.d 0, FRET2, f4
   |   add.d FRET1, FRET2, f4		// (|x| + 2^52) - 2^52
   |  bc1f 0, >1				// Truncate only if |x| < 2^52.
@@ -2820,6 +2821,122 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |  sfmin_max min, vm_sfcmpolt
   |  sfmin_max max, vm_sfcmpogt
+  |
+  |//-----------------------------------------------------------------------
+  |//-- Number conversion functions ----------------------------------------
+  |//-----------------------------------------------------------------------
+  |
+  |// int64_t lj_vm_num2int_check(double x)
+  |->vm_num2int_check:
+  |.if FPU
+  |  trunc.w.d FARG2, FARG1
+  |  mfc1 SFRETLO, FARG2
+  |  cvt.d.w FARG2, FARG2
+  |  c.eq.d FARG1, FARG2
+  |  bc1f 0, >2
+  |.  nop
+  |  jr ra
+  |.  move SFRETHI, r0
+  |
+  |.else
+  |
+  |  sll SFRETLO, SFARG1HI, 1
+  |  or SFRETHI, SFRETLO, SFARG1LO
+  |  beqz SFRETHI, >1			// Return 0 for +-0.
+  |.  li TMP0, 1054
+  |  srl AT, SFRETLO, 21
+  |  subu TMP0, TMP0, AT
+  |  sltiu AT, TMP0, 32
+  |  beqz AT, >2			// Fail if |x| < 0x1p0 || |x| >= 0x1p32.
+  |.  sll SFRETLO, SFARG1HI, 11
+  |   srl SFRETHI, SFARG1LO, 21
+  |  negu TMP1, TMP0
+  |   or SFRETLO, SFRETLO, SFRETHI	// Left-aligned mantissa.
+  |  sllv TMP2, SFRETLO, TMP1
+  |   lui AT, 0x8000
+  |  sll SFRETHI, SFARG1LO, 11
+  |   or SFRETLO, SFRETLO, AT		// Merge leading 1.
+  |  or TMP2, TMP2, SFRETHI
+  |   srlv SFRETLO, SFRETLO, TMP0	// lo = right-aligned absolute value.
+  |  bnez TMP2, >2			// Fail if fractional part != 0.
+  |.  sra SFARG1HI, SFARG1HI, 31	// sign = 0 or -1.
+  |  addu SFRETLO, SFRETLO, SFARG1HI
+  |  bltz SFRETLO, >2			// Fail if lo+sign >= 0x80000000.
+  |.  xor SFRETLO, SFRETLO, SFARG1HI	// lo = sign?-lo:lo = (lo+sign)^sign.
+  |1:
+  |  jr ra
+  |.  move SFRETHI, r0
+  |.endif
+  |2:  // Not an integer, return 0x8000000080000000LL.
+  |  lui SFRETHI, 0x8000
+  |  jr ra
+  |.  lui SFRETLO, 0x8000
+  |
+  |// int64_t lj_vm_num2i64(double x)
+  |->vm_num2i64:
+  |// fallthrough, same as lj_vm_num2u64.
+  |
+  |// uint64_t lj_vm_num2u64(double x)
+  |->vm_num2u64:
+  |.if FPU
+  |  mfc1 SFARG1HI, FARG1HI
+  |  mfc1 SFARG1LO, FARG1
+  |.endif
+  |  srl TMP0, SFARG1HI, 20
+  |  andi TMP0, TMP0, 0x7ff
+  |  addiu SFRETLO, TMP0, -1023
+  |  sltiu SFRETLO, SFRETLO, 116
+  |  beqz SFRETLO, >3			// Exponent out of range.
+  |.  sll SFRETHI, SFARG1HI, 12
+  |  lui AT, 0x0010
+  |  srl SFRETHI, SFRETHI, 12
+  |  addiu TMP0, TMP0, -1075
+  |  sra SFARG1HI, SFARG1HI, 31		// sign = 0 or -1.
+  |  bgez TMP0, >2			// Shift mantissa left or right?
+  |.  or SFRETHI, SFRETHI, AT		// Merge leading 1 into masked mantissa.
+  |  subu TMP1, r0, TMP0
+  |  sll AT, SFRETHI, 1
+  |  nor TMP0, r0, TMP1
+  |  srlv SFRETHI, SFRETHI, TMP1	// Shift hi mantissa right for low exp.
+  |   sllv AT, AT, TMP0			// Shifted-out hi mantissa.
+  |  srlv SFRETLO, SFARG1LO, TMP1	// Shift lo mantissa right for low exp.
+  |   andi TMP1, TMP1, 0x20		// Conditional right shift by 32.
+  |    or AT, AT, SFRETLO		// Merge into lo mantissa.
+  |   movn AT, SFRETHI, TMP1
+  |   movn SFRETHI, r0, TMP1
+  |1:
+  |  addu SFRETLO, AT, SFARG1HI		// m = sign?-m:m = (m+sign)^sign.
+  |  addu SFRETHI, SFRETHI, SFARG1HI
+  |  sltu TMP0, SFRETLO, AT		// Carry
+  |  addu SFRETHI, SFRETHI, TMP0
+  |  xor SFRETLO, SFRETLO, SFARG1HI
+  |  jr ra
+  |.  xor SFRETHI, SFRETHI, SFARG1HI
+  |2:
+  |  srl TMP2, SFARG1LO, 1
+  |  nor AT, r0, TMP0
+  |  sllv SFRETHI, SFRETHI, TMP0	// Shift hi mantissa left for high exp.
+  |    srlv TMP2, TMP2, AT		// Shifted-out lo mantissa.
+  |  sllv AT, SFARG1LO, TMP0		// Shift lo mantissa left for high exp.
+  |   andi TMP0, TMP0, 0x20		// Conditional left shift by 32.
+  |    or SFRETHI, SFRETHI, TMP2	// Merge into hi mantissa.
+  |   movn SFRETHI, AT, TMP0
+  |  b <1
+  |.  movn AT, r0, TMP0
+  |3:
+  |  jr ra
+  |.  li SFRETHI, 0
+  |
+  |// int32_t lj_vm_tobit(double x)
+  |.if FPU
+  |->vm_tobit:
+  |  lui AT, 0x59c0		// 2^52 + 2^51 (float).
+  |  mtc1 AT, FARG2
+  |  cvt.d.s FARG2, FARG2
+  |  add.d FARG1, FARG1, FARG2
+  |  jr ra
+  |.  mfc1 CRET1, FARG1
+  |.endif
   |
   |//-----------------------------------------------------------------------
   |//-- Miscellaneous functions --------------------------------------------

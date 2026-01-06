@@ -105,7 +105,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 
 !!! info "更进一步"
 
-    您将在文档的[高级用法](advanced.md)和仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/examples) 目录中找到多站点模式的具体示例。
+    您将在文档的[高级用法](advanced.md)和仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc1/examples) 目录中找到多站点模式的具体示例。
 
 ## 自定义配置 {#custom-configurations}
 
@@ -126,7 +126,7 @@ BunkerWeb 的另一个不可或缺的组件是 ModSecurity Web 应用程序防�
 
 !!! info "更进一步"
 
-    您将在文档的[高级用法](advanced.md#custom-configurations)和仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/examples) 目录中找到自定义配置的具体示例。
+    您将在文档的[高级用法](advanced.md#custom-configurations)和仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc1/examples) 目录中找到自定义配置的具体示例。
 
 ## 数据库
 

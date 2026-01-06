@@ -210,7 +210,7 @@ jq -r 'to_entries[] | "\(.key) \(.value)"' databases.json | while read -r databa
       log "✨ Creating migration scripts from version $TAG to $NEXT_TAG and database $database"
     fi
 
-    transformed_tag="${NEXT_TAG//[.-]/_}.py"
+    transformed_tag="${NEXT_TAG//[.~-]/_}.py"
     migration_dir="${db_dir}/alembic/${database}_versions"
 
     # Skip if migration script already exists

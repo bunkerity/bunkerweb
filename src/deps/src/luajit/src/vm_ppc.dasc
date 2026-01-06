@@ -3392,6 +3392,154 @@ static void build_subroutines(BuildCtx *ctx)
   |  blr
   |
   |//-----------------------------------------------------------------------
+  |//-- Number conversion functions ----------------------------------------
+  |//-----------------------------------------------------------------------
+  |
+  |// int64_t lj_vm_num2int_check(double x)
+  |->vm_num2int_check:
+  |.if FPU
+  |  subi sp, sp, 16
+  |  stfd FARG1, 0(sp)
+  |  lwz CARG1, 0(sp)
+  |  lwz CARG2, 4(sp)
+  |.endif
+  |  slwi TMP1, CARG1, 1
+  |.if PPE
+  |  or TMP1, TMP1, CARG2
+  |  cmpwi TMP1, 0
+  |.else
+  |  or. TMP1, TMP1, CARG2
+  |.endif
+  |  beq >2				// Return 0 for +-0.
+  |  rlwinm RB, CARG1, 12, 21, 31
+  |  subfic RB, RB, 1054
+  |  cmplwi RB, 32
+  |  bge >1				// Fail if |x| < 0x1p0 || |x| >= 0x1p32.
+  |  slwi CARG3, CARG1, 11
+  |  rlwimi CARG3, CARG2, 11, 21, 31	// Left-aligned mantissa.
+  |  subfic TMP1, RB, 32
+  |  slw TMP1, CARG3, TMP1
+  |  slwi TMP2, CARG2, 11
+  |.if PPE
+  |  or. TMP1, TMP1, TMP2
+  |.else
+  |  or TMP1, TMP1, TMP2
+  |  cmpwi TMP1, 0
+  |.endif
+  |  bne >1				// Fail if fractional part != 0.
+  |  oris CARG3, CARG3, 0x8000		// Merge leading 1.
+  |  srw CRET2, CARG3, RB		// lo = right-aligned absolute value.
+  |  srawi CARG4, CARG1, 31		// sign = 0 or -1.
+  |.if GPR64
+  |  add CRET2, CRET2, CARG4
+  |  cmpwi CRET2, 0
+  |.else
+  |  add. CRET2, CRET2, CARG4
+  |.endif
+  |  blt >1				// Fail if fractional part != 0.
+  |  xor CRET2, CRET2, CARG4		// lo = sign?-lo:lo = (lo+sign)^sign.
+  |2:
+  |.if GPR64
+  |  rldicl CRET1, CRET1, 0, 32
+  |.else
+  |  li CRET1, 0
+  |.endif
+  |.if FPU
+  |  addi sp, sp, 16
+  |.endif
+  |  blr
+  |1:
+  |.if GPR64
+  |  lus CRET1, 0x8000
+  |  rldicr CRET1, CRET1, 32, 32
+  |.else
+  |  lus CRET1, 0x8000
+  |  lus CRET2, 0x8000
+  |.endif
+  |.if FPU
+  |  addi sp, sp, 16
+  |.endif
+  |  blr
+  |
+  |// int64_t lj_vm_num2i64(double x)
+  |->vm_num2i64:
+  |// fallthrough, same as lj_vm_num2u64.
+  |
+  |// uint64_t lj_vm_num2u64(double x)
+  |->vm_num2u64:
+  |.if FPU
+  |  subi sp, sp, 16
+  |  stfd FARG1, 0(sp)
+  |  lwz CARG1, 0(sp)
+  |  lwz CARG2, 4(sp)
+  |.endif
+  |  rlwinm RB, CARG1, 12, 21, 31
+  |  addi RB, RB, -1023
+  |  cmplwi RB, 116
+  |  bge >3				// Exponent out of range.
+  |  srawi CARG4, CARG1, 31		// sign = 0 or -1.
+  |  clrlwi CARG1, CARG1, 12
+  |   subfic RB, RB, 52
+  |  oris CARG1, CARG1, 0x0010
+  |   cmpwi RB, 0
+  |   blt >2				// Shift mantissa left or right?
+  |   subfic TMP1, RB, 32		// 64 bit right shift.
+  |  srw CARG2, CARG2, RB
+  |   slw TMP2, CARG1, TMP1
+  |   addi TMP1, RB, -32
+  |  or CARG2, CARG2, TMP2
+  |   srw TMP2, CARG1, TMP1
+  |  or CARG2, CARG2, TMP2
+  |  srw CARG1, CARG1, RB
+  |1:
+  |  addc CARG2, CARG2, CARG4
+  |  adde CARG1, CARG1, CARG4
+  |  xor CRET2, CARG2, CARG4
+  |  xor CRET1, CARG1, CARG4
+  |.if GPR64
+  |  rldimi CRET2, CRET1, 0, 32
+  |  mr CRET1, CRET2
+  |.endif
+  |.if FPU
+  |  addi sp, sp, 16
+  |.endif
+  |  blr
+  |2:
+  |  subfic TMP1, RB, 0			// 64 bit left shift.
+  |   addi RB, RB, -32
+  |  slw CARG1, CARG1, TMP1
+  |   srw TMP2, CARG2, RB
+  |   addi RB, TMP1, -32
+  |  or CARG1, CARG1, TMP2
+  |   slw TMP2, CARG2, RB
+  |  or CARG1, CARG1, TMP2
+  |  slw CARG2, CARG2, TMP1
+  |  b <1
+  |3:
+  |  li CRET1, 0
+  |.if not GPR64
+  |  li CRET2, 0
+  |.endif
+  |.if FPU
+  |  addi sp, sp, 16
+  |.endif
+  |  blr
+  |
+  |// int32_t lj_vm_tobit(double x)
+  |.if FPU
+  |->vm_tobit:
+  |  lus TMP0, 0x59c0			// 2^52 + 2^51 (float).
+  |  subi sp, sp, 16
+  |  stw TMP0, 0(sp)
+  |  lfs FARG2, 0(sp)
+  |  fadd FARG1, FARG1, FARG2
+  |  stfd FARG1, 0(sp)
+  |  lwz CRET1, 4(sp)
+  |  addi sp, sp, 16
+  |  blr
+  |.endif
+  |
+  |//-----------------------------------------------------------------------
   |//-- Miscellaneous functions --------------------------------------------
   |//-----------------------------------------------------------------------
   |

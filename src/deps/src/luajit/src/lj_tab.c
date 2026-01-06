@@ -302,9 +302,9 @@ static uint32_t countint(cTValue *key, uint32_t *bins)
 {
   lj_assertX(!tvisint(key), "bad integer key");
   if (tvisnum(key)) {
-    lua_Number nk = numV(key);
-    int32_t k = lj_num2int(nk);
-    if ((uint32_t)k < LJ_MAX_ASIZE && nk == (lua_Number)k) {
+    int64_t i64;
+    int32_t k;
+    if (lj_num2int_cond(numV(key), i64, k, (uint32_t)i64 < LJ_MAX_ASIZE)) {
       bins[(k > 2 ? lj_fls((uint32_t)(k-1)) : 0)]++;
       return 1;
     }
@@ -416,9 +416,9 @@ cTValue *lj_tab_get(lua_State *L, GCtab *t, cTValue *key)
     if (tv)
       return tv;
   } else if (tvisnum(key)) {
-    lua_Number nk = numV(key);
-    int32_t k = lj_num2int(nk);
-    if (nk == (lua_Number)k) {
+    int64_t i64;
+    int32_t k;
+    if (lj_num2int_check(numV(key), i64, k)) {
       cTValue *tv = lj_tab_getint(t, k);
       if (tv)
 	return tv;
@@ -549,9 +549,9 @@ TValue *lj_tab_set(lua_State *L, GCtab *t, cTValue *key)
   } else if (tvisint(key)) {
     return lj_tab_setint(L, t, intV(key));
   } else if (tvisnum(key)) {
-    lua_Number nk = numV(key);
-    int32_t k = lj_num2int(nk);
-    if (nk == (lua_Number)k)
+    int64_t i64;
+    int32_t k;
+    if (lj_num2int_check(numV(key), i64, k))
       return lj_tab_setint(L, t, k);
     if (tvisnan(key))
       lj_err_msg(L, LJ_ERR_NANIDX);
@@ -587,9 +587,9 @@ uint32_t LJ_FASTCALL lj_tab_keyindex(GCtab *t, cTValue *key)
     setnumV(&tmp, (lua_Number)k);
     key = &tmp;
   } else if (tvisnum(key)) {
-    lua_Number nk = numV(key);
-    int32_t k = lj_num2int(nk);
-    if ((uint32_t)k < t->asize && nk == (lua_Number)k)
+    int64_t i64;
+    int32_t k;
+    if (lj_num2int_cond(numV(key), i64, k, (uint32_t)i64 < t->asize))
       return (uint32_t)k + 1;
   }
   if (!tvisnil(key)) {

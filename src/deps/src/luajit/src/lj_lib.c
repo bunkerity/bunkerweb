@@ -357,7 +357,7 @@ int32_t lj_lib_checkintrange(lua_State *L, int narg, int32_t a, int32_t b)
       ** integer overflow. Overflow detection still works, since all FPUs
       ** return either MININT or MAXINT, which is then out of range.
       */
-      int32_t i = (int32_t)numV(o);
+      int32_t i = lj_num2int(numV(o));
       if (i >= a && i <= b) return i;
 #if LJ_HASFFI
     } else if (tviscdata(o)) {

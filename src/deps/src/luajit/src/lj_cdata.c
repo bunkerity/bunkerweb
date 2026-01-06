@@ -133,12 +133,7 @@ collect_attrib:
     idx = (ptrdiff_t)intV(key);
     goto integer_key;
   } else if (tvisnum(key)) {  /* Numeric key. */
-#ifdef _MSC_VER
-    /* Workaround for MSVC bug. */
-    volatile
-#endif
-    lua_Number n = numV(key);
-    idx = LJ_64 ? (ptrdiff_t)n : (ptrdiff_t)lj_num2int(n);
+    idx = lj_num2int_type(numV(key), ptrdiff_t);
   integer_key:
     if (ctype_ispointer(ct->info)) {
       CTSize sz = lj_ctype_size(cts, ctype_cid(ct->info));  /* Element size. */

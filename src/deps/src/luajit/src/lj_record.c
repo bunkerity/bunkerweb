@@ -351,9 +351,14 @@ static TRef find_kinit(jit_State *J, const BCIns *endpc, BCReg slot, IRType t)
 	} else {
 	  cTValue *tv = proto_knumtv(J->pt, bc_d(ins));
 	  if (t == IRT_INT) {
-	    int32_t k = numberVint(tv);
-	    if (tvisint(tv) || numV(tv) == (lua_Number)k)  /* -0 is ok here. */
-	      return lj_ir_kint(J, k);
+	    if (tvisint(tv)) {
+	      return lj_ir_kint(J, intV(tv));
+	    } else {
+	      int64_t i64;
+	      int32_t k;
+	      if (lj_num2int_check(numV(tv), i64, k))  /* -0 is ok here. */
+		return lj_ir_kint(J, k);
+	    }
 	    return 0;  /* Type mismatch. */
 	  } else {
 	    return lj_ir_knum(J, numberVnum(tv));
@@ -377,12 +382,27 @@ static TRef fori_load(jit_State *J, BCReg slot, IRType t, int mode)
 		mode + conv);
 }
 
+/* Convert FORI argument to expected target type. */
+static TRef fori_conv(jit_State *J, TRef tr, IRType t)
+{
+  if (t == IRT_INT) {
+    if (!tref_isinteger(tr))
+      return emitir(IRTGI(IR_CONV), tr, IRCONV_INT_NUM|IRCONV_CHECK);
+  } else {
+    if (!tref_isnum(tr))
+      return emitir(IRTN(IR_CONV), tr, IRCONV_NUM_INT);
+  }
+  return tr;
+}
+
 /* Peek before FORI to find a const initializer. Otherwise load from slot. */
 static TRef fori_arg(jit_State *J, const BCIns *fori, BCReg slot,
 		     IRType t, int mode)
 {
   TRef tr = J->base[slot];
-  if (!tr) {
+  if (tr) {
+    tr = fori_conv(J, tr, t);
+  } else {
     tr = find_kinit(J, fori, slot, t);
     if (!tr)
       tr = fori_load(J, slot, t, mode);
@@ -529,13 +549,7 @@ static LoopEvent rec_for(jit_State *J, const BCIns *fori, int isforl)
       lj_assertJ(tref_isnumber_str(tr[i]), "bad FORI argument type");
       if (tref_isstr(tr[i]))
 	tr[i] = emitir(IRTG(IR_STRTO, IRT_NUM), tr[i], 0);
-      if (t == IRT_INT) {
-	if (!tref_isinteger(tr[i]))
-	  tr[i] = emitir(IRTGI(IR_CONV), tr[i], IRCONV_INT_NUM|IRCONV_CHECK);
-      } else {
-	if (!tref_isnum(tr[i]))
-	  tr[i] = emitir(IRTN(IR_CONV), tr[i], IRCONV_NUM_INT);
-      }
+      tr[i] = fori_conv(J, tr[i], t);
     }
     tr[FORL_EXT] = tr[FORL_IDX];
     stop = tr[FORL_STOP];
@@ -1426,9 +1440,13 @@ static TRef rec_idx_key(jit_State *J, RecordIndex *ix, IRRef *rbref,
   /* Integer keys are looked up in the array part first. */
   key = ix->key;
   if (tref_isnumber(key)) {
-    int32_t k = numberVint(&ix->keyv);
-    if (!tvisint(&ix->keyv) && numV(&ix->keyv) != (lua_Number)k)
-      k = LJ_MAX_ASIZE;
+    int32_t k;
+    if (tvisint(&ix->keyv)) {
+      k = intV(&ix->keyv);
+    } else {
+      int64_t i64;
+      if (!lj_num2int_check(numV(&ix->keyv), i64, k)) k = LJ_MAX_ASIZE;
+    }
     if ((MSize)k < LJ_MAX_ASIZE) {  /* Potential array key? */
       TRef ikey = lj_opt_narrow_index(J, key);
       TRef asizeref = emitir(IRTI(IR_FLOAD), ix->tab, IRFL_TAB_ASIZE);

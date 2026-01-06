@@ -89,7 +89,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
     services:
     ...
       bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+      image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
       volumes:
         - ./bw-data:/data
     ...
@@ -125,7 +125,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
         volumes:
           - ./bw-data:/data
     ...
@@ -168,7 +168,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -215,7 +215,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.7~rc1
+              image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -255,7 +255,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
 
 !!! tip "Plugins existants"
 
-    Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des [plugins officiels](https://github.com/bunkerity/bunkerweb-plugins) et des [plugins core](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/src/common/core) (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).
+    Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des [plugins officiels](https://github.com/bunkerity/bunkerweb-plugins) et des [plugins core](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc1/src/common/core) (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).
 
 À quoi ressemble la structure d'un plugin :
 ```
@@ -560,7 +560,7 @@ end
 
 !!! tip "Plus d'exemples"
 
-    Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le [répertoire lua](https://github.com/bunkerity/bunkerweb/tree/v1.6.7~rc1/src/bw/lua/bunkerweb) du dépôt.
+    Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le [répertoire lua](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc1/src/bw/lua/bunkerweb) du dépôt.
 
 ### Emplois
 

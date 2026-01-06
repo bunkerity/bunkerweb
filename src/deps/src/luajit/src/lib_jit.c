@@ -545,12 +545,21 @@ static int jitopt_param(jit_State *J, const char *str)
     size_t len = *(const uint8_t *)lst;
     lj_assertJ(len != 0, "bad JIT_P_STRING");
     if (strncmp(str, lst+1, len) == 0 && str[len] == '=') {
-      int32_t n = 0;
+      uint32_t n = 0;
       const char *p = &str[len+1];
       while (*p >= '0' && *p <= '9')
 	n = n*10 + (*p++ - '0');
-      if (*p) return 0;  /* Malformed number. */
-      J->param[i] = n;
+      if (*p || (int32_t)n < 0) return 0;  /* Malformed number. */
+      if (i == JIT_P_sizemcode) {  /* Adjust to required range here. */
+#if LJ_TARGET_JUMPRANGE
+	uint32_t maxkb = ((1 << (LJ_TARGET_JUMPRANGE - 10)) - 64);
+#else
+	uint32_t maxkb = ((1 << (31 - 10)) - 64);
+#endif
+	n = (n + (LJ_PAGESIZE >> 10) - 1) & ~((LJ_PAGESIZE >> 10) - 1);
+	if (n > maxkb) n = maxkb;
+      }
+      J->param[i] = (int32_t)n;
       if (i == JIT_P_hotloop)
 	lj_dispatch_init_hotcount(J2G(J));
       return 1;  /* Ok. */
@@ -781,7 +790,16 @@ static void jit_init(lua_State *L)
   jit_State *J = L2J(L);
   J->flags = jit_cpudetect() | JIT_F_ON | JIT_F_OPT_DEFAULT;
   memcpy(J->param, jit_param_default, sizeof(J->param));
+#if LJ_TARGET_UNALIGNED
+  G(L)->tmptv.u64 = U64x(0000504d,4d500000);
+#endif
   lj_dispatch_update(G(L));
+#if LJ_TARGET_UNALIGNED
+  /* If you get a crash below then your toolchain indicates unaligned
+  ** accesses are OK, but your kernel disagrees. I.e. fix your toolchain.
+  */
+  if (*(uint32_t *)((char *)&G(L)->tmptv + 2) != 0x504d4d50u) L->top = NULL;
+#endif
 }
 #endif
 

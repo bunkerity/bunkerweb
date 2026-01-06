@@ -71,7 +71,7 @@ static int32_t argv2int(jit_State *J, TValue *o)
 {
   if (!lj_strscan_numberobj(o))
     lj_trace_err(J, LJ_TRERR_BADTYPE);
-  return tvisint(o) ? intV(o) : lj_num2int(numV(o));
+  return numberVint(o);
 }
 
 /* Get runtime value of string argument. */
@@ -587,7 +587,7 @@ static void LJ_FASTCALL recff_math_round(jit_State *J, RecordFFData *rd)
     /* Result is integral (or NaN/Inf), but may not fit an int32_t. */
     if (LJ_DUALNUM) {  /* Try to narrow using a guarded conversion to int. */
       lua_Number n = lj_vm_foldfpm(numberVnum(&rd->argv[0]), rd->data);
-      if (n == (lua_Number)lj_num2int(n))
+      if (lj_num2int_ok(n))
 	tr = emitir(IRTGI(IR_CONV), tr, IRCONV_INT_NUM|IRCONV_CHECK);
     }
     J->base[0] = tr;
@@ -797,7 +797,7 @@ static TRef recff_string_start(jit_State *J, GCstr *s, int32_t *st, TRef tr,
     emitir(IRTGI(IR_EQ), tr, tr0);
     tr = tr0;
   } else {
-    tr = emitir(IRTI(IR_ADD), tr, lj_ir_kint(J, -1));
+    tr = emitir(IRTGI(IR_ADDOV), tr, lj_ir_kint(J, -1));
     emitir(IRTGI(IR_GE), tr, tr0);
     start--;
   }
@@ -849,7 +849,7 @@ static void LJ_FASTCALL recff_string_range(jit_State *J, RecordFFData *rd)
   } else if ((MSize)end <= str->len) {
     emitir(IRTGI(IR_ULE), trend, trlen);
   } else {
-    emitir(IRTGI(IR_UGT), trend, trlen);
+    emitir(IRTGI(IR_GT), trend, trlen);
     end = (int32_t)str->len;
     trend = trlen;
   }
@@ -857,7 +857,7 @@ static void LJ_FASTCALL recff_string_range(jit_State *J, RecordFFData *rd)
   if (rd->data) {  /* Return string.sub result. */
     if (end - start >= 0) {
       /* Also handle empty range here, to avoid extra traces. */
-      TRef trptr, trslen = emitir(IRTI(IR_SUB), trend, trstart);
+      TRef trptr, trslen = emitir(IRTGI(IR_SUBOV), trend, trstart);
       emitir(IRTGI(IR_GE), trslen, tr0);
       trptr = emitir(IRT(IR_STRREF, IRT_PGC), trstr, trstart);
       J->base[0] = emitir(IRT(IR_SNEW, IRT_STR), trptr, trslen);
@@ -868,7 +868,7 @@ static void LJ_FASTCALL recff_string_range(jit_State *J, RecordFFData *rd)
   } else {  /* Return string.byte result(s). */
     ptrdiff_t i, len = end - start;
     if (len > 0) {
-      TRef trslen = emitir(IRTI(IR_SUB), trend, trstart);
+      TRef trslen = emitir(IRTGI(IR_SUBOV), trend, trstart);
       emitir(IRTGI(IR_EQ), trslen, lj_ir_kint(J, (int32_t)len));
       if (J->baseslot + len > LJ_MAX_JSLOTS)
 	lj_trace_err_info(J, LJ_TRERR_STACKOV);

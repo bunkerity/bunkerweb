@@ -351,7 +351,7 @@ SBuf *lj_strfmt_putfxint(SBuf *sb, SFormat sf, uint64_t k)
 /* Add number formatted as signed integer to buffer. */
 SBuf *lj_strfmt_putfnum_int(SBuf *sb, SFormat sf, lua_Number n)
 {
-  int64_t k = (int64_t)n;
+  int64_t k = lj_num2i64(n);
   if (checki32(k) && sf == STRFMT_INT)
     return lj_strfmt_putint(sb, (int32_t)k);  /* Shortcut for plain %d. */
   else
@@ -361,12 +361,7 @@ SBuf *lj_strfmt_putfnum_int(SBuf *sb, SFormat sf, lua_Number n)
 /* Add number formatted as unsigned integer to buffer. */
 SBuf *lj_strfmt_putfnum_uint(SBuf *sb, SFormat sf, lua_Number n)
 {
-  int64_t k;
-  if (n >= 9223372036854775808.0)
-    k = (int64_t)(n - 18446744073709551616.0);
-  else
-    k = (int64_t)n;
-  return lj_strfmt_putfxint(sb, sf, (uint64_t)k);
+  return lj_strfmt_putfxint(sb, sf, lj_num2u64(n));
 }
 
 /* Format stack arguments to buffer. */

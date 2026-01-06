@@ -1,4 +1,4 @@
-FROM redhat/ubi9:9.7@sha256:d4feb579a84ead49894ec71fe54f14300992e202f3491d9bb22b62cc57affd49 AS builder
+FROM redhat/ubi9:9.7@sha256:2c9bb68a869abf7d7417f6639509ab5eb8500d8429ea11ab59e677be5545162b AS builder
 
 ENV OS=rhel
 ENV NGINX_VERSION=1.28.0
@@ -17,7 +17,7 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-9
 RUN dnf install -y wget make yum-utils && \
   dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
   rpm -e --nodeps openssl-fips-provider-so && \
-  dnf install -y --skip-broken --setopt=install_weak_deps=False openssl-libs openssl-devel readline-devel python3.11 python3.11-devel python3.11-setuptools brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl libxslt bash gd gd-devel gcc-c++ znc-modtcl gawk libtool pcre-devel automake autoconf gcc make git zlib-devel libxml2-devel pkgconf libcurl-devel libmaxminddb && \
+  dnf install -y --skip-broken --setopt=install_weak_deps=False openssl-libs openssl-devel readline-devel python3.11 python3.11-devel python3.11-setuptools brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl libxslt bash gd gd-devel gcc-c++ znc-modtcl gawk libtool pcre2-devel automake autoconf gcc make git zlib-devel libxml2-devel pkgconf libcurl-devel libmaxminddb lmdb-devel ssdeep-devel cargo && \
   dnf install -y https://nginx.org/packages/rhel/9/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el9.ngx.$(uname -m).rpm
 
 WORKDIR /tmp/bunkerweb/deps
@@ -136,7 +136,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
   echo "Skipping HTML minification"; \
   fi
 
-FROM redhat/ubi9:9.7@sha256:d4feb579a84ead49894ec71fe54f14300992e202f3491d9bb22b62cc57affd49
+FROM redhat/ubi9:9.7@sha256:2c9bb68a869abf7d7417f6639509ab5eb8500d8429ea11ab59e677be5545162b
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

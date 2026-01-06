@@ -2,12 +2,12 @@ bcrypt<5.0.0
 biscuit-python==0.4.0
 cryptography==46.0.3
 email-validator==2.3.0
-fastapi==0.124.4
+fastapi==0.128.0
 gunicorn==23.0.0
 pydantic==2.12.5
 pydantic_settings==2.12.0
-python-multipart==0.0.20
+python-multipart==0.0.21
 PyYAML==6.0.3
 regex==2025.11.3
 slowapi==0.1.9
-uvicorn[standard]==0.38.0
+uvicorn[standard]==0.40.0

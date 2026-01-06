@@ -193,9 +193,9 @@
     },
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20251030",
+      "name": "LuaJIT v2.1-20251229",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "71fae383f6c4637d64b03a6d0ec76ae8c19d6821",
+      "commit": "87e2724a33bf524d0995626d404d0ea830a0c619",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {
@@ -252,6 +252,13 @@
       "url": "https://github.com/nginx/nginx.git",
       "commit": "481d28cb4e04c8096b9b6134856891dc52ecc68f",
       "post_install": "rm -r src/deps/src/nginx/docs"
+    },
+    {
+      "id": "nginx-1.28.1",
+      "name": "Nginx v1.28.1",
+      "url": "https://github.com/nginx/nginx.git",
+      "commit": "95078974cfe998ec4095ac2c504c5c92bbc9a326",
+      "post_install": "rm -r src/deps/src/nginx-1.28.1/docs"
     },
     {
       "id": "nginx_cookie_flag_module",
