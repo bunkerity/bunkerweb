@@ -86,6 +86,7 @@ TESTS+=test/test-cases/regression/operator-fuzzyhash.json
 TESTS+=test/test-cases/regression/operator-inpectFile.json
 TESTS+=test/test-cases/regression/operator-ipMatchFromFile.json
 TESTS+=test/test-cases/regression/operator-pm.json
+TESTS+=test/test-cases/regression/operator-pmfromfile.json
 TESTS+=test/test-cases/regression/operator-rx.json
 TESTS+=test/test-cases/regression/operator-rxGlobal.json
 TESTS+=test/test-cases/regression/operator-UnconditionalMatch.json

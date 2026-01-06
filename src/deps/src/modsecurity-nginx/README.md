@@ -39,8 +39,7 @@ Or, to build a dynamic module:
 Note that when building a dynamic module, your nginx source version
 needs to match the version of nginx you're compiling this for.
 
-Further information about nginx third-party add-ons support are available here:
-http://wiki.nginx.org/3rdPartyModules
+Further information about nginx third-party add-ons support are available [here](https://www.f5.com/company/blog/nginx/compiling-dynamic-modules-nginx-plus).
 
 
 # Usage

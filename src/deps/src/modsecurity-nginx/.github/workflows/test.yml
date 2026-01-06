@@ -1,0 +1,323 @@
+name: Quality Assurance
+
+on:
+  push:
+  pull_request:
+
+  # Default: none
+permissions: {}
+
+jobs:
+  build-linux:
+    permissions:
+      contents: read
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+        compiler: [gcc, clang]
+    env:
+        CC: "/usr/bin/${{ matrix.compiler }}"
+        CXX: "/usr/bin/${{ matrix.compiler == 'gcc' && 'g' || 'clang' }}++"
+        COMPDEPS: "${{ matrix.compiler == 'gcc' && 'gcc g++' || 'clang' }}"
+    steps:
+      - name: Setup Dependencies
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update -y -qq
+          sudo apt-get install -y make autoconf automake make libyajl-dev libxml2-dev libmaxminddb-dev libcurl4-gnutls-dev $COMPDEPS
+      - name: Get libModSecurity source
+        uses: actions/checkout@v4
+        with:
+          repository: owasp-modsecurity/ModSecurity
+          path: ModSecurity
+          submodules: true
+          fetch-depth: 1
+      - name: Build libModSecurity
+        working-directory: ModSecurity
+        run: |
+          ./build.sh
+          ./configure --without-lmdb --prefix=/usr
+          make -j $(nproc)
+          sudo make install
+      - uses: actions/checkout@v4
+        with:
+          path: ModSecurity-nginx
+          fetch-depth: 1
+      - name: Get Nginx source
+        uses: actions/checkout@v4
+        with:
+          repository: nginx/nginx
+          path: nginx
+          fetch-depth: 1
+      - name: Get Nginx tests
+        uses: actions/checkout@v4
+        with:
+          repository: nginx/nginx-tests
+          path: nginx/test
+          fetch-depth: 1
+      - name: Copy ModSecurity-nginx tests to nginx/test
+        run: |
+          cp ModSecurity-nginx/tests/* nginx/test
+      - name: Build nginx with ModSecurity-nginx module
+        working-directory: nginx
+        run: |
+          ./auto/configure --with-ld-opt="-Wl,-rpath,/usr/local/lib" --without-pcre2 --with-http_v2_module --with-http_auth_request_module --add-module=../ModSecurity-nginx
+          make
+          make modules
+          sudo make install
+      - name: Run ModSecurity-nginx tests
+        working-directory: nginx/test
+        run: |
+          TEST_NGINX_BINARY=../objs/nginx prove modsecurity*.t
+      - name: Start Nginx
+        run: |
+          sudo cp /home/runner/work/ModSecurity-nginx/ModSecurity-nginx/ModSecurity-nginx/.github/nginx/docs/* /usr/local/nginx/html/
+          sudo /usr/local/nginx/sbin/nginx -c /home/runner/work/ModSecurity-nginx/ModSecurity-nginx/ModSecurity-nginx/.github/nginx/nginx.conf
+      - name: Run attack test vhost 1
+        run: |
+          status=$(curl -sSo /dev/null -w %{http_code} -I -X GET -H "Host: modsectest1" "http://localhost/?q=attack")
+          if [ "${status}" == "403" ]; then
+            echo "OK"
+          else
+            echo "FAIL"
+            exit 1
+          fi
+      - name: Run non-attack test vhost 1
+        run: |
+          status=$(curl -sSo /dev/null -w %{http_code} -I -X GET -H "Host: modsectest1" "http://localhost/?q=1")
+          if [ "${status}" == "200" ]; then
+            echo "OK"
+          else
+            echo "FAIL"
+            exit 1
+          fi
+      - name: Run attack test vhost 2
+        run: |
+          status=$(curl -sSo /dev/null -w %{http_code} -I -X GET -H "Host: modsectest2" "http://localhost/?q=attack")
+          if [ "${status}" == "403" ]; then
+            echo "OK"
+          else
+            echo "FAIL"
+            exit 1
+          fi
+      - name: Run non-attack test vhost 2
+        run: |
+          status=$(curl -sSo /dev/null -w %{http_code} -I -X GET -H "Host: modsectest2" "http://localhost/?q=1")
+          if [ "${status}" == "200" ]; then
+            echo "OK"
+          else
+            echo "FAIL"
+            exit 1
+          fi
+      - name: Run file consistency check 1
+        run: |
+          curl -sS "http://localhost/data50k.json" --output data50k.json
+          if [ -f data50k.json ]; then
+            diff data50k.json /usr/local/nginx/html/data50k.json > /dev/null
+            if [ $? -eq 0 ]; then
+                echo "OK"
+            else
+                echo "FAIL"
+                exit 2
+            fi
+          else
+            echo "FAIL"
+            exit 1
+          fi
+      - name: Run file consistency check 2
+        run: |
+          curl -sS "http://localhost/plugged.png" --output plugged.png
+          if [ -f plugged.png ]; then
+            diff plugged.png /usr/local/nginx/html/plugged.png > /dev/null
+            if [ $? -eq 0 ]; then
+                echo "OK"
+            else
+                echo "FAIL"
+                exit 2
+            fi
+          else
+            echo "FAIL"
+            exit 1
+          fi
+      - name: Start Nginx with redir
+        run: |
+          sudo killall nginx
+          sudo /usr/local/nginx/sbin/nginx -c /home/runner/work/ModSecurity-nginx/ModSecurity-nginx/ModSecurity-nginx/.github/nginx/nginx.conf.redir
+      - name: Run attack test vhost 1
+        run: |
+          status=$(curl -sSo /dev/null -w %{http_code} -I -X GET -H "Host: modsectest1" "http://localhost/?q=attack")
+          if [ "${status}" == "403" ]; then
+            echo "OK"
+          else
+            echo "FAIL"
+            exit 1
+          fi
+      - name: Run non-attack test vhost 1 (redir config)
+        run: |
+          status=$(curl -sSo /dev/null -w %{http_code} -I -X GET -H "Host: modsectest1" "http://localhost/?q=1")
+          if [ "${status}" == "200" ]; then
+            echo "OK"
+          else
+            echo "FAIL"
+            exit 1
+          fi
+      - name: Run attack test vhost 2 (redir config)
+        run: |
+          status=$(curl -sSo /dev/null -w %{http_code} -I -X GET -H "Host: modsectest2" "http://localhost/?q=attack")
+          if [ "${status}" == "403" ]; then
+            echo "OK"
+          else
+            echo "FAIL"
+            exit 1
+          fi
+      - name: Run non-attack test vhost 2 (redir config)
+        run: |
+          status=$(curl -sSo /dev/null -w %{http_code} -I -X GET -H "Host: modsectest2" "http://localhost/?q=1")
+          if [ "${status}" == "200" ]; then
+            echo "OK"
+          else
+            echo "FAIL"
+            exit 1
+          fi
+      - name: Run file consistency check 1 (redir config)
+        run: |
+          curl -sS "http://localhost/data50k.json" --output data50k.json
+          if [ -f data50k.json ]; then
+            diff data50k.json /usr/local/nginx/html/data50k.json > /dev/null
+            if [ $? -eq 0 ]; then
+                ls -l data50k.json /usr/local/nginx/html/data50k.json
+                echo "OK"
+            else
+                echo "FAIL"
+                exit 2
+            fi
+          else
+            echo "FAIL"
+            exit 1
+          fi
+      - name: Run file consistency check 2 (redir config)
+        run: |
+          curl -sS "http://localhost/plugged.png" --output plugged.png
+          if [ -f plugged.png ]; then
+            diff plugged.png /usr/local/nginx/html/plugged.png > /dev/null
+            if [ $? -eq 0 ]; then
+                ls -l plugged.png /usr/local/nginx/html/plugged.png
+                echo "OK"
+            else
+                echo "FAIL"
+                exit 2
+            fi
+          else
+            echo "FAIL"
+            exit 1
+          fi
+
+
+  build-windows:
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+      - name: Set up msys
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          path-type: inherit
+      - name: Get Nginx source
+        uses: actions/checkout@v4
+        with:
+          repository: nginx/nginx
+          path: nginx
+          fetch-depth: 1
+      - name: Get Nginx tests
+        uses: actions/checkout@v4
+        with:
+          repository: nginx/nginx-tests
+          path: nginx/test
+          fetch-depth: 1
+      - name: Set up third-party libraries
+        working-directory: nginx
+        run: |
+          mkdir objs
+          mkdir objs/lib
+          cd objs/lib
+          wget -q -O - https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.39/pcre2-10.39.tar.gz | tar -xzf -
+          wget -q -O - https://www.zlib.net/fossils/zlib-1.3.tar.gz | tar -xzf -
+          wget -q -O - https://www.openssl.org/source/openssl-3.0.13.tar.gz | tar -xzf -
+      - name: Get libModSecurity source
+        uses: actions/checkout@v4
+        with:
+          repository: owasp-modsecurity/ModSecurity
+          submodules: true
+          path: nginx/objs/lib/ModSecurity
+          fetch-depth: 1
+      - name: Setup Conan
+        shell: cmd
+        run: |
+          pip3 install conan --upgrade
+          conan profile detect
+      - name: Build libModSecurity
+        working-directory: nginx/objs/lib/ModSecurity
+        shell: cmd
+        run: |
+          vcbuild.bat
+      - name: Get ModSecurity-nginx source code
+        uses: actions/checkout@v4
+        with:
+          path: nginx/objs/lib/ModSecurity-nginx
+      - name: Copy ModSecurity-nginx tests to nginx/test
+        working-directory: nginx/test
+        run: |
+          cp ../objs/lib/ModSecurity-nginx/tests/* .
+      - name: Remove /usr/bin/link conflicting with MSVC link.exe
+        run: |
+          set -ex
+          which link
+          rm /usr/bin/link
+      - name: Build nginx w/ModSecurity-nginx module
+        working-directory: nginx
+        run: |
+          : # Windows native version of Perl is required by nginx build
+          export PATH=/c/Strawberry/perl/bin:$PATH
+          : # Set env variables to point to libModSecurity v3 include & lib directories
+          export MODSECURITY_INC=objs/lib/ModSecurity/headers
+          export MODSECURITY_LIB=objs/lib/ModSecurity/build/win32/build/Release
+          : # Copy libModSecurity.dll to objs dir (to be able to run nginx later)
+          cp $MODSECURITY_LIB/libModSecurity.dll objs
+          : # Configure nginx build w/ModSecurity-nginx module
+          auto/configure \
+              --with-cc=cl \
+              --with-debug \
+              --prefix= \
+              --conf-path=conf/nginx.conf \
+              --pid-path=logs/nginx.pid \
+              --http-log-path=logs/access.log \
+              --error-log-path=logs/error.log \
+              --sbin-path=nginx.exe \
+              --http-client-body-temp-path=temp/client_body_temp \
+              --http-proxy-temp-path=temp/proxy_temp \
+              --http-fastcgi-temp-path=temp/fastcgi_temp \
+              --http-scgi-temp-path=temp/scgi_temp \
+              --http-uwsgi-temp-path=temp/uwsgi_temp \
+              --with-cc-opt=-DFD_SETSIZE=1024 \
+              --with-pcre=objs/lib/pcre2-10.39 \
+              --with-zlib=objs/lib/zlib-1.3 \
+              --with-openssl=objs/lib/openssl-3.0.13 \
+              --with-openssl-opt=no-asm \
+              --with-http_ssl_module \
+              --with-http_v2_module \
+              --with-http_auth_request_module \
+              --add-module=objs/lib/ModSecurity-nginx
+          nmake
+      - name: Run ModSecurity-nginx tests
+        working-directory: nginx/test
+        shell: cmd  # tests need to run on a "windows" shell
+        run: |
+          md temp
+          set TEMP=temp
+          set TEST_NGINX_BINARY=..\objs\nginx.exe
+          prove modsecurity*.t

@@ -13,6 +13,8 @@
  *
  */
 
+#include <ngx_config.h>
+
 #ifndef MODSECURITY_DDEBUG
 #define MODSECURITY_DDEBUG 0
 #endif
@@ -39,16 +41,8 @@ ngx_http_modsecurity_log_handler(ngx_http_request_t *r)
 {
     ngx_pool_t                   *old_pool;
     ngx_http_modsecurity_ctx_t   *ctx;
-    ngx_http_modsecurity_conf_t  *mcf;
 
     dd("catching a new _log_ phase handler");
-
-    mcf = ngx_http_get_module_loc_conf(r, ngx_http_modsecurity_module);
-    if (mcf == NULL || mcf->enable != 1)
-    {
-        dd("ModSecurity not enabled... returning");
-        return NGX_OK;
-    }
 
     /*
     if (r->method != NGX_HTTP_GET &&
@@ -58,13 +52,13 @@ ngx_http_modsecurity_log_handler(ngx_http_request_t *r)
         return NGX_OK;
     }
     */
-    ctx = ngx_http_get_module_ctx(r, ngx_http_modsecurity_module);
+    ctx = ngx_http_modsecurity_get_module_ctx(r);
 
     dd("recovering ctx: %p", ctx);
 
     if (ctx == NULL) {
-        dd("something really bad happened here. returning NGX_ERROR");
-        return NGX_ERROR;
+        dd("ModSecurity not enabled or error occurred");
+        return NGX_OK;
     }
 
     if (ctx->logged) {

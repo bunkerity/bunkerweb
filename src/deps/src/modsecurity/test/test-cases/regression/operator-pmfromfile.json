@@ -1,0 +1,39 @@
+[
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "version_max": 0,
+    "title": "pmFromFile operator test",
+    "client": {
+      "ip": "10.20.30.40",
+      "port": 2313
+    },
+    "server": {
+      "ip": "1.2.3.4",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "foobar.com"
+      },
+      "uri": "\/test.php?param1=pattern2",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "text\/html; charset=utf-8\n\r",
+        "Content-Length": "10\n\r"
+      }
+    },
+    "expected": {
+      "debug_log": "Rule returned 1",
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@pmFromFile test-cases/data/pattern-file1.data test-cases/data/pattern-file2.data\" \"phase:1,id:999,deny\""
+    ]
+  }
+]

@@ -51,25 +51,13 @@ namespace modsecurity {
 namespace audit_log {
 
 
-AuditLog::AuditLog()
-    : m_path1(""),
-    m_path2(""),
-    m_storage_dir(""),
-    m_format(NotSetAuditLogFormat),
-    m_parts(-1),
-    m_filePermission(-1),
-    m_directoryPermission(-1),
-    m_status(NotSetLogStatus),
-    m_type(NotSetAuditLogType),
-    m_relevant(""),
-    m_writer(NULL),
-    m_ctlAuditEngineActive(false) { }
+AuditLog::AuditLog() = default;
 
 
 AuditLog::~AuditLog() {
     if (m_writer) {
         delete m_writer;
-        m_writer = NULL;
+        m_writer = nullptr;
     }
 }
 
@@ -108,35 +96,42 @@ bool AuditLog::setStatus(AuditLogStatus status) {
 }
 
 
-bool AuditLog::setRelevantStatus(const std::basic_string<char>& status) {
+bool AuditLog::setRelevantStatus(std::string_view status) {
     this->m_relevant = std::string(status);
     return true;
 }
 
 
-bool AuditLog::setStorageDir(const std::basic_string<char>& path) {
+bool AuditLog::setStorageDir(std::string_view path) {
     this->m_storage_dir = path;
     return true;
 }
 
 
-bool AuditLog::setFilePath1(const std::basic_string<char>& path) {
+bool AuditLog::setFilePath1(std::string_view path) {
     this->m_path1 = path;
     return true;
 }
 
 
-bool AuditLog::setFilePath2(const std::basic_string<char>& path) {
+bool AuditLog::setFilePath2(std::string_view path) {
     this->m_path2 = path;
     return true;
 }
+
+
+bool AuditLog::setPrefix(std::string_view prefix) {
+    this->m_prefix = prefix;
+    return true;
+}
+
 
 bool AuditLog::setFormat(AuditLogFormat fmt) {
     this->m_format = fmt;
     return true;
 }
 
-int AuditLog::addParts(int parts, const std::string& new_parts) {
+int AuditLog::addParts(int parts, std::string_view new_parts) {
     PARTS_CONSTAINS('A', AAuditLogPart)
     PARTS_CONSTAINS('B', BAuditLogPart)
     PARTS_CONSTAINS('C', CAuditLogPart)
@@ -154,7 +149,7 @@ int AuditLog::addParts(int parts, const std::string& new_parts) {
 }
 
 
-int AuditLog::removeParts(int parts, const std::string& new_parts) {
+int AuditLog::removeParts(int parts, std::string_view new_parts) {
     PARTS_CONSTAINS_REM('A', AAuditLogPart)
     PARTS_CONSTAINS_REM('B', BAuditLogPart)
     PARTS_CONSTAINS_REM('C', CAuditLogPart)
@@ -172,7 +167,7 @@ int AuditLog::removeParts(int parts, const std::string& new_parts) {
 }
 
 
-bool AuditLog::setParts(const std::basic_string<char>& new_parts) {
+bool AuditLog::setParts(std::string_view new_parts) {
     int parts = 0;
 
     PARTS_CONSTAINS('A', AAuditLogPart)
@@ -208,7 +203,6 @@ bool AuditLog::setType(AuditLogType audit_type) {
 }
 
 
-
 bool AuditLog::init(std::string *error) {
     audit_log::writer::Writer *tmp_writer;
 
@@ -216,7 +210,7 @@ bool AuditLog::init(std::string *error) {
         && !m_ctlAuditEngineActive) {
         if (m_writer) {
             delete m_writer;
-            m_writer = NULL;
+            m_writer = nullptr;
         }
         return true;
     }
@@ -234,7 +228,7 @@ bool AuditLog::init(std::string *error) {
         tmp_writer = new audit_log::writer::Serial(this);
     }
 
-    if (tmp_writer == NULL) {
+    if (tmp_writer == nullptr) {
         error->assign("Writer memory alloc failed!");
         return false;
     }
@@ -312,7 +306,7 @@ bool AuditLog::saveIfRelevant(Transaction *transaction, int parts) {
     }
     ms_dbg_a(transaction, 5, "Saving this request as part " \
             "of the audit logs.");
-    if (m_writer == NULL) {
+    if (m_writer == nullptr) {
         ms_dbg_a(transaction, 1, "Internal error, audit log writer is null");
     } else {
         std::string error;
@@ -337,6 +331,7 @@ bool AuditLog::merge(AuditLog *from, std::string *error) {
     AL_MERGE_STRING_CONF(from->m_path2, m_path2);
     AL_MERGE_STRING_CONF(from->m_storage_dir, m_storage_dir);
     AL_MERGE_STRING_CONF(from->m_relevant, m_relevant);
+    AL_MERGE_STRING_CONF(from->m_prefix, m_prefix);
 
     if (from->m_filePermission != -1) {
         m_filePermission = from->m_filePermission;

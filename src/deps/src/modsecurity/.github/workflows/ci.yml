@@ -26,7 +26,7 @@ jobs:
           - {label: "wo geoip",   opt: "--without-geoip" }
           - {label: "wo ssdeep",  opt: "--without-ssdeep" }
           - {label: "with lmdb",  opt: "--with-lmdb" }
-          - {label: "with pcre2", opt: "--with-pcre2" }
+          - {label: "with pcre", opt: "--with-pcre" }
         exclude:
           - platform: {label: "x32"}
             configure: {label: "wo geoip"}
@@ -88,7 +88,7 @@ jobs:
           - {label: "wo geoip",   opt: "--without-geoip" }
           - {label: "wo ssdeep",  opt: "--without-ssdeep" }
           - {label: "with lmdb",  opt: "--with-lmdb" }
-          - {label: "with pcre2", opt: "--with-pcre2" }
+          - {label: "with pcre", opt: "--with-pcre" }
     steps:
       - name: Setup Dependencies
         # curl, pcre2 not installed because they're already

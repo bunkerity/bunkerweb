@@ -80,14 +80,13 @@ typedef struct Rules_t RulesSet;
 
 #define LOGFY_ADD(a, b) \
     yajl_gen_string(g, reinterpret_cast<const unsigned char*>(a), strlen(a)); \
-    if (b == NULL) { \
+    if (b.data() == NULL) { \
       yajl_gen_string(g, reinterpret_cast<const unsigned char*>(""), \
           strlen("")); \
     } else { \
-      yajl_gen_string(g, reinterpret_cast<const unsigned char*>(b), \
-          strlen(b)); \
+      yajl_gen_string(g, reinterpret_cast<const unsigned char*>(b.data()), \
+          b.length()); \
     }
-
 
 #define LOGFY_ADD_INT(a, b) \
     yajl_gen_string(g, reinterpret_cast<const unsigned char*>(a), strlen(a)); \
@@ -412,7 +411,7 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
     int getRuleEngineState() const;
 
     std::string toJSON(int parts);
-    std::string toOldAuditLogFormat(int parts, const std::string &trailer);
+    std::string toOldAuditLogFormat(int parts, const std::string &trailer, const std::string &header);
     std::string toOldAuditLogFormatIndex(const std::string &filename,
         double size, const std::string &md5);
 
@@ -619,6 +618,7 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
     RequestBodyProcessor::JSON *m_json;
 
     int m_secRuleEngine;
+    int m_secXMLParseXmlIntoArgs;
 
     std::string m_variableDuration;
     std::map<std::string, std::string> m_variableEnvs;
@@ -738,6 +738,9 @@ int msc_update_status_code(Transaction *transaction, int status);
 
 /** @ingroup ModSecurity_C_API */
 int msc_set_request_hostname(Transaction *transaction, const unsigned char *hostname);
+
+/** @ingroup ModSecurity_C_API */
+const char *msc_get_transaction_variable(Transaction *transaction, const char *var_name);
 
 #ifdef __cplusplus
 }

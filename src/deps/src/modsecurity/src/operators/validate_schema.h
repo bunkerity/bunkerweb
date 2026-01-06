@@ -75,8 +75,6 @@ class ValidateSchema : public Operator {
         va_end(args);
     }
 
-    static void null_error(void *, const char *, ...) { // cppcheck-suppress[constParameterPointer,constParameterCallback]
-    }
 
     template<typename Pred>
     static void callback_func(void *ctx, Pred pred, const char *base_msg, const char *msg, va_list args) {

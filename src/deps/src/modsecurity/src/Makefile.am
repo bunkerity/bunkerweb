@@ -66,24 +66,7 @@ libmodsecurity_includesub_collection_HEADERS = \
 libmodsecurity_includesub_actions_HEADERS = \
 	../headers/modsecurity/actions/action.h
 
-
-noinst_HEADERS = \
-	actions/*.h \
-	actions/ctl/*.h \
-	actions/data/*.h \
-	actions/disruptive/*.h \
-	actions/transformations/*.h \
-	debug_log/*.h \
-	audit_log/writer/*.h \
-	collection/backend/*.h \
-	operators/*.h \
-	parser/*.h \
-	request_body_processor/*.h \
-	utils/*.h \
-	variables/*.h \
-	engine/*.h \
-	*.h
-
+include headers.mk
 
 ENGINES = \
 	engine/lua.cc
@@ -119,6 +102,7 @@ ACTIONS = \
 	actions/chain.cc \
 	actions/ctl/audit_log_parts.cc \
 	actions/ctl/audit_engine.cc \
+	actions/ctl/parse_xml_into_args.cc \
 	actions/ctl/rule_engine.cc \
 	actions/ctl/request_body_processor_json.cc \
 	actions/ctl/request_body_processor_xml.cc \
@@ -307,13 +291,14 @@ libmodsecurity_la_CFLAGS =
 
 
 libmodsecurity_la_CPPFLAGS = \
-	-I.. \
+	-I$(top_srcdir) \
+	-I$(top_builddir) \
 	-g \
-	-I../others \
-	-I../others/mbedtls/include \
+	-I$(top_srcdir)/others \
+	-I$(top_srcdir)/others/mbedtls/include \
 	-fPIC \
 	-O3 \
-	-I../headers \
+	-I$(top_srcdir)/headers \
 	$(CURL_CFLAGS) \
 	$(GEOIP_CFLAGS) \
 	$(GLOBAL_CPPFLAGS) \

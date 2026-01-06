@@ -2,7 +2,7 @@
   {
     "enabled":1,
     "version_min":300000,
-    "title":"Testing Variables :: MATCHED_VARS_NAMES (1/2)",
+    "title":"Testing Variables :: MATCHED_VARS_NAMES (1/5)",
     "client":{
       "ip":"200.249.12.31",
       "port":123
@@ -43,7 +43,7 @@
   {
     "enabled":1,
     "version_min":300000,
-    "title":"Testing Variables :: MATCHED_VARS_NAMES (2/2)",
+    "title":"Testing Variables :: MATCHED_VARS_NAMES (2/5)",
     "client":{
       "ip":"200.249.12.31",
       "port":123
@@ -81,6 +81,128 @@
       "SecRule MATCHED_VARS_NAMES \"@contains asdf\" \"\"",
       "SecRule MATCHED_VARS_NAMES \"@contains value\" \"id:29\""
     ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: MATCHED_VARS_NAMES (3/5)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?foo=1&bar=2&baz=2",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 200
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS \"@rx 1\" \"id:1,phase:1,pass\"",
+      "SecRule ARGS \"@rx 2\" \"id:2,phase:1,pass\"",
+      "SecRule MATCHED_VARS_NAMES \"@within ARGS:foo ARGS:bar ARGS:baz\" \"id:3,phase:1,deny,status:403\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: MATCHED_VARS_NAMES (4/5)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?foo=1&bar=2&baz=2",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 200
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS \"@rx 1\" \"id:1,phase:1,pass\"",
+      "SecRule ARGS \"@rx 2\" \"id:2,phase:1,deny,status:403,chain\"",
+      "SecRule MATCHED_VARS_NAMES \"@strEq ARGS:foo\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: MATCHED_VARS_NAMES (5/5)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?foo=1&bar=2&baz=2",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS \"@rx 1\" \"id:1,phase:1,pass\"",
+      "SecRule ARGS \"@rx 2\" \"id:2,phase:1,deny,status:403,chain\"",
+      "SecRule MATCHED_VARS_NAMES \"@within ARGS:bar ARGS:baz\""
+    ]
   }
 ]
-

@@ -580,7 +580,7 @@ int Multipart::process_part_data(std::string *error, size_t offset) {
                 m_mpp->m_tmp_file->Open();
 
                 /* do we have an opened file? */
-                if (!m_mpp->m_tmp_file || m_mpp->m_tmp_file->getFd() < 0) {
+                if (m_mpp->m_tmp_file->getFd() < 0) {
                     ms_dbg_a(m_transaction, 1,
                         "Multipart: Failed to create file: " \
                         + m_mpp->m_tmp_file->getFilename());
@@ -1638,7 +1638,7 @@ bool Multipart::process(const std::string& data, std::string *error,
                     }
                 } else { /* It looks like a boundary but */
                          /* we couldn't match it. */
-                    char *p = NULL;
+                    const char *p = NULL;
 
                     /* Check if an attempt to use quotes around the
                      * boundary was made. */

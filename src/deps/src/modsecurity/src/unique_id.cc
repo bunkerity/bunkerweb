@@ -134,7 +134,7 @@ std::string UniqueId::ethernetMacAddress() {
                 (unsigned char)LLADDR(sdl)[3],
                 (unsigned char)LLADDR(sdl)[4],
                 (unsigned char)LLADDR(sdl)[5]);
-            goto end;
+            break;
         }
     }
 
@@ -177,7 +177,7 @@ std::string UniqueId::ethernetMacAddress() {
                 (unsigned char)ifr->ifr_addr.sa_data[4],
                 (unsigned char)ifr->ifr_addr.sa_data[5]);
 
-            goto end;
+            break;
         }
     }
     close(sock);
@@ -219,7 +219,7 @@ std::string UniqueId::ethernetMacAddress() {
                 (unsigned char)pAdapter->Address[3],
                 (unsigned char)pAdapter->Address[4],
                 (unsigned char)pAdapter->Address[5]);
-            goto end;
+            break;
         }
         pAdapter = pAdapter->Next;
     }
@@ -227,9 +227,6 @@ std::string UniqueId::ethernetMacAddress() {
     free(pAdapterInfo);
 #endif
 
-#if defined(__linux__) || defined(__gnu_linux__) || defined(DARWIN) || defined(WIN32)
-end:
-#endif
     return std::string(reinterpret_cast<const char *>(mac));
 #if defined(__linux__) || defined(__gnu_linux__) || defined(DARWIN) || defined(WIN32)
 failed:

@@ -53,8 +53,8 @@ class RulesExceptions {
     bool contains(int a);
     bool merge(RulesExceptions *from);
 
-    bool loadRemoveRuleByMsg(const std::string &msg, std::string *error);
-    bool loadRemoveRuleByTag(const std::string &msg, std::string *error);
+    bool loadRemoveRuleByMsg(const std::string &msg, const std::string *error);
+    bool loadRemoveRuleByTag(const std::string &msg, const std::string *error);
 
     bool loadUpdateTargetByMsg(const std::string &msg,
         std::unique_ptr<std::vector<std::unique_ptr<variables::Variable> > > v,

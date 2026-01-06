@@ -28,6 +28,6 @@ libmbedtls_la_SOURCES = \
 	mbedtls/library/sha1.c \
 	mbedtls/library/platform_util.c
 
-libmbedtls_la_CFLAGS = -DMBEDTLS_CONFIG_FILE=\"mbedtls/mbedtls_config.h\" -Imbedtls/include
+libmbedtls_la_CFLAGS = -DMBEDTLS_CONFIG_FILE=\"mbedtls/mbedtls_config.h\" -I$(top_srcdir)/others/mbedtls/include
 libmbedtls_la_CPPFLAGS =
 libmbedtls_la_LIBADD =

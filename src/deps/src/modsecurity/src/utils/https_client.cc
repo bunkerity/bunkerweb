@@ -110,14 +110,17 @@ bool HttpsClient::download(const std::string &uri) {
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
 
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "ModSecurity3");
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers_chunk);
 
     /* We want Curl to return error in case there is an HTTP error code */
     curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
 
     if (m_requestBody.empty() == false) {
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, m_requestBody.c_str());
+        headers_chunk = curl_slist_append(headers_chunk, "Expect:"); // Disable Expect: 100-continue
     }
+
+    /* set HTTP headers for request */
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers_chunk);
 
     res = curl_easy_perform(curl);
 

@@ -148,6 +148,7 @@ Transaction::Transaction(ModSecurity *ms, RulesSet *rules, const char *id,
     m_json(nullptr),
 #endif
     m_secRuleEngine(RulesSetProperties::PropertyNotSetRuleEngine),
+    m_secXMLParseXmlIntoArgs(rules->m_secXMLParseXmlIntoArgs),
     m_logCbData(logCbData),
     TransactionAnchoredVariables(this) {
     m_variableUrlEncodedError.set("0", 0);
@@ -187,7 +188,7 @@ Transaction::~Transaction() {
  *
  * Debug logs are important during the rules creation phase, this method can be
  * used to print message on this debug log.
- * 
+ *
  * @param level Debug level, current supported from 0 to 9.
  * @param message Message to be logged.
  *
@@ -664,7 +665,7 @@ int Transaction::addRequestHeader(const unsigned char *key, size_t key_n,
  * @note It is necessary to "append" the request body prior to the execution
  *       of this function.
  * @note Remember to check for a possible intervention.
- * 
+ *
  * @returns If the operation was successful or not.
  * @retval true Operation was successful.
  * @retval false Operation failed.
@@ -684,11 +685,11 @@ int Transaction::processRequestBody() {
 
     /*
      * Process the request body even if there is nothing to be done.
-     * 
+     *
      * if (m_requestBody.tellp() <= 0) {
      *     return true;
      * }
-     * 
+     *
      */
     std::unique_ptr<std::string> a = m_variableRequestHeaders.resolveFirst(
         "Content-Type");
@@ -877,7 +878,7 @@ int Transaction::processRequestBody() {
  *
  * With this method it is possible to feed ModSecurity with data for
  * inspection regarding the request body. There are two possibilities here:
- * 
+ *
  * 1 - Adds the buffer in a row;
  * 2 - Adds it in chunks;
  *
@@ -982,7 +983,7 @@ int Transaction::appendRequestBody(const unsigned char *buf, size_t len) {
  *
  * @param code The returned http code.
  * @param proto Protocol used on the response.
- * 
+ *
  * @returns If the operation was successful or not.
  * @retval true Operation was successful.
  * @retval false Operation failed.
@@ -1078,7 +1079,7 @@ int Transaction::addResponseHeader(const unsigned char *key,
  * @param key_n   header name size.
  * @param value   header value.
  * @param value_n header value size.
- * 
+ *
  * @returns If the operation was successful or not.
  * @retval true Operation was successful.
  * @retval false Operation failed.
@@ -1163,7 +1164,7 @@ int Transaction::processResponseBody() {
  * With this method it is possible to feed ModSecurity with data for
  * inspection regarding the response body. ModSecurity can also update the
  * contents of the response body, this is not quite ready yet on this version
- * of the API. 
+ * of the API.
  *
  * @note If the content is updated, the client cannot receive the content
  *       length header filled, at least not with the old values. Otherwise
@@ -1311,7 +1312,7 @@ int Transaction::processLogging() {
     this->m_rules->evaluate(modsecurity::LoggingPhase, this);
 
     /* If relevant, save this transaction information at the audit_logs */
-    if (m_rules != NULL && m_rules->m_auditLog != NULL) {
+    if (m_rules->m_auditLog != NULL) {
         int parts = this->m_rules->m_auditLog->getParts();
         ms_dbg(8, "Checking if this request is suitable to be " \
             "saved as an audit log.");
@@ -1351,7 +1352,7 @@ int Transaction::processLogging() {
  * @brief   Check if ModSecurity has anything to ask to the server.
  *
  * Intervention can generate a log event and/or perform a disruptive action.
- * 
+ *
  * If the return value is true, all fields in the ModSecurityIntervention
  * parameter have been initialized and are safe to access.
  * If the return value is false, no changes to the ModSecurityIntervention
@@ -1451,7 +1452,7 @@ std::string Transaction::toOldAuditLogFormatIndex(const std::string &filename,
 
 
 std::string Transaction::toOldAuditLogFormat(int parts,
-    const std::string &trailer) {
+    const std::string &trailer, const std::string &prefix) {
     std::stringstream audit_log;
 
     struct tm timeinfo;
@@ -1460,7 +1461,8 @@ std::string Transaction::toOldAuditLogFormat(int parts,
     char tstr[std::size("[dd/Mmm/yyyy:hh:mm:ss shhmm]")];
     strftime(tstr, std::size(tstr), "[%d/%b/%Y:%H:%M:%S %z]", &timeinfo);
 
-    audit_log << "--" << trailer << "-" << "A--" << std::endl;
+    audit_log << prefix << "--" << trailer << "-" << "A--" << std::endl;
+    audit_log << prefix;
     audit_log << tstr;
     audit_log << " " << m_id;
     audit_log << " " << this->m_clientIpAddress;
@@ -1471,7 +1473,8 @@ std::string Transaction::toOldAuditLogFormat(int parts,
 
     if (parts & audit_log::AuditLog::BAuditLogPart) {
         std::vector<const VariableValue *> l;
-        audit_log << "--" << trailer << "-" << "B--" << std::endl;
+        audit_log << prefix << "--" << trailer << "-" << "B--" << std::endl;
+        audit_log << prefix;
         audit_log << utils::string::dash_if_empty(
             m_variableRequestMethod.evaluate());
         audit_log << " " << this->m_uri.c_str() << " " << "HTTP/";
@@ -1480,79 +1483,81 @@ std::string Transaction::toOldAuditLogFormat(int parts,
         m_variableRequestHeaders.resolve(&l);
         for (auto &h : l) {
             size_t pos = strlen("REQUEST_HEADERS:");
+            audit_log << prefix;
             audit_log << h->getKeyWithCollection().c_str() + pos << ": ";
             audit_log << h->getValue().c_str() << std::endl;
             delete h;
         }
-        audit_log << std::endl;
+        audit_log << prefix << std::endl;
     }
     if (parts & audit_log::AuditLog::CAuditLogPart
         &&  m_requestBody.tellp() > 0) {
         std::string body =  m_requestBody.str();
-        audit_log << "--" << trailer << "-" << "C--" << std::endl;
+        audit_log << prefix << "--" << trailer << "-" << "C--" << std::endl;
         if (body.size() > 0) {
-            audit_log << body << std::endl;
+            audit_log << prefix << body << std::endl;
         }
-        audit_log << std::endl;
+        audit_log << prefix << std::endl;
     }
     if (parts & audit_log::AuditLog::DAuditLogPart) {
-        audit_log << "--" << trailer << "-" << "D--" << std::endl;
-        audit_log << std::endl;
+        audit_log << prefix << "--" << trailer << "-" << "D--" << std::endl;
+        audit_log << prefix << std::endl;
         /** TODO: write audit_log D part. */
     }
     if (parts & audit_log::AuditLog::EAuditLogPart
         && m_responseBody.tellp() > 0) {
         std::string body = utils::string::toHexIfNeeded(m_responseBody.str());
-        audit_log << "--" << trailer << "-" << "E--" << std::endl;
+        audit_log << prefix << "--" << trailer << "-" << "E--" << std::endl;
         if (body.size() > 0) {
-            audit_log << body << std::endl;
+            audit_log << prefix << body << std::endl;
         }
-        audit_log << std::endl;
+        audit_log << prefix << std::endl;
     }
     if (parts & audit_log::AuditLog::FAuditLogPart) {
         std::vector<const VariableValue *> l;
 
-        audit_log << "--" << trailer << "-" << "F--" << std::endl;
-        audit_log << "HTTP/" << m_httpVersion.c_str()  << " ";
+        audit_log << prefix << "--" << trailer << "-" << "F--" << std::endl;
+        audit_log << prefix << "HTTP/" << m_httpVersion.c_str()  << " ";
         audit_log << this->m_httpCodeReturned << std::endl;
         m_variableResponseHeaders.resolve(&l);
         for (auto &h : l) {
+            audit_log << prefix;
             audit_log << h->getKey().c_str() << ": ";
             audit_log << h->getValue().c_str() << std::endl;
             delete h;
         }
     }
-    audit_log << std::endl;
+    audit_log << prefix << std::endl;
 
     if (parts & audit_log::AuditLog::GAuditLogPart) {
-        audit_log << "--" << trailer << "-" << "G--" << std::endl;
+        audit_log << prefix << "--" << trailer << "-" << "G--" << std::endl;
         audit_log << std::endl;
         /** TODO: write audit_log G part. */
     }
     if (parts & audit_log::AuditLog::HAuditLogPart) {
-        audit_log << "--" << trailer << "-" << "H--" << std::endl;
+        audit_log << prefix << "--" << trailer << "-" << "H--" << std::endl;
         for (const auto &a : m_rulesMessages) {
-            audit_log << a.log(0, m_httpCodeReturned) << std::endl;
+            audit_log << prefix << a.log(0, m_httpCodeReturned) << std::endl;
         }
-        audit_log << std::endl;
+        audit_log << prefix << std::endl;
         /** TODO: write audit_log H part. */
     }
     if (parts & audit_log::AuditLog::IAuditLogPart) {
-        audit_log << "--" << trailer << "-" << "I--" << std::endl;
-        audit_log << std::endl;
+        audit_log << prefix << "--" << trailer << "-" << "I--" << std::endl;
+        audit_log << prefix << std::endl;
         /** TODO: write audit_log I part. */
     }
     if (parts & audit_log::AuditLog::JAuditLogPart) {
-        audit_log << "--" << trailer << "-" << "J--" << std::endl;
-        audit_log << std::endl;
+        audit_log << prefix << "--" << trailer << "-" << "J--" << std::endl;
+        audit_log << prefix << std::endl;
         /** TODO: write audit_log J part. */
     }
     if (parts & audit_log::AuditLog::KAuditLogPart) {
-        audit_log << "--" << trailer << "-" << "K--" << std::endl;
-        audit_log << std::endl;
+        audit_log << prefix << "--" << trailer << "-" << "K--" << std::endl;
+        audit_log << prefix << std::endl;
         /** TODO: write audit_log K part. */
     }
-    audit_log << "--" << trailer << "-" << "Z--" << std::endl << std::endl;
+    audit_log << prefix << "--" << trailer << "-" << "Z--" << std::endl << std::endl;
 
     return audit_log.str();
 }
@@ -1564,7 +1569,7 @@ std::string Transaction::toJSON(int parts) {
     size_t len;
     yajl_gen g;
     std::string log;
-    std::string ts = utils::string::ascTime(&m_timeStamp).c_str();
+    std::string ts = utils::string::ascTime(&m_timeStamp);
     std::string uniqueId = UniqueId::uniqueId();
 
     g = yajl_gen_alloc(NULL);
@@ -1582,13 +1587,13 @@ std::string Transaction::toJSON(int parts) {
 
     yajl_gen_map_open(g);
     /* Part: A (header mandatory) */
-    LOGFY_ADD("client_ip", m_clientIpAddress.c_str());
-    LOGFY_ADD("time_stamp", ts.c_str());
-    LOGFY_ADD("server_id", uniqueId.c_str());
+    LOGFY_ADD("client_ip", m_clientIpAddress);
+    LOGFY_ADD("time_stamp", ts);
+    LOGFY_ADD("server_id", uniqueId);
     LOGFY_ADD_NUM("client_port", m_clientPort);
-    LOGFY_ADD("host_ip", m_serverIpAddress.c_str());
+    LOGFY_ADD("host_ip", m_serverIpAddress);
     LOGFY_ADD_NUM("host_port", m_serverPort);
-    LOGFY_ADD("unique_id", m_id.c_str());
+    LOGFY_ADD("unique_id", m_id);
 
     /* request */
     yajl_gen_string(g, reinterpret_cast<const unsigned char*>("request"),
@@ -1597,14 +1602,15 @@ std::string Transaction::toJSON(int parts) {
 
     LOGFY_ADD("method",
         utils::string::dash_if_empty(
-            m_variableRequestMethod.evaluate()).c_str());
+            m_variableRequestMethod.evaluate()));
 
-    LOGFY_ADD_INT("http_version", m_httpVersion.c_str());
-    LOGFY_ADD("uri", this->m_uri.c_str());
+    LOGFY_ADD("http_version", m_httpVersion);
+    LOGFY_ADD("hostname", m_requestHostName);
+    LOGFY_ADD("uri", this->m_uri);
 
     if (parts & audit_log::AuditLog::CAuditLogPart) {
         // FIXME: check for the binary content size.
-        LOGFY_ADD("body", this->m_requestBody.str().c_str());
+        LOGFY_ADD("body", utils::string::toHexIfNeeded(this->m_requestBody.str()));
     }
 
     /* request headers */
@@ -1616,7 +1622,7 @@ std::string Transaction::toJSON(int parts) {
 
         m_variableRequestHeaders.resolve(&l);
         for (auto &h : l) {
-            LOGFY_ADD(h->getKey().c_str(), h->getValue().c_str());
+            LOGFY_ADD(utils::string::toHexIfNeeded(h->getKey().c_str()).c_str(), utils::string::toHexIfNeeded(h->getValue()));
             delete h;
         }
 
@@ -1633,7 +1639,7 @@ std::string Transaction::toJSON(int parts) {
     yajl_gen_map_open(g);
 
     if (parts & audit_log::AuditLog::EAuditLogPart) {
-        LOGFY_ADD("body", this->m_responseBody.str().c_str());
+        LOGFY_ADD("body", this->m_responseBody.str());
     }
     LOGFY_ADD_NUM("http_code", m_httpCodeReturned);
 
@@ -1646,7 +1652,7 @@ std::string Transaction::toJSON(int parts) {
 
         m_variableResponseHeaders.resolve(&l);
         for (auto &h : l) {
-            LOGFY_ADD(h->getKey().c_str(), h->getValue().c_str());
+            LOGFY_ADD(h->getKey().c_str(), h->getValue());
             delete h;
         }
 
@@ -1663,10 +1669,10 @@ std::string Transaction::toJSON(int parts) {
         yajl_gen_map_open(g);
 
         /* producer > libmodsecurity */
-        LOGFY_ADD("modsecurity", m_ms->whoAmI().c_str());
+        LOGFY_ADD("modsecurity", m_ms->whoAmI());
 
         /* producer > connector */
-        LOGFY_ADD("connector", m_ms->getConnectorInformation().c_str());
+        LOGFY_ADD("connector", m_ms->getConnectorInformation());
 
         /* producer > engine state */
         LOGFY_ADD("secrules_engine",
@@ -1682,7 +1688,7 @@ std::string Transaction::toJSON(int parts) {
         for (const auto &a : m_rules->m_components) {
             yajl_gen_string(g,
                 reinterpret_cast<const unsigned char*>
-                    (a.c_str()), a.length());
+                    (a.data()), a.length());
         }
         yajl_gen_array_close(g);
 
@@ -1696,20 +1702,20 @@ std::string Transaction::toJSON(int parts) {
         yajl_gen_array_open(g);
         for (auto a : m_rulesMessages) {
             yajl_gen_map_open(g);
-            LOGFY_ADD("message", a.m_message.c_str());
+            LOGFY_ADD("message", a.m_message);
             yajl_gen_string(g,
                 reinterpret_cast<const unsigned char*>("details"),
                 strlen("details"));
             yajl_gen_map_open(g);
-            LOGFY_ADD("match", a.m_match.c_str());
-            LOGFY_ADD("reference", a.m_reference.c_str());
-            LOGFY_ADD("ruleId", std::to_string(a.m_rule.m_ruleId).c_str());
-            LOGFY_ADD("file", a.m_rule.getFileName().c_str());
-            LOGFY_ADD("lineNumber", std::to_string(a.m_rule.getLineNumber()).c_str());
-            LOGFY_ADD("data", a.m_data.c_str());
-            LOGFY_ADD("severity", std::to_string(a.m_severity).c_str());
-            LOGFY_ADD("ver", a.m_rule.m_ver.c_str());
-            LOGFY_ADD("rev", a.m_rule.m_rev.c_str());
+            LOGFY_ADD("match", a.m_match);
+            LOGFY_ADD("reference", a.m_reference);
+            LOGFY_ADD("ruleId", std::to_string(a.m_rule.m_ruleId));
+            LOGFY_ADD("file", a.m_rule.getFileName());
+            LOGFY_ADD("lineNumber", std::to_string(a.m_rule.getLineNumber()));
+            LOGFY_ADD("data", utils::string::toHexIfNeeded(a.m_data));
+            LOGFY_ADD("severity", std::to_string(a.m_severity));
+            LOGFY_ADD("ver", a.m_rule.m_ver);
+            LOGFY_ADD("rev", a.m_rule.m_rev);
 
             yajl_gen_string(g,
                 reinterpret_cast<const unsigned char*>("tags"),
@@ -1717,13 +1723,13 @@ std::string Transaction::toJSON(int parts) {
             yajl_gen_array_open(g);
             for (auto b : a.m_tags) {
                 yajl_gen_string(g,
-                    reinterpret_cast<const unsigned char*>(b.c_str()),
-                    strlen(b.c_str()));
+                    reinterpret_cast<const unsigned char*>(b.data()),
+                    b.length());
             }
             yajl_gen_array_close(g);
 
-            LOGFY_ADD("maturity", std::to_string(a.m_rule.m_maturity).c_str());
-            LOGFY_ADD("accuracy", std::to_string(a.m_rule.m_accuracy).c_str());
+            LOGFY_ADD("maturity", std::to_string(a.m_rule.m_maturity));
+            LOGFY_ADD("accuracy", std::to_string(a.m_rule.m_accuracy));
             yajl_gen_map_close(g);
             yajl_gen_map_close(g);
         }
@@ -1795,7 +1801,7 @@ int Transaction::updateStatusCode(int code) {
  *
  * The transaction is the unit that will be used the inspect every request. It holds
  * all the information for a given request.
- * 
+ *
  * @note Remember to cleanup the transaction when the transaction is complete.
  *
  * @param ms ModSecurity core pointer.
@@ -1907,7 +1913,7 @@ extern "C" int msc_process_request_headers(Transaction *transaction) {
  * @note Remember to check for a possible intervention.
  *
  * @param transaction ModSecurity transaction.
- * 
+ *
  * @returns If the operation was successful or not.
  * @retval 1 Operation was successful.
  * @retval 0 Operation failed.
@@ -1924,7 +1930,7 @@ extern "C" int msc_process_request_body(Transaction *transaction) {
  *
  * With this function it is possible to feed ModSecurity with data for
  * inspection regarding the request body. There are two possibilities here:
- * 
+ *
  * 1 - Adds the buffer in a row;
  * 2 - Adds it in chunks;
  *
@@ -1938,7 +1944,7 @@ extern "C" int msc_process_request_body(Transaction *transaction) {
  *       in this case is upon the rules.
  *
  * @param transaction ModSecurity transaction.
- * 
+ *
  * @returns If the operation was successful or not.
  * @retval 1 Operation was successful.
  * @retval 0 Operation failed.
@@ -2009,7 +2015,7 @@ extern "C" int msc_process_response_body(Transaction *transaction) {
  * With this function it is possible to feed ModSecurity with data for
  * inspection regarding the response body. ModSecurity can also update the
  * contents of the response body, this is not quite ready yet on this version
- * of the API. 
+ * of the API.
  *
  * @note If the content is updated, the client cannot receive the content
  *       length header filled, at least not with the old values. Otherwise
@@ -2116,7 +2122,7 @@ extern "C" int msc_add_response_header(Transaction *transaction,
  * @param key_len header name size.
  * @param value   header value.
  * @param val_len header value size.
- * 
+ *
  * @returns If the operation was successful or not.
  * @retval 1 Operation was successful.
  * @retval 0 Operation failed.
@@ -2318,6 +2324,66 @@ extern "C" int msc_set_request_hostname(Transaction *transaction,
     return transaction->setRequestHostName(reinterpret_cast<const char *>(hostname));
 }
 
+/**
+ * @name   msc_get_transaction_variable
+ * @brief  Retrieve variable value by name.
+ *
+ * This function returns tx_collection variable value by name.
+ *
+ * @param transaction ModSecurity transaction.
+ * @param var_name variable name
+ * @return variable value.
+ *
+ */
+extern "C" const char *msc_get_transaction_variable(Transaction *transaction, const char *var_name){
+    std::vector<const VariableValue *> l;
+    modsecurity::collection::Collection *c = NULL;
+    std::string cn;
+    const char *p = NULL;
+
+    if (var_name == NULL ){
+        return NULL;
+    }
+
+    p = strchr(var_name,':');
+
+    if ( p == NULL ){
+        return NULL;
+    }
+
+    cn = std::string(var_name,p-var_name);
+    transform(cn.begin(),cn.end(),cn.begin(),::tolower);
+
+    if ( cn.compare("global") == 0){
+        c = transaction->m_collections.m_global_collection;
+    }else if ( cn.compare("ip") == 0){
+        c = transaction->m_collections.m_ip_collection;
+    }else if ( cn.compare("session") == 0){
+        c = transaction->m_collections.m_session_collection;
+    }else if ( cn.compare("user") == 0){
+        c = transaction->m_collections.m_user_collection;
+    }else if ( cn.compare("resource") == 0){
+        c = transaction->m_collections.m_resource_collection;
+    }else if( cn.compare("tx") == 0){
+        c = transaction->m_collections.m_tx_collection;
+    }
+
+    if(c == NULL){
+        return NULL;
+    }
+
+    ++p;
+    cn = std::string(p);
+    transform(cn.begin(),cn.end(),cn.begin(),::tolower);
+
+    c->resolveSingleMatch(cn.c_str(),&l);
+
+    if ( l.size() < 1){
+        return NULL;
+    }
+
+    return l[0]->getValue().c_str();
+}
 
 }  // namespace modsecurity
 

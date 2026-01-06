@@ -1,0 +1,107 @@
+@@ -31,17 +31,85 @@
+ 
+ static ngx_int_t ngx_http_modsecurity_init(ngx_conf_t *cf);
+ static void *ngx_http_modsecurity_create_main_conf(ngx_conf_t *cf);
+ static char *ngx_http_modsecurity_init_main_conf(ngx_conf_t *cf, void *conf);
+ static void *ngx_http_modsecurity_create_conf(ngx_conf_t *cf);
+ static char *ngx_http_modsecurity_merge_conf(ngx_conf_t *cf, void *parent, void *child);
+ static void ngx_http_modsecurity_cleanup_instance(void *data);
+ static void ngx_http_modsecurity_cleanup_rules(void *data);
++static ngx_int_t ngx_http_modsecurity_get_variable(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data);
++static ngx_int_t ngx_http_modsecurity_add_variables(ngx_conf_t *cf);
+ 
++static ngx_http_variable_t modsecurity_variables[] = {
++    { ngx_string("modsecurity_reason"), NULL, ngx_http_modsecurity_get_variable, (uintptr_t) "tx:bunkerweb_reason", NGX_HTTP_VAR_CHANGEABLE|NGX_HTTP_VAR_NOCACHEABLE },
++    { ngx_string("modsecurity_unique_id"), NULL, ngx_http_modsecurity_get_variable, (uintptr_t) "tx:bunkerweb_unique_id", NGX_HTTP_VAR_CHANGEABLE|NGX_HTTP_VAR_NOCACHEABLE },
++    { ngx_string("modsecurity_rules"), NULL, ngx_http_modsecurity_get_variable, (uintptr_t) "tx:bunkerweb_rules", NGX_HTTP_VAR_CHANGEABLE|NGX_HTTP_VAR_NOCACHEABLE },
++    { ngx_string("modsecurity_msgs"), NULL, ngx_http_modsecurity_get_variable, (uintptr_t) "tx:bunkerweb_msgs", NGX_HTTP_VAR_CHANGEABLE|NGX_HTTP_VAR_NOCACHEABLE },
++    { ngx_string("modsecurity_matched_vars"), NULL, ngx_http_modsecurity_get_variable, (uintptr_t) "tx:bunkerweb_matched_vars", NGX_HTTP_VAR_CHANGEABLE|NGX_HTTP_VAR_NOCACHEABLE },
++    { ngx_string("modsecurity_matched_var_names"), NULL, ngx_http_modsecurity_get_variable, (uintptr_t) "tx:bunkerweb_matched_var_names", NGX_HTTP_VAR_CHANGEABLE|NGX_HTTP_VAR_NOCACHEABLE },
++    { ngx_string("modsecurity_anomaly_score"), NULL, ngx_http_modsecurity_get_variable, (uintptr_t) "tx:bunkerweb_anomaly_score", NGX_HTTP_VAR_CHANGEABLE|NGX_HTTP_VAR_NOCACHEABLE },
++    ngx_http_null_variable
++};
++
++static ngx_int_t
++ngx_http_modsecurity_get_variable(ngx_http_request_t *r,
++                                ngx_http_variable_value_t *v,
++                                uintptr_t data)
++{
++    ngx_http_modsecurity_ctx_t *ctx;
++    const char *var_name = (const char *)data;
++
++    ctx = ngx_http_get_module_ctx(r, ngx_http_modsecurity_module);
++    if (ctx == NULL || ctx->modsec_transaction == NULL) {
++        v->not_found = 1;
++        return NGX_OK;
++    }
++
++    const char *value = msc_get_transaction_variable(ctx->modsec_transaction, var_name);
++
++    if (value == NULL) {
++        v->not_found = 1;
++        return NGX_OK;
++    }
++
++    size_t len = ngx_strlen(value);
++    u_char *p = ngx_pnalloc(r->pool, len);
++    if (p == NULL) {
++        return NGX_ERROR;
++    }
++
++    ngx_memcpy(p, value, len);
++
++    v->data = p;
++    v->len = len;
++    v->valid = 1;
++    v->no_cacheable = 1;
++    v->not_found = 0;
++
++    return NGX_OK;
++}
++
++static ngx_int_t
++ngx_http_modsecurity_add_variables(ngx_conf_t *cf)
++{
++    ngx_http_variable_t  *var, *v;
++
++    for (v = modsecurity_variables; v->name.len; v++) {
++        var = ngx_http_add_variable(cf, &v->name, v->flags);
++        if (var == NULL) {
++            return NGX_ERROR;
++        }
++
++        var->get_handler = v->get_handler;
++        var->data = v->data;
++    }
++
++    return NGX_OK;
++}
+ 
+ /*
+  * PCRE malloc/free workaround, based on
+  * https://github.com/openresty/lua-nginx-module/blob/master/src/ngx_http_lua_pcrefix.c
+  */
+ 
+ #if !(NGX_PCRE2)
+ static void *(*old_pcre_malloc)(size_t);
+@@ -599,17 +667,19 @@
+         return rc;
+     }
+ 
+     rc = ngx_http_modsecurity_body_filter_init();
+     if (rc != NGX_OK) {
+         return rc;
+     }
+ 
+-    return NGX_OK;
++    // Process variables
++    return ngx_http_modsecurity_add_variables(cf);
++
+ }
+ 
+ 
+ static void *
+ ngx_http_modsecurity_create_main_conf(ngx_conf_t *cf)
+ {
+     ngx_pool_cleanup_t                *cln;
+     ngx_http_modsecurity_main_conf_t  *conf;

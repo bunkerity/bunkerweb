@@ -21,8 +21,8 @@ AC_ARG_WITH(
     [test_paths="${with_pcre}"],
     [test_paths="/usr/local/libpcre /usr/local/pcre /usr/local /opt/libpcre /opt/pcre /opt /usr /opt/local"])
 
-if test "x${with_pcre2}" != "x" && test "x${with_pcre2}" != "xno"; then
-    AC_MSG_NOTICE([pcre2 specified; omitting check for pcre])
+if test "x${with_pcre}" == "x" && test "x${with_pcre}" != "xno"; then
+    AC_MSG_NOTICE([Support for pcre not requested; omitting check for pcre])
 else
 
     AC_MSG_CHECKING([for libpcre config script])
@@ -106,6 +106,7 @@ else
         LIBS=$save_LIBS
     fi
 
+    PCRE_CFLAGS="-DWITH_PCRE ${PCRE_CFLAGS}"
     AC_SUBST(PCRE_CONFIG)
     AC_SUBST(PCRE_VERSION)
     AC_SUBST(PCRE_CPPFLAGS)

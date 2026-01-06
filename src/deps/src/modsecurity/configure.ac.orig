@@ -42,7 +42,7 @@ AC_PREFIX_DEFAULT([/usr/local/modsecurity])
 
 
 # General automake options.
-AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
+AM_INIT_AUTOMAKE([-Wall foreign subdir-objects])
 
 
 # Check for dependencies (C++, AR, Lex, Yacc and Make)
@@ -109,24 +109,19 @@ AM_CONDITIONAL([YAJL_VERSION], [test "$YAJL_VERSION" != ""])
 
 # Check for LibGeoIP
 PROG_GEOIP
-AM_CONDITIONAL([GEOIP_CFLAGS], [test "GEOIP_CFLAGS" != ""])
 
 # Check for MaxMind
 PROG_MAXMIND
-AM_CONDITIONAL([MAXMIND_CFLAGS], [test "MAXMIND_CFLAGS" != ""])
 
 
 # Check for LMDB
 PROG_LMDB
-AM_CONDITIONAL([LMDB_CFLAGS], [test "LMDB_CFLAGS" != ""])
 
 # Check for SSDEEP
 CHECK_SSDEEP
-AM_CONDITIONAL([SSDEEP_CFLAGS], [test "SSDEEP_CFLAGS" != ""])
 
 # Check for LUA
 CHECK_LUA
-AM_CONDITIONAL([LUA_CFLAGS], [test "LUA_CFLAGS" != ""])
 
 
 #
@@ -146,16 +141,16 @@ CHECK_LIBXML2
 
 
 #
-# Check for libpcre
+# Check for libpcre only if explicitly requested
 #
-CHECK_PCRE
-
-
-#
-# Check for pcre2
-#
-PROG_PCRE2
-AM_CONDITIONAL([PCRE2_CFLAGS], [test "PCRE2_CFLAGS" != ""])
+if test "x${with_pcre}" != "x" && test "x${with_pcre}" != "xno"; then
+  CHECK_PCRE
+else
+  #
+  # Check for pcre2
+  #
+  PROG_PCRE2
+fi
 
 
 # Checks for header files.
@@ -585,6 +580,17 @@ if test "x$LUA_FOUND" = "x1"; then
 fi
 if test "x$LUA_FOUND" = "x2"; then
     echo "   + LUA                                           ....disabled"
+fi
+
+##PCRE
+if test "x${with_pcre}" != "x" \
+   && test "x${with_pcre}" != "xno" \
+   && test "x${PCRE_VERSION}" == "x"; then
+    AC_MSG_NOTICE([*** pcre library not found.])
+else
+    echo "   + PCRE                                          ....found "
+    echo "     using pcre v${PCRE_VERSION}"
+    echo "      ${PCRE_LDADD}, ${PCRE_CFLAGS}"
 fi
 
 

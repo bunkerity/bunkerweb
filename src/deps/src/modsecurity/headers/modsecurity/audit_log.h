@@ -153,17 +153,18 @@ class AuditLog {
     bool setStorageDirMode(int permission);
     bool setFileMode(int permission);
     bool setStatus(AuditLogStatus new_status);
-    bool setRelevantStatus(const std::basic_string<char>& new_relevant_status);
-    bool setFilePath1(const std::basic_string<char>& path);
-    bool setFilePath2(const std::basic_string<char>& path);
-    bool setStorageDir(const std::basic_string<char>& path);
+    bool setRelevantStatus(std::string_view new_relevant_status);
+    bool setFilePath1(std::string_view path);
+    bool setFilePath2(std::string_view path);
+    bool setStorageDir(std::string_view path);
+    bool setPrefix(std::string_view prefix);
     bool setFormat(AuditLogFormat fmt);
 
     int getDirectoryPermission() const;
     int getFilePermission() const;
     int getParts() const;
 
-    bool setParts(const std::basic_string<char>& new_parts);
+    bool setParts(std::string_view new_parts);
     bool setType(AuditLogType audit_type);
 
     bool init(std::string *error);
@@ -173,8 +174,8 @@ class AuditLog {
     bool saveIfRelevant(Transaction *transaction, int parts);
     bool isRelevant(int status);
 
-    static int addParts(int parts, const std::string& new_parts);
-    static int removeParts(int parts, const std::string& new_parts);
+    static int addParts(int parts, std::string_view new_parts);
+    static int removeParts(int parts, std::string_view new_parts);
 
     void setCtlAuditEngineActive() {
         m_ctlAuditEngineActive = true;
@@ -182,31 +183,32 @@ class AuditLog {
 
     bool merge(AuditLog *from, std::string *error);
 
-    std::string m_path1;
-    std::string m_path2;
-    std::string m_storage_dir;
+    std::string m_path1 = std::string("");
+    std::string m_path2 = std::string("");
+    std::string m_storage_dir = std::string("");
+    std::string m_prefix = std::string("");
 
-    AuditLogFormat m_format;
+    AuditLogFormat m_format = NotSetAuditLogFormat;
 
  protected:
-    int m_parts;
+    int m_parts = -1;
     int m_defaultParts = AAuditLogPart | BAuditLogPart | CAuditLogPart
         | FAuditLogPart | HAuditLogPart | ZAuditLogPart;
 
-    int m_filePermission;
+    int m_filePermission = -1;
     int m_defaultFilePermission = 0640;
 
-    int m_directoryPermission;
+    int m_directoryPermission = -1;
     int m_defaultDirectoryPermission = 0750;
 
  private:
-    AuditLogStatus m_status;
+    AuditLogStatus m_status = NotSetLogStatus;
 
-    AuditLogType m_type;
-    std::string m_relevant;
+    AuditLogType m_type = NotSetAuditLogType;
+    std::string m_relevant = std::string("");
 
-    audit_log::writer::Writer *m_writer;
-    bool m_ctlAuditEngineActive; // rules have at least one action On or RelevantOnly
+    audit_log::writer::Writer *m_writer = nullptr;
+    bool m_ctlAuditEngineActive = false; // rules have at least one action On or RelevantOnly
 };
 
 

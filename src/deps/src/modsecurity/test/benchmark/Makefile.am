@@ -10,6 +10,7 @@ benchmark_LDADD = \
 	$(GEOIP_LDADD) \
 	$(MAXMIND_LDADD) \
 	$(PCRE_LDADD) \
+	$(PCRE2_LDADD) \
 	$(YAJL_LDADD) \
 	$(LMDB_LDADD) \
 	$(SSDEEP_LDADD) \
@@ -35,6 +36,7 @@ benchmark_CPPFLAGS = \
 	-I$(top_builddir)/headers \
 	$(GLOBAL_CPPFLAGS) \
 	$(PCRE_CFLAGS) \
+	$(PCRE2_CFLAGS) \
 	$(LMDB_CFLAGS) \
 	$(LIBXML2_CFLAGS)
 

@@ -70,7 +70,7 @@
       ]
     },
     "expected":{  
-      "debug_log":"XML parsing error: XML: Failed parsing document"
+      "debug_log":"XML parsing error: XML: Failed to parse document"
     },
     "rules":[  
       "SecRuleEngine On",

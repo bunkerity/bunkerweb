@@ -236,15 +236,15 @@
       "id": "modsecurity",
       "name": "ModSecurity v3.0.14",
       "url": "https://github.com/owasp-modsecurity/ModSecurity.git",
-      "commit": "a555e5a44573e50f04ad997b3b24c214c42f8e29",
-      "post_install": "rm src/deps/src/modsecurity/.gitmodules && rm -rf src/deps/src/modsecurity/others/libinjection src/deps/src/modsecurity/others/mbedtls && patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch || rm src/deps/src/modsecurity/configure.ac.orig src/deps/src/modsecurity/configure.ac.rej"
+      "commit": "7791f753f45fc446725a5932162d653781d2e537",
+      "post_install": "rm src/deps/src/modsecurity/.gitmodules && rm -rf src/deps/src/modsecurity/others/libinjection src/deps/src/modsecurity/others/mbedtls && patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch || rm src/deps/src/modsecurity/configure.ac.orig src/deps/src/modsecurity/configure.ac.rej && patch --forward src/deps/src/modsecurity/src/transaction.cc src/deps/misc/modsecurity-transaction-cc.patch || rm src/deps/src/modsecurity/src/transaction.cc.orig src/deps/src/modsecurity/src/transaction.cc.rej && patch --forward src/deps/src/modsecurity/headers/modsecurity/transaction.h src/deps/misc/modsecurity-transaction-h.patch || rm src/deps/src/modsecurity/headers/modsecurity/transaction.h.orig src/deps/src/modsecurity/headers/modsecurity/transaction.h.rej"
     },
     {
       "id": "modsecurity-nginx",
       "name": "ModSecurity-nginx v1.0.3",
       "url": "https://github.com/owasp-modsecurity/ModSecurity-nginx.git",
-      "commit": "d59e4ad121df702751940fd66bcc0b3ecb51a079",
-      "post_install": "rm -r src/deps/src/modsecurity-nginx/tests && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c src/deps/misc/modsecurity-nginx.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c.rej && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h src/deps/misc/ngx_http_modsecurity_common.h.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h.rej && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c src/deps/misc/ngx_http_modsecurity_module.c.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c.rej && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/modsecurity-nginx-config.patch || rm src/deps/src/modsecurity-nginx/config.orig src/deps/src/modsecurity-nginx/config.rej"
+      "commit": "c752756186ca8e8bdde966197e88ef7215f18678",
+      "post_install": "rm -r src/deps/src/modsecurity-nginx/tests && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c src/deps/misc/modsecurity-nginx-log.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c.rej && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/modsecurity-nginx-config.patch || rm src/deps/src/modsecurity-nginx/config.orig src/deps/src/modsecurity-nginx/config.rej && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c src/deps/misc/modsecurity-nginx-module.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c.rej"
     },
     {
       "id": "nginx",

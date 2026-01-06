@@ -80,6 +80,8 @@ class RulesSet : public RulesSetProperties {
     void debug(int level, const std::string &id, const std::string &uri,
         const std::string &msg);
 
+    static void cleanMatchedVars(Transaction *trans);
+
     RulesSetPhases m_rulesSetPhases;
  private:
 #ifndef NO_LOGS

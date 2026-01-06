@@ -219,8 +219,8 @@ the utilities, follow the commands listed below:
 $ cd /path/to/your/ModSecurity
 $ git submodule foreach git pull
 $ cd test
-$ ./regression-tests
-$ ./unit-tests
+$ ./regression_tests
+$ ./unit_tests
  ```
 
 ### Debugging

@@ -32,6 +32,7 @@ src/location.hh
 src/position.hh
 src/stack.hh
 src/stamp-h1
+src/headers.mk
 /test/rules_optimization
 /test/regression_tests
 /test/unit_tests

@@ -30,7 +30,6 @@
         "<some-tag>aaa</some-tag><some-tag>bbb</some-tag>",
         "</bookstore>"
       ]
-
     },
     "server":{
       "ip":"200.249.12.31",
@@ -41,6 +40,580 @@
         "SecRequestBodyAccess On",
         "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500011,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
         "SecRule XML://bookstore/*[local-name()='some-tag'] \"bbb\" \"id:500012,phase:3,t:none,t:lowercase,log,deny,status:403\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"libxml2",
+    "title":"Testing XML parsing to ARGS with On, check if ARGS is populated",
+    "expected":{
+      "http_code": 403
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+        "<!DOCTYPE author [",
+        "<!ELEMENT book ANY>",
+        "<!ENTITY js SYSTEM \"/etc/passwd\">",
+        "]>",
+        "<bookstore>",
+        "<some-tag>aaa</some-tag><some-tag>bbb</some-tag>",
+        "</bookstore>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecParseXmlIntoArgs On",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500011,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule ARGS:xml.bookstore.some-tag \"@rx aaa\" \"id:500012,phase:2,t:none,t:lowercase,log,deny,status:403\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"libxml2",
+    "title":"Testing XML parsing to ARGS with On, check if XML is populated",
+    "expected":{
+      "http_code": 403
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+        "<!DOCTYPE author [",
+        "<!ELEMENT book ANY>",
+        "<!ENTITY js SYSTEM \"/etc/passwd\">",
+        "]>",
+        "<bookstore>",
+        "<some-tag>aaa</some-tag><some-tag>bbb</some-tag>",
+        "</bookstore>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecParseXmlIntoArgs On",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500011,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule XML:/* \"@rx aaa\" \"id:500012,phase:2,t:none,t:lowercase,log,deny,status:403\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"libxml2",
+    "title":"Testing XML parsing to ARGS with OnlyArgs, check if ARGS is populated",
+    "expected":{
+      "http_code": 403
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+        "<!DOCTYPE author [",
+        "<!ELEMENT book ANY>",
+        "<!ENTITY js SYSTEM \"/etc/passwd\">",
+        "]>",
+        "<bookstore>",
+        "<some-tag>aaa</some-tag><some-tag>bbb</some-tag>",
+        "</bookstore>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecParseXmlIntoArgs OnlyArgs",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500011,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule ARGS:xml.bookstore.some-tag \"@rx aaa\" \"id:500012,phase:2,t:none,t:lowercase,log,deny,status:403\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"libxml2",
+    "title":"Testing XML parsing to ARGS with OnlyArgs, check if XML is populated",
+    "expected":{
+      "http_code": 200
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+        "<!DOCTYPE author [",
+        "<!ELEMENT book ANY>",
+        "<!ENTITY js SYSTEM \"/etc/passwd\">",
+        "]>",
+        "<bookstore>",
+        "<some-tag>aaa</some-tag><some-tag>bbb</some-tag>",
+        "</bookstore>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecParseXmlIntoArgs OnlyArgs",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500011,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule XML:/* \"@rx aaa\" \"id:500012,phase:2,t:none,t:lowercase,log,deny,status:403\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"libxml2",
+    "title":"Testing XML parsing to ARGS with Off, check if ARGS is populated",
+    "expected":{
+      "http_code": 200
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+        "<!DOCTYPE author [",
+        "<!ELEMENT book ANY>",
+        "<!ENTITY js SYSTEM \"/etc/passwd\">",
+        "]>",
+        "<bookstore>",
+        "<some-tag>aaa</some-tag><some-tag>bbb</some-tag>",
+        "</bookstore>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecParseXmlIntoArgs Off",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500011,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule ARGS \"@rx aaa\" \"id:500012,phase:2,t:none,t:lowercase,log,deny,status:403\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"libxml2",
+    "title":"Testing XML parsing to ARGS with Off, check if XML is populated",
+    "expected":{
+      "http_code": 403
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+        "<!DOCTYPE author [",
+        "<!ELEMENT book ANY>",
+        "<!ENTITY js SYSTEM \"/etc/passwd\">",
+        "]>",
+        "<bookstore>",
+        "<some-tag>aaa</some-tag><some-tag>bbb</some-tag>",
+        "</bookstore>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecParseXmlIntoArgs Off",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500011,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule XML:/* \"@rx aaa\" \"id:500012,phase:2,t:none,t:lowercase,log,deny,status:403\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"libxml2",
+    "title":"Testing XML parsing to ARGS with On, turn Off with ctl, check ARGS",
+    "expected":{
+      "http_code": 200
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?q=xml",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+        "<!DOCTYPE author [",
+        "<!ELEMENT book ANY>",
+        "<!ENTITY js SYSTEM \"/etc/passwd\">",
+        "]>",
+        "<bookstore>",
+        "<some-tag>aaa</some-tag><some-tag>bbb</some-tag>",
+        "</bookstore>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecParseXmlIntoArgs On",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500011,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule ARGS_GET:q \"@rx xml\" \"id:500012,phase:1,t:none,t:lowercase,ctl:parseXmlIntoArgs=Off\"",
+        "SecRule ARGS:xml.bookstore.some-tag \"@rx aaa\" \"id:500013,phase:2,t:none,t:lowercase,log,deny,status:403\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"libxml2",
+    "title":"Testing XML parsing to ARGS with On, turn Off with ctl, check XML",
+    "expected":{
+      "http_code": 403
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?q=xml",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+        "<!DOCTYPE author [",
+        "<!ELEMENT book ANY>",
+        "<!ENTITY js SYSTEM \"/etc/passwd\">",
+        "]>",
+        "<bookstore>",
+        "<some-tag>aaa</some-tag><some-tag>bbb</some-tag>",
+        "</bookstore>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecParseXmlIntoArgs On",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500011,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule ARGS_GET:q \"@rx xml\" \"id:500012,phase:1,t:none,t:lowercase,ctl:parseXmlIntoArgs=Off\"",
+        "SecRule XML:/* \"@rx aaa\" \"id:500013,phase:2,t:none,t:lowercase,log,deny,status:403\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"libxml2",
+    "title":"Testing XML parsing to ARGS with On, turn OnlyArgs with ctl, check ARGS",
+    "expected":{
+      "http_code": 403
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?q=xml",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+        "<!DOCTYPE author [",
+        "<!ELEMENT book ANY>",
+        "<!ENTITY js SYSTEM \"/etc/passwd\">",
+        "]>",
+        "<bookstore>",
+        "<some-tag>aaa</some-tag><some-tag>bbb</some-tag>",
+        "</bookstore>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecParseXmlIntoArgs On",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500011,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule ARGS_GET:q \"@rx xml\" \"id:500012,phase:1,t:none,t:lowercase,ctl:parseXmlIntoArgs=OnlyArgs\"",
+        "SecRule ARGS:xml.bookstore.some-tag \"@rx aaa\" \"id:500013,phase:2,t:none,t:lowercase,log,deny,status:403\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"libxml2",
+    "title":"Testing XML parsing to ARGS with On, turn OnlyArgs with ctl, check XML",
+    "expected":{
+      "http_code": 200
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?q=xml",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+        "<!DOCTYPE author [",
+        "<!ELEMENT book ANY>",
+        "<!ENTITY js SYSTEM \"/etc/passwd\">",
+        "]>",
+        "<bookstore>",
+        "<some-tag>aaa</some-tag><some-tag>bbb</some-tag>",
+        "</bookstore>"
+      ]
+
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecParseXmlIntoArgs On",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500011,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule ARGS_GET:q \"@rx xml\" \"id:500012,phase:1,t:none,t:lowercase,ctl:parseXmlIntoArgs=OnlyArgs\"",
+        "SecRule XML:/* \"@rx aaa\" \"id:500013,phase:2,t:none,t:lowercase,log,deny,status:403\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"libxml2",
+    "title":"Testing XML parsing to ARGS with Off, turn On with ctl, check ARGS",
+    "expected":{
+      "http_code": 403
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?q=xml",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+        "<!DOCTYPE author [",
+        "<!ELEMENT book ANY>",
+        "<!ENTITY js SYSTEM \"/etc/passwd\">",
+        "]>",
+        "<bookstore>",
+        "<some-tag>aaa</some-tag><some-tag>bbb</some-tag>",
+        "</bookstore>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecParseXmlIntoArgs Off",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500011,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule ARGS_GET:q \"@rx xml\" \"id:500012,phase:1,t:none,t:lowercase,ctl:parseXmlIntoArgs=On\"",
+        "SecRule ARGS:xml.bookstore.some-tag \"@rx aaa\" \"id:500013,phase:2,t:none,t:lowercase,log,deny,status:403\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"libxml2",
+    "title":"Testing XML parsing to ARGS with Off, turn On with ctl, check XML",
+    "expected":{
+      "http_code": 403
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?q=xml",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+        "<!DOCTYPE author [",
+        "<!ELEMENT book ANY>",
+        "<!ENTITY js SYSTEM \"/etc/passwd\">",
+        "]>",
+        "<bookstore>",
+        "<some-tag>aaa</some-tag><some-tag>bbb</some-tag>",
+        "</bookstore>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecParseXmlIntoArgs Off",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500011,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule ARGS_GET:q \"@rx xml\" \"id:500012,phase:1,t:none,t:lowercase,ctl:parseXmlIntoArgs=On\"",
+        "SecRule XML:/* \"@rx aaa\" \"id:500013,phase:2,t:none,t:lowercase,log,deny,status:403\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "resource":"libxml2",
+    "title":"Testing XML parsing to ARGS with On, node contains utf8 character",
+    "expected":{
+      "http_code": 403
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?q=xml",
+      "method":"POST",
+      "body": [
+        "<pizza>",
+        "<has>pineapple</has><has>🍍</has>",
+        "</pizza>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecParseXmlIntoArgs On",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500011,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule ARGS \"@rx 🍍\" \"id:500013,phase:2,t:none,t:lowercase,log,deny,status:403\""
     ]
   }
 ]

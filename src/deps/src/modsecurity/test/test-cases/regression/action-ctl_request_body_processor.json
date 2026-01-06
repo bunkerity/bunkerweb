@@ -144,7 +144,7 @@
     "resource":"libxml2",
     "title":"Testing CtlRequestBodyProcessor=XML (3)",
     "expected":{
-      "debug_log": "XML: Failed parsing document."
+      "debug_log": "XML: Failed to parse document."
     },
     "client":{
       "ip":"200.249.12.31",

@@ -95,5 +95,73 @@
         "SecRule REQUEST_FILENAME \"@endsWith /wp-login.php\" \"id:9002100,phase:2,t:none,nolog,pass,ctl:ruleRemoveTargetById=1;ARGS\"",
         "SecRule ARGS \"@contains lhebs\" \"id:1,phase:3,t:none,status:202,block,deny,tag:'CRS'\""
     ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing CtlRuleRemoveTargetById (4): uppercase `Referer` header",
+    "expected":{
+      "http_code": 200
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "text/xml",
+        "Referer": "This is an attack"
+      },
+      "uri":"/index.html",
+      "method":"GET",
+      "body": [ ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule REQUEST_FILENAME \"@unconditionalMatch\" \"id:1,phase:1,pass,t:none,ctl:ruleRemoveTargetById=2;REQUEST_HEADERS:referer\"",
+        "SecRule REQUEST_HEADERS:Referer \"@contains attack\" \"id:2,phase:1,deny,t:none,log\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing CtlRuleRemoveTargetById (5): lowercase `Referer` header",
+    "expected":{
+      "http_code": 200
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "text/xml",
+        "referer": "This is an attack"
+      },
+      "uri":"/index.html",
+      "method":"GET",
+      "body": [ ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule REQUEST_FILENAME \"@unconditionalMatch\" \"id:1,phase:1,pass,t:none,ctl:ruleRemoveTargetById=2;REQUEST_HEADERS:referer\"",
+        "SecRule REQUEST_HEADERS:Referer \"@contains attack\" \"id:2,phase:1,deny,t:none,log\""
+    ]
   }
 ]
