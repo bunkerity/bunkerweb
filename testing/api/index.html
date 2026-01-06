@@ -954,6 +954,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#runtime-time-zone" class="md-nav__link">
+    <span class="md-ellipsis">
+      Runtime &amp; time zone
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#configuration-reference-power-users" class="md-nav__link">
     <span class="md-ellipsis">
       Configuration reference (power users)
@@ -1441,6 +1450,25 @@
 <li>Env file at <code>/etc/bunkerweb/api.env</code></li>
 <li>Built-in defaults</li>
 </ol>
+<h3 id="runtime-time-zone">Runtime &amp; time zone</h3>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+<th>Accepted values</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TZ</code></td>
+<td>Time zone for API logs and time-based claims (e.g., Biscuit TTL evaluation and log timestamps)</td>
+<td>TZ database name (e.g., <code>UTC</code>, <code>Europe/Paris</code>)</td>
+<td>unset (container default, usually UTC)</td>
+</tr>
+</tbody>
+</table>
 <p>Disable docs or schema by setting their URLs to <code>off|disabled|none|false|0</code>. Set <code>API_SSL_ENABLED=yes</code> with <code>API_SSL_CERTFILE</code> and <code>API_SSL_KEYFILE</code> to terminate TLS in the API. When reverse-proxying, set <code>API_FORWARDED_ALLOW_IPS</code> to the proxy IPs so Gunicorn trusts <code>X-Forwarded-*</code> headers.</p>
 <h3 id="configuration-reference-power-users">Configuration reference (power users)</h3>
 <h4 id="surface-docs">Surface &amp; docs</h4>
@@ -1743,20 +1771,26 @@
 <tr>
 <td><code>LOG_LEVEL</code>, <code>CUSTOM_LOG_LEVEL</code></td>
 <td>Base log level / override</td>
-<td><code>debug/info/warning/error/critical</code></td>
+<td><code>debug</code>, <code>info</code>, <code>warning</code>, <code>error</code>, <code>critical</code></td>
 <td><code>info</code></td>
 </tr>
 <tr>
 <td><code>LOG_TYPES</code></td>
 <td>Destinations</td>
-<td><code>file</code>, <code>stdout</code>, <code>syslog</code> (comma-separated)</td>
-<td><code>file</code></td>
+<td>Space-separated <code>stderr</code>/<code>file</code>/<code>syslog</code></td>
+<td><code>stderr</code></td>
 </tr>
 <tr>
 <td><code>LOG_FILE_PATH</code></td>
-<td>Log file location</td>
-<td>Path</td>
-<td><code>/var/log/bunkerweb/api.log</code></td>
+<td>Log file location (used when <code>LOG_TYPES</code> includes <code>file</code> or <code>CAPTURE_OUTPUT=yes</code>)</td>
+<td>File path</td>
+<td><code>/var/log/bunkerweb/api.log</code> when file/capture enabled, else unset</td>
+</tr>
+<tr>
+<td><code>LOG_SYSLOG_ADDRESS</code></td>
+<td>Syslog target (<code>udp://host:514</code>, <code>tcp://host:514</code>, socket)</td>
+<td>Host:port, proto-prefixed host, or socket path</td>
+<td>unset</td>
 </tr>
 <tr>
 <td><code>LOG_SYSLOG_TAG</code></td>
@@ -1772,9 +1806,9 @@
 </tr>
 <tr>
 <td><code>CAPTURE_OUTPUT</code></td>
-<td>Capture stdout/stderr</td>
-<td><code>yes/no/on/off/true/false/0/1</code></td>
-<td><code>yes</code></td>
+<td>Capture Gunicorn stdout/stderr into the configured handlers</td>
+<td><code>yes</code> or <code>no</code></td>
+<td><code>no</code></td>
 </tr>
 </tbody>
 </table>

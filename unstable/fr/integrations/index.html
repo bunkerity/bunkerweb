@@ -1699,6 +1699,96 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#parametres-du-conteneur-scheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      Paramètres du conteneur Scheduler
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Paramètres du conteneur Scheduler">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sources-de-configuration-et-priorite" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sources de configuration et priorité
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reference-de-configuration-power-users" class="md-nav__link">
+    <span class="md-ellipsis">
+      Référence de configuration (power users)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Référence de configuration (power users)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#runtime-securite" class="md-nav__link">
+    <span class="md-ellipsis">
+      Runtime &amp; sécurité
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#base-de-donnees" class="md-nav__link">
+    <span class="md-ellipsis">
+      Base de données
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parametres-du-conteneur-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      Paramètres du conteneur UI
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Paramètres du conteneur UI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#logging_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#reseau" class="md-nav__link">
     <span class="md-ellipsis">
       Réseau
@@ -1892,6 +1982,90 @@
   
     <nav class="md-nav" aria-label="Docker autoconf">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parametres-du-conteneur-autoconf" class="md-nav__link">
+    <span class="md-ellipsis">
+      Paramètres du conteneur Autoconf
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Paramètres du conteneur Autoconf">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sources-de-configuration-et-priorite_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sources de configuration et priorité
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reference-de-configuration-power-users_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Référence de configuration (power users)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Référence de configuration (power users)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mode-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mode &amp; runtime
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#base-de-donnees-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Base de données &amp; validation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#portee-filtres-de-decouverte" class="md-nav__link">
+    <span class="md-ellipsis">
+      Portée &amp; filtres de découverte
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specifique-kubernetes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Spécifique Kubernetes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#les-services-dautoconf" class="md-nav__link">
@@ -4225,14 +4399,14 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Paramètres BunkerWeb</p>
-<p>Since version <code>1.6.0</code>, the Scheduler container is where you define the settings for BunkerWeb. The Scheduler then pushes the configuration to the BunkerWeb container.</p>
+<p>Depuis la version <code>1.6.0</code>, le conteneur Scheduler est l’endroit où vous définissez les paramètres de BunkerWeb. Le Scheduler pousse ensuite la configuration vers le conteneur BunkerWeb.</p>
 <p>⚠ <strong>Important</strong>: Tous les paramètres liés à l'API (comme <code>API_HTTP_PORT</code>, <code>API_LISTEN_IP</code>, <code>API_SERVER_NAME</code>, <code>API_WHITELIST_IP</code>, et <code>API_TOKEN</code> si vous l'utilisez) <strong>doivent également être définis dans le conteneur BunkerWeb</strong>. Les paramètres doivent être répliqués dans les deux conteneurs, sinon le conteneur BunkerWeb n'acceptera pas les requêtes API du Scheduler.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">x-bw-api-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-api-env</span>
-<span class="w">  </span><span class="c1"># We use an anchor to avoid repeating the same settings for both containers</span>
-<span class="w">  </span><span class="nt">API_HTTP_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5000&quot;</span><span class="w"> </span><span class="c1"># Default value</span>
-<span class="w">  </span><span class="nt">API_LISTEN_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0.0.0.0&quot;</span><span class="w"> </span><span class="c1"># Default value</span>
-<span class="w">  </span><span class="nt">API_SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bwapi&quot;</span><span class="w"> </span><span class="c1"># Default value</span>
-<span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/24</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span><span class="w"> </span><span class="c1"># Set this according to your network settings</span>
+<span class="w">  </span><span class="c1"># Nous utilisons une ancre pour éviter de répéter les mêmes réglages pour les deux conteneurs</span>
+<span class="w">  </span><span class="nt">API_HTTP_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5000&quot;</span><span class="w"> </span><span class="c1"># Valeur par défaut</span>
+<span class="w">  </span><span class="nt">API_LISTEN_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0.0.0.0&quot;</span><span class="w"> </span><span class="c1"># Valeur par défaut</span>
+<span class="w">  </span><span class="nt">API_SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bwapi&quot;</span><span class="w"> </span><span class="c1"># Valeur par défaut</span>
+<span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/24</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span><span class="w"> </span><span class="c1"># Adaptez selon votre réseau</span>
 <span class="w">  </span><span class="c1"># Jeton optionnel ; si défini, le Scheduler enverra Authorization: Bearer &lt;token&gt;</span>
 <span class="w">  </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
 
@@ -4240,7 +4414,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="c1"># This will set the API settings for the BunkerWeb container</span>
+<span class="w">      </span><span class="c1"># Paramètres API pour le conteneur BunkerWeb</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
@@ -4249,10 +4423,10 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="c1"># This will set the API settings for the Scheduler container</span>
+<span class="w">      </span><span class="c1"># Paramètres API pour le conteneur Scheduler</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like backups</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># Pour persister le cache et d&#39;autres données comme les sauvegardes</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -4296,8 +4470,209 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>b
 sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
 </code></pre></div>
 </div>
+<h3 id="parametres-du-conteneur-scheduler">Paramètres du conteneur Scheduler</h3>
+<p>Le Scheduler est le worker du plan de contrôle qui lit les paramètres, rend les configs et les pousse vers les instances BunkerWeb. Les réglages sont centralisés ici avec leurs valeurs par défaut et acceptées.</p>
+<h4 id="sources-de-configuration-et-priorite">Sources de configuration et priorité</h4>
+<ol>
+<li>Variables d'environnement (y compris <code>environment:</code> Docker/Compose)</li>
+<li>Secrets dans <code>/run/secrets/&lt;VAR&gt;</code> (chargés automatiquement par l'entrypoint)</li>
+<li>Valeurs par défaut intégrées</li>
+</ol>
+<h4 id="reference-de-configuration-power-users">Référence de configuration (power users)</h4>
+<h5 id="runtime-securite">Runtime &amp; sécurité</h5>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+<th>Valeurs acceptées</th>
+<th>Défaut</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HEALTHCHECK_INTERVAL</code></td>
+<td>Secondes entre les healthchecks du Scheduler</td>
+<td>Secondes entières</td>
+<td><code>30</code></td>
+</tr>
+<tr>
+<td><code>RELOAD_MIN_TIMEOUT</code></td>
+<td>Secondes minimales entre deux reloads successifs</td>
+<td>Secondes entières</td>
+<td><code>5</code></td>
+</tr>
+<tr>
+<td><code>DISABLE_CONFIGURATION_TESTING</code></td>
+<td>Sauter les tests de configuration avant application</td>
+<td><code>yes</code> ou <code>no</code></td>
+<td><code>no</code></td>
+</tr>
+<tr>
+<td><code>IGNORE_FAIL_SENDING_CONFIG</code></td>
+<td>Continuer même si certaines instances ne reçoivent pas la config</td>
+<td><code>yes</code> ou <code>no</code></td>
+<td><code>no</code></td>
+</tr>
+<tr>
+<td><code>IGNORE_REGEX_CHECK</code></td>
+<td>Ignorer la validation regex des paramètres (partagé avec autoconf)</td>
+<td><code>yes</code> ou <code>no</code></td>
+<td><code>no</code></td>
+</tr>
+<tr>
+<td><code>TZ</code></td>
+<td>Fuseau horaire pour les logs du Scheduler, tâches type cron, sauvegardes et dates</td>
+<td>Nom de base TZ (ex. <code>UTC</code>, <code>Europe/Paris</code>)</td>
+<td>unset (défaut conteneur, généralement UTC)</td>
+</tr>
+</tbody>
+</table>
+<h5 id="base-de-donnees">Base de données</h5>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+<th>Valeurs acceptées</th>
+<th>Défaut</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DATABASE_URI</code></td>
+<td>DSN principal de base de données (partagé avec autoconf et les instances)</td>
+<td>DSN SQLAlchemy</td>
+<td><code>sqlite:////var/lib/bunkerweb/db.sqlite3</code></td>
+</tr>
+<tr>
+<td><code>DATABASE_URI_READONLY</code></td>
+<td>DSN optionnel en lecture seule ; le Scheduler bascule en RO si c'est tout ce qui fonctionne</td>
+<td>DSN SQLAlchemy ou vide</td>
+<td>unset</td>
+</tr>
+</tbody>
+</table>
+<h5 id="logging">Logging</h5>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+<th>Valeurs acceptées</th>
+<th>Défaut</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOG_LEVEL</code>, <code>CUSTOM_LOG_LEVEL</code></td>
+<td>Niveau de log de base / override</td>
+<td><code>debug</code>, <code>info</code>, <code>warning</code>, <code>error</code>, <code>critical</code></td>
+<td><code>info</code></td>
+</tr>
+<tr>
+<td><code>LOG_TYPES</code></td>
+<td>Destinations</td>
+<td><code>stderr</code>/<code>file</code>/<code>syslog</code> séparés par espaces</td>
+<td><code>stderr</code></td>
+</tr>
+<tr>
+<td><code>SCHEDULER_LOG_TO_FILE</code></td>
+<td>Activer le log fichier et définir le chemin par défaut</td>
+<td><code>yes</code> ou <code>no</code></td>
+<td><code>no</code></td>
+</tr>
+<tr>
+<td><code>LOG_FILE_PATH</code></td>
+<td>Chemin de log personnalisé (utilisé quand <code>LOG_TYPES</code> inclut <code>file</code>)</td>
+<td>Chemin de fichier</td>
+<td><code>/var/log/bunkerweb/scheduler.log</code> avec <code>SCHEDULER_LOG_TO_FILE=yes</code>, sinon unset</td>
+</tr>
+<tr>
+<td><code>LOG_SYSLOG_ADDRESS</code></td>
+<td>Cible syslog (<code>udp://host:514</code>, <code>tcp://host:514</code>, ou chemin de socket)</td>
+<td>Host:port, hôte préfixé protocole ou socket</td>
+<td>unset</td>
+</tr>
+<tr>
+<td><code>LOG_SYSLOG_TAG</code></td>
+<td>Ident/tag syslog</td>
+<td>Chaîne</td>
+<td><code>bw-scheduler</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="parametres-du-conteneur-ui">Paramètres du conteneur UI</h3>
+<p>Le conteneur UI respecte aussi <code>TZ</code> pour localiser les logs et les tâches planifiées (ex. nettoyages lancés via l'UI).</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+<th>Valeurs acceptées</th>
+<th>Défaut</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TZ</code></td>
+<td>Fuseau horaire pour les logs UI et actions planifiées</td>
+<td>Nom dans la base TZ (ex. <code>UTC</code>, <code>Europe/Paris</code>)</td>
+<td>unset (défaut conteneur, généralement UTC)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="logging_1">Logging</h4>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+<th>Valeurs acceptées</th>
+<th>Défaut</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOG_LEVEL</code>, <code>CUSTOM_LOG_LEVEL</code></td>
+<td>Niveau de base / override</td>
+<td><code>debug</code>, <code>info</code>, <code>warning</code>, <code>error</code>, <code>critical</code></td>
+<td><code>info</code></td>
+</tr>
+<tr>
+<td><code>LOG_TYPES</code></td>
+<td>Destinations</td>
+<td><code>stderr</code>/<code>file</code>/<code>syslog</code> séparés par espaces</td>
+<td><code>stderr</code></td>
+</tr>
+<tr>
+<td><code>LOG_FILE_PATH</code></td>
+<td>Chemin pour le log fichier (utilisé si <code>LOG_TYPES</code> inclut <code>file</code> ou <code>CAPTURE_OUTPUT=yes</code>)</td>
+<td>Chemin de fichier</td>
+<td><code>/var/log/bunkerweb/ui.log</code> quand file/capture, sinon unset</td>
+</tr>
+<tr>
+<td><code>LOG_SYSLOG_ADDRESS</code></td>
+<td>Cible syslog (<code>udp://host:514</code>, <code>tcp://host:514</code>, socket)</td>
+<td>Host:port, hôte préfixé protocole ou chemin</td>
+<td>unset</td>
+</tr>
+<tr>
+<td><code>LOG_SYSLOG_TAG</code></td>
+<td>Ident/tag syslog</td>
+<td>Chaîne</td>
+<td><code>bw-ui</code></td>
+</tr>
+<tr>
+<td><code>CAPTURE_OUTPUT</code></td>
+<td>Envoyer stdout/stderr Gunicorn vers les sorties de log configurées</td>
+<td><code>yes</code> ou <code>no</code></td>
+<td><code>no</code></td>
+</tr>
+</tbody>
+</table>
 <h3 id="reseau">Réseau</h3>
-<p>Par défaut, le conteneur BunkerWeb écoute (à l'intérieur du conteneur) les <strong>fichiers 8080/tcp</strong> pour <strong>HTTP,</strong> <strong>8443/tcp</strong> pour <strong>HTTPS</strong> et <strong>8443/udp</strong> pour <strong>QUIC</strong>.</p>
+<p>Par défaut, le conteneur BunkerWeb écoute (à l'intérieur du conteneur) sur <strong>8080/tcp</strong> pour <strong>HTTP</strong>, <strong>8443/tcp</strong> pour <strong>HTTPS</strong> et <strong>8443/udp</strong> pour <strong>QUIC</strong>.</p>
 <p>!! avertissement "Ports privilégiés en mode rootless ou lors de l'utilisation de Podman"
     Si vous utilisez <a href="https://docs.docker.com/engine/security/rootless">Docker en mode rootless</a> et que vous souhaitez rediriger les ports privilégiés (&lt; 1024) tels que 80 et 443 vers BunkerWeb, veuillez vous référer aux prérequis <a href="https://docs.docker.com/engine/security/rootless/#exposing-privileged-ports">ici</a>.</p>
 <pre><code>If you are using [Podman](https://podman.io/), you can lower the minimum number for unprivileged ports:
@@ -4808,9 +5183,23 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>setopt<span class="w"> </span>updates-testing.enabled<span class="o">=</span><span class="m">1</span>
 </code></pre></div>
 </div>
-<p>Fedora fournit déjà NGINX 1.28.0, que nous prenons en charge :</p>
+<p>Fedora fournit déjà NGINX, que nous prenons en charge. Choisissez votre version de Fedora ci-dessous pour installer le bon paquet NGINX :</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Fedora 41</label><label for="__tabbed_2_2">Fedora 42 / 43</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.28.0
 </code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="admonition warning">
+<p class="admonition-title">NGINX 1.28.0 n'est plus disponible</p>
+<p>Fedora 42 et 43 ont supprimé NGINX 1.28.0 de leurs miroirs. Vous devez installer NGINX 1.28.1 à la place.</p>
+</div>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.28.1
+</code></pre></div>
+</div>
+</div>
+</div>
 <div class="admonition example">
 <p class="admonition-title">Désactiver l'assistant d'installation</p>
 <p>Si vous ne souhaitez pas utiliser l'assistant de configuration de l'interface Web lors de l'installation de BunkerWeb, exportez la variable suivante :</p>
@@ -5028,6 +5417,248 @@ MY_SETTING_2=value2
 <p class="admonition-title">Utilisation de Docker en mode rootless</p>
 <p>Si vous utilisez <a href="https://docs.docker.com/engine/security/rootless">Docker en mode rootless</a>, vous devrez remplacer le support du socket docker par la valeur suivante : <code>$XDG_RUNTIME_DIR/docker.sock:/var/run/docker.sock:ro</code>.</p>
 </div>
+<h3 id="parametres-du-conteneur-autoconf">Paramètres du conteneur Autoconf</h3>
+<p>Le contrôleur <code>bw-autoconf</code> surveille votre orchestrateur et écrit les changements dans la base de données partagée.</p>
+<h4 id="sources-de-configuration-et-priorite_1">Sources de configuration et priorité</h4>
+<ol>
+<li>Variables d'environnement (y compris <code>environment:</code> Docker/Compose)</li>
+<li>Secrets dans <code>/run/secrets/&lt;VAR&gt;</code> (chargés automatiquement par l'entrypoint)</li>
+<li>Valeurs par défaut intégrées</li>
+</ol>
+<h4 id="reference-de-configuration-power-users_1">Référence de configuration (power users)</h4>
+<h5 id="mode-runtime">Mode &amp; runtime</h5>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+<th>Valeurs acceptées</th>
+<th>Défaut</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AUTOCONF_MODE</code></td>
+<td>Activer le contrôleur autoconf</td>
+<td><code>yes</code> ou <code>no</code></td>
+<td><code>no</code></td>
+</tr>
+<tr>
+<td><code>SWARM_MODE</code></td>
+<td>Surveiller les services Swarm au lieu des conteneurs Docker</td>
+<td><code>yes</code> ou <code>no</code></td>
+<td><code>no</code></td>
+</tr>
+<tr>
+<td><code>KUBERNETES_MODE</code></td>
+<td>Surveiller les ingress/pods Kubernetes au lieu de Docker</td>
+<td><code>yes</code> ou <code>no</code></td>
+<td><code>no</code></td>
+</tr>
+<tr>
+<td><code>DOCKER_HOST</code></td>
+<td>Socket Docker / URL API distante</td>
+<td>ex. <code>unix:///var/run/docker.sock</code></td>
+<td><code>unix:///var/run/docker.sock</code></td>
+</tr>
+<tr>
+<td><code>WAIT_RETRY_INTERVAL</code></td>
+<td>Secondes entre les vérifications de disponibilité des instances</td>
+<td>Secondes entières</td>
+<td><code>5</code></td>
+</tr>
+<tr>
+<td><code>LOG_SYSLOG_TAG</code></td>
+<td>Tag syslog pour les logs autoconf</td>
+<td>Chaîne</td>
+<td><code>bw-autoconf</code></td>
+</tr>
+<tr>
+<td><code>TZ</code></td>
+<td>Fuseau horaire pour les logs autoconf et les horodatages</td>
+<td>Nom de base TZ (ex. <code>Europe/Paris</code>)</td>
+<td>unset (défaut conteneur, souvent UTC)</td>
+</tr>
+</tbody>
+</table>
+<h5 id="base-de-donnees-validation">Base de données &amp; validation</h5>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+<th>Valeurs acceptées</th>
+<th>Défaut</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DATABASE_URI</code></td>
+<td>DSN principal de base de données (doit correspondre à la BD du Scheduler)</td>
+<td>DSN SQLAlchemy</td>
+<td><code>sqlite:////var/lib/bunkerweb/db.sqlite3</code></td>
+</tr>
+<tr>
+<td><code>DATABASE_URI_READONLY</code></td>
+<td>DSN optionnel en lecture seule ; autoconf bascule en RO si c'est tout ce qui fonctionne</td>
+<td>DSN SQLAlchemy ou vide</td>
+<td>unset</td>
+</tr>
+<tr>
+<td><code>IGNORE_REGEX_CHECK</code></td>
+<td>Ignorer la validation regex pour les paramètres issus des labels/annotations</td>
+<td><code>yes</code> ou <code>no</code></td>
+<td><code>no</code></td>
+</tr>
+</tbody>
+</table>
+<h5 id="logging_2">Logging</h5>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+<th>Valeurs acceptées</th>
+<th>Défaut</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOG_LEVEL</code>, <code>CUSTOM_LOG_LEVEL</code></td>
+<td>Niveau de log de base / override</td>
+<td><code>debug</code>, <code>info</code>, <code>warning</code>, <code>error</code>, <code>critical</code></td>
+<td><code>info</code></td>
+</tr>
+<tr>
+<td><code>LOG_TYPES</code></td>
+<td>Destinations</td>
+<td><code>stderr</code>/<code>file</code>/<code>syslog</code> séparés par espaces</td>
+<td><code>stderr</code></td>
+</tr>
+<tr>
+<td><code>LOG_FILE_PATH</code></td>
+<td>Chemin pour le log fichier (quand <code>LOG_TYPES</code> inclut <code>file</code>)</td>
+<td>Chemin de fichier</td>
+<td>unset (définissez le vôtre si vous activez <code>file</code>)</td>
+</tr>
+<tr>
+<td><code>LOG_SYSLOG_ADDRESS</code></td>
+<td>Cible syslog (<code>udp://host:514</code>, <code>tcp://host:514</code>, socket)</td>
+<td>Host:port, hôte préfixé protocole ou chemin</td>
+<td>unset</td>
+</tr>
+<tr>
+<td><code>LOG_SYSLOG_TAG</code></td>
+<td>Ident/tag syslog</td>
+<td>Chaîne</td>
+<td><code>bw-autoconf</code></td>
+</tr>
+</tbody>
+</table>
+<h5 id="portee-filtres-de-decouverte">Portée &amp; filtres de découverte</h5>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+<th>Valeurs acceptées</th>
+<th>Défaut</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NAMESPACES</code></td>
+<td>Liste d'espaces/ projets gérés (séparés par espaces) ; unset = tous</td>
+<td>Chaînes séparées par espaces</td>
+<td>unset</td>
+</tr>
+<tr>
+<td><code>DOCKER_IGNORE_LABELS</code></td>
+<td>Ignorer des conteneurs/labels lors de la collecte d'instances/services/configs</td>
+<td>Clés complètes ou suffixes séparés espace/virgule</td>
+<td>unset</td>
+</tr>
+<tr>
+<td><code>SWARM_IGNORE_LABELS</code></td>
+<td>Ignorer les services/configs Swarm avec labels correspondants</td>
+<td>Clés complètes ou suffixes séparés espace/virgule</td>
+<td>unset</td>
+</tr>
+<tr>
+<td><code>KUBERNETES_IGNORE_ANNOTATIONS</code></td>
+<td>Ignorer des annotations d'ingress/pod pendant la découverte</td>
+<td>Clés complètes ou suffixes séparés espace/virgule</td>
+<td>unset</td>
+</tr>
+</tbody>
+</table>
+<h5 id="specifique-kubernetes">Spécifique Kubernetes</h5>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+<th>Valeurs acceptées</th>
+<th>Défaut</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>KUBERNETES_VERIFY_SSL</code></td>
+<td>Vérifier le TLS de l'API Kubernetes</td>
+<td><code>yes</code> ou <code>no</code></td>
+<td><code>yes</code></td>
+</tr>
+<tr>
+<td><code>KUBERNETES_SSL_CA_CERT</code></td>
+<td>Chemin vers un bundle CA personnalisé pour l'API Kubernetes</td>
+<td>Chemin de fichier</td>
+<td>unset</td>
+</tr>
+<tr>
+<td><code>USE_KUBERNETES_FQDN</code></td>
+<td>Utiliser <code>&lt;pod&gt;.&lt;ns&gt;.pod.&lt;domain&gt;</code> plutôt que l'IP du Pod comme hostname d'instance</td>
+<td><code>yes</code> ou <code>no</code></td>
+<td><code>yes</code></td>
+</tr>
+<tr>
+<td><code>KUBERNETES_INGRESS_CLASS</code></td>
+<td>Ne traiter que les ingress avec cette classe</td>
+<td>Chaîne</td>
+<td>unset (toutes)</td>
+</tr>
+<tr>
+<td><code>KUBERNETES_DOMAIN_NAME</code></td>
+<td>Suffixe de domaine du cluster lors de la construction des hôtes upstream</td>
+<td>Chaîne</td>
+<td><code>cluster.local</code></td>
+</tr>
+<tr>
+<td><code>KUBERNETES_SERVICE_PROTOCOL</code></td>
+<td>Schéma utilisé pour les hôtes de reverse proxy générés</td>
+<td><code>http</code> ou <code>https</code></td>
+<td><code>http</code></td>
+</tr>
+<tr>
+<td><code>BUNKERWEB_SERVICE_NAME</code></td>
+<td>Nom du Service lu lors du patch du statut Ingress avec l'adresse du load balancer</td>
+<td>Chaîne</td>
+<td><code>bunkerweb</code></td>
+</tr>
+<tr>
+<td><code>BUNKERWEB_NAMESPACE</code></td>
+<td>Namespace de ce Service</td>
+<td>Chaîne</td>
+<td><code>bunkerweb</code></td>
+</tr>
+<tr>
+<td><code>KUBERNETES_REVERSE_PROXY_SUFFIX_START</code></td>
+<td>Index de départ pour <code>REVERSE_PROXY_HOST_n</code>/<code>REVERSE_PROXY_URL_n</code> générés sur les ingress multi-path</td>
+<td>Entier (&gt;=0)</td>
+<td><code>1</code></td>
+</tr>
+</tbody>
+</table>
 <h3 id="les-services-dautoconf">Les services d'Autoconf</h3>
 <p>Une fois la pile configurée, vous pourrez créer le conteneur de l'application web et ajouter les paramètres sous forme d'étiquettes à l'aide du préfixe "bunkerweb." afin de configurer automatiquement BunkerWeb :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
@@ -6336,7 +6967,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <li>Modèle Azure ARM</li>
 <li>Portail Azure via la Place de marché</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Cloud Shell</label><label for="__tabbed_2_2">Modèle ARM</label><label for="__tabbed_2_3">Marketplace</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Cloud Shell</label><label for="__tabbed_3_2">Modèle ARM</label><label for="__tabbed_3_3">Marketplace</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Créez un groupe de ressources. Remplacez la valeur <code>RG_NAME</code></p>

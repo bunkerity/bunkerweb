@@ -917,9 +917,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#authentifizierung-berechtigungen" class="md-nav__link">
+  <a href="#authentifizierung-und-autorisierung" class="md-nav__link">
     <span class="md-ellipsis">
-      Authentifizierung &amp; Berechtigungen
+      Authentifizierung und Autorisierung
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#berechtigungen-und-acl" class="md-nav__link">
+    <span class="md-ellipsis">
+      Berechtigungen und ACL
     </span>
   </a>
   
@@ -935,18 +944,120 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#konfigurationsquellen-prioritat" class="md-nav__link">
+  <a href="#konfigurationsquellen-und-prioritat" class="md-nav__link">
     <span class="md-ellipsis">
-      Konfigurationsquellen (Priorität)
+      Konfigurationsquellen und Priorität
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Konfigurationsquellen und Priorität">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#laufzeit-zeitzone" class="md-nav__link">
+    <span class="md-ellipsis">
+      Laufzeit &amp; Zeitzone
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#konfigurationsreferenz-power-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      Konfigurationsreferenz (Power User)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Konfigurationsreferenz (Power User)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#oberflache-docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Oberfläche &amp; Docs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auth-acl-biscuit" class="md-nav__link">
+    <span class="md-ellipsis">
+      Auth, ACL, Biscuit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#allowlist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Allowlist
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ratenbegrenzung_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ratenbegrenzung
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#redisvalkey-fur-rate-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      Redis/Valkey (für Rate Limits)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#listener-tls" class="md-nav__link">
+    <span class="md-ellipsis">
+      Listener &amp; TLS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging-laufzeit-package-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging &amp; Laufzeit (Package-Defaults)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-flache-capabilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      API-Fläche (Capabilities)
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#wichtige-einstellungen-auszug" class="md-nav__link">
+  <a href="#betriebsverhalten" class="md-nav__link">
     <span class="md-ellipsis">
-      Wichtige Einstellungen (Auszug)
+      Betriebsverhalten
     </span>
   </a>
   
@@ -1091,48 +1202,230 @@
 
 <h1 id="api">API</h1>
 <h2 id="rolle-der-api">Rolle der API</h2>
-<p>Die BunkerWeb API ist die Steuerungsebene zum Verwalten von Instanzen, Diensten, Sperren, Jobs, Plugins und Konfigurationen. Sie läuft als FastAPI-Anwendung hinter Gunicorn und sollte auf einem vertrauenswürdigen Netz bleiben. Interaktive Doku: <code>/docs</code> (oder <code>&lt;API_ROOT_PATH&gt;/docs</code>), OpenAPI: <code>/openapi.json</code>.</p>
+<p>Die BunkerWeb API ist die Steuerungsebene zum Verwalten von Instanzen, Diensten, Sperren, Plugins, Jobs und benutzerdefinierten Konfigurationen. Sie läuft als FastAPI-Anwendung hinter Gunicorn und sollte in einem vertrauenswürdigen Netz bleiben. Interaktive Doku unter <code>/docs</code> (oder <code>&lt;API_ROOT_PATH&gt;/docs</code>); das OpenAPI-Schema unter <code>/openapi.json</code>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Privat halten</p>
-<p>Exponieren Sie die API nicht direkt ins Internet. Halten Sie sie intern, beschränken Sie Quell-IP-Bereiche und verlangen Sie Authentifizierung.</p>
+<p>Exponieren Sie die API nicht direkt ins Internet. Halten Sie sie in einem internen Netz, beschränken Sie Quell-IPs und verlangen Sie Authentifizierung.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Kurzinfos</p>
+<ul>
+<li>Health-Endpoints: <code>GET /ping</code> und <code>GET /health</code></li>
+<li>Root-Pfad: setzen Sie <code>API_ROOT_PATH</code>, wenn per Reverse Proxy auf einem Unterpfad veröffentlicht, damit Docs und OpenAPI-Links funktionieren</li>
+<li>Auth ist Pflicht: Biscuit-Tokens, Admin-Basic oder ein override-Bearer-Token</li>
+<li>IP-Allowlist standardmäßig auf RFC1918-Bereiche (<code>API_WHITELIST_IPS</code>); nur deaktivieren, wenn Upstream den Zugang kontrolliert</li>
+<li>Ratenbegrenzung standardmäßig an; <code>/auth</code> hat immer eigenes Limit</li>
+</ul>
 </div>
 <h2 id="sicherheits-checkliste">Sicherheits-Checkliste</h2>
 <ul>
-<li>Netzwerk: intern binden, <code>API_WHITELIST_IPS</code> gesetzt lassen oder upstream filtern.</li>
-<li>Auth vorhanden: <code>API_USERNAME</code>/<code>API_PASSWORD</code> setzen, optional <code>API_TOKEN</code> als Notfall.</li>
-<li>Pfad verbergen: bei Reverse Proxy <code>API_ROOT_PATH</code> spiegeln.</li>
-<li>Ratenbegrenzung: aktiviert lassen, <code>/auth</code> hat eigenes Limit.</li>
-<li>TLS: am Proxy terminieren oder <code>API_SSL_ENABLED=yes</code> plus Zertifikate.</li>
+<li>Netzwerk: Traffic intern halten; an Loopback oder internes Interface binden und Quell-IPs per <code>API_WHITELIST_IPS</code> (standardmäßig aktiv) begrenzen.</li>
+<li>Auth vorhanden: <code>API_USERNAME</code>/<code>API_PASSWORD</code> (Admin) setzen und bei Bedarf <code>API_ACL_BOOTSTRAP_FILE</code> für weitere Nutzer/ACLs; ein Override <code>API_TOKEN</code> nur als Notfall behalten.</li>
+<li>Pfad verbergen: beim Reverse Proxy einen nicht offensichtlichen <code>API_ROOT_PATH</code> wählen und auf dem Proxy spiegeln.</li>
+<li>Ratenbegrenzung: aktiviert lassen, außer eine andere Schicht erzwingt gleichwertige Limits; <code>/auth</code> ist immer begrenzt.</li>
+<li>TLS: am Proxy terminieren oder <code>API_SSL_ENABLED=yes</code> mit Zertifikat/Key setzen.</li>
 </ul>
 <h2 id="ausfuhren">Ausführen</h2>
+<p>Wählen Sie die Variante, die zu Ihrer Umgebung passt.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">All-in-One</label><label for="__tabbed_1_3">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Minimaler Compose-ähnlicher Aufbau mit der API hinter BunkerWeb. Versionen und Passwörter vor Nutzung anpassen.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">x-bw-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-env</span>
+<span class="w">  </span><span class="c1"># Wir nutzen einen Anker, um dieselben Einstellungen nicht doppelt zu schreiben</span>
+<span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span><span class="w"> </span><span class="c1"># Korrekte IP-Range setzen, damit der Scheduler die Konfiguration an die Instanz senden kann (interne BunkerWeb API)</span>
+<span class="w">  </span><span class="c1"># Optional: API-Token setzen und in beiden Containern spiegeln (interne BunkerWeb API)</span>
+<span class="w">  </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+<span class="w">  </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Stärkeres Datenbank-Passwort setzen</span>
+
+<span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># Name, unter dem die Instanz im Scheduler erscheint</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/udp&quot;</span><span class="w"> </span><span class="c1"># Für QUIC / HTTP3</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span><span class="w"> </span><span class="c1"># Anker wiederverwenden, um Dopplungen zu vermeiden</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
+
+<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
+<span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># Instanznamen korrekt setzen</span>
+<span class="w">      </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;api.example.com&quot;</span>
+<span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">USE_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">REDIS_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;redis&quot;</span>
+<span class="w">      </span><span class="nt">DISABLE_DEFAULT_SERVER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">AUTO_LETS_ENCRYPT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">api.example.com_USE_TEMPLATE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;api&quot;</span>
+<span class="w">      </span><span class="nt">api.example.com_USE_REVERSE_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">api.example.com_REVERSE_PROXY_URL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/&quot;</span>
+<span class="w">      </span><span class="nt">api.example.com_REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://bw-api:8888&quot;</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># Cache und Backups persistent halten</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+
+<span class="w">  </span><span class="nt">bw-api</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-api:testing</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
+<span class="w">      </span><span class="nt">API_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin&quot;</span>
+<span class="w">      </span><span class="nt">API_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Str0ng&amp;P@ss!&quot;</span>
+<span class="w">      </span><span class="c1"># API_TOKEN: &quot;admin-override-token&quot; # optional</span>
+<span class="w">      </span><span class="nt">FORWARDED_ALLOW_IPS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span><span class="w"> </span><span class="c1"># Vorsicht: nur setzen, wenn sicher nur der Reverse Proxy Zugriff hat</span>
+<span class="w">      </span><span class="nt">API_ROOT_PATH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+
+<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="c1"># Größeres max allowed packet, um Probleme mit großen Queries zu vermeiden</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Stärkeres DB-Passwort setzen</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+
+<span class="w">  </span><span class="nt">redis</span><span class="p">:</span><span class="w"> </span><span class="c1"># Redis-Service zur Persistenz von Reports/Bans/Stats</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:8-alpine</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
+<span class="w">      </span><span class="no">redis-server</span>
+<span class="w">      </span><span class="no">--maxmemory 256mb</span>
+<span class="w">      </span><span class="no">--maxmemory-policy allkeys-lru</span>
+<span class="w">      </span><span class="no">--save 60 1000</span>
+<span class="w">      </span><span class="no">--appendonly yes</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis-data:/data</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+
+<span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">redis-data</span><span class="p">:</span>
+
+<span class="nt">networks</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">    </span><span class="nt">ipam</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">      </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.20.30.0/24</span><span class="w"> </span><span class="c1"># Korrekte IP-Range setzen, damit der Scheduler die Konfiguration an die Instanz senden kann</span>
+<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
+<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">SERVICE_API</span><span class="o">=</span>yes<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">API_WHITELIST_IPS</span><span class="o">=</span><span class="s2">&quot;127.0.0.0/8&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:testing
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Die DEB/RPM-Pakete bringen <code>bunkerweb-api.service</code>, verwaltet über <code>/usr/share/bunkerweb/scripts/bunkerweb-api.sh</code>.</p>
 <ul>
-<li>Docker/Compose oder All-in-One wie in der englischen <code>docs/api.md</code> beschrieben.</li>
-<li>Linux-Pakete bringen <code>bunkerweb-api.service</code>; Logs unter <code>/var/log/bunkerweb/api.log</code>.</li>
+<li>Aktivieren/Starten: <code>sudo systemctl enable --now bunkerweb-api.service</code></li>
+<li>Reload: <code>sudo systemctl reload bunkerweb-api.service</code></li>
+<li>Logs: Journal plus <code>/var/log/bunkerweb/api.log</code></li>
+<li>Standard-Liste: <code>127.0.0.1:8888</code> mit <code>API_WHITELIST_IPS=127.0.0.1</code></li>
+<li>Konfigurationsdateien: <code>/etc/bunkerweb/api.env</code> (bei erstem Start mit kommentierten Defaults erzeugt) und <code>/etc/bunkerweb/api.yml</code></li>
+<li>Umgebungsquellen: <code>api.env</code>, <code>variables.env</code>, <code>/run/secrets/&lt;VAR&gt;</code> und dann exportiert in den Gunicorn-Prozess</li>
 </ul>
-<h2 id="authentifizierung-berechtigungen">Authentifizierung &amp; Berechtigungen</h2>
+<p>Bearbeiten Sie <code>/etc/bunkerweb/api.env</code>, um <code>API_USERNAME</code>/<code>API_PASSWORD</code>, Allowlist, TLS, Ratenlimits oder <code>API_ROOT_PATH</code> zu setzen, dann <code>systemctl reload bunkerweb-api</code>.</p>
+</div>
+</div>
+</div>
+<h2 id="authentifizierung-und-autorisierung">Authentifizierung und Autorisierung</h2>
 <ul>
-<li><code>/auth</code> gibt Biscuit-Tokens aus; Basic, Formular, JSON oder Bearer gleich <code>API_TOKEN</code>.</li>
-<li>Admin kann auch direkt per Basic arbeiten.</li>
-<li>Biscuit enthält Benutzer, Zeit, Client-IP, Rolle/ACL und TTL (<code>API_BISCUIT_TTL_SECONDS</code>, <code>0/off</code> deaktiviert).</li>
+<li><code>/auth</code> gibt Biscuit-Tokens aus. Zugangsdaten können per Basic Auth, Formularfeldern, JSON-Body oder Bearer-Header gleich <code>API_TOKEN</code> (Admin-Override) kommen.</li>
+<li>Admins können geschützte Routen auch direkt mit HTTP Basic aufrufen (kein Biscuit nötig).</li>
+<li>Stimmt der Bearer-Token mit <code>API_TOKEN</code> überein, besteht voller/Admin-Zugriff. Sonst erzwingt der Biscuit-Guard ACLs.</li>
+<li>Biscuit-Payload enthält Benutzer, Zeit, Client-IP, Host, Version, eine grobe <code>role("api_user", ["read", "write"])</code> und entweder <code>admin(true)</code> oder feingranulare <code>api_perm(resource_type, resource_id|*, permission)</code>.</li>
+<li>TTL: <code>API_BISCUIT_TTL_SECONDS</code> (0/off deaktiviert Ablauf). Schlüssel liegen unter <code>/var/lib/bunkerweb/.api_biscuit_private_key</code> und <code>.api_biscuit_public_key</code>, sofern nicht via <code>BISCUIT_PRIVATE_KEY</code>/<code>BISCUIT_PUBLIC_KEY</code> gesetzt.</li>
+<li>Auth-Endpoints sind nur verfügbar, wenn mindestens ein API-User in der Datenbank existiert.</li>
 </ul>
+<div class="admonition tip">
+<p class="admonition-title">Auth-Quickstart</p>
+<ol>
+<li><code>API_USERNAME</code> und <code>API_PASSWORD</code> setzen (und <code>OVERRIDE_API_CREDS=yes</code>, wenn neu seeds nötig sind).</li>
+<li><code>POST /auth</code> mit Basic Auth aufrufen; <code>.token</code> aus der Antwort lesen.</li>
+<li><code>Authorization: Bearer &lt;token&gt;</code> bei folgenden Aufrufen nutzen.</li>
+</ol>
+</div>
+<h2 id="berechtigungen-und-acl">Berechtigungen und ACL</h2>
+<ul>
+<li>Grobe Rolle: GET/HEAD/OPTIONS brauchen <code>read</code>; schreibende Verben brauchen <code>write</code>.</li>
+<li>Feingranulare ACL greift, wenn Routen Berechtigungen deklarieren; <code>admin(true)</code> umgeht Checks.</li>
+<li>Ressourcentypen: <code>instances</code>, <code>global_settings</code>, <code>services</code>, <code>configs</code>, <code>plugins</code>, <code>cache</code>, <code>bans</code>, <code>jobs</code>.</li>
+<li>Berechtigungsnamen:</li>
+<li><code>instances_*</code>: <code>instances_read</code>, <code>instances_update</code>, <code>instances_delete</code>, <code>instances_create</code>, <code>instances_execute</code></li>
+<li><code>global_settings_*</code>: <code>global_settings_read</code>, <code>global_settings_update</code></li>
+<li><code>services</code>: <code>service_read</code>, <code>service_create</code>, <code>service_update</code>, <code>service_delete</code>, <code>service_convert</code>, <code>service_export</code></li>
+<li><code>configs</code>: <code>configs_read</code>, <code>config_read</code>, <code>config_create</code>, <code>config_update</code>, <code>config_delete</code></li>
+<li><code>plugins</code>: <code>plugin_read</code>, <code>plugin_create</code>, <code>plugin_delete</code></li>
+<li><code>cache</code>: <code>cache_read</code>, <code>cache_delete</code></li>
+<li><code>bans</code>: <code>ban_read</code>, <code>ban_update</code>, <code>ban_delete</code>, <code>ban_created</code></li>
+<li><code>jobs</code>: <code>job_read</code>, <code>job_run</code></li>
+<li><code>resource_id</code> ist meist die zweite Pfadkomponente (z. B. <code>/services/{id}</code>); "*" gewährt globalen Zugriff.</li>
+<li>Nicht-Admin-Nutzer und Grants per <code>API_ACL_BOOTSTRAP_FILE</code> oder gemounteter <code>/var/lib/bunkerweb/api_acl_bootstrap.json</code> bootstrappen. Passwörter dürfen Klartext oder bcrypt-Hashes sein.</li>
+</ul>
+<details class="example">
+<summary>Minimales ACL-Bootstrap</summary>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;users&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;ci&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;admin&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Str0ng&amp;P@ss!&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;permissions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;services&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;*&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;service_read&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;configs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;*&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;config_read&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;config_update&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+</details>
 <h2 id="ratenbegrenzung">Ratenbegrenzung</h2>
-<p>Standardmäßig aktiv mit zwei Strings: <code>API_RATE_LIMIT</code> (global, Standard <code>100r/m</code>) und <code>API_RATE_LIMIT_AUTH</code> (Standard <code>10r/m</code> oder <code>off</code>). Raten akzeptieren NGINX-Notation (<code>3r/s</code>, <code>40r/m</code>, <code>200r/h</code>) oder ausgeschrieben (<code>100/minute</code>, <code>200 per 30 minutes</code>).</p>
+<p>Standardmäßig aktiv mit zwei Strings: <code>API_RATE_LIMIT</code> (global, Standard <code>100r/m</code>) und <code>API_RATE_LIMIT_AUTH</code> (Standard <code>10r/m</code> oder <code>off</code>). Raten akzeptieren NGINX-Notation (<code>3r/s</code>, <code>40r/m</code>, <code>200r/h</code>) oder ausgeschriebene Formen (<code>100/minute</code>, <code>200 per 30 minutes</code>). Konfigurieren über:</p>
 <ul>
 <li><code>API_RATE_LIMIT</code>, <code>API_RATE_LIMIT_AUTH</code></li>
 <li><code>API_RATE_LIMIT_ENABLED</code>, <code>API_RATE_LIMIT_HEADERS_ENABLED</code></li>
-<li><code>API_RATE_LIMIT_RULES</code> (CSV/JSON/YAML inline oder Dateipfad)</li>
+<li><code>API_RATE_LIMIT_RULES</code> (CSV/JSON/YAML-String oder Dateipfad)</li>
 <li><code>API_RATE_LIMIT_STRATEGY</code>, <code>API_RATE_LIMIT_KEY</code>, <code>API_RATE_LIMIT_EXEMPT_IPS</code></li>
-<li>Speicher: In-Memory oder Redis/Valkey bei <code>USE_REDIS=yes</code> + <code>REDIS_*</code> (auch Sentinel)</li>
+<li>Speicherung: In-Memory oder Redis/Valkey bei <code>USE_REDIS=yes</code> plus <code>REDIS_*</code> (Sentinel unterstützt).</li>
 </ul>
 <p>Limiter-Strategien (bereitgestellt von <code>limits</code>):</p>
 <ul>
-<li><code>fixed-window</code> (Standard): Eimer wird am Intervallgrenzwert zurückgesetzt; günstig und gut für grobe Limits.</li>
-<li><code>moving-window</code>: echtes gleitendes Fenster mit Zeitstempeln; glatter, aber speicherintensiver.</li>
-<li><code>sliding-window-counter</code>: Hybrid mit gewichteten Zählungen aus der vorherigen Periode; leichter als moving, glatter als fixed.</li>
+<li><code>fixed-window</code> (Standard): Bucket wird an jeder Intervallgrenze zurückgesetzt; am günstigsten und ausreichend für grobe Limits.</li>
+<li><code>moving-window</code>: echtes gleitendes Fenster mit präzisen Zeitstempeln; glatter, aber speicherintensiver in den Operationen.</li>
+<li><code>sliding-window-counter</code>: Hybrid, der mit gewichteten Zählungen des vorherigen Fensters glättet; leichter als moving, glatter als fixed.</li>
 </ul>
 <p>Mehr Details und Abwägungen: <a href="https://limits.readthedocs.io/en/stable/strategies.html">https://limits.readthedocs.io/en/stable/strategies.html</a></p>
 <details class="example">
-<summary>Inline CSV</summary>
+<summary>Inline-CSV</summary>
 <div class="highlight"><pre><span></span><code>API_RATE_LIMIT_RULES=&#39;POST /auth 10r/m, GET /instances* 200r/m, POST|PATCH /services* 40r/m&#39;
 </code></pre></div>
 </details>
@@ -1149,23 +1442,427 @@
 <span class="w">    </span><span class="nt">rate</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;100r/m&quot;</span>
 </code></pre></div>
 </details>
-<h2 id="konfigurationsquellen-prioritat">Konfigurationsquellen (Priorität)</h2>
+<h2 id="konfigurationsquellen-und-prioritat">Konfigurationsquellen und Priorität</h2>
 <ol>
-<li>Umgebungsvariablen</li>
-<li>Secrets unter <code>/run/secrets/&lt;VAR&gt;</code></li>
-<li>YAML <code>/etc/bunkerweb/api.yml</code></li>
-<li>Env-Datei <code>/etc/bunkerweb/api.env</code></li>
-<li>Defaults im Code</li>
+<li>Umgebungsvariablen (inkl. Docker/Compose <code>environment:</code>)</li>
+<li>Secrets in <code>/run/secrets/&lt;VAR&gt;</code> (Docker)</li>
+<li>YAML unter <code>/etc/bunkerweb/api.yml</code></li>
+<li>Env-Datei unter <code>/etc/bunkerweb/api.env</code></li>
+<li>Eingebaute Defaults</li>
 </ol>
-<h2 id="wichtige-einstellungen-auszug">Wichtige Einstellungen (Auszug)</h2>
+<h3 id="laufzeit-zeitzone">Laufzeit &amp; Zeitzone</h3>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Beschreibung</th>
+<th>Akzeptierte Werte</th>
+<th>Standard</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TZ</code></td>
+<td>Zeitzone für API-Logs und zeitbasierte Claims (z. B. Biscuit-TTL-Auswertung und Log-Zeitstempel)</td>
+<td>TZ-Datenbank-Name (z. B. <code>UTC</code>, <code>Europe/Paris</code>)</td>
+<td>unset (Container-Default, meist UTC)</td>
+</tr>
+</tbody>
+</table>
+<p>Docs oder Schema deaktivieren, indem die zugehörigen URLs auf <code>off|disabled|none|false|0</code> gesetzt werden. Setzen Sie <code>API_SSL_ENABLED=yes</code> mit <code>API_SSL_CERTFILE</code> und <code>API_SSL_KEYFILE</code>, um TLS direkt in der API zu terminieren. Beim Reverse-Proxy <code>API_FORWARDED_ALLOW_IPS</code> auf die Proxy-IPs setzen, damit Gunicorn <code>X-Forwarded-*</code> vertraut.</p>
+<h3 id="konfigurationsreferenz-power-user">Konfigurationsreferenz (Power User)</h3>
+<h4 id="oberflache-docs">Oberfläche &amp; Docs</h4>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Beschreibung</th>
+<th>Akzeptierte Werte</th>
+<th>Standard</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>API_DOCS_URL</code>, <code>API_REDOC_URL</code>, <code>API_OPENAPI_URL</code></td>
+<td>Pfade für Swagger, ReDoc und OpenAPI; auf <code>off/disabled/none/false/0</code> setzen zum Deaktivieren</td>
+<td>Pfad oder <code>off</code></td>
+<td><code>/docs</code>, <code>/redoc</code>, <code>/openapi.json</code></td>
+</tr>
+<tr>
+<td><code>API_ROOT_PATH</code></td>
+<td>Mount-Prefix bei Reverse Proxy</td>
+<td>Pfad (z. B. <code>/api</code>)</td>
+<td>leer</td>
+</tr>
+<tr>
+<td><code>API_FORWARDED_ALLOW_IPS</code></td>
+<td>Vertrauenswürdige Proxy-IPs für <code>X-Forwarded-*</code></td>
+<td>Kommagetrennte IPs/CIDRs</td>
+<td><code>127.0.0.1</code> (Package-Default)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="auth-acl-biscuit">Auth, ACL, Biscuit</h4>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Beschreibung</th>
+<th>Akzeptierte Werte</th>
+<th>Standard</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>API_USERNAME</code>, <code>API_PASSWORD</code></td>
+<td>Bootstrap-Admin-Nutzer</td>
+<td>Strings; starkes Passwort außerhalb Debug erforderlich</td>
+<td>unset</td>
+</tr>
+<tr>
+<td><code>OVERRIDE_API_CREDS</code></td>
+<td>Admin-Creds beim Start erneut anwenden</td>
+<td><code>yes/no/on/off/true/false/0/1</code></td>
+<td><code>no</code></td>
+</tr>
+<tr>
+<td><code>API_TOKEN</code></td>
+<td>Admin-Override-Bearer-Token</td>
+<td>Opaquer String</td>
+<td>unset</td>
+</tr>
+<tr>
+<td><code>API_ACL_BOOTSTRAP_FILE</code></td>
+<td>Pfad zu JSON für Nutzer/Berechtigungen</td>
+<td>Dateipfad oder gemountetes <code>/var/lib/bunkerweb/api_acl_bootstrap.json</code></td>
+<td>unset</td>
+</tr>
+<tr>
+<td><code>BISCUIT_PRIVATE_KEY</code>, <code>BISCUIT_PUBLIC_KEY</code></td>
+<td>Biscuit-Schlüssel (Hex), falls keine Dateien</td>
+<td>Hex-Strings</td>
+<td>auto-generiert/persistent</td>
+</tr>
+<tr>
+<td><code>API_BISCUIT_TTL_SECONDS</code></td>
+<td>Token-Lebensdauer; <code>0/off</code> deaktiviert Ablauf</td>
+<td>Integer Sekunden oder <code>off/disabled</code></td>
+<td><code>3600</code></td>
+</tr>
+<tr>
+<td><code>CHECK_PRIVATE_IP</code></td>
+<td>Biscuit an Client-IP binden (außer private)</td>
+<td><code>yes/no/on/off/true/false/0/1</code></td>
+<td><code>yes</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="allowlist">Allowlist</h4>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Beschreibung</th>
+<th>Akzeptierte Werte</th>
+<th>Standard</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>API_WHITELIST_ENABLED</code></td>
+<td>IP-Allowlist-Middleware umschalten</td>
+<td><code>yes/no/on/off/true/false/0/1</code></td>
+<td><code>yes</code></td>
+</tr>
+<tr>
+<td><code>API_WHITELIST_IPS</code></td>
+<td>Leer- oder kommagetrennte IPs/CIDRs</td>
+<td>IPs/CIDRs</td>
+<td>RFC1918-Bereiche im Code</td>
+</tr>
+</tbody>
+</table>
+<h4 id="ratenbegrenzung_1">Ratenbegrenzung</h4>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Beschreibung</th>
+<th>Akzeptierte Werte</th>
+<th>Standard</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>API_RATE_LIMIT</code></td>
+<td>Globales Limit (NGINX-String)</td>
+<td><code>3r/s</code>, <code>100/minute</code>, <code>500 per 30 minutes</code></td>
+<td><code>100r/m</code></td>
+</tr>
+<tr>
+<td><code>API_RATE_LIMIT_AUTH</code></td>
+<td><code>/auth</code>-Limit (oder <code>off</code>)</td>
+<td>wie oben oder <code>off/disabled/none/false/0</code></td>
+<td><code>10r/m</code></td>
+</tr>
+<tr>
+<td><code>API_RATE_LIMIT_ENABLED</code></td>
+<td>Limiter aktivieren</td>
+<td><code>yes/no/on/off/true/false/0/1</code></td>
+<td><code>yes</code></td>
+</tr>
+<tr>
+<td><code>API_RATE_LIMIT_HEADERS_ENABLED</code></td>
+<td>Rate-Limit-Header injizieren</td>
+<td>wie oben</td>
+<td><code>yes</code></td>
+</tr>
+<tr>
+<td><code>API_RATE_LIMIT_RULES</code></td>
+<td>Pfadregeln (CSV/JSON/YAML oder Dateipfad)</td>
+<td>String oder Pfad</td>
+<td>unset</td>
+</tr>
+<tr>
+<td><code>API_RATE_LIMIT_STRATEGY</code></td>
+<td>Algorithmus</td>
+<td><code>fixed-window</code>, <code>moving-window</code>, <code>sliding-window-counter</code></td>
+<td><code>fixed-window</code></td>
+</tr>
+<tr>
+<td><code>API_RATE_LIMIT_KEY</code></td>
+<td>Schlüssel-Selektion</td>
+<td><code>ip</code>, <code>header:&lt;Name&gt;</code></td>
+<td><code>ip</code></td>
+</tr>
+<tr>
+<td><code>API_RATE_LIMIT_EXEMPT_IPS</code></td>
+<td>Limits für diese IPs/CIDRs überspringen</td>
+<td>Leer- oder kommagetrennt</td>
+<td>unset</td>
+</tr>
+<tr>
+<td><code>API_RATE_LIMIT_STORAGE_OPTIONS</code></td>
+<td>JSON, das in die Storage-Konfig gemerged wird</td>
+<td>JSON-String</td>
+<td>unset</td>
+</tr>
+</tbody>
+</table>
+<h4 id="redisvalkey-fur-rate-limits">Redis/Valkey (für Rate Limits)</h4>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Beschreibung</th>
+<th>Akzeptierte Werte</th>
+<th>Standard</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_REDIS</code></td>
+<td>Redis-Backend aktivieren</td>
+<td><code>yes/no/on/off/true/false/0/1</code></td>
+<td><code>no</code></td>
+</tr>
+<tr>
+<td><code>REDIS_HOST</code>, <code>REDIS_PORT</code>, <code>REDIS_DATABASE</code></td>
+<td>Verbindungsdetails</td>
+<td>Host, int, int</td>
+<td>unset, <code>6379</code>, <code>0</code></td>
+</tr>
+<tr>
+<td><code>REDIS_USERNAME</code>, <code>REDIS_PASSWORD</code></td>
+<td>Auth</td>
+<td>Strings</td>
+<td>unset</td>
+</tr>
+<tr>
+<td><code>REDIS_SSL</code>, <code>REDIS_SSL_VERIFY</code></td>
+<td>TLS und Verifizierung</td>
+<td><code>yes/no/on/off/true/false/0/1</code></td>
+<td><code>no</code>, <code>yes</code></td>
+</tr>
+<tr>
+<td><code>REDIS_TIMEOUT</code></td>
+<td>Timeout (ms)</td>
+<td>Integer</td>
+<td><code>1000</code></td>
+</tr>
+<tr>
+<td><code>REDIS_KEEPALIVE_POOL</code></td>
+<td>Pool-Keepalive</td>
+<td>Integer</td>
+<td><code>10</code></td>
+</tr>
+<tr>
+<td><code>REDIS_SENTINEL_HOSTS</code></td>
+<td>Sentinel-Hosts</td>
+<td>Leerzeichen-getrennte <code>host:port</code></td>
+<td>unset</td>
+</tr>
+<tr>
+<td><code>REDIS_SENTINEL_MASTER</code></td>
+<td>Sentinel-Mastername</td>
+<td>String</td>
+<td>unset</td>
+</tr>
+<tr>
+<td><code>REDIS_SENTINEL_USERNAME</code>, <code>REDIS_SENTINEL_PASSWORD</code></td>
+<td>Sentinel-Auth</td>
+<td>Strings</td>
+<td>unset</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">DB-Redis</p>
+<p>Wenn Redis/Valkey-Einstellungen in der BunkerWeb-Datenbank vorhanden sind, nutzt die API sie automatisch fürs Rate Limiting, auch ohne <code>USE_REDIS</code> in der Umgebung. Bei Bedarf per Umgebungsvariablen überschreiben.</p>
+</div>
+<h4 id="listener-tls">Listener &amp; TLS</h4>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Beschreibung</th>
+<th>Akzeptierte Werte</th>
+<th>Standard</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>API_LISTEN_ADDR</code>, <code>API_LISTEN_PORT</code></td>
+<td>Bind-Adresse/Port für Gunicorn</td>
+<td>IP oder Hostname, int</td>
+<td><code>127.0.0.1</code>, <code>8888</code> (Package-Skript)</td>
+</tr>
+<tr>
+<td><code>API_SSL_ENABLED</code></td>
+<td>TLS in der API aktivieren</td>
+<td><code>yes/no/on/off/true/false/0/1</code></td>
+<td><code>no</code></td>
+</tr>
+<tr>
+<td><code>API_SSL_CERTFILE</code>, <code>API_SSL_KEYFILE</code></td>
+<td>PEM-Zertifikat und -Schlüssel</td>
+<td>Dateipfade</td>
+<td>unset</td>
+</tr>
+<tr>
+<td><code>API_SSL_CA_CERTS</code></td>
+<td>Optionale CA/Chain</td>
+<td>Dateipfad</td>
+<td>unset</td>
+</tr>
+</tbody>
+</table>
+<h4 id="logging-laufzeit-package-defaults">Logging &amp; Laufzeit (Package-Defaults)</h4>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Beschreibung</th>
+<th>Akzeptierte Werte</th>
+<th>Standard</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOG_LEVEL</code>, <code>CUSTOM_LOG_LEVEL</code></td>
+<td>Basis-Log-Level / Override</td>
+<td><code>debug</code>, <code>info</code>, <code>warning</code>, <code>error</code>, <code>critical</code></td>
+<td><code>info</code></td>
+</tr>
+<tr>
+<td><code>LOG_TYPES</code></td>
+<td>Ziele</td>
+<td>Leerzeichen-getrennt <code>stderr</code>/<code>file</code>/<code>syslog</code></td>
+<td><code>stderr</code></td>
+</tr>
+<tr>
+<td><code>LOG_FILE_PATH</code></td>
+<td>Log-Dateipfad (bei <code>LOG_TYPES</code> mit <code>file</code> oder <code>CAPTURE_OUTPUT=yes</code> genutzt)</td>
+<td>Dateipfad</td>
+<td><code>/var/log/bunkerweb/api.log</code>, falls file/capture aktiv, sonst unset</td>
+</tr>
+<tr>
+<td><code>LOG_SYSLOG_ADDRESS</code></td>
+<td>Syslog-Ziel (<code>udp://host:514</code>, <code>tcp://host:514</code>, Socket)</td>
+<td>Host:Port, Protokoll-präfixter Host oder Socket</td>
+<td>unset</td>
+</tr>
+<tr>
+<td><code>LOG_SYSLOG_TAG</code></td>
+<td>Syslog-Tag</td>
+<td>String</td>
+<td><code>bw-api</code></td>
+</tr>
+<tr>
+<td><code>MAX_WORKERS</code>, <code>MAX_THREADS</code></td>
+<td>Gunicorn-Worker/Threads</td>
+<td>Integer oder unset für Auto</td>
+<td>unset</td>
+</tr>
+<tr>
+<td><code>CAPTURE_OUTPUT</code></td>
+<td>Gunicorn stdout/stderr in die konfigurierten Handler umlenken</td>
+<td><code>yes</code> oder <code>no</code></td>
+<td><code>no</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="api-flache-capabilities">API-Fläche (Capabilities)</h2>
 <ul>
-<li><strong>Docs</strong>: <code>API_DOCS_URL</code>, <code>API_REDOC_URL</code>, <code>API_OPENAPI_URL</code>, <code>API_ROOT_PATH</code></li>
-<li><strong>Auth</strong>: <code>API_USERNAME</code>, <code>API_PASSWORD</code>, <code>API_TOKEN</code>, <code>API_ACL_BOOTSTRAP_FILE</code></li>
-<li><strong>Biscuit</strong>: <code>API_BISCUIT_TTL_SECONDS</code>, <code>CHECK_PRIVATE_IP</code></li>
-<li><strong>Whitelist</strong>: <code>API_WHITELIST_ENABLED</code>, <code>API_WHITELIST_IPS</code></li>
-<li><strong>Ratenbegrenzung</strong>: <code>API_RATE_LIMIT_ENABLED</code>, <code>API_RATE_LIMIT</code>, <code>API_RATE_LIMIT_AUTH</code>, <code>API_RATE_LIMIT_RULES</code>, <code>API_RATE_LIMIT_STRATEGY</code>, <code>API_RATE_LIMIT_KEY</code>, <code>API_RATE_LIMIT_EXEMPT_IPS</code>, <code>API_RATE_LIMIT_HEADERS_ENABLED</code>, <code>API_RATE_LIMIT_STORAGE_OPTIONS</code></li>
-<li><strong>Redis/Valkey</strong>: <code>USE_REDIS</code>, <code>REDIS_HOST</code>, <code>REDIS_PORT</code>, <code>REDIS_DATABASE</code>, <code>REDIS_USERNAME</code>, <code>REDIS_PASSWORD</code>, <code>REDIS_SSL</code>, Sentinel-Variablen</li>
-<li><strong>Netz/TLS</strong>: <code>API_LISTEN_ADDR</code>, <code>API_LISTEN_PORT</code>, <code>API_FORWARDED_ALLOW_IPS</code>, <code>API_SSL_ENABLED</code>, <code>API_SSL_CERTFILE</code>, <code>API_SSL_KEYFILE</code>, <code>API_SSL_CA_CERTS</code></li>
+<li><strong>Core</strong></li>
+<li><code>GET /ping</code>, <code>GET /health</code>: Liveness-Checks für die API selbst.</li>
+<li><strong>Auth</strong></li>
+<li><code>POST /auth</code>: Biscuit-Tokens ausgeben; akzeptiert Basic, Formular, JSON oder Bearer-Override bei passendem <code>API_TOKEN</code>.</li>
+<li><strong>Instances</strong></li>
+<li><code>GET /instances</code>: Instanzen mit Erstellungs-/Last-seen-Metadaten auflisten.</li>
+<li><code>POST /instances</code>: Instanz registrieren (hostname/port/server_name/method).</li>
+<li><code>GET/PATCH/DELETE /instances/{hostname}</code>: inspizieren, veränderbare Felder updaten oder API-gemanagte Instanzen löschen.</li>
+<li><code>DELETE /instances</code>: API-gemanagte Instanzen en masse löschen; Einträge außerhalb der API werden übersprungen.</li>
+<li>Health/Aktionen: <code>GET /instances/ping</code>, <code>GET /instances/{hostname}/ping</code>, <code>POST /instances/reload?test=yes|no</code>, <code>POST /instances/{hostname}/reload</code>, <code>POST /instances/stop</code>, <code>POST /instances/{hostname}/stop</code>.</li>
+<li><strong>Global settings</strong></li>
+<li><code>GET /global_settings</code>: standardmäßig nur Nicht-Defaults; <code>full=true</code> für alle Settings, <code>methods=true</code> für Herkunft.</li>
+<li><code>PATCH /global_settings</code>: API-eigene Globals upserten; read-only Keys werden abgelehnt.</li>
+<li><strong>Services</strong></li>
+<li><code>GET /services</code>: Dienste auflisten (Drafts standardmäßig enthalten).</li>
+<li><code>GET /services/{service}</code>: Nicht-Defaults oder volle Config holen (<code>full=true</code>); <code>methods=true</code> fügt Herkunft hinzu.</li>
+<li><code>POST /services</code>: Dienst anlegen (Draft oder online), Variablen setzen und <code>SERVER_NAME</code>-Roster atomar aktualisieren.</li>
+<li><code>PATCH /services/{service}</code>: umbenennen, Variablen updaten, Draft toggeln.</li>
+<li><code>DELETE /services/{service}</code>: Dienst und abgeleitete Config-Keys entfernen.</li>
+<li><code>POST /services/{service}/convert?convert_to=online|draft</code>: Draft/Online schnell umschalten.</li>
+<li><strong>Custom configs</strong></li>
+<li><code>GET /configs</code>: Snippets auflisten (Default-Service <code>global</code>); <code>with_data=true</code> bettet druckbaren Inhalt ein.</li>
+<li><code>POST /configs</code>, <code>POST /configs/upload</code>: Snippets via JSON oder File-Upload erstellen.</li>
+<li><code>GET /configs/{service}/{type}/{name}</code>: Snippet holen; <code>with_data=true</code> für Inhalt.</li>
+<li><code>PATCH /configs/{service}/{type}/{name}</code>, <code>PATCH .../upload</code>: API-gemanagte Snippets aktualisieren oder verschieben.</li>
+<li><code>DELETE /configs</code> oder <code>DELETE /configs/{service}/{type}/{name}</code>: API-gemanagte Snippets löschen; template-gemanagte werden übersprungen.</li>
+<li>Unterstützte Typen: <code>http</code>, <code>server_http</code>, <code>default_server_http</code>, <code>modsec</code>, <code>modsec_crs</code>, <code>stream</code>, <code>server_stream</code>, CRS/Plugin-Hooks.</li>
+<li><strong>Bans</strong></li>
+<li><code>GET /bans</code>: aktive Bans aus Instanzen aggregieren.</li>
+<li><code>POST /bans</code> oder <code>/bans/ban</code>: einen oder mehrere Bans anwenden; Payload darf Objekt, Array oder JSON-String sein.</li>
+<li><code>POST /bans/unban</code> oder <code>DELETE /bans</code>: Bans global oder pro Service entfernen.</li>
+<li><strong>Plugins (UI-Plugins)</strong></li>
+<li><code>GET /plugins</code>: Plugins auflisten; <code>with_data=true</code> enthält Paket-Bytes, sofern verfügbar.</li>
+<li><code>POST /plugins/upload</code>: UI-Plugins aus <code>.zip</code>, <code>.tar.gz</code>, <code>.tar.xz</code> installieren.</li>
+<li><code>DELETE /plugins/{id}</code>: Plugin per ID entfernen.</li>
+<li><strong>Cache (Job-Artefakte)</strong></li>
+<li><code>GET /cache</code>: Cache-Dateien mit Filtern (<code>service</code>, <code>plugin</code>, <code>job_name</code>) auflisten; <code>with_data=true</code> bettet druckbaren Inhalt ein.</li>
+<li><code>GET /cache/{service}/{plugin}/{job}/{file}</code>: spezifische Cache-Datei holen/herunterladen (<code>download=true</code>).</li>
+<li><code>DELETE /cache</code> oder <code>DELETE /cache/{service}/{plugin}/{job}/{file}</code>: Cache-Dateien löschen und Scheduler benachrichtigen.</li>
+<li><strong>Jobs</strong></li>
+<li><code>GET /jobs</code>: Jobs, Zeitpläne und Cache-Zusammenfassungen auflisten.</li>
+<li><code>POST /jobs/run</code>: Plugins als geändert markieren, um zugehörige Jobs auszulösen.</li>
+</ul>
+<h2 id="betriebsverhalten">Betriebsverhalten</h2>
+<ul>
+<li>Fehlermeldungen sind normalisiert zu <code>{"status": "error", "message": "..."}</code> mit passenden HTTP-Statuscodes.</li>
+<li>Schreiboperationen landen in der gemeinsamen Datenbank; Instanzen übernehmen Änderungen per Scheduler-Sync oder nach einem Reload.</li>
+<li><code>API_ROOT_PATH</code> muss dem Reverse-Proxy-Pfad entsprechen, damit <code>/docs</code> und Links funktionieren.</li>
+<li>Start schlägt fehl, wenn kein Auth-Pfad existiert (keine Biscuit-Schlüssel, kein Admin-User und kein <code>API_TOKEN</code>); Fehler werden in <code>/var/tmp/bunkerweb/api.error</code> geloggt.</li>
 </ul>
 
 
