@@ -523,10 +523,10 @@ StrScanFmt lj_strscan_scan(const uint8_t *p, MSize len, TValue *o,
       fmt = strscan_dec(sp, o, fmt, opt, ex, neg, dig);
 
     /* Try to convert number to integer, if requested. */
-    if (fmt == STRSCAN_NUM && (opt & STRSCAN_OPT_TOINT) && !tvismzero(o)) {
-      double n = o->n;
-      int32_t i = lj_num2int(n);
-      if (n == (lua_Number)i) { o->i = i; return STRSCAN_INT; }
+    if (fmt == STRSCAN_NUM && (opt & STRSCAN_OPT_TOINT)) {
+      int64_t tmp;
+      if (lj_num2int_check(o->n, tmp, o->i) && !tvismzero(o))
+	return STRSCAN_INT;
     }
     return fmt;
   }

@@ -120,6 +120,7 @@ typedef struct {
 static LJ_AINLINE uint32_t *exitstub_trace_addr_(uint32_t *p, uint32_t exitno)
 {
   while (*p == 0x60000000) p++;  /* Skip PPCI_NOP. */
+  if (p[3] == 0x4e800421) p += 2;  /* Indirect branch PPCI_BCTRL. */
   return p + 3 + exitno;
 }
 /* Avoid dependence on lj_jit.h if only including lj_target.h. */

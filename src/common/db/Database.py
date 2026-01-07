@@ -503,7 +503,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.7~rc1"
+                return "1.6.7~rc2"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -536,7 +536,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.7~rc1",
+            "version": "1.6.7~rc2",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -1038,8 +1038,9 @@ class Database:
             # Plugins to delete
             for pid in old_plugin_ids - new_plugin_ids:
                 old_p = old_plugins[pid]
-                self.logger.warning(f'{old_p.type.title()} plugin "{pid}" has been removed, deleting it')
-                to_delete.append({"type": "plugin", "filter": {"id": pid}})
+                if old_p.type == "core":
+                    self.logger.warning(f'{old_p.type.title()} plugin "{pid}" has been removed, deleting it')
+                    to_delete.append({"type": "plugin", "filter": {"id": pid}})
 
             # SETTINGS
             old_setting_keys = set(old_settings.keys())

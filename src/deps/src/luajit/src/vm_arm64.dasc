@@ -1696,6 +1696,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  adr lr, >1
   |  checkint CARG1, ->vm_tobit_fb
   |1:
+  |  bti_jump
   |.endmacro
   |
   |.macro .ffunc_bit_op, name, ins
@@ -1710,6 +1711,7 @@ static void build_subroutines(BuildCtx *ctx)
   |   bge >9
   |  checkint CARG1, ->vm_tobit_fb
   |2:
+  |  bti_jump
   |  ins TMP0w, TMP0w, CARG1w
   |  b <1
   |.endmacro
@@ -1742,6 +1744,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  adr lr, >1
   |  checkint CARG1, ->vm_tobit_fb
   |1:
+  |  bti_jump
   |.if shmod == 0
   |  mov TMP1, CARG1
   |.else
@@ -1751,6 +1754,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  adr lr, >2
   |  checkint CARG1, ->vm_tobit_fb
   |2:
+  |  bti_jump
   |  ins TMP0w, CARG1w, TMP1w
   |  add_TISNUM CARG1, TMP0
   |  b ->fff_restv
@@ -2153,6 +2157,42 @@ static void build_subroutines(BuildCtx *ctx)
   |  eor CARG3w, CARG1w, CARG2w
   |  cmp CARG3w, #0
   |  cneg CARG1w, CARG1w, mi
+  |  ret
+  |
+  |//-----------------------------------------------------------------------
+  |//-- Number conversion functions ----------------------------------------
+  |//-----------------------------------------------------------------------
+  |
+  |// int64_t lj_vm_num2int_check(double x)
+  |->vm_num2int_check:
+  |  fcvtzs CRET1w, FARG1
+  |  scvtf FARG2, CRET1w
+  |  fcmp FARG2, FARG1
+  |  bne >1
+  |  ret
+  |1:
+  |  mov CRET1, #0x8000000080000000
+  |  ret
+  |
+  |// int64_t lj_vm_num2i64(double x)
+  |->vm_num2i64:
+  |  fcvtzs CRET1, FARG1
+  |  ret
+  |
+  |// uint64_t lj_vm_num2u64(double x)
+  |->vm_num2u64:
+  |  fcvtzs CRET1, FARG1
+  |  fcvtzu CARG2, FARG1
+  |  cmn CRET1, #1			// Set overflow if CRET1 == INT64_MAX.
+  |  csel CRET1, CRET1, CARG2, vc	// No overflow ? i64 : u64.
+  |  ret
+  |
+  |// int32_t lj_vm_tobit(double x)
+  |->vm_tobit:
+  |  movz CRET1, #0x4338, lsl #48	// 2^52 + 2^51.
+  |  fmov FARG2, CRET1
+  |  fadd FARG1, FARG1, FARG2
+  |  fmov CRET1w, s0
   |  ret
   |
   |//-----------------------------------------------------------------------

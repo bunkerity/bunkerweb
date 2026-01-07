@@ -306,9 +306,6 @@ endif
 ifneq (,$(INSTALL_LJLIBD))
   TARGET_XCFLAGS+= -DLUA_LJDIR=\"$(INSTALL_LJLIBD)\"
 endif
-ifeq (,$(shell $(TARGET_CC) -o /dev/null -c -x c /dev/null -fno-strict-float-cast-overflow 2>/dev/null || echo 1))
-  TARGET_XCFLAGS+= -fno-strict-float-cast-overflow
-endif
 
 ##############################################################################
 # Target system detection.

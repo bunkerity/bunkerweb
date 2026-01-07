@@ -53,6 +53,9 @@ static void emit_rotlwi(ASMState *as, Reg ra, Reg rs, int32_t n)
 
 /* -- Emit loads/stores --------------------------------------------------- */
 
+#define jglofs(as, k) \
+  (((uintptr_t)(k) - (uintptr_t)J2G(as->J) - 32768) & 0xffff)
+
 /* Prefer rematerialization of BASE/L from global_State over spills. */
 #define emit_canremat(ref)	((ref) <= REF_BASE)
 

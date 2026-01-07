@@ -1,5 +1,6 @@
 local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
+local utils = require "bunkerweb.utils"
 
 local redis = class("redis", plugin)
 
@@ -7,6 +8,7 @@ local ngx = ngx
 local NOTICE = ngx.NOTICE
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local HTTP_OK = ngx.HTTP_OK
+local has_variable = utils.has_variable
 
 function redis:initialize(ctx)
 	-- Call parent initialize
@@ -35,6 +37,35 @@ function redis:init_worker()
 	self.logger:log(NOTICE, "connectivity with redis server " .. self.variables["REDIS_HOST"] .. " is successful")
 	return self:ret(true, "success")
 end
+
+-- function redis:timer()
+-- 	-- Check if metrics is used
+-- 	local is_needed, err = has_variable("USE_REDIS", "yes")
+-- 	if is_needed == nil then
+-- 		return self:ret(false, "can't check USE_REDIS variable : " .. err)
+-- 	end
+-- 	if not is_needed then
+-- 		return self:ret(true, "redis not used")
+-- 	end
+-- 	-- Return values
+-- 	local ret = true
+-- 	local ret_err = "redis is working"
+-- 	-- Check redis connection
+-- 	local ok, err = self.clusterstore:connect(true)
+-- 	if not ok then
+-- 		self.
+-- 		return self:ret(false, "redis connect error : " .. err)
+-- 	end
+-- 	-- Send ping
+-- 	local ok, err = self.clusterstore:call("ping")
+-- 	self.clusterstore:close()
+-- 	if err then
+-- 		return self:ret(false, "error while sending ping command to redis server : " .. err)
+-- 	end
+-- 	if not ok then
+-- 		return self:ret(false, "redis ping command failed")
+-- 	end
+-- end
 
 function redis:api()
 	if self.ctx.bw.uri == "/redis/ping" and self.ctx.bw.request_method == "POST" then

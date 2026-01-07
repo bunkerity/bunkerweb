@@ -51,15 +51,27 @@ static Reg ra_alloc2(ASMState *as, IRIns *ir, RegSet allow)
 static void asm_exitstub_setup(ASMState *as, ExitNo nexits)
 {
   ExitNo i;
+  int ind;
+  MCode *target = (MCode *)(void *)lj_vm_exit_handler;
   MCode *mxp = as->mctop;
-  if (mxp - (nexits + 3 + MCLIM_REDZONE) < as->mclim)
+  if (mxp - (nexits + 4 + MCLIM_REDZONE) < as->mclim)
     asm_mclimit(as);
-  /* 1: str lr,[sp]; bl ->vm_exit_handler; movz w0,traceno; bl <1; bl <1; ... */
+  ind = !A64F_S_OK(target - (mxp - nexits - 2), 26);
+  /* !ind: 1: str lr,[sp]; bl ->vm_exit_handler; movz w0,traceno;
+  **  ind: 1: str lr,[sp]; ldr lr, [gl, K64_VXH]; blr lr; movz w0,traceno;
+  **          bl <1; bl <1; ...
+  */
   for (i = nexits-1; (int32_t)i >= 0; i--)
-    *--mxp = A64I_LE(A64I_BL | A64F_S26(-3-i));
+    *--mxp = A64I_LE(A64I_BL | A64F_S26(-3-ind-i));
+  as->mcexit = mxp;
   *--mxp = A64I_LE(A64I_MOVZw | A64F_U16(as->T->traceno));
-  mxp--;
-  *mxp = A64I_LE(A64I_BL | A64F_S26(((MCode *)(void *)lj_vm_exit_handler-mxp)));
+  if (ind) {
+    *--mxp = A64I_LE(A64I_BLR_AUTH | A64F_N(RID_LR));
+    *--mxp = A64I_LE(A64I_LDRx | A64F_D(RID_LR) | A64F_N(RID_GL) | A64F_U12(glofs(as, &as->J->k64[LJ_K64_VM_EXIT_HANDLER]) >> 3));
+  } else {
+    mxp--;
+    *mxp = A64I_LE(A64I_BL | A64F_S26(target-mxp));
+  }
   *--mxp = A64I_LE(A64I_STRx | A64F_D(RID_LR) | A64F_N(RID_SP));
   as->mctop = mxp;
 }
@@ -67,7 +79,7 @@ static void asm_exitstub_setup(ASMState *as, ExitNo nexits)
 static MCode *asm_exitstub_addr(ASMState *as, ExitNo exitno)
 {
   /* Keep this in-sync with exitstub_trace_addr(). */
-  return as->mctop + exitno + 3;
+  return as->mcexit + exitno;
 }
 
 /* Emit conditional branch to exit for guard. */
@@ -665,14 +677,18 @@ static void asm_conv(ASMState *as, IRIns *ir)
     } else {
       Reg left = ra_alloc1(as, lref, RSET_FPR);
       Reg dest = ra_dest(as, ir, RSET_GPR);
-      A64Ins ai = irt_is64(ir->t) ?
-	(st == IRT_NUM ?
-	 (irt_isi64(ir->t) ? A64I_FCVT_S64_F64 : A64I_FCVT_U64_F64) :
-	 (irt_isi64(ir->t) ? A64I_FCVT_S64_F32 : A64I_FCVT_U64_F32)) :
-	(st == IRT_NUM ?
-	 (irt_isint(ir->t) ? A64I_FCVT_S32_F64 : A64I_FCVT_U32_F64) :
-	 (irt_isint(ir->t) ? A64I_FCVT_S32_F32 : A64I_FCVT_U32_F32));
-      emit_dn(as, ai, dest, (left & 31));
+      lj_assertA(!irt_isu32(ir->t), "bad CONV u32.fp emitted");
+      if (irt_isu64(ir->t)) {
+	emit_dnm(as, A64I_CSELx | A64F_CC(CC_VC), dest, dest, RID_TMP);
+	emit_n(as, (A64I_CMNx^A64I_K12) | A64F_U12(1), dest);
+	emit_dn(as, st == IRT_NUM ? A64I_FCVT_U64_F64 : A64I_FCVT_U64_F32, RID_TMP, (left & 31));
+	emit_dn(as, st == IRT_NUM ? A64I_FCVT_S64_F64 : A64I_FCVT_S64_F32, dest, (left & 31));
+      } else {
+	A64Ins ai = irt_is64(ir->t) ?
+	  (st == IRT_NUM ? A64I_FCVT_S64_F64 : A64I_FCVT_S64_F32) :
+	  (st == IRT_NUM ? A64I_FCVT_S32_F64 : A64I_FCVT_S32_F32);
+	emit_dn(as, ai, dest, (left & 31));
+      }
     }
   } else if (st >= IRT_I8 && st <= IRT_U16) { /* Extend to 32 bit integer. */
     Reg dest = ra_dest(as, ir, RSET_GPR);
@@ -1073,7 +1089,8 @@ static void asm_fstore(ASMState *as, IRIns *ir)
 static void asm_xload(ASMState *as, IRIns *ir)
 {
   Reg dest = ra_dest(as, ir, irt_isfp(ir->t) ? RSET_FPR : RSET_GPR);
-  lj_assertA(!(ir->op2 & IRXLOAD_UNALIGNED), "unaligned XLOAD");
+  lj_assertA(LJ_TARGET_UNALIGNED || !(ir->op2 & IRXLOAD_UNALIGNED),
+	     "unaligned XLOAD");
   asm_fusexref(as, asm_fxloadins(ir), dest, ir->op1, RSET_GPR);
 }
 
@@ -1972,34 +1989,42 @@ static Reg asm_head_side_base(ASMState *as, IRIns *irp)
 /* Fixup the tail code. */
 static void asm_tail_fixup(ASMState *as, TraceNo lnk)
 {
-  MCode *p = as->mctop;
+  MCode *mcp = as->mctail;
   MCode *target;
   /* Undo the sp adjustment in BC_JLOOP when exiting to the interpreter. */
   int32_t spadj = as->T->spadjust + (lnk ? 0 : sps_scale(SPS_FIXED));
-  if (spadj == 0) {
-    *--p = A64I_LE(A64I_NOP);
-    as->mctop = p;
-  } else {
-    /* Patch stack adjustment. */
+  if (spadj) {  /* Emit stack adjustment. */
     uint32_t k = emit_isk12(spadj);
     lj_assertA(k, "stack adjustment %d does not fit in K12", spadj);
-    p[-2] = (A64I_ADDx^k) | A64F_D(RID_SP) | A64F_N(RID_SP);
+    *mcp++ = (A64I_ADDx^k) | A64F_D(RID_SP) | A64F_N(RID_SP);
   }
-  /* Patch exit branch. */
-  target = lnk ? traceref(as->J, lnk)->mcode : (MCode *)lj_vm_exit_interp;
-  p[-1] = A64I_B | A64F_S26((target-p)+1);
+  /* Emit exit branch. */
+  target = lnk ? traceref(as->J, lnk)->mcode : (MCode *)(void *)lj_vm_exit_interp;
+  if (lnk || A64F_S_OK(target - mcp, 26)) {
+    *mcp = A64I_B | A64F_S26(target - mcp); mcp++;
+  } else {
+    *mcp++ = A64I_LDRx | A64F_D(RID_LR) | A64F_N(RID_GL) | A64F_U12(glofs(as, &as->J->k64[LJ_K64_VM_EXIT_INTERP]) >> 3);
+    *mcp++ = A64I_BR_AUTH | A64F_N(RID_LR);
+  }
+  while (as->mctop > mcp) *--as->mctop = A64I_LE(A64I_NOP);
 }
 
 /* Prepare tail of code. */
-static void asm_tail_prep(ASMState *as)
+static void asm_tail_prep(ASMState *as, TraceNo lnk)
 {
   MCode *p = as->mctop - 1;  /* Leave room for exit branch. */
   if (as->loopref) {
     as->invmcp = as->mcp = p;
   } else {
-    as->mcp = p-1;  /* Leave room for stack pointer adjustment. */
+    if (!lnk) {
+      MCode *target = (MCode *)(void *)lj_vm_exit_interp;
+      if (!A64F_S_OK(target - p, 26) || !A64F_S_OK(target - (p+1), 26)) p--;
+    }
+    p--;  /* Leave room for stack pointer adjustment. */
+    as->mcp = p;
     as->invmcp = NULL;
   }
+  as->mctail = p;
   *p = 0;  /* Prevent load/store merging. */
 }
 

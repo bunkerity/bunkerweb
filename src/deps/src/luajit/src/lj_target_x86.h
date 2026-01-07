@@ -314,6 +314,7 @@ typedef enum {
   XO_FSTPq =	XO_(dd), XOg_FSTPq = 3,
   XO_FISTPq =	XO_(df), XOg_FISTPq = 7,
   XO_FISTTPq =	XO_(dd), XOg_FISTTPq = 1,
+  XO_FADDd =	XO_(d8), XOg_FADDd = 0,
   XO_FADDq =	XO_(dc), XOg_FADDq = 0,
   XO_FLDCW =	XO_(d9), XOg_FLDCW = 5,
   XO_FNSTCW =	XO_(d9), XOg_FNSTCW = 7

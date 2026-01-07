@@ -1,7 +1,7 @@
 FROM fedora:42@sha256:b3d16134560afa00d7cc2a9e4967eb5b954512805f3fe27d8e70bbed078e22ea
 
 ENV container=docker
-ENV NGINX_VERSION=1.28.0
+ENV NGINX_VERSION=1.28.1
 
 RUN dnf -y update \
     && dnf -y install systemd \

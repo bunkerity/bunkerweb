@@ -237,20 +237,15 @@ typedef struct CCallInfo {
   _(SOFTFP_MIPS64, lj_vm_tointg,	1,   N, INT, 0) \
   _(SOFTFP_FFI,	softfp_ui2d,		1,   N, NUM, 0) \
   _(SOFTFP_FFI,	softfp_f2d,		1,   N, NUM, 0) \
-  _(SOFTFP_FFI,	softfp_d2ui,		1,   N, INT, XA_FP32) \
   _(SOFTFP_FFI,	softfp_d2f,		1,   N, FLOAT, XA_FP32) \
   _(SOFTFP_FFI,	softfp_i2f,		1,   N, FLOAT, 0) \
   _(SOFTFP_FFI,	softfp_ui2f,		1,   N, FLOAT, 0) \
   _(SOFTFP_FFI,	softfp_f2i,		1,   N, INT, 0) \
-  _(SOFTFP_FFI,	softfp_f2ui,		1,   N, INT, 0) \
   _(FP64_FFI,	fp64_l2d,		1,   N, NUM, XA_64) \
   _(FP64_FFI,	fp64_ul2d,		1,   N, NUM, XA_64) \
   _(FP64_FFI,	fp64_l2f,		1,   N, FLOAT, XA_64) \
   _(FP64_FFI,	fp64_ul2f,		1,   N, FLOAT, XA_64) \
-  _(FP64_FFI,	fp64_d2l,		1,   N, I64, XA_FP) \
-  _(FP64_FFI,	fp64_d2ul,		1,   N, U64, XA_FP) \
-  _(FP64_FFI,	fp64_f2l,		1,   N, I64, 0) \
-  _(FP64_FFI,	fp64_f2ul,		1,   N, U64, 0) \
+  _(FP64_FFI,	lj_vm_num2u64,		1,   N, U64, XA_FP) \
   _(FFI,	lj_carith_divi64,	2,   N, I64, XA2_64|CCI_NOFPRCLOBBER) \
   _(FFI,	lj_carith_divu64,	2,   N, U64, XA2_64|CCI_NOFPRCLOBBER) \
   _(FFI,	lj_carith_modi64,	2,   N, I64, XA2_64|CCI_NOFPRCLOBBER) \
@@ -295,27 +290,14 @@ LJ_DATA const CCallInfo lj_ir_callinfo[IRCALL__MAX+1];
 #define softfp_d2i __aeabi_d2iz
 #define softfp_ui2d __aeabi_ui2d
 #define softfp_f2d __aeabi_f2d
-#define softfp_d2ui __aeabi_d2uiz
 #define softfp_d2f __aeabi_d2f
 #define softfp_i2f __aeabi_i2f
 #define softfp_ui2f __aeabi_ui2f
 #define softfp_f2i __aeabi_f2iz
-#define softfp_f2ui __aeabi_f2uiz
 #define fp64_l2d __aeabi_l2d
 #define fp64_ul2d __aeabi_ul2d
 #define fp64_l2f __aeabi_l2f
 #define fp64_ul2f __aeabi_ul2f
-#if LJ_TARGET_IOS
-#define fp64_d2l __fixdfdi
-#define fp64_d2ul __fixunsdfdi
-#define fp64_f2l __fixsfdi
-#define fp64_f2ul __fixunssfdi
-#else
-#define fp64_d2l __aeabi_d2lz
-#define fp64_d2ul __aeabi_d2ulz
-#define fp64_f2l __aeabi_f2lz
-#define fp64_f2ul __aeabi_f2ulz
-#endif
 #elif LJ_TARGET_MIPS || LJ_TARGET_PPC
 #define softfp_add __adddf3
 #define softfp_sub __subdf3
@@ -326,12 +308,10 @@ LJ_DATA const CCallInfo lj_ir_callinfo[IRCALL__MAX+1];
 #define softfp_d2i __fixdfsi
 #define softfp_ui2d __floatunsidf
 #define softfp_f2d __extendsfdf2
-#define softfp_d2ui __fixunsdfsi
 #define softfp_d2f __truncdfsf2
 #define softfp_i2f __floatsisf
 #define softfp_ui2f __floatunsisf
 #define softfp_f2i __fixsfsi
-#define softfp_f2ui __fixunssfsi
 #else
 #error "Missing soft-float definitions for target architecture"
 #endif
@@ -345,12 +325,10 @@ extern int32_t softfp_d2i(double a);
 #if LJ_HASFFI
 extern double softfp_ui2d(uint32_t a);
 extern double softfp_f2d(float a);
-extern uint32_t softfp_d2ui(double a);
 extern float softfp_d2f(double a);
 extern float softfp_i2f(int32_t a);
 extern float softfp_ui2f(uint32_t a);
 extern int32_t softfp_f2i(float a);
-extern uint32_t softfp_f2ui(float a);
 #endif
 #if LJ_TARGET_MIPS
 extern double lj_vm_sfmin(double a, double b);
@@ -364,10 +342,6 @@ extern double lj_vm_sfmax(double a, double b);
 #define fp64_ul2d __floatundidf
 #define fp64_l2f __floatdisf
 #define fp64_ul2f __floatundisf
-#define fp64_d2l __fixdfdi
-#define fp64_d2ul __fixunsdfdi
-#define fp64_f2l __fixsfdi
-#define fp64_f2ul __fixunssfdi
 #else
 #error "Missing fp64 helper definitions for this compiler"
 #endif
@@ -378,10 +352,6 @@ extern double fp64_l2d(int64_t a);
 extern double fp64_ul2d(uint64_t a);
 extern float fp64_l2f(int64_t a);
 extern float fp64_ul2f(uint64_t a);
-extern int64_t fp64_d2l(double a);
-extern uint64_t fp64_d2ul(double a);
-extern int64_t fp64_f2l(float a);
-extern uint64_t fp64_f2ul(float a);
 #endif
 
 #endif

@@ -106,7 +106,7 @@ local function determine_wildcard_bases(labels_list)
 	return bases
 end
 
-local function build_wildcard_domain_list(domains)
+local function build_wildcard_groups(domains)
 	local grouped = {}
 	local has_entries = false
 	for _, domain in ipairs(domains) do
@@ -127,48 +127,50 @@ local function build_wildcard_domain_list(domains)
 	if not has_entries then
 		return {}
 	end
-	local results = {}
-	local seen = {}
+	local groups = {}
 	for _, labels_list in pairs(grouped) do
 		local bases = determine_wildcard_bases(labels_list)
 		for _, base in ipairs(bases) do
 			if base ~= "" then
-				local wildcard = "*." .. base
-				if not seen[wildcard] then
-					insert(results, wildcard)
-					seen[wildcard] = true
-				end
-				if not seen[base] then
-					insert(results, base)
-					seen[base] = true
-				end
+				groups[base] = groups[base] or {}
+				groups[base]["*." .. base] = true
+				groups[base][base] = true
 			end
 		end
 	end
-	sort(results, function(a, b)
-		local a_wildcard = sub(a, 1, 2) == "*."
-		local b_wildcard = sub(b, 1, 2) == "*."
-		if a_wildcard == b_wildcard then
-			return a < b
+	local result = {}
+	for base, names_set in pairs(groups) do
+		local names = {}
+		for name, _ in pairs(names_set) do
+			insert(names, name)
 		end
-		return a_wildcard and not b_wildcard
-	end)
-	return results
+		sort(names, function(a, b)
+			local a_wildcard = sub(a, 1, 2) == "*."
+			local b_wildcard = sub(b, 1, 2) == "*."
+			if a_wildcard == b_wildcard then
+				return a < b
+			end
+			return a_wildcard and not b_wildcard
+		end)
+		result[base] = names
+	end
+	return result
 end
 
-local function get_wildcard_cert_identifier(host, domains)
+local function resolve_wildcard_base(host, bases)
 	if not host or host == "" then
-		return host
+		return nil
 	end
-	local targets = domains
-	if not targets or #targets == 0 then
-		targets = { host }
+	for _, base in ipairs(bases) do
+		if host == base then
+			return base
+		end
+		local suffix = "." .. base
+		if #host > #suffix and host:sub(-#suffix) == suffix then
+			return base
+		end
 	end
-	local processed = build_wildcard_domain_list(targets)
-	if #processed > 0 then
-		return processed[#processed]
-	end
-	return host
+	return nil
 end
 
 function letsencrypt:initialize(ctx)
@@ -187,6 +189,7 @@ end
 function letsencrypt:init()
 	local ret_ok, ret_err = true, "success"
 	local wildcard_servers = {}
+	local wildcard_bases_set = {}
 
 	if has_variable("AUTO_LETS_ENCRYPT", "yes") then
 		local multisite, err = get_variable("MULTISITE", false)
@@ -235,41 +238,71 @@ function letsencrypt:init()
 						multisite_vars["LETS_ENCRYPT_CHALLENGE"] == "dns"
 						and multisite_vars["USE_LETS_ENCRYPT_WILDCARD"] == "yes"
 					then
-						cert_identifier = get_wildcard_cert_identifier(cert_identifier, server_list)
-						for _, part in ipairs(server_list) do
-							wildcard_servers[part] = cert_identifier
+						local wildcard_groups = build_wildcard_groups(server_list)
+						local bases = {}
+						for base, _ in pairs(wildcard_groups) do
+							insert(bases, base)
+							wildcard_bases_set[base] = true
+							wildcard_servers[base] = base
 						end
-						wildcard_servers[cert_identifier] = cert_identifier
-						data = self.internalstore:get("plugin_letsencrypt_" .. cert_identifier, true)
+						sort(bases, function(a, b)
+							if #a == #b then
+								return a < b
+							end
+							return #a > #b
+						end)
+						for _, part in ipairs(server_list) do
+							local base = resolve_wildcard_base(part, bases)
+							if base then
+								wildcard_servers[part] = base
+							else
+								wildcard_servers[part] = false
+							end
+						end
+						for _, base in ipairs(bases) do
+							data = self.internalstore:get("plugin_letsencrypt_" .. base, true)
+							if not data then
+								local check
+								check, data = read_files({
+									"/var/cache/bunkerweb/letsencrypt/etc/live/" .. base .. "/fullchain.pem",
+									"/var/cache/bunkerweb/letsencrypt/etc/live/" .. base .. "/privkey.pem",
+								})
+								if not check then
+									self.logger:log(ERR, "error while reading files : " .. data)
+									ret_ok = false
+									ret_err = "error reading files"
+								else
+									check, err = self:load_data(data, base)
+									if not check then
+										self.logger:log(ERR, "error while loading data : " .. err)
+										ret_ok = false
+										ret_err = "error loading data"
+									end
+								end
+							end
+						end
 					else
 						for _, part in ipairs(server_list) do
 							wildcard_servers[part] = false
 						end
-					end
-					if not data then
-						-- Load certificate
-						local check
-						check, data = read_files({
-							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/fullchain.pem",
-							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/privkey.pem",
-						})
-						if not check then
-							self.logger:log(ERR, "error while reading files : " .. data)
-							ret_ok = false
-							ret_err = "error reading files"
-						else
-							if
-								multisite_vars["LETS_ENCRYPT_CHALLENGE"] == "dns"
-								and multisite_vars["USE_LETS_ENCRYPT_WILDCARD"] == "yes"
-							then
-								check, err = self:load_data(data, cert_identifier)
+						data = self.internalstore:get("plugin_letsencrypt_" .. cert_identifier, true)
+						if not data then
+							local check
+							check, data = read_files({
+								"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/fullchain.pem",
+								"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/privkey.pem",
+							})
+							if not check then
+								self.logger:log(ERR, "error while reading files : " .. data)
+								ret_ok = false
+								ret_err = "error reading files"
 							else
 								check, err = self:load_data(data, multisite_vars["SERVER_NAME"])
-							end
-							if not check then
-								self.logger:log(ERR, "error while loading data : " .. err)
-								ret_ok = false
-								ret_err = "error loading data"
+								if not check then
+									self.logger:log(ERR, "error while loading data : " .. err)
+									ret_ok = false
+									ret_err = "error loading data"
+								end
 							end
 						end
 					end
@@ -299,31 +332,68 @@ function letsencrypt:init()
 			end
 			local use_wildcard_mode = challenge == "dns" and use_wildcard == "yes"
 			if use_wildcard_mode then
-				cert_identifier = get_wildcard_cert_identifier(cert_identifier, server_list)
-				for _, part in ipairs(server_list) do
-					wildcard_servers[part] = cert_identifier
+				local wildcard_groups = build_wildcard_groups(server_list)
+				local bases = {}
+				for base, _ in pairs(wildcard_groups) do
+					insert(bases, base)
+					wildcard_bases_set[base] = true
+					wildcard_servers[base] = base
 				end
-				wildcard_servers[cert_identifier] = cert_identifier
+				sort(bases, function(a, b)
+					if #a == #b then
+						return a < b
+					end
+					return #a > #b
+				end)
+				for _, part in ipairs(server_list) do
+					local base = resolve_wildcard_base(part, bases)
+					if base then
+						wildcard_servers[part] = base
+					else
+						wildcard_servers[part] = false
+					end
+				end
+				for _, base in ipairs(bases) do
+					local data = self.internalstore:get("plugin_letsencrypt_" .. base, true)
+					if not data then
+						local check
+						check, data = read_files({
+							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. base .. "/fullchain.pem",
+							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. base .. "/privkey.pem",
+						})
+						if not check then
+							self.logger:log(ERR, "error while reading files : " .. data)
+							ret_ok = false
+							ret_err = "error reading files"
+						else
+							check, err = self:load_data(data, base)
+							if not check then
+								self.logger:log(ERR, "error while loading data : " .. err)
+								ret_ok = false
+								ret_err = "error loading data"
+							end
+						end
+					end
+				end
 			else
 				for _, part in ipairs(server_list) do
 					wildcard_servers[part] = false
 				end
-			end
-			local check, data = read_files({
-				"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/fullchain.pem",
-				"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/privkey.pem",
-			})
-			if not check then
-				self.logger:log(ERR, "error while reading files : " .. data)
-				ret_ok = false
-				ret_err = "error reading files"
-			else
-				local load_key = use_wildcard_mode and cert_identifier or server_names
-				check, err = self:load_data(data, load_key)
+				local check, data = read_files({
+					"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/fullchain.pem",
+					"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/privkey.pem",
+				})
 				if not check then
-					self.logger:log(ERR, "error while loading data : " .. err)
+					self.logger:log(ERR, "error while reading files : " .. data)
 					ret_ok = false
-					ret_err = "error loading data"
+					ret_err = "error reading files"
+				else
+					check, err = self:load_data(data, server_names)
+					if not check then
+						self.logger:log(ERR, "error while loading data : " .. err)
+						ret_ok = false
+						ret_err = "error loading data"
+					end
 				end
 			end
 		end
@@ -331,7 +401,23 @@ function letsencrypt:init()
 		ret_err = "let's encrypt is not used"
 	end
 
-	local ok, err = self.internalstore:set("plugin_letsencrypt_wildcard_servers", wildcard_servers, nil, true)
+	local wildcard_bases = {}
+	for base, _ in pairs(wildcard_bases_set) do
+		insert(wildcard_bases, base)
+	end
+	sort(wildcard_bases, function(a, b)
+		if #a == #b then
+			return a < b
+		end
+		return #a > #b
+	end)
+
+	local ok, err = self.internalstore:set("plugin_letsencrypt_wildcard_bases", wildcard_bases, nil, true)
+	if not ok then
+		return self:ret(false, "error while setting wildcard bases into internalstore : " .. err)
+	end
+
+	ok, err = self.internalstore:set("plugin_letsencrypt_wildcard_servers", wildcard_servers, nil, true)
 	if not ok then
 		return self:ret(false, "error while setting wildcard servers into internalstore : " .. err)
 	end
@@ -348,17 +434,28 @@ function letsencrypt:ssl_certificate()
 	if not wildcard_servers then
 		return self:ret(false, "can't get wildcard servers : " .. err)
 	end
+	local wildcard_bases = {}
+	local stored_bases, bases_err = self.internalstore:get("plugin_letsencrypt_wildcard_bases", true)
+	if stored_bases then
+		wildcard_bases = stored_bases
+	elseif bases_err ~= "not found" then
+		return self:ret(false, "can't get wildcard bases : " .. bases_err)
+	end
 	local alias = wildcard_servers[server_name]
-	if alias == true then
-		local parts = {}
-		for part in server_name:gmatch("[^.]+") do
-			insert(parts, part)
-		end
-		if #parts > 2 then
-			server_name = table.concat(parts, ".", 2)
-		end
-	elseif type(alias) == "string" and alias ~= "" then
+	if type(alias) == "string" and alias ~= "" then
 		server_name = alias
+	else
+		for _, base in ipairs(wildcard_bases) do
+			if server_name == base then
+				server_name = base
+				break
+			end
+			local suffix = "." .. base
+			if #server_name > #suffix and server_name:sub(-#suffix) == suffix then
+				server_name = base
+				break
+			end
+		end
 	end
 	local data
 	data, err = self.internalstore:get("plugin_letsencrypt_" .. server_name, true)

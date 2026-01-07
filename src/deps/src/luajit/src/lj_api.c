@@ -416,11 +416,7 @@ LUA_API lua_Integer lua_tointeger(lua_State *L, int idx)
       return intV(&tmp);
     n = numV(&tmp);
   }
-#if LJ_64
-  return (lua_Integer)n;
-#else
-  return lj_num2int(n);
-#endif
+  return lj_num2int_type(n, lua_Integer);
 }
 
 LUA_API lua_Integer lua_tointegerx(lua_State *L, int idx, int *ok)
@@ -445,11 +441,7 @@ LUA_API lua_Integer lua_tointegerx(lua_State *L, int idx, int *ok)
     n = numV(&tmp);
   }
   if (ok) *ok = 1;
-#if LJ_64
-  return (lua_Integer)n;
-#else
-  return lj_num2int(n);
-#endif
+  return lj_num2int_type(n, lua_Integer);
 }
 
 LUALIB_API lua_Integer luaL_checkinteger(lua_State *L, int idx)
@@ -468,11 +460,7 @@ LUALIB_API lua_Integer luaL_checkinteger(lua_State *L, int idx)
       return (lua_Integer)intV(&tmp);
     n = numV(&tmp);
   }
-#if LJ_64
-  return (lua_Integer)n;
-#else
-  return lj_num2int(n);
-#endif
+  return lj_num2int_type(n, lua_Integer);
 }
 
 LUALIB_API lua_Integer luaL_optinteger(lua_State *L, int idx, lua_Integer def)
@@ -493,11 +481,7 @@ LUALIB_API lua_Integer luaL_optinteger(lua_State *L, int idx, lua_Integer def)
       return (lua_Integer)intV(&tmp);
     n = numV(&tmp);
   }
-#if LJ_64
-  return (lua_Integer)n;
-#else
-  return lj_num2int(n);
-#endif
+  return lj_num2int_type(n, lua_Integer);
 }
 
 LUA_API int lua_toboolean(lua_State *L, int idx)

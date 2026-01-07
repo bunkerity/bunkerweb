@@ -309,7 +309,12 @@
 #define LJ_TARGET_MASKROT	1
 #define LJ_TARGET_UNIFYROT	2	/* Want only IR_BROR. */
 #define LJ_TARGET_GC64		1
+#define LJ_PAGESIZE		16384
 #define LJ_ARCH_NUMMODE		LJ_NUMMODE_DUAL
+
+#if __ARM_FEATURE_UNALIGNED
+#define LJ_TARGET_UNALIGNED	1
+#endif
 
 #define LJ_ARCH_VERSION		80
 
@@ -473,7 +478,7 @@
 #define LJ_TARGET_MIPS		1
 #define LJ_TARGET_EHRETREG	4
 #define LJ_TARGET_EHRAREG	31
-#define LJ_TARGET_JUMPRANGE	27	/* 2*2^27 = 256MB-aligned region */
+#define LJ_TARGET_JUMPRANGE	28	/* 2^28 = 256MB-aligned region */
 #define LJ_TARGET_MASKSHIFT	1
 #define LJ_TARGET_MASKROT	1
 #define LJ_TARGET_UNIFYROT	2	/* Want only IR_BROR. */

@@ -173,6 +173,11 @@ static int emit_kdelta2(ASMState *as, Reg rd, int32_t i)
   return 0;  /* Failed. */
 }
 
+#define emit_movw_k(k) \
+  (ARMI_MOVW | ((k) & 0x0fffu) | (((k) & 0xf000u) << 4))
+#define emit_movt_k(k) \
+  (ARMI_MOVT | (((k) >> 16) & 0x0fffu) | ((((k) >> 16) & 0xf000u) << 4))
+
 /* Load a 32 bit constant into a GPR. */
 static void emit_loadi(ASMState *as, Reg rd, int32_t i)
 {
@@ -184,13 +189,13 @@ static void emit_loadi(ASMState *as, Reg rd, int32_t i)
     emit_d(as, ARMI_MOV^k, rd);
   } else if ((as->flags & JIT_F_ARMV6T2) && (uint32_t)i < 0x00010000u) {
     /* 16 bit loword constant for ARMv6T2. */
-    emit_d(as, ARMI_MOVW|(i & 0x0fff)|((i & 0xf000)<<4), rd);
+    emit_d(as, emit_movw_k(i), rd);
   } else if (emit_kdelta1(as, rd, i)) {
     /* One step delta relative to another constant. */
   } else if ((as->flags & JIT_F_ARMV6T2)) {
     /* 32 bit hiword/loword constant for ARMv6T2. */
-    emit_d(as, ARMI_MOVT|((i>>16) & 0x0fff)|(((i>>16) & 0xf000)<<4), rd);
-    emit_d(as, ARMI_MOVW|(i & 0x0fff)|((i & 0xf000)<<4), rd);
+    emit_d(as, emit_movt_k(i), rd);
+    emit_d(as, emit_movw_k(i), rd);
   } else if (emit_kdelta2(as, rd, i)) {
     /* Two step delta relative to another constant. */
   } else {

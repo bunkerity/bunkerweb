@@ -303,17 +303,18 @@ LJFOLDF(kfold_intarith)
   return INTFOLD(kfold_intop(fleft->i, fright->i, (IROp)fins->o));
 }
 
+/* Forward declaration. */
+static uint64_t kfold_int64arith(jit_State *J, uint64_t k1, uint64_t k2,
+				 IROp op);
+
 LJFOLD(ADDOV KINT KINT)
 LJFOLD(SUBOV KINT KINT)
 LJFOLD(MULOV KINT KINT)
 LJFOLDF(kfold_intovarith)
 {
-  lua_Number n = lj_vm_foldarith((lua_Number)fleft->i, (lua_Number)fright->i,
-				 fins->o - IR_ADDOV);
-  int32_t k = lj_num2int(n);
-  if (n != (lua_Number)k)
-    return FAILFOLD;
-  return INTFOLD(k);
+  int64_t k = kfold_int64arith(J, (int64_t)fleft->i, (int64_t)fright->i,
+		(IROp)((int)fins->o - (int)IR_ADDOV + (int)IR_ADD));
+  return checki32(k) ? INTFOLD(k) : FAILFOLD;
 }
 
 LJFOLD(BNOT KINT)
@@ -368,11 +369,11 @@ static uint64_t kfold_int64arith(jit_State *J, uint64_t k1, uint64_t k2,
 				 IROp op)
 {
   UNUSED(J);
-#if LJ_HASFFI
   switch (op) {
   case IR_ADD: k1 += k2; break;
   case IR_SUB: k1 -= k2; break;
   case IR_MUL: k1 *= k2; break;
+#if LJ_HASFFI
   case IR_BAND: k1 &= k2; break;
   case IR_BOR: k1 |= k2; break;
   case IR_BXOR: k1 ^= k2; break;
@@ -382,11 +383,8 @@ static uint64_t kfold_int64arith(jit_State *J, uint64_t k1, uint64_t k2,
   case IR_BROL: k1 = lj_rol(k1, (k2 & 63)); break;
   case IR_BROR: k1 = lj_ror(k1, (k2 & 63)); break;
   default: lj_assertJ(0, "bad IR op %d", op); break;
-  }
-#else
-  UNUSED(k2); UNUSED(op);
-  lj_assertJ(0, "FFI IR op without FFI");
 #endif
+  }
   return k1;
 }
 
@@ -883,8 +881,11 @@ LJFOLD(CONV KNUM IRCONV_INT_NUM)
 LJFOLDF(kfold_conv_knum_int_num)
 {
   lua_Number n = knumleft;
-  int32_t k = lj_num2int(n);
-  if (irt_isguard(fins->t) && n != (lua_Number)k) {
+  if (irt_isguard(fins->t)) {
+    int64_t i64;
+    int32_t k;
+    if (lj_num2int_check(n, i64, k))
+      return INTFOLD(k);
     /* We're about to create a guard which always fails, like CONV +1.5.
     ** Some pathological loops cause this during LICM, e.g.:
     **   local x,k,t = 0,1.5,{1,[1.5]=2}
@@ -892,27 +893,15 @@ LJFOLDF(kfold_conv_knum_int_num)
     **   assert(x == 300)
     */
     return FAILFOLD;
+  } else {
+    return INTFOLD(lj_num2int(n));
   }
-  return INTFOLD(k);
-}
-
-LJFOLD(CONV KNUM IRCONV_U32_NUM)
-LJFOLDF(kfold_conv_knum_u32_num)
-{
-#ifdef _MSC_VER
-  {  /* Workaround for MSVC bug. */
-    volatile uint32_t u = (uint32_t)knumleft;
-    return INTFOLD((int32_t)u);
-  }
-#else
-  return INTFOLD((int32_t)(uint32_t)knumleft);
-#endif
 }
 
 LJFOLD(CONV KNUM IRCONV_I64_NUM)
 LJFOLDF(kfold_conv_knum_i64_num)
 {
-  return INT64FOLD((uint64_t)(int64_t)knumleft);
+  return INT64FOLD((uint64_t)lj_num2i64(knumleft));
 }
 
 LJFOLD(CONV KNUM IRCONV_U64_NUM)
@@ -1135,7 +1124,6 @@ LJFOLDF(shortcut_conv_num_int)
 }
 
 LJFOLD(CONV CONV IRCONV_INT_NUM)  /* _INT */
-LJFOLD(CONV CONV IRCONV_U32_NUM)  /* _U32 */
 LJFOLDF(simplify_conv_int_num)
 {
   /* Fold even across PHI to avoid expensive num->int conversions in loop. */
@@ -1332,6 +1320,24 @@ LJFOLDF(narrow_convert)
   lj_assertJ(fins->o != IR_CONV || (fins->op2&IRCONV_CONVMASK) != IRCONV_TOBIT,
 	     "unexpected CONV TOBIT");
   return lj_opt_narrow_convert(J);
+}
+
+LJFOLD(XSTORE any CONV)
+LJFOLDF(xstore_conv)
+{
+#if LJ_64
+  PHIBARRIER(fright);
+  if (!irt_is64(fins->t) &&
+      irt_type(fins->t) == (IRType)((fright->op2&IRCONV_DSTMASK)>>IRCONV_DSH) &&
+      ((fright->op2&IRCONV_SRCMASK) == IRT_I64 ||
+       (fright->op2&IRCONV_SRCMASK) == IRT_U64)) {
+    fins->op2 = fright->op1;
+    return RETRYFOLD;
+  }
+#else
+  UNUSED(J);
+#endif
+  return NEXTFOLD;
 }
 
 /* -- Integer algebraic simplifications ----------------------------------- */

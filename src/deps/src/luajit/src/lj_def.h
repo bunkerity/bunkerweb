@@ -135,6 +135,7 @@ typedef uintptr_t BloomFilter;
 #define LJ_INLINE	inline
 #define LJ_AINLINE	inline __attribute__((always_inline))
 #define LJ_NOINLINE	__attribute__((noinline))
+#define LJ_CONSTF	__attribute__((nothrow,const))
 
 #if defined(__ELF__) || defined(__MACH__) || defined(__psp2__)
 #if !((defined(__sun__) && defined(__svr4__)) || defined(__CELLOS_LV2__))
@@ -253,6 +254,7 @@ static LJ_AINLINE uint32_t lj_getu32(const void *p)
 #define LJ_INLINE	__inline
 #define LJ_AINLINE	__forceinline
 #define LJ_NOINLINE	__declspec(noinline)
+#define LJ_CONSTF	__declspec(noalias)
 #if defined(_M_IX86)
 #define LJ_FASTCALL	__fastcall
 #endif

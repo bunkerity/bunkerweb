@@ -281,22 +281,20 @@ static int narrow_conv_backprop(NarrowConv *nc, IRRef ref, int depth)
     return 0;
   } else if (ir->o == IR_KNUM) {  /* Narrow FP constant. */
     lua_Number n = ir_knum(ir)->n;
+    int64_t i64;
+    int32_t k;
     if ((nc->mode & IRCONV_CONVMASK) == IRCONV_TOBIT) {
-      /* Allows a wider range of constants. */
-      int64_t k64 = (int64_t)n;
-      if (n == (lua_Number)k64) {  /* Only if const doesn't lose precision. */
-	*nc->sp++ = NARROWINS(NARROW_INT, 0);
-	*nc->sp++ = (NarrowIns)k64;  /* But always truncate to 32 bits. */
-	return 0;
-      }
-    } else {
-      int32_t k = lj_num2int(n);
-      /* Only if constant is a small integer. */
-      if (checki16(k) && n == (lua_Number)k) {
+      /* Allows a wider range of constants, if const doesn't lose precision. */
+      if (lj_num2int_check(n, i64, k)) {
 	*nc->sp++ = NARROWINS(NARROW_INT, 0);
 	*nc->sp++ = (NarrowIns)k;
 	return 0;
       }
+    } else if (lj_num2int_cond(n, i64, k, checki16((int32_t)i64))) {
+      /* Only if constant is a small integer. */
+      *nc->sp++ = NARROWINS(NARROW_INT, 0);
+      *nc->sp++ = (NarrowIns)k;
+      return 0;
     }
     return 10;  /* Never narrow other FP constants (this is rare). */
   }
@@ -512,12 +510,6 @@ TRef LJ_FASTCALL lj_opt_narrow_cindex(jit_State *J, TRef tr)
 
 /* -- Narrowing of arithmetic operators ----------------------------------- */
 
-/* Check whether a number fits into an int32_t (-0 is ok, too). */
-static int numisint(lua_Number n)
-{
-  return (n == (lua_Number)lj_num2int(n));
-}
-
 /* Convert string to number. Error out for non-numeric string values. */
 static TRef conv_str_tonum(jit_State *J, TRef tr, TValue *o)
 {
@@ -539,8 +531,8 @@ TRef lj_opt_narrow_arith(jit_State *J, TRef rb, TRef rc,
   /* Must not narrow MUL in non-DUALNUM variant, because it loses -0. */
   if ((op >= IR_ADD && op <= (LJ_DUALNUM ? IR_MUL : IR_SUB)) &&
       tref_isinteger(rb) && tref_isinteger(rc) &&
-      numisint(lj_vm_foldarith(numberVnum(vb), numberVnum(vc),
-			       (int)op - (int)IR_ADD)))
+      lj_num2int_ok(lj_vm_foldarith(numberVnum(vb), numberVnum(vc),
+				    (int)op - (int)IR_ADD)))
     return emitir(IRTGI((int)op - (int)IR_ADD + (int)IR_ADDOV), rb, rc);
   if (!tref_isnum(rb)) rb = emitir(IRTN(IR_CONV), rb, IRCONV_NUM_INT);
   if (!tref_isnum(rc)) rc = emitir(IRTN(IR_CONV), rc, IRCONV_NUM_INT);
@@ -553,9 +545,9 @@ TRef lj_opt_narrow_unm(jit_State *J, TRef rc, TValue *vc)
   rc = conv_str_tonum(J, rc, vc);
   if (tref_isinteger(rc)) {
     uint32_t k = (uint32_t)numberVint(vc);
-    if ((LJ_DUALNUM || k != 0) && k != 0x80000000u) {
+    if ((tvisint(vc) || k != 0) && k != 0x80000000u) {
       TRef zero = lj_ir_kint(J, 0);
-      if (!LJ_DUALNUM)
+      if (!tvisint(vc))
 	emitir(IRTGI(IR_NE), rc, zero);
       return emitir(IRTGI(IR_SUBOV), zero, rc);
     }
@@ -591,7 +583,7 @@ TRef lj_opt_narrow_mod(jit_State *J, TRef rb, TRef rc, TValue *vb, TValue *vc)
 static int narrow_forl(jit_State *J, cTValue *o)
 {
   if (tvisint(o)) return 1;
-  if (LJ_DUALNUM || (J->flags & JIT_F_OPT_NARROW)) return numisint(numV(o));
+  if (LJ_DUALNUM || (J->flags & JIT_F_OPT_NARROW)) return lj_num2int_ok(numV(o));
   return 0;
 }
 

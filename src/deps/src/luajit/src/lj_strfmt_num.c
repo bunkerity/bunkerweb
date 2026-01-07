@@ -169,7 +169,9 @@ static uint32_t nd_div2k(uint32_t* nd, uint32_t ndhi, uint32_t k, SFormat sf)
   }
   if (k > 18) {
     if (STRFMT_FP(sf) == STRFMT_FP(STRFMT_T_FP_F)) {
-      stop1 = 63 - (int32_t)STRFMT_PREC(sf) / 9;
+      /* Must not limit precision here or nd_round cannot round to even.
+      ** stop1 = 63 - (int32_t)STRFMT_PREC(sf) / 9;
+      */
     } else {
       int32_t floorlog2 = ndhi * 29 + lj_fls(nd[ndhi]) - k;
       int32_t floorlog10 = (int32_t)(floorlog2 * 0.30102999566398114);
@@ -240,6 +242,41 @@ static uint32_t nd_add_m10e(uint32_t* nd, uint32_t ndhi, uint8_t m, int32_t e)
     }
   }
   return ndhi;
+}
+
+/* Round to even with given precision. Extra digits are not zeroed. */
+static uint32_t nd_round(uint32_t* nd, uint32_t ndlo, uint32_t ndhi, int32_t e)
+{
+  uint32_t i;
+  int32_t d;
+  char buf[9];
+  if (e >= 0) {
+    i = (uint32_t)e / 9;
+    d = 8 - e + (int32_t)i * 9;
+  } else {
+    int32_t f = (e - 8) / 9;
+    i = (uint32_t)(64 + f);
+    d = 8 - e + f * 9;
+  }
+  lj_strfmt_wuint9(buf, nd[i]);
+  if (buf[d] < '5') {
+    return ndhi;  /* Don't round up. */
+  } else if (buf[d] == '5') {  /* Must check for round to even. */
+    if (d ? (buf[d-1] & 1) : (nd[(i + 1) & 0x3f] & 1))
+      goto round_up;  /* Round up '[13579]5.*' */
+    while (++d < 9) {  /* Check remaining digits in buffer. */
+      if (buf[d] != '0')
+	goto round_up;  /* Round up '[02468]5[^0]*'. */
+    }
+    while (i != ndlo) {  /* Check remaining fraction. */
+      if (nd[i])
+	goto round_up;  /* Round up '[02468]5[^0]*'. */
+      i = (i - 1) & 0x3f;
+    }
+    return ndhi;  /* Don't round up. */
+  } /* else: round up.*/
+round_up:
+  return nd_add_m10e(nd, ndhi, 5, e);  /* Round up by adding 5*10^e. */
 }
 
 /* Test whether two "nd" values are equal in their most significant digits. */
@@ -432,7 +469,7 @@ static char *lj_strfmt_wfnum(SBuf *sb, SFormat sf, lua_Number n, char *p)
       }
       if ((int32_t)(prec - nde) < (0x3f & -(int32_t)ndlo) * 9) {
 	/* Precision is sufficiently low as to maybe require rounding. */
-	ndhi = nd_add_m10e(nd, ndhi, 5, nde - prec - 1);
+	ndhi = nd_round(nd, ndlo, ndhi, nde - prec - 1);
 	nde += (hilen != ndigits_dec(nd[ndhi]));
       }
       nde += ndebias;
@@ -508,7 +545,7 @@ static char *lj_strfmt_wfnum(SBuf *sb, SFormat sf, lua_Number n, char *p)
       /* %f (or, shortly, %g in %f style) */
       if (prec < (MSize)(0x3f & -(int32_t)ndlo) * 9) {
 	/* Precision is sufficiently low as to maybe require rounding. */
-	ndhi = nd_add_m10e(nd, ndhi, 5, 0 - prec - 1);
+	ndhi = nd_round(nd, ndlo, ndhi, 0 - prec - 1);
       }
       g_format_like_f:
       if ((sf & STRFMT_T_FP_E) && !(sf & STRFMT_F_ALT) && prec && width) {

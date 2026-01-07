@@ -63,31 +63,46 @@ void lj_mcode_sync(void *start, void *end)
 
 #if LJ_HASJIT
 
+#if LUAJIT_SECURITY_MCODE != 0
+/* Protection twiddling failed. Probably due to kernel security. */
+static LJ_NORET LJ_NOINLINE void mcode_protfail(jit_State *J)
+{
+  lua_CFunction panic = J2G(J)->panic;
+  if (panic) {
+    lua_State *L = J->L;
+    setstrV(L, L->top++, lj_err_str(L, LJ_ERR_JITPROT));
+    panic(L);
+  }
+  exit(EXIT_FAILURE);
+}
+#endif
+
 #if LJ_TARGET_WINDOWS
 
 #define MCPROT_RW	PAGE_READWRITE
 #define MCPROT_RX	PAGE_EXECUTE_READ
 #define MCPROT_RWX	PAGE_EXECUTE_READWRITE
 
-static void *mcode_alloc_at(jit_State *J, uintptr_t hint, size_t sz, DWORD prot)
+static void *mcode_alloc_at(uintptr_t hint, size_t sz, DWORD prot)
 {
-  void *p = LJ_WIN_VALLOC((void *)hint, sz,
-			  MEM_RESERVE|MEM_COMMIT|MEM_TOP_DOWN, prot);
-  if (!p && !hint)
-    lj_trace_err(J, LJ_TRERR_MCODEAL);
-  return p;
+  return LJ_WIN_VALLOC((void *)hint, sz,
+		       MEM_RESERVE|MEM_COMMIT|MEM_TOP_DOWN, prot);
 }
 
-static void mcode_free(jit_State *J, void *p, size_t sz)
+static void mcode_free(void *p, size_t sz)
 {
-  UNUSED(J); UNUSED(sz);
+  UNUSED(sz);
   VirtualFree(p, 0, MEM_RELEASE);
 }
 
-static int mcode_setprot(void *p, size_t sz, DWORD prot)
+static void mcode_setprot(jit_State *J, void *p, size_t sz, DWORD prot)
 {
+#if LUAJIT_SECURITY_MCODE != 0
   DWORD oprot;
-  return !LJ_WIN_VPROTECT(p, sz, prot, &oprot);
+  if (!LJ_WIN_VPROTECT(p, sz, prot, &oprot)) mcode_protfail(J);
+#else
+  UNUSED(J); UNUSED(p); UNUSED(sz); UNUSED(prot);
+#endif
 }
 
 #elif LJ_TARGET_POSIX
@@ -117,33 +132,33 @@ static int mcode_setprot(void *p, size_t sz, DWORD prot)
 #define MCPROT_CREATE	0
 #endif
 
-static void *mcode_alloc_at(jit_State *J, uintptr_t hint, size_t sz, int prot)
+static void *mcode_alloc_at(uintptr_t hint, size_t sz, int prot)
 {
   void *p = mmap((void *)hint, sz, prot|MCPROT_CREATE, MAP_PRIVATE|MAP_ANONYMOUS|MCMAP_CREATE, -1, 0);
-  if (p == MAP_FAILED) {
-    if (!hint) lj_trace_err(J, LJ_TRERR_MCODEAL);
-    p = NULL;
+  if (p == MAP_FAILED) return NULL;
 #if MCMAP_CREATE
-  } else {
-    pthread_jit_write_protect_np(0);
+  pthread_jit_write_protect_np(0);
 #endif
-  }
   return p;
 }
 
-static void mcode_free(jit_State *J, void *p, size_t sz)
+static void mcode_free(void *p, size_t sz)
 {
-  UNUSED(J);
   munmap(p, sz);
 }
 
-static int mcode_setprot(void *p, size_t sz, int prot)
+static void mcode_setprot(jit_State *J, void *p, size_t sz, int prot)
 {
+#if LUAJIT_SECURITY_MCODE != 0
 #if MCMAP_CREATE
+  UNUSED(J); UNUSED(p); UNUSED(sz);
   pthread_jit_write_protect_np((prot & PROT_EXEC));
   return 0;
 #else
-  return mprotect(p, sz, prot);
+  if (mprotect(p, sz, prot)) mcode_protfail(J);
+#endif
+#else
+  UNUSED(J); UNUSED(p); UNUSED(sz); UNUSED(prot);
 #endif
 }
 
@@ -151,6 +166,49 @@ static int mcode_setprot(void *p, size_t sz, int prot)
 
 #error "Missing OS support for explicit placement of executable memory"
 
+#endif
+
+#ifdef LUAJIT_MCODE_TEST
+/* Test wrapper for mcode allocation. DO NOT ENABLE in production! Try:
+**   LUAJIT_MCODE_TEST=hhhhhhhhhhhhhhhh luajit -jv main.lua
+**   LUAJIT_MCODE_TEST=F luajit -jv main.lua
+*/
+static void *mcode_alloc_at_TEST(jit_State *J, uintptr_t hint, size_t sz, int prot)
+{
+  static int test_ofs = 0;
+  static const char *test_str;
+  if (!test_str) {
+    test_str = getenv("LUAJIT_MCODE_TEST");
+    if (!test_str) test_str = "";
+  }
+  switch (test_str[test_ofs]) {
+  case 'a':  /* OK for one allocation. */
+    test_ofs++;
+    /* fallthrough */
+  case '\0':  /* EOS: OK for any further allocations. */
+    break;
+  case 'h':  /* Ignore one hint. */
+    test_ofs++;
+    /* fallthrough */
+  case 'H':  /* Ignore any further hints. */
+    hint = 0u;
+    break;
+  case 'r':  /* Randomize one hint. */
+    test_ofs++;
+    /* fallthrough */
+  case 'R':  /* Randomize any further hints. */
+    hint = lj_prng_u64(&J2G(J)->prng) & ~(uintptr_t)0xffffu;
+    hint &= ((uintptr_t)1 << (LJ_64 ? 47 : 31)) - 1;
+    break;
+  case 'f':  /* Fail one allocation. */
+    test_ofs++;
+    /* fallthrough */
+  default:  /* 'F' or unknown: Fail any further allocations. */
+    return NULL;
+  }
+  return mcode_alloc_at(hint, sz, prot);
+}
+#define mcode_alloc_at(hint, sz, prot)	mcode_alloc_at_TEST(J, hint, sz, prot)
 #endif
 
 /* -- MCode area protection ----------------------------------------------- */
@@ -174,7 +232,7 @@ static int mcode_setprot(void *p, size_t sz, int prot)
 
 static void mcode_protect(jit_State *J, int prot)
 {
-  UNUSED(J); UNUSED(prot); UNUSED(mcode_setprot);
+  UNUSED(J); UNUSED(prot);
 }
 
 #else
@@ -190,24 +248,11 @@ static void mcode_protect(jit_State *J, int prot)
 #define MCPROT_GEN	MCPROT_RW
 #define MCPROT_RUN	MCPROT_RX
 
-/* Protection twiddling failed. Probably due to kernel security. */
-static LJ_NORET LJ_NOINLINE void mcode_protfail(jit_State *J)
-{
-  lua_CFunction panic = J2G(J)->panic;
-  if (panic) {
-    lua_State *L = J->L;
-    setstrV(L, L->top++, lj_err_str(L, LJ_ERR_JITPROT));
-    panic(L);
-  }
-  exit(EXIT_FAILURE);
-}
-
 /* Change protection of MCode area. */
 static void mcode_protect(jit_State *J, int prot)
 {
   if (J->mcprot != prot) {
-    if (LJ_UNLIKELY(mcode_setprot(J->mcarea, J->szmcarea, prot)))
-      mcode_protfail(J);
+    mcode_setprot(J, J->mcarea, J->szmcarea, prot);
     J->mcprot = prot;
   }
 }
@@ -216,47 +261,74 @@ static void mcode_protect(jit_State *J, int prot)
 
 /* -- MCode area allocation ----------------------------------------------- */
 
-#if LJ_64
-#define mcode_validptr(p)	(p)
-#else
-#define mcode_validptr(p)	((p) && (uintptr_t)(p) < 0xffff0000)
-#endif
-
 #ifdef LJ_TARGET_JUMPRANGE
 
-/* Get memory within relative jump distance of our code in 64 bit mode. */
+#define MCODE_RANGE64	((1u << LJ_TARGET_JUMPRANGE) - 0x10000u)
+
+/* Set a memory range for mcode allocation with addr in the middle. */
+static void mcode_setrange(jit_State *J, uintptr_t addr)
+{
+#if LJ_TARGET_MIPS
+  /* Use the whole 256MB-aligned region. */
+  J->mcmin = addr & ~(uintptr_t)((1u << LJ_TARGET_JUMPRANGE) - 1);
+  J->mcmax = J->mcmin + (1u << LJ_TARGET_JUMPRANGE);
+#else
+  /* Every address in the 64KB-aligned range should be able to reach
+  ** any other, so MCODE_RANGE64 is only half the (signed) branch range.
+  */
+  J->mcmin = (addr - (MCODE_RANGE64 >> 1) + 0xffffu) & ~(uintptr_t)0xffffu;
+  J->mcmax = J->mcmin + MCODE_RANGE64;
+#endif
+  /* Avoid wrap-around and the 64KB corners. */
+  if (addr < J->mcmin || !J->mcmin) J->mcmin = 0x10000u;
+  if (addr > J->mcmax) J->mcmax = ~(uintptr_t)0xffffu;
+}
+
+/* Check if an address is in range of the mcode allocation range. */
+static LJ_AINLINE int mcode_inrange(jit_State *J, uintptr_t addr, size_t sz)
+{
+  /* Take care of unsigned wrap-around of addr + sz, too. */
+  return addr >= J->mcmin && addr + sz >= J->mcmin && addr + sz <= J->mcmax;
+}
+
+/* Get memory within a specific jump range in 64 bit mode. */
 static void *mcode_alloc(jit_State *J, size_t sz)
 {
-  /* Target an address in the static assembler code (64K aligned).
-  ** Try addresses within a distance of target-range/2+1MB..target+range/2-1MB.
-  ** Use half the jump range so every address in the range can reach any other.
-  */
-#if LJ_TARGET_MIPS
-  /* Use the middle of the 256MB-aligned region. */
-  uintptr_t target = ((uintptr_t)(void *)lj_vm_exit_handler &
-		      ~(uintptr_t)0x0fffffffu) + 0x08000000u;
-#else
-  uintptr_t target = (uintptr_t)(void *)lj_vm_exit_handler & ~(uintptr_t)0xffff;
-#endif
-  const uintptr_t range = (1u << (LJ_TARGET_JUMPRANGE-1)) - (1u << 21);
-  /* First try a contiguous area below the last one. */
-  uintptr_t hint = J->mcarea ? (uintptr_t)J->mcarea - sz : 0;
-  int i;
-  /* Limit probing iterations, depending on the available pool size. */
-  for (i = 0; i < LJ_TARGET_JUMPRANGE; i++) {
-    if (mcode_validptr(hint)) {
-      void *p = mcode_alloc_at(J, hint, sz, MCPROT_GEN);
-
-      if (mcode_validptr(p) &&
-	  ((uintptr_t)p + sz - target < range || target - (uintptr_t)p < range))
-	return p;
-      if (p) mcode_free(J, p, sz);  /* Free badly placed area. */
-    }
-    /* Next try probing 64K-aligned pseudo-random addresses. */
+  uintptr_t hint;
+  int i = 0, j;
+  if (!J->mcmin)  /* Place initial range near the interpreter code. */
+    mcode_setrange(J, (uintptr_t)(void *)lj_vm_exit_handler);
+  else if (!J->mcmax)  /* Switch to a new range (already flushed). */
+    goto newrange;
+  /* First try a contiguous area below the last one (if in range). */
+  hint = (uintptr_t)J->mcarea - sz;
+  if (!mcode_inrange(J, hint, sz))  /* Also takes care of NULL J->mcarea. */
+    goto probe;
+  for (; i < 16; i++) {
+    void *p = mcode_alloc_at(hint, sz, MCPROT_GEN);
+    if (mcode_inrange(J, (uintptr_t)p, sz))
+      return p;  /* Success. */
+    else if (p)
+      mcode_free(p, sz);  /* Free badly placed area. */
+  probe:
+    /* Next try probing 64KB-aligned pseudo-random addresses. */
+    j = 0;
     do {
-      hint = lj_prng_u64(&J->prng) & ((1u<<LJ_TARGET_JUMPRANGE)-0x10000);
-    } while (!(hint + sz < range+range));
-    hint = target + hint - range;
+      hint = J->mcmin + (lj_prng_u64(&J2G(J)->prng) & MCODE_RANGE64);
+      if (++j > 15) goto fail;
+    } while (!mcode_inrange(J, hint, sz));
+  }
+fail:
+  if (!J->mcarea) {  /* Switch to a new range now. */
+    void *p;
+  newrange:
+    p = mcode_alloc_at(0, sz, MCPROT_GEN);
+    if (p) {
+      mcode_setrange(J, (uintptr_t)p + (sz >> 1));
+      return p;  /* Success. */
+    }
+  } else {
+    J->mcmax = 0;  /* Switch to a new range after the flush. */
   }
   lj_trace_err(J, LJ_TRERR_MCODEAL);  /* Give up. OS probably ignores hints? */
   return NULL;
@@ -269,15 +341,13 @@ static void *mcode_alloc(jit_State *J, size_t sz)
 {
 #if defined(__OpenBSD__) || defined(__NetBSD__) || LJ_TARGET_UWP
   /* Allow better executable memory allocation for OpenBSD W^X mode. */
-  void *p = mcode_alloc_at(J, 0, sz, MCPROT_RUN);
-  if (p && mcode_setprot(p, sz, MCPROT_GEN)) {
-    mcode_free(J, p, sz);
-    return NULL;
-  }
-  return p;
+  void *p = mcode_alloc_at(0, sz, MCPROT_RUN);
+  if (p) mcode_setprot(J, p, sz, MCPROT_GEN);
 #else
-  return mcode_alloc_at(J, 0, sz, MCPROT_GEN);
+  void *p = mcode_alloc_at(0, sz, MCPROT_GEN);
 #endif
+  if (!p) lj_trace_err(J, LJ_TRERR_MCODEAL);
+  return p;
 }
 
 #endif
@@ -289,7 +359,6 @@ static void mcode_allocarea(jit_State *J)
 {
   MCode *oldarea = J->mcarea;
   size_t sz = (size_t)J->param[JIT_P_sizemcode] << 10;
-  sz = (sz + LJ_PAGESIZE-1) & ~(size_t)(LJ_PAGESIZE - 1);
   J->mcarea = (MCode *)mcode_alloc(J, sz);
   J->szmcarea = sz;
   J->mcprot = MCPROT_GEN;
@@ -311,7 +380,7 @@ void lj_mcode_free(jit_State *J)
     MCode *next = ((MCLink *)mc)->next;
     size_t sz = ((MCLink *)mc)->size;
     lj_err_deregister_mcode(mc, sz, (uint8_t *)mc + sizeof(MCLink));
-    mcode_free(J, mc, sz);
+    mcode_free(mc, sz);
     mc = next;
   }
 }
@@ -347,32 +416,25 @@ void lj_mcode_abort(jit_State *J)
 MCode *lj_mcode_patch(jit_State *J, MCode *ptr, int finish)
 {
   if (finish) {
-#if LUAJIT_SECURITY_MCODE
     if (J->mcarea == ptr)
       mcode_protect(J, MCPROT_RUN);
-    else if (LJ_UNLIKELY(mcode_setprot(ptr, ((MCLink *)ptr)->size, MCPROT_RUN)))
-      mcode_protfail(J);
-#endif
+    else
+      mcode_setprot(J, ptr, ((MCLink *)ptr)->size, MCPROT_RUN);
     return NULL;
   } else {
-    MCode *mc = J->mcarea;
+    uintptr_t base = (uintptr_t)J->mcarea, addr = (uintptr_t)ptr;
     /* Try current area first to use the protection cache. */
-    if (ptr >= mc && ptr < (MCode *)((char *)mc + J->szmcarea)) {
-#if LUAJIT_SECURITY_MCODE
+    if (addr >= base && addr < base + J->szmcarea) {
       mcode_protect(J, MCPROT_GEN);
-#endif
-      return mc;
+      return (MCode *)base;
     }
     /* Otherwise search through the list of MCode areas. */
     for (;;) {
-      mc = ((MCLink *)mc)->next;
-      lj_assertJ(mc != NULL, "broken MCode area chain");
-      if (ptr >= mc && ptr < (MCode *)((char *)mc + ((MCLink *)mc)->size)) {
-#if LUAJIT_SECURITY_MCODE
-	if (LJ_UNLIKELY(mcode_setprot(mc, ((MCLink *)mc)->size, MCPROT_GEN)))
-	  mcode_protfail(J);
-#endif
-	return mc;
+      base = (uintptr_t)(((MCLink *)base)->next);
+      lj_assertJ(base != 0, "broken MCode area chain");
+      if (addr >= base && addr < base + ((MCLink *)base)->size) {
+	mcode_setprot(J, (MCode *)base, ((MCLink *)base)->size, MCPROT_GEN);
+	return (MCode *)base;
       }
     }
   }
@@ -384,7 +446,6 @@ void lj_mcode_limiterr(jit_State *J, size_t need)
   size_t sizemcode, maxmcode;
   lj_mcode_abort(J);
   sizemcode = (size_t)J->param[JIT_P_sizemcode] << 10;
-  sizemcode = (sizemcode + LJ_PAGESIZE-1) & ~(size_t)(LJ_PAGESIZE - 1);
   maxmcode = (size_t)J->param[JIT_P_maxmcode] << 10;
   if (need * sizeof(MCode) > sizemcode)
     lj_trace_err(J, LJ_TRERR_MCODEOV);  /* Too long for any area. */

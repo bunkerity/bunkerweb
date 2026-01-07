@@ -112,6 +112,29 @@ CHALLENGE_TYPES = ("http", "dns")
 PROFILE_TYPES = ("classic", "tlsserver", "shortlived")
 DNS_PROPAGATION_DEFAULT = "default"
 
+
+def normalize_server_names(server_names: str) -> Set[str]:
+    """Return a normalized set of server names split on comma/space, lowercased and trimmed."""
+    return {part.strip().lower() for part in server_names.replace(",", " ").split() if part.strip()}
+
+
+def filter_wildcard_names(names: Set[str]) -> Set[str]:
+    """Drop wildcard entries (e.g. '*.example.com') from a set of server names."""
+    return {name for name in names if not name.startswith("*.")}
+
+
+def format_server_names(names: Set[str]) -> str:
+    """Return a deterministic, certbot-friendly server names string."""
+    return ",".join(sorted(names, key=lambda value: (0 if value.startswith("*.") else 1, value)))
+
+
+def parse_certbot_domains(certificate_block: str) -> str:
+    match = search(r"^\s*(Domains|Identifiers):\s+(.+)$", certificate_block, MULTILINE)
+    if not match:
+        return ""
+    return " ".join(match.group(2).split()).replace(" ", ",")
+
+
 PROVIDERS: Dict[str, Type[Provider]] = {
     "bunny": BunnyNetProvider,
     "cloudflare": CloudflareProvider,
@@ -276,7 +299,7 @@ def extract_provider(service: str, authenticator: str = "", decode_base64: bool 
         return None
 
 
-def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]:
+def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, bool, int, Dict[str, str]]]]:
     def env(key: str, default: Optional[str] = None) -> str:
         if IS_MULTISITE:
             return getenv(f"{service}_{key}", default)
@@ -369,13 +392,9 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
             wildcard = False
 
     server_names = server_names_val.split()
-    server_name = service
-    if wildcard:
-        server_names = extract_wildcards_from_domains(server_names)
-        server_name = server_names[-1] if server_names else service
 
-    return server_name, {
-        "server_names": ",".join(server_names),
+    return server_names, {
+        "server_names": "",
         "activated": activated,
         "email": email_val,
         "challenge": challenge_val,
@@ -392,7 +411,7 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
     }
 
 
-def extract_wildcards_from_domains(domains: List[str]) -> List[str]:
+def extract_wildcard_groups(domains: List[str]) -> Dict[str, List[str]]:
     cleaned_labels: List[List[str]] = []
 
     for domain in domains:
@@ -411,19 +430,54 @@ def extract_wildcards_from_domains(domains: List[str]) -> List[str]:
         key = ".".join(labels[-2:]) if len(labels) >= 2 else ".".join(labels)
         grouped[key].append(labels)
 
-    bases: Set[str] = set()
+    groups: Dict[str, Set[str]] = {}
     for labels_list in grouped.values():
-        bases.update(_determine_wildcard_bases(labels_list))
+        for base in _determine_wildcard_bases(labels_list):
+            base = base.strip(".")
+            if not base:
+                continue
+            groups.setdefault(base, set()).update({f"*.{base}", base})
 
-    results = set()
-    for base in bases:
-        base = base.strip(".")
-        if not base:
-            continue
-        results.add(f"*.{base}")
-        results.add(base)
+    return {base: sorted(names, key=lambda value: (0 if value.startswith("*.") else 1, value)) for base, names in groups.items()}
 
-    return sorted(results, key=lambda value: (0 if value.startswith("*.") else 1, value))
+
+def certificate_fingerprint(config: Dict[str, Union[str, bool, int, Dict[str, str]]]) -> Tuple:
+    provider_hash = ""
+    if config.get("challenge") == "dns" and config.get("provider"):
+        provider_hash = bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256")
+    return (
+        config.get("challenge"),
+        config.get("authenticator"),
+        config.get("staging"),
+        config.get("profile"),
+        config.get("email"),
+        config.get("dns_propagation"),
+        config.get("wildcard"),
+        config.get("disable_psl_check"),
+        provider_hash,
+    )
+
+
+def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]:
+    server_names, base_config = build_service_config(service)
+    if not server_names:
+        return {}
+
+    entries: Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]] = {}
+    if base_config["wildcard"]:
+        wildcard_groups = extract_wildcard_groups(server_names)
+        if not wildcard_groups and base_config["activated"]:
+            LOGGER.warning(f"[Service: {service}] No valid wildcard groups found, skipping generation.")
+        for base, names in wildcard_groups.items():
+            config = base_config.copy()
+            config["server_names"] = ",".join(names)
+            entries[base] = config
+        return entries
+
+    config = base_config.copy()
+    config["server_names"] = ",".join(server_names)
+    entries[service] = config
+    return entries
 
 
 def _determine_wildcard_bases(labels_list: List[List[str]]) -> Set[str]:
@@ -494,12 +548,14 @@ def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
     return process.returncode
 
 
-def certbot_new(config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str] = None) -> int:
+def certbot_new(service: str, config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str] = None) -> int:
     # * Building the certbot command
     command = [
         CERTBOT_BIN,
         "certonly",
         "-n",
+        "--cert-name",
+        service,
         "-d",
         config["server_names"],
         "--preferred-profile",
@@ -607,10 +663,15 @@ try:
         if not service.strip():
             continue
 
-        server_name, config = build_service_config(service)
-        if config["wildcard"] and server_name in services:
-            continue
-        services[server_name] = config
+        for cert_name, config in build_service_entries(service).items():
+            if cert_name in services:
+                if certificate_fingerprint(services[cert_name]) == certificate_fingerprint(config):
+                    merged = normalize_server_names(services[cert_name]["server_names"]) | normalize_server_names(config["server_names"])
+                    services[cert_name]["server_names"] = format_server_names(merged)
+                    continue
+                LOGGER.warning(f"[Service: {cert_name}] Certificate configuration conflict detected, keeping first occurrence.")
+                continue
+            services[cert_name] = config
 
     if not any(service["activated"] for service in services.values()):
         LOGGER.info("No services uses Let's Encrypt, skipping generation of new certificates...")
@@ -668,10 +729,9 @@ try:
                 continue
 
             service = certificate_lines[0].split()[0].strip()
-            match_domains = search(r"Domains:\s+(.+)$", certificate_block, MULTILINE)
-            domains = match_domains.group(1).strip().replace(" ", ",") if match_domains else ""
+            domains = parse_certbot_domains(certificate_block)
 
-            existing_certificates[service] = {"active": False, "server_names": domains}
+            existing_certificates[service] = {"active": False, "server_names": domains, "server_names_set": normalize_server_names(domains)}
 
             renewal_file = DATA_PATH.joinpath("renewal", f"{service}.conf")
             if renewal_file.is_file():
@@ -722,28 +782,36 @@ try:
             if psl_rules is None:
                 psl_rules = parse_psl(psl_lines)
 
-            if check_psl_blacklist(config["server_names"].split(","), psl_rules, server_name):
+            if check_psl_blacklist(list(normalize_server_names(config["server_names"])), psl_rules, server_name):
                 config["activated"] = False
                 continue
 
-        if set(config["server_names"].split(",")) != set(existing_cert["server_names"].split(",")):
-            LOGGER.warning(f"[Service: {service}] Server names do not match existing certificate, forcing renewal.")
+        config_server_names = normalize_server_names(config["server_names"])
+        existing_server_names = existing_cert["server_names_set"]
+        wildcard_valid = config["wildcard"] and config["challenge"] == "dns"
+
+        if not wildcard_valid:
+            config_server_names = filter_wildcard_names(config_server_names)
+            existing_server_names = filter_wildcard_names(existing_server_names)
+
+        if config_server_names != existing_server_names:
+            LOGGER.warning(f"[Service: {server_name}] Server names do not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["challenge"] != existing_cert["challenge"]:
-            LOGGER.warning(f"[Service: {service}] Challenge type does not match existing certificate, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] Challenge type does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["authenticator"] != existing_cert["authenticator"]:
-            LOGGER.warning(f"[Service: {service}] DNS provider does not match existing certificate, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] DNS provider does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["staging"] != existing_cert["staging"]:
-            LOGGER.warning(f"[Service: {service}] Staging environment does not match existing certificate, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] Staging environment does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["profile"] != existing_cert["profile"]:
-            LOGGER.warning(f"[Service: {service}] Profile does not match existing certificate, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] Profile does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
 
         if config["challenge"] == "dns" and bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256") != existing_cert["credentials_hash"]:
-            LOGGER.warning(f"[Service: {service}] DNS credentials have changed, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] DNS credentials have changed, forcing renewal.")
             config["force_renew"] = True
 
     # ? generate new certificates and renew existing ones if needed
@@ -768,7 +836,7 @@ try:
                 LOGGER.info(f"Waiting {wait_time} seconds before retry...")
                 sleep(wait_time)
 
-            ret = certbot_new(config, cmd_env.copy())
+            ret = certbot_new(service, config, cmd_env.copy())
 
             if ret == 0:
                 LOGGER.info(f"Certificate(s) for {service} generated successfully.")

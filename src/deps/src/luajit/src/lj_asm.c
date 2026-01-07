@@ -93,6 +93,10 @@ typedef struct ASMState {
   MCode *invmcp;	/* Points to invertible loop branch (or NULL). */
   MCode *flagmcp;	/* Pending opportunity to merge flag setting ins. */
   MCode *realign;	/* Realign loop if not NULL. */
+  MCode *mctail;	/* Tail of trace before stack adjust + jmp. */
+#if LJ_TARGET_PPC || LJ_TARGET_ARM64
+  MCode *mcexit;	/* Pointer to exit stubs. */
+#endif
 
 #ifdef LUAJIT_RANDOM_RA
   /* Randomize register allocation. OK for fuzz testing, not for production. */
@@ -1325,27 +1329,32 @@ static void asm_conv64(ASMState *as, IRIns *ir)
   IRType st = (IRType)((ir-1)->op2 & IRCONV_SRCMASK);
   IRType dt = (((ir-1)->op2 & IRCONV_DSTMASK) >> IRCONV_DSH);
   IRCallID id;
+  const CCallInfo *ci;
+#if LJ_TARGET_ARM && !LJ_ABI_SOFTFP
+  CCallInfo cim;
+#endif
   IRRef args[2];
   lj_assertA((ir-1)->o == IR_CONV && ir->o == IR_HIOP,
 	     "not a CONV/HIOP pair at IR %04d", (int)(ir - as->ir) - REF_BIAS);
   args[LJ_BE] = (ir-1)->op1;
   args[LJ_LE] = ir->op1;
-  if (st == IRT_NUM || st == IRT_FLOAT) {
-    id = IRCALL_fp64_d2l + ((st == IRT_FLOAT) ? 2 : 0) + (dt - IRT_I64);
+  lj_assertA(st != IRT_FLOAT, "bad CONV *64.float emitted");
+  if (st == IRT_NUM) {
+    id = IRCALL_lj_vm_num2u64;
     ir--;
+    ci = &lj_ir_callinfo[id];
   } else {
     id = IRCALL_fp64_l2d + ((dt == IRT_FLOAT) ? 2 : 0) + (st - IRT_I64);
-  }
-  {
 #if LJ_TARGET_ARM && !LJ_ABI_SOFTFP
-    CCallInfo cim = lj_ir_callinfo[id], *ci = &cim;
+    cim = lj_ir_callinfo[id];
     cim.flags |= CCI_VARARG;  /* These calls don't use the hard-float ABI! */
+    ci = &cim;
 #else
-    const CCallInfo *ci = &lj_ir_callinfo[id];
+    ci = &lj_ir_callinfo[id];
 #endif
-    asm_setupresult(as, ir, ci);
-    asm_gencall(as, ci, args);
   }
+  asm_setupresult(as, ir, ci);
+  asm_gencall(as, ci, args);
 }
 #endif
 
@@ -2543,7 +2552,7 @@ void lj_asm_trace(jit_State *J, GCtrace *T)
     RA_DBGX((as, "===== STOP ====="));
 
     /* General trace setup. Emit tail of trace. */
-    asm_tail_prep(as);
+    asm_tail_prep(as, T->link);
     as->mcloop = NULL;
     as->flagmcp = NULL;
     as->topslot = 0;

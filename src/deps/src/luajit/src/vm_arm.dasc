@@ -2452,6 +2452,118 @@ static void build_subroutines(BuildCtx *ctx)
   |  bx lr
   |
   |//-----------------------------------------------------------------------
+  |//-- Number conversion functions ----------------------------------------
+  |//-----------------------------------------------------------------------
+  |
+  |// int64_t lj_vm_num2int_check(double x)
+  |->vm_num2int_check:
+  |.if FPU
+  |.if not HFABI
+  |  vmov d0, CARG1, CARG2
+  |.endif
+  |  vcvt.s32.f64 s4, d0
+  |  vcvt.f64.s32 d1, s4
+  |  vcmp.f64 d0, d1
+  |  vmrs
+  |  bne >1
+  |  vmov CRET1, s4
+  |  mov CRET2, #0
+  |  bx lr
+  |
+  |.else
+  |
+  |  asr CARG4, CARG2, #31		// sign = 0 or -1.
+  |  lsl CARG2, CARG2, #1
+  |  orrs RB, CARG2, CARG1
+  |  bxeq lr				// Return 0 for +-0.
+  |  mov RB, #1024
+  |  add RB, RB, #30
+  |  sub RB, RB, CARG2, lsr #21
+  |  cmp RB, #32
+  |  bhs >1				// Fail if |x| < 0x1p0 || |x| >= 0x1p32.
+  |  lsr CARG3, CARG1, #21
+  |  orr CARG2, CARG3, CARG2, lsl #10	// Left-aligned mantissa.
+  |   rsb CARG3, RB, #32
+  |   lsl CARG3, CARG2, CARG3
+  |  orr CARG2, CARG2, #0x80000000	// Merge leading 1.
+  |   orrs CARG3, CARG3, CARG1, lsl #11
+  |  lsr CARG1, CARG2, RB		// lo = right-aligned absolute value.
+  |   bne >1				// Fail if fractional part != 0.
+  |  adds CRET1, CARG1, CARG4
+  |  bmi >1				// Fail if lo+sign >= 0x80000000.
+  |  eor CRET1, CRET1, CARG4		// lo = sign?-lo:lo = (lo+sign)^sign.
+  |  mov CRET2, #0
+  |  bx lr
+  |.endif
+  |1:
+  |  mov CRET1, #0x80000000
+  |  mov CRET2, #0x80000000
+  |  bx lr
+  |
+  |// int64_t lj_vm_num2i64(double x)
+  |->vm_num2i64:
+  |// fallthrough, same as lj_vm_num2u64.
+  |
+  |// uint64_t lj_vm_num2u64(double x)
+  |->vm_num2u64:
+  |.if HFABI
+  |  vmov CARG1, CARG2, d0
+  |.endif
+  |  lsl RB, CARG2, #1
+  |  lsr RB, RB, #21
+  |  sub RB, RB, #1020
+  |  sub RB, RB, #3
+  |  cmp RB, #116
+  |  bhs >3				// Exponent out of range.
+  |  asr CARG4, CARG2, #31		// sign = 0 or -1.
+  |  lsl CARG2, CARG2, #12
+  |  lsr CARG2, CARG2, #12
+  |   rsbs RB, RB, #52
+  |  orr CARG2, CARG2, #0x00100000
+  |   bmi >2				// Shift mantissa left or right?
+  |  lsr CARG1, CARG1, RB		// 64 bit right shift.
+  |  lsr CARG3, CARG2, RB
+  |  rsb RB, RB, #32
+  |  orr CARG1, CARG1, CARG2, lsl RB
+  |  rsb RB, RB, #0
+  |  orr CARG1, CARG1, CARG2, lsr RB
+  |  adds CRET1, CARG1, CARG4		// m = sign?-m:m = (m+sign)^sign.
+  |  adc CRET2, CARG3, CARG4
+  |1:
+  |  eor CRET1, CRET1, CARG4
+  |  eor CRET2, CRET2, CARG4
+  |  bx lr
+  |2:
+  |  rsb RB, RB, #0
+  |  lsl CARG2, CARG2, RB		// 64 bit left shift.
+  |  lsl CARG3, CARG1, RB
+  |  sub RB, RB, #32
+  |  orr CARG2, CARG2, CARG1, lsl RB
+  |  rsb RB, RB, #0
+  |  orr CARG2, CARG2, CARG1, lsr RB
+  |  adds CRET1, CARG3, CARG4
+  |  adc CRET2, CARG2, CARG4
+  |  b <1
+  |3:
+  |  mov CRET1, #0
+  |  mov CRET2, #0
+  |  bx lr
+  |
+  |// int32_t lj_vm_tobit(double x)
+  |.if FPU
+  |->vm_tobit:
+  |  vldr d1, >9
+  |.if not HFABI
+  |  vmov d0, CARG1, CARG2
+  |.endif
+  |  vadd.f64 d0, d0, d1
+  |  vmov CARG1, s0
+  |  bx lr
+  |9:
+  |  .long 0, 0x43380000		// (double)(2^52 + 2^51).
+  |.endif
+  |
+  |//-----------------------------------------------------------------------
   |//-- Miscellaneous functions --------------------------------------------
   |//-----------------------------------------------------------------------
   |
@@ -4097,7 +4209,8 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  ldr TRACE:CARG1, [CARG1, CARG2, lsl #2]
     |  // Subsumes ins_next1 and ins_next2.
     |  ldr INS, TRACE:CARG1->startins
-    |  bfi INS, OP, #0, #8
+    |  bic INS, INS, #0xff
+    |  orr INS, INS, OP
     |  str INS, [PC], #4
     |  b <1
     |.endif
