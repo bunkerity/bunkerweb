@@ -26,6 +26,7 @@ Siga estos pasos para configurar y usar la función SSL:
 | `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | multisite | no       | **Protocolos SSL:** Lista de protocolos SSL/TLS a admitir, separados por espacios.                                                                  |
 | `SSL_CIPHERS_LEVEL`           | `modern`          | multisite | no       | **Nivel de Cifrados SSL:** Nivel de seguridad preestablecido para los conjuntos de cifrado (`modern`, `intermediate` o `old`).                      |
 | `SSL_CIPHERS_CUSTOM`          |                   | multisite | no       | **Cifrados SSL Personalizados:** Lista de conjuntos de cifrado separados por dos puntos para usar en las conexiones SSL/TLS (sobrescribe el nivel). |
+| `SSL_ECDH_CURVE`              | `auto`            | multisite | no       | **Curvas ECDH SSL:** Lista separada por `:` de curvas ECDH (grupos TLS) o `auto` para selección inteligente (PQC con OpenSSL 3.5+).                 |
 | `SSL_SESSION_CACHE_SIZE`      | `10m`             | multisite | no       | **Tamaño de Caché de Sesión SSL:** Tamaño de la caché de sesión SSL (ej., `10m`, `512k`). Establecer a `off` o `none` para desactivar.              |
 
 !!! tip "Pruebas de SSL Labs"

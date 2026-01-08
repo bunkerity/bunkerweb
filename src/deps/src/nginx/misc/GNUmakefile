@@ -6,9 +6,9 @@ TEMP =		tmp
 
 CC =		cl
 OBJS =		objs.msvc8
-OPENSSL =	openssl-3.0.15
+OPENSSL =	openssl-3.5.4
 ZLIB =		zlib-1.3.1
-PCRE =		pcre2-10.39
+PCRE =		pcre2-10.46
 
 
 release: export
@@ -76,7 +76,8 @@ win32:
 		--with-stream_realip_module				\
 		--with-stream_ssl_preread_module			\
 		--with-openssl=$(OBJS)/lib/$(OPENSSL)			\
-		--with-openssl-opt="no-asm no-tests -D_WIN32_WINNT=0x0501" \
+		--with-openssl-opt="no-asm no-tests no-makedepend	\
+			-D_WIN32_WINNT=0x0501"				\
 		--with-http_ssl_module					\
 		--with-mail_ssl_module					\
 		--with-stream_ssl_module
@@ -109,7 +110,7 @@ zip: export
 	cp -p $(OBJS)/lib/$(OPENSSL)/LICENSE.txt			\
 		$(TEMP)/$(NGINX)/docs/OpenSSL.LICENSE
 
-	cp -p $(OBJS)/lib/$(PCRE)/LICENCE				\
+	cp -p $(OBJS)/lib/$(PCRE)/LICENCE.md				\
 		$(TEMP)/$(NGINX)/docs/PCRE.LICENCE
 
 	sed -ne '/^ (C) 1995-20/,/^  jloup@gzip\.org/p'			\

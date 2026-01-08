@@ -1026,6 +1026,7 @@
     "service": "服務",
     "show_message": "全部顯示",
     "start_date": "開始日期",
+    "status": "狀態",
     "status_code": "狀態碼",
     "stream": "串流支援",
     "template": "範本",

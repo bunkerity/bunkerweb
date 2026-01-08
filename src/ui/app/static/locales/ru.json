@@ -1021,6 +1021,7 @@
     "service": "Сервис",
     "show_message": "Показать все",
     "start_date": "Дата начала",
+    "status": "Статус",
     "status_code": "Код состояния",
     "stream": "Поддержка Stream",
     "template": "Шаблон",

@@ -1,8 +1,18 @@
 # Changelog
 
+## v1.6.7 - 2026/01/??
+
+- [BUGFIX] Fix wrong modsecurity reason data under heavy load
+- [UI] Restrict flash messages containing sensitive information to authenticated users only
+- [UI] Enhance breadcrumb navigation and filtering on custom configuration pages for improved user experience
+- [DEPS] Updated Modsecurity nginx connector version to 1.0.4
+
 ## v1.6.7~rc2 - 2026/01/??
 
 - [BUGFIX] Fix wrong certificate name checks in Let's Encrypt
+- [BUGFIX] Fix issues with Let's Encrypt's HTTP challenge on Linux HA integrations
+- [FEATURE] Implement automatic LRU cache eviction in the metrics module to prevent memory exhaustion by purging least-recently-used elements when capacity is reached
+- [FEATURE] Optimize Redis connection handling by reusing pooled connections in Lua timers for improved performance and reduced overhead
 - [LINUX] Updated NGINX version to v1.28.1 for Fedora 42 and 43 integration
 - [ALL-IN-ONE] Update CrowdSec version to 1.7.4
 - [DEPS] Updated luajit2 version to v2.1-20251229

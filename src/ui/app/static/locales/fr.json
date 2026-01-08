@@ -1032,6 +1032,7 @@
     "service": "Service",
     "show_message": "Tout Afficher",
     "start_date": "Date de Début",
+    "status": "Statut",
     "status_code": "Code de Statut",
     "stream": "Support Stream",
     "template": "Modèle",

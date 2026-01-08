@@ -129,7 +129,7 @@ def format_server_names(names: Set[str]) -> str:
 
 
 def parse_certbot_domains(certificate_block: str) -> str:
-    match = search(r"^\\s*(Domains|Identifiers):\\s+(.+)$", certificate_block, MULTILINE)
+    match = search(r"^\s*(Domains|Identifiers):\s+(.+)$", certificate_block, MULTILINE)
     if not match:
         return ""
     return " ".join(match.group(2).split()).replace(" ", ",")

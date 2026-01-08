@@ -1031,6 +1031,7 @@
     "service": "Dienst",
     "show_message": "Alle anzeigen",
     "start_date": "Startdatum",
+    "status": "Status",
     "status_code": "Statuscode",
     "stream": "Stream-Unterstützung",
     "template": "Vorlage",

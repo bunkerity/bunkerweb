@@ -1,0 +1,56 @@
+@@ -2318,6 +2318,55 @@
+     return transaction->setRequestHostName(reinterpret_cast<const char *>(hostname));
+ }
+ 
++extern "C" const char *msc_get_transaction_variable(Transaction *transaction, const char *var_name){
++    std::vector<const VariableValue *> l;
++    modsecurity::collection::Collection *c = NULL;
++    std::string cn;
++    const char *p = NULL;
++
++    if (var_name == NULL ){
++        return NULL;
++    }
++
++    p = strchr(var_name,':');
++
++    if ( p == NULL ){
++        return NULL;
++    }
++
++    cn = std::string(var_name,p-var_name);
++    transform(cn.begin(),cn.end(),cn.begin(),::tolower);
++
++    if ( cn.compare("global") == 0){
++        c = transaction->m_collections.m_global_collection;
++    }else if ( cn.compare("ip") == 0){
++        c = transaction->m_collections.m_ip_collection;
++    }else if ( cn.compare("session") == 0){
++        c = transaction->m_collections.m_session_collection;
++    }else if ( cn.compare("user") == 0){
++        c = transaction->m_collections.m_user_collection;
++    }else if ( cn.compare("resource") == 0){
++        c = transaction->m_collections.m_resource_collection;
++    }else if( cn.compare("tx") == 0){
++        c = transaction->m_collections.m_tx_collection;
++    }
++
++    if(c == NULL){
++        return NULL;
++    }
++
++    ++p;
++    cn = std::string(p);
++    transform(cn.begin(),cn.end(),cn.begin(),::tolower);
++
++    c->resolveSingleMatch(cn.c_str(),&l);
++
++    if ( l.size() < 1){
++        return NULL;
++    }
++
++    return l[0]->getValue().c_str();
++}
+ 
+ }  // namespace modsecurity
+ 

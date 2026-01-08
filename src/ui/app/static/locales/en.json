@@ -1033,6 +1033,7 @@
     "service": "Service",
     "show_message": "Show All",
     "start_date": "Start Date",
+    "status": "Status",
     "status_code": "Status Code",
     "stream": "Stream Support",
     "template": "Template",

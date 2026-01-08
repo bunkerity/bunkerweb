@@ -1664,7 +1664,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.7-rc1
+        image: bunkerity/bunkerweb:1.6.7-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1681,7 +1681,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
             syslog-address: "udp://10.20.30.254:514" # Die IP-Adresse des syslog-Dienstes
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -4943,14 +4943,15 @@ So funktioniert's:
 
 ### Parameter
 
-| Parameter                     | Standard          | Kontext   | Mehrfach | Beschreibung                                                                                      |
-| :---------------------------- | :---------------- | :-------- | :------- | :------------------------------------------------------------------------------------------------ |
-| `REDIRECT_HTTP_TO_HTTPS`      | `no`              | Multisite | nein     | Leitet alle HTTP-Anfragen zu HTTPS um.                                                            |
-| `AUTO_REDIRECT_HTTP_TO_HTTPS` | `yes`             | Multisite | nein     | Automatische Weiterleitung, wenn HTTPS erkannt wird.                                              |
-| `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | Multisite | nein     | Unterstützte SSL/TLS-Protokolle (durch Leerzeichen getrennt).                                     |
-| `SSL_CIPHERS_LEVEL`           | `modern`          | Multisite | nein     | Sicherheitsniveau der Suiten (`modern`, `intermediate`, `old`).                                   |
-| `SSL_CIPHERS_CUSTOM`          |                   | Multisite | nein     | Benutzerdefinierte Suiten (durch `:` getrennte Liste), die das Niveau ersetzen.                   |
-| `SSL_SESSION_CACHE_SIZE`      | `10m`             | Multisite | nein     | Größe des SSL-Sitzungscaches (z.B. `10m`, `512k`). Auf `off` oder `none` setzen zum Deaktivieren. |
+| Parameter                     | Standard          | Kontext   | Mehrfach | Beschreibung                                                                                                                               |
+| :---------------------------- | :---------------- | :-------- | :------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
+| `REDIRECT_HTTP_TO_HTTPS`      | `no`              | Multisite | nein     | Leitet alle HTTP-Anfragen zu HTTPS um.                                                                                                     |
+| `AUTO_REDIRECT_HTTP_TO_HTTPS` | `yes`             | Multisite | nein     | Automatische Weiterleitung, wenn HTTPS erkannt wird.                                                                                       |
+| `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | Multisite | nein     | Unterstützte SSL/TLS-Protokolle (durch Leerzeichen getrennt).                                                                              |
+| `SSL_CIPHERS_LEVEL`           | `modern`          | Multisite | nein     | Sicherheitsniveau der Suiten (`modern`, `intermediate`, `old`).                                                                            |
+| `SSL_CIPHERS_CUSTOM`          |                   | Multisite | nein     | Benutzerdefinierte Suiten (durch `:` getrennte Liste), die das Niveau ersetzen.                                                            |
+| `SSL_ECDH_CURVE`              | `auto`            | Multisite | nein     | **SSL-ECDH-Kurven:** Durch `:` getrennte Liste von ECDH-Kurven (TLS-Gruppen) oder `auto` fuer intelligente Auswahl (PQC mit OpenSSL 3.5+). |
+| `SSL_SESSION_CACHE_SIZE`      | `10m`             | Multisite | nein     | Größe des SSL-Sitzungscaches (z.B. `10m`, `512k`). Auf `off` oder `none` setzen zum Deaktivieren.                                          |
 
 !!! tip "SSL Labs Test"
     Testen Sie Ihre Konfiguration über [Qualys SSL Labs](https://www.ssllabs.com/ssltest/). Eine gut eingestellte BunkerWeb-Konfiguration erreicht in der Regel A+.

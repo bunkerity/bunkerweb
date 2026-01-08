@@ -1268,7 +1268,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.7-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.7-rc2
 ```
 
 Por defecto, el contenedor expone:
@@ -1284,7 +1284,7 @@ Se requiere un volumen nombrado (o un bind mount) para persistir la base de dato
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.7-rc1
+    image: bunkerity/bunkerweb-all-in-one:1.6.7-rc2
     volumes:
       - bw-storage:/data
 ...
@@ -1361,7 +1361,7 @@ docker run -d \
   -e API_PASSWORD=StrongP@ssw0rd \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
   -p 8888:8888/tcp \
-  bunkerity/bunkerweb-all-in-one:1.6.7-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.7-rc2
 ```
 
 Recomendado (detrás de BunkerWeb) — no publiques el `8888`; en su lugar, haz un proxy inverso:
@@ -1369,7 +1369,7 @@ Recomendado (detrás de BunkerWeb) — no publiques el `8888`; en su lugar, haz 
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.7-rc1
+    image: bunkerity/bunkerweb-all-in-one:1.6.7-rc2
     container_name: bunkerweb-aio
     ports:
       - "80:8080/tcp"
@@ -1441,7 +1441,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.7-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.7-rc2
 ```
 
 *   Cuando `USE_CROWDSEC=yes`, el punto de entrada hará lo siguiente:
@@ -1496,7 +1496,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.7-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.7-rc2
 ```
 
 !!! info "Cómo funciona internamente"
@@ -1518,7 +1518,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.7-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.7-rc2
 ```
 
 Notas:
@@ -1554,7 +1554,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.7-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.7-rc2
 ```
 
 *   El **registro local** se omite cuando `CROWDSEC_API` no es `127.0.0.1` o `localhost`.
@@ -1586,13 +1586,13 @@ Al acceder a estas imágenes preconstruidas desde Docker Hub, puedes obtener y e
 Ya sea que estés realizando pruebas, desarrollando aplicaciones o desplegando BunkerWeb en producción, la opción de contenedorización de Docker proporciona flexibilidad y facilidad de uso. Adoptar este método te permite aprovechar al máximo las características de BunkerWeb mientras te beneficias de las ventajas de la tecnología Docker.
 
 ```shell
-docker pull bunkerity/bunkerweb:1.6.7-rc1
+docker pull bunkerity/bunkerweb:1.6.7-rc2
 ```
 
 Las imágenes de Docker también están disponibles en [GitHub packages](https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb) y se pueden descargar usando la dirección del repositorio `ghcr.io`:
 
 ```shell
-docker pull ghcr.io/bunkerity/bunkerweb:1.6.7-rc1
+docker pull ghcr.io/bunkerity/bunkerweb:1.6.7-rc2
 ```
 
 Los conceptos clave para la integración con Docker incluyen:
@@ -1602,7 +1602,7 @@ Los conceptos clave para la integración con Docker incluyen:
 - **Redes**: Las redes de Docker desempeñan un papel vital en la integración de BunkerWeb. Estas redes tienen dos propósitos principales: exponer puertos a los clientes y conectarse a los servicios web ascendentes. Al exponer los puertos, BunkerWeb puede aceptar solicitudes entrantes de los clientes, permitiéndoles acceder a los servicios web protegidos. Además, al conectarse a los servicios web ascendentes, BunkerWeb puede enrutar y gestionar el tráfico de manera eficiente, proporcionando una mayor seguridad y rendimiento.
 
 !!! info "Backend de la base de datos"
-    Ten en cuenta que nuestras instrucciones asumen que estás utilizando SQLite como el backend de base de datos predeterminado, según lo configurado por el ajuste `DATABASE_URI`. Sin embargo, también se admiten otros backends de bases de datos. Consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc1/misc/integrations) del repositorio para obtener más información.
+    Ten en cuenta que nuestras instrucciones asumen que estás utilizando SQLite como el backend de base de datos predeterminado, según lo configurado por el ajuste `DATABASE_URI`. Sin embargo, también se admiten otros backends de bases de datos. Consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc2/misc/integrations) del repositorio para obtener más información.
 
 ### Variables de entorno
 
@@ -1612,7 +1612,7 @@ Las configuraciones se pasan al Programador usando las variables de entorno de D
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
     environment:
       - MY_SETTING=value
       - ANOTHER_SETTING=another value
@@ -1656,7 +1656,7 @@ Esto asegura que las configuraciones sensibles se mantengan fuera del entorno y 
 El [programador](concepts.md#scheduler) se ejecuta en su propio contenedor, que también está disponible en Docker Hub:
 
 ```shell
-docker pull bunkerity/bunkerweb-scheduler:1.6.7-rc1
+docker pull bunkerity/bunkerweb-scheduler:1.6.7-rc2
 ```
 
 !!! info "Configuraciones de BunkerWeb"
@@ -1677,7 +1677,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.7-rc1
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7-rc1
+        image: bunkerity/bunkerweb:1.6.7-rc2
         environment:
           # Esto establecerá las configuraciones de la API para el contenedor de BunkerWeb
           <<: *bw-api-env
@@ -1686,7 +1686,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.7-rc1
           - bw-universe
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
         environment:
           # Esto establecerá las configuraciones de la API para el contenedor del Programador
           <<: *bw-api-env
@@ -1704,7 +1704,7 @@ Se necesita un volumen para almacenar la base de datos SQLite y las copias de se
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
     volumes:
       - bw-storage:/data
 ...
@@ -1766,51 +1766,51 @@ El programador es el worker del plano de control que lee configuraciones, genera
 
 ##### Runtime y seguridad
 
-| Setting                         | Descripción                                                                       | Valores aceptados                                         | Predeterminado                               |
-| ------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------- | -------------------------------------------- |
-| `HEALTHCHECK_INTERVAL`          | Segundos entre healthchecks del programador                                       | Segundos enteros                                           | `30`                                         |
-| `RELOAD_MIN_TIMEOUT`            | Segundos mínimos entre recargas consecutivas                                      | Segundos enteros                                           | `5`                                          |
-| `DISABLE_CONFIGURATION_TESTING` | Saltar pruebas de configuración antes de aplicar                                   | `yes` o `no`                                               | `no`                                         |
-| `IGNORE_FAIL_SENDING_CONFIG`    | Continuar incluso si algunas instancias no reciben la configuración               | `yes` o `no`                                               | `no`                                         |
-| `IGNORE_REGEX_CHECK`            | Omitir validación regex de configuraciones (compartido con autoconf)              | `yes` o `no`                                               | `no`                                         |
-| `TZ`                            | Zona horaria para logs del programador, jobs tipo cron, backups y marcas de tiempo | Nombre en base TZ (ej. `UTC`, `Europe/Paris`)             | unset (default de contenedor, suele ser UTC) |
+| Setting                         | Descripción                                                                        | Valores aceptados                             | Predeterminado                               |
+| ------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------- | -------------------------------------------- |
+| `HEALTHCHECK_INTERVAL`          | Segundos entre healthchecks del programador                                        | Segundos enteros                              | `30`                                         |
+| `RELOAD_MIN_TIMEOUT`            | Segundos mínimos entre recargas consecutivas                                       | Segundos enteros                              | `5`                                          |
+| `DISABLE_CONFIGURATION_TESTING` | Saltar pruebas de configuración antes de aplicar                                   | `yes` o `no`                                  | `no`                                         |
+| `IGNORE_FAIL_SENDING_CONFIG`    | Continuar incluso si algunas instancias no reciben la configuración                | `yes` o `no`                                  | `no`                                         |
+| `IGNORE_REGEX_CHECK`            | Omitir validación regex de configuraciones (compartido con autoconf)               | `yes` o `no`                                  | `no`                                         |
+| `TZ`                            | Zona horaria para logs del programador, jobs tipo cron, backups y marcas de tiempo | Nombre en base TZ (ej. `UTC`, `Europe/Paris`) | unset (default de contenedor, suele ser UTC) |
 
 ##### Base de datos
 
-| Setting                 | Descripción                                                                             | Valores aceptados           | Predeterminado                               |
-| ----------------------- | --------------------------------------------------------------------------------------- | --------------------------- | -------------------------------------------- |
-| `DATABASE_URI`          | DSN principal de base de datos (compartido con autoconf e instancias)                   | DSN de SQLAlchemy           | `sqlite:////var/lib/bunkerweb/db.sqlite3`    |
-| `DATABASE_URI_READONLY` | DSN opcional solo-lectura; el programador cae a solo-lectura si es lo único que funciona | DSN de SQLAlchemy o vacío   | unset                                        |
+| Setting                 | Descripción                                                                              | Valores aceptados         | Predeterminado                            |
+| ----------------------- | ---------------------------------------------------------------------------------------- | ------------------------- | ----------------------------------------- |
+| `DATABASE_URI`          | DSN principal de base de datos (compartido con autoconf e instancias)                    | DSN de SQLAlchemy         | `sqlite:////var/lib/bunkerweb/db.sqlite3` |
+| `DATABASE_URI_READONLY` | DSN opcional solo-lectura; el programador cae a solo-lectura si es lo único que funciona | DSN de SQLAlchemy o vacío | unset                                     |
 
 ##### Logging
 
-| Setting                         | Descripción                                                                  | Valores aceptados                                         | Predeterminado                                                             |
-| ------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Nivel base / override                                                        | `debug`, `info`, `warning`, `error`, `critical`           | `info`                                                                     |
-| `LOG_TYPES`                     | Destinos                                                                     | `stderr`/`file`/`syslog` separados por espacios            | `stderr`                                                                   |
-| `SCHEDULER_LOG_TO_FILE`         | Habilitar logging a archivo y ruta por defecto                               | `yes` o `no`                                               | `no`                                                                       |
-| `LOG_FILE_PATH`                 | Ruta de log personalizada (usada cuando `LOG_TYPES` incluye `file`)          | Ruta de archivo                                            | `/var/log/bunkerweb/scheduler.log` con `SCHEDULER_LOG_TO_FILE=yes`, si no unset |
-| `LOG_SYSLOG_ADDRESS`            | Destino syslog (`udp://host:514`, `tcp://host:514` o ruta de socket)         | Host:puerto, host con prefijo de protocolo o socket        | unset                                                                      |
-| `LOG_SYSLOG_TAG`                | Ident/tag de syslog                                                          | Cadena                                                     | `bw-scheduler`                                                             |
+| Setting                         | Descripción                                                          | Valores aceptados                                   | Predeterminado                                                                  |
+| ------------------------------- | -------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Nivel base / override                                                | `debug`, `info`, `warning`, `error`, `critical`     | `info`                                                                          |
+| `LOG_TYPES`                     | Destinos                                                             | `stderr`/`file`/`syslog` separados por espacios     | `stderr`                                                                        |
+| `SCHEDULER_LOG_TO_FILE`         | Habilitar logging a archivo y ruta por defecto                       | `yes` o `no`                                        | `no`                                                                            |
+| `LOG_FILE_PATH`                 | Ruta de log personalizada (usada cuando `LOG_TYPES` incluye `file`)  | Ruta de archivo                                     | `/var/log/bunkerweb/scheduler.log` con `SCHEDULER_LOG_TO_FILE=yes`, si no unset |
+| `LOG_SYSLOG_ADDRESS`            | Destino syslog (`udp://host:514`, `tcp://host:514` o ruta de socket) | Host:puerto, host con prefijo de protocolo o socket | unset                                                                           |
+| `LOG_SYSLOG_TAG`                | Ident/tag de syslog                                                  | Cadena                                              | `bw-scheduler`                                                                  |
 
 ### Configuraciones del contenedor de UI
 
 El contenedor de UI también respeta `TZ` para localizar los logs y las tareas programadas (p. ej. tareas de limpieza iniciadas por la UI).
 
-| Setting | Descripción                                   | Valores aceptados                                  | Predeterminado                                |
-| ------- | --------------------------------------------- | -------------------------------------------------- | --------------------------------------------- |
-| `TZ`    | Zona horaria para logs de UI y acciones programadas | Nombre en base TZ (ej. `UTC`, `Europe/Paris`)     | unset (default de contenedor, suele ser UTC)  |
+| Setting | Descripción                                         | Valores aceptados                             | Predeterminado                               |
+| ------- | --------------------------------------------------- | --------------------------------------------- | -------------------------------------------- |
+| `TZ`    | Zona horaria para logs de UI y acciones programadas | Nombre en base TZ (ej. `UTC`, `Europe/Paris`) | unset (default de contenedor, suele ser UTC) |
 
 #### Logging
 
-| Setting                         | Descripción                                                              | Valores aceptados                                         | Predeterminado                                                         |
-| ------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Nivel base / override                                                    | `debug`, `info`, `warning`, `error`, `critical`           | `info`                                                                  |
-| `LOG_TYPES`                     | Destinos                                                                 | `stderr`/`file`/`syslog` separados por espacios            | `stderr`                                                                |
-| `LOG_FILE_PATH`                 | Ruta para logging a archivo (usada si `LOG_TYPES` incluye `file` o `CAPTURE_OUTPUT=yes`) | Ruta de archivo                                            | `/var/log/bunkerweb/ui.log` si file/capture, si no unset              |
-| `LOG_SYSLOG_ADDRESS`            | Destino syslog (`udp://host:514`, `tcp://host:514`, socket)              | Host:puerto, host con prefijo de protocolo o ruta          | unset                                                                   |
-| `LOG_SYSLOG_TAG`                | Ident/tag de syslog                                                      | Cadena                                                    | `bw-ui`                                                                 |
-| `CAPTURE_OUTPUT`                | Enviar stdout/stderr de Gunicorn a las salidas de log configuradas       | `yes` o `no`                                              | `no`                                                                    |
+| Setting                         | Descripción                                                                              | Valores aceptados                                 | Predeterminado                                           |
+| ------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------- |
+| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Nivel base / override                                                                    | `debug`, `info`, `warning`, `error`, `critical`   | `info`                                                   |
+| `LOG_TYPES`                     | Destinos                                                                                 | `stderr`/`file`/`syslog` separados por espacios   | `stderr`                                                 |
+| `LOG_FILE_PATH`                 | Ruta para logging a archivo (usada si `LOG_TYPES` incluye `file` o `CAPTURE_OUTPUT=yes`) | Ruta de archivo                                   | `/var/log/bunkerweb/ui.log` si file/capture, si no unset |
+| `LOG_SYSLOG_ADDRESS`            | Destino syslog (`udp://host:514`, `tcp://host:514`, socket)                              | Host:puerto, host con prefijo de protocolo o ruta | unset                                                    |
+| `LOG_SYSLOG_TAG`                | Ident/tag de syslog                                                                      | Cadena                                            | `bw-ui`                                                  |
+| `CAPTURE_OUTPUT`                | Enviar stdout/stderr de Gunicorn a las salidas de log configuradas                       | `yes` o `no`                                      | `no`                                                     |
 
 ### Redes
 
@@ -1850,7 +1850,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.7-rc1
+    image: bunkerity/bunkerweb:1.6.7-rc2
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -1863,7 +1863,7 @@ services:
       - bw-universe
 ...
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
     environment:
       <<: *bw-api-env
       BUNKERWEB_INSTANCES: "bunkerweb" # Esta configuración es obligatoria para especificar la instancia de BunkerWeb
@@ -1896,7 +1896,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.7-rc1
+    image: bunkerity/bunkerweb:1.6.7-rc2
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -1909,7 +1909,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
     depends_on:
       - bunkerweb
     environment:
@@ -1962,7 +1962,7 @@ Las distribuciones de Linux compatibles con BunkerWeb (arquitecturas amd64/x86_6
 - Debian 13 "Trixie"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
-- Fedora 41, 42 y 43
+- Fedora 42 y 43
 - Red Hat Enterprise Linux (RHEL) 8, 9 y 10
 
 ### Script de instalación fácil
@@ -1975,8 +1975,8 @@ Para empezar, descarga el script de instalación y su suma de verificación, lue
 
 ```bash
 # Descargar el script y su suma de verificación
-curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7-rc1/install-bunkerweb.sh
-curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7-rc1/install-bunkerweb.sh.sha256
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7-rc2/install-bunkerweb.sh
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7-rc2/install-bunkerweb.sh.sha256
 
 # Verificar la suma de verificación
 sha256sum -c install-bunkerweb.sh.sha256
@@ -2034,7 +2034,7 @@ Para configuraciones no interactivas o automatizadas, el script se puede control
 
 | Opción                  | Descripción                                                                                       |
 | :---------------------- | :------------------------------------------------------------------------------------------------ |
-| `-v, --version VERSION` | Especifica la versión de BunkerWeb a instalar (p. ej., `1.6.7~rc1`).                                  |
+| `-v, --version VERSION` | Especifica la versión de BunkerWeb a instalar (p. ej., `1.6.7~rc2`).                              |
 | `-w, --enable-wizard`   | Habilita el asistente de configuración.                                                           |
 | `-n, --no-wizard`       | Deshabilita el asistente de configuración.                                                        |
 | `-y, --yes`             | Se ejecuta en modo no interactivo usando las respuestas predeterminadas para todas las preguntas. |
@@ -2088,7 +2088,7 @@ sudo ./install-bunkerweb.sh --yes
 sudo ./install-bunkerweb.sh --worker --no-wizard
 
 # Instalar una versión específica
-sudo ./install-bunkerweb.sh --version 1.6.7~rc1
+sudo ./install-bunkerweb.sh --version 1.6.7~rc2
 
 # Configuración del Gestor con instancias de trabajador remotas (se requieren instancias)
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
@@ -2186,9 +2186,9 @@ Dependiendo de tus elecciones durante la instalación:
 2.  Añade la configuración de tu servidor y los servicios protegidos
 3.  Reinicia el programador: `sudo systemctl restart bunkerweb-scheduler`
 
-### Instalación usando el gestor de paquetes
+### Instalación mediante el gestor de paquetes
 
-Asegúrate de tener **NGINX 1.28.0 instalado antes de instalar BunkerWeb**. Para todas las distribuciones, excepto Fedora, es obligatorio usar los paquetes precompilados del [repositorio oficial de NGINX](https://nginx.org/en/linux_packages.html). Compilar NGINX desde el código fuente o usar paquetes de diferentes repositorios no funcionará con los paquetes precompilados oficiales de BunkerWeb. Sin embargo, tienes la opción de compilar BunkerWeb desde el código fuente.
+Asegúrate de tener **NGINX 1.28.1 instalado antes de instalar BunkerWeb**. Para todas las distribuciones, excepto Fedora, es obligatorio usar los paquetes precompilados del [repositorio oficial de NGINX](https://nginx.org/en/linux_packages.html). Compilar NGINX desde el código fuente o usar paquetes de diferentes repositorios no funcionará con los paquetes precompilados oficiales de BunkerWeb. Sin embargo, tienes la opción de compilar BunkerWeb desde el código fuente.
 
 === "Debian Bookworm/Trixie"
 
@@ -2203,11 +2203,11 @@ Asegúrate de tener **NGINX 1.28.0 instalado antes de instalar BunkerWeb**. Para
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    Ahora deberías poder instalar NGINX 1.28.0:
+    Ahora deberías poder instalar NGINX 1.28.1:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.28.0-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.28.1-1~$(lsb_release -cs)
     ```
 
     !!! warning "Versión de prueba/desarrollo"
@@ -2224,12 +2224,12 @@ Asegúrate de tener **NGINX 1.28.0 instalado antes de instalar BunkerWeb**. Para
         export UI_WIZARD=no
         ```
 
-    Y finalmente instala BunkerWeb 1.6.7~rc1:
+    Y finalmente instala BunkerWeb 1.6.7~rc2:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.7~rc1
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.7~rc2
     ```
 
     Para evitar la actualización de los paquetes de NGINX y/o BunkerWeb al ejecutar `apt upgrade`, puedes usar el siguiente comando:
@@ -2251,11 +2251,11 @@ Asegúrate de tener **NGINX 1.28.0 instalado antes de instalar BunkerWeb**. Para
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    Ahora deberías poder instalar NGINX 1.28.0:
+    Ahora deberías poder instalar NGINX 1.28.1:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.28.0-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.28.1-1~$(lsb_release -cs)
     ```
 
     !!! warning "Versión de prueba/desarrollo"
@@ -2272,12 +2272,12 @@ Asegúrate de tener **NGINX 1.28.0 instalado antes de instalar BunkerWeb**. Para
         export UI_WIZARD=no
         ```
 
-    Y finalmente instala BunkerWeb 1.6.7~rc1:
+    Y finalmente instala BunkerWeb 1.6.7~rc2:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.7~rc1
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.7~rc2
     ```
 
     Para evitar la actualización de los paquetes de NGINX y/o BunkerWeb al ejecutar `apt upgrade`, puedes usar el siguiente comando:
@@ -2295,22 +2295,11 @@ Asegúrate de tener **NGINX 1.28.0 instalado antes de instalar BunkerWeb**. Para
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora ya proporciona NGINX que nosotros soportamos. Elige tu versión de Fedora a continuación para instalar el paquete NGINX correcto:
+    Fedora ya proporciona NGINX 1.28.1 que soportamos
 
-    === "Fedora 41"
-
-        ```shell
-        sudo dnf install -y --allowerasing nginx-1.28.0
-        ```
-
-    === "Fedora 42 / 43"
-
-        !!! warning "NGINX 1.28.0 ya no está disponible"
-            Fedora 42 y 43 han eliminado NGINX 1.28.0 de sus mirrors. Debes instalar NGINX 1.28.1 en su lugar.
-
-        ```shell
-        sudo dnf install -y --allowerasing nginx-1.28.1
-        ```
+    ```shell
+    sudo dnf install -y --allowerasing nginx-1.28.1
+    ```
 
     !!! example "Deshabilitar el asistente de configuración"
         Si no quieres usar el asistente de configuración de la interfaz de usuario web cuando se instale BunkerWeb, exporta la siguiente variable:
@@ -2319,12 +2308,12 @@ Asegúrate de tener **NGINX 1.28.0 instalado antes de instalar BunkerWeb**. Para
         export UI_WIZARD=no
         ```
 
-    Y finalmente instala BunkerWeb 1.6.7~rc1:
+    Y finalmente instala BunkerWeb 1.6.7~rc2:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
   	sudo dnf makecache && \
-  	sudo -E dnf install -y --allowerasing bunkerweb-1.6.7~rc1
+  	sudo -E dnf install -y --allowerasing bunkerweb-1.6.7~rc2
     ```
 
     Para evitar la actualización de los paquetes de NGINX y/o BunkerWeb al ejecutar `dnf upgrade`, puedes usar el siguiente comando:
@@ -2356,10 +2345,10 @@ Asegúrate de tener **NGINX 1.28.0 instalado antes de instalar BunkerWeb**. Para
     module_hotfixes=true
     ```
 
-    Ahora deberías poder instalar NGINX 1.28.0:
+    Ahora deberías poder instalar NGINX 1.28.1:
 
     ```shell
-    sudo dnf install --allowerasing nginx-1.28.0
+    sudo dnf install --allowerasing nginx-1.28.1
     ```
 
     !!! example "Deshabilitar el asistente de configuración"
@@ -2369,12 +2358,12 @@ Asegúrate de tener **NGINX 1.28.0 instalado antes de instalar BunkerWeb**. Para
         export UI_WIZARD=no
         ```
 
-    Y finalmente instala BunkerWeb 1.6.7~rc1:
+    Y finalmente instala BunkerWeb 1.6.7~rc2:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
-    sudo -E dnf install -y --allowerasing bunkerweb-1.6.7~rc1
+    sudo -E dnf install -y --allowerasing bunkerweb-1.6.7~rc2
     ```
 
     Para evitar la actualización de los paquetes de NGINX y/o BunkerWeb al ejecutar `dnf upgrade`, puedes usar el siguiente comando:
@@ -2467,7 +2456,7 @@ Al adoptar este enfoque, puedes disfrutar de la reconfiguración en tiempo real 
     La integración de autoconfiguración de Docker implica el uso del **modo multisitio**. Por favor, consulta la [sección de multisitio](concepts.md#multisite-mode) de la documentación para obtener más información.
 
 !!! info "Backend de la base de datos"
-    Ten en cuenta que nuestras instrucciones asumen que estás utilizando MariaDB como el backend de base de datos predeterminado, según lo configurado por el ajuste `DATABASE_URI`. Sin embargo, entendemos que puedes preferir utilizar backends alternativos para tu integración con Docker. Si ese es el caso, ten la seguridad de que otros backends de bases de datos también son posibles. Consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc1/misc/integrations) del repositorio para obtener más información.
+    Ten en cuenta que nuestras instrucciones asumen que estás utilizando MariaDB como el backend de base de datos predeterminado, según lo configurado por el ajuste `DATABASE_URI`. Sin embargo, entendemos que puedes preferir utilizar backends alternativos para tu integración con Docker. Si ese es el caso, ten la seguridad de que otros backends de bases de datos también son posibles. Consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc2/misc/integrations) del repositorio para obtener más información.
 
 Para habilitar las actualizaciones de configuración automatizadas, incluye un contenedor adicional llamado `bw-autoconf` en la pila. Este contenedor aloja el servicio de autoconfiguración, que gestiona los cambios de configuración dinámicos para BunkerWeb.
 
@@ -2481,7 +2470,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.7-rc1
+    image: bunkerity/bunkerweb:1.6.7-rc2
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -2496,7 +2485,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # No necesitamos especificar la instancia de BunkerWeb aquí, ya que son detectadas automáticamente por el servicio de autoconfiguración
@@ -2511,7 +2500,7 @@ services:
       - bw-db
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.7-rc1
+    image: bunkerity/bunkerweb-autoconf:1.6.7-rc2
     depends_on:
       - bunkerweb
       - bw-docker
@@ -2590,56 +2579,56 @@ El controlador `bw-autoconf` vigila tu orquestador y escribe cambios en la base 
 
 ##### Modo y runtime
 
-| Setting               | Descripción                                                  | Valores aceptados                         | Predeterminado                        |
-| --------------------- | ------------------------------------------------------------ | ----------------------------------------- | ------------------------------------- |
-| `AUTOCONF_MODE`       | Habilitar el controlador de autoconf                         | `yes` o `no`                              | `no`                                  |
-| `SWARM_MODE`          | Observar servicios Swarm en lugar de contenedores Docker     | `yes` o `no`                              | `no`                                  |
-| `KUBERNETES_MODE`     | Observar ingress/pods de Kubernetes en lugar de Docker       | `yes` o `no`                              | `no`                                  |
-| `DOCKER_HOST`         | Socket Docker / URL de API remota                            | p. ej. `unix:///var/run/docker.sock`      | `unix:///var/run/docker.sock`         |
-| `WAIT_RETRY_INTERVAL` | Segundos entre comprobaciones de disponibilidad de instancias | Segundos enteros                          | `5`                                   |
-| `LOG_SYSLOG_TAG`      | Tag syslog para logs de autoconf                             | Cadena                                    | `bw-autoconf`                         |
-| `TZ`                  | Zona horaria para logs de autoconf y marcas de tiempo        | Nombre en base TZ (ej. `Europe/Paris`)    | unset (default de contenedor, suele UTC) |
+| Setting               | Descripción                                                   | Valores aceptados                      | Predeterminado                           |
+| --------------------- | ------------------------------------------------------------- | -------------------------------------- | ---------------------------------------- |
+| `AUTOCONF_MODE`       | Habilitar el controlador de autoconf                          | `yes` o `no`                           | `no`                                     |
+| `SWARM_MODE`          | Observar servicios Swarm en lugar de contenedores Docker      | `yes` o `no`                           | `no`                                     |
+| `KUBERNETES_MODE`     | Observar ingress/pods de Kubernetes en lugar de Docker        | `yes` o `no`                           | `no`                                     |
+| `DOCKER_HOST`         | Socket Docker / URL de API remota                             | p. ej. `unix:///var/run/docker.sock`   | `unix:///var/run/docker.sock`            |
+| `WAIT_RETRY_INTERVAL` | Segundos entre comprobaciones de disponibilidad de instancias | Segundos enteros                       | `5`                                      |
+| `LOG_SYSLOG_TAG`      | Tag syslog para logs de autoconf                              | Cadena                                 | `bw-autoconf`                            |
+| `TZ`                  | Zona horaria para logs de autoconf y marcas de tiempo         | Nombre en base TZ (ej. `Europe/Paris`) | unset (default de contenedor, suele UTC) |
 
 ##### Base de datos y validación
 
-| Setting                 | Descripción                                                                          | Valores aceptados            | Predeterminado                               |
-| ----------------------- | ------------------------------------------------------------------------------------ | ---------------------------- | -------------------------------------------- |
-| `DATABASE_URI`          | DSN principal de base de datos (debe coincidir con la BD del programador)            | DSN de SQLAlchemy            | `sqlite:////var/lib/bunkerweb/db.sqlite3`    |
-| `DATABASE_URI_READONLY` | DSN opcional solo-lectura; autoconf cae a solo-lectura si es lo único que funciona   | DSN de SQLAlchemy o vacío    | unset                                        |
-| `IGNORE_REGEX_CHECK`    | Saltar validación regex de configuraciones provenientes de etiquetas/anotaciones     | `yes` o `no`                 | `no`                                         |
+| Setting                 | Descripción                                                                        | Valores aceptados         | Predeterminado                            |
+| ----------------------- | ---------------------------------------------------------------------------------- | ------------------------- | ----------------------------------------- |
+| `DATABASE_URI`          | DSN principal de base de datos (debe coincidir con la BD del programador)          | DSN de SQLAlchemy         | `sqlite:////var/lib/bunkerweb/db.sqlite3` |
+| `DATABASE_URI_READONLY` | DSN opcional solo-lectura; autoconf cae a solo-lectura si es lo único que funciona | DSN de SQLAlchemy o vacío | unset                                     |
+| `IGNORE_REGEX_CHECK`    | Saltar validación regex de configuraciones provenientes de etiquetas/anotaciones   | `yes` o `no`              | `no`                                      |
 
 ##### Logging
 
-| Setting                         | Descripción                                                | Valores aceptados                                         | Predeterminado                                  |
-| ------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------- | ----------------------------------------------- |
-| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Nivel base / override                                      | `debug`, `info`, `warning`, `error`, `critical`           | `info`                                          |
-| `LOG_TYPES`                     | Destinos                                                   | `stderr`/`file`/`syslog` separados por espacios            | `stderr`                                        |
-| `LOG_FILE_PATH`                 | Ruta para logging a archivo (si `LOG_TYPES` incluye `file`) | Ruta de archivo                                            | unset (define la tuya al habilitar `file`)      |
-| `LOG_SYSLOG_ADDRESS`            | Destino syslog (`udp://host:514`, `tcp://host:514`, socket) | Host:puerto, host con prefijo de protocolo o ruta          | unset                                           |
-| `LOG_SYSLOG_TAG`                | Ident/tag de syslog                                        | Cadena                                                     | `bw-autoconf`                                   |
+| Setting                         | Descripción                                                 | Valores aceptados                                 | Predeterminado                             |
+| ------------------------------- | ----------------------------------------------------------- | ------------------------------------------------- | ------------------------------------------ |
+| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Nivel base / override                                       | `debug`, `info`, `warning`, `error`, `critical`   | `info`                                     |
+| `LOG_TYPES`                     | Destinos                                                    | `stderr`/`file`/`syslog` separados por espacios   | `stderr`                                   |
+| `LOG_FILE_PATH`                 | Ruta para logging a archivo (si `LOG_TYPES` incluye `file`) | Ruta de archivo                                   | unset (define la tuya al habilitar `file`) |
+| `LOG_SYSLOG_ADDRESS`            | Destino syslog (`udp://host:514`, `tcp://host:514`, socket) | Host:puerto, host con prefijo de protocolo o ruta | unset                                      |
+| `LOG_SYSLOG_TAG`                | Ident/tag de syslog                                         | Cadena                                            | `bw-autoconf`                              |
 
 ##### Alcance y filtros de descubrimiento
 
-| Setting                         | Descripción                                                                 | Valores aceptados                               | Predeterminado |
-| ------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------- | -------------- |
-| `NAMESPACES`                    | Lista separada por espacios de namespaces/proyectos a gestionar; unset = todos | Cadenas separadas por espacios                  | unset          |
-| `DOCKER_IGNORE_LABELS`          | Omitir contenedores/etiquetas al recopilar instancias/servicios/configs     | Claves completas o sufijos separados por espacio/coma | unset          |
-| `SWARM_IGNORE_LABELS`           | Ignorar servicios/configs Swarm con etiquetas coincidentes                   | Claves completas o sufijos separados por espacio/coma | unset          |
-| `KUBERNETES_IGNORE_ANNOTATIONS` | Ignorar anotaciones de ingress/pod durante el descubrimiento                | Claves completas o sufijos separados por espacio/coma | unset          |
+| Setting                         | Descripción                                                                    | Valores aceptados                                     | Predeterminado |
+| ------------------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------- | -------------- |
+| `NAMESPACES`                    | Lista separada por espacios de namespaces/proyectos a gestionar; unset = todos | Cadenas separadas por espacios                        | unset          |
+| `DOCKER_IGNORE_LABELS`          | Omitir contenedores/etiquetas al recopilar instancias/servicios/configs        | Claves completas o sufijos separados por espacio/coma | unset          |
+| `SWARM_IGNORE_LABELS`           | Ignorar servicios/configs Swarm con etiquetas coincidentes                     | Claves completas o sufijos separados por espacio/coma | unset          |
+| `KUBERNETES_IGNORE_ANNOTATIONS` | Ignorar anotaciones de ingress/pod durante el descubrimiento                   | Claves completas o sufijos separados por espacio/coma | unset          |
 
 ##### Solo Kubernetes
 
-| Setting                                 | Descripción                                                                                      | Valores aceptados         | Predeterminado        |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------- | --------------------- |
-| `KUBERNETES_VERIFY_SSL`                 | Verificar TLS de la API de Kubernetes                                                            | `yes` o `no`              | `yes`                 |
-| `KUBERNETES_SSL_CA_CERT`                | Ruta a un bundle de CA personalizado para la API de Kubernetes                                   | Ruta de archivo           | unset                 |
-| `USE_KUBERNETES_FQDN`                   | Usar `<pod>.<ns>.pod.<domain>` en vez de la IP del pod como hostname de instancia                 | `yes` o `no`              | `yes`                 |
-| `KUBERNETES_INGRESS_CLASS`              | Procesar solo los ingress con esta clase                                                         | Cadena                    | unset (todas)         |
-| `KUBERNETES_DOMAIN_NAME`                | Sufijo de dominio del clúster al construir hosts upstream                                        | Cadena                    | `cluster.local`       |
-| `KUBERNETES_SERVICE_PROTOCOL`           | Esquema usado para los hosts de reverse proxy generados                                          | `http` o `https`          | `http`                |
-| `BUNKERWEB_SERVICE_NAME`                | Nombre del servicio que se lee al parchear el estado del Ingress con la dirección del LB         | Cadena                    | `bunkerweb`           |
-| `BUNKERWEB_NAMESPACE`                   | Namespace de ese servicio                                                                        | Cadena                    | `bunkerweb`           |
-| `KUBERNETES_REVERSE_PROXY_SUFFIX_START` | Índice inicial para `REVERSE_PROXY_HOST_n`/`REVERSE_PROXY_URL_n` generados en ingress multipath  | Entero (>=0)              | `1`                   |
+| Setting                                 | Descripción                                                                                     | Valores aceptados | Predeterminado  |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------- | ----------------- | --------------- |
+| `KUBERNETES_VERIFY_SSL`                 | Verificar TLS de la API de Kubernetes                                                           | `yes` o `no`      | `yes`           |
+| `KUBERNETES_SSL_CA_CERT`                | Ruta a un bundle de CA personalizado para la API de Kubernetes                                  | Ruta de archivo   | unset           |
+| `USE_KUBERNETES_FQDN`                   | Usar `<pod>.<ns>.pod.<domain>` en vez de la IP del pod como hostname de instancia               | `yes` o `no`      | `yes`           |
+| `KUBERNETES_INGRESS_CLASS`              | Procesar solo los ingress con esta clase                                                        | Cadena            | unset (todas)   |
+| `KUBERNETES_DOMAIN_NAME`                | Sufijo de dominio del clúster al construir hosts upstream                                       | Cadena            | `cluster.local` |
+| `KUBERNETES_SERVICE_PROTOCOL`           | Esquema usado para los hosts de reverse proxy generados                                         | `http` o `https`  | `http`          |
+| `BUNKERWEB_SERVICE_NAME`                | Nombre del servicio que se lee al parchear el estado del Ingress con la dirección del LB        | Cadena            | `bunkerweb`     |
+| `BUNKERWEB_NAMESPACE`                   | Namespace de ese servicio                                                                       | Cadena            | `bunkerweb`     |
+| `KUBERNETES_REVERSE_PROXY_SUFFIX_START` | Índice inicial para `REVERSE_PROXY_HOST_n`/`REVERSE_PROXY_URL_n` generados en ingress multipath | Entero (>=0)      | `1`             |
 
 ### Servicios de Autoconfiguración
 
@@ -2690,13 +2679,13 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7-rc1
+        image: bunkerity/bunkerweb:1.6.7-rc2
         labels:
           - "bunkerweb.INSTANCE=yes"
           - "bunkerweb.NAMESPACE=my-namespace" # Establece el espacio de nombres para la instancia de BunkerWeb para que el servicio de autoconfiguración pueda detectarla
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.7-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.7-rc2
         environment:
           ...
           NAMESPACES: "my-namespace my-other-namespace" # Solo escucha a estos espacios de nombres
@@ -2735,7 +2724,7 @@ Para una configuración óptima, se recomienda definir BunkerWeb como un **[Daem
 Dada la presencia de múltiples instancias de BunkerWeb, es necesario establecer un almacén de datos compartido implementado como un servicio de [Redis](https://redis.io/) o [Valkey](https://valkey.io/). Este servicio será utilizado por las instancias para almacenar en caché y compartir datos entre ellas. Se puede encontrar más información sobre la configuración de Redis/Valkey [aquí](features.md#redis).
 
 !!! info "Backend de la base de datos"
-    Ten en cuenta que nuestras instrucciones asumen que estás utilizando MariaDB como el backend de base de datos predeterminado, según lo configurado por el ajuste `DATABASE_URI`. Sin embargo, entendemos que puedes preferir utilizar backends alternativos para tu integración con Docker. Si ese es el caso, ten la seguridad de que otros backends de bases de datos también son posibles. Consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc1/misc/integrations) del repositorio para obtener más información.
+    Ten en cuenta que nuestras instrucciones asumen que estás utilizando MariaDB como el backend de base de datos predeterminado, según lo configurado por el ajuste `DATABASE_URI`. Sin embargo, entendemos que puedes preferir utilizar backends alternativos para tu integración con Docker. Si ese es el caso, ten la seguridad de que otros backends de bases de datos también son posibles. Consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc2/misc/integrations) del repositorio para obtener más información.
 
     La configuración de backends de bases de datos en clúster está fuera del alcance de esta documentación.
 
@@ -2850,7 +2839,7 @@ The **BunkerWeb controller** automatically discovers pods with BunkerWeb sidecar
 ```yaml
 controller:
   enabled: true
-  tag: "1.6.7~rc1"
+  tag: "1.6.7~rc2"
 ```
 
 2. For each sidecar, add:
@@ -2943,7 +2932,7 @@ In your BunkerWeb chart `values.yaml`, configure the `BUNKERWEB_INSTANCES` envir
 
 ```yaml
 scheduler:
-  tag: "1.6.7~rc1"
+  tag: "1.6.7~rc2"
   extraEnvs:
     - name: BUNKERWEB_INSTANCES
       value: "http://app1-bunkerweb-workers.namespace.svc.cluster.local:5000 http://app2-bunkerweb-workers.namespace.svc.cluster.local:5000"
@@ -2987,7 +2976,7 @@ spec:
 
         # BunkerWeb Sidecar
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.7-rc1
+          image: bunkerity/bunkerweb:1.6.7-rc2
           ports:
             - containerPort: 8080  # Exposed HTTP port
             - containerPort: 5000  # Internal API (mandatory)
@@ -3257,7 +3246,7 @@ To add a new application protected by BunkerWeb:
 
 #### Archivos YAML completos
 
-En lugar de usar el chart de Helm, también puedes usar las plantillas YAML dentro de la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc1/misc/integrations) del repositorio de GitHub. Ten en cuenta que recomendamos encarecidamente usar el chart de Helm en su lugar.
+En lugar de usar el chart de Helm, también puedes usar las plantillas YAML dentro de la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc2/misc/integrations) del repositorio de GitHub. Ten en cuenta que recomendamos encarecidamente usar el chart de Helm en su lugar.
 
 ### Recursos de Ingress
 
@@ -3340,7 +3329,7 @@ metadata:
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.6.7-rc1
+              image: bunkerity/bunkerweb-autoconf:1.6.7-rc2
               imagePullPolicy: Always
               env:
                 - name: NAMESPACES
@@ -3483,11 +3472,11 @@ service:
 
 # Configuraciones de BunkerWeb
 bunkerweb:
-  tag: 1.6.7~rc1
+  tag: 1.6.7~rc2
 
 # Configuraciones del programador
 scheduler:
-  tag: 1.6.7~rc1
+  tag: 1.6.7~rc2
   extraEnvs:
     # Habilita el módulo de IP real para obtener la IP real de los clientes
     - name: USE_REAL_IP
@@ -3495,11 +3484,11 @@ scheduler:
 
 # Configuraciones del controlador
 controller:
-  tag: 1.6.7~rc1
+  tag: 1.6.7~rc2
 
 # Configuraciones de la UI
 ui:
-  tag: 1.6.7~rc1
+  tag: 1.6.7~rc2
 ```
 
 Instala BunkerWeb con valores personalizados:
@@ -3627,7 +3616,7 @@ Dado que se están ejecutando múltiples instancias de BunkerWeb, se debe crear 
 En cuanto al volumen de la base de datos, la documentación no especifica un enfoque concreto. La elección de una carpeta compartida o un controlador específico para el volumen de la base de datos depende de tu caso de uso particular y se deja como ejercicio para el lector.
 
 !!! info "Backend de la base de datos"
-    Ten en cuenta que nuestras instrucciones asumen que estás utilizando MariaDB como el backend de base de datos predeterminado, según lo configurado por el ajuste `DATABASE_URI`. Sin embargo, entendemos que puedes preferir utilizar backends alternativos para tu integración con Docker. Si ese es el caso, ten la seguridad de que otros backends de bases de datos también son posibles. Consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc1/misc/integrations) del repositorio para obtener más información.
+    Ten en cuenta que nuestras instrucciones asumen que estás utilizando MariaDB como el backend de base de datos predeterminado, según lo configurado por el ajuste `DATABASE_URI`. Sin embargo, entendemos que puedes preferir utilizar backends alternativos para tu integración con Docker. Si ese es el caso, ten la seguridad de que otros backends de bases de datos también son posibles. Consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc2/misc/integrations) del repositorio para obtener más información.
 
     La configuración de backends de bases de datos en clúster está fuera del alcance de esta documentación.
 
@@ -3641,7 +3630,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.7-rc1
+    image: bunkerity/bunkerweb:1.6.7-rc2
     ports:
       - published: 80
         target: 8080
@@ -3670,7 +3659,7 @@ services:
         - "bunkerweb.INSTANCE=yes" # Etiqueta obligatoria para que el servicio de autoconfiguración identifique la instancia de BunkerWeb
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.7-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # No necesitamos especificar la instancia de BunkerWeb aquí, ya que son detectadas automáticamente por el servicio de autoconfiguración
@@ -3691,7 +3680,7 @@ services:
           - "node.role == worker"
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.7-rc1
+    image: bunkerity/bunkerweb-autoconf:1.6.7-rc2
     environment:
       SWARM_MODE: "yes"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Recuerda establecer una contraseña más segura para la base de datos
@@ -3843,7 +3832,7 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7-rc1
+        image: bunkerity/bunkerweb:1.6.7-rc2
         ...
         deploy:
           mode: global
@@ -3855,7 +3844,7 @@ networks:
             - "bunkerweb.NAMESPACE=my-namespace" # Establece el espacio de nombres para la instancia de BunkerWeb
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.7-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.7-rc2
         environment:
           NAMESPACES: "my-namespace my-other-namespace" # Solo escucha a estos espacios de nombres
           ...

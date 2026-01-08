@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # Default values
 # Hardcoded default version (immutable reference)
-DEFAULT_BUNKERWEB_VERSION="1.6.7~rc1"
+DEFAULT_BUNKERWEB_VERSION="1.6.7~rc2"
 # Mutable effective version (can be overridden by --version)
 BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 NGINX_VERSION=""
@@ -534,6 +534,7 @@ show_rhel_database_warning() {
         read -p "Press Enter to continue..." -r
     fi
 }
+
 check_supported_os() {
     case "$DISTRO_ID" in
         "debian")
@@ -546,7 +547,7 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.28.0-1~$DISTRO_CODENAME"
+            NGINX_VERSION="1.28.1-1~$DISTRO_CODENAME"
             ;;
         "ubuntu")
             if [[ "$DISTRO_VERSION" != "22.04" && "$DISTRO_VERSION" != "24.04" ]]; then
@@ -558,11 +559,11 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.28.0-1~$DISTRO_CODENAME"
+            NGINX_VERSION="1.28.1-1~$DISTRO_CODENAME"
             ;;
         "fedora")
-            if [[ "$DISTRO_VERSION" != "41" && "$DISTRO_VERSION" != "42" && "$DISTRO_VERSION" != "43" ]]; then
-                print_warning "Only Fedora 41, 42 and 43 are officially supported"
+            if [[ "$DISTRO_VERSION" != "42" && "$DISTRO_VERSION" != "43" ]]; then
+                print_warning "Only Fedora 42 and 43 are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
                     read -p "Continue anyway? (y/N): " -r
                     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -570,13 +571,7 @@ check_supported_os() {
                     fi
                 fi
             fi
-            # Note: Fedora 42 and 43 have removed NGINX 1.28.0 from their mirrors,
-            # so NGINX 1.28.1 is required for these versions. Fedora 41 still has 1.28.0.
-            if [ "$DISTRO_VERSION" != "41" ]; then
-                NGINX_VERSION="1.28.1"
-            else
-                NGINX_VERSION="1.28.0"
-            fi
+            NGINX_VERSION="1.28.1"
             ;;
         "rhel"|"rocky"|"almalinux")
             major_version=$(echo "$DISTRO_VERSION" | cut -d. -f1)
@@ -589,11 +584,11 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.28.0"
+            NGINX_VERSION="1.28.1"
             ;;
         *)
             print_error "Unsupported operating system: $DISTRO_ID"
-            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04, Fedora 41/42/43, RHEL 8/9/10"
+            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04, Fedora 42/43, RHEL 8/9/10"
             exit 1
             ;;
     esac

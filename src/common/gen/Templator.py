@@ -2,6 +2,7 @@
 
 from concurrent.futures import ProcessPoolExecutor
 from contextlib import suppress
+from functools import lru_cache
 from importlib import import_module
 from glob import glob
 from math import ceil
@@ -10,6 +11,7 @@ from os import cpu_count
 from os.path import basename, join, sep
 from pathlib import Path
 from random import choice
+from ssl import PROTOCOL_TLS_SERVER, SSLContext
 from string import ascii_letters, digits
 from sys import path as sys_path
 from typing import Any, Dict, List, Optional, Type
@@ -25,6 +27,58 @@ from jinja2 import Environment, FileSystemBytecodeCache, FileSystemLoader, Undef
 
 # Configure logging
 logger = getLogger("TEMPLATOR")
+
+
+@lru_cache(maxsize=32)
+def _supports_tls_group(name: str) -> bool:
+    try:
+        ctx = SSLContext(PROTOCOL_TLS_SERVER)
+        ctx.set_ecdh_curve(name)
+        logger.debug(f"SSL ECDH curve supported: {name}")
+        return True
+    except ValueError:
+        logger.debug(f"SSL ECDH curve not supported: {name}")
+        return False
+    except Exception as exc:
+        logger.debug(f"SSL ECDH curve check failed for {name}: {exc}")
+        return False
+
+
+@lru_cache(maxsize=1)
+def _best_ssl_ecdh_curve() -> Optional[str]:
+    preferred = ("X25519MLKEM768", "X25519", "prime256v1", "secp384r1")
+    aliases = {"prime256v1": ("P-256",), "secp384r1": ("P-384",)}
+
+    selected = []
+    for name in preferred:
+        if _supports_tls_group(name):
+            selected.append(name)
+            continue
+        for alias in aliases.get(name, []):
+            if _supports_tls_group(alias):
+                selected.append(alias)
+                break
+
+    if not selected:
+        logger.debug("No supported SSL ECDH curves found for auto-selection")
+        return None
+
+    logger.debug(f"SSL ECDH curve auto-selection candidates: {':'.join(selected)}")
+    return ":".join(selected)
+
+
+def resolve_ssl_ecdh_curve(value: str, fallback: str = "X25519:prime256v1:secp384r1") -> str:
+    if value and value != "auto":
+        logger.debug(f"SSL ECDH curve explicitly set to {value}")
+        return value
+
+    best_curve = _best_ssl_ecdh_curve()
+    if best_curve:
+        logger.debug(f"SSL ECDH curve auto-selected: {best_curve}")
+        return best_curve
+
+    logger.debug(f"SSL ECDH curve auto-selection unavailable, falling back to {fallback}")
+    return fallback
 
 
 class ConfigurableCustomUndefined(Undefined):
@@ -253,6 +307,7 @@ class Templator:
             "random": Templator.random,
             "read_lines": Templator.read_lines,
             "import": import_module,
+            "resolve_ssl_ecdh_curve": resolve_ssl_ecdh_curve,
         }
 
     def render(self) -> None:

@@ -19,7 +19,9 @@
 #include <openssl/bn.h>
 #include <openssl/conf.h>
 #include <openssl/crypto.h>
+#ifndef OPENSSL_NO_DH
 #include <openssl/dh.h>
+#endif
 #ifndef OPENSSL_NO_ENGINE
 #include <openssl/engine.h>
 #endif
@@ -80,6 +82,22 @@
 
 #if (OPENSSL_VERSION_NUMBER < 0x30000000L && !defined ERR_peek_error_data)
 #define ERR_peek_error_data(d, f)    ERR_peek_error_line_data(NULL, NULL, d, f)
+#endif
+
+
+#ifdef OPENSSL_NO_DEPRECATED_3_4
+#define SSL_SESSION_get_time(s)      SSL_SESSION_get_time_ex(s)
+#define SSL_SESSION_set_time(s, t)   SSL_SESSION_set_time_ex(s, t)
+#endif
+
+
+#ifdef OPENSSL_NO_DEPRECATED_3_0
+#define EVP_CIPHER_CTX_cipher(c)     EVP_CIPHER_CTX_get0_cipher(c)
+#endif
+
+
+#if (OPENSSL_VERSION_NUMBER < 0x30000000L)
+#define SSL_group_to_name(s, nid)    NULL
 #endif
 
 

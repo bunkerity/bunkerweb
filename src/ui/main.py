@@ -941,7 +941,7 @@ def before_request():
 
         DB.readonly = DATA.get("READONLY_MODE", False)
 
-        if not request.path.startswith(("/check", "/loading", "/login", "/totp")) and DB.readonly:
+        if not request.path.startswith(("/check", "/loading", "/login", "/totp")) and DB.readonly and current_user.is_authenticated:
             flask_flash("Database connection is in read-only mode : no modifications possible.", "error")
 
         if current_user.is_authenticated:
@@ -1005,7 +1005,7 @@ def before_request():
         if not changes_ongoing and DATA.get("PRO_LOADING"):
             DATA["PRO_LOADING"] = False
 
-        if not request.path.startswith("/loading"):
+        if not request.path.startswith("/loading") and current_user.is_authenticated:
             if not changes_ongoing and metadata["failover"]:
                 flask_flash(
                     "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.</p>",
@@ -1027,7 +1027,7 @@ def before_request():
         x_requested_with = request.headers.get("X-Requested-With")
         is_cors = fetch_mode == "cors" or (x_requested_with and x_requested_with.lower() == "xmlhttprequest")
 
-        if not is_cors:
+        if not is_cors and current_user.is_authenticated:
             seen = set()
             for f in DATA.get("TO_FLASH", []):
                 content = f["content"]

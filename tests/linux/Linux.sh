@@ -28,9 +28,6 @@ function buildPackage() {
     if [ "$DISTRO" = "debian-trixie" ]; then
       sudo docker build -t linux-debian-trixie -f src/linux/Dockerfile-debian-trixie .
     fi
-    if [ "$DISTRO" = "fedora-41" ]; then
-      sudo docker build -t linux-fedora-41 -f src/linux/Dockerfile-fedora-41 .
-    fi
     if [ "$DISTRO" = "fedora-42" ]; then
       sudo docker build -t linux-fedora-42 -f src/linux/Dockerfile-fedora-42 .
     fi
@@ -65,9 +62,6 @@ function createContainer() {
     if [ "$DISTRO" = "debian-trixie" ]; then
       sudo docker run -v /tmp/debian-trixie:/data linux-debian-trixie
     fi
-    if [ "$DISTRO" = "fedora-41" ]; then
-      sudo docker run -v /tmp/fedora-41:/data linux-fedora-41
-    fi
     if [ "$DISTRO" = "fedora-42" ]; then
       sudo docker run -v /tmp/fedora-42:/data linux-fedora-42
     fi
@@ -92,7 +86,7 @@ function createContainer() {
 # Retrieve $DISTRO from the user
 
 function retrieveDistro() {
-  echo "Which distro do you want to use? (ubuntu, debian-bookworm, debian-trixie, fedora-41, fedora-42, fedora-43, rhel-8, rhel-9, rhel-10)"
+  echo "Which distro do you want to use? (ubuntu, debian-bookworm, debian-trixie, fedora-42, fedora-43, rhel-8, rhel-9, rhel-10)"
   read -r DISTRO
 }
 

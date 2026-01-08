@@ -56,7 +56,7 @@
 
 #define MODSECURITY_NGINX_MAJOR "1"
 #define MODSECURITY_NGINX_MINOR "0"
-#define MODSECURITY_NGINX_PATCHLEVEL "3"
+#define MODSECURITY_NGINX_PATCHLEVEL "4"
 #define MODSECURITY_NGINX_TAG ""
 #define MODSECURITY_NGINX_TAG_NUM "100"
 
@@ -99,6 +99,7 @@ typedef struct {
     unsigned processed:1;
     unsigned logged:1;
     unsigned intervention_triggered:1;
+    unsigned request_body_processed:1;
 } ngx_http_modsecurity_ctx_t;
 
 
@@ -139,6 +140,7 @@ extern ngx_module_t ngx_http_modsecurity_module;
 /* ngx_http_modsecurity_module.c */
 int ngx_http_modsecurity_process_intervention (Transaction *transaction, ngx_http_request_t *r, ngx_int_t early_log);
 ngx_http_modsecurity_ctx_t *ngx_http_modsecurity_create_ctx(ngx_http_request_t *r);
+ngx_http_modsecurity_ctx_t *ngx_http_modsecurity_get_module_ctx(ngx_http_request_t *r);
 char *ngx_str_to_char(ngx_str_t a, ngx_pool_t *p);
 #if (NGX_PCRE2)
 #define ngx_http_modsecurity_pcre_malloc_init(x) NULL
