@@ -11303,6 +11303,13 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><strong>自定义 SSL 密码：</strong> 用于 SSL/TLS 连接的密码套件的冒号分隔列表（覆盖级别）。</td>
 </tr>
 <tr>
+<td><code>SSL_ECDH_CURVE</code></td>
+<td><code>auto</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>SSL ECDH 曲线：</strong> 以 <code>:</code> 分隔的 ECDH 曲线（TLS 组）列表，或 <code>auto</code> 启用智能选择（OpenSSL 3.5+ 的 PQC 组）。</td>
+</tr>
+<tr>
 <td><code>SSL_SESSION_CACHE_SIZE</code></td>
 <td><code>10m</code></td>
 <td>multisite</td>

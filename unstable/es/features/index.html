@@ -11325,6 +11325,13 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><strong>Cifrados SSL Personalizados:</strong> Lista de conjuntos de cifrado separados por dos puntos para usar en las conexiones SSL/TLS (sobrescribe el nivel).</td>
 </tr>
 <tr>
+<td><code>SSL_ECDH_CURVE</code></td>
+<td><code>auto</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Curvas ECDH SSL:</strong> Lista separada por <code>:</code> de curvas ECDH (grupos TLS) o <code>auto</code> para selección inteligente (PQC con OpenSSL 3.5+).</td>
+</tr>
+<tr>
 <td><code>SSL_SESSION_CACHE_SIZE</code></td>
 <td><code>10m</code></td>
 <td>multisite</td>

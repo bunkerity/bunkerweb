@@ -11352,6 +11352,13 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><strong>Custom SSL Ciphers:</strong> Colon-separated list of cipher suites to use for SSL/TLS connections (overrides level).</td>
 </tr>
 <tr>
+<td><code>SSL_ECDH_CURVE</code></td>
+<td><code>auto</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>SSL ECDH Curves:</strong> Colon-separated list of ECDH curves (TLS groups) or <code>auto</code> for smart selection (prefers PQC on OpenSSL 3.5+).</td>
+</tr>
+<tr>
 <td><code>SSL_SESSION_CACHE_SIZE</code></td>
 <td><code>10m</code></td>
 <td>multisite</td>
