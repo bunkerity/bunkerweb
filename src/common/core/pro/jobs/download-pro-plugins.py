@@ -39,9 +39,12 @@ STATUS_MESSAGES = {
 LOGGER = getLogger("PRO.DOWNLOAD-PLUGINS")
 status = 0
 existing_pro_plugin_ids = set()
+cleaned_up_plugins = False
 
 
 def clean_pro_plugins(db) -> None:
+    global cleaned_up_plugins
+
     LOGGER.warning("Cleaning up Pro plugins...")
     # Clean Pro plugins
     for plugin_dir in PRO_PLUGINS_DIR.glob("*"):
@@ -60,6 +63,7 @@ def clean_pro_plugins(db) -> None:
                 rmtree(plugin_dir, ignore_errors=True)
     # Update database
     db.update_external_plugins([], _type="pro", only_clear_metadata=True)
+    cleaned_up_plugins = True
 
 
 def install_plugin(plugin_path: Path, db, preview: bool = True) -> bool:
@@ -88,15 +92,16 @@ def install_plugin(plugin_path: Path, db, preview: bool = True) -> bool:
                 old_version = plugin["version"]
                 break
 
-        if old_version == metadata["version"]:
+        if not cleaned_up_plugins and old_version == metadata["version"]:
             LOGGER.warning(
                 f"Skipping installation of {'preview version of ' if preview else ''}Pro plugin {metadata['id']} (version {metadata['version']} already installed)"
             )
             return False
 
-        LOGGER.warning(
-            f"{'Preview version of ' if preview else ''}Pro plugin {metadata['id']} is already installed but version {metadata['version']} is different from database ({old_version}), updating it..."
-        )
+        if old_version != metadata["version"]:
+            LOGGER.warning(
+                f"{'Preview version of ' if preview else ''}Pro plugin {metadata['id']} is already installed but version {metadata['version']} is different from database ({old_version}), updating it..."
+            )
         rmtree(new_plugin_path, ignore_errors=True)
 
     # Copy the plugin

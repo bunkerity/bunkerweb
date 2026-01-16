@@ -5,7 +5,22 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
-## Version 4.22.0-dev - 2025-MM-DD
+## Version 4.22.0 - 2026-01-05
+
+## What's Changed
+### CRITICAL
+* fix for 9AJ-260102
+
+### 🧰 Other Changes
+* feat(934100): added sequence for CVE-2025-55182 POCs by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4372
+* feat(942440): reduce false positive by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4346
+* fix(942431): reduce false positive with arrays in ARGS_NAMES by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4305
+* fix: make regexen Rust's regex compatible by @fgsch in https://github.com/coreruleset/coreruleset/pull/4385
+* refactor: drop older spelling variants by @fgsch in https://github.com/coreruleset/coreruleset/pull/4386
+
+Special thanks to @daytriftnewgen for responsible reporting 9AJ-260102
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.21.0...v4.22.0
 
 ## Version 4.21.0 - 2025-12-01
 

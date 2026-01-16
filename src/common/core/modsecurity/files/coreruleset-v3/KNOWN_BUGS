@@ -26,7 +26,7 @@ or the CRS Google Group at
   We advise to upgrade your Apache version. If upgrading is not possible,
   we have provided a script in the util/join-multiline-rules directory
   which converts the rules into a format that works around the bug.
-  You have to re-run this script whenever you modify or update 
+  You have to re-run this script whenever you modify or update
   the CRS rules.
 * Debian up to and including Jessie lacks YAJL/JSON support in ModSecurity,
   which causes the following error in the Apache ErrorLog or SecAuditLog:
@@ -38,8 +38,8 @@ or the CRS Google Group at
   type by default, as specified in RFC 3902. OF IMPORTANCE, application/soap+xml is
   indicative that XML will be provided. In accordance with this, ModSecurity's XML
   Request Body Processor should also be configured to support this MIME type. Within
-  the ModSecurity project, commit 5e4e2af 
-  (https://github.com/SpiderLabs/ModSecurity/commit/5e4e2af7a6f07854fee6ed36ef4a381d4e03960e) 
+  the ModSecurity project, commit 5e4e2af
+  (https://github.com/SpiderLabs/ModSecurity/commit/5e4e2af7a6f07854fee6ed36ef4a381d4e03960e)
   has been merged to support this endeavour. However, if you are running a modified or
   preexisting version of the modsecurity.conf provided by this repository, you may
   wish to upgrade rule '200000' accordingly. The rule now appears as follows:

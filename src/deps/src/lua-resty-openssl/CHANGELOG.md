@@ -2,6 +2,12 @@
 ## [Unreleased]
 
 
+<a name="1.7.1"></a>
+## [1.7.1] - 2026-01-13
+### features
+- fix table.unpack nil handling issue specific to LuaJIT bytecode compilation [5de40a8](https://github.com/fffonion/lua-resty-openssl/commit/5de40a8675a9c3013c848be5a5897c16f7e0b12b)
+
+
 <a name="1.7.0"></a>
 ## [1.7.0] - 2025-10-28
 ### features
@@ -62,8 +68,8 @@
 - **asn1:** correct time_t to be 64 bits type ([#171](https://github.com/fffonion/lua-resty-openssl/issues/171)) [7d6d8b5](https://github.com/fffonion/lua-resty-openssl/commit/7d6d8b5d241374427da2231612e1e4552ff4cf1d)
 - **bn:** fix potential use-after-free in bn.new ([#177](https://github.com/fffonion/lua-resty-openssl/issues/177)) [224fae6](https://github.com/fffonion/lua-resty-openssl/commit/224fae68ca8716fbd97a2a94d194237aaa2eaa58)
 - **objects:** fix a buffer overflow issue in find_sigid_algs. ([#175](https://github.com/fffonion/lua-resty-openssl/issues/175)) [d94064c](https://github.com/fffonion/lua-resty-openssl/commit/d94064cc7754c744b325fcd2908bfce26915b76e)
-- **param:** save converted value to prevent potential use-after-free [8c366c2](https://github.com/fffonion/lua-resty-openssl/commit/8c366c22c796b0b44bc49d4953084a09bcba4e6c)
 - **param:** fix issue when gettable schema may be overwritten by settable schema [7669555](https://github.com/fffonion/lua-resty-openssl/commit/766955521cee5c7ed6a7e64a1439e3ca38c2f958)
+- **param:** save converted value to prevent potential use-after-free [8c366c2](https://github.com/fffonion/lua-resty-openssl/commit/8c366c22c796b0b44bc49d4953084a09bcba4e6c)
 - **pkey:** fix potential use-after-free in pkey.paramgen ([#176](https://github.com/fffonion/lua-resty-openssl/issues/176)) [e924ee0](https://github.com/fffonion/lua-resty-openssl/commit/e924ee0454e1d95b63f62b660d6c0090bfeabb26)
 - **x509.\*:** fix potential use-after-free when get or set subject_alt_name, info_access and dist_points [407d31e](https://github.com/fffonion/lua-resty-openssl/commit/407d31ec31f2fe8cb968b1d7d140f717ef620290)
 - **x509.csr:** fix potential use-after-free in set_extension and add_extension [a0711de](https://github.com/fffonion/lua-resty-openssl/commit/a0711de99cf57e6d8fa62f03abba46e02360063d)
@@ -581,8 +587,8 @@
 - **autogen:** generate tests for x509, csr and crl [1392428](https://github.com/fffonion/lua-resty-openssl/commit/1392428352164d2a1a6e0c03075ff65b55aecdee)
 - **objects:** add helper function for ASN1_OBJECT [d037706](https://github.com/fffonion/lua-resty-openssl/commit/d037706c11d716afe3616bdaf4658afc1763081d)
 - **pkey:** asymmetric encryption and decryption [6d60451](https://github.com/fffonion/lua-resty-openssl/commit/6d60451157edbf9cefb634f888dfa3e6d9be302f)
-- **x509:** getter/setters for extensions [243f40d](https://github.com/fffonion/lua-resty-openssl/commit/243f40d35562a516f404188a5c7eb8f5134d9b30)
 - **x509:** add get_ocsp_url and get_crl_url [6141b6f](https://github.com/fffonion/lua-resty-openssl/commit/6141b6f5aed38706b477a71d8c4383bf55da7eee)
+- **x509:** getter/setters for extensions [243f40d](https://github.com/fffonion/lua-resty-openssl/commit/243f40d35562a516f404188a5c7eb8f5134d9b30)
 - **x509.altname:** support iterate and decode over the stack [083a201](https://github.com/fffonion/lua-resty-openssl/commit/083a201746e02d51f6c5c640ad9bf8c6730ebe0b)
 - **x509.crl:** add crl module [242f8cb](https://github.com/fffonion/lua-resty-openssl/commit/242f8cb45d6c2df5918f26540c92a430d42feb5d)
 - **x509.csr:** autogen some csr functions as well [9800e36](https://github.com/fffonion/lua-resty-openssl/commit/9800e36c2ff8a299b88f24091cc722940a8652bb)
@@ -670,7 +676,8 @@
 - **x509:** export pubkey [ede4f81](https://github.com/fffonion/lua-resty-openssl/commit/ede4f817cb0fe092ad6f9ab5d6ecdcde864a9fd8)
 
 
-[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.7.0...HEAD
+[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.7.1...HEAD
+[1.7.1]: https://github.com/fffonion/lua-resty-openssl/compare/1.7.0...1.7.1
 [1.7.0]: https://github.com/fffonion/lua-resty-openssl/compare/1.6.4...1.7.0
 [1.6.4]: https://github.com/fffonion/lua-resty-openssl/compare/1.6.3...1.6.4
 [1.6.3]: https://github.com/fffonion/lua-resty-openssl/compare/1.6.2...1.6.3

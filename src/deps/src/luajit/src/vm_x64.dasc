@@ -1,6 +1,6 @@
 |// Low-level VM code for x64 CPUs in LJ_GC64 mode.
 |// Bytecode interpreter, fast functions and helper functions.
-|// Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
+|// Copyright (C) 2005-2026 Mike Pall. See Copyright Notice in luajit.h
 |
 |.arch x64
 |.section code_op, code_sub
@@ -3279,11 +3279,15 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |.if DUALNUM
     |  checkint RB, >5
     |  neg RBd
+    |  jz >3
     |  jo >4
     |  setint RB
     |9:
     |  mov [BASE+RA*8], RB
     |  ins_next
+    |3:
+    |  mov64 RB, U64x(80000000,00000000)  // -0.
+    |  jmp <9
     |4:
     |  mov64 RB, U64x(41e00000,00000000)  // 2^31.
     |  jmp <9

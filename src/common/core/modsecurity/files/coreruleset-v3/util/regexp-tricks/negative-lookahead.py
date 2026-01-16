@@ -49,9 +49,9 @@ def set(strings, index, flags):
         # Continue so we don't panic
         if index > len(s) -1:
             continue
-        
+
         dict[s[index]] = ''
-    
+
     return "[" + flags + flatten(dict) + "]"
 
 # prepare converts a string for negative lookaheads emulation
@@ -73,7 +73,7 @@ def prepare(s, offset):
 
     return r
 
-# run runs the 
+# run runs the
 def run():
     strings = args.strings
 
@@ -86,7 +86,7 @@ def run():
     # Only find common string if we have more than one
     if len(strings) > 1:
         c = commonprefix(strings)
-        
+
         # Collect all characters after the common substring from every string
         for s in strings:
             if len(s) > len(c) and s.startswith(c):
@@ -107,7 +107,7 @@ def run():
             g = prepare(s, len(c) + 1)
         else:
             g = prepare(s, 1)
-        
+
         # Add OR boolean if necessary
         if len(g) > 0:
             r += "|"

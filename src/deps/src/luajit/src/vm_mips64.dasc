@@ -1,6 +1,6 @@
 |// Low-level VM code for MIPS64 CPUs.
 |// Bytecode interpreter, fast functions and helper functions.
-|// Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
+|// Copyright (C) 2005-2026 Mike Pall. See Copyright Notice in luajit.h
 |//
 |// Contributed by Djordje Kovacevic and Stefan Pejic from RT-RK.com.
 |// Sponsored by Cisco Systems, Inc.
@@ -3804,7 +3804,8 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  sextw CARG1, CARG1
     |  beq CARG1, TMP1, ->vmeta_unm	// Meta handler deals with -2^31.
     |.  negu CARG1, CARG1
-    |  zextw CARG1, CARG1
+    |  beqz CARG1, >3
+    |.  zextw CARG1, CARG1
     |  settp CARG1, TISNUM
     |1:
     |  ins_next1
@@ -3816,6 +3817,9 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |.  dsll TMP1, TMP1, 32
     |  b <1
     |.  xor CARG1, CARG1, TMP1
+    |3:
+    |  b <1
+    |.  dsll CARG1, TMP1, 32
     break;
   case BC_LEN:
     |  // RA = dst*8, RD = src*8

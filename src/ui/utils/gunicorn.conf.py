@@ -1,7 +1,7 @@
 from datetime import datetime
 from hashlib import sha256
 from json import JSONDecodeError, dump, dumps, loads
-from os import cpu_count, environ, getenv, sep
+from os import environ, getenv, sep
 from os.path import join
 from pathlib import Path
 from secrets import token_hex
@@ -18,7 +18,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from biscuit_auth import KeyPair, PublicKey, PrivateKey
 from passlib.totp import generate_secret
 
-from common_utils import handle_docker_secrets  # type: ignore
+from common_utils import effective_cpu_count, handle_docker_secrets  # type: ignore
 from logger import getLogger, log_types  # type: ignore
 
 from app.models.ui_database import UIDatabase
@@ -48,7 +48,7 @@ TOTP_HASH_FILE = TOTP_SECRETS_FILE.with_suffix(".hash")  # File to store hash of
 BISCUIT_PUBLIC_KEY_HASH_FILE = BISCUIT_PUBLIC_KEY_FILE.with_suffix(".hash")  # File to store hash of Biscuit public key
 BISCUIT_PRIVATE_KEY_HASH_FILE = BISCUIT_PRIVATE_KEY_FILE.with_suffix(".hash")  # File to store hash of Biscuit private key
 
-MAX_WORKERS = int(getenv("MAX_WORKERS", max((cpu_count() or 1) - 1, 1)))
+MAX_WORKERS = int(getenv("MAX_WORKERS", max(effective_cpu_count() - 1, 1)))
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "info"))
 LISTEN_ADDR = getenv("UI_LISTEN_ADDR", getenv("LISTEN_ADDR", "0.0.0.0"))
 LISTEN_PORT = getenv("UI_LISTEN_PORT", getenv("LISTEN_PORT", "7000"))

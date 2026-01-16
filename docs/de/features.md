@@ -1664,7 +1664,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.7-rc2
+        image: bunkerity/bunkerweb:1.6.7
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1681,7 +1681,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
             syslog-address: "udp://10.20.30.254:514" # Die IP-Adresse des syslog-Dienstes
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.7
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -2814,11 +2814,13 @@ Das Let's Encrypt-Plugin unterstützt eine breite Palette von DNS-Anbietern für
 | `desec`           | deSEC            | `token`                                                                                                      |                                                                                                                                                                                                                                                                              | [Dokumentation](https://github.com/desec-io/certbot-dns-desec/blob/main/README.md)                    |
 | `digitalocean`    | DigitalOcean     | `token`                                                                                                      |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-digitalocean.readthedocs.io/en/stable/)                           |
 | `domainoffensive` | Domain-Offensive | `api_token`                                                                                                  |                                                                                                                                                                                                                                                                              | [Dokumentation](https://github.com/domainoffensive/certbot-dns-domainoffensive/blob/master/README.md) |
+| `domeneshop`      | Domeneshop       | `token`<br>`secret`                                                                                          |                                                                                                                                                                                                                                                                              | [Dokumentation](https://github.com/domeneshop/certbot-dns-domeneshop/blob/master/README.rst)          |
 | `dnsimple`        | DNSimple         | `token`                                                                                                      |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-dnsimple.readthedocs.io/en/stable/)                               |
 | `dnsmadeeasy`     | DNS Made Easy    | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)                            |
 | `duckdns`         | DuckDNS          | `duckdns_token`                                                                                              |                                                                                                                                                                                                                                                                              | [Dokumentation](https://github.com/infinityofspace/certbot_dns_duckdns/blob/main/Readme.md)           |
 | `dynu`            | Dynu             | `auth_token`                                                                                                 |                                                                                                                                                                                                                                                                              | [Dokumentation](https://github.com/bikram990/certbot-dns-dynu/blob/main/README.md)                    |
 | `gehirn`          | Gehirn DNS       | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                                 |
+| `godaddy`         | GoDaddy          | `key`<br>`secret`                                                                                            | `ttl` (Standard: `600`)                                                                                                                                                                                                                                                      | [Dokumentation](https://github.com/miigotu/certbot-dns-godaddy/blob/main/README.md)                   |
 | `google`          | Google Cloud     | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (Standard: `service_account`)<br>`auth_uri` (Standard: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (Standard: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (Standard: `https://www.googleapis.com/oauth2/v1/certs`) | [Dokumentation](https://certbot-dns-google.readthedocs.io/en/stable/)                                 |
 | `infomaniak`      | Infomaniak       | `token`                                                                                                      |                                                                                                                                                                                                                                                                              | [Dokumentation](https://github.com/infomaniak/certbot-dns-infomaniak/blob/main/README.rst)            |
 | `ionos`           | IONOS            | `prefix`<br>`secret`                                                                                         | `endpoint` (Standard: `https://api.hosting.ionos.com`)                                                                                                                                                                                                                       | [Dokumentation](https://github.com/helgeerbe/certbot-dns-ionos/blob/master/README.md)                 |
@@ -3619,8 +3621,8 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
 
 Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entspricht:
 
-- **`3`**: Stabile [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`**: Stabile [v4.21.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.21.0) (**Standard**).
+- **`3`**: Stabile [v3.3.8](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8).
+- **`4`**: Stabile [v4.22.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.22.0) (**Standard**).
 - **`nightly`**: [Nightly-Build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) mit den neuesten Regel-Updates.
 
 !!! example "Nightly-Build"
@@ -3895,6 +3897,69 @@ Gehen Sie diese Schritte durch, um Mutual TLS kontrolliert einzuführen:
     MTLS_VERIFY_CLIENT: "optional_no_ca"
     MTLS_FORWARD_CLIENT_HEADERS: "no"
     ```
+
+## OpenAPI Validator <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM-Unterstützung :x:
+
+Validates incoming HTTP requests against an OpenAPI / Swagger specification.
+
+| Einstellung                  | Standardwert                        | Kontext   | Mehrfach | Beschreibung                                                                                    |
+| ---------------------------- | ----------------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------- |
+| `USE_OPENAPI_VALIDATOR`      | `no`                                | multisite | nein     | Enable OpenAPI route validation for this site.                                                  |
+| `OPENAPI_SPEC`               |                                     | multisite | nein     | Absolute path or HTTP(S) URL to the OpenAPI (swagger) document in JSON format.                  |
+| `OPENAPI_BASE_PATH`          |                                     | multisite | nein     | Optional base path prefix to prepend to every path in the spec (overrides servers[*].url path). |
+| `OPENAPI_ALLOW_UNSPECIFIED`  | `no`                                | multisite | nein     | Allow requests to paths not listed in the specification (otherwise they are denied).            |
+| `OPENAPI_ALLOW_INSECURE_URL` | `no`                                | multisite | nein     | Allow fetching the OpenAPI spec over plain HTTP (not recommended).                              |
+| `OPENAPI_IGNORE_URLS`        | `^/docs$ ^/redoc$ ^/openapi\.json$` | multisite | nein     | List of URL regexes to bypass OpenAPI validation (space separated).                             |
+| `OPENAPI_CACHE_TTL`          | `300`                               | global    | nein     | Seconds to cache the parsed specification in shared cache.                                      |
+| `OPENAPI_MAX_SPEC_SIZE`      | `2M`                                | global    | nein     | Maximum allowed size of the OpenAPI document (accepts suffix k/M/G).                            |
+
+## OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM-Unterstützung :x:
+
+OpenID Connect authentication plugin providing SSO capabilities with identity providers.
+
+| Einstellung                               | Standardwert           | Kontext   | Mehrfach | Beschreibung                                                                                                                                            |
+| ----------------------------------------- | ---------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_OPENIDC`                             | `no`                   | multisite | nein     | Enable or disable OpenID Connect authentication.                                                                                                        |
+| `OPENIDC_DISCOVERY`                       |                        | multisite | nein     | OpenID Connect discovery URL (e.g. https://idp.example.com/.well-known/openid-configuration).                                                           |
+| `OPENIDC_CLIENT_ID`                       |                        | multisite | nein     | OAuth 2.0 client identifier registered with the IdP.                                                                                                    |
+| `OPENIDC_CLIENT_SECRET`                   |                        | multisite | nein     | OAuth 2.0 client secret registered with the IdP.                                                                                                        |
+| `OPENIDC_TOKEN_ENDPOINT_AUTH_METHOD`      | `basic`                | multisite | nein     | Token endpoint auth method: basic (recommended, HTTP Basic), post (POST body), secret_jwt (JWT with client secret), private_key_jwt (JWT with RSA key). |
+| `OPENIDC_CLIENT_RSA_PRIVATE_KEY`          |                        | multisite | nein     | PEM-encoded RSA private key for private_key_jwt authentication.                                                                                         |
+| `OPENIDC_CLIENT_RSA_PRIVATE_KEY_ID`       |                        | multisite | nein     | Optional key ID (kid) for private_key_jwt authentication.                                                                                               |
+| `OPENIDC_CLIENT_JWT_ASSERTION_EXPIRES_IN` |                        | multisite | nein     | JWT assertion lifetime in seconds (empty to use library default).                                                                                       |
+| `OPENIDC_REDIRECT_URI`                    | `/callback`            | multisite | nein     | URI path where the IdP redirects after authentication.                                                                                                  |
+| `OPENIDC_SCOPE`                           | `openid email profile` | multisite | nein     | Space-separated list of OAuth 2.0 scopes to request.                                                                                                    |
+| `OPENIDC_AUTHORIZATION_PARAMS`            |                        | multisite | nein     | Additional authorization params as comma-separated key=value pairs (e.g. audience=api,resource=xyz). URL-encode values if needed.                       |
+| `OPENIDC_USE_NONCE`                       | `yes`                  | multisite | nein     | Use nonce in authentication requests to prevent replay attacks.                                                                                         |
+| `OPENIDC_USE_PKCE`                        | `no`                   | multisite | nein     | Use PKCE (Proof Key for Code Exchange) for authorization code flow.                                                                                     |
+| `OPENIDC_FORCE_REAUTHORIZE`               | `no`                   | multisite | nein     | Force re-authorization on every request (not recommended for production).                                                                               |
+| `OPENIDC_REFRESH_SESSION_INTERVAL`        |                        | multisite | nein     | Interval in seconds to silently re-authenticate (empty to disable).                                                                                     |
+| `OPENIDC_IAT_SLACK`                       | `120`                  | multisite | nein     | Allowed clock skew in seconds for token validation.                                                                                                     |
+| `OPENIDC_ACCESS_TOKEN_EXPIRES_IN`         | `3600`                 | multisite | nein     | Default access token lifetime (seconds) if not provided by IdP.                                                                                         |
+| `OPENIDC_RENEW_ACCESS_TOKEN_ON_EXPIRY`    | `yes`                  | multisite | nein     | Automatically renew access token using refresh token when expired.                                                                                      |
+| `OPENIDC_ACCEPT_UNSUPPORTED_ALG`          | `no`                   | multisite | nein     | Accept tokens signed with unsupported algorithms (not recommended).                                                                                     |
+| `OPENIDC_LOGOUT_PATH`                     | `/logout`              | multisite | nein     | URI path for logout requests.                                                                                                                           |
+| `OPENIDC_REVOKE_TOKENS_ON_LOGOUT`         | `no`                   | multisite | nein     | Revoke tokens at the IdP when logging out.                                                                                                              |
+| `OPENIDC_REDIRECT_AFTER_LOGOUT_URI`       |                        | multisite | nein     | URI to redirect after logout (leave empty for IdP default).                                                                                             |
+| `OPENIDC_POST_LOGOUT_REDIRECT_URI`        |                        | multisite | nein     | URI to redirect after IdP logout is complete.                                                                                                           |
+| `OPENIDC_TIMEOUT_CONNECT`                 | `10000`                | multisite | nein     | Connection timeout in milliseconds for IdP requests.                                                                                                    |
+| `OPENIDC_TIMEOUT_SEND`                    | `10000`                | multisite | nein     | Send timeout in milliseconds for IdP requests.                                                                                                          |
+| `OPENIDC_TIMEOUT_READ`                    | `10000`                | multisite | nein     | Read timeout in milliseconds for IdP requests.                                                                                                          |
+| `OPENIDC_SSL_VERIFY`                      | `yes`                  | multisite | nein     | Verify SSL certificates when communicating with the IdP.                                                                                                |
+| `OPENIDC_KEEPALIVE`                       | `yes`                  | multisite | nein     | Enable HTTP keepalive for connections to the IdP.                                                                                                       |
+| `OPENIDC_HTTP_PROXY`                      |                        | multisite | nein     | HTTP proxy URL for IdP connections (e.g. http://proxy:8080).                                                                                            |
+| `OPENIDC_HTTPS_PROXY`                     |                        | multisite | nein     | HTTPS proxy URL for IdP connections (e.g. http://proxy:8080).                                                                                           |
+| `OPENIDC_USER_HEADER`                     | `X-User`               | multisite | nein     | Header to pass user info to upstream (empty to disable).                                                                                                |
+| `OPENIDC_USER_HEADER_CLAIM`               | `sub`                  | multisite | nein     | ID token claim to use for the user header (e.g. sub, email, preferred_username).                                                                        |
+| `OPENIDC_DISPLAY_CLAIM`                   | `preferred_username`   | multisite | nein     | Claim to use for display in logs and metrics (e.g. preferred_username, name, email). Falls back to User Header Claim if not found.                      |
+| `OPENIDC_DISCOVERY_DICT_SIZE`             | `1m`                   | global    | nein     | Size of the shared dictionary to cache discovery data.                                                                                                  |
+| `OPENIDC_JWKS_DICT_SIZE`                  | `1m`                   | global    | nein     | Size of the shared dictionary to cache JWKS data.                                                                                                       |
 
 ## PHP
 

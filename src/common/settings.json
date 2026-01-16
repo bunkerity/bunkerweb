@@ -428,7 +428,7 @@
   },
   "PLUGINS_ORDER_INIT": {
     "context": "global",
-    "default": "sessions whitelist blacklist greylist bunkernet limit authbasic securitytxt robotstxt",
+    "default": "sessions whitelist blacklist greylist bunkernet limit authbasic securitytxt robotstxt crowdsec dnsbl headers customcert letsencrypt selfsigned",
     "help": "Plugins that should run first during the init phase (engine bootstrap, runs once). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
     "id": "plugins-order-init",
     "label": "Plugins order (init)",
@@ -458,7 +458,7 @@
   },
   "PLUGINS_ORDER_ACCESS": {
     "context": "multisite",
-    "default": "ssl whitelist letsencrypt blacklist greylist country dnsbl bunkernet reversescan limit authbasic misc cors securitytxt robotstxt antibot",
+    "default": "ssl whitelist letsencrypt blacklist greylist country dnsbl bunkernet crowdsec reversescan limit authbasic misc cors securitytxt robotstxt antibot",
     "help": "Plugins that should run first during the access phase for this site (request admission/control). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
     "id": "plugins-order-access",
     "label": "Plugins order (access)",

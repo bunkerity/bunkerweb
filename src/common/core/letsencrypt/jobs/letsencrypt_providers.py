@@ -149,6 +149,25 @@ class DomainOffensiveProvider(Provider):
         return ["--authenticator", "dns-domainoffensive"]
 
 
+class DomeneshopProvider(Provider):
+    """Domeneshop DNS provider."""
+
+    dns_domeneshop_token: str
+    dns_domeneshop_secret: str
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_domeneshop_token": ("dns_domeneshop_token", "domeneshop_token", "token"),
+            "dns_domeneshop_secret": ("dns_domeneshop_secret", "domeneshop_secret", "secret"),
+        }
+    )
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["--authenticator", "dns-domeneshop"]
+
+
 class DnsimpleProvider(Provider):
     """DNSimple DNS provider."""
 
@@ -236,6 +255,27 @@ class GehirnProvider(Provider):
     def get_extra_args() -> dict:
         """Return additional arguments for the provider."""
         return ["--dns-gehirn"]
+
+
+class GoDaddyProvider(Provider):
+    """GoDaddy DNS provider."""
+
+    dns_godaddy_key: str
+    dns_godaddy_secret: str
+    dns_godaddy_ttl: str = "600"
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_godaddy_key": ("dns_godaddy_key", "godaddy_key", "key"),
+            "dns_godaddy_secret": ("dns_godaddy_secret", "godaddy_secret", "secret"),
+            "dns_godaddy_ttl": ("dns_godaddy_ttl", "godaddy_ttl", "ttl"),
+        }
+    )
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["--authenticator", "dns-godaddy"]
 
 
 class GoogleProvider(Provider):
@@ -411,11 +451,12 @@ class OvhProvider(Provider):
     def get_extra_args() -> dict:
         """Return additional arguments for the provider."""
         return ["--dns-ovh"]
-        
+
+
 class PowerdnsProvider(Provider):
     """PowerDNS DNS provider."""
 
-    dns_pdns_endpoint: str 
+    dns_pdns_endpoint: str
     dns_pdns_api_key: str
     dns_pdns_server_id: str = "localhost"
     dns_pdns_disable_notify: str = "false"
@@ -433,6 +474,7 @@ class PowerdnsProvider(Provider):
     def get_extra_args() -> dict:
         """Return additional arguments for the provider."""
         return ["--authenticator", "dns-pdns"]
+
 
 class Rfc2136Provider(Provider):
     """RFC 2136 DNS provider."""

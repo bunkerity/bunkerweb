@@ -1,8 +1,8 @@
 package = "lua-resty-openssl"
-version = "1.7.0-1"
+version = "1.7.1-1"
 source = {
    url = "git+https://github.com/fffonion/lua-resty-openssl.git",
-   tag = "1.7.0"
+   tag = "1.7.1"
 }
 description = {
    detailed = "FFI-based OpenSSL binding for LuaJIT.",
@@ -23,6 +23,7 @@ build = {
       ["resty.openssl.auxiliary.nginx_c"] = "lib/resty/openssl/auxiliary/nginx_c.lua",
       ["resty.openssl.bn"] = "lib/resty/openssl/bn.lua",
       ["resty.openssl.cipher"] = "lib/resty/openssl/cipher.lua",
+      ["resty.openssl.crypto"] = "lib/resty/openssl/crypto.lua",
       ["resty.openssl.ctx"] = "lib/resty/openssl/ctx.lua",
       ["resty.openssl.dh"] = "lib/resty/openssl/dh.lua",
       ["resty.openssl.digest"] = "lib/resty/openssl/digest.lua",

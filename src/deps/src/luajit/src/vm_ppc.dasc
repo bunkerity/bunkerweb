@@ -1,6 +1,6 @@
 |// Low-level VM code for PowerPC 32 bit or 32on64 bit mode.
 |// Bytecode interpreter, fast functions and helper functions.
-|// Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
+|// Copyright (C) 2005-2026 Mike Pall. See Copyright Notice in luajit.h
 |
 |.arch ppc
 |.section code_op, code_sub
@@ -4323,11 +4323,13 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  bne >5
     |.if GPR64
     |  lus TMP2, 0x8000
-    |  neg TMP0, TMP0
+    |  neg. TMP0, TMP0
+    |  beq >8
     |  cmplw TMP0, TMP2
     |  beq >4
     |.else
     |  nego. TMP0, TMP0
+    |  beq >8
     |  bso >4
     |.endif
     |  ins_next1
@@ -4349,6 +4351,9 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |   stwx TMP0, BASE_LO, RA
     |.if DUALNUM
     |  b <3
+    |8:
+    |  lus TMP1, 0x8000			// -0.
+    |  b <7
     |.else
     |  ins_next2
     |.endif

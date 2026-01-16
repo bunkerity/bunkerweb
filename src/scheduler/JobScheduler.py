@@ -24,6 +24,7 @@ for deps_path in [os.path.join(os.sep, "usr", "share", "bunkerweb", *paths) for 
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from common_utils import effective_cpu_count  # type: ignore
 from Database import Database  # type: ignore
 from logger import getLogger  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
@@ -47,7 +48,7 @@ class JobScheduler(ApiCaller):
         self.__thread_lock = Lock()
         self.__job_success = True
         self.__job_reload = False
-        self.__executor = ThreadPoolExecutor(max_workers=min(8, (os.cpu_count() or 1) * 4))
+        self.__executor = ThreadPoolExecutor(max_workers=min(8, effective_cpu_count() * 4))
         self.__compiled_regexes = self.__compile_regexes()
         self.__module_paths = set()
         self.__module_paths_lock = Lock()  # Dedicated lock for module paths

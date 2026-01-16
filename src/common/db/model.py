@@ -125,7 +125,7 @@ class Global_values(Base):
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    value = Column(Text, nullable=True, default="")
+    value = Column(Text(length=(2**24) - 1), nullable=True, default="")
     suffix = Column(Integer, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
@@ -153,7 +153,7 @@ class Services_settings(Base):
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     service_id = Column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=False)
     setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    value = Column(Text, nullable=True, default="")
+    value = Column(Text(length=(2**24) - 1), nullable=True, default="")
     suffix = Column(Integer, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
@@ -352,7 +352,7 @@ class Metadata(Base):
     failover = Column(Boolean, default=None, nullable=True)
     failover_message = Column(Text, nullable=True, default="")
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.7~rc2", nullable=False)
+    version = Column(String(32), default="1.6.7", nullable=False)
 
 
 ## UI Models

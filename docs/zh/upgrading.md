@@ -25,16 +25,16 @@
             ```yaml
             services:
                 bunkerweb:
-                    image: bunkerity/bunkerweb:1.6.7-rc2
+                    image: bunkerity/bunkerweb:1.6.7
                     ...
                 bw-scheduler:
-                    image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+                    image: bunkerity/bunkerweb-scheduler:1.6.7
                     ...
                 bw-autoconf:
-                    image: bunkerity/bunkerweb-autoconf:1.6.7-rc2
+                    image: bunkerity/bunkerweb-autoconf:1.6.7
                     ...
                 bw-ui:
-                    image: bunkerity/bunkerweb-ui:1.6.7-rc2
+                    image: bunkerity/bunkerweb-ui:1.6.7
                     ...
             ```
 
@@ -61,7 +61,7 @@
         要开始使用，请下载安装脚本及其校验和，然后在运行前验证脚本的完整性。
 
         ```bash
-        LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | jq -r .tag_name)
+        LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
 
         # Download the script and its checksum
         curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
@@ -141,20 +141,20 @@
         示例：
 
         ```bash
-        # 交互式升级到 1.6.7~rc2（会提示备份）
-        sudo ./install-bunkerweb.sh --version 1.6.7~rc2
+        # 交互式升级到 1.6.7（会提示备份）
+        sudo ./install-bunkerweb.sh --version 1.6.7
 
         # 使用自动备份到自定义目录的非交互式升级
-        sudo ./install-bunkerweb.sh -v 1.6.7~rc2 --backup-dir /var/backups/bw-2025-01 -y
+        sudo ./install-bunkerweb.sh -v 1.6.7 --backup-dir /var/backups/bw-2025-01 -y
 
         # 静默无人值守升级（抑制日志）– 依赖默认的自动备份
-        sudo ./install-bunkerweb.sh -v 1.6.7~rc2 -y -q
+        sudo ./install-bunkerweb.sh -v 1.6.7 -y -q
 
         # 执行一次空运行（计划）而不应用更改
-        sudo ./install-bunkerweb.sh -v 1.6.7~rc2 --dry-run
+        sudo ./install-bunkerweb.sh -v 1.6.7 --dry-run
 
         # 跳过自动备份进行升级（不推荐）
-        sudo ./install-bunkerweb.sh -v 1.6.7~rc2 --no-auto-backup -y
+        sudo ./install-bunkerweb.sh -v 1.6.7 --no-auto-backup -y
         ```
 
         !!! warning "跳过备份"
@@ -234,7 +234,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.7~rc2
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.7
                     ```
 
                     为了防止在执行 `apt upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -260,7 +260,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.7~rc2
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.7
                     ```
 
                     为了防止在执行 `dnf upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -657,16 +657,16 @@
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.7-rc2
+                        image: bunkerity/bunkerweb:1.6.7
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+                        image: bunkerity/bunkerweb-scheduler:1.6.7
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.7-rc2
+                        image: bunkerity/bunkerweb-autoconf:1.6.7
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.7-rc2
+                        image: bunkerity/bunkerweb-ui:1.6.7
                         ...
                 ```
 
@@ -701,7 +701,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.7~rc2
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.7
                     ```
 
                     为了防止在执行 `apt upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -727,7 +727,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.7~rc2
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.7
                     ```
 
                     为了防止在执行 `dnf upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：

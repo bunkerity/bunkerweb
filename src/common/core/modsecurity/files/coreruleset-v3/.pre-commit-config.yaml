@@ -1,0 +1,17 @@
+---
+ci:
+    autofix_prs: false
+    skip: []
+    submodules: false
+# Update the rev variable with the release version that you want, from the yamllint repo
+# You can pass your custom .yamllint with args attribute.
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v6.0.0
+  hooks:
+    - id: check-yaml
+      args: [--allow-multiple-documents]
+    - id: end-of-file-fixer
+    - id: trailing-whitespace
+      exclude: '^util/regexp-assembly/'
+      args: [--markdown-linebreak-ext=md]

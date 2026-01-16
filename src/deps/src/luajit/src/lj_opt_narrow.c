@@ -1,7 +1,7 @@
 /*
 ** NARROW: Narrowing of numbers to integers (double to int32_t).
 ** STRIPOV: Stripping of overflow checks.
-** Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2026 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lj_opt_narrow_c
@@ -545,10 +545,9 @@ TRef lj_opt_narrow_unm(jit_State *J, TRef rc, TValue *vc)
   rc = conv_str_tonum(J, rc, vc);
   if (tref_isinteger(rc)) {
     uint32_t k = (uint32_t)numberVint(vc);
-    if ((tvisint(vc) || k != 0) && k != 0x80000000u) {
+    if (k != 0 && k != 0x80000000u) {
       TRef zero = lj_ir_kint(J, 0);
-      if (!tvisint(vc))
-	emitir(IRTGI(IR_NE), rc, zero);
+      emitir(IRTGI(IR_NE), rc, zero);
       return emitir(IRTGI(IR_SUBOV), zero, rc);
     }
     rc = emitir(IRTN(IR_CONV), rc, IRCONV_NUM_INT);

@@ -49,8 +49,8 @@ Suivez ces étapes pour configurer et utiliser ModSecurity :
 
 Sélectionnez une version du CRS pour répondre au mieux à vos besoins de sécurité :
 
-- **`3`** : Stable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`** : Stable [v4.21.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.21.0) (**par défaut**).
+- **`3`** : Stable [v3.3.8](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8).
+- **`4`** : Stable [v4.22.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.22.0) (**par défaut**).
 - **`nightly`** : [Version de nuit](https://github.com/coreruleset/coreruleset/releases/tag/nightly) offrant les dernières mises à jour de règles.
 
 !!! example "Version de nuit (Nightly Build)"

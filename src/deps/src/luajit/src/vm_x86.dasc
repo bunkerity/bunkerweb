@@ -1,6 +1,6 @@
 |// Low-level VM code for x86 CPUs.
 |// Bytecode interpreter, fast functions and helper functions.
-|// Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
+|// Copyright (C) 2005-2026 Mike Pall. See Copyright Notice in luajit.h
 |
 |.if P64
 |.arch x64
@@ -3871,11 +3871,16 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  checkint RD, >5
     |  mov RB, [BASE+RD*8]
     |  neg RB
+    |  jz >3
     |  jo >4
     |  mov dword [BASE+RA*8+4], LJ_TISNUM
+    |8:
     |  mov dword [BASE+RA*8], RB
     |9:
     |  ins_next
+    |3:
+    |  mov dword [BASE+RA*8+4], 0x80000000  // -0.
+    |  jmp <8
     |4:
     |  mov dword [BASE+RA*8+4], 0x41e00000  // 2^31.
     |  mov dword [BASE+RA*8], 0

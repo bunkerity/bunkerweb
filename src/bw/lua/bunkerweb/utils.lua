@@ -299,10 +299,14 @@ end
 
 utils.get_reason = function(ctx)
 	-- ngx.ctx
-	local security_mode = utils.get_security_mode(ctx)
-	if ctx and ctx.bw and ctx.bw.reason then
-		return ctx.bw.reason, ctx.bw.reason_data or {}, security_mode
+	local security_mode
+	if ctx and ctx.bw then
+		security_mode = ctx.bw.security_mode or utils.get_security_mode(ctx)
+		if ctx.bw.reason then
+			return ctx.bw.reason, ctx.bw.reason_data or {}, security_mode
+		end
 	end
+	security_mode = security_mode or utils.get_security_mode(ctx)
 	-- ngx.var
 	local var_reason = var.reason
 	if var_reason and var_reason ~= "" then

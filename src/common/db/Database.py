@@ -379,10 +379,9 @@ class Database:
         with LOCK:
             session = None
             try:
-                with self.sql_engine.connect() as conn:
-                    session_factory = sessionmaker(bind=conn, autoflush=True, expire_on_commit=False)
-                    session = scoped_session(session_factory)
-                    yield session
+                session_factory = sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False)
+                session = scoped_session(session_factory)
+                yield session
             except BaseException as e:
                 if session:
                     session.rollback()
@@ -503,7 +502,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.7~rc2"
+                return "1.6.7"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -536,7 +535,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.7~rc2",
+            "version": "1.6.7",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -1578,15 +1577,22 @@ class Database:
                     service_configs = defaultdict(dict)
                     global_config = {}
 
+                    services_set = set(services)
+
                     for key, value in config.items():
                         matched = False
-                        for service in services:
-                            prefix = f"{service}_"
-                            if key.startswith(prefix):
-                                stripped_key = key[len(prefix) :]  # noqa: E203
-                                service_configs[service][stripped_key] = value
+                        underscore_pos = 0
+                        while True:
+                            underscore_pos = key.find("_", underscore_pos)
+                            if underscore_pos == -1:
+                                break
+                            potential_service = key[:underscore_pos]
+                            if potential_service in services_set:
+                                stripped_key = key[underscore_pos + 1 :]  # noqa: E203
+                                service_configs[potential_service][stripped_key] = value
                                 matched = True
                                 break
+                            underscore_pos += 1
                         if not matched:
                             global_config[key] = value
 
@@ -2066,21 +2072,32 @@ class Database:
                 services = services.filter_by(is_draft=False)
 
             if not global_only and is_multisite:
-                servers = ""
+                # Build list of service IDs and their draft status efficiently
+                service_list = []
+                is_draft_default = self._empty_if_none(config.get("IS_DRAFT", {"value": "no"})["value"])
                 for db_service in services:
                     if service and db_service.id != service:
                         continue
-                    for key in multisite:
-                        config[f"{db_service.id}_{key}"] = config[key]
+                    service_list.append((db_service.id, db_service.is_draft))
                     config[f"{db_service.id}_IS_DRAFT"] = {
                         "value": "yes" if db_service.is_draft else "no",
                         "global": False,
                         "method": "default",
-                        "default": self._empty_if_none(config.get("IS_DRAFT", {"value": "no"})["value"]),
+                        "default": is_draft_default,
                         "template": None,
                     }
-                    servers += f"{db_service.id} "
-                servers = servers.strip()
+
+                servers = " ".join(s[0] for s in service_list)
+
+                # Pre-build multisite defaults mapping for efficient lookup
+                # Share the same dictionary objects instead of creating copies
+                multisite_defaults = {key: config[key] for key in multisite if key in config}
+
+                # Populate service-specific entries using shared references
+                # This is still O(services * multisite_settings) but avoids deepcopy overhead
+                for service_id, _ in service_list:
+                    for key, value in multisite_defaults.items():
+                        config[f"{service_id}_{key}"] = value
 
                 # Define the join operation
                 j = join(Services, Services_settings, Services.id == Services_settings.service_id)
@@ -2139,7 +2156,8 @@ class Database:
             }
 
             if service:
-                for key in config.copy().keys():
+                # Use list() to avoid modifying dict during iteration, more efficient than copy()
+                for key in list(config.keys()):
                     if (original_config is None or key not in ("SERVER_NAME", "MULTISITE", "USE_TEMPLATE")) and not key.startswith(f"{service}_"):
                         del config[key]
                         continue
@@ -2147,8 +2165,9 @@ class Database:
                         config[key.replace(f"{service}_", "")] = config.pop(key)
 
             if not methods:
-                for key, value in config.copy().items():
-                    config[key] = value["value"]
+                # Avoid full dictionary copy - iterate over keys and update in place
+                for key in list(config.keys()):
+                    config[key] = config[key]["value"]
 
             return config
 
@@ -2236,37 +2255,58 @@ class Database:
                     }
 
             if not global_only and config["MULTISITE"]["value"] == "yes":
-                for service_id in config["SERVER_NAME"]["value"].split():
+                server_names = config["SERVER_NAME"]["value"].split()
+
+                # Collect all unique templates used by services
+                service_templates = {}
+                for service_id in server_names:
                     service_template_used = config.get(f"{service_id}_USE_TEMPLATE", {"value": self._empty_if_none(template_used)})["value"]
                     if service_template_used:
                         templates[service_id] = service_template_used
+                        service_templates.setdefault(service_template_used, []).append(service_id)
 
-                        query = (
-                            session.query(Template_settings)
-                            .with_entities(Template_settings.setting_id, Template_settings.default, Template_settings.suffix)
-                            .filter_by(template_id=service_template_used)
-                            .order_by(Template_settings.order)
-                        )
+                # Batch query: fetch all template settings for all used templates at once
+                if service_templates:
+                    template_ids = list(service_templates.keys())
+                    query = (
+                        session.query(Template_settings)
+                        .with_entities(Template_settings.template_id, Template_settings.setting_id, Template_settings.default, Template_settings.suffix)
+                        .filter(Template_settings.template_id.in_(template_ids))
+                        .order_by(Template_settings.order)
+                    )
 
-                        if filtered_settings:
-                            query = query.filter(Template_settings.setting_id.in_(filtered_settings))
+                    if filtered_settings:
+                        query = query.filter(Template_settings.setting_id.in_(filtered_settings))
 
-                        for setting in query:
-                            key = f"{service_id}_{setting.setting_id}" + (f"_{setting.suffix}" if setting.suffix > 0 else "")
-                            if key in config and config[key]["method"] != "default" and not config[key]["global"]:
-                                continue
+                    # Group template settings by template_id for efficient lookup
+                    template_settings_map = {}
+                    for setting in query:
+                        template_settings_map.setdefault(setting.template_id, []).append(setting)
 
-                            config[key] = {
-                                "value": self._empty_if_none(setting.default),
-                                "global": False,
-                                "method": "default",
-                                "default": self._empty_if_none(setting.default),
-                                "template": service_template_used,
-                            }
+                    # Apply template settings to each service that uses them
+                    for tmpl_id, service_ids in service_templates.items():
+                        tmpl_settings = template_settings_map.get(tmpl_id, [])
+                        for service_id in service_ids:
+                            for setting in tmpl_settings:
+                                key = f"{service_id}_{setting.setting_id}" + (f"_{setting.suffix}" if setting.suffix > 0 else "")
+                                if key in config and config[key]["method"] != "default" and not config[key]["global"]:
+                                    continue
+
+                                config[key] = {
+                                    "value": self._empty_if_none(setting.default),
+                                    "global": False,
+                                    "method": "default",
+                                    "default": self._empty_if_none(setting.default),
+                                    "template": tmpl_id,
+                                }
 
         multiple = {}
         services = config["SERVER_NAME"]["value"].split()
-        for key, data in config.copy().items():
+        services_set = set(services)  # O(1) lookup for service prefix matching
+
+        # Process config items - use list(items()) which is more memory efficient than copy().items()
+        # for large dicts since it creates a list of tuples, not a full dict copy
+        for key, data in list(config.items()):
             new_value = None
             if service:
                 data = config.pop(key)
@@ -2283,11 +2323,18 @@ class Database:
                 window = "global"
                 matched_group = multiple_groups.get(match.group("setting"), None)
                 if matched_group is None:
-                    for db_service in services:
-                        if key.startswith(f"{db_service}_"):
-                            window = db_service
-                            matched_group = multiple_groups.get(match.group("setting").replace(f"{db_service}_", ""), None)
+                    # Use set lookup and underscore scanning instead of O(n) service iteration
+                    underscore_pos = 0
+                    while True:
+                        underscore_pos = key.find("_", underscore_pos)
+                        if underscore_pos == -1:
                             break
+                        potential_service = key[:underscore_pos]
+                        if potential_service in services_set:
+                            window = potential_service
+                            matched_group = multiple_groups.get(match.group("setting").replace(f"{potential_service}_", ""), None)
+                            break
+                        underscore_pos += 1
 
                 if matched_group is not None:
                     multiple.setdefault(matched_group, {}).setdefault(window, set()).add(int(match.group("suffix")))

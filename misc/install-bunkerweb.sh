@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # Default values
 # Hardcoded default version (immutable reference)
-DEFAULT_BUNKERWEB_VERSION="1.6.7~rc2"
+DEFAULT_BUNKERWEB_VERSION="1.6.7"
 # Mutable effective version (can be overridden by --version)
 BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 NGINX_VERSION=""
@@ -1588,6 +1588,9 @@ check_existing_installation() {
 
 perform_upgrade_backup() {
     [ "$UPGRADE_SCENARIO" != "yes" ] && return 0
+    if should_skip_upgrade_backup; then
+        return 0
+    fi
     if [ "$AUTO_BACKUP" != "yes" ]; then
         print_warning "Automatic backup disabled. Ensure you already performed a manual backup (see https://docs.bunkerweb.io/latest/upgrading)."
         return 0
@@ -1617,44 +1620,61 @@ perform_upgrade_backup() {
     fi
 }
 
+should_skip_upgrade_backup() {
+    if [[ "$INSTALL_TYPE" = "worker" || "$INSTALL_TYPE" = "ui" || "$INSTALL_TYPE" = "api" ]]; then
+        return 0
+    fi
+    if ! systemctl list-unit-files --type=service 2>/dev/null | grep -q "^bunkerweb-scheduler.service"; then
+        return 0
+    fi
+    if ! systemctl is-enabled --quiet bunkerweb-scheduler 2>/dev/null && ! systemctl is-active --quiet bunkerweb-scheduler 2>/dev/null; then
+        return 0
+    fi
+    return 1
+}
+
 upgrade_only() {
-    # Interactive confirmation about backup (optional, enabled by default)
-    if [ "$INTERACTIVE_MODE" = "yes" ]; then
-        if [ "$AUTO_BACKUP" = "yes" ]; then
-            echo
-            echo -e "${BLUE}========================================${NC}"
-            echo -e "${BLUE}💾 Pre-upgrade Backup${NC}"
-            echo -e "${BLUE}========================================${NC}"
-            echo "A pre-upgrade backup is recommended to preserve configuration and database."
-            echo "You can change the destination directory or accept the default."
-            DEFAULT_BACKUP_DIR="/var/tmp/bunkerweb-backup-$(date +%Y%m%d-%H%M%S)"
-            echo
-            echo -e "${YELLOW}Create automatic backup before upgrade? (Y/n):${NC} "
-            read -p "" -r
-            case $REPLY in
-                [Nn]*) AUTO_BACKUP="no" ;;
-                *)
-                    echo -e "${YELLOW}Backup directory [${DEFAULT_BACKUP_DIR}]:${NC} "
-                    read -p "" -r BACKUP_DIRECTORY_INPUT
-                    if [ -n "$BACKUP_DIRECTORY_INPUT" ]; then
-                        BACKUP_DIRECTORY="$BACKUP_DIRECTORY_INPUT"
-                    else
-                        BACKUP_DIRECTORY="${BACKUP_DIRECTORY:-$DEFAULT_BACKUP_DIR}"
-                    fi
-                    ;;
-            esac
-        else
-            echo
-            echo -e "${BLUE}========================================${NC}"
-            echo -e "${BLUE}⚠️  Backup Confirmation${NC}"
-            echo -e "${BLUE}========================================${NC}"
-            echo "Automatic backup is disabled. Make sure you already performed a manual backup as described in the documentation."
-            echo
-            echo -e "${YELLOW}Confirm manual backup was performed? (y/N):${NC} "
-            read -p "" -r
-            case $REPLY in
-                [Yy]*) ;; * ) print_error "Upgrade aborted until backup is confirmed."; exit 1 ;;
-            esac
+    if should_skip_upgrade_backup; then
+        print_status "Skipping pre-upgrade backup (scheduler not enabled; worker/ui/api install)."
+    else
+        # Interactive confirmation about backup (optional, enabled by default)
+        if [ "$INTERACTIVE_MODE" = "yes" ]; then
+            if [ "$AUTO_BACKUP" = "yes" ]; then
+                echo
+                echo -e "${BLUE}========================================${NC}"
+                echo -e "${BLUE}💾 Pre-upgrade Backup${NC}"
+                echo -e "${BLUE}========================================${NC}"
+                echo "A pre-upgrade backup is recommended to preserve configuration and database."
+                echo "You can change the destination directory or accept the default."
+                DEFAULT_BACKUP_DIR="/var/tmp/bunkerweb-backup-$(date +%Y%m%d-%H%M%S)"
+                echo
+                echo -e "${YELLOW}Create automatic backup before upgrade? (Y/n):${NC} "
+                read -p "" -r
+                case $REPLY in
+                    [Nn]*) AUTO_BACKUP="no" ;;
+                    *)
+                        echo -e "${YELLOW}Backup directory [${DEFAULT_BACKUP_DIR}]:${NC} "
+                        read -p "" -r BACKUP_DIRECTORY_INPUT
+                        if [ -n "$BACKUP_DIRECTORY_INPUT" ]; then
+                            BACKUP_DIRECTORY="$BACKUP_DIRECTORY_INPUT"
+                        else
+                            BACKUP_DIRECTORY="${BACKUP_DIRECTORY:-$DEFAULT_BACKUP_DIR}"
+                        fi
+                        ;;
+                esac
+            else
+                echo
+                echo -e "${BLUE}========================================${NC}"
+                echo -e "${BLUE}⚠️  Backup Confirmation${NC}"
+                echo -e "${BLUE}========================================${NC}"
+                echo "Automatic backup is disabled. Make sure you already performed a manual backup as described in the documentation."
+                echo
+                echo -e "${YELLOW}Confirm manual backup was performed? (y/N):${NC} "
+                read -p "" -r
+                case $REPLY in
+                    [Yy]*) ;; * ) print_error "Upgrade aborted until backup is confirmed."; exit 1 ;;
+                esac
+            fi
         fi
     fi
 

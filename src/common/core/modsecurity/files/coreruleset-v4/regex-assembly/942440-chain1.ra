@@ -10,16 +10,14 @@
 ##!> define base64-urlencoded-charset [a-zA-Z0-9_-]+
 ##!> define dot [.]
 
-##!^ ^ey
+##!^ ^
 
-{{base64-urlencoded-charset}}
+##!> assemble
+  ey{{base64-urlencoded-charset}}{{dot}}ey{{base64-urlencoded-charset}}{{dot}}{{base64-urlencoded-charset}}
+##!<
 
-##!=>
-
-{{dot}}ey{{base64-urlencoded-charset}}
-
-##!=>
-
-{{dot}}{{base64-urlencoded-charset}}
+##!> assemble
+  [\w-]+
+##!<
 
 ##!$ $

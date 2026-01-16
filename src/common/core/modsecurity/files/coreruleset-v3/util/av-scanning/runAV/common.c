@@ -24,7 +24,7 @@ int unlock_file(int fd)
 }
 
 int print_request(char* url,char *command,parameter_t *parameters, int num_of_parameters, int mask)
-{	
+{
 	char time_str[64], line[1024*1024];
 	time_t t;
 	int fd;
@@ -61,7 +61,7 @@ int print_request(char* url,char *command,parameter_t *parameters, int num_of_pa
 					else sprintf(line,"\n");
 					write(fd,line,strlen(line));
 				}
-				
+
 			}
 			sprintf(line,"%s:REQUEST-END:========================================\n",time_str);
 			write(fd,line,strlen(line));
@@ -165,7 +165,7 @@ int is_proxy_up()
 	if (fscanf(fp,"%d",&pid) == 0) {
 		print_error("is_proxy_up","fscanf","missing PID",0);
 		fclose(fp);
-		return 0; 
+		return 0;
 	}
 	fclose(fp);
 
@@ -177,7 +177,7 @@ int is_proxy_up()
 
 int run_cmd(char *command, char *output, int output_size)
 {
-	char line[1024]; 
+	char line[1024];
 	FILE *fp;
 
 	if (output_size > 0 && output) output[0]='\0';
@@ -228,7 +228,7 @@ int parse_file(char *filename, parameter_t *parameters, int max_parameters)
 	while ( i < max_parameters && fgets(line,1024,fp)) {
 		if (ptr = strstr(line,"#"))
 			*ptr='\0';
-		if (sscanf(line,"%[^=]=%s",parameters[i].name,parameters[i].value) != 2) 
+		if (sscanf(line,"%[^=]=%s",parameters[i].name,parameters[i].value) != 2)
 			continue;
 		i++;
 	}
@@ -365,7 +365,7 @@ int parse_query_and_body (parameter_t *parameters, int max_parameters)
 		}
 		query[body_len] = '\0';
 		num_of_params = parse_query(query,parameters,max_parameters);
-		free(query);	
+		free(query);
 		return num_of_params;
 	}
 }
@@ -380,10 +380,10 @@ int parse_cli (parameter_t *parameters, int max_parameters, int num_of_args, cha
 			if (sscanf(args[i],"%[^=]=%s",name,value) < 2)
 				continue;
 			if (strlen(name) < MAX_NAME_LENGTH)
-				strcpy(parameters[num_of_params].name,name);	
+				strcpy(parameters[num_of_params].name,name);
 			else continue;
 			if (strlen(value) < MAX_VALUE_LENGTH) {
-				strcpy(parameters[num_of_params].value,value);	
+				strcpy(parameters[num_of_params].value,value);
 				num_of_params++;
 			}
 		}
@@ -426,7 +426,7 @@ int send_request(char *request,char *ip,char *port,char *reply,int max_reply_siz
 
 	i = 1; reply_len=0;
 	while ( (reply_len < max_reply_size) && (i>0) ) {
-		i = read(sock,reply+reply_len,(max_reply_size-reply_len)<1024?(max_reply_size-reply_len):1024); 
+		i = read(sock,reply+reply_len,(max_reply_size-reply_len)<1024?(max_reply_size-reply_len):1024);
 		if (i > 0 ) reply_len+=i;
 	}
 	reply[reply_len] = '\0';
@@ -602,7 +602,7 @@ int init_cgi()
 
 	setresuid(0,0,0);
 	setresgid(0,0,0);
-	
+
 	strcpy(modsec_cli_home,"/opt/modsecurity-cli");
 	strcpy(modsec_rpc_home,"/opt/modsecurity-rpc");
 	strcpy(modsec_rpc_log_file,"/opt/modsecurity-rpc/var/logs/rpc.log");

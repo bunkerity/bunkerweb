@@ -57,6 +57,9 @@ function applyTranslations() {
       }
     });
   }
+  if (typeof window.updatePageTitle === "function") {
+    window.updatePageTitle();
+  }
 }
 
 // Parse supported languages from hidden textarea
