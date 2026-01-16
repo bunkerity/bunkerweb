@@ -177,6 +177,19 @@ try:
         )
         exit(1)
 
+    # Check the SameSite value (Lax, Strict or None) when the global flags request one
+    if not cookie_flags_1:
+        expected_samesite = next(
+            (flag.split("=", 1)[1] for flag in cookie_flags.split() if flag.lower().startswith("samesite=")),
+            None,
+        )
+        actual_samesite = cookie.get_nonstandard_attr("SameSite")
+        if expected_samesite and (actual_samesite or "").lower() != expected_samesite.lower():
+            print(
+                f"❌ Cookie {cookie.name} has SameSite = {actual_samesite} but {expected_samesite} was expected, exiting ...",
+            )
+            exit(1)
+
     print("✅ Headers are working as expected ...", flush=True)
 except SystemExit:
     exit(1)

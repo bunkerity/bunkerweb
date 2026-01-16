@@ -3100,8 +3100,15 @@ Follow these steps to configure and use the Headers feature:
 
     !!! tip "Best Practices"
         - Use `SameSite=Strict` for sensitive cookies to prevent cross-origin access.
+        - Use `SameSite=None` only when cookies must be sent in cross-site contexts (e.g. SSO callbacks or embedded content); browsers require the `Secure` flag alongside it, so keep `COOKIE_AUTO_SECURE_FLAG` enabled or add `Secure` explicitly.
         - Regularly audit your cookie settings to ensure compliance with security and privacy regulations.
         - Avoid setting cookies without the Secure flag in production environments.
+
+    !!! example "SameSite=None for cross-site cookies"
+        ```yaml
+        COOKIE_FLAGS: "* HttpOnly SameSite=None"
+        COOKIE_AUTO_SECURE_FLAG: "yes"
+        ```
 
 === "Custom Headers"
 
