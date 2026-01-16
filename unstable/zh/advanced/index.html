@@ -1511,6 +1511,207 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#openid-connect-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      OpenID Connect (PRO)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OpenID Connect (PRO)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_34" class="md-nav__link">
+    <span class="md-ellipsis">
+      请求流程如何工作
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_35" class="md-nav__link">
+    <span class="md-ellipsis">
+      设置（说明）
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="设置（说明）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_36" class="md-nav__link">
+    <span class="md-ellipsis">
+      基础启用
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#idp" class="md-nav__link">
+    <span class="md-ellipsis">
+      身份提供方（IdP）+ 客户端注册
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_37" class="md-nav__link">
+    <span class="md-ellipsis">
+      回调 / 重定向
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scope 与授权参数
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_38" class="md-nav__link">
+    <span class="md-ellipsis">
+      安全加固
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_39" class="md-nav__link">
+    <span class="md-ellipsis">
+      会话/令牌生命周期
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      Token endpoint 认证设置
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_40" class="md-nav__link">
+    <span class="md-ellipsis">
+      登出行为
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#idp-tls" class="md-nav__link">
+    <span class="md-ellipsis">
+      到 IdP 的连接与 TLS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_41" class="md-nav__link">
+    <span class="md-ellipsis">
+      向上游传递身份
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_42" class="md-nav__link">
+    <span class="md-ellipsis">
+      缓存
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#discovery-jwks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Discovery + JWKS 缓存
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cookie-vs-redis" class="md-nav__link">
+    <span class="md-ellipsis">
+      会话（Cookie vs Redis）
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_43" class="md-nav__link">
+    <span class="md-ellipsis">
+      向上游传递用户身份
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_44" class="md-nav__link">
+    <span class="md-ellipsis">
+      登出
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-endpoint_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Token endpoint 认证
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_45" class="md-nav__link">
+    <span class="md-ellipsis">
+      最小配置示例
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_46" class="md-nav__link">
+    <span class="md-ellipsis">
+      故障排除
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -5843,6 +6044,178 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><strong>缓存文件</strong>位于 <code>/var/cache/bunkerweb/custom_pages</code>；更新源文件就足够了—作业检测到新哈希并自动重新加载 NGINX。</li>
 <li><strong>CSP 合规</strong>：始终对内联脚本和样式使用 <code>nonce_script</code> 和 <code>nonce_style</code> 变量，以确保正确的内容安全策略处理。</li>
 <li><strong>测试模板</strong>：您可以在部署到 BunkerWeb 之前使用 Lua 模板引擎在本地渲染测试您的模板。</li>
+</ul>
+<h2 id="openid-connect-pro">OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p align="center">
+  <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/0e4lcXTIIfs" title="OpenID Connect" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
+<p><strong>OpenID Connect</strong> 插件（PRO）通过标准 OAuth 2.0 / OIDC <strong>Authorization Code</strong> 流程，在您的应用前增加单点登录（SSO）。</p>
+<p>该插件运行在 BunkerWeb（NGINX/Lua）内部，并在 <strong>access 阶段</strong>强制执行认证，因此未认证请求会在到达上游之前被拦截。</p>
+<h3 id="_34">请求流程如何工作</h3>
+<p>当浏览器访问受保护的 URL 时：</p>
+<ol>
+<li>若没有有效会话，BunkerWeb 会将用户重定向到身份提供方（IdP）。</li>
+<li>IdP 完成用户认证后，会携带授权码重定向回 BunkerWeb 的 <code>OPENIDC_REDIRECT_URI</code>（默认：<code>/callback</code>）。</li>
+<li>BunkerWeb 在 IdP 的 token endpoint 用授权码交换令牌。</li>
+<li>令牌会被校验（issuer、audience、过期时间、<code>iat</code> 容差，以及通过 JWKS 校验签名）。</li>
+<li>创建会话并将浏览器重定向回原始 URL。</li>
+</ol>
+<pre class="mermaid"><code>sequenceDiagram
+  participant B as 浏览器
+  participant BW as BunkerWeb (OpenIDC)
+  participant IdP as 身份提供方
+  participant Up as 上游
+
+  B-&gt;&gt;BW: GET /protected
+  alt 未认证
+  BW--&gt;&gt;B: 302 重定向到 IdP 的 authorize 端点
+  B-&gt;&gt;IdP: 授权请求（nonce/PKCE 可选）
+  IdP--&gt;&gt;B: 302 重定向到 /callback?code=...
+  B-&gt;&gt;BW: GET /callback?code=...
+  BW-&gt;&gt;IdP: Token 请求（授权码交换）
+  IdP--&gt;&gt;BW: ID token + access token（+ refresh token）
+  BW--&gt;&gt;B: 302 重定向回原始 URL
+  end
+  B-&gt;&gt;BW: GET /protected（已认证）
+  BW-&gt;&gt;Up: 转发请求（+ 可选身份 Header）
+  Up--&gt;&gt;BW: 响应
+  BW--&gt;&gt;B: 响应</code></pre>
+<div class="admonition warning">
+<p class="admonition-title">回调 URL 必须与 IdP 客户端配置一致</p>
+<p>请在 IdP 侧注册完整的回调 URL（协议 + 主机 + 路径）。例如默认配置下为：<code>https://app.example.com/callback</code>。</p>
+</div>
+<h3 id="_35">设置（说明）</h3>
+<div class="admonition info">
+<p class="admonition-title">必需设置</p>
+<p>至少需要配置 <code>OPENIDC_DISCOVERY</code> 与 <code>OPENIDC_CLIENT_ID</code>，插件才能工作。</p>
+</div>
+<h4 id="_36">基础启用</h4>
+<ul>
+<li><code>USE_OPENIDC</code>（默认：<code>no</code>）：启用/禁用该站点的 OpenID Connect 认证。</li>
+</ul>
+<h4 id="idp">身份提供方（IdP）+ 客户端注册</h4>
+<ul>
+<li><code>OPENIDC_DISCOVERY</code>：discovery URL（例如 <code>https://idp.example.com/.well-known/openid-configuration</code>）。</li>
+<li><code>OPENIDC_CLIENT_ID</code>：在 IdP 注册的 OAuth 2.0 客户端 ID。</li>
+<li><code>OPENIDC_CLIENT_SECRET</code>：OAuth 2.0 客户端密钥（<code>basic</code>、<code>post</code>、<code>secret_jwt</code> 使用）。</li>
+</ul>
+<h4 id="_37">回调 / 重定向</h4>
+<ul>
+<li><code>OPENIDC_REDIRECT_URI</code>（默认：<code>/callback</code>）：IdP 认证完成后回调的路径（必须在 IdP 注册）。</li>
+</ul>
+<h4 id="scope">Scope 与授权参数</h4>
+<ul>
+<li><code>OPENIDC_SCOPE</code>（默认：<code>openid email profile</code>）：以空格分隔的 scope 列表。</li>
+<li><code>OPENIDC_AUTHORIZATION_PARAMS</code>：额外授权参数，使用逗号分隔 <code>key=value</code>。</li>
+</ul>
+<h4 id="_38">安全加固</h4>
+<ul>
+<li><code>OPENIDC_USE_NONCE</code>（默认：<code>yes</code>）：在授权请求中加入 nonce。</li>
+<li><code>OPENIDC_USE_PKCE</code>（默认：<code>no</code>）：为 Authorization Code 流程启用 PKCE。</li>
+<li><code>OPENIDC_IAT_SLACK</code>（默认：<code>120</code>）：令牌校验允许的时钟偏差（秒）。</li>
+<li><code>OPENIDC_ACCEPT_UNSUPPORTED_ALG</code>（默认：<code>no</code>）：接受不支持算法签名的令牌（不推荐）。</li>
+<li><code>OPENIDC_FORCE_REAUTHORIZE</code>（默认：<code>no</code>）：每次请求都强制重新授权（仅调试）。</li>
+</ul>
+<h4 id="_39">会话/令牌生命周期</h4>
+<ul>
+<li><code>OPENIDC_REFRESH_SESSION_INTERVAL</code>：静默重新认证/刷新会话的间隔（秒，空值禁用）。</li>
+<li><code>OPENIDC_ACCESS_TOKEN_EXPIRES_IN</code>（默认：<code>3600</code>）：当 IdP 未返回时使用的 access token 默认有效期。</li>
+<li><code>OPENIDC_RENEW_ACCESS_TOKEN_ON_EXPIRY</code>（默认：<code>yes</code>）：access token 过期时使用 refresh token 自动续期。</li>
+</ul>
+<h4 id="token-endpoint">Token endpoint 认证设置</h4>
+<ul>
+<li><code>OPENIDC_TOKEN_ENDPOINT_AUTH_METHOD</code>（默认：<code>basic</code>）：<code>basic</code>、<code>post</code>、<code>secret_jwt</code>、<code>private_key_jwt</code>。</li>
+<li><code>OPENIDC_CLIENT_RSA_PRIVATE_KEY</code>：使用 <code>private_key_jwt</code> 时必需。</li>
+<li><code>OPENIDC_CLIENT_RSA_PRIVATE_KEY_ID</code>：<code>private_key_jwt</code> 可选 <code>kid</code>。</li>
+<li><code>OPENIDC_CLIENT_JWT_ASSERTION_EXPIRES_IN</code>：JWT 断言有效期（秒）。</li>
+</ul>
+<h4 id="_40">登出行为</h4>
+<ul>
+<li><code>OPENIDC_LOGOUT_PATH</code>（默认：<code>/logout</code>）：由 BunkerWeb 处理的本地登出路径。</li>
+<li><code>OPENIDC_REVOKE_TOKENS_ON_LOGOUT</code>（默认：<code>no</code>）：登出时在 IdP 侧吊销令牌。</li>
+<li><code>OPENIDC_REDIRECT_AFTER_LOGOUT_URI</code>：本地登出后的跳转（空值使用 IdP 默认行为）。</li>
+<li><code>OPENIDC_POST_LOGOUT_REDIRECT_URI</code>：IdP 登出完成后的跳转（若 IdP 支持）。</li>
+</ul>
+<h4 id="idp-tls">到 IdP 的连接与 TLS</h4>
+<ul>
+<li><code>OPENIDC_TIMEOUT_CONNECT|SEND|READ</code>（默认：每项 <code>10000</code> ms）：访问 IdP 的 HTTP 超时。</li>
+<li><code>OPENIDC_SSL_VERIFY</code>（默认：<code>yes</code>）：校验 IdP TLS 证书。</li>
+<li><code>OPENIDC_KEEPALIVE</code>（默认：<code>yes</code>）：IdP 连接 keepalive。</li>
+<li><code>OPENIDC_HTTP_PROXY</code> / <code>OPENIDC_HTTPS_PROXY</code>：访问 IdP 的代理配置。</li>
+</ul>
+<h4 id="_41">向上游传递身份</h4>
+<ul>
+<li><code>OPENIDC_USER_HEADER</code>（默认：<code>X-User</code>）：传递到上游的身份 header（空值禁用）。</li>
+<li><code>OPENIDC_USER_HEADER_CLAIM</code>（默认：<code>sub</code>）：用于生成 header 值的 claim。</li>
+<li><code>OPENIDC_DISPLAY_CLAIM</code>（默认：<code>preferred_username</code>）：用于日志/指标展示的 claim。</li>
+</ul>
+<h4 id="_42">缓存</h4>
+<ul>
+<li><code>OPENIDC_DISCOVERY_DICT_SIZE</code>（默认：<code>1m</code>）：discovery 缓存的 shared dict 大小。</li>
+<li><code>OPENIDC_JWKS_DICT_SIZE</code>（默认：<code>1m</code>）：JWKS 缓存的 shared dict 大小。</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Redis 会话存储</p>
+<p>当全局配置 <code>USE_REDIS=yes</code> 且 Redis 可用时，OpenIDC 插件会把会话存储到 Redis 而不是 Cookie（若 Redis 暂不可用会自动回退到 Cookie）。这是多实例/高可用部署的推荐模式。</p>
+</div>
+<h3 id="discovery-jwks">Discovery + JWKS 缓存</h3>
+<p>插件通过 <code>OPENIDC_DISCOVERY</code>（IdP 的 <code>.well-known/openid-configuration</code>）发现各端点，然后获取并缓存 JWKS，用于校验令牌签名。</p>
+<p>Discovery/JWKS 数据会缓存在 NGINX shared dict 中。如果您有很多租户/IdP 或非常大的密钥集合，可增大：</p>
+<ul>
+<li><code>OPENIDC_DISCOVERY_DICT_SIZE</code>（global）</li>
+<li><code>OPENIDC_JWKS_DICT_SIZE</code>（global）</li>
+</ul>
+<h3 id="cookie-vs-redis">会话（Cookie vs Redis）</h3>
+<p>默认情况下，会话以安全 Cookie 的形式存储，由 OpenID Connect 库管理。</p>
+<p>当 <code>USE_REDIS=yes</code> 且 Redis 配置正确时，插件会自动切换为 <strong>Redis 会话</strong>（Redis 临时不可用时会自动回退到 Cookie）。推荐用于负载均衡/高可用场景，并可避免令牌较大时的 Cookie 大小限制。</p>
+<h3 id="_43">向上游传递用户身份</h3>
+<p>如果设置了 <code>OPENIDC_USER_HEADER</code>（默认：<code>X-User</code>），插件会从某个 claim 中提取值注入到 header（默认：<code>OPENIDC_USER_HEADER_CLAIM=sub</code>）。</p>
+<p>重要的安全行为：</p>
+<ul>
+<li>插件会<strong>清除所有传入</strong>的同名 header（<code>OPENIDC_USER_HEADER</code>），防止客户端伪造。</li>
+<li>如果找不到配置的 claim，则不会设置 header。</li>
+<li>将 <code>OPENIDC_USER_HEADER</code> 设为空值可禁用身份传递。</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">选择 claim</p>
+<p>优先使用令牌中稳定存在的标识（例如 <code>sub</code>、<code>email</code>、<code>preferred_username</code>）。claim 先从 ID token 读取，不存在时再从 userinfo 读取（若有）。</p>
+</div>
+<h3 id="_44">登出</h3>
+<p>登出请求在 <code>OPENIDC_LOGOUT_PATH</code>（默认：<code>/logout</code>）处理。</p>
+<ul>
+<li>如需登出时在 IdP 侧吊销令牌，请设置 <code>OPENIDC_REVOKE_TOKENS_ON_LOGOUT=yes</code>。</li>
+<li>使用 <code>OPENIDC_REDIRECT_AFTER_LOGOUT_URI</code> 与 <code>OPENIDC_POST_LOGOUT_REDIRECT_URI</code> 控制登出后的跳转。</li>
+</ul>
+<h3 id="token-endpoint_1">Token endpoint 认证</h3>
+<p>大多数 IdP 使用默认的 <code>OPENIDC_TOKEN_ENDPOINT_AUTH_METHOD=basic</code>（HTTP Basic 携带 client secret）即可工作。也支持：</p>
+<ul>
+<li><code>post</code></li>
+<li><code>secret_jwt</code></li>
+<li><code>private_key_jwt</code>（需要 <code>OPENIDC_CLIENT_RSA_PRIVATE_KEY</code>，可选 <code>OPENIDC_CLIENT_RSA_PRIVATE_KEY_ID</code>）</li>
+</ul>
+<h3 id="_45">最小配置示例</h3>
+<p>每个受保护服务至少需要：</p>
+<ul>
+<li><code>USE_OPENIDC=yes</code></li>
+<li><code>OPENIDC_DISCOVERY=...</code></li>
+<li><code>OPENIDC_CLIENT_ID=...</code></li>
+<li><code>OPENIDC_CLIENT_SECRET=...</code>（或 <code>private_key_jwt</code> 的 JWT 密钥配置）</li>
+</ul>
+<p>常见的加固/调优选项：</p>
+<ul>
+<li><code>OPENIDC_USE_NONCE=yes</code>（默认）</li>
+<li><code>OPENIDC_USE_PKCE=yes</code></li>
+<li>若存在时钟偏差，调整 <code>OPENIDC_IAT_SLACK=...</code></li>
+<li>根据 IdP 延迟调整 <code>OPENIDC_TIMEOUT_CONNECT|SEND|READ</code></li>
+<li><code>OPENIDC_SSL_VERIFY=yes</code>（默认）</li>
+</ul>
+<h3 id="_46">故障排除</h3>
+<ul>
+<li><strong>403 且显示 "Authentication failed"</strong>：常见原因是 discovery URL 错误、IdP 侧回调 URL 不匹配或 IdP 不可达。</li>
+<li><strong>时钟偏差 / "token not yet valid"</strong>：确保启用 NTP；必要时调整 <code>OPENIDC_IAT_SLACK</code>。</li>
+<li><strong>未注入用户 header</strong>：确认 <code>OPENIDC_USER_HEADER_CLAIM</code> 指定的 claim 在 ID token/userinfo 中存在。</li>
+<li><strong>多实例部署</strong>：启用 <code>USE_REDIS=yes</code> 并配置 <code>REDIS_HOST</code>（或 Sentinel）以共享会话。</li>
 </ul>
 
 

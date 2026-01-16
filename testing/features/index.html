@@ -2207,6 +2207,24 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#openapi-validator-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      OpenAPI Validator (PRO)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#openid-connect-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      OpenID Connect (PRO)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#php" class="md-nav__link">
     <span class="md-ellipsis">
       PHP
@@ -7833,6 +7851,13 @@ TrustedMonitor/\d+\.\d+
 <td><a href="https://github.com/domainoffensive/certbot-dns-domainoffensive/blob/master/README.md">Documentation</a></td>
 </tr>
 <tr>
+<td><code>domeneshop</code></td>
+<td>Domeneshop</td>
+<td><code>token</code><br><code>secret</code></td>
+<td></td>
+<td><a href="https://github.com/domeneshop/certbot-dns-domeneshop/blob/master/README.rst">Documentation</a></td>
+</tr>
+<tr>
 <td><code>dnsimple</code></td>
 <td>DNSimple</td>
 <td><code>token</code></td>
@@ -7866,6 +7891,13 @@ TrustedMonitor/\d+\.\d+
 <td><code>api_token</code><br><code>api_secret</code></td>
 <td></td>
 <td><a href="https://certbot-dns-gehirn.readthedocs.io/en/stable/">Documentation</a></td>
+</tr>
+<tr>
+<td><code>godaddy</code></td>
+<td>GoDaddy</td>
+<td><code>key</code><br><code>secret</code></td>
+<td><code>ttl</code> (default: <code>600</code>)</td>
+<td><a href="https://github.com/miigotu/certbot-dns-godaddy/blob/main/README.md">Documentation</a></td>
 </tr>
 <tr>
 <td><code>google</code></td>
@@ -9207,8 +9239,8 @@ OPEN_FILE_CACHE_VALID: "60s"</p>
 <h3 id="available-crs-versions">Available CRS Versions</h3>
 <p>Select a CRS version to best match your security needs:</p>
 <ul>
-<li><strong><code>3</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7">v3.3.7</a>.</li>
-<li><strong><code>4</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.21.0">v4.21.0</a> (<strong>default</strong>).</li>
+<li><strong><code>3</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8">v3.3.8</a>.</li>
+<li><strong><code>4</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.22.0">v4.22.0</a> (<strong>default</strong>).</li>
 <li><strong><code>nightly</code></strong>: <a href="https://github.com/coreruleset/coreruleset/releases/tag/nightly">Nightly build</a> offering the latest rule updates.</li>
 </ul>
 <div class="admonition example">
@@ -9527,6 +9559,339 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 </div>
+<h2 id="openapi-validator-pro">OpenAPI Validator <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
+<p>Validates incoming HTTP requests against an OpenAPI / Swagger specification.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_OPENAPI_VALIDATOR</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Enable OpenAPI route validation for this site.</td>
+</tr>
+<tr>
+<td><code>OPENAPI_SPEC</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Absolute path or HTTP(S) URL to the OpenAPI (swagger) document in JSON format.</td>
+</tr>
+<tr>
+<td><code>OPENAPI_BASE_PATH</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Optional base path prefix to prepend to every path in the spec (overrides servers[*].url path).</td>
+</tr>
+<tr>
+<td><code>OPENAPI_ALLOW_UNSPECIFIED</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Allow requests to paths not listed in the specification (otherwise they are denied).</td>
+</tr>
+<tr>
+<td><code>OPENAPI_ALLOW_INSECURE_URL</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Allow fetching the OpenAPI spec over plain HTTP (not recommended).</td>
+</tr>
+<tr>
+<td><code>OPENAPI_IGNORE_URLS</code></td>
+<td><code>^/docs$ ^/redoc$ ^/openapi\.json$</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>List of URL regexes to bypass OpenAPI validation (space separated).</td>
+</tr>
+<tr>
+<td><code>OPENAPI_CACHE_TTL</code></td>
+<td><code>300</code></td>
+<td>global</td>
+<td>no</td>
+<td>Seconds to cache the parsed specification in shared cache.</td>
+</tr>
+<tr>
+<td><code>OPENAPI_MAX_SPEC_SIZE</code></td>
+<td><code>2M</code></td>
+<td>global</td>
+<td>no</td>
+<td>Maximum allowed size of the OpenAPI document (accepts suffix k/M/G).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="openid-connect-pro">OpenID Connect <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
+<p>OpenID Connect authentication plugin providing SSO capabilities with identity providers.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_OPENIDC</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Enable or disable OpenID Connect authentication.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_DISCOVERY</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>OpenID Connect discovery URL (e.g. https://idp.example.com/.well-known/openid-configuration).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_CLIENT_ID</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>OAuth 2.0 client identifier registered with the IdP.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_CLIENT_SECRET</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>OAuth 2.0 client secret registered with the IdP.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_TOKEN_ENDPOINT_AUTH_METHOD</code></td>
+<td><code>basic</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Token endpoint auth method: basic (recommended, HTTP Basic), post (POST body), secret_jwt (JWT with client secret), private_key_jwt (JWT with RSA key).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_CLIENT_RSA_PRIVATE_KEY</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>PEM-encoded RSA private key for private_key_jwt authentication.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_CLIENT_RSA_PRIVATE_KEY_ID</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Optional key ID (kid) for private_key_jwt authentication.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_CLIENT_JWT_ASSERTION_EXPIRES_IN</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>JWT assertion lifetime in seconds (empty to use library default).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_REDIRECT_URI</code></td>
+<td><code>/callback</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>URI path where the IdP redirects after authentication.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_SCOPE</code></td>
+<td><code>openid email profile</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Space-separated list of OAuth 2.0 scopes to request.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_AUTHORIZATION_PARAMS</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Additional authorization params as comma-separated key=value pairs (e.g. audience=api,resource=xyz). URL-encode values if needed.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_USE_NONCE</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Use nonce in authentication requests to prevent replay attacks.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_USE_PKCE</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Use PKCE (Proof Key for Code Exchange) for authorization code flow.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_FORCE_REAUTHORIZE</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Force re-authorization on every request (not recommended for production).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_REFRESH_SESSION_INTERVAL</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Interval in seconds to silently re-authenticate (empty to disable).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_IAT_SLACK</code></td>
+<td><code>120</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Allowed clock skew in seconds for token validation.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_ACCESS_TOKEN_EXPIRES_IN</code></td>
+<td><code>3600</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Default access token lifetime (seconds) if not provided by IdP.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_RENEW_ACCESS_TOKEN_ON_EXPIRY</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Automatically renew access token using refresh token when expired.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_ACCEPT_UNSUPPORTED_ALG</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Accept tokens signed with unsupported algorithms (not recommended).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_LOGOUT_PATH</code></td>
+<td><code>/logout</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>URI path for logout requests.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_REVOKE_TOKENS_ON_LOGOUT</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Revoke tokens at the IdP when logging out.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_REDIRECT_AFTER_LOGOUT_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>URI to redirect after logout (leave empty for IdP default).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_POST_LOGOUT_REDIRECT_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>URI to redirect after IdP logout is complete.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_TIMEOUT_CONNECT</code></td>
+<td><code>10000</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Connection timeout in milliseconds for IdP requests.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_TIMEOUT_SEND</code></td>
+<td><code>10000</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Send timeout in milliseconds for IdP requests.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_TIMEOUT_READ</code></td>
+<td><code>10000</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Read timeout in milliseconds for IdP requests.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_SSL_VERIFY</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Verify SSL certificates when communicating with the IdP.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_KEEPALIVE</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Enable HTTP keepalive for connections to the IdP.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_HTTP_PROXY</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>HTTP proxy URL for IdP connections (e.g. http://proxy:8080).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_HTTPS_PROXY</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>HTTPS proxy URL for IdP connections (e.g. http://proxy:8080).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_USER_HEADER</code></td>
+<td><code>X-User</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Header to pass user info to upstream (empty to disable).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_USER_HEADER_CLAIM</code></td>
+<td><code>sub</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>ID token claim to use for the user header (e.g. sub, email, preferred_username).</td>
+</tr>
+<tr>
+<td><code>OPENIDC_DISPLAY_CLAIM</code></td>
+<td><code>preferred_username</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Claim to use for display in logs and metrics (e.g. preferred_username, name, email). Falls back to User Header Claim if not found.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_DISCOVERY_DICT_SIZE</code></td>
+<td><code>1m</code></td>
+<td>global</td>
+<td>no</td>
+<td>Size of the shared dictionary to cache discovery data.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_JWKS_DICT_SIZE</code></td>
+<td><code>1m</code></td>
+<td>global</td>
+<td>no</td>
+<td>Size of the shared dictionary to cache JWKS data.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="php">PHP</h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>The PHP plugin provides seamless integration with PHP-FPM for BunkerWeb, enabling dynamic PHP processing for your websites. This feature supports both local PHP-FPM instances running on the same machine and remote PHP-FPM servers, giving you flexibility in how you configure your PHP environment.</p>

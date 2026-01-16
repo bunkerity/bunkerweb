@@ -1511,6 +1511,207 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#openid-connect-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      OpenID Connect (PRO)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OpenID Connect (PRO)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-the-request-flow-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      How the request flow works
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#settings-explained" class="md-nav__link">
+    <span class="md-ellipsis">
+      Settings (explained)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Settings (explained)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-enablement" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core enablement
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#identity-provider-idp-client-registration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Identity Provider (IdP) + client registration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#callback-redirect" class="md-nav__link">
+    <span class="md-ellipsis">
+      Callback / redirect
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scopes-and-authorization-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scopes and authorization parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-hardening" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security hardening
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sessiontoken-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      Session/token lifecycle
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-endpoint-authentication-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Token endpoint authentication settings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logout-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logout behavior
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connectivity-and-tls-to-the-idp" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connectivity and TLS to the IdP
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forwarding-identity-to-upstreams" class="md-nav__link">
+    <span class="md-ellipsis">
+      Forwarding identity to upstreams
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      Caching
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#discovery-jwks-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      Discovery + JWKS caching
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sessions-cookies-vs-redis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sessions (cookies vs Redis)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forwarding-user-identity-to-the-upstream" class="md-nav__link">
+    <span class="md-ellipsis">
+      Forwarding user identity to the upstream
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logout" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logout
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-endpoint-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      Token endpoint authentication
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#minimal-configuration-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Minimal configuration examples
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -5845,6 +6046,178 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><strong>Cached files</strong> live in <code>/var/cache/bunkerweb/custom_pages</code>; updating the source file is enough—the job detects the new hash and reloads NGINX automatically.</li>
 <li><strong>CSP compliance</strong>: Always use the <code>nonce_script</code> and <code>nonce_style</code> variables for inline scripts and styles to ensure proper Content Security Policy handling.</li>
 <li><strong>Testing templates</strong>: You can test your templates locally by rendering them with a Lua template engine before deploying to BunkerWeb.</li>
+</ul>
+<h2 id="openid-connect-pro">OpenID Connect <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/0e4lcXTIIfs" title="OpenID Connect" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
+<p>The <strong>OpenID Connect</strong> plugin (PRO) adds Single Sign-On (SSO) in front of your application using the standard OAuth 2.0 / OIDC <strong>Authorization Code</strong> flow.</p>
+<p>It runs inside BunkerWeb (NGINX/Lua) and enforces authentication during the <strong>access phase</strong>, so unauthenticated requests are stopped <em>before</em> they reach your upstream.</p>
+<h3 id="how-the-request-flow-works">How the request flow works</h3>
+<p>When a browser requests a protected URL:</p>
+<ol>
+<li>If there is no valid session, BunkerWeb redirects the user to the Identity Provider (IdP).</li>
+<li>The IdP authenticates the user and redirects back to BunkerWeb on <code>OPENIDC_REDIRECT_URI</code> (default: <code>/callback</code>) with an authorization code.</li>
+<li>BunkerWeb exchanges the code for tokens at the IdP token endpoint.</li>
+<li>Tokens are validated (issuer, audience, expiry, <code>iat</code> with slack, and signature using JWKS).</li>
+<li>A session is created and the browser is redirected back to the original URL.</li>
+</ol>
+<pre class="mermaid"><code>sequenceDiagram
+  participant B as Browser
+  participant BW as BunkerWeb (OpenIDC)
+  participant IdP as Identity Provider
+  participant Up as Upstream
+
+  B-&gt;&gt;BW: GET /protected
+  alt Not authenticated
+    BW--&gt;&gt;B: 302 Redirect to IdP authorize endpoint
+    B-&gt;&gt;IdP: Authorization request (nonce/PKCE optional)
+    IdP--&gt;&gt;B: 302 Redirect to /callback?code=...
+    B-&gt;&gt;BW: GET /callback?code=...
+    BW-&gt;&gt;IdP: Token request (code exchange)
+    IdP--&gt;&gt;BW: ID token + access token (+ refresh token)
+    BW--&gt;&gt;B: 302 Redirect back to original URL
+  end
+  B-&gt;&gt;BW: GET /protected (authenticated)
+  BW-&gt;&gt;Up: Forward request (+ optional identity header)
+  Up--&gt;&gt;BW: Response
+  BW--&gt;&gt;B: Response</code></pre>
+<div class="admonition warning">
+<p class="admonition-title">Callback URL must match the IdP client configuration</p>
+<p>Register the full callback URL on the IdP side (scheme + host + path). For example with default settings: <code>https://app.example.com/callback</code>.</p>
+</div>
+<h3 id="settings-explained">Settings (explained)</h3>
+<div class="admonition info">
+<p class="admonition-title">Required settings</p>
+<p>At minimum, <code>OPENIDC_DISCOVERY</code> and <code>OPENIDC_CLIENT_ID</code> must be set for the plugin to operate.</p>
+</div>
+<h4 id="core-enablement">Core enablement</h4>
+<ul>
+<li><code>USE_OPENIDC</code> (default: <code>no</code>): enable or disable OpenID Connect authentication for the site.</li>
+</ul>
+<h4 id="identity-provider-idp-client-registration">Identity Provider (IdP) + client registration</h4>
+<ul>
+<li><code>OPENIDC_DISCOVERY</code>: discovery URL (e.g. <code>https://idp.example.com/.well-known/openid-configuration</code>).</li>
+<li><code>OPENIDC_CLIENT_ID</code>: OAuth 2.0 client identifier registered with the IdP.</li>
+<li><code>OPENIDC_CLIENT_SECRET</code>: OAuth 2.0 client secret (used by <code>basic</code>, <code>post</code>, and <code>secret_jwt</code>).</li>
+</ul>
+<h4 id="callback-redirect">Callback / redirect</h4>
+<ul>
+<li><code>OPENIDC_REDIRECT_URI</code> (default: <code>/callback</code>): callback path used by the IdP after authentication (must be registered on the IdP).</li>
+</ul>
+<h4 id="scopes-and-authorization-parameters">Scopes and authorization parameters</h4>
+<ul>
+<li><code>OPENIDC_SCOPE</code> (default: <code>openid email profile</code>): space-separated list of scopes to request.</li>
+<li><code>OPENIDC_AUTHORIZATION_PARAMS</code>: extra authorization parameters as comma-separated <code>key=value</code> pairs.</li>
+</ul>
+<h4 id="security-hardening">Security hardening</h4>
+<ul>
+<li><code>OPENIDC_USE_NONCE</code> (default: <code>yes</code>): add a nonce to authorization requests.</li>
+<li><code>OPENIDC_USE_PKCE</code> (default: <code>no</code>): enable PKCE for the Authorization Code flow.</li>
+<li><code>OPENIDC_IAT_SLACK</code> (default: <code>120</code>): allowed clock skew in seconds for token validation.</li>
+<li><code>OPENIDC_ACCEPT_UNSUPPORTED_ALG</code> (default: <code>no</code>): accept tokens with unsupported algorithms (not recommended).</li>
+<li><code>OPENIDC_FORCE_REAUTHORIZE</code> (default: <code>no</code>): force re-authorization on every request (debug-only).</li>
+</ul>
+<h4 id="sessiontoken-lifecycle">Session/token lifecycle</h4>
+<ul>
+<li><code>OPENIDC_REFRESH_SESSION_INTERVAL</code>: interval in seconds to silently re-authenticate/refresh the session (empty disables).</li>
+<li><code>OPENIDC_ACCESS_TOKEN_EXPIRES_IN</code> (default: <code>3600</code>): default access token lifetime if not provided by the IdP.</li>
+<li><code>OPENIDC_RENEW_ACCESS_TOKEN_ON_EXPIRY</code> (default: <code>yes</code>): renew access token using refresh token when expired.</li>
+</ul>
+<h4 id="token-endpoint-authentication-settings">Token endpoint authentication settings</h4>
+<ul>
+<li><code>OPENIDC_TOKEN_ENDPOINT_AUTH_METHOD</code> (default: <code>basic</code>): <code>basic</code>, <code>post</code>, <code>secret_jwt</code>, <code>private_key_jwt</code>.</li>
+<li><code>OPENIDC_CLIENT_RSA_PRIVATE_KEY</code>: required when using <code>private_key_jwt</code>.</li>
+<li><code>OPENIDC_CLIENT_RSA_PRIVATE_KEY_ID</code>: optional <code>kid</code> for <code>private_key_jwt</code>.</li>
+<li><code>OPENIDC_CLIENT_JWT_ASSERTION_EXPIRES_IN</code>: JWT assertion lifetime in seconds.</li>
+</ul>
+<h4 id="logout-behavior">Logout behavior</h4>
+<ul>
+<li><code>OPENIDC_LOGOUT_PATH</code> (default: <code>/logout</code>): local logout path handled by BunkerWeb.</li>
+<li><code>OPENIDC_REVOKE_TOKENS_ON_LOGOUT</code> (default: <code>no</code>): revoke tokens at the IdP during logout.</li>
+<li><code>OPENIDC_REDIRECT_AFTER_LOGOUT_URI</code>: redirect after local logout (empty uses IdP default behavior).</li>
+<li><code>OPENIDC_POST_LOGOUT_REDIRECT_URI</code>: redirect after IdP logout completes (if supported).</li>
+</ul>
+<h4 id="connectivity-and-tls-to-the-idp">Connectivity and TLS to the IdP</h4>
+<ul>
+<li><code>OPENIDC_TIMEOUT_CONNECT|SEND|READ</code> (default: <code>10000</code> ms each): timeouts for IdP HTTP calls.</li>
+<li><code>OPENIDC_SSL_VERIFY</code> (default: <code>yes</code>): verify IdP TLS certificates.</li>
+<li><code>OPENIDC_KEEPALIVE</code> (default: <code>yes</code>): keepalive for IdP connections.</li>
+<li><code>OPENIDC_HTTP_PROXY</code> / <code>OPENIDC_HTTPS_PROXY</code>: proxies for IdP calls.</li>
+</ul>
+<h4 id="forwarding-identity-to-upstreams">Forwarding identity to upstreams</h4>
+<ul>
+<li><code>OPENIDC_USER_HEADER</code> (default: <code>X-User</code>): header used to pass identity to the upstream (empty disables).</li>
+<li><code>OPENIDC_USER_HEADER_CLAIM</code> (default: <code>sub</code>): claim to extract for the user header value.</li>
+<li><code>OPENIDC_DISPLAY_CLAIM</code> (default: <code>preferred_username</code>): claim used for display in logs/metrics.</li>
+</ul>
+<h4 id="caching">Caching</h4>
+<ul>
+<li><code>OPENIDC_DISCOVERY_DICT_SIZE</code> (default: <code>1m</code>): shared dict size for discovery cache.</li>
+<li><code>OPENIDC_JWKS_DICT_SIZE</code> (default: <code>1m</code>): shared dict size for JWKS cache.</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Redis session storage</p>
+<p>When <code>USE_REDIS=yes</code> is configured globally in BunkerWeb, the OpenIDC plugin stores sessions in Redis instead of cookies (with automatic fallback to cookies if Redis becomes unavailable). This is the recommended mode for multi-instance / HA deployments.</p>
+</div>
+<h3 id="discovery-jwks-caching">Discovery + JWKS caching</h3>
+<p>The plugin uses <code>OPENIDC_DISCOVERY</code> (the IdP <code>.well-known/openid-configuration</code> URL) to discover endpoints, then fetches and caches JWKS keys to validate token signatures.</p>
+<p>Discovery and JWKS data are cached in NGINX shared dictionaries. If you have many tenants/IdPs or large key sets, increase:</p>
+<ul>
+<li><code>OPENIDC_DISCOVERY_DICT_SIZE</code> (global)</li>
+<li><code>OPENIDC_JWKS_DICT_SIZE</code> (global)</li>
+</ul>
+<h3 id="sessions-cookies-vs-redis">Sessions (cookies vs Redis)</h3>
+<p>By default, sessions are stored as secure cookies managed by the OpenID Connect library.</p>
+<p>If <code>USE_REDIS=yes</code> is enabled globally in BunkerWeb and Redis is configured, the plugin automatically switches to <strong>Redis-backed sessions</strong> (with automatic fallback to cookie sessions if Redis is temporarily unavailable). This is recommended for load-balanced / HA deployments and avoids cookie size limits when token payloads are large.</p>
+<h3 id="forwarding-user-identity-to-the-upstream">Forwarding user identity to the upstream</h3>
+<p>If <code>OPENIDC_USER_HEADER</code> is set (default: <code>X-User</code>), the plugin injects a header value extracted from a claim (default: <code>OPENIDC_USER_HEADER_CLAIM=sub</code>).</p>
+<p>Important security behavior:</p>
+<ul>
+<li>The plugin <strong>clears any incoming</strong> header matching <code>OPENIDC_USER_HEADER</code> to prevent client-side spoofing.</li>
+<li>If the configured claim is missing, the header is not set.</li>
+<li>Set <code>OPENIDC_USER_HEADER</code> to an empty value to disable identity forwarding.</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Choosing a claim</p>
+<p>Prefer stable identifiers that are present in tokens (e.g. <code>sub</code>, <code>email</code>, <code>preferred_username</code>). Claims are read from the ID token first, then from userinfo if present.</p>
+</div>
+<h3 id="logout">Logout</h3>
+<p>Logout requests are handled on <code>OPENIDC_LOGOUT_PATH</code> (default: <code>/logout</code>).</p>
+<ul>
+<li>To revoke tokens at the IdP during logout, set <code>OPENIDC_REVOKE_TOKENS_ON_LOGOUT=yes</code>.</li>
+<li>Use <code>OPENIDC_REDIRECT_AFTER_LOGOUT_URI</code> and <code>OPENIDC_POST_LOGOUT_REDIRECT_URI</code> to control browser redirects after logout.</li>
+</ul>
+<h3 id="token-endpoint-authentication">Token endpoint authentication</h3>
+<p>Most IdPs work with the default <code>OPENIDC_TOKEN_ENDPOINT_AUTH_METHOD=basic</code> (client secret in HTTP Basic auth). Advanced methods are also supported:</p>
+<ul>
+<li><code>post</code></li>
+<li><code>secret_jwt</code></li>
+<li><code>private_key_jwt</code> (requires <code>OPENIDC_CLIENT_RSA_PRIVATE_KEY</code>, optional <code>OPENIDC_CLIENT_RSA_PRIVATE_KEY_ID</code>)</li>
+</ul>
+<h3 id="minimal-configuration-examples">Minimal configuration examples</h3>
+<p>Minimum required settings per protected service:</p>
+<ul>
+<li><code>USE_OPENIDC=yes</code></li>
+<li><code>OPENIDC_DISCOVERY=...</code></li>
+<li><code>OPENIDC_CLIENT_ID=...</code></li>
+<li><code>OPENIDC_CLIENT_SECRET=...</code> (or a JWT key configuration for <code>private_key_jwt</code>)</li>
+</ul>
+<p>Common hardening/tuning options:</p>
+<ul>
+<li><code>OPENIDC_USE_NONCE=yes</code> (default)</li>
+<li><code>OPENIDC_USE_PKCE=yes</code></li>
+<li><code>OPENIDC_IAT_SLACK=...</code> if you have clock skew</li>
+<li><code>OPENIDC_TIMEOUT_CONNECT|SEND|READ</code> to match IdP latency</li>
+<li><code>OPENIDC_SSL_VERIFY=yes</code> (default)</li>
+</ul>
+<h3 id="troubleshooting">Troubleshooting</h3>
+<ul>
+<li><strong>403 with "Authentication failed"</strong>: most commonly a wrong discovery URL, a callback URL mismatch on the IdP side, or the IdP being unreachable.</li>
+<li><strong>Clock skew / "token not yet valid"</strong>: ensure NTP is enabled; tune <code>OPENIDC_IAT_SLACK</code> if needed.</li>
+<li><strong>No user header injected</strong>: verify the claim name in <code>OPENIDC_USER_HEADER_CLAIM</code> exists in the ID token/userinfo.</li>
+<li><strong>Multi-instance deployments</strong>: enable <code>USE_REDIS=yes</code> and configure <code>REDIS_HOST</code> (or Sentinel) so sessions are shared.</li>
 </ul>
 
 
