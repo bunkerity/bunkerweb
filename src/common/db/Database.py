@@ -502,7 +502,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.7"
+                return "1.6.8~rc1"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -510,7 +510,7 @@ class Database:
         """Get the metadata from the database"""
         data = {
             "is_initialized": False,
-            "is_pro": "no",
+            "is_pro": False,
             "pro_license": "",
             "pro_expire": None,
             "pro_status": "invalid",
@@ -535,7 +535,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.7",
+            "version": "1.6.8~rc1",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -1037,7 +1037,7 @@ class Database:
             # Plugins to delete
             for pid in old_plugin_ids - new_plugin_ids:
                 old_p = old_plugins[pid]
-                if old_p.type == "core":
+                if old_p.method == "manual":
                     self.logger.warning(f'{old_p.type.title()} plugin "{pid}" has been removed, deleting it')
                     to_delete.append({"type": "plugin", "filter": {"id": pid}})
 

@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # Default values
 # Hardcoded default version (immutable reference)
-DEFAULT_BUNKERWEB_VERSION="1.6.7"
+DEFAULT_BUNKERWEB_VERSION="1.6.8~rc1"
 # Mutable effective version (can be overridden by --version)
 BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 NGINX_VERSION=""
@@ -23,6 +23,15 @@ FORCE_INSTALL="no"
 INTERACTIVE_MODE="yes"
 CROWDSEC_INSTALL="no"
 CROWDSEC_APPSEC_INSTALL="no"
+CROWDSEC_API_KEY=""
+REDIS_INSTALL="no"
+REDIS_HOST_INPUT=""
+REDIS_PORT_INPUT=""
+REDIS_DATABASE_INPUT=""
+REDIS_USERNAME_INPUT=""
+REDIS_PASSWORD_INPUT=""
+REDIS_SSL_INPUT=""
+REDIS_SSL_VERIFY_INPUT=""
 INSTALL_TYPE=""
 BUNKERWEB_INSTANCES_INPUT=""
 MANAGER_IP_INPUT=""
@@ -57,6 +66,33 @@ run_cmd() {
         print_error "Command failed: $*"
         exit 1
     fi
+}
+
+set_config_kv() {
+    local config_file="$1"
+    local key="$2"
+    local value="$3"
+
+    if grep -q "^${key}=" "$config_file"; then
+        sed -i "s|^${key}=.*|${key}=${value}|" "$config_file"
+    else
+        echo "${key}=${value}" >> "$config_file"
+    fi
+}
+
+ensure_config_file() {
+    local config_file="$1"
+
+    if [ ! -d /etc/bunkerweb ]; then
+        mkdir -p /etc/bunkerweb
+    fi
+
+    if [ ! -f "$config_file" ]; then
+        touch "$config_file"
+    fi
+
+    chown root:nginx "$config_file" 2>/dev/null || true
+    chmod 660 "$config_file" 2>/dev/null || true
 }
 
 # Function to check if running as root
@@ -460,6 +496,123 @@ ask_user_preferences() {
             done
         fi
 
+        # Ask about Redis configuration
+        if [[ "$INSTALL_TYPE" = "full" || "$INSTALL_TYPE" = "manager" || -z "$INSTALL_TYPE" ]]; then
+            if [ -z "$REDIS_INSTALL" ] || [ "$REDIS_INSTALL" = "no" ]; then
+                echo
+                echo -e "${BLUE}========================================${NC}"
+                echo -e "${BLUE}🧠 Redis Cache (Sessions/Cluster Storage)${NC}"
+                echo -e "${BLUE}========================================${NC}"
+                echo "Redis/Valkey enables shared caching and fast data retrieval across BunkerWeb nodes."
+                echo "It stores session data, metrics, and security data centrally so clustering and load balancing work seamlessly."
+                echo "For HA, you can also use Redis Sentinel for automatic failover."
+                echo "You can install Redis locally or point to an existing Redis server."
+                echo
+                while true; do
+                    echo -e "${YELLOW}Enable Redis integration? (y/N):${NC} "
+                    read -p "" -r
+                    case $REPLY in
+                        [Yy]*)
+                            REDIS_INSTALL="yes"
+                            break
+                            ;;
+                        [Nn]*|"")
+                            REDIS_INSTALL="no"
+                            break
+                            ;;
+                        *)
+                            echo "Please answer yes (y) or no (n)."
+                            ;;
+                    esac
+                done
+            fi
+
+            if [ "$REDIS_INSTALL" = "yes" ]; then
+                echo
+                echo -e "${BLUE}----------------------------------------${NC}"
+                echo -e "${BLUE}🗄️  Redis Instance${NC}"
+                echo -e "${BLUE}----------------------------------------${NC}"
+                while true; do
+                    echo -e "${YELLOW}Install Redis locally on this host? (Y/n):${NC} "
+                    read -p "" -r
+                    case $REPLY in
+                        [Nn]*)
+                            REDIS_INSTALL="no"
+                            break
+                            ;;
+                        [Yy]*|"")
+                            REDIS_INSTALL="yes"
+                            break
+                            ;;
+                        *)
+                            echo "Please answer yes (y) or no (n)."
+                            ;;
+                    esac
+                done
+
+                if [ "$REDIS_INSTALL" = "no" ]; then
+                    echo
+                    echo -e "${BLUE}----------------------------------------${NC}"
+                    echo -e "${BLUE}✍️  Existing Redis Configuration${NC}"
+                    echo -e "${BLUE}----------------------------------------${NC}"
+                    echo "Provide connection details for your existing Redis server."
+                    echo
+                    echo -e "${YELLOW}Redis host [127.0.0.1]:${NC} "
+                    read -p "" -r REDIS_HOST_INPUT
+                    REDIS_HOST_INPUT=${REDIS_HOST_INPUT:-127.0.0.1}
+                    echo -e "${YELLOW}Redis port [6379]:${NC} "
+                    read -p "" -r REDIS_PORT_INPUT
+                    REDIS_PORT_INPUT=${REDIS_PORT_INPUT:-6379}
+                    echo -e "${YELLOW}Redis database [0]:${NC} "
+                    read -p "" -r REDIS_DATABASE_INPUT
+                    REDIS_DATABASE_INPUT=${REDIS_DATABASE_INPUT:-0}
+                    echo -e "${YELLOW}Redis username (optional):${NC} "
+                    read -p "" -r REDIS_USERNAME_INPUT
+                    echo -e "${YELLOW}Redis password (optional):${NC} "
+                    read -p "" -r REDIS_PASSWORD_INPUT
+                    while true; do
+                        echo -e "${YELLOW}Use SSL/TLS for Redis connection? (y/N):${NC} "
+                        read -p "" -r
+                        case $REPLY in
+                            [Yy]*)
+                                REDIS_SSL_INPUT="yes"
+                                break
+                                ;;
+                            [Nn]*|"")
+                                REDIS_SSL_INPUT="no"
+                                break
+                                ;;
+                            *)
+                                echo "Please answer yes (y) or no (n)."
+                                ;;
+                        esac
+                    done
+                    if [ "$REDIS_SSL_INPUT" = "yes" ]; then
+                        while true; do
+                            echo -e "${YELLOW}Verify Redis SSL certificate? (Y/n):${NC} "
+                            read -p "" -r
+                            case $REPLY in
+                                [Nn]*)
+                                    REDIS_SSL_VERIFY_INPUT="no"
+                                    break
+                                    ;;
+                                [Yy]*|"")
+                                    REDIS_SSL_VERIFY_INPUT="yes"
+                                    break
+                                    ;;
+                                *)
+                                    echo "Please answer yes (y) or no (n)."
+                                    ;;
+                            esac
+                        done
+                    fi
+                fi
+            fi
+        else
+            # Redis only applicable for full or manager installations
+            REDIS_INSTALL="no"
+        fi
+
         echo
         print_status "Configuration summary:"
         echo "  🛡 BunkerWeb version: $BUNKERWEB_VERSION"
@@ -510,6 +663,17 @@ ask_user_preferences() {
                 fi
             else
                 echo "  🦙 CrowdSec: Not installed"
+            fi
+        fi
+        if [[ "$INSTALL_TYPE" != "full" && "$INSTALL_TYPE" != "manager" && -n "$INSTALL_TYPE" ]]; then
+            echo "  🧠 Redis: Not available for this mode"
+        else
+            if [ "$REDIS_INSTALL" = "yes" ]; then
+                echo "  🧠 Redis: Will be installed and configured locally"
+            elif [ -n "$REDIS_HOST_INPUT" ]; then
+                echo "  🧠 Redis: Will use existing server at $REDIS_HOST_INPUT:${REDIS_PORT_INPUT:-6379}"
+            else
+                echo "  🧠 Redis: Not installed"
             fi
         fi
         echo
@@ -733,6 +897,85 @@ get_primary_ipv4() {
     echo "$primary_ip"
 }
 
+should_apply_redis_config() {
+    if [ "$REDIS_INSTALL" = "yes" ] || [ -n "$REDIS_HOST_INPUT" ] || [ -n "$REDIS_PORT_INPUT" ] || [ -n "$REDIS_DATABASE_INPUT" ] || [ -n "$REDIS_USERNAME_INPUT" ] || [ -n "$REDIS_PASSWORD_INPUT" ] || [ -n "$REDIS_SSL_INPUT" ] || [ -n "$REDIS_SSL_VERIFY_INPUT" ]; then
+        return 0
+    fi
+    return 1
+}
+
+apply_redis_config() {
+    local config_file="$1"
+    local redis_host="${REDIS_HOST_INPUT:-}"
+    local redis_port="${REDIS_PORT_INPUT:-6379}"
+    local redis_db="${REDIS_DATABASE_INPUT:-0}"
+
+    if [ -z "$redis_host" ]; then
+        redis_host="127.0.0.1"
+    fi
+
+    set_config_kv "$config_file" "USE_REDIS" "yes"
+    set_config_kv "$config_file" "REDIS_HOST" "$redis_host"
+    set_config_kv "$config_file" "REDIS_PORT" "$redis_port"
+    set_config_kv "$config_file" "REDIS_DATABASE" "$redis_db"
+    if [ -n "$REDIS_USERNAME_INPUT" ]; then
+        set_config_kv "$config_file" "REDIS_USERNAME" "$REDIS_USERNAME_INPUT"
+    fi
+    if [ -n "$REDIS_PASSWORD_INPUT" ]; then
+        set_config_kv "$config_file" "REDIS_PASSWORD" "$REDIS_PASSWORD_INPUT"
+    fi
+    if [ -n "$REDIS_SSL_INPUT" ]; then
+        set_config_kv "$config_file" "REDIS_SSL" "$REDIS_SSL_INPUT"
+    fi
+    if [ -n "$REDIS_SSL_VERIFY_INPUT" ]; then
+        set_config_kv "$config_file" "REDIS_SSL_VERIFY" "$REDIS_SSL_VERIFY_INPUT"
+    fi
+}
+
+should_apply_crowdsec_config() {
+    if [ "$CROWDSEC_INSTALL" = "yes" ]; then
+        return 0
+    fi
+    return 1
+}
+
+apply_crowdsec_config() {
+    local config_file="$1"
+
+    set_config_kv "$config_file" "USE_CROWDSEC" "yes"
+    set_config_kv "$config_file" "CROWDSEC_API" "http://127.0.0.1:8080"
+    if [ -n "$CROWDSEC_API_KEY" ]; then
+        set_config_kv "$config_file" "CROWDSEC_API_KEY" "$CROWDSEC_API_KEY"
+    fi
+    if [ "$CROWDSEC_APPSEC_INSTALL" = "yes" ]; then
+        set_config_kv "$config_file" "CROWDSEC_APPSEC_URL" "http://127.0.0.1:7422"
+    fi
+}
+
+apply_optional_integrations() {
+    local config_file="$1"
+    local needs_reload_var="$2"
+    local needs_reload=false
+
+    if should_apply_redis_config; then
+        print_status "Applying Redis configuration"
+        apply_redis_config "$config_file"
+        needs_reload=true
+    fi
+
+    if should_apply_crowdsec_config; then
+        print_status "Applying CrowdSec configuration"
+        apply_crowdsec_config "$config_file"
+        needs_reload=true
+    fi
+
+    if [ -n "$needs_reload_var" ]; then
+        if [ "$needs_reload" = true ]; then
+            eval "$needs_reload_var=true"
+        fi
+    fi
+}
+
 # Ensure manager installations expose the API and only whitelist the local host IP
 configure_manager_api_defaults() {
     local config_file="/etc/bunkerweb/variables.env"
@@ -767,9 +1010,7 @@ configure_manager_api_defaults() {
 
     print_status "Applying manager API defaults (listen on 0.0.0.0, whitelist local IP $whitelist_ip)"
 
-    if [ ! -d /etc/bunkerweb ]; then
-        mkdir -p /etc/bunkerweb
-    fi
+    ensure_config_file "$config_file"
 
     {
         echo "SERVER_NAME="
@@ -797,8 +1038,7 @@ configure_manager_api_defaults() {
             echo "MULTISITE=yes"
         fi
     } > "$config_file"
-    chown root:nginx "$config_file" 2>/dev/null || true
-    chmod 660 "$config_file" 2>/dev/null || true
+    apply_optional_integrations "$config_file"
 
     print_status "Enabling and starting BunkerWeb Scheduler with configured settings..."
     run_cmd systemctl enable --now bunkerweb-scheduler
@@ -821,16 +1061,7 @@ configure_worker_api_whitelist() {
 
     print_status "Applying worker API whitelist: $whitelist_value"
 
-    if [ ! -d /etc/bunkerweb ]; then
-        mkdir -p /etc/bunkerweb
-    fi
-
-    if [ ! -f "$config_file" ]; then
-        touch "$config_file"
-    fi
-
-    chown root:nginx "$config_file" 2>/dev/null || true
-    chmod 660 "$config_file" 2>/dev/null || true
+    ensure_config_file "$config_file"
 
     if grep -q "^API_LISTEN_IP=" "$config_file"; then
         sed -i 's|^API_LISTEN_IP=.*|API_LISTEN_IP=0.0.0.0|' "$config_file"
@@ -875,16 +1106,7 @@ configure_full_config() {
     local config_file="/etc/bunkerweb/variables.env"
     local needs_reload=false
 
-    if [ ! -d /etc/bunkerweb ]; then
-        mkdir -p /etc/bunkerweb
-    fi
-
-    if [ ! -f "$config_file" ]; then
-        touch "$config_file"
-    fi
-
-    chown root:nginx "$config_file" 2>/dev/null || true
-    chmod 660 "$config_file" 2>/dev/null || true
+    ensure_config_file "$config_file"
 
     # Configure custom DNS resolvers if provided
     if [ -n "$DNS_RESOLVERS_INPUT" ]; then
@@ -917,6 +1139,8 @@ configure_full_config() {
         fi
         needs_reload=true
     fi
+
+    apply_optional_integrations "$config_file" "needs_reload"
 
     # Start bunkerweb and the scheduler if any changes were made
     if [ "$needs_reload" = true ]; then
@@ -1165,21 +1389,61 @@ source: appsec
         print_status "Bouncer Successfully registered"
     fi
 
-    CROWDSEC_ENV_TMP="/var/tmp/crowdsec.env"
-    {
-        echo "USE_CROWDSEC=yes"
-        echo "CROWDSEC_API=http://127.0.0.1:8080"
-        if [ -n "$BOUNCER_KEY" ]; then
-            echo "CROWDSEC_API_KEY=$BOUNCER_KEY"
-        fi
-        if [ "$CROWDSEC_APPSEC_INSTALL" = "yes" ]; then
-            echo "CROWDSEC_APPSEC_URL=http://127.0.0.1:7422"
-        fi
-    } > "$CROWDSEC_ENV_TMP"
+    if [ -n "$BOUNCER_KEY" ]; then
+        CROWDSEC_API_KEY="$BOUNCER_KEY"
+    fi
 
     echo
     echo -e "${GREEN}CrowdSec installed successfully${NC}"
     echo "See BunkerWeb docs for more: https://docs.bunkerweb.io/latest/features/#crowdsec"
+    echo -e "${BLUE}========================================${NC}"
+}
+
+# Function to install Redis
+install_redis() {
+    echo
+    echo -e "${BLUE}========================================${NC}"
+    echo -e "${BLUE}Redis Installation${NC}"
+    echo -e "${BLUE}========================================${NC}"
+    echo
+    print_step "Installing Redis"
+
+    case "$DISTRO_ID" in
+        "debian"|"ubuntu")
+            run_cmd apt update
+            run_cmd apt install -y redis-server
+            ;;
+        "fedora"|"rhel"|"rocky"|"almalinux")
+            run_cmd dnf install -y redis
+            ;;
+        *)
+            print_error "Unsupported distribution: $DISTRO_ID"
+            return
+            ;;
+    esac
+
+    REDIS_SERVICE=""
+    for candidate in redis-server redis; do
+        if systemctl list-unit-files --type=service --all 2>/dev/null | grep -q "^${candidate}\.service"; then
+            REDIS_SERVICE="$candidate"
+            break
+        fi
+    done
+
+    if [ -n "$REDIS_SERVICE" ]; then
+        run_cmd systemctl enable --now "$REDIS_SERVICE"
+        print_status "Redis service enabled and started ($REDIS_SERVICE)"
+    else
+        print_warning "Redis service name not found; start it manually if needed."
+    fi
+
+    if [ -z "$REDIS_HOST_INPUT" ]; then
+        REDIS_HOST_INPUT="127.0.0.1"
+    fi
+
+    echo
+    echo -e "${GREEN}Redis installed and configured successfully${NC}"
+    echo "See BunkerWeb docs for more: https://docs.bunkerweb.io/latest/features/#redis"
     echo -e "${BLUE}========================================${NC}"
 }
 
@@ -1364,6 +1628,8 @@ usage() {
     echo "  --crowdsec               Install and configure CrowdSec"
     echo "  --no-crowdsec            Skip CrowdSec installation"
     echo "  --crowdsec-appsec        Install CrowdSec with AppSec component"
+    echo "  --redis                  Install and configure Redis"
+    echo "  --no-redis               Skip Redis installation"
     echo
     echo "Advanced options:"
     echo "  --instances \"IP1 IP2\"    Space-separated list of BunkerWeb instances"
@@ -1373,6 +1639,15 @@ usage() {
     echo "  --api-https              Enable HTTPS for internal API communication (default: HTTP only)"
     echo "  --backup-dir PATH        Directory to store automatic backup before upgrade"
     echo "  --no-auto-backup         Skip automatic backup (you MUST have done it manually)"
+    echo "  --redis-host HOST        Redis host for existing server"
+    echo "  --redis-port PORT        Redis port for existing server"
+    echo "  --redis-database DB      Redis database number"
+    echo "  --redis-username USER    Redis username"
+    echo "  --redis-password PASS    Redis password"
+    echo "  --redis-ssl              Enable SSL/TLS for Redis connection"
+    echo "  --redis-no-ssl           Disable SSL/TLS for Redis connection"
+    echo "  --redis-ssl-verify       Verify Redis SSL certificate"
+    echo "  --redis-no-ssl-verify    Do not verify Redis SSL certificate"
     echo
     echo "Examples:"
     echo "  $0                       # Interactive installation"
@@ -1464,6 +1739,59 @@ while [[ $# -gt 0 ]]; do
             CROWDSEC_APPSEC_INSTALL="yes"
             shift
             ;;
+        --redis)
+            REDIS_INSTALL="yes"
+            shift
+            ;;
+        --no-redis)
+            REDIS_INSTALL="no"
+            shift
+            ;;
+        --redis-host)
+            REDIS_HOST_INPUT="$2"
+            REDIS_INSTALL="no"
+            shift 2
+            ;;
+        --redis-port)
+            REDIS_PORT_INPUT="$2"
+            REDIS_INSTALL="no"
+            shift 2
+            ;;
+        --redis-database)
+            REDIS_DATABASE_INPUT="$2"
+            REDIS_INSTALL="no"
+            shift 2
+            ;;
+        --redis-username)
+            REDIS_USERNAME_INPUT="$2"
+            REDIS_INSTALL="no"
+            shift 2
+            ;;
+        --redis-password)
+            REDIS_PASSWORD_INPUT="$2"
+            REDIS_INSTALL="no"
+            shift 2
+            ;;
+        --redis-ssl)
+            REDIS_SSL_INPUT="yes"
+            REDIS_INSTALL="no"
+            shift
+            ;;
+        --redis-no-ssl)
+            REDIS_SSL_INPUT="no"
+            REDIS_INSTALL="no"
+            shift
+            ;;
+        --redis-ssl-verify)
+            REDIS_SSL_VERIFY_INPUT="yes"
+            REDIS_INSTALL="no"
+            shift
+            ;;
+        --redis-no-ssl-verify)
+            REDIS_SSL_VERIFY_INPUT="no"
+            REDIS_INSTALL="no"
+            shift
+            ;;
         --instances)
             BUNKERWEB_INSTANCES_INPUT="$2"
             shift 2
@@ -1503,6 +1831,16 @@ while [[ $# -gt 0 ]]; do
             echo "Installation type: ${INSTALL_TYPE:-full}"
             echo "Setup wizard: ${ENABLE_WIZARD:-auto}"
             echo "CrowdSec: ${CROWDSEC_INSTALL:-no}"
+            if [ "$REDIS_INSTALL" = "yes" ]; then
+                echo "Redis: yes (local install)"
+            elif [ -n "$REDIS_HOST_INPUT" ]; then
+                echo "Redis: yes (existing server)"
+            else
+                echo "Redis: no"
+            fi
+            if [ -n "$REDIS_HOST_INPUT" ]; then
+                echo "Redis host: $REDIS_HOST_INPUT"
+            fi
             if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
                 echo "BunkerWeb instances: $BUNKERWEB_INSTANCES_INPUT"
             fi
@@ -1554,6 +1892,12 @@ fi
 # Validate CrowdSec options usage
 if [[ "$CROWDSEC_INSTALL" = "yes" || "$CROWDSEC_APPSEC_INSTALL" = "yes" ]] && [[ "$INSTALL_TYPE" = "worker" || "$INSTALL_TYPE" = "scheduler" || "$INSTALL_TYPE" = "ui" || "$INSTALL_TYPE" = "api" ]]; then
     print_error "CrowdSec options (--crowdsec, --crowdsec-appsec) can only be used with --full or --manager installation types"
+    exit 1
+fi
+
+if { [ "$REDIS_INSTALL" = "yes" ] || [ -n "$REDIS_HOST_INPUT" ] || [ -n "$REDIS_PORT_INPUT" ] || [ -n "$REDIS_DATABASE_INPUT" ] || [ -n "$REDIS_USERNAME_INPUT" ] || [ -n "$REDIS_PASSWORD_INPUT" ] || [ -n "$REDIS_SSL_INPUT" ] || [ -n "$REDIS_SSL_VERIFY_INPUT" ]; } \
+    && [[ "$INSTALL_TYPE" != "full" && "$INSTALL_TYPE" != "manager" && -n "$INSTALL_TYPE" ]]; then
+    print_error "Redis options (--redis, --redis-*) can only be used with --full or --manager installation types"
     exit 1
 fi
 
@@ -1851,6 +2195,11 @@ main() {
         install_crowdsec
     fi
 
+    # Install Redis if chosen (configuration applied later)
+    if [ "$REDIS_INSTALL" = "yes" ]; then
+        install_redis
+    fi
+
     # Install BunkerWeb based on distribution
     # Set environment variables to prevent postinstall from starting services we'll configure
     if [ "$INSTALL_TYPE" = "manager" ]; then
@@ -1859,7 +2208,7 @@ main() {
         export SERVICE_BUNKERWEB=no
     elif [ "$INSTALL_TYPE" = "full" ] || [ -z "$INSTALL_TYPE" ]; then
         # Only prevent start if we have configuration to apply
-        if [ -n "$DNS_RESOLVERS_INPUT" ] || [ -n "$API_LISTEN_HTTPS_INPUT" ]; then
+        if [ -n "$DNS_RESOLVERS_INPUT" ] || [ -n "$API_LISTEN_HTTPS_INPUT" ] || [ -n "$REDIS_HOST_INPUT" ] || [ "$REDIS_INSTALL" = "yes" ] || [ -n "$REDIS_PORT_INPUT" ] || [ -n "$REDIS_DATABASE_INPUT" ] || [ -n "$REDIS_USERNAME_INPUT" ] || [ -n "$REDIS_PASSWORD_INPUT" ] || [ -n "$REDIS_SSL_INPUT" ] || [ -n "$REDIS_SSL_VERIFY_INPUT" ] || [ "$CROWDSEC_INSTALL" = "yes" ] || [ "$CROWDSEC_APPSEC_INSTALL" = "yes" ]; then
             export SERVICE_BUNKERWEB=no
             export SERVICE_SCHEDULER=no
         fi

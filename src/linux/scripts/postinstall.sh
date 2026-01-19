@@ -250,22 +250,6 @@ else
     echo "ℹ️ BunkerWeb API service is not enabled in the current configuration."
 fi
 
-# Fetch CrowdSec config from /var/tmp/crowdsec.env and merge into variables.env if present
-if [ -f /var/tmp/crowdsec.env ] && [ -f /etc/bunkerweb/variables.env ]; then
-    echo "Adding CrowdSec configuration from the easy-install script to /etc/bunkerweb/variables.env ..."
-    while IFS= read -r line; do
-        key="${line%%=*}"
-        value="${line#*=}"
-        if grep -q "^${key}=" /etc/bunkerweb/variables.env; then
-            sed -i "s|^${key}=.*|${key}=${value}|" /etc/bunkerweb/variables.env
-        else
-            echo "${key}=${value}" >> /etc/bunkerweb/variables.env
-        fi
-    done < /var/tmp/crowdsec.env
-    echo "✔️ CrowdSec configuration added to /etc/bunkerweb/variables.env"
-    rm -f /var/tmp/crowdsec.env
-fi
-
 if [ -f /var/tmp/bunkerweb_upgrade ]; then
     rm -f /var/tmp/bunkerweb_upgrade
     echo "BunkerWeb has been successfully upgraded! 🎉"

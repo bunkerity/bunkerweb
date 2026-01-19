@@ -11,28 +11,6 @@ export PYTHON_BIN
 # Set the PYTHONPATH
 export PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/db
 
-# Helper function to extract variables with fallback
-function get_env_var() {
-    local var_name=$1
-    local default_value=$2
-    local value
-
-    # First try scheduler.env
-    value=$(grep "^${var_name}=" /etc/bunkerweb/scheduler.env 2>/dev/null | cut -d '=' -f 2-)
-
-    # If not found, try variables.env
-    if [ -z "$value" ] && [ -f /etc/bunkerweb/variables.env ]; then
-        value=$(grep "^${var_name}=" /etc/bunkerweb/variables.env 2>/dev/null | cut -d '=' -f 2-)
-    fi
-
-    # Return default if still not found
-    if [ -z "$value" ]; then
-        echo "$default_value"
-    else
-        echo "$value"
-    fi
-}
-
 # Display usage information
 function display_help() {
     echo "Usage: $(basename "$0") [start|stop|reload|restart]"
@@ -103,31 +81,44 @@ function start() {
         chown nginx:nginx /var/log/bunkerweb
     fi
 
-    # Extract environment variables with fallback
-    CUSTOM_LOG_LEVEL=$(get_env_var "LOG_LEVEL" "INFO")
-    export CUSTOM_LOG_LEVEL
+    # Export variables from env files (scheduler overrides variables.env)
+    export_env_file /etc/bunkerweb/variables.env
+    export_env_file /etc/bunkerweb/scheduler.env
 
-    LOG_TYPES=$(get_env_var "SCHEDULER_LOG_TYPES" "")
-    if [ -z "$LOG_TYPES" ]; then
-        LOG_TYPES=$(get_env_var "LOG_TYPES" "file")
+    : "${LOG_LEVEL:=INFO}"
+    : "${CUSTOM_LOG_LEVEL:=$LOG_LEVEL}"
+
+    if [ -n "${SCHEDULER_LOG_TYPES:-}" ]; then
+        LOG_TYPES="$SCHEDULER_LOG_TYPES"
+    else
+        : "${LOG_TYPES:=file}"
     fi
-    export LOG_TYPES
 
-    LOG_FILE_PATH=$(get_env_var "SCHEDULER_LOG_FILE_PATH" "")
-    if [ -z "$LOG_FILE_PATH" ]; then
-        LOG_FILE_PATH=$(get_env_var "LOG_FILE_PATH" "/var/log/bunkerweb/scheduler.log")
+    if [ -n "${SCHEDULER_LOG_FILE_PATH:-}" ]; then
+        LOG_FILE_PATH="$SCHEDULER_LOG_FILE_PATH"
+    else
+        : "${LOG_FILE_PATH:=/var/log/bunkerweb/scheduler.log}"
     fi
-    export LOG_FILE_PATH
 
-    LOG_SYSLOG_TAG=$(get_env_var "SCHEDULER_LOG_SYSLOG_TAG" "")
-    if [ -z "$LOG_SYSLOG_TAG" ]; then
-        LOG_SYSLOG_TAG=$(get_env_var "LOG_SYSLOG_TAG" "bw-scheduler")
+    if [ -n "${SCHEDULER_LOG_SYSLOG_TAG:-}" ]; then
+        LOG_SYSLOG_TAG="$SCHEDULER_LOG_SYSLOG_TAG"
+    else
+        : "${LOG_SYSLOG_TAG:=bw-scheduler}"
     fi
-    export LOG_SYSLOG_TAG
 
-    # Extract DATABASE_URI with fallback
-    DATABASE_URI=$(get_env_var "DATABASE_URI" "sqlite:////var/lib/bunkerweb/db.sqlite3")
-    export DATABASE_URI
+    : "${LOG_SYSLOG_ADDRESS:=}"
+    : "${HEALTHCHECK_INTERVAL:=30}"
+    : "${RELOAD_MIN_TIMEOUT:=5}"
+    : "${DISABLE_CONFIGURATION_TESTING:=no}"
+    : "${IGNORE_FAIL_SENDING_CONFIG:=no}"
+    : "${IGNORE_REGEX_CHECK:=no}"
+    : "${DATABASE_URI:=sqlite:////var/lib/bunkerweb/db.sqlite3}"
+    : "${DATABASE_RETRY_TIMEOUT:=60}"
+    : "${DATABASE_LOG_LEVEL:=WARNING}"
+
+    export LOG_LEVEL CUSTOM_LOG_LEVEL LOG_TYPES LOG_FILE_PATH LOG_SYSLOG_TAG LOG_SYSLOG_ADDRESS
+    export HEALTHCHECK_INTERVAL RELOAD_MIN_TIMEOUT DISABLE_CONFIGURATION_TESTING IGNORE_FAIL_SENDING_CONFIG IGNORE_REGEX_CHECK
+    export DATABASE_URI DATABASE_RETRY_TIMEOUT DATABASE_LOG_LEVEL
 
     # Database migration section
     log "SYSTEMCTL" "ℹ️" "Checking database configuration..."

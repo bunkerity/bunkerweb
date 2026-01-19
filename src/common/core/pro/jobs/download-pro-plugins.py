@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from contextlib import suppress
-from datetime import datetime
+from datetime import datetime, timezone
 from io import BytesIO
 from os import getenv, sep
 from os.path import join
@@ -205,15 +205,26 @@ try:
 
     # Skip daily/license checks if forced
     if not force_update:
-        # If we already checked today and metadata unchanged, skip
-        if (
-            pro_license_key == db_metadata.get("pro_license", "")
-            and metadata.get("is_pro", False) == db_metadata["is_pro"]
-            and (not metadata.get("pro_overlapped", False) or metadata.get("non_draft_services", 0) == db_metadata.get("non_draft_services", 0))
-            and db_metadata["last_pro_check"]
-            and current_date.replace(hour=0, minute=0, second=0, microsecond=0)
-            == db_metadata["last_pro_check"].replace(hour=0, minute=0, second=0, microsecond=0)
-        ):
+        # Convert current date to UTC and normalize to midnight for daily comparison
+        current_day_utc = current_date.astimezone(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+
+        # Normalize database last check date to midnight UTC
+        # Note: MariaDB returns naive datetime (stored as UTC), so we need to make it timezone-aware
+        db_last_check = db_metadata["last_pro_check"]
+        if db_last_check:
+            if db_last_check.tzinfo is None:
+                db_last_check = db_last_check.replace(tzinfo=timezone.utc)
+            else:
+                db_last_check = db_last_check.astimezone(timezone.utc)
+        db_last_check_day_utc = db_last_check.replace(hour=0, minute=0, second=0, microsecond=0) if db_last_check else None
+
+        # Check if we can skip: same license, same pro status, not overlapped (or same service count), and already checked today
+        license_unchanged = pro_license_key == db_metadata.get("pro_license", "")
+        pro_status_unchanged = metadata.get("is_pro", False) == db_metadata["is_pro"]
+        overlap_ok = not metadata.get("pro_overlapped", False) or metadata.get("non_draft_services", 0) == db_metadata.get("non_draft_services", 0)
+        already_checked_today = db_last_check_day_utc is not None and current_day_utc == db_last_check_day_utc
+
+        if license_unchanged and pro_status_unchanged and overlap_ok and already_checked_today:
             LOGGER.info("Skipping the check for BunkerWeb Pro license (already checked today)")
             sys_exit(0)
 
