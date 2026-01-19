@@ -116,7 +116,7 @@ class CLI(ApiCaller):
             use_redis=self.__use_redis,
             redis_host=self.__get_variable("REDIS_HOST"),
             redis_port=self.__get_variable("REDIS_PORT", "6379"),
-            redis_db=self.__get_variable("REDIS_DB", "0"),
+            redis_db=self.__get_variable("REDIS_DATABASE", "0"),
             redis_timeout=self.__get_variable("REDIS_TIMEOUT", "1000.0"),
             redis_keepalive_pool=self.__get_variable("REDIS_KEEPALIVE_POOL", "10"),
             redis_ssl=self.__get_variable("REDIS_SSL", "no") == "yes",

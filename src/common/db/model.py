@@ -3,8 +3,12 @@
 from json import dumps, loads
 from typing import Any, Optional
 from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Identity, Integer, LargeBinary, String, Text, TypeDecorator, UnicodeText
+from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.schema import UniqueConstraint
+
+# Large text type that maps to MEDIUMTEXT on MySQL/MariaDB, TEXT elsewhere
+LargeText = Text().with_variant(MEDIUMTEXT, "mysql").with_variant(MEDIUMTEXT, "mariadb")
 
 CONTEXTS_ENUM = Enum("global", "multisite", name="contexts_enum")
 SETTINGS_TYPES_ENUM = Enum("password", "text", "number", "check", "select", "multiselect", "multivalue", name="settings_types_enum")
@@ -125,7 +129,7 @@ class Global_values(Base):
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    value = Column(Text, nullable=True, default="")
+    value = Column(LargeText, nullable=True, default="")
     suffix = Column(Integer, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
@@ -153,7 +157,7 @@ class Services_settings(Base):
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     service_id = Column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=False)
     setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    value = Column(Text, nullable=True, default="")
+    value = Column(LargeText, nullable=True, default="")
     suffix = Column(Integer, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
@@ -352,7 +356,7 @@ class Metadata(Base):
     failover = Column(Boolean, default=None, nullable=True)
     failover_message = Column(Text, nullable=True, default="")
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.7~rc2", nullable=False)
+    version = Column(String(32), default="1.6.8~rc1", nullable=False)
 
 
 ## UI Models

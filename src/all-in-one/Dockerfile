@@ -1,4 +1,4 @@
-FROM nginx:1.28.0-alpine-slim@sha256:ce2bd4775ed6859d35f47d65401ee9f35f1dd00b32ed05f0ce38b68aa1830195 AS builder
+FROM nginx:1.28.1-alpine-slim@sha256:3593d957405454b184539e7ed906f71fdb69654bfcbc25f5ad39ed960ef1c7bb AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -153,7 +153,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM nginx:1.28.0-alpine-slim@sha256:ce2bd4775ed6859d35f47d65401ee9f35f1dd00b32ed05f0ce38b68aa1830195
+FROM nginx:1.28.1-alpine-slim@sha256:3593d957405454b184539e7ed906f71fdb69654bfcbc25f5ad39ed960ef1c7bb
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -229,7 +229,7 @@ COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.
 COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.7~rc2"
+LABEL version="1.6.8~rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="all-in-one"
 

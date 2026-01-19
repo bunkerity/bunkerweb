@@ -26,6 +26,7 @@ SSL 插件为您的 BunkerWeb 保护的网站提供强大的 SSL/TLS 加密功�
 | `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | multisite | 否   | **SSL 协议：** 要支持的 SSL/TLS 协议的空格分隔列表。                                               |
 | `SSL_CIPHERS_LEVEL`           | `modern`          | multisite | 否   | **SSL 密码级别：** 密码套件的预设安全级别（`modern`、`intermediate` 或 `old`）。                   |
 | `SSL_CIPHERS_CUSTOM`          |                   | multisite | 否   | **自定义 SSL 密码：** 用于 SSL/TLS 连接的密码套件的冒号分隔列表（覆盖级别）。                      |
+| `SSL_ECDH_CURVE`              | `auto`            | multisite | 否   | **SSL ECDH 曲线：** 以 `:` 分隔的 ECDH 曲线（TLS 组）列表，或 `auto` 启用智能选择（OpenSSL 3.5+ 的 PQC 组）。 |
 | `SSL_SESSION_CACHE_SIZE`      | `10m`             | multisite | 否   | **SSL 会话缓存大小：** SSL 会话缓存的大小（例如 `10m`、`512k`）。设置为 `off` 或 `none` 以禁用。   |
 
 !!! tip "SSL Labs 测试"

@@ -22,6 +22,7 @@ So funktioniert's:
 | `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | Multisite | nein     | Unterstützte SSL/TLS-Protokolle (durch Leerzeichen getrennt).                                     |
 | `SSL_CIPHERS_LEVEL`           | `modern`          | Multisite | nein     | Sicherheitsniveau der Suiten (`modern`, `intermediate`, `old`).                                   |
 | `SSL_CIPHERS_CUSTOM`          |                   | Multisite | nein     | Benutzerdefinierte Suiten (durch `:` getrennte Liste), die das Niveau ersetzen.                   |
+| `SSL_ECDH_CURVE`              | `auto`            | Multisite | nein     | **SSL-ECDH-Kurven:** Durch `:` getrennte Liste von ECDH-Kurven (TLS-Gruppen) oder `auto` fuer intelligente Auswahl (PQC mit OpenSSL 3.5+). |
 | `SSL_SESSION_CACHE_SIZE`      | `10m`             | Multisite | nein     | Größe des SSL-Sitzungscaches (z.B. `10m`, `512k`). Auf `off` oder `none` setzen zum Deaktivieren. |
 
 !!! tip "SSL Labs Test"

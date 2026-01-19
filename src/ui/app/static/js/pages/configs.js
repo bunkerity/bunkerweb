@@ -59,6 +59,20 @@ $(document).ready(function () {
       config.name
     }`;
 
+  const getStatusValue = (cellData) => {
+    if (!cellData) return "";
+    const $wrapper = $("<div>").html(cellData);
+    const value = $wrapper.find("[data-value]").data("value");
+    if (value) return value;
+    const text = $wrapper.text().trim();
+    if (!text) return "";
+    const normalized = text.toLowerCase();
+    if (normalized === t("status.online", "Online").toLowerCase())
+      return "online";
+    if (normalized === t("status.draft", "Draft").toLowerCase()) return "draft";
+    return normalized;
+  };
+
   const buildConfigsList = (configs, $container) => {
     $container.empty();
 
@@ -574,18 +588,13 @@ $(document).ready(function () {
               {
                 label: `<span data-i18n="status.online">${t("status.online", "Online")}</span>`,
                 value: function (rowData) {
-                  return (
-                    $(rowData[6]).find("[data-value]").data("value") ===
-                    "online"
-                  );
+                  return getStatusValue(rowData[6]) === "online";
                 },
               },
               {
                 label: `<span data-i18n="status.draft">${t("status.draft", "Draft")}</span>`,
                 value: function (rowData) {
-                  return (
-                    $(rowData[6]).find("[data-value]").data("value") === "draft"
-                  );
+                  return getStatusValue(rowData[6]) === "draft";
                 },
               },
             ],
@@ -632,41 +641,60 @@ $(document).ready(function () {
     },
   };
 
-  // Trigger initial search pane selections if applicable
-  if (configTypeSelection) {
-    const typeLabelElement = $(
-      `#DataTables_Table_0 span[data-i18n='${configTypeMap[configTypeSelection]?.key}']`,
-    );
-    if (typeLabelElement.length) {
-      typeLabelElement.closest("span.dtsp-name").trigger("click"); // Click the parent span which has the DT handler
-    } else {
-      console.warn(
-        `Could not find search pane option for type: ${configTypeSelection}`,
-      );
-    }
-  }
+  const applyInitialFilters = (dt) => {
+    const container = dt.searchPanes?.container?.();
+    if (!container) return;
 
-  if (configServiceSelection) {
-    const serviceLabelElement = $(
-      `#DataTables_Table_2 span:contains('${configServiceSelection}')`,
-    );
-    if (serviceLabelElement.length) {
-      const targetElement = serviceLabelElement.filter(
-        (_, el) => $(el).text().trim() === configServiceSelection,
-      );
-      if (targetElement.length) {
-        targetElement.closest("span.dtsp-name").trigger("click");
+    const $container = $(container);
+    const clickPaneOption = (selector, description) => {
+      const $match = $container.find(selector).first();
+      if ($match.length) {
+        const $target = $match.closest("span.dtsp-name");
+        ($target.length ? $target : $match).trigger("click");
+        return true;
+      }
+      console.warn(`Could not find search pane option for ${description}`);
+      return false;
+    };
+
+    if (configTypeSelection) {
+      const typeSelector = "span.dtsp-name";
+      const $typeMatch = $container
+        .find(typeSelector)
+        .filter((_, el) => $(el).text().trim() === configTypeSelection)
+        .first();
+      if ($typeMatch.length) {
+        $typeMatch.trigger("click");
       } else {
         console.warn(
-          `Could not find exact match for service pane option: ${configServiceSelection}`,
+          `Could not find search pane option for type: ${configTypeSelection}`,
         );
       }
-    } else {
-      console.warn(
-        `Could not find any search pane option containing: ${configServiceSelection}`,
-      );
     }
-  }
+
+    if (configServiceSelection) {
+      const isGlobal = configServiceSelection.toLowerCase() === "global";
+      if (isGlobal) {
+        clickPaneOption(
+          "span.dtsp-name [data-i18n='scope.global']",
+          `service: ${configServiceSelection}`,
+        );
+      } else {
+        const serviceSelector = "span.dtsp-name";
+        const $serviceMatch = $container
+          .find(serviceSelector)
+          .filter((_, el) => $(el).text().trim() === configServiceSelection)
+          .first();
+        if ($serviceMatch.length) {
+          $serviceMatch.trigger("click");
+        } else {
+          console.warn(
+            `Could not find search pane option for service: ${configServiceSelection}`,
+          );
+        }
+      }
+    }
+  };
 
   // Wait for window.i18nextReady = true before continuing
   if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
@@ -681,6 +709,7 @@ $(document).ready(function () {
       waitForI18next(resolve);
     }).then(() => {
       const dt = initializeDataTable(configs_config);
+      applyInitialFilters(dt);
       // Show/hide filters based on initial selections
       if (configTypeSelection || configServiceSelection) {
         dt.searchPanes.container().show();

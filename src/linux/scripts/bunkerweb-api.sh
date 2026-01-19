@@ -222,23 +222,8 @@ start() {
 
     export CAPTURE_OUTPUT="yes"
 
-    # Export variables from variables.env
-    if [ -f /etc/bunkerweb/variables.env ]; then
-        while IFS='=' read -r key value; do
-            [[ -z "$key" || "$key" =~ ^# ]] && continue
-            key=$(echo "$key" | xargs)
-            export "$key=$value"
-        done < /etc/bunkerweb/variables.env
-    fi
-
-    # Export variables from api.env
-    if [ -f /etc/bunkerweb/api.env ]; then
-        while IFS='=' read -r key value; do
-            [[ -z "$key" || "$key" =~ ^# ]] && continue
-            key=$(echo "$key" | xargs)
-            export "$key=$value"
-        done < /etc/bunkerweb/api.env
-    fi
+    export_env_file /etc/bunkerweb/variables.env
+    export_env_file /etc/bunkerweb/api.env
 
     if ! run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" -m gunicorn \
         --chdir /usr/share/bunkerweb/api \

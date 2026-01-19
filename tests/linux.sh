@@ -36,7 +36,7 @@ function build_image() {
 }
 
 if [ ! -d /opt/packages ] ; then
-    do_and_check_cmd sudo mkdir -p /opt/packages/{dev,prod}/{ubuntu,debian-bookworm,debian-trixie,fedora-41,fedora-42,fedora-43,rhel-8,rhel-9,rhel-10}
+    do_and_check_cmd sudo mkdir -p /opt/packages/{dev,prod}/{ubuntu,debian-bookworm,debian-trixie,fedora-42,fedora-43,rhel-8,rhel-9,rhel-10}
     do_and_check_cmd sudo chmod -R 777 /opt/packages/
 fi
 
@@ -55,8 +55,6 @@ find /opt/packages/ -type f -exec rm -f {} \;
 # gen_package "$1" "debian"
 # echo "Building centos package ..."
 # gen_package "$1" "centos"
-echo "Building fedora 41 package ..."
-gen_package "$1" "fedora-41"
 echo "Building fedora 42 package ..."
 gen_package "$1" "fedora-42"
 echo "Building fedora 43 package ..."
@@ -78,8 +76,6 @@ do_and_check_cmd cp -r "/opt/packages/$1" ./packages
 # build_image "debian"
 # echo "Building centos test image ..."
 # build_image "centos"
-echo "Building fedora 41 test image ..."
-build_image "fedora-41"
 echo "Building fedora 42 test image ..."
 build_image "fedora-42"
 echo "Building fedora 43 test image ..."

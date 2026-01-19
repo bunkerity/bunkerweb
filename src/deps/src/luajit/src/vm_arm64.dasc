@@ -1,6 +1,6 @@
 |// Low-level VM code for ARM64 CPUs.
 |// Bytecode interpreter, fast functions and helper functions.
-|// Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
+|// Copyright (C) 2005-2026 Mike Pall. See Copyright Notice in luajit.h
 |
 |.arch arm64
 |.section code_op, code_sub
@@ -2687,6 +2687,8 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |   movz CARG3, #0x41e0, lsl #48	// 2^31.
     |   add_TISNUM TMP0, TMP0
     |  csel TMP0, TMP0, CARG3, vc
+    |   movz CARG3, #0x8000, lsl #48	// -0.
+    |  csel TMP0, TMP0, CARG3, ne
     |5:
     |  str TMP0, [BASE, RA, lsl #3]
     |  ins_next

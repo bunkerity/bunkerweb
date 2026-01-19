@@ -153,9 +153,6 @@ include /etc/nginx/modsec-crs/*.conf
 include /etc/nginx/{{ service_id }}/modsec-crs/*.conf
     {% endif %}
 
-# unset REASON* env vars
-SecAction "nolog,phase:1,setenv:REASON=none,setenv:REASON_DATA_MSGS=none,setenv:REASON_DATA_UNIQUE_ID=none,setenv:REASON_DATA_RULES=none,setenv:REASON_DATA_MATCHED_VARS=none,setenv:REASON_DATA_MATCHED_VAR_NAMES=none"
-
 # Auto update allowed methods (Generated from ALLOWED_METHODS)
 SecAction \
  "id:900200,\
@@ -234,26 +231,26 @@ include /etc/nginx/{{ service_id }}/modsec/*.conf
   {% endif %}
 
   {% if USE_MODSECURITY_CRS == "yes" -%}
-# set REASON env var
+# set reasons data tx vars
 SecRuleUpdateActionById 949110 \
   "t:none,deny,status:{{ DENY_HTTP_STATUS }},\
-   setenv:'REASON=modsecurity',\
-   setenv:'REASON_DATA_UNIQUE_ID=%{UNIQUE_ID}',\
-   setenv:'REASON_DATA_RULES=%{TX.BUNKERWEB_RULES}',\
-   setenv:'REASON_DATA_MSGS=%{TX.BUNKERWEB_MSGS}',\
-   setenv:'REASON_DATA_MATCHED_VARS=%{TX.BUNKERWEB_MATCHED_VARS}',\
-   setenv:'REASON_DATA_MATCHED_VAR_NAMES=%{TX.BUNKERWEB_MATCHED_VAR_NAMES}',\
-   setenv:'REASON_DATA_ANOMALY_SCORE=%{TX.BUNKERWEB_ANOMALY_SCORE}'"
+   setvar:'tx.bunkerweb_reason=modsecurity',\
+   setvar:'tx.bunkerweb_unique_id=%{UNIQUE_ID}',\
+   setvar:'tx.bunkerweb_rules=%{TX.BUNKERWEB_RULES}',\
+   setvar:'tx.bunkerweb_msgs=%{TX.BUNKERWEB_MSGS}',\
+   setvar:'tx.bunkerweb_matched_vars=%{TX.BUNKERWEB_MATCHED_VARS}',\
+   setvar:'tx.bunkerweb_matched_var_names=%{TX.BUNKERWEB_MATCHED_VAR_NAMES}',\
+   setvar:'tx.bunkerweb_anomaly_score=%{TX.BUNKERWEB_ANOMALY_SCORE}'"
 
 SecRuleUpdateActionById 959100 \
   "t:none,deny,status:{{ DENY_HTTP_STATUS }},\
-   setenv:'REASON=modsecurity',\
-   setenv:'REASON_DATA_UNIQUE_ID=%{UNIQUE_ID}',\
-   setenv:'REASON_DATA_RULES=%{TX.BUNKERWEB_RULES}',\
-   setenv:'REASON_DATA_MSGS=%{TX.BUNKERWEB_MSGS}',\
-   setenv:'REASON_DATA_MATCHED_VARS=%{TX.BUNKERWEB_MATCHED_VARS}',\
-   setenv:'REASON_DATA_MATCHED_VAR_NAMES=%{TX.BUNKERWEB_MATCHED_VAR_NAMES}',\
-   setenv:'REASON_DATA_ANOMALY_SCORE=%{TX.BUNKERWEB_ANOMALY_SCORE}'"
+   setvar:'tx.bunkerweb_reason=modsecurity',\
+   setvar:'tx.bunkerweb_unique_id=%{UNIQUE_ID}',\
+   setvar:'tx.bunkerweb_rules=%{TX.BUNKERWEB_RULES}',\
+   setvar:'tx.bunkerweb_msgs=%{TX.BUNKERWEB_MSGS}',\
+   setvar:'tx.bunkerweb_matched_vars=%{TX.BUNKERWEB_MATCHED_VARS}',\
+   setvar:'tx.bunkerweb_matched_var_names=%{TX.BUNKERWEB_MATCHED_VAR_NAMES}',\
+   setvar:'tx.bunkerweb_anomaly_score=%{TX.BUNKERWEB_ANOMALY_SCORE}'"
 
 
 # let BW manage when method is not allowed (and save up some computing)

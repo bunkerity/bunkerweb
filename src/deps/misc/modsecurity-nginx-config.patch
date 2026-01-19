@@ -1,19 +1,26 @@
-@@ -14,3 +14,3 @@
- ngx_feature_libs="-lmodsecurity"
--ngx_feature_test='printf("hello");'
-+ngx_feature_test='msc_init();'
- ngx_modsecurity_opt_I=
-@@ -112,3 +112,3 @@
+@@ -117,7 +117,7 @@
+ 	ngx_module_type=HTTP_FILTER
+ 	ngx_module_name="$ngx_addon_name"
  	ngx_module_srcs="$ngx_addon_dir/src/ngx_http_modsecurity_module.c \
 -            $ngx_addon_dir/src/ngx_http_modsecurity_pre_access.c \
 +            $ngx_addon_dir/src/ngx_http_modsecurity_access.c \
              $ngx_addon_dir/src/ngx_http_modsecurity_header_filter.c \
-@@ -128,2 +128,3 @@
+             $ngx_addon_dir/src/ngx_http_modsecurity_body_filter.c \
+             $ngx_addon_dir/src/ngx_http_modsecurity_log.c \
+@@ -133,6 +133,7 @@
+                           ngx_http_v2_filter_module \
+                           ngx_http_range_header_filter_module \
                            ngx_http_gzip_filter_module \
 +                          ngx_http_brotli_filter_module \
                            $ngx_module_name \
-@@ -143,3 +144,3 @@
+                           $modsecurity_dependency";
+ 
+@@ -148,7 +149,7 @@
+ 	NGX_ADDON_SRCS="\
+ 	    $NGX_ADDON_SRCS \
  	    $ngx_addon_dir/src/ngx_http_modsecurity_module.c \
 -	    $ngx_addon_dir/src/ngx_http_modsecurity_pre_access.c \
 +	    $ngx_addon_dir/src/ngx_http_modsecurity_access.c \
  	    $ngx_addon_dir/src/ngx_http_modsecurity_header_filter.c \
+ 	    $ngx_addon_dir/src/ngx_http_modsecurity_body_filter.c \
+ 	    $ngx_addon_dir/src/ngx_http_modsecurity_log.c \

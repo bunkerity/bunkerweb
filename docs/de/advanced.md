@@ -1,8 +1,8 @@
 # Fortgeschrittene Nutzungen
 
-Viele Beispiele für reale Anwendungsfälle sind im Ordner [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc2/examples) des GitHub-Repositorys verfügbar.
+Viele Beispiele für reale Anwendungsfälle sind im Ordner [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc1/examples) des GitHub-Repositorys verfügbar.
 
-Wir stellen auch zahlreiche Boilerplates zur Verfügung, wie z. B. YAML-Dateien für verschiedene Integrationen und Datenbanktypen. Diese sind im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.7-rc2/misc/integrations) verfügbar.
+Wir stellen auch zahlreiche Boilerplates zur Verfügung, wie z. B. YAML-Dateien für verschiedene Integrationen und Datenbanktypen. Diese sind im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc1/misc/integrations) verfügbar.
 
 Dieser Abschnitt konzentriert sich nur auf fortgeschrittene Nutzungen und Sicherheits-Tuning. Informationen zu allen verfügbaren Einstellungen finden Sie im [Features-Abschnitt](features.md) der Dokumentation.
 
@@ -85,7 +85,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.7-rc2
+            bunkerity/bunkerweb-all-in-one:1.6.8-rc1
         ```
 
         Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen aktualisiert werden.
@@ -96,7 +96,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.7-rc2
+          image: bunkerity/bunkerweb:1.6.8-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -104,7 +104,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+          image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -121,7 +121,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.7-rc2
+          image: bunkerity/bunkerweb:1.6.8-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -129,7 +129,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+          image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -176,7 +176,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.7-rc2
+          image: bunkerity/bunkerweb:1.6.8-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -184,7 +184,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+          image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -249,7 +249,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.7-rc2
+            bunkerity/bunkerweb-all-in-one:1.6.8-rc1
         ```
 
         Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen aktualisiert werden.
@@ -260,7 +260,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.7-rc2
+          image: bunkerity/bunkerweb:1.6.8-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -270,7 +270,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+          image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -288,7 +288,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.7-rc2
+          image: bunkerity/bunkerweb:1.6.8-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -298,7 +298,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+          image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -350,7 +350,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.7-rc2
+          image: bunkerity/bunkerweb:1.6.8-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -360,7 +360,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+          image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -485,8 +485,8 @@ Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank 
 
         ```bash
         # Skript und Checksumme laden
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7-rc2/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.7-rc2/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.8-rc1/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.8-rc1/install-bunkerweb.sh.sha256
 
         # Prüfsumme verifizieren
         sha256sum -c install-bunkerweb.sh.sha256
@@ -585,7 +585,7 @@ Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank 
 
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "192.168.1.11 192.168.1.12" # Ersetzen durch die IPs Ihrer Worker
@@ -604,7 +604,7 @@ Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank 
           - bw-redis
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.7-rc2
+        image: bunkerity/bunkerweb-ui:1.6.8-rc1
         ports:
           - "7000:7000" # UI-Port veröffentlichen
         environment:
@@ -687,7 +687,7 @@ Worker sind die Knoten, die den eingehenden Verkehr verarbeiten.
     ```yaml title="docker-compose.yml"
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7-rc2
+        image: bunkerity/bunkerweb:1.6.8-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -992,7 +992,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.7-rc2
+        bunkerity/bunkerweb-all-in-one:1.6.8-rc1
     ```
 
 === "Docker"
@@ -1020,7 +1020,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7-rc2
+        image: bunkerity/bunkerweb:1.6.8-rc1
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1031,7 +1031,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1145,7 +1145,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.7-rc2
+        bunkerity/bunkerweb-all-in-one:1.6.8-rc1
     ```
 
     Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen angewendet werden.
@@ -1185,7 +1185,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.7-rc2
+        bunkerity/bunkerweb-all-in-one:1.6.8-rc1
     ```
 
 === "Docker"
@@ -1208,7 +1208,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+      image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1251,7 +1251,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+      image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
       volumes:
         - ./bw-data:/data
       ...
@@ -1321,7 +1321,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+      image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
       volumes:
         - ./bw-data:/data
       ...
@@ -1552,7 +1552,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.7-rc2
+        bunkerity/bunkerweb-all-in-one:1.6.8-rc1
     ```
 
     Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen angewendet werden.
@@ -1575,7 +1575,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7-rc2
+        image: bunkerity/bunkerweb:1.6.8-rc1
         ports:
           - "80:8080" # Behalten, wenn Sie die Let's Encrypt-Automatisierung mit dem http-Challenge-Typ verwenden möchten
           - "10000:10000" # app1
@@ -1590,7 +1590,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Diese Einstellung ist obligatorisch, um die BunkerWeb-Instanz anzugeben
@@ -1641,7 +1641,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7-rc2
+        image: bunkerity/bunkerweb:1.6.8-rc1
         ports:
           - "80:8080" # Behalten, wenn Sie die Let's Encrypt-Automatisierung mit dem http-Challenge-Typ verwenden möchten
           - "10000:10000" # app1
@@ -1871,7 +1871,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7-rc2
+        image: bunkerity/bunkerweb:1.6.8-rc1
         ports:
           # Behalten, wenn Sie die Let's Encrypt-Automatisierung mit dem http-Challenge-Typ verwenden möchten
           - published: 80
@@ -2001,7 +2001,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.7-rc2
+        bunkerity/bunkerweb-all-in-one:1.6.8-rc1
     ```
 
     Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen angewendet werden.
@@ -2045,7 +2045,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7-rc2
+        image: bunkerity/bunkerweb:1.6.8-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2060,7 +2060,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Diese Einstellung ist obligatorisch, um die BunkerWeb-Instanz anzugeben
@@ -2154,7 +2154,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7-rc2
+        image: bunkerity/bunkerweb:1.6.8-rc1
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -2167,7 +2167,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # Wir müssen die BunkerWeb-Instanz hier nicht angeben, da sie automatisch vom Autoconf-Dienst erkannt werden
@@ -2182,7 +2182,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.7-rc2
+        image: bunkerity/bunkerweb-autoconf:1.6.8-rc1
         depends_on:
           - bunkerweb
           - bw-docker
@@ -2422,7 +2422,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.7-rc2
+        image: bunkerity/bunkerweb:1.6.8-rc1
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2521,7 +2521,7 @@ Standardmäßig lauscht BunkerWeb nur auf IPv4-Adressen und verwendet kein IPv6 
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
         environment:
           USE_IPv6: "yes"
 
@@ -2661,7 +2661,7 @@ LOG_LEVEL_1=error
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifikation der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.7-rc2
+        image: bunkerity/bunkerweb:1.6.8-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2674,7 +2674,7 @@ LOG_LEVEL_1=error
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen setzen
@@ -2691,7 +2691,7 @@ LOG_LEVEL_1=error
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.7-rc2
+        image: bunkerity/bunkerweb-ui:1.6.8-rc1
         environment:
           <<: *bw-env
         volumes:
@@ -2826,7 +2826,7 @@ Sie können den Protokollierungstreiber für Ihre Dienste in Ihrer `docker-compo
 ```yaml
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.7-rc2
+    image: bunkerity/bunkerweb:1.6.8-rc1
     logging:
       driver: "json-file"
       options:
@@ -3340,54 +3340,24 @@ Mit diesem Plugin können Administratoren mühelos Benutzerkonten erstellen, akt
 
 ## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/45vX0WJqjxo" title="Easy Resolve" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
 Das Easy Resolve Plugin ermöglicht es Ihnen, Fehlalarme und wiederkehrende Probleme direkt von der Berichtsseite aus schnell zu beheben. Es wandelt geführte "Resolve"-Aktionen in sichere, bereichsbezogene Konfigurationsupdates um – ohne manuelle Bearbeitung.
 
 ### Funktionen
 
--   Ein-Klick-Aktionen aus Berichten und Berichtsdetails.
--   Kontextbezogene Vorschläge für ModSecurity, Blacklist und DNSBL.
--   Generiert sichere ModSecurity-Ausschlüsse oder aktualisiert Ignorierlisten.
--   Wendet Änderungen auf Dienst- oder globaler Ebene mit Berechtigungsprüfungen an.
--   Optionales automatisches Öffnen der zugehörigen Konfigurationsseite nach der Anwendung.
+- Ein-Klick-Aktionen aus Berichten und Berichtsdetails.
+- Kontextbezogene Vorschläge für ModSecurity, Blacklist, DNSBL, Ratenbegrenzung, erlaubte HTTP-Methoden und Whitelisted/Blacklisted Länder.
+- Generiert sichere ModSecurity-Ausschlüsse oder aktualisiert Ignorierlisten.
+- Wendet Änderungen auf Dienst- oder globaler Ebene mit Berechtigungsprüfungen an.
+- Optionales automatisches Öffnen der zugehörigen Konfigurationsseite nach der Anwendung.
 
 <figure markdown>
   ![Übersicht](assets/img/easy-resolve.png){ align=center }
   <figcaption>Berichtsseite - mit Easy Resolve</figcaption>
 </figure>
-
-<div class="grid grid-2" markdown>
-<figure markdown>
-  ![ModSecurity beheben](assets/img/easy-resolve-modsecurity.png){ width="100%" }
-  <figcaption>ModSecurity beheben</figcaption>
-</figure>
-<figure markdown>
-  ![DNSBL beheben](assets/img/easy-resolve-dnsbl.png){ width="100%" }
-  <figcaption>DNSBL beheben</figcaption>
-</figure>
-</div>
-
-<div class="grid grid-5" markdown>
-<figure markdown>
-  ![Blacklist beheben - IP](assets/img/easy-resolve-blacklist-ip.png){ width="100%" }
-  <figcaption>Blacklist - IP</figcaption>
-</figure>
-<figure markdown>
-  ![Blacklist beheben - User-Agent](assets/img/easy-resolve-blacklist-ua.png){ width="100%" }
-  <figcaption>Blacklist - User-Agent</figcaption>
-</figure>
-<figure markdown>
-  ![Blacklist beheben - rDNS](assets/img/easy-resolve-blacklist-rdns.png){ width="100%" }
-  <figcaption>Blacklist - rDNS</figcaption>
-</figure>
-<figure markdown>
-  ![Blacklist beheben - ASN](assets/img/easy-resolve-blacklist-asn.png){ width="100%" }
-  <figcaption>Blacklist - ASN</figcaption>
-</figure>
-<figure markdown>
-  ![Blacklist beheben - URI](assets/img/easy-resolve-blacklist-uri.png){ width="100%" }
-  <figcaption>Blacklist - URI</figcaption>
-</figure>
-</div>
 
 ## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
@@ -3853,11 +3823,11 @@ Vorlagen verwenden Lua-Vorlagensyntax mit den folgenden Trennzeichen:
         ```yaml
         services:
           bunkerweb:
-            image: bunkerity/bunkerweb:1.6.7-rc2
+            image: bunkerity/bunkerweb:1.6.8-rc1
             # ... andere Einstellungen (keine Umgebungsvariablen für Custom Pages hier benötigt)
 
           bw-scheduler:
-            image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+            image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
             volumes:
               - ./templates:/custom_templates:ro
             environment:
@@ -3940,7 +3910,7 @@ Vorlagen verwenden Lua-Vorlagensyntax mit den folgenden Trennzeichen:
             spec:
               containers:
                 - name: bunkerweb-scheduler
-                  image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+                  image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
                   env:
                     - name: CUSTOM_ERROR_PAGE
                       value: "/custom_templates/error.html"
@@ -3969,3 +3939,189 @@ Vorlagen verwenden Lua-Vorlagensyntax mit den folgenden Trennzeichen:
 - **Gecachte Dateien** befinden sich in `/var/cache/bunkerweb/custom_pages`; das Aktualisieren der Quelldatei reicht aus—der Job erkennt den neuen Hash und lädt NGINX automatisch neu.
 - **CSP-Konformität**: Verwenden Sie immer die Variablen `nonce_script` und `nonce_style` für Inline-Skripte und Styles, um eine ordnungsgemäße Content Security Policy-Handhabung sicherzustellen.
 - **Vorlagen testen**: Sie können Ihre Vorlagen lokal mit einer Lua-Template-Engine rendern, bevor Sie sie in BunkerWeb bereitstellen.
+
+## OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+<p align="center">
+  <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/0e4lcXTIIfs" title="OpenID Connect" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
+Das **OpenID Connect**-Plugin (PRO) fügt Single Sign-On (SSO) vor Ihrer Anwendung hinzu, indem es den standardisierten OAuth 2.0 / OIDC-Flow **Authorization Code** verwendet.
+
+Es läuft innerhalb von BunkerWeb (NGINX/Lua) und erzwingt die Authentifizierung in der **access phase**, sodass nicht authentifizierte Anfragen gestoppt werden, *bevor* sie Ihren Upstream erreichen.
+
+### Wie der Request-Flow funktioniert
+
+Wenn ein Browser eine geschützte URL anfordert:
+
+1. Wenn keine gültige Session vorhanden ist, leitet BunkerWeb den Benutzer zum Identity Provider (IdP) um.
+2. Der IdP authentifiziert den Benutzer und leitet mit einem Authorization Code zurück zu BunkerWeb auf `OPENIDC_REDIRECT_URI` (Standard: `/callback`).
+3. BunkerWeb tauscht den Code am Token-Endpoint des IdP gegen Tokens.
+4. Tokens werden validiert (Issuer, Audience, Ablaufzeit, `iat` mit Toleranz sowie Signatur über JWKS).
+5. Eine Session wird erstellt und der Browser wird zurück zur ursprünglichen URL umgeleitet.
+
+```mermaid
+sequenceDiagram
+  participant B as Browser
+  participant BW as BunkerWeb (OpenIDC)
+  participant IdP as Identitätsanbieter
+  participant Up as Upstream
+
+  B->>BW: GET /protected
+  alt Nicht authentifiziert
+  BW-->>B: 302 Redirect zum Autorisierungs-Endpoint des IdP
+  B->>IdP: Autorisierungsanfrage (Nonce/PKCE optional)
+  IdP-->>B: 302 Redirect zu /callback?code=...
+  B->>BW: GET /callback?code=...
+  BW->>IdP: Token-Anfrage (Code Exchange)
+  IdP-->>BW: ID Token + Access Token (+ Refresh Token)
+  BW-->>B: 302 Redirect zurück zur ursprünglichen URL
+  end
+  B->>BW: GET /protected (authentifiziert)
+  BW->>Up: Request weiterleiten (+ optionaler Identity-Header)
+  Up-->>BW: Antwort
+  BW-->>B: Antwort
+```
+
+!!! warning "Callback-URL muss mit der IdP-Client-Konfiguration übereinstimmen"
+    Registrieren Sie die vollständige Callback-URL beim IdP (Schema + Host + Pfad). Zum Beispiel mit Standardwerten: `https://app.example.com/callback`.
+
+### Einstellungen (erklärt)
+
+!!! info "Erforderliche Einstellungen"
+    Mindestens `OPENIDC_DISCOVERY` und `OPENIDC_CLIENT_ID` müssen gesetzt sein, damit das Plugin funktionieren kann.
+
+#### Grundlegende Aktivierung
+
+- `USE_OPENIDC` (Standard: `no`): OpenID Connect-Authentifizierung für die Site aktivieren oder deaktivieren.
+
+#### Identity Provider (IdP) + Client-Registrierung
+
+- `OPENIDC_DISCOVERY`: Discovery-URL (z. B. `https://idp.example.com/.well-known/openid-configuration`).
+- `OPENIDC_CLIENT_ID`: OAuth 2.0 Client-ID, die beim IdP registriert ist.
+- `OPENIDC_CLIENT_SECRET`: OAuth 2.0 Client-Secret (verwendet von `basic`, `post` und `secret_jwt`).
+
+#### Callback / Redirect
+
+- `OPENIDC_REDIRECT_URI` (Standard: `/callback`): Callback-Pfad, den der IdP nach erfolgreicher Authentifizierung aufruft (muss beim IdP registriert sein).
+
+#### Scopes und Authorization-Parameter
+
+- `OPENIDC_SCOPE` (Standard: `openid email profile`): durch Leerzeichen getrennte Liste der anzufordernden Scopes.
+- `OPENIDC_AUTHORIZATION_PARAMS`: zusätzliche Authorization-Parameter als kommagetrennte `key=value` Paare.
+
+#### Security-Härtung
+
+- `OPENIDC_USE_NONCE` (Standard: `yes`): Nonce zu Authorization-Anfragen hinzufügen.
+- `OPENIDC_USE_PKCE` (Standard: `no`): PKCE für den Authorization-Code-Flow aktivieren.
+- `OPENIDC_IAT_SLACK` (Standard: `120`): erlaubte Uhrzeitabweichung (Sekunden) bei der Token-Validierung.
+- `OPENIDC_ACCEPT_UNSUPPORTED_ALG` (Standard: `no`): Tokens mit nicht unterstützten Algorithmen akzeptieren (nicht empfohlen).
+- `OPENIDC_FORCE_REAUTHORIZE` (Standard: `no`): bei jeder Anfrage Re-Authorization erzwingen (nur Debug).
+
+#### Session-/Token-Lebenszyklus
+
+- `OPENIDC_REFRESH_SESSION_INTERVAL`: Intervall in Sekunden, um die Session still zu erneuern (leer = deaktiviert).
+- `OPENIDC_ACCESS_TOKEN_EXPIRES_IN` (Standard: `3600`): Standard-Lebensdauer des Access Tokens, wenn der IdP nichts liefert.
+- `OPENIDC_RENEW_ACCESS_TOKEN_ON_EXPIRY` (Standard: `yes`): Access Token bei Ablauf via Refresh Token erneuern.
+
+#### Token-Endpoint-Authentifizierungseinstellungen
+
+- `OPENIDC_TOKEN_ENDPOINT_AUTH_METHOD` (Standard: `basic`): `basic`, `post`, `secret_jwt`, `private_key_jwt`.
+- `OPENIDC_CLIENT_RSA_PRIVATE_KEY`: erforderlich bei `private_key_jwt`.
+- `OPENIDC_CLIENT_RSA_PRIVATE_KEY_ID`: optionales `kid` für `private_key_jwt`.
+- `OPENIDC_CLIENT_JWT_ASSERTION_EXPIRES_IN`: Lebensdauer der JWT-Assertion in Sekunden.
+
+#### Logout-Verhalten
+
+- `OPENIDC_LOGOUT_PATH` (Standard: `/logout`): lokaler Logout-Pfad, der von BunkerWeb verarbeitet wird.
+- `OPENIDC_REVOKE_TOKENS_ON_LOGOUT` (Standard: `no`): Tokens beim IdP beim Logout widerrufen.
+- `OPENIDC_REDIRECT_AFTER_LOGOUT_URI`: Redirect nach lokalem Logout (leer = IdP-Default).
+- `OPENIDC_POST_LOGOUT_REDIRECT_URI`: Redirect nach abgeschlossenem IdP-Logout (falls unterstützt).
+
+#### Konnektivität und TLS zum IdP
+
+- `OPENIDC_TIMEOUT_CONNECT|SEND|READ` (Standard: jeweils `10000` ms): Timeouts für HTTP-Aufrufe zum IdP.
+- `OPENIDC_SSL_VERIFY` (Standard: `yes`): TLS-Zertifikate des IdP prüfen.
+- `OPENIDC_KEEPALIVE` (Standard: `yes`): Keepalive für IdP-Verbindungen.
+- `OPENIDC_HTTP_PROXY` / `OPENIDC_HTTPS_PROXY`: Proxys für IdP-Aufrufe.
+
+#### Weitergabe der Identität an Upstreams
+
+- `OPENIDC_USER_HEADER` (Standard: `X-User`): Header zur Weitergabe der Identität an den Upstream (leer = deaktiviert).
+- `OPENIDC_USER_HEADER_CLAIM` (Standard: `sub`): Claim, der für den User-Header extrahiert wird.
+- `OPENIDC_DISPLAY_CLAIM` (Standard: `preferred_username`): Claim für Anzeige in Logs/Metriken.
+
+#### Caching
+
+- `OPENIDC_DISCOVERY_DICT_SIZE` (Standard: `1m`): Shared-Dict-Größe für Discovery-Cache.
+- `OPENIDC_JWKS_DICT_SIZE` (Standard: `1m`): Shared-Dict-Größe für JWKS-Cache.
+
+!!! tip "Redis Session Storage"
+    Wenn `USE_REDIS=yes` global in BunkerWeb konfiguriert ist, speichert das OpenIDC-Plugin Sessions in Redis statt in Cookies (mit automatischem Fallback auf Cookies, falls Redis nicht verfügbar ist). Das ist der empfohlene Modus für Multi-Instance-/HA-Deployments.
+
+### Discovery + JWKS-Caching
+
+Das Plugin verwendet `OPENIDC_DISCOVERY` (die IdP `.well-known/openid-configuration` URL), um Endpoints zu entdecken, und lädt anschließend JWKS-Keys, um Token-Signaturen zu validieren.
+
+Discovery- und JWKS-Daten werden in NGINX Shared Dictionaries gecacht. Wenn Sie viele Tenants/IdPs oder große Key-Sets haben, erhöhen Sie:
+
+- `OPENIDC_DISCOVERY_DICT_SIZE` (global)
+- `OPENIDC_JWKS_DICT_SIZE` (global)
+
+### Sessions (Cookies vs Redis)
+
+Standardmäßig werden Sessions als sichere Cookies gespeichert, die von der OpenID-Connect-Bibliothek verwaltet werden.
+
+Wenn `USE_REDIS=yes` global aktiviert ist und Redis konfiguriert wurde, wechselt das Plugin automatisch zu **Redis-basierten Sessions** (mit automatischem Fallback auf Cookie-Sessions, wenn Redis vorübergehend nicht verfügbar ist). Das ist für Load Balancing / HA empfehlenswert und vermeidet Cookie-Größenlimits bei großen Token-Payloads.
+
+### Weitergabe der Benutzeridentität an den Upstream
+
+Wenn `OPENIDC_USER_HEADER` gesetzt ist (Standard: `X-User`), injiziert das Plugin einen Header-Wert aus einem Claim (Standard: `OPENIDC_USER_HEADER_CLAIM=sub`).
+
+Wichtiges Security-Verhalten:
+
+- Das Plugin **löscht eingehende** Header mit dem Namen `OPENIDC_USER_HEADER`, um Spoofing zu verhindern.
+- Fehlt der konfigurierte Claim, wird der Header nicht gesetzt.
+- Setzen Sie `OPENIDC_USER_HEADER` auf einen leeren Wert, um die Identitätsweitergabe zu deaktivieren.
+
+!!! tip "Claim auswählen"
+    Bevorzugen Sie stabile Identifier, die in Tokens vorhanden sind (z. B. `sub`, `email`, `preferred_username`). Claims werden zuerst aus dem ID Token gelesen, danach aus userinfo (falls vorhanden).
+
+### Logout
+
+Logout-Anfragen werden auf `OPENIDC_LOGOUT_PATH` (Standard: `/logout`) verarbeitet.
+
+- Um Tokens beim IdP beim Logout zu widerrufen, setzen Sie `OPENIDC_REVOKE_TOKENS_ON_LOGOUT=yes`.
+- Verwenden Sie `OPENIDC_REDIRECT_AFTER_LOGOUT_URI` und `OPENIDC_POST_LOGOUT_REDIRECT_URI`, um Redirects nach dem Logout zu steuern.
+
+### Token-Endpoint-Authentifizierung
+
+Die meisten IdPs funktionieren mit dem Standard `OPENIDC_TOKEN_ENDPOINT_AUTH_METHOD=basic` (Client Secret via HTTP Basic Auth). Zusätzlich werden unterstützt:
+
+- `post`
+- `secret_jwt`
+- `private_key_jwt` (erfordert `OPENIDC_CLIENT_RSA_PRIVATE_KEY`, optional `OPENIDC_CLIENT_RSA_PRIVATE_KEY_ID`)
+
+### Minimale Konfigurationsbeispiele
+
+Minimale erforderliche Einstellungen pro geschütztem Service:
+
+- `USE_OPENIDC=yes`
+- `OPENIDC_DISCOVERY=...`
+- `OPENIDC_CLIENT_ID=...`
+- `OPENIDC_CLIENT_SECRET=...` (oder JWT-Key-Konfiguration für `private_key_jwt`)
+
+Häufige Hardening-/Tuning-Optionen:
+
+- `OPENIDC_USE_NONCE=yes` (Standard)
+- `OPENIDC_USE_PKCE=yes`
+- `OPENIDC_IAT_SLACK=...` bei Clock Skew
+- `OPENIDC_TIMEOUT_CONNECT|SEND|READ` passend zur IdP-Latenz
+- `OPENIDC_SSL_VERIFY=yes` (Standard)
+
+### Fehlerbehebung
+
+- **403 mit "Authentication failed"**: meist falsche Discovery-URL, Callback-URL-Mismatch in der IdP-Client-Konfiguration oder IdP nicht erreichbar.
+- **Clock skew / "token not yet valid"**: NTP aktivieren; `OPENIDC_IAT_SLACK` bei Bedarf anpassen.
+- **Kein User-Header gesetzt**: prüfen, ob der Claim aus `OPENIDC_USER_HEADER_CLAIM` im ID Token/userinfo vorhanden ist.
+- **Multi-Instance-Deployments**: `USE_REDIS=yes` aktivieren und `REDIS_HOST` (oder Sentinel) konfigurieren, damit Sessions geteilt werden.

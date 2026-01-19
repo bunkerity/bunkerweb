@@ -32,7 +32,6 @@ local bytes = random.bytes
 local char = string.char
 local session_start = session.start
 local tonumber = tonumber
-local getenv = os.getenv
 
 local datastore = cdatastore:new()
 local internalstore
@@ -300,10 +299,14 @@ end
 
 utils.get_reason = function(ctx)
 	-- ngx.ctx
-	local security_mode = utils.get_security_mode(ctx)
-	if ctx and ctx.bw and ctx.bw.reason then
-		return ctx.bw.reason, ctx.bw.reason_data or {}, security_mode
+	local security_mode
+	if ctx and ctx.bw then
+		security_mode = ctx.bw.security_mode or utils.get_security_mode(ctx)
+		if ctx.bw.reason then
+			return ctx.bw.reason, ctx.bw.reason_data or {}, security_mode
+		end
 	end
+	security_mode = security_mode or utils.get_security_mode(ctx)
 	-- ngx.var
 	local var_reason = var.reason
 	if var_reason and var_reason ~= "" then
@@ -317,12 +320,12 @@ utils.get_reason = function(ctx)
 		end
 		return var_reason, reason_data, security_mode
 	end
-	-- os.getenv / modsecurity
-	if getenv("REASON") == "modsecurity" then
+	-- ngx.var / modsecurity
+	if ngx.var.modsecurity_reason == "modsecurity" then
 		local reason_data = {}
 
 		-- Handle IDs
-		local env_reason_data_ids = getenv("REASON_DATA_RULES")
+		local env_reason_data_ids = ngx.var.modsecurity_rules
 		if env_reason_data_ids and env_reason_data_ids ~= "" and env_reason_data_ids ~= "none" then
 			if env_reason_data_ids:sub(1, 1) == " " then
 				env_reason_data_ids = env_reason_data_ids:sub(2)
@@ -334,16 +337,16 @@ utils.get_reason = function(ctx)
 		end
 
 		-- Handle messages, matched_vars, and matched_var_names
-		local env_unique_id_separator = getenv("REASON_DATA_UNIQUE_ID")
+		local env_unique_id_separator = ngx.var.modsecurity_unique_id
 		local data_types = {
-			{ key = "msgs", env_var = "REASON_DATA_MSGS" },
-			{ key = "matched_vars", env_var = "REASON_DATA_MATCHED_VARS" },
-			{ key = "matched_var_names", env_var = "REASON_DATA_MATCHED_VAR_NAMES" },
-			{ key = "anomaly_score", env_var = "REASON_DATA_ANOMALY_SCORE" },
+			{ key = "msgs", env_var = "modsecurity_msgs" },
+			{ key = "matched_vars", env_var = "modsecurity_matched_vars" },
+			{ key = "matched_var_names", env_var = "modsecurity_matched_var_names" },
+			{ key = "anomaly_score", env_var = "modsecurity_anomaly_score" },
 		}
 
 		for _, data_type in ipairs(data_types) do
-			local env_data = getenv(data_type.env_var)
+			local env_data = ngx.var[data_type.env_var]
 			if env_data and env_data ~= "" and env_data ~= "none" and env_unique_id_separator then
 				-- Remove leading |separator| if present
 				local separator_pattern = "|" .. env_unique_id_separator .. "|"

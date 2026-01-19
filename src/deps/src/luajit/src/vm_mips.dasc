@@ -1,6 +1,6 @@
 |// Low-level VM code for MIPS CPUs.
 |// Bytecode interpreter, fast functions and helper functions.
-|// Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
+|// Copyright (C) 2005-2026 Mike Pall. See Copyright Notice in luajit.h
 |//
 |// MIPS soft-float support contributed by Djordje Kovacevic and
 |// Stefan Pejic from RT-RK.com, sponsored by Cisco Systems, Inc.
@@ -3566,7 +3566,8 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |   addu RA, BASE, RA
     |  bne SFARG1HI, TISNUM, >2
     |.  lw SFARG1LO, LO(RB)
-    |  lui TMP1, 0x8000
+    |  beqz SFARG1LO, >3
+    |.  lui TMP1, 0x8000
     |  beq SFARG1LO, TMP1, ->vmeta_unm	// Meta handler deals with -2^31.
     |.  negu SFARG1LO, SFARG1LO
     |1:
@@ -3580,6 +3581,9 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |.  lui TMP1, 0x8000
     |  b <1
     |.  xor SFARG1HI, SFARG1HI, TMP1
+    |3:
+    |  b <1
+    |.  lui SFARG1HI, 0x8000	// -0.
     break;
   case BC_LEN:
     |  // RA = dst*8, RD = src*8

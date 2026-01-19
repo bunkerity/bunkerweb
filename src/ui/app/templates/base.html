@@ -33,7 +33,8 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="BunkerWeb user interface" />
         <meta name="author" content="Bunkerity" />
-        <title>BunkerWeb UI</title>
+        {% set page_title_fallback = (current_endpoint or "") | replace('-', ' ') | replace('_', ' ') | title %}
+        <title>{% if page_title_fallback %}{{ page_title_fallback }} - {% endif %}BunkerWeb UI</title>
         <!-- Favicon -->
         <link rel="icon"
               type="image/x-icon"
@@ -92,7 +93,7 @@
             {% endif %}
         {% endfor %}
     </head>
-    <body>
+    <body data-page-title="{{ page_title_fallback if page_title_fallback else 'BunkerWeb UI' }}">
         {% if not starting %}<input type="hidden" id="home-path" value="{{ url_for('home') }}" />{% endif %}
         <input type="hidden" id="is-read-only" value="{{ is_readonly }}" />
         <input type="hidden" id="db-read-only" value="{{ db_readonly }}" />

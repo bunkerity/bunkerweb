@@ -1,6 +1,31 @@
 # Changelog
 
-## v1.6.7~rc2 - 2026/01/??
+## v1.6.8~rc1 - 2026/01/??
+
+- [FEATURE] Refactor Templator engine to use Jinja2 for improved templating capabilities and maintainability
+- [BUGFIX] Fix Redis database selection in web UI and bwcli by renaming `REDIS_DB` to `REDIS_DATABASE` when fetching the settings
+- [BUGFIX] Fix timezone discrepancies when checking for daily PRO plugin updates by normalizing dates to UTC
+- [BUGFIX] Fix plugin deletion logic to correctly identify manually installed plugins so they are only removed when explicitly uninstalled
+- [LINUX] Check the installation type in the easy-install script to avoid issues when upgrading from an older version and the installation type is not `all-in-one` or `manager`
+- [LINUX] Enhance Easy Install script by adding an option to install a Redis server for data persistence and caching
+- [UI] Enhance page titles to dynamically reflect current context and navigation state for improved user experience
+- [DEPS] Update coreruleset-v3 version to v3.3.8
+- [DEPS] Update coreruleset-v4 version to v4.22.0
+- [DEPS] Updated luajit2 version to v2.1-20260114
+- [DEPS] Update lua-resty-openssl version to v1.7.1
+
+## v1.6.7 - 2026/01/09
+
+- [BUGFIX] Fix wrong modsecurity reason data under heavy load
+- [FEATURE] Enhance SSL/TLS negotiation by implementing dynamic ECDH curve resolution, enabling more flexible and secure key exchange configurations in preparation for post-quantum cryptography (X25519MLKEM768) with OpenSSL 3.5+
+- [UI] Restrict flash messages containing sensitive information to authenticated users only
+- [UI] Enhance breadcrumb navigation and filtering on custom configuration pages for improved user experience
+- [LINUX] Drop support of Fedora 41
+- [DOCS] Add Easy Resolve PRO plugin video tutorial link to the documentation
+- [DEPS] Updated Modsecurity nginx connector version to 1.0.4
+- [DEPS] Updated NGINX version to v1.28.1 for all integrations
+
+## v1.6.7~rc2 - 2026/01/07
 
 - [BUGFIX] Fix wrong certificate name checks in Let's Encrypt
 - [BUGFIX] Fix issues with Let's Encrypt's HTTP challenge on Linux HA integrations

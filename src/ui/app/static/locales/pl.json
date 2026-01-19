@@ -1035,6 +1035,7 @@
     "service": "Usługa",
     "show_message": "Pokaż wszystko",
     "start_date": "Data rozpoczęcia",
+    "status": "Status",
     "status_code": "Kod statusu",
     "stream": "Obsługa strumieniowa",
     "template": "Szablon",

@@ -13,6 +13,8 @@
  *
  */
 
+#include <ngx_config.h>
+
 #ifndef MODSECURITY_DDEBUG
 #define MODSECURITY_DDEBUG 0
 #endif
@@ -20,9 +22,12 @@
 
 #include "ngx_http_modsecurity_common.h"
 #include "stdio.h"
-#include <ngx_config.h>
 #include <ngx_core.h>
 #include <ngx_http.h>
+
+#ifdef _MSC_VER
+#define strdup _strdup
+#endif
 
 static ngx_int_t ngx_http_modsecurity_init(ngx_conf_t *cf);
 static void *ngx_http_modsecurity_create_main_conf(ngx_conf_t *cf);
@@ -31,7 +36,75 @@ static void *ngx_http_modsecurity_create_conf(ngx_conf_t *cf);
 static char *ngx_http_modsecurity_merge_conf(ngx_conf_t *cf, void *parent, void *child);
 static void ngx_http_modsecurity_cleanup_instance(void *data);
 static void ngx_http_modsecurity_cleanup_rules(void *data);
+static ngx_int_t ngx_http_modsecurity_get_variable(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data);
+static ngx_int_t ngx_http_modsecurity_add_variables(ngx_conf_t *cf);
+ 
+static ngx_http_variable_t modsecurity_variables[] = {
+    { ngx_string("modsecurity_reason"), NULL, ngx_http_modsecurity_get_variable, (uintptr_t) "tx:bunkerweb_reason", NGX_HTTP_VAR_CHANGEABLE|NGX_HTTP_VAR_NOCACHEABLE },
+    { ngx_string("modsecurity_unique_id"), NULL, ngx_http_modsecurity_get_variable, (uintptr_t) "tx:bunkerweb_unique_id", NGX_HTTP_VAR_CHANGEABLE|NGX_HTTP_VAR_NOCACHEABLE },
+    { ngx_string("modsecurity_rules"), NULL, ngx_http_modsecurity_get_variable, (uintptr_t) "tx:bunkerweb_rules", NGX_HTTP_VAR_CHANGEABLE|NGX_HTTP_VAR_NOCACHEABLE },
+    { ngx_string("modsecurity_msgs"), NULL, ngx_http_modsecurity_get_variable, (uintptr_t) "tx:bunkerweb_msgs", NGX_HTTP_VAR_CHANGEABLE|NGX_HTTP_VAR_NOCACHEABLE },
+    { ngx_string("modsecurity_matched_vars"), NULL, ngx_http_modsecurity_get_variable, (uintptr_t) "tx:bunkerweb_matched_vars", NGX_HTTP_VAR_CHANGEABLE|NGX_HTTP_VAR_NOCACHEABLE },
+    { ngx_string("modsecurity_matched_var_names"), NULL, ngx_http_modsecurity_get_variable, (uintptr_t) "tx:bunkerweb_matched_var_names", NGX_HTTP_VAR_CHANGEABLE|NGX_HTTP_VAR_NOCACHEABLE },
+    { ngx_string("modsecurity_anomaly_score"), NULL, ngx_http_modsecurity_get_variable, (uintptr_t) "tx:bunkerweb_anomaly_score", NGX_HTTP_VAR_CHANGEABLE|NGX_HTTP_VAR_NOCACHEABLE },
+    ngx_http_null_variable
+};
 
+static ngx_int_t
+ngx_http_modsecurity_get_variable(ngx_http_request_t *r,
+                                ngx_http_variable_value_t *v,
+                                uintptr_t data)
+{
+    ngx_http_modsecurity_ctx_t *ctx;
+    const char *var_name = (const char *)data;
+
+    ctx = ngx_http_modsecurity_get_module_ctx(r);
+    if (ctx == NULL || ctx->modsec_transaction == NULL) {
+        v->not_found = 1;
+        return NGX_OK;
+    }
+
+    const char *value = msc_get_transaction_variable(ctx->modsec_transaction, var_name);
+
+    if (value == NULL) {
+        v->not_found = 1;
+        return NGX_OK;
+    }
+
+    size_t len = ngx_strlen(value);
+    u_char *p = ngx_pnalloc(r->pool, len);
+    if (p == NULL) {
+        return NGX_ERROR;
+    }
+
+    ngx_memcpy(p, value, len);
+
+    v->data = p;
+    v->len = len;
+    v->valid = 1;
+    v->no_cacheable = 1;
+    v->not_found = 0;
+
+    return NGX_OK;
+}
+
+static ngx_int_t
+ngx_http_modsecurity_add_variables(ngx_conf_t *cf)
+{
+    ngx_http_variable_t  *var, *v;
+
+    for (v = modsecurity_variables; v->name.len; v++) {
+        var = ngx_http_add_variable(cf, &v->name, v->flags);
+        if (var == NULL) {
+            return NGX_ERROR;
+        }
+
+        var->get_handler = v->get_handler;
+        var->data = v->data;
+    }
+
+    return NGX_OK;
+}
 
 /*
  * PCRE malloc/free workaround, based on
@@ -131,7 +204,7 @@ ngx_inline char *ngx_str_to_char(ngx_str_t a, ngx_pool_t *p)
 }
 
 
-ngx_inline int
+int
 ngx_http_modsecurity_process_intervention (Transaction *transaction, ngx_http_request_t *r, ngx_int_t early_log)
 {
     char *log = NULL;
@@ -144,7 +217,7 @@ ngx_http_modsecurity_process_intervention (Transaction *transaction, ngx_http_re
 
     dd("processing intervention");
 
-    ctx = ngx_http_get_module_ctx(r, ngx_http_modsecurity_module);
+    ctx = ngx_http_modsecurity_get_module_ctx(r);
     if (ctx == NULL)
     {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
@@ -254,7 +327,7 @@ ngx_http_modsecurity_cleanup(void *data)
 }
 
 
-ngx_inline ngx_http_modsecurity_ctx_t *
+ngx_http_modsecurity_ctx_t *
 ngx_http_modsecurity_create_ctx(ngx_http_request_t *r)
 {
     ngx_str_t                          s;
@@ -308,6 +381,27 @@ ngx_http_modsecurity_create_ctx(ngx_http_request_t *r)
     return ctx;
 }
 
+ngx_inline ngx_http_modsecurity_ctx_t *
+ngx_http_modsecurity_get_module_ctx(ngx_http_request_t *r)
+{
+    ngx_http_modsecurity_ctx_t *ctx;
+    ctx = ngx_http_get_module_ctx(r, ngx_http_modsecurity_module);
+    if (ctx == NULL) {
+        /*
+         * refer <nginx>/src/http/modules/ngx_http_realip_module.c
+         * if module context was reset, the original address
+         * can still be found in the cleanup handler
+         */
+        ngx_pool_cleanup_t *cln;
+        for (cln = r->pool->cleanup; cln; cln = cln->next) {
+            if (cln->handler == ngx_http_modsecurity_cleanup) {
+                ctx = cln->data;
+                break;
+            }
+        }
+    }
+    return ctx;
+}
 
 char *
 ngx_conf_set_rules(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
@@ -595,7 +689,8 @@ ngx_http_modsecurity_init(ngx_conf_t *cf)
         return rc;
     }
 
-    return NGX_OK;
+    // Process variables
+    return ngx_http_modsecurity_add_variables(cf);
 }
 
 
@@ -661,6 +756,9 @@ ngx_http_modsecurity_init_main_conf(ngx_conf_t *cf, void *conf)
                   "%s (rules loaded inline/local/remote: %ui/%ui/%ui)",
                   MODSECURITY_NGINX_WHOAMI, mmcf->rules_inline,
                   mmcf->rules_file, mmcf->rules_remote);
+    ngx_log_error(NGX_LOG_NOTICE, cf->log, 0,
+                  "libmodsecurity3 version %s.%s.%s",
+                  MODSECURITY_MAJOR, MODSECURITY_MINOR, MODSECURITY_PATCHLEVEL);
 
     return NGX_CONF_OK;
 }

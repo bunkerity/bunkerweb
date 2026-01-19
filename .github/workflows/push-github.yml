@@ -114,10 +114,10 @@ jobs:
             Documentation : https://docs.bunkerweb.io/${{ inputs.VERSION }}/
 
             Docker tags :
-            - BunkerWeb : `bunkerity/bunkerweb:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb:${{ inputs.VERSION }}`
-            - Scheduler : `bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}`
-            - Autoconf : `bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}`
-            - UI : `bunkerity/bunkerweb-ui:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-ui:${{ inputs.VERSION }}`
+            - BunkerWeb : `bunkerity/bunkerweb:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb:${{ steps.sanitize.outputs.version }}`
+            - Scheduler : `bunkerity/bunkerweb-scheduler:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-scheduler:${{ steps.sanitize.outputs.version }}`
+            - Autoconf : `bunkerity/bunkerweb-autoconf:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-autoconf:${{ steps.sanitize.outputs.version }}`
+            - UI : `bunkerity/bunkerweb-ui:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-ui:${{ steps.sanitize.outputs.version }}`
 
             Linux packages : https://packagecloud.io/app/bunkerity/bunkerweb/search?q=${{ inputs.VERSION }}&filter=all&dist=
 
@@ -143,10 +143,10 @@ jobs:
             Documentation : https://docs.bunkerweb.io/${{ inputs.VERSION }}/
 
             Docker tags :
-            - BunkerWeb : `bunkerity/bunkerweb:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb:${{ inputs.VERSION }}`
-            - Scheduler : `bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}`
-            - Autoconf : `bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}`
-            - UI : `bunkerity/bunkerweb-ui:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-ui:${{ inputs.VERSION }}`
+            - BunkerWeb : `bunkerity/bunkerweb:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb:${{ steps.sanitize.outputs.version }}`
+            - Scheduler : `bunkerity/bunkerweb-scheduler:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-scheduler:${{ steps.sanitize.outputs.version }}`
+            - Autoconf : `bunkerity/bunkerweb-autoconf:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-autoconf:${{ steps.sanitize.outputs.version }}`
+            - UI : `bunkerity/bunkerweb-ui:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-ui:${{ steps.sanitize.outputs.version }}`
 
             Linux packages : https://packagecloud.io/app/bunkerity/bunkerweb/search?q=${{ inputs.VERSION }}&filter=all&dist=
 

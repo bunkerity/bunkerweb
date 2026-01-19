@@ -1032,6 +1032,7 @@
     "service": "Servicio",
     "show_message": "Mostrar Todo",
     "start_date": "Fecha de Inicio",
+    "status": "Estado",
     "status_code": "Código de Estado",
     "stream": "Soporte Stream",
     "template": "Plantilla",

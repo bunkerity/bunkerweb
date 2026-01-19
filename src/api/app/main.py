@@ -1,10 +1,12 @@
 from contextlib import suppress
+from functools import lru_cache
+from io import StringIO
 from os import sep
 from os.path import join
 from re import split
 from sys import path as sys_path
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from traceback import format_exc
 from ipaddress import ip_address, ip_network, IPv4Network, IPv6Network
@@ -12,6 +14,8 @@ from ipaddress import ip_address, ip_network, IPv4Network, IPv6Network
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
+
+from yaml import safe_dump as yaml_dump
 
 from common_utils import get_version  # type: ignore
 
@@ -106,6 +110,14 @@ def create_app() -> FastAPI:
         with suppress(Exception):
             LOGGER.debug(f"Unhandled exception: {exc}\n{format_exc()}")
         return JSONResponse(status_code=500, content={"status": "error", "message": "internal error"})
+
+    @app.get("/openapi.yaml", include_in_schema=False)
+    @lru_cache()
+    def read_openapi_yaml():
+        openapi_json = app.openapi()
+        yaml_s = StringIO()
+        yaml_dump(openapi_json, yaml_s)
+        return Response(yaml_s.getvalue(), media_type="text/yaml")
 
     return app
 

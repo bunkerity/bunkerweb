@@ -218,11 +218,7 @@ fi
 # Set CFALGS
 export CFLAGS="$CFLAGS -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1"
 
-if [[ "$OS" = "fedora" && "$OS_VERSION" != "41" ]] ; then
-	export CHANGE_DIR="/tmp/bunkerweb/deps/src/nginx-1.28.1"
-else
-	export CHANGE_DIR="/tmp/bunkerweb/deps/src/nginx"
-fi
+export CHANGE_DIR="/tmp/bunkerweb/deps/src/nginx"
 do_and_check_cmd mv auto/configure ./
 echo '#!/bin/bash' > "${CHANGE_DIR}/configure-fix.sh"
 echo "./configure $CONFARGS --add-dynamic-module=/tmp/bunkerweb/deps/src/headers-more-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/nginx_cookie_flag_module --add-dynamic-module=/tmp/bunkerweb/deps/src/lua-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/ngx_brotli --add-dynamic-module=/tmp/bunkerweb/deps/src/ngx_devel_kit --add-dynamic-module=/tmp/bunkerweb/deps/src/stream-lua-nginx-module" --add-dynamic-module=/tmp/bunkerweb/deps/src/modsecurity-nginx --add-dynamic-module=/tmp/bunkerweb/deps/src/lua-upstream-nginx-module >> "${CHANGE_DIR}/configure-fix.sh"

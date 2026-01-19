@@ -117,30 +117,9 @@ start() {
 
     export CAPTURE_OUTPUT="yes"
 
-    # Export all variables from variables.env
-    if [ -f /etc/bunkerweb/variables.env ]; then
-        while IFS='=' read -r key value; do
-            # Skip empty lines and comments
-            [[ -z "$key" || "$key" =~ ^# ]] && continue
-            # Trim whitespace from key
-            key=$(echo "$key" | xargs)
-            # Export the variable (value may contain spaces)
-            export "$key=$value"
-        done < /etc/bunkerweb/variables.env
-    fi
-
-    # Export all variables from ui.env
     # But we keep the above explicit exports to ensure defaults are properly set
-    if [ -f /etc/bunkerweb/ui.env ]; then
-        while IFS='=' read -r key value; do
-            # Skip empty lines and comments
-            [[ -z "$key" || "$key" =~ ^# ]] && continue
-            # Trim whitespace from key
-            key=$(echo "$key" | xargs)
-            # Export the variable (value may contain spaces)
-            export "$key=$value"
-        done < /etc/bunkerweb/ui.env
-    fi
+    export_env_file /etc/bunkerweb/variables.env
+    export_env_file /etc/bunkerweb/ui.env
 
     if [ -f "/var/run/bunkerweb/tmp-ui.pid" ]; then
         rm -f /var/run/bunkerweb/tmp-ui.pid

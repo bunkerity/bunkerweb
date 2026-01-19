@@ -1,6 +1,6 @@
 |// Low-level VM code for ARM CPUs.
 |// Bytecode interpreter, fast functions and helper functions.
-|// Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
+|// Copyright (C) 2005-2026 Mike Pall. See Copyright Notice in luajit.h
 |
 |.arch arm
 |.section code_op, code_sub
@@ -3125,13 +3125,16 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  bhi ->vmeta_unm
     |  eorne CARG2, CARG2, #0x80000000
     |  bne >5
-    |  rsbseq CARG1, CARG1, #0
+    |  rsbs CARG1, CARG1, #0
+    |  ldrdeq CARG12, >8
     |  ldrdvs CARG12, >9
     |5:
     |  strd CARG12, [BASE, RA]
     |   ins_next3
     |
     |.align 8
+    |8:
+    |  .long 0x00000000, 0x80000000	// -0.
     |9:
     |  .long 0x00000000, 0x41e00000	// 2^31.
     break;

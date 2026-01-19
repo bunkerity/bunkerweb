@@ -1715,7 +1715,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.7-rc2
+        image: bunkerity/bunkerweb:1.6.8-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1732,7 +1732,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.7-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -2925,11 +2925,13 @@ The Let's Encrypt plugin supports a wide range of DNS providers for DNS challeng
 | `desec`           | deSEC            | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/desec-io/certbot-dns-desec/blob/main/README.md)                    |
 | `digitalocean`    | DigitalOcean     | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-digitalocean.readthedocs.io/en/stable/)                           |
 | `domainoffensive` | Domain-Offensive | `api_token`                                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/domainoffensive/certbot-dns-domainoffensive/blob/master/README.md) |
+| `domeneshop`      | Domeneshop       | `token`<br>`secret`                                                                                          |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/domeneshop/certbot-dns-domeneshop/blob/master/README.rst)          |
 | `dnsimple`        | DNSimple         | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsimple.readthedocs.io/en/stable/)                               |
 | `dnsmadeeasy`     | DNS Made Easy    | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)                            |
 | `duckdns`         | DuckDNS          | `duckdns_token`                                                                                              |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/infinityofspace/certbot_dns_duckdns/blob/main/Readme.md)           |
 | `dynu`            | Dynu             | `auth_token`                                                                                                 |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/bikram990/certbot-dns-dynu/blob/main/README.md)                    |
 | `gehirn`          | Gehirn DNS       | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                                 |
+| `godaddy`         | GoDaddy          | `key`<br>`secret`                                                                                            | `ttl` (default: `600`)                                                                                                                                                                                                                                                   | [Documentation](https://github.com/miigotu/certbot-dns-godaddy/blob/main/README.md)                   |
 | `google`          | Google Cloud     | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (default: `service_account`)<br>`auth_uri` (default: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (default: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (default: `https://www.googleapis.com/oauth2/v1/certs`) | [Documentation](https://certbot-dns-google.readthedocs.io/en/stable/)                                 |
 | `infomaniak`      | Infomaniak       | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/infomaniak/certbot-dns-infomaniak/blob/main/README.rst)            |
 | `ionos`           | IONOS            | `prefix`<br>`secret`                                                                                         | `endpoint` (default: `https://api.hosting.ionos.com`)                                                                                                                                                                                                                    | [Documentation](https://github.com/helgeerbe/certbot-dns-ionos/blob/master/README.md)                 |
@@ -3728,8 +3730,8 @@ Follow these steps to configure and use ModSecurity:
 
 Select a CRS version to best match your security needs:
 
-- **`3`**: Stable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`**: Stable [v4.21.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.21.0) (**default**).
+- **`3`**: Stable [v3.3.8](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8).
+- **`4`**: Stable [v4.22.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.22.0) (**default**).
 - **`nightly`**: [Nightly build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) offering the latest rule updates.
 
 !!! example "Nightly Build"
@@ -4004,6 +4006,69 @@ Follow these steps to deploy mutual TLS with confidence:
     MTLS_VERIFY_CLIENT: "optional_no_ca"
     MTLS_FORWARD_CLIENT_HEADERS: "no"
     ```
+
+## OpenAPI Validator <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :x:
+
+Validates incoming HTTP requests against an OpenAPI / Swagger specification.
+
+| Setting                      | Default                             | Context   | Multiple | Description                                                                                     |
+| ---------------------------- | ----------------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------- |
+| `USE_OPENAPI_VALIDATOR`      | `no`                                | multisite | no       | Enable OpenAPI route validation for this site.                                                  |
+| `OPENAPI_SPEC`               |                                     | multisite | no       | Absolute path or HTTP(S) URL to the OpenAPI (swagger) document in JSON format.                  |
+| `OPENAPI_BASE_PATH`          |                                     | multisite | no       | Optional base path prefix to prepend to every path in the spec (overrides servers[*].url path). |
+| `OPENAPI_ALLOW_UNSPECIFIED`  | `no`                                | multisite | no       | Allow requests to paths not listed in the specification (otherwise they are denied).            |
+| `OPENAPI_ALLOW_INSECURE_URL` | `no`                                | multisite | no       | Allow fetching the OpenAPI spec over plain HTTP (not recommended).                              |
+| `OPENAPI_IGNORE_URLS`        | `^/docs$ ^/redoc$ ^/openapi\.json$` | multisite | no       | List of URL regexes to bypass OpenAPI validation (space separated).                             |
+| `OPENAPI_CACHE_TTL`          | `300`                               | global    | no       | Seconds to cache the parsed specification in shared cache.                                      |
+| `OPENAPI_MAX_SPEC_SIZE`      | `2M`                                | global    | no       | Maximum allowed size of the OpenAPI document (accepts suffix k/M/G).                            |
+
+## OpenID Connect <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :x:
+
+OpenID Connect authentication plugin providing SSO capabilities with identity providers.
+
+| Setting                                   | Default                | Context   | Multiple | Description                                                                                                                                             |
+| ----------------------------------------- | ---------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_OPENIDC`                             | `no`                   | multisite | no       | Enable or disable OpenID Connect authentication.                                                                                                        |
+| `OPENIDC_DISCOVERY`                       |                        | multisite | no       | OpenID Connect discovery URL (e.g. https://idp.example.com/.well-known/openid-configuration).                                                           |
+| `OPENIDC_CLIENT_ID`                       |                        | multisite | no       | OAuth 2.0 client identifier registered with the IdP.                                                                                                    |
+| `OPENIDC_CLIENT_SECRET`                   |                        | multisite | no       | OAuth 2.0 client secret registered with the IdP.                                                                                                        |
+| `OPENIDC_TOKEN_ENDPOINT_AUTH_METHOD`      | `basic`                | multisite | no       | Token endpoint auth method: basic (recommended, HTTP Basic), post (POST body), secret_jwt (JWT with client secret), private_key_jwt (JWT with RSA key). |
+| `OPENIDC_CLIENT_RSA_PRIVATE_KEY`          |                        | multisite | no       | PEM-encoded RSA private key for private_key_jwt authentication.                                                                                         |
+| `OPENIDC_CLIENT_RSA_PRIVATE_KEY_ID`       |                        | multisite | no       | Optional key ID (kid) for private_key_jwt authentication.                                                                                               |
+| `OPENIDC_CLIENT_JWT_ASSERTION_EXPIRES_IN` |                        | multisite | no       | JWT assertion lifetime in seconds (empty to use library default).                                                                                       |
+| `OPENIDC_REDIRECT_URI`                    | `/callback`            | multisite | no       | URI path where the IdP redirects after authentication.                                                                                                  |
+| `OPENIDC_SCOPE`                           | `openid email profile` | multisite | no       | Space-separated list of OAuth 2.0 scopes to request.                                                                                                    |
+| `OPENIDC_AUTHORIZATION_PARAMS`            |                        | multisite | no       | Additional authorization params as comma-separated key=value pairs (e.g. audience=api,resource=xyz). URL-encode values if needed.                       |
+| `OPENIDC_USE_NONCE`                       | `yes`                  | multisite | no       | Use nonce in authentication requests to prevent replay attacks.                                                                                         |
+| `OPENIDC_USE_PKCE`                        | `no`                   | multisite | no       | Use PKCE (Proof Key for Code Exchange) for authorization code flow.                                                                                     |
+| `OPENIDC_FORCE_REAUTHORIZE`               | `no`                   | multisite | no       | Force re-authorization on every request (not recommended for production).                                                                               |
+| `OPENIDC_REFRESH_SESSION_INTERVAL`        |                        | multisite | no       | Interval in seconds to silently re-authenticate (empty to disable).                                                                                     |
+| `OPENIDC_IAT_SLACK`                       | `120`                  | multisite | no       | Allowed clock skew in seconds for token validation.                                                                                                     |
+| `OPENIDC_ACCESS_TOKEN_EXPIRES_IN`         | `3600`                 | multisite | no       | Default access token lifetime (seconds) if not provided by IdP.                                                                                         |
+| `OPENIDC_RENEW_ACCESS_TOKEN_ON_EXPIRY`    | `yes`                  | multisite | no       | Automatically renew access token using refresh token when expired.                                                                                      |
+| `OPENIDC_ACCEPT_UNSUPPORTED_ALG`          | `no`                   | multisite | no       | Accept tokens signed with unsupported algorithms (not recommended).                                                                                     |
+| `OPENIDC_LOGOUT_PATH`                     | `/logout`              | multisite | no       | URI path for logout requests.                                                                                                                           |
+| `OPENIDC_REVOKE_TOKENS_ON_LOGOUT`         | `no`                   | multisite | no       | Revoke tokens at the IdP when logging out.                                                                                                              |
+| `OPENIDC_REDIRECT_AFTER_LOGOUT_URI`       |                        | multisite | no       | URI to redirect after logout (leave empty for IdP default).                                                                                             |
+| `OPENIDC_POST_LOGOUT_REDIRECT_URI`        |                        | multisite | no       | URI to redirect after IdP logout is complete.                                                                                                           |
+| `OPENIDC_TIMEOUT_CONNECT`                 | `10000`                | multisite | no       | Connection timeout in milliseconds for IdP requests.                                                                                                    |
+| `OPENIDC_TIMEOUT_SEND`                    | `10000`                | multisite | no       | Send timeout in milliseconds for IdP requests.                                                                                                          |
+| `OPENIDC_TIMEOUT_READ`                    | `10000`                | multisite | no       | Read timeout in milliseconds for IdP requests.                                                                                                          |
+| `OPENIDC_SSL_VERIFY`                      | `yes`                  | multisite | no       | Verify SSL certificates when communicating with the IdP.                                                                                                |
+| `OPENIDC_KEEPALIVE`                       | `yes`                  | multisite | no       | Enable HTTP keepalive for connections to the IdP.                                                                                                       |
+| `OPENIDC_HTTP_PROXY`                      |                        | multisite | no       | HTTP proxy URL for IdP connections (e.g. http://proxy:8080).                                                                                            |
+| `OPENIDC_HTTPS_PROXY`                     |                        | multisite | no       | HTTPS proxy URL for IdP connections (e.g. http://proxy:8080).                                                                                           |
+| `OPENIDC_USER_HEADER`                     | `X-User`               | multisite | no       | Header to pass user info to upstream (empty to disable).                                                                                                |
+| `OPENIDC_USER_HEADER_CLAIM`               | `sub`                  | multisite | no       | ID token claim to use for the user header (e.g. sub, email, preferred_username).                                                                        |
+| `OPENIDC_DISPLAY_CLAIM`                   | `preferred_username`   | multisite | no       | Claim to use for display in logs and metrics (e.g. preferred_username, name, email). Falls back to User Header Claim if not found.                      |
+| `OPENIDC_DISCOVERY_DICT_SIZE`             | `1m`                   | global    | no       | Size of the shared dictionary to cache discovery data.                                                                                                  |
+| `OPENIDC_JWKS_DICT_SIZE`                  | `1m`                   | global    | no       | Size of the shared dictionary to cache JWKS data.                                                                                                       |
 
 ## PHP
 
@@ -5126,14 +5191,15 @@ Follow these steps to configure and use the SSL feature:
 
 ### Configuration Settings
 
-| Setting                       | Default           | Context   | Multiple | Description                                                                                                         |
-| ----------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
-| `REDIRECT_HTTP_TO_HTTPS`      | `no`              | multisite | no       | **Redirect HTTP to HTTPS:** When set to `yes`, all HTTP requests are redirected to HTTPS.                           |
-| `AUTO_REDIRECT_HTTP_TO_HTTPS` | `yes`             | multisite | no       | **Auto Redirect HTTP to HTTPS:** When set to `yes`, automatically redirects HTTP to HTTPS if HTTPS is detected.     |
-| `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | multisite | no       | **SSL Protocols:** Space-separated list of SSL/TLS protocols to support.                                            |
-| `SSL_CIPHERS_LEVEL`           | `modern`          | multisite | no       | **SSL Ciphers Level:** Preset security level for cipher suites (`modern`, `intermediate`, or `old`).                |
-| `SSL_CIPHERS_CUSTOM`          |                   | multisite | no       | **Custom SSL Ciphers:** Colon-separated list of cipher suites to use for SSL/TLS connections (overrides level).     |
-| `SSL_SESSION_CACHE_SIZE`      | `10m`             | multisite | no       | **SSL Session Cache Size:** Size of the SSL session cache (e.g., `10m`, `512k`). Set to `off` or `none` to disable. |
+| Setting                       | Default           | Context   | Multiple | Description                                                                                                                        |
+| ----------------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `REDIRECT_HTTP_TO_HTTPS`      | `no`              | multisite | no       | **Redirect HTTP to HTTPS:** When set to `yes`, all HTTP requests are redirected to HTTPS.                                          |
+| `AUTO_REDIRECT_HTTP_TO_HTTPS` | `yes`             | multisite | no       | **Auto Redirect HTTP to HTTPS:** When set to `yes`, automatically redirects HTTP to HTTPS if HTTPS is detected.                    |
+| `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | multisite | no       | **SSL Protocols:** Space-separated list of SSL/TLS protocols to support.                                                           |
+| `SSL_CIPHERS_LEVEL`           | `modern`          | multisite | no       | **SSL Ciphers Level:** Preset security level for cipher suites (`modern`, `intermediate`, or `old`).                               |
+| `SSL_CIPHERS_CUSTOM`          |                   | multisite | no       | **Custom SSL Ciphers:** Colon-separated list of cipher suites to use for SSL/TLS connections (overrides level).                    |
+| `SSL_ECDH_CURVE`              | `auto`            | multisite | no       | **SSL ECDH Curves:** Colon-separated list of ECDH curves (TLS groups) or `auto` for smart selection (prefers PQC on OpenSSL 3.5+). |
+| `SSL_SESSION_CACHE_SIZE`      | `10m`             | multisite | no       | **SSL Session Cache Size:** Size of the SSL session cache (e.g., `10m`, `512k`). Set to `off` or `none` to disable.                |
 
 !!! tip "SSL Labs Testing"
     After configuring your SSL settings, use the [Qualys SSL Labs Server Test](https://www.ssllabs.com/ssltest/) to verify your configuration and check for potential security issues. A proper BunkerWeb SSL configuration should achieve an A+ rating.

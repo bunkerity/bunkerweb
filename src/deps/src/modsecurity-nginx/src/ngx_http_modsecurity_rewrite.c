@@ -13,6 +13,8 @@
  *
  */
 
+#include <ngx_config.h>
+
 #ifndef MODSECURITY_DDEBUG
 #define MODSECURITY_DDEBUG 0
 #endif
@@ -44,7 +46,7 @@ ngx_http_modsecurity_rewrite_handler(ngx_http_request_t *r)
 
     dd("catching a new _rewrite_ phase handler");
 
-    ctx = ngx_http_get_module_ctx(r, ngx_http_modsecurity_module);
+    ctx = ngx_http_modsecurity_get_module_ctx(r);
 
     dd("recovering ctx: %p", ctx);
 
@@ -83,6 +85,45 @@ ngx_http_modsecurity_rewrite_handler(ngx_http_request_t *r)
         if (client_addr == (char*)-1) {
             return NGX_HTTP_INTERNAL_SERVER_ERROR;
         }
+
+#if defined(MODSECURITY_CHECK_VERSION)
+#if MODSECURITY_VERSION_NUM >= 30130100
+        ngx_str_t hostname;
+        hostname.len = 0;
+        // first check if Nginx received a Host header and it's usable
+        // (i.e. not empty)
+        // if yes, we can use that
+        if (r->headers_in.server.len > 0) {
+            hostname.len = r->headers_in.server.len;
+            hostname.data = r->headers_in.server.data;
+        }
+        else {
+            // otherwise we try to use the server config, namely the
+            // server_name $SERVER_NAME
+            // directive
+            // for eg. in default config, server_name is "_"
+            // possible all requests without a Host header will be
+            // handled by this server block
+            ngx_http_core_srv_conf_t  *cscf;
+            cscf = ngx_http_get_module_srv_conf(r, ngx_http_core_module);
+            if (cscf->server_name.len > 0) {
+                hostname.len = cscf->server_name.len;
+                hostname.data = cscf->server_name.data;
+            }
+        }
+        if (hostname.len > 0) {
+            const char *host_name = ngx_str_to_char(hostname, r->pool);
+            if (host_name == (char*)-1 || host_name == NULL) {
+                return NGX_HTTP_INTERNAL_SERVER_ERROR;
+            }
+            else {
+                // set the hostname in the transaction
+                // this function is only available in ModSecurity 3.0.13 and later
+                msc_set_request_hostname(ctx->modsec_transaction, (const unsigned char *)host_name);
+            }
+        }
+#endif
+#endif
 
         ngx_str_t s;
         u_char addr[NGX_SOCKADDR_STRLEN];

@@ -1,11 +1,12 @@
+from contextlib import suppress
 from hashlib import new as new_hash
 from io import BytesIO
-from os import getenv, sep, access, R_OK
+from os import getenv, sched_getaffinity, sep, access, R_OK, cpu_count
 from pathlib import Path
 from platform import machine
 from typing import Dict, List, Optional, Union, Any
+from math import ceil
 import logging
-from contextlib import suppress
 
 
 def handle_docker_secrets() -> Dict[str, str]:
@@ -88,6 +89,38 @@ def get_os_info() -> Dict[str, str]:
             os_data[line.split("=")[0].lower()] = line.split("=")[1].strip('"')
 
     return os_data
+
+
+def _cgroup_cpu_limit() -> Optional[int]:
+    with suppress(Exception):
+        cpu_max = Path("/sys/fs/cgroup/cpu.max").read_text().strip()
+        quota, period = cpu_max.split()
+        if quota != "max":
+            quota_value = int(quota)
+            period_value = int(period)
+            if quota_value > 0 and period_value > 0:
+                return max(1, ceil(quota_value / period_value))
+
+    with suppress(Exception):
+        quota_value = int(Path("/sys/fs/cgroup/cpu/cpu.cfs_quota_us").read_text().strip())
+        period_value = int(Path("/sys/fs/cgroup/cpu/cpu.cfs_period_us").read_text().strip())
+        if quota_value > 0 and period_value > 0:
+            return max(1, ceil(quota_value / period_value))
+
+    return None
+
+
+def effective_cpu_count() -> int:
+    candidates = [cpu_count() or 1]
+
+    with suppress(Exception):
+        candidates.append(len(sched_getaffinity(0)))
+
+    cgroup_limit = _cgroup_cpu_limit()
+    if cgroup_limit:
+        candidates.append(cgroup_limit)
+
+    return max(1, min(candidates))
 
 
 def file_hash(file: Union[str, Path], *, algorithm: str = "sha512") -> str:

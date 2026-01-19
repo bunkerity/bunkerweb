@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from time import time
 from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
@@ -23,10 +23,18 @@ def pro_page():
         online_services += 1
 
     metadata = DB.get_metadata()
-    current_day = datetime.now().astimezone().replace(hour=0, minute=0, second=0, microsecond=0)
+    # Convert current date to UTC and normalize to midnight for daily comparison
+    current_day_utc = datetime.now().astimezone().astimezone(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     pro_expires_in = "Unknown"
     if metadata["pro_expire"]:
-        exp = (metadata["pro_expire"].astimezone() - current_day).total_seconds()
+        # Ensure pro_expire is timezone-aware UTC (MariaDB returns naive datetime stored as UTC)
+        pro_expire = metadata["pro_expire"]
+        if pro_expire.tzinfo is None:
+            pro_expire = pro_expire.replace(tzinfo=timezone.utc)
+        else:
+            pro_expire = pro_expire.astimezone(timezone.utc)
+
+        exp = (pro_expire - current_day_utc).total_seconds()
         remain = ("Unknown", "Unknown") if exp <= 0 else get_remain(exp)
         pro_expires_in = remain[0]
 

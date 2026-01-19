@@ -52,6 +52,15 @@
       "regex": "^(?!:)(:?[A-Za-z0-9-]+)*$",
       "type": "text"
     },
+    "SSL_ECDH_CURVE": {
+      "context": "multisite",
+      "default": "auto",
+      "help": "Preferred ECDH curves (TLS groups) for key exchange. Use \"auto\" for smart selection (prefers PQC groups like X25519MLKEM768 on OpenSSL 3.5+ when available).",
+      "id": "ssl-ecdh-curve",
+      "label": "SSL ECDH Curves",
+      "regex": "^[A-Za-z0-9:_-]+$",
+      "type": "text"
+    },
     "SSL_SESSION_CACHE_SIZE": {
       "context": "multisite",
       "default": "10m",

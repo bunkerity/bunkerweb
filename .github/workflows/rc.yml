@@ -110,7 +110,6 @@ jobs:
             ubuntu,
             debian-bookworm,
             debian-trixie,
-            fedora-41,
             fedora-42,
             fedora-43,
             rhel-8,
@@ -127,8 +126,6 @@ jobs:
             package: deb
           - linux: debian-trixie
             package: deb
-          - linux: fedora-41
-            package: rpm
           - linux: fedora-42
             package: rpm
           - linux: fedora-43
@@ -236,7 +233,6 @@ jobs:
             ubuntu,
             debian-bookworm,
             debian-trixie,
-            fedora-41,
             fedora-42,
             fedora-43,
             el-8,
@@ -263,11 +259,6 @@ jobs:
             suffix: ""
             version: trixie
             package: deb
-          - linux: fedora-41
-            separator: "-"
-            suffix: "1."
-            version: 41
-            package: rpm
           - linux: fedora-42
             separator: "-"
             suffix: "1."
@@ -307,9 +298,6 @@ jobs:
           - linux: debian-trixie
             arch: amd64
             package_arch: amd64
-          - linux: fedora-41
-            arch: amd64
-            package_arch: x86_64
           - linux: fedora-42
             arch: amd64
             package_arch: x86_64
@@ -337,9 +325,6 @@ jobs:
           - linux: debian-trixie
             arch: arm64
             package_arch: arm64
-          - linux: fedora-41
-            arch: arm64
-            package_arch: aarch64
           - linux: fedora-42
             arch: arm64
             package_arch: aarch64

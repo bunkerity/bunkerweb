@@ -1020,6 +1020,7 @@
     "service": "Servis",
     "show_message": "Tümünü Göster",
     "start_date": "Başlangıç Tarihi",
+    "status": "Durum",
     "status_code": "Durum Kodu",
     "stream": "Akış Desteği",
     "template": "Şablon",

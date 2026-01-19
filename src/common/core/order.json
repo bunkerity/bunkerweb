@@ -8,7 +8,13 @@
     "limit",
     "authbasic",
     "securitytxt",
-    "robotstxt"
+    "robotstxt",
+    "crowdsec",
+    "dnsbl",
+    "headers",
+    "customcert",
+    "letsencrypt",
+    "selfsigned"
   ],
   "init_worker": ["redis", "bunkernet", "dnsbl"],
   "set": [
@@ -28,6 +34,7 @@
     "greylist",
     "country",
     "dnsbl",
+    "crowdsec",
     "bunkernet",
     "reversescan",
     "limit",
