@@ -4823,7 +4823,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <ol>
 <li><strong>Systemanalyse</strong>: Erkennt Ihr Betriebssystem und überprüft es anhand der Liste der unterstützten Distributionen.</li>
 <li><strong>Anpassung der Installation</strong>: Im interaktiven Modus werden Sie aufgefordert, einen Installationstyp (All-In-One, Manager, Worker usw.) auszuwählen und zu entscheiden, ob der webbasierte Einrichtungsassistent aktiviert werden soll.</li>
-<li><strong>Optionale Integrationen</strong>: Bietet an, die <a href="#crowdsec-integration-with-the-script">CrowdSec Security Engine</a> automatisch zu installieren und zu konfigurieren.</li>
+<li><strong>Optionale Integrationen</strong>: Bietet an, die <a href="#crowdsec-integration-with-the-script">CrowdSec Security Engine</a> sowie Redis/Valkey für gemeinsam genutzten Cache/Sitzungsdaten automatisch zu installieren und zu konfigurieren.</li>
 <li><strong>Abhängigkeitsmanagement</strong>: Installiert die korrekte Version von NGINX, die von BunkerWeb benötigt wird, aus offiziellen Quellen und sperrt die Version, um unbeabsichtigte Upgrades zu verhindern.</li>
 <li><strong>BunkerWeb-Installation</strong>: Fügt das BunkerWeb-Paket-Repository hinzu, installiert die erforderlichen Pakete und sperrt die Version.</li>
 <li><strong>Dienstkonfiguration</strong>: Richtet die <code>systemd</code>-Dienste entsprechend dem von Ihnen gewählten Installationstyp ein und aktiviert sie.</li>
@@ -4844,6 +4844,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <li><strong>Einrichtungsassistent</strong>: Wählen Sie, ob der webbasierte Konfigurationsassistent aktiviert werden soll. Dies wird für Erstanwender dringend empfohlen.</li>
 <li><strong>CrowdSec-Integration</strong>: Entscheiden Sie sich für die Installation der CrowdSec-Sicherheits-Engine für erweiterten Echtzeit-Bedrohungsschutz. Nur für Full Stack-Installationen verfügbar.</li>
 <li><strong>CrowdSec AppSec</strong>: Wenn Sie sich für die Installation von CrowdSec entscheiden, können Sie auch die Application Security (AppSec)-Komponente aktivieren, die WAF-Funktionen hinzufügt.</li>
+<li><strong>Redis/Valkey-Integration</strong>: Aktiviert Redis/Valkey, um Sitzungsdaten, Metriken und Sicherheitsdaten über mehrere Knoten zu teilen – für Clustering und Load-Balancing. Lokal installieren oder bestehenden Server verwenden. Nur für Full Stack und Manager verfügbar.</li>
 <li><strong>DNS-Resolver</strong>: Für Full Stack-, Manager- und Worker-Installationen können Sie optional benutzerdefinierte DNS-Resolver-IPs angeben.</li>
 <li><strong>Interne API HTTPS</strong>: Für Full Stack-, Manager- und Worker-Installationen können Sie HTTPS für die interne API-Kommunikation zwischen Scheduler/Manager und BunkerWeb/Worker-Instanzen aktivieren (Standard: nur HTTP).</li>
 <li><strong>API-Dienst</strong>: Für Full Stack- und Manager-Installationen können Sie den optionalen externen API-Dienst aktivieren. Er ist bei Linux-Installationen standardmäßig deaktiviert.</li>
@@ -4961,6 +4962,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <td><code>--crowdsec-appsec</code></td>
 <td>Installiert CrowdSec mit der AppSec-Komponente (einschließlich WAF-Funktionen).</td>
 </tr>
+<tr>
+<td><code>--redis</code></td>
+<td>Installiert und konfiguriert Redis lokal.</td>
+</tr>
+<tr>
+<td><code>--no-redis</code></td>
+<td>Überspringt die Redis-Integration.</td>
+</tr>
 </tbody>
 </table>
 <p><strong>Erweiterte Optionen:</strong></p>
@@ -4996,6 +5005,42 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <td><code>--no-auto-backup</code></td>
 <td>Automatische Sicherung überspringen (Sie MÜSSEN es manuell getan haben).</td>
 </tr>
+<tr>
+<td><code>--redis-host HOST</code></td>
+<td>Redis-Host für einen bestehenden Redis/Valkey-Server.</td>
+</tr>
+<tr>
+<td><code>--redis-port PORT</code></td>
+<td>Redis-Port für einen bestehenden Redis/Valkey-Server.</td>
+</tr>
+<tr>
+<td><code>--redis-database DB</code></td>
+<td>Redis-Datenbanknummer.</td>
+</tr>
+<tr>
+<td><code>--redis-username USER</code></td>
+<td>Redis-Benutzername (Redis 6+).</td>
+</tr>
+<tr>
+<td><code>--redis-password PASS</code></td>
+<td>Redis-Passwort.</td>
+</tr>
+<tr>
+<td><code>--redis-ssl</code></td>
+<td>SSL/TLS für die Redis-Verbindung aktivieren.</td>
+</tr>
+<tr>
+<td><code>--redis-no-ssl</code></td>
+<td>SSL/TLS für die Redis-Verbindung deaktivieren.</td>
+</tr>
+<tr>
+<td><code>--redis-ssl-verify</code></td>
+<td>Redis-SSL-Zertifikat prüfen.</td>
+</tr>
+<tr>
+<td><code>--redis-no-ssl-verify</code></td>
+<td>Redis-SSL-Zertifikat nicht prüfen.</td>
+</tr>
 </tbody>
 </table>
 <p><strong>Beispielverwendung:</strong></p>
@@ -5023,6 +5068,9 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--work
 <span class="c1"># Vollständige Installation mit CrowdSec und AppSec</span>
 sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--crowdsec-appsec
 
+<span class="c1"># Vollständige Installation mit bestehendem Redis-Server</span>
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--redis-host<span class="w"> </span>redis.example.com<span class="w"> </span>--redis-password<span class="w"> </span><span class="s2">&quot;your-strong-password&quot;</span>
+
 <span class="c1"># Stille nicht-interaktive Installation</span>
 sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--quiet<span class="w"> </span>--yes
 
@@ -5044,6 +5092,11 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--yes<
 <ul>
 <li>CrowdSec-Optionen (<code>--crowdsec</code>, <code>--crowdsec-appsec</code>) sind nur mit dem Installationstyp <code>--full</code> (Standard) kompatibel</li>
 <li>Sie können nicht mit <code>--manager</code>, <code>--worker</code>, <code>--scheduler-only</code>, <code>--ui-only</code> oder <code>--api-only</code> Installationen verwendet werden</li>
+</ul>
+<p><strong>Redis-Einschränkungen:</strong></p>
+<ul>
+<li>Redis-Optionen (<code>--redis</code>, <code>--redis-*</code>) sind nur mit <code>--full</code> (Standard) und <code>--manager</code> kompatibel</li>
+<li>Sie können nicht mit <code>--worker</code>, <code>--scheduler-only</code>, <code>--ui-only</code> oder <code>--api-only</code> Installationen verwendet werden</li>
 </ul>
 <p><strong>Verfügbarkeit des API-Dienstes:</strong></p>
 <ul>

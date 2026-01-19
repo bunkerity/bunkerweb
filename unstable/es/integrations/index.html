@@ -4876,7 +4876,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <ol>
 <li><strong>Análisis del sistema</strong>: Detecta tu sistema operativo y lo verifica contra la lista de distribuciones compatibles.</li>
 <li><strong>Personalización de la instalación</strong>: En modo interactivo, te pide que elijas un tipo de instalación (Todo en uno, Gestor, Trabajador, etc.) y decidas si habilitar el asistente de configuración basado en la web.</li>
-<li><strong>Integraciones opcionales</strong>: Ofrece instalar y configurar automáticamente el <a href="#crowdsec-integration-with-the-script">Motor de Seguridad CrowdSec</a>.</li>
+<li><strong>Integraciones opcionales</strong>: Ofrece instalar y configurar automáticamente el <a href="#crowdsec-integration-with-the-script">Motor de Seguridad CrowdSec</a> y Redis/Valkey para caché y sesiones compartidas.</li>
 <li><strong>Gestión de dependencias</strong>: Instala la versión correcta de NGINX requerida por BunkerWeb desde fuentes oficiales y bloquea la versión para evitar actualizaciones no deseadas.</li>
 <li><strong>Instalación de BunkerWeb</strong>: Añade el repositorio de paquetes de BunkerWeb, instala los paquetes necesarios y bloquea la versión.</li>
 <li><strong>Configuración del servicio</strong>: Configura y habilita los servicios <code>systemd</code> correspondientes a tu tipo de instalación elegido.</li>
@@ -4897,6 +4897,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <li><strong>Asistente de configuración</strong>: Elige si habilitar el asistente de configuración basado en la web. Esto es muy recomendable para los usuarios primerizos.</li>
 <li><strong>Integración con CrowdSec</strong>: Opta por instalar el motor de seguridad CrowdSec para una protección avanzada contra amenazas en tiempo real. Disponible solo para instalaciones de Pila completa.</li>
 <li><strong>CrowdSec AppSec</strong>: Si eliges instalar CrowdSec, también puedes habilitar el componente de Seguridad de Aplicaciones (AppSec), que añade capacidades de WAF.</li>
+<li><strong>Redis/Valkey</strong>: Activa Redis/Valkey para compartir sesiones, métricas y datos de seguridad entre nodos (clustering y balanceo). Instalación local o servidor existente. Disponible solo para Pila completa y Gestor.</li>
 <li><strong>Resolvers DNS</strong>: Para instalaciones de Pila completa, Gestor y Trabajador, puede especificar opcionalmente IPs de resolvers DNS personalizados.</li>
 <li><strong>API interna HTTPS</strong>: Para instalaciones de Pila completa, Gestor y Trabajador, elija si habilitar HTTPS para la comunicación API interna entre el programador/gestor y las instancias BunkerWeb/trabajador (predeterminado: solo HTTP).</li>
 <li><strong>Servicio de API</strong>: Para instalaciones de Pila completa y Gestor, elige si habilitar el servicio API externo opcional. Está deshabilitado por defecto en las instalaciones de Linux.</li>
@@ -5014,6 +5015,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <td style="text-align: left;"><code>--crowdsec-appsec</code></td>
 <td style="text-align: left;">Instala CrowdSec con el componente AppSec (incluye capacidades de WAF).</td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>--redis</code></td>
+<td style="text-align: left;">Instala y configura Redis localmente.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>--no-redis</code></td>
+<td style="text-align: left;">Omite la integración de Redis.</td>
+</tr>
 </tbody>
 </table>
 <p><strong>Opciones avanzadas:</strong></p>
@@ -5049,6 +5058,42 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <td style="text-align: left;"><code>--no-auto-backup</code></td>
 <td style="text-align: left;">Omitir copia de seguridad automática (DEBE haberla hecho manualmente).</td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>--redis-host HOST</code></td>
+<td style="text-align: left;">Host Redis para un servidor Redis/Valkey existente.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>--redis-port PORT</code></td>
+<td style="text-align: left;">Puerto Redis para un servidor Redis/Valkey existente.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>--redis-database DB</code></td>
+<td style="text-align: left;">Número de base de datos Redis.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>--redis-username USER</code></td>
+<td style="text-align: left;">Usuario Redis (Redis 6+).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>--redis-password PASS</code></td>
+<td style="text-align: left;">Contraseña Redis.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>--redis-ssl</code></td>
+<td style="text-align: left;">Habilitar SSL/TLS para la conexión Redis.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>--redis-no-ssl</code></td>
+<td style="text-align: left;">Deshabilitar SSL/TLS para la conexión Redis.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>--redis-ssl-verify</code></td>
+<td style="text-align: left;">Verificar el certificado SSL de Redis.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>--redis-no-ssl-verify</code></td>
+<td style="text-align: left;">No verificar el certificado SSL de Redis.</td>
+</tr>
 </tbody>
 </table>
 <p><strong>Ejemplo de uso:</strong></p>
@@ -5076,6 +5121,9 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--work
 <span class="c1"># Instalación completa con CrowdSec y AppSec</span>
 sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--crowdsec-appsec
 
+<span class="c1"># Instalación completa con un servidor Redis existente</span>
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--redis-host<span class="w"> </span>redis.example.com<span class="w"> </span>--redis-password<span class="w"> </span><span class="s2">&quot;your-strong-password&quot;</span>
+
 <span class="c1"># Instalación silenciosa no interactiva</span>
 sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--quiet<span class="w"> </span>--yes
 
@@ -5097,6 +5145,11 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--yes<
 <ul>
 <li>Las opciones de CrowdSec (<code>--crowdsec</code>, <code>--crowdsec-appsec</code>) solo son compatibles con el tipo de instalación <code>--full</code> (predeterminado)</li>
 <li>No se pueden usar con instalaciones <code>--manager</code>, <code>--worker</code>, <code>--scheduler-only</code>, <code>--ui-only</code> o <code>--api-only</code></li>
+</ul>
+<p><strong>Limitaciones de Redis:</strong></p>
+<ul>
+<li>Las opciones Redis (<code>--redis</code>, <code>--redis-*</code>) solo son compatibles con <code>--full</code> (predeterminado) y <code>--manager</code></li>
+<li>No se pueden usar con <code>--worker</code>, <code>--scheduler-only</code>, <code>--ui-only</code> o <code>--api-only</code></li>
 </ul>
 <p><strong>Disponibilidad del servicio API:</strong></p>
 <ul>

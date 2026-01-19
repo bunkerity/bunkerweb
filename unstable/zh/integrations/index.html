@@ -4873,7 +4873,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <ol>
 <li><strong>系统分析</strong>：检测您的操作系统并对照支持的发行版列表进行验证。</li>
 <li><strong>安装定制</strong>：在交互模式下，它会提示您选择安装类型（一体化、管理器、工作节点等），并决定是否启用基于 Web 的设置向导。</li>
-<li><strong>可选集成</strong>：提供自动安装和配置 <a href="#crowdsec-integration-with-the-script">CrowdSec 安全引擎</a>的选项。</li>
+<li><strong>可选集成</strong>：提供自动安装和配置 <a href="#crowdsec-integration-with-the-script">CrowdSec 安全引擎</a>以及 Redis/Valkey（用于共享缓存与会话数据）的选项。</li>
 <li><strong>依赖管理</strong>：从官方源安装 BunkerWeb 所需的正确版本的 NGINX，并锁定版本以防止意外升级。</li>
 <li><strong>BunkerWeb 安装</strong>：添加 BunkerWeb 软件包仓库，安装必要的软件包，并锁定版本。</li>
 <li><strong>服务配置</strong>：根据您选择的安装类型设置并启用 <code>systemd</code> 服务。</li>
@@ -4894,6 +4894,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <li><strong>设置向导</strong>：选择是否启用基于 Web 的配置向导。强烈建议初次使用的用户选择此项。</li>
 <li><strong>CrowdSec 集成</strong>：选择安装 CrowdSec 安全引擎，以获得先进的实时威胁防护。仅适用于完整堆栈安装。</li>
 <li><strong>CrowdSec AppSec</strong>：如果您选择安装 CrowdSec，您还可以启用应用程序安全 (AppSec) 组件，它增加了 WAF 功能。</li>
+<li><strong>Redis/Valkey</strong>：启用 Redis/Valkey 以在节点之间共享会话、指标和安全数据（用于集群与负载均衡）。可本地安装或使用已有服务器。仅适用于完整堆栈和管理器安装。</li>
 <li><strong>DNS 解析器</strong>：对于完整堆栈、管理器和工作节点安装，您可以选择指定自定义 DNS 解析器 IP。</li>
 <li><strong>内部 API HTTPS</strong>：对于完整堆栈、管理器和工作节点安装，选择是否为调度器/管理器与 BunkerWeb/工作节点实例之间的内部 API 通信启用 HTTPS（默认：仅 HTTP）。</li>
 <li><strong>API 服务</strong>：对于完整堆栈和管理器安装，选择是否启用可选的外部 API 服务。在 Linux 安装中，它默认是禁用的。</li>
@@ -5011,6 +5012,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <td><code>--crowdsec-appsec</code></td>
 <td>安装带有 AppSec 组件的 CrowdSec（包括 WAF 功能）。</td>
 </tr>
+<tr>
+<td><code>--redis</code></td>
+<td>本地安装并配置 Redis。</td>
+</tr>
+<tr>
+<td><code>--no-redis</code></td>
+<td>跳过 Redis 集成。</td>
+</tr>
 </tbody>
 </table>
 <p><strong>高级选项：</strong></p>
@@ -5046,6 +5055,42 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <td><code>--no-auto-backup</code></td>
 <td>跳过自动备份（您必须手动完成）。</td>
 </tr>
+<tr>
+<td><code>--redis-host HOST</code></td>
+<td>现有 Redis/Valkey 服务器的主机。</td>
+</tr>
+<tr>
+<td><code>--redis-port PORT</code></td>
+<td>现有 Redis/Valkey 服务器的端口。</td>
+</tr>
+<tr>
+<td><code>--redis-database DB</code></td>
+<td>Redis 数据库编号。</td>
+</tr>
+<tr>
+<td><code>--redis-username USER</code></td>
+<td>Redis 用户名（Redis 6+）。</td>
+</tr>
+<tr>
+<td><code>--redis-password PASS</code></td>
+<td>Redis 密码。</td>
+</tr>
+<tr>
+<td><code>--redis-ssl</code></td>
+<td>为 Redis 连接启用 SSL/TLS。</td>
+</tr>
+<tr>
+<td><code>--redis-no-ssl</code></td>
+<td>禁用 Redis 连接的 SSL/TLS。</td>
+</tr>
+<tr>
+<td><code>--redis-ssl-verify</code></td>
+<td>验证 Redis SSL 证书。</td>
+</tr>
+<tr>
+<td><code>--redis-no-ssl-verify</code></td>
+<td>不验证 Redis SSL 证书。</td>
+</tr>
 </tbody>
 </table>
 <p><strong>用法示例：</strong></p>
@@ -5073,6 +5118,9 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--work
 <span class="c1"># 带有 CrowdSec 和 AppSec 的完整安装</span>
 sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--crowdsec-appsec
 
+<span class="c1"># 使用现有 Redis 服务器的完整安装</span>
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--redis-host<span class="w"> </span>redis.example.com<span class="w"> </span>--redis-password<span class="w"> </span><span class="s2">&quot;your-strong-password&quot;</span>
+
 <span class="c1"># 静默非交互式安装</span>
 sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--quiet<span class="w"> </span>--yes
 
@@ -5094,6 +5142,11 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--yes<
 <ul>
 <li>CrowdSec 选项（<code>--crowdsec</code>, <code>--crowdsec-appsec</code>）仅与 <code>--full</code>（默认）安装类型兼容</li>
 <li>它们不能与 <code>--manager</code>, <code>--worker</code>, <code>--scheduler-only</code>, <code>--ui-only</code> 或 <code>--api-only</code> 安装一起使用</li>
+</ul>
+<p><strong>Redis 限制：</strong></p>
+<ul>
+<li>Redis 选项（<code>--redis</code>, <code>--redis-*</code>）仅与 <code>--full</code>（默认）和 <code>--manager</code> 安装类型兼容</li>
+<li>它们不能与 <code>--worker</code>, <code>--scheduler-only</code>, <code>--ui-only</code> 或 <code>--api-only</code> 安装一起使用</li>
 </ul>
 <p><strong>API 服务可用性：</strong></p>
 <ul>

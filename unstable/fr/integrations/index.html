@@ -4835,7 +4835,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <ol>
 <li><strong>Analyse du système</strong>: détecte votre système d'exploitation et le compare à la liste des distributions prises en charge.</li>
 <li><strong>Personnalisation de l'installation</strong>: en mode interactif, il vous invite à choisir un type d'installation (Tout en un, Manager, Worker, etc.) et à décider d'activer ou non l'assistant de configuration Web.</li>
-<li><strong>Intégrations facultatives</strong>: propose d'installer et de configurer automatiquement le <a href="#crowdsec-integration-with-the-script">moteur de sécurité CrowdSec</a>.</li>
+<li><strong>Intégrations facultatives</strong>: propose d'installer et de configurer automatiquement le <a href="#crowdsec-integration-with-the-script">moteur de sécurité CrowdSec</a> ainsi que Redis/Valkey pour le cache et les sessions partagés.</li>
 <li><strong>Gestion des </strong>dépendances : Installe la version correcte de NGINX requise par BunkerWeb à partir de sources officielles et verrouille la version pour éviter les mises à niveau involontaires.</li>
 <li><strong>Installation de BunkerWeb</strong>: Ajoute le référentiel de paquets BunkerWeb, installe les paquets nécessaires et verrouille la version.</li>
 <li><strong>Configuration du service</strong> : Configure et active les <code>systemd</code> services correspondant au type d'installation que vous avez choisi.</li>
@@ -4853,8 +4853,9 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </ul>
 </li>
 <li><strong>Assistant d'installation</strong>: choisissez d'activer ou non l'assistant de configuration Web. Ceci est fortement recommandé pour les nouveaux utilisateurs.</li>
-<li><strong>Intégration CrowdSec</strong>: choisissez d'installer le moteur de sécurité CrowdSec pour une protection avancée et en temps réel contre les menaces.</li>
+<li><strong>Intégration CrowdSec</strong>: choisissez d'installer le moteur de sécurité CrowdSec pour une protection avancée et en temps réel contre les menaces (Full Stack uniquement).</li>
 <li><strong>CrowdSec AppSec</strong>: si vous choisissez d'installer CrowdSec, vous pouvez également activer le composant Application Security (AppSec), qui ajoute des fonctionnalités WAF.</li>
+<li><strong>Redis/Valkey</strong>: active Redis/Valkey pour partager les sessions, métriques et données de sécurité entre nœuds (clustering et équilibrage de charge). Installation locale ou serveur existant. Disponible pour Full Stack et Manager uniquement.</li>
 <li><strong>Service API</strong> : choisissez d'activer le service API BunkerWeb optionnel. Il est désactivé par défaut sur les installations Linux.</li>
 </ol>
 <div class="admonition info">
@@ -4970,6 +4971,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <td><code>--crowdsec-appsec</code></td>
 <td>Installez CrowdSec avec le composant AppSec (inclut les fonctionnalités WAF).</td>
 </tr>
+<tr>
+<td><code>--redis</code></td>
+<td>Installe et configure Redis localement.</td>
+</tr>
+<tr>
+<td><code>--no-redis</code></td>
+<td>Ignore l'intégration Redis.</td>
+</tr>
 </tbody>
 </table>
 <p><strong>Options avancées :</strong></p>
@@ -5005,6 +5014,42 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <td><code>--no-auto-backup</code></td>
 <td>Ignorer la sauvegarde automatique (vous DEVEZ l'avoir fait manuellement).</td>
 </tr>
+<tr>
+<td><code>--redis-host HOST</code></td>
+<td>Hôte Redis pour un serveur Redis/Valkey existant.</td>
+</tr>
+<tr>
+<td><code>--redis-port PORT</code></td>
+<td>Port Redis pour un serveur Redis/Valkey existant.</td>
+</tr>
+<tr>
+<td><code>--redis-database DB</code></td>
+<td>Numéro de base de données Redis.</td>
+</tr>
+<tr>
+<td><code>--redis-username USER</code></td>
+<td>Nom d'utilisateur Redis (Redis 6+).</td>
+</tr>
+<tr>
+<td><code>--redis-password PASS</code></td>
+<td>Mot de passe Redis.</td>
+</tr>
+<tr>
+<td><code>--redis-ssl</code></td>
+<td>Activer SSL/TLS pour la connexion Redis.</td>
+</tr>
+<tr>
+<td><code>--redis-no-ssl</code></td>
+<td>Désactiver SSL/TLS pour la connexion Redis.</td>
+</tr>
+<tr>
+<td><code>--redis-ssl-verify</code></td>
+<td>Vérifier le certificat SSL de Redis.</td>
+</tr>
+<tr>
+<td><code>--redis-no-ssl-verify</code></td>
+<td>Ne pas vérifier le certificat SSL de Redis.</td>
+</tr>
 </tbody>
 </table>
 <p><strong>Exemple d'utilisation :</strong></p>
@@ -5032,6 +5077,9 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--work
 <span class="c1"># Full installation with CrowdSec and AppSec</span>
 sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--crowdsec-appsec
 
+<span class="c1"># Installation complète avec un serveur Redis existant</span>
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--redis-host<span class="w"> </span>redis.example.com<span class="w"> </span>--redis-password<span class="w"> </span><span class="s2">&quot;your-strong-password&quot;</span>
+
 <span class="c1"># Silent non-interactive installation</span>
 sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--quiet<span class="w"> </span>--yes
 
@@ -5050,6 +5098,11 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--dry-
 <ul>
 <li>Les options CrowdSec (<code>--crowdsec</code>, <code>--crowdsec-appsec</code>) ne sont compatibles qu'avec le type d'installation <code>--full</code> (par défaut)</li>
 <li>Ils ne peuvent pas être utilisés avec les installations <code>--manager</code>, <code>--worker</code>, <code>--scheduler-only</code>, <code>--ui-only</code> ou <code>--api-only</code></li>
+</ul>
+<p><strong>Limitations Redis :</strong></p>
+<ul>
+<li>Les options Redis (<code>--redis</code>, <code>--redis-*</code>) ne sont compatibles qu'avec <code>--full</code> (par défaut) et <code>--manager</code></li>
+<li>Elles ne peuvent pas être utilisées avec <code>--worker</code>, <code>--scheduler-only</code>, <code>--ui-only</code> ou <code>--api-only</code></li>
 </ul>
 <p><strong>Disponibilité du service API :</strong></p>
 <ul>
