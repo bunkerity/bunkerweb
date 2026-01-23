@@ -1014,6 +1014,39 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#traductions-i18n" class="md-nav__link">
+    <span class="md-ellipsis">
+      Traductions (i18n)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Traductions (i18n)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#langues-disponibles-et-contributeurs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Langues disponibles et contributeurs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comment-contribuer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comment contribuer
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1194,7 +1227,7 @@
 </div>
 <h2 id="checklist-securite">Checklist sécurité</h2>
 <ul>
-<li>Placez l’UI derrière BunkerWeb sur un réseau interne ; choisissez un <code>REVERSE_PROXY_URL</code> difficile à deviner et limitez les IP sources.</li>
+<li>Placez l’UI derrière BunkerWeb sur un réseau interne ; choisissez un <code>REVERSE_PROXY_URL</code> difficile à testinginer et limitez les IP sources.</li>
 <li>Définissez des <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code> solides ; activez <code>OVERRIDE_ADMIN_CREDS=yes</code> uniquement si vous voulez vraiment les réinitialiser.</li>
 <li>Fournissez <code>TOTP_ENCRYPTION_KEYS</code> et activez le TOTP pour les comptes admin ; gardez les codes de récupération en sécurité.</li>
 <li>Utilisez le TLS (terminé sur BunkerWeb ou via <code>UI_SSL_ENABLED=yes</code> avec chemins cert/clé) ; définissez <code>UI_FORWARDED_ALLOW_IPS</code> sur vos proxies de confiance.</li>
@@ -1208,7 +1241,7 @@
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Utilisez les images publiées et le layout du <a href="../quickstart-guide/#__tabbed_1_3">guide de démarrage rapide</a> pour monter la stack, puis terminez la configuration dans le navigateur.</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/bunkerity/bunkerweb/vtesting-rc1/misc/integrations/docker-compose.yml<span class="w"> </span>up<span class="w"> </span>-d
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.8~rc1-rc1/misc/integrations/docker-compose.yml<span class="w"> </span>up<span class="w"> </span>-d
 </code></pre></div>
 <p>Ouvrez le nom d’hôte du scheduler (par ex. <code>https://www.example.com/changeme</code>) et lancez l’assistant <code>/setup</code> pour configurer l’UI, le scheduler et l’instance.</p>
 </div>
@@ -1221,7 +1254,7 @@
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.8-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -1232,7 +1265,7 @@
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bw-services</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
@@ -1252,7 +1285,7 @@
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bw-db</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.8-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin&quot;</span>
@@ -1612,6 +1645,157 @@ log { source(s_net); destination(d_dyna_file); };
   </p>
 <figcaption>Informations de licence PRO</figcaption>
 </figure>
+<h2 id="traductions-i18n">Traductions (i18n)</h2>
+<p>L’interface Web est disponible en plusieurs langues grâce aux contributions de la communauté. Les traductions sont stockées dans des fichiers JSON par langue (par exemple <code>en.json</code>, <code>fr.json</code>, …). Pour chaque langue, l’origine de la traduction est clairement documentée (manuelle ou générée par IA), ainsi que son statut de relecture.</p>
+<h3 id="langues-disponibles-et-contributeurs">Langues disponibles et contributeurs</h3>
+<table>
+<thead>
+<tr>
+<th>Langue</th>
+<th>Locale</th>
+<th>Créée par</th>
+<th>Relue par</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Arabe</td>
+<td><code>ar</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Bengali</td>
+<td><code>bn</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Breton</td>
+<td><code>br</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Allemand</td>
+<td><code>de</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Anglais</td>
+<td><code>en</code></td>
+<td>Manuel (@TheophileDiot)</td>
+<td>Manuel (@TheophileDiot)</td>
+</tr>
+<tr>
+<td>Espagnol</td>
+<td><code>es</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Français</td>
+<td><code>fr</code></td>
+<td>Manuel (@TheophileDiot)</td>
+<td>Manuel (@TheophileDiot)</td>
+</tr>
+<tr>
+<td>Hindi</td>
+<td><code>hi</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Italien</td>
+<td><code>it</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Coréen</td>
+<td><code>ko</code></td>
+<td>Manuel (@rayshoo)</td>
+<td>Manuel (@rayshoo)</td>
+</tr>
+<tr>
+<td>Polonais</td>
+<td><code>pl</code></td>
+<td>Manuel (@tomkolp) via Weblate</td>
+<td>Manuel (@tomkolp)</td>
+</tr>
+<tr>
+<td>Portugais</td>
+<td><code>pt</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Russe</td>
+<td><code>ru</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Turc</td>
+<td><code>tr</code></td>
+<td>Manuel (@wiseweb-works)</td>
+<td>Manuel (@wiseweb-works)</td>
+</tr>
+<tr>
+<td>Chinois (Traditionnel)</td>
+<td><code>tw</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Ourdou</td>
+<td><code>ur</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Chinois (Simplifié)</td>
+<td><code>zh</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 Certaines traductions peuvent être partielles. Une relecture manuelle est fortement recommandée, en particulier pour les éléments critiques de l’interface.</p>
+</blockquote>
+<h3 id="comment-contribuer">Comment contribuer</h3>
+<p>Les contributions aux traductions suivent le workflow de contribution standard de BunkerWeb :</p>
+<ol>
+<li><strong>Créer ou mettre à jour le fichier de traduction</strong></li>
+<li>Copier <code>src/ui/app/static/locales/en.json</code> et le renommer avec le code de la langue cible (par exemple <code>de.json</code>).</li>
+<li>
+<p>Traduire <strong>uniquement les valeurs</strong> ; les clés ne doivent pas être modifiées.</p>
+</li>
+<li>
+<p><strong>Enregistrer la langue</strong></p>
+</li>
+<li>
+<p>Ajouter ou mettre à jour l’entrée correspondante dans <code>src/ui/app/lang_config.py</code> (code de langue, nom affiché, drapeau, nom anglais).<br />
+     Ce fichier constitue la source de vérité pour les langues supportées.</p>
+</li>
+<li>
+<p><strong>Mettre à jour la documentation et la provenance</strong></p>
+</li>
+<li><code>src/ui/app/static/locales/README.md</code> → ajouter la nouvelle langue dans la table de provenance (créée par / relue par).</li>
+<li><code>README.md</code> → mettre à jour la documentation générale du projet pour refléter la nouvelle langue supportée.</li>
+<li><code>docs/web-ui.md</code> → mettre à jour la documentation de l’interface Web (cette section Traductions).</li>
+<li>
+<p><code>docs/*/web-ui.md</code> → mettre à jour les versions traduites de la documentation de l’interface Web avec la même section Traductions.</p>
+</li>
+<li>
+<p><strong>Ouvrir une pull request</strong></p>
+</li>
+<li>Indiquer clairement si la traduction a été réalisée manuellement ou à l’aide d’un outil d’IA.</li>
+<li>Pour les changements non triviaux (nouvelle langue ou mises à jour importantes), il est recommandé d’ouvrir au préalable une issue afin d’en discuter.</li>
+</ol>
+<p>En contribuant aux traductions, vous aidez à rendre BunkerWeb accessible à un public international plus large.</p>
 
 
 

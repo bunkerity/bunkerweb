@@ -1014,6 +1014,39 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#traducciones-i18n" class="md-nav__link">
+    <span class="md-ellipsis">
+      Traducciones (i18n)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Traducciones (i18n)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#idiomas-disponibles-y-colaboradores" class="md-nav__link">
+    <span class="md-ellipsis">
+      Idiomas disponibles y colaboradores
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#como-contribuir" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cómo contribuir
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1208,7 +1241,7 @@
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Usa las imágenes publicadas y el layout del <a href="../quickstart-guide/#__tabbed_1_3">guía rápida</a> para levantar el stack, luego completa el asistente en el navegador.</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/bunkerity/bunkerweb/vtesting-rc1/misc/integrations/docker-compose.yml<span class="w"> </span>up<span class="w"> </span>-d
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.8~rc1-rc1/misc/integrations/docker-compose.yml<span class="w"> </span>up<span class="w"> </span>-d
 </code></pre></div>
 <p>Visita el hostname del scheduler (ej. <code>https://www.example.com/changeme</code>) y ejecuta el asistente <code>/setup</code> para configurar la UI, el scheduler y la instancia.</p>
 </div>
@@ -1221,7 +1254,7 @@
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.8-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -1232,7 +1265,7 @@
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bw-services</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
@@ -1252,7 +1285,7 @@
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bw-db</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.8-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin&quot;</span>
@@ -1612,6 +1645,157 @@ log { source(s_net); destination(d_dyna_file); };
   </p>
 <figcaption>Información de licencia PRO</figcaption>
 </figure>
+<h2 id="traducciones-i18n">Traducciones (i18n)</h2>
+<p>La interfaz web está disponible en varios idiomas gracias a las contribuciones de la comunidad. Las traducciones se almacenan en archivos JSON por idioma (por ejemplo <code>en.json</code>, <code>fr.json</code>, …). Para cada idioma se documenta claramente si la traducción fue realizada de forma manual o generada mediante IA, así como su estado de revisión.</p>
+<h3 id="idiomas-disponibles-y-colaboradores">Idiomas disponibles y colaboradores</h3>
+<table>
+<thead>
+<tr>
+<th>Idioma</th>
+<th>Locale</th>
+<th>Creado por</th>
+<th>Revisado por</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Árabe</td>
+<td><code>ar</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Bengalí</td>
+<td><code>bn</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Bretón</td>
+<td><code>br</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Alemán</td>
+<td><code>de</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Inglés</td>
+<td><code>en</code></td>
+<td>Manual (@TheophileDiot)</td>
+<td>Manual (@TheophileDiot)</td>
+</tr>
+<tr>
+<td>Español</td>
+<td><code>es</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Francés</td>
+<td><code>fr</code></td>
+<td>Manual (@TheophileDiot)</td>
+<td>Manual (@TheophileDiot)</td>
+</tr>
+<tr>
+<td>Hindi</td>
+<td><code>hi</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Italiano</td>
+<td><code>it</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Coreano</td>
+<td><code>ko</code></td>
+<td>Manual (@rayshoo)</td>
+<td>Manual (@rayshoo)</td>
+</tr>
+<tr>
+<td>Polaco</td>
+<td><code>pl</code></td>
+<td>Manual (@tomkolp) vía Weblate</td>
+<td>Manual (@tomkolp)</td>
+</tr>
+<tr>
+<td>Portugués</td>
+<td><code>pt</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Ruso</td>
+<td><code>ru</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Turco</td>
+<td><code>tr</code></td>
+<td>Manual (@wiseweb-works)</td>
+<td>Manual (@wiseweb-works)</td>
+</tr>
+<tr>
+<td>Chino (Tradicional)</td>
+<td><code>tw</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Urdu</td>
+<td><code>ur</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+<tr>
+<td>Chino (Simplificado)</td>
+<td><code>zh</code></td>
+<td>IA (Google:Gemini-2.5-pro)</td>
+<td>IA (Google:Gemini-3-pro)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 Algunas traducciones pueden ser parciales. Se recomienda encarecidamente una revisión manual, especialmente para los elementos críticos de la interfaz.</p>
+</blockquote>
+<h3 id="como-contribuir">Cómo contribuir</h3>
+<p>Las contribuciones de traducción siguen el flujo estándar de contribuciones de BunkerWeb:</p>
+<ol>
+<li><strong>Crear o actualizar el archivo de traducción</strong></li>
+<li>Copia <code>src/ui/app/static/locales/en.json</code> y renómbralo con el código de tu idioma (por ejemplo <code>de.json</code>).</li>
+<li>
+<p>Traduce <strong>solo los valores</strong>; las claves no deben modificarse.</p>
+</li>
+<li>
+<p><strong>Registrar el idioma</strong></p>
+</li>
+<li>
+<p>Añade o actualiza la entrada del idioma en <code>src/ui/app/lang_config.py</code> (código del locale, nombre visible, bandera, nombre en inglés).<br />
+     Este archivo es la fuente única de verdad para los idiomas compatibles.</p>
+</li>
+<li>
+<p><strong>Actualizar la documentación y la procedencia</strong></p>
+</li>
+<li><code>src/ui/app/static/locales/README.md</code> → añade el nuevo idioma a la tabla de procedencia (creado por / revisado por).</li>
+<li><code>README.md</code> → actualiza la documentación general del proyecto para reflejar el nuevo idioma compatible.</li>
+<li><code>docs/web-ui.md</code> → actualiza la documentación de la interfaz web (esta sección de Traducciones).</li>
+<li>
+<p><code>docs/*/web-ui.md</code> → actualiza las versiones traducidas de la documentación de la interfaz web con la misma sección de Traducciones.</p>
+</li>
+<li>
+<p><strong>Abrir un pull request</strong></p>
+</li>
+<li>Indica claramente si la traducción se realizó de forma manual o con una herramienta de IA.</li>
+<li>Para cambios importantes (nuevo idioma o actualizaciones grandes), se recomienda abrir primero un issue para su discusión.</li>
+</ol>
+<p>Al contribuir con traducciones, ayudas a que BunkerWeb sea accesible para una audiencia internacional más amplia.</p>
 
 
 

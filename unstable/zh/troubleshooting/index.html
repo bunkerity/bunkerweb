@@ -1054,6 +1054,75 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#clear-old-instances-db" class="md-nav__link">
+    <span class="md-ellipsis">
+      从数据库清理旧实例
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="从数据库清理旧实例">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      表与字段（参考）
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-" class="md-nav__link">
+    <span class="md-ellipsis">
+      1 - 连接数据库
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-dry-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      2 - Dry-run：列出过期实例
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-" class="md-nav__link">
+    <span class="md-ellipsis">
+      3 - 删除过期实例
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-" class="md-nav__link">
+    <span class="md-ellipsis">
+      4 - 标记实例已变更（可选）
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-" class="md-nav__link">
+    <span class="md-ellipsis">
+      5 - 回收空间（可选）
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#web-ui" class="md-nav__link">
     <span class="md-ellipsis">
       Web UI
@@ -1064,7 +1133,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
+  <a href="#_12" class="md-nav__link">
     <span class="md-ellipsis">
       访问数据库
     </span>
@@ -1073,7 +1142,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
+  <a href="#_13" class="md-nav__link">
     <span class="md-ellipsis">
       故障排除操作
     </span>
@@ -1082,7 +1151,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_13" class="md-nav__link">
+  <a href="#_14" class="md-nav__link">
     <span class="md-ellipsis">
       上传插件
     </span>
@@ -1432,13 +1501,147 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 <p>如果您在日志中看到以下错误 <code>could not build server_names_hash, you should increase server_names_hash_bucket_size</code>，您将需要调整 <code>SERVER_NAMES_HASH_BUCKET_SIZE</code> 设置。</p>
 <h2 id="_10">时区</h2>
 <p>当使用基于容器的集成时，容器的时区可能与主机的时区不匹配。要解决此问题，您可以在您的容器上将 <code>TZ</code> 环境变量设置为您选择的时区（例如 <code>TZ=Europe/Paris</code>）。您可以在<a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List">此处</a>找到时区标识符的列表。</p>
-<h2 id="web-ui">Web UI</h2>
-<p>如果您忘记了 UI 凭据或遇到 2FA 问题，您可以连接到数据库以重新获得访问权限。</p>
-<h3 id="_11">访问数据库</h3>
+<h2 id="clear-old-instances-db">从数据库清理旧实例</h2>
+<p>BunkerWeb 会将已知实例存储在 <code>bw_instances</code> 表中（主键：<code>hostname</code>）。
+如果你经常重新部署，可能会残留旧记录（例如长时间未上报的实例），此时你可能希望将其清理掉。</p>
+<div class="admonition warning">
+<p class="admonition-title">先备份</p>
+<p>在手动修改数据库之前，请先创建备份（对 SQLite 卷做快照，或使用你的数据库引擎备份工具）。</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">停止写入端</p>
+<p>为避免删除时发生竞态，请先停止（或缩容）会更新实例信息的组件
+（通常是 scheduler / autoconf，取决于你的部署方式），执行清理后再重新启动它们。</p>
+</div>
+<h3 id="_11">表与字段（参考）</h3>
+<p>实例模型定义如下：</p>
+<ul>
+<li>表：<code>bw_instances</code></li>
+<li>主键：<code>hostname</code></li>
+<li>“最后一次出现”时间戳：<code>last_seen</code></li>
+<li>还包含：
+  <code>name</code>, <code>port</code>, <code>listen_https</code>, <code>https_port</code>,
+  <code>server_name</code>, <code>type</code>, <code>status</code>, <code>method</code>,
+  <code>creation_date</code></li>
+</ul>
+<h3 id="1-">1 - 连接数据库</h3>
+<p>使用现有的 <a href="#access-database">访问数据库</a> 章节进行连接
+（SQLite / MariaDB / PostgreSQL）。</p>
+<h3 id="2-dry-run">2 - Dry-run：列出过期实例</h3>
+<p>选择一个保留窗口（示例：90 天），先查看将会被删除的内容。</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">SQLite</label><label for="__tabbed_3_2">MariaDB / MySQL</label><label for="__tabbed_3_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Linux</label><label for="__tabbed_4_2">Docker</label><label for="__tabbed_4_3">All-in-one</label></div>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">hostname</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="k">server_name</span><span class="p">,</span><span class="w"> </span><span class="k">method</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">creation_date</span><span class="p">,</span><span class="w"> </span><span class="n">last_seen</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">datetime</span><span class="p">(</span><span class="s1">&#39;now&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-90 days&#39;</span><span class="p">)</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="k">ASC</span>
+<span class="k">LIMIT</span><span class="w"> </span><span class="mi">50</span><span class="p">;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">hostname</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="k">server_name</span><span class="p">,</span><span class="w"> </span><span class="k">method</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">creation_date</span><span class="p">,</span><span class="w"> </span><span class="n">last_seen</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">DATE_SUB</span><span class="p">(</span><span class="n">NOW</span><span class="p">(),</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="mi">90</span><span class="w"> </span><span class="k">DAY</span><span class="p">)</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="k">ASC</span>
+<span class="k">LIMIT</span><span class="w"> </span><span class="mi">50</span><span class="p">;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">hostname</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="k">server_name</span><span class="p">,</span><span class="w"> </span><span class="k">method</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">creation_date</span><span class="p">,</span><span class="w"> </span><span class="n">last_seen</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NOW</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">&#39;90 days&#39;</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="k">ASC</span>
+<span class="k">LIMIT</span><span class="w"> </span><span class="mi">50</span><span class="p">;</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h3 id="3-">3 - 删除过期实例</h3>
+<p>确认无误后，删除这些记录。</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">SQLite</label><label for="__tabbed_4_2">MariaDB / MySQL</label><label for="__tabbed_4_3">PostgreSQL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">BEGIN</span><span class="p">;</span>
+
+<span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">datetime</span><span class="p">(</span><span class="s1">&#39;now&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-90 days&#39;</span><span class="p">);</span>
+
+<span class="k">COMMIT</span><span class="p">;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span>
+
+<span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">DATE_SUB</span><span class="p">(</span><span class="n">NOW</span><span class="p">(),</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="mi">90</span><span class="w"> </span><span class="k">DAY</span><span class="p">);</span>
+
+<span class="k">COMMIT</span><span class="p">;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">BEGIN</span><span class="p">;</span>
+
+<span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NOW</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">&#39;90 days&#39;</span><span class="p">;</span>
+
+<span class="k">COMMIT</span><span class="p">;</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">按 hostname 删除</p>
+<p>如需删除某个特定实例，请使用其 hostname（主键）。</p>
+<div class="highlight"><pre><span></span><code><span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">hostname</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;&lt;hostname&gt;&#39;</span><span class="p">;</span>
+</code></pre></div>
+</div>
+<h3 id="4-">4 - 标记实例已变更（可选）</h3>
+<p>BunkerWeb 会在 <code>bw_metadata</code> 表中跟踪实例变更
+（<code>instances_changed</code>, <code>last_instances_change</code>）。</p>
+<p>如果手动清理后 UI 没有按预期刷新，你可以强制更新“变更标记”：</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">SQLite / PostgreSQL</label><label for="__tabbed_5_2">MariaDB / MySQL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">UPDATE</span><span class="w"> </span><span class="n">bw_metadata</span>
+<span class="k">SET</span><span class="w"> </span><span class="n">instances_changed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="n">last_instances_change</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">CURRENT_TIMESTAMP</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">UPDATE</span><span class="w"> </span><span class="n">bw_metadata</span>
+<span class="k">SET</span><span class="w"> </span><span class="n">instances_changed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="n">last_instances_change</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NOW</span><span class="p">()</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h3 id="5-">5 - 回收空间（可选）</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">SQLite</label><label for="__tabbed_6_2">PostgreSQL</label><label for="__tabbed_6_3">MariaDB / MySQL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">VACUUM</span><span class="p">;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">VACUUM</span><span class="w"> </span><span class="p">(</span><span class="k">ANALYZE</span><span class="p">);</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">OPTIMIZE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">bw_instances</span><span class="p">;</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="web-ui">Web UI</h2>
+<p>如果您忘记了 UI 凭据或遇到 2FA 问题，您可以连接到数据库以重新获得访问权限。</p>
+<h3 id="_12">访问数据库</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">SQLite</label><label for="__tabbed_7_2">MariaDB / MySQL</label><label for="__tabbed_7_3">PostgreSQL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="tabbed-set tabbed-alternate" data-tabs="8:3"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Linux</label><label for="__tabbed_8_2">Docker</label><label for="__tabbed_8_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>安装 SQLite (Debian/Ubuntu)：</p>
@@ -1502,7 +1705,7 @@ sqlite&gt;
 <p class="admonition-title">凭据和数据库名称</p>
 <p>您将需要使用 <code>DATABASE_URI</code> 设置中使用的相同凭据和数据库名称。</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Linux</label><label for="__tabbed_5_2">Docker</label><label for="__tabbed_5_3">All-in-one</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:3"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Linux</label><label for="__tabbed_9_2">Docker</label><label for="__tabbed_9_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>访问您的本地数据库：</p>
@@ -1542,7 +1745,7 @@ sqlite&gt;
 <p class="admonition-title">凭据、主机和数据库名称</p>
 <p>您将需要使用 <code>DATABASE_URI</code> 设置中使用的相同凭据（用户/密码）、主机和数据库名称。</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Linux</label><label for="__tabbed_6_2">Docker</label><label for="__tabbed_6_3">All-in-one</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Linux</label><label for="__tabbed_10_2">Docker</label><label for="__tabbed_10_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>访问您的本地数据库：</p>
@@ -1578,7 +1781,7 @@ sqlite&gt;
 </div>
 </div>
 </div>
-<h3 id="_12">故障排除操作</h3>
+<h3 id="_13">故障排除操作</h3>
 <div class="admonition info">
 <p class="admonition-title">表模式</p>
 <p><code>bw_ui_users</code> 表的模式如下：</p>
@@ -1677,7 +1880,7 @@ sqlite&gt;
 </tbody>
 </table>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:5"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><input id="__tabbed_7_4" name="__tabbed_7" type="radio" /><input id="__tabbed_7_5" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">检索用户名</label><label for="__tabbed_7_2">更新管理员用户密码</label><label for="__tabbed_7_3">为管理员用户禁用 2FA 认证</label><label for="__tabbed_7_4">刷新 2FA 恢复码</label><label for="__tabbed_7_5">导出配置和匿名日志</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:5"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><input id="__tabbed_11_4" name="__tabbed_11" type="radio" /><input id="__tabbed_11_5" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">检索用户名</label><label for="__tabbed_11_2">更新管理员用户密码</label><label for="__tabbed_11_3">为管理员用户禁用 2FA 认证</label><label for="__tabbed_11_4">刷新 2FA 恢复码</label><label for="__tabbed_11_5">导出配置和匿名日志</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>执行以下命令从 <code>bw_ui_users</code> 表中提取数据：</p>
@@ -1810,7 +2013,7 @@ sqlite&gt;
 </div>
 </div>
 </div>
-<h3 id="_13">上传插件</h3>
+<h3 id="_14">上传插件</h3>
 <p>在某些情况下，可能无法从 UI 上传插件：</p>
 <ul>
 <li>您的集成缺少管理压缩文件的软件包，在这种情况下，您需要添加必要的软件包</li>

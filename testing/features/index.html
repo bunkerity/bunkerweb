@@ -3544,6 +3544,13 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><strong>Kubernetes Mode:</strong> Enable Kubernetes integration.</td>
 </tr>
 <tr>
+<td><code>KEEP_CONFIG_ON_RESTART</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>No</td>
+<td><strong>Keep Config on Restart:</strong> Keep the configuration on restart. Set to 'yes' to prevent config reset on restart.</td>
+</tr>
+<tr>
 <td><code>USE_TEMPLATE</code></td>
 <td></td>
 <td>multisite</td>
@@ -3595,9 +3602,9 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<p>Configuration for a development environment with extra logging:</p>
+<p>Configuration for a testingelopment environment with extra logging:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">SECURITY_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;detect&quot;</span>
-<span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dev.example.com&quot;</span>
+<span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;testing.example.com&quot;</span>
 <span class="nt">LOG_LEVEL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;debug&quot;</span>
 </code></pre></div>
 </div>
@@ -5388,7 +5395,7 @@ TrustedMonitor/\d+\.\d+
 <li>BunkerWeb checks if the requesting origin is permitted based on your configuration.</li>
 <li>If allowed, BunkerWeb responds with the appropriate CORS headers that define what the requesting site can do.</li>
 <li>For non-permitted origins, the request can be either completely denied or served without CORS headers.</li>
-<li>Additional cross-origin policies, such as <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy">COEP</a>, <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy">COOP</a>, and <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy">CORP</a>, can be configured to further enhance security.</li>
+<li>Additional cross-origin policies, such as <a href="https://testingeloper.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy">COEP</a>, <a href="https://testingeloper.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy">COOP</a>, and <a href="https://testingeloper.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy">CORP</a>, can be configured to further enhance security.</li>
 </ol>
 <h3 id="how-to-use_7">How to Use</h3>
 <p>Follow these steps to configure and use the CORS feature:</p>
@@ -5973,7 +5980,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># This is the name that will be used to identify the instance in the Scheduler</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.8-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -5990,7 +5997,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># The IP address of the syslog service</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># Make sure to set the correct instance name</span>
@@ -7219,7 +7226,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 <div class="admonition info">
 <p class="admonition-title">Browser Support</p>
-<p>GZIP is supported by all modern browsers and has been the standard compression method for HTTP responses for many years, ensuring excellent compatibility across devices and browsers.</p>
+<p>GZIP is supported by all modern browsers and has been the standard compression method for HTTP responses for many years, ensuring excellent compatibility across testingices and browsers.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Compression vs. CPU Usage</p>
@@ -7361,7 +7368,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 <h2 id="headers">Headers</h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
-<p>Headers play a crucial role in HTTP security. The Headers plugin provides robust management of both standard and custom HTTP headers—enhancing security and functionality. It dynamically applies security measures, such as <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security">HSTS</a>, <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy">CSP</a> (including a reporting mode), and custom header injection, while preventing information leakage.</p>
+<p>Headers play a crucial role in HTTP security. The Headers plugin provides robust management of both standard and custom HTTP headers—enhancing security and functionality. It dynamically applies security measures, such as <a href="https://testingeloper.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security">HSTS</a>, <a href="https://testingeloper.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy">CSP</a> (including a reporting mode), and custom header injection, while preventing information leakage.</p>
 <p><strong>How it works</strong></p>
 <ol>
 <li>When a client requests content from your website, BunkerWeb processes the response headers.</li>
@@ -7379,7 +7386,7 @@ TrustedMonitor/\d+\.\d+
 <li><strong>Remove unwanted headers:</strong> Use <code>REMOVE_HEADERS</code> to ensure headers that could expose server details are stripped out.</li>
 <li><strong>Set cookie security:</strong> Enable robust cookie security by configuring <code>COOKIE_FLAGS</code> and setting <code>COOKIE_AUTO_SECURE_FLAG</code> to <code>yes</code> so that the Secure flag is automatically added on HTTPS connections.</li>
 <li><strong>Preserve upstream headers:</strong> Specify which upstream headers to retain by using <code>KEEP_UPSTREAM_HEADERS</code>.</li>
-<li><strong>Leverage conditional header application:</strong> If you wish to test policies without disruption, enable <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only">CSP Report-Only</a> mode via <code>CONTENT_SECURITY_POLICY_REPORT_ONLY</code>.</li>
+<li><strong>Leverage conditional header application:</strong> If you wish to test policies without disruption, enable <a href="https://testingeloper.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only">CSP Report-Only</a> mode via <code>CONTENT_SECURITY_POLICY_REPORT_ONLY</code>.</li>
 </ol>
 <h3 id="configuration-guide">Configuration Guide</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="24:3"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><input id="__tabbed_24_3" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">Security Headers</label><label for="__tabbed_24_2">Cookie Settings</label><label for="__tabbed_24_3">Custom Headers</label></div>
@@ -7647,11 +7654,13 @@ TrustedMonitor/\d+\.\d+
 </ol>
 <div class="admonition tip">
 <p class="admonition-title">Certificate Profiles</p>
-<p>Let's Encrypt provides different certificate profiles for different use cases:
-- <strong>classic</strong>: General-purpose certificates with 90-day validity (default)
-- <strong>tlsserver</strong>: Optimized for TLS server authentication with 90-day validity and smaller payload
-- <strong>shortlived</strong>: Enhanced security with 7-day validity for automated environments
-- <strong>custom</strong>: If your ACME server supports a different profile, set it using <code>LETS_ENCRYPT_CUSTOM_PROFILE</code>.</p>
+<p>Let's Encrypt provides different certificate profiles for different use cases:</p>
+<ul>
+<li><strong>classic</strong>: General-purpose certificates with 90-day validity (default)</li>
+<li><strong>tlsserver</strong>: Optimized for TLS server authentication with 90-day validity and smaller payload</li>
+<li><strong>shortlived</strong>: Enhanced security with 7-day validity for automated environments</li>
+<li><strong>custom</strong>: If your ACME server supports a different profile, set it using <code>LETS_ENCRYPT_CUSTOM_PROFILE</code>.</li>
+</ul>
 </div>
 <div class="admonition info">
 <p class="admonition-title">Profile Availability</p>
@@ -7745,6 +7754,13 @@ TrustedMonitor/\d+\.\d+
 <td>global</td>
 <td>no</td>
 <td><strong>Clear Old Certificates:</strong> When set to <code>yes</code>, removes old certificates that are no longer needed during renewal.</td>
+</tr>
+<tr>
+<td><code>LETS_ENCRYPT_CONCURRENT_REQUESTS</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Concurrent Requests:</strong> When set to <code>yes</code>, certbot-new issues certificate requests concurrently. Use with caution to avoid rate limits.</td>
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_PROFILE</code></td>
@@ -7989,6 +8005,13 @@ TrustedMonitor/\d+\.\d+
 <td><code>application_token</code></td>
 <td></td>
 <td><a href="https://github.com/vanonox/certbot-dns-scaleway/blob/main/README.rst">Documentation</a></td>
+</tr>
+<tr>
+<td><code>transip</code></td>
+<td>TransIP</td>
+<td><code>key_file</code><br><code>username</code></td>
+<td></td>
+<td><a href="https://certbot-dns-transip.readthedocs.io/en/stable/">Documentation</a></td>
 </tr>
 </tbody>
 </table>
@@ -8679,7 +8702,7 @@ TrustedMonitor/\d+\.\d+
 <p>In HTTP, the <code>Host</code> header specifies the target server, but it may be missing or unknown, often due to bots scanning for vulnerabilities.</p>
 <p>To block such requests:</p>
 <ul>
-<li>Set <code>DISABLE_DEFAULT_SERVER</code> to <code>yes</code> to silently deny such requests using <a href="https://http.dev/444">NGINX's <code>444</code> status code</a>.</li>
+<li>Set <code>DISABLE_DEFAULT_SERVER</code> to <code>yes</code> to silently deny such requests using <a href="https://http.testing/444">NGINX's <code>444</code> status code</a>.</li>
 <li>For stricter security, enable <code>DISABLE_DEFAULT_SERVER_STRICT_SNI</code> to reject SSL/TLS connections without valid SNI.</li>
 </ul>
 <div class="admonition success">
@@ -8725,7 +8748,7 @@ TrustedMonitor/\d+\.\d+
 <div class="tabbed-block">
 <p><strong>HTTP Status Control</strong></p>
 <p>The first step in handling denied client access is defining the appropriate action. This can be configured using the <code>DENY_HTTP_STATUS</code> setting. When BunkerWeb denies a request, you can control its response using this setting. By default, it returns a <code>403 Forbidden</code> status, displaying a web page or custom content to the client.</p>
-<p>Alternatively, setting it to <code>444</code> closes the connection immediately without sending any response. This <a href="https://http.dev/444">non-standard status code</a>, specific to NGINX, is useful for silently dropping unwanted requests.</p>
+<p>Alternatively, setting it to <code>444</code> closes the connection immediately without sending any response. This <a href="https://http.testing/444">non-standard status code</a>, specific to NGINX, is useful for silently dropping unwanted requests.</p>
 <table>
 <thead>
 <tr>
@@ -8948,7 +8971,7 @@ TrustedMonitor/\d+\.\d+
 <p><strong>Plugin and System Management</strong></p>
 <p>These settings manage BunkerWeb's interaction with external systems and contribute to improving the product through optional anonymous usage statistics.</p>
 <p><strong>Anonymous Reporting</strong></p>
-<p>Anonymous reporting provides the BunkerWeb team with insights into how the software is being used. This helps identify areas for improvement and prioritize feature development. The reports are strictly statistical and do not include any sensitive or personally identifiable information. They cover:</p>
+<p>Anonymous reporting provides the BunkerWeb team with insights into how the software is being used. This helps identify areas for improvement and prioritize feature testingelopment. The reports are strictly statistical and do not include any sensitive or personally identifiable information. They cover:</p>
 <ul>
 <li>Enabled features</li>
 <li>General configuration patterns</li>
@@ -9629,6 +9652,13 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td>no</td>
 <td>Maximum allowed size of the OpenAPI document (accepts suffix k/M/G).</td>
 </tr>
+<tr>
+<td><code>OPENAPI_VALIDATE_PARAMS</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Validate query, header, cookie, and path parameters against the OpenAPI specification.</td>
+</tr>
 </tbody>
 </table>
 <h2 id="openid-connect-pro">OpenID Connect <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
@@ -10137,7 +10167,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>The Real IP plugin ensures that BunkerWeb correctly identifies the client’s IP address even when behind proxies. This is essential for applying security rules, rate limiting, and logging properly; without it, all requests would appear to come from your proxy's IP rather than the client's actual IP.</p>
 <p><strong>How it works:</strong></p>
 <ol>
-<li>When enabled, BunkerWeb examines incoming requests for specific headers (like <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For"><code>X-Forwarded-For</code></a>) that contain the client's original IP address.</li>
+<li>When enabled, BunkerWeb examines incoming requests for specific headers (like <a href="https://testingeloper.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For"><code>X-Forwarded-For</code></a>) that contain the client's original IP address.</li>
 <li>BunkerWeb checks if the incoming IP is in your trusted proxy list (<code>REAL_IP_FROM</code>), ensuring that only legitimate proxies can pass client IPs.</li>
 <li>The original client IP is extracted from the specified header (<code>REAL_IP_HEADER</code>) and used for all security evaluations and logging.</li>
 <li>For recursive IP chains, BunkerWeb can trace through multiple proxy hops to determine the originating client IP.</li>
@@ -11940,7 +11970,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 <h2 id="self-signed-certificate">Self-signed certificate</h2>
 <p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
-<p>The Self-signed Certificate plugin automatically generates and manages SSL/TLS certificates directly within BunkerWeb, enabling secure HTTPS connections without requiring an external certificate authority. This feature is particularly useful in development environments, internal networks, or whenever you need to quickly deploy HTTPS without configuring external certificates.</p>
+<p>The Self-signed Certificate plugin automatically generates and manages SSL/TLS certificates directly within BunkerWeb, enabling secure HTTPS connections without requiring an external certificate authority. This feature is particularly useful in testingelopment environments, internal networks, or whenever you need to quickly deploy HTTPS without configuring external certificates.</p>
 <p><strong>How it works:</strong></p>
 <ol>
 <li>When enabled, BunkerWeb automatically generates a self-signed SSL/TLS certificate for your configured domains.</li>
@@ -12009,7 +12039,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </table>
 <div class="admonition tip">
 <p class="admonition-title">Development Environments</p>
-<p>Self-signed certificates are ideal for development and testing environments where you need HTTPS but do not require certificates trusted by public browsers.</p>
+<p>Self-signed certificates are ideal for testingelopment and testing environments where you need HTTPS but do not require certificates trusted by public browsers.</p>
 </div>
 <div class="admonition info">
 <p class="admonition-title">Certificate Information</p>
@@ -12031,7 +12061,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <div class="highlight"><pre><span></span><code><span class="nt">GENERATE_SELF_SIGNED_SSL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">SELF_SIGNED_SSL_ALGORITHM</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ec-prime256v1&quot;</span>
 <span class="nt">SELF_SIGNED_SSL_EXPIRY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;90&quot;</span>
-<span class="nt">SELF_SIGNED_SSL_SUBJ</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/CN=dev.example.com/&quot;</span>
+<span class="nt">SELF_SIGNED_SSL_SUBJ</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/CN=testing.example.com/&quot;</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">

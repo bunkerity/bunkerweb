@@ -1054,6 +1054,75 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#clear-old-instances-db" class="md-nav__link">
+    <span class="md-ellipsis">
+      Clear old instances from database
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Clear old instances from database">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#table-and-columns-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table and columns (reference)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-connect-to-the-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      1 - Connect to the database
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-dry-run-list-stale-instances" class="md-nav__link">
+    <span class="md-ellipsis">
+      2 - Dry-run: list stale instances
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-delete-stale-instances" class="md-nav__link">
+    <span class="md-ellipsis">
+      3 - Delete stale instances
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-mark-instances-as-changed-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      4 - Mark instances as changed (optional)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-reclaim-space-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      5 - Reclaim space (optional)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#web-ui" class="md-nav__link">
     <span class="md-ellipsis">
       Web UI
@@ -1432,13 +1501,148 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 <p>If you see the following error <code>could not build server_names_hash, you should increase server_names_hash_bucket_size</code> in the logs, you will need to tweak the <code>SERVER_NAMES_HASH_BUCKET_SIZE</code> setting.</p>
 <h2 id="timezone">Timezone</h2>
 <p>When using container-based integrations, the timezone of the container may not match that of the host machine. To resolve that, you can set the <code>TZ</code> environment variable to the timezone of your choice on your containers (e.g. <code>TZ=Europe/Paris</code>). You will find the list of timezone identifiers <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List">here</a>.</p>
-<h2 id="web-ui">Web UI</h2>
-<p>In case you forgot your UI credentials or are experiencing 2FA issues, you can connect to the database to regain access.</p>
-<h3 id="access-database">Access database</h3>
+<h2 id="clear-old-instances-db">Clear old instances from database</h2>
+<p>BunkerWeb stores known instances in the <code>bw_instances</code> table (primary key: <code>hostname</code>).
+If you frequently redeploy, old rows may remain (for example, instances that haven’t checked in for a long time) and you may want to purge them.</p>
+<div class="admonition warning">
+<p class="admonition-title">Backup first</p>
+<p>Before editing the database manually, create a backup (snapshot the SQLite volume or use your DB engine backup tools).</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Stop writers</p>
+<p>To avoid races while deleting, stop (or scale down) components that can update instances
+(typically the scheduler / autoconf depending on your deployment), run the cleanup, then start them again.</p>
+</div>
+<h3 id="table-and-columns-reference">Table and columns (reference)</h3>
+<p>The instance model is defined as:</p>
+<ul>
+<li>Table: <code>bw_instances</code></li>
+<li>Primary key: <code>hostname</code></li>
+<li>“Last seen” timestamp: <code>last_seen</code></li>
+<li>Also contains:
+  <code>name</code>, <code>port</code>, <code>listen_https</code>, <code>https_port</code>,
+  <code>server_name</code>, <code>type</code>, <code>status</code>, <code>method</code>,
+  <code>creation_date</code></li>
+</ul>
+<h3 id="1-connect-to-the-database">1 - Connect to the database</h3>
+<p>Use the existing <a href="#access-database">Access database</a> section to connect
+(SQLite / MariaDB / PostgreSQL).</p>
+<h3 id="2-dry-run-list-stale-instances">2 - Dry-run: list stale instances</h3>
+<p>Pick a retention window (example: 90 days) and review what would be deleted.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">SQLite</label><label for="__tabbed_3_2">MariaDB / MySQL</label><label for="__tabbed_3_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Linux</label><label for="__tabbed_4_2">Docker</label><label for="__tabbed_4_3">All-in-one</label></div>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">hostname</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="k">server_name</span><span class="p">,</span><span class="w"> </span><span class="k">method</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">creation_date</span><span class="p">,</span><span class="w"> </span><span class="n">last_seen</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">datetime</span><span class="p">(</span><span class="s1">&#39;now&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-90 days&#39;</span><span class="p">)</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="k">ASC</span>
+<span class="k">LIMIT</span><span class="w"> </span><span class="mi">50</span><span class="p">;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">hostname</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="k">server_name</span><span class="p">,</span><span class="w"> </span><span class="k">method</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">creation_date</span><span class="p">,</span><span class="w"> </span><span class="n">last_seen</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">DATE_SUB</span><span class="p">(</span><span class="n">NOW</span><span class="p">(),</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="mi">90</span><span class="w"> </span><span class="k">DAY</span><span class="p">)</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="k">ASC</span>
+<span class="k">LIMIT</span><span class="w"> </span><span class="mi">50</span><span class="p">;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">hostname</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="k">server_name</span><span class="p">,</span><span class="w"> </span><span class="k">method</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">creation_date</span><span class="p">,</span><span class="w"> </span><span class="n">last_seen</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NOW</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">&#39;90 days&#39;</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="k">ASC</span>
+<span class="k">LIMIT</span><span class="w"> </span><span class="mi">50</span><span class="p">;</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h3 id="3-delete-stale-instances">3 - Delete stale instances</h3>
+<p>Once verified, delete the rows.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">SQLite</label><label for="__tabbed_4_2">MariaDB / MySQL</label><label for="__tabbed_4_3">PostgreSQL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">BEGIN</span><span class="p">;</span>
+
+<span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">datetime</span><span class="p">(</span><span class="s1">&#39;now&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-90 days&#39;</span><span class="p">);</span>
+
+<span class="k">COMMIT</span><span class="p">;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span>
+
+<span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">DATE_SUB</span><span class="p">(</span><span class="n">NOW</span><span class="p">(),</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="mi">90</span><span class="w"> </span><span class="k">DAY</span><span class="p">);</span>
+
+<span class="k">COMMIT</span><span class="p">;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">BEGIN</span><span class="p">;</span>
+
+<span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NOW</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">&#39;90 days&#39;</span><span class="p">;</span>
+
+<span class="k">COMMIT</span><span class="p">;</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Delete by hostname</p>
+<p>To delete a specific instance, use its hostname (the primary key).</p>
+<div class="highlight"><pre><span></span><code><span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">hostname</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;&lt;hostname&gt;&#39;</span><span class="p">;</span>
+</code></pre></div>
+</div>
+<h3 id="4-mark-instances-as-changed-optional">4 - Mark instances as changed (optional)</h3>
+<p>BunkerWeb tracks instance changes in the <code>bw_metadata</code> table
+(<code>instances_changed</code>, <code>last_instances_change</code>).</p>
+<p>If the UI does not refresh as expected after manual cleanup,
+you can force a “change marker” update:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">SQLite / PostgreSQL</label><label for="__tabbed_5_2">MariaDB / MySQL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">UPDATE</span><span class="w"> </span><span class="n">bw_metadata</span>
+<span class="k">SET</span><span class="w"> </span><span class="n">instances_changed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="n">last_instances_change</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">CURRENT_TIMESTAMP</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">UPDATE</span><span class="w"> </span><span class="n">bw_metadata</span>
+<span class="k">SET</span><span class="w"> </span><span class="n">instances_changed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="n">last_instances_change</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NOW</span><span class="p">()</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h3 id="5-reclaim-space-optional">5 - Reclaim space (optional)</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">SQLite</label><label for="__tabbed_6_2">PostgreSQL</label><label for="__tabbed_6_3">MariaDB / MySQL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">VACUUM</span><span class="p">;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">VACUUM</span><span class="w"> </span><span class="p">(</span><span class="k">ANALYZE</span><span class="p">);</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">OPTIMIZE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">bw_instances</span><span class="p">;</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="web-ui">Web UI</h2>
+<p>In case you forgot your UI credentials or are experiencing 2FA issues, you can connect to the database to regain access.</p>
+<h3 id="access-database">Access database</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">SQLite</label><label for="__tabbed_7_2">MariaDB / MySQL</label><label for="__tabbed_7_3">PostgreSQL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="tabbed-set tabbed-alternate" data-tabs="8:3"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Linux</label><label for="__tabbed_8_2">Docker</label><label for="__tabbed_8_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Install SQLite (Debian/Ubuntu):</p>
@@ -1502,7 +1706,7 @@ sqlite&gt;
 <p class="admonition-title">Credentials and database name</p>
 <p>You will need to use the same credentials and database named used in the <code>DATABASE_URI</code> setting.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Linux</label><label for="__tabbed_5_2">Docker</label><label for="__tabbed_5_3">All-in-one</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:3"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Linux</label><label for="__tabbed_9_2">Docker</label><label for="__tabbed_9_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Access your local database :</p>
@@ -1542,7 +1746,7 @@ sqlite&gt;
 <p class="admonition-title">Credentials, host and database name</p>
 <p>You will need to use the same credentials (user/password), host and database name used in the <code>DATABASE_URI</code> setting.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Linux</label><label for="__tabbed_6_2">Docker</label><label for="__tabbed_6_3">All-in-one</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Linux</label><label for="__tabbed_10_2">Docker</label><label for="__tabbed_10_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Access your local database:</p>
@@ -1677,7 +1881,7 @@ sqlite&gt;
 </tbody>
 </table>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:5"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><input id="__tabbed_7_4" name="__tabbed_7" type="radio" /><input id="__tabbed_7_5" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Retrieve username</label><label for="__tabbed_7_2">Update admin user password</label><label for="__tabbed_7_3">Disable 2FA authentication for admin user</label><label for="__tabbed_7_4">Refresh 2FA recovery codes</label><label for="__tabbed_7_5">Export configuration and anonymized logs</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:5"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><input id="__tabbed_11_4" name="__tabbed_11" type="radio" /><input id="__tabbed_11_5" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Retrieve username</label><label for="__tabbed_11_2">Update admin user password</label><label for="__tabbed_11_3">Disable 2FA authentication for admin user</label><label for="__tabbed_11_4">Refresh 2FA recovery codes</label><label for="__tabbed_11_5">Export configuration and anonymized logs</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Execute the following command to extract data from the <code>bw_ui_users</code> table :</p>

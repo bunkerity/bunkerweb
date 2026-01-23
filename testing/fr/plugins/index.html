@@ -1353,7 +1353,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <details class="warning">
 <summary>Utilisation d'un dossier local pour les données persistantes</summary>
 <p>Le planificateur s'exécute en tant qu'utilisateur non privilégié avec UID 101 et GID 101 à l'intérieur du conteneur. La raison en est la sécurité : en cas d'exploitation d'une vulnérabilité, l'attaquant n'aura pas de privilèges root complets (UID/GID 0).
-Mais il y a un inconvénient : si vous utilisez un <strong>dossier local pour les données persistantes</strong>, vous devrez <strong>définir les permissions correctes</strong> afin que l'utilisateur non privilégié puisse écrire des données dedans. Quelque chose comme ça devrait faire l'affaire :</p>
+Mais il y a un inconvénient : si vous utilisez un <strong>dossier local pour les données persistantes</strong>, vous testingrez <strong>définir les permissions correctes</strong> afin que l'utilisateur non privilégié puisse écrire des données dedans. Quelque chose comme ça testingrait faire l'affaire :</p>
 <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 chown<span class="w"> </span>root:101<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
@@ -1362,7 +1362,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>b
 <div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span>root:101<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
 </code></pre></div>
-<p>Si vous utilisez <a href="https://docs.docker.com/engine/security/rootless">Docker en mode rootless</a> ou <a href="https://podman.io/">podman</a>, les UID et GID dans le conteneur seront mappés à des valeurs différentes sur l'hôte. Vous devrez d'abord vérifier vos subuid et subgid initiaux :</p>
+<p>Si vous utilisez <a href="https://docs.docker.com/engine/security/rootless">Docker en mode rootless</a> ou <a href="https://podman.io/">podman</a>, les UID et GID dans le conteneur seront mappés à des valeurs différentes sur l'hôte. Vous testingrez d'abord vérifier vos subuid et subgid initiaux :</p>
 <div class="highlight"><pre><span></span><code>grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subuid<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subgid
 </code></pre></div>
@@ -1380,7 +1380,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc1</span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="nn">...</span>
@@ -1395,14 +1395,14 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/bunkerity/bunkerweb-plugins<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span class="w"> </span>./bw-data/plugins
 </code></pre></div>
-<p>Étant donné que le planificateur s'exécute en tant qu'utilisateur non privilégié avec UID et GID 101, vous devrez modifier les permissions :</p>
+<p>Étant donné que le planificateur s'exécute en tant qu'utilisateur non privilégié avec UID et GID 101, vous testingrez modifier les permissions :</p>
 <div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span><span class="m">101</span>:101<span class="w"> </span>./bw-data
 </code></pre></div>
 <p>Ensuite, vous pouvez monter le volume lors du démarrage de votre stack Docker :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc1</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="nn">...</span>
@@ -1426,14 +1426,14 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/bunkerity/bunkerweb-plugins<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span class="w"> </span>/shared/bw-plugins
 </code></pre></div>
-<p>Étant donné que le planificateur s'exécute en tant qu'utilisateur non privilégié avec UID et GID 101, vous devrez modifier les permissions :</p>
+<p>Étant donné que le planificateur s'exécute en tant qu'utilisateur non privilégié avec UID et GID 101, vous testingrez modifier les permissions :</p>
 <div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span><span class="m">101</span>:101<span class="w"> </span>/shared/bw-plugins
 </code></pre></div>
 <p>Ensuite, vous pouvez monter le volume lors du démarrage de votre stack Swarm :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc1</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/shared/bw-plugins:/data/plugins</span>
 <span class="nn">...</span>
@@ -1473,7 +1473,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc1</span>
 <span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
 <span class="w">          </span><span class="nt">env</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
@@ -1510,7 +1510,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <h3 id="structure">Structure</h3>
 <div class="admonition tip">
 <p class="admonition-title">Plugins existants</p>
-<p>Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des <a href="https://github.com/bunkerity/bunkerweb-plugins">plugins officiels</a> et des <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/src/common/core">plugins core</a> (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).</p>
+<p>Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des <a href="https://github.com/bunkerity/bunkerweb-plugins">plugins officiels</a> et des <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc1/src/common/core">plugins core</a> (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).</p>
 </div>
 <p>À quoi ressemble la structure d'un plugin :
 <div class="highlight"><pre><span></span><code>plugin /
@@ -1945,7 +1945,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Plus d'exemples</p>
-<p>Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/src/bw/lua/bunkerweb">répertoire lua</a> du dépôt.</p>
+<p>Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc1/src/bw/lua/bunkerweb">répertoire lua</a> du dépôt.</p>
 </div>
 <h3 id="emplois">Emplois</h3>
 <p>BunkerWeb utilise un planificateur de tâches interne pour des tâches périodiques telles que le renouvellement des certificats avec certbot, le téléchargement de listes noires, le téléchargement de fichiers MMDB, ... Vous pouvez ajouter des tâches de votre choix en les plaçant dans un sous-dossier nommé <strong>tâches</strong> et en les répertoriant dans le  fichier de métadonnées <strong>plugin.json</strong>. N'oubliez pas d'ajouter les permissions d'exécution pour tout le monde afin d'éviter tout problème lorsqu'un utilisateur clone et installe votre plugin.</p>
@@ -2139,7 +2139,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <h3 id="plans">Plans</h3>
 <p>Dans Flask, <strong>les blueprints</strong> servent de moyen modulaire pour organiser les composants associés, tels que les vues, les modèles et les fichiers statiques, au sein de votre application. Ils vous permettent de regrouper logiquement les fonctionnalités et peuvent être utilisés pour créer de nouvelles sections de votre application ou remplacer celles existantes.</p>
 <h4 id="creation-dun-blueprint">Création d'un Blueprint</h4>
-<p>Pour définir un blueprint, vous devez créer une instance de la <code>Blueprint</code> classe, en spécifiant son nom et son chemin d'importation. Vous définissez ensuite les itinéraires et les vues associés à ce blueprint.</p>
+<p>Pour définir un blueprint, vous testingez créer une instance de la <code>Blueprint</code> classe, en spécifiant son nom et son chemin d'importation. Vous définissez ensuite les itinéraires et les vues associés à ce blueprint.</p>
 <p><strong>Exemple : Définition d'un nouveau blueprint</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">dirname</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Blueprint</span><span class="p">,</span> <span class="n">render_template</span>
@@ -2170,7 +2170,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <div class="admonition warning">
 <p class="admonition-title">À propos de la dérogation</p>
 <p>Soyez prudent lorsque vous remplacez des blueprints existants, car cela peut avoir un impact sur le comportement de l'application. Assurez-vous que les modifications sont conformes aux exigences de l'application et n'introduisent pas d'effets secondaires inattendus.</p>
-<p>Toutes les routes existantes seront supprimées du blueprint original, vous devrez donc les réimplémenter si nécessaire.</p>
+<p>Toutes les routes existantes seront supprimées du blueprint original, vous testingrez donc les réimplémenter si nécessaire.</p>
 </div>
 <h4 id="conventions-de-nommage">Conventions de nommage</h4>
 <div class="admonition danger">
