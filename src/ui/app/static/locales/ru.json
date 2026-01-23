@@ -77,9 +77,9 @@
     "clear": "ОЧИСТИТЬ",
     "close": "Закрыть",
     "columns": "Столбцы",
-    "convert_services": "Конвертировать сервисы",
     "convert_configs": "Преобразовать конфиги",
     "convert_configs_to": "Преобразовать в {{state}}",
+    "convert_services": "Конвертировать сервисы",
     "copy": "Копировать",
     "copy_codes": "Копировать коды",
     "copy_raw": "Копировать необработанные данные",
@@ -102,10 +102,12 @@
     "fetch_global": "Получить глобальные настройки",
     "filters_suffix": " Фильтры",
     "follow": "Следить",
+    "force_update": "Force update",
     "github_stars": "Звезды",
     "go_back": "Вернуться",
     "hide": "Скрыть",
     "history": "История",
+    "import_services": "Импорт служб",
     "login": "Войти",
     "multiple_add": "ДОБАВИТЬ",
     "multiple_hide": "СКРЫТЬ",
@@ -146,8 +148,7 @@
     "upload_photo": "Загрузить новое фото",
     "view_details": "Просмотреть детали",
     "view_raw_data": "Просмотреть необработанные данные",
-    "wipe_other_sessions": "Очистить другие сессии",
-    "force_update": "Force update"
+    "wipe_other_sessions": "Очистить другие сессии"
   },
   "country": {
     "AD": "Андорра",
@@ -748,11 +749,11 @@
       "add_plugin_dropzone": "Перетащите архив плагина сюда или нажмите, чтобы выбрать файлы.",
       "confirm_cache_deletion_alert": "Вы уверены, что хотите удалить выбранный файл кэша?",
       "confirm_cache_deletion_alert_plural": "Вы уверены, что хотите удалить выбранные файлы кэша?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "Вы уверены, что хотите преобразовать выбранные пользовательские конфигурации в {{state}}?",
       "confirm_configs_deletion_alert": "Вы уверены, что хотите удалить выбранную пользовательскую конфигурацию?",
       "confirm_configs_deletion_alert_plural": "Вы уверены, что хотите удалить выбранные пользовательские конфигурации?",
       "confirm_conversion_confirmation": "Вы уверены, что хотите конвертировать выбранные сервисы?",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
-      "confirm_configs_conversion_to": "Вы уверены, что хотите преобразовать выбранные пользовательские конфигурации в {{state}}?",
       "confirm_next_step": "Вы уверены, что хотите перейти к следующему шагу?",
       "confirm_plugin_deletion": "Вы уверены, что хотите удалить выбранный плагин?",
       "confirm_plugin_deletion_plural": "Вы уверены, что хотите удалить выбранные плагины?",
@@ -760,6 +761,15 @@
       "confirmation_instance_deletion": "Вы уверены, что хотите удалить выбранный экземпляр?",
       "delete_confirmation_alert": "Вы уверены, что хотите удалить выбранный экземпляр?",
       "delete_confirmation_alert_plural": "Вы уверены, что хотите удалить выбранные экземпляры?",
+      "delete_step_confirmation": "Вы уверены, что хотите удалить этот шаг?",
+      "delete_step_content_label": "Содержимое",
+      "delete_step_name_label": "Шаг",
+      "fetch_global_settings_bold": "Это загрузит глобальные настройки и применит их к текущему шаблону.",
+      "fetch_global_settings_point_1": "Обновляются только параметры, присутствующие в этом шаблоне.",
+      "fetch_global_settings_point_2": "Значения, совпадающие со значениями по умолчанию, игнорируются.",
+      "fetch_global_settings_point_3": "SERVER_NAME никогда не перезаписывается.",
+      "import_services_dropzone": "Перетащите файл экспорта служб сюда или нажмите, чтобы выбрать файл.",
+      "import_services_warning": "Импорт служб создаст новые службы пользовательского интерфейса из файла экспорта. Существующие службы пропускаются.",
       "instance_creation_alert": "Вам не нужно указывать порт или имя сервера; для конфигурации экземпляра будут использованы значения `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` и `API_SERVER_NAME`.",
       "next_step_in_case_of_issue": "Если возникнут проблемы, вы можете вручную принять небезопасный сертификат:",
       "recovery_codes_save_alert": "Пожалуйста, сохраните эти коды восстановления в безопасном месте (например, в менеджере паролей или сейфе). Вы можете использовать их для доступа к своей учетной записи, если потеряете устройство аутентификации.",
@@ -768,14 +778,7 @@
       "services_deletion_confirmation": "Вы уверены, что хотите удалить выбранные сервисы?",
       "unban_confirmation_alert": "Вы уверены, что хотите разбанить выбранный IP-адрес?",
       "unban_confirmation_alert_plural": "Вы уверены, что хотите разбанить выбранные IP-адреса?",
-      "update_duration_alert": "Выберите новую продолжительность для выбранных банов:",
-      "fetch_global_settings_bold": "Это загрузит глобальные настройки и применит их к текущему шаблону.",
-      "fetch_global_settings_point_1": "Обновляются только параметры, присутствующие в этом шаблоне.",
-      "fetch_global_settings_point_2": "Значения, совпадающие со значениями по умолчанию, игнорируются.",
-      "fetch_global_settings_point_3": "SERVER_NAME никогда не перезаписывается.",
-      "delete_step_confirmation": "Вы уверены, что хотите удалить этот шаг?",
-      "delete_step_name_label": "Шаг",
-      "delete_step_content_label": "Содержимое"
+      "update_duration_alert": "Выберите новую продолжительность для выбранных банов:"
     },
     "button": {
       "reset_template_confirm": "Сбросить конфигурацию шаблона",
@@ -795,17 +798,18 @@
       "create_new_instance": "Создать новый экземпляр",
       "create_template": "Создать шаблон",
       "delete_instance": "Удалить экземпляры",
+      "delete_step": "Удалить шаг",
       "delete_template": "Удалить шаблоны",
+      "fetch_global_settings": "Применить глобальные настройки?",
       "from_plugin": "из плагина",
       "full_url": "Полный URL",
+      "import_services": "Импорт служб",
       "job_history": "Последние 10 выполнений задачи",
       "job_history_count": "Последние {{count}} выполнений задачи",
       "recovery_codes": "Коды восстановления",
       "reset_template_config": "Сбросить конфигурацию шаблона?",
-      "fetch_global_settings": "Применить глобальные настройки?",
       "server_name_not_unique": "Имя сервера не уникально",
-      "update_duration": "Обновить срок бана",
-      "delete_step": "Удалить шаг"
+      "update_duration": "Обновить срок бана"
     }
   },
   "mode": {
@@ -978,6 +982,10 @@
     "global_all_services": "Глобальный (все сервисы)",
     "permanent": "Постоянный",
     "service_specific": "Специфичный для сервиса"
+  },
+  "security_mode": {
+    "block": "Блокировка",
+    "detect": "Обнаружение"
   },
   "searchpane": {
     "active": "Активный",
@@ -1622,6 +1630,7 @@
         "last_update": "Дата и время последнего обновления сервиса",
         "method": "Метод создания сервиса (например, ui, file)",
         "name": "Имя сервиса",
+        "security_mode": "Режим безопасности сервиса (Блокировка или Обнаружение)",
         "select_all": "Выбрать все Сервисы",
         "template": "Шаблон, используемый Сервисом",
         "type": "Тип Сервиса (Онлайн/Черновик)"

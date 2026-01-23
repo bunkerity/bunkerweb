@@ -154,12 +154,13 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
 
 === "Integrationseinstellungen"
 
-    | Einstellung       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                               |
-    | ----------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-    | `AUTOCONF_MODE`   | `no`     | global    | Nein     | **Autoconf-Modus:** Autoconf-Docker-Integration aktivieren.                                                |
-    | `SWARM_MODE`      | `no`     | global    | Nein     | **Swarm-Modus:** Docker-Swarm-Integration aktivieren.                                                      |
-    | `KUBERNETES_MODE` | `no`     | global    | Nein     | **Kubernetes-Modus:** Kubernetes-Integration aktivieren.                                                   |
-    | `USE_TEMPLATE`    |          | multisite | Nein     | **Vorlage verwenden:** Konfigurationsvorlage, die die Standardwerte bestimmter Einstellungen überschreibt. |
+    | Einstellung              | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                          |
+    | ------------------------ | -------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `AUTOCONF_MODE`          | `no`     | global    | Nein     | **Autoconf-Modus:** Autoconf-Docker-Integration aktivieren.                                                                                                           |
+    | `SWARM_MODE`             | `no`     | global    | Nein     | **Swarm-Modus:** Docker-Swarm-Integration aktivieren.                                                                                                                 |
+    | `KUBERNETES_MODE`        | `no`     | global    | Nein     | **Kubernetes-Modus:** Kubernetes-Integration aktivieren.                                                                                                              |
+    | `KEEP_CONFIG_ON_RESTART` | `no`     | global    | Nein     | **Konfiguration bei Neustart behalten:** Konfiguration bei Neustart beibehalten. Auf 'yes' setzen, um das Zurücksetzen der Konfiguration beim Neustart zu verhindern. |
+    | `USE_TEMPLATE`           |          | multisite | Nein     | **Vorlage verwenden:** Konfigurationsvorlage, die die Standardwerte bestimmter Einstellungen überschreibt.                                                            |
 
 === "Nginx-Einstellungen"
 
@@ -1664,7 +1665,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.8-rc1
+        image: bunkerity/bunkerweb:1.6.8-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1681,7 +1682,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
             syslog-address: "udp://10.20.30.254:514" # Die IP-Adresse des syslog-Dienstes
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.8-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -2753,7 +2754,12 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 6.  **Lassen Sie BunkerWeb den Rest erledigen:** Nach der Konfiguration werden Zertifikate automatisch ausgestellt, installiert und bei Bedarf erneuert.
 
 !!! tip "Zertifikatsprofile"
-    Let's Encrypt bietet verschiedene Zertifikatsprofile für unterschiedliche Anwendungsfälle: - **classic**: Allzweck-Zertifikate mit 90-tägiger Gültigkeit (Standard) - **tlsserver**: Optimiert für die TLS-Server-Authentifizierung mit 90-tägiger Gültigkeit und kleinerem Payload - **shortlived**: Erhöhte Sicherheit mit 7-tägiger Gültigkeit für automatisierte Umgebungen - **custom**: Wenn Ihr ACME-Server ein anderes Profil unterstützt, legen Sie es mit `LETS_ENCRYPT_CUSTOM_PROFILE` fest.
+    Let's Encrypt bietet verschiedene Zertifikatsprofile für unterschiedliche Anwendungsfälle:
+
+    - **classic**: Allzweck-Zertifikate mit 90-tägiger Gültigkeit (Standard)
+    - **tlsserver**: Optimiert für die TLS-Server-Authentifizierung mit 90-tägiger Gültigkeit und kleinerem Payload
+    - **shortlived**: Erhöhte Sicherheit mit 7-tägiger Gültigkeit für automatisierte Umgebungen
+    - **custom**: Wenn Ihr ACME-Server ein anderes Profil unterstützt, legen Sie es mit `LETS_ENCRYPT_CUSTOM_PROFILE` fest.
 
 !!! info "Profilverfügbarkeit"
     Beachten Sie, dass die Profile `tlsserver` und `shortlived` derzeit möglicherweise nicht in allen Umgebungen oder mit allen ACME-Clients verfügbar sind. Das `classic`-Profil hat die breiteste Kompatibilität und wird für die meisten Benutzer empfohlen. Wenn ein ausgewähltes Profil nicht verfügbar ist, greift das System automatisch auf das `classic`-Profil zurück.
@@ -2773,6 +2779,7 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 | `USE_LETS_ENCRYPT_WILDCARD`                 | `no`      | multisite | nein     | **Wildcard-Zertifikate:** Wenn auf `yes` gesetzt, werden Wildcard-Zertifikate für alle Domains erstellt. Nur mit DNS-Challenges verfügbar.                                                                                                                                                                                                                             |
 | `USE_LETS_ENCRYPT_STAGING`                  | `no`      | multisite | nein     | **Staging verwenden:** Wenn auf `yes` gesetzt, wird die Staging-Umgebung von Let's Encrypt zum Testen verwendet. Staging hat höhere Ratenbegrenzungen, aber die Zertifikate sind nicht vertrauenswürdig.                                                                                                                                                               |
 | `LETS_ENCRYPT_CLEAR_OLD_CERTS`              | `no`      | global    | nein     | **Alte Zertifikate löschen:** Wenn auf `yes` gesetzt, werden alte Zertifikate, die bei der Erneuerung nicht mehr benötigt werden, entfernt.                                                                                                                                                                                                                            |
+| `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`      | global    | nein     | **Parallele Anfragen:** Wenn auf `yes` gesetzt, stellt certbot-new Zertifikatsanfragen parallel. Vorsicht wegen Rate-Limits.                                                                                                                                                                                                                                           |
 | `LETS_ENCRYPT_PROFILE`                      | `classic` | multisite | nein     | **Zertifikatsprofil:** Wählen Sie das zu verwendende Zertifikatsprofil aus. Optionen: `classic` (Allzweck), `tlsserver` (optimiert für TLS-Server) oder `shortlived` (7-Tage-Zertifikate).                                                                                                                                                                             |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`               |           | multisite | nein     | **Benutzerdefiniertes Zertifikatsprofil:** Geben Sie ein benutzerdefiniertes Zertifikatsprofil ein, wenn Ihr ACME-Server nicht standardmäßige Profile unterstützt. Dies überschreibt `LETS_ENCRYPT_PROFILE`, falls gesetzt.                                                                                                                                            |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `3`       | multisite | nein     | **Maximale Wiederholungen:** Anzahl der Wiederholungsversuche bei der Zertifikatserstellung bei einem Fehler. Auf `0` setzen, um Wiederholungen zu deaktivieren. Nützlich bei temporären Netzwerkproblemen.                                                                                                                                                            |
@@ -2834,6 +2841,7 @@ Das Let's Encrypt-Plugin unterstützt eine breite Palette von DNS-Anbietern für
 | `route53`         | Amazon Route 53  | `access_key_id`<br>`secret_access_key`                                                                       |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-route53.readthedocs.io/en/stable/)                                |
 | `sakuracloud`     | Sakura Cloud     | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-sakuracloud.readthedocs.io/en/stable/)                            |
 | `scaleway`        | Scaleway         | `application_token`                                                                                          |                                                                                                                                                                                                                                                                              | [Dokumentation](https://github.com/vanonox/certbot-dns-scaleway/blob/main/README.rst)                 |
+| `transip`         | TransIP          | `key_file`<br>`username`                                                                                     |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-transip.readthedocs.io/en/stable/)                                |
 
 ### Beispielkonfigurationen
 
@@ -3915,6 +3923,7 @@ Validates incoming HTTP requests against an OpenAPI / Swagger specification.
 | `OPENAPI_IGNORE_URLS`        | `^/docs$ ^/redoc$ ^/openapi\.json$` | multisite | nein     | List of URL regexes to bypass OpenAPI validation (space separated).                             |
 | `OPENAPI_CACHE_TTL`          | `300`                               | global    | nein     | Seconds to cache the parsed specification in shared cache.                                      |
 | `OPENAPI_MAX_SPEC_SIZE`      | `2M`                                | global    | nein     | Maximum allowed size of the OpenAPI document (accepts suffix k/M/G).                            |
+| `OPENAPI_VALIDATE_PARAMS`    | `yes`                               | multisite | nein     | Validate query, header, cookie, and path parameters against the OpenAPI specification.          |
 
 ## OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

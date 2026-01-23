@@ -76,9 +76,9 @@
     "clear": "清除",
     "close": "关闭",
     "columns": "列",
-    "convert_services": "转换服务",
     "convert_configs": "转换配置",
     "convert_configs_to": "转换为 {{state}}",
+    "convert_services": "转换服务",
     "copy": "复制",
     "copy_codes": "复制代码",
     "copy_raw": "复制原始数据",
@@ -101,10 +101,12 @@
     "fetch_global": "获取全局设置",
     "filters_suffix": " 过滤器",
     "follow": "跟随",
+    "force_update": "Force update",
     "github_stars": "星标",
     "go_back": "返回",
     "hide": "隐藏",
     "history": "历史记录",
+    "import_services": "导入服务",
     "login": "登录",
     "multiple_add": "添加",
     "multiple_hide": "隐藏",
@@ -145,8 +147,7 @@
     "upload_photo": "上传新照片",
     "view_details": "查看详情",
     "view_raw_data": "查看原始数据",
-    "wipe_other_sessions": "清除其他会话",
-    "force_update": "Force update"
+    "wipe_other_sessions": "清除其他会话"
   },
   "country": {
     "AD": "安道尔",
@@ -747,11 +748,11 @@
       "add_plugin_dropzone": "将您的插件存档拖放到此处或单击以选择文件。",
       "confirm_cache_deletion_alert": "您确定要删除选定的缓存文件吗？",
       "confirm_cache_deletion_alert_plural": "您确定要删除选定的缓存文件吗？",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "确定将选定的自定义配置转换为 {{state}} 吗？",
       "confirm_configs_deletion_alert": "您确定要删除选定的自定义配置吗？",
       "confirm_configs_deletion_alert_plural": "您确定要删除选定的自定义配置吗？",
       "confirm_conversion_confirmation": "您确定要转换选定的服务吗？",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
-      "confirm_configs_conversion_to": "确定将选定的自定义配置转换为 {{state}} 吗？",
       "confirm_next_step": "您确定要继续下一步吗？",
       "confirm_plugin_deletion": "您确定要删除选定的插件吗？",
       "confirm_plugin_deletion_plural": "您确定要删除选定的插件吗？",
@@ -759,6 +760,15 @@
       "confirmation_instance_deletion": "您确定要删除选定的实例吗？",
       "delete_confirmation_alert": "您确定要删除选定的实例吗？",
       "delete_confirmation_alert_plural": "您确定要删除选定的实例吗？",
+      "delete_step_confirmation": "您确定要删除此步骤吗？",
+      "delete_step_content_label": "内容",
+      "delete_step_name_label": "步骤",
+      "fetch_global_settings_bold": "这将获取全局设置并将其应用到当前模板。",
+      "fetch_global_settings_point_1": "仅更新本模板中存在的设置。",
+      "fetch_global_settings_point_2": "与默认值相同的值会被忽略。",
+      "fetch_global_settings_point_3": "SERVER_NAME 永不会被覆盖。",
+      "import_services_dropzone": "将您的服务导出文件拖放到此处，或单击以选择文件。",
+      "import_services_warning": "导入服务将从导出文件创建新的 UI 服务。现有服务将被跳过。",
       "instance_creation_alert": "您不需要提供端口或服务器名称；`API_HTTP_PORT`、`API_LISTEN_HTTPS`、`API_HTTPS_PORT` 和 `API_SERVER_NAME` 的值将用于实例配置。",
       "next_step_in_case_of_issue": "如果遇到问题，您可以手动接受不安全的证书：",
       "recovery_codes_save_alert": "请将这些恢复代码保存在安全的位置（例如密码管理器或保险箱）。如果丢失身份验证设备，您可以使用它们访问您的帐户。",
@@ -767,14 +777,7 @@
       "services_deletion_confirmation": "您确定要删除选定的服务吗？",
       "unban_confirmation_alert": "您确定要解禁选定的 IP 地址吗？",
       "unban_confirmation_alert_plural": "您确定要解禁选定的 IP 地址吗？",
-      "update_duration_alert": "请为选定的封禁选择新的期限：",
-      "fetch_global_settings_bold": "这将获取全局设置并将其应用到当前模板。",
-      "fetch_global_settings_point_1": "仅更新本模板中存在的设置。",
-      "fetch_global_settings_point_2": "与默认值相同的值会被忽略。",
-      "fetch_global_settings_point_3": "SERVER_NAME 永不会被覆盖。",
-      "delete_step_confirmation": "您确定要删除此步骤吗？",
-      "delete_step_name_label": "步骤",
-      "delete_step_content_label": "内容"
+      "update_duration_alert": "请为选定的封禁选择新的期限："
     },
     "button": {
       "reset_template_confirm": "重置模板配置",
@@ -794,17 +797,18 @@
       "create_new_instance": "创建新实例",
       "create_template": "创建模板",
       "delete_instance": "删除实例",
+      "delete_step": "删除步骤",
       "delete_template": "删除模板",
+      "fetch_global_settings": "应用全局设置？",
       "from_plugin": "来自插件",
       "full_url": "完整 URL",
+      "import_services": "导入服务",
       "job_history": "最近 10 次任务执行",
       "job_history_count": "任务 {{count}} 次执行",
       "recovery_codes": "恢复代码",
       "reset_template_config": "重置模板配置？",
-      "fetch_global_settings": "应用全局设置？",
       "server_name_not_unique": "服务器名称不是唯一的",
-      "update_duration": "更新封禁期限",
-      "delete_step": "删除步骤"
+      "update_duration": "更新封禁期限"
     }
   },
   "mode": {
@@ -977,6 +981,10 @@
     "global_all_services": "全局（所有服务）",
     "permanent": "永久",
     "service_specific": "特定服务"
+  },
+  "security_mode": {
+    "block": "阻止",
+    "detect": "检测"
   },
   "searchpane": {
     "active": "活动",
@@ -1621,6 +1629,7 @@
         "last_update": "服务最后更新的日期和时间",
         "method": "服务的创建方法（例如，ui, file）",
         "name": "服务的名称",
+        "security_mode": "服务的安全模式（阻止或检测）",
         "select_all": "选择所有服务",
         "template": "服务使用的模板",
         "type": "服务类型（在线/草稿）"

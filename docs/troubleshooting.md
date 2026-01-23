@@ -288,6 +288,159 @@ If you see the following error `could not build server_names_hash, you should in
 
 When using container-based integrations, the timezone of the container may not match that of the host machine. To resolve that, you can set the `TZ` environment variable to the timezone of your choice on your containers (e.g. `TZ=Europe/Paris`). You will find the list of timezone identifiers [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List).
 
+## Clear old instances from database {#clear-old-instances-db}
+
+BunkerWeb stores known instances in the `bw_instances` table (primary key: `hostname`).
+If you frequently redeploy, old rows may remain (for example, instances that haven’t checked in for a long time) and you may want to purge them.
+
+!!! warning "Backup first"
+    Before editing the database manually, create a backup (snapshot the SQLite volume or use your DB engine backup tools).
+
+!!! warning "Stop writers"
+    To avoid races while deleting, stop (or scale down) components that can update instances
+    (typically the scheduler / autoconf depending on your deployment), run the cleanup, then start them again.
+
+### Table and columns (reference)
+
+The instance model is defined as:
+
+- Table: `bw_instances`
+- Primary key: `hostname`
+- “Last seen” timestamp: `last_seen`
+- Also contains:
+  `name`, `port`, `listen_https`, `https_port`,
+  `server_name`, `type`, `status`, `method`,
+  `creation_date`
+
+### 1 - Connect to the database
+
+Use the existing [Access database](#access-database) section to connect
+(SQLite / MariaDB / PostgreSQL).
+
+### 2 - Dry-run: list stale instances
+
+Pick a retention window (example: 90 days) and review what would be deleted.
+
+=== "SQLite"
+
+    ```sql
+    SELECT hostname, name, server_name, method, status, creation_date, last_seen
+    FROM bw_instances
+    WHERE last_seen < datetime('now', '-90 days')
+    ORDER BY last_seen ASC
+    LIMIT 50;
+    ```
+
+=== "MariaDB / MySQL"
+
+    ```sql
+    SELECT hostname, name, server_name, method, status, creation_date, last_seen
+    FROM bw_instances
+    WHERE last_seen < DATE_SUB(NOW(), INTERVAL 90 DAY)
+    ORDER BY last_seen ASC
+    LIMIT 50;
+    ```
+
+=== "PostgreSQL"
+
+    ```sql
+    SELECT hostname, name, server_name, method, status, creation_date, last_seen
+    FROM bw_instances
+    WHERE last_seen < NOW() - INTERVAL '90 days'
+    ORDER BY last_seen ASC
+    LIMIT 50;
+    ```
+
+### 3 - Delete stale instances
+
+Once verified, delete the rows.
+
+=== "SQLite"
+
+    ```sql
+    BEGIN;
+
+    DELETE FROM bw_instances
+    WHERE last_seen < datetime('now', '-90 days');
+
+    COMMIT;
+    ```
+
+=== "MariaDB / MySQL"
+
+    ```sql
+    START TRANSACTION;
+
+    DELETE FROM bw_instances
+    WHERE last_seen < DATE_SUB(NOW(), INTERVAL 90 DAY);
+
+    COMMIT;
+    ```
+
+=== "PostgreSQL"
+
+    ```sql
+    BEGIN;
+
+    DELETE FROM bw_instances
+    WHERE last_seen < NOW() - INTERVAL '90 days';
+
+    COMMIT;
+    ```
+
+!!! tip "Delete by hostname"
+    To delete a specific instance, use its hostname (the primary key).
+
+    ```sql
+    DELETE FROM bw_instances WHERE hostname = '<hostname>';
+    ```
+
+### 4 - Mark instances as changed (optional)
+
+BunkerWeb tracks instance changes in the `bw_metadata` table
+(`instances_changed`, `last_instances_change`).
+
+If the UI does not refresh as expected after manual cleanup,
+you can force a “change marker” update:
+
+=== "SQLite / PostgreSQL"
+
+    ```sql
+    UPDATE bw_metadata
+    SET instances_changed = 1,
+        last_instances_change = CURRENT_TIMESTAMP
+    WHERE id = 1;
+    ```
+
+=== "MariaDB / MySQL"
+
+    ```sql
+    UPDATE bw_metadata
+    SET instances_changed = 1,
+        last_instances_change = NOW()
+    WHERE id = 1;
+    ```
+
+### 5 - Reclaim space (optional)
+
+=== "SQLite"
+
+    ```sql
+    VACUUM;
+    ```
+
+=== "PostgreSQL"
+
+    ```sql
+    VACUUM (ANALYZE);
+    ```
+
+=== "MariaDB / MySQL"
+
+    ```sql
+    OPTIMIZE TABLE bw_instances;
+    ```
+
 ## Web UI {#web-ui}
 
 In case you forgot your UI credentials or are experiencing 2FA issues, you can connect to the database to regain access.

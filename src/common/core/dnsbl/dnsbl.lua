@@ -48,7 +48,14 @@ function dnsbl:initialize(ctx)
 			self.logger:log(ERR, err)
 			self.lists = {}
 		else
-			self.lists = internalstore_lists
+			-- Create a deep copy to avoid modifying the shared internalstore reference
+			self.lists = {}
+			for kind, list in pairs(internalstore_lists) do
+				self.lists[kind] = {}
+				for _, item in ipairs(list) do
+					table.insert(self.lists[kind], item)
+				end
+			end
 		end
 		-- Ensure kinds and merge with variable values
 		local kinds = { ["IGNORE_IP"] = {} }

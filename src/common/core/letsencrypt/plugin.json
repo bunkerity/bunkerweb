@@ -76,7 +76,8 @@
         "rfc2136",
         "route53",
         "sakuracloud",
-        "scaleway"
+        "scaleway",
+        "transip"
       ]
     },
     "LETS_ENCRYPT_DNS_PROPAGATION": {
@@ -171,6 +172,15 @@
       "label": "Maximum Retries",
       "regex": "^\\d+$",
       "type": "number"
+    },
+    "LETS_ENCRYPT_CONCURRENT_REQUESTS": {
+      "context": "global",
+      "default": "no",
+      "help": "Run certificate requests concurrently in the certbot-new job (may increase the risk of rate limits).",
+      "id": "lets-encrypt-concurrent-requests",
+      "label": "Concurrent Certificate Requests",
+      "regex": "^(yes|no)$",
+      "type": "check"
     }
   },
   "jobs": [

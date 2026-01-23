@@ -42,6 +42,7 @@ function start() {
             echo "HTTPS_PORT=443"
             echo "API_LISTEN_IP=127.0.0.1"
             echo "API_TOKEN="
+            echo "KEEP_CONFIG_ON_RESTART=no"
         } > /etc/bunkerweb/variables.env
         chown root:nginx /etc/bunkerweb/variables.env
         chmod 660 /etc/bunkerweb/variables.env
@@ -88,6 +89,7 @@ function start() {
         [REAL_IP_HEADER]="X-Forwarded-For"
         [HTTP_PORT]="80"
         [HTTPS_PORT]="443"
+        [KEEP_CONFIG_ON_RESTART]="no"
     )
 
     # File containing the environment variables
@@ -116,14 +118,16 @@ function start() {
         fi
     done
 
-    echo -ne "IS_LOADING=yes\nUSE_BUNKERNET=no\nSEND_ANONYMOUS_REPORT=no\nSERVER_NAME=\nDNS_RESOLVERS=${DNS_RESOLVERS}\nAPI_LISTEN_HTTP=${API_LISTEN_HTTP}\nAPI_HTTP_PORT=${API_HTTP_PORT}\nAPI_LISTEN_HTTPS=${API_LISTEN_HTTPS}\nAPI_HTTPS_PORT=${API_HTTPS_PORT}\nAPI_LISTEN_IP=${API_LISTEN_IP}\nAPI_SERVER_NAME=${API_SERVER_NAME}\nAPI_WHITELIST_IP=${API_WHITELIST_IP}\nAPI_TOKEN=${API_TOKEN}\nUSE_REAL_IP=${USE_REAL_IP}\nUSE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL}\nREAL_IP_FROM=${REAL_IP_FROM}\nREAL_IP_HEADER=${REAL_IP_HEADER}\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\n" > /var/tmp/bunkerweb/tmp.env
-    chown root:nginx /var/tmp/bunkerweb/tmp.env
-    chmod 660 /var/tmp/bunkerweb/tmp.env
+    if [[ "$KEEP_CONFIG_ON_RESTART" == "no" ]] || [[ ! -f /var/tmp/bunkerweb/tmp.env ]] ; then
+      echo -ne "IS_LOADING=yes\nUSE_BUNKERNET=no\nSEND_ANONYMOUS_REPORT=no\nSERVER_NAME=\nDNS_RESOLVERS=${DNS_RESOLVERS}\nAPI_LISTEN_HTTP=${API_LISTEN_HTTP}\nAPI_HTTP_PORT=${API_HTTP_PORT}\nAPI_LISTEN_HTTPS=${API_LISTEN_HTTPS}\nAPI_HTTPS_PORT=${API_HTTPS_PORT}\nAPI_LISTEN_IP=${API_LISTEN_IP}\nAPI_SERVER_NAME=${API_SERVER_NAME}\nAPI_WHITELIST_IP=${API_WHITELIST_IP}\nAPI_TOKEN=${API_TOKEN}\nUSE_REAL_IP=${USE_REAL_IP}\nUSE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL}\nREAL_IP_FROM=${REAL_IP_FROM}\nREAL_IP_HEADER=${REAL_IP_HEADER}\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\nKEEP_CONFIG_ON_RESTART=${KEEP_CONFIG_ON_RESTART}\n" > /var/tmp/bunkerweb/tmp.env
+      chown root:nginx /var/tmp/bunkerweb/tmp.env
+      chmod 660 /var/tmp/bunkerweb/tmp.env
 
-    if ! run_as_nginx env PYTHONPATH="/usr/share/bunkerweb/deps/python" "$PYTHON_BIN" /usr/share/bunkerweb/gen/main.py \
-        --variables /var/tmp/bunkerweb/tmp.env; then
-        log "SYSTEMCTL" "❌" "Error while generating config from /var/tmp/bunkerweb/tmp.env"
-        exit 1
+      if ! run_as_nginx env PYTHONPATH="/usr/share/bunkerweb/deps/python" "$PYTHON_BIN" /usr/share/bunkerweb/gen/main.py \
+          --variables /var/tmp/bunkerweb/tmp.env; then
+          log "SYSTEMCTL" "❌" "Error while generating config from /var/tmp/bunkerweb/tmp.env"
+          exit 1
+      fi
     fi
     # Start nginx
     log "SYSTEMCTL" "ℹ️" "Starting nginx ..."

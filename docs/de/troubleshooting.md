@@ -288,6 +288,159 @@ Wenn Sie den Fehler `could not build server_names_hash, you should increase serv
 
 Bei Verwendung von containerbasierten Integrationen kann die Zeitzone des Containers von der des Host-Rechners abweichen. Um dies zu beheben, können Sie die Umgebungsvariable `TZ` auf die Zeitzone Ihrer Wahl in Ihren Containern setzen (z. B. `TZ=Europe/Paris`). Eine Liste der Zeitzonen-Identifikatoren finden Sie [hier](https://de.wikipedia.org/wiki/Liste_der_Zeitzonen-Datenbank-Zeitzonen#Liste).
 
+## Alte Instanzen aus der Datenbank bereinigen {#clear-old-instances-db}
+
+BunkerWeb speichert bekannte Instanzen in der Tabelle `bw_instances` (Primärschlüssel: `hostname`).
+Wenn du häufig neu ausrollst, können alte Zeilen bestehen bleiben (z. B. Instanzen, die sich seit langer Zeit nicht mehr gemeldet haben) – dann möchtest du sie ggf. löschen.
+
+!!! warning "Zuerst ein Backup"
+    Bevor du die Datenbank manuell bearbeitest, erstelle ein Backup (SQLite-Volume snapshotten oder die Backup-Tools deiner DB-Engine verwenden).
+
+!!! warning "Schreibende Komponenten stoppen"
+    Um Race-Conditions beim Löschen zu vermeiden, stoppe (oder skaliere herunter) Komponenten, die Instanzen aktualisieren können
+    (typischerweise Scheduler / Autoconf – abhängig von deinem Deployment), führe die Bereinigung aus und starte sie anschließend wieder.
+
+### Tabelle und Spalten (Referenz)
+
+Das Instanzmodell ist definiert als:
+
+- Tabelle: `bw_instances`
+- Primärschlüssel: `hostname`
+- „Zuletzt gesehen“-Zeitstempel: `last_seen`
+- Enthält außerdem:
+  `name`, `port`, `listen_https`, `https_port`,
+  `server_name`, `type`, `status`, `method`,
+  `creation_date`
+
+### 1 - Mit der Datenbank verbinden
+
+Nutze den bestehenden Abschnitt [Datenbankzugriff](#access-database), um dich zu verbinden
+(SQLite / MariaDB / PostgreSQL).
+
+### 2 - Dry-Run: Veraltete Instanzen auflisten
+
+Wähle ein Aufbewahrungsfenster (Beispiel: 90 Tage) und prüfe, was gelöscht würde.
+
+=== "SQLite"
+
+    ```sql
+    SELECT hostname, name, server_name, method, status, creation_date, last_seen
+    FROM bw_instances
+    WHERE last_seen < datetime('now', '-90 days')
+    ORDER BY last_seen ASC
+    LIMIT 50;
+    ```
+
+=== "MariaDB / MySQL"
+
+    ```sql
+    SELECT hostname, name, server_name, method, status, creation_date, last_seen
+    FROM bw_instances
+    WHERE last_seen < DATE_SUB(NOW(), INTERVAL 90 DAY)
+    ORDER BY last_seen ASC
+    LIMIT 50;
+    ```
+
+=== "PostgreSQL"
+
+    ```sql
+    SELECT hostname, name, server_name, method, status, creation_date, last_seen
+    FROM bw_instances
+    WHERE last_seen < NOW() - INTERVAL '90 days'
+    ORDER BY last_seen ASC
+    LIMIT 50;
+    ```
+
+### 3 - Veraltete Instanzen löschen
+
+Nach der Prüfung kannst du die Zeilen löschen.
+
+=== "SQLite"
+
+    ```sql
+    BEGIN;
+
+    DELETE FROM bw_instances
+    WHERE last_seen < datetime('now', '-90 days');
+
+    COMMIT;
+    ```
+
+=== "MariaDB / MySQL"
+
+    ```sql
+    START TRANSACTION;
+
+    DELETE FROM bw_instances
+    WHERE last_seen < DATE_SUB(NOW(), INTERVAL 90 DAY);
+
+    COMMIT;
+    ```
+
+=== "PostgreSQL"
+
+    ```sql
+    BEGIN;
+
+    DELETE FROM bw_instances
+    WHERE last_seen < NOW() - INTERVAL '90 days';
+
+    COMMIT;
+    ```
+
+!!! tip "Löschen nach Hostname"
+    Um eine bestimmte Instanz zu löschen, verwende ihren Hostname (Primärschlüssel).
+
+    ```sql
+    DELETE FROM bw_instances WHERE hostname = '<hostname>';
+    ```
+
+### 4 - Instanzen als geändert markieren (optional)
+
+BunkerWeb verfolgt Instanzänderungen in der Tabelle `bw_metadata`
+(`instances_changed`, `last_instances_change`).
+
+Wenn die UI nach der manuellen Bereinigung nicht wie erwartet aktualisiert,
+kannst du ein „Change Marker“-Update erzwingen:
+
+=== "SQLite / PostgreSQL"
+
+    ```sql
+    UPDATE bw_metadata
+    SET instances_changed = 1,
+        last_instances_change = CURRENT_TIMESTAMP
+    WHERE id = 1;
+    ```
+
+=== "MariaDB / MySQL"
+
+    ```sql
+    UPDATE bw_metadata
+    SET instances_changed = 1,
+        last_instances_change = NOW()
+    WHERE id = 1;
+    ```
+
+### 5 - Speicherplatz freigeben (optional)
+
+=== "SQLite"
+
+    ```sql
+    VACUUM;
+    ```
+
+=== "PostgreSQL"
+
+    ```sql
+    VACUUM (ANALYZE);
+    ```
+
+=== "MariaDB / MySQL"
+
+    ```sql
+    OPTIMIZE TABLE bw_instances;
+    ```
+
 ## Web-UI {#web-ui}
 
 Falls Sie Ihre UI-Anmeldeinformationen vergessen haben oder Probleme mit 2FA haben, können Sie sich mit der Datenbank verbinden, um wieder Zugriff zu erhalten.

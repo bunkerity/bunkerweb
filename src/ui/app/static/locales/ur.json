@@ -76,9 +76,9 @@
     "clear": "صاف کریں",
     "close": "بند کریں",
     "columns": "کالم",
-    "convert_services": "خدمات تبدیل کریں",
     "convert_configs": "کنفیگریشن تبدیل کریں",
     "convert_configs_to": "{{state}} میں تبدیل کریں",
+    "convert_services": "خدمات تبدیل کریں",
     "copy": "کاپی کریں",
     "copy_codes": "کوڈز کاپی کریں",
     "copy_raw": "خام ڈیٹا کاپی کریں",
@@ -101,10 +101,12 @@
     "fetch_global": "عالمی سیٹنگز حاصل کریں",
     "filters_suffix": " فلٹرز",
     "follow": "فالو کریں",
+    "force_update": "Force update",
     "github_stars": "ستارے",
     "go_back": "پیچھے جائیں",
     "hide": "چھپائیں",
     "history": "تاریخچہ",
+    "import_services": "خدمات درآمد کریں",
     "login": "لاگ ان کریں",
     "multiple_add": "شامل کریں",
     "multiple_hide": "چھپائیں",
@@ -145,8 +147,7 @@
     "upload_photo": "نئی تصویر اپ لوڈ کریں",
     "view_details": "تفصیلات دیکھیں",
     "view_raw_data": "خام ڈیٹا دیکھیں",
-    "wipe_other_sessions": "دیگر سیشنز صاف کریں",
-    "force_update": "Force update"
+    "wipe_other_sessions": "دیگر سیشنز صاف کریں"
   },
   "country": {
     "AD": "انڈورا",
@@ -747,11 +748,11 @@
       "add_plugin_dropzone": "اپنا پلگ ان آرکائیو یہاں ڈریگ اور ڈراپ کریں یا فائلیں منتخب کرنے کے لیے کلک کریں۔",
       "confirm_cache_deletion_alert": "کیا آپ واقعی منتخب کردہ کیشے فائل حذف کرنا چاہتے ہیں؟",
       "confirm_cache_deletion_alert_plural": "کیا آپ واقعی منتخب کردہ کیشے فائلیں حذف کرنا چاہتے ہیں؟",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "کیا آپ واقعی منتخب کردہ کسٹم کنفیگریشنز کو {{state}} میں تبدیل کرنا چاہتے ہیں؟",
       "confirm_configs_deletion_alert": "کیا آپ واقعی منتخب کردہ کسٹم کنفیگریشن حذف کرنا چاہتے ہیں؟",
       "confirm_configs_deletion_alert_plural": "کیا آپ واقعی منتخب کردہ کسٹم کنفیگریشنز حذف کرنا چاہتے ہیں؟",
       "confirm_conversion_confirmation": "کیا آپ واقعی منتخب کردہ خدمات کو تبدیل کرنا چاہتے ہیں؟",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
-      "confirm_configs_conversion_to": "کیا آپ واقعی منتخب کردہ کسٹم کنفیگریشنز کو {{state}} میں تبدیل کرنا چاہتے ہیں؟",
       "confirm_next_step": "کیا آپ واقعی اگلے مرحلے پر جانا چاہتے ہیں؟",
       "confirm_plugin_deletion": "کیا آپ واقعی منتخب کردہ پلگ ان حذف کرنا چاہتے ہیں؟",
       "confirm_plugin_deletion_plural": "کیا آپ واقعی منتخب کردہ پلگ انز حذف کرنا چاہتے ہیں؟",
@@ -759,6 +760,15 @@
       "confirmation_instance_deletion": "کیا آپ واقعی منتخب کردہ انسٹینس حذف کرنا چاہتے ہیں؟",
       "delete_confirmation_alert": "کیا آپ واقعی منتخب کردہ انسٹینس حذف کرنا چاہتے ہیں؟",
       "delete_confirmation_alert_plural": "کیا آپ واقعی منتخب کردہ انسٹینسز حذف کرنا چاہتے ہیں؟",
+      "delete_step_confirmation": "کیا آپ واقعی اس مرحلے کو حذف کرنا چاہتے ہیں؟",
+      "delete_step_content_label": "مواد",
+      "delete_step_name_label": "مرحلہ",
+      "fetch_global_settings_bold": "یہ عالمی سیٹنگز حاصل کرے گا اور موجودہ ٹیمپلیٹ پر لاگو کرے گا۔",
+      "fetch_global_settings_point_1": "صرف وہ سیٹنگز اپڈیٹ ہوتی ہیں جو اس ٹیمپلیٹ میں موجود ہیں۔",
+      "fetch_global_settings_point_2": "جو قدریں ڈیفالٹ کے برابر ہوں انہیں نظر انداز کیا جاتا ہے۔",
+      "fetch_global_settings_point_3": "SERVER_NAME کو کبھی اوور رائٹ نہیں کیا جاتا۔",
+      "import_services_dropzone": "اپنی خدمات کی برآمد فائل کو یہاں گھسیٹیں اور چھوڑیں یا فائل کو منتخب کرنے کے لیے کلک کریں۔",
+      "import_services_warning": "خدمات درآمد کرنے سے برآمد فائل سے نئی UI خدمات بن جائیں گی۔ موجودہ خدمات کو چھوڑ دیا گیا ہے۔",
       "instance_creation_alert": "آپ کو پورٹ یا سرور کا نام فراہم کرنے کی ضرورت نہیں ہے؛ انسٹینس کنفیگریشن کے لیے `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` اور `API_SERVER_NAME` کی قدریں استعمال ہوں گی۔",
       "next_step_in_case_of_issue": "اگر مسائل کا سامنا ہو تو، آپ دستی طور پر غیر محفوظ سرٹیفکیٹ قبول کر سکتے ہیں:",
       "recovery_codes_save_alert": "براہ کرم یہ ریکوری کوڈز محفوظ جگہ پر محفوظ کریں (جیسے پاس ورڈ مینیجر یا بنکر)۔ اگر آپ اپنا تصدیقی آلہ کھو دیتے ہیں تو آپ اپنے اکاؤنٹ تک رسائی کے لیے ان کا استعمال کر سکتے ہیں۔",
@@ -767,14 +777,7 @@
       "services_deletion_confirmation": "کیا آپ واقعی منتخب کردہ خدمات حذف کرنا چاہتے ہیں؟",
       "unban_confirmation_alert": "کیا آپ واقعی منتخب کردہ IP ایڈریس سے پابندی ہٹانا چاہتے ہیں؟",
       "unban_confirmation_alert_plural": "کیا آپ واقعی منتخب کردہ IP ایڈریسز سے پابندی ہٹانا چاہتے ہیں؟",
-      "update_duration_alert": "منتخب پابندیوں کے لیے نئی مدت منتخب کریں:",
-      "fetch_global_settings_bold": "یہ عالمی سیٹنگز حاصل کرے گا اور موجودہ ٹیمپلیٹ پر لاگو کرے گا۔",
-      "fetch_global_settings_point_1": "صرف وہ سیٹنگز اپڈیٹ ہوتی ہیں جو اس ٹیمپلیٹ میں موجود ہیں۔",
-      "fetch_global_settings_point_2": "جو قدریں ڈیفالٹ کے برابر ہوں انہیں نظر انداز کیا جاتا ہے۔",
-      "fetch_global_settings_point_3": "SERVER_NAME کو کبھی اوور رائٹ نہیں کیا جاتا۔",
-      "delete_step_confirmation": "کیا آپ واقعی اس مرحلے کو حذف کرنا چاہتے ہیں؟",
-      "delete_step_name_label": "مرحلہ",
-      "delete_step_content_label": "مواد"
+      "update_duration_alert": "منتخب پابندیوں کے لیے نئی مدت منتخب کریں:"
     },
     "button": {
       "reset_template_confirm": "ٹیمپلیٹ کنفیگریشن ری سیٹ کریں",
@@ -794,17 +797,18 @@
       "create_new_instance": "نیا انسٹینس بنائیں",
       "create_template": "ٹیمپلیٹ بنائیں",
       "delete_instance": "انسٹینس حذف کریں",
+      "delete_step": "مرحلہ حذف کریں",
       "delete_template": "ٹیمپلیٹس حذف کریں",
+      "fetch_global_settings": "گلوبل سیٹنگز لاگو کی جائیں؟",
       "from_plugin": "پلگ ان سے",
       "full_url": "مکمل URL",
+      "import_services": "خدمات درآمد کریں",
       "job_history": "آخری 10 ٹاسک ایگزیکیوشنز",
       "job_history_count": "ٹاسک کی آخری {{count}} ایگزیکیوشنز",
       "recovery_codes": "ریکوری کوڈز",
       "reset_template_config": "ٹیمپلیٹ کنفیگریشن ری سیٹ کریں؟",
-      "fetch_global_settings": "گلوبل سیٹنگز لاگو کی جائیں؟",
       "server_name_not_unique": "سرور کا نام منفرد نہیں ہے",
-      "update_duration": "پابندی کی مدت اپ ڈیٹ کریں",
-      "delete_step": "مرحلہ حذف کریں"
+      "update_duration": "پابندی کی مدت اپ ڈیٹ کریں"
     }
   },
   "mode": {
@@ -977,6 +981,10 @@
     "global_all_services": "عالمی (تمام خدمات)",
     "permanent": "مستقل",
     "service_specific": "سروس-مخصوص"
+  },
+  "security_mode": {
+    "block": "بلاک",
+    "detect": "دریافت"
   },
   "searchpane": {
     "active": "فعال",
@@ -1618,6 +1626,7 @@
         "last_update": "سروس کی آخری اپ ڈیٹ کی تاریخ اور وقت",
         "method": "سروس بنانے کا طریقہ (مثلاً ui, file)",
         "name": "سروس کا نام",
+        "security_mode": "سروس کا سیکیورٹی موڈ (بلاک یا دریافت)",
         "select_all": "تمام سروسز منتخب کریں",
         "template": "خدمت کے ذریعہ استعمال کردہ ٹیمپلیٹ",
         "type": "سروس کی قسم (آن لائن/ڈرافٹ)"

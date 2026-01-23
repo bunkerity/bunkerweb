@@ -63,7 +63,7 @@ from sqlalchemy.exc import (
     SAWarning,
     SQLAlchemyError,
 )
-from sqlalchemy.orm import joinedload, scoped_session, sessionmaker
+from sqlalchemy.orm import joinedload, scoped_session, sessionmaker, aliased
 from sqlalchemy.pool import QueuePool
 from sqlite3 import Connection as SQLiteConnection
 
@@ -502,7 +502,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.8~rc1"
+                return "1.6.8~rc2"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -535,7 +535,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.8~rc1",
+            "version": "1.6.8~rc2",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -2621,27 +2621,43 @@ class Database:
         """Get the services from the database"""
         services = []
         with self._db_session() as session:
-            db_services = (
-                session.query(Services).with_entities(Services.id, Services.method, Services.is_draft, Services.creation_date, Services.last_update).all()
+            # Fetch all services with their USE_TEMPLATE and SECURITY_MODE settings in a single optimized query
+            # This avoids N+1 query problem when loading many services
+            template_alias = aliased(Services_settings)
+            security_mode_alias = aliased(Services_settings)
+
+            query = (
+                session.query(Services)
+                .outerjoin(template_alias, (Services.id == template_alias.service_id) & (template_alias.setting_id == "USE_TEMPLATE"))
+                .outerjoin(security_mode_alias, (Services.id == security_mode_alias.service_id) & (security_mode_alias.setting_id == "SECURITY_MODE"))
+                .with_entities(
+                    Services.id,
+                    Services.method,
+                    Services.is_draft,
+                    Services.creation_date,
+                    Services.last_update,
+                    template_alias.value.label("template"),
+                    security_mode_alias.value.label("security_mode"),
+                )
             )
 
+            if not with_drafts:
+                query = query.filter(Services.is_draft == False)  # noqa: E712
+
+            db_services = query.all()
+
         for service in db_services:
-            if with_drafts or not service.is_draft:
-                service_settings = self.get_non_default_settings(
-                    with_drafts=with_drafts,
-                    filtered_settings=("USE_TEMPLATE",),
-                    service=service.id,
-                )
-                services.append(
-                    {
-                        "id": service.id,
-                        "method": service.method,
-                        "is_draft": service.is_draft,
-                        "creation_date": service.creation_date,
-                        "last_update": service.last_update,
-                        "template": service_settings.get("USE_TEMPLATE", ""),
-                    }
-                )
+            services.append(
+                {
+                    "id": service.id,
+                    "method": service.method,
+                    "is_draft": service.is_draft,
+                    "creation_date": service.creation_date,
+                    "last_update": service.last_update,
+                    "template": service.template or "",
+                    "security_mode": service.security_mode or "block",
+                }
+            )
 
         return services
 

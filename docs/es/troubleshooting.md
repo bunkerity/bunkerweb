@@ -288,6 +288,159 @@ Si ves el siguiente error `could not build server_names_hash, you should increas
 
 Cuando se utilizan integraciones basadas en contenedores, la zona horaria del contenedor puede no coincidir con la de la máquina anfitriona. Para resolver esto, puedes establecer la variable de entorno `TZ` a la zona horaria de tu elección en tus contenedores (p. ej., `TZ=Europe/Paris`). Encontrarás la lista de identificadores de zona horaria [aquí](https://es.wikipedia.org/wiki/Anexo:Lista_de_zonas_horarias_de_la_base_de_datos_IANA#Lista).
 
+## Limpiar instancias antiguas de la base de datos {#clear-old-instances-db}
+
+BunkerWeb almacena las instancias conocidas en la tabla `bw_instances` (clave primaria: `hostname`).
+Si redespliegas con frecuencia, pueden quedar filas antiguas (por ejemplo, instancias que no han hecho check-in en mucho tiempo) y quizá quieras purgarlas.
+
+!!! warning "Haz un backup primero"
+    Antes de editar la base de datos manualmente, crea una copia de seguridad (haz un snapshot del volumen de SQLite o usa las herramientas de backup de tu motor de BD).
+
+!!! warning "Detén a quienes escriben"
+    Para evitar condiciones de carrera al eliminar, detén (o escala hacia abajo) los componentes que pueden actualizar instancias
+    (normalmente el scheduler / autoconf según tu despliegue), ejecuta la limpieza y luego vuelve a iniciarlos.
+
+### Tabla y columnas (referencia)
+
+El modelo de instancia se define así:
+
+- Tabla: `bw_instances`
+- Clave primaria: `hostname`
+- Marca de tiempo “visto por última vez”: `last_seen`
+- También contiene:
+  `name`, `port`, `listen_https`, `https_port`,
+  `server_name`, `type`, `status`, `method`,
+  `creation_date`
+
+### 1 - Conectarse a la base de datos
+
+Usa la sección existente [Acceso a la base de datos](#access-database) para conectarte
+(SQLite / MariaDB / PostgreSQL).
+
+### 2 - Dry-run: listar instancias obsoletas
+
+Elige una ventana de retención (ejemplo: 90 días) y revisa qué se eliminaría.
+
+=== "SQLite"
+
+    ```sql
+    SELECT hostname, name, server_name, method, status, creation_date, last_seen
+    FROM bw_instances
+    WHERE last_seen < datetime('now', '-90 days')
+    ORDER BY last_seen ASC
+    LIMIT 50;
+    ```
+
+=== "MariaDB / MySQL"
+
+    ```sql
+    SELECT hostname, name, server_name, method, status, creation_date, last_seen
+    FROM bw_instances
+    WHERE last_seen < DATE_SUB(NOW(), INTERVAL 90 DAY)
+    ORDER BY last_seen ASC
+    LIMIT 50;
+    ```
+
+=== "PostgreSQL"
+
+    ```sql
+    SELECT hostname, name, server_name, method, status, creation_date, last_seen
+    FROM bw_instances
+    WHERE last_seen < NOW() - INTERVAL '90 days'
+    ORDER BY last_seen ASC
+    LIMIT 50;
+    ```
+
+### 3 - Eliminar instancias obsoletas
+
+Una vez verificado, elimina las filas.
+
+=== "SQLite"
+
+    ```sql
+    BEGIN;
+
+    DELETE FROM bw_instances
+    WHERE last_seen < datetime('now', '-90 days');
+
+    COMMIT;
+    ```
+
+=== "MariaDB / MySQL"
+
+    ```sql
+    START TRANSACTION;
+
+    DELETE FROM bw_instances
+    WHERE last_seen < DATE_SUB(NOW(), INTERVAL 90 DAY);
+
+    COMMIT;
+    ```
+
+=== "PostgreSQL"
+
+    ```sql
+    BEGIN;
+
+    DELETE FROM bw_instances
+    WHERE last_seen < NOW() - INTERVAL '90 days';
+
+    COMMIT;
+    ```
+
+!!! tip "Eliminar por hostname"
+    Para eliminar una instancia específica, usa su hostname (la clave primaria).
+
+    ```sql
+    DELETE FROM bw_instances WHERE hostname = '<hostname>';
+    ```
+
+### 4 - Marcar instancias como cambiadas (opcional)
+
+BunkerWeb registra los cambios de instancias en la tabla `bw_metadata`
+(`instances_changed`, `last_instances_change`).
+
+Si la UI no se actualiza como esperas tras una limpieza manual,
+puedes forzar una actualización del “marcador de cambios”:
+
+=== "SQLite / PostgreSQL"
+
+    ```sql
+    UPDATE bw_metadata
+    SET instances_changed = 1,
+        last_instances_change = CURRENT_TIMESTAMP
+    WHERE id = 1;
+    ```
+
+=== "MariaDB / MySQL"
+
+    ```sql
+    UPDATE bw_metadata
+    SET instances_changed = 1,
+        last_instances_change = NOW()
+    WHERE id = 1;
+    ```
+
+### 5 - Recuperar espacio (opcional)
+
+=== "SQLite"
+
+    ```sql
+    VACUUM;
+    ```
+
+=== "PostgreSQL"
+
+    ```sql
+    VACUUM (ANALYZE);
+    ```
+
+=== "MariaDB / MySQL"
+
+    ```sql
+    OPTIMIZE TABLE bw_instances;
+    ```
+
 ## Interfaz de usuario web {#web-ui}
 
 En caso de que hayas olvidado tus credenciales de la interfaz de usuario o estés experimentando problemas con la 2FA, puedes conectarte a la base de datos para recuperar el acceso.

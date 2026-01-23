@@ -153,12 +153,13 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 === "Integration Settings"
 
-    | Setting           | Default | Context   | Multiple | Description                                                                                          |
-    | ----------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
-    | `AUTOCONF_MODE`   | `no`    | global    | No       | **Autoconf Mode:** Enable Autoconf Docker integration.                                               |
-    | `SWARM_MODE`      | `no`    | global    | No       | **Swarm Mode:** Enable Docker Swarm integration.                                                     |
-    | `KUBERNETES_MODE` | `no`    | global    | No       | **Kubernetes Mode:** Enable Kubernetes integration.                                                  |
-    | `USE_TEMPLATE`    |         | multisite | No       | **Use Template:** Config template to use that will override the default values of specific settings. |
+    | Setting                  | Default | Context   | Multiple | Description                                                                                                     |
+    | ------------------------ | ------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------- |
+    | `AUTOCONF_MODE`          | `no`    | global    | No       | **Autoconf Mode:** Enable Autoconf Docker integration.                                                          |
+    | `SWARM_MODE`             | `no`    | global    | No       | **Swarm Mode:** Enable Docker Swarm integration.                                                                |
+    | `KUBERNETES_MODE`        | `no`    | global    | No       | **Kubernetes Mode:** Enable Kubernetes integration.                                                             |
+    | `KEEP_CONFIG_ON_RESTART` | `no`    | global    | No       | **Keep Config on Restart:** Keep the configuration on restart. Set to 'yes' to prevent config reset on restart. |
+    | `USE_TEMPLATE`           |         | multisite | No       | **Use Template:** Config template to use that will override the default values of specific settings.            |
 
 === "Nginx Settings"
 
@@ -1715,7 +1716,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.8-rc1
+        image: bunkerity/bunkerweb:1.6.8-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1732,7 +1733,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.8-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -2860,6 +2861,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
 
 !!! tip "Certificate Profiles"
     Let's Encrypt provides different certificate profiles for different use cases:
+
     - **classic**: General-purpose certificates with 90-day validity (default)
     - **tlsserver**: Optimized for TLS server authentication with 90-day validity and smaller payload
     - **shortlived**: Enhanced security with 7-day validity for automated environments
@@ -2883,6 +2885,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | `USE_LETS_ENCRYPT_WILDCARD`                 | `no`      | multisite | no       | **Wildcard Certificates:** When set to `yes`, creates wildcard certificates for all domains. Only available with DNS challenges.                                                                                                                                               |
 | `USE_LETS_ENCRYPT_STAGING`                  | `no`      | multisite | no       | **Use Staging:** When set to `yes`, uses Let's Encrypt's staging environment for testing. Staging has higher rate limits but produces certificates that are not trusted by browsers.                                                                                           |
 | `LETS_ENCRYPT_CLEAR_OLD_CERTS`              | `no`      | global    | no       | **Clear Old Certificates:** When set to `yes`, removes old certificates that are no longer needed during renewal.                                                                                                                                                              |
+| `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`      | global    | no       | **Concurrent Requests:** When set to `yes`, certbot-new issues certificate requests concurrently. Use with caution to avoid rate limits.                                                                                                                                       |
 | `LETS_ENCRYPT_PROFILE`                      | `classic` | multisite | no       | **Certificate Profile:** Select the certificate profile to use. Options: `classic` (general-purpose), `tlsserver` (optimized for TLS servers), or `shortlived` (7-day certificates).                                                                                           |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`               |           | multisite | no       | **Custom Certificate Profile:** Enter a custom certificate profile if your ACME server supports non-standard profiles. This overrides `LETS_ENCRYPT_PROFILE` if set.                                                                                                           |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `3`       | multisite | no       | **Maximum Retries:** Number of times to retry certificate generation on failure. Set to `0` to disable retries. Useful for handling temporary network issues or API rate limits.                                                                                               |
@@ -2945,6 +2948,7 @@ The Let's Encrypt plugin supports a wide range of DNS providers for DNS challeng
 | `route53`         | Amazon Route 53  | `access_key_id`<br>`secret_access_key`                                                                       |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-route53.readthedocs.io/en/stable/)                                |
 | `sakuracloud`     | Sakura Cloud     | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-sakuracloud.readthedocs.io/en/stable/)                            |
 | `scaleway`        | Scaleway         | `application_token`                                                                                          |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/vanonox/certbot-dns-scaleway/blob/main/README.rst)                 |
+| `transip`         | TransIP          | `key_file`<br>`username`                                                                                     |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-transip.readthedocs.io/en/stable/)                                |
 
 ### Example Configurations
 
@@ -4024,6 +4028,7 @@ Validates incoming HTTP requests against an OpenAPI / Swagger specification.
 | `OPENAPI_IGNORE_URLS`        | `^/docs$ ^/redoc$ ^/openapi\.json$` | multisite | no       | List of URL regexes to bypass OpenAPI validation (space separated).                             |
 | `OPENAPI_CACHE_TTL`          | `300`                               | global    | no       | Seconds to cache the parsed specification in shared cache.                                      |
 | `OPENAPI_MAX_SPEC_SIZE`      | `2M`                                | global    | no       | Maximum allowed size of the OpenAPI document (accepts suffix k/M/G).                            |
+| `OPENAPI_VALIDATE_PARAMS`    | `yes`                               | multisite | no       | Validate query, header, cookie, and path parameters against the OpenAPI specification.          |
 
 ## OpenID Connect <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

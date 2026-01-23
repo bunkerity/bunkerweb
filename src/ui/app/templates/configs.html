@@ -148,14 +148,16 @@
                         <td>
                             {% if config.get("is_draft") %}
                                 <span id="status-{{ config_id }}"
-                                      class="badge rounded-pill bg-label-secondary"
-                                      data-value="draft"
-                                      data-i18n="status.draft">Draft</span>
+                                      class="badge rounded-pill bg-label-secondary d-inline-flex align-items-center"
+                                      data-value="draft">
+                                    <i class="bx bx-file-blank me-1"></i><span data-i18n="status.draft">Draft</span>
+                                </span>
                             {% else %}
                                 <span id="status-{{ config_id }}"
-                                      class="badge rounded-pill bg-label-primary"
-                                      data-value="online"
-                                      data-i18n="status.online">Online</span>
+                                      class="badge rounded-pill bg-label-primary d-inline-flex align-items-center"
+                                      data-value="online">
+                                    <i class="bx bx-globe me-1"></i><span data-i18n="status.online">Online</span>
+                                </span>
                             {% endif %}
                         </td>
                         <td>
