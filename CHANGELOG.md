@@ -5,6 +5,7 @@
 - [FEATURE] Enhance `Let's Encrypt` plugin to support concurrent certificate generation for multiple services via the new `LETS_ENCRYPT_CONCURRENT_REQUESTS` setting (default: `no`), improving efficiency and reducing wait times during bulk operations
 - [FEATURE] Add `GoDaddy` as a DNS provider in the `letsencrypt` plugin
 - [FEATURE] Add `TransIP` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add `Domeneshop` as a DNS provider in the `letsencrypt` plugin
 - [FEATURE] Add new `KEEP_CONFIG_ON_RESTART` global setting to control whether a temporary configuration should be generated on each restart or preserve the existing one (default: `no`)
 - [BUGFIX] Fix robots.txt and list-based plugins (greylist/whitelist/blacklist/dnsbl) appending duplicate entries on subsequent requests by creating deep copies of internalstore data instead of using shared references
 - [LINUX] Enhance Easy Install script to detect if the epel-release should be installed or not for RHEL-family distros

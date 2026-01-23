@@ -28,7 +28,7 @@ certbot-dns-ionos==2024.11.9
 certbot-dns-njalla==2.0.2
 certbot-dns-pdns==0.1.1
 certbot-dns-scaleway==0.0.7
-certbot-dns-transip==0.5.2
+https://github.com/TheophileDiot/certbot-dns-transip/archive/7b4f24d12f6fb21b2145912a8de75ad356cb584f.zip#egg=certbot-dns-transip # 0.5.2
 
 cffi==2.0.0
 cryptography==46.0.3
