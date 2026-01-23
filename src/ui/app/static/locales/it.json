@@ -76,9 +76,9 @@
     "clear": "PULISCI",
     "close": "Chiudi",
     "columns": "Colonne",
-    "convert_services": "Converti Servizi",
     "convert_configs": "Converti configurazioni",
     "convert_configs_to": "Converti in {{state}}",
+    "convert_services": "Converti Servizi",
     "copy": "Copia",
     "copy_codes": "Copia Codici",
     "copy_raw": "Copia Dati Grezzi",
@@ -101,10 +101,12 @@
     "fetch_global": "Recupera impostazioni globali",
     "filters_suffix": " Filtri",
     "follow": "Segui",
+    "force_update": "Force update",
     "github_stars": "Stelle",
     "go_back": "Indietro",
     "hide": "Nascondi",
     "history": "Cronologia",
+    "import_services": "Importa servizi",
     "login": "Accedi",
     "multiple_add": "AGGIUNGI",
     "multiple_hide": "NASCONDI",
@@ -145,8 +147,7 @@
     "upload_photo": "Carica Nuova Foto",
     "view_details": "Visualizza Dettagli",
     "view_raw_data": "Visualizza Dati Grezzi",
-    "wipe_other_sessions": "Pulisci Altre Sessioni",
-    "force_update": "Force update"
+    "wipe_other_sessions": "Pulisci Altre Sessioni"
   },
   "country": {
     "AD": "Andorra",
@@ -747,11 +748,11 @@
       "add_plugin_dropzone": "Trascina e rilascia il tuo archivio plugin qui o clicca per selezionare i file.",
       "confirm_cache_deletion_alert": "Sei sicuro di voler eliminare il file cache selezionato?",
       "confirm_cache_deletion_alert_plural": "Sei sicuro di voler eliminare i file cache selezionati?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "Sei sicuro di voler convertire le configurazioni personalizzate selezionate in {{state}}?",
       "confirm_configs_deletion_alert": "Sei sicuro di voler eliminare la configurazione personalizzata selezionata?",
       "confirm_configs_deletion_alert_plural": "Sei sicuro di voler eliminare le configurazioni personalizzate selezionate?",
       "confirm_conversion_confirmation": "Sei sicuro di voler convertire i servizi selezionati?",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
-      "confirm_configs_conversion_to": "Sei sicuro di voler convertire le configurazioni personalizzate selezionate in {{state}}?",
       "confirm_next_step": "Sei sicuro di voler procedere al passo successivo?",
       "confirm_plugin_deletion": "Sei sicuro di voler eliminare il plugin selezionato?",
       "confirm_plugin_deletion_plural": "Sei sicuro di voler eliminare i plugin selezionati?",
@@ -759,6 +760,15 @@
       "confirmation_instance_deletion": "Sei sicuro di voler eliminare l'istanza selezionata?",
       "delete_confirmation_alert": "Sei sicuro di voler eliminare l'istanza selezionata?",
       "delete_confirmation_alert_plural": "Sei sicuro di voler eliminare le istanze selezionate?",
+      "delete_step_confirmation": "Sei sicuro di voler eliminare questo passo?",
+      "delete_step_content_label": "Contenuto",
+      "delete_step_name_label": "Passo",
+      "fetch_global_settings_bold": "Questo recupererà le impostazioni globali e le applicherà al modello corrente.",
+      "fetch_global_settings_point_1": "Vengono aggiornate solo le impostazioni presenti in questo modello.",
+      "fetch_global_settings_point_2": "I valori identici ai predefiniti vengono ignorati.",
+      "fetch_global_settings_point_3": "SERVER_NAME non viene mai sovrascritto.",
+      "import_services_dropzone": "Trascina qui il file di esportazione dei servizi o fai clic per selezionare un file.",
+      "import_services_warning": "L'importazione dei servizi creerà nuovi servizi dell'interfaccia utente dal file di esportazione. I servizi esistenti vengono ignorati.",
       "instance_creation_alert": "Non è necessario fornire la porta o il nome del server; i valori di `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` e `API_SERVER_NAME` verranno utilizzati per la configurazione dell'istanza.",
       "next_step_in_case_of_issue": "In caso di problemi, puoi accettare manualmente il certificato non sicuro:",
       "recovery_codes_save_alert": "Salva questi codici di recupero in un luogo sicuro (come un gestore di password o una cassaforte). Puoi usarli per accedere al tuo account se perdi il tuo dispositivo di autenticazione.",
@@ -767,14 +777,7 @@
       "services_deletion_confirmation": "Sei sicuro di voler eliminare i servizi selezionati?",
       "unban_confirmation_alert": "Sei sicuro di voler sbloccare l'indirizzo IP selezionato?",
       "unban_confirmation_alert_plural": "Sei sicuro di voler sbloccare gli indirizzi IP selezionati?",
-      "update_duration_alert": "Seleziona una nuova durata per i divieti selezionati:",
-      "fetch_global_settings_bold": "Questo recupererà le impostazioni globali e le applicherà al modello corrente.",
-      "fetch_global_settings_point_1": "Vengono aggiornate solo le impostazioni presenti in questo modello.",
-      "fetch_global_settings_point_2": "I valori identici ai predefiniti vengono ignorati.",
-      "fetch_global_settings_point_3": "SERVER_NAME non viene mai sovrascritto.",
-      "delete_step_confirmation": "Sei sicuro di voler eliminare questo passo?",
-      "delete_step_name_label": "Passo",
-      "delete_step_content_label": "Contenuto"
+      "update_duration_alert": "Seleziona una nuova durata per i divieti selezionati:"
     },
     "button": {
       "reset_template_confirm": "Ripristina Configurazione Modello",
@@ -794,17 +797,18 @@
       "create_new_instance": "Crea Nuova Istanza",
       "create_template": "Crea modello",
       "delete_instance": "Elimina Istanze",
+      "delete_step": "Elimina passo",
       "delete_template": "Elimina modelli",
+      "fetch_global_settings": "Applicare le impostazioni globali?",
       "from_plugin": "da Plugin",
       "full_url": "URL Completo",
+      "import_services": "Importa servizi",
       "job_history": "Ultime 10 Esecuzioni dei Processi",
       "job_history_count": "Ultime {{count}} esecuzioni del Processo",
       "recovery_codes": "Codici di Recupero",
       "reset_template_config": "Ripristinare Configurazione Modello?",
-      "fetch_global_settings": "Applicare le impostazioni globali?",
       "server_name_not_unique": "Nome Server non è Unico",
-      "update_duration": "Aggiorna Durata Blocco",
-      "delete_step": "Elimina passo"
+      "update_duration": "Aggiorna Durata Blocco"
     }
   },
   "mode": {
@@ -977,6 +981,10 @@
     "global_all_services": "Globale (tutti i servizi)",
     "permanent": "Permanente",
     "service_specific": "Specifico del servizio"
+  },
+  "security_mode": {
+    "block": "Blocca",
+    "detect": "Rileva"
   },
   "searchpane": {
     "active": "Attivo",
@@ -1619,6 +1627,7 @@
         "last_update": "Data e ora dell'ultimo aggiornamento del Servizio",
         "method": "Metodo di creazione del Servizio (es. ui, file)",
         "name": "Nome Servizio",
+        "security_mode": "La modalità di sicurezza del servizio (Blocca o Rileva)",
         "select_all": "Seleziona tutti i Servizi",
         "template": "Il template utilizzato dal Servizio",
         "type": "Tipo di Servizio (Online/Bozza)"

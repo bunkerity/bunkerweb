@@ -314,6 +314,12 @@ def setup_loading():
         sleep(1)
         return redirect(url_for("setup.setup_loading"))
 
+    ui_service["url"] = ui_service.get("url") or "/"
+    if not ui_service["url"].startswith("/"):
+        ui_service["url"] = f"/{ui_service['url']}"
+    if not ui_service["url"].endswith("/"):
+        ui_service["url"] = f"{ui_service['url']}/"
+
     target_endpoint = request.args.get("target_endpoint", "")
     if target_endpoint and not match(
         rf"^https://{escape(ui_service['server_name'])}{escape(ui_service['url'])}/check$".replace("//check", "/check"), target_endpoint
@@ -321,7 +327,7 @@ def setup_loading():
         return Response(status=400)
 
     # Support an optional next parameter but sanitize (falls back to login)
-    default_next = url_for("login.login_page")
+    default_next = f"{ui_service['url']}login"
     requested_next = request.args.get("next")
     try:
         safe_next = _sanitize_internal_next(requested_next, default_next)

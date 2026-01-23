@@ -572,3 +572,22 @@ class ScalewayProvider(Provider):
     def get_extra_args() -> dict:
         """Return additional arguments for the provider."""
         return ["-a", "dns-scaleway"]
+
+
+class TransIPProvider(Provider):
+    """TransIP DNS provider."""
+
+    dns_transip_key_file: str
+    dns_transip_username: str
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_transip_key_file": ("dns_transip_key_file", "transip_key_file", "key_file"),
+            "dns_transip_username": ("dns_transip_username", "transip_username", "username"),
+        }
+    )
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["-a", "dns-transip"]

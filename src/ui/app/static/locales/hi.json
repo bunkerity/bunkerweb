@@ -76,9 +76,9 @@
     "clear": "साफ़ करें",
     "close": "बंद करें",
     "columns": "कॉलम",
-    "convert_services": "सेवाएं बदलें",
     "convert_configs": "कॉन्फ़िग रूपांतरित करें",
     "convert_configs_to": "{{state}} में रूपांतरित करें",
+    "convert_services": "सेवाएं बदलें",
     "copy": "कॉपी करें",
     "copy_codes": "कोड कॉपी करें",
     "copy_raw": "रॉ डेटा कॉपी करें",
@@ -101,10 +101,12 @@
     "fetch_global": "ग्लोबल सेटिंग्स लाएँ",
     "filters_suffix": " फ़िल्टर",
     "follow": "अनुसरण करें",
+    "force_update": "Force update",
     "github_stars": "स्टार्स",
     "go_back": "वापस जाओ",
     "hide": "छिपाएं",
     "history": "इतिहास",
+    "import_services": "सेवाएं आयात करें",
     "login": "लॉगिन करें",
     "multiple_add": "जोड़ें",
     "multiple_hide": "छिपाएं",
@@ -145,8 +147,7 @@
     "upload_photo": "नई फ़ोटो अपलोड करें",
     "view_details": "विवरण देखें",
     "view_raw_data": "रॉ डेटा देखें",
-    "wipe_other_sessions": "अन्य सत्र साफ़ करें",
-    "force_update": "Force update"
+    "wipe_other_sessions": "अन्य सत्र साफ़ करें"
   },
   "country": {
     "AD": "अंडोरा",
@@ -747,11 +748,11 @@
       "add_plugin_dropzone": "अपना प्लगइन संग्रह यहाँ खींचें और छोड़ें या फ़ाइलें चुनने के लिए क्लिक करें।",
       "confirm_cache_deletion_alert": "क्या आप वाकई चयनित कैश फ़ाइल हटाना चाहते हैं?",
       "confirm_cache_deletion_alert_plural": "क्या आप वाकई चयनित कैश फ़ाइलें हटाना चाहते हैं?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "क्या आप सुनिश्चित हैं कि चयनित कस्टम कॉन्फ़िगरेशन को {{state}} में रूपांतरित करना चाहते हैं?",
       "confirm_configs_deletion_alert": "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन हटाना चाहते हैं?",
       "confirm_configs_deletion_alert_plural": "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन हटाना चाहते हैं?",
       "confirm_conversion_confirmation": "क्या आप वाकई चयनित सेवाओं को कनवर्ट करना चाहते हैं?",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
-      "confirm_configs_conversion_to": "क्या आप सुनिश्चित हैं कि चयनित कस्टम कॉन्फ़िगरेशन को {{state}} में रूपांतरित करना चाहते हैं?",
       "confirm_next_step": "क्या आप वाकई अगले चरण पर जाना चाहते हैं?",
       "confirm_plugin_deletion": "क्या आप वाकई चयनित प्लगइन हटाना चाहते हैं?",
       "confirm_plugin_deletion_plural": "क्या आप वाकई चयनित प्लगइन्स हटाना चाहते हैं?",
@@ -759,6 +760,15 @@
       "confirmation_instance_deletion": "क्या आप वाकई चयनित इंस्टेंस हटाना चाहते हैं?",
       "delete_confirmation_alert": "क्या आप वाकई चयनित इंस्टेंस हटाना चाहते हैं?",
       "delete_confirmation_alert_plural": "क्या आप वाकई चयनित इंस्टेंस हटाना चाहते हैं?",
+      "delete_step_confirmation": "क्या आप वाकई इस चरण को हटाना चाहते हैं?",
+      "delete_step_content_label": "सामग्री",
+      "delete_step_name_label": "चरण",
+      "fetch_global_settings_bold": "यह ग्लोबल सेटिंग्स को प्राप्त करेगा और वर्तमान टेम्पलेट पर लागू करेगा।",
+      "fetch_global_settings_point_1": "केवल इस टेम्पलेट में मौजूद सेटिंग्स अपडेट होती हैं।",
+      "fetch_global_settings_point_2": "जो मान डिफ़ॉल्ट के समान हैं उन्हें नज़रअंदाज़ किया जाता है।",
+      "fetch_global_settings_point_3": "SERVER_NAME कभी ओवरराइट नहीं किया जाता है।",
+      "import_services_dropzone": "अपनी सेवाओं की निर्यात फ़ाइल को यहाँ खींचें और छोड़ें (Drag and drop) या फ़ाइल चुनने के लिए क्लिक करें।",
+      "import_services_warning": "सेवाओं को आयात करने से निर्यात फ़ाइल से नई UI सेवाएँ बन जाएँगी। मौजूदा सेवाओं को छोड़ दिया जाता है।",
       "instance_creation_alert": "आपको पोर्ट या सर्वर नाम प्रदान करने की आवश्यकता नहीं है; इंस्टेंस कॉन्फ़िगरेशन के लिए `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` और `API_SERVER_NAME` के मानों का उपयोग किया जाएगा।",
       "next_step_in_case_of_issue": "यदि आपको समस्याएँ आती हैं, तो आप मैन्युअल रूप से असुरक्षित प्रमाणपत्र स्वीकार कर सकते हैं:",
       "recovery_codes_save_alert": "कृपया इन पुनर्प्राप्ति कोड को सुरक्षित स्थान (जैसे पासवर्ड मैनेजर या बंकर) पर सहेजें। यदि आप अपना प्रमाणीकरण उपकरण खो देते हैं तो आप इनका उपयोग अपने खाते तक पहुँचने के लिए कर सकते हैं।",
@@ -767,14 +777,7 @@
       "services_deletion_confirmation": "क्या आप वाकई चयनित सेवाओं को हटाना चाहते हैं?",
       "unban_confirmation_alert": "क्या आप वाकई चयनित आईपी पते का प्रतिबंध हटाना चाहते हैं?",
       "unban_confirmation_alert_plural": "क्या आप वाकई चयनित आईपी पतों का प्रतिबंध हटाना चाहते हैं?",
-      "update_duration_alert": "चयनित प्रतिबंधों के लिए एक नई अवधि का चयन करें:",
-      "fetch_global_settings_bold": "यह ग्लोबल सेटिंग्स को प्राप्त करेगा और वर्तमान टेम्पलेट पर लागू करेगा।",
-      "fetch_global_settings_point_1": "केवल इस टेम्पलेट में मौजूद सेटिंग्स अपडेट होती हैं।",
-      "fetch_global_settings_point_2": "जो मान डिफ़ॉल्ट के समान हैं उन्हें नज़रअंदाज़ किया जाता है।",
-      "fetch_global_settings_point_3": "SERVER_NAME कभी ओवरराइट नहीं किया जाता है।",
-      "delete_step_confirmation": "क्या आप वाकई इस चरण को हटाना चाहते हैं?",
-      "delete_step_name_label": "चरण",
-      "delete_step_content_label": "सामग्री"
+      "update_duration_alert": "चयनित प्रतिबंधों के लिए एक नई अवधि का चयन करें:"
     },
     "button": {
       "reset_template_confirm": "टेम्पलेट कॉन्फ़िगरेशन रीसेट करें",
@@ -794,17 +797,18 @@
       "create_new_instance": "नया इंस्टेंस बनाएं",
       "create_template": "टेम्पलेट बनाएं",
       "delete_instance": "इंस्टेंस हटाएं",
+      "delete_step": "चरण हटाएं",
       "delete_template": "टेम्पलेट हटाएं",
+      "fetch_global_settings": "ग्लोबल सेटिंग्स लागू करें?",
       "from_plugin": "प्लगइन से",
       "full_url": "पूर्ण URL",
+      "import_services": "सेवाएं आयात करें",
       "job_history": "पिछले 10 कार्य निष्पादन",
       "job_history_count": "कार्य {{count}} निष्पादन",
       "recovery_codes": "पुनर्प्राप्ति कोड",
       "reset_template_config": "टेम्पलेट कॉन्फ़िगरेशन रीसेट करें?",
-      "fetch_global_settings": "ग्लोबल सेटिंग्स लागू करें?",
       "server_name_not_unique": "सर्वर का नाम अद्वितीय नहीं है",
-      "update_duration": "प्रतिबंध अवधि अपडेट करें",
-      "delete_step": "चरण हटाएं"
+      "update_duration": "प्रतिबंध अवधि अपडेट करें"
     }
   },
   "mode": {
@@ -976,6 +980,10 @@
     "global_all_services": "वैश्विक (सभी सेवाएं)",
     "permanent": "स्थायी",
     "service_specific": "सेवा-विशिष्ट"
+  },
+  "security_mode": {
+    "block": "ब्लॉक",
+    "detect": "पता लगाना"
   },
   "searchpane": {
     "active": "सक्रिय",
@@ -1617,6 +1625,7 @@
         "last_update": "सेवा को अंतिम बार अपडेट करने की तारीख और समय",
         "method": "सेवा की निर्माण विधि (उदाहरण के लिए, ui, file)",
         "name": "सेवा का नाम",
+        "security_mode": "सेवा का सुरक्षा मोड (ब्लॉक या पता लगाना)",
         "select_all": "सभी सेवाएं चुनें",
         "template": "सेवा द्वारा उपयोग किया गया टेम्पलेट",
         "type": "सेवा प्रकार (ऑनलाइन/ड्राफ्ट)"

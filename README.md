@@ -387,19 +387,23 @@ You will find more information in the [plugins section](https://docs.bunkerweb.i
 
 BunkerWeb UI supports multiple languages. Translations are managed in the `src/ui/app/static/locales` directory. The following languages are currently available:
 
-- English (en)
-- French (fr)
 - Arabic (ar)
 - Bengali (bn)
+- Brazilian Portuguese (br)
+- German (de)
+- English (en)
 - Spanish (es)
+- French (fr)
 - Hindi (hi)
+- Italian (it)
+- Korean (ko)
+- Polish (pl)
 - Portuguese (pt)
 - Russian (ru)
-- Urdu (ur)
-- Chinese (zh)
-- German (de)
-- Italian (it)
 - Turkish (tr)
+- Traditional Chinese (tw)
+- Urdu (ur)
+- Simplified Chinese (zh)
 
 See the [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.8-rc1/src/ui/app/static/locales/README.md) for details on translation provenance and review status.
 

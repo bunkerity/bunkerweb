@@ -41,6 +41,7 @@ UPGRADE_SCENARIO="no"
 BACKUP_DIRECTORY=""
 AUTO_BACKUP="yes"
 SYSTEM_ARCH=""
+INSTALL_EPEL="auto"
 
 # Function to print colored output
 print_status() {
@@ -1272,6 +1273,29 @@ install_bunkerweb_debian() {
 install_bunkerweb_rpm() {
     print_step "Installing BunkerWeb on $DISTRO_ID"
 
+    # Offer to install EPEL on RHEL-family distros before installing BunkerWeb
+    if [[ "$DISTRO_ID" =~ ^(rhel|centos|fedora|rocky|almalinux|redhat)$ ]] && ! rpm -q epel-release >/dev/null 2>&1; then
+        if [ "$INSTALL_EPEL" = "yes" ]; then
+            print_step "Installing EPEL repository (epel-release)"
+            run_cmd dnf install -y epel-release
+        elif [ "$INSTALL_EPEL" = "no" ]; then
+            print_warning "EPEL repository not installed; continuing without epel-release."
+        elif [ "$INTERACTIVE_MODE" = "yes" ]; then
+            print_warning "EPEL repository is not installed."
+            read -p "Install epel-release? (y/N): " -r
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                INSTALL_EPEL="yes"
+                print_step "Installing EPEL repository (epel-release)"
+                run_cmd dnf install -y epel-release
+            else
+                INSTALL_EPEL="no"
+            fi
+        else
+            INSTALL_EPEL="no"
+            print_warning "EPEL repository not installed; skipping epel-release in non-interactive mode."
+        fi
+    fi
+
     # Set environment variables
     if [ "$ENABLE_WIZARD" = "no" ]; then
         export UI_WIZARD=no
@@ -1648,6 +1672,8 @@ usage() {
     echo "  --redis-no-ssl           Disable SSL/TLS for Redis connection"
     echo "  --redis-ssl-verify       Verify Redis SSL certificate"
     echo "  --redis-no-ssl-verify    Do not verify Redis SSL certificate"
+    echo "  --epel                   Install epel-release on RHEL-family distros if missing"
+    echo "  --no-epel                Do not install epel-release on RHEL-family distros"
     echo
     echo "Examples:"
     echo "  $0                       # Interactive installation"
@@ -1820,6 +1846,14 @@ while [[ $# -gt 0 ]]; do
             BACKUP_DIRECTORY="$2"; shift 2 ;;
         --no-auto-backup)
             AUTO_BACKUP="no"; shift ;;
+        --epel)
+            INSTALL_EPEL="yes"
+            shift
+            ;;
+        --no-epel)
+            INSTALL_EPEL="no"
+            shift
+            ;;
         -q|--quiet)
             exec >/dev/null 2>&1
             shift

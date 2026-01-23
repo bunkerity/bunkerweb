@@ -81,9 +81,9 @@
     "clear": "清除",
     "close": "關閉",
     "columns": "欄",
-    "convert_services": "轉換服務",
     "convert_configs": "轉換設定",
     "convert_configs_to": "轉換為 {{state}}",
+    "convert_services": "轉換服務",
     "copy": "複製",
     "copy_codes": "複製代碼",
     "copy_raw": "複製原始資料",
@@ -106,10 +106,12 @@
     "fetch_global": "取得全域設定",
     "filters_suffix": " 過濾器",
     "follow": "追蹤",
+    "force_update": "Force update",
     "github_stars": "星號",
     "go_back": "返回",
     "hide": "隱藏",
     "history": "歷史記錄",
+    "import_services": "匯入服務",
     "login": "登入",
     "multiple_add": "新增",
     "multiple_hide": "隱藏",
@@ -150,8 +152,7 @@
     "upload_photo": "上傳新相片",
     "view_details": "檢視詳情",
     "view_raw_data": "檢視原始資料",
-    "wipe_other_sessions": "清除其他工作階段",
-    "force_update": "Force update"
+    "wipe_other_sessions": "清除其他工作階段"
   },
   "country": {
     "AD": "安道爾",
@@ -752,11 +753,11 @@
       "add_plugin_dropzone": "將您的外掛程式封存拖放到此處或點擊以選取檔案。",
       "confirm_cache_deletion_alert": "您確定要刪除選定的快取檔案嗎？",
       "confirm_cache_deletion_alert_plural": "您確定要刪除選定的快取檔案嗎？",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "確定將所選自訂設定轉換為 {{state}} 嗎？",
       "confirm_configs_deletion_alert": "您確定要刪除選定的自訂設定嗎？",
       "confirm_configs_deletion_alert_plural": "您確定要刪除選定的自訂設定嗎？",
       "confirm_conversion_confirmation": "您確定要轉換選定的服務嗎？",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
-      "confirm_configs_conversion_to": "確定將所選自訂設定轉換為 {{state}} 嗎？",
       "confirm_next_step": "您確定要繼續下一步嗎？",
       "confirm_plugin_deletion": "您確定要刪除選定的外掛程式嗎？",
       "confirm_plugin_deletion_plural": "您確定要刪除選定的外掛程式嗎？",
@@ -764,6 +765,15 @@
       "confirmation_instance_deletion": "您確定要刪除選定的執行個體嗎？",
       "delete_confirmation_alert": "您確定要刪除選定的執行個體嗎？",
       "delete_confirmation_alert_plural": "您確定要刪除選定的執行個體嗎？",
+      "delete_step_confirmation": "您確定要刪除此步驟嗎？",
+      "delete_step_content_label": "內容",
+      "delete_step_name_label": "步驟",
+      "fetch_global_settings_bold": "這將取得全域設定並套用到目前的樣板。",
+      "fetch_global_settings_point_1": "只會更新此樣板中存在的設定。",
+      "fetch_global_settings_point_2": "與預設值相同的數值會被忽略。",
+      "fetch_global_settings_point_3": "SERVER_NAME 永不會被覆寫。",
+      "import_services_dropzone": "將您的服務匯出檔案拖放到此處，或按一下以選取檔案。",
+      "import_services_warning": "匯入服務將從匯出檔案建立新的 UI 服務。現有服務將被略過。",
       "instance_creation_alert": "您不需要提供連接埠或伺服器名稱；`API_HTTP_PORT`、`API_LISTEN_HTTPS`、`API_HTTPS_PORT` 和 `API_SERVER_NAME` 的值將用於執行個體設定。",
       "next_step_in_case_of_issue": "如果遇到問題，您可以手動接受不安全的憑證：",
       "recovery_codes_save_alert": "請將這些恢復碼儲存在安全的位置（例如密碼管理器或保險箱）。如果遺失驗證裝置，您可以使用它們存取您的帳戶。",
@@ -772,14 +782,7 @@
       "services_deletion_confirmation": "您確定要刪除選定的服務嗎？",
       "unban_confirmation_alert": "您確定要解除封鎖選定的 IP 位址嗎？",
       "unban_confirmation_alert_plural": "您確定要解除封鎖選定的 IP 位址嗎？",
-      "update_duration_alert": "請為選定的封鎖選擇新的期限：",
-      "fetch_global_settings_bold": "這將取得全域設定並套用到目前的樣板。",
-      "fetch_global_settings_point_1": "只會更新此樣板中存在的設定。",
-      "fetch_global_settings_point_2": "與預設值相同的數值會被忽略。",
-      "fetch_global_settings_point_3": "SERVER_NAME 永不會被覆寫。",
-      "delete_step_confirmation": "您確定要刪除此步驟嗎？",
-      "delete_step_name_label": "步驟",
-      "delete_step_content_label": "內容"
+      "update_duration_alert": "請為選定的封鎖選擇新的期限："
     },
     "button": {
       "reset_template_confirm": "重設範本設定",
@@ -799,17 +802,18 @@
       "create_new_instance": "建立新執行個體",
       "create_template": "建立範本",
       "delete_instance": "刪除執行個體",
+      "delete_step": "刪除步驟",
       "delete_template": "刪除範本",
+      "fetch_global_settings": "要套用全域設定嗎？",
       "from_plugin": "來自外掛程式",
       "full_url": "完整 URL",
+      "import_services": "匯入服務",
       "job_history": "最近 10 次任務執行",
       "job_history_count": "任務 {{count}} 次執行",
       "recovery_codes": "恢復碼",
       "reset_template_config": "重設範本設定？",
-      "fetch_global_settings": "要套用全域設定嗎？",
       "server_name_not_unique": "伺服器名稱不是唯一的",
-      "update_duration": "更新封鎖期限",
-      "delete_step": "刪除步驟"
+      "update_duration": "更新封鎖期限"
     }
   },
   "mode": {
@@ -982,6 +986,10 @@
     "global_all_services": "全域（所有服務）",
     "permanent": "永久",
     "service_specific": "特定服務"
+  },
+  "security_mode": {
+    "block": "封鎖",
+    "detect": "偵測"
   },
   "searchpane": {
     "active": "啟用中",
@@ -1627,6 +1635,7 @@
         "last_update": "服務最後更新的日期和時間",
         "method": "服務的建立方法（例如，ui, file）",
         "name": "服務的名稱",
+        "security_mode": "服務的安全模式（封鎖或偵測）",
         "select_all": "選擇所有服務",
         "template": "服務使用的範本",
         "type": "服務類型 (線上/草稿)"

@@ -179,56 +179,56 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
 
 ### Laufzeit & Zeitzone
 
-| Setting | Beschreibung | Erlaubte Werte | Standard |
-| --- | --- | --- | --- |
-| `TZ` | Zeitzone für UI-Logs und geplante Aktionen | TZ-Datenbankname (z. B. `UTC`, `Europe/Berlin`) | unset (Container-Default, meist UTC) |
+| Setting | Beschreibung                               | Erlaubte Werte                                  | Standard                             |
+| ------- | ------------------------------------------ | ----------------------------------------------- | ------------------------------------ |
+| `TZ`    | Zeitzone für UI-Logs und geplante Aktionen | TZ-Datenbankname (z. B. `UTC`, `Europe/Berlin`) | unset (Container-Default, meist UTC) |
 
 ### Listener & TLS
 
-| Setting | Beschreibung | Erlaubte Werte | Standard |
-| --- | --- | --- | --- |
-| `UI_LISTEN_ADDR` | Bind-Adresse der UI | IP oder Hostname | `0.0.0.0` (Docker) / `127.0.0.1` (Paket) |
-| `UI_LISTEN_PORT` | Bind-Port der UI | Integer | `7000` |
-| `LISTEN_ADDR`, `LISTEN_PORT` | Fallbacks, falls UI-Variablen fehlen | IP/Hostname, Integer | `0.0.0.0`, `7000` |
-| `UI_SSL_ENABLED` | TLS in der UI aktivieren | `yes` oder `no` | `no` |
-| `UI_SSL_CERTFILE`, `UI_SSL_KEYFILE` | PEM-Zertifikat/Key bei TLS | Dateipfade | unset |
-| `UI_SSL_CA_CERTS` | Optionale CA/Chain | Dateipfad | unset |
-| `UI_FORWARDED_ALLOW_IPS` | Vertrauenswürdige Proxies für `X-Forwarded-*` | IPs/CIDRs (Leer- oder Komma-separiert) | `*` |
+| Setting                             | Beschreibung                                  | Erlaubte Werte                         | Standard                                 |
+| ----------------------------------- | --------------------------------------------- | -------------------------------------- | ---------------------------------------- |
+| `UI_LISTEN_ADDR`                    | Bind-Adresse der UI                           | IP oder Hostname                       | `0.0.0.0` (Docker) / `127.0.0.1` (Paket) |
+| `UI_LISTEN_PORT`                    | Bind-Port der UI                              | Integer                                | `7000`                                   |
+| `LISTEN_ADDR`, `LISTEN_PORT`        | Fallbacks, falls UI-Variablen fehlen          | IP/Hostname, Integer                   | `0.0.0.0`, `7000`                        |
+| `UI_SSL_ENABLED`                    | TLS in der UI aktivieren                      | `yes` oder `no`                        | `no`                                     |
+| `UI_SSL_CERTFILE`, `UI_SSL_KEYFILE` | PEM-Zertifikat/Key bei TLS                    | Dateipfade                             | unset                                    |
+| `UI_SSL_CA_CERTS`                   | Optionale CA/Chain                            | Dateipfad                              | unset                                    |
+| `UI_FORWARDED_ALLOW_IPS`            | Vertrauenswürdige Proxies für `X-Forwarded-*` | IPs/CIDRs (Leer- oder Komma-separiert) | `*`                                      |
 
 ### Auth, Sessions, Cookies
 
-| Setting | Beschreibung | Erlaubte Werte | Standard |
-| --- | --- | --- | --- |
-| `ADMIN_USERNAME`, `ADMIN_PASSWORD` | Admin-Konto initial befüllen (Passwortrichtlinie) | Strings | unset |
-| `OVERRIDE_ADMIN_CREDS` | Admin-Zugang aus Env erzwingen | `yes` oder `no` | `no` |
-| `FLASK_SECRET` | Session-Signing-Secret (persistiert in `/var/lib/bunkerweb/.flask_secret`) | Hex/Base64/opaque | auto-generiert |
-| `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`) | Verschlüsselungs-Keys für TOTP (Leerzeichen oder JSON) | Strings / JSON | auto-generiert falls fehlend |
-| `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Biscuit-Keys (hex) für UI-Tokens | Hex-Strings | auto-generiert & gespeichert |
-| `SESSION_LIFETIME_HOURS` | Session-Lebensdauer | Zahl (Stunden) | `12` |
-| `ALWAYS_REMEMBER` | „Remember me“-Cookies immer setzen | `yes` oder `no` | `no` |
-| `CHECK_PRIVATE_IP` | Sessions an IP binden (locker für private Netze bei `no`) | `yes` oder `no` | `yes` |
-| `PROXY_NUMBERS` | Anzahl vertrauenswürdiger Proxy-Hops für `X-Forwarded-*` | Integer | `1` |
+| Setting                                     | Beschreibung                                                               | Erlaubte Werte    | Standard                     |
+| ------------------------------------------- | -------------------------------------------------------------------------- | ----------------- | ---------------------------- |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | Admin-Konto initial befüllen (Passwortrichtlinie)                          | Strings           | unset                        |
+| `OVERRIDE_ADMIN_CREDS`                      | Admin-Zugang aus Env erzwingen                                             | `yes` oder `no`   | `no`                         |
+| `FLASK_SECRET`                              | Session-Signing-Secret (persistiert in `/var/lib/bunkerweb/.flask_secret`) | Hex/Base64/opaque | auto-generiert               |
+| `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | Verschlüsselungs-Keys für TOTP (Leerzeichen oder JSON)                     | Strings / JSON    | auto-generiert falls fehlend |
+| `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Biscuit-Keys (hex) für UI-Tokens                                           | Hex-Strings       | auto-generiert & gespeichert |
+| `SESSION_LIFETIME_HOURS`                    | Session-Lebensdauer                                                        | Zahl (Stunden)    | `12`                         |
+| `ALWAYS_REMEMBER`                           | „Remember me“-Cookies immer setzen                                         | `yes` oder `no`   | `no`                         |
+| `CHECK_PRIVATE_IP`                          | Sessions an IP binden (locker für private Netze bei `no`)                  | `yes` oder `no`   | `yes`                        |
+| `PROXY_NUMBERS`                             | Anzahl vertrauenswürdiger Proxy-Hops für `X-Forwarded-*`                   | Integer           | `1`                          |
 
 ### Logging
 
-| Setting | Beschreibung | Erlaubte Werte | Standard |
-| --- | --- | --- | --- |
-| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Basis-Log-Level / Override | `debug`, `info`, `warning`, `error`, `critical` | `info` |
-| `LOG_TYPES` | Ziele | Leerzeichengetrennt `stderr`/`file`/`syslog` | `stderr` |
-| `LOG_FILE_PATH` | Pfad für File-Logging (`file` oder `CAPTURE_OUTPUT=yes`) | Dateipfad | `/var/log/bunkerweb/ui.log` bei File/Capture |
-| `CAPTURE_OUTPUT` | Gunicorn stdout/stderr an Log-Handler senden | `yes` oder `no` | `no` |
-| `LOG_SYSLOG_ADDRESS` | Syslog-Ziel (`udp://host:514`, `tcp://host:514`, Socket) | Host:Port / URL / Socketpfad | unset |
-| `LOG_SYSLOG_TAG` | Syslog-Tag/Ident | String | `bw-ui` |
+| Setting                         | Beschreibung                                             | Erlaubte Werte                                  | Standard                                     |
+| ------------------------------- | -------------------------------------------------------- | ----------------------------------------------- | -------------------------------------------- |
+| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Basis-Log-Level / Override                               | `debug`, `info`, `warning`, `error`, `critical` | `info`                                       |
+| `LOG_TYPES`                     | Ziele                                                    | Leerzeichengetrennt `stderr`/`file`/`syslog`    | `stderr`                                     |
+| `LOG_FILE_PATH`                 | Pfad für File-Logging (`file` oder `CAPTURE_OUTPUT=yes`) | Dateipfad                                       | `/var/log/bunkerweb/ui.log` bei File/Capture |
+| `CAPTURE_OUTPUT`                | Gunicorn stdout/stderr an Log-Handler senden             | `yes` oder `no`                                 | `no`                                         |
+| `LOG_SYSLOG_ADDRESS`            | Syslog-Ziel (`udp://host:514`, `tcp://host:514`, Socket) | Host:Port / URL / Socketpfad                    | unset                                        |
+| `LOG_SYSLOG_TAG`                | Syslog-Tag/Ident                                         | String                                          | `bw-ui`                                      |
 
 ### Sonstiges Runtime
 
-| Setting | Beschreibung | Erlaubte Werte | Standard |
-| --- | --- | --- | --- |
-| `MAX_WORKERS`, `MAX_THREADS` | Gunicorn-Worker/Threads | Integer | `cpu_count()-1` (min 1), `workers*2` |
-| `ENABLE_HEALTHCHECK` | `GET /healthcheck` bereitstellen | `yes` oder `no` | `no` |
-| `FORWARDED_ALLOW_IPS` | Veralteter Alias für Proxy-Allowlist | IPs/CIDRs | `*` |
-| `DISABLE_CONFIGURATION_TESTING` | Test-Reloads beim Push skippen | `yes` oder `no` | `no` |
-| `IGNORE_REGEX_CHECK` | Regex-Validierung der Settings überspringen | `yes` oder `no` | `no` |
+| Setting                         | Beschreibung                                | Erlaubte Werte  | Standard                             |
+| ------------------------------- | ------------------------------------------- | --------------- | ------------------------------------ |
+| `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn-Worker/Threads                     | Integer         | `cpu_count()-1` (min 1), `workers*2` |
+| `ENABLE_HEALTHCHECK`            | `GET /healthcheck` bereitstellen            | `yes` oder `no` | `no`                                 |
+| `FORWARDED_ALLOW_IPS`           | Veralteter Alias für Proxy-Allowlist        | IPs/CIDRs       | `*`                                  |
+| `DISABLE_CONFIGURATION_TESTING` | Test-Reloads beim Push skippen              | `yes` oder `no` | `no`                                 |
+| `IGNORE_REGEX_CHECK`            | Regex-Validierung der Settings überspringen | `yes` oder `no` | `no`                                 |
 
 ## Log-Zugriff
 
@@ -272,3 +272,55 @@ Fügen Sie den PRO-Lizenzschlüssel in der Seite **PRO** der UI ein (oder setzen
   ![PRO upgrade](assets/img/ui-pro.png){ align=center, width="700" }
   <figcaption>PRO-Lizenzinformationen</figcaption>
 </figure>
+
+## Übersetzungen (i18n)
+
+Die Web-Oberfläche ist dank Beiträgen aus der Community in mehreren Sprachen verfügbar. Die Übersetzungen werden als sprachspezifische JSON-Dateien gespeichert (z. B. `en.json`, `fr.json`, …). Für jede Sprache ist klar dokumentiert, ob sie manuell oder mithilfe von KI erstellt wurde und wie ihr Prüfstatus aussieht.
+
+### Verfügbare Sprachen und Mitwirkende
+
+| Sprache                   | Locale | Erstellt von                   | Geprüft von              |
+| ------------------------- | ------ | ------------------------------ | ------------------------ |
+| Arabisch                  | `ar`   | KI (Google:Gemini-2.5-pro)     | KI (Google:Gemini-3-pro) |
+| Bengalisch                | `bn`   | KI (Google:Gemini-2.5-pro)     | KI (Google:Gemini-3-pro) |
+| Bretonisch                | `br`   | KI (Google:Gemini-2.5-pro)     | KI (Google:Gemini-3-pro) |
+| Deutsch                   | `de`   | KI (Google:Gemini-2.5-pro)     | KI (Google:Gemini-3-pro) |
+| Englisch                  | `en`   | Manuell (@TheophileDiot)       | Manuell (@TheophileDiot) |
+| Spanisch                  | `es`   | KI (Google:Gemini-2.5-pro)     | KI (Google:Gemini-3-pro) |
+| Französisch               | `fr`   | Manuell (@TheophileDiot)       | Manuell (@TheophileDiot) |
+| Hindi                     | `hi`   | KI (Google:Gemini-2.5-pro)     | KI (Google:Gemini-3-pro) |
+| Italienisch               | `it`   | KI (Google:Gemini-2.5-pro)     | KI (Google:Gemini-3-pro) |
+| Koreanisch                | `ko`   | Manuell (@rayshoo)             | Manuell (@rayshoo)       |
+| Polnisch                  | `pl`   | Manuell (@tomkolp) via Weblate | Manuell (@tomkolp)       |
+| Portugiesisch             | `pt`   | KI (Google:Gemini-2.5-pro)     | KI (Google:Gemini-3-pro) |
+| Russisch                  | `ru`   | KI (Google:Gemini-2.5-pro)     | KI (Google:Gemini-3-pro) |
+| Türkisch                  | `tr`   | Manuell (@wiseweb-works)       | Manuell (@wiseweb-works) |
+| Chinesisch (Traditionell) | `tw`   | KI (Google:Gemini-2.5-pro)     | KI (Google:Gemini-3-pro) |
+| Urdu                      | `ur`   | KI (Google:Gemini-2.5-pro)     | KI (Google:Gemini-3-pro) |
+| Chinesisch (Vereinfacht)  | `zh`   | KI (Google:Gemini-2.5-pro)     | KI (Google:Gemini-3-pro) |
+
+> 💡 Einige Übersetzungen können unvollständig sein. Eine manuelle Überprüfung wird insbesondere für kritische UI-Elemente dringend empfohlen.
+
+### Wie man beitragen kann
+
+Beiträge zu Übersetzungen folgen dem allgemeinen Beitrags-Workflow von BunkerWeb:
+
+1. **Neue Übersetzungsdatei erstellen oder bestehende aktualisieren**
+   - Kopiere `src/ui/app/static/locales/en.json` und benenne die Datei nach dem gewünschten Locale-Code (z. B. `de.json`).
+   - Übersetze **nur die Werte**; die Schlüssel dürfen nicht geändert werden.
+
+2. **Sprache registrieren**
+   - Ergänze oder aktualisiere den Spracheintrag in `src/ui/app/lang_config.py` (Locale-Code, Anzeigename, Flagge, englischer Name).  
+     Diese Datei ist die maßgebliche Quelle für unterstützte Sprachen.
+
+3. **Dokumentation und Herkunft aktualisieren**
+   - `src/ui/app/static/locales/README.md` → neue Sprache in der Herkunftstabelle eintragen (erstellt von / geprüft von).
+   - `README.md` → Projektweite Dokumentation um die neue unterstützte Sprache ergänzen.
+   - `docs/web-ui.md` → Dokumentation der Web-Oberfläche (diesen Abschnitt zu Übersetzungen).
+   - `docs/*/web-ui.md` → Entsprechende übersetzte Web-UI-Dokumentationen mit demselben Übersetzungsabschnitt aktualisieren.
+
+4. **Pull Request öffnen**
+   - Gib klar an, ob die Übersetzung manuell oder mit einem KI-Tool erstellt wurde.
+   - Bei größeren Änderungen (neue Sprache oder umfangreiche Updates) empfiehlt es sich, vorab ein Issue zur Diskussion zu eröffnen.
+
+Durch deine Beiträge zu Übersetzungen hilfst du dabei, BunkerWeb für ein internationales Publikum zugänglich zu machen.

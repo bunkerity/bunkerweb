@@ -2,6 +2,7 @@
 
 from base64 import b64decode
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from json import loads
 from os import W_OK, access, environ, getenv, sep, umask
@@ -12,8 +13,16 @@ from select import select
 from subprocess import DEVNULL, PIPE, STDOUT, Popen, run
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
+from threading import Event, Lock, Thread
 from traceback import format_exc
 from typing import Dict, List, Optional, Set, Tuple, Type, Union
+from certbot_concurrency import (
+    CertbotPaths,
+    ensure_accounts,
+    finalize_certbot_run,
+    prepare_certbot_paths,
+    select_account_id,
+)
 
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -23,7 +32,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from pydantic import ValidationError
 from requests import get
 
-from common_utils import bytes_hash, file_hash  # type: ignore
+from common_utils import bytes_hash, effective_cpu_count, file_hash  # type: ignore
 from jobs import Job  # type: ignore
 from logger import getLogger  # type: ignore
 
@@ -54,6 +63,7 @@ from letsencrypt_providers import (
     Route53Provider,
     SakuraCloudProvider,
     ScalewayProvider,
+    TransIPProvider,
 )
 
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper()
@@ -68,6 +78,36 @@ CACHE_PATH = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
 DATA_PATH = CACHE_PATH.joinpath("etc")
 WORK_DIR = join(sep, "var", "lib", "bunkerweb", "letsencrypt")
 LOGS_DIR = join(sep, "var", "log", "bunkerweb", "letsencrypt")
+MERGE_LOCK = Lock()
+RUNNING_LOCK = Lock()
+RUNNING_CERTBOT = 0
+MONITOR_STOP = Event()
+MONITOR_THREAD: Optional[Thread] = None
+
+
+def _monitor_certbot_progress() -> None:
+    while not MONITOR_STOP.wait(10):
+        with RUNNING_LOCK:
+            running = RUNNING_CERTBOT
+        if running > 0:
+            LOGGER.info("⏳ Still generating certificate(s)...")
+
+
+def start_progress_monitor() -> None:
+    global MONITOR_THREAD
+    if MONITOR_THREAD and MONITOR_THREAD.is_alive():
+        return
+    MONITOR_STOP.clear()
+    MONITOR_THREAD = Thread(target=_monitor_certbot_progress, daemon=True)
+    MONITOR_THREAD.start()
+
+
+def stop_progress_monitor() -> None:
+    global MONITOR_THREAD
+    MONITOR_STOP.set()
+    if MONITOR_THREAD:
+        MONITOR_THREAD.join(timeout=2)
+        MONITOR_THREAD = None
 
 
 def prepare_logs_dir() -> None:
@@ -163,6 +203,7 @@ PROVIDERS: Dict[str, Type[Provider]] = {
     "route53": Route53Provider,
     "sakuracloud": SakuraCloudProvider,
     "scaleway": ScalewayProvider,
+    "transip": TransIPProvider,
 }
 
 status = 0
@@ -312,7 +353,7 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
     authenticator = env("LETS_ENCRYPT_DNS_PROVIDER", "").lower()
     server_names_val = env("SERVER_NAME", "www.example.com").strip() if IS_MULTISITE else getenv("SERVER_NAME", "www.example.com").strip()
     email_val = env("EMAIL_LETS_ENCRYPT", "").strip()
-    retries_val = env("LETS_ENCRYPT_RETRIES", "0")
+    retries_val = env("LETS_ENCRYPT_MAX_RETRIES", "0")
     challenge_val = env("LETS_ENCRYPT_CHALLENGE", "http").lower()
     profile_val = env("LETS_ENCRYPT_PROFILE", "classic").lower()
     custom_profile = env("LETS_ENCRYPT_CUSTOM_PROFILE", "").lower()
@@ -338,11 +379,11 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
         retries_int = int(retries_val)
         if retries_int < 0:
             if activated:
-                LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_RETRIES is negative. Defaulting to 0.")
+                LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_MAX_RETRIES is negative. Defaulting to 0.")
             retries_int = 0
     except Exception:
         if activated:
-            LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_RETRIES is not a valid integer. Defaulting to 0.")
+            LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_MAX_RETRIES is not a valid integer. Defaulting to 0.")
         retries_int = 0
 
     if activated and challenge_val not in CHALLENGE_TYPES:
@@ -552,7 +593,12 @@ def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
     return process.returncode
 
 
-def certbot_new(service: str, config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str] = None) -> int:
+def certbot_new(
+    service: str,
+    config: Dict[str, Union[str, bool, int, Dict[str, str]]],
+    cmd_env: Dict[str, str],
+    paths: CertbotPaths,
+) -> int:
     # * Building the certbot command
     command = [
         CERTBOT_BIN,
@@ -566,11 +612,11 @@ def certbot_new(service: str, config: Dict[str, Union[str, bool, int, Dict[str, 
         config["profile"],
         "--agree-tos",
         "--config-dir",
-        DATA_PATH.as_posix(),
+        paths.config_dir.as_posix(),
         "--work-dir",
-        WORK_DIR,
+        paths.work_dir.as_posix(),
         "--logs-dir",
-        LOGS_DIR,
+        paths.logs_dir.as_posix(),
         "--break-my-certs",
         "--expand",
     ]
@@ -580,11 +626,12 @@ def certbot_new(service: str, config: Dict[str, Union[str, bool, int, Dict[str, 
     else:
         command.append("--register-unsafely-without-email")
 
+    account_id = select_account_id(paths.config_dir.joinpath("accounts"), bool(config["staging"]), str(config.get("email") or ""))
+    if account_id:
+        command.extend(["--account", account_id])
+
     if LOG_LEVEL == "DEBUG":
         command.append("-v")
-
-    if not cmd_env:
-        cmd_env = {}
 
     if config["challenge"] == "dns":
         # * Adding DNS challenge hooks
@@ -634,7 +681,6 @@ def certbot_new(service: str, config: Dict[str, Union[str, bool, int, Dict[str, 
         else:
             LOGGER.info(f"No existing certificate found for {service}, skipping removal.")
 
-    current_date = datetime.now()
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
 
     while process.poll() is None:
@@ -645,13 +691,46 @@ def certbot_new(service: str, config: Dict[str, Union[str, bool, int, Dict[str, 
                     LOGGER_CERTBOT.info(line.strip())
                     break
 
-        if datetime.now() - current_date > timedelta(seconds=5):
-            LOGGER.info(
-                "⏳ Still generating certificate(s)" + (" (this may take a while depending on the provider)" if config["challenge"] == "dns" else "") + "..."
-            )
-            current_date = datetime.now()
-
     return process.returncode
+
+
+def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str]) -> bool:
+    LOGGER.info(
+        f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email'] or 'not provided'}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile..."
+    )
+    LOGGER.debug(f"Service configuration: {config}")
+
+    concurrent_requests = getenv("LETS_ENCRYPT_CONCURRENT_REQUESTS", "no").lower() == "yes"
+    paths, temp_root = prepare_certbot_paths(service, concurrent_requests, CACHE_PATH, DATA_PATH, WORK_DIR, LOGS_DIR)
+    success = False
+
+    try:
+        for attempts in range(1, config["retries"] + 2):
+            if attempts > 1:
+                LOGGER.warning(f"Certificate generation failed, retrying... (attempt {attempts}/{config['retries'] + 1})")
+                # Wait before retrying (exponential backoff: 30s, 60s, 120s...)
+                wait_time = min(30 * (2 ** (attempts - 2)), 300)  # Cap at 5 minutes
+                LOGGER.info(f"Waiting {wait_time} seconds before retry...")
+                sleep(wait_time)
+
+            with RUNNING_LOCK:
+                global RUNNING_CERTBOT
+                RUNNING_CERTBOT += 1
+            try:
+                ret = certbot_new(service, config, cmd_env.copy(), paths)
+            finally:
+                with RUNNING_LOCK:
+                    RUNNING_CERTBOT -= 1
+
+            if ret == 0:
+                LOGGER.info(f"Certificate(s) for {service} generated successfully.")
+                success = True
+                return True
+    finally:
+        finalize_certbot_run(paths, temp_root, success, MERGE_LOCK, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER)
+
+    LOGGER.error(f"Failed to generate certificate(s) for {service} after {config['retries'] + 1} attempts.")
+    return False
 
 
 try:
@@ -819,40 +898,52 @@ try:
             config["force_renew"] = True
 
     # ? generate new certificates and renew existing ones if needed
+    concurrent_requests = getenv("LETS_ENCRYPT_CONCURRENT_REQUESTS", "no").lower() == "yes"
+    pending_services: List[Tuple[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]] = []
+
     for service, config in services.items():
         if existing_certificates.get(service, {}).get("active") and not config["force_renew"]:
             LOGGER.info(f"Certificate(s) for {service} already exist, skipping generation.")
             config["exists"] = True
             continue
-        elif not config["activated"]:
+        if not config["activated"]:
             continue
+        pending_services.append((service, config))
 
-        LOGGER.info(
-            f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email'] or 'not provided'}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile..."
-        )
-        LOGGER.debug(f"Service configuration: {config}")
-
-        for attempts in range(1, config["retries"] + 2):
-            if attempts > 1:
-                LOGGER.warning(f"Certificate generation failed, retrying... (attempt {attempts}/{config['retries'] + 1})")
-                # Wait before retrying (exponential backoff: 30s, 60s, 120s...)
-                wait_time = min(30 * (2 ** (attempts - 2)), 300)  # Cap at 5 minutes
-                LOGGER.info(f"Waiting {wait_time} seconds before retry...")
-                sleep(wait_time)
-
-            ret = certbot_new(service, config, cmd_env.copy())
-
-            if ret == 0:
-                LOGGER.info(f"Certificate(s) for {service} generated successfully.")
-                config["exists"] = True
-                status = 1 if status == 0 else status
-                break
-
-            attempts += 1
-
-        if not config["exists"]:
-            status = 2
-            LOGGER.error(f"Failed to generate certificate(s) for {service} after {config['retries'] + 1} attempts.")
+    if pending_services:
+        if concurrent_requests:
+            required_accounts: Set[Tuple[bool, str]] = set()
+            for _, config in pending_services:
+                required_accounts.add((bool(config.get("staging")), str(config.get("email") or "")))
+            ensure_accounts(required_accounts, cmd_env.copy(), CERTBOT_BIN, LOG_LEVEL, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER)
+        start_progress_monitor()
+        try:
+            if concurrent_requests and len(pending_services) > 1:
+                max_workers = max(1, min(len(pending_services), effective_cpu_count()))
+                with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                    futures = {executor.submit(generate_certificate, service, config, cmd_env.copy()): service for service, config in pending_services}
+                    for future in as_completed(futures):
+                        service = futures[future]
+                        config = services[service]
+                        try:
+                            success = future.result()
+                        except BaseException as e:
+                            LOGGER.error(f"Unexpected error while generating certificate(s) for {service}: {e}")
+                            success = False
+                        config["exists"] = success
+                        if success:
+                            status = 1 if status == 0 else status
+                        else:
+                            status = 2
+            else:
+                for service, config in pending_services:
+                    config["exists"] = generate_certificate(service, config, cmd_env)
+                    if config["exists"]:
+                        status = 1 if status == 0 else status
+                    else:
+                        status = 2
+        finally:
+            stop_progress_monitor()
 
     if CACHE_PATH.is_dir():
         # * Clean up unused credential files

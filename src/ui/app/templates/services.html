@@ -56,6 +56,12 @@
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
+                        data-bs-original-title="The Service's security mode (Block or Detect)"
+                        data-i18n="tooltip.table.services.security_mode">
+                        <span data-i18n="table.header.security_mode">Security Mode</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
                         data-bs-original-title="The template used by the Service"
                         data-i18n="tooltip.table.services.template">
                         <span data-i18n="table.header.template">Template</span>
@@ -96,16 +102,29 @@
                             {% if service['is_draft'] %}
                                 <span id="type-{{ service['id'].replace('.', '-') }}"
                                       data-value="draft"
-                                      class="badge rounded-pill bg-label-secondary"
-                                      data-i18n="status.draft">Draft</span>
+                                      class="badge rounded-pill bg-label-secondary d-inline-flex align-items-center">
+                                    <i class="bx bx-file-blank me-1"></i><span data-i18n="status.draft">Draft</span>
+                                </span>
                             {% else %}
                                 <span id="type-{{ service['id'].replace('.', '-') }}"
                                       data-value="online"
-                                      class="badge rounded-pill bg-label-primary"
-                                      data-i18n="status.online">Online</span>
+                                      class="badge rounded-pill bg-label-primary d-inline-flex align-items-center">
+                                    <i class="bx bx-globe me-1"></i><span data-i18n="status.online">Online</span>
+                                </span>
                             {% endif %}
                         </td>
                         <td id="method-{{ service['id'].replace('.', '-') }}">{{ service["method"] }}</td>
+                        <td>
+                            {% if service['security_mode'] == 'detect' %}
+                                <span class="badge rounded-pill bg-label-warning d-inline-flex align-items-center">
+                                    <i class="bx bx-show me-1"></i><span data-i18n="security_mode.detect">Detect</span>
+                                </span>
+                            {% else %}
+                                <span class="badge rounded-pill bg-label-primary d-inline-flex align-items-center">
+                                    <i class="bx bx-shield-alt-2 me-1"></i><span data-i18n="security_mode.block">Block</span>
+                                </span>
+                            {% endif %}
+                        </td>
                         <td>
                             {% if service["template"] %}
                                 <a href="{{ url_for("templates") }}/{{ service["template"] }}"
@@ -225,6 +244,63 @@
         <div class="toast-body" data-i18n="flash.easter_egg">If you read this, it means that you're curious 👀</div>
     </div>
     {% if not is_readonly %}
+        <div class="modal modal-xl fade"
+             id="modal-import-services"
+             data-bs-backdrop="static"
+             tabindex="-1"
+             aria-hidden="true"
+             role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" data-i18n="modal.title.import_services">Import services</h5>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                                data-i18n="aria.label.close"></button>
+                    </div>
+                    <form action="{{ url_for("services") }}/import"
+                          method="POST"
+                          enctype="multipart/form-data">
+                        <div class="modal-body">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <div role="button"
+                                 id="services-drag-area"
+                                 class="border border-primary border-2 border-dashed rounded d-flex justify-content-center align-items-center h-px-200">
+                                <div class="text-center">
+                                    <i class="bx bx-lg bxs-cloud-upload text-primary"></i>
+                                    <p class="mt-3 fs-5" data-i18n="modal.body.import_services_dropzone">
+                                        Drag and drop your services export file here or click to select a file.
+                                    </p>
+                                </div>
+                            </div>
+                            <input type="file"
+                                   id="services-import-file"
+                                   name="services_file"
+                                   accept=".env,text/plain"
+                                   class="visually-hidden"
+                                   required />
+                            <div id="services-import-file-list" class="mt-3"></div>
+                            <div class="alert alert-warning text-center mt-3"
+                                 role="alert"
+                                 data-i18n="modal.body.import_services_warning">
+                                Importing services will create new UI services from the export file. Existing services are skipped.
+                            </div>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="submit"
+                                    class="btn btn-outline-primary me-2"
+                                    data-i18n="button.import_services">Import services</button>
+                            <button type="reset"
+                                    class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal"
+                                    data-i18n="button.cancel">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
         <div class="modal fade"
              id="modal-convert-services"
              data-bs-backdrop="static"

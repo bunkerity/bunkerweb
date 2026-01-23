@@ -321,3 +321,55 @@ log {
 <figure markdown>
   ![PRO upgrade](assets/img/ui-pro.png){ align=center, width="700" }
 </figure>
+
+## Translations (i18n)
+
+The Web UI is available in multiple languages thanks to community contributions. Translation strings are stored as per-locale JSON files (for example `en.json`, `fr.json`, …). Each locale has a clear provenance indicating whether it was translated manually or generated using AI, as well as its review status.
+
+### Available languages and contributors
+
+| Language              | Locale | Created by                    | Reviewed by              |
+| --------------------- | ------ | ----------------------------- | ------------------------ |
+| Arabic                | `ar`   | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
+| Bengali               | `bn`   | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
+| Breton                | `br`   | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
+| German                | `de`   | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
+| English               | `en`   | Manual (@TheophileDiot)       | Manual (@TheophileDiot)  |
+| Spanish               | `es`   | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
+| French                | `fr`   | Manual (@TheophileDiot)       | Manual (@TheophileDiot)  |
+| Hindi                 | `hi`   | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
+| Italian               | `it`   | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
+| Korean                | `ko`   | Manual (@rayshoo)             | Manual (@rayshoo)        |
+| Polish                | `pl`   | Manual (@tomkolp) via Weblate | Manual (@tomkolp)        |
+| Portuguese            | `pt`   | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
+| Russian               | `ru`   | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
+| Turkish               | `tr`   | Manual (@wiseweb-works)       | Manual (@wiseweb-works)  |
+| Chinese (Traditional) | `tw`   | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
+| Urdu                  | `ur`   | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
+| Chinese (Simplified)  | `zh`   | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
+
+> 💡 Some translations may be partial. Manual review is encouraged, especially for critical UI elements.
+
+### How to contribute
+
+Translation contributions follow the standard BunkerWeb contribution workflow:
+
+1. **Create or update the locale file**
+   - Copy `src/ui/app/static/locales/en.json` and rename it to your locale code (for example `de.json`).
+   - Translate **values only**; keys must remain unchanged.
+
+2. **Register the language**
+   - Add or update the language entry in `src/ui/app/lang_config.py` (locale code, display name, flag, English name).  
+     This file is the single source of truth for supported languages.
+
+3. **Update documentation and provenance**
+   - `src/ui/app/static/locales/README.md` → add the new language to the provenance table (created by / reviewed by).
+   - `README.md` → ensure the project-level documentation reflects the new supported language.
+   - `docs/web-ui.md` → update the Web UI documentation (this Translations section).
+   - `docs/*/web-ui.md` → update the corresponding translated Web UI documentation with the same Translations section.
+
+4. **Open a pull request**
+   - Clearly state whether the translation was done manually or with an AI tool.
+   - For non-trivial additions (new language or major updates), consider opening an issue first to discuss the change.
+
+By contributing translations, you help make BunkerWeb accessible to a broader, international audience.

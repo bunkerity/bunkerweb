@@ -28,6 +28,7 @@ acme==5.2.2 \
     #   certbot-dns-route53
     #   certbot-dns-sakuracloud
     #   certbot-dns-scaleway
+    #   certbot-dns-transip
 annotated-types==0.7.0 \
     --hash=sha256:1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53 \
     --hash=sha256:aff07c09a53a08bc8cfccb9c85b05f1aa9a2a6f23728d790723543408344ce89
@@ -80,6 +81,7 @@ certbot==5.2.2 \
     #   certbot-dns-route53
     #   certbot-dns-sakuracloud
     #   certbot-dns-scaleway
+    #   certbot-dns-transip
 certbot-dns-bunny==3.0.0 \
     --hash=sha256:507fe45c3aa399c93c30fd68b06ba6e5646bb56e1d454a7f1ffac8c8677e5a21 \
     --hash=sha256:e58e450747e79fd9dad6cdf21d3685b23e7e3d2fea65c16aca3a4dfd8cd31397
@@ -178,6 +180,10 @@ certbot-dns-sakuracloud==5.2.2 \
 certbot-dns-scaleway==0.0.7 \
     --hash=sha256:999dda5b8689277facb77e1757b8a6b207baeecc0ded0c27aea2c51331affc92 \
     --hash=sha256:bc0833ed71a5cd314a93f8d02144c54e17066ee1e2b950ed868b14b2211f5e9e
+    # via -r requirements.in
+certbot-dns-transip==0.5.2 \
+    --hash=sha256:6feb8df2220960aec130238ed63cb9c234cb918dbe6da7509c9b0f8c030c8f4f \
+    --hash=sha256:71fca31a2b40824d6731491d81feff0a6ef671bb08492bf1cf0a1ce1cacca7ff
     # via -r requirements.in
 certifi==2026.1.4 \
     --hash=sha256:9943707519e4add1115f44c2bc244f782c0249876bf51b6599fee1ffbedd685c \
@@ -461,6 +467,7 @@ cryptography==46.0.3 \
     #   dns-lexicon
     #   josepy
     #   pyopenssl
+    #   python-transip
 distro==1.9.0 \
     --hash=sha256:2fa77c6fd8940f116ee1d6b94a2f90b13b5ea8d019b98bc8bafdcabcdd9bdbed \
     --hash=sha256:7bffd925d65168f85027d8da9af6bddab658135b840670a223589bc0c8ef02b2
@@ -840,6 +847,10 @@ python-magic==0.4.27 \
     --hash=sha256:c1ba14b08e4a5f5c31a302b7721239695b2f0f058d125bd5ce1ee36b9d9d3c3b \
     --hash=sha256:c212960ad306f700aa0d01e5d7a325d20548ff97eb9920dcd29513174f0294d3
     # via -r requirements.in
+python-transip==0.6.0 \
+    --hash=sha256:43cb57a79c0ab8ce8d524dc9e76c6209298e52a0004ac385c87588589af9c76b \
+    --hash=sha256:d9fd984db4eda4f91b99083c21ad6e00c718c734ad200a53d113fe680c871fe0
+    # via certbot-dns-transip
 pyyaml==6.0.3 \
     --hash=sha256:00c4bdeba853cc34e7dd471f16b4114f4162dc03e6b7afcc2128711f0eca823c \
     --hash=sha256:0150219816b6a1fa26fb4699fb7daa9caf09eb1999f3b70fb6e786805e80375a \
@@ -936,6 +947,7 @@ requests==2.32.5 \
     #   dns-lexicon
     #   google-api-core
     #   python-digitalocean
+    #   python-transip
     #   requests-file
     #   requests-mock
     #   tldextract
@@ -974,9 +986,9 @@ six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
     --hash=sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81
     # via python-dateutil
-soupsieve==2.8.2 \
-    --hash=sha256:0f4c2f6b5a5fb97a641cf69c0bd163670a0e45e6d6c01a2107f93a6a6f93c51a \
-    --hash=sha256:78a66b0fdee2ab40b7199dc3e747ee6c6e231899feeaae0b9b98a353afd48fd8
+soupsieve==2.8.3 \
+    --hash=sha256:3267f1eeea4251fb42728b6dfb746edc9acaffc4a45b27e19450b676586e8349 \
+    --hash=sha256:ed64f2ba4eebeab06cc4962affce381647455978ffc1e36bb79a545b91f45a95
     # via beautifulsoup4
 tldextract==5.3.1 \
     --hash=sha256:6bfe36d518de569c572062b788e16a659ccaceffc486d243af0484e8ecf432d9 \
@@ -1049,3 +1061,4 @@ zope-interface==8.2 \
     #   certbot-dns-domeneshop
     #   certbot-dns-ionos
     #   certbot-dns-scaleway
+    #   certbot-dns-transip

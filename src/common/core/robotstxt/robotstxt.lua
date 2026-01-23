@@ -40,7 +40,10 @@ function robotstxt:initialize(ctx)
 		if not robots_rules then
 			self.logger:log(ERR, err)
 		else
-			self.policies.rule = robots_rules
+			-- Create a copy of the table to avoid modifying the shared internalstore reference
+			for _, rule in ipairs(robots_rules) do
+				table.insert(self.policies.rule, rule)
+			end
 		end
 
 		-- Get all rules and sitemaps from environment variables

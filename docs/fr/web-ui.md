@@ -179,56 +179,56 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 
 ### Runtime et fuseau
 
-| Paramètre | Description | Valeurs acceptées | Défaut |
-| --- | --- | --- | --- |
-| `TZ` | Fuseau pour les journaux UI et actions planifiées | Nom TZ (ex. `UTC`, `Europe/Paris`) | non défini (UTC conteneur en général) |
+| Paramètre | Description                                       | Valeurs acceptées                  | Défaut                                |
+| --------- | ------------------------------------------------- | ---------------------------------- | ------------------------------------- |
+| `TZ`      | Fuseau pour les journaux UI et actions planifiées | Nom TZ (ex. `UTC`, `Europe/Paris`) | non défini (UTC conteneur en général) |
 
 ### Écoute et TLS
 
-| Paramètre | Description | Valeurs acceptées | Défaut |
-| --- | --- | --- | --- |
-| `UI_LISTEN_ADDR` | Adresse d’écoute de l’UI | IP ou hostname | `0.0.0.0` (Docker) / `127.0.0.1` (paquet) |
-| `UI_LISTEN_PORT` | Port d’écoute de l’UI | Entier | `7000` |
-| `LISTEN_ADDR`, `LISTEN_PORT` | Substituts si les variables UI manquent | IP/hostname, entier | `0.0.0.0`, `7000` |
-| `UI_SSL_ENABLED` | Activer le TLS dans le conteneur UI | `yes` ou `no` | `no` |
-| `UI_SSL_CERTFILE`, `UI_SSL_KEYFILE` | Chemins cert/clé PEM si TLS activé | Chemins de fichier | non définis |
-| `UI_SSL_CA_CERTS` | CA/chaîne optionnelle | Chemin de fichier | non défini |
-| `UI_FORWARDED_ALLOW_IPS` | Proxies de confiance pour `X-Forwarded-*` | IP/CIDR séparés par espaces/virgules | `*` |
+| Paramètre                           | Description                               | Valeurs acceptées                    | Défaut                                    |
+| ----------------------------------- | ----------------------------------------- | ------------------------------------ | ----------------------------------------- |
+| `UI_LISTEN_ADDR`                    | Adresse d’écoute de l’UI                  | IP ou hostname                       | `0.0.0.0` (Docker) / `127.0.0.1` (paquet) |
+| `UI_LISTEN_PORT`                    | Port d’écoute de l’UI                     | Entier                               | `7000`                                    |
+| `LISTEN_ADDR`, `LISTEN_PORT`        | Substituts si les variables UI manquent   | IP/hostname, entier                  | `0.0.0.0`, `7000`                         |
+| `UI_SSL_ENABLED`                    | Activer le TLS dans le conteneur UI       | `yes` ou `no`                        | `no`                                      |
+| `UI_SSL_CERTFILE`, `UI_SSL_KEYFILE` | Chemins cert/clé PEM si TLS activé        | Chemins de fichier                   | non définis                               |
+| `UI_SSL_CA_CERTS`                   | CA/chaîne optionnelle                     | Chemin de fichier                    | non défini                                |
+| `UI_FORWARDED_ALLOW_IPS`            | Proxies de confiance pour `X-Forwarded-*` | IP/CIDR séparés par espaces/virgules | `*`                                       |
 
 ### Auth, sessions et cookies
 
-| Paramètre | Description | Valeurs acceptées | Défaut |
-| --- | --- | --- | --- |
-| `ADMIN_USERNAME`, `ADMIN_PASSWORD` | Initialiser le compte admin (politique de mot de passe) | Chaînes | non définis |
-| `OVERRIDE_ADMIN_CREDS` | Forcer la mise à jour des identifiants admin depuis l’env | `yes` ou `no` | `no` |
-| `FLASK_SECRET` | Secret de signature de session (persisté dans `/var/lib/bunkerweb/.flask_secret`) | Chaîne hex/base64/opacité | généré automatiquement |
-| `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`) | Clés de chiffrement TOTP (espaces ou map JSON) | Chaînes / JSON | générées si absent |
-| `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Clés Biscuit (hex) pour générer des tokens UI | Chaînes hex | auto-générées et stockées |
-| `SESSION_LIFETIME_HOURS` | Durée de session | Nombre (heures) | `12` |
-| `ALWAYS_REMEMBER` | Toujours activer le cookie “remember me” | `yes` ou `no` | `no` |
-| `CHECK_PRIVATE_IP` | Lier la session à l’IP (relâchement sur plages privées si `no`) | `yes` ou `no` | `yes` |
-| `PROXY_NUMBERS` | Nombre de sauts proxy à faire confiance pour `X-Forwarded-*` | Entier | `1` |
+| Paramètre                                   | Description                                                                       | Valeurs acceptées         | Défaut                    |
+| ------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------- | ------------------------- |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | Initialiser le compte admin (politique de mot de passe)                           | Chaînes                   | non définis               |
+| `OVERRIDE_ADMIN_CREDS`                      | Forcer la mise à jour des identifiants admin depuis l’env                         | `yes` ou `no`             | `no`                      |
+| `FLASK_SECRET`                              | Secret de signature de session (persisté dans `/var/lib/bunkerweb/.flask_secret`) | Chaîne hex/base64/opacité | généré automatiquement    |
+| `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | Clés de chiffrement TOTP (espaces ou map JSON)                                    | Chaînes / JSON            | générées si absent        |
+| `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Clés Biscuit (hex) pour générer des tokens UI                                     | Chaînes hex               | auto-générées et stockées |
+| `SESSION_LIFETIME_HOURS`                    | Durée de session                                                                  | Nombre (heures)           | `12`                      |
+| `ALWAYS_REMEMBER`                           | Toujours activer le cookie “remember me”                                          | `yes` ou `no`             | `no`                      |
+| `CHECK_PRIVATE_IP`                          | Lier la session à l’IP (relâchement sur plages privées si `no`)                   | `yes` ou `no`             | `yes`                     |
+| `PROXY_NUMBERS`                             | Nombre de sauts proxy à faire confiance pour `X-Forwarded-*`                      | Entier                    | `1`                       |
 
 ### Journalisation
 
-| Paramètre | Description | Valeurs acceptées | Défaut |
-| --- | --- | --- | --- |
-| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Niveau de log de base / override | `debug`, `info`, `warning`, `error`, `critical` | `info` |
-| `LOG_TYPES` | Destinations | `stderr`/`file`/`syslog` séparés par espaces | `stderr` |
-| `LOG_FILE_PATH` | Chemin pour les logs fichier (`file` ou `CAPTURE_OUTPUT=yes`) | Chemin de fichier | `/var/log/bunkerweb/ui.log` si fichier/capture |
-| `CAPTURE_OUTPUT` | Envoyer stdout/stderr Gunicorn vers les handlers | `yes` ou `no` | `no` |
-| `LOG_SYSLOG_ADDRESS` | Cible syslog (`udp://host:514`, `tcp://host:514`, socket) | Host:port / URL / socket | non défini |
-| `LOG_SYSLOG_TAG` | Tag/ident syslog | Chaîne | `bw-ui` |
+| Paramètre                       | Description                                                   | Valeurs acceptées                               | Défaut                                         |
+| ------------------------------- | ------------------------------------------------------------- | ----------------------------------------------- | ---------------------------------------------- |
+| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Niveau de log de base / override                              | `debug`, `info`, `warning`, `error`, `critical` | `info`                                         |
+| `LOG_TYPES`                     | Destinations                                                  | `stderr`/`file`/`syslog` séparés par espaces    | `stderr`                                       |
+| `LOG_FILE_PATH`                 | Chemin pour les logs fichier (`file` ou `CAPTURE_OUTPUT=yes`) | Chemin de fichier                               | `/var/log/bunkerweb/ui.log` si fichier/capture |
+| `CAPTURE_OUTPUT`                | Envoyer stdout/stderr Gunicorn vers les handlers              | `yes` ou `no`                                   | `no`                                           |
+| `LOG_SYSLOG_ADDRESS`            | Cible syslog (`udp://host:514`, `tcp://host:514`, socket)     | Host:port / URL / socket                        | non défini                                     |
+| `LOG_SYSLOG_TAG`                | Tag/ident syslog                                              | Chaîne                                          | `bw-ui`                                        |
 
 ### Divers runtime
 
-| Paramètre | Description | Valeurs acceptées | Défaut |
-| --- | --- | --- | --- |
-| `MAX_WORKERS`, `MAX_THREADS` | Workers/threads Gunicorn | Entier | `cpu_count()-1` (min 1), `workers*2` |
-| `ENABLE_HEALTHCHECK` | Exposer `GET /healthcheck` | `yes` ou `no` | `no` |
-| `FORWARDED_ALLOW_IPS` | Alias déprécié pour la liste des proxies | IP/CIDR | `*` |
-| `DISABLE_CONFIGURATION_TESTING` | Sauter les reloads de test lors des push config | `yes` ou `no` | `no` |
-| `IGNORE_REGEX_CHECK` | Ignorer la validation regex des paramètres | `yes` ou `no` | `no` |
+| Paramètre                       | Description                                     | Valeurs acceptées | Défaut                               |
+| ------------------------------- | ----------------------------------------------- | ----------------- | ------------------------------------ |
+| `MAX_WORKERS`, `MAX_THREADS`    | Workers/threads Gunicorn                        | Entier            | `cpu_count()-1` (min 1), `workers*2` |
+| `ENABLE_HEALTHCHECK`            | Exposer `GET /healthcheck`                      | `yes` ou `no`     | `no`                                 |
+| `FORWARDED_ALLOW_IPS`           | Alias déprécié pour la liste des proxies        | IP/CIDR           | `*`                                  |
+| `DISABLE_CONFIGURATION_TESTING` | Sauter les reloads de test lors des push config | `yes` ou `no`     | `no`                                 |
+| `IGNORE_REGEX_CHECK`            | Ignorer la validation regex des paramètres      | `yes` ou `no`     | `no`                                 |
 
 ## Accès aux journaux
 
@@ -272,3 +272,55 @@ Collez votre clé PRO dans la page **PRO** de l’UI (ou pré-renseignez `PRO_LI
   ![PRO upgrade](assets/img/ui-pro.png){ align=center, width="700" }
   <figcaption>Informations de licence PRO</figcaption>
 </figure>
+
+## Traductions (i18n)
+
+L’interface Web est disponible en plusieurs langues grâce aux contributions de la communauté. Les traductions sont stockées dans des fichiers JSON par langue (par exemple `en.json`, `fr.json`, …). Pour chaque langue, l’origine de la traduction est clairement documentée (manuelle ou générée par IA), ainsi que son statut de relecture.
+
+### Langues disponibles et contributeurs
+
+| Langue                 | Locale | Créée par                     | Relue par                |
+| ---------------------- | ------ | ----------------------------- | ------------------------ |
+| Arabe                  | `ar`   | IA (Google:Gemini-2.5-pro)    | IA (Google:Gemini-3-pro) |
+| Bengali                | `bn`   | IA (Google:Gemini-2.5-pro)    | IA (Google:Gemini-3-pro) |
+| Breton                 | `br`   | IA (Google:Gemini-2.5-pro)    | IA (Google:Gemini-3-pro) |
+| Allemand               | `de`   | IA (Google:Gemini-2.5-pro)    | IA (Google:Gemini-3-pro) |
+| Anglais                | `en`   | Manuel (@TheophileDiot)       | Manuel (@TheophileDiot)  |
+| Espagnol               | `es`   | IA (Google:Gemini-2.5-pro)    | IA (Google:Gemini-3-pro) |
+| Français               | `fr`   | Manuel (@TheophileDiot)       | Manuel (@TheophileDiot)  |
+| Hindi                  | `hi`   | IA (Google:Gemini-2.5-pro)    | IA (Google:Gemini-3-pro) |
+| Italien                | `it`   | IA (Google:Gemini-2.5-pro)    | IA (Google:Gemini-3-pro) |
+| Coréen                 | `ko`   | Manuel (@rayshoo)             | Manuel (@rayshoo)        |
+| Polonais               | `pl`   | Manuel (@tomkolp) via Weblate | Manuel (@tomkolp)        |
+| Portugais              | `pt`   | IA (Google:Gemini-2.5-pro)    | IA (Google:Gemini-3-pro) |
+| Russe                  | `ru`   | IA (Google:Gemini-2.5-pro)    | IA (Google:Gemini-3-pro) |
+| Turc                   | `tr`   | Manuel (@wiseweb-works)       | Manuel (@wiseweb-works)  |
+| Chinois (Traditionnel) | `tw`   | IA (Google:Gemini-2.5-pro)    | IA (Google:Gemini-3-pro) |
+| Ourdou                 | `ur`   | IA (Google:Gemini-2.5-pro)    | IA (Google:Gemini-3-pro) |
+| Chinois (Simplifié)    | `zh`   | IA (Google:Gemini-2.5-pro)    | IA (Google:Gemini-3-pro) |
+
+> 💡 Certaines traductions peuvent être partielles. Une relecture manuelle est fortement recommandée, en particulier pour les éléments critiques de l’interface.
+
+### Comment contribuer
+
+Les contributions aux traductions suivent le workflow de contribution standard de BunkerWeb :
+
+1. **Créer ou mettre à jour le fichier de traduction**
+   - Copier `src/ui/app/static/locales/en.json` et le renommer avec le code de la langue cible (par exemple `de.json`).
+   - Traduire **uniquement les valeurs** ; les clés ne doivent pas être modifiées.
+
+2. **Enregistrer la langue**
+   - Ajouter ou mettre à jour l’entrée correspondante dans `src/ui/app/lang_config.py` (code de langue, nom affiché, drapeau, nom anglais).  
+     Ce fichier constitue la source de vérité pour les langues supportées.
+
+3. **Mettre à jour la documentation et la provenance**
+   - `src/ui/app/static/locales/README.md` → ajouter la nouvelle langue dans la table de provenance (créée par / relue par).
+   - `README.md` → mettre à jour la documentation générale du projet pour refléter la nouvelle langue supportée.
+   - `docs/web-ui.md` → mettre à jour la documentation de l’interface Web (cette section Traductions).
+   - `docs/*/web-ui.md` → mettre à jour les versions traduites de la documentation de l’interface Web avec la même section Traductions.
+
+4. **Ouvrir une pull request**
+   - Indiquer clairement si la traduction a été réalisée manuellement ou à l’aide d’un outil d’IA.
+   - Pour les changements non triviaux (nouvelle langue ou mises à jour importantes), il est recommandé d’ouvrir au préalable une issue afin d’en discuter.
+
+En contribuant aux traductions, vous aidez à rendre BunkerWeb accessible à un public international plus large.

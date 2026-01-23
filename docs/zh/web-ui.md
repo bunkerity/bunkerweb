@@ -179,56 +179,56 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 
 ### 运行时与时区
 
-| 设置 | 描述 | 可接受值 | 默认值 |
-| --- | --- | --- | --- |
+| 设置 | 描述                    | 可接受值                             | 默认值               |
+| ---- | ----------------------- | ------------------------------------ | -------------------- |
 | `TZ` | UI 日志和计划任务的时区 | TZ 名称（如 `UTC`、`Asia/Shanghai`） | 未设（容器通常 UTC） |
 
 ### 监听与 TLS
 
-| 设置 | 描述 | 可接受值 | 默认值 |
-| --- | --- | --- | --- |
-| `UI_LISTEN_ADDR` | UI 监听地址 | IP 或主机名 | `0.0.0.0`（Docker） / `127.0.0.1`（包） |
-| `UI_LISTEN_PORT` | UI 监听端口 | 整数 | `7000` |
-| `LISTEN_ADDR`, `LISTEN_PORT` | UI 变量缺失时的备用 | IP/主机名，整数 | `0.0.0.0`, `7000` |
-| `UI_SSL_ENABLED` | 在 UI 容器中启用 TLS | `yes` 或 `no` | `no` |
-| `UI_SSL_CERTFILE`, `UI_SSL_KEYFILE` | 启用 TLS 时的证书/密钥路径 | 文件路径 | 未设 |
-| `UI_SSL_CA_CERTS` | 可选 CA/链 | 文件路径 | 未设 |
-| `UI_FORWARDED_ALLOW_IPS` | 信任的代理 IP/CIDR | 空格/逗号分隔 IP/CIDR | `*` |
+| 设置                                | 描述                       | 可接受值              | 默认值                                  |
+| ----------------------------------- | -------------------------- | --------------------- | --------------------------------------- |
+| `UI_LISTEN_ADDR`                    | UI 监听地址                | IP 或主机名           | `0.0.0.0`（Docker） / `127.0.0.1`（包） |
+| `UI_LISTEN_PORT`                    | UI 监听端口                | 整数                  | `7000`                                  |
+| `LISTEN_ADDR`, `LISTEN_PORT`        | UI 变量缺失时的备用        | IP/主机名，整数       | `0.0.0.0`, `7000`                       |
+| `UI_SSL_ENABLED`                    | 在 UI 容器中启用 TLS       | `yes` 或 `no`         | `no`                                    |
+| `UI_SSL_CERTFILE`, `UI_SSL_KEYFILE` | 启用 TLS 时的证书/密钥路径 | 文件路径              | 未设                                    |
+| `UI_SSL_CA_CERTS`                   | 可选 CA/链                 | 文件路径              | 未设                                    |
+| `UI_FORWARDED_ALLOW_IPS`            | 信任的代理 IP/CIDR         | 空格/逗号分隔 IP/CIDR | `*`                                     |
 
 ### 认证、会话与 Cookie
 
-| 设置 | 描述 | 可接受值 | 默认值 |
-| --- | --- | --- | --- |
-| `ADMIN_USERNAME`, `ADMIN_PASSWORD` | 初始化管理员账户（执行密码策略） | 字符串 | 未设 |
-| `OVERRIDE_ADMIN_CREDS` | 强制用环境变量更新管理员凭据 | `yes` 或 `no` | `no` |
-| `FLASK_SECRET` | 会话签名密钥（存于 `/var/lib/bunkerweb/.flask_secret`） | 十六进制/Base64/不透明字符串 | 自动生成 |
-| `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`) | TOTP 秘钥加密键（空格或 JSON） | 字符串 / JSON | 缺失时自动生成 |
-| `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Biscuit 密钥（hex），用于 UI token | Hex 字符串 | 自动生成并存储 |
-| `SESSION_LIFETIME_HOURS` | 会话时长 | 数值（小时） | `12` |
-| `ALWAYS_REMEMBER` | 总是启用 “remember me” | `yes` 或 `no` | `no` |
-| `CHECK_PRIVATE_IP` | 绑定会话到 IP（`no` 时放宽私网变更） | `yes` 或 `no` | `yes` |
-| `PROXY_NUMBERS` | 信任的 `X-Forwarded-*` 代理层数 | 整数 | `1` |
+| 设置                                        | 描述                                                    | 可接受值                     | 默认值         |
+| ------------------------------------------- | ------------------------------------------------------- | ---------------------------- | -------------- |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | 初始化管理员账户（执行密码策略）                        | 字符串                       | 未设           |
+| `OVERRIDE_ADMIN_CREDS`                      | 强制用环境变量更新管理员凭据                            | `yes` 或 `no`                | `no`           |
+| `FLASK_SECRET`                              | 会话签名密钥（存于 `/var/lib/bunkerweb/.flask_secret`） | 十六进制/Base64/不透明字符串 | 自动生成       |
+| `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | TOTP 秘钥加密键（空格或 JSON）                          | 字符串 / JSON                | 缺失时自动生成 |
+| `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Biscuit 密钥（hex），用于 UI token                      | Hex 字符串                   | 自动生成并存储 |
+| `SESSION_LIFETIME_HOURS`                    | 会话时长                                                | 数值（小时）                 | `12`           |
+| `ALWAYS_REMEMBER`                           | 总是启用 “remember me”                                  | `yes` 或 `no`                | `no`           |
+| `CHECK_PRIVATE_IP`                          | 绑定会话到 IP（`no` 时放宽私网变更）                    | `yes` 或 `no`                | `yes`          |
+| `PROXY_NUMBERS`                             | 信任的 `X-Forwarded-*` 代理层数                         | 整数                         | `1`            |
 
 ### 日志
 
-| 设置 | 描述 | 可接受值 | 默认值 |
-| --- | --- | --- | --- |
-| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | 日志级别 / 覆盖 | `debug`, `info`, `warning`, `error`, `critical` | `info` |
-| `LOG_TYPES` | 目标 | 空格分隔 `stderr`/`file`/`syslog` | `stderr` |
-| `LOG_FILE_PATH` | 文件日志路径（`file` 或 `CAPTURE_OUTPUT=yes` 时） | 文件路径 | 启用文件/捕获时为 `/var/log/bunkerweb/ui.log` |
-| `CAPTURE_OUTPUT` | 将 Gunicorn stdout/stderr 发给日志处理 | `yes` 或 `no` | `no` |
-| `LOG_SYSLOG_ADDRESS` | Syslog 目标（`udp://host:514`、`tcp://host:514` 或套接字） | 主机:端口 / URL / 套接字路径 | 未设 |
-| `LOG_SYSLOG_TAG` | Syslog 标签 | 字符串 | `bw-ui` |
+| 设置                            | 描述                                                       | 可接受值                                        | 默认值                                        |
+| ------------------------------- | ---------------------------------------------------------- | ----------------------------------------------- | --------------------------------------------- |
+| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | 日志级别 / 覆盖                                            | `debug`, `info`, `warning`, `error`, `critical` | `info`                                        |
+| `LOG_TYPES`                     | 目标                                                       | 空格分隔 `stderr`/`file`/`syslog`               | `stderr`                                      |
+| `LOG_FILE_PATH`                 | 文件日志路径（`file` 或 `CAPTURE_OUTPUT=yes` 时）          | 文件路径                                        | 启用文件/捕获时为 `/var/log/bunkerweb/ui.log` |
+| `CAPTURE_OUTPUT`                | 将 Gunicorn stdout/stderr 发给日志处理                     | `yes` 或 `no`                                   | `no`                                          |
+| `LOG_SYSLOG_ADDRESS`            | Syslog 目标（`udp://host:514`、`tcp://host:514` 或套接字） | 主机:端口 / URL / 套接字路径                    | 未设                                          |
+| `LOG_SYSLOG_TAG`                | Syslog 标签                                                | 字符串                                          | `bw-ui`                                       |
 
 ### 其他运行时
 
-| 设置 | 描述 | 可接受值 | 默认值 |
-| --- | --- | --- | --- |
-| `MAX_WORKERS`, `MAX_THREADS` | Gunicorn worker/线程数 | 整数 | `cpu_count()-1`（至少 1），`workers*2` |
-| `ENABLE_HEALTHCHECK` | 暴露 `GET /healthcheck` | `yes` 或 `no` | `no` |
-| `FORWARDED_ALLOW_IPS` | 代理允许列表的弃用别名 | IP/CIDR | `*` |
-| `DISABLE_CONFIGURATION_TESTING` | 应用配置时跳过测试 reload | `yes` 或 `no` | `no` |
-| `IGNORE_REGEX_CHECK` | 跳过设置的正则校验 | `yes` 或 `no` | `no` |
+| 设置                            | 描述                      | 可接受值      | 默认值                                 |
+| ------------------------------- | ------------------------- | ------------- | -------------------------------------- |
+| `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn worker/线程数    | 整数          | `cpu_count()-1`（至少 1），`workers*2` |
+| `ENABLE_HEALTHCHECK`            | 暴露 `GET /healthcheck`   | `yes` 或 `no` | `no`                                   |
+| `FORWARDED_ALLOW_IPS`           | 代理允许列表的弃用别名    | IP/CIDR       | `*`                                    |
+| `DISABLE_CONFIGURATION_TESTING` | 应用配置时跳过测试 reload | `yes` 或 `no` | `no`                                   |
+| `IGNORE_REGEX_CHECK`            | 跳过设置的正则校验        | `yes` 或 `no` | `no`                                   |
 
 ## 日志访问
 
@@ -272,3 +272,55 @@ log { source(s_net); destination(d_dyna_file); };
   ![PRO upgrade](assets/img/ui-pro.png){ align=center, width="700" }
   <figcaption>PRO 许可证信息</figcaption>
 </figure>
+
+## 翻译（i18n）
+
+Web 界面支持多种语言，这得益于社区的贡献。翻译内容以按语言划分的 JSON 文件形式存储（例如 `en.json`、`fr.json` 等）。每种语言都会明确标注其来源（人工翻译或由 AI 生成）以及审核状态。
+
+### 可用语言与贡献者
+
+| 语言         | Locale | 创建者                         | 审核者                    |
+| ------------ | ------ | ------------------------------ | ------------------------- |
+| 阿拉伯语     | `ar`   | AI（Google:Gemini-2.5-pro）    | AI（Google:Gemini-3-pro） |
+| 孟加拉语     | `bn`   | AI（Google:Gemini-2.5-pro）    | AI（Google:Gemini-3-pro） |
+| 布列塔尼语   | `br`   | AI（Google:Gemini-2.5-pro）    | AI（Google:Gemini-3-pro） |
+| 德语         | `de`   | AI（Google:Gemini-2.5-pro）    | AI（Google:Gemini-3-pro） |
+| 英语         | `en`   | 人工（@TheophileDiot）         | 人工（@TheophileDiot）    |
+| 西班牙语     | `es`   | AI（Google:Gemini-2.5-pro）    | AI（Google:Gemini-3-pro） |
+| 法语         | `fr`   | 人工（@TheophileDiot）         | 人工（@TheophileDiot）    |
+| 印地语       | `hi`   | AI（Google:Gemini-2.5-pro）    | AI（Google:Gemini-3-pro） |
+| 意大利语     | `it`   | AI（Google:Gemini-2.5-pro）    | AI（Google:Gemini-3-pro） |
+| 韩语         | `ko`   | 人工（@rayshoo）               | 人工（@rayshoo）          |
+| 波兰语       | `pl`   | 人工（@tomkolp，经由 Weblate） | 人工（@tomkolp）          |
+| 葡萄牙语     | `pt`   | AI（Google:Gemini-2.5-pro）    | AI（Google:Gemini-3-pro） |
+| 俄语         | `ru`   | AI（Google:Gemini-2.5-pro）    | AI（Google:Gemini-3-pro） |
+| 土耳其语     | `tr`   | 人工（@wiseweb-works）         | 人工（@wiseweb-works）    |
+| 中文（繁体） | `tw`   | AI（Google:Gemini-2.5-pro）    | AI（Google:Gemini-3-pro） |
+| 乌尔都语     | `ur`   | AI（Google:Gemini-2.5-pro）    | AI（Google:Gemini-3-pro） |
+| 中文（简体） | `zh`   | AI（Google:Gemini-2.5-pro）    | AI（Google:Gemini-3-pro） |
+
+> 💡 部分翻译可能尚不完整。强烈建议对关键界面元素进行人工校对。
+
+### 如何参与贡献
+
+翻译贡献遵循 BunkerWeb 的标准贡献流程：
+
+1. **创建或更新翻译文件**
+   - 复制 `src/ui/app/static/locales/en.json`，并将其重命名为对应的语言代码（例如 `de.json`）。
+   - **仅翻译值**，不要修改任何键名。
+
+2. **注册语言**
+   - 在 `src/ui/app/lang_config.py` 中添加或更新语言条目（语言代码、显示名称、国旗、英文名称）。  
+     该文件是支持语言的唯一权威来源。
+
+3. **更新文档与来源说明**
+   - `src/ui/app/static/locales/README.md` → 在来源表中添加新语言（创建者 / 审核者）。
+   - `README.md` → 更新项目的总体文档，以反映新增的支持语言。
+   - `docs/web-ui.md` → 更新 Web 界面文档（本翻译章节）。
+   - `docs/*/web-ui.md` → 在对应语言的 Web 界面文档中同步更新相同的翻译章节。
+
+4. **提交 Pull Request**
+   - 明确说明翻译是人工完成还是使用了 AI 工具。
+   - 对于较大的改动（新增语言或大规模更新），建议先创建一个 issue 进行讨论。
+
+通过参与翻译工作，您将帮助 BunkerWeb 触达更广泛的国际用户群体。

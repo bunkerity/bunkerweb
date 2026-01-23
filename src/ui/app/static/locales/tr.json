@@ -76,9 +76,9 @@
     "clear": "TEMİZLE",
     "close": "Kapat",
     "columns": "Sütunlar",
-    "convert_services": "Servisleri Dönüştür",
     "convert_configs": "Yapılandırmaları dönüştür",
     "convert_configs_to": "{{state}} durumuna dönüştür",
+    "convert_services": "Servisleri Dönüştür",
     "copy": "Kopyala",
     "copy_codes": "Kodları Kopyala",
     "copy_raw": "Ham Veriyi Kopyala",
@@ -101,10 +101,12 @@
     "fetch_global": "Genel ayarları getir",
     "filters_suffix": " Filtreler",
     "follow": "Takip Et",
+    "force_update": "Force update",
     "github_stars": "Yıldızlar",
     "go_back": "Geri Dön",
     "hide": "Gizle",
     "history": "Geçmiş",
+    "import_services": "Hizmetleri içe aktar",
     "login": "Giriş Yap",
     "multiple_add": "EKLE",
     "multiple_hide": "GİZLE",
@@ -145,8 +147,7 @@
     "upload_photo": "Yeni Fotoğraf Yükle",
     "view_details": "Detayları Görüntüle",
     "view_raw_data": "Ham Veriyi Görüntüle",
-    "wipe_other_sessions": "Diğer Oturumları Sonlandır",
-    "force_update": "Force update"
+    "wipe_other_sessions": "Diğer Oturumları Sonlandır"
   },
   "country": {
     "AD": "Andorra",
@@ -747,11 +748,11 @@
       "add_plugin_dropzone": "Eklenti arşivinizi buraya sürükleyip bırakın veya dosya seçmek için tıklayın.",
       "confirm_cache_deletion_alert": "Seçili önbellek dosyasını silmek istediğinizden emin misiniz?",
       "confirm_cache_deletion_alert_plural": "Seçili önbellek dosyalarını silmek istediğinizden emin misiniz?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "Seçili özel yapılandırmaları {{state}} olarak dönüştürmek istediğinizden emin misiniz?",
       "confirm_configs_deletion_alert": "Seçili özel yapılandırmayı silmek istediğinizden emin misiniz?",
       "confirm_configs_deletion_alert_plural": "Seçili özel yapılandırmaları silmek istediğinizden emin misiniz?",
       "confirm_conversion_confirmation": "Seçili servisleri dönüştürmek istediğinizden emin misiniz?",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
-      "confirm_configs_conversion_to": "Seçili özel yapılandırmaları {{state}} olarak dönüştürmek istediğinizden emin misiniz?",
       "confirm_next_step": "Bir sonraki adıma geçmek istediğinizden emin misiniz?",
       "confirm_plugin_deletion": "Seçili eklentiyi silmek istediğinizden emin misiniz?",
       "confirm_plugin_deletion_plural": "Seçili eklentileri silmek istediğinizden emin misiniz?",
@@ -759,6 +760,15 @@
       "confirmation_instance_deletion": "Seçili örneği silmek istediğinizden emin misiniz?",
       "delete_confirmation_alert": "Seçili örneği silmek istediğinizden emin misiniz?",
       "delete_confirmation_alert_plural": "Seçili örnekleri silmek istediğinizden emin misiniz?",
+      "delete_step_confirmation": "Bu adımı silmek istediğinizden emin misiniz?",
+      "delete_step_content_label": "İçerik",
+      "delete_step_name_label": "Adım",
+      "fetch_global_settings_bold": "Bu, genel ayarları alıp mevcut şablona uygulayacaktır.",
+      "fetch_global_settings_point_1": "Yalnızca bu şablonda bulunan ayarlar güncellenir.",
+      "fetch_global_settings_point_2": "Varsayılanlarla aynı olan değerler yok sayılır.",
+      "fetch_global_settings_point_3": "SERVER_NAME asla üzerine yazılmaz.",
+      "import_services_dropzone": "Hizmet dışa aktarma dosyanızı buraya sürükleyip bırakın veya bir dosya seçmek için tıklayın.",
+      "import_services_warning": "Hizmetlerin içe aktarılması, dışa aktarma dosyasından yeni arayüz hizmetleri oluşturacaktır. Mevcut hizmetler atlanır.",
       "instance_creation_alert": "Port veya sunucu adı belirtmenize gerek yoktur; örnek yapılandırması için `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` ve `API_SERVER_NAME` değerleri kullanılacaktır.",
       "next_step_in_case_of_issue": "Sorun yaşarsanız, güvensiz sertifikayı manuel olarak kabul edebilirsiniz:",
       "recovery_codes_save_alert": "Lütfen bu kurtarma kodlarını güvenli bir yerde (şifre yöneticisi veya kasa gibi) saklayın. Kimlik doğrulama cihazınızı kaybederseniz hesabınıza erişmek için kullanabilirsiniz.",
@@ -767,14 +777,7 @@
       "services_deletion_confirmation": "Seçili servisleri silmek istediğinizden emin misiniz?",
       "unban_confirmation_alert": "Seçili IP adresinin yasağını kaldırmak istediğinizden emin misiniz?",
       "unban_confirmation_alert_plural": "Seçili IP adreslerinin yasağını kaldırmak istediğinizden emin misiniz?",
-      "update_duration_alert": "Seçili yasaklamalar için yeni bir süre seçin:",
-      "fetch_global_settings_bold": "Bu, genel ayarları alıp mevcut şablona uygulayacaktır.",
-      "fetch_global_settings_point_1": "Yalnızca bu şablonda bulunan ayarlar güncellenir.",
-      "fetch_global_settings_point_2": "Varsayılanlarla aynı olan değerler yok sayılır.",
-      "fetch_global_settings_point_3": "SERVER_NAME asla üzerine yazılmaz.",
-      "delete_step_confirmation": "Bu adımı silmek istediğinizden emin misiniz?",
-      "delete_step_name_label": "Adım",
-      "delete_step_content_label": "İçerik"
+      "update_duration_alert": "Seçili yasaklamalar için yeni bir süre seçin:"
     },
     "button": {
       "reset_template_confirm": "Şablon Yapılandırmasını Sıfırla",
@@ -794,17 +797,18 @@
       "create_new_instance": "Yeni Örnek Oluştur",
       "create_template": "Şablon oluştur",
       "delete_instance": "Örnekleri Sil",
+      "delete_step": "Adımı Sil",
       "delete_template": "Şablonları sil",
+      "fetch_global_settings": "Genel ayarlar uygulansın mı?",
       "from_plugin": "eklenti üzerinden",
       "full_url": "Tam URL",
+      "import_services": "Hizmetleri içe aktar",
       "job_history": "Son 10 İş Çalıştırması",
       "job_history_count": "İşin Son {{count}} Çalıştırması",
       "recovery_codes": "Kurtarma Kodları",
       "reset_template_config": "Şablon Yapılandırması Sıfırlansın mı?",
-      "fetch_global_settings": "Genel ayarlar uygulansın mı?",
       "server_name_not_unique": "Sunucu Adı Benzersiz Değil",
-      "update_duration": "Yasaklama Süresini Güncelle",
-      "delete_step": "Adımı Sil"
+      "update_duration": "Yasaklama Süresini Güncelle"
     }
   },
   "mode": {
@@ -977,6 +981,10 @@
     "global_all_services": "Küresel (tüm servisler)",
     "permanent": "Kalıcı",
     "service_specific": "Servise özel"
+  },
+  "security_mode": {
+    "block": "Engelle",
+    "detect": "Tespit Et"
   },
   "searchpane": {
     "active": "Aktif",
@@ -1606,6 +1614,7 @@
         "last_update": "Servisin en son güncellendiği tarih ve saati",
         "method": "Servisin oluşturulma yöntemi (örn. ui, dosya)",
         "name": "Servisin adı",
+        "security_mode": "Hizmetin güvenlik modu (Engelle veya Tespit Et)",
         "select_all": "Tüm Servisleri Seç",
         "template": "Hizmet tarafından kullanılan şablon",
         "type": "Servis Türü (Çevrimiçi/Taslak)"
