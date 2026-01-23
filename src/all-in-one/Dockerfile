@@ -163,6 +163,7 @@ RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc+
 
 # Fix CVEs
 RUN apk add --no-cache "busybox>=1.37.0-r14" "busybox-binsh>=1.37.0-r14" "ssl_client>=1.37.0-r14" # CVE-2024-58251 CVE-2025-46394
+RUN apk add --no-cache "libpng>=1.6.54-r0" # CVE-2026-22695 CVE-2026-22801
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 

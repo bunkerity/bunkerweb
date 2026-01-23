@@ -79,6 +79,7 @@ RUN apk add --no-cache openssl pcre2 bash python3 yajl geoip libxml2 libgd curl 
 
 # Fix CVEs
 RUN apk add --no-cache "busybox>=1.37.0-r14" "busybox-binsh>=1.37.0-r14" "ssl_client>=1.37.0-r14" # CVE-2024-58251 CVE-2025-46394
+RUN apk add --no-cache "libpng>=1.6.54-r0" # CVE-2026-22695 CVE-2026-22801
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
