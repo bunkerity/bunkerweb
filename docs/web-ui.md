@@ -47,7 +47,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.8-rc1
+        image: bunkerity/bunkerweb:1.6.8-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -62,7 +62,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -86,7 +86,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.8-rc1
+        image: bunkerity/bunkerweb-ui:1.6.8-rc3
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -359,7 +359,7 @@ Translation contributions follow the standard BunkerWeb contribution workflow:
    - Translate **values only**; keys must remain unchanged.
 
 2. **Register the language**
-   - Add or update the language entry in `src/ui/app/lang_config.py` (locale code, display name, flag, English name).  
+   - Add or update the language entry in `src/ui/app/lang_config.py` (locale code, display name, flag, English name).
      This file is the single source of truth for supported languages.
 
 3. **Update documentation and provenance**

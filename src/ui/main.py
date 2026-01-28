@@ -779,8 +779,10 @@ def handle_csrf_error(_):
     LOGGER.debug(format_exc())
     LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {current_user.get_id()}")
     if not current_user:
-        return redirect(url_for("setup.setup_page")), 403
-    return logout_page(), 403
+        return redirect(url_for("setup.setup_page"), 303)
+    response = logout_page()
+    response.status_code = 303
+    return response
 
 
 def update_latest_stable_release():
@@ -1161,8 +1163,8 @@ def index():
     if DB.get_ui_user():
         if current_user.is_authenticated:  # type: ignore
             return redirect(url_for("home.home_page"))
-        return redirect(url_for("login.login_page"), 301)
-    return redirect(url_for("setup.setup_page"), 301)
+        return redirect(url_for("login.login_page"), 303)
+    return redirect(url_for("setup.setup_page"), 303)
 
 
 @app.route("/loading", methods=["GET"])

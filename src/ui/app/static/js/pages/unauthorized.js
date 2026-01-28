@@ -7,11 +7,13 @@ $(document).ready(function () {
     if (typeof endpoint !== "string") return false;
     // Only allow relative paths starting with /
     // Disallow `:` or `//` to prevent scheme/protocol and protocol-relative URLs
-    return endpoint.startsWith("/") &&
-           !endpoint.includes("://") &&
-           !endpoint.trim().toLowerCase().startsWith("javascript:") &&
-           !endpoint.includes("<") &&
-           !endpoint.includes(">");
+    return (
+      endpoint.startsWith("/") &&
+      !endpoint.includes("://") &&
+      !endpoint.trim().toLowerCase().startsWith("javascript:") &&
+      !endpoint.includes("<") &&
+      !endpoint.includes(">")
+    );
   }
 
   // Handle go back button click

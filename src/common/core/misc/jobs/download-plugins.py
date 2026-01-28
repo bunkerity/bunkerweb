@@ -226,7 +226,7 @@ try:
             continue
 
         with BytesIO() as plugin_content:
-            with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
+            with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=3) as tar:
                 add_dir_to_tar_safely(tar, plugin_path, arc_root=plugin_path.name)
             plugin_content.seek(0, 0)
 

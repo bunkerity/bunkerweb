@@ -55,6 +55,8 @@ markdown_extensions:
   - admonition
   - tables
   - pymdownx.details
+  - toc:
+      toc_depth: 3
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid

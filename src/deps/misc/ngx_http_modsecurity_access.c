@@ -233,4 +233,3 @@ ngx_http_modsecurity_access_handler(ngx_http_request_t *r)
 #endif
     return NGX_DECLINED;
 }
-

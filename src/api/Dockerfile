@@ -1,4 +1,4 @@
-FROM python:3.13-alpine@sha256:e7e041128ffc3e3600509f508e44d34ab08ff432bdb62ec508d01dfc5ca459f7 AS builder
+FROM python:3.13-alpine@sha256:60d8a90d427695c386a97c8eaa476bdc2abb8bd8d61dc72b5f43a59912fbb5c1 AS builder
 
 ARG TARGETPLATFORM
 
@@ -29,7 +29,7 @@ COPY src/common/helpers helpers
 COPY src/VERSION VERSION
 COPY src/api api
 
-FROM python:3.13-alpine@sha256:e7e041128ffc3e3600509f508e44d34ab08ff432bdb62ec508d01dfc5ca459f7
+FROM python:3.13-alpine@sha256:60d8a90d427695c386a97c8eaa476bdc2abb8bd8d61dc72b5f43a59912fbb5c1
 
 RUN umask 027
 
@@ -63,7 +63,7 @@ RUN echo "Docker" > INTEGRATION && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.8~rc1"
+LABEL version="1.6.8~rc3"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="api"
 

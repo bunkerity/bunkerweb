@@ -3,10 +3,10 @@ biscuit-python==0.4.0
 cryptography==46.0.3
 email-validator==2.3.0
 fastapi==0.128.0
-gunicorn==24.0.0
+gunicorn==24.1.1
 pydantic==2.12.5
 pydantic_settings==2.12.0
-python-multipart==0.0.21
+python-multipart==0.0.22
 PyYAML==6.0.3
 regex==2026.1.15
 slowapi==0.1.9

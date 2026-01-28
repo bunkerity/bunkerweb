@@ -123,9 +123,9 @@ def create_app() -> FastAPI:
 
 
 description = (
-    """# BunkerWeb Internal API
+    """# BunkerWeb API
 
-This API is the internal control plane for BunkerWeb. It manages configuration, instances, plugins, bans, and scheduler artefacts and should remain on a trusted network.
+This API is the control plane for BunkerWeb. It manages configuration, instances, plugins, bans, and scheduler artefacts and should remain on a trusted network.
 
 ## Feature overview
 

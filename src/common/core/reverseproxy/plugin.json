@@ -54,6 +54,16 @@
       "type": "check",
       "multiple": "reverse-proxy"
     },
+    "REVERSE_PROXY_REQUEST_BUFFERING": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Enable or disable buffering of requests to the proxied resource.",
+      "id": "reverse-proxy-request-buffering",
+      "label": "Reverse proxy request buffering",
+      "regex": "^(yes|no)$",
+      "type": "check",
+      "multiple": "reverse-proxy"
+    },
     "REVERSE_PROXY_KEEPALIVE": {
       "context": "multisite",
       "default": "no",
