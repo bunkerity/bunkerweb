@@ -1428,21 +1428,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Schritt 2 – BunkerWeb-Einstellungen konfigurieren">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#parameter-der-anwendungssicherheitskomponente" class="md-nav__link">
-    <span class="md-ellipsis">
-      Parameter der Anwendungssicherheitskomponente
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
         
           <li class="md-nav__item">
@@ -2106,30 +2091,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Benutzerdefinierte Konfigurationen">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#hinzufugen-von-crs-ausschlussen-mit-modsec-crs" class="md-nav__link">
-    <span class="md-ellipsis">
-      Hinzufügen von CRS-Ausschlüssen mit modsec-crs
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#aktualisieren-von-crs-regeln-mit-modsec" class="md-nav__link">
-    <span class="md-ellipsis">
-      Aktualisieren von CRS-Regeln mit modsec
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
         
           <li class="md-nav__item">
@@ -2444,39 +2405,6 @@
       Redis Best Practices
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Redis Best Practices">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#speicherverwaltung" class="md-nav__link">
-    <span class="md-ellipsis">
-      Speicherverwaltung
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#datenpersistenz" class="md-nav__link">
-    <span class="md-ellipsis">
-      Datenpersistenz
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#leistungsoptimierung" class="md-nav__link">
-    <span class="md-ellipsis">
-      Leistungsoptimierung
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
         
@@ -3604,7 +3532,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <div class="tabbed-block">
 <p>Konfiguration für eine Entwicklungsumgebung mit zusätzlicher Protokollierung:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">SECURITY_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;detect&quot;</span>
-<span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;testing.example.com&quot;</span>
+<span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dev.example.com&quot;</span>
 <span class="nt">LOG_LEVEL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;debug&quot;</span>
 </code></pre></div>
 </div>
@@ -4810,11 +4738,6 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><code>ip:laurent-minne-data-shield-aggressive</code></td>
-<td style="text-align: left;">Data-Shield IPv4 Blocklist. DST = Europa</td>
-<td style="text-align: left;"><code>https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt</code></td>
-</tr>
-<tr>
 <td style="text-align: left;"><code>ip:danmeuk-tor-exit</code></td>
 <td style="text-align: left;">IP-Adressen von Tor-Exit-Nodes (dan.me.uk)</td>
 <td style="text-align: left;"><code>https://www.dan.me.uk/torlist/?exit</code></td>
@@ -5228,7 +5151,7 @@ TrustedMonitor/\d+\.\d+
 <li>BunkerWeb prüft, ob der anfragende Ursprung basierend auf Ihrer Konfiguration zulässig ist.</li>
 <li>Wenn dies der Fall ist, antwortet BunkerWeb mit den entsprechenden CORS-Headern, die definieren, was die anfragende Website tun darf.</li>
 <li>Bei nicht zulässigen Ursprüngen kann die Anfrage entweder komplett verweigert oder ohne CORS-Header ausgeliefert werden.</li>
-<li>Zusätzliche Cross-Origin-Richtlinien wie <a href="https://testingeloper.mozilla.org/de/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy">COEP</a>, <a href="https://testingeloper.mozilla.org/de/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy">COOP</a> und <a href="https://testingeloper.mozilla.org/de/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy">CORP</a> können konfiguriert werden, um die Sicherheit weiter zu erhöhen.</li>
+<li>Zusätzliche Cross-Origin-Richtlinien wie <a href="https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy">COEP</a>, <a href="https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy">COOP</a> und <a href="https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy">CORP</a> können konfiguriert werden, um die Sicherheit weiter zu erhöhen.</li>
 </ol>
 <h3 id="wie-man-es-benutzt_4">Wie man es benutzt</h3>
 <p>Führen Sie die folgenden Schritte aus, um die CORS-Funktion zu konfigurieren und zu verwenden:</p>
@@ -5768,7 +5691,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.8-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -5785,7 +5708,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># Die IP-Adresse des syslog-Dienstes</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen</span>
@@ -7102,7 +7025,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 <h2 id="headers">Headers</h2>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
-<p>HTTP-Header spielen eine entscheidende Rolle bei der Sicherheit. Das Headers-Plugin bietet eine robuste Verwaltung von Standard- und benutzerdefinierten HTTP-Headern und verbessert so Sicherheit und Funktionalität. Es wendet dynamisch Sicherheitsmaßnahmen an, wie <a href="https://testingeloper.mozilla.org/de/docs/Web/HTTP/Headers/Strict-Transport-Security">HSTS</a>, <a href="https://testingeloper.mozilla.org/de/docs/Web/HTTP/CSP">CSP</a> (einschließlich eines reinen Berichtsmodus) und die Injektion benutzerdefinierter Header, während es gleichzeitig Informationslecks verhindert.</p>
+<p>HTTP-Header spielen eine entscheidende Rolle bei der Sicherheit. Das Headers-Plugin bietet eine robuste Verwaltung von Standard- und benutzerdefinierten HTTP-Headern und verbessert so Sicherheit und Funktionalität. Es wendet dynamisch Sicherheitsmaßnahmen an, wie <a href="https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Strict-Transport-Security">HSTS</a>, <a href="https://developer.mozilla.org/de/docs/Web/HTTP/CSP">CSP</a> (einschließlich eines reinen Berichtsmodus) und die Injektion benutzerdefinierter Header, während es gleichzeitig Informationslecks verhindert.</p>
 <p><strong>Wie es funktioniert</strong></p>
 <ol>
 <li>Wenn ein Client Inhalte von Ihrer Website anfordert, verarbeitet BunkerWeb die Antwort-Header.</li>
@@ -7120,7 +7043,7 @@ TrustedMonitor/\d+\.\d+
 <li><strong>Unerwünschte Header entfernen:</strong> Verwenden Sie <code>REMOVE_HEADERS</code>, um sicherzustellen, dass Header, die Serverdetails preisgeben könnten, entfernt werden.</li>
 <li><strong>Cookie-Sicherheit einstellen:</strong> Aktivieren Sie eine robuste Cookie-Sicherheit, indem Sie <code>COOKIE_FLAGS</code> konfigurieren und <code>COOKIE_AUTO_SECURE_FLAG</code> auf <code>yes</code> setzen, damit das Secure-Flag bei HTTPS-Verbindungen automatisch hinzugefügt wird.</li>
 <li><strong>Upstream-Header beibehalten:</strong> Geben Sie mit <code>KEEP_UPSTREAM_HEADERS</code> an, welche Upstream-Header beibehalten werden sollen.</li>
-<li><strong>Bedingte Header-Anwendung nutzen:</strong> Wenn Sie Richtlinien ohne Unterbrechung testen möchten, aktivieren Sie den <a href="https://testingeloper.mozilla.org/de/docs/Web/HTTP/Headers/Content-Security-Policy-Report-Only">CSP Report-Only-Modus</a> über <code>CONTENT_SECURITY_POLICY_REPORT_ONLY</code>.</li>
+<li><strong>Bedingte Header-Anwendung nutzen:</strong> Wenn Sie Richtlinien ohne Unterbrechung testen möchten, aktivieren Sie den <a href="https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Content-Security-Policy-Report-Only">CSP Report-Only-Modus</a> über <code>CONTENT_SECURITY_POLICY_REPORT_ONLY</code>.</li>
 </ol>
 <h3 id="konfigurationsleitfaden">Konfigurationsleitfaden</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="25:3"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><input id="__tabbed_25_3" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">Sicherheits-Header</label><label for="__tabbed_25_2">Cookie-Einstellungen</label><label for="__tabbed_25_3">Benutzerdefinierte Header</label></div>
@@ -8440,7 +8363,7 @@ TrustedMonitor/\d+\.\d+
 <p>In HTTP gibt der <code>Host</code>-Header den Zielserver an, aber er kann fehlen oder unbekannt sein, oft aufgrund von Bots, die nach Schwachstellen suchen.</p>
 <p>Um solche Anfragen zu blockieren:</p>
 <ul>
-<li>Setzen Sie <code>DISABLE_DEFAULT_SERVER</code> auf <code>yes</code>, um solche Anfragen stillschweigend mit dem <a href="https://http.testing/444">NGINX-Statuscode <code>444</code></a> abzulehnen.</li>
+<li>Setzen Sie <code>DISABLE_DEFAULT_SERVER</code> auf <code>yes</code>, um solche Anfragen stillschweigend mit dem <a href="https://http.dev/444">NGINX-Statuscode <code>444</code></a> abzulehnen.</li>
 <li>Für eine strengere Sicherheit aktivieren Sie <code>DISABLE_DEFAULT_SERVER_STRICT_SNI</code>, um SSL/TLS-Verbindungen ohne gültiges SNI abzulehnen.</li>
 </ul>
 <div class="admonition success">
@@ -8486,7 +8409,7 @@ TrustedMonitor/\d+\.\d+
 <div class="tabbed-block">
 <p><strong>Steuerung des HTTP-Status</strong></p>
 <p>Der erste Schritt bei der Behandlung von verweigertem Client-Zugriff ist die Definition der geeigneten Aktion. Dies kann mit der Einstellung <code>DENY_HTTP_STATUS</code> konfiguriert werden. Wenn BunkerWeb eine Anfrage ablehnt, können Sie seine Antwort steuern. Standardmäßig gibt es einen <code>403 Forbidden</code>-Status zurück und zeigt dem Client eine Webseite oder benutzerdefinierten Inhalt an.</p>
-<p>Alternativ schließt das Setzen auf <code>444</code> die Verbindung sofort, ohne eine Antwort zu senden. Dieser <a href="https://http.testing/444">nicht standardmäßige Statuscode</a>, der spezifisch für NGINX ist, ist nützlich, um unerwünschte Anfragen stillschweigend zu verwerfen.</p>
+<p>Alternativ schließt das Setzen auf <code>444</code> die Verbindung sofort, ohne eine Antwort zu senden. Dieser <a href="https://http.dev/444">nicht standardmäßige Statuscode</a>, der spezifisch für NGINX ist, ist nützlich, um unerwünschte Anfragen stillschweigend zu verwerfen.</p>
 <table>
 <thead>
 <tr>
@@ -9346,7 +9269,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td></td>
 <td>multisite</td>
 <td>nein</td>
-<td>Absolute path or HTTP(S) URL to the OpenAPI (swagger) document in JSON format.</td>
+<td>Absolute path or HTTP(S) URL to the OpenAPI (swagger) document in JSON/YAML format.</td>
 </tr>
 <tr>
 <td><code>OPENAPI_BASE_PATH</code></td>
@@ -9375,13 +9298,6 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td>multisite</td>
 <td>nein</td>
 <td>List of URL regexes to bypass OpenAPI validation (space separated).</td>
-</tr>
-<tr>
-<td><code>OPENAPI_CACHE_TTL</code></td>
-<td><code>300</code></td>
-<td>global</td>
-<td>nein</td>
-<td>Seconds to cache the parsed specification in shared cache.</td>
 </tr>
 <tr>
 <td><code>OPENAPI_MAX_SPEC_SIZE</code></td>
@@ -9905,7 +9821,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Das Real IP Plugin stellt sicher, dass BunkerWeb die IP-Adresse des Clients auch hinter Proxys korrekt identifiziert. Dies ist unerlässlich für die Anwendung von Sicherheitsregeln, Ratenbegrenzung and zuverlässige Protokolle; andernfalls würden alle Anfragen von der IP des Proxys zu kommen scheinen.</p>
 <p>So funktioniert's:</p>
 <ol>
-<li>Nach der Aktivierung prüft BunkerWeb die Header (z.B. <a href="https://testingeloper.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For"><code>X-Forwarded-For</code></a>), die die ursprüngliche IP enthalten.</li>
+<li>Nach der Aktivierung prüft BunkerWeb die Header (z.B. <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For"><code>X-Forwarded-For</code></a>), die die ursprüngliche IP enthalten.</li>
 <li>Es wird überprüft, ob die Quell-IP in <code>REAL_IP_FROM</code> (Liste vertrauenswürdiger Proxys) enthalten ist, um nur legitime Proxys zu akzeptieren.</li>
 <li>Die Client-IP wird aus dem Header <code>REAL_IP_HEADER</code> extrahiert and für die Sicherheitsbewertung and Protokollierung verwendet.</li>
 <li>Bei IP-Ketten kann eine rekursive Suche über <code>REAL_IP_RECURSIVE</code> die ursprüngliche IP ermitteln.</li>
@@ -10555,6 +10471,13 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><strong>Antwort-Pufferung:</strong> Aktiviert oder deaktiviert die Pufferung von Antworten von der weitergeleiteten Ressource.</td>
 </tr>
 <tr>
+<td><code>REVERSE_PROXY_REQUEST_BUFFERING</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>ja</td>
+<td><strong>Anfrage-Pufferung:</strong> Aktiviert oder deaktiviert die Pufferung von Anfragen an die weitergeleitete Ressource.</td>
+</tr>
+<tr>
 <td><code>REVERSE_PROXY_KEEPALIVE</code></td>
 <td><code>no</code></td>
 <td>multisite</td>
@@ -10584,6 +10507,10 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>Verwenden Sie <code>REVERSE_PROXY_INTERCEPT_ERRORS</code>, um konsistente Fehlerseiten für alle Ihre Dienste bereitzustellen</li>
 <li>Verwenden Sie bei der Konfiguration mehrerer Backends das nummerierte Suffixformat (z. B. <code>REVERSE_PROXY_HOST_2</code>, <code>REVERSE_PROXY_URL_2</code>)</li>
 </ul>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Verhalten der Anfrage-Pufferung</p>
+<p>Das Deaktivieren von <code>REVERSE_PROXY_REQUEST_BUFFERING</code> hat nur Wirkung, wenn ModSecurity deaktiviert ist, da die Anfrage-Pufferung ansonsten erzwungen wird.</p>
 </div>
 </div>
 <div class="tabbed-block">
@@ -11727,7 +11654,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <div class="highlight"><pre><span></span><code><span class="nt">GENERATE_SELF_SIGNED_SSL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">SELF_SIGNED_SSL_ALGORITHM</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ec-prime256v1&quot;</span>
 <span class="nt">SELF_SIGNED_SSL_EXPIRY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;90&quot;</span>
-<span class="nt">SELF_SIGNED_SSL_SUBJ</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/CN=testing.example.com/&quot;</span>
+<span class="nt">SELF_SIGNED_SSL_SUBJ</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/CN=dev.example.com/&quot;</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">

@@ -1241,7 +1241,7 @@
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>使用已发布镜像与<a href="../quickstart-guide/#__tabbed_1_3">快速入门</a>的布局启动栈，然后在浏览器完成向导。</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.8~rc1-rc1/misc/integrations/docker-compose.yml<span class="w"> </span>up<span class="w"> </span>-d
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/bunkerity/bunkerweb/vtesting-rc1/misc/integrations/docker-compose.yml<span class="w"> </span>up<span class="w"> </span>-d
 </code></pre></div>
 <p>访问 scheduler 主机名（如 <code>https://www.example.com/changeme</code>），运行 <code>/setup</code> 向导以配置 UI、scheduler 与实例。</p>
 </div>
@@ -1254,7 +1254,7 @@
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.8-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -1265,7 +1265,7 @@
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bw-services</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
@@ -1285,7 +1285,7 @@
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bw-db</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.8-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin&quot;</span>
@@ -1777,7 +1777,7 @@ log { source(s_net); destination(d_dyna_file); };
 <p><strong>注册语言</strong></p>
 </li>
 <li>
-<p>在 <code>src/ui/app/lang_config.py</code> 中添加或更新语言条目（语言代码、显示名称、国旗、英文名称）。<br />
+<p>在 <code>src/ui/app/lang_config.py</code> 中添加或更新语言条目（语言代码、显示名称、国旗、英文名称）。
      该文件是支持语言的唯一权威来源。</p>
 </li>
 <li>

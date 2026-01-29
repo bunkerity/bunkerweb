@@ -969,75 +969,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Référence de configuration (power users)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#surface-docs" class="md-nav__link">
-    <span class="md-ellipsis">
-      Surface &amp; docs
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#auth-acl-biscuit" class="md-nav__link">
-    <span class="md-ellipsis">
-      Auth, ACL, Biscuit
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#liste-blanche" class="md-nav__link">
-    <span class="md-ellipsis">
-      Liste blanche
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#limitation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Limitation
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#redisvalkey-pour-les-limites" class="md-nav__link">
-    <span class="md-ellipsis">
-      Redis/Valkey (pour les limites)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#listener-tls" class="md-nav__link">
-    <span class="md-ellipsis">
-      Listener &amp; TLS
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#logging-runtime-defauts-paquet" class="md-nav__link">
-    <span class="md-ellipsis">
-      Logging &amp; runtime (défauts paquet)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
         
       </ul>
@@ -1221,7 +1152,7 @@
 <ul>
 <li>Réseau : gardez le trafic interne ; liez sur loopback ou interface interne et restreignez les IP sources avec <code>API_WHITELIST_IPS</code> (activé par défaut).</li>
 <li>Auth présente : définissez <code>API_USERNAME</code>/<code>API_PASSWORD</code> (admin) et, si besoin, <code>API_ACL_BOOTSTRAP_FILE</code> pour d’autres utilisateurs/ACL ; conservez un <code>API_TOKEN</code> uniquement pour le break-glass.</li>
-<li>Masquage de chemin : en reverse proxy, choisissez un <code>API_ROOT_PATH</code> peu testinginable et reflétez-le côté proxy.</li>
+<li>Masquage de chemin : en reverse proxy, choisissez un <code>API_ROOT_PATH</code> peu devinable et reflétez-le côté proxy.</li>
 <li>Rate limiting : laissez activé sauf si une autre couche impose des limites équivalentes ; <code>/auth</code> est toujours limité.</li>
 <li>TLS : terminez au proxy ou activez <code>API_SSL_ENABLED=yes</code> avec chemins de cert/clé.</li>
 </ul>
@@ -1241,7 +1172,7 @@
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># Nom utilisé par le scheduler pour identifier l’instance</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.8-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -1254,7 +1185,7 @@
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># Assurez-vous de mettre le bon nom d’instance</span>
@@ -1276,7 +1207,7 @@
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-api</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-api:1.6.8-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-api:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">API_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin&quot;</span>
@@ -1341,7 +1272,7 @@
 <span class="w">  </span>-e<span class="w"> </span><span class="nv">SERVICE_API</span><span class="o">=</span>yes<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-e<span class="w"> </span><span class="nv">API_WHITELIST_IPS</span><span class="o">=</span><span class="s2">&quot;127.0.0.0/8&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.8-rc1
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:testing
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -1370,7 +1301,7 @@
 <div class="admonition tip">
 <p class="admonition-title">Démarrage auth</p>
 <ol>
-<li>Définissez <code>API_USERNAME</code> et <code>API_PASSWORD</code> (et <code>OVERRIDE_API_CREDS=yes</code> si vous testingez réamorcer).</li>
+<li>Définissez <code>API_USERNAME</code> et <code>API_PASSWORD</code> (et <code>OVERRIDE_API_CREDS=yes</code> si vous devez réamorcer).</li>
 <li>Appelez <code>POST /auth</code> en Basic ; lisez <code>.token</code> dans la réponse.</li>
 <li>Utilisez <code>Authorization: Bearer &lt;token&gt;</code> pour les appels suivants.</li>
 </ol>

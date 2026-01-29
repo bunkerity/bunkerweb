@@ -1068,39 +1068,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="LUA">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#script-principal" class="md-nav__link">
-    <span class="md-ellipsis">
-      Script principal
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#librerias" class="md-nav__link">
-    <span class="md-ellipsis">
-      Librerías
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#ayudantes" class="md-nav__link">
-    <span class="md-ellipsis">
-      Ayudantes
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
         
           <li class="md-nav__item">
@@ -1118,57 +1085,6 @@
       Página del plugin
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Página del plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#requisitos-previos" class="md-nav__link">
-    <span class="md-ellipsis">
-      Requisitos previos
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#ejemplo-basico" class="md-nav__link">
-    <span class="md-ellipsis">
-      Ejemplo básico
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#actionspy" class="md-nav__link">
-    <span class="md-ellipsis">
-      Actions.py
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#sobrescribir-un-blueprint-existente" class="md-nav__link">
-    <span class="md-ellipsis">
-      Sobrescribir un Blueprint existente
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#convenciones-de-nomenclatura" class="md-nav__link">
-    <span class="md-ellipsis">
-      Convenciones de nomenclatura
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
         
@@ -1347,7 +1263,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="nn">...</span>
@@ -1369,7 +1285,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="nn">...</span>
@@ -1400,7 +1316,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/shared/bw-plugins:/data/plugins</span>
 <span class="nn">...</span>
@@ -1440,7 +1356,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc1</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
 <span class="w">          </span><span class="nt">env</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
@@ -1477,7 +1393,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <h3 id="estructura">Estructura</h3>
 <div class="admonition tip">
 <p class="admonition-title">Plugins existentes</p>
-<p>Si la documentación no es suficiente, puedes echar un vistazo al código fuente existente de los <a href="https://github.com/bunkerity/bunkerweb-plugins">plugins oficiales</a> y los <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc1/src/common/core">plugins del núcleo</a> (ya incluidos en BunkerWeb, pero técnicamente son plugins).</p>
+<p>Si la documentación no es suficiente, puedes echar un vistazo al código fuente existente de los <a href="https://github.com/bunkerity/bunkerweb-plugins">plugins oficiales</a> y los <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/src/common/core">plugins del núcleo</a> (ya incluidos en BunkerWeb, pero técnicamente son plugins).</p>
 </div>
 <p>Así es como se ve la estructura de un plugin:
 <div class="highlight"><pre><span></span><code>plugin /
@@ -1822,7 +1738,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <td style="text-align: center;"><code>access</code></td>
 <td style="text-align: center;"><a href="https://github.com/openresty/lua-nginx-module#access_by_lua">access_by_lua</a></td>
 <td style="text-align: left;">Se llama en cada solicitud recibida por el servidor. El caso de uso típico es hacer las comprobaciones de seguridad aquí y denegar la solicitud si es necesario.</td>
-<td style="text-align: left;"><code>ret</code>, <code>msg</code>,<code>status</code>,<code>redirect</code><ul><li><code>ret</code> (booleano): true si no hay error, de lo contrario false</li><li><code>msg</code> (cadena): mensaje de éxito o error</li><li><code>status</code> (número): interrumpe el proceso actual y testinguelve el <a href="https://github.com/openresty/lua-nginx-module#http-status-constants">estado HTTP</a></li><li><code>redirect</code> (URL): si se establece, redirigirá a la URL dada</li></ul></td>
+<td style="text-align: left;"><code>ret</code>, <code>msg</code>,<code>status</code>,<code>redirect</code><ul><li><code>ret</code> (booleano): true si no hay error, de lo contrario false</li><li><code>msg</code> (cadena): mensaje de éxito o error</li><li><code>status</code> (número): interrumpe el proceso actual y devuelve el <a href="https://github.com/openresty/lua-nginx-module#http-status-constants">estado HTTP</a></li><li><code>redirect</code> (URL): si se establece, redirigirá a la URL dada</li></ul></td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>log</code></td>
@@ -1840,7 +1756,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <td style="text-align: center;"><code>preread</code></td>
 <td style="text-align: center;"><a href="https://github.com/openresty/stream-lua-nginx-module#preread_by_lua_block">preread_by_lua</a></td>
 <td style="text-align: left;">Similar a la función <code>access</code> pero para el modo stream.</td>
-<td style="text-align: left;"><code>ret</code>, <code>msg</code>,<code>status</code><ul><li><code>ret</code> (booleano): true si no hay error, de lo contrario false</li><li><code>msg</code> (cadena): mensaje de éxito o error</li><li><code>status</code> (número): interrumpe el proceso actual y testinguelve el <a href="https://github.com/openresty/lua-nginx-module#http-status-constants">estado</a></li></ul></td>
+<td style="text-align: left;"><code>ret</code>, <code>msg</code>,<code>status</code><ul><li><code>ret</code> (booleano): true si no hay error, de lo contrario false</li><li><code>msg</code> (cadena): mensaje de éxito o error</li><li><code>status</code> (número): interrumpe el proceso actual y devuelve el <a href="https://github.com/openresty/lua-nginx-module#http-status-constants">estado</a></li></ul></td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>log_stream</code></td>
@@ -1912,7 +1828,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Más ejemplos</p>
-<p>Si quieres ver la lista completa de funciones disponibles, puedes echar un vistazo a los archivos presentes en el <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc1/src/bw/lua/bunkerweb">directorio lua</a> del repositorio.</p>
+<p>Si quieres ver la lista completa de funciones disponibles, puedes echar un vistazo a los archivos presentes en el <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/src/bw/lua/bunkerweb">directorio lua</a> del repositorio.</p>
 </div>
 <h3 id="trabajos">Trabajos</h3>
 <p>BunkerWeb utiliza un programador de trabajos interno para tareas periódicas como renovar certificados con certbot, descargar listas negras, descargar archivos MMDB, ... Puedes añadir tareas de tu elección colocándolas dentro de una subcarpeta llamada <strong>jobs</strong> y listándolas en el archivo de metadatos <strong>plugin.json</strong>. No olvides añadir los permisos de ejecución para todos para evitar cualquier problema cuando un usuario clone e instale tu plugin.</p>
@@ -2034,7 +1950,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <span class="o">===</span> <span class="s2">&quot;before_request&quot;</span>
     <span class="n">Estos</span> <span class="n">ganchos</span> <span class="n">se</span> <span class="n">ejecutan</span> <span class="o">**</span><span class="n">antes</span><span class="o">**</span> <span class="n">de</span> <span class="n">procesar</span> <span class="n">una</span> <span class="n">solicitud</span> <span class="n">entrante</span><span class="o">.</span> <span class="n">Se</span> <span class="n">utilizan</span> <span class="n">normalmente</span> <span class="n">para</span> <span class="n">tareas</span> <span class="n">de</span> <span class="n">preprocesamiento</span> <span class="n">como</span> <span class="n">autenticación</span><span class="p">,</span> <span class="n">validación</span> <span class="n">o</span> <span class="n">registro</span><span class="o">.</span>
 
-    <span class="n">Si</span> <span class="n">el</span> <span class="n">gancho</span> <span class="n">testinguelve</span> <span class="n">un</span> <span class="n">objeto</span> <span class="n">de</span> <span class="n">respuesta</span><span class="p">,</span> <span class="n">Flask</span> <span class="n">omitirá</span> <span class="n">el</span> <span class="n">manejo</span> <span class="n">de</span> <span class="n">la</span> <span class="n">solicitud</span> <span class="n">y</span> <span class="n">testingolverá</span> <span class="n">la</span> <span class="n">respuesta</span> <span class="n">directamente</span><span class="o">.</span> <span class="n">Esto</span> <span class="n">puede</span> <span class="n">ser</span> <span class="n">útil</span> <span class="n">para</span> <span class="n">cortocircuitar</span> <span class="n">el</span> <span class="n">pipeline</span> <span class="n">de</span> <span class="n">procesamiento</span> <span class="n">de</span> <span class="n">la</span> <span class="n">solicitud</span><span class="o">.</span>
+    <span class="n">Si</span> <span class="n">el</span> <span class="n">gancho</span> <span class="n">devuelve</span> <span class="n">un</span> <span class="n">objeto</span> <span class="n">de</span> <span class="n">respuesta</span><span class="p">,</span> <span class="n">Flask</span> <span class="n">omitirá</span> <span class="n">el</span> <span class="n">manejo</span> <span class="n">de</span> <span class="n">la</span> <span class="n">solicitud</span> <span class="n">y</span> <span class="n">devolverá</span> <span class="n">la</span> <span class="n">respuesta</span> <span class="n">directamente</span><span class="o">.</span> <span class="n">Esto</span> <span class="n">puede</span> <span class="n">ser</span> <span class="n">útil</span> <span class="n">para</span> <span class="n">cortocircuitar</span> <span class="n">el</span> <span class="n">pipeline</span> <span class="n">de</span> <span class="n">procesamiento</span> <span class="n">de</span> <span class="n">la</span> <span class="n">solicitud</span><span class="o">.</span>
 
     <span class="o">**</span><span class="n">Ejemplo</span><span class="p">:</span><span class="o">**</span>
 
@@ -2054,7 +1970,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <span class="o">===</span> <span class="s2">&quot;after_request&quot;</span>
     <span class="n">Estos</span> <span class="n">ganchos</span> <span class="n">se</span> <span class="n">ejecutan</span> <span class="o">**</span><span class="n">después</span><span class="o">**</span> <span class="n">de</span> <span class="n">que</span> <span class="n">la</span> <span class="n">solicitud</span> <span class="n">ha</span> <span class="n">sido</span> <span class="n">procesada</span><span class="o">.</span> <span class="n">Son</span> <span class="n">ideales</span> <span class="n">para</span> <span class="n">tareas</span> <span class="n">de</span> <span class="n">postprocesamiento</span> <span class="n">como</span> <span class="n">limpieza</span><span class="p">,</span> <span class="n">registro</span> <span class="n">adicional</span> <span class="n">o</span> <span class="n">modificación</span> <span class="n">de</span> <span class="n">la</span> <span class="n">respuesta</span> <span class="n">antes</span> <span class="n">de</span> <span class="n">que</span> <span class="n">se</span> <span class="n">envíe</span> <span class="n">de</span> <span class="n">vuelta</span><span class="o">.</span>
 
-    <span class="n">Reciben</span> <span class="n">el</span> <span class="n">objeto</span> <span class="n">de</span> <span class="n">respuesta</span> <span class="n">como</span> <span class="n">argumento</span> <span class="n">y</span> <span class="n">pueden</span> <span class="n">modificarlo</span> <span class="n">antes</span> <span class="n">de</span> <span class="n">testingolverlo</span><span class="o">.</span> <span class="n">El</span> <span class="n">primer</span> <span class="n">gancho</span> <span class="n">after_request</span> <span class="n">que</span> <span class="n">testinguelva</span> <span class="n">una</span> <span class="n">respuesta</span> <span class="n">se</span> <span class="n">utilizará</span> <span class="n">como</span> <span class="n">la</span> <span class="n">respuesta</span> <span class="n">final</span><span class="o">.</span>
+    <span class="n">Reciben</span> <span class="n">el</span> <span class="n">objeto</span> <span class="n">de</span> <span class="n">respuesta</span> <span class="n">como</span> <span class="n">argumento</span> <span class="n">y</span> <span class="n">pueden</span> <span class="n">modificarlo</span> <span class="n">antes</span> <span class="n">de</span> <span class="n">devolverlo</span><span class="o">.</span> <span class="n">El</span> <span class="n">primer</span> <span class="n">gancho</span> <span class="n">after_request</span> <span class="n">que</span> <span class="n">devuelva</span> <span class="n">una</span> <span class="n">respuesta</span> <span class="n">se</span> <span class="n">utilizará</span> <span class="n">como</span> <span class="n">la</span> <span class="n">respuesta</span> <span class="n">final</span><span class="o">.</span>
 
     <span class="o">**</span><span class="n">Ejemplo</span><span class="p">:</span><span class="o">**</span>
 
@@ -2095,7 +2011,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <span class="o">===</span> <span class="s2">&quot;context_processor&quot;</span>
     <span class="n">Estos</span> <span class="n">ganchos</span> <span class="n">se</span> <span class="n">utilizan</span> <span class="n">para</span> <span class="n">inyectar</span> <span class="n">contexto</span> <span class="n">adicional</span> <span class="n">en</span> <span class="n">las</span> <span class="n">plantillas</span> <span class="n">o</span> <span class="n">vistas</span><span class="o">.</span> <span class="n">Enriquecen</span> <span class="n">el</span> <span class="n">contexto</span> <span class="n">de</span> <span class="n">tiempo</span> <span class="n">de</span> <span class="n">ejecución</span> <span class="n">pasando</span> <span class="n">datos</span> <span class="n">comunes</span> <span class="p">(</span><span class="n">como</span> <span class="n">información</span> <span class="k">del</span> <span class="n">usuario</span> <span class="n">o</span> <span class="n">configuraciones</span><span class="p">)</span> <span class="n">a</span> <span class="n">las</span> <span class="n">plantillas</span><span class="o">.</span>
 
-    <span class="n">Si</span> <span class="n">un</span> <span class="n">procesador</span> <span class="n">de</span> <span class="n">contexto</span> <span class="n">testinguelve</span> <span class="n">un</span> <span class="n">diccionario</span><span class="p">,</span> <span class="n">las</span> <span class="n">claves</span> <span class="n">y</span> <span class="n">los</span> <span class="n">valores</span> <span class="n">se</span> <span class="n">añadirán</span> <span class="n">al</span> <span class="n">contexto</span> <span class="n">para</span> <span class="n">todas</span> <span class="n">las</span> <span class="n">plantillas</span><span class="o">.</span> <span class="n">Esto</span> <span class="n">te</span> <span class="n">permite</span> <span class="n">compartir</span> <span class="n">datos</span> <span class="n">entre</span> <span class="n">múltiples</span> <span class="n">vistas</span> <span class="n">o</span> <span class="n">plantillas</span><span class="o">.</span>
+    <span class="n">Si</span> <span class="n">un</span> <span class="n">procesador</span> <span class="n">de</span> <span class="n">contexto</span> <span class="n">devuelve</span> <span class="n">un</span> <span class="n">diccionario</span><span class="p">,</span> <span class="n">las</span> <span class="n">claves</span> <span class="n">y</span> <span class="n">los</span> <span class="n">valores</span> <span class="n">se</span> <span class="n">añadirán</span> <span class="n">al</span> <span class="n">contexto</span> <span class="n">para</span> <span class="n">todas</span> <span class="n">las</span> <span class="n">plantillas</span><span class="o">.</span> <span class="n">Esto</span> <span class="n">te</span> <span class="n">permite</span> <span class="n">compartir</span> <span class="n">datos</span> <span class="n">entre</span> <span class="n">múltiples</span> <span class="n">vistas</span> <span class="n">o</span> <span class="n">plantillas</span><span class="o">.</span>
 
     <span class="o">**</span><span class="n">Ejemplo</span><span class="p">:</span><span class="o">**</span>
 

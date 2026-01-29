@@ -1428,21 +1428,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="第 2 步 – 配置 BunkerWeb 参数">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_41" class="md-nav__link">
-    <span class="md-ellipsis">
-      应用程序安全组件设置
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
         
           <li class="md-nav__item">
@@ -2106,30 +2091,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="自定义配置">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#modsec-crs-crs" class="md-nav__link">
-    <span class="md-ellipsis">
-      使用 modsec-crs 添加 CRS 排除项
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#modsec-crs" class="md-nav__link">
-    <span class="md-ellipsis">
-      使用 modsec 更新 CRS 规则
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
         
           <li class="md-nav__item">
@@ -2444,39 +2405,6 @@
       Redis 最佳实践
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Redis 最佳实践">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_104" class="md-nav__link">
-    <span class="md-ellipsis">
-      内存管理
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_105" class="md-nav__link">
-    <span class="md-ellipsis">
-      数据持久性
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_106" class="md-nav__link">
-    <span class="md-ellipsis">
-      性能优化
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
         
@@ -3606,7 +3534,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <div class="tabbed-block">
 <p>一个带有额外日志记录的开发环境的配置：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">SECURITY_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;detect&quot;</span>
-<span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;testing.example.com&quot;</span>
+<span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dev.example.com&quot;</span>
 <span class="nt">LOG_LEVEL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;debug&quot;</span>
 </code></pre></div>
 </div>
@@ -4817,16 +4745,6 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </thead>
 <tbody>
 <tr>
-<td><code>ip:laurent-minne-data-shield-aggressive</code></td>
-<td>Data-Shield IPv4 黑名单。DST = 欧洲</td>
-<td></td>
-</tr>
-<tr>
-<td><code>https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt</code></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
 <td><code>ip:danmeuk-tor-exit</code></td>
 <td>Tor 出口节点 IP (dan.me.uk)</td>
 <td><code>https://www.dan.me.uk/torlist/?exit</code></td>
@@ -5390,7 +5308,7 @@ TrustedMonitor/\d+\.\d+
 <li>BunkerWeb 会根据您的配置检查请求的源是否被允许。</li>
 <li>如果允许，BunkerWeb 会响应适当的 CORS 标头，这些标头定义了请求站点可以执行的操作。</li>
 <li>对于不允许的源，请求可以被完全拒绝，也可以不带 CORS 标头地提供服务。</li>
-<li>可以配置其他跨源策略，例如 <a href="https://testingeloper.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy">COEP</a>、<a href="https://testingeloper.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy">COOP</a> 和 <a href="https://testingeloper.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy">CORP</a>，以进一步增强安全性。</li>
+<li>可以配置其他跨源策略，例如 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy">COEP</a>、<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy">COOP</a> 和 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy">CORP</a>，以进一步增强安全性。</li>
 </ol>
 <h3 id="_30">如何使用</h3>
 <p>请按照以下步骤配置和使用 CORS 功能：</p>
@@ -5974,7 +5892,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># 这是将用于在调度器中识别实例的名称</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.8-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -5991,7 +5909,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># syslog 服务的 IP 地址</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># 确保设置正确的实例名称</span>
@@ -7334,7 +7252,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 <h2 id="headers">Headers</h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
-<p>请求头在 HTTP 安全中扮演着至关重要的角色。请求头插件提供了对标准和自定义 HTTP 请求头的强大管理功能——增强了安全性和功能性。它动态地应用安全措施，例如 <a href="https://testingeloper.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security">HSTS</a>、<a href="https://testingeloper.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy">CSP</a>（包括报告模式）和自定义请求头注入，同时防止信息泄露。</p>
+<p>请求头在 HTTP 安全中扮演着至关重要的角色。请求头插件提供了对标准和自定义 HTTP 请求头的强大管理功能——增强了安全性和功能性。它动态地应用安全措施，例如 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security">HSTS</a>、<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy">CSP</a>（包括报告模式）和自定义请求头注入，同时防止信息泄露。</p>
 <p><strong>工作原理</strong></p>
 <ol>
 <li>当客户端从您的网站请求内容时，BunkerWeb 会处理响应头。</li>
@@ -7352,7 +7270,7 @@ TrustedMonitor/\d+\.\d+
 <li><strong>移除不需要的头：</strong> 使用 <code>REMOVE_HEADERS</code> 确保可能会暴露服务器细节的请求头被剥离。</li>
 <li><strong>设置 Cookie 安全：</strong> 通过配置 <code>COOKIE_FLAGS</code> 并将 <code>COOKIE_AUTO_SECURE_FLAG</code> 设置为 <code>yes</code> 来启用强大的 Cookie 安全，以便在 HTTPS 连接上自动添加 Secure 标志。</li>
 <li><strong>保留上游头：</strong> 使用 <code>KEEP_UPSTREAM_HEADERS</code> 指定要保留的上游请求头。</li>
-<li><strong>利用条件性头应用：</strong> 如果您希望在不中断的情况下测试策略，请通过 <code>CONTENT_SECURITY_POLICY_REPORT_ONLY</code> 启用 <a href="https://testingeloper.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only">CSP 仅报告</a>模式。</li>
+<li><strong>利用条件性头应用：</strong> 如果您希望在不中断的情况下测试策略，请通过 <code>CONTENT_SECURITY_POLICY_REPORT_ONLY</code> 启用 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only">CSP 仅报告</a>模式。</li>
 </ol>
 <h3 id="_66">配置指南</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="24:3"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><input id="__tabbed_24_3" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">安全头</label><label for="__tabbed_24_2">Cookie 设置</label><label for="__tabbed_24_3">自定义头</label></div>
@@ -8663,7 +8581,7 @@ TrustedMonitor/\d+\.\d+
 <p>在 HTTP 中，<code>Host</code> 标头指定目标服务器，但它可能缺失或未知，这通常是由于机器人扫描漏洞造成的。</p>
 <p>要阻止此类请求：</p>
 <ul>
-<li>将 <code>DISABLE_DEFAULT_SERVER</code> 设置为 <code>yes</code>，以使用 <a href="https://http.testing/444">NGINX 的 <code>444</code> 状态码</a> 静默拒绝此类请求。</li>
+<li>将 <code>DISABLE_DEFAULT_SERVER</code> 设置为 <code>yes</code>，以使用 <a href="https://http.dev/444">NGINX 的 <code>444</code> 状态码</a> 静默拒绝此类请求。</li>
 <li>为了更严格的安全性，启用 <code>DISABLE_DEFAULT_SERVER_STRICT_SNI</code> 以拒绝没有有效 SNI 的 SSL/TLS 连接。</li>
 </ul>
 <div class="admonition success">
@@ -8709,7 +8627,7 @@ TrustedMonitor/\d+\.\d+
 <div class="tabbed-block">
 <p><strong>HTTP 状态控制</strong></p>
 <p>处理被拒绝的客户端访问的第一步是定义适当的操作。这可以使用 <code>DENY_HTTP_STATUS</code> 设置进行配置。当 BunkerWeb 拒绝一个请求时，您可以使用此设置控制其响应。默认情况下，它返回一个 <code>403 Forbidden</code> 状态，并向客户端显示一个网页或自定义内容。</p>
-<p>或者，将其设置为 <code>444</code> 会立即关闭连接而不发送任何响应。这个<a href="https://http.testing/444">非标准状态码</a>，特定于 NGINX，对于静默丢弃不需要的请求很有用。</p>
+<p>或者，将其设置为 <code>444</code> 会立即关闭连接而不发送任何响应。这个<a href="https://http.dev/444">非标准状态码</a>，特定于 NGINX，对于静默丢弃不需要的请求很有用。</p>
 <table>
 <thead>
 <tr>
@@ -9569,7 +9487,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td></td>
 <td>multisite</td>
 <td>否</td>
-<td>Absolute path or HTTP(S) URL to the OpenAPI (swagger) document in JSON format.</td>
+<td>Absolute path or HTTP(S) URL to the OpenAPI (swagger) document in JSON/YAML format.</td>
 </tr>
 <tr>
 <td><code>OPENAPI_BASE_PATH</code></td>
@@ -9598,13 +9516,6 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td>multisite</td>
 <td>否</td>
 <td>List of URL regexes to bypass OpenAPI validation (space separated).</td>
-</tr>
-<tr>
-<td><code>OPENAPI_CACHE_TTL</code></td>
-<td><code>300</code></td>
-<td>global</td>
-<td>否</td>
-<td>Seconds to cache the parsed specification in shared cache.</td>
 </tr>
 <tr>
 <td><code>OPENAPI_MAX_SPEC_SIZE</code></td>
@@ -10128,7 +10039,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Real IP 插件可确保 BunkerWeb 即使在代理后面也能正确识别客户端的 IP 地址。这对于正确应用安全规则、速率限制和日志记录至关重要；没有它，所有请求都将看起来来自您的代理 IP，而不是客户端的实际 IP。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
-<li>启用后，BunkerWeb 会检查传入请求中是否包含特定标头（如 <a href="https://testingeloper.mozilla.org/zh-CN/docs/Web/HTTP/Reference/Headers/X-Forwarded-For"><code>X-Forwarded-For</code></a>），这些标头包含客户端的原始 IP 地址。</li>
+<li>启用后，BunkerWeb 会检查传入请求中是否包含特定标头（如 <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Reference/Headers/X-Forwarded-For"><code>X-Forwarded-For</code></a>），这些标头包含客户端的原始 IP 地址。</li>
 <li>BunkerWeb 会检查传入的 IP 是否在您的受信任代理列表 (<code>REAL_IP_FROM</code>) 中，确保只有合法的代理才能传递客户端 IP。</li>
 <li>从指定的标头 (<code>REAL_IP_HEADER</code>) 中提取原始客户端 IP，并用于所有安全评估和日志记录。</li>
 <li>对于递归 IP 链，BunkerWeb 可以追溯多个代理跃点以确定始发客户端 IP。</li>
@@ -10826,6 +10737,13 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><strong>响应缓冲：</strong> 启用或禁用来自代理资源的响应缓冲。</td>
 </tr>
 <tr>
+<td><code>REVERSE_PROXY_REQUEST_BUFFERING</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>是</td>
+<td><strong>请求缓冲：</strong> 启用或禁用向代理资源发送请求时的缓冲。</td>
+</tr>
+<tr>
 <td><code>REVERSE_PROXY_KEEPALIVE</code></td>
 <td><code>no</code></td>
 <td>multisite</td>
@@ -10855,6 +10773,10 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>使用 <code>REVERSE_PROXY_INTERCEPT_ERRORS</code> 在您所有服务中提供一致的错误页面</li>
 <li>当配置多个后端时，使用带编号的后缀格式（例如，<code>REVERSE_PROXY_HOST_2</code>、<code>REVERSE_PROXY_URL_2</code>）</li>
 </ul>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">请求缓冲行为</p>
+<p>禁用 <code>REVERSE_PROXY_REQUEST_BUFFERING</code> 仅在 ModSecurity 被禁用时才会生效，因为否则会强制执行请求缓冲。</p>
 </div>
 </div>
 <div class="tabbed-block">
@@ -12016,7 +11938,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <div class="highlight"><pre><span></span><code><span class="nt">GENERATE_SELF_SIGNED_SSL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">SELF_SIGNED_SSL_ALGORITHM</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ec-prime256v1&quot;</span>
 <span class="nt">SELF_SIGNED_SSL_EXPIRY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;90&quot;</span>
-<span class="nt">SELF_SIGNED_SSL_SUBJ</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/CN=testing.example.com/&quot;</span>
+<span class="nt">SELF_SIGNED_SSL_SUBJ</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/CN=dev.example.com/&quot;</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">

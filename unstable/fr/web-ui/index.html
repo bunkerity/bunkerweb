@@ -1227,7 +1227,7 @@
 </div>
 <h2 id="checklist-securite">Checklist sécurité</h2>
 <ul>
-<li>Placez l’UI derrière BunkerWeb sur un réseau interne ; choisissez un <code>REVERSE_PROXY_URL</code> difficile à testinginer et limitez les IP sources.</li>
+<li>Placez l’UI derrière BunkerWeb sur un réseau interne ; choisissez un <code>REVERSE_PROXY_URL</code> difficile à deviner et limitez les IP sources.</li>
 <li>Définissez des <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code> solides ; activez <code>OVERRIDE_ADMIN_CREDS=yes</code> uniquement si vous voulez vraiment les réinitialiser.</li>
 <li>Fournissez <code>TOTP_ENCRYPTION_KEYS</code> et activez le TOTP pour les comptes admin ; gardez les codes de récupération en sécurité.</li>
 <li>Utilisez le TLS (terminé sur BunkerWeb ou via <code>UI_SSL_ENABLED=yes</code> avec chemins cert/clé) ; définissez <code>UI_FORWARDED_ALLOW_IPS</code> sur vos proxies de confiance.</li>
@@ -1241,7 +1241,7 @@
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Utilisez les images publiées et le layout du <a href="../quickstart-guide/#__tabbed_1_3">guide de démarrage rapide</a> pour monter la stack, puis terminez la configuration dans le navigateur.</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.8~rc1-rc1/misc/integrations/docker-compose.yml<span class="w"> </span>up<span class="w"> </span>-d
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/bunkerity/bunkerweb/vtesting-rc1/misc/integrations/docker-compose.yml<span class="w"> </span>up<span class="w"> </span>-d
 </code></pre></div>
 <p>Ouvrez le nom d’hôte du scheduler (par ex. <code>https://www.example.com/changeme</code>) et lancez l’assistant <code>/setup</code> pour configurer l’UI, le scheduler et l’instance.</p>
 </div>
@@ -1254,7 +1254,7 @@
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.8-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -1265,7 +1265,7 @@
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bw-services</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
@@ -1285,7 +1285,7 @@
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bw-db</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.8-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin&quot;</span>
@@ -1777,7 +1777,7 @@ log { source(s_net); destination(d_dyna_file); };
 <p><strong>Enregistrer la langue</strong></p>
 </li>
 <li>
-<p>Ajouter ou mettre à jour l’entrée correspondante dans <code>src/ui/app/lang_config.py</code> (code de langue, nom affiché, drapeau, nom anglais).<br />
+<p>Ajouter ou mettre à jour l’entrée correspondante dans <code>src/ui/app/lang_config.py</code> (code de langue, nom affiché, drapeau, nom anglais).
      Ce fichier constitue la source de vérité pour les langues supportées.</p>
 </li>
 <li>

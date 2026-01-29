@@ -1428,21 +1428,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Étape 2 – Configurer les paramètres de BunkerWeb">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#parametres-du-composant-de-securite-applicative" class="md-nav__link">
-    <span class="md-ellipsis">
-      Paramètres du composant de sécurité applicative
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
         
           <li class="md-nav__item">
@@ -2061,30 +2046,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Configurations personnalisées">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#ajout-dexclusions-crs-avec-modsec-crs" class="md-nav__link">
-    <span class="md-ellipsis">
-      Ajout d'exclusions CRS avec modsec-crs
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#mise-a-jour-des-regles-crs-avec-modsec" class="md-nav__link">
-    <span class="md-ellipsis">
-      Mise à jour des règles CRS avec modsec
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
         
           <li class="md-nav__item">
@@ -2399,39 +2360,6 @@
       Bonnes pratiques Redis
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Bonnes pratiques Redis">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#gestion-de-la-memoire" class="md-nav__link">
-    <span class="md-ellipsis">
-      Gestion de la mémoire
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#persistance-des-donnees" class="md-nav__link">
-    <span class="md-ellipsis">
-      Persistance des données
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#optimisation-des-performances" class="md-nav__link">
-    <span class="md-ellipsis">
-      Optimisation des performances
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
         
@@ -3192,7 +3120,7 @@
 </tr>
 </tbody>
 </table>
-<p>Remarque : pour des raisons d’amorçage, si vous activez <code>API_TOKEN</code>, vous testingez le définir dans l’environnement à la fois de l’instance BunkerWeb et du Scheduler. Le Scheduler ajoute automatiquement l’en-tête <code>Authorization</code> quand <code>API_TOKEN</code> est présent dans son environnement. S’il n’est pas défini, aucun en-tête n’est envoyé et BunkerWeb n’applique pas l’authentification par jeton. Vous pouvez exposer l’API en HTTPS en définissant <code>API_LISTEN_HTTPS=yes</code> (port : <code>API_HTTPS_PORT</code>, <code>5443</code> par défaut).</p>
+<p>Remarque : pour des raisons d’amorçage, si vous activez <code>API_TOKEN</code>, vous devez le définir dans l’environnement à la fois de l’instance BunkerWeb et du Scheduler. Le Scheduler ajoute automatiquement l’en-tête <code>Authorization</code> quand <code>API_TOKEN</code> est présent dans son environnement. S’il n’est pas défini, aucun en-tête n’est envoyé et BunkerWeb n’applique pas l’authentification par jeton. Vous pouvez exposer l’API en HTTPS en définissant <code>API_LISTEN_HTTPS=yes</code> (port : <code>API_HTTPS_PORT</code>, <code>5443</code> par défaut).</p>
 <p>Exemple de test avec curl (remplacez le jeton et l’hôte) :</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: bwapi&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
@@ -3541,7 +3469,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <div class="tabbed-block">
 <p>Configuration pour un environnement de développement avec journalisation détaillée :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">SECURITY_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;detect&quot;</span>
-<span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;testing.example.com&quot;</span>
+<span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dev.example.com&quot;</span>
 <span class="nt">LOG_LEVEL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;debug&quot;</span>
 </code></pre></div>
 </div>
@@ -3652,7 +3580,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Sessions en environnement cluster</p>
-<p>La fonction antibot utilise des cookies pour suivre si un utilisateur a complété le défi. Si vous exécutez BunkerWeb en cluster (plusieurs instances), vous testingez configurer correctement la gestion des sessions : définissez <code>SESSIONS_SECRET</code> et <code>SESSIONS_NAME</code> avec les mêmes valeurs sur toutes les instances BunkerWeb. Sinon, les utilisateurs pourront être invités à répéter le défi. Plus d’informations sur la configuration des sessions <a href="#sessions">ici</a>.</p>
+<p>La fonction antibot utilise des cookies pour suivre si un utilisateur a complété le défi. Si vous exécutez BunkerWeb en cluster (plusieurs instances), vous devez configurer correctement la gestion des sessions : définissez <code>SESSIONS_SECRET</code> et <code>SESSIONS_NAME</code> avec les mêmes valeurs sur toutes les instances BunkerWeb. Sinon, les utilisateurs pourront être invités à répéter le défi. Plus d’informations sur la configuration des sessions <a href="#sessions">ici</a>.</p>
 </div>
 <h3 id="parametres-communs">Paramètres communs</h3>
 <p>Les paramètres suivants sont partagés par tous les mécanismes de défi :</p>
@@ -4005,7 +3933,7 @@ Pour la nouvelle version, créez une clé reCAPTCHA dans votre projet Google Clo
 </div>
 <div class="tabbed-block">
 <p>Lorsqu’il est activé, hCaptcha offre une alternative efficace à reCAPTCHA en vérifiant les interactions des utilisateurs sans reposer sur un mécanisme de score. Il met les utilisateurs au défi avec un test simple et interactif pour confirmer leur légitimité.</p>
-<p>Pour intégrer hCaptcha avec BunkerWeb, vous testingez obtenir les informations d’identification nécessaires depuis le tableau de bord hCaptcha sur <a href="https://www.hcaptcha.com">hCaptcha</a>. Ces informations incluent une clé de site et une clé secrète.</p>
+<p>Pour intégrer hCaptcha avec BunkerWeb, vous devez obtenir les informations d’identification nécessaires depuis le tableau de bord hCaptcha sur <a href="https://www.hcaptcha.com">hCaptcha</a>. Ces informations incluent une clé de site et une clé secrète.</p>
 <p><strong>Paramètres :</strong></p>
 <table>
 <thead>
@@ -4084,7 +4012,7 @@ Pour la nouvelle version, créez une clé reCAPTCHA dans votre projet Google Clo
 <div class="tabbed-block">
 <p>mCaptcha est un mécanisme de défi CAPTCHA alternatif qui vérifie la légitimité des utilisateurs en présentant un test interactif similaire à d’autres solutions antibot. Lorsqu’il est activé, il met les utilisateurs au défi avec un CAPTCHA fourni par mCaptcha, s’assurant que seuls les utilisateurs authentiques contournent les contrôles de sécurité automatisés.</p>
 <p>mCaptcha est conçu dans le respect de la vie privée. Il est entièrement conforme au RGPD, garantissant que toutes les données des utilisateurs impliquées dans le processus de défi respectent des normes strictes de protection des données. De plus, mCaptcha offre la flexibilité d’être auto-hébergé, permettant aux organisations de garder un contrôle total sur leurs données et leur infrastructure. Cette capacité d’auto-hébergement améliore non seulement la confidentialité, mais optimise également les performances et la personnalisation pour répondre aux besoins spécifiques de déploiement.</p>
-<p>Pour intégrer mCaptcha avec BunkerWeb, vous testingez obtenir les informations d’identification nécessaires depuis la plateforme <a href="https://mcaptcha.org/">mCaptcha</a> ou votre propre fournisseur. Ces informations incluent une clé de site et une clé secrète pour la vérification.</p>
+<p>Pour intégrer mCaptcha avec BunkerWeb, vous devez obtenir les informations d’identification nécessaires depuis la plateforme <a href="https://mcaptcha.org/">mCaptcha</a> ou votre propre fournisseur. Ces informations incluent une clé de site et une clé secrète pour la vérification.</p>
 <p><strong>Paramètres :</strong></p>
 <table>
 <thead>
@@ -4709,11 +4637,6 @@ BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
 </tr>
 </thead>
 <tbody>
-<tr>
-<td><code>ip:laurent-minne-data-shield-aggressive</code></td>
-<td>Data-Shield IPv4 Blocklist. DST = Europa</td>
-<td><code>https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt</code></td>
-</tr>
 <tr>
 <td><code>ip:danmeuk-tor-exit</code></td>
 <td>Adresses IP des nœuds de sortie Tor (dan.me.uk)</td>
@@ -5687,7 +5610,7 @@ TrustedMonitor/\d+\.\d+
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Fichier d'acquisition</strong></p>
-<p>Vous testingrez exécuter une instance de CrowdSec et la configurer pour analyser les journaux de BunkerWeb. Utilisez la valeur dédiée <code>bunkerweb</code> pour le paramètre <code>type</code> dans votre fichier d'acquisition (en supposant que les journaux de BunkerWeb sont stockés tels quels sans données supplémentaires) :</p>
+<p>Vous devrez exécuter une instance de CrowdSec et la configurer pour analyser les journaux de BunkerWeb. Utilisez la valeur dédiée <code>bunkerweb</code> pour le paramètre <code>type</code> dans votre fichier d'acquisition (en supposant que les journaux de BunkerWeb sont stockés tels quels sans données supplémentaires) :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">filenames</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/log/bunkerweb.log</span>
 <span class="nt">labels</span><span class="p">:</span>
@@ -5695,7 +5618,7 @@ TrustedMonitor/\d+\.\d+
 </code></pre></div>
 <p>Si la collection n'apparaît pas dans le conteneur CrowdSec, exécutez <code>docker exec -it &lt;crowdsec-container&gt; cscli hub update</code>, puis redémarrez ce conteneur (<code>docker restart &lt;crowdsec-container&gt;</code>) afin que les nouveaux artefacts soient disponibles. Remplacez <code>&lt;crowdsec-container&gt;</code> par le nom de votre conteneur CrowdSec.</p>
 <p><strong>Composant de sécurité applicative (<em>optionnel</em>)</strong></p>
-<p>CrowdSec fournit également un <a href="https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs">Composant de sécurité applicative</a> qui peut être utilisé pour protéger votre application contre les attaques. Si vous souhaitez l'utiliser, vous testingez créer un autre fichier d'acquisition pour le composant AppSec :</p>
+<p>CrowdSec fournit également un <a href="https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs">Composant de sécurité applicative</a> qui peut être utilisé pour protéger votre application contre les attaques. Si vous souhaitez l'utiliser, vous devez créer un autre fichier d'acquisition pour le composant AppSec :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">appsec_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/appsec-default</span>
 <span class="nt">labels</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">appsec</span>
@@ -5735,7 +5658,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># C&#39;est le nom qui sera utilisé pour identifier l&#39;instance dans le planificateur</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.8-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -5752,7 +5675,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># L&#39;adresse IP du service syslog</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># Assurez-vous de définir le nom correct de l&#39;instance</span>
@@ -5836,7 +5759,7 @@ log {
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<p>Vous testingez installer CrowdSec et le configurer pour analyser les journaux de BunkerWeb. Suivez la <a href="https://doc.crowdsec.net/docs/getting_started/install_crowdsec?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs#scenarios">documentation officielle</a>.</p>
+<p>Vous devez installer CrowdSec et le configurer pour analyser les journaux de BunkerWeb. Suivez la <a href="https://doc.crowdsec.net/docs/getting_started/install_crowdsec?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs#scenarios">documentation officielle</a>.</p>
 <p>Pour permettre à CrowdSec d'analyser les journaux de BunkerWeb, ajoutez les lignes suivantes à votre fichier d'acquisition situé à <code>/etc/crowdsec/acquis.yaml</code> :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">filenames</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/log/bunkerweb/access.log</span>
@@ -5860,14 +5783,14 @@ sudo<span class="w"> </span>cscli<span class="w"> </span>collections<span class=
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>crowdsec
 </code></pre></div>
 <p><strong>Composant de sécurité applicative (<em>optionnel</em>)</strong></p>
-<p>Si vous souhaitez utiliser le composant AppSec, vous testingez créer un autre fichier d'acquisition pour celui-ci, situé à <code>/etc/crowdsec/acquis.d/appsec.yaml</code> :</p>
+<p>Si vous souhaitez utiliser le composant AppSec, vous devez créer un autre fichier d'acquisition pour celui-ci, situé à <code>/etc/crowdsec/acquis.d/appsec.yaml</code> :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">appsec_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/appsec-default</span>
 <span class="nt">labels</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">appsec</span>
 <span class="nt">listen_addr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">127.0.0.1:7422</span>
 <span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">appsec</span>
 </code></pre></div>
-<p>Vous testingrez également installer les collections du composant AppSec :</p>
+<p>Vous devrez également installer les collections du composant AppSec :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>cscli<span class="w"> </span>collections<span class="w"> </span>install<span class="w"> </span>crowdsecurity/appsec-virtual-patching
 sudo<span class="w"> </span>cscli<span class="w"> </span>collections<span class="w"> </span>install<span class="w"> </span>crowdsecurity/appsec-generic-rules
 </code></pre></div>
@@ -6980,7 +6903,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 <h2 id="headers">Headers</h2>
 <p>Prise en charge STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
-<p>Les en-têtes HTTP jouent un rôle crucial dans la sécurité. Le plugin Headers offre une gestion robuste des en-têtes HTTP standards et personnalisés, améliorant ainsi la sécurité et les fonctionnalités. Il applique dynamiquement des mesures de sécurité, telles que <a href="https://testingeloper.mozilla.org/fr/docs/Web/HTTP/Headers/Strict-Transport-Security">HSTS</a>, <a href="https://testingeloper.mozilla.org/fr/docs/Web/HTTP/Headers/Content-Security-Policy">CSP</a> (y compris un mode de rapport seul), et l'injection d'en-têtes personnalisés, tout en empêchant les fuites d'informations.</p>
+<p>Les en-têtes HTTP jouent un rôle crucial dans la sécurité. Le plugin Headers offre une gestion robuste des en-têtes HTTP standards et personnalisés, améliorant ainsi la sécurité et les fonctionnalités. Il applique dynamiquement des mesures de sécurité, telles que <a href="https://developer.mozilla.org/fr/docs/Web/HTTP/Headers/Strict-Transport-Security">HSTS</a>, <a href="https://developer.mozilla.org/fr/docs/Web/HTTP/Headers/Content-Security-Policy">CSP</a> (y compris un mode de rapport seul), et l'injection d'en-têtes personnalisés, tout en empêchant les fuites d'informations.</p>
 <p><strong>Comment ça marche</strong></p>
 <ol>
 <li>Lorsqu'un client demande du contenu depuis votre site web, BunkerWeb traite les en-têtes de la réponse.</li>
@@ -6998,7 +6921,7 @@ TrustedMonitor/\d+\.\d+
 <li><strong>Supprimer les en-têtes indésirables :</strong> Utilisez <code>REMOVE_HEADERS</code> pour vous assurer que les en-têtes qui pourraient exposer des détails sur le serveur sont supprimés.</li>
 <li><strong>Définir la sécurité des cookies :</strong> Activez une sécurité robuste des cookies en configurant <code>COOKIE_FLAGS</code> et en réglant <code>COOKIE_AUTO_SECURE_FLAG</code> sur <code>yes</code> pour que l'attribut Secure soit automatiquement ajouté sur les connexions HTTPS.</li>
 <li><strong>Préserver les en-têtes en amont :</strong> Spécifiez les en-têtes en amont à conserver en utilisant <code>KEEP_UPSTREAM_HEADERS</code>.</li>
-<li><strong>Tirer parti de l'application conditionnelle des en-têtes :</strong> Si vous souhaitez tester des politiques sans interruption, activez le mode <a href="https://testingeloper.mozilla.org/fr/docs/Web/HTTP/Headers/Content-Security-Policy-Report-Only">CSP Report-Only</a> via <code>CONTENT_SECURITY_POLICY_REPORT_ONLY</code>.</li>
+<li><strong>Tirer parti de l'application conditionnelle des en-têtes :</strong> Si vous souhaitez tester des politiques sans interruption, activez le mode <a href="https://developer.mozilla.org/fr/docs/Web/HTTP/Headers/Content-Security-Policy-Report-Only">CSP Report-Only</a> via <code>CONTENT_SECURITY_POLICY_REPORT_ONLY</code>.</li>
 </ol>
 <h3 id="guide-de-configuration">Guide de configuration</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="23:3"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><input id="__tabbed_23_3" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">En-têtes de sécurité</label><label for="__tabbed_23_2">Paramètres des cookies</label><label for="__tabbed_23_3">En-têtes personnalisés</label></div>
@@ -7403,7 +7326,7 @@ TrustedMonitor/\d+\.\d+
 <li>Le paramètre <code>LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</code> est un paramètre multiple et peut être utilisé pour définir plusieurs éléments pour le fournisseur DNS. Les éléments seront enregistrés dans un fichier de cache, et Certbot lira les informations d'identification à partir de celui-ci.</li>
 <li>Si aucun paramètre <code>LETS_ENCRYPT_DNS_PROPAGATION</code> n'est fourni, le temps de propagation par défaut du fournisseur est utilisé.</li>
 <li>L'automatisation complète de Let's Encrypt avec le défi <code>http</code> fonctionne en mode stream tant que vous ouvrez le port <code>80/tcp</code> depuis l'extérieur. Utilisez le paramètre <code>LISTEN_STREAM_PORT_SSL</code> pour choisir votre port d'écoute SSL/TLS.</li>
-<li>Si <code>LETS_ENCRYPT_PASSTHROUGH</code> est mis à <code>yes</code>, BunkerWeb ne gérera pas les requêtes de défi ACME lui-même mais les transmettra au serveur web backend. Ceci est utile dans les scénarios où BunkerWeb agit comme un reverse proxy testingant un autre serveur configuré pour gérer les défis Let's Encrypt.</li>
+<li>Si <code>LETS_ENCRYPT_PASSTHROUGH</code> est mis à <code>yes</code>, BunkerWeb ne gérera pas les requêtes de défi ACME lui-même mais les transmettra au serveur web backend. Ceci est utile dans les scénarios où BunkerWeb agit comme un reverse proxy devant un autre serveur configuré pour gérer les défis Let's Encrypt.</li>
 </ul>
 </div>
 <div class="admonition tip">
@@ -7424,7 +7347,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Certificats wildcard</p>
-<p>Les certificats wildcard ne sont disponibles qu'avec les défis DNS. Si vous souhaitez les utiliser, vous testingez mettre le paramètre <code>USE_LETS_ENCRYPT_WILDCARD</code> à <code>yes</code> et configurer correctement les identifiants de votre fournisseur DNS.</p>
+<p>Les certificats wildcard ne sont disponibles qu'avec les défis DNS. Si vous souhaitez les utiliser, vous devez mettre le paramètre <code>USE_LETS_ENCRYPT_WILDCARD</code> à <code>yes</code> et configurer correctement les identifiants de votre fournisseur DNS.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Limites de débit</p>
@@ -8233,7 +8156,7 @@ TrustedMonitor/\d+\.\d+
 <p>En HTTP, l'en-tête <code>Host</code> spécifie le serveur cible, mais il peut être manquant ou inconnu, souvent à cause de bots recherchant des vulnérabilités.</p>
 <p>Pour bloquer de telles requêtes :</p>
 <ul>
-<li>Mettez <code>DISABLE_DEFAULT_SERVER</code> à <code>yes</code> pour refuser silencieusement ces requêtes en utilisant le <a href="https://http.testing/444">code de statut <code>444</code> de NGINX</a>.</li>
+<li>Mettez <code>DISABLE_DEFAULT_SERVER</code> à <code>yes</code> pour refuser silencieusement ces requêtes en utilisant le <a href="https://http.dev/444">code de statut <code>444</code> de NGINX</a>.</li>
 <li>Pour une sécurité plus stricte, activez <code>DISABLE_DEFAULT_SERVER_STRICT_SNI</code> pour rejeter les connexions SSL/TLS sans SNI valide.</li>
 </ul>
 <div class="admonition success">
@@ -8279,7 +8202,7 @@ TrustedMonitor/\d+\.\d+
 <div class="tabbed-block">
 <p><strong>Contrôle du statut HTTP</strong></p>
 <p>La première étape dans la gestion de l'accès refusé à un client est de définir l'action appropriée. Cela peut être configuré avec le paramètre <code>DENY_HTTP_STATUS</code>. Lorsque BunkerWeb refuse une requête, vous pouvez contrôler sa réponse. Par défaut, il renvoie un statut <code>403 Forbidden</code>, affichant une page web ou un contenu personnalisé.</p>
-<p>Alternativement, le régler sur <code>444</code> ferme immédiatement la connexion sans envoyer de réponse. Ce <a href="https://http.testing/444">code de statut non standard</a>, spécifique à NGINX, est utile pour ignorer silencieusement les requêtes indésirables.</p>
+<p>Alternativement, le régler sur <code>444</code> ferme immédiatement la connexion sans envoyer de réponse. Ce <a href="https://http.dev/444">code de statut non standard</a>, spécifique à NGINX, est utile pour ignorer silencieusement les requêtes indésirables.</p>
 <table>
 <thead>
 <tr>
@@ -8313,7 +8236,7 @@ TrustedMonitor/\d+\.\d+
 <p><strong>Contrôle des méthodes HTTP</strong></p>
 <p>Restreindre les méthodes HTTP à celles requises par votre application est une mesure de sécurité fondamentale qui respecte le principe du moindre privilège. En définissant explicitement les méthodes acceptables, vous minimisez le risque d'exploitation via des méthodes inutilisées ou dangereuses.</p>
 <p>Cette fonctionnalité est configurée avec <code>ALLOWED_METHODS</code>, où les méthodes sont listées et séparées par un <code>|</code> (défaut : <code>GET|POST|HEAD</code>). Si un client tente une méthode non listée, le serveur répondra avec un statut <strong>405 - Method Not Allowed</strong>.</p>
-<p>Pour la plupart des sites web, le défaut <code>GET|POST|HEAD</code> est suffisant. Si votre application utilise des API RESTful, vous testingrez peut-être inclure <code>PUT</code> et <code>DELETE</code>.</p>
+<p>Pour la plupart des sites web, le défaut <code>GET|POST|HEAD</code> est suffisant. Si votre application utilise des API RESTful, vous devrez peut-être inclure <code>PUT</code> et <code>DELETE</code>.</p>
 <div class="admonition success">
 <p class="admonition-title">Avantages en matière de sécurité</p>
 <ul>
@@ -8344,7 +8267,7 @@ TrustedMonitor/\d+\.\d+
 </table>
 <div class="admonition abstract">
 <p class="admonition-title">CORS et requêtes pre-flight</p>
-<p>Si votre application prend en charge le <a href="#cors">Cross-Origin Resource Sharing (CORS)</a>, vous testingriez inclure la méthode <code>OPTIONS</code> dans <code>ALLOWED_METHODS</code> pour gérer les requêtes pre-flight. Cela garantit le bon fonctionnement pour les navigateurs effectuant des requêtes inter-origines.</p>
+<p>Si votre application prend en charge le <a href="#cors">Cross-Origin Resource Sharing (CORS)</a>, vous devriez inclure la méthode <code>OPTIONS</code> dans <code>ALLOWED_METHODS</code> pour gérer les requêtes pre-flight. Cela garantit le bon fonctionnement pour les navigateurs effectuant des requêtes inter-origines.</p>
 </div>
 <div class="admonition danger">
 <p class="admonition-title">Considérations de sécurité</p>
@@ -8389,7 +8312,7 @@ TrustedMonitor/\d+\.\d+
 </table>
 <div class="admonition tip">
 <p class="admonition-title">Bonnes pratiques de configuration de la taille des requêtes</p>
-<p>Si vous testingez autoriser un corps de requête de taille illimitée, vous pouvez mettre la valeur <code>MAX_CLIENT_SIZE</code> à <code>0</code>. Cependant, ce n'est <strong>pas recommandé</strong> en raison des risques potentiels de sécurité et de performance.</p>
+<p>Si vous devez autoriser un corps de requête de taille illimitée, vous pouvez mettre la valeur <code>MAX_CLIENT_SIZE</code> à <code>0</code>. Cependant, ce n'est <strong>pas recommandé</strong> en raison des risques potentiels de sécurité et de performance.</p>
 <p><strong>Bonnes pratiques :</strong></p>
 <ul>
 <li>Configurez toujours <code>MAX_CLIENT_SIZE</code> à la plus petite valeur répondant aux besoins légitimes de votre application.</li>
@@ -9137,7 +9060,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td></td>
 <td>multisite</td>
 <td>non</td>
-<td>Absolute path or HTTP(S) URL to the OpenAPI (swagger) document in JSON format.</td>
+<td>Absolute path or HTTP(S) URL to the OpenAPI (swagger) document in JSON/YAML format.</td>
 </tr>
 <tr>
 <td><code>OPENAPI_BASE_PATH</code></td>
@@ -9166,13 +9089,6 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td>multisite</td>
 <td>non</td>
 <td>List of URL regexes to bypass OpenAPI validation (space separated).</td>
-</tr>
-<tr>
-<td><code>OPENAPI_CACHE_TTL</code></td>
-<td><code>300</code></td>
-<td>global</td>
-<td>non</td>
-<td>Seconds to cache the parsed specification in shared cache.</td>
 </tr>
 <tr>
 <td><code>OPENAPI_MAX_SPEC_SIZE</code></td>
@@ -9685,7 +9601,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Le plugin Real IP garantit que BunkerWeb identifie correctement l’adresse IP du client même derrière des proxys. Indispensable pour appliquer les règles de sécurité, la limitation de débit et des logs fiables : sinon toutes les requêtes sembleraient venir de l’IP du proxy.</p>
 <p>Comment ça marche :</p>
 <ol>
-<li>Activé, BunkerWeb inspecte les en‑têtes (ex. <a href="https://testingeloper.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For"><code>X-Forwarded-For</code></a>) contenant l’IP d’origine.</li>
+<li>Activé, BunkerWeb inspecte les en‑têtes (ex. <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For"><code>X-Forwarded-For</code></a>) contenant l’IP d’origine.</li>
 <li>Il vérifie que l’IP source figure dans <code>REAL_IP_FROM</code> (liste de proxys de confiance) pour n’accepter que les proxys légitimes.</li>
 <li>L’IP client est extraite de l’en‑tête <code>REAL_IP_HEADER</code> et utilisée pour l’évaluation sécurité et la journalisation.</li>
 <li>En chaînes d’IPs, une recherche récursive peut déterminer l’IP d’origine via <code>REAL_IP_RECURSIVE</code>.</li>
@@ -9856,7 +9772,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 <div class="admonition info">
 <p class="admonition-title">Conservation du chemin</p>
-<p>Avec <code>REDIRECT_TO_REQUEST_URI: yes</code>, <code>/blog/post-1</code> vers <code>https://new.com</code> testingient <code>https://new.com/blog/post-1</code>.</p>
+<p>Avec <code>REDIRECT_TO_REQUEST_URI: yes</code>, <code>/blog/post-1</code> vers <code>https://new.com</code> devient <code>https://new.com/blog/post-1</code>.</p>
 </div>
 <h3 id="exemples_15">Exemples</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="36:7"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><input id="__tabbed_36_5" name="__tabbed_36" type="radio" /><input id="__tabbed_36_6" name="__tabbed_36" type="radio" /><input id="__tabbed_36_7" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">Multiples chemins</label><label for="__tabbed_36_2">Domaine entier</label><label for="__tabbed_36_3">Conserver le chemin</label><label for="__tabbed_36_4">Temporaire</label><label for="__tabbed_36_5">Sous‑domaine → chemin</label><label for="__tabbed_36_6">Migration API</label><label for="__tabbed_36_7">Après soumission de formulaire</label></div>
@@ -10323,6 +10239,13 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><strong>Mise en tampon de la réponse :</strong> Active ou désactive la mise en tampon des réponses de la ressource proxifiée.</td>
 </tr>
 <tr>
+<td><code>REVERSE_PROXY_REQUEST_BUFFERING</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>yes</td>
+<td><strong>Mise en tampon des requêtes :</strong> Active ou désactive la mise en tampon des requêtes vers la ressource proxifiée.</td>
+</tr>
+<tr>
 <td><code>REVERSE_PROXY_KEEPALIVE</code></td>
 <td><code>no</code></td>
 <td>multisite</td>
@@ -10352,6 +10275,10 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>Utilisez <code>REVERSE_PROXY_INTERCEPT_ERRORS</code> pour fournir des pages d'erreur cohérentes sur tous vos services</li>
 <li>Lors de la configuration de plusieurs backends, utilisez le format de suffixe numéroté (par exemple, <code>REVERSE_PROXY_HOST_2</code>, <code>REVERSE_PROXY_URL_2</code>)</li>
 </ul>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Comportement de la mise en tampon des requêtes</p>
+<p>La désactivation de <code>REVERSE_PROXY_REQUEST_BUFFERING</code> n'a d'effet que lorsque ModSecurity est désactivé, car la mise en tampon des requêtes est autrement imposée.</p>
 </div>
 </div>
 <div class="tabbed-block">
@@ -10787,7 +10714,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 <div class="admonition danger">
 <p class="admonition-title">Utilisateurs de Docker Compose - Variables NGINX</p>
-<p>Lorsque vous utilisez Docker Compose avec des variables NGINX dans vos configurations, vous testingez échapper le signe dollar (<code>$</code>) en utilisant des doubles signes dollar (<code>$$</code>). Cela s'applique à tous les paramètres contenant des variables NGINX comme <code>$remote_addr</code>, <code>$proxy_add_x_forwarded_for</code>, etc.</p>
+<p>Lorsque vous utilisez Docker Compose avec des variables NGINX dans vos configurations, vous devez échapper le signe dollar (<code>$</code>) en utilisant des doubles signes dollar (<code>$$</code>). Cela s'applique à tous les paramètres contenant des variables NGINX comme <code>$remote_addr</code>, <code>$proxy_add_x_forwarded_for</code>, etc.</p>
 <p>Sans cet échappement, Docker Compose essaiera de substituer ces variables par des variables d'environnement, qui n'existent généralement pas, ce qui entraînera des valeurs vides dans votre configuration NGINX.</p>
 </div>
 <h3 id="exemples-de-configuration_10">Exemples de configuration</h3>
@@ -11465,7 +11392,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <div class="highlight"><pre><span></span><code><span class="nt">GENERATE_SELF_SIGNED_SSL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">SELF_SIGNED_SSL_ALGORITHM</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ec-prime256v1&quot;</span>
 <span class="nt">SELF_SIGNED_SSL_EXPIRY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;90&quot;</span>
-<span class="nt">SELF_SIGNED_SSL_SUBJ</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/CN=testing.example.com/&quot;</span>
+<span class="nt">SELF_SIGNED_SSL_SUBJ</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/CN=dev.example.com/&quot;</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">

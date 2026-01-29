@@ -1118,7 +1118,7 @@
 <figure>
 <p><img align="center," alt="Vue d'ensemble" src="../../assets/img/concepts.svg" width="600" /></p>
 </figure>
-<p>Au sein de votre infrastructure, BunkerWeb agit comme un proxy inverse testingant vos services web. L'architecture typique consiste à accéder à BunkerWeb à partir d'Internet, qui transmet ensuite les demandes au service d'application approprié sur un réseau sécurisé.</p>
+<p>Au sein de votre infrastructure, BunkerWeb agit comme un proxy inverse devant vos services web. L'architecture typique consiste à accéder à BunkerWeb à partir d'Internet, qui transmet ensuite les demandes au service d'application approprié sur un réseau sécurisé.</p>
 <p>L'utilisation de BunkerWeb de cette manière (architecture classique de proxy inverse) avec le déchargement TLS et les politiques de sécurité centralisées améliore les performances en réduisant la surcharge de chiffrement sur les serveurs backend tout en garantissant un contrôle d'accès cohérent, l'atténuation des menaces et l'application de la conformité dans tous les services.</p>
 <h2 id="integrations">Intégrations</h2>
 <p>Le premier concept est l'intégration de BunkerWeb dans l'environnement cible. Nous préférons utiliser le mot "intégration" au lieu de "installation" car l'un des objectifs de BunkerWeb est de s'intégrer de manière transparente dans les environnements existants.</p>
@@ -1140,7 +1140,7 @@
 <p class="admonition-title">Paramètres BunkerWeb PRO</p>
 <p>Certains plugins sont réservés à la <strong>version PRO</strong>. Vous souhaitez tester rapidement BunkerWeb PRO pendant un mois ? Utilisez le code <code>freetrial</code> lors de votre commande sur le <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=french&amp;utm_campaign=self&amp;utm_source=doc">panneau BunkerWeb</a> ou en cliquant <a href="https://panel.bunkerweb.io/cart.php?language=french&amp;a=add&amp;pid=19&amp;promocode=freetrial&amp;utm_campaign=self&amp;utm_source=doc">ici</a> pour appliquer directement le code promo (sera effectif à la caisse).</p>
 </div>
-<p>Une fois BunkerWeb intégré à votre environnement, vous testingrez le configurer pour servir et protéger vos applications Web.</p>
+<p>Une fois BunkerWeb intégré à votre environnement, vous devrez le configurer pour servir et protéger vos applications Web.</p>
 <p>La configuration de BunkerWeb se fait à l'aide de ce que nous appelons des "paramètres" ou des "variables". Chaque paramètre est identifié par un nom tel que <code>AUTO_LETS_ENCRYPT</code> ou <code>USE_ANTIBOT</code>. Vous pouvez attribuer des valeurs à ces paramètres pour configurer BunkerWeb.</p>
 <p>Voici un exemple factice de configuration BunkerWeb:</p>
 <div class="highlight"><pre><span></span><code>SERVER_NAME=www.example.com
@@ -1170,7 +1170,7 @@ USE_BROTLI=no
 <h2 id="multisite-mode">Mode multisite</h2>
 <p>Comprendre le mode multisite est essentiel lors de l'utilisation de BunkerWeb. Comme notre objectif principal est la protection des applications web, notre solution est intimement liée au concept d'« hôtes virtuels » ou « vhosts » (plus d'informations <a href="https://en.wikipedia.org/wiki/Virtual_hosting">ici</a>). Ces hôtes virtuels permettent de diffuser plusieurs applications Web à partir d'une seule instance ou d'un seul cluster.</p>
 <p>Par défaut, le mode multisite est désactivé sur BunkerWeb. Cela signifie qu'une seule application web sera servie et que tous les paramètres lui seront appliqués. Cette configuration est idéale lorsque vous avez une seule application à protéger, car vous n'avez pas besoin de vous soucier des configurations multisites.</p>
-<p>Cependant, lorsque le mode multisite est activé, BunkerWeb testingient capable de servir et de protéger plusieurs applications Web. Chaque application Web est identifiée par un nom de serveur unique et possède son propre ensemble de paramètres. Ce mode s'avère avantageux lorsque vous avez plusieurs applications à sécuriser et que vous préférez utiliser une seule instance (ou un cluster) de BunkerWeb.</p>
+<p>Cependant, lorsque le mode multisite est activé, BunkerWeb devient capable de servir et de protéger plusieurs applications Web. Chaque application Web est identifiée par un nom de serveur unique et possède son propre ensemble de paramètres. Ce mode s'avère avantageux lorsque vous avez plusieurs applications à sécuriser et que vous préférez utiliser une seule instance (ou un cluster) de BunkerWeb.</p>
 <p>L'activation du mode multisite est contrôlée par le <code>MULTISITE</code> paramètre, qui peut être défini pour <code>yes</code> l'activer ou <code>no</code> pour le garder désactivé (valeur par défaut).</p>
 <p>Chaque paramètre de BunkerWeb a un contexte spécifique qui détermine où il peut être appliqué. Si le contexte est défini sur « global », le paramètre ne peut pas être appliqué par serveur ou site, mais à l'ensemble de la configuration. D'autre part, si le contexte est « multisite », le paramètre peut être appliqué globalement et par serveur. Pour définir un paramètre multisite pour un serveur spécifique, il suffit d'ajouter le nom du serveur en tant que préfixe au nom du paramètre. Par exemple, <code>app1.example.com_AUTO_LETS_ENCRYPT</code> ou <code>app2.example.com_USE_ANTIBOT</code> sont des exemples de définition de noms avec des préfixes de nom de serveur. Lorsqu'un paramètre multisite est défini globalement sans préfixe de serveur, tous les serveurs héritent de ce paramètre. Toutefois, des serveurs individuels peuvent toujours remplacer le paramètre si le même paramètre est défini avec un préfixe de nom de serveur.</p>
 <p>Comprendre les subtilités du mode multisite et de ses paramètres associés vous permet d'adapter le comportement de BunkerWeb à vos besoins spécifiques, garantissant ainsi une protection optimale de vos applications Web.</p>
@@ -1194,7 +1194,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </figure>
 <div class="admonition info">
 <p class="admonition-title">Aller plus loin</p>
-<p>Vous trouverez des exemples concrets du mode multisite dans la section <a href="../advanced/">Utilisations avancées</a> de la documentation et dans le répertoire <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc1/examples">examples</a> du dépôt.</p>
+<p>Vous trouverez des exemples concrets du mode multisite dans la section <a href="../advanced/">Utilisations avancées</a> de la documentation et dans le répertoire <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples</a> du dépôt.</p>
 </div>
 <h2 id="custom-configurations">Configurations personnalisées</h2>
 <p>Pour relever des défis uniques et répondre à des cas d'utilisation spécifiques, BunkerWeb offre la flexibilité de configurations personnalisées. Bien que les paramètres fournis et les <a href="../plugins/">plug-ins externes</a> couvrent un large éventail de scénarios, il peut y avoir des situations qui nécessitent une personnalisation supplémentaire.</p>
@@ -1209,7 +1209,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </figure>
 <div class="admonition info">
 <p class="admonition-title">Aller plus loin</p>
-<p>Vous trouverez des exemples concrets de configurations personnalisées dans la section <a href="../advanced/#custom-configurations">Utilisations avancées</a> de la documentation et dans le répertoire <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc1/examples">examples</a> du dépôt.</p>
+<p>Vous trouverez des exemples concrets de configurations personnalisées dans la section <a href="../advanced/#custom-configurations">Utilisations avancées</a> de la documentation et dans le répertoire <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples</a> du dépôt.</p>
 </div>
 <h2 id="base-de-donnees">Base de données</h2>
 <p>BunkerWeb stocke en toute sécurité sa configuration actuelle dans une base de données backend, qui contient des données essentielles pour un fonctionnement sans faille. Les informations suivantes sont stockées dans la base de données:</p>
@@ -1238,7 +1238,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p>La configuration de la base de données est simple à l'aide du <code>DATABASE_URI</code> paramètre, qui suit les formats spécifiés pour chaque base de données prise en charge:</p>
 <div class="admonition avertissement">
 <p class="admonition-title">Avertissement</p>
-<p>Lors de l'utilisation de l'intégration Docker, vous testingez définir la <code>DATABASE_URI</code> variable d'environnement dans tous les conteneurs BunkerWeb (à l'exception du conteneur BunkerWeb lui-même), afin de vous assurer que tous les composants peuvent accéder correctement à la base de données. Ceci est crucial pour maintenir l'intégrité et la fonctionnalité du système.</p>
+<p>Lors de l'utilisation de l'intégration Docker, vous devez définir la <code>DATABASE_URI</code> variable d'environnement dans tous les conteneurs BunkerWeb (à l'exception du conteneur BunkerWeb lui-même), afin de vous assurer que tous les composants peuvent accéder correctement à la base de données. Ceci est crucial pour maintenir l'intégrité et la fonctionnalité du système.</p>
 <p>In all cases, ensure that <code>DATABASE_URI</code> is set before starting BunkerWeb, as it is required for proper operation.</p>
 </div>
 <ul>
@@ -1302,7 +1302,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <ul>
 <li><a href="https://www.postgresql.org/download/">Guide de téléchargement et de dépôt PostgreSQL</a></li>
 <li><a href="https://mariadb.org/download/?t=repo-config">Outil de configuration du dépôt MariaDB</a></li>
-<li><a href="https://testing.mysql.com/doc/mysql-yum-repo-quick-guide/en/">Guide de configuration du dépôt MySQL</a></li>
+<li><a href="https://dev.mysql.com/doc/mysql-yum-repo-quick-guide/en/">Guide de configuration du dépôt MySQL</a></li>
 <li><a href="https://www.sqlite.org/download.html">Page de téléchargement de SQLite</a></li>
 </ul>
 <figure>
@@ -1336,7 +1336,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <figcaption>Gérer les tâches à partir de l'interface utilisateur web</figcaption>
 </figure>
 <p><strong>Vérification de l'état des instances</strong></p>
-<p>Depuis la version 1.6.0, le planificateur dispose d'un système de vérification de l'état intégré qui surveille l'état des instances. Si une instance testingient défectueuse, le planificateur cessera de lui envoyer la configuration. Si l'instance retestingient saine, le planificateur reprend l'envoi de la configuration.</p>
+<p>Depuis la version 1.6.0, le planificateur dispose d'un système de vérification de l'état intégré qui surveille l'état des instances. Si une instance devient défectueuse, le planificateur cessera de lui envoyer la configuration. Si l'instance redevient saine, le planificateur reprend l'envoi de la configuration.</p>
 <p>L'intervalle de vérification de l'état est défini par la <code>HEALTHCHECK_INTERVAL</code> variable d'environnement, avec une valeur par défaut de <code>30</code>, ce qui signifie que le planificateur vérifiera l'état des instances toutes les 30 secondes.</p>
 <h2 id="templates">Modèles</h2>
 <p>BunkerWeb exploite la puissance des modèles pour simplifier le processus de configuration et améliorer la flexibilité. Les modèles offrent une approche structurée et standardisée de la définition des paramètres et des configurations personnalisées, garantissant ainsi la cohérence et la facilité d'utilisation.</p>

@@ -1348,7 +1348,7 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 </div>
 </div>
 <h2 id="autorisations">Autorisations</h2>
-<p>N'oubliez pas que BunkerWeb fonctionne en tant qu'utilisateur non privilégié pour des raisons de sécurité évidentes. Vérifiez les autorisations des fichiers et dossiers utilisés par BunkerWeb, surtout si vous utilisez des configurations personnalisées (plus d'informations <a href="../advanced/#custom-configurations">ici</a>). Vous testingrez définir au moins les droits <strong><em>RW</em></strong> sur les fichiers et <strong><em>RWX</em></strong> sur les dossiers.</p>
+<p>N'oubliez pas que BunkerWeb fonctionne en tant qu'utilisateur non privilégié pour des raisons de sécurité évidentes. Vérifiez les autorisations des fichiers et dossiers utilisés par BunkerWeb, surtout si vous utilisez des configurations personnalisées (plus d'informations <a href="../advanced/#custom-configurations">ici</a>). Vous devrez définir au moins les droits <strong><em>RW</em></strong> sur les fichiers et <strong><em>RWX</em></strong> sur les dossiers.</p>
 <h2 id="debannissement-dip">Débannissement d'IP</h2>
 <p>Vous pouvez débannir manuellement une IP, ce qui est utile lors de la réalisation de tests afin de pouvoir contacter l'API interne de BunkerWeb (remplacez <code>1.2.3.4</code> par l'adresse IP à débannir) :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Docker / Docker Autoconf</label><label for="__tabbed_2_2">Tout-en-un</label><label for="__tabbed_2_3">Swarm</label><label for="__tabbed_2_4">Kubernetes</label><label for="__tabbed_2_5">Linux</label></div>
@@ -1478,10 +1478,10 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 <li>Règle <strong>932160</strong> appariée</li>
 <li>Accès refusé (règle <strong>949110</strong>)</li>
 </ol>
-<p>Une chose importante à comprendre est que la règle <strong>949110</strong> n'est pas une "vraie" règle : c'est celle qui refusera la requête car le seuil d'anomalie est atteint (qui est de <strong>10</strong> dans cet exemple). Vous ne testingriez jamais supprimer la règle <strong>949110</strong> !</p>
-<p>S'il s'agit d'un faux positif, vous testingez alors vous concentrer sur les règles <strong>930120</strong> et <strong>932160</strong>. Le réglage de ModSecurity et/ou du CRS n'entre pas dans le cadre de cette documentation, mais n'oubliez pas que vous pouvez appliquer des configurations personnalisées avant et après le chargement du SCR (plus d'informations <a href="../advanced/#custom-configurations">ici</a>).</p>
+<p>Une chose importante à comprendre est que la règle <strong>949110</strong> n'est pas une "vraie" règle : c'est celle qui refusera la requête car le seuil d'anomalie est atteint (qui est de <strong>10</strong> dans cet exemple). Vous ne devriez jamais supprimer la règle <strong>949110</strong> !</p>
+<p>S'il s'agit d'un faux positif, vous devez alors vous concentrer sur les règles <strong>930120</strong> et <strong>932160</strong>. Le réglage de ModSecurity et/ou du CRS n'entre pas dans le cadre de cette documentation, mais n'oubliez pas que vous pouvez appliquer des configurations personnalisées avant et après le chargement du SCR (plus d'informations <a href="../advanced/#custom-configurations">ici</a>).</p>
 <h3 id="mauvais-comportement">Mauvais comportement</h3>
-<p>Un cas courant de faux positifs est lorsque le client est banni en raison de la fonction "mauvais comportement", ce qui signifie que trop de codes d'état HTTP suspects ont été générés au cours d'une période donnée (plus d'informations <a href="../features/#bad-behavior">ici</a>). Vous testingez commencer par examiner les paramètres, puis les modifier en fonction de votre ou vos applications web, comme la suppression d'un code HTTP suspect, la diminution du temps de comptage, l'augmentation du seuil, ...</p>
+<p>Un cas courant de faux positifs est lorsque le client est banni en raison de la fonction "mauvais comportement", ce qui signifie que trop de codes d'état HTTP suspects ont été générés au cours d'une période donnée (plus d'informations <a href="../features/#bad-behavior">ici</a>). Vous devez commencer par examiner les paramètres, puis les modifier en fonction de votre ou vos applications web, comme la suppression d'un code HTTP suspect, la diminution du temps de comptage, l'augmentation du seuil, ...</p>
 <h3 id="liste-blanche">Liste blanche</h3>
 <p>Si vous avez des bots (ou des administrateurs) qui ont besoin d'accéder à votre site Web, la méthode recommandée pour éviter tout faux positif est de les mettre sur liste blanche à l'aide de la <a href="../features/#whitelist">fonction de liste blanche</a>. Nous vous déconseillons d'utiliser les <code>WHITELIST_URI*</code> paramètres  ou <code>WHITELIST_USER_AGENT*</code> à moins qu'ils ne soient définis sur des valeurs secrètes et imprévisibles. Les cas d'utilisation courants sont :</p>
 <ul>
@@ -1491,14 +1491,14 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 </ul>
 <h2 id="erreurs-courantes">Erreurs courantes</h2>
 <h3 id="en-tete-trop-gros-envoye-en-amont">En-tête trop gros envoyé en amont</h3>
-<p>Si vous voyez l'erreur suivante <code>upstream sent too big header while reading response header from upstream</code> dans les journaux, vous testingrez ajuster la taille des différents tampons proxy à l'aide des paramètres suivants :</p>
+<p>Si vous voyez l'erreur suivante <code>upstream sent too big header while reading response header from upstream</code> dans les journaux, vous devrez ajuster la taille des différents tampons proxy à l'aide des paramètres suivants :</p>
 <ul>
 <li><code>PROXY_BUFFERS</code></li>
 <li><code>PROXY_BUFFER_SIZE</code></li>
 <li><code>PROXY_BUSY_BUFFERS_SIZE</code></li>
 </ul>
 <h3 id="impossible-de-construire-server_names_hash">Impossible de construire server_names_hash</h3>
-<p>Si vous voyez l'erreur suivante <code>could not build server_names_hash, you should increase server_names_hash_bucket_size</code> dans les journaux, vous testingrez modifier le <code>SERVER_NAMES_HASH_BUCKET_SIZE</code> paramètre.</p>
+<p>Si vous voyez l'erreur suivante <code>could not build server_names_hash, you should increase server_names_hash_bucket_size</code> dans les journaux, vous devrez modifier le <code>SERVER_NAMES_HASH_BUCKET_SIZE</code> paramètre.</p>
 <h2 id="fuseau-horaire">Fuseau horaire</h2>
 <p>Lors de l'utilisation d'intégrations basées sur des conteneurs, le fuseau horaire du conteneur peut ne pas correspondre à celui de la machine hôte. Pour résoudre ce problème, vous pouvez définir la <code>TZ</code> variable d'environnement sur le fuseau horaire de votre choix sur vos conteneurs (par exemple, <code>TZ=Europe/Paris</code>). Vous trouverez la liste des identifiants de fuseau horaire <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List">ici</a>.</p>
 <h2 id="clear-old-instances-db">Nettoyer les anciennes instances dans la base de données</h2>
@@ -1686,12 +1686,12 @@ vous pouvez forcer la mise à jour du « marqueur de changement » :</p>
 <p>Accéder à votre base de données :</p>
 <div class="admonition note">
 <p class="admonition-title">Chemin de la base de données</p>
-<p>Nous supposons que vous utilisez le chemin de base de données par défaut. Si vous utilisez un chemin personnalisé, vous testingrez adapter la commande.
+<p>Nous supposons que vous utilisez le chemin de base de données par défaut. Si vous utilisez un chemin personnalisé, vous devrez adapter la commande.
 Pour Tout-en-un, nous supposons que la base de données est <code>db.sqlite3</code> située dans le volume persistant <code>/data</code> (<code>/data/db.sqlite3</code>).</p>
 </div>
 <div class="highlight"><pre><span></span><code>sqlite3<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
 </code></pre></div>
-<p>Vous testingriez voir quelque chose comme ceci :</p>
+<p>Vous devriez voir quelque chose comme ceci :</p>
 <div class="highlight"><pre><span></span><code>SQLite version &lt;VER&gt; &lt;DATE&gt;
 Enter &quot;.help&quot; for usage hints.
 sqlite&gt;
@@ -1704,7 +1704,7 @@ sqlite&gt;
 </div>
 <div class="admonition note">
 <p class="admonition-title">Identifiants et nom de la base de données</p>
-<p>Vous testingrez utiliser les mêmes identifiants et nom de base de données utilisés dans le paramètre <code>DATABASE_URI</code>.</p>
+<p>Vous devrez utiliser les mêmes identifiants et nom de base de données utilisés dans le paramètre <code>DATABASE_URI</code>.</p>
 </div>
 <div class="tabbed-set tabbed-alternate" data-tabs="9:3"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Linux</label><label for="__tabbed_9_2">Docker</label><label for="__tabbed_9_3">All-in-one</label></div>
 <div class="tabbed-content">
@@ -1712,7 +1712,7 @@ sqlite&gt;
 <p>Accédez à votre base de données locale :</p>
 <div class="highlight"><pre><span></span><code>mysql<span class="w"> </span>-u<span class="w"> </span>&lt;user&gt;<span class="w"> </span>-p<span class="w"> </span>&lt;database&gt;
 </code></pre></div>
-<p>Ensuite, entrez le mot de passe de l'utilisateur de la base de données et vous testingriez pouvoir accéder à votre base de données.</p>
+<p>Ensuite, entrez le mot de passe de l'utilisateur de la base de données et vous devriez pouvoir accéder à votre base de données.</p>
 </div>
 <div class="tabbed-block">
 <p>Accédez à votre conteneur de base de données :</p>
@@ -1728,10 +1728,10 @@ sqlite&gt;
 </div>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-u<span class="w"> </span><span class="m">0</span><span class="w"> </span>-it<span class="w"> </span>&lt;bunkerweb_db_container&gt;<span class="w"> </span>mysql<span class="w"> </span>-u<span class="w"> </span>&lt;user&gt;<span class="w"> </span>-p<span class="w"> </span>&lt;database&gt;
 </code></pre></div>
-<p>Ensuite, entrez le mot de passe de l'utilisateur de la base de données et vous testingriez pouvoir accéder à votre base de données.</p>
+<p>Ensuite, entrez le mot de passe de l'utilisateur de la base de données et vous devriez pouvoir accéder à votre base de données.</p>
 </div>
 <div class="tabbed-block">
-<p>L'image Tout-en-un n'inclut pas de serveur MariaDB/MySQL. Si vous avez configuré l'AIO pour utiliser une base de données MariaDB/MySQL externe (en définissant la variable d'environnement <code>DATABASE_URI</code>), vous testingez vous connecter à cette base de données directement à l'aide des outils clients MySQL standard.</p>
+<p>L'image Tout-en-un n'inclut pas de serveur MariaDB/MySQL. Si vous avez configuré l'AIO pour utiliser une base de données MariaDB/MySQL externe (en définissant la variable d'environnement <code>DATABASE_URI</code>), vous devez vous connecter à cette base de données directement à l'aide des outils clients MySQL standard.</p>
 <p>La méthode de connexion serait similaire à l'onglet "Linux" (si vous vous connectez depuis l'hôte où AIO fonctionne ou une autre machine) ou en exécutant un client MySQL dans un conteneur Docker séparé si préféré, en ciblant l'hôte et les identifiants de votre base de données externe.</p>
 </div>
 </div>
@@ -1744,7 +1744,7 @@ sqlite&gt;
 </div>
 <div class="admonition note">
 <p class="admonition-title">Identifiants, hôte et nom de base de données</p>
-<p>Vous testingrez utiliser les mêmes identifiants (utilisateur/mot de passe), l’hôte et le nom de base de données utilisés dans le paramètre <code>DATABASE_URI</code>.</p>
+<p>Vous devrez utiliser les mêmes identifiants (utilisateur/mot de passe), l’hôte et le nom de base de données utilisés dans le paramètre <code>DATABASE_URI</code>.</p>
 </div>
 <div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Linux</label><label for="__tabbed_10_2">Docker</label><label for="__tabbed_10_3">All-in-one</label></div>
 <div class="tabbed-content">
@@ -1774,7 +1774,7 @@ sqlite&gt;
 <p>Si la base de données est hébergée ailleurs, ajoutez les options <code>-h &lt;host&gt;</code> et <code>-p 5432</code> selon le cas.</p>
 </div>
 <div class="tabbed-block">
-<p>L'image Tout-en-un n'inclut pas de serveur PostgreSQL. Si vous avez configuré l'AIO pour utiliser une base de données PostgreSQL externe (en définissant la variable d'environnement <code>DATABASE_URI</code>), vous testingez vous connecter à cette base de données directement à l'aide des outils clients PostgreSQL standard.</p>
+<p>L'image Tout-en-un n'inclut pas de serveur PostgreSQL. Si vous avez configuré l'AIO pour utiliser une base de données PostgreSQL externe (en définissant la variable d'environnement <code>DATABASE_URI</code>), vous devez vous connecter à cette base de données directement à l'aide des outils clients PostgreSQL standard.</p>
 <p>La méthode de connexion serait similaire à l'onglet "Linux" (si vous vous connectez depuis l'hôte où AIO fonctionne ou une autre machine) ou en exécutant un client PostgreSQL dans un conteneur Docker séparé si préféré, en ciblant l'hôte et les identifiants de votre base de données externe.</p>
 </div>
 </div>
@@ -1887,7 +1887,7 @@ sqlite&gt;
 <p>Exécutez la commande suivante pour extraire les données de la table <code>bw_ui_users</code> :</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">bw_ui_users</span><span class="p">;</span>
 </code></pre></div>
-<p>Vous testingriez voir quelque chose comme ceci :</p>
+<p>Vous devriez voir quelque chose comme ceci :</p>
 <table>
 <thead>
 <tr>
@@ -1918,7 +1918,7 @@ sqlite&gt;
 </table>
 </div>
 <div class="tabbed-block">
-<p>Vous testingez d'abord hacher le nouveau mot de passe en utilisant l'algorithme bcrypt.</p>
+<p>Vous devez d'abord hacher le nouveau mot de passe en utilisant l'algorithme bcrypt.</p>
 <p>Installez la bibliothèque Python bcrypt :</p>
 <div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>bcrypt
 </code></pre></div>
@@ -1931,7 +1931,7 @@ sqlite&gt;
 <p>Si vous vérifiez à nouveau votre table <code>bw_ui_users</code> en suivant cette commande :</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">bw_ui_users</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="k">admin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
 </code></pre></div>
-<p>Vous testingriez voir quelque chose comme ceci :</p>
+<p>Vous devriez voir quelque chose comme ceci :</p>
 <table>
 <thead>
 <tr>
@@ -1960,7 +1960,7 @@ sqlite&gt;
 </tr>
 </tbody>
 </table>
-<p>Vous testingriez maintenant pouvoir utiliser les nouvelles informations d'identification pour vous connecter à l'interface utilisateur Web.</p>
+<p>Vous devriez maintenant pouvoir utiliser les nouvelles informations d'identification pour vous connecter à l'interface utilisateur Web.</p>
 </div>
 <div class="tabbed-block">
 <p>Vous pouvez désactiver l'authentification 2FA en exécutant cette commande :</p>
@@ -1969,7 +1969,7 @@ sqlite&gt;
 <p>Si vous vérifiez à nouveau votre table <code>bw_ui_users</code> en suivant cette commande :</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">bw_ui_users</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="k">admin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
 </code></pre></div>
-<p>Vous testingriez voir quelque chose comme ceci :</p>
+<p>Vous devriez voir quelque chose comme ceci :</p>
 <table>
 <thead>
 <tr>
@@ -1998,7 +1998,7 @@ sqlite&gt;
 </tr>
 </tbody>
 </table>
-<p>Vous testingriez maintenant pouvoir vous connecter à l'interface utilisateur Web en utilisant uniquement votre nom d'utilisateur et votre mot de passe sans 2FA.</p>
+<p>Vous devriez maintenant pouvoir vous connecter à l'interface utilisateur Web en utilisant uniquement votre nom d'utilisateur et votre mot de passe sans 2FA.</p>
 </div>
 <div class="tabbed-block">
 <p>Les codes de récupération peuvent être actualisés dans votre <strong>page de profil</strong> de l'interface utilisateur Web sous l'onglet <code>Sécurité</code>.</p>
@@ -2017,8 +2017,8 @@ sqlite&gt;
 <h3 id="televersement-de-plugin">Téléversement de plugin</h3>
 <p>Il peut ne pas être possible de télécharger un plugin à partir de l'interface utilisateur dans certaines situations :</p>
 <ul>
-<li>Package manquant pour gérer les fichiers compressés sur votre intégration, auquel cas vous testingrez ajouter les packages nécessaires</li>
-<li>Navigateur Safari : le 'mode sans échec' peut vous empêcher d'ajouter un plugin. Vous testingrez apporter les modifications nécessaires sur votre machine</li>
+<li>Package manquant pour gérer les fichiers compressés sur votre intégration, auquel cas vous devrez ajouter les packages nécessaires</li>
+<li>Navigateur Safari : le 'mode sans échec' peut vous empêcher d'ajouter un plugin. Vous devrez apporter les modifications nécessaires sur votre machine</li>
 </ul>
 
 
