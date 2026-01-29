@@ -1,6 +1,6 @@
 bcrypt<5.0.0
 biscuit-python==0.4.0
-cryptography==46.0.3
+cryptography==46.0.4
 email-validator==2.3.0
 fastapi==0.128.0
 gunicorn==24.1.1

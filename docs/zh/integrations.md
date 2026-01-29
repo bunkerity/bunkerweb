@@ -2598,15 +2598,16 @@ networks:
 
 ##### 模式与运行时
 
-| Setting               | 描述                                    | 接受的值                           | 默认值                        |
-| --------------------- | --------------------------------------- | ---------------------------------- | ----------------------------- |
-| `AUTOCONF_MODE`       | 启用 autoconf 控制器                    | `yes` 或 `no`                      | `no`                          |
-| `SWARM_MODE`          | 监控 Swarm 服务而非 Docker 容器         | `yes` 或 `no`                      | `no`                          |
-| `KUBERNETES_MODE`     | 监控 Kubernetes ingress/pod 而非 Docker | `yes` 或 `no`                      | `no`                          |
-| `DOCKER_HOST`         | Docker 套接字 / 远程 API URL            | 例如 `unix:///var/run/docker.sock` | `unix:///var/run/docker.sock` |
-| `WAIT_RETRY_INTERVAL` | 实例就绪检查之间的秒数                  | 整秒                               | `5`                           |
-| `LOG_SYSLOG_TAG`      | Autoconf 日志的 syslog tag              | 字符串                             | `bw-autoconf`                 |
-| `TZ`                  | Autoconf 日志和时间戳使用的时区         | TZ 数据库名（如 `Europe/Paris`）   | unset（容器默认，通常为 UTC） |
+| Setting                   | 描述                                    | 接受的值                           | 默认值                        |
+| ------------------------- | --------------------------------------- | ---------------------------------- | ----------------------------- |
+| `AUTOCONF_MODE`           | 启用 autoconf 控制器                    | `yes` 或 `no`                      | `no`                          |
+| `SWARM_MODE`              | 监控 Swarm 服务而非 Docker 容器         | `yes` 或 `no`                      | `no`                          |
+| `KUBERNETES_MODE`         | 监控 Kubernetes ingress/pod 而非 Docker | `yes` 或 `no`                      | `no`                          |
+| `KUBERNETES_GATEWAY_MODE` | 启用 Kubernetes Gateway API 控制器      | `yes` 或 `no`                      | `no`                          |
+| `DOCKER_HOST`             | Docker 套接字 / 远程 API URL            | 例如 `unix:///var/run/docker.sock` | `unix:///var/run/docker.sock` |
+| `WAIT_RETRY_INTERVAL`     | 实例就绪检查之间的秒数                  | 整秒                               | `5`                           |
+| `LOG_SYSLOG_TAG`          | Autoconf 日志的 syslog tag              | 字符串                             | `bw-autoconf`                 |
+| `TZ`                      | Autoconf 日志和时间戳使用的时区         | TZ 数据库名（如 `Europe/Paris`）   | unset（容器默认，通常为 UTC） |
 
 ##### 数据库与校验
 
@@ -2643,9 +2644,12 @@ networks:
 | `KUBERNETES_SSL_CA_CERT`                | Kubernetes API 自定义 CA bundle 路径                                        | 文件路径          | unset           |
 | `USE_KUBERNETES_FQDN`                   | 使用 `<pod>.<ns>.pod.<domain>` 而不是 Pod IP 作为实例主机名                 | `yes` 或 `no`     | `yes`           |
 | `KUBERNETES_INGRESS_CLASS`              | 仅处理该类的 ingress                                                        | 字符串            | unset（全部）   |
+| `KUBERNETES_GATEWAY_MODE`               | 使用 Gateway API 控制器而非 Ingress                                         | `yes` 或 `no`     | `no`            |
+| `KUBERNETES_GATEWAY_CLASS`              | 仅处理该类的 Gateway                                                        | 字符串            | unset（全部）   |
+| `KUBERNETES_GATEWAY_API_VERSION`        | 使用的 Gateway API 版本（缺失时自动回退）                                   | `v1` 或 `v1beta1` | `v1`            |
 | `KUBERNETES_DOMAIN_NAME`                | 构建上游主机时使用的集群域名后缀                                            | 字符串            | `cluster.local` |
 | `KUBERNETES_SERVICE_PROTOCOL`           | 生成的反向代理主机所用的协议                                                | `http` 或 `https` | `http`          |
-| `BUNKERWEB_SERVICE_NAME`                | 在补丁 Ingress 状态时读取的 Service 名称                                    | 字符串            | `bunkerweb`     |
+| `BUNKERWEB_SERVICE_NAME`                | 在补丁 Ingress/Gateway 状态时读取的 Service 名称                            | 字符串            | `bunkerweb`     |
 | `BUNKERWEB_NAMESPACE`                   | 该 Service 的命名空间                                                       | 字符串            | `bunkerweb`     |
 | `KUBERNETES_REVERSE_PROXY_SUFFIX_START` | 多路径 ingress 生成 `REVERSE_PROXY_HOST_n`/`REVERSE_PROXY_URL_n` 的起始索引 | 整数 (>=0)        | `1`             |
 
@@ -2727,9 +2731,20 @@ networks:
 </figure>
 
 为了在 Kubernetes 环境中自动化 BunkerWeb 实例的配置，
-autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)。
+autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) 或 [Gateway API 控制器](https://kubernetes.io/docs/concepts/services-networking/gateway/)。
 它根据 [Ingress 资源](https://kubernetes.io/docs/concepts/services-networking/ingress/) 配置 BunkerWeb 实例，
 并监控其他 Kubernetes 对象，例如 [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/)，以获取自定义配置。
+
+!!! example "Gateway API 模式"
+    Gateway API 模式目前处于 **beta**。
+
+    请确保集群已安装 Gateway API 的 CRD（参见 [Gateway API 安装指南](https://gateway-api.sigs.k8s.io/guides/getting-started/#installing-gateway-api)）。
+
+    如果你使用 Kubernetes Gateway API，请设置 `KUBERNETES_MODE=yes` 和 `KUBERNETES_GATEWAY_MODE=yes`。
+
+    控制器将监控 `Gateway` 与 `HTTPRoute` 资源，而不是 `Ingress` 对象。你可以通过 `KUBERNETES_GATEWAY_CLASS` 限制处理范围，并选择 `KUBERNETES_GATEWAY_API_VERSION`（`v1` 或 `v1beta1`）。
+
+    如果你的 Service 名称不是 `bunkerweb`，请设置 `BUNKERWEB_SERVICE_NAME` 以便状态补丁读取正确的 Service。
 
 !!! info "ConfigMap 同步"
     - Ingress 控制器仅管理带有 `bunkerweb.io/CONFIG_TYPE` 注解的 ConfigMap。
@@ -2751,7 +2766,7 @@ autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/conce
 !!! warning "Kubernetes API 的自定义 CA"
     如果您为您的 Kubernetes API 使用自定义 CA，您可以在 ingress 控制器上挂载一个包含您的中间证书和根证书的捆绑文件，并将 `KUBERNETES_SSL_CA_CERT` 环境变量的值设置为容器内捆绑文件的路径。或者，即使不推荐，您也可以通过将 ingress 控制器的 `KUBERNETES_SSL_VERIFY` 环境变量设置为 `no`（默认为 `yes`）来禁用证书验证。
 
-此外，**在使用 Kubernetes 集成时，将 `KUBERNETES_MODE` 环境变量设置为 `yes` 至关重要**。此变量是正常运行所必需的。
+此外，**在使用 Kubernetes 集成时，将 `KUBERNETES_MODE` 环境变量设置为 `yes` 至关重要**。此变量是正常运行所必需的。如果你使用 Gateway API，还需要设置 `KUBERNETES_GATEWAY_MODE=yes`。
 
 ### 安装方法 {#kubernetes-installation}
 
@@ -3057,10 +3072,11 @@ spec:
 
 ###### Important Environment Variables
 
-| Variable           | Value                                                 | Description                                              |
-| ------------------ | ----------------------------------------------------- | -------------------------------------------------------- |
-| `KUBERNETES_MODE`  | `yes`                                                 | **Mandatory** for automatic discovery via the controller |
-| `API_WHITELIST_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API                            |
+| Variable                  | Value                                                 | Description                                              |
+| ------------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
+| `KUBERNETES_MODE`         | `yes`                                                 | **Mandatory** for automatic discovery via the controller |
+| `KUBERNETES_GATEWAY_MODE` | `yes` or `no` (if using Gateway API)                  | Use Gateway API mode                                     |
+| `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API                            |
 
 
 ##### Step 3: Creating Services
@@ -3308,6 +3324,52 @@ spec:
 ...
 ```
 
+### Gateway 资源
+
+当使用 Gateway API 模式时，你可以声明 `Gateway` 与 `HTTPRoute` 资源。
+在 `HTTPRoute` 上通过 `bunkerweb.io/<SETTING>` 注解提供 BunkerWeb 配置；如需限定到某个主机，
+使用 `bunkerweb.io/<hostname>_<SETTING>`。`hostnames` 字段用于驱动服务器名称。参见 [Gateway 类](#gateway-class)。
+
+!!! info "TLS 支持"
+    TLS 终止通过 `Gateway` 的 listeners 及其 `certificateRefs`（TLS secrets）完成。
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: my-gateway
+spec:
+  gatewayClassName: bunkerweb
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: www.example.com
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: my-route
+  annotations:
+    # 应用于该路由内所有 hostnames
+    bunkerweb.io/MY_SETTING: "value"
+    # 仅应用于 www.example.com
+    bunkerweb.io/www.example.com_MY_SETTING: "value"
+spec:
+  parentRefs:
+    - name: my-gateway
+  hostnames:
+    - www.example.com
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: svc-my-app
+          port: 8000
+```
+
 ### 命名空间 {#namespaces_1}
 
 从 `1.6.0` 版本开始，BunkerWeb 的自动配置堆栈现在支持命名空间。此功能使您能够在同一个 Kubernetes 集群上管理多个 BunkerWeb 实例和服务的集群。要利用命名空间，只需在您的 BunkerWeb 实例和服务上设置 `namespace` 元数据字段。这是一个示例：
@@ -3400,6 +3462,36 @@ spec:
                 name: svc-my-app
                 port:
                   number: 8000
+```
+
+### Gateway 类 {#gateway-class}
+
+当使用 Gateway API 时，BunkerWeb 需要一个指向其控制器的 `GatewayClass`：
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: bunkerweb
+spec:
+  controllerName: bunkerweb.io/gateway-controller
+```
+
+若要限制被监控的 `Gateway` 资源，请设置 `KUBERNETES_GATEWAY_CLASS`（例如 `bunkerweb`），并在 `Gateway` 资源中
+使用匹配的 `gatewayClassName`：
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: my-gateway
+spec:
+  gatewayClassName: bunkerweb
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: www.example.com
 ```
 
 ### 自定义域名
@@ -3717,11 +3809,11 @@ kubectl delete ingress <old-ingress> -n <namespace>
 
 ##### 关键差异
 
-| 方面 | NGINX | BunkerWeb |
-|--------|-------|-----------|
-| Ingress 类 | `kubernetes.io/ingress.class` 注解 | `ingressClassName` 字段 |
-| SSL 证书 | 需要 cert-manager | cert-manager 或内置 Let's Encrypt |
-| 安全性 | 默认无 | 默认启用 WAF |
+| 方面       | NGINX                              | BunkerWeb                         |
+| ---------- | ---------------------------------- | --------------------------------- |
+| Ingress 类 | `kubernetes.io/ingress.class` 注解 | `ingressClassName` 字段           |
+| SSL 证书   | 需要 cert-manager                  | cert-manager 或内置 Let's Encrypt |
+| 安全性     | 默认无                             | 默认启用 WAF                      |
 
 ---
 
@@ -3845,17 +3937,17 @@ kubectl delete ingress <old-ingress> -n <namespace>
 
 ##### 注解转换
 
-| 功能 | NGINX Ingress | BunkerWeb Ingress |
-|----------------|---------------|-------------------|
-| HTTPS 重定向 | `ssl-redirect: "true"` | `REDIRECT_HTTP_TO_HTTPS: "yes"` |
-| 启用 CORS | `enable-cors: "true"` | `USE_CORS: "yes"` |
-| CORS 来源 | `cors-allow-origin: "https://..."` | `CORS_ALLOW_ORIGIN: "^https://..."`（PCRE 正则表达式或 `*` 或 `self`） |
-| CORS 方法 | `cors-allow-methods: "GET, POST"` | `CORS_ALLOW_METHODS: "GET, POST"` |
-| 速率限制 | `limit-rps: "20"` | `USE_LIMIT_REQ: "yes"` + `LIMIT_REQ_URL: "/"` + `LIMIT_REQ_RATE: "20r/s"` |
-| 超时 | `proxy-*-timeout: "60"` | `REVERSE_PROXY_*_TIMEOUT: "60s"` |
-| 请求体大小 | `proxy-body-size: "20m"` | `MAX_CLIENT_SIZE: "20m"` |
-| 自定义请求头 | `proxy-set-headers: "custom-headers"` | `CUSTOM_HEADER: "Header-Name: value"`（多个注解可设置多个请求头） |
-| 安全性 | 无 | `USE_MODSECURITY: "yes"` + `USE_BAD_BEHAVIOR: "yes"` |
+| 功能         | NGINX Ingress                         | BunkerWeb Ingress                                                         |
+| ------------ | ------------------------------------- | ------------------------------------------------------------------------- |
+| HTTPS 重定向 | `ssl-redirect: "true"`                | `REDIRECT_HTTP_TO_HTTPS: "yes"`                                           |
+| 启用 CORS    | `enable-cors: "true"`                 | `USE_CORS: "yes"`                                                         |
+| CORS 来源    | `cors-allow-origin: "https://..."`    | `CORS_ALLOW_ORIGIN: "^https://..."`（PCRE 正则表达式或 `*` 或 `self`）    |
+| CORS 方法    | `cors-allow-methods: "GET, POST"`     | `CORS_ALLOW_METHODS: "GET, POST"`                                         |
+| 速率限制     | `limit-rps: "20"`                     | `USE_LIMIT_REQ: "yes"` + `LIMIT_REQ_URL: "/"` + `LIMIT_REQ_RATE: "20r/s"` |
+| 超时         | `proxy-*-timeout: "60"`               | `REVERSE_PROXY_*_TIMEOUT: "60s"`                                          |
+| 请求体大小   | `proxy-body-size: "20m"`              | `MAX_CLIENT_SIZE: "20m"`                                                  |
+| 自定义请求头 | `proxy-set-headers: "custom-headers"` | `CUSTOM_HEADER: "Header-Name: value"`（多个注解可设置多个请求头）         |
+| 安全性       | 无                                    | `USE_MODSECURITY: "yes"` + `USE_BAD_BEHAVIOR: "yes"`                      |
 
 ---
 
@@ -4091,27 +4183,27 @@ kubectl delete ingress <old-ingress> -n <namespace>
 
 ##### 比较：原生功能 vs ConfigMap
 
-| NGINX 规则 | BunkerWeb 方法 |
-|-------------|-------------------|
-| `auth-type: basic` | ✅ 原生注解：`USE_AUTH_BASIC` |
-| `whitelist-source-range` | ✅ 原生注解：`WHITELIST_IP` |
+| NGINX 规则                 | BunkerWeb 方法                     |
+| -------------------------- | ---------------------------------- |
+| `auth-type: basic`         | ✅ 原生注解：`USE_AUTH_BASIC`       |
+| `whitelist-source-range`   | ✅ 原生注解：`WHITELIST_IP`         |
 | `if ($http_user_agent ~*)` | ✅ 原生注解：`BLACKLIST_USER_AGENT` |
-| 缓存的 `expires 7d` | ✅ 原生注解：`USE_CLIENT_CACHE` |
-| `limit_conn addr 10` | ✅ 原生注解：`USE_LIMIT_CONN` |
-| 复杂的 `rewrite` | ⚠️ ConfigMap：`CONFIG_TYPE: http` |
-| 自定义 `location` | ⚠️ ConfigMap：`CONFIG_TYPE: http` |
-| 外部 `proxy_pass` | ⚠️ ConfigMap：`CONFIG_TYPE: http` |
+| 缓存的 `expires 7d`        | ✅ 原生注解：`USE_CLIENT_CACHE`     |
+| `limit_conn addr 10`       | ✅ 原生注解：`USE_LIMIT_CONN`       |
+| 复杂的 `rewrite`           | ⚠️ ConfigMap：`CONFIG_TYPE: http`   |
+| 自定义 `location`          | ⚠️ ConfigMap：`CONFIG_TYPE: http`   |
+| 外部 `proxy_pass`          | ⚠️ ConfigMap：`CONFIG_TYPE: http`   |
 
 ---
 
 #### 迁移前后对比
 
-| 指标 | NGINX Ingress | BunkerWeb | 备注 |
-|----------|---------------|-----------|-------------|
-| 平均响应时间 | 45ms | 52ms | +7ms（可接受的安全开销）|
-| 被阻止的请求（XSS/SQLi）| 0 | **127** | WAF 已激活 ✅ |
-| SSL 证书 | 有效 | 有效 | 迁移成功 ✅ |
-| 可用性 | 99.9% | 99.9% | 稳定 ✅ |
+| 指标                     | NGINX Ingress | BunkerWeb | 备注                     |
+| ------------------------ | ------------- | --------- | ------------------------ |
+| 平均响应时间             | 45ms          | 52ms      | +7ms（可接受的安全开销） |
+| 被阻止的请求（XSS/SQLi） | 0             | **127**   | WAF 已激活 ✅             |
+| SSL 证书                 | 有效          | 有效      | 迁移成功 ✅               |
+| 可用性                   | 99.9%         | 99.9%     | 稳定 ✅                   |
 
 
 ## Swarm

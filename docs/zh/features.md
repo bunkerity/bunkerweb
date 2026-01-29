@@ -922,10 +922,12 @@ STREAM 支持 :warning:
 
     `BLACKLIST_COMMUNITY_LISTS` 设置允许您从精选的黑名单源中进行选择。可用选项包括：
 
-    | ID                                  | 描述                                                                                                                                                                        | 来源                                                                                                                           |
-    | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-    | `ip:danmeuk-tor-exit`               | Tor 出口节点 IP (dan.me.uk)                                                                                                                                                 | `https://www.dan.me.uk/torlist/?exit`                                                                                          |
-    | `ua:mitchellkrogza-bad-user-agents` | Nginx 阻止不良机器人、垃圾邮件引荐来源、漏洞扫描器、用户代理、恶意软件、广告软件、勒索软件、恶意网站，具有反 DDOS、Wordpress 主题检测器阻止和针对重复违规者的 Fail2Ban Jail | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` |
+    | ID                                        | 描述                                                                                                                                                                        | 来源                                                                                                                                  |
+    | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+    | `ip:danmeuk-tor-exit`                     | Tor 出口节点 IP (dan.me.uk)                                                                                                                                                 | `https://www.dan.me.uk/torlist/?exit`                                                                                                 |
+    | `ua:mitchellkrogza-bad-user-agents`       | Nginx 阻止不良机器人、垃圾邮件引荐来源、漏洞扫描器、用户代理、恶意软件、广告软件、勒索软件、恶意网站，具有反 DDOS、Wordpress 主题检测器阻止和针对重复违规者的 Fail2Ban Jail | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`        |
+    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist - Laurent M. - 适用于 Web 应用, WordPress, VPS (Apache/Nginx)                                                                                    | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`          |
+    | `ip:laurent-minne-data-shield-critical`   | Data-Shield IPv4 Blocklist - Laurent M. - 适用于 DMZs, SaaS, API 和关键资产                                                                                                 | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_critical_data-shield_ipv4_blocklist.txt` |
 
     **配置：** 指定多个列表，以空格分隔。例如：
     ```yaml
@@ -934,6 +936,9 @@ STREAM 支持 :warning:
 
     !!! tip "社区与手动配置"
         社区黑名单提供了一种方便的方式来开始使用经过验证的黑名单源。您可以将它们与手动 URL 配置一起使用，以实现最大的灵活性。
+
+    !!! note "致谢"
+        感谢 Laurent Minne 贡献了 [Data-Shield 阻止列表](https://duggytuxy.github.io/#)！
 
 === "IP 地址"
     **这是做什么的：** 根据访问者的 IP 地址或网络阻止访问。
@@ -4659,16 +4664,16 @@ STREAM 支持 :warning:
         - **协议处理：** 支持 HTTP、HTTPS、WebSockets 和其他协议
         - **错误拦截：** 自定义错误页面以获得一致的用户体验
 
-    | 设置                             | 默认值 | 上下文    | 多选 | 描述                                                 |
-    | -------------------------------- | ------ | --------- | ---- | ---------------------------------------------------- |
-    | `USE_REVERSE_PROXY`              | `no`   | multisite | 否   | **启用反向代理：** 设置为 `yes` 以启用反向代理功能。 |
-    | `REVERSE_PROXY_HOST`             |        | multisite | 是   | **后端主机：** 代理资源的完整 URL (proxy_pass)。     |
-    | `REVERSE_PROXY_URL`              | `/`    | multisite | 是   | **位置 URL：** 将被代理到后端服务器的路径。          |
-    | `REVERSE_PROXY_BUFFERING`        | `yes`  | multisite | 是   | **响应缓冲：** 启用或禁用来自代理资源的响应缓冲。    |
-    | `REVERSE_PROXY_REQUEST_BUFFERING`| `yes`  | multisite | 是   | **请求缓冲：** 启用或禁用向代理资源发送请求时的缓冲。 |
-    | `REVERSE_PROXY_KEEPALIVE`        | `no`   | multisite | 是   | **保持连接：** 启用或禁用与代理资源的保持连接。      |
-    | `REVERSE_PROXY_CUSTOM_HOST`      |        | multisite | 否   | **自定义主机：** 覆盖发送到上游服务器的 Host 标头。  |
-    | `REVERSE_PROXY_INTERCEPT_ERRORS` | `yes`  | multisite | 否   | **拦截错误：** 是否拦截和重写来自后端的错误响应。    |
+    | 设置                              | 默认值 | 上下文    | 多选 | 描述                                                  |
+    | --------------------------------- | ------ | --------- | ---- | ----------------------------------------------------- |
+    | `USE_REVERSE_PROXY`               | `no`   | multisite | 否   | **启用反向代理：** 设置为 `yes` 以启用反向代理功能。  |
+    | `REVERSE_PROXY_HOST`              |        | multisite | 是   | **后端主机：** 代理资源的完整 URL (proxy_pass)。      |
+    | `REVERSE_PROXY_URL`               | `/`    | multisite | 是   | **位置 URL：** 将被代理到后端服务器的路径。           |
+    | `REVERSE_PROXY_BUFFERING`         | `yes`  | multisite | 是   | **响应缓冲：** 启用或禁用来自代理资源的响应缓冲。     |
+    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`  | multisite | 是   | **请求缓冲：** 启用或禁用向代理资源发送请求时的缓冲。 |
+    | `REVERSE_PROXY_KEEPALIVE`         | `no`   | multisite | 是   | **保持连接：** 启用或禁用与代理资源的保持连接。       |
+    | `REVERSE_PROXY_CUSTOM_HOST`       |        | multisite | 否   | **自定义主机：** 覆盖发送到上游服务器的 Host 标头。   |
+    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`  | multisite | 否   | **拦截错误：** 是否拦截和重写来自后端的错误响应。     |
 
     !!! tip "最佳实践"
         - 始终在 `REVERSE_PROXY_HOST` 中指定完整的 URL，包括协议（http:// 或 https://）

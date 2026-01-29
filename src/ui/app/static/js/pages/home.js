@@ -93,44 +93,95 @@ $(function () {
     );
   }
 
-  // Function to get color based on data value, using a gradient of "#0b354a"
-  function getColor(d) {
-    if (d == null || d === 0) {
-      return "transparent"; // No data, make it transparent
+  const baseMapColor = "#0b354a";
+  const noDataColor = "#6a6a6a";
+
+  const blockedValues = Object.values(requestsMapData)
+    .map((item) => parseInt(item?.blocked ?? 0, 10))
+    .filter((value) => Number.isFinite(value) && value > 0);
+
+  function niceStep(value) {
+    const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
+    const residual = value / magnitude;
+    if (residual <= 1) return 1 * magnitude;
+    if (residual <= 2) return 2 * magnitude;
+    if (residual <= 5) return 5 * magnitude;
+    return 10 * magnitude;
+  }
+
+  function buildLegendGrades(values) {
+    if (!values.length) {
+      return [0, 1];
     }
 
-    // Calculate shades based on data range
-    if (d > 1000) {
-      return adjustColor("#0b354a", -30); // Even darker
-    } else if (d > 500) {
-      return adjustColor("#0b354a", -20); // Darker shade
-    } else if (d > 200) {
-      return adjustColor("#0b354a", -10); // Slightly dark
-    } else if (d > 100) {
-      return adjustColor("#0b354a", 0); // Base color
-    } else if (d > 50) {
-      return adjustColor("#0b354a", 10); // Slightly light
-    } else if (d > 20) {
-      return adjustColor("#0b354a", 20); // Lighter shade
-    } else if (d > 10) {
-      return adjustColor("#0b354a", 30); // Even lighter
-    } else {
-      return adjustColor("#0b354a", 40); // Very light shade
+    const maxValue = Math.max(...values);
+    const targetBuckets = 6;
+    const step = Math.max(1, Math.round(niceStep(maxValue / targetBuckets)));
+    const grades = [0];
+
+    for (let current = step; current < maxValue; current += step) {
+      grades.push(current);
     }
+
+    if (grades[grades.length - 1] !== maxValue) {
+      grades.push(maxValue);
+    }
+
+    return grades;
+  }
+
+  const legendGrades = buildLegendGrades(blockedValues);
+  const numberFormatter = new Intl.NumberFormat();
+
+  function formatNumber(value) {
+    return numberFormatter.format(value);
+  }
+
+  function buildColorRamp(steps) {
+    const lightnessStart = 40;
+    const lightnessEnd = -30;
+
+    if (steps <= 1) {
+      return [adjustColor(baseMapColor, lightnessEnd)];
+    }
+
+    const ramp = [];
+    for (let i = 0; i < steps; i++) {
+      const percent =
+        lightnessStart + ((lightnessEnd - lightnessStart) * i) / (steps - 1);
+      ramp.push(adjustColor(baseMapColor, percent));
+    }
+    return ramp;
+  }
+
+  const colorRamp = buildColorRamp(Math.max(legendGrades.length - 1, 1));
+
+  // Function to get color based on blocked requests value
+  function getColor(d) {
+    if (d == null || d === 0) {
+      return noDataColor;
+    }
+
+    for (let i = legendGrades.length - 1; i > 0; i--) {
+      if (d >= legendGrades[i]) {
+        return colorRamp[Math.min(i - 1, colorRamp.length - 1)];
+      }
+    }
+
+    return colorRamp[0];
   }
 
   // Function to style each feature
   function style(feature) {
+    const blockedValue = feature.properties.value;
+
     return {
-      fillColor: getColor(feature.properties.value),
+      fillColor: getColor(blockedValue),
       weight: 1,
       opacity: 1,
       color: "white",
       dashArray: "3",
-      fillOpacity:
-        feature.properties.value == null || feature.properties.value === 0
-          ? 0
-          : 0.7,
+      fillOpacity: blockedValue === 0 ? 0.2 : 0.85,
     };
   }
 
@@ -342,10 +393,9 @@ $(function () {
     // Assign value to each country from requestsMapData
     geojsonData.features.forEach((feature) => {
       const isoCode = feature.properties.ISO_A2;
-      feature.properties.value =
-        (requestsMapData[isoCode] || {})["request"] || 0; // Assign 0 if not found
-      feature.properties.blocked =
-        (requestsMapData[isoCode] || {})["blocked"] || 0; // Assign 0 if not found
+      const requestStats = requestsMapData[isoCode] || {};
+      feature.properties.value = requestStats["blocked"] || 0; // Assign 0 if not found
+      feature.properties.blocked = requestStats["blocked"] || 0; // Assign 0 if not found
     });
 
     // Add GeoJSON layer to the map once the file is loaded
@@ -370,10 +420,9 @@ $(function () {
   function processGeoJSONData(geojsonData) {
     geojsonData.features.forEach((feature) => {
       const isoCode = feature.properties.ISO_A2;
-      feature.properties.value =
-        (requestsMapData[isoCode] || {})["request"] || 0;
-      feature.properties.blocked =
-        (requestsMapData[isoCode] || {})["blocked"] || 0;
+      const requestStats = requestsMapData[isoCode] || {};
+      feature.properties.value = requestStats["blocked"] || 0;
+      feature.properties.blocked = requestStats["blocked"] || 0;
     });
 
     geojson = L.geoJson(geojsonData, {
@@ -389,31 +438,38 @@ $(function () {
   const legend = L.control({ position: "bottomright" });
 
   legend.onAdd = function () {
-    const div = L.DomUtil.create("div", "legend shadow"),
-      grades = [0, 10, 20, 50, 100, 200, 500, 1000],
-      labels = [
-        `<i style="background:transparent"></i> ${t("dashboard.map.no_data")}`,
-      ];
+    const div = L.DomUtil.create("div", "legend map-legend shadow");
+    const gradientStops = colorRamp.join(", ");
+    const grades = legendGrades;
+    const bucketLabels = [];
 
-    div.innerHTML =
-      '<div class="card mb-1"><div class="card-body text-center p-1"><strong>' +
-      t("dashboard.map.legend") +
-      "</strong><br>";
-
-    for (let i = 0; i < grades.length; i++) {
-      const from = grades[i];
-      const to = grades[i + 1];
-
-      labels.push(
-        '<i style="background:' +
-          getColor(from + 1) +
-          '"></i> ' +
-          from +
-          (to ? "&ndash;" + to : "+"),
-      );
+    if (grades.length > 1) {
+      for (let i = 0; i < grades.length - 1; i++) {
+        const from = grades[i];
+        const to = grades[i + 1];
+        const labelFrom = from === 0 ? 1 : from;
+        bucketLabels.push(
+          `${formatNumber(labelFrom)}${to ? "–" + formatNumber(to) : "+"}`,
+        );
+      }
     }
 
-    div.innerHTML += labels.join("<br>") + "</div></div>";
+    div.innerHTML = `
+      <div class="map-legend__title">${t("dashboard.map.legend")}</div>
+      <div class="map-legend__swatches">
+        <div class="map-legend__swatch">
+          <span class="map-legend__chip" style="background:${noDataColor}"></span>
+          <span>${t("dashboard.map.no_data")}</span>
+        </div>
+      </div>
+      <div class="map-legend__gradient" style="background: linear-gradient(90deg, ${gradientStops});"></div>
+      <div class="map-legend__ticks">
+        <span>${formatNumber(grades[0] === 0 ? 1 : grades[0])}</span>
+        <span>${formatNumber(grades[grades.length - 1])}</span>
+      </div>
+      <div class="map-legend__ranges">${bucketLabels.join(" · ")}</div>
+    `;
+
     return div;
   };
 

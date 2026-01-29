@@ -2599,15 +2599,16 @@ El controlador `bw-autoconf` vigila tu orquestador y escribe cambios en la base 
 
 ##### Modo y runtime
 
-| Setting               | Descripción                                                   | Valores aceptados                      | Predeterminado                           |
-| --------------------- | ------------------------------------------------------------- | -------------------------------------- | ---------------------------------------- |
-| `AUTOCONF_MODE`       | Habilitar el controlador de autoconf                          | `yes` o `no`                           | `no`                                     |
-| `SWARM_MODE`          | Observar servicios Swarm en lugar de contenedores Docker      | `yes` o `no`                           | `no`                                     |
-| `KUBERNETES_MODE`     | Observar ingress/pods de Kubernetes en lugar de Docker        | `yes` o `no`                           | `no`                                     |
-| `DOCKER_HOST`         | Socket Docker / URL de API remota                             | p. ej. `unix:///var/run/docker.sock`   | `unix:///var/run/docker.sock`            |
-| `WAIT_RETRY_INTERVAL` | Segundos entre comprobaciones de disponibilidad de instancias | Segundos enteros                       | `5`                                      |
-| `LOG_SYSLOG_TAG`      | Tag syslog para logs de autoconf                              | Cadena                                 | `bw-autoconf`                            |
-| `TZ`                  | Zona horaria para logs de autoconf y marcas de tiempo         | Nombre en base TZ (ej. `Europe/Paris`) | unset (default de contenedor, suele UTC) |
+| Setting                   | Descripción                                                   | Valores aceptados                      | Predeterminado                           |
+| ------------------------- | ------------------------------------------------------------- | -------------------------------------- | ---------------------------------------- |
+| `AUTOCONF_MODE`           | Habilitar el controlador de autoconf                          | `yes` o `no`                           | `no`                                     |
+| `SWARM_MODE`              | Observar servicios Swarm en lugar de contenedores Docker      | `yes` o `no`                           | `no`                                     |
+| `KUBERNETES_MODE`         | Observar ingress/pods de Kubernetes en lugar de Docker        | `yes` o `no`                           | `no`                                     |
+| `KUBERNETES_GATEWAY_MODE` | Usar el controlador de Gateway API para Kubernetes            | `yes` o `no`                           | `no`                                     |
+| `DOCKER_HOST`             | Socket Docker / URL de API remota                             | p. ej. `unix:///var/run/docker.sock`   | `unix:///var/run/docker.sock`            |
+| `WAIT_RETRY_INTERVAL`     | Segundos entre comprobaciones de disponibilidad de instancias | Segundos enteros                       | `5`                                      |
+| `LOG_SYSLOG_TAG`          | Tag syslog para logs de autoconf                              | Cadena                                 | `bw-autoconf`                            |
+| `TZ`                      | Zona horaria para logs de autoconf y marcas de tiempo         | Nombre en base TZ (ej. `Europe/Paris`) | unset (default de contenedor, suele UTC) |
 
 ##### Base de datos y validación
 
@@ -2644,9 +2645,12 @@ El controlador `bw-autoconf` vigila tu orquestador y escribe cambios en la base 
 | `KUBERNETES_SSL_CA_CERT`                | Ruta a un bundle de CA personalizado para la API de Kubernetes                                  | Ruta de archivo   | unset           |
 | `USE_KUBERNETES_FQDN`                   | Usar `<pod>.<ns>.pod.<domain>` en vez de la IP del pod como hostname de instancia               | `yes` o `no`      | `yes`           |
 | `KUBERNETES_INGRESS_CLASS`              | Procesar solo los ingress con esta clase                                                        | Cadena            | unset (todas)   |
+| `KUBERNETES_GATEWAY_MODE`               | Usar el controlador de Gateway API en lugar de Ingress                                          | `yes` o `no`      | `no`            |
+| `KUBERNETES_GATEWAY_CLASS`              | Procesar solo los Gateways con esta clase                                                       | Cadena            | unset (todas)   |
+| `KUBERNETES_GATEWAY_API_VERSION`        | Versión de la Gateway API a usar (fallback automático si falta)                                 | `v1` o `v1beta1`  | `v1`            |
 | `KUBERNETES_DOMAIN_NAME`                | Sufijo de dominio del clúster al construir hosts upstream                                       | Cadena            | `cluster.local` |
 | `KUBERNETES_SERVICE_PROTOCOL`           | Esquema usado para los hosts de reverse proxy generados                                         | `http` o `https`  | `http`          |
-| `BUNKERWEB_SERVICE_NAME`                | Nombre del servicio que se lee al parchear el estado del Ingress con la dirección del LB        | Cadena            | `bunkerweb`     |
+| `BUNKERWEB_SERVICE_NAME`                | Nombre del servicio que se lee al parchear el estado de Ingress/Gateway con la dirección del LB | Cadena            | `bunkerweb`     |
 | `BUNKERWEB_NAMESPACE`                   | Namespace de ese servicio                                                                       | Cadena            | `bunkerweb`     |
 | `KUBERNETES_REVERSE_PROXY_SUFFIX_START` | Índice inicial para `REVERSE_PROXY_HOST_n`/`REVERSE_PROXY_URL_n` generados en ingress multipath | Entero (>=0)      | `1`             |
 
@@ -2728,10 +2732,21 @@ networks:
 </figure>
 
 Para automatizar la configuración de las instancias de BunkerWeb en un entorno de Kubernetes,
-el servicio de autoconfiguración sirve como un [controlador de Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/).
+el servicio de autoconfiguración sirve como un [controlador de Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) o como [controlador de Gateway API](https://kubernetes.io/docs/concepts/services-networking/gateway/).
 Configura las instancias de BunkerWeb basándose en los [recursos de Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
 y también supervisa otros objetos de Kubernetes, como [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/),
 para configuraciones personalizadas.
+
+!!! example "Modo Gateway API"
+    El modo Gateway API está actualmente en **beta**.
+
+    Asegúrate de que las CRD de Gateway API estén instaladas en el clúster (consulta la [guía de instalación de Gateway API](https://gateway-api.sigs.k8s.io/guides/getting-started/#installing-gateway-api)).
+
+    Si usas la Gateway API de Kubernetes, establece `KUBERNETES_MODE=yes` y `KUBERNETES_GATEWAY_MODE=yes`.
+
+    El controlador observa recursos `Gateway` y `HTTPRoute` en lugar de objetos `Ingress`. Puedes limitar lo que procesa con `KUBERNETES_GATEWAY_CLASS` y elegir `KUBERNETES_GATEWAY_API_VERSION` (`v1` o `v1beta1`).
+
+    Si tu Service no se llama `bunkerweb`, establece `BUNKERWEB_SERVICE_NAME` para que el parcheo de estado lea el Service correcto.
 
 !!! info "Reconciliación de ConfigMap"
     - El controlador de Ingress solo gestiona las ConfigMap que tienen la anotación `bunkerweb.io/CONFIG_TYPE`.
@@ -2753,7 +2768,7 @@ Asegúrate de que los servicios de autoconfiguración tengan acceso a la API de 
 !!! warning "CA personalizada para la API de Kubernetes"
     Si usas una CA personalizada para tu API de Kubernetes, puedes montar un archivo de paquete que contenga tus certificados intermedios y raíz en el controlador de ingress y establecer el valor del entorno `KUBERNETES_SSL_CA_CERT` en la ruta del paquete dentro del contenedor. Alternativamente, aunque no se recomienda, puedes deshabilitar la verificación de certificados estableciendo la variable de entorno `KUBERNETES_SSL_VERIFY` del controlador de ingress en `no` (el valor predeterminado es `yes`).
 
-Además, **es crucial establecer la variable de entorno `KUBERNETES_MODE` en `yes` cuando se utiliza la integración con Kubernetes**. Esta variable es obligatoria para un funcionamiento correcto.
+Además, **es crucial establecer la variable de entorno `KUBERNETES_MODE` en `yes` cuando se utiliza la integración con Kubernetes**. Esta variable es obligatoria para un funcionamiento correcto. Si usas la Gateway API, establece también `KUBERNETES_GATEWAY_MODE=yes`.
 
 ### Métodos de instalación {#kubernetes-installation}
 
@@ -3059,10 +3074,11 @@ spec:
 
 ###### Important Environment Variables
 
-| Variable           | Value                                                 | Description                                              |
-| ------------------ | ----------------------------------------------------- | -------------------------------------------------------- |
-| `KUBERNETES_MODE`  | `yes`                                                 | **Mandatory** for automatic discovery via the controller |
-| `API_WHITELIST_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API                            |
+| Variable                  | Value                                                 | Description                                              |
+| ------------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
+| `KUBERNETES_MODE`         | `yes`                                                 | **Mandatory** for automatic discovery via the controller |
+| `KUBERNETES_GATEWAY_MODE` | `yes` or `no` (if using Gateway API)                  | Use Gateway API mode                                     |
+| `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API                            |
 
 
 ##### Step 3: Creating Services
@@ -3310,6 +3326,52 @@ spec:
 ...
 ```
 
+### Recursos de Gateway
+
+Cuando el modo Gateway API está habilitado, puedes declarar recursos `Gateway` y `HTTPRoute`.
+Las configuraciones de BunkerWeb se indican como anotaciones `bunkerweb.io/<SETTING>` en el `HTTPRoute`; para limitar una
+configuración a un host, usa `bunkerweb.io/<hostname>_<SETTING>`. El campo `hostnames` define los nombres de servidor. Consulta [Clase de Gateway](#gateway-class).
+
+!!! info "Soporte TLS"
+    La terminación TLS se gestiona mediante los listeners del `Gateway` y sus `certificateRefs` (secrets TLS).
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: my-gateway
+spec:
+  gatewayClassName: bunkerweb
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: www.example.com
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: my-route
+  annotations:
+    # Se aplica a todos los hostnames de esta ruta
+    bunkerweb.io/MY_SETTING: "value"
+    # Se aplica solo al host www.example.com
+    bunkerweb.io/www.example.com_MY_SETTING: "value"
+spec:
+  parentRefs:
+    - name: my-gateway
+  hostnames:
+    - www.example.com
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: svc-my-app
+          port: 8000
+```
+
 ### Espacios de nombres {#namespaces_1}
 
 A partir de la versión `1.6.0`, las pilas de autoconfiguración de BunkerWeb ahora admiten espacios de nombres. Esta característica te permite gestionar múltiples clústeres de instancias y servicios de BunkerWeb en el mismo clúster de Kubernetes. Para aprovechar los espacios de nombres, simplemente establece el campo de metadatos `namespace` en tus instancias y servicios de BunkerWeb. Aquí tienes un ejemplo:
@@ -3402,6 +3464,36 @@ spec:
                 name: svc-my-app
                 port:
                   number: 8000
+```
+
+### Clase de Gateway {#gateway-class}
+
+Cuando uses la Gateway API, BunkerWeb espera una `GatewayClass` que apunte a su controlador:
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: bunkerweb
+spec:
+  controllerName: bunkerweb.io/gateway-controller
+```
+
+Para limitar los recursos `Gateway` monitoreados, establece `KUBERNETES_GATEWAY_CLASS` (por ejemplo, `bunkerweb`) y usa el
+`gatewayClassName` correspondiente en tus recursos `Gateway`:
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: my-gateway
+spec:
+  gatewayClassName: bunkerweb
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: www.example.com
 ```
 
 ### Nombre de dominio personalizado
@@ -3718,11 +3810,11 @@ Una aplicación web simple con HTTPS automático a través de cert-manager.
 
 ##### Diferencias clave
 
-| Aspecto | NGINX | BunkerWeb |
-|--------|-------|-----------|
-| Clase Ingress | Anotación `kubernetes.io/ingress.class` | Campo `ingressClassName` |
-| Certificados SSL | cert-manager requerido | cert-manager O Let's Encrypt integrado |
-| Seguridad | Ninguna por defecto | WAF activado por defecto |
+| Aspecto          | NGINX                                   | BunkerWeb                              |
+| ---------------- | --------------------------------------- | -------------------------------------- |
+| Clase Ingress    | Anotación `kubernetes.io/ingress.class` | Campo `ingressClassName`               |
+| Certificados SSL | cert-manager requerido                  | cert-manager O Let's Encrypt integrado |
+| Seguridad        | Ninguna por defecto                     | WAF activado por defecto               |
 
 ---
 
@@ -3846,17 +3938,17 @@ API REST con limitación de tasa, CORS, redirección HTTPS y configuración de t
 
 ##### Conversión de anotaciones
 
-| Funcionalidad | NGINX Ingress | BunkerWeb Ingress |
-|----------------|---------------|-------------------|
-| Redirección HTTPS | `ssl-redirect: "true"` | `REDIRECT_HTTP_TO_HTTPS: "yes"` |
-| Activar CORS | `enable-cors: "true"` | `USE_CORS: "yes"` |
-| Orígenes CORS | `cors-allow-origin: "https://..."` | `CORS_ALLOW_ORIGIN: "^https://..."` (expresión regular PCRE o `*` o `self`) |
-| Métodos CORS | `cors-allow-methods: "GET, POST"` | `CORS_ALLOW_METHODS: "GET, POST"` |
-| Limitación de tasa | `limit-rps: "20"` | `USE_LIMIT_REQ: "yes"` + `LIMIT_REQ_URL: "/"` + `LIMIT_REQ_RATE: "20r/s"` |
-| Timeouts | `proxy-*-timeout: "60"` | `REVERSE_PROXY_*_TIMEOUT: "60s"` |
-| Tamaño del cuerpo | `proxy-body-size: "20m"` | `MAX_CLIENT_SIZE: "20m"` |
+| Funcionalidad            | NGINX Ingress                         | BunkerWeb Ingress                                                                     |
+| ------------------------ | ------------------------------------- | ------------------------------------------------------------------------------------- |
+| Redirección HTTPS        | `ssl-redirect: "true"`                | `REDIRECT_HTTP_TO_HTTPS: "yes"`                                                       |
+| Activar CORS             | `enable-cors: "true"`                 | `USE_CORS: "yes"`                                                                     |
+| Orígenes CORS            | `cors-allow-origin: "https://..."`    | `CORS_ALLOW_ORIGIN: "^https://..."` (expresión regular PCRE o `*` o `self`)           |
+| Métodos CORS             | `cors-allow-methods: "GET, POST"`     | `CORS_ALLOW_METHODS: "GET, POST"`                                                     |
+| Limitación de tasa       | `limit-rps: "20"`                     | `USE_LIMIT_REQ: "yes"` + `LIMIT_REQ_URL: "/"` + `LIMIT_REQ_RATE: "20r/s"`             |
+| Timeouts                 | `proxy-*-timeout: "60"`               | `REVERSE_PROXY_*_TIMEOUT: "60s"`                                                      |
+| Tamaño del cuerpo        | `proxy-body-size: "20m"`              | `MAX_CLIENT_SIZE: "20m"`                                                              |
 | Cabeceras personalizadas | `proxy-set-headers: "custom-headers"` | `CUSTOM_HEADER: "Header-Name: value"` (múltiples anotaciones para varios encabezados) |
-| Seguridad | N/A | `USE_MODSECURITY: "yes"` + `USE_BAD_BEHAVIOR: "yes"` |
+| Seguridad                | N/A                                   | `USE_MODSECURITY: "yes"` + `USE_BAD_BEHAVIOR: "yes"`                                  |
 
 ---
 
@@ -4092,27 +4184,27 @@ Aplicación con reglas NGINX personalizadas a través de `configuration-snippet`
 
 ##### Comparación: Funcionalidades nativas vs ConfigMap
 
-| Regla NGINX | Enfoque BunkerWeb |
-|-------------|-------------------|
-| `auth-type: basic` | ✅ Anotación nativa: `USE_AUTH_BASIC` |
-| `whitelist-source-range` | ✅ Anotación nativa: `WHITELIST_IP` |
+| Regla NGINX                | Enfoque BunkerWeb                          |
+| -------------------------- | ------------------------------------------ |
+| `auth-type: basic`         | ✅ Anotación nativa: `USE_AUTH_BASIC`       |
+| `whitelist-source-range`   | ✅ Anotación nativa: `WHITELIST_IP`         |
 | `if ($http_user_agent ~*)` | ✅ Anotación nativa: `BLACKLIST_USER_AGENT` |
-| `expires 7d` para caché | ✅ Anotación nativa: `USE_CLIENT_CACHE` |
-| `limit_conn addr 10` | ✅ Anotación nativa: `USE_LIMIT_CONN` |
-| `rewrite` complejo | ⚠️ ConfigMap: `CONFIG_TYPE: http` |
-| `location` personalizada | ⚠️ ConfigMap: `CONFIG_TYPE: http` |
-| `proxy_pass` externo | ⚠️ ConfigMap: `CONFIG_TYPE: http` |
+| `expires 7d` para caché    | ✅ Anotación nativa: `USE_CLIENT_CACHE`     |
+| `limit_conn addr 10`       | ✅ Anotación nativa: `USE_LIMIT_CONN`       |
+| `rewrite` complejo         | ⚠️ ConfigMap: `CONFIG_TYPE: http`           |
+| `location` personalizada   | ⚠️ ConfigMap: `CONFIG_TYPE: http`           |
+| `proxy_pass` externo       | ⚠️ ConfigMap: `CONFIG_TYPE: http`           |
 
 ---
 
 #### Comparación antes/después de la migración
 
-| Métrica | NGINX Ingress | BunkerWeb | Comentario |
-|----------|---------------|-----------|-------------|
-| Tiempo de respuesta promedio | 45ms | 52ms | +7ms (sobrecarga de seguridad aceptable) |
-| Solicitudes bloqueadas (XSS/SQLi) | 0 | **127** | WAF activo ✅ |
-| Certificado SSL | Válido | Válido | Migración OK ✅ |
-| Disponibilidad | 99.9% | 99.9% | Estable ✅ |
+| Métrica                           | NGINX Ingress | BunkerWeb | Comentario                               |
+| --------------------------------- | ------------- | --------- | ---------------------------------------- |
+| Tiempo de respuesta promedio      | 45ms          | 52ms      | +7ms (sobrecarga de seguridad aceptable) |
+| Solicitudes bloqueadas (XSS/SQLi) | 0             | **127**   | WAF activo ✅                             |
+| Certificado SSL                   | Válido        | Válido    | Migración OK ✅                           |
+| Disponibilidad                    | 99.9%         | 99.9%     | Estable ✅                                |
 
 
 ## Swarm

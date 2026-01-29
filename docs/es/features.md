@@ -930,10 +930,12 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
 
     El ajuste `BLACKLIST_COMMUNITY_LISTS` le permite seleccionar de fuentes de listas negras curadas. Las opciones disponibles incluyen:
 
-    | ID                                  | Descripción                                                                                                                                                                                                                    | Fuente                                                                                                                         |
-    | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-    | `ip:danmeuk-tor-exit`               | IP de nodos de salida de Tor (dan.me.uk)                                                                                                                                                                                       | `https://www.dan.me.uk/torlist/?exit`                                                                                          |
-    | `ua:mitchellkrogza-bad-user-agents` | Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, con anti-DDOS, Wordpress Theme Detector Blocking y Fail2Ban Jail para infractores reincidentes | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` |
+    | ID                                        | Descripción                                                                                                                                                                                                                    | Fuente                                                                                                                                |
+    | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+    | `ip:danmeuk-tor-exit`                     | IP de nodos de salida de Tor (dan.me.uk)                                                                                                                                                                                       | `https://www.dan.me.uk/torlist/?exit`                                                                                                 |
+    | `ua:mitchellkrogza-bad-user-agents`       | Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, con anti-DDOS, Wordpress Theme Detector Blocking y Fail2Ban Jail para infractores reincidentes | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`        |
+    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist - Laurent M. - Para Web Apps, WordPress, VPS (Apache/Nginx)                                                                                                                                         | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`          |
+    | `ip:laurent-minne-data-shield-critical`   | Data-Shield IPv4 Blocklist - Laurent M. - Para DMZs, SaaS, API y Activos Críticos                                                                                                                                              | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_critical_data-shield_ipv4_blocklist.txt` |
 
     **Configuración:** Especifique múltiples listas separadas por espacios. Por ejemplo:
     ```yaml
@@ -942,6 +944,9 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
 
     !!! tip "Comunidad vs Configuración Manual"
         Las listas negras de la comunidad proporcionan una forma conveniente de empezar con fuentes de listas negras probadas. Puede usarlas junto con configuraciones de URL manuales para una máxima flexibilidad.
+
+    !!! note "Agradecimientos"
+        ¡Gracias a Laurent Minne por contribuir con las [listas de bloqueo Data-Shield](https://duggytuxy.github.io/#)!
 
 === "Dirección IP"
     **Qué hace esto:** Bloquea a los visitantes según su dirección IP o red.
@@ -4667,16 +4672,16 @@ Siga estos pasos para configurar y usar la función de Proxy Inverso:
         - **Manejo de Protocolos:** Soporte para HTTP, HTTPS, WebSockets y otros protocolos
         - **Interceptación de Errores:** Personalice las páginas de error para una experiencia de usuario consistente
 
-| Ajuste                           | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                     |
-| -------------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_REVERSE_PROXY`              | `no`              | multisite | no       | **Habilitar Proxy Inverso:** Establezca en `yes` para habilitar la funcionalidad de proxy inverso.                                              |
-| `REVERSE_PROXY_HOST`             |                   | multisite | yes      | **Host de Backend:** URL completa del recurso al que se hace proxy (proxy_pass).                                                                |
-| `REVERSE_PROXY_URL`              | `/`               | multisite | yes      | **URL de Ubicación:** Ruta que se enviará al servidor de backend.                                                                               |
-| `REVERSE_PROXY_BUFFERING`        | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Respuesta:** Habilite o deshabilite el almacenamiento en búfer de las respuestas del recurso al que se hace proxy. |
-| `REVERSE_PROXY_REQUEST_BUFFERING`| `yes`             | multisite | yes      | **Almacenamiento en Búfer de Solicitudes:** Habilite o deshabilite el almacenamiento en búfer de las solicitudes al recurso al que se hace proxy. |
-| `REVERSE_PROXY_KEEPALIVE`        | `no`              | multisite | yes      | **Keep-Alive:** Habilite o deshabilite las conexiones keepalive con el recurso al que se hace proxy.                                            |
-| `REVERSE_PROXY_CUSTOM_HOST`      |                   | multisite | no       | **Host Personalizado:** Anule el encabezado Host enviado al servidor upstream.                                                                  |
-| `REVERSE_PROXY_INTERCEPT_ERRORS` | `yes`             | multisite | no       | **Interceptar Errores:** Si se deben interceptar y reescribir las respuestas de error del backend.                                              |
+| Ajuste                            | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                       |
+| --------------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_REVERSE_PROXY`               | `no`              | multisite | no       | **Habilitar Proxy Inverso:** Establezca en `yes` para habilitar la funcionalidad de proxy inverso.                                                |
+| `REVERSE_PROXY_HOST`              |                   | multisite | yes      | **Host de Backend:** URL completa del recurso al que se hace proxy (proxy_pass).                                                                  |
+| `REVERSE_PROXY_URL`               | `/`               | multisite | yes      | **URL de Ubicación:** Ruta que se enviará al servidor de backend.                                                                                 |
+| `REVERSE_PROXY_BUFFERING`         | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Respuesta:** Habilite o deshabilite el almacenamiento en búfer de las respuestas del recurso al que se hace proxy.   |
+| `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Solicitudes:** Habilite o deshabilite el almacenamiento en búfer de las solicitudes al recurso al que se hace proxy. |
+| `REVERSE_PROXY_KEEPALIVE`         | `no`              | multisite | yes      | **Keep-Alive:** Habilite o deshabilite las conexiones keepalive con el recurso al que se hace proxy.                                              |
+| `REVERSE_PROXY_CUSTOM_HOST`       |                   | multisite | no       | **Host Personalizado:** Anule el encabezado Host enviado al servidor upstream.                                                                    |
+| `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`             | multisite | no       | **Interceptar Errores:** Si se deben interceptar y reescribir las respuestas de error del backend.                                                |
 
     !!! tip "Mejores Prácticas"
         - Siempre especifique la URL completa en `REVERSE_PROXY_HOST`, incluido el protocolo (http:// o https://)

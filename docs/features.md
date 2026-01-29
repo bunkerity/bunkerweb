@@ -934,10 +934,12 @@ Follow these steps to configure and use the Blacklist feature:
 
     The `BLACKLIST_COMMUNITY_LISTS` setting allows you to select from curated blacklist sources. Available options include:
 
-    | ID                                  | Description                                                                                                                                                                                                              | Source                                                                                                                         |
-    | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-    | `ip:danmeuk-tor-exit`               | Tor Exit Nodes IPs (dan.me.uk)                                                                                                                                                                                           | `https://www.dan.me.uk/torlist/?exit`                                                                                          |
-    | `ua:mitchellkrogza-bad-user-agents` | Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, with anti-DDOS, Wordpress Theme Detector Blocking and Fail2Ban Jail for Repeat Offenders | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` |
+    | ID                                        | Description                                                                                                                                                                                                              | Source                                                                                                                                |
+    | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+    | `ip:danmeuk-tor-exit`                     | Tor Exit Nodes IPs (dan.me.uk)                                                                                                                                                                                           | `https://www.dan.me.uk/torlist/?exit`                                                                                                 |
+    | `ua:mitchellkrogza-bad-user-agents`       | Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, with anti-DDOS, Wordpress Theme Detector Blocking and Fail2Ban Jail for Repeat Offenders | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`        |
+    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist - Laurent M. - For Web Apps, WordPress, VPS (Apache/Nginx)                                                                                                                                    | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`          |
+    | `ip:laurent-minne-data-shield-critical`   | Data-Shield IPv4 Blocklist - Laurent M. - For DMZs, SaaS, API & Critical Assets                                                                                                                                          | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_critical_data-shield_ipv4_blocklist.txt` |
 
     **Configuration:** Specify multiple lists separated by spaces. For example:
     ```yaml
@@ -946,6 +948,9 @@ Follow these steps to configure and use the Blacklist feature:
 
     !!! tip "Community vs Manual Configuration"
         Community blacklists provide a convenient way to get started with proven blacklist sources. You can use them alongside manual URL configurations for maximum flexibility.
+
+    !!! note "Acknowledgements"
+        Thank you Laurent Minne for contributing the [Data-Shield blocklists](https://duggytuxy.github.io/#)!
 
 === "IP Address"
     **What this does:** Blocks visitors based on their IP address or network.
@@ -4688,16 +4693,16 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - **Protocol Handling:** Support for HTTP, HTTPS, WebSockets, and other protocols
         - **Error Interception:** Customize error pages for a consistent user experience
 
-    | Setting                          | Default | Context   | Multiple | Description                                                                              |
-    | -------------------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------- |
-    | `USE_REVERSE_PROXY`              | `no`    | multisite | no       | **Enable Reverse Proxy:** Set to `yes` to enable reverse proxy functionality.            |
-    | `REVERSE_PROXY_HOST`             |         | multisite | yes      | **Backend Host:** Full URL of the proxied resource (proxy_pass).                         |
-    | `REVERSE_PROXY_URL`              | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the backend server.                       |
-    | `REVERSE_PROXY_BUFFERING`        | `yes`   | multisite | yes      | **Response Buffering:** Enable or disable buffering of responses from proxied resource.  |
-    | `REVERSE_PROXY_REQUEST_BUFFERING`| `yes`   | multisite | yes      | **Request Buffering:** Enable or disable buffering of requests to the proxied resource.  |
-    | `REVERSE_PROXY_KEEPALIVE`        | `no`    | multisite | yes      | **Keep-Alive:** Enable or disable keepalive connections with the proxied resource.       |
-    | `REVERSE_PROXY_CUSTOM_HOST`      |         | multisite | no       | **Custom Host:** Override Host header sent to upstream server.                           |
-    | `REVERSE_PROXY_INTERCEPT_ERRORS` | `yes`   | multisite | no       | **Intercept Errors:** Whether to intercept and rewrite error responses from the backend. |
+    | Setting                           | Default | Context   | Multiple | Description                                                                              |
+    | --------------------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------- |
+    | `USE_REVERSE_PROXY`               | `no`    | multisite | no       | **Enable Reverse Proxy:** Set to `yes` to enable reverse proxy functionality.            |
+    | `REVERSE_PROXY_HOST`              |         | multisite | yes      | **Backend Host:** Full URL of the proxied resource (proxy_pass).                         |
+    | `REVERSE_PROXY_URL`               | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the backend server.                       |
+    | `REVERSE_PROXY_BUFFERING`         | `yes`   | multisite | yes      | **Response Buffering:** Enable or disable buffering of responses from proxied resource.  |
+    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`   | multisite | yes      | **Request Buffering:** Enable or disable buffering of requests to the proxied resource.  |
+    | `REVERSE_PROXY_KEEPALIVE`         | `no`    | multisite | yes      | **Keep-Alive:** Enable or disable keepalive connections with the proxied resource.       |
+    | `REVERSE_PROXY_CUSTOM_HOST`       |         | multisite | no       | **Custom Host:** Override Host header sent to upstream server.                           |
+    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`   | multisite | no       | **Intercept Errors:** Whether to intercept and rewrite error responses from the backend. |
 
     !!! tip "Best Practices"
         - Always specify the full URL in `REVERSE_PROXY_HOST` including the protocol (http:// or https://)

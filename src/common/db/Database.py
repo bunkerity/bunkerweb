@@ -1329,7 +1329,77 @@ class Database:
                     elif t == "plugin":
                         session.query(Plugins).filter_by(**delete["filter"]).delete()
 
-                session.add_all(to_put)
+                # Insert parents before children to avoid FK errors on some DBs.
+                to_put_by_type = {
+                    "plugins": [],
+                    "settings": [],
+                    "selects": [],
+                    "multiselects": [],
+                    "templates": [],
+                    "template_steps": [],
+                    "template_settings": [],
+                    "template_configs": [],
+                    "jobs": [],
+                    "plugin_pages": [],
+                    "cli_commands": [],
+                    "other": [],
+                }
+
+                for item in to_put:
+                    if isinstance(item, Plugins):
+                        to_put_by_type["plugins"].append(item)
+                    elif isinstance(item, Settings):
+                        to_put_by_type["settings"].append(item)
+                    elif isinstance(item, Selects):
+                        to_put_by_type["selects"].append(item)
+                    elif isinstance(item, Multiselects):
+                        to_put_by_type["multiselects"].append(item)
+                    elif isinstance(item, Templates):
+                        to_put_by_type["templates"].append(item)
+                    elif isinstance(item, Template_steps):
+                        to_put_by_type["template_steps"].append(item)
+                    elif isinstance(item, Template_settings):
+                        to_put_by_type["template_settings"].append(item)
+                    elif isinstance(item, Template_custom_configs):
+                        to_put_by_type["template_configs"].append(item)
+                    elif isinstance(item, Jobs):
+                        to_put_by_type["jobs"].append(item)
+                    elif isinstance(item, Plugin_pages):
+                        to_put_by_type["plugin_pages"].append(item)
+                    elif isinstance(item, Bw_cli_commands):
+                        to_put_by_type["cli_commands"].append(item)
+                    else:
+                        to_put_by_type["other"].append(item)
+
+                if to_put_by_type["plugins"]:
+                    session.add_all(to_put_by_type["plugins"])
+                if to_put_by_type["settings"]:
+                    session.add_all(to_put_by_type["settings"])
+                if to_put_by_type["plugins"] or to_put_by_type["settings"]:
+                    session.flush()
+
+                if to_put_by_type["selects"]:
+                    session.add_all(to_put_by_type["selects"])
+                if to_put_by_type["multiselects"]:
+                    session.add_all(to_put_by_type["multiselects"])
+
+                if to_put_by_type["templates"]:
+                    session.add_all(to_put_by_type["templates"])
+                if to_put_by_type["template_steps"]:
+                    session.add_all(to_put_by_type["template_steps"])
+                if to_put_by_type["template_settings"]:
+                    session.add_all(to_put_by_type["template_settings"])
+                if to_put_by_type["template_configs"]:
+                    session.add_all(to_put_by_type["template_configs"])
+
+                if to_put_by_type["jobs"]:
+                    session.add_all(to_put_by_type["jobs"])
+                if to_put_by_type["plugin_pages"]:
+                    session.add_all(to_put_by_type["plugin_pages"])
+                if to_put_by_type["cli_commands"]:
+                    session.add_all(to_put_by_type["cli_commands"])
+                if to_put_by_type["other"]:
+                    session.add_all(to_put_by_type["other"])
 
                 # Apply updates
                 for update in to_update:
@@ -2785,6 +2855,81 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
+            def _add_ordered(items: List[Any]) -> None:
+                if not items:
+                    return
+
+                buckets = {
+                    "plugins": [],
+                    "settings": [],
+                    "selects": [],
+                    "multiselects": [],
+                    "templates": [],
+                    "template_steps": [],
+                    "template_settings": [],
+                    "template_configs": [],
+                    "jobs": [],
+                    "plugin_pages": [],
+                    "cli_commands": [],
+                    "other": [],
+                }
+
+                for item in items:
+                    if isinstance(item, Plugins):
+                        buckets["plugins"].append(item)
+                    elif isinstance(item, Settings):
+                        buckets["settings"].append(item)
+                    elif isinstance(item, Selects):
+                        buckets["selects"].append(item)
+                    elif isinstance(item, Multiselects):
+                        buckets["multiselects"].append(item)
+                    elif isinstance(item, Templates):
+                        buckets["templates"].append(item)
+                    elif isinstance(item, Template_steps):
+                        buckets["template_steps"].append(item)
+                    elif isinstance(item, Template_settings):
+                        buckets["template_settings"].append(item)
+                    elif isinstance(item, Template_custom_configs):
+                        buckets["template_configs"].append(item)
+                    elif isinstance(item, Jobs):
+                        buckets["jobs"].append(item)
+                    elif isinstance(item, Plugin_pages):
+                        buckets["plugin_pages"].append(item)
+                    elif isinstance(item, Bw_cli_commands):
+                        buckets["cli_commands"].append(item)
+                    else:
+                        buckets["other"].append(item)
+
+                if buckets["plugins"]:
+                    session.add_all(buckets["plugins"])
+                if buckets["settings"]:
+                    session.add_all(buckets["settings"])
+                if buckets["plugins"] or buckets["settings"]:
+                    session.flush()
+
+                if buckets["selects"]:
+                    session.add_all(buckets["selects"])
+                if buckets["multiselects"]:
+                    session.add_all(buckets["multiselects"])
+
+                if buckets["templates"]:
+                    session.add_all(buckets["templates"])
+                if buckets["template_steps"]:
+                    session.add_all(buckets["template_steps"])
+                if buckets["template_settings"]:
+                    session.add_all(buckets["template_settings"])
+                if buckets["template_configs"]:
+                    session.add_all(buckets["template_configs"])
+
+                if buckets["jobs"]:
+                    session.add_all(buckets["jobs"])
+                if buckets["plugin_pages"]:
+                    session.add_all(buckets["plugin_pages"])
+                if buckets["cli_commands"]:
+                    session.add_all(buckets["cli_commands"])
+                if buckets["other"]:
+                    session.add_all(buckets["other"])
+
             db_plugins = session.query(Plugins).with_entities(Plugins.id).filter_by(type=_type).all()
 
             db_ids = []
@@ -3432,7 +3577,7 @@ class Database:
                     try:
                         if per_plugin_commit:
                             if local_to_put:
-                                session.add_all(local_to_put)
+                                _add_ordered(local_to_put)
                             # Commit also captures any .update() / .delete() executed above.
                             session.commit()
                         else:
@@ -3676,7 +3821,7 @@ class Database:
                 try:
                     if per_plugin_commit:
                         if local_to_put:
-                            session.add_all(local_to_put)
+                            _add_ordered(local_to_put)
                         # Commit also captures any .update() / .delete() executed above.
                         session.commit()
                     else:
@@ -3700,7 +3845,7 @@ class Database:
 
             try:
                 if not per_plugin_commit and to_put:
-                    session.add_all(to_put)
+                    _add_ordered(to_put)
                 session.commit()
             except BaseException as e:
                 session.rollback()

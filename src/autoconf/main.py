@@ -13,9 +13,10 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from common_utils import handle_docker_secrets  # type: ignore
 from logger import getLogger  # type: ignore
-from SwarmController import SwarmController
-from IngressController import IngressController
-from DockerController import DockerController
+from controllers.SwarmController import SwarmController
+from controllers.IngressController import IngressController
+from controllers.DockerController import DockerController
+from controllers.GatewayController import GatewayController
 
 # Get variables
 # Handle Docker secrets first
@@ -30,7 +31,8 @@ if docker_secrets:
     LOGGER.info(f"Loaded {len(docker_secrets)} Docker secrets")
 
 swarm = getenv("SWARM_MODE", "no").lower() == "yes"
-kubernetes = getenv("KUBERNETES_MODE", "no").lower() == "yes"
+gateway_api = getenv("KUBERNETES_GATEWAY_MODE", "no").lower() == "yes"
+kubernetes = gateway_api or getenv("KUBERNETES_MODE", "no").lower() == "yes"
 docker_host = getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
 wait_retry_interval = getenv("WAIT_RETRY_INTERVAL", "5")
 
@@ -55,8 +57,12 @@ try:
         LOGGER.info("Swarm mode detected")
         controller = SwarmController(docker_host)
     elif kubernetes:
-        LOGGER.info("Kubernetes mode detected")
-        controller = IngressController()
+        if gateway_api:
+            LOGGER.info("Kubernetes Gateway API mode detected")
+            controller = GatewayController()
+        else:
+            LOGGER.info("Kubernetes mode detected")
+            controller = IngressController()
     else:
         LOGGER.info("Docker mode detected")
         controller = DockerController(docker_host)

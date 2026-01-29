@@ -2636,15 +2636,16 @@ The `bw-autoconf` controller watches your orchestrator and writes changes to the
 
 ##### Mode & runtime
 
-| Setting               | Description                                       | Accepted values                         | Default                                |
-| --------------------- | ------------------------------------------------- | --------------------------------------- | -------------------------------------- |
-| `AUTOCONF_MODE`       | Enable the autoconf controller                    | `yes` or `no`                           | `no`                                   |
-| `SWARM_MODE`          | Watch Swarm services instead of Docker containers | `yes` or `no`                           | `no`                                   |
-| `KUBERNETES_MODE`     | Watch Kubernetes ingresses/pods instead of Docker | `yes` or `no`                           | `no`                                   |
-| `DOCKER_HOST`         | Docker socket / remote API URL                    | e.g., `unix:///var/run/docker.sock`     | `unix:///var/run/docker.sock`          |
-| `WAIT_RETRY_INTERVAL` | Seconds between readiness checks for instances    | Integer seconds                         | `5`                                    |
-| `LOG_SYSLOG_TAG`      | Syslog tag for autoconf logs                      | String                                  | `bw-autoconf`                          |
-| `TZ`                  | Time zone used for autoconf logs and timestamps   | TZ database name (e.g., `Europe/Paris`) | unset (container default, usually UTC) |
+| Setting                   | Description                                       | Accepted values                         | Default                                |
+| ------------------------- | ------------------------------------------------- | --------------------------------------- | -------------------------------------- |
+| `AUTOCONF_MODE`           | Enable the autoconf controller                    | `yes` or `no`                           | `no`                                   |
+| `SWARM_MODE`              | Watch Swarm services instead of Docker containers | `yes` or `no`                           | `no`                                   |
+| `KUBERNETES_MODE`         | Watch Kubernetes ingresses/pods instead of Docker | `yes` or `no`                           | `no`                                   |
+| `KUBERNETES_GATEWAY_MODE` | Use the Gateway API controller for Kubernetes     | `yes` or `no`                           | `no`                                   |
+| `DOCKER_HOST`             | Docker socket / remote API URL                    | e.g., `unix:///var/run/docker.sock`     | `unix:///var/run/docker.sock`          |
+| `WAIT_RETRY_INTERVAL`     | Seconds between readiness checks for instances    | Integer seconds                         | `5`                                    |
+| `LOG_SYSLOG_TAG`          | Syslog tag for autoconf logs                      | String                                  | `bw-autoconf`                          |
+| `TZ`                      | Time zone used for autoconf logs and timestamps   | TZ database name (e.g., `Europe/Paris`) | unset (container default, usually UTC) |
 
 ##### Database & validation
 
@@ -2681,9 +2682,11 @@ The `bw-autoconf` controller watches your orchestrator and writes changes to the
 | `KUBERNETES_SSL_CA_CERT`                | Path to a custom CA bundle for the Kubernetes API                                                 | File path         | unset               |
 | `USE_KUBERNETES_FQDN`                   | Use `<pod>.<ns>.pod.<domain>` instead of Pod IP as instance hostname                              | `yes` or `no`     | `yes`               |
 | `KUBERNETES_INGRESS_CLASS`              | Only process ingresses with this class                                                            | String            | unset (all classes) |
+| `KUBERNETES_GATEWAY_CLASS`              | Only process Gateways with this class                                                             | String            | unset (all classes) |
+| `KUBERNETES_GATEWAY_API_VERSION`        | Gateway API version to use (auto-falls back if missing)                                           | `v1` or `v1beta1` | `v1`                |
 | `KUBERNETES_DOMAIN_NAME`                | Cluster domain suffix used when building upstream hosts                                           | String            | `cluster.local`     |
 | `KUBERNETES_SERVICE_PROTOCOL`           | Scheme used for generated reverse proxy hosts                                                     | `http` or `https` | `http`              |
-| `BUNKERWEB_SERVICE_NAME`                | Service name to read when patching Ingress status with the load balancer address                  | String            | `bunkerweb`         |
+| `BUNKERWEB_SERVICE_NAME`                | Service name to read when patching Ingress/Gateway status with the load balancer address          | String            | `bunkerweb`         |
 | `BUNKERWEB_NAMESPACE`                   | Namespace of that Service                                                                         | String            | `bunkerweb`         |
 | `KUBERNETES_REVERSE_PROXY_SUFFIX_START` | Starting index for generated `REVERSE_PROXY_HOST_n`/`REVERSE_PROXY_URL_n` on multi-path ingresses | Integer (>=0)     | `1`                 |
 
@@ -2765,9 +2768,20 @@ networks:
 </figure>
 
 To automate the configuration of BunkerWeb instances in a Kubernetes environment,
-the autoconf service serves as an [Ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/).
+the autoconf service serves as an [Ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) or a [Gateway API controller](https://kubernetes.io/docs/concepts/services-networking/gateway/).
 It configures the BunkerWeb instances based on [Ingress resources](https://kubernetes.io/docs/concepts/services-networking/ingress/)
 and also monitors other Kubernetes objects, such as [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/), for custom configurations.
+
+!!! example "Gateway API mode"
+    Gateway API mode is currently **beta**.
+
+    Make sure the Gateway API CRDs are installed in your cluster (see the [Gateway API installation guide](https://gateway-api.sigs.k8s.io/guides/getting-started/#installing-gateway-api)).
+
+    If you use the Kubernetes Gateway API, set `KUBERNETES_MODE=yes` and `KUBERNETES_GATEWAY_MODE=yes`.
+
+    The controller will watch `Gateway` and `HTTPRoute` resources instead of `Ingress` objects. You can optionally limit what it processes with `KUBERNETES_GATEWAY_CLASS` and choose `KUBERNETES_GATEWAY_API_VERSION` (`v1` or `v1beta1`).
+
+    If your Service name is not `bunkerweb`, set `BUNKERWEB_SERVICE_NAME` so status patching reads the correct Service.
 
 !!! info "ConfigMap reconciliation"
     - The ingress controller only manages ConfigMaps that carry the `bunkerweb.io/CONFIG_TYPE` annotation.
@@ -2800,7 +2814,7 @@ It is recommended to utilize [RBAC authorization](https://kubernetes.io/docs/ref
 !!! warning "Custom CA for Kubernetes API"
     If you use a custom CA for your Kubernetes API, you can mount a bundle file containing your intermediate(s) and root certificates on the ingress controller and set the `KUBERNETES_SSL_CA_CERT` environment value to the path of the bundle inside the container. Alternatively, even if it's not recommended, you can disable certificate verification by setting the `KUBERNETES_SSL_VERIFY` environment variable of the ingress controller to `no` (default is `yes`).
 
-Additionally, **it is crucial to set the `KUBERNETES_MODE` environment variable to `yes` when utilizing the Kubernetes integration**. This variable is mandatory for proper functionality.
+Additionally, **it is crucial to set the `KUBERNETES_MODE` environment variable to `yes` when utilizing the Kubernetes integration**. This variable is mandatory for proper functionality. If you are using the Gateway API, also set `KUBERNETES_GATEWAY_MODE=yes`.
 
 ### Installation methods {#kubernetes-installation}
 
@@ -3106,11 +3120,11 @@ spec:
 
 ###### Important Environment Variables
 
-| Variable           | Value                                                 | Description                                              |
-| ------------------ | ----------------------------------------------------- | -------------------------------------------------------- |
-| `KUBERNETES_MODE`  | `yes`                                                 | **Mandatory** for automatic discovery via the controller |
-| `API_WHITELIST_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API                            |
-
+| Variable                  | Value                                                 | Description                                              |
+| ------------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
+| `KUBERNETES_MODE`         | `yes`                                                 | **Mandatory** for automatic discovery via the controller |
+| `KUBERNETES_GATEWAY_MODE` | `yes` or `no` (if using Gateway API)                  | Use Gateway API mode                                     |
+| `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API                            |
 
 ##### Step 3: Creating Services
 
@@ -3358,6 +3372,52 @@ spec:
 ...
 ```
 
+### Gateway resources
+
+When Gateway API mode is enabled, you can declare `Gateway` and `HTTPRoute` resources.
+BunkerWeb settings are provided as `bunkerweb.io/<SETTING>` annotations on the `HTTPRoute`; to scope a setting to a host,
+use `bunkerweb.io/<hostname>_<SETTING>`. The `hostnames` field drives the server names. See [Gateway class](#gateway-class).
+
+!!! info "TLS support"
+    TLS termination is handled via the `Gateway` listeners and their `certificateRefs` (TLS secrets).
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: my-gateway
+spec:
+  gatewayClassName: bunkerweb
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: www.example.com
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: my-route
+  annotations:
+    # Will be applied to all hostnames in this route
+    bunkerweb.io/MY_SETTING: "value"
+    # Will only be applied to the www.example.com host
+    bunkerweb.io/www.example.com_MY_SETTING: "value"
+spec:
+  parentRefs:
+    - name: my-gateway
+  hostnames:
+    - www.example.com
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: svc-my-app
+          port: 8000
+```
+
 ### Namespaces {#namespaces_1}
 
 Starting from version `1.6.0`, BunkerWeb's autoconf stacks now support namespaces. This feature enables you to manage multiple clusters of BunkerWeb instances and services on the same Kubernetes cluster. To take advantage of namespaces, simply set the `namespace` metadata field on your BunkerWeb instances and services. Here's an example:
@@ -3450,6 +3510,36 @@ spec:
                 name: svc-my-app
                 port:
                   number: 8000
+```
+
+### Gateway class {#gateway-class}
+
+When using the Gateway API, BunkerWeb expects a `GatewayClass` that points to its controller:
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: bunkerweb
+spec:
+  controllerName: bunkerweb.io/gateway-controller
+```
+
+To restrict which `Gateway` resources are monitored, set `KUBERNETES_GATEWAY_CLASS` (for example, `bunkerweb`) and use the matching
+`gatewayClassName` in your `Gateway` resources:
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: my-gateway
+spec:
+  gatewayClassName: bunkerweb
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: www.example.com
 ```
 
 ### Custom domain name

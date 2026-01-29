@@ -1732,10 +1732,20 @@ span.cursor-pointer ~ .reset-setting {
   color: rgba(20, 33, 41, 0.82);
 }
 
+.dark-style [data-news-row] .card-text.courier-prime,
+.dark-style [data-news-row-home] .card-text.courier-prime {
+  color: rgba(226, 236, 245, 0.82);
+}
+
 [data-news-row] .card p.card-text small,
 [data-news-row-home] .card p.card-text small {
   font-weight: 600;
   letter-spacing: 0.02em;
+}
+
+.dark-style [data-news-row] .card p.card-text small,
+.dark-style [data-news-row-home] .card p.card-text small {
+  color: rgba(210, 222, 233, 0.85);
 }
 
 [data-news-row] .card-title a,
@@ -1744,9 +1754,19 @@ span.cursor-pointer ~ .reset-setting {
   text-decoration: none;
 }
 
+.dark-style [data-news-row] .card-title,
+.dark-style [data-news-row-home] .card-title {
+  color: #f3f7fb;
+}
+
 [data-news-row] .card-title a:hover,
 [data-news-row-home] .card-title a:hover {
   color: var(--bs-primary);
+}
+
+.dark-style [data-news-row] .card-title a:hover,
+.dark-style [data-news-row-home] .card-title a:hover {
+  color: #7bd1ff;
 }
 
 [data-news-row] .btn-outline-primary,

@@ -12,7 +12,7 @@ from base64 import b64decode
 
 from docker.models.services import Service
 from docker.errors import DockerException
-from Controller import Controller
+from controllers.Controller import Controller
 
 
 class SwarmController(Controller):
