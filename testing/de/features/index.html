@@ -1125,18 +1125,18 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#konfigurationsparameter91011121314151617" class="md-nav__link">
+  <a href="#konfigurationsparameter" class="md-nav__link">
     <span class="md-ellipsis">
-      Konfigurationsparameter[9][10][11][12][13][14][15][16][17]
+      Konfigurationsparameter
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#konfigurationsbeispiele38" class="md-nav__link">
+  <a href="#konfigurationsbeispiele_1" class="md-nav__link">
     <span class="md-ellipsis">
-      Konfigurationsbeispiele[38]
+      Konfigurationsbeispiele
     </span>
   </a>
   
@@ -1431,7 +1431,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#konfigurationsbeispiele_1" class="md-nav__link">
+  <a href="#konfigurationsbeispiele_2" class="md-nav__link">
     <span class="md-ellipsis">
       Konfigurationsbeispiele
     </span>
@@ -2154,7 +2154,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#konfigurationsbeispiele_2" class="md-nav__link">
+  <a href="#konfigurationsbeispiele_3" class="md-nav__link">
     <span class="md-ellipsis">
       Konfigurationsbeispiele
     </span>
@@ -4673,12 +4673,12 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <h2 id="blacklist">Blacklist</h2>
 <p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Das Blacklist-Plugin schützt Ihre Website, indem es den Zugriff basierend auf verschiedenen Client-Attributen blockiert. Diese Funktion wehrt bekannte bösartige Entitäten, Scanner und verdächtige Besucher ab, indem sie den Zugriff basierend auf IP-Adressen, Netzwerken, Reverse-DNS-Einträgen (rDNS), ASNs, User-Agents und spezifischen URI-Mustern verweigert.</p>
-<p><strong>So funktioniert's:</strong>[1][2][3]</p>
+<p><strong>So funktioniert's:</strong></p>
 <ol>
 <li>Das Plugin überprüft eingehende Anfragen anhand mehrerer Blacklist-Kriterien (IP-Adressen, Netzwerke, rDNS, ASN, User-Agent oder URI-Muster).</li>
 <li>Blacklists können direkt in Ihrer Konfiguration angegeben oder von externen URLs geladen werden.</li>
 <li>Wenn ein Besucher einer Blacklist-Regel entspricht (und keiner Ignorier-Regel), wird der Zugriff verweigert.</li>
-<li>Blacklists werden automatisch in regelmäßigen Abständen von den konfigurierten URLs aktualisiert.[4][5][6][7][8]</li>
+<li>Blacklists werden automatisch in regelmäßigen Abständen von den konfigurierten URLs aktualisiert.</li>
 <li>Sie können genau anpassen, welche Kriterien überprüft und ignoriert werden, basierend auf Ihren spezifischen Sicherheitsanforderungen.</li>
 </ol>
 <h3 id="so-verwenden-sie-es_1">So verwenden Sie es</h3>
@@ -4687,14 +4687,14 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <li><strong>Funktion aktivieren:</strong> Die Blacklist-Funktion ist standardmäßig aktiviert. Bei Bedarf können Sie sie mit dem Parameter <code>USE_BLACKLIST</code> steuern.</li>
 <li><strong>Blockierregeln konfigurieren:</strong> Definieren Sie, welche IPs, Netzwerke, rDNS-Muster, ASNs, User-Agents oder URIs blockiert werden sollen.</li>
 <li><strong>Ignorierregeln einrichten:</strong> Geben Sie Ausnahmen an, die die Blacklist-Überprüfungen umgehen sollen.</li>
-<li><strong>Externe Quellen hinzufügen:</strong> Konfigurieren Sie URLs, um Blacklist-Daten automatisch herunterzuladen und zu aktualisieren.[4][5][6][7][8]</li>
+<li><strong>Externe Quellen hinzufügen:</strong> Konfigurieren Sie URLs, um Blacklist-Daten automatisch herunterzuladen und zu aktualisieren.</li>
 <li><strong>Effektivität überwachen:</strong> Konsultieren Sie die <a href="../web-ui/">Web-Oberfläche</a>, um Statistiken über blockierte Anfragen anzuzeigen.</li>
 </ol>
 <div class="admonition info">
 <p class="admonition-title">Stream-Modus</p>
 <p>Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.</p>
 </div>
-<h3 id="konfigurationsparameter91011121314151617">Konfigurationsparameter[9][10][11][12][13][14][15][16][17]</h3>
+<h3 id="konfigurationsparameter">Konfigurationsparameter</h3>
 <p><strong>Allgemein</strong></p>
 <table>
 <thead>
@@ -4723,7 +4723,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:1"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Community-Blacklists</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:6"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><input id="__tabbed_8_4" name="__tabbed_8" type="radio" /><input id="__tabbed_8_5" name="__tabbed_8" type="radio" /><input id="__tabbed_8_6" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Community-Blacklists</label><label for="__tabbed_8_2">IP-Adresse</label><label for="__tabbed_8_3">Reverse DNS</label><label for="__tabbed_8_4">ASN</label><label for="__tabbed_8_5">User-Agent</label><label for="__tabbed_8_6">URI</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Was es bewirkt:</strong> Ermöglicht Ihnen, schnell gut gepflegte und von der Community stammende Blacklists hinzuzufügen, ohne die URLs manuell konfigurieren zu müssen.</p>
@@ -4747,6 +4747,16 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <td style="text-align: left;">Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, mit Anti-DDOS, Wordpress Theme Detector Blocking und Fail2Ban Jail für Wiederholungstäter</td>
 <td style="text-align: left;"><code>https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list</code></td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>ip:laurent-minne-data-shield-aggressive</code></td>
+<td style="text-align: left;">Data-Shield IPv4 Blocklist - Laurent M. - Für Web Apps, WordPress, VPS (Apache/Nginx)</td>
+<td style="text-align: left;"><code>https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ip:laurent-minne-data-shield-critical</code></td>
+<td style="text-align: left;">Data-Shield IPv4 Blocklist - Laurent M. - Für DMZs, SaaS, API &amp; Kritische Assets</td>
+<td style="text-align: left;"><code>https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_critical_data-shield_ipv4_blocklist.txt</code></td>
+</tr>
 </tbody>
 </table>
 <p><strong>Konfiguration:</strong> Geben Sie mehrere Listen durch Leerzeichen getrennt an. Zum Beispiel:
@@ -4756,34 +4766,108 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <p class="admonition-title">Community-Listen vs. manuelle Konfiguration</p>
 <p>Community-Blacklists bieten eine bequeme Möglichkeit, mit bewährten Blacklist-Quellen zu beginnen. Sie können diese parallel zu manuellen URL-Konfigurationen für maximale Flexibilität verwenden.</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Danksagung</p>
+<p>Vielen Dank an Laurent Minne für den Beitrag der <a href="https://duggytuxy.github.io/#">Data-Shield-Blocklisten</a>!</p>
 </div>
 </div>
+<div class="tabbed-block">
+<p><strong>Was es bewirkt:</strong> Blockiert Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Standard</th>
+<th style="text-align: left;">Kontext</th>
+<th style="text-align: left;">Mehrfach</th>
+<th style="text-align: left;">Beschreibung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>BLACKLIST_IP</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">Nein</td>
+<td style="text-align: left;"><strong>IP-Blacklist:</strong> Liste von IP-Adressen oder Netzwerken (CIDR-Notation) zum Blockieren, durch Leerzeichen getrennt.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>BLACKLIST_IGNORE_IP</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">Nein</td>
+<td style="text-align: left;"><strong>IP-Ignorierliste:</strong> Liste von IP-Adressen oder Netzwerken, die IP-Blacklist-Überprüfungen umgehen sollen.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>BLACKLIST_IP_URLS</code></td>
+<td style="text-align: left;"><code>https://www.dan.me.uk/torlist/?exit</code></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">Nein</td>
+<td style="text-align: left;"><strong>IP-Blacklist-URLs:</strong> Liste von URLs, die zu blockierende IP-Adressen oder Netzwerke enthalten, durch Leerzeichen getrennt.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>BLACKLIST_IGNORE_IP_URLS</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">Nein</td>
+<td style="text-align: left;"><strong>IP-Ignorierlisten-URLs:</strong> Liste von URLs, die zu ignorierende IP-Adressen oder Netzwerke enthalten.</td>
+</tr>
+</tbody>
+</table>
+<p>Der Standardparameter <code>BLACKLIST_IP_URLS</code> enthält eine URL, die eine <strong>Liste bekannter Tor-Exit-Nodes</strong> bereitstellt. Dies ist eine häufige Quelle für bösartigen Datenverkehr und ein guter Ausgangspunkt für viele Websites.</p>
 </div>
-<p>=== "IP-Adresse"[18][19][20][21][22]
-    <strong>Was es bewirkt:</strong> Blockiert Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk.</p>
-<pre><code>| Parameter                  | Standard                              | Kontext   | Mehrfach | Beschreibung                                                                                                                 |
-| :------------------------- | :------------------------------------ | :-------- | :------- | :--------------------------------------------------------------------------------------------------------------------------- |
-| `BLACKLIST_IP`             |                                       | Multisite | Nein     | **IP-Blacklist:** Liste von IP-Adressen oder Netzwerken (CIDR-Notation) zum Blockieren, durch Leerzeichen getrennt.          |
-| `BLACKLIST_IGNORE_IP`      |                                       | Multisite | Nein     | **IP-Ignorierliste:** Liste von IP-Adressen oder Netzwerken, die IP-Blacklist-Überprüfungen umgehen sollen.                  |
-| `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit` | Multisite | Nein     | **IP-Blacklist-URLs:** Liste von URLs, die zu blockierende IP-Adressen oder Netzwerke enthalten, durch Leerzeichen getrennt. |
-| `BLACKLIST_IGNORE_IP_URLS` |                                       | Multisite | Nein     | **IP-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende IP-Adressen oder Netzwerke enthalten.                        |
-
-Der Standardparameter `BLACKLIST_IP_URLS` enthält eine URL, die eine **Liste bekannter Tor-Exit-Nodes** bereitstellt. Dies ist eine häufige Quelle für bösartigen Datenverkehr und ein guter Ausgangspunkt für viele Websites.
-</code></pre>
-<p>=== "Reverse DNS"[23][24][25][26][27]
-    <strong>Was es bewirkt:</strong> Blockiert Besucher basierend auf ihrem Reverse-Domain-Namen. Dies ist nützlich, um bekannte Scanner und Crawler basierend auf ihren Organisationsdomänen zu blockieren.</p>
-<pre><code>| Parameter                    | Standard                | Kontext   | Mehrfach | Beschreibung                                                                                               |
-| :--------------------------- | :---------------------- | :-------- | :------- | :--------------------------------------------------------------------------------------------------------- |
-| `BLACKLIST_RDNS`             | `.shodan.io .censys.io` | Multisite | Nein     | **rDNS-Blacklist:** Liste von Reverse-DNS-Suffixen zum Blockieren, durch Leerzeichen getrennt.             |
-| `BLACKLIST_RDNS_GLOBAL`      | `yes`                   | Multisite | Nein     | **Nur globales rDNS:** Führt rDNS-Überprüfungen nur für globale IP-Adressen durch, wenn auf `yes` gesetzt. |
-| `BLACKLIST_IGNORE_RDNS`      |                         | Multisite | Nein     | **rDNS-Ignorierliste:** Liste von Reverse-DNS-Suffixen, die rDNS-Blacklist-Überprüfungen umgehen sollen.   |
-| `BLACKLIST_RDNS_URLS`        |                         | Multisite | Nein     | **rDNS-Blacklist-URLs:** Liste von URLs, die zu blockierende Reverse-DNS-Suffixe enthalten.                |
-| `BLACKLIST_IGNORE_RDNS_URLS` |                         | Multisite | Nein     | **rDNS-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende Reverse-DNS-Suffixe enthalten.           |
-
-Der Standardparameter `BLACKLIST_RDNS` enthält Domänen gängiger Scanner wie **Shodan** und **Censys**. Diese werden oft von Sicherheitsforschern und Scannern verwendet, um anfällige Websites zu identifizieren.
-</code></pre>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:1"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">ASN</label></div>
-<div class="tabbed-content">
+<div class="tabbed-block">
+<p><strong>Was es bewirkt:</strong> Blockiert Besucher basierend auf ihrem Reverse-Domain-Namen. Dies ist nützlich, um bekannte Scanner und Crawler basierend auf ihren Organisationsdomänen zu blockieren.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Standard</th>
+<th style="text-align: left;">Kontext</th>
+<th style="text-align: left;">Mehrfach</th>
+<th style="text-align: left;">Beschreibung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>BLACKLIST_RDNS</code></td>
+<td style="text-align: left;"><code>.shodan.io .censys.io</code></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">Nein</td>
+<td style="text-align: left;"><strong>rDNS-Blacklist:</strong> Liste von Reverse-DNS-Suffixen zum Blockieren, durch Leerzeichen getrennt.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>BLACKLIST_RDNS_GLOBAL</code></td>
+<td style="text-align: left;"><code>yes</code></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">Nein</td>
+<td style="text-align: left;"><strong>Nur globales rDNS:</strong> Führt rDNS-Überprüfungen nur für globale IP-Adressen durch, wenn auf <code>yes</code> gesetzt.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>BLACKLIST_IGNORE_RDNS</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">Nein</td>
+<td style="text-align: left;"><strong>rDNS-Ignorierliste:</strong> Liste von Reverse-DNS-Suffixen, die rDNS-Blacklist-Überprüfungen umgehen sollen.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>BLACKLIST_RDNS_URLS</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">Nein</td>
+<td style="text-align: left;"><strong>rDNS-Blacklist-URLs:</strong> Liste von URLs, die zu blockierende Reverse-DNS-Suffixe enthalten.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>BLACKLIST_IGNORE_RDNS_URLS</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">Nein</td>
+<td style="text-align: left;"><strong>rDNS-Ignorierlisten-URLs:</strong> Liste von URLs, die zu ignorierende Reverse-DNS-Suffixe enthalten.</td>
+</tr>
+</tbody>
+</table>
+<p>Der Standardparameter <code>BLACKLIST_RDNS</code> enthält Domänen gängiger Scanner wie <strong>Shodan</strong> und <strong>Censys</strong>. Diese werden oft von Sicherheitsforschern und Scannern verwendet, um anfällige Websites zu identifizieren.</p>
+</div>
 <div class="tabbed-block">
 <p><strong>Was es bewirkt:</strong> Blockiert Besucher von bestimmten Netzwerkanbietern. ASNs sind wie Postleitzahlen für das Internet – sie identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.</p>
 <table>
@@ -4828,36 +4912,107 @@ Der Standardparameter `BLACKLIST_RDNS` enthält Domänen gängiger Scanner wie *
 </tbody>
 </table>
 </div>
+<div class="tabbed-block">
+<p><strong>Was es bewirkt:</strong> Blockiert Besucher basierend auf dem Browser oder Tool, das sie angeblich verwenden. Dies ist effektiv gegen Bots, die sich ehrlich identifizieren (wie "ScannerBot" oder "WebHarvestTool").</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Standard</th>
+<th style="text-align: left;">Kontext</th>
+<th style="text-align: left;">Mehrfach</th>
+<th style="text-align: left;">Beschreibung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>BLACKLIST_USER_AGENT</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">Nein</td>
+<td style="text-align: left;"><strong>User-Agent-Blacklist:</strong> Liste von User-Agent-Mustern (PCRE-Regex) zum Blockieren, durch Leerzeichen getrennt.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>BLACKLIST_IGNORE_USER_AGENT</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">Nein</td>
+<td style="text-align: left;"><strong>User-Agent-Ignorierliste:</strong> Liste von User-Agent-Mustern, die User-Agent-Blacklist-Überprüfungen umgehen sollen.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>BLACKLIST_USER_AGENT_URLS</code></td>
+<td style="text-align: left;"><code>https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list</code></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">Nein</td>
+<td style="text-align: left;"><strong>User-Agent-Blacklist-URLs:</strong> Liste von URLs, die zu blockierende User-Agent-Muster enthalten.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>BLACKLIST_IGNORE_USER_AGENT_URLS</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">Nein</td>
+<td style="text-align: left;"><strong>User-Agent-Ignorierlisten-URLs:</strong> Liste von URLs, die zu ignorierende User-Agent-Muster enthalten.</td>
+</tr>
+</tbody>
+</table>
+<p>Der Standardparameter <code>BLACKLIST_USER_AGENT_URLS</code> enthält eine URL, die eine <strong>Liste bekannter bösartiger User-Agents</strong> bereitstellt. Diese werden oft von bösartigen Bots und Scannern verwendet, um anfällige Websites zu identifizieren.</p>
+</div>
+<div class="tabbed-block">
+<p><strong>Was es bewirkt:</strong> Blockiert Anfragen an spezifische URLs auf Ihrer Website. Dies ist nützlich, um Zugriffsversuche auf Admin-Seiten, Anmeldeformulare oder andere sensible Bereiche zu blockieren, die angegriffen werden könnten.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Standard</th>
+<th style="text-align: left;">Kontext</th>
+<th style="text-align: left;">Mehrfach</th>
+<th style="text-align: left;">Beschreibung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>BLACKLIST_URI</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">Nein</td>
+<td style="text-align: left;"><strong>URI-Blacklist:</strong> Liste von URI-Mustern (PCRE-Regex) zum Blockieren, durch Leerzeichen getrennt.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>BLACKLIST_IGNORE_URI</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">Nein</td>
+<td style="text-align: left;"><strong>URI-Ignorierliste:</strong> Liste von URI-Mustern, die URI-Blacklist-Überprüfungen umgehen sollen.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>BLACKLIST_URI_URLS</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">Nein</td>
+<td style="text-align: left;"><strong>URI-Blacklist-URLs:</strong> Liste von URLs, die zu blockierende URI-Muster enthalten.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>BLACKLIST_IGNORE_URI_URLS</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">Nein</td>
+<td style="text-align: left;"><strong>URI-Ignorierlisten-URLs:</strong> Liste von URLs, die zu ignorierende URI-Muster enthalten.</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
-<p>=== "User-Agent"[28][29][30][31][32]
-    <strong>Was es bewirkt:</strong> Blockiert Besucher basierend auf dem Browser oder Tool, das sie angeblich verwenden. Dies ist effektiv gegen Bots, die sich ehrlich identifizieren (wie "ScannerBot" oder "WebHarvestTool").</p>
-<pre><code>| Parameter                          | Standard                                                                                                                       | Kontext   | Mehrfach | Beschreibung                                                                                                       |
-| :--------------------------------- | :----------------------------------------------------------------------------------------------------------------------------- | :-------- | :------- | :----------------------------------------------------------------------------------------------------------------- |
-| `BLACKLIST_USER_AGENT`             |                                                                                                                                | Multisite | Nein     | **User-Agent-Blacklist:** Liste von User-Agent-Mustern (PCRE-Regex) zum Blockieren, durch Leerzeichen getrennt.    |
-| `BLACKLIST_IGNORE_USER_AGENT`      |                                                                                                                                | Multisite | Nein     | **User-Agent-Ignorierliste:** Liste von User-Agent-Mustern, die User-Agent-Blacklist-Überprüfungen umgehen sollen. |
-| `BLACKLIST_USER_AGENT_URLS`        | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` | Multisite | Nein     | **User-Agent-Blacklist-URLs:** Liste von URLs, die zu blockierende User-Agent-Muster enthalten.                    |
-| `BLACKLIST_IGNORE_USER_AGENT_URLS` |                                                                                                                                | Multisite | Nein     | **User-Agent-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende User-Agent-Muster enthalten.               |
-
-Der Standardparameter `BLACKLIST_USER_AGENT_URLS` enthält eine URL, die eine **Liste bekannter bösartiger User-Agents** bereitstellt. Diese werden oft von bösartigen Bots und Scannern verwendet, um anfällige Websites zu identifizieren.
-</code></pre>
-<p>=== "URI"[33][34][35][36][37]
-    <strong>Was es bewirkt:</strong> Blockiert Anfragen an spezifische URLs auf Ihrer Website. Dies ist nützlich, um Zugriffsversuche auf Admin-Seiten, Anmeldeformulare oder andere sensible Bereiche zu blockieren, die angegriffen werden könnten.</p>
-<pre><code>| Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                                      |
-| :-------------------------- | :------- | :-------- | :------- | :------------------------------------------------------------------------------------------------ |
-| `BLACKLIST_URI`             |          | Multisite | Nein     | **URI-Blacklist:** Liste von URI-Mustern (PCRE-Regex) zum Blockieren, durch Leerzeichen getrennt. |
-| `BLACKLIST_IGNORE_URI`      |          | Multisite | Nein     | **URI-Ignorierliste:** Liste von URI-Mustern, die URI-Blacklist-Überprüfungen umgehen sollen.     |
-| `BLACKLIST_URI_URLS`        |          | Multisite | Nein     | **URI-Blacklist-URLs:** Liste von URLs, die zu blockierende URI-Muster enthalten.                 |
-| `BLACKLIST_IGNORE_URI_URLS` |          | Multisite | Nein     | **URI-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende URI-Muster enthalten.            |
-</code></pre>
+</div>
 <div class="admonition info">
 <p class="admonition-title">Unterstützung von URL-Formaten</p>
 <p>Alle <code>*_URLS</code>-Parameter unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade unter Verwendung des Präfixes <code>file:///</code>. Die Basisauthentifizierung wird im Format <code>http://user:pass@url</code> unterstützt.</p>
 </div>
-<p>!!! tip "Regelmäßige Updates"[4][5][6][7][8]
-    Blacklists von URLs werden automatisch stündlich heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz gegen die neuesten Bedrohungen auf dem neuesten Stand bleibt.</p>
-<h3 id="konfigurationsbeispiele38">Konfigurationsbeispiele[38]</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Grundlegender Schutz durch IP und User-Agent</label><label for="__tabbed_10_2">Erweiterter Schutz mit benutzerdefinierten Regeln</label><label for="__tabbed_10_3">Verwendung lokaler Dateien</label></div>
+<div class="admonition tip">
+<p class="admonition-title">Regelmäßige Updates</p>
+<p>Blacklists von URLs werden automatisch stündlich heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz gegen die neuesten Bedrohungen auf dem neuesten Stand bleibt.</p>
+</div>
+<h3 id="konfigurationsbeispiele_1">Konfigurationsbeispiele</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:3"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Grundlegender Schutz durch IP und User-Agent</label><label for="__tabbed_9_2">Erweiterter Schutz mit benutzerdefinierten Regeln</label><label for="__tabbed_9_3">Verwendung lokaler Dateien</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration, die bekannte Tor-Exit-Nodes und gängige bösartige User-Agents mithilfe der Community-Blacklists blockiert:</p>
@@ -4988,7 +5143,7 @@ TrustedMonitor/\d+\.\d+
 <p><code>6</code> bietet einen guten Kompromiss. Für statische Inhalte and verfügbare CPU: 9–11. Für dynamische Inhalte oder bei CPU-Einschränkungen: 4–5.</p>
 </div>
 <h3 id="beispiele">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Basis</label><label for="__tabbed_11_2">Maximale Komprimierung</label><label for="__tabbed_11_3">Ausgewogene Leistung</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Basis</label><label for="__tabbed_10_2">Maximale Komprimierung</label><label for="__tabbed_10_3">Ausgewogene Leistung</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">USE_BROTLI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -5080,7 +5235,7 @@ TrustedMonitor/\d+\.\d+
 <p>Bei der Meldung von Bedrohungsinformationen an BunkerNet teilt Ihre Instanz nur die zur Identifizierung der Bedrohung erforderlichen Daten: die IP-Adresse, den Grund für die Sperrung und minimale kontextbezogene Daten. Es werden keine persönlichen Informationen über Ihre Benutzer oder sensible Details über Ihre Website weitergegeben.</p>
 </div>
 <h3 id="beispielkonfigurationen_4">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:3"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><input id="__tabbed_12_3" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Standardkonfiguration (empfohlen)</label><label for="__tabbed_12_2">Deaktivierte Konfiguration</label><label for="__tabbed_12_3">Benutzerdefinierte Serverkonfiguration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Standardkonfiguration (empfohlen)</label><label for="__tabbed_11_2">Deaktivierte Konfiguration</label><label for="__tabbed_11_3">Benutzerdefinierte Serverkonfiguration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Die Standardkonfiguration aktiviert BunkerNet mit dem offiziellen BunkerWeb-API-Server:</p>
@@ -5271,7 +5426,7 @@ TrustedMonitor/\d+\.\d+
 <li><strong><code>^https://(www\.example1\.com|www\.example2\.com)$</code></strong>: Erlaubt Anfragen entweder von <code>https://www.example1.com</code> oder <code>https://www.example2.com</code>.</li>
 <li><strong><code>^https?://www\.example\.com$</code></strong>: Erlaubt Anfragen sowohl von <code>https://www.example.com</code> als auch von <code>http://www.example.com</code>.</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:5"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><input id="__tabbed_13_3" name="__tabbed_13" type="radio" /><input id="__tabbed_13_4" name="__tabbed_13" type="radio" /><input id="__tabbed_13_5" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Grundlegende Konfiguration</label><label for="__tabbed_13_2">Konfiguration für öffentliche API</label><label for="__tabbed_13_3">Mehrere vertrauenswürdige Domains</label><label for="__tabbed_13_4">Subdomain-Platzhalter</label><label for="__tabbed_13_5">Mehrere Domain-Muster</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:5"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><input id="__tabbed_12_3" name="__tabbed_12" type="radio" /><input id="__tabbed_12_4" name="__tabbed_12" type="radio" /><input id="__tabbed_12_5" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Grundlegende Konfiguration</label><label for="__tabbed_12_2">Konfiguration für öffentliche API</label><label for="__tabbed_12_3">Mehrere vertrauenswürdige Domains</label><label for="__tabbed_12_4">Subdomain-Platzhalter</label><label for="__tabbed_12_5">Mehrere Domain-Muster</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration, die Cross-Origin-Anfragen von derselben Domain erlaubt:</p>
@@ -5494,7 +5649,7 @@ TrustedMonitor/\d+\.\d+
 <p>Unterschiedliche Browser implementieren Caching geringfügig anders, aber alle modernen Browser respektieren die Standard-Cache-Control-Anweisungen. ETags bieten einen zusätzlichen Validierungsmechanismus, der Browsern hilft festzustellen, ob zwischengespeicherte Inhalte noch gültig sind.</p>
 </div>
 <h3 id="beispielkonfigurationen_6">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:3"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Grundlegende Konfiguration</label><label for="__tabbed_14_2">Aggressives Caching</label><label for="__tabbed_14_3">Strategie für gemischte Inhalte</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:3"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><input id="__tabbed_13_3" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Grundlegende Konfiguration</label><label for="__tabbed_13_2">Aggressives Caching</label><label for="__tabbed_13_3">Strategie für gemischte Inhalte</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration, die das Caching für gängige statische Assets aktiviert:</p>
@@ -5581,7 +5736,7 @@ TrustedMonitor/\d+\.\d+
 <p>BunkerWeb verwendet die mmdb-Datenbank <a href="https://db-ip.com/db/download/ip-to-country-lite">db-ip lite</a>.</p>
 </div>
 <h3 id="beispiele_1">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:4"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><input id="__tabbed_15_4" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Nur Whitelist</label><label for="__tabbed_15_2">Nur Blacklist</label><label for="__tabbed_15_3">Nur EU</label><label for="__tabbed_15_4">Blockierung von Risikoländern</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:4"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><input id="__tabbed_14_4" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Nur Whitelist</label><label for="__tabbed_14_2">Nur Blacklist</label><label for="__tabbed_14_3">Nur EU</label><label for="__tabbed_14_4">Blockierung von Risikoländern</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">WHITELIST_COUNTRY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;US</span><span class="nv"> </span><span class="s">CA</span><span class="nv"> </span><span class="s">GB&quot;</span>
@@ -5639,7 +5794,7 @@ TrustedMonitor/\d+\.\d+
 </ol>
 <p>Die folgenden Abschnitte führen diese Schritte im Detail durch.</p>
 <h3 id="schritt-1-crowdsec-auf-das-einlesen-von-bunkerweb-protokollen-vorbereiten">Schritt&nbsp;1 – CrowdSec auf das Einlesen von BunkerWeb-Protokollen vorbereiten</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:3"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><input id="__tabbed_16_3" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Docker</label><label for="__tabbed_16_2">Linux</label><label for="__tabbed_16_3">All-in-one</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:3"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Docker</label><label for="__tabbed_15_2">Linux</label><label for="__tabbed_15_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Akquisitionsdatei</strong></p>
@@ -5990,8 +6145,8 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tbody>
 </table>
 <p>!!! info "Über die Betriebsmodi" - Der <strong>Live-Modus</strong> fragt die CrowdSec-API für jede eingehende Anfrage ab und bietet Echtzeitschutz auf Kosten einer höheren Latenz. - Der <strong>Stream-Modus</strong> lädt periodisch alle Entscheidungen von der CrowdSec-API herunter und speichert sie lokal im Cache, wodurch die Latenz mit einer leichten Verzögerung bei der Anwendung neuer Entscheidungen reduziert wird.</p>
-<h3 id="konfigurationsbeispiele_1">Konfigurationsbeispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Basiskonfiguration</label><label for="__tabbed_17_2">Erweiterte Konfiguration mit AppSec</label></div>
+<h3 id="konfigurationsbeispiele_2">Konfigurationsbeispiele</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Basiskonfiguration</label><label for="__tabbed_16_2">Erweiterte Konfiguration mit AppSec</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Dies ist eine einfache Konfiguration, wenn CrowdSec auf demselben Host ausgeführt wird:</p>
@@ -6197,7 +6352,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p>Wenn eine Zwischenkette erforderlich ist, stellen Sie das vollständige Bundle in der richtigen Reihenfolge bereit (Zertifikat, dann Zwischenzertifikate).</p>
 </div>
 <h3 id="beispiele_2">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:4"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><input id="__tabbed_18_3" name="__tabbed_18" type="radio" /><input id="__tabbed_18_4" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Dateien</label><label for="__tabbed_18_2">Base64-Daten</label><label for="__tabbed_18_3">Klartext-PEM</label><label for="__tabbed_18_4">Fallback</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:4"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><input id="__tabbed_17_3" name="__tabbed_17" type="radio" /><input id="__tabbed_17_4" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Dateien</label><label for="__tabbed_17_2">Base64-Daten</label><label for="__tabbed_17_3">Klartext-PEM</label><label for="__tabbed_17_4">Fallback</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">USE_CUSTOM_SSL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -6331,7 +6486,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p>Obwohl BunkerWeb DNSBL-Abfragen auf Leistung optimiert, könnte das Hinzufügen einer großen Anzahl von DNSBL-Servern potenziell die Antwortzeiten beeinträchtigen. Beginnen Sie mit einigen seriösen DNSBL-Servern und überwachen Sie die Leistung, bevor Sie weitere hinzufügen.</p>
 </div>
 <h3 id="beispielkonfigurationen_7">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:5"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><input id="__tabbed_19_4" name="__tabbed_19" type="radio" /><input id="__tabbed_19_5" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Grundlegende Konfiguration</label><label for="__tabbed_19_2">Minimale Konfiguration</label><label for="__tabbed_19_3">Ausschluss vertrauenswürdiger IPs</label><label for="__tabbed_19_4">Verwendung von Remote-URLs</label><label for="__tabbed_19_5">Verwendung lokaler Dateien</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:5"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><input id="__tabbed_18_3" name="__tabbed_18" type="radio" /><input id="__tabbed_18_4" name="__tabbed_18" type="radio" /><input id="__tabbed_18_5" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Grundlegende Konfiguration</label><label for="__tabbed_18_2">Minimale Konfiguration</label><label for="__tabbed_18_3">Ausschluss vertrauenswürdiger IPs</label><label for="__tabbed_18_4">Verwendung von Remote-URLs</label><label for="__tabbed_18_5">Verwendung lokaler Dateien</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration mit den Standard-DNSBL-Servern:</p>
@@ -6533,7 +6688,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li>5xx (Server-seitig): Unmöglichkeit, eine gültige Anfrage zu bearbeiten (interner Fehler, vorübergehende Nichtverfügbarkeit…).</li>
 </ul>
 <h3 id="beispiele_3">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:3"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Standardverwaltung</label><label for="__tabbed_20_2">Benutzerdefinierte Seiten</label><label for="__tabbed_20_3">Selektive Verwaltung</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Standardverwaltung</label><label for="__tabbed_19_2">Benutzerdefinierte Seiten</label><label for="__tabbed_19_3">Selektive Verwaltung</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">INTERCEPTED_ERROR_CODES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;400</span><span class="nv"> </span><span class="s">401</span><span class="nv"> </span><span class="s">403</span><span class="nv"> </span><span class="s">404</span><span class="nv"> </span><span class="s">405</span><span class="nv"> </span><span class="s">413</span><span class="nv"> </span><span class="s">429</span><span class="nv"> </span><span class="s">500</span><span class="nv"> </span><span class="s">501</span><span class="nv"> </span><span class="s">502</span><span class="nv"> </span><span class="s">503</span><span class="nv"> </span><span class="s">504&quot;</span>
@@ -6603,7 +6758,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:5"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><input id="__tabbed_21_4" name="__tabbed_21" type="radio" /><input id="__tabbed_21_5" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">IP-Adresse</label><label for="__tabbed_21_2">Reverse DNS</label><label for="__tabbed_21_3">ASN</label><label for="__tabbed_21_4">User-Agent</label><label for="__tabbed_21_5">URI</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:5"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><input id="__tabbed_20_4" name="__tabbed_20" type="radio" /><input id="__tabbed_20_5" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">IP-Adresse</label><label for="__tabbed_20_2">Reverse DNS</label><label for="__tabbed_20_3">ASN</label><label for="__tabbed_20_4">User-Agent</label><label for="__tabbed_20_5">URI</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Was dies bewirkt:</strong> Setzt Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk auf die Greylist. Diese Besucher erhalten Zugriff, unterliegen aber weiterhin den Sicherheitsprüfungen.</p>
@@ -6773,7 +6928,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p>Greylists von URLs werden stündlich automatisch heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz mit den neuesten vertrauenswürdigen Quellen auf dem neuesten Stand bleibt.</p>
 </div>
 <h3 id="beispielkonfigurationen_8">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="22:4"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><input id="__tabbed_22_4" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Grundlegende Konfiguration</label><label for="__tabbed_22_2">Erweiterte Konfiguration</label><label for="__tabbed_22_3">Verwendung lokaler Dateien</label><label for="__tabbed_22_4">Selektiver API-Zugriff</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:4"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><input id="__tabbed_21_4" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Grundlegende Konfiguration</label><label for="__tabbed_21_2">Erweiterte Konfiguration</label><label for="__tabbed_21_3">Verwendung lokaler Dateien</label><label for="__tabbed_21_4">Selektiver API-Zugriff</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration, die Greylisting auf das interne Netzwerk eines Unternehmens und einen Crawler anwendet:</p>
@@ -6910,7 +7065,7 @@ TrustedMonitor/\d+\.\d+
 <p><code>5</code> ist ein guter Kompromiss. Statisch/CPU verfügbar: 7–9. Dynamisch/CPU begrenzt: 1–3.</p>
 </div>
 <h3 id="beispiele_4">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="23:4"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><input id="__tabbed_23_3" name="__tabbed_23" type="radio" /><input id="__tabbed_23_4" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">Standard</label><label for="__tabbed_23_2">Maximale Kompression</label><label for="__tabbed_23_3">Ausgewogene Leistung</label><label for="__tabbed_23_4">Proxied-Inhalt</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:4"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><input id="__tabbed_22_4" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Standard</label><label for="__tabbed_22_2">Maximale Kompression</label><label for="__tabbed_22_3">Ausgewogene Leistung</label><label for="__tabbed_22_4">Proxied-Inhalt</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">USE_GZIP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -6995,7 +7150,7 @@ TrustedMonitor/\d+\.\d+
 <p>!!! tip "Bewährte Praktiken" - Aus Leistungsgründen sollten Sie JavaScript-Dateien am Ende des Body platzieren, um das Rendern nicht zu blockieren. - Platzieren Sie CSS und kritisches JavaScript im Head-Bereich, um ein Aufblitzen von ungestyltem Inhalt zu vermeiden. - Seien Sie vorsichtig mit eingefügtem Inhalt, der die Funktionalität Ihrer Website beeinträchtigen könnte.</p>
 <p>!!! info "Häufige Anwendungsfälle" - Hinzufügen von Analyses-Skripten (wie Google Analytics, Matomo) - Integration von Chat-Widgets oder Kundensupport-Tools - Einbinden von Tracking-Pixeln für Marketingkampagnen - Hinzufügen von benutzerdefinierten CSS-Stilen oder JavaScript-Funktionen - Einbinden von Bibliotheken von Drittanbietern, ohne den Anwendungscode zu ändern</p>
 <h3 id="beispielkonfigurationen_9">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="24:4"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><input id="__tabbed_24_3" name="__tabbed_24" type="radio" /><input id="__tabbed_24_4" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">Google Analytics</label><label for="__tabbed_24_2">Benutzerdefinierte Stile</label><label for="__tabbed_24_3">Mehrere Integrationen</label><label for="__tabbed_24_4">Cookie-Einwilligungsbanner</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="23:4"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><input id="__tabbed_23_3" name="__tabbed_23" type="radio" /><input id="__tabbed_23_4" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">Google Analytics</label><label for="__tabbed_23_2">Benutzerdefinierte Stile</label><label for="__tabbed_23_3">Mehrere Integrationen</label><label for="__tabbed_23_4">Cookie-Einwilligungsbanner</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Hinzufügen von Google-Analytics-Tracking zu Ihrer Website:</p>
@@ -7046,7 +7201,7 @@ TrustedMonitor/\d+\.\d+
 <li><strong>Bedingte Header-Anwendung nutzen:</strong> Wenn Sie Richtlinien ohne Unterbrechung testen möchten, aktivieren Sie den <a href="https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Content-Security-Policy-Report-Only">CSP Report-Only-Modus</a> über <code>CONTENT_SECURITY_POLICY_REPORT_ONLY</code>.</li>
 </ol>
 <h3 id="konfigurationsleitfaden">Konfigurationsleitfaden</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="25:3"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><input id="__tabbed_25_3" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">Sicherheits-Header</label><label for="__tabbed_25_2">Cookie-Einstellungen</label><label for="__tabbed_25_3">Benutzerdefinierte Header</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="24:3"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><input id="__tabbed_24_3" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">Sicherheits-Header</label><label for="__tabbed_24_2">Cookie-Einstellungen</label><label for="__tabbed_24_3">Benutzerdefinierte Header</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Überblick</strong></p>
@@ -7247,7 +7402,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h3 id="beispielkonfigurationen_10">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="26:4"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><input id="__tabbed_26_3" name="__tabbed_26" type="radio" /><input id="__tabbed_26_4" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Grundlegende Sicherheits-Header</label><label for="__tabbed_26_2">Verbesserte Cookie-Sicherheit</label><label for="__tabbed_26_3">Benutzerdefinierte Header für API</label><label for="__tabbed_26_4">Content Security Policy - Berichtsmodus</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="25:4"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><input id="__tabbed_25_3" name="__tabbed_25" type="radio" /><input id="__tabbed_25_4" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">Grundlegende Sicherheits-Header</label><label for="__tabbed_25_2">Verbesserte Cookie-Sicherheit</label><label for="__tabbed_25_3">Benutzerdefinierte Header für API</label><label for="__tabbed_25_4">Content Security Policy - Berichtsmodus</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine Standardkonfiguration mit wesentlichen Sicherheits-Headern:</p>
@@ -7673,7 +7828,7 @@ TrustedMonitor/\d+\.\d+
 </tbody>
 </table>
 <h3 id="beispielkonfigurationen_11">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="27:6"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><input id="__tabbed_27_2" name="__tabbed_27" type="radio" /><input id="__tabbed_27_3" name="__tabbed_27" type="radio" /><input id="__tabbed_27_4" name="__tabbed_27" type="radio" /><input id="__tabbed_27_5" name="__tabbed_27" type="radio" /><input id="__tabbed_27_6" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">Grundlegende HTTP-Challenge</label><label for="__tabbed_27_2">Cloudflare DNS mit Wildcard</label><label for="__tabbed_27_3">AWS Route53-Konfiguration</label><label for="__tabbed_27_4">Testen mit Staging-Umgebung und Wiederholungen</label><label for="__tabbed_27_5">DigitalOcean mit benutzerdefinierter Propagationszeit</label><label for="__tabbed_27_6">Google Cloud DNS</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="26:6"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><input id="__tabbed_26_3" name="__tabbed_26" type="radio" /><input id="__tabbed_26_4" name="__tabbed_26" type="radio" /><input id="__tabbed_26_5" name="__tabbed_26" type="radio" /><input id="__tabbed_26_6" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Grundlegende HTTP-Challenge</label><label for="__tabbed_26_2">Cloudflare DNS mit Wildcard</label><label for="__tabbed_26_3">AWS Route53-Konfiguration</label><label for="__tabbed_26_4">Testen mit Staging-Umgebung und Wiederholungen</label><label for="__tabbed_26_5">DigitalOcean mit benutzerdefinierter Propagationszeit</label><label for="__tabbed_26_6">Google Cloud DNS</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Einfache Konfiguration mit HTTP-Challenges für eine einzelne Domain:</p>
@@ -7758,7 +7913,7 @@ TrustedMonitor/\d+\.\d+
 <li><strong>Wirksamkeit überwachen:</strong> Verwenden Sie die <a href="../web-ui/">Web-Benutzeroberfläche</a>, um Statistiken über begrenzte Anfragen und Verbindungen anzuzeigen.</li>
 </ol>
 <h3 id="konfigurationseinstellungen_12">Konfigurationseinstellungen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="28:1"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Anforderungsratenbegrenzung</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="27:1"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">Anforderungsratenbegrenzung</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <table>
@@ -7809,7 +7964,7 @@ TrustedMonitor/\d+\.\d+
 </ul>
 <p>Zum Beispiel bedeutet <code>5r/m</code>, dass 5 Anfragen pro Minute von jeder IP-Adresse erlaubt sind.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="29:1"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">Verbindungsbegrenzung</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="28:1"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Verbindungsbegrenzung</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <table>
@@ -7876,7 +8031,7 @@ TrustedMonitor/\d+\.\d+
 <p>Zu restriktive Grenzwerte können legitime Benutzer beeinträchtigen, insbesondere bei HTTP/2 und HTTP/3, wo Browser oft mehrere Streams verwenden. Die Standardwerte sind für die meisten Anwendungsfälle ausgewogen, aber erwägen Sie, sie je nach den Bedürfnissen Ihrer Anwendung und dem Benutzerverhalten anzupassen.</p>
 </div>
 <h3 id="beispielkonfigurationen_12">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="30:4"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><input id="__tabbed_30_4" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">Grundschutz</label><label for="__tabbed_30_2">Schutz spezifischer Endpunkte</label><label for="__tabbed_30_3">Konfiguration für eine Website mit hohem Verkehrsaufkommen</label><label for="__tabbed_30_4">Konfiguration für einen API-Server</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="29:4"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><input id="__tabbed_29_2" name="__tabbed_29" type="radio" /><input id="__tabbed_29_3" name="__tabbed_29" type="radio" /><input id="__tabbed_29_4" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">Grundschutz</label><label for="__tabbed_29_2">Schutz spezifischer Endpunkte</label><label for="__tabbed_29_3">Konfiguration für eine Website mit hohem Verkehrsaufkommen</label><label for="__tabbed_29_4">Konfiguration für einen API-Server</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration mit Standardeinstellungen zum Schutz Ihrer gesamten Website:</p>
@@ -8258,7 +8413,7 @@ TrustedMonitor/\d+\.\d+
 <p>Jeder NGINX-Worker verwaltet seine eigenen Metriken im Speicher. Beim Zugriff auf Metriken über die API werden die Daten aller Worker automatisch aggregiert, um eine vollständige Ansicht zu erhalten.</p>
 </div>
 <h3 id="beispielkonfigurationen_13">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="31:4"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><input id="__tabbed_31_4" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">Grundlegende Konfiguration</label><label for="__tabbed_31_2">Umgebung mit geringen Ressourcen</label><label for="__tabbed_31_3">Umgebung mit hohem Verkehrsaufkommen</label><label for="__tabbed_31_4">Metriken deaktiviert</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="30:4"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><input id="__tabbed_30_4" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">Grundlegende Konfiguration</label><label for="__tabbed_30_2">Umgebung mit geringen Ressourcen</label><label for="__tabbed_30_3">Umgebung mit hohem Verkehrsaufkommen</label><label for="__tabbed_30_4">Metriken deaktiviert</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Standardkonfiguration, die für die meisten Bereitstellungen geeignet ist:</p>
@@ -8356,7 +8511,7 @@ TrustedMonitor/\d+\.\d+
 </tbody>
 </table>
 <h3 id="konfigurationsanleitung">Konfigurationsanleitung</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="32:8"><input checked="checked" id="__tabbed_32_1" name="__tabbed_32" type="radio" /><input id="__tabbed_32_2" name="__tabbed_32" type="radio" /><input id="__tabbed_32_3" name="__tabbed_32" type="radio" /><input id="__tabbed_32_4" name="__tabbed_32" type="radio" /><input id="__tabbed_32_5" name="__tabbed_32" type="radio" /><input id="__tabbed_32_6" name="__tabbed_32" type="radio" /><input id="__tabbed_32_7" name="__tabbed_32" type="radio" /><input id="__tabbed_32_8" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="__tabbed_32_1">Sicherheit des Standardservers</label><label for="__tabbed_32_2">HTTP-Status bei Ablehnung</label><label for="__tabbed_32_3">HTTP-Methoden</label><label for="__tabbed_32_4">Größenbeschränkungen für Anfragen</label><label for="__tabbed_32_5">Protokollunterstützung</label><label for="__tabbed_32_6">Bereitstellung statischer Dateien</label><label for="__tabbed_32_7">Systemeinstellungen</label><label for="__tabbed_32_8">Datei-Caching</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="31:8"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><input id="__tabbed_31_4" name="__tabbed_31" type="radio" /><input id="__tabbed_31_5" name="__tabbed_31" type="radio" /><input id="__tabbed_31_6" name="__tabbed_31" type="radio" /><input id="__tabbed_31_7" name="__tabbed_31" type="radio" /><input id="__tabbed_31_8" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">Sicherheit des Standardservers</label><label for="__tabbed_31_2">HTTP-Status bei Ablehnung</label><label for="__tabbed_31_3">HTTP-Methoden</label><label for="__tabbed_31_4">Größenbeschränkungen für Anfragen</label><label for="__tabbed_31_5">Protokollunterstützung</label><label for="__tabbed_31_6">Bereitstellung statischer Dateien</label><label for="__tabbed_31_7">Systemeinstellungen</label><label for="__tabbed_31_8">Datei-Caching</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Steuerung des Standardservers</strong></p>
@@ -8755,7 +8910,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h3 id="beispielkonfigurationen_14">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="33:7"><input checked="checked" id="__tabbed_33_1" name="__tabbed_33" type="radio" /><input id="__tabbed_33_2" name="__tabbed_33" type="radio" /><input id="__tabbed_33_3" name="__tabbed_33" type="radio" /><input id="__tabbed_33_4" name="__tabbed_33" type="radio" /><input id="__tabbed_33_5" name="__tabbed_33" type="radio" /><input id="__tabbed_33_6" name="__tabbed_33" type="radio" /><input id="__tabbed_33_7" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="__tabbed_33_1">Sicherheit des Standardservers</label><label for="__tabbed_33_2">HTTP-Status bei Ablehnung</label><label for="__tabbed_33_3">HTTP-Methoden</label><label for="__tabbed_33_4">Größenbeschränkungen für Anfragen</label><label for="__tabbed_33_5">Protokollunterstützung</label><label for="__tabbed_33_6">Bereitstellung statischer Dateien</label><label for="__tabbed_33_7">Datei-Caching</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="32:7"><input checked="checked" id="__tabbed_32_1" name="__tabbed_32" type="radio" /><input id="__tabbed_32_2" name="__tabbed_32" type="radio" /><input id="__tabbed_32_3" name="__tabbed_32" type="radio" /><input id="__tabbed_32_4" name="__tabbed_32" type="radio" /><input id="__tabbed_32_5" name="__tabbed_32" type="radio" /><input id="__tabbed_32_6" name="__tabbed_32" type="radio" /><input id="__tabbed_32_7" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="__tabbed_32_1">Sicherheit des Standardservers</label><label for="__tabbed_32_2">HTTP-Status bei Ablehnung</label><label for="__tabbed_32_3">HTTP-Methoden</label><label for="__tabbed_32_4">Größenbeschränkungen für Anfragen</label><label for="__tabbed_32_5">Protokollunterstützung</label><label for="__tabbed_32_6">Bereitstellung statischer Dateien</label><label for="__tabbed_32_7">Datei-Caching</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Beispielkonfiguration zum Deaktivieren des Standardservers und Erzwingen von striktem SNI:</p>
@@ -9017,7 +9172,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Höhere Sicherheitseinstellungen können legitimen Verkehr blockieren. Beginnen Sie mit den Standardeinstellungen und überwachen Sie die Protokolle, bevor Sie die Sicherheitsstufen erhöhen. Seien Sie bereit, Ausnahmeregeln für die spezifischen Anforderungen Ihrer Anwendung hinzuzufügen.</p>
 </div>
 <h3 id="beispielkonfigurationen_15">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="34:6"><input checked="checked" id="__tabbed_34_1" name="__tabbed_34" type="radio" /><input id="__tabbed_34_2" name="__tabbed_34" type="radio" /><input id="__tabbed_34_3" name="__tabbed_34" type="radio" /><input id="__tabbed_34_4" name="__tabbed_34" type="radio" /><input id="__tabbed_34_5" name="__tabbed_34" type="radio" /><input id="__tabbed_34_6" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="__tabbed_34_1">Grundlegende Konfiguration</label><label for="__tabbed_34_2">Nur-Erkennungsmodus</label><label for="__tabbed_34_3">Erweiterte Konfiguration mit Plugins</label><label for="__tabbed_34_4">Legacy-Konfiguration</label><label for="__tabbed_34_5">Globales ModSecurity</label><label for="__tabbed_34_6">Nightly-Build mit benutzerdefinierten Plugins</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="33:6"><input checked="checked" id="__tabbed_33_1" name="__tabbed_33" type="radio" /><input id="__tabbed_33_2" name="__tabbed_33" type="radio" /><input id="__tabbed_33_3" name="__tabbed_33" type="radio" /><input id="__tabbed_33_4" name="__tabbed_33" type="radio" /><input id="__tabbed_33_5" name="__tabbed_33" type="radio" /><input id="__tabbed_33_6" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="__tabbed_33_1">Grundlegende Konfiguration</label><label for="__tabbed_33_2">Nur-Erkennungsmodus</label><label for="__tabbed_33_3">Erweiterte Konfiguration mit Plugins</label><label for="__tabbed_33_4">Legacy-Konfiguration</label><label for="__tabbed_33_5">Globales ModSecurity</label><label for="__tabbed_33_6">Nightly-Build mit benutzerdefinierten Plugins</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine Standardkonfiguration mit aktiviertem ModSecurity und CRS v4:</p>
@@ -9214,8 +9369,8 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">Vertrauensquelle und Verifizierung</p>
 <p>BunkerWeb nutzt dasselbe CA-Bundle sowohl für die Client-Prüfung als auch für den Aufbau der Vertrauenskette, damit OCSP/CRL-Checks konsistent bleiben.</p>
 </div>
-<h3 id="konfigurationsbeispiele_2">Konfigurationsbeispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="35:3"><input checked="checked" id="__tabbed_35_1" name="__tabbed_35" type="radio" /><input id="__tabbed_35_2" name="__tabbed_35" type="radio" /><input id="__tabbed_35_3" name="__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="__tabbed_35_1">Strikte Zugriffskontrolle</label><label for="__tabbed_35_2">Optionale Client-Authentifizierung</label><label for="__tabbed_35_3">Diagnose ohne CA</label></div>
+<h3 id="konfigurationsbeispiele_3">Konfigurationsbeispiele</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="34:3"><input checked="checked" id="__tabbed_34_1" name="__tabbed_34" type="radio" /><input id="__tabbed_34_2" name="__tabbed_34" type="radio" /><input id="__tabbed_34_3" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="__tabbed_34_1">Strikte Zugriffskontrolle</label><label for="__tabbed_34_2">Optionale Client-Authentifizierung</label><label for="__tabbed_34_3">Diagnose ohne CA</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Verlangen Sie gültige Client-Zertifikate Ihrer privaten CA und leiten Sie die Verifizierungsergebnisse an das Backend weiter:</p>
@@ -9661,7 +9816,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Das PHP-Plugin konfiguriert automatisch die URL-Umschreibung, um moderne PHP-Anwendungen zu unterstützen. Anfragen für nicht existierende Dateien werden an <code>index.php</code> weitergeleitet, wobei die ursprüngliche Anfrage-URI als Abfrageparameter verfügbar ist.</p>
 </div>
 <h3 id="beispielkonfigurationen_16">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="36:4"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">Lokale PHP-FPM-Konfiguration</label><label for="__tabbed_36_2">Entfernte PHP-FPM-Konfiguration</label><label for="__tabbed_36_3">Konfiguration mit benutzerdefiniertem Port</label><label for="__tabbed_36_4">WordPress-Konfiguration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="35:4"><input checked="checked" id="__tabbed_35_1" name="__tabbed_35" type="radio" /><input id="__tabbed_35_2" name="__tabbed_35" type="radio" /><input id="__tabbed_35_3" name="__tabbed_35" type="radio" /><input id="__tabbed_35_4" name="__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="__tabbed_35_1">Lokale PHP-FPM-Konfiguration</label><label for="__tabbed_35_2">Entfernte PHP-FPM-Konfiguration</label><label for="__tabbed_35_3">Konfiguration mit benutzerdefiniertem Port</label><label for="__tabbed_35_4">WordPress-Konfiguration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Konfiguration für die Verwendung einer lokalen PHP-FPM-Instanz:</p>
@@ -9910,7 +10065,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Mit <code>REAL_IP_RECURSIVE</code> wird, wenn der Header mehrere IPs enthält, die erste IP, die nicht als vertrauenswürdiger Proxy aufgeführt ist, als Client-IP verwendet.</p>
 </div>
 <h3 id="beispiele_5">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="37:1"><input checked="checked" id="__tabbed_37_1" name="__tabbed_37" type="radio" /><div class="tabbed-labels"><label for="__tabbed_37_1">Basis (hinter Reverse Proxy)</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="36:1"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">Basis (hinter Reverse Proxy)</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -9997,7 +10152,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Wenn <code>REDIRECT_TO_REQUEST_URI</code> auf <code>yes</code> gesetzt ist, behält BunkerWeb den ursprünglichen Anfragepfad bei. Wenn ein Benutzer beispielsweise <code>https://old-domain.com/blog/post-1</code> besucht und Sie eine Umleitung zu <code>https://new-domain.com</code> eingerichtet haben, wird er zu <code>https://new-domain.com/blog/post-1</code> umgeleitet.</p>
 </div>
 <h3 id="beispielkonfigurationen_17">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="38:7"><input checked="checked" id="__tabbed_38_1" name="__tabbed_38" type="radio" /><input id="__tabbed_38_2" name="__tabbed_38" type="radio" /><input id="__tabbed_38_3" name="__tabbed_38" type="radio" /><input id="__tabbed_38_4" name="__tabbed_38" type="radio" /><input id="__tabbed_38_5" name="__tabbed_38" type="radio" /><input id="__tabbed_38_6" name="__tabbed_38" type="radio" /><input id="__tabbed_38_7" name="__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="__tabbed_38_1">Umleitung mehrerer Pfade</label><label for="__tabbed_38_2">Einfache Domain-Umleitung</label><label for="__tabbed_38_3">Pfadbeibehaltende Umleitung</label><label for="__tabbed_38_4">Temporäre Umleitung</label><label for="__tabbed_38_5">Subdomain-Konsolidierung</label><label for="__tabbed_38_6">API-Endpunkt-Migration</label><label for="__tabbed_38_7">Nach Formularübermittlung</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="37:7"><input checked="checked" id="__tabbed_37_1" name="__tabbed_37" type="radio" /><input id="__tabbed_37_2" name="__tabbed_37" type="radio" /><input id="__tabbed_37_3" name="__tabbed_37" type="radio" /><input id="__tabbed_37_4" name="__tabbed_37" type="radio" /><input id="__tabbed_37_5" name="__tabbed_37" type="radio" /><input id="__tabbed_37_6" name="__tabbed_37" type="radio" /><input id="__tabbed_37_7" name="__tabbed_37" type="radio" /><div class="tabbed-labels"><label for="__tabbed_37_1">Umleitung mehrerer Pfade</label><label for="__tabbed_37_2">Einfache Domain-Umleitung</label><label for="__tabbed_37_3">Pfadbeibehaltende Umleitung</label><label for="__tabbed_37_4">Temporäre Umleitung</label><label for="__tabbed_37_5">Subdomain-Konsolidierung</label><label for="__tabbed_37_6">API-Endpunkt-Migration</label><label for="__tabbed_37_7">Nach Formularübermittlung</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine Konfiguration, die mehrere Pfade an verschiedene Ziele umleitet:</p>
@@ -10226,7 +10381,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </ul>
 </div>
 <h3 id="beispiele_6">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="39:4"><input checked="checked" id="__tabbed_39_1" name="__tabbed_39" type="radio" /><input id="__tabbed_39_2" name="__tabbed_39" type="radio" /><input id="__tabbed_39_3" name="__tabbed_39" type="radio" /><input id="__tabbed_39_4" name="__tabbed_39" type="radio" /><div class="tabbed-labels"><label for="__tabbed_39_1">Basiskonfiguration</label><label for="__tabbed_39_2">Sichere Konfiguration</label><label for="__tabbed_39_3">Redis Sentinel</label><label for="__tabbed_39_4">Erweitertes Tuning</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="38:4"><input checked="checked" id="__tabbed_38_1" name="__tabbed_38" type="radio" /><input id="__tabbed_38_2" name="__tabbed_38" type="radio" /><input id="__tabbed_38_3" name="__tabbed_38" type="radio" /><input id="__tabbed_38_4" name="__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="__tabbed_38_1">Basiskonfiguration</label><label for="__tabbed_38_2">Sichere Konfiguration</label><label for="__tabbed_38_3">Redis Sentinel</label><label for="__tabbed_38_4">Erweitertes Tuning</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration für die Verbindung zu einem Redis- oder Valkey-Server auf dem lokalen Computer:</p>
@@ -10417,7 +10572,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>Caching einrichten (optional):</strong> Aktivieren und konfigurieren Sie das Proxy-Caching, um die Leistung für häufig aufgerufene Inhalte zu verbessern.</li>
 </ol>
 <h3 id="konfigurationsanleitung_1">Konfigurationsanleitung</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="40:8"><input checked="checked" id="__tabbed_40_1" name="__tabbed_40" type="radio" /><input id="__tabbed_40_2" name="__tabbed_40" type="radio" /><input id="__tabbed_40_3" name="__tabbed_40" type="radio" /><input id="__tabbed_40_4" name="__tabbed_40" type="radio" /><input id="__tabbed_40_5" name="__tabbed_40" type="radio" /><input id="__tabbed_40_6" name="__tabbed_40" type="radio" /><input id="__tabbed_40_7" name="__tabbed_40" type="radio" /><input id="__tabbed_40_8" name="__tabbed_40" type="radio" /><div class="tabbed-labels"><label for="__tabbed_40_1">Grundlegende Konfiguration</label><label for="__tabbed_40_2">Verbindungseinstellungen</label><label for="__tabbed_40_3">SSL/TLS-Konfiguration</label><label for="__tabbed_40_4">Protokollunterstützung</label><label for="__tabbed_40_5">Header-Verwaltung</label><label for="__tabbed_40_6">Authentifizierung</label><label for="__tabbed_40_7">Erweiterte Konfiguration</label><label for="__tabbed_40_8">Caching-Konfiguration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="39:8"><input checked="checked" id="__tabbed_39_1" name="__tabbed_39" type="radio" /><input id="__tabbed_39_2" name="__tabbed_39" type="radio" /><input id="__tabbed_39_3" name="__tabbed_39" type="radio" /><input id="__tabbed_39_4" name="__tabbed_39" type="radio" /><input id="__tabbed_39_5" name="__tabbed_39" type="radio" /><input id="__tabbed_39_6" name="__tabbed_39" type="radio" /><input id="__tabbed_39_7" name="__tabbed_39" type="radio" /><input id="__tabbed_39_8" name="__tabbed_39" type="radio" /><div class="tabbed-labels"><label for="__tabbed_39_1">Grundlegende Konfiguration</label><label for="__tabbed_39_2">Verbindungseinstellungen</label><label for="__tabbed_39_3">SSL/TLS-Konfiguration</label><label for="__tabbed_39_4">Protokollunterstützung</label><label for="__tabbed_39_5">Header-Verwaltung</label><label for="__tabbed_39_6">Authentifizierung</label><label for="__tabbed_39_7">Erweiterte Konfiguration</label><label for="__tabbed_39_8">Caching-Konfiguration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Kerneinstellungen</strong></p>
@@ -10950,7 +11105,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Ohne diese Maskierung versucht Docker Compose, diese Variablen durch Umgebungsvariablen zu ersetzen, die normalerweise nicht existieren, was zu leeren Werten in Ihrer NGINX-Konfiguration führt.</p>
 </div>
 <h3 id="beispielkonfigurationen_18">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="41:6"><input checked="checked" id="__tabbed_41_1" name="__tabbed_41" type="radio" /><input id="__tabbed_41_2" name="__tabbed_41" type="radio" /><input id="__tabbed_41_3" name="__tabbed_41" type="radio" /><input id="__tabbed_41_4" name="__tabbed_41" type="radio" /><input id="__tabbed_41_5" name="__tabbed_41" type="radio" /><input id="__tabbed_41_6" name="__tabbed_41" type="radio" /><div class="tabbed-labels"><label for="__tabbed_41_1">Grundlegender HTTP-Proxy</label><label for="__tabbed_41_2">WebSocket-Anwendung</label><label for="__tabbed_41_3">Mehrere Standorte</label><label for="__tabbed_41_4">Caching-Konfiguration</label><label for="__tabbed_41_5">Erweiterte Header-Verwaltung</label><label for="__tabbed_41_6">Authentifizierungsintegration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="40:6"><input checked="checked" id="__tabbed_40_1" name="__tabbed_40" type="radio" /><input id="__tabbed_40_2" name="__tabbed_40" type="radio" /><input id="__tabbed_40_3" name="__tabbed_40" type="radio" /><input id="__tabbed_40_4" name="__tabbed_40" type="radio" /><input id="__tabbed_40_5" name="__tabbed_40" type="radio" /><input id="__tabbed_40_6" name="__tabbed_40" type="radio" /><div class="tabbed-labels"><label for="__tabbed_40_1">Grundlegender HTTP-Proxy</label><label for="__tabbed_40_2">WebSocket-Anwendung</label><label for="__tabbed_40_3">Mehrere Standorte</label><label for="__tabbed_40_4">Caching-Konfiguration</label><label for="__tabbed_40_5">Erweiterte Header-Verwaltung</label><label for="__tabbed_40_6">Authentifizierungsintegration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration zum Weiterleiten von HTTP-Anfragen an einen Backend-Anwendungsserver:</p>
@@ -11104,7 +11259,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Die Standardkonfiguration umfasst gängige Ports, die von Proxyservern (80, 443, 8080, 3128) und SSH (22) verwendet werden. Sie können diese Liste basierend auf Ihrem Bedrohungsmodell anpassen.</p>
 </div>
 <h3 id="beispielkonfigurationen_19">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="42:4"><input checked="checked" id="__tabbed_42_1" name="__tabbed_42" type="radio" /><input id="__tabbed_42_2" name="__tabbed_42" type="radio" /><input id="__tabbed_42_3" name="__tabbed_42" type="radio" /><input id="__tabbed_42_4" name="__tabbed_42" type="radio" /><div class="tabbed-labels"><label for="__tabbed_42_1">Grundlegende Konfiguration</label><label for="__tabbed_42_2">Umfassendes Scannen</label><label for="__tabbed_42_3">Leistungsoptimierte Konfiguration</label><label for="__tabbed_42_4">Hochsicherheitskonfiguration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="41:4"><input checked="checked" id="__tabbed_41_1" name="__tabbed_41" type="radio" /><input id="__tabbed_41_2" name="__tabbed_41" type="radio" /><input id="__tabbed_41_3" name="__tabbed_41" type="radio" /><input id="__tabbed_41_4" name="__tabbed_41" type="radio" /><div class="tabbed-labels"><label for="__tabbed_41_1">Grundlegende Konfiguration</label><label for="__tabbed_41_2">Umfassendes Scannen</label><label for="__tabbed_41_3">Leistungsoptimierte Konfiguration</label><label for="__tabbed_41_4">Hochsicherheitskonfiguration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration zum Aktivieren des Client-Port-Scannens:</p>
@@ -11380,7 +11535,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>SSLv3, TLSv1.0 und TLSv1.1 sind standardmäßig deaktiviert (bekannte Schwachstellen). Aktivieren Sie diese nur bei Bedarf für ältere Clients.</p>
 </div>
 <h3 id="beispiele_7">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="43:4"><input checked="checked" id="__tabbed_43_1" name="__tabbed_43" type="radio" /><input id="__tabbed_43_2" name="__tabbed_43" type="radio" /><input id="__tabbed_43_3" name="__tabbed_43" type="radio" /><input id="__tabbed_43_4" name="__tabbed_43" type="radio" /><div class="tabbed-labels"><label for="__tabbed_43_1">Moderne Sicherheit (Standard)</label><label for="__tabbed_43_2">Maximale Sicherheit</label><label for="__tabbed_43_3">Legacy-Kompatibilität</label><label for="__tabbed_43_4">Benutzerdefinierte Suiten</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="42:4"><input checked="checked" id="__tabbed_42_1" name="__tabbed_42" type="radio" /><input id="__tabbed_42_2" name="__tabbed_42" type="radio" /><input id="__tabbed_42_3" name="__tabbed_42" type="radio" /><input id="__tabbed_42_4" name="__tabbed_42" type="radio" /><div class="tabbed-labels"><label for="__tabbed_42_1">Moderne Sicherheit (Standard)</label><label for="__tabbed_42_2">Maximale Sicherheit</label><label for="__tabbed_42_3">Legacy-Kompatibilität</label><label for="__tabbed_42_4">Benutzerdefinierte Suiten</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">LISTEN_HTTPS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -11537,7 +11692,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Gemäß RFC 9116 MÜSSEN alle URLs in der security.txt-Datei (außer <code>mailto:</code>- und <code>tel:</code>-Links) HTTPS verwenden. Nicht-HTTPS-URLs werden von BunkerWeb automatisch in HTTPS konvertiert, um die Einhaltung des Standards zu gewährleisten.</p>
 </div>
 <h3 id="beispielkonfigurationen_21">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="44:3"><input checked="checked" id="__tabbed_44_1" name="__tabbed_44" type="radio" /><input id="__tabbed_44_2" name="__tabbed_44" type="radio" /><input id="__tabbed_44_3" name="__tabbed_44" type="radio" /><div class="tabbed-labels"><label for="__tabbed_44_1">Grundlegende Konfiguration</label><label for="__tabbed_44_2">Umfassende Konfiguration</label><label for="__tabbed_44_3">Konfiguration mit mehreren Kontakten</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="43:3"><input checked="checked" id="__tabbed_43_1" name="__tabbed_43" type="radio" /><input id="__tabbed_43_2" name="__tabbed_43" type="radio" /><input id="__tabbed_43_3" name="__tabbed_43" type="radio" /><div class="tabbed-labels"><label for="__tabbed_43_1">Grundlegende Konfiguration</label><label for="__tabbed_43_2">Umfassende Konfiguration</label><label for="__tabbed_43_3">Konfiguration mit mehreren Kontakten</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine minimale Konfiguration mit nur Kontaktinformationen:</p>
@@ -11641,7 +11796,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h3 id="beispiele_8">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="45:3"><input checked="checked" id="__tabbed_45_1" name="__tabbed_45" type="radio" /><input id="__tabbed_45_2" name="__tabbed_45" type="radio" /><input id="__tabbed_45_3" name="__tabbed_45" type="radio" /><div class="tabbed-labels"><label for="__tabbed_45_1">Standard</label><label for="__tabbed_45_2">Kurzzeit-Zertifikate</label><label for="__tabbed_45_3">Test in RSA</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="44:3"><input checked="checked" id="__tabbed_44_1" name="__tabbed_44" type="radio" /><input id="__tabbed_44_2" name="__tabbed_44" type="radio" /><input id="__tabbed_44_3" name="__tabbed_44" type="radio" /><div class="tabbed-labels"><label for="__tabbed_44_1">Standard</label><label for="__tabbed_44_2">Kurzzeit-Zertifikate</label><label for="__tabbed_44_3">Test in RSA</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">GENERATE_SELF_SIGNED_SSL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -11771,7 +11926,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </ol>
 </div>
 <h3 id="beispielkonfigurationen_22">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="46:4"><input checked="checked" id="__tabbed_46_1" name="__tabbed_46" type="radio" /><input id="__tabbed_46_2" name="__tabbed_46" type="radio" /><input id="__tabbed_46_3" name="__tabbed_46" type="radio" /><input id="__tabbed_46_4" name="__tabbed_46" type="radio" /><div class="tabbed-labels"><label for="__tabbed_46_1">Grundlegende Konfiguration</label><label for="__tabbed_46_2">Erhöhte Sicherheit</label><label for="__tabbed_46_3">Cluster-Umgebung mit Redis</label><label for="__tabbed_46_4">Langlebige Sitzungen</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="45:4"><input checked="checked" id="__tabbed_45_1" name="__tabbed_45" type="radio" /><input id="__tabbed_45_2" name="__tabbed_45" type="radio" /><input id="__tabbed_45_3" name="__tabbed_45" type="radio" /><input id="__tabbed_45_4" name="__tabbed_45" type="radio" /><div class="tabbed-labels"><label for="__tabbed_45_1">Grundlegende Konfiguration</label><label for="__tabbed_45_2">Erhöhte Sicherheit</label><label for="__tabbed_45_3">Cluster-Umgebung mit Redis</label><label for="__tabbed_45_4">Langlebige Sitzungen</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration für eine einzelne BunkerWeb-Instanz:</p>
@@ -11918,7 +12073,7 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="47:5"><input checked="checked" id="__tabbed_47_1" name="__tabbed_47" type="radio" /><input id="__tabbed_47_2" name="__tabbed_47" type="radio" /><input id="__tabbed_47_3" name="__tabbed_47" type="radio" /><input id="__tabbed_47_4" name="__tabbed_47" type="radio" /><input id="__tabbed_47_5" name="__tabbed_47" type="radio" /><div class="tabbed-labels"><label for="__tabbed_47_1">IP-Adresse</label><label for="__tabbed_47_2">Reverse DNS</label><label for="__tabbed_47_3">ASN</label><label for="__tabbed_47_4">User-Agent</label><label for="__tabbed_47_5">URI</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="46:5"><input checked="checked" id="__tabbed_46_1" name="__tabbed_46" type="radio" /><input id="__tabbed_46_2" name="__tabbed_46" type="radio" /><input id="__tabbed_46_3" name="__tabbed_46" type="radio" /><input id="__tabbed_46_4" name="__tabbed_46" type="radio" /><input id="__tabbed_46_5" name="__tabbed_46" type="radio" /><div class="tabbed-labels"><label for="__tabbed_46_1">IP-Adresse</label><label for="__tabbed_46_2">Reverse DNS</label><label for="__tabbed_46_3">ASN</label><label for="__tabbed_46_4">User-Agent</label><label for="__tabbed_46_5">URI</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Was dies bewirkt:</strong> Setzt Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk auf die Whitelist. Diese Besucher umgehen alle Sicherheitsprüfungen.</p>
@@ -12162,7 +12317,7 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 <p>Auf der Whitelist stehende Besucher <strong>umgehen vollständig alle anderen Sicherheitsprüfungen</strong> in BunkerWeb, einschließlich WAF-Regeln, Ratenbegrenzung, Erkennung bösartiger Bots und aller anderen Sicherheitsmechanismen. Verwenden Sie die Whitelist nur für vertrauenswürdige Quellen, bei denen Sie absolut sicher sind.</p>
 </div>
 <h3 id="beispielkonfigurationen_23">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="48:5"><input checked="checked" id="__tabbed_48_1" name="__tabbed_48" type="radio" /><input id="__tabbed_48_2" name="__tabbed_48" type="radio" /><input id="__tabbed_48_3" name="__tabbed_48" type="radio" /><input id="__tabbed_48_4" name="__tabbed_48" type="radio" /><input id="__tabbed_48_5" name="__tabbed_48" type="radio" /><div class="tabbed-labels"><label for="__tabbed_48_1">Grundlegender Organisationszugriff</label><label for="__tabbed_48_2">Erweiterte Konfiguration</label><label for="__tabbed_48_3">Verwendung lokaler Dateien</label><label for="__tabbed_48_4">API-Zugriffsmuster</label><label for="__tabbed_48_5">Bekannte Crawler</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="47:5"><input checked="checked" id="__tabbed_47_1" name="__tabbed_47" type="radio" /><input id="__tabbed_47_2" name="__tabbed_47" type="radio" /><input id="__tabbed_47_3" name="__tabbed_47" type="radio" /><input id="__tabbed_47_4" name="__tabbed_47" type="radio" /><input id="__tabbed_47_5" name="__tabbed_47" type="radio" /><div class="tabbed-labels"><label for="__tabbed_47_1">Grundlegender Organisationszugriff</label><label for="__tabbed_47_2">Erweiterte Konfiguration</label><label for="__tabbed_47_3">Verwendung lokaler Dateien</label><label for="__tabbed_47_4">API-Zugriffsmuster</label><label for="__tabbed_47_5">Bekannte Crawler</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration, die die IP-Adressen des Unternehmensbüros auf die Whitelist setzt:</p>

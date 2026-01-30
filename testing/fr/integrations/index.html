@@ -1171,6 +1171,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#ressources-gateway" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ressources Gateway
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#namespaces_1" class="md-nav__link">
     <span class="md-ellipsis">
       Espaces de noms
@@ -1183,6 +1192,15 @@
   <a href="#classe-dentree" class="md-nav__link">
     <span class="md-ellipsis">
       Classe d'entrée
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gateway-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      Classe Gateway
     </span>
   </a>
   
@@ -3539,7 +3557,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <li><strong>Configuration du service</strong> : Configure et active les <code>systemd</code> services correspondant au type d'installation que vous avez choisi.</li>
 <li><strong>Conseils post-installation</strong>: Fournit des étapes suivantes claires pour vous aider à démarrer avec votre nouvelle instance BunkerWeb.</li>
 </ol>
-<h4 id="interactive-installation">Interactive Installation</h4>
+<h4 id="installation-interactive">Installation interactive</h4>
 <p>Lorsqu'il est exécuté sans aucune option, le script passe en mode interactif qui vous guide tout au long du processus d'installation. Il vous sera demandé de faire les choix suivants :</p>
 <ol>
 <li><strong>Type d'installation</strong>: sélectionnez les composants que vous souhaitez installer.<ul>
@@ -4193,6 +4211,12 @@ MY_SETTING_2=value2
 <td><code>no</code></td>
 </tr>
 <tr>
+<td><code>KUBERNETES_GATEWAY_MODE</code></td>
+<td>Utiliser le contrôleur Gateway API pour Kubernetes</td>
+<td><code>yes</code> ou <code>no</code></td>
+<td><code>no</code></td>
+</tr>
+<tr>
 <td><code>DOCKER_HOST</code></td>
 <td>Socket Docker / URL API distante</td>
 <td>ex. <code>unix:///var/run/docker.sock</code></td>
@@ -4365,6 +4389,24 @@ MY_SETTING_2=value2
 <td>unset (toutes)</td>
 </tr>
 <tr>
+<td><code>KUBERNETES_GATEWAY_MODE</code></td>
+<td>Utiliser le contrôleur Gateway API au lieu des Ingress</td>
+<td><code>yes</code> ou <code>no</code></td>
+<td><code>no</code></td>
+</tr>
+<tr>
+<td><code>KUBERNETES_GATEWAY_CLASS</code></td>
+<td>Ne traiter que les Gateways avec cette classe</td>
+<td>Chaîne</td>
+<td>unset (toutes)</td>
+</tr>
+<tr>
+<td><code>KUBERNETES_GATEWAY_API_VERSION</code></td>
+<td>Version de l'API Gateway à utiliser (repli automatique si absente)</td>
+<td><code>v1</code>, <code>v1beta1</code>, <code>v1beta2</code>, <code>v1alpha2</code>, <code>v1alpha1</code></td>
+<td><code>v1</code></td>
+</tr>
+<tr>
 <td><code>KUBERNETES_DOMAIN_NAME</code></td>
 <td>Suffixe de domaine du cluster lors de la construction des hôtes upstream</td>
 <td>Chaîne</td>
@@ -4378,7 +4420,7 @@ MY_SETTING_2=value2
 </tr>
 <tr>
 <td><code>BUNKERWEB_SERVICE_NAME</code></td>
-<td>Nom du Service lu lors du patch du statut Ingress avec l'adresse du load balancer</td>
+<td>Nom du Service lu lors du patch du statut Ingress/Gateway avec l'adresse du load balancer</td>
 <td>Chaîne</td>
 <td><code>bunkerweb</code></td>
 </tr>
@@ -4431,28 +4473,28 @@ MY_SETTING_2=value2
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Comportement de l'espace de nommage</p>
-<p>By default all Autoconf stacks listen to all namespaces. If you want to restrict a stack to specific namespaces, you can set the <code>NAMESPACES</code> environment variable in the <code>bw-autoconf</code> service:</p>
+<p>Par défaut, toutes les piles Autoconf écoutent tous les espaces de noms. Si vous souhaitez restreindre une pile à des espaces de noms spécifiques, vous pouvez définir la variable d'environnement <code>NAMESPACES</code> dans le service <code>bw-autoconf</code> :</p>
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
 <span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.INSTANCE=yes&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.NAMESPACE=my-namespace&quot;</span><span class="w"> </span><span class="c1"># Set the namespace for the BunkerWeb instance so the autoconf service can detect it</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.NAMESPACE=my-namespace&quot;</span><span class="w"> </span><span class="c1"># Définir l&#39;espace de noms pour l&#39;instance BunkerWeb afin que le service autoconf puisse la détecter</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-<span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">NAMESPACES</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;my-namespace</span><span class="nv"> </span><span class="s">my-other-namespace&quot;</span><span class="w"> </span><span class="c1"># Only listen to these namespaces</span>
+<span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">NAMESPACES</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;my-namespace</span><span class="nv"> </span><span class="s">my-other-namespace&quot;</span><span class="w"> </span><span class="c1"># Écouter uniquement ces espaces de noms</span>
 <span class="nn">...</span>
 </code></pre></div>
-<p>Keep in mind that the <code>NAMESPACES</code> environment variable is a space-separated list of namespaces.</p>
+<p>Gardez à l'esprit que la variable d'environnement <code>NAMESPACES</code> est une liste d'espaces de noms séparés par des espaces.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Spécifications de l'espace de nommage</p>
-<p>There can only be <strong>one database</strong> and <strong>one Scheduler</strong> per namespace. If you try to create multiple databases or Schedulers in the same namespace, the configurations will end up conflicting with each other.</p>
-<p>The Scheduler doesn't need the <code>NAMESPACE</code> label to work properly. It will only need the <code>DATABASE_URI</code> setting properly configured so that it can access the same database as the autoconf service.</p>
+<p>Il ne peut y avoir <strong>qu'une seule base de données</strong> et <strong>un seul Scheduler</strong> par espace de noms. Si vous tentez de créer plusieurs bases de données ou plusieurs Schedulers dans le même espace de noms, les configurations entreront en conflit.</p>
+<p>Le Scheduler n'a pas besoin de l'étiquette <code>NAMESPACE</code> pour fonctionner correctement. Il a seulement besoin que le paramètre <code>DATABASE_URI</code> soit correctement configuré afin qu'il puisse accéder à la même base de données que le service autoconf.</p>
 </div>
 <h2 id="kubernetes">Kubernetes</h2>
 <figure>
@@ -4461,9 +4503,17 @@ MY_SETTING_2=value2
 <figcaption>Intégration Kubernetes</figcaption>
 </figure>
 <p>Pour automatiser la configuration des instances BunkerWeb dans un environnement Kubernetes,
-le service autoconf sert de <a href="https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/">contrôleur d'entrée</a>.
+le service autoconf sert de <a href="https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/">contrôleur d'entrée</a> ou de <a href="https://kubernetes.io/docs/concepts/services-networking/gateway/">contrôleur Gateway API</a>.
 Il configure les instances BunkerWeb en fonction des <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/">ressources d'entrée</a>
 et surveille également d'autres objets Kubernetes, tels que <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>, pour des configurations personnalisées.</p>
+<div class="admonition example">
+<p class="admonition-title">Mode Gateway API</p>
+<p>Le mode Gateway API est actuellement en <strong>bêta</strong>.</p>
+<p>Assurez-vous que les CRD de la Gateway API sont installées dans le cluster (voir le <a href="https://gateway-api.sigs.k8s.io/guides/getting-started/#installing-gateway-api">guide d'installation de la Gateway API</a>).</p>
+<p>Si vous utilisez la Gateway API Kubernetes, définissez <code>KUBERNETES_MODE=yes</code> et <code>KUBERNETES_GATEWAY_MODE=yes</code>.</p>
+<p>Le contrôleur surveille les ressources <code>Gateway</code>, <code>HTTPRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code> et <code>UDPRoute</code> au lieu des objets <code>Ingress</code>. Vous pouvez limiter ce qui est traité avec <code>KUBERNETES_GATEWAY_CLASS</code> et choisir <code>KUBERNETES_GATEWAY_API_VERSION</code> (<code>v1</code>, <code>v1beta1</code>, <code>v1beta2</code>, <code>v1alpha2</code> ou <code>v1alpha1</code>).</p>
+<p>Si votre Service ne s'appelle pas <code>bunkerweb</code>, définissez <code>BUNKERWEB_SERVICE_NAME</code> pour que le patch de statut lise le bon Service.</p>
+</div>
 <div class="admonition info">
 <p class="admonition-title">Synchronisation des ConfigMap</p>
 <ul>
@@ -4485,7 +4535,7 @@ et surveille également d'autres objets Kubernetes, tels que <a href="https://ku
 <p class="admonition-title">Autorité de certification personnalisée pour l'API Kubernetes</p>
 <p>Si vous utilisez une autorité de certification personnalisée pour votre API Kubernetes, vous pouvez monter un fichier de bundle contenant vos certificats intermédiaires et racines sur le contrôleur d'entrée et définir la <code>KUBERNETES_SSL_CA_CERT</code> valeur de l'environnement sur le chemin d'accès du bundle à l'intérieur du conteneur. Sinon, même si cela n'est pas recommandé, vous pouvez désactiver la vérification du certificat en définissant la <code>KUBERNETES_SSL_VERIFY</code> variable d'environnement du contrôleur d'entrée sur <code>no</code> (la valeur par défaut <code>yes</code>est ).</p>
 </div>
-<p>De plus, <strong>il est crucial de définir la <code>KUBERNETES_MODE</code> variable d'environnement lors <code>yes</code> de  l'utilisation de l'intégration Kubernetes</strong>. Cette variable est obligatoire pour un bon fonctionnement.</p>
+<p>De plus, <strong>il est crucial de définir la <code>KUBERNETES_MODE</code> variable d'environnement lors <code>yes</code> de  l'utilisation de l'intégration Kubernetes</strong>. Cette variable est obligatoire pour un bon fonctionnement. Si vous utilisez la Gateway API, définissez également <code>KUBERNETES_GATEWAY_MODE=yes</code>.</p>
 <h3 id="kubernetes-installation">Méthodes d'installation</h3>
 <h4 id="utilisation-de-la-charte-helm-recommande">Utilisation de la charte Helm (recommandé)</h4>
 <p>La méthode recommandée pour installer Kubernetes est d'utiliser la charte Helm disponible à l'adresse <code>https://github.com/bunkerity/bunkerweb-helm</code>:</p>
@@ -4726,10 +4776,11 @@ et surveille également d'autres objets Kubernetes, tels que <a href="https://ku
 
 <span class="c1">###### Variables d&#39;environnement importantes</span>
 
-<span class="p p-Indicator">|</span><span class="err"> Variable           | Valeur                                                | Description                                                      |</span>
-<span class="p p-Indicator">|</span><span class="err"> ------------------ | ----------------------------------------------------- | ---------------------------------------------------------------- |</span>
-<span class="p p-Indicator">|</span><span class="err"> `KUBERNETES_MODE`  | `yes`                                                 | **Obligatoire** pour la découverte automatique via le controller |</span>
-<span class="p p-Indicator">|</span><span class="err"> `API_WHITELIST_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs autorisées à accéder à l&#39;API                                 |</span>
+<span class="p p-Indicator">|</span><span class="err"> Variable                  | Valeur                                                | Description                                                      |</span>
+<span class="p p-Indicator">|</span><span class="err"> ------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------- |</span>
+<span class="p p-Indicator">|</span><span class="err"> `KUBERNETES_MODE`         | `yes`                                                 | **Obligatoire** pour la découverte automatique via le controller |</span>
+<span class="p p-Indicator">|</span><span class="err"> `KUBERNETES_GATEWAY_MODE` | `yes` or `no` (if using Gateway API)                  | Use Gateway API mode                                             |</span>
+<span class="p p-Indicator">|</span><span class="err"> `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs autorisées à accéder à l&#39;API                                 |</span>
 
 <span class="c1">##### Étape 3 : Création des Services</span>
 
@@ -4986,6 +5037,70 @@ et surveille également d'autres objets Kubernetes, tels que <a href="https://ku
 <span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span>
 <span class="nn">...</span>
 </code></pre></div>
+<h3 id="ressources-gateway">Ressources Gateway</h3>
+<p>Lorsque le mode Gateway API est activé, vous pouvez déclarer des ressources <code>Gateway</code>, <code>HTTPRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code> et <code>UDPRoute</code>.
+Les paramètres BunkerWeb sont fournis via des annotations <code>bunkerweb.io/&lt;SETTING&gt;</code> sur le <code>HTTPRoute</code> ; pour limiter un
+paramètre à un hôte, utilisez <code>bunkerweb.io/&lt;hostname&gt;_&lt;SETTING&gt;</code>. Le champ <code>hostnames</code> pilote les noms de serveur. Pour <code>TCPRoute</code>/<code>UDPRoute</code> (et <code>TLSRoute</code> sans <code>hostnames</code>), BunkerWeb génère un nom de serveur du type <code>&lt;route&gt;.&lt;namespace&gt;.&lt;protocol&gt;</code>. Voir <a href="#gateway-class">Classe Gateway</a>.
+Les annotations sur le <code>Gateway</code> s'appliquent à toutes les routes qui y sont rattachées, tandis que les annotations sur un <code>HTTPRoute</code> ne s'appliquent qu'à cette route.
+Vous pouvez limiter les annotations du Gateway à un nom de serveur avec <code>bunkerweb.io/&lt;hostname&gt;_&lt;SETTING&gt;</code> ; elles ne s'appliqueront que si cette route/ce nom de serveur existe.</p>
+<h4 id="ressources-prises-en-charge">Ressources prises en charge</h4>
+<ul>
+<li>Ressources : <code>HTTPRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code> et <code>UDPRoute</code> (pas de <code>GRPCRoute</code>).</li>
+<li>Règles : seule la première règle est utilisée pour <code>TLSRoute</code>, <code>TCPRoute</code> et <code>UDPRoute</code>.</li>
+<li>Backends : uniquement <code>Service</code>, premier <code>backendRef</code> par règle.</li>
+</ul>
+<h4 id="protocoles-et-tls">Protocoles et TLS</h4>
+<ul>
+<li>Protocoles de listener : <code>HTTP</code>/<code>HTTPS</code> pour <code>HTTPRoute</code>, <code>TLS</code> pour <code>TLSRoute</code>, <code>TCP</code> pour <code>TCPRoute</code> et <code>UDP</code> pour <code>UDPRoute</code>.</li>
+<li>TLS : certificats via les <code>certificateRefs</code> du listener avec <code>HTTPS</code> ou <code>TLS</code> + <code>mode: Terminate</code> (Passthrough n'est pas pris en charge pour la terminaison). <code>TLSRoute</code> fonctionne en mode stream.</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Nom de serveur pour les routes stream</p>
+<p>Pour <code>TLSRoute</code>, <code>TCPRoute</code> et <code>UDPRoute</code>, vous pouvez remplacer le nom de serveur généré en définissant <code>bunkerweb.io/SERVER_NAME</code> sur la route.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Experimental Channel pour les routes stream</p>
+<p>Si vous souhaitez utiliser <code>TLSRoute</code>, <code>TCPRoute</code> ou <code>UDPRoute</code>, installez les CRD de l'Experimental Channel : https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Prise en charge TLS</p>
+<p>La terminaison TLS est gérée via les listeners du <code>Gateway</code> et leurs <code>certificateRefs</code> (secrets TLS) pour <code>HTTPRoute</code> avec <code>HTTPS</code> ou <code>TLS</code> + <code>mode: Terminate</code>. <code>TLSRoute</code> fonctionne en mode stream.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gateway.networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gateway</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-gateway</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">gatewayClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+<span class="w">  </span><span class="nt">listeners</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTTP</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">      </span><span class="nt">hostname</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">www.example.com</span>
+<span class="nn">---</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gateway.networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTTPRoute</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-route</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># S&#39;applique à tous les hostnames de cette route</span>
+<span class="w">    </span><span class="nt">bunkerweb.io/MY_SETTING</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
+<span class="w">    </span><span class="c1"># S&#39;applique uniquement au host www.example.com</span>
+<span class="w">    </span><span class="nt">bunkerweb.io/www.example.com_MY_SETTING</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">parentRefs</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-gateway</span>
+<span class="w">  </span><span class="nt">hostnames</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">www.example.com</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">matches</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PathPrefix</span>
+<span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">      </span><span class="nt">backendRefs</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-my-app</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span>
+</code></pre></div>
 <h3 id="namespaces_1">Espaces de noms</h3>
 <p>À partir de la version <code>1.6.0</code>, les piles autoconf de BunkerWeb prennent désormais en charge les espaces de noms. Cette fonctionnalité vous permet de gérer plusieurs clusters d'instances et de services BunkerWeb sur le même cluster Kubernetes. Pour tirer parti des espaces de noms, il suffit de définir le <code>namespace</code> champ de métadonnées sur vos instances et services BunkerWeb. Voici un exemple :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
@@ -5064,6 +5179,29 @@ et surveille également d'autres objets Kubernetes, tels que <a href="https://ku
 <span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-my-app</span>
 <span class="w">                </span><span class="nt">port</span><span class="p">:</span>
 <span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span>
+</code></pre></div>
+<h3 id="gateway-class">Classe Gateway</h3>
+<p>Lorsque vous utilisez la Gateway API, BunkerWeb attend une <code>GatewayClass</code> pointant vers son contrôleur :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gateway.networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GatewayClass</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">controllerName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb.io/gateway-controller</span>
+</code></pre></div>
+<p>Pour limiter les ressources <code>Gateway</code> surveillées, définissez <code>KUBERNETES_GATEWAY_CLASS</code> (par exemple <code>bunkerweb</code>) et utilisez
+le <code>gatewayClassName</code> correspondant dans vos ressources <code>Gateway</code> :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gateway.networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gateway</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-gateway</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">gatewayClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+<span class="w">  </span><span class="nt">listeners</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTTP</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">      </span><span class="nt">hostname</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">www.example.com</span>
 </code></pre></div>
 <h3 id="nom-de-domaine-personnalise">Nom de domaine personnalisé</h3>
 <p>Si vous utilisez un nom de domaine personnalisé différent de celui par défaut pour votre cluster Kubernetes <code>kubernetes.local</code> , vous pouvez définir la valeur à l'aide de la <code>KUBERNETES_DOMAIN_NAME</code> variable d'environnement sur le conteneur du Scheduler.</p>

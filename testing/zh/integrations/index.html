@@ -1171,6 +1171,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#gateway" class="md-nav__link">
+    <span class="md-ellipsis">
+      Gateway 资源
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#namespaces_1" class="md-nav__link">
     <span class="md-ellipsis">
       命名空间
@@ -1189,7 +1198,16 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_66" class="md-nav__link">
+  <a href="#gateway-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      Gateway 类
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_67" class="md-nav__link">
     <span class="md-ellipsis">
       自定义域名
     </span>
@@ -1264,7 +1282,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_76" class="md-nav__link">
+  <a href="#_77" class="md-nav__link">
     <span class="md-ellipsis">
       简介
     </span>
@@ -1273,7 +1291,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_77" class="md-nav__link">
+  <a href="#_78" class="md-nav__link">
     <span class="md-ellipsis">
       先决条件
     </span>
@@ -1282,7 +1300,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_78" class="md-nav__link">
+  <a href="#_79" class="md-nav__link">
     <span class="md-ellipsis">
       安装
     </span>
@@ -1291,7 +1309,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_79" class="md-nav__link">
+  <a href="#_80" class="md-nav__link">
     <span class="md-ellipsis">
       配置
     </span>
@@ -1300,7 +1318,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_81" class="md-nav__link">
+  <a href="#_82" class="md-nav__link">
     <span class="md-ellipsis">
       使用示例
     </span>
@@ -1309,7 +1327,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_85" class="md-nav__link">
+  <a href="#_86" class="md-nav__link">
     <span class="md-ellipsis">
       可用资源
     </span>
@@ -1318,7 +1336,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_86" class="md-nav__link">
+  <a href="#_87" class="md-nav__link">
     <span class="md-ellipsis">
       数据源
     </span>
@@ -1327,7 +1345,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_87" class="md-nav__link">
+  <a href="#_88" class="md-nav__link">
     <span class="md-ellipsis">
       临时资源
     </span>
@@ -1336,7 +1354,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_88" class="md-nav__link">
+  <a href="#_89" class="md-nav__link">
     <span class="md-ellipsis">
       完整示例
     </span>
@@ -1345,7 +1363,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_89" class="md-nav__link">
+  <a href="#_90" class="md-nav__link">
     <span class="md-ellipsis">
       其他资源
     </span>
@@ -1354,7 +1372,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_90" class="md-nav__link">
+  <a href="#_91" class="md-nav__link">
     <span class="md-ellipsis">
       支持和贡献
     </span>
@@ -4195,6 +4213,12 @@ MY_SETTING_2=value2
 <td><code>no</code></td>
 </tr>
 <tr>
+<td><code>KUBERNETES_GATEWAY_MODE</code></td>
+<td>启用 Kubernetes Gateway API 控制器</td>
+<td><code>yes</code> 或 <code>no</code></td>
+<td><code>no</code></td>
+</tr>
+<tr>
 <td><code>DOCKER_HOST</code></td>
 <td>Docker 套接字 / 远程 API URL</td>
 <td>例如 <code>unix:///var/run/docker.sock</code></td>
@@ -4367,6 +4391,24 @@ MY_SETTING_2=value2
 <td>unset（全部）</td>
 </tr>
 <tr>
+<td><code>KUBERNETES_GATEWAY_MODE</code></td>
+<td>使用 Gateway API 控制器而非 Ingress</td>
+<td><code>yes</code> 或 <code>no</code></td>
+<td><code>no</code></td>
+</tr>
+<tr>
+<td><code>KUBERNETES_GATEWAY_CLASS</code></td>
+<td>仅处理该类的 Gateway</td>
+<td>字符串</td>
+<td>unset（全部）</td>
+</tr>
+<tr>
+<td><code>KUBERNETES_GATEWAY_API_VERSION</code></td>
+<td>使用的 Gateway API 版本（缺失时自动回退）</td>
+<td><code>v1</code>、<code>v1beta1</code>、<code>v1beta2</code>、<code>v1alpha2</code>、<code>v1alpha1</code></td>
+<td><code>v1</code></td>
+</tr>
+<tr>
 <td><code>KUBERNETES_DOMAIN_NAME</code></td>
 <td>构建上游主机时使用的集群域名后缀</td>
 <td>字符串</td>
@@ -4380,7 +4422,7 @@ MY_SETTING_2=value2
 </tr>
 <tr>
 <td><code>BUNKERWEB_SERVICE_NAME</code></td>
-<td>在补丁 Ingress 状态时读取的 Service 名称</td>
+<td>在补丁 Ingress/Gateway 状态时读取的 Service 名称</td>
 <td>字符串</td>
 <td><code>bunkerweb</code></td>
 </tr>
@@ -4463,9 +4505,17 @@ MY_SETTING_2=value2
 <figcaption>Kubernetes 集成</figcaption>
 </figure>
 <p>为了在 Kubernetes 环境中自动化 BunkerWeb 实例的配置，
-autoconf 服务充当一个 <a href="https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/">Ingress 控制器</a>。
+autoconf 服务充当一个 <a href="https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/">Ingress 控制器</a> 或 <a href="https://kubernetes.io/docs/concepts/services-networking/gateway/">Gateway API 控制器</a>。
 它根据 <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/">Ingress 资源</a> 配置 BunkerWeb 实例，
 并监控其他 Kubernetes 对象，例如 <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>，以获取自定义配置。</p>
+<div class="admonition example">
+<p class="admonition-title">Gateway API 模式</p>
+<p>Gateway API 模式目前处于 <strong>beta</strong>。</p>
+<p>请确保集群已安装 Gateway API 的 CRD（参见 <a href="https://gateway-api.sigs.k8s.io/guides/getting-started/#installing-gateway-api">Gateway API 安装指南</a>）。</p>
+<p>如果你使用 Kubernetes Gateway API，请设置 <code>KUBERNETES_MODE=yes</code> 和 <code>KUBERNETES_GATEWAY_MODE=yes</code>。</p>
+<p>控制器将监控 <code>Gateway</code>、<code>HTTPRoute</code>、<code>TLSRoute</code>、<code>TCPRoute</code> 和 <code>UDPRoute</code> 资源，而不是 <code>Ingress</code> 对象。你可以通过 <code>KUBERNETES_GATEWAY_CLASS</code> 限制处理范围，并选择 <code>KUBERNETES_GATEWAY_API_VERSION</code>（<code>v1</code>、<code>v1beta1</code>、<code>v1beta2</code>、<code>v1alpha2</code> 或 <code>v1alpha1</code>）。</p>
+<p>如果你的 Service 名称不是 <code>bunkerweb</code>，请设置 <code>BUNKERWEB_SERVICE_NAME</code> 以便状态补丁读取正确的 Service。</p>
+</div>
 <div class="admonition info">
 <p class="admonition-title">ConfigMap 同步</p>
 <ul>
@@ -4487,7 +4537,7 @@ autoconf 服务充当一个 <a href="https://kubernetes.io/docs/concepts/service
 <p class="admonition-title">Kubernetes API 的自定义 CA</p>
 <p>如果您为您的 Kubernetes API 使用自定义 CA，您可以在 ingress 控制器上挂载一个包含您的中间证书和根证书的捆绑文件，并将 <code>KUBERNETES_SSL_CA_CERT</code> 环境变量的值设置为容器内捆绑文件的路径。或者，即使不推荐，您也可以通过将 ingress 控制器的 <code>KUBERNETES_SSL_VERIFY</code> 环境变量设置为 <code>no</code>（默认为 <code>yes</code>）来禁用证书验证。</p>
 </div>
-<p>此外，<strong>在使用 Kubernetes 集成时，将 <code>KUBERNETES_MODE</code> 环境变量设置为 <code>yes</code> 至关重要</strong>。此变量是正常运行所必需的。</p>
+<p>此外，<strong>在使用 Kubernetes 集成时，将 <code>KUBERNETES_MODE</code> 环境变量设置为 <code>yes</code> 至关重要</strong>。此变量是正常运行所必需的。如果你使用 Gateway API，还需要设置 <code>KUBERNETES_GATEWAY_MODE=yes</code>。</p>
 <h3 id="kubernetes-installation">安装方法</h3>
 <h4 id="helm-chart">使用 helm chart（推荐）</h4>
 <p>安装 Kubernetes 的推荐方法是使用位于 <code>https://repo.bunkerweb.io/charts</code> 的 Helm chart：</p>
@@ -4766,6 +4816,11 @@ autoconf 服务充当一个 <a href="https://kubernetes.io/docs/concepts/service
 <td><strong>Mandatory</strong> for automatic discovery via the controller</td>
 </tr>
 <tr>
+<td><code>KUBERNETES_GATEWAY_MODE</code></td>
+<td><code>yes</code> or <code>no</code> (if using Gateway API)</td>
+<td>Use Gateway API mode</td>
+</tr>
+<tr>
 <td><code>API_WHITELIST_IP</code></td>
 <td><code>127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16</code></td>
 <td>IPs allowed to access the API</td>
@@ -5023,6 +5078,70 @@ autoconf 服务充当一个 <a href="https://kubernetes.io/docs/concepts/service
 <span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span>
 <span class="nn">...</span>
 </code></pre></div>
+<h3 id="gateway">Gateway 资源</h3>
+<p>当使用 Gateway API 模式时，你可以声明 <code>Gateway</code>、<code>HTTPRoute</code>、<code>TLSRoute</code>、<code>TCPRoute</code> 与 <code>UDPRoute</code> 资源。
+在 <code>HTTPRoute</code> 上通过 <code>bunkerweb.io/&lt;SETTING&gt;</code> 注解提供 BunkerWeb 配置；如需限定到某个主机，
+使用 <code>bunkerweb.io/&lt;hostname&gt;_&lt;SETTING&gt;</code>。<code>hostnames</code> 字段用于驱动服务器名称。对于 <code>TCPRoute</code>/<code>UDPRoute</code>（以及没有 <code>hostnames</code> 的 <code>TLSRoute</code>），BunkerWeb 会生成类似 <code>&lt;route&gt;.&lt;namespace&gt;.&lt;protocol&gt;</code> 的服务器名称。参见 <a href="#gateway-class">Gateway 类</a>。
+<code>Gateway</code> 上的注解会应用到其挂载的所有路由，而 <code>HTTPRoute</code> 上的注解仅作用于该路由。
+你也可以用 <code>bunkerweb.io/&lt;hostname&gt;_&lt;SETTING&gt;</code> 将 Gateway 注解限定到某个服务器名；只有当该路由/服务器名存在时才会生效。</p>
+<h4 id="_66">支持的资源</h4>
+<ul>
+<li>资源：<code>HTTPRoute</code>、<code>TLSRoute</code>、<code>TCPRoute</code>、<code>UDPRoute</code>（不支持 <code>GRPCRoute</code>）。</li>
+<li>规则：<code>TLSRoute</code>、<code>TCPRoute</code> 和 <code>UDPRoute</code> 只使用第一条规则。</li>
+<li>后端：仅 <code>Service</code>，每条规则只取第一个 <code>backendRef</code>。</li>
+</ul>
+<h4 id="tls">协议与 TLS</h4>
+<ul>
+<li>Listener 协议：<code>HTTP</code>/<code>HTTPS</code> 用于 <code>HTTPRoute</code>，<code>TLS</code> 用于 <code>TLSRoute</code>，<code>TCP</code> 用于 <code>TCPRoute</code>，<code>UDP</code> 用于 <code>UDPRoute</code>。</li>
+<li>TLS：通过 listener 的 <code>certificateRefs</code>，仅 <code>HTTPS</code> 或 <code>TLS</code> + <code>mode: Terminate</code>（不支持 Passthrough 终止）。<code>TLSRoute</code> 运行在 stream 模式。</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Stream 路由的服务器名称</p>
+<p>对于 <code>TLSRoute</code>、<code>TCPRoute</code> 和 <code>UDPRoute</code>，你可以通过设置 <code>bunkerweb.io/SERVER_NAME</code> 来覆盖生成的服务器名称。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Experimental Channel（stream 路由）</p>
+<p>如果你打算使用 <code>TLSRoute</code>、<code>TCPRoute</code> 或 <code>UDPRoute</code>，请安装 Experimental Channel CRD： https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">TLS 支持</p>
+<p><code>HTTPRoute</code> 使用 <code>HTTPS</code> 或 <code>TLS</code> + <code>mode: Terminate</code> 时，TLS 终止通过 <code>Gateway</code> 的 listeners 及其 <code>certificateRefs</code>（TLS secrets）完成。<code>TLSRoute</code> 运行在 stream 模式。</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gateway.networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gateway</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-gateway</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">gatewayClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+<span class="w">  </span><span class="nt">listeners</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTTP</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">      </span><span class="nt">hostname</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">www.example.com</span>
+<span class="nn">---</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gateway.networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTTPRoute</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-route</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># 应用于该路由内所有 hostnames</span>
+<span class="w">    </span><span class="nt">bunkerweb.io/MY_SETTING</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
+<span class="w">    </span><span class="c1"># 仅应用于 www.example.com</span>
+<span class="w">    </span><span class="nt">bunkerweb.io/www.example.com_MY_SETTING</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">parentRefs</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-gateway</span>
+<span class="w">  </span><span class="nt">hostnames</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">www.example.com</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">matches</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PathPrefix</span>
+<span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">      </span><span class="nt">backendRefs</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-my-app</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span>
+</code></pre></div>
 <h3 id="namespaces_1">命名空间</h3>
 <p>从 <code>1.6.0</code> 版本开始，BunkerWeb 的自动配置堆栈现在支持命名空间。此功能使您能够在同一个 Kubernetes 集群上管理多个 BunkerWeb 实例和服务的集群。要利用命名空间，只需在您的 BunkerWeb 实例和服务上设置 <code>namespace</code> 元数据字段。这是一个示例：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
@@ -5102,7 +5221,30 @@ autoconf 服务充当一个 <a href="https://kubernetes.io/docs/concepts/service
 <span class="w">                </span><span class="nt">port</span><span class="p">:</span>
 <span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span>
 </code></pre></div>
-<h3 id="_66">自定义域名</h3>
+<h3 id="gateway-class">Gateway 类</h3>
+<p>当使用 Gateway API 时，BunkerWeb 需要一个指向其控制器的 <code>GatewayClass</code>：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gateway.networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GatewayClass</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">controllerName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb.io/gateway-controller</span>
+</code></pre></div>
+<p>若要限制被监控的 <code>Gateway</code> 资源，请设置 <code>KUBERNETES_GATEWAY_CLASS</code>（例如 <code>bunkerweb</code>），并在 <code>Gateway</code> 资源中
+使用匹配的 <code>gatewayClassName</code>：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gateway.networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gateway</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-gateway</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">gatewayClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+<span class="w">  </span><span class="nt">listeners</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTTP</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">      </span><span class="nt">hostname</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">www.example.com</span>
+</code></pre></div>
+<h3 id="_67">自定义域名</h3>
 <p>如果您为您的 Kubernetes 集群使用不同于默认 <code>kubernetes.local</code> 的自定义域名，您可以在调度器容器上使用 <code>KUBERNETES_DOMAIN_NAME</code> 环境变量来设置该值。</p>
 <h3 id="ingress_2">与现有 ingress 控制器一起使用</h3>
 <div class="admonition info">
@@ -5270,10 +5412,10 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 </code></pre></div>
 <p>您可以访问 <code>http(s)://myapp.example.com</code>，现在它已受到 BunkerWeb 的保护 🛡️</p>
 <h3 id="migrate-from-nginx-ingress-controller">从 nginx ingress 控制器迁移</h3>
-<h4 id="_67">简介</h4>
+<h4 id="_68">简介</h4>
 <p>本实用指南将引导您将 <strong>NGINX Ingress</strong> 资源迁移到 <strong>BunkerWeb</strong>。它专注于转换您现有的 Kubernetes 清单，并提供使用示例。</p>
 <p><strong>前提条件</strong>：BunkerWeb 必须安装在您的集群中（参见<a href="#kubernetes-installation">安装方法</a>）。</p>
-<h4 id="_68">迁移策略</h4>
+<h4 id="_69">迁移策略</h4>
 <p>推荐方法：<em>共存</em></p>
 <ol>
 <li><strong>并行安装 BunkerWeb</strong> 与 NGINX Ingress</li>
@@ -5282,7 +5424,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <li><strong>切换 DNS</strong> 验证通过后</li>
 <li><strong>删除</strong> 旧的 NGINX Ingress 资源</li>
 </ol>
-<h4 id="_69">迁移工作流</h4>
+<h4 id="_70">迁移工作流</h4>
 <div class="highlight"><pre><span></span><code><span class="c1"># 1. 备份当前的 Ingress</span>
 kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"> </span>--all-namespaces<span class="w"> </span>-o<span class="w"> </span>yaml<span class="w"> </span>&gt;<span class="w"> </span>nginx-ingress-backup.yaml
 
@@ -5298,7 +5440,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 </code></pre></div>
 <hr />
 <h4 id="1-ingress">示例 1：标准 Ingress</h4>
-<h5 id="_70">场景</h5>
+<h5 id="_71">场景</h5>
 <p>通过 cert-manager 实现自动 HTTPS 的简单 Web 应用程序。</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">NGINX Ingress</label><label for="__tabbed_2_2">BunkerWeb Ingress</label></div>
 <div class="tabbed-content">
@@ -5363,7 +5505,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 </div>
 </div>
 </div>
-<h5 id="_71">关键差异</h5>
+<h5 id="_72">关键差异</h5>
 <table>
 <thead>
 <tr>
@@ -5392,7 +5534,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 </table>
 <hr />
 <h4 id="2-ingress">示例 2：带注解的 Ingress</h4>
-<h5 id="_72">场景</h5>
+<h5 id="_73">场景</h5>
 <p>具有速率限制、CORS、HTTPS 重定向和超时配置的 REST API。</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">NGINX Ingress</label><label for="__tabbed_3_2">BunkerWeb Ingress</label></div>
 <div class="tabbed-content">
@@ -5506,7 +5648,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 </div>
 </div>
 </div>
-<h5 id="_73">注解转换</h5>
+<h5 id="_74">注解转换</h5>
 <table>
 <thead>
 <tr>
@@ -5565,7 +5707,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 </table>
 <hr />
 <h4 id="3-nginx-ingress">示例 3：带自定义 NGINX 配置的 Ingress</h4>
-<h5 id="_74">场景</h5>
+<h5 id="_75">场景</h5>
 <p>通过 <code>configuration-snippet</code> 使用自定义 NGINX 规则的应用程序：复杂的重写规则、身份验证、特殊请求头。</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">NGINX Ingress</label><label for="__tabbed_4_2">BunkerWeb Ingress</label><label for="__tabbed_4_3">BunkerWeb Ingress + ConfigMap</label></div>
 <div class="tabbed-content">
@@ -5830,7 +5972,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 </tbody>
 </table>
 <hr />
-<h4 id="_75">迁移前后对比</h4>
+<h4 id="_76">迁移前后对比</h4>
 <table>
 <thead>
 <tr>
@@ -6122,15 +6264,15 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <p>调度器不需要 <code>NAMESPACE</code> 标签即可正常工作。它只需要正确配置 <code>DATABASE_URI</code> 设置，以便它可以访问与自动配置服务相同的数据库。</p>
 </div>
 <h2 id="terraform">Terraform</h2>
-<h3 id="_76">简介</h3>
+<h3 id="_77">简介</h3>
 <p>BunkerWeb 的 Terraform Provider 允许您通过基础设施即代码（IaC）管理 BunkerWeb 实例、服务和配置。该 Provider 与 BunkerWeb API 交互,自动化部署和管理您的安全配置。</p>
-<h3 id="_77">先决条件</h3>
+<h3 id="_78">先决条件</h3>
 <ul>
 <li><a href="https://developer.hashicorp.com/terraform/downloads">Terraform</a> &gt;= 1.12</li>
 <li>已启用 API 的 BunkerWeb 实例</li>
 <li>API 令牌或基本身份验证凭据</li>
 </ul>
-<h3 id="_78">安装</h3>
+<h3 id="_79">安装</h3>
 <p>该 Provider 可在 <a href="https://registry.terraform.io/providers/bunkerity/bunkerweb/latest">Terraform Registry</a> 上获得。将其添加到您的 Terraform 配置中:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">terraform</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="nb">required_providers</span><span class="w"> </span><span class="p">{</span>
@@ -6141,21 +6283,21 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="_79">配置</h3>
+<h3 id="_80">配置</h3>
 <h4 id="bearer-token">Bearer Token 身份验证(推荐)</h4>
 <div class="highlight"><pre><span></span><code><span class="kr">provider</span><span class="w"> </span><span class="nv">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">api_endpoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://bunkerweb.example.com:8888&quot;</span>
 <span class="w">  </span><span class="na">api_token</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nv">var.bunkerweb_token</span>
 <span class="p">}</span>
 </code></pre></div>
-<h4 id="_80">基本身份验证</h4>
+<h4 id="_81">基本身份验证</h4>
 <div class="highlight"><pre><span></span><code><span class="kr">provider</span><span class="w"> </span><span class="nv">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">api_endpoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://bunkerweb.example.com:8888&quot;</span>
 <span class="w">  </span><span class="na">api_username</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">var.bunkerweb_username</span>
 <span class="w">  </span><span class="na">api_password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">var.bunkerweb_password</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="_81">使用示例</h3>
+<h3 id="_82">使用示例</h3>
 <h4 id="web">创建 Web 服务</h4>
 <div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;bunkerweb_service&quot;</span><span class="w"> </span><span class="nv">&quot;app&quot;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">server_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;app.example.com&quot;</span>
@@ -6166,7 +6308,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<h4 id="_82">注册实例</h4>
+<h4 id="_83">注册实例</h4>
 <div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;bunkerweb_instance&quot;</span><span class="w"> </span><span class="nv">&quot;worker1&quot;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">hostname</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;worker-1.internal&quot;</span>
 <span class="w">  </span><span class="na">name</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Worker 1&quot;</span>
@@ -6177,7 +6319,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">  </span><span class="na">method</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;api&quot;</span>
 <span class="p">}</span>
 </code></pre></div>
-<h4 id="_83">配置全局设置</h4>
+<h4 id="_84">配置全局设置</h4>
 <div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;bunkerweb_global_config_setting&quot;</span><span class="w"> </span><span class="nv">&quot;retry&quot;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">key</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;retry_limit&quot;</span>
 <span class="w">  </span><span class="na">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;10&quot;</span>
@@ -6190,7 +6332,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">  </span><span class="na">duration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3600</span><span class="c1">  # 1小时(秒)</span>
 <span class="p">}</span>
 </code></pre></div>
-<h4 id="_84">自定义配置</h4>
+<h4 id="_85">自定义配置</h4>
 <div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;bunkerweb_config&quot;</span><span class="w"> </span><span class="nv">&quot;custom_rules&quot;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">service_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;app.example.com&quot;</span>
 <span class="w">  </span><span class="na">type</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;http&quot;</span>
@@ -6198,7 +6340,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">  </span><span class="na">content</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nf">file</span><span class="p">(</span><span class="s2">&quot;${path.module}/configs/custom-rules.conf&quot;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="_85">可用资源</h3>
+<h3 id="_86">可用资源</h3>
 <p>该 Provider 提供以下资源:</p>
 <ul>
 <li><strong>bunkerweb_service</strong>: Web 服务管理</li>
@@ -6208,7 +6350,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <li><strong>bunkerweb_ban</strong>: IP 封禁管理</li>
 <li><strong>bunkerweb_plugin</strong>: 插件安装和管理</li>
 </ul>
-<h3 id="_86">数据源</h3>
+<h3 id="_87">数据源</h3>
 <p>数据源允许读取现有信息:</p>
 <ul>
 <li><strong>bunkerweb_service</strong>: 读取现有服务</li>
@@ -6217,7 +6359,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <li><strong>bunkerweb_cache</strong>: 缓存信息</li>
 <li><strong>bunkerweb_jobs</strong>: 计划作业状态</li>
 </ul>
-<h3 id="_87">临时资源</h3>
+<h3 id="_88">临时资源</h3>
 <p>用于一次性操作:</p>
 <ul>
 <li><strong>bunkerweb_run_jobs</strong>: 按需触发作业</li>
@@ -6225,7 +6367,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <li><strong>bunkerweb_service_snapshot</strong>: 捕获服务状态</li>
 <li><strong>bunkerweb_config_upload</strong>: 批量配置上传</li>
 </ul>
-<h3 id="_88">完整示例</h3>
+<h3 id="_89">完整示例</h3>
 <p>以下是使用 BunkerWeb 的完整基础设施示例:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">terraform</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="nb">required_providers</span><span class="w"> </span><span class="p">{</span>
@@ -6310,14 +6452,14 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">  </span><span class="na">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">bunkerweb_service.api.id</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="_89">其他资源</h3>
+<h3 id="_90">其他资源</h3>
 <ul>
 <li><a href="https://registry.terraform.io/providers/bunkerity/bunkerweb/latest/docs">完整 Provider 文档</a></li>
 <li><a href="https://github.com/bunkerity/terraform-provider-bunkerweb">GitHub 仓库</a></li>
 <li><a href="https://github.com/bunkerity/terraform-provider-bunkerweb/tree/main/examples">使用示例</a></li>
 <li><a href="https://docs.bunkerweb.io/latest/api/">BunkerWeb API 文档</a></li>
 </ul>
-<h3 id="_90">支持和贡献</h3>
+<h3 id="_91">支持和贡献</h3>
 <p>要报告错误或提出改进建议,请访问 <a href="https://github.com/bunkerity/terraform-provider-bunkerweb/issues">Provider 的 GitHub 仓库</a>。</p>
 <h2 id="microsoft-azure">Microsoft Azure</h2>
 <figure>
