@@ -25,16 +25,16 @@
             ```yaml
             services:
                 bunkerweb:
-                    image: bunkerity/bunkerweb:1.6.8-rc2
+                    image: bunkerity/bunkerweb:1.6.8-rc3
                     ...
                 bw-scheduler:
-                    image: bunkerity/bunkerweb-scheduler:1.6.8-rc2
+                    image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
                     ...
                 bw-autoconf:
-                    image: bunkerity/bunkerweb-autoconf:1.6.8-rc2
+                    image: bunkerity/bunkerweb-autoconf:1.6.8-rc3
                     ...
                 bw-ui:
-                    image: bunkerity/bunkerweb-ui:1.6.8-rc2
+                    image: bunkerity/bunkerweb-ui:1.6.8-rc3
                     ...
             ```
 
@@ -141,20 +141,20 @@
         Exemples:
 
         ```bash
-        # Upgrade to 1.6.8~rc2 interactively (will prompt for backup)
-        sudo ./install-bunkerweb.sh --version 1.6.8~rc2
+        # Upgrade to 1.6.8~rc3 interactively (will prompt for backup)
+        sudo ./install-bunkerweb.sh --version 1.6.8~rc3
 
         # Non-interactive upgrade with automatic backup to custom directory
-        sudo ./install-bunkerweb.sh -v 1.6.8~rc2 --backup-dir /var/backups/bw-2025-01 -y
+        sudo ./install-bunkerweb.sh -v 1.6.8~rc3 --backup-dir /var/backups/bw-2025-01 -y
 
         # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
-        sudo ./install-bunkerweb.sh -v 1.6.8~rc2 -y -q
+        sudo ./install-bunkerweb.sh -v 1.6.8~rc3 -y -q
 
         # Perform a dry run (plan) without applying changes
-        sudo ./install-bunkerweb.sh -v 1.6.8~rc2 --dry-run
+        sudo ./install-bunkerweb.sh -v 1.6.8~rc3 --dry-run
 
         # Upgrade skipping automatic backup (NOT recommended)
-        sudo ./install-bunkerweb.sh -v 1.6.8~rc2 --no-auto-backup -y
+        sudo ./install-bunkerweb.sh -v 1.6.8~rc3 --no-auto-backup -y
         ```
 
         !!! warning "Sauter les sauvegardes"
@@ -234,7 +234,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.8~rc2
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.8~rc3
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `apt upgrade`, vous pouvez utiliser la commande suivante :
@@ -260,7 +260,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.8~rc2
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.8~rc3
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `dnf upgrade`, vous pouvez utiliser la commande suivante :
@@ -657,16 +657,16 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.8-rc2
+                        image: bunkerity/bunkerweb:1.6.8-rc3
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.8-rc2
+                        image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.8-rc2
+                        image: bunkerity/bunkerweb-autoconf:1.6.8-rc3
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.8-rc2
+                        image: bunkerity/bunkerweb-ui:1.6.8-rc3
                         ...
                 ```
 
@@ -701,7 +701,7 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.8~rc2
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.8~rc3
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `apt upgrade`, vous pouvez utiliser la commande suivante :
@@ -727,7 +727,7 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.8~rc2
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.8~rc3
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `dnf upgrade`, vous pouvez utiliser la commande suivante :

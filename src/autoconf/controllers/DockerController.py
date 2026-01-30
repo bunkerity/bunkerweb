@@ -11,7 +11,7 @@ from traceback import format_exc
 
 from docker.models.containers import Container
 from docker.errors import DockerException
-from Controller import Controller
+from controllers.Controller import Controller
 
 
 class DockerController(Controller):

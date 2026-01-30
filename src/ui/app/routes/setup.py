@@ -66,7 +66,7 @@ def setup_page():
     for server_name in db_config["SERVER_NAME"].split():
         if server_name and db_config.get(f"{server_name}_USE_UI", db_config.get("USE_UI", "no")) == "yes":
             if admin_user:
-                return redirect(url_for("login.login_page"), 301)
+                return redirect(url_for("login.login_page"), 303)
             ui_reverse_proxy = server_name
             ui_reverse_proxy_url = db_config.get(f"{server_name}_REVERSE_PROXY_URL", db_config.get("REVERSE_PROXY_URL", "/"))
             break
@@ -306,7 +306,7 @@ def setup_loading():
     for server_name in db_config["SERVER_NAME"].split():
         if server_name and db_config.get(f"{server_name}_USE_UI", "no") == "yes":
             if admin_old_enough:
-                return redirect(url_for("login.login_page"), 301)
+                return redirect(url_for("login.login_page"), 303)
             ui_service = {"server_name": server_name, "url": db_config.get(f"{server_name}_REVERSE_PROXY_URL", "/")}
             break
 

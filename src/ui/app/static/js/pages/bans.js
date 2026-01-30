@@ -370,7 +370,15 @@ $(document).ready(function () {
             );
             return null;
           }
-          update.end_date = customEndDate;
+          const customEndDateWithOffset = `${customEndDate}${getTimeZoneOffset()}`;
+          update.end_date = customEndDateWithOffset;
+          update.custom_exp = Math.max(
+            0,
+            Math.floor(
+              new Date(customEndDateWithOffset).getTime() / 1000 -
+                Date.now() / 1000,
+            ),
+          );
         }
 
         return update;

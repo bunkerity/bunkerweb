@@ -4,6 +4,8 @@ x-env: &env
   CUSTOM_LOG_LEVEL: "debug"
   LOG_TYPES: "stderr syslog"
   LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
+  USE_REDIS: "yes"
+  REDIS_HOST: "redis"
 
 services:
   bunkerweb:
@@ -137,8 +139,22 @@ services:
         aliases:
           - bw-syslog
 
+  redis: # Redis service for the persistence of reports/bans/stats
+    image: redis:8-alpine
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 60 1000
+      --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
   app1:
-    image: nginxdemos/nginx-hello
+    image: bunkerity/bunkerweb-hello:v1.0
     restart: "unless-stopped"
     networks:
       bw-services:
@@ -149,6 +165,7 @@ volumes:
   bw-data:
   bw-storage:
   bw-logs:
+  redis-data:
 
 networks:
   bw-universe:

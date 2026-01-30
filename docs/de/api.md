@@ -41,7 +41,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
     services:
       bunkerweb:
         # Name, unter dem die Instanz im Scheduler erscheint
-        image: bunkerity/bunkerweb:1.6.8-rc2
+        image: bunkerity/bunkerweb:1.6.8-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -54,7 +54,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.8-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Instanznamen korrekt setzen
@@ -76,7 +76,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.8-rc2
+        image: bunkerity/bunkerweb-api:1.6.8-rc3
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -143,7 +143,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.8-rc2
+      bunkerity/bunkerweb-all-in-one:1.6.8-rc3
     ```
 
 === "Linux"

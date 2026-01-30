@@ -1,0 +1,64 @@
+publiccodeYmlVersion: 0.5.0
+name: BunkerWeb
+url: https://github.com/bunkerity/bunkerweb
+softwareVersion: 1.6.7
+releaseDate: 2026-01-09
+logo: https://github.com/bunkerity/bunkerweb/raw/v1.6.7/misc/logo.png
+platforms:
+  - linux
+categories:
+  - cloud-management
+  - it-security
+  - it-service-management
+  - network-management
+fundedBy:
+  - name: Bunkerity
+    uri: https://www.bunkerity.com
+developmentStatus: stable
+softwareType: standalone/backend
+description:
+  en:
+    localisedName: BunkerWeb
+    shortDescription: Open-source, cloud-native and sovereign Web Application
+      Firewall (WAF) / Web Application and API Protection (WAAP)
+    longDescription: Stop OWASP top 10 threats, bots, and DDoS attacks with an
+      open-source, cloud-native and sovereign Web Application Firewall (WAF) /
+      Web Application and API Protection (WAAP) that runs as a reverse proxy and
+      integrates with Linux, Docker, and Kubernetes. Secure by default,
+      extensible via plugins, and easy to manage through a clean UI, giving devs
+      and SecOps both freedom and confidence in their infrastructure.
+    documentation: https://docs.bunkerweb.io
+    apiDocumentation: https://docs.bunkerweb.io/latest/api/
+    features:
+      - OWASP Top 10 protection
+      - Antibot
+      - HTTPS management
+      - SSL offloading
+      - Blacklisting
+      - Whitelisting
+      - Detect bad behavior
+      - Security headers
+      - Load Balancer
+      - OpenAPI validator
+      - mTLS
+      - Docker
+      - Linux
+      - Kubernetes
+      - Caching
+      - Geoblocking
+    videos:
+      - https://www.youtube.com/watch?v=oybLtyhWJIo
+legal:
+  license: AGPL-3.0-only
+maintenance:
+  type: internal
+  contacts:
+    - name: Bunkerity
+localisation:
+  localisationReady: true
+  availableLanguages:
+    - en
+    - fr
+    - de
+    - es
+    - zh

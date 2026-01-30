@@ -1,6 +1,5 @@
 local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
-local utils = require "bunkerweb.utils"
 
 local redis = class("redis", plugin)
 
@@ -8,7 +7,6 @@ local ngx = ngx
 local NOTICE = ngx.NOTICE
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local HTTP_OK = ngx.HTTP_OK
-local has_variable = utils.has_variable
 
 function redis:initialize(ctx)
 	-- Call parent initialize

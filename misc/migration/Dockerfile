@@ -13,7 +13,8 @@ WORKDIR /usr/share/migration
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
-  pip install --no-cache-dir --require-hashes -r /tmp/req/requirements-db.txt
+  pip install --no-cache-dir --require-hashes -r /tmp/req/requirements-db.txt && \
+  pip install psycopg2
 
 # Install dependencies
 RUN apk add --no-cache bash sed curl mariadb-connector-c mariadb-client postgresql-client sqlite tzdata

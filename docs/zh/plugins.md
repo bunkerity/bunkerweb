@@ -89,7 +89,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.8-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
         volumes:
           - ./bw-data:/data
     ...
@@ -125,7 +125,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.8-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
         volumes:
           - ./bw-data:/data
     ...
@@ -168,7 +168,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.8-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -215,7 +215,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.8-rc2
+              image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -255,7 +255,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
 
 !!! tip "现有插件"
 
-    如果文档不够，您可以查看[官方插件](https://github.com/bunkerity/bunkerweb-plugins)和[核心插件](https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc2/src/common/core)的现有源代码（已包含在 BunkerWeb 中，但从技术上讲它们是插件）。
+    如果文档不够，您可以查看[官方插件](https://github.com/bunkerity/bunkerweb-plugins)和[核心插件](https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc3/src/common/core)的现有源代码（已包含在 BunkerWeb 中，但从技术上讲它们是插件）。
 
 插件结构如下所示：
 ```
@@ -560,7 +560,7 @@ end
 
 !!! tip "更多示例"
 
-    如果您想查看可用函数的完整列表，可以查看仓库的 [lua 目录](https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc2/src/bw/lua/bunkerweb)中存在的文件。
+    如果您想查看可用函数的完整列表，可以查看仓库的 [lua 目录](https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc3/src/bw/lua/bunkerweb)中存在的文件。
 
 ### 作业
 

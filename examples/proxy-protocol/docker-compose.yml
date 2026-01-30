@@ -8,7 +8,7 @@ x-env: &env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.8-rc2
+    image: bunkerity/bunkerweb:1.6.8-rc3
     container_name: bunkerweb
     environment:
       <<: *env
@@ -19,7 +19,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.8-rc2
+    image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
     container_name: bw-scheduler
     depends_on:
       - bunkerweb
