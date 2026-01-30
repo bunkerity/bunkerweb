@@ -218,7 +218,8 @@ class GatewayController(KubernetesController):
     def _apply_annotations(
         self,
         services: List[Dict[str, Any]],
-        server_names: List[str],
+        service_ids: List[str],
+        all_hosts: List[str],
         annotations: Dict[str, str],
     ) -> None:
         if not annotations:
@@ -234,12 +235,12 @@ class GatewayController(KubernetesController):
                     continue
 
                 setting = annotation.replace("bunkerweb.io/", "", 1)
-                prefixed_targets = [name for name in server_names if setting.startswith(f"{name}_")]
-                if prefixed_targets and server_name not in prefixed_targets:
+                prefixed_targets = [name for name in all_hosts if setting.startswith(f"{name}_")]
+                if prefixed_targets and not setting.startswith(f"{server_name}_"):
                     continue
                 success, _ = self._db.is_valid_setting(setting, value=value, multisite=True)
                 if success and not setting.startswith(f"{server_name}_"):
-                    if any(setting.startswith(f"{s}_") for s in server_names):
+                    if any(setting.startswith(f"{s}_") for s in all_hosts):
                         continue
                     if setting == "SERVER_NAME":
                         self._logger.warning("Variable SERVER_NAME can't be set globally via annotations, ignoring it")
@@ -457,7 +458,6 @@ class GatewayController(KubernetesController):
             server_name_override = annotations.pop("bunkerweb.io/SERVER_NAME").strip().split()[0]
 
         services: List[Dict[str, Any]] = []
-        server_names: set = set()
         rules = spec.get("rules") or []
 
         if route_kind == "httproute":
@@ -471,28 +471,23 @@ class GatewayController(KubernetesController):
                     self._logger.warning(f"Ignoring HTTPRoute {namespace}/{name} without hostnames")
                     return []
 
-            server_names = set(hostnames)
-            for host in hostnames:
-                service: Dict[str, Any] = {"SERVER_NAME": host}
-                location = self._reverse_proxy_suffix_start
-                listener_protocol = self._get_listener_protocol(controller_service, host, allowed_protocols=["HTTP", "HTTPS", "TLS"])
-                if not listener_protocol:
-                    self._logger.warning(f"Ignoring HTTPRoute {namespace}/{name} host {host}: no compatible HTTP/HTTPS/TLS listener found")
-                    continue
-                reverse_proxy_scheme = "tcp" if listener_protocol == "TCP" else listener_protocol.lower()
+            service: Dict[str, Any] = {"SERVER_NAME": " ".join(hostnames)}
+            location = self._reverse_proxy_suffix_start
+            listener_protocol = self._get_listener_protocol(controller_service, hostnames[0], allowed_protocols=["HTTP", "HTTPS", "TLS"])
+            if not listener_protocol:
+                self._logger.warning(f"Ignoring HTTPRoute {namespace}/{name}: no compatible HTTP/HTTPS/TLS listener found")
+                return []
+            reverse_proxy_scheme = "tcp" if listener_protocol == "TCP" else listener_protocol.lower()
 
-                if listener_protocol == "TCP":
-                    service["SERVER_TYPE"] = "stream"
-                    listener_port = self._get_listener_port(controller_service, hostname=host, protocols=["TCP"])
-                    if listener_port:
-                        service["LISTEN_STREAM_PORT"] = str(listener_port)
-                    service["USE_TCP"] = "yes"
-                    service["USE_UDP"] = "no"
+            if listener_protocol == "TCP":
+                service["SERVER_TYPE"] = "stream"
+                listener_port = self._get_listener_port(controller_service, hostname=hostnames[0], protocols=["TCP"])
+                if listener_port:
+                    service["LISTEN_STREAM_PORT"] = str(listener_port)
+                service["USE_TCP"] = "yes"
+                service["USE_UDP"] = "no"
 
-                if not rules:
-                    services.append(service)
-                    continue
-
+            if rules:
                 for rule in rules:
                     matches = rule.get("matches") or [None]
                     backend_ref = self._get_backend_ref(rule.get("backendRefs") or [], namespace, name or "unknown", "HTTPRoute")
@@ -523,7 +518,7 @@ class GatewayController(KubernetesController):
                         )
                         location += 1
 
-                services.append(service)
+            services.append(service)
         elif route_kind == "tlsroute":
             hostnames = spec.get("hostnames") or []
             if server_name_override:
@@ -540,18 +535,14 @@ class GatewayController(KubernetesController):
                 hostnames = [default_name]
                 self._logger.warning(f"TLSRoute {namespace}/{name} has no hostnames, using {default_name}")
 
-            server_names = set(hostnames)
-            for host in hostnames:
-                service = {"SERVER_NAME": host, "SERVER_TYPE": "stream", "USE_TCP": "yes", "USE_UDP": "no"}
-                listener_port = self._get_listener_port(controller_service, hostname=host, protocols=["TLS"])
-                if listener_port:
-                    service["LISTEN_STREAM_PORT_SSL"] = str(listener_port)
+            service = {"SERVER_NAME": " ".join(hostnames), "SERVER_TYPE": "stream", "USE_TCP": "yes", "USE_UDP": "no"}
+            listener_port = self._get_listener_port(controller_service, hostname=hostnames[0], protocols=["TLS"])
+            if listener_port:
+                service["LISTEN_STREAM_PORT_SSL"] = str(listener_port)
 
-                if not rules:
-                    self._logger.warning(f"Ignoring TLSRoute {namespace}/{name} without rules")
-                    services.append(service)
-                    continue
-
+            if not rules:
+                self._logger.warning(f"Ignoring TLSRoute {namespace}/{name} without rules")
+            else:
                 for rule_index, rule in enumerate(rules):
                     if rule_index > 0:
                         self._logger.warning(f"TLSRoute {namespace}/{name} has multiple rules, using only the first one")
@@ -572,22 +563,18 @@ class GatewayController(KubernetesController):
                             "REVERSE_PROXY_URL": "/",
                         }
                     )
-                services.append(service)
+            services.append(service)
         elif route_kind in ("tcproute", "udproute"):
             protocol = "UDP" if route_kind == "udproute" else "TCP"
             default_name = self._route_default_server_name(protocol.lower(), namespace, name)
             if server_name_override:
-                default_name = server_name_override
+                hostnames = [server_name_override]
             else:
                 listener_hostnames = self._get_listener_hostnames(controller_service, protocols=[protocol])
-                if listener_hostnames:
-                    default_name = listener_hostnames[0]
-                    if len(listener_hostnames) > 1:
-                        self._logger.warning(f"{protocol}Route {namespace}/{name} has multiple listener hostnames, using {default_name}")
-            server_names = {default_name}
+                hostnames = listener_hostnames or [default_name]
             listener_port = self._get_listener_port(controller_service, protocols=[protocol])
             service = {
-                "SERVER_NAME": default_name,
+                "SERVER_NAME": " ".join(hostnames),
                 "SERVER_TYPE": "stream",
                 "USE_TCP": "yes" if protocol == "TCP" else "no",
                 "USE_UDP": "yes" if protocol == "UDP" else "no",
@@ -625,10 +612,20 @@ class GatewayController(KubernetesController):
             return []
 
         if services:
-            server_names = [service["SERVER_NAME"].strip().split(" ")[0] for service in services if service.get("SERVER_NAME")]
+            service_ids = []
+            all_hosts = []
+            for service in services:
+                if not service.get("SERVER_NAME"):
+                    continue
+                hosts = service["SERVER_NAME"].strip().split()
+                if hosts:
+                    service_ids.append(hosts[0])
+                    all_hosts.extend(hosts)
+            service_ids = list(dict.fromkeys(service_ids))
+            all_hosts = list(dict.fromkeys(all_hosts))
             for gw_annotations in gateway_annotations:
-                self._apply_annotations(services, server_names, gw_annotations)
-            self._apply_annotations(services, server_names, annotations)
+                self._apply_annotations(services, service_ids, all_hosts, gw_annotations)
+            self._apply_annotations(services, service_ids, all_hosts, annotations)
 
         for service in services:
             for server_name in service["SERVER_NAME"].strip().split():
