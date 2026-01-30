@@ -2642,7 +2642,7 @@ Le contrôleur `bw-autoconf` surveille votre orchestrateur et écrit les changem
 | `KUBERNETES_INGRESS_CLASS`              | Ne traiter que les ingress avec cette classe                                                         | Chaîne            | unset (toutes)  |
 | `KUBERNETES_GATEWAY_MODE`               | Utiliser le contrôleur Gateway API au lieu des Ingress                                               | `yes` ou `no`     | `no`            |
 | `KUBERNETES_GATEWAY_CLASS`              | Ne traiter que les Gateways avec cette classe                                                        | Chaîne            | unset (toutes)  |
-| `KUBERNETES_GATEWAY_API_VERSION`        | Version de l'API Gateway à utiliser (repli automatique si absente)                                   | `v1` ou `v1beta1` | `v1`            |
+| `KUBERNETES_GATEWAY_API_VERSION`        | Version de l'API Gateway à utiliser (repli automatique si absente)                                   | `v1`, `v1beta1`, `v1beta2`, `v1alpha2`, `v1alpha1` | `v1` |
 | `KUBERNETES_DOMAIN_NAME`                | Suffixe de domaine du cluster lors de la construction des hôtes upstream                             | Chaîne            | `cluster.local` |
 | `KUBERNETES_SERVICE_PROTOCOL`           | Schéma utilisé pour les hôtes de reverse proxy générés                                               | `http` ou `https` | `http`          |
 | `BUNKERWEB_SERVICE_NAME`                | Nom du Service lu lors du patch du statut Ingress/Gateway avec l'adresse du load balancer            | Chaîne            | `bunkerweb`     |
@@ -2738,7 +2738,7 @@ et surveille également d'autres objets Kubernetes, tels que [ConfigMap](https:/
 
     Si vous utilisez la Gateway API Kubernetes, définissez `KUBERNETES_MODE=yes` et `KUBERNETES_GATEWAY_MODE=yes`.
 
-    Le contrôleur surveille les ressources `Gateway` et `HTTPRoute` au lieu des objets `Ingress`. Vous pouvez limiter ce qui est traité avec `KUBERNETES_GATEWAY_CLASS` et choisir `KUBERNETES_GATEWAY_API_VERSION` (`v1` ou `v1beta1`).
+    Le contrôleur surveille les ressources `Gateway`, `HTTPRoute`, `TLSRoute`, `TCPRoute` et `UDPRoute` au lieu des objets `Ingress`. Vous pouvez limiter ce qui est traité avec `KUBERNETES_GATEWAY_CLASS` et choisir `KUBERNETES_GATEWAY_API_VERSION` (`v1`, `v1beta1`, `v1beta2`, `v1alpha2` ou `v1alpha1`).
 
     Si votre Service ne s'appelle pas `bunkerweb`, définissez `BUNKERWEB_SERVICE_NAME` pour que le patch de statut lise le bon Service.
 
@@ -3293,12 +3293,31 @@ spec:
 
 ### Ressources Gateway
 
-Lorsque le mode Gateway API est activé, vous pouvez déclarer des ressources `Gateway` et `HTTPRoute`.
+Lorsque le mode Gateway API est activé, vous pouvez déclarer des ressources `Gateway`, `HTTPRoute`, `TLSRoute`, `TCPRoute` et `UDPRoute`.
 Les paramètres BunkerWeb sont fournis via des annotations `bunkerweb.io/<SETTING>` sur le `HTTPRoute` ; pour limiter un
-paramètre à un hôte, utilisez `bunkerweb.io/<hostname>_<SETTING>`. Le champ `hostnames` pilote les noms de serveur. Voir [Classe Gateway](#gateway-class).
+paramètre à un hôte, utilisez `bunkerweb.io/<hostname>_<SETTING>`. Le champ `hostnames` pilote les noms de serveur. Pour `TCPRoute`/`UDPRoute` (et `TLSRoute` sans `hostnames`), BunkerWeb génère un nom de serveur du type `<route>.<namespace>.<protocol>`. Voir [Classe Gateway](#gateway-class).
+Les annotations sur le `Gateway` s'appliquent à toutes les routes qui y sont rattachées, tandis que les annotations sur un `HTTPRoute` ne s'appliquent qu'à cette route.
+Vous pouvez limiter les annotations du Gateway à un nom de serveur avec `bunkerweb.io/<hostname>_<SETTING>` ; elles ne s'appliqueront que si cette route/ce nom de serveur existe.
+
+#### Ressources prises en charge
+
+- Ressources : `HTTPRoute`, `TLSRoute`, `TCPRoute` et `UDPRoute` (pas de `GRPCRoute`).
+- Règles : seule la première règle est utilisée pour `TLSRoute`, `TCPRoute` et `UDPRoute`.
+- Backends : uniquement `Service`, premier `backendRef` par règle.
+
+#### Protocoles et TLS
+
+- Protocoles de listener : `HTTP`/`HTTPS` pour `HTTPRoute`, `TLS` pour `TLSRoute`, `TCP` pour `TCPRoute` et `UDP` pour `UDPRoute`.
+- TLS : certificats via les `certificateRefs` du listener avec `HTTPS` ou `TLS` + `mode: Terminate` (Passthrough n'est pas pris en charge pour la terminaison). `TLSRoute` fonctionne en mode stream.
+
+!!! tip "Nom de serveur pour les routes stream"
+    Pour `TLSRoute`, `TCPRoute` et `UDPRoute`, vous pouvez remplacer le nom de serveur généré en définissant `bunkerweb.io/SERVER_NAME` sur la route.
+
+!!! note "Experimental Channel pour les routes stream"
+    Si vous souhaitez utiliser `TLSRoute`, `TCPRoute` ou `UDPRoute`, installez les CRD de l'Experimental Channel : https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel
 
 !!! info "Prise en charge TLS"
-    La terminaison TLS est gérée via les listeners du `Gateway` et leurs `certificateRefs` (secrets TLS).
+    La terminaison TLS est gérée via les listeners du `Gateway` et leurs `certificateRefs` (secrets TLS) pour `HTTPRoute` avec `HTTPS` ou `TLS` + `mode: Terminate`. `TLSRoute` fonctionne en mode stream.
 
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1

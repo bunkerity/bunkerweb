@@ -23,7 +23,7 @@ class KubernetesController(Controller):
         self._debounce_delay = 2  # seconds
         self._event_summary = {}
         self._event_summary_max = 8
-        self._event_loggable_kinds = {"Ingress", "Gateway", "HTTPRoute", "ConfigMap", "Secret"}
+        self._event_loggable_kinds = {"Ingress", "Gateway", "HTTPRoute", "TLSRoute", "TCPRoute", "UDPRoute", "ConfigMap", "Secret"}
         super().__init__("kubernetes")
         config.load_incluster_config()
         self._managed_configmaps = set()
