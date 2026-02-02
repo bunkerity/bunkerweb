@@ -492,9 +492,9 @@ flask-wtf==1.2.2 \
     --hash=sha256:79d2ee1e436cf570bccb7d916533fa18757a2f18c290accffab1b9a0b684666b \
     --hash=sha256:e93160c5c5b6b571cf99300b6e01b72f9a101027cab1579901f8b10c5daf0b70
     # via -r requirements.in
-gunicorn==24.1.1 \
-    --hash=sha256:757f6b621fc4f7581a90600b2cd9df593461f06a41d7259cb9b94499dc4095a8 \
-    --hash=sha256:f006d110e5cb3102859b4f5cd48335dbd9cc28d0d27cd24ddbdafa6c60929408
+gunicorn==25.0.0 \
+    --hash=sha256:4b1ab820ffc316352da7146005a9e66044a131434b17a7d2a9fb0604f1268864 \
+    --hash=sha256:b9b88f0ebc5a0fcd1e9e29a1f045f56f5402c6423ee3e3f675f679d0db5345d1
     # via -r requirements.in
 idna==3.11 \
     --hash=sha256:771a87f49d9defaf64091e6e6fe9c18d4833f140bd19464795bc32d966ca37ea \
