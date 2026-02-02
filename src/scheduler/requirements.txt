@@ -114,9 +114,9 @@ certbot-dns-domeneshop==0.2.9 \
     --hash=sha256:9e65048c3a58ee52cbbca5af85944ff736727c43677941aaee0a0ffb9da84f30 \
     --hash=sha256:a3bb383620017db55b2eb47c224364a4cbaf82c1a890d2545e86f267aef0b8f2
     # via -r requirements.in
-certbot-dns-duckdns==1.7.1 \
-    --hash=sha256:223ab65600cbdd8b968b0559e45d315fe710912a863dfdcdc55d1fca7975eed7 \
-    --hash=sha256:c7e2ff7f2cdb5b46fa52f5753525c168ce107ef44c67f8097d6859f5165bf962
+certbot-dns-duckdns==1.8.0 \
+    --hash=sha256:50325a12d48271e5e6ce812acb2c6ef5b4fe9c5e477913affcd06702dd4738b8 \
+    --hash=sha256:ffbe2a4a8fc5e15c5e96bb6e843e98b63254eae0ec64670ec9dff5868a351451
     # via -r requirements.in
 certbot-dns-dynu==0.0.6.post2502111739272536 \
     --hash=sha256:3bca6343a5e962bdc666301228dcc73c6b3ebef9f2921d8afe1a56f1450d9229
@@ -968,14 +968,6 @@ s3transfer==0.16.0 \
 schedule==1.2.2 \
     --hash=sha256:15fe9c75fe5fd9b9627f3f19cc0ef1420508f9f9a46f45cd0769ef75ede5f0b7 \
     --hash=sha256:5bef4a2a0183abf44046ae0d164cadcac21b1db011bdd8102e4a0c1e91e06a7d
-    # via
-    #   certbot-dns-domainoffensive
-    #   certbot-dns-domeneshop
-
-# The following packages are considered to be unsafe in a requirements file:
-setuptools==80.10.2 \
-    --hash=sha256:8b0e9d10c784bf7d262c4e5ec5d4ec94127ce206e8738f29a437945fbc219b70 \
-    --hash=sha256:95b30ddfb717250edb492926c92b5221f7ef3fbcc2b07579bcd4a27da21d0173
     # via -r requirements.in
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
@@ -1049,6 +1041,14 @@ zope-interface==8.2 \
     --hash=sha256:d2bb8e7364e18f083bf6744ccf30433b2a5f236c39c95df8514e3c13007098ce \
     --hash=sha256:dfc4f44e8de2ff4eba20af4f0a3ca42d3c43ab24a08e49ccd8558b7a4185b466 \
     --hash=sha256:f777e68c76208503609c83ca021a6864902b646530a1a39abb9ed310d1100664
+    # via
+    #   certbot-dns-domainoffensive
+    #   certbot-dns-domeneshop
+
+# The following packages are considered to be unsafe in a requirements file:
+setuptools==80.10.2 \
+    --hash=sha256:8b0e9d10c784bf7d262c4e5ec5d4ec94127ce206e8738f29a437945fbc219b70 \
+    --hash=sha256:95b30ddfb717250edb492926c92b5221f7ef3fbcc2b07579bcd4a27da21d0173
     # via
     #   certbot-dns-bunny
     #   certbot-dns-desec
