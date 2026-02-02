@@ -526,7 +526,7 @@ Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank 
         # TOTP_ENCRYPTION_KEYS=changeme
         LISTEN_ADDR=0.0.0.0
         # LISTEN_PORT=7000
-        FORWARDED_ALLOW_IPS=127.0.0.1
+        FORWARDED_ALLOW_IPS=127.0.0.1,::1
         # ENABLE_HEALTHCHECK=no
         ```
 

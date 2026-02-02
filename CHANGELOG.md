@@ -10,6 +10,9 @@
 - [UI] Fix bug where updating a ban to a custom duration accidentally created a permanent ban
 - [UI] Enhance map legend and color ramp for blocked requests visualization
 - [UI] Enhance dark mode styles for news card elements
+- [UI] Add CIDR annotations support for `FORWARDED_ALLOW_IPS` and `PROXY_ALLOW_IPS` settings and update the default values to common private network ranges
+- [API] Add HTTP/2 support in Gunicorn configuration for improved performance and compatibility
+- [API] Add CIDR annotations support for `FORWARDED_ALLOW_IPS` and `PROXY_ALLOW_IPS` settings and update the default values to common private network ranges
 - [MISC] Update Laurent Minne's blacklist's label and add the new one from [DuggyTuxy Data-Shield IPv4 Blocklist](https://duggytuxy.github.io/)
 - [MISC] Add publiccode metadata file for open source compliance
 

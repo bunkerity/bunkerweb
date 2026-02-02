@@ -148,7 +148,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
 ### Unterschiede Linux vs Docker
 
 - Bind-Defaults: Docker-Images hören auf `0.0.0.0:7000`; Linux-Pakete auf `127.0.0.1:7000`. Anpassung via `UI_LISTEN_ADDR` / `UI_LISTEN_PORT`.
-- Proxy-Header: `UI_FORWARDED_ALLOW_IPS` ist standardmäßig `*`; bei Linux-Installationen auf die Proxy-IP(s) setzen für strengere Defaults.
+- Proxy-Header: `UI_FORWARDED_ALLOW_IPS` ist standardmäßig `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16`; `UI_PROXY_ALLOW_IPS` übernimmt standardmäßig den Wert von `FORWARDED_ALLOW_IPS`. Bei Linux-Installationen auf die Proxy-IP(s) setzen für strengere Defaults.
 - Secrets/State: `/var/lib/bunkerweb` enthält `FLASK_SECRET`, Biscuit-Keys und TOTP-Daten. In Docker mounten; unter Linux vom Paket verwaltet.
 - Logs: `/var/log/bunkerweb` muss für UID/GID 101 (oder gemappte UID im Rootless-Betrieb) lesbar sein. Pakete legen den Pfad an; Container brauchen ein Volume mit passenden Rechten.
 - Wizard: easy-install unter Linux startet UI und Wizard automatisch; in Docker erreicht man den Wizard über die reverse-proxied URL, sofern nicht per Env vorbelegt.
@@ -193,7 +193,8 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
 | `UI_SSL_ENABLED`                    | TLS in der UI aktivieren                      | `yes` oder `no`                        | `no`                                     |
 | `UI_SSL_CERTFILE`, `UI_SSL_KEYFILE` | PEM-Zertifikat/Key bei TLS                    | Dateipfade                             | unset                                    |
 | `UI_SSL_CA_CERTS`                   | Optionale CA/Chain                            | Dateipfad                              | unset                                    |
-| `UI_FORWARDED_ALLOW_IPS`            | Vertrauenswürdige Proxies für `X-Forwarded-*` | IPs/CIDRs (Leer- oder Komma-separiert) | `*`                                      |
+| `UI_FORWARDED_ALLOW_IPS`            | Vertrauenswürdige Proxies für `X-Forwarded-*` | IPs/CIDRs (Leer- oder Komma-separiert) | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
+| `UI_PROXY_ALLOW_IPS`                | Vertrauenswürdige Proxies für PROXY-Protokoll | IPs/CIDRs (Leer- oder Komma-separiert) | `FORWARDED_ALLOW_IPS`                                 |
 
 ### Auth, Sessions, Cookies
 
@@ -226,7 +227,8 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
 | ------------------------------- | ------------------------------------------- | --------------- | ------------------------------------ |
 | `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn-Worker/Threads                     | Integer         | `cpu_count()-1` (min 1), `workers*2` |
 | `ENABLE_HEALTHCHECK`            | `GET /healthcheck` bereitstellen            | `yes` oder `no` | `no`                                 |
-| `FORWARDED_ALLOW_IPS`           | Veralteter Alias für Proxy-Allowlist        | IPs/CIDRs       | `*`                                  |
+| `FORWARDED_ALLOW_IPS`           | Alias für Proxy-Allowlist                   | IPs/CIDRs       | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
+| `PROXY_ALLOW_IPS`               | Alias für PROXY-Allowlist                   | IPs/CIDRs       | `FORWARDED_ALLOW_IPS`                                 |
 | `DISABLE_CONFIGURATION_TESTING` | Test-Reloads beim Push skippen              | `yes` oder `no` | `no`                                 |
 | `IGNORE_REGEX_CHECK`            | Regex-Validierung der Settings überspringen | `yes` oder `no` | `no`                                 |
 

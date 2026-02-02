@@ -526,7 +526,7 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
         # TOTP_ENCRYPTION_KEYS=changeme
         LISTEN_ADDR=0.0.0.0
         # LISTEN_PORT=7000
-        FORWARDED_ALLOW_IPS=127.0.0.1
+        FORWARDED_ALLOW_IPS=127.0.0.1,::1
         # ENABLE_HEALTHCHECK=no
         ```
 

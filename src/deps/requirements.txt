@@ -22,9 +22,9 @@ packaging==26.0 \
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
-pip==25.2 \
-    --hash=sha256:578283f006390f85bb6282dffb876454593d637f5d1be494b5202ce4877e71f2 \
-    --hash=sha256:6d67a2b4e7f14d8b31b8b52648866fa717f45a1eb70e83002f4331d07e953717
+pip==26.0 \
+    --hash=sha256:3ce220a0a17915972fbf1ab451baae1521c4539e778b28127efa79b974aff0fa \
+    --hash=sha256:98436feffb9e31bc9339cf369fd55d3331b1580b6a6f1173bacacddcf9c34754
     # via
     #   build
     #   wheel

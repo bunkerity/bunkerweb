@@ -53,7 +53,10 @@ start() {
             echo "LISTEN_PORT=8888"
             echo "# Trusted proxy IPs for X-Forwarded-* headers (comma-separated)."
             echo "# Default is restricted to loopback for security."
-            echo "FORWARDED_ALLOW_IPS=127.0.0.1"
+            echo "FORWARDED_ALLOW_IPS=127.0.0.1,::1"
+            echo "# Trusted proxy IPs for PROXY protocol (comma-separated)."
+            echo "# Defaults to FORWARDED_ALLOW_IPS when unset."
+            echo "PROXY_ALLOW_IPS=127.0.0.1,::1"
             echo
             echo "# --- Logging & Runtime ---"
             echo "# LOG_LEVEL affects most components; CUSTOM_LOG_LEVEL overrides when provided."
@@ -192,9 +195,15 @@ start() {
 
     FORWARDED_ALLOW_IPS=$(get_env_var "API_FORWARDED_ALLOW_IPS" "")
     if [ -z "$FORWARDED_ALLOW_IPS" ]; then
-        FORWARDED_ALLOW_IPS=$(get_env_var "FORWARDED_ALLOW_IPS" "127.0.0.1")
+        FORWARDED_ALLOW_IPS=$(get_env_var "FORWARDED_ALLOW_IPS" "127.0.0.1,::1")
     fi
     export FORWARDED_ALLOW_IPS
+
+    PROXY_ALLOW_IPS=$(get_env_var "API_PROXY_ALLOW_IPS" "")
+    if [ -z "$PROXY_ALLOW_IPS" ]; then
+        PROXY_ALLOW_IPS=$(get_env_var "PROXY_ALLOW_IPS" "$FORWARDED_ALLOW_IPS")
+    fi
+    export PROXY_ALLOW_IPS
 
     API_WHITELIST_IPS=$(get_env_var "API_WHITELIST_IPS" "")
     if [ -z "$API_WHITELIST_IPS" ]; then

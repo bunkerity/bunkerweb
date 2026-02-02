@@ -1,4 +1,4 @@
-alembic==1.18.2
+alembic==1.18.3
 cryptography==46.0.4
 # oracledb==3.0.0
 psycopg[binary,pool]==3.2.9

@@ -44,11 +44,17 @@ LISTEN_PORT = getenv("API_LISTEN_PORT", getenv("LISTEN_PORT", "8888"))
 """
 Trusted proxies / forwarded headers
 
-Default to trusting only the local machine (127.0.0.1). This assumes there is
-no load balancer or WAF in front of the API. Operators can override via
-API_FORWARDED_ALLOW_IPS or FORWARDED_ALLOW_IPS.
+Default to local/private networks for container installs so reverse proxies on
+typical Docker networks can be trusted without opening this to the world.
+Linux packages set FORWARDED_ALLOW_IPS explicitly (127.0.0.1) via service
+scripts. Operators can override via API_FORWARDED_ALLOW_IPS or
+FORWARDED_ALLOW_IPS.
 """
-FORWARDED_ALLOW_IPS = getenv("API_FORWARDED_ALLOW_IPS", getenv("FORWARDED_ALLOW_IPS", "127.0.0.1"))
+FORWARDED_ALLOW_IPS = getenv(
+    "API_FORWARDED_ALLOW_IPS",
+    getenv("FORWARDED_ALLOW_IPS", "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"),
+)
+PROXY_ALLOW_IPS = getenv("API_PROXY_ALLOW_IPS", getenv("PROXY_ALLOW_IPS", FORWARDED_ALLOW_IPS))
 
 """
 TLS/SSL support
@@ -91,10 +97,14 @@ umask = 0x027
 pidfile = PID_FILE.as_posix()
 worker_tmp_dir = join(sep, "dev", "shm")
 tmp_upload_dir = TMP_UI_DIR.as_posix()
-secure_scheme_headers = {}
+secure_scheme_headers = {
+    "X-FORWARDED-PROTOCOL": "https",
+    "X-FORWARDED-PROTO": "https",
+    "X-FORWARDED-SSL": "on",
+}
 forwarded_allow_ips = FORWARDED_ALLOW_IPS
 pythonpath = join(sep, "usr", "share", "bunkerweb", "deps", "python") + "," + join(sep, "usr", "share", "bunkerweb", "api")
-proxy_allow_ips = FORWARDED_ALLOW_IPS
+proxy_allow_ips = PROXY_ALLOW_IPS
 casefold_http_method = True
 workers = MAX_WORKERS
 bind = f"{LISTEN_ADDR}:{LISTEN_PORT}"
@@ -102,6 +112,7 @@ worker_class = "utils.worker.ApiUvicornWorker"
 threads = int(getenv("MAX_THREADS", MAX_WORKERS * 2))
 max_requests_jitter = min(8, MAX_WORKERS)
 graceful_timeout = 30
+http_protocols = "h3,h2,h1"
 
 DEBUG = getenv("DEBUG", False)
 

@@ -82,7 +82,7 @@ Choose the flavor that matches your environment.
           API_USERNAME: "admin"
           API_PASSWORD: "Str0ng&P@ss!"
           # API_TOKEN: "admin-override-token" # optional
-          FORWARDED_ALLOW_IPS: "*" # Be careful with this setting; only use it if you are sure that the reverse proxy is the only way to access the API
+          FORWARDED_ALLOW_IPS: "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16" # Be careful with this setting; only use it if you are sure that the reverse proxy is the only way to access the API
           API_ROOT_PATH: "/"
         networks:
           - bw-universe
@@ -266,7 +266,8 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------- | ---------------------------------- |
 | `API_DOCS_URL`, `API_REDOC_URL`, `API_OPENAPI_URL` | Paths for Swagger, ReDoc, and OpenAPI schema; set to `off/disabled/none/false/0` to disable | Path or `off`             | `/docs`, `/redoc`, `/openapi.json` |
 | `API_ROOT_PATH`                                    | Mount prefix when reverse-proxying                                                          | Path (e.g. `/api`)        | empty                              |
-| `API_FORWARDED_ALLOW_IPS`                          | Trusted proxy IPs for `X-Forwarded-*`                                                       | Comma-separated IPs/CIDRs | `127.0.0.1` (package default)      |
+| `API_FORWARDED_ALLOW_IPS`                          | Trusted proxy IPs for `X-Forwarded-*`                                                       | Comma-separated IPs/CIDRs | `127.0.0.1,::1` (package default)      |
+| `API_PROXY_ALLOW_IPS`                              | Trusted proxy IPs for PROXY protocol                                                        | Comma-separated IPs/CIDRs | `FORWARDED_ALLOW_IPS`              |
 
 #### Auth, ACL, Biscuit
 

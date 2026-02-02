@@ -40,7 +40,9 @@ function update_python_deps() {
 
 update_python_deps requirements-deps.in
 
-pip install --no-cache-dir --require-hashes -r requirements-deps.txt
+# pip install --no-cache-dir --require-hashes -r requirements-deps.txt
+
+pip install "pip<25.3"
 
 echo "Updating python requirements files"
 

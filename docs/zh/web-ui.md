@@ -148,7 +148,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 ### Linux 与 Docker 差异
 
 - 监听默认值：Docker 镜像在 `0.0.0.0:7000`，Linux 包在 `127.0.0.1:7000`。可用 `UI_LISTEN_ADDR` / `UI_LISTEN_PORT` 覆盖。
-- 代理头：`UI_FORWARDED_ALLOW_IPS` 默认 `*`；在 Linux 安装中将其设为反代 IP 以更严格。
+- 代理头：`UI_FORWARDED_ALLOW_IPS` 默认 `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16`；`UI_PROXY_ALLOW_IPS` 默认取 `FORWARDED_ALLOW_IPS` 的值。在 Linux 安装中将其设为反代 IP 以更严格。
 - 秘密与状态：`/var/lib/bunkerweb` 保存 `FLASK_SECRET`、Biscuit 密钥和 TOTP 数据。Docker 需挂载；Linux 由包脚本创建管理。
 - 日志：`/var/log/bunkerweb` 需对 UID/GID 101（或 rootless 映射 UID）可读。包会创建路径；容器需挂载权限正确的卷。
 - 向导行为：Linux easy-install 自动启动 UI 和向导；Docker 需通过反代 URL 访问向导，除非预置环境变量。
@@ -193,7 +193,8 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 | `UI_SSL_ENABLED`                    | 在 UI 容器中启用 TLS       | `yes` 或 `no`         | `no`                                    |
 | `UI_SSL_CERTFILE`, `UI_SSL_KEYFILE` | 启用 TLS 时的证书/密钥路径 | 文件路径              | 未设                                    |
 | `UI_SSL_CA_CERTS`                   | 可选 CA/链                 | 文件路径              | 未设                                    |
-| `UI_FORWARDED_ALLOW_IPS`            | 信任的代理 IP/CIDR         | 空格/逗号分隔 IP/CIDR | `*`                                     |
+| `UI_FORWARDED_ALLOW_IPS`            | 信任的代理 IP/CIDR         | 空格/逗号分隔 IP/CIDR | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
+| `UI_PROXY_ALLOW_IPS`                | PROXY 协议的可信代理 IP/CIDR | 空格/逗号分隔 IP/CIDR | `FORWARDED_ALLOW_IPS`                                 |
 
 ### 认证、会话与 Cookie
 
@@ -226,7 +227,8 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 | ------------------------------- | ------------------------- | ------------- | -------------------------------------- |
 | `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn worker/线程数    | 整数          | `cpu_count()-1`（至少 1），`workers*2` |
 | `ENABLE_HEALTHCHECK`            | 暴露 `GET /healthcheck`   | `yes` 或 `no` | `no`                                   |
-| `FORWARDED_ALLOW_IPS`           | 代理允许列表的弃用别名    | IP/CIDR       | `*`                                    |
+| `FORWARDED_ALLOW_IPS`           | 代理允许列表的别名        | IP/CIDR       | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
+| `PROXY_ALLOW_IPS`               | PROXY 允许列表的别名      | IP/CIDR       | `FORWARDED_ALLOW_IPS`                                 |
 | `DISABLE_CONFIGURATION_TESTING` | 应用配置时跳过测试 reload | `yes` 或 `no` | `no`                                   |
 | `IGNORE_REGEX_CHECK`            | 跳过设置的正则校验        | `yes` 或 `no` | `no`                                   |
 

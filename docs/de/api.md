@@ -82,7 +82,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
           API_USERNAME: "admin"
           API_PASSWORD: "Str0ng&P@ss!"
           # API_TOKEN: "admin-override-token" # optional
-          FORWARDED_ALLOW_IPS: "*" # Vorsicht: nur setzen, wenn sicher nur der Reverse Proxy Zugriff hat
+          FORWARDED_ALLOW_IPS: "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16" # Vorsicht: nur setzen, wenn sicher nur der Reverse Proxy Zugriff hat
           API_ROOT_PATH: "/"
         networks:
           - bw-universe
@@ -266,7 +266,8 @@ Docs oder Schema deaktivieren, indem die zugehörigen URLs auf `off|disabled|non
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------ | --------------------------- | ---------------------------------- |
 | `API_DOCS_URL`, `API_REDOC_URL`, `API_OPENAPI_URL` | Pfade für Swagger, ReDoc und OpenAPI; auf `off/disabled/none/false/0` setzen zum Deaktivieren | Pfad oder `off`             | `/docs`, `/redoc`, `/openapi.json` |
 | `API_ROOT_PATH`                                    | Mount-Prefix bei Reverse Proxy                                                             | Pfad (z. B. `/api`)         | leer                               |
-| `API_FORWARDED_ALLOW_IPS`                          | Vertrauenswürdige Proxy-IPs für `X-Forwarded-*`                                            | Kommagetrennte IPs/CIDRs    | `127.0.0.1` (Package-Default)      |
+| `API_FORWARDED_ALLOW_IPS`                          | Vertrauenswürdige Proxy-IPs für `X-Forwarded-*`                                            | Kommagetrennte IPs/CIDRs    | `127.0.0.1,::1` (Package-Default)      |
+| `API_PROXY_ALLOW_IPS`                              | Vertrauenswürdige Proxy-IPs für PROXY-Protokoll                                            | Kommagetrennte IPs/CIDRs    | `FORWARDED_ALLOW_IPS`              |
 
 #### Auth, ACL, Biscuit
 

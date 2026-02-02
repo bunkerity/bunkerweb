@@ -49,7 +49,8 @@ start() {
             echo "# TOTP_ENCRYPTION_KEYS=changeme"
             echo "LISTEN_ADDR=127.0.0.1"
             echo "# LISTEN_PORT=7000"
-            echo "FORWARDED_ALLOW_IPS=127.0.0.1"
+            echo "FORWARDED_ALLOW_IPS=127.0.0.1,::1"
+            echo "PROXY_ALLOW_IPS=127.0.0.1,::1"
             echo "# ENABLE_HEALTHCHECK=no"
             echo "LOG_LEVEL=info"
             echo "LOG_TYPES=file"
@@ -93,9 +94,15 @@ start() {
 
     FORWARDED_ALLOW_IPS=$(get_env_var "UI_FORWARDED_ALLOW_IPS" "")
     if [ -z "$FORWARDED_ALLOW_IPS" ]; then
-        FORWARDED_ALLOW_IPS=$(get_env_var "FORWARDED_ALLOW_IPS" "127.0.0.1")
+        FORWARDED_ALLOW_IPS=$(get_env_var "FORWARDED_ALLOW_IPS" "127.0.0.1,::1")
     fi
     export FORWARDED_ALLOW_IPS
+
+    PROXY_ALLOW_IPS=$(get_env_var "UI_PROXY_ALLOW_IPS" "")
+    if [ -z "$PROXY_ALLOW_IPS" ]; then
+        PROXY_ALLOW_IPS=$(get_env_var "PROXY_ALLOW_IPS" "$FORWARDED_ALLOW_IPS")
+    fi
+    export PROXY_ALLOW_IPS
 
     LOG_TYPES=$(get_env_var "UI_LOG_TYPES" "")
     if [ -z "$LOG_TYPES" ]; then
