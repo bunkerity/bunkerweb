@@ -1,5 +1,4 @@
 from collections import defaultdict
-from datetime import datetime, timedelta
 from operator import itemgetter
 from psutil import virtual_memory
 from flask import Blueprint, render_template
@@ -13,32 +12,13 @@ home = Blueprint("home", __name__)
 @home.route("/home", methods=["GET"])
 @login_required
 def home_page():
-    requests = BW_INSTANCES_UTILS.get_metrics("requests").get("requests", [])
+    # Use streaming aggregation to avoid loading all requests into memory
+    # This significantly reduces memory usage for large Redis datasets
+    home_aggregates = BW_INSTANCES_UTILS.get_home_aggregates(hours=24)
 
-    request_countries = {}
-    request_ips = {}
-    current_date = datetime.now().astimezone()
-    time_buckets = {(current_date - timedelta(hours=i)).replace(minute=0, second=0, microsecond=0): 0 for i in range(24)}
-
-    for request in requests:
-        timestamp = datetime.fromtimestamp(request["date"]).astimezone()
-        bucket = timestamp.replace(minute=0, second=0, microsecond=0)
-        if bucket < current_date - timedelta(hours=24):
-            continue
-
-        if request["country"] not in request_countries:
-            request_countries[request["country"]] = {"request": 0, "blocked": 0}
-        if request["ip"] not in request_ips:
-            request_ips[request["ip"]] = {"request": 0, "blocked": 0}
-
-        request_countries[request["country"]]["request"] = request_countries[request["country"]]["request"] + 1
-        request_ips[request["ip"]]["request"] += 1
-        if request["status"] in (403, 429, 444):
-            request_countries[request["country"]]["blocked"] = request_countries[request["country"]]["blocked"] + 1
-            request_ips[request["ip"]]["blocked"] += 1
-
-            if bucket <= current_date:
-                time_buckets[bucket] += 1
+    request_countries = home_aggregates.get("request_countries", {})
+    request_ips = home_aggregates.get("request_ips", {})
+    time_buckets = home_aggregates.get("time_buckets", {})
 
     errors = BW_INSTANCES_UTILS.get_metrics("errors")
     request_errors = defaultdict(int)
@@ -79,6 +59,6 @@ def home_page():
         request_errors=dict(sorted(request_errors.items(), key=itemgetter(0))),
         request_countries=dict(sorted(request_countries.items(), key=lambda item: (-item[1]["blocked"], item[0]))),
         request_ips=dict(sorted(request_ips.items(), key=lambda item: (-item[1]["blocked"], item[0]))),
-        time_buckets={key.isoformat(): value for key, value in time_buckets.items()},
+        time_buckets=time_buckets,
         memory_info=memory_info,
     )

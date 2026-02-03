@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-from datetime import datetime
+from contextlib import suppress
+from datetime import datetime, timedelta
 from json import loads
 from operator import itemgetter
 from os import getenv
+from traceback import format_exc
 from typing import Any, List, Literal, Optional, Tuple, Union
 
 from urllib.parse import quote
@@ -308,7 +310,11 @@ class InstancesUtils:
         *,
         instances: Optional[List[Instance]] = None,
     ) -> dict[str, Any]:
-        """Get paginated and filtered reports using optimized query endpoint"""
+        """Get paginated and filtered reports using optimized query endpoint.
+
+        This method uses memory-efficient streaming to process large Redis datasets.
+        Pane counts are computed incrementally during the streaming pass.
+        """
         from app.routes.utils import get_redis_client
 
         redis_client = get_redis_client()
@@ -345,22 +351,27 @@ class InstancesUtils:
                 pane_fields = ["ip", "country", "method", "url", "status", "reason", "server_name", "security_mode"]
                 pane_counts = {field: {} for field in pane_fields}
 
-                seen_ids = set()
+                seen_ids: set = set()
                 valid_total = 0
+                filtered_count = 0
                 filtered_requests: List[dict[str, Any]] = []
 
-                for report in self._iter_redis_requests(redis_client):
+                for report in self._iter_redis_requests(redis_client, chunk_size=2000):
                     report_id = report.get("id")
                     if report_id in seen_ids:
                         continue
                     seen_ids.add(report_id)
 
-                    if not (400 <= report.get("status", 0) < 500 or report.get("security_mode") == "detect"):
+                    status = report.get("status", 0)
+                    security_mode = report.get("security_mode")
+                    if not (400 <= status < 500 or security_mode == "detect"):
                         continue
 
                     valid_total += 1
                     matches = matches_filters(report, search, pane_filters)
 
+                    # Update pane counts incrementally - this is the key optimization
+                    # We compute pane counts as we stream, avoiding a second pass
                     for field in pane_fields:
                         value = str(report.get(field, "N/A"))
                         if value not in pane_counts[field]:
@@ -370,11 +381,15 @@ class InstancesUtils:
                             pane_counts[field][value]["count"] += 1
 
                     if matches:
-                        filtered_requests.append(report)
+                        filtered_count += 1
+                        # Only collect reports if we're not just counting
+                        if not count_only:
+                            filtered_requests.append(report)
 
                 if count_only:
-                    return {"total": valid_total, "filtered": len(filtered_requests), "data": [], "pane_counts": {}}
+                    return {"total": valid_total, "filtered": filtered_count, "data": [], "pane_counts": {}}
 
+                # Sort and paginate
                 filtered_requests = self._sort_reports(filtered_requests, order_column, order_dir)
 
                 if length == -1:
@@ -382,9 +397,13 @@ class InstancesUtils:
                 else:
                     paginated = filtered_requests[start : start + length]  # noqa: E203
 
-                return {"total": valid_total, "filtered": len(filtered_requests), "data": paginated, "pane_counts": pane_counts}
+                # Clear the large list after pagination to help GC
+                del filtered_requests
+
+                return {"total": valid_total, "filtered": filtered_count, "data": paginated, "pane_counts": pane_counts}
             except Exception as e:
                 LOGGER.error(f"Error querying Redis for reports: {e}")
+                LOGGER.debug(format_exc())
                 # Fall through to instance queries
 
         # Query instances directly
@@ -490,6 +509,88 @@ class InstancesUtils:
                 break
             start += chunk_size
 
+    def get_home_aggregates(self, hours: int = 24) -> dict[str, Any]:
+        """
+        Compute home page aggregates (country counts, IP counts, time buckets)
+        using streaming/chunked processing to minimize memory usage.
+
+        This method processes requests in chunks and computes aggregates incrementally,
+        only keeping the aggregated counts in memory instead of all request data.
+
+        Args:
+            hours: Number of hours to look back for requests (default: 24)
+
+        Returns:
+            Dictionary containing:
+            - request_countries: Dict of country -> {request: count, blocked: count}
+            - request_ips: Dict of IP -> {request: count, blocked: count}
+            - time_buckets: Dict of ISO timestamp -> blocked count
+        """
+        from app.routes.utils import get_redis_client
+
+        redis_client = get_redis_client()
+
+        # Initialize aggregates
+        request_countries: dict[str, dict[str, int]] = {}
+        request_ips: dict[str, dict[str, int]] = {}
+
+        current_date = datetime.now().astimezone()
+        cutoff_timestamp = (current_date - timedelta(hours=hours)).timestamp()
+
+        # Initialize time buckets for the last N hours
+        time_buckets: dict[datetime, int] = {(current_date - timedelta(hours=i)).replace(minute=0, second=0, microsecond=0): 0 for i in range(hours)}
+
+        if not redis_client:
+            # Fallback: return empty aggregates if no Redis
+            return {
+                "request_countries": {},
+                "request_ips": {},
+                "time_buckets": {key.isoformat(): value for key, value in time_buckets.items()},
+            }
+
+        # Process requests in chunks using the iterator
+        # This avoids loading all requests into memory at once
+        for request in self._iter_redis_requests(redis_client, chunk_size=2000):
+            request_date = request.get("date", 0)
+
+            # Skip requests older than cutoff
+            if request_date < cutoff_timestamp:
+                continue
+
+            country = request.get("country", "unknown")
+            ip = request.get("ip", "unknown")
+            status = request.get("status", 0)
+
+            # Initialize country entry if needed
+            if country not in request_countries:
+                request_countries[country] = {"request": 0, "blocked": 0}
+
+            # Initialize IP entry if needed
+            if ip not in request_ips:
+                request_ips[ip] = {"request": 0, "blocked": 0}
+
+            # Increment request counts
+            request_countries[country]["request"] += 1
+            request_ips[ip]["request"] += 1
+
+            # Check if blocked (403, 429, 444)
+            if status in (403, 429, 444):
+                request_countries[country]["blocked"] += 1
+                request_ips[ip]["blocked"] += 1
+
+                # Add to time bucket
+                with suppress(ValueError, OSError):
+                    timestamp = datetime.fromtimestamp(request_date).astimezone()
+                    bucket = timestamp.replace(minute=0, second=0, microsecond=0)
+                    if bucket in time_buckets:
+                        time_buckets[bucket] += 1
+
+        return {
+            "request_countries": request_countries,
+            "request_ips": request_ips,
+            "time_buckets": {key.isoformat(): value for key, value in time_buckets.items()},
+        }
+
     def _calculate_pane_counts(self, all_reports: List[dict], filtered_reports: List[dict]) -> dict:
         """Calculate search panes counts"""
         pane_counts = {}
@@ -562,10 +663,12 @@ class InstancesUtils:
 
             try:
                 if plugin_id == "requests":
-                    # Requests are always saved to Redis
+                    # WARNING: Loading all requests into memory can consume significant memory
+                    # for large Redis datasets. Consider using get_home_aggregates() for the
+                    # home page or get_reports_query() for paginated report access instead.
                     requests_list = []
-                    seen_ids = set()
-                    for request in self._iter_redis_requests(redis_client):
+                    seen_ids: set = set()
+                    for request in self._iter_redis_requests(redis_client, chunk_size=2000):
                         req_id = request.get("id")
                         if req_id in seen_ids:
                             continue
