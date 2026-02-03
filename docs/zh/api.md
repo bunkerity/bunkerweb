@@ -41,7 +41,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
     services:
       bunkerweb:
         # 调度器识别实例的名称
-        image: bunkerity/bunkerweb:1.6.8-rc1
+        image: bunkerity/bunkerweb:1.6.8-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -54,7 +54,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保填写正确的实例名
@@ -76,13 +76,13 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.8-rc1
+        image: bunkerity/bunkerweb-api:1.6.8-rc3
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
           API_PASSWORD: "Str0ng&P@ss!"
           # API_TOKEN: "admin-override-token" # 可选
-          FORWARDED_ALLOW_IPS: "*" # 小心使用：仅在 reverse proxy 为唯一入口时开启
+          FORWARDED_ALLOW_IPS: "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16" # 小心使用：仅在 reverse proxy 为唯一入口时开启
           API_ROOT_PATH: "/"
         networks:
           - bw-universe
@@ -143,7 +143,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.8-rc1
+      bunkerity/bunkerweb-all-in-one:1.6.8-rc3
     ```
 
 === "Linux"
@@ -266,7 +266,8 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------ | ----------------------------------- |
 | `API_DOCS_URL`, `API_REDOC_URL`, `API_OPENAPI_URL` | Swagger、ReDoc、OpenAPI 的路径；设为 `off/disabled/none/false/0` 可禁用                     | 路径或 `off`             | `/docs`, `/redoc`, `/openapi.json`  |
 | `API_ROOT_PATH`                                    | 反向代理时的挂载前缀                                                                       | 路径（如 `/api`）        | 空                                  |
-| `API_FORWARDED_ALLOW_IPS`                          | 可信的代理 IP（用于 `X-Forwarded-*`）                                                       | 逗号分隔 IP/CIDR         | `127.0.0.1`（包默认值）             |
+| `API_FORWARDED_ALLOW_IPS`                          | 可信的代理 IP（用于 `X-Forwarded-*`）                                                       | 逗号分隔 IP/CIDR         | `127.0.0.1,::1`（包默认值）             |
+| `API_PROXY_ALLOW_IPS`                              | 可信的 PROXY 协议代理 IP                                                                  | 逗号分隔 IP/CIDR         | `FORWARDED_ALLOW_IPS`               |
 
 #### Auth、ACL、Biscuit
 

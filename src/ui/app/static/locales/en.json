@@ -23,11 +23,11 @@
   },
   "badge": {
     "from_template": "From template",
+    "managed_via_api": "Managed via API",
     "new_version": "New version",
     "no_template": "No Template",
-    "unread_notifications": "Unread notifications",
     "unread_news": "Unread news",
-    "managed_via_api": "Managed via API"
+    "unread_notifications": "Unread notifications"
   },
   "banner": {
     "community": "Be part of the Bunker community by joining the <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">Discord chat</a> and following us on <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a>.",
@@ -76,17 +76,17 @@
     "clear": "CLEAR",
     "close": "Close",
     "columns": "Columns",
-    "convert_services": "Convert Services",
     "convert_configs": "Convert Configs",
     "convert_configs_to": "Convert to {{state}}",
+    "convert_services": "Convert Services",
     "copy": "Copy",
     "copy_codes": "Copy Codes",
     "copy_raw": "Copy Raw Data",
     "copy_visible": "Copy Visible",
     "create_config": "Create Custom Config",
     "create_instance": "Create Instance",
-    "create_template": "Create template",
     "create_service": "Create new service",
+    "create_template": "Create template",
     "delete": "Delete",
     "delete_instance": "Delete Instances",
     "disable_totp": "Disable TOTP",
@@ -107,6 +107,7 @@
     "go_back": "Go Back",
     "hide": "Hide",
     "history": "History",
+    "import_services": "Import services",
     "login": "Login",
     "multiple_add": "ADD",
     "multiple_hide": "HIDE",
@@ -446,26 +447,26 @@
         "title": "Blocked Requests by Country"
       },
       "blocking_status": {
-        "title": "Blocking Status Over Time",
-        "subtitle": "Blocked requests over time",
         "blocked_requests": "Blocked Requests",
+        "count": "Count",
+        "subtitle": "Blocked requests over time",
         "time": "Time",
-        "count": "Count"
+        "title": "Blocking Status Over Time"
       },
       "request_status": {
-        "title": "Request Status Distribution",
-        "blocked": "Blocked Requests"
+        "blocked": "Blocked Requests",
+        "title": "Request Status Distribution"
       },
       "top_blocked_ips": {
-        "title": "Top 10 Blocked IPs",
-        "most_blocked": "Most Blocked IP"
+        "most_blocked": "Most Blocked IP",
+        "title": "Top 10 Blocked IPs"
       }
     },
     "map": {
       "blocked_requests": "Blocked Requests",
       "hover_info": "Hover over a country",
-      "no_data": "No data",
-      "legend": "Legend"
+      "legend": "Legend",
+      "no_data": "No data"
     }
   },
   "datatable": {
@@ -665,6 +666,7 @@
       "optional": "(Optional)",
       "password": "Password",
       "permanent_ban": "Permanent Ban",
+      "plugin_id": "Plugin",
       "raw_configuration": "Raw Configuration",
       "real_ip_from": "Real IP from",
       "real_ip_from_urls": "Real IP from (URLs)",
@@ -674,9 +676,8 @@
       "secret_token": "Secret Token",
       "server_name": "Server Name",
       "service_name": "Service Name",
-      "theme": "Theme",
       "template_id": "Template ID",
-      "plugin_id": "Plugin",
+      "theme": "Theme",
       "type": "Type",
       "ui_host": "UI Host",
       "ui_url": "UI URL",
@@ -732,14 +733,6 @@
     "locked_settings_annotation": "Locked ({{method}})",
     "locked_settings_hint": "Locked settings are highlighted"
   },
-  "logs": {
-    "eventsource_failed": "EventSource connection failed",
-    "parse_error": "Failed to parse stream data: {{error}}",
-    "stream_error": "Stream error: {{message}}",
-    "stream_init": "Stream initialized, file size: {{size}}",
-    "stream_initialized": "Stream initialized with refresh, file size: {{size}}",
-    "trimmed_notice": "--- {{count}} older log lines were removed for performance ---"
-  },
   "link": {
     "back_to_login": "Back to Login",
     "forgot_password": "Forgot Password?",
@@ -751,16 +744,24 @@
     "see_more": "See More",
     "upgrade": "Upgrade?"
   },
+  "logs": {
+    "eventsource_failed": "EventSource connection failed",
+    "parse_error": "Failed to parse stream data: {{error}}",
+    "stream_error": "Stream error: {{message}}",
+    "stream_init": "Stream initialized, file size: {{size}}",
+    "stream_initialized": "Stream initialized with refresh, file size: {{size}}",
+    "trimmed_notice": "--- {{count}} older log lines were removed for performance ---"
+  },
   "modal": {
     "body": {
       "add_plugin_dropzone": "Drag and drop your plugin archive here or click to select files.",
       "confirm_cache_deletion_alert": "Are you sure you want to delete the selected cache file?",
       "confirm_cache_deletion_alert_plural": "Are you sure you want to delete the selected cache files?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "Are you sure you want to convert the selected custom configurations to {{state}}?",
       "confirm_configs_deletion_alert": "Are you sure you want to delete the selected custom configuration?",
       "confirm_configs_deletion_alert_plural": "Are you sure you want to delete the selected custom configurations?",
       "confirm_conversion_confirmation": "Are you sure you want to convert the selected services?",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
-      "confirm_configs_conversion_to": "Are you sure you want to convert the selected custom configurations to {{state}}?",
       "confirm_next_step": "Are you sure you want to proceed to the next step?",
       "confirm_plugin_deletion": "Are you sure you want to delete the selected plugin?",
       "confirm_plugin_deletion_plural": "Are you sure you want to delete the selected plugins?",
@@ -769,8 +770,17 @@
       "delete_confirmation_alert": "Are you sure you want to delete the selected instance?",
       "delete_confirmation_alert_plural": "Are you sure you want to delete the selected instances?",
       "delete_confirmation_template_used": "One or more selected templates are assigned to services ({{services_count}} service(s) total). Removing them will clear those assignments. Do you want to continue?",
+      "delete_step_confirmation": "Are you sure you want to delete this step?",
+      "delete_step_content_label": "Content",
+      "delete_step_name_label": "Step",
       "delete_template_global_usage": "Used by the global settings",
       "delete_template_services_list": "Used by services: {{services}}",
+      "fetch_global_settings_bold": "This will fetch the global settings and apply them to the current template.",
+      "fetch_global_settings_point_1": "Only settings present in this template are updated.",
+      "fetch_global_settings_point_2": "Values identical to defaults are ignored.",
+      "fetch_global_settings_point_3": "SERVER_NAME is never overridden.",
+      "import_services_dropzone": "Drag and drop your services export file here or click to select a file.",
+      "import_services_warning": "Importing services will create new UI services from the export file. Existing services are skipped.",
       "instance_creation_alert": "You don't need to provide the port or the server name; the values of `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT`, and `API_SERVER_NAME` will be used for the instance configuration.",
       "next_step_in_case_of_issue": "If you encounter issues, you can manually accept the unsafe certificate:",
       "recovery_codes_save_alert": "Please save these recovery codes in a secure location (like a password manager or bunker). You can use them to access your account if you lose your authentication device.",
@@ -779,18 +789,11 @@
       "services_deletion_confirmation": "Are you sure you want to delete the selected services?",
       "unban_confirmation_alert": "Are you sure you want to unban the selected IP address?",
       "unban_confirmation_alert_plural": "Are you sure you want to unban the selected IP addresses?",
-      "update_duration_alert": "Select a new duration for the selected bans:",
-      "fetch_global_settings_bold": "This will fetch the global settings and apply them to the current template.",
-      "fetch_global_settings_point_1": "Only settings present in this template are updated.",
-      "fetch_global_settings_point_2": "Values identical to defaults are ignored.",
-      "fetch_global_settings_point_3": "SERVER_NAME is never overridden.",
-      "delete_step_confirmation": "Are you sure you want to delete this step?",
-      "delete_step_name_label": "Step",
-      "delete_step_content_label": "Content"
+      "update_duration_alert": "Select a new duration for the selected bans:"
     },
     "button": {
-      "reset_template_confirm": "Reset Template Configuration",
-      "fetch_global_settings_confirm": "Apply global settings"
+      "fetch_global_settings_confirm": "Apply global settings",
+      "reset_template_confirm": "Reset Template Configuration"
     },
     "section": {
       "ban_details": "Ban Details",
@@ -803,21 +806,22 @@
       "confirm_conversion": "Confirm Conversion",
       "confirm_deletion": "Confirm Deletion",
       "confirm_unban": "Confirm Unban",
-      "create_template": "Create template",
       "create_new_instance": "Create New Instance",
-      "delete_template": "Delete template",
+      "create_template": "Create template",
       "delete_instance": "Delete Instances",
+      "delete_step": "Delete step",
+      "delete_template": "Delete template",
+      "edit_template": "Edit template: {{name}}",
+      "fetch_global_settings": "Apply Global Settings?",
       "from_plugin": "from plugin",
       "full_url": "Full URL",
+      "import_services": "Import services",
       "job_history": "Last 10 Job Executions",
-      "edit_template": "Edit template: {{name}}",
       "job_history_count": "Last {{count}} executions of Job",
       "recovery_codes": "Recovery Codes",
       "reset_template_config": "Reset Template Configuration?",
-      "fetch_global_settings": "Apply Global Settings?",
       "server_name_not_unique": "Server Name Is Not Unique",
-      "update_duration": "Update Ban Duration",
-      "delete_step": "Delete step"
+      "update_duration": "Update Ban Duration"
     }
   },
   "mode": {
@@ -912,12 +916,12 @@
       "unknown": "Unknown expiration date"
     },
     "force_check": {
-      "title": "Force check",
-      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
+      "title": "Force check"
     },
     "force_update": {
-      "title": "Force update",
-      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept.",
+      "title": "Force update"
     },
     "key": {
       "title": {
@@ -1022,9 +1026,9 @@
     "next_30d": "Next 30 days",
     "next_7d": "Next 7 days",
     "older_30d": "More than 30 days ago",
+    "one_or_more": "One or more",
     "permanent": "Permanent",
     "plugin": "Plugin",
-    "steps": "Steps",
     "reason": "Reason",
     "reload": "Reload Required",
     "scope": "Scope",
@@ -1035,16 +1039,20 @@
     "start_date": "Start Date",
     "status": "Status",
     "status_code": "Status Code",
+    "steps": "Steps",
     "stream": "Stream Support",
     "template": "Template",
-    "zero": "None",
-    "one_or_more": "One or more",
     "title_0": "No Active Filters",
     "title_1": "Active Filter - 1",
     "title_plural": "Active Filters - %d",
     "type": "Type",
     "url": "URL",
-    "version": "Version"
+    "version": "Version",
+    "zero": "None"
+  },
+  "security_mode": {
+    "block": "Block",
+    "detect": "Detect"
   },
   "settings": {
     "custom_config": {
@@ -1056,6 +1064,13 @@
     }
   },
   "setup": {
+    "status": {
+      "admin_user_exists": "🧑‍🚀 An admin user already exists. Please proceed to the next step.",
+      "pro_license_key_exists": "⭐ A PRO license key is already configured, please proceed to the next step.",
+      "reverse_proxy_configured": "↪️ A reverse proxy is already configured for the web interface. Please proceed to the next step.",
+      "secure_password": "Secure Password",
+      "unique_server_name": "Unique Server Name"
+    },
     "step1": {
       "subtitle": "Create your administrator account.",
       "title": "Admin User"
@@ -1071,19 +1086,19 @@
       "title": "UI Settings"
     },
     "step3": {
-      "title": "Upgrade to PRO",
-      "subtitle": "Unlock advanced features and get the most out of BunkerWeb.",
       "label": {
         "pro_benefits": "PRO Benefits"
       },
-      "pro_benefit_1_title": "Access to all PRO features",
       "pro_benefit_1_description": "Unlock all advanced features including enhanced security, performance, and management tools.",
-      "pro_benefit_2_title": "Technical support from maintainers",
+      "pro_benefit_1_title": "Access to all PRO features",
       "pro_benefit_2_description": "Get priority support from the BunkerWeb team for any issues or questions you may have.",
-      "pro_benefit_3_title": "Custom development",
+      "pro_benefit_2_title": "Technical support from maintainers",
       "pro_benefit_3_description": "Tailored solutions to meet your specific needs.",
+      "pro_benefit_3_title": "Custom development",
+      "pro_benefit_4_description": "Expert advice to optimize your BunkerWeb setup.",
       "pro_benefit_4_title": "Custom consulting",
-      "pro_benefit_4_description": "Expert advice to optimize your BunkerWeb setup."
+      "subtitle": "Unlock advanced features and get the most out of BunkerWeb.",
+      "title": "Upgrade to PRO"
     },
     "step4": {
       "label": {
@@ -1091,13 +1106,6 @@
       },
       "subtitle": "Review your settings before completing the setup.",
       "title": "Overview"
-    },
-    "status": {
-      "admin_user_exists": "🧑‍🚀 An admin user already exists. Please proceed to the next step.",
-      "pro_license_key_exists": "⭐ A PRO license key is already configured, please proceed to the next step.",
-      "reverse_proxy_configured": "↪️ A reverse proxy is already configured for the web interface. Please proceed to the next step.",
-      "secure_password": "Secure Password",
-      "unique_server_name": "Unique Server Name"
     },
     "subtitle": "Follow the steps to complete the setup wizard.",
     "title": "Setup Wizard"
@@ -1108,8 +1116,12 @@
     "default_server": "Default Server",
     "down": "Down",
     "draft": "Draft",
+    "error_deleting_template": "An error occurred while deleting the template.",
     "error_loading_bans": "Error loading bans. Please try refreshing the page.",
+    "error_loading_template": "Unable to load template data.",
+    "error_saving_template": "An error occurred while saving the template.",
     "failed": "Failed",
+    "invalid_json_payload": "Invalid JSON payload.",
     "loading": "Loading...",
     "loading_bans": "Loading bans...",
     "loading_cache_file": "Loading cache file...",
@@ -1119,16 +1131,12 @@
     "loading_instances": "Loading instances...",
     "loading_items": "Loading items...",
     "loading_jobs": "Loading jobs...",
-    "loading_templates": "Loading templates...",
     "loading_logs": "Loading logs...",
     "loading_plugins": "Loading plugins...",
     "loading_reports": "Loading reports...",
     "loading_services": "Loading services...",
+    "loading_templates": "Loading templates...",
     "missing_template_information": "Missing template information.",
-    "error_loading_template": "Unable to load template data.",
-    "error_saving_template": "An error occurred while saving the template.",
-    "error_deleting_template": "An error occurred while deleting the template.",
-    "invalid_json_payload": "Invalid JSON payload.",
     "news_connection_error": "Could not connect to the blog for news updates.",
     "no": "No",
     "no_data": "No data",
@@ -1185,6 +1193,7 @@
       "active": "Active",
       "async": "Async",
       "checksum": "Checksum",
+      "configs": "Configs",
       "country": "Country",
       "created": "Created",
       "current_time_left": "Current Time Left",
@@ -1205,9 +1214,6 @@
       "method": "Method",
       "name": "Name",
       "plugin": "Plugin",
-      "configs": "Configs",
-      "settings": "Settings",
-      "steps": "Steps",
       "reason": "Reason",
       "reload": "Reload",
       "request_id": "Request ID",
@@ -1216,8 +1222,10 @@
       "server_name": "Server Name",
       "service": "Service",
       "service_name": "Service Name",
+      "settings": "Settings",
       "status": "Status",
       "status_code": "Status Code",
+      "steps": "Steps",
       "stream": "Stream",
       "template": "Template",
       "templates": "Templates",
@@ -1229,7 +1237,6 @@
     }
   },
   "template": {
-    "none": "No Template",
     "editor": {
       "button_add_config": "Add config",
       "button_add_setting": "Add setting",
@@ -1261,6 +1268,19 @@
       "label_step_settings": "Settings in this step",
       "label_step_subtitle": "Step subtitle",
       "label_step_title": "Step title",
+      "missing_configs_body": "The imported template references custom configs that haven't been uploaded yet. Please import these configs to complete the template setup:",
+      "missing_configs_browse": "Browse Files",
+      "missing_configs_done": "Done",
+      "missing_configs_drop_hint": "Drag and drop config files here (.conf, .cfg, .txt)",
+      "missing_configs_drop_or": "or",
+      "missing_configs_hint_body": "Upload files will be automatically added to your template. Make sure the filenames match the missing configs listed above.",
+      "missing_configs_hint_title": "Tip:",
+      "missing_configs_resolved": "All missing configs have been uploaded! Template imported successfully.",
+      "missing_configs_title": "Missing Custom Configs",
+      "missing_configs_upload_failed": "Failed to upload config files",
+      "missing_configs_upload_label": "Upload missing configs (.conf, .cfg, .txt)",
+      "missing_configs_upload_partial": "{{uploaded}} of {{total}} configs uploaded. Still missing: {{missing}}",
+      "missing_configs_upload_success": "{{count}} config file(s) uploaded successfully",
       "panel_overview": "Overview",
       "panel_overview_help": "Track key information and navigate between sections.",
       "placeholder_config_data": "Data",
@@ -1272,6 +1292,46 @@
       "placeholder_step_title": "Step title",
       "placeholder_template_id": "template-id",
       "placeholder_template_name": "My template",
+      "raw_configs_browse": "Browse files",
+      "raw_configs_drop_hint": "Drag and drop config files here or click to browse (.conf, .cfg, .txt)",
+      "raw_configs_drop_supported": "Supported formats: .conf, .cfg, .txt",
+      "raw_configs_empty": "No imported config files yet. New files will appear below.",
+      "raw_configs_help": "Upload config files (.conf, .cfg, .txt) to append entries to <code>configs</code>. Types default to <code>server_http</code>; adjust in the JSON if needed.",
+      "raw_configs_import_invalid": "Unable to import configs because the current JSON is invalid.",
+      "raw_configs_import_none": "No configs were imported.",
+      "raw_configs_import_success": "{{count}} config file(s) imported.",
+      "raw_configs_note": "Imported files are added to the JSON editor. Review and adjust before saving.",
+      "raw_configs_title": "Custom config imports",
+      "raw_configs_upload": "Upload config files (.conf, .cfg, .txt)",
+      "raw_configs_upload_failed": "Unable to read one of the selected files.",
+      "raw_editor_drop_hint": "Drop a template JSON file (.json only) to replace the current content.",
+      "raw_editor_help": "Edit the complete template definition as JSON. Switching back to Easy mode validates and reloads the visual editor.",
+      "raw_editor_import_success": "Template JSON imported successfully.",
+      "raw_editor_override_body": "Importing this file will completely replace the current template JSON. Changes made in the editor will be lost. Do you want to continue?",
+      "raw_editor_override_confirm": "Replace template",
+      "raw_editor_override_title": "Replace template JSON?",
+      "raw_editor_title": "Raw template JSON",
+      "raw_editor_upload_empty": "Uploaded file is empty.",
+      "raw_editor_upload_failed": "Unable to read the selected file.",
+      "raw_editor_upload_template": "Upload template JSON (.json only)",
+      "raw_validation_config_definition": "Invalid config definition.",
+      "raw_validation_config_object": "Config entries must be objects.",
+      "raw_validation_configs_unassigned": "Configs {{configs}} are not assigned to any step.",
+      "raw_validation_empty": "Template JSON cannot be empty.",
+      "raw_validation_invalid_json": "Invalid JSON payload: {{error}}",
+      "raw_validation_object": "Template payload must be a JSON object.",
+      "raw_validation_setting_key": "Settings keys must be non-empty strings.",
+      "raw_validation_settings_object": "Settings must be provided as an object.",
+      "raw_validation_settings_unassigned": "Settings {{settings}} are not assigned to any step.",
+      "raw_validation_step_config_duplicate": "Config {{config}} is assigned to multiple steps.",
+      "raw_validation_step_config_reference": "Step {{index}} contains an invalid config reference.",
+      "raw_validation_step_config_unknown": "Step {{index}} references unknown config {{config}}.",
+      "raw_validation_step_object": "Step {{index}} must be an object.",
+      "raw_validation_step_setting_duplicate": "Setting {{setting}} is assigned to multiple steps.",
+      "raw_validation_step_setting_reference": "Step {{index}} contains an invalid setting reference.",
+      "raw_validation_step_setting_unknown": "Step {{index}} references unknown setting {{setting}}.",
+      "raw_validation_step_title": "Step {{index}} must have a title.",
+      "raw_validation_steps_required": "A template must contain at least one step.",
       "readonly_db": "The database is currently read-only. Templates cannot be changed.",
       "readonly_method": "This template was created by the {{method}} process and cannot be edited from the UI.",
       "readonly_title": "Read-only",
@@ -1279,8 +1339,6 @@
       "select_config_placeholder": "Select a config",
       "select_config_type_placeholder": "Select a type",
       "select_setting_placeholder": "Select a setting",
-      "settings": "Settings",
-      "settings_help": "Define the settings exposed by this template and their default values.",
       "setting_remove_confirm": "Are you sure you want to remove this setting from the template?",
       "setting_remove_key": "Setting",
       "setting_remove_title": "Remove setting",
@@ -1305,6 +1363,8 @@
       "setting_selector_search_label": "Find a multisite setting",
       "setting_selector_search_placeholder": "Search by label, key, or plugin",
       "setting_toggle_enabled": "Enabled",
+      "settings": "Settings",
+      "settings_help": "Define the settings exposed by this template and their default values.",
       "step_configs_empty": "No configs added to this step yet.",
       "step_configs_selection_title": "Select existing configs",
       "step_default_title": "Untitled step",
@@ -1334,61 +1394,9 @@
       "validation_configs_unique": "Each config name must be unique.",
       "validation_id_required": "Template ID is required.",
       "validation_setting_key": "Each setting must have a key.",
-      "validation_settings_unique": "Each setting key must be unique.",
-      "raw_configs_help": "Upload config files (.conf, .cfg, .txt) to append entries to <code>configs</code>. Types default to <code>server_http</code>; adjust in the JSON if needed.",
-      "raw_configs_import_invalid": "Unable to import configs because the current JSON is invalid.",
-      "raw_configs_import_none": "No configs were imported.",
-      "raw_configs_import_success": "{{count}} config file(s) imported.",
-      "raw_configs_note": "Imported files are added to the JSON editor. Review and adjust before saving.",
-      "raw_configs_title": "Custom config imports",
-      "raw_configs_upload": "Upload config files (.conf, .cfg, .txt)",
-      "raw_configs_upload_failed": "Unable to read one of the selected files.",
-      "raw_configs_browse": "Browse files",
-      "raw_configs_drop_hint": "Drag and drop config files here or click to browse (.conf, .cfg, .txt)",
-      "raw_configs_drop_supported": "Supported formats: .conf, .cfg, .txt",
-      "raw_configs_empty": "No imported config files yet. New files will appear below.",
-      "raw_editor_help": "Edit the complete template definition as JSON. Switching back to Easy mode validates and reloads the visual editor.",
-      "raw_editor_import_success": "Template JSON imported successfully.",
-      "raw_editor_title": "Raw template JSON",
-      "raw_editor_upload_empty": "Uploaded file is empty.",
-      "raw_editor_upload_failed": "Unable to read the selected file.",
-      "raw_editor_upload_template": "Upload template JSON (.json only)",
-      "raw_validation_configs_unassigned": "Configs {{configs}} are not assigned to any step.",
-      "raw_validation_config_definition": "Invalid config definition.",
-      "raw_validation_config_object": "Config entries must be objects.",
-      "raw_validation_empty": "Template JSON cannot be empty.",
-      "raw_validation_invalid_json": "Invalid JSON payload: {{error}}",
-      "raw_validation_object": "Template payload must be a JSON object.",
-      "raw_validation_setting_key": "Settings keys must be non-empty strings.",
-      "raw_validation_settings_object": "Settings must be provided as an object.",
-      "raw_validation_step_config_duplicate": "Config {{config}} is assigned to multiple steps.",
-      "raw_validation_step_config_reference": "Step {{index}} contains an invalid config reference.",
-      "raw_validation_step_config_unknown": "Step {{index}} references unknown config {{config}}.",
-      "raw_validation_step_object": "Step {{index}} must be an object.",
-      "raw_validation_step_setting_duplicate": "Setting {{setting}} is assigned to multiple steps.",
-      "raw_validation_step_setting_reference": "Step {{index}} contains an invalid setting reference.",
-      "raw_validation_step_setting_unknown": "Step {{index}} references unknown setting {{setting}}.",
-      "raw_validation_step_title": "Step {{index}} must have a title.",
-      "raw_validation_steps_required": "A template must contain at least one step.",
-      "raw_validation_settings_unassigned": "Settings {{settings}} are not assigned to any step.",
-      "raw_editor_drop_hint": "Drop a template JSON file (.json only) to replace the current content.",
-      "raw_editor_override_title": "Replace template JSON?",
-      "raw_editor_override_body": "Importing this file will completely replace the current template JSON. Changes made in the editor will be lost. Do you want to continue?",
-      "raw_editor_override_confirm": "Replace template",
-      "missing_configs_title": "Missing Custom Configs",
-      "missing_configs_body": "The imported template references custom configs that haven't been uploaded yet. Please import these configs to complete the template setup:",
-      "missing_configs_hint_title": "Tip:",
-      "missing_configs_hint_body": "Upload files will be automatically added to your template. Make sure the filenames match the missing configs listed above.",
-      "missing_configs_upload_label": "Upload missing configs (.conf, .cfg, .txt)",
-      "missing_configs_drop_hint": "Drag and drop config files here (.conf, .cfg, .txt)",
-      "missing_configs_drop_or": "or",
-      "missing_configs_browse": "Browse Files",
-      "missing_configs_done": "Done",
-      "missing_configs_upload_success": "{{count}} config file(s) uploaded successfully",
-      "missing_configs_upload_partial": "{{uploaded}} of {{total}} configs uploaded. Still missing: {{missing}}",
-      "missing_configs_upload_failed": "Failed to upload config files",
-      "missing_configs_resolved": "All missing configs have been uploaded! Template imported successfully."
-    }
+      "validation_settings_unique": "Each setting key must be unique."
+    },
+    "none": "No Template"
   },
   "theme": {
     "dark": "Dark",
@@ -1403,40 +1411,40 @@
     },
     "copied": "Copied!",
     "disclaimer_title": "Disclaimer",
+    "global_settings_applied_body": "Global settings have been successfully fetched and applied to the current form.",
+    "global_settings_applied_title": "Global settings applied",
+    "global_settings_failed_body": "An error occurred while fetching global settings.",
+    "global_settings_failed_title": "Failed to fetch global settings",
     "header": {
       "ping_failed": "Ping failed",
       "ping_succeed": "Ping successful"
     },
-    "ip_unbanned": "IP address unbanned successfully!",
-    "global_settings_applied_title": "Global settings applied",
-    "global_settings_applied_body": "Global settings have been successfully fetched and applied to the current form.",
-    "global_settings_failed_title": "Failed to fetch global settings",
-    "global_settings_failed_body": "An error occurred while fetching global settings."
+    "ip_unbanned": "IP address unbanned successfully!"
   },
   "tooltip": {
     "auto_lets_encrypt": "Whether to automatically request a Let's Encrypt certificate.",
     "button": {
-      "convert_service_to_draft": "Convert Service {{name}} to Draft",
-      "convert_service_to_online": "Convert Service {{name}} to Online",
+      "ban_ip": "Ban this IP address",
       "convert_config_to_draft": "Convert Config {{name}} to Draft",
       "convert_config_to_online": "Convert Config {{name}} to Online",
+      "convert_service_to_draft": "Convert Service {{name}} to Draft",
+      "convert_service_to_online": "Convert Service {{name}} to Online",
       "delete_config": "Delete Custom Config {{name}}",
       "delete_file": "Delete Cache File: {{filename}}",
       "delete_instance": "Delete Instance {{hostname}}",
       "delete_plugin": "Delete Plugin {{name}}",
       "delete_service": "Delete Service {{name}}",
       "delete_template": "Delete Template {{name}}",
+      "force_check": "Schedules a check; downloads only if updates exist.",
+      "force_update": "Skips checks and forces PRO plugin download; keeps current state on failure.",
       "ping_instance": "Ping Instance {{hostname}}",
       "reload_instance": "Reload Instance {{hostname}}",
       "reset_default": "Reset to default value",
       "reset_global": "Reset to global value",
-      "value_from_global": "Value from global settings",
       "run_job": "Run Job {{job}}",
       "stop_instance": "Stop Instance {{hostname}}",
       "unban_ip": "Unban {{ip}}",
-      "ban_ip": "Ban this IP address",
-      "force_check": "Schedules a check; downloads only if updates exist.",
-      "force_update": "Skips checks and forces PRO plugin download; keeps current state on failure."
+      "value_from_global": "Value from global settings"
     },
     "cannot_delete_original_ban": "Cannot delete the original Ban entry.",
     "cannot_remove_disabled": "Cannot remove because one or more settings are disabled.",
@@ -1474,32 +1482,32 @@
     "dns_provider_dns_only": "DNS provider selection is only applicable for DNS challenges.",
     "download_file": "Download file",
     "draft_toggle_disabled": "Draft mode can only be toggled for services created via the UI.",
-    "email_lets_encrypt": "The email address to register with Let's Encrypt for certificate management and notifications.",
     "email_length": "Email must be between 1 and 256 characters.",
-    "follow_latest_page_only": "Follow mode is only available on the latest page",
+    "email_lets_encrypt": "The email address to register with Let's Encrypt for certificate management and notifications.",
     "fetch_global_settings": "Fetch global settings and apply them to the current template",
+    "follow_latest_page_only": "Follow mode is only available on the latest page",
     "global_settings_source": "Value inherited from global settings.",
     "instance_not_up": "Instance {{hostname}} is currently not responding ('up').",
+    "latest_version_installed": "You are running the latest version.",
     "lets_encrypt_custom_profile": "The custom profile to use for Let's Encrypt (e.g. 'my_custom_profile').",
     "lets_encrypt_disable_public_suffixes": "Disable certificate requests for domains matching the Public Suffix List (recommended).",
     "lets_encrypt_profile": "The profile to use for Let's Encrypt (classic, tlsserver, shortlived).",
-    "latest_version_installed": "You are running the latest version.",
     "license_key": "Your BunkerWeb PRO license key.",
     "link": {
       "access_plugin_page": "Access {{name}} Page",
       "access_service": "Access Service {{name}}",
       "clone_config": "Clone Custom Config {{name}}",
       "clone_service": "Clone Service {{name}}",
+      "clone_template": "Clone Template {{template}}",
       "download_file": "Download {{filename}}",
       "edit_config": "Edit Custom Config {{name}}",
       "edit_service": "Edit Service {{service}}",
+      "edit_template": "Edit Template {{template}}",
       "export_service": "Export Service {{service}} Configuration",
       "view_config": "View Custom Config {{name}}",
       "view_file": "View {{filename}}",
       "view_service": "View Service {{service}}",
-      "edit_template": "Edit Template {{template}}",
-      "view_template": "View Template {{template}}",
-      "clone_template": "Clone Template {{template}}"
+      "view_template": "View Template {{template}}"
     },
     "modal": {
       "title": {
@@ -1530,20 +1538,6 @@
       "yes": "Supports STREAM mode."
     },
     "table": {
-      "templates": {
-        "actions": "Actions available for this Template",
-        "details": "Show Template details",
-        "select_all": "Select all Templates",
-        "id": "The ID of the Template",
-        "name": "The user-defined or auto-generated Template name",
-        "plugin": "The Plugin containing the Template",
-        "steps": "The Template's steps count",
-        "settings": "The Template's settings count",
-        "configs": "The Template's configs count",
-        "method": "The Template's creation method",
-        "created": "The Template's creation date",
-        "last_update": "The Template's last update date"
-      },
       "bans": {
         "actions": "Actions available for this Ban",
         "country": "Country of the banned IP address",
@@ -1575,9 +1569,9 @@
         "name": "Name of the Custom Config",
         "select_all": "Select all Custom Configs",
         "service": "Service associated with the Custom Config (or Global)",
+        "status": "Draft status of the Custom configuration",
         "template": "Indicates if the Custom Config originates from a template",
-        "type": "Type or context of the Custom Config (e.g., HTTP, MODSEC)",
-        "status": "Draft status of the Custom configuration"
+        "type": "Type or context of the Custom Config (e.g., HTTP, MODSEC)"
       },
       "instances": {
         "actions": "Actions available for this Instance",
@@ -1639,9 +1633,24 @@
         "last_update": "Date and time when the Service was last updated",
         "method": "Creation method of the Service (e.g., ui, file)",
         "name": "Name of the Service",
+        "security_mode": "The Service's security mode (Block or Detect)",
         "select_all": "Select all Services",
         "template": "The template used by the Service",
         "type": "Service type (Online/Draft)"
+      },
+      "templates": {
+        "actions": "Actions available for this Template",
+        "configs": "The Template's configs count",
+        "created": "The Template's creation date",
+        "details": "Show Template details",
+        "id": "The ID of the Template",
+        "last_update": "The Template's last update date",
+        "method": "The Template's creation method",
+        "name": "The user-defined or auto-generated Template name",
+        "plugin": "The Plugin containing the Template",
+        "select_all": "Select all Templates",
+        "settings": "The Template's settings count",
+        "steps": "The Template's steps count"
       }
     },
     "ui_host": "The hostname or IP address that will serve the BunkerWeb UI via the reverse proxy.",

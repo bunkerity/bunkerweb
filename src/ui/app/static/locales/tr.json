@@ -23,11 +23,11 @@
   },
   "badge": {
     "from_template": "Şablondan",
+    "managed_via_api": "API aracılığıyla yönetilir",
     "new_version": "Yeni sürüm",
     "no_template": "Şablon Yok",
     "unread_news": "Okunmamış haberler",
-    "unread_notifications": "Okunmamış bildirimler",
-    "managed_via_api": "API aracılığıyla yönetilir"
+    "unread_notifications": "Okunmamış bildirimler"
   },
   "banner": {
     "community": "<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">Discord sohbetine</a> katılarak ve <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a>'de bizi takip ederek Bunker topluluğunun bir parçası olun.",
@@ -76,9 +76,9 @@
     "clear": "TEMİZLE",
     "close": "Kapat",
     "columns": "Sütunlar",
-    "convert_services": "Servisleri Dönüştür",
     "convert_configs": "Yapılandırmaları dönüştür",
     "convert_configs_to": "{{state}} durumuna dönüştür",
+    "convert_services": "Servisleri Dönüştür",
     "copy": "Kopyala",
     "copy_codes": "Kodları Kopyala",
     "copy_raw": "Ham Veriyi Kopyala",
@@ -101,10 +101,13 @@
     "fetch_global": "Genel ayarları getir",
     "filters_suffix": " Filtreler",
     "follow": "Takip Et",
+    "force_check": "Zorla kontrol et",
+    "force_update": "Force update",
     "github_stars": "Yıldızlar",
     "go_back": "Geri Dön",
     "hide": "Gizle",
     "history": "Geçmiş",
+    "import_services": "Hizmetleri içe aktar",
     "login": "Giriş Yap",
     "multiple_add": "EKLE",
     "multiple_hide": "GİZLE",
@@ -145,8 +148,7 @@
     "upload_photo": "Yeni Fotoğraf Yükle",
     "view_details": "Detayları Görüntüle",
     "view_raw_data": "Ham Veriyi Görüntüle",
-    "wipe_other_sessions": "Diğer Oturumları Sonlandır",
-    "force_update": "Force update"
+    "wipe_other_sessions": "Diğer Oturumları Sonlandır"
   },
   "country": {
     "AD": "Andorra",
@@ -445,26 +447,26 @@
         "title": "Ülkeye Göre Engellenen İstekler"
       },
       "blocking_status": {
-        "title": "Zaman İçinde Engelleme Durumu",
-        "subtitle": "Zaman içinde engellenen istekler",
         "blocked_requests": "Engellenen İstekler",
+        "count": "Adet",
+        "subtitle": "Zaman içinde engellenen istekler",
         "time": "Zaman",
-        "count": "Adet"
+        "title": "Zaman İçinde Engelleme Durumu"
       },
       "request_status": {
-        "title": "İstek Durumu Dağılımı",
-        "blocked": "Engellenen İstekler"
+        "blocked": "Engellenen İstekler",
+        "title": "İstek Durumu Dağılımı"
       },
       "top_blocked_ips": {
-        "title": "En Çok Engellenen 10 IP",
-        "most_blocked": "En Çok Engellenen IP"
+        "most_blocked": "En Çok Engellenen IP",
+        "title": "En Çok Engellenen 10 IP"
       }
     },
     "map": {
       "blocked_requests": "Engellenen İstekler",
       "hover_info": "Bir ülkenin üzerine gelin",
-      "no_data": "Veri yok",
-      "legend": "Açıklama"
+      "legend": "Açıklama",
+      "no_data": "Veri yok"
     }
   },
   "datatable": {
@@ -480,6 +482,7 @@
     "info_empty_plugins": "Hiç Eklenti yok",
     "info_empty_reports": "Hiç Rapor yok",
     "info_empty_services": "Hiç Servis yok",
+    "info_empty_templates": "Kullanılabilir şablon yok",
     "info_filtered_bans": "(_MAX_ toplam Yasaklama içinden filtrelendi)",
     "info_filtered_cache": "(_MAX_ toplam Önbellek Dosyası içinden filtrelendi)",
     "info_filtered_configs": "(_MAX_ toplam Özel Yapılandırma içinden filtrelendi)",
@@ -489,12 +492,14 @@
     "info_filtered_plugins": "(_MAX_ toplam Eklenti içinden filtrelendi)",
     "info_filtered_reports": "(_MAX_ toplam Rapor içinden filtrelendi)",
     "info_filtered_services": "(_MAX_ toplam Servis içinden filtrelendi)",
+    "info_filtered_templates": "(_MAX_ toplam şablondan filtrelendi)",
     "info_instances": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} Örnek",
     "info_items": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} öğe",
     "info_jobs": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} İş",
     "info_plugins": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} Eklenti",
     "info_reports": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} Rapor",
     "info_services": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} Servis",
+    "info_templates": "{{total}} şablonun {{start}} ile {{end}} arası gösteriliyor",
     "length_all": "Tümü",
     "length_menu_bans": "_MENU_ Yasaklama Göster",
     "length_menu_cache": "_MENU_ Önbellek Dosyası Göster",
@@ -505,6 +510,7 @@
     "length_menu_plugins": "_MENU_ Eklenti Göster",
     "length_menu_reports": "_MENU_ Rapor Göster",
     "length_menu_services": "_MENU_ Servis Göster",
+    "length_menu_templates": "_MENU_ şablon göster",
     "paginate": {
       "first": "İlk",
       "last": "Son",
@@ -540,6 +546,9 @@
     "select_rows_services_0": "Hiç Servis seçilmedi",
     "select_rows_services_1": "1 Servis seçildi",
     "select_rows_services_plural": "%d Servis seçildi",
+    "select_rows_templates_0": "Şablon seçilmedi",
+    "select_rows_templates_1": "1 şablon seçildi",
+    "select_rows_templates_plural": "%d şablon seçildi",
     "zero_records_bans": "Eşleşen Yasaklama bulunamadı",
     "zero_records_cache": "Eşleşen Önbellek Dosyası bulunamadı",
     "zero_records_configs": "Eşleşen Özel Yapılandırma bulunamadı",
@@ -548,7 +557,8 @@
     "zero_records_jobs": "Eşleşen İş bulunamadı",
     "zero_records_plugins": "Eşleşen Eklenti bulunamadı",
     "zero_records_reports": "Eşleşen Rapor bulunamadı",
-    "zero_records_services": "Eşleşen Servis bulunamadı"
+    "zero_records_services": "Eşleşen Servis bulunamadı",
+    "zero_records_templates": "Eşleşen şablon bulunamadı"
   },
   "dev_log": {
     "copy_failed": "Metin kopyalanamadı:",
@@ -747,11 +757,11 @@
       "add_plugin_dropzone": "Eklenti arşivinizi buraya sürükleyip bırakın veya dosya seçmek için tıklayın.",
       "confirm_cache_deletion_alert": "Seçili önbellek dosyasını silmek istediğinizden emin misiniz?",
       "confirm_cache_deletion_alert_plural": "Seçili önbellek dosyalarını silmek istediğinizden emin misiniz?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "Seçili özel yapılandırmaları {{state}} olarak dönüştürmek istediğinizden emin misiniz?",
       "confirm_configs_deletion_alert": "Seçili özel yapılandırmayı silmek istediğinizden emin misiniz?",
       "confirm_configs_deletion_alert_plural": "Seçili özel yapılandırmaları silmek istediğinizden emin misiniz?",
       "confirm_conversion_confirmation": "Seçili servisleri dönüştürmek istediğinizden emin misiniz?",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
-      "confirm_configs_conversion_to": "Seçili özel yapılandırmaları {{state}} olarak dönüştürmek istediğinizden emin misiniz?",
       "confirm_next_step": "Bir sonraki adıma geçmek istediğinizden emin misiniz?",
       "confirm_plugin_deletion": "Seçili eklentiyi silmek istediğinizden emin misiniz?",
       "confirm_plugin_deletion_plural": "Seçili eklentileri silmek istediğinizden emin misiniz?",
@@ -759,6 +769,18 @@
       "confirmation_instance_deletion": "Seçili örneği silmek istediğinizden emin misiniz?",
       "delete_confirmation_alert": "Seçili örneği silmek istediğinizden emin misiniz?",
       "delete_confirmation_alert_plural": "Seçili örnekleri silmek istediğinizden emin misiniz?",
+      "delete_confirmation_template_used": "Seçilen bir veya daha fazla şablon servislere atanmış (toplam {{services_count}} servis). Bunları kaldırmak, bu atamaları temizleyecektir. Devam etmek istiyor musunuz?",
+      "delete_step_confirmation": "Bu adımı silmek istediğinizden emin misiniz?",
+      "delete_step_content_label": "İçerik",
+      "delete_step_name_label": "Adım",
+      "delete_template_global_usage": "Küresel ayarlar tarafından kullanılıyor",
+      "delete_template_services_list": "Servisler tarafından kullanılıyor: {{services}}",
+      "fetch_global_settings_bold": "Bu, genel ayarları alıp mevcut şablona uygulayacaktır.",
+      "fetch_global_settings_point_1": "Yalnızca bu şablonda bulunan ayarlar güncellenir.",
+      "fetch_global_settings_point_2": "Varsayılanlarla aynı olan değerler yok sayılır.",
+      "fetch_global_settings_point_3": "SERVER_NAME asla üzerine yazılmaz.",
+      "import_services_dropzone": "Hizmet dışa aktarma dosyanızı buraya sürükleyip bırakın veya bir dosya seçmek için tıklayın.",
+      "import_services_warning": "Hizmetlerin içe aktarılması, dışa aktarma dosyasından yeni arayüz hizmetleri oluşturacaktır. Mevcut hizmetler atlanır.",
       "instance_creation_alert": "Port veya sunucu adı belirtmenize gerek yoktur; örnek yapılandırması için `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` ve `API_SERVER_NAME` değerleri kullanılacaktır.",
       "next_step_in_case_of_issue": "Sorun yaşarsanız, güvensiz sertifikayı manuel olarak kabul edebilirsiniz:",
       "recovery_codes_save_alert": "Lütfen bu kurtarma kodlarını güvenli bir yerde (şifre yöneticisi veya kasa gibi) saklayın. Kimlik doğrulama cihazınızı kaybederseniz hesabınıza erişmek için kullanabilirsiniz.",
@@ -767,18 +789,11 @@
       "services_deletion_confirmation": "Seçili servisleri silmek istediğinizden emin misiniz?",
       "unban_confirmation_alert": "Seçili IP adresinin yasağını kaldırmak istediğinizden emin misiniz?",
       "unban_confirmation_alert_plural": "Seçili IP adreslerinin yasağını kaldırmak istediğinizden emin misiniz?",
-      "update_duration_alert": "Seçili yasaklamalar için yeni bir süre seçin:",
-      "fetch_global_settings_bold": "Bu, genel ayarları alıp mevcut şablona uygulayacaktır.",
-      "fetch_global_settings_point_1": "Yalnızca bu şablonda bulunan ayarlar güncellenir.",
-      "fetch_global_settings_point_2": "Varsayılanlarla aynı olan değerler yok sayılır.",
-      "fetch_global_settings_point_3": "SERVER_NAME asla üzerine yazılmaz.",
-      "delete_step_confirmation": "Bu adımı silmek istediğinizden emin misiniz?",
-      "delete_step_name_label": "Adım",
-      "delete_step_content_label": "İçerik"
+      "update_duration_alert": "Seçili yasaklamalar için yeni bir süre seçin:"
     },
     "button": {
-      "reset_template_confirm": "Şablon Yapılandırmasını Sıfırla",
-      "fetch_global_settings_confirm": "Genel ayarları uygula"
+      "fetch_global_settings_confirm": "Genel ayarları uygula",
+      "reset_template_confirm": "Şablon Yapılandırmasını Sıfırla"
     },
     "section": {
       "ban_details": "Yasaklama Detayları",
@@ -794,17 +809,19 @@
       "create_new_instance": "Yeni Örnek Oluştur",
       "create_template": "Şablon oluştur",
       "delete_instance": "Örnekleri Sil",
+      "delete_step": "Adımı Sil",
       "delete_template": "Şablonları sil",
+      "edit_template": "Şablonu düzenle: {{name}}",
+      "fetch_global_settings": "Genel ayarlar uygulansın mı?",
       "from_plugin": "eklenti üzerinden",
       "full_url": "Tam URL",
+      "import_services": "Hizmetleri içe aktar",
       "job_history": "Son 10 İş Çalıştırması",
       "job_history_count": "İşin Son {{count}} Çalıştırması",
       "recovery_codes": "Kurtarma Kodları",
       "reset_template_config": "Şablon Yapılandırması Sıfırlansın mı?",
-      "fetch_global_settings": "Genel ayarlar uygulansın mı?",
       "server_name_not_unique": "Sunucu Adı Benzersiz Değil",
-      "update_duration": "Yasaklama Süresini Güncelle",
-      "delete_step": "Adımı Sil"
+      "update_duration": "Yasaklama Süresini Güncelle"
     }
   },
   "mode": {
@@ -900,12 +917,12 @@
       "unknown": "Bilinmeyen bitiş tarihi"
     },
     "force_check": {
-      "title": "Force check",
-      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
+      "title": "Force check"
     },
     "force_update": {
-      "title": "Force update",
-      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept.",
+      "title": "Force update"
     },
     "key": {
       "title": {
@@ -1010,6 +1027,7 @@
     "next_30d": "Sonraki 30 gün",
     "next_7d": "Sonraki 7 gün",
     "older_30d": "30 günden daha eski",
+    "one_or_more": "Bir veya daha fazla",
     "permanent": "Kalıcı",
     "plugin": "Eklenti",
     "reason": "Sebep",
@@ -1022,6 +1040,7 @@
     "start_date": "Başlangıç Tarihi",
     "status": "Durum",
     "status_code": "Durum Kodu",
+    "steps": "Adımlar",
     "stream": "Akış Desteği",
     "template": "Şablon",
     "title_0": "Aktif Filtre Yok",
@@ -1029,7 +1048,12 @@
     "title_plural": "Aktif Filtreler - %d",
     "type": "Tür",
     "url": "URL",
-    "version": "Versiyon"
+    "version": "Versiyon",
+    "zero": "Hiçbiri"
+  },
+  "security_mode": {
+    "block": "Engelle",
+    "detect": "Tespit Et"
   },
   "settings": {
     "custom_config": {
@@ -1041,6 +1065,13 @@
     }
   },
   "setup": {
+    "status": {
+      "admin_user_exists": "🧑‍🚀 Bir yönetici kullanıcısı zaten mevcut. Lütfen bir sonraki adıma geçin.",
+      "pro_license_key_exists": "⭐ Bir PRO lisans anahtarı zaten yapılandırılmış, lütfen bir sonraki adıma geçin.",
+      "reverse_proxy_configured": "↪️ Web arayüzü için bir ters proxy zaten yapılandırılmış. Lütfen bir sonraki adıma geçin.",
+      "secure_password": "Güvenli Şifre",
+      "unique_server_name": "Benzersiz Sunucu Adı"
+    },
     "step1": {
       "subtitle": "Yönetici hesabınızı oluşturun.",
       "title": "Yönetici Kullanıcı"
@@ -1056,19 +1087,19 @@
       "title": "UI Ayarları"
     },
     "step3": {
-      "title": "PRO'ya Yükselt",
-      "subtitle": "Gelişmiş özelliklerin kilidini açın ve BunkerWeb'den en iyi şekilde yararlanın.",
       "label": {
         "pro_benefits": "PRO Avantajları"
       },
-      "pro_benefit_1_title": "Tüm PRO özelliklerine erişim",
       "pro_benefit_1_description": "Gelişmiş güvenlik, performans ve yönetim araçları dahil tüm gelişmiş özelliklerin kilidini açın.",
-      "pro_benefit_2_title": "Bakımcılardan teknik destek",
+      "pro_benefit_1_title": "Tüm PRO özelliklerine erişim",
       "pro_benefit_2_description": "Herhangi bir sorun veya sorunuz için BunkerWeb ekibinden öncelikli destek alın.",
-      "pro_benefit_3_title": "Özel geliştirme",
+      "pro_benefit_2_title": "Bakımcılardan teknik destek",
       "pro_benefit_3_description": "Özel ihtiyaçlarınızı karşılamak için özel çözümler.",
+      "pro_benefit_3_title": "Özel geliştirme",
+      "pro_benefit_4_description": "BunkerWeb kurulumunuzu optimize etmek için uzman tavsiyesi.",
       "pro_benefit_4_title": "Özel danışmanlık",
-      "pro_benefit_4_description": "BunkerWeb kurulumunuzu optimize etmek için uzman tavsiyesi."
+      "subtitle": "Gelişmiş özelliklerin kilidini açın ve BunkerWeb'den en iyi şekilde yararlanın.",
+      "title": "PRO'ya Yükselt"
     },
     "step4": {
       "label": {
@@ -1076,13 +1107,6 @@
       },
       "subtitle": "Kurulumu tamamlamadan önce ayarlarınızı gözden geçirin.",
       "title": "Genel Bakış"
-    },
-    "status": {
-      "admin_user_exists": "🧑‍🚀 Bir yönetici kullanıcısı zaten mevcut. Lütfen bir sonraki adıma geçin.",
-      "pro_license_key_exists": "⭐ Bir PRO lisans anahtarı zaten yapılandırılmış, lütfen bir sonraki adıma geçin.",
-      "reverse_proxy_configured": "↪️ Web arayüzü için bir ters proxy zaten yapılandırılmış. Lütfen bir sonraki adıma geçin.",
-      "secure_password": "Güvenli Şifre",
-      "unique_server_name": "Benzersiz Sunucu Adı"
     },
     "subtitle": "Kurulum sihirbazını tamamlamak için adımları izleyin.",
     "title": "Kurulum Sihirbazı"
@@ -1093,8 +1117,12 @@
     "default_server": "varsayılan sunucu",
     "down": "Kapalı",
     "draft": "Taslak",
+    "error_deleting_template": "Şablon silinirken bir hata oluştu.",
     "error_loading_bans": "Yasaklamalar yüklenirken hata oluştu. Lütfen sayfayı yenilemeyi deneyin.",
+    "error_loading_template": "Şablon verileri yüklenemedi.",
+    "error_saving_template": "Şablon kaydedilirken bir hata oluştu.",
     "failed": "Başarısız",
+    "invalid_json_payload": "Geçersiz JSON yükü.",
     "loading": "Yükleniyor...",
     "loading_bans": "Yasaklamalar yükleniyor...",
     "loading_cache_file": "Önbellek dosyası yükleniyor...",
@@ -1109,6 +1137,7 @@
     "loading_reports": "Raporlar yükleniyor...",
     "loading_services": "Servisler yükleniyor...",
     "loading_templates": "Şablonlar yükleniyor...",
+    "missing_template_information": "Şablon bilgisi eksik.",
     "news_connection_error": "Haber güncellemeleri için bloga bağlanılamadı.",
     "no": "Hayır",
     "no_data": "Veri yok",
@@ -1195,20 +1224,20 @@
       "service": "Servis",
       "service_name": "Servis Adı",
       "settings": "Ayarlar",
+      "status": "Durum",
       "status_code": "Durum Kodu",
       "steps": "Adımlar",
       "stream": "Akış",
       "template": "Şablon",
+      "templates": "Şablonlar",
       "time_left": "Kalan Süre",
       "type": "Tür",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "Versiyon",
-      "status": "Durum"
+      "version": "Versiyon"
     }
   },
   "template": {
-    "none": "Şablon Yok",
     "editor": {
       "button_add_config": "Yapılandırma ekle",
       "button_add_setting": "Ayar ekle",
@@ -1217,7 +1246,6 @@
       "button_move_up": "Yukarı taşı",
       "button_remove": "Kaldır",
       "clone_badge": "{{template}} şablonundan kopyalandı",
-      "setting_toggle_enabled": "Etkin",
       "configs": "Özel yapılandırmalar",
       "configs_help": "Bu şablona isteğe bağlı özel yapılandırma parçacıkları ekleyin.",
       "delete_step_confirm": "Bu adımı silmek istediğinizden emin misiniz?",
@@ -1241,6 +1269,29 @@
       "label_step_settings": "Bu adımdaki ayarlar",
       "label_step_subtitle": "Adım alt başlığı",
       "label_step_title": "Adım başlığı",
+      "missing_configs_body": "İçe aktarılan şablon henüz yüklenmemiş özel yapılandırmalara referans veriyor. Şablon kurulumunu tamamlamak için lütfen bu yapılandırmaları içe aktarın:",
+      "missing_configs_browse": "Dosya seç",
+      "missing_configs_done": "Bitti",
+      "missing_configs_drop": "Yüklemek için dosyaları buraya sürükleyin",
+      "missing_configs_drop_hint": "Yapılandırma dosyalarını buraya sürükleyip bırakın (.conf, .cfg, .txt)",
+      "missing_configs_drop_or": "veya",
+      "missing_configs_empty": "Eksik yapılandırma yok",
+      "missing_configs_file_empty": "Yapılandırma dosyası boş",
+      "missing_configs_file_invalid": "Geçersiz yapılandırma dosyası ({reason})",
+      "missing_configs_file_uploaded": "Yapılandırma dosyası yüklendi",
+      "missing_configs_help": "Eksik yapılandırmalar, şablona atıfta bulunan fakat tanımlanmayan yapılandırmalardır.",
+      "missing_configs_hint_body": "Yüklenen dosyalar şablonunuza otomatik olarak eklenecektir. Dosya adlarının yukarıda listelenen eksik yapılandırmalarla eşleştiğinden emin olun.",
+      "missing_configs_hint_title": "İpucu:",
+      "missing_configs_partial": "Bazı yapılandırmalar yüklenmedi",
+      "missing_configs_partial_list": "Yüklenmedi: {configs}",
+      "missing_configs_resolved": "Tüm eksik yapılandırmalar yüklendi! Şablon başarıyla içe aktarıldı.",
+      "missing_configs_title": "Eksik Özel Yapılandırmalar",
+      "missing_configs_upload": "Eksik yapılandırmaları yükle",
+      "missing_configs_upload_failed": "Yapılandırma dosyaları yüklenemedi",
+      "missing_configs_upload_label": "Eksik yapılandırmaları yükle (.conf, .cfg, .txt)",
+      "missing_configs_upload_partial": "{{total}} yapılandırmadan {{uploaded}} tanesi yüklendi. Hâlâ eksik: {{missing}}",
+      "missing_configs_upload_success": "{{count}} yapılandırma dosyası başarıyla yüklendi",
+      "missing_configs_uploaded": "Eksik yapılandırmalar yüklendi",
       "panel_overview": "Genel Bakış",
       "panel_overview_help": "Önemli bilgileri takip edin ve bölümler arasında gezinin.",
       "placeholder_config_data": "Veri",
@@ -1252,6 +1303,69 @@
       "placeholder_step_title": "Adım başlığı",
       "placeholder_template_id": "sablon-kimligi",
       "placeholder_template_name": "Benim şablonum",
+      "raw_configs_browse": "Dosya seç",
+      "raw_configs_drop": "Yüklemek için dosyaları buraya sürükleyin",
+      "raw_configs_drop_hint": "Yapılandırma dosyalarını buraya sürükleyip bırakın veya göz atmak için tıklayın (.conf, .cfg, .txt)",
+      "raw_configs_drop_supported": "Desteklenen formatlar: .conf, .cfg, .txt",
+      "raw_configs_empty": "Henüz yapılandırma dosyası yüklenmedi",
+      "raw_configs_file_empty": "Yapılandırma dosyası boş",
+      "raw_configs_file_invalid": "Geçersiz yapılandırma dosyası ({reason})",
+      "raw_configs_file_uploaded": "Yapılandırma dosyası yüklendi",
+      "raw_configs_help": "<code>configs</code>'e girdi eklemek için yapılandırma dosyalarını (.conf, .cfg, .txt) yükleyin.",
+      "raw_configs_import": "İçe aktar",
+      "raw_configs_import_invalid": "Mevcut JSON geçersiz olduğu için yapılandırmalar içe aktarılamıyor.",
+      "raw_configs_import_none": "Hiçbir yapılandırma içe aktarılmadı.",
+      "raw_configs_import_success": "{{count}} yapılandırma dosyası içe aktarıldı.",
+      "raw_configs_note": "İçe aktarılan dosyalar JSON düzenleyicisine eklenir. Kaydetmeden önce inceleyin ve ayarlayın.",
+      "raw_configs_title": "Özel yapılandırma içe aktarımları",
+      "raw_configs_upload": "Yapılandırma dosyalarını yükle",
+      "raw_configs_upload_failed": "Seçilen dosyalardan biri okunamadı.",
+      "raw_editor_drop_hint": "Mevcut içeriği değiştirmek için bir şablon JSON dosyası (.json) bırakın.",
+      "raw_editor_help": "Ham şablon JSON'ını düzenleyin. Doğrulama otomatik olarak gerçekleştirilir.",
+      "raw_editor_import": "İçe aktar",
+      "raw_editor_import_success": "Şablon başarıyla içe aktarıldı!",
+      "raw_editor_override_body": "Bu dosyanın içe aktarılması mevcut şablon JSON'unu tamamen değiştirecektir. Düzenleyicide yapılan değişiklikler kaybolacaktır. Devam etmek istiyor musunuz?",
+      "raw_editor_override_confirm": "Şablonu değiştir",
+      "raw_editor_override_title": "Şablon JSON değiştirilsin mi?",
+      "raw_editor_title": "Ham şablon JSON",
+      "raw_editor_upload": "Şablon dosyasını yükle",
+      "raw_editor_upload_empty": "Yüklenen dosya boş.",
+      "raw_editor_upload_failed": "Seçilen dosya okunamadı.",
+      "raw_editor_upload_success": "Şablon dosyası başarıyla yüklendi",
+      "raw_editor_upload_template": "Şablon JSON yükle (sadece .json)",
+      "raw_editor_validation_failed": "Şablon doğrulaması başarısız oldu",
+      "raw_validation_config_definition": "Geçersiz yapılandırma tanımı.",
+      "raw_validation_config_object": "Yapılandırma girişleri nesne olmalıdır.",
+      "raw_validation_configs_empty": "Yapılandırmalar boş olamaz",
+      "raw_validation_configs_invalid": "Yapılandırmalar geçersiz",
+      "raw_validation_configs_type": "Yapılandırma türü dize veya dize dizisi olmalıdır",
+      "raw_validation_configs_unassigned": "{{configs}} yapılandırmaları herhangi bir adıma atanmamış.",
+      "raw_validation_details_description": "Açıklama 0 ile 2000 karakter arasında olmalıdır",
+      "raw_validation_details_name": "Şablon adı gereklidir",
+      "raw_validation_details_name_length": "Şablon adı 1 ile 255 karakter arasında olmalıdır",
+      "raw_validation_details_name_pattern": "Şablon adı yalnızca alfanümerik karakterler, tire, alt çizgi ve nokta içerebilir",
+      "raw_validation_details_type": "Şablon türü gereklidir",
+      "raw_validation_details_type_invalid": "Geçersiz şablon türü",
+      "raw_validation_empty": "Şablon JSON boş olamaz.",
+      "raw_validation_invalid_json": "Geçersiz JSON yükü: {{error}}",
+      "raw_validation_object": "Şablon yükü bir JSON nesnesi olmalıdır.",
+      "raw_validation_setting_key": "Ayar anahtarları boş olmayan dizeler olmalıdır.",
+      "raw_validation_settings_key": "Ayar anahtarı gereklidir",
+      "raw_validation_settings_key_length": "Ayar anahtarı en fazla 255 karakter olabilir",
+      "raw_validation_settings_key_pattern": "Ayar anahtarı geçersiz karakter içeriyor",
+      "raw_validation_settings_object": "Ayarlar bir nesne olarak sağlanmalıdır.",
+      "raw_validation_settings_unassigned": "{{settings}} ayarları herhangi bir adıma atanmamış.",
+      "raw_validation_settings_value": "Ayar değeri gereklidir",
+      "raw_validation_settings_value_type": "Ayar değeri dize veya sayı olmalıdır",
+      "raw_validation_step_config_duplicate": "{{config}} yapılandırması birden fazla adıma atanmış.",
+      "raw_validation_step_config_reference": "{{index}} adımı geçersiz bir yapılandırma referansı içeriyor.",
+      "raw_validation_step_config_unknown": "{{index}} adımı bilinmeyen {{config}} yapılandırmasına referans veriyor.",
+      "raw_validation_step_object": "{{index}} adımı bir nesne olmalıdır.",
+      "raw_validation_step_setting_duplicate": "{{setting}} ayarı birden fazla adıma atanmış.",
+      "raw_validation_step_setting_reference": "{{index}} adımı geçersiz bir ayar referansı içeriyor.",
+      "raw_validation_step_setting_unknown": "{{index}} adımı bilinmeyen {{setting}} ayarına referans veriyor.",
+      "raw_validation_step_title": "{{index}} adımının bir başlığı olmalıdır.",
+      "raw_validation_steps_required": "Bir şablon en az bir adım içermelidir.",
       "readonly_db": "Veritabanı şu anda salt okunur moddadır. Şablonlar değiştirilemez.",
       "readonly_method": "Bu şablon {{method}} süreci tarafından oluşturuldu ve kullanıcı arayüzünden düzenlenemez.",
       "readonly_title": "Salt okunur",
@@ -1259,8 +1373,6 @@
       "select_config_placeholder": "Bir yapılandırma seçin",
       "select_config_type_placeholder": "Bir tür seçin",
       "select_setting_placeholder": "Bir ayar seçin",
-      "settings": "Ayarlar",
-      "settings_help": "Bu şablon tarafından sunulan ayarları ve varsayılan değerlerini tanımlayın.",
       "setting_remove_confirm": "Bu ayarı şablondan kaldırmak istediğinizden emin misiniz?",
       "setting_remove_key": "Ayar",
       "setting_remove_title": "Ayarı kaldır",
@@ -1284,6 +1396,9 @@
       "setting_selector_pattern": "Desen",
       "setting_selector_search_label": "Bir çoklu site ayarı bul",
       "setting_selector_search_placeholder": "Etiket, anahtar veya eklentiye göre ara",
+      "setting_toggle_enabled": "Etkin",
+      "settings": "Ayarlar",
+      "settings_help": "Bu şablon tarafından sunulan ayarları ve varsayılan değerlerini tanımlayın.",
       "step_configs_empty": "Bu adıma henüz yapılandırma eklenmedi.",
       "step_configs_selection_title": "Mevcut yapılandırmaları seçin",
       "step_default_title": "Başlıksız adım",
@@ -1313,49 +1428,9 @@
       "validation_configs_unique": "Her yapılandırma adı benzersiz olmalıdır.",
       "validation_id_required": "Şablon kimliği gereklidir.",
       "validation_setting_key": "Her ayarın bir anahtarı olmalıdır.",
-      "validation_settings_unique": "Her ayar anahtarı benzersiz olmalıdır.",
-      "raw_configs_help": "<code>configs</code>'e girdi eklemek için yapılandırma dosyalarını (.conf, .cfg, .txt) yükleyin.",
-      "raw_configs_import": "İçe aktar",
-      "raw_configs_upload": "Yapılandırma dosyalarını yükle",
-      "raw_configs_browse": "Dosya seç",
-      "raw_configs_drop": "Yüklemek için dosyaları buraya sürükleyin",
-      "raw_configs_empty": "Henüz yapılandırma dosyası yüklenmedi",
-      "raw_configs_file_empty": "Yapılandırma dosyası boş",
-      "raw_configs_file_invalid": "Geçersiz yapılandırma dosyası ({reason})",
-      "raw_configs_file_uploaded": "Yapılandırma dosyası yüklendi",
-      "raw_editor_help": "Ham şablon JSON'ını düzenleyin. Doğrulama otomatik olarak gerçekleştirilir.",
-      "raw_editor_import": "İçe aktar",
-      "raw_editor_import_success": "Şablon başarıyla içe aktarıldı!",
-      "raw_editor_upload": "Şablon dosyasını yükle",
-      "raw_editor_upload_success": "Şablon dosyası başarıyla yüklendi",
-      "raw_editor_validation_failed": "Şablon doğrulaması başarısız oldu",
-      "raw_validation_configs_invalid": "Yapılandırmalar geçersiz",
-      "raw_validation_configs_type": "Yapılandırma türü dize veya dize dizisi olmalıdır",
-      "raw_validation_details_name": "Şablon adı gereklidir",
-      "raw_validation_details_name_length": "Şablon adı 1 ile 255 karakter arasında olmalıdır",
-      "raw_validation_details_name_pattern": "Şablon adı yalnızca alfanümerik karakterler, tire, alt çizgi ve nokta içerebilir",
-      "raw_validation_details_type": "Şablon türü gereklidir",
-      "raw_validation_details_type_invalid": "Geçersiz şablon türü",
-      "raw_validation_details_description": "Açıklama 0 ile 2000 karakter arasında olmalıdır",
-      "raw_validation_configs_empty": "Yapılandırmalar boş olamaz",
-      "raw_validation_settings_key": "Ayar anahtarı gereklidir",
-      "raw_validation_settings_key_length": "Ayar anahtarı en fazla 255 karakter olabilir",
-      "raw_validation_settings_key_pattern": "Ayar anahtarı geçersiz karakter içeriyor",
-      "raw_validation_settings_value": "Ayar değeri gereklidir",
-      "raw_validation_settings_value_type": "Ayar değeri dize veya sayı olmalıdır",
-      "missing_configs_help": "Eksik yapılandırmalar, şablona atıfta bulunan fakat tanımlanmayan yapılandırmalardır.",
-      "missing_configs_upload": "Eksik yapılandırmaları yükle",
-      "missing_configs_browse": "Dosya seç",
-      "missing_configs_drop": "Yüklemek için dosyaları buraya sürükleyin",
-      "missing_configs_empty": "Eksik yapılandırma yok",
-      "missing_configs_uploaded": "Eksik yapılandırmalar yüklendi",
-      "missing_configs_file_empty": "Yapılandırma dosyası boş",
-      "missing_configs_file_invalid": "Geçersiz yapılandırma dosyası ({reason})",
-      "missing_configs_file_uploaded": "Yapılandırma dosyası yüklendi",
-      "missing_configs_partial": "Bazı yapılandırmalar yüklenmedi",
-      "missing_configs_partial_list": "Yüklenmedi: {configs}",
-      "missing_configs_resolved": "Tüm eksik yapılandırmalar yüklendi! Şablon başarıyla içe aktarıldı."
-    }
+      "validation_settings_unique": "Her ayar anahtarı benzersiz olmalıdır."
+    },
+    "none": "Şablon Yok"
   },
   "theme": {
     "dark": "Koyu",
@@ -1370,40 +1445,40 @@
     },
     "copied": "Kopyalandı!",
     "disclaimer_title": "Uyarı",
+    "global_settings_applied_body": "Genel ayarlar başarıyla alındı ve mevcut forma uygulandı.",
+    "global_settings_applied_title": "Genel ayarlar uygulandı",
+    "global_settings_failed_body": "Genel ayarlar alınırken bir hata oluştu.",
+    "global_settings_failed_title": "Genel ayarlar alınamadı",
     "header": {
       "ping_failed": "Ping başarısız",
       "ping_succeed": "Ping başarılı"
     },
-    "ip_unbanned": "IP adresinin yasağı başarıyla kaldırıldı!",
-    "global_settings_applied_title": "Genel ayarlar uygulandı",
-    "global_settings_applied_body": "Genel ayarlar başarıyla alındı ve mevcut forma uygulandı.",
-    "global_settings_failed_title": "Genel ayarlar alınamadı",
-    "global_settings_failed_body": "Genel ayarlar alınırken bir hata oluştu."
+    "ip_unbanned": "IP adresinin yasağı başarıyla kaldırıldı!"
   },
   "tooltip": {
     "auto_lets_encrypt": "Otomatik olarak Let's Encrypt sertifikası isteyip istemediği.",
     "button": {
-      "convert_service_to_draft": "Servisi Taslağa Dönüştür: {{name}}",
-      "convert_service_to_online": "Servisi Çevrimiçine Dönüştür: {{name}}",
+      "ban_ip": "Bu IP adresini yasakla",
       "convert_config_to_draft": "Convert Config {{name}} to Draft",
       "convert_config_to_online": "Convert Config {{name}} to Online",
+      "convert_service_to_draft": "Servisi Taslağa Dönüştür: {{name}}",
+      "convert_service_to_online": "Servisi Çevrimiçine Dönüştür: {{name}}",
       "delete_config": "Özel Yapılandırmayı Sil: {{name}}",
       "delete_file": "Önbellek Dosyasını Sil: {{filename}}",
       "delete_instance": "Örneği Sil: {{hostname}}",
       "delete_plugin": "Eklentiyi Sil: {{name}}",
       "delete_service": "Servisi Sil: {{name}}",
       "delete_template": "Şablonu Sil: {{name}}",
+      "force_check": "Bir kontrol planlar; yalnızca güncellemeler varsa indirir.",
+      "force_update": "Kontrolleri atlar ve PRO eklentileri indirmeyi zorlar; hata olursa mevcut durumu korur.",
       "ping_instance": "Örneğe Ping At: {{hostname}}",
       "reload_instance": "Örneği Yeniden Yükle: {{hostname}}",
       "reset_default": "Varsayılana sıfırla",
       "reset_global": "Küresel değere sıfırla",
-      "value_from_global": "Genel ayarlardan gelen değer",
       "run_job": "İşi Çalıştır: {{job}}",
       "stop_instance": "Örneği Durdur: {{hostname}}",
       "unban_ip": "{{ip}} yasağını kaldır",
-      "ban_ip": "Bu IP adresini yasakla",
-      "force_check": "Bir kontrol planlar; yalnızca güncellemeler varsa indirir.",
-      "force_update": "Kontrolleri atlar ve PRO eklentileri indirmeyi zorlar; hata olursa mevcut durumu korur."
+      "value_from_global": "Genel ayarlardan gelen değer"
     },
     "cannot_delete_original_ban": "Orijinal Yasaklama girdisi silinemez.",
     "cannot_remove_disabled": "Bir veya daha fazla ayar devre dışı olduğu için kaldırılamaz.",
@@ -1441,10 +1516,10 @@
     "dns_provider_dns_only": "DNS sağlayıcı seçimi yalnızca DNS doğrulamaları için geçerlidir.",
     "download_file": "Dosyayı indir",
     "draft_toggle_disabled": "Taslak modu yalnızca UI üzerinden oluşturulan servisler için değiştirilebilir.",
-    "email_lets_encrypt": "Let's Encrypt ile sertifika yönetimi ve bildirimler için kaydedilecek e-posta adresi.",
     "email_length": "E-posta 1 ile 256 karakter arasında olmalıdır.",
-    "follow_latest_page_only": "Takip modu sadece son sayfada kullanılabilir",
+    "email_lets_encrypt": "Let's Encrypt ile sertifika yönetimi ve bildirimler için kaydedilecek e-posta adresi.",
     "fetch_global_settings": "Genel ayarları al ve bunları mevcut şablona uygula",
+    "follow_latest_page_only": "Takip modu sadece son sayfada kullanılabilir",
     "global_settings_source": "Değer genel ayarlardan miras alınmıştır.",
     "instance_not_up": "Örnek {{hostname}} şu anda yanıt vermiyor ('açık' değil).",
     "latest_version_installed": "En son sürümü kullanıyorsunuz.",
@@ -1457,16 +1532,16 @@
       "access_service": "{{name}} Servisine Eriş",
       "clone_config": "{{name}} Özel Yapılandırmasını Klonla",
       "clone_service": "{{name}} Servisini Klonla",
+      "clone_template": "{{template}} Şablonunu Klonla",
       "download_file": "{{filename}} İndir",
       "edit_config": "{{name}} Özel Yapılandırmasını Düzenle",
       "edit_service": "{{service}} Servisini Düzenle",
+      "edit_template": "{{template}} Şablonunu Düzenle",
       "export_service": "{{name}} Servis Yapılandırmasını Dışa Aktar",
       "view_config": "{{name}} Özel Yapılandırmasını Görüntüle",
       "view_file": "{{filename}} Görüntüle",
       "view_service": "{{service}} Servisini Görüntüle",
-      "edit_template": "{{template}} Şablonunu Düzenle",
-      "view_template": "{{template}} Şablonunu Görüntüle",
-      "clone_template": "{{template}} Şablonunu Klonla"
+      "view_template": "{{template}} Şablonunu Görüntüle"
     },
     "modal": {
       "title": {
@@ -1497,20 +1572,6 @@
       "yes": "Akış modunu destekler."
     },
     "table": {
-      "templates": {
-        "actions": "Bu Şablon için mevcut işlemler",
-        "details": "Şablon ayrıntılarını göster",
-        "select_all": "Tüm Şablonları seç",
-        "id": "Şablonun kimliği",
-        "name": "Kullanıcı tanımlı veya otomatik oluşturulan Şablon adı",
-        "plugin": "Şablonu içeren Eklenti",
-        "steps": "Şablonun adım sayısı",
-        "settings": "Şablonun ayar sayısı",
-        "configs": "Şablonun yapılandırma sayısı",
-        "method": "Şablonun oluşturulma yöntemi",
-        "created": "Şablonun oluşturulma tarihi",
-        "last_update": "Şablonun son güncelleme tarihi"
-      },
       "bans": {
         "actions": "Bu Yasaklama için mevcut aksiyonlar",
         "country": "Yasaklanan IP adresinin ülkesi",
@@ -1542,9 +1603,9 @@
         "name": "Özel Yapılandırmanın adı",
         "select_all": "Tüm Özel Yapılandırmaları seç",
         "service": "Özel Yapılandırmayla ilişkili servis (veya Küresel)",
+        "status": "Özel yapılandırmanın taslak durumu",
         "template": "Özel Yapılandırmanın bir şablondan gelip gelmediğini belirtir",
-        "type": "Özel Yapılandırmanın türü veya bağlamı (örn. HTTP, MODSEC)",
-        "status": "Özel yapılandırmanın taslak durumu"
+        "type": "Özel Yapılandırmanın türü veya bağlamı (örn. HTTP, MODSEC)"
       },
       "instances": {
         "actions": "Bu Örnek için mevcut aksiyonlar",
@@ -1606,9 +1667,24 @@
         "last_update": "Servisin en son güncellendiği tarih ve saati",
         "method": "Servisin oluşturulma yöntemi (örn. ui, dosya)",
         "name": "Servisin adı",
+        "security_mode": "Hizmetin güvenlik modu (Engelle veya Tespit Et)",
         "select_all": "Tüm Servisleri Seç",
         "template": "Hizmet tarafından kullanılan şablon",
         "type": "Servis Türü (Çevrimiçi/Taslak)"
+      },
+      "templates": {
+        "actions": "Bu Şablon için mevcut işlemler",
+        "configs": "Şablonun yapılandırma sayısı",
+        "created": "Şablonun oluşturulma tarihi",
+        "details": "Şablon ayrıntılarını göster",
+        "id": "Şablonun kimliği",
+        "last_update": "Şablonun son güncelleme tarihi",
+        "method": "Şablonun oluşturulma yöntemi",
+        "name": "Kullanıcı tanımlı veya otomatik oluşturulan Şablon adı",
+        "plugin": "Şablonu içeren Eklenti",
+        "select_all": "Tüm Şablonları seç",
+        "settings": "Şablonun ayar sayısı",
+        "steps": "Şablonun adım sayısı"
       }
     },
     "ui_host": "BunkerWeb kullanıcı arayüzünü ters proxy üzerinden sunacak ana bilgisayar adı veya IP adresi.",

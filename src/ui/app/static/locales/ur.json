@@ -23,11 +23,11 @@
   },
   "badge": {
     "from_template": "ٹیمپلیٹ سے",
+    "managed_via_api": "API کے ذریعے منظم",
     "new_version": "نیا ورژن",
     "no_template": "کوئی ٹیمپلیٹ نہیں",
     "unread_news": "غیر پڑھی ہوئی خبریں",
-    "unread_notifications": "غیر پڑھے ہوئے اطلاعات",
-    "managed_via_api": "API کے ذریعے منظم"
+    "unread_notifications": "غیر پڑھے ہوئے اطلاعات"
   },
   "banner": {
     "community": "Bunker کمیونٹی کا حصہ بنیں <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">Discord چیٹ</a> میں شامل ہو کر اور <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a> پر ہمیں فالو کر کے۔",
@@ -76,9 +76,9 @@
     "clear": "صاف کریں",
     "close": "بند کریں",
     "columns": "کالم",
-    "convert_services": "خدمات تبدیل کریں",
     "convert_configs": "کنفیگریشن تبدیل کریں",
     "convert_configs_to": "{{state}} میں تبدیل کریں",
+    "convert_services": "خدمات تبدیل کریں",
     "copy": "کاپی کریں",
     "copy_codes": "کوڈز کاپی کریں",
     "copy_raw": "خام ڈیٹا کاپی کریں",
@@ -101,10 +101,13 @@
     "fetch_global": "عالمی سیٹنگز حاصل کریں",
     "filters_suffix": " فلٹرز",
     "follow": "فالو کریں",
+    "force_check": "Force check",
+    "force_update": "Force update",
     "github_stars": "ستارے",
     "go_back": "پیچھے جائیں",
     "hide": "چھپائیں",
     "history": "تاریخچہ",
+    "import_services": "خدمات درآمد کریں",
     "login": "لاگ ان کریں",
     "multiple_add": "شامل کریں",
     "multiple_hide": "چھپائیں",
@@ -145,8 +148,7 @@
     "upload_photo": "نئی تصویر اپ لوڈ کریں",
     "view_details": "تفصیلات دیکھیں",
     "view_raw_data": "خام ڈیٹا دیکھیں",
-    "wipe_other_sessions": "دیگر سیشنز صاف کریں",
-    "force_update": "Force update"
+    "wipe_other_sessions": "دیگر سیشنز صاف کریں"
   },
   "country": {
     "AD": "انڈورا",
@@ -445,26 +447,26 @@
         "title": "ملک کے لحاظ سے روکی گئی درخواستیں"
       },
       "blocking_status": {
-        "title": "وقت کے ساتھ بلاکنگ کی حالت",
-        "subtitle": "وقت کے ساتھ روکی گئی درخواستیں",
         "blocked_requests": "روکی گئی درخواستیں",
+        "count": "تعداد",
+        "subtitle": "وقت کے ساتھ روکی گئی درخواستیں",
         "time": "وقت",
-        "count": "تعداد"
+        "title": "وقت کے ساتھ بلاکنگ کی حالت"
       },
       "request_status": {
-        "title": "درخواست کی حالت کی تقسیم",
-        "blocked": "روکی گئی درخواستیں"
+        "blocked": "روکی گئی درخواستیں",
+        "title": "درخواست کی حالت کی تقسیم"
       },
       "top_blocked_ips": {
-        "title": "سب سے زیادہ روکے گئے 10 IPs",
-        "most_blocked": "سب سے زیادہ روکا گیا IP"
+        "most_blocked": "سب سے زیادہ روکا گیا IP",
+        "title": "سب سے زیادہ روکے گئے 10 IPs"
       }
     },
     "map": {
       "blocked_requests": "روکی گئی درخواستیں",
       "hover_info": "کسی ملک پر ہوور کریں",
-      "no_data": "کوئی ڈیٹا نہیں",
-      "legend": "علامات"
+      "legend": "علامات",
+      "no_data": "کوئی ڈیٹا نہیں"
     }
   },
   "datatable": {
@@ -480,6 +482,7 @@
     "info_empty_plugins": "کوئی پلگ ان دستیاب نہیں",
     "info_empty_reports": "کوئی رپورٹ دستیاب نہیں",
     "info_empty_services": "کوئی سروس دستیاب نہیں",
+    "info_empty_templates": "کوئی ٹیمپلیٹس دستیاب نہیں ہیں",
     "info_filtered_bans": "(کل _MAX_ پابندیوں سے فلٹر کیا گیا)",
     "info_filtered_cache": "(کل _MAX_ کیشے فائلوں سے فلٹر کیا گیا)",
     "info_filtered_configs": "(کل _MAX_ کسٹم کنفیگریشنز سے فلٹر کیا گیا)",
@@ -489,12 +492,14 @@
     "info_filtered_plugins": "(کل _MAX_ پلگ انز سے فلٹر کیا گیا)",
     "info_filtered_reports": "(کل _MAX_ رپورٹس سے فلٹر کیا گیا)",
     "info_filtered_services": "(کل _MAX_ خدمات سے فلٹر کیا گیا)",
+    "info_filtered_templates": "(_MAX_ کل ٹیمپلیٹس سے فلٹر کیا گیا)",
     "info_instances": "{{total}} انسٹینسز میں سے {{start}} سے {{end}} دکھا رہا ہے",
     "info_items": "{{total}} آئٹمز میں سے {{start}} سے {{end}} دکھا رہا ہے",
     "info_jobs": "{{total}} ٹاسکس میں سے {{start}} سے {{end}} دکھا رہا ہے",
     "info_plugins": "{{total}} پلگ انز میں سے {{start}} سے {{end}} دکھا رہا ہے",
     "info_reports": "{{total}} رپورٹس میں سے {{start}} سے {{end}} دکھا رہا ہے",
     "info_services": "{{total}} خدمات میں سے {{start}} سے {{end}} دکھا رہا ہے",
+    "info_templates": "{{total}} ٹیمپلیٹس میں سے {{start}} تا {{end}} دکھا رہا ہے",
     "length_all": "سب",
     "length_menu_bans": "دکھائیں _MENU_ پابندیاں",
     "length_menu_cache": "دکھائیں _MENU_ کیشے فائلیں",
@@ -505,6 +510,7 @@
     "length_menu_plugins": "دکھائیں _MENU_ پلگ انز",
     "length_menu_reports": "دکھائیں _MENU_ رپورٹس",
     "length_menu_services": "دکھائیں _MENU_ خدمات",
+    "length_menu_templates": "_MENU_ ٹیمپلیٹس دکھائیں",
     "paginate": {
       "first": "پہلا",
       "last": "آخری",
@@ -540,6 +546,9 @@
     "select_rows_services_0": "کوئی سروس منتخب نہیں کی گئی",
     "select_rows_services_1": "۱ سروس منتخب کی گئی",
     "select_rows_services_plural": "%d خدمات منتخب کی گئیں",
+    "select_rows_templates_0": "کوئی ٹیمپلیٹ منتخب نہیں",
+    "select_rows_templates_1": "1 ٹیمپلیٹ منتخب کیا گیا",
+    "select_rows_templates_plural": "%d ٹیمپلیٹس منتخب کیے گئے",
     "zero_records_bans": "کوئی مماثل پابندی نہیں ملی",
     "zero_records_cache": "کوئی مماثل کیشے فائل نہیں ملی",
     "zero_records_configs": "کوئی مماثل کسٹم کنفیگریشن نہیں ملی",
@@ -548,7 +557,8 @@
     "zero_records_jobs": "کوئی مماثل ٹاسک نہیں ملا",
     "zero_records_plugins": "کوئی مماثل پلگ ان نہیں ملا",
     "zero_records_reports": "کوئی مماثل رپورٹ نہیں ملی",
-    "zero_records_services": "کوئی مماثل سروس نہیں ملی"
+    "zero_records_services": "کوئی مماثل سروس نہیں ملی",
+    "zero_records_templates": "کوئی مماثل ٹیمپلیٹس نہیں ملے"
   },
   "dev_log": {
     "copy_failed": "متن کاپی کرنے میں ناکام:",
@@ -723,14 +733,6 @@
     "locked_settings_annotation": "مقفل ({{method}})",
     "locked_settings_hint": "لاک شدہ ترتیبات نمایاں ہیں"
   },
-  "logs": {
-    "eventsource_failed": "EventSource کنکشن ناکام ہوگیا",
-    "parse_error": "سٹریم ڈیٹا پارس کرنے میں ناکام: {{error}}",
-    "stream_error": "سٹریم کی خرابی: {{message}}",
-    "stream_init": "سٹریم شروع ہوگیا، فائل کا سائز: {{size}}",
-    "stream_initialized": "سٹریم ریفریش کے ساتھ شروع ہوگیا، فائل کا سائز: {{size}}",
-    "trimmed_notice": "--- کارکردگی کے لیے {{count}} پرانی لاگ لائنیں ہٹا دی گئیں ---"
-  },
   "link": {
     "back_to_login": "لاگ ان پر واپس جائیں",
     "forgot_password": "پاس ورڈ بھول گئے؟",
@@ -742,16 +744,24 @@
     "see_more": "مزید دیکھیں",
     "upgrade": "اپ گریڈ کریں؟"
   },
+  "logs": {
+    "eventsource_failed": "EventSource کنکشن ناکام ہوگیا",
+    "parse_error": "سٹریم ڈیٹا پارس کرنے میں ناکام: {{error}}",
+    "stream_error": "سٹریم کی خرابی: {{message}}",
+    "stream_init": "سٹریم شروع ہوگیا، فائل کا سائز: {{size}}",
+    "stream_initialized": "سٹریم ریفریش کے ساتھ شروع ہوگیا، فائل کا سائز: {{size}}",
+    "trimmed_notice": "--- کارکردگی کے لیے {{count}} پرانی لاگ لائنیں ہٹا دی گئیں ---"
+  },
   "modal": {
     "body": {
       "add_plugin_dropzone": "اپنا پلگ ان آرکائیو یہاں ڈریگ اور ڈراپ کریں یا فائلیں منتخب کرنے کے لیے کلک کریں۔",
       "confirm_cache_deletion_alert": "کیا آپ واقعی منتخب کردہ کیشے فائل حذف کرنا چاہتے ہیں؟",
       "confirm_cache_deletion_alert_plural": "کیا آپ واقعی منتخب کردہ کیشے فائلیں حذف کرنا چاہتے ہیں؟",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "کیا آپ واقعی منتخب کردہ کسٹم کنفیگریشنز کو {{state}} میں تبدیل کرنا چاہتے ہیں؟",
       "confirm_configs_deletion_alert": "کیا آپ واقعی منتخب کردہ کسٹم کنفیگریشن حذف کرنا چاہتے ہیں؟",
       "confirm_configs_deletion_alert_plural": "کیا آپ واقعی منتخب کردہ کسٹم کنفیگریشنز حذف کرنا چاہتے ہیں؟",
       "confirm_conversion_confirmation": "کیا آپ واقعی منتخب کردہ خدمات کو تبدیل کرنا چاہتے ہیں؟",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
-      "confirm_configs_conversion_to": "کیا آپ واقعی منتخب کردہ کسٹم کنفیگریشنز کو {{state}} میں تبدیل کرنا چاہتے ہیں؟",
       "confirm_next_step": "کیا آپ واقعی اگلے مرحلے پر جانا چاہتے ہیں؟",
       "confirm_plugin_deletion": "کیا آپ واقعی منتخب کردہ پلگ ان حذف کرنا چاہتے ہیں؟",
       "confirm_plugin_deletion_plural": "کیا آپ واقعی منتخب کردہ پلگ انز حذف کرنا چاہتے ہیں؟",
@@ -759,6 +769,18 @@
       "confirmation_instance_deletion": "کیا آپ واقعی منتخب کردہ انسٹینس حذف کرنا چاہتے ہیں؟",
       "delete_confirmation_alert": "کیا آپ واقعی منتخب کردہ انسٹینس حذف کرنا چاہتے ہیں؟",
       "delete_confirmation_alert_plural": "کیا آپ واقعی منتخب کردہ انسٹینسز حذف کرنا چاہتے ہیں؟",
+      "delete_confirmation_template_used": "ایک یا زیادہ منتخب ٹیمپلیٹس سروسز (کل {{services_count}} سروس(ز)) کو تفویض کیے گئے ہیں۔ انہیں ہٹانے سے وہ اسائنمنٹس صاف ہو جائیں گی۔ کیا آپ جاری رکھنا چاہتے ہیں؟",
+      "delete_step_confirmation": "کیا آپ واقعی اس مرحلے کو حذف کرنا چاہتے ہیں؟",
+      "delete_step_content_label": "مواد",
+      "delete_step_name_label": "مرحلہ",
+      "delete_template_global_usage": "عالمی ترتیبات کے ذریعہ استعمال کیا جاتا ہے",
+      "delete_template_services_list": "سروسز کے ذریعہ استعمال کیا جاتا ہے: {{services}}",
+      "fetch_global_settings_bold": "یہ عالمی سیٹنگز حاصل کرے گا اور موجودہ ٹیمپلیٹ پر لاگو کرے گا۔",
+      "fetch_global_settings_point_1": "صرف وہ سیٹنگز اپڈیٹ ہوتی ہیں جو اس ٹیمپلیٹ میں موجود ہیں۔",
+      "fetch_global_settings_point_2": "جو قدریں ڈیفالٹ کے برابر ہوں انہیں نظر انداز کیا جاتا ہے۔",
+      "fetch_global_settings_point_3": "SERVER_NAME کو کبھی اوور رائٹ نہیں کیا جاتا۔",
+      "import_services_dropzone": "اپنی خدمات کی برآمد فائل کو یہاں گھسیٹیں اور چھوڑیں یا فائل کو منتخب کرنے کے لیے کلک کریں۔",
+      "import_services_warning": "خدمات درآمد کرنے سے برآمد فائل سے نئی UI خدمات بن جائیں گی۔ موجودہ خدمات کو چھوڑ دیا گیا ہے۔",
       "instance_creation_alert": "آپ کو پورٹ یا سرور کا نام فراہم کرنے کی ضرورت نہیں ہے؛ انسٹینس کنفیگریشن کے لیے `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` اور `API_SERVER_NAME` کی قدریں استعمال ہوں گی۔",
       "next_step_in_case_of_issue": "اگر مسائل کا سامنا ہو تو، آپ دستی طور پر غیر محفوظ سرٹیفکیٹ قبول کر سکتے ہیں:",
       "recovery_codes_save_alert": "براہ کرم یہ ریکوری کوڈز محفوظ جگہ پر محفوظ کریں (جیسے پاس ورڈ مینیجر یا بنکر)۔ اگر آپ اپنا تصدیقی آلہ کھو دیتے ہیں تو آپ اپنے اکاؤنٹ تک رسائی کے لیے ان کا استعمال کر سکتے ہیں۔",
@@ -767,18 +789,11 @@
       "services_deletion_confirmation": "کیا آپ واقعی منتخب کردہ خدمات حذف کرنا چاہتے ہیں؟",
       "unban_confirmation_alert": "کیا آپ واقعی منتخب کردہ IP ایڈریس سے پابندی ہٹانا چاہتے ہیں؟",
       "unban_confirmation_alert_plural": "کیا آپ واقعی منتخب کردہ IP ایڈریسز سے پابندی ہٹانا چاہتے ہیں؟",
-      "update_duration_alert": "منتخب پابندیوں کے لیے نئی مدت منتخب کریں:",
-      "fetch_global_settings_bold": "یہ عالمی سیٹنگز حاصل کرے گا اور موجودہ ٹیمپلیٹ پر لاگو کرے گا۔",
-      "fetch_global_settings_point_1": "صرف وہ سیٹنگز اپڈیٹ ہوتی ہیں جو اس ٹیمپلیٹ میں موجود ہیں۔",
-      "fetch_global_settings_point_2": "جو قدریں ڈیفالٹ کے برابر ہوں انہیں نظر انداز کیا جاتا ہے۔",
-      "fetch_global_settings_point_3": "SERVER_NAME کو کبھی اوور رائٹ نہیں کیا جاتا۔",
-      "delete_step_confirmation": "کیا آپ واقعی اس مرحلے کو حذف کرنا چاہتے ہیں؟",
-      "delete_step_name_label": "مرحلہ",
-      "delete_step_content_label": "مواد"
+      "update_duration_alert": "منتخب پابندیوں کے لیے نئی مدت منتخب کریں:"
     },
     "button": {
-      "reset_template_confirm": "ٹیمپلیٹ کنفیگریشن ری سیٹ کریں",
-      "fetch_global_settings_confirm": "گلوبل سیٹنگز لاگو کریں"
+      "fetch_global_settings_confirm": "گلوبل سیٹنگز لاگو کریں",
+      "reset_template_confirm": "ٹیمپلیٹ کنفیگریشن ری سیٹ کریں"
     },
     "section": {
       "ban_details": "پابندی کی تفصیلات",
@@ -794,17 +809,19 @@
       "create_new_instance": "نیا انسٹینس بنائیں",
       "create_template": "ٹیمپلیٹ بنائیں",
       "delete_instance": "انسٹینس حذف کریں",
+      "delete_step": "مرحلہ حذف کریں",
       "delete_template": "ٹیمپلیٹس حذف کریں",
+      "edit_template": "ٹیمپلیٹ میں ترمیم کریں: {{name}}",
+      "fetch_global_settings": "گلوبل سیٹنگز لاگو کی جائیں؟",
       "from_plugin": "پلگ ان سے",
       "full_url": "مکمل URL",
+      "import_services": "خدمات درآمد کریں",
       "job_history": "آخری 10 ٹاسک ایگزیکیوشنز",
       "job_history_count": "ٹاسک کی آخری {{count}} ایگزیکیوشنز",
       "recovery_codes": "ریکوری کوڈز",
       "reset_template_config": "ٹیمپلیٹ کنفیگریشن ری سیٹ کریں؟",
-      "fetch_global_settings": "گلوبل سیٹنگز لاگو کی جائیں؟",
       "server_name_not_unique": "سرور کا نام منفرد نہیں ہے",
-      "update_duration": "پابندی کی مدت اپ ڈیٹ کریں",
-      "delete_step": "مرحلہ حذف کریں"
+      "update_duration": "پابندی کی مدت اپ ڈیٹ کریں"
     }
   },
   "mode": {
@@ -900,12 +917,12 @@
       "unknown": "نامعلوم میعاد ختم ہونے کی تاریخ"
     },
     "force_check": {
-      "title": "Force check",
-      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
+      "title": "Force check"
     },
     "force_update": {
-      "title": "Force update",
-      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept.",
+      "title": "Force update"
     },
     "key": {
       "title": {
@@ -1010,6 +1027,7 @@
     "next_30d": "اگلے 30 دن",
     "next_7d": "اگلے 7 دن",
     "older_30d": "30 دن سے زیادہ",
+    "one_or_more": "ایک یا زیادہ",
     "permanent": "مستقل",
     "plugin": "پلگ ان",
     "reason": "وجہ",
@@ -1022,6 +1040,7 @@
     "start_date": "شروعاتی تاریخ",
     "status": "حالت",
     "status_code": "اسٹیٹس کوڈ",
+    "steps": "مراحل",
     "stream": "سٹریم سپورٹ",
     "template": "ٹیمپلیٹ",
     "title_0": "کوئی فعال فلٹر نہیں",
@@ -1029,7 +1048,12 @@
     "title_plural": "فعال فلٹرز - %d",
     "type": "قسم",
     "url": "URL",
-    "version": "ورژن"
+    "version": "ورژن",
+    "zero": "کوئی نہیں"
+  },
+  "security_mode": {
+    "block": "بلاک",
+    "detect": "دریافت"
   },
   "settings": {
     "custom_config": {
@@ -1041,6 +1065,13 @@
     }
   },
   "setup": {
+    "status": {
+      "admin_user_exists": "🧑‍🚀 ایک ایڈمن صارف پہلے سے موجود ہے۔ براہ کرم اگلے مرحلے پر جائیں۔",
+      "pro_license_key_exists": "⭐ ایک PRO لائسنس کلید پہلے سے کنفیگر ہے، براہ کرم اگلے مرحلے پر جائیں۔",
+      "reverse_proxy_configured": "↪️ ویب انٹرفیس کے لیے ایک ریورس پراکسی پہلے سے کنفیگر ہے۔ براہ کرم اگلے مرحلے پر جائیں۔",
+      "secure_password": "محفوظ پاس ورڈ",
+      "unique_server_name": "منفرد سرور نام"
+    },
     "step1": {
       "subtitle": "اپنا ایڈمنسٹریٹر اکاؤنٹ بنائیں۔",
       "title": "ایڈمن صارف"
@@ -1056,19 +1087,19 @@
       "title": "UI سیٹنگز"
     },
     "step3": {
-      "title": "PRO میں اپ گریڈ کریں",
-      "subtitle": "جدید خصوصیات کو غیر مقفل کریں اور BunkerWeb سے زیادہ سے زیادہ فائدہ اٹھائیں۔",
       "label": {
         "pro_benefits": "PRO کے فوائد"
       },
-      "pro_benefit_1_title": "تمام PRO خصوصیات تک رسائی",
       "pro_benefit_1_description": "تمام جدید خصوصیات کو غیر مقفل کریں بشمول بہتر سیکیورٹی، کارکردگی، اور انتظامی اوزار۔",
-      "pro_benefit_2_title": "دیکھ بھال کرنے والوں سے تکنیکی مدد",
+      "pro_benefit_1_title": "تمام PRO خصوصیات تک رسائی",
       "pro_benefit_2_description": "آپ کو درپیش کسی بھی مسئلے یا سوالات کے لیے BunkerWeb ٹیم سے ترجیحی مدد حاصل کریں۔",
-      "pro_benefit_3_title": "حسب ضرورت ترقی",
+      "pro_benefit_2_title": "دیکھ بھال کرنے والوں سے تکنیکی مدد",
       "pro_benefit_3_description": "آپ کی مخصوص ضروریات کو پورا کرنے کے لیے موزوں حل۔",
+      "pro_benefit_3_title": "حسب ضرورت ترقی",
+      "pro_benefit_4_description": "آپ کے BunkerWeb سیٹ اپ کو بہتر بنانے کے لیے ماہرانہ مشورہ۔",
       "pro_benefit_4_title": "حسب ضرورت مشاورت",
-      "pro_benefit_4_description": "آپ کے BunkerWeb سیٹ اپ کو بہتر بنانے کے لیے ماہرانہ مشورہ۔"
+      "subtitle": "جدید خصوصیات کو غیر مقفل کریں اور BunkerWeb سے زیادہ سے زیادہ فائدہ اٹھائیں۔",
+      "title": "PRO میں اپ گریڈ کریں"
     },
     "step4": {
       "label": {
@@ -1076,13 +1107,6 @@
       },
       "subtitle": "سیٹ اپ مکمل کرنے سے پہلے اپنی سیٹنگز کا جائزہ لیں۔",
       "title": "جائزہ"
-    },
-    "status": {
-      "admin_user_exists": "🧑‍🚀 ایک ایڈمن صارف پہلے سے موجود ہے۔ براہ کرم اگلے مرحلے پر جائیں۔",
-      "pro_license_key_exists": "⭐ ایک PRO لائسنس کلید پہلے سے کنفیگر ہے، براہ کرم اگلے مرحلے پر جائیں۔",
-      "reverse_proxy_configured": "↪️ ویب انٹرفیس کے لیے ایک ریورس پراکسی پہلے سے کنفیگر ہے۔ براہ کرم اگلے مرحلے پر جائیں۔",
-      "secure_password": "محفوظ پاس ورڈ",
-      "unique_server_name": "منفرد سرور نام"
     },
     "subtitle": "سیٹ اپ وزرڈ مکمل کرنے کے لیے مراحل پر عمل کریں۔",
     "title": "سیٹ اپ وزرڈ"
@@ -1093,8 +1117,12 @@
     "default_server": "ڈیفالٹ سرور",
     "down": "غیر فعال",
     "draft": "ڈرافٹ",
+    "error_deleting_template": "ٹیمپلیٹ کو حذف کرتے وقت ایک خرابی پیش آگئی۔",
     "error_loading_bans": "پابندیاں لوڈ کرتے وقت خرابی پیش آئی۔ براہ کرم صفحہ ریفریش کرنے کی کوشش کریں۔",
+    "error_loading_template": "ٹیمپلیٹ ڈیٹا لوڈ کرنے سے قاصر۔",
+    "error_saving_template": "ٹیمپلیٹ کو محفوظ کرتے وقت ایک خرابی پیش آگئی۔",
     "failed": "ناکام",
+    "invalid_json_payload": "غلط JSON پے لوڈ۔",
     "loading": "لوڈ ہو رہا ہے...",
     "loading_bans": "پابندیاں لوڈ ہو رہی ہیں...",
     "loading_cache_file": "کیشے فائل لوڈ ہو رہی ہے...",
@@ -1109,6 +1137,7 @@
     "loading_reports": "رپورٹس لوڈ ہو رہی ہیں...",
     "loading_services": "خدمات لوڈ ہو رہی ہیں...",
     "loading_templates": "ٹیمپلیٹس لوڈ ہو رہے ہیں...",
+    "missing_template_information": "ٹیمپلیٹ کی معلومات غائب ہے۔",
     "news_connection_error": "خبروں کی اپ ڈیٹس کے لیے بلاگ سے رابطہ نہیں ہو سکا۔",
     "no": "نہیں",
     "no_data": "کوئی ڈیٹا نہیں",
@@ -1195,20 +1224,20 @@
       "service": "سروس",
       "service_name": "سروس کا نام",
       "settings": "سیٹنگز",
+      "status": "حالت",
       "status_code": "اسٹیٹس کوڈ",
       "steps": "مراحل",
       "stream": "سٹریم",
       "template": "ٹیمپلیٹ",
+      "templates": "ٹیمپلیٹس",
       "time_left": "باقی وقت",
       "type": "قسم",
       "url": "URL",
       "user_agent": "صارف ایجنٹ",
-      "version": "ورژن",
-      "status": "حالت"
+      "version": "ورژن"
     }
   },
   "template": {
-    "none": "کوئی ٹیمپلیٹ نہیں",
     "editor": {
       "button_add_config": "کنفیگریشن شامل کریں",
       "button_add_setting": "سیٹنگ شامل کریں",
@@ -1217,7 +1246,6 @@
       "button_move_up": "اوپر لے جائیں",
       "button_remove": "ہٹائیں",
       "clone_badge": "{{template}} سے کلون کیا گیا",
-      "setting_toggle_enabled": "فعال",
       "configs": "کسٹم کنفیگریشنز",
       "configs_help": "اس ٹیمپلیٹ میں اختیاری کسٹم کنفیگریشن کے ٹکڑے منسلک کریں۔",
       "delete_step_confirm": "کیا آپ واقعی اس مرحلے کو حذف کرنا چاہتے ہیں؟",
@@ -1241,6 +1269,19 @@
       "label_step_settings": "اس مرحلے میں سیٹنگز",
       "label_step_subtitle": "مرحلے کا ذیلی عنوان",
       "label_step_title": "مرحلے کا عنوان",
+      "missing_configs_body": "درآمد شدہ ٹیمپلیٹ حسب ضرورت کنفیگریشنز کا حوالہ دیتا ہے جو ابھی تک اپ لوڈ نہیں کی گئی ہیں۔ ٹیمپلیٹ سیٹ اپ مکمل کرنے کے لیے براہ کرم ان کنفیگریشنز کو درآمد کریں:",
+      "missing_configs_browse": "فائلیں براؤز کریں",
+      "missing_configs_done": "ہو گیا",
+      "missing_configs_drop_hint": "کنفیگ فائلیں یہاں ڈریگ اور ڈراپ کریں (.conf, .cfg, .txt)",
+      "missing_configs_drop_or": "یا",
+      "missing_configs_hint_body": "اپ لوڈ کردہ فائلیں خود بخود آپ کے ٹیمپلیٹ میں شامل ہو جائیں گی۔ یقینی بنائیں کہ فائل کے نام اوپر درج گمشدہ کنفیگریشنز سے مماثل ہیں۔",
+      "missing_configs_hint_title": "ٹپ:",
+      "missing_configs_resolved": "تمام گمشدہ کنفیگریشنز اپ لوڈ کر دی گئی ہیں! ٹیمپلیٹ کامیابی سے درآمد کیا گیا۔",
+      "missing_configs_title": "گمشدہ حسب ضرورت کنفیگریشنز",
+      "missing_configs_upload_failed": "کنفیگ فائلیں اپ لوڈ کرنے میں ناکام",
+      "missing_configs_upload_label": "گمشدہ کنفیگریشنز اپ لوڈ کریں (.conf, .cfg, .txt)",
+      "missing_configs_upload_partial": "{{uploaded}} کنفیگریشنز {{total}} میں سے اپ لوڈ کی گئیں۔ ابھی بھی گمشدہ: {{missing}}",
+      "missing_configs_upload_success": "{{count}} کنفیگ فائل(یں) کامیابی سے اپ لوڈ کی گئیں",
       "panel_overview": "جائزہ",
       "panel_overview_help": "اہم معلومات کو ٹریک کریں اور سیکشنز کے درمیان نیویگیٹ کریں۔",
       "placeholder_config_data": "ڈیٹا",
@@ -1252,6 +1293,46 @@
       "placeholder_step_title": "مرحلے کا عنوان",
       "placeholder_template_id": "ٹیمپلیٹ-آئی-ڈی",
       "placeholder_template_name": "میرا ٹیمپلیٹ",
+      "raw_configs_browse": "فائلیں براؤز کریں",
+      "raw_configs_drop_hint": "کنفیگ فائلیں یہاں ڈریگ اور ڈراپ کریں یا براؤز کرنے کے لیے کلک کریں (.conf, .cfg, .txt)",
+      "raw_configs_drop_supported": "سپورٹ کردہ فارمیٹس: .conf, .cfg, .txt",
+      "raw_configs_empty": "ابھی تک کوئی درآمد شدہ کنفیگ فائلیں نہیں ہیں۔ نئی فائلیں نیچے ظاہر ہوں گی۔",
+      "raw_configs_help": "<code>configs</code> میں اندراجات شامل کرنے کے لیے کنفیگریشن فائلیں (.conf, .cfg, .txt) اپ لوڈ کریں۔ اقسام پہلے سے طے شدہ طور پر <code>server_http</code> ہیں؛ اگر ضرورت ہو تو JSON میں ایڈجسٹ کریں۔",
+      "raw_configs_import_invalid": "کنفیگریشنز درآمد کرنے سے قاصر کیونکہ موجودہ JSON غلط ہے۔",
+      "raw_configs_import_none": "کوئی کنفیگریشن درآمد نہیں کی گئی۔",
+      "raw_configs_import_success": "{{count}} کنفیگ فائل(یں) درآمد کی گئیں۔",
+      "raw_configs_note": "درآمد شدہ فائلیں JSON ایڈیٹر میں شامل کی جاتی ہیں۔ محفوظ کرنے سے پہلے جائزہ لیں اور ایڈجسٹ کریں۔",
+      "raw_configs_title": "حسب ضرورت کنفیگ درآمدات",
+      "raw_configs_upload": "کنفیگ فائلیں اپ لوڈ کریں (.conf, .cfg, .txt)",
+      "raw_configs_upload_failed": "منتخب کردہ فائلوں میں سے ایک کو پڑھنے سے قاصر۔",
+      "raw_editor_drop_hint": "موجودہ مواد کو تبدیل کرنے کے لیے ایک ٹیمپلیٹ JSON فائل (صرف .json) ڈراپ کریں۔",
+      "raw_editor_help": "مکمل ٹیمپلیٹ تعریف کو JSON کے طور پر ترمیم کریں۔ آسان موڈ پر واپس جانے سے بصری ایڈیٹر کی توثیق اور دوبارہ لوڈنگ ہوتی ہے۔",
+      "raw_editor_import_success": "ٹیمپلیٹ JSON کامیابی سے درآمد کیا گیا۔",
+      "raw_editor_override_body": "اس فائل کو درآمد کرنے سے موجودہ ٹیمپلیٹ JSON مکمل طور پر تبدیل ہو جائے گا۔ ایڈیٹر میں کی گئی تبدیلیاں ضائع ہو جائیں گی۔ کیا آپ جاری رکھنا چاہتے ہیں؟",
+      "raw_editor_override_confirm": "ٹیمپلیٹ تبدیل کریں",
+      "raw_editor_override_title": "ٹیمپلیٹ JSON تبدیل کریں؟",
+      "raw_editor_title": "خام ٹیمپلیٹ JSON",
+      "raw_editor_upload_empty": "اپ لوڈ کردہ فائل خالی ہے۔",
+      "raw_editor_upload_failed": "منتخب کردہ فائل پڑھنے سے قاصر۔",
+      "raw_editor_upload_template": "ٹیمپلیٹ JSON اپ لوڈ کریں (صرف .json)",
+      "raw_validation_config_definition": "غلط کنفیگ تعریف۔",
+      "raw_validation_config_object": "کنفیگ اندراجات آبجیکٹ ہونے چاہئیں۔",
+      "raw_validation_configs_unassigned": "کنفیگریشنز {{configs}} کسی بھی مرحلے کو تفویض نہیں کی گئی ہیں۔",
+      "raw_validation_empty": "ٹیمپلیٹ JSON خالی نہیں ہو سکتا۔",
+      "raw_validation_invalid_json": "غلط JSON پے لوڈ: {{error}}",
+      "raw_validation_object": "ٹیمپلیٹ پے لوڈ ایک JSON آبجیکٹ ہونا چاہیے۔",
+      "raw_validation_setting_key": "سیٹنگز کیز غیر خالی سٹرنگز ہونی چاہئیں۔",
+      "raw_validation_settings_object": "سیٹنگز کو ایک آبجیکٹ کے طور پر فراہم کیا جانا چاہیے۔",
+      "raw_validation_settings_unassigned": "سیٹنگز {{settings}} کسی بھی مرحلے کو تفویض نہیں کی گئی ہیں۔",
+      "raw_validation_step_config_duplicate": "کنفیگ {{config}} متعدد مراحل کو تفویض کیا گیا ہے۔",
+      "raw_validation_step_config_reference": "مرحلہ {{index}} میں ایک غلط کنفیگ حوالہ موجود ہے۔",
+      "raw_validation_step_config_unknown": "مرحلہ {{index}} نامعلوم کنفیگ {{config}} کا حوالہ دیتا ہے۔",
+      "raw_validation_step_object": "مرحلہ {{index}} ایک آبجیکٹ ہونا چاہیے۔",
+      "raw_validation_step_setting_duplicate": "سیٹنگ {{setting}} متعدد مراحل کو تفویض کی گئی ہے۔",
+      "raw_validation_step_setting_reference": "مرحلہ {{index}} میں ایک غلط سیٹنگ حوالہ موجود ہے۔",
+      "raw_validation_step_setting_unknown": "مرحلہ {{index}} نامعلوم سیٹنگ {{setting}} کا حوالہ دیتا ہے۔",
+      "raw_validation_step_title": "مرحلہ {{index}} کا ایک عنوان ہونا چاہیے۔",
+      "raw_validation_steps_required": "ایک ٹیمپلیٹ میں کم از کم ایک مرحلہ ہونا چاہیے۔",
       "readonly_db": "ڈیٹا بیس فی الحال صرف پڑھنے کے لیے ہے۔ ٹیمپلیٹس کو تبدیل نہیں کیا جا سکتا۔",
       "readonly_method": "یہ ٹیمپلیٹ {{method}} کے عمل سے بنایا گیا تھا اور اسے UI سے ترمیم نہیں کیا جا سکتا۔",
       "readonly_title": "صرف پڑھنے کے لیے",
@@ -1259,8 +1340,6 @@
       "select_config_placeholder": "ایک کنفیگریشن منتخب کریں",
       "select_config_type_placeholder": "ایک قسم منتخب کریں",
       "select_setting_placeholder": "ایک سیٹنگ منتخب کریں",
-      "settings": "سیٹنگز",
-      "settings_help": "اس ٹیمپلیٹ کے ذریعے ظاہر کی گئی سیٹنگز اور ان کی ڈیفالٹ اقدار کی وضاحت کریں۔",
       "setting_remove_confirm": "کیا آپ واقعی اس ٹیمپلیٹ سے یہ سیٹنگ ہٹانا چاہتے ہیں؟",
       "setting_remove_key": "سیٹنگ",
       "setting_remove_title": "سیٹنگ ہٹائیں",
@@ -1284,6 +1363,9 @@
       "setting_selector_pattern": "پیٹرن",
       "setting_selector_search_label": "ملٹی سائٹ سیٹنگ تلاش کریں",
       "setting_selector_search_placeholder": "لیبل، کلید، یا پلگ ان کے ذریعے تلاش کریں",
+      "setting_toggle_enabled": "فعال",
+      "settings": "سیٹنگز",
+      "settings_help": "اس ٹیمپلیٹ کے ذریعے ظاہر کی گئی سیٹنگز اور ان کی ڈیفالٹ اقدار کی وضاحت کریں۔",
       "step_configs_empty": "اس مرحلے میں ابھی تک کوئی کنفیگریشن شامل نہیں کی گئی۔",
       "step_configs_selection_title": "موجودہ کنفیگریشنز منتخب کریں",
       "step_default_title": "بلا عنوان مرحلہ",
@@ -1313,61 +1395,9 @@
       "validation_configs_unique": "ہر کنفیگریشن کا نام منفرد ہونا چاہیے۔",
       "validation_id_required": "ٹیمپلیٹ ID درکار ہے۔",
       "validation_setting_key": "ہر سیٹنگ میں ایک کلید ہونی چاہیے۔",
-      "validation_settings_unique": "ہر سیٹنگ کلید منفرد ہونی چاہیے۔",
-      "raw_configs_help": "<code>configs</code> میں اندراجات شامل کرنے کے لیے کنفیگریشن فائلیں (.conf, .cfg, .txt) اپ لوڈ کریں۔ اقسام پہلے سے طے شدہ طور پر <code>server_http</code> ہیں؛ اگر ضرورت ہو تو JSON میں ایڈجسٹ کریں۔",
-      "raw_configs_import_invalid": "کنفیگریشنز درآمد کرنے سے قاصر کیونکہ موجودہ JSON غلط ہے۔",
-      "raw_configs_import_none": "کوئی کنفیگریشن درآمد نہیں کی گئی۔",
-      "raw_configs_import_success": "{{count}} کنفیگ فائل(یں) درآمد کی گئیں۔",
-      "raw_configs_note": "درآمد شدہ فائلیں JSON ایڈیٹر میں شامل کی جاتی ہیں۔ محفوظ کرنے سے پہلے جائزہ لیں اور ایڈجسٹ کریں۔",
-      "raw_configs_title": "حسب ضرورت کنفیگ درآمدات",
-      "raw_configs_upload": "کنفیگ فائلیں اپ لوڈ کریں (.conf, .cfg, .txt)",
-      "raw_configs_upload_failed": "منتخب کردہ فائلوں میں سے ایک کو پڑھنے سے قاصر۔",
-      "raw_configs_browse": "فائلیں براؤز کریں",
-      "raw_configs_drop_hint": "کنفیگ فائلیں یہاں ڈریگ اور ڈراپ کریں یا براؤز کرنے کے لیے کلک کریں (.conf, .cfg, .txt)",
-      "raw_configs_drop_supported": "سپورٹ کردہ فارمیٹس: .conf, .cfg, .txt",
-      "raw_configs_empty": "ابھی تک کوئی درآمد شدہ کنفیگ فائلیں نہیں ہیں۔ نئی فائلیں نیچے ظاہر ہوں گی۔",
-      "raw_editor_help": "مکمل ٹیمپلیٹ تعریف کو JSON کے طور پر ترمیم کریں۔ آسان موڈ پر واپس جانے سے بصری ایڈیٹر کی توثیق اور دوبارہ لوڈنگ ہوتی ہے۔",
-      "raw_editor_import_success": "ٹیمپلیٹ JSON کامیابی سے درآمد کیا گیا۔",
-      "raw_editor_title": "خام ٹیمپلیٹ JSON",
-      "raw_editor_upload_empty": "اپ لوڈ کردہ فائل خالی ہے۔",
-      "raw_editor_upload_failed": "منتخب کردہ فائل پڑھنے سے قاصر۔",
-      "raw_editor_upload_template": "ٹیمپلیٹ JSON اپ لوڈ کریں (صرف .json)",
-      "raw_validation_configs_unassigned": "کنفیگریشنز {{configs}} کسی بھی مرحلے کو تفویض نہیں کی گئی ہیں۔",
-      "raw_validation_config_definition": "غلط کنفیگ تعریف۔",
-      "raw_validation_config_object": "کنفیگ اندراجات آبجیکٹ ہونے چاہئیں۔",
-      "raw_validation_empty": "ٹیمپلیٹ JSON خالی نہیں ہو سکتا۔",
-      "raw_validation_invalid_json": "غلط JSON پے لوڈ: {{error}}",
-      "raw_validation_object": "ٹیمپلیٹ پے لوڈ ایک JSON آبجیکٹ ہونا چاہیے۔",
-      "raw_validation_setting_key": "سیٹنگز کیز غیر خالی سٹرنگز ہونی چاہئیں۔",
-      "raw_validation_settings_object": "سیٹنگز کو ایک آبجیکٹ کے طور پر فراہم کیا جانا چاہیے۔",
-      "raw_validation_step_config_duplicate": "کنفیگ {{config}} متعدد مراحل کو تفویض کیا گیا ہے۔",
-      "raw_validation_step_config_reference": "مرحلہ {{index}} میں ایک غلط کنفیگ حوالہ موجود ہے۔",
-      "raw_validation_step_config_unknown": "مرحلہ {{index}} نامعلوم کنفیگ {{config}} کا حوالہ دیتا ہے۔",
-      "raw_validation_step_object": "مرحلہ {{index}} ایک آبجیکٹ ہونا چاہیے۔",
-      "raw_validation_step_setting_duplicate": "سیٹنگ {{setting}} متعدد مراحل کو تفویض کی گئی ہے۔",
-      "raw_validation_step_setting_reference": "مرحلہ {{index}} میں ایک غلط سیٹنگ حوالہ موجود ہے۔",
-      "raw_validation_step_setting_unknown": "مرحلہ {{index}} نامعلوم سیٹنگ {{setting}} کا حوالہ دیتا ہے۔",
-      "raw_validation_step_title": "مرحلہ {{index}} کا ایک عنوان ہونا چاہیے۔",
-      "raw_validation_steps_required": "ایک ٹیمپلیٹ میں کم از کم ایک مرحلہ ہونا چاہیے۔",
-      "raw_validation_settings_unassigned": "سیٹنگز {{settings}} کسی بھی مرحلے کو تفویض نہیں کی گئی ہیں۔",
-      "raw_editor_drop_hint": "موجودہ مواد کو تبدیل کرنے کے لیے ایک ٹیمپلیٹ JSON فائل (صرف .json) ڈراپ کریں۔",
-      "raw_editor_override_title": "ٹیمپلیٹ JSON تبدیل کریں؟",
-      "raw_editor_override_body": "اس فائل کو درآمد کرنے سے موجودہ ٹیمپلیٹ JSON مکمل طور پر تبدیل ہو جائے گا۔ ایڈیٹر میں کی گئی تبدیلیاں ضائع ہو جائیں گی۔ کیا آپ جاری رکھنا چاہتے ہیں؟",
-      "raw_editor_override_confirm": "ٹیمپلیٹ تبدیل کریں",
-      "missing_configs_title": "گمشدہ حسب ضرورت کنفیگریشنز",
-      "missing_configs_body": "درآمد شدہ ٹیمپلیٹ حسب ضرورت کنفیگریشنز کا حوالہ دیتا ہے جو ابھی تک اپ لوڈ نہیں کی گئی ہیں۔ ٹیمپلیٹ سیٹ اپ مکمل کرنے کے لیے براہ کرم ان کنفیگریشنز کو درآمد کریں:",
-      "missing_configs_hint_title": "ٹپ:",
-      "missing_configs_hint_body": "اپ لوڈ کردہ فائلیں خود بخود آپ کے ٹیمپلیٹ میں شامل ہو جائیں گی۔ یقینی بنائیں کہ فائل کے نام اوپر درج گمشدہ کنفیگریشنز سے مماثل ہیں۔",
-      "missing_configs_upload_label": "گمشدہ کنفیگریشنز اپ لوڈ کریں (.conf, .cfg, .txt)",
-      "missing_configs_drop_hint": "کنفیگ فائلیں یہاں ڈریگ اور ڈراپ کریں (.conf, .cfg, .txt)",
-      "missing_configs_drop_or": "یا",
-      "missing_configs_browse": "فائلیں براؤز کریں",
-      "missing_configs_done": "ہو گیا",
-      "missing_configs_upload_success": "{{count}} کنفیگ فائل(یں) کامیابی سے اپ لوڈ کی گئیں",
-      "missing_configs_upload_partial": "{{uploaded}} کنفیگریشنز {{total}} میں سے اپ لوڈ کی گئیں۔ ابھی بھی گمشدہ: {{missing}}",
-      "missing_configs_upload_failed": "کنفیگ فائلیں اپ لوڈ کرنے میں ناکام",
-      "missing_configs_resolved": "تمام گمشدہ کنفیگریشنز اپ لوڈ کر دی گئی ہیں! ٹیمپلیٹ کامیابی سے درآمد کیا گیا۔"
-    }
+      "validation_settings_unique": "ہر سیٹنگ کلید منفرد ہونی چاہیے۔"
+    },
+    "none": "کوئی ٹیمپلیٹ نہیں"
   },
   "theme": {
     "dark": "تاریک",
@@ -1382,40 +1412,40 @@
     },
     "copied": "کاپی ہو گیا!",
     "disclaimer_title": "دستبرداری",
+    "global_settings_applied_body": "گلوبل سیٹنگز کامیابی سے حاصل کر لی گئی ہیں اور موجودہ فارم پر لاگو کر دی گئی ہیں۔",
+    "global_settings_applied_title": "گلوبل سیٹنگز لاگو ہو گئیں",
+    "global_settings_failed_body": "گلوبل سیٹنگز حاصل کرتے وقت ایک خرابی پیش آئی۔",
+    "global_settings_failed_title": "گلوبل سیٹنگز حاصل کرنے میں ناکامی",
     "header": {
       "ping_failed": "پنگ ناکام",
       "ping_succeed": "پنگ کامیاب"
     },
-    "ip_unbanned": "IP ایڈریس سے پابندی کامیابی سے ہٹا دی گئی!",
-    "global_settings_applied_title": "گلوبل سیٹنگز لاگو ہو گئیں",
-    "global_settings_applied_body": "گلوبل سیٹنگز کامیابی سے حاصل کر لی گئی ہیں اور موجودہ فارم پر لاگو کر دی گئی ہیں۔",
-    "global_settings_failed_title": "گلوبل سیٹنگز حاصل کرنے میں ناکامی",
-    "global_settings_failed_body": "گلوبل سیٹنگز حاصل کرتے وقت ایک خرابی پیش آئی۔"
+    "ip_unbanned": "IP ایڈریس سے پابندی کامیابی سے ہٹا دی گئی!"
   },
   "tooltip": {
     "auto_lets_encrypt": "کیا خود بخود Let's Encrypt سرٹیفکیٹ کی درخواست کرنی ہے۔",
     "button": {
-      "convert_service_to_draft": "سروس {{name}} کو ڈرافٹ میں تبدیل کریں",
-      "convert_service_to_online": "سروس {{name}} کو آن لائن میں تبدیل کریں",
+      "ban_ip": "Ban this IP address",
       "convert_config_to_draft": "Convert Config {{name}} to Draft",
       "convert_config_to_online": "Convert Config {{name}} to Online",
+      "convert_service_to_draft": "سروس {{name}} کو ڈرافٹ میں تبدیل کریں",
+      "convert_service_to_online": "سروس {{name}} کو آن لائن میں تبدیل کریں",
       "delete_config": "کسٹم کنفیگریشن {{name}} حذف کریں",
       "delete_file": "کیشے فائل حذف کریں: {{filename}}",
       "delete_instance": "انسٹینس {{hostname}} حذف کریں",
       "delete_plugin": "پلگ ان {{name}} حذف کریں",
       "delete_service": "سروس {{name}} حذف کریں",
       "delete_template": "ٹیمپلیٹ {{name}} حذف کریں",
+      "force_check": "چیک شیڈول کرتا ہے؛ صرف اپڈیٹس ہونے پر ڈاؤن لوڈ کرتا ہے۔",
+      "force_update": "چیکس کو چھوڑ کر PRO پلگ انز کا فورس ڈاؤن لوڈ؛ ناکامی پر موجودہ حالت برقرار رہتی ہے۔",
       "ping_instance": "انسٹینس {{hostname}} پنگ کریں",
       "reload_instance": "انسٹینس {{hostname}} دوبارہ لوڈ کریں",
       "reset_default": "ڈیفالٹ قدر پر ری سیٹ کریں",
       "reset_global": "عالمی قدر پر ری سیٹ کریں",
-      "value_from_global": "عالمی سیٹنگز سے قدر",
       "run_job": "ٹاسک {{job}} چلائیں",
       "stop_instance": "انسٹینس {{hostname}} روکیں",
       "unban_ip": "{{ip}} سے پابندی ہٹائیں",
-      "ban_ip": "Ban this IP address",
-      "force_check": "چیک شیڈول کرتا ہے؛ صرف اپڈیٹس ہونے پر ڈاؤن لوڈ کرتا ہے۔",
-      "force_update": "چیکس کو چھوڑ کر PRO پلگ انز کا فورس ڈاؤن لوڈ؛ ناکامی پر موجودہ حالت برقرار رہتی ہے۔"
+      "value_from_global": "عالمی سیٹنگز سے قدر"
     },
     "cannot_delete_original_ban": "اصل پابندی اندراج کو حذف نہیں کیا جا سکتا۔",
     "cannot_remove_disabled": "ہٹایا نہیں جا سکتا کیونکہ ایک یا زیادہ سیٹنگز غیر فعال ہیں۔",
@@ -1453,10 +1483,10 @@
     "dns_provider_dns_only": "DNS فراہم کنندہ کا انتخاب صرف DNS چیلنجز کے لیے قابل اطلاق ہے۔",
     "download_file": "فائل ڈاؤن لوڈ کریں",
     "draft_toggle_disabled": "ڈرافٹ موڈ صرف UI کے ذریعے بنائی گئی خدمات کے لیے ٹوگل کیا جا سکتا ہے۔",
-    "email_lets_encrypt": "Let's Encrypt کے ساتھ سرٹیفکیٹ کے انتظام اور اطلاعات کے لیے رجسٹر کرنے والا ای میل ایڈریس۔",
     "email_length": "ای میل 1 اور 256 حروف کے درمیان ہونا چاہیے۔",
-    "follow_latest_page_only": "فالو موڈ صرف تازہ ترین صفحے پر دستیاب ہے",
+    "email_lets_encrypt": "Let's Encrypt کے ساتھ سرٹیفکیٹ کے انتظام اور اطلاعات کے لیے رجسٹر کرنے والا ای میل ایڈریس۔",
     "fetch_global_settings": "گلوبل سیٹنگز کو بازیافت کریں اور انہیں موجودہ ٹیمپلیٹ پر لاگو کریں",
+    "follow_latest_page_only": "فالو موڈ صرف تازہ ترین صفحے پر دستیاب ہے",
     "global_settings_source": "قدر عالمی سیٹنگز سے وراثت میں ملی ہے۔",
     "instance_not_up": "انسٹینس {{hostname}} فی الحال جواب نہیں دے رہا ہے ('up')۔",
     "latest_version_installed": "آپ تازہ ترین ورژن چلا رہے ہیں۔",
@@ -1469,16 +1499,16 @@
       "access_service": "سروس {{name}} تک رسائی حاصل کریں",
       "clone_config": "کسٹم کنفیگریشن {{name}} کلون کریں",
       "clone_service": "سروس {{name}} کلون کریں",
+      "clone_template": "ٹیمپلیٹ {{template}} کلون کریں",
       "download_file": "{{filename}} ڈاؤن لوڈ کریں",
       "edit_config": "کسٹم کنفیگریشن {{name}} میں ترمیم کریں",
       "edit_service": "سروس {{service}} میں ترمیم کریں",
+      "edit_template": "ٹیمپلیٹ {{template}} میں ترمیم کریں",
       "export_service": "سروس {{name}} کنفیگریشن برآمد کریں",
       "view_config": "کسٹم کنفیگریشن {{name}} دیکھیں",
       "view_file": "{{filename}} دیکھیں",
       "view_service": "سروس {{service}} دیکھیں",
-      "edit_template": "ٹیمپلیٹ {{template}} میں ترمیم کریں",
-      "view_template": "ٹیمپلیٹ {{template}} دیکھیں",
-      "clone_template": "ٹیمپلیٹ {{template}} کلون کریں"
+      "view_template": "ٹیمپلیٹ {{template}} دیکھیں"
     },
     "modal": {
       "title": {
@@ -1509,20 +1539,6 @@
       "yes": "سٹریم موڈ کی حمایت کرتا ہے۔"
     },
     "table": {
-      "templates": {
-        "actions": "اس ٹیمپلیٹ کے لیے دستیاب کارروائیاں",
-        "details": "ٹیمپلیٹ کی تفصیلات دکھائیں",
-        "select_all": "تمام ٹیمپلیٹس منتخب کریں",
-        "id": "ٹیمپلیٹ کی شناخت",
-        "name": "یوزر سے متعین یا خودکار طور پر بنے ٹیمپلیٹ کا نام",
-        "plugin": "وہ پلگ اِن جس میں ٹیمپلیٹ موجود ہے",
-        "steps": "ٹیمپلیٹ کے مراحل کی تعداد",
-        "settings": "ٹیمپلیٹ کی سیٹنگز کی تعداد",
-        "configs": "ٹیمپلیٹ کی کنفیگریشنز کی تعداد",
-        "method": "ٹیمپلیٹ بنانے کا طریقہ",
-        "created": "ٹیمپلیٹ بنانے کی تاریخ",
-        "last_update": "ٹیمپلیٹ کی آخری اپ ڈیٹ کی تاریخ"
-      },
       "bans": {
         "actions": "اس پابندی کے لیے دستیاب اعمال",
         "country": "پابندی عائد IP ایڈریس کا ملک",
@@ -1554,9 +1570,9 @@
         "name": "کسٹم کنفیگریشن کا نام",
         "select_all": "تمام کسٹم کنفیگریشنز منتخب کریں",
         "service": "کسٹم کنفیگریشن سے وابستہ سروس (یا عالمی)",
+        "status": "کسٹم کنفیگریشن کی ڈرافٹ حالت",
         "template": "ظاہر کرتا ہے کہ آیا کسٹم کنفیگریشن کسی ٹیمپلیٹ سے شروع ہوئی ہے",
-        "type": "کسٹم کنفیگریشن کی قسم یا سیاق و سباق (مثلاً HTTP, MODSEC)",
-        "status": "کسٹم کنفیگریشن کی ڈرافٹ حالت"
+        "type": "کسٹم کنفیگریشن کی قسم یا سیاق و سباق (مثلاً HTTP, MODSEC)"
       },
       "instances": {
         "actions": "اس انسٹینس کے لیے دستیاب اعمال",
@@ -1618,9 +1634,24 @@
         "last_update": "سروس کی آخری اپ ڈیٹ کی تاریخ اور وقت",
         "method": "سروس بنانے کا طریقہ (مثلاً ui, file)",
         "name": "سروس کا نام",
+        "security_mode": "سروس کا سیکیورٹی موڈ (بلاک یا دریافت)",
         "select_all": "تمام سروسز منتخب کریں",
         "template": "خدمت کے ذریعہ استعمال کردہ ٹیمپلیٹ",
         "type": "سروس کی قسم (آن لائن/ڈرافٹ)"
+      },
+      "templates": {
+        "actions": "اس ٹیمپلیٹ کے لیے دستیاب کارروائیاں",
+        "configs": "ٹیمپلیٹ کی کنفیگریشنز کی تعداد",
+        "created": "ٹیمپلیٹ بنانے کی تاریخ",
+        "details": "ٹیمپلیٹ کی تفصیلات دکھائیں",
+        "id": "ٹیمپلیٹ کی شناخت",
+        "last_update": "ٹیمپلیٹ کی آخری اپ ڈیٹ کی تاریخ",
+        "method": "ٹیمپلیٹ بنانے کا طریقہ",
+        "name": "یوزر سے متعین یا خودکار طور پر بنے ٹیمپلیٹ کا نام",
+        "plugin": "وہ پلگ اِن جس میں ٹیمپلیٹ موجود ہے",
+        "select_all": "تمام ٹیمپلیٹس منتخب کریں",
+        "settings": "ٹیمپلیٹ کی سیٹنگز کی تعداد",
+        "steps": "ٹیمپلیٹ کے مراحل کی تعداد"
       }
     },
     "ui_host": "ریورس پراکسی کے ذریعے BunkerWeb UI کی خدمت کرنے والا ہوسٹ نام یا IP ایڈریس۔",

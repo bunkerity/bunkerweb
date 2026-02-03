@@ -38,6 +38,7 @@ Follow these steps to configure and use the Reverse Proxy feature:
     | `REVERSE_PROXY_HOST`             |         | multisite | yes      | **Backend Host:** Full URL of the proxied resource (proxy_pass).                         |
     | `REVERSE_PROXY_URL`              | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the backend server.                       |
     | `REVERSE_PROXY_BUFFERING`        | `yes`   | multisite | yes      | **Response Buffering:** Enable or disable buffering of responses from proxied resource.  |
+    | `REVERSE_PROXY_REQUEST_BUFFERING`| `yes`   | multisite | yes      | **Request Buffering:** Enable or disable buffering of requests to the proxied resource.  |
     | `REVERSE_PROXY_KEEPALIVE`        | `no`    | multisite | yes      | **Keep-Alive:** Enable or disable keepalive connections with the proxied resource.       |
     | `REVERSE_PROXY_CUSTOM_HOST`      |         | multisite | no       | **Custom Host:** Override Host header sent to upstream server.                           |
     | `REVERSE_PROXY_INTERCEPT_ERRORS` | `yes`   | multisite | no       | **Intercept Errors:** Whether to intercept and rewrite error responses from the backend. |
@@ -46,6 +47,9 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - Always specify the full URL in `REVERSE_PROXY_HOST` including the protocol (http:// or https://)
         - Use `REVERSE_PROXY_INTERCEPT_ERRORS` to provide consistent error pages across all your services
         - When configuring multiple backends, use the numbered suffix format (e.g., `REVERSE_PROXY_HOST_2`, `REVERSE_PROXY_URL_2`)
+
+    !!! warning "Request buffering behavior"
+        Disabling `REVERSE_PROXY_REQUEST_BUFFERING` only takes effect when ModSecurity is disabled, because request buffering is otherwise enforced.
 
 === "Connection Settings"
 

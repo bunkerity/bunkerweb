@@ -19,6 +19,9 @@ $(document).ready(function () {
   const templates = ($("#templates").val() || "").trim().split(" ");
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   const userReadOnly = $("#user-read-only").val().trim() === "True";
+  const importDragArea = $("#services-drag-area");
+  const importFileInput = $("#services-import-file");
+  const importFileList = $("#services-import-file-list");
 
   const templatesSearchPanesOptions = [
     {
@@ -26,7 +29,7 @@ $(document).ready(function () {
         "template.none",
         "no template",
       )}</span>`,
-      value: (rowData) => rowData[5].includes("template.none"),
+      value: (rowData) => rowData[6].includes("template.none"),
     },
   ];
 
@@ -34,7 +37,7 @@ $(document).ready(function () {
     if (template) {
       templatesSearchPanesOptions.push({
         label: template,
-        value: (rowData) => $(rowData[5]).text().trim() === template,
+        value: (rowData) => $(rowData[6]).text().trim() === template,
       });
     }
   });
@@ -125,7 +128,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [3, 4, 5, 6, 7],
+        columns: [3, 4, 5, 6, 7, 8],
       },
     },
     topStart: {},
@@ -162,6 +165,9 @@ $(document).ready(function () {
   layout.topStart.buttons = [
     {
       extend: "create_service",
+    },
+    {
+      extend: "import_services",
     },
     {
       extend: "colvis",
@@ -283,6 +289,13 @@ $(document).ready(function () {
         .val("");
     },
   );
+  $("#modal-import-services").on("hidden.bs.modal", function () {
+    importFileInput.val("");
+    importFileList.empty();
+    importDragArea.addClass("border-dashed");
+    importDragArea.removeClass("bg-primary text-white");
+    importDragArea.find("i").addClass("text-primary");
+  });
 
   const getSelectedServices = () =>
     $("tr.selected")
@@ -296,7 +309,7 @@ $(document).ready(function () {
       "button.create_service",
       "Create new service",
     )}</span>`,
-    className: `btn btn-sm rounded me-4 btn-bw-green${
+    className: `btn btn-sm rounded me-2 btn-bw-green${
       isReadOnly ? " disabled" : ""
     }`,
     action: function () {
@@ -310,6 +323,33 @@ $(document).ready(function () {
         return;
       }
       window.location.href = `${window.location.href}/new`;
+    },
+  };
+
+  $.fn.dataTable.ext.buttons.import_services = {
+    text: `<span class="tf-icons bx bx-import bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.import_services">${t(
+      "button.import_services",
+      "Import services",
+    )}</span>`,
+    className: `btn btn-sm rounded btn-outline-bw-green me-2${
+      isReadOnly ? " disabled" : ""
+    }`,
+    action: function () {
+      if (isReadOnly) {
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
+        return;
+      }
+      importFileInput.val("");
+      importFileList.empty();
+      const modalInstance = new bootstrap.Modal(
+        document.getElementById("modal-import-services"),
+      );
+      modalInstance.show();
     },
   };
 
@@ -410,7 +450,7 @@ $(document).ready(function () {
   const services_config = {
     tableSelector: "#services",
     tableName: "services",
-    columnVisibilityCondition: (column) => column > 2 && column < 8,
+    columnVisibilityCondition: (column) => column > 2 && column < 9,
     dataTableOptions: {
       columnDefs: [
         {
@@ -425,7 +465,7 @@ $(document).ready(function () {
         },
         { orderable: false, targets: -1 },
         {
-          targets: [6, 7],
+          targets: [7, 8],
           render: function (data, type, row) {
             if (type === "display" || type === "filter") {
               const date = new Date(data);
@@ -469,59 +509,37 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
-            header: t("searchpane.template", "Template"),
+            header: t("searchpane.security_mode", "Security Mode"),
+            options: [
+              {
+                label:
+                  '<i class="bx bx-xs bx-shield-alt-2"></i>&nbsp;<span data-i18n="security_mode.block">Block</span>',
+                value: (rowData) => rowData[5].includes("security_mode.block"),
+              },
+              {
+                label:
+                  '<i class="bx bx-xs bx-show"></i>&nbsp;<span data-i18n="security_mode.detect">Detect</span>',
+                value: (rowData) => rowData[5].includes("security_mode.detect"),
+              },
+            ],
             combiner: "or",
-            options: templatesSearchPanesOptions,
+            orderable: false,
           },
           targets: 5,
         },
         {
           searchPanes: {
             show: true,
-            header: t("searchpane.created", "Created"),
-            options: [
-              {
-                label: `<span data-i18n="searchpane.last_24h">${t(
-                  "searchpane.last_24h",
-                  "Last 24 hours",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[6]) < 86400000,
-              },
-              {
-                label: `<span data-i18n="searchpane.last_7d">${t(
-                  "searchpane.last_7d",
-                  "Last 7 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[6]) < 604800000,
-              },
-              {
-                label: `<span data-i18n="searchpane.last_30d">${t(
-                  "searchpane.last_30d",
-                  "Last 30 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[6]) < 2592000000,
-              },
-              {
-                label: `<span data-i18n="searchpane.older_30d">${t(
-                  "searchpane.older_30d",
-                  "More than 30 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[6]) >= 2592000000,
-              },
-            ],
+            header: t("searchpane.template", "Template"),
             combiner: "or",
-            orderable: false,
+            options: templatesSearchPanesOptions,
           },
           targets: 6,
         },
         {
           searchPanes: {
             show: true,
-            header: t("searchpane.last_update", "Last update"),
+            header: t("searchpane.created", "Created"),
             options: [
               {
                 label: `<span data-i18n="searchpane.last_24h">${t(
@@ -560,6 +578,49 @@ $(document).ready(function () {
             orderable: false,
           },
           targets: 7,
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.last_update", "Last update"),
+            options: [
+              {
+                label: `<span data-i18n="searchpane.last_24h">${t(
+                  "searchpane.last_24h",
+                  "Last 24 hours",
+                )}</span>`,
+                value: (rowData) =>
+                  new Date() - new Date(rowData[8]) < 86400000,
+              },
+              {
+                label: `<span data-i18n="searchpane.last_7d">${t(
+                  "searchpane.last_7d",
+                  "Last 7 days",
+                )}</span>`,
+                value: (rowData) =>
+                  new Date() - new Date(rowData[8]) < 604800000,
+              },
+              {
+                label: `<span data-i18n="searchpane.last_30d">${t(
+                  "searchpane.last_30d",
+                  "Last 30 days",
+                )}</span>`,
+                value: (rowData) =>
+                  new Date() - new Date(rowData[8]) < 2592000000,
+              },
+              {
+                label: `<span data-i18n="searchpane.older_30d">${t(
+                  "searchpane.older_30d",
+                  "More than 30 days",
+                )}</span>`,
+                value: (rowData) =>
+                  new Date() - new Date(rowData[8]) >= 2592000000,
+              },
+            ],
+            combiner: "or",
+            orderable: false,
+          },
+          targets: 8,
         },
       ],
       order: [[2, "asc"]],
@@ -635,5 +696,54 @@ $(document).ready(function () {
     const service = $(this).data("service-id");
     const conversionType = $(this).data("value");
     setupConversionModal([service], conversionType);
+  });
+
+  const validateImportFile = (file) => {
+    const fileName = file.name.toLowerCase();
+    return fileName.endsWith(".env") || fileName.endsWith(".txt");
+  };
+
+  importDragArea.on("click", function () {
+    importFileInput.click();
+  });
+
+  importDragArea.on("dragover", function (e) {
+    e.preventDefault();
+    importDragArea.removeClass("border-dashed");
+    importDragArea.addClass("bg-primary text-white");
+    importDragArea.find("i").removeClass("text-primary");
+  });
+
+  importDragArea.on("dragleave", function (e) {
+    e.preventDefault();
+    importDragArea.addClass("border-dashed");
+    importDragArea.removeClass("bg-primary text-white");
+    importDragArea.find("i").addClass("text-primary");
+  });
+
+  importFileInput.on("change", function () {
+    const file = this.files && this.files[0];
+    importFileList.empty();
+    if (!file) {
+      return;
+    }
+    if (!validateImportFile(file)) {
+      alert("Please upload a valid services export file (.env).");
+      importFileInput.val("");
+      return;
+    }
+    const fileSize = (file.size / 1024).toFixed(2);
+    importFileList.append(
+      `<div class="file-item"><strong>${file.name}</strong> (${fileSize} KB)</div>`,
+    );
+  });
+
+  importDragArea.on("drop", function (e) {
+    e.preventDefault();
+    importDragArea.addClass("border-dashed");
+    importDragArea.removeClass("bg-primary text-white");
+    importDragArea.find("i").addClass("text-primary");
+    importFileInput.prop("files", e.originalEvent.dataTransfer.files);
+    importFileInput.trigger("change");
   });
 });

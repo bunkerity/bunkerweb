@@ -622,7 +622,24 @@ def bans_update_duration():
         elif duration == "1w":
             new_exp = 604800
         elif duration == "custom":
-            new_exp = update.get("custom_exp", 0)
+            custom_exp = update.get("custom_exp", None)
+            if custom_exp is not None:
+                try:
+                    new_exp = max(0, int(custom_exp))
+                except (TypeError, ValueError):
+                    new_exp = 0
+            else:
+                custom_end_date = update.get("end_date")
+                if custom_end_date:
+                    try:
+                        end_dt = datetime.fromisoformat(custom_end_date)
+                        if end_dt.tzinfo is None:
+                            end_dt = end_dt.replace(tzinfo=datetime.now().astimezone().tzinfo)
+                        new_exp = max(0, int(end_dt.timestamp() - time()))
+                    except (TypeError, ValueError):
+                        new_exp = 0
+                else:
+                    new_exp = 0
         else:
             new_exp = 0
 

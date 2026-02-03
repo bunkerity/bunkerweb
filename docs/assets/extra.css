@@ -121,14 +121,31 @@ nav.md-tabs ul li.md-tabs__item--active a:hover {
 */
 
 /* START: Custom styles for TOC dropdowns */
+.md-nav--secondary .md-nav__link {
+  display: flex;
+  align-items: center;
+}
+
+.md-nav--secondary .md-nav__link::before {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-top: 0.3em solid transparent;
+  border-bottom: 0.3em solid transparent;
+  border-left: 0.5em solid transparent;
+  margin-right: 0.7rem;
+  opacity: 0;
+  transition: transform 0.2s ease-in-out, color 0.25s, opacity 0.2s;
+}
+
 .toc-dropdown > summary {
   list-style: none; /* Remove default arrow */
   cursor: pointer;
   position: relative;
-  display: flex;
-  align-items: center;
   outline: none; /* Remove focus outline */
   transition: color 0.25s; /* Smooth color transition */
+  font-weight: 700;
 }
 
 .toc-dropdown > summary::-webkit-details-marker {
@@ -136,18 +153,20 @@ nav.md-tabs ul li.md-tabs__item--active a:hover {
 }
 
 /* Style the dropdown arrow */
-.toc-dropdown > summary::before {
-  content: "";
-  display: inline-block;
-  width: 0;
-  height: 0;
-  border-top: 0.3em solid transparent;
-  border-bottom: 0.3em solid transparent;
-  border-left: 0.5em solid currentColor;
-  margin-right: 0.7rem;
-  transform: rotate(0deg);
-  transition: transform 0.2s ease-in-out, color 0.25s;
-  opacity: 0.7;
+.md-nav--secondary .toc-dropdown > summary::before {
+  border-left-color: currentColor;
+  opacity: 0.85;
+}
+
+/* Keep leaf links inside dropdowns visually lighter than section headers */
+.md-nav--secondary .toc-dropdown .md-nav__item > a.md-nav__link {
+  font-weight: 400;
+}
+
+/* Make ALL first-level TOC items bold (both dropdowns and regular links) */
+.md-nav--secondary > .md-nav__list > .md-nav__item > .toc-dropdown > summary.md-nav__link,
+.md-nav--secondary > .md-nav__list > .md-nav__item > a.md-nav__link {
+  font-weight: 700;
 }
 
 /* Rotate arrow when dropdown is open */

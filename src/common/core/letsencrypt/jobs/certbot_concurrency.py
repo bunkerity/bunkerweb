@@ -16,46 +16,71 @@ class CertbotPaths:
     logs_dir: Path
 
 
-def _merge_dir(src: Path, dest: Path) -> None:
+def _merge_dir(src: Path, dest: Path, logger=None) -> None:
     for root, dirs, files in walk(src):
         rel_root = Path(root).relative_to(src)
         dest_root = dest.joinpath(rel_root)
-        dest_root.mkdir(parents=True, exist_ok=True)
+        try:
+            dest_root.mkdir(parents=True, exist_ok=True)
+        except OSError as e:
+            if logger:
+                logger.warning(f"Failed to create directory {dest_root}: {e}")
+            continue
         for file_name in files:
             src_file = Path(root).joinpath(file_name)
             dest_file = dest_root.joinpath(file_name)
-            if dest_file.exists() or dest_file.is_symlink():
-                dest_file.unlink()
-            if src_file.is_symlink():
-                target = readlink(src_file)
-                symlink(target, dest_file)
-                copystat(src_file, dest_file, follow_symlinks=False)
-            else:
-                copy2(src_file, dest_file)
+            try:
+                if dest_file.exists() or dest_file.is_symlink():
+                    dest_file.unlink()
+                if src_file.is_symlink():
+                    target = readlink(src_file)
+                    symlink(target, dest_file)
+                    copystat(src_file, dest_file, follow_symlinks=False)
+                else:
+                    copy2(src_file, dest_file)
+            except OSError as e:
+                if logger:
+                    logger.warning(f"Failed to merge file {src_file} to {dest_file}: {e}")
+                continue
 
 
-def _merge_logs(src: Path, dest: Path) -> None:
-    dest.mkdir(parents=True, exist_ok=True)
+def _merge_logs(src: Path, dest: Path, logger=None) -> None:
+    try:
+        dest.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        if logger:
+            logger.warning(f"Failed to create log directory {dest}: {e}")
+        return
     for root, _, files in walk(src):
         rel_root = Path(root).relative_to(src)
         dest_root = dest.joinpath(rel_root)
-        dest_root.mkdir(parents=True, exist_ok=True)
+        try:
+            dest_root.mkdir(parents=True, exist_ok=True)
+        except OSError as e:
+            if logger:
+                logger.warning(f"Failed to create log subdirectory {dest_root}: {e}")
+            continue
         for file_name in files:
             src_file = Path(root).joinpath(file_name)
             dest_file = dest_root.joinpath(file_name)
-            if src_file.is_symlink():
-                if dest_file.exists() or dest_file.is_symlink():
-                    dest_file.unlink()
-                target = readlink(src_file)
-                symlink(target, dest_file)
-                copystat(src_file, dest_file, follow_symlinks=False)
+            try:
+                if src_file.is_symlink():
+                    if dest_file.exists() or dest_file.is_symlink():
+                        dest_file.unlink()
+                    target = readlink(src_file)
+                    symlink(target, dest_file)
+                    copystat(src_file, dest_file, follow_symlinks=False)
+                    continue
+                if dest_file.exists():
+                    with src_file.open("rb") as src_handle, dest_file.open("ab") as dest_handle:
+                        dest_handle.write(b"\n")
+                        copyfileobj(src_handle, dest_handle)
+                else:
+                    copy2(src_file, dest_file)
+            except (OSError, IOError) as e:
+                if logger:
+                    logger.warning(f"Failed to merge log file {src_file} to {dest_file}: {e}")
                 continue
-            if dest_file.exists():
-                with src_file.open("rb") as src_handle, dest_file.open("ab") as dest_handle:
-                    dest_handle.write(b"\n")
-                    copyfileobj(src_handle, dest_handle)
-            else:
-                copy2(src_file, dest_file)
 
 
 def select_account_id(accounts_root: Path, staging: bool, email: str) -> Optional[str]:
@@ -89,7 +114,8 @@ def select_account_id(accounts_root: Path, staging: bool, email: str) -> Optiona
                     meta = loads(meta_path.read_text())
                     if isinstance(meta, dict):
                         meta_email = str(meta.get("email") or "")
-                except BaseException:
+                except (OSError, ValueError, KeyError):
+                    # Silently skip corrupted meta.json files
                     meta_email = ""
             candidates.append((account_dir, meta_email))
 
@@ -138,7 +164,8 @@ def _account_exists(accounts_root: Path, staging: bool, email: str) -> bool:
                     meta = loads(meta_path.read_text())
                     if isinstance(meta, dict):
                         meta_email = str(meta.get("email") or "")
-                except BaseException:
+                except (OSError, ValueError, KeyError):
+                    # Silently skip corrupted meta.json files
                     meta_email = ""
             if email:
                 if meta_email.lower() == email.lower():
@@ -193,6 +220,9 @@ def ensure_accounts(
             check=False,
         )
         if proc.returncode != 0:
+            if "existing account" in proc.stdout.lower():
+                logger.info(f"Let's Encrypt account already exists (staging={staging}, email={'set' if email else 'empty'}), skipping registration.")
+                continue
             logger.error(f"Failed to register Let's Encrypt account (staging={staging}, email={'set' if email else 'empty'}):\n{proc.stdout}")
 
 
@@ -262,7 +292,10 @@ def finalize_certbot_run(
     with merge_lock:
         if success:
             _rewrite_renewal_paths(paths, data_path, work_dir, logs_dir, logger)
-            _merge_dir(paths.config_dir, data_path)
-            _merge_dir(paths.work_dir, Path(work_dir))
-        _merge_logs(paths.logs_dir, Path(logs_dir))
-    rmtree(temp_root, ignore_errors=True)
+            _merge_dir(paths.config_dir, data_path, logger)
+            _merge_dir(paths.work_dir, Path(work_dir), logger)
+        _merge_logs(paths.logs_dir, Path(logs_dir), logger)
+    try:
+        rmtree(temp_root, ignore_errors=False)
+    except OSError as e:
+        logger.warning(f"Failed to remove temporary directory {temp_root}: {e}")

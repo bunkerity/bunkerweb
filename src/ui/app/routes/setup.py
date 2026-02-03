@@ -66,7 +66,7 @@ def setup_page():
     for server_name in db_config["SERVER_NAME"].split():
         if server_name and db_config.get(f"{server_name}_USE_UI", db_config.get("USE_UI", "no")) == "yes":
             if admin_user:
-                return redirect(url_for("login.login_page"), 301)
+                return redirect(url_for("login.login_page"), 303)
             ui_reverse_proxy = server_name
             ui_reverse_proxy_url = db_config.get(f"{server_name}_REVERSE_PROXY_URL", db_config.get("REVERSE_PROXY_URL", "/"))
             break
@@ -306,13 +306,19 @@ def setup_loading():
     for server_name in db_config["SERVER_NAME"].split():
         if server_name and db_config.get(f"{server_name}_USE_UI", "no") == "yes":
             if admin_old_enough:
-                return redirect(url_for("login.login_page"), 301)
+                return redirect(url_for("login.login_page"), 303)
             ui_service = {"server_name": server_name, "url": db_config.get(f"{server_name}_REVERSE_PROXY_URL", "/")}
             break
 
     if not ui_service:
         sleep(1)
         return redirect(url_for("setup.setup_loading"))
+
+    ui_service["url"] = ui_service.get("url") or "/"
+    if not ui_service["url"].startswith("/"):
+        ui_service["url"] = f"/{ui_service['url']}"
+    if not ui_service["url"].endswith("/"):
+        ui_service["url"] = f"{ui_service['url']}/"
 
     target_endpoint = request.args.get("target_endpoint", "")
     if target_endpoint and not match(
@@ -321,7 +327,7 @@ def setup_loading():
         return Response(status=400)
 
     # Support an optional next parameter but sanitize (falls back to login)
-    default_next = url_for("login.login_page")
+    default_next = f"{ui_service['url']}login"
     requested_next = request.args.get("next")
     try:
         safe_next = _sanitize_internal_next(requested_next, default_next)

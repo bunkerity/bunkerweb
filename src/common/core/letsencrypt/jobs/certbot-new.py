@@ -63,6 +63,7 @@ from letsencrypt_providers import (
     Route53Provider,
     SakuraCloudProvider,
     ScalewayProvider,
+    TransIPProvider,
 )
 
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper()
@@ -202,6 +203,7 @@ PROVIDERS: Dict[str, Type[Provider]] = {
     "route53": Route53Provider,
     "sakuracloud": SakuraCloudProvider,
     "scaleway": ScalewayProvider,
+    "transip": TransIPProvider,
 }
 
 status = 0
@@ -351,7 +353,7 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
     authenticator = env("LETS_ENCRYPT_DNS_PROVIDER", "").lower()
     server_names_val = env("SERVER_NAME", "www.example.com").strip() if IS_MULTISITE else getenv("SERVER_NAME", "www.example.com").strip()
     email_val = env("EMAIL_LETS_ENCRYPT", "").strip()
-    retries_val = env("LETS_ENCRYPT_RETRIES", "0")
+    retries_val = env("LETS_ENCRYPT_MAX_RETRIES", "0")
     challenge_val = env("LETS_ENCRYPT_CHALLENGE", "http").lower()
     profile_val = env("LETS_ENCRYPT_PROFILE", "classic").lower()
     custom_profile = env("LETS_ENCRYPT_CUSTOM_PROFILE", "").lower()
@@ -377,11 +379,11 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
         retries_int = int(retries_val)
         if retries_int < 0:
             if activated:
-                LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_RETRIES is negative. Defaulting to 0.")
+                LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_MAX_RETRIES is negative. Defaulting to 0.")
             retries_int = 0
     except Exception:
         if activated:
-            LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_RETRIES is not a valid integer. Defaulting to 0.")
+            LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_MAX_RETRIES is not a valid integer. Defaulting to 0.")
         retries_int = 0
 
     if activated and challenge_val not in CHALLENGE_TYPES:

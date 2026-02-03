@@ -151,6 +151,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
     | `AUTOCONF_MODE`   | `no`   | global    | 否   | **自动配置模式：** 启用 Autoconf Docker 集成。              |
     | `SWARM_MODE`      | `no`   | global    | 否   | **Swarm 模式：** 启用 Docker Swarm 集成。                   |
     | `KUBERNETES_MODE` | `no`   | global    | 否   | **Kubernetes 模式：** 启用 Kubernetes 集成。                |
+    | `KEEP_CONFIG_ON_RESTART` | `no` | global | 否 | **重启时保留配置：** 重启时保留配置。设置为 'yes' 以防止重启时重置配置。 |
     | `USE_TEMPLATE`    |        | multisite | 否   | **使用模板：** 要使用的配置模板，它将覆盖特定设置的默认值。 |
 
 === "Nginx 设置"

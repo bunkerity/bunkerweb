@@ -541,7 +541,6 @@ with app.app_context():
     app.config["SESSION_COOKIE_PATH"] = "/"
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-    app.config["SESSION_USE_SIGNER"] = True
 
     app.config["REMEMBER_COOKIE_PATH"] = "/"
     app.config["REMEMBER_COOKIE_HTTPONLY"] = True
@@ -558,7 +557,6 @@ with app.app_context():
         session_lifetime_hours = 12.0
         LOGGER.warning("Invalid SESSION_LIFETIME_HOURS, defaulting to 12h")
 
-    app.config["SESSION_PERMANENT"] = True
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=session_lifetime_hours)
     app.config["SESSION_ID_LENGTH"] = 64
 
@@ -635,7 +633,7 @@ with app.app_context():
     def custom_url_for(endpoint, **values):
         if endpoint:
             try:
-                if endpoint not in ("static", "index", "loading", "check", "check_reloading") and "_page" not in endpoint:
+                if endpoint not in ("static", "index", "loading", "check", "check_reloading") and not endpoint.endswith("_page"):
                     return url_for(f"{endpoint}.{endpoint}_page", **values)
                 return url_for(endpoint, **values)
             except BuildError as e:
@@ -781,8 +779,10 @@ def handle_csrf_error(_):
     LOGGER.debug(format_exc())
     LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {current_user.get_id()}")
     if not current_user:
-        return redirect(url_for("setup.setup_page")), 403
-    return logout_page(), 403
+        return redirect(url_for("setup.setup_page"), 303)
+    response = logout_page()
+    response.status_code = 303
+    return response
 
 
 def update_latest_stable_release():
@@ -917,10 +917,10 @@ def before_request():
         # Requests from other sources
         app.config["SESSION_COOKIE_NAME"] = "bw_ui_session"
         app.config["SESSION_COOKIE_SECURE"] = False
-        app.config["SESSION_COOKIE_DOMAIN"] = False
+        app.config["SESSION_COOKIE_DOMAIN"] = None
         app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_token"
         app.config["REMEMBER_COOKIE_SECURE"] = False
-        app.config["REMEMBER_COOKIE_DOMAIN"] = False
+        app.config["REMEMBER_COOKIE_DOMAIN"] = None
 
     metadata = None
     app.config["SCRIPT_NONCE"] = token_urlsafe(32)
@@ -1163,8 +1163,8 @@ def index():
     if DB.get_ui_user():
         if current_user.is_authenticated:  # type: ignore
             return redirect(url_for("home.home_page"))
-        return redirect(url_for("login.login_page"), 301)
-    return redirect(url_for("setup.setup_page"), 301)
+        return redirect(url_for("login.login_page"), 303)
+    return redirect(url_for("setup.setup_page"), 303)
 
 
 @app.route("/loading", methods=["GET"])

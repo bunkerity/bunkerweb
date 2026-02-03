@@ -339,6 +339,15 @@
     "regex": "^(yes|no)$",
     "type": "check"
   },
+  "KEEP_CONFIG_ON_RESTART": {
+    "context": "global",
+    "default": "no",
+    "help": "Keep the configuration on restart. Set to 'yes' to prevent config reset on restart.",
+    "id": "keep-config-on-restart",
+    "label": "Keep config on restart",
+    "regex": "^(yes|no)$",
+    "type": "check"
+  },
   "TIMERS_LOG_LEVEL": {
     "context": "global",
     "default": "debug",

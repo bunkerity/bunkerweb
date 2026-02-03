@@ -41,7 +41,7 @@ Choisissez la saveur adaptée à votre environnement.
     services:
       bunkerweb:
         # Nom utilisé par le scheduler pour identifier l’instance
-        image: bunkerity/bunkerweb:1.6.8-rc1
+        image: bunkerity/bunkerweb:1.6.8-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -54,7 +54,7 @@ Choisissez la saveur adaptée à votre environnement.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de mettre le bon nom d’instance
@@ -76,13 +76,13 @@ Choisissez la saveur adaptée à votre environnement.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.8-rc1
+        image: bunkerity/bunkerweb-api:1.6.8-rc3
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
           API_PASSWORD: "Str0ng&P@ss!"
           # API_TOKEN: "admin-override-token" # optionnel
-          FORWARDED_ALLOW_IPS: "*" # Attention : à n’utiliser que si le reverse proxy est l’unique accès
+          FORWARDED_ALLOW_IPS: "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16" # Attention : à n’utiliser que si le reverse proxy est l’unique accès
           API_ROOT_PATH: "/"
         networks:
           - bw-universe
@@ -143,7 +143,7 @@ Choisissez la saveur adaptée à votre environnement.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.8-rc1
+      bunkerity/bunkerweb-all-in-one:1.6.8-rc3
     ```
 
 === "Linux"
@@ -266,7 +266,8 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
 | -------------------------------------------------- | -------------------------------------------------------------------------------------------- | --------------------------- | ---------------------------------- |
 | `API_DOCS_URL`, `API_REDOC_URL`, `API_OPENAPI_URL` | Chemins Swagger, ReDoc et schéma OpenAPI ; mettre `off/disabled/none/false/0` pour désactiver | Chemin ou `off`             | `/docs`, `/redoc`, `/openapi.json` |
 | `API_ROOT_PATH`                                    | Préfixe de montage en reverse proxy                                                          | Chemin (ex. `/api`)         | vide                               |
-| `API_FORWARDED_ALLOW_IPS`                          | IPs proxy de confiance pour `X-Forwarded-*`                                                  | IPs/CIDR séparées par virgule | `127.0.0.1` (défaut paquet)        |
+| `API_FORWARDED_ALLOW_IPS`                          | IPs proxy de confiance pour `X-Forwarded-*`                                                  | IPs/CIDR séparées par virgule | `127.0.0.1,::1` (défaut paquet)        |
+| `API_PROXY_ALLOW_IPS`                              | IPs proxy de confiance pour le protocole PROXY                                               | IPs/CIDR séparées par virgule | `FORWARDED_ALLOW_IPS`              |
 
 #### Auth, ACL, Biscuit
 

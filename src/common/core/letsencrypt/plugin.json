@@ -76,7 +76,8 @@
         "rfc2136",
         "route53",
         "sakuracloud",
-        "scaleway"
+        "scaleway",
+        "transip"
       ]
     },
     "LETS_ENCRYPT_DNS_PROPAGATION": {

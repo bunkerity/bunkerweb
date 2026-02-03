@@ -1,11 +1,43 @@
 # Changelog
 
-## v1.6.8~rc2 - 2026/01/??
+## v1.6.8 - 2026/02/??
+
+- [DOCS] Add forward proxy configuration for outgoing traffic
+
+## v1.6.8~rc3 - 2026/02/02
+
+- [FEATURE] Add new `REVERSE_PROXY_REQUEST_BUFFERING` setting to the `Reverse Proxy` plugin to control request body buffering behavior when proxying requests (default: `on`)
+- [BUGFIX] Initialize is_whitelisted variable to 'no' in configuration files to avoid spam uninitialized messages in logs
+- [BUGFIX] Reorganize insertion logic to prevent foreign key errors and improve order of operations in database when creating/updating plugins
+- [AUTOCONF] Add experimental Gateway API controller support (Gateway/HTTPRoute) and documentation
+- [UI] Change redirect status code from 302 to 303 in the web UI to follow best practices for redirection after form submissions
+- [UI] Fix bug where updating a ban to a custom duration accidentally created a permanent ban
+- [UI] Enhance map legend and color ramp for blocked requests visualization
+- [UI] Enhance dark mode styles for news card elements
+- [UI] Add CIDR annotations support for `FORWARDED_ALLOW_IPS` and `PROXY_ALLOW_IPS` settings and update the default values to common private network ranges
+- [API] Add HTTP/2 support in Gunicorn configuration for improved performance and compatibility
+- [API] Add CIDR annotations support for `FORWARDED_ALLOW_IPS` and `PROXY_ALLOW_IPS` settings and update the default values to common private network ranges
+- [MISC] Update Laurent Minne's blacklist's label and add the new one from [DuggyTuxy Data-Shield IPv4 Blocklist](https://duggytuxy.github.io/)
+- [MISC] Add publiccode metadata file for open source compliance
+
+## v1.6.8~rc2 - 2026/01/23
 
 - [FEATURE] Enhance `Let's Encrypt` plugin to support concurrent certificate generation for multiple services via the new `LETS_ENCRYPT_CONCURRENT_REQUESTS` setting (default: `no`), improving efficiency and reducing wait times during bulk operations
+- [FEATURE] Add `GoDaddy` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add `TransIP` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add `Domeneshop` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add new `KEEP_CONFIG_ON_RESTART` global setting to control whether a temporary configuration should be generated on each restart or preserve the existing one (default: `no`)
+- [BUGFIX] Fix robots.txt and list-based plugins (greylist/whitelist/blacklist/dnsbl) appending duplicate entries on subsequent requests by creating deep copies of internalstore data instead of using shared references
+- [LINUX] Enhance Easy Install script to detect if the epel-release should be installed or not for RHEL-family distros
+- [UI] Add security mode in services table
+- [UI] Implement services import functionality with drag-and-drop support
+- [UI] Ensure UI service URL is properly formatted in setup loading route
+- [UI] Enhance Redis report querying with filter parsing and chunked retrieval
+- [UI] Update ace editor to version 1.43.5
 - [DEPS] Updated lua-cjson version to v2.1.0.16
+- [CONTRIBUTION] Thank you [rayshoo](https://github.com/rayshoo) for your contribution regarding the `Korean` translation of the web UI.
 
-## v1.6.8~rc1 - 2026/01/??
+## v1.6.8~rc1 - 2026/01/19
 
 - [FEATURE] Refactor Templator engine to use Jinja2 for improved templating capabilities and maintainability
 - [BUGFIX] Fix Redis database selection in web UI and bwcli by renaming `REDIS_DB` to `REDIS_DATABASE` when fetching the settings

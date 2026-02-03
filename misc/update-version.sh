@@ -85,3 +85,10 @@ sed -i "s@LABEL version.*@LABEL version=\"$NEW_VERSION_UNESCAPED\"@g" src/ui/Doc
 sed -i "s@LABEL version.*@LABEL version=\"$NEW_VERSION_UNESCAPED\"@g" src/autoconf/Dockerfile
 # easy-install script
 sed -i "s@DEFAULT_BUNKERWEB_VERSION=.*@DEFAULT_BUNKERWEB_VERSION=\"$NEW_VERSION_UNESCAPED\"@g" misc/install-bunkerweb.sh
+# publiccode.yml
+# if non stable we don't update publiccode.yml
+if [[ ! "$1" =~ ~ ]] ; then
+    sed -i "s@softwareVersion: .*@softwareVersion: $NEW_VERSION_UNESCAPED@g" publiccode.yml
+    sed -i "s@releaseDate: .*@releaseDate: $(date +%Y-%m-%d)@g" publiccode.yml
+    sed -i "s@logo: .*@logo: https://github.com/bunkerity/bunkerweb/raw/v$NEW_VERSION_UNESCAPED/misc/logo.png@g" publiccode.yml
+fi

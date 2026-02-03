@@ -313,42 +313,76 @@ class InstancesUtils:
 
         redis_client = get_redis_client()
 
+        def parse_search_panes(search_panes_value: str) -> dict[str, list[str]]:
+            pane_filters: dict[str, list[str]] = {}
+            if not search_panes_value:
+                return pane_filters
+            for field_filter in search_panes_value.split(";"):
+                if ":" in field_filter:
+                    field, values = field_filter.split(":", 1)
+                    pane_filters[field] = values.split(",")
+            return pane_filters
+
+        def matches_filters(report: dict[str, Any], search_value: str, pane_filters: dict[str, list[str]]) -> bool:
+            if search_value:
+                search_lower = search_value.lower()
+                if not any(
+                    search_lower in str(report.get(field, "")).lower()
+                    for field in ("ip", "country", "method", "url", "status", "user_agent", "reason", "server_name")
+                ):
+                    return False
+
+            for field, allowed_values in pane_filters.items():
+                if str(report.get(field, "N/A")) not in allowed_values:
+                    return False
+
+            return True
+
         # If Redis is available, use it for optimized queries
         if redis_client and not hostname:
             try:
-                # Get all requests from Redis
-                redis_reports_raw = redis_client.lrange("requests", 0, -1)
-                all_requests = []
-                for report_raw in redis_reports_raw:
-                    try:
-                        report = loads(report_raw.decode("utf-8", "replace"))
-                        all_requests.append(report)
-                    except Exception:
+                pane_filters = parse_search_panes(search_panes)
+                pane_fields = ["ip", "country", "method", "url", "status", "reason", "server_name", "security_mode"]
+                pane_counts = {field: {} for field in pane_fields}
+
+                seen_ids = set()
+                valid_total = 0
+                filtered_requests: List[dict[str, Any]] = []
+
+                for report in self._iter_redis_requests(redis_client):
+                    report_id = report.get("id")
+                    if report_id in seen_ids:
+                        continue
+                    seen_ids.add(report_id)
+
+                    if not (400 <= report.get("status", 0) < 500 or report.get("security_mode") == "detect"):
                         continue
 
-                # Filter by status and security mode
-                valid_requests = [r for r in all_requests if (400 <= r.get("status", 0) < 500 or r.get("security_mode") == "detect")]
+                    valid_total += 1
+                    matches = matches_filters(report, search, pane_filters)
 
-                # Apply filters
-                filtered_requests = self._apply_report_filters(valid_requests, search, search_panes)
+                    for field in pane_fields:
+                        value = str(report.get(field, "N/A"))
+                        if value not in pane_counts[field]:
+                            pane_counts[field][value] = {"total": 0, "count": 0}
+                        pane_counts[field][value]["total"] += 1
+                        if matches:
+                            pane_counts[field][value]["count"] += 1
 
-                # If count only, return early
+                    if matches:
+                        filtered_requests.append(report)
+
                 if count_only:
-                    return {"total": len(valid_requests), "filtered": len(filtered_requests), "data": [], "pane_counts": {}}
+                    return {"total": valid_total, "filtered": len(filtered_requests), "data": [], "pane_counts": {}}
 
-                # Sort
                 filtered_requests = self._sort_reports(filtered_requests, order_column, order_dir)
 
-                # Paginate
                 if length == -1:
                     paginated = filtered_requests
                 else:
                     paginated = filtered_requests[start : start + length]  # noqa: E203
 
-                # Calculate pane counts
-                pane_counts = self._calculate_pane_counts(valid_requests, filtered_requests)
-
-                return {"total": len(valid_requests), "filtered": len(filtered_requests), "data": paginated, "pane_counts": pane_counts}
+                return {"total": valid_total, "filtered": len(filtered_requests), "data": paginated, "pane_counts": pane_counts}
             except Exception as e:
                 LOGGER.error(f"Error querying Redis for reports: {e}")
                 # Fall through to instance queries
@@ -438,6 +472,24 @@ class InstancesUtils:
             return sorted(reports, key=lambda x: float(x.get("date", 0)), reverse=reverse)
         return sorted(reports, key=lambda x: x.get(order_column, ""), reverse=reverse)
 
+    def _iter_redis_requests(self, redis_client, chunk_size: int = 1000):
+        start = 0
+        while True:
+            end = start + chunk_size - 1
+            chunk = redis_client.lrange("requests", start, end)
+            if not chunk:
+                break
+            for report_raw in chunk:
+                try:
+                    report = loads(report_raw.decode("utf-8", "replace"))
+                except Exception:
+                    continue
+                if isinstance(report, dict):
+                    yield report
+            if len(chunk) < chunk_size:
+                break
+            start += chunk_size
+
     def _calculate_pane_counts(self, all_reports: List[dict], filtered_reports: List[dict]) -> dict:
         """Calculate search panes counts"""
         pane_counts = {}
@@ -511,18 +563,14 @@ class InstancesUtils:
             try:
                 if plugin_id == "requests":
                     # Requests are always saved to Redis
-                    requests_data = redis_client.lrange("requests", 0, -1)
                     requests_list = []
                     seen_ids = set()
-                    for item in requests_data:
-                        try:
-                            request = loads(item.decode("utf-8"))
-                            req_id = request.get("id")
-                            if req_id not in seen_ids:
-                                seen_ids.add(req_id)
-                                requests_list.append(request)
-                        except Exception:
+                    for request in self._iter_redis_requests(redis_client):
+                        req_id = request.get("id")
+                        if req_id in seen_ids:
                             continue
+                        seen_ids.add(req_id)
+                        requests_list.append(request)
                     return {"requests": requests_list}
 
                 # Check if METRICS_SAVE_TO_REDIS is enabled for errors

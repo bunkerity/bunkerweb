@@ -371,6 +371,11 @@ $(document).ready(function () {
 
   $(document).on("click", ".toggle-filters", updateFilterTranslations);
 
+  // Prevent scroll propagation to the menu
+  $("#language-dropdown-menu").on("wheel touchmove", function (e) {
+    e.stopPropagation();
+  });
+
   // Language selector search logic
   $(document).on(
     "input",

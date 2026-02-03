@@ -24,16 +24,6 @@
       "type": "multiselect",
       "multiselect": [
         {
-          "id": "ip:laurent-minne-fr-be-aggressive",
-          "label": "Laurent Minne's FR/BE aggressive IPs (deprecated, please use the new Data Shield Aggressive IPs)",
-          "value": "https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt"
-        },
-        {
-          "id": "ip:laurent-minne-data-shield-aggressive",
-          "label": "Laurent Minne's Data Shield Aggressive IPs",
-          "value": "https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt"
-        },
-        {
           "id": "ip:danmeuk-tor-exit",
           "label": "Tor Exit Nodes IPs (dan.me.uk)",
           "value": "https://www.dan.me.uk/torlist/?exit"
@@ -42,6 +32,16 @@
           "id": "ua:mitchellkrogza-bad-user-agents",
           "label": "Mitchell Krogza's Bad User-Agents",
           "value": "https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list"
+        },
+        {
+          "id": "ip:laurent-minne-data-shield-aggressive",
+          "label": "Data-Shield IPv4 Blocklist - Laurent M. - For Web Apps, WordPress, VPS (Apache/Nginx)",
+          "value": "https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt"
+        },
+        {
+          "id": "ip:laurent-minne-data-shield-critical",
+          "label": "Data-Shield IPv4 Blocklist - Laurent M. - For DMZs, SaaS, API & Critical Assets",
+          "value": "https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_critical_data-shield_ipv4_blocklist.txt"
         }
       ]
     },

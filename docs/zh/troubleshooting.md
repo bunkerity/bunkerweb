@@ -288,6 +288,158 @@ BunkerWeb 中 ModSecurity 的默认配置是以异常评分模式加载核心规
 
 当使用基于容器的集成时，容器的时区可能与主机的时区不匹配。要解决此问题，您可以在您的容器上将 `TZ` 环境变量设置为您选择的时区（例如 `TZ=Europe/Paris`）。您可以在[此处](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List)找到时区标识符的列表。
 
+## 从数据库清理旧实例 {#clear-old-instances-db}
+
+BunkerWeb 会将已知实例存储在 `bw_instances` 表中（主键：`hostname`）。
+如果你经常重新部署，可能会残留旧记录（例如长时间未上报的实例），此时你可能希望将其清理掉。
+
+!!! warning "先备份"
+    在手动修改数据库之前，请先创建备份（对 SQLite 卷做快照，或使用你的数据库引擎备份工具）。
+
+!!! warning "停止写入端"
+    为避免删除时发生竞态，请先停止（或缩容）会更新实例信息的组件
+    （通常是 scheduler / autoconf，取决于你的部署方式），执行清理后再重新启动它们。
+
+### 表与字段（参考）
+
+实例模型定义如下：
+
+- 表：`bw_instances`
+- 主键：`hostname`
+- “最后一次出现”时间戳：`last_seen`
+- 还包含：
+  `name`, `port`, `listen_https`, `https_port`,
+  `server_name`, `type`, `status`, `method`,
+  `creation_date`
+
+### 1 - 连接数据库
+
+使用现有的 [访问数据库](#access-database) 章节进行连接
+（SQLite / MariaDB / PostgreSQL）。
+
+### 2 - Dry-run：列出过期实例
+
+选择一个保留窗口（示例：90 天），先查看将会被删除的内容。
+
+=== "SQLite"
+
+    ```sql
+    SELECT hostname, name, server_name, method, status, creation_date, last_seen
+    FROM bw_instances
+    WHERE last_seen < datetime('now', '-90 days')
+    ORDER BY last_seen ASC
+    LIMIT 50;
+    ```
+
+=== "MariaDB / MySQL"
+
+    ```sql
+    SELECT hostname, name, server_name, method, status, creation_date, last_seen
+    FROM bw_instances
+    WHERE last_seen < DATE_SUB(NOW(), INTERVAL 90 DAY)
+    ORDER BY last_seen ASC
+    LIMIT 50;
+    ```
+
+=== "PostgreSQL"
+
+    ```sql
+    SELECT hostname, name, server_name, method, status, creation_date, last_seen
+    FROM bw_instances
+    WHERE last_seen < NOW() - INTERVAL '90 days'
+    ORDER BY last_seen ASC
+    LIMIT 50;
+    ```
+
+### 3 - 删除过期实例
+
+确认无误后，删除这些记录。
+
+=== "SQLite"
+
+    ```sql
+    BEGIN;
+
+    DELETE FROM bw_instances
+    WHERE last_seen < datetime('now', '-90 days');
+
+    COMMIT;
+    ```
+
+=== "MariaDB / MySQL"
+
+    ```sql
+    START TRANSACTION;
+
+    DELETE FROM bw_instances
+    WHERE last_seen < DATE_SUB(NOW(), INTERVAL 90 DAY);
+
+    COMMIT;
+    ```
+
+=== "PostgreSQL"
+
+    ```sql
+    BEGIN;
+
+    DELETE FROM bw_instances
+    WHERE last_seen < NOW() - INTERVAL '90 days';
+
+    COMMIT;
+    ```
+
+!!! tip "按 hostname 删除"
+    如需删除某个特定实例，请使用其 hostname（主键）。
+
+    ```sql
+    DELETE FROM bw_instances WHERE hostname = '<hostname>';
+    ```
+
+### 4 - 标记实例已变更（可选）
+
+BunkerWeb 会在 `bw_metadata` 表中跟踪实例变更
+（`instances_changed`, `last_instances_change`）。
+
+如果手动清理后 UI 没有按预期刷新，你可以强制更新“变更标记”：
+
+=== "SQLite / PostgreSQL"
+
+    ```sql
+    UPDATE bw_metadata
+    SET instances_changed = 1,
+        last_instances_change = CURRENT_TIMESTAMP
+    WHERE id = 1;
+    ```
+
+=== "MariaDB / MySQL"
+
+    ```sql
+    UPDATE bw_metadata
+    SET instances_changed = 1,
+        last_instances_change = NOW()
+    WHERE id = 1;
+    ```
+
+### 5 - 回收空间（可选）
+
+=== "SQLite"
+
+    ```sql
+    VACUUM;
+    ```
+
+=== "PostgreSQL"
+
+    ```sql
+    VACUUM (ANALYZE);
+    ```
+
+=== "MariaDB / MySQL"
+
+    ```sql
+    OPTIMIZE TABLE bw_instances;
+    ```
+
 ## Web UI {#web-ui}
 
 如果您忘记了 UI 凭据或遇到 2FA 问题，您可以连接到数据库以重新获得访问权限。

@@ -1268,7 +1268,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.8-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.8-rc3
 ```
 
 默认情况下，容器暴露：
@@ -1284,7 +1284,7 @@ docker run -d \
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.8-rc1
+    image: bunkerity/bunkerweb-all-in-one:1.6.8-rc3
     volumes:
       - bw-storage:/data
 ...
@@ -1361,7 +1361,7 @@ docker run -d \
   -e API_PASSWORD=StrongP@ssw0rd \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
   -p 8888:8888/tcp \
-  bunkerity/bunkerweb-all-in-one:1.6.8-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.8-rc3
 ```
 
 推荐（在 BunkerWeb 之后）— 不要发布 `8888`；而是反向代理它：
@@ -1369,7 +1369,7 @@ docker run -d \
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.8-rc1
+    image: bunkerity/bunkerweb-all-in-one:1.6.8-rc3
     container_name: bunkerweb-aio
     ports:
       - "80:8080/tcp"
@@ -1441,7 +1441,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.8-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.8-rc3
 ```
 
 *   当 `USE_CROWDSEC=yes` 时，入口点将：
@@ -1496,7 +1496,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.8-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.8-rc3
 ```
 
 !!! info "内部工作原理"
@@ -1518,7 +1518,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.8-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.8-rc3
 ```
 
 注意：
@@ -1554,7 +1554,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.8-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.8-rc3
 ```
 
 *   当 `CROWDSEC_API` 不是 `127.0.0.1` 或 `localhost` 时，将跳过**本地注册**。
@@ -1588,13 +1588,13 @@ docker run -d \
 无论您是进行测试、开发应用程序还是在生产中部署 BunkerWeb，Docker 容器化选项都提供了灵活性和易用性。采用这种方法使您能够充分利用 BunkerWeb 的功能，同时利用 Docker 技术的优势。
 
 ```shell
-docker pull bunkerity/bunkerweb:1.6.8-rc1
+docker pull bunkerity/bunkerweb:1.6.8-rc3
 ```
 
 Docker 镜像也可在 [GitHub packages](https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb) 上找到，可以使用 `ghcr.io` 仓库地址下载：
 
 ```shell
-docker pull ghcr.io/bunkerity/bunkerweb:1.6.8-rc1
+docker pull ghcr.io/bunkerity/bunkerweb:1.6.8-rc3
 ```
 
 Docker 集成的关键概念包括：
@@ -1604,7 +1604,7 @@ Docker 集成的关键概念包括：
 - **网络**：Docker 网络在 BunkerWeb 的集成中扮演着至关重要的角色。这些网络有两个主要目的：向客户端公开端口以及连接到上游 Web 服务。通过公开端口，BunkerWeb 可以接受来自客户端的传入请求，允许他们访问受保护的 Web 服务。此外，通过连接到上游 Web 服务，BunkerWeb 可以高效地路由和管理流量，提供增强的安全性和性能。
 
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 SQLite 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，也支持其他数据库后端。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc1/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 SQLite 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，也支持其他数据库后端。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc3/misc/integrations)中的 docker-compose 文件。
 
 ### 环境变量
 
@@ -1614,7 +1614,7 @@ Docker 集成的关键概念包括：
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
     environment:
       - MY_SETTING=value
       - ANOTHER_SETTING=another value
@@ -1655,7 +1655,7 @@ secrets:
 [调度器](concepts.md#scheduler) 在其自己的容器中运行，该容器也可在 Docker Hub 上找到：
 
 ```shell
-docker pull bunkerity/bunkerweb-scheduler:1.6.8-rc1
+docker pull bunkerity/bunkerweb-scheduler:1.6.8-rc3
 ```
 
 !!! info "BunkerWeb 设置"
@@ -1676,7 +1676,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.8-rc1
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.8-rc1
+        image: bunkerity/bunkerweb:1.6.8-rc3
         environment:
           # 这将为 BunkerWeb 容器设置 API
           <<: *bw-api-env
@@ -1685,7 +1685,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.8-rc1
           - bw-universe
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
         environment:
           # 这将为调度器容器设置 API
           <<: *bw-api-env
@@ -1703,7 +1703,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.8-rc1
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
     volumes:
       - bw-storage:/data
 ...
@@ -1849,7 +1849,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.8-rc1
+    image: bunkerity/bunkerweb:1.6.8-rc3
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -1862,7 +1862,7 @@ services:
       - bw-universe
 ...
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
     environment:
       <<: *bw-api-env
       BUNKERWEB_INSTANCES: "bunkerweb" # 这个设置是强制性的，用来指定 BunkerWeb 实例
@@ -1895,7 +1895,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.8-rc1
+    image: bunkerity/bunkerweb:1.6.8-rc3
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -1908,7 +1908,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
     depends_on:
       - bunkerweb
     environment:
@@ -1974,8 +1974,8 @@ docker build -t bw-ui -f src/ui/Dockerfile .
 
 ```bash
 # 下载脚本及其校验和
-curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.8-rc1/install-bunkerweb.sh
-curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.8-rc1/install-bunkerweb.sh.sha256
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.8-rc3/install-bunkerweb.sh
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.8-rc3/install-bunkerweb.sh.sha256
 
 # 验证校验和
 sha256sum -c install-bunkerweb.sh.sha256
@@ -2034,7 +2034,7 @@ sudo ./install-bunkerweb.sh
 
 | 选项                    | 描述                                              |
 | ----------------------- | ------------------------------------------------- |
-| `-v, --version VERSION` | 指定要安装的 BunkerWeb 版本（例如 `1.6.8~rc1`）。 |
+| `-v, --version VERSION` | 指定要安装的 BunkerWeb 版本（例如 `1.6.8~rc3`）。 |
 | `-w, --enable-wizard`   | 启用设置向导。                                    |
 | `-n, --no-wizard`       | 禁用设置向导。                                    |
 | `-y, --yes`             | 以非交互模式运行，对所有提示使用默认答案。        |
@@ -2099,7 +2099,7 @@ sudo ./install-bunkerweb.sh --yes
 sudo ./install-bunkerweb.sh --worker --no-wizard
 
 # 安装一个特定版本
-sudo ./install-bunkerweb.sh --version 1.6.8~rc1
+sudo ./install-bunkerweb.sh --version 1.6.8~rc3
 
 # 带有远程工作实例的管理器设置（需要 instances）
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
@@ -2243,12 +2243,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.8~rc1：
+    最后安装 BunkerWeb 1.6.8~rc3：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.8~rc1
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.8~rc3
     ```
 
     要防止在执行 `apt upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -2291,12 +2291,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.8~rc1：
+    最后安装 BunkerWeb 1.6.8~rc3：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.8~rc1
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.8~rc3
     ```
 
     要防止在执行 `apt upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -2327,12 +2327,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.8~rc1：
+    最后安装 BunkerWeb 1.6.8~rc3：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
   	sudo dnf makecache && \
-  	sudo -E dnf install -y --allowerasing bunkerweb-1.6.8~rc1
+  	sudo -E dnf install -y --allowerasing bunkerweb-1.6.8~rc3
     ```
 
     要防止在执行 `dnf upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -2377,12 +2377,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.8~rc1：
+    最后安装 BunkerWeb 1.6.8~rc3：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
-    sudo -E dnf install -y --allowerasing bunkerweb-1.6.8~rc1
+    sudo -E dnf install -y --allowerasing bunkerweb-1.6.8~rc3
     ```
 
     要防止在执行 `dnf upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -2475,7 +2475,7 @@ export SERVICE_UI=yes
     Docker 自动配置集成意味着使用**多站点模式**。有关更多信息，请参阅文档的[多站点部分](concepts.md#multisite-mode)。
 
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc1/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc3/misc/integrations)中的 docker-compose 文件。
 
 要启用自动配置更新，请在堆栈中包含一个名为 `bw-autoconf` 的额外容器。此容器承载自动配置服务，该服务管理 BunkerWeb 的动态配置更改。
 
@@ -2489,7 +2489,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.8-rc1
+    image: bunkerity/bunkerweb:1.6.8-rc3
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -2504,7 +2504,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由自动配置服务自动检测
@@ -2519,7 +2519,7 @@ services:
       - bw-db
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.8-rc1
+    image: bunkerity/bunkerweb-autoconf:1.6.8-rc3
     depends_on:
       - bunkerweb
       - bw-docker
@@ -2598,15 +2598,16 @@ networks:
 
 ##### 模式与运行时
 
-| Setting               | 描述                                    | 接受的值                           | 默认值                        |
-| --------------------- | --------------------------------------- | ---------------------------------- | ----------------------------- |
-| `AUTOCONF_MODE`       | 启用 autoconf 控制器                    | `yes` 或 `no`                      | `no`                          |
-| `SWARM_MODE`          | 监控 Swarm 服务而非 Docker 容器         | `yes` 或 `no`                      | `no`                          |
-| `KUBERNETES_MODE`     | 监控 Kubernetes ingress/pod 而非 Docker | `yes` 或 `no`                      | `no`                          |
-| `DOCKER_HOST`         | Docker 套接字 / 远程 API URL            | 例如 `unix:///var/run/docker.sock` | `unix:///var/run/docker.sock` |
-| `WAIT_RETRY_INTERVAL` | 实例就绪检查之间的秒数                  | 整秒                               | `5`                           |
-| `LOG_SYSLOG_TAG`      | Autoconf 日志的 syslog tag              | 字符串                             | `bw-autoconf`                 |
-| `TZ`                  | Autoconf 日志和时间戳使用的时区         | TZ 数据库名（如 `Europe/Paris`）   | unset（容器默认，通常为 UTC） |
+| Setting                   | 描述                                    | 接受的值                           | 默认值                        |
+| ------------------------- | --------------------------------------- | ---------------------------------- | ----------------------------- |
+| `AUTOCONF_MODE`           | 启用 autoconf 控制器                    | `yes` 或 `no`                      | `no`                          |
+| `SWARM_MODE`              | 监控 Swarm 服务而非 Docker 容器         | `yes` 或 `no`                      | `no`                          |
+| `KUBERNETES_MODE`         | 监控 Kubernetes ingress/pod 而非 Docker | `yes` 或 `no`                      | `no`                          |
+| `KUBERNETES_GATEWAY_MODE` | 启用 Kubernetes Gateway API 控制器      | `yes` 或 `no`                      | `no`                          |
+| `DOCKER_HOST`             | Docker 套接字 / 远程 API URL            | 例如 `unix:///var/run/docker.sock` | `unix:///var/run/docker.sock` |
+| `WAIT_RETRY_INTERVAL`     | 实例就绪检查之间的秒数                  | 整秒                               | `5`                           |
+| `LOG_SYSLOG_TAG`          | Autoconf 日志的 syslog tag              | 字符串                             | `bw-autoconf`                 |
+| `TZ`                      | Autoconf 日志和时间戳使用的时区         | TZ 数据库名（如 `Europe/Paris`）   | unset（容器默认，通常为 UTC） |
 
 ##### 数据库与校验
 
@@ -2637,17 +2638,20 @@ networks:
 
 ##### 仅 Kubernetes
 
-| Setting                                 | 描述                                                                        | 接受的值          | 默认值          |
-| --------------------------------------- | --------------------------------------------------------------------------- | ----------------- | --------------- |
-| `KUBERNETES_VERIFY_SSL`                 | 校验 Kubernetes API 的 TLS                                                  | `yes` 或 `no`     | `yes`           |
-| `KUBERNETES_SSL_CA_CERT`                | Kubernetes API 自定义 CA bundle 路径                                        | 文件路径          | unset           |
-| `USE_KUBERNETES_FQDN`                   | 使用 `<pod>.<ns>.pod.<domain>` 而不是 Pod IP 作为实例主机名                 | `yes` 或 `no`     | `yes`           |
-| `KUBERNETES_INGRESS_CLASS`              | 仅处理该类的 ingress                                                        | 字符串            | unset（全部）   |
-| `KUBERNETES_DOMAIN_NAME`                | 构建上游主机时使用的集群域名后缀                                            | 字符串            | `cluster.local` |
-| `KUBERNETES_SERVICE_PROTOCOL`           | 生成的反向代理主机所用的协议                                                | `http` 或 `https` | `http`          |
-| `BUNKERWEB_SERVICE_NAME`                | 在补丁 Ingress 状态时读取的 Service 名称                                    | 字符串            | `bunkerweb`     |
-| `BUNKERWEB_NAMESPACE`                   | 该 Service 的命名空间                                                       | 字符串            | `bunkerweb`     |
-| `KUBERNETES_REVERSE_PROXY_SUFFIX_START` | 多路径 ingress 生成 `REVERSE_PROXY_HOST_n`/`REVERSE_PROXY_URL_n` 的起始索引 | 整数 (>=0)        | `1`             |
+| Setting                                 | 描述                                                                        | 接受的值                                           | 默认值          |
+| --------------------------------------- | --------------------------------------------------------------------------- | -------------------------------------------------- | --------------- |
+| `KUBERNETES_VERIFY_SSL`                 | 校验 Kubernetes API 的 TLS                                                  | `yes` 或 `no`                                      | `yes`           |
+| `KUBERNETES_SSL_CA_CERT`                | Kubernetes API 自定义 CA bundle 路径                                        | 文件路径                                           | unset           |
+| `USE_KUBERNETES_FQDN`                   | 使用 `<pod>.<ns>.pod.<domain>` 而不是 Pod IP 作为实例主机名                 | `yes` 或 `no`                                      | `yes`           |
+| `KUBERNETES_INGRESS_CLASS`              | 仅处理该类的 ingress                                                        | 字符串                                             | unset（全部）   |
+| `KUBERNETES_GATEWAY_MODE`               | 使用 Gateway API 控制器而非 Ingress                                         | `yes` 或 `no`                                      | `no`            |
+| `KUBERNETES_GATEWAY_CLASS`              | 仅处理该类的 Gateway                                                        | 字符串                                             | unset（全部）   |
+| `KUBERNETES_GATEWAY_API_VERSION`        | 使用的 Gateway API 版本（缺失时自动回退）                                   | `v1`、`v1beta1`、`v1beta2`、`v1alpha2`、`v1alpha1` | `v1`            |
+| `KUBERNETES_DOMAIN_NAME`                | 构建上游主机时使用的集群域名后缀                                            | 字符串                                             | `cluster.local` |
+| `KUBERNETES_SERVICE_PROTOCOL`           | 生成的反向代理主机所用的协议                                                | `http` 或 `https`                                  | `http`          |
+| `BUNKERWEB_SERVICE_NAME`                | 在补丁 Ingress/Gateway 状态时读取的 Service 名称                            | 字符串                                             | `bunkerweb`     |
+| `BUNKERWEB_NAMESPACE`                   | 该 Service 的命名空间                                                       | 字符串                                             | `bunkerweb`     |
+| `KUBERNETES_REVERSE_PROXY_SUFFIX_START` | 多路径 ingress 生成 `REVERSE_PROXY_HOST_n`/`REVERSE_PROXY_URL_n` 的起始索引 | 整数 (>=0)                                         | `1`             |
 
 ### 自动配置服务
 
@@ -2698,13 +2702,13 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.8-rc1
+        image: bunkerity/bunkerweb:1.6.8-rc3
         labels:
           - "bunkerweb.INSTANCE=yes"
           - "bunkerweb.NAMESPACE=my-namespace" # 为 BunkerWeb 实例设置命名空间，以便自动配置服务可以检测到它
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.8-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.8-rc3
         environment:
           ...
           NAMESPACES: "my-namespace my-other-namespace" # 只监听这些命名空间
@@ -2727,9 +2731,20 @@ networks:
 </figure>
 
 为了在 Kubernetes 环境中自动化 BunkerWeb 实例的配置，
-autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)。
+autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) 或 [Gateway API 控制器](https://kubernetes.io/docs/concepts/services-networking/gateway/)。
 它根据 [Ingress 资源](https://kubernetes.io/docs/concepts/services-networking/ingress/) 配置 BunkerWeb 实例，
 并监控其他 Kubernetes 对象，例如 [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/)，以获取自定义配置。
+
+!!! example "Gateway API 模式"
+    Gateway API 模式目前处于 **beta**。
+
+    请确保集群已安装 Gateway API 的 CRD（参见 [Gateway API 安装指南](https://gateway-api.sigs.k8s.io/guides/getting-started/#installing-gateway-api)）。
+
+    如果你使用 Kubernetes Gateway API，请设置 `KUBERNETES_MODE=yes` 和 `KUBERNETES_GATEWAY_MODE=yes`。
+
+    控制器将监控 `Gateway`、`HTTPRoute`、`TLSRoute`、`TCPRoute` 和 `UDPRoute` 资源，而不是 `Ingress` 对象。你可以通过 `KUBERNETES_GATEWAY_CLASS` 限制处理范围，并选择 `KUBERNETES_GATEWAY_API_VERSION`（`v1`、`v1beta1`、`v1beta2`、`v1alpha2` 或 `v1alpha1`）。
+
+    如果你的 Service 名称不是 `bunkerweb`，请设置 `BUNKERWEB_SERVICE_NAME` 以便状态补丁读取正确的 Service。
 
 !!! info "ConfigMap 同步"
     - Ingress 控制器仅管理带有 `bunkerweb.io/CONFIG_TYPE` 注解的 ConfigMap。
@@ -2742,7 +2757,7 @@ autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/conce
 鉴于存在多个 BunkerWeb 实例，有必要建立一个共享数据存储，实现为一个 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 服务。这些实例将利用该服务来缓存和共享彼此之间的数据。有关 Redis/Valkey 设置的更多信息，请参见[此处](features.md#redis)。
 
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc1/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc3/misc/integrations)中的 docker-compose 文件。
 
     集群数据库后端的设置超出了本文档的范围。
 
@@ -2751,9 +2766,9 @@ autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/conce
 !!! warning "Kubernetes API 的自定义 CA"
     如果您为您的 Kubernetes API 使用自定义 CA，您可以在 ingress 控制器上挂载一个包含您的中间证书和根证书的捆绑文件，并将 `KUBERNETES_SSL_CA_CERT` 环境变量的值设置为容器内捆绑文件的路径。或者，即使不推荐，您也可以通过将 ingress 控制器的 `KUBERNETES_SSL_VERIFY` 环境变量设置为 `no`（默认为 `yes`）来禁用证书验证。
 
-此外，**在使用 Kubernetes 集成时，将 `KUBERNETES_MODE` 环境变量设置为 `yes` 至关重要**。此变量是正常运行所必需的。
+此外，**在使用 Kubernetes 集成时，将 `KUBERNETES_MODE` 环境变量设置为 `yes` 至关重要**。此变量是正常运行所必需的。如果你使用 Gateway API，还需要设置 `KUBERNETES_GATEWAY_MODE=yes`。
 
-### 安装方法
+### 安装方法 {#kubernetes-installation}
 
 #### 使用 helm chart（推荐）
 
@@ -2857,7 +2872,7 @@ The **BunkerWeb controller** automatically discovers pods with BunkerWeb sidecar
 ```yaml
 controller:
   enabled: true
-  tag: "1.6.8~rc1"
+  tag: "1.6.8~rc3"
 ```
 
 2. For each sidecar, add:
@@ -2950,7 +2965,7 @@ In your BunkerWeb chart `values.yaml`, configure the `BUNKERWEB_INSTANCES` envir
 
 ```yaml
 scheduler:
-  tag: "1.6.8~rc1"
+  tag: "1.6.8~rc3"
   extraEnvs:
     - name: BUNKERWEB_INSTANCES
       value: "http://app1-bunkerweb-workers.namespace.svc.cluster.local:5000 http://app2-bunkerweb-workers.namespace.svc.cluster.local:5000"
@@ -2994,7 +3009,7 @@ spec:
 
         # BunkerWeb Sidecar
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.8-rc1
+          image: bunkerity/bunkerweb:1.6.8-rc3
           ports:
             - containerPort: 8080  # Exposed HTTP port
             - containerPort: 5000  # Internal API (mandatory)
@@ -3057,10 +3072,11 @@ spec:
 
 ###### Important Environment Variables
 
-| Variable           | Value                                                 | Description                                              |
-| ------------------ | ----------------------------------------------------- | -------------------------------------------------------- |
-| `KUBERNETES_MODE`  | `yes`                                                 | **Mandatory** for automatic discovery via the controller |
-| `API_WHITELIST_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API                            |
+| Variable                  | Value                                                 | Description                                              |
+| ------------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
+| `KUBERNETES_MODE`         | `yes`                                                 | **Mandatory** for automatic discovery via the controller |
+| `KUBERNETES_GATEWAY_MODE` | `yes` or `no` (if using Gateway API)                  | Use Gateway API mode                                     |
+| `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API                            |
 
 
 ##### Step 3: Creating Services
@@ -3264,7 +3280,7 @@ To add a new application protected by BunkerWeb:
 
 #### 完整的 YAML 文件
 
-除了使用 helm chart，您还可以使用 GitHub 仓库中 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc1/misc/integrations)内的 YAML 样板文件。请注意，我们强烈建议您改用 helm chart。
+除了使用 helm chart，您还可以使用 GitHub 仓库中 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc3/misc/integrations)内的 YAML 样板文件。请注意，我们强烈建议您改用 helm chart。
 
 ### Ingress 资源
 
@@ -3308,6 +3324,71 @@ spec:
 ...
 ```
 
+### Gateway 资源
+
+当使用 Gateway API 模式时，你可以声明 `Gateway`、`HTTPRoute`、`TLSRoute`、`TCPRoute` 与 `UDPRoute` 资源。
+在 `HTTPRoute` 上通过 `bunkerweb.io/<SETTING>` 注解提供 BunkerWeb 配置；如需限定到某个主机，
+使用 `bunkerweb.io/<hostname>_<SETTING>`。`hostnames` 字段用于驱动服务器名称。对于 `TCPRoute`/`UDPRoute`（以及没有 `hostnames` 的 `TLSRoute`），BunkerWeb 会生成类似 `<route>.<namespace>.<protocol>` 的服务器名称。参见 [Gateway 类](#gateway-class)。
+`Gateway` 上的注解会应用到其挂载的所有路由，而 `HTTPRoute` 上的注解仅作用于该路由。
+你也可以用 `bunkerweb.io/<hostname>_<SETTING>` 将 Gateway 注解限定到某个服务器名；只有当该路由/服务器名存在时才会生效。
+
+#### 支持的资源
+
+- 资源：`HTTPRoute`、`TLSRoute`、`TCPRoute`、`UDPRoute`（不支持 `GRPCRoute`）。
+- 规则：`TLSRoute`、`TCPRoute` 和 `UDPRoute` 只使用第一条规则。
+- 后端：仅 `Service`，每条规则只取第一个 `backendRef`。
+
+#### 协议与 TLS
+
+- Listener 协议：`HTTP`/`HTTPS` 用于 `HTTPRoute`，`TLS` 用于 `TLSRoute`，`TCP` 用于 `TCPRoute`，`UDP` 用于 `UDPRoute`。
+- TLS：通过 listener 的 `certificateRefs`，仅 `HTTPS` 或 `TLS` + `mode: Terminate`（不支持 Passthrough 终止）。`TLSRoute` 运行在 stream 模式。
+
+!!! tip "Stream 路由的服务器名称"
+    对于 `TLSRoute`、`TCPRoute` 和 `UDPRoute`，你可以通过设置 `bunkerweb.io/SERVER_NAME` 来覆盖生成的服务器名称。
+
+!!! note "Experimental Channel（stream 路由）"
+    如果你打算使用 `TLSRoute`、`TCPRoute` 或 `UDPRoute`，请安装 Experimental Channel CRD： https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel
+
+!!! info "TLS 支持"
+    `HTTPRoute` 使用 `HTTPS` 或 `TLS` + `mode: Terminate` 时，TLS 终止通过 `Gateway` 的 listeners 及其 `certificateRefs`（TLS secrets）完成。`TLSRoute` 运行在 stream 模式。
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: my-gateway
+spec:
+  gatewayClassName: bunkerweb
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: www.example.com
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: my-route
+  annotations:
+    # 应用于该路由内所有 hostnames
+    bunkerweb.io/MY_SETTING: "value"
+    # 仅应用于 www.example.com
+    bunkerweb.io/www.example.com_MY_SETTING: "value"
+spec:
+  parentRefs:
+    - name: my-gateway
+  hostnames:
+    - www.example.com
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: svc-my-app
+          port: 8000
+```
+
 ### 命名空间 {#namespaces_1}
 
 从 `1.6.0` 版本开始，BunkerWeb 的自动配置堆栈现在支持命名空间。此功能使您能够在同一个 Kubernetes 集群上管理多个 BunkerWeb 实例和服务的集群。要利用命名空间，只需在您的 BunkerWeb 实例和服务上设置 `namespace` 元数据字段。这是一个示例：
@@ -3347,7 +3428,7 @@ metadata:
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.6.8-rc1
+              image: bunkerity/bunkerweb-autoconf:1.6.8-rc3
               imagePullPolicy: Always
               env:
                 - name: NAMESPACES
@@ -3400,6 +3481,36 @@ spec:
                 name: svc-my-app
                 port:
                   number: 8000
+```
+
+### Gateway 类 {#gateway-class}
+
+当使用 Gateway API 时，BunkerWeb 需要一个指向其控制器的 `GatewayClass`：
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: bunkerweb
+spec:
+  controllerName: bunkerweb.io/gateway-controller
+```
+
+若要限制被监控的 `Gateway` 资源，请设置 `KUBERNETES_GATEWAY_CLASS`（例如 `bunkerweb`），并在 `Gateway` 资源中
+使用匹配的 `gatewayClassName`：
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: my-gateway
+spec:
+  gatewayClassName: bunkerweb
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: www.example.com
 ```
 
 ### 自定义域名
@@ -3491,11 +3602,11 @@ service:
 
 # BunkerWeb 设置
 bunkerweb:
-  tag: 1.6.8~rc1
+  tag: 1.6.8~rc3
 
 # 调度器设置
 scheduler:
-  tag: 1.6.8~rc1
+  tag: 1.6.8~rc3
   extraEnvs:
     # 启用 real IP 模块以获取客户端的真实 IP
     - name: USE_REAL_IP
@@ -3503,11 +3614,11 @@ scheduler:
 
 # 控制器设置
 controller:
-  tag: 1.6.8~rc1
+  tag: 1.6.8~rc3
 
 # UI 设置
 ui:
-  tag: 1.6.8~rc1
+  tag: 1.6.8~rc3
 ```
 
 使用自定义值安装 BunkerWeb：
@@ -3554,7 +3665,7 @@ spec:
         backend:
           service:
             # 由 Helm chart 创建
-            name: bunkerweb-external
+            name: bunkerweb-ui
             port:
               # UI 必须使用 HTTPS 端口
               number: 443
@@ -3608,6 +3719,500 @@ spec:
 
 您可以访问 `http(s)://myapp.example.com`，现在它已受到 BunkerWeb 的保护 🛡️
 
+
+### 从 nginx ingress 控制器迁移 {#migrate-from-nginx-ingress-controller}
+
+#### 简介
+
+本实用指南将引导您将 **NGINX Ingress** 资源迁移到 **BunkerWeb**。它专注于转换您现有的 Kubernetes 清单，并提供使用示例。
+
+**前提条件**：BunkerWeb 必须安装在您的集群中（参见[安装方法](#kubernetes-installation)）。
+
+#### 迁移策略
+
+推荐方法：_共存_
+
+1. **并行安装 BunkerWeb** 与 NGINX Ingress
+2. **复制您的 Ingress** 使用 `bunkerweb` 类
+3. **测试** BunkerWeb LoadBalancer IP
+4. **切换 DNS** 验证通过后
+5. **删除** 旧的 NGINX Ingress 资源
+
+#### 迁移工作流
+
+```bash
+# 1. 备份当前的 Ingress
+kubectl get ingress --all-namespaces -o yaml > nginx-ingress-backup.yaml
+
+# 2. 转换并创建新的 BunkerWeb Ingress
+kubectl apply -f bunkerweb-ingress.yaml
+
+# 3. 使用 BunkerWeb IP 测试
+BUNKERWEB_IP=$(kubectl get svc -n bunkerweb bunkerweb-external -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+curl -H "Host: your-domain.com" http://$BUNKERWEB_IP
+
+# 4. 验证通过后，切换 DNS 然后删除旧的
+kubectl delete ingress <old-ingress> -n <namespace>
+```
+
+---
+
+#### 示例 1：标准 Ingress
+
+##### 场景
+
+通过 cert-manager 实现自动 HTTPS 的简单 Web 应用程序。
+
+=== "NGINX Ingress"
+
+    ```yaml title="nginx-ingress.yaml"
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: webapp-ingress
+      namespace: production
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    spec:
+      tls:
+      - hosts:
+        - webapp.example.com
+        secretName: webapp-tls
+      rules:
+      - host: webapp.example.com
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: webapp-service
+                port:
+                  number: 80
+    ```
+
+=== "BunkerWeb Ingress"
+
+    ```yaml title="bunkerweb-ingress.yaml"
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: webapp-ingress
+      namespace: production
+      annotations:
+        # BunkerWeb 自动 Let's Encrypt（cert-manager 的替代方案）
+        bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+        bunkerweb.io/EMAIL_LETS_ENCRYPT: "admin@example.com"
+
+        # 或保留 cert-manager（注释掉上面的 AUTO_LETS_ENCRYPT）
+        # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    spec:
+      ingressClassName: bunkerweb  # 主要变化：Ingress 类
+      tls:
+      - hosts:
+        - webapp.example.com
+        secretName: webapp-tls
+      rules:
+      - host: webapp.example.com
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: webapp-service
+                port:
+                  number: 80
+    ```
+
+##### 关键差异
+
+| 方面       | NGINX                              | BunkerWeb                         |
+| ---------- | ---------------------------------- | --------------------------------- |
+| Ingress 类 | `kubernetes.io/ingress.class` 注解 | `ingressClassName` 字段           |
+| SSL 证书   | 需要 cert-manager                  | cert-manager 或内置 Let's Encrypt |
+| 安全性     | 默认无                             | 默认启用 WAF                      |
+
+---
+
+#### 示例 2：带注解的 Ingress
+
+##### 场景
+
+具有速率限制、CORS、HTTPS 重定向和超时配置的 REST API。
+
+=== "NGINX Ingress"
+
+    ```yaml title="nginx-ingress.yaml"
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: api-ingress
+      namespace: production
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+
+        # HTTPS 重定向
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+
+        # CORS
+        nginx.ingress.kubernetes.io/enable-cors: "true"
+        nginx.ingress.kubernetes.io/cors-allow-origin: "https://app.example.com,https://admin.example.com"
+        nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+        nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+
+        # 速率限制
+        nginx.ingress.kubernetes.io/limit-rps: "20"
+        nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"
+
+        # 超时和大小
+        nginx.ingress.kubernetes.io/proxy-connect-timeout: "10"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+        nginx.ingress.kubernetes.io/proxy-body-size: "20m"
+
+        # 请求头
+        nginx.ingress.kubernetes.io/proxy-set-headers: "custom-headers"
+    spec:
+      tls:
+      - hosts:
+        - api.example.com
+        secretName: api-tls
+      rules:
+      - host: api.example.com
+        http:
+          paths:
+          - path: /v1
+            pathType: Prefix
+            backend:
+              service:
+                name: api-service
+                port:
+                  number: 8080
+    ```
+
+=== "BunkerWeb Ingress"
+
+    ```yaml title="bunkerweb-ingress.yaml"
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: api-ingress
+      namespace: production
+      annotations:
+        # 自动 SSL
+        bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+        bunkerweb.io/EMAIL_LETS_ENCRYPT: "admin@example.com"
+
+        # HTTPS 重定向
+        bunkerweb.io/REDIRECT_HTTP_TO_HTTPS: "yes"
+
+        # CORS
+        bunkerweb.io/USE_CORS: "yes"
+        bunkerweb.io/CORS_ALLOW_ORIGIN: "^https://(app|admin).example.com$"
+        bunkerweb.io/CORS_ALLOW_METHODS: "GET, POST, PUT, DELETE, OPTIONS"
+        bunkerweb.io/CORS_ALLOW_CREDENTIALS: "yes"
+
+        # 速率限制
+        bunkerweb.io/USE_LIMIT_REQ: "yes"
+        bunkerweb.io/LIMIT_REQ_URL: "/"
+        bunkerweb.io/LIMIT_REQ_RATE: "20r/s"
+
+        # 超时
+        bunkerweb.io/REVERSE_PROXY_CONNECT_TIMEOUT: "10s"
+        bunkerweb.io/REVERSE_PROXY_SEND_TIMEOUT: "60s"
+        bunkerweb.io/REVERSE_PROXY_READ_TIMEOUT: "60s"
+
+        # 最大请求体大小
+        bunkerweb.io/MAX_CLIENT_SIZE: "20m"
+
+        # 自定义请求头
+        bunkerweb.io/CUSTOM_HEADER: "X-API-Version: v1"
+
+        # 额外的安全性（BunkerWeb 附加功能）
+        bunkerweb.io/USE_MODSECURITY: "yes"
+        bunkerweb.io/USE_BAD_BEHAVIOR: "yes"
+    spec:
+      ingressClassName: bunkerweb
+      tls:
+      - hosts:
+        - api.example.com
+        secretName: api-tls
+      rules:
+      - host: api.example.com
+        http:
+          paths:
+          - path: /v1
+            pathType: Prefix
+            backend:
+              service:
+                name: api-service
+                port:
+                  number: 8080
+    ```
+
+##### 注解转换
+
+| 功能         | NGINX Ingress                         | BunkerWeb Ingress                                                         |
+| ------------ | ------------------------------------- | ------------------------------------------------------------------------- |
+| HTTPS 重定向 | `ssl-redirect: "true"`                | `REDIRECT_HTTP_TO_HTTPS: "yes"`                                           |
+| 启用 CORS    | `enable-cors: "true"`                 | `USE_CORS: "yes"`                                                         |
+| CORS 来源    | `cors-allow-origin: "https://..."`    | `CORS_ALLOW_ORIGIN: "^https://..."`（PCRE 正则表达式或 `*` 或 `self`）    |
+| CORS 方法    | `cors-allow-methods: "GET, POST"`     | `CORS_ALLOW_METHODS: "GET, POST"`                                         |
+| 速率限制     | `limit-rps: "20"`                     | `USE_LIMIT_REQ: "yes"` + `LIMIT_REQ_URL: "/"` + `LIMIT_REQ_RATE: "20r/s"` |
+| 超时         | `proxy-*-timeout: "60"`               | `REVERSE_PROXY_*_TIMEOUT: "60s"`                                          |
+| 请求体大小   | `proxy-body-size: "20m"`              | `MAX_CLIENT_SIZE: "20m"`                                                  |
+| 自定义请求头 | `proxy-set-headers: "custom-headers"` | `CUSTOM_HEADER: "Header-Name: value"`（多个注解可设置多个请求头）         |
+| 安全性       | 无                                    | `USE_MODSECURITY: "yes"` + `USE_BAD_BEHAVIOR: "yes"`                      |
+
+---
+
+#### 示例 3：带自定义 NGINX 配置的 Ingress
+
+##### 场景
+
+通过 `configuration-snippet` 使用自定义 NGINX 规则的应用程序：复杂的重写规则、身份验证、特殊请求头。
+
+=== "NGINX Ingress"
+
+    ```yaml title="nginx-ingress.yaml"
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: custom-app-ingress
+      namespace: production
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+
+        # 基本身份验证
+        nginx.ingress.kubernetes.io/auth-type: basic
+        nginx.ingress.kubernetes.io/auth-secret: basic-auth
+        nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+
+        # IP 白名单
+        nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12"
+
+        # 通过代码片段自定义配置
+        nginx.ingress.kubernetes.io/configuration-snippet: |
+          # 自定义重写
+          rewrite ^/old-path/(.*)$ /new-path/$1 permanent;
+
+          # 条件请求头
+          if ($request_uri ~* ^/api/) {
+            add_header X-API-Gateway "true";
+          }
+
+          # 阻止某些用户代理
+          if ($http_user_agent ~* (bot|crawler|spider)) {
+            return 403;
+          }
+
+          # 资源缓存
+          location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
+            expires 7d;
+            add_header Cache-Control "public, immutable";
+          }
+
+          # 并发连接限制
+          limit_conn addr 10;
+
+          # 代理到外部服务的路径
+          location /external-api {
+            proxy_pass https://external-service.com;
+            proxy_set_header Host external-service.com;
+          }
+    spec:
+      tls:
+      - hosts:
+        - custom-app.example.com
+        secretName: custom-app-tls
+      rules:
+      - host: custom-app.example.com
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: custom-app-service
+                port:
+                  number: 80
+
+    ---
+    # 身份验证的 ConfigMap
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: basic-auth
+      namespace: production
+    type: Opaque
+    data:
+      auth: dXNlcjokYXByMSRIRzJLbkZNTyR5ZnBmRUxYVXFTSGg0ME5pRC8uNGcuCg==  # user:password
+    ```
+
+=== "BunkerWeb Ingress"
+
+    <!-- ###### 选项 A：使用 BunkerWeb 原生功能 -->
+
+    ```yaml title="bunkerweb-ingress.yaml"
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: custom-app-ingress
+      namespace: production
+      annotations:
+        # SSL
+        bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+        bunkerweb.io/EMAIL_LETS_ENCRYPT: "admin@example.com"
+
+        # 基本身份验证（BunkerWeb 原生）
+        bunkerweb.io/USE_AUTH_BASIC: "yes"
+        bunkerweb.io/AUTH_BASIC_LOCATION: "sitewide" # 或 "/secure" 或 "^~ /admin/"
+        bunkerweb.io/AUTH_BASIC_USER: "user"
+        bunkerweb.io/AUTH_BASIC_PASSWORD: "password"  # 或使用 Secret
+        bunkerweb.io/AUTH_BASIC_USER_1: "user1"
+        bunkerweb.io/AUTH_BASIC_PASSWORD_1: "otherpassword"  # 或使用 Secret
+        bunkerweb.io/AUTH_BASIC_TEXT: "Authentication Required"
+
+        # IP 白名单（BunkerWeb 原生）
+        bunkerweb.io/WHITELIST_IP: "10.0.0.0/8 172.16.0.0/12"
+
+        # User-Agent 阻止（BunkerWeb 原生）
+        bunkerweb.io/USE_BAD_BEHAVIOR: "yes"
+        bunkerweb.io/BLACKLIST_USER_AGENT: "bot crawler spider" # 或 PCRE 正则
+
+        # 缓存（BunkerWeb 原生）
+        bunkerweb.io/USE_CLIENT_CACHE: "yes"
+        bunkerweb.io/CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|bmp|ico|svg|tif|css|js|otf|ttf|eot|woff|woff2"
+        bunkerweb.io/CLIENT_CACHE_CONTROL: "public, max-age=15552000" # Cache-Control HTTP 请求头的值
+        bunkerweb.io/CLIENT_CACHE_ETAG: "yes" # 启用 ETag 请求头
+
+        # 连接限制
+        bunkerweb.io/USE_LIMIT_CONN: "yes"
+        bunkerweb.io/LIMIT_CONN_MAX_HTTP1: "10"
+        bunkerweb.io/LIMIT_CONN_MAX_HTTP2: "100"
+        bunkerweb.io/LIMIT_CONN_MAX_HTTP3: "100"
+    spec:
+      ingressClassName: bunkerweb
+      tls:
+      - hosts:
+        - custom-app.example.com
+        secretName: custom-app-tls
+      rules:
+      - host: custom-app.example.com
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: custom-app-service
+                port:
+                  number: 80
+    ```
+
+=== "BunkerWeb Ingress + ConfigMap"
+
+    <!-- ###### 选项 B：使用 ConfigMap 进行自定义配置 -->
+
+    对于没有直接等效的规则（复杂重写、外部代理），使用 ConfigMap：
+
+    ```yaml title="bunkerweb-ingress-configmap.yaml"
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: custom-app-ingress
+      namespace: production
+      annotations:
+        bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+        bunkerweb.io/EMAIL_LETS_ENCRYPT: "admin@example.com"
+
+        # 原生功能
+        bunkerweb.io/USE_AUTH_BASIC: "yes"
+        bunkerweb.io/AUTH_BASIC_LOCATION: "sitewide" # 或 "/secure" 或 "^~ /admin/"
+        bunkerweb.io/AUTH_BASIC_USER: "user"
+        bunkerweb.io/AUTH_BASIC_PASSWORD: "password"  # 或使用 Secret
+        bunkerweb.io/AUTH_BASIC_USER_1: "user1"
+        bunkerweb.io/AUTH_BASIC_PASSWORD_1: "otherpassword"  # 或使用 Secret
+        bunkerweb.io/AUTH_BASIC_TEXT: "Authentication Required"
+
+        bunkerweb.io/WHITELIST_IP: "10.0.0.0/8 172.16.0.0/12"
+
+        bunkerweb.io/USE_BAD_BEHAVIOR: "yes"
+
+        bunkerweb.io/BLACKLIST_USER_AGENT: "bot crawler spider" # 或 PCRE 正则
+    spec:
+      ingressClassName: bunkerweb
+      tls:
+      - hosts:
+        - custom-app.example.com
+        secretName: custom-app-tls
+      rules:
+      - host: custom-app.example.com
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: custom-app-service
+                port:
+                  number: 80
+
+    ---
+    # 自定义 NGINX 配置的 ConfigMap
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: custom-app-nginx-config
+      namespace: production
+      annotations:
+        # 指示这是此站点的 HTTP 配置
+        bunkerweb.io/CONFIG_TYPE: "http"
+        bunkerweb.io/CONFIG_SITE: "custom-app.example.com"
+    data:
+      custom-rules.conf: |
+        # 自定义重写
+        rewrite ^/old-path/(.*)$ /new-path/$1 permanent;
+
+        # API 的条件请求头
+        location ^~ /api/ {
+          add_header X-API-Gateway "true";
+          proxy_pass http://custom-app-service.production.svc.cluster.local;
+        }
+
+        # 静态资源缓存
+        location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
+          expires 7d;
+          add_header Cache-Control "public, immutable";
+          proxy_pass http://custom-app-service.production.svc.cluster.local;
+        }
+
+        # 代理到外部服务
+        location /external-api {
+          proxy_pass https://external-service.com;
+          proxy_set_header Host external-service.com;
+          proxy_ssl_server_name on;
+        }
+    ```
+
+##### 比较：原生功能 vs ConfigMap
+
+| NGINX 规则                 | BunkerWeb 方法                     |
+| -------------------------- | ---------------------------------- |
+| `auth-type: basic`         | ✅ 原生注解：`USE_AUTH_BASIC`       |
+| `whitelist-source-range`   | ✅ 原生注解：`WHITELIST_IP`         |
+| `if ($http_user_agent ~*)` | ✅ 原生注解：`BLACKLIST_USER_AGENT` |
+| 缓存的 `expires 7d`        | ✅ 原生注解：`USE_CLIENT_CACHE`     |
+| `limit_conn addr 10`       | ✅ 原生注解：`USE_LIMIT_CONN`       |
+| 复杂的 `rewrite`           | ⚠️ ConfigMap：`CONFIG_TYPE: http`   |
+| 自定义 `location`          | ⚠️ ConfigMap：`CONFIG_TYPE: http`   |
+| 外部 `proxy_pass`          | ⚠️ ConfigMap：`CONFIG_TYPE: http`   |
+
 ## Swarm
 
 <figure markdown>
@@ -3635,7 +4240,7 @@ spec:
 至于数据库卷，文档并未指定具体的方法。为数据库卷选择共享文件夹或特定驱动程序取决于您的独特用例，留给读者自行决定。
 
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc1/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc3/misc/integrations)中的 docker-compose 文件。
 
     集群数据库后端的设置超出了本文档的范围。
 
@@ -3649,7 +4254,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.8-rc1
+    image: bunkerity/bunkerweb:1.6.8-rc3
     ports:
       - published: 80
         target: 8080
@@ -3678,7 +4283,7 @@ services:
         - "bunkerweb.INSTANCE=yes" # autoconf 服务识别 BunkerWeb 实例的强制性标签
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.8-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由 autoconf 服务自动检测
@@ -3699,7 +4304,7 @@ services:
           - "node.role == worker"
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.8-rc1
+    image: bunkerity/bunkerweb-autoconf:1.6.8-rc3
     environment:
       SWARM_MODE: "yes"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
@@ -3848,7 +4453,7 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.8-rc1
+        image: bunkerity/bunkerweb:1.6.8-rc3
         ...
         deploy:
           mode: global
@@ -3860,7 +4465,7 @@ networks:
             - "bunkerweb.NAMESPACE=my-namespace" # 为 BunkerWeb 实例设置命名空间
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.8-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.8-rc3
         environment:
           NAMESPACES: "my-namespace my-other-namespace" # 只监听这些命名空间
           ...

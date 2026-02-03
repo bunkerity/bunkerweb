@@ -8,7 +8,6 @@ local utils = require "bunkerweb.utils"
 local metrics = class("metrics", plugin)
 local ngx = ngx
 local ERR = ngx.ERR
-local WARN = ngx.WARN
 local INFO = ngx.INFO
 local unescape_uri = ngx.unescape_uri
 

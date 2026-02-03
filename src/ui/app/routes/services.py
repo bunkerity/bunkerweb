@@ -2,7 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from itertools import chain
 from time import time
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from flask import Blueprint, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
 from regex import sub
@@ -13,6 +13,32 @@ from app.routes.utils import CUSTOM_CONF_RX, handle_error, verify_data_in_form, 
 from app.utils import LOGGER, get_blacklisted_settings, is_editable_method
 
 services = Blueprint("services", __name__)
+
+
+def parse_services_export(content: str) -> Tuple[Dict[str, Dict[str, str]], List[str]]:
+    services_map: Dict[str, Dict[str, str]] = {}
+    errors: List[str] = []
+
+    for line_number, raw_line in enumerate(content.splitlines(), start=1):
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if "=" not in line:
+            errors.append(f"Line {line_number} is not a valid key/value pair.")
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip()
+        if "_" not in key:
+            errors.append(f"Line {line_number} is missing a service prefix.")
+            continue
+        service_id, setting = key.split("_", 1)
+        if not service_id or not setting:
+            errors.append(f"Line {line_number} has an invalid key: {key}.")
+            continue
+        services_map.setdefault(service_id, {})[setting] = value
+
+    return services_map, errors
 
 
 @services.route("/services", methods=["GET"])
@@ -315,6 +341,10 @@ def services_service_page(service: str):
                     if "checksum" in data:
                         db_custom_configs[db_custom_config]["checksum"] = data["checksum"]
 
+            for db_custom_config, data in all_custom_configs.items():
+                if data.get("method") == "default" and data.get("template"):
+                    removed_custom_configs.add(db_custom_config)
+
             variables_to_check = variables.copy()
 
             for variable, value in variables.items():
@@ -550,3 +580,84 @@ def services_service_export():
     env_output.seek(0)
 
     return send_file(env_output, mimetype="text/plain", as_attachment=True, download_name="services_export.env")
+
+
+@services.route("/services/import", methods=["POST"])
+@login_required
+def services_service_import():
+    if DB.readonly:
+        return handle_error("Database is in read-only mode", "services")
+
+    services_file = request.files.get("services_file")
+    if not services_file or not services_file.filename:
+        return handle_error("No services file uploaded.", "services", True)
+
+    try:
+        content = services_file.read().decode("utf-8")
+    except UnicodeDecodeError:
+        return handle_error("Invalid file encoding. Please upload a UTF-8 file.", "services", True)
+
+    services_map, parse_errors = parse_services_export(content)
+    if not services_map:
+        return handle_error("No services found in the import file.", "services", True)
+
+    DATA.load_from_file()
+
+    def import_services(services_map: Dict[str, Dict[str, str]], parse_errors: List[str]):
+        wait_applying()
+
+        for error in parse_errors:
+            DATA["TO_FLASH"].append({"content": f"Import warning: {error}", "type": "error"})
+
+        existing_services = {service["id"] for service in DB.get_services(with_drafts=True)}
+        base_config = DB.get_config(global_only=True, methods=True)
+        created = []
+        skipped = []
+        failed = []
+
+        for service_id, variables in services_map.items():
+            service_variables = variables.copy()
+            is_draft = service_variables.pop("IS_DRAFT", "no") == "yes"
+
+            if service_id in existing_services:
+                skipped.append(service_id)
+                continue
+
+            server_name = service_variables.get("SERVER_NAME", "").strip()
+            if not server_name:
+                failed.append(f"{service_id} (missing SERVER_NAME)")
+                continue
+
+            service_variables = BW_CONFIG.check_variables(service_variables, base_config, service_variables.copy(), new=True, threaded=True)
+            server_name = service_variables.get("SERVER_NAME", "").strip()
+            if not server_name:
+                failed.append(f"{service_id} (invalid SERVER_NAME)")
+                continue
+
+            operation, error = BW_CONFIG.new_service(service_variables, is_draft=is_draft, override_method="ui", check_changes=not is_draft)
+            if error:
+                failed.append(service_id)
+                DATA["TO_FLASH"].append({"content": operation, "type": "error"})
+                continue
+
+            created.append(server_name.split(" ")[0])
+
+        if created:
+            DATA["TO_FLASH"].append({"content": f"Imported service{'s' if len(created) > 1 else ''}: {', '.join(created)}", "type": "success"})
+        if skipped:
+            DATA["TO_FLASH"].append({"content": f"Skipped existing service{'s' if len(skipped) > 1 else ''}: {', '.join(skipped)}", "type": "warning"})
+        if failed:
+            DATA["TO_FLASH"].append({"content": f"Failed to import service{'s' if len(failed) > 1 else ''}: {', '.join(failed)}", "type": "error"})
+
+        DATA.update({"RELOADING": False, "CONFIG_CHANGED": bool(created)})
+
+    DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
+    CONFIG_TASKS_EXECUTOR.submit(import_services, services_map, parse_errors)
+
+    return redirect(
+        url_for(
+            "loading",
+            next=url_for("services.services_page"),
+            message="Importing services",
+        )
+    )

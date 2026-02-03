@@ -23,11 +23,11 @@
   },
   "badge": {
     "from_template": "来自模板",
+    "managed_via_api": "通过 API 管理",
     "new_version": "新版本",
     "no_template": "无模板",
     "unread_news": "未读新闻",
-    "unread_notifications": "未读通知",
-    "managed_via_api": "通过 API 管理"
+    "unread_notifications": "未读通知"
   },
   "banner": {
     "community": "加入 Bunker 社区，加入 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">Discord 聊天</a>并在 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a> 上关注我们。",
@@ -76,9 +76,9 @@
     "clear": "清除",
     "close": "关闭",
     "columns": "列",
-    "convert_services": "转换服务",
     "convert_configs": "转换配置",
     "convert_configs_to": "转换为 {{state}}",
+    "convert_services": "转换服务",
     "copy": "复制",
     "copy_codes": "复制代码",
     "copy_raw": "复制原始数据",
@@ -101,10 +101,13 @@
     "fetch_global": "获取全局设置",
     "filters_suffix": " 过滤器",
     "follow": "跟随",
+    "force_check": "强制检查",
+    "force_update": "Force update",
     "github_stars": "星标",
     "go_back": "返回",
     "hide": "隐藏",
     "history": "历史记录",
+    "import_services": "导入服务",
     "login": "登录",
     "multiple_add": "添加",
     "multiple_hide": "隐藏",
@@ -145,8 +148,7 @@
     "upload_photo": "上传新照片",
     "view_details": "查看详情",
     "view_raw_data": "查看原始数据",
-    "wipe_other_sessions": "清除其他会话",
-    "force_update": "Force update"
+    "wipe_other_sessions": "清除其他会话"
   },
   "country": {
     "AD": "安道尔",
@@ -445,26 +447,26 @@
         "title": "按国家/地区阻止的请求"
       },
       "blocking_status": {
-        "title": "阻止状态随时间变化",
-        "subtitle": "随时间变化的被阻止请求",
         "blocked_requests": "被阻止的请求",
+        "count": "数量",
+        "subtitle": "随时间变化的被阻止请求",
         "time": "时间",
-        "count": "数量"
+        "title": "阻止状态随时间变化"
       },
       "request_status": {
-        "title": "请求状态分布",
-        "blocked": "被阻止的请求"
+        "blocked": "被阻止的请求",
+        "title": "请求状态分布"
       },
       "top_blocked_ips": {
-        "title": "前 10 名被阻止的 IP",
-        "most_blocked": "被阻止最多的 IP"
+        "most_blocked": "被阻止最多的 IP",
+        "title": "前 10 名被阻止的 IP"
       }
     },
     "map": {
       "blocked_requests": "被阻止的请求",
       "hover_info": "将鼠标悬停在国家/地区上",
-      "no_data": "无数据",
-      "legend": "图例"
+      "legend": "图例",
+      "no_data": "无数据"
     }
   },
   "datatable": {
@@ -480,6 +482,7 @@
     "info_empty_plugins": "无可用插件",
     "info_empty_reports": "无可用报告",
     "info_empty_services": "无可用服务",
+    "info_empty_templates": "没有可用的模板",
     "info_filtered_bans": "（从 _MAX_ 条总封禁中筛选）",
     "info_filtered_cache": "（从 _MAX_ 个总缓存文件中筛选）",
     "info_filtered_configs": "（从 _MAX_ 条总自定义配置中筛选）",
@@ -489,12 +492,14 @@
     "info_filtered_plugins": "（从 _MAX_ 个总插件中筛选）",
     "info_filtered_reports": "（从 _MAX_ 个总报告中筛选）",
     "info_filtered_services": "（从 _MAX_ 个总服务中筛选）",
+    "info_filtered_templates": "（从 _MAX_ 个总模板中筛选）",
     "info_instances": "显示 {{start}} 到 {{end}} 条，共 {{total}} 个实例",
     "info_items": "显示 {{start}} 到 {{end}} 条，共 {{total}} 个项目",
     "info_jobs": "显示 {{start}} 到 {{end}} 条，共 {{total}} 个任务",
     "info_plugins": "显示 {{start}} 到 {{end}} 条，共 {{total}} 个插件",
     "info_reports": "显示 {{start}} 到 {{end}} 条，共 {{total}} 个报告",
     "info_services": "显示 {{start}} 到 {{end}} 条，共 {{total}} 个服务",
+    "info_templates": "显示 {{start}} 到 {{end}} 个模板，共 {{total}} 个",
     "length_all": "全部",
     "length_menu_bans": "显示 _MENU_ 条封禁",
     "length_menu_cache": "显示 _MENU_ 个缓存文件",
@@ -505,6 +510,7 @@
     "length_menu_plugins": "显示 _MENU_ 个插件",
     "length_menu_reports": "显示 _MENU_ 个报告",
     "length_menu_services": "显示 _MENU_ 个服务",
+    "length_menu_templates": "显示 _MENU_ 个模板",
     "paginate": {
       "first": "首页",
       "last": "末页",
@@ -540,6 +546,9 @@
     "select_rows_services_0": "未选择服务",
     "select_rows_services_1": "已选择 1 个服务",
     "select_rows_services_plural": "已选择 %d 个服务",
+    "select_rows_templates_0": "未选择模板",
+    "select_rows_templates_1": "选择了 1 个模板",
+    "select_rows_templates_plural": "选择了 %d 个模板",
     "zero_records_bans": "未找到匹配的封禁",
     "zero_records_cache": "未找到匹配的缓存文件",
     "zero_records_configs": "未找到匹配的自定义配置",
@@ -548,7 +557,8 @@
     "zero_records_jobs": "未找到匹配的任务",
     "zero_records_plugins": "未找到匹配的插件",
     "zero_records_reports": "未找到匹配的报告",
-    "zero_records_services": "未找到匹配的服务"
+    "zero_records_services": "未找到匹配的服务",
+    "zero_records_templates": "未找到匹配的模板"
   },
   "dev_log": {
     "copy_failed": "复制文本失败：",
@@ -723,14 +733,6 @@
     "locked_settings_annotation": "已锁定 ({{method}})",
     "locked_settings_hint": "锁定的设置会突出显示"
   },
-  "logs": {
-    "eventsource_failed": "EventSource 连接失败",
-    "parse_error": "解析流数据失败：{{error}}",
-    "stream_error": "流错误：{{message}}",
-    "stream_init": "流已初始化，文件大小：{{size}}",
-    "stream_initialized": "流已通过刷新初始化，文件大小：{{size}}",
-    "trimmed_notice": "--- 为提高性能，已删除 {{count}} 条较早的日志行 ---"
-  },
   "link": {
     "back_to_login": "返回登录",
     "forgot_password": "忘记密码？",
@@ -742,16 +744,24 @@
     "see_more": "查看更多",
     "upgrade": "升级？"
   },
+  "logs": {
+    "eventsource_failed": "EventSource 连接失败",
+    "parse_error": "解析流数据失败：{{error}}",
+    "stream_error": "流错误：{{message}}",
+    "stream_init": "流已初始化，文件大小：{{size}}",
+    "stream_initialized": "流已通过刷新初始化，文件大小：{{size}}",
+    "trimmed_notice": "--- 为提高性能，已删除 {{count}} 条较早的日志行 ---"
+  },
   "modal": {
     "body": {
       "add_plugin_dropzone": "将您的插件存档拖放到此处或单击以选择文件。",
       "confirm_cache_deletion_alert": "您确定要删除选定的缓存文件吗？",
       "confirm_cache_deletion_alert_plural": "您确定要删除选定的缓存文件吗？",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "确定将选定的自定义配置转换为 {{state}} 吗？",
       "confirm_configs_deletion_alert": "您确定要删除选定的自定义配置吗？",
       "confirm_configs_deletion_alert_plural": "您确定要删除选定的自定义配置吗？",
       "confirm_conversion_confirmation": "您确定要转换选定的服务吗？",
-      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
-      "confirm_configs_conversion_to": "确定将选定的自定义配置转换为 {{state}} 吗？",
       "confirm_next_step": "您确定要继续下一步吗？",
       "confirm_plugin_deletion": "您确定要删除选定的插件吗？",
       "confirm_plugin_deletion_plural": "您确定要删除选定的插件吗？",
@@ -759,6 +769,18 @@
       "confirmation_instance_deletion": "您确定要删除选定的实例吗？",
       "delete_confirmation_alert": "您确定要删除选定的实例吗？",
       "delete_confirmation_alert_plural": "您确定要删除选定的实例吗？",
+      "delete_confirmation_template_used": "一个或多个选定的模板已分配给服务（总共 {{services_count}} 个服务）。删除它们将清除这些分配。您想继续吗？",
+      "delete_step_confirmation": "您确定要删除此步骤吗？",
+      "delete_step_content_label": "内容",
+      "delete_step_name_label": "步骤",
+      "delete_template_global_usage": "由全局设置使用",
+      "delete_template_services_list": "由服务使用：{{services}}",
+      "fetch_global_settings_bold": "这将获取全局设置并将其应用到当前模板。",
+      "fetch_global_settings_point_1": "仅更新本模板中存在的设置。",
+      "fetch_global_settings_point_2": "与默认值相同的值会被忽略。",
+      "fetch_global_settings_point_3": "SERVER_NAME 永不会被覆盖。",
+      "import_services_dropzone": "将您的服务导出文件拖放到此处，或单击以选择文件。",
+      "import_services_warning": "导入服务将从导出文件创建新的 UI 服务。现有服务将被跳过。",
       "instance_creation_alert": "您不需要提供端口或服务器名称；`API_HTTP_PORT`、`API_LISTEN_HTTPS`、`API_HTTPS_PORT` 和 `API_SERVER_NAME` 的值将用于实例配置。",
       "next_step_in_case_of_issue": "如果遇到问题，您可以手动接受不安全的证书：",
       "recovery_codes_save_alert": "请将这些恢复代码保存在安全的位置（例如密码管理器或保险箱）。如果丢失身份验证设备，您可以使用它们访问您的帐户。",
@@ -767,18 +789,11 @@
       "services_deletion_confirmation": "您确定要删除选定的服务吗？",
       "unban_confirmation_alert": "您确定要解禁选定的 IP 地址吗？",
       "unban_confirmation_alert_plural": "您确定要解禁选定的 IP 地址吗？",
-      "update_duration_alert": "请为选定的封禁选择新的期限：",
-      "fetch_global_settings_bold": "这将获取全局设置并将其应用到当前模板。",
-      "fetch_global_settings_point_1": "仅更新本模板中存在的设置。",
-      "fetch_global_settings_point_2": "与默认值相同的值会被忽略。",
-      "fetch_global_settings_point_3": "SERVER_NAME 永不会被覆盖。",
-      "delete_step_confirmation": "您确定要删除此步骤吗？",
-      "delete_step_name_label": "步骤",
-      "delete_step_content_label": "内容"
+      "update_duration_alert": "请为选定的封禁选择新的期限："
     },
     "button": {
-      "reset_template_confirm": "重置模板配置",
-      "fetch_global_settings_confirm": "应用全局设置"
+      "fetch_global_settings_confirm": "应用全局设置",
+      "reset_template_confirm": "重置模板配置"
     },
     "section": {
       "ban_details": "封禁详情",
@@ -794,17 +809,19 @@
       "create_new_instance": "创建新实例",
       "create_template": "创建模板",
       "delete_instance": "删除实例",
+      "delete_step": "删除步骤",
       "delete_template": "删除模板",
+      "edit_template": "编辑模板：{{name}}",
+      "fetch_global_settings": "应用全局设置？",
       "from_plugin": "来自插件",
       "full_url": "完整 URL",
+      "import_services": "导入服务",
       "job_history": "最近 10 次任务执行",
       "job_history_count": "任务 {{count}} 次执行",
       "recovery_codes": "恢复代码",
       "reset_template_config": "重置模板配置？",
-      "fetch_global_settings": "应用全局设置？",
       "server_name_not_unique": "服务器名称不是唯一的",
-      "update_duration": "更新封禁期限",
-      "delete_step": "删除步骤"
+      "update_duration": "更新封禁期限"
     }
   },
   "mode": {
@@ -900,12 +917,12 @@
       "unknown": "未知的到期日期"
     },
     "force_check": {
-      "title": "Force check",
-      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
+      "title": "Force check"
     },
     "force_update": {
-      "title": "Force update",
-      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept.",
+      "title": "Force update"
     },
     "key": {
       "title": {
@@ -1012,6 +1029,7 @@
     "next_30d": "未来 30 天",
     "next_7d": "未来 7 天",
     "older_30d": "超过 30 天前",
+    "one_or_more": "一个或多个",
     "permanent": "永久",
     "plugin": "插件",
     "reason": "原因",
@@ -1024,6 +1042,7 @@
     "start_date": "开始日期",
     "status": "状态",
     "status_code": "状态码",
+    "steps": "步骤",
     "stream": "流支持",
     "template": "模板",
     "title_0": "无活动过滤器",
@@ -1031,7 +1050,12 @@
     "title_plural": "活动过滤器 - %d",
     "type": "类型",
     "url": "URL",
-    "version": "版本"
+    "version": "版本",
+    "zero": "无"
+  },
+  "security_mode": {
+    "block": "阻止",
+    "detect": "检测"
   },
   "settings": {
     "custom_config": {
@@ -1043,6 +1067,13 @@
     }
   },
   "setup": {
+    "status": {
+      "admin_user_exists": "🧑‍🚀 管理员用户已存在。请继续下一步。",
+      "pro_license_key_exists": "⭐ PRO 许可证密钥已配置，请继续下一步。",
+      "reverse_proxy_configured": "↪️ Web 界面已配置反向代理。请继续下一步。",
+      "secure_password": "安全密码",
+      "unique_server_name": "唯一服务器名称"
+    },
     "step1": {
       "subtitle": "创建您的管理员帐户。",
       "title": "管理员用户"
@@ -1058,19 +1089,19 @@
       "title": "UI 设置"
     },
     "step3": {
-      "title": "升级到 PRO",
-      "subtitle": "解锁高级功能，充分利用 BunkerWeb。",
       "label": {
         "pro_benefits": "PRO 权益"
       },
-      "pro_benefit_1_title": "访问所有 PRO 功能",
       "pro_benefit_1_description": "解锁所有高级功能，包括增强的安全性、性能和管理工具。",
-      "pro_benefit_2_title": "来自维护者的技术支持",
+      "pro_benefit_1_title": "访问所有 PRO 功能",
       "pro_benefit_2_description": "对于您可能遇到的任何问题或疑问，从 BunkerWeb 团队获得优先支持。",
-      "pro_benefit_3_title": "定制开发",
+      "pro_benefit_2_title": "来自维护者的技术支持",
       "pro_benefit_3_description": "量身定制的解决方案，满足您的特定需求。",
+      "pro_benefit_3_title": "定制开发",
+      "pro_benefit_4_description": "优化您的 BunkerWeb 设置的专家建议。",
       "pro_benefit_4_title": "定制咨询",
-      "pro_benefit_4_description": "优化您的 BunkerWeb 设置的专家建议。"
+      "subtitle": "解锁高级功能，充分利用 BunkerWeb。",
+      "title": "升级到 PRO"
     },
     "step4": {
       "label": {
@@ -1078,13 +1109,6 @@
       },
       "subtitle": "在完成设置前检查您的设置。",
       "title": "概览"
-    },
-    "status": {
-      "admin_user_exists": "🧑‍🚀 管理员用户已存在。请继续下一步。",
-      "pro_license_key_exists": "⭐ PRO 许可证密钥已配置，请继续下一步。",
-      "reverse_proxy_configured": "↪️ Web 界面已配置反向代理。请继续下一步。",
-      "secure_password": "安全密码",
-      "unique_server_name": "唯一服务器名称"
     },
     "subtitle": "按照步骤完成设置向导。",
     "title": "设置向导"
@@ -1095,8 +1119,12 @@
     "default_server": "默认服务器",
     "down": "已停止",
     "draft": "草稿",
+    "error_deleting_template": "删除模板时发生错误。",
     "error_loading_bans": "加载封禁时出错。请尝试刷新页面。",
+    "error_loading_template": "无法加载模板数据。",
+    "error_saving_template": "保存模板时发生错误。",
     "failed": "失败",
+    "invalid_json_payload": "无效的 JSON 负载。",
     "loading": "加载中...",
     "loading_bans": "正在加载封禁...",
     "loading_cache_file": "正在加载缓存文件...",
@@ -1111,6 +1139,7 @@
     "loading_reports": "正在加载报告...",
     "loading_services": "正在加载服务...",
     "loading_templates": "正在加载模板...",
+    "missing_template_information": "缺少模板信息。",
     "news_connection_error": "无法连接到博客获取新闻更新。",
     "no": "否",
     "no_data": "无数据",
@@ -1197,20 +1226,20 @@
       "service": "服务",
       "service_name": "服务名称",
       "settings": "设置",
+      "status": "状态",
       "status_code": "状态码",
       "steps": "步骤",
       "stream": "流",
       "template": "模板",
+      "templates": "模板",
       "time_left": "剩余时间",
       "type": "类型",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "版本",
-      "status": "状态"
+      "version": "版本"
     }
   },
   "template": {
-    "none": "无模板",
     "editor": {
       "button_add_config": "添加配置",
       "button_add_setting": "添加设置",
@@ -1219,7 +1248,6 @@
       "button_move_up": "上移",
       "button_remove": "移除",
       "clone_badge": "克隆自 {{template}}",
-      "setting_toggle_enabled": "已启用",
       "configs": "自定义配置",
       "configs_help": "为此模板附加可选的自定义配置片段。",
       "delete_step_confirm": "您确定要删除此步骤吗？",
@@ -1243,6 +1271,19 @@
       "label_step_settings": "此步骤中的设置",
       "label_step_subtitle": "步骤副标题",
       "label_step_title": "步骤标题",
+      "missing_configs_body": "导入的模板引用了尚未上传的自定义配置。请导入这些配置以完成模板设置：",
+      "missing_configs_browse": "浏览文件",
+      "missing_configs_done": "完成",
+      "missing_configs_drop_hint": "将配置文件拖放到此处 (.conf, .cfg, .txt)",
+      "missing_configs_drop_or": "或",
+      "missing_configs_hint_body": "上传的文件将自动添加到您的模板。请确保文件名与上面列出的缺少配置相匹配。",
+      "missing_configs_hint_title": "提示:",
+      "missing_configs_resolved": "所有缺少的配置已上传！模板导入成功。",
+      "missing_configs_title": "缺少自定义配置",
+      "missing_configs_upload_failed": "上传配置文件失败",
+      "missing_configs_upload_label": "上传缺少的配置 (.conf, .cfg, .txt)",
+      "missing_configs_upload_partial": "已上传 {{total}} 个配置中的 {{uploaded}} 个。仍然缺少: {{missing}}",
+      "missing_configs_upload_success": "已成功上传 {{count}} 个配置文件",
       "panel_overview": "概览",
       "panel_overview_help": "跟踪关键信息并在各部分之间导航。",
       "placeholder_config_data": "数据",
@@ -1254,6 +1295,46 @@
       "placeholder_step_title": "步骤标题",
       "placeholder_template_id": "模板ID",
       "placeholder_template_name": "我的模板",
+      "raw_configs_browse": "浏览文件",
+      "raw_configs_drop_hint": "将配置文件拖放到此处或单击以浏览 (.conf, .cfg, .txt)",
+      "raw_configs_drop_supported": "支持的格式: .conf, .cfg, .txt",
+      "raw_configs_empty": "尚无导入的配置文件。新文件将显示在下方。",
+      "raw_configs_help": "上传配置文件 (.conf, .cfg, .txt) 以将条目附加到 <code>configs</code>。类型默认为 <code>server_http</code>；如有需要，请在 JSON 中进行调整。",
+      "raw_configs_import_invalid": "由于当前 JSON 无效，无法导入配置。",
+      "raw_configs_import_none": "未导入任何配置。",
+      "raw_configs_import_success": "已导入 {{count}} 个配置文件。",
+      "raw_configs_note": "导入的文件已添加到 JSON 编辑器。保存前请进行审阅和调整。",
+      "raw_configs_title": "自定义配置导入",
+      "raw_configs_upload": "上传配置文件 (.conf, .cfg, .txt)",
+      "raw_configs_upload_failed": "无法读取所选文件之一。",
+      "raw_editor_drop_hint": "拖放模板 JSON 文件（仅限 .json）以替换当前内容。",
+      "raw_editor_help": "将完整的模板定义编辑为 JSON。切换回简单模式会验证并重新加载可视化编辑器。",
+      "raw_editor_import_success": "模板 JSON 成功导入。",
+      "raw_editor_override_body": "导入此文件将完全替换当前模板 JSON。在编辑器中所做的更改将丢失。您要继续吗？",
+      "raw_editor_override_confirm": "替换模板",
+      "raw_editor_override_title": "替换模板 JSON 吗？",
+      "raw_editor_title": "原始模板 JSON",
+      "raw_editor_upload_empty": "上传的文件为空。",
+      "raw_editor_upload_failed": "无法读取所选文件。",
+      "raw_editor_upload_template": "上传模板 JSON (仅限 .json)",
+      "raw_validation_config_definition": "无效的配置定义。",
+      "raw_validation_config_object": "配置条目必须是对象。",
+      "raw_validation_configs_unassigned": "配置 {{configs}} 未分配给任何步骤。",
+      "raw_validation_empty": "模板 JSON 不能为空。",
+      "raw_validation_invalid_json": "无效的 JSON 负载: {{error}}",
+      "raw_validation_object": "模板负载必须是 JSON 对象。",
+      "raw_validation_setting_key": "设置键必须是非空字符串。",
+      "raw_validation_settings_object": "设置必须以对象形式提供。",
+      "raw_validation_settings_unassigned": "设置 {{settings}} 未分配给任何步骤。",
+      "raw_validation_step_config_duplicate": "配置 {{config}} 已分配给多个步骤。",
+      "raw_validation_step_config_reference": "步骤 {{index}} 包含无效的配置引用。",
+      "raw_validation_step_config_unknown": "步骤 {{index}} 引用了未知配置 {{config}}。",
+      "raw_validation_step_object": "步骤 {{index}} 必须是一个对象。",
+      "raw_validation_step_setting_duplicate": "设置 {{setting}} 已分配给多个步骤。",
+      "raw_validation_step_setting_reference": "步骤 {{index}} 包含无效的设置引用。",
+      "raw_validation_step_setting_unknown": "步骤 {{index}} 引用了未知设置 {{setting}}。",
+      "raw_validation_step_title": "步骤 {{index}} 必须有一个标题。",
+      "raw_validation_steps_required": "模板必须至少包含一个步骤。",
       "readonly_db": "数据库当前为只读。无法更改模板。",
       "readonly_method": "此模板是在 UI 之外创建的，无法编辑。",
       "readonly_title": "只读",
@@ -1261,8 +1342,6 @@
       "select_config_placeholder": "选择一个配置",
       "select_config_type_placeholder": "选择类型",
       "select_setting_placeholder": "选择一个设置",
-      "settings": "设置",
-      "settings_help": "定义此模板公开的设置及其默认值。",
       "setting_remove_confirm": "您确定要从模板中移除此设置吗？",
       "setting_remove_key": "设置",
       "setting_remove_title": "移除设置",
@@ -1286,6 +1365,9 @@
       "setting_selector_pattern": "模式",
       "setting_selector_search_label": "查找多站点设置",
       "setting_selector_search_placeholder": "按标签、键或插件搜索",
+      "setting_toggle_enabled": "已启用",
+      "settings": "设置",
+      "settings_help": "定义此模板公开的设置及其默认值。",
       "step_configs_empty": "此步骤尚未添加任何配置。",
       "step_configs_selection_title": "选择现有配置",
       "step_default_title": "未命名步骤",
@@ -1315,61 +1397,9 @@
       "validation_configs_unique": "每个配置名称必须唯一。",
       "validation_id_required": "模板 ID 为必填项。",
       "validation_setting_key": "每个设置必须有一个键。",
-      "validation_settings_unique": "每个设置键必须唯一。",
-      "raw_configs_help": "上传配置文件 (.conf, .cfg, .txt) 以将条目附加到 <code>configs</code>。类型默认为 <code>server_http</code>；如有需要，请在 JSON 中进行调整。",
-      "raw_configs_import_invalid": "由于当前 JSON 无效，无法导入配置。",
-      "raw_configs_import_none": "未导入任何配置。",
-      "raw_configs_import_success": "已导入 {{count}} 个配置文件。",
-      "raw_configs_note": "导入的文件已添加到 JSON 编辑器。保存前请进行审阅和调整。",
-      "raw_configs_title": "自定义配置导入",
-      "raw_configs_upload": "上传配置文件 (.conf, .cfg, .txt)",
-      "raw_configs_upload_failed": "无法读取所选文件之一。",
-      "raw_configs_browse": "浏览文件",
-      "raw_configs_drop_hint": "将配置文件拖放到此处或单击以浏览 (.conf, .cfg, .txt)",
-      "raw_configs_drop_supported": "支持的格式: .conf, .cfg, .txt",
-      "raw_configs_empty": "尚无导入的配置文件。新文件将显示在下方。",
-      "raw_editor_help": "将完整的模板定义编辑为 JSON。切换回简单模式会验证并重新加载可视化编辑器。",
-      "raw_editor_import_success": "模板 JSON 成功导入。",
-      "raw_editor_title": "原始模板 JSON",
-      "raw_editor_upload_empty": "上传的文件为空。",
-      "raw_editor_upload_failed": "无法读取所选文件。",
-      "raw_editor_upload_template": "上传模板 JSON (仅限 .json)",
-      "raw_validation_configs_unassigned": "配置 {{configs}} 未分配给任何步骤。",
-      "raw_validation_config_definition": "无效的配置定义。",
-      "raw_validation_config_object": "配置条目必须是对象。",
-      "raw_validation_empty": "模板 JSON 不能为空。",
-      "raw_validation_invalid_json": "无效的 JSON 负载: {{error}}",
-      "raw_validation_object": "模板负载必须是 JSON 对象。",
-      "raw_validation_setting_key": "设置键必须是非空字符串。",
-      "raw_validation_settings_object": "设置必须以对象形式提供。",
-      "raw_validation_step_config_duplicate": "配置 {{config}} 已分配给多个步骤。",
-      "raw_validation_step_config_reference": "步骤 {{index}} 包含无效的配置引用。",
-      "raw_validation_step_config_unknown": "步骤 {{index}} 引用了未知配置 {{config}}。",
-      "raw_validation_step_object": "步骤 {{index}} 必须是一个对象。",
-      "raw_validation_step_setting_duplicate": "设置 {{setting}} 已分配给多个步骤。",
-      "raw_validation_step_setting_reference": "步骤 {{index}} 包含无效的设置引用。",
-      "raw_validation_step_setting_unknown": "步骤 {{index}} 引用了未知设置 {{setting}}。",
-      "raw_validation_step_title": "步骤 {{index}} 必须有一个标题。",
-      "raw_validation_steps_required": "模板必须至少包含一个步骤。",
-      "raw_validation_settings_unassigned": "设置 {{settings}} 未分配给任何步骤。",
-      "raw_editor_drop_hint": "拖放模板 JSON 文件（仅限 .json）以替换当前内容。",
-      "raw_editor_override_title": "替换模板 JSON 吗？",
-      "raw_editor_override_body": "导入此文件将完全替换当前模板 JSON。在编辑器中所做的更改将丢失。您要继续吗？",
-      "raw_editor_override_confirm": "替换模板",
-      "missing_configs_title": "缺少自定义配置",
-      "missing_configs_body": "导入的模板引用了尚未上传的自定义配置。请导入这些配置以完成模板设置：",
-      "missing_configs_hint_title": "提示:",
-      "missing_configs_hint_body": "上传的文件将自动添加到您的模板。请确保文件名与上面列出的缺少配置相匹配。",
-      "missing_configs_upload_label": "上传缺少的配置 (.conf, .cfg, .txt)",
-      "missing_configs_drop_hint": "将配置文件拖放到此处 (.conf, .cfg, .txt)",
-      "missing_configs_drop_or": "或",
-      "missing_configs_browse": "浏览文件",
-      "missing_configs_done": "完成",
-      "missing_configs_upload_success": "已成功上传 {{count}} 个配置文件",
-      "missing_configs_upload_partial": "已上传 {{total}} 个配置中的 {{uploaded}} 个。仍然缺少: {{missing}}",
-      "missing_configs_upload_failed": "上传配置文件失败",
-      "missing_configs_resolved": "所有缺少的配置已上传！模板导入成功。"
-    }
+      "validation_settings_unique": "每个设置键必须唯一。"
+    },
+    "none": "无模板"
   },
   "theme": {
     "dark": "深色",
@@ -1384,41 +1414,41 @@
     },
     "copied": "已复制！",
     "disclaimer_title": "免责声明",
+    "global_settings_applied_body": "已成功获取全局设置并应用到当前表单。",
+    "global_settings_applied_title": "全局设置已应用",
+    "global_settings_failed_body": "获取全局设置时发生错误。",
+    "global_settings_failed_title": "获取全局设置失败",
     "header": {
       "ping_failed": "Ping 失败",
       "ping_succeed": "Ping 成功"
     },
-    "ip_unbanned": "IP 地址已成功解禁！",
-    "global_settings_applied_title": "全局设置已应用",
-    "global_settings_applied_body": "已成功获取全局设置并应用到当前表单。",
-    "global_settings_failed_title": "获取全局设置失败",
-    "global_settings_failed_body": "获取全局设置时发生错误。"
+    "ip_unbanned": "IP 地址已成功解禁！"
   },
   "tooltip": {
     "auto_lets_encrypt": "是否自动请求 Let's Encrypt 证书。",
     "button": {
+      "ban_ip": "封禁此 IP 地址",
       "clone_template": "克隆模板 {{template}}",
-      "convert_service_to_draft": "将服务 {{name}} 转换为草稿",
-      "convert_service_to_online": "将服务 {{name}} 转换为在线",
       "convert_config_to_draft": "Convert Config {{name}} to Draft",
       "convert_config_to_online": "Convert Config {{name}} to Online",
+      "convert_service_to_draft": "将服务 {{name}} 转换为草稿",
+      "convert_service_to_online": "将服务 {{name}} 转换为在线",
       "delete_config": "删除自定义配置 {{name}}",
       "delete_file": "删除缓存文件：{{filename}}",
       "delete_instance": "删除实例 {{hostname}}",
       "delete_plugin": "删除插件 {{name}}",
       "delete_service": "删除服务 {{name}}",
       "delete_template": "删除模板 {{name}}",
+      "force_check": "安排检查；仅在有更新时下载。",
+      "force_update": "跳过检查并强制下载 PRO 插件；失败时保留当前状态。",
       "ping_instance": "Ping 实例 {{hostname}}",
       "reload_instance": "重新加载实例 {{hostname}}",
       "reset_default": "重置为默认值",
       "reset_global": "重置为全局值",
-      "value_from_global": "来自全局设置的值",
       "run_job": "运行任务 {{job}}",
       "stop_instance": "停止实例 {{hostname}}",
       "unban_ip": "解禁 {{ip}}",
-      "ban_ip": "封禁此 IP 地址",
-      "force_check": "安排检查；仅在有更新时下载。",
-      "force_update": "跳过检查并强制下载 PRO 插件；失败时保留当前状态。"
+      "value_from_global": "来自全局设置的值"
     },
     "cannot_delete_original_ban": "无法删除原始封禁条目。",
     "cannot_remove_disabled": "无法移除，因为一个或多个设置被禁用。",
@@ -1456,10 +1486,10 @@
     "dns_provider_dns_only": "DNS 提供商选择仅适用于 DNS 质询。",
     "download_file": "下载文件",
     "draft_toggle_disabled": "草稿模式只能在通过 UI 创建的服务上切换。",
-    "email_lets_encrypt": "用于向 Let's Encrypt 注册以进行证书管理和通知的电子邮件地址。",
     "email_length": "电子邮件必须在 1 到 256 个字符之间。",
-    "follow_latest_page_only": "跟随模式仅在最新页面可用",
+    "email_lets_encrypt": "用于向 Let's Encrypt 注册以进行证书管理和通知的电子邮件地址。",
     "fetch_global_settings": "获取全局设置并应用于当前模板",
+    "follow_latest_page_only": "跟随模式仅在最新页面可用",
     "global_settings_source": "值继承自全局设置。",
     "instance_not_up": "实例 {{hostname}} 当前未响应 ('up')。",
     "latest_version_installed": "您正在运行最新版本。",
@@ -1472,16 +1502,16 @@
       "access_service": "访问服务 {{name}}",
       "clone_config": "克隆自定义配置 {{name}}",
       "clone_service": "克隆服务 {{name}}",
+      "clone_template": "克隆模板 {{template}}",
       "download_file": "下载 {{filename}}",
       "edit_config": "编辑自定义配置 {{name}}",
       "edit_service": "编辑服务 {{service}}",
+      "edit_template": "编辑模板 {{template}}",
       "export_service": "导出服务 {{name}} 配置",
       "view_config": "查看自定义配置 {{name}}",
       "view_file": "查看 {{filename}}",
       "view_service": "查看服务 {{service}}",
-      "edit_template": "编辑模板 {{template}}",
-      "view_template": "查看模板 {{template}}",
-      "clone_template": "克隆模板 {{template}}"
+      "view_template": "查看模板 {{template}}"
     },
     "modal": {
       "title": {
@@ -1512,20 +1542,6 @@
       "yes": "支持 STREAM 模式。"
     },
     "table": {
-      "templates": {
-        "actions": "此模板可用的操作",
-        "details": "显示模板详细信息",
-        "select_all": "选择所有模板",
-        "id": "模板 ID",
-        "name": "用户定义或自动生成的模板名称",
-        "plugin": "包含该模板的插件",
-        "steps": "模板的步骤数量",
-        "settings": "模板的设置数量",
-        "configs": "模板的配置数量",
-        "method": "模板的创建方式",
-        "created": "模板的创建日期",
-        "last_update": "模板的最后更新日期"
-      },
       "bans": {
         "actions": "此封禁可用的操作",
         "country": "被封禁 IP 地址的国家/地区",
@@ -1557,9 +1573,9 @@
         "name": "自定义配置的名称",
         "select_all": "选择所有自定义配置",
         "service": "与自定义配置关联的服务（或全局）",
+        "status": "自定义配置的草稿状态",
         "template": "指示自定义配置是否源自模板",
-        "type": "自定义配置的类型或上下文（例如，HTTP, MODSEC）",
-        "status": "自定义配置的草稿状态"
+        "type": "自定义配置的类型或上下文（例如，HTTP, MODSEC）"
       },
       "instances": {
         "actions": "此实例可用的操作",
@@ -1621,9 +1637,24 @@
         "last_update": "服务最后更新的日期和时间",
         "method": "服务的创建方法（例如，ui, file）",
         "name": "服务的名称",
+        "security_mode": "服务的安全模式（阻止或检测）",
         "select_all": "选择所有服务",
         "template": "服务使用的模板",
         "type": "服务类型（在线/草稿）"
+      },
+      "templates": {
+        "actions": "此模板可用的操作",
+        "configs": "模板的配置数量",
+        "created": "模板的创建日期",
+        "details": "显示模板详细信息",
+        "id": "模板 ID",
+        "last_update": "模板的最后更新日期",
+        "method": "模板的创建方式",
+        "name": "用户定义或自动生成的模板名称",
+        "plugin": "包含该模板的插件",
+        "select_all": "选择所有模板",
+        "settings": "模板的设置数量",
+        "steps": "模板的步骤数量"
       }
     },
     "ui_host": "将通过反向代理提供 BunkerWeb UI 的主机名或 IP 地址。",

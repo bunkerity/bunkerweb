@@ -63,7 +63,7 @@ from sqlalchemy.exc import (
     SAWarning,
     SQLAlchemyError,
 )
-from sqlalchemy.orm import joinedload, scoped_session, sessionmaker
+from sqlalchemy.orm import joinedload, scoped_session, sessionmaker, aliased
 from sqlalchemy.pool import QueuePool
 from sqlite3 import Connection as SQLiteConnection
 
@@ -502,7 +502,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.8~rc1"
+                return "1.6.8~rc3"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -535,7 +535,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.8~rc1",
+            "version": "1.6.8~rc3",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -1329,7 +1329,77 @@ class Database:
                     elif t == "plugin":
                         session.query(Plugins).filter_by(**delete["filter"]).delete()
 
-                session.add_all(to_put)
+                # Insert parents before children to avoid FK errors on some DBs.
+                to_put_by_type = {
+                    "plugins": [],
+                    "settings": [],
+                    "selects": [],
+                    "multiselects": [],
+                    "templates": [],
+                    "template_steps": [],
+                    "template_settings": [],
+                    "template_configs": [],
+                    "jobs": [],
+                    "plugin_pages": [],
+                    "cli_commands": [],
+                    "other": [],
+                }
+
+                for item in to_put:
+                    if isinstance(item, Plugins):
+                        to_put_by_type["plugins"].append(item)
+                    elif isinstance(item, Settings):
+                        to_put_by_type["settings"].append(item)
+                    elif isinstance(item, Selects):
+                        to_put_by_type["selects"].append(item)
+                    elif isinstance(item, Multiselects):
+                        to_put_by_type["multiselects"].append(item)
+                    elif isinstance(item, Templates):
+                        to_put_by_type["templates"].append(item)
+                    elif isinstance(item, Template_steps):
+                        to_put_by_type["template_steps"].append(item)
+                    elif isinstance(item, Template_settings):
+                        to_put_by_type["template_settings"].append(item)
+                    elif isinstance(item, Template_custom_configs):
+                        to_put_by_type["template_configs"].append(item)
+                    elif isinstance(item, Jobs):
+                        to_put_by_type["jobs"].append(item)
+                    elif isinstance(item, Plugin_pages):
+                        to_put_by_type["plugin_pages"].append(item)
+                    elif isinstance(item, Bw_cli_commands):
+                        to_put_by_type["cli_commands"].append(item)
+                    else:
+                        to_put_by_type["other"].append(item)
+
+                if to_put_by_type["plugins"]:
+                    session.add_all(to_put_by_type["plugins"])
+                if to_put_by_type["settings"]:
+                    session.add_all(to_put_by_type["settings"])
+                if to_put_by_type["plugins"] or to_put_by_type["settings"]:
+                    session.flush()
+
+                if to_put_by_type["selects"]:
+                    session.add_all(to_put_by_type["selects"])
+                if to_put_by_type["multiselects"]:
+                    session.add_all(to_put_by_type["multiselects"])
+
+                if to_put_by_type["templates"]:
+                    session.add_all(to_put_by_type["templates"])
+                if to_put_by_type["template_steps"]:
+                    session.add_all(to_put_by_type["template_steps"])
+                if to_put_by_type["template_settings"]:
+                    session.add_all(to_put_by_type["template_settings"])
+                if to_put_by_type["template_configs"]:
+                    session.add_all(to_put_by_type["template_configs"])
+
+                if to_put_by_type["jobs"]:
+                    session.add_all(to_put_by_type["jobs"])
+                if to_put_by_type["plugin_pages"]:
+                    session.add_all(to_put_by_type["plugin_pages"])
+                if to_put_by_type["cli_commands"]:
+                    session.add_all(to_put_by_type["cli_commands"])
+                if to_put_by_type["other"]:
+                    session.add_all(to_put_by_type["other"])
 
                 # Apply updates
                 for update in to_update:
@@ -2621,18 +2691,23 @@ class Database:
         """Get the services from the database"""
         services = []
         with self._db_session() as session:
-            # Fetch all services with their USE_TEMPLATE setting in a single optimized query
+            # Fetch all services with their USE_TEMPLATE and SECURITY_MODE settings in a single optimized query
             # This avoids N+1 query problem when loading many services
+            template_alias = aliased(Services_settings)
+            security_mode_alias = aliased(Services_settings)
+
             query = (
                 session.query(Services)
-                .outerjoin(Services_settings, (Services.id == Services_settings.service_id) & (Services_settings.setting_id == "USE_TEMPLATE"))
+                .outerjoin(template_alias, (Services.id == template_alias.service_id) & (template_alias.setting_id == "USE_TEMPLATE"))
+                .outerjoin(security_mode_alias, (Services.id == security_mode_alias.service_id) & (security_mode_alias.setting_id == "SECURITY_MODE"))
                 .with_entities(
                     Services.id,
                     Services.method,
                     Services.is_draft,
                     Services.creation_date,
                     Services.last_update,
-                    Services_settings.value.label("template"),
+                    template_alias.value.label("template"),
+                    security_mode_alias.value.label("security_mode"),
                 )
             )
 
@@ -2650,6 +2725,7 @@ class Database:
                     "creation_date": service.creation_date,
                     "last_update": service.last_update,
                     "template": service.template or "",
+                    "security_mode": service.security_mode or "block",
                 }
             )
 
@@ -2778,6 +2854,81 @@ class Database:
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
+
+            def _add_ordered(items: List[Any]) -> None:
+                if not items:
+                    return
+
+                buckets = {
+                    "plugins": [],
+                    "settings": [],
+                    "selects": [],
+                    "multiselects": [],
+                    "templates": [],
+                    "template_steps": [],
+                    "template_settings": [],
+                    "template_configs": [],
+                    "jobs": [],
+                    "plugin_pages": [],
+                    "cli_commands": [],
+                    "other": [],
+                }
+
+                for item in items:
+                    if isinstance(item, Plugins):
+                        buckets["plugins"].append(item)
+                    elif isinstance(item, Settings):
+                        buckets["settings"].append(item)
+                    elif isinstance(item, Selects):
+                        buckets["selects"].append(item)
+                    elif isinstance(item, Multiselects):
+                        buckets["multiselects"].append(item)
+                    elif isinstance(item, Templates):
+                        buckets["templates"].append(item)
+                    elif isinstance(item, Template_steps):
+                        buckets["template_steps"].append(item)
+                    elif isinstance(item, Template_settings):
+                        buckets["template_settings"].append(item)
+                    elif isinstance(item, Template_custom_configs):
+                        buckets["template_configs"].append(item)
+                    elif isinstance(item, Jobs):
+                        buckets["jobs"].append(item)
+                    elif isinstance(item, Plugin_pages):
+                        buckets["plugin_pages"].append(item)
+                    elif isinstance(item, Bw_cli_commands):
+                        buckets["cli_commands"].append(item)
+                    else:
+                        buckets["other"].append(item)
+
+                if buckets["plugins"]:
+                    session.add_all(buckets["plugins"])
+                if buckets["settings"]:
+                    session.add_all(buckets["settings"])
+                if buckets["plugins"] or buckets["settings"]:
+                    session.flush()
+
+                if buckets["selects"]:
+                    session.add_all(buckets["selects"])
+                if buckets["multiselects"]:
+                    session.add_all(buckets["multiselects"])
+
+                if buckets["templates"]:
+                    session.add_all(buckets["templates"])
+                if buckets["template_steps"]:
+                    session.add_all(buckets["template_steps"])
+                if buckets["template_settings"]:
+                    session.add_all(buckets["template_settings"])
+                if buckets["template_configs"]:
+                    session.add_all(buckets["template_configs"])
+
+                if buckets["jobs"]:
+                    session.add_all(buckets["jobs"])
+                if buckets["plugin_pages"]:
+                    session.add_all(buckets["plugin_pages"])
+                if buckets["cli_commands"]:
+                    session.add_all(buckets["cli_commands"])
+                if buckets["other"]:
+                    session.add_all(buckets["other"])
 
             db_plugins = session.query(Plugins).with_entities(Plugins.id).filter_by(type=_type).all()
 
@@ -3426,7 +3577,7 @@ class Database:
                     try:
                         if per_plugin_commit:
                             if local_to_put:
-                                session.add_all(local_to_put)
+                                _add_ordered(local_to_put)
                             # Commit also captures any .update() / .delete() executed above.
                             session.commit()
                         else:
@@ -3670,7 +3821,7 @@ class Database:
                 try:
                     if per_plugin_commit:
                         if local_to_put:
-                            session.add_all(local_to_put)
+                            _add_ordered(local_to_put)
                         # Commit also captures any .update() / .delete() executed above.
                         session.commit()
                     else:
@@ -3694,7 +3845,7 @@ class Database:
 
             try:
                 if not per_plugin_commit and to_put:
-                    session.add_all(to_put)
+                    _add_ordered(to_put)
                 session.commit()
             except BaseException as e:
                 session.rollback()

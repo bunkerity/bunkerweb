@@ -165,7 +165,7 @@ services:
           - bw-syslog
 
   app1:
-    image: nginxdemos/nginx-hello
+    image: bunkerity/bunkerweb-hello:v1.0
     restart: "unless-stopped"
     networks:
       bw-services:
