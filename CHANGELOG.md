@@ -3,6 +3,8 @@
 ## v1.6.8 - 2026/02/??
 
 - [DOCS] Add forward proxy configuration for outgoing traffic
+- [DEPS] Update coreruleset-v4 version to v4.23.0
+- [DEPS] Updated NGINX version to v1.28.2 (except for Fedora as it is not yet available)
 
 ## v1.6.8~rc3 - 2026/02/02
 

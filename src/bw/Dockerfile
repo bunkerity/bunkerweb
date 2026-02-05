@@ -1,4 +1,4 @@
-FROM nginx:1.28.1-alpine-slim@sha256:ffade223c16e4859427075ca02940708f8138e7c6d68ec356ea5aa56b1bda1bf AS builder
+FROM nginx:1.28.2-alpine-slim@sha256:8393e91e100dcda823dcdd5f7d08e3e1be61670c41b513c612d2f80913a46a83 AS builder
 
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre2-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip python3-dev cargo lmdb-dev libfuzzy2-dev pkgconfig ca-certificates coreutils libc-dev
@@ -69,7 +69,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
   echo "Skipping HTML minification"; \
   fi
 
-FROM nginx:1.28.1-alpine-slim@sha256:ffade223c16e4859427075ca02940708f8138e7c6d68ec356ea5aa56b1bda1bf
+FROM nginx:1.28.2-alpine-slim@sha256:8393e91e100dcda823dcdd5f7d08e3e1be61670c41b513c612d2f80913a46a83
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

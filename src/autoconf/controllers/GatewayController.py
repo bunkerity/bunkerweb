@@ -10,6 +10,8 @@ from kubernetes.client.exceptions import ApiException
 
 from controllers.KubernetesController import KubernetesController
 
+GATEWAY_API_VERSIONS = ("v1", "v1alpha2", "v1alpha3", "v1beta1", "v1alpha1")
+
 
 class GatewayController(KubernetesController):
     def __init__(self):
@@ -23,7 +25,7 @@ class GatewayController(KubernetesController):
 
         self._gateway_api_group = "gateway.networking.k8s.io"
         self._gateway_api_version = getenv("KUBERNETES_GATEWAY_API_VERSION", "v1").strip().lower()
-        if self._gateway_api_version not in ("v1", "v1beta1", "v1beta2", "v1alpha2", "v1alpha1"):
+        if self._gateway_api_version not in GATEWAY_API_VERSIONS:
             self._logger.warning(f"Unsupported KUBERNETES_GATEWAY_API_VERSION {self._gateway_api_version}, defaulting to v1")
             self._gateway_api_version = "v1"
 
@@ -45,7 +47,7 @@ class GatewayController(KubernetesController):
 
     def _candidate_gateway_api_versions(self) -> List[str]:
         versions = [self._gateway_api_version]
-        for version in ("v1", "v1beta1", "v1beta2", "v1alpha2", "v1alpha1"):
+        for version in GATEWAY_API_VERSIONS:
             if version not in versions:
                 versions.append(version)
         return versions

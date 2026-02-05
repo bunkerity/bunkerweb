@@ -6,7 +6,7 @@ RUN apt update && \
     bash libssl-dev git zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre2-dev libbrotli-dev libgd-dev liblmdb-dev libfuzzy-dev cargo coreutils python3.11 python3.11-dev python3.11-venv python3-pip -y
 
 ENV OS=ubuntu
-ENV NGINX_VERSION=1.28.1
+ENV NGINX_VERSION=1.28.2
 ENV EXPECTED_FPR=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
 
 # Install Nginx
