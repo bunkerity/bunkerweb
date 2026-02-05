@@ -1,0 +1,17 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Block Unix commands being executed with no arguments
+##! This rule specifically only blocks commands that can be executed
+##! with no arguments to minimize the risk of false positives.
+
+##!+ i
+
+##!$ $
+
+##!> assemble
+  ##!> include unix-shell-evasion-prefix-start-of-string
+
+  ##! The `@` processor is not defined since we're matching the execution of commands with no arguments.
+  ##!> include-except unix-shell-noarguments unix-shell-noarguments-fps-pl1 -- ~ \S{1,10}\b
+##!<

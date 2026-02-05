@@ -6,6 +6,7 @@
 # home level dotfiles (keep in sync with lfi-os-files.data).
 # Also include commented values (e.g., `# .env`), but not comments.
 # grep -E "^(#\s*)?\.\S+$" lfi-os-files.data | sed 's/^#\s*//'
+.access/
 .addressbook
 .anydesk/
 .aptitude/config
@@ -15,20 +16,28 @@
 .bash_
 .bashrc
 .boto
+.cache/
 .cache/notify-osd.log
 .cargo/
+.config.local.php
 .config/
+.coverage
+.coveralls.yml
+.credentials
 .cshrc
 .cups/
+.cvs
 .dbus/
 .deployment-secrets.txt
 .docker/
+.dockerignore
 .drush/
 .env
 .envrc
 .eslintignore
 .fbcindex
 .forward
+.ftpconfig
 .gem/
 .git/
 .gitattributes
@@ -44,10 +53,12 @@
 .gsutil/
 .hg/
 .hgignore
+.history
 .hplip/hplip.conf
 .htaccess
 .htdigest
 .htpasswd
+.ipynb_checkpoints/
 .java/
 .ksh_history
 .kube/
@@ -62,7 +73,9 @@
 .local/state/
 .lynx_cookies
 .minikube/
+.msmtprc
 .my.cnf
+.myscmserverinfo
 .mysql_history
 .nano_history
 .netrc
@@ -73,6 +86,9 @@
 .nsr
 .nvm/
 .oh-my-
+.pac
+.pass
+.passwd
 .password-store
 .pearrc
 .pgpass
@@ -83,23 +99,32 @@
 .procmailrc
 .profile
 .psql_history
+.pwd
+.pytest_cache/
 .python_history
 .rediscli_history
+.remote-sync.json
 .rhistory
 .rhosts
 .rustup
+.s3cfg
+.secrets
 .selected_editor
+.settings/
 .sh_history
-.sqlite_history
 .snap/
+.sqlite_history
 .ssh/
 .subversion/
 .svn/
 .svnignore
 .tconn/
 .tcshrc
-.tmux.conf
+.terraform.lock.hcl
+.terraform/
 .thunderbird/
+.tmux.conf
+.tools/
 .tor/
 .travis.yaml
 .travis.yml
@@ -108,16 +133,17 @@
 .vim/
 .viminfo
 .vimrc
-.vscode
 .vmware/
+.vscode
+.web.config.swp
 .wget-hsts
 .www_acl
 .wwwacl
 .xauthority
 .yarnrc
-.zshenv
 .zhistory
 .zsh_history
+.zshenv
 .zshrc
 
 # Generic config filenames and common permutations
@@ -277,6 +303,11 @@ config_sample.yml
 config_test.yml
 config-test.yml
 config.test.yml
+config.sample.inc.php
+credentials.json
+secrets.json
+secrets.yaml
+secrets.yml
 # Compressed database dumps
 .sql.001
 .sql.7z
@@ -310,6 +341,10 @@ config.test.yml
 .sql.xz
 .sql.yz1
 .sql.z
+# GitLab Omnibus
+gitlab.rb
+gitlab_config_
+initial_root_password
 # AWS cli
 aws.yaml
 aws.yml
@@ -318,6 +353,9 @@ aws-key.yml
 # October CMS credentials file
 /auth.json
 # Wordpress
+/debug.log
+/error.log
+/errors.log
 wp-config.
 wp-config-
 wp-config_
@@ -413,6 +451,28 @@ compose.yml
 compose.yaml
 # CVE-2023-49103
 phpinfo.php
+# Python cache
+__pycache__/
+# Windows system ini files
+boot.ini
+system.ini
+win.ini
+# NodeJS log file
+pm2.log
+# Generic log filename
+debug.log
+# Mysql/MariaDB config file
+debian.cnf
+my.cnf
+mysql.cnf
+mysqldump.cnf
+# FTP config files
+ftp-sync.json
+# Yarn log files
+yarn-debug.log
+yarn-error.log
+# Code coverage config file
+coverage.xml
 
 # /proc entries (keep in sync with lfi-os-files.data)
 # grep -E "^proc/" lfi-os-files.data
@@ -496,6 +556,9 @@ proc/version_signature
 proc/vmallocinfo
 proc/vmstat
 proc/zoneinfo
+/proc/
+
+sftp.json
 
 # /sys entries (keep in sync with lfi-os-files.data)
 # grep -E "^sys/" lfi-os-files.data
@@ -510,3 +573,9 @@ sys/hypervisor
 sys/kernel
 sys/module
 sys/power
+/sys/
+
+# Vite.js development server endpoints (CVE-2025-30208)
+# These endpoints allow arbitrary file system access and should never be exposed
+/@fs/
+/@id/

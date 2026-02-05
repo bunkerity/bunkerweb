@@ -1,6 +1,12 @@
 # Changelog
 
-## v1.6.8~rc3 - 2026/01/??
+## v1.6.8 - 2026/02/??
+
+- [DOCS] Add forward proxy configuration for outgoing traffic
+- [DEPS] Update coreruleset-v4 version to v4.23.0
+- [DEPS] Updated NGINX version to v1.28.2 (except for Fedora as it is not yet available)
+
+## v1.6.8~rc3 - 2026/02/02
 
 - [FEATURE] Add new `REVERSE_PROXY_REQUEST_BUFFERING` setting to the `Reverse Proxy` plugin to control request body buffering behavior when proxying requests (default: `on`)
 - [BUGFIX] Initialize is_whitelisted variable to 'no' in configuration files to avoid spam uninitialized messages in logs
@@ -10,7 +16,11 @@
 - [UI] Fix bug where updating a ban to a custom duration accidentally created a permanent ban
 - [UI] Enhance map legend and color ramp for blocked requests visualization
 - [UI] Enhance dark mode styles for news card elements
+- [UI] Add CIDR annotations support for `FORWARDED_ALLOW_IPS` and `PROXY_ALLOW_IPS` settings and update the default values to common private network ranges
+- [API] Add HTTP/2 support in Gunicorn configuration for improved performance and compatibility
+- [API] Add CIDR annotations support for `FORWARDED_ALLOW_IPS` and `PROXY_ALLOW_IPS` settings and update the default values to common private network ranges
 - [MISC] Update Laurent Minne's blacklist's label and add the new one from [DuggyTuxy Data-Shield IPv4 Blocklist](https://duggytuxy.github.io/)
+- [MISC] Add publiccode metadata file for open source compliance
 
 ## v1.6.8~rc2 - 2026/01/23
 

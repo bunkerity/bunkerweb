@@ -2207,7 +2207,7 @@ sudo ./install-bunkerweb.sh --yes --api
 
 ### 使用软件包管理器安装
 
-请确保在安装 BunkerWeb 之前**已经安装了 NGINX 1.28.1**。对于除 Fedora 之外的所有发行版，强制要求使用来自[官方 NGINX 仓库](https://nginx.org/en/linux_packages.html)的预构建包。从源代码编译 NGINX 或使用来自不同仓库的包将无法与 BunkerWeb 的官方预构建包一起工作。但是，您可以选择从源代码构建 BunkerWeb。
+请确保在安装 BunkerWeb 之前**已经安装了 NGINX 1.28.2**。对于除 Fedora 之外的所有发行版，强制要求使用来自[官方 NGINX 仓库](https://nginx.org/en/linux_packages.html)的预构建包。从源代码编译 NGINX 或使用来自不同仓库的包将无法与 BunkerWeb 的官方预构建包一起工作。但是，您可以选择从源代码构建 BunkerWeb。
 
 === "Debian Bookworm/Trixie"
 
@@ -2222,11 +2222,11 @@ sudo ./install-bunkerweb.sh --yes --api
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    您现在应该能够安装 NGINX 1.28.1：
+    您现在应该能够安装 NGINX 1.28.2：
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.28.1-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.28.2-1~$(lsb_release -cs)
     ```
 
     !!! warning "测试/开发版本"
@@ -2270,11 +2270,11 @@ sudo ./install-bunkerweb.sh --yes --api
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    您现在应该能够安装 NGINX 1.28.1：
+    您现在应该能够安装 NGINX 1.28.2：
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.28.1-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.28.2-1~$(lsb_release -cs)
     ```
 
     !!! warning "测试/开发版本"
@@ -2364,10 +2364,10 @@ sudo ./install-bunkerweb.sh --yes --api
     module_hotfixes=true
     ```
 
-    您现在应该能够安装 NGINX 1.28.1：
+    您现在应该能够安装 NGINX 1.28.2：
 
     ```shell
-    sudo dnf install --allowerasing nginx-1.28.1
+    sudo dnf install --allowerasing nginx-1.28.2
     ```
 
     !!! example "禁用设置向导"
@@ -2638,20 +2638,20 @@ networks:
 
 ##### 仅 Kubernetes
 
-| Setting                                 | 描述                                                                        | 接受的值          | 默认值          |
-| --------------------------------------- | --------------------------------------------------------------------------- | ----------------- | --------------- |
-| `KUBERNETES_VERIFY_SSL`                 | 校验 Kubernetes API 的 TLS                                                  | `yes` 或 `no`     | `yes`           |
-| `KUBERNETES_SSL_CA_CERT`                | Kubernetes API 自定义 CA bundle 路径                                        | 文件路径          | unset           |
-| `USE_KUBERNETES_FQDN`                   | 使用 `<pod>.<ns>.pod.<domain>` 而不是 Pod IP 作为实例主机名                 | `yes` 或 `no`     | `yes`           |
-| `KUBERNETES_INGRESS_CLASS`              | 仅处理该类的 ingress                                                        | 字符串            | unset（全部）   |
-| `KUBERNETES_GATEWAY_MODE`               | 使用 Gateway API 控制器而非 Ingress                                         | `yes` 或 `no`     | `no`            |
-| `KUBERNETES_GATEWAY_CLASS`              | 仅处理该类的 Gateway                                                        | 字符串            | unset（全部）   |
-| `KUBERNETES_GATEWAY_API_VERSION`        | 使用的 Gateway API 版本（缺失时自动回退）                                   | `v1`、`v1beta1`、`v1beta2`、`v1alpha2`、`v1alpha1` | `v1` |
-| `KUBERNETES_DOMAIN_NAME`                | 构建上游主机时使用的集群域名后缀                                            | 字符串            | `cluster.local` |
-| `KUBERNETES_SERVICE_PROTOCOL`           | 生成的反向代理主机所用的协议                                                | `http` 或 `https` | `http`          |
-| `BUNKERWEB_SERVICE_NAME`                | 在补丁 Ingress/Gateway 状态时读取的 Service 名称                            | 字符串            | `bunkerweb`     |
-| `BUNKERWEB_NAMESPACE`                   | 该 Service 的命名空间                                                       | 字符串            | `bunkerweb`     |
-| `KUBERNETES_REVERSE_PROXY_SUFFIX_START` | 多路径 ingress 生成 `REVERSE_PROXY_HOST_n`/`REVERSE_PROXY_URL_n` 的起始索引 | 整数 (>=0)        | `1`             |
+| Setting                                 | 描述                                                                        | 接受的值                                           | 默认值          |
+| --------------------------------------- | --------------------------------------------------------------------------- | -------------------------------------------------- | --------------- |
+| `KUBERNETES_VERIFY_SSL`                 | 校验 Kubernetes API 的 TLS                                                  | `yes` 或 `no`                                      | `yes`           |
+| `KUBERNETES_SSL_CA_CERT`                | Kubernetes API 自定义 CA bundle 路径                                        | 文件路径                                           | unset           |
+| `USE_KUBERNETES_FQDN`                   | 使用 `<pod>.<ns>.pod.<domain>` 而不是 Pod IP 作为实例主机名                 | `yes` 或 `no`                                      | `yes`           |
+| `KUBERNETES_INGRESS_CLASS`              | 仅处理该类的 ingress                                                        | 字符串                                             | unset（全部）   |
+| `KUBERNETES_GATEWAY_MODE`               | 使用 Gateway API 控制器而非 Ingress                                         | `yes` 或 `no`                                      | `no`            |
+| `KUBERNETES_GATEWAY_CLASS`              | 仅处理该类的 Gateway                                                        | 字符串                                             | unset（全部）   |
+| `KUBERNETES_GATEWAY_API_VERSION`        | 使用的 Gateway API 版本（缺失时自动回退）                                   | `v1`、`v1beta1`、`v1beta2`、`v1alpha2`、`v1alpha1` | `v1`            |
+| `KUBERNETES_DOMAIN_NAME`                | 构建上游主机时使用的集群域名后缀                                            | 字符串                                             | `cluster.local` |
+| `KUBERNETES_SERVICE_PROTOCOL`           | 生成的反向代理主机所用的协议                                                | `http` 或 `https`                                  | `http`          |
+| `BUNKERWEB_SERVICE_NAME`                | 在补丁 Ingress/Gateway 状态时读取的 Service 名称                            | 字符串                                             | `bunkerweb`     |
+| `BUNKERWEB_NAMESPACE`                   | 该 Service 的命名空间                                                       | 字符串                                             | `bunkerweb`     |
+| `KUBERNETES_REVERSE_PROXY_SUFFIX_START` | 多路径 ingress 生成 `REVERSE_PROXY_HOST_n`/`REVERSE_PROXY_URL_n` 的起始索引 | 整数 (>=0)                                         | `1`             |
 
 ### 自动配置服务
 
@@ -4212,18 +4212,6 @@ kubectl delete ingress <old-ingress> -n <namespace>
 | 复杂的 `rewrite`           | ⚠️ ConfigMap：`CONFIG_TYPE: http`   |
 | 自定义 `location`          | ⚠️ ConfigMap：`CONFIG_TYPE: http`   |
 | 外部 `proxy_pass`          | ⚠️ ConfigMap：`CONFIG_TYPE: http`   |
-
----
-
-#### 迁移前后对比
-
-| 指标                     | NGINX Ingress | BunkerWeb | 备注                     |
-| ------------------------ | ------------- | --------- | ------------------------ |
-| 平均响应时间             | 45ms          | 52ms      | +7ms（可接受的安全开销） |
-| 被阻止的请求（XSS/SQLi） | 0             | **127**   | WAF 已激活 ✅             |
-| SSL 证书                 | 有效          | 有效      | 迁移成功 ✅               |
-| 可用性                   | 99.9%         | 99.9%     | 稳定 ✅                   |
-
 
 ## Swarm
 

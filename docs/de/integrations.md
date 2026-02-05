@@ -2207,7 +2207,7 @@ Abhängig von Ihren Entscheidungen während der Installation:
 
 ### Installation mit dem Paketmanager
 
-Bitte stellen Sie sicher, dass Sie **NGINX 1.28.1 installiert haben, bevor Sie BunkerWeb installieren**. Für alle Distributionen außer Fedora ist es zwingend erforderlich, vorgefertigte Pakete aus dem [offiziellen NGINX-Repository](https://nginx.org/en/linux_packages.html) zu verwenden. Das Kompilieren von NGINX aus dem Quellcode oder die Verwendung von Paketen aus verschiedenen Repositories funktioniert nicht mit den offiziellen vorgefertigten Paketen von BunkerWeb. Sie haben jedoch die Möglichkeit, BunkerWeb aus dem Quellcode zu erstellen.
+Bitte stellen Sie sicher, dass Sie **NGINX 1.28.2 installiert haben, bevor Sie BunkerWeb installieren**. Für alle Distributionen außer Fedora ist es zwingend erforderlich, vorgefertigte Pakete aus dem [offiziellen NGINX-Repository](https://nginx.org/en/linux_packages.html) zu verwenden. Das Kompilieren von NGINX aus dem Quellcode oder die Verwendung von Paketen aus verschiedenen Repositories funktioniert nicht mit den offiziellen vorgefertigten Paketen von BunkerWeb. Sie haben jedoch die Möglichkeit, BunkerWeb aus dem Quellcode zu erstellen.
 
 === "Debian Bookworm/Trixie"
 
@@ -2222,11 +2222,11 @@ Bitte stellen Sie sicher, dass Sie **NGINX 1.28.1 installiert haben, bevor Sie B
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    Sie sollten jetzt NGINX 1.28.1 installieren können:
+    Sie sollten jetzt NGINX 1.28.2 installieren können:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.28.1-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.28.2-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev-Version"
@@ -2270,11 +2270,11 @@ Bitte stellen Sie sicher, dass Sie **NGINX 1.28.1 installiert haben, bevor Sie B
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    Sie sollten jetzt NGINX 1.28.1 installieren können:
+    Sie sollten jetzt NGINX 1.28.2 installieren können:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.28.1-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.28.2-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev-Version"
@@ -2364,10 +2364,10 @@ Bitte stellen Sie sicher, dass Sie **NGINX 1.28.1 installiert haben, bevor Sie B
     module_hotfixes=true
     ```
 
-    Sie sollten jetzt NGINX 1.28.1 installieren können:
+    Sie sollten jetzt NGINX 1.28.2 installieren können:
 
     ```shell
-    sudo dnf install --allowerasing nginx-1.28.1
+    sudo dnf install --allowerasing nginx-1.28.2
     ```
 
     !!! example "Einrichtungsassistenten deaktivieren"
@@ -2637,20 +2637,20 @@ Der `bw-autoconf`-Controller überwacht Ihren Orchestrator und schreibt Änderun
 
 ##### Nur Kubernetes
 
-| Setting                                 | Beschreibung                                                                                    | Akzeptierte Werte   | Standard        |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------- | --------------- |
-| `KUBERNETES_VERIFY_SSL`                 | TLS der Kubernetes-API verifizieren                                                             | `yes` oder `no`     | `yes`           |
-| `KUBERNETES_SSL_CA_CERT`                | Pfad zu einem benutzerdefinierten CA-Bundle für die Kubernetes-API                              | Dateipfad           | unset           |
-| `USE_KUBERNETES_FQDN`                   | `<pod>.<ns>.pod.<domain>` statt Pod-IP als Instanz-Hostname verwenden                           | `yes` oder `no`     | `yes`           |
-| `KUBERNETES_INGRESS_CLASS`              | Nur Ingresses mit dieser Klasse verarbeiten                                                     | String              | unset (alle)    |
-| `KUBERNETES_GATEWAY_MODE`               | Gateway-API-Controller statt Ingresses verwenden                                                | `yes` oder `no`     | `no`            |
-| `KUBERNETES_GATEWAY_CLASS`              | Nur Gateways mit dieser Klasse verarbeiten                                                      | String              | unset (alle)    |
-| `KUBERNETES_GATEWAY_API_VERSION`        | Zu verwendende Gateway-API-Version (automatischer Fallback bei fehlender Version)               | `v1`, `v1beta1`, `v1beta2`, `v1alpha2`, `v1alpha1` | `v1` |
-| `KUBERNETES_DOMAIN_NAME`                | Cluster-Domain-Suffix beim Bauen von Upstream-Hosts                                             | String              | `cluster.local` |
-| `KUBERNETES_SERVICE_PROTOCOL`           | Schema für generierte Reverse-Proxy-Hosts                                                       | `http` oder `https` | `http`          |
-| `BUNKERWEB_SERVICE_NAME`                | Service-Name, der beim Patchen des Ingress-/Gateway-Status gelesen wird                         | String              | `bunkerweb`     |
-| `BUNKERWEB_NAMESPACE`                   | Namespace dieses Services                                                                       | String              | `bunkerweb`     |
-| `KUBERNETES_REVERSE_PROXY_SUFFIX_START` | Startindex für generierte `REVERSE_PROXY_HOST_n`/`REVERSE_PROXY_URL_n` bei Multi-Path-Ingresses | Integer (>=0)       | `1`             |
+| Setting                                 | Beschreibung                                                                                    | Akzeptierte Werte                                  | Standard        |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------- | --------------- |
+| `KUBERNETES_VERIFY_SSL`                 | TLS der Kubernetes-API verifizieren                                                             | `yes` oder `no`                                    | `yes`           |
+| `KUBERNETES_SSL_CA_CERT`                | Pfad zu einem benutzerdefinierten CA-Bundle für die Kubernetes-API                              | Dateipfad                                          | unset           |
+| `USE_KUBERNETES_FQDN`                   | `<pod>.<ns>.pod.<domain>` statt Pod-IP als Instanz-Hostname verwenden                           | `yes` oder `no`                                    | `yes`           |
+| `KUBERNETES_INGRESS_CLASS`              | Nur Ingresses mit dieser Klasse verarbeiten                                                     | String                                             | unset (alle)    |
+| `KUBERNETES_GATEWAY_MODE`               | Gateway-API-Controller statt Ingresses verwenden                                                | `yes` oder `no`                                    | `no`            |
+| `KUBERNETES_GATEWAY_CLASS`              | Nur Gateways mit dieser Klasse verarbeiten                                                      | String                                             | unset (alle)    |
+| `KUBERNETES_GATEWAY_API_VERSION`        | Zu verwendende Gateway-API-Version (automatischer Fallback bei fehlender Version)               | `v1`, `v1beta1`, `v1beta2`, `v1alpha2`, `v1alpha1` | `v1`            |
+| `KUBERNETES_DOMAIN_NAME`                | Cluster-Domain-Suffix beim Bauen von Upstream-Hosts                                             | String                                             | `cluster.local` |
+| `KUBERNETES_SERVICE_PROTOCOL`           | Schema für generierte Reverse-Proxy-Hosts                                                       | `http` oder `https`                                | `http`          |
+| `BUNKERWEB_SERVICE_NAME`                | Service-Name, der beim Patchen des Ingress-/Gateway-Status gelesen wird                         | String                                             | `bunkerweb`     |
+| `BUNKERWEB_NAMESPACE`                   | Namespace dieses Services                                                                       | String                                             | `bunkerweb`     |
+| `KUBERNETES_REVERSE_PROXY_SUFFIX_START` | Startindex für generierte `REVERSE_PROXY_HOST_n`/`REVERSE_PROXY_URL_n` bei Multi-Path-Ingresses | Integer (>=0)                                      | `1`             |
 
 ### Autoconf-Dienste
 
@@ -4212,18 +4212,6 @@ Anwendung mit benutzerdefinierten NGINX-Regeln über `configuration-snippet`: ko
 | Komplexes `rewrite`            | ⚠️ ConfigMap: `CONFIG_TYPE: http`            |
 | Benutzerdefiniertes `location` | ⚠️ ConfigMap: `CONFIG_TYPE: http`            |
 | Externes `proxy_pass`          | ⚠️ ConfigMap: `CONFIG_TYPE: http`            |
-
----
-
-#### Vorher/Nachher-Vergleich der Migration
-
-| Metrik                         | NGINX Ingress | BunkerWeb | Kommentar                               |
-| ------------------------------ | ------------- | --------- | --------------------------------------- |
-| Durchschnittliche Antwortzeit  | 45ms          | 52ms      | +7ms (akzeptabler Sicherheits-Overhead) |
-| Blockierte Anfragen (XSS/SQLi) | 0             | **127**   | WAF aktiv ✅                             |
-| SSL-Zertifikat                 | Gültig        | Gültig    | Migration OK ✅                          |
-| Verfügbarkeit                  | 99.9%         | 99.9%     | Stabil ✅                                |
-
 
 ## Swarm
 

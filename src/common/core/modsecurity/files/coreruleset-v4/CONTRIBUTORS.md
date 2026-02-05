@@ -30,6 +30,7 @@
 
 ## Contributors:
 
+- [disisto](https://github.com/disisto)
 - [touchweb-vincent](https://github.com/touchweb-vincent)
 - [Elnadrion](https://github.com/Elnadrion)
 - [pha6d](https://github.com/pha6d)

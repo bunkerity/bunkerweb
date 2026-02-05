@@ -526,7 +526,7 @@ The Manager is the brain of the cluster. It runs the Scheduler, Database, and op
         # TOTP_ENCRYPTION_KEYS=changeme
         LISTEN_ADDR=0.0.0.0
         # LISTEN_PORT=7000
-        FORWARDED_ALLOW_IPS=127.0.0.1
+        FORWARDED_ALLOW_IPS=127.0.0.1,::1
         # ENABLE_HEALTHCHECK=no
         ```
 
@@ -2882,6 +2882,143 @@ Pro tip: When viewing your alerts, click the "columns" option and check the "con
   ![Overview](assets/img/crowdity4.png){ align=center }
   <figcaption>BunkerWeb data shown in the context column</figcaption>
 </figure>
+
+## Forward proxy for outgoing traffic {#forward-proxy-outgoing-traffic}
+
+If your environment requires outbound HTTP(S) traffic to go through a forward proxy (for example a corporate proxy or Squid), you can rely on standard proxy environment variables. There is no dedicated BunkerWeb setting for this.
+
+**NGINX itself does not use these variables for upstream traffic**, so the forward proxy configuration only matters for components that initiate outbound requests. In practice, set them on the **Scheduler**, because it handles periodic tasks like Let's Encrypt certificate renewals, external API calls, and webhooks.
+
+The commonly used variables are:
+
+- `HTTP_PROXY` / `HTTPS_PROXY`: proxy URL, optionally with credentials.
+- `NO_PROXY`: comma-separated list of hosts, domains, or CIDRs that must bypass the proxy (match your integration: service names in Docker/Swarm, cluster domains in Kubernetes, or just localhost on Linux).
+- `REQUESTS_CA_BUNDLE` / `SSL_CERT_FILE`: optional, needed when the proxy uses a custom CA. Mount the CA bundle into the container and point both variables to it so Python requests can validate TLS (adjust the path to match your base image).
+
+!!! warning "NO_PROXY is required for internal traffic"
+    If you omit internal ranges or service names, internal traffic can be sent to the proxy and fail. Tailor the list to your integration (for example Docker service names, Kubernetes cluster domains, or just localhost on Linux).
+
+=== "Linux"
+
+    Add the variables to `/etc/bunkerweb/variables.env`. This file is loaded by both services, but only the Scheduler will use them:
+
+    ```conf
+    HTTP_PROXY=http://proxy.example.local:3128
+    HTTPS_PROXY=http://proxy.example.local:3128
+    NO_PROXY=localhost,127.0.0.1
+    REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+    SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+    ```
+
+    Restart the services so the environment is reloaded:
+
+    ```shell
+    sudo systemctl restart bunkerweb && \
+    sudo systemctl restart bunkerweb-scheduler
+    ```
+
+=== "All-in-one"
+
+    Provide the variables at container creation time (and mount the CA bundle if needed). The All-in-one image includes the Scheduler, so this will cover outbound tasks:
+
+    ```bash
+    docker run -d \
+        --name bunkerweb-aio \
+        -v bw-storage:/data \
+        -v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro \
+        -e HTTP_PROXY="http://proxy.example.local:3128" \
+        -e HTTPS_PROXY="http://proxy.example.local:3128" \
+        -e NO_PROXY="localhost,127.0.0.1" \
+        -e REQUESTS_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt" \
+        -e SSL_CERT_FILE="/etc/ssl/certs/ca-certificates.crt" \
+        -p 80:8080/tcp \
+        -p 443:8443/tcp \
+        -p 443:8443/udp \
+        bunkerity/bunkerweb-all-in-one:1.6.8-rc3
+    ```
+
+    If the container already exists, recreate it to apply the new environment.
+
+=== "Docker"
+
+    Add the variables to the scheduler container:
+
+    ```yaml
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
+      ...
+      environment:
+        HTTP_PROXY: "http://proxy.example.local:3128"
+        HTTPS_PROXY: "http://proxy.example.local:3128"
+        NO_PROXY: "localhost,127.0.0.1,bunkerweb,bw-scheduler,redis,db"
+        REQUESTS_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
+        SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"
+      volumes:
+        - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
+      ...
+    ```
+
+=== "Docker autoconf"
+
+    Apply the variables to the scheduler container:
+
+    ```yaml
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
+      ...
+      environment:
+        HTTP_PROXY: "http://proxy.example.local:3128"
+        HTTPS_PROXY: "http://proxy.example.local:3128"
+        NO_PROXY: "localhost,127.0.0.1,bunkerweb,bw-scheduler,redis,db"
+        REQUESTS_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
+        SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"
+      volumes:
+        - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
+      ...
+    ```
+
+=== "Kubernetes"
+
+    Add the variables to the Scheduler pod using `extraEnvs`. If you need a custom CA, mount it via `extraVolumes`/`extraVolumeMounts` and point the variables to the mounted path:
+
+    ```yaml
+    scheduler:
+      extraEnvs:
+        - name: HTTP_PROXY
+          value: "http://proxy.example.local:3128"
+        - name: HTTPS_PROXY
+          value: "http://proxy.example.local:3128"
+        - name: NO_PROXY
+          value: "localhost,127.0.0.1,.svc,.cluster.local"
+        - name: REQUESTS_CA_BUNDLE
+          value: "/etc/ssl/certs/ca-certificates.crt"
+        - name: SSL_CERT_FILE
+          value: "/etc/ssl/certs/ca-certificates.crt"
+    ```
+
+=== "Swarm"
+
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
+
+    Add the variables to the scheduler service:
+
+    ```yaml
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
+      ...
+      environment:
+        HTTP_PROXY: "http://proxy.example.local:3128"
+        HTTPS_PROXY: "http://proxy.example.local:3128"
+        NO_PROXY: "localhost,127.0.0.1,bunkerweb,bw-scheduler,redis,db"
+        REQUESTS_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
+        SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"
+      volumes:
+        - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
+      ...
+    ```
 
 ## Monitoring and reporting
 

@@ -526,7 +526,7 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
         # TOTP_ENCRYPTION_KEYS=changeme
         LISTEN_ADDR=0.0.0.0
         # LISTEN_PORT=7000
-        FORWARDED_ALLOW_IPS=127.0.0.1
+        FORWARDED_ALLOW_IPS=127.0.0.1,::1
         # ENABLE_HEALTHCHECK=no
         ```
 
@@ -2882,6 +2882,143 @@ Conseil professionnel : Lorsque vous consultez vos alertes, cliquez sur l'option
   ![Vue d'ensemble](assets/img/crowdity4.png){ align=center }
   <figcaption>Données BunkerWeb affichées dans la colonne de contexte</figcaption>
 </figure>
+
+## Proxy direct pour le trafic sortant {#forward-proxy-outgoing-traffic}
+
+Si votre environnement doit faire passer le trafic HTTP(S) sortant par un proxy direct (par exemple un proxy d'entreprise ou Squid), vous pouvez utiliser les variables d'environnement de proxy standard. Il n'existe pas de réglage BunkerWeb dédié.
+
+**NGINX lui-même n'utilise pas ces variables pour le trafic upstream**, donc la configuration du proxy direct ne concerne que les composants qui initient des requêtes sortantes. En pratique, configurez-les sur le **Scheduler**, car il gère des tâches périodiques comme les renouvellements de certificats Let's Encrypt, les appels d'API externes et les webhooks.
+
+Les variables couramment utilisées sont :
+
+- `HTTP_PROXY` / `HTTPS_PROXY` : URL du proxy, éventuellement avec identifiants.
+- `NO_PROXY` : liste séparée par des virgules des hôtes, domaines ou CIDR à exclure du proxy (adaptez selon l'intégration : noms de services en Docker/Swarm, domaines de cluster en Kubernetes, ou simplement localhost sous Linux).
+- `REQUESTS_CA_BUNDLE` / `SSL_CERT_FILE` : optionnel, requis si le proxy utilise une AC personnalisée. Montez le bundle CA dans le conteneur et pointez ces variables vers celui-ci afin que les requêtes Python puissent valider TLS (adaptez le chemin à votre image de base).
+
+!!! warning "NO_PROXY est requis pour le trafic interne"
+    Si vous omettez les plages internes ou les noms de services, le trafic interne peut être envoyé au proxy et échouer. Adaptez la liste à votre intégration (par exemple noms de services Docker, domaines de cluster Kubernetes ou simplement localhost sous Linux).
+
+=== "Linux"
+
+    Ajoutez les variables dans `/etc/bunkerweb/variables.env`. Ce fichier est chargé par les deux services, mais seul le Scheduler les utilisera :
+
+    ```conf
+    HTTP_PROXY=http://proxy.example.local:3128
+    HTTPS_PROXY=http://proxy.example.local:3128
+    NO_PROXY=localhost,127.0.0.1
+    REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+    SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+    ```
+
+    Redémarrez les services pour recharger l'environnement :
+
+    ```shell
+    sudo systemctl restart bunkerweb && \
+    sudo systemctl restart bunkerweb-scheduler
+    ```
+
+=== "All-in-one"
+
+    Fournissez les variables lors de la création du conteneur (et montez le bundle CA si nécessaire). L'image All-in-one inclut le Scheduler, ce qui couvre les tâches sortantes :
+
+    ```bash
+    docker run -d \
+        --name bunkerweb-aio \
+        -v bw-storage:/data \
+        -v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro \
+        -e HTTP_PROXY="http://proxy.example.local:3128" \
+        -e HTTPS_PROXY="http://proxy.example.local:3128" \
+        -e NO_PROXY="localhost,127.0.0.1" \
+        -e REQUESTS_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt" \
+        -e SSL_CERT_FILE="/etc/ssl/certs/ca-certificates.crt" \
+        -p 80:8080/tcp \
+        -p 443:8443/tcp \
+        -p 443:8443/udp \
+        bunkerity/bunkerweb-all-in-one:1.6.8-rc3
+    ```
+
+    Si le conteneur existe déjà, recréez-le pour appliquer le nouvel environnement.
+
+=== "Docker"
+
+    Ajoutez les variables au conteneur scheduler :
+
+    ```yaml
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
+      ...
+      environment:
+        HTTP_PROXY: "http://proxy.example.local:3128"
+        HTTPS_PROXY: "http://proxy.example.local:3128"
+        NO_PROXY: "localhost,127.0.0.1,bunkerweb,bw-scheduler,redis,db"
+        REQUESTS_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
+        SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"
+      volumes:
+        - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
+      ...
+    ```
+
+=== "Docker autoconf"
+
+    Appliquez les variables au conteneur scheduler :
+
+    ```yaml
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
+      ...
+      environment:
+        HTTP_PROXY: "http://proxy.example.local:3128"
+        HTTPS_PROXY: "http://proxy.example.local:3128"
+        NO_PROXY: "localhost,127.0.0.1,bunkerweb,bw-scheduler,redis,db"
+        REQUESTS_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
+        SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"
+      volumes:
+        - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
+      ...
+    ```
+
+=== "Kubernetes"
+
+    Ajoutez les variables au pod Scheduler via `extraEnvs`. Si vous avez besoin d'une AC personnalisée, montez-la via `extraVolumes`/`extraVolumeMounts` et pointez les variables vers le chemin monté :
+
+    ```yaml
+    scheduler:
+      extraEnvs:
+        - name: HTTP_PROXY
+          value: "http://proxy.example.local:3128"
+        - name: HTTPS_PROXY
+          value: "http://proxy.example.local:3128"
+        - name: NO_PROXY
+          value: "localhost,127.0.0.1,.svc,.cluster.local"
+        - name: REQUESTS_CA_BUNDLE
+          value: "/etc/ssl/certs/ca-certificates.crt"
+        - name: SSL_CERT_FILE
+          value: "/etc/ssl/certs/ca-certificates.crt"
+    ```
+
+=== "Swarm"
+
+    !!! warning "Obsolète"
+        L'intégration Swarm est obsolète et sera supprimée dans une future version. Veuillez envisager d'utiliser l'[intégration Kubernetes](integrations.md#kubernetes) à la place.
+
+        **Plus d'informations sont disponibles dans la [documentation de l'intégration Swarm](integrations.md#swarm).**
+
+    Ajoutez les variables au service scheduler :
+
+    ```yaml
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
+      ...
+      environment:
+        HTTP_PROXY: "http://proxy.example.local:3128"
+        HTTPS_PROXY: "http://proxy.example.local:3128"
+        NO_PROXY: "localhost,127.0.0.1,bunkerweb,bw-scheduler,redis,db"
+        REQUESTS_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
+        SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"
+      volumes:
+        - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
+      ...
+    ```
 
 ## Surveillance et rapports
 

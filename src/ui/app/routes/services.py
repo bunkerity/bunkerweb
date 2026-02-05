@@ -341,6 +341,10 @@ def services_service_page(service: str):
                     if "checksum" in data:
                         db_custom_configs[db_custom_config]["checksum"] = data["checksum"]
 
+            for db_custom_config, data in all_custom_configs.items():
+                if data.get("method") == "default" and data.get("template"):
+                    removed_custom_configs.add(db_custom_config)
+
             variables_to_check = variables.copy()
 
             for variable, value in variables.items():

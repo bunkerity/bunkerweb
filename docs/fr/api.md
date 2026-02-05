@@ -82,7 +82,7 @@ Choisissez la saveur adaptée à votre environnement.
           API_USERNAME: "admin"
           API_PASSWORD: "Str0ng&P@ss!"
           # API_TOKEN: "admin-override-token" # optionnel
-          FORWARDED_ALLOW_IPS: "*" # Attention : à n’utiliser que si le reverse proxy est l’unique accès
+          FORWARDED_ALLOW_IPS: "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16" # Attention : à n’utiliser que si le reverse proxy est l’unique accès
           API_ROOT_PATH: "/"
         networks:
           - bw-universe
@@ -266,7 +266,8 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
 | -------------------------------------------------- | -------------------------------------------------------------------------------------------- | --------------------------- | ---------------------------------- |
 | `API_DOCS_URL`, `API_REDOC_URL`, `API_OPENAPI_URL` | Chemins Swagger, ReDoc et schéma OpenAPI ; mettre `off/disabled/none/false/0` pour désactiver | Chemin ou `off`             | `/docs`, `/redoc`, `/openapi.json` |
 | `API_ROOT_PATH`                                    | Préfixe de montage en reverse proxy                                                          | Chemin (ex. `/api`)         | vide                               |
-| `API_FORWARDED_ALLOW_IPS`                          | IPs proxy de confiance pour `X-Forwarded-*`                                                  | IPs/CIDR séparées par virgule | `127.0.0.1` (défaut paquet)        |
+| `API_FORWARDED_ALLOW_IPS`                          | IPs proxy de confiance pour `X-Forwarded-*`                                                  | IPs/CIDR séparées par virgule | `127.0.0.1,::1` (défaut paquet)        |
+| `API_PROXY_ALLOW_IPS`                              | IPs proxy de confiance pour le protocole PROXY                                               | IPs/CIDR séparées par virgule | `FORWARDED_ALLOW_IPS`              |
 
 #### Auth, ACL, Biscuit
 

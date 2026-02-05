@@ -1,0 +1,35 @@
+# SSRF patterns without schemes
+#
+# This file contains localhost and internal DNS names that are commonly used
+# in SSRF attacks. These patterns are checked without URI schemes to catch
+# cases where frameworks automatically prepend 'http://' or 'https://'.
+#
+# Sources:
+# - https://gist.githubusercontent.com/jhaddix/78cece26c91c6263653f31ba453e273b/raw/a4869d58a5ce337d1465c2d1b29777b9eecd371f/cloud_metadata.txt
+# - https://book.hacktricks.xyz/pentesting-web/ssrf-server-side-request-forgery/cloud-ssrf
+# - https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server%20Side%20Request%20Forgery
+# - https://github.com/assetnote/blind-ssrf-chains
+# - https://github.com/coreruleset/coreruleset/issues/4427
+
+# Standard hosts aliases
+localhost/
+localhost.localdomain/
+localhost4/
+localhost4.localdomain4/
+ipv6-localhost/
+ip6-loopback/
+
+# Docker based aliases
+host.docker.internal/
+gateway.docker.internal/
+kubernetes.docker.internal/
+
+# Podman
+host.containers.internal/
+
+# K8s API local service
+kubernetes.default.svc.cluster.local/
+
+# Testing services
+localtest.me/
+lvh.me/

@@ -3,7 +3,7 @@
 --license agpl3
 --version %VERSION%
 --architecture %ARCH%
---depends bash --depends 'nginx = 1.28.1-1~jammy' --depends python3.11 --depends libcurl4 --depends libgeoip-dev --depends libxml2 --depends libyajl2 --depends libmagic1 --depends net-tools --depends sudo --depends procps --depends lsof --depends libpq5 --depends libcap2-bin --depends logrotate --depends mariadb-client --depends postgresql-client --depends sqlite3 --depends unzip --depends libpcre2-8-0 --depends liblmdb0 --depends libfuzzy2 --depends tar --depends libgd3
+--depends bash --depends 'nginx = 1.28.2-1~jammy' --depends python3.11 --depends libcurl4 --depends libgeoip-dev --depends libxml2 --depends libyajl2 --depends libmagic1 --depends net-tools --depends sudo --depends procps --depends lsof --depends libpq5 --depends libcap2-bin --depends logrotate --depends mariadb-client --depends postgresql-client --depends sqlite3 --depends unzip --depends libpcre2-8-0 --depends liblmdb0 --depends libfuzzy2 --depends tar --depends libgd3
 --description "BunkerWeb %VERSION% for Ubuntu 22.04"
 --url "https://www.bunkerweb.io"
 --maintainer "Bunkerity <contact at bunkerity dot com>"

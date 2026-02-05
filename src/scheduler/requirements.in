@@ -20,7 +20,7 @@ certbot-dns-bunny==3.0.0
 certbot-dns-desec==1.3.2
 certbot-dns-domainoffensive==2.0.0
 certbot-dns-domeneshop==0.2.9
-certbot-dns-duckdns==1.7.1
+certbot-dns-duckdns==1.8.0
 certbot-dns-dynu==0.0.6.post2502111739272536
 certbot-dns-godaddy==2.8.0
 certbot-dns-infomaniak==0.2.4

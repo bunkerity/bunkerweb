@@ -21,7 +21,11 @@ PID_FILE = RUN_DIR.joinpath("tmp-ui.pid")
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "info"))
 LISTEN_ADDR = getenv("UI_LISTEN_ADDR", getenv("LISTEN_ADDR", "0.0.0.0"))
 LISTEN_PORT = getenv("UI_LISTEN_PORT", getenv("LISTEN_PORT", "7000"))
-FORWARDED_ALLOW_IPS = getenv("UI_FORWARDED_ALLOW_IPS", getenv("FORWARDED_ALLOW_IPS", "*"))
+FORWARDED_ALLOW_IPS = getenv(
+    "UI_FORWARDED_ALLOW_IPS",
+    getenv("FORWARDED_ALLOW_IPS", "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"),
+)
+PROXY_ALLOW_IPS = getenv("UI_PROXY_ALLOW_IPS", getenv("PROXY_ALLOW_IPS", FORWARDED_ALLOW_IPS))
 CAPTURE_OUTPUT = getenv("CAPTURE_OUTPUT", "no").lower() == "yes"
 DEBUG = getenv("DEBUG", False)
 
@@ -56,7 +60,7 @@ tmp_upload_dir = TMP_UI_DIR.as_posix()
 secure_scheme_headers = {}
 forwarded_allow_ips = FORWARDED_ALLOW_IPS
 pythonpath = join(sep, "usr", "share", "bunkerweb", "deps", "python") + "," + join(sep, "usr", "share", "bunkerweb", "ui")
-proxy_allow_ips = "*"
+proxy_allow_ips = PROXY_ALLOW_IPS
 casefold_http_method = True
 workers = 1
 bind = f"{LISTEN_ADDR}:{LISTEN_PORT}"
