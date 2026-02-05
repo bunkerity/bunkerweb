@@ -38,9 +38,15 @@ function update_python_deps() {
     cd - || return
 }
 
+pip install "pip<25.3"
+
 update_python_deps requirements-deps.in
 
+pip install "pip<25.3"
+
 # pip install --no-cache-dir --require-hashes -r requirements-deps.txt
+
+update_python_deps requirements.in
 
 pip install "pip<25.3"
 
@@ -48,7 +54,6 @@ echo "Updating python requirements files"
 
 # Use array for explicit file list
 files=(
-    "requirements.in"
     "../api/requirements.in"
     "../autoconf/requirements.in"
     "../scheduler/requirements.in"
