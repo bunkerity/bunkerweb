@@ -1113,6 +1113,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#forward-proxy-outgoing-traffic" class="md-nav__link">
+    <span class="md-ellipsis">
+      Forward-Proxy für ausgehenden Traffic
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#uberwachung-und-berichterstattung" class="md-nav__link">
     <span class="md-ellipsis">
       Überwachung und Berichterstattung
@@ -2213,7 +2222,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="c1"># TOTP_ENCRYPTION_KEYS=changeme</span>
 <span class="na">LISTEN_ADDR</span><span class="o">=</span><span class="s">0.0.0.0</span>
 <span class="c1"># LISTEN_PORT=7000</span>
-<span class="na">FORWARDED_ALLOW_IPS</span><span class="o">=</span><span class="s">127.0.0.1</span>
+<span class="na">FORWARDED_ALLOW_IPS</span><span class="o">=</span><span class="s">127.0.0.1,::1</span>
 <span class="c1"># ENABLE_HEALTHCHECK=no</span>
 </code></pre></div>
 <div class="admonition warning">
@@ -4316,6 +4325,123 @@ log {
   </p>
 <figcaption>BunkerWeb-Daten, die in der Kontextspalte angezeigt werden</figcaption>
 </figure>
+<h2 id="forward-proxy-outgoing-traffic">Forward-Proxy für ausgehenden Traffic</h2>
+<p>Wenn Ihre Umgebung ausgehenden HTTP(S)-Traffic über einen Forward-Proxy leiten muss (z. B. einen Unternehmensproxy oder Squid), können Sie die Standard-Proxy-Umgebungsvariablen verwenden. Es gibt dafür keine dedizierte BunkerWeb-Einstellung.</p>
+<p><strong>NGINX selbst verwendet diese Variablen nicht für Upstream-Traffic</strong>, daher betrifft die Forward-Proxy-Konfiguration nur Komponenten, die ausgehende Requests initiieren. In der Praxis setzen Sie sie beim <strong>Scheduler</strong>, da er periodische Aufgaben wie Let's-Encrypt-Zertifikatserneuerungen, externe API-Aufrufe und Webhooks ausführt.</p>
+<p>Die üblichen Variablen sind:</p>
+<ul>
+<li><code>HTTP_PROXY</code> / <code>HTTPS_PROXY</code>: Proxy-URL, optional mit Zugangsdaten.</li>
+<li><code>NO_PROXY</code>: durch Kommas getrennte Liste von Hosts, Domains oder CIDRs, die den Proxy umgehen sollen (an die Integration anpassen: Servicenamen in Docker/Swarm, Cluster-Domains in Kubernetes oder nur localhost unter Linux).</li>
+<li><code>REQUESTS_CA_BUNDLE</code> / <code>SSL_CERT_FILE</code>: optional, erforderlich wenn der Proxy eine eigene CA nutzt. Mounten Sie das CA-Bundle in den Container und verweisen Sie die Variablen darauf, damit Python-Requests TLS validieren können (Pfad an das Basis-Image anpassen).</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">NO_PROXY ist für internen Traffic erforderlich</p>
+<p>Wenn Sie interne Bereiche oder Servicenamen weglassen, kann interner Traffic über den Proxy laufen und fehlschlagen. Passen Sie die Liste an Ihre Integration an (z. B. Docker-Servicenamen, Kubernetes-Cluster-Domains oder nur localhost unter Linux).</p>
+</div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:6"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><input id="__tabbed_20_4" name="__tabbed_20" type="radio" /><input id="__tabbed_20_5" name="__tabbed_20" type="radio" /><input id="__tabbed_20_6" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Linux</label><label for="__tabbed_20_2">All-in-one</label><label for="__tabbed_20_3">Docker</label><label for="__tabbed_20_4">Docker autoconf</label><label for="__tabbed_20_5">Kubernetes</label><label for="__tabbed_20_6">Swarm</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Fügen Sie die Variablen in <code>/etc/bunkerweb/variables.env</code> ein. Diese Datei wird von beiden Diensten geladen, aber nur der Scheduler verwendet sie:</p>
+<div class="highlight"><pre><span></span><code>HTTP_PROXY=http://proxy.example.local:3128
+HTTPS_PROXY=http://proxy.example.local:3128
+NO_PROXY=localhost,127.0.0.1
+REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+</code></pre></div>
+<p>Starten Sie die Dienste neu, damit die Umgebung geladen wird:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>bunkerweb-scheduler
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Geben Sie die Variablen beim Erstellen des Containers an (und mounten Sie das CA-Bundle falls nötig). Das All-in-one-Image enthält den Scheduler, damit sind ausgehende Aufgaben abgedeckt:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>bw-storage:/data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>/etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">HTTP_PROXY</span><span class="o">=</span><span class="s2">&quot;http://proxy.example.local:3128&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">HTTPS_PROXY</span><span class="o">=</span><span class="s2">&quot;http://proxy.example.local:3128&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">NO_PROXY</span><span class="o">=</span><span class="s2">&quot;localhost,127.0.0.1&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">REQUESTS_CA_BUNDLE</span><span class="o">=</span><span class="s2">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">SSL_CERT_FILE</span><span class="o">=</span><span class="s2">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:testing
+</code></pre></div>
+<p>Wenn der Container bereits existiert, erstellen Sie ihn neu, um die neue Umgebung anzuwenden.</p>
+</div>
+<div class="tabbed-block">
+<p>Fügen Sie die Variablen dem Scheduler-Container hinzu:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">HTTP_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://proxy.example.local:3128&quot;</span>
+<span class="w">    </span><span class="nt">HTTPS_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://proxy.example.local:3128&quot;</span>
+<span class="w">    </span><span class="nt">NO_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;localhost,127.0.0.1,bunkerweb,bw-scheduler,redis,db&quot;</span>
+<span class="w">    </span><span class="nt">REQUESTS_CA_BUNDLE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span>
+<span class="w">    </span><span class="nt">SSL_CERT_FILE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span>
+<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Wenden Sie die Variablen auf den Scheduler-Container an:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">HTTP_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://proxy.example.local:3128&quot;</span>
+<span class="w">    </span><span class="nt">HTTPS_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://proxy.example.local:3128&quot;</span>
+<span class="w">    </span><span class="nt">NO_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;localhost,127.0.0.1,bunkerweb,bw-scheduler,redis,db&quot;</span>
+<span class="w">    </span><span class="nt">REQUESTS_CA_BUNDLE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span>
+<span class="w">    </span><span class="nt">SSL_CERT_FILE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span>
+<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Fügen Sie die Variablen dem Scheduler-Pod über <code>extraEnvs</code> hinzu. Wenn Sie eine benutzerdefinierte CA benötigen, mounten Sie sie über <code>extraVolumes</code>/<code>extraVolumeMounts</code> und verweisen Sie die Variablen auf den gemounteten Pfad:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">scheduler</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">extraEnvs</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTTP_PROXY</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://proxy.example.local:3128&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTTPS_PROXY</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://proxy.example.local:3128&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NO_PROXY</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;localhost,127.0.0.1,.svc,.cluster.local&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REQUESTS_CA_BUNDLE</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SSL_CERT_FILE</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="admonition warning">
+<p class="admonition-title">Veraltet</p>
+<p>Die Swarm-Integration ist veraltet und wird in einer zukünftigen Version entfernt. Bitte erwägen Sie stattdessen die Verwendung der <a href="../integrations/#kubernetes">Kubernetes-Integration</a>.</p>
+<p><strong>Weitere Informationen finden Sie in der <a href="../integrations/#swarm">Swarm-Integrationsdokumentation</a>.</strong></p>
+</div>
+<p>Fügen Sie die Variablen dem Scheduler-Service hinzu:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">HTTP_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://proxy.example.local:3128&quot;</span>
+<span class="w">    </span><span class="nt">HTTPS_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://proxy.example.local:3128&quot;</span>
+<span class="w">    </span><span class="nt">NO_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;localhost,127.0.0.1,bunkerweb,bw-scheduler,redis,db&quot;</span>
+<span class="w">    </span><span class="nt">REQUESTS_CA_BUNDLE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span>
+<span class="w">    </span><span class="nt">SSL_CERT_FILE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span>
+<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <h2 id="uberwachung-und-berichterstattung">Überwachung und Berichterstattung</h2>
 <h3 id="uberwachung-pro">Überwachung <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
@@ -4531,7 +4657,7 @@ log {
 <details class="warning">
 <summary>Informationen für Benutzer von Red Hat Enterprise Linux (RHEL) 8.9</summary>
 <p>Wenn Sie <strong>RHEL 8.9</strong> verwenden und eine <strong>externe Datenbank</strong> nutzen möchten, müssen Sie das Paket <code>mysql-community-client</code> installieren, um sicherzustellen, dass der Befehl <code>mysqldump</code> verfügbar ist. Sie können das Paket mit den folgenden Befehlen installieren:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">MySQL/MariaDB</label><label for="__tabbed_20_2">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">MySQL/MariaDB</label><label for="__tabbed_21_2">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -4651,7 +4777,7 @@ log {
 </table>
 <h4 id="manuelle-sicherung">Manuelle Sicherung</h4>
 <p>Um eine Sicherung manuell zu starten, führen Sie den folgenden Befehl aus:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Linux</label><label for="__tabbed_21_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:2"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Linux</label><label for="__tabbed_22_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -4665,7 +4791,7 @@ log {
 </div>
 <p>Dieser Befehl erstellt eine Sicherung Ihrer Datenbank und speichert sie im S3-Bucket, der in der Einstellung <code>BACKUP_S3_BUCKET</code> angegeben ist.</p>
 <p>Sie können auch einen benutzerdefinierten S3-Bucket für die Sicherung angeben, indem Sie die Umgebungsvariable <code>BACKUP_S3_BUCKET</code> bei der Ausführung des Befehls bereitstellen:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="22:2"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Linux</label><label for="__tabbed_22_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="23:2"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">Linux</label><label for="__tabbed_23_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nv">BACKUP_S3_BUCKET</span><span class="o">=</span>your-bucket-name<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -4686,7 +4812,7 @@ log {
 <div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="s1">&#39;yourusername&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span><span class="w"> </span><span class="n">IDENTIFIED</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">mysql_native_password</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="s1">&#39;youpassword&#39;</span><span class="p">;</span>
 </code></pre></div>
 <p>Wenn Sie die Docker-Integration verwenden, können Sie den folgenden Befehl zur <code>docker-compose.yml</code>-Datei hinzufügen, um das Authentifizierungs-Plugin automatisch zu ändern:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="23:2"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">MariaDB</label><label for="__tabbed_23_2">MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">MariaDB</label><label for="__tabbed_24_2">MySQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
@@ -4707,7 +4833,7 @@ log {
 </div>
 <h4 id="manuelle-wiederherstellung">Manuelle Wiederherstellung</h4>
 <p>Um eine Wiederherstellung manuell zu starten, führen Sie den folgenden Befehl aus:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">Linux</label><label for="__tabbed_24_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="25:2"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">Linux</label><label for="__tabbed_25_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -4721,7 +4847,7 @@ log {
 </div>
 <p>Dieser Befehl erstellt eine temporäre Sicherung Ihrer Datenbank im S3-Bucket, der in der Einstellung <code>BACKUP_S3_BUCKET</code> angegeben ist, und stellt Ihre Datenbank auf die neueste im Bucket verfügbare Sicherung wieder her.</p>
 <p>Sie können auch eine benutzerdefinierte Sicherungsdatei für die Wiederherstellung angeben, indem Sie den Pfad dazu als Argument bei der Ausführung des Befehls angeben:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="25:2"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">Linux</label><label for="__tabbed_25_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="26:2"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Linux</label><label for="__tabbed_26_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore<span class="w"> </span>s3_backup_file.zip
@@ -4736,7 +4862,7 @@ log {
 <div class="admonition example">
 <p class="admonition-title">Im Falle eines Fehlers</p>
 <p>Machen Sie sich keine Sorgen, wenn die Wiederherstellung fehlschlägt, Sie können Ihre Datenbank jederzeit auf den vorherigen Zustand zurücksetzen, indem Sie den Befehl erneut ausführen, da vor der Wiederherstellung eine Sicherung erstellt wird:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="26:2"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Linux</label><label for="__tabbed_26_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="27:2"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><input id="__tabbed_27_2" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">Linux</label><label for="__tabbed_27_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -4766,7 +4892,7 @@ log {
 </ul>
 <h3 id="eine-migrationsdatei-erstellen">Eine Migrationsdatei erstellen</h3>
 <p>Um eine Migrationsdatei manuell zu erstellen, führen Sie den folgenden Befehl aus:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="27:2"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><input id="__tabbed_27_2" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">Linux</label><label for="__tabbed_27_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="28:2"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Linux</label><label for="__tabbed_28_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>create<span class="w"> </span>/pfad/zur/migrations/datei
@@ -4798,7 +4924,7 @@ log {
 <div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="s1">&#39;yourusername&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span><span class="w"> </span><span class="n">IDENTIFIED</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">mysql_native_password</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="s1">&#39;youpassword&#39;</span><span class="p">;</span>
 </code></pre></div>
 <p>Wenn Sie die Docker-Integration verwenden, können Sie den folgenden Befehl zur <code>docker-compose.yml</code>-Datei hinzufügen, um das Authentifizierungs-Plugin automatisch zu ändern:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="28:2"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">MariaDB</label><label for="__tabbed_28_2">MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="29:2"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><input id="__tabbed_29_2" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">MariaDB</label><label for="__tabbed_29_2">MySQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
@@ -4819,7 +4945,7 @@ log {
 </div>
 <h3 id="eine-migration-initialisieren">Eine Migration initialisieren</h3>
 <p>Um eine Migration manuell zu initialisieren, führen Sie den folgenden Befehl aus:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="29:3"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><input id="__tabbed_29_2" name="__tabbed_29" type="radio" /><input id="__tabbed_29_3" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">Linux</label><label for="__tabbed_29_2">Docker</label><label for="__tabbed_29_3">All-in-one</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="30:3"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">Linux</label><label for="__tabbed_30_2">Docker</label><label for="__tabbed_30_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>migrate<span class="w"> </span>/pfad/zur/migrations/datei
@@ -5497,7 +5623,7 @@ log {
 <span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
 </code></pre></div>
 <h3 id="beispiele">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="30:3"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">Benutzerdefinierte Fehlerseite</label><label for="__tabbed_30_2">Benutzerdefinierte Captcha-Seite</label><label for="__tabbed_30_3">Benutzerdefinierte Standard-Server-Seite</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="31:3"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">Benutzerdefinierte Fehlerseite</label><label for="__tabbed_31_2">Benutzerdefinierte Captcha-Seite</label><label for="__tabbed_31_3">Benutzerdefinierte Standard-Server-Seite</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Erstellen Sie eine benutzerdefinierte Fehlerseiten-Vorlage unter <code>/etc/bunkerweb/templates/error.html</code>:</p>
@@ -5688,7 +5814,7 @@ log {
 </div>
 </div>
 <h3 id="bereitstellungsbeispiele">Bereitstellungsbeispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="31:3"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">Linux</label><label for="__tabbed_31_2">Docker</label><label for="__tabbed_31_3">Kubernetes</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="32:3"><input checked="checked" id="__tabbed_32_1" name="__tabbed_32" type="radio" /><input id="__tabbed_32_2" name="__tabbed_32" type="radio" /><input id="__tabbed_32_3" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="__tabbed_32_1">Linux</label><label for="__tabbed_32_2">Docker</label><label for="__tabbed_32_3">Kubernetes</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>

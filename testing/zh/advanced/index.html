@@ -1113,6 +1113,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#forward-proxy-outgoing-traffic" class="md-nav__link">
+    <span class="md-ellipsis">
+      出站流量的前向代理
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       监控和报告
@@ -2213,7 +2222,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="c1"># TOTP_ENCRYPTION_KEYS=changeme</span>
 <span class="na">LISTEN_ADDR</span><span class="o">=</span><span class="s">0.0.0.0</span>
 <span class="c1"># LISTEN_PORT=7000</span>
-<span class="na">FORWARDED_ALLOW_IPS</span><span class="o">=</span><span class="s">127.0.0.1</span>
+<span class="na">FORWARDED_ALLOW_IPS</span><span class="o">=</span><span class="s">127.0.0.1,::1</span>
 <span class="c1"># ENABLE_HEALTHCHECK=no</span>
 </code></pre></div>
 <div class="admonition warning">
@@ -4313,6 +4322,123 @@ log {
   </p>
 <figcaption>在上下文列中显示的 BunkerWeb 数据</figcaption>
 </figure>
+<h2 id="forward-proxy-outgoing-traffic">出站流量的前向代理</h2>
+<p>如果你的环境需要将出站 HTTP(S) 流量通过前向代理（例如企业代理或 Squid），可以使用标准的代理环境变量。BunkerWeb 没有专用配置。</p>
+<p><strong>NGINX 本身不会使用这些变量来处理上游流量</strong>，因此前向代理配置只影响发起出站请求的组件。实际使用中，请将其设置在 <strong>Scheduler</strong> 上，因为它负责 Let's Encrypt 证书续期、外部 API 调用以及 Webhook 等周期性任务。</p>
+<p>常用变量如下：</p>
+<ul>
+<li><code>HTTP_PROXY</code> / <code>HTTPS_PROXY</code>：代理 URL，可选带凭据。</li>
+<li><code>NO_PROXY</code>：以逗号分隔的主机、域名或 CIDR 列表，用于绕过代理（根据集成调整：Docker/Swarm 的服务名、Kubernetes 的集群域名，或 Linux 上仅 localhost）。</li>
+<li><code>REQUESTS_CA_BUNDLE</code> / <code>SSL_CERT_FILE</code>：可选，当代理使用自定义 CA 时需要。将 CA bundle 挂载到容器并指向该路径，以便 Python 请求验证 TLS（路径按基础镜像调整）。</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">NO_PROXY 对内部流量是必需的</p>
+<p>如果省略内部网段或服务名，内部流量可能会走代理并失败。请根据集成调整列表（例如 Docker 服务名、Kubernetes 集群域名或 Linux 上仅 localhost）。</p>
+</div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:6"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><input id="__tabbed_20_4" name="__tabbed_20" type="radio" /><input id="__tabbed_20_5" name="__tabbed_20" type="radio" /><input id="__tabbed_20_6" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Linux</label><label for="__tabbed_20_2">All-in-one</label><label for="__tabbed_20_3">Docker</label><label for="__tabbed_20_4">Docker autoconf</label><label for="__tabbed_20_5">Kubernetes</label><label for="__tabbed_20_6">Swarm</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>将变量添加到 <code>/etc/bunkerweb/variables.env</code>。该文件会被两个服务加载，但只有 Scheduler 会使用它们：</p>
+<div class="highlight"><pre><span></span><code>HTTP_PROXY=http://proxy.example.local:3128
+HTTPS_PROXY=http://proxy.example.local:3128
+NO_PROXY=localhost,127.0.0.1
+REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+</code></pre></div>
+<p>重启服务以重新加载环境：</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>bunkerweb-scheduler
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>在创建容器时提供这些变量（如有需要请挂载 CA bundle）。All-in-one 镜像包含 Scheduler，因此可覆盖出站任务：</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>bw-storage:/data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>/etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">HTTP_PROXY</span><span class="o">=</span><span class="s2">&quot;http://proxy.example.local:3128&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">HTTPS_PROXY</span><span class="o">=</span><span class="s2">&quot;http://proxy.example.local:3128&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">NO_PROXY</span><span class="o">=</span><span class="s2">&quot;localhost,127.0.0.1&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">REQUESTS_CA_BUNDLE</span><span class="o">=</span><span class="s2">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">SSL_CERT_FILE</span><span class="o">=</span><span class="s2">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:testing
+</code></pre></div>
+<p>如果容器已存在，请重新创建以应用新的环境变量。</p>
+</div>
+<div class="tabbed-block">
+<p>将变量添加到 scheduler 容器：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">HTTP_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://proxy.example.local:3128&quot;</span>
+<span class="w">    </span><span class="nt">HTTPS_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://proxy.example.local:3128&quot;</span>
+<span class="w">    </span><span class="nt">NO_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;localhost,127.0.0.1,bunkerweb,bw-scheduler,redis,db&quot;</span>
+<span class="w">    </span><span class="nt">REQUESTS_CA_BUNDLE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span>
+<span class="w">    </span><span class="nt">SSL_CERT_FILE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span>
+<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>将变量应用到 scheduler 容器：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">HTTP_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://proxy.example.local:3128&quot;</span>
+<span class="w">    </span><span class="nt">HTTPS_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://proxy.example.local:3128&quot;</span>
+<span class="w">    </span><span class="nt">NO_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;localhost,127.0.0.1,bunkerweb,bw-scheduler,redis,db&quot;</span>
+<span class="w">    </span><span class="nt">REQUESTS_CA_BUNDLE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span>
+<span class="w">    </span><span class="nt">SSL_CERT_FILE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span>
+<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>使用 <code>extraEnvs</code> 将变量添加到 Scheduler Pod。如需自定义 CA，可通过 <code>extraVolumes</code>/<code>extraVolumeMounts</code> 挂载并指向挂载路径：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">scheduler</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">extraEnvs</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTTP_PROXY</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://proxy.example.local:3128&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTTPS_PROXY</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://proxy.example.local:3128&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NO_PROXY</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;localhost,127.0.0.1,.svc,.cluster.local&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REQUESTS_CA_BUNDLE</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SSL_CERT_FILE</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="admonition warning">
+<p class="admonition-title">已弃用</p>
+<p>Swarm 集成已弃用，并将在未来版本中删除。请考虑改用 <a href="../integrations/#kubernetes">Kubernetes 集成</a>。</p>
+<p><strong>更多信息请参阅 <a href="../integrations/#swarm">Swarm 集成文档</a>。</strong></p>
+</div>
+<p>将变量添加到 scheduler 服务：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">HTTP_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://proxy.example.local:3128&quot;</span>
+<span class="w">    </span><span class="nt">HTTPS_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://proxy.example.local:3128&quot;</span>
+<span class="w">    </span><span class="nt">NO_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;localhost,127.0.0.1,bunkerweb,bw-scheduler,redis,db&quot;</span>
+<span class="w">    </span><span class="nt">REQUESTS_CA_BUNDLE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span>
+<span class="w">    </span><span class="nt">SSL_CERT_FILE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/ssl/certs/ca-certificates.crt&quot;</span>
+<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <h2 id="_8">监控和报告</h2>
 <h3 id="pro">监控 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
@@ -4528,7 +4654,7 @@ log {
 <details class="warning">
 <summary>给红帽企业 Linux (RHEL) 8.9 用户的信息</summary>
 <p>如果您正在使用 <strong>RHEL 8.9</strong> 并计划使用<strong>外部数据库</strong>，您需要安装 <code>mysql-community-client</code> 包以确保 <code>mysqldump</code> 命令可用。您可以通过执行以下命令来安装该包：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">MySQL/MariaDB</label><label for="__tabbed_20_2">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">MySQL/MariaDB</label><label for="__tabbed_21_2">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -4648,7 +4774,7 @@ log {
 </table>
 <h4 id="_10">手动备份</h4>
 <p>要手动启动备份，请执行以下命令：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Linux</label><label for="__tabbed_21_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:2"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Linux</label><label for="__tabbed_22_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -4662,7 +4788,7 @@ log {
 </div>
 <p>此命令将创建您的数据库备份，并将其存储在 <code>BACKUP_S3_BUCKET</code> 设置中指定的 S3 存储桶中。</p>
 <p>您还可以在执行命令时通过提供 <code>BACKUP_S3_BUCKET</code> 环境变量来为备份指定自定义 S3 存储桶：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="22:2"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Linux</label><label for="__tabbed_22_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="23:2"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">Linux</label><label for="__tabbed_23_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nv">BACKUP_S3_BUCKET</span><span class="o">=</span>your-bucket-name<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -4683,7 +4809,7 @@ log {
 <div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="s1">&#39;yourusername&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span><span class="w"> </span><span class="n">IDENTIFIED</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">mysql_native_password</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="s1">&#39;youpassword&#39;</span><span class="p">;</span>
 </code></pre></div>
 <p>如果您正在使用 Docker 集成，可以将以下命令添加到 <code>docker-compose.yml</code> 文件中，以自动更改身份验证插件：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="23:2"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">MariaDB</label><label for="__tabbed_23_2">MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">MariaDB</label><label for="__tabbed_24_2">MySQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
@@ -4704,7 +4830,7 @@ log {
 </div>
 <h4 id="_11">手动恢复</h4>
 <p>要手动启动恢复，请执行以下命令：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">Linux</label><label for="__tabbed_24_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="25:2"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">Linux</label><label for="__tabbed_25_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -4718,7 +4844,7 @@ log {
 </div>
 <p>此命令将在 <code>BACKUP_S3_BUCKET</code> 设置中指定的 S3 存储桶中创建您数据库的临时备份，并将您的数据库恢复到存储桶中可用的最新备份。</p>
 <p>您还可以在执行命令时通过提供备份文件的路径作为参数来为恢复指定自定义备份文件：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="25:2"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">Linux</label><label for="__tabbed_25_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="26:2"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Linux</label><label for="__tabbed_26_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore<span class="w"> </span>s3_backup_file.zip
@@ -4733,7 +4859,7 @@ log {
 <div class="admonition example">
 <p class="admonition-title">如果失败</p>
 <p>如果恢复失败，请不要担心，您可以随时通过再次执行命令将数据库恢复到先前的状态，因为在恢复之前会创建一个备份：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="26:2"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Linux</label><label for="__tabbed_26_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="27:2"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><input id="__tabbed_27_2" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">Linux</label><label for="__tabbed_27_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -4763,7 +4889,7 @@ log {
 </ul>
 <h3 id="_12">创建迁移文件</h3>
 <p>要手动创建迁移文件，请执行以下命令：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="27:2"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><input id="__tabbed_27_2" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">Linux</label><label for="__tabbed_27_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="28:2"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Linux</label><label for="__tabbed_28_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>create<span class="w"> </span>/path/to/migration/file
@@ -4795,7 +4921,7 @@ log {
 <div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="s1">&#39;yourusername&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span><span class="w"> </span><span class="n">IDENTIFIED</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">mysql_native_password</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="s1">&#39;youpassword&#39;</span><span class="p">;</span>
 </code></pre></div>
 <p>如果您正在使用 Docker 集成，可以将以下命令添加到 <code>docker-compose.yml</code> 文件中，以自动更改身份验证插件：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="28:2"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">MariaDB</label><label for="__tabbed_28_2">MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="29:2"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><input id="__tabbed_29_2" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">MariaDB</label><label for="__tabbed_29_2">MySQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
@@ -4816,7 +4942,7 @@ log {
 </div>
 <h3 id="_13">初始化迁移</h3>
 <p>要手动初始化迁移，请执行以下命令：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="29:3"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><input id="__tabbed_29_2" name="__tabbed_29" type="radio" /><input id="__tabbed_29_3" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">Linux</label><label for="__tabbed_29_2">Docker</label><label for="__tabbed_29_3">All-in-one</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="30:3"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">Linux</label><label for="__tabbed_30_2">Docker</label><label for="__tabbed_30_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>migrate<span class="w"> </span>/path/to/migration/file
@@ -5494,7 +5620,7 @@ log {
 <span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
 </code></pre></div>
 <h3 id="_31">示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="30:3"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">自定义错误页面</label><label for="__tabbed_30_2">自定义验证码页面</label><label for="__tabbed_30_3">自定义默认服务器页面</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="31:3"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">自定义错误页面</label><label for="__tabbed_31_2">自定义验证码页面</label><label for="__tabbed_31_3">自定义默认服务器页面</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>在 <code>/etc/bunkerweb/templates/error.html</code> 创建自定义错误页面模板：</p>
@@ -5685,7 +5811,7 @@ log {
 </div>
 </div>
 <h3 id="_32">部署示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="31:3"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">Linux</label><label for="__tabbed_31_2">Docker</label><label for="__tabbed_31_3">Kubernetes</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="32:3"><input checked="checked" id="__tabbed_32_1" name="__tabbed_32" type="radio" /><input id="__tabbed_32_2" name="__tabbed_32" type="radio" /><input id="__tabbed_32_3" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="__tabbed_32_1">Linux</label><label for="__tabbed_32_2">Docker</label><label for="__tabbed_32_3">Kubernetes</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>

@@ -1213,7 +1213,7 @@
 <span class="w">      </span><span class="nt">API_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin&quot;</span>
 <span class="w">      </span><span class="nt">API_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Str0ng&amp;P@ss!&quot;</span>
 <span class="w">      </span><span class="c1"># API_TOKEN: &quot;admin-override-token&quot; # 可选</span>
-<span class="w">      </span><span class="nt">FORWARDED_ALLOW_IPS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span><span class="w"> </span><span class="c1"># 小心使用：仅在 reverse proxy 为唯一入口时开启</span>
+<span class="w">      </span><span class="nt">FORWARDED_ALLOW_IPS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16&quot;</span><span class="w"> </span><span class="c1"># 小心使用：仅在 reverse proxy 为唯一入口时开启</span>
 <span class="w">      </span><span class="nt">API_ROOT_PATH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -1429,7 +1429,13 @@
 <td><code>API_FORWARDED_ALLOW_IPS</code></td>
 <td>可信的代理 IP（用于 <code>X-Forwarded-*</code>）</td>
 <td>逗号分隔 IP/CIDR</td>
-<td><code>127.0.0.1</code>（包默认值）</td>
+<td><code>127.0.0.1,::1</code>（包默认值）</td>
+</tr>
+<tr>
+<td><code>API_PROXY_ALLOW_IPS</code></td>
+<td>可信的 PROXY 协议代理 IP</td>
+<td>逗号分隔 IP/CIDR</td>
+<td><code>FORWARDED_ALLOW_IPS</code></td>
 </tr>
 </tbody>
 </table>

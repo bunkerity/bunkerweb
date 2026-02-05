@@ -1282,7 +1282,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_77" class="md-nav__link">
+  <a href="#_76" class="md-nav__link">
     <span class="md-ellipsis">
       简介
     </span>
@@ -1291,7 +1291,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_78" class="md-nav__link">
+  <a href="#_77" class="md-nav__link">
     <span class="md-ellipsis">
       先决条件
     </span>
@@ -1300,7 +1300,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_79" class="md-nav__link">
+  <a href="#_78" class="md-nav__link">
     <span class="md-ellipsis">
       安装
     </span>
@@ -1309,7 +1309,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_80" class="md-nav__link">
+  <a href="#_79" class="md-nav__link">
     <span class="md-ellipsis">
       配置
     </span>
@@ -1318,7 +1318,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_82" class="md-nav__link">
+  <a href="#_81" class="md-nav__link">
     <span class="md-ellipsis">
       使用示例
     </span>
@@ -1327,7 +1327,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_86" class="md-nav__link">
+  <a href="#_85" class="md-nav__link">
     <span class="md-ellipsis">
       可用资源
     </span>
@@ -1336,7 +1336,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_87" class="md-nav__link">
+  <a href="#_86" class="md-nav__link">
     <span class="md-ellipsis">
       数据源
     </span>
@@ -1345,7 +1345,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_88" class="md-nav__link">
+  <a href="#_87" class="md-nav__link">
     <span class="md-ellipsis">
       临时资源
     </span>
@@ -1354,7 +1354,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_89" class="md-nav__link">
+  <a href="#_88" class="md-nav__link">
     <span class="md-ellipsis">
       完整示例
     </span>
@@ -1363,7 +1363,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_90" class="md-nav__link">
+  <a href="#_89" class="md-nav__link">
     <span class="md-ellipsis">
       其他资源
     </span>
@@ -1372,7 +1372,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_91" class="md-nav__link">
+  <a href="#_90" class="md-nav__link">
     <span class="md-ellipsis">
       支持和贡献
     </span>
@@ -3876,7 +3876,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> <
 <li>重启调度器：<code>sudo systemctl restart bunkerweb-scheduler</code></li>
 </ol>
 <h3 id="_54">使用软件包管理器安装</h3>
-<p>请确保在安装 BunkerWeb 之前<strong>已经安装了 NGINX 1.28.1</strong>。对于除 Fedora 之外的所有发行版，强制要求使用来自<a href="https://nginx.org/en/linux_packages.html">官方 NGINX 仓库</a>的预构建包。从源代码编译 NGINX 或使用来自不同仓库的包将无法与 BunkerWeb 的官方预构建包一起工作。但是，您可以选择从源代码构建 BunkerWeb。</p>
+<p>请确保在安装 BunkerWeb 之前<strong>已经安装了 NGINX 1.28.2</strong>。对于除 Fedora 之外的所有发行版，强制要求使用来自<a href="https://nginx.org/en/linux_packages.html">官方 NGINX 仓库</a>的预构建包。从源代码编译 NGINX 或使用来自不同仓库的包将无法与 BunkerWeb 的官方预构建包一起工作。但是，您可以选择从源代码构建 BunkerWeb。</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Debian Bookworm/Trixie</label><label for="__tabbed_1_2">Ubuntu</label><label for="__tabbed_1_3">Fedora</label><label for="__tabbed_1_4">RedHat</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -3888,9 +3888,9 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 <span class="s2">http://nginx.org/packages/debian `lsb_release -cs` nginx&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
 </code></pre></div>
-<p>您现在应该能够安装 NGINX 1.28.1：</p>
+<p>您现在应该能够安装 NGINX 1.28.2：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.28.1-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.28.2-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">测试/开发版本</p>
@@ -3922,9 +3922,9 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 <span class="s2">http://nginx.org/packages/ubuntu `lsb_release -cs` nginx&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
 </code></pre></div>
-<p>您现在应该能够安装 NGINX 1.28.1：</p>
+<p>您现在应该能够安装 NGINX 1.28.2：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.28.1-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.28.2-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">测试/开发版本</p>
@@ -3991,8 +3991,8 @@ enabled=0
 gpgkey=https://nginx.org/keys/nginx_signing.key
 module_hotfixes=true
 </code></pre></div>
-<p>您现在应该能够安装 NGINX 1.28.1：</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.28.1
+<p>您现在应该能够安装 NGINX 1.28.2：</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.28.2
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">禁用设置向导</p>
@@ -5971,44 +5971,6 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 </tr>
 </tbody>
 </table>
-<hr />
-<h4 id="_76">迁移前后对比</h4>
-<table>
-<thead>
-<tr>
-<th>指标</th>
-<th>NGINX Ingress</th>
-<th>BunkerWeb</th>
-<th>备注</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>平均响应时间</td>
-<td>45ms</td>
-<td>52ms</td>
-<td>+7ms（可接受的安全开销）</td>
-</tr>
-<tr>
-<td>被阻止的请求（XSS/SQLi）</td>
-<td>0</td>
-<td><strong>127</strong></td>
-<td>WAF 已激活 ✅</td>
-</tr>
-<tr>
-<td>SSL 证书</td>
-<td>有效</td>
-<td>有效</td>
-<td>迁移成功 ✅</td>
-</tr>
-<tr>
-<td>可用性</td>
-<td>99.9%</td>
-<td>99.9%</td>
-<td>稳定 ✅</td>
-</tr>
-</tbody>
-</table>
 <h2 id="swarm">Swarm</h2>
 <figure>
 <p><img align="center," alt="概述" src="../../assets/img/integration-swarm.svg" width="600" />
@@ -6264,15 +6226,15 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <p>调度器不需要 <code>NAMESPACE</code> 标签即可正常工作。它只需要正确配置 <code>DATABASE_URI</code> 设置，以便它可以访问与自动配置服务相同的数据库。</p>
 </div>
 <h2 id="terraform">Terraform</h2>
-<h3 id="_77">简介</h3>
+<h3 id="_76">简介</h3>
 <p>BunkerWeb 的 Terraform Provider 允许您通过基础设施即代码（IaC）管理 BunkerWeb 实例、服务和配置。该 Provider 与 BunkerWeb API 交互,自动化部署和管理您的安全配置。</p>
-<h3 id="_78">先决条件</h3>
+<h3 id="_77">先决条件</h3>
 <ul>
 <li><a href="https://developer.hashicorp.com/terraform/downloads">Terraform</a> &gt;= 1.12</li>
 <li>已启用 API 的 BunkerWeb 实例</li>
 <li>API 令牌或基本身份验证凭据</li>
 </ul>
-<h3 id="_79">安装</h3>
+<h3 id="_78">安装</h3>
 <p>该 Provider 可在 <a href="https://registry.terraform.io/providers/bunkerity/bunkerweb/latest">Terraform Registry</a> 上获得。将其添加到您的 Terraform 配置中:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">terraform</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="nb">required_providers</span><span class="w"> </span><span class="p">{</span>
@@ -6283,21 +6245,21 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="_80">配置</h3>
+<h3 id="_79">配置</h3>
 <h4 id="bearer-token">Bearer Token 身份验证(推荐)</h4>
 <div class="highlight"><pre><span></span><code><span class="kr">provider</span><span class="w"> </span><span class="nv">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">api_endpoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://bunkerweb.example.com:8888&quot;</span>
 <span class="w">  </span><span class="na">api_token</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nv">var.bunkerweb_token</span>
 <span class="p">}</span>
 </code></pre></div>
-<h4 id="_81">基本身份验证</h4>
+<h4 id="_80">基本身份验证</h4>
 <div class="highlight"><pre><span></span><code><span class="kr">provider</span><span class="w"> </span><span class="nv">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">api_endpoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://bunkerweb.example.com:8888&quot;</span>
 <span class="w">  </span><span class="na">api_username</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">var.bunkerweb_username</span>
 <span class="w">  </span><span class="na">api_password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">var.bunkerweb_password</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="_82">使用示例</h3>
+<h3 id="_81">使用示例</h3>
 <h4 id="web">创建 Web 服务</h4>
 <div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;bunkerweb_service&quot;</span><span class="w"> </span><span class="nv">&quot;app&quot;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">server_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;app.example.com&quot;</span>
@@ -6308,7 +6270,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<h4 id="_83">注册实例</h4>
+<h4 id="_82">注册实例</h4>
 <div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;bunkerweb_instance&quot;</span><span class="w"> </span><span class="nv">&quot;worker1&quot;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">hostname</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;worker-1.internal&quot;</span>
 <span class="w">  </span><span class="na">name</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Worker 1&quot;</span>
@@ -6319,7 +6281,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">  </span><span class="na">method</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;api&quot;</span>
 <span class="p">}</span>
 </code></pre></div>
-<h4 id="_84">配置全局设置</h4>
+<h4 id="_83">配置全局设置</h4>
 <div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;bunkerweb_global_config_setting&quot;</span><span class="w"> </span><span class="nv">&quot;retry&quot;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">key</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;retry_limit&quot;</span>
 <span class="w">  </span><span class="na">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;10&quot;</span>
@@ -6332,7 +6294,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">  </span><span class="na">duration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3600</span><span class="c1">  # 1小时(秒)</span>
 <span class="p">}</span>
 </code></pre></div>
-<h4 id="_85">自定义配置</h4>
+<h4 id="_84">自定义配置</h4>
 <div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;bunkerweb_config&quot;</span><span class="w"> </span><span class="nv">&quot;custom_rules&quot;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">service_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;app.example.com&quot;</span>
 <span class="w">  </span><span class="na">type</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;http&quot;</span>
@@ -6340,7 +6302,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">  </span><span class="na">content</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nf">file</span><span class="p">(</span><span class="s2">&quot;${path.module}/configs/custom-rules.conf&quot;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="_86">可用资源</h3>
+<h3 id="_85">可用资源</h3>
 <p>该 Provider 提供以下资源:</p>
 <ul>
 <li><strong>bunkerweb_service</strong>: Web 服务管理</li>
@@ -6350,7 +6312,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <li><strong>bunkerweb_ban</strong>: IP 封禁管理</li>
 <li><strong>bunkerweb_plugin</strong>: 插件安装和管理</li>
 </ul>
-<h3 id="_87">数据源</h3>
+<h3 id="_86">数据源</h3>
 <p>数据源允许读取现有信息:</p>
 <ul>
 <li><strong>bunkerweb_service</strong>: 读取现有服务</li>
@@ -6359,7 +6321,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <li><strong>bunkerweb_cache</strong>: 缓存信息</li>
 <li><strong>bunkerweb_jobs</strong>: 计划作业状态</li>
 </ul>
-<h3 id="_88">临时资源</h3>
+<h3 id="_87">临时资源</h3>
 <p>用于一次性操作:</p>
 <ul>
 <li><strong>bunkerweb_run_jobs</strong>: 按需触发作业</li>
@@ -6367,7 +6329,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <li><strong>bunkerweb_service_snapshot</strong>: 捕获服务状态</li>
 <li><strong>bunkerweb_config_upload</strong>: 批量配置上传</li>
 </ul>
-<h3 id="_89">完整示例</h3>
+<h3 id="_88">完整示例</h3>
 <p>以下是使用 BunkerWeb 的完整基础设施示例:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">terraform</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="nb">required_providers</span><span class="w"> </span><span class="p">{</span>
@@ -6452,14 +6414,14 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">  </span><span class="na">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">bunkerweb_service.api.id</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="_90">其他资源</h3>
+<h3 id="_89">其他资源</h3>
 <ul>
 <li><a href="https://registry.terraform.io/providers/bunkerity/bunkerweb/latest/docs">完整 Provider 文档</a></li>
 <li><a href="https://github.com/bunkerity/terraform-provider-bunkerweb">GitHub 仓库</a></li>
 <li><a href="https://github.com/bunkerity/terraform-provider-bunkerweb/tree/main/examples">使用示例</a></li>
 <li><a href="https://docs.bunkerweb.io/latest/api/">BunkerWeb API 文档</a></li>
 </ul>
-<h3 id="_91">支持和贡献</h3>
+<h3 id="_90">支持和贡献</h3>
 <p>要报告错误或提出改进建议,请访问 <a href="https://github.com/bunkerity/terraform-provider-bunkerweb/issues">Provider 的 GitHub 仓库</a>。</p>
 <h2 id="microsoft-azure">Microsoft Azure</h2>
 <figure>

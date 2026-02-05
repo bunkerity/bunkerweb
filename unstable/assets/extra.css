@@ -145,7 +145,7 @@ nav.md-tabs ul li.md-tabs__item--active a:hover {
   position: relative;
   outline: none; /* Remove focus outline */
   transition: color 0.25s; /* Smooth color transition */
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .toc-dropdown > summary::-webkit-details-marker {
@@ -158,9 +158,15 @@ nav.md-tabs ul li.md-tabs__item--active a:hover {
   opacity: 0.85;
 }
 
-/* Keep leaf links visually lighter than section headers */
-.md-nav--secondary .md-nav__item > a.md-nav__link {
+/* Keep leaf links inside dropdowns visually lighter than section headers */
+.md-nav--secondary .toc-dropdown .md-nav__item > a.md-nav__link {
   font-weight: 400;
+}
+
+/* Make ALL first-level TOC items bold (both dropdowns and regular links) */
+.md-nav--secondary > .md-nav__list > .md-nav__item > .toc-dropdown > summary.md-nav__link,
+.md-nav--secondary > .md-nav__list > .md-nav__item > a.md-nav__link {
+  font-weight: 700;
 }
 
 /* Rotate arrow when dropdown is open */

@@ -1213,7 +1213,7 @@
 <span class="w">      </span><span class="nt">API_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin&quot;</span>
 <span class="w">      </span><span class="nt">API_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Str0ng&amp;P@ss!&quot;</span>
 <span class="w">      </span><span class="c1"># API_TOKEN: &quot;admin-override-token&quot; # optionnel</span>
-<span class="w">      </span><span class="nt">FORWARDED_ALLOW_IPS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span><span class="w"> </span><span class="c1"># Attention : à n’utiliser que si le reverse proxy est l’unique accès</span>
+<span class="w">      </span><span class="nt">FORWARDED_ALLOW_IPS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16&quot;</span><span class="w"> </span><span class="c1"># Attention : à n’utiliser que si le reverse proxy est l’unique accès</span>
 <span class="w">      </span><span class="nt">API_ROOT_PATH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -1429,7 +1429,13 @@
 <td><code>API_FORWARDED_ALLOW_IPS</code></td>
 <td>IPs proxy de confiance pour <code>X-Forwarded-*</code></td>
 <td>IPs/CIDR séparées par virgule</td>
-<td><code>127.0.0.1</code> (défaut paquet)</td>
+<td><code>127.0.0.1,::1</code> (défaut paquet)</td>
+</tr>
+<tr>
+<td><code>API_PROXY_ALLOW_IPS</code></td>
+<td>IPs proxy de confiance pour le protocole PROXY</td>
+<td>IPs/CIDR séparées par virgule</td>
+<td><code>FORWARDED_ALLOW_IPS</code></td>
 </tr>
 </tbody>
 </table>

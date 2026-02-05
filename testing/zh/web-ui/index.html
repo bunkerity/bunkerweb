@@ -1347,7 +1347,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <h3 id="linux-docker">Linux 与 Docker 差异</h3>
 <ul>
 <li>监听默认值：Docker 镜像在 <code>0.0.0.0:7000</code>，Linux 包在 <code>127.0.0.1:7000</code>。可用 <code>UI_LISTEN_ADDR</code> / <code>UI_LISTEN_PORT</code> 覆盖。</li>
-<li>代理头：<code>UI_FORWARDED_ALLOW_IPS</code> 默认 <code>*</code>；在 Linux 安装中将其设为反代 IP 以更严格。</li>
+<li>代理头：<code>UI_FORWARDED_ALLOW_IPS</code> 默认 <code>127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16</code>；<code>UI_PROXY_ALLOW_IPS</code> 默认取 <code>FORWARDED_ALLOW_IPS</code> 的值。在 Linux 安装中将其设为反代 IP 以更严格。</li>
 <li>秘密与状态：<code>/var/lib/bunkerweb</code> 保存 <code>FLASK_SECRET</code>、Biscuit 密钥和 TOTP 数据。Docker 需挂载；Linux 由包脚本创建管理。</li>
 <li>日志：<code>/var/log/bunkerweb</code> 需对 UID/GID 101（或 rootless 映射 UID）可读。包会创建路径；容器需挂载权限正确的卷。</li>
 <li>向导行为：Linux easy-install 自动启动 UI 和向导；Docker 需通过反代 URL 访问向导，除非预置环境变量。</li>
@@ -1444,7 +1444,13 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <td><code>UI_FORWARDED_ALLOW_IPS</code></td>
 <td>信任的代理 IP/CIDR</td>
 <td>空格/逗号分隔 IP/CIDR</td>
-<td><code>*</code></td>
+<td><code>127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16</code></td>
+</tr>
+<tr>
+<td><code>UI_PROXY_ALLOW_IPS</code></td>
+<td>PROXY 协议的可信代理 IP/CIDR</td>
+<td>空格/逗号分隔 IP/CIDR</td>
+<td><code>FORWARDED_ALLOW_IPS</code></td>
 </tr>
 </tbody>
 </table>
@@ -1589,9 +1595,15 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 <tr>
 <td><code>FORWARDED_ALLOW_IPS</code></td>
-<td>代理允许列表的弃用别名</td>
+<td>代理允许列表的别名</td>
 <td>IP/CIDR</td>
-<td><code>*</code></td>
+<td><code>127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16</code></td>
+</tr>
+<tr>
+<td><code>PROXY_ALLOW_IPS</code></td>
+<td>PROXY 允许列表的别名</td>
+<td>IP/CIDR</td>
+<td><code>FORWARDED_ALLOW_IPS</code></td>
 </tr>
 <tr>
 <td><code>DISABLE_CONFIGURATION_TESTING</code></td>
