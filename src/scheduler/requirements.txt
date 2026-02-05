@@ -640,17 +640,17 @@ proto-plus==1.27.0 \
     --hash=sha256:1baa7f81cf0f8acb8bc1f6d085008ba4171eaf669629d1b6d1673b21ed1c0a82 \
     --hash=sha256:873af56dd0d7e91836aee871e5799e1c6f1bda86ac9a983e0bb9f0c266a568c4
     # via google-api-core
-protobuf==6.33.2 \
-    --hash=sha256:1f8017c48c07ec5859106533b682260ba3d7c5567b1ca1f24297ce03384d1b4f \
-    --hash=sha256:2981c58f582f44b6b13173e12bb8656711189c2a70250845f264b877f00b1913 \
-    --hash=sha256:56dc370c91fbb8ac85bc13582c9e373569668a290aa2e66a590c2a0d35ddb9e4 \
-    --hash=sha256:7109dcc38a680d033ffb8bf896727423528db9163be1b6a02d6a49606dcadbfe \
-    --hash=sha256:7636aad9bb01768870266de5dc009de2d1b936771b38a793f73cbbf279c91c5c \
-    --hash=sha256:87eb388bd2d0f78febd8f4c8779c79247b26a5befad525008e49a6955787ff3d \
-    --hash=sha256:8cd7640aee0b7828b6d03ae518b5b4806fdfc1afe8de82f79c3454f8aef29872 \
-    --hash=sha256:b5d3b5625192214066d99b2b605f5783483575656784de223f00a8d00754fc0e \
-    --hash=sha256:d9b19771ca75935b3a4422957bc518b0cecb978b31d1dd12037b088f6bcc0e43 \
-    --hash=sha256:fc2a0e8b05b180e5fc0dd1559fe8ebdae21a27e81ac77728fb6c42b12c7419b4
+protobuf==6.33.5 \
+    --hash=sha256:3093804752167bcab3998bec9f1048baae6e29505adaf1afd14a37bddede533c \
+    --hash=sha256:69915a973dd0f60f31a08b8318b73eab2bd6a392c79184b3612226b0a3f8ec02 \
+    --hash=sha256:6ddcac2a081f8b7b9642c09406bc6a4290128fce5f471cddd165960bb9119e5c \
+    --hash=sha256:8afa18e1d6d20af15b417e728e9f60f3aa108ee76f23c3b2c07a2c3b546d3afd \
+    --hash=sha256:8f04fa32763dcdb4973d537d6b54e615cc61108c7cb38fe59310c3192d29510a \
+    --hash=sha256:9b71e0281f36f179d00cbcb119cb19dec4d14a81393e5ea220f64b286173e190 \
+    --hash=sha256:a3157e62729aafb8df6da2c03aa5c0937c7266c626ce11a278b6eb7963c4e37c \
+    --hash=sha256:a5cb85982d95d906df1e2210e58f8e4f1e3cdc088e52c921a041f9c9a0386de5 \
+    --hash=sha256:cbf16ba3350fb7b889fca858fb215967792dc125b35c7976ca4818bee3521cf0 \
+    --hash=sha256:d71b040839446bac0f4d162e758bea99c8251161dae9d0983a3b88dee345153b
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -946,12 +946,6 @@ s3transfer==0.16.0 \
 schedule==1.2.2 \
     --hash=sha256:15fe9c75fe5fd9b9627f3f19cc0ef1420508f9f9a46f45cd0769ef75ede5f0b7 \
     --hash=sha256:5bef4a2a0183abf44046ae0d164cadcac21b1db011bdd8102e4a0c1e91e06a7d
-    # via certbot-dns-domainoffensive
-
-# The following packages are considered to be unsafe in a requirements file:
-setuptools==80.9.0 \
-    --hash=sha256:062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922 \
-    --hash=sha256:f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c
     # via -r requirements.in
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
@@ -1025,6 +1019,12 @@ zope-interface==8.1.1 \
     --hash=sha256:efef80ddec4d7d99618ef71bc93b88859248075ca2e1ae1c78636654d3d55533 \
     --hash=sha256:fc65f5633d5a9583ee8d88d1f5de6b46cd42c62e47757cfe86be36fb7c8c4c9b \
     --hash=sha256:ff8a92dc8c8a2c605074e464984e25b9b5a8ac9b2a0238dd73a0f374df59a77e
+    # via certbot-dns-domainoffensive
+
+# The following packages are considered to be unsafe in a requirements file:
+setuptools==80.9.0 \
+    --hash=sha256:062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922 \
+    --hash=sha256:f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c
     # via
     #   certbot-dns-bunny
     #   certbot-dns-desec
