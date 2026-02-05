@@ -8,10 +8,10 @@
 ##! To regenerate this list from unix-shell.data, run the following:
 ##! NL=$'\n'
 ##! original="$(grep -vE '^[#$]' regex-assembly/include/unix-shell-4andup.ra)"
-##! source="$(awk '/^[^#$]/ {split($0,x,"/"); y=x[length(x)]} length(y) > 3 {print y}' \
-##!   rules/unix-{shell,shell-builtins}.data | \
+##! # Exclude entries starting with `(dev/|etc/|proc/|#)` and empty lines, they are not commands
+##! source="$(grep -vEh '^(dev/|etc/|proc/|#|$)' rules/unix-{shell,shell-builtins}.data | \
+##!   awk '/^[^#$]/ {split($0,x,"/"); y=x[length(x)]} length(y) > 3 {print y}' | \
 ##!   sort | uniq)"
-##! result=""
 ##! # retain all unmodified entries in this list and skip removed ones; ignore the manually added suffixes
 ##! while read -r oword; do
 ##!   # strip suffixes from end of words
@@ -52,9 +52,10 @@
 
 ##! # Suffix all English words or words shorter than 5 characters with `@`
 ##! original="${result}"
+##! tmpfile="$(mktemp)"
 ##! wget https://raw.githubusercontent.com/coreruleset/coreruleset/refs/tags/v4.0.0/util/fp-finder/english-extended.txt
-##! english="$(crs-toolchain util fp-finder -e english-extended.txt - <<<"${result}")"
-##! rm -f english-extended.txt
+##! english="$(crs-toolchain util fp-finder "$tmpfile" -e english-extended.txt <<<"${result}")"
+##! rm -f "$tmpfile" english-extended.txt
 ##! result=""
 ##! while read -r oword; do
 ##!   found=0
@@ -253,7 +254,6 @@ gimp@
 ginsh@
 grcat@
 grep@
-group@
 groupmod
 gtester
 gunzip
@@ -346,7 +346,6 @@ mail@
 mailq@
 mailx@
 make@
-master\.passwd
 mawk@
 mkdir@
 mkfifo
@@ -389,7 +388,6 @@ nroff@
 nsenter
 nslookup
 nstat@
-null@
 octave@
 onintr
 openssl
@@ -437,7 +435,6 @@ ptardiff
 ptargrep
 puppet@
 pushd@
-pwd\.db
 py3versions
 python2
 python3
@@ -487,8 +484,6 @@ setfacl@
 setsid
 sftp@
 sh\.distrib
-shadow@
-shells@
 shuf@
 shutdown@
 sleep@
@@ -500,7 +495,6 @@ soelim
 sort@
 source@
 split@
-spwd\.db
 sqlite3
 ssh-add
 ssh-agent
@@ -510,9 +504,6 @@ ssh-keyscan
 sshpass
 start-stop-daemon
 stdbuf
-stderr
-stdin@
-stdout
 strace
 strings@
 sudo-rs
@@ -552,6 +543,7 @@ tmux@
 touch@
 traceroute
 traceroute6
+trap@
 troff@
 tshark
 ulimit@
@@ -616,7 +608,6 @@ zcat@
 zcmp@
 zdiff@
 zegrep
-zero@
 zfgrep
 zgrep@
 zipcloak

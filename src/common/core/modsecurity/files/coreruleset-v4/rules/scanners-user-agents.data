@@ -61,6 +61,9 @@ morfeus
 # https://trunc.org/learning/the-mozlila-user-agent-bot
 Mozlila
 
+# Typo of Mozilla/5.0 user-agent
+Mozilla/5.g
+
 # Nessus
 # http://www.tenable.com/products/nessus-vulnerability-scanner
 nessus

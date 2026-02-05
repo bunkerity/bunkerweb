@@ -6,8 +6,9 @@
 ##! NL=$'\n'
 ##! # select words of length <= 3
 ##! original="$(grep -vE '^[#$]' regex-assembly/include/unix-shell-upto3.ra)"
-##! source=$(awk '/^[^#$]/ {split($0,x,"/"); y=x[length(x)]} length(y) <= 3 {print y}' \
-##!   rules/unix-{shell,shell-builtins}.data | \
+##! # Exclude entries starting with `(dev/|etc/|proc/|#)` and empty lines, they are not commands
+##! source=$(grep -vEh '^(dev/|etc/|proc/|#|$)' rules/unix-{shell,shell-builtins}.data | \
+##!   awk '/^[^#$]/ {split($0,x,"/"); y=x[length(x)]} length(y) <= 3 {print y}' | \
 ##!   sort | uniq)
 ##! result=""
 ##! # retain all unmodified entries in this list and skip removed ones; ignore the manually added suffixes
@@ -102,7 +103,6 @@ es@
 esh@
 ex@
 fc@
-fd@
 fg@
 fi@
 fmt@
@@ -146,8 +146,8 @@ pf@
 pg@
 php@
 pic@
-pip~
 pip@
+pip~
 pkg@
 pr@
 pry@
@@ -175,12 +175,10 @@ svn@
 tac@
 tar@
 tbl@
-tcp@
 tee@
 tex@
 tic@
 top@
-udp@
 ul@
 vi@
 vim@

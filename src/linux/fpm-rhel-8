@@ -3,7 +3,7 @@
 --license agpl3
 --version %VERSION%
 --architecture %ARCH%
---depends bash --depends 'nginx = 1:1.28.1' --depends python3.11 --depends libcurl-devel --depends libxml2 --depends yajl --depends file-libs --depends net-tools --depends gd --depends sudo --depends procps --depends lsof --depends geoip --depends libpq --depends libcap --depends openssl --depends sqlite --depends unzip --depends tar --depends pcre2 --depends lmdb-libs --depends ssdeep-libs
+--depends bash --depends 'nginx = 1:1.28.2' --depends python3.11 --depends libcurl-devel --depends libxml2 --depends yajl --depends file-libs --depends net-tools --depends gd --depends sudo --depends procps --depends lsof --depends geoip --depends libpq --depends libcap --depends openssl --depends sqlite --depends unzip --depends tar --depends pcre2 --depends lmdb-libs --depends ssdeep-libs
 --description "BunkerWeb %VERSION% for RHEL 8"
 --url "https://www.bunkerweb.io"
 --maintainer "Bunkerity <contact at bunkerity dot com>"
