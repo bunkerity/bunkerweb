@@ -114,7 +114,6 @@ ALWAYS_USED_PLUGINS = (
     "errors",
     "headers",
     "misc",
-    "php",
     "pro",
     "sessions",
     "ssl",
@@ -126,6 +125,7 @@ PLUGINS_SPECIFICS = {
     "INJECT": {"INJECT_BODY": "", "INJECT_HEAD": ""},
     "LETSENCRYPT": {"AUTO_LETS_ENCRYPT": "no"},
     "LIMIT": {"USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no"},
+    "PHP": {"REMOTE_PHP": "", "LOCAL_PHP": ""},
     "REDIRECT": {"REDIRECT_TO": ""},
     "SELFSIGNED": {"GENERATE_SELF_SIGNED_SSL": "no"},
 }
