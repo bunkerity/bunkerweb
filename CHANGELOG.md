@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.8 - 2026/02/??
+## v1.6.9~rc1 - 2026/02/??
+
+- [UI] Fix status for PHP plugin to not always be shown as activated
+
+## v1.6.8 - 2026/02/06
 
 - [DOCS] Add forward proxy configuration for outgoing traffic
 - [DEPS] Update coreruleset-v4 version to v4.23.0
