@@ -219,7 +219,7 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     USE_UDP: "no"
     ```
 
-## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :x:
@@ -761,7 +761,7 @@ bwcli plugin backup restore /ruta/a/copia/de/seguridad/backup-sqlite-2023-08-15_
     BACKUP_DIRECTORY: "/mnt/backup-drive/bunkerweb-backups"
     ```
 
-## Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :white_check_mark:
@@ -1428,7 +1428,7 @@ Aquí hay ejemplos de posibles valores para el ajuste `CORS_ALLOW_ORIGIN`, junto
     CORS_DENY_REQUEST: "yes"
     ```
 
-## Cache <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :x:
@@ -1707,7 +1707,7 @@ Las siguientes secciones desarrollan cada paso.
     services:
       bunkerweb:
         # Este es el nombre que se utilizará para identificar la instancia en el Planificador
-        image: bunkerity/bunkerweb:1.6.8-rc3
+        image: bunkerity/bunkerweb:1.6.8
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1724,7 +1724,7 @@ Las siguientes secciones desarrollan cada paso.
             syslog-address: "udp://10.20.30.254:514" # La dirección IP del servicio syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.8-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.8
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrese de establecer el nombre de instancia correcto
@@ -1967,7 +1967,7 @@ Aplica las siguientes variables de entorno (o valores del scheduler) para que la
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
     ```
 
-## Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :x:
@@ -2254,7 +2254,7 @@ Siga estos pasos para configurar y utilizar la función de Base de Datos:
 
 Estas tareas evitan el crecimiento ilimitado de la base de datos mientras conservan un historial operativo útil.
 
-## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :x:
@@ -3162,7 +3162,7 @@ El complemento de Límite en BunkerWeb proporciona capacidades robustas para apl
     LIMIT_CONN_MAX_STREAM: "20"
     ```
 
-## Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/cOVp0rAt5nw' title='Balanceador de carga' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
@@ -3352,7 +3352,7 @@ Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes blo
     USE_METRICS: "no"
     ```
 
-## Migration <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :white_check_mark:
@@ -3890,7 +3890,7 @@ El OWASP Core Rule Set también admite una gama de **complementos** diseñados p
 !!! note "Valores de tamaño legibles por humanos"
     Para los ajustes de tamaño como `MODSECURITY_REQ_BODY_NO_FILES_LIMIT`, se admiten los sufijos `k`, `m` y `g` (sin distinción entre mayúsculas y minúsculas) y representan kibibytes, mebibytes y gibibytes (múltiplos de 1024). Ejemplos: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
 
-## Monitoring <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Monitoring <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :x:
@@ -3991,7 +3991,7 @@ Siga estos pasos para desplegar Mutual TLS con confianza:
     MTLS_FORWARD_CLIENT_HEADERS: "no"
     ```
 
-## OpenAPI Validator <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## OpenAPI Validator <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :x:
@@ -4009,7 +4009,7 @@ Validates incoming HTTP requests against an OpenAPI / Swagger specification.
 | `OPENAPI_MAX_SPEC_SIZE`      | `2M`                                | global    | no       | Maximum allowed size of the OpenAPI document (accepts suffix k/M/G).                            |
 | `OPENAPI_VALIDATE_PARAMS`    | `yes`                               | multisite | no       | Validate query, header, cookie, and path parameters against the OpenAPI specification.          |
 
-## OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :x:
@@ -4204,7 +4204,7 @@ R: ¡Absolutamente! BunkerWeb ofrece dos planes Pro para satisfacer sus necesida
 
 Puede explorar las características Pro con una prueba gratuita de 1 mes utilizando el código de promoción `freetrial`. Visite el [Panel de BunkerWeb](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) para activar su prueba y obtener más información sobre las opciones de precios flexibles basadas en el número de servicios protegidos por BunkerWeb PRO.
 
-## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :x:
@@ -4613,7 +4613,7 @@ Cuando utilice Redis o Valkey con BunkerWeb, considere estas mejores prácticas 
 - [Alta Disponibilidad de Redis](https://redis.io/topics/sentinel)
 - [Persistencia de Redis](https://redis.io/topics/persistence)
 
-## Reporting <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Reporting <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :x:
@@ -5530,7 +5530,7 @@ Integrate easily the BunkerWeb UI.
 | `USE_UI`  | `no`                 | multisite | no       | Use UI                                       |
 | `UI_HOST` |                      | global    | no       | Address of the web UI used for initial setup |
 
-## User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## User Manager <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/EIohiUf9Fg4' title='Página del Administrador de usuarios' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>

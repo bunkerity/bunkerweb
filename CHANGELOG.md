@@ -3,6 +3,7 @@
 ## v1.6.9~rc1 - 2026/02/??
 
 - [FEATURE] Add ClouDNS DNS provider support to Let's Encrypt plugin
+- [UI] Fix status for PHP plugin to not always be shown as activated
 
 ## v1.6.8 - 2026/02/06
 
