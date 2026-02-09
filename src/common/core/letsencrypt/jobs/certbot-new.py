@@ -38,6 +38,7 @@ from logger import getLogger  # type: ignore
 
 from letsencrypt_providers import (
     BunnyNetProvider,
+    ClouDNSProvider,
     CloudflareProvider,
     DesecProvider,
     DigitalOceanProvider,
@@ -179,6 +180,7 @@ def parse_certbot_domains(certificate_block: str) -> str:
 
 PROVIDERS: Dict[str, Type[Provider]] = {
     "bunny": BunnyNetProvider,
+    "cloudns": ClouDNSProvider,
     "cloudflare": CloudflareProvider,
     "desec": DesecProvider,
     "digitalocean": DigitalOceanProvider,
