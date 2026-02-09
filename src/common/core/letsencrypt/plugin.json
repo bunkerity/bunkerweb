@@ -53,6 +53,7 @@
       "select": [
         "",
         "bunny",
+        "cloudns",
         "cloudflare",
         "desec",
         "digitalocean",

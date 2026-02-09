@@ -11,6 +11,7 @@ acme==5.3.0 \
     #   certbot
     #   certbot-dns-bunny
     #   certbot-dns-cloudflare
+    #   certbot-dns-cloudns
     #   certbot-dns-digitalocean
     #   certbot-dns-dnsimple
     #   certbot-dns-dnsmadeeasy
@@ -41,13 +42,13 @@ beautifulsoup4==4.14.3 \
     --hash=sha256:0918bfe44902e6ad8d57732ba310582e98da931428d231a5ecb9e7c703a735bb \
     --hash=sha256:6292b1c5186d356bba669ef9f7f051757099565ad9ada5dd630bd9de5fa7fb86
     # via dns-lexicon
-boto3==1.42.42 \
-    --hash=sha256:8c2537156f5ccd72bbbfe4fc27a8a80bf3e4f80523f306417f3fb6023d13edda \
-    --hash=sha256:8c78169ef47dc29863ebb11ba99134b1b418d3dfdd836419830f22552f8afe43
+boto3==1.42.44 \
+    --hash=sha256:32e995b0d56e19422cff22f586f698e8924c792eb00943de9c517ff4607e4e18 \
+    --hash=sha256:d5601ea520d30674c1d15791a1f98b5c055e973c775e1d9952ccc09ee5913c4e
     # via certbot-dns-route53
-botocore==1.42.42 \
-    --hash=sha256:1c9df5fc31e9073a9aa956271c4007d72f5d342cafca5f4154ea099bc6f83085 \
-    --hash=sha256:cb75639f5ba7bf73b83ac18bcd87f07b7f484f302748da974dad2801a83a1d60
+botocore==1.42.44 \
+    --hash=sha256:47ba27360f2afd2c2721545d8909217f7be05fdee16dd8fc0b09589535a0701c \
+    --hash=sha256:ba406b9243a20591ee87d53abdb883d46416705cebccb639a7f1c923f9dd82df
     # via
     #   boto3
     #   s3transfer
@@ -58,6 +59,7 @@ certbot==5.3.0 \
     #   -r requirements.in
     #   certbot-dns-bunny
     #   certbot-dns-cloudflare
+    #   certbot-dns-cloudns
     #   certbot-dns-desec
     #   certbot-dns-digitalocean
     #   certbot-dns-dnsimple
@@ -89,6 +91,10 @@ certbot-dns-bunny==3.0.0 \
 certbot-dns-cloudflare==5.3.0 \
     --hash=sha256:1c7b395616e5ada1435f05721225db05ee22673ac7f2a00db911a7ba582fc1cb \
     --hash=sha256:60f1eca573d3726aa5a1a2f1177fb436d83ed7cb5514724cae8945c01b3f55a7
+    # via -r requirements.in
+certbot-dns-cloudns==0.7.0 \
+    --hash=sha256:41f27d345c3e4e7d211f2b376d23e50e8f9f54e592ba3832d769a6f7a00642cc \
+    --hash=sha256:7a5f45c744b8db543caafa879b753786e1c5dfabdf956d9566964e056c231b3a
     # via -r requirements.in
 certbot-dns-desec==1.3.2 \
     --hash=sha256:3b7aed97b808383874da4f8c3668d4142002c870d8e26cda3f7feb2a319a0964 \
@@ -396,6 +402,10 @@ charset-normalizer==3.4.4 \
 cloudflare==2.19.4 \
     --hash=sha256:3b6000a01a237c23bccfdf6d20256ea5111ec74a826ae9e74f9f0e5bb5b2383f
     # via certbot-dns-cloudflare
+cloudns-api==0.9.3 \
+    --hash=sha256:0be157365c997d8a4162065867f07702398882cd3481bc7936637d8a807eb58f \
+    --hash=sha256:ee3ce5e02fa9748e3376640f17daa4ef2b77d211130354d70b0b9de529a0a41e
+    # via certbot-dns-cloudns
 configargparse==1.7.1 \
     --hash=sha256:79c2ddae836a1e5914b71d58e4b9adbd9f7779d4e6351a637b7d2d9b6c46d3d9 \
     --hash=sha256:8b586a31f9d873abd1ca527ffbe58863c99f36d896e2829779803125e83be4b6
@@ -487,6 +497,7 @@ dnspython==2.8.0 \
     --hash=sha256:01d9bbc4a2d76bf0db7c1f729812ded6d912bd318d3b1cf81d30c0f845dbf3af \
     --hash=sha256:181d3c6996452cb1189c4046c61599b84a5a86e099562ffde77d26984ff26d0f
     # via
+    #   certbot-dns-cloudns
     #   certbot-dns-desec
     #   certbot-dns-duckdns
     #   certbot-dns-dynu
@@ -939,6 +950,7 @@ requests==2.32.5 \
     #   certbot-dns-ionos
     #   certbot-dns-scaleway
     #   cloudflare
+    #   cloudns-api
     #   dns-lexicon
     #   google-api-core
     #   python-digitalocean
@@ -1042,13 +1054,14 @@ zope-interface==8.2 \
     --hash=sha256:dfc4f44e8de2ff4eba20af4f0a3ca42d3c43ab24a08e49ccd8558b7a4185b466 \
     --hash=sha256:f777e68c76208503609c83ca021a6864902b646530a1a39abb9ed310d1100664
     # via
+    #   certbot-dns-cloudns
     #   certbot-dns-domainoffensive
     #   certbot-dns-domeneshop
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==80.10.2 \
-    --hash=sha256:8b0e9d10c784bf7d262c4e5ec5d4ec94127ce206e8738f29a437945fbc219b70 \
-    --hash=sha256:95b30ddfb717250edb492926c92b5221f7ef3fbcc2b07579bcd4a27da21d0173
+setuptools==82.0.0 \
+    --hash=sha256:22e0a2d69474c6ae4feb01951cb69d515ed23728cf96d05513d36e42b62b37cb \
+    --hash=sha256:70b18734b607bd1da571d097d236cfcfacaf01de45717d59e6e04b96877532e0
     # via
     #   certbot-dns-bunny
     #   certbot-dns-desec

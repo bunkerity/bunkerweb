@@ -9,7 +9,7 @@ echo "Creating virtual environment"
 python3 -m venv tmp_venv && source tmp_venv/bin/activate
 
 # Upgrade pip first for security
-pip install --upgrade "pip<25.3" setuptools wheel
+pip install --upgrade "pip<25.3" "setuptools<81" wheel
 
 pip install --force-reinstall --no-cache-dir --require-hashes -r requirements-deps.txt
 
@@ -38,11 +38,11 @@ function update_python_deps() {
     cd - || return
 }
 
-pip install "pip<25.3"
+pip install --upgrade "pip<25.3" "setuptools<81"
 
 update_python_deps requirements-deps.in
 
-pip install "pip<25.3"
+pip install --upgrade "pip<25.3" "setuptools<81"
 
 # pip install --no-cache-dir --require-hashes -r requirements-deps.txt
 
