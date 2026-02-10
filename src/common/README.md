@@ -92,12 +92,16 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 === "Network & Port Settings"
 
-    | Setting         | Default      | Context | Multiple | Description                                           |
-    | --------------- | ------------ | ------- | -------- | ----------------------------------------------------- |
-    | `HTTP_PORT`     | `8080`       | global  | Yes      | **HTTP Port:** Port number for HTTP traffic.          |
-    | `HTTPS_PORT`    | `8443`       | global  | Yes      | **HTTPS Port:** Port number for HTTPS traffic.        |
-    | `USE_IPV6`      | `no`         | global  | No       | **IPv6 Support:** Enable IPv6 connectivity.           |
-    | `DNS_RESOLVERS` | `127.0.0.11` | global  | No       | **DNS Resolvers:** DNS addresses of resolvers to use. |
+    | Setting                 | Default      | Context | Multiple | Description                                                                        |
+    | ----------------------- | ------------ | ------- | -------- | ---------------------------------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`       | global  | Yes      | **HTTP Port:** Port number for HTTP traffic.                                       |
+    | `HTTPS_PORT`            | `8443`       | global  | Yes      | **HTTPS Port:** Port number for HTTPS traffic.                                     |
+    | `USE_IPV6`              | `no`         | global  | No       | **IPv6 Support:** Enable IPv6 connectivity.                                        |
+    | `DNS_RESOLVERS`         | `127.0.0.11` | global  | No       | **DNS Resolvers:** DNS addresses of resolvers to use.                              |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global  | No       | **Client Body Timeout:** Timeout for reading the client request body.              |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global  | No       | **Client Header Timeout:** Timeout for reading the client request header.          |
+    | `KEEPALIVE_TIMEOUT`     | `15s`        | global  | No       | **Keepalive Timeout:** Timeout for keep-alive client connections.                  |
+    | `SEND_TIMEOUT`          | `10s`        | global  | No       | **Send Timeout:** Timeout for transmitting a response to the client.               |
 
 === "Stream Server Settings"
 

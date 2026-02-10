@@ -92,12 +92,16 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
 
 === "Paramètres réseau et ports"
 
-    | Paramètre       | Valeur par défaut | Contexte | Multiple | Description                                              |
-    | --------------- | ----------------- | -------- | -------- | -------------------------------------------------------- |
-    | `HTTP_PORT`     | `8080`            | global   | Oui      | **Port HTTP :** Numéro de port pour le trafic HTTP.      |
-    | `HTTPS_PORT`    | `8443`            | global   | Oui      | **Port HTTPS :** Numéro de port pour le trafic HTTPS.    |
-    | `USE_IPV6`      | `no`              | global   | Non      | **Support IPv6 :** Active la connectivité IPv6.          |
-    | `DNS_RESOLVERS` | `127.0.0.11`      | global   | Non      | **Résolveurs DNS :** Adresses des résolveurs à utiliser. |
+    | Paramètre               | Valeur par défaut | Contexte | Multiple | Description                                                                          |
+    | ----------------------- | ----------------- | -------- | -------- | ------------------------------------------------------------------------------------ |
+    | `HTTP_PORT`             | `8080`            | global   | Oui      | **Port HTTP :** Numéro de port pour le trafic HTTP.                                 |
+    | `HTTPS_PORT`            | `8443`            | global   | Oui      | **Port HTTPS :** Numéro de port pour le trafic HTTPS.                               |
+    | `USE_IPV6`              | `no`              | global   | Non      | **Support IPv6 :** Active la connectivité IPv6.                                     |
+    | `DNS_RESOLVERS`         | `127.0.0.11`      | global   | Non      | **Résolveurs DNS :** Adresses des résolveurs à utiliser.                            |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`             | global   | Non      | **Timeout corps client :** Délai de lecture du corps de la requête client.          |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`             | global   | Non      | **Timeout en-têtes client :** Délai de lecture des en-têtes de la requête client.   |
+    | `KEEPALIVE_TIMEOUT`     | `15s`             | global   | Non      | **Timeout keepalive :** Délai des connexions client en keepalive.                   |
+    | `SEND_TIMEOUT`          | `10s`             | global   | Non      | **Timeout d'envoi :** Délai maximal de transmission de la réponse au client.        |
 
 === "Paramètres serveur Stream"
 

@@ -92,12 +92,16 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
 
 === "Netzwerk- & Port-Einstellungen"
 
-    | Einstellung     | Standard     | Kontext | Mehrfach | Beschreibung                                                 |
-    | --------------- | ------------ | ------- | -------- | ------------------------------------------------------------ |
-    | `HTTP_PORT`     | `8080`       | global  | Ja       | **HTTP-Port:** Portnummer für HTTP-Verkehr.                  |
-    | `HTTPS_PORT`    | `8443`       | global  | Ja       | **HTTPS-Port:** Portnummer für HTTPS-Verkehr.                |
-    | `USE_IPV6`      | `no`         | global  | Nein     | **IPv6-Unterstützung:** IPv6-Konnektivität aktivieren.       |
-    | `DNS_RESOLVERS` | `127.0.0.11` | global  | Nein     | **DNS-Resolver:** DNS-Adressen der zu verwendenden Resolver. |
+    | Einstellung             | Standard     | Kontext | Mehrfach | Beschreibung                                                                     |
+    | ----------------------- | ------------ | ------- | -------- | -------------------------------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`       | global  | Ja       | **HTTP-Port:** Portnummer für HTTP-Verkehr.                                     |
+    | `HTTPS_PORT`            | `8443`       | global  | Ja       | **HTTPS-Port:** Portnummer für HTTPS-Verkehr.                                   |
+    | `USE_IPV6`              | `no`         | global  | Nein     | **IPv6-Unterstützung:** IPv6-Konnektivität aktivieren.                          |
+    | `DNS_RESOLVERS`         | `127.0.0.11` | global  | Nein     | **DNS-Resolver:** DNS-Adressen der zu verwendenden Resolver.                    |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global  | Nein     | **Client-Body-Timeout:** Timeout zum Lesen des Request-Bodys vom Client.        |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global  | Nein     | **Client-Header-Timeout:** Timeout zum Lesen der Request-Header vom Client.     |
+    | `KEEPALIVE_TIMEOUT`     | `15s`        | global  | Nein     | **Keepalive-Timeout:** Timeout für Keepalive-Clientverbindungen.                |
+    | `SEND_TIMEOUT`          | `10s`        | global  | Nein     | **Sende-Timeout:** Timeout für das Übertragen einer Antwort an den Client.      |
 
 === "Stream-Server-Einstellungen"
 
