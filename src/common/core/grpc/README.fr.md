@@ -1,5 +1,8 @@
 Le plugin gRPC permet à BunkerWeb de proxyfier des services gRPC via HTTP/2 avec `grpc_pass`. Il est conçu pour des environnements multisites où chaque hôte virtuel peut exposer un ou plusieurs backends gRPC sur des chemins spécifiques.
 
+!!! example "Fonctionnalité expérimentale"
+    Cette fonctionnalité n'est pas prête pour la production. N'hésitez pas à la tester et à nous signaler tout bug via les [issues](https://github.com/bunkerity/bunkerweb/issues) du dépôt GitHub.
+
 **Fonctionnement :**
 
 1. Un client envoie une requête HTTP/2 à BunkerWeb.

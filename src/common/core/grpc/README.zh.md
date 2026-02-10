@@ -1,5 +1,8 @@
 gRPC 插件允许 BunkerWeb 通过 HTTP/2 使用 `grpc_pass` 代理 gRPC 服务。它适用于多站点场景，每个虚拟主机都可以在特定路径下暴露一个或多个 gRPC 后端。
 
+!!! example "实验性功能"
+    该功能尚未达到生产可用状态。欢迎测试并通过 GitHub 仓库中的 [issues](https://github.com/bunkerity/bunkerweb/issues) 向我们反馈任何 bug。
+
 **工作原理：**
 
 1. 客户端向 BunkerWeb 发送 HTTP/2 请求。

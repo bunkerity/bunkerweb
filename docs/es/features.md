@@ -2510,6 +2510,9 @@ Compatibilidad con STREAM :x:
 
 El plugin gRPC permite a BunkerWeb hacer proxy de servicios gRPC a través de HTTP/2 usando `grpc_pass`. Está diseñado para entornos multisitio donde cada host virtual puede exponer uno o varios backends gRPC en rutas específicas.
 
+!!! example "Funcionalidad experimental"
+    Esta funcionalidad todavía no está lista para producción. Siéntete libre de probarla y reportar cualquier bug mediante [issues](https://github.com/bunkerity/bunkerweb/issues) en el repositorio de GitHub.
+
 **Cómo funciona:**
 
 1. Un cliente envía una petición HTTP/2 a BunkerWeb.

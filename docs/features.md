@@ -2524,6 +2524,9 @@ STREAM support :x:
 
 The gRPC plugin lets BunkerWeb proxy gRPC services through HTTP/2 using `grpc_pass`. It is designed for multisite setups where each virtual host can expose one or more gRPC backends under specific paths.
 
+!!! example "Experimental feature"
+    This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
+
 **How it works:**
 
 1. A client sends an HTTP/2 request to BunkerWeb.
