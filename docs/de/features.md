@@ -101,12 +101,16 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
 
 === "Netzwerk- & Port-Einstellungen"
 
-    | Einstellung     | Standard     | Kontext | Mehrfach | Beschreibung                                                 |
-    | --------------- | ------------ | ------- | -------- | ------------------------------------------------------------ |
-    | `HTTP_PORT`     | `8080`       | global  | Ja       | **HTTP-Port:** Portnummer für HTTP-Verkehr.                  |
-    | `HTTPS_PORT`    | `8443`       | global  | Ja       | **HTTPS-Port:** Portnummer für HTTPS-Verkehr.                |
-    | `USE_IPV6`      | `no`         | global  | Nein     | **IPv6-Unterstützung:** IPv6-Konnektivität aktivieren.       |
-    | `DNS_RESOLVERS` | `127.0.0.11` | global  | Nein     | **DNS-Resolver:** DNS-Adressen der zu verwendenden Resolver. |
+    | Einstellung             | Standard     | Kontext | Mehrfach | Beschreibung                                                                |
+    | ----------------------- | ------------ | ------- | -------- | --------------------------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`       | global  | Ja       | **HTTP-Port:** Portnummer für HTTP-Verkehr.                                 |
+    | `HTTPS_PORT`            | `8443`       | global  | Ja       | **HTTPS-Port:** Portnummer für HTTPS-Verkehr.                               |
+    | `USE_IPV6`              | `no`         | global  | Nein     | **IPv6-Unterstützung:** IPv6-Konnektivität aktivieren.                      |
+    | `DNS_RESOLVERS`         | `127.0.0.11` | global  | Nein     | **DNS-Resolver:** DNS-Adressen der zu verwendenden Resolver.                |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global  | Nein     | **Client-Body-Timeout:** Timeout zum Lesen des Request-Bodys vom Client.    |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global  | Nein     | **Client-Header-Timeout:** Timeout zum Lesen der Request-Header vom Client. |
+    | `KEEPALIVE_TIMEOUT`     | `15s`        | global  | Nein     | **Keepalive-Timeout:** Timeout für Keepalive-Clientverbindungen.            |
+    | `SEND_TIMEOUT`          | `10s`        | global  | Nein     | **Sende-Timeout:** Timeout für das Übertragen einer Antwort an den Client.  |
 
 === "Stream-Server-Einstellungen"
 
@@ -1270,6 +1274,106 @@ Profi-Tipp: Wenn Sie Ihre Warnungen anzeigen, klicken Sie auf die Option „Spal
   <figcaption>BunkerWeb-Daten werden in der Kontextspalte angezeigt</figcaption>
 </figure>
 
+## Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM-Unterstützung :x:
+
+Provides caching functionality at the reverse proxy level.
+
+| Einstellung                 | Standardwert                      | Kontext   | Mehrfach | Beschreibung                                                                   |
+| --------------------------- | --------------------------------- | --------- | -------- | ------------------------------------------------------------------------------ |
+| `CACHE_PATH`                |                                   | global    | ja       | Path and parameters for a cache.                                               |
+| `CACHE_ZONE`                |                                   | multisite | nein     | Name of cache zone to use (specified in a CACHE_PATH setting).                 |
+| `CACHE_HEADER`              | `X-Cache`                         | multisite | nein     | Add header about cache status.                                                 |
+| `CACHE_BACKGROUND_UPDATE`   | `no`                              | multisite | nein     | Enable or disable background update of the cache.                              |
+| `CACHE_BYPASS`              |                                   | multisite | nein     | List of variables to determine if the cache should be bypassed or not.         |
+| `CACHE_NO_CACHE`            | `$http_pragma$http_authorization` | multisite | nein     | Disable caching if variables are set.                                          |
+| `CACHE_KEY`                 | `$scheme$proxy_host$request_uri`  | multisite | nein     | Key used to identify cached elements.                                          |
+| `CACHE_CONVERT_HEAD_TO_GET` | `yes`                             | multisite | nein     | Convert HEAD requests to GET when caching.                                     |
+| `CACHE_LOCK`                | `no`                              | multisite | nein     | Lock concurrent requests when populating the cache.                            |
+| `CACHE_LOCK_AGE`            | `5s`                              | multisite | nein     | Pass request to upstream if cache is locked for that time (possible cache).    |
+| `CACHE_LOCK_TIMEOUT`        | `5s`                              | multisite | nein     | Pass request to upstream if cache is locked for that time (no cache).          |
+| `CACHE_METHODS`             | `GET HEAD`                        | multisite | nein     | Only cache response if corresponding method is present.                        |
+| `CACHE_MIN_USES`            | `1`                               | multisite | nein     | Number of requests before we put the corresponding response in cache.          |
+| `CACHE_REVALIDATE`          | `no`                              | multisite | nein     | Revalidate expired items using conditional requests to upstream.               |
+| `CACHE_USE_STALE`           | `off`                             | multisite | nein     | Determines the use of staled cache response (proxy_cache_use_stale directive). |
+| `CACHE_VALID`               | `10m`                             | multisite | ja       | Defines default caching with optional status code.                             |
+
+## Client cache
+
+STREAM-Unterstützung :x:
+
+Das Client-Cache-Plugin optimiert die Leistung von Websites, indem es steuert, wie Browser statische Inhalte zwischenspeichern. Es reduziert die Bandbreitennutzung, senkt die Serverlast und verbessert die Ladezeiten von Seiten, indem es Browser anweist, statische Assets wie Bilder, CSS- und JavaScript-Dateien lokal zu speichern und wiederzuverwenden, anstatt sie bei jedem Seitenbesuch erneut anzufordern.
+
+**So funktioniert es:**
+
+1.  Wenn aktiviert, fügt BunkerWeb den Antworten für statische Dateien Cache-Control-Header hinzu.
+2.  Diese Header teilen den Browsern mit, wie lange sie den Inhalt lokal zwischenspeichern sollen.
+3.  Für Dateien mit bestimmten Erweiterungen (wie Bilder, CSS, JavaScript) wendet BunkerWeb die konfigurierte Caching-Richtlinie an.
+4.  Die optionale ETag-Unterstützung bietet einen zusätzlichen Validierungsmechanismus, um festzustellen, ob der zwischengespeicherte Inhalt noch aktuell ist.
+5.  Wenn Besucher auf Ihre Website zurückkehren, können ihre Browser lokal zwischengespeicherte Dateien verwenden, anstatt sie erneut herunterzuladen, was zu schnelleren Ladezeiten der Seite führt.
+
+### Wie man es benutzt
+
+Führen Sie die folgenden Schritte aus, um die Client-Cache-Funktion zu konfigurieren und zu verwenden:
+
+1.  **Aktivieren Sie die Funktion:** Die Client-Cache-Funktion ist standardmäßig deaktiviert. Setzen Sie die Einstellung `USE_CLIENT_CACHE` auf `yes`, um sie zu aktivieren.
+2.  **Dateierweiterungen konfigurieren:** Geben Sie mit der Einstellung `CLIENT_CACHE_EXTENSIONS` an, welche Dateitypen zwischengespeichert werden sollen.
+3.  **Cache-Control-Anweisungen festlegen:** Passen Sie mit der Einstellung `CLIENT_CACHE_CONTROL` an, wie Clients Inhalte zwischenspeichern sollen.
+4.  **ETag-Unterstützung konfigurieren:** Entscheiden Sie mit der Einstellung `CLIENT_CACHE_ETAG`, ob ETags zur Validierung der Cache-Frische aktiviert werden sollen.
+5.  **Lassen Sie BunkerWeb den Rest erledigen:** Nach der Konfiguration werden Caching-Header automatisch auf berechtigte Antworten angewendet.
+
+### Konfigurationseinstellungen
+
+| Einstellung               | Standard                   | Kontext   | Mehrfach | Beschreibung                                                                                                      |
+| ------------------------- | -------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------- | --- |
+| `USE_CLIENT_CACHE`        | `no`                       | multisite | nein     | **Client-Cache aktivieren:** Auf `yes` setzen, um das clientseitige Caching von statischen Dateien zu aktivieren. |
+| `CLIENT_CACHE_EXTENSIONS` | `jpg                       | jpeg      | png      | bmp                                                                                                               | ico | svg | tif | css | js | otf | ttf | eot | woff | woff2` | global | nein | **Cache-fähige Erweiterungen:** Liste der Dateierweiterungen (getrennt durch ` | `), die vom Client zwischengespeichert werden sollen. |
+| `CLIENT_CACHE_CONTROL`    | `public, max-age=15552000` | multisite | nein     | **Cache-Control-Header:** Wert für den Cache-Control-HTTP-Header zur Steuerung des Caching-Verhaltens.            |
+| `CLIENT_CACHE_ETAG`       | `yes`                      | multisite | nein     | **ETags aktivieren:** Auf `yes` setzen, um den HTTP-ETag-Header für statische Ressourcen zu senden.               |
+
+!!! tip "Optimierung der Cache-Einstellungen"
+    Für häufig aktualisierte Inhalte sollten Sie kürzere `max-age`-Werte verwenden. Für Inhalte, die sich selten ändern (wie versionierte JavaScript-Bibliotheken oder Logos), verwenden Sie längere Cache-Zeiten. Der Standardwert von 15552000 Sekunden (180 Tage) ist für die meisten statischen Assets angemessen.
+
+!!! info "Browser-Verhalten"
+    Unterschiedliche Browser implementieren Caching geringfügig anders, aber alle modernen Browser respektieren die Standard-Cache-Control-Anweisungen. ETags bieten einen zusätzlichen Validierungsmechanismus, der Browsern hilft festzustellen, ob zwischengespeicherte Inhalte noch gültig sind.
+
+### Beispielkonfigurationen
+
+=== "Grundlegende Konfiguration"
+
+    Eine einfache Konfiguration, die das Caching für gängige statische Assets aktiviert:
+
+    ```yaml
+    USE_CLIENT_CACHE: "yes"
+    CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|gif|css|js|svg|woff|woff2"
+    CLIENT_CACHE_CONTROL: "public, max-age=86400"  # 1 Tag
+    CLIENT_CACHE_ETAG: "yes"
+    ```
+
+=== "Aggressives Caching"
+
+    Eine für maximales Caching optimierte Konfiguration, geeignet für Websites mit selten aktualisierten statischen Inhalten:
+
+    ```yaml
+    USE_CLIENT_CACHE: "yes"
+    CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|bmp|ico|svg|tif|gif|css|js|otf|ttf|eot|woff|woff2|pdf|xml|txt"
+    CLIENT_CACHE_CONTROL: "public, max-age=31536000, immutable"  # 1 Jahr
+    CLIENT_CACHE_ETAG: "yes"
+    ```
+
+=== "Strategie für gemischte Inhalte"
+
+    Für Websites mit einer Mischung aus häufig und selten aktualisierten Inhalten sollten Sie die Dateiversionierung in Ihrer Anwendung und eine Konfiguration wie diese in Betracht ziehen:
+
+    ```yaml
+    USE_CLIENT_CACHE: "yes"
+    CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|bmp|ico|svg|tif|gif|css|js|otf|ttf|eot|woff|woff2"
+    CLIENT_CACHE_CONTROL: "public, max-age=604800"  # 1 Woche
+    CLIENT_CACHE_ETAG: "yes"
+    ```
+
 ## CORS
 
 STREAM-Unterstützung :x:
@@ -1395,106 +1499,6 @@ Hier sind Beispiele für mögliche Werte der Einstellung `CORS_ALLOW_ORIGIN` und
     CORS_ALLOW_CREDENTIALS: "no"
     CORS_MAX_AGE: "86400"
     CORS_DENY_REQUEST: "yes"
-    ```
-
-## Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
-
-
-STREAM-Unterstützung :x:
-
-Provides caching functionality at the reverse proxy level.
-
-| Einstellung                 | Standardwert                      | Kontext   | Mehrfach | Beschreibung                                                                   |
-| --------------------------- | --------------------------------- | --------- | -------- | ------------------------------------------------------------------------------ |
-| `CACHE_PATH`                |                                   | global    | ja       | Path and parameters for a cache.                                               |
-| `CACHE_ZONE`                |                                   | multisite | nein     | Name of cache zone to use (specified in a CACHE_PATH setting).                 |
-| `CACHE_HEADER`              | `X-Cache`                         | multisite | nein     | Add header about cache status.                                                 |
-| `CACHE_BACKGROUND_UPDATE`   | `no`                              | multisite | nein     | Enable or disable background update of the cache.                              |
-| `CACHE_BYPASS`              |                                   | multisite | nein     | List of variables to determine if the cache should be bypassed or not.         |
-| `CACHE_NO_CACHE`            | `$http_pragma$http_authorization` | multisite | nein     | Disable caching if variables are set.                                          |
-| `CACHE_KEY`                 | `$scheme$proxy_host$request_uri`  | multisite | nein     | Key used to identify cached elements.                                          |
-| `CACHE_CONVERT_HEAD_TO_GET` | `yes`                             | multisite | nein     | Convert HEAD requests to GET when caching.                                     |
-| `CACHE_LOCK`                | `no`                              | multisite | nein     | Lock concurrent requests when populating the cache.                            |
-| `CACHE_LOCK_AGE`            | `5s`                              | multisite | nein     | Pass request to upstream if cache is locked for that time (possible cache).    |
-| `CACHE_LOCK_TIMEOUT`        | `5s`                              | multisite | nein     | Pass request to upstream if cache is locked for that time (no cache).          |
-| `CACHE_METHODS`             | `GET HEAD`                        | multisite | nein     | Only cache response if corresponding method is present.                        |
-| `CACHE_MIN_USES`            | `1`                               | multisite | nein     | Number of requests before we put the corresponding response in cache.          |
-| `CACHE_REVALIDATE`          | `no`                              | multisite | nein     | Revalidate expired items using conditional requests to upstream.               |
-| `CACHE_USE_STALE`           | `off`                             | multisite | nein     | Determines the use of staled cache response (proxy_cache_use_stale directive). |
-| `CACHE_VALID`               | `10m`                             | multisite | ja       | Defines default caching with optional status code.                             |
-
-## Client cache
-
-STREAM-Unterstützung :x:
-
-Das Client-Cache-Plugin optimiert die Leistung von Websites, indem es steuert, wie Browser statische Inhalte zwischenspeichern. Es reduziert die Bandbreitennutzung, senkt die Serverlast und verbessert die Ladezeiten von Seiten, indem es Browser anweist, statische Assets wie Bilder, CSS- und JavaScript-Dateien lokal zu speichern und wiederzuverwenden, anstatt sie bei jedem Seitenbesuch erneut anzufordern.
-
-**So funktioniert es:**
-
-1.  Wenn aktiviert, fügt BunkerWeb den Antworten für statische Dateien Cache-Control-Header hinzu.
-2.  Diese Header teilen den Browsern mit, wie lange sie den Inhalt lokal zwischenspeichern sollen.
-3.  Für Dateien mit bestimmten Erweiterungen (wie Bilder, CSS, JavaScript) wendet BunkerWeb die konfigurierte Caching-Richtlinie an.
-4.  Die optionale ETag-Unterstützung bietet einen zusätzlichen Validierungsmechanismus, um festzustellen, ob der zwischengespeicherte Inhalt noch aktuell ist.
-5.  Wenn Besucher auf Ihre Website zurückkehren, können ihre Browser lokal zwischengespeicherte Dateien verwenden, anstatt sie erneut herunterzuladen, was zu schnelleren Ladezeiten der Seite führt.
-
-### Wie man es benutzt
-
-Führen Sie die folgenden Schritte aus, um die Client-Cache-Funktion zu konfigurieren und zu verwenden:
-
-1.  **Aktivieren Sie die Funktion:** Die Client-Cache-Funktion ist standardmäßig deaktiviert. Setzen Sie die Einstellung `USE_CLIENT_CACHE` auf `yes`, um sie zu aktivieren.
-2.  **Dateierweiterungen konfigurieren:** Geben Sie mit der Einstellung `CLIENT_CACHE_EXTENSIONS` an, welche Dateitypen zwischengespeichert werden sollen.
-3.  **Cache-Control-Anweisungen festlegen:** Passen Sie mit der Einstellung `CLIENT_CACHE_CONTROL` an, wie Clients Inhalte zwischenspeichern sollen.
-4.  **ETag-Unterstützung konfigurieren:** Entscheiden Sie mit der Einstellung `CLIENT_CACHE_ETAG`, ob ETags zur Validierung der Cache-Frische aktiviert werden sollen.
-5.  **Lassen Sie BunkerWeb den Rest erledigen:** Nach der Konfiguration werden Caching-Header automatisch auf berechtigte Antworten angewendet.
-
-### Konfigurationseinstellungen
-
-| Einstellung               | Standard                   | Kontext   | Mehrfach | Beschreibung                                                                                                      |
-| ------------------------- | -------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------- | --- |
-| `USE_CLIENT_CACHE`        | `no`                       | multisite | nein     | **Client-Cache aktivieren:** Auf `yes` setzen, um das clientseitige Caching von statischen Dateien zu aktivieren. |
-| `CLIENT_CACHE_EXTENSIONS` | `jpg                       | jpeg      | png      | bmp                                                                                                               | ico | svg | tif | css | js | otf | ttf | eot | woff | woff2` | global | nein | **Cache-fähige Erweiterungen:** Liste der Dateierweiterungen (getrennt durch ` | `), die vom Client zwischengespeichert werden sollen. |
-| `CLIENT_CACHE_CONTROL`    | `public, max-age=15552000` | multisite | nein     | **Cache-Control-Header:** Wert für den Cache-Control-HTTP-Header zur Steuerung des Caching-Verhaltens.            |
-| `CLIENT_CACHE_ETAG`       | `yes`                      | multisite | nein     | **ETags aktivieren:** Auf `yes` setzen, um den HTTP-ETag-Header für statische Ressourcen zu senden.               |
-
-!!! tip "Optimierung der Cache-Einstellungen"
-    Für häufig aktualisierte Inhalte sollten Sie kürzere `max-age`-Werte verwenden. Für Inhalte, die sich selten ändern (wie versionierte JavaScript-Bibliotheken oder Logos), verwenden Sie längere Cache-Zeiten. Der Standardwert von 15552000 Sekunden (180 Tage) ist für die meisten statischen Assets angemessen.
-
-!!! info "Browser-Verhalten"
-    Unterschiedliche Browser implementieren Caching geringfügig anders, aber alle modernen Browser respektieren die Standard-Cache-Control-Anweisungen. ETags bieten einen zusätzlichen Validierungsmechanismus, der Browsern hilft festzustellen, ob zwischengespeicherte Inhalte noch gültig sind.
-
-### Beispielkonfigurationen
-
-=== "Grundlegende Konfiguration"
-
-    Eine einfache Konfiguration, die das Caching für gängige statische Assets aktiviert:
-
-    ```yaml
-    USE_CLIENT_CACHE: "yes"
-    CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|gif|css|js|svg|woff|woff2"
-    CLIENT_CACHE_CONTROL: "public, max-age=86400"  # 1 Tag
-    CLIENT_CACHE_ETAG: "yes"
-    ```
-
-=== "Aggressives Caching"
-
-    Eine für maximales Caching optimierte Konfiguration, geeignet für Websites mit selten aktualisierten statischen Inhalten:
-
-    ```yaml
-    USE_CLIENT_CACHE: "yes"
-    CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|bmp|ico|svg|tif|gif|css|js|otf|ttf|eot|woff|woff2|pdf|xml|txt"
-    CLIENT_CACHE_CONTROL: "public, max-age=31536000, immutable"  # 1 Jahr
-    CLIENT_CACHE_ETAG: "yes"
-    ```
-
-=== "Strategie für gemischte Inhalte"
-
-    Für Websites mit einer Mischung aus häufig und selten aktualisierten Inhalten sollten Sie die Dateiversionierung in Ihrer Anwendung und eine Konfiguration wie diese in Betracht ziehen:
-
-    ```yaml
-    USE_CLIENT_CACHE: "yes"
-    CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|bmp|ico|svg|tif|gif|css|js|otf|ttf|eot|woff|woff2"
-    CLIENT_CACHE_CONTROL: "public, max-age=604800"  # 1 Woche
-    CLIENT_CACHE_ETAG: "yes"
     ```
 
 ## Country
@@ -2037,6 +2041,58 @@ So funktioniert's:
     CUSTOM_SSL_KEY_DATA: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSEV..."
     ```
 
+## Database
+
+STREAM-Unterstützung :white_check_mark:
+
+Das Datenbank-Plugin bietet eine robuste Datenbankintegration für BunkerWeb, indem es die zentrale Speicherung und Verwaltung von Konfigurationsdaten, Protokollen und anderen wichtigen Informationen ermöglicht.
+
+Diese Kernkomponente unterstützt mehrere Datenbank-Engines, darunter SQLite, PostgreSQL, MySQL/MariaDB und Oracle, sodass Sie die Datenbanklösung wählen können, die am besten zu Ihrer Umgebung und Ihren Anforderungen passt.
+
+**So funktioniert es:**
+
+1.  BunkerWeb verbindet sich mit Ihrer konfigurierten Datenbank über die bereitgestellte URI im SQLAlchemy-Format.
+2.  Kritische Konfigurationsdaten, Laufzeitinformationen und Job-Protokolle werden sicher in der Datenbank gespeichert.
+3.  Automatische Wartungsprozesse optimieren Ihre Datenbank, indem sie das Datenwachstum verwalten und überschüssige Datensätze bereinigen.
+4.  Für Hochverfügbarkeitsszenarien können Sie eine schreibgeschützte Datenbank-URI konfigurieren, die sowohl als Failover als auch zur Entlastung von Leseoperationen dient.
+5.  Datenbankoperationen werden entsprechend Ihrer angegebenen Protokollierungsstufe protokolliert, um eine angemessene Transparenz der Datenbankinteraktionen zu gewährleisten.
+
+### Wie man es benutzt
+
+Führen Sie die folgenden Schritte aus, um die Datenbankfunktion zu konfigurieren und zu verwenden:
+
+1.  **Wählen Sie eine Datenbank-Engine:** Wählen Sie je nach Ihren Anforderungen zwischen SQLite (Standard), PostgreSQL, MySQL/MariaDB oder Oracle.
+2.  **Konfigurieren Sie die Datenbank-URI:** Setzen Sie `DATABASE_URI`, um sich mit Ihrer primären Datenbank im SQLAlchemy-Format zu verbinden.
+3.  **Optionale schreibgeschützte Datenbank:** Konfigurieren Sie für Hochverfügbarkeits-Setups eine `DATABASE_URI_READONLY` als Fallback oder für Leseoperationen.
+
+### Konfigurationseinstellungen
+
+| Einstellung                     | Standard                                  | Kontext | Mehrfach | Beschreibung                                                                                                                                |
+| ------------------------------- | ----------------------------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | nein     | **Datenbank-URI:** Die primäre Datenbankverbindungszeichenfolge im SQLAlchemy-Format.                                                       |
+| `DATABASE_URI_READONLY`         |                                           | global  | nein     | **Schreibgeschützte Datenbank-URI:** Optionale Datenbank für schreibgeschützte Operationen oder als Failover.                               |
+| `DATABASE_LOG_LEVEL`            | `warning`                                 | global  | nein     | **Protokollierungsstufe:** Die Ausführlichkeitsstufe für Datenbankprotokolle. Optionen: `debug`, `info`, `warn`, `warning` oder `error`.    |
+| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global  | nein     | **Maximale Job-Ausführungen:** Die maximale Anzahl von Job-Ausführungsdatensätzen, die vor der automatischen Bereinigung aufbewahrt werden. |
+| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global  | nein     | **Sitzungsaufbewahrung:** Das maximale Alter (in Tagen) von UI-Benutzersitzungen, bevor sie automatisch bereinigt werden.                   |
+
+!!! tip "Auswahl der Datenbank" - **SQLite** (Standard): Ideal für Single-Node-Bereitstellungen oder Testumgebungen aufgrund seiner Einfachheit und dateibasierten Natur. - **PostgreSQL**: Empfohlen für Produktionsumgebungen mit mehreren BunkerWeb-Instanzen aufgrund seiner Robustheit und Unterstützung für Gleichzeitigkeit. - **MySQL/MariaDB**: Eine gute Alternative zu PostgreSQL mit ähnlichen produktionsreifen Fähigkeiten. - **Oracle**: Geeignet für Unternehmensumgebungen, in denen Oracle bereits die Standard-Datenbankplattform ist.
+
+!!! info "SQLAlchemy-URI-Format"
+    Die Datenbank-URI folgt dem SQLAlchemy-Format:
+
+    - SQLite: `sqlite:////pfad/zur/datenbank.sqlite3`
+    - PostgreSQL: `postgresql://benutzername:passwort@hostname:port/datenbank`
+    - MySQL/MariaDB: `mysql://benutzername:passwort@hostname:port/datenbank` oder `mariadb://benutzername:passwort@hostname:port/datenbank`
+    - Oracle: `oracle://benutzername:passwort@hostname:port/datenbank`
+
+!!! warning "Datenbankwartung"
+    Das Plugin führt automatisch tägliche Wartungsjobs aus:
+
+- **Bereinigung überschüssiger Job-Ausführungen:** Entfernt Historien, die über dem Wert von `DATABASE_MAX_JOBS_RUNS` liegen.
+- **Bereinigung abgelaufener UI-Sitzungen:** Löscht UI-Benutzersitzungen, die älter sind als `DATABASE_MAX_SESSION_AGE_DAYS`.
+
+Diese Aufgaben verhindern ein unbegrenztes Datenbankwachstum und bewahren gleichzeitig eine nützliche Betriebshistorie.
+
 ## DNSBL
 
 STREAM-Unterstützung :white_check_mark:
@@ -2149,58 +2205,6 @@ Führen Sie die folgenden Schritte aus, um die DNSBL-Funktion zu konfigurieren u
     DNSBL_LIST: "zen.spamhaus.org"
     DNSBL_IGNORE_IP_URLS: "file:///etc/bunkerweb/dnsbl/ignore.txt file:///opt/data/allow-cidrs.txt"
     ```
-
-## Database
-
-STREAM-Unterstützung :white_check_mark:
-
-Das Datenbank-Plugin bietet eine robuste Datenbankintegration für BunkerWeb, indem es die zentrale Speicherung und Verwaltung von Konfigurationsdaten, Protokollen und anderen wichtigen Informationen ermöglicht.
-
-Diese Kernkomponente unterstützt mehrere Datenbank-Engines, darunter SQLite, PostgreSQL, MySQL/MariaDB und Oracle, sodass Sie die Datenbanklösung wählen können, die am besten zu Ihrer Umgebung und Ihren Anforderungen passt.
-
-**So funktioniert es:**
-
-1.  BunkerWeb verbindet sich mit Ihrer konfigurierten Datenbank über die bereitgestellte URI im SQLAlchemy-Format.
-2.  Kritische Konfigurationsdaten, Laufzeitinformationen und Job-Protokolle werden sicher in der Datenbank gespeichert.
-3.  Automatische Wartungsprozesse optimieren Ihre Datenbank, indem sie das Datenwachstum verwalten und überschüssige Datensätze bereinigen.
-4.  Für Hochverfügbarkeitsszenarien können Sie eine schreibgeschützte Datenbank-URI konfigurieren, die sowohl als Failover als auch zur Entlastung von Leseoperationen dient.
-5.  Datenbankoperationen werden entsprechend Ihrer angegebenen Protokollierungsstufe protokolliert, um eine angemessene Transparenz der Datenbankinteraktionen zu gewährleisten.
-
-### Wie man es benutzt
-
-Führen Sie die folgenden Schritte aus, um die Datenbankfunktion zu konfigurieren und zu verwenden:
-
-1.  **Wählen Sie eine Datenbank-Engine:** Wählen Sie je nach Ihren Anforderungen zwischen SQLite (Standard), PostgreSQL, MySQL/MariaDB oder Oracle.
-2.  **Konfigurieren Sie die Datenbank-URI:** Setzen Sie `DATABASE_URI`, um sich mit Ihrer primären Datenbank im SQLAlchemy-Format zu verbinden.
-3.  **Optionale schreibgeschützte Datenbank:** Konfigurieren Sie für Hochverfügbarkeits-Setups eine `DATABASE_URI_READONLY` als Fallback oder für Leseoperationen.
-
-### Konfigurationseinstellungen
-
-| Einstellung                     | Standard                                  | Kontext | Mehrfach | Beschreibung                                                                                                                                |
-| ------------------------------- | ----------------------------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | nein     | **Datenbank-URI:** Die primäre Datenbankverbindungszeichenfolge im SQLAlchemy-Format.                                                       |
-| `DATABASE_URI_READONLY`         |                                           | global  | nein     | **Schreibgeschützte Datenbank-URI:** Optionale Datenbank für schreibgeschützte Operationen oder als Failover.                               |
-| `DATABASE_LOG_LEVEL`            | `warning`                                 | global  | nein     | **Protokollierungsstufe:** Die Ausführlichkeitsstufe für Datenbankprotokolle. Optionen: `debug`, `info`, `warn`, `warning` oder `error`.    |
-| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global  | nein     | **Maximale Job-Ausführungen:** Die maximale Anzahl von Job-Ausführungsdatensätzen, die vor der automatischen Bereinigung aufbewahrt werden. |
-| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global  | nein     | **Sitzungsaufbewahrung:** Das maximale Alter (in Tagen) von UI-Benutzersitzungen, bevor sie automatisch bereinigt werden.                   |
-
-!!! tip "Auswahl der Datenbank" - **SQLite** (Standard): Ideal für Single-Node-Bereitstellungen oder Testumgebungen aufgrund seiner Einfachheit und dateibasierten Natur. - **PostgreSQL**: Empfohlen für Produktionsumgebungen mit mehreren BunkerWeb-Instanzen aufgrund seiner Robustheit und Unterstützung für Gleichzeitigkeit. - **MySQL/MariaDB**: Eine gute Alternative zu PostgreSQL mit ähnlichen produktionsreifen Fähigkeiten. - **Oracle**: Geeignet für Unternehmensumgebungen, in denen Oracle bereits die Standard-Datenbankplattform ist.
-
-!!! info "SQLAlchemy-URI-Format"
-    Die Datenbank-URI folgt dem SQLAlchemy-Format:
-
-    - SQLite: `sqlite:////pfad/zur/datenbank.sqlite3`
-    - PostgreSQL: `postgresql://benutzername:passwort@hostname:port/datenbank`
-    - MySQL/MariaDB: `mysql://benutzername:passwort@hostname:port/datenbank` oder `mariadb://benutzername:passwort@hostname:port/datenbank`
-    - Oracle: `oracle://benutzername:passwort@hostname:port/datenbank`
-
-!!! warning "Datenbankwartung"
-    Das Plugin führt automatisch tägliche Wartungsjobs aus:
-
-- **Bereinigung überschüssiger Job-Ausführungen:** Entfernt Historien, die über dem Wert von `DATABASE_MAX_JOBS_RUNS` liegen.
-- **Bereinigung abgelaufener UI-Sitzungen:** Löscht UI-Benutzersitzungen, die älter sind als `DATABASE_MAX_SESSION_AGE_DAYS`.
-
-Diese Aufgaben verhindern ein unbegrenztes Datenbankwachstum und bewahren gleichzeitig eine nützliche Betriebshistorie.
 
 ## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -2434,6 +2438,110 @@ Beispieldateien im erwarteten Format:
 TrustedMonitor/\d+\.\d+
 ```
 
+## gRPC
+
+STREAM-Unterstützung :x:
+
+Das gRPC-Plugin ermöglicht BunkerWeb, gRPC-Dienste über HTTP/2 mit `grpc_pass` zu proxien. Es ist für Multisite-Setups konzipiert, bei denen jeder virtuelle Host einen oder mehrere gRPC-Backends unter bestimmten Pfaden bereitstellen kann.
+
+**Funktionsweise:**
+
+1. Ein Client sendet eine HTTP/2-Anfrage an BunkerWeb.
+2. Das gRPC-Plugin gleicht eine konfigurierte `location` (`GRPC_URL`) ab und leitet die Anfrage mit `grpc_pass` an das konfigurierte Upstream (`GRPC_HOST`) weiter.
+3. BunkerWeb fügt Forwarding-Header hinzu und wendet Timeout-/Retry-Einstellungen für Upstreams an.
+4. Der gRPC-Upstream antwortet und BunkerWeb leitet die Antwort an den Client zurück.
+
+### Verwendung
+
+1. **Funktion aktivieren:** Setzen Sie `USE_GRPC` auf `yes`.
+2. **Upstream(s) konfigurieren:** Setzen Sie mindestens `GRPC_HOST` (optional zusätzlich `GRPC_HOST_2`, `GRPC_HOST_3`, ...).
+3. **Pfad(e) zuordnen:** Setzen Sie `GRPC_URL` pro Upstream (bei mehreren Einträgen mit passenden Suffixen).
+4. **Verhalten abstimmen:** Konfigurieren Sie bei Bedarf Timeouts, Retries, Header und TLS-SNI-Optionen.
+
+### Konfigurationseinstellungen
+
+| Einstellung                  | Standard | Kontext   | Mehrfach | Beschreibung                                                                                          |
+| ---------------------------- | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `USE_GRPC`                   | `no`     | multisite | nein     | **gRPC aktivieren:** Auf `yes` setzen, um gRPC-Proxying zu aktivieren.                                |
+| `GRPC_HOST`                  |          | multisite | ja       | **gRPC-Upstream:** Wert für `grpc_pass` (z. B. `grpc://service:50051` oder `grpcs://...`).            |
+| `GRPC_URL`                   | `/`      | multisite | ja       | **Location-URL:** Pfad, der an das gRPC-Upstream weitergeleitet wird.                                 |
+| `GRPC_CUSTOM_HOST`           |          | multisite | nein     | **Eigener Host-Header:** Überschreibt den an das Upstream gesendeten `Host`-Header.                   |
+| `GRPC_HEADERS`               |          | multisite | ja       | **Zusätzliche Upstream-Header:** Semikolon-getrennte Liste von `grpc_set_header`-Werten.              |
+| `GRPC_HIDE_HEADERS`          |          | multisite | ja       | **Versteckte Antwort-Header:** Leerzeichen-getrennte Liste von `grpc_hide_header`-Werten.             |
+| `GRPC_INTERCEPT_ERRORS`      | `yes`    | multisite | nein     | **Fehler abfangen:** Aktiviert/deaktiviert `grpc_intercept_errors`.                                   |
+| `GRPC_CONNECT_TIMEOUT`       | `60s`    | multisite | ja       | **Connect-Timeout:** Timeout für den Verbindungsaufbau zum Upstream.                                  |
+| `GRPC_READ_TIMEOUT`          | `60s`    | multisite | ja       | **Read-Timeout:** Timeout für das Lesen vom Upstream.                                                 |
+| `GRPC_SEND_TIMEOUT`          | `60s`    | multisite | ja       | **Send-Timeout:** Timeout für das Senden an das Upstream.                                             |
+| `GRPC_SOCKET_KEEPALIVE`      | `off`    | multisite | ja       | **Socket Keepalive:** Aktiviert/deaktiviert Keepalive auf Upstream-Sockets.                           |
+| `GRPC_SSL_SNI`               | `no`     | multisite | nein     | **SSL SNI:** Aktiviert/deaktiviert SNI für TLS-Upstreams.                                             |
+| `GRPC_SSL_SNI_NAME`          |          | multisite | nein     | **SSL-SNI-Name:** SNI-Name, der gesendet wird, wenn `GRPC_SSL_SNI=yes`.                               |
+| `GRPC_NEXT_UPSTREAM`         |          | multisite | ja       | **Next-Upstream-Bedingungen:** Wert für `grpc_next_upstream`.                                         |
+| `GRPC_NEXT_UPSTREAM_TIMEOUT` |          | multisite | ja       | **Next-Upstream-Timeout:** Wert für `grpc_next_upstream_timeout`.                                     |
+| `GRPC_NEXT_UPSTREAM_TRIES`   |          | multisite | ja       | **Next-Upstream-Versuche:** Wert für `grpc_next_upstream_tries`.                                      |
+| `GRPC_INCLUDES`              |          | multisite | ja       | **Zusätzliche Includes:** Leerzeichen-getrennte Include-Dateien innerhalb des gRPC-`location`-Blocks. |
+
+!!! warning "ModSecurity in gRPC-Location-Blöcken"
+    ModSecurity wird aktuell in den von diesem Plugin generierten gRPC-`location`-Blöcken automatisch deaktiviert, da ModSecurity gRPC-Verkehrsmuster nicht zuverlässig unterstützt.
+
+!!! warning "Lang laufende Streams und Core-Timeouts"
+    Lang laufende oder Streaming-RPCs benötigen eventuell höhere generische NGINX-Timeouts als die globalen Standardwerte. Am häufigsten werden `CLIENT_BODY_TIMEOUT` und `CLIENT_HEADER_TIMEOUT` in den Einstellungen des General-Plugins angepasst.
+
+!!! tip "Mehrere gRPC-Backends"
+    Nutzen Sie suffixierte Einstellungen für mehrere Routen:
+    - `GRPC_HOST`, `GRPC_URL`
+    - `GRPC_HOST_2`, `GRPC_URL_2`
+    - `GRPC_HOST_3`, `GRPC_URL_3`
+
+### Beispielkonfigurationen
+
+=== "Grundlegender gRPC-Proxy"
+
+    ```yaml
+    USE_GRPC: "yes"
+    GRPC_HOST: "grpc://grpcbin:9000"
+    GRPC_URL: "/"
+    GRPC_CONNECT_TIMEOUT: "10s"
+    GRPC_READ_TIMEOUT: "300s"
+    GRPC_SEND_TIMEOUT: "300s"
+    ```
+
+=== "TLS-Upstream (grpcs + SNI)"
+
+    ```yaml
+    USE_GRPC: "yes"
+    GRPC_HOST: "grpcs://internal-grpc.example.net:443"
+    GRPC_URL: "/"
+    GRPC_SSL_SNI: "yes"
+    GRPC_SSL_SNI_NAME: "internal-grpc.example.net"
+    ```
+
+=== "Mehrere Pfade / Backends"
+
+    ```yaml
+    USE_GRPC: "yes"
+
+    GRPC_HOST: "grpc://user-service:50051"
+    GRPC_URL: "/users.UserService/"
+
+    GRPC_HOST_2: "grpc://billing-service:50052"
+    GRPC_URL_2: "/billing.BillingService/"
+
+    GRPC_HOST_3: "grpc://inventory-service:50053"
+    GRPC_URL_3: "/inventory.InventoryService/"
+    ```
+
+=== "Header und Retry-Richtlinie"
+
+    ```yaml
+    USE_GRPC: "yes"
+    GRPC_HOST: "grpc://grpcbin:9000"
+    GRPC_URL: "/"
+    GRPC_HEADERS: "x-request-source bunkerweb;x-env production"
+    GRPC_NEXT_UPSTREAM: "error timeout unavailable"
+    GRPC_NEXT_UPSTREAM_TIMEOUT: "15s"
+    GRPC_NEXT_UPSTREAM_TRIES: "3"
+    ```
+
 ## Gzip
 
 STREAM-Unterstützung :x:
@@ -2507,78 +2615,6 @@ Der GZIP-Plugin komprimiert HTTP-Antworten mit dem GZIP-Algorithmus, um die Band
     GZIP_MIN_LENGTH: "1000"
     GZIP_COMP_LEVEL: "4"
     GZIP_PROXIED: "any"
-    ```
-
-## HTML injection
-
-STREAM-Unterstützung :x:
-
-Das HTML-Injection-Plugin ermöglicht es Ihnen, nahtlos benutzerdefinierten HTML-Code zu den Seiten Ihrer Website vor den schließenden `</body>`- oder `</head>`-Tags hinzuzufügen. Diese Funktion ist besonders nützlich, um Analyses-Skripte, Tracking-Pixel, benutzerdefiniertes JavaScript, CSS-Stile oder andere Integrationen von Drittanbietern hinzuzufügen, ohne den Quellcode Ihrer Website ändern zu müssen.
-
-**So funktioniert es:**
-
-1.  Wenn eine Seite von Ihrer Website ausgeliefert wird, untersucht BunkerWeb die HTML-Antwort.
-2.  Wenn Sie die Body-Injection konfiguriert haben, fügt BunkerWeb Ihren benutzerdefinierten HTML-Code direkt vor dem schließenden `</body>`-Tag ein.
-3.  Wenn Sie die Head-Injection konfiguriert haben, fügt BunkerWeb Ihren benutzerdefinierten HTML-Code direkt vor dem schließenden `</head>`-Tag ein.
-4.  Das Einfügen erfolgt automatisch für alle HTML-Seiten, die von Ihrer Website ausgeliefert werden.
-5.  Dies ermöglicht es Ihnen, Skripte, Stile oder andere Elemente hinzuzufügen, ohne den Code Ihrer Anwendung ändern zu müssen.
-
-### Wie man es benutzt
-
-Führen Sie die folgenden Schritte aus, um die HTML-Injection-Funktion zu konfigurieren und zu verwenden:
-
-1.  **Bereiten Sie Ihren benutzerdefinierten HTML-Code vor:** Entscheiden Sie, welchen HTML-Code Sie in Ihre Seiten einfügen möchten.
-2.  **Wählen Sie die Einfügeorte:** Bestimmen Sie, ob Sie Code im `<head>`-Bereich, im `<body>`-Bereich oder in beiden einfügen müssen.
-3.  **Konfigurieren Sie die Einstellungen:** Fügen Sie Ihren benutzerdefinierten HTML-Code zu den entsprechenden Einstellungen (`INJECT_HEAD` und/oder `INJECT_BODY`) hinzu.
-4.  **Lassen Sie BunkerWeb den Rest erledigen:** Nach der Konfiguration wird der HTML-Code automatisch in alle ausgelieferten HTML-Seiten eingefügt.
-
-### Konfigurationseinstellungen
-
-| Einstellung   | Standard | Kontext   | Mehrfach | Beschreibung                                                                 |
-| ------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------- |
-| `INJECT_HEAD` |          | multisite | nein     | **Head-HTML-Code:** Der HTML-Code, der vor dem `</head>`-Tag eingefügt wird. |
-| `INJECT_BODY` |          | multisite | nein     | **Body-HTML-Code:** Der HTML-Code, der vor dem `</body>`-Tag eingefügt wird. |
-
-!!! tip "Bewährte Praktiken" - Aus Leistungsgründen sollten Sie JavaScript-Dateien am Ende des Body platzieren, um das Rendern nicht zu blockieren. - Platzieren Sie CSS und kritisches JavaScript im Head-Bereich, um ein Aufblitzen von ungestyltem Inhalt zu vermeiden. - Seien Sie vorsichtig mit eingefügtem Inhalt, der die Funktionalität Ihrer Website beeinträchtigen könnte.
-
-!!! info "Häufige Anwendungsfälle" - Hinzufügen von Analyses-Skripten (wie Google Analytics, Matomo) - Integration von Chat-Widgets oder Kundensupport-Tools - Einbinden von Tracking-Pixeln für Marketingkampagnen - Hinzufügen von benutzerdefinierten CSS-Stilen oder JavaScript-Funktionen - Einbinden von Bibliotheken von Drittanbietern, ohne den Anwendungscode zu ändern
-
-### Beispielkonfigurationen
-
-=== "Google Analytics"
-
-    Hinzufügen von Google-Analytics-Tracking zu Ihrer Website:
-
-    ```yaml
-    INJECT_HEAD: ""
-    INJECT_BODY: "<script async src=\"https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX\"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-XXXXXXXXXX');</script>"
-    ```
-
-=== "Benutzerdefinierte Stile"
-
-    Hinzufügen von benutzerdefinierten CSS-Stilen zu Ihrer Website:
-
-    ```yaml
-    INJECT_HEAD: "<style>body { font-family: 'Arial', sans-serif; } .custom-element { color: blue; }</style>"
-    INJECT_BODY: ""
-    ```
-
-=== "Mehrere Integrationen"
-
-    Hinzufügen von sowohl benutzerdefinierten Stilen als auch JavaScript:
-
-    ```yaml
-    INJECT_HEAD: "<style>body { font-family: 'Arial', sans-serif; } .notification-banner { background: #f8f9fa; padding: 10px; text-align: center; }</style>"
-    INJECT_BODY: "<script src=\"https://cdn.example.com/js/widget.js\"></script><script>initializeWidget('your-api-key');</script>"
-    ```
-
-=== "Cookie-Einwilligungsbanner"
-
-    Hinzufügen eines einfachen Cookie-Einwilligungsbanners:
-
-    ```yaml
-    INJECT_HEAD: "<style>.cookie-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #f1f1f1; padding: 20px; text-align: center; z-index: 1000; } .cookie-banner button { background: #4CAF50; border: none; color: white; padding: 10px 20px; cursor: pointer; }</style>"
-    INJECT_BODY: "<div id=\"cookie-banner\" class=\"cookie-banner\">Diese Website verwendet Cookies, um sicherzustellen, dass Sie das beste Erlebnis erhalten. <button onclick=\"acceptCookies()\">Akzeptieren</button></div><script>function acceptCookies() { document.getElementById('cookie-banner').style.display = 'none'; localStorage.setItem('cookies-accepted', 'true'); } if(localStorage.getItem('cookies-accepted') === 'true') { document.getElementById('cookie-banner').style.display = 'none'; }</script>"
     ```
 
 ## Headers
@@ -2726,6 +2762,78 @@ Führen Sie die folgenden Schritte aus, um die Headers-Funktion zu konfigurieren
     ```yaml
     CONTENT_SECURITY_POLICY: "default-src 'self'; script-src 'self' https://trusted-cdn.example.com; img-src 'self' data: https://*.example.com; style-src 'self' 'unsafe-inline' https://trusted-cdn.example.com; connect-src 'self' https://api.example.com; object-src 'none'; frame-ancestors 'self'; form-action 'self'; base-uri 'self'; report-uri https://example.com/csp-reports"
     CONTENT_SECURITY_POLICY_REPORT_ONLY: "yes"
+    ```
+
+## HTML injection
+
+STREAM-Unterstützung :x:
+
+Das HTML-Injection-Plugin ermöglicht es Ihnen, nahtlos benutzerdefinierten HTML-Code zu den Seiten Ihrer Website vor den schließenden `</body>`- oder `</head>`-Tags hinzuzufügen. Diese Funktion ist besonders nützlich, um Analyses-Skripte, Tracking-Pixel, benutzerdefiniertes JavaScript, CSS-Stile oder andere Integrationen von Drittanbietern hinzuzufügen, ohne den Quellcode Ihrer Website ändern zu müssen.
+
+**So funktioniert es:**
+
+1.  Wenn eine Seite von Ihrer Website ausgeliefert wird, untersucht BunkerWeb die HTML-Antwort.
+2.  Wenn Sie die Body-Injection konfiguriert haben, fügt BunkerWeb Ihren benutzerdefinierten HTML-Code direkt vor dem schließenden `</body>`-Tag ein.
+3.  Wenn Sie die Head-Injection konfiguriert haben, fügt BunkerWeb Ihren benutzerdefinierten HTML-Code direkt vor dem schließenden `</head>`-Tag ein.
+4.  Das Einfügen erfolgt automatisch für alle HTML-Seiten, die von Ihrer Website ausgeliefert werden.
+5.  Dies ermöglicht es Ihnen, Skripte, Stile oder andere Elemente hinzuzufügen, ohne den Code Ihrer Anwendung ändern zu müssen.
+
+### Wie man es benutzt
+
+Führen Sie die folgenden Schritte aus, um die HTML-Injection-Funktion zu konfigurieren und zu verwenden:
+
+1.  **Bereiten Sie Ihren benutzerdefinierten HTML-Code vor:** Entscheiden Sie, welchen HTML-Code Sie in Ihre Seiten einfügen möchten.
+2.  **Wählen Sie die Einfügeorte:** Bestimmen Sie, ob Sie Code im `<head>`-Bereich, im `<body>`-Bereich oder in beiden einfügen müssen.
+3.  **Konfigurieren Sie die Einstellungen:** Fügen Sie Ihren benutzerdefinierten HTML-Code zu den entsprechenden Einstellungen (`INJECT_HEAD` und/oder `INJECT_BODY`) hinzu.
+4.  **Lassen Sie BunkerWeb den Rest erledigen:** Nach der Konfiguration wird der HTML-Code automatisch in alle ausgelieferten HTML-Seiten eingefügt.
+
+### Konfigurationseinstellungen
+
+| Einstellung   | Standard | Kontext   | Mehrfach | Beschreibung                                                                 |
+| ------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------- |
+| `INJECT_HEAD` |          | multisite | nein     | **Head-HTML-Code:** Der HTML-Code, der vor dem `</head>`-Tag eingefügt wird. |
+| `INJECT_BODY` |          | multisite | nein     | **Body-HTML-Code:** Der HTML-Code, der vor dem `</body>`-Tag eingefügt wird. |
+
+!!! tip "Bewährte Praktiken" - Aus Leistungsgründen sollten Sie JavaScript-Dateien am Ende des Body platzieren, um das Rendern nicht zu blockieren. - Platzieren Sie CSS und kritisches JavaScript im Head-Bereich, um ein Aufblitzen von ungestyltem Inhalt zu vermeiden. - Seien Sie vorsichtig mit eingefügtem Inhalt, der die Funktionalität Ihrer Website beeinträchtigen könnte.
+
+!!! info "Häufige Anwendungsfälle" - Hinzufügen von Analyses-Skripten (wie Google Analytics, Matomo) - Integration von Chat-Widgets oder Kundensupport-Tools - Einbinden von Tracking-Pixeln für Marketingkampagnen - Hinzufügen von benutzerdefinierten CSS-Stilen oder JavaScript-Funktionen - Einbinden von Bibliotheken von Drittanbietern, ohne den Anwendungscode zu ändern
+
+### Beispielkonfigurationen
+
+=== "Google Analytics"
+
+    Hinzufügen von Google-Analytics-Tracking zu Ihrer Website:
+
+    ```yaml
+    INJECT_HEAD: ""
+    INJECT_BODY: "<script async src=\"https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX\"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-XXXXXXXXXX');</script>"
+    ```
+
+=== "Benutzerdefinierte Stile"
+
+    Hinzufügen von benutzerdefinierten CSS-Stilen zu Ihrer Website:
+
+    ```yaml
+    INJECT_HEAD: "<style>body { font-family: 'Arial', sans-serif; } .custom-element { color: blue; }</style>"
+    INJECT_BODY: ""
+    ```
+
+=== "Mehrere Integrationen"
+
+    Hinzufügen von sowohl benutzerdefinierten Stilen als auch JavaScript:
+
+    ```yaml
+    INJECT_HEAD: "<style>body { font-family: 'Arial', sans-serif; } .notification-banner { background: #f8f9fa; padding: 10px; text-align: center; }</style>"
+    INJECT_BODY: "<script src=\"https://cdn.example.com/js/widget.js\"></script><script>initializeWidget('your-api-key');</script>"
+    ```
+
+=== "Cookie-Einwilligungsbanner"
+
+    Hinzufügen eines einfachen Cookie-Einwilligungsbanners:
+
+    ```yaml
+    INJECT_HEAD: "<style>.cookie-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #f1f1f1; padding: 20px; text-align: center; z-index: 1000; } .cookie-banner button { background: #4CAF50; border: none; color: white; padding: 10px 20px; cursor: pointer; }</style>"
+    INJECT_BODY: "<div id=\"cookie-banner\" class=\"cookie-banner\">Diese Website verwendet Cookies, um sicherzustellen, dass Sie das beste Erlebnis erhalten. <button onclick=\"acceptCookies()\">Akzeptieren</button></div><script>function acceptCookies() { document.getElementById('cookie-banner').style.display = 'none'; localStorage.setItem('cookies-accepted', 'true'); } if(localStorage.getItem('cookies-accepted') === 'true') { document.getElementById('cookie-banner').style.display = 'none'; }</script>"
     ```
 
 ## Let's Encrypt
@@ -5004,83 +5112,6 @@ ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"```
 Weitere Informationen finden Sie in der [robots.txt-Dokumentation](https://www.robotstxt.org/robotstxt.html).
 ````
 
-## SSL
-
-STREAM-Unterstützung :white_check_mark:
-
-Das SSL-Plugin bietet eine robuste SSL/TLS-Verschlüsselung für Ihre durch BunkerWeb geschützten Websites. Es ermöglicht sichere HTTPS-Verbindungen durch die Konfiguration von Protokollen, kryptografischen Suiten und zugehörigen Parametern.
-
-So funktioniert's:
-
-1.  Bei einer HTTPS-Verbindung verwaltet BunkerWeb die SSL/TLS-Aushandlung gemäß Ihren Einstellungen.
-2.  Das Plugin erzwingt moderne Protokolle und starke Suiten und deaktiviert anfällige Optionen.
-3.  Optimierte Sitzungsparameter verbessern die Leistung, ohne die Sicherheit zu beeinträchtigen.
-4.  Die Präsentation der Zertifikate folgt Best Practices für Kompatibilität und Sicherheit.
-
-### Verwendung
-
-1.  **Protokolle**: Wählen Sie die Versionen über `SSL_PROTOCOLS`.
-2.  **Suiten**: Wählen Sie ein Niveau über `SSL_CIPHERS_LEVEL` oder benutzerdefinierte Suiten über `SSL_CIPHERS_CUSTOM`.
-3.  **Weiterleitungen**: Konfigurieren Sie die HTTP→HTTPS-Weiterleitung mit `AUTO_REDIRECT_HTTP_TO_HTTPS` und/oder `REDIRECT_HTTP_TO_HTTPS`.
-
-### Parameter
-
-| Parameter                     | Standard          | Kontext   | Mehrfach | Beschreibung                                                                                                                               |
-| :---------------------------- | :---------------- | :-------- | :------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
-| `REDIRECT_HTTP_TO_HTTPS`      | `no`              | Multisite | nein     | Leitet alle HTTP-Anfragen zu HTTPS um.                                                                                                     |
-| `AUTO_REDIRECT_HTTP_TO_HTTPS` | `yes`             | Multisite | nein     | Automatische Weiterleitung, wenn HTTPS erkannt wird.                                                                                       |
-| `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | Multisite | nein     | Unterstützte SSL/TLS-Protokolle (durch Leerzeichen getrennt).                                                                              |
-| `SSL_CIPHERS_LEVEL`           | `modern`          | Multisite | nein     | Sicherheitsniveau der Suiten (`modern`, `intermediate`, `old`).                                                                            |
-| `SSL_CIPHERS_CUSTOM`          |                   | Multisite | nein     | Benutzerdefinierte Suiten (durch `:` getrennte Liste), die das Niveau ersetzen.                                                            |
-| `SSL_ECDH_CURVE`              | `auto`            | Multisite | nein     | **SSL-ECDH-Kurven:** Durch `:` getrennte Liste von ECDH-Kurven (TLS-Gruppen) oder `auto` fuer intelligente Auswahl (PQC mit OpenSSL 3.5+). |
-| `SSL_SESSION_CACHE_SIZE`      | `10m`             | Multisite | nein     | Größe des SSL-Sitzungscaches (z.B. `10m`, `512k`). Auf `off` oder `none` setzen zum Deaktivieren.                                          |
-
-!!! tip "SSL Labs Test"
-    Testen Sie Ihre Konfiguration über [Qualys SSL Labs](https://www.ssllabs.com/ssltest/). Eine gut eingestellte BunkerWeb-Konfiguration erreicht in der Regel A+.
-
-!!! warning "Veraltete Protokolle"
-    SSLv3, TLSv1.0 und TLSv1.1 sind standardmäßig deaktiviert (bekannte Schwachstellen). Aktivieren Sie diese nur bei Bedarf für ältere Clients.
-
-### Beispiele
-
-=== "Moderne Sicherheit (Standard)"
-
-    ```yaml
-    LISTEN_HTTPS: "yes"
-    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
-    SSL_CIPHERS_LEVEL: "modern"
-    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
-    REDIRECT_HTTP_TO_HTTPS: "no"
-    ```
-
-=== "Maximale Sicherheit"
-
-    ```yaml
-    LISTEN_HTTPS: "yes"
-    SSL_PROTOCOLS: "TLSv1.3"
-    SSL_CIPHERS_LEVEL: "modern"
-    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
-    REDIRECT_HTTP_TO_HTTPS: "yes"
-    ```
-
-=== "Legacy-Kompatibilität"
-
-    ```yaml
-    LISTEN_HTTPS: "yes"
-    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
-    SSL_CIPHERS_LEVEL: "old"
-    AUTO_REDIRECT_HTTP_TO_HTTPS: "no"
-    ```
-
-=== "Benutzerdefinierte Suiten"
-
-    ```yaml
-    LISTEN_HTTPS: "yes"
-    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
-    SSL_CIPHERS_CUSTOM: "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305"
-    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
-    ```
-
 ## Security.txt
 
 STREAM-Unterstützung :white_check_mark:
@@ -5343,6 +5374,83 @@ Führen Sie die folgenden Schritte aus, um die Sessions-Funktion zu konfiguriere
     SESSIONS_ABSOLUTE_TIMEOUT: "604800"  # 7 Tage
     ```
 
+## SSL
+
+STREAM-Unterstützung :white_check_mark:
+
+Das SSL-Plugin bietet eine robuste SSL/TLS-Verschlüsselung für Ihre durch BunkerWeb geschützten Websites. Es ermöglicht sichere HTTPS-Verbindungen durch die Konfiguration von Protokollen, kryptografischen Suiten und zugehörigen Parametern.
+
+So funktioniert's:
+
+1.  Bei einer HTTPS-Verbindung verwaltet BunkerWeb die SSL/TLS-Aushandlung gemäß Ihren Einstellungen.
+2.  Das Plugin erzwingt moderne Protokolle und starke Suiten und deaktiviert anfällige Optionen.
+3.  Optimierte Sitzungsparameter verbessern die Leistung, ohne die Sicherheit zu beeinträchtigen.
+4.  Die Präsentation der Zertifikate folgt Best Practices für Kompatibilität und Sicherheit.
+
+### Verwendung
+
+1.  **Protokolle**: Wählen Sie die Versionen über `SSL_PROTOCOLS`.
+2.  **Suiten**: Wählen Sie ein Niveau über `SSL_CIPHERS_LEVEL` oder benutzerdefinierte Suiten über `SSL_CIPHERS_CUSTOM`.
+3.  **Weiterleitungen**: Konfigurieren Sie die HTTP→HTTPS-Weiterleitung mit `AUTO_REDIRECT_HTTP_TO_HTTPS` und/oder `REDIRECT_HTTP_TO_HTTPS`.
+
+### Parameter
+
+| Parameter                     | Standard          | Kontext   | Mehrfach | Beschreibung                                                                                                                               |
+| :---------------------------- | :---------------- | :-------- | :------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
+| `REDIRECT_HTTP_TO_HTTPS`      | `no`              | Multisite | nein     | Leitet alle HTTP-Anfragen zu HTTPS um.                                                                                                     |
+| `AUTO_REDIRECT_HTTP_TO_HTTPS` | `yes`             | Multisite | nein     | Automatische Weiterleitung, wenn HTTPS erkannt wird.                                                                                       |
+| `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | Multisite | nein     | Unterstützte SSL/TLS-Protokolle (durch Leerzeichen getrennt).                                                                              |
+| `SSL_CIPHERS_LEVEL`           | `modern`          | Multisite | nein     | Sicherheitsniveau der Suiten (`modern`, `intermediate`, `old`).                                                                            |
+| `SSL_CIPHERS_CUSTOM`          |                   | Multisite | nein     | Benutzerdefinierte Suiten (durch `:` getrennte Liste), die das Niveau ersetzen.                                                            |
+| `SSL_ECDH_CURVE`              | `auto`            | Multisite | nein     | **SSL-ECDH-Kurven:** Durch `:` getrennte Liste von ECDH-Kurven (TLS-Gruppen) oder `auto` fuer intelligente Auswahl (PQC mit OpenSSL 3.5+). |
+| `SSL_SESSION_CACHE_SIZE`      | `10m`             | Multisite | nein     | Größe des SSL-Sitzungscaches (z.B. `10m`, `512k`). Auf `off` oder `none` setzen zum Deaktivieren.                                          |
+
+!!! tip "SSL Labs Test"
+    Testen Sie Ihre Konfiguration über [Qualys SSL Labs](https://www.ssllabs.com/ssltest/). Eine gut eingestellte BunkerWeb-Konfiguration erreicht in der Regel A+.
+
+!!! warning "Veraltete Protokolle"
+    SSLv3, TLSv1.0 und TLSv1.1 sind standardmäßig deaktiviert (bekannte Schwachstellen). Aktivieren Sie diese nur bei Bedarf für ältere Clients.
+
+### Beispiele
+
+=== "Moderne Sicherheit (Standard)"
+
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
+    SSL_CIPHERS_LEVEL: "modern"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
+    REDIRECT_HTTP_TO_HTTPS: "no"
+    ```
+
+=== "Maximale Sicherheit"
+
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.3"
+    SSL_CIPHERS_LEVEL: "modern"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
+    REDIRECT_HTTP_TO_HTTPS: "yes"
+    ```
+
+=== "Legacy-Kompatibilität"
+
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
+    SSL_CIPHERS_LEVEL: "old"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "no"
+    ```
+
+=== "Benutzerdefinierte Suiten"
+
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
+    SSL_CIPHERS_CUSTOM: "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
+    ```
+
 ## UI
 
 STREAM-Unterstützung :x:
@@ -5353,6 +5461,30 @@ Integrate easily the BunkerWeb UI.
 | ----------- | ------------ | --------- | -------- | -------------------------------------------- |
 | `USE_UI`    | `no`         | multisite | nein     | Use UI                                       |
 | `UI_HOST`   |              | global    | nein     | Address of the web UI used for initial setup |
+
+## UI Single Sign-On <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM-Unterstützung :x:
+
+Enable SSO authentication for the BunkerWeb web interface by reading headers set by upstream authentication proxies (Authentik, Authelia, Keycloak, Traefik Forward Auth, etc.)
+
+| Einstellung                   | Standardwert    | Kontext | Mehrfach | Beschreibung                                                                                     |
+| ----------------------------- | --------------- | ------- | -------- | ------------------------------------------------------------------------------------------------ |
+| `USE_UI_SSO`                  | `no`            | global  | nein     | Enable or disable UI Single Sign-On authentication for the web interface                         |
+| `UI_SSO_HEADER_USERNAME`      | `X-User`        | global  | nein     | HTTP header containing the authenticated username                                                |
+| `UI_SSO_HEADER_EMAIL`         | `X-Email`       | global  | nein     | HTTP header containing the user's email address                                                  |
+| `UI_SSO_HEADER_GROUPS`        | `X-Groups`      | global  | nein     | HTTP header containing the user's groups (comma or space separated)                              |
+| `UI_SSO_HEADER_NAME`          | `X-Name`        | global  | nein     | HTTP header containing the user's display name                                                   |
+| `UI_SSO_TRUSTED_IPS`          | `127.0.0.1,::1` | global  | nein     | Comma-separated list of trusted IP addresses or CIDR ranges that are allowed to send SSO headers |
+| `UI_SSO_AUTO_CREATE_USERS`    | `yes`           | global  | nein     | Automatically create new users when they authenticate via SSO for the first time                 |
+| `UI_SSO_DEFAULT_ROLE`         | `reader`        | global  | nein     | Default role assigned to new SSO users when no group mapping matches                             |
+| `UI_SSO_GROUP_ADMIN`          |                 | global  | nein     | Group name that grants admin role (highest priority)                                             |
+| `UI_SSO_GROUP_WRITER`         |                 | global  | nein     | Group name that grants writer role                                                               |
+| `UI_SSO_GROUP_READER`         |                 | global  | nein     | Group name that grants reader role                                                               |
+| `UI_SSO_FALLBACK_TO_LOGIN`    | `yes`           | global  | nein     | Allow users to fall back to normal login when SSO headers are not present                        |
+| `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`           | global  | nein     | Update user information (email, role) from SSO headers on each login                             |
+| `UI_SSO_LOGOUT_REDIRECT_URL`  |                 | global  | nein     | URL to redirect users to after logout (e.g., SSO provider logout endpoint)                       |
 
 ## User Manager <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -5555,4 +5687,3 @@ Beispieldateien im erwarteten Format:
 (?:^|\s)FriendlyScanner(?:\s|$)
 TrustedMonitor/\d+\.\d+
 ```
-
