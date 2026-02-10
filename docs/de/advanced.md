@@ -4265,7 +4265,9 @@ Häufige Hardening-/Tuning-Optionen:
 
 ## OpenAPI Validator <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
-STREAM-Unterstützung :x:
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/3oZOO1XdSlc" title="OpenAPI Validator" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
 
 Das **OpenAPI Validator** Plugin setzt Ihren API-Vertrag durch, indem es eingehende Anfragen gegen eine OpenAPI / Swagger Spezifikation validiert. Es stellt sicher, dass der angeforderte Pfad existiert, die HTTP-Methode erlaubt ist und validiert optional Abfrage-, Header-, Cookie- und Pfadparameter gegen deren Schema-Definitionen.
 
@@ -4286,16 +4288,16 @@ Das **OpenAPI Validator** Plugin setzt Ihren API-Vertrag durch, indem es eingehe
 
 ### Konfiguration
 
-| Einstellung                  | Standard                             | Kontext   | Mehrfach | Beschreibung                                                                 |
-| ---------------------------- | ------------------------------------ | --------- | -------- | ---------------------------------------------------------------------------- |
-| `USE_OPENAPI_VALIDATOR`      | `no`                                 | multisite | nein     | Aktiviert die OpenAPI-Routenvalidierung für diese Seite.                     |
-| `OPENAPI_SPEC`               |                                      | multisite | nein     | Absoluter Pfad oder HTTP(S)-URL zum OpenAPI-Dokument im JSON/YAML-Format.    |
+| Einstellung                  | Standard                             | Kontext   | Mehrfach | Beschreibung                                                                         |
+| ---------------------------- | ------------------------------------ | --------- | -------- | ------------------------------------------------------------------------------------ |
+| `USE_OPENAPI_VALIDATOR`      | `no`                                 | multisite | nein     | Aktiviert die OpenAPI-Routenvalidierung für diese Seite.                             |
+| `OPENAPI_SPEC`               |                                      | multisite | nein     | Absoluter Pfad oder HTTP(S)-URL zum OpenAPI-Dokument im JSON/YAML-Format.            |
 | `OPENAPI_BASE_PATH`          |                                      | multisite | nein     | Optionaler Basispfad-Präfix, der jedem Pfad in der Spezifikation vorangestellt wird. |
-| `OPENAPI_ALLOW_UNSPECIFIED`  | `no`                                 | multisite | nein     | Erlaubt Anfragen an Pfade, die nicht in der Spezifikation aufgeführt sind.   |
+| `OPENAPI_ALLOW_UNSPECIFIED`  | `no`                                 | multisite | nein     | Erlaubt Anfragen an Pfade, die nicht in der Spezifikation aufgeführt sind.           |
 | `OPENAPI_ALLOW_INSECURE_URL` | `no`                                 | multisite | nein     | Erlaubt das Abrufen der OpenAPI-Spezifikation über einfaches HTTP (nicht empfohlen). |
-| `OPENAPI_IGNORE_URLS`        | `^/docs$ ^/redoc$ ^/openapi\\.json$` | multisite | nein     | Leerzeichengetrennte Liste von URL-Regexes zur Umgehung der OpenAPI-Validierung. |
-| `OPENAPI_MAX_SPEC_SIZE`      | `2M`                                 | global    | nein     | Maximal erlaubte Größe des OpenAPI-Dokuments (akzeptiert Suffixe k/M/G).      |
-| `OPENAPI_VALIDATE_PARAMS`    | `yes`                                | multisite | nein     | Validiert Abfrage-, Header-, Cookie- und Pfadparameter gegen die Spezifikation. |
+| `OPENAPI_IGNORE_URLS`        | `^/docs$ ^/redoc$ ^/openapi\\.json$` | multisite | nein     | Leerzeichengetrennte Liste von URL-Regexes zur Umgehung der OpenAPI-Validierung.     |
+| `OPENAPI_MAX_SPEC_SIZE`      | `2M`                                 | global    | nein     | Maximal erlaubte Größe des OpenAPI-Dokuments (akzeptiert Suffixe k/M/G).             |
+| `OPENAPI_VALIDATE_PARAMS`    | `yes`                                | multisite | nein     | Validiert Abfrage-, Header-, Cookie- und Pfadparameter gegen die Spezifikation.      |
 
 ### Verhaltenshinweise
 

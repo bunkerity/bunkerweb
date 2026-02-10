@@ -4264,7 +4264,9 @@ Common hardening/tuning options:
 
 ## OpenAPI Validator <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
-STREAM support :x:
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/3oZOO1XdSlc" title="OpenAPI Validator" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
 
 The **OpenAPI Validator** plugin enforces your API contract by validating incoming requests against an OpenAPI / Swagger specification. It ensures the requested path exists, the HTTP method is allowed, and optionally validates query, header, cookie, and path parameters against their schema definitions.
 
