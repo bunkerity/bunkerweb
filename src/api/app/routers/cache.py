@@ -52,12 +52,13 @@ def list_cache(
     for it in items:
         if service not in (None, "", "global") and it.get("service_id") != service:
             continue
+        last_update = it.get("last_update")
         data = {
             "plugin": it.get("plugin_id"),
             "job_name": it.get("job_name"),
             "service": it.get("service_id") or "global",
             "file_name": it.get("file_name"),
-            "last_update": it.get("last_update").astimezone().isoformat() if it.get("last_update") else None,
+            "last_update": last_update.astimezone().isoformat() if isinstance(last_update, datetime) else None,
             "checksum": it.get("checksum"),
         }
         if with_data:
@@ -110,6 +111,7 @@ def fetch_cache_file(
     # Return printable content only
     content = data.get("data") if isinstance(data, dict) else data
     text, printable = _decode_printable(content)
+    last_update = data.get("last_update") if isinstance(data, dict) else None
     return JSONResponse(
         status_code=200,
         content={
@@ -119,7 +121,7 @@ def fetch_cache_file(
                 "job_name": job_name,
                 "service": service or "global",
                 "file_name": fname,
-                "last_update": (datetime.fromtimestamp(data.get("last_update")).astimezone().isoformat() if isinstance(data, dict) and data.get("last_update") else None),  # type: ignore
+                "last_update": (datetime.fromtimestamp(last_update).astimezone().isoformat() if isinstance(last_update, (int, float)) else None),
                 "checksum": (data.get("checksum") if isinstance(data, dict) else None),
                 "data": text,
                 "printable": printable,

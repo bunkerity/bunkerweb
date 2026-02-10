@@ -33,15 +33,16 @@ class GatewayController(KubernetesController):
         self._gateway_api_available = "gateways" in self._resource_versions
         if self._gateway_api_available:
             self._gateway_api_version = self._resource_versions["gateways"]
-            missing = [plural for plural in ("httproutes", "tlsroutes", "tcproutes", "udproutes") if plural not in self._resource_versions]
+            missing = [plural for plural in ("httproutes", "grpcroutes", "tlsroutes", "tcproutes", "udproutes") if plural not in self._resource_versions]
             if missing:
                 missing_list = ", ".join(missing)
-                self._logger.warning(
-                    "Gateway API resources not available: "
-                    f"{missing_list}. Skipping their watches until the next restart. "
-                    "If you intend to use these routes, install the Experimental Channel CRDs: "
-                    "https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel"
-                )
+                hint = ""
+                if any(plural in {"grpcroutes", "tlsroutes", "tcproutes", "udproutes"} for plural in missing):
+                    hint = (
+                        " If you intend to use GRPCRoute/TLSRoute/TCPRoute/UDPRoute, install the Experimental Channel CRDs: "
+                        "https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel"
+                    )
+                self._logger.warning(f"Gateway API resources not available: {missing_list}. Skipping their watches until the next restart.{hint}")
         else:
             self._logger.warning("Gateway API CRDs not detected, controller will stay idle")
 
@@ -55,7 +56,7 @@ class GatewayController(KubernetesController):
     def _detect_resource_versions(self) -> Dict[str, str]:
         resource_versions: Dict[str, str] = {}
         versions = self._candidate_gateway_api_versions()
-        resources = ("gateways", "httproutes", "tlsroutes", "tcproutes", "udproutes")
+        resources = ("gateways", "httproutes", "grpcroutes", "tlsroutes", "tcproutes", "udproutes")
 
         for plural in resources:
             for version in versions:
@@ -156,7 +157,7 @@ class GatewayController(KubernetesController):
     def _get_controller_routes(self) -> List[Dict[str, Any]]:
         routes = []
         gateways = self._get_gateways()
-        for plural in ("httproutes", "tlsroutes", "tcproutes", "udproutes"):
+        for plural in ("httproutes", "grpcroutes", "tlsroutes", "tcproutes", "udproutes"):
             for route in self._list_custom_objects(plural):
                 metadata = route.get("metadata") or {}
                 namespace = metadata.get("namespace")
@@ -446,6 +447,24 @@ class GatewayController(KubernetesController):
 
         return backend_name, backend_port, backend_namespace
 
+    def _grpc_match_path(self, match: Any) -> str:
+        if not isinstance(match, dict):
+            return "/"
+
+        method = match.get("method")
+        if not isinstance(method, dict):
+            return "/"
+
+        service = (method.get("service") or "").strip().strip("/")
+        rpc_method = (method.get("method") or "").strip().strip("/")
+
+        if service and rpc_method:
+            return f"/{service}/{rpc_method}"
+        if service:
+            return f"/{service}/"
+
+        return "/"
+
     def _to_services(self, controller_service) -> List[dict]:
         metadata = controller_service.get("metadata") or {}
         spec = controller_service.get("spec") or {}
@@ -519,6 +538,52 @@ class GatewayController(KubernetesController):
                             }
                         )
                         location += 1
+
+            services.append(service)
+        elif route_kind == "grpcroute":
+            hostnames = spec.get("hostnames") or []
+            if not hostnames:
+                listener_hostnames = self._get_listener_hostnames(controller_service, protocols=["HTTP", "HTTPS", "TLS"])
+                if listener_hostnames:
+                    hostnames = listener_hostnames
+                    self._logger.info(f"GRPCRoute {namespace}/{name} uses listener hostnames: {', '.join(listener_hostnames)}")
+                else:
+                    self._logger.warning(f"Ignoring GRPCRoute {namespace}/{name} without hostnames")
+                    return []
+
+            listener_protocol = self._get_listener_protocol(controller_service, hostnames[0], allowed_protocols=["HTTP", "HTTPS", "TLS"])
+            if not listener_protocol:
+                self._logger.warning(f"Ignoring GRPCRoute {namespace}/{name}: no compatible HTTP/HTTPS/TLS listener found")
+                return []
+
+            grpc_scheme = "grpcs" if self._service_protocol == "https" else "grpc"
+            location = self._reverse_proxy_suffix_start
+            service: Dict[str, Any] = {"SERVER_NAME": " ".join(hostnames), "USE_GRPC": "yes"}
+
+            if rules:
+                for rule in rules:
+                    matches = rule.get("matches") or [None]
+                    backend_ref = self._get_backend_ref(rule.get("backendRefs") or [], namespace, name or "unknown", "GRPCRoute")
+                    if not backend_ref:
+                        continue
+                    backend_name, backend_port, backend_namespace = backend_ref
+
+                    for match in matches:
+                        grpc_url = self._grpc_match_path(match)
+                        grpc_host = f"{grpc_scheme}://{backend_name}.{backend_namespace}.svc.{self._domain_name}"
+                        if (grpc_scheme == "grpc" and backend_port != 80) or (grpc_scheme == "grpcs" and backend_port != 443):
+                            grpc_host += f":{backend_port}"
+
+                        service.update(
+                            {
+                                "USE_GRPC": "yes",
+                                f"GRPC_HOST_{location}" if location else "GRPC_HOST": grpc_host,
+                                f"GRPC_URL_{location}" if location else "GRPC_URL": grpc_url,
+                            }
+                        )
+                        location += 1
+            else:
+                self._logger.warning(f"Ignoring GRPCRoute {namespace}/{name} without rules")
 
             services.append(service)
         elif route_kind == "tlsroute":
@@ -659,7 +724,7 @@ class GatewayController(KubernetesController):
                         elif setting.startswith(f"{server_name}_REVERSE_PROXY_URL") and setting in service:
                             del service[setting]
 
-        if route_kind == "httproute":
+        if route_kind in ("httproute", "grpcroute"):
             for service in services:
                 server_name = service["SERVER_NAME"].strip().split(" ")[0]
                 tls_data = self._get_tls_data_for_route(controller_service, server_name)
@@ -673,7 +738,7 @@ class GatewayController(KubernetesController):
         return services
 
     def _is_custom_event(self, kind, obj, annotations, namespace, name) -> bool:
-        return kind in ("HTTPRoute", "TLSRoute", "TCPRoute", "UDPRoute", "Gateway")
+        return kind in ("HTTPRoute", "GRPCRoute", "TLSRoute", "TCPRoute", "UDPRoute", "Gateway")
 
     def _get_watchers(self):
         watchers = {
@@ -704,6 +769,7 @@ class GatewayController(KubernetesController):
         watchers_map = {
             "gateway": make_list("gateways"),
             "httproute": make_list("httproutes"),
+            "grpcroute": make_list("grpcroutes"),
             "tlsroute": make_list("tlsroutes"),
             "tcproute": make_list("tcproutes"),
             "udproute": make_list("udproutes"),

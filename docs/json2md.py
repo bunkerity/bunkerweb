@@ -222,11 +222,11 @@ def generate_docs_for_lang(lang: str):
                 core_settings[pro_plugin["name"]]["is_pro"] = True
 
     # Print plugins and their settings
-    for data in dict(sorted(core_settings.items())).values():
+    for _, data in sorted(core_settings.items(), key=lambda item: item[0].casefold()):
         pro_crown = ""
         if "is_pro" in data:
             pro_crown = (
-                f" <img src='{'../' if lang != 'en' else ''}../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'>"
+                f" <img src='{'../' if lang != 'en' else ''}../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'>"
                 + tr_lang("pro_badge")
                 + "\n"
             )
