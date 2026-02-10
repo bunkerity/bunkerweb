@@ -4517,7 +4517,8 @@ para configuraciones personalizadas.</p>
 <p>El modo Gateway API está actualmente en <strong>beta</strong>.</p>
 <p>Asegúrate de que las CRD de Gateway API estén instaladas en el clúster (consulta la <a href="https://gateway-api.sigs.k8s.io/guides/getting-started/#installing-gateway-api">guía de instalación de Gateway API</a>).</p>
 <p>Si usas la Gateway API de Kubernetes, establece <code>KUBERNETES_MODE=yes</code> y <code>KUBERNETES_GATEWAY_MODE=yes</code>.</p>
-<p>El controlador observa recursos <code>Gateway</code>, <code>HTTPRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code> y <code>UDPRoute</code> en lugar de objetos <code>Ingress</code>. Puedes limitar lo que procesa con <code>KUBERNETES_GATEWAY_CLASS</code> y elegir <code>KUBERNETES_GATEWAY_API_VERSION</code> (<code>v1</code>, <code>v1beta1</code>, <code>v1beta2</code>, <code>v1alpha2</code> o <code>v1alpha1</code>).</p>
+<p>El controlador observa recursos <code>Gateway</code>, <code>HTTPRoute</code>, <code>GRPCRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code> y <code>UDPRoute</code> en lugar de objetos <code>Ingress</code>. Puedes limitar lo que procesa con <code>KUBERNETES_GATEWAY_CLASS</code> y elegir <code>KUBERNETES_GATEWAY_API_VERSION</code> (<code>v1</code>, <code>v1beta1</code>, <code>v1beta2</code>, <code>v1alpha2</code> o <code>v1alpha1</code>).</p>
+<p>El soporte de <code>GRPCRoute</code> en BunkerWeb es actualmente <strong>experimental</strong>.</p>
 <p>Si tu Service no se llama <code>bunkerweb</code>, establece <code>BUNKERWEB_SERVICE_NAME</code> para que el parcheo de estado lea el Service correcto.</p>
 </div>
 <div class="admonition info">
@@ -5083,20 +5084,20 @@ para configuraciones personalizadas.</p>
 <span class="nn">...</span>
 </code></pre></div>
 <h3 id="recursos-de-gateway">Recursos de Gateway</h3>
-<p>Cuando el modo Gateway API está habilitado, puedes declarar recursos <code>Gateway</code>, <code>HTTPRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code> y <code>UDPRoute</code>.
-Las configuraciones de BunkerWeb se indican como anotaciones <code>bunkerweb.io/&lt;SETTING&gt;</code> en el <code>HTTPRoute</code>; para limitar una
+<p>Cuando el modo Gateway API está habilitado, puedes declarar recursos <code>Gateway</code>, <code>HTTPRoute</code>, <code>GRPCRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code> y <code>UDPRoute</code>.
+Las configuraciones de BunkerWeb se indican como anotaciones <code>bunkerweb.io/&lt;SETTING&gt;</code> en el <code>HTTPRoute</code>/<code>GRPCRoute</code>; para limitar una
 configuración a un host, usa <code>bunkerweb.io/&lt;hostname&gt;_&lt;SETTING&gt;</code>. El campo <code>hostnames</code> define los nombres de servidor. Para <code>TCPRoute</code>/<code>UDPRoute</code> (y <code>TLSRoute</code> sin <code>hostnames</code>), BunkerWeb genera un nombre de servidor como <code>&lt;route&gt;.&lt;namespace&gt;.&lt;protocol&gt;</code>. Consulta <a href="#gateway-class">Clase de Gateway</a>.
-Las anotaciones en el <code>Gateway</code> se aplican a todas las rutas asociadas, mientras que las anotaciones en un <code>HTTPRoute</code> solo se aplican a esa ruta.
+Las anotaciones en el <code>Gateway</code> se aplican a todas las rutas asociadas, mientras que las anotaciones en un <code>HTTPRoute</code>/<code>GRPCRoute</code> solo se aplican a esa ruta.
 También puedes limitar las anotaciones del Gateway a un nombre de servidor con <code>bunkerweb.io/&lt;hostname&gt;_&lt;SETTING&gt;</code>; solo se aplicarán si existe esa ruta/nombre de servidor.</p>
 <h4 id="recursos-compatibles">Recursos compatibles</h4>
 <ul>
-<li>Recursos: <code>HTTPRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code> y <code>UDPRoute</code> (no <code>GRPCRoute</code>).</li>
+<li>Recursos: <code>HTTPRoute</code>, <code>GRPCRoute</code> (experimental), <code>TLSRoute</code>, <code>TCPRoute</code> y <code>UDPRoute</code>.</li>
 <li>Reglas: solo se usa la primera regla para <code>TLSRoute</code>, <code>TCPRoute</code> y <code>UDPRoute</code>.</li>
 <li>Backends: solo <code>Service</code>, primer <code>backendRef</code> por regla.</li>
 </ul>
 <h4 id="protocolos-y-tls">Protocolos y TLS</h4>
 <ul>
-<li>Protocolos de listener: <code>HTTP</code>/<code>HTTPS</code> para <code>HTTPRoute</code>, <code>TLS</code> para <code>TLSRoute</code>, <code>TCP</code> para <code>TCPRoute</code> y <code>UDP</code> para <code>UDPRoute</code>.</li>
+<li>Protocolos de listener: <code>HTTP</code>/<code>HTTPS</code> para <code>HTTPRoute</code> y <code>GRPCRoute</code>, <code>TLS</code> para <code>TLSRoute</code>, <code>TCP</code> para <code>TCPRoute</code> y <code>UDP</code> para <code>UDPRoute</code>.</li>
 <li>TLS: certificados mediante <code>certificateRefs</code> del listener con <code>HTTPS</code> o <code>TLS</code> + <code>mode: Terminate</code> (Passthrough no está soportado para la terminación). <code>TLSRoute</code> funciona en modo stream.</li>
 </ul>
 <div class="admonition tip">
@@ -5104,8 +5105,8 @@ También puedes limitar las anotaciones del Gateway a un nombre de servidor con 
 <p>Para <code>TLSRoute</code>, <code>TCPRoute</code> y <code>UDPRoute</code>, puedes reemplazar el nombre de servidor generado configurando <code>bunkerweb.io/SERVER_NAME</code> en la ruta.</p>
 </div>
 <div class="admonition note">
-<p class="admonition-title">Experimental Channel para rutas stream</p>
-<p>Si quieres usar <code>TLSRoute</code>, <code>TCPRoute</code> o <code>UDPRoute</code>, instala las CRD del Experimental Channel: https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel</p>
+<p class="admonition-title">Experimental Channel para rutas avanzadas</p>
+<p>Si quieres usar <code>GRPCRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code> o <code>UDPRoute</code>, instala las CRD del Experimental Channel: https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel</p>
 </div>
 <div class="admonition info">
 <p class="admonition-title">Soporte TLS</p>

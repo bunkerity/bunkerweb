@@ -4513,7 +4513,8 @@ autoconf 服务充当一个 <a href="https://kubernetes.io/docs/concepts/service
 <p>Gateway API 模式目前处于 <strong>beta</strong>。</p>
 <p>请确保集群已安装 Gateway API 的 CRD（参见 <a href="https://gateway-api.sigs.k8s.io/guides/getting-started/#installing-gateway-api">Gateway API 安装指南</a>）。</p>
 <p>如果你使用 Kubernetes Gateway API，请设置 <code>KUBERNETES_MODE=yes</code> 和 <code>KUBERNETES_GATEWAY_MODE=yes</code>。</p>
-<p>控制器将监控 <code>Gateway</code>、<code>HTTPRoute</code>、<code>TLSRoute</code>、<code>TCPRoute</code> 和 <code>UDPRoute</code> 资源，而不是 <code>Ingress</code> 对象。你可以通过 <code>KUBERNETES_GATEWAY_CLASS</code> 限制处理范围，并选择 <code>KUBERNETES_GATEWAY_API_VERSION</code>（<code>v1</code>、<code>v1beta1</code>、<code>v1beta2</code>、<code>v1alpha2</code> 或 <code>v1alpha1</code>）。</p>
+<p>控制器将监控 <code>Gateway</code>、<code>HTTPRoute</code>、<code>GRPCRoute</code>、<code>TLSRoute</code>、<code>TCPRoute</code> 和 <code>UDPRoute</code> 资源，而不是 <code>Ingress</code> 对象。你可以通过 <code>KUBERNETES_GATEWAY_CLASS</code> 限制处理范围，并选择 <code>KUBERNETES_GATEWAY_API_VERSION</code>（<code>v1</code>、<code>v1beta1</code>、<code>v1beta2</code>、<code>v1alpha2</code> 或 <code>v1alpha1</code>）。</p>
+<p>BunkerWeb 对 <code>GRPCRoute</code> 的支持目前为 <strong>实验性</strong>。</p>
 <p>如果你的 Service 名称不是 <code>bunkerweb</code>，请设置 <code>BUNKERWEB_SERVICE_NAME</code> 以便状态补丁读取正确的 Service。</p>
 </div>
 <div class="admonition info">
@@ -5079,20 +5080,20 @@ autoconf 服务充当一个 <a href="https://kubernetes.io/docs/concepts/service
 <span class="nn">...</span>
 </code></pre></div>
 <h3 id="gateway">Gateway 资源</h3>
-<p>当使用 Gateway API 模式时，你可以声明 <code>Gateway</code>、<code>HTTPRoute</code>、<code>TLSRoute</code>、<code>TCPRoute</code> 与 <code>UDPRoute</code> 资源。
-在 <code>HTTPRoute</code> 上通过 <code>bunkerweb.io/&lt;SETTING&gt;</code> 注解提供 BunkerWeb 配置；如需限定到某个主机，
+<p>当使用 Gateway API 模式时，你可以声明 <code>Gateway</code>、<code>HTTPRoute</code>、<code>GRPCRoute</code>、<code>TLSRoute</code>、<code>TCPRoute</code> 与 <code>UDPRoute</code> 资源。
+在 <code>HTTPRoute</code>/<code>GRPCRoute</code> 上通过 <code>bunkerweb.io/&lt;SETTING&gt;</code> 注解提供 BunkerWeb 配置；如需限定到某个主机，
 使用 <code>bunkerweb.io/&lt;hostname&gt;_&lt;SETTING&gt;</code>。<code>hostnames</code> 字段用于驱动服务器名称。对于 <code>TCPRoute</code>/<code>UDPRoute</code>（以及没有 <code>hostnames</code> 的 <code>TLSRoute</code>），BunkerWeb 会生成类似 <code>&lt;route&gt;.&lt;namespace&gt;.&lt;protocol&gt;</code> 的服务器名称。参见 <a href="#gateway-class">Gateway 类</a>。
-<code>Gateway</code> 上的注解会应用到其挂载的所有路由，而 <code>HTTPRoute</code> 上的注解仅作用于该路由。
+<code>Gateway</code> 上的注解会应用到其挂载的所有路由，而 <code>HTTPRoute</code>/<code>GRPCRoute</code> 上的注解仅作用于该路由。
 你也可以用 <code>bunkerweb.io/&lt;hostname&gt;_&lt;SETTING&gt;</code> 将 Gateway 注解限定到某个服务器名；只有当该路由/服务器名存在时才会生效。</p>
 <h4 id="_66">支持的资源</h4>
 <ul>
-<li>资源：<code>HTTPRoute</code>、<code>TLSRoute</code>、<code>TCPRoute</code>、<code>UDPRoute</code>（不支持 <code>GRPCRoute</code>）。</li>
+<li>资源：<code>HTTPRoute</code>、<code>GRPCRoute</code>（实验性）、<code>TLSRoute</code>、<code>TCPRoute</code>、<code>UDPRoute</code>。</li>
 <li>规则：<code>TLSRoute</code>、<code>TCPRoute</code> 和 <code>UDPRoute</code> 只使用第一条规则。</li>
 <li>后端：仅 <code>Service</code>，每条规则只取第一个 <code>backendRef</code>。</li>
 </ul>
 <h4 id="tls">协议与 TLS</h4>
 <ul>
-<li>Listener 协议：<code>HTTP</code>/<code>HTTPS</code> 用于 <code>HTTPRoute</code>，<code>TLS</code> 用于 <code>TLSRoute</code>，<code>TCP</code> 用于 <code>TCPRoute</code>，<code>UDP</code> 用于 <code>UDPRoute</code>。</li>
+<li>Listener 协议：<code>HTTP</code>/<code>HTTPS</code> 用于 <code>HTTPRoute</code> 和 <code>GRPCRoute</code>，<code>TLS</code> 用于 <code>TLSRoute</code>，<code>TCP</code> 用于 <code>TCPRoute</code>，<code>UDP</code> 用于 <code>UDPRoute</code>。</li>
 <li>TLS：通过 listener 的 <code>certificateRefs</code>，仅 <code>HTTPS</code> 或 <code>TLS</code> + <code>mode: Terminate</code>（不支持 Passthrough 终止）。<code>TLSRoute</code> 运行在 stream 模式。</li>
 </ul>
 <div class="admonition tip">
@@ -5100,8 +5101,8 @@ autoconf 服务充当一个 <a href="https://kubernetes.io/docs/concepts/service
 <p>对于 <code>TLSRoute</code>、<code>TCPRoute</code> 和 <code>UDPRoute</code>，你可以通过设置 <code>bunkerweb.io/SERVER_NAME</code> 来覆盖生成的服务器名称。</p>
 </div>
 <div class="admonition note">
-<p class="admonition-title">Experimental Channel（stream 路由）</p>
-<p>如果你打算使用 <code>TLSRoute</code>、<code>TCPRoute</code> 或 <code>UDPRoute</code>，请安装 Experimental Channel CRD： https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel</p>
+<p class="admonition-title">Experimental Channel（高级路由）</p>
+<p>如果你打算使用 <code>GRPCRoute</code>、<code>TLSRoute</code>、<code>TCPRoute</code> 或 <code>UDPRoute</code>，请安装 Experimental Channel CRD： https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel</p>
 </div>
 <div class="admonition info">
 <p class="admonition-title">TLS 支持</p>

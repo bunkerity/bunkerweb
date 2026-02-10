@@ -4511,7 +4511,8 @@ et surveille également d'autres objets Kubernetes, tels que <a href="https://ku
 <p>Le mode Gateway API est actuellement en <strong>bêta</strong>.</p>
 <p>Assurez-vous que les CRD de la Gateway API sont installées dans le cluster (voir le <a href="https://gateway-api.sigs.k8s.io/guides/getting-started/#installing-gateway-api">guide d'installation de la Gateway API</a>).</p>
 <p>Si vous utilisez la Gateway API Kubernetes, définissez <code>KUBERNETES_MODE=yes</code> et <code>KUBERNETES_GATEWAY_MODE=yes</code>.</p>
-<p>Le contrôleur surveille les ressources <code>Gateway</code>, <code>HTTPRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code> et <code>UDPRoute</code> au lieu des objets <code>Ingress</code>. Vous pouvez limiter ce qui est traité avec <code>KUBERNETES_GATEWAY_CLASS</code> et choisir <code>KUBERNETES_GATEWAY_API_VERSION</code> (<code>v1</code>, <code>v1beta1</code>, <code>v1beta2</code>, <code>v1alpha2</code> ou <code>v1alpha1</code>).</p>
+<p>Le contrôleur surveille les ressources <code>Gateway</code>, <code>HTTPRoute</code>, <code>GRPCRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code> et <code>UDPRoute</code> au lieu des objets <code>Ingress</code>. Vous pouvez limiter ce qui est traité avec <code>KUBERNETES_GATEWAY_CLASS</code> et choisir <code>KUBERNETES_GATEWAY_API_VERSION</code> (<code>v1</code>, <code>v1beta1</code>, <code>v1beta2</code>, <code>v1alpha2</code> ou <code>v1alpha1</code>).</p>
+<p>Le support de <code>GRPCRoute</code> est actuellement <strong>expérimental</strong> dans BunkerWeb.</p>
 <p>Si votre Service ne s'appelle pas <code>bunkerweb</code>, définissez <code>BUNKERWEB_SERVICE_NAME</code> pour que le patch de statut lise le bon Service.</p>
 </div>
 <div class="admonition info">
@@ -5038,20 +5039,20 @@ et surveille également d'autres objets Kubernetes, tels que <a href="https://ku
 <span class="nn">...</span>
 </code></pre></div>
 <h3 id="ressources-gateway">Ressources Gateway</h3>
-<p>Lorsque le mode Gateway API est activé, vous pouvez déclarer des ressources <code>Gateway</code>, <code>HTTPRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code> et <code>UDPRoute</code>.
-Les paramètres BunkerWeb sont fournis via des annotations <code>bunkerweb.io/&lt;SETTING&gt;</code> sur le <code>HTTPRoute</code> ; pour limiter un
+<p>Lorsque le mode Gateway API est activé, vous pouvez déclarer des ressources <code>Gateway</code>, <code>HTTPRoute</code>, <code>GRPCRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code> et <code>UDPRoute</code>.
+Les paramètres BunkerWeb sont fournis via des annotations <code>bunkerweb.io/&lt;SETTING&gt;</code> sur le <code>HTTPRoute</code>/<code>GRPCRoute</code> ; pour limiter un
 paramètre à un hôte, utilisez <code>bunkerweb.io/&lt;hostname&gt;_&lt;SETTING&gt;</code>. Le champ <code>hostnames</code> pilote les noms de serveur. Pour <code>TCPRoute</code>/<code>UDPRoute</code> (et <code>TLSRoute</code> sans <code>hostnames</code>), BunkerWeb génère un nom de serveur du type <code>&lt;route&gt;.&lt;namespace&gt;.&lt;protocol&gt;</code>. Voir <a href="#gateway-class">Classe Gateway</a>.
-Les annotations sur le <code>Gateway</code> s'appliquent à toutes les routes qui y sont rattachées, tandis que les annotations sur un <code>HTTPRoute</code> ne s'appliquent qu'à cette route.
+Les annotations sur le <code>Gateway</code> s'appliquent à toutes les routes qui y sont rattachées, tandis que les annotations sur un <code>HTTPRoute</code>/<code>GRPCRoute</code> ne s'appliquent qu'à cette route.
 Vous pouvez limiter les annotations du Gateway à un nom de serveur avec <code>bunkerweb.io/&lt;hostname&gt;_&lt;SETTING&gt;</code> ; elles ne s'appliqueront que si cette route/ce nom de serveur existe.</p>
 <h4 id="ressources-prises-en-charge">Ressources prises en charge</h4>
 <ul>
-<li>Ressources : <code>HTTPRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code> et <code>UDPRoute</code> (pas de <code>GRPCRoute</code>).</li>
+<li>Ressources : <code>HTTPRoute</code>, <code>GRPCRoute</code> (expérimental), <code>TLSRoute</code>, <code>TCPRoute</code> et <code>UDPRoute</code>.</li>
 <li>Règles : seule la première règle est utilisée pour <code>TLSRoute</code>, <code>TCPRoute</code> et <code>UDPRoute</code>.</li>
 <li>Backends : uniquement <code>Service</code>, premier <code>backendRef</code> par règle.</li>
 </ul>
 <h4 id="protocoles-et-tls">Protocoles et TLS</h4>
 <ul>
-<li>Protocoles de listener : <code>HTTP</code>/<code>HTTPS</code> pour <code>HTTPRoute</code>, <code>TLS</code> pour <code>TLSRoute</code>, <code>TCP</code> pour <code>TCPRoute</code> et <code>UDP</code> pour <code>UDPRoute</code>.</li>
+<li>Protocoles de listener : <code>HTTP</code>/<code>HTTPS</code> pour <code>HTTPRoute</code> et <code>GRPCRoute</code>, <code>TLS</code> pour <code>TLSRoute</code>, <code>TCP</code> pour <code>TCPRoute</code> et <code>UDP</code> pour <code>UDPRoute</code>.</li>
 <li>TLS : certificats via les <code>certificateRefs</code> du listener avec <code>HTTPS</code> ou <code>TLS</code> + <code>mode: Terminate</code> (Passthrough n'est pas pris en charge pour la terminaison). <code>TLSRoute</code> fonctionne en mode stream.</li>
 </ul>
 <div class="admonition tip">
@@ -5059,8 +5060,8 @@ Vous pouvez limiter les annotations du Gateway à un nom de serveur avec <code>b
 <p>Pour <code>TLSRoute</code>, <code>TCPRoute</code> et <code>UDPRoute</code>, vous pouvez remplacer le nom de serveur généré en définissant <code>bunkerweb.io/SERVER_NAME</code> sur la route.</p>
 </div>
 <div class="admonition note">
-<p class="admonition-title">Experimental Channel pour les routes stream</p>
-<p>Si vous souhaitez utiliser <code>TLSRoute</code>, <code>TCPRoute</code> ou <code>UDPRoute</code>, installez les CRD de l'Experimental Channel : https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel</p>
+<p class="admonition-title">Experimental Channel pour les routes avancées</p>
+<p>Si vous souhaitez utiliser <code>GRPCRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code> ou <code>UDPRoute</code>, installez les CRD de l'Experimental Channel : https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel</p>
 </div>
 <div class="admonition info">
 <p class="admonition-title">Prise en charge TLS</p>
