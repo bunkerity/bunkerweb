@@ -2742,7 +2742,9 @@ für benutzerdefinierte Konfigurationen.
 
     Wenn Sie die Kubernetes Gateway API verwenden, setzen Sie `KUBERNETES_MODE=yes` und `KUBERNETES_GATEWAY_MODE=yes`.
 
-    Der Controller überwacht `Gateway`, `HTTPRoute`, `TLSRoute`, `TCPRoute` und `UDPRoute` statt `Ingress`-Objekten. Optional können Sie die Auswahl mit `KUBERNETES_GATEWAY_CLASS` einschränken und die API-Version mit `KUBERNETES_GATEWAY_API_VERSION` (`v1`, `v1beta1`, `v1beta2`, `v1alpha2` oder `v1alpha1`) festlegen.
+    Der Controller überwacht `Gateway`, `HTTPRoute`, `GRPCRoute`, `TLSRoute`, `TCPRoute` und `UDPRoute` statt `Ingress`-Objekten. Optional können Sie die Auswahl mit `KUBERNETES_GATEWAY_CLASS` einschränken und die API-Version mit `KUBERNETES_GATEWAY_API_VERSION` (`v1`, `v1beta1`, `v1beta2`, `v1alpha2` oder `v1alpha1`) festlegen.
+
+    Die Unterstützung für `GRPCRoute` ist in BunkerWeb derzeit **experimentell**.
 
     Wenn Ihr Service nicht `bunkerweb` heißt, setzen Sie `BUNKERWEB_SERVICE_NAME`, damit das Status-Patching den richtigen Service verwendet.
 
@@ -3326,28 +3328,28 @@ spec:
 
 ### Gateway-Ressourcen
 
-Wenn der Gateway-API-Modus aktiviert ist, können Sie `Gateway`-, `HTTPRoute`-, `TLSRoute`-, `TCPRoute`- und `UDPRoute`-Ressourcen deklarieren.
-BunkerWeb-Einstellungen werden als `bunkerweb.io/<SETTING>`-Annotationen an der `HTTPRoute` angegeben; um eine Einstellung
+Wenn der Gateway-API-Modus aktiviert ist, können Sie `Gateway`-, `HTTPRoute`-, `GRPCRoute`-, `TLSRoute`-, `TCPRoute`- und `UDPRoute`-Ressourcen deklarieren.
+BunkerWeb-Einstellungen werden als `bunkerweb.io/<SETTING>`-Annotationen an der `HTTPRoute`/`GRPCRoute` angegeben; um eine Einstellung
 auf einen Host zu begrenzen, verwenden Sie `bunkerweb.io/<hostname>_<SETTING>`. Das Feld `hostnames` steuert die Servernamen. Für `TCPRoute`/`UDPRoute` (und `TLSRoute` ohne `hostnames`) erzeugt BunkerWeb einen Servernamen wie `<route>.<namespace>.<protocol>`. Siehe [Gateway-Klasse](#gateway-class).
-Annotationen auf dem `Gateway` gelten für alle daran angehängten Routen, während Annotationen auf einer `HTTPRoute` nur für diese Route gelten.
+Annotationen auf dem `Gateway` gelten für alle daran angehängten Routen, während Annotationen auf einer `HTTPRoute`/`GRPCRoute` nur für diese Route gelten.
 Sie können Gateway-Annotationen weiterhin auf einen bestimmten Servernamen einschränken, indem Sie `bunkerweb.io/<hostname>_<SETTING>` verwenden; sie werden nur angewendet, wenn diese Route bzw. dieser Servername existiert.
 
 #### Unterstützte Ressourcen
 
-- Ressourcen: `HTTPRoute`, `TLSRoute`, `TCPRoute` und `UDPRoute` (keine `GRPCRoute`).
+- Ressourcen: `HTTPRoute`, `GRPCRoute` (experimentell), `TLSRoute`, `TCPRoute` und `UDPRoute`.
 - Regeln: Für `TLSRoute`, `TCPRoute` und `UDPRoute` wird nur die erste Regel verwendet.
 - Backends: nur `Service`, erste `backendRef` pro Regel.
 
 #### Protokolle und TLS
 
-- Listener-Protokolle: `HTTP`/`HTTPS` für `HTTPRoute`, `TLS` für `TLSRoute`, `TCP` für `TCPRoute` und `UDP` für `UDPRoute`.
+- Listener-Protokolle: `HTTP`/`HTTPS` für `HTTPRoute` und `GRPCRoute`, `TLS` für `TLSRoute`, `TCP` für `TCPRoute` und `UDP` für `UDPRoute`.
 - TLS: Zertifikate über Listener-`certificateRefs` mit `HTTPS` oder `TLS` + `mode: Terminate` (Passthrough wird für die Terminierung nicht unterstützt). `TLSRoute` läuft im Stream-Modus.
 
 !!! tip "Servername für Stream-Routen"
     Für `TLSRoute`, `TCPRoute` und `UDPRoute` können Sie den generierten Servernamen überschreiben, indem Sie `bunkerweb.io/SERVER_NAME` an der Route setzen.
 
-!!! note "Experimental Channel für Stream-Routen"
-    Wenn Sie `TLSRoute`, `TCPRoute` oder `UDPRoute` verwenden möchten, installieren Sie die Experimental-Channel-CRDs: https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel
+!!! note "Experimental Channel für erweiterte Routen"
+    Wenn Sie `GRPCRoute`, `TLSRoute`, `TCPRoute` oder `UDPRoute` verwenden möchten, installieren Sie die Experimental-Channel-CRDs: https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel
 
 !!! info "TLS-Unterstützung"
     Die TLS-Terminierung erfolgt über die `Gateway`-Listener und deren `certificateRefs` (TLS-Secrets) für `HTTPRoute` mit `HTTPS` oder `TLS` + `mode: Terminate`. `TLSRoute` läuft im Stream-Modus.

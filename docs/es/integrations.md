@@ -2744,7 +2744,9 @@ para configuraciones personalizadas.
 
     Si usas la Gateway API de Kubernetes, establece `KUBERNETES_MODE=yes` y `KUBERNETES_GATEWAY_MODE=yes`.
 
-    El controlador observa recursos `Gateway`, `HTTPRoute`, `TLSRoute`, `TCPRoute` y `UDPRoute` en lugar de objetos `Ingress`. Puedes limitar lo que procesa con `KUBERNETES_GATEWAY_CLASS` y elegir `KUBERNETES_GATEWAY_API_VERSION` (`v1`, `v1beta1`, `v1beta2`, `v1alpha2` o `v1alpha1`).
+    El controlador observa recursos `Gateway`, `HTTPRoute`, `GRPCRoute`, `TLSRoute`, `TCPRoute` y `UDPRoute` en lugar de objetos `Ingress`. Puedes limitar lo que procesa con `KUBERNETES_GATEWAY_CLASS` y elegir `KUBERNETES_GATEWAY_API_VERSION` (`v1`, `v1beta1`, `v1beta2`, `v1alpha2` o `v1alpha1`).
+
+    El soporte de `GRPCRoute` en BunkerWeb es actualmente **experimental**.
 
     Si tu Service no se llama `bunkerweb`, establece `BUNKERWEB_SERVICE_NAME` para que el parcheo de estado lea el Service correcto.
 
@@ -3328,28 +3330,28 @@ spec:
 
 ### Recursos de Gateway
 
-Cuando el modo Gateway API está habilitado, puedes declarar recursos `Gateway`, `HTTPRoute`, `TLSRoute`, `TCPRoute` y `UDPRoute`.
-Las configuraciones de BunkerWeb se indican como anotaciones `bunkerweb.io/<SETTING>` en el `HTTPRoute`; para limitar una
+Cuando el modo Gateway API está habilitado, puedes declarar recursos `Gateway`, `HTTPRoute`, `GRPCRoute`, `TLSRoute`, `TCPRoute` y `UDPRoute`.
+Las configuraciones de BunkerWeb se indican como anotaciones `bunkerweb.io/<SETTING>` en el `HTTPRoute`/`GRPCRoute`; para limitar una
 configuración a un host, usa `bunkerweb.io/<hostname>_<SETTING>`. El campo `hostnames` define los nombres de servidor. Para `TCPRoute`/`UDPRoute` (y `TLSRoute` sin `hostnames`), BunkerWeb genera un nombre de servidor como `<route>.<namespace>.<protocol>`. Consulta [Clase de Gateway](#gateway-class).
-Las anotaciones en el `Gateway` se aplican a todas las rutas asociadas, mientras que las anotaciones en un `HTTPRoute` solo se aplican a esa ruta.
+Las anotaciones en el `Gateway` se aplican a todas las rutas asociadas, mientras que las anotaciones en un `HTTPRoute`/`GRPCRoute` solo se aplican a esa ruta.
 También puedes limitar las anotaciones del Gateway a un nombre de servidor con `bunkerweb.io/<hostname>_<SETTING>`; solo se aplicarán si existe esa ruta/nombre de servidor.
 
 #### Recursos compatibles
 
-- Recursos: `HTTPRoute`, `TLSRoute`, `TCPRoute` y `UDPRoute` (no `GRPCRoute`).
+- Recursos: `HTTPRoute`, `GRPCRoute` (experimental), `TLSRoute`, `TCPRoute` y `UDPRoute`.
 - Reglas: solo se usa la primera regla para `TLSRoute`, `TCPRoute` y `UDPRoute`.
 - Backends: solo `Service`, primer `backendRef` por regla.
 
 #### Protocolos y TLS
 
-- Protocolos de listener: `HTTP`/`HTTPS` para `HTTPRoute`, `TLS` para `TLSRoute`, `TCP` para `TCPRoute` y `UDP` para `UDPRoute`.
+- Protocolos de listener: `HTTP`/`HTTPS` para `HTTPRoute` y `GRPCRoute`, `TLS` para `TLSRoute`, `TCP` para `TCPRoute` y `UDP` para `UDPRoute`.
 - TLS: certificados mediante `certificateRefs` del listener con `HTTPS` o `TLS` + `mode: Terminate` (Passthrough no está soportado para la terminación). `TLSRoute` funciona en modo stream.
 
 !!! tip "Nombre de servidor para rutas stream"
     Para `TLSRoute`, `TCPRoute` y `UDPRoute`, puedes reemplazar el nombre de servidor generado configurando `bunkerweb.io/SERVER_NAME` en la ruta.
 
-!!! note "Experimental Channel para rutas stream"
-    Si quieres usar `TLSRoute`, `TCPRoute` o `UDPRoute`, instala las CRD del Experimental Channel: https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel
+!!! note "Experimental Channel para rutas avanzadas"
+    Si quieres usar `GRPCRoute`, `TLSRoute`, `TCPRoute` o `UDPRoute`, instala las CRD del Experimental Channel: https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel
 
 !!! info "Soporte TLS"
     La terminación TLS se gestiona mediante los listeners del `Gateway` y sus `certificateRefs` (secrets TLS) para `HTTPRoute` con `HTTPS` o `TLS` + `mode: Terminate`. `TLSRoute` funciona en modo stream.
