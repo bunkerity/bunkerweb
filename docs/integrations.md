@@ -2779,7 +2779,9 @@ and also monitors other Kubernetes objects, such as [ConfigMap](https://kubernet
 
     If you use the Kubernetes Gateway API, set `KUBERNETES_MODE=yes` and `KUBERNETES_GATEWAY_MODE=yes`.
 
-    The controller will watch `Gateway`, `HTTPRoute`, `TLSRoute`, `TCPRoute`, and `UDPRoute` resources instead of `Ingress` objects. You can optionally limit what it processes with `KUBERNETES_GATEWAY_CLASS` and choose `KUBERNETES_GATEWAY_API_VERSION` (`v1`, `v1beta1`, `v1beta2`, `v1alpha2`, or `v1alpha1`).
+    The controller will watch `Gateway`, `HTTPRoute`, `GRPCRoute`, `TLSRoute`, `TCPRoute`, and `UDPRoute` resources instead of `Ingress` objects. You can optionally limit what it processes with `KUBERNETES_GATEWAY_CLASS` and choose `KUBERNETES_GATEWAY_API_VERSION` (`v1`, `v1beta1`, `v1beta2`, `v1alpha2`, or `v1alpha1`).
+
+    `GRPCRoute` support is currently **experimental** in BunkerWeb.
 
     If your Service name is not `bunkerweb`, set `BUNKERWEB_SERVICE_NAME` so status patching reads the correct Service.
 
@@ -3374,28 +3376,28 @@ spec:
 
 ### Gateway resources
 
-When Gateway API mode is enabled, you can declare `Gateway`, `HTTPRoute`, `TLSRoute`, `TCPRoute`, and `UDPRoute` resources.
-BunkerWeb settings are provided as `bunkerweb.io/<SETTING>` annotations on the `HTTPRoute`; to scope a setting to a host,
+When Gateway API mode is enabled, you can declare `Gateway`, `HTTPRoute`, `GRPCRoute`, `TLSRoute`, `TCPRoute`, and `UDPRoute` resources.
+BunkerWeb settings are provided as `bunkerweb.io/<SETTING>` annotations on the `HTTPRoute`/`GRPCRoute`; to scope a setting to a host,
 use `bunkerweb.io/<hostname>_<SETTING>`. The `hostnames` field drives the server names. For `TCPRoute`/`UDPRoute` (and `TLSRoute` without `hostnames`), BunkerWeb generates a server name like `<route>.<namespace>.<protocol>`. See [Gateway class](#gateway-class).
-Annotations on the `Gateway` itself apply to all routes attached to it, while annotations on an `HTTPRoute` only apply to that route.
+Annotations on the `Gateway` itself apply to all routes attached to it, while annotations on an `HTTPRoute`/`GRPCRoute` only apply to that route.
 You can still scope gateway annotations to a specific server name using `bunkerweb.io/<hostname>_<SETTING>`, and they will only apply if that route/server name exists.
 
 #### Supported resources
 
-- Resources: `HTTPRoute`, `TLSRoute`, `TCPRoute`, and `UDPRoute` (no `GRPCRoute`).
+- Resources: `HTTPRoute`, `GRPCRoute` (experimental), `TLSRoute`, `TCPRoute`, and `UDPRoute`.
 - Rules: only the first rule is used for `TLSRoute`, `TCPRoute`, and `UDPRoute`.
 - Backends: `Service` only, first `backendRef` per rule.
 
 #### Protocols and TLS
 
-- Listener protocols: `HTTP`/`HTTPS` for `HTTPRoute`, `TLS` for `TLSRoute`, `TCP` for `TCPRoute`, and `UDP` for `UDPRoute`.
+- Listener protocols: `HTTP`/`HTTPS` for `HTTPRoute` and `GRPCRoute`, `TLS` for `TLSRoute`, `TCP` for `TCPRoute`, and `UDP` for `UDPRoute`.
 - TLS: certificates via listener `certificateRefs` with `HTTPS` or `TLS` + `mode: Terminate` (Passthrough is not supported for termination). `TLSRoute` runs in stream mode.
 
 !!! tip "Stream route server name"
     For `TLSRoute`, `TCPRoute`, and `UDPRoute`, you can override the generated server name by setting `bunkerweb.io/SERVER_NAME` on the route.
 
-!!! note "Experimental Channel for stream routes"
-    If you intend to use `TLSRoute`, `TCPRoute`, or `UDPRoute`, install the Experimental Channel CRDs: https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel
+!!! note "Experimental Channel for advanced routes"
+    If you intend to use `GRPCRoute`, `TLSRoute`, `TCPRoute`, or `UDPRoute`, install the Experimental Channel CRDs: https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel
 
 !!! info "TLS support"
     TLS termination is handled via the `Gateway` listeners and their `certificateRefs` (TLS secrets) for `HTTPRoute` with `HTTPS` or `TLS` + `mode: Terminate`. `TLSRoute` runs in stream mode.

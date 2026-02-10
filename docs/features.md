@@ -101,12 +101,16 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 === "Network & Port Settings"
 
-    | Setting         | Default      | Context | Multiple | Description                                           |
-    | --------------- | ------------ | ------- | -------- | ----------------------------------------------------- |
-    | `HTTP_PORT`     | `8080`       | global  | Yes      | **HTTP Port:** Port number for HTTP traffic.          |
-    | `HTTPS_PORT`    | `8443`       | global  | Yes      | **HTTPS Port:** Port number for HTTPS traffic.        |
-    | `USE_IPV6`      | `no`         | global  | No       | **IPv6 Support:** Enable IPv6 connectivity.           |
-    | `DNS_RESOLVERS` | `127.0.0.11` | global  | No       | **DNS Resolvers:** DNS addresses of resolvers to use. |
+    | Setting                 | Default      | Context | Multiple | Description                                                               |
+    | ----------------------- | ------------ | ------- | -------- | ------------------------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`       | global  | Yes      | **HTTP Port:** Port number for HTTP traffic.                              |
+    | `HTTPS_PORT`            | `8443`       | global  | Yes      | **HTTPS Port:** Port number for HTTPS traffic.                            |
+    | `USE_IPV6`              | `no`         | global  | No       | **IPv6 Support:** Enable IPv6 connectivity.                               |
+    | `DNS_RESOLVERS`         | `127.0.0.11` | global  | No       | **DNS Resolvers:** DNS addresses of resolvers to use.                     |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global  | No       | **Client Body Timeout:** Timeout for reading the client request body.     |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global  | No       | **Client Header Timeout:** Timeout for reading the client request header. |
+    | `KEEPALIVE_TIMEOUT`     | `15s`        | global  | No       | **Keepalive Timeout:** Timeout for keep-alive client connections.         |
+    | `SEND_TIMEOUT`          | `10s`        | global  | No       | **Send Timeout:** Timeout for transmitting a response to the client.      |
 
 === "Stream Server Settings"
 
@@ -1305,6 +1309,106 @@ Pro tip: When viewing your alerts, click the "columns" option and check the "con
   <figcaption>BunkerWeb data shown in the context column</figcaption>
 </figure>
 
+## Cache <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :x:
+
+Provides caching functionality at the reverse proxy level.
+
+| Setting                     | Default                           | Context   | Multiple | Description                                                                    |
+| --------------------------- | --------------------------------- | --------- | -------- | ------------------------------------------------------------------------------ |
+| `CACHE_PATH`                |                                   | global    | yes      | Path and parameters for a cache.                                               |
+| `CACHE_ZONE`                |                                   | multisite | no       | Name of cache zone to use (specified in a CACHE_PATH setting).                 |
+| `CACHE_HEADER`              | `X-Cache`                         | multisite | no       | Add header about cache status.                                                 |
+| `CACHE_BACKGROUND_UPDATE`   | `no`                              | multisite | no       | Enable or disable background update of the cache.                              |
+| `CACHE_BYPASS`              |                                   | multisite | no       | List of variables to determine if the cache should be bypassed or not.         |
+| `CACHE_NO_CACHE`            | `$http_pragma$http_authorization` | multisite | no       | Disable caching if variables are set.                                          |
+| `CACHE_KEY`                 | `$scheme$proxy_host$request_uri`  | multisite | no       | Key used to identify cached elements.                                          |
+| `CACHE_CONVERT_HEAD_TO_GET` | `yes`                             | multisite | no       | Convert HEAD requests to GET when caching.                                     |
+| `CACHE_LOCK`                | `no`                              | multisite | no       | Lock concurrent requests when populating the cache.                            |
+| `CACHE_LOCK_AGE`            | `5s`                              | multisite | no       | Pass request to upstream if cache is locked for that time (possible cache).    |
+| `CACHE_LOCK_TIMEOUT`        | `5s`                              | multisite | no       | Pass request to upstream if cache is locked for that time (no cache).          |
+| `CACHE_METHODS`             | `GET HEAD`                        | multisite | no       | Only cache response if corresponding method is present.                        |
+| `CACHE_MIN_USES`            | `1`                               | multisite | no       | Number of requests before we put the corresponding response in cache.          |
+| `CACHE_REVALIDATE`          | `no`                              | multisite | no       | Revalidate expired items using conditional requests to upstream.               |
+| `CACHE_USE_STALE`           | `off`                             | multisite | no       | Determines the use of staled cache response (proxy_cache_use_stale directive). |
+| `CACHE_VALID`               | `10m`                             | multisite | yes      | Defines default caching with optional status code.                             |
+
+## Client cache
+
+STREAM support :x:
+
+The Client Cache plugin optimizes website performance by controlling how browsers cache static content. It reduces bandwidth usage, lowers server load, and improves page load times by instructing browsers to store and reuse static assets—such as images, CSS, and JavaScript files—locally instead of requesting them on every page visit.
+
+**How it works:**
+
+1. When enabled, BunkerWeb adds Cache-Control headers to responses for static files.
+2. These headers tell browsers how long they should cache the content locally.
+3. For files with specified extensions (like images, CSS, JavaScript), BunkerWeb applies the configured caching policy.
+4. Optional ETag support provides an additional validation mechanism to determine whether cached content is still fresh.
+5. When visitors return to your site, their browsers can use locally cached files instead of downloading them again, resulting in faster page load times.
+
+### How to Use
+
+Follow these steps to configure and use the Client Cache feature:
+
+1. **Enable the feature:** The Client Cache feature is disabled by default; set the `USE_CLIENT_CACHE` setting to `yes` to enable it.
+2. **Configure file extensions:** Specify which file types should be cached using the `CLIENT_CACHE_EXTENSIONS` setting.
+3. **Set cache control directives:** Customize how clients should cache content using the `CLIENT_CACHE_CONTROL` setting.
+4. **Configure ETag support:** Decide whether to enable ETags for validating cache freshness with the `CLIENT_CACHE_ETAG` setting.
+5. **Let BunkerWeb handle the rest:** Once configured, caching headers are applied automatically to eligible responses.
+
+### Configuration Settings
+
+| Setting                   | Default                    | Context   | Multiple | Description                                                                                    |
+| ------------------------- | -------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------- |
+| `USE_CLIENT_CACHE`        | `no`                       | multisite | no       | **Enable Client Cache:** Set to `yes` to enable client-side caching of static files.           |
+| `CLIENT_CACHE_EXTENSIONS` | `jpg                       | jpeg      | png      | bmp                                                                                            | ico | svg | tif | css | js | otf | ttf | eot | woff | woff2` | global | no | **Cacheable Extensions:** List of file extensions (separated by pipes) that should be cached by the client. |
+| `CLIENT_CACHE_CONTROL`    | `public, max-age=15552000` | multisite | no       | **Cache-Control Header:** Value for the Cache-Control HTTP header to control caching behavior. |
+| `CLIENT_CACHE_ETAG`       | `yes`                      | multisite | no       | **Enable ETags:** Set to `yes` to send the HTTP ETag header for static resources.              |
+
+!!! tip "Optimizing Cache Settings"
+    For frequently updated content, consider using shorter max-age values. For content that rarely changes (like versioned JavaScript libraries or logos), use longer cache times. The default value of 15552000 seconds (180 days) is appropriate for most static assets.
+
+!!! info "Browser Behavior"
+    Different browsers implement caching slightly differently, but all modern browsers honor standard Cache-Control directives. ETags provide an additional validation mechanism that helps browsers determine if cached content is still valid.
+
+### Example Configurations
+
+=== "Basic Configuration"
+
+    A simple configuration that enables caching for common static assets:
+
+    ```yaml
+    USE_CLIENT_CACHE: "yes"
+    CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|gif|css|js|svg|woff|woff2"
+    CLIENT_CACHE_CONTROL: "public, max-age=86400"  # 1 day
+    CLIENT_CACHE_ETAG: "yes"
+    ```
+
+=== "Aggressive Caching"
+
+    Configuration optimized for maximum caching, suitable for sites with infrequently updated static content:
+
+    ```yaml
+    USE_CLIENT_CACHE: "yes"
+    CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|bmp|ico|svg|tif|gif|css|js|otf|ttf|eot|woff|woff2|pdf|xml|txt"
+    CLIENT_CACHE_CONTROL: "public, max-age=31536000, immutable"  # 1 year
+    CLIENT_CACHE_ETAG: "yes"
+    ```
+
+=== "Mixed Content Strategy"
+
+    For sites with a mix of frequently and infrequently updated content, consider using file versioning in your application and a configuration like this:
+
+    ```yaml
+    USE_CLIENT_CACHE: "yes"
+    CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|bmp|ico|svg|tif|gif|css|js|otf|ttf|eot|woff|woff2"
+    CLIENT_CACHE_CONTROL: "public, max-age=604800"  # 1 week
+    CLIENT_CACHE_ETAG: "yes"
+    ```
+
 ## CORS
 
 STREAM support :x:
@@ -1430,106 +1534,6 @@ Here are examples of possible values for the `CORS_ALLOW_ORIGIN` setting, along 
     CORS_ALLOW_CREDENTIALS: "no"
     CORS_MAX_AGE: "86400"
     CORS_DENY_REQUEST: "yes"
-    ```
-
-## Cache <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
-
-
-STREAM support :x:
-
-Provides caching functionality at the reverse proxy level.
-
-| Setting                     | Default                           | Context   | Multiple | Description                                                                    |
-| --------------------------- | --------------------------------- | --------- | -------- | ------------------------------------------------------------------------------ |
-| `CACHE_PATH`                |                                   | global    | yes      | Path and parameters for a cache.                                               |
-| `CACHE_ZONE`                |                                   | multisite | no       | Name of cache zone to use (specified in a CACHE_PATH setting).                 |
-| `CACHE_HEADER`              | `X-Cache`                         | multisite | no       | Add header about cache status.                                                 |
-| `CACHE_BACKGROUND_UPDATE`   | `no`                              | multisite | no       | Enable or disable background update of the cache.                              |
-| `CACHE_BYPASS`              |                                   | multisite | no       | List of variables to determine if the cache should be bypassed or not.         |
-| `CACHE_NO_CACHE`            | `$http_pragma$http_authorization` | multisite | no       | Disable caching if variables are set.                                          |
-| `CACHE_KEY`                 | `$scheme$proxy_host$request_uri`  | multisite | no       | Key used to identify cached elements.                                          |
-| `CACHE_CONVERT_HEAD_TO_GET` | `yes`                             | multisite | no       | Convert HEAD requests to GET when caching.                                     |
-| `CACHE_LOCK`                | `no`                              | multisite | no       | Lock concurrent requests when populating the cache.                            |
-| `CACHE_LOCK_AGE`            | `5s`                              | multisite | no       | Pass request to upstream if cache is locked for that time (possible cache).    |
-| `CACHE_LOCK_TIMEOUT`        | `5s`                              | multisite | no       | Pass request to upstream if cache is locked for that time (no cache).          |
-| `CACHE_METHODS`             | `GET HEAD`                        | multisite | no       | Only cache response if corresponding method is present.                        |
-| `CACHE_MIN_USES`            | `1`                               | multisite | no       | Number of requests before we put the corresponding response in cache.          |
-| `CACHE_REVALIDATE`          | `no`                              | multisite | no       | Revalidate expired items using conditional requests to upstream.               |
-| `CACHE_USE_STALE`           | `off`                             | multisite | no       | Determines the use of staled cache response (proxy_cache_use_stale directive). |
-| `CACHE_VALID`               | `10m`                             | multisite | yes      | Defines default caching with optional status code.                             |
-
-## Client cache
-
-STREAM support :x:
-
-The Client Cache plugin optimizes website performance by controlling how browsers cache static content. It reduces bandwidth usage, lowers server load, and improves page load times by instructing browsers to store and reuse static assets—such as images, CSS, and JavaScript files—locally instead of requesting them on every page visit.
-
-**How it works:**
-
-1. When enabled, BunkerWeb adds Cache-Control headers to responses for static files.
-2. These headers tell browsers how long they should cache the content locally.
-3. For files with specified extensions (like images, CSS, JavaScript), BunkerWeb applies the configured caching policy.
-4. Optional ETag support provides an additional validation mechanism to determine whether cached content is still fresh.
-5. When visitors return to your site, their browsers can use locally cached files instead of downloading them again, resulting in faster page load times.
-
-### How to Use
-
-Follow these steps to configure and use the Client Cache feature:
-
-1. **Enable the feature:** The Client Cache feature is disabled by default; set the `USE_CLIENT_CACHE` setting to `yes` to enable it.
-2. **Configure file extensions:** Specify which file types should be cached using the `CLIENT_CACHE_EXTENSIONS` setting.
-3. **Set cache control directives:** Customize how clients should cache content using the `CLIENT_CACHE_CONTROL` setting.
-4. **Configure ETag support:** Decide whether to enable ETags for validating cache freshness with the `CLIENT_CACHE_ETAG` setting.
-5. **Let BunkerWeb handle the rest:** Once configured, caching headers are applied automatically to eligible responses.
-
-### Configuration Settings
-
-| Setting                   | Default                    | Context   | Multiple | Description                                                                                    |
-| ------------------------- | -------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------- |
-| `USE_CLIENT_CACHE`        | `no`                       | multisite | no       | **Enable Client Cache:** Set to `yes` to enable client-side caching of static files.           |
-| `CLIENT_CACHE_EXTENSIONS` | `jpg                       | jpeg      | png      | bmp                                                                                            | ico | svg | tif | css | js | otf | ttf | eot | woff | woff2` | global | no | **Cacheable Extensions:** List of file extensions (separated by pipes) that should be cached by the client. |
-| `CLIENT_CACHE_CONTROL`    | `public, max-age=15552000` | multisite | no       | **Cache-Control Header:** Value for the Cache-Control HTTP header to control caching behavior. |
-| `CLIENT_CACHE_ETAG`       | `yes`                      | multisite | no       | **Enable ETags:** Set to `yes` to send the HTTP ETag header for static resources.              |
-
-!!! tip "Optimizing Cache Settings"
-    For frequently updated content, consider using shorter max-age values. For content that rarely changes (like versioned JavaScript libraries or logos), use longer cache times. The default value of 15552000 seconds (180 days) is appropriate for most static assets.
-
-!!! info "Browser Behavior"
-    Different browsers implement caching slightly differently, but all modern browsers honor standard Cache-Control directives. ETags provide an additional validation mechanism that helps browsers determine if cached content is still valid.
-
-### Example Configurations
-
-=== "Basic Configuration"
-
-    A simple configuration that enables caching for common static assets:
-
-    ```yaml
-    USE_CLIENT_CACHE: "yes"
-    CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|gif|css|js|svg|woff|woff2"
-    CLIENT_CACHE_CONTROL: "public, max-age=86400"  # 1 day
-    CLIENT_CACHE_ETAG: "yes"
-    ```
-
-=== "Aggressive Caching"
-
-    Configuration optimized for maximum caching, suitable for sites with infrequently updated static content:
-
-    ```yaml
-    USE_CLIENT_CACHE: "yes"
-    CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|bmp|ico|svg|tif|gif|css|js|otf|ttf|eot|woff|woff2|pdf|xml|txt"
-    CLIENT_CACHE_CONTROL: "public, max-age=31536000, immutable"  # 1 year
-    CLIENT_CACHE_ETAG: "yes"
-    ```
-
-=== "Mixed Content Strategy"
-
-    For sites with a mix of frequently and infrequently updated content, consider using file versioning in your application and a configuration like this:
-
-    ```yaml
-    USE_CLIENT_CACHE: "yes"
-    CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|bmp|ico|svg|tif|gif|css|js|otf|ttf|eot|woff|woff2"
-    CLIENT_CACHE_CONTROL: "public, max-age=604800"  # 1 week
-    CLIENT_CACHE_ETAG: "yes"
     ```
 
 ## Country
@@ -2098,6 +2102,62 @@ Follow these steps to configure and use the Custom SSL certificate feature:
     CUSTOM_SSL_KEY_DATA: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSEV...base64 encoded key...Cg=="
     ```
 
+## Database
+
+STREAM support :white_check_mark:
+
+The Database plugin provides a robust database integration for BunkerWeb by enabling centralized storage and management of configuration data, logs, and other essential information.
+
+This core component supports multiple database engines, including SQLite, PostgreSQL, MySQL/MariaDB, and Oracle, allowing you to choose the database solution that best fits your environment and requirements.
+
+**How it works:**
+
+1. BunkerWeb connects to your configured database using the provided URI in the SQLAlchemy format.
+2. Critical configuration data, runtime information, and job logs are stored securely in the database.
+3. Automatic maintenance processes optimize your database by managing data growth and cleaning up excess records.
+4. For high-availability scenarios, you can configure a read-only database URI that serves both as a failover and as a method to offload read operations.
+5. Database operations are logged according to your specified log level, providing appropriate visibility into database interactions.
+
+### How to Use
+
+Follow these steps to configure and use the Database feature:
+
+1. **Choose a database engine:** Select from SQLite (default), PostgreSQL, MySQL/MariaDB, or Oracle based on your requirements.
+2. **Configure the database URI:** Set the `DATABASE_URI` to connect to your primary database using the SQLAlchemy format.
+3. **Optional read-only database:** For high-availability setups, configure a `DATABASE_URI_READONLY` as a fallback or for read operations.
+
+### Configuration Settings
+
+| Setting                         | Default                                   | Context | Multiple | Description                                                                                                           |
+| ------------------------------- | ----------------------------------------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | no       | **Database URI:** The primary database connection string in the SQLAlchemy format.                                    |
+| `DATABASE_URI_READONLY`         |                                           | global  | no       | **Read-Only Database URI:** Optional database for read-only operations or as a failover if the main database is down. |
+| `DATABASE_LOG_LEVEL`            | `warning`                                 | global  | no       | **Log Level:** The verbosity level for database logs. Options: `debug`, `info`, `warn`, `warning`, or `error`.        |
+| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global  | no       | **Maximum Job Runs:** The maximum number of job execution records to retain in the database before automatic cleanup. |
+| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global  | no       | **Session Retention:** The maximum age (in days) for UI user sessions before they are purged automatically.           |
+
+!!! tip "Database Selection"
+    - **SQLite** (default): Ideal for single-node deployments or testing environments due to its simplicity and file-based nature.
+    - **PostgreSQL**: Recommended for production environments with multiple BunkerWeb instances due to its robustness and concurrency support.
+    - **MySQL/MariaDB**: A good alternative to PostgreSQL with similar production-grade capabilities.
+    - **Oracle**: Suitable for enterprise environments where Oracle is already the standard database platform.
+
+!!! info "SQLAlchemy URI Format"
+    The database URI follows the SQLAlchemy format:
+
+    - SQLite: `sqlite:////path/to/database.sqlite3`
+    - PostgreSQL: `postgresql://username:password@hostname:port/database`
+    - MySQL/MariaDB: `mysql://username:password@hostname:port/database` or `mariadb://username:password@hostname:port/database`
+    - Oracle: `oracle://username:password@hostname:port/database`
+
+!!! warning "Database Maintenance"
+    The plugin automatically runs daily maintenance jobs:
+
+    - **Cleanup Excess Job Runs:** Purges job execution history beyond the `DATABASE_MAX_JOBS_RUNS` limit.
+    - **Cleanup Expired UI Sessions:** Removes UI user sessions older than `DATABASE_MAX_SESSION_AGE_DAYS`.
+
+    Together, these jobs prevent unbounded database growth while preserving useful operational history.
+
 ## DNSBL
 
 STREAM support :white_check_mark:
@@ -2210,62 +2270,6 @@ Follow these steps to configure and use the DNSBL feature:
     DNSBL_LIST: "zen.spamhaus.org"
     DNSBL_IGNORE_IP_URLS: "file:///etc/bunkerweb/dnsbl/ignore.txt file:///opt/data/allow-cidrs.txt"
     ```
-
-## Database
-
-STREAM support :white_check_mark:
-
-The Database plugin provides a robust database integration for BunkerWeb by enabling centralized storage and management of configuration data, logs, and other essential information.
-
-This core component supports multiple database engines, including SQLite, PostgreSQL, MySQL/MariaDB, and Oracle, allowing you to choose the database solution that best fits your environment and requirements.
-
-**How it works:**
-
-1. BunkerWeb connects to your configured database using the provided URI in the SQLAlchemy format.
-2. Critical configuration data, runtime information, and job logs are stored securely in the database.
-3. Automatic maintenance processes optimize your database by managing data growth and cleaning up excess records.
-4. For high-availability scenarios, you can configure a read-only database URI that serves both as a failover and as a method to offload read operations.
-5. Database operations are logged according to your specified log level, providing appropriate visibility into database interactions.
-
-### How to Use
-
-Follow these steps to configure and use the Database feature:
-
-1. **Choose a database engine:** Select from SQLite (default), PostgreSQL, MySQL/MariaDB, or Oracle based on your requirements.
-2. **Configure the database URI:** Set the `DATABASE_URI` to connect to your primary database using the SQLAlchemy format.
-3. **Optional read-only database:** For high-availability setups, configure a `DATABASE_URI_READONLY` as a fallback or for read operations.
-
-### Configuration Settings
-
-| Setting                         | Default                                   | Context | Multiple | Description                                                                                                           |
-| ------------------------------- | ----------------------------------------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | no       | **Database URI:** The primary database connection string in the SQLAlchemy format.                                    |
-| `DATABASE_URI_READONLY`         |                                           | global  | no       | **Read-Only Database URI:** Optional database for read-only operations or as a failover if the main database is down. |
-| `DATABASE_LOG_LEVEL`            | `warning`                                 | global  | no       | **Log Level:** The verbosity level for database logs. Options: `debug`, `info`, `warn`, `warning`, or `error`.        |
-| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global  | no       | **Maximum Job Runs:** The maximum number of job execution records to retain in the database before automatic cleanup. |
-| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global  | no       | **Session Retention:** The maximum age (in days) for UI user sessions before they are purged automatically.           |
-
-!!! tip "Database Selection"
-    - **SQLite** (default): Ideal for single-node deployments or testing environments due to its simplicity and file-based nature.
-    - **PostgreSQL**: Recommended for production environments with multiple BunkerWeb instances due to its robustness and concurrency support.
-    - **MySQL/MariaDB**: A good alternative to PostgreSQL with similar production-grade capabilities.
-    - **Oracle**: Suitable for enterprise environments where Oracle is already the standard database platform.
-
-!!! info "SQLAlchemy URI Format"
-    The database URI follows the SQLAlchemy format:
-
-    - SQLite: `sqlite:////path/to/database.sqlite3`
-    - PostgreSQL: `postgresql://username:password@hostname:port/database`
-    - MySQL/MariaDB: `mysql://username:password@hostname:port/database` or `mariadb://username:password@hostname:port/database`
-    - Oracle: `oracle://username:password@hostname:port/database`
-
-!!! warning "Database Maintenance"
-    The plugin automatically runs daily maintenance jobs:
-
-    - **Cleanup Excess Job Runs:** Purges job execution history beyond the `DATABASE_MAX_JOBS_RUNS` limit.
-    - **Cleanup Expired UI Sessions:** Removes UI user sessions older than `DATABASE_MAX_SESSION_AGE_DAYS`.
-
-    Together, these jobs prevent unbounded database growth while preserving useful operational history.
 
 ## Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -2514,6 +2518,113 @@ Example files that match the expected format:
 TrustedMonitor/\d+\.\d+
 ```
 
+## gRPC
+
+STREAM support :x:
+
+The gRPC plugin lets BunkerWeb proxy gRPC services through HTTP/2 using `grpc_pass`. It is designed for multisite setups where each virtual host can expose one or more gRPC backends under specific paths.
+
+!!! example "Experimental feature"
+    This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
+
+**How it works:**
+
+1. A client sends an HTTP/2 request to BunkerWeb.
+2. The gRPC plugin matches a configured `location` (`GRPC_URL`) and forwards the request to the configured upstream (`GRPC_HOST`) with `grpc_pass`.
+3. BunkerWeb adds forwarding headers and applies timeout / upstream retry settings.
+4. The upstream gRPC server replies and BunkerWeb relays the response back to the client.
+
+### How to Use
+
+1. **Enable the feature:** Set `USE_GRPC` to `yes`.
+2. **Configure upstream(s):** Set at least `GRPC_HOST` (and optionally `GRPC_HOST_2`, `GRPC_HOST_3`, ...).
+3. **Map path(s):** Set `GRPC_URL` for each upstream (and matching suffixed values for multiple entries).
+4. **Tune behavior:** Configure timeouts, retries, headers, and TLS SNI options if needed.
+
+### Configuration Settings
+
+| Setting                      | Default | Context   | Multiple | Description                                                                                         |
+| ---------------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------------------- |
+| `USE_GRPC`                   | `no`    | multisite | no       | **Enable gRPC:** Set to `yes` to enable gRPC proxying.                                              |
+| `GRPC_HOST`                  |         | multisite | yes      | **gRPC Upstream:** Value used by `grpc_pass` (for example `grpc://service:50051` or `grpcs://...`). |
+| `GRPC_URL`                   | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the gRPC upstream.                                   |
+| `GRPC_CUSTOM_HOST`           |         | multisite | no       | **Custom Host Header:** Overrides `Host` header sent upstream.                                      |
+| `GRPC_HEADERS`               |         | multisite | yes      | **Extra Upstream Headers:** Semicolon-separated list of `grpc_set_header` values.                   |
+| `GRPC_HIDE_HEADERS`          |         | multisite | yes      | **Hidden Response Headers:** Space-separated list of `grpc_hide_header` values.                     |
+| `GRPC_INTERCEPT_ERRORS`      | `yes`   | multisite | no       | **Intercept Errors:** Enables/disables `grpc_intercept_errors`.                                     |
+| `GRPC_CONNECT_TIMEOUT`       | `60s`   | multisite | yes      | **Connect Timeout:** Timeout for establishing connection to upstream.                               |
+| `GRPC_READ_TIMEOUT`          | `60s`   | multisite | yes      | **Read Timeout:** Timeout for reading from upstream.                                                |
+| `GRPC_SEND_TIMEOUT`          | `60s`   | multisite | yes      | **Send Timeout:** Timeout for sending to upstream.                                                  |
+| `GRPC_SOCKET_KEEPALIVE`      | `off`   | multisite | yes      | **Socket Keepalive:** Enables/disables upstream socket keepalive.                                   |
+| `GRPC_SSL_SNI`               | `no`    | multisite | no       | **SSL SNI:** Enables/disables SNI for TLS upstreams.                                                |
+| `GRPC_SSL_SNI_NAME`          |         | multisite | no       | **SSL SNI Name:** SNI name to send when `GRPC_SSL_SNI=yes`.                                         |
+| `GRPC_NEXT_UPSTREAM`         |         | multisite | yes      | **Next Upstream Conditions:** Value for `grpc_next_upstream`.                                       |
+| `GRPC_NEXT_UPSTREAM_TIMEOUT` |         | multisite | yes      | **Next Upstream Timeout:** Value for `grpc_next_upstream_timeout`.                                  |
+| `GRPC_NEXT_UPSTREAM_TRIES`   |         | multisite | yes      | **Next Upstream Tries:** Value for `grpc_next_upstream_tries`.                                      |
+| `GRPC_INCLUDES`              |         | multisite | yes      | **Additional Includes:** Space-separated include files added inside the gRPC `location` block.      |
+
+!!! warning "ModSecurity on gRPC Locations"
+    ModSecurity is currently disabled automatically inside gRPC `location` blocks generated by this plugin because ModSecurity does not reliably support gRPC traffic patterns.
+
+!!! warning "Long-Lived Streams and Core Timeouts"
+    Long-lived or streaming RPCs may require higher generic NGINX timeouts than the global defaults. Commonly tuned settings are `CLIENT_BODY_TIMEOUT` and `CLIENT_HEADER_TIMEOUT` in the General plugin settings.
+
+!!! tip "Multiple gRPC Backends"
+    Use suffixed settings for multiple routes:
+    - `GRPC_HOST`, `GRPC_URL`
+    - `GRPC_HOST_2`, `GRPC_URL_2`
+    - `GRPC_HOST_3`, `GRPC_URL_3`
+
+### Example Configurations
+
+=== "Basic gRPC Proxy"
+
+    ```yaml
+    USE_GRPC: "yes"
+    GRPC_HOST: "grpc://grpcbin:9000"
+    GRPC_URL: "/"
+    GRPC_CONNECT_TIMEOUT: "10s"
+    GRPC_READ_TIMEOUT: "300s"
+    GRPC_SEND_TIMEOUT: "300s"
+    ```
+
+=== "TLS Upstream (grpcs + SNI)"
+
+    ```yaml
+    USE_GRPC: "yes"
+    GRPC_HOST: "grpcs://internal-grpc.example.net:443"
+    GRPC_URL: "/"
+    GRPC_SSL_SNI: "yes"
+    GRPC_SSL_SNI_NAME: "internal-grpc.example.net"
+    ```
+
+=== "Multiple Paths / Backends"
+
+    ```yaml
+    USE_GRPC: "yes"
+
+    GRPC_HOST: "grpc://user-service:50051"
+    GRPC_URL: "/users.UserService/"
+
+    GRPC_HOST_2: "grpc://billing-service:50052"
+    GRPC_URL_2: "/billing.BillingService/"
+
+    GRPC_HOST_3: "grpc://inventory-service:50053"
+    GRPC_URL_3: "/inventory.InventoryService/"
+    ```
+
+=== "Headers and Retry Policy"
+
+    ```yaml
+    USE_GRPC: "yes"
+    GRPC_HOST: "grpc://grpcbin:9000"
+    GRPC_URL: "/"
+    GRPC_HEADERS: "x-request-source bunkerweb;x-env production"
+    GRPC_NEXT_UPSTREAM: "error timeout unavailable"
+    GRPC_NEXT_UPSTREAM_TIMEOUT: "15s"
+    GRPC_NEXT_UPSTREAM_TRIES: "3"
+    ```
+
 ## Gzip
 
 STREAM support :x:
@@ -2604,86 +2715,6 @@ Follow these steps to configure and use the GZIP compression feature:
     GZIP_MIN_LENGTH: "1000"
     GZIP_COMP_LEVEL: "4"
     GZIP_PROXIED: "any"
-    ```
-
-## HTML injection
-
-STREAM support :x:
-
-The HTML Injection plugin enables you to seamlessly add custom HTML code to your website's pages before either the closing `</body>` or `</head>` tags. This feature is particularly useful for adding analytics scripts, tracking pixels, custom JavaScript, CSS styles, or other third-party integrations without modifying your website's source code.
-
-**How it works:**
-
-1. When a page is served from your website, BunkerWeb examines the HTML response.
-2. If you've configured body injection, BunkerWeb inserts your custom HTML code just before the closing `</body>` tag.
-3. If you've configured head injection, BunkerWeb inserts your custom HTML code just before the closing `</head>` tag.
-4. The insertion happens automatically for all HTML pages served by your website.
-5. This allows you to add scripts, styles, or other elements without modifying your application's code.
-
-### How to Use
-
-Follow these steps to configure and use the HTML Injection feature:
-
-1. **Prepare your custom HTML:** Decide what HTML code you want to inject into your pages.
-2. **Choose injection locations:** Determine whether you need to inject code in the `<head>` section, the `<body>` section, or both.
-3. **Configure the settings:** Add your custom HTML to the appropriate settings (`INJECT_HEAD` and/or `INJECT_BODY`).
-4. **Let BunkerWeb handle the rest:** Once configured, the HTML will be automatically injected into all served HTML pages.
-
-### Configuration Settings
-
-| Setting       | Default | Context   | Multiple | Description                                                           |
-| ------------- | ------- | --------- | -------- | --------------------------------------------------------------------- |
-| `INJECT_HEAD` |         | multisite | no       | **Head HTML Code:** The HTML code to inject before the `</head>` tag. |
-| `INJECT_BODY` |         | multisite | no       | **Body HTML Code:** The HTML code to inject before the `</body>` tag. |
-
-!!! tip "Best Practices"
-    - For performance reasons, place JavaScript files at the end of the body to prevent render blocking.
-    - Place CSS and critical JavaScript in the head section to avoid a flash of unstyled content.
-    - Be careful with injected content that could potentially break your site's functionality.
-
-!!! info "Common Use Cases"
-    - Adding analytics scripts (like Google Analytics, Matomo)
-    - Integrating chat widgets or customer support tools
-    - Including tracking pixels for marketing campaigns
-    - Adding custom CSS styles or JavaScript functionality
-    - Including third-party libraries without modifying your application code
-
-### Example Configurations
-
-=== "Google Analytics"
-
-    Adding Google Analytics tracking to your website:
-
-    ```yaml
-    INJECT_HEAD: ""
-    INJECT_BODY: "<script async src=\"https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX\"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-XXXXXXXXXX');</script>"
-    ```
-
-=== "Custom Styles"
-
-    Adding custom CSS styles to your website:
-
-    ```yaml
-    INJECT_HEAD: "<style>body { font-family: 'Arial', sans-serif; } .custom-element { color: blue; }</style>"
-    INJECT_BODY: ""
-    ```
-
-=== "Multiple Integrations"
-
-    Adding both custom styles and JavaScript:
-
-    ```yaml
-    INJECT_HEAD: "<style>body { font-family: 'Arial', sans-serif; } .notification-banner { background: #f8f9fa; padding: 10px; text-align: center; }</style>"
-    INJECT_BODY: "<script src=\"https://cdn.example.com/js/widget.js\"></script><script>initializeWidget('your-api-key');</script>"
-    ```
-
-=== "Cookie Consent Banner"
-
-    Adding a simple cookie consent banner:
-
-    ```yaml
-    INJECT_HEAD: "<style>.cookie-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #f1f1f1; padding: 20px; text-align: center; z-index: 1000; } .cookie-banner button { background: #4CAF50; border: none; color: white; padding: 10px 20px; cursor: pointer; }</style>"
-    INJECT_BODY: "<div id=\"cookie-banner\" class=\"cookie-banner\">This website uses cookies to ensure you get the best experience. <button onclick=\"acceptCookies()\">Accept</button></div><script>function acceptCookies() { document.getElementById('cookie-banner').style.display = 'none'; localStorage.setItem('cookies-accepted', 'true'); } if(localStorage.getItem('cookies-accepted') === 'true') { document.getElementById('cookie-banner').style.display = 'none'; }</script>"
     ```
 
 ## Headers
@@ -2833,6 +2864,86 @@ Follow these steps to configure and use the Headers feature:
     CONTENT_SECURITY_POLICY_REPORT_ONLY: "yes"
     ```
 
+## HTML injection
+
+STREAM support :x:
+
+The HTML Injection plugin enables you to seamlessly add custom HTML code to your website's pages before either the closing `</body>` or `</head>` tags. This feature is particularly useful for adding analytics scripts, tracking pixels, custom JavaScript, CSS styles, or other third-party integrations without modifying your website's source code.
+
+**How it works:**
+
+1. When a page is served from your website, BunkerWeb examines the HTML response.
+2. If you've configured body injection, BunkerWeb inserts your custom HTML code just before the closing `</body>` tag.
+3. If you've configured head injection, BunkerWeb inserts your custom HTML code just before the closing `</head>` tag.
+4. The insertion happens automatically for all HTML pages served by your website.
+5. This allows you to add scripts, styles, or other elements without modifying your application's code.
+
+### How to Use
+
+Follow these steps to configure and use the HTML Injection feature:
+
+1. **Prepare your custom HTML:** Decide what HTML code you want to inject into your pages.
+2. **Choose injection locations:** Determine whether you need to inject code in the `<head>` section, the `<body>` section, or both.
+3. **Configure the settings:** Add your custom HTML to the appropriate settings (`INJECT_HEAD` and/or `INJECT_BODY`).
+4. **Let BunkerWeb handle the rest:** Once configured, the HTML will be automatically injected into all served HTML pages.
+
+### Configuration Settings
+
+| Setting       | Default | Context   | Multiple | Description                                                           |
+| ------------- | ------- | --------- | -------- | --------------------------------------------------------------------- |
+| `INJECT_HEAD` |         | multisite | no       | **Head HTML Code:** The HTML code to inject before the `</head>` tag. |
+| `INJECT_BODY` |         | multisite | no       | **Body HTML Code:** The HTML code to inject before the `</body>` tag. |
+
+!!! tip "Best Practices"
+    - For performance reasons, place JavaScript files at the end of the body to prevent render blocking.
+    - Place CSS and critical JavaScript in the head section to avoid a flash of unstyled content.
+    - Be careful with injected content that could potentially break your site's functionality.
+
+!!! info "Common Use Cases"
+    - Adding analytics scripts (like Google Analytics, Matomo)
+    - Integrating chat widgets or customer support tools
+    - Including tracking pixels for marketing campaigns
+    - Adding custom CSS styles or JavaScript functionality
+    - Including third-party libraries without modifying your application code
+
+### Example Configurations
+
+=== "Google Analytics"
+
+    Adding Google Analytics tracking to your website:
+
+    ```yaml
+    INJECT_HEAD: ""
+    INJECT_BODY: "<script async src=\"https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX\"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-XXXXXXXXXX');</script>"
+    ```
+
+=== "Custom Styles"
+
+    Adding custom CSS styles to your website:
+
+    ```yaml
+    INJECT_HEAD: "<style>body { font-family: 'Arial', sans-serif; } .custom-element { color: blue; }</style>"
+    INJECT_BODY: ""
+    ```
+
+=== "Multiple Integrations"
+
+    Adding both custom styles and JavaScript:
+
+    ```yaml
+    INJECT_HEAD: "<style>body { font-family: 'Arial', sans-serif; } .notification-banner { background: #f8f9fa; padding: 10px; text-align: center; }</style>"
+    INJECT_BODY: "<script src=\"https://cdn.example.com/js/widget.js\"></script><script>initializeWidget('your-api-key');</script>"
+    ```
+
+=== "Cookie Consent Banner"
+
+    Adding a simple cookie consent banner:
+
+    ```yaml
+    INJECT_HEAD: "<style>.cookie-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #f1f1f1; padding: 20px; text-align: center; z-index: 1000; } .cookie-banner button { background: #4CAF50; border: none; color: white; padding: 10px 20px; cursor: pointer; }</style>"
+    INJECT_BODY: "<div id=\"cookie-banner\" class=\"cookie-banner\">This website uses cookies to ensure you get the best experience. <button onclick=\"acceptCookies()\">Accept</button></div><script>function acceptCookies() { document.getElementById('cookie-banner').style.display = 'none'; localStorage.setItem('cookies-accepted', 'true'); } if(localStorage.getItem('cookies-accepted') === 'true') { document.getElementById('cookie-banner').style.display = 'none'; }</script>"
+    ```
+
 ## Let's Encrypt
 
 STREAM support :white_check_mark:
@@ -2927,6 +3038,7 @@ The Let's Encrypt plugin supports a wide range of DNS providers for DNS challeng
 | Provider          | Description      | Mandatory Settings                                                                                           | Optional Settings                                                                                                                                                                                                                                                        | Documentation                                                                                         |
 | ----------------- | ---------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
 | `bunny`           | bunny.net        | `api_key`                                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/mwt/certbot-dns-bunny/blob/main/README.rst)                        |
+| `cloudns`         | ClouDNS          | either `auth_id`, `sub_auth_id`, or `sub_auth_user`<br>and `auth_password`                                   |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/certbot/certbot/blob/master/certbot-dns-cloudns/README.rst)        |
 | `cloudflare`      | Cloudflare       | either `api_token`<br>or `email` and `api_key`                                                               |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-cloudflare.readthedocs.io/en/stable/)                             |
 | `desec`           | deSEC            | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/desec-io/certbot-dns-desec/blob/main/README.md)                    |
 | `digitalocean`    | DigitalOcean     | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-digitalocean.readthedocs.io/en/stable/)                           |
@@ -5173,99 +5285,6 @@ ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
 
 For more information, see the [robots.txt documentation](https://www.robotstxt.org/robotstxt.html).
 
-## SSL
-
-STREAM support :white_check_mark:
-
-The SSL plugin provides robust SSL/TLS encryption capabilities for your BunkerWeb-protected websites. This core component enables secure HTTPS connections by configuring and optimizing cryptographic protocols, ciphers, and related security settings to protect data in transit between clients and your web services.
-
-**How it works:**
-
-1. When a client initiates an HTTPS connection to your website, BunkerWeb handles the SSL/TLS handshake using your configured settings.
-2. The plugin enforces modern encryption protocols and strong cipher suites while disabling known vulnerable options.
-3. Optimized SSL session parameters improve connection performance without sacrificing security.
-4. Certificate presentation is configured according to best practices to ensure compatibility and security.
-
-!!! success "Security Benefits"
-    - **Data Protection:** Encrypts data in transit, preventing eavesdropping and man-in-the-middle attacks
-    - **Authentication:** Verifies the identity of your server to clients
-    - **Integrity:** Ensures data hasn't been tampered with during transmission
-    - **Modern Standards:** Configured for compliance with industry best practices and security standards
-
-### How to Use
-
-Follow these steps to configure and use the SSL feature:
-
-1. **Configure protocols:** Choose which SSL/TLS protocol versions to support using the `SSL_PROTOCOLS` setting.
-2. **Select cipher suites:** Specify the encryption strength using the `SSL_CIPHERS_LEVEL` setting or provide custom ciphers with `SSL_CIPHERS_CUSTOM`.
-3. **Configure HTTP to HTTPS redirection:** Set up automatic redirection using the `AUTO_REDIRECT_HTTP_TO_HTTPS` or `REDIRECT_HTTP_TO_HTTPS` settings.
-
-### Configuration Settings
-
-| Setting                       | Default           | Context   | Multiple | Description                                                                                                                        |
-| ----------------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `REDIRECT_HTTP_TO_HTTPS`      | `no`              | multisite | no       | **Redirect HTTP to HTTPS:** When set to `yes`, all HTTP requests are redirected to HTTPS.                                          |
-| `AUTO_REDIRECT_HTTP_TO_HTTPS` | `yes`             | multisite | no       | **Auto Redirect HTTP to HTTPS:** When set to `yes`, automatically redirects HTTP to HTTPS if HTTPS is detected.                    |
-| `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | multisite | no       | **SSL Protocols:** Space-separated list of SSL/TLS protocols to support.                                                           |
-| `SSL_CIPHERS_LEVEL`           | `modern`          | multisite | no       | **SSL Ciphers Level:** Preset security level for cipher suites (`modern`, `intermediate`, or `old`).                               |
-| `SSL_CIPHERS_CUSTOM`          |                   | multisite | no       | **Custom SSL Ciphers:** Colon-separated list of cipher suites to use for SSL/TLS connections (overrides level).                    |
-| `SSL_ECDH_CURVE`              | `auto`            | multisite | no       | **SSL ECDH Curves:** Colon-separated list of ECDH curves (TLS groups) or `auto` for smart selection (prefers PQC on OpenSSL 3.5+). |
-| `SSL_SESSION_CACHE_SIZE`      | `10m`             | multisite | no       | **SSL Session Cache Size:** Size of the SSL session cache (e.g., `10m`, `512k`). Set to `off` or `none` to disable.                |
-
-!!! tip "SSL Labs Testing"
-    After configuring your SSL settings, use the [Qualys SSL Labs Server Test](https://www.ssllabs.com/ssltest/) to verify your configuration and check for potential security issues. A proper BunkerWeb SSL configuration should achieve an A+ rating.
-
-!!! warning "Protocol Selection"
-    Support for older protocols like SSLv3, TLSv1.0, and TLSv1.1 is intentionally disabled by default due to known vulnerabilities. Only enable these protocols if you absolutely need to support legacy clients and understand the security implications of doing so.
-
-### Example Configurations
-
-=== "Modern Security (Default)"
-
-    The default configuration that provides strong security while maintaining compatibility with modern browsers:
-
-    ```yaml
-    LISTEN_HTTPS: "yes"
-    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
-    SSL_CIPHERS_LEVEL: "modern"
-    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
-    REDIRECT_HTTP_TO_HTTPS: "no"
-    ```
-
-=== "Maximum Security"
-
-    Configuration focused on maximum security, potentially with reduced compatibility for older clients:
-
-    ```yaml
-    LISTEN_HTTPS: "yes"
-    SSL_PROTOCOLS: "TLSv1.3"
-    SSL_CIPHERS_LEVEL: "modern"
-    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
-    REDIRECT_HTTP_TO_HTTPS: "yes"
-    ```
-
-=== "Legacy Compatibility"
-
-    Configuration with broader compatibility for older clients (use only if necessary):
-
-    ```yaml
-    LISTEN_HTTPS: "yes"
-    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
-    SSL_CIPHERS_LEVEL: "old"
-    AUTO_REDIRECT_HTTP_TO_HTTPS: "no"
-    ```
-
-=== "Custom Ciphers"
-
-    Configuration using custom cipher specification:
-
-    ```yaml
-    LISTEN_HTTPS: "yes"
-    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
-    SSL_CIPHERS_CUSTOM: "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305"
-    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
-    ```
-
 ## Security.txt
 
 STREAM support :white_check_mark:
@@ -5543,6 +5562,99 @@ Follow these steps to configure and use the Sessions feature:
     SESSIONS_ABSOLUTE_TIMEOUT: "604800"  # 7 days
     ```
 
+## SSL
+
+STREAM support :white_check_mark:
+
+The SSL plugin provides robust SSL/TLS encryption capabilities for your BunkerWeb-protected websites. This core component enables secure HTTPS connections by configuring and optimizing cryptographic protocols, ciphers, and related security settings to protect data in transit between clients and your web services.
+
+**How it works:**
+
+1. When a client initiates an HTTPS connection to your website, BunkerWeb handles the SSL/TLS handshake using your configured settings.
+2. The plugin enforces modern encryption protocols and strong cipher suites while disabling known vulnerable options.
+3. Optimized SSL session parameters improve connection performance without sacrificing security.
+4. Certificate presentation is configured according to best practices to ensure compatibility and security.
+
+!!! success "Security Benefits"
+    - **Data Protection:** Encrypts data in transit, preventing eavesdropping and man-in-the-middle attacks
+    - **Authentication:** Verifies the identity of your server to clients
+    - **Integrity:** Ensures data hasn't been tampered with during transmission
+    - **Modern Standards:** Configured for compliance with industry best practices and security standards
+
+### How to Use
+
+Follow these steps to configure and use the SSL feature:
+
+1. **Configure protocols:** Choose which SSL/TLS protocol versions to support using the `SSL_PROTOCOLS` setting.
+2. **Select cipher suites:** Specify the encryption strength using the `SSL_CIPHERS_LEVEL` setting or provide custom ciphers with `SSL_CIPHERS_CUSTOM`.
+3. **Configure HTTP to HTTPS redirection:** Set up automatic redirection using the `AUTO_REDIRECT_HTTP_TO_HTTPS` or `REDIRECT_HTTP_TO_HTTPS` settings.
+
+### Configuration Settings
+
+| Setting                       | Default           | Context   | Multiple | Description                                                                                                                        |
+| ----------------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `REDIRECT_HTTP_TO_HTTPS`      | `no`              | multisite | no       | **Redirect HTTP to HTTPS:** When set to `yes`, all HTTP requests are redirected to HTTPS.                                          |
+| `AUTO_REDIRECT_HTTP_TO_HTTPS` | `yes`             | multisite | no       | **Auto Redirect HTTP to HTTPS:** When set to `yes`, automatically redirects HTTP to HTTPS if HTTPS is detected.                    |
+| `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | multisite | no       | **SSL Protocols:** Space-separated list of SSL/TLS protocols to support.                                                           |
+| `SSL_CIPHERS_LEVEL`           | `modern`          | multisite | no       | **SSL Ciphers Level:** Preset security level for cipher suites (`modern`, `intermediate`, or `old`).                               |
+| `SSL_CIPHERS_CUSTOM`          |                   | multisite | no       | **Custom SSL Ciphers:** Colon-separated list of cipher suites to use for SSL/TLS connections (overrides level).                    |
+| `SSL_ECDH_CURVE`              | `auto`            | multisite | no       | **SSL ECDH Curves:** Colon-separated list of ECDH curves (TLS groups) or `auto` for smart selection (prefers PQC on OpenSSL 3.5+). |
+| `SSL_SESSION_CACHE_SIZE`      | `10m`             | multisite | no       | **SSL Session Cache Size:** Size of the SSL session cache (e.g., `10m`, `512k`). Set to `off` or `none` to disable.                |
+
+!!! tip "SSL Labs Testing"
+    After configuring your SSL settings, use the [Qualys SSL Labs Server Test](https://www.ssllabs.com/ssltest/) to verify your configuration and check for potential security issues. A proper BunkerWeb SSL configuration should achieve an A+ rating.
+
+!!! warning "Protocol Selection"
+    Support for older protocols like SSLv3, TLSv1.0, and TLSv1.1 is intentionally disabled by default due to known vulnerabilities. Only enable these protocols if you absolutely need to support legacy clients and understand the security implications of doing so.
+
+### Example Configurations
+
+=== "Modern Security (Default)"
+
+    The default configuration that provides strong security while maintaining compatibility with modern browsers:
+
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
+    SSL_CIPHERS_LEVEL: "modern"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
+    REDIRECT_HTTP_TO_HTTPS: "no"
+    ```
+
+=== "Maximum Security"
+
+    Configuration focused on maximum security, potentially with reduced compatibility for older clients:
+
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.3"
+    SSL_CIPHERS_LEVEL: "modern"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
+    REDIRECT_HTTP_TO_HTTPS: "yes"
+    ```
+
+=== "Legacy Compatibility"
+
+    Configuration with broader compatibility for older clients (use only if necessary):
+
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
+    SSL_CIPHERS_LEVEL: "old"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "no"
+    ```
+
+=== "Custom Ciphers"
+
+    Configuration using custom cipher specification:
+
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
+    SSL_CIPHERS_CUSTOM: "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
+    ```
+
 ## UI
 
 STREAM support :x:
@@ -5553,6 +5665,30 @@ Integrate easily the BunkerWeb UI.
 | --------- | ------- | --------- | -------- | -------------------------------------------- |
 | `USE_UI`  | `no`    | multisite | no       | Use UI                                       |
 | `UI_HOST` |         | global    | no       | Address of the web UI used for initial setup |
+
+## UI Single Sign-On <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :x:
+
+Enable SSO authentication for the BunkerWeb web interface by reading headers set by upstream authentication proxies (Authentik, Authelia, Keycloak, Traefik Forward Auth, etc.)
+
+| Setting                       | Default         | Context | Multiple | Description                                                                                      |
+| ----------------------------- | --------------- | ------- | -------- | ------------------------------------------------------------------------------------------------ |
+| `USE_UI_SSO`                  | `no`            | global  | no       | Enable or disable UI Single Sign-On authentication for the web interface                         |
+| `UI_SSO_HEADER_USERNAME`      | `X-User`        | global  | no       | HTTP header containing the authenticated username                                                |
+| `UI_SSO_HEADER_EMAIL`         | `X-Email`       | global  | no       | HTTP header containing the user's email address                                                  |
+| `UI_SSO_HEADER_GROUPS`        | `X-Groups`      | global  | no       | HTTP header containing the user's groups (comma or space separated)                              |
+| `UI_SSO_HEADER_NAME`          | `X-Name`        | global  | no       | HTTP header containing the user's display name                                                   |
+| `UI_SSO_TRUSTED_IPS`          | `127.0.0.1,::1` | global  | no       | Comma-separated list of trusted IP addresses or CIDR ranges that are allowed to send SSO headers |
+| `UI_SSO_AUTO_CREATE_USERS`    | `yes`           | global  | no       | Automatically create new users when they authenticate via SSO for the first time                 |
+| `UI_SSO_DEFAULT_ROLE`         | `reader`        | global  | no       | Default role assigned to new SSO users when no group mapping matches                             |
+| `UI_SSO_GROUP_ADMIN`          |                 | global  | no       | Group name that grants admin role (highest priority)                                             |
+| `UI_SSO_GROUP_WRITER`         |                 | global  | no       | Group name that grants writer role                                                               |
+| `UI_SSO_GROUP_READER`         |                 | global  | no       | Group name that grants reader role                                                               |
+| `UI_SSO_FALLBACK_TO_LOGIN`    | `yes`           | global  | no       | Allow users to fall back to normal login when SSO headers are not present                        |
+| `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`           | global  | no       | Update user information (email, role) from SSO headers on each login                             |
+| `UI_SSO_LOGOUT_REDIRECT_URL`  |                 | global  | no       | URL to redirect users to after logout (e.g., SSO provider logout endpoint)                       |
 
 ## User Manager <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

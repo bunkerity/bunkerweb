@@ -92,6 +92,42 @@
     "type": "multivalue",
     "separator": " "
   },
+  "CLIENT_BODY_TIMEOUT": {
+    "context": "global",
+    "default": "10s",
+    "help": "Timeout for reading the client request body.",
+    "id": "client-body-timeout",
+    "label": "Client body timeout",
+    "regex": "^\\d+(ms?|[shdwMy])?$",
+    "type": "text"
+  },
+  "CLIENT_HEADER_TIMEOUT": {
+    "context": "global",
+    "default": "10s",
+    "help": "Timeout for reading the client request header.",
+    "id": "client-header-timeout",
+    "label": "Client header timeout",
+    "regex": "^\\d+(ms?|[shdwMy])?$",
+    "type": "text"
+  },
+  "KEEPALIVE_TIMEOUT": {
+    "context": "global",
+    "default": "15s",
+    "help": "Timeout for keep-alive client connections.",
+    "id": "keepalive-timeout",
+    "label": "Keepalive timeout",
+    "regex": "^\\d+(ms?|[shdwMy])?$",
+    "type": "text"
+  },
+  "SEND_TIMEOUT": {
+    "context": "global",
+    "default": "10s",
+    "help": "Timeout for transmitting a response to the client.",
+    "id": "send-timeout",
+    "label": "Send timeout",
+    "regex": "^\\d+(ms?|[shdwMy])?$",
+    "type": "text"
+  },
   "WORKERLOCK_MEMORY_SIZE": {
     "context": "global",
     "default": "48k",

@@ -2742,7 +2742,9 @@ autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/conce
 
     如果你使用 Kubernetes Gateway API，请设置 `KUBERNETES_MODE=yes` 和 `KUBERNETES_GATEWAY_MODE=yes`。
 
-    控制器将监控 `Gateway`、`HTTPRoute`、`TLSRoute`、`TCPRoute` 和 `UDPRoute` 资源，而不是 `Ingress` 对象。你可以通过 `KUBERNETES_GATEWAY_CLASS` 限制处理范围，并选择 `KUBERNETES_GATEWAY_API_VERSION`（`v1`、`v1beta1`、`v1beta2`、`v1alpha2` 或 `v1alpha1`）。
+    控制器将监控 `Gateway`、`HTTPRoute`、`GRPCRoute`、`TLSRoute`、`TCPRoute` 和 `UDPRoute` 资源，而不是 `Ingress` 对象。你可以通过 `KUBERNETES_GATEWAY_CLASS` 限制处理范围，并选择 `KUBERNETES_GATEWAY_API_VERSION`（`v1`、`v1beta1`、`v1beta2`、`v1alpha2` 或 `v1alpha1`）。
+
+    BunkerWeb 对 `GRPCRoute` 的支持目前为 **实验性**。
 
     如果你的 Service 名称不是 `bunkerweb`，请设置 `BUNKERWEB_SERVICE_NAME` 以便状态补丁读取正确的 Service。
 
@@ -3326,28 +3328,28 @@ spec:
 
 ### Gateway 资源
 
-当使用 Gateway API 模式时，你可以声明 `Gateway`、`HTTPRoute`、`TLSRoute`、`TCPRoute` 与 `UDPRoute` 资源。
-在 `HTTPRoute` 上通过 `bunkerweb.io/<SETTING>` 注解提供 BunkerWeb 配置；如需限定到某个主机，
+当使用 Gateway API 模式时，你可以声明 `Gateway`、`HTTPRoute`、`GRPCRoute`、`TLSRoute`、`TCPRoute` 与 `UDPRoute` 资源。
+在 `HTTPRoute`/`GRPCRoute` 上通过 `bunkerweb.io/<SETTING>` 注解提供 BunkerWeb 配置；如需限定到某个主机，
 使用 `bunkerweb.io/<hostname>_<SETTING>`。`hostnames` 字段用于驱动服务器名称。对于 `TCPRoute`/`UDPRoute`（以及没有 `hostnames` 的 `TLSRoute`），BunkerWeb 会生成类似 `<route>.<namespace>.<protocol>` 的服务器名称。参见 [Gateway 类](#gateway-class)。
-`Gateway` 上的注解会应用到其挂载的所有路由，而 `HTTPRoute` 上的注解仅作用于该路由。
+`Gateway` 上的注解会应用到其挂载的所有路由，而 `HTTPRoute`/`GRPCRoute` 上的注解仅作用于该路由。
 你也可以用 `bunkerweb.io/<hostname>_<SETTING>` 将 Gateway 注解限定到某个服务器名；只有当该路由/服务器名存在时才会生效。
 
 #### 支持的资源
 
-- 资源：`HTTPRoute`、`TLSRoute`、`TCPRoute`、`UDPRoute`（不支持 `GRPCRoute`）。
+- 资源：`HTTPRoute`、`GRPCRoute`（实验性）、`TLSRoute`、`TCPRoute`、`UDPRoute`。
 - 规则：`TLSRoute`、`TCPRoute` 和 `UDPRoute` 只使用第一条规则。
 - 后端：仅 `Service`，每条规则只取第一个 `backendRef`。
 
 #### 协议与 TLS
 
-- Listener 协议：`HTTP`/`HTTPS` 用于 `HTTPRoute`，`TLS` 用于 `TLSRoute`，`TCP` 用于 `TCPRoute`，`UDP` 用于 `UDPRoute`。
+- Listener 协议：`HTTP`/`HTTPS` 用于 `HTTPRoute` 和 `GRPCRoute`，`TLS` 用于 `TLSRoute`，`TCP` 用于 `TCPRoute`，`UDP` 用于 `UDPRoute`。
 - TLS：通过 listener 的 `certificateRefs`，仅 `HTTPS` 或 `TLS` + `mode: Terminate`（不支持 Passthrough 终止）。`TLSRoute` 运行在 stream 模式。
 
 !!! tip "Stream 路由的服务器名称"
     对于 `TLSRoute`、`TCPRoute` 和 `UDPRoute`，你可以通过设置 `bunkerweb.io/SERVER_NAME` 来覆盖生成的服务器名称。
 
-!!! note "Experimental Channel（stream 路由）"
-    如果你打算使用 `TLSRoute`、`TCPRoute` 或 `UDPRoute`，请安装 Experimental Channel CRD： https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel
+!!! note "Experimental Channel（高级路由）"
+    如果你打算使用 `GRPCRoute`、`TLSRoute`、`TCPRoute` 或 `UDPRoute`，请安装 Experimental Channel CRD： https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel
 
 !!! info "TLS 支持"
     `HTTPRoute` 使用 `HTTPS` 或 `TLS` + `mode: Terminate` 时，TLS 终止通过 `Gateway` 的 listeners 及其 `certificateRefs`（TLS secrets）完成。`TLSRoute` 运行在 stream 模式。
