@@ -39,3 +39,5 @@ pydantic==2.12.5
 python-magic==0.4.27
 requests==2.32.5
 schedule==1.2.2
+
+setuptools<81
