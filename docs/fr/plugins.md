@@ -8,12 +8,12 @@ Voici la liste des plugins "officiels" que nous maintenons (voir le dépôt [bun
 
 |       Nom       | Version | Description                                                                                                                                             |                                                Lien                                                 |
 | :-------------: | :-----: | :------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------: |
-|   **ClamAV**    |   1.9   | Analyse automatiquement les fichiers téléchargés avec le moteur antivirus ClamAV et rejette la demande lorsqu'un fichier est détecté comme malveillant. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
-|   **Coraza**    |   1.9   | Inspectez les requêtes à l'aide du WAF Coraza (alternative à ModSecurity).                                                                              |     [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)     |
-|  **Discorde**   |   1.9   | Envoyez des notifications de sécurité à un canal Discord à l'aide d'un Webhook.                                                                         |    [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)    |
-|    **Lâche**    |   1.9   | Envoyez des notifications de sécurité à un canal Slack à l'aide d'un Webhook.                                                                           |      [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)      |
-| **VirusTotal**  |   1.9   | Analyse automatiquement les fichiers téléchargés à l'aide de l'API VirusTotal et rejette la demande lorsqu'un fichier est détecté comme malveillant.    | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
-| **Crochet Web** |   1.9   | Envoyez des notifications de sécurité à un point de terminaison HTTP personnalisé à l'aide d'un Webhook.                                                |    [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)    |
+|   **ClamAV**    |   1.10  | Analyse automatiquement les fichiers téléchargés avec le moteur antivirus ClamAV et rejette la demande lorsqu'un fichier est détecté comme malveillant. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
+|   **Coraza**    |   1.10  | Inspectez les requêtes à l'aide du WAF Coraza (alternative à ModSecurity).                                                                              |     [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)     |
+|  **Discorde**   |   1.10  | Envoyez des notifications de sécurité à un canal Discord à l'aide d'un Webhook.                                                                         |    [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)    |
+|    **Lâche**    |   1.10  | Envoyez des notifications de sécurité à un canal Slack à l'aide d'un Webhook.                                                                           |      [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)      |
+| **VirusTotal**  |   1.10  | Analyse automatiquement les fichiers téléchargés à l'aide de l'API VirusTotal et rejette la demande lorsqu'un fichier est détecté comme malveillant.    | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
+| **Crochet Web** |   1.10  | Envoyez des notifications de sécurité à un point de terminaison HTTP personnalisé à l'aide d'un Webhook.                                                |    [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)    |
 
 ## Comment utiliser un plugin
 
@@ -21,7 +21,7 @@ Voici la liste des plugins "officiels" que nous maintenons (voir le dépôt [bun
 
 Si vous souhaitez installer rapidement des plugins externes, vous pouvez utiliser ce `EXTERNAL_PLUGIN_URLS` paramètre. Il prend une liste d'URL séparées par des espaces, chacune pointant vers une archive compressée (format zip) contenant un ou plusieurs plugins.
 
-Vous pouvez utiliser la valeur suivante si vous souhaitez installer automatiquement les plugins officiels : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.9.zip`
+Vous pouvez utiliser la valeur suivante si vous souhaitez installer automatiquement les plugins officiels : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.10.zip`
 
 ### Manuelle
 
