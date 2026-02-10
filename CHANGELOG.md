@@ -4,6 +4,7 @@
 
 - [FEATURE] Add ClouDNS DNS provider support to Let's Encrypt plugin
 - [UI] Fix status for PHP plugin to not always be shown as activated
+- [UI] Fix dark theme background for datatables actions
 
 ## v1.6.8 - 2026/02/06
 

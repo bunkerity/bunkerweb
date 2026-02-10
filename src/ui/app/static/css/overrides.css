@@ -1331,7 +1331,12 @@ a.courier-prime:hover {
 }
 
 table.table.dataTable > tbody > tr.selected > * {
-  box-shadow: inset 0 0 0 9999px rgb(var(--bs-primary-rgb), 0.1) !important;
+  box-shadow: inset 0 0 0 9999px rgb(var(--bs-primary-rgb), 0.06) !important;
+  color: var(--bs-body-color) !important;
+}
+
+table.table.dataTable > tbody > tr.selected a {
+  color: var(--bs-link-color) !important;
 }
 
 div.dtsp-panesContainer {
@@ -2268,6 +2273,42 @@ span.cursor-pointer ~ .reset-setting {
 
 .dark-style .dropdown-menu {
   --bs-dropdown-bg: #0c283a;
+}
+
+.dark-style div.dt-button-collection,
+.dark-style .dt-button-collection.dropdown-menu,
+[data-bs-theme="dark"] div.dt-button-collection,
+[data-bs-theme="dark"] .dt-button-collection.dropdown-menu {
+  background-color: #0c283a !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  color: #fff !important;
+}
+
+.dark-style div.dt-button-collection .dt-button,
+.dark-style div.dt-button-collection .dropdown-item,
+[data-bs-theme="dark"] div.dt-button-collection .dt-button,
+[data-bs-theme="dark"] div.dt-button-collection .dropdown-item {
+  color: #fff !important;
+}
+
+.dark-style div.dt-button-collection .dt-button:not(.disabled):not(:disabled):hover,
+.dark-style div.dt-button-collection .dropdown-item:not(.disabled):not(:disabled):hover,
+[data-bs-theme="dark"] div.dt-button-collection .dt-button:not(.disabled):not(:disabled):hover,
+[data-bs-theme="dark"] div.dt-button-collection .dropdown-item:not(.disabled):not(:disabled):hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-style div.dt-button-collection .dt-button.disabled,
+.dark-style div.dt-button-collection .dt-button:disabled,
+.dark-style div.dt-button-collection .dropdown-item.disabled,
+[data-bs-theme="dark"] div.dt-button-collection .dt-button.disabled,
+[data-bs-theme="dark"] div.dt-button-collection .dt-button:disabled,
+[data-bs-theme="dark"] div.dt-button-collection .dropdown-item.disabled {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+div.dt-button-background {
+  background: rgba(0, 0, 0, 0.45) !important;
 }
 
 .dark-style .offcanvas,
