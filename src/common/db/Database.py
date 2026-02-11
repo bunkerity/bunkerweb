@@ -3924,9 +3924,9 @@ class Database:
                 query = query.filter(Plugins.type.in_(["external", "ui"]))
             elif _type != "all":
                 query = query.filter_by(type=_type)
+            query = query.order_by(Plugins.id.asc())
 
-            plugins_list = query.all()
-            plugin_ids = [plugin.id for plugin in plugins_list]
+            plugin_ids = [plugin.id for plugin in query]
 
             # Pre-fetch plugin pages.
             pages = session.query(Plugin_pages.plugin_id).filter(Plugin_pages.plugin_id.in_(plugin_ids)).all()
@@ -3966,7 +3966,7 @@ class Database:
 
             # Assemble the plugin data.
             result = []
-            for plugin in plugins_list:
+            for plugin in query:
                 plugin_data: Dict[str, Any] = {
                     "id": plugin.id,
                     "stream": plugin.stream,

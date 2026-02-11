@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from concurrent.futures import ThreadPoolExecutor
-from operator import itemgetter
 from os import getenv, sep
 from flask import flash
 from json import loads as json_loads
@@ -72,7 +71,6 @@ class Config:
 
     def get_plugins(self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False) -> dict:
         db_plugins = self.__db.get_plugins(_type=_type, with_data=with_data)
-        db_plugins.sort(key=itemgetter("name"))
 
         plugins = {"general": {}}
 
