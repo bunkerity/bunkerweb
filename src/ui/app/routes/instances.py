@@ -7,7 +7,7 @@ from flask import Blueprint, jsonify, redirect, render_template, request, url_fo
 from flask_login import login_required
 
 from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS, CONFIG_TASKS_EXECUTOR, DATA, DB
-from app.utils import flash
+from app.utils import flash, is_ui_api_method
 
 from app.models.instance import Instance
 from app.routes.utils import handle_error, verify_data_in_form
@@ -157,20 +157,23 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
         return jsonify({"succeed": succeed, "failed": failed}), 200
     elif action == "delete":
         delete_instances = set()
-        non_ui_instances = set()
+        non_deletable_instances = set()
         for instance in DB.get_instances():
             if instance["hostname"] in instances:
-                if instance["method"] != "ui":
-                    non_ui_instances.add(instance["hostname"])
+                if not is_ui_api_method(instance["method"]):
+                    non_deletable_instances.add(instance["hostname"])
                     continue
                 delete_instances.add(instance["hostname"])
 
-        for non_ui_instance in non_ui_instances:
-            flash(f"Instance {non_ui_instance} is not a UI instance and will not be deleted.", "error")
+        for non_deletable_instance in non_deletable_instances:
+            flash(f"Instance {non_deletable_instance} is not a UI/API instance and will not be deleted.", "error")
 
         if not delete_instances:
             return handle_error(
-                f"{'All selected instances' if len(delete_instances) > 1 else 'Selected instance'} could not be found or {'are not UI instances' if len(delete_instances) > 1 else 'is not an UI instance'}.",
+                (
+                    f"{'All selected instances' if len(instances) > 1 else 'Selected instance'} could not be found or "
+                    f"{'are not UI/API instances' if len(instances) > 1 else 'is not a UI/API instance'}."
+                ),
                 "instances",
                 True,
             )

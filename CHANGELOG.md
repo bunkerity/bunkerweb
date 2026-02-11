@@ -9,6 +9,7 @@
 - [AUTOCONF] Add experimental support for GRPCRoute in the Kubernetes integration to allow routing gRPC traffic based on Kubernetes Gateway API resources.
 - [UI] Fix status for PHP plugin to not always be shown as activated
 - [UI] Fix dark theme background for datatables actions
+- [UI] Make it possible to edit settings with the `wizard` method in the web UI
 
 ## v1.6.8 - 2026/02/06
 
