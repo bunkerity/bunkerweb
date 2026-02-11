@@ -4264,7 +4264,9 @@ Options fréquentes de durcissement / tuning :
 
 ## OpenAPI Validator <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
-SUPPORT STREAM : :x:
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/3oZOO1XdSlc" title="OpenAPI Validator" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
 
 Le plugin **OpenAPI Validator** applique votre contrat d'API en validant les requêtes entrantes par rapport à une spécification OpenAPI / Swagger. Il s'assure que le chemin demandé existe, que la méthode HTTP est autorisée et valide éventuellement les paramètres de requête, d'en-tête, de cookie et de chemin par rapport à leurs définitions de schéma.
 
@@ -4285,16 +4287,16 @@ Le plugin **OpenAPI Validator** applique votre contrat d'API en validant les req
 
 ### Configuration
 
-| Paramètre                    | Défaut                               | Contexte  | Multiple | Description                                                               |
-| ---------------------------- | ------------------------------------ | --------- | -------- | ------------------------------------------------------------------------- |
-| `USE_OPENAPI_VALIDATOR`      | `no`                                 | multisite | non       | Activer la validation des routes OpenAPI pour ce site.                    |
-| `OPENAPI_SPEC`               |                                      | multisite | non       | Chemin absolu ou URL HTTP(S) vers le document OpenAPI au format JSON/YAML. |
-| `OPENAPI_BASE_PATH`          |                                      | multisite | non       | Préfixe de chemin de base optionnel à ajouter à chaque chemin de la spécification. |
-| `OPENAPI_ALLOW_UNSPECIFIED`  | `no`                                 | multisite | non       | Autoriser les requêtes vers des chemins non listés dans la spécification.  |
-| `OPENAPI_ALLOW_INSECURE_URL` | `no`                                 | multisite | non       | Autoriser la récupération de la spécification OpenAPI via HTTP simple (non recommandé). |
-| `OPENAPI_IGNORE_URLS`        | `^/docs$ ^/redoc$ ^/openapi\\.json$` | multisite | non       | Liste d'expressions régulières d'URL séparées par des espaces pour contourner la validation OpenAPI. |
-| `OPENAPI_MAX_SPEC_SIZE`      | `2M`                                 | global    | non       | Taille maximale autorisée du document OpenAPI (accepte les suffixes k/M/G). |
-| `OPENAPI_VALIDATE_PARAMS`    | `yes`                                | multisite | non       | Valider les paramètres de requête, d'en-tête, de cookie et de chemin par rapport à la spécification. |
+| Paramètre                    | Défaut                               | Contexte  | Multiple | Description                                                                                          |
+| ---------------------------- | ------------------------------------ | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `USE_OPENAPI_VALIDATOR`      | `no`                                 | multisite | non      | Activer la validation des routes OpenAPI pour ce site.                                               |
+| `OPENAPI_SPEC`               |                                      | multisite | non      | Chemin absolu ou URL HTTP(S) vers le document OpenAPI au format JSON/YAML.                           |
+| `OPENAPI_BASE_PATH`          |                                      | multisite | non      | Préfixe de chemin de base optionnel à ajouter à chaque chemin de la spécification.                   |
+| `OPENAPI_ALLOW_UNSPECIFIED`  | `no`                                 | multisite | non      | Autoriser les requêtes vers des chemins non listés dans la spécification.                            |
+| `OPENAPI_ALLOW_INSECURE_URL` | `no`                                 | multisite | non      | Autoriser la récupération de la spécification OpenAPI via HTTP simple (non recommandé).              |
+| `OPENAPI_IGNORE_URLS`        | `^/docs$ ^/redoc$ ^/openapi\\.json$` | multisite | non      | Liste d'expressions régulières d'URL séparées par des espaces pour contourner la validation OpenAPI. |
+| `OPENAPI_MAX_SPEC_SIZE`      | `2M`                                 | global    | non      | Taille maximale autorisée du document OpenAPI (accepte les suffixes k/M/G).                          |
+| `OPENAPI_VALIDATE_PARAMS`    | `yes`                                | multisite | non      | Valider les paramètres de requête, d'en-tête, de cookie et de chemin par rapport à la spécification. |
 
 ### Notes de comportement
 

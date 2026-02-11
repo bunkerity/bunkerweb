@@ -4265,7 +4265,9 @@ Opciones comunes de hardening/tuning:
 
 ## OpenAPI Validator <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
-SOPORTE STREAM: :x:
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/3oZOO1XdSlc" title="OpenAPI Validator" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
 
 El plugin **OpenAPI Validator** aplica su contrato de API validando las solicitudes entrantes contra una especificación OpenAPI / Swagger. Asegura que la ruta solicitada exista, que el método HTTP esté permitido y, opcionalmente, valida los parámetros de consulta, cabecera, cookie y ruta contra sus definiciones de esquema.
 
@@ -4286,16 +4288,16 @@ El plugin **OpenAPI Validator** aplica su contrato de API validando las solicitu
 
 ### Configuración
 
-| Ajuste                       | Por defecto                          | Contexto  | Múltiple | Descripción                                                               |
-| ---------------------------- | ------------------------------------ | --------- | -------- | ------------------------------------------------------------------------- |
-| `USE_OPENAPI_VALIDATOR`      | `no`                                 | multisite | no       | Habilita la validación de rutas OpenAPI para este sitio.                  |
-| `OPENAPI_SPEC`               |                                      | multisite | no       | Ruta absoluta o URL HTTP(S) al documento OpenAPI en formato JSON/YAML.    |
-| `OPENAPI_BASE_PATH`          |                                      | multisite | no       | Prefijo de ruta base opcional para anteponer a cada ruta en la especificación. |
-| `OPENAPI_ALLOW_UNSPECIFIED`  | `no`                                 | multisite | no       | Permite solicitudes a rutas no listadas en la especificación.             |
+| Ajuste                       | Por defecto                          | Contexto  | Múltiple | Descripción                                                                         |
+| ---------------------------- | ------------------------------------ | --------- | -------- | ----------------------------------------------------------------------------------- |
+| `USE_OPENAPI_VALIDATOR`      | `no`                                 | multisite | no       | Habilita la validación de rutas OpenAPI para este sitio.                            |
+| `OPENAPI_SPEC`               |                                      | multisite | no       | Ruta absoluta o URL HTTP(S) al documento OpenAPI en formato JSON/YAML.              |
+| `OPENAPI_BASE_PATH`          |                                      | multisite | no       | Prefijo de ruta base opcional para anteponer a cada ruta en la especificación.      |
+| `OPENAPI_ALLOW_UNSPECIFIED`  | `no`                                 | multisite | no       | Permite solicitudes a rutas no listadas en la especificación.                       |
 | `OPENAPI_ALLOW_INSECURE_URL` | `no`                                 | multisite | no       | Permite obtener la especificación OpenAPI a través de HTTP simple (no recomendado). |
-| `OPENAPI_IGNORE_URLS`        | `^/docs$ ^/redoc$ ^/openapi\\.json$` | multisite | no       | Lista de regex de URL separadas por espacios para omitir la validación OpenAPI. |
-| `OPENAPI_MAX_SPEC_SIZE`      | `2M`                                 | global    | no       | Tamaño máximo permitido del documento OpenAPI (acepta sufijos k/M/G).     |
-| `OPENAPI_VALIDATE_PARAMS`    | `yes`                                | multisite | no       | Valida parámetros de consulta, cabecera, cookie y ruta contra la especificación. |
+| `OPENAPI_IGNORE_URLS`        | `^/docs$ ^/redoc$ ^/openapi\\.json$` | multisite | no       | Lista de regex de URL separadas por espacios para omitir la validación OpenAPI.     |
+| `OPENAPI_MAX_SPEC_SIZE`      | `2M`                                 | global    | no       | Tamaño máximo permitido del documento OpenAPI (acepta sufijos k/M/G).               |
+| `OPENAPI_VALIDATE_PARAMS`    | `yes`                                | multisite | no       | Valida parámetros de consulta, cabecera, cookie y ruta contra la especificación.    |
 
 ### Notas de comportamiento
 
