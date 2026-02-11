@@ -9,7 +9,11 @@ PYTHON_BIN=$(get_python_bin)
 export PYTHON_BIN
 
 # Set the PYTHONPATH
-export PYTHONPATH=/usr/share/bunkerweb/deps/python
+BW_PYTHONPATH=$(get_bunkerweb_pythonpath)
+export PYTHONPATH="$BW_PYTHONPATH"
+
+NGINX_BIN=$(get_nginx_bin)
+NGINX_CONF_DIR=$(get_nginx_conf_dir)
 # Display usage information
 function display_help() {
     echo "Usage: $(basename "$0") [start|stop|reload|restart]"
@@ -24,12 +28,16 @@ function display_help() {
 function start() {
 
     # Set the PYTHONPATH
-    export PYTHONPATH=/usr/share/bunkerweb/deps/python
+    export PYTHONPATH="$BW_PYTHONPATH"
 
     log "SYSTEMCTL" "ℹ️" "Starting BunkerWeb service ..."
 
-    setcap 'CAP_NET_BIND_SERVICE=+eip' /usr/sbin/nginx
-    chown -R nginx:nginx /etc/nginx
+    if command -v setcap >/dev/null 2>&1 && [ -x "$NGINX_BIN" ]; then
+        setcap 'CAP_NET_BIND_SERVICE=+eip' "$NGINX_BIN" || true
+    fi
+    if [ -d "$NGINX_CONF_DIR" ]; then
+        chown -R nginx:nginx "$NGINX_CONF_DIR"
+    fi
 
     # Create dummy variables.env
     if [ ! -f /etc/bunkerweb/variables.env ]; then
@@ -123,7 +131,7 @@ function start() {
       chown root:nginx /var/tmp/bunkerweb/tmp.env
       chmod 660 /var/tmp/bunkerweb/tmp.env
 
-      if ! run_as_nginx env PYTHONPATH="/usr/share/bunkerweb/deps/python" "$PYTHON_BIN" /usr/share/bunkerweb/gen/main.py \
+      if ! run_as_nginx env PYTHONPATH="$BW_PYTHONPATH" "$PYTHON_BIN" /usr/share/bunkerweb/gen/main.py \
           --variables /var/tmp/bunkerweb/tmp.env; then
           log "SYSTEMCTL" "❌" "Error while generating config from /var/tmp/bunkerweb/tmp.env"
           exit 1
@@ -131,7 +139,14 @@ function start() {
     fi
     # Start nginx
     log "SYSTEMCTL" "ℹ️" "Starting nginx ..."
-    if ! run_as_nginx /usr/sbin/nginx -e /var/log/bunkerweb/error.log; then
+    if [ "$(uname)" = "FreeBSD" ]; then
+        "$NGINX_BIN" -e /var/log/bunkerweb/error.log
+        nginx_rc=$?
+    else
+        run_as_nginx "$NGINX_BIN" -e /var/log/bunkerweb/error.log
+        nginx_rc=$?
+    fi
+    if [ "$nginx_rc" -ne 0 ]; then
         log "SYSTEMCTL" "❌" "Error while executing temp nginx"
         exit 1
     fi
@@ -230,7 +245,7 @@ function reload()
         pid="$(cat "$pid_file" 2>/dev/null)"
         if [ -n "$pid" ] && kill -0 "$pid" >/dev/null 2>&1 ; then
             log "SYSTEMCTL" "ℹ️" "Reloading nginx ..."
-            nginx -s reload
+            "$NGINX_BIN" -s reload
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "SYSTEMCTL" "❌" "Error while sending reload signal to nginx"

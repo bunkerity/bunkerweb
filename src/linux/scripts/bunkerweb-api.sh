@@ -8,7 +8,8 @@ source /usr/share/bunkerweb/helpers/utils.sh
 PYTHON_BIN=$(get_python_bin)
 export PYTHON_BIN
 
-export PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/api
+BW_PYTHONPATH=$(get_bunkerweb_pythonpath)
+export PYTHONPATH="${BW_PYTHONPATH}:/usr/share/bunkerweb/api"
 
 API_PID_FILE=/var/run/bunkerweb/api.pid
 

@@ -1,8 +1,29 @@
 #!/bin/bash
 
+# Ensure common FreeBSD/Linux local binary paths are available in non-interactive contexts
+# (e.g. pkg post-install scripts, rc.d service execution).
+if ! echo ":$PATH:" | grep -q ":/usr/local/bin:"; then
+	export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+fi
+
 # Helper to find the highest available Python binary
 function get_python_bin() {
-	local python_bin="python3"
+	local python_bin="/usr/local/bin/python3"
+
+	resolve_python_cmd() {
+		local candidate="$1"
+		if command -v "$candidate" >/dev/null 2>&1; then
+			command -v "$candidate"
+			return 0
+		fi
+		for prefix in /usr/local/bin /usr/bin /bin; do
+			if [ -x "${prefix}/${candidate}" ]; then
+				echo "${prefix}/${candidate}"
+				return 0
+			fi
+		done
+		return 1
+	}
 
 	# Prefer the interpreter version used to build bundled deps (deduced from compiled wheels)
 	local deps_path="/usr/share/bunkerweb/deps/python"
@@ -17,21 +38,86 @@ function get_python_bin() {
 
 		if [ -n "$abi_tag" ]; then
 			local deps_version="3.${abi_tag:1}"
-			if command -v "python${deps_version}" >/dev/null 2>&1; then
-				echo "python${deps_version}"
+			if resolved_python=$(resolve_python_cmd "python${deps_version}"); then
+				echo "$resolved_python"
 				return
 			fi
 		fi
 	fi
 
 	for version in 3.13 3.12 3.11 3.10 3.9; do
-		if command -v "python${version}" >/dev/null 2>&1; then
-			python_bin="python${version}"
-			break
+		if resolved_python=$(resolve_python_cmd "python${version}"); then
+			echo "$resolved_python"
+			return
 		fi
 	done
 
+	if resolved_python=$(resolve_python_cmd "python3"); then
+		echo "$resolved_python"
+		return
+	fi
+
 	echo "$python_bin"
+}
+
+# Resolve the Python site-packages path used by BunkerWeb packaging.
+function get_bunkerweb_pythonpath() {
+	if [ -d /usr/share/bunkerweb/deps/python ]; then
+		echo "/usr/share/bunkerweb/deps/python"
+		return
+	fi
+	if [ -d /usr/share/bunkerweb/deps ]; then
+		echo "/usr/share/bunkerweb/deps"
+		return
+	fi
+	echo "/usr/share/bunkerweb/deps/python"
+}
+
+# Resolve nginx binary path across Linux and FreeBSD.
+function get_nginx_bin() {
+	if command -v nginx >/dev/null 2>&1; then
+		command -v nginx
+		return
+	fi
+	if [ -x /usr/sbin/nginx ]; then
+		echo "/usr/sbin/nginx"
+		return
+	fi
+	echo "/usr/local/sbin/nginx"
+}
+
+# Resolve nginx config directory across Linux and FreeBSD.
+function get_nginx_conf_dir() {
+	if [ "$(uname)" = "FreeBSD" ] && [ -d /usr/local/etc/nginx ]; then
+		echo "/usr/local/etc/nginx"
+		return
+	fi
+
+	if [ -d /etc/nginx ]; then
+		if [ -L /etc/nginx ]; then
+			local nginx_target
+			nginx_target=$(readlink /etc/nginx 2>/dev/null)
+			if [ -n "$nginx_target" ]; then
+				case "$nginx_target" in
+					/*)
+						[ -d "$nginx_target" ] && { echo "$nginx_target"; return; }
+						;;
+					*)
+						[ -d "/etc/${nginx_target}" ] && { echo "/etc/${nginx_target}"; return; }
+						;;
+				esac
+			fi
+		fi
+		echo "/etc/nginx"
+		return
+	fi
+
+	if [ -d /usr/local/etc/nginx ]; then
+		echo "/usr/local/etc/nginx"
+		return
+	fi
+
+	echo "/etc/nginx"
 }
 
 # Export key/value pairs from a simple env file (KEY=VALUE lines).
@@ -60,6 +146,13 @@ function run_as_nginx() {
 
 	if command -v sudo >/dev/null 2>&1; then
 		sudo -n -E -u nginx -g nginx -- "$@"
+		return $?
+	fi
+
+	if command -v su >/dev/null 2>&1; then
+		local cmd_escaped
+		cmd_escaped=$(printf "%q " "$@")
+		su -m nginx -c "$cmd_escaped"
 		return $?
 	fi
 
@@ -100,7 +193,9 @@ function spaces_to_lua() {
 
 # check if at least one env var (global or multisite) has a specific value
 function has_value() {
-	envs=$(find /etc/nginx -name "*.env")
+	nginx_conf_dir=$(get_nginx_conf_dir)
+	[ -d "$nginx_conf_dir" ] || return 0
+	envs=$(find "$nginx_conf_dir" -name "*.env")
 	for file in $envs ; do
 		if [ "$(grep "^${1}=${2}$" "$file")" != "" ] ; then
 			echo "$file"
@@ -145,4 +240,277 @@ function handle_docker_secrets() {
 			fi
 		done
 	fi
+}
+
+# ============================================================================
+# Cross-platform init system detection and service management
+# Supports: systemd (Linux), rc.d (FreeBSD)
+# ============================================================================
+
+# Detect the init system in use
+# Returns: "systemd", "rcd", or "unknown"
+function detect_init_system() {
+	if [ "$(uname)" = "FreeBSD" ]; then
+		echo "rcd"
+		return
+	fi
+	if command -v systemctl >/dev/null 2>&1 && systemctl --version >/dev/null 2>&1; then
+		echo "systemd"
+		return
+	fi
+	# Fallback check for rc.d (FreeBSD-style)
+	if [ -d /usr/local/etc/rc.d ] || [ -d /etc/rc.d ]; then
+		echo "rcd"
+		return
+	fi
+	echo "unknown"
+}
+
+# Convert service name for rc.d (replace hyphens with underscores)
+function rcd_service_name() {
+	echo "$1" | tr '-' '_'
+}
+
+# Check if a service is enabled
+function service_is_enabled() {
+	local service_name="$1"
+	local init_system
+	init_system=$(detect_init_system)
+
+	case "$init_system" in
+		systemd)
+			systemctl is-enabled --quiet "$service_name" 2>/dev/null
+			return $?
+			;;
+		rcd)
+			local rcd_name
+			rcd_name=$(rcd_service_name "$service_name")
+			sysrc -n "${rcd_name}_enable" 2>/dev/null | grep -qi "yes"
+			return $?
+			;;
+		*)
+			return 1
+			;;
+	esac
+}
+
+# Check if a service is currently running
+function service_is_running() {
+	local service_name="$1"
+	local init_system
+	init_system=$(detect_init_system)
+
+	case "$init_system" in
+		systemd)
+			systemctl is-active --quiet "$service_name" 2>/dev/null
+			return $?
+			;;
+		rcd)
+			local rcd_name
+			rcd_name=$(rcd_service_name "$service_name")
+			service "$rcd_name" status >/dev/null 2>&1
+			return $?
+			;;
+		*)
+			return 1
+			;;
+	esac
+}
+
+# Enable a service (set to start on boot)
+function service_enable() {
+	local service_name="$1"
+	local init_system
+	init_system=$(detect_init_system)
+
+	case "$init_system" in
+		systemd)
+			systemctl enable "$service_name" 2>/dev/null
+			return $?
+			;;
+		rcd)
+			local rcd_name
+			rcd_name=$(rcd_service_name "$service_name")
+			sysrc "${rcd_name}_enable=YES" >/dev/null 2>&1
+			return $?
+			;;
+		*)
+			return 1
+			;;
+	esac
+}
+
+# Disable a service (do not start on boot)
+function service_disable() {
+	local service_name="$1"
+	local init_system
+	init_system=$(detect_init_system)
+
+	case "$init_system" in
+		systemd)
+			systemctl disable "$service_name" 2>/dev/null
+			return $?
+			;;
+		rcd)
+			local rcd_name
+			rcd_name=$(rcd_service_name "$service_name")
+			sysrc "${rcd_name}_enable=NO" >/dev/null 2>&1
+			return $?
+			;;
+		*)
+			return 1
+			;;
+	esac
+}
+
+# Start a service
+function service_start() {
+	local service_name="$1"
+	local init_system
+	init_system=$(detect_init_system)
+
+	case "$init_system" in
+		systemd)
+			systemctl start "$service_name" 2>/dev/null
+			return $?
+			;;
+		rcd)
+			local rcd_name
+			rcd_name=$(rcd_service_name "$service_name")
+			service "$rcd_name" start 2>/dev/null
+			return $?
+			;;
+		*)
+			return 1
+			;;
+	esac
+}
+
+# Stop a service
+function service_stop() {
+	local service_name="$1"
+	local init_system
+	init_system=$(detect_init_system)
+
+	case "$init_system" in
+		systemd)
+			systemctl stop "$service_name" 2>/dev/null
+			return $?
+			;;
+		rcd)
+			local rcd_name
+			rcd_name=$(rcd_service_name "$service_name")
+			service "$rcd_name" stop 2>/dev/null
+			return $?
+			;;
+		*)
+			return 1
+			;;
+	esac
+}
+
+# Restart a service
+function service_restart() {
+	local service_name="$1"
+	local init_system
+	init_system=$(detect_init_system)
+
+	case "$init_system" in
+		systemd)
+			systemctl restart "$service_name" 2>/dev/null
+			return $?
+			;;
+		rcd)
+			local rcd_name
+			rcd_name=$(rcd_service_name "$service_name")
+			service "$rcd_name" restart 2>/dev/null
+			return $?
+			;;
+		*)
+			return 1
+			;;
+	esac
+}
+
+# Reload a service (if supported) or restart
+function service_reload() {
+	local service_name="$1"
+	local init_system
+	init_system=$(detect_init_system)
+
+	case "$init_system" in
+		systemd)
+			systemctl reload "$service_name" 2>/dev/null
+			return $?
+			;;
+		rcd)
+			local rcd_name
+			rcd_name=$(rcd_service_name "$service_name")
+			# Try reload, fall back to restart
+			service "$rcd_name" reload 2>/dev/null || service "$rcd_name" restart 2>/dev/null
+			return $?
+			;;
+		*)
+			return 1
+			;;
+	esac
+}
+
+# Enable and start a service in one call
+function service_enable_now() {
+	local service_name="$1"
+	service_enable "$service_name" && service_start "$service_name"
+	return $?
+}
+
+# Disable and stop a service in one call
+function service_disable_now() {
+	local service_name="$1"
+	service_stop "$service_name"
+	service_disable "$service_name"
+	return $?
+}
+
+# Get service status (for display purposes)
+function service_status() {
+	local service_name="$1"
+	local init_system
+	init_system=$(detect_init_system)
+
+	case "$init_system" in
+		systemd)
+			systemctl status "$service_name" --no-pager -l 2>/dev/null
+			return $?
+			;;
+		rcd)
+			local rcd_name
+			rcd_name=$(rcd_service_name "$service_name")
+			service "$rcd_name" status 2>/dev/null
+			return $?
+			;;
+		*)
+			echo "Unknown init system"
+			return 1
+			;;
+	esac
+}
+
+# Reload init system configuration (systemd daemon-reload equivalent)
+function init_reload_config() {
+	local init_system
+	init_system=$(detect_init_system)
+
+	case "$init_system" in
+		systemd)
+			systemctl daemon-reload 2>/dev/null
+			return $?
+			;;
+		rcd)
+			# rc.d doesn't need a daemon-reload equivalent
+			return 0
+			;;
+		*)
+			return 1
+			;;
+	esac
 }

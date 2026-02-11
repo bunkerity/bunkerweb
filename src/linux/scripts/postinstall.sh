@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# Detect if running on FreeBSD and delegate to FreeBSD-specific script
+if [ "$(uname)" = "FreeBSD" ]; then
+    if [ -f /usr/share/bunkerweb/scripts/postinstall-freebsd.sh ]; then
+        exec /usr/share/bunkerweb/scripts/postinstall-freebsd.sh "$@"
+    else
+        echo "❌ FreeBSD postinstall script not found"
+        exit 1
+    fi
+fi
+
 # Function to run a command and check its return code
 function do_and_check_cmd() {
     output=$("$@" 2>&1)

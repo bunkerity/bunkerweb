@@ -1,0 +1,74 @@
+#!/bin/sh
+
+# PROVIDE: bunkerweb_ui
+# REQUIRE: LOGIN DAEMON NETWORKING
+# KEYWORD: shutdown
+#
+# Add the following line to /etc/rc.conf to enable bunkerweb_ui:
+#
+# bunkerweb_ui_enable="YES"
+#
+
+. /etc/rc.subr
+
+name="bunkerweb_ui"
+rcvar="${name}_enable"
+desc="BunkerWeb UI service"
+
+load_rc_config $name
+
+: ${bunkerweb_ui_enable:="NO"}
+: ${bunkerweb_ui_user:="root"}
+: ${bunkerweb_ui_group:="nginx"}
+: ${bunkerweb_ui_pidfile:="/var/run/bunkerweb/ui.pid"}
+: ${bunkerweb_ui_wrapper_pidfile:="/var/run/bunkerweb/ui-wrapper.pid"}
+
+pidfile="${bunkerweb_ui_pidfile}"
+start_cmd="${name}_start"
+stop_cmd="${name}_stop"
+reload_cmd="${name}_reload"
+status_cmd="${name}_status"
+extra_commands="reload"
+
+bunkerweb_ui_start()
+{
+    echo "Starting ${name}."
+    mkdir -p /var/run/bunkerweb
+    /usr/sbin/daemon -f -p "${bunkerweb_ui_wrapper_pidfile}" /usr/local/bin/bash /usr/share/bunkerweb/scripts/bunkerweb-ui.sh start
+}
+
+bunkerweb_ui_stop()
+{
+    if [ -f "${pidfile}" ]; then
+        echo "Stopping ${name}."
+        /usr/local/bin/bash /usr/share/bunkerweb/scripts/bunkerweb-ui.sh stop
+    else
+        echo "${name} is not running."
+    fi
+    if [ -f "${bunkerweb_ui_wrapper_pidfile}" ]; then
+        wrapper_pid=$(cat "${bunkerweb_ui_wrapper_pidfile}" 2>/dev/null)
+        [ -n "${wrapper_pid}" ] && kill "${wrapper_pid}" 2>/dev/null || true
+        rm -f "${bunkerweb_ui_wrapper_pidfile}"
+    fi
+}
+
+bunkerweb_ui_reload()
+{
+    echo "Reloading ${name}."
+    /usr/local/bin/bash /usr/share/bunkerweb/scripts/bunkerweb-ui.sh reload
+}
+
+bunkerweb_ui_status()
+{
+    if [ -f "${pidfile}" ]; then
+        pid=$(cat "${pidfile}")
+        if kill -0 "${pid}" 2>/dev/null; then
+            echo "${name} is running as pid ${pid}."
+            return 0
+        fi
+    fi
+    echo "${name} is not running."
+    return 1
+}
+
+run_rc_command "$1"
