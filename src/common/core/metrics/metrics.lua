@@ -9,6 +9,7 @@ local metrics = class("metrics", plugin)
 local ngx = ngx
 local ERR = ngx.ERR
 local INFO = ngx.INFO
+local null = ngx.null
 local unescape_uri = ngx.unescape_uri
 
 local lru, err_lru = lrucache.new(100000)
@@ -35,6 +36,185 @@ local tonumber = tonumber
 local tostring = tostring
 local table_insert = table.insert
 local table_remove = table.remove
+
+local REQUEST_FACET_FIELDS = { "ip", "country", "method", "url", "status", "reason", "server_name", "security_mode" }
+
+local function get_request_facet_value(request, field)
+	local value = request[field]
+	if value == nil or value == "" or value == null then
+		return "N/A"
+	end
+	return tostring(value)
+end
+
+local function clear_request_facets(self, set_initialized)
+	if set_initialized == nil then
+		set_initialized = true
+	end
+
+	for _, field in ipairs(REQUEST_FACET_FIELDS) do
+		local _, err = self.clusterstore:call("del", "requests:facet:" .. field)
+		if err then
+			self.logger:log(ERR, "Can't clear request facet " .. field .. ": " .. err)
+		end
+	end
+
+	if set_initialized then
+		local ok, err = self.clusterstore:call("set", "requests:facets:initialized", "1")
+		if not ok then
+			self.logger:log(ERR, "Can't mark request facets as initialized: " .. (err or "unknown error"))
+		end
+	end
+end
+
+local function incr_request_facets(self, request)
+	for _, field in ipairs(REQUEST_FACET_FIELDS) do
+		local facet_key = "requests:facet:" .. field
+		local facet_value = get_request_facet_value(request, field)
+		local count_raw, err = self.clusterstore:call("hincrby", facet_key, facet_value, 1)
+		if count_raw == nil or count_raw == false then
+			self.logger:log(
+				ERR,
+				"Can't increment request facet " .. field .. "=" .. facet_value .. ": " .. (err or "unknown error")
+			)
+		end
+	end
+end
+
+local function decr_request_facets(self, request)
+	for _, field in ipairs(REQUEST_FACET_FIELDS) do
+		local facet_key = "requests:facet:" .. field
+		local facet_value = get_request_facet_value(request, field)
+		local count_raw, err = self.clusterstore:call("hincrby", facet_key, facet_value, -1)
+		if count_raw == nil or count_raw == false then
+			self.logger:log(
+				ERR,
+				"Can't decrement request facet " .. field .. "=" .. facet_value .. ": " .. (err or "unknown error")
+			)
+		else
+			local count = tonumber(count_raw)
+			if count and count <= 0 then
+				local ok, hdel_err = self.clusterstore:call("hdel", facet_key, facet_value)
+				if ok == nil or ok == false then
+					self.logger:log(
+						ERR,
+						"Can't remove empty request facet "
+							.. field
+							.. "="
+							.. facet_value
+							.. ": "
+							.. (hdel_err or "unknown error")
+					)
+				end
+			end
+		end
+	end
+end
+
+local function initialize_request_facets(self)
+	local initialized_raw, _ = self.clusterstore:call("get", "requests:facets:initialized")
+	if
+		initialized_raw ~= nil
+		and initialized_raw ~= false
+		and initialized_raw ~= null
+		and tostring(initialized_raw) == "1"
+	then
+		return
+	end
+
+	clear_request_facets(self, false)
+
+	local nb_requests_raw, len_err = self.clusterstore:call("llen", "requests")
+	if nb_requests_raw == nil or nb_requests_raw == false then
+		self.logger:log(
+			ERR,
+			"Can't initialize request facets, failed to get requests length: " .. (len_err or "unknown error")
+		)
+		return
+	end
+
+	local nb_requests = tonumber(nb_requests_raw) or 0
+	if nb_requests > 0 then
+		local chunk_size = 1000
+		for start_idx = 0, nb_requests - 1, chunk_size do
+			local stop_idx = start_idx + chunk_size - 1
+			local chunk, range_err = self.clusterstore:call("lrange", "requests", start_idx, stop_idx)
+			if chunk == nil or chunk == false then
+				self.logger:log(
+					ERR,
+					"Can't initialize request facets, failed to read requests chunk: " .. (range_err or "unknown error")
+				)
+				break
+			end
+			for _, request_raw in ipairs(chunk) do
+				if request_raw ~= nil and request_raw ~= false and request_raw ~= null then
+					local ok, request = pcall(decode, request_raw)
+					if ok and type(request) == "table" then
+						incr_request_facets(self, request)
+					end
+				end
+			end
+		end
+	end
+
+	local ok, set_err = self.clusterstore:call("set", "requests:facets:initialized", "1")
+	if not ok then
+		self.logger:log(ERR, "Can't finalize request facets initialization: " .. (set_err or "unknown error"))
+	end
+end
+
+local function enforce_redis_requests_cap(self)
+	local max_requests = tonumber(self.variables["METRICS_MAX_BLOCKED_REQUESTS_REDIS"]) or 0
+	if max_requests < 0 then
+		max_requests = 0
+	end
+
+	local nb_requests_raw, err = self.clusterstore:call("llen", "requests")
+	if nb_requests_raw == nil or nb_requests_raw == false then
+		self.logger:log(ERR, "Can't get Redis requests length: " .. (err or "unknown error"))
+		return
+	end
+
+	local nb_requests = tonumber(nb_requests_raw)
+	if not nb_requests then
+		self.logger:log(ERR, "Can't parse Redis requests length: " .. tostring(nb_requests_raw))
+		return
+	end
+
+	if nb_requests <= max_requests then
+		return
+	end
+
+	local ok
+	if max_requests == 0 then
+		ok, err = self.clusterstore:call("del", "requests")
+		if ok then
+			clear_request_facets(self)
+		end
+	else
+		local to_remove = nb_requests - max_requests
+		ok = true
+		for _ = 1, to_remove do
+			local removed_raw, pop_err = self.clusterstore:call("lpop", "requests")
+			if removed_raw == nil or removed_raw == false then
+				self.logger:log(ERR, "Can't trim Redis requests list: " .. (pop_err or "unknown error"))
+				ok = false
+				break
+			end
+			if removed_raw == null then
+				break
+			end
+			local decoded_ok, removed_request = pcall(decode, removed_raw)
+			if decoded_ok and type(removed_request) == "table" then
+				decr_request_facets(self, removed_request)
+			end
+		end
+	end
+
+	if not ok then
+		self.logger:log(ERR, "Can't enforce Redis requests cap: " .. (err or "unknown error"))
+	end
+end
 
 function metrics:initialize(ctx)
 	-- Call parent initialize
@@ -187,6 +367,8 @@ function metrics:timer()
 		clusterstore_ok, err = self.clusterstore:connect()
 		if not clusterstore_ok then
 			self.logger:log(ERR, "Can't connect to Redis server: " .. err .. " - requests will be stored in datastore")
+		else
+			initialize_request_facets(self)
 		end
 	end
 
@@ -206,14 +388,8 @@ function metrics:timer()
 							break
 						end
 						request.synced = true -- Mark as synced
+						incr_request_facets(self, request)
 					end
-				end
-
-				-- Remove old requests if needed
-				local max_requests = tonumber(self.variables["METRICS_MAX_BLOCKED_REQUESTS_REDIS"])
-				local nb_requests = self.clusterstore:call("llen", "requests")
-				if nb_requests and nb_requests > max_requests then
-					self.clusterstore:call("ltrim", "requests", -max_requests, -1)
 				end
 
 				-- Update LRU cache
@@ -272,6 +448,7 @@ function metrics:timer()
 	end
 
 	if clusterstore_ok then
+		enforce_redis_requests_cap(self)
 		self.clusterstore:close()
 	end
 

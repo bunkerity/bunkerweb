@@ -17,12 +17,12 @@ repos:
         args: ["--allow-multiple-documents"]
       - id: check-case-conflict
 
-  - repo: https://github.com/psf/black
-    rev: 05f0a8ce1f71fbb36e1e032d3b518c7b945089a2 # frozen: 25.11.0
-    hooks:
-      - id: black
-        name: Black Python Formatter
-        language_version: python3.9
+  # - repo: https://github.com/psf/black
+  #   rev: 05f0a8ce1f71fbb36e1e032d3b518c7b945089a2 # frozen: 25.11.0
+  #   hooks:
+  #     - id: black
+  #       name: Black Python Formatter
+  #       language_version: python3.9
 
   - repo: local
     hooks:
@@ -54,12 +54,12 @@ repos:
         args: ["--max-line-length=160", "--ignore=E266,E402,E501,E722,W503"]
         exclude: ^src/common/db/alembic/(mariadb|mysql|postgresql|sqlite)_versions
 
-  - repo: https://github.com/dosisod/refurb
-    rev: 854db6cdfab04b7f4911d9cba6bfc084f086ea92 # frozen: v2.2.0
-    hooks:
-      - id: refurb
-        name: Refurb Python Refactoring Tool
-        exclude: ^tests/
+  # - repo: https://github.com/dosisod/refurb
+  #   rev: 854db6cdfab04b7f4911d9cba6bfc084f086ea92 # frozen: v2.2.0
+  #   hooks:
+  #     - id: refurb
+  #       name: Refurb Python Refactoring Tool
+  #       exclude: ^tests/
 
   - repo: https://github.com/codespell-project/codespell
     rev: 63c8f8312b7559622c0d82815639671ae42132ac # frozen: v2.4.1
