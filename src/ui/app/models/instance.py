@@ -232,6 +232,50 @@ class InstancesUtils:
             return value.decode("utf-8", errors="replace")
         return str(value)
 
+    def _get_redis_top_ip_counts_from_facets(self, redis_client, *, limit: int = 10) -> tuple[list[tuple[str, int]], int]:
+        """Read top blocked IPs and unique IP count from Redis request facets.
+
+        Uses HSCAN + heap top-k to keep memory bounded even with large facet maps.
+        """
+        if limit < 0:
+            limit = 0
+
+        top_heap: list[tuple[int, str]] = []
+        unique_ips = 0
+
+        try:
+            cursor = 0
+            while True:
+                cursor, raw_pairs = redis_client.hscan("requests:facet:ip", cursor=cursor, count=1000)
+
+                for raw_ip, raw_count in raw_pairs.items():
+                    ip = self._decode_redis_text(raw_ip).strip() or "unknown"
+                    try:
+                        count = int(self._decode_redis_text(raw_count))
+                    except Exception:
+                        continue
+                    if count <= 0:
+                        continue
+
+                    unique_ips += 1
+
+                    if limit == 0:
+                        continue
+
+                    item = (count, ip)
+                    if len(top_heap) < limit:
+                        heappush(top_heap, item)
+                    elif item > top_heap[0]:
+                        heapreplace(top_heap, item)
+
+                if cursor == 0:
+                    break
+        except Exception:
+            return [], 0
+
+        top_items = sorted(((ip, count) for count, ip in top_heap), key=lambda item: (-item[1], item[0]))
+        return top_items, unique_ips
+
     def _get_redis_pane_counts_from_facets(self, redis_client, pane_fields: List[str]) -> Optional[dict[str, dict[str, dict[str, int]]]]:
         pane_counts: dict[str, dict[str, dict[str, int]]] = {field: {} for field in pane_fields}
         has_values = False
@@ -342,7 +386,7 @@ class InstancesUtils:
             end_idx = total_requests - 1 - start
             start_idx = max(scan_start_idx, end_idx - fetch_count + 1)
             raw_chunk = redis_client.lrange("requests", start_idx, end_idx)
-            raw_chunk = list(reversed(raw_chunk))
+            raw_chunk.reverse()
 
         reports: list[dict[str, Any]] = []
         seen_ids: set = set()
@@ -470,7 +514,6 @@ class InstancesUtils:
         if not report_id:
             return None
 
-        report_id = str(report_id)
         redis_client = get_redis_client()
 
         if redis_client and not hostname:
@@ -621,9 +664,7 @@ class InstancesUtils:
                 pane_fields = self._REPORT_PANE_FIELDS
                 pane_counts_enabled = include_pane_counts
                 can_use_precomputed_pane_counts = pane_counts_enabled and search == "" and not pane_filters
-                precomputed_pane_counts = (
-                    self._get_redis_pane_counts_from_facets(redis_client, pane_fields) if can_use_precomputed_pane_counts else None
-                )
+                precomputed_pane_counts = self._get_redis_pane_counts_from_facets(redis_client, pane_fields) if can_use_precomputed_pane_counts else None
                 use_precomputed_pane_counts = precomputed_pane_counts is not None
                 pane_counts = precomputed_pane_counts if use_precomputed_pane_counts else ({field: {} for field in pane_fields} if pane_counts_enabled else {})
 
@@ -838,7 +879,7 @@ class InstancesUtils:
                 break
             start += chunk_size
 
-    def get_home_aggregates(self, hours: int = 24) -> dict[str, Any]:
+    def get_home_aggregates(self, hours: int = 24 * 7, top_ips_limit: int = 10) -> dict[str, Any]:
         """
         Compute home page aggregates (country counts, IP counts, time buckets)
         using streaming/chunked processing to minimize memory usage.
@@ -851,9 +892,11 @@ class InstancesUtils:
 
         Returns:
             Dictionary containing:
-            - request_countries: Dict of country -> {request: count, blocked: count}
-            - request_ips: Dict of IP -> {request: count, blocked: count}
+            - request_countries: Dict of country -> {blocked: count}
+            - top_blocked_ips: Dict of IP -> {blocked: count}
+            - blocked_unique_ips: Number of unique blocked IP addresses
             - time_buckets: Dict of ISO timestamp -> blocked count
+            - request_statuses: Dict of status code -> count
         """
         from app.routes.utils import get_redis_client
 
@@ -861,7 +904,10 @@ class InstancesUtils:
 
         # Initialize aggregates
         request_countries: dict[str, dict[str, int]] = {}
-        request_ips: dict[str, dict[str, int]] = {}
+        blocked_ip_counts: dict[str, int] = {}
+        request_statuses: dict[int, int] = {}
+        top_ips_from_facets, blocked_unique_ips = self._get_redis_top_ip_counts_from_facets(redis_client, limit=top_ips_limit)
+        use_facet_ip_counts = blocked_unique_ips > 0
 
         current_date = datetime.now().astimezone()
         cutoff_timestamp = (current_date - timedelta(hours=hours)).timestamp()
@@ -873,16 +919,20 @@ class InstancesUtils:
             # Fallback: return empty aggregates if no Redis
             return {
                 "request_countries": {},
-                "request_ips": {},
+                "top_blocked_ips": {},
+                "blocked_unique_ips": 0,
                 "time_buckets": {key.isoformat(): value for key, value in time_buckets.items()},
+                "request_statuses": {},
             }
 
         max_redis_requests = self._get_max_blocked_requests_redis()
         if max_redis_requests == 0:
             return {
                 "request_countries": {},
-                "request_ips": {},
+                "top_blocked_ips": {},
+                "blocked_unique_ips": 0,
                 "time_buckets": {key.isoformat(): value for key, value in time_buckets.items()},
+                "request_statuses": {},
             }
 
         # Process requests in chunks using the iterator
@@ -896,25 +946,28 @@ class InstancesUtils:
                 continue
 
             country = request.get("country", "unknown")
-            ip = request.get("ip", "unknown")
             status = request.get("status", 0)
+            if not isinstance(status, int):
+                with suppress(ValueError, TypeError):
+                    status = int(status)
+            if not isinstance(status, int):
+                status = 0
 
-            # Initialize country entry if needed
-            if country not in request_countries:
-                request_countries[country] = {"request": 0, "blocked": 0}
-
-            # Initialize IP entry if needed
-            if ip not in request_ips:
-                request_ips[ip] = {"request": 0, "blocked": 0}
-
-            # Increment request counts
-            request_countries[country]["request"] += 1
-            request_ips[ip]["request"] += 1
+            # Track status distribution in the selected window.
+            request_statuses[status] = request_statuses.get(status, 0) + 1
 
             # Check if blocked (403, 429, 444)
             if status in (403, 429, 444):
+                if country not in request_countries:
+                    request_countries[country] = {"blocked": 0}
                 request_countries[country]["blocked"] += 1
-                request_ips[ip]["blocked"] += 1
+
+                if not use_facet_ip_counts:
+                    ip = request.get("ip")
+                    if ip is None or ip == "":
+                        ip = "unknown"
+                    ip_str = str(ip)
+                    blocked_ip_counts[ip_str] = blocked_ip_counts.get(ip_str, 0) + 1
 
                 # Add to time bucket
                 with suppress(ValueError, OSError):
@@ -923,10 +976,27 @@ class InstancesUtils:
                     if bucket in time_buckets:
                         time_buckets[bucket] += 1
 
+        if use_facet_ip_counts:
+            top_blocked_ips = {ip: {"blocked": count} for ip, count in top_ips_from_facets}
+        else:
+            sorted_ips = sorted(blocked_ip_counts.items(), key=lambda item: (-item[1], item[0]))
+            if top_ips_limit > 0:
+                sorted_ips = sorted_ips[:top_ips_limit]
+            top_blocked_ips = {ip: {"blocked": count} for ip, count in sorted_ips}
+            blocked_unique_ips = len(blocked_ip_counts)
+        blocked_total = sum(time_buckets.values())
+
+        # Defensive fallback: if timeline has blocked data but statuses are empty,
+        # keep status cards/charts usable.
+        if blocked_total > 0 and not request_statuses:
+            request_statuses[403] = blocked_total
+
         return {
             "request_countries": request_countries,
-            "request_ips": request_ips,
+            "top_blocked_ips": top_blocked_ips,
+            "blocked_unique_ips": blocked_unique_ips,
             "time_buckets": {key.isoformat(): value for key, value in time_buckets.items()},
+            "request_statuses": request_statuses,
         }
 
     def _calculate_pane_counts(self, all_reports: List[dict], filtered_reports: List[dict]) -> dict:

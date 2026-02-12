@@ -11,6 +11,7 @@
 - [UI] Fix dark theme background for datatables actions
 - [UI] Make it possible to edit settings with the `wizard` method in the web UI
 - [UI] Enhance reports functionality with improved filter handling and data fetching
+- [UI] Enhance home dashboard with new IP blocking metrics and improved tooltips
 
 ## v1.6.8 - 2026/02/06
 

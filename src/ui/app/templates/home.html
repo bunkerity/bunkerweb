@@ -18,6 +18,15 @@
 {% endblock %}
 {% block content %}
     <!-- Content -->
+    <div class="home-period-floating" role="status" aria-live="polite">
+        <div class="home-period-floating__card shadow-sm">
+            <i class='bx bx-calendar-event home-period-floating__icon'></i>
+            <div class="home-period-floating__text">
+                <span class="home-period-floating__label">Dashboard window</span>
+                <strong>Last {{ home_stats_days }} days</strong>
+            </div>
+        </div>
+    </div>
     <div class="row g-4">
         <div class="col-md-3 mb-2">
             <div class="card p-4 position-relative shadow-sm rounded-3 h-100 text-white {% if is_pro_version %}bg-primary{% else %}bg-bw-green{% endif %}">
@@ -194,13 +203,7 @@
                 <p class="ps-4 fs-4 mb-2">
                     <span data-i18n="dashboard.card.blocked_unique_ips.title">Blocked Unique IPs</span>
                     <br />
-                    {% set ips_ns = namespace(ips=0, blocked_ips=0) %}
-                    {% for data in request_ips.values() %}
-                        {% if data["blocked"] > 0 %}
-                            {% set ips_ns.blocked_ips = ips_ns.blocked_ips + 1 %}
-                        {% endif %}
-                    {% endfor %}
-                    <span class="fs-3 don-jose">{{ human_readable_number(ips_ns.blocked_ips) }}</span>
+                    <span class="fs-3 don-jose">{{ human_readable_number(blocked_unique_ips) }}</span>
                 </p>
             </div>
         </div>
@@ -229,8 +232,6 @@
                     </div>
                     <div class="card-body d-flex align-items-center justify-content-center">
                         {% if request_ips %}
-                            {% set limited_request_ips = request_ips.items() | list %}
-                            {% set top_ips = limited_request_ips[:10] %}
                             <div id="requests-ips-data" class="visually-hidden">{{ request_ips|tojson }}</div>
                             <div id="requests-ips"></div>
                         {% else %}
