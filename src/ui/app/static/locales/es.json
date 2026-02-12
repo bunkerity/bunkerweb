@@ -467,6 +467,10 @@
       "hover_info": "Pasa el cursor sobre un país",
       "legend": "Leyenda",
       "no_data": "Sin datos"
+    },
+    "window": {
+      "last_days": "Últimos {{days}} días",
+      "title": "Ventana del panel"
     }
   },
   "datatable": {

@@ -467,6 +467,10 @@
       "hover_info": "将鼠标悬停在国家/地区上",
       "legend": "图例",
       "no_data": "无数据"
+    },
+    "window": {
+      "last_days": "最近 {{days}} 天",
+      "title": "仪表板窗口"
     }
   },
   "datatable": {

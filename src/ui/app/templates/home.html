@@ -22,8 +22,10 @@
         <div class="home-period-floating__card shadow-sm">
             <i class='bx bx-calendar-event home-period-floating__icon'></i>
             <div class="home-period-floating__text">
-                <span class="home-period-floating__label">Dashboard window</span>
-                <strong>Last {{ home_stats_days }} days</strong>
+                <span class="home-period-floating__label"
+                      data-i18n="dashboard.window.title">Dashboard window</span>
+                <strong data-i18n="dashboard.window.last_days"
+                        data-i18n-options='{"days": {{ home_stats_days }}}'>Last {{ home_stats_days }} days</strong>
             </div>
         </div>
     </div>

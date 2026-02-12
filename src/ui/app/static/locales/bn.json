@@ -467,6 +467,10 @@
       "hover_info": "একটি দেশের উপর হোভার করুন",
       "legend": "লিজেন্ড",
       "no_data": "কোনো ডেটা নেই"
+    },
+    "window": {
+      "last_days": "Last {{days}} days",
+      "title": "Dashboard window"
     }
   },
   "datatable": {

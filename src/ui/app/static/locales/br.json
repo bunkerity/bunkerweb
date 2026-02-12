@@ -467,6 +467,10 @@
       "hover_info": "Passe o mouse sobre um país",
       "legend": "Legenda",
       "no_data": "Sem dados"
+    },
+    "window": {
+      "last_days": "Últimos {{days}} dias",
+      "title": "Janela do painel"
     }
   },
   "datatable": {
