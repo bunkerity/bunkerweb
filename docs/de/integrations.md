@@ -2034,7 +2034,7 @@ Für nicht-interaktive oder automatisierte Setups kann das Skript mit Befehlszei
 
 | Option                  | Beschreibung                                                                                |
 | ----------------------- | ------------------------------------------------------------------------------------------- |
-| `-v, --version VERSION` | Gibt die zu installierende BunkerWeb-Version an (z. B. `1.6.8`).                        |
+| `-v, --version VERSION` | Gibt die zu installierende BunkerWeb-Version an (z. B. `1.6.8`).                            |
 | `-w, --enable-wizard`   | Aktiviert den Einrichtungsassistenten.                                                      |
 | `-n, --no-wizard`       | Deaktiviert den Einrichtungsassistenten.                                                    |
 | `-y, --yes`             | Führt im nicht-interaktiven Modus mit Standardantworten für alle Eingabeaufforderungen aus. |
@@ -2207,7 +2207,7 @@ Abhängig von Ihren Entscheidungen während der Installation:
 
 ### Installation mit dem Paketmanager
 
-Bitte stellen Sie sicher, dass Sie **NGINX 1.28.2 installiert haben, bevor Sie BunkerWeb installieren**. Für alle Distributionen außer Fedora ist es zwingend erforderlich, vorgefertigte Pakete aus dem [offiziellen NGINX-Repository](https://nginx.org/en/linux_packages.html) zu verwenden. Das Kompilieren von NGINX aus dem Quellcode oder die Verwendung von Paketen aus verschiedenen Repositories funktioniert nicht mit den offiziellen vorgefertigten Paketen von BunkerWeb. Sie haben jedoch die Möglichkeit, BunkerWeb aus dem Quellcode zu erstellen.
+Bitte stellen Sie sicher, dass Sie **NGINX 1.28.2 installiert haben, bevor Sie BunkerWeb installieren**. Für alle Distributionen ist es zwingend erforderlich, vorgefertigte Pakete aus dem [offiziellen NGINX-Repository](https://nginx.org/en/linux_packages.html) zu verwenden. Das Kompilieren von NGINX aus dem Quellcode oder die Verwendung von Paketen aus verschiedenen Repositories funktioniert nicht mit den offiziellen vorgefertigten Paketen von BunkerWeb. Sie haben jedoch die Möglichkeit, BunkerWeb aus dem Quellcode zu erstellen.
 
 === "Debian Bookworm/Trixie"
 
@@ -2314,10 +2314,10 @@ Bitte stellen Sie sicher, dass Sie **NGINX 1.28.2 installiert haben, bevor Sie B
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora stellt bereits NGINX 1.28.1 zur Verfügung, das wir unterstützen
+    Fedora stellt bereits NGINX 1.28.2 zur Verfügung, das wir unterstützen
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.28.1
+    sudo dnf install -y --allowerasing nginx-1.28.2
     ```
 
     !!! example "Einrichtungsassistenten deaktivieren"

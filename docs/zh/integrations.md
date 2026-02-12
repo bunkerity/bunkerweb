@@ -2032,18 +2032,18 @@ sudo ./install-bunkerweb.sh
 
 **通用选项：**
 
-| 选项                    | 描述                                              |
-| ----------------------- | ------------------------------------------------- |
-| `-v, --version VERSION` | 指定要安装的 BunkerWeb 版本（例如 `1.6.8`）。 |
-| `-w, --enable-wizard`   | 启用设置向导。                                    |
-| `-n, --no-wizard`       | 禁用设置向导。                                    |
-| `-y, --yes`             | 以非交互模式运行，对所有提示使用默认答案。        |
-| `-f, --force`           | 即使在不受支持的操作系统版本上，也强制继续安装。  |
-| `-q, --quiet`           | 静默安装（抑制输出）。                            |
-| `--api`, `--enable-api` | 启用 API (FastAPI) systemd 服务（默认禁用）。     |
-| `--no-api`              | 明确禁用 API 服务。                               |
-| `-h, --help`            | 显示包含所有可用选项的帮助信息。                  |
-| `--dry-run`             | 显示将要安装的内容，但不实际执行。                |
+| 选项                    | 描述                                             |
+| ----------------------- | ------------------------------------------------ |
+| `-v, --version VERSION` | 指定要安装的 BunkerWeb 版本（例如 `1.6.8`）。    |
+| `-w, --enable-wizard`   | 启用设置向导。                                   |
+| `-n, --no-wizard`       | 禁用设置向导。                                   |
+| `-y, --yes`             | 以非交互模式运行，对所有提示使用默认答案。       |
+| `-f, --force`           | 即使在不受支持的操作系统版本上，也强制继续安装。 |
+| `-q, --quiet`           | 静默安装（抑制输出）。                           |
+| `--api`, `--enable-api` | 启用 API (FastAPI) systemd 服务（默认禁用）。    |
+| `--no-api`              | 明确禁用 API 服务。                              |
+| `-h, --help`            | 显示包含所有可用选项的帮助信息。                 |
+| `--dry-run`             | 显示将要安装的内容，但不实际执行。               |
 
 **安装类型：**
 
@@ -2207,7 +2207,7 @@ sudo ./install-bunkerweb.sh --yes --api
 
 ### 使用软件包管理器安装
 
-请确保在安装 BunkerWeb 之前**已经安装了 NGINX 1.28.2**。对于除 Fedora 之外的所有发行版，强制要求使用来自[官方 NGINX 仓库](https://nginx.org/en/linux_packages.html)的预构建包。从源代码编译 NGINX 或使用来自不同仓库的包将无法与 BunkerWeb 的官方预构建包一起工作。但是，您可以选择从源代码构建 BunkerWeb。
+请确保在安装 BunkerWeb 之前**已经安装了 NGINX 1.28.2**。对于所有发行版，强制要求使用来自[官方 NGINX 仓库](https://nginx.org/en/linux_packages.html)的预构建包。从源代码编译 NGINX 或使用来自不同仓库的包将无法与 BunkerWeb 的官方预构建包一起工作。但是，您可以选择从源代码构建 BunkerWeb。
 
 === "Debian Bookworm/Trixie"
 
@@ -2314,10 +2314,10 @@ sudo ./install-bunkerweb.sh --yes --api
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora 已经提供了我们支持的 NGINX 1.28.1
+    Fedora 已经提供了我们支持的 NGINX 1.28.2
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.28.1
+    sudo dnf install -y --allowerasing nginx-1.28.2
     ```
 
     !!! example "禁用设置向导"
