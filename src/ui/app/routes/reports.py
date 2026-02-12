@@ -271,9 +271,16 @@ def reports_filters():
         if key.startswith("searchPanes["):
             field = key.split("[")[1].split("]")[0]
             search_panes[field].append(value)
-    search_panes_str = ";".join(f"{field}:{','.join(values)}" for field, values in search_panes.items()) if search_panes else ""
+
+    search_panes_str = ";".join(f"{field}:{','.join(sorted(values))}" for field, values in sorted(search_panes.items())) if search_panes else ""
+    has_active_panes = any(values for values in search_panes.values())
 
     force_refresh = request.form.get("force", "").strip().lower() in ("1", "true", "yes")
+    if has_active_panes:
+        # Always recompute pane counters while filters are actively selected
+        # to keep SearchPanes counts in sync with current selection.
+        force_refresh = True
+
     cache_key = f"search={search_value}|panes={search_panes_str}"
     cache_now = monotonic()
     cache_entry = REPORTS_FILTERS_CACHE.get(cache_key) or {}

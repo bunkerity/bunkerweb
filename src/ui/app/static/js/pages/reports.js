@@ -10,6 +10,59 @@ $(document).ready(function () {
   const filtersStateCache = new Map();
   const filtersStateTtlMs = 10000;
 
+  const collectSearchPaneEntries = (requestData) => {
+    if (!requestData || typeof requestData !== "object") return [];
+
+    const entries = Object.keys(requestData)
+      .filter((key) => key.startsWith("searchPanes["))
+      .map((key) => [key, String(requestData[key] || "")]);
+
+    const flattenNestedPanes = (value, path) => {
+      if (value === null || typeof value === "undefined") return;
+
+      if (Array.isArray(value)) {
+        value.forEach((item, index) =>
+          flattenNestedPanes(item, `${path}[${index}]`),
+        );
+        return;
+      }
+
+      if (typeof value === "object") {
+        Object.keys(value)
+          .sort((a, b) => a.localeCompare(b))
+          .forEach((key) =>
+            flattenNestedPanes(value[key], `${path}[${String(key)}]`),
+          );
+        return;
+      }
+
+      entries.push([path, String(value)]);
+    };
+
+    if (
+      requestData.searchPanes &&
+      typeof requestData.searchPanes === "object"
+    ) {
+      flattenNestedPanes(requestData.searchPanes, "searchPanes");
+    }
+
+    // Remove duplicates while keeping all distinct key/value pairs.
+    const seen = new Set();
+    return entries
+      .filter(([key, value]) => {
+        const signature = `${key}=${value}`;
+        if (seen.has(signature)) return false;
+        seen.add(signature);
+        return true;
+      })
+      .sort((a, b) => a[0].localeCompare(b[0]));
+  };
+
+  const hasActiveSearchPaneSelections = (requestData) =>
+    collectSearchPaneEntries(requestData).some(
+      ([, value]) => value.trim() !== "",
+    );
+
   const buildFiltersStateKey = (requestData) => {
     if (!requestData || typeof requestData !== "object") return "default";
 
@@ -20,10 +73,7 @@ $(document).ready(function () {
             .toLowerCase()
         : "";
 
-    const paneEntries = Object.keys(requestData)
-      .filter((key) => key.startsWith("searchPanes["))
-      .map((key) => [key, String(requestData[key] || "")])
-      .sort((a, b) => a[0].localeCompare(b[0]));
+    const paneEntries = collectSearchPaneEntries(requestData);
 
     return JSON.stringify({ search: searchValue, panes: paneEntries });
   };
@@ -596,8 +646,11 @@ $(document).ready(function () {
       serverSide: true,
       ajax: function (d, callback) {
         d.csrf_token = $("#csrf_token").val();
+        const hasActivePaneSelections = hasActiveSearchPaneSelections(d);
         const filtersStateKey = buildFiltersStateKey(d);
-        const cachedFiltersPayload = getCachedFiltersForState(filtersStateKey);
+        const cachedFiltersPayload = hasActivePaneSelections
+          ? null
+          : getCachedFiltersForState(filtersStateKey);
         const rowsRequest = $.ajax({
           url: `${window.location.pathname}/fetch`,
           type: "POST",
@@ -609,7 +662,10 @@ $(document).ready(function () {
             : $.ajax({
                 url: `${window.location.pathname}/filters`,
                 type: "POST",
-                data: d,
+                data: {
+                  ...d,
+                  force: hasActivePaneSelections ? "1" : "0",
+                },
               });
 
         let rowsPayload = null;
@@ -680,7 +736,7 @@ $(document).ready(function () {
             .done(function (response) {
               filtersPayload =
                 response && typeof response === "object" ? response : null;
-              if (filtersPayload) {
+              if (filtersPayload && !hasActivePaneSelections) {
                 cacheFiltersForState(filtersStateKey, filtersPayload);
               }
             })
