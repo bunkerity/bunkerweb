@@ -764,6 +764,52 @@ if __name__ == "__main__":
 
         LOGGER.info("Scheduler started ...")
 
+        def run_config_saver(log_message: str) -> bool:
+            if SCHEDULER.db.readonly:
+                LOGGER.warning("The database is read-only, no need to save plugins settings changes as they will not be saved")
+                return False
+
+            LOGGER.info(log_message)
+            env_file_path = deepcopy(NGINX_TMP_VARIABLES_PATH)
+            if args.variables:
+                env_file_path = deepcopy(tmp_variables_path)
+            else:
+                env_content = "\n".join(f"{key}={value}" for key, value in (env | environ).items() if "CUSTOM_CONF" not in key)
+                env_file_path.write_text(env_content + "\n", encoding="utf-8")
+
+            cmd_env = {
+                "PATH": getenv("PATH", ""),
+                "PYTHONPATH": getenv("PYTHONPATH", ""),
+                "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
+                "LOG_LEVEL": getenv("LOG_LEVEL", ""),
+                "DATABASE_URI": getenv("DATABASE_URI", ""),
+            }
+
+            if getenv("TZ"):
+                cmd_env["TZ"] = getenv("TZ")
+
+            for key, value in environ.items():
+                if "CUSTOM_CONF" in key:
+                    cmd_env[key] = value
+
+            proc = subprocess_run(
+                [
+                    BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
+                    "--settings",
+                    BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
+                    "--variables",
+                    env_file_path.as_posix(),
+                ],
+                stdin=DEVNULL,
+                stderr=STDOUT,
+                check=False,
+                env=cmd_env,
+            )
+            if proc.returncode != 0:
+                LOGGER.error("Config saver failed, configuration will not work as expected...")
+                return False
+            return True
+
         def check_configs_changes():
             # Checking if any custom config has been created by the user
             assert SCHEDULER is not None, "SCHEDULER is not defined"
@@ -812,6 +858,7 @@ if __name__ == "__main__":
             assert SCHEDULER is not None, "SCHEDULER is not defined"
             LOGGER.info(f"Checking if there are any changes in {_type} plugins ...")
             plugin_path = PRO_PLUGINS_PATH if _type == "pro" else EXTERNAL_PLUGINS_PATH
+            plugins_before = {file.parent.name for file in plugin_path.glob("*/plugin.json")}
             db_plugins = SCHEDULER.db.get_plugins(_type=_type)
             external_plugins = []
             tmp_external_plugins = []
@@ -865,11 +912,15 @@ if __name__ == "__main__":
                     except BaseException as e:
                         LOGGER.error(f"Error while saving {_type} plugins to database: {e}")
                 else:
-                    return send_file_to_bunkerweb(plugin_path, "/pro_plugins" if _type == "pro" else "/plugins")
+                    send_file_to_bunkerweb(plugin_path, "/pro_plugins" if _type == "pro" else "/plugins")
+                    return False
 
             generate_external_plugins(plugin_path)
+            plugins_after = {file.parent.name for file in plugin_path.glob("*/plugin.json")}
+            return plugins_before != plugins_after
 
         check_configs_changes()
+        plugins_refreshed = []
         task_futures.extend(
             [
                 SCHEDULER_TASKS_EXECUTOR.submit(check_plugin_changes, "external"),
@@ -878,9 +929,18 @@ if __name__ == "__main__":
         )
 
         for future in task_futures:
-            future.result()
+            plugins_refreshed.append(bool(future.result()))
 
         task_futures.clear()
+
+        if any(plugins_refreshed):
+            if run_config_saver("Running config saver after restoring plugin files from database ..."):
+                SCHEDULER.update_jobs()
+                env = SCHEDULER.db.get_config()
+                env["DATABASE_URI"] = SCHEDULER.db.database_uri
+                tz = getenv("TZ")
+                if tz:
+                    env["TZ"] = tz
 
         LOGGER.info("Running plugins download jobs ...")
         SCHEDULER.run_once(["misc", "pro"])
@@ -902,46 +962,7 @@ if __name__ == "__main__":
             if SCHEDULER.db.readonly:
                 LOGGER.warning("The database is read-only, no need to look for changes in the plugins settings as they will not be saved")
             else:
-                # run the config saver to save potential ignored external plugins settings
-                LOGGER.info("Running config saver to save potential ignored external plugins settings ...")
-
-                env_file_path = deepcopy(NGINX_TMP_VARIABLES_PATH)
-                if args.variables:
-                    env_file_path = deepcopy(tmp_variables_path)
-                else:
-                    env_content = "\n".join(f"{key}={value}" for key, value in (env | environ).items() if "CUSTOM_CONF" not in key)
-                    env_file_path.write_text(env_content + "\n", encoding="utf-8")
-
-                cmd_env = {
-                    "PATH": getenv("PATH", ""),
-                    "PYTHONPATH": getenv("PYTHONPATH", ""),
-                    "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-                    "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-                    "DATABASE_URI": getenv("DATABASE_URI", ""),
-                }
-
-                if getenv("TZ"):
-                    cmd_env["TZ"] = getenv("TZ")
-
-                for key, value in environ.items():
-                    if "CUSTOM_CONF" in key:
-                        cmd_env[key] = value
-
-                proc = subprocess_run(
-                    [
-                        BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
-                        "--settings",
-                        BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
-                        "--variables",
-                        env_file_path.as_posix(),
-                    ],
-                    stdin=DEVNULL,
-                    stderr=STDOUT,
-                    check=False,
-                    env=cmd_env,
-                )
-                if proc.returncode != 0:
-                    LOGGER.error("Config saver failed, configuration will not work as expected...")
+                run_config_saver("Running config saver to save potential ignored external plugins settings ...")
 
             SCHEDULER.update_jobs()
             env = SCHEDULER.db.get_config()

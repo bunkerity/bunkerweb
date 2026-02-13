@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # Default values
 # Hardcoded default version (immutable reference)
-DEFAULT_BUNKERWEB_VERSION="1.6.8~rc3"
+DEFAULT_BUNKERWEB_VERSION="1.6.8"
 # Mutable effective version (can be overridden by --version)
 BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 NGINX_VERSION=""
@@ -712,7 +712,7 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.28.1-1~$DISTRO_CODENAME"
+            NGINX_VERSION="1.28.2-1~$DISTRO_CODENAME"
             ;;
         "ubuntu")
             if [[ "$DISTRO_VERSION" != "22.04" && "$DISTRO_VERSION" != "24.04" ]]; then
@@ -724,7 +724,7 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.28.1-1~$DISTRO_CODENAME"
+            NGINX_VERSION="1.28.2-1~$DISTRO_CODENAME"
             ;;
         "fedora")
             if [[ "$DISTRO_VERSION" != "42" && "$DISTRO_VERSION" != "43" ]]; then
@@ -736,7 +736,7 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.28.1"
+            NGINX_VERSION="1.28.2"
             ;;
         "rhel"|"rocky"|"almalinux")
             major_version=$(echo "$DISTRO_VERSION" | cut -d. -f1)
@@ -749,7 +749,7 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.28.1"
+            NGINX_VERSION="1.28.2"
             ;;
         *)
             print_error "Unsupported operating system: $DISTRO_ID"
@@ -1189,11 +1189,7 @@ install_nginx_fedora() {
     # Enable testing repository if needed
     if ! dnf info "nginx-$NGINX_VERSION" >/dev/null 2>&1; then
         print_status "Enabling updates-testing repository"
-        if [ "$DISTRO_VERSION" = "40" ]; then
-            run_cmd dnf config-manager --set-enabled updates-testing
-        else
-            run_cmd dnf config-manager setopt updates-testing.enabled=1
-        fi
+        run_cmd dnf config-manager setopt updates-testing.enabled=1
     fi
 
     # Install NGINX

@@ -17,6 +17,7 @@
 # curl -s https://raw.githubusercontent.com/lightos/Panoptic/master/home.txt | grep -E "^\." |  awk  '{ print tolower($0) }' | sort | uniq
 # curl -s https://raw.githubusercontent.com/lightos/Panoptic/master/cases.xml | grep "file value" | cut -d'"' -f2 | grep -E "^\." |  awk  '{ print tolower($0) }' | sort | uniq
 # curl -s https://raw.githubusercontent.com/danielmiessler/SecLists/master/Fuzzing/fuzz-Bo0oM.txt | grep -Ev '\\|\.\.|=\b|%' | grep -E "^\." |  awk  '{ print tolower($0) }' | sort | uniq
+.access/
 .addressbook
 .anydesk/
 .aptitude/config
@@ -26,20 +27,28 @@
 .bash_
 .bashrc
 .boto
+.cache/
 .cache/notify-osd.log
 .cargo/
+.config.local.php
 .config/
+.coverage
+.coveralls.yml
+.credentials
 .cshrc
 .cups/
+.cvs
 .dbus/
 .deployment-secrets.txt
 .docker/
+.dockerignore
 .drush/
 # .env
 .envrc
 .eslintignore
 .fbcindex
 .forward
+.ftpconfig
 .gem/
 .git/
 .gitattributes
@@ -55,10 +64,12 @@
 .gsutil/
 .hg/
 .hgignore
+.history
 .hplip/hplip.conf
 .htaccess
 .htdigest
 .htpasswd
+.ipynb_checkpoints/
 .java/
 .ksh_history
 .kube/
@@ -73,7 +84,9 @@
 .local/state/
 .lynx_cookies
 .minikube/
+.msmtprc
 .my.cnf
+.myscmserverinfo
 .mysql_history
 .nano_history
 .netrc
@@ -84,6 +97,9 @@
 .nsr
 .nvm/
 .oh-my-
+# .pac
+# .pass
+# .passwd
 .password-store
 .pearrc
 .pgpass
@@ -94,23 +110,33 @@
 .procmailrc
 .profile
 .psql_history
+# .pwd
+.pytest_cache/
 .python_history
 .rediscli_history
+.remote-sync.json
 .rhistory
 .rhosts
+.rustup
 .rustup/
+.s3cfg
+.secrets
 .selected_editor
+.settings/
 .sh_history
-.sqlite_history
 .snap/
+.sqlite_history
 .ssh/
 .subversion/
 .svn/
 .svnignore
 .tconn/
 .tcshrc
-.tmux.conf
+.terraform.lock.hcl
+.terraform/
 .thunderbird/
+.tmux.conf
+.tools/
 .tor/
 .travis.yaml
 .travis.yml
@@ -119,18 +145,18 @@
 .vim/
 .viminfo
 .vimrc
-.vscode
 .vmware/
+.vscode
+.web.config.swp
 .wget-hsts
 .www_acl
 .wwwacl
 .xauthority
 .yarnrc
-.zshenv
 .zhistory
 .zsh_history
+.zshenv
 .zshrc
-
 
 /php.ini
 /tmp/
@@ -292,6 +318,11 @@ config_sample.yml
 config_test.yml
 config-test.yml
 config.test.yml
+config.sample.inc.php
+credentials.json
+secrets.json
+secrets.yaml
+secrets.yml
 # Compressed database dumps
 .sql.001
 .sql.7z
@@ -332,6 +363,28 @@ aws.yaml
 aws.yml
 aws-key.yaml
 aws-key.yml
+# Python cache
+__pycache__/
+# Windows system ini files
+boot.ini
+system.ini
+win.ini
+# NodeJS log file
+pm2.log
+# Generic log filename
+debug.log
+# Mysql/MariaDB config file
+debian.cnf
+my.cnf
+mysql.cnf
+mysqldump.cnf
+# FTP config files
+ftp-sync.json
+# Yarn log files
+yarn-debug.log
+yarn-error.log
+# Code coverage config file
+coverage.xml
 # Apache httpd entries can be generated with the following command:
 # curl -s https://raw.githubusercontent.com/lightos/Panoptic/master/cases.xml | grep "file value" | cut -d'"' -f2 | awk -F/ '{ { if (length($NF) > 0) {v1 = NF-1; v2 = NF} else {v1 = NF-2; v2 = NF-1} print tolower($v1"/"$v2) }) }' | grep apache | sort | uniq
 apache/access.conf
@@ -387,6 +440,7 @@ etc/adduser.conf
 etc/alias
 etc/alsa
 etc/alternatives
+etc/amavis
 etc/anacrontab
 etc/ansible
 etc/apache/access.conf
@@ -402,9 +456,10 @@ etc/apt
 etc/asciidoc
 etc/at.allow
 etc/at.deny
+etc/audit
 etc/avahi
-etc/bash_completion.d
 etc/bash.bashrc
+etc/bash_completion.d
 etc/bashrc
 etc/bind
 etc/binfmt.d
@@ -412,6 +467,7 @@ etc/bluetooth
 etc/bonobo-activation
 etc/bootptab
 etc/brltty
+etc/byobu
 etc/ca-certificates
 etc/calendar
 etc/casper.conf
@@ -432,7 +488,9 @@ etc/cron.d
 etc/cron.hourly
 etc/cron.monthly
 etc/cron.weekly
+etc/cron.yearly
 etc/crontab
+etc/crowdsec
 etc/crypttab
 etc/cups
 etc/cvs-cron.conf
@@ -449,7 +507,9 @@ etc/dictionaries-common
 etc/dkms
 etc/dns2tcpd.conf
 etc/dnsmasq.d
+etc/docker
 etc/dockeretc/dpkg
+etc/dovecot
 etc/e2fsck.conf
 etc/elasticsearch
 etc/emacs
@@ -479,6 +539,7 @@ etc/gdm3
 etc/geoclue
 etc/ghostscript
 etc/gimp
+etc/gitlab
 etc/glvnd
 etc/gnome
 etc/gnucash
@@ -515,6 +576,7 @@ etc/kernel
 etc/kibana
 etc/ld.so.conf
 etc/ldap
+etc/letsencrypt
 etc/libblockdev
 etc/libibverbs.d
 etc/libnl-3
@@ -527,6 +589,7 @@ etc/login.defs
 etc/logrotate.conf
 etc/logrotate.d
 etc/logstash
+etc/logwatch
 etc/lsb-release
 etc/ltrace.conf
 etc/lvm
@@ -563,12 +626,15 @@ etc/networkmanager
 etc/newsyslog.conf
 etc/newt
 etc/nghttpx
-etc/nginx/
+etc/nginx
 etc/nikto
 etc/npasswd
+etc/nsswitch.conf
 etc/nuxeo.conf
 etc/odbcdatasources
 etc/openal
+etc/opendkim
+etc/opendmarc
 etc/openldap/ldap.conf
 etc/openmpi
 etc/opt
@@ -598,6 +664,7 @@ etc/pulse
 etc/pure-ftpd
 etc/pureftpd
 etc/python
+etc/qemu
 etc/rc.conf
 etc/rc.d/rc.httpd
 etc/rc0.d
@@ -631,6 +698,7 @@ etc/smb.conf
 etc/smbpasswd
 etc/smi.conf
 etc/snmp
+etc/sogo
 etc/sound
 etc/spamassassin
 etc/speech-dispatcher
@@ -669,6 +737,7 @@ etc/ubuntu-advantage
 etc/udev
 etc/udisks2
 etc/ufw
+etc/unbound
 etc/update-manager
 etc/update-motd.d
 etc/update-notifier
@@ -693,12 +762,15 @@ etc/wu-ftpd
 etc/x11
 etc/xdg
 etc/xml
+gitlab.rb
+gitlab_config_
 gruntfile.js
 home/postgres
 http/httpd.conf
 httpd/conf/httpd.conf
 includes/configure.php
 inetpub/wwwroot/global.asa
+initial_root_password
 jakarta/dist/tomcat
 jakarta/tomcat/conf
 jakarta/tomcat/logs
@@ -745,6 +817,7 @@ php5/apache.conf
 php5/apache2.conf
 php5/httpd.conf
 postgresql/log/
+/proc/
 proc/0
 proc/1
 proc/2
@@ -837,10 +910,12 @@ server/default/conf
 server/default/deploy
 server/default/log
 services.yml
+sftp.json
 sites/default/default.settings.php
 sites/default/settings.local.php
 sites/default/settings.php
 squirrelmail/www
+/sys/
 sys/block
 sys/bus
 sys/class
@@ -903,9 +978,7 @@ var/saf/_log
 var/saf/port/log
 var/spool
 var/webmin
-var/www/conf
-var/www/html/squirrelmail
-var/www/log
+var/www
 volumes/macintosh_hd
 volumes/webbackup
 wamp/bin/apache
@@ -922,6 +995,7 @@ windows/setupact.log
 windows/setupapi.log
 windows/setuperr.log
 windows/system32
+windows/syswow64
 windows/updspapi.log
 windows/windowsupdate.log
 windows/wmsetup.log

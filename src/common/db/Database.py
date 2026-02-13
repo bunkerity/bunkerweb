@@ -502,7 +502,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.8~rc3"
+                return "1.6.8"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -535,7 +535,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.8~rc3",
+            "version": "1.6.8",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -2966,10 +2966,11 @@ class Database:
                     else:
                         session.query(Plugins).filter(Plugins.id.in_(missing_ids)).update({Plugins.data: None, Plugins.checksum: None})
 
-                    try:
-                        session.commit()
-                    except BaseException as e:
-                        return str(e)
+                    if per_plugin_commit:
+                        try:
+                            session.commit()
+                        except BaseException as e:
+                            return str(e)
 
             db_settings = [setting.id for setting in session.query(Settings).with_entities(Settings.id)]
 
@@ -3924,9 +3925,9 @@ class Database:
                 query = query.filter(Plugins.type.in_(["external", "ui"]))
             elif _type != "all":
                 query = query.filter_by(type=_type)
+            query = query.order_by(Plugins.id.asc())
 
-            plugins_list = query.all()
-            plugin_ids = [plugin.id for plugin in plugins_list]
+            plugin_ids = [plugin.id for plugin in query]
 
             # Pre-fetch plugin pages.
             pages = session.query(Plugin_pages.plugin_id).filter(Plugin_pages.plugin_id.in_(plugin_ids)).all()
@@ -3966,7 +3967,7 @@ class Database:
 
             # Assemble the plugin data.
             result = []
-            for plugin in plugins_list:
+            for plugin in query:
                 plugin_data: Dict[str, Any] = {
                     "id": plugin.id,
                     "stream": plugin.stream,

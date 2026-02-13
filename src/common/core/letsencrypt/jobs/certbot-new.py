@@ -38,6 +38,7 @@ from logger import getLogger  # type: ignore
 
 from letsencrypt_providers import (
     BunnyNetProvider,
+    ClouDNSProvider,
     CloudflareProvider,
     DesecProvider,
     DigitalOceanProvider,
@@ -179,6 +180,7 @@ def parse_certbot_domains(certificate_block: str) -> str:
 
 PROVIDERS: Dict[str, Type[Provider]] = {
     "bunny": BunnyNetProvider,
+    "cloudns": ClouDNSProvider,
     "cloudflare": CloudflareProvider,
     "desec": DesecProvider,
     "digitalocean": DigitalOceanProvider,
@@ -775,6 +777,9 @@ try:
     cmd_env["PYTHONPATH"] = cmd_env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in cmd_env["PYTHONPATH"] else "")
     if getenv("DATABASE_URI", ""):
         cmd_env["DATABASE_URI"] = getenv("DATABASE_URI", "")
+    if getenv("API_TOKEN", ""):
+        # Required by certbot hooks (auth/cleanup/deploy) when API token auth is enabled.
+        cmd_env["API_TOKEN"] = getenv("API_TOKEN", "")
 
     proc = run(
         [

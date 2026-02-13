@@ -586,6 +586,7 @@ bin/touch
 bin/traceroute
 bin/traceroute6
 bin/troff
+bin/trap
 bin/tshark
 bin/ul
 bin/ulimit

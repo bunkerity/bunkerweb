@@ -467,6 +467,10 @@
       "hover_info": "Bir ülkenin üzerine gelin",
       "legend": "Açıklama",
       "no_data": "Veri yok"
+    },
+    "window": {
+      "last_days": "Son {{days}} gün",
+      "title": "Panel penceresi"
     }
   },
   "datatable": {
