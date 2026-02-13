@@ -132,7 +132,7 @@
 
     | 设置                 | 默认值 | 上下文    | 多选 | 描述                                                           |
     | -------------------- | ------ | --------- | ---- | -------------------------------------------------------------- |
-    | `LISTEN_HTTP`        | `yes`  | multisite | no   | **HTTP 监听：** 当设置为 `yes` 时，响应（不安全的）HTTP 请求。 |
+    | `LISTEN_HTTP`        | `yes`  | multisite | no   | **HTTP 监听：** 当设置为 `yes` 时，响应（不安全的）HTTP 请求。也可以通过将`HTTP_PORT`留空来禁用。 |
     | `HTTP2`              | `yes`  | multisite | no   | **HTTP2：** 当启用 HTTPS 时，支持 HTTP2 协议。                 |
     | `HTTP3`              | `yes`  | multisite | no   | **HTTP3：** 当启用 HTTPS 时，支持 HTTP3 协议。                 |
     | `HTTP3_ALT_SVC_PORT` | `443`  | multisite | no   | **HTTP3 Alt-Svc 端口：** 在 Alt-Svc 标头中用于 HTTP3 的端口。  |

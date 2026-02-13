@@ -94,8 +94,8 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
 
     | Einstellung             | Standard     | Kontext | Mehrfach | Beschreibung                                                                     |
     | ----------------------- | ------------ | ------- | -------- | -------------------------------------------------------------------------------- |
-    | `HTTP_PORT`             | `8080`       | global  | Ja       | **HTTP-Port:** Portnummer für HTTP-Verkehr.                                     |
-    | `HTTPS_PORT`            | `8443`       | global  | Ja       | **HTTPS-Port:** Portnummer für HTTPS-Verkehr.                                   |
+    | `HTTP_PORT`             | `8080`       | global  | Ja       | **HTTP-Port:** Portnummer für HTTP-Verkehr. Leer lassen, um HTTP-Listening zu deaktivieren.                                     |
+    | `HTTPS_PORT`            | `8443`       | global  | Ja       | **HTTPS-Port:** Portnummer für HTTPS-Verkehr. Leer lassen, um HTTPS-Listening zu deaktivieren.                                   |
     | `USE_IPV6`              | `no`         | global  | Nein     | **IPv6-Unterstützung:** IPv6-Konnektivität aktivieren.                          |
     | `DNS_RESOLVERS`         | `127.0.0.11` | global  | Nein     | **DNS-Resolver:** DNS-Adressen der zu verwendenden Resolver.                    |
     | `CLIENT_BODY_TIMEOUT`   | `10s`        | global  | Nein     | **Client-Body-Timeout:** Timeout zum Lesen des Request-Bodys vom Client.        |
@@ -108,8 +108,8 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
     | Einstellung              | Standard | Kontext   | Mehrfach | Beschreibung                                                          |
     | ------------------------ | -------- | --------- | -------- | --------------------------------------------------------------------- |
     | `LISTEN_STREAM`          | `yes`    | multisite | Nein     | **Stream lauschen:** Lauschen für Nicht-SSL (Passthrough) aktivieren. |
-    | `LISTEN_STREAM_PORT`     | `1337`   | multisite | Ja       | **Stream-Port:** Lauschport für Nicht-SSL (Passthrough).              |
-    | `LISTEN_STREAM_PORT_SSL` | `4242`   | multisite | Ja       | **Stream-SSL-Port:** Lauschport für SSL (Passthrough).                |
+    | `LISTEN_STREAM_PORT`     | `1337`   | multisite | Ja       | **Stream-Port:** Lauschport für Nicht-SSL (Passthrough). Leer lassen, um non-SSL Stream-Listening zu deaktivieren.              |
+    | `LISTEN_STREAM_PORT_SSL` | `4242`   | multisite | Ja       | **Stream-SSL-Port:** Lauschport für SSL (Passthrough). Leer lassen, um SSL Stream-Listening zu deaktivieren.                |
     | `USE_TCP`                | `yes`    | multisite | Nein     | **TCP lauschen:** TCP-Lauschen (Stream) aktivieren.                   |
     | `USE_UDP`                | `no`     | multisite | Nein     | **UDP lauschen:** UDP-Lauschen (Stream) aktivieren.                   |
 

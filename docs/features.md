@@ -101,26 +101,26 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 === "Network & Port Settings"
 
-    | Setting                 | Default      | Context | Multiple | Description                                                               |
-    | ----------------------- | ------------ | ------- | -------- | ------------------------------------------------------------------------- |
-    | `HTTP_PORT`             | `8080`       | global  | Yes      | **HTTP Port:** Port number for HTTP traffic.                              |
-    | `HTTPS_PORT`            | `8443`       | global  | Yes      | **HTTPS Port:** Port number for HTTPS traffic.                            |
-    | `USE_IPV6`              | `no`         | global  | No       | **IPv6 Support:** Enable IPv6 connectivity.                               |
-    | `DNS_RESOLVERS`         | `127.0.0.11` | global  | No       | **DNS Resolvers:** DNS addresses of resolvers to use.                     |
-    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global  | No       | **Client Body Timeout:** Timeout for reading the client request body.     |
-    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global  | No       | **Client Header Timeout:** Timeout for reading the client request header. |
-    | `KEEPALIVE_TIMEOUT`     | `15s`        | global  | No       | **Keepalive Timeout:** Timeout for keep-alive client connections.         |
-    | `SEND_TIMEOUT`          | `10s`        | global  | No       | **Send Timeout:** Timeout for transmitting a response to the client.      |
+    | Setting                 | Default      | Context | Multiple | Description                                                                            |
+    | ----------------------- | ------------ | ------- | -------- | -------------------------------------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`       | global  | Yes      | **HTTP Port:** Port number for HTTP traffic. Leave empty to disable HTTP listening.    |
+    | `HTTPS_PORT`            | `8443`       | global  | Yes      | **HTTPS Port:** Port number for HTTPS traffic. Leave empty to disable HTTPS listening. |
+    | `USE_IPV6`              | `no`         | global  | No       | **IPv6 Support:** Enable IPv6 connectivity.                                            |
+    | `DNS_RESOLVERS`         | `127.0.0.11` | global  | No       | **DNS Resolvers:** DNS addresses of resolvers to use.                                  |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global  | No       | **Client Body Timeout:** Timeout for reading the client request body.                  |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global  | No       | **Client Header Timeout:** Timeout for reading the client request header.              |
+    | `KEEPALIVE_TIMEOUT`     | `15s`        | global  | No       | **Keepalive Timeout:** Timeout for keep-alive client connections.                      |
+    | `SEND_TIMEOUT`          | `10s`        | global  | No       | **Send Timeout:** Timeout for transmitting a response to the client.                   |
 
 === "Stream Server Settings"
 
-    | Setting                  | Default | Context   | Multiple | Description                                                    |
-    | ------------------------ | ------- | --------- | -------- | -------------------------------------------------------------- |
-    | `LISTEN_STREAM`          | `yes`   | multisite | No       | **Listen Stream:** Enable listening for non-ssl (passthrough). |
-    | `LISTEN_STREAM_PORT`     | `1337`  | multisite | Yes      | **Stream Port:** Listening port for non-ssl (passthrough).     |
-    | `LISTEN_STREAM_PORT_SSL` | `4242`  | multisite | Yes      | **Stream SSL Port:** Listening port for ssl (passthrough).     |
-    | `USE_TCP`                | `yes`   | multisite | No       | **TCP Listen:** Enable TCP listening (stream).                 |
-    | `USE_UDP`                | `no`    | multisite | No       | **UDP Listen:** Enable UDP listening (stream).                 |
+    | Setting                  | Default | Context   | Multiple | Description                                                                                                 |
+    | ------------------------ | ------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------- |
+    | `LISTEN_STREAM`          | `yes`   | multisite | No       | **Listen Stream:** Enable listening for non-ssl (passthrough).                                              |
+    | `LISTEN_STREAM_PORT`     | `1337`  | multisite | Yes      | **Stream Port:** Listening port for non-ssl (passthrough). Leave empty to disable non-SSL stream listening. |
+    | `LISTEN_STREAM_PORT_SSL` | `4242`  | multisite | Yes      | **Stream SSL Port:** Listening port for ssl (passthrough). Leave empty to disable SSL stream listening.     |
+    | `USE_TCP`                | `yes`   | multisite | No       | **TCP Listen:** Enable TCP listening (stream).                                                              |
+    | `USE_UDP`                | `no`    | multisite | No       | **UDP Listen:** Enable UDP listening (stream).                                                              |
 
 === "Worker Settings"
 
@@ -221,6 +221,28 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     LISTEN_STREAM_PORT: "1337"
     USE_TCP: "yes"
     USE_UDP: "no"
+    ```
+
+=== "Disabling Listening Modes"
+
+    You can disable specific listening modes by leaving port settings empty:
+
+    ```yaml
+    # Disable HTTP listening (HTTPS only)
+    HTTP_PORT: ""
+    HTTPS_PORT: "8443"
+
+    # Disable HTTPS listening (HTTP only)
+    HTTP_PORT: "8080"
+    HTTPS_PORT: ""
+
+    # Stream: Disable non-SSL listening (SSL only)
+    LISTEN_STREAM_PORT: ""
+    LISTEN_STREAM_PORT_SSL: "4242"
+
+    # Stream: Disable SSL listening (non-SSL only)
+    LISTEN_STREAM_PORT: "1337"
+    LISTEN_STREAM_PORT_SSL: ""
     ```
 
 ## Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
@@ -3631,12 +3653,12 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
         - **Security Advantages:** Modern protocols like HTTP/2 and HTTP/3 enforce TLS/HTTPS by default, reduce susceptibility to certain attacks, and improve privacy through encrypted headers (HTTP/3).
         - **Performance Benefits:** Features like multiplexing, header compression, server push, and binary data transfer enhance speed and efficiency.
 
-    | Setting              | Default | Context   | Multiple | Description                                                             |
-    | -------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------- |
-    | `LISTEN_HTTP`        | `yes`   | multisite | no       | **HTTP Listen:** Respond to (insecure) HTTP requests when set to `yes`. |
-    | `HTTP2`              | `yes`   | multisite | no       | **HTTP2:** Support HTTP2 protocol when HTTPS is enabled.                |
-    | `HTTP3`              | `yes`   | multisite | no       | **HTTP3:** Support HTTP3 protocol when HTTPS is enabled.                |
-    | `HTTP3_ALT_SVC_PORT` | `443`   | multisite | no       | **HTTP3 Alt-Svc Port:** Port to use in the Alt-Svc header for HTTP3.    |
+    | Setting              | Default | Context   | Multiple | Description                                                                                                                |
+    | -------------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
+    | `LISTEN_HTTP`        | `yes`   | multisite | no       | **HTTP Listen:** Respond to (insecure) HTTP requests when set to `yes`. Can also be disabled by leaving `HTTP_PORT` empty. |
+    | `HTTP2`              | `yes`   | multisite | no       | **HTTP2:** Support HTTP2 protocol when HTTPS is enabled.                                                                   |
+    | `HTTP3`              | `yes`   | multisite | no       | **HTTP3:** Support HTTP3 protocol when HTTPS is enabled.                                                                   |
+    | `HTTP3_ALT_SVC_PORT` | `443`   | multisite | no       | **HTTP3 Alt-Svc Port:** Port to use in the Alt-Svc header for HTTP3.                                                       |
 
     !!! example "About HTTP/3"
         HTTP/3, the latest version of the Hypertext Transfer Protocol, uses QUIC over UDP instead of TCP, addressing issues like head-of-line blocking for faster, more reliable connections.

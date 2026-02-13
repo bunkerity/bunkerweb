@@ -6,6 +6,7 @@
 - [FEATURE] Add ClouDNS DNS provider support to Let's Encrypt plugin
 - [FEATURE] Add new `CLIENT_BODY_TIMEOUT`, `CLIENT_HEADER_TIMEOUT`, `KEEPALIVE_TIMEOUT` and `SEND_TIMEOUT` settings to control the corresponding NGINX timeouts, allowing better handling of long-lived connections and preventing unintended timeouts.
 - [FEATURE] Add a new `gRPC` plugin to allow proxying gRPC traffic to upstream gRPC services with support for TLS, SNI, custom headers and retry policies.
+- [FEATURE] Make it possible to leave HTTP/HTTPS/STREAM/TLS ports empty to not listen on them.
 - [AUTOCONF] Add experimental support for GRPCRoute in the Kubernetes integration to allow routing gRPC traffic based on Kubernetes Gateway API resources.
 - [LINUX] Updated NGINX version to v1.28.2 for Fedora 42 and 43 integration
 - [UI] Fix status for PHP plugin to not always be shown as activated

@@ -132,7 +132,7 @@ Que vous ayez besoin de restreindre les méthodes HTTP, de gérer la taille des 
 
     | Paramètre            | Défaut | Contexte  | Multiple | Description                                                                   |
     | -------------------- | ------ | --------- | -------- | ----------------------------------------------------------------------------- |
-    | `LISTEN_HTTP`        | `yes`  | multisite | no       | **Écoute HTTP :** Répondre aux requêtes HTTP (non sécurisées) si mis à `yes`. |
+    | `LISTEN_HTTP`        | `yes`  | multisite | no       | **Écoute HTTP :** Répondre aux requêtes HTTP (non sécurisées) si mis à `yes`. Peut également être désactivé en laissant `HTTP_PORT` vide. |
     | `HTTP2`              | `yes`  | multisite | no       | **HTTP2 :** Supporte le protocole HTTP2 lorsque HTTPS est activé.             |
     | `HTTP3`              | `yes`  | multisite | no       | **HTTP3 :** Supporte le protocole HTTP3 lorsque HTTPS est activé.             |
     | `HTTP3_ALT_SVC_PORT` | `443`  | multisite | no       | **Port Alt-Svc HTTP3 :** Port à utiliser dans l'en-tête Alt-Svc pour HTTP3.   |
