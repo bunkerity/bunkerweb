@@ -13,6 +13,7 @@
 - [UI] Make it possible to edit settings with the `wizard` method in the web UI
 - [UI] Enhance reports functionality with improved filter handling and data fetching
 - [UI] Enhance home dashboard with new IP blocking metrics and improved tooltips
+- [API] Fix redis sentinel issue when a password is set on the master node
 
 ## v1.6.8 - 2026/02/06
 

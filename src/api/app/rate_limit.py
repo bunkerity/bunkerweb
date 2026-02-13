@@ -423,23 +423,40 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
         storage_options.setdefault("max_connections", keepalive_pool)
 
         if sentinels and sentinel_master:
-            # redis sentinel URI: redis+sentinel://[user:pass@]h1:26379,h2:26379/master
-            auth = ""
-            if username or password:
-                auth = f"{username}:{password}@"
+            # redis sentinel URI must not embed master auth, otherwise limits applies
+            # these credentials to Sentinel too. Keep Sentinel and Redis auth separate.
             # ensure ports on sentinels (default 26379)
             parts = []
             for item in sentinels.split():
                 host, _, port = item.partition(":")
                 parts.append(f"{host}:{port or '26379'}")
             hostlist = ",".join(parts)
-            storage = f"redis+sentinel://{auth}{hostlist}/{sentinel_master}"
-            # pass SSL and auth to sentinel via options
+            storage = f"redis+sentinel://{hostlist}/{sentinel_master}"
+            # pass SSL and auth to sentinel via options.
             storage_options.setdefault("ssl", redis_ssl)
+            if username:
+                storage_options.setdefault("username", username)
+            if password:
+                storage_options.setdefault("password", password)
             sent_user = str(_env_or_cfg("REDIS_SENTINEL_USERNAME", "") or "").strip()
             sent_pass = str(_env_or_cfg("REDIS_SENTINEL_PASSWORD", "") or "").strip()
-            if sent_user or sent_pass:
-                storage_options.setdefault("sentinel_kwargs", {"username": sent_user, "password": sent_pass})
+            current_sentinel_kwargs = storage_options.get("sentinel_kwargs")
+            if not isinstance(current_sentinel_kwargs, dict):
+                current_sentinel_kwargs = {}
+
+            sentinel_kwargs = dict(current_sentinel_kwargs)
+            # Ensure sentinel_kwargs is truthy even without Sentinel auth.
+            sentinel_kwargs.setdefault("socket_timeout", storage_options.get("socket_timeout"))
+            sentinel_kwargs.setdefault("socket_connect_timeout", storage_options.get("socket_connect_timeout"))
+            sentinel_kwargs.setdefault("socket_keepalive", storage_options.get("socket_keepalive"))
+            sentinel_kwargs.setdefault("ssl", redis_ssl)
+
+            # Explicit None values prevent limits from reusing master auth
+            # when Sentinel auth is intentionally unset.
+            sentinel_kwargs.setdefault("username", sent_user or None)
+            sentinel_kwargs.setdefault("password", sent_pass or None)
+
+            storage_options["sentinel_kwargs"] = sentinel_kwargs
         else:
             # Direct redis connection
             host = str(_env_or_cfg("REDIS_HOST", "") or "").strip()
@@ -594,6 +611,10 @@ def setup_rate_limiter(app) -> None:
     # Use slowapi's default handler to include useful headers
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
     _enabled = True
+    sentinel_opts = storage_options.get("sentinel_kwargs", {})
+    sentinel_auth_enabled = isinstance(sentinel_opts, dict) and bool(sentinel_opts.get("password"))
+    master_auth_enabled = bool(storage_options.get("password"))
     LOGGER.info(
-        f"Rate limiting enabled with storage={storage}; strategy={api_config.API_RATE_LIMIT_STRATEGY}; headers={api_config.rate_limit_headers_enabled}; defaults={len(_base_limits)}; rules={len(_rules)}; auth_limit={'on' if _auth_limit else 'off'}"
+        f"Rate limiting enabled with storage={storage}; strategy={api_config.API_RATE_LIMIT_STRATEGY}; headers={api_config.rate_limit_headers_enabled}; defaults={len(_base_limits)}; rules={len(_rules)}; auth_limit={'on' if _auth_limit else 'off'}; "
+        + f"redis_master_auth={'on' if master_auth_enabled else 'off'}; redis_sentinel_auth={'on' if sentinel_auth_enabled else 'off'}"
     )
