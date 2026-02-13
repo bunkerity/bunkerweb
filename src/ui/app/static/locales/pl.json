@@ -467,6 +467,10 @@
       "hover_info": "Najedź kursorem na kraj",
       "legend": "Legenda",
       "no_data": "Brak danych"
+    },
+    "window": {
+      "last_days": "Ostatnie {{days}} dni",
+      "title": "Okno pulpitu"
     }
   },
   "datatable": {

@@ -467,6 +467,10 @@
       "hover_info": "국가 위에 마우스를 올리세요",
       "legend": "범례",
       "no_data": "데이터 없음"
+    },
+    "window": {
+      "last_days": "지난 {{days}}일",
+      "title": "대시보드 창"
     }
   },
   "datatable": {

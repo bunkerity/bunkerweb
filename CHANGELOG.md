@@ -7,8 +7,12 @@
 - [FEATURE] Add new `CLIENT_BODY_TIMEOUT`, `CLIENT_HEADER_TIMEOUT`, `KEEPALIVE_TIMEOUT` and `SEND_TIMEOUT` settings to control the corresponding NGINX timeouts, allowing better handling of long-lived connections and preventing unintended timeouts.
 - [FEATURE] Add a new `gRPC` plugin to allow proxying gRPC traffic to upstream gRPC services with support for TLS, SNI, custom headers and retry policies.
 - [AUTOCONF] Add experimental support for GRPCRoute in the Kubernetes integration to allow routing gRPC traffic based on Kubernetes Gateway API resources.
+- [LINUX] Updated NGINX version to v1.28.2 for Fedora 42 and 43 integration
 - [UI] Fix status for PHP plugin to not always be shown as activated
 - [UI] Fix dark theme background for datatables actions
+- [UI] Make it possible to edit settings with the `wizard` method in the web UI
+- [UI] Enhance reports functionality with improved filter handling and data fetching
+- [UI] Enhance home dashboard with new IP blocking metrics and improved tooltips
 
 ## v1.6.8 - 2026/02/06
 

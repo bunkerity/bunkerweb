@@ -6,6 +6,7 @@ from traceback import format_exc
 from html import escape
 from io import StringIO, BytesIO
 import csv
+from time import monotonic
 
 
 from flask import Blueprint, jsonify, render_template, request, url_for, Response, send_file
@@ -19,6 +20,61 @@ from app.utils import LOGGER
 from app.routes.utils import cors_required
 
 reports = Blueprint("reports", __name__)
+REPORTS_FILTERS_CACHE_TTL_SECONDS = 5.0
+REPORTS_FILTERS_CACHE: dict[str, dict[str, object]] = {}
+
+
+def build_search_panes_options(pane_counts_backend: dict) -> dict:
+    base_flags_url = url_for("static", filename="img/flags")
+    search_panes_options = {}
+
+    for field, values in pane_counts_backend.items():
+        if field == "country":
+            search_panes_options["country"] = []
+            for code, counts in values.items():
+                str_code = str(code)
+                country_code = str_code.lower()
+                is_unknown = str_code in ("unknown", "local", "n/a")
+                fallback_label = "N/A" if is_unknown else str_code
+                i18n_key = "not_applicable" if str_code in ("unknown", "local") else str_code.upper()
+                flag_code = "zz" if is_unknown else country_code
+                search_panes_options["country"].append(
+                    {
+                        "label": f'<img src="{base_flags_url}/{flag_code}.svg" class="border border-1 p-0 me-1" height="17" />&nbsp;－&nbsp;<span data-i18n="country.{i18n_key}">{fallback_label}</span>',
+                        "value": str_code,
+                        "total": counts["total"],
+                        "count": counts["count"],
+                    }
+                )
+        elif field == "server_name":
+            search_panes_options["server_name"] = []
+            for name, counts in values.items():
+                search_panes_options["server_name"].append(
+                    {
+                        "label": f'<code class="language-dns">{escape("default server" if name == "_" else name)}</code>',
+                        "value": escape(name),
+                        "total": counts["total"],
+                        "count": counts["count"],
+                    }
+                )
+        else:
+            search_panes_options[field] = [
+                {
+                    "label": escape(str(value)),
+                    "value": escape(str(value)),
+                    "total": counts["total"],
+                    "count": counts["count"],
+                }
+                for value, counts in values.items()
+            ]
+
+    return search_panes_options
+
+
+def pane_counts_has_values(pane_counts_backend: dict) -> bool:
+    if not isinstance(pane_counts_backend, dict):
+        return False
+    return any(isinstance(values, dict) and len(values) > 0 for values in pane_counts_backend.values())
 
 
 @reports.route("/reports", methods=["GET"])
@@ -93,6 +149,7 @@ def reports_fetch():
 
     # Build search panes string for backend (format: field1:value1,value2;field2:value3)
     search_panes_str = ";".join(f"{field}:{','.join(values)}" for field, values in search_panes.items()) if search_panes else ""
+    include_pane_counts = False
 
     # Determine order column name
     order_column_name = columns[order_column_index] if 0 <= order_column_index < len(columns) else "date"
@@ -108,12 +165,12 @@ def reports_fetch():
                 order_dir=order_direction,
                 search_panes=search_panes_str,
                 count_only=False,
+                include_pane_counts=include_pane_counts,
             )
 
             total_count = result.get("total", 0)
             filtered_count = result.get("filtered", 0)
             paginated_reports = result.get("data", [])
-            pane_counts_backend = result.get("pane_counts", {})
 
         except Exception as e:
             LOGGER.error(f"Error using optimized reports query: {e}")
@@ -123,34 +180,35 @@ def reports_fetch():
             total_count = 0
             filtered_count = 0
             paginated_reports = []
-            pane_counts_backend = {}
     else:
         # Fallback when BW_INSTANCES_UTILS is not available
         result = {"total": 0, "filtered": 0, "data": [], "pane_counts": {}}
         total_count = 0
         filtered_count = 0
         paginated_reports = []
-        pane_counts_backend = {}
 
     # Format reports for the response
     def format_report(report):
         try:
-            # Handle the data field safely - ensure it's proper JSON or convert safely
             data_field = report.get("data", {})
-            if isinstance(data_field, str):
-                try:
-                    # Try to parse it as JSON
-                    data_output = dumps(loads(data_field))
-                except (ValueError, TypeError):
-                    # If it fails, wrap it as a JSON string
-                    data_output = dumps({"raw": data_field})
+            has_data = False
+            if isinstance(data_field, dict):
+                has_data = len(data_field) > 0
+            elif isinstance(data_field, list):
+                has_data = len(data_field) > 0
+            elif isinstance(data_field, str):
+                stripped = data_field.strip()
+                has_data = stripped not in ("", "{}", "[]", "null", "None")
             else:
-                # If it's not a string, dump the object directly
-                data_output = dumps(data_field)
+                has_data = data_field is not None
+
+            request_id = str(report.get("id", "N/A"))
+            server_name = str(report.get("server_name", "N/A"))
 
             return {
                 "date": datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A",
-                "id": escape(str(report.get("id", "N/A"))),
+                "id": escape(request_id),
+                "request_id": request_id,
                 "ip": escape(str(report.get("ip", "N/A"))),
                 "country": escape(str(report.get("country", "N/A"))),
                 "method": escape(str(report.get("method", "N/A"))),
@@ -158,11 +216,13 @@ def reports_fetch():
                 "status": escape(str(report.get("status", "N/A"))),
                 "user_agent": escape(str(report.get("user_agent", "N/A"))),
                 "reason": escape(str(report.get("reason", "N/A"))),
-                "server_name": escape(str(report.get("server_name", "N/A"))),
-                "data": data_output,
+                "server_name": escape(server_name),
+                # Keep payloads light; details are lazy-loaded by request_id.
+                "data": "available" if has_data else "",
+                "has_data": has_data,
                 "security_mode": escape(str(report.get("security_mode", "N/A"))),
                 # default ban duration in seconds for quick-ban action
-                "ban_default_exp": get_default_ban_time(str(report.get("server_name", "_"))),
+                "ban_default_exp": get_default_ban_time(server_name),
                 # Placeholder for UI actions column
                 "actions": "",
             }
@@ -172,6 +232,7 @@ def reports_fetch():
             return {
                 "date": "N/A",
                 "id": "N/A",
+                "request_id": "N/A",
                 "ip": escape(str(report.get("ip", "N/A"))),
                 "country": "N/A",
                 "method": "N/A",
@@ -180,7 +241,8 @@ def reports_fetch():
                 "user_agent": "N/A",
                 "reason": "Error parsing report data",
                 "server_name": "N/A",
-                "data": "{}",
+                "data": "",
+                "has_data": False,
                 "security_mode": "N/A",
                 "ban_default_exp": 86400,
                 "actions": "",
@@ -188,60 +250,112 @@ def reports_fetch():
 
     formatted_reports = [format_report(report) for report in paginated_reports]
 
-    # Prepare SearchPanes options from backend counts
-    base_flags_url = url_for("static", filename="img/flags")
-    search_panes_options = {}
-
-    for field, values in pane_counts_backend.items():
-        if field == "country":
-            search_panes_options["country"] = []
-            for code, counts in values.items():
-                str_code = str(code)
-                country_code = str_code.lower()
-                is_unknown = str_code in ("unknown", "local", "n/a")
-                fallback_label = "N/A" if is_unknown else str_code
-                i18n_key = "not_applicable" if str_code in ("unknown", "local") else str_code.upper()
-                flag_code = "zz" if is_unknown else country_code
-                search_panes_options["country"].append(
-                    {
-                        "label": f'<img src="{base_flags_url}/{flag_code}.svg" class="border border-1 p-0 me-1" height="17" />&nbsp;－&nbsp;<span data-i18n="country.{i18n_key}">{fallback_label}</span>',
-                        "value": str_code,
-                        "total": counts["total"],
-                        "count": counts["count"],
-                    }
-                )
-        elif field == "server_name":
-            search_panes_options["server_name"] = []
-            for name, counts in values.items():
-                search_panes_options["server_name"].append(
-                    {
-                        "label": f'<code class="language-dns">{escape("default server" if name == "_" else name)}</code>',
-                        "value": escape(name),
-                        "total": counts["total"],
-                        "count": counts["count"],
-                    }
-                )
-        else:
-            search_panes_options[field] = [
-                {
-                    "label": escape(str(value)),
-                    "value": escape(str(value)),
-                    "total": counts["total"],
-                    "count": counts["count"],
-                }
-                for value, counts in values.items()
-            ]
-
     # Response
-    return jsonify(
-        {
-            "draw": draw,
-            "recordsTotal": total_count,
-            "recordsFiltered": filtered_count,
-            "data": formatted_reports,
-            "searchPanes": {"options": search_panes_options},
-        }
-    )
+    response_payload = {
+        "draw": draw,
+        "recordsTotal": total_count,
+        "recordsFiltered": filtered_count,
+        "data": formatted_reports,
+    }
+
+    return jsonify(response_payload)
+
+
+@reports.route("/reports/filters", methods=["POST"])
+@login_required
+@cors_required
+def reports_filters():
+    search_value = request.form.get("search[value]", "").lower()
+    search_panes = defaultdict(list)
+    for key, value in request.form.items():
+        if key.startswith("searchPanes["):
+            field = key.split("[")[1].split("]")[0]
+            search_panes[field].append(value)
+
+    search_panes_str = ";".join(f"{field}:{','.join(sorted(values))}" for field, values in sorted(search_panes.items())) if search_panes else ""
+    has_active_panes = any(values for values in search_panes.values())
+
+    force_refresh = request.form.get("force", "").strip().lower() in ("1", "true", "yes")
+    if has_active_panes:
+        # Always recompute pane counters while filters are actively selected
+        # to keep SearchPanes counts in sync with current selection.
+        force_refresh = True
+
+    cache_key = f"search={search_value}|panes={search_panes_str}"
+    cache_now = monotonic()
+    cache_entry = REPORTS_FILTERS_CACHE.get(cache_key) or {}
+    cache_payload = cache_entry.get("payload")
+    cache_expires_at = float(cache_entry.get("expires_at", 0.0) or 0.0)
+
+    if not force_refresh and cache_payload and cache_expires_at > cache_now:
+        return jsonify(cache_payload)
+
+    pane_counts_backend = {}
+    if BW_INSTANCES_UTILS:
+        try:
+            result = BW_INSTANCES_UTILS.get_reports_query(
+                start=0,
+                length=0,
+                search=search_value,
+                order_column="date",
+                order_dir="desc",
+                search_panes=search_panes_str,
+                count_only=True,
+                include_pane_counts=True,
+            )
+            pane_counts_backend = result.get("pane_counts", {})
+
+            # Safety fallback: if count-only pane aggregation unexpectedly returns
+            # empty panes, retry through the non-count-only path (historically stable).
+            if not pane_counts_has_values(pane_counts_backend):
+                fallback_result = BW_INSTANCES_UTILS.get_reports_query(
+                    start=0,
+                    length=1,
+                    search=search_value,
+                    order_column="date",
+                    order_dir="desc",
+                    search_panes=search_panes_str,
+                    count_only=False,
+                    include_pane_counts=True,
+                )
+                pane_counts_backend = fallback_result.get("pane_counts", {})
+        except Exception as e:
+            LOGGER.error(f"Error loading reports filters: {e}")
+            LOGGER.debug(format_exc())
+
+    payload = {"searchPanes": {"options": build_search_panes_options(pane_counts_backend)}}
+    if pane_counts_has_values(pane_counts_backend):
+        REPORTS_FILTERS_CACHE[cache_key] = {"payload": payload, "expires_at": cache_now + REPORTS_FILTERS_CACHE_TTL_SECONDS}
+    else:
+        # Don't keep empty pane snapshots around; allow immediate retry.
+        REPORTS_FILTERS_CACHE.pop(cache_key, None)
+    return jsonify(payload)
+
+
+@reports.route("/reports/data", methods=["POST"])
+@login_required
+@cors_required
+def report_data_fetch():
+    report_id = request.form.get("report_id", "").strip()
+    hostname = request.form.get("hostname", "").strip() or None
+
+    if not report_id:
+        return jsonify({"status": "error", "message": "Missing report_id"}), 400
+
+    if not BW_INSTANCES_UTILS:
+        return jsonify({"status": "error", "message": "Reports service unavailable"}), 503
+
+    try:
+        report_data = BW_INSTANCES_UTILS.get_report_data(report_id=report_id, hostname=hostname)
+    except Exception as e:
+        LOGGER.error(f"Failed to fetch report data for id={report_id}: {e}")
+        LOGGER.debug(format_exc())
+        return jsonify({"status": "error", "message": "Failed to load report data"}), 500
+
+    if report_data is None:
+        return jsonify({"status": "error", "message": "Report data not found"}), 404
+
+    return jsonify({"status": "success", "report_id": report_id, "data": report_data})
 
 
 @reports.route("/reports/export/csv", methods=["GET"])
@@ -264,6 +378,7 @@ def reports_export_csv():
                 order_dir=order_dir,
                 search_panes="",
                 count_only=False,
+                include_pane_counts=False,
             )
             all_reports = result.get("data", [])
         else:
@@ -355,6 +470,7 @@ def reports_export_excel():
                 order_dir=order_dir,
                 search_panes="",
                 count_only=False,
+                include_pane_counts=False,
             )
             all_reports = result.get("data", [])
         else:

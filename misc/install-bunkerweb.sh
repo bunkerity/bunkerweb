@@ -736,7 +736,7 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.28.1"
+            NGINX_VERSION="1.28.2"
             ;;
         "rhel"|"rocky"|"almalinux")
             major_version=$(echo "$DISTRO_VERSION" | cut -d. -f1)
@@ -1189,11 +1189,7 @@ install_nginx_fedora() {
     # Enable testing repository if needed
     if ! dnf info "nginx-$NGINX_VERSION" >/dev/null 2>&1; then
         print_status "Enabling updates-testing repository"
-        if [ "$DISTRO_VERSION" = "40" ]; then
-            run_cmd dnf config-manager --set-enabled updates-testing
-        else
-            run_cmd dnf config-manager setopt updates-testing.enabled=1
-        fi
+        run_cmd dnf config-manager setopt updates-testing.enabled=1
     fi
 
     # Install NGINX

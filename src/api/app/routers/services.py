@@ -70,6 +70,13 @@ def _persist_config(config: Dict[str, Any]) -> JSONResponse:
     return JSONResponse(status_code=200, content={"status": "success", "changed_plugins": sorted(list(ret))})
 
 
+def _service_method(service: str) -> Optional[str]:
+    for item in get_db().get_services(with_drafts=True):
+        if item.get("id") == service:
+            return item.get("method")
+    return None
+
+
 @router.post("", dependencies=[Depends(guard)])
 def create_service(req: ServiceCreateRequest) -> JSONResponse:
     """Create a new service with the specified configuration.
@@ -166,6 +173,8 @@ def delete_service(service: str) -> JSONResponse:
     services_list = (conf.get("SERVER_NAME", "") or "").split()
     if service not in services_list:
         return JSONResponse(status_code=404, content={"status": "error", "message": f"Service {service} not found"})
+    if _service_method(service) == "wizard":
+        return JSONResponse(status_code=403, content={"status": "error", "message": f"Service {service} is managed by wizard and cannot be deleted"})
 
     # Remove from server list
     conf["SERVER_NAME"] = " ".join([s for s in services_list if s != service])

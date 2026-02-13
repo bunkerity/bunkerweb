@@ -467,6 +467,10 @@
       "hover_info": "किसी देश पर होवर करें",
       "legend": "लीजेंड",
       "no_data": "कोई डेटा नहीं"
+    },
+    "window": {
+      "last_days": "Last {{days}} days",
+      "title": "Dashboard window"
     }
   },
   "datatable": {
