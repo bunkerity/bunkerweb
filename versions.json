@@ -9,9 +9,7 @@
   {
     "version": "1.6.8~rc3",
     "title": "1.6.8~rc3",
-    "aliases": [
-      "rc"
-    ],
+    "aliases": [],
     "properties": {
       "hidden": true
     }
@@ -36,7 +34,8 @@
     "version": "1.6.8",
     "title": "1.6.8",
     "aliases": [
-      "latest"
+      "latest",
+      "rc"
     ]
   },
   {

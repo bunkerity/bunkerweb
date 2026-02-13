@@ -1252,7 +1252,7 @@
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.8-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.8</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -1267,7 +1267,7 @@
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># Make sure to set the correct instance name</span>
@@ -1291,7 +1291,7 @@
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.8-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.8</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin&quot;</span>
@@ -1370,7 +1370,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <h3 id="linux-vs-docker-specifics">Linux vs Docker specifics</h3>
 <ul>
 <li>Bind defaults: Docker images listen on <code>0.0.0.0:7000</code>; Linux packages bind to <code>127.0.0.1:7000</code>. Override with <code>UI_LISTEN_ADDR</code> / <code>UI_LISTEN_PORT</code>.</li>
-<li>Proxy headers: <code>UI_FORWARDED_ALLOW_IPS</code> defaults to <code>*</code>; on Linux installations set it to your reverse proxy IPs for tighter defaults.</li>
+<li>Proxy headers: <code>UI_FORWARDED_ALLOW_IPS</code> defaults to <code>127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16</code>; <code>UI_PROXY_ALLOW_IPS</code> defaults to the value of <code>FORWARDED_ALLOW_IPS</code>. On Linux installations set them to your reverse proxy IPs for tighter defaults.</li>
 <li>Secrets and state: <code>/var/lib/bunkerweb</code> stores <code>FLASK_SECRET</code>, Biscuit keys, and TOTP material. Mount it in Docker; on Linux it is created and managed by the package scripts.</li>
 <li>Logs: <code>/var/log/bunkerweb</code> must be readable by UID/GID 101 (or the mapped UID in rootless Docker). Packages create the path; containers need a volume with correct ownership.</li>
 <li>Wizard behavior: easy-install on Linux starts the UI and wizard automatically; Docker users reach the wizard via the reverse-proxied URL unless they preseed env vars.</li>
@@ -1466,7 +1466,13 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <td><code>UI_FORWARDED_ALLOW_IPS</code></td>
 <td>Trusted proxy IPs for <code>X-Forwarded-*</code></td>
 <td>Comma/space-separated IPs/CIDRs</td>
-<td><code>*</code></td>
+<td><code>127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16</code></td>
+</tr>
+<tr>
+<td><code>UI_PROXY_ALLOW_IPS</code></td>
+<td>Trusted proxy IPs for PROXY protocol</td>
+<td>Comma/space-separated IPs/CIDRs</td>
+<td><code>FORWARDED_ALLOW_IPS</code></td>
 </tr>
 </tbody>
 </table>
@@ -1611,9 +1617,15 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 <tr>
 <td><code>FORWARDED_ALLOW_IPS</code></td>
-<td>Deprecated alias for proxy allowlist</td>
+<td>Alias for proxy allowlist</td>
 <td>IPs/CIDRs</td>
-<td><code>*</code></td>
+<td><code>127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16</code></td>
+</tr>
+<tr>
+<td><code>PROXY_ALLOW_IPS</code></td>
+<td>Alias for PROXY allowlist</td>
+<td>IPs/CIDRs</td>
+<td><code>FORWARDED_ALLOW_IPS</code></td>
 </tr>
 <tr>
 <td><code>DISABLE_CONFIGURATION_TESTING</code></td>

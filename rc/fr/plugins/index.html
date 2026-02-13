@@ -1198,37 +1198,37 @@
 <tbody>
 <tr>
 <td style="text-align: center;"><strong>ClamAV</strong></td>
-<td style="text-align: center;">1.9</td>
+<td style="text-align: center;">1.10</td>
 <td style="text-align: left;">Analyse automatiquement les fichiers téléchargés avec le moteur antivirus ClamAV et rejette la demande lorsqu'un fichier est détecté comme malveillant.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">bunkerweb-plugins/clamav</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Coraza</strong></td>
-<td style="text-align: center;">1.9</td>
+<td style="text-align: center;">1.10</td>
 <td style="text-align: left;">Inspectez les requêtes à l'aide du WAF Coraza (alternative à ModSecurity).</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza">bunkerweb-plugins/coraza</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Discorde</strong></td>
-<td style="text-align: center;">1.9</td>
+<td style="text-align: center;">1.10</td>
 <td style="text-align: left;">Envoyez des notifications de sécurité à un canal Discord à l'aide d'un Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord">bunkerweb-plugins/discord</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Lâche</strong></td>
-<td style="text-align: center;">1.9</td>
+<td style="text-align: center;">1.10</td>
 <td style="text-align: left;">Envoyez des notifications de sécurité à un canal Slack à l'aide d'un Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack">bunkerweb-plugins/slack</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>VirusTotal</strong></td>
-<td style="text-align: center;">1.9</td>
+<td style="text-align: center;">1.10</td>
 <td style="text-align: left;">Analyse automatiquement les fichiers téléchargés à l'aide de l'API VirusTotal et rejette la demande lorsqu'un fichier est détecté comme malveillant.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">bunkerweb-plugins/virustotal</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Crochet Web</strong></td>
-<td style="text-align: center;">1.9</td>
+<td style="text-align: center;">1.10</td>
 <td style="text-align: left;">Envoyez des notifications de sécurité à un point de terminaison HTTP personnalisé à l'aide d'un Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook">bunkerweb-plugins/webhook</a></td>
 </tr>
@@ -1237,7 +1237,7 @@
 <h2 id="comment-utiliser-un-plugin">Comment utiliser un plugin</h2>
 <h3 id="automatique">Automatique</h3>
 <p>Si vous souhaitez installer rapidement des plugins externes, vous pouvez utiliser ce <code>EXTERNAL_PLUGIN_URLS</code> paramètre. Il prend une liste d'URL séparées par des espaces, chacune pointant vers une archive compressée (format zip) contenant un ou plusieurs plugins.</p>
-<p>Vous pouvez utiliser la valeur suivante si vous souhaitez installer automatiquement les plugins officiels : <code>EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.9.zip</code></p>
+<p>Vous pouvez utiliser la valeur suivante si vous souhaitez installer automatiquement les plugins officiels : <code>EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.10.zip</code></p>
 <h3 id="manuelle">Manuelle</h3>
 <p>La première étape consiste à installer le plugin en plaçant ses fichiers dans le dossier de données correspondant <code>plugins</code> . La procédure dépend de votre intégration :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label></div>
@@ -1281,7 +1281,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc3</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8</span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="nn">...</span>
@@ -1303,7 +1303,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="nn">...</span>
@@ -1334,7 +1334,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/shared/bw-plugins:/data/plugins</span>
 <span class="nn">...</span>
@@ -1374,7 +1374,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc3</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8</span>
 <span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
 <span class="w">          </span><span class="nt">env</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
@@ -1411,7 +1411,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <h3 id="structure">Structure</h3>
 <div class="admonition tip">
 <p class="admonition-title">Plugins existants</p>
-<p>Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des <a href="https://github.com/bunkerity/bunkerweb-plugins">plugins officiels</a> et des <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc3/src/common/core">plugins core</a> (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).</p>
+<p>Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des <a href="https://github.com/bunkerity/bunkerweb-plugins">plugins officiels</a> et des <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.8/src/common/core">plugins core</a> (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).</p>
 </div>
 <p>À quoi ressemble la structure d'un plugin :
 <div class="highlight"><pre><span></span><code>plugin /
@@ -1846,7 +1846,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Plus d'exemples</p>
-<p>Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.8-rc3/src/bw/lua/bunkerweb">répertoire lua</a> du dépôt.</p>
+<p>Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.8/src/bw/lua/bunkerweb">répertoire lua</a> du dépôt.</p>
 </div>
 <h3 id="emplois">Emplois</h3>
 <p>BunkerWeb utilise un planificateur de tâches interne pour des tâches périodiques telles que le renouvellement des certificats avec certbot, le téléchargement de listes noires, le téléchargement de fichiers MMDB, ... Vous pouvez ajouter des tâches de votre choix en les plaçant dans un sous-dossier nommé <strong>tâches</strong> et en les répertoriant dans le  fichier de métadonnées <strong>plugin.json</strong>. N'oubliez pas d'ajouter les permissions d'exécution pour tout le monde afin d'éviter tout problème lorsqu'un utilisateur clone et installe votre plugin.</p>

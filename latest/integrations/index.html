@@ -3955,7 +3955,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> <
 <p>For Manager, Scheduler, UI, and API installations, you must configure a shared database using the <code>DATABASE_URI</code> setting. The format is: <code>mariadb+pymysql://user:password@host:port/database</code> (or <code>postgresql://</code>, <code>mysql+pymysql://</code>, <code>sqlite:////path/to/db.sqlite</code>).</p>
 </div>
 <h3 id="installation-using-package-manager">Installation using package manager</h3>
-<p>Please ensure that you have <strong>NGINX 1.28.2 installed before installing BunkerWeb</strong>. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
+<p>Please ensure that you have <strong>NGINX 1.28.2 installed before installing BunkerWeb</strong>. For all distributions, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Debian Bookworm/Trixie</label><label for="__tabbed_1_2">Ubuntu</label><label for="__tabbed_1_3">Fedora</label><label for="__tabbed_1_4">RedHat</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -4033,8 +4033,8 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>setopt<span class="w"> </span>updates-testing.enabled<span class="o">=</span><span class="m">1</span>
 </code></pre></div>
 </div>
-<p>Fedora already provides NGINX 1.28.1 that we support</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.28.1
+<p>Fedora already provides NGINX 1.28.2 that we support</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.28.2
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">Disable the setup wizard</p>
@@ -4586,7 +4586,8 @@ and also monitors other Kubernetes objects, such as <a href="https://kubernetes.
 <p>Gateway API mode is currently <strong>beta</strong>.</p>
 <p>Make sure the Gateway API CRDs are installed in your cluster (see the <a href="https://gateway-api.sigs.k8s.io/guides/getting-started/#installing-gateway-api">Gateway API installation guide</a>).</p>
 <p>If you use the Kubernetes Gateway API, set <code>KUBERNETES_MODE=yes</code> and <code>KUBERNETES_GATEWAY_MODE=yes</code>.</p>
-<p>The controller will watch <code>Gateway</code>, <code>HTTPRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code>, and <code>UDPRoute</code> resources instead of <code>Ingress</code> objects. You can optionally limit what it processes with <code>KUBERNETES_GATEWAY_CLASS</code> and choose <code>KUBERNETES_GATEWAY_API_VERSION</code> (<code>v1</code>, <code>v1beta1</code>, <code>v1beta2</code>, <code>v1alpha2</code>, or <code>v1alpha1</code>).</p>
+<p>The controller will watch <code>Gateway</code>, <code>HTTPRoute</code>, <code>GRPCRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code>, and <code>UDPRoute</code> resources instead of <code>Ingress</code> objects. You can optionally limit what it processes with <code>KUBERNETES_GATEWAY_CLASS</code> and choose <code>KUBERNETES_GATEWAY_API_VERSION</code> (<code>v1</code>, <code>v1beta1</code>, <code>v1beta2</code>, <code>v1alpha2</code>, or <code>v1alpha1</code>).</p>
+<p><code>GRPCRoute</code> support is currently <strong>experimental</strong> in BunkerWeb.</p>
 <p>If your Service name is not <code>bunkerweb</code>, set <code>BUNKERWEB_SERVICE_NAME</code> so status patching reads the correct Service.</p>
 </div>
 <div class="admonition info">
@@ -5163,20 +5164,20 @@ It is recommended to utilize <a href="https://kubernetes.io/docs/reference/acces
 <span class="nn">...</span>
 </code></pre></div>
 <h3 id="gateway-resources">Gateway resources</h3>
-<p>When Gateway API mode is enabled, you can declare <code>Gateway</code>, <code>HTTPRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code>, and <code>UDPRoute</code> resources.
-BunkerWeb settings are provided as <code>bunkerweb.io/&lt;SETTING&gt;</code> annotations on the <code>HTTPRoute</code>; to scope a setting to a host,
+<p>When Gateway API mode is enabled, you can declare <code>Gateway</code>, <code>HTTPRoute</code>, <code>GRPCRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code>, and <code>UDPRoute</code> resources.
+BunkerWeb settings are provided as <code>bunkerweb.io/&lt;SETTING&gt;</code> annotations on the <code>HTTPRoute</code>/<code>GRPCRoute</code>; to scope a setting to a host,
 use <code>bunkerweb.io/&lt;hostname&gt;_&lt;SETTING&gt;</code>. The <code>hostnames</code> field drives the server names. For <code>TCPRoute</code>/<code>UDPRoute</code> (and <code>TLSRoute</code> without <code>hostnames</code>), BunkerWeb generates a server name like <code>&lt;route&gt;.&lt;namespace&gt;.&lt;protocol&gt;</code>. See <a href="#gateway-class">Gateway class</a>.
-Annotations on the <code>Gateway</code> itself apply to all routes attached to it, while annotations on an <code>HTTPRoute</code> only apply to that route.
+Annotations on the <code>Gateway</code> itself apply to all routes attached to it, while annotations on an <code>HTTPRoute</code>/<code>GRPCRoute</code> only apply to that route.
 You can still scope gateway annotations to a specific server name using <code>bunkerweb.io/&lt;hostname&gt;_&lt;SETTING&gt;</code>, and they will only apply if that route/server name exists.</p>
 <h4 id="supported-resources">Supported resources</h4>
 <ul>
-<li>Resources: <code>HTTPRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code>, and <code>UDPRoute</code> (no <code>GRPCRoute</code>).</li>
+<li>Resources: <code>HTTPRoute</code>, <code>GRPCRoute</code> (experimental), <code>TLSRoute</code>, <code>TCPRoute</code>, and <code>UDPRoute</code>.</li>
 <li>Rules: only the first rule is used for <code>TLSRoute</code>, <code>TCPRoute</code>, and <code>UDPRoute</code>.</li>
 <li>Backends: <code>Service</code> only, first <code>backendRef</code> per rule.</li>
 </ul>
 <h4 id="protocols-and-tls">Protocols and TLS</h4>
 <ul>
-<li>Listener protocols: <code>HTTP</code>/<code>HTTPS</code> for <code>HTTPRoute</code>, <code>TLS</code> for <code>TLSRoute</code>, <code>TCP</code> for <code>TCPRoute</code>, and <code>UDP</code> for <code>UDPRoute</code>.</li>
+<li>Listener protocols: <code>HTTP</code>/<code>HTTPS</code> for <code>HTTPRoute</code> and <code>GRPCRoute</code>, <code>TLS</code> for <code>TLSRoute</code>, <code>TCP</code> for <code>TCPRoute</code>, and <code>UDP</code> for <code>UDPRoute</code>.</li>
 <li>TLS: certificates via listener <code>certificateRefs</code> with <code>HTTPS</code> or <code>TLS</code> + <code>mode: Terminate</code> (Passthrough is not supported for termination). <code>TLSRoute</code> runs in stream mode.</li>
 </ul>
 <div class="admonition tip">
@@ -5184,8 +5185,8 @@ You can still scope gateway annotations to a specific server name using <code>bu
 <p>For <code>TLSRoute</code>, <code>TCPRoute</code>, and <code>UDPRoute</code>, you can override the generated server name by setting <code>bunkerweb.io/SERVER_NAME</code> on the route.</p>
 </div>
 <div class="admonition note">
-<p class="admonition-title">Experimental Channel for stream routes</p>
-<p>If you intend to use <code>TLSRoute</code>, <code>TCPRoute</code>, or <code>UDPRoute</code>, install the Experimental Channel CRDs: https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel</p>
+<p class="admonition-title">Experimental Channel for advanced routes</p>
+<p>If you intend to use <code>GRPCRoute</code>, <code>TLSRoute</code>, <code>TCPRoute</code>, or <code>UDPRoute</code>, install the Experimental Channel CRDs: https://gateway-api.sigs.k8s.io/guides/getting-started/#install-experimental-channel</p>
 </div>
 <div class="admonition info">
 <p class="admonition-title">TLS support</p>

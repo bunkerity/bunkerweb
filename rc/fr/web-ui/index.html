@@ -1241,7 +1241,7 @@
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Utilisez les images publiées et le layout du <a href="../quickstart-guide/#__tabbed_1_3">guide de démarrage rapide</a> pour monter la stack, puis terminez la configuration dans le navigateur.</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.8~rc3-rc1/misc/integrations/docker-compose.yml<span class="w"> </span>up<span class="w"> </span>-d
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.8-rc1/misc/integrations/docker-compose.yml<span class="w"> </span>up<span class="w"> </span>-d
 </code></pre></div>
 <p>Ouvrez le nom d’hôte du scheduler (par ex. <code>https://www.example.com/changeme</code>) et lancez l’assistant <code>/setup</code> pour configurer l’UI, le scheduler et l’instance.</p>
 </div>
@@ -1254,7 +1254,7 @@
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.8-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.8</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -1265,7 +1265,7 @@
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bw-services</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.8</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
@@ -1285,7 +1285,7 @@
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bw-db</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.8-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.8</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin&quot;</span>
@@ -1347,7 +1347,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <h3 id="specificites-linux-vs-docker">Spécificités Linux vs Docker</h3>
 <ul>
 <li>Liens par défaut : images Docker sur <code>0.0.0.0:7000</code> ; paquets Linux sur <code>127.0.0.1:7000</code>. Changez via <code>UI_LISTEN_ADDR</code> / <code>UI_LISTEN_PORT</code>.</li>
-<li>En-têtes proxy : <code>UI_FORWARDED_ALLOW_IPS</code> vaut <code>*</code> par défaut ; en Linux, réglez-le sur vos IP de proxy pour un durcissement immédiat.</li>
+<li>En-têtes proxy : <code>UI_FORWARDED_ALLOW_IPS</code> vaut <code>127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16</code> par défaut ; <code>UI_PROXY_ALLOW_IPS</code> reprend par défaut la valeur de <code>FORWARDED_ALLOW_IPS</code>. En Linux, réglez-les sur vos IP de proxy pour un durcissement immédiat.</li>
 <li>Secrets et état : <code>/var/lib/bunkerweb</code> contient <code>FLASK_SECRET</code>, clés Biscuit et données TOTP. Montez-le en Docker ; sur Linux, il est géré par les scripts du paquet.</li>
 <li>Journaux : <code>/var/log/bunkerweb</code> doit être lisible par l’UID/GID 101 (ou l’UID mappé en rootless). Les paquets créent le chemin ; les conteneurs requièrent un volume avec les bons droits.</li>
 <li>Comportement de l’assistant : l’easy-install Linux démarre automatiquement l’UI et l’assistant ; en Docker, on accède à l’assistant via l’URL reverse-proxifiée sauf si vous pré-semez les variables d’environnement.</li>
@@ -1444,7 +1444,13 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <td><code>UI_FORWARDED_ALLOW_IPS</code></td>
 <td>Proxies de confiance pour <code>X-Forwarded-*</code></td>
 <td>IP/CIDR séparés par espaces/virgules</td>
-<td><code>*</code></td>
+<td><code>127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16</code></td>
+</tr>
+<tr>
+<td><code>UI_PROXY_ALLOW_IPS</code></td>
+<td>Proxies de confiance pour le protocole PROXY</td>
+<td>IP/CIDR séparés par espaces/virgules</td>
+<td><code>FORWARDED_ALLOW_IPS</code></td>
 </tr>
 </tbody>
 </table>
@@ -1589,9 +1595,15 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 <tr>
 <td><code>FORWARDED_ALLOW_IPS</code></td>
-<td>Alias déprécié pour la liste des proxies</td>
+<td>Alias pour la liste des proxies</td>
 <td>IP/CIDR</td>
-<td><code>*</code></td>
+<td><code>127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16</code></td>
+</tr>
+<tr>
+<td><code>PROXY_ALLOW_IPS</code></td>
+<td>Alias pour la liste PROXY</td>
+<td>IP/CIDR</td>
+<td><code>FORWARDED_ALLOW_IPS</code></td>
 </tr>
 <tr>
 <td><code>DISABLE_CONFIGURATION_TESTING</code></td>
