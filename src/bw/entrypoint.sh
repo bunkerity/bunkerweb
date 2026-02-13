@@ -57,10 +57,63 @@ function trap_reload() {
 }
 trap "trap_reload" HUP
 
+function generate_tmp_env_content() {
+	cat <<EOF
+IS_LOADING=yes
+USE_BUNKERNET=no
+SEND_ANONYMOUS_REPORT=no
+SERVER_NAME=
+MODSECURITY_CRS_VERSION=${MODSECURITY_CRS_VERSION:-4}
+API_LISTEN_HTTP=${API_LISTEN_HTTP:-yes}
+API_HTTP_PORT=${API_HTTP_PORT:-5000}
+API_LISTEN_HTTPS=${API_LISTEN_HTTPS:-no}
+API_HTTPS_PORT=${API_HTTPS_PORT:-5443}
+API_SERVER_NAME=${API_SERVER_NAME:-bwapi}
+API_WHITELIST_IP=${API_WHITELIST_IP:-127.0.0.0/8}
+API_TOKEN=${API_TOKEN:-}
+USE_REAL_IP=${USE_REAL_IP:-no}
+USE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL:-no}
+REAL_IP_FROM=${REAL_IP_FROM:-192.168.0.0/16 172.16.0.0/12 10.0.0.0/8}
+REAL_IP_HEADER=${REAL_IP_HEADER:-X-Forwarded-For}
+HTTP_PORT=${HTTP_PORT:-8080}
+HTTPS_PORT=${HTTPS_PORT:-8443}
+KEEP_CONFIG_ON_RESTART=${KEEP_CONFIG_ON_RESTART:-no}
+EOF
+}
+
+function set_loading_state() {
+	local nginx_variables_path="$1"
+	if [ ! -f "$nginx_variables_path" ] ; then
+		return 1
+	fi
+
+	if grep -q "^IS_LOADING=" "$nginx_variables_path" ; then
+		sed -i "s/^IS_LOADING=.*/IS_LOADING=yes/" "$nginx_variables_path"
+	else
+		echo "IS_LOADING=yes" >> "$nginx_variables_path"
+	fi
+
+	return 0
+}
+
 # generate "temp" config
-if [[ "$KEEP_CONFIG_ON_RESTART" == "no" ]] || [[ ! -f /tmp/variables.env ]] ; then
-  echo -e "IS_LOADING=yes\nUSE_BUNKERNET=no\nSEND_ANONYMOUS_REPORT=no\nSERVER_NAME=\nMODSECURITY_CRS_VERSION=${MODSECURITY_CRS_VERSION:-4}\nAPI_LISTEN_HTTP=${API_LISTEN_HTTP:-yes}\nAPI_HTTP_PORT=${API_HTTP_PORT:-5000}\nAPI_LISTEN_HTTPS=${API_LISTEN_HTTPS:-no}\nAPI_HTTPS_PORT=${API_HTTPS_PORT:-5443}\nAPI_SERVER_NAME=${API_SERVER_NAME:-bwapi}\nAPI_WHITELIST_IP=${API_WHITELIST_IP:-127.0.0.0/8}\nAPI_TOKEN=${API_TOKEN:-}\nUSE_REAL_IP=${USE_REAL_IP:-no}\nUSE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL:-no}\nREAL_IP_FROM=${REAL_IP_FROM:-192.168.0.0/16 172.16.0.0/12 10.0.0.0/8}\nREAL_IP_HEADER=${REAL_IP_HEADER:-X-Forwarded-For}\nHTTP_PORT=${HTTP_PORT:-8080}\nHTTPS_PORT=${HTTPS_PORT:-8443}\nKEEP_CONFIG_ON_RESTART=${KEEP_CONFIG_ON_RESTART:-no}" > /tmp/variables.env
-  python3 /usr/share/bunkerweb/gen/main.py --variables /tmp/variables.env
+tmp_env_path="/tmp/variables.env"
+tmp_env_content="$(generate_tmp_env_content)"
+regenerate_temp_config=false
+
+if [[ "$KEEP_CONFIG_ON_RESTART" == "no" ]] || [[ ! -f "$tmp_env_path" ]] ; then
+	regenerate_temp_config=true
+else
+	log "ENTRYPOINT" "ℹ️" "Preserving current config on restart, forcing loading state to receive latest config ..."
+	if ! set_loading_state "/etc/nginx/variables.env" ; then
+		log "ENTRYPOINT" "⚠️" "Couldn't set IS_LOADING=yes because /etc/nginx/variables.env is missing"
+	fi
+fi
+
+printf "%s\n" "$tmp_env_content" > "$tmp_env_path"
+
+if [[ "$regenerate_temp_config" == "true" ]] ; then
+  python3 /usr/share/bunkerweb/gen/main.py --variables "$tmp_env_path"
 fi
 
 if [ -f /var/tmp/bunkerweb_reloading ] ; then

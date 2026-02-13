@@ -3,9 +3,11 @@
 ## v1.6.9~rc1 - 2026/02/??
 
 - [BUGFIX] Ensure variables are only added if they are defined in the environment file and are valid key-value pairs to prevent issues with malformed lines in the variables file.
+- [BUGFIX] Add API token back for certbot hooks in environment configuration
 - [FEATURE] Add ClouDNS DNS provider support to Let's Encrypt plugin
 - [FEATURE] Add new `CLIENT_BODY_TIMEOUT`, `CLIENT_HEADER_TIMEOUT`, `KEEPALIVE_TIMEOUT` and `SEND_TIMEOUT` settings to control the corresponding NGINX timeouts, allowing better handling of long-lived connections and preventing unintended timeouts.
 - [FEATURE] Add a new `gRPC` plugin to allow proxying gRPC traffic to upstream gRPC services with support for TLS, SNI, custom headers and retry policies.
+- [FEATURE] Make it possible to leave HTTP/HTTPS/STREAM/TLS ports empty to not listen on them.
 - [AUTOCONF] Add experimental support for GRPCRoute in the Kubernetes integration to allow routing gRPC traffic based on Kubernetes Gateway API resources.
 - [LINUX] Updated NGINX version to v1.28.2 for Fedora 42 and 43 integration
 - [UI] Fix status for PHP plugin to not always be shown as activated
@@ -13,6 +15,8 @@
 - [UI] Make it possible to edit settings with the `wizard` method in the web UI
 - [UI] Enhance reports functionality with improved filter handling and data fetching
 - [UI] Enhance home dashboard with new IP blocking metrics and improved tooltips
+- [API] Fix redis sentinel issue when a password is set on the master node
+- [MISC] Remove warning for uninitialized variables in default server configuration (as we control the configuration and we know that some variables may be uninitialized in some cases, especially for 400 errors)
 
 ## v1.6.8 - 2026/02/06
 

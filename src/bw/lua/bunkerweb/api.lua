@@ -136,13 +136,7 @@ api.global.GET["^/ping$"] = function(self)
 end
 
 api.global.GET["^/health$"] = function(self)
-	-- Check if reload indicator file exists
-	local f = open("/var/tmp/bunkerweb_reloading", "r")
-	if f then
-		f:close()
-		return self:response(HTTP_OK, "success", "reloading")
-	end
-
+	-- Loading state must have priority (startup-like behavior)
 	local data, err = get_variable("IS_LOADING", false)
 	if not data then
 		logger:log(ERR, "can't get IS_LOADING variable : " .. err)
@@ -151,6 +145,14 @@ api.global.GET["^/health$"] = function(self)
 	if data == "yes" then
 		return self:response(HTTP_OK, "success", "loading")
 	end
+
+	-- Check if reload indicator file exists
+	local f = open("/var/tmp/bunkerweb_reloading", "r")
+	if f then
+		f:close()
+		return self:response(HTTP_OK, "success", "reloading")
+	end
+
 	return self:response(HTTP_OK, "success", "ok")
 end
 

@@ -2966,10 +2966,11 @@ class Database:
                     else:
                         session.query(Plugins).filter(Plugins.id.in_(missing_ids)).update({Plugins.data: None, Plugins.checksum: None})
 
-                    try:
-                        session.commit()
-                    except BaseException as e:
-                        return str(e)
+                    if per_plugin_commit:
+                        try:
+                            session.commit()
+                        except BaseException as e:
+                            return str(e)
 
             db_settings = [setting.id for setting in session.query(Settings).with_entities(Settings.id)]
 
