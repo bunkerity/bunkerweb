@@ -15,6 +15,7 @@
 - [UI] Enhance reports functionality with improved filter handling and data fetching
 - [UI] Enhance home dashboard with new IP blocking metrics and improved tooltips
 - [API] Fix redis sentinel issue when a password is set on the master node
+- [MISC] Remove warning for uninitialized variables in default server configuration (as we control the configuration and we know that some variables may be uninitialized in some cases, especially for 400 errors)
 
 ## v1.6.8 - 2026/02/06
 
