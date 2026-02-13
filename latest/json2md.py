@@ -222,7 +222,7 @@ def generate_docs_for_lang(lang: str):
                 core_settings[pro_plugin["name"]]["is_pro"] = True
 
     # Print plugins and their settings
-    for _, data in sorted(core_settings.items(), key=lambda item: item[0].casefold()):
+    for data in dict(sorted(core_settings.items())).values():
         pro_crown = ""
         if "is_pro" in data:
             pro_crown = (

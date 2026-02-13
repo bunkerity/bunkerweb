@@ -1180,37 +1180,37 @@
 <tbody>
 <tr>
 <td style="text-align: center;"><strong>ClamAV</strong></td>
-<td style="text-align: center;">1.10</td>
+<td style="text-align: center;">1.9</td>
 <td style="text-align: left;">Escanea automáticamente los archivos subidos con el motor antivirus ClamAV y deniega la solicitud cuando un archivo es detectado como malicioso.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">bunkerweb-plugins/clamav</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Coraza</strong></td>
-<td style="text-align: center;">1.10</td>
+<td style="text-align: center;">1.9</td>
 <td style="text-align: left;">Inspecciona las solicitudes usando el WAF de Coraza (alternativa a ModSecurity).</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza">bunkerweb-plugins/coraza</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Discord</strong></td>
-<td style="text-align: center;">1.10</td>
+<td style="text-align: center;">1.9</td>
 <td style="text-align: left;">Envía notificaciones de seguridad a un canal de Discord usando un Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord">bunkerweb-plugins/discord</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Slack</strong></td>
-<td style="text-align: center;">1.10</td>
+<td style="text-align: center;">1.9</td>
 <td style="text-align: left;">Envía notificaciones de seguridad a un canal de Slack usando un Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack">bunkerweb-plugins/slack</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>VirusTotal</strong></td>
-<td style="text-align: center;">1.10</td>
+<td style="text-align: center;">1.9</td>
 <td style="text-align: left;">Escanea automáticamente los archivos subidos con la API de VirusTotal y deniega la solicitud cuando un archivo es detectado como malicioso.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">bunkerweb-plugins/virustotal</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>WebHook</strong></td>
-<td style="text-align: center;">1.10</td>
+<td style="text-align: center;">1.9</td>
 <td style="text-align: left;">Envía notificaciones de seguridad a un punto final HTTP personalizado usando un Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook">bunkerweb-plugins/webhook</a></td>
 </tr>
@@ -1219,7 +1219,7 @@
 <h2 id="como-usar-un-plugin">Cómo usar un plugin</h2>
 <h3 id="automatico">Automático</h3>
 <p>Si quieres instalar rápidamente plugins externos, puedes usar la configuración <code>EXTERNAL_PLUGIN_URLS</code>. Acepta una lista de URLs separadas por espacios, cada una apuntando a un archivo comprimido (formato zip) que contiene uno o más plugins.</p>
-<p>Puedes usar el siguiente valor si quieres instalar automáticamente los plugins oficiales: <code>EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.10.zip</code></p>
+<p>Puedes usar el siguiente valor si quieres instalar automáticamente los plugins oficiales: <code>EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.9.zip</code></p>
 <h3 id="manual">Manual</h3>
 <p>El primer paso es instalar el plugin colocando sus archivos dentro de la carpeta de datos <code>plugins</code> correspondiente. El procedimiento depende de tu integración:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label></div>
