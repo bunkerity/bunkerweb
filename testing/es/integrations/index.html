@@ -3879,7 +3879,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> <
 <li>Reinicia el programador: <code>sudo systemctl restart bunkerweb-scheduler</code></li>
 </ol>
 <h3 id="instalacion-mediante-el-gestor-de-paquetes">Instalación mediante el gestor de paquetes</h3>
-<p>Asegúrate de tener <strong>NGINX 1.28.2 instalado antes de instalar BunkerWeb</strong>. Para todas las distribuciones, excepto Fedora, es obligatorio usar los paquetes precompilados del <a href="https://nginx.org/en/linux_packages.html">repositorio oficial de NGINX</a>. Compilar NGINX desde el código fuente o usar paquetes de diferentes repositorios no funcionará con los paquetes precompilados oficiales de BunkerWeb. Sin embargo, tienes la opción de compilar BunkerWeb desde el código fuente.</p>
+<p>Asegúrate de tener <strong>NGINX 1.28.2 instalado antes de instalar BunkerWeb</strong>. Para todas las distribuciones, es obligatorio usar los paquetes precompilados del <a href="https://nginx.org/en/linux_packages.html">repositorio oficial de NGINX</a>. Compilar NGINX desde el código fuente o usar paquetes de diferentes repositorios no funcionará con los paquetes precompilados oficiales de BunkerWeb. Sin embargo, tienes la opción de compilar BunkerWeb desde el código fuente.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Debian Bookworm/Trixie</label><label for="__tabbed_1_2">Ubuntu</label><label for="__tabbed_1_3">Fedora</label><label for="__tabbed_1_4">RedHat</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -3957,8 +3957,8 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>setopt<span class="w"> </span>updates-testing.enabled<span class="o">=</span><span class="m">1</span>
 </code></pre></div>
 </div>
-<p>Fedora ya proporciona NGINX 1.28.1 que soportamos</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.28.1
+<p>Fedora ya proporciona NGINX 1.28.2 que soportamos</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.28.2
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">Deshabilitar el asistente de configuración</p>

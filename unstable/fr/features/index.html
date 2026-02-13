@@ -3200,14 +3200,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><code>8080</code></td>
 <td>global</td>
 <td>Oui</td>
-<td><strong>Port HTTP :</strong> Numéro de port pour le trafic HTTP.</td>
+<td><strong>Port HTTP :</strong> Numéro de port pour le trafic HTTP. Laisser vide pour désactiver l'écoute HTTP.</td>
 </tr>
 <tr>
 <td><code>HTTPS_PORT</code></td>
 <td><code>8443</code></td>
 <td>global</td>
 <td>Oui</td>
-<td><strong>Port HTTPS :</strong> Numéro de port pour le trafic HTTPS.</td>
+<td><strong>Port HTTPS :</strong> Numéro de port pour le trafic HTTPS. Laisser vide pour désactiver l'écoute HTTPS.</td>
 </tr>
 <tr>
 <td><code>USE_IPV6</code></td>
@@ -3271,21 +3271,21 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><code>yes</code></td>
 <td>multisite</td>
 <td>Non</td>
-<td><strong>Écoute stream :</strong> Active l’écoute non-ssl (pass-through).</td>
+<td><strong>Écoute stream :</strong> Active l'écoute non-ssl (pass-through).</td>
 </tr>
 <tr>
 <td><code>LISTEN_STREAM_PORT</code></td>
 <td><code>1337</code></td>
 <td>multisite</td>
 <td>Oui</td>
-<td><strong>Port stream :</strong> Port d’écoute pour le non-ssl (pass-through).</td>
+<td><strong>Port stream :</strong> Port d'écoute pour le non-ssl (pass-through). Laisser vide pour désactiver l'écoute stream non-SSL.</td>
 </tr>
 <tr>
 <td><code>LISTEN_STREAM_PORT_SSL</code></td>
 <td><code>4242</code></td>
 <td>multisite</td>
 <td>Oui</td>
-<td><strong>Port stream SSL :</strong> Port d’écoute pour le SSL (pass-through).</td>
+<td><strong>Port stream SSL :</strong> Port d'écoute pour le SSL (pass-through). Laisser vide pour désactiver l'écoute stream SSL.</td>
 </tr>
 <tr>
 <td><code>USE_TCP</code></td>
@@ -8662,7 +8662,7 @@ TrustedMonitor/\d+\.\d+
 <td><code>yes</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Écoute HTTP :</strong> Répondre aux requêtes HTTP (non sécurisées) si mis à <code>yes</code>.</td>
+<td><strong>Écoute HTTP :</strong> Répondre aux requêtes HTTP (non sécurisées) si mis à <code>yes</code>. Peut également être désactivé en laissant <code>HTTP_PORT</code> vide.</td>
 </tr>
 <tr>
 <td><code>HTTP2</code></td>

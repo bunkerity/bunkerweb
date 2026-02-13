@@ -3263,14 +3263,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><code>8080</code></td>
 <td>global</td>
 <td>Yes</td>
-<td><strong>HTTP Port:</strong> Port number for HTTP traffic.</td>
+<td><strong>HTTP Port:</strong> Port number for HTTP traffic. Leave empty to disable HTTP listening.</td>
 </tr>
 <tr>
 <td><code>HTTPS_PORT</code></td>
 <td><code>8443</code></td>
 <td>global</td>
 <td>Yes</td>
-<td><strong>HTTPS Port:</strong> Port number for HTTPS traffic.</td>
+<td><strong>HTTPS Port:</strong> Port number for HTTPS traffic. Leave empty to disable HTTPS listening.</td>
 </tr>
 <tr>
 <td><code>USE_IPV6</code></td>
@@ -3341,14 +3341,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><code>1337</code></td>
 <td>multisite</td>
 <td>Yes</td>
-<td><strong>Stream Port:</strong> Listening port for non-ssl (passthrough).</td>
+<td><strong>Stream Port:</strong> Listening port for non-ssl (passthrough). Leave empty to disable non-SSL stream listening.</td>
 </tr>
 <tr>
 <td><code>LISTEN_STREAM_PORT_SSL</code></td>
 <td><code>4242</code></td>
 <td>multisite</td>
 <td>Yes</td>
-<td><strong>Stream SSL Port:</strong> Listening port for ssl (passthrough).</td>
+<td><strong>Stream SSL Port:</strong> Listening port for ssl (passthrough). Leave empty to disable SSL stream listening.</td>
 </tr>
 <tr>
 <td><code>USE_TCP</code></td>
@@ -3599,7 +3599,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </div>
 </div>
 <h3 id="example-configurations">Example Configurations</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:4"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Basic Production Setup</label><label for="__tabbed_2_2">Development Mode</label><label for="__tabbed_2_3">Multisite Configuration</label><label for="__tabbed_2_4">Stream Server Configuration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Basic Production Setup</label><label for="__tabbed_2_2">Development Mode</label><label for="__tabbed_2_3">Multisite Configuration</label><label for="__tabbed_2_4">Stream Server Configuration</label><label for="__tabbed_2_5">Disabling Listening Modes</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>A standard configuration for a production site with strict security:</p>
@@ -3636,6 +3636,25 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <span class="nt">LISTEN_STREAM_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1337&quot;</span>
 <span class="nt">USE_TCP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">USE_UDP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>You can disable specific listening modes by leaving port settings empty:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Disable HTTP listening (HTTPS only)</span>
+<span class="nt">HTTP_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+<span class="nt">HTTPS_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;8443&quot;</span>
+
+<span class="c1"># Disable HTTPS listening (HTTP only)</span>
+<span class="nt">HTTP_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;8080&quot;</span>
+<span class="nt">HTTPS_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+
+<span class="c1"># Stream: Disable non-SSL listening (SSL only)</span>
+<span class="nt">LISTEN_STREAM_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+<span class="nt">LISTEN_STREAM_PORT_SSL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;4242&quot;</span>
+
+<span class="c1"># Stream: Disable SSL listening (non-SSL only)</span>
+<span class="nt">LISTEN_STREAM_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1337&quot;</span>
+<span class="nt">LISTEN_STREAM_PORT_SSL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
 </code></pre></div>
 </div>
 </div>
@@ -9126,7 +9145,7 @@ TrustedMonitor/\d+\.\d+
 <td><code>yes</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>HTTP Listen:</strong> Respond to (insecure) HTTP requests when set to <code>yes</code>.</td>
+<td><strong>HTTP Listen:</strong> Respond to (insecure) HTTP requests when set to <code>yes</code>. Can also be disabled by leaving <code>HTTP_PORT</code> empty.</td>
 </tr>
 <tr>
 <td><code>HTTP2</code></td>

@@ -3265,14 +3265,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><code>8080</code></td>
 <td>global</td>
 <td>是</td>
-<td><strong>HTTP 端口：</strong> HTTP 流量的端口号。</td>
+<td><strong>HTTP 端口：</strong> HTTP 流量的端口号。留空以禁用HTTP监听。</td>
 </tr>
 <tr>
 <td><code>HTTPS_PORT</code></td>
 <td><code>8443</code></td>
 <td>global</td>
 <td>是</td>
-<td><strong>HTTPS 端口：</strong> HTTPS 流量的端口号。</td>
+<td><strong>HTTPS 端口：</strong> HTTPS 流量的端口号。留空以禁用HTTPS监听。</td>
 </tr>
 <tr>
 <td><code>USE_IPV6</code></td>
@@ -3343,14 +3343,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><code>1337</code></td>
 <td>multisite</td>
 <td>是</td>
-<td><strong>流端口：</strong> 非 SSL（直通）的监听端口。</td>
+<td><strong>流端口：</strong> 非 SSL（直通）的监听端口。留空以禁用非SSL流监听。</td>
 </tr>
 <tr>
 <td><code>LISTEN_STREAM_PORT_SSL</code></td>
 <td><code>4242</code></td>
 <td>multisite</td>
 <td>是</td>
-<td><strong>流 SSL 端口：</strong> SSL（直通）的监听端口。</td>
+<td><strong>流 SSL 端口：</strong> SSL（直通）的监听端口。留空以禁用SSL流监听。</td>
 </tr>
 <tr>
 <td><code>USE_TCP</code></td>
@@ -9087,7 +9087,7 @@ TrustedMonitor/\d+\.\d+
 <td><code>yes</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>HTTP 监听：</strong> 当设置为 <code>yes</code> 时，响应（不安全的）HTTP 请求。</td>
+<td><strong>HTTP 监听：</strong> 当设置为 <code>yes</code> 时，响应（不安全的）HTTP 请求。也可以通过将<code>HTTP_PORT</code>留空来禁用。</td>
 </tr>
 <tr>
 <td><code>HTTP2</code></td>

@@ -3263,14 +3263,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><code>8080</code></td>
 <td>global</td>
 <td>Sí</td>
-<td><strong>Puerto HTTP:</strong> Número de puerto para el tráfico HTTP.</td>
+<td><strong>Puerto HTTP:</strong> Número de puerto para el tráfico HTTP. Dejar vacío para desactivar la escucha HTTP.</td>
 </tr>
 <tr>
 <td><code>HTTPS_PORT</code></td>
 <td><code>8443</code></td>
 <td>global</td>
 <td>Sí</td>
-<td><strong>Puerto HTTPS:</strong> Número de puerto para el tráfico HTTPS.</td>
+<td><strong>Puerto HTTPS:</strong> Número de puerto para el tráfico HTTPS. Dejar vacío para desactivar la escucha HTTPS.</td>
 </tr>
 <tr>
 <td><code>USE_IPV6</code></td>
@@ -3341,14 +3341,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><code>1337</code></td>
 <td>multisite</td>
 <td>Sí</td>
-<td><strong>Puerto de Stream:</strong> Puerto de escucha para no-ssl (passthrough).</td>
+<td><strong>Puerto de Stream:</strong> Puerto de escucha para no-ssl (passthrough). Dejar vacío para desactivar la escucha stream non-SSL.</td>
 </tr>
 <tr>
 <td><code>LISTEN_STREAM_PORT_SSL</code></td>
 <td><code>4242</code></td>
 <td>multisite</td>
 <td>Sí</td>
-<td><strong>Puerto SSL de Stream:</strong> Puerto de escucha para ssl (passthrough).</td>
+<td><strong>Puerto SSL de Stream:</strong> Puerto de escucha para ssl (passthrough). Dejar vacío para desactivar la escucha stream SSL.</td>
 </tr>
 <tr>
 <td><code>USE_TCP</code></td>
@@ -9093,7 +9093,7 @@ TrustedMonitor/\d+\.\d+
 <td><code>yes</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Escucha HTTP:</strong> Responda a las solicitudes HTTP (inseguras) cuando se establezca en <code>yes</code>.</td>
+<td><strong>Escucha HTTP:</strong> Responda a las solicitudes HTTP (inseguras) cuando se establezca en <code>yes</code>. También puede desactivarse dejando <code>HTTP_PORT</code> vacío.</td>
 </tr>
 <tr>
 <td><code>HTTP2</code></td>

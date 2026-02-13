@@ -3263,14 +3263,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><code>8080</code></td>
 <td>global</td>
 <td>Ja</td>
-<td><strong>HTTP-Port:</strong> Portnummer für HTTP-Verkehr.</td>
+<td><strong>HTTP-Port:</strong> Portnummer für HTTP-Verkehr. Leer lassen, um HTTP-Listening zu deaktivieren.</td>
 </tr>
 <tr>
 <td><code>HTTPS_PORT</code></td>
 <td><code>8443</code></td>
 <td>global</td>
 <td>Ja</td>
-<td><strong>HTTPS-Port:</strong> Portnummer für HTTPS-Verkehr.</td>
+<td><strong>HTTPS-Port:</strong> Portnummer für HTTPS-Verkehr. Leer lassen, um HTTPS-Listening zu deaktivieren.</td>
 </tr>
 <tr>
 <td><code>USE_IPV6</code></td>
@@ -3341,14 +3341,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><code>1337</code></td>
 <td>multisite</td>
 <td>Ja</td>
-<td><strong>Stream-Port:</strong> Lauschport für Nicht-SSL (Passthrough).</td>
+<td><strong>Stream-Port:</strong> Lauschport für Nicht-SSL (Passthrough). Leer lassen, um non-SSL Stream-Listening zu deaktivieren.</td>
 </tr>
 <tr>
 <td><code>LISTEN_STREAM_PORT_SSL</code></td>
 <td><code>4242</code></td>
 <td>multisite</td>
 <td>Ja</td>
-<td><strong>Stream-SSL-Port:</strong> Lauschport für SSL (Passthrough).</td>
+<td><strong>Stream-SSL-Port:</strong> Lauschport für SSL (Passthrough). Leer lassen, um SSL Stream-Listening zu deaktivieren.</td>
 </tr>
 <tr>
 <td><code>USE_TCP</code></td>
@@ -9010,7 +9010,7 @@ TrustedMonitor/\d+\.\d+
 <td><code>yes</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>HTTP-Listen:</strong> Auf (unsichere) HTTP-Anfragen antworten, wenn auf <code>yes</code> gesetzt.</td>
+<td><strong>HTTP-Listen:</strong> Auf (unsichere) HTTP-Anfragen antworten, wenn auf <code>yes</code> gesetzt. Kann auch durch Leerlassen von <code>HTTP_PORT</code> deaktiviert werden.</td>
 </tr>
 <tr>
 <td><code>HTTP2</code></td>
