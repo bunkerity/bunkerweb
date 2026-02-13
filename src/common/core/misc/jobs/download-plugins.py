@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
 from io import BytesIO
 from mimetypes import guess_type
 from os import getenv, sep
@@ -42,6 +43,66 @@ LOGGER = getLogger("DOWNLOAD-EXTERNAL-PLUGINS")
 status = 0
 
 
+def _set_plugin_permissions(plugin_path: Path) -> None:
+    # Add u+x permissions to executable files
+    desired_perms = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP  # 0o750
+    for subdir, pattern in (
+        ("jobs", "*"),
+        ("bwcli", "*"),
+        ("ui", "*.py"),
+    ):
+        for executable_file in plugin_path.joinpath(subdir).rglob(pattern):
+            if executable_file.stat().st_mode & 0o777 != desired_perms:
+                executable_file.chmod(desired_perms)
+
+
+def _plugin_checksum_matches_database(plugin_path: Path, checksum: str) -> bool:
+    try:
+        with BytesIO() as plugin_content:
+            with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=3) as tar:
+                add_dir_to_tar_safely(tar, plugin_path, arc_root=plugin_path.name)
+            plugin_content.seek(0)
+            return bytes_hash(plugin_content, algorithm="sha256") == checksum
+    except BaseException as e:
+        LOGGER.debug(format_exc())
+        LOGGER.warning(f"Could not verify plugin {plugin_path.name} integrity before skipping reinstall: {e}")
+        return False
+
+
+def _cleanup_stale_plugin_dirs() -> None:
+    for pattern in (".*.tmp-*", ".*.bak-*"):
+        for stale_dir in EXTERNAL_PLUGINS_DIR.glob(pattern):
+            if stale_dir.is_dir():
+                LOGGER.warning(f"Found stale plugin directory {stale_dir}, cleaning it up ...")
+                rmtree(stale_dir, ignore_errors=True)
+
+
+def _install_plugin_atomically(plugin_path: Path, new_plugin_path: Path) -> None:
+    tmp_plugin_path = new_plugin_path.parent.joinpath(f".{new_plugin_path.name}.tmp-{uuid4()}")
+    backup_plugin_path = new_plugin_path.parent.joinpath(f".{new_plugin_path.name}.bak-{uuid4()}")
+    replaced_existing = False
+
+    try:
+        copytree(plugin_path, tmp_plugin_path)
+        _set_plugin_permissions(tmp_plugin_path)
+
+        if new_plugin_path.is_dir():
+            new_plugin_path.rename(backup_plugin_path)
+            replaced_existing = True
+
+        tmp_plugin_path.rename(new_plugin_path)
+    except BaseException:
+        rmtree(tmp_plugin_path, ignore_errors=True)
+
+        if replaced_existing and backup_plugin_path.is_dir() and not new_plugin_path.exists():
+            with suppress(OSError):
+                backup_plugin_path.rename(new_plugin_path)
+        raise
+    finally:
+        if backup_plugin_path.is_dir() and new_plugin_path.exists():
+            rmtree(backup_plugin_path, ignore_errors=True)
+
+
 def install_plugin(plugin_path: Path, db) -> bool:
     plugin_file = plugin_path.joinpath("plugin.json")
 
@@ -62,38 +123,41 @@ def install_plugin(plugin_path: Path, db) -> bool:
     # Don't go further if plugin is already installed
     if new_plugin_path.is_dir():
         old_version = None
+        old_checksum = ""
+        old_method = ""
 
         for plugin in db.get_plugins(_type="external"):
             if plugin["id"] == metadata["id"]:
                 old_version = plugin["version"]
+                old_checksum = plugin.get("checksum", "")
+                old_method = plugin.get("method", "")
                 break
 
         if old_version == metadata["version"]:
-            LOGGER.warning(f"Skipping installation of plugin {metadata['id']} (version {metadata['version']} already installed)")
-            return False
+            if old_method != "scheduler":
+                LOGGER.warning(
+                    f"Skipping installation of plugin {metadata['id']} (version {metadata['version']} already installed by method {old_method or 'unknown'})"
+                )
+                return False
 
-        LOGGER.warning(
-            f"Plugin {metadata['id']} is already installed but version {metadata['version']} is different from database ({old_version}), updating it..."
-        )
-        rmtree(new_plugin_path, ignore_errors=True)
+            if old_checksum and _plugin_checksum_matches_database(new_plugin_path, old_checksum):
+                LOGGER.warning(f"Skipping installation of plugin {metadata['id']} (version {metadata['version']} already installed)")
+                return False
 
-    # Copy the plugin
-    copytree(plugin_path, new_plugin_path)
-    # Add u+x permissions to executable files
-    desired_perms = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP  # 0o750
-    for subdir, pattern in (
-        ("jobs", "*"),
-        ("bwcli", "*"),
-        ("ui", "*.py"),
-    ):
-        for executable_file in new_plugin_path.joinpath(subdir).rglob(pattern):
-            if executable_file.stat().st_mode & 0o777 != desired_perms:
-                executable_file.chmod(desired_perms)
+            LOGGER.warning(f"Detected an integrity mismatch for plugin {metadata['id']}, reinstalling it...")
+        elif old_version != metadata["version"]:
+            LOGGER.warning(
+                f"Plugin {metadata['id']} is already installed but version {metadata['version']} is different from database ({old_version}), updating it..."
+            )
+
+    _install_plugin_atomically(plugin_path, new_plugin_path)
     LOGGER.info(f"✅ Plugin {metadata['id']} (version {metadata['version']}) installed successfully!")
     return True
 
 
 try:
+    _cleanup_stale_plugin_dirs()
+
     # Check if we have plugins to download
     plugin_urls = getenv("EXTERNAL_PLUGIN_URLS", "").strip()
     if not plugin_urls:
@@ -109,8 +173,8 @@ try:
         with BytesIO() as content:
             # Download Plugin file
             try:
-                if plugin_urls.startswith("file://"):
-                    content.write(Path(plugin_urls[7:]).read_bytes())
+                if plugin_url.startswith("file://"):
+                    content.write(Path(plugin_url[7:]).read_bytes())
                 else:
                     max_retries = 3
                     retry_count = 0
@@ -251,7 +315,7 @@ try:
         if plugin["method"] != "scheduler" and plugin["id"] not in external_plugins_ids:
             external_plugins.append(plugin)
 
-    err = db.update_external_plugins(external_plugins)
+    err = db.update_external_plugins(external_plugins, per_plugin_commit=False)
 
     if err:
         LOGGER.error(f"Couldn't update external plugins to database: {err}")
