@@ -55,6 +55,7 @@ daemon = bool(DEBUG)
 chdir = join(sep, "usr", "share", "bunkerweb", "ui")
 umask = 0x027
 pidfile = PID_FILE.as_posix()
+control_socket = RUN_DIR.joinpath("tmp-ui.ctl").as_posix()
 worker_tmp_dir = join(sep, "dev", "shm")
 tmp_upload_dir = TMP_UI_DIR.as_posix()
 secure_scheme_headers = {}
