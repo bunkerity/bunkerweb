@@ -43,6 +43,43 @@ $(document).ready(() => {
   let currentMode = normalizeTemplateId($("#selected-mode").val());
   let currentType = normalizeTemplateId($("#selected-type").val());
 
+  const isOverrideNonGlobalEnabled = () =>
+    ($("#override-non-global-settings").val() || "no")
+      .toString()
+      .trim()
+      .toLowerCase() === "yes";
+
+  const setOverrideNonGlobalEnabled = (enabled) => {
+    const value = enabled ? "yes" : "no";
+
+    const $hidden = $("#override-non-global-settings");
+    if ($hidden.length) {
+      $hidden.val(value);
+    }
+
+    const $buttons = $(
+      "#override-non-global-settings-toggle, #override-non-global-settings-toggle-mobile",
+    );
+    $buttons
+      .toggleClass("btn-outline-secondary", !enabled)
+      .toggleClass("btn-primary", enabled)
+      .attr("aria-pressed", enabled ? "true" : "false");
+
+    $buttons.find("i").each(function () {
+      $(this)
+        .toggleClass("bx-toggle-left", !enabled)
+        .toggleClass("bx-toggle-right", enabled);
+    });
+  };
+
+  if ($("#override-non-global-settings").length) {
+    setOverrideNonGlobalEnabled(isOverrideNonGlobalEnabled());
+  }
+
+  $(document).on("click", ".toggle-override-non-global", () => {
+    setOverrideNonGlobalEnabled(!isOverrideNonGlobalEnabled());
+  });
+
   if (!currentTemplate) currentTemplate = usedTemplate;
   if (!currentMode) currentMode = "easy";
   if (!currentType) currentType = "all";
@@ -736,6 +773,17 @@ $(document).ready(() => {
     const $oldServerName = $("#old-server-name");
     if ($oldServerName.length) {
       appendHiddenInput(form, "OLD_SERVER_NAME", $oldServerName.val());
+    }
+
+    const hasOverrideNonGlobalSetting =
+      $("#override-non-global-settings").length > 0;
+    if (hasOverrideNonGlobalSetting) {
+      const overrideNonGlobalServices = isOverrideNonGlobalEnabled();
+      appendHiddenInput(
+        form,
+        "OVERRIDE_NON_GLOBAL_SERVICES",
+        overrideNonGlobalServices ? "yes" : "no",
+      );
     }
 
     return form;

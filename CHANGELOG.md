@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.9~rc1 - 2026/02/??
+## v1.6.9~rc2 - 2026/02/??
+
+- [UI] Add override non-global services functionality in global settings
+
+## v1.6.9~rc1 - 2026/02/13
 
 - [BUGFIX] Ensure variables are only added if they are defined in the environment file and are valid key-value pairs to prevent issues with malformed lines in the variables file.
 - [BUGFIX] Add API token back for certbot hooks in environment configuration

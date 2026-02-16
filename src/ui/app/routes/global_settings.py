@@ -28,8 +28,9 @@ def global_settings_page():
         # Check variables
         variables = request.form.to_dict().copy()
         del variables["csrf_token"]
+        override_non_global_services = variables.pop("OVERRIDE_NON_GLOBAL_SERVICES", variables.pop("OVERRIDE_TEMPLATE_SERVICES", "no")) == "yes"
 
-        def update_global_config(variables: Dict[str, str]):
+        def update_global_config(variables: Dict[str, str], override_non_global_services: bool):
             wait_applying()
 
             # Edit check fields and remove already existing ones
@@ -43,6 +44,7 @@ def global_settings_page():
                     del variables_to_check[variable]
 
             variables = BW_CONFIG.check_variables(variables, config, variables_to_check, global_config=True, threaded=True)
+            changed_variables = {key: value for key, value in variables.items() if key in variables_to_check}
 
             no_removed_settings = True
             blacklist = get_blacklisted_settings(True)
@@ -60,10 +62,14 @@ def global_settings_page():
             if "PRO_LICENSE_KEY" in variables:
                 DATA["PRO_LOADING"] = True
 
-            for variable, value in variables.copy().items():
+            for variable, value in changed_variables.items():
                 for service in services:
                     setting = config.get(f"{service}_{variable}", None)
-                    if setting and setting["global"] and (setting["value"] != value or setting["value"] == config.get(variable, {"value": None})["value"]):
+                    if (
+                        setting
+                        and (setting["global"] or override_non_global_services)
+                        and (setting["value"] != value or setting["value"] == config.get(variable, {"value": None})["value"])
+                    ):
                         variables[f"{service}_{variable}"] = value
 
             with suppress(BaseException):
@@ -85,7 +91,7 @@ def global_settings_page():
             DATA["RELOADING"] = False
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        CONFIG_TASKS_EXECUTOR.submit(update_global_config, variables)
+        CONFIG_TASKS_EXECUTOR.submit(update_global_config, variables, override_non_global_services)
 
         arguments = {}
         if request.args.get("mode", "advanced") != "advanced":
