@@ -813,14 +813,12 @@ $(document).ready(function () {
               }
 
               const reportId = row.request_id || row.id || "";
-              const hostname = row.server_name || "";
 
               return `<a href="#"
                         class="text-decoration-underline"
                         data-bs-toggle="modal"
                         data-bs-target="#dataModal"
                         data-report-id="${escapeHtmlAttribute(reportId)}"
-                        data-hostname="${escapeHtmlAttribute(hostname)}"
                         style="cursor: pointer;"
                         data-i18n="button.view_details">
                         ${t("button.view_details", "View Details")}
@@ -956,7 +954,7 @@ $(document).ready(function () {
     const reportId =
       button.data("report-id") ||
       (rowData ? rowData.request_id || rowData.id : "");
-    const hostname = button.data("hostname") || currentServerName;
+    const hostname = button.data("hostname") || "";
 
     const baseTitle = `
       <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report Details - ${escapeHtml(
@@ -985,14 +983,18 @@ $(document).ready(function () {
       return;
     }
 
+    const requestPayload = {
+      csrf_token: $("#csrf_token").val(),
+      report_id: reportId,
+    };
+    if (hostname) {
+      requestPayload.hostname = hostname;
+    }
+
     $.ajax({
       url: `${window.location.pathname}/data`,
       type: "POST",
-      data: {
-        csrf_token: $("#csrf_token").val(),
-        report_id: reportId,
-        hostname: hostname,
-      },
+      data: requestPayload,
       success: function (response) {
         if (!response || response.status !== "success") {
           const fallbackData = {
