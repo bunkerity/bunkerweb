@@ -103,8 +103,8 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
 
     | Parámetro               | Valor por defecto | Contexto | Múltiple | Descripción                                                                                              |
     | ----------------------- | ----------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------- |
-    | `HTTP_PORT`             | `8080`            | global   | Sí       | **Puerto HTTP:** Número de puerto para el tráfico HTTP.                                                  |
-    | `HTTPS_PORT`            | `8443`            | global   | Sí       | **Puerto HTTPS:** Número de puerto para el tráfico HTTPS.                                                |
+    | `HTTP_PORT`             | `8080`            | global   | Sí       | **Puerto HTTP:** Número de puerto para el tráfico HTTP. Dejar vacío para desactivar la escucha HTTP.     |
+    | `HTTPS_PORT`            | `8443`            | global   | Sí       | **Puerto HTTPS:** Número de puerto para el tráfico HTTPS. Dejar vacío para desactivar la escucha HTTPS.  |
     | `USE_IPV6`              | `no`              | global   | No       | **Soporte IPv6:** Habilita la conectividad IPv6.                                                         |
     | `DNS_RESOLVERS`         | `127.0.0.11`      | global   | No       | **Resolutores DNS:** Direcciones DNS de los resolutores a usar.                                          |
     | `CLIENT_BODY_TIMEOUT`   | `10s`             | global   | No       | **Timeout del cuerpo del cliente:** Tiempo límite para leer el cuerpo de la solicitud del cliente.       |
@@ -114,13 +114,13 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
 
 === "Ajustes del Servidor de Stream"
 
-    | Parámetro                | Valor por defecto | Contexto  | Múltiple | Descripción                                                           |
-    | ------------------------ | ----------------- | --------- | -------- | --------------------------------------------------------------------- |
-    | `LISTEN_STREAM`          | `yes`             | multisite | No       | **Escucha de Stream:** Habilita la escucha para no-ssl (passthrough). |
-    | `LISTEN_STREAM_PORT`     | `1337`            | multisite | Sí       | **Puerto de Stream:** Puerto de escucha para no-ssl (passthrough).    |
-    | `LISTEN_STREAM_PORT_SSL` | `4242`            | multisite | Sí       | **Puerto SSL de Stream:** Puerto de escucha para ssl (passthrough).   |
-    | `USE_TCP`                | `yes`             | multisite | No       | **Escucha TCP:** Habilita la escucha TCP (stream).                    |
-    | `USE_UDP`                | `no`              | multisite | No       | **Escucha UDP:** Habilita la escucha UDP (stream).                    |
+    | Parámetro                | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                               |
+    | ------------------------ | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
+    | `LISTEN_STREAM`          | `yes`             | multisite | No       | **Escucha de Stream:** Habilita la escucha para no-ssl (passthrough).                                                     |
+    | `LISTEN_STREAM_PORT`     | `1337`            | multisite | Sí       | **Puerto de Stream:** Puerto de escucha para no-ssl (passthrough). Dejar vacío para desactivar la escucha stream non-SSL. |
+    | `LISTEN_STREAM_PORT_SSL` | `4242`            | multisite | Sí       | **Puerto SSL de Stream:** Puerto de escucha para ssl (passthrough). Dejar vacío para desactivar la escucha stream SSL.    |
+    | `USE_TCP`                | `yes`             | multisite | No       | **Escucha TCP:** Habilita la escucha TCP (stream).                                                                        |
+    | `USE_UDP`                | `no`              | multisite | No       | **Escucha UDP:** Habilita la escucha UDP (stream).                                                                        |
 
 === "Ajustes de Workers"
 
@@ -1711,7 +1711,7 @@ Las siguientes secciones desarrollan cada paso.
     services:
       bunkerweb:
         # Este es el nombre que se utilizará para identificar la instancia en el Planificador
-        image: bunkerity/bunkerweb:1.6.8
+        image: bunkerity/bunkerweb:1.6.9-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1728,7 +1728,7 @@ Las siguientes secciones desarrollan cada paso.
             syslog-address: "udp://10.20.30.254:514" # La dirección IP del servicio syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.8
+        image: bunkerity/bunkerweb-scheduler:1.6.9-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrese de establecer el nombre de instancia correcto
@@ -2967,7 +2967,7 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 | Ajuste                                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                                                                                                                                 |
 | ------------------------------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `AUTO_LETS_ENCRYPT`                         | `no`              | multisite | no       | **Habilitar Let's Encrypt:** Establezca en `yes` para habilitar la emisión y renovación automática de certificados.                                                                                                                                                                                                                                                         |
-| `LETS_ENCRYPT_PASSTHROUGH`                  | `no`              | multisite | no       | **Pasar a través de Let's Encrypt:** Establezca en `yes` para pasar las solicitudes de Let's Encrypt al servidor web. Esto es útil cuando BunkerWeb está detrás de otro proxy inverso que maneja SSL.                                                                                                                                                                       |
+| `LETS_ENCRYPT_PASSTHROUGH`                  | `no`              | multisite | no       | **Pasar a través de Let's Encrypt:** Establezca en `yes` para pasar las solicitudes de Let's Encrypt al servidor web. Esto es útil cuando BunkerWeb está delante de otro proxy inverso que maneja SSL.                                                                                                                                                                       |
 | `EMAIL_LETS_ENCRYPT`                        | `-`               | multisite | no       | **Correo electrónico de contacto:** Dirección utilizada para los avisos de caducidad de Let's Encrypt. Déjelo en blanco solo si acepta no recibir alertas ni correos de recuperación (Certbot se registra con `--register-unsafely-without-email`).                                                                                                                         |
 | `LETS_ENCRYPT_CHALLENGE`                    | `http`            | multisite | no       | **Tipo de desafío:** Método utilizado para verificar la propiedad del dominio. Opciones: `http` o `dns`.                                                                                                                                                                                                                                                                    |
 | `LETS_ENCRYPT_DNS_PROVIDER`                 |                   | multisite | no       | **Proveedor de DNS:** Cuando se utilizan desafíos DNS, el proveedor de DNS a utilizar (por ejemplo, cloudflare, route53, digitalocean).                                                                                                                                                                                                                                     |
@@ -3606,12 +3606,12 @@ Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las 
         -   **Ventajas de Seguridad:** Los protocolos modernos como HTTP/2 y HTTP/3 imponen TLS/HTTPS por defecto, reducen la susceptibilidad a ciertos ataques y mejoran la privacidad a través de encabezados cifrados (HTTP/3).
         -   **Beneficios de Rendimiento:** Características como la multiplexación, la compresión de encabezados, el empuje del servidor y la transferencia de datos binarios mejoran la velocidad y la eficiencia.
 
-| Ajuste               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                  |
-| -------------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------- |
-| `LISTEN_HTTP`        | `yes`             | multisite | no       | **Escucha HTTP:** Responda a las solicitudes HTTP (inseguras) cuando se establezca en `yes`. |
-| `HTTP2`              | `yes`             | multisite | no       | **HTTP2:** Soporte para el protocolo HTTP2 cuando HTTPS está habilitado.                     |
-| `HTTP3`              | `yes`             | multisite | no       | **HTTP3:** Soporte para el protocolo HTTP3 cuando HTTPS está habilitado.                     |
-| `HTTP3_ALT_SVC_PORT` | `443`             | multisite | no       | **Puerto Alt-Svc de HTTP3:** Puerto a utilizar en el encabezado Alt-Svc para HTTP3.          |
+| Ajuste               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                        |
+| -------------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LISTEN_HTTP`        | `yes`             | multisite | no       | **Escucha HTTP:** Responda a las solicitudes HTTP (inseguras) cuando se establezca en `yes`. También puede desactivarse dejando `HTTP_PORT` vacío. |
+| `HTTP2`              | `yes`             | multisite | no       | **HTTP2:** Soporte para el protocolo HTTP2 cuando HTTPS está habilitado.                                                                           |
+| `HTTP3`              | `yes`             | multisite | no       | **HTTP3:** Soporte para el protocolo HTTP3 cuando HTTPS está habilitado.                                                                           |
+| `HTTP3_ALT_SVC_PORT` | `443`             | multisite | no       | **Puerto Alt-Svc de HTTP3:** Puerto a utilizar en el encabezado Alt-Svc para HTTP3.                                                                |
 
     !!! example "Sobre HTTP/3"
         HTTP/3, la última versión del Protocolo de Transferencia de Hipertexto, utiliza QUIC sobre UDP en lugar de TCP, abordando problemas como el bloqueo de cabeza de línea para conexiones más rápidas y fiables.

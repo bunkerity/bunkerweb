@@ -1,5 +1,5 @@
 /* gzlib.c -- zlib functions common to reading and writing gzip files
- * Copyright (C) 2004-2025 Mark Adler
+ * Copyright (C) 2004-2026 Mark Adler
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
@@ -93,7 +93,7 @@ local gzFile gz_open(const void *path, int fd, const char *mode) {
 #endif
 
     /* check input */
-    if (path == NULL)
+    if (path == NULL || mode == NULL)
         return NULL;
 
     /* allocate gzFile structure to return */

@@ -472,6 +472,10 @@
       "hover_info": "將滑鼠懸停在國家/地區上",
       "legend": "圖例",
       "no_data": "無資料"
+    },
+    "window": {
+      "last_days": "最近 {{days}} 天",
+      "title": "儀表板視窗"
     }
   },
   "datatable": {

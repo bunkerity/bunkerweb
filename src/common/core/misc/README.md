@@ -132,7 +132,7 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
     | Setting              | Default | Context   | Multiple | Description                                                             |
     | -------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------- |
-    | `LISTEN_HTTP`        | `yes`   | multisite | no       | **HTTP Listen:** Respond to (insecure) HTTP requests when set to `yes`. |
+    | `LISTEN_HTTP`        | `yes`   | multisite | no       | **HTTP Listen:** Respond to (insecure) HTTP requests when set to `yes`. Can also be disabled by leaving `HTTP_PORT` empty. |
     | `HTTP2`              | `yes`   | multisite | no       | **HTTP2:** Support HTTP2 protocol when HTTPS is enabled.                |
     | `HTTP3`              | `yes`   | multisite | no       | **HTTP3:** Support HTTP3 protocol when HTTPS is enabled.                |
     | `HTTP3_ALT_SVC_PORT` | `443`   | multisite | no       | **HTTP3 Alt-Svc Port:** Port to use in the Alt-Svc header for HTTP3.    |

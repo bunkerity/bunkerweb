@@ -1,6 +1,31 @@
 
                 ChangeLog file for zlib
 
+Changes in 1.3.2 (17 Feb 2026)
+- Continued rewrite of CMake build [Vollstrecker]
+- Various portability improvements
+- Various github workflow additions and improvements
+- Check for negative lengths in crc32_combine functions
+- Copy only the initialized window contents in inflateCopy
+- Prevent the use of insecure functions without an explicit request
+- Add compressBound_z and deflateBound_z functions for large values
+- Use atomics to build inflate fixed tables once
+- Add definition of ZLIB_INSECURE to build tests with c89 and c94
+- Add --undefined option to ./configure for UBSan checker
+- Copy only the initialized deflate state in deflateCopy
+- Zero inflate state on allocation
+- Remove untgz from contrib
+- Add _z versions of the compress and uncompress functions
+- Vectorize the CRC-32 calculation on the s390x
+- Set bit 11 of the zip header flags in minizip if UTF-8
+- Update OS/400 support
+- Add a test to configure to check for a working compiler
+- Check for invalid NULL pointer inputs to zlib operations
+- Add --mandir to ./configure to specify manual directory
+- Add LICENSE.Info-Zip to contrib/minizip
+- Remove vstudio projects in lieu of cmake-generated projects
+- Replace strcpy() with memcpy() in contrib/minizip
+
 Changes in 1.3.1.2 (8 Dec 2025)
 - Improve portability to RISC OS
 - Permit compiling contrib/minizip/unzip.c with decryption

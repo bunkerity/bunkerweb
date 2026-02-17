@@ -228,6 +228,7 @@ const normalizeCatalogEntry = (entry, index) => {
     options: Array.isArray(entry.options) ? entry.options : [],
     multiselect: Array.isArray(entry.multiselect) ? entry.multiselect : [],
     separator: typeof entry.separator === "string" ? entry.separator : "",
+    accept: typeof entry.accept === "string" ? entry.accept : "",
     docs:
       typeof entry.docs === "string"
         ? entry.docs.trim()

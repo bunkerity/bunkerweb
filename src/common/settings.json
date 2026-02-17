@@ -20,20 +20,20 @@
   "HTTP_PORT": {
     "context": "global",
     "default": "8080",
-    "help": "HTTP port number which bunkerweb binds to.",
+    "help": "HTTP port number which bunkerweb binds to. Leave empty to disable HTTP listening.",
     "id": "http-port",
     "label": "HTTP port",
-    "regex": "^\\d+$",
+    "regex": "^\\d*$",
     "type": "number",
     "multiple": "listen-http-ports"
   },
   "HTTPS_PORT": {
     "context": "global",
     "default": "8443",
-    "help": "HTTPS port number which bunkerweb binds to.",
+    "help": "HTTPS port number which bunkerweb binds to. Leave empty to disable HTTPS listening.",
     "id": "https-port",
     "label": "HTTPS port",
-    "regex": "^\\d+$",
+    "regex": "^\\d*$",
     "type": "number",
     "multiple": "listen-https-ports"
   },
@@ -322,20 +322,20 @@
   "LISTEN_STREAM_PORT": {
     "context": "multisite",
     "default": "1337",
-    "help": "Listening port for non-ssl (passthrough).",
+    "help": "Listening port for non-ssl (passthrough). Leave empty to disable non-SSL stream listening.",
     "id": "listen-stream-port",
     "label": "Listen stream port",
-    "regex": "^[0-9]+$",
+    "regex": "^[0-9]*$",
     "type": "text",
     "multiple": "listen-stream-ports"
   },
   "LISTEN_STREAM_PORT_SSL": {
     "context": "multisite",
     "default": "4242",
-    "help": "Listening port for ssl (passthrough).",
+    "help": "Listening port for ssl (passthrough). Leave empty to disable SSL stream listening.",
     "id": "listen-stream-port-ssl",
     "label": "Listen stream port ssl",
-    "regex": "^[0-9]+$",
+    "regex": "^[0-9]*$",
     "type": "text",
     "multiple": "listen-stream-ports-ssl"
   },

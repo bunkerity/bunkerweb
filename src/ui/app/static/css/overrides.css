@@ -1664,6 +1664,38 @@ span.cursor-pointer ~ .reset-setting {
   padding-right: 3.5rem !important;
 }
 
+.plugin-setting-file-upload-container {
+  --bw-file-button-width: 7.25rem;
+  --bw-file-toggle-width: 3.25rem;
+}
+
+.plugin-setting-file-upload-display {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--bw-file-button-width) + 0.35rem);
+  right: calc(var(--bw-file-toggle-width) + 0.4rem);
+  transform: translateY(-50%);
+  z-index: 2;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.95rem;
+}
+
+.plugin-setting-file-upload.has-persisted-name {
+  color: transparent;
+}
+
+.plugin-setting-file-upload.has-persisted-name::file-selector-button {
+  color: var(--bs-body-color);
+}
+
+.dark-style
+  .plugin-setting-file-upload.has-persisted-name::file-selector-button {
+  color: #d7dee3;
+}
+
 .form-check .form-check-label {
   padding-right: 3rem !important;
 }
@@ -2291,10 +2323,18 @@ span.cursor-pointer ~ .reset-setting {
   color: #fff !important;
 }
 
-.dark-style div.dt-button-collection .dt-button:not(.disabled):not(:disabled):hover,
-.dark-style div.dt-button-collection .dropdown-item:not(.disabled):not(:disabled):hover,
-[data-bs-theme="dark"] div.dt-button-collection .dt-button:not(.disabled):not(:disabled):hover,
-[data-bs-theme="dark"] div.dt-button-collection .dropdown-item:not(.disabled):not(:disabled):hover {
+.dark-style
+  div.dt-button-collection
+  .dt-button:not(.disabled):not(:disabled):hover,
+.dark-style
+  div.dt-button-collection
+  .dropdown-item:not(.disabled):not(:disabled):hover,
+[data-bs-theme="dark"]
+  div.dt-button-collection
+  .dt-button:not(.disabled):not(:disabled):hover,
+[data-bs-theme="dark"]
+  div.dt-button-collection
+  .dropdown-item:not(.disabled):not(:disabled):hover {
   background-color: rgba(255, 255, 255, 0.08) !important;
 }
 

@@ -105,7 +105,7 @@ jobs:
       # Build cached image
       - name: Build image
         if: inputs.CACHE == true
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
@@ -118,7 +118,7 @@ jobs:
       # Build non-cached image
       - name: Build image
         if: inputs.CACHE != true
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
@@ -130,7 +130,7 @@ jobs:
       # Check OS vulnerabilities
       - name: Check OS vulnerabilities
         if: ${{ startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # v0.33.1
+        uses: aquasecurity/trivy-action@c1824fd6edce30d7ab345a9989de00bbd46ef284 # v0.34.0
         with:
           vuln-type: os
           skip-dirs: /root/.cargo

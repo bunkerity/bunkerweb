@@ -78,12 +78,13 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt
 
 # Install runtime dependencies and add ui user
-RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client postgresql-client sqlite tzdata && \
+# TODO: Add postgresql-client back when the CVEs are fixed
+RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client sqlite tzdata && \
   addgroup -g 101 ui && \
   adduser -h /usr/share/bunkerweb/ui -g ui -s /sbin/nologin -G ui -D -H -u 101 --disabled-password ui
 
 # Fix CVEs
-# There are no CVEs for the following packages
+RUN apk add --no-cache "libpq>=18.2-r0" "postgresql18-client>=18.2-r0" # CVE-2026-2003 CVE-2026-2004 CVE-2026-2005 CVE-2026-2006 CVE-2026-2007
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -105,7 +106,7 @@ RUN echo "Docker" > INTEGRATION && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.8"
+LABEL version="1.6.9~rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="ui"
 

@@ -467,6 +467,10 @@
       "hover_info": "Fahre mit der Maus über ein Land",
       "legend": "Legende",
       "no_data": "Keine Daten"
+    },
+    "window": {
+      "last_days": "Letzte {{days}} Tage",
+      "title": "Dashboard-Fenster"
     }
   },
   "datatable": {

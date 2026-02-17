@@ -32,6 +32,295 @@ $(document).ready(() => {
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
   }
+
+  const pendingFileReads = new Set();
+
+  const getValidationTargetInput = ($input) => {
+    if ($input.hasClass("plugin-setting-file-text")) {
+      const manualSelector = $input.data("manualTarget");
+      if (manualSelector) {
+        const $manual = $(manualSelector).first();
+        if ($manual.length && !$manual.hasClass("d-none")) return $manual;
+      }
+
+      const targetSelector = $input.data("uploadTarget");
+      if (targetSelector) {
+        const $target = $(targetSelector);
+        if ($target.length) return $target;
+      }
+      const $fallback = $input
+        .closest(".plugin-file-setting-wrapper")
+        .find(".plugin-setting-file-upload")
+        .first();
+      if ($fallback.length) return $fallback;
+    }
+    return $input;
+  };
+
+  const upsertValidationFeedback = ($target) => {
+    let $feedback = $target.next(".invalid-feedback");
+    if (!$feedback.length) {
+      $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
+        $target,
+      );
+    }
+    return $feedback;
+  };
+
+  const setFieldValidationState = ($input, isValid, errorMessage = "") => {
+    const $target = getValidationTargetInput($input);
+    const isFileSetting = $input.hasClass("plugin-setting-file-text");
+    $target.toggleClass("is-invalid", !isValid);
+    $input.toggleClass("is-invalid", !isValid);
+    if (isFileSetting) {
+      // Keep file controls neutral on success (no green "is-valid" state).
+      $target.removeClass("is-valid");
+      $input.removeClass("is-valid");
+    }
+    const $existingFeedback = $target.next(".invalid-feedback");
+    if (!isValid || $existingFeedback.length) {
+      const $feedback = $existingFeedback.length
+        ? $existingFeedback
+        : upsertValidationFeedback($target);
+      $feedback.text(isValid ? "" : errorMessage);
+    }
+    return $target;
+  };
+
+  const buildValidationRegex = ($input, pattern) => {
+    if ($input.hasClass("plugin-setting-file-text")) {
+      // File settings often contain multiline payloads (PEM/base64 blocks).
+      return new RegExp(pattern, "s");
+    }
+    return new RegExp(pattern);
+  };
+
+  const FILE_NAME_STORAGE_PREFIX = "bw-file-setting-name::";
+
+  const getFileNameStorageKey = ($fileTextInput) => {
+    const settingName = String(
+      $fileTextInput.attr("name") || $fileTextInput.attr("id") || "",
+    ).trim();
+    if (!settingName) return "";
+    return `${FILE_NAME_STORAGE_PREFIX}${window.location.pathname}::${settingName}`;
+  };
+
+  const getStoredFileSettingName = ($fileTextInput) => {
+    const key = getFileNameStorageKey($fileTextInput);
+    if (!key || typeof localStorage === "undefined") return "";
+    try {
+      return String(localStorage.getItem(key) || "");
+    } catch (_err) {
+      return "";
+    }
+  };
+
+  const setStoredFileSettingName = ($fileTextInput, fileName) => {
+    const key = getFileNameStorageKey($fileTextInput);
+    if (!key || typeof localStorage === "undefined") return;
+    try {
+      const normalizedName = String(fileName || "").trim();
+      if (normalizedName) {
+        localStorage.setItem(key, normalizedName);
+      } else {
+        localStorage.removeItem(key);
+      }
+    } catch (_err) {
+      // Ignore storage errors (private mode/quota).
+    }
+  };
+
+  const clearStoredFileSettingName = ($fileTextInput) => {
+    $fileTextInput.removeData("lastFileName");
+    $fileTextInput.attr("data-file-name", "");
+    setStoredFileSettingName($fileTextInput, "");
+  };
+
+  const setCurrentFileSettingName = ($fileTextInput, fileName) => {
+    const normalizedName = String(fileName || "").trim();
+    if (!normalizedName) {
+      clearStoredFileSettingName($fileTextInput);
+      return "";
+    }
+    $fileTextInput.data("lastFileName", normalizedName);
+    $fileTextInput.attr("data-file-name", normalizedName);
+    setStoredFileSettingName($fileTextInput, normalizedName);
+    return normalizedName;
+  };
+
+  const syncPersistedFileNameDisplay = ($fileTextInput) => {
+    const $wrapper = $fileTextInput.closest(".plugin-file-setting-wrapper");
+    const $uploadInput = $wrapper.find(".plugin-setting-file-upload").first();
+    const $display = $wrapper
+      .find(".plugin-setting-file-upload-display")
+      .first();
+    if (!$uploadInput.length || !$display.length) return;
+
+    const uploadEl = $uploadInput.get(0);
+    const hasSelectedFile = Boolean(
+      uploadEl && uploadEl.files && uploadEl.files.length > 0,
+    );
+    const currentMode = String($fileTextInput.data("inputMode") || "upload");
+    const hasContent = String($fileTextInput.val() ?? "").trim() !== "";
+    const rememberedFileName =
+      String($fileTextInput.data("lastFileName") || "").trim() ||
+      String($fileTextInput.attr("data-file-name") || "").trim() ||
+      getStoredFileSettingName($fileTextInput);
+
+    if (
+      currentMode === "manual" ||
+      $uploadInput.hasClass("d-none") ||
+      hasSelectedFile ||
+      !hasContent ||
+      !rememberedFileName
+    ) {
+      $uploadInput.removeClass("has-persisted-name");
+      $display.addClass("d-none").text("");
+      return;
+    }
+
+    $uploadInput.addClass("has-persisted-name");
+    $display.text(rememberedFileName).removeClass("d-none");
+  };
+
+  const setFileSettingStatus = ($fileTextInput, textOverride = null) => {
+    const $wrapper = $fileTextInput.closest(".plugin-file-setting-wrapper");
+    const $status = $wrapper.find(".plugin-setting-file-status").first();
+    if (!$status.length) return;
+
+    const rawValue = $fileTextInput.val();
+    const value =
+      rawValue === undefined || rawValue === null ? "" : String(rawValue);
+    if (textOverride !== null) {
+      $status.text(textOverride);
+      syncPersistedFileNameDisplay($fileTextInput);
+      return;
+    }
+
+    if (value.trim() === "") {
+      clearStoredFileSettingName($fileTextInput);
+      const emptyText = $status.data("emptyText") || "No file selected";
+      $status.text(emptyText);
+      syncPersistedFileNameDisplay($fileTextInput);
+      return;
+    }
+
+    const rememberedFileName =
+      String($fileTextInput.data("lastFileName") || "").trim() ||
+      String($fileTextInput.attr("data-file-name") || "").trim() ||
+      getStoredFileSettingName($fileTextInput);
+    if (rememberedFileName) {
+      setCurrentFileSettingName($fileTextInput, rememberedFileName);
+      $status.text(
+        `Current content loaded from ${rememberedFileName} (${value.length} chars)`,
+      );
+      syncPersistedFileNameDisplay($fileTextInput);
+      return;
+    }
+
+    $status.text(`Current content loaded (${value.length} chars)`);
+    syncPersistedFileNameDisplay($fileTextInput);
+  };
+
+  const syncFileSettingManualInput = ($fileTextInput) => {
+    const manualSelector = $fileTextInput.data("manualTarget");
+    if (!manualSelector) return $();
+    const $manualInput = $(manualSelector).first();
+    if (!$manualInput.length) return $();
+
+    const value = String($fileTextInput.val() ?? "");
+    if ($manualInput.val() !== value) {
+      $manualInput.val(value);
+    }
+    return $manualInput;
+  };
+
+  const setFileSettingMode = ($fileTextInput, mode = "upload") => {
+    const $wrapper = $fileTextInput.closest(".plugin-file-setting-wrapper");
+    if (!$wrapper.length) return;
+
+    const manualSelector = $fileTextInput.data("manualTarget");
+    const uploadSelector = $fileTextInput.data("uploadTarget");
+    const $manualInput = manualSelector ? $(manualSelector).first() : $();
+    const $uploadInput = uploadSelector ? $(uploadSelector).first() : $();
+    const $toggle = $wrapper.find(".plugin-setting-file-mode-toggle").first();
+    const $toggleIcon = $toggle.find("i").first();
+    const $toggleGroup = $toggle.parent();
+
+    const isManual = mode === "manual";
+    $uploadInput.toggleClass("d-none", isManual);
+    $manualInput.toggleClass("d-none", !isManual);
+    $fileTextInput.data("inputMode", isManual ? "manual" : "upload");
+
+    if ($toggleGroup.length) {
+      if (isManual) {
+        $toggleGroup
+          .removeClass("input-group")
+          .addClass("d-flex justify-content-end");
+        $toggle.addClass("btn-sm");
+      } else {
+        $toggleGroup
+          .removeClass("d-flex justify-content-end")
+          .addClass("input-group");
+        $toggle.removeClass("btn-sm");
+      }
+    }
+
+    if ($toggle.length) {
+      const uploadLabel =
+        $toggle.data("uploadLabel") || "Switch to text editor";
+      const manualLabel = $toggle.data("manualLabel") || "Back to file upload";
+      const nextLabel = isManual ? manualLabel : uploadLabel;
+      $toggle.attr("data-mode", isManual ? "manual" : "upload");
+      $toggle.attr("aria-pressed", isManual ? "true" : "false");
+      $toggle.addClass("btn-outline-secondary").removeClass("btn-secondary");
+      if (isManual) {
+        $toggleIcon.removeClass("bx-edit-alt").addClass("bx-upload");
+        $toggle.attr("title", nextLabel);
+        $toggle.attr("aria-label", nextLabel);
+        $toggle.attr("data-bs-original-title", nextLabel);
+      } else {
+        $toggleIcon.removeClass("bx-upload").addClass("bx-edit-alt");
+        $toggle.attr("title", nextLabel);
+        $toggle.attr("aria-label", nextLabel);
+        $toggle.attr("data-bs-original-title", nextLabel);
+      }
+
+      const toggleEl = $toggle.get(0);
+      if (toggleEl && typeof bootstrap !== "undefined" && bootstrap.Tooltip) {
+        const tooltipInstance = bootstrap.Tooltip.getInstance(toggleEl);
+        if (tooltipInstance) {
+          tooltipInstance.hide();
+          tooltipInstance.dispose();
+          new bootstrap.Tooltip(toggleEl);
+        }
+      }
+    }
+
+    syncPersistedFileNameDisplay($fileTextInput);
+  };
+
+  const readFileAsText = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => resolve(String(event.target?.result ?? ""));
+      reader.onerror = () =>
+        reject(new Error("Unable to read the selected file."));
+      reader.readAsText(file);
+    });
+
+  const trackPendingFileRead = (promise) => {
+    pendingFileReads.add(promise);
+    const cleanup = () => pendingFileReads.delete(promise);
+    promise.then(cleanup, cleanup);
+    return promise;
+  };
+
+  const waitForPendingFileReads = async () => {
+    if (pendingFileReads.size === 0) return;
+    await Promise.allSettled(Array.from(pendingFileReads));
+  };
+
   const $templateInput = $("#used-template");
   let usedTemplate = "low";
   if ($templateInput.length) {
@@ -42,6 +331,43 @@ $(document).ready(() => {
   let currentTemplate = normalizeTemplateId($("#selected-template").val());
   let currentMode = normalizeTemplateId($("#selected-mode").val());
   let currentType = normalizeTemplateId($("#selected-type").val());
+
+  const isOverrideNonGlobalEnabled = () =>
+    ($("#override-non-global-settings").val() || "no")
+      .toString()
+      .trim()
+      .toLowerCase() === "yes";
+
+  const setOverrideNonGlobalEnabled = (enabled) => {
+    const value = enabled ? "yes" : "no";
+
+    const $hidden = $("#override-non-global-settings");
+    if ($hidden.length) {
+      $hidden.val(value);
+    }
+
+    const $buttons = $(
+      "#override-non-global-settings-toggle, #override-non-global-settings-toggle-mobile",
+    );
+    $buttons
+      .toggleClass("btn-outline-secondary", !enabled)
+      .toggleClass("btn-primary", enabled)
+      .attr("aria-pressed", enabled ? "true" : "false");
+
+    $buttons.find("i").each(function () {
+      $(this)
+        .toggleClass("bx-toggle-left", !enabled)
+        .toggleClass("bx-toggle-right", enabled);
+    });
+  };
+
+  if ($("#override-non-global-settings").length) {
+    setOverrideNonGlobalEnabled(isOverrideNonGlobalEnabled());
+  }
+
+  $(document).on("click", ".toggle-override-non-global", () => {
+    setOverrideNonGlobalEnabled(!isOverrideNonGlobalEnabled());
+  });
 
   if (!currentTemplate) currentTemplate = usedTemplate;
   if (!currentMode) currentMode = "easy";
@@ -224,26 +550,44 @@ $(document).ready(() => {
       .find(".global-override-badge")
       .addClass("visually-hidden");
     templateContainer.find("input, select").each(function () {
-      const type = $(this).attr("type");
+      const $field = $(this);
+      const type = $field.attr("type");
       const isNewEndpoint = window.location.pathname.endsWith("/new");
       const templateValue = isNewEndpoint
         ? $(`#${this.id}-template`).val()
-        : $(this).data("original");
-      if ($(this).prop("disabled") || type === "hidden") {
+        : $field.data("original");
+
+      if ($field.hasClass("plugin-setting-file-upload")) {
+        $field.val("");
+        return;
+      }
+
+      if (
+        $field.prop("disabled") ||
+        (type === "hidden" && !$field.hasClass("plugin-setting-file-text"))
+      ) {
         return;
       }
 
       // Check for select element
-      if ($(this).is("select")) {
-        $(this)
-          .find("option")
-          .each(function () {
-            $(this).prop("selected", $(this).val() == templateValue);
-          });
+      if ($field.is("select")) {
+        $field.find("option").each(function () {
+          $(this).prop("selected", $(this).val() == templateValue);
+        });
       } else if (type === "checkbox") {
-        $(this).prop("checked", templateValue === "yes");
+        $field.prop("checked", templateValue === "yes");
       } else {
-        $(this).val(templateValue);
+        $field.val(templateValue);
+        if ($field.hasClass("plugin-setting-file-text")) {
+          $field.data("fileReadError", false);
+          const originalFileName = String(
+            $field.data("originalFileName") || "",
+          ).trim();
+          setCurrentFileSettingName($field, originalFileName);
+          setFieldValidationState($field, true, "");
+          syncFileSettingManualInput($field);
+          setFileSettingStatus($field);
+        }
       }
     });
 
@@ -455,7 +799,9 @@ $(document).ready(() => {
     currentStepContainer.find(".plugin-setting").each(function () {
       const $input = $(this);
       let value = $input.val();
-      const isRequired = $input.prop("required");
+      const isRequired =
+        $input.prop("required") ||
+        String($input.data("required") || "false").toLowerCase() === "true";
       const pattern = $input.attr("pattern");
       let $label = $(`label[for="${$input.attr("id")}"]`);
       let fieldName = $input.attr("name") || t("validation.default_field_name");
@@ -495,6 +841,14 @@ $(document).ready(() => {
 
       let errorMessage = "";
       let isValid = true;
+      const hasFileReadError =
+        $input.hasClass("plugin-setting-file-text") &&
+        Boolean($input.data("fileReadError"));
+
+      if (hasFileReadError) {
+        errorMessage = "Unable to read the selected file.";
+        isValid = false;
+      }
 
       // Check if the field is required and not empty
       if (isRequired && !skipRequiredCheck && value === "") {
@@ -505,7 +859,7 @@ $(document).ready(() => {
       // Validate based on pattern if the input is not empty
       if (isValid && pattern && value !== "") {
         try {
-          const regex = new RegExp(pattern);
+          const regex = buildValidationRegex($input, pattern);
           if (!regex.test(value)) {
             errorMessage = patternMessage;
             isValid = false;
@@ -522,28 +876,20 @@ $(document).ready(() => {
         }
       }
 
-      // Toggle valid/invalid classes
-      $input.toggleClass("is-invalid", !isValid);
-
-      // Manage the invalid-feedback element
-      let $feedback = $input.next(".invalid-feedback");
-      if (!$feedback.length) {
-        $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
-          $input,
-        );
-      }
+      const $validationTarget = setFieldValidationState(
+        $input,
+        isValid,
+        errorMessage,
+      );
 
       if (!isValid) {
-        $feedback.text(errorMessage);
         isStepValid = false;
         invalidFieldsCount++;
 
         // Store the first invalid input for focusing later
         if (!firstInvalidInput) {
-          firstInvalidInput = $input;
+          firstInvalidInput = $validationTarget;
         }
-      } else {
-        $feedback.text("");
       }
     });
 
@@ -574,7 +920,17 @@ $(document).ready(() => {
     });
 
     // Helper function to append hidden inputs
-    const appendHiddenInput = (form, name, value) => {
+    const appendHiddenInput = (form, name, value, asTextarea = false) => {
+      if (asTextarea) {
+        const $textarea = $("<textarea>", {
+          name: name,
+          class: "visually-hidden",
+        });
+        $textarea.val(value ?? "");
+        form.append($textarea);
+        return;
+      }
+
       form.append(
         $("<input>", {
           type: "hidden",
@@ -589,15 +945,31 @@ $(document).ready(() => {
         const $this = $(this);
         const settingType = $this.attr("type");
 
-        if (settingType === "hidden") return;
+        if (
+          settingType === "hidden" &&
+          !$this.hasClass("plugin-setting-file-text")
+        ) {
+          return;
+        }
 
         const settingName = $this.attr("name");
+        if (!settingName) return;
         let settingValue = $this.val();
+        const isFileTextSetting = $this.hasClass("plugin-setting-file-text");
 
         if ($this.is("select")) {
           settingValue = $this.val();
         } else if (settingType === "checkbox") {
           settingValue = $this.is(":checked") ? "yes" : "no";
+        }
+
+        if (isFileTextSetting) {
+          const settingFileName = String(
+            $this.data("lastFileName") || $this.attr("data-file-name") || "",
+          ).trim();
+          appendHiddenInput(form, settingName, settingValue, true);
+          appendHiddenInput(form, `${settingName}__FILE_NAME`, settingFileName);
+          return;
         }
 
         appendHiddenInput(form, settingName, settingValue);
@@ -736,6 +1108,17 @@ $(document).ready(() => {
     const $oldServerName = $("#old-server-name");
     if ($oldServerName.length) {
       appendHiddenInput(form, "OLD_SERVER_NAME", $oldServerName.val());
+    }
+
+    const hasOverrideNonGlobalSetting =
+      $("#override-non-global-settings").length > 0;
+    if (hasOverrideNonGlobalSetting) {
+      const overrideNonGlobalServices = isOverrideNonGlobalEnabled();
+      appendHiddenInput(
+        form,
+        "OVERRIDE_NON_GLOBAL_SERVICES",
+        overrideNonGlobalServices ? "yes" : "no",
+      );
     }
 
     return form;
@@ -893,12 +1276,26 @@ $(document).ready(() => {
 
   $(document).on("input", ".plugin-setting", function () {
     debounce(() => {
-      const isValid = $(this).attr("pattern")
-        ? new RegExp($(this).attr("pattern")).test($(this).val())
-        : true;
-      $(this)
-        .toggleClass("is-valid", isValid)
-        .toggleClass("is-invalid", !isValid);
+      const $input = $(this);
+      const pattern = $input.attr("pattern");
+      let isValid = true;
+      if (pattern) {
+        try {
+          isValid = buildValidationRegex($input, pattern).test($input.val());
+        } catch (_err) {
+          isValid = false;
+        }
+      }
+      const $target = getValidationTargetInput($input);
+      if ($input.hasClass("plugin-setting-file-text")) {
+        $target.removeClass("is-valid").toggleClass("is-invalid", !isValid);
+        $input.removeClass("is-valid").toggleClass("is-invalid", !isValid);
+      } else {
+        $target
+          .toggleClass("is-valid", isValid)
+          .toggleClass("is-invalid", !isValid);
+        $input.toggleClass("is-invalid", !isValid);
+      }
     }, 100)();
   });
 
@@ -1134,18 +1531,48 @@ $(document).ready(() => {
       // Safeguard checks for missing attributes
       const originalId = element.attr("id") || "";
       const originalLabelledBy = element.attr("aria-labelledby") || "";
+      const originalName = element.attr("name");
+      const originalFileInputTarget = element.attr("data-file-input") || "";
+      const originalUploadTarget = element.attr("data-upload-target") || "";
+      const originalManualTarget = element.attr("data-manual-target") || "";
 
       // Update IDs and attributes
       const newId = originalId.replace("-0", `-${suffix}`);
       const newLabelledBy = originalLabelledBy.replace("-0", `-${suffix}`);
-      const newName = `${element.attr("name") || ""}_${suffix}`;
+      const newName = originalName ? `${originalName}_${suffix}` : "";
+      const newFileInputTarget = originalFileInputTarget.replace(
+        "-0",
+        `-${suffix}`,
+      );
+      const newUploadTarget = originalUploadTarget.replace("-0", `-${suffix}`);
+      const newManualTarget = originalManualTarget.replace("-0", `-${suffix}`);
 
       element
         .attr("id", newId)
         .attr("aria-labelledby", newLabelledBy)
-        .attr("name", newName)
         .attr("data-original", defaultVal)
         .prop("disabled", false);
+
+      if (originalFileInputTarget) {
+        element.attr("data-file-input", newFileInputTarget);
+      }
+      if (originalUploadTarget) {
+        element.attr("data-upload-target", newUploadTarget);
+      }
+      if (originalManualTarget) {
+        element.attr("data-manual-target", newManualTarget);
+      }
+
+      if (originalName) {
+        element.attr("name", newName);
+      } else {
+        element.removeAttr("name");
+      }
+
+      if (element.hasClass("plugin-setting-file-manual")) {
+        element.val(defaultVal);
+        return;
+      }
 
       // Cache label and description elements to avoid multiple traversals
       const settingLabel = element.next("label");
@@ -1175,11 +1602,29 @@ $(document).ready(() => {
       } else {
         element.val(defaultVal);
       }
+
+      if (element.hasClass("plugin-setting-file-text")) {
+        element.data("fileReadError", false);
+        setCurrentFileSettingName(element, "");
+        setFieldValidationState(element, true, "");
+      }
     };
 
-    // Reset input/select fields inside the clone
-    multipleClone.find("input, select").each(function () {
+    // Reset input/select/textarea fields inside the clone
+    multipleClone.find("input, select, textarea").each(function () {
       resetInputField($(this), suffix);
+    });
+    multipleClone.find(".plugin-setting-file-text").each(function () {
+      syncFileSettingManualInput($(this));
+      setFileSettingMode($(this), "upload");
+      setFileSettingStatus($(this));
+    });
+    multipleClone.find(".plugin-setting-file-mode-toggle").each(function () {
+      const currentTarget = $(this).attr("data-file-input") || "";
+      $(this).attr(
+        "data-file-input",
+        currentTarget.replace("-0", `-${suffix}`),
+      );
     });
 
     // Update the collapse section's ID and remove tooltips
@@ -1351,11 +1796,13 @@ $(document).ready(() => {
     return allValid;
   };
 
-  $(".save-settings").on("click", function () {
+  $(".save-settings").on("click", async function () {
     if (isReadOnly) {
       alert(t("alert.readonly_mode"));
       return;
     }
+
+    await waitForPendingFileReads();
 
     // For easy mode, validate all steps before saving
     if (currentMode === "easy") {
@@ -1403,13 +1850,14 @@ $(document).ready(() => {
         const pluginId = $pluginContainer
           .attr("id")
           .replace("navs-plugins-", "");
-        let pluginHasErrors = false;
 
         // Check all inputs in this plugin
         $pluginContainer.find(".plugin-setting").each(function () {
           const $input = $(this);
           let value = $input.val();
-          const isRequired = $input.prop("required");
+          const isRequired =
+            $input.prop("required") ||
+            String($input.data("required") || "false").toLowerCase() === "true";
           const pattern = $input.attr("pattern");
           let $label = $(`label[for="${$input.attr("id")}"]`);
           let fieldName =
@@ -1448,6 +1896,14 @@ $(document).ready(() => {
 
           let errorMessage = "";
           let isValid = true;
+          const hasFileReadError =
+            $input.hasClass("plugin-setting-file-text") &&
+            Boolean($input.data("fileReadError"));
+
+          if (hasFileReadError) {
+            errorMessage = "Unable to read the selected file.";
+            isValid = false;
+          }
 
           // Check if the field is required and not empty
           if (isRequired && value === "") {
@@ -1458,7 +1914,7 @@ $(document).ready(() => {
           // Validate based on pattern if the input is not empty
           if (isValid && pattern && value !== "") {
             try {
-              const regex = new RegExp(pattern);
+              const regex = buildValidationRegex($input, pattern);
               if (!regex.test(value)) {
                 errorMessage = patternMessage;
                 isValid = false;
@@ -1475,29 +1931,20 @@ $(document).ready(() => {
             }
           }
 
-          // Toggle valid/invalid classes
-          $input.toggleClass("is-invalid", !isValid);
-
-          // Manage the invalid-feedback element
-          let $feedback = $input.next(".invalid-feedback");
-          if (!$feedback.length) {
-            $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
-              $input,
-            );
-          }
+          const $validationTarget = setFieldValidationState(
+            $input,
+            isValid,
+            errorMessage,
+          );
 
           if (!isValid) {
-            $feedback.text(errorMessage);
             allValid = false;
-            pluginHasErrors = true;
 
             // Store the first invalid input for focusing later
             if (!firstInvalidInput) {
-              firstInvalidInput = $input;
+              firstInvalidInput = $validationTarget;
               firstInvalidPlugin = pluginId;
             }
-          } else {
-            $feedback.text("");
           }
         });
       });
@@ -1640,6 +2087,16 @@ $(document).ready(() => {
               $input.val(settingValue).trigger("change");
             } else if (inputType === "checkbox") {
               $input.prop("checked", settingValue === "yes").trigger("change");
+            } else if ($input.hasClass("plugin-setting-file-text")) {
+              $input.data("fileReadError", false);
+              $input.val(settingValue).trigger("input").trigger("change");
+              setCurrentFileSettingName(
+                $input,
+                String(settingData.file_name || "").trim(),
+              );
+              setFieldValidationState($input, true, "");
+              syncFileSettingManualInput($input);
+              setFileSettingStatus($input);
             } else if ($input.hasClass("multivalue-hidden-input")) {
               const $container = $input.closest(".multivalue-container");
               const separator = $container.data("separator") || " ";
@@ -2307,6 +2764,25 @@ $(document).ready(() => {
       $settingField.val(valueToSet).trigger("change");
     } else if (settingType === "checkbox") {
       $settingField.prop("checked", valueToSet === "yes").trigger("change");
+    } else if ($settingField.hasClass("plugin-setting-file-text")) {
+      $settingField.data("fileReadError", false);
+      $settingField.val(valueToSet).trigger("input").trigger("change");
+      const fileNameToSet = String(
+        isGlobal
+          ? $settingField.data("originalFileName")
+          : $settingField.data("defaultFileName") || "",
+      ).trim();
+      setCurrentFileSettingName($settingField, fileNameToSet);
+      const $uploadInput = $settingField
+        .closest(".plugin-file-setting-wrapper")
+        .find(".plugin-setting-file-upload")
+        .first();
+      if ($uploadInput.length) {
+        $uploadInput.val("").removeClass("is-valid is-invalid");
+      }
+      setFieldValidationState($settingField, true, "");
+      syncFileSettingManualInput($settingField);
+      setFileSettingStatus($settingField);
     } else if ($settingField.hasClass("multivalue-hidden-input")) {
       // Handle multivalue reset
       const $container = $settingField.closest(".multivalue-container");
@@ -2352,6 +2828,122 @@ $(document).ready(() => {
     // Highlight the field to indicate it's been reset
     const $setting = $settingField.closest(".col-12");
     highlightSettings($setting);
+  });
+
+  $(".plugin-setting-file-text").each(function () {
+    const $fileTextInput = $(this);
+    const persistedFileName = String(
+      $fileTextInput.attr("data-file-name") || "",
+    ).trim();
+    if (persistedFileName) {
+      setCurrentFileSettingName($fileTextInput, persistedFileName);
+    } else {
+      clearStoredFileSettingName($fileTextInput);
+    }
+    syncFileSettingManualInput($fileTextInput);
+    setFileSettingMode($fileTextInput, "upload");
+    setFileSettingStatus($fileTextInput);
+  });
+
+  $(document).on("click", ".plugin-setting-file-mode-toggle", function () {
+    const $toggle = $(this);
+    const hiddenInputSelector = $toggle.data("fileInput");
+    const $fileTextInput = hiddenInputSelector
+      ? $(hiddenInputSelector).first()
+      : $toggle
+          .closest(".plugin-file-setting-wrapper")
+          .find(".plugin-setting-file-text")
+          .first();
+
+    if (!$fileTextInput.length) return;
+
+    const currentMode = String($toggle.attr("data-mode") || "upload");
+    const nextMode = currentMode === "manual" ? "upload" : "manual";
+    setFileSettingMode($fileTextInput, nextMode);
+    if (nextMode === "manual") {
+      const $manualInput = syncFileSettingManualInput($fileTextInput);
+      if ($manualInput.length) {
+        $manualInput.trigger("focus");
+      }
+    }
+  });
+
+  $(document).on("input", ".plugin-setting-file-manual", function () {
+    const $manualInput = $(this);
+    const hiddenInputSelector = $manualInput.data("fileInput");
+    const $fileTextInput = hiddenInputSelector
+      ? $(hiddenInputSelector).first()
+      : $manualInput
+          .closest(".plugin-file-setting-wrapper")
+          .find(".plugin-setting-file-text")
+          .first();
+
+    if (!$fileTextInput.length) return;
+
+    const normalizedContent = String($manualInput.val() ?? "")
+      .replace(/\r\n/g, "\n")
+      .replace(/\r/g, "\n");
+    if ($manualInput.val() !== normalizedContent) {
+      $manualInput.val(normalizedContent);
+    }
+    $fileTextInput.data("fileReadError", false);
+    clearStoredFileSettingName($fileTextInput);
+    $fileTextInput.val(normalizedContent).trigger("input").trigger("change");
+    setFileSettingStatus($fileTextInput);
+  });
+
+  $(document).on("change", ".plugin-setting-file-upload", function () {
+    const $uploadInput = $(this);
+    const hiddenInputSelector = $uploadInput.data("fileInput");
+    const $fileTextInput = hiddenInputSelector
+      ? $(hiddenInputSelector).first()
+      : $uploadInput
+          .closest(".plugin-file-setting-wrapper")
+          .find(".plugin-setting-file-text")
+          .first();
+
+    if (!$fileTextInput.length) return;
+
+    const file = this.files && this.files[0];
+    if (!file) {
+      $fileTextInput.data("fileReadError", false);
+      setFieldValidationState($fileTextInput, true, "");
+      syncFileSettingManualInput($fileTextInput);
+      setFileSettingStatus($fileTextInput);
+      return;
+    }
+
+    const pendingRead = readFileAsText(file)
+      .then((content) => {
+        const normalizedContent = content
+          .replace(/\r\n/g, "\n")
+          .replace(/\r/g, "\n");
+        $fileTextInput.data("fileReadError", false);
+        setCurrentFileSettingName($fileTextInput, file.name);
+        $fileTextInput
+          .val(normalizedContent)
+          .trigger("input")
+          .trigger("change");
+        setFieldValidationState($fileTextInput, true, "");
+        syncFileSettingManualInput($fileTextInput);
+        setFileSettingStatus(
+          $fileTextInput,
+          `Loaded: ${file.name} (${normalizedContent.length} chars)`,
+        );
+      })
+      .catch(() => {
+        $fileTextInput.data("fileReadError", true);
+        setFieldValidationState(
+          $fileTextInput,
+          false,
+          "Unable to read the selected file.",
+        );
+        setFileSettingStatus($fileTextInput, `Unable to read: ${file.name}`);
+        // Clear on failure so the same file can be selected again immediately.
+        $uploadInput.val("");
+      });
+
+    trackPendingFileRead(pendingRead);
   });
 
   isInit = false;

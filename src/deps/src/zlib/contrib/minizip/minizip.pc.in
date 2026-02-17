@@ -7,6 +7,7 @@ Name: minizip
 Description: Minizip zip file manipulation library
 Requires:
 Version: @PACKAGE_VERSION@
+License: Zlib
 Libs: -L${libdir} -lminizip
 Libs.private: -lz
 Cflags: -I${includedir}

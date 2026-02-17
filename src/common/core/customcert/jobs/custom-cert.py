@@ -35,22 +35,38 @@ def process_ssl_data(data: str, file_path: Optional[str], data_type: Literal["ce
         if not data:
             return None
 
-        # Try base64 decode first
+        # If the data already looks like PEM, use it directly.
+        text_data = data.encode()
+        if text_data.strip().startswith(b"-----BEGIN"):
+            if data_type == "cert" and not text_data.strip().startswith(b"-----BEGIN CERTIFICATE-----"):
+                LOGGER.error(f"Invalid certificate format for server {server_name}")
+                return None
+            if data_type == "key" and b"PRIVATE KEY" not in text_data:
+                LOGGER.error(f"Invalid key format for server {server_name}")
+                return None
+            return text_data
+
+        # Try strict base64 decode. We remove whitespaces and pad if needed.
+        decoded = b""
         try:
-            decoded = b64decode(data)
+            base64_data = "".join(data.split())
+            base64_data += "=" * (-len(base64_data) % 4)
+            decoded = b64decode(base64_data, validate=True)
+            if data_type == "cert" and not decoded.strip().startswith(b"-----BEGIN CERTIFICATE-----"):
+                raise ValueError("decoded certificate data is not PEM")
+            if data_type == "key" and (not decoded.strip().startswith(b"-----BEGIN") or b"PRIVATE KEY" not in decoded):
+                raise ValueError("decoded key data is not PEM")
             return decoded
         except BaseException:
             LOGGER.debug(format_exc())
             LOGGER.warning(f"Failed to decode {data_type} data as base64 for server {server_name}, trying as plain text")
 
-            # Try using the data directly as plain text
+            # Fallback: validate and use plaintext data.
             try:
-                text_data = data.encode()
-                # Quick validation check
                 if data_type == "cert" and not text_data.strip().startswith(b"-----BEGIN CERTIFICATE-----"):
                     LOGGER.error(f"Invalid certificate format for server {server_name}")
                     return None
-                elif data_type == "key" and (not text_data.strip().startswith(b"-----BEGIN") or not (b"PRIVATE KEY" in text_data)):
+                elif data_type == "key" and (not text_data.strip().startswith(b"-----BEGIN") or b"PRIVATE KEY" not in text_data):
                     LOGGER.error(f"Invalid key format for server {server_name}")
                     return None
                 return text_data
@@ -106,7 +122,8 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
 
         cert_hash = bytes_hash(cert_file)
         old_hash = JOB.cache_hash("cert.pem", service_id=first_server)
-        if old_hash != cert_hash:
+        cert_path = Path(sep, "var", "cache", "bunkerweb", "customcert", first_server, "cert.pem")
+        if old_hash != cert_hash or not cert_path.is_file():
             ret = True
             cached, err = JOB.cache_file("cert.pem", cert_file, service_id=first_server, checksum=cert_hash, delete_file=False)
             if not cached:
@@ -115,7 +132,8 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
 
         key_hash = bytes_hash(key_file)
         old_hash = JOB.cache_hash("key.pem", service_id=first_server)
-        if old_hash != key_hash:
+        key_path = Path(sep, "var", "cache", "bunkerweb", "customcert", first_server, "key.pem")
+        if old_hash != key_hash or not key_path.is_file():
             ret = True
             cached, err = JOB.cache_file("key.pem", key_file, service_id=first_server, checksum=key_hash, delete_file=False)
             if not cached:

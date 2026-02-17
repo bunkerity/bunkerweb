@@ -101,26 +101,26 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
 
 === "Netzwerk- & Port-Einstellungen"
 
-    | Einstellung             | Standard     | Kontext | Mehrfach | Beschreibung                                                                |
-    | ----------------------- | ------------ | ------- | -------- | --------------------------------------------------------------------------- |
-    | `HTTP_PORT`             | `8080`       | global  | Ja       | **HTTP-Port:** Portnummer für HTTP-Verkehr.                                 |
-    | `HTTPS_PORT`            | `8443`       | global  | Ja       | **HTTPS-Port:** Portnummer für HTTPS-Verkehr.                               |
-    | `USE_IPV6`              | `no`         | global  | Nein     | **IPv6-Unterstützung:** IPv6-Konnektivität aktivieren.                      |
-    | `DNS_RESOLVERS`         | `127.0.0.11` | global  | Nein     | **DNS-Resolver:** DNS-Adressen der zu verwendenden Resolver.                |
-    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global  | Nein     | **Client-Body-Timeout:** Timeout zum Lesen des Request-Bodys vom Client.    |
-    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global  | Nein     | **Client-Header-Timeout:** Timeout zum Lesen der Request-Header vom Client. |
-    | `KEEPALIVE_TIMEOUT`     | `15s`        | global  | Nein     | **Keepalive-Timeout:** Timeout für Keepalive-Clientverbindungen.            |
-    | `SEND_TIMEOUT`          | `10s`        | global  | Nein     | **Sende-Timeout:** Timeout für das Übertragen einer Antwort an den Client.  |
+    | Einstellung             | Standard     | Kontext | Mehrfach | Beschreibung                                                                                   |
+    | ----------------------- | ------------ | ------- | -------- | ---------------------------------------------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`       | global  | Ja       | **HTTP-Port:** Portnummer für HTTP-Verkehr. Leer lassen, um HTTP-Listening zu deaktivieren.    |
+    | `HTTPS_PORT`            | `8443`       | global  | Ja       | **HTTPS-Port:** Portnummer für HTTPS-Verkehr. Leer lassen, um HTTPS-Listening zu deaktivieren. |
+    | `USE_IPV6`              | `no`         | global  | Nein     | **IPv6-Unterstützung:** IPv6-Konnektivität aktivieren.                                         |
+    | `DNS_RESOLVERS`         | `127.0.0.11` | global  | Nein     | **DNS-Resolver:** DNS-Adressen der zu verwendenden Resolver.                                   |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global  | Nein     | **Client-Body-Timeout:** Timeout zum Lesen des Request-Bodys vom Client.                       |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global  | Nein     | **Client-Header-Timeout:** Timeout zum Lesen der Request-Header vom Client.                    |
+    | `KEEPALIVE_TIMEOUT`     | `15s`        | global  | Nein     | **Keepalive-Timeout:** Timeout für Keepalive-Clientverbindungen.                               |
+    | `SEND_TIMEOUT`          | `10s`        | global  | Nein     | **Sende-Timeout:** Timeout für das Übertragen einer Antwort an den Client.                     |
 
 === "Stream-Server-Einstellungen"
 
-    | Einstellung              | Standard | Kontext   | Mehrfach | Beschreibung                                                          |
-    | ------------------------ | -------- | --------- | -------- | --------------------------------------------------------------------- |
-    | `LISTEN_STREAM`          | `yes`    | multisite | Nein     | **Stream lauschen:** Lauschen für Nicht-SSL (Passthrough) aktivieren. |
-    | `LISTEN_STREAM_PORT`     | `1337`   | multisite | Ja       | **Stream-Port:** Lauschport für Nicht-SSL (Passthrough).              |
-    | `LISTEN_STREAM_PORT_SSL` | `4242`   | multisite | Ja       | **Stream-SSL-Port:** Lauschport für SSL (Passthrough).                |
-    | `USE_TCP`                | `yes`    | multisite | Nein     | **TCP lauschen:** TCP-Lauschen (Stream) aktivieren.                   |
-    | `USE_UDP`                | `no`     | multisite | Nein     | **UDP lauschen:** UDP-Lauschen (Stream) aktivieren.                   |
+    | Einstellung              | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                       |
+    | ------------------------ | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+    | `LISTEN_STREAM`          | `yes`    | multisite | Nein     | **Stream lauschen:** Lauschen für Nicht-SSL (Passthrough) aktivieren.                                              |
+    | `LISTEN_STREAM_PORT`     | `1337`   | multisite | Ja       | **Stream-Port:** Lauschport für Nicht-SSL (Passthrough). Leer lassen, um non-SSL Stream-Listening zu deaktivieren. |
+    | `LISTEN_STREAM_PORT_SSL` | `4242`   | multisite | Ja       | **Stream-SSL-Port:** Lauschport für SSL (Passthrough). Leer lassen, um SSL Stream-Listening zu deaktivieren.       |
+    | `USE_TCP`                | `yes`    | multisite | Nein     | **TCP lauschen:** TCP-Lauschen (Stream) aktivieren.                                                                |
+    | `USE_UDP`                | `no`     | multisite | Nein     | **UDP lauschen:** UDP-Lauschen (Stream) aktivieren.                                                                |
 
 === "Worker-Einstellungen"
 
@@ -1673,7 +1673,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.8
+        image: bunkerity/bunkerweb:1.6.9-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1690,7 +1690,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
             syslog-address: "udp://10.20.30.254:514" # Die IP-Adresse des syslog-Dienstes
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.8
+        image: bunkerity/bunkerweb-scheduler:1.6.9-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -2884,7 +2884,7 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 | Einstellung                                 | Standard  | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                                                                                                                           |
 | ------------------------------------------- | --------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `AUTO_LETS_ENCRYPT`                         | `no`      | multisite | nein     | **Let's Encrypt aktivieren:** Auf `yes` setzen, um die automatische Ausstellung und Erneuerung von Zertifikaten zu aktivieren.                                                                                                                                                                                                                                         |
-| `LETS_ENCRYPT_PASSTHROUGH`                  | `no`      | multisite | nein     | **Let's Encrypt durchleiten:** Auf `yes` setzen, um Let's Encrypt-Anfragen an den Webserver weiterzuleiten. Dies ist nützlich, wenn BunkerWeb hinter einem anderen Reverse-Proxy mit SSL-Handling steht.                                                                                                                                                               |
+| `LETS_ENCRYPT_PASSTHROUGH`                  | `no`      | multisite | nein     | **Let's Encrypt durchleiten:** Auf `yes` setzen, um Let's Encrypt-Anfragen an den Webserver weiterzuleiten. Dies ist nützlich, wenn BunkerWeb vor einem anderen Reverse-Proxy mit SSL-Handling steht.                                                                                                                                                               |
 | `EMAIL_LETS_ENCRYPT`                        | `-`       | multisite | nein     | **Kontakt-E-Mail:** E-Mail-Adresse für Let's-Encrypt-Erinnerungen. Lassen Sie das Feld nur leer, wenn Sie akzeptieren, dass keine Warnungen oder Wiederherstellungs-E-Mails gesendet werden (Certbot registriert mit `--register-unsafely-without-email`).                                                                                                             |
 | `LETS_ENCRYPT_CHALLENGE`                    | `http`    | multisite | nein     | **Challenge-Typ:** Methode zur Überprüfung des Domainbesitzes. Optionen: `http` oder `dns`.                                                                                                                                                                                                                                                                            |
 | `LETS_ENCRYPT_DNS_PROVIDER`                 |           | multisite | nein     | **DNS-Anbieter:** Bei Verwendung von DNS-Challenges der zu verwendende DNS-Anbieter (z.B. cloudflare, route53, digitalocean).                                                                                                                                                                                                                                          |
@@ -3526,12 +3526,12 @@ Ob Sie HTTP-Methoden einschränken, Anforderungsgrößen verwalten, das Datei-Ca
         - **Sicherheitsvorteile:** Moderne Protokolle wie HTTP/2 und HTTP/3 erzwingen standardmäßig TLS/HTTPS, reduzieren die Anfälligkeit für bestimmte Angriffe und verbessern die Privatsphäre durch verschlüsselte Header (HTTP/3).
         - **Leistungsvorteile:** Funktionen wie Multiplexing, Header-Komprimierung, Server-Push und binäre Datenübertragung verbessern Geschwindigkeit und Effizienz.
 
-    | Einstellung          | Standard | Kontext   | Mehrfach | Beschreibung                                                                      |
-    | -------------------- | -------- | --------- | -------- | --------------------------------------------------------------------------------- |
-    | `LISTEN_HTTP`        | `yes`    | multisite | nein     | **HTTP-Listen:** Auf (unsichere) HTTP-Anfragen antworten, wenn auf `yes` gesetzt. |
-    | `HTTP2`              | `yes`    | multisite | nein     | **HTTP2:** Unterstützt das HTTP2-Protokoll, wenn HTTPS aktiviert ist.             |
-    | `HTTP3`              | `yes`    | multisite | nein     | **HTTP3:** Unterstützt das HTTP3-Protokoll, wenn HTTPS aktiviert ist.             |
-    | `HTTP3_ALT_SVC_PORT` | `443`    | multisite | nein     | **HTTP3 Alt-Svc Port:** Port, der im Alt-Svc-Header für HTTP3 verwendet wird.     |
+    | Einstellung          | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                     |
+    | -------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | `LISTEN_HTTP`        | `yes`    | multisite | nein     | **HTTP-Listen:** Auf (unsichere) HTTP-Anfragen antworten, wenn auf `yes` gesetzt. Kann auch durch Leerlassen von `HTTP_PORT` deaktiviert werden. |
+    | `HTTP2`              | `yes`    | multisite | nein     | **HTTP2:** Unterstützt das HTTP2-Protokoll, wenn HTTPS aktiviert ist.                                                                            |
+    | `HTTP3`              | `yes`    | multisite | nein     | **HTTP3:** Unterstützt das HTTP3-Protokoll, wenn HTTPS aktiviert ist.                                                                            |
+    | `HTTP3_ALT_SVC_PORT` | `443`    | multisite | nein     | **HTTP3 Alt-Svc Port:** Port, der im Alt-Svc-Header für HTTP3 verwendet wird.                                                                    |
 
     !!! example "Über HTTP/3"
         HTTP/3, die neueste Version des Hypertext Transfer Protocol, verwendet QUIC über UDP anstelle von TCP und behebt Probleme wie das Head-of-Line-Blocking für schnellere, zuverlässigere Verbindungen.

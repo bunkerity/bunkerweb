@@ -18,10 +18,11 @@
            id="csrf_token"
            name="csrf_token"
            value="{{ csrf_token() }}">
+    {% set config_editable = config_template or not config_method or is_editable_method(config_method) %}
     <div class="card p-1 mb-4 sticky-card">
         <div class="d-flex flex-wrap justify-content-around align-items-center">
             <div class="d-flex">
-                {% if (not config_template and config_method and config_method != "ui") or is_readonly %}
+                {% if (not config_editable) or is_readonly %}
                     <button type="button" class="btn btn-sm btn-secondary ms-2 disabled">
                         <i class="bx bx-xs bx-cube"></i>
                         &nbsp;<span data-i18n="button.service">Service</span>: {{ config_service or "Global" }}
@@ -126,7 +127,7 @@
                            value="{{ name }}"
                            pattern="^[a-zA-Z0-9_\-]{1,255}$"
                            required
-                           {% if (not config_template and config_method and config_method != "ui") or is_readonly %}disabled{% endif %}
+                           {% if (not config_editable) or is_readonly %}disabled{% endif %}
                            {% if config_template %}readonly data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Renaming a template-based custom config is not allowed."{% endif %}>
                     <label for="config-name" data-i18n="form.label.configuration_name">Configuration Name</label>
                     <span class="input-group-text border-0 border-primary border-bottom mt-2 pb-0 shadow-none"
@@ -134,7 +135,7 @@
                 </div>
             </div>
             <div class="d-flex justify-content-center">
-                {% set draft_toggle_disabled = config_name and config_method not in ['ui', 'api'] %}
+                {% set draft_toggle_disabled = config_name and not is_editable_method(config_method) %}
                 <div {% if draft_toggle_disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
                     <button type="button"
                             class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if draft_toggle_disabled %}disabled{% endif %}">
@@ -147,12 +148,12 @@
                             {% endif %}
                         </span>
                     </button>
-                    {% set save_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if config_method and config_method != "ui" else '')) %}
-                    {% set save_tooltip_options = '{"method": "' ~ config_method ~ '"}' if config_method and config_method != "ui" and not is_readonly else '{}' %}
+                    {% set save_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if not config_editable else '')) %}
+                    {% set save_tooltip_options = '{"method": "' ~ config_method ~ '"}' if not config_editable and not is_readonly else '{}' %}
                 </div>
-                <div {% if not config_template and config_method and config_method != "ui" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="..." data-i18n="{{ save_tooltip_key }}" data-i18n-options='{{ save_tooltip_options }}' {% endif %}>
+                <div {% if (not config_editable) or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="..." data-i18n="{{ save_tooltip_key }}" data-i18n-options='{{ save_tooltip_options }}' {% endif %}>
                     <button type="button"
-                            class="btn btn-sm btn-bw-green px-3 save-config{% if not config_template and config_method and config_method != "ui" or is_readonly %} disabled{% endif %}">
+                            class="btn btn-sm btn-bw-green px-3 save-config{% if (not config_editable) or is_readonly %} disabled{% endif %}">
                         <i class="bx bx-save bx-sm"></i>
                         <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
                     </button>
@@ -160,10 +161,10 @@
             </div>
         </div>
     </div>
-    {% set editor_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if config_method and config_method != "ui" else '')) %}
-    {% set editor_tooltip_options = '{"method": "' ~ config_method ~ '"}' if config_method and config_method != "ui" and not is_readonly else '{}' %}
+    {% set editor_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if not config_editable else '')) %}
+    {% set editor_tooltip_options = '{"method": "' ~ config_method ~ '"}' if not config_editable and not is_readonly else '{}' %}
     <div class="card position-relative p-4 min-vh-70"
-         {% if not config_template and config_method and config_method != "ui" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="..." data-i18n="{{ editor_tooltip_key }}" data-i18n-options='{{ editor_tooltip_options }}' {% endif %}>
+         {% if (not config_editable) or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="..." data-i18n="{{ editor_tooltip_key }}" data-i18n-options='{{ editor_tooltip_options }}' {% endif %}>
         <p id="config-waiting"
            class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
            data-i18n="status.loading_custom_config">Loading custom configuration...</p>

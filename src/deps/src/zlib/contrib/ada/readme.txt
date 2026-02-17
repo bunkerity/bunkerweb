@@ -59,7 +59,7 @@ the main functionality of ZLib.Ada.
 The routines from the package specifications are commented.
 
 
-Homepage: http://zlib-ada.sourceforge.net/
+Homepage: https://zlib-ada.sourceforge.net/
 Author: Dmitriy Anisimkov <anisimkov@yahoo.com>
 
 Contributors: Pascal Obry <pascal@obry.org>, Steve Sangwine <sjs@essex.ac.uk>

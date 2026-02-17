@@ -130,7 +130,8 @@ PLUGINS_SPECIFICS = {
     "SELFSIGNED": {"GENERATE_SELF_SIGNED_SSL": "no"},
 }
 
-EDITABLE_METHODS: FrozenSet[str] = frozenset({"ui", "api"})
+UI_API_METHODS: FrozenSet[str] = frozenset({"ui", "api"})
+EDITABLE_METHODS: FrozenSet[str] = UI_API_METHODS | frozenset({"wizard"})
 
 
 def stop(status, _stop: bool = True):
@@ -229,6 +230,11 @@ def is_editable_method(method: Optional[str], *, allow_default: bool = False) ->
     if method == "default":
         return allow_default
     return method in EDITABLE_METHODS
+
+
+def is_ui_api_method(method: Optional[str]) -> bool:
+    """Determine if a method belongs to the UI/API editable family."""
+    return method in UI_API_METHODS
 
 
 def get_filtered_settings(settings: dict, global_config: bool = False) -> Dict[str, dict]:

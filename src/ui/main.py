@@ -54,7 +54,9 @@ from app.utils import (
     get_multiples,
     handle_stop,
     human_readable_number,
+    is_editable_method,
     is_plugin_active,
+    is_ui_api_method,
     stop,
     restart_workers,
 )
@@ -647,8 +649,10 @@ with app.app_context():
         get_blacklisted_settings=get_blacklisted_settings,
         get_plugins_settings=BW_CONFIG.get_plugins_settings,
         human_readable_number=human_readable_number,
+        is_editable_method=is_editable_method,
         url_for=custom_url_for,
         is_plugin_active=is_plugin_active,
+        is_ui_api_method=is_ui_api_method,
     )
 
     app.config.update({hook_info["key"]: [] for hook_info in HOOKS.values()})

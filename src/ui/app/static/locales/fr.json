@@ -467,6 +467,10 @@
       "hover_info": "Survolez un pays",
       "legend": "Légende",
       "no_data": "Aucune donnée"
+    },
+    "window": {
+      "last_days": "Les {{days}} derniers jours",
+      "title": "Fenêtre du tableau de bord"
     }
   },
   "datatable": {

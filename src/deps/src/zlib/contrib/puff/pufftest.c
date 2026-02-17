@@ -1,8 +1,7 @@
 /*
  * pufftest.c
- * Copyright (C) 2002-2013 Mark Adler
+ * Copyright (C) 2002-2026 Mark Adler
  * For conditions of distribution and use, see copyright notice in puff.h
- * version 2.3, 21 Jan 2013
  */
 
 /* Example of how to use puff().
@@ -24,7 +23,7 @@
 #include <stdlib.h>
 #include "puff.h"
 
-#if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__CYGWIN__)
+#if defined(MSDOS) || defined(OS2) || defined(_WIN32) || defined(__CYGWIN__)
 #  include <fcntl.h>
 #  include <io.h>
 #  define SET_BINARY_MODE(file) setmode(fileno(file), O_BINARY)

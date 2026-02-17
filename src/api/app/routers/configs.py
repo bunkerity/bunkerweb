@@ -20,6 +20,7 @@ from ..schemas import (
 
 
 router = APIRouter(prefix="/configs", tags=["configs"])
+EDITABLE_METHODS = {"api", "ui"}
 
 
 def _sanitize_name_from_filename(filename: str) -> str:
@@ -227,7 +228,7 @@ def update_config(
     name: str,
     req: ConfigUpdateRequest,
 ) -> JSONResponse:
-    """Update or move a custom config. Only configs managed by method "api" or template-derived ones can be edited via API."""
+    """Update or move a custom config. Only configs managed by method "api"/"ui" or template-derived ones can be edited via API."""
     s_orig = None if service in (None, "", "global") else service
     ctype_orig = config_type  # Already normalized by Pydantic
     name_orig = name
@@ -236,9 +237,9 @@ def update_config(
     current = db.get_custom_config(ctype_orig, name_orig, service_id=s_orig, with_data=True)
     if not current:
         return JSONResponse(status_code=404, content={"status": "error", "message": "Config not found"})
-    # Enforce ownership similar to UI: allow editing only if current method is "api" or the item is template-derived
-    if not current.get("template") and current.get("method") != "api":
-        return JSONResponse(status_code=403, content={"status": "error", "message": "Config is not API-managed and cannot be edited"})
+    # Enforce ownership similar to UI: allow editing only if current method is "api" or "ui", or template-derived
+    if not current.get("template") and current.get("method") not in EDITABLE_METHODS:
+        return JSONResponse(status_code=403, content={"status": "error", "message": "Config is not UI/API-managed and cannot be edited"})
 
     # New values (optional)
     service_new = req.service
@@ -265,7 +266,14 @@ def update_config(
     error = db.upsert_custom_config(
         ctype_orig,
         name_orig,
-        {"service_id": service_new, "type": type_new, "name": name_new, "data": data_new, "method": "api", "is_draft": is_draft_new},
+        {
+            "service_id": service_new,
+            "type": type_new,
+            "name": name_new,
+            "data": data_new,
+            "method": current.get("method", "api"),
+            "is_draft": is_draft_new,
+        },
         service_id=s_orig,
     )
     if error:
@@ -297,8 +305,8 @@ async def update_config_upload(
     current = db.get_custom_config(ctype_orig, name_orig, service_id=s_orig, with_data=True)
     if not current:
         return JSONResponse(status_code=404, content={"status": "error", "message": "Config not found"})
-    if not current.get("template") and current.get("method") != "api":
-        return JSONResponse(status_code=403, content={"status": "error", "message": "Config is not API-managed and cannot be edited"})
+    if not current.get("template") and current.get("method") not in EDITABLE_METHODS:
+        return JSONResponse(status_code=403, content={"status": "error", "message": "Config is not UI/API-managed and cannot be edited"})
 
     s_new = None if new_service in (None, "", "global") else new_service
     t_new = new_type or current.get("type")  # Already normalized by Pydantic if provided
@@ -346,7 +354,7 @@ async def update_config_upload(
             "type": t_new,
             "name": n_new,
             "data": content,
-            "method": "api",
+            "method": current.get("method", "api"),
             "is_draft": bool(new_is_draft) if new_is_draft is not None else current.get("is_draft", False),
         },
         service_id=s_orig,
@@ -359,11 +367,11 @@ async def update_config_upload(
 
 @router.delete("", dependencies=[Depends(guard)])
 def delete_configs(req: ConfigsDeleteRequest) -> JSONResponse:
-    """Delete multiple API-managed custom configs.
+    """Delete multiple UI/API-managed custom configs.
 
     Body example:
     {"configs": [{"service": "global", "type": "http", "name": "my_snippet"}, ...]}
-    Only configs with method == "api" will be deleted; others are ignored.
+    Only configs with method in {"api", "ui"} will be deleted; others are ignored.
     """
     configs = req.configs
 
@@ -374,36 +382,43 @@ def delete_configs(req: ConfigsDeleteRequest) -> JSONResponse:
         return JSONResponse(status_code=422, content={"status": "error", "message": "No valid configs to delete"})
 
     db = get_db()
-    # Keep only API-managed configs not in to_del
+    # Keep only UI/API-managed configs not in to_del
     current = db.get_custom_configs(with_drafts=True, with_data=True)
-    keep: List[Dict[str, Any]] = []
+    keep_by_method: Dict[str, List[Dict[str, Any]]] = {"api": [], "ui": []}
     skipped: List[str] = []
+    deleted: List[str] = []
     for it in current:
         key = (it.get("service_id"), it.get("type"), it.get("name"))
-        if it.get("method") != "api":
-            # Not API-managed: ignore deletions for these
+        method = it.get("method")
+        if method not in keep_by_method:
             if key in to_del:
                 skipped.append(f"{(it.get('service_id') or 'global')}/{it.get('type')}/{it.get('name')}")
             continue
         if key in to_del:
             # delete -> skip adding to keep
+            deleted.append(f"{(it.get('service_id') or 'global')}/{it.get('type')}/{it.get('name')}")
             continue
-        # Convert to expected format for save_custom_configs
-        keep.append(
+        keep_by_method[method].append(
             {
                 "service_id": it.get("service_id") or None,
                 "type": it.get("type"),
                 "name": it.get("name"),
                 "data": it.get("data") or b"",
-                "method": "api",
+                "method": method,
+                "is_draft": bool(it.get("is_draft", False)),
             }
         )
 
-    err = db.save_custom_configs(keep, "api")
-    if err:
-        return JSONResponse(status_code=500, content={"status": "error", "message": err})
+    if not deleted:
+        return JSONResponse(status_code=404, content={"status": "error", "message": "No deletable UI/API configs found among selection", "skipped": skipped})
+
+    for method, keep in keep_by_method.items():
+        err = db.save_custom_configs(keep, method)
+        if err:
+            return JSONResponse(status_code=500, content={"status": "error", "message": err, "skipped": skipped})
 
     content: Dict[str, Any] = {"status": "success"}
+    content["deleted"] = deleted
     if skipped:
         content["skipped"] = skipped
     return JSONResponse(status_code=200, content=content)
@@ -415,7 +430,7 @@ def delete_config(
     config_type: Annotated[ConfigType, PathParam(description="Config type")],
     name: str,
 ) -> JSONResponse:
-    """Delete a single API-managed custom config by replacing the API set without the selected item."""
+    """Delete a single UI/API-managed custom config."""
     s_id = None if service in (None, "", "global") else service
     # config_type is already normalized by Pydantic
     return delete_configs(ConfigsDeleteRequest(configs=[ConfigKey(service=s_id or "global", type=config_type, name=name)]))

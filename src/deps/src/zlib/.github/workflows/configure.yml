@@ -105,7 +105,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Install packages (Ubuntu)
       if: runner.os == 'Linux' && matrix.packages
@@ -131,13 +131,13 @@ jobs:
     - name: Run test cases
       run: |
         make test
-        make cover
+        # make cover
       working-directory: ${{ matrix.build-dir }}
       env:
         QEMU_RUN: ${{ matrix.qemu-run }}
 
     - name: Upload build errors
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       if: failure()
       with:
         name: ${{ matrix.name }} (configure)

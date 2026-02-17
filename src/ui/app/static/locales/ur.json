@@ -467,6 +467,10 @@
       "hover_info": "کسی ملک پر ہوور کریں",
       "legend": "علامات",
       "no_data": "کوئی ڈیٹا نہیں"
+    },
+    "window": {
+      "last_days": "Last {{days}} days",
+      "title": "Dashboard window"
     }
   },
   "datatable": {

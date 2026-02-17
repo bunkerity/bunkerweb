@@ -175,15 +175,16 @@
                         <td>{{ config["checksum"] }}</td>
                         <td>
                             <div class="d-flex justify-content-evenly">
+                                {% set can_edit_config = config['template'] or is_editable_method(config['method']) %}
                                 <a role="button"
                                    class="btn btn-primary btn-sm me-1"
                                    href="{{ url_for("configs") }}/{{ service_id }}/{{ config['type'] }}/{{ config['name'] }}"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
                                    data-bs-original-title="..."
-                                   data-i18n="{% if config['method'] != 'ui' and not config['template'] or is_readonly %}tooltip.link.view_config{% else %}tooltip.link.edit_config{% endif %}"
+                                   data-i18n="{% if not can_edit_config or is_readonly %}tooltip.link.view_config{% else %}tooltip.link.edit_config{% endif %}"
                                    data-i18n-options='{"name": "{{ config['name'] }}"}'>
-                                    <i class="bx bx-{% if config['method'] != 'ui' and not config['template'] or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>
+                                    <i class="bx bx-{% if not can_edit_config or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>
                                 </a>
                                 <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly" data-i18n="tooltip.disabled_readonly"{% endif %}>
                                     <a role="button"
@@ -197,8 +198,8 @@
                                         <i class="bx bx-copy-alt bx-xs"></i>
                                     </a>
                                 </div>
-                                {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if config['method'] != 'ui' else 'tooltip.button.delete_config')) %}
-                                {% set delete_tooltip_options = '{"method": "' ~ config['method'] ~ '"}' if config['method'] != 'ui' and not is_readonly else '{"name": "' ~ config['name'] ~ '"}' %}
+                                {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if not can_edit_config else 'tooltip.button.delete_config')) %}
+                                {% set delete_tooltip_options = '{"method": "' ~ config['method'] ~ '"}' if not can_edit_config and not is_readonly else '{"name": "' ~ config['name'] ~ '"}' %}
                                 <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly" data-i18n="tooltip.disabled_readonly"{% endif %}>
                                     <button type="button"
                                             data-config-name="{{ config['name'] }}"
@@ -223,7 +224,7 @@
                                             data-config-name="{{ config['name'] }}"
                                             data-config-type="{{ config['type'] }}"
                                             data-config-service="{{ config['service_id'] or 'global' }}"
-                                            class="btn btn-outline-danger btn-sm me-1 delete-config{% if config['method'] != 'ui' or is_readonly %} disabled{% endif %}">
+                                            class="btn btn-outline-danger btn-sm me-1 delete-config{% if not can_edit_config or is_readonly %} disabled{% endif %}">
                                         <i class="bx bx-trash bx-xs"></i>
                                     </button>
                                 </div>
