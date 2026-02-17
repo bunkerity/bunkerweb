@@ -7,7 +7,7 @@
 - [UI] Add override non-global services functionality in global settings
 - [ALL-IN-ONE] Update CrowdSec version to 1.7.6
 - [MISC] Change type of `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings to `file` to allow users to upload their certificate and key files directly from the web UI.
-- [DEPS] Update ApexCharts.js version to v5.5.0
+- [DEPS] Update ApexCharts.js version to v5.6.0
 - [DEPS] Update i18next version to v25.8.10
 - [DEPS] Updated zlib version to v1.3.2
 - [CONTRIBUTION] Thank you [Kn-ut99](https://github.com/Kn-ut99) for your contribution regarding the fix of a typo in the `Let's Encrypt` plugin's documentation.
