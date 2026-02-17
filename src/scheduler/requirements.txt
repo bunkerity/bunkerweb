@@ -42,13 +42,13 @@ beautifulsoup4==4.14.3 \
     --hash=sha256:0918bfe44902e6ad8d57732ba310582e98da931428d231a5ecb9e7c703a735bb \
     --hash=sha256:6292b1c5186d356bba669ef9f7f051757099565ad9ada5dd630bd9de5fa7fb86
     # via dns-lexicon
-boto3==1.42.48 \
-    --hash=sha256:c9164fae0dc196f5040cf15d4fbc309475b09cb15649087fad4b65af55f815f2 \
-    --hash=sha256:f4e37445be869157c4aaa53ef3e1b1d1986f9722e64d36f4894de832dd4b11ef
+boto3==1.42.50 \
+    --hash=sha256:2fdf8f5349b130d62576068a6c47b3eec368a70bc28f16d8cce17c5f7e74fc2e \
+    --hash=sha256:38545d7e6e855fefc8a11e899ccbd6d2c9f64671d6648c2acfb1c78c1057a480
     # via certbot-dns-route53
-botocore==1.42.48 \
-    --hash=sha256:57d23635a90239051bab1e1e980401890ec2d87ded38623b1e4570260aec56f7 \
-    --hash=sha256:970983e520de6d85981379efd44dbf293dbc6288d376169787b3b23ea8cd6163
+botocore==1.42.50 \
+    --hash=sha256:3ec7004009d1557a881b1d076d54b5768230849fa9ccdebfd409f0571490e691 \
+    --hash=sha256:de1e128e4898f4e66877bfabbbb03c61f99366f27520442539339e8a74afe3a5
     # via
     #   boto3
     #   s3transfer
@@ -68,6 +68,7 @@ certbot==5.3.1 \
     #   certbot-dns-domeneshop
     #   certbot-dns-duckdns
     #   certbot-dns-dynu
+    #   certbot-dns-gandi
     #   certbot-dns-gehirn
     #   certbot-dns-godaddy
     #   certbot-dns-google
@@ -126,6 +127,9 @@ certbot-dns-duckdns==1.8.0 \
     # via -r requirements.in
 certbot-dns-dynu==0.0.6.post2502111739272536 \
     --hash=sha256:3bca6343a5e962bdc666301228dcc73c6b3ebef9f2921d8afe1a56f1450d9229
+    # via -r requirements.in
+certbot-dns-gandi @ https://github.com/TheophileDiot/certbot-plugin-gandi/archive/da4655bc6d39941b44de2a7c049163a7e34a5a39.zip \
+    --hash=sha256:b875034494ec49f305dba96212c202973def92618936636db3107e498a2abec4
     # via -r requirements.in
 certbot-dns-gehirn==5.3.1 \
     --hash=sha256:b56aebf6ea94cc326623c02e29b846a00fd9bcb6084bfa6c1205b868d7fa6946 \
@@ -507,9 +511,9 @@ domeneshop==0.4.4 \
     --hash=sha256:502c480e7848024c59d68417611c8031d1a052c519e809585f0b312f8f531408 \
     --hash=sha256:60845dd023896f82fc6edd3e4bd1542b37121116a5e44fe28526f6f0af5a8cf3
     # via certbot-dns-domeneshop
-filelock==3.21.2 \
-    --hash=sha256:cfd218cfccf8b947fce7837da312ec3359d10ef2a47c8602edd59e0bacffb708 \
-    --hash=sha256:d6cd4dbef3e1bb63bc16500fc5aa100f16e405bbff3fb4231711851be50c1560
+filelock==3.24.2 \
+    --hash=sha256:667d7dc0b7d1e1064dd5f8f8e80bdac157a6482e8d2e02cd16fd3b6b33bd6556 \
+    --hash=sha256:c22803117490f156e59fafce621f0550a7a853e2bbf4f87f112b11d469b6c81b
     # via tldextract
 google-api-core==2.29.0 \
     --hash=sha256:84181be0f8e6b04006df75ddfe728f24489f0af57c96a529ff7cf45bc28797f7 \
@@ -946,6 +950,7 @@ requests==2.32.5 \
     #   certbot-dns-domeneshop
     #   certbot-dns-duckdns
     #   certbot-dns-dynu
+    #   certbot-dns-gandi
     #   certbot-dns-infomaniak
     #   certbot-dns-ionos
     #   certbot-dns-scaleway

@@ -3,6 +3,7 @@
 ## v1.6.9~rc2 - 2026/02/??
 
 - [FEATURE] Add new `file` setting type to allow users to upload files directly from the web UI and use their content as values for settings.
+- [FEATURE] Add `Gandi` as a DNS provider in the `letsencrypt` plugin
 - [UI] Add override non-global services functionality in global settings
 - [ALL-IN-ONE] Update CrowdSec version to 1.7.6
 - [MISC] Change type of `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings to `file` to allow users to upload their certificate and key files directly from the web UI.
@@ -14,7 +15,7 @@
 
 - [BUGFIX] Ensure variables are only added if they are defined in the environment file and are valid key-value pairs to prevent issues with malformed lines in the variables file.
 - [BUGFIX] Add API token back for certbot hooks in environment configuration
-- [FEATURE] Add ClouDNS DNS provider support to Let's Encrypt plugin
+- [FEATURE] Add `ClouDNS` as a DNS provider in the `letsencrypt` plugin
 - [FEATURE] Add new `CLIENT_BODY_TIMEOUT`, `CLIENT_HEADER_TIMEOUT`, `KEEPALIVE_TIMEOUT` and `SEND_TIMEOUT` settings to control the corresponding NGINX timeouts, allowing better handling of long-lived connections and preventing unintended timeouts.
 - [FEATURE] Add a new `gRPC` plugin to allow proxying gRPC traffic to upstream gRPC services with support for TLS, SNI, custom headers and retry policies.
 - [FEATURE] Make it possible to leave HTTP/HTTPS/STREAM/TLS ports empty to not listen on them.

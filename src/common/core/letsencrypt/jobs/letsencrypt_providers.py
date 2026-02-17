@@ -180,7 +180,7 @@ class DomainOffensiveProvider(Provider):
     @staticmethod
     def get_extra_args() -> dict:
         """Return additional arguments for the provider."""
-        return ["--authenticator", "dns-domainoffensive"]
+        return ["-a", "dns-domainoffensive"]
 
 
 class DomeneshopProvider(Provider):
@@ -199,7 +199,7 @@ class DomeneshopProvider(Provider):
     @staticmethod
     def get_extra_args() -> dict:
         """Return additional arguments for the provider."""
-        return ["--authenticator", "dns-domeneshop"]
+        return ["-a", "dns-domeneshop"]
 
 
 class DnsimpleProvider(Provider):
@@ -252,7 +252,7 @@ class DuckDnsProvider(Provider):
     @staticmethod
     def get_extra_args() -> dict:
         """Return additional arguments for the provider."""
-        return ["--authenticator", "dns-duckdns"]
+        return ["-a", "dns-duckdns"]
 
 
 class DynuProvider(Provider):
@@ -269,7 +269,30 @@ class DynuProvider(Provider):
     @staticmethod
     def get_extra_args() -> dict:
         """Return additional arguments for the provider."""
-        return ["--authenticator", "dns-dynu"]
+        return ["-a", "dns-dynu"]
+
+
+class GandiProvider(Provider):
+    """Gandi DNS provider."""
+
+    dns_gandi_token: str
+    dns_gandi_sharing_id: str = ""
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_gandi_token": ("dns_gandi_token", "gandi_token", "token"),
+            "dns_gandi_sharing_id": ("dns_gandi_sharing_id", "gandi_sharing_id", "sharing_id"),
+        }
+    )
+
+    def get_formatted_credentials(self) -> bytes:
+        """Return the formatted credentials, excluding defaults."""
+        return "\n".join(f"{key} = {value}" for key, value in self.model_dump(exclude={"file_type"}, exclude_defaults=True).items()).encode("utf-8")
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["-a", "dns-gandi"]
 
 
 class GehirnProvider(Provider):
@@ -309,7 +332,7 @@ class GoDaddyProvider(Provider):
     @staticmethod
     def get_extra_args() -> dict:
         """Return additional arguments for the provider."""
-        return ["--authenticator", "dns-godaddy"]
+        return ["-a", "dns-godaddy"]
 
 
 class GoogleProvider(Provider):
@@ -507,7 +530,7 @@ class PowerdnsProvider(Provider):
     @staticmethod
     def get_extra_args() -> dict:
         """Return additional arguments for the provider."""
-        return ["--authenticator", "dns-pdns"]
+        return ["-a", "dns-pdns"]
 
 
 class Rfc2136Provider(Provider):
