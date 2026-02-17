@@ -40,12 +40,13 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt
 
 # Install runtime dependencies and add api user
-RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client postgresql-client sqlite tzdata && \
+# TODO: Add postgresql-client back when the CVEs are fixed
+RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client sqlite tzdata && \
   addgroup -g 101 api && \
   adduser -h /usr/share/bunkerweb/api -g api -s /sbin/nologin -G api -D -H -u 101 --disabled-password api
 
 # Fix CVEs
-# There are no CVEs for the following packages
+RUN apk add --no-cache "libpq>=18.2-r0" "postgresql18-client>=18.2-r0" # CVE-2026-2003 CVE-2026-2004 CVE-2026-2005 CVE-2026-2006 CVE-2026-2007
 
 # Copy deps and app
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

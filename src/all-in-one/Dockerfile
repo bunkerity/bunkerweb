@@ -159,11 +159,13 @@ FROM nginx:1.28.2-alpine-slim@sha256:8393e91e100dcda823dcdd5f7d08e3e1be61670c41b
 RUN umask 027
 
 # Install runtime dependencies including supervisord
-RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 postgresql-client python3 py3-pip sed sqlite tzdata unzip yajl supervisor brotli lmdb libfuzzy2
+# TODO: Add postgresql-client back when the CVEs are fixed
+RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 python3 py3-pip sed sqlite tzdata unzip yajl supervisor brotli lmdb libfuzzy2
 
 # Fix CVEs
 RUN apk add --no-cache "busybox>=1.37.0-r14" "busybox-binsh>=1.37.0-r14" "ssl_client>=1.37.0-r14" # CVE-2024-58251 CVE-2025-46394
 RUN apk add --no-cache "libpng>=1.6.54-r0" # CVE-2026-22695 CVE-2026-22801
+RUN apk add --no-cache "libpq>=18.2-r0" "postgresql18-client>=18.2-r0" # CVE-2026-2003 CVE-2026-2004 CVE-2026-2005 CVE-2026-2006 CVE-2026-2007
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 

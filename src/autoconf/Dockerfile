@@ -39,12 +39,13 @@ FROM python:3.13-alpine@sha256:3527940d79521d5746929cb52e73b477e6acc3f34b35524fb
 RUN umask 027
 
 # Install bash and create autoconf user
-RUN apk add --no-cache bash tzdata && \
+# TODO: Add postgresql-client back when the CVEs are fixed
+RUN apk add --no-cache bash tzdata mariadb-connector-c mariadb-client sqlite && \
   addgroup -g 101 autoconf && \
   adduser -h /usr/share/bunkerweb/autoconf -g autoconf -s /sbin/nologin -G autoconf -D -H -u 101 --disabled-password autoconf
 
 # Fix CVEs
-# There are no CVEs for the following packages
+RUN apk add --no-cache "libpq>=18.2-r0" "postgresql18-client>=18.2-r0" # CVE-2026-2003 CVE-2026-2004 CVE-2026-2005 CVE-2026-2006 CVE-2026-2007
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
