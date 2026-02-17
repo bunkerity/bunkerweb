@@ -2,7 +2,9 @@
 
 ## v1.6.9~rc2 - 2026/02/??
 
+- [FEATURE] Add new `file` setting type to allow users to upload files directly from the web UI and use their content as values for settings.
 - [UI] Add override non-global services functionality in global settings
+- [MISC] Change type of `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings to `file` to allow users to upload their certificate and key files directly from the web UI.
 
 ## v1.6.9~rc1 - 2026/02/13
 

@@ -8,7 +8,7 @@ from flask_login import login_required
 from app.dependencies import BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA, DB
 from app.utils import get_blacklisted_settings
 
-from app.routes.utils import handle_error, wait_applying
+from app.routes.utils import extract_file_setting_names, handle_error, wait_applying
 
 
 global_settings = Blueprint("global_settings", __name__)
@@ -28,20 +28,28 @@ def global_settings_page():
         # Check variables
         variables = request.form.to_dict().copy()
         del variables["csrf_token"]
+        file_setting_names = extract_file_setting_names(variables)
         override_non_global_services = variables.pop("OVERRIDE_NON_GLOBAL_SERVICES", variables.pop("OVERRIDE_TEMPLATE_SERVICES", "no")) == "yes"
 
-        def update_global_config(variables: Dict[str, str], override_non_global_services: bool):
+        def update_global_config(variables: Dict[str, str], override_non_global_services: bool, file_setting_names: Dict[str, str]):
             wait_applying()
 
             # Edit check fields and remove already existing ones
             config = DB.get_config(methods=True, with_drafts=True)
             services = config["SERVER_NAME"]["value"].split()
             variables_to_check = variables.copy()
+            has_file_name_changes = False
 
             for variable, value in variables.items():
                 setting = config.get(variable, {"value": None, "global": True})
                 if setting["global"] and value == setting["value"]:
                     del variables_to_check[variable]
+
+            for setting_name, file_name in file_setting_names.items():
+                current_file_name = str(config.get(setting_name, {}).get("file_name", "") or "").strip()
+                if file_name != current_file_name:
+                    has_file_name_changes = True
+                    break
 
             variables = BW_CONFIG.check_variables(variables, config, variables_to_check, global_config=True, threaded=True)
             changed_variables = {key: value for key, value in variables.items() if key in variables_to_check}
@@ -53,7 +61,7 @@ def global_settings_page():
                     no_removed_settings = False
                     break
 
-            if no_removed_settings and not variables_to_check:
+            if no_removed_settings and not variables_to_check and not has_file_name_changes:
                 content = "The global settings were not edited because no values were changed."
                 DATA["TO_FLASH"].append({"content": content, "type": "warning"})
                 DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
@@ -76,7 +84,7 @@ def global_settings_page():
                 if config["PRO_LICENSE_KEY"]["value"] != variables["PRO_LICENSE_KEY"]:
                     DATA["TO_FLASH"].append({"content": "Checking license key to upgrade.", "type": "success", "save": False})
 
-            operation, error = BW_CONFIG.edit_global_conf(variables, check_changes=True)
+            operation, error = BW_CONFIG.edit_global_conf(variables, check_changes=True, file_name_map=file_setting_names)
 
             if not error:
                 operation = "Global settings successfully saved."
@@ -91,7 +99,7 @@ def global_settings_page():
             DATA["RELOADING"] = False
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        CONFIG_TASKS_EXECUTOR.submit(update_global_config, variables, override_non_global_services)
+        CONFIG_TASKS_EXECUTOR.submit(update_global_config, variables, override_non_global_services, file_setting_names)
 
         arguments = {}
         if request.args.get("mode", "advanced") != "advanced":

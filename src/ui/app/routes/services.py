@@ -9,7 +9,7 @@ from regex import sub
 
 from app.dependencies import BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA, DB
 
-from app.routes.utils import CUSTOM_CONF_RX, handle_error, verify_data_in_form, wait_applying
+from app.routes.utils import CUSTOM_CONF_RX, extract_file_setting_names, handle_error, verify_data_in_form, wait_applying
 from app.utils import LOGGER, get_blacklisted_settings, is_editable_method, is_ui_api_method
 
 services = Blueprint("services", __name__)
@@ -225,6 +225,7 @@ def services_service_page(service: str):
         # Check variables
         variables = request.form.to_dict().copy()
         del variables["csrf_token"]
+        file_setting_names = extract_file_setting_names(variables)
 
         mode = request.args.get("mode", "easy")
         clone = request.args.get("clone", "")
@@ -240,7 +241,7 @@ def services_service_page(service: str):
 
         is_draft = variables.pop("IS_DRAFT", "no") == "yes"
 
-        def update_service(service: str, variables: Dict[str, str], is_draft: bool, mode: str, clone: str):
+        def update_service(service: str, variables: Dict[str, str], is_draft: bool, mode: str, clone: str, file_setting_names: Dict[str, str]):
             wait_applying()
 
             if clone and service == "new":
@@ -346,10 +347,17 @@ def services_service_page(service: str):
                     removed_custom_configs.add(db_custom_config)
 
             variables_to_check = variables.copy()
+            has_file_name_changes = False
 
             for variable, value in variables.items():
                 if value == db_config.get(variable, {"value": None})["value"]:
                     del variables_to_check[variable]
+
+            for setting_name, file_name in file_setting_names.items():
+                current_file_name = str(db_config.get(setting_name, {}).get("file_name", "") or "").strip()
+                if file_name != current_file_name:
+                    has_file_name_changes = True
+                    break
 
             variables = BW_CONFIG.check_variables(variables, db_config, variables_to_check, new=service == "new", threaded=True)
 
@@ -360,7 +368,14 @@ def services_service_page(service: str):
                     no_removed_settings = False
                     break
 
-            if no_removed_settings and service != "new" and was_draft == is_draft and not variables_to_check and not configs_changed:
+            if (
+                no_removed_settings
+                and service != "new"
+                and was_draft == is_draft
+                and not variables_to_check
+                and not configs_changed
+                and not has_file_name_changes
+            ):
                 DATA["TO_FLASH"].append(
                     {
                         "content": f"The service {service} was not edited because no values{' or custom configs' if mode == 'easy' else ''} were changed.",
@@ -412,7 +427,7 @@ def services_service_page(service: str):
 
             if service == "new":
                 old_server_name = variables["SERVER_NAME"]
-                operation, error = BW_CONFIG.new_service(variables, is_draft=is_draft, override_method=override_method)
+                operation, error = BW_CONFIG.new_service(variables, is_draft=is_draft, override_method=override_method, file_name_map=file_setting_names)
             else:
                 operation, error = BW_CONFIG.edit_service(
                     old_server_name,
@@ -420,6 +435,7 @@ def services_service_page(service: str):
                     check_changes=(was_draft != is_draft or not is_draft),
                     is_draft=is_draft,
                     override_method=override_method,
+                    file_name_map=file_setting_names,
                 )
 
             # Save custom configs after the service edit so the new service id exists
@@ -469,7 +485,7 @@ def services_service_page(service: str):
             DATA["RELOADING"] = False
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        CONFIG_TASKS_EXECUTOR.submit(update_service, service, variables.copy(), is_draft, mode, clone)
+        CONFIG_TASKS_EXECUTOR.submit(update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names)
 
         new_service = False
         if service == "new":

@@ -11,7 +11,7 @@ from logging import Logger
 from os import _exit, getenv, sep
 from os.path import join as os_join
 from pathlib import Path
-from re import Match, compile as re_compile, escape, error as RegexError, search
+from re import DOTALL, Match, compile as re_compile, escape, error as RegexError, search
 from sys import argv, path as sys_path
 from tarfile import open as tar_open
 from threading import Lock
@@ -452,7 +452,8 @@ class Database:
 
                 if value is not None:
                     try:
-                        if not self.__ignore_regex_check and search(db_setting.regex, value) is None:
+                        regex_flags = DOTALL if db_setting.type == "file" else 0
+                        if not self.__ignore_regex_check and search(db_setting.regex, value, regex_flags) is None:
                             return False, f"not matching regex: {db_setting.regex!r}"
                     except RegexError:
                         return False, f"invalid regex: {db_setting.regex!r}"
@@ -1458,7 +1459,9 @@ class Database:
             return False, ""
         return True, ""
 
-    def save_config(self, config: Dict[str, Any], method: str, changed: Optional[bool] = True) -> Union[str, Set[str]]:
+    def save_config(
+        self, config: Dict[str, Any], method: str, changed: Optional[bool] = True, file_names: Optional[Dict[str, str]] = None
+    ) -> Union[str, Set[str]]:
         """Save the config in the database"""
         to_put = []
         to_update = []
@@ -1470,6 +1473,22 @@ class Database:
         db_config = {}
         if method == "autoconf":
             db_config = self.get_non_default_settings(with_drafts=True)
+
+        normalized_file_names = {k: ("" if v is None else v.strip()) for k, v in (file_names or {}).items()}
+
+        def get_setting_file_name(setting_type: str, original_key: str, value_changed: bool, current_file_name: str = "") -> Tuple[Optional[str], bool]:
+            if setting_type != "file":
+                return None, False
+
+            if original_key in normalized_file_names:
+                file_name = normalized_file_names[original_key]
+                return file_name or None, file_name != current_file_name
+
+            # If value was edited without a file name metadata, clear stale file references.
+            if value_changed and current_file_name:
+                return None, True
+
+            return None, False
 
         def is_default_value(val: str, key: str, setting: dict, template_default: Optional[str] = None, suffix: int = 0, is_global: bool = False) -> bool:
             """
@@ -1667,15 +1686,24 @@ class Database:
                             global_config[key] = value
 
                     # Collect necessary data before threading
-                    settings_data = session.query(Settings.id, Settings.default, Settings.plugin_id).all()
-                    settings_dict = {s.id: {"default": self._empty_if_none(s.default), "plugin_id": s.plugin_id} for s in settings_data}
+                    settings_data = session.query(Settings.id, Settings.default, Settings.plugin_id, Settings.type).all()
+                    settings_dict = {s.id: {"default": self._empty_if_none(s.default), "plugin_id": s.plugin_id, "type": s.type} for s in settings_data}
 
                     # Collect existing service settings
                     existing_service_settings = session.query(
-                        Services_settings.service_id, Services_settings.setting_id, Services_settings.suffix, Services_settings.value, Services_settings.method
+                        Services_settings.service_id,
+                        Services_settings.setting_id,
+                        Services_settings.suffix,
+                        Services_settings.value,
+                        Services_settings.file_name,
+                        Services_settings.method,
                     ).all()
                     existing_service_settings_dict = {
-                        (s.service_id, s.setting_id, s.suffix or 0): {"value": self._empty_if_none(s.value), "method": s.method}
+                        (s.service_id, s.setting_id, s.suffix or 0): {
+                            "value": self._empty_if_none(s.value),
+                            "file_name": self._empty_if_none(s.file_name),
+                            "method": s.method,
+                        }
                         for s in existing_service_settings
                     }
 
@@ -1725,6 +1753,12 @@ class Database:
                                     local_changed_services = True
 
                             service_setting = existing_service_settings_dict.get((server_name, key, suffix))
+                            current_file_name = service_setting["file_name"] if service_setting else ""
+                            value_changed = bool(service_setting and service_setting["value"] != value)
+                            should_update_value = (value_changed and self._methods_are_compatible(method, service_setting["method"])) or (
+                                bool(service_setting) and method == "autoconf" and service_setting["method"] != "autoconf"
+                            )
+                            target_file_name, file_name_changed = get_setting_file_name(setting["type"], original_key, value_changed, current_file_name)
 
                             template_setting_default = None
                             if service_template:
@@ -1738,19 +1772,27 @@ class Database:
 
                                 self.logger.debug(f"Adding setting {key} for service {server_name}")
                                 local_changed_plugins.add(setting["plugin_id"])
-                                local_to_put.append(Services_settings(service_id=server_name, setting_id=key, value=value, suffix=suffix, method=method))
+                                local_to_put.append(
+                                    Services_settings(
+                                        service_id=server_name,
+                                        setting_id=key,
+                                        value=value,
+                                        file_name=target_file_name if setting["type"] == "file" else None,
+                                        suffix=suffix,
+                                        method=method,
+                                    )
+                                )
                                 # Update Services.last_update
                                 local_to_update.append(
                                     {"model": Services, "filter": {"id": server_name}, "values": {"last_update": datetime.now().astimezone()}}
                                 )
                                 if key == "SERVER_NAME":
                                     local_changed_services = True
-                            elif (service_setting["value"] != value and self._methods_are_compatible(method, service_setting["method"])) or (
-                                method == "autoconf" and service_setting["method"] != "autoconf"
-                            ):
-                                local_changed_plugins.add(setting["plugin_id"])
+                            elif should_update_value or file_name_changed:
+                                if should_update_value:
+                                    local_changed_plugins.add(setting["plugin_id"])
 
-                                if check_value(key, value, setting, template_setting_default, suffix):
+                                if should_update_value and check_value(key, value, setting, template_setting_default, suffix):
                                     self.logger.debug(f"Removing setting {key} for service {server_name}")
                                     local_to_delete.append(
                                         {"model": Services_settings, "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix}}
@@ -1758,12 +1800,15 @@ class Database:
                                     continue
 
                                 self.logger.debug(f"Updating setting {key} for service {server_name}")
+                                setting_values = {"value": self._empty_if_none(value), "method": method}
+                                if setting["type"] == "file" and (file_name_changed or value_changed):
+                                    setting_values["file_name"] = target_file_name
                                 local_to_update.extend(
                                     [
                                         {
                                             "model": Services_settings,
                                             "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix},
-                                            "values": {"value": self._empty_if_none(value), "method": method},
+                                            "values": setting_values,
                                         },
                                         {"model": Services, "filter": {"id": server_name}, "values": {"last_update": datetime.now().astimezone()}},
                                     ]
@@ -1792,7 +1837,17 @@ class Database:
                                 self.logger.debug(f"Setting {key} does not exist")
                                 continue
 
-                            global_value = session.query(Global_values.value, Global_values.method).filter_by(setting_id=key, suffix=suffix).first()
+                            global_value = (
+                                session.query(Global_values.value, Global_values.file_name, Global_values.method)
+                                .filter_by(setting_id=key, suffix=suffix)
+                                .first()
+                            )
+                            current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
+                            value_changed = bool(global_value and global_value.value != value)
+                            should_update_value = (value_changed and self._methods_are_compatible(method, global_value.method)) or (
+                                bool(global_value) and method == "autoconf" and global_value.method != "autoconf"
+                            )
+                            target_file_name, file_name_changed = get_setting_file_name(setting["type"], original_key, value_changed, current_file_name)
 
                             template_setting_default = None
                             if template:
@@ -1805,23 +1860,33 @@ class Database:
 
                                 self.logger.debug(f"Adding global setting {key}")
                                 local_changed_plugins.add(setting["plugin_id"])
-                                local_to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
-                            elif (global_value.value != value and self._methods_are_compatible(method, global_value.method)) or (
-                                method == "autoconf" and global_value.method != "autoconf"
-                            ):
-                                local_changed_plugins.add(setting["plugin_id"])
+                                local_to_put.append(
+                                    Global_values(
+                                        setting_id=key,
+                                        value=value,
+                                        file_name=target_file_name if setting["type"] == "file" else None,
+                                        suffix=suffix,
+                                        method=method,
+                                    )
+                                )
+                            elif should_update_value or file_name_changed:
+                                if should_update_value:
+                                    local_changed_plugins.add(setting["plugin_id"])
 
-                                if check_value(key, value, setting, template_setting_default, suffix, True):
+                                if should_update_value and check_value(key, value, setting, template_setting_default, suffix, True):
                                     self.logger.debug(f"Removing global setting {key}")
                                     local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
                                     continue
 
                                 self.logger.debug(f"Updating global setting {key}")
+                                setting_values = {"value": self._empty_if_none(value), "method": method}
+                                if setting["type"] == "file" and (file_name_changed or value_changed):
+                                    setting_values["file_name"] = target_file_name
                                 local_to_update.append(
                                     {
                                         "model": Global_values,
                                         "filter": {"setting_id": key, "suffix": suffix},
-                                        "values": {"value": self._empty_if_none(value), "method": method},
+                                        "values": setting_values,
                                     }
                                 )
 
@@ -1878,23 +1943,28 @@ class Database:
                             )
                             changed_services = True
 
-                    for key, value in config.items():
+                    for original_key, value in config.items():
+                        key = deepcopy(original_key)
                         suffix = 0
                         if self.SUFFIX_RX.search(key):
                             suffix = int(key.split("_")[-1])
                             key = key[: -len(str(suffix)) - 1]
 
-                        setting = session.query(Settings).with_entities(Settings.default, Settings.plugin_id).filter_by(id=key).first()
+                        setting = session.query(Settings).with_entities(Settings.default, Settings.plugin_id, Settings.type).filter_by(id=key).first()
 
                         if not setting:
                             continue
 
                         global_value = (
                             session.query(Global_values)
-                            .with_entities(Global_values.value, Global_values.method)
+                            .with_entities(Global_values.value, Global_values.file_name, Global_values.method)
                             .filter_by(setting_id=key, suffix=suffix)
                             .first()
                         )
+                        current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
+                        value_changed = bool(global_value and global_value.value != value)
+                        should_update_value = bool(global_value and self._methods_are_compatible(method, global_value.method) and value_changed)
+                        target_file_name, file_name_changed = get_setting_file_name(setting.type, original_key, value_changed, current_file_name)
 
                         template_setting = None
                         if template:
@@ -1912,21 +1982,33 @@ class Database:
 
                             self.logger.debug(f"Adding global setting {key}")
                             changed_plugins.add(setting.plugin_id)
-                            to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
-                        elif self._methods_are_compatible(method, global_value.method) and global_value.value != value:
-                            changed_plugins.add(setting.plugin_id)
+                            to_put.append(
+                                Global_values(
+                                    setting_id=key,
+                                    value=value,
+                                    file_name=target_file_name if setting.type == "file" else None,
+                                    suffix=suffix,
+                                    method=method,
+                                )
+                            )
+                        elif should_update_value or file_name_changed:
+                            if should_update_value:
+                                changed_plugins.add(setting.plugin_id)
 
-                            if value == (template_setting.default if template_setting is not None else setting.default):
+                            if should_update_value and value == (template_setting.default if template_setting is not None else setting.default):
                                 self.logger.debug(f"Removing global setting {key}")
                                 to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
                                 continue
 
                             self.logger.debug(f"Updating global setting {key}")
+                            setting_values = {"value": self._empty_if_none(value), "method": method}
+                            if setting.type == "file" and (file_name_changed or value_changed):
+                                setting_values["file_name"] = target_file_name
                             to_update.append(
                                 {
                                     "model": Global_values,
                                     "filter": {"setting_id": key, "suffix": suffix},
-                                    "values": {"value": self._empty_if_none(value), "method": method},
+                                    "values": setting_values,
                                 }
                             )
 
@@ -2105,9 +2187,11 @@ class Database:
                 db_select(
                     Settings.id.label("setting_id"),
                     Settings.context,
+                    Settings.type,
                     Settings.default,
                     Settings.multiple,
                     Global_values.value,
+                    Global_values.file_name,
                     Global_values.suffix,
                     Global_values.method,
                 )
@@ -2125,6 +2209,7 @@ class Database:
                 setting_id = global_value.setting_id + (f"_{global_value.suffix}" if global_value.multiple and global_value.suffix > 0 else "")
                 config[setting_id] = {
                     "value": self._empty_if_none(global_value.value),
+                    "file_name": self._empty_if_none(global_value.file_name) if global_value.type == "file" else "",
                     "global": True,
                     "method": global_value.method,
                     "default": self._empty_if_none(global_value.default),
@@ -2178,9 +2263,11 @@ class Database:
                     db_select(
                         Services.id.label("service_id"),
                         Settings.id.label("setting_id"),
+                        Settings.type,
                         Settings.default,
                         Settings.multiple,
                         Services_settings.value,
+                        Services_settings.file_name,
                         Services_settings.suffix,
                         Services_settings.method,
                     )
@@ -2209,6 +2296,7 @@ class Database:
 
                     config[f"{result.service_id}_{result.setting_id}" + (f"_{result.suffix}" if result.multiple and result.suffix else "")] = {
                         "value": self._empty_if_none(value),
+                        "file_name": self._empty_if_none(result.file_name) if result.type == "file" else "",
                         "global": False,
                         "method": result.method,
                         "default": self._empty_if_none(config.get(result.setting_id, {"value": self._empty_if_none(result.default)})["value"]),
@@ -3068,6 +3156,8 @@ class Database:
                                 Settings.regex,
                                 Settings.type,
                                 Settings.multiple,
+                                Settings.separator,
+                                Settings.accept,
                                 Settings.order,
                             )
                             .filter_by(id=setting)
@@ -3118,6 +3208,12 @@ class Database:
 
                             if value.get("multiple") != db_setting.multiple:
                                 updates[Settings.multiple] = value.get("multiple")
+
+                            if value.get("separator") != db_setting.separator:
+                                updates[Settings.separator] = value.get("separator")
+
+                            if value.get("accept") != db_setting.accept:
+                                updates[Settings.accept] = value.get("accept")
 
                             if order != db_setting.order:
                                 updates[Settings.order] = order
@@ -4001,6 +4097,8 @@ class Database:
                         setting_data["multiselect"] = multiselects_map.get(setting.id, [])
                     elif setting.type == "multivalue":
                         setting_data["separator"] = getattr(setting, "separator", " ")
+                    elif setting.type == "file":
+                        setting_data["accept"] = getattr(setting, "accept", "")
                     plugin_data["settings"][setting.id] = setting_data
 
                 if plugin.id in commands_map:

@@ -49,7 +49,8 @@
       "id": "custom-ssl-cert-data",
       "label": "Certificate data (base64/plaintext)",
       "regex": "^.*$",
-      "type": "text"
+      "type": "file",
+      "accept": ".pem,.crt,.cer,.txt"
     },
     "CUSTOM_SSL_KEY_DATA": {
       "context": "multisite",
@@ -58,7 +59,8 @@
       "id": "custom-ssl-key-data",
       "label": "Key data (base64/plaintext)",
       "regex": "^.*$",
-      "type": "text"
+      "type": "file",
+      "accept": ".pem,.key,.txt"
     }
   },
   "jobs": [
