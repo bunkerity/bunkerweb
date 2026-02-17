@@ -6,6 +6,7 @@
 - [UI] Add override non-global services functionality in global settings
 - [MISC] Change type of `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings to `file` to allow users to upload their certificate and key files directly from the web UI.
 - [DEPS] Update ApexCharts.js version to v5.5.0
+- [DEPS] Update i18next version to v25.8.10
 
 ## v1.6.9~rc1 - 2026/02/13
 
