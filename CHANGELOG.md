@@ -4,6 +4,7 @@
 
 - [FEATURE] Add new `file` setting type to allow users to upload files directly from the web UI and use their content as values for settings.
 - [UI] Add override non-global services functionality in global settings
+- [ALL-IN-ONE] Update CrowdSec version to 1.7.6
 - [MISC] Change type of `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings to `file` to allow users to upload their certificate and key files directly from the web UI.
 - [DEPS] Update ApexCharts.js version to v5.5.0
 - [DEPS] Update i18next version to v25.8.10
