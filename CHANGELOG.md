@@ -10,6 +10,7 @@
 - [DEPS] Update ApexCharts.js version to v5.5.0
 - [DEPS] Update i18next version to v25.8.10
 - [DEPS] Updated zlib version to v1.3.2
+- [CONTRIBUTION] Thank you [Kn-ut99](https://github.com/Kn-ut99) for your contribution regarding the fix of a typo in the `Let's Encrypt` plugin's documentation.
 
 ## v1.6.9~rc1 - 2026/02/13
 
