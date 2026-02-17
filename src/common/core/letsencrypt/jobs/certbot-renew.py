@@ -28,6 +28,13 @@ WORK_DIR = join(sep, "var", "lib", "bunkerweb", "letsencrypt")
 LOGS_DIR = join(sep, "var", "log", "bunkerweb", "letsencrypt")
 
 
+def add_internal_api_env(cmd_env: dict) -> None:
+    """Re-add internal API env vars removed with DB config keys."""
+    for key, value in environ.items():
+        if key.startswith("API_") and value:
+            cmd_env[key] = value
+
+
 def prepare_logs_dir() -> None:
     """Ensure the Let's Encrypt logs directory is writable by the running user.
 
@@ -97,9 +104,7 @@ try:
     cmd_env["PYTHONPATH"] = cmd_env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in cmd_env["PYTHONPATH"] else "")
     if getenv("DATABASE_URI", ""):
         cmd_env["DATABASE_URI"] = getenv("DATABASE_URI", "")
-    if getenv("API_TOKEN", ""):
-        # Required by certbot hooks (auth/cleanup/deploy) when API token auth is enabled.
-        cmd_env["API_TOKEN"] = getenv("API_TOKEN", "")
+    add_internal_api_env(cmd_env)
 
     process = Popen(
         [

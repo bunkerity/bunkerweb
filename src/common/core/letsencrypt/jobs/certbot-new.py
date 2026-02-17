@@ -178,6 +178,13 @@ def parse_certbot_domains(certificate_block: str) -> str:
     return " ".join(match.group(2).split()).replace(" ", ",")
 
 
+def add_internal_api_env(cmd_env: Dict[str, str]) -> None:
+    """Re-add internal API env vars removed with DB config keys."""
+    for key, value in environ.items():
+        if key.startswith("API_") and value:
+            cmd_env[key] = value
+
+
 PROVIDERS: Dict[str, Type[Provider]] = {
     "bunny": BunnyNetProvider,
     "cloudns": ClouDNSProvider,
@@ -777,9 +784,7 @@ try:
     cmd_env["PYTHONPATH"] = cmd_env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in cmd_env["PYTHONPATH"] else "")
     if getenv("DATABASE_URI", ""):
         cmd_env["DATABASE_URI"] = getenv("DATABASE_URI", "")
-    if getenv("API_TOKEN", ""):
-        # Required by certbot hooks (auth/cleanup/deploy) when API token auth is enabled.
-        cmd_env["API_TOKEN"] = getenv("API_TOKEN", "")
+    add_internal_api_env(cmd_env)
 
     proc = run(
         [
