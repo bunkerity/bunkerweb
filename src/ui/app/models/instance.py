@@ -203,6 +203,7 @@ class Instance:
 
 class InstancesUtils:
     _REPORT_PANE_FIELDS = ["ip", "country", "method", "url", "status", "reason", "server_name", "security_mode"]
+    _REPORT_PANE_MAX_VALUES = 200
 
     def __init__(self, db):
         self.__db = db
@@ -281,27 +282,42 @@ class InstancesUtils:
         has_values = False
 
         for field in pane_fields:
-            raw_counts = redis_client.hgetall(f"requests:facet:{field}")
-            if not raw_counts:
+            max_values = max(0, self._REPORT_PANE_MAX_VALUES)
+            top_heap: list[tuple[int, str]] = []
+
+            try:
+                cursor = 0
+                while True:
+                    cursor, raw_pairs = redis_client.hscan(f"requests:facet:{field}", cursor=cursor, count=1000)
+                    if not raw_pairs and cursor == 0:
+                        break
+
+                    for raw_value, raw_count in raw_pairs.items():
+                        value = self._decode_redis_text(raw_value) or "N/A"
+                        try:
+                            count = int(self._decode_redis_text(raw_count))
+                        except Exception:
+                            continue
+                        if count <= 0:
+                            continue
+
+                        has_values = True
+                        if max_values == 0:
+                            continue
+
+                        item = (count, value)
+                        if len(top_heap) < max_values:
+                            heappush(top_heap, item)
+                        elif item > top_heap[0]:
+                            heapreplace(top_heap, item)
+
+                    if cursor == 0:
+                        break
+            except Exception:
                 continue
 
-            field_counts: dict[str, dict[str, int]] = {}
-            for raw_value, raw_count in raw_counts.items():
-                value = self._decode_redis_text(raw_value) or "N/A"
-                try:
-                    count = int(self._decode_redis_text(raw_count))
-                except Exception:
-                    continue
-                if count <= 0:
-                    continue
-
-                if value not in field_counts:
-                    field_counts[value] = {"total": 0, "count": 0}
-                field_counts[value]["total"] += count
-                field_counts[value]["count"] += count
-                has_values = True
-
-            pane_counts[field] = field_counts
+            if max_values > 0:
+                pane_counts[field] = {value: {"total": count, "count": count} for count, value in sorted(top_heap, key=lambda item: (-item[0], item[1]))}
 
         return pane_counts if has_values else None
 
@@ -544,6 +560,10 @@ class InstancesUtils:
             instance = Instance.from_hostname(hostname, self.__db)
             if instance:
                 target_instances = [instance]
+            else:
+                # A non-instance hostname can be sent by the UI (e.g. service/server_name).
+                # Fall back to searching across instances instead of returning no data.
+                target_instances = instances or self.get_instances(status="up")
         else:
             target_instances = instances or self.get_instances(status="up")
 
@@ -662,6 +682,8 @@ class InstancesUtils:
 
                 pane_filters = parse_search_panes(search_panes)
                 pane_fields = self._REPORT_PANE_FIELDS
+                selected_pane_values = {field: set(values) for field, values in pane_filters.items()}
+                max_pane_values = max(0, self._REPORT_PANE_MAX_VALUES)
                 pane_counts_enabled = include_pane_counts
                 can_use_precomputed_pane_counts = pane_counts_enabled and search == "" and not pane_filters
                 precomputed_pane_counts = self._get_redis_pane_counts_from_facets(redis_client, pane_fields) if can_use_precomputed_pane_counts else None
@@ -732,6 +754,10 @@ class InstancesUtils:
                         for field in pane_fields:
                             value = str(report.get(field, "N/A"))
                             if value not in pane_counts[field]:
+                                # Keep pane maps bounded for high-cardinality fields
+                                # while always retaining currently selected values.
+                                if max_pane_values and len(pane_counts[field]) >= max_pane_values and value not in selected_pane_values.get(field, set()):
+                                    continue
                                 pane_counts[field][value] = {"total": 0, "count": 0}
                             pane_counts[field][value]["total"] += 1
                             if matches:

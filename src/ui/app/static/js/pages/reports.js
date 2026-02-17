@@ -9,6 +9,7 @@ $(document).ready(function () {
   const userReadOnly = $("#user-read-only").val().trim() === "True";
   const filtersStateCache = new Map();
   const filtersStateTtlMs = 10000;
+  const filtersStateMaxEntries = 100;
 
   const collectSearchPaneEntries = (requestData) => {
     if (!requestData || typeof requestData !== "object") return [];
@@ -88,9 +89,27 @@ $(document).ready(function () {
     return entry.payload;
   };
 
+  const pruneFiltersStateCache = () => {
+    const now = Date.now();
+    for (const [key, entry] of filtersStateCache.entries()) {
+      if (now - entry.ts > filtersStateTtlMs) {
+        filtersStateCache.delete(key);
+      }
+    }
+
+    while (filtersStateCache.size >= filtersStateMaxEntries) {
+      const oldestKey = filtersStateCache.keys().next().value;
+      if (typeof oldestKey === "undefined") {
+        break;
+      }
+      filtersStateCache.delete(oldestKey);
+    }
+  };
+
   const cacheFiltersForState = (stateKey, payload) => {
     if (!payload || typeof payload !== "object") return;
     if (!payload.searchPanes || !payload.searchPanes.options) return;
+    pruneFiltersStateCache();
     filtersStateCache.set(stateKey, { ts: Date.now(), payload });
   };
 
@@ -413,25 +432,32 @@ $(document).ready(function () {
 
   // Custom button for auto-refresh
   let autoRefresh = false;
+  let autoRefreshInterval = null;
   const sessionAutoRefresh = sessionStorage.getItem("reportsAutoRefresh");
+
+  function stopAutoRefreshInterval() {
+    if (autoRefreshInterval) {
+      clearInterval(autoRefreshInterval);
+      autoRefreshInterval = null;
+    }
+  }
 
   function toggleAutoRefresh() {
     autoRefresh = !autoRefresh;
     sessionStorage.setItem("reportsAutoRefresh", autoRefresh);
     if (autoRefresh) {
+      stopAutoRefreshInterval();
       $(".bx-loader")
         .addClass("bx-spin")
         .closest(".btn")
         .removeClass("btn-outline-primary")
         .addClass("btn-primary");
-      const interval = setInterval(() => {
-        if (!autoRefresh) {
-          clearInterval(interval);
-        } else {
-          $("#reports").DataTable().ajax.reload(null, false);
-        }
+      autoRefreshInterval = setInterval(() => {
+        if (!autoRefresh) return;
+        $("#reports").DataTable().ajax.reload(null, false);
       }, 10000); // 10 seconds
     } else {
+      stopAutoRefreshInterval();
       $(".bx-loader")
         .removeClass("bx-spin")
         .closest(".btn")
@@ -1779,6 +1805,11 @@ $(document).ready(function () {
       "",
       value === "10" ? location.pathname : `#${value}`,
     );
+  });
+
+  $(window).on("beforeunload pagehide", function () {
+    autoRefresh = false;
+    stopAutoRefreshInterval();
   });
 
   // Utility function to manage header tooltips
