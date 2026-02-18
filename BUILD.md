@@ -206,6 +206,27 @@ Notes:
 
 FreeBSD packages must be built on FreeBSD.
 
+### Preflight requirements
+
+- Use a native FreeBSD 14 host/VM.
+- Run the build as `root` (or with equivalent privileges), because the build script installs packages and stages files under system paths.
+- Ensure dependency sources are initialized:
+
+```sh
+bash src/deps/init_deps.sh
+```
+
+- Install build prerequisites:
+
+```sh
+pkg bootstrap -f
+pkg update -f
+pkg install -y bash git wget curl gtar pigz gmake pkgconf autoconf automake libtool \
+  rust ruby rubygem-fpm nginx sudo lsof unzip openssl sqlite3 pcre2 lmdb ssdeep \
+  libxml2 yajl libgd libmaxminddb libffi python311 py311-pip py311-setuptools \
+  py311-wheel py311-sqlite3 postgresql18-client gcc14
+```
+
 ### Quick build (recommended)
 
 ```sh
@@ -214,18 +235,13 @@ bash src/linux/build-freebsd.sh
 
 Output:
 
-- `bunkerweb-<VERSION>.pkg` in the repository root
+- `bunkerweb-<VERSION>.pkg` (or `bunkerweb-dev.pkg`, depending on `src/VERSION`) in the repository root
 
 Install test:
 
 ```sh
-pkg bootstrap -f
-pkg update -f
-pkg install -y bash git nginx gtar pigz python311 py311-sqlite3 ruby rubygem-fpm sudo libxml2 yajl libgd lsof libmaxminddb openssl unzip lmdb ssdeep gcc14
 pkg install -fy ./bunkerweb-<VERSION>.pkg
 ```
-
-For more FreeBSD details, see `src/linux/BUILD-FREEBSD.md`.
 
 ## CI Parity (Reference)
 

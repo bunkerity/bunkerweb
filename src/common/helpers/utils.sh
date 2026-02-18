@@ -271,6 +271,11 @@ function rcd_service_name() {
 	echo "$1" | tr '-' '_'
 }
 
+# Return the rc.conf.d file path for a given rc.d service.
+function rcd_conf_file() {
+	echo "/etc/rc.conf.d/$1"
+}
+
 # Check if a service is enabled
 function service_is_enabled() {
 	local service_name="$1"
@@ -283,8 +288,14 @@ function service_is_enabled() {
 			return $?
 			;;
 		rcd)
-			local rcd_name
+			local rcd_name rcd_conf enabled_value
 			rcd_name=$(rcd_service_name "$service_name")
+			rcd_conf=$(rcd_conf_file "$rcd_name")
+			if [ -f "$rcd_conf" ]; then
+				enabled_value=$(sysrc -f "$rcd_conf" -n "${rcd_name}_enable" 2>/dev/null || true)
+				echo "$enabled_value" | grep -qi "yes"
+				return $?
+			fi
 			sysrc -n "${rcd_name}_enable" 2>/dev/null | grep -qi "yes"
 			return $?
 			;;
@@ -329,9 +340,11 @@ function service_enable() {
 			return $?
 			;;
 		rcd)
-			local rcd_name
+			local rcd_name rcd_conf
 			rcd_name=$(rcd_service_name "$service_name")
-			sysrc "${rcd_name}_enable=YES" >/dev/null 2>&1
+			rcd_conf=$(rcd_conf_file "$rcd_name")
+			mkdir -p /etc/rc.conf.d
+			sysrc -f "$rcd_conf" "${rcd_name}_enable=YES" >/dev/null 2>&1
 			return $?
 			;;
 		*)
@@ -352,9 +365,11 @@ function service_disable() {
 			return $?
 			;;
 		rcd)
-			local rcd_name
+			local rcd_name rcd_conf
 			rcd_name=$(rcd_service_name "$service_name")
-			sysrc "${rcd_name}_enable=NO" >/dev/null 2>&1
+			rcd_conf=$(rcd_conf_file "$rcd_name")
+			mkdir -p /etc/rc.conf.d
+			sysrc -f "$rcd_conf" "${rcd_name}_enable=NO" >/dev/null 2>&1
 			return $?
 			;;
 		*)
