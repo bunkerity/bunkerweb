@@ -32,6 +32,61 @@
       "regex": "^([^@ \\t\\r\\n]+@[^@ \\t\\r\\n]+\\.[^@ \\t\\r\\n]+)?$",
       "type": "text"
     },
+    "LETS_ENCRYPT_SERVER": {
+      "context": "multisite",
+      "default": "letsencrypt",
+      "help": "Select the certificate authority server to use for certificate generation.",
+      "id": "lets-encrypt-server",
+      "label": "Certificate Authority Server",
+      "regex": "^(letsencrypt|zerossl)$",
+      "type": "select",
+      "select": ["letsencrypt", "zerossl"]
+    },
+    "LETS_ENCRYPT_ZEROSSL_API_KEY": {
+      "context": "multisite",
+      "default": "",
+      "help": "Optional ZeroSSL API key used by zerossl-bot. If empty, EMAIL_LETS_ENCRYPT is used to fetch EAB credentials.",
+      "id": "lets-encrypt-zerossl-api-key",
+      "label": "ZeroSSL API Key",
+      "regex": "^.*$",
+      "type": "password"
+    },
+    "LETS_ENCRYPT_ZEROSSL_API_RETRY": {
+      "context": "multisite",
+      "default": "3",
+      "help": "Number of retries for ZeroSSL API requests done by zerossl-bot (0 disables retries).",
+      "id": "lets-encrypt-zerossl-api-retry",
+      "label": "ZeroSSL API Retries",
+      "regex": "^\\d+$",
+      "type": "number"
+    },
+    "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
+      "context": "multisite",
+      "default": "2",
+      "help": "Delay in seconds between ZeroSSL API retries in zerossl-bot.",
+      "id": "lets-encrypt-zerossl-api-retry-delay",
+      "label": "ZeroSSL API Retry Delay",
+      "regex": "^\\d+$",
+      "type": "number"
+    },
+    "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
+      "context": "multisite",
+      "default": "5",
+      "help": "Connection timeout in seconds for ZeroSSL API requests in zerossl-bot.",
+      "id": "lets-encrypt-zerossl-api-connect-timeout",
+      "label": "ZeroSSL API Connect Timeout",
+      "regex": "^[1-9]\\d*$",
+      "type": "number"
+    },
+    "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
+      "context": "multisite",
+      "default": "20",
+      "help": "Maximum total time in seconds for each ZeroSSL API request in zerossl-bot.",
+      "id": "lets-encrypt-zerossl-api-max-time",
+      "label": "ZeroSSL API Max Time",
+      "regex": "^[1-9]\\d*$",
+      "type": "number"
+    },
     "LETS_ENCRYPT_CHALLENGE": {
       "context": "multisite",
       "default": "http",

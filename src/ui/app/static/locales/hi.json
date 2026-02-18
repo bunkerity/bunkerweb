@@ -690,7 +690,13 @@
       "use_proxy_protocol": "PROXY प्रोटोकॉल का उपयोग करें",
       "use_real_ip": "वास्तविक आईपी का उपयोग करें",
       "username": "उपयोगकर्ता नाम",
-      "wildcard_certificates": "वाइल्डकार्ड प्रमाणपत्र"
+      "wildcard_certificates": "वाइल्डकार्ड प्रमाणपत्र",
+      "certificate_authority": "प्रमाणपत्र प्राधिकरण",
+      "zerossl_api_key": "ZeroSSL API कुंजी",
+      "zerossl_api_retry": "ZeroSSL API पुनः प्रयास",
+      "zerossl_api_retry_delay": "ZeroSSL API पुनः प्रयास विलंब",
+      "zerossl_api_connect_timeout": "ZeroSSL API कनेक्शन टाइमआउट",
+      "zerossl_api_max_time": "ZeroSSL API अधिकतम समय"
     },
     "placeholder": {
       "2fa_code": "कोड दर्ज करें",
@@ -1084,10 +1090,17 @@
         "custom_certificate": "कस्टम प्रमाणपत्र",
         "lets_encrypt": "Let's Encrypt",
         "real_ip": "वास्तविक आईपी",
-        "reverse_proxy": "रिवर्स प्रॉक्सी"
+        "reverse_proxy": "रिवर्स प्रॉक्सी",
+        "zerossl": "ZeroSSL"
       },
       "subtitle": "वेब UI विशिष्ट सेटिंग्स कॉन्फ़िगर करें।",
-      "title": "UI सेटिंग्स"
+      "title": "UI सेटिंग्स",
+      "lets_encrypt": {
+        "certificate_authority_selector": "प्रमाणपत्र प्राधिकरण चयनकर्ता",
+        "letsencrypt_description": "मानक ACME जारी करने के लिए Let's Encrypt का उपयोग करें। परीक्षण और इंटीग्रेशन जांच के लिए स्टेजिंग उपलब्ध है।",
+        "zerossl_api_key_hint": "खाली होने पर, ZeroSSL खाते के पंजीकरण के लिए कॉन्फ़िगर किया गया ईमेल उपयोग करेगा।",
+        "zerossl_description": "zerossl-bot के साथ ZeroSSL का उपयोग करें। खाते के जारीकरण और कुंजी-आधारित पुनःजारी ट्रैकिंग के लिए खाता ईमेल या API कुंजी दें।"
+      }
     },
     "step3": {
       "label": {
@@ -1668,7 +1681,14 @@
     "value_from_global": "ग्लोबल सेटिंग्स से मान लाएँ",
     "view_full_url": "पूर्ण URL देखने के लिए क्लिक करें",
     "wildcard_certificates": "वाइल्डकार्ड प्रमाणपत्र (*.domain.com) उत्पन्न करें। DNS चुनौती की आवश्यकता है।",
-    "wildcard_dns_only": "वाइल्डकार्ड प्रमाणपत्र केवल DNS चुनौती प्रकार के साथ समर्थित हैं।"
+    "wildcard_dns_only": "वाइल्डकार्ड प्रमाणपत्र केवल DNS चुनौती प्रकार के साथ समर्थित हैं।",
+    "lets_encrypt_server": "प्रदाता-विशिष्ट सेटिंग्स दिखाने के लिए अपना प्रमाणपत्र प्रदाता चुनें।",
+    "use_lets_encrypt_staging_letsencrypt_only": "Let's Encrypt स्टेजिंग केवल तब उपलब्ध है जब Let's Encrypt सर्वर का उपयोग किया जाता है।",
+    "zerossl_api_key": "zerossl-bot द्वारा उपयोग की जाने वाली वैकल्पिक ZeroSSL API कुंजी।",
+    "zerossl_api_retry": "ZeroSSL API अनुरोधों के लिए पुनः प्रयासों की संख्या (0 पुनः प्रयास बंद करता है)।",
+    "zerossl_api_retry_delay": "ZeroSSL API पुनः प्रयासों के बीच सेकंड में विलंब।",
+    "zerossl_api_connect_timeout": "ZeroSSL API कॉल के लिए सेकंड में कनेक्शन टाइमआउट।",
+    "zerossl_api_max_time": "प्रत्येक ZeroSSL API अनुरोध के लिए सेकंड में अधिकतम कुल समय।"
   },
   "totp": {
     "prompt": "कृपया अपना TOTP कोड दर्ज करें।"
@@ -1682,6 +1702,7 @@
     "ip_service_duplicate": "यह आईपी पता चयनित सेवा ({{service}}) के लिए पहले से ही प्रतिबंधित है।",
     "pattern": "कृपया {{field}} के लिए एक मान्य मान दर्ज करें।",
     "required": "{{field}} आवश्यक है।",
-    "service_required_for_ban": "सेवा-विशिष्ट प्रतिबंध के लिए एक सेवा का चयन किया जाना चाहिए।"
+    "service_required_for_ban": "सेवा-विशिष्ट प्रतिबंध के लिए एक सेवा का चयन किया जाना चाहिए।",
+    "zerossl_email_or_api_key_required": "ZeroSSL के लिए ईमेल या ZeroSSL API कुंजी में से एक आवश्यक है।"
   }
 }

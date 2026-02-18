@@ -18,10 +18,12 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 
 1.  **启用该功能：** 将 `AUTO_LETS_ENCRYPT` 设置为 `yes` 以启用自动证书颁发和续订。
 2.  **提供联系电子邮件（建议填写）：** 使用 `EMAIL_LETS_ENCRYPT` 设置输入您的电子邮件地址，以便 Let's Encrypt 在证书即将过期时提醒您。如果留空，BunkerWeb 会在没有地址的情况下注册（使用 Certbot 的 `--register-unsafely-without-email` 选项），但您将不会收到任何提醒或恢复邮件。
-3.  **选择验证类型：** 使用 `LETS_ENCRYPT_CHALLENGE` 设置选择 `http` 或 `dns` 验证。
-4.  **配置 DNS 提供商：** 如果使用 DNS 验证，请指定您的 DNS 提供商和凭据。
-5.  **选择证书配置文件：** 使用 `LETS_ENCRYPT_PROFILE` 设置选择您偏好的证书配置文件（classic、tlsserver 或 shortlived）。
-6.  **让 BunkerWeb 处理其余部分：** 配置完成后，证书将根据需要自动颁发、安装和续订。
+3.  **选择证书颁发机构：** 将 `LETS_ENCRYPT_SERVER` 设置为 `letsencrypt`（默认）或 `zerossl`。
+4.  **提供 ZeroSSL 凭据（如需要）：** 使用 `zerossl` 时，请设置 `EMAIL_LETS_ENCRYPT` 或 `LETS_ENCRYPT_ZEROSSL_API_KEY`，以便 `zerossl-bot` 获取 EAB 凭据。
+5.  **选择验证类型：** 使用 `LETS_ENCRYPT_CHALLENGE` 设置选择 `http` 或 `dns` 验证。
+6.  **配置 DNS 提供商：** 如果使用 DNS 验证，请指定您的 DNS 提供商和凭据。
+7.  **选择证书配置文件：** 使用 `LETS_ENCRYPT_PROFILE` 设置选择您偏好的证书配置文件（classic、tlsserver 或 shortlived）。
+8.  **让 BunkerWeb 处理其余部分：** 配置完成后，证书将根据需要自动颁发、安装和续订。
 
 !!! tip "证书配置文件"
     Let's Encrypt 为不同的用例提供了不同的证书配置文件：
@@ -41,6 +43,12 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 | `AUTO_LETS_ENCRYPT`                         | `no`      | multisite | 否   | **启用 Let's Encrypt：** 设置为 `yes` 以启用自动证书颁发和续订。                                                                                                                   |
 | `LETS_ENCRYPT_PASSTHROUGH`                  | `no`      | multisite | 否   | **传递 Let's Encrypt 请求：** 设置为 `yes` 以将 Let's Encrypt 请求传递给 Web 服务器。当 BunkerWeb 位于处理 SSL 的另一个反向代理前面时，此功能很有用。                              |
 | `EMAIL_LETS_ENCRYPT`                        | `-`       | multisite | 否   | **联系电子邮件：** 用于 Let's Encrypt 到期提醒的电子邮件地址。只有在接受不接收任何警报或恢复邮件的情况下才可留空（此时 Certbot 会使用 `--register-unsafely-without-email` 注册）。 |
+| `LETS_ENCRYPT_SERVER`                       | `letsencrypt` | multisite | 否   | **证书颁发机构：** 选择用于签发证书的 ACME 服务器。可选值：`letsencrypt` 或 `zerossl`。                                                                                             |
+| `LETS_ENCRYPT_ZEROSSL_API_KEY`              |           | multisite | 否   | **ZeroSSL API 密钥：** 当 `LETS_ENCRYPT_SERVER=zerossl` 时由 `zerossl-bot` 使用的可选密钥。若为空，则使用 `EMAIL_LETS_ENCRYPT` 获取 EAB 凭据。                                         |
+| `LETS_ENCRYPT_ZEROSSL_API_RETRY`            | `3`       | multisite | 否   | **ZeroSSL API 重试次数：** `zerossl-bot` 发起 ZeroSSL API 请求时的重试次数（`0` 表示禁用重试）。                                                                                |
+| `LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY`      | `2`       | multisite | 否   | **ZeroSSL API 重试延迟：** `zerossl-bot` 中 ZeroSSL API 重试之间的延迟秒数。                                                                                                    |
+| `LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT`  | `5`       | multisite | 否   | **ZeroSSL API 连接超时：** `zerossl-bot` 中 ZeroSSL API 调用的连接超时时间（秒）。                                                                                              |
+| `LETS_ENCRYPT_ZEROSSL_API_MAX_TIME`         | `20`      | multisite | 否   | **ZeroSSL API 最大时长：** `zerossl-bot` 中每次 ZeroSSL API 调用允许的最大总时长（秒）。                                                                                         |
 | `LETS_ENCRYPT_CHALLENGE`                    | `http`    | multisite | 否   | **验证类型：** 用于验证域名所有权的方法。选项：`http` 或 `dns`。                                                                                                                   |
 | `LETS_ENCRYPT_DNS_PROVIDER`                 |           | multisite | 否   | **DNS 提供商：** 使用 DNS 验证时，要使用的 DNS 提供商（例如 cloudflare、route53、digitalocean）。                                                                                  |
 | `LETS_ENCRYPT_DNS_PROPAGATION`              | `default` | multisite | 否   | **DNS 传播：** 等待 DNS 传播的时间（秒）。如果未提供值，则使用提供商的默认传播时间。                                                                                               |

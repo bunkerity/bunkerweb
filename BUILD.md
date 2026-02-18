@@ -197,6 +197,7 @@ Notes:
 
 - For RPM, use Linux arch naming (`x86_64`, `aarch64`, ...).
 - For DEB, use Debian arch naming (`amd64`, `arm64`, ...).
+- `curl` is a runtime requirement for scheduler ACME integrations (notably ZeroSSL/EAB flows).
 - `package.sh` intentionally does not build FreeBSD packages in Docker.
 - Dockerfiles for Linux package builders are preconfigured with their package type:
   - Debian/Ubuntu Dockerfiles run `fpm.sh deb`

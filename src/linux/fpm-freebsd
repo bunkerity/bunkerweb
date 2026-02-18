@@ -3,7 +3,7 @@
 --license agpl3
 --version %VERSION%
 --architecture %ARCH%
---depends bash --depends nginx --depends python311 --depends curl --depends libxml2 --depends yajl --depends libgd --depends sudo --depends lsof --depends libmaxminddb --depends libffi --depends openssl --depends sqlite3 --depends unzip --depends pcre2 --depends lmdb --depends ssdeep
+--depends bash --depends nginx --depends python311 --depends libxml2 --depends yajl --depends libgd --depends sudo --depends lsof --depends libmaxminddb --depends libffi --depends openssl --depends sqlite3 --depends unzip --depends pcre2 --depends lmdb --depends ssdeep --depends curl
 --description "BunkerWeb %VERSION% for FreeBSD"
 --url "https://www.bunkerweb.io"
 --maintainer "Bunkerity <contact at bunkerity dot com>"

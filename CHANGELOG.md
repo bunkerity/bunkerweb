@@ -4,6 +4,7 @@
 
 - [FEATURE] Add new `file` setting type to allow users to upload files directly from the web UI and use their content as values for settings.
 - [FEATURE] Add `Gandi` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add certificate authority selection in the `Let's Encrypt` plugin to allow users to choose between `Let's Encrypt` and `ZeroSSL` as the certificate authority for their certificates (Also added ZeroSSL specific settings).
 - [UI] Add override non-global services functionality in global settings
 - [ALL-IN-ONE] Update CrowdSec version to 1.7.6
 - [MISC] Change type of `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings to `file` to allow users to upload their certificate and key files directly from the web UI.

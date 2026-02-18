@@ -690,7 +690,13 @@
       "use_proxy_protocol": "Utiliser le protocole PROXY",
       "use_real_ip": "Utiliser l'IP réelle",
       "username": "Nom d'utilisateur",
-      "wildcard_certificates": "Certificats Wildcard"
+      "wildcard_certificates": "Certificats Wildcard",
+      "certificate_authority": "Autorité de Certification",
+      "zerossl_api_key": "Clé API ZeroSSL",
+      "zerossl_api_retry": "Nouvelles tentatives API ZeroSSL",
+      "zerossl_api_retry_delay": "Délai de nouvelle tentative API ZeroSSL",
+      "zerossl_api_connect_timeout": "Délai de connexion API ZeroSSL",
+      "zerossl_api_max_time": "Durée maximale API ZeroSSL"
     },
     "placeholder": {
       "2fa_code": "Entrez le code",
@@ -1084,10 +1090,17 @@
         "custom_certificate": "Certificat Personnalisé",
         "lets_encrypt": "Let's Encrypt",
         "real_ip": "IP Réelle",
-        "reverse_proxy": "Proxy Inverse"
+        "reverse_proxy": "Proxy Inverse",
+        "zerossl": "ZeroSSL"
       },
       "subtitle": "Configurez les paramètres spécifiques à l'interface Web.",
-      "title": "Paramètres UI"
+      "title": "Paramètres UI",
+      "lets_encrypt": {
+        "certificate_authority_selector": "Sélecteur d'autorité de certification",
+        "letsencrypt_description": "Utilisez Let's Encrypt pour l'émission ACME standard. Le mode staging est disponible pour les tests et les vérifications d'intégration.",
+        "zerossl_api_key_hint": "Si vide, ZeroSSL utilisera l'email configuré pour l'enregistrement du compte.",
+        "zerossl_description": "Utilisez ZeroSSL avec zerossl-bot. Fournissez un email de compte ou une clé API pour l'émission du compte et le suivi des réémissions basées sur clé."
+      }
     },
     "step3": {
       "label": {
@@ -1669,7 +1682,14 @@
     "value_from_global": "Valeur des paramètres globaux",
     "view_full_url": "Cliquez pour voir l'URL complète",
     "wildcard_certificates": "Générer des certificats wildcard (*.domaine.com). Nécessite le challenge DNS.",
-    "wildcard_dns_only": "Les certificats wildcard ne sont supportés qu'avec le type de challenge DNS."
+    "wildcard_dns_only": "Les certificats wildcard ne sont supportés qu'avec le type de challenge DNS.",
+    "lets_encrypt_server": "Choisissez votre fournisseur de certificats pour afficher les paramètres spécifiques au fournisseur.",
+    "use_lets_encrypt_staging_letsencrypt_only": "Le staging Let's Encrypt est disponible uniquement lors de l'utilisation du serveur Let's Encrypt.",
+    "zerossl_api_key": "Clé API ZeroSSL optionnelle utilisée par zerossl-bot.",
+    "zerossl_api_retry": "Nombre de tentatives pour les requêtes API ZeroSSL (0 désactive les tentatives).",
+    "zerossl_api_retry_delay": "Délai en secondes entre les tentatives API ZeroSSL.",
+    "zerossl_api_connect_timeout": "Délai de connexion en secondes pour les appels API ZeroSSL.",
+    "zerossl_api_max_time": "Durée totale maximale en secondes pour chaque requête API ZeroSSL."
   },
   "totp": {
     "prompt": "Veuillez entrer votre code TOTP."
@@ -1683,6 +1703,7 @@
     "ip_service_duplicate": "Cette adresse IP est déjà bannie pour le service sélectionné ({{service}}).",
     "pattern": "Veuillez entrer une valeur valide pour {{field}}.",
     "required": "{{field}} est requis.",
-    "service_required_for_ban": "Un service doit être sélectionné pour un bannissement spécifique au service."
+    "service_required_for_ban": "Un service doit être sélectionné pour un bannissement spécifique au service.",
+    "zerossl_email_or_api_key_required": "ZeroSSL nécessite soit un email, soit une clé API ZeroSSL."
   }
 }

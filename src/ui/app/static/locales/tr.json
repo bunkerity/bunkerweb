@@ -690,7 +690,13 @@
       "use_proxy_protocol": "PROXY protokolünü kullan",
       "use_real_ip": "Gerçek IP Kullan",
       "username": "Kullanıcı Adı",
-      "wildcard_certificates": "Wildcard Sertifikalar"
+      "wildcard_certificates": "Wildcard Sertifikalar",
+      "certificate_authority": "Sertifika Yetkilisi",
+      "zerossl_api_key": "ZeroSSL API Anahtarı",
+      "zerossl_api_retry": "ZeroSSL API Yeniden Deneme Sayısı",
+      "zerossl_api_retry_delay": "ZeroSSL API Yeniden Deneme Gecikmesi",
+      "zerossl_api_connect_timeout": "ZeroSSL API Bağlantı Zaman Aşımı",
+      "zerossl_api_max_time": "ZeroSSL API Azami Süre"
     },
     "placeholder": {
       "2fa_code": "Kod girin",
@@ -1085,10 +1091,17 @@
         "custom_certificate": "Özel Sertifika",
         "lets_encrypt": "Let's Encrypt",
         "real_ip": "Gerçek IP",
-        "reverse_proxy": "Ters Proxy"
+        "reverse_proxy": "Ters Proxy",
+        "zerossl": "ZeroSSL"
       },
       "subtitle": "Web arayüzüne özel ayarları yapılandırın.",
-      "title": "UI Ayarları"
+      "title": "UI Ayarları",
+      "lets_encrypt": {
+        "certificate_authority_selector": "Sertifika Yetkilisi Seçici",
+        "letsencrypt_description": "Standart ACME düzenlemesi için Let's Encrypt kullanın. Test ve entegrasyon kontrolleri için hazırlık ortamı kullanılabilir.",
+        "zerossl_api_key_hint": "Boş bırakılırsa ZeroSSL hesap kaydı için yapılandırılmış e-postayı kullanır.",
+        "zerossl_description": "zerossl-bot ile ZeroSSL kullanın. Hesap oluşturma ve anahtar tabanlı yeniden düzenleme takibi için bir hesap e-postası veya API anahtarı sağlayın."
+      }
     },
     "step3": {
       "label": {
@@ -1702,7 +1715,14 @@
     "value_from_global": "Genel ayarlardan değer alın",
     "view_full_url": "Tam URL'yi görüntülemek için tıklayın",
     "wildcard_certificates": "Wildcard sertifikalar (*.alanadiniz.com) oluşturun. DNS doğrulaması gerektirir.",
-    "wildcard_dns_only": "Wildcard sertifikalar yalnızca DNS doğrulama türü ile desteklenir."
+    "wildcard_dns_only": "Wildcard sertifikalar yalnızca DNS doğrulama türü ile desteklenir.",
+    "lets_encrypt_server": "Sağlayıcıya özel ayarları göstermek için sertifika sağlayıcınızı seçin.",
+    "use_lets_encrypt_staging_letsencrypt_only": "Let's Encrypt hazırlık ortamı yalnızca Let's Encrypt sunucusu kullanıldığında kullanılabilir.",
+    "zerossl_api_key": "zerossl-bot tarafından kullanılan isteğe bağlı ZeroSSL API anahtarı.",
+    "zerossl_api_retry": "ZeroSSL API istekleri için yeniden deneme sayısı (0 yeniden denemeyi devre dışı bırakır).",
+    "zerossl_api_retry_delay": "ZeroSSL API yeniden denemeleri arasındaki saniye cinsinden gecikme.",
+    "zerossl_api_connect_timeout": "ZeroSSL API çağrıları için saniye cinsinden bağlantı zaman aşımı.",
+    "zerossl_api_max_time": "Her ZeroSSL API isteği için saniye cinsinden azami toplam süre."
   },
   "totp": {
     "prompt": "Lütfen TOTP kodunuzu girin."
@@ -1716,6 +1736,7 @@
     "ip_service_duplicate": "Bu IP adresi seçili servis için zaten yasaklanmış ({{service}}).",
     "pattern": "Lütfen {{field}} için geçerli bir değer girin.",
     "required": "{{field}} gereklidir.",
-    "service_required_for_ban": "Servise özel bir yasaklama için bir servis seçilmelidir."
+    "service_required_for_ban": "Servise özel bir yasaklama için bir servis seçilmelidir.",
+    "zerossl_email_or_api_key_required": "ZeroSSL için e-posta veya ZeroSSL API anahtarından biri gereklidir."
   }
 }

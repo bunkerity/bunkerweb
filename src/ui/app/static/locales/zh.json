@@ -690,7 +690,13 @@
       "use_proxy_protocol": "使用 PROXY 协议",
       "use_real_ip": "使用真实 IP",
       "username": "用户名",
-      "wildcard_certificates": "通配符证书"
+      "wildcard_certificates": "通配符证书",
+      "certificate_authority": "证书颁发机构",
+      "zerossl_api_key": "ZeroSSL API 密钥",
+      "zerossl_api_retry": "ZeroSSL API 重试次数",
+      "zerossl_api_retry_delay": "ZeroSSL API 重试延迟",
+      "zerossl_api_connect_timeout": "ZeroSSL API 连接超时",
+      "zerossl_api_max_time": "ZeroSSL API 最大时长"
     },
     "placeholder": {
       "2fa_code": "输入代码",
@@ -1087,10 +1093,17 @@
         "custom_certificate": "自定义证书",
         "lets_encrypt": "Let's Encrypt",
         "real_ip": "真实 IP",
-        "reverse_proxy": "反向代理"
+        "reverse_proxy": "反向代理",
+        "zerossl": "ZeroSSL"
       },
       "subtitle": "配置 Web UI 特定设置。",
-      "title": "UI 设置"
+      "title": "UI 设置",
+      "lets_encrypt": {
+        "certificate_authority_selector": "证书颁发机构选择器",
+        "letsencrypt_description": "使用 Let's Encrypt 进行标准 ACME 签发。可使用 staging 环境进行测试和集成检查。",
+        "zerossl_api_key_hint": "若留空，ZeroSSL 将使用已配置的邮箱进行账户注册。",
+        "zerossl_description": "使用 zerossl-bot 配合 ZeroSSL。请提供账户邮箱或 API 密钥，用于账户签发和基于密钥的重新签发跟踪。"
+      }
     },
     "step3": {
       "label": {
@@ -1672,7 +1685,14 @@
     "value_from_global": "来自全局设置的值",
     "view_full_url": "点击查看完整 URL",
     "wildcard_certificates": "生成通配符证书 (*.domain.com)。需要 DNS 质询。",
-    "wildcard_dns_only": "通配符证书仅支持 DNS 质询类型。"
+    "wildcard_dns_only": "通配符证书仅支持 DNS 质询类型。",
+    "lets_encrypt_server": "选择您的证书提供商以显示提供商特定设置。",
+    "use_lets_encrypt_staging_letsencrypt_only": "仅在使用 Let's Encrypt 服务器时才可使用 Let's Encrypt staging。",
+    "zerossl_api_key": "由 zerossl-bot 使用的可选 ZeroSSL API 密钥。",
+    "zerossl_api_retry": "ZeroSSL API 请求的重试次数（0 表示禁用重试）。",
+    "zerossl_api_retry_delay": "ZeroSSL API 重试之间的延迟秒数。",
+    "zerossl_api_connect_timeout": "ZeroSSL API 调用的连接超时秒数。",
+    "zerossl_api_max_time": "每个 ZeroSSL API 请求的最大总时长（秒）。"
   },
   "totp": {
     "prompt": "请输入您的 TOTP 代码。"
@@ -1686,6 +1706,7 @@
     "ip_service_duplicate": "此 IP 地址已针对所选服务 ({{service}}) 被封禁。",
     "pattern": "请输入有效的 {{field}} 值。",
     "required": "{{field}} 是必填项。",
-    "service_required_for_ban": "对于特定于服务的封禁，必须选择一个服务。"
+    "service_required_for_ban": "对于特定于服务的封禁，必须选择一个服务。",
+    "zerossl_email_or_api_key_required": "ZeroSSL 需要邮箱或 ZeroSSL API 密钥。"
   }
 }

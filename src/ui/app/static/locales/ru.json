@@ -691,7 +691,13 @@
       "use_proxy_protocol": "Использовать протокол PROXY",
       "use_real_ip": "Использовать реальный IP",
       "username": "Имя пользователя",
-      "wildcard_certificates": "Wildcard-сертификаты"
+      "wildcard_certificates": "Wildcard-сертификаты",
+      "certificate_authority": "Центр сертификации",
+      "zerossl_api_key": "API-ключ ZeroSSL",
+      "zerossl_api_retry": "Повторы API ZeroSSL",
+      "zerossl_api_retry_delay": "Задержка повтора API ZeroSSL",
+      "zerossl_api_connect_timeout": "Таймаут подключения API ZeroSSL",
+      "zerossl_api_max_time": "Максимальное время API ZeroSSL"
     },
     "placeholder": {
       "2fa_code": "Введите код",
@@ -1086,10 +1092,17 @@
         "custom_certificate": "Пользовательский сертификат",
         "lets_encrypt": "Let's Encrypt",
         "real_ip": "Реальный IP",
-        "reverse_proxy": "Обратный прокси"
+        "reverse_proxy": "Обратный прокси",
+        "zerossl": "ZeroSSL"
       },
       "subtitle": "Настройте специфические параметры веб-интерфейса.",
-      "title": "Настройки UI"
+      "title": "Настройки UI",
+      "lets_encrypt": {
+        "certificate_authority_selector": "Выбор центра сертификации",
+        "letsencrypt_description": "Используйте Let's Encrypt для стандартной выдачи ACME. Режим staging доступен для тестирования и проверок интеграции.",
+        "zerossl_api_key_hint": "Если поле пустое, ZeroSSL будет использовать настроенный email для регистрации аккаунта.",
+        "zerossl_description": "Используйте ZeroSSL с zerossl-bot. Укажите email аккаунта или API-ключ для выпуска аккаунта и отслеживания перевыпуска по ключу."
+      }
     },
     "step3": {
       "label": {
@@ -1675,7 +1688,14 @@
     "value_from_global": "Значение из глобальных настроек",
     "view_full_url": "Нажмите, чтобы просмотреть полный URL",
     "wildcard_certificates": "Генерировать wildcard-сертификаты (*.domain.com). Требуется DNS-вызов.",
-    "wildcard_dns_only": "Wildcard-сертификаты поддерживаются только с типом вызова DNS."
+    "wildcard_dns_only": "Wildcard-сертификаты поддерживаются только с типом вызова DNS.",
+    "lets_encrypt_server": "Выберите поставщика сертификатов, чтобы показать настройки для выбранного поставщика.",
+    "use_lets_encrypt_staging_letsencrypt_only": "Staging Let's Encrypt доступен только при использовании сервера Let's Encrypt.",
+    "zerossl_api_key": "Необязательный API-ключ ZeroSSL, используемый zerossl-bot.",
+    "zerossl_api_retry": "Количество повторов для запросов API ZeroSSL (0 отключает повторы).",
+    "zerossl_api_retry_delay": "Задержка в секундах между повторами API ZeroSSL.",
+    "zerossl_api_connect_timeout": "Таймаут подключения в секундах для вызовов API ZeroSSL.",
+    "zerossl_api_max_time": "Максимальное общее время в секундах для каждого запроса API ZeroSSL."
   },
   "totp": {
     "prompt": "Пожалуйста, введите ваш TOTP-код."
@@ -1689,6 +1709,7 @@
     "ip_service_duplicate": "Этот IP-адрес уже забанен для выбранного сервиса ({{service}}).",
     "pattern": "Пожалуйста, введите допустимое значение для {{field}}.",
     "required": "{{field}} обязательно для заполнения.",
-    "service_required_for_ban": "Для бана, специфичного для сервиса, необходимо выбрать сервис."
+    "service_required_for_ban": "Для бана, специфичного для сервиса, необходимо выбрать сервис.",
+    "zerossl_email_or_api_key_required": "ZeroSSL требует либо email, либо API-ключ ZeroSSL."
   }
 }

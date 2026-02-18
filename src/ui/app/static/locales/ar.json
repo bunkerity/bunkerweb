@@ -695,7 +695,13 @@
       "use_proxy_protocol": "استخدام بروتوكول PROXY",
       "use_real_ip": "استخدام IP الحقيقي",
       "username": "اسم المستخدم",
-      "wildcard_certificates": "شهادات Wildcard"
+      "wildcard_certificates": "شهادات Wildcard",
+      "certificate_authority": "الجهة المصدرة للشهادة",
+      "zerossl_api_key": "مفتاح واجهة برمجة تطبيقات ZeroSSL",
+      "zerossl_api_retry": "محاولات إعادة واجهة برمجة تطبيقات ZeroSSL",
+      "zerossl_api_retry_delay": "مهلة إعادة المحاولة لواجهة برمجة تطبيقات ZeroSSL",
+      "zerossl_api_connect_timeout": "مهلة الاتصال لواجهة برمجة تطبيقات ZeroSSL",
+      "zerossl_api_max_time": "الوقت الأقصى لواجهة برمجة تطبيقات ZeroSSL"
     },
     "placeholder": {
       "2fa_code": "أدخل الرمز",
@@ -1091,10 +1097,17 @@
         "custom_certificate": "شهادة مخصصة",
         "lets_encrypt": "Let's Encrypt",
         "real_ip": "IP الحقيقي",
-        "reverse_proxy": "وكيل عكسي"
+        "reverse_proxy": "وكيل عكسي",
+        "zerossl": "ZeroSSL"
       },
       "subtitle": "قم بتكوين الإعدادات الخاصة بواجهة المستخدم على الويب.",
-      "title": "إعدادات واجهة المستخدم"
+      "title": "إعدادات واجهة المستخدم",
+      "lets_encrypt": {
+        "certificate_authority_selector": "محدد الجهة المصدرة للشهادة",
+        "letsencrypt_description": "استخدم Let's Encrypt للإصدار القياسي عبر ACME. تتوفر بيئة Staging للاختبار والتحقق من التكامل.",
+        "zerossl_api_key_hint": "إذا تُرك فارغًا، سيستخدم ZeroSSL البريد الإلكتروني المُعد لتسجيل الحساب.",
+        "zerossl_description": "استخدم ZeroSSL مع zerossl-bot. قدّم بريد الحساب الإلكتروني أو مفتاح API لإصدار الحساب وتتبع إعادة الإصدار المعتمدة على المفتاح."
+      }
     },
     "step3": {
       "label": {
@@ -1675,7 +1688,14 @@
     "value_from_global": "القيمة من الإعدادات العامة",
     "view_full_url": "انقر لعرض URL الكامل",
     "wildcard_certificates": "إنشاء شهادات wildcard (*.domain.com). يتطلب تحدي DNS.",
-    "wildcard_dns_only": "شهادات Wildcard مدعومة فقط مع نوع تحدي DNS."
+    "wildcard_dns_only": "شهادات Wildcard مدعومة فقط مع نوع تحدي DNS.",
+    "lets_encrypt_server": "اختر موفر الشهادات لعرض الإعدادات الخاصة بكل موفر.",
+    "use_lets_encrypt_staging_letsencrypt_only": "بيئة Let's Encrypt Staging متاحة فقط عند استخدام خادم Let's Encrypt.",
+    "zerossl_api_key": "مفتاح API اختياري لـ ZeroSSL يستخدمه zerossl-bot.",
+    "zerossl_api_retry": "عدد محاولات إعادة طلبات واجهة برمجة تطبيقات ZeroSSL (القيمة 0 تعطل إعادة المحاولة).",
+    "zerossl_api_retry_delay": "التأخير بالثواني بين محاولات إعادة واجهة برمجة تطبيقات ZeroSSL.",
+    "zerossl_api_connect_timeout": "مهلة الاتصال بالثواني لطلبات واجهة برمجة تطبيقات ZeroSSL.",
+    "zerossl_api_max_time": "الوقت الإجمالي الأقصى بالثواني لكل طلب واجهة برمجة تطبيقات ZeroSSL."
   },
   "totp": {
     "prompt": "يرجى إدخال رمز TOTP الخاص بك."
@@ -1689,6 +1709,7 @@
     "ip_service_duplicate": "عنوان IP هذا محظور بالفعل للخدمة المحددة ({{service}}).",
     "pattern": "يرجى إدخال قيمة صالحة لـ {{field}}.",
     "required": "{{field}} مطلوب.",
-    "service_required_for_ban": "يجب تحديد خدمة لحظر خاص بالخدمة."
+    "service_required_for_ban": "يجب تحديد خدمة لحظر خاص بالخدمة.",
+    "zerossl_email_or_api_key_required": "يتطلب ZeroSSL إما بريدًا إلكترونيًا أو مفتاح API لـ ZeroSSL."
   }
 }

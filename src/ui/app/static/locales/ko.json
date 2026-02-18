@@ -690,7 +690,13 @@
       "use_proxy_protocol": "PROXY 프로토콜 사용",
       "use_real_ip": "실제 IP 사용",
       "username": "사용자 이름",
-      "wildcard_certificates": "와일드카드 인증서"
+      "wildcard_certificates": "와일드카드 인증서",
+      "certificate_authority": "인증 기관",
+      "zerossl_api_key": "ZeroSSL API 키",
+      "zerossl_api_retry": "ZeroSSL API 재시도 횟수",
+      "zerossl_api_retry_delay": "ZeroSSL API 재시도 지연",
+      "zerossl_api_connect_timeout": "ZeroSSL API 연결 시간 초과",
+      "zerossl_api_max_time": "ZeroSSL API 최대 시간"
     },
     "placeholder": {
       "2fa_code": "코드 입력",
@@ -1084,10 +1090,17 @@
         "custom_certificate": "사용자 정의 인증서",
         "lets_encrypt": "Let's Encrypt",
         "real_ip": "실제 IP",
-        "reverse_proxy": "리버스 프록시"
+        "reverse_proxy": "리버스 프록시",
+        "zerossl": "ZeroSSL"
       },
       "subtitle": "Web UI 전용 설정을 구성합니다.",
-      "title": "UI 설정"
+      "title": "UI 설정",
+      "lets_encrypt": {
+        "certificate_authority_selector": "인증 기관 선택기",
+        "letsencrypt_description": "표준 ACME 발급에는 Let's Encrypt를 사용하세요. 테스트 및 통합 점검을 위해 스테이징을 사용할 수 있습니다.",
+        "zerossl_api_key_hint": "비워 두면 ZeroSSL은 계정 등록에 구성된 이메일을 사용합니다.",
+        "zerossl_description": "zerossl-bot과 함께 ZeroSSL을 사용하세요. 계정 발급 및 키 기반 재발급 추적을 위해 계정 이메일 또는 API 키를 제공하세요."
+      }
     },
     "step3": {
       "label": {
@@ -1671,7 +1684,14 @@
     "value_from_global": "전역 설정에서 가져온 값",
     "view_full_url": "클릭하여 전체 URL 보기",
     "wildcard_certificates": "와일드카드 인증서(*.domain.com)를 생성합니다. DNS 챌린지가 필요합니다.",
-    "wildcard_dns_only": "와일드카드 인증서는 DNS 챌린지 유형에서만 지원됩니다."
+    "wildcard_dns_only": "와일드카드 인증서는 DNS 챌린지 유형에서만 지원됩니다.",
+    "lets_encrypt_server": "공급자별 설정을 표시하려면 인증서 공급자를 선택하세요.",
+    "use_lets_encrypt_staging_letsencrypt_only": "Let's Encrypt 스테이징은 Let's Encrypt 서버를 사용할 때만 사용할 수 있습니다.",
+    "zerossl_api_key": "zerossl-bot에서 사용하는 선택적 ZeroSSL API 키입니다.",
+    "zerossl_api_retry": "ZeroSSL API 요청의 재시도 횟수입니다 (0이면 재시도를 비활성화).",
+    "zerossl_api_retry_delay": "ZeroSSL API 재시도 간 지연 시간(초)입니다.",
+    "zerossl_api_connect_timeout": "ZeroSSL API 호출의 연결 시간 초과(초)입니다.",
+    "zerossl_api_max_time": "각 ZeroSSL API 요청의 최대 총 시간(초)입니다."
   },
   "totp": {
     "prompt": "TOTP 코드를 입력해 주세요."
@@ -1685,6 +1705,7 @@
     "ip_service_duplicate": "이 IP 주소는 선택한 서비스({{service}})에 이미 차단되어 있습니다.",
     "pattern": "{{field}}에 유효한 값을 입력해 주세요.",
     "required": "{{field}} 필드는 필수입니다.",
-    "service_required_for_ban": "서비스별 차단을 위해서는 서비스를 선택해야 합니다."
+    "service_required_for_ban": "서비스별 차단을 위해서는 서비스를 선택해야 합니다.",
+    "zerossl_email_or_api_key_required": "ZeroSSL은 이메일 또는 ZeroSSL API 키가 필요합니다."
   }
 }

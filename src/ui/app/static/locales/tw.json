@@ -695,7 +695,13 @@
       "use_proxy_protocol": "使用 PROXY 協定",
       "use_real_ip": "使用真實 IP",
       "username": "使用者名稱",
-      "wildcard_certificates": "萬用字元憑證"
+      "wildcard_certificates": "萬用字元憑證",
+      "certificate_authority": "憑證授權單位",
+      "zerossl_api_key": "ZeroSSL API 金鑰",
+      "zerossl_api_retry": "ZeroSSL API 重試次數",
+      "zerossl_api_retry_delay": "ZeroSSL API 重試延遲",
+      "zerossl_api_connect_timeout": "ZeroSSL API 連線逾時",
+      "zerossl_api_max_time": "ZeroSSL API 最長時間"
     },
     "placeholder": {
       "2fa_code": "輸入代碼",
@@ -1091,10 +1097,17 @@
         "custom_certificate": "自訂憑證",
         "lets_encrypt": "Let's Encrypt",
         "real_ip": "真實 IP",
-        "reverse_proxy": "反向代理"
+        "reverse_proxy": "反向代理",
+        "zerossl": "ZeroSSL"
       },
       "subtitle": "設定 Web UI 特定設定。",
-      "title": "UI 設定"
+      "title": "UI 設定",
+      "lets_encrypt": {
+        "certificate_authority_selector": "憑證授權單位選擇器",
+        "letsencrypt_description": "使用 Let's Encrypt 進行標準 ACME 簽發。可使用 staging 環境進行測試與整合檢查。",
+        "zerossl_api_key_hint": "若留空，ZeroSSL 會使用已設定的電子郵件進行帳戶註冊。",
+        "zerossl_description": "搭配 zerossl-bot 使用 ZeroSSL。請提供帳戶電子郵件或 API 金鑰，以進行帳戶簽發與基於金鑰的重新簽發追蹤。"
+      }
     },
     "step3": {
       "label": {
@@ -1678,7 +1691,14 @@
     "value_from_global": "來自全域設定的值",
     "view_full_url": "點擊檢視完整 URL",
     "wildcard_certificates": "產生萬用字元憑證 (*.domain.com)。需要 DNS 挑戰。",
-    "wildcard_dns_only": "萬用字元憑證僅支援 DNS 挑戰類型。"
+    "wildcard_dns_only": "萬用字元憑證僅支援 DNS 挑戰類型。",
+    "lets_encrypt_server": "選擇您的憑證供應商以顯示供應商專屬設定。",
+    "use_lets_encrypt_staging_letsencrypt_only": "只有在使用 Let's Encrypt 伺服器時，才可使用 Let's Encrypt staging。",
+    "zerossl_api_key": "由 zerossl-bot 使用的可選 ZeroSSL API 金鑰。",
+    "zerossl_api_retry": "ZeroSSL API 請求的重試次數（0 代表停用重試）。",
+    "zerossl_api_retry_delay": "ZeroSSL API 重試之間的延遲秒數。",
+    "zerossl_api_connect_timeout": "ZeroSSL API 呼叫的連線逾時秒數。",
+    "zerossl_api_max_time": "每個 ZeroSSL API 請求的最大總秒數。"
   },
   "totp": {
     "prompt": "請輸入您的 TOTP 代碼。"
@@ -1692,6 +1712,7 @@
     "ip_service_duplicate": "此 IP 位址已針對所選服務 ({{service}}) 被封鎖。",
     "pattern": "請輸入有效的 {{field}} 值。",
     "required": "{{field}} 是必填項。",
-    "service_required_for_ban": "對於特定於服務的封鎖，必須選取一個服務。"
+    "service_required_for_ban": "對於特定於服務的封鎖，必須選取一個服務。",
+    "zerossl_email_or_api_key_required": "ZeroSSL 需要電子郵件或 ZeroSSL API 金鑰。"
   }
 }
