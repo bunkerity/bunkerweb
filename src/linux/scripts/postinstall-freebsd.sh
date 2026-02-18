@@ -145,7 +145,16 @@ fi
 
 # Helper functions for FreeBSD service management
 service_is_enabled() {
-    sysrc -n "${1}_enable" 2>/dev/null | grep -qi "yes"
+    service_name="$1"
+    rc_conf_file="/etc/rc.conf.d/${service_name}"
+
+    if [ -f "$rc_conf_file" ]; then
+        enabled_value=$(sysrc -f "$rc_conf_file" -n "${service_name}_enable" 2>/dev/null || true)
+        echo "$enabled_value" | grep -qi "yes"
+        return $?
+    fi
+
+    sysrc -n "${service_name}_enable" 2>/dev/null | grep -qi "yes"
 }
 
 service_is_running() {
@@ -153,11 +162,17 @@ service_is_running() {
 }
 
 service_enable() {
-    sysrc "${1}_enable=YES" >/dev/null 2>&1
+    service_name="$1"
+    rc_conf_file="/etc/rc.conf.d/${service_name}"
+    mkdir -p /etc/rc.conf.d
+    sysrc -f "$rc_conf_file" "${service_name}_enable=YES" >/dev/null 2>&1
 }
 
 service_disable() {
-    sysrc "${1}_enable=NO" >/dev/null 2>&1
+    service_name="$1"
+    rc_conf_file="/etc/rc.conf.d/${service_name}"
+    mkdir -p /etc/rc.conf.d
+    sysrc -f "$rc_conf_file" "${service_name}_enable=NO" >/dev/null 2>&1
 }
 
 service_start() {
@@ -361,7 +376,7 @@ echo "[INFO] Thank you for using BunkerWeb!"
 echo ""
 echo "[INFO]  FreeBSD Notes:"
 echo "  * Services are managed via rc.d: service bunkerweb start|stop|restart"
-echo "  * Enable services in /etc/rc.conf: sysrc bunkerweb_enable=YES"
+echo "  * Enable services in /etc/rc.conf.d: sysrc -f /etc/rc.conf.d/bunkerweb bunkerweb_enable=YES"
 echo "  * Configuration files are in /etc/bunkerweb/"
 echo ""
 echo "[INFO]  External Database Clients:"
