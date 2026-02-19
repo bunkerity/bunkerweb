@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager, suppress
 from copy import deepcopy
 from datetime import datetime, timedelta
+from functools import wraps
 from io import BytesIO
 from json import JSONDecodeError, loads
 from logging import Logger
@@ -16,7 +17,7 @@ from sys import argv, path as sys_path
 from tarfile import open as tar_open
 from threading import Lock
 from traceback import format_exc
-from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Set, Tuple, TypeVar, Union
 from time import sleep
 from uuid import uuid4
 from warnings import filterwarnings
@@ -82,10 +83,45 @@ def set_sqlite_pragma(dbapi_connection, _):
 
 filterwarnings("ignore", category=SAWarning, message="DELETE statement on table .* expected to delete")
 
+T = TypeVar("T")
+
+
+def retry_on_transient_db_errors(func: Callable[..., T]) -> Callable[..., T]:
+    @wraps(func)
+    def wrapper(self: "Database", *args, **kwargs) -> T:
+        attempts = max(1, getattr(self, "_request_retry_attempts", 1))
+        delay = max(0.0, getattr(self, "_request_retry_delay", 0.0))
+
+        for attempt in range(1, attempts + 1):
+            try:
+                return func(self, *args, **kwargs)
+            except (ConnectionRefusedError, OperationalError, DatabaseError) as e:
+                if attempt >= attempts or not self._is_transient_connection_error(e):
+                    raise
+
+                self.logger.warning(f"Transient database error in {func.__name__} (attempt {attempt}/{attempts}), retrying in {delay:.2f}s ...")
+                if delay:
+                    sleep(delay)
+
+        raise RuntimeError("retry_on_transient_db_errors: unreachable code")
+
+    return wrapper
+
 
 class Database:
     DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?|oracle(\+oracledb)?):/+(?P<path>/[^\s]+)")
     READONLY_ERROR = ("readonly", "read-only", "command denied", "Access denied")
+    TRANSIENT_CONNECTION_ERROR_HINTS = (
+        "connection refused",
+        "can't connect",
+        "lost connection",
+        "server has gone away",
+        "connection reset",
+        "connection aborted",
+        "timed out",
+        "timeout",
+        "connection is closed",
+    )
     RESTRICTED_TEMPLATE_SETTINGS = ("USE_TEMPLATE", "IS_DRAFT")
     MULTISITE_CUSTOM_CONFIG_TYPES = ("server_http", "modsec_crs", "modsec", "server_stream", "crs_plugins_before", "crs_plugins_after")
     SUFFIX_RX = re_compile(r"(?P<setting>.+)_(?P<suffix>\d+)$")
@@ -98,6 +134,20 @@ class Database:
         self.readonly = False
         self.last_connection_retry = None
         self.__ignore_regex_check = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
+        self._request_retry_attempts = 2
+        self._request_retry_delay = 0.25
+
+        request_retry_attempts = getenv("DATABASE_REQUEST_RETRY_ATTEMPTS", "2")
+        if request_retry_attempts.isdigit() and int(request_retry_attempts) > 0:
+            self._request_retry_attempts = int(request_retry_attempts)
+        else:
+            self.logger.warning(f"Invalid DATABASE_REQUEST_RETRY_ATTEMPTS value: {request_retry_attempts}, using default value (2)")
+
+        request_retry_delay = getenv("DATABASE_REQUEST_RETRY_DELAY", "0.25")
+        try:
+            self._request_retry_delay = max(0.0, float(request_retry_delay))
+        except ValueError:
+            self.logger.warning(f"Invalid DATABASE_REQUEST_RETRY_DELAY value: {request_retry_delay}, using default value (0.25)")
 
         if pool:
             self.logger.warning("The pool parameter is deprecated, it will be removed in the next version")
@@ -328,6 +378,23 @@ class Database:
             return True
         return new_method == current_method
 
+    def _is_transient_connection_error(self, error: BaseException) -> bool:
+        """Return True if the exception looks like a temporary DB connectivity issue."""
+        if isinstance(error, ConnectionRefusedError):
+            return True
+
+        if isinstance(error, OperationalError) and getattr(error, "connection_invalidated", False):
+            return True
+
+        if not isinstance(error, (OperationalError, DatabaseError)):
+            return False
+
+        error_text = str(getattr(error, "orig", error)).lower()
+        if not error_text:
+            error_text = str(error).lower()
+
+        return any(hint in error_text for hint in self.TRANSIENT_CONNECTION_ERROR_HINTS)
+
     def test_read(self):
         """Test the read access to the database"""
         self.logger.debug("Testing read access to the database ...")
@@ -507,6 +574,7 @@ class Database:
             except BaseException as e:
                 return f"Error: {e}"
 
+    @retry_on_transient_db_errors
     def get_metadata(self) -> Dict[str, Any]:
         """Get the metadata from the database"""
         data = {
@@ -2158,6 +2226,7 @@ class Database:
 
         return message
 
+    @retry_on_transient_db_errors
     def get_non_default_settings(
         self,
         global_only: bool = False,
@@ -2329,6 +2398,7 @@ class Database:
 
             return config
 
+    @retry_on_transient_db_errors
     def get_config(
         self,
         global_only: bool = False,
@@ -2775,6 +2845,7 @@ class Database:
 
         return services
 
+    @retry_on_transient_db_errors
     def get_services(self, *, with_drafts: bool = False) -> List[Dict[str, Any]]:
         """Get the services from the database"""
         services = []
@@ -3999,6 +4070,7 @@ class Database:
                 return str(e)
         return ""
 
+    @retry_on_transient_db_errors
     def get_plugins(self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False) -> List[Dict[str, Any]]:
         """Get all plugins from the database using batched queries to avoid N+1 issues."""
         with self._db_session() as session:
