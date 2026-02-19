@@ -295,12 +295,12 @@ markupsafe==3.0.3 \
     --hash=sha256:f9e130248f4462aaa8e2552d547f36ddadbeaa573879158d721bbd33dfe4743a \
     --hash=sha256:fed51ac40f757d41b7c48425901843666a6677e3e8eb0abcff09e4ba6e664f50
     # via mako
-psycopg==3.3.2 \
-    --hash=sha256:3e94bc5f4690247d734599af56e51bae8e0db8e4311ea413f801fef82b14a99b \
-    --hash=sha256:707a67975ee214d200511177a6a80e56e654754c9afca06a7194ea6bbfde9ca7
+psycopg==3.3.3 \
+    --hash=sha256:5e9a47458b3c1583326513b2556a2a9473a1001a56c9efe9e587245b43148dd9 \
+    --hash=sha256:f96525a72bcfade6584ab17e89de415ff360748c766f0106959144dcbb38c698
     # via -r requirements.arm.in
-psycopg-c==3.3.2 \
-    --hash=sha256:a65927731d394cc77bbf85d02d0311d7843616a4a627f3e816e94ad3a052ef83
+psycopg-c==3.3.3 \
+    --hash=sha256:86ef6f4424348247828e83fb0882c9f8acb33e64d0a5ce66c1b4a5107ee73edd
     # via psycopg
 psycopg-pool==3.3.0 \
     --hash=sha256:2e44329155c410b5e8666372db44276a8b1ebd8c90f1c3026ebba40d4bc81063 \
