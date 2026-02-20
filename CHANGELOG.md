@@ -1,10 +1,26 @@
 # Changelog
 
-## v1.6.9~rc1 - 2026/02/??
+## v1.6.9~rc2 - 2026/02/??
+
+- [BUGFIX] Update reCAPTCHA handling to use ANTIBOT_RECAPTCHA_CLASSIC variable instead of session data to determine whether to use the classic reCAPTCHA response format or the new one, ensuring consistent behavior regardless of session state.
+- [FEATURE] Add new `file` setting type to allow users to upload files directly from the web UI and use their content as values for settings.
+- [FEATURE] Add `Gandi` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add `Hetzner` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add certificate authority selection in the `Let's Encrypt` plugin to allow users to choose between `Let's Encrypt` and `ZeroSSL` as the certificate authority for their certificates (Also added ZeroSSL specific settings).
+- [UI] Add override non-global services functionality in global settings
+- [UI] Make data columns in the reports page non orderable to avoid issues
+- [ALL-IN-ONE] Update CrowdSec version to 1.7.6
+- [MISC] Change type of `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings to `file` to allow users to upload their certificate and key files directly from the web UI.
+- [DEPS] Update ApexCharts.js version to v5.6.0
+- [DEPS] Update i18next version to v25.8.10
+- [DEPS] Updated zlib version to v1.3.2
+- [CONTRIBUTION] Thank you [Kn-ut99](https://github.com/Kn-ut99) for your contribution regarding the fix of a typo in the `Let's Encrypt` plugin's documentation.
+
+## v1.6.9~rc1 - 2026/02/13
 
 - [BUGFIX] Ensure variables are only added if they are defined in the environment file and are valid key-value pairs to prevent issues with malformed lines in the variables file.
 - [BUGFIX] Add API token back for certbot hooks in environment configuration
-- [FEATURE] Add ClouDNS DNS provider support to Let's Encrypt plugin
+- [FEATURE] Add `ClouDNS` as a DNS provider in the `letsencrypt` plugin
 - [FEATURE] Add new `CLIENT_BODY_TIMEOUT`, `CLIENT_HEADER_TIMEOUT`, `KEEPALIVE_TIMEOUT` and `SEND_TIMEOUT` settings to control the corresponding NGINX timeouts, allowing better handling of long-lived connections and preventing unintended timeouts.
 - [FEATURE] Add a new `gRPC` plugin to allow proxying gRPC traffic to upstream gRPC services with support for TLS, SNI, custom headers and retry policies.
 - [FEATURE] Make it possible to leave HTTP/HTTPS/STREAM/TLS ports empty to not listen on them.

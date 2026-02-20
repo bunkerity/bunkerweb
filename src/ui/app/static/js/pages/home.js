@@ -454,6 +454,12 @@ $(function () {
       feature.properties.blocked = requestStats["blocked"] || 0; // Assign 0 if not found
     });
 
+    // Replace the previous layer so old geometry/event listeners can be GC'ed.
+    if (geojson) {
+      map.removeLayer(geojson);
+      geojson = null;
+    }
+
     // Add GeoJSON layer to the map once the file is loaded
     geojson = L.geoJson(geojsonData, {
       style: style,
@@ -480,6 +486,11 @@ $(function () {
       feature.properties.value = requestStats["blocked"] || 0;
       feature.properties.blocked = requestStats["blocked"] || 0;
     });
+
+    if (geojson) {
+      map.removeLayer(geojson);
+      geojson = null;
+    }
 
     geojson = L.geoJson(geojsonData, {
       style: style,

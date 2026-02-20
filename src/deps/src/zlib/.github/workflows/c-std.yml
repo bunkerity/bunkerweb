@@ -27,6 +27,10 @@ jobs:
             value: windows-latest
             cmake-opt: -G Ninja
 
+          - name: Windows ARM64
+            value: windows-11-arm
+            cmake-opt: -G Ninja
+
         compiler:
           - gcc
           - clang
@@ -50,12 +54,15 @@ jobs:
         std:
           - name: c89
             value: c89
+            compiler-opt: -DZLIB_INSECURE
 
           - name: gnu89
             value: gnu89
+            compiler-opt: -DZLIB_INSECURE
 
           - name: c94
             value: iso9899:199409
+            compiler-opt: -DZLIB_INSECURE
 
           - name: c99
             value: c99
@@ -90,14 +97,26 @@ jobs:
           - { os:   { name: Windows },
               builder: configure }
 
+            # Don't run configure on Windows ARM64
+          - { os:   { name: Windows ARM64 },
+              builder: configure }
+
             # Don't run gcc 32-bit on Windows
           - { os:   { name: Windows },
               arch: { tag:  i386  } }
 
+            # Don't run 32 bit on Windows ARM64
+          - { os:   { name: Windows ARM64 },
+              arch: { tag:  i386  } }
+
+            # Don't run gcc on Windows ARM64
+          - { os:   { name: Windows ARM64 },
+              compiler: gcc }
+
     steps:
 
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         show-progress: 'false'
 
@@ -118,7 +137,7 @@ jobs:
         ./configure
       env:
         CC: ${{ matrix.compiler }}
-        CFLAGS: -std=${{ matrix.std.value }} ${{ matrix.arch.compiler-opt }} -Werror -Wall -Wextra
+        CFLAGS: -std=${{ matrix.std.value }} ${{ matrix.std.compiler-opt }} ${{ matrix.arch.compiler-opt }} -Werror -Wall -Wextra
 
     - name: Compile source code (configure)
       if: matrix.builder == 'configure'
@@ -128,7 +147,7 @@ jobs:
       if: matrix.builder == 'configure'
       run: |
         make test
-        make cover
+        # make cover
 
     - name: Generate project files (cmake)
       if: matrix.builder == 'cmake'
@@ -136,7 +155,7 @@ jobs:
         cmake -S . -B ./build1 -D CMAKE_BUILD_TYPE=Release ${{ matrix.os.cmake-opt }} -DZLIB_BUILD_TESTING=OFF
       env:
         CC: ${{ matrix.compiler }}
-        CFLAGS: -std=${{ matrix.std.value }} ${{ matrix.arch.compiler-opt }} -Werror -Wall -Wextra
+        CFLAGS: -std=${{ matrix.std.value }} ${{ matrix.std.compiler-opt }} ${{ matrix.arch.compiler-opt }} -Werror -Wall -Wextra
 
     - name: Generate project files with tests (cmake)
       if: matrix.builder == 'cmake'
@@ -144,7 +163,7 @@ jobs:
         cmake -S . -B ./build2 -D CMAKE_BUILD_TYPE=Release ${{ matrix.os.cmake-opt }} -DZLIB_BUILD_MINIZIP=ON -DMINIZIP_ENABLE_BZIP2=OFF
       env:
         CC: ${{ matrix.compiler }}
-        CFLAGS: -std=${{ matrix.std.value }} ${{ matrix.arch.compiler-opt }} -Wall -Wextra
+        CFLAGS: -std=${{ matrix.std.value }} ${{ matrix.std.compiler-opt }} ${{ matrix.arch.compiler-opt }} -Wall -Wextra
 
     - name: Compile source code (cmake)
       if: matrix.builder == 'cmake'
@@ -169,6 +188,9 @@ jobs:
           - name: Windows
             value: windows-latest
 
+          - name: Windows ARM64
+            value: windows-11-arm
+
         compiler:
           - cl
 
@@ -178,6 +200,9 @@ jobs:
 
           - name: 64-bit
             value: -A x64
+
+          - name: ARM64
+            value: -A ARM64
 
         builder:
           - cmake
@@ -199,10 +224,23 @@ jobs:
           - name: latest
             value: /std:clatest
 
+        exclude:
+          # Don't run 32-bit on Windows ARM64
+          - { os:   { name: Windows ARM64 },
+              arch: { name: 32-bit } }
+
+          # Don't run x64 on Windows ARM64
+          - { os:   { name: Windows ARM64 },
+              arch: { name: 64-bit } }
+
+          # Don't run ARM64 on regular Windows
+          - { os:   { name: Windows },
+              arch: { name: ARM64 } }
+
     steps:
 
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         show-progress: 'false'
 

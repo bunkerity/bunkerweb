@@ -21,17 +21,23 @@ set(CPACK_RESOURCE_FILE_LICENSE ${minizip_SOURCE_DIR}/../../LICENSE)
 set(CPACK_RESOURCE_FILE_README ${minizip_SOURCE_DIR}/MiniZip64_info.txt)
 
 # ============================================================================
+# set options if build from zlib
+# ============================================================================
+if(ZLIB_BUILD_MINIZIP)
+    set(MINIZIP_BUILD_SHARED ${ZLIB_MINIZIP_BUILD_SHARED} CACHE BOOL "")
+    set(MINIZIP_BUILD_STATIC ${ZLIB_MINIZIP_BUILD_STATIC} CACHE BOOL "")
+    set(MINIZIP_BUILD_TESTING ${ZLIB_MINIZIP_INSTALL} CACHE BOOL "")
+    set(MINIZIP_INSTALL ${ZLIB_MINIZIP_INSTALL} CACHE BOOL "")
+endif(ZLIB_BUILD_MINIZIP)
+
+# ============================================================================
 # configuration
 # ============================================================================
 option(MINIZIP_BUILD_SHARED "Enable building minizip shared library" ON)
 option(MINIZIP_BUILD_STATIC "Enable building minizip static library" ON)
 option(MINIZIP_BUILD_TESTING "Enable testing of minizip" ON)
-option(MINIZIP_ENABLE_BZIP2 "Build minizip withj bzip2 support" ON)
+option(MINIZIP_ENABLE_BZIP2 "Build minizip with bzip2 support" OFF)
 option(MINIZIP_INSTALL "Enable installation of minizip" ON)
-
-if(MINGW)
-    option(MINIZIP_INSTALL_COMPAT_DLL "Install a copy as libminizip-1.dll" ON)
-endif(MINGW)
 
 include(CheckCSourceCompiles)
 include(CheckFunctionExists)
@@ -43,6 +49,18 @@ include(GNUInstallDirs)
 if(NOT CPACK_INCLUDED)
     include(CPack)
 endif(NOT CPACK_INCLUDED)
+
+if(NOT DEFINED ZLIB_BUILD_MINIZIP)
+    if(MINIZIP_BUILD_SHARED)
+        list(APPEND REQUIRED_COMPONENTS "shared")
+    endif(MINIZIP_BUILD_SHARED)
+
+    if(MINIZIP_BUILD_STATIC)
+        list(APPEND REQUIRED_COMPONENTS "static")
+    endif(MINIZIP_BUILD_STATIC)
+
+    find_package(ZLIB REQUIRED COMPONENTS ${REQUIRED_COMPONENTS} CONFIG)
+endif(NOT DEFINED ZLIB_BUILD_MINIZIP)
 
 if(MINIZIP_ENABLE_BZIP2)
     find_package(BZip2 REQUIRED)
@@ -88,10 +106,6 @@ check_c_source_compiles(
     HAVE___ATTR__VIS_HIDDEN)
 
 unset(CMAKE_REQUIRED_FLAGS)
-
-if(NOT TARGET ZLIB::ZLIB)
-    find_package(ZLIB REQUIRED CONFIG)
-endif(NOT TARGET ZLIB::ZLIB)
 
 set(LIBMINIZIP_SRCS ioapi.c mztools.c unzip.c zip.c)
 
@@ -217,13 +231,6 @@ if(MINIZIP_INSTALL)
             FILE minizip-shared.cmake
             NAMESPACE MINIZIP::
             DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/minizip)
-        if(MINIZIP_INSTALL_COMPAT_DLL)
-            install(
-                FILES $<TARGET_FILE:libminizip>
-                COMPONENT Runtime
-                RENAME libminizip-${minizip_VERSION_MAJOR}.dll
-                DESTINATION "${CMAKE_INSTALL_BINDIR}")
-        endif(MINIZIP_INSTALL_COMPAT_DLL)
 
         if(MSVC)
             install(

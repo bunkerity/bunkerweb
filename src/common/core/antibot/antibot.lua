@@ -624,9 +624,9 @@ function antibot:check_challenge()
 			return nil, "error while decoding JSON from reCAPTCHA API : " .. rdata, nil
 		end
 		local success, score, reason
-		if self.session_data.recaptcha_classic then
+		if self.variables["ANTIBOT_RECAPTCHA_CLASSIC"] == "yes" then
 			success = rdata.success
-			score = rdata.score or 0
+			score = rdata.score or 1
 		else
 			success = rdata.tokenProperties and rdata.tokenProperties.valid
 			score = rdata.riskAnalysis and rdata.riskAnalysis.score or 0

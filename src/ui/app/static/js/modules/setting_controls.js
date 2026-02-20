@@ -84,6 +84,9 @@ class SettingControl {
       case "number":
         this.renderText(value, "number");
         break;
+      case "file":
+        this.renderFile(value);
+        break;
       case "password":
         this.renderPassword(value);
         break;
@@ -419,6 +422,60 @@ class SettingControl {
 
   renderMultiselectMenu() {
     // placeholder handled in renderMultiselect
+  }
+
+  renderFile(value) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "setting-file-wrapper d-flex flex-column gap-2";
+
+    const hidden = document.createElement("textarea");
+    hidden.className = "d-none setting-value";
+    hidden.dataset.settingType = "file";
+    hidden.value = value;
+    if (this.entry?.regex) hidden.setAttribute("pattern", this.entry.regex);
+
+    const upload = document.createElement("input");
+    upload.type = "file";
+    upload.className = "form-control";
+    if (typeof this.entry?.accept === "string" && this.entry.accept.trim()) {
+      upload.setAttribute("accept", this.entry.accept.trim());
+    }
+
+    const status = document.createElement("small");
+    status.className = "text-muted";
+    status.textContent = value
+      ? `Current content loaded (${value.length} chars)`
+      : "No file selected";
+
+    upload.addEventListener("change", () => {
+      const file = upload.files && upload.files[0];
+      if (!file) {
+        status.textContent = hidden.value
+          ? `Current content loaded (${hidden.value.length} chars)`
+          : "No file selected";
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const content = String(event.target?.result ?? "")
+          .replace(/\r\n/g, "\n")
+          .replace(/\r/g, "\n");
+        hidden.value = content;
+        status.textContent = `Loaded: ${file.name} (${content.length} chars)`;
+      };
+      reader.onerror = () => {
+        status.textContent = `Unable to read: ${file.name}`;
+        // Clear on failure so selecting the same file retriggers change.
+        upload.value = "";
+      };
+      reader.readAsText(file);
+    });
+
+    wrapper.append(upload, hidden, status);
+    this.root.append(wrapper);
+    this.primary = upload;
+    this.valueGetter = () => hidden.value.trim();
   }
 
   focus() {

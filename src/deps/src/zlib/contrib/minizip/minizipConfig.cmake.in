@@ -1,15 +1,7 @@
 @PACKAGE_INIT@
 
-set(_minizip_supported_components "")
+set(_MINIZIP_supported_components "shared" "static")
 include(CMakeFindDependencyMacro)
-
-if(@MINIZIP_BUILD_SHARED@)
-    list(APPEND _minizip_supported_components shared)
-endif(@MINIZIP_BUILD_SHARED@)
-
-if(@MINIZIP_BUILD_STATIC@)
-    list(APPEND _minizip_supported_components static)
-endif(@MINIZIP_BUILD_STATIC@)
 
 if(@MINIZIP_ENABLE_BZIP2@)
     find_dependency(BZip2)
@@ -29,7 +21,7 @@ if(minizip_FIND_COMPONENTS)
 else(minizip_FIND_COMPONENTS)
     find_dependency(ZLIB CONFIG)
 
-    foreach(_component_config IN LISTS _minizip_supported_components)
+    foreach(_component_config IN LISTS _MINIZIP_supported_components)
         include("${CMAKE_CURRENT_LIST_DIR}/minizip-${_component_config}.cmake")
-    endforeach(_component_config IN LISTS _minizip_supported_components)
+    endforeach(_component_config IN LISTS _MINIZIP_supported_components)
 endif(minizip_FIND_COMPONENTS)

@@ -23,7 +23,9 @@ certbot-dns-domainoffensive==2.0.0
 certbot-dns-domeneshop==0.2.9
 certbot-dns-duckdns==1.8.0
 certbot-dns-dynu==0.0.6.post2502111739272536
+https://github.com/TheophileDiot/certbot-plugin-gandi/archive/da4655bc6d39941b44de2a7c049163a7e34a5a39.zip#egg=certbot-dns-gandi # 1.6.1
 certbot-dns-godaddy==2.8.0
+certbot-dns-hetzner==3.0.0
 certbot-dns-infomaniak==0.2.4
 certbot-dns-ionos==2024.11.9
 certbot-dns-njalla==2.0.2

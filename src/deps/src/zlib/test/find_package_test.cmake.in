@@ -6,11 +6,11 @@ project(
     VERSION @zlib_VERSION@)
 
 enable_testing()
-find_package(ZLIB @zlib_VERSION@ CONFIG REQUIRED)
 option(ZLIB_BUILD_SHARED "" @ZLIB_BUILD_SHARED@)
 option(ZLIB_BUILD_STATIC "" @ZLIB_BUILD_STATIC@)
 
 if(ZLIB_BUILD_SHARED)
+    find_package(ZLIB @zlib_VERSION@ CONFIG COMPONENTS shared REQUIRED)
     add_executable(test_example @zlib_SOURCE_DIR@/test/example.c)
     target_link_libraries(test_example ZLIB::ZLIB)
 
@@ -20,6 +20,7 @@ if(ZLIB_BUILD_SHARED)
 endif(ZLIB_BUILD_SHARED)
 
 if(ZLIB_BUILD_STATIC)
+    find_package(ZLIB @zlib_VERSION@ CONFIG COMPONENTS static REQUIRED)
     add_executable(test_example_static @zlib_SOURCE_DIR@/test/example.c)
     target_link_libraries(test_example_static ZLIB::ZLIBSTATIC)
     add_test(NAME zlib_test_example_static COMMAND test_example_static)

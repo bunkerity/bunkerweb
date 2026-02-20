@@ -638,6 +638,7 @@
       "admin_username": "অ্যাডমিন ব্যবহারকারীর নাম",
       "auto_lets_encrypt": "স্বয়ংক্রিয় Let's Encrypt",
       "ban_scope": "নিষেধাজ্ঞার পরিধি",
+      "certificate_authority": "সার্টিফিকেট অথরিটি",
       "certificate_priority": "শংসাপত্র অগ্রাধিকার",
       "challenge_type": "চ্যালেঞ্জের প্রকার",
       "config_type": "কনফিগারেশনের প্রকার",
@@ -690,7 +691,12 @@
       "use_proxy_protocol": "PROXY প্রোটোকল ব্যবহার করুন",
       "use_real_ip": "আসল আইপি ব্যবহার করুন",
       "username": "ব্যবহারকারীর নাম",
-      "wildcard_certificates": "ওয়াইল্ডকার্ড শংসাপত্র"
+      "wildcard_certificates": "ওয়াইল্ডকার্ড শংসাপত্র",
+      "zerossl_api_connect_timeout": "ZeroSSL API সংযোগ টাইমআউট",
+      "zerossl_api_key": "ZeroSSL API কী",
+      "zerossl_api_max_time": "ZeroSSL API সর্বোচ্চ সময়",
+      "zerossl_api_retry": "ZeroSSL API পুনরায় চেষ্টা",
+      "zerossl_api_retry_delay": "ZeroSSL API পুনরায় চেষ্টার বিলম্ব"
     },
     "placeholder": {
       "2fa_code": "কোড লিখুন",
@@ -1081,11 +1087,18 @@
       "title": "অ্যাডমিন ব্যবহারকারী"
     },
     "step2": {
+      "lets_encrypt": {
+        "certificate_authority_selector": "সার্টিফিকেট অথরিটি নির্বাচক",
+        "letsencrypt_description": "স্ট্যান্ডার্ড ACME ইস্যুর জন্য Let's Encrypt ব্যবহার করুন। পরীক্ষা ও ইন্টিগ্রেশন যাচাইয়ের জন্য স্টেজিং উপলব্ধ।",
+        "zerossl_api_key_hint": "ফাঁকা থাকলে, ZeroSSL অ্যাকাউন্ট নিবন্ধনের জন্য কনফিগার করা ইমেল ব্যবহার করবে।",
+        "zerossl_description": "zerossl-bot সহ ZeroSSL ব্যবহার করুন। অ্যাকাউন্ট ইস্যু এবং কী-ভিত্তিক পুনরায় ইস্যু ট্র্যাকিংয়ের জন্য একটি অ্যাকাউন্ট ইমেল বা API কী দিন।"
+      },
       "section": {
         "custom_certificate": "কাস্টম শংসাপত্র",
         "lets_encrypt": "Let's Encrypt",
         "real_ip": "আসল আইপি",
-        "reverse_proxy": "রিভার্স প্রক্সি"
+        "reverse_proxy": "রিভার্স প্রক্সি",
+        "zerossl": "ZeroSSL"
       },
       "subtitle": "ওয়েব UI নির্দিষ্ট সেটিংস কনফিগার করুন।",
       "title": "UI সেটিংস"
@@ -1286,6 +1299,10 @@
       "missing_configs_upload_label": "অনুপস্থিত কনফিগ (.conf, .cfg, .txt) আপলোড করুন",
       "missing_configs_upload_partial": "মোট {{total}} কনফিগের মধ্যে {{uploaded}} টি আপলোড করা হয়েছে। এখনও অনুপস্থিত: {{missing}}",
       "missing_configs_upload_success": "{{count}} টি কনফিগ ফাইল সফলভাবে আপলোড করা হয়েছে",
+      "multiselect_placeholder": "বিকল্পগুলি নির্বাচন করুন",
+      "multiselect_summary": "{{count}} টি নির্বাচিত",
+      "multivalue_add": "মান যোগ করুন",
+      "multivalue_helper": "প্রতি লাইনে একটি মান।{{separatorNote}}",
       "panel_overview": "সংক্ষিপ্ত বিবরণ",
       "panel_overview_help": "মূল তথ্য ট্র্যাক করুন এবং বিভাগগুলির মধ্যে নেভিগেট করুন।",
       "placeholder_config_data": "ডেটা",
@@ -1309,6 +1326,7 @@
       "raw_configs_title": "কাস্টম কনফিগ আমদানি",
       "raw_configs_upload": "কনফিগ ফাইল (.conf, .cfg, .txt) আপলোড করুন",
       "raw_configs_upload_failed": "নির্বাচিত ফাইলগুলির মধ্যে একটি পড়া যায়নি।",
+      "raw_editor_aria": "র টেমপ্লেট JSON এডিটর",
       "raw_editor_drop_hint": "বর্তমান বিষয়বস্তু প্রতিস্থাপন করতে একটি টেমপ্লেট JSON ফাইল (.json শুধুমাত্র) ফেলুন।",
       "raw_editor_help": "সম্পূর্ণ টেমপ্লেট সংজ্ঞা JSON হিসেবে সম্পাদনা করুন। ইজি মোডে ফিরে গেলে ভিজ্যুয়াল এডিটর যাচাই এবং পুনরায় লোড হবে।",
       "raw_editor_import_success": "টেমপ্লেট JSON সফলভাবে আমদানি করা হয়েছে।",
@@ -1497,6 +1515,7 @@
     "lets_encrypt_custom_profile": "Let's Encrypt-এর জন্য ব্যবহারের কাস্টম প্রোফাইল (যেমন 'my_custom_profile')।",
     "lets_encrypt_disable_public_suffixes": "পাবলিক সাফিক্স লিস্টের সাথে মিলে যাওয়া ডোমেইনের জন্য শংসাপত্র অনুরোধ নিষ্ক্রিয় করুন (প্রস্তাবিত)।",
     "lets_encrypt_profile": "Let's Encrypt-এর জন্য ব্যবহার করার প্রোফাইল (classic, tlsserver, shortlived)।",
+    "lets_encrypt_server": "প্রদানকারী-নির্দিষ্ট সেটিংস দেখাতে আপনার সার্টিফিকেট প্রদানকারী নির্বাচন করুন।",
     "license_key": "আপনার BunkerWeb PRO লাইসেন্স কী।",
     "link": {
       "access_plugin_page": "{{name}} পৃষ্ঠা অ্যাক্সেস করুন",
@@ -1663,13 +1682,19 @@
     "ui_url_security": "একটি অ-মানক, অনুমান করা কঠিন URL পাথ ব্যবহার নিরাপত্তা বাড়ায়।",
     "use_custom_ssl": "Let's Encrypt-এর পরিবর্তে কাস্টম SSL শংসাপত্র ব্যবহার করতে হবে কিনা।",
     "use_lets_encrypt_staging": "পরীক্ষার জন্য Let's Encrypt স্টেজিং পরিবেশ ব্যবহার করতে হবে কিনা (অবিশ্বস্ত শংসাপত্র তৈরি করে)।",
+    "use_lets_encrypt_staging_letsencrypt_only": "Let's Encrypt স্টেজিং শুধু তখনই উপলব্ধ যখন Let's Encrypt সার্ভার ব্যবহার করা হয়।",
     "use_proxy_protocol": "PROXY প্রোটোকল যোগাযোগ সক্ষম করুন।",
     "use_real_ip": "আসল আইপি ব্যবহার করুন",
     "username_length": "ব্যবহারকারীর নাম অবশ্যই ১ থেকে ২৫৬ অক্ষরের মধ্যে হতে হবে।",
     "value_from_global": "গ্লোবাল সেটিংস থেকে মান",
     "view_full_url": "সম্পূর্ণ URL দেখতে ক্লিক করুন",
     "wildcard_certificates": "ওয়াইল্ডকার্ড শংসাপত্র তৈরি করুন (*.domain.com)। DNS চ্যালেঞ্জ প্রয়োজন।",
-    "wildcard_dns_only": "ওয়াইল্ডকার্ড শংসাপত্রগুলি কেবল DNS চ্যালেঞ্জ প্রকারের সাথে সমর্থিত।"
+    "wildcard_dns_only": "ওয়াইল্ডকার্ড শংসাপত্রগুলি কেবল DNS চ্যালেঞ্জ প্রকারের সাথে সমর্থিত।",
+    "zerossl_api_connect_timeout": "ZeroSSL API কলের জন্য সেকেন্ডে সংযোগ টাইমআউট।",
+    "zerossl_api_key": "zerossl-bot দ্বারা ব্যবহৃত ঐচ্ছিক ZeroSSL API কী।",
+    "zerossl_api_max_time": "প্রতি ZeroSSL API অনুরোধের জন্য সেকেন্ডে সর্বোচ্চ মোট সময়।",
+    "zerossl_api_retry": "ZeroSSL API অনুরোধের পুনরায় চেষ্টার সংখ্যা (0 দিলে পুনরায় চেষ্টা বন্ধ হবে)।",
+    "zerossl_api_retry_delay": "ZeroSSL API পুনরায় চেষ্টার মধ্যে সেকেন্ডে বিলম্ব।"
   },
   "totp": {
     "prompt": "অনুগ্রহ করে আপনার TOTP কোড লিখুন।"
@@ -1683,6 +1708,7 @@
     "ip_service_duplicate": "এই আইপি ঠিকানাটি নির্বাচিত পরিষেবার ({{service}}) জন্য ইতিমধ্যে নিষিদ্ধ।",
     "pattern": "অনুগ্রহ করে {{field}} এর জন্য একটি বৈধ মান লিখুন।",
     "required": "{{field}} প্রয়োজন।",
-    "service_required_for_ban": "পরিষেবা-নির্দিষ্ট নিষেধাজ্ঞার জন্য একটি পরিষেবা নির্বাচন করতে হবে।"
+    "service_required_for_ban": "পরিষেবা-নির্দিষ্ট নিষেধাজ্ঞার জন্য একটি পরিষেবা নির্বাচন করতে হবে।",
+    "zerossl_email_or_api_key_required": "ZeroSSL-এর জন্য একটি ইমেল বা ZeroSSL API কী-এর যেকোনো একটি প্রয়োজন।"
   }
 }

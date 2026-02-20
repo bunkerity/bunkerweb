@@ -158,6 +158,24 @@ $(document).ready(function () {
     ],
   });
 
+  const destroyBanFlatpickr = ($banItem) => {
+    if (!$banItem || !$banItem.length) return;
+    const seenInputs = new Set();
+
+    $banItem.find("input").each(function () {
+      if (!this || seenInputs.has(this)) return;
+      seenInputs.add(this);
+
+      const flatpickrInstance = this._flatpickr;
+      if (
+        flatpickrInstance &&
+        typeof flatpickrInstance.destroy === "function"
+      ) {
+        flatpickrInstance.destroy();
+      }
+    });
+  };
+
   // Function to set up the unban modal
   const setupUnbanModal = (bans) => {
     const $modalBody = $("#selected-ips-unban");
@@ -1278,6 +1296,7 @@ $(document).ready(function () {
       .find("li.ban-item")
       .each(function () {
         if ($(this).attr("id") !== "ban-1") {
+          destroyBanFlatpickr($(this));
           $(this).remove();
         }
       });
@@ -1296,6 +1315,7 @@ $(document).ready(function () {
     const banContainer = $(this).closest("li.ban-item");
     if (banContainer.attr("id") === "ban-1") return;
     banContainer.fadeOut(300, function () {
+      destroyBanFlatpickr($(this));
       $(this).remove();
     });
   });

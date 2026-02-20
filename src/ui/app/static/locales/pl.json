@@ -638,6 +638,7 @@
       "admin_username": "Nazwa użytkownika administratora",
       "auto_lets_encrypt": "Auto Let's Encrypt",
       "ban_scope": "Zakres blokowania",
+      "certificate_authority": "Urząd certyfikacji",
       "certificate_priority": "Priorytet certyfikatu",
       "challenge_type": "Rodzaj wyzwania",
       "config_type": "Typ konfiguracji",
@@ -690,7 +691,12 @@
       "use_proxy_protocol": "Użyj protokołu PROXY",
       "use_real_ip": "Użyj prawdziwego IP",
       "username": "Nazwa użytkownika",
-      "wildcard_certificates": "Certyfikaty Wildcard"
+      "wildcard_certificates": "Certyfikaty Wildcard",
+      "zerossl_api_connect_timeout": "Limit czasu połączenia API ZeroSSL",
+      "zerossl_api_key": "Klucz API ZeroSSL",
+      "zerossl_api_max_time": "Maksymalny czas API ZeroSSL",
+      "zerossl_api_retry": "Liczba ponowień API ZeroSSL",
+      "zerossl_api_retry_delay": "Opóźnienie ponowień API ZeroSSL"
     },
     "placeholder": {
       "2fa_code": "Wprowadź kod",
@@ -1080,11 +1086,18 @@
       "title": "Użytkownik administracyjny"
     },
     "step2": {
+      "lets_encrypt": {
+        "certificate_authority_selector": "Selektor urzędu certyfikacji",
+        "letsencrypt_description": "Użyj Let's Encrypt do standardowego wydawania ACME. Środowisko staging jest dostępne do testów i sprawdzeń integracji.",
+        "zerossl_api_key_hint": "Jeśli puste, ZeroSSL użyje skonfigurowanego adresu e-mail do rejestracji konta.",
+        "zerossl_description": "Użyj ZeroSSL z zerossl-bot. Podaj adres e-mail konta lub klucz API do wydania konta i śledzenia ponownego wydania opartego na kluczu."
+      },
       "section": {
         "custom_certificate": "Certyfikat niestandardowy",
         "lets_encrypt": "Let's Encrypt",
         "real_ip": "Prawdziwy adres IP",
-        "reverse_proxy": "Reverse Proxy"
+        "reverse_proxy": "Reverse Proxy",
+        "zerossl": "ZeroSSL"
       },
       "subtitle": "Skonfiguruj ustawienia specyficzne dla interfejsu użytkownika aplikacji internetowej.",
       "title": "Ustawienia interfejsu użytkownika"
@@ -1285,6 +1298,10 @@
       "missing_configs_upload_label": "Prześlij brakujące konfiguracje (.conf, .cfg, .txt)",
       "missing_configs_upload_partial": "Przesłano {{uploaded}} z {{total}} konfiguracji. Nadal brakuje: {{missing}}",
       "missing_configs_upload_success": "Pomyślnie przesłano {{count}} plik(ów) konfiguracyjny(ch)",
+      "multiselect_placeholder": "Wybierz opcje",
+      "multiselect_summary": "Wybrano: {{count}}",
+      "multivalue_add": "Dodaj wartość",
+      "multivalue_helper": "Jedna wartość w wierszu.{{separatorNote}}",
       "panel_overview": "Przegląd",
       "panel_overview_help": "Śledź kluczowe informacje i przechodź między sekcjami.",
       "placeholder_config_data": "Data",
@@ -1308,6 +1325,7 @@
       "raw_configs_title": "Importy niestandardowej konfiguracji",
       "raw_configs_upload": "Prześlij pliki konfiguracyjne (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "Nie można odczytać jednego z wybranych plików.",
+      "raw_editor_aria": "Edytor surowego JSON szablonu",
       "raw_editor_drop_hint": "Upuść plik JSON szablonu (tylko .json), aby zastąpić bieżącą zawartość.",
       "raw_editor_help": "Edytuj pełną definicję szablonu jako JSON. Powrót do trybu Łatwego waliduje i ponownie ładuje edytor wizualny.",
       "raw_editor_import_success": "Szablon JSON zaimportowany pomyślnie.",
@@ -1496,6 +1514,7 @@
     "lets_encrypt_custom_profile": "Profil niestandardowy do użycia w Let's Encrypt (np. 'my_custom_profile').",
     "lets_encrypt_disable_public_suffixes": "Wyłącz żądania certyfikatów dla domen pasujących do listy Public Suffix List (zalecane).",
     "lets_encrypt_profile": "Profil do użycia dla Let's Encrypt (klasyczny, tlsserver, krótkotrwały).",
+    "lets_encrypt_server": "Wybierz dostawcę certyfikatów, aby wyświetlić ustawienia specyficzne dla dostawcy.",
     "license_key": "Twój klucz licencyjny BunkerWeb PRO.",
     "link": {
       "access_plugin_page": "Dostęp do strony {{name}}",
@@ -1662,13 +1681,19 @@
     "ui_url_security": "Korzystanie z niestandardowej, trudnej do odgadnięcia ścieżki URL zwiększa bezpieczeństwo.",
     "use_custom_ssl": "Czy używać niestandardowego certyfikatu SSL zamiast Let's Encrypt.",
     "use_lets_encrypt_staging": "Czy używać środowiska testowego Let's Encrypt do testowania (generuje certyfikaty niezaufane).",
+    "use_lets_encrypt_staging_letsencrypt_only": "Staging Let's Encrypt jest dostępny tylko przy użyciu serwera Let's Encrypt.",
     "use_proxy_protocol": "Włącz komunikację protokołu PROXY.",
     "use_real_ip": "Użyj prawdziwego adresu IP",
     "username_length": "Nazwa użytkownika musi mieć od 1 do 256 znaków.",
     "value_from_global": "Wartość z ustawień globalnych",
     "view_full_url": "Kliknij, aby wyświetlić pełny adres URL",
     "wildcard_certificates": "Generuj certyfikaty z symbolami wieloznacznymi (*.domain.com). Wymaga wyzwania DNS.",
-    "wildcard_dns_only": "Certyfikaty z symbolami wieloznacznymi są obsługiwane tylko w przypadku typu wyzwania DNS."
+    "wildcard_dns_only": "Certyfikaty z symbolami wieloznacznymi są obsługiwane tylko w przypadku typu wyzwania DNS.",
+    "zerossl_api_connect_timeout": "Limit czasu połączenia w sekundach dla wywołań API ZeroSSL.",
+    "zerossl_api_key": "Opcjonalny klucz API ZeroSSL używany przez zerossl-bot.",
+    "zerossl_api_max_time": "Maksymalny łączny czas w sekundach dla każdego żądania API ZeroSSL.",
+    "zerossl_api_retry": "Liczba ponowień żądań API ZeroSSL (0 wyłącza ponowienia).",
+    "zerossl_api_retry_delay": "Opóźnienie w sekundach między ponowieniami API ZeroSSL."
   },
   "totp": {
     "prompt": "Wprowadź swój kod TOTP."
@@ -1682,6 +1707,7 @@
     "ip_service_duplicate": "Ten adres IP jest już zablokowany dla wybranej usługi ({{service}}).",
     "pattern": "Wprowadź prawidłową wartość dla {{field}}.",
     "required": "{{field}} jest wymagane.",
-    "service_required_for_ban": "Aby nałożyć blokadę na konkretną usługę, należy ją najpierw wybrać."
+    "service_required_for_ban": "Aby nałożyć blokadę na konkretną usługę, należy ją najpierw wybrać.",
+    "zerossl_email_or_api_key_required": "ZeroSSL wymaga adresu e-mail lub klucza API ZeroSSL."
   }
 }

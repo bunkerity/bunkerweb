@@ -98,15 +98,15 @@ if(ZLIB_BUILD_STATIC)
         target_link_options(infcover PRIVATE -coverage)
         target_compile_definitions(
             infcover PRIVATE $<$<BOOL:${HAVE___ATTR__VIS_HIDDEN}>:HAVE_HIDDEN>)
-        add_test(NAME zlib-coverage COMMAND infcover)
+        add_test(NAME zlib_coverage COMMAND infcover)
         set(INFCOVER_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/infcover.dir)
         add_test(
-            NAME zlib-coverage-summary
+            NAME zlib_coverage-summary
             COMMAND
                 ${GCOV_EXECUTABLE} ${llvm_option}
                 ${CMAKE_CURRENT_SOURCE_DIR}/infcover.c -o
                 ${INFCOVER_DIR}/infcover.c.gcda)
-        set_tests_properties(zlib-coverage-summary PROPERTIES DEPENDS
+        set_tests_properties(zlib_coverage-summary PROPERTIES DEPENDS
                                                               zlib-coverage)
         set(CMAKE_C_FLAGS
             ${CFLAGS_OLD}
@@ -134,12 +134,22 @@ add_test(
 set_tests_properties(zlib_install PROPERTIES FIXTURES_SETUP zlib_install)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/findpackage_test)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/find_package_no_components_test)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/find_package_wrong_components_test)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/add_subdirectory_test)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/add_subdirectory_exclude_test)
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/find_package_test.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/findpackage_test/CMakeLists.txt @ONLY)
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/find_package_no_components_test.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/findpackage_no_components_test/CMakeLists.txt @ONLY)
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/find_package_wrong_components_test.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/findpackage_wrong_components_test/CMakeLists.txt @ONLY)
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/add_subdirectory_test.cmake.in
@@ -190,6 +200,49 @@ set_tests_properties(
 set_tests_properties(
     zlib_find_package_test PROPERTIES FIXTURES_REQUIRED fp_build ENVIRONMENT
                                       CTEST_OUTPUT_ON_FAILURE=1)
+
+#
+# findpackage_no_components_test
+#
+add_test(
+    NAME zlib_find_package_no_components_configure
+    COMMAND
+        ${CMAKE_COMMAND} ${PLATFORM}
+        -B${CMAKE_CURRENT_BINARY_DIR}/findpackage_no_components_test_build
+        -DCMAKE_BUILD_TYPE=$<CONFIG> -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+        -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/test_install --fresh
+        -G "${CMAKE_GENERATOR}"
+        -S${CMAKE_CURRENT_BINARY_DIR}/findpackage_no_components_test)
+
+set_tests_properties(
+    zlib_find_package_no_components_configure
+        PROPERTIES FIXTURES_REQUIRED zlib_install)
+
+if(NOT ZLIB_BUILD_SHARED OR NOT ZLIB_BUILD_STATIC)
+    set_tests_properties(
+        zlib_find_package_no_components_configure
+            PROPERTIES WILL_FAIL TRUE)
+endif(NOT ZLIB_BUILD_SHARED OR NOT ZLIB_BUILD_STATIC)
+
+#
+# findpackage_no_component_test
+#
+add_test(
+    NAME zlib_find_package_wrong_components_configure
+    COMMAND
+        ${CMAKE_COMMAND} ${PLATFORM}
+        -B${CMAKE_CURRENT_BINARY_DIR}/findpackage_wrong_components_test_build
+        -DCMAKE_BUILD_TYPE=$<CONFIG> -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+        -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/test_install --fresh
+        -G "${CMAKE_GENERATOR}"
+        -S${CMAKE_CURRENT_BINARY_DIR}/findpackage_wrong_components_test)
+
+set_tests_properties(
+    zlib_find_package_wrong_components_configure
+        PROPERTIES FIXTURES_REQUIRED zlib_install
+                   WILL_FAIL TRUE)
 
 #
 # add_subdirectory_test

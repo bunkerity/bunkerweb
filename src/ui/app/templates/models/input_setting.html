@@ -1,37 +1,123 @@
-<div class="form-floating mt-1 overflow-hidden{% if setting_data['type'] == 'password' %} input-group input-group-merge form-password-toggle{% endif %} position-relative">
-    <input id="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
-           name="{{ setting }}"
-           type="{{ setting_data['type'] }}"
-           class="form-control plugin-setting"
-           aria-labelledby="label-{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
-           pattern="{{ setting_data['regex'] }}"
-           value="{{ setting_value }}"
-           data-original="{% if current_endpoint != 'new' %}{{ setting_value }}{% else %}{{ setting_default }}{% endif %}"
-           data-default="{{ setting_default }}"
-           {% if setting_data['type'] == 'password' %}autocomplete="off"{% endif %}
-           {% if disabled %}disabled{% endif %}
-           {% if setting == 'SERVER_NAME' or required %}required{% endif %}
-           {% if input_readonly %}readonly{% endif %}>
-    <label for="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
-           class="text-truncate">{{ setting }}</label>
-    {% if setting_data['type'] == 'password' %}
-        <span class="input-group-text cursor-pointer rounded-end"><i class="bx bx-hide"></i></span>
-    {% endif %}
-    {% if setting_config %}
-        {% if current_endpoint != 'global-config' and current_endpoint != 'global-settings' and setting_config and setting_config.get('global') and setting_value != setting_default %}
-            {% set tooltip_key = "tooltip.button.reset_global" %}
-            {% set tooltip_fallback = "Reset to global value" %}
-        {% else %}
-            {% set tooltip_key = "tooltip.button.reset_default" %}
-            {% set tooltip_fallback = "Reset to default value" %}
+{% if setting_data['type'] == 'file' %}
+    {% set setting_file_name = setting_config.get("file_name", "") if setting_config else "" %}
+    <div class="mt-1 position-relative plugin-file-setting-wrapper">
+        <input id="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
+               name="{{ setting }}"
+               type="hidden"
+               class="plugin-setting plugin-setting-file-text"
+               aria-labelledby="label-{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
+               pattern="{{ setting_data['regex'] }}"
+               value="{{ setting_value }}"
+               data-original="{% if current_endpoint != 'new' %}{{ setting_value }}{% else %}{{ setting_default }}{% endif %}"
+               data-default="{{ setting_default }}"
+               data-file-name="{{ setting_file_name }}"
+               data-original-file-name="{% if current_endpoint != 'new' %}{{ setting_file_name }}{% endif %}"
+               data-default-file-name=""
+               data-upload-target="#{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}-upload"
+               data-manual-target="#{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}-manual"
+               data-required="{% if setting == 'SERVER_NAME' or required %}true{% else %}false{% endif %}"
+               {% if disabled %}disabled{% endif %}
+               {% if setting == 'SERVER_NAME' or required %}required{% endif %}
+               {% if input_readonly %}readonly{% endif %}>
+        <div class="position-relative plugin-setting-file-upload-container">
+            <div class="input-group">
+                <input id="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}-upload"
+                       type="file"
+                       class="form-control plugin-setting-file-upload"
+                       data-file-input="#{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
+                       aria-labelledby="label-{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
+                       {% if setting_data.get('accept') %}accept="{{ setting_data.get('accept') }}"{% endif %}
+                       {% if disabled or input_readonly %}disabled{% endif %}>
+                <button type="button"
+                        class="btn btn-outline-secondary plugin-setting-file-mode-toggle"
+                        data-file-input="#{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
+                        data-mode="upload"
+                        data-upload-label="Switch to text editor"
+                        data-manual-label="Back to file upload"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-original-title="Switch to text editor"
+                        aria-label="Switch to text editor"
+                        {% if disabled or input_readonly %}disabled{% endif %}>
+                    <i class="bx bx-edit-alt"></i>
+                </button>
+            </div>
+            <span class="plugin-setting-file-upload-display text-muted d-none"
+                  aria-hidden="true"></span>
+        </div>
+        <textarea id="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}-manual"
+                  class="form-control mt-2 d-none plugin-setting-file-manual"
+                  rows="6"
+                  data-file-input="#{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
+                  data-original="{% if current_endpoint != 'new' %}{{ setting_value }}{% else %}{{ setting_default }}{% endif %}"
+                  data-default="{{ setting_default }}"
+                  placeholder="Paste or edit the value here..."
+                  aria-labelledby="label-{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
+                  {% if disabled or input_readonly %}disabled{% endif %}>{{ setting_value }}</textarea>
+        <small class="text-muted d-block mt-1 plugin-setting-file-status"
+               data-empty-text="No file selected">
+            {% if setting_value and setting_file_name %}
+                Current content loaded from {{ setting_file_name }} ({{ setting_value|length }} chars)
+            {% elif setting_value %}
+                Current content loaded ({{ setting_value|length }} chars)
+            {% else %}
+                No file selected
+            {% endif %}
+        </small>
+        {% if setting_config %}
+            {% if current_endpoint != 'global-config' and current_endpoint != 'global-settings' and setting_config and setting_config.get('global') and setting_value != setting_default %}
+                {% set tooltip_key = "tooltip.button.reset_global" %}
+                {% set tooltip_fallback = "Reset to global value" %}
+            {% else %}
+                {% set tooltip_key = "tooltip.button.reset_default" %}
+                {% set tooltip_fallback = "Reset to default value" %}
+            {% endif %}
+            <button type="button"
+                    class="btn btn-sm btn-link {% if disabled or input_readonly %}text-muted{% else %}text-danger{% endif %} position-absolute end-0 top-0 mt-1 me-1 reset-setting"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="left"
+                    data-bs-original-title="{{ tooltip_fallback }}"
+                    data-i18n="{{ tooltip_key }}">
+                <i class="bx bx-sm bx-reset"></i>
+            </button>
         {% endif %}
-        <button type="button"
-                class="btn btn-sm btn-link {% if disabled or input_readonly %}text-muted{% else %}text-danger{% endif %} position-absolute end-0 top-0 mt-1 me-1 reset-setting"
-                data-bs-toggle="tooltip"
-                data-bs-placement="left"
-                data-bs-original-title="{{ tooltip_fallback }}"
-                data-i18n="{{ tooltip_key }}">
-            <i class="bx bx-sm bx-reset"></i>
-        </button>
-    {% endif %}
-</div>
+    </div>
+{% else %}
+    <div class="form-floating mt-1 overflow-hidden{% if setting_data['type'] == 'password' %} input-group input-group-merge form-password-toggle{% endif %} position-relative">
+        <input id="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
+               name="{{ setting }}"
+               type="{{ setting_data['type'] }}"
+               class="form-control plugin-setting"
+               aria-labelledby="label-{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
+               pattern="{{ setting_data['regex'] }}"
+               value="{{ setting_value }}"
+               data-original="{% if current_endpoint != 'new' %}{{ setting_value }}{% else %}{{ setting_default }}{% endif %}"
+               data-default="{{ setting_default }}"
+               {% if setting_data['type'] == 'password' %}autocomplete="off"{% endif %}
+               {% if disabled %}disabled{% endif %}
+               {% if setting == 'SERVER_NAME' or required %}required{% endif %}
+               {% if input_readonly %}readonly{% endif %}>
+        <label for="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
+               class="text-truncate">{{ setting }}</label>
+        {% if setting_data['type'] == 'password' %}
+            <span class="input-group-text cursor-pointer rounded-end"><i class="bx bx-hide"></i></span>
+        {% endif %}
+        {% if setting_config %}
+            {% if current_endpoint != 'global-config' and current_endpoint != 'global-settings' and setting_config and setting_config.get('global') and setting_value != setting_default %}
+                {% set tooltip_key = "tooltip.button.reset_global" %}
+                {% set tooltip_fallback = "Reset to global value" %}
+            {% else %}
+                {% set tooltip_key = "tooltip.button.reset_default" %}
+                {% set tooltip_fallback = "Reset to default value" %}
+            {% endif %}
+            <button type="button"
+                    class="btn btn-sm btn-link {% if disabled or input_readonly %}text-muted{% else %}text-danger{% endif %} position-absolute end-0 top-0 mt-1 me-1 reset-setting"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="left"
+                    data-bs-original-title="{{ tooltip_fallback }}"
+                    data-i18n="{{ tooltip_key }}">
+                <i class="bx bx-sm bx-reset"></i>
+            </button>
+        {% endif %}
+    </div>
+{% endif %}

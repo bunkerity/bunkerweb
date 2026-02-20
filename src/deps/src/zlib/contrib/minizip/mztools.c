@@ -35,7 +35,7 @@ extern int ZEXPORT unzRepair(const char* file, const char* fileOut, const char* 
   FILE* fpZip = fopen(file, "rb");
   FILE* fpOut = fopen(fileOut, "wb");
   FILE* fpOutCD = fopen(fileOutTmp, "wb");
-  if (fpZip != NULL &&  fpOut != NULL) {
+  if (fpZip != NULL && fpOut != NULL && fpOutCD != NULL ) {
     int entries = 0;
     uLong totalBytes = 0;
     char header[30];
@@ -282,6 +282,12 @@ extern int ZEXPORT unzRepair(const char* file, const char* fileOut, const char* 
       }
     }
   } else {
+    if (fpOutCD != NULL)
+      fclose(fpOutCD);
+    if (fpZip != NULL)
+      fclose(fpZip);
+    if (fpOut != NULL)
+      fclose(fpOut);
     err = Z_STREAM_ERROR;
   }
   return err;

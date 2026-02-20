@@ -22,6 +22,7 @@ PLUGIN_ID_RX = re_compile(r"^[\w_-]{1,64}$")
 CUSTOM_CONF_RX = re_compile(
     r"^CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(?P<name>.+)$"
 )
+FILE_SETTING_NAME_RX = re_compile(r"^(?P<setting>.+)__FILE_NAME(?P<suffix>_\d+)?$")
 
 
 def wait_applying():
@@ -201,3 +202,23 @@ def get_redis_client():
         flash("Couldn't connect to redis", "error")
 
     return redis_client
+
+
+def extract_file_setting_names(variables: Dict[str, str]) -> Dict[str, str]:
+    """
+    Extract `<SETTING>__FILE_NAME` metadata fields from a form payload.
+
+    Supported keys:
+    - `SETTING__FILE_NAME`
+    - `SETTING__FILE_NAME_<suffix>` (for multiple settings)
+    """
+    file_setting_names: Dict[str, str] = {}
+    for key in list(variables.keys()):
+        match = FILE_SETTING_NAME_RX.match(key)
+        if not match:
+            continue
+
+        setting_name = match.group("setting") + (match.group("suffix") or "")
+        file_setting_names[setting_name] = variables.pop(key, "").strip()
+
+    return file_setting_names
