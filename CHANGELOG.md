@@ -2,6 +2,7 @@
 
 ## v1.6.9~rc2 - 2026/02/??
 
+- [BUGFIX] Update reCAPTCHA handling to use ANTIBOT_RECAPTCHA_CLASSIC variable instead of session data to determine whether to use the classic reCAPTCHA response format or the new one, ensuring consistent behavior regardless of session state.
 - [FEATURE] Add new `file` setting type to allow users to upload files directly from the web UI and use their content as values for settings.
 - [FEATURE] Add `Gandi` as a DNS provider in the `letsencrypt` plugin
 - [FEATURE] Add `Hetzner` as a DNS provider in the `letsencrypt` plugin
