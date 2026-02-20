@@ -1022,19 +1022,8 @@ $(document).ready(() => {
         if (editorValue !== editorDefault)
           appendHiddenInput(form, $(this).data("name"), editorValue);
       });
-
-      // Append 'IS_DRAFT' if it exists
-      const $draftInput = $("#is-draft");
-      if ($draftInput.length) {
-        appendHiddenInput(form, "IS_DRAFT", $draftInput.val());
-      }
     } else if (currentMode === undefined || currentMode === "advanced") {
       addChildrenToForm(form, $("div[id^='navs-plugins-']"));
-
-      const $draftInput = $("#is-draft");
-      if ($draftInput.length) {
-        appendHiddenInput(form, "IS_DRAFT", $draftInput.val());
-      }
     } else if (currentMode === "raw") {
       // Helper function to parse configuration strings into an object
       const parseConfig = (selector) => {
@@ -1081,6 +1070,10 @@ $(document).ready(() => {
             console.warn(`Skipping malformed line: ${line}`);
             return;
           }
+          if (key === "IS_DRAFT") {
+            skippedKeys.add(key);
+            return;
+          }
 
           appendHiddenInput(form, key, value);
           formKeys.add(key);
@@ -1102,6 +1095,12 @@ $(document).ready(() => {
           formKeys.add(key);
         }
       });
+    }
+
+    // Always post current draft state, including in raw mode.
+    const $draftInput = $("#is-draft");
+    if ($draftInput.length) {
+      appendHiddenInput(form, "IS_DRAFT", $draftInput.val());
     }
 
     // Append 'OLD_SERVER_NAME' if it exists

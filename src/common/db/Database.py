@@ -2321,7 +2321,8 @@ class Database:
                 # This is still O(services * multisite_settings) but avoids deepcopy overhead
                 for service_id, _ in service_list:
                     for key, value in multisite_defaults.items():
-                        config[f"{service_id}_{key}"] = value
+                        # Keep already-materialized service values (notably *_IS_DRAFT from bw_services).
+                        config.setdefault(f"{service_id}_{key}", value)
 
                 # Define the join operation
                 j = join(Services, Services_settings, Services.id == Services_settings.service_id)
