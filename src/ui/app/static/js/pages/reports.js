@@ -617,6 +617,7 @@ $(document).ready(function () {
             header: t("searchpane.data", "Data"),
             combiner: "or",
           },
+          orderable: false,
           targets: 12,
         },
         {
