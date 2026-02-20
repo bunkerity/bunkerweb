@@ -44,13 +44,13 @@ beautifulsoup4==4.14.3 \
     # via
     #   dns-lexicon
     #   dns-lexicon-coop
-boto3==1.42.52 \
-    --hash=sha256:7b3e0c4bfd8815a3df64fbe98fc9f87dfb12bd7a783cf63dfc2f166c66798c9d \
-    --hash=sha256:ff4a4afb832f63a1358e11fe6eb321da0f4767979c6721dd32fb02e6eabcebf5
+boto3==1.42.53 \
+    --hash=sha256:3bd32f3508a6e9851671d0ef3b1f9e8ee7e8c095aa0488bcd9e86074aef5b7eb \
+    --hash=sha256:56bc79388763995852b6d3fe48023e661e63fc2e60a921273c422d0171b9fbfb
     # via certbot-dns-route53
-botocore==1.42.52 \
-    --hash=sha256:3bdef10aee4cee13ff019b6a1423a2ce3ca17352328d9918157a1829e5cc9be1 \
-    --hash=sha256:c3a0b7138a4c5a534da0eb2444c19763b4d03ba2190c0602c49315e54efd7252
+botocore==1.42.53 \
+    --hash=sha256:0bc1a2e1b6ae4c8397c9bede3bb9007b4f16e159ef2ca7f24837e31d5860caac \
+    --hash=sha256:1255db56bc0a284a8caa182c20966277e6c8871b6881cf816d40e993fa5da503
     # via
     #   boto3
     #   s3transfer

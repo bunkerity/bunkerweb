@@ -5,9 +5,9 @@ email-validator==2.3.0
 fastapi==0.129.0
 gunicorn[gthread,http2]==25.1.0
 pydantic==2.12.5
-pydantic_settings==2.13.0
+pydantic_settings==2.13.1
 python-multipart==0.0.22
 PyYAML==6.0.3
-regex==2026.1.15
+regex==2026.2.19
 slowapi==0.1.9
 uvicorn[standard]==0.41.0
