@@ -638,6 +638,7 @@
       "admin_username": "관리자 이름",
       "auto_lets_encrypt": "자동 Let's Encrypt",
       "ban_scope": "차단 범위",
+      "certificate_authority": "인증 기관",
       "certificate_priority": "인증서 우선순위",
       "challenge_type": "챌린지 유형",
       "config_type": "설정 유형",
@@ -691,12 +692,11 @@
       "use_real_ip": "실제 IP 사용",
       "username": "사용자 이름",
       "wildcard_certificates": "와일드카드 인증서",
-      "certificate_authority": "인증 기관",
-      "zerossl_api_key": "ZeroSSL API 키",
-      "zerossl_api_retry": "ZeroSSL API 재시도 횟수",
-      "zerossl_api_retry_delay": "ZeroSSL API 재시도 지연",
       "zerossl_api_connect_timeout": "ZeroSSL API 연결 시간 초과",
-      "zerossl_api_max_time": "ZeroSSL API 최대 시간"
+      "zerossl_api_key": "ZeroSSL API 키",
+      "zerossl_api_max_time": "ZeroSSL API 최대 시간",
+      "zerossl_api_retry": "ZeroSSL API 재시도 횟수",
+      "zerossl_api_retry_delay": "ZeroSSL API 재시도 지연"
     },
     "placeholder": {
       "2fa_code": "코드 입력",
@@ -1086,6 +1086,12 @@
       "title": "관리자 사용자"
     },
     "step2": {
+      "lets_encrypt": {
+        "certificate_authority_selector": "인증 기관 선택기",
+        "letsencrypt_description": "표준 ACME 발급에는 Let's Encrypt를 사용하세요. 테스트 및 통합 점검을 위해 스테이징을 사용할 수 있습니다.",
+        "zerossl_api_key_hint": "비워 두면 ZeroSSL은 계정 등록에 구성된 이메일을 사용합니다.",
+        "zerossl_description": "zerossl-bot과 함께 ZeroSSL을 사용하세요. 계정 발급 및 키 기반 재발급 추적을 위해 계정 이메일 또는 API 키를 제공하세요."
+      },
       "section": {
         "custom_certificate": "사용자 정의 인증서",
         "lets_encrypt": "Let's Encrypt",
@@ -1094,13 +1100,7 @@
         "zerossl": "ZeroSSL"
       },
       "subtitle": "Web UI 전용 설정을 구성합니다.",
-      "title": "UI 설정",
-      "lets_encrypt": {
-        "certificate_authority_selector": "인증 기관 선택기",
-        "letsencrypt_description": "표준 ACME 발급에는 Let's Encrypt를 사용하세요. 테스트 및 통합 점검을 위해 스테이징을 사용할 수 있습니다.",
-        "zerossl_api_key_hint": "비워 두면 ZeroSSL은 계정 등록에 구성된 이메일을 사용합니다.",
-        "zerossl_description": "zerossl-bot과 함께 ZeroSSL을 사용하세요. 계정 발급 및 키 기반 재발급 추적을 위해 계정 이메일 또는 API 키를 제공하세요."
-      }
+      "title": "UI 설정"
     },
     "step3": {
       "label": {
@@ -1301,6 +1301,10 @@
       "missing_configs_upload_label": "누락된 설정 업로드 (.conf, .cfg, .txt)",
       "missing_configs_upload_partial": "{{total}}개 중 {{uploaded}}개 업로드됨. 남은 항목: {{missing}}",
       "missing_configs_upload_success": "{{count}}개의 설정 파일이 성공적으로 업로드되었습니다",
+      "multiselect_placeholder": "옵션 선택",
+      "multiselect_summary": "{{count}}개 선택됨",
+      "multivalue_add": "값 추가",
+      "multivalue_helper": "한 줄에 하나의 값.{{separatorNote}}",
       "panel_overview": "개요",
       "panel_overview_help": "주요 정보를 확인하고 각 섹션으로 이동합니다.",
       "placeholder_config_data": "데이터",
@@ -1324,6 +1328,7 @@
       "raw_configs_title": "사용자 정의 설정 가져오기",
       "raw_configs_upload": "설정 파일 업로드 (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "선택한 파일 중 하나를 읽을 수 없습니다.",
+      "raw_editor_aria": "원시 템플릿 JSON 편집기",
       "raw_editor_drop_hint": "현재 내용을 교체하려면 템플릿 JSON 파일(.json 전용)을 여기에 끌어다 놓으세요.",
       "raw_editor_help": "전체 템플릿 정의를 JSON으로 편집합니다. 간편 모드로 돌아가면 시각적 에디터가 유효성 검사 후 다시 로드됩니다.",
       "raw_editor_import_success": "템플릿 JSON을 성공적으로 가져왔습니다.",
@@ -1512,6 +1517,7 @@
     "lets_encrypt_custom_profile": "Let's Encrypt에 사용할 사용자 정의 프로필입니다 (예: 'my_custom_profile').",
     "lets_encrypt_disable_public_suffixes": "공용 접미사 목록(PSL)과 일치하는 도메인에 대한 인증서 요청을 비활성화합니다(권장).",
     "lets_encrypt_profile": "Let's Encrypt에 사용할 프로필 (classic, tlsserver, shortlived)입니다.",
+    "lets_encrypt_server": "공급자별 설정을 표시하려면 인증서 공급자를 선택하세요.",
     "license_key": "BunkerWeb PRO 라이선스 키입니다.",
     "link": {
       "access_plugin_page": "{{name}} 페이지 접근",
@@ -1678,6 +1684,7 @@
     "ui_url_security": "표준적이지 않고 추측하기 어려운 URL 경로를 사용하면 보안이 강화됩니다.",
     "use_custom_ssl": "Let's Encrypt 대신 사용자 정의 SSL 인증서를 사용할지 여부입니다.",
     "use_lets_encrypt_staging": "테스트를 위해 Let's Encrypt 스테이징 환경을 사용할지 여부입니다 (신뢰되지 않는 인증서 생성).",
+    "use_lets_encrypt_staging_letsencrypt_only": "Let's Encrypt 스테이징은 Let's Encrypt 서버를 사용할 때만 사용할 수 있습니다.",
     "use_proxy_protocol": "PROXY 프로토콜 통신을 활성화합니다.",
     "use_real_ip": "실제 IP 사용",
     "username_length": "사용자 이름은 1자에서 256자 사이여야 합니다.",
@@ -1685,13 +1692,11 @@
     "view_full_url": "클릭하여 전체 URL 보기",
     "wildcard_certificates": "와일드카드 인증서(*.domain.com)를 생성합니다. DNS 챌린지가 필요합니다.",
     "wildcard_dns_only": "와일드카드 인증서는 DNS 챌린지 유형에서만 지원됩니다.",
-    "lets_encrypt_server": "공급자별 설정을 표시하려면 인증서 공급자를 선택하세요.",
-    "use_lets_encrypt_staging_letsencrypt_only": "Let's Encrypt 스테이징은 Let's Encrypt 서버를 사용할 때만 사용할 수 있습니다.",
-    "zerossl_api_key": "zerossl-bot에서 사용하는 선택적 ZeroSSL API 키입니다.",
-    "zerossl_api_retry": "ZeroSSL API 요청의 재시도 횟수입니다 (0이면 재시도를 비활성화).",
-    "zerossl_api_retry_delay": "ZeroSSL API 재시도 간 지연 시간(초)입니다.",
     "zerossl_api_connect_timeout": "ZeroSSL API 호출의 연결 시간 초과(초)입니다.",
-    "zerossl_api_max_time": "각 ZeroSSL API 요청의 최대 총 시간(초)입니다."
+    "zerossl_api_key": "zerossl-bot에서 사용하는 선택적 ZeroSSL API 키입니다.",
+    "zerossl_api_max_time": "각 ZeroSSL API 요청의 최대 총 시간(초)입니다.",
+    "zerossl_api_retry": "ZeroSSL API 요청의 재시도 횟수입니다 (0이면 재시도를 비활성화).",
+    "zerossl_api_retry_delay": "ZeroSSL API 재시도 간 지연 시간(초)입니다."
   },
   "totp": {
     "prompt": "TOTP 코드를 입력해 주세요."

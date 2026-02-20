@@ -638,6 +638,7 @@
       "admin_username": "Admin-Benutzername",
       "auto_lets_encrypt": "Auto Let's Encrypt",
       "ban_scope": "Sperrbereich",
+      "certificate_authority": "Zertifizierungsstelle",
       "certificate_priority": "Zertifikatspriorität",
       "challenge_type": "Challenge-Typ",
       "config_type": "Konfigurationstyp",
@@ -691,12 +692,11 @@
       "use_real_ip": "Echte IP verwenden",
       "username": "Benutzername",
       "wildcard_certificates": "Wildcard-Zertifikate",
-      "certificate_authority": "Zertifizierungsstelle",
-      "zerossl_api_key": "ZeroSSL-API-Schlüssel",
-      "zerossl_api_retry": "ZeroSSL-API-Wiederholungen",
-      "zerossl_api_retry_delay": "ZeroSSL-API-Wiederholungsverzögerung",
       "zerossl_api_connect_timeout": "ZeroSSL-API-Verbindungs-Timeout",
-      "zerossl_api_max_time": "ZeroSSL-API-Maximalzeit"
+      "zerossl_api_key": "ZeroSSL-API-Schlüssel",
+      "zerossl_api_max_time": "ZeroSSL-API-Maximalzeit",
+      "zerossl_api_retry": "ZeroSSL-API-Wiederholungen",
+      "zerossl_api_retry_delay": "ZeroSSL-API-Wiederholungsverzögerung"
     },
     "placeholder": {
       "2fa_code": "Code eingeben",
@@ -1088,6 +1088,12 @@
       "title": "Admin-Benutzer"
     },
     "step2": {
+      "lets_encrypt": {
+        "certificate_authority_selector": "Auswahl der Zertifizierungsstelle",
+        "letsencrypt_description": "Verwenden Sie Let's Encrypt für die standardmäßige ACME-Ausstellung. Staging ist für Tests und Integrationsprüfungen verfügbar.",
+        "zerossl_api_key_hint": "Wenn leer, verwendet ZeroSSL die konfigurierte E-Mail-Adresse zur Kontoregistrierung.",
+        "zerossl_description": "Verwenden Sie ZeroSSL mit zerossl-bot. Geben Sie eine Konto-E-Mail oder einen API-Schlüssel für die Kontoausstellung und die schlüsselbasierte Neu-Ausstellungsverfolgung an."
+      },
       "section": {
         "custom_certificate": "Benutzerdefiniertes Zertifikat",
         "lets_encrypt": "Let's Encrypt",
@@ -1096,13 +1102,7 @@
         "zerossl": "ZeroSSL"
       },
       "subtitle": "Konfigurieren Sie spezifische Einstellungen für die Web-UI.",
-      "title": "UI-Einstellungen",
-      "lets_encrypt": {
-        "certificate_authority_selector": "Auswahl der Zertifizierungsstelle",
-        "letsencrypt_description": "Verwenden Sie Let's Encrypt für die standardmäßige ACME-Ausstellung. Staging ist für Tests und Integrationsprüfungen verfügbar.",
-        "zerossl_api_key_hint": "Wenn leer, verwendet ZeroSSL die konfigurierte E-Mail-Adresse zur Kontoregistrierung.",
-        "zerossl_description": "Verwenden Sie ZeroSSL mit zerossl-bot. Geben Sie eine Konto-E-Mail oder einen API-Schlüssel für die Kontoausstellung und die schlüsselbasierte Neu-Ausstellungsverfolgung an."
-      }
+      "title": "UI-Einstellungen"
     },
     "step3": {
       "label": {
@@ -1300,6 +1300,10 @@
       "missing_configs_upload_label": "Fehlende Konfigurationen hochladen (.conf, .cfg, .txt)",
       "missing_configs_upload_partial": "{{uploaded}} von {{total}} Konfigurationen hochgeladen. Noch fehlend: {{missing}}",
       "missing_configs_upload_success": "{{count}} Konfigurationsdatei(en) erfolgreich hochgeladen",
+      "multiselect_placeholder": "Optionen auswählen",
+      "multiselect_summary": "{{count}} ausgewählt",
+      "multivalue_add": "Wert hinzufügen",
+      "multivalue_helper": "Ein Wert pro Zeile.{{separatorNote}}",
       "panel_overview": "Übersicht",
       "panel_overview_help": "Verfolgen Sie wichtige Informationen und navigieren Sie zwischen den Abschnitten.",
       "placeholder_config_data": "Daten",
@@ -1323,6 +1327,7 @@
       "raw_configs_title": "Benutzerdefinierte Konfigurationsimporte",
       "raw_configs_upload": "Konfigurationsdateien hochladen (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "Eine der ausgewählten Dateien konnte nicht gelesen werden.",
+      "raw_editor_aria": "Editor für rohes Vorlagen-JSON",
       "raw_editor_drop_hint": "Legen Sie eine Vorlagen-JSON-Datei (.json nur) ab, um den aktuellen Inhalt zu ersetzen.",
       "raw_editor_help": "Bearbeiten Sie die gesamte Vorlagendefinition als JSON. Das Zurückschalten in den Einfach-Modus validiert und lädt den visuellen Editor neu.",
       "raw_editor_import_success": "Vorlagen-JSON erfolgreich importiert.",
@@ -1514,6 +1519,7 @@
     "lets_encrypt_custom_profile": "Das benutzerdefinierte Profil, das für Let's Encrypt verwendet werden soll (z. B. 'mein_benutzerdefiniertes_profil').",
     "lets_encrypt_disable_public_suffixes": "Zertifikatsanfragen für Domains, die mit der Public Suffix List übereinstimmen, deaktivieren (empfohlen).",
     "lets_encrypt_profile": "Das Profil, das für Let's Encrypt verwendet werden soll (classic, tlsserver, shortlived).",
+    "lets_encrypt_server": "Wählen Sie Ihren Zertifikatsanbieter, um anbieterspezifische Einstellungen anzuzeigen.",
     "license_key": "Ihr BunkerWeb PRO Lizenzschlüssel.",
     "link": {
       "access_plugin_page": "Zugriff auf Seite {{name}}",
@@ -1680,6 +1686,7 @@
     "ui_url_security": "Die Verwendung eines nicht standardmäßigen, schwer zu erratenden URL-Pfads erhöht die Sicherheit.",
     "use_custom_ssl": "Ob anstelle von Let's Encrypt ein benutzerdefiniertes SSL-Zertifikat verwendet werden soll.",
     "use_lets_encrypt_staging": "Ob die Let's Encrypt Staging-Umgebung für Tests verwendet werden soll (erzeugt nicht vertrauenswürdige Zertifikate).",
+    "use_lets_encrypt_staging_letsencrypt_only": "Let's Encrypt Staging ist nur verfügbar, wenn der Let's Encrypt-Server verwendet wird.",
     "use_proxy_protocol": "PROXY-Protokoll-Kommunikation aktivieren.",
     "use_real_ip": "Echte IP verwenden",
     "username_length": "Der Benutzername muss zwischen 1 und 256 Zeichen lang sein.",
@@ -1687,13 +1694,11 @@
     "view_full_url": "Klicken, um die vollständige URL anzuzeigen",
     "wildcard_certificates": "Wildcard-Zertifikate generieren (*.domain.com). Erfordert DNS-Challenge.",
     "wildcard_dns_only": "Wildcard-Zertifikate werden nur mit dem DNS-Challenge-Typ unterstützt.",
-    "lets_encrypt_server": "Wählen Sie Ihren Zertifikatsanbieter, um anbieterspezifische Einstellungen anzuzeigen.",
-    "use_lets_encrypt_staging_letsencrypt_only": "Let's Encrypt Staging ist nur verfügbar, wenn der Let's Encrypt-Server verwendet wird.",
-    "zerossl_api_key": "Optionaler ZeroSSL-API-Schlüssel, der von zerossl-bot verwendet wird.",
-    "zerossl_api_retry": "Anzahl der Wiederholungen für ZeroSSL-API-Anfragen (0 deaktiviert Wiederholungen).",
-    "zerossl_api_retry_delay": "Verzögerung in Sekunden zwischen ZeroSSL-API-Wiederholungen.",
     "zerossl_api_connect_timeout": "Verbindungs-Timeout in Sekunden für ZeroSSL-API-Aufrufe.",
-    "zerossl_api_max_time": "Maximale Gesamtzeit in Sekunden pro ZeroSSL-API-Anfrage."
+    "zerossl_api_key": "Optionaler ZeroSSL-API-Schlüssel, der von zerossl-bot verwendet wird.",
+    "zerossl_api_max_time": "Maximale Gesamtzeit in Sekunden pro ZeroSSL-API-Anfrage.",
+    "zerossl_api_retry": "Anzahl der Wiederholungen für ZeroSSL-API-Anfragen (0 deaktiviert Wiederholungen).",
+    "zerossl_api_retry_delay": "Verzögerung in Sekunden zwischen ZeroSSL-API-Wiederholungen."
   },
   "totp": {
     "prompt": "Bitte geben Sie Ihren TOTP-Code ein."

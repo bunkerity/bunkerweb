@@ -643,6 +643,7 @@
       "admin_username": "اسم مستخدم المسؤول",
       "auto_lets_encrypt": "Let's Encrypt تلقائي",
       "ban_scope": "نطاق الحظر",
+      "certificate_authority": "الجهة المصدرة للشهادة",
       "certificate_priority": "أولوية الشهادة",
       "challenge_type": "نوع التحدي",
       "config_type": "نوع التكوين",
@@ -696,12 +697,11 @@
       "use_real_ip": "استخدام IP الحقيقي",
       "username": "اسم المستخدم",
       "wildcard_certificates": "شهادات Wildcard",
-      "certificate_authority": "الجهة المصدرة للشهادة",
-      "zerossl_api_key": "مفتاح واجهة برمجة تطبيقات ZeroSSL",
-      "zerossl_api_retry": "محاولات إعادة واجهة برمجة تطبيقات ZeroSSL",
-      "zerossl_api_retry_delay": "مهلة إعادة المحاولة لواجهة برمجة تطبيقات ZeroSSL",
       "zerossl_api_connect_timeout": "مهلة الاتصال لواجهة برمجة تطبيقات ZeroSSL",
-      "zerossl_api_max_time": "الوقت الأقصى لواجهة برمجة تطبيقات ZeroSSL"
+      "zerossl_api_key": "مفتاح واجهة برمجة تطبيقات ZeroSSL",
+      "zerossl_api_max_time": "الوقت الأقصى لواجهة برمجة تطبيقات ZeroSSL",
+      "zerossl_api_retry": "محاولات إعادة واجهة برمجة تطبيقات ZeroSSL",
+      "zerossl_api_retry_delay": "مهلة إعادة المحاولة لواجهة برمجة تطبيقات ZeroSSL"
     },
     "placeholder": {
       "2fa_code": "أدخل الرمز",
@@ -1093,6 +1093,12 @@
       "title": "مستخدم مسؤول"
     },
     "step2": {
+      "lets_encrypt": {
+        "certificate_authority_selector": "محدد الجهة المصدرة للشهادة",
+        "letsencrypt_description": "استخدم Let's Encrypt للإصدار القياسي عبر ACME. تتوفر بيئة Staging للاختبار والتحقق من التكامل.",
+        "zerossl_api_key_hint": "إذا تُرك فارغًا، سيستخدم ZeroSSL البريد الإلكتروني المُعد لتسجيل الحساب.",
+        "zerossl_description": "استخدم ZeroSSL مع zerossl-bot. قدّم بريد الحساب الإلكتروني أو مفتاح API لإصدار الحساب وتتبع إعادة الإصدار المعتمدة على المفتاح."
+      },
       "section": {
         "custom_certificate": "شهادة مخصصة",
         "lets_encrypt": "Let's Encrypt",
@@ -1101,13 +1107,7 @@
         "zerossl": "ZeroSSL"
       },
       "subtitle": "قم بتكوين الإعدادات الخاصة بواجهة المستخدم على الويب.",
-      "title": "إعدادات واجهة المستخدم",
-      "lets_encrypt": {
-        "certificate_authority_selector": "محدد الجهة المصدرة للشهادة",
-        "letsencrypt_description": "استخدم Let's Encrypt للإصدار القياسي عبر ACME. تتوفر بيئة Staging للاختبار والتحقق من التكامل.",
-        "zerossl_api_key_hint": "إذا تُرك فارغًا، سيستخدم ZeroSSL البريد الإلكتروني المُعد لتسجيل الحساب.",
-        "zerossl_description": "استخدم ZeroSSL مع zerossl-bot. قدّم بريد الحساب الإلكتروني أو مفتاح API لإصدار الحساب وتتبع إعادة الإصدار المعتمدة على المفتاح."
-      }
+      "title": "إعدادات واجهة المستخدم"
     },
     "step3": {
       "label": {
@@ -1305,6 +1305,10 @@
       "missing_configs_upload_label": "تحميل التكوينات المفقودة (.conf, .cfg, .txt)",
       "missing_configs_upload_partial": "تم تحميل {{uploaded}} من أصل {{total}} تكوينات. لا يزال مفقودًا: {{missing}}",
       "missing_configs_upload_success": "تم تحميل {{count}} ملف (ملفات) تكوين بنجاح",
+      "multiselect_placeholder": "اختر الخيارات",
+      "multiselect_summary": "تم اختيار {{count}}",
+      "multivalue_add": "إضافة قيمة",
+      "multivalue_helper": "قيمة واحدة لكل سطر.{{separatorNote}}",
       "panel_overview": "نظرة عامة",
       "panel_overview_help": "تتبع المعلومات الرئيسية وانتقل بين الأقسام.",
       "placeholder_config_data": "البيانات",
@@ -1328,6 +1332,7 @@
       "raw_configs_title": "استيراد التكوينات المخصصة",
       "raw_configs_upload": "تحميل ملفات التكوين (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "تعذر قراءة أحد الملفات المحددة.",
+      "raw_editor_aria": "محرر JSON للقالب الخام",
       "raw_editor_drop_hint": "أسقط ملف JSON قالب (.json فقط) لاستبدال المحتوى الحالي.",
       "raw_editor_help": "تعديل تعريف القالب الكامل بصيغة JSON. يؤدي التبديل مرة أخرى إلى الوضع السهل إلى التحقق من الصحة وإعادة تحميل المحرر المرئي.",
       "raw_editor_import_success": "تم استيراد JSON القالب بنجاح.",
@@ -1516,6 +1521,7 @@
     "lets_encrypt_custom_profile": "ملف التعريف المخصص الذي سيتم استخدامه لـ Let's Encrypt (مثل 'my_custom_profile').",
     "lets_encrypt_disable_public_suffixes": "تعطيل طلبات الشهادات للنطاقات التي تطابق قائمة Public Suffix List (موصى به).",
     "lets_encrypt_profile": "ملف التعريف الذي سيتم استخدامه لـ Let's Encrypt (classic، tlsserver، shortlived).",
+    "lets_encrypt_server": "اختر موفر الشهادات لعرض الإعدادات الخاصة بكل موفر.",
     "license_key": "مفتاح ترخيص BunkerWeb PRO الخاص بك.",
     "link": {
       "access_plugin_page": "الوصول إلى صفحة {{name}}",
@@ -1682,6 +1688,7 @@
     "ui_url_security": "استخدام مسار URL غير قياسي وصعب التخمين يعزز الأمان.",
     "use_custom_ssl": "هل يجب استخدام شهادة SSL مخصصة بدلاً من Let's Encrypt.",
     "use_lets_encrypt_staging": "هل يجب استخدام بيئة Let's Encrypt staging للاختبار (تنشئ شهادات غير موثوقة).",
+    "use_lets_encrypt_staging_letsencrypt_only": "بيئة Let's Encrypt Staging متاحة فقط عند استخدام خادم Let's Encrypt.",
     "use_proxy_protocol": "تمكين اتصال بروتوكول PROXY.",
     "use_real_ip": "استخدام IP الحقيقي",
     "username_length": "يجب أن يتراوح طول اسم المستخدم بين 1 و 256 حرفًا.",
@@ -1689,13 +1696,11 @@
     "view_full_url": "انقر لعرض URL الكامل",
     "wildcard_certificates": "إنشاء شهادات wildcard (*.domain.com). يتطلب تحدي DNS.",
     "wildcard_dns_only": "شهادات Wildcard مدعومة فقط مع نوع تحدي DNS.",
-    "lets_encrypt_server": "اختر موفر الشهادات لعرض الإعدادات الخاصة بكل موفر.",
-    "use_lets_encrypt_staging_letsencrypt_only": "بيئة Let's Encrypt Staging متاحة فقط عند استخدام خادم Let's Encrypt.",
-    "zerossl_api_key": "مفتاح API اختياري لـ ZeroSSL يستخدمه zerossl-bot.",
-    "zerossl_api_retry": "عدد محاولات إعادة طلبات واجهة برمجة تطبيقات ZeroSSL (القيمة 0 تعطل إعادة المحاولة).",
-    "zerossl_api_retry_delay": "التأخير بالثواني بين محاولات إعادة واجهة برمجة تطبيقات ZeroSSL.",
     "zerossl_api_connect_timeout": "مهلة الاتصال بالثواني لطلبات واجهة برمجة تطبيقات ZeroSSL.",
-    "zerossl_api_max_time": "الوقت الإجمالي الأقصى بالثواني لكل طلب واجهة برمجة تطبيقات ZeroSSL."
+    "zerossl_api_key": "مفتاح API اختياري لـ ZeroSSL يستخدمه zerossl-bot.",
+    "zerossl_api_max_time": "الوقت الإجمالي الأقصى بالثواني لكل طلب واجهة برمجة تطبيقات ZeroSSL.",
+    "zerossl_api_retry": "عدد محاولات إعادة طلبات واجهة برمجة تطبيقات ZeroSSL (القيمة 0 تعطل إعادة المحاولة).",
+    "zerossl_api_retry_delay": "التأخير بالثواني بين محاولات إعادة واجهة برمجة تطبيقات ZeroSSL."
   },
   "totp": {
     "prompt": "يرجى إدخال رمز TOTP الخاص بك."
