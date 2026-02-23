@@ -782,9 +782,9 @@ class GatewayController(KubernetesController):
     def _status_patch_enabled(self) -> bool:
         return self._gateway_api_available
 
-    def _patch_gateway_status(self, gateway: Dict[str, Any], ip: str) -> bool:
-        if not ip:
-            self._logger.warning("Cannot patch gateway without IP address")
+    def _patch_gateway_status(self, gateway: Dict[str, Any], ips: List[str]) -> bool:
+        if not ips:
+            self._logger.warning("Cannot patch gateway without IP addresses")
             return False
 
         metadata = gateway.get("metadata") or {}
@@ -796,12 +796,14 @@ class GatewayController(KubernetesController):
             return False
 
         patch_body = {"status": {"addresses": []}}
-        ip_match = self._ip_pattern.match(ip)
 
-        if ip_match:
-            patch_body["status"]["addresses"].append({"type": "IPAddress", "value": ip})
-        else:
-            patch_body["status"]["addresses"].append({"type": "Hostname", "value": ip})
+        # Add all IPs to the gateway status
+        for ip in ips:
+            ip_match = self._ip_pattern.match(ip)
+            if ip_match:
+                patch_body["status"]["addresses"].append({"type": "IPAddress", "value": ip})
+            else:
+                patch_body["status"]["addresses"].append({"type": "Hostname", "value": ip})
 
         try:
             self._custom_objects.patch_namespaced_custom_object_status(
@@ -812,9 +814,7 @@ class GatewayController(KubernetesController):
                 gateway_name,
                 patch_body,
             )
-            self._logger.info(
-                f"Successfully patched status of gateway {gateway_name} in namespace {gateway_namespace} with {'IP' if ip_match else 'hostname'} {ip}"
-            )
+            self._logger.info(f"Successfully patched status of gateway {gateway_name} in namespace {gateway_namespace} with {len(ips)} address(es)")
             return True
         except ApiException as e:
             if e.status == 404:
@@ -833,6 +833,6 @@ class GatewayController(KubernetesController):
             self._logger.debug(format_exc())
             return False
 
-    def _patch_controller_status(self, ip: str) -> None:
+    def _patch_controller_status(self, ips: List[str]) -> None:
         for gateway in self._gateways_cache.values():
-            self._patch_gateway_status(gateway, ip)
+            self._patch_gateway_status(gateway, ips)
