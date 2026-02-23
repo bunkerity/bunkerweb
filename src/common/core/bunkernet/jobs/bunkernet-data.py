@@ -68,6 +68,7 @@ try:
     # Download data
     LOGGER.info("Downloading BunkerNet data ...")
     ok, status, data = data()
+    LOGGER.debug(f"Data API reply - ok: {ok}, status: {status}, data: {data}")
     if not ok:
         LOGGER.error(f"Error while sending data request to BunkerNet API : {data}")
         sys_exit(2)

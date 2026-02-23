@@ -2347,6 +2347,36 @@ span.cursor-pointer ~ .reset-setting {
   color: rgba(255, 255, 255, 0.45) !important;
 }
 
+div.dt-button-collection .dt-button.text-danger:not(.disabled):not(:disabled),
+div.dt-button-collection
+  .dt-button.text-danger:not(.disabled):not(:disabled)
+  > a.dropdown-item,
+div.dt-button-collection
+  .dropdown-item.text-danger:not(.disabled):not(:disabled) {
+  color: var(--bs-danger) !important;
+}
+
+div.dt-button-collection
+  .dt-button.text-danger:not(.disabled):not(:disabled)
+  span,
+div.dt-button-collection
+  .dt-button.text-danger:not(.disabled):not(:disabled)
+  > a.dropdown-item
+  span,
+div.dt-button-collection
+  .dropdown-item.text-danger:not(.disabled):not(:disabled)
+  span,
+div.dt-button-collection .dt-button.text-danger:not(.disabled):not(:disabled) i,
+div.dt-button-collection
+  .dt-button.text-danger:not(.disabled):not(:disabled)
+  > a.dropdown-item
+  i,
+div.dt-button-collection
+  .dropdown-item.text-danger:not(.disabled):not(:disabled)
+  i {
+  color: inherit !important;
+}
+
 div.dt-button-background {
   background: rgba(0, 0, 0, 0.45) !important;
 }
