@@ -32,12 +32,14 @@ def request(
             timeout=5,
         )
         status = resp.status_code
+        getLogger("BUNKERNET.send").debug(f"API replied with status code {status} for {method} {url}")
         if status == 429:
             return True, 429, "rate limited"
         elif status == 403:
             return True, 403, "forbidden"
 
         raw_data: dict = resp.json()
+        getLogger("BUNKERNET.send").debug(f"API response data: {raw_data}")
 
         assert "result" in raw_data
         assert "data" in raw_data
