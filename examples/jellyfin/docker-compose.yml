@@ -51,7 +51,7 @@ services:
       - bw-universe
 
   jellyfin:
-    image: jellyfin/jellyfin:10.10.7
+    image: jellyfin/jellyfin:10
     container_name: jellyfin
     volumes:
       - ./jellyfin-data/config:/config
