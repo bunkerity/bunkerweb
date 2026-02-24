@@ -6036,7 +6036,7 @@ log {
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">crowdsec</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/crowdsec:v1.7.4</span><span class="w"> </span><span class="c1"># 使用最新版本，但为了更好的稳定性和安全性，请始终固定版本</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/crowdsec:v1.7.6</span><span class="w"> </span><span class="c1"># 使用最新版本，但为了更好的稳定性和安全性，请始终固定版本</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cs-data:/var/lib/crowdsec/data</span><span class="w"> </span><span class="c1"># 持久化 CrowdSec 数据</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log:ro</span><span class="w"> </span><span class="c1"># BunkerWeb 的日志，供 CrowdSec 解析</span>
@@ -7838,6 +7838,8 @@ TrustedMonitor/\d+\.\d+
 <ol>
 <li><strong>启用该功能：</strong> 将 <code>AUTO_LETS_ENCRYPT</code> 设置为 <code>yes</code> 以启用自动证书颁发和续订。</li>
 <li><strong>提供联系电子邮件（建议填写）：</strong> 使用 <code>EMAIL_LETS_ENCRYPT</code> 设置输入您的电子邮件地址，以便 Let's Encrypt 在证书即将过期时提醒您。如果留空，BunkerWeb 会在没有地址的情况下注册（使用 Certbot 的 <code>--register-unsafely-without-email</code> 选项），但您将不会收到任何提醒或恢复邮件。</li>
+<li><strong>选择证书颁发机构：</strong> 将 <code>LETS_ENCRYPT_SERVER</code> 设置为 <code>letsencrypt</code>（默认）或 <code>zerossl</code>。</li>
+<li><strong>提供 ZeroSSL 凭据（如需要）：</strong> 使用 <code>zerossl</code> 时，请设置 <code>EMAIL_LETS_ENCRYPT</code> 或 <code>LETS_ENCRYPT_ZEROSSL_API_KEY</code>，以便 <code>zerossl-bot</code> 获取 EAB 凭据。</li>
 <li><strong>选择验证类型：</strong> 使用 <code>LETS_ENCRYPT_CHALLENGE</code> 设置选择 <code>http</code> 或 <code>dns</code> 验证。</li>
 <li><strong>配置 DNS 提供商：</strong> 如果使用 DNS 验证，请指定您的 DNS 提供商和凭据。</li>
 <li><strong>选择证书配置文件：</strong> 使用 <code>LETS_ENCRYPT_PROFILE</code> 设置选择您偏好的证书配置文件（classic、tlsserver 或 shortlived）。</li>
@@ -7881,7 +7883,7 @@ TrustedMonitor/\d+\.\d+
 <td><code>no</code></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>传递 Let's Encrypt 请求：</strong> 设置为 <code>yes</code> 以将 Let's Encrypt 请求传递给 Web 服务器。当 BunkerWeb 位于处理 SSL 的另一个反向代理后面时，此功能很有用。</td>
+<td><strong>传递 Let's Encrypt 请求：</strong> 设置为 <code>yes</code> 以将 Let's Encrypt 请求传递给 Web 服务器。当 BunkerWeb 位于处理 SSL 的另一个反向代理前面时，此功能很有用。</td>
 </tr>
 <tr>
 <td><code>EMAIL_LETS_ENCRYPT</code></td>
@@ -7889,6 +7891,48 @@ TrustedMonitor/\d+\.\d+
 <td>multisite</td>
 <td>否</td>
 <td><strong>联系电子邮件：</strong> 用于 Let's Encrypt 到期提醒的电子邮件地址。只有在接受不接收任何警报或恢复邮件的情况下才可留空（此时 Certbot 会使用 <code>--register-unsafely-without-email</code> 注册）。</td>
+</tr>
+<tr>
+<td><code>LETS_ENCRYPT_SERVER</code></td>
+<td><code>letsencrypt</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>证书颁发机构：</strong> 选择用于签发证书的 ACME 服务器。可选值：<code>letsencrypt</code> 或 <code>zerossl</code>。</td>
+</tr>
+<tr>
+<td><code>LETS_ENCRYPT_ZEROSSL_API_KEY</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>ZeroSSL API 密钥：</strong> 当 <code>LETS_ENCRYPT_SERVER=zerossl</code> 时由 <code>zerossl-bot</code> 使用的可选密钥。若为空，则使用 <code>EMAIL_LETS_ENCRYPT</code> 获取 EAB 凭据。</td>
+</tr>
+<tr>
+<td><code>LETS_ENCRYPT_ZEROSSL_API_RETRY</code></td>
+<td><code>3</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>ZeroSSL API 重试次数：</strong> <code>zerossl-bot</code> 发起 ZeroSSL API 请求时的重试次数（<code>0</code> 表示禁用重试）。</td>
+</tr>
+<tr>
+<td><code>LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY</code></td>
+<td><code>2</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>ZeroSSL API 重试延迟：</strong> <code>zerossl-bot</code> 中 ZeroSSL API 重试之间的延迟秒数。</td>
+</tr>
+<tr>
+<td><code>LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT</code></td>
+<td><code>5</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>ZeroSSL API 连接超时：</strong> <code>zerossl-bot</code> 中 ZeroSSL API 调用的连接超时时间（秒）。</td>
+</tr>
+<tr>
+<td><code>LETS_ENCRYPT_ZEROSSL_API_MAX_TIME</code></td>
+<td><code>20</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>ZeroSSL API 最大时长：</strong> <code>zerossl-bot</code> 中每次 ZeroSSL API 调用允许的最大总时长（秒）。</td>
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_CHALLENGE</code></td>
@@ -8100,6 +8144,13 @@ TrustedMonitor/\d+\.\d+
 <td><a href="https://github.com/bikram990/certbot-dns-dynu/blob/main/README.md">文档</a></td>
 </tr>
 <tr>
+<td><code>gandi</code></td>
+<td>Gandi</td>
+<td><code>token</code></td>
+<td><code>sharing_id</code></td>
+<td><a href="https://github.com/TheophileDiot/certbot-plugin-gandi">文档</a></td>
+</tr>
+<tr>
 <td><code>gehirn</code></td>
 <td>Gehirn DNS</td>
 <td><code>api_token</code><br><code>api_secret</code></td>
@@ -8119,6 +8170,13 @@ TrustedMonitor/\d+\.\d+
 <td><code>project_id</code><br><code>private_key_id</code><br><code>private_key</code><br><code>client_email</code><br><code>client_id</code><br><code>client_x509_cert_url</code></td>
 <td><code>type</code> (默认: <code>service_account</code>)<br><code>auth_uri</code> (默认: <code>https://accounts.google.com/o/oauth2/auth</code>)<br><code>token_uri</code> (默认: <code>https://accounts.google.com/o/oauth2/token</code>)<br><code>auth_provider_x509_cert_url</code> (默认: <code>https://www.googleapis.com/oauth2/v1/certs</code>)</td>
 <td><a href="https://certbot-dns-google.readthedocs.io/en/stable/">文档</a></td>
+</tr>
+<tr>
+<td><code>hetzner</code></td>
+<td>Hetzner</td>
+<td><code>api_token</code></td>
+<td></td>
+<td><a href="https://github.com/ctrlaltcoop/certbot-dns-hetzner/blob/main/README.md">文档</a></td>
 </tr>
 <tr>
 <td><code>infomaniak</code></td>

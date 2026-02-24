@@ -5976,7 +5976,7 @@ log {
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">crowdsec</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/crowdsec:v1.7.4</span><span class="w"> </span><span class="c1"># Verwenden Sie die neueste Version, aber pinnen Sie immer die Version für bessere Stabilität/Sicherheit</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/crowdsec:v1.7.6</span><span class="w"> </span><span class="c1"># Verwenden Sie die neueste Version, aber pinnen Sie immer die Version für bessere Stabilität/Sicherheit</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cs-data:/var/lib/crowdsec/data</span><span class="w"> </span><span class="c1"># Zum Persistieren der CrowdSec-Daten</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log:ro</span><span class="w"> </span><span class="c1"># Die BunkerWeb-Protokolle, die von CrowdSec analysiert werden sollen</span>
@@ -7752,6 +7752,8 @@ TrustedMonitor/\d+\.\d+
 <ol>
 <li><strong>Aktivieren Sie die Funktion:</strong> Setzen Sie die Einstellung <code>AUTO_LETS_ENCRYPT</code> auf <code>yes</code>, um die automatische Ausstellung und Erneuerung von Zertifikaten zu aktivieren.</li>
 <li><strong>Kontakt-E-Mail angeben (empfohlen):</strong> Geben Sie Ihre E-Mail-Adresse in der Einstellung <code>EMAIL_LETS_ENCRYPT</code> ein, damit Let's Encrypt Sie vor ablaufenden Zertifikaten warnen kann. Wenn Sie das Feld leer lassen, registriert sich BunkerWeb ohne Adresse (Certbot-Option <code>--register-unsafely-without-email</code>) – Sie erhalten dann keine Erinnerungen oder Wiederherstellungs-E-Mails.</li>
+<li><strong>Zertifizierungsstelle auswählen:</strong> Setzen Sie <code>LETS_ENCRYPT_SERVER</code> auf <code>letsencrypt</code> (Standard) oder <code>zerossl</code>.</li>
+<li><strong>ZeroSSL-Zugangsdaten angeben (falls erforderlich):</strong> Bei Verwendung von <code>zerossl</code> setzen Sie <code>EMAIL_LETS_ENCRYPT</code> oder <code>LETS_ENCRYPT_ZEROSSL_API_KEY</code>, damit <code>zerossl-bot</code> EAB-Zugangsdaten abrufen kann.</li>
 <li><strong>Wählen Sie den Challenge-Typ:</strong> Wählen Sie entweder die <code>http</code>- oder <code>dns</code>-Verifizierung mit der Einstellung <code>LETS_ENCRYPT_CHALLENGE</code>.</li>
 <li><strong>DNS-Anbieter konfigurieren:</strong> Wenn Sie DNS-Challenges verwenden, geben Sie Ihren DNS-Anbieter und Ihre Anmeldeinformationen an.</li>
 <li><strong>Zertifikatsprofil auswählen:</strong> Wählen Sie Ihr bevorzugtes Zertifikatsprofil mit der Einstellung <code>LETS_ENCRYPT_PROFILE</code> (classic, tlsserver oder shortlived).</li>
@@ -7795,7 +7797,7 @@ TrustedMonitor/\d+\.\d+
 <td><code>no</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>Let's Encrypt durchleiten:</strong> Auf <code>yes</code> setzen, um Let's Encrypt-Anfragen an den Webserver weiterzuleiten. Dies ist nützlich, wenn BunkerWeb hinter einem anderen Reverse-Proxy mit SSL-Handling steht.</td>
+<td><strong>Let's Encrypt durchleiten:</strong> Auf <code>yes</code> setzen, um Let's Encrypt-Anfragen an den Webserver weiterzuleiten. Dies ist nützlich, wenn BunkerWeb vor einem anderen Reverse-Proxy mit SSL-Handling steht.</td>
 </tr>
 <tr>
 <td><code>EMAIL_LETS_ENCRYPT</code></td>
@@ -7803,6 +7805,48 @@ TrustedMonitor/\d+\.\d+
 <td>multisite</td>
 <td>nein</td>
 <td><strong>Kontakt-E-Mail:</strong> E-Mail-Adresse für Let's-Encrypt-Erinnerungen. Lassen Sie das Feld nur leer, wenn Sie akzeptieren, dass keine Warnungen oder Wiederherstellungs-E-Mails gesendet werden (Certbot registriert mit <code>--register-unsafely-without-email</code>).</td>
+</tr>
+<tr>
+<td><code>LETS_ENCRYPT_SERVER</code></td>
+<td><code>letsencrypt</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td><strong>Zertifizierungsstelle:</strong> Wählen Sie den ACME-Server für die Ausstellung. Optionen: <code>letsencrypt</code> oder <code>zerossl</code>.</td>
+</tr>
+<tr>
+<td><code>LETS_ENCRYPT_ZEROSSL_API_KEY</code></td>
+<td></td>
+<td>multisite</td>
+<td>nein</td>
+<td><strong>ZeroSSL-API-Schlüssel:</strong> Optionaler Schlüssel, der von <code>zerossl-bot</code> verwendet wird, wenn <code>LETS_ENCRYPT_SERVER=zerossl</code> gesetzt ist. Wenn leer, wird <code>EMAIL_LETS_ENCRYPT</code> verwendet, um EAB-Zugangsdaten abzurufen.</td>
+</tr>
+<tr>
+<td><code>LETS_ENCRYPT_ZEROSSL_API_RETRY</code></td>
+<td><code>3</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td><strong>ZeroSSL-API-Wiederholungen:</strong> Anzahl der Wiederholungen für ZeroSSL-API-Anfragen durch <code>zerossl-bot</code> (<code>0</code> deaktiviert Wiederholungen).</td>
+</tr>
+<tr>
+<td><code>LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY</code></td>
+<td><code>2</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td><strong>ZeroSSL-API-Wiederholungsverzögerung:</strong> Verzögerung in Sekunden zwischen ZeroSSL-API-Wiederholungen in <code>zerossl-bot</code>.</td>
+</tr>
+<tr>
+<td><code>LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT</code></td>
+<td><code>5</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td><strong>ZeroSSL-API-Verbindungs-Timeout:</strong> Verbindungs-Timeout in Sekunden für ZeroSSL-API-Aufrufe in <code>zerossl-bot</code>.</td>
+</tr>
+<tr>
+<td><code>LETS_ENCRYPT_ZEROSSL_API_MAX_TIME</code></td>
+<td><code>20</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td><strong>ZeroSSL-API-Maximalzeit:</strong> Maximale Gesamtzeit in Sekunden für jeden ZeroSSL-API-Aufruf in <code>zerossl-bot</code>.</td>
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_CHALLENGE</code></td>
@@ -8014,6 +8058,13 @@ TrustedMonitor/\d+\.\d+
 <td><a href="https://github.com/bikram990/certbot-dns-dynu/blob/main/README.md">Dokumentation</a></td>
 </tr>
 <tr>
+<td><code>gandi</code></td>
+<td>Gandi</td>
+<td><code>token</code></td>
+<td><code>sharing_id</code></td>
+<td><a href="https://github.com/TheophileDiot/certbot-plugin-gandi">Dokumentation</a></td>
+</tr>
+<tr>
 <td><code>gehirn</code></td>
 <td>Gehirn DNS</td>
 <td><code>api_token</code><br><code>api_secret</code></td>
@@ -8033,6 +8084,13 @@ TrustedMonitor/\d+\.\d+
 <td><code>project_id</code><br><code>private_key_id</code><br><code>private_key</code><br><code>client_email</code><br><code>client_id</code><br><code>client_x509_cert_url</code></td>
 <td><code>type</code> (Standard: <code>service_account</code>)<br><code>auth_uri</code> (Standard: <code>https://accounts.google.com/o/oauth2/auth</code>)<br><code>token_uri</code> (Standard: <code>https://accounts.google.com/o/oauth2/token</code>)<br><code>auth_provider_x509_cert_url</code> (Standard: <code>https://www.googleapis.com/oauth2/v1/certs</code>)</td>
 <td><a href="https://certbot-dns-google.readthedocs.io/en/stable/">Dokumentation</a></td>
+</tr>
+<tr>
+<td><code>hetzner</code></td>
+<td>Hetzner</td>
+<td><code>api_token</code></td>
+<td></td>
+<td><a href="https://github.com/ctrlaltcoop/certbot-dns-hetzner/blob/main/README.md">Dokumentation</a></td>
 </tr>
 <tr>
 <td><code>infomaniak</code></td>
