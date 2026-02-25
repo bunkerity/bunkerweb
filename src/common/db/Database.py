@@ -4168,8 +4168,11 @@ class Database:
                         setting_data["select"] = selects_map.get(setting.id, [])
                     elif setting.type == "multiselect":
                         setting_data["multiselect"] = multiselects_map.get(setting.id, [])
+                        sep_value = getattr(setting, "separator", None)
+                        setting_data["separator"] = sep_value if sep_value is not None else " "
                     elif setting.type == "multivalue":
-                        setting_data["separator"] = getattr(setting, "separator", " ")
+                        sep_value = getattr(setting, "separator", None)
+                        setting_data["separator"] = sep_value if sep_value is not None else " "
                     elif setting.type == "file":
                         setting_data["accept"] = getattr(setting, "accept", "")
                     plugin_data["settings"][setting.id] = setting_data

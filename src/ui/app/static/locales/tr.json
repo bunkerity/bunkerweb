@@ -1161,6 +1161,7 @@
     "no_history": "Geçmiş yok.",
     "no_item": "Öğe Yok",
     "no_notifications": "Gösterilecek bildirim yok.",
+    "no_search_results": "Öğe bulunamadı.",
     "no_steps": "Adım Yok",
     "no_steps_description": "Bu şablonda yapılandırılacak adım yok.",
     "online": "Çevrimiçi",
@@ -1498,6 +1499,7 @@
       "reset_default": "Varsayılana sıfırla",
       "reset_global": "Küresel değere sıfırla",
       "run_job": "İşi Çalıştır: {{job}}",
+      "show_selected_only": "Yalnızca seçilenleri göster",
       "stop_instance": "Örneği Durdur: {{hostname}}",
       "unban_ip": "{{ip}} yasağını kaldır",
       "value_from_global": "Genel ayarlardan gelen değer"

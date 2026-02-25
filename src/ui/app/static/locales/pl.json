@@ -1160,6 +1160,7 @@
     "no_history": "Brak dostępnej historii.",
     "no_item": "Brak pozycji",
     "no_notifications": "Brak powiadomień do wyświetlenia.",
+    "no_search_results": "Nie znaleziono elementów.",
     "no_steps": "Brak dostępnych kroków",
     "no_steps_description": "Ten szablon nie wymaga żadnych kroków konfiguracyjnych.",
     "online": "Online",
@@ -1464,6 +1465,7 @@
       "reset_default": "Resetuj do wartości domyślnej",
       "reset_global": "Resetuj wartość globalną",
       "run_job": "Uruchom zadanie {{job}}",
+      "show_selected_only": "Pokaż tylko zaznaczone",
       "stop_instance": "Zatrzymaj instancję {{hostname}}",
       "unban_ip": "Odblokuj {{ip}}",
       "value_from_global": "Wartość z ustawień globalnych"

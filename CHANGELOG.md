@@ -11,6 +11,7 @@
 - [UI] Add override non-global services functionality in global settings
 - [UI] Make data columns in the reports page non orderable to avoid issues
 - [UI] Add control socket configuration for gunicorn
+- [UI] Enhance multiselect dropdown functionality and update the type of multiple settings to use it
 - [ALL-IN-ONE] Update CrowdSec version to 1.7.6
 - [AUTOCONF] Update gateway and ingress status patching to handle multiple IP addresses and Handle NodePort services if a load balancer IP is not available.
 - [API] Add control socket configuration for gunicorn

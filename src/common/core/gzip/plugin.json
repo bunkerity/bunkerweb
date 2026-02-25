@@ -21,8 +21,7 @@
       "id": "gzip-types",
       "label": "MIME types",
       "regex": "^( *[\\-\\w.]+/[\\-\\w.+]+ *)+$",
-      "type": "multivalue",
-      "separator": " "
+      "type": "multivalue"
     },
     "GZIP_MIN_LENGTH": {
       "context": "multisite",
@@ -50,8 +49,54 @@
       "id": "gzip-proxied",
       "label": "Proxied requests",
       "regex": "^.*$",
-      "type": "multivalue",
-      "separator": " "
+      "type": "multiselect",
+      "multiselect": [
+        {
+          "id": "off",
+          "label": "off - Disable for all proxied requests",
+          "value": "off"
+        },
+        {
+          "id": "expired",
+          "label": "expired - Expires header is present",
+          "value": "expired"
+        },
+        {
+          "id": "no-cache",
+          "label": "no-cache - Cache-Control: no-cache",
+          "value": "no-cache"
+        },
+        {
+          "id": "no-store",
+          "label": "no-store - Cache-Control: no-store",
+          "value": "no-store"
+        },
+        {
+          "id": "private",
+          "label": "private - Cache-Control: private",
+          "value": "private"
+        },
+        {
+          "id": "no_last_modified",
+          "label": "no_last_modified - No Last-Modified header",
+          "value": "no_last_modified"
+        },
+        {
+          "id": "no_etag",
+          "label": "no_etag - No ETag header",
+          "value": "no_etag"
+        },
+        {
+          "id": "auth",
+          "label": "auth - Authorization header is present",
+          "value": "auth"
+        },
+        {
+          "id": "any",
+          "label": "any - Enable for all proxied requests",
+          "value": "any"
+        }
+      ]
     }
   }
 }

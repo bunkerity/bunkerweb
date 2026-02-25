@@ -228,15 +228,32 @@ class SettingControl {
       return;
     }
 
-    const selected = new Set(
-      value
+    // Handle different separator types to split the value correctly
+    let selectedArray;
+    const separator = this.entry?.separator;
+
+    if (separator === "") {
+      // For empty separator, split the string into individual characters
+      selectedArray = value.split("").filter(Boolean);
+    } else if (separator !== undefined && separator !== null) {
+      // For custom separator, split by that separator
+      selectedArray = value
+        .split(separator)
+        .map((item) => item.trim())
+        .filter(Boolean);
+    } else {
+      // For no separator defined, split by whitespace (default behavior)
+      selectedArray = value
         .split(/\s+/)
         .map((item) => item.trim())
-        .filter(Boolean),
-    );
+        .filter(Boolean);
+    }
+
+    const selected = new Set(selectedArray);
 
     const dropdown = document.createElement("div");
     dropdown.className = "dropdown setting-multiselect";
+    dropdown.style.position = "relative";
 
     const toggle = document.createElement("button");
     toggle.type = "button";
@@ -244,6 +261,10 @@ class SettingControl {
       "btn btn-outline-primary w-100 d-flex justify-content-between align-items-center setting-multiselect-toggle";
     toggle.dataset.bsToggle = "dropdown";
     toggle.dataset.bsAutoClose = "outside";
+
+    const toggleContent = document.createElement("span");
+    toggleContent.className =
+      "d-flex justify-content-between align-items-center gap-2 flex-grow-1";
 
     const toggleLabel = document.createElement("span");
     toggleLabel.className = "flex-grow-1 text-truncate text-start";
@@ -262,15 +283,108 @@ class SettingControl {
       { count: selected.size },
     );
 
-    toggle.append(toggleLabel, toggleBadge);
+    toggleContent.append(toggleLabel, toggleBadge);
+    toggle.append(toggleContent);
 
     const menu = document.createElement("div");
-    menu.className = "dropdown-menu setting-multiselect-menu w-100 p-2";
+    menu.className = "dropdown-menu setting-multiselect-menu multiselect-menu";
     menu.addEventListener("click", (event) => event.stopPropagation());
+    // Prevent Bootstrap Dropdown from capturing keyboard events (ArrowDown,
+    // ArrowUp, Home, End, Escape) on any focused element inside the menu.
+    // Without this, Bootstrap tries to call focus() on .dropdown-item elements
+    // in a loop which can crash the browser tab.
+    menu.addEventListener("keydown", (event) => event.stopPropagation());
+    menu.addEventListener("keyup", (event) => event.stopPropagation());
+
+    // Add search input
+    const searchWrapper = document.createElement("div");
+    searchWrapper.className =
+      "p-2 border-bottom position-sticky top-0 multiselect-search-container";
+
+    const searchRow = document.createElement("div");
+    searchRow.className = "d-flex align-items-center gap-2";
+
+    const searchGroup = document.createElement("div");
+    searchGroup.className = "input-group input-group-sm flex-grow-1";
+
+    const searchIcon = document.createElement("span");
+    searchIcon.className = "input-group-text border-0 bg-transparent";
+    searchIcon.innerHTML = '<i class="bx bx-search bx-sm"></i>';
+
+    const searchInput = document.createElement("input");
+    searchInput.type = "text";
+    searchInput.className = "form-control border-0 multiselect-search";
+    searchInput.setAttribute("data-i18n", "form.placeholder.search");
+    searchInput.placeholder = this.translate(
+      "form.placeholder.search",
+      "Search...",
+    );
+    searchInput.setAttribute(
+      "aria-label",
+      this.translate("form.placeholder.search", "Search..."),
+    );
+    searchInput.addEventListener("click", (e) => e.stopPropagation());
+    // Prevent Bootstrap Dropdown from capturing keyboard events
+    searchInput.addEventListener("keydown", (e) => e.stopPropagation());
+    searchInput.addEventListener("keyup", (e) => e.stopPropagation());
+
+    const selectedOnlyBtn = document.createElement("button");
+    selectedOnlyBtn.type = "button";
+    selectedOnlyBtn.className = "btn btn-sm multiselect-selected-only-btn";
+    selectedOnlyBtn.setAttribute("data-bs-toggle", "tooltip");
+    selectedOnlyBtn.setAttribute("data-bs-placement", "top");
+    selectedOnlyBtn.setAttribute(
+      "data-bs-original-title",
+      this.translate("tooltip.button.show_selected_only", "Show selected only"),
+    );
+    selectedOnlyBtn.setAttribute(
+      "data-i18n",
+      "tooltip.button.show_selected_only",
+    );
+    selectedOnlyBtn.setAttribute("aria-pressed", "false");
+    selectedOnlyBtn.innerHTML = '<i class="bx bx-check-double bx-xs"></i>';
+    selectedOnlyBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isActive = selectedOnlyBtn.getAttribute("aria-pressed") === "true";
+      selectedOnlyBtn.setAttribute("aria-pressed", String(!isActive));
+      selectedOnlyBtn.classList.toggle("active", !isActive);
+      applyFilters();
+    });
+
+    searchGroup.append(searchIcon, searchInput);
+    searchRow.append(searchGroup, selectedOnlyBtn);
+    searchWrapper.append(searchRow);
+    // Only show search bar when there are more than 10 options
+    if (options.length <= 10) {
+      searchWrapper.classList.add("d-none");
+    }
+    menu.append(searchWrapper);
+
+    // Options container
+    const optionsContainer = document.createElement("div");
+    optionsContainer.className =
+      "setting-multiselect-options multiselect-options";
+
+    // Pre-create "no items found" message (hidden by default)
+    const noOptionsMsg = document.createElement("div");
+    noOptionsMsg.className =
+      "dropdown-item no-options-message border-0 p-3 text-center small d-none";
+    const noOptionsMsgSpan = document.createElement("span");
+    this.setContent(
+      noOptionsMsgSpan,
+      "status.no_search_results",
+      "No items found.",
+    );
+    noOptionsMsg.append(noOptionsMsgSpan);
+
+    // Pre-declare footerText so refreshSummary can update it once assigned
+    let footerText = null;
 
     const refreshSummary = () => {
       const entries = [];
-      menu.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
+      Array.from(
+        optionsContainer.querySelectorAll('input[type="checkbox"]'),
+      ).forEach((checkbox) => {
         if (checkbox.checked) {
           entries.push({
             id: checkbox.value,
@@ -291,36 +405,92 @@ class SettingControl {
         toggleLabel.removeAttribute("data-i18n");
         toggleLabel.removeAttribute("data-i18n-options");
       }
-      this.setContent(
-        toggleBadge,
-        "template.editor.multiselect_summary",
-        entries.length === 1 ? "{{count}} selected" : "{{count}} selected",
-        { count: entries.length },
-      );
+      toggleBadge.textContent = entries.length;
+      if (footerText) {
+        this.setContent(
+          footerText,
+          "template.editor.multiselect_summary",
+          "{{count}} selected",
+          { count: entries.length },
+        );
+      }
     };
+
+    const applyFilters = () => {
+      const lowerTerm = searchInput.value.toLowerCase().trim();
+      const selectedOnly =
+        selectedOnlyBtn.getAttribute("aria-pressed") === "true";
+      let visibleCount = 0;
+
+      // Use d-none toggling; items have d-flex which overrides inline display:none
+      optionsContainer.querySelectorAll("label").forEach((item) => {
+        const text = item.textContent.toLowerCase();
+        const isChecked = item.querySelector('input[type="checkbox"]')?.checked;
+        const matchesSearch = !lowerTerm || text.includes(lowerTerm);
+        const matchesFilter = !selectedOnly || isChecked;
+
+        if (matchesSearch && matchesFilter) {
+          item.classList.remove("d-none");
+          visibleCount++;
+        } else {
+          item.classList.add("d-none");
+        }
+      });
+
+      if (visibleCount === 0) {
+        noOptionsMsg.classList.remove("d-none");
+      } else {
+        noOptionsMsg.classList.add("d-none");
+      }
+    };
+
+    searchInput.addEventListener("input", () => applyFilters());
 
     options.forEach((option, index) => {
       const item = document.createElement("label");
-      item.className = "dropdown-item d-flex align-items-start gap-2";
+      item.className =
+        "dropdown-item d-flex align-items-center gap-2 py-2 px-3 cursor-pointer multiselect-option";
       item.setAttribute("role", "menuitemcheckbox");
+      item.setAttribute("data-option-id", option.id);
+      item.setAttribute("for", `${this.settingId}-multiselect-${index}`);
+      item.title = option.label || option.id;
 
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
-      checkbox.className = "form-check-input mt-0";
+      checkbox.className = "form-check-input m-0";
       checkbox.value = option.id;
       checkbox.dataset.label = option.label || option.id;
       checkbox.checked = selected.has(option.id);
       checkbox.id = `${this.settingId}-multiselect-${index}`;
-      checkbox.addEventListener("change", refreshSummary);
-      checkbox.addEventListener("click", (event) => event.stopPropagation());
+      checkbox.addEventListener("change", () => {
+        refreshSummary();
+        applyFilters();
+      });
 
-      const label = document.createElement("span");
-      label.className = "small flex-grow-1";
-      label.textContent = option.label || option.id;
+      const labelSpan = document.createElement("span");
+      labelSpan.className = "flex-grow-1 small";
+      labelSpan.textContent = option.label || option.id;
 
-      item.append(checkbox, label);
-      menu.append(item);
+      item.append(checkbox, labelSpan);
+      optionsContainer.append(item);
     });
+
+    optionsContainer.append(noOptionsMsg);
+    menu.append(optionsContainer);
+
+    // Add footer with count
+    const footer = document.createElement("div");
+    footer.className = "p-2 border-top text-center";
+    footerText = document.createElement("small");
+    footerText.className = "text-muted";
+    this.setContent(
+      footerText,
+      "template.editor.multiselect_summary",
+      "{{count}} selected",
+      { count: 0 },
+    );
+    footer.append(footerText);
+    menu.append(footer);
 
     dropdown.append(toggle, menu);
     this.root.append(dropdown);
@@ -330,14 +500,30 @@ class SettingControl {
       if (typeof bootstrap !== "undefined" && bootstrap.Dropdown) {
         bootstrap.Dropdown.getOrCreateInstance(toggle);
       }
+      if (typeof bootstrap !== "undefined" && bootstrap.Tooltip) {
+        // Use a dynamic title function so applyTranslations() updates to
+        // data-bs-original-title are picked up on every show
+        // (Bootstrap 5 Tooltip lacks setContent unlike Popover).
+        new bootstrap.Tooltip(selectedOnlyBtn, {
+          title() {
+            return selectedOnlyBtn.getAttribute("data-bs-original-title");
+          },
+        });
+      }
       refreshSummary();
     });
 
-    this.valueGetter = () =>
-      Array.from(menu.querySelectorAll('input[type="checkbox"]'))
+    this.valueGetter = () => {
+      const separator = this.entry?.separator;
+      const joinSeparator =
+        separator !== undefined && separator !== null ? separator : " ";
+      return Array.from(
+        optionsContainer.querySelectorAll('input[type="checkbox"]'),
+      )
         .filter((checkbox) => checkbox.checked)
         .map((checkbox) => checkbox.value)
-        .join(" ");
+        .join(joinSeparator);
+    };
   }
 
   renderMultivalue(value) {

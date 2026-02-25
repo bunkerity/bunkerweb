@@ -80,7 +80,7 @@ class Settings(Base):
     regex = Column(String(1024), nullable=False)
     type = Column(SETTINGS_TYPES_ENUM, nullable=False)
     multiple = Column(String(128), nullable=True)
-    separator = Column(String(10), nullable=True)
+    separator = Column(String(10), default=" ", nullable=True)
     accept = Column(String(512), nullable=True)
     order = Column(Integer, default=0, nullable=False)
 

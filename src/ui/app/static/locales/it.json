@@ -1162,6 +1162,7 @@
     "no_history": "Nessuna cronologia disponibile.",
     "no_item": "Nessun Elemento",
     "no_notifications": "Nessuna notifica da mostrare.",
+    "no_search_results": "Nessun elemento trovato.",
     "no_steps": "Nessun Passo Disponibile",
     "no_steps_description": "Questo modello non ha passi da configurare.",
     "online": "Online",
@@ -1466,6 +1467,7 @@
       "reset_default": "Ripristina valore predefinito",
       "reset_global": "Ripristina valore globale",
       "run_job": "Esegui Processo {{job}}",
+      "show_selected_only": "Mostra solo selezionati",
       "stop_instance": "Ferma Istanza {{hostname}}",
       "unban_ip": "Sblocca {{ip}}",
       "value_from_global": "Valore dalle impostazioni globali"

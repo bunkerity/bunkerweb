@@ -1163,6 +1163,7 @@
     "no_history": "无可用历史记录。",
     "no_item": "无项目",
     "no_notifications": "无通知显示。",
+    "no_search_results": "未找到项目。",
     "no_steps": "无可用步骤",
     "no_steps_description": "此模板没有任何可配置的步骤。",
     "online": "在线",
@@ -1468,6 +1469,7 @@
       "reset_default": "重置为默认值",
       "reset_global": "重置为全局值",
       "run_job": "运行任务 {{job}}",
+      "show_selected_only": "仅显示所选项",
       "stop_instance": "停止实例 {{hostname}}",
       "unban_ip": "解禁 {{ip}}",
       "value_from_global": "来自全局设置的值"

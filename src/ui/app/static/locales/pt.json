@@ -1163,6 +1163,7 @@
     "no_history": "Nenhum histórico disponível.",
     "no_item": "Nenhum Item",
     "no_notifications": "Nenhuma notificação para mostrar.",
+    "no_search_results": "Nenhum item encontrado.",
     "no_steps": "Nenhum Passo Disponível",
     "no_steps_description": "Este modelo não tem passos para configurar.",
     "online": "Online",
@@ -1467,6 +1468,7 @@
       "reset_default": "Restabelecer valor padrão",
       "reset_global": "Restabelecer valor global",
       "run_job": "Executar Tarefa {{job}}",
+      "show_selected_only": "Mostrar apenas selecionados",
       "stop_instance": "Parar Instância {{hostname}}",
       "unban_ip": "Desbloquear {{ip}}",
       "value_from_global": "Valor das configurações globais"
