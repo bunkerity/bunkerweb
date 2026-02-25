@@ -1,4 +1,4 @@
-FROM python:3.13-alpine@sha256:3527940d79521d5746929cb52e73b477e6acc3f34b35524fbee0dd11b23ff6b4 AS builder
+FROM python:3.13-alpine@sha256:bb1f2fdb1065c85468775c9d680dcd344f6442a2d1181ef7916b60a623f11d40 AS builder
 
 ARG TARGETPLATFORM
 
@@ -29,7 +29,7 @@ COPY src/common/helpers helpers
 COPY src/VERSION VERSION
 COPY src/api api
 
-FROM python:3.13-alpine@sha256:3527940d79521d5746929cb52e73b477e6acc3f34b35524fbee0dd11b23ff6b4
+FROM python:3.13-alpine@sha256:bb1f2fdb1065c85468775c9d680dcd344f6442a2d1181ef7916b60a623f11d40
 
 RUN umask 027
 
@@ -40,13 +40,12 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt
 
 # Install runtime dependencies and add api user
-# TODO: Add postgresql-client back when the CVEs are fixed
-RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client sqlite tzdata && \
+RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client sqlite postgresql-client tzdata && \
   addgroup -g 101 api && \
   adduser -h /usr/share/bunkerweb/api -g api -s /sbin/nologin -G api -D -H -u 101 --disabled-password api
 
 # Fix CVEs
-RUN apk add --no-cache "libpq>=18.2-r0" "postgresql18-client>=18.2-r0" # CVE-2026-2003 CVE-2026-2004 CVE-2026-2005 CVE-2026-2006 CVE-2026-2007
+# There are no CVEs for the following packages
 
 # Copy deps and app
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
