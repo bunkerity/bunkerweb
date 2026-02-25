@@ -106,6 +106,7 @@ try:
 
         LOGGER.info(f"Sending {len(batch)} / {remaining} reports to BunkerNet API ...")
         ok, status, data = send_reports(batch)
+        LOGGER.debug(f"Send reports API reply - ok: {ok}, status: {status}, data: {data}")
 
         if not ok or status in (429, 403):
             reports = batch + reports  # Add batch back to reports

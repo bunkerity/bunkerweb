@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # Default values
 # Hardcoded default version (immutable reference)
-DEFAULT_BUNKERWEB_VERSION="1.6.9~rc1"
+DEFAULT_BUNKERWEB_VERSION="1.6.9~rc2"
 # Mutable effective version (can be overridden by --version)
 BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 NGINX_VERSION=""
@@ -109,6 +109,15 @@ detect_os() {
     DISTRO_ID=""
     DISTRO_VERSION=""
     DISTRO_CODENAME=""
+
+    # Check for FreeBSD first
+    if [ "$(uname)" = "FreeBSD" ]; then
+        DISTRO_ID="freebsd"
+        DISTRO_VERSION=$(freebsd-version -u 2>/dev/null | cut -d'-' -f1 || uname -r | cut -d'-' -f1)
+        DISTRO_CODENAME=""
+        print_status "Detected OS: FreeBSD $DISTRO_VERSION"
+        return
+    fi
 
     if [ -f /etc/os-release ]; then
         # shellcheck disable=SC1091
@@ -702,6 +711,19 @@ show_rhel_database_warning() {
 
 check_supported_os() {
     case "$DISTRO_ID" in
+        "freebsd")
+            major_version=$(echo "$DISTRO_VERSION" | cut -d. -f1)
+            if [[ "$major_version" != "13" && "$major_version" != "14" ]]; then
+                print_warning "Only FreeBSD 13 and 14 are officially supported"
+                if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
+                    read -p "Continue anyway? (y/N): " -r
+                    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                        exit 1
+                    fi
+                fi
+            fi
+            NGINX_VERSION="1.28.0"
+            ;;
         "debian")
             if [[ "$DISTRO_VERSION" != "12" && "$DISTRO_VERSION" != "13" ]]; then
                 print_warning "Only Debian 12 (Bookworm) and 13 (Trixie) are officially supported"
@@ -753,7 +775,7 @@ check_supported_os() {
             ;;
         *)
             print_error "Unsupported operating system: $DISTRO_ID"
-            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04, Fedora 42/43, RHEL 8/9/10"
+            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04, Fedora 42/43, RHEL 8/9/10, FreeBSD 13/14"
             exit 1
             ;;
     esac
@@ -1042,9 +1064,16 @@ configure_manager_api_defaults() {
     apply_optional_integrations "$config_file"
 
     print_status "Enabling and starting BunkerWeb Scheduler with configured settings..."
-    run_cmd systemctl enable --now bunkerweb-scheduler
-    sleep 2
-    systemctl status bunkerweb-scheduler --no-pager -l || print_warning "BunkerWeb Scheduler may not be running"
+    if [ "$DISTRO_ID" = "freebsd" ]; then
+        sysrc bunkerweb_scheduler_enable=YES >/dev/null 2>&1
+        service bunkerweb_scheduler start
+        sleep 2
+        service bunkerweb_scheduler status || print_warning "BunkerWeb Scheduler may not be running"
+    else
+        run_cmd systemctl enable --now bunkerweb-scheduler
+        sleep 2
+        systemctl status bunkerweb-scheduler --no-pager -l || print_warning "BunkerWeb Scheduler may not be running"
+    fi
 }
 
 # Ensure worker installations whitelist the selected manager/scheduler IPs
@@ -1097,9 +1126,16 @@ configure_worker_api_whitelist() {
     fi
 
     print_status "Enabling and starting BunkerWeb with configured settings..."
-    run_cmd systemctl enable --now bunkerweb
-    sleep 2
-    systemctl status bunkerweb --no-pager -l || print_warning "BunkerWeb may not be running"
+    if [ "$DISTRO_ID" = "freebsd" ]; then
+        sysrc bunkerweb_enable=YES >/dev/null 2>&1
+        service bunkerweb start
+        sleep 2
+        service bunkerweb status || print_warning "BunkerWeb may not be running"
+    else
+        run_cmd systemctl enable --now bunkerweb
+        sleep 2
+        systemctl status bunkerweb --no-pager -l || print_warning "BunkerWeb may not be running"
+    fi
 }
 
 # Configure full installation settings (DNS resolvers, API HTTPS, multisite)
@@ -1146,8 +1182,15 @@ configure_full_config() {
     # Start bunkerweb and the scheduler if any changes were made
     if [ "$needs_reload" = true ]; then
         print_status "Enabling and starting services with configured settings..."
-        run_cmd systemctl enable --now bunkerweb
-        run_cmd systemctl enable --now bunkerweb-scheduler
+        if [ "$DISTRO_ID" = "freebsd" ]; then
+            sysrc bunkerweb_enable=YES >/dev/null 2>&1
+            sysrc bunkerweb_scheduler_enable=YES >/dev/null 2>&1
+            service bunkerweb start || true
+            service bunkerweb_scheduler start || true
+        else
+            run_cmd systemctl enable --now bunkerweb
+            run_cmd systemctl enable --now bunkerweb-scheduler
+        fi
     fi
 }
 
@@ -1236,6 +1279,22 @@ EOF
     print_status "NGINX $NGINX_VERSION installed successfully"
 }
 
+# Function to install NGINX on FreeBSD
+install_nginx_freebsd() {
+    print_step "Installing NGINX on FreeBSD"
+
+    # Update pkg database
+    run_cmd pkg update -f
+
+    # Install NGINX from packages
+    run_cmd pkg install -y nginx
+
+    # Lock NGINX package version
+    run_cmd pkg lock -y nginx
+
+    print_status "NGINX installed successfully"
+}
+
 # Function to install BunkerWeb on Debian/Ubuntu
 install_bunkerweb_debian() {
     print_step "Installing BunkerWeb on Debian/Ubuntu"
@@ -1311,6 +1370,99 @@ install_bunkerweb_rpm() {
     print_status "BunkerWeb $BUNKERWEB_VERSION installed successfully"
 }
 
+# Function to install BunkerWeb on FreeBSD
+install_bunkerweb_freebsd() {
+    print_step "Installing BunkerWeb on FreeBSD"
+
+    # Install required dependencies
+    run_cmd pkg install -y bash python311 py311-pip curl libxml2 yajl gd sudo \
+        lsof libmaxminddb postgresql16-client mariadb1011-client sqlite3 \
+        openssl pcre2 lmdb ssdeep unzip gtar
+
+    # Create nginx user and group if they don't exist
+    if ! pw groupshow nginx >/dev/null 2>&1; then
+        print_status "Creating nginx group..."
+        pw groupadd nginx
+    fi
+
+    if ! pw usershow nginx >/dev/null 2>&1; then
+        print_status "Creating nginx user..."
+        pw useradd nginx -g nginx -d /nonexistent -s /usr/sbin/nologin -c "nginx user"
+    fi
+
+    # Set environment variables
+    if [ "$ENABLE_WIZARD" = "no" ]; then
+        export UI_WIZARD=no
+    fi
+
+    # Download and install BunkerWeb package from GitHub releases or custom repo
+    print_status "Installing BunkerWeb..."
+
+    # For FreeBSD, we provide instructions for manual installation until packages are available
+    print_warning "FreeBSD packages are currently built from source."
+    print_status "Downloading BunkerWeb source..."
+
+    BUNKERWEB_INSTALL_DIR="/usr/share/bunkerweb"
+
+    # Create required directories
+    mkdir -p "$BUNKERWEB_INSTALL_DIR"
+    mkdir -p /etc/bunkerweb/configs /etc/bunkerweb/plugins
+    mkdir -p /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb
+    mkdir -p /var/log/bunkerweb /var/lib/bunkerweb /var/www/html
+
+    # Clone and setup BunkerWeb (or download release tarball)
+    if [ -n "$BUNKERWEB_TARBALL_URL" ]; then
+        run_cmd curl -fsSL "$BUNKERWEB_TARBALL_URL" -o /tmp/bunkerweb.tar.gz
+        run_cmd tar -xzf /tmp/bunkerweb.tar.gz -C "$BUNKERWEB_INSTALL_DIR" --strip-components=1
+        rm -f /tmp/bunkerweb.tar.gz
+    else
+        print_warning "Please download BunkerWeb from https://github.com/bunkerity/bunkerweb/releases"
+        print_status "Then run the FreeBSD postinstall script: /usr/share/bunkerweb/scripts/postinstall-freebsd.sh"
+    fi
+
+    # Install Python dependencies
+    if [ -d "$BUNKERWEB_INSTALL_DIR/deps" ]; then
+        print_status "Python dependencies already bundled"
+    else
+        print_status "Installing Python dependencies..."
+        mkdir -p "$BUNKERWEB_INSTALL_DIR/deps/python"
+        python3.11 -m pip install --target "$BUNKERWEB_INSTALL_DIR/deps/python" \
+            -r "$BUNKERWEB_INSTALL_DIR/requirements.txt" 2>/dev/null || true
+    fi
+
+    # Install rc.d scripts
+    print_status "Installing rc.d service scripts..."
+    if [ -d "$BUNKERWEB_INSTALL_DIR/rc.d" ]; then
+        for script in bunkerweb bunkerweb_scheduler bunkerweb_ui bunkerweb_api; do
+            if [ -f "$BUNKERWEB_INSTALL_DIR/rc.d/${script}" ]; then
+                cp "$BUNKERWEB_INSTALL_DIR/rc.d/${script}" "/usr/local/etc/rc.d/${script}"
+                chmod 555 "/usr/local/etc/rc.d/${script}"
+            fi
+        done
+    fi
+
+    # Set permissions
+    chown -R root:nginx "$BUNKERWEB_INSTALL_DIR"
+    chown -R nginx:nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb \
+        /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb
+    chmod 755 /var/log/bunkerweb
+    chmod 770 /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb
+    chmod 2770 /var/tmp/bunkerweb
+
+    # Install CLI
+    if [ -f "$BUNKERWEB_INSTALL_DIR/helpers/bwcli" ]; then
+        install -m 755 "$BUNKERWEB_INSTALL_DIR/helpers/bwcli" /usr/bin/bwcli
+    fi
+
+    # Write integration marker
+    echo "FreeBSD" > "$BUNKERWEB_INSTALL_DIR/INTEGRATION"
+
+    # Lock BunkerWeb package
+    pkg lock -y bunkerweb 2>/dev/null || true
+
+    print_status "BunkerWeb installed successfully on FreeBSD"
+}
+
 # Function to install CrowdSec
 install_crowdsec() {
     echo
@@ -1332,6 +1484,9 @@ install_crowdsec() {
                 "fedora"|"rhel"|"rocky"|"almalinux")
                     run_cmd dnf install -y $dep
                     ;;
+                "freebsd")
+                    run_cmd pkg install -y $dep
+                    ;;
                 *)
                     print_warning "Automatic install not supported on $DISTRO_ID"
                     ;;
@@ -1348,6 +1503,9 @@ install_crowdsec() {
             ;;
         "fedora"|"rhel"|"rocky"|"almalinux")
             run_cmd dnf install -y crowdsec
+            ;;
+        "freebsd")
+            run_cmd pkg install -y crowdsec
             ;;
         *)
             print_error "Unsupported distribution: $DISTRO_ID"
@@ -1436,25 +1594,36 @@ install_redis() {
         "fedora"|"rhel"|"rocky"|"almalinux")
             run_cmd dnf install -y redis
             ;;
+        "freebsd")
+            run_cmd pkg install -y redis
+            ;;
         *)
             print_error "Unsupported distribution: $DISTRO_ID"
             return
             ;;
     esac
 
-    REDIS_SERVICE=""
-    for candidate in redis-server redis; do
-        if systemctl list-unit-files --type=service --all 2>/dev/null | grep -q "^${candidate}\.service"; then
-            REDIS_SERVICE="$candidate"
-            break
-        fi
-    done
-
-    if [ -n "$REDIS_SERVICE" ]; then
-        run_cmd systemctl enable --now "$REDIS_SERVICE"
-        print_status "Redis service enabled and started ($REDIS_SERVICE)"
+    # Cross-platform service detection and enablement
+    if [ "$DISTRO_ID" = "freebsd" ]; then
+        # FreeBSD uses rc.d
+        sysrc redis_enable=YES >/dev/null 2>&1
+        service redis start || true
+        print_status "Redis service enabled and started"
     else
-        print_warning "Redis service name not found; start it manually if needed."
+        REDIS_SERVICE=""
+        for candidate in redis-server redis; do
+            if systemctl list-unit-files --type=service --all 2>/dev/null | grep -q "^${candidate}\.service"; then
+                REDIS_SERVICE="$candidate"
+                break
+            fi
+        done
+
+        if [ -n "$REDIS_SERVICE" ]; then
+            run_cmd systemctl enable --now "$REDIS_SERVICE"
+            print_status "Redis service enabled and started ($REDIS_SERVICE)"
+        else
+            print_warning "Redis service name not found; start it manually if needed."
+        fi
     fi
 
     if [ -z "$REDIS_HOST_INPUT" ]; then
@@ -1475,15 +1644,27 @@ show_final_info() {
     echo "========================================="
     echo
     echo "Services status:"
-    systemctl status bunkerweb --no-pager -l || true
-    systemctl status bunkerweb-scheduler --no-pager -l || true
-    # Show API service status if present on this system
-    if systemctl list-units --type=service --all | grep -q '^bunkerweb-api.service'; then
-        systemctl status bunkerweb-api --no-pager -l || true
-    fi
 
-    if [ "$ENABLE_WIZARD" = "yes" ]; then
-        systemctl status bunkerweb-ui --no-pager -l || true
+    # Cross-platform service status display
+    if [ "$DISTRO_ID" = "freebsd" ]; then
+        service bunkerweb status 2>/dev/null || true
+        service bunkerweb_scheduler status 2>/dev/null || true
+        if [ -f /usr/local/etc/rc.d/bunkerweb_api ]; then
+            service bunkerweb_api status 2>/dev/null || true
+        fi
+        if [ "$ENABLE_WIZARD" = "yes" ]; then
+            service bunkerweb_ui status 2>/dev/null || true
+        fi
+    else
+        systemctl status bunkerweb --no-pager -l || true
+        systemctl status bunkerweb-scheduler --no-pager -l || true
+        # Show API service status if present on this system
+        if systemctl list-units --type=service --all | grep -q '^bunkerweb-api.service'; then
+            systemctl status bunkerweb-api --no-pager -l || true
+        fi
+        if [ "$ENABLE_WIZARD" = "yes" ]; then
+            systemctl status bunkerweb-ui --no-pager -l || true
+        fi
     fi
 
     echo
@@ -1495,11 +1676,28 @@ show_final_info() {
     fi
 
     echo "  - Scheduler config: /etc/bunkerweb/scheduler.env"
-    if [ "${SERVICE_API:-no}" = "yes" ] || systemctl list-units --type=service --all | grep -q '^bunkerweb-api.service'; then
-        echo "  - API config: /etc/bunkerweb/api.env"
+
+    # Cross-platform API service detection
+    if [ "$DISTRO_ID" = "freebsd" ]; then
+        if [ "${SERVICE_API:-no}" = "yes" ] || [ -f /usr/local/etc/rc.d/bunkerweb_api ]; then
+            echo "  - API config: /etc/bunkerweb/api.env"
+        fi
+    else
+        if [ "${SERVICE_API:-no}" = "yes" ] || systemctl list-units --type=service --all | grep -q '^bunkerweb-api.service'; then
+            echo "  - API config: /etc/bunkerweb/api.env"
+        fi
     fi
     echo "  - Logs: /var/log/bunkerweb/"
     echo
+
+    # FreeBSD-specific instructions
+    if [ "$DISTRO_ID" = "freebsd" ]; then
+        echo "FreeBSD Notes:"
+        echo "  - Services are managed via rc.d: service bunkerweb start|stop|restart"
+        echo "  - Enable services in /etc/rc.conf: sysrc bunkerweb_enable=YES"
+        echo "  - View logs: tail -f /var/log/bunkerweb/*.log"
+        echo
+    fi
 
     # Display next steps based on installation type and wizard status
     case "$INSTALL_TYPE" in
@@ -1512,7 +1710,11 @@ show_final_info() {
                 echo "  3. Access the Web UI at: http://your-server-ip:7000"
                 echo "  4. Use the UI to manage your BunkerWeb workers"
             else
-                echo "  3. Start the Web UI: systemctl start bunkerweb-ui"
+                if [ "$DISTRO_ID" = "freebsd" ]; then
+                    echo "  3. Start the Web UI: service bunkerweb_ui start"
+                else
+                    echo "  3. Start the Web UI: systemctl start bunkerweb-ui"
+                fi
                 echo "  4. Access the UI at: http://your-server-ip:7000"
             fi
             echo
@@ -1534,14 +1736,22 @@ show_final_info() {
             echo "  • API_WHITELIST_IP is configured to allow: $MANAGER_IP_INPUT"
             echo "  • API listens on: 0.0.0.0:5000 (whitelisting enforces access control)"
             echo "  • Local config changes in /etc/bunkerweb/variables.env may be overwritten"
-            echo "  • Check logs: journalctl -u bunkerweb -f"
+            if [ "$DISTRO_ID" = "freebsd" ]; then
+                echo "  • Check logs: tail -f /var/log/bunkerweb/*.log"
+            else
+                echo "  • Check logs: journalctl -u bunkerweb -f"
+            fi
             ;;
         "scheduler")
             echo "Next steps:"
             echo "  1. Configure database connection in /etc/bunkerweb/scheduler.env"
             echo "     Set DATABASE_URI for shared configuration storage"
             echo "  2. Verify BUNKERWEB_INSTANCES is set to: $BUNKERWEB_INSTANCES_INPUT"
-            echo "  3. Restart scheduler: systemctl restart bunkerweb-scheduler"
+            if [ "$DISTRO_ID" = "freebsd" ]; then
+                echo "  3. Restart scheduler: service bunkerweb_scheduler restart"
+            else
+                echo "  3. Restart scheduler: systemctl restart bunkerweb-scheduler"
+            fi
             echo "  4. Use 'bwcli' commands to manage the cluster"
             echo
             echo "📝 Scheduler-only mode information:"
@@ -1553,7 +1763,11 @@ show_final_info() {
             echo "Next steps:"
             echo "  1. Configure database connection in /etc/bunkerweb/ui.env"
             echo "     Set DATABASE_URI to the same database as your scheduler"
-            echo "  2. Restart the UI: systemctl restart bunkerweb-ui"
+            if [ "$DISTRO_ID" = "freebsd" ]; then
+                echo "  2. Restart the UI: service bunkerweb_ui restart"
+            else
+                echo "  2. Restart the UI: systemctl restart bunkerweb-ui"
+            fi
             echo "  3. Access the Web UI at: http://your-server-ip:7000"
             echo
             echo "📝 UI-only mode information:"
@@ -1566,7 +1780,11 @@ show_final_info() {
             echo "  1. Configure API settings in /etc/bunkerweb/api.env"
             echo "     Set API_LISTEN_IP and API_HTTP_PORT as needed"
             echo "  2. Configure database connection: DATABASE_URI"
-            echo "  3. Restart the API: systemctl restart bunkerweb-api"
+            if [ "$DISTRO_ID" = "freebsd" ]; then
+                echo "  3. Restart the API: service bunkerweb_api restart"
+            else
+                echo "  3. Restart the API: systemctl restart bunkerweb-api"
+            fi
             echo "  4. The API will be available at: http://your-server-ip:8000"
             echo
             echo "📝 API-only mode information:"
@@ -1590,12 +1808,20 @@ show_final_info() {
                 echo "Next steps:"
                 echo "  1. Edit /etc/bunkerweb/variables.env to configure BunkerWeb"
                 echo "  2. Add your server settings and protected services"
-                echo "  3. Restart services: systemctl restart bunkerweb bunkerweb-scheduler"
+                if [ "$DISTRO_ID" = "freebsd" ]; then
+                    echo "  3. Restart services: service bunkerweb restart && service bunkerweb_scheduler restart"
+                else
+                    echo "  3. Restart services: systemctl restart bunkerweb bunkerweb-scheduler"
+                fi
                 echo
                 echo "📝 Manual configuration:"
                 echo "  • Default database: SQLite (upgrade to MariaDB/PostgreSQL for production)"
                 echo "  • Use 'bwcli' for command-line management"
-                echo "  • Check logs: journalctl -u bunkerweb -f"
+                if [ "$DISTRO_ID" = "freebsd" ]; then
+                    echo "  • Check logs: tail -f /var/log/bunkerweb/*.log"
+                else
+                    echo "  • Check logs: journalctl -u bunkerweb -f"
+                fi
                 echo "  • Access Web UI (if enabled): http://your-server-ip:7000"
             fi
             ;;
@@ -1973,9 +2199,24 @@ perform_upgrade_backup() {
         print_warning "bwcli not found, cannot run automatic backup. Perform manual backup per documentation."
         return 0
     fi
-    if ! systemctl is-active --quiet bunkerweb-scheduler; then
+    # Check if scheduler service is running using cross-platform helper
+    local scheduler_running="no"
+    if [ "$DISTRO_ID" = "freebsd" ]; then
+        if service bunkerweb_scheduler status >/dev/null 2>&1; then
+            scheduler_running="yes"
+        fi
+    else
+        if systemctl is-active --quiet bunkerweb-scheduler 2>/dev/null; then
+            scheduler_running="yes"
+        fi
+    fi
+    if [ "$scheduler_running" = "no" ]; then
         print_warning "Scheduler service not active; starting temporarily for backup."
-        systemctl start bunkerweb-scheduler || print_warning "Failed to start scheduler; backup may fail."
+        if [ "$DISTRO_ID" = "freebsd" ]; then
+            service bunkerweb_scheduler onestart || print_warning "Failed to start scheduler; backup may fail."
+        else
+            systemctl start bunkerweb-scheduler || print_warning "Failed to start scheduler; backup may fail."
+        fi
         TEMP_STARTED="yes"
     fi
     if [ -z "$BACKUP_DIRECTORY" ]; then
@@ -1990,7 +2231,11 @@ perform_upgrade_backup() {
         print_warning "Automatic backup failed. Verify manually before continuing."
     fi
     if [ "$TEMP_STARTED" = "yes" ]; then
-        systemctl stop bunkerweb-scheduler || print_warning "Failed to stop bunkerweb-scheduler after temporary start."
+        if [ "$DISTRO_ID" = "freebsd" ]; then
+            service bunkerweb_scheduler onestop || print_warning "Failed to stop bunkerweb_scheduler after temporary start."
+        else
+            systemctl stop bunkerweb-scheduler || print_warning "Failed to stop bunkerweb-scheduler after temporary start."
+        fi
     fi
 }
 
@@ -2218,6 +2463,9 @@ main() {
         "rhel"|"rocky"|"almalinux")
             install_nginx_rhel
             ;;
+        "freebsd")
+            install_nginx_freebsd
+            ;;
     esac
 
     # Install CrowdSec if chosen
@@ -2253,6 +2501,9 @@ main() {
             ;;
         "rhel"|"rocky"|"almalinux")
             install_bunkerweb_rpm
+            ;;
+        "freebsd")
+            install_bunkerweb_freebsd
             ;;
     esac
 

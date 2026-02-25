@@ -63,7 +63,7 @@ if __name__ == "__main__":
         # Plugin subparser
         parser_plugin = subparsers.add_parser("plugin", help="execute a custom command from a plugin")
         parser_plugin.add_argument("plugin_id", type=str, help="the plugin id that you want to execute the command on")
-        parser_plugin.add_argument("command", type=str, help="the command to execute on the plugin")
+        parser_plugin.add_argument("plugin_command", type=str, help="the command to execute on the plugin")
         parser_plugin.add_argument("-d", "--debug", action="store_true", help="sets the LOG_LEVEL env variable to DEBUG")
 
         # Parse args
@@ -85,10 +85,10 @@ if __name__ == "__main__":
             ret, err = cli.bans()
         elif args.command == "plugin_list":
             ret, err = cli.plugin_list()
-        else:
+        elif args.command == "plugin":
             if args.debug:
                 logger.setLevel("DEBUG")
-            ret, err = cli.custom(args.plugin_id, args.command, debug=args.debug, extra_args=unknown_args)
+            ret, err = cli.custom(args.plugin_id, args.plugin_command, debug=args.debug, extra_args=unknown_args)
 
         if not ret:
             logger.error(f"CLI command status : ❌ (fail)\n{err}")

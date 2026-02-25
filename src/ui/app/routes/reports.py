@@ -21,7 +21,25 @@ from app.routes.utils import cors_required
 
 reports = Blueprint("reports", __name__)
 REPORTS_FILTERS_CACHE_TTL_SECONDS = 5.0
+REPORTS_FILTERS_CACHE_MAX_ENTRIES = 128
 REPORTS_FILTERS_CACHE: dict[str, dict[str, object]] = {}
+
+
+def prune_reports_filters_cache(cache_now: float) -> None:
+    expired_keys = [key for key, entry in REPORTS_FILTERS_CACHE.items() if float(entry.get("expires_at", 0.0) or 0.0) <= cache_now]
+    for key in expired_keys:
+        REPORTS_FILTERS_CACHE.pop(key, None)
+
+    if len(REPORTS_FILTERS_CACHE) <= REPORTS_FILTERS_CACHE_MAX_ENTRIES:
+        return
+
+    overflow = len(REPORTS_FILTERS_CACHE) - REPORTS_FILTERS_CACHE_MAX_ENTRIES
+    oldest_keys = sorted(
+        REPORTS_FILTERS_CACHE.items(),
+        key=lambda item: float(item[1].get("created_at", 0.0) or 0.0),
+    )[:overflow]
+    for key, _ in oldest_keys:
+        REPORTS_FILTERS_CACHE.pop(key, None)
 
 
 def build_search_panes_options(pane_counts_backend: dict) -> dict:
@@ -283,6 +301,7 @@ def reports_filters():
 
     cache_key = f"search={search_value}|panes={search_panes_str}"
     cache_now = monotonic()
+    prune_reports_filters_cache(cache_now)
     cache_entry = REPORTS_FILTERS_CACHE.get(cache_key) or {}
     cache_payload = cache_entry.get("payload")
     cache_expires_at = float(cache_entry.get("expires_at", 0.0) or 0.0)
@@ -325,7 +344,12 @@ def reports_filters():
 
     payload = {"searchPanes": {"options": build_search_panes_options(pane_counts_backend)}}
     if pane_counts_has_values(pane_counts_backend):
-        REPORTS_FILTERS_CACHE[cache_key] = {"payload": payload, "expires_at": cache_now + REPORTS_FILTERS_CACHE_TTL_SECONDS}
+        REPORTS_FILTERS_CACHE[cache_key] = {
+            "payload": payload,
+            "expires_at": cache_now + REPORTS_FILTERS_CACHE_TTL_SECONDS,
+            "created_at": cache_now,
+        }
+        prune_reports_filters_cache(cache_now)
     else:
         # Don't keep empty pane snapshots around; allow immediate retry.
         REPORTS_FILTERS_CACHE.pop(cache_key, None)

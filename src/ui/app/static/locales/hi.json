@@ -638,6 +638,7 @@
       "admin_username": "व्यवस्थापक उपयोगकर्ता नाम",
       "auto_lets_encrypt": "स्वतः Let's Encrypt",
       "ban_scope": "प्रतिबंध का दायरा",
+      "certificate_authority": "प्रमाणपत्र प्राधिकरण",
       "certificate_priority": "प्रमाणपत्र प्राथमिकता",
       "challenge_type": "चुनौती प्रकार",
       "config_type": "कॉन्फ़िगरेशन प्रकार",
@@ -690,7 +691,12 @@
       "use_proxy_protocol": "PROXY प्रोटोकॉल का उपयोग करें",
       "use_real_ip": "वास्तविक आईपी का उपयोग करें",
       "username": "उपयोगकर्ता नाम",
-      "wildcard_certificates": "वाइल्डकार्ड प्रमाणपत्र"
+      "wildcard_certificates": "वाइल्डकार्ड प्रमाणपत्र",
+      "zerossl_api_connect_timeout": "ZeroSSL API कनेक्शन टाइमआउट",
+      "zerossl_api_key": "ZeroSSL API कुंजी",
+      "zerossl_api_max_time": "ZeroSSL API अधिकतम समय",
+      "zerossl_api_retry": "ZeroSSL API पुनः प्रयास",
+      "zerossl_api_retry_delay": "ZeroSSL API पुनः प्रयास विलंब"
     },
     "placeholder": {
       "2fa_code": "कोड दर्ज करें",
@@ -1080,11 +1086,18 @@
       "title": "व्यवस्थापक उपयोगकर्ता"
     },
     "step2": {
+      "lets_encrypt": {
+        "certificate_authority_selector": "प्रमाणपत्र प्राधिकरण चयनकर्ता",
+        "letsencrypt_description": "मानक ACME जारी करने के लिए Let's Encrypt का उपयोग करें। परीक्षण और इंटीग्रेशन जांच के लिए स्टेजिंग उपलब्ध है।",
+        "zerossl_api_key_hint": "खाली होने पर, ZeroSSL खाते के पंजीकरण के लिए कॉन्फ़िगर किया गया ईमेल उपयोग करेगा।",
+        "zerossl_description": "zerossl-bot के साथ ZeroSSL का उपयोग करें। खाते के जारीकरण और कुंजी-आधारित पुनःजारी ट्रैकिंग के लिए खाता ईमेल या API कुंजी दें।"
+      },
       "section": {
         "custom_certificate": "कस्टम प्रमाणपत्र",
         "lets_encrypt": "Let's Encrypt",
         "real_ip": "वास्तविक आईपी",
-        "reverse_proxy": "रिवर्स प्रॉक्सी"
+        "reverse_proxy": "रिवर्स प्रॉक्सी",
+        "zerossl": "ZeroSSL"
       },
       "subtitle": "वेब UI विशिष्ट सेटिंग्स कॉन्फ़िगर करें।",
       "title": "UI सेटिंग्स"
@@ -1147,6 +1160,7 @@
     "no_history": "कोई इतिहास उपलब्ध नहीं।",
     "no_item": "कोई आइटम नहीं",
     "no_notifications": "दिखाने के लिए कोई सूचना नहीं।",
+    "no_search_results": "कोई आइटम नहीं मिला।",
     "no_steps": "कोई चरण उपलब्ध नहीं",
     "no_steps_description": "इस टेम्पलेट में कॉन्फ़िगर करने के लिए कोई चरण नहीं हैं।",
     "online": "ऑनलाइन",
@@ -1285,6 +1299,10 @@
       "missing_configs_upload_label": "लुप्त कॉन्फ़िगरेशन अपलोड करें (.conf, .cfg, .txt)",
       "missing_configs_upload_partial": "{{total}} कॉन्फ़िग में से {{uploaded}} अपलोड किए गए। अभी भी लुप्त: {{missing}}",
       "missing_configs_upload_success": "{{count}} कॉन्फ़िग फ़ाइलें सफलतापूर्वक अपलोड की गईं",
+      "multiselect_placeholder": "विकल्प चुनें",
+      "multiselect_summary": "{{count}} चयनित",
+      "multivalue_add": "मान जोड़ें",
+      "multivalue_helper": "प्रति पंक्ति एक मान।{{separatorNote}}",
       "panel_overview": "अवलोकन",
       "panel_overview_help": "मुख्य जानकारी ट्रैक करें और अनुभागों के बीच नेविगेट करें।",
       "placeholder_config_data": "डेटा",
@@ -1308,6 +1326,7 @@
       "raw_configs_title": "कस्टम कॉन्फ़िग आयात",
       "raw_configs_upload": "कॉन्फ़िग फाइलें अपलोड करें (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "चयनित फ़ाइलों में से एक को पढ़ने में असमर्थ।",
+      "raw_editor_aria": "रॉ टेम्पलेट JSON एडिटर",
       "raw_editor_drop_hint": "वर्तमान सामग्री को बदलने के लिए एक टेम्पलेट JSON फ़ाइल (.json केवल) छोड़ें।",
       "raw_editor_help": "संपूर्ण टेम्पलेट परिभाषा को JSON के रूप में संपादित करें। आसान मोड पर वापस स्विच करने से विज़ुअल संपादक मान्य और पुनः लोड हो जाता है।",
       "raw_editor_import_success": "टेम्पलेट JSON सफलतापूर्वक आयात किया गया।",
@@ -1446,6 +1465,7 @@
       "reset_default": "डिफ़ॉल्ट मान पर रीसेट करें",
       "reset_global": "वैश्विक मान पर रीसेट करें",
       "run_job": "कार्य {{job}} चलाएं",
+      "show_selected_only": "केवल चयनित दिखाएं",
       "stop_instance": "इंस्टेंस {{hostname}} रोकें",
       "unban_ip": "{{ip}} का प्रतिबंध हटाएं",
       "value_from_global": "ग्लोबल सेटिंग्स से मान"
@@ -1496,6 +1516,7 @@
     "lets_encrypt_custom_profile": "Let's Encrypt के लिए उपयोग करने हेतु कस्टम प्रोफ़ाइल (जैसे 'my_custom_profile')।",
     "lets_encrypt_disable_public_suffixes": "सार्वजनिक प्रत्यय सूची से मेल खाने वाले डोमेन के लिए प्रमाणपत्र अनुरोध अक्षम करें (अनुशंसित)।",
     "lets_encrypt_profile": "Let's Encrypt के लिए उपयोग करने हेतु प्रोफ़ाइल (classic, tlsserver, shortlived)।",
+    "lets_encrypt_server": "प्रदाता-विशिष्ट सेटिंग्स दिखाने के लिए अपना प्रमाणपत्र प्रदाता चुनें।",
     "license_key": "आपकी BunkerWeb PRO लाइसेंस कुंजी।",
     "link": {
       "access_plugin_page": "एक्सेस {{name}} पृष्ठ",
@@ -1662,13 +1683,19 @@
     "ui_url_security": "एक गैर-मानक, अनुमान लगाने में मुश्किल URL पथ का उपयोग सुरक्षा बढ़ाता है।",
     "use_custom_ssl": "क्या Let's Encrypt के बजाय कस्टम SSL प्रमाणपत्र का उपयोग करना है।",
     "use_lets_encrypt_staging": "क्या परीक्षण के लिए Let's Encrypt स्टेजिंग वातावरण का उपयोग करना है (अविश्वसनीय प्रमाणपत्र उत्पन्न करता है)।",
+    "use_lets_encrypt_staging_letsencrypt_only": "Let's Encrypt स्टेजिंग केवल तब उपलब्ध है जब Let's Encrypt सर्वर का उपयोग किया जाता है।",
     "use_proxy_protocol": "PROXY प्रोटोकॉल संचार सक्षम करें।",
     "use_real_ip": "वास्तविक आईपी का उपयोग करें",
     "username_length": "उपयोगकर्ता नाम 1 और 256 वर्णों के बीच होना चाहिए।",
     "value_from_global": "ग्लोबल सेटिंग्स से मान लाएँ",
     "view_full_url": "पूर्ण URL देखने के लिए क्लिक करें",
     "wildcard_certificates": "वाइल्डकार्ड प्रमाणपत्र (*.domain.com) उत्पन्न करें। DNS चुनौती की आवश्यकता है।",
-    "wildcard_dns_only": "वाइल्डकार्ड प्रमाणपत्र केवल DNS चुनौती प्रकार के साथ समर्थित हैं।"
+    "wildcard_dns_only": "वाइल्डकार्ड प्रमाणपत्र केवल DNS चुनौती प्रकार के साथ समर्थित हैं।",
+    "zerossl_api_connect_timeout": "ZeroSSL API कॉल के लिए सेकंड में कनेक्शन टाइमआउट।",
+    "zerossl_api_key": "zerossl-bot द्वारा उपयोग की जाने वाली वैकल्पिक ZeroSSL API कुंजी।",
+    "zerossl_api_max_time": "प्रत्येक ZeroSSL API अनुरोध के लिए सेकंड में अधिकतम कुल समय।",
+    "zerossl_api_retry": "ZeroSSL API अनुरोधों के लिए पुनः प्रयासों की संख्या (0 पुनः प्रयास बंद करता है)।",
+    "zerossl_api_retry_delay": "ZeroSSL API पुनः प्रयासों के बीच सेकंड में विलंब।"
   },
   "totp": {
     "prompt": "कृपया अपना TOTP कोड दर्ज करें।"
@@ -1682,6 +1709,7 @@
     "ip_service_duplicate": "यह आईपी पता चयनित सेवा ({{service}}) के लिए पहले से ही प्रतिबंधित है।",
     "pattern": "कृपया {{field}} के लिए एक मान्य मान दर्ज करें।",
     "required": "{{field}} आवश्यक है।",
-    "service_required_for_ban": "सेवा-विशिष्ट प्रतिबंध के लिए एक सेवा का चयन किया जाना चाहिए।"
+    "service_required_for_ban": "सेवा-विशिष्ट प्रतिबंध के लिए एक सेवा का चयन किया जाना चाहिए।",
+    "zerossl_email_or_api_key_required": "ZeroSSL के लिए ईमेल या ZeroSSL API कुंजी में से एक आवश्यक है।"
   }
 }

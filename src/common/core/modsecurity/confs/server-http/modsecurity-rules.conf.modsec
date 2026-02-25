@@ -81,7 +81,7 @@ SecResponseBodyLimitAction ProcessPartial
 
 # Log useful stuff
 SecAuditEngine {{ MODSECURITY_SEC_AUDIT_ENGINE }}
-SecAuditLogParts {{ MODSECURITY_SEC_AUDIT_LOG_PARTS }}
+SecAuditLogParts A{{ MODSECURITY_SEC_AUDIT_LOG_PARTS | replace(" ", "") | replace("A", "") | replace("Z", "") }}Z
 SecAuditLogType Serial
 SecAuditLog /var/log/bunkerweb/modsec_audit.log
 

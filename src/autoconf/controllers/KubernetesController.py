@@ -447,7 +447,7 @@ class KubernetesController(Controller):
         for thread in threads:
             thread.join()
 
-    def _get_loadbalancer_ip(self, name: str, namespace: str) -> Optional[str]:
+    def _get_loadbalancer_ip(self, name: str, namespace: str) -> Optional[List[str]]:
         try:
             if not name or not namespace:
                 self._logger.warning("Service name or namespace is empty, cannot retrieve LoadBalancer IP")
@@ -455,6 +455,53 @@ class KubernetesController(Controller):
 
             service = self._corev1.read_namespaced_service(name=name, namespace=namespace)
 
+            if not service.spec:
+                self._logger.warning(f"Service {name} in {namespace} has no spec")
+                return None
+
+            service_type = service.spec.type
+
+            # Handle NodePort services by returning node IPs
+            if service_type == "NodePort":
+                self._logger.debug(f"Service {name} in {namespace} is of type NodePort, retrieving node IPs")
+                try:
+                    nodes = self._corev1.list_node(watch=False).items
+                    if not nodes:
+                        self._logger.warning("No nodes found in the cluster")
+                        return None
+
+                    node_ips = []
+                    for node in nodes:
+                        if not node.status or not node.status.addresses:
+                            continue
+
+                        # Prefer ExternalIP, fall back to InternalIP
+                        external_ip = None
+                        internal_ip = None
+                        for address in node.status.addresses:
+                            if address.type == "ExternalIP":
+                                external_ip = address.address
+                            elif address.type == "InternalIP":
+                                internal_ip = address.address
+
+                        # Use ExternalIP if available, otherwise use InternalIP
+                        node_ip = external_ip or internal_ip
+                        if node_ip and node_ip not in node_ips:
+                            node_ips.append(node_ip)
+
+                    if node_ips:
+                        self._logger.info(f"Found {len(node_ips)} node IP(s) for NodePort service {name} in {namespace}: {', '.join(node_ips)}")
+                        return node_ips
+                    else:
+                        self._logger.warning(f"No node IPs found for NodePort service {name} in {namespace}")
+                        return None
+
+                except Exception as e:
+                    self._logger.error(f"Error retrieving node IPs for NodePort service {name} in {namespace}: {e}")
+                    self._logger.debug(format_exc())
+                    return None
+
+            # Handle LoadBalancer services with the existing logic
             if not service.status:
                 self._logger.warning(f"Service {name} in {namespace} has no status")
                 return None
@@ -468,13 +515,17 @@ class KubernetesController(Controller):
                 self._logger.warning(f"No ingress entries found in LoadBalancer status for service {name} in {namespace}")
                 return None
 
+            ips = []
             for ingress_entry in ingress_list:
                 if ingress_entry.ip:
                     self._logger.debug(f"Found LoadBalancer IP {ingress_entry.ip} for service {name} in {namespace}")
-                    return ingress_entry.ip
+                    ips.append(ingress_entry.ip)
                 elif ingress_entry.hostname:
                     self._logger.debug(f"Found LoadBalancer hostname {ingress_entry.hostname} for service {name} in {namespace}")
-                    return ingress_entry.hostname
+                    ips.append(ingress_entry.hostname)
+
+            if ips:
+                return ips
 
             self._logger.warning(f"No IP or hostname found in LoadBalancer ingress entries for service {name} in {namespace}")
 
@@ -493,18 +544,18 @@ class KubernetesController(Controller):
     def _status_patch_enabled(self) -> bool:
         return True
 
-    def _patch_controller_status(self, ip: str) -> None:
+    def _patch_controller_status(self, ips: List[str]) -> None:
         raise NotImplementedError
 
     def _maybe_patch_status(self) -> None:
         if not self._status_patch_enabled():
             return
 
-        ip = self._get_loadbalancer_ip(self._service_name, self._namespace)
-        if not ip:
+        ips = self._get_loadbalancer_ip(self._service_name, self._namespace)
+        if not ips:
             return
 
-        self._patch_controller_status(ip)
+        self._patch_controller_status(ips)
 
     def apply_config(self) -> bool:
         result = self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded, extra_config=self._extra_config)

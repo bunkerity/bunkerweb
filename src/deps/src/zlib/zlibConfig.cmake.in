@@ -1,14 +1,6 @@
 @PACKAGE_INIT@
 
-set(_ZLIB_supported_components "")
-
-if(@ZLIB_BUILD_SHARED@)
-    list(APPEND _ZLIB_supported_components shared)
-endif(@ZLIB_BUILD_SHARED@)
-
-if(@ZLIB_BUILD_STATIC@)
-    list(APPEND _ZLIB_supported_components static)
-endif(@ZLIB_BUILD_STATIC@)
+set(_ZLIB_supported_components "shared" "static")
 
 if(ZLIB_FIND_COMPONENTS)
     foreach(_comp ${ZLIB_FIND_COMPONENTS})

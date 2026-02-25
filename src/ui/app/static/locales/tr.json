@@ -638,6 +638,7 @@
       "admin_username": "Yönetici Kullanıcı Adı",
       "auto_lets_encrypt": "Otomatik Let's Encrypt",
       "ban_scope": "Yasaklama Kapsamı",
+      "certificate_authority": "Sertifika Yetkilisi",
       "certificate_priority": "Sertifika Önceliği",
       "challenge_type": "Doğrulama Türü",
       "config_type": "Yapılandırma Türü",
@@ -690,7 +691,12 @@
       "use_proxy_protocol": "PROXY protokolünü kullan",
       "use_real_ip": "Gerçek IP Kullan",
       "username": "Kullanıcı Adı",
-      "wildcard_certificates": "Wildcard Sertifikalar"
+      "wildcard_certificates": "Wildcard Sertifikalar",
+      "zerossl_api_connect_timeout": "ZeroSSL API Bağlantı Zaman Aşımı",
+      "zerossl_api_key": "ZeroSSL API Anahtarı",
+      "zerossl_api_max_time": "ZeroSSL API Azami Süre",
+      "zerossl_api_retry": "ZeroSSL API Yeniden Deneme Sayısı",
+      "zerossl_api_retry_delay": "ZeroSSL API Yeniden Deneme Gecikmesi"
     },
     "placeholder": {
       "2fa_code": "Kod girin",
@@ -1081,11 +1087,18 @@
       "title": "Yönetici Kullanıcı"
     },
     "step2": {
+      "lets_encrypt": {
+        "certificate_authority_selector": "Sertifika Yetkilisi Seçici",
+        "letsencrypt_description": "Standart ACME düzenlemesi için Let's Encrypt kullanın. Test ve entegrasyon kontrolleri için hazırlık ortamı kullanılabilir.",
+        "zerossl_api_key_hint": "Boş bırakılırsa ZeroSSL hesap kaydı için yapılandırılmış e-postayı kullanır.",
+        "zerossl_description": "zerossl-bot ile ZeroSSL kullanın. Hesap oluşturma ve anahtar tabanlı yeniden düzenleme takibi için bir hesap e-postası veya API anahtarı sağlayın."
+      },
       "section": {
         "custom_certificate": "Özel Sertifika",
         "lets_encrypt": "Let's Encrypt",
         "real_ip": "Gerçek IP",
-        "reverse_proxy": "Ters Proxy"
+        "reverse_proxy": "Ters Proxy",
+        "zerossl": "ZeroSSL"
       },
       "subtitle": "Web arayüzüne özel ayarları yapılandırın.",
       "title": "UI Ayarları"
@@ -1148,6 +1161,7 @@
     "no_history": "Geçmiş yok.",
     "no_item": "Öğe Yok",
     "no_notifications": "Gösterilecek bildirim yok.",
+    "no_search_results": "Öğe bulunamadı.",
     "no_steps": "Adım Yok",
     "no_steps_description": "Bu şablonda yapılandırılacak adım yok.",
     "online": "Çevrimiçi",
@@ -1296,6 +1310,10 @@
       "missing_configs_upload_partial": "{{total}} yapılandırmadan {{uploaded}} tanesi yüklendi. Hâlâ eksik: {{missing}}",
       "missing_configs_upload_success": "{{count}} yapılandırma dosyası başarıyla yüklendi",
       "missing_configs_uploaded": "Eksik yapılandırmalar yüklendi",
+      "multiselect_placeholder": "Seçenekleri belirleyin",
+      "multiselect_summary": "{{count}} seçildi",
+      "multivalue_add": "Değer ekle",
+      "multivalue_helper": "Satır başına bir değer.{{separatorNote}}",
       "panel_overview": "Genel Bakış",
       "panel_overview_help": "Önemli bilgileri takip edin ve bölümler arasında gezinin.",
       "placeholder_config_data": "Veri",
@@ -1324,6 +1342,7 @@
       "raw_configs_title": "Özel yapılandırma içe aktarımları",
       "raw_configs_upload": "Yapılandırma dosyalarını yükle",
       "raw_configs_upload_failed": "Seçilen dosyalardan biri okunamadı.",
+      "raw_editor_aria": "Ham şablon JSON düzenleyici",
       "raw_editor_drop_hint": "Mevcut içeriği değiştirmek için bir şablon JSON dosyası (.json) bırakın.",
       "raw_editor_help": "Ham şablon JSON'ını düzenleyin. Doğrulama otomatik olarak gerçekleştirilir.",
       "raw_editor_import": "İçe aktar",
@@ -1480,6 +1499,7 @@
       "reset_default": "Varsayılana sıfırla",
       "reset_global": "Küresel değere sıfırla",
       "run_job": "İşi Çalıştır: {{job}}",
+      "show_selected_only": "Yalnızca seçilenleri göster",
       "stop_instance": "Örneği Durdur: {{hostname}}",
       "unban_ip": "{{ip}} yasağını kaldır",
       "value_from_global": "Genel ayarlardan gelen değer"
@@ -1530,6 +1550,7 @@
     "lets_encrypt_custom_profile": "Let's Encrypt için kullanılacak özel profil (örn. 'my_custom_profile').",
     "lets_encrypt_disable_public_suffixes": "Genel Sonek Listesi (Public Suffix List) ile eşleşen alan adları için sertifika isteklerini devre dışı bırak (önerilir).",
     "lets_encrypt_profile": "Let's Encrypt için kullanılacak profil (classic, tlsserver, shortlived).",
+    "lets_encrypt_server": "Sağlayıcıya özel ayarları göstermek için sertifika sağlayıcınızı seçin.",
     "license_key": "BunkerWeb PRO lisans anahtarınız.",
     "link": {
       "access_plugin_page": "{{name}} Sayfasına Eriş",
@@ -1696,13 +1717,19 @@
     "ui_url_security": "Standart dışı, tahmin edilmesi zor bir URL yolu kullanmak güvenliği artırır.",
     "use_custom_ssl": "Let's Encrypt yerine özel bir SSL sertifikası kullanılıp kullanılmayacağı.",
     "use_lets_encrypt_staging": "Test için Let's Encrypt hazırlık ortamının kullanılıp kullanılmayacağı (güvenilmeyen sertifikalar üretir).",
+    "use_lets_encrypt_staging_letsencrypt_only": "Let's Encrypt hazırlık ortamı yalnızca Let's Encrypt sunucusu kullanıldığında kullanılabilir.",
     "use_proxy_protocol": "PROXY protokolü iletişimini etkinleştirin.",
     "use_real_ip": "Gerçek IP Kullan",
     "username_length": "Kullanıcı adı 1 ile 256 karakter arasında olmalıdır.",
     "value_from_global": "Genel ayarlardan değer alın",
     "view_full_url": "Tam URL'yi görüntülemek için tıklayın",
     "wildcard_certificates": "Wildcard sertifikalar (*.alanadiniz.com) oluşturun. DNS doğrulaması gerektirir.",
-    "wildcard_dns_only": "Wildcard sertifikalar yalnızca DNS doğrulama türü ile desteklenir."
+    "wildcard_dns_only": "Wildcard sertifikalar yalnızca DNS doğrulama türü ile desteklenir.",
+    "zerossl_api_connect_timeout": "ZeroSSL API çağrıları için saniye cinsinden bağlantı zaman aşımı.",
+    "zerossl_api_key": "zerossl-bot tarafından kullanılan isteğe bağlı ZeroSSL API anahtarı.",
+    "zerossl_api_max_time": "Her ZeroSSL API isteği için saniye cinsinden azami toplam süre.",
+    "zerossl_api_retry": "ZeroSSL API istekleri için yeniden deneme sayısı (0 yeniden denemeyi devre dışı bırakır).",
+    "zerossl_api_retry_delay": "ZeroSSL API yeniden denemeleri arasındaki saniye cinsinden gecikme."
   },
   "totp": {
     "prompt": "Lütfen TOTP kodunuzu girin."
@@ -1716,6 +1743,7 @@
     "ip_service_duplicate": "Bu IP adresi seçili servis için zaten yasaklanmış ({{service}}).",
     "pattern": "Lütfen {{field}} için geçerli bir değer girin.",
     "required": "{{field}} gereklidir.",
-    "service_required_for_ban": "Servise özel bir yasaklama için bir servis seçilmelidir."
+    "service_required_for_ban": "Servise özel bir yasaklama için bir servis seçilmelidir.",
+    "zerossl_email_or_api_key_required": "ZeroSSL için e-posta veya ZeroSSL API anahtarından biri gereklidir."
   }
 }

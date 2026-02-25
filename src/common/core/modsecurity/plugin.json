@@ -49,8 +49,7 @@
       "id": "modsecurity-crs-plugins",
       "label": "Core Rule Set Plugins",
       "regex": "^.*$",
-      "type": "multivalue",
-      "separator": " "
+      "type": "multivalue"
     },
     "USE_MODSECURITY_GLOBAL_CRS": {
       "context": "global",
@@ -83,12 +82,29 @@
     },
     "MODSECURITY_SEC_AUDIT_LOG_PARTS": {
       "context": "multisite",
-      "default": "ABCFHZ",
-      "help": "SecAuditLogParts directive of ModSecurity.",
+      "default": "BCFH",
+      "help": "SecAuditLogParts directive of ModSecurity. Parts A and Z are always included automatically as prefix and suffix.",
       "id": "modsecurity-sec-audit-log-parts",
       "label": "SecAuditLogParts",
-      "regex": "^A[B-K]+Z$",
-      "type": "text"
+      "regex": "^[A-KZ]*$",
+      "separator": "",
+      "type": "multiselect",
+      "multiselect": [
+        { "id": "B", "label": "B - Request headers", "value": "B" },
+        { "id": "C", "label": "C - Request body", "value": "C" },
+        { "id": "D", "label": "D - Reserved (not used)", "value": "D" },
+        { "id": "E", "label": "E - Intended response body", "value": "E" },
+        { "id": "F", "label": "F - Response headers", "value": "F" },
+        { "id": "G", "label": "G - Reserved (not used)", "value": "G" },
+        { "id": "H", "label": "H - Audit log trailer", "value": "H" },
+        {
+          "id": "I",
+          "label": "I - Compact request body (alternative to C)",
+          "value": "I"
+        },
+        { "id": "J", "label": "J - Upload file information", "value": "J" },
+        { "id": "K", "label": "K - List of matched rules", "value": "K" }
+      ]
     },
     "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
       "context": "multisite",

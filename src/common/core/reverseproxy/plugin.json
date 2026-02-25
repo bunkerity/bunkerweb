@@ -220,7 +220,6 @@
       "label": "Reverse proxy includes",
       "regex": "^(?! )( ?([^ ]))*$",
       "type": "multivalue",
-      "separator": " ",
       "multiple": "reverse-proxy"
     },
     "REVERSE_PROXY_PASS_REQUEST_BODY": {
@@ -303,8 +302,7 @@
       "id": "proxy-cache-valid",
       "label": "Reverse proxy cache valid",
       "regex": "^(?! )( ?[1-5]\\d{2}=\\d+(ms?|[shdwMy]))*$",
-      "type": "multivalue",
-      "separator": " "
+      "type": "multivalue"
     },
     "PROXY_NO_CACHE": {
       "context": "multisite",

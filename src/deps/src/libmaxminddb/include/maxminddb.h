@@ -3,80 +3,97 @@ extern "C" {
 #endif
 
 #ifndef MAXMINDDB_H
-#define MAXMINDDB_H
+    #define MAXMINDDB_H
 
-#include "maxminddb_config.h"
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <sys/types.h>
+    #include "maxminddb_config.h"
+    #include <stdarg.h>
+    #include <stdbool.h>
+    #include <stdint.h>
+    #include <stdio.h>
+    #include <sys/types.h>
 
-#ifdef _WIN32
-#include <winsock2.h>
-#include <ws2tcpip.h>
-/* libmaxminddb package version from configure */
+    #ifdef __has_include
+        #if __has_include(<endian.h>)
+            #include <endian.h>
+        #elif __has_include(<sys/endian.h>)
+            #include <sys/endian.h>
+        #endif
+    #endif
 
-#if defined(_MSC_VER)
-/* MSVC doesn't define signed size_t, copy it from configure */
-#define ssize_t SSIZE_T
+    #ifdef _WIN32
+        #include <winsock2.h>
+        #include <ws2tcpip.h>
+    /* libmaxminddb package version from configure */
 
-/* MSVC doesn't support restricted pointers */
-#define restrict
-#endif
-#else
-#include <netdb.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#endif
+        #if defined(_MSC_VER)
+            /* MSVC doesn't define signed size_t, copy it from configure */
+            #define ssize_t SSIZE_T
 
-#define MMDB_DATA_TYPE_EXTENDED (0)
-#define MMDB_DATA_TYPE_POINTER (1)
-#define MMDB_DATA_TYPE_UTF8_STRING (2)
-#define MMDB_DATA_TYPE_DOUBLE (3)
-#define MMDB_DATA_TYPE_BYTES (4)
-#define MMDB_DATA_TYPE_UINT16 (5)
-#define MMDB_DATA_TYPE_UINT32 (6)
-#define MMDB_DATA_TYPE_MAP (7)
-#define MMDB_DATA_TYPE_INT32 (8)
-#define MMDB_DATA_TYPE_UINT64 (9)
-#define MMDB_DATA_TYPE_UINT128 (10)
-#define MMDB_DATA_TYPE_ARRAY (11)
-#define MMDB_DATA_TYPE_CONTAINER (12)
-#define MMDB_DATA_TYPE_END_MARKER (13)
-#define MMDB_DATA_TYPE_BOOLEAN (14)
-#define MMDB_DATA_TYPE_FLOAT (15)
+        #endif
+    #else
+        #include <netdb.h>
+        #include <netinet/in.h>
+        #include <sys/socket.h>
+    #endif
 
-#define MMDB_RECORD_TYPE_SEARCH_NODE (0)
-#define MMDB_RECORD_TYPE_EMPTY (1)
-#define MMDB_RECORD_TYPE_DATA (2)
-#define MMDB_RECORD_TYPE_INVALID (3)
+    #if !defined(MMDB_LITTLE_ENDIAN)
+        #if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__)
+            #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+                #define MMDB_LITTLE_ENDIAN 1
+            #endif
+        #elif defined(_WIN32) || defined(_WIN64)
+            // We assume modern Windows targets are little endian
+            #define MMDB_LITTLE_ENDIAN 1
+        #endif
+    #endif
 
-/* flags for open */
-#define MMDB_MODE_MMAP (1)
-#define MMDB_MODE_MASK (7)
+    #define MMDB_DATA_TYPE_EXTENDED (0)
+    #define MMDB_DATA_TYPE_POINTER (1)
+    #define MMDB_DATA_TYPE_UTF8_STRING (2)
+    #define MMDB_DATA_TYPE_DOUBLE (3)
+    #define MMDB_DATA_TYPE_BYTES (4)
+    #define MMDB_DATA_TYPE_UINT16 (5)
+    #define MMDB_DATA_TYPE_UINT32 (6)
+    #define MMDB_DATA_TYPE_MAP (7)
+    #define MMDB_DATA_TYPE_INT32 (8)
+    #define MMDB_DATA_TYPE_UINT64 (9)
+    #define MMDB_DATA_TYPE_UINT128 (10)
+    #define MMDB_DATA_TYPE_ARRAY (11)
+    #define MMDB_DATA_TYPE_CONTAINER (12)
+    #define MMDB_DATA_TYPE_END_MARKER (13)
+    #define MMDB_DATA_TYPE_BOOLEAN (14)
+    #define MMDB_DATA_TYPE_FLOAT (15)
 
-/* error codes */
-#define MMDB_SUCCESS (0)
-#define MMDB_FILE_OPEN_ERROR (1)
-#define MMDB_CORRUPT_SEARCH_TREE_ERROR (2)
-#define MMDB_INVALID_METADATA_ERROR (3)
-#define MMDB_IO_ERROR (4)
-#define MMDB_OUT_OF_MEMORY_ERROR (5)
-#define MMDB_UNKNOWN_DATABASE_FORMAT_ERROR (6)
-#define MMDB_INVALID_DATA_ERROR (7)
-#define MMDB_INVALID_LOOKUP_PATH_ERROR (8)
-#define MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR (9)
-#define MMDB_INVALID_NODE_NUMBER_ERROR (10)
-#define MMDB_IPV6_LOOKUP_IN_IPV4_DATABASE_ERROR (11)
+    #define MMDB_RECORD_TYPE_SEARCH_NODE (0)
+    #define MMDB_RECORD_TYPE_EMPTY (1)
+    #define MMDB_RECORD_TYPE_DATA (2)
+    #define MMDB_RECORD_TYPE_INVALID (3)
 
-#if !(MMDB_UINT128_IS_BYTE_ARRAY)
-#if MMDB_UINT128_USING_MODE
+    /* flags for open */
+    #define MMDB_MODE_MMAP (1)
+    #define MMDB_MODE_MASK (7)
+
+    /* error codes */
+    #define MMDB_SUCCESS (0)
+    #define MMDB_FILE_OPEN_ERROR (1)
+    #define MMDB_CORRUPT_SEARCH_TREE_ERROR (2)
+    #define MMDB_INVALID_METADATA_ERROR (3)
+    #define MMDB_IO_ERROR (4)
+    #define MMDB_OUT_OF_MEMORY_ERROR (5)
+    #define MMDB_UNKNOWN_DATABASE_FORMAT_ERROR (6)
+    #define MMDB_INVALID_DATA_ERROR (7)
+    #define MMDB_INVALID_LOOKUP_PATH_ERROR (8)
+    #define MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR (9)
+    #define MMDB_INVALID_NODE_NUMBER_ERROR (10)
+    #define MMDB_IPV6_LOOKUP_IN_IPV4_DATABASE_ERROR (11)
+
+    #if !(MMDB_UINT128_IS_BYTE_ARRAY)
+        #if MMDB_UINT128_USING_MODE
 typedef unsigned int mmdb_uint128_t __attribute__((__mode__(TI)));
-#else
+        #else
 typedef unsigned __int128 mmdb_uint128_t;
-#endif
-#endif
+        #endif
+    #endif
 
 /* This is a pointer into the data section for a given IP address lookup */
 typedef struct MMDB_entry_s {
@@ -101,11 +118,11 @@ typedef struct MMDB_entry_data_s {
         uint32_t uint32;
         int32_t int32;
         uint64_t uint64;
-#if MMDB_UINT128_IS_BYTE_ARRAY
+    #if MMDB_UINT128_IS_BYTE_ARRAY
         uint8_t uint128[16];
-#else
+    #else
         mmdb_uint128_t uint128;
-#endif
+    #endif
         bool boolean;
         float float_value;
     };

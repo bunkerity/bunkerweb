@@ -104,6 +104,9 @@ def _build_multisite_settings_catalog() -> List[Dict[str, Any]]:
         if isinstance(meta.get("separator"), str):
             entry["separator"] = meta["separator"]
 
+        if isinstance(meta.get("accept"), str):
+            entry["accept"] = meta["accept"]
+
         seen_keys.add(key)
         catalog.append(entry)
 

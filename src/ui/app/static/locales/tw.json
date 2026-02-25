@@ -643,6 +643,7 @@
       "admin_username": "管理員使用者名稱",
       "auto_lets_encrypt": "自動 Let's Encrypt",
       "ban_scope": "封鎖範圍",
+      "certificate_authority": "憑證授權單位",
       "certificate_priority": "憑證優先順序",
       "challenge_type": "挑戰類型",
       "config_type": "設定類型",
@@ -695,7 +696,12 @@
       "use_proxy_protocol": "使用 PROXY 協定",
       "use_real_ip": "使用真實 IP",
       "username": "使用者名稱",
-      "wildcard_certificates": "萬用字元憑證"
+      "wildcard_certificates": "萬用字元憑證",
+      "zerossl_api_connect_timeout": "ZeroSSL API 連線逾時",
+      "zerossl_api_key": "ZeroSSL API 金鑰",
+      "zerossl_api_max_time": "ZeroSSL API 最長時間",
+      "zerossl_api_retry": "ZeroSSL API 重試次數",
+      "zerossl_api_retry_delay": "ZeroSSL API 重試延遲"
     },
     "placeholder": {
       "2fa_code": "輸入代碼",
@@ -1087,11 +1093,18 @@
       "title": "管理員使用者"
     },
     "step2": {
+      "lets_encrypt": {
+        "certificate_authority_selector": "憑證授權單位選擇器",
+        "letsencrypt_description": "使用 Let's Encrypt 進行標準 ACME 簽發。可使用 staging 環境進行測試與整合檢查。",
+        "zerossl_api_key_hint": "若留空，ZeroSSL 會使用已設定的電子郵件進行帳戶註冊。",
+        "zerossl_description": "搭配 zerossl-bot 使用 ZeroSSL。請提供帳戶電子郵件或 API 金鑰，以進行帳戶簽發與基於金鑰的重新簽發追蹤。"
+      },
       "section": {
         "custom_certificate": "自訂憑證",
         "lets_encrypt": "Let's Encrypt",
         "real_ip": "真實 IP",
-        "reverse_proxy": "反向代理"
+        "reverse_proxy": "反向代理",
+        "zerossl": "ZeroSSL"
       },
       "subtitle": "設定 Web UI 特定設定。",
       "title": "UI 設定"
@@ -1154,6 +1167,7 @@
     "no_history": "無可用歷史記錄。",
     "no_item": "無項目",
     "no_notifications": "無通知可顯示。",
+    "no_search_results": "找不到項目。",
     "no_steps": "無可用步驟",
     "no_steps_description": "此範本沒有任何可設定的步驟。",
     "online": "線上",
@@ -1292,6 +1306,10 @@
       "missing_configs_upload_label": "上傳缺少的設定檔 (.conf, .cfg, .txt)",
       "missing_configs_upload_partial": "已上傳 {{total}} 個設定檔中的 {{uploaded}} 個。仍缺少: {{missing}}",
       "missing_configs_upload_success": "成功上傳 {{count}} 個設定檔",
+      "multiselect_placeholder": "選擇選項",
+      "multiselect_summary": "已選擇 {{count}} 項",
+      "multivalue_add": "新增值",
+      "multivalue_helper": "每行一個值。{{separatorNote}}",
       "panel_overview": "總覽",
       "panel_overview_help": "追蹤關鍵資訊並在各區塊間導覽。",
       "placeholder_config_data": "資料",
@@ -1315,6 +1333,7 @@
       "raw_configs_title": "自訂設定檔匯入",
       "raw_configs_upload": "上傳設定檔 (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "無法讀取其中一個選定的檔案。",
+      "raw_editor_aria": "原始模板 JSON 編輯器",
       "raw_editor_drop_hint": "拖曳範本 JSON 檔案 (僅 .json) 以取代目前的內容。",
       "raw_editor_help": "將完整的範本定義編輯為 JSON。切換回簡易模式會驗證並重新載入視覺化編輯器。",
       "raw_editor_import_success": "範本 JSON 成功匯入。",
@@ -1455,6 +1474,7 @@
       "reset_default": "重設為預設值",
       "reset_global": "重設為全域值",
       "run_job": "執行任務 {{job}}",
+      "show_selected_only": "僅顯示所選項目",
       "stop_instance": "停止執行個體 {{hostname}}",
       "unban_ip": "解除封鎖 {{ip}}",
       "value_from_global": "來自全域設定的值",
@@ -1506,6 +1526,7 @@
     "lets_encrypt_custom_profile": "用於 Let's Encrypt 的自訂設定檔（例如 'my_custom_profile'）。",
     "lets_encrypt_disable_public_suffixes": "停用符合公共字尾清單（PSL）的網域的憑證請求（建議啟用）。",
     "lets_encrypt_profile": "用於 Let's Encrypt 的設定檔（classic、tlsserver、shortlived）。",
+    "lets_encrypt_server": "選擇您的憑證供應商以顯示供應商專屬設定。",
     "license_key": "您的 BunkerWeb PRO 授權金鑰。",
     "link": {
       "access_plugin_page": "存取 {{name}} 頁面",
@@ -1672,13 +1693,19 @@
     "ui_url_security": "使用非標準、難以猜測的 URL 路徑可增強安全性。",
     "use_custom_ssl": "是否使用自訂 SSL 憑證而不是 Let's Encrypt。",
     "use_lets_encrypt_staging": "是否使用 Let's Encrypt 的 staging 環境進行測試（產生不受信任的憑證）。",
+    "use_lets_encrypt_staging_letsencrypt_only": "只有在使用 Let's Encrypt 伺服器時，才可使用 Let's Encrypt staging。",
     "use_proxy_protocol": "啟用 PROXY 協定通訊。",
     "use_real_ip": "使用真實 IP",
     "username_length": "使用者名稱必須在 1 到 256 個字元之間。",
     "value_from_global": "來自全域設定的值",
     "view_full_url": "點擊檢視完整 URL",
     "wildcard_certificates": "產生萬用字元憑證 (*.domain.com)。需要 DNS 挑戰。",
-    "wildcard_dns_only": "萬用字元憑證僅支援 DNS 挑戰類型。"
+    "wildcard_dns_only": "萬用字元憑證僅支援 DNS 挑戰類型。",
+    "zerossl_api_connect_timeout": "ZeroSSL API 呼叫的連線逾時秒數。",
+    "zerossl_api_key": "由 zerossl-bot 使用的可選 ZeroSSL API 金鑰。",
+    "zerossl_api_max_time": "每個 ZeroSSL API 請求的最大總秒數。",
+    "zerossl_api_retry": "ZeroSSL API 請求的重試次數（0 代表停用重試）。",
+    "zerossl_api_retry_delay": "ZeroSSL API 重試之間的延遲秒數。"
   },
   "totp": {
     "prompt": "請輸入您的 TOTP 代碼。"
@@ -1692,6 +1719,7 @@
     "ip_service_duplicate": "此 IP 位址已針對所選服務 ({{service}}) 被封鎖。",
     "pattern": "請輸入有效的 {{field}} 值。",
     "required": "{{field}} 是必填項。",
-    "service_required_for_ban": "對於特定於服務的封鎖，必須選取一個服務。"
+    "service_required_for_ban": "對於特定於服務的封鎖，必須選取一個服務。",
+    "zerossl_email_or_api_key_required": "ZeroSSL 需要電子郵件或 ZeroSSL API 金鑰。"
   }
 }

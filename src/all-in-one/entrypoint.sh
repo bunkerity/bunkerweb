@@ -25,6 +25,25 @@ if [ "${USE_REDIS}" = "yes" ]; then
 	fi
 fi
 
+# Ensure CrowdSec data directory exists when running the AIO image
+if [ "${USE_CROWDSEC}" = "yes" ]; then
+	crowdsec_dir="/var/lib/crowdsec"
+	if [ -L "$crowdsec_dir" ]; then
+		crowdsec_dir="$(readlink "$crowdsec_dir")"
+	fi
+	if [ ! -d "$crowdsec_dir" ]; then
+		if mkdir -p "$crowdsec_dir"; then
+			# Align permissions with build-time defaults
+			chmod 770 "$crowdsec_dir"
+			chown root:nginx "$crowdsec_dir"
+			log "ENTRYPOINT" "✅" "Created CrowdSec data directory at $crowdsec_dir"
+		else
+			log "ENTRYPOINT" "❌" "Failed to create CrowdSec data directory at $crowdsec_dir (check /data permissions)"
+			exit 1
+		fi
+	fi
+fi
+
 handle_docker_secrets
 
 if [[ $(echo "$SWARM_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
@@ -233,6 +252,22 @@ if [ "${USE_CROWDSEC}" = "yes" ] && [[ "${CROWDSEC_API:-http://127.0.0.1:8000}" 
 	fi
 	log "ENTRYPOINT" "ℹ️" "[CROWDSEC] The CrowdSec service is enabled. Starting configuration..."
 
+	# Ensure the symlink is properly set up
+	if [ ! -L "/var/lib/crowdsec" ]; then
+		if [ -d "/var/lib/crowdsec" ]; then
+			# It's a directory, not a symlink - remove it if it's empty or convert via /data/crowdsec
+			if [ -d "/data/crowdsec" ]; then
+				rm -rf /var/lib/crowdsec
+				ln -s /data/crowdsec /var/lib/crowdsec
+				log "ENTRYPOINT" "✅" "Fixed CrowdSec symlink"
+			fi
+		elif [ ! -e "/var/lib/crowdsec" ]; then
+			# Doesn't exist at all - create the symlink
+			ln -s /data/crowdsec /var/lib/crowdsec
+			log "ENTRYPOINT" "✅" "Created CrowdSec symlink"
+		fi
+	fi
+
 	# Enable autorestart for CrowdSec service
 	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/crowdsec.ini
 	log "ENTRYPOINT" "✅" "Enabled autorestart for CrowdSec service"
@@ -332,7 +367,21 @@ else
 fi
 
 if [ "${USE_REDIS}" = "yes" ] && { [ "${REDIS_HOST:-127.0.0.1}" = "127.0.0.1" ] || [ "${REDIS_HOST:-127.0.0.1}" = "localhost" ]; }; then
-	mkdir -p /var/lib/redis
+	# Ensure the symlink is properly set up
+	if [ ! -L "/var/lib/redis" ]; then
+		if [ -d "/var/lib/redis" ]; then
+			# It's a directory, not a symlink - remove it if it's empty or convert via /data/redis
+			if [ -d "/data/redis" ]; then
+				rm -rf /var/lib/redis
+				ln -s /data/redis /var/lib/redis
+				log "ENTRYPOINT" "✅" "Fixed Redis symlink"
+			fi
+		elif [ ! -e "/var/lib/redis" ]; then
+			# Doesn't exist at all - create the symlink
+			ln -s /data/redis /var/lib/redis
+			log "ENTRYPOINT" "✅" "Created Redis symlink"
+		fi
+	fi
 	export REDIS_HOST="${REDIS_HOST:-127.0.0.1}"
 	# Enable autorestart for Redis service
 	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/redis.ini

@@ -638,6 +638,7 @@
       "admin_username": "Nom d'Utilisateur Admin",
       "auto_lets_encrypt": "Let's Encrypt Auto",
       "ban_scope": "Portée du Bannissement",
+      "certificate_authority": "Autorité de Certification",
       "certificate_priority": "Priorité du Certificat",
       "challenge_type": "Type de Challenge",
       "config_type": "Type de Config",
@@ -690,7 +691,12 @@
       "use_proxy_protocol": "Utiliser le protocole PROXY",
       "use_real_ip": "Utiliser l'IP réelle",
       "username": "Nom d'utilisateur",
-      "wildcard_certificates": "Certificats Wildcard"
+      "wildcard_certificates": "Certificats Wildcard",
+      "zerossl_api_connect_timeout": "Délai de connexion API ZeroSSL",
+      "zerossl_api_key": "Clé API ZeroSSL",
+      "zerossl_api_max_time": "Durée maximale API ZeroSSL",
+      "zerossl_api_retry": "Nouvelles tentatives API ZeroSSL",
+      "zerossl_api_retry_delay": "Délai de nouvelle tentative API ZeroSSL"
     },
     "placeholder": {
       "2fa_code": "Entrez le code",
@@ -1080,11 +1086,18 @@
       "title": "Utilisateur Admin"
     },
     "step2": {
+      "lets_encrypt": {
+        "certificate_authority_selector": "Sélecteur d'autorité de certification",
+        "letsencrypt_description": "Utilisez Let's Encrypt pour l'émission ACME standard. Le mode staging est disponible pour les tests et les vérifications d'intégration.",
+        "zerossl_api_key_hint": "Si vide, ZeroSSL utilisera l'email configuré pour l'enregistrement du compte.",
+        "zerossl_description": "Utilisez ZeroSSL avec zerossl-bot. Fournissez un email de compte ou une clé API pour l'émission du compte et le suivi des réémissions basées sur clé."
+      },
       "section": {
         "custom_certificate": "Certificat Personnalisé",
         "lets_encrypt": "Let's Encrypt",
         "real_ip": "IP Réelle",
-        "reverse_proxy": "Proxy Inverse"
+        "reverse_proxy": "Proxy Inverse",
+        "zerossl": "ZeroSSL"
       },
       "subtitle": "Configurez les paramètres spécifiques à l'interface Web.",
       "title": "Paramètres UI"
@@ -1147,6 +1160,7 @@
     "no_history": "Aucun historique disponible.",
     "no_item": "Aucun élément",
     "no_notifications": "Aucune notification à afficher.",
+    "no_search_results": "Aucun élément trouvé.",
     "no_steps": "Aucune Étape Disponible",
     "no_steps_description": "Ce modèle n'a aucune étape à configurer.",
     "online": "En Ligne",
@@ -1285,6 +1299,10 @@
       "missing_configs_upload_label": "Télécharger les configurations manquantes (.conf, .cfg, .txt)",
       "missing_configs_upload_partial": "{{uploaded}} sur {{total}} configurations téléchargées. Manquantes : {{missing}}",
       "missing_configs_upload_success": "{{count}} fichier(s) de configuration téléchargé(s) avec succès",
+      "multiselect_placeholder": "Sélectionnez des options",
+      "multiselect_summary": "{{count}} sélectionné(s)",
+      "multivalue_add": "Ajouter une valeur",
+      "multivalue_helper": "Une valeur par ligne.{{separatorNote}}",
       "panel_overview": "Aperçu",
       "panel_overview_help": "Suivez les informations clés et naviguez entre les sections.",
       "placeholder_config_data": "Données",
@@ -1308,6 +1326,7 @@
       "raw_configs_title": "Importations de configuration personnalisée",
       "raw_configs_upload": "Télécharger des fichiers de configuration (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "Impossible de lire l'un des fichiers sélectionnés.",
+      "raw_editor_aria": "Éditeur JSON de modèle brut",
       "raw_editor_drop_hint": "Déposez un fichier JSON de modèle (.json uniquement) pour remplacer le contenu actuel.",
       "raw_editor_help": "Modifiez la définition complète du modèle en tant que JSON. Revenir au mode Facile valide et recharge l'éditeur visuel.",
       "raw_editor_import_success": "JSON du modèle importé avec succès.",
@@ -1447,6 +1466,7 @@
       "reset_default": "Réinitialiser à la valeur par défaut",
       "reset_global": "Réinitialiser à la valeur globale",
       "run_job": "Exécuter la Tâche {{job}}",
+      "show_selected_only": "Afficher uniquement la sélection",
       "stop_instance": "Arrêter l'Instance {{hostname}}",
       "unban_ip": "Débannir {{ip}}",
       "value_from_global": "Valeur provenant des paramètres globaux"
@@ -1497,6 +1517,7 @@
     "lets_encrypt_custom_profile": "Le profil personnalisé à utiliser pour Let's Encrypt (ex : 'mon_profil_personnalise').",
     "lets_encrypt_disable_public_suffixes": "Désactiver les demandes de certificat pour les domaines correspondant à la Public Suffix List (recommandé).",
     "lets_encrypt_profile": "Le profil à utiliser pour Let's Encrypt (classic, tlsserver, shortlived).",
+    "lets_encrypt_server": "Choisissez votre fournisseur de certificats pour afficher les paramètres spécifiques au fournisseur.",
     "license_key": "Votre clé de licence BunkerWeb PRO.",
     "link": {
       "access_plugin_page": "Accéder à la Page {{name}}",
@@ -1663,13 +1684,19 @@
     "ui_url_security": "Utiliser un chemin d'URL non standard et difficile à deviner améliore la sécurité.",
     "use_custom_ssl": "Indique s'il faut utiliser un certificat SSL personnalisé au lieu de Let's Encrypt.",
     "use_lets_encrypt_staging": "Indique s'il faut utiliser l'environnement de staging Let's Encrypt pour les tests (génère des certificats non fiables).",
+    "use_lets_encrypt_staging_letsencrypt_only": "Le staging Let's Encrypt est disponible uniquement lors de l'utilisation du serveur Let's Encrypt.",
     "use_proxy_protocol": "Activer la communication du protocole PROXY.",
     "use_real_ip": "Utiliser l'IP réelle",
     "username_length": "Le nom d'utilisateur doit contenir entre 1 et 256 caractères.",
     "value_from_global": "Valeur des paramètres globaux",
     "view_full_url": "Cliquez pour voir l'URL complète",
     "wildcard_certificates": "Générer des certificats wildcard (*.domaine.com). Nécessite le challenge DNS.",
-    "wildcard_dns_only": "Les certificats wildcard ne sont supportés qu'avec le type de challenge DNS."
+    "wildcard_dns_only": "Les certificats wildcard ne sont supportés qu'avec le type de challenge DNS.",
+    "zerossl_api_connect_timeout": "Délai de connexion en secondes pour les appels API ZeroSSL.",
+    "zerossl_api_key": "Clé API ZeroSSL optionnelle utilisée par zerossl-bot.",
+    "zerossl_api_max_time": "Durée totale maximale en secondes pour chaque requête API ZeroSSL.",
+    "zerossl_api_retry": "Nombre de tentatives pour les requêtes API ZeroSSL (0 désactive les tentatives).",
+    "zerossl_api_retry_delay": "Délai en secondes entre les tentatives API ZeroSSL."
   },
   "totp": {
     "prompt": "Veuillez entrer votre code TOTP."
@@ -1683,6 +1710,7 @@
     "ip_service_duplicate": "Cette adresse IP est déjà bannie pour le service sélectionné ({{service}}).",
     "pattern": "Veuillez entrer une valeur valide pour {{field}}.",
     "required": "{{field}} est requis.",
-    "service_required_for_ban": "Un service doit être sélectionné pour un bannissement spécifique au service."
+    "service_required_for_ban": "Un service doit être sélectionné pour un bannissement spécifique au service.",
+    "zerossl_email_or_api_key_required": "ZeroSSL nécessite soit un email, soit une clé API ZeroSSL."
   }
 }

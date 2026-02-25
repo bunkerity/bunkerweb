@@ -1365,16 +1365,33 @@ Comment ça marche :
 ### Comment l’utiliser
 
 1. Stratégie : choisir liste blanche (peu de pays autorisés) ou liste noire (bloquer certains pays).
-2. Codes pays : ajoutez des codes ISO 3166‑1 alpha‑2 (US, GB, FR) à `WHITELIST_COUNTRY` ou `BLACKLIST_COUNTRY`.
+2. Codes ou groupes : ajoutez des codes ISO 3166‑1 alpha‑2 (US, GB, FR) et/ou des tokens de groupe pris en charge (comme `@EU`, `@SCHENGEN`) à `WHITELIST_COUNTRY` ou `BLACKLIST_COUNTRY`.
 3. Application : une fois configuré, la restriction s’applique à tous les visiteurs.
 4. Suivi : consultez la [web UI](web-ui.md) pour les statistiques par pays.
 
 ### Paramètres
 
-| Paramètre           | Défaut | Contexte  | Multiple | Description                                                                                           |
-| ------------------- | ------ | --------- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `WHITELIST_COUNTRY` |        | multisite | non      | Liste blanche : codes pays ISO 3166‑1 alpha‑2 séparés par des espaces. Seuls ces pays sont autorisés. |
-| `BLACKLIST_COUNTRY` |        | multisite | non      | Liste noire : codes pays ISO 3166‑1 alpha‑2 séparés par des espaces. Ces pays sont bloqués.           |
+| Paramètre           | Défaut | Contexte  | Multiple | Description                                                                                                |
+| ------------------- | ------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| `WHITELIST_COUNTRY` |        | multisite | non      | Liste blanche : codes pays et/ou tokens de groupe, séparés par des espaces. Seuls ces pays sont autorisés. |
+| `BLACKLIST_COUNTRY` |        | multisite | non      | Liste noire : codes pays et/ou tokens de groupe, séparés par des espaces. Ces pays sont bloqués.           |
+
+### Groupes de pays pris en charge
+
+Vous pouvez utiliser des tokens de groupe préfixés par `@`. Ils sont étendus côté serveur en pays membres :
+
+- `@EU` : États membres de l’Union européenne.
+- `@SCHENGEN` : pays de l’espace Schengen.
+- `@EEA` : Espace économique européen (`@EU` + Islande, Liechtenstein, Norvège).
+- `@BENELUX` : Belgique, Pays-Bas, Luxembourg.
+- `@DACH` : zone germanophone de référence (Allemagne, Autriche, Suisse).
+- `@NORDICS` : pays nordiques (Danemark, Finlande, Islande, Norvège, Suède).
+- `@USMCA` : zone de l’accord USMCA (États-Unis, Canada, Mexique).
+- `@FIVE_EYES` : pays de l’alliance de renseignement Five Eyes.
+- `@ASEAN` : États membres de l’ASEAN en Asie du Sud-Est.
+- `@GCC` : États membres du Conseil de coopération du Golfe.
+- `@G7` : pays du Groupe des Sept.
+- `@LATAM` : ensemble Amérique latine utilisé par ce plugin.
 
 !!! tip "Liste blanche vs noire"
     Liste blanche : accès restreint à quelques pays. Liste noire : bloquer des régions problématiques et autoriser le reste.
@@ -1402,7 +1419,13 @@ Comment ça marche :
 === "UE uniquement"
 
     ```yaml
-    WHITELIST_COUNTRY: "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE"
+    WHITELIST_COUNTRY: "@EU"
+    ```
+
+=== "Groupe + pays explicites"
+
+    ```yaml
+    WHITELIST_COUNTRY: "@SCHENGEN GB"
     ```
 
 === "Blocage pays à risque"
@@ -1520,7 +1543,7 @@ Les sections suivantes détaillent chacune de ces étapes.
     services:
       bunkerweb:
         # C'est le nom qui sera utilisé pour identifier l'instance dans le planificateur
-        image: bunkerity/bunkerweb:1.6.9-rc1
+        image: bunkerity/bunkerweb:1.6.9-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1537,7 +1560,7 @@ Les sections suivantes détaillent chacune de ces étapes.
             syslog-address: "udp://10.20.30.254:514" # L'adresse IP du service syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom correct de l'instance
@@ -1571,7 +1594,7 @@ Les sections suivantes détaillent chacune de ces étapes.
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.4 # Utilisez la dernière version mais épinglez toujours la version pour une meilleure stabilité/sécurité
+        image: crowdsecurity/crowdsec:v1.7.6 # Utilisez la dernière version mais épinglez toujours la version pour une meilleure stabilité/sécurité
         volumes:
           - cs-data:/var/lib/crowdsec/data # Pour persister les données de CrowdSec
           - bw-logs:/var/log:ro # Les journaux de BunkerWeb à analyser par CrowdSec
@@ -2617,10 +2640,12 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Let's Encrypt 
 
 1.  **Activer la fonctionnalité :** Mettez le paramètre `AUTO_LETS_ENCRYPT` à `yes` pour activer l'émission et le renouvellement automatiques des certificats.
 2.  **Fournir un e-mail de contact (recommandé) :** Saisissez votre adresse e-mail dans le paramètre `EMAIL_LETS_ENCRYPT` pour que Let's Encrypt puisse vous prévenir avant l'expiration d'un certificat. Si vous laissez ce champ vide, BunkerWeb s'enregistrera sans adresse (option Certbot `--register-unsafely-without-email`) et vous ne recevrez aucun rappel ni e-mail de récupération.
-3.  **Choisir le type de défi :** Sélectionnez la vérification `http` ou `dns` avec le paramètre `LETS_ENCRYPT_CHALLENGE`.
-4.  **Configurer le fournisseur DNS :** Si vous utilisez les défis DNS, spécifiez votre fournisseur DNS et vos identifiants.
-5.  **Sélectionner un profil de certificat :** Choisissez votre profil de certificat préféré avec le paramètre `LETS_ENCRYPT_PROFILE` (classic, tlsserver ou shortlived).
-6.  **Laissez BunkerWeb s'occuper du reste :** Une fois configuré, les certificats sont automatiquement émis, installés et renouvelés selon les besoins.
+3.  **Choisir l'autorité de certification :** Définissez `LETS_ENCRYPT_SERVER` sur `letsencrypt` (par défaut) ou `zerossl`.
+4.  **Fournir les identifiants ZeroSSL (si nécessaire) :** En utilisant `zerossl`, renseignez `EMAIL_LETS_ENCRYPT` ou `LETS_ENCRYPT_ZEROSSL_API_KEY` afin que `zerossl-bot` puisse récupérer les identifiants EAB.
+5.  **Choisir le type de défi :** Sélectionnez la vérification `http` ou `dns` avec le paramètre `LETS_ENCRYPT_CHALLENGE`.
+6.  **Configurer le fournisseur DNS :** Si vous utilisez les défis DNS, spécifiez votre fournisseur DNS et vos identifiants.
+7.  **Sélectionner un profil de certificat :** Choisissez votre profil de certificat préféré avec le paramètre `LETS_ENCRYPT_PROFILE` (classic, tlsserver ou shortlived).
+8.  **Laissez BunkerWeb s'occuper du reste :** Une fois configuré, les certificats sont automatiquement émis, installés et renouvelés selon les besoins.
 
 !!! tip "Profils de certificat"
     Let's Encrypt propose différents profils de certificat pour différents cas d'usage :
@@ -2635,23 +2660,29 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Let's Encrypt 
 
 ### Paramètres de configuration
 
-| Paramètre                                   | Défaut    | Contexte  | Multiple | Description                                                                                                                                                                                                                                                                                                                  |
-| ------------------------------------------- | --------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AUTO_LETS_ENCRYPT`                         | `no`      | multisite | no       | **Activer Let's Encrypt :** Mettre à `yes` pour activer l'émission et le renouvellement automatiques des certificats.                                                                                                                                                                                                        |
-| `LETS_ENCRYPT_PASSTHROUGH`                  | `no`      | multisite | no       | **Passer à travers Let's Encrypt :** Mettre à `yes` pour passer les requêtes Let's Encrypt au serveur web. Utile si BunkerWeb est derrière un autre reverse proxy gérant le SSL.                                                                                                                                             |
-| `EMAIL_LETS_ENCRYPT`                        | `-`       | multisite | no       | **E-mail de contact :** Adresse e-mail utilisée pour les rappels Let's Encrypt. Ne laissez ce champ vide que si vous acceptez de ne recevoir aucun avertissement ni e-mail de récupération (Certbot s'enregistre avec `--register-unsafely-without-email`).                                                                  |
-| `LETS_ENCRYPT_CHALLENGE`                    | `http`    | multisite | no       | **Type de défi :** Méthode utilisée pour vérifier la propriété du domaine. Options : `http` ou `dns`.                                                                                                                                                                                                                        |
-| `LETS_ENCRYPT_DNS_PROVIDER`                 |           | multisite | no       | **Fournisseur DNS :** Pour les défis DNS, le fournisseur à utiliser (ex. : cloudflare, route53, digitalocean).                                                                                                                                                                                                               |
-| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default` | multisite | no       | **Propagation DNS :** Le temps d'attente en secondes pour la propagation DNS. Si aucune valeur n'est fournie, le temps par défaut du fournisseur est utilisé.                                                                                                                                                                |
-| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |           | multisite | yes      | **Élément d'identification :** Éléments de configuration pour l'authentification du fournisseur DNS (ex. : `cloudflare_api_token 123456`). Les valeurs peuvent être du texte brut, encodées en base64 ou un objet JSON.                                                                                                      |
-| `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`     | multisite | no       | **Décoder les identifiants DNS Base64 :** Décoder automatiquement les identifiants du fournisseur DNS encodés en base64 lorsqu'il est défini sur `yes`. Les valeurs au format base64 sont décodées avant utilisation (sauf pour le fournisseur `rfc2136`). Désactivez si vos identifiants sont intentionnellement en base64. |
-| `USE_LETS_ENCRYPT_WILDCARD`                 | `no`      | multisite | no       | **Certificats Wildcard :** Si mis à `yes`, crée des certificats wildcard pour tous les domaines. Uniquement disponible avec les défis DNS.                                                                                                                                                                                   |
-| `USE_LETS_ENCRYPT_STAGING`                  | `no`      | multisite | no       | **Utiliser Staging :** Si mis à `yes`, utilise l'environnement de staging de Let's Encrypt pour les tests. Les limites de débit y sont plus élevées mais les certificats ne sont pas fiables.                                                                                                                                |
-| `LETS_ENCRYPT_CLEAR_OLD_CERTS`              | `no`      | global    | no       | **Effacer les anciens certificats :** Si mis à `yes`, supprime les anciens certificats inutiles lors du renouvellement.                                                                                                                                                                                                      |
-| `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`      | global    | no       | **Requêtes concurrentes :** Si mis à `yes`, certbot-new effectue les demandes de certificats en parallèle. À utiliser avec prudence pour éviter les limites de débit.                                                                                                                                                        |
-| `LETS_ENCRYPT_PROFILE`                      | `classic` | multisite | no       | **Profil de certificat :** Sélectionnez le profil à utiliser. Options : `classic` (général), `tlsserver` (optimisé TLS), ou `shortlived` (7 jours).                                                                                                                                                                          |
-| `LETS_ENCRYPT_CUSTOM_PROFILE`               |           | multisite | no       | **Profil de certificat personnalisé :** Saisissez un profil personnalisé si votre serveur ACME le supporte. Remplace `LETS_ENCRYPT_PROFILE` s'il est défini.                                                                                                                                                                 |
-| `LETS_ENCRYPT_MAX_RETRIES`                  | `3`       | multisite | no       | **Tentatives maximales :** Nombre de tentatives de génération de certificat en cas d'échec. `0` pour désactiver. Utile pour les problèmes réseau temporaires.                                                                                                                                                                |
+| Paramètre                                   | Défaut        | Contexte  | Multiple | Description                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------- | ------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AUTO_LETS_ENCRYPT`                         | `no`          | multisite | no       | **Activer Let's Encrypt :** Mettre à `yes` pour activer l'émission et le renouvellement automatiques des certificats.                                                                                                                                                                                                        |
+| `LETS_ENCRYPT_PASSTHROUGH`                  | `no`          | multisite | no       | **Passer à travers Let's Encrypt :** Mettre à `yes` pour passer les requêtes Let's Encrypt au serveur web. Utile si BunkerWeb est devant un autre reverse proxy gérant le SSL.                                                                                                                                               |
+| `EMAIL_LETS_ENCRYPT`                        | `-`           | multisite | no       | **E-mail de contact :** Adresse e-mail utilisée pour les rappels Let's Encrypt. Ne laissez ce champ vide que si vous acceptez de ne recevoir aucun avertissement ni e-mail de récupération (Certbot s'enregistre avec `--register-unsafely-without-email`).                                                                  |
+| `LETS_ENCRYPT_SERVER`                       | `letsencrypt` | multisite | no       | **Autorité de certification :** Sélectionnez le serveur ACME utilisé pour l'émission. Options : `letsencrypt` ou `zerossl`.                                                                                                                                                                                                  |
+| `LETS_ENCRYPT_ZEROSSL_API_KEY`              |               | multisite | no       | **Clé API ZeroSSL :** Clé optionnelle utilisée par `zerossl-bot` lorsque `LETS_ENCRYPT_SERVER=zerossl`. Si elle est vide, `EMAIL_LETS_ENCRYPT` est utilisé pour récupérer les identifiants EAB.                                                                                                                              |
+| `LETS_ENCRYPT_ZEROSSL_API_RETRY`            | `3`           | multisite | no       | **Tentatives API ZeroSSL :** Nombre de tentatives pour les requêtes API ZeroSSL effectuées par `zerossl-bot` (`0` désactive les tentatives).                                                                                                                                                                                 |
+| `LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY`      | `2`           | multisite | no       | **Délai de tentative ZeroSSL :** Délai en secondes entre les tentatives API ZeroSSL dans `zerossl-bot`.                                                                                                                                                                                                                      |
+| `LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT`  | `5`           | multisite | no       | **Délai de connexion ZeroSSL :** Délai de connexion en secondes pour les appels API ZeroSSL dans `zerossl-bot`.                                                                                                                                                                                                              |
+| `LETS_ENCRYPT_ZEROSSL_API_MAX_TIME`         | `20`          | multisite | no       | **Durée maximale de requête ZeroSSL :** Durée totale maximale en secondes pour chaque appel API ZeroSSL dans `zerossl-bot`.                                                                                                                                                                                                  |
+| `LETS_ENCRYPT_CHALLENGE`                    | `http`        | multisite | no       | **Type de défi :** Méthode utilisée pour vérifier la propriété du domaine. Options : `http` ou `dns`.                                                                                                                                                                                                                        |
+| `LETS_ENCRYPT_DNS_PROVIDER`                 |               | multisite | no       | **Fournisseur DNS :** Pour les défis DNS, le fournisseur à utiliser (ex. : cloudflare, route53, digitalocean).                                                                                                                                                                                                               |
+| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | no       | **Propagation DNS :** Le temps d'attente en secondes pour la propagation DNS. Si aucune valeur n'est fournie, le temps par défaut du fournisseur est utilisé.                                                                                                                                                                |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | yes      | **Élément d'identification :** Éléments de configuration pour l'authentification du fournisseur DNS (ex. : `cloudflare_api_token 123456`). Les valeurs peuvent être du texte brut, encodées en base64 ou un objet JSON.                                                                                                      |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`         | multisite | no       | **Décoder les identifiants DNS Base64 :** Décoder automatiquement les identifiants du fournisseur DNS encodés en base64 lorsqu'il est défini sur `yes`. Les valeurs au format base64 sont décodées avant utilisation (sauf pour le fournisseur `rfc2136`). Désactivez si vos identifiants sont intentionnellement en base64. |
+| `USE_LETS_ENCRYPT_WILDCARD`                 | `no`          | multisite | no       | **Certificats Wildcard :** Si mis à `yes`, crée des certificats wildcard pour tous les domaines. Uniquement disponible avec les défis DNS.                                                                                                                                                                                   |
+| `USE_LETS_ENCRYPT_STAGING`                  | `no`          | multisite | no       | **Utiliser Staging :** Si mis à `yes`, utilise l'environnement de staging de Let's Encrypt pour les tests. Les limites de débit y sont plus élevées mais les certificats ne sont pas fiables.                                                                                                                                |
+| `LETS_ENCRYPT_CLEAR_OLD_CERTS`              | `no`          | global    | no       | **Effacer les anciens certificats :** Si mis à `yes`, supprime les anciens certificats inutiles lors du renouvellement.                                                                                                                                                                                                      |
+| `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`          | global    | no       | **Requêtes concurrentes :** Si mis à `yes`, certbot-new effectue les demandes de certificats en parallèle. À utiliser avec prudence pour éviter les limites de débit.                                                                                                                                                        |
+| `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | no       | **Profil de certificat :** Sélectionnez le profil à utiliser. Options : `classic` (général), `tlsserver` (optimisé TLS), ou `shortlived` (7 jours).                                                                                                                                                                          |
+| `LETS_ENCRYPT_CUSTOM_PROFILE`               |               | multisite | no       | **Profil de certificat personnalisé :** Saisissez un profil personnalisé si votre serveur ACME le supporte. Remplace `LETS_ENCRYPT_PROFILE` s'il est défini.                                                                                                                                                                 |
+| `LETS_ENCRYPT_MAX_RETRIES`                  | `3`           | multisite | no       | **Tentatives maximales :** Nombre de tentatives de génération de certificat en cas d'échec. `0` pour désactiver. Utile pour les problèmes réseau temporaires.                                                                                                                                                                |
 
 !!! info "Information et comportement"
     - Le paramètre `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` est un paramètre multiple et peut être utilisé pour définir plusieurs éléments pour le fournisseur DNS. Les éléments seront enregistrés dans un fichier de cache, et Certbot lira les informations d'identification à partir de celui-ci.
@@ -2696,9 +2727,11 @@ Le plugin Let's Encrypt prend en charge un large éventail de fournisseurs DNS p
 | `dnsmadeeasy`     | DNS Made Easy    | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)                            |
 | `duckdns`         | DuckDNS          | `duckdns_token`                                                                                              |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/infinityofspace/certbot_dns_duckdns/blob/main/Readme.md)           |
 | `dynu`            | Dynu             | `auth_token`                                                                                                 |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/bikram990/certbot-dns-dynu/blob/main/README.md)                    |
+| `gandi`           | Gandi            | `token`                                                                                                      | `sharing_id`                                                                                                                                                                                                                                                             | [Documentation](https://github.com/TheophileDiot/certbot-plugin-gandi)                                |
 | `gehirn`          | Gehirn DNS       | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                                 |
 | `godaddy`         | GoDaddy          | `key`<br>`secret`                                                                                            | `ttl` (défaut : `600`)                                                                                                                                                                                                                                                   | [Documentation](https://github.com/miigotu/certbot-dns-godaddy/blob/main/README.md)                   |
 | `google`          | Google Cloud     | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (défaut : `service_account`)<br>`auth_uri` (défaut : `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (défaut : `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (défaut : `https://www.googleapis.com/oauth2/v1/certs`) | [Documentation](https://certbot-dns-google.readthedocs.io/en/stable/)                                 |
+| `hetzner`         | Hetzner          | `api_token`                                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/ctrlaltcoop/certbot-dns-hetzner/blob/main/README.md)               |
 | `infomaniak`      | Infomaniak       | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/infomaniak/certbot-dns-infomaniak/blob/main/README.rst)            |
 | `ionos`           | IONOS            | `prefix`<br>`secret`                                                                                         | `endpoint` (défaut : `https://api.hosting.ionos.com`)                                                                                                                                                                                                                    | [Documentation](https://github.com/helgeerbe/certbot-dns-ionos/blob/master/README.md)                 |
 | `linode`          | Linode           | `key`                                                                                                        |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-linode.readthedocs.io/en/stable/)                                 |

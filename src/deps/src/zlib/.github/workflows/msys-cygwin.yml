@@ -4,18 +4,21 @@ on: [push, pull_request]
 
 jobs:
   MSys:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os || 'windows-latest' }}
     strategy:
       fail-fast: false
       matrix:
-        sys: [mingw32, mingw64, ucrt64, clang64]
+        sys: [mingw32, mingw64, ucrt64, clang64, clangarm64]
+        include:
+          - sys: clangarm64
+            os: windows-11-arm
     name: MSys - ${{ matrix.sys }}
     defaults:
       run:
         shell: msys2 {0}
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
     - name: Setup MSYS2
@@ -29,12 +32,24 @@ jobs:
           toolchain:p
           cmake:p
     - name: Configure
+      if: matrix.sys != 'clang64'
       run: |
         cmake -G"Unix Makefiles" \
           -S . \
           -B build \
           -DCMAKE_VERBOSE_MAKEFILE=ON \
           -DCMAKE_BUILD_TYPE=Release \
+          -DZLIB_BUILD_MINIZIP=ON \
+          -DMINIZIP_ENABLE_BZIP2=ON
+    - name: Configure clang64
+      if: matrix.sys == 'clang64'
+      run: |
+        CC=clang cmake -G"Unix Makefiles" \
+          -S . \
+          -B build \
+          -DCMAKE_VERBOSE_MAKEFILE=ON \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DZLIB_BUILD_MINIZIP=ON \
           -DMINIZIP_ENABLE_BZIP2=ON
     - name: Build
       run: cmake --build build --config Release
@@ -51,7 +66,7 @@ jobs:
     name: Cygwin
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
     - name: Setup cygwin
