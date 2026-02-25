@@ -16,6 +16,7 @@
 - [AUTOCONF] Update gateway and ingress status patching to handle multiple IP addresses and Handle NodePort services if a load balancer IP is not available.
 - [API] Add control socket configuration for gunicorn
 - [MISC] Change type of `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings to `file` to allow users to upload their certificate and key files directly from the web UI.
+- [MISC] Update default value for Permissions-Policy header to include an additional feature (`gamepad`).
 - [DEPS] Update ApexCharts.js version to v5.6.0
 - [DEPS] Update i18next version to v25.8.10
 - [DEPS] Updated zlib version to v1.3.2
