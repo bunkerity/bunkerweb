@@ -274,7 +274,7 @@
       "help": "HTTP methods that should trigger a cache operation.",
       "id": "proxy-cache-methods",
       "label": "Reverse proxy cache methods",
-      "regex": "^(?! )( ?[A-Z]{3})+$",
+      "regex": "^(?! )( ?[A-Z]{3,})+$",
       "type": "text"
     },
     "PROXY_CACHE_MIN_USES": {
