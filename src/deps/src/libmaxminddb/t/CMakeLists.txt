@@ -5,11 +5,14 @@ add_library(tap
 # test programs
 set(TEST_TARGET_NAMES
   bad_pointers_t
+  bad_search_tree_t
   basic_lookup_t
   data_entry_list_t
   data-pool-t
   data_types_t
+  double_close_t
   dump_t
+  gai_error_t
   get_value_pointer_bug_t
   get_value_t
   ipv4_start_cache_t
@@ -17,6 +20,7 @@ set(TEST_TARGET_NAMES
   metadata_pointers_t
   metadata_t
   no_map_get_value_t
+  overflow_bounds_t
   read_node_t
   version_t
 )
@@ -24,6 +28,10 @@ set(TEST_TARGET_NAMES
 if(UNIX)  # or if (NOT WIN32)
   list(APPEND TEST_TARGET_NAMES
     bad_databases_t
+    bad_data_size_t
+    bad_epoch_t
+    bad_indent_t
+    max_depth_t
     threads_t
   )
   find_package(Threads)

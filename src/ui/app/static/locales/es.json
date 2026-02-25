@@ -1161,6 +1161,7 @@
     "no_history": "No hay historial disponible.",
     "no_item": "Ningún elemento",
     "no_notifications": "No hay notificaciones para mostrar.",
+    "no_search_results": "No se encontraron elementos.",
     "no_steps": "No hay Pasos Disponibles",
     "no_steps_description": "Esta plantilla no tiene pasos para configurar.",
     "online": "En línea",
@@ -1465,6 +1466,7 @@
       "reset_default": "Restablecer al valor predeterminado",
       "reset_global": "Restablecer al valor global",
       "run_job": "Ejecutar Tarea {{job}}",
+      "show_selected_only": "Mostrar solo seleccionados",
       "stop_instance": "Detener Instancia {{hostname}}",
       "unban_ip": "Desbloquear {{ip}}",
       "value_from_global": "Valor de los ajustes globales"

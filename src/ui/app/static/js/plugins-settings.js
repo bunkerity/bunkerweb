@@ -5,7 +5,8 @@ $(document).ready(() => {
   let toastNum = 0;
   let currentPlugin = "general";
   let currentStep = 1;
-  const isReadOnly = $("#is-read-only").val().trim() === "True";
+  const isReadOnlyValue = $("#is-read-only").val() || "";
+  const isReadOnly = isReadOnlyValue.trim() === "True";
   let isInit = true;
 
   if (isReadOnly && window.location.pathname.endsWith("/new"))
@@ -593,7 +594,8 @@ $(document).ready(() => {
 
     templateContainer.find(".ace-editor").each(function () {
       const editor = ace.edit(this);
-      const editorValue = $(`#${this.id}-default`).val().trim();
+      const editorDefaultElem = $(`#${this.id}-default`).val();
+      const editorValue = editorDefaultElem ? editorDefaultElem.trim() : "";
       editor.setValue(editorValue);
       editor.session.setValue(editorValue);
       editor.gotoLine(0);
@@ -1018,7 +1020,8 @@ $(document).ready(() => {
       templateContainer.find(".ace-editor").each(function () {
         const editor = ace.edit(this);
         const editorValue = editor.getValue().trim();
-        const editorDefault = $(`#${this.id}-default`).val().trim();
+        const editorDefaultElem = $(`#${this.id}-default`).val();
+        const editorDefault = editorDefaultElem ? editorDefaultElem.trim() : "";
         if (editorValue !== editorDefault)
           appendHiddenInput(form, $(this).data("name"), editorValue);
       });
@@ -2136,10 +2139,15 @@ $(document).ready(() => {
               $input.closest(".dropdown").find(".multiselect-toggle").length
             ) {
               $input.val(settingValue).trigger("input");
-              const selectedValues = settingValue
-                ? settingValue.split(" ")
-                : [];
               const $dropdown = $input.closest(".dropdown");
+              const separator = $dropdown.data("separator");
+              const separatorValue =
+                separator === undefined ? " " : String(separator);
+              const selectedValues = settingValue
+                ? separatorValue === ""
+                  ? settingValue.split("")
+                  : settingValue.split(separatorValue)
+                : [];
               $dropdown.find(".form-check-input").each(function () {
                 const $checkbox = $(this);
                 const checkboxVal = $checkbox.val();
@@ -2820,6 +2828,27 @@ $(document).ready(() => {
       });
 
       updateMultivalueHiddenInput($container);
+    } else if (
+      $settingField.closest(".dropdown").find(".multiselect-toggle").length
+    ) {
+      $settingField.val(valueToSet).trigger("input");
+      const $dropdown = $settingField.closest(".dropdown");
+      const separator = $dropdown.data("separator");
+      const separatorValue = separator === undefined ? " " : String(separator);
+      const selectedValues = valueToSet
+        ? separatorValue === ""
+          ? valueToSet.split("")
+          : valueToSet.split(separatorValue)
+        : [];
+
+      $dropdown.find(".form-check-input").each(function () {
+        const $checkbox = $(this);
+        const checkboxVal = $checkbox.val();
+        $checkbox.prop("checked", selectedValues.includes(checkboxVal));
+      });
+      const selectedCount = selectedValues.filter((v) => v).length;
+      const $label = $dropdown.find(".multiselect-toggle label");
+      $label.text(`(${selectedCount} selected)`);
     } else {
       $settingField.val(valueToSet).trigger("input");
     }
@@ -2976,7 +3005,8 @@ $(document).ready(() => {
     $container.find(".multivalue-input-group").each(function () {
       const $inputGroup = $(this);
       const $input = $inputGroup.find(".multivalue-input");
-      const hasValue = $input.val().trim() !== "";
+      const inputValue = $input.val() || "";
+      const hasValue = inputValue.trim() !== "";
 
       if (hasValue) {
         $inputGroup.addClass("has-value");
@@ -3052,7 +3082,7 @@ $(document).ready(() => {
     const values = [];
 
     $container.find(".multivalue-input").each(function () {
-      const value = $(this).val().trim();
+      const value = ($(this).val() || "").trim();
       if (value) {
         values.push(value);
       }
@@ -3211,7 +3241,7 @@ $(document).ready(() => {
       e.preventDefault();
       const $container = $(this).closest(".multivalue-container");
       const $currentInputGroup = $(this).closest(".multivalue-input-group");
-      const currentValue = $(this).val().trim();
+      const currentValue = ($(this).val() || "").trim();
 
       if (currentValue) {
         addMultivalueItem($container, "", $currentInputGroup);
@@ -3219,22 +3249,44 @@ $(document).ready(() => {
     }
   });
 
-  // Multiselect dropdown functionality
+  // Multiselect dropdown functionality with search
   const updateMultiselectDisplay = ($dropdown) => {
     const $toggle = $dropdown.find(".multiselect-toggle");
-    const $label = $toggle.find("label");
-    const $checkboxes = $dropdown.find('input[type="checkbox"]');
+    const $badge = $toggle.find("[data-selected-badge]");
+    const $countDisplay = $dropdown.find("[data-selected-count]");
+    const $checkboxes = $dropdown.find(
+      '.multiselect-options input[type="checkbox"]',
+    );
 
     const checkedCheckboxes = $checkboxes.filter(":checked");
     const checkedCount = checkedCheckboxes.length;
 
-    // Update the count in the label
-    $label.text(`(${checkedCount} selected)`);
+    // Update the count in the badge
+    if ($badge.length) {
+      $badge.text(checkedCount);
+    }
 
-    // Update the hidden value - space-separated list of selected option IDs
+    // Update the count in the footer
+    if ($countDisplay.length) {
+      $countDisplay
+        .text(
+          t("template.editor.multiselect_summary", {
+            count: checkedCount,
+            defaultValue: `${checkedCount} selected`,
+          }),
+        )
+        .attr("data-i18n-options", JSON.stringify({ count: checkedCount }));
+    }
+
+    // Get separator from dropdown data attribute
+    const separator = $dropdown.data("separator");
+    const separatorValue =
+      separator === undefined || separator === null ? " " : String(separator);
+
+    // Update the hidden value - separated list of selected option IDs
     const selectedIds = checkedCheckboxes
       .map(function () {
-        return $(this).attr("value"); // Use the option ID from the value attribute
+        return $(this).attr("value");
       })
       .get();
 
@@ -3242,119 +3294,218 @@ $(document).ready(() => {
     let $hiddenInput = $dropdown.find('input[type="hidden"]');
     if ($hiddenInput.length === 0) {
       const settingName = $toggle.find(".multiselect-text").text();
-      // Escape the settingName to prevent XSS in attribute context
       $hiddenInput = $(
         `<input type="hidden" name="${escapeAttr(settingName)}" class="plugin-setting">`,
       );
       $dropdown.append($hiddenInput);
     }
 
-    // Save as space-separated list of option IDs
-    $hiddenInput.val(selectedIds.join(" "));
+    // Save as list of option IDs joined by the separator
+    $hiddenInput.val(selectedIds.join(separatorValue));
 
     // Trigger change event for validation
     $hiddenInput.trigger("change");
   };
 
-  // Initialize multiselect dropdowns with custom behavior
-  $(".dropdown")
-    .has(".multiselect-toggle")
-    .each(function () {
-      const $dropdown = $(this);
-      updateMultiselectDisplay($dropdown);
+  // Filter multiselect options based on search input and selected-only mode
+  const filterMultiselectOptions = ($dropdown, searchTerm, selectedOnly) => {
+    const $options = $dropdown.find(".multiselect-option");
+    const $noOptionsMsg = $dropdown.find(".no-options-message");
+    let visibleCount = 0;
 
-      // Initialize Bootstrap dropdown with autoClose disabled
-      const $toggle = $dropdown.find(".multiselect-toggle");
-      if ($toggle.length) {
-        new bootstrap.Dropdown($toggle[0], {
-          autoClose: false,
-        });
+    const lowerTerm = searchTerm.toLowerCase().trim();
+
+    $options.each(function () {
+      const $option = $(this);
+      const label = $option.text().toLowerCase();
+      // data() parses numeric attributes as numbers, so coerce to string first
+      const optionId = String($option.data("option-id") ?? "").toLowerCase();
+      const isChecked = $option.find('input[type="checkbox"]').is(":checked");
+
+      const matchesSearch =
+        label.includes(lowerTerm) || optionId.includes(lowerTerm);
+      const matchesFilter = !selectedOnly || isChecked;
+
+      // Use d-none class toggling instead of show()/hide() because
+      // the options have d-flex which uses !important and overrides inline display:none
+      if ((matchesSearch || !lowerTerm) && matchesFilter) {
+        $option.removeClass("d-none");
+        visibleCount++;
+      } else {
+        $option.addClass("d-none");
       }
     });
 
-  // Handle multiselect toggle button clicks manually
-  $(document).on("click", ".multiselect-toggle", function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const $dropdown = $(this).closest(".dropdown");
-    const $menu = $dropdown.find(".dropdown-menu");
-    const isOpen = $dropdown.hasClass("show");
-
-    // Close all other multiselect dropdowns first
-    $(".dropdown")
-      .has(".multiselect-toggle")
-      .not($dropdown)
-      .each(function () {
-        const $otherDropdown = $(this);
-        const $otherMenu = $otherDropdown.find(".dropdown-menu");
-        const $otherToggle = $otherDropdown.find(".multiselect-toggle");
-
-        $otherDropdown.removeClass("show");
-        $otherMenu.removeClass("show");
-        $otherToggle.attr("aria-expanded", "false");
-      });
-
-    if (isOpen) {
-      // Close this dropdown
-      $dropdown.removeClass("show");
-      $menu.removeClass("show");
-      $(this).attr("aria-expanded", "false");
+    // Show/hide no options message
+    // Use class toggling instead of show()/hide() because d-none uses !important
+    if (visibleCount === 0) {
+      $noOptionsMsg.removeClass("d-none");
     } else {
-      // Open this dropdown
-      $dropdown.addClass("show");
-      $menu.addClass("show");
-      $(this).attr("aria-expanded", "true");
+      $noOptionsMsg.addClass("d-none");
     }
-  });
+  };
 
-  // Handle clicks outside multiselect dropdowns to close them
-  $(document).on("click", function (e) {
-    const $target = $(e.target);
+  // Helper to re-apply current filters on a dropdown
+  const applyMultiselectFilters = ($dropdown) => {
+    const searchTerm = $dropdown.find(".multiselect-search").val() || "";
+    const selectedOnly =
+      $dropdown.find(".multiselect-selected-only-btn").attr("aria-pressed") ===
+      "true";
+    filterMultiselectOptions($dropdown, searchTerm, selectedOnly);
+  };
 
-    // Check if click is outside any multiselect dropdown
-    $(".dropdown")
-      .has(".multiselect-toggle")
-      .each(function () {
-        const $dropdown = $(this);
-        const $menu = $dropdown.find(".dropdown-menu");
-        const $toggle = $dropdown.find(".multiselect-toggle");
+  // Initialize multiselect dropdowns with custom behavior
+  $(".multiselect-container").each(function () {
+    const $dropdown = $(this);
 
-        // If click is outside this dropdown and it's open, close it
-        if (
-          !$dropdown.is($target) &&
-          $dropdown.has($target).length === 0 &&
-          $dropdown.hasClass("show")
-        ) {
-          $dropdown.removeClass("show");
-          $menu.removeClass("show");
-          $toggle.attr("aria-expanded", "false");
+    // Sync checkbox states from the hidden input value (or data-default fallback).
+    // The template may render with no checkboxes checked when setting_value is
+    // None/empty, so we need to initialise from the stored value or the default.
+    const $hiddenInput = $dropdown.find('input[type="hidden"]');
+    if ($hiddenInput.length) {
+      const rawValue = $hiddenInput.val() || $hiddenInput.data("default") || "";
+      const initValue = String(rawValue);
+      if (initValue) {
+        const separator = $dropdown.data("separator");
+        const sepStr = String(separator ?? "");
+        let selectedIds =
+          sepStr === "" ? [...initValue] : initValue.split(sepStr);
+
+        // Fallback: if split produced no matching option IDs, try character-by-character.
+        // This handles the case where DB separator is NULL but plugin.json intended "".
+        if (sepStr !== "") {
+          const optionIds = new Set();
+          $dropdown
+            .find('.multiselect-options input[type="checkbox"]')
+            .each(function () {
+              optionIds.add($(this).attr("value"));
+            });
+          const hasMatch = selectedIds.some((id) => optionIds.has(id));
+          if (!hasMatch && initValue.length > 0) {
+            selectedIds = [...initValue];
+          }
         }
+
+        const selectedSet = new Set(selectedIds);
+        $dropdown
+          .find('.multiselect-options input[type="checkbox"]')
+          .each(function () {
+            $(this).prop("checked", selectedSet.has($(this).attr("value")));
+          });
+      }
+    }
+
+    updateMultiselectDisplay($dropdown);
+
+    // Hide search bar if there are 10 or fewer options
+    const optionCount = $dropdown.find(".multiselect-option").length;
+    if (optionCount <= 10) {
+      $dropdown.find(".multiselect-search-container").addClass("d-none");
+    }
+
+    // Initialize Bootstrap dropdown
+    const $toggle = $dropdown.find(".multiselect-toggle");
+    if ($toggle.length) {
+      new bootstrap.Dropdown($toggle[0], {
+        autoClose: "outside",
       });
+    }
+
+    // Handle search input
+    const $searchInput = $dropdown.find(".multiselect-search");
+    if ($searchInput.length) {
+      $searchInput.on("input", function () {
+        applyMultiselectFilters($dropdown);
+      });
+
+      // Prevent dropdown from closing when clicking search input
+      $searchInput.on("click", function (e) {
+        e.stopPropagation();
+      });
+
+      // Prevent Bootstrap Dropdown from capturing keyboard events (arrow keys,
+      // Escape) that would steal focus away from the search input
+      $searchInput.on("keydown keyup", function (e) {
+        e.stopPropagation();
+      });
+    }
+
+    // Handle "show selected only" toggle
+    const $selectedOnlyBtn = $dropdown.find(".multiselect-selected-only-btn");
+    if ($selectedOnlyBtn.length) {
+      // Dispose any tooltip initialized by main.js global init and reinitialize
+      // with a dynamic title function so applyTranslations() updates are picked
+      // up on every show (Bootstrap 5 Tooltip lacks setContent unlike Popover).
+      const existingTooltip = bootstrap.Tooltip.getInstance(
+        $selectedOnlyBtn[0],
+      );
+      if (existingTooltip) existingTooltip.dispose();
+      const selectedOnlyBtnEl = $selectedOnlyBtn[0];
+      new bootstrap.Tooltip(selectedOnlyBtnEl, {
+        title() {
+          return selectedOnlyBtnEl.getAttribute("data-bs-original-title");
+        },
+      });
+
+      $selectedOnlyBtn.on("click", function (e) {
+        e.stopPropagation();
+        const isActive = $(this).attr("aria-pressed") === "true";
+        $(this).attr("aria-pressed", String(!isActive));
+        $(this).toggleClass("active", !isActive);
+        applyMultiselectFilters($dropdown);
+      });
+    }
   });
 
   // Handle checkbox changes in multiselect dropdowns
-  $(document).on("change", '.dropdown input[type="checkbox"]', function () {
-    const $dropdown = $(this).closest(".dropdown");
-    if ($dropdown.find(".multiselect-toggle").length) {
+  $(document).on(
+    "change",
+    '.multiselect-container input[type="checkbox"]',
+    function () {
+      const $dropdown = $(this).closest(".multiselect-container");
       updateMultiselectDisplay($dropdown);
+      // Re-apply filters so that unchecking in "selected only" mode hides the option
+      applyMultiselectFilters($dropdown);
+    },
+  );
+
+  // Handle clicking on multiselect options - toggle checkbox
+  $(document).on("click", ".multiselect-option", function (e) {
+    e.stopPropagation();
+
+    const $checkbox = $(this).find('input[type="checkbox"]');
+    // Only manually toggle if clicking directly on checkbox
+    // Otherwise, let the native label behavior work
+    if ($(e.target).is('input[type="checkbox"]')) {
+      $checkbox.trigger("change");
     }
   });
 
-  // Handle clicking on dropdown items - toggle checkbox but keep dropdown open
-  $(document).on("click", ".dropdown-menu .dropdown-item", function (e) {
-    // Only handle if this is a multiselect dropdown
-    if ($(this).closest(".dropdown").find(".multiselect-toggle").length) {
-      e.stopPropagation(); // Prevent event bubbling
+  // Prevent closing dropdown when clicking inside options
+  $(document).on("click", ".multiselect-menu", function (e) {
+    e.stopPropagation();
+  });
 
-      if (
-        !$(e.target).is('input[type="checkbox"]') &&
-        !$(e.target).is("label")
-      ) {
-        const $checkbox = $(this).find('input[type="checkbox"]');
-        $checkbox.prop("checked", !$checkbox.prop("checked")).trigger("change");
+  // Prevent Bootstrap Dropdown from capturing keyboard events on any focused
+  // element inside the menu (checkboxes, labels). Without this, ArrowDown/Up
+  // triggers Bootstrap's focus() loop which can crash the browser tab.
+  $(document).on("keydown keyup", ".multiselect-menu", function (e) {
+    e.stopPropagation();
+  });
+
+  // Close multiselect when clicking outside
+  $(document).on("click", function (e) {
+    const $target = $(e.target);
+
+    $(".multiselect-container").each(function () {
+      const $dropdown = $(this);
+      const $toggle = $dropdown.find(".multiselect-toggle");
+      const dropdown = bootstrap.Dropdown.getInstance($toggle[0]);
+
+      if (dropdown && !$dropdown.has($target).length && !$target.is($toggle)) {
+        dropdown.hide();
       }
-    }
+    });
   });
 
   // Sidebar plugin navigation: ensure clicking a plugin shows its pane

@@ -3,18 +3,24 @@
 ## v1.6.9~rc2 - 2026/02/??
 
 - [BUGFIX] Update reCAPTCHA handling to use ANTIBOT_RECAPTCHA_CLASSIC variable instead of session data to determine whether to use the classic reCAPTCHA response format or the new one, ensuring consistent behavior regardless of session state.
+- [BUGFIX] Rename command argument to plugin_command for clarity and to avoid conflicts with other command arguments with bwcli.
 - [FEATURE] Add new `file` setting type to allow users to upload files directly from the web UI and use their content as values for settings.
 - [FEATURE] Add `Gandi` as a DNS provider in the `letsencrypt` plugin
 - [FEATURE] Add `Hetzner` as a DNS provider in the `letsencrypt` plugin
 - [FEATURE] Add certificate authority selection in the `Let's Encrypt` plugin to allow users to choose between `Let's Encrypt` and `ZeroSSL` as the certificate authority for their certificates (Also added ZeroSSL specific settings).
 - [UI] Add override non-global services functionality in global settings
 - [UI] Make data columns in the reports page non orderable to avoid issues
+- [UI] Add control socket configuration for gunicorn
+- [UI] Enhance multiselect dropdown functionality and update the type of multiple settings to use it
 - [ALL-IN-ONE] Update CrowdSec version to 1.7.6
 - [AUTOCONF] Update gateway and ingress status patching to handle multiple IP addresses and Handle NodePort services if a load balancer IP is not available.
+- [API] Add control socket configuration for gunicorn
 - [MISC] Change type of `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings to `file` to allow users to upload their certificate and key files directly from the web UI.
+- [MISC] Update default value for Permissions-Policy header to include an additional feature (`gamepad`).
 - [DEPS] Update ApexCharts.js version to v5.6.0
 - [DEPS] Update i18next version to v25.8.10
 - [DEPS] Updated zlib version to v1.3.2
+- [DEPS] Updated libmaxminddb version to v1.13.1
 - [CONTRIBUTION] Thank you [Kn-ut99](https://github.com/Kn-ut99) for your contribution regarding the fix of a typo in the `Let's Encrypt` plugin's documentation.
 
 ## v1.6.9~rc1 - 2026/02/13

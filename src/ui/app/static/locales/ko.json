@@ -1160,6 +1160,7 @@
     "no_history": "사용 가능한 기록이 없습니다.",
     "no_item": "항목 없음",
     "no_notifications": "표시할 알림이 없습니다.",
+    "no_search_results": "항목을 찾을 수 없습니다.",
     "no_steps": "사용 가능한 단계 없음",
     "no_steps_description": "이 템플릿에는 구성할 수 있는 단계가 없습니다.",
     "online": "온라인",
@@ -1467,6 +1468,7 @@
       "reset_default": "기본값으로 초기화",
       "reset_global": "전역 설정값으로 초기화",
       "run_job": "작업 {{job}} 실행",
+      "show_selected_only": "선택한 항목만 표시",
       "stop_instance": "인스턴스 {{hostname}} 중지",
       "unban_ip": "{{ip}} 차단 해제",
       "value_from_global": "전역 설정에서 가져온 값"

@@ -1,0 +1,24 @@
+exclude = [
+    ".git",
+    "maxmind-db/**",
+    "t/libtap/**",
+    "t/maxmind-db/**",
+]
+
+[commands.clang-format]
+type = "both"
+cmd = ["clang-format", "-style=file"]
+lint-flags = ["--dry-run", "-Werror"]
+tidy-flags = ["-i"]
+path-args = "file"
+include = ["**/*.c", "**/*.h"]
+ok-exit-codes = 0
+
+[commands.prettier-markdown]
+type = "both"
+cmd = ["prettier", "--prose-wrap", "always", "--print-width", "80"]
+lint-flags = ["--check"]
+tidy-flags = ["--write"]
+path-args = "file"
+include = ["**/*.md"]
+ok-exit-codes = 0

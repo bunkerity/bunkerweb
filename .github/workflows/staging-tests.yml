@@ -41,7 +41,7 @@ jobs:
       - name: Install test dependencies
         run: PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --no-cache-dir --require-hashes --no-deps -r tests/requirements.txt
       - name: Install Terraform
-        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
         if: inputs.TYPE == 'k8s'
       - uses: actions/download-artifact@v7.0.0
         with:

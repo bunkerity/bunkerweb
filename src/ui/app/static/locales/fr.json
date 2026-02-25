@@ -1160,6 +1160,7 @@
     "no_history": "Aucun historique disponible.",
     "no_item": "Aucun élément",
     "no_notifications": "Aucune notification à afficher.",
+    "no_search_results": "Aucun élément trouvé.",
     "no_steps": "Aucune Étape Disponible",
     "no_steps_description": "Ce modèle n'a aucune étape à configurer.",
     "online": "En Ligne",
@@ -1465,6 +1466,7 @@
       "reset_default": "Réinitialiser à la valeur par défaut",
       "reset_global": "Réinitialiser à la valeur globale",
       "run_job": "Exécuter la Tâche {{job}}",
+      "show_selected_only": "Afficher uniquement la sélection",
       "stop_instance": "Arrêter l'Instance {{hostname}}",
       "unban_ip": "Débannir {{ip}}",
       "value_from_global": "Valeur provenant des paramètres globaux"

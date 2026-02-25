@@ -89,8 +89,7 @@
     "id": "dns-resolvers",
     "label": "DNS resolvers",
     "regex": "^(?! )(( *[^ ]+)(?!.*\\2))*$",
-    "type": "multivalue",
-    "separator": " "
+    "type": "multivalue"
   },
   "CLIENT_BODY_TIMEOUT": {
     "context": "global",
@@ -270,8 +269,7 @@
     "id": "api-whitelist-ip",
     "label": "API whitelist IP",
     "regex": "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
-    "type": "multivalue",
-    "separator": " "
+    "type": "multivalue"
   },
   "AUTOCONF_MODE": {
     "context": "global",
@@ -410,8 +408,7 @@
     "id": "bunkerweb-instances",
     "label": "BunkerWeb instances",
     "regex": "^.*$",
-    "type": "multivalue",
-    "separator": " "
+    "type": "multivalue"
   },
   "USE_TEMPLATE": {
     "context": "multisite",
@@ -478,8 +475,7 @@
     "id": "plugins-order-init",
     "label": "Plugins order (init)",
     "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
-    "type": "multivalue",
-    "separator": " "
+    "type": "multivalue"
   },
   "PLUGINS_ORDER_INIT_WORKER": {
     "context": "global",
@@ -488,8 +484,7 @@
     "id": "plugins-order-init-worker",
     "label": "Plugins order (init_worker)",
     "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
-    "type": "multivalue",
-    "separator": " "
+    "type": "multivalue"
   },
   "PLUGINS_ORDER_SET": {
     "context": "multisite",
@@ -498,8 +493,7 @@
     "id": "plugins-order-set",
     "label": "Plugins order (set)",
     "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
-    "type": "multivalue",
-    "separator": " "
+    "type": "multivalue"
   },
   "PLUGINS_ORDER_ACCESS": {
     "context": "multisite",
@@ -508,8 +502,7 @@
     "id": "plugins-order-access",
     "label": "Plugins order (access)",
     "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
-    "type": "multivalue",
-    "separator": " "
+    "type": "multivalue"
   },
   "PLUGINS_ORDER_SSL_CERTIFICATE": {
     "context": "multisite",
@@ -518,8 +511,7 @@
     "id": "plugins-order-ssl-certificate",
     "label": "Plugins order (ssl_certificate)",
     "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
-    "type": "multivalue",
-    "separator": " "
+    "type": "multivalue"
   },
   "PLUGINS_ORDER_HEADER": {
     "context": "multisite",
@@ -528,8 +520,7 @@
     "id": "plugins-order-header",
     "label": "Plugins order (header)",
     "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
-    "type": "multivalue",
-    "separator": " "
+    "type": "multivalue"
   },
   "PLUGINS_ORDER_LOG": {
     "context": "multisite",
@@ -538,8 +529,7 @@
     "id": "plugins-order-log",
     "label": "Plugins order (log)",
     "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
-    "type": "multivalue",
-    "separator": " "
+    "type": "multivalue"
   },
   "PLUGINS_ORDER_PREREAD": {
     "context": "multisite",
@@ -548,8 +538,7 @@
     "id": "plugins-order-preread",
     "label": "Plugins order (preread)",
     "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
-    "type": "multivalue",
-    "separator": " "
+    "type": "multivalue"
   },
   "PLUGINS_ORDER_LOG_STREAM": {
     "context": "multisite",
@@ -558,8 +547,7 @@
     "id": "plugins-order-log-stream",
     "label": "Plugins order (log_stream)",
     "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
-    "type": "multivalue",
-    "separator": " "
+    "type": "multivalue"
   },
   "PLUGINS_ORDER_LOG_DEFAULT": {
     "context": "multisite",
@@ -568,8 +556,7 @@
     "id": "plugins-order-log-default",
     "label": "Plugins order (log_default)",
     "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
-    "type": "multivalue",
-    "separator": " "
+    "type": "multivalue"
   },
   "PLUGINS_ORDER_TIMER": {
     "context": "global",
@@ -578,8 +565,7 @@
     "id": "plugins-order-timer",
     "label": "Plugins order (timer)",
     "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
-    "type": "multivalue",
-    "separator": " "
+    "type": "multivalue"
   },
   "PLUGINS_ORDER_INIT_WORKERS": {
     "context": "global",
@@ -587,9 +573,8 @@
     "help": "Comma or space separated plugin IDs to run during the init_workers phase.",
     "id": "plugins-order-init-workers",
     "label": "Plugins order (init_workers)",
-    "regex": "^$|^[A-Za-z0-9._-]+([ ,]+[A-Za-z0-9._-]+)*$",
-    "type": "multivalue",
-    "separator": " "
+    "regex": "^$|^[A-Za-z0-9._-]+([ ]+[A-Za-z0-9._-]+)*$",
+    "type": "multivalue"
   },
   "LOG_LEVEL": {
     "context": "global",

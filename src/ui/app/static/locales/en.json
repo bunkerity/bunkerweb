@@ -1160,6 +1160,7 @@
     "no_history": "No history available.",
     "no_item": "No Item",
     "no_notifications": "No notifications to show.",
+    "no_search_results": "No items found.",
     "no_steps": "No Steps Available",
     "no_steps_description": "This template does not have any steps to configure.",
     "online": "Online",
@@ -1464,6 +1465,7 @@
       "reset_default": "Reset to default value",
       "reset_global": "Reset to global value",
       "run_job": "Run Job {{job}}",
+      "show_selected_only": "Show selected only",
       "stop_instance": "Stop Instance {{hostname}}",
       "unban_ip": "Unban {{ip}}",
       "value_from_global": "Value from global settings"
