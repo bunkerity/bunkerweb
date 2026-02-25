@@ -1577,7 +1577,7 @@ The Country plugin enables geo-blocking functionality for your website, allowing
 Follow these steps to configure and use the Country feature:
 
 1. **Define your strategy:** Decide whether you want to use a whitelist approach (allow only specific countries) or a blacklist approach (block specific countries).
-2. **Configure country codes:** Add the ISO 3166-1 alpha-2 country codes (two-letter codes like US, GB, FR) to either the `WHITELIST_COUNTRY` or `BLACKLIST_COUNTRY` setting.
+2. **Configure countries or groups:** Add ISO 3166-1 alpha-2 country codes (two-letter codes like US, GB, FR) and/or supported group tokens (like `@EU`, `@SCHENGEN`) to either the `WHITELIST_COUNTRY` or `BLACKLIST_COUNTRY` setting.
 3. **Apply settings:** Once configured, the country-based restrictions will apply to all visitors to your site.
 4. **Monitor effectiveness:** Check the [web UI](web-ui.md) to see statistics on blocked requests by country.
 
@@ -1585,8 +1585,25 @@ Follow these steps to configure and use the Country feature:
 
 | Setting             | Default | Context   | Multiple | Description                                                                                                                     |
 | ------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `WHITELIST_COUNTRY` |         | multisite | no       | **Country Whitelist:** List of country codes (ISO 3166-1 alpha-2 format) separated by spaces. Only these countries are allowed. |
-| `BLACKLIST_COUNTRY` |         | multisite | no       | **Country Blacklist:** List of country codes (ISO 3166-1 alpha-2 format) separated by spaces. These countries are blocked.      |
+| `WHITELIST_COUNTRY` |         | multisite | no       | **Country Whitelist:** List of country codes and/or country-group tokens separated by spaces. Only these countries are allowed. |
+| `BLACKLIST_COUNTRY` |         | multisite | no       | **Country Blacklist:** List of country codes and/or country-group tokens separated by spaces. These countries are blocked.      |
+
+### Supported Country Groups
+
+You can use group tokens prefixed with `@`. They are expanded server-side into their member countries:
+
+- `@EU`: European Union member states.
+- `@SCHENGEN`: Schengen Area countries.
+- `@EEA`: European Economic Area (`@EU` + Iceland, Liechtenstein, Norway).
+- `@BENELUX`: Belgium, Netherlands, Luxembourg.
+- `@DACH`: German-speaking core region (Germany, Austria, Switzerland).
+- `@NORDICS`: Nordic countries (Denmark, Finland, Iceland, Norway, Sweden).
+- `@USMCA`: North American USMCA trade area (United States, Canada, Mexico).
+- `@FIVE_EYES`: Five Eyes intelligence alliance countries.
+- `@ASEAN`: ASEAN member states in Southeast Asia.
+- `@GCC`: Gulf Cooperation Council member states.
+- `@G7`: Group of Seven major advanced economies.
+- `@LATAM`: Latin America set used by this plugin.
 
 !!! tip "Whitelist vs. Blacklist"
     Choose the approach that best fits your needs:
@@ -1623,7 +1640,15 @@ Follow these steps to configure and use the Country feature:
     Allow access only from European Union member states:
 
     ```yaml
-    WHITELIST_COUNTRY: "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE"
+    WHITELIST_COUNTRY: "@EU"
+    ```
+
+=== "Group + Explicit Countries"
+
+    Allow Schengen countries plus the United Kingdom:
+
+    ```yaml
+    WHITELIST_COUNTRY: "@SCHENGEN GB"
     ```
 
 === "High-Risk Countries Blocked"

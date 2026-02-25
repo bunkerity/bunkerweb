@@ -1518,16 +1518,33 @@ So funktioniert's:
 ### Anwendung
 
 1. Strategie: Wählen Sie eine Whitelist (wenige zugelassene Länder) oder eine Blacklist (bestimmte Länder blockieren).
-2. Ländercodes: Fügen Sie ISO 3166-1 Alpha-2 Codes (US, GB, FR) zu `WHITELIST_COUNTRY` oder `BLACKLIST_COUNTRY` hinzu.
+2. Länder oder Gruppen: Fügen Sie ISO 3166-1 Alpha-2 Codes (US, GB, FR) und/oder unterstützte Gruppentokens (wie `@EU`, `@SCHENGEN`) zu `WHITELIST_COUNTRY` oder `BLACKLIST_COUNTRY` hinzu.
 3. Anwendung: Nach der Konfiguration gilt die Beschränkung für alle Besucher.
 4. Überwachung: Konsultieren Sie die [Web-UI](web-ui.md) für Statistiken nach Ländern.
 
 ### Parameter
 
-| Parameter           | Standard | Kontext   | Mehrfach | Beschreibung                                                                                             |
-| :------------------ | :------- | :-------- | :------- | :------------------------------------------------------------------------------------------------------- |
-| `WHITELIST_COUNTRY` |          | Multisite | Nein     | Whitelist: ISO 3166-1 Alpha-2 Ländercodes, durch Leerzeichen getrennt. Nur diese Länder sind zugelassen. |
-| `BLACKLIST_COUNTRY` |          | Multisite | Nein     | Blacklist: ISO 3166-1 Alpha-2 Ländercodes, durch Leerzeichen getrennt. Diese Länder sind blockiert.      |
+| Parameter           | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                 |
+| :------------------ | :------- | :-------- | :------- | :----------------------------------------------------------------------------------------------------------- |
+| `WHITELIST_COUNTRY` |          | Multisite | Nein     | Whitelist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Nur diese Länder sind zugelassen. |
+| `BLACKLIST_COUNTRY` |          | Multisite | Nein     | Blacklist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Diese Länder sind blockiert.      |
+
+### Unterstützte Ländergruppen
+
+Sie können Gruppentokens mit `@` verwenden. Diese werden serverseitig in Mitgliedsländer aufgelöst:
+
+- `@EU`: Mitgliedstaaten der Europäischen Union.
+- `@SCHENGEN`: Länder des Schengen-Raums.
+- `@EEA`: Europäischer Wirtschaftsraum (`@EU` + Island, Liechtenstein, Norwegen).
+- `@BENELUX`: Belgien, Niederlande, Luxemburg.
+- `@DACH`: deutschsprachiger Kernraum (Deutschland, Österreich, Schweiz).
+- `@NORDICS`: nordische Länder (Dänemark, Finnland, Island, Norwegen, Schweden).
+- `@USMCA`: USMCA-Wirtschaftsraum (USA, Kanada, Mexiko).
+- `@FIVE_EYES`: Länder der Five-Eyes-Geheimdienstallianz.
+- `@ASEAN`: ASEAN-Mitgliedstaaten in Südostasien.
+- `@GCC`: Mitgliedstaaten des Golf-Kooperationsrats.
+- `@G7`: Staaten der Gruppe der Sieben.
+- `@LATAM`: in diesem Plugin verwendete Lateinamerika-Gruppe.
 
 !!! tip "Whitelist vs. Blacklist"
     Whitelist: Zugriff auf wenige Länder beschränkt. Blacklist: Problematische Regionen blockieren und den Rest zulassen.
@@ -1555,7 +1572,13 @@ So funktioniert's:
 === "Nur EU"
 
     ```yaml
-    WHITELIST_COUNTRY: "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE"
+    WHITELIST_COUNTRY: "@EU"
+    ```
+
+=== "Gruppe + explizite Länder"
+
+    ```yaml
+    WHITELIST_COUNTRY: "@SCHENGEN GB"
     ```
 
 === "Blockierung von Risikoländern"

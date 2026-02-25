@@ -8,6 +8,7 @@
 - [FEATURE] Add `Gandi` as a DNS provider in the `letsencrypt` plugin
 - [FEATURE] Add `Hetzner` as a DNS provider in the `letsencrypt` plugin
 - [FEATURE] Add certificate authority selection in the `Let's Encrypt` plugin to allow users to choose between `Let's Encrypt` and `ZeroSSL` as the certificate authority for their certificates (Also added ZeroSSL specific settings).
+- [FEATURE] Add the possibility to whitelist/blacklist group of countries in the `Country` plugin.
 - [UI] Add override non-global services functionality in global settings
 - [UI] Make data columns in the reports page non orderable to avoid issues
 - [UI] Add control socket configuration for gunicorn
