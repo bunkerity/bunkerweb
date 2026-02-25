@@ -9,8 +9,10 @@
 - [FEATURE] Add certificate authority selection in the `Let's Encrypt` plugin to allow users to choose between `Let's Encrypt` and `ZeroSSL` as the certificate authority for their certificates (Also added ZeroSSL specific settings).
 - [UI] Add override non-global services functionality in global settings
 - [UI] Make data columns in the reports page non orderable to avoid issues
+- [UI] Add control socket configuration for gunicorn
 - [ALL-IN-ONE] Update CrowdSec version to 1.7.6
 - [AUTOCONF] Update gateway and ingress status patching to handle multiple IP addresses and Handle NodePort services if a load balancer IP is not available.
+- [API] Add control socket configuration for gunicorn
 - [MISC] Change type of `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings to `file` to allow users to upload their certificate and key files directly from the web UI.
 - [DEPS] Update ApexCharts.js version to v5.6.0
 - [DEPS] Update i18next version to v25.8.10
