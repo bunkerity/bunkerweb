@@ -114,10 +114,12 @@ jobs:
             Documentation : https://docs.bunkerweb.io/${{ inputs.VERSION }}/
 
             Docker tags :
+            - All-in-one : `bunkerity/bunkerweb-all-in-one:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-all-in-one:${{ steps.sanitize.outputs.version }}`
             - BunkerWeb : `bunkerity/bunkerweb:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb:${{ steps.sanitize.outputs.version }}`
             - Scheduler : `bunkerity/bunkerweb-scheduler:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-scheduler:${{ steps.sanitize.outputs.version }}`
             - Autoconf : `bunkerity/bunkerweb-autoconf:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-autoconf:${{ steps.sanitize.outputs.version }}`
             - UI : `bunkerity/bunkerweb-ui:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-ui:${{ steps.sanitize.outputs.version }}`
+            - API : `bunkerity/bunkerweb-api:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-api:${{ steps.sanitize.outputs.version }}`
 
             Linux packages : https://packagecloud.io/app/bunkerity/bunkerweb/search?q=${{ inputs.VERSION }}&filter=all&dist=
 
@@ -147,6 +149,8 @@ jobs:
             - Scheduler : `bunkerity/bunkerweb-scheduler:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-scheduler:${{ steps.sanitize.outputs.version }}`
             - Autoconf : `bunkerity/bunkerweb-autoconf:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-autoconf:${{ steps.sanitize.outputs.version }}`
             - UI : `bunkerity/bunkerweb-ui:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-ui:${{ steps.sanitize.outputs.version }}`
+            - API : `bunkerity/bunkerweb-api:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-api:${{ steps.sanitize.outputs.version }}`
+            - All-in-one : `bunkerity/bunkerweb-all-in-one:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-all-in-one:${{ steps.sanitize.outputs.version }}`
 
             Linux packages : https://packagecloud.io/app/bunkerity/bunkerweb/search?q=${{ inputs.VERSION }}&filter=all&dist=
 
