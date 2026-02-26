@@ -27,20 +27,17 @@ case "$NTASK" in
 	''|*[!0-9]*|0) NTASK=1 ;;
 esac
 
-# Detect a working C/C++ toolchain for build steps that still assume `gcc`.
-if command -v gcc14 >/dev/null 2>&1; then
-	BUILD_CC="$(command -v gcc14)"
-	BUILD_CXX="$(command -v g++14 2>/dev/null || true)"
-elif command -v gcc >/dev/null 2>&1; then
+# Detect a working C/C++ toolchain (base-system Clang or fallback).
+if command -v gcc >/dev/null 2>&1; then
 	BUILD_CC="$(command -v gcc)"
 	BUILD_CXX="$(command -v g++ 2>/dev/null || true)"
-else
-	BUILD_CC="$(command -v cc 2>/dev/null || true)"
+elif command -v cc >/dev/null 2>&1; then
+	BUILD_CC="$(command -v cc)"
 	BUILD_CXX="$(command -v c++ 2>/dev/null || true)"
 fi
 
 if [ -z "$BUILD_CC" ]; then
-	echo "❌ Error: no C compiler found (gcc14/gcc/cc)"
+	echo "❌ Error: no C compiler found"
 	exit 1
 fi
 
@@ -52,7 +49,7 @@ export CC="${CC:-$BUILD_CC}"
 export CXX="${CXX:-$BUILD_CXX}"
 
 # Some upstream Makefiles hardcode `gcc`/`g++` instead of honoring CC/CXX.
-# Provide temporary wrappers in PATH so builds stay deterministic on FreeBSD.
+# Provide temporary wrappers so builds use the detected toolchain.
 COMPAT_BIN_DIR="/tmp/bunkerweb/toolchain/bin"
 mkdir -p "$COMPAT_BIN_DIR"
 
@@ -69,7 +66,12 @@ export PATH="$COMPAT_BIN_DIR:$PATH"
 # Compiling and installing lua
 echo "ℹ️ Compiling and installing lua-5.1.5"
 export CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-5.1.5"
-do_and_check_cmd gmake "CC=$CC" "CFLAGS=-O2 -Wall -fPIC -DLUA_USE_DLOPEN" "LFLAGS=-Wl,-rpath,/usr/share/bunkerweb/deps/lib" -j "$NTASK" freebsd
+# Use the 'bsd' platform target instead of 'freebsd': both set the same
+# MYCFLAGS="-DLUA_USE_POSIX -DLUA_USE_DLOPEN" but 'freebsd' hard-codes
+# MYLIBS="-Wl,-E -lreadline" which requires readline to be installed.
+# 'bsd' omits readline (MYLIBS="-Wl,-E"), which is correct for a
+# non-interactive WAF environment.
+do_and_check_cmd gmake "CC=$CC" "CFLAGS=-O2 -Wall -fPIC -DLUA_USE_DLOPEN" "LFLAGS=-Wl,-rpath,/usr/share/bunkerweb/deps/lib" -j "$NTASK" bsd
 do_and_check_cmd gmake INSTALL_TOP=/usr/share/bunkerweb/deps install
 
 # Compiling and installing libmaxminddb
@@ -106,15 +108,21 @@ do_and_check_cmd mv /tmp/bunkerweb/deps/src/libinjection /tmp/bunkerweb/deps/src
 do_and_check_cmd mv /tmp/bunkerweb/deps/src/mbedtls /tmp/bunkerweb/deps/src/modsecurity/others/mbedtls
 export CHANGE_DIR="/tmp/bunkerweb/deps/src/modsecurity"
 export CXXFLAGS="${CXXFLAGS} -include cstdint"
-MODSEC_GCC_LIBDIR="/usr/local/lib/gcc14"
-if [ -x /usr/local/bin/gcc14 ] && [ -x /usr/local/bin/g++14 ] && [ -d "$MODSEC_GCC_LIBDIR" ]; then
-	echo "ℹ️ Using GCC 14 toolchain for ModSecurity"
-	export CC="/usr/local/bin/gcc14"
-	export CXX="/usr/local/bin/g++14"
-	export LDFLAGS="${LDFLAGS:+$LDFLAGS }-Wl,-rpath,${MODSEC_GCC_LIBDIR}"
+# ModSecurity is C++ and its shared library embeds a dependency on the C++
+# runtime it was compiled against. Using Clang (FreeBSD base system) links
+# against /usr/lib/libc++ which is always present — no additional package is
+# needed at runtime, keeping the installed footprint minimal and secure.
+if command -v clang++ >/dev/null 2>&1; then
+	MODSEC_CC="clang"
+	MODSEC_CXX="clang++"
+	echo "ℹ️ Compiling ModSecurity with Clang (base-system libc++)"
 else
-	echo "⚠️ GCC 14 not found, using default compiler toolchain for ModSecurity"
+	MODSEC_CC="cc"
+	MODSEC_CXX="c++"
+	echo "ℹ️ Compiling ModSecurity with base-system cc/c++"
 fi
+export CC="$MODSEC_CC"
+export CXX="$MODSEC_CXX"
 do_and_check_cmd chmod +x "build.sh"
 do_and_check_cmd ./build.sh
 do_and_check_cmd sh build.sh
@@ -123,6 +131,10 @@ ARGS="--disable-dependency-tracking --disable-static --disable-examples --disabl
 do_and_check_cmd ./configure $ARGS
 do_and_check_cmd gmake -j "$NTASK"
 do_and_check_cmd gmake install-strip
+
+# Restore build compiler for subsequent components.
+export CC="$BUILD_CC"
+export CXX="$BUILD_CXX"
 
 # Compiling and installing luajit
 echo "ℹ️ Compiling and installing luajit"
