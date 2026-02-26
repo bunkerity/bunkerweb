@@ -408,17 +408,17 @@ class Configurator:
                         f"Invalid multiple for setting {setting} in plugin {plugin['id']} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 128))",
                     )
 
-            if data["type"] == "multivalue":
+            if data["type"] in ("multivalue", "multiselect"):
                 if "separator" in data:
                     if len(data["separator"]) > 10:
                         return (False, f"Invalid separator for setting {setting} in plugin {plugin['id']} (Max 10 characters)")
-                    if not data["separator"]:
+                    if data["type"] == "multivalue" and not data["separator"]:
                         return (False, f"Empty separator for multivalue setting {setting} in plugin {plugin['id']} (Must have at least 1 character)")
                 else:
                     # Set default separator if not provided
                     data["separator"] = " "
             elif "separator" in data:
-                # Keep data model clean for non-multivalue settings.
+                # Keep data model clean for setting types without separator support.
                 data.pop("separator", None)
 
             if data["type"] == "file":
