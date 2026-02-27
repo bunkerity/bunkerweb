@@ -1,4 +1,4 @@
-FROM python:3.13-alpine@sha256:3527940d79521d5746929cb52e73b477e6acc3f34b35524fbee0dd11b23ff6b4 AS builder
+FROM python:3.13-alpine@sha256:bb1f2fdb1065c85468775c9d680dcd344f6442a2d1181ef7916b60a623f11d40 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -36,13 +36,13 @@ COPY src/common/utils utils
 COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 
-FROM python:3.13-alpine@sha256:3527940d79521d5746929cb52e73b477e6acc3f34b35524fbee0dd11b23ff6b4
+FROM python:3.13-alpine@sha256:bb1f2fdb1065c85468775c9d680dcd344f6442a2d1181ef7916b60a623f11d40
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
 
 # Install runtime dependencies and add scheduler user
-RUN apk add --no-cache bash unzip libgcc libstdc++ libpq openssl libmagic mariadb-connector-c mariadb-client postgresql-client sqlite tzdata sed grep && \
+RUN apk add --no-cache bash unzip curl libgcc libstdc++ libpq openssl libmagic mariadb-connector-c mariadb-client sqlite postgresql-client tzdata sed grep && \
   addgroup -g 101 scheduler && \
   adduser -h /usr/share/bunkerweb/scheduler -g scheduler -s /sbin/nologin -G scheduler -D -H -u 101 --disabled-password scheduler
 
@@ -76,7 +76,7 @@ COPY --chown=root:scheduler --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/
 COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.8"
+LABEL version="1.6.9~rc2"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="scheduler"
 

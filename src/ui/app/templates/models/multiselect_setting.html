@@ -1,43 +1,95 @@
 <div class="form-floating mt-1">
-    <div class="dropdown">
+    <div class="dropdown multiselect-container"
+         data-separator="{{ setting_data.get('separator', ' ') }}">
+        {% set render_value = setting_value if (current_endpoint != 'new' and setting_value is not none and setting_value != '') else setting_default %}
         <input type="hidden"
                id="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
                name="{{ setting }}"
                class="plugin-setting"
-               value="{{ setting_value }}"
-               data-original="{% if current_endpoint != 'new' %}{{ setting_value }}{% else %}{{ setting_default }}{% endif %}"
+               value="{{ render_value }}"
+               data-original="{{ render_value }}"
                data-default="{{ setting_default }}"
                {% if disabled %}disabled{% endif %}>
         <button class="form-control form-select dropdown-toggle multiselect-toggle"
                 type="button"
                 id="{{ setting_id_prefix }}{{ setting_data.id }}{{ setting_id_suffix }}_toggle"
+                data-bs-toggle="dropdown"
                 aria-expanded="false"
                 {% if disabled %}disabled{% endif %}>
-            <span class="multiselect-text">{{ setting }}</span>
-            <label for="{{ setting_id_prefix }}{{ setting_data.id }}{{ setting_id_suffix }}_toggle"
-                   class="text-truncate small">
-                {% set selected_count = setting_value.split() | length if setting_value else 0 %}
-                ({{ selected_count }} selected)
-            </label>
+            <span class="multiselect-text d-flex justify-content-between align-items-center gap-2 flex-grow-1">
+                <span class="text-truncate flex-grow-1">{{ setting }}</span>
+                <span class="badge bg-primary" data-selected-badge>0</span>
+            </span>
         </button>
-        <ul class="dropdown-menu p-2"
-            aria-labelledby="{{ setting_id_prefix }}{{ setting_data.id }}{{ setting_id_suffix }}_toggle">
-            {% for option in setting_data.multiselect %}
-                <li class="dropdown-item" title="{{ option.value }}">
-                    <div class="form-check">
-                        <input class="form-check-input"
+        <div class="dropdown-menu multiselect-menu"
+             aria-labelledby="{{ setting_id_prefix }}{{ setting_data.id }}{{ setting_id_suffix }}_toggle">
+            <div class="p-2 border-bottom position-sticky top-0 bg-white multiselect-search-container{% if setting_data.multiselect | length <= 10 %} d-none{% endif %}">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="input-group input-group-sm flex-grow-1">
+                        <span class="input-group-text border-0 bg-transparent"><i class="bx bx-search bx-sm"></i></span>
+                        <input type="text"
+                               class="form-control border-0 multiselect-search"
+                               placeholder="Search..."
+                               aria-label="Search..."
+                               data-i18n="form.placeholder.search">
+                    </div>
+                    <button type="button"
+                            class="btn btn-sm multiselect-selected-only-btn"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            data-bs-original-title="Show selected only"
+                            data-i18n="tooltip.button.show_selected_only"
+                            aria-pressed="false">
+                        <i class="bx bx-check-double bx-xs"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="multiselect-options">
+                {% set separator = setting_data.get('separator', ' ') %}
+                {% if separator == '' %}
+                    {% set selected_values = render_value if render_value else [] %}
+                {% else %}
+                    {% set selected_values = render_value.split(separator) if render_value else [] %}
+                {% endif %}
+                {# Fallback: if space-split produced no matching option IDs, try character-by-character.
+                   This handles the case where DB separator is NULL but plugin.json intended "". #}
+                {% if selected_values and separator != '' %}
+                    {% set option_ids = setting_data.multiselect | map(attribute='id') | list %}
+                    {% set has_match = [] %}
+                    {% for val in selected_values %}
+                        {% if val in option_ids %}
+                            {% if has_match.append(true) %}{% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if not has_match and render_value %}
+                        {% set selected_values = render_value %}
+                    {% endif %}
+                {% endif %}
+                {% for option in setting_data.multiselect %}
+                    <label class="dropdown-item d-flex align-items-center gap-2 py-2 px-3 cursor-pointer multiselect-option"
+                           role="menuitemcheckbox"
+                           data-option-id="{{ option.id }}"
+                           for="{{ setting_id_prefix }}{{ setting_data.id }}{{ setting_id_suffix }}_opt_{{ loop.index }}"
+                           title="{{ option.label }}">
+                        <input class="form-check-input m-0"
                                type="checkbox"
                                value="{{ option.id }}"
                                data-label="{{ option.label }}"
                                id="{{ setting_id_prefix }}{{ setting_data.id }}{{ setting_id_suffix }}_opt_{{ loop.index }}"
-                               {% if option.id in setting_value %}checked{% endif %}>
-                        <label class="form-check-label"
-                               for="{{ setting_id_prefix }}{{ setting_data.id }}{{ setting_id_suffix }}_opt_{{ loop.index }}">
-                            {{ option.label }}
-                        </label>
-                    </div>
-                </li>
-            {% endfor %}
-        </ul>
+                               {% if option.id in selected_values %}checked{% endif %}>
+                        <span class="flex-grow-1 small">{{ option.label }}</span>
+                    </label>
+                {% endfor %}
+                <div class="dropdown-item no-options-message border-0 p-3 text-center small d-none">
+                    <span data-i18n="status.no_search_results">No items found.</span>
+                </div>
+            </div>
+            <div class="p-2 border-top text-center">
+                <small class="text-muted"
+                       data-selected-count
+                       data-i18n="template.editor.multiselect_summary"
+                       data-i18n-options='{"count": 0}'>0 selected</small>
+            </div>
+        </div>
     </div>
 </div>

@@ -26,6 +26,8 @@ services:
 
       # API settings
       SERVICE_API: "yes"
+      MAX_WORKERS: "1"
+      MAX_THREADS: "4"
       # Set a strong token and whitelist only trusted IPs/networks (more details below)
       API_USERNAME: "admin"
       API_PASSWORD: "StrongP@ssw0rd"

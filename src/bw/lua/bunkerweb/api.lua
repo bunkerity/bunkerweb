@@ -42,6 +42,35 @@ local require_plugin = helpers.require_plugin
 local new_plugin = helpers.new_plugin
 local call_plugin = helpers.call_plugin
 
+local function file_exists(path)
+	local file = open(path, "r")
+	if file then
+		file:close()
+		return true
+	end
+	return false
+end
+
+local function get_nginx_bin()
+	local candidates = { "/usr/sbin/nginx", "/usr/local/sbin/nginx", "/usr/bin/nginx", "/usr/local/bin/nginx" }
+	for _, candidate in ipairs(candidates) do
+		if file_exists(candidate) then
+			return candidate
+		end
+	end
+	return "nginx"
+end
+
+local function get_nginx_conf()
+	local candidates = { "/etc/nginx/nginx.conf", "/usr/local/etc/nginx/nginx.conf" }
+	for _, candidate in ipairs(candidates) do
+		if file_exists(candidate) then
+			return candidate
+		end
+	end
+	return "/etc/nginx/nginx.conf"
+end
+
 api.global = { GET = {}, POST = {}, PUT = {}, DELETE = {} }
 
 -- Constant-time string comparison to mitigate timing attacks
@@ -136,13 +165,7 @@ api.global.GET["^/ping$"] = function(self)
 end
 
 api.global.GET["^/health$"] = function(self)
-	-- Check if reload indicator file exists
-	local f = open("/var/tmp/bunkerweb_reloading", "r")
-	if f then
-		f:close()
-		return self:response(HTTP_OK, "success", "reloading")
-	end
-
+	-- Loading state must have priority (startup-like behavior)
 	local data, err = get_variable("IS_LOADING", false)
 	if not data then
 		logger:log(ERR, "can't get IS_LOADING variable : " .. err)
@@ -151,6 +174,14 @@ api.global.GET["^/health$"] = function(self)
 	if data == "yes" then
 		return self:response(HTTP_OK, "success", "loading")
 	end
+
+	-- Check if reload indicator file exists
+	local f = open("/var/tmp/bunkerweb_reloading", "r")
+	if f then
+		f:close()
+		return self:response(HTTP_OK, "success", "reloading")
+	end
+
 	return self:response(HTTP_OK, "success", "ok")
 end
 
@@ -162,13 +193,22 @@ api.global.POST["^/reload"] = function(self)
 	if test_arg ~= "no" then
 		-- Check Nginx configuration
 		logger:log(NOTICE, "Checking Nginx configuration")
-		local handle = io.popen("/usr/sbin/nginx -t 2>&1")
+		local nginx_bin = get_nginx_bin()
+		local nginx_conf = get_nginx_conf()
+		local command = nginx_bin .. " -t -e /var/log/bunkerweb/error.log -c " .. nginx_conf .. " 2>&1"
+		local handle = io.popen(command)
 		local result = handle:read("*a")
 		handle:close()
 
 		-- Check for success message in output regardless of exit code
 		if string.match(result, "configuration file .+ test is successful") then
 			logger:log(NOTICE, "Nginx configuration is valid")
+		elseif
+			string.match(result, "syntax is ok")
+			and string.match(result, "Permission denied")
+			and (string.match(result, "nginx.pid") or string.match(result, "/var/log/nginx/error.log"))
+		then
+			logger:log(NOTICE, "Nginx configuration syntax is valid (non-root permission warnings ignored)")
 		else
 			return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "config check failed: " .. result)
 		end
@@ -179,6 +219,13 @@ api.global.POST["^/reload"] = function(self)
 	-- Send HUP signal to master process
 	local ok, err = kill(get_master_pid(), "HUP")
 	if not ok then
+		-- FreeBSD package mode runs nginx master as root; fallback to sudo-managed rc reload.
+		if err == "Operation not permitted" then
+			local rc = execute("sudo -n /usr/sbin/service bunkerweb reload >/dev/null 2>&1")
+			if rc == 0 or rc == true then
+				return self:response(HTTP_OK, "success", "reload successful")
+			end
+		end
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "err = " .. err)
 	end
 

@@ -34,7 +34,9 @@
         <meta name="description" content="BunkerWeb user interface" />
         <meta name="author" content="Bunkerity" />
         {% set page_title_fallback = (current_endpoint or "") | replace('-', ' ') | replace('_', ' ') | title %}
-        <title>{% if page_title_fallback %}{{ page_title_fallback }} - {% endif %}BunkerWeb UI</title>
+        <title>
+            {% if page_title_fallback %}{{ page_title_fallback }} -&nbsp;{% endif %}
+        BunkerWeb UI</title>
         <!-- Favicon -->
         <link rel="icon"
               type="image/x-icon"

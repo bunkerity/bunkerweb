@@ -29,6 +29,45 @@ OPERATIONS = {
     "POST": "write",
 }
 
+# Some UI endpoints use POST for datatable/query payloads but are read-only operations.
+READ_ONLY_POST_ENDPOINTS = frozenset(
+    {
+        "reports.reports_fetch",
+        "reports.reports_filters",
+        "reports.report_data_fetch",
+    }
+)
+READ_ONLY_POST_RULES = frozenset(
+    {
+        "/reports/fetch",
+        "/reports/filters",
+        "/reports/data",
+    }
+)
+READ_ONLY_POST_PATH_SUFFIXES = (
+    "/reports/fetch",
+    "/reports/filters",
+    "/reports/data",
+)
+
+
+def _normalize_path(path: str) -> str:
+    # Normalize path to tolerate duplicate/trailing slashes (e.g. /reports//fetch/).
+    return "/" + "/".join(segment for segment in path.split("/") if segment)
+
+
+def resolve_operation(method: str, path: str, endpoint: Optional[str] = None, rule: Optional[str] = None) -> str:
+    normalized_path = _normalize_path(path).rstrip("/")
+    normalized_rule = _normalize_path(rule or "").rstrip("/") if rule else ""
+
+    if method == "POST" and endpoint in READ_ONLY_POST_ENDPOINTS:
+        return "read"
+    if method == "POST" and normalized_rule in READ_ONLY_POST_RULES:
+        return "read"
+    if method == "POST" and any(normalized_path.rstrip("/").endswith(suffix) for suffix in READ_ONLY_POST_PATH_SUFFIXES):
+        return "read"
+    return OPERATIONS.get(method, "read")
+
 
 class BiscuitMiddleware:
     """
@@ -114,13 +153,15 @@ class BiscuitMiddleware:
                 current_app.logger.error(f"Unexpected error during version check: {e}")
                 return redirect(url_for("logout.logout_page"))
 
-        operation = OPERATIONS.get(request.method, "read")
+        route_rule = request.url_rule.rule if request.url_rule else None
+        resource_path = route_rule or request.path
+        operation = resolve_operation(request.method, request.path, request.endpoint, route_rule)
 
         for attempt in range(max_retries):
             try:
                 authorizer = AuthorizerBuilder()
 
-                authorizer.add_fact(Fact(f'resource("{request.path}")'))
+                authorizer.add_fact(Fact(f'resource("{resource_path}")'))
                 authorizer.add_fact(Fact(f'operation("{operation}")'))
 
                 authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path.starts_with("/profile")'))
@@ -138,7 +179,9 @@ class BiscuitMiddleware:
                     current_app.logger.warning(f"Datalog execution limits reached, retrying... (attempt {attempt + 1}/{max_retries})")
                     continue
 
-                current_app.logger.warning(f"Biscuit authorization error: {e}")
+                current_app.logger.warning(
+                    f"Biscuit authorization error on {request.method} {request.path} endpoint={request.endpoint} rule={route_rule} (operation={operation}): {e}"
+                )
                 return (
                     render_template(
                         "unauthorized.html",

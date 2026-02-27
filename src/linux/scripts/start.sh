@@ -9,7 +9,11 @@ PYTHON_BIN=$(get_python_bin)
 export PYTHON_BIN
 
 # Set the PYTHONPATH
-export PYTHONPATH=/usr/share/bunkerweb/deps/python
+BW_PYTHONPATH=$(get_bunkerweb_pythonpath)
+export PYTHONPATH="$BW_PYTHONPATH"
+
+NGINX_BIN=$(get_nginx_bin)
+NGINX_CONF_DIR=$(get_nginx_conf_dir)
 # Display usage information
 function display_help() {
     echo "Usage: $(basename "$0") [start|stop|reload|restart]"
@@ -20,16 +24,68 @@ function display_help() {
     echo "  restart: Stop and then start the bunkerweb service."
 }
 
+function generate_tmp_env_content() {
+    cat <<EOF
+IS_LOADING=yes
+USE_BUNKERNET=no
+SEND_ANONYMOUS_REPORT=no
+SERVER_NAME=
+DNS_RESOLVERS=${DNS_RESOLVERS}
+API_LISTEN_HTTP=${API_LISTEN_HTTP}
+API_HTTP_PORT=${API_HTTP_PORT}
+API_LISTEN_HTTPS=${API_LISTEN_HTTPS}
+API_HTTPS_PORT=${API_HTTPS_PORT}
+API_LISTEN_IP=${API_LISTEN_IP}
+API_SERVER_NAME=${API_SERVER_NAME}
+API_WHITELIST_IP=${API_WHITELIST_IP}
+API_TOKEN=${API_TOKEN}
+USE_REAL_IP=${USE_REAL_IP}
+USE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL}
+REAL_IP_FROM=${REAL_IP_FROM}
+REAL_IP_HEADER=${REAL_IP_HEADER}
+HTTP_PORT=${HTTP_PORT}
+HTTPS_PORT=${HTTPS_PORT}
+KEEP_CONFIG_ON_RESTART=${KEEP_CONFIG_ON_RESTART}
+EOF
+}
+
+function write_tmp_env_file() {
+    local tmp_env_path="$1"
+    local tmp_env_content="$2"
+    printf "%s\n" "$tmp_env_content" > "$tmp_env_path"
+    chown root:nginx "$tmp_env_path"
+    chmod 660 "$tmp_env_path"
+}
+
+function set_loading_state() {
+    local nginx_variables_path="$1"
+    if [ ! -f "$nginx_variables_path" ] ; then
+        return 1
+    fi
+
+    if grep -q "^IS_LOADING=" "$nginx_variables_path" ; then
+        sed -i "s/^IS_LOADING=.*/IS_LOADING=yes/" "$nginx_variables_path"
+    else
+        echo "IS_LOADING=yes" >> "$nginx_variables_path"
+    fi
+
+    return 0
+}
+
 # Start the bunkerweb service
 function start() {
 
     # Set the PYTHONPATH
-    export PYTHONPATH=/usr/share/bunkerweb/deps/python
+    export PYTHONPATH="$BW_PYTHONPATH"
 
     log "SYSTEMCTL" "ℹ️" "Starting BunkerWeb service ..."
 
-    setcap 'CAP_NET_BIND_SERVICE=+eip' /usr/sbin/nginx
-    chown -R nginx:nginx /etc/nginx
+    if command -v setcap >/dev/null 2>&1 && [ -x "$NGINX_BIN" ]; then
+        setcap 'CAP_NET_BIND_SERVICE=+eip' "$NGINX_BIN" || true
+    fi
+    if [ -d "$NGINX_CONF_DIR" ]; then
+        chown -R nginx:nginx "$NGINX_CONF_DIR"
+    fi
 
     # Create dummy variables.env
     if [ ! -f /etc/bunkerweb/variables.env ]; then
@@ -118,20 +174,46 @@ function start() {
         fi
     done
 
-    if [[ "$KEEP_CONFIG_ON_RESTART" == "no" ]] || [[ ! -f /var/tmp/bunkerweb/tmp.env ]] ; then
-      echo -ne "IS_LOADING=yes\nUSE_BUNKERNET=no\nSEND_ANONYMOUS_REPORT=no\nSERVER_NAME=\nDNS_RESOLVERS=${DNS_RESOLVERS}\nAPI_LISTEN_HTTP=${API_LISTEN_HTTP}\nAPI_HTTP_PORT=${API_HTTP_PORT}\nAPI_LISTEN_HTTPS=${API_LISTEN_HTTPS}\nAPI_HTTPS_PORT=${API_HTTPS_PORT}\nAPI_LISTEN_IP=${API_LISTEN_IP}\nAPI_SERVER_NAME=${API_SERVER_NAME}\nAPI_WHITELIST_IP=${API_WHITELIST_IP}\nAPI_TOKEN=${API_TOKEN}\nUSE_REAL_IP=${USE_REAL_IP}\nUSE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL}\nREAL_IP_FROM=${REAL_IP_FROM}\nREAL_IP_HEADER=${REAL_IP_HEADER}\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\nKEEP_CONFIG_ON_RESTART=${KEEP_CONFIG_ON_RESTART}\n" > /var/tmp/bunkerweb/tmp.env
-      chown root:nginx /var/tmp/bunkerweb/tmp.env
-      chmod 660 /var/tmp/bunkerweb/tmp.env
+    tmp_env_path="/var/tmp/bunkerweb/tmp.env"
+    tmp_env_content="$(generate_tmp_env_content)"
+    regenerate_temp_config=false
 
-      if ! run_as_nginx env PYTHONPATH="/usr/share/bunkerweb/deps/python" "$PYTHON_BIN" /usr/share/bunkerweb/gen/main.py \
-          --variables /var/tmp/bunkerweb/tmp.env; then
-          log "SYSTEMCTL" "❌" "Error while generating config from /var/tmp/bunkerweb/tmp.env"
-          exit 1
-      fi
+    tmp_env_path="/var/tmp/bunkerweb/tmp.env"
+
+    if [[ "$KEEP_CONFIG_ON_RESTART" == "no" ]] || [[ ! -f "$tmp_env_path" ]] ; then
+        regenerate_temp_config=true
+    else
+        log "SYSTEMCTL" "ℹ️" "Preserving current config on restart, forcing loading state to receive latest config ..."
+        if ! set_loading_state "/etc/nginx/variables.env" ; then
+            log "SYSTEMCTL" "⚠️" "Couldn't set IS_LOADING=yes because /etc/nginx/variables.env is missing"
+        fi
     fi
+
+    write_tmp_env_file "$tmp_env_path" "$tmp_env_content"
+
+    if [[ "$regenerate_temp_config" == "true" ]] ; then
+        if ! run_as_nginx env PYTHONPATH="$BW_PYTHONPATH" "$PYTHON_BIN" /usr/share/bunkerweb/gen/main.py \
+            --variables "$tmp_env_path"; then
+            log "SYSTEMCTL" "❌" "Error while generating config from $tmp_env_path"
+            exit 1
+        fi
+    fi
+
+    # Ensure health endpoint can report "loading" (not stale "reloading")
+    if [ -f /var/tmp/bunkerweb_reloading ] ; then
+        rm -f /var/tmp/bunkerweb_reloading
+    fi
+
     # Start nginx
     log "SYSTEMCTL" "ℹ️" "Starting nginx ..."
-    if ! run_as_nginx /usr/sbin/nginx -e /var/log/bunkerweb/error.log; then
+    if [ "$(uname)" = "FreeBSD" ]; then
+        "$NGINX_BIN" -e /var/log/bunkerweb/error.log
+        nginx_rc=$?
+    else
+        run_as_nginx "$NGINX_BIN" -e /var/log/bunkerweb/error.log
+        nginx_rc=$?
+    fi
+    if [ "$nginx_rc" -ne 0 ]; then
         log "SYSTEMCTL" "❌" "Error while executing temp nginx"
         exit 1
     fi
@@ -230,7 +312,7 @@ function reload()
         pid="$(cat "$pid_file" 2>/dev/null)"
         if [ -n "$pid" ] && kill -0 "$pid" >/dev/null 2>&1 ; then
             log "SYSTEMCTL" "ℹ️" "Reloading nginx ..."
-            nginx -s reload
+            "$NGINX_BIN" -s reload
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "SYSTEMCTL" "❌" "Error while sending reload signal to nginx"

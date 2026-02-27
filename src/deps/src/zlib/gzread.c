@@ -1,5 +1,5 @@
 /* gzread.c -- zlib functions for reading gzip files
- * Copyright (C) 2004-2025 Mark Adler
+ * Copyright (C) 2004-2026 Mark Adler
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
@@ -27,7 +27,7 @@ local int gz_load(gz_statep state, unsigned char *buf, unsigned len,
         get = len - *have;
         if (get > max)
             get = max;
-        ret = read(state->fd, buf + *have, get);
+        ret = (int)read(state->fd, buf + *have, get);
         if (ret <= 0)
             break;
         *have += (unsigned)ret;
@@ -267,6 +267,10 @@ local int gz_fetch(gz_statep state) {
             strm->next_out = state->out;
             if (gz_decomp(state) == -1)
                 return -1;
+            break;
+        default:
+            gz_error(state, Z_STREAM_ERROR, "state corrupt");
+            return -1;
         }
     } while (state->x.have == 0 && (!state->eof || strm->avail_in));
     return 0;
@@ -412,7 +416,7 @@ int ZEXPORT gzread(gzFile file, voidp buf, unsigned len) {
     }
 
     /* read len or fewer bytes to buf */
-    len = gz_read(state, buf, len);
+    len = (unsigned)gz_read(state, buf, len);
 
     /* check for an error */
     if (len == 0) {

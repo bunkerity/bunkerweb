@@ -331,9 +331,10 @@
                                                        pattern="{{ server_name_setting['regex'] }}"
                                                        required />
                                             </div>
-                                            <h6 class="mt-2 mb-2 fw-bold">Let's Encrypt</h6>
+                                            <h6 class="mt-2 mb-2 fw-bold"
+                                                data-i18n="setup.step2.section.lets_encrypt">Let's Encrypt</h6>
                                             <div class="row pb-0">
-                                                <div class="col-6 col-md-3 pb-3">
+                                                <div class="col-12 col-md-4 pb-3">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-AUTO_LETS_ENCRYPT"
                                                                for="AUTO_LETS_ENCRYPT"
@@ -369,43 +370,8 @@
                                                                {% if auto_lets_encrypt == "yes" %}checked{% endif %} />
                                                     </div>
                                                 </div>
-                                                <div class="col-6 col-md-3 pb-3">
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <label id="label-USE_LETS_ENCRYPT_STAGING"
-                                                               for="USE_LETS_ENCRYPT_STAGING"
-                                                               class="form-label fw-semibold text-truncate"
-                                                               data-i18n="form.label.use_lets_encrypt_staging">
-                                                            Use Let's Encrypt Staging
-                                                        </label>
-                                                        <div class="d-flex align-items-center">
-                                                            {% if lets_encrypt_staging == "yes" %}
-                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
-                                                                      data-bs-toggle="tooltip"
-                                                                      data-bs-placement="top"
-                                                                      data-bs-original-title="From global settings">
-                                                                    <span class="bx bx-globe bx-xs"></span>
-                                                                </span>
-                                                            {% endif %}
-                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
-                                                                  data-bs-toggle="tooltip"
-                                                                  data-bs-placement="top"
-                                                                  data-bs-original-title="Whether to use the Let's Encrypt staging environment"
-                                                                  data-i18n="tooltip.use_lets_encrypt_staging">
-                                                                <span class="bx bx-question-mark bx-xs"></span>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-check form-switch mt-1">
-                                                        <input id="USE_LETS_ENCRYPT_STAGING"
-                                                               name="USE_LETS_ENCRYPT_STAGING"
-                                                               class="form-check-input"
-                                                               type="checkbox"
-                                                               role="switch"
-                                                               aria-labelledby="label-USE_LETS_ENCRYPT_STAGING"
-                                                               {% if lets_encrypt_staging == "yes" %}checked{% endif %} />
-                                                    </div>
-                                                </div>
-                                                <div class="col-6 col-md-3 pb-3"
+                                                <div class="col-12 col-md-4 pb-3"
+                                                     data-le-field="wildcard"
                                                      {% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Wildcard certificates are only supported with DNS challenges." data-i18n="tooltip.wildcard_dns_only"{% endif %}>
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-USE_LETS_ENCRYPT_WILDCARD"
@@ -443,7 +409,7 @@
                                                                {% if lets_encrypt_challenge == 'http' %}disabled{% endif %} />
                                                     </div>
                                                 </div>
-                                                <div class="col-6 col-md-3 pb-3">
+                                                <div class="col-12 col-md-4 pb-3">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES"
                                                                for="LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES"
@@ -479,7 +445,7 @@
                                                                {% if lets_encrypt_disable_public_suffixes == "yes" %}checked{% endif %} />
                                                     </div>
                                                 </div>
-                                                <div class="col-sm-6 col-md-4 pb-3">
+                                                <div class="col-12 col-md-6 pb-3">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-EMAIL_LETS_ENCRYPT"
                                                                for="EMAIL_LETS_ENCRYPT"
@@ -513,6 +479,307 @@
                                                            class="form-control plugin-setting mt-1"
                                                            aria-labelledby="label-EMAIL_LETS_ENCRYPT"
                                                            pattern="{{ plugins_settings.get('EMAIL_LETS_ENCRYPT', {'regex': '^.*$'})['regex'] }}" />
+                                                </div>
+                                                <div class="col-12 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-LETS_ENCRYPT_SERVER"
+                                                               for="LETS_ENCRYPT_SERVER"
+                                                               class="form-label fw-semibold text-truncate"
+                                                               data-i18n="form.label.certificate_authority">
+                                                            Certificate Authority
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            {% if lets_encrypt_server != "letsencrypt" %}
+                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                      data-bs-toggle="tooltip"
+                                                                      data-bs-placement="top"
+                                                                      data-bs-original-title="From global settings">
+                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                </span>
+                                                            {% endif %}
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="Choose your certificate provider to show provider-specific settings."
+                                                                  data-i18n="tooltip.lets_encrypt_server">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <select id="LETS_ENCRYPT_SERVER"
+                                                            name="LETS_ENCRYPT_SERVER"
+                                                            class="form-select d-none"
+                                                            aria-labelledby="label-LETS_ENCRYPT_SERVER">
+                                                        {% for cert_server in plugins_settings.get('LETS_ENCRYPT_SERVER', {'select': ['letsencrypt', 'zerossl']})['select'] %}
+                                                            <option value="{{ cert_server }}"
+                                                                    {% if lets_encrypt_server == cert_server %}selected{% endif %}>
+                                                                {{ cert_server }}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <ul class="nav nav-pills nav-fill mt-1"
+                                                        id="acme-server-tabs"
+                                                        role="tablist"
+                                                        data-i18n="setup.step2.lets_encrypt.certificate_authority_selector"
+                                                        aria-label="Certificate Authority Selector">
+                                                        <li class="nav-item" role="presentation">
+                                                            <button class="nav-link {% if lets_encrypt_server == 'letsencrypt' %}active{% endif %}"
+                                                                    id="acme-tab-letsencrypt"
+                                                                    type="button"
+                                                                    role="tab"
+                                                                    data-acme-server="letsencrypt"
+                                                                    data-i18n="setup.step2.section.lets_encrypt"
+                                                                    aria-selected="{% if lets_encrypt_server == 'letsencrypt' %}true{% else %}false{% endif %}">
+                                                                Let's Encrypt
+                                                            </button>
+                                                        </li>
+                                                        <li class="nav-item" role="presentation">
+                                                            <button class="nav-link {% if lets_encrypt_server == 'zerossl' %}active{% endif %}"
+                                                                    id="acme-tab-zerossl"
+                                                                    type="button"
+                                                                    role="tab"
+                                                                    data-acme-server="zerossl"
+                                                                    data-i18n="setup.step2.section.zerossl"
+                                                                    aria-selected="{% if lets_encrypt_server == 'zerossl' %}true{% else %}false{% endif %}">
+                                                                ZeroSSL
+                                                            </button>
+                                                        </li>
+                                                    </ul>
+                                                    <div class="tab-content border rounded-3 p-3 mt-2 bg-body-secondary">
+                                                        <div class="tab-pane fade {% if lets_encrypt_server == 'letsencrypt' %}show active{% endif %}"
+                                                             id="acme-pane-letsencrypt"
+                                                             role="tabpanel">
+                                                            <p class="text-muted mb-3 small"
+                                                               data-i18n="setup.step2.lets_encrypt.letsencrypt_description">
+                                                                Use Let's Encrypt for standard ACME issuance. Staging is available for testing and integration checks.
+                                                            </p>
+                                                            <div class="row">
+                                                                <div class="col-12 col-md-6 pb-3" data-le-field="staging">
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <label id="label-USE_LETS_ENCRYPT_STAGING"
+                                                                               for="USE_LETS_ENCRYPT_STAGING"
+                                                                               class="form-label fw-semibold text-truncate"
+                                                                               data-i18n="form.label.use_lets_encrypt_staging">
+                                                                            Use Let's Encrypt Staging
+                                                                        </label>
+                                                                        <div class="d-flex align-items-center">
+                                                                            {% if lets_encrypt_staging == "yes" %}
+                                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                      data-bs-toggle="tooltip"
+                                                                                      data-bs-placement="top"
+                                                                                      data-bs-original-title="From global settings">
+                                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                                </span>
+                                                                            {% endif %}
+                                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="Whether to use the Let's Encrypt staging environment"
+                                                                                  data-i18n="tooltip.use_lets_encrypt_staging">
+                                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-check form-switch mt-1">
+                                                                        <input id="USE_LETS_ENCRYPT_STAGING"
+                                                                               name="USE_LETS_ENCRYPT_STAGING"
+                                                                               class="form-check-input"
+                                                                               type="checkbox"
+                                                                               role="switch"
+                                                                               aria-labelledby="label-USE_LETS_ENCRYPT_STAGING"
+                                                                               {% if lets_encrypt_staging == "yes" %}checked{% endif %} />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="tab-pane fade {% if lets_encrypt_server == 'zerossl' %}show active{% endif %}"
+                                                             id="acme-pane-zerossl"
+                                                             role="tabpanel">
+                                                            <p class="text-muted mb-3 small"
+                                                               data-i18n="setup.step2.lets_encrypt.zerossl_description">
+                                                                Use ZeroSSL with zerossl-bot. Provide an account email or API key for account issuance and key-based reissue tracking.
+                                                            </p>
+                                                            <div class="row">
+                                                                <div class="col-12 pb-3">
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <label id="label-LETS_ENCRYPT_ZEROSSL_API_KEY"
+                                                                               for="LETS_ENCRYPT_ZEROSSL_API_KEY"
+                                                                               class="form-label fw-semibold text-truncate"
+                                                                               data-i18n="form.label.zerossl_api_key">
+                                                                            ZeroSSL API Key
+                                                                        </label>
+                                                                        <div class="d-flex align-items-center">
+                                                                            {% if lets_encrypt_zerossl_api_key %}
+                                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                      data-bs-toggle="tooltip"
+                                                                                      data-bs-placement="top"
+                                                                                      data-bs-original-title="From global settings">
+                                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                                </span>
+                                                                            {% endif %}
+                                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="Optional ZeroSSL API key used by zerossl-bot."
+                                                                                  data-i18n="tooltip.zerossl_api_key">
+                                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <input id="LETS_ENCRYPT_ZEROSSL_API_KEY"
+                                                                           name="LETS_ENCRYPT_ZEROSSL_API_KEY"
+                                                                           type="password"
+                                                                           placeholder=""
+                                                                           value="{{ lets_encrypt_zerossl_api_key }}"
+                                                                           class="form-control plugin-setting mt-1"
+                                                                           aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_KEY"
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_KEY', {'regex': '^.*$'})['regex'] }}" />
+                                                                    <small class="text-muted d-block mt-1"
+                                                                           data-i18n="setup.step2.lets_encrypt.zerossl_api_key_hint">If empty, ZeroSSL will use the configured email for account registration.</small>
+                                                                </div>
+                                                                <div class="col-sm-6 col-md-3 pb-3">
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <label id="label-LETS_ENCRYPT_ZEROSSL_API_RETRY"
+                                                                               for="LETS_ENCRYPT_ZEROSSL_API_RETRY"
+                                                                               class="form-label fw-semibold text-truncate"
+                                                                               data-i18n="form.label.zerossl_api_retry">
+                                                                            ZeroSSL API Retries
+                                                                        </label>
+                                                                        <div class="d-flex align-items-center">
+                                                                            {% if lets_encrypt_zerossl_api_retry != "3" %}
+                                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                      data-bs-toggle="tooltip"
+                                                                                      data-bs-placement="top"
+                                                                                      data-bs-original-title="From global settings">
+                                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                                </span>
+                                                                            {% endif %}
+                                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="Number of retries for ZeroSSL API requests (0 disables retries)."
+                                                                                  data-i18n="tooltip.zerossl_api_retry">
+                                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <input id="LETS_ENCRYPT_ZEROSSL_API_RETRY"
+                                                                           name="LETS_ENCRYPT_ZEROSSL_API_RETRY"
+                                                                           type="number"
+                                                                           min="0"
+                                                                           value="{{ lets_encrypt_zerossl_api_retry }}"
+                                                                           class="form-control plugin-setting mt-1"
+                                                                           aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_RETRY"
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY', {'regex': '^\\d+$'})['regex'] }}" />
+                                                                </div>
+                                                                <div class="col-sm-6 col-md-3 pb-3">
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <label id="label-LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"
+                                                                               for="LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"
+                                                                               class="form-label fw-semibold text-truncate"
+                                                                               data-i18n="form.label.zerossl_api_retry_delay">
+                                                                            ZeroSSL API Retry Delay
+                                                                        </label>
+                                                                        <div class="d-flex align-items-center">
+                                                                            {% if lets_encrypt_zerossl_api_retry_delay != "2" %}
+                                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                      data-bs-toggle="tooltip"
+                                                                                      data-bs-placement="top"
+                                                                                      data-bs-original-title="From global settings">
+                                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                                </span>
+                                                                            {% endif %}
+                                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="Delay in seconds between ZeroSSL API retries."
+                                                                                  data-i18n="tooltip.zerossl_api_retry_delay">
+                                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <input id="LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"
+                                                                           name="LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"
+                                                                           type="number"
+                                                                           min="0"
+                                                                           value="{{ lets_encrypt_zerossl_api_retry_delay }}"
+                                                                           class="form-control plugin-setting mt-1"
+                                                                           aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY', {'regex': '^\\d+$'})['regex'] }}" />
+                                                                </div>
+                                                                <div class="col-sm-6 col-md-3 pb-3">
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <label id="label-LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"
+                                                                               for="LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"
+                                                                               class="form-label fw-semibold text-truncate"
+                                                                               data-i18n="form.label.zerossl_api_connect_timeout">
+                                                                            ZeroSSL API Connect Timeout
+                                                                        </label>
+                                                                        <div class="d-flex align-items-center">
+                                                                            {% if lets_encrypt_zerossl_api_connect_timeout != "5" %}
+                                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                      data-bs-toggle="tooltip"
+                                                                                      data-bs-placement="top"
+                                                                                      data-bs-original-title="From global settings">
+                                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                                </span>
+                                                                            {% endif %}
+                                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="Connection timeout in seconds for ZeroSSL API calls."
+                                                                                  data-i18n="tooltip.zerossl_api_connect_timeout">
+                                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <input id="LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"
+                                                                           name="LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"
+                                                                           type="number"
+                                                                           min="1"
+                                                                           value="{{ lets_encrypt_zerossl_api_connect_timeout }}"
+                                                                           class="form-control plugin-setting mt-1"
+                                                                           aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT', {'regex': '^[1-9]\\d*$'})['regex'] }}" />
+                                                                </div>
+                                                                <div class="col-sm-6 col-md-3 pb-3">
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <label id="label-LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"
+                                                                               for="LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"
+                                                                               class="form-label fw-semibold text-truncate"
+                                                                               data-i18n="form.label.zerossl_api_max_time">
+                                                                            ZeroSSL API Max Time
+                                                                        </label>
+                                                                        <div class="d-flex align-items-center">
+                                                                            {% if lets_encrypt_zerossl_api_max_time != "20" %}
+                                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                      data-bs-toggle="tooltip"
+                                                                                      data-bs-placement="top"
+                                                                                      data-bs-original-title="From global settings">
+                                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                                </span>
+                                                                            {% endif %}
+                                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="Maximum total time in seconds for each ZeroSSL API request."
+                                                                                  data-i18n="tooltip.zerossl_api_max_time">
+                                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <input id="LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"
+                                                                           name="LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"
+                                                                           type="number"
+                                                                           min="1"
+                                                                           value="{{ lets_encrypt_zerossl_api_max_time }}"
+                                                                           class="form-control plugin-setting mt-1"
+                                                                           aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_MAX_TIME', {'regex': '^[1-9]\\d*$'})['regex'] }}" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <div class="col-sm-6 col-md-4 pb-3">
                                                     <div class="d-flex justify-content-between align-items-center">
@@ -553,6 +820,7 @@
                                                     </select>
                                                 </div>
                                                 <div class="col-sm-6 col-md-4 pb-3"
+                                                     data-le-field="dns-provider"
                                                      {% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="DNS provider is only supported with DNS challenges." data-i18n="tooltip.dns_provider_dns_only"{% endif %}>
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-LETS_ENCRYPT_DNS_PROVIDER"
@@ -595,9 +863,11 @@
                                                             "dnsmadeeasy",
                                                             "duckdns",
                                                             "dynu",
+                                                            "gandi",
                                                             "gehirn",
                                                             "godaddy",
                                                             "google",
+                                                            "hetzner",
                                                             "infomaniak",
                                                             "ionos",
                                                             "linode",
@@ -693,6 +963,7 @@
                                                            pattern="{{ plugins_settings.get('LETS_ENCRYPT_CUSTOM_PROFILE', {'regex': '^.*$'})['regex'] }}" />
                                                 </div>
                                                 <div class="col-sm-6 col-md-4 pb-3"
+                                                     data-le-field="dns-propagation"
                                                      {% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="DNS propagation is only supported with DNS challenges." data-i18n="tooltip.dns_propagation_dns_only"{% endif %}>
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-LETS_ENCRYPT_DNS_PROPAGATION"
@@ -729,6 +1000,7 @@
                                                            {% if lets_encrypt_challenge == 'http' %}disabled{% endif %} />
                                                 </div>
                                                 <div class="col-12 pb-3"
+                                                     data-le-field="dns-credentials"
                                                      {% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Credentials are only supported with DNS challenges." data-i18n="tooltip.dns_credentials_dns_only"{% endif %}>
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <label id="label-LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS"

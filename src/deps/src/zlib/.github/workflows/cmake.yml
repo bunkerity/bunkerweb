@@ -15,6 +15,20 @@ jobs:
             pkgtgt: package package_source
             cmake-args: -DMINIZIP_ENABLE_BZIP2=ON
 
+          - name: Ubuntu GCC no shared
+            os: ubuntu-latest
+            compiler: gcc
+            cflags: -Wall -Wextra
+            pkgtgt: package package_source
+            cmake-args: -DZLIB_BUILD_SHARED=OFF -DMINIZIP_ENABLE_BZIP2=ON
+
+          - name: Ubuntu GCC no static
+            os: ubuntu-latest
+            compiler: gcc
+            cflags: -Wall -Wextra
+            pkgtgt: package package_source
+            cmake-args: -DZLIB_BUILD_STATIC=OFF -DMINIZIP_ENABLE_BZIP2=ON
+
           - name: Ubuntu GCC -O3
             os: ubuntu-latest
             compiler: gcc
@@ -49,6 +63,13 @@ jobs:
             compiler: cl
             cflags: /W3
             cmake-args: -A x64 -DMINIZIP_ENABLE_BZIP2=OFF
+            pkgtgt: PACKAGE
+
+          - name: Windows MSVC ARM64
+            os: windows-11-arm
+            compiler: cl
+            cflags: /W3
+            cmake-args: -A ARM64 -DMINIZIP_ENABLE_BZIP2=OFF
             pkgtgt: PACKAGE
 
           - name: Windows GCC
@@ -88,7 +109,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Install packages (Windows)
       if: runner.os == 'Windows'
@@ -116,7 +137,7 @@ jobs:
       run: cmake --build ../build --config ${{ matrix.build-config || 'Release' }} -t ${{ matrix.pkgtgt }}
 
     - name: Upload build errors
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       if: failure()
       with:
         name: ${{ matrix.name }} (cmake)

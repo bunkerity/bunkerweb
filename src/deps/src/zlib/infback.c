@@ -1,5 +1,5 @@
 /* infback.c -- inflate using a call-back interface
- * Copyright (C) 1995-2025 Mark Adler
+ * Copyright (C) 1995-2026 Mark Adler
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
@@ -61,57 +61,6 @@ int ZEXPORT inflateBackInit_(z_streamp strm, int windowBits,
     state->whave = 0;
     state->sane = 1;
     return Z_OK;
-}
-
-/*
-   Return state with length and distance decoding tables and index sizes set to
-   fixed code decoding.  Normally this returns fixed tables from inffixed.h.
-   If BUILDFIXED is defined, then instead this routine builds the tables the
-   first time it's called, and returns those tables the first time and
-   thereafter.  This reduces the size of the code by about 2K bytes, in
-   exchange for a little execution time.  However, BUILDFIXED should not be
-   used for threaded applications, since the rewriting of the tables and virgin
-   may not be thread-safe.
- */
-local void fixedtables(struct inflate_state FAR *state) {
-#ifdef BUILDFIXED
-    static int virgin = 1;
-    static code *lenfix, *distfix;
-    static code fixed[544];
-
-    /* build fixed huffman tables if first call (may not be thread safe) */
-    if (virgin) {
-        unsigned sym, bits;
-        static code *next;
-
-        /* literal/length table */
-        sym = 0;
-        while (sym < 144) state->lens[sym++] = 8;
-        while (sym < 256) state->lens[sym++] = 9;
-        while (sym < 280) state->lens[sym++] = 7;
-        while (sym < 288) state->lens[sym++] = 8;
-        next = fixed;
-        lenfix = next;
-        bits = 9;
-        inflate_table(LENS, state->lens, 288, &(next), &(bits), state->work);
-
-        /* distance table */
-        sym = 0;
-        while (sym < 32) state->lens[sym++] = 5;
-        distfix = next;
-        bits = 5;
-        inflate_table(DISTS, state->lens, 32, &(next), &(bits), state->work);
-
-        /* do this just once */
-        virgin = 0;
-    }
-#else /* !BUILDFIXED */
-#   include "inffixed.h"
-#endif /* BUILDFIXED */
-    state->lencode = lenfix;
-    state->lenbits = 9;
-    state->distcode = distfix;
-    state->distbits = 5;
 }
 
 /* Macros for inflateBack(): */
@@ -293,7 +242,7 @@ int ZEXPORT inflateBack(z_streamp strm, in_func in, void FAR *in_desc,
                 state->mode = STORED;
                 break;
             case 1:                             /* fixed block */
-                fixedtables(state);
+                inflate_fixed(state);
                 Tracev((stderr, "inflate:     fixed codes block%s\n",
                         state->last ? " (last)" : ""));
                 state->mode = LEN;              /* decode codes */
@@ -303,7 +252,7 @@ int ZEXPORT inflateBack(z_streamp strm, in_func in, void FAR *in_desc,
                         state->last ? " (last)" : ""));
                 state->mode = TABLE;
                 break;
-            case 3:
+            default:
                 strm->msg = (z_const char *)"invalid block type";
                 state->mode = BAD;
             }

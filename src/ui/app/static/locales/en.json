@@ -467,6 +467,10 @@
       "hover_info": "Hover over a country",
       "legend": "Legend",
       "no_data": "No data"
+    },
+    "window": {
+      "last_days": "Last {{days}} days",
+      "title": "Dashboard window"
     }
   },
   "datatable": {
@@ -634,6 +638,7 @@
       "admin_username": "Admin Username",
       "auto_lets_encrypt": "Auto Let's Encrypt",
       "ban_scope": "Ban Scope",
+      "certificate_authority": "Certificate Authority",
       "certificate_priority": "Certificate Priority",
       "challenge_type": "Challenge Type",
       "config_type": "Config Type",
@@ -686,7 +691,12 @@
       "use_proxy_protocol": "Use PROXY protocol",
       "use_real_ip": "Use Real IP",
       "username": "Username",
-      "wildcard_certificates": "Wildcard Certificates"
+      "wildcard_certificates": "Wildcard Certificates",
+      "zerossl_api_key": "ZeroSSL API Key",
+      "zerossl_api_retry": "ZeroSSL API Retries",
+      "zerossl_api_retry_delay": "ZeroSSL API Retry Delay",
+      "zerossl_api_connect_timeout": "ZeroSSL API Connect Timeout",
+      "zerossl_api_max_time": "ZeroSSL API Max Time"
     },
     "placeholder": {
       "2fa_code": "Enter code",
@@ -1076,9 +1086,16 @@
       "title": "Admin User"
     },
     "step2": {
+      "lets_encrypt": {
+        "certificate_authority_selector": "Certificate Authority Selector",
+        "letsencrypt_description": "Use Let's Encrypt for standard ACME issuance. Staging is available for testing and integration checks.",
+        "zerossl_api_key_hint": "If empty, ZeroSSL will use the configured email for account registration.",
+        "zerossl_description": "Use ZeroSSL with zerossl-bot. Provide an account email or API key for account issuance and key-based reissue tracking."
+      },
       "section": {
         "custom_certificate": "Custom Certificate",
         "lets_encrypt": "Let's Encrypt",
+        "zerossl": "ZeroSSL",
         "real_ip": "Real IP",
         "reverse_proxy": "Reverse Proxy"
       },
@@ -1143,6 +1160,7 @@
     "no_history": "No history available.",
     "no_item": "No Item",
     "no_notifications": "No notifications to show.",
+    "no_search_results": "No items found.",
     "no_steps": "No Steps Available",
     "no_steps_description": "This template does not have any steps to configure.",
     "online": "Online",
@@ -1281,6 +1299,10 @@
       "missing_configs_upload_label": "Upload missing configs (.conf, .cfg, .txt)",
       "missing_configs_upload_partial": "{{uploaded}} of {{total}} configs uploaded. Still missing: {{missing}}",
       "missing_configs_upload_success": "{{count}} config file(s) uploaded successfully",
+      "multiselect_placeholder": "Select options",
+      "multiselect_summary": "{{count}} selected",
+      "multivalue_add": "Add value",
+      "multivalue_helper": "One value per line.{{separatorNote}}",
       "panel_overview": "Overview",
       "panel_overview_help": "Track key information and navigate between sections.",
       "placeholder_config_data": "Data",
@@ -1305,6 +1327,7 @@
       "raw_configs_upload": "Upload config files (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "Unable to read one of the selected files.",
       "raw_editor_drop_hint": "Drop a template JSON file (.json only) to replace the current content.",
+      "raw_editor_aria": "Raw template JSON editor",
       "raw_editor_help": "Edit the complete template definition as JSON. Switching back to Easy mode validates and reloads the visual editor.",
       "raw_editor_import_success": "Template JSON imported successfully.",
       "raw_editor_override_body": "Importing this file will completely replace the current template JSON. Changes made in the editor will be lost. Do you want to continue?",
@@ -1442,6 +1465,7 @@
       "reset_default": "Reset to default value",
       "reset_global": "Reset to global value",
       "run_job": "Run Job {{job}}",
+      "show_selected_only": "Show selected only",
       "stop_instance": "Stop Instance {{hostname}}",
       "unban_ip": "Unban {{ip}}",
       "value_from_global": "Value from global settings"
@@ -1491,6 +1515,7 @@
     "latest_version_installed": "You are running the latest version.",
     "lets_encrypt_custom_profile": "The custom profile to use for Let's Encrypt (e.g. 'my_custom_profile').",
     "lets_encrypt_disable_public_suffixes": "Disable certificate requests for domains matching the Public Suffix List (recommended).",
+    "lets_encrypt_server": "Choose your certificate provider to show provider-specific settings.",
     "lets_encrypt_profile": "The profile to use for Let's Encrypt (classic, tlsserver, shortlived).",
     "license_key": "Your BunkerWeb PRO license key.",
     "link": {
@@ -1658,13 +1683,19 @@
     "ui_url_security": "Using a non-standard, hard-to-guess URL path enhances security.",
     "use_custom_ssl": "Whether to use a custom SSL certificate instead of Let's Encrypt.",
     "use_lets_encrypt_staging": "Whether to use the Let's Encrypt staging environment for testing (generates untrusted certificates).",
+    "use_lets_encrypt_staging_letsencrypt_only": "Let's Encrypt staging is only available when using the Let's Encrypt server.",
     "use_proxy_protocol": "Enable PROXY protocol communication.",
     "use_real_ip": "Use Real IP",
     "username_length": "Username must be between 1 and 256 characters.",
     "value_from_global": "Value from global settings",
     "view_full_url": "Click to view full URL",
     "wildcard_certificates": "Generate wildcard certificates (*.domain.com). Requires DNS challenge.",
-    "wildcard_dns_only": "Wildcard certificates are only supported with the DNS challenge type."
+    "wildcard_dns_only": "Wildcard certificates are only supported with the DNS challenge type.",
+    "zerossl_api_key": "Optional ZeroSSL API key used by zerossl-bot.",
+    "zerossl_api_retry": "Number of retries for ZeroSSL API requests (0 disables retries).",
+    "zerossl_api_retry_delay": "Delay in seconds between ZeroSSL API retries.",
+    "zerossl_api_connect_timeout": "Connection timeout in seconds for ZeroSSL API calls.",
+    "zerossl_api_max_time": "Maximum total time in seconds for each ZeroSSL API request."
   },
   "totp": {
     "prompt": "Please enter your TOTP code."
@@ -1678,6 +1709,7 @@
     "ip_service_duplicate": "This IP address is already banned for the selected service ({{service}}).",
     "pattern": "Please enter a valid value for {{field}}.",
     "required": "{{field}} is required.",
-    "service_required_for_ban": "A service must be selected for a service-specific ban."
+    "service_required_for_ban": "A service must be selected for a service-specific ban.",
+    "zerossl_email_or_api_key_required": "ZeroSSL requires either an email or a ZeroSSL API key."
   }
 }

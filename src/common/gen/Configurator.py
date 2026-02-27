@@ -9,7 +9,7 @@ from logging import Logger
 from os import getenv, listdir, sep
 from os.path import join
 from pathlib import Path
-from re import compile as re_compile, error as RegexError, search as re_search
+from re import DOTALL, compile as re_compile, error as RegexError, search as re_search
 from sys import path as sys_path
 from tarfile import open as tar_open
 from typing import Dict, List, Literal, Optional, Tuple, Union
@@ -44,7 +44,7 @@ class Configurator:
         self.__mandatory_job_keys = frozenset(("name", "file", "every", "reload"))
         self.__valid_stream_values = frozenset(("yes", "no", "partial"))
         self.__valid_contexts = frozenset(("global", "multisite"))
-        self.__valid_setting_types = frozenset(("password", "text", "number", "check", "select", "multiselect", "multivalue"))
+        self.__valid_setting_types = frozenset(("password", "text", "number", "file", "check", "select", "multiselect", "multivalue"))
         self.__valid_job_every_values = frozenset(("once", "minute", "hour", "day", "week"))
 
         # Pre-compile regex patterns cache
@@ -316,7 +316,8 @@ class Configurator:
                 return False, f"variable name {variable} doesn't exist"
 
             try:
-                if not self.__ignore_regex_check and re_search(where[real_var]["regex"], value) is None:
+                regex_flags = DOTALL if where[real_var].get("type") == "file" else 0
+                if not self.__ignore_regex_check and re_search(where[real_var]["regex"], value, regex_flags) is None:
                     return (False, f"value {value} doesn't match regex {where[real_var]['regex']}")
             except RegexError:
                 self.__logger.warning(f"Invalid regex for {variable} : {where[real_var]['regex']}, ignoring regex check")
@@ -331,7 +332,8 @@ class Configurator:
             return False, f"context of {variable} isn't multisite"
 
         try:
-            if not self.__ignore_regex_check and re_search(where[real_var]["regex"], value) is None:
+            regex_flags = DOTALL if where[real_var].get("type") == "file" else 0
+            if not self.__ignore_regex_check and re_search(where[real_var]["regex"], value, regex_flags) is None:
                 return (False, f"value {value} doesn't match regex {where[real_var]['regex']}")
         except RegexError:
             self.__logger.warning(f"Invalid regex for {variable} : {where[real_var]['regex']}, ignoring regex check")
@@ -396,7 +398,7 @@ class Configurator:
             elif data["type"] not in self.__valid_setting_types:
                 return (
                     False,
-                    f"Invalid type for setting {setting} in plugin {plugin['id']} (Must be password, text, number, check, select, multiselect or multivalue)",
+                    f"Invalid type for setting {setting} in plugin {plugin['id']} (Must be password, text, number, file, check, select, multiselect or multivalue)",
                 )
 
             if "multiple" in data:
@@ -406,15 +408,30 @@ class Configurator:
                         f"Invalid multiple for setting {setting} in plugin {plugin['id']} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 128))",
                     )
 
-            if data["type"] == "multivalue":
+            if data["type"] in ("multivalue", "multiselect"):
                 if "separator" in data:
                     if len(data["separator"]) > 10:
                         return (False, f"Invalid separator for setting {setting} in plugin {plugin['id']} (Max 10 characters)")
-                    if not data["separator"]:
+                    if data["type"] == "multivalue" and not data["separator"]:
                         return (False, f"Empty separator for multivalue setting {setting} in plugin {plugin['id']} (Must have at least 1 character)")
                 else:
                     # Set default separator if not provided
                     data["separator"] = " "
+            elif "separator" in data:
+                # Keep data model clean for setting types without separator support.
+                data.pop("separator", None)
+
+            if data["type"] == "file":
+                if "accept" in data:
+                    if not isinstance(data["accept"], str):
+                        return (False, f"Invalid accept for file setting {setting} in plugin {plugin['id']} (Must be a string)")
+                    if len(data["accept"]) > 512:
+                        return (False, f"Invalid accept for setting {setting} in plugin {plugin['id']} (Max 512 characters)")
+                else:
+                    data["accept"] = ""
+            elif "accept" in data:
+                # Keep data model clean for non-file settings.
+                data.pop("accept", None)
 
             for select in data.get("select", []):
                 if len(select) > 256:

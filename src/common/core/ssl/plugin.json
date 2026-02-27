@@ -27,11 +27,37 @@
       "context": "multisite",
       "default": "TLSv1.2 TLSv1.3",
       "help": "The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.",
-      "id": "https-protocols",
-      "label": "HTTPS protocols",
+      "id": "ssl-protocols",
+      "label": "SSL protocols",
       "regex": "^(?! )( ?(?:SSLv[23]|TLSv1(?:\\.[1-3])?))+$",
-      "type": "multivalue",
-      "separator": " "
+      "type": "multiselect",
+      "multiselect": [
+        {
+          "id": "SSLv3",
+          "label": "SSLv3 (deprecated)",
+          "value": "SSLv3"
+        },
+        {
+          "id": "TLSv1",
+          "label": "TLSv1 (1.0)",
+          "value": "TLSv1"
+        },
+        {
+          "id": "TLSv1.1",
+          "label": "TLSv1.1",
+          "value": "TLSv1.1"
+        },
+        {
+          "id": "TLSv1.2",
+          "label": "TLSv1.2 (recommended)",
+          "value": "TLSv1.2"
+        },
+        {
+          "id": "TLSv1.3",
+          "label": "TLSv1.3 (recommended)",
+          "value": "TLSv1.3"
+        }
+      ]
     },
     "SSL_CIPHERS_LEVEL": {
       "context": "multisite",

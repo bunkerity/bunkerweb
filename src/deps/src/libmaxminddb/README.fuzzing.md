@@ -9,10 +9,10 @@ These tests are only meant to be run on GNU/Linux.
 Note that in `CFLAGS` and `CXXFLAGS`, any type of sanitizers can be added.
 
 - [AddressSanitizer](https://clang.llvm.org/docs/AddressSanitizer.html),
-    [ThreadSanitizer](https://clang.llvm.org/docs/ThreadSanitizer.html),
-    [MemorySanitizer](https://clang.llvm.org/docs/MemorySanitizer.html),
-    [UndefinedBehaviorSanitizer](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html),
-    [LeakSanitizer](https://clang.llvm.org/docs/LeakSanitizer.html).
+  [ThreadSanitizer](https://clang.llvm.org/docs/ThreadSanitizer.html),
+  [MemorySanitizer](https://clang.llvm.org/docs/MemorySanitizer.html),
+  [UndefinedBehaviorSanitizer](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html),
+  [LeakSanitizer](https://clang.llvm.org/docs/LeakSanitizer.html).
 
 ```shell
 $ export CC=clang
@@ -38,4 +38,5 @@ $ find ../t/maxmind-db/test-data/ -type f -size -4k -exec cp {} ./fuzz_mmdb_seed
 $ ./t/fuzz_mmdb fuzz_mmdb_seed/ fuzz_mmdb_seed_corpus/
 ```
 
-Here is more information about [LibFuzzer](https://llvm.org/docs/LibFuzzer.html).
+Here is more information about
+[LibFuzzer](https://llvm.org/docs/LibFuzzer.html).

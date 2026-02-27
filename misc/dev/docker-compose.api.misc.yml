@@ -85,6 +85,8 @@ services:
       API_PASSWORD: "P@ssw0rd"
       FORWARDED_ALLOW_IPS: "*"
       DEBUG: "1"
+      MAX_WORKERS: "1"
+      MAX_THREADS: "4"
     restart: "unless-stopped"
     networks:
       bw-universe:

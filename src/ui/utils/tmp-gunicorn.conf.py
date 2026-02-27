@@ -55,7 +55,10 @@ daemon = bool(DEBUG)
 chdir = join(sep, "usr", "share", "bunkerweb", "ui")
 umask = 0x027
 pidfile = PID_FILE.as_posix()
-worker_tmp_dir = join(sep, "dev", "shm")
+control_socket = RUN_DIR.joinpath("tmp-ui.ctl").as_posix()
+SHM_TMP_DIR = Path(sep, "dev", "shm")
+TMP_UI_WORKER_TMP_DIR = Path(sep, "tmp", "bunkerweb", "tmp-ui-workers")
+worker_tmp_dir = SHM_TMP_DIR.as_posix() if SHM_TMP_DIR.is_dir() else TMP_UI_WORKER_TMP_DIR.as_posix()
 tmp_upload_dir = TMP_UI_DIR.as_posix()
 secure_scheme_headers = {}
 forwarded_allow_ips = FORWARDED_ALLOW_IPS
@@ -86,6 +89,8 @@ def on_starting(server):
     TMP_UI_DIR.mkdir(parents=True, exist_ok=True)
     RUN_DIR.mkdir(parents=True, exist_ok=True)
     LIB_DIR.mkdir(parents=True, exist_ok=True)
+    if worker_tmp_dir != SHM_TMP_DIR:
+        TMP_UI_WORKER_TMP_DIR.mkdir(parents=True, exist_ok=True)
 
     # Handle Docker secrets first
     docker_secrets = handle_docker_secrets()

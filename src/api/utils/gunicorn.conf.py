@@ -90,12 +90,15 @@ capture_output = CAPTURE_OUTPUT
 limit_request_line = 0
 limit_request_fields = 32768
 limit_request_field_size = 0
-reuse_port = True
+reuse_port = False
 daemon = False
 chdir = join(sep, "usr", "share", "bunkerweb", "api")
 umask = 0x027
 pidfile = PID_FILE.as_posix()
-worker_tmp_dir = join(sep, "dev", "shm")
+control_socket = RUN_DIR.joinpath("api.ctl").as_posix()
+SHM_TMP_DIR = Path(sep, "dev", "shm")
+API_WORKER_TMP_DIR = Path(sep, "tmp", "bunkerweb", "api-workers")
+worker_tmp_dir = SHM_TMP_DIR.as_posix() if SHM_TMP_DIR.is_dir() else API_WORKER_TMP_DIR.as_posix()
 tmp_upload_dir = TMP_UI_DIR.as_posix()
 secure_scheme_headers = {
     "X-FORWARDED-PROTOCOL": "https",
@@ -139,6 +142,8 @@ def on_starting(server):
     TMP_UI_DIR.mkdir(parents=True, exist_ok=True)
     RUN_DIR.mkdir(parents=True, exist_ok=True)
     LIB_DIR.mkdir(parents=True, exist_ok=True)
+    if worker_tmp_dir != SHM_TMP_DIR:
+        API_WORKER_TMP_DIR.mkdir(parents=True, exist_ok=True)
 
     # Handle Docker secrets first
     docker_secrets = handle_docker_secrets()

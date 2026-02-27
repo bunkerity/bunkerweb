@@ -252,10 +252,43 @@ void run_32_bit_record_tests(int mode, const char *mode_desc) {
     free(mmdb);
 }
 
+void run_read_node_invalid_node_number_tests(int mode, const char *mode_desc) {
+    const char *filename = "MaxMind-DB-test-mixed-24.mmdb";
+    char *path = test_database_path(filename);
+    MMDB_s *mmdb = open_ok(path, mode, mode_desc);
+    free(path);
+
+    uint32_t node_count = mmdb->metadata.node_count;
+
+    MMDB_search_node_s node;
+    int status;
+
+    /* node_count is one past the last valid node (nodes are 0-indexed).
+     * This must be rejected. */
+    status = MMDB_read_node(mmdb, node_count, &node);
+    cmp_ok(status,
+           "==",
+           MMDB_INVALID_NODE_NUMBER_ERROR,
+           "MMDB_read_node with node_number == node_count returns "
+           "MMDB_INVALID_NODE_NUMBER_ERROR");
+
+    /* node_count + 1 should also be rejected. */
+    status = MMDB_read_node(mmdb, node_count + 1, &node);
+    cmp_ok(status,
+           "==",
+           MMDB_INVALID_NODE_NUMBER_ERROR,
+           "MMDB_read_node with node_number > node_count returns "
+           "MMDB_INVALID_NODE_NUMBER_ERROR");
+
+    MMDB_close(mmdb);
+    free(mmdb);
+}
+
 void run_tests(int mode, const char *mode_desc) {
     run_24_bit_record_tests(mode, mode_desc);
     run_28_bit_record_tests(mode, mode_desc);
     run_32_bit_record_tests(mode, mode_desc);
+    run_read_node_invalid_node_number_tests(mode, mode_desc);
 }
 
 int main(void) {

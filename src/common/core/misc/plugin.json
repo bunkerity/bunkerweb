@@ -148,8 +148,7 @@
       "id": "external-plugin-urls",
       "label": "External plugin URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
-      "type": "multivalue",
-      "separator": " "
+      "type": "multivalue"
     },
     "DENY_HTTP_STATUS": {
       "context": "global",

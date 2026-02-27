@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-from os import W_OK, access, environ, getenv, sep, umask
+from os import getenv, sep
 from os.path import join
-from pathlib import Path
 from subprocess import DEVNULL, PIPE, Popen
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
@@ -13,59 +12,23 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
+from letsencrypt_utils import (
+    CERTBOT_BIN,
+    DEPS_PATH,
+    LETSENCRYPT_DATA_PATH as DATA_PATH,
+    LETSENCRYPT_LOGS_DIR as LOGS_DIR,
+    LETSENCRYPT_WORK_DIR as WORK_DIR,
+    ZEROSSL_BOT_SCRIPT,
+    build_certbot_env,
+    is_zerossl_used_in_env,
+    prepare_logs_dir,
+    resolve_certbot_entrypoint,
+)
 
 LOGGER = getLogger("LETS-ENCRYPT.RENEW")
-LIB_PATH = Path(sep, "var", "lib", "bunkerweb", "letsencrypt")
-CERTBOT_BIN = join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot")
-DEPS_PATH = join(sep, "usr", "share", "bunkerweb", "deps", "python")
 
 LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.RENEW.CERTBOT")
 status = 0
-
-CACHE_PATH = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
-DATA_PATH = CACHE_PATH.joinpath("etc")
-WORK_DIR = join(sep, "var", "lib", "bunkerweb", "letsencrypt")
-LOGS_DIR = join(sep, "var", "log", "bunkerweb", "letsencrypt")
-
-
-def prepare_logs_dir() -> None:
-    """Ensure the Let's Encrypt logs directory is writable by the running user.
-
-    Old installations could leave `letsencrypt.log` owned by root with 640
-    permissions, blocking renewals executed as a non-root user. We normalise the
-    directory permissions, drop the umask to keep group write access, and remove
-    any stale, non-writable log files so certbot can recreate them.
-    """
-
-    # Allow group write on newly created files
-    try:
-        umask(0o007)
-    except BaseException:
-        LOGGER.debug("Failed to set umask to 007 for letsencrypt logs")
-
-    logs_path = Path(LOGS_DIR)
-
-    try:
-        logs_path.mkdir(parents=True, exist_ok=True)
-    except BaseException as e:
-        LOGGER.error(f"Failed to create Let's Encrypt logs directory {logs_path}: {e}")
-        return
-
-    try:
-        logs_path.chmod(0o2770)
-    except BaseException as e:
-        LOGGER.debug(f"Failed to set permissions on {logs_path}: {e}")
-
-    for log_file in logs_path.glob("*.log*"):
-        try:
-            if access(log_file, W_OK):
-                log_file.chmod(0o660)
-            else:
-                LOGGER.warning(f"Removing unwritable Let's Encrypt log file {log_file}")
-                log_file.unlink(missing_ok=True)
-        except BaseException as e:
-            LOGGER.debug(f"Failed to adjust permissions on log file {log_file}: {e}")
-
 
 try:
     # Check if we're using let's encrypt
@@ -83,24 +46,27 @@ try:
         LOGGER.info("Let's Encrypt is not activated, skipping renew...")
         sys_exit(0)
 
-    prepare_logs_dir()
+    prepare_logs_dir(LOGS_DIR, LOGGER)
 
     JOB = Job(LOGGER, __file__)
 
-    cmd_env = environ.copy()
-
-    db_config = JOB.db.get_config()
-    for key in db_config:
-        if key in cmd_env:
-            del cmd_env[key]
-
-    cmd_env["PYTHONPATH"] = cmd_env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in cmd_env["PYTHONPATH"] else "")
-    if getenv("DATABASE_URI", ""):
-        cmd_env["DATABASE_URI"] = getenv("DATABASE_URI", "")
+    cmd_env = build_certbot_env(JOB, DEPS_PATH)
+    acme_server = "zerossl" if is_zerossl_used_in_env() else "letsencrypt"
+    certbot_entrypoint = resolve_certbot_entrypoint(
+        acme_server,
+        CERTBOT_BIN,
+        ZEROSSL_BOT_SCRIPT,
+        LOGGER,
+        cmd_env=cmd_env,
+        fallback_to_certbot=True,
+    )
+    certbot_bin = certbot_entrypoint[0]
+    if acme_server == "zerossl" and certbot_bin != CERTBOT_BIN:
+        LOGGER.info("Using zerossl-bot wrapper for certificate renewal.")
 
     process = Popen(
         [
-            CERTBOT_BIN,
+            certbot_bin,
             "renew",
             "-n",
             "--no-random-sleep-on-renew",
