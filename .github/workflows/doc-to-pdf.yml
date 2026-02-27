@@ -35,7 +35,7 @@ jobs:
         run: mkdocs serve -f mkdocs_print.yml & sleep 15
       - name: Run pdf script
         run: node docs/misc/pdf.js http://localhost:8000/print_page/ BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf 'BunkerWeb documentation v${{ inputs.VERSION }}'
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
           path: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
