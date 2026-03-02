@@ -3,6 +3,7 @@
 ## v1.6.9 - 2026/03/??
 
 - [BUGFIX] Fix issues with the new `multiselect` logic where a custom separator can be used, but the default one (space) was still used if the separator was empty, which caused issues with settings that had an empty string as a value.
+- [FEATURE] Add field value redaction in Let's Encrypt plugin and update ZeroSSL API key handling to avoid exposing sensitive information in logs and process arguments.
 - [UI] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.
 - [UI] Tweak plugins headers style to avoid the text moving the buttons out of the page when the header is too long.
 - [API] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.

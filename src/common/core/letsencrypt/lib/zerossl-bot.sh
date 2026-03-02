@@ -52,6 +52,7 @@ ZEROSSL_API_RETRY_DELAY_EFFECTIVE="$(normalize_non_negative_int "${ZEROSSL_API_R
 ZEROSSL_API_CONNECT_TIMEOUT_EFFECTIVE="$(normalize_positive_int "${ZEROSSL_API_CONNECT_TIMEOUT:-${LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT:-5}}" "5")"
 ZEROSSL_API_MAX_TIME_EFFECTIVE="$(normalize_positive_int "${ZEROSSL_API_MAX_TIME:-${LETS_ENCRYPT_ZEROSSL_API_MAX_TIME:-20}}" "20")"
 ZEROSSL_BOT_DEBUG_EFFECTIVE="${ZEROSSL_BOT_DEBUG:-${CUSTOM_LOG_LEVEL:-${LOG_LEVEL:-INFO}}}"
+ZEROSSL_API_KEY="${LETS_ENCRYPT_ZEROSSL_API_KEY:-}"
 
 function is_debug_enabled()
 {
@@ -101,8 +102,8 @@ if msg:
 function zerossl_api_request()
 {
     local method=$1
-    local url=$2
     local safe_url=$2
+    local curl_url=$2
     shift 2
 
     local response http_code body
@@ -110,6 +111,8 @@ function zerossl_api_request()
         safe_url="${safe_url%%access_key=*}access_key=***"
     fi
     log_debug "Requesting ZeroSSL API (method=${method}, url=${safe_url}, user_agent=${USER_AGENT})"
+    curl_url="${curl_url//\\/\\\\}"
+    curl_url="${curl_url//\"/\\\"}"
     response="$(
         curl \
             --silent \
@@ -124,7 +127,7 @@ function zerossl_api_request()
             --user-agent "$USER_AGENT" \
             --header "Accept: application/json" \
             --write-out $'\n%{http_code}' \
-            "$url" \
+            --config <(printf 'url = "%s"\n' "$curl_url") \
             "$@"
     )"
     # shellcheck disable=SC2181
@@ -209,13 +212,6 @@ print(hmac)
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
-        --zerossl-api-key=*)
-            ZEROSSL_API_KEY=${1#*=}
-        ;;
-        --zerossl-api-key|-z)
-           ZEROSSL_API_KEY=$2
-           shift
-        ;;
         --zerossl-email=*)
             ZEROSSL_EMAIL=${1#*=}
         ;;
@@ -250,6 +246,9 @@ elif [[ -n $ZEROSSL_EMAIL ]]; then
 else
     log_debug "No ZeroSSL API key or email provided; continuing without EAB prefetch."
 fi
+
+# Prevent ZeroSSL API credentials from propagating to certbot's process environment.
+unset LETS_ENCRYPT_ZEROSSL_API_KEY
 
 if is_debug_enabled; then
     redacted_args=()

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
 from sys import path as sys_path
-from typing import List, Literal, Optional
+from typing import Any, List, Literal, Optional, Tuple
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
@@ -47,6 +47,16 @@ class Provider(BaseModel):
     def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return []
+
+    @classmethod
+    def _redact_field_value(cls, field_name: str, value: Any) -> Any:
+        if value in ("", None):
+            return value
+        return "***"
+
+    def __repr_args__(self) -> List[Tuple[str, Any]]:
+        """Redact secret-like fields when a provider is stringified for logs/debug output."""
+        return [(field_name, self._redact_field_value(field_name, value)) for field_name, value in super().__repr_args__()]
 
 
 class BunnyNetProvider(Provider):

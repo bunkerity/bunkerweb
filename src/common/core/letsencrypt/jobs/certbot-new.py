@@ -727,7 +727,7 @@ def certbot_new(
 
         zerossl_api_key = str(config.get("zerossl_api_key") or "")
         if zerossl_api_key:
-            command.extend(["--zerossl-api-key", zerossl_api_key])
+            cmd_env["LETS_ENCRYPT_ZEROSSL_API_KEY"] = zerossl_api_key
 
     if LOG_LEVEL == "DEBUG":
         command.append("-v")
