@@ -824,7 +824,7 @@ def certbot_new(
 
         zerossl_api_key = str(config.get("zerossl_api_key") or "")
         if zerossl_api_key:
-            command.extend(["--zerossl-api-key", zerossl_api_key])
+            cmd_env["LETS_ENCRYPT_ZEROSSL_API_KEY"] = zerossl_api_key
 
     if LOG_LEVEL == "DEBUG":
         command.append("-v")
@@ -889,13 +889,9 @@ def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, D
     LOGGER.info(
         f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email'] or 'not provided'}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile on {config['acme_server']}..."
     )
-    # Build a safe copy for debug logging — mask the provider object (which may
-    # hold credential data) and the raw zerossl_api_key without shallow-copy risk.
-    # dict.copy() is shallow, so modifying a dict value through the copy also
-    # mutates the original; using a dict comprehension avoids that entirely.
-    debug_config = {k: (v if k not in ("provider", "zerossl_api_key") else "***") for k, v in config.items()}
-    if config.get("provider"):
-        debug_config["provider"] = f"<{type(config['provider']).__name__}>"
+    debug_config = config.copy()
+    if LOG_LEVEL != "TRACE" and debug_config.get("zerossl_api_key"):
+        debug_config["zerossl_api_key"] = "***"
     LOGGER.debug(f"Service configuration: {debug_config}")
 
     concurrent_requests = getenv("LETS_ENCRYPT_CONCURRENT_REQUESTS", "no").lower() == "yes"
