@@ -523,16 +523,18 @@ out:
 /* Stitch a new trace. */
 void LJ_FASTCALL lj_dispatch_stitch(jit_State *J, const BCIns *pc)
 {
-  ERRNO_SAVE
-  lua_State *L = J->L;
-  void *cf = cframe_raw(L->cframe);
-  const BCIns *oldpc = cframe_pc(cf);
-  setcframe_pc(cf, pc);
-  /* Before dispatch, have to bias PC by 1. */
-  L->top = L->base + cur_topslot(curr_proto(L), pc+1, cframe_multres_n(cf));
-  lj_trace_stitch(J, pc-1);  /* Point to the CALL instruction. */
-  setcframe_pc(cf, oldpc);
-  ERRNO_RESTORE
+  if (!(J2G(J)->hookmask & HOOK_VMEVENT)) {
+    ERRNO_SAVE
+    lua_State *L = J->L;
+    void *cf = cframe_raw(L->cframe);
+    const BCIns *oldpc = cframe_pc(cf);
+    setcframe_pc(cf, pc);
+    /* Before dispatch, have to bias PC by 1. */
+    L->top = L->base + cur_topslot(curr_proto(L), pc+1, cframe_multres_n(cf));
+    lj_trace_stitch(J, pc-1);  /* Point to the CALL instruction. */
+    setcframe_pc(cf, oldpc);
+    ERRNO_RESTORE
+  }
 }
 #endif
 

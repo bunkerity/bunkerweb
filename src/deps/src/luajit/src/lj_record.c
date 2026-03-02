@@ -526,6 +526,12 @@ static LoopEvent rec_for(jit_State *J, const BCIns *fori, int isforl)
   LoopEvent ev;
   TRef stop;
   IRType t;
+  /* Avoid semantic mismatches and always failing guards. */
+  if ((tvisnum(&tv[FORL_IDX]) && tvisnan(&tv[FORL_IDX])) ||
+      (tvisnum(&tv[FORL_STOP]) && tvisnan(&tv[FORL_STOP])) ||
+      (tvisnum(&tv[FORL_STEP]) && tvisnan(&tv[FORL_STEP])) ||
+      tvismzero(&tv[FORL_STEP]))
+    lj_trace_err(J, LJ_TRERR_GFAIL);
   if (isforl) {  /* Handle FORL/JFORL opcodes. */
     TRef idx = tr[FORL_IDX];
     if (mref(J->scev.pc, const BCIns) == fori && tref_ref(idx) == J->scev.idx) {
@@ -2276,7 +2282,7 @@ void lj_record_ins(jit_State *J)
   /* Need snapshot before recording next bytecode (e.g. after a store). */
   if (J->needsnap) {
     J->needsnap = 0;
-    if (J->pt) lj_snap_purge(J);
+    if (J->pt && bc_op(*J->pc) < BC_FUNCF) lj_snap_purge(J);
     lj_snap_add(J);
     J->mergesnap = 1;
   }
