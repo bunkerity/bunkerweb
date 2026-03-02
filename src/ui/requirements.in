@@ -12,5 +12,5 @@ pillow==12.1.1
 psutil==7.2.2
 python_dateutil==2.9.0.post0
 qrcode==8.2
-regex==2026.2.19
+regex==2026.2.28
 user_agents==2.2.0
