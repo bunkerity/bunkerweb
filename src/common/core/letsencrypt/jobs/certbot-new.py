@@ -798,7 +798,7 @@ def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, D
         f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email'] or 'not provided'}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile on {config['acme_server']}..."
     )
     debug_config = config.copy()
-    if debug_config.get("zerossl_api_key"):
+    if LOG_LEVEL != "TRACE" and debug_config.get("zerossl_api_key"):
         debug_config["zerossl_api_key"] = "***"
     LOGGER.debug(f"Service configuration: {debug_config}")
 

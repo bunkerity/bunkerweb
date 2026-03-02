@@ -57,7 +57,15 @@ ZEROSSL_API_KEY="${LETS_ENCRYPT_ZEROSSL_API_KEY:-}"
 function is_debug_enabled()
 {
     case "${ZEROSSL_BOT_DEBUG_EFFECTIVE,,}" in
-        1|true|yes|on|debug) return 0 ;;
+        1|true|yes|on|debug|trace) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+function is_trace_enabled()
+{
+    case "${ZEROSSL_BOT_DEBUG_EFFECTIVE,,}" in
+        trace) return 0 ;;
         *) return 1 ;;
     esac
 }
@@ -107,7 +115,7 @@ function zerossl_api_request()
     shift 2
 
     local response http_code body
-    if [[ "$safe_url" == *"access_key="* ]]; then
+    if ! is_trace_enabled && [[ "$safe_url" == *"access_key="* ]]; then
         safe_url="${safe_url%%access_key=*}access_key=***"
     fi
     log_debug "Requesting ZeroSSL API (method=${method}, url=${safe_url}, user_agent=${USER_AGENT})"
@@ -251,26 +259,31 @@ fi
 unset LETS_ENCRYPT_ZEROSSL_API_KEY
 
 if is_debug_enabled; then
-    redacted_args=()
-    redact_next="no"
-    for arg in "${CERTBOT_ARGS[@]}"; do
-        if [ "$redact_next" = "yes" ]; then
-            redacted_args+=("***")
-            redact_next="no"
-            continue
-        fi
-        case "$arg" in
-            --eab-kid|--eab-hmac-key)
-                redacted_args+=("$arg")
-                redact_next="yes"
-            ;;
-            *)
-                redacted_args+=("$arg")
-            ;;
-        esac
-    done
-    log_debug "Launching certbot with redacted arguments."
-    printf '%s ' "$CERTBOT_EXEC" "${redacted_args[@]}"; echo
+    if is_trace_enabled; then
+        log_debug "Launching certbot with full arguments."
+        printf '%s ' "$CERTBOT_EXEC" "${CERTBOT_ARGS[@]}"; echo
+    else
+        redacted_args=()
+        redact_next="no"
+        for arg in "${CERTBOT_ARGS[@]}"; do
+            if [ "$redact_next" = "yes" ]; then
+                redacted_args+=("***")
+                redact_next="no"
+                continue
+            fi
+            case "$arg" in
+                --eab-kid|--eab-hmac-key)
+                    redacted_args+=("$arg")
+                    redact_next="yes"
+                ;;
+                *)
+                    redacted_args+=("$arg")
+                ;;
+            esac
+        done
+        log_debug "Launching certbot with redacted arguments."
+        printf '%s ' "$CERTBOT_EXEC" "${redacted_args[@]}"; echo
+    fi
 fi
 
 "$CERTBOT_EXEC" "${CERTBOT_ARGS[@]}"
