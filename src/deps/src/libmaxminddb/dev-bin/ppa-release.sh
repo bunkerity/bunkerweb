@@ -12,6 +12,12 @@ if [[ ! $changelog_header =~ ^##\ ([0-9]+\.[0-9]+\.[0-9]+)\ -\ ([0-9]{4}-[0-9]{2
     exit 1
 fi
 VERSION="${BASH_REMATCH[1]}"
+DATE="${BASH_REMATCH[2]}"
+
+if [[ "$DATE" != "$(date +"%Y-%m-%d")" ]]; then
+    echo "$DATE is not today!"
+    exit 1
+fi
 
 git push
 

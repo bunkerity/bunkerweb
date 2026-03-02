@@ -1,3 +1,9 @@
+## 1.13.2 - 2026-02-25
+
+- Fixed a compilation failure on macOS 26 (Tahoe) where `sys/endian.h` defines
+  `bswap32` and `bswap64` as macros, conflicting with our function declarations.
+  Reported by Anton Melnikov. GitHub #419.
+
 ## 1.13.1 - 2026-02-24
 
 - Re-release for Ubuntu PPA. No code changes.

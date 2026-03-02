@@ -6,6 +6,7 @@
 - [UI] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.
 - [UI] Tweak plugins headers style to avoid the text moving the buttons out of the page when the header is too long.
 - [API] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.
+- [DEPS] Updated libmaxminddb version to v1.13.2
 
 ## v1.6.9~rc2 - 2026/02/26
 

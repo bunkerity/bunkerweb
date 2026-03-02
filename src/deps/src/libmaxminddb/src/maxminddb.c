@@ -1804,7 +1804,7 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
     #define __has_builtin(x) 0
 #endif
 
-static inline uint32_t bswap32(uint32_t x) {
+static inline uint32_t mmdb_bswap32(uint32_t x) {
 #if defined(_MSC_VER)
     return _byteswap_ulong(x);
 #elif __has_builtin(__builtin_bswap32)
@@ -1815,7 +1815,7 @@ static inline uint32_t bswap32(uint32_t x) {
 #endif
 }
 
-static inline uint64_t bswap64(uint64_t x) {
+static inline uint64_t mmdb_bswap64(uint64_t x) {
 #if defined(_MSC_VER)
     return _byteswap_uint64(x);
 #elif __has_builtin(__builtin_bswap64)
@@ -1837,7 +1837,7 @@ static float get_ieee754_float(const uint8_t *restrict p) {
     memcpy(&i, p, sizeof(uint32_t));
 
 #if MMDB_LITTLE_ENDIAN
-    i = bswap32(i);
+    i = mmdb_bswap32(i);
 #endif
 
     memcpy(&f, &i, sizeof(float));
@@ -1852,7 +1852,7 @@ static double get_ieee754_double(const uint8_t *restrict p) {
     memcpy(&i, p, sizeof(uint64_t));
 
 #if MMDB_LITTLE_ENDIAN
-    i = bswap64(i);
+    i = mmdb_bswap64(i);
 #endif
 
     memcpy(&d, &i, sizeof(double));
