@@ -1,6 +1,13 @@
 # Changelog
 
-## v1.6.9~rc2 - 2026/02/??
+## v1.6.9 - 2026/03/??
+
+- [BUGFIX] Fix issues with the new `multiselect` logic where a custom separator can be used, but the default one (space) was still used if the separator was empty, which caused issues with settings that had an empty string as a value.
+- [UI] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.
+- [UI] Tweak plugins headers style to avoid the text moving the buttons out of the page when the header is too long.
+- [API] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.
+
+## v1.6.9~rc2 - 2026/02/26
 
 - [BUGFIX] Update reCAPTCHA handling to use ANTIBOT_RECAPTCHA_CLASSIC variable instead of session data to determine whether to use the classic reCAPTCHA response format or the new one, ensuring consistent behavior regardless of session state.
 - [BUGFIX] Rename command argument to plugin_command for clarity and to avoid conflicts with other command arguments with bwcli.
