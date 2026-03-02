@@ -3907,7 +3907,7 @@ Follow these steps to configure and use ModSecurity:
 Select a CRS version to best match your security needs:
 
 - **`3`**: Stable [v3.3.8](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8).
-- **`4`**: Stable [v4.23.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.23.0) (**default**).
+- **`4`**: Stable [v4.24.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.24.0) (**default**).
 - **`nightly`**: [Nightly build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) offering the latest rule updates.
 
 !!! example "Nightly Build"
@@ -5730,22 +5730,23 @@ STREAM support :x:
 
 Enable SSO authentication for the BunkerWeb web interface by reading headers set by upstream authentication proxies (Authentik, Authelia, Keycloak, Traefik Forward Auth, etc.)
 
-| Setting                       | Default         | Context | Multiple | Description                                                                                      |
-| ----------------------------- | --------------- | ------- | -------- | ------------------------------------------------------------------------------------------------ |
-| `USE_UI_SSO`                  | `no`            | global  | no       | Enable or disable UI Single Sign-On authentication for the web interface                         |
-| `UI_SSO_HEADER_USERNAME`      | `X-User`        | global  | no       | HTTP header containing the authenticated username                                                |
-| `UI_SSO_HEADER_EMAIL`         | `X-Email`       | global  | no       | HTTP header containing the user's email address                                                  |
-| `UI_SSO_HEADER_GROUPS`        | `X-Groups`      | global  | no       | HTTP header containing the user's groups (comma or space separated)                              |
-| `UI_SSO_HEADER_NAME`          | `X-Name`        | global  | no       | HTTP header containing the user's display name                                                   |
-| `UI_SSO_TRUSTED_IPS`          | `127.0.0.1,::1` | global  | no       | Comma-separated list of trusted IP addresses or CIDR ranges that are allowed to send SSO headers |
-| `UI_SSO_AUTO_CREATE_USERS`    | `yes`           | global  | no       | Automatically create new users when they authenticate via SSO for the first time                 |
-| `UI_SSO_DEFAULT_ROLE`         | `reader`        | global  | no       | Default role assigned to new SSO users when no group mapping matches                             |
-| `UI_SSO_GROUP_ADMIN`          |                 | global  | no       | Group name that grants admin role (highest priority)                                             |
-| `UI_SSO_GROUP_WRITER`         |                 | global  | no       | Group name that grants writer role                                                               |
-| `UI_SSO_GROUP_READER`         |                 | global  | no       | Group name that grants reader role                                                               |
-| `UI_SSO_FALLBACK_TO_LOGIN`    | `yes`           | global  | no       | Allow users to fall back to normal login when SSO headers are not present                        |
-| `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`           | global  | no       | Update user information (email, role) from SSO headers on each login                             |
-| `UI_SSO_LOGOUT_REDIRECT_URL`  |                 | global  | no       | URL to redirect users to after logout (e.g., SSO provider logout endpoint)                       |
+| Setting                       | Default             | Context | Multiple | Description                                                                                      |
+| ----------------------------- | ------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------ |
+| `USE_UI_SSO`                  | `no`                | global  | no       | Enable or disable UI Single Sign-On authentication for the web interface                         |
+| `UI_SSO_HEADER_USERNAME`      | `X-User`            | global  | no       | HTTP header containing the authenticated username                                                |
+| `UI_SSO_HEADER_EMAIL`         | `X-Email`           | global  | no       | HTTP header containing the user's email address                                                  |
+| `UI_SSO_HEADER_GROUPS`        | `X-Groups`          | global  | no       | HTTP header containing the user's groups (comma or space separated)                              |
+| `UI_SSO_HEADER_NAME`          | `X-Name`            | global  | no       | HTTP header containing the user's display name                                                   |
+| `UI_SSO_TRUSTED_IPS`          | `127.0.0.1,::1`     | global  | no       | Comma-separated list of trusted IP addresses or CIDR ranges that are allowed to send SSO headers |
+| `UI_SSO_AUTO_CREATE_USERS`    | `yes`               | global  | no       | Automatically create new users when they authenticate via SSO for the first time                 |
+| `UI_SSO_DEFAULT_ROLE`         | `reader`            | global  | no       | Default role assigned to new SSO users when no group mapping matches                             |
+| `UI_SSO_GROUP_ADMIN`          |                     | global  | no       | Group name that grants admin role (highest priority)                                             |
+| `UI_SSO_GROUP_WRITER`         |                     | global  | no       | Group name that grants writer role                                                               |
+| `UI_SSO_GROUP_READER`         |                     | global  | no       | Group name that grants reader role                                                               |
+| `UI_SSO_FALLBACK_TO_LOGIN`    | `yes`               | global  | no       | Allow users to fall back to normal login when SSO headers are not present                        |
+| `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`               | global  | no       | Update user information (email, role) from SSO headers on each login                             |
+| `UI_SSO_ACCOUNT_LINKING`      | `username_or_email` | global  | no       | How to match incoming SSO users to local accounts                                                |
+| `UI_SSO_LOGOUT_REDIRECT_URL`  |                     | global  | no       | URL to redirect users to after logout (e.g., SSO provider logout endpoint)                       |
 
 ## User Manager <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

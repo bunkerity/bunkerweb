@@ -1,6 +1,7 @@
 # This list comes from the default IIS error pages
-# To renerate get the files from a default installation and use:
-# grep -h '<title' *.htm
+# To regenerate, get the files from a default IIS installation (C:\inetpub\custerr\en-US) and use:
+# PowerShell: Get-ChildItem "C:\inetpub\custerr\en-US\*.htm" | ForEach-Object { Select-String -Path $_.FullName -Pattern "<title>.*</title>" }
+# Or on Unix-like systems after copying the files: grep -h '<title' *.htm
 
 <title>401.1 - Unauthorized: Access is denied due to invalid credentials.</title>
 <title>401.2 - Unauthorized: Access is denied due to server configuration.</title>

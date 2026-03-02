@@ -3851,7 +3851,7 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 选择一个 CRS 版本以最符合您的安全需求：
 
 - **`3`**：稳定版 [v3.3.8](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8)。
-- **`4`**：稳定版 [v4.23.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.23.0) (**默认**)。
+- **`4`**：稳定版 [v4.24.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.24.0) (**默认**)。
 - **`nightly`**：[每日构建版](https://github.com/coreruleset/coreruleset/releases/tag/nightly)，提供最新的规则更新。
 
 !!! example "每日构建版"
@@ -5672,22 +5672,23 @@ STREAM 支持 :x:
 
 Enable SSO authentication for the BunkerWeb web interface by reading headers set by upstream authentication proxies (Authentik, Authelia, Keycloak, Traefik Forward Auth, etc.)
 
-| 参数                          | 默认值          | 上下文 | 可重复 | 描述                                                                                             |
-| ----------------------------- | --------------- | ------ | ------ | ------------------------------------------------------------------------------------------------ |
-| `USE_UI_SSO`                  | `no`            | global | 否     | Enable or disable UI Single Sign-On authentication for the web interface                         |
-| `UI_SSO_HEADER_USERNAME`      | `X-User`        | global | 否     | HTTP header containing the authenticated username                                                |
-| `UI_SSO_HEADER_EMAIL`         | `X-Email`       | global | 否     | HTTP header containing the user's email address                                                  |
-| `UI_SSO_HEADER_GROUPS`        | `X-Groups`      | global | 否     | HTTP header containing the user's groups (comma or space separated)                              |
-| `UI_SSO_HEADER_NAME`          | `X-Name`        | global | 否     | HTTP header containing the user's display name                                                   |
-| `UI_SSO_TRUSTED_IPS`          | `127.0.0.1,::1` | global | 否     | Comma-separated list of trusted IP addresses or CIDR ranges that are allowed to send SSO headers |
-| `UI_SSO_AUTO_CREATE_USERS`    | `yes`           | global | 否     | Automatically create new users when they authenticate via SSO for the first time                 |
-| `UI_SSO_DEFAULT_ROLE`         | `reader`        | global | 否     | Default role assigned to new SSO users when no group mapping matches                             |
-| `UI_SSO_GROUP_ADMIN`          |                 | global | 否     | Group name that grants admin role (highest priority)                                             |
-| `UI_SSO_GROUP_WRITER`         |                 | global | 否     | Group name that grants writer role                                                               |
-| `UI_SSO_GROUP_READER`         |                 | global | 否     | Group name that grants reader role                                                               |
-| `UI_SSO_FALLBACK_TO_LOGIN`    | `yes`           | global | 否     | Allow users to fall back to normal login when SSO headers are not present                        |
-| `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`           | global | 否     | Update user information (email, role) from SSO headers on each login                             |
-| `UI_SSO_LOGOUT_REDIRECT_URL`  |                 | global | 否     | URL to redirect users to after logout (e.g., SSO provider logout endpoint)                       |
+| 参数                          | 默认值              | 上下文 | 可重复 | 描述                                                                                             |
+| ----------------------------- | ------------------- | ------ | ------ | ------------------------------------------------------------------------------------------------ |
+| `USE_UI_SSO`                  | `no`                | global | 否     | Enable or disable UI Single Sign-On authentication for the web interface                         |
+| `UI_SSO_HEADER_USERNAME`      | `X-User`            | global | 否     | HTTP header containing the authenticated username                                                |
+| `UI_SSO_HEADER_EMAIL`         | `X-Email`           | global | 否     | HTTP header containing the user's email address                                                  |
+| `UI_SSO_HEADER_GROUPS`        | `X-Groups`          | global | 否     | HTTP header containing the user's groups (comma or space separated)                              |
+| `UI_SSO_HEADER_NAME`          | `X-Name`            | global | 否     | HTTP header containing the user's display name                                                   |
+| `UI_SSO_TRUSTED_IPS`          | `127.0.0.1,::1`     | global | 否     | Comma-separated list of trusted IP addresses or CIDR ranges that are allowed to send SSO headers |
+| `UI_SSO_AUTO_CREATE_USERS`    | `yes`               | global | 否     | Automatically create new users when they authenticate via SSO for the first time                 |
+| `UI_SSO_DEFAULT_ROLE`         | `reader`            | global | 否     | Default role assigned to new SSO users when no group mapping matches                             |
+| `UI_SSO_GROUP_ADMIN`          |                     | global | 否     | Group name that grants admin role (highest priority)                                             |
+| `UI_SSO_GROUP_WRITER`         |                     | global | 否     | Group name that grants writer role                                                               |
+| `UI_SSO_GROUP_READER`         |                     | global | 否     | Group name that grants reader role                                                               |
+| `UI_SSO_FALLBACK_TO_LOGIN`    | `yes`               | global | 否     | Allow users to fall back to normal login when SSO headers are not present                        |
+| `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`               | global | 否     | Update user information (email, role) from SSO headers on each login                             |
+| `UI_SSO_ACCOUNT_LINKING`      | `username_or_email` | global | 否     | How to match incoming SSO users to local accounts                                                |
+| `UI_SSO_LOGOUT_REDIRECT_URL`  |                     | global | 否     | URL to redirect users to after logout (e.g., SSO provider logout endpoint)                       |
 
 ## User Manager <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

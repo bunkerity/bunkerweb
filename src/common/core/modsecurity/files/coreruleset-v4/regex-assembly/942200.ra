@@ -1,23 +1,47 @@
 ##! Please refer to the documentation at
 ##! https://coreruleset.org/docs/development/regex_assembly/.
 
+##! Detect the following patterns:
+##! - SELECT * FROM users WHERE username = 'admin', '1'='1'
+##! - INSERT INTO logs (ip, comment) VALUES ('192.168.0.1', 'test')
+##! - SELECT * FROM data WHERE hash = 'abc', 0x1a
+##! - SELECT * FROM orders WHERE product = 'item', (5)
+##! - ,varname"
+
+##! Do not detect things like French addresses:
+##! 999, rue d'Arlon
+
 ##!+ i
 
 ##! Helpers
-##!> define punctuation-hexnumbers ,.*?[)\da-f\"'`]
+##!> define punctuation-plus ,.*?
 
-##!> define ticks [\"'`]
+##!> define hex-numbers [)\da-f]
+
+##!> define ticks \"'`
+
+##!> define ticks-class [{{ticks}}]
+
+##!> define not-ticks-class [^{{ticks}}]
 
 ##!> define spaces \s*?\(\s*?space\s*?\(
 
 ##! Main assembly
 ##!> assemble
-  {{punctuation-hexnumbers}}{{ticks}}
-  ##!=>
-  {{ticks}}.*?{{ticks}}
-  (?:\r?\n)?\z
-  [^\"'`]+
-  ##!=>
+  ##!> assemble
+    {{punctuation-plus}}{{hex-numbers}}
+    ##!=>
+    $
+    {{ticks-class}}$
+    {{ticks-class}}{{not-ticks-class}}+{{ticks-class}}
+    \z
+    \n\z
+    \r\n\z
+    ##!=>
+  ##!<
+  ##!> assemble
+    {{punctuation-plus}}{{ticks-class}}{{not-ticks-class}}+{{ticks-class}}
+  ##!<
 ##!<
 
 \Wselect.+\W*?from

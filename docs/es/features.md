@@ -3859,7 +3859,7 @@ Siga estos pasos para configurar y usar ModSecurity:
 Seleccione una versión de CRS que se ajuste mejor a sus necesidades de seguridad:
 
 - **`3`**: Estable [v3.3.8](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8).
-- **`4`**: Estable [v4.23.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.23.0) (**predeterminada**).
+- **`4`**: Estable [v4.24.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.24.0) (**predeterminada**).
 - **`nightly`**: [Compilación nocturna](https://github.com/coreruleset/coreruleset/releases/tag/nightly) que ofrece las últimas actualizaciones de reglas.
 
 !!! example "Compilación Nocturna"
@@ -5696,6 +5696,7 @@ Enable SSO authentication for the BunkerWeb web interface by reading headers set
 | `UI_SSO_GROUP_READER`         |                      | global   | no       | Group name that grants reader role                                                               |
 | `UI_SSO_FALLBACK_TO_LOGIN`    | `yes`                | global   | no       | Allow users to fall back to normal login when SSO headers are not present                        |
 | `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`                | global   | no       | Update user information (email, role) from SSO headers on each login                             |
+| `UI_SSO_ACCOUNT_LINKING`      | `username_or_email`  | global   | no       | How to match incoming SSO users to local accounts                                                |
 | `UI_SSO_LOGOUT_REDIRECT_URL`  |                      | global   | no       | URL to redirect users to after logout (e.g., SSO provider logout endpoint)                       |
 
 ## User Manager <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
