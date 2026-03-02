@@ -41,6 +41,7 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
         "challenge": [],
         "authenticator": [],
         "key_type": [],
+        "key_size": [],
     }
 
     for folder_path in folder_paths:
@@ -62,6 +63,7 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
                 "challenge": "Unknown",
                 "authenticator": "Unknown",
                 "key_type": "Unknown",
+                "key_size": "Unknown",
             }
 
             # * Parsing the certificate
@@ -90,6 +92,9 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
 
                 # ? Getting the version
                 cert_info["version"] = cert.version.name
+                # key_size is the actual bit length of the public key:
+                # 256 for P-256 ECDSA, 384 for P-384 ECDSA, 4096 for RSA-4096, etc.
+                cert_info["key_size"] = str(cert.public_key().key_size)
             except BaseException:
                 print(f"Error while parsing certificate {cert_file}: {format_exc()}", flush=True)
 
@@ -137,6 +142,7 @@ def pre_render(app, *args, **kwargs):
                 "challenge": [],
                 "authenticator": [],
                 "key_type": [],
+                "key_size": [],
             },
             "order": {
                 "column": 5,

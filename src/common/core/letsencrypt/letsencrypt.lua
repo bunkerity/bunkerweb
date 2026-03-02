@@ -515,11 +515,48 @@ function letsencrypt:api()
 	end
 	local acme_folder = "/var/tmp/bunkerweb/lets-encrypt/.well-known/acme-challenge/"
 	local ngx_req = ngx.req
+
+	-- read_body() must be called before get_body_data() in the lua-nginx-module.
+	-- Without it, get_body_data() always returns nil because nginx has not yet
+	-- buffered the request body into memory.
 	ngx_req.read_body()
-	local ret, data = pcall(decode, ngx_req.get_body_data())
+
+	-- get_body_data() returns nil if nginx buffered the body to disk instead of
+	-- memory (happens when body exceeds client_body_buffer_size, default 8k/16k).
+	local body_data = ngx_req.get_body_data()
+	local content_length = tonumber(self.ctx.bw.http_content_length or 0) or 0
+
+	self.logger:log(ngx.DEBUG, "Received challenge request - Content-Length: " .. content_length .. ", body_data: " .. (body_data and "present (" .. #body_data .. " bytes)" or "nil"))
+
+	-- Fallback: read body from the temp file nginx wrote to disk
+	if not body_data then
+		local body_file = ngx_req.get_body_file()
+		self.logger:log(ngx.DEBUG, "Body not in memory, checking disk - body_file: " .. (body_file or "nil"))
+		if body_file then
+			local file = open(body_file, "r")
+			if file then
+				body_data = file:read("*a")
+				file:close()
+				self.logger:log(ngx.DEBUG, "Read body from disk file: " .. #body_data .. " bytes")
+			end
+		end
+	end
+
+	if not body_data or body_data == "" then
+		self.logger:log(ERR, "No request body found - Content-Length was " .. content_length)
+		return self:ret(true, "empty request body", HTTP_BAD_REQUEST)
+	end
+
+	self.logger:log(ngx.DEBUG, "Attempting to decode JSON body (" .. #body_data .. " bytes)")
+
+	local ret, data = pcall(decode, body_data)
 	if not ret then
+		-- Include body content in the error log to diagnose encoding/Content-Type issues
+		self.logger:log(ERR, "Failed to decode JSON: " .. tostring(data))
+		self.logger:log(ERR, "Body length: " .. #body_data .. ", Content: " .. body_data:sub(1, 500))
 		return self:ret(true, "json body decoding failed", HTTP_BAD_REQUEST)
 	end
+	self.logger:log(ngx.DEBUG, "Successfully decoded JSON - token: " .. (data.token and data.token:sub(1, 20) or "missing"))
 	execute("mkdir -p " .. acme_folder)
 	if self.ctx.bw.request_method == "POST" then
 		local file, err = open(acme_folder .. data.token, "w+")

@@ -49,6 +49,7 @@ DATATABLE_COLUMNS = (
     "preferred_profile",
     "challenge",
     "key_type",
+    "key_size",
     "serial_number",
     "fingerprint",
     "version",
@@ -66,6 +67,7 @@ SEARCHABLE_FIELDS = (
     "challenge",
     "authenticator",
     "key_type",
+    "key_size",
     "valid_from",
     "valid_to",
 )
@@ -103,6 +105,7 @@ def retrieve_certificates():
         "challenge": [],
         "authenticator": [],
         "key_type": [],
+        "key_size": [],
     }
 
     for cert_file in Path(DATA_PATH).joinpath("live").glob("*/fullchain.pem"):
@@ -121,6 +124,7 @@ def retrieve_certificates():
             "challenge": "Unknown",
             "authenticator": "Unknown",
             "key_type": "Unknown",
+            "key_size": "Unknown",
         }
         try:
             cert = x509.load_pem_x509_certificate(cert_file.read_bytes(), default_backend())
@@ -135,6 +139,9 @@ def retrieve_certificates():
             cert_info["serial_number"] = str(cert.serial_number)
             cert_info["fingerprint"] = cert.fingerprint(hashes.SHA256()).hex()
             cert_info["version"] = cert.version.name
+            # key_size returns the actual bit length of the public key regardless of type:
+            # 256 for P-256 ECDSA, 384 for P-384 ECDSA, 4096 for RSA-4096, etc.
+            cert_info["key_size"] = str(cert.public_key().key_size)
         except BaseException as e:
             LOGGER.debug(format_exc())
             LOGGER.error(f"Error while parsing certificate {cert_file}: {e}")
@@ -209,6 +216,7 @@ def letsencrypt_fetch():
                     "challenge": certs.get("challenge", [""])[i],
                     "authenticator": certs.get("authenticator", [""])[i],
                     "key_type": certs.get("key_type", [""])[i],
+                    "key_size": certs.get("key_size", [""])[i],
                 }
             )
     except BaseException as e:

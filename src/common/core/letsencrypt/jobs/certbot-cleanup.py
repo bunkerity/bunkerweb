@@ -23,9 +23,16 @@ try:
     instances = db.get_instances()
 
     LOGGER.info(f"Cleaning challenge from {len(instances)} instances")
+    LOGGER.debug(f"Challenge token to clean: {token}")
+
     for instance in instances:
         api = API.from_instance(instance)
-        sent, err, status, resp = api.request("DELETE", "/lets-encrypt/challenge", data={"token": token})
+        # Pass dict directly so API.request() uses kwargs["json"] = data, which sets
+        # Content-Type: application/json automatically. Passing bytes would skip this,
+        # causing the Lua handler to receive a body without correct Content-Type.
+        payload = {"token": token}
+        LOGGER.debug(f"Sending DELETE request to {api.endpoint}: {payload}")
+        sent, err, status, resp = api.request("DELETE", "/lets-encrypt/challenge", data=payload)
         if not sent:
             status = 1
             LOGGER.error(f"Can't send API request to {api.endpoint}/lets-encrypt/challenge : {err}")

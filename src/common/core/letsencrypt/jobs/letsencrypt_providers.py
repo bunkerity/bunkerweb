@@ -35,8 +35,14 @@ class Provider(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     def get_formatted_credentials(self) -> bytes:
-        """Return the formatted credentials to be written to a file."""
-        return "\n".join(f"{key} = {value}" for key, value in self.model_dump(exclude={"file_type"}).items()).encode("utf-8")
+        """Return the formatted credentials to be written to a file, excluding empty values.
+
+        Empty values (None, "", 0, False) are filtered out to avoid writing lines like
+        'dns_cloudflare_email = ' into the credentials INI file, which certbot would
+        treat as an empty string value and may reject or misinterpret.
+        """
+        items = {key: str(value) for key, value in self.model_dump(exclude={"file_type"}).items() if value}
+        return "\n".join(f"{key} = {value}" for key, value in items.items()).encode("utf-8")
 
     @staticmethod
     def get_file_type() -> Literal["ini"]:
@@ -84,8 +90,9 @@ class ClouDNSProvider(Provider):
     )
 
     def get_formatted_credentials(self) -> bytes:
-        """Return the formatted credentials, excluding defaults."""
-        return "\n".join(f"{key} = {value}" for key, value in self.model_dump(exclude={"file_type"}, exclude_defaults=True).items()).encode("utf-8")
+        """Return the formatted credentials, excluding empty values."""
+        items = {key: str(value) for key, value in self.model_dump(exclude={"file_type"}).items() if value}
+        return "\n".join(f"{key} = {value}" for key, value in items.items()).encode("utf-8")
 
     @model_validator(mode="after")
     def validate_cloudns_credentials(self):
@@ -116,8 +123,24 @@ class CloudflareProvider(Provider):
     )
 
     def get_formatted_credentials(self) -> bytes:
-        """Return the formatted credentials, excluding defaults."""
-        return "\n".join(f"{key} = {value}" for key, value in self.model_dump(exclude={"file_type"}, exclude_defaults=True).items()).encode("utf-8")
+        """Return the formatted credentials with mutual exclusivity for auth methods.
+
+        Prefer API token over legacy email+api_key method when both are available.
+        Output format: standard INI file with credentials.
+        """
+        items = {key: str(value) for key, value in self.model_dump(exclude={"file_type"}).items() if value}
+
+        # Implement mutual exclusivity: if api_token is set, exclude email+api_key
+        if self.dns_cloudflare_api_token:
+            items.pop("dns_cloudflare_email", None)
+            items.pop("dns_cloudflare_api_key", None)
+
+        # Build the credentials in INI format
+        lines = []
+        for key, value in items.items():
+            lines.append(f"{key} = {value}")
+
+        return "\n".join(lines).encode("utf-8")
 
     @model_validator(mode="after")
     def validate_cloudflare_credentials(self):
@@ -286,8 +309,9 @@ class GandiProvider(Provider):
     )
 
     def get_formatted_credentials(self) -> bytes:
-        """Return the formatted credentials, excluding defaults."""
-        return "\n".join(f"{key} = {value}" for key, value in self.model_dump(exclude={"file_type"}, exclude_defaults=True).items()).encode("utf-8")
+        """Return the formatted credentials, excluding empty values."""
+        items = {key: str(value) for key, value in self.model_dump(exclude={"file_type"}).items() if value}
+        return "\n".join(f"{key} = {value}" for key, value in items.items()).encode("utf-8")
 
     @staticmethod
     def get_extra_args() -> dict:
@@ -572,8 +596,9 @@ class Rfc2136Provider(Provider):
     )
 
     def get_formatted_credentials(self) -> bytes:
-        """Return the formatted credentials, excluding defaults."""
-        return "\n".join(f"{key} = {value}" for key, value in self.model_dump(exclude={"file_type"}, exclude_defaults=True).items()).encode("utf-8")
+        """Return the formatted credentials, excluding empty values."""
+        items = {key: str(value) for key, value in self.model_dump(exclude={"file_type"}).items() if value}
+        return "\n".join(f"{key} = {value}" for key, value in items.items()).encode("utf-8")
 
     @staticmethod
     def get_extra_args() -> dict:
@@ -598,7 +623,8 @@ class Route53Provider(Provider):
         """Return the formatted credentials in environment variable format, with [default] at the top."""
         lines = ["[default]"]
         for key, value in self.model_dump(exclude={"file_type"}).items():
-            lines.append(f"{key}={value}")
+            if value:
+                lines.append(f"{key}={value}")
         return "\n".join(lines).encode("utf-8")
 
     @staticmethod

@@ -25,15 +25,26 @@ try:
     instances = db.get_instances()
 
     LOGGER.info(f"Sending challenge to {len(instances)} instances")
+    LOGGER.debug(f"Challenge data - token length: {len(token)}, validation length: {len(validation)}")
+
     for instance in instances:
         api = API.from_instance(instance)
-        sent, err, status, resp = api.request("POST", "/lets-encrypt/challenge", data={"token": token, "validation": validation})
+        # Pass dict directly so API.request() uses kwargs["json"] = data, which sets
+        # Content-Type: application/json automatically via the requests library.
+        # Passing bytes instead would use kwargs["data"] = data with no Content-Type,
+        # causing the Lua handler's json.decode() to fail ("json body decoding failed").
+        payload = {"token": token, "validation": validation}
+        LOGGER.debug(f"Sending payload to {api.endpoint}: {payload}")
+        sent, err, status, resp = api.request("POST", "/lets-encrypt/challenge", data=payload)
         if not sent:
             status = 1
             LOGGER.error(f"Can't send API request to {api.endpoint}/lets-encrypt/challenge : {err}")
         elif status != 200:
             status = 1
-            LOGGER.error(f"Error while sending API request to {api.endpoint}/lets-encrypt/challenge : status = {resp['status']}, msg = {resp['msg']}")
+            # Log HTTP status directly from the return value rather than from resp dict,
+            # since resp structure varies and may not always have 'status'/'msg' keys.
+            LOGGER.error(f"Error while sending API request (HTTP {status}) to {api.endpoint}/lets-encrypt/challenge : {resp}")
+            LOGGER.debug(f"Full response: {resp}")
         else:
             LOGGER.info(f"Successfully sent API request to {api.endpoint}/lets-encrypt/challenge")
 except BaseException as e:

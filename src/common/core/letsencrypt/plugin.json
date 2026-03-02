@@ -213,6 +213,36 @@
       "regex": "^([a-zA-Z0-9_-]{0,64})$",
       "type": "text"
     },
+    "LETS_ENCRYPT_KEY_TYPE": {
+      "context": "multisite",
+      "default": "ecdsa",
+      "help": "Key type for the certificate. 'ecdsa' is recommended for performance; 'rsa' for legacy compatibility.",
+      "id": "lets-encrypt-key-type",
+      "label": "Certificate Key Type",
+      "regex": "^(ecdsa|rsa)$",
+      "type": "select",
+      "select": ["ecdsa", "rsa"]
+    },
+    "LETS_ENCRYPT_ELLIPTIC_CURVE": {
+      "context": "multisite",
+      "default": "secp384r1",
+      "help": "Elliptic curve to use when LETS_ENCRYPT_KEY_TYPE is 'ecdsa'. secp256r1 = ECC 256, secp384r1 = ECC 384 (default). Ignored for RSA key type.",
+      "id": "lets-encrypt-elliptic-curve",
+      "label": "Elliptic Curve",
+      "regex": "^(secp256r1|secp384r1)$",
+      "type": "select",
+      "select": ["secp256r1", "secp384r1"]
+    },
+    "LETS_ENCRYPT_RSA_KEY_SIZE": {
+      "context": "multisite",
+      "default": "4096",
+      "help": "RSA key size in bits. Only used when LETS_ENCRYPT_KEY_TYPE is 'rsa'. Minimum 3072 bits (2048 is obsolete per BSI standards). Ignored for ECDSA keys.",
+      "id": "lets-encrypt-rsa-key-size",
+      "label": "RSA Key Size",
+      "regex": "^(3072|4096|8192)$",
+      "type": "select",
+      "select": ["3072", "4096", "8192"]
+    },
     "LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES": {
       "context": "multisite",
       "default": "yes",

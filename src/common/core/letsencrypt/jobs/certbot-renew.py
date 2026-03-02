@@ -2,7 +2,8 @@
 
 from os import getenv, sep
 from os.path import join
-from subprocess import DEVNULL, PIPE, Popen
+from pathlib import Path
+from subprocess import DEVNULL, PIPE, Popen, TimeoutExpired
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
@@ -23,6 +24,8 @@ from letsencrypt_utils import (
     is_zerossl_used_in_env,
     prepare_logs_dir,
     resolve_certbot_entrypoint,
+    run_process_with_timeout,
+    update_renewal_config_authenticator,
 )
 
 LOGGER = getLogger("LETS-ENCRYPT.RENEW")
@@ -64,33 +67,52 @@ try:
     if acme_server == "zerossl" and certbot_bin != CERTBOT_BIN:
         LOGGER.info("Using zerossl-bot wrapper for certificate renewal.")
 
-    process = Popen(
-        [
-            certbot_bin,
-            "renew",
-            "-n",
-            "--no-random-sleep-on-renew",
-            "--config-dir",
-            DATA_PATH.as_posix(),
-            "--work-dir",
-            WORK_DIR,
-            "--logs-dir",
-            LOGS_DIR,
-        ]
-        + (["-v"] if getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper() == "DEBUG" else []),
-        stdin=DEVNULL,
-        stderr=PIPE,
-        universal_newlines=True,
-        env=cmd_env,
-    )
-    while process.poll() is None:
-        if process.stderr:
-            for line in process.stderr:
-                LOGGER_CERTBOT.info(line.strip())
+    # Update renewal configs if challenge type or DNS provider has changed
+    renewal_conf_dir = DATA_PATH / "renewal"
+    if renewal_conf_dir.is_dir():
+        for conf_file in renewal_conf_dir.glob("*.conf"):
+            domain = conf_file.stem
+            try:
+                # Determine new authenticator based on current settings
+                if getenv("MULTISITE", "no") == "yes":
+                    challenge = getenv(f"{domain}_LETS_ENCRYPT_CHALLENGE", getenv("LETS_ENCRYPT_CHALLENGE", "http")).lower()
+                    dns_provider = getenv(f"{domain}_LETS_ENCRYPT_DNS_PROVIDER", getenv("LETS_ENCRYPT_DNS_PROVIDER", "")).lower()
+                else:
+                    challenge = getenv("LETS_ENCRYPT_CHALLENGE", "http").lower()
+                    dns_provider = getenv("LETS_ENCRYPT_DNS_PROVIDER", "").lower()
 
-    if process.returncode != 0:
+                if challenge == "dns" and dns_provider:
+                    new_authenticator = f"dns-{dns_provider}"
+                else:
+                    new_authenticator = "webroot"
+
+                update_renewal_config_authenticator(renewal_conf_dir, domain, new_authenticator, LOGGER)
+            except BaseException as e:
+                LOGGER.debug(f"Failed to update renewal config for {domain}: {e}")
+
+    command = [
+        certbot_bin,
+        "renew",
+        "-n",
+        "--no-random-sleep-on-renew",
+        "--config-dir",
+        DATA_PATH.as_posix(),
+        "--work-dir",
+        WORK_DIR,
+        "--logs-dir",
+        LOGS_DIR,
+    ]
+    if getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper() == "DEBUG":
+        command.append("-v")
+
+    try:
+        returncode = run_process_with_timeout(command, 360, LOGGER_CERTBOT, cmd_env)
+        if returncode != 0:
+            status = 2
+            LOGGER.error("Certificates renewal failed")
+    except TimeoutExpired:
         status = 2
-        LOGGER.error("Certificates renewal failed")
+        LOGGER.error("Certificates renewal exceeded 6 minute timeout")
 
     # Save Let's Encrypt data to db cache
     if DATA_PATH.is_dir() and list(DATA_PATH.iterdir()):

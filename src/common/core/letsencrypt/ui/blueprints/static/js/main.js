@@ -58,6 +58,10 @@
         title: "Key Type",
         tooltip: "Type of key used in the certificate",
       },
+      {
+        title: "Key Size",
+        tooltip: "Size of the key in bits (e.g. 256, 384, 4096)",
+      },
     ];
 
     // Set up the delete confirmation modal
@@ -471,6 +475,10 @@
           title: "Key Type",
         },
         {
+          data: "key_size",
+          title: "Key Size",
+        },
+        {
           data: "serial_number",
           title: "Serial Number",
         },
@@ -508,7 +516,10 @@
     const letsencrypt_config = {
       tableSelector: "#letsencrypt",
       tableName: "letsencrypt",
-      columnVisibilityCondition: (column) => column > 2 && column < 13,
+      // Columns 0-2 are always visible (checkbox, domain, status).
+      // Upper bound must equal the last toggleable column index + 1.
+      // Update this when adding/removing columns (currently 3..13 = 11 toggleable columns).
+      columnVisibilityCondition: (column) => column > 2 && column < 14,
       dataTableOptions: {
         columnDefs: buildColumnDefs(),
         order: [[2, "asc"]], // Sort by domain name

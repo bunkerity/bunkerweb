@@ -1,6 +1,10 @@
 from os import W_OK, X_OK, access, environ, getenv, sep, umask
 from os.path import join
 from pathlib import Path
+from re import sub
+from select import select
+from subprocess import DEVNULL, PIPE, Popen, TimeoutExpired
+from time import time
 from typing import Dict, List, Mapping, Optional, Union
 
 CERTBOT_BIN = join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot")
@@ -49,8 +53,14 @@ def build_certbot_env(job, deps_path: str, base_env: Optional[Dict[str, str]] = 
     return cmd_env
 
 
-def prepare_logs_dir(logs_dir: Union[str, Path], logger) -> None:
-    """Ensure the Let's Encrypt logs directory is writable by the running user."""
+def prepare_logs_dir(logs_dir: Union[str, Path], logger, clear_main_log: bool = False) -> None:
+    """Ensure the Let's Encrypt logs directory is writable by the running user.
+
+    Args:
+        logs_dir: Path to logs directory
+        logger: Logger instance
+        clear_main_log: If True, clear letsencrypt.log at the start (only once)
+    """
     try:
         umask(0o007)
     except BaseException:
@@ -67,6 +77,16 @@ def prepare_logs_dir(logs_dir: Union[str, Path], logger) -> None:
         logs_path.chmod(0o2770)
     except BaseException as e:
         logger.debug(f"Failed to set permissions on {logs_path}: {e}")
+
+    # Clear main letsencrypt.log only once at job start
+    if clear_main_log:
+        main_log = logs_path / "letsencrypt.log"
+        try:
+            if main_log.exists():
+                main_log.write_text("")
+                logger.debug(f"Cleared main log file: {main_log}")
+        except BaseException as e:
+            logger.debug(f"Failed to clear main log file {main_log}: {e}")
 
     for log_file in logs_path.glob("*.log*"):
         try:
@@ -129,3 +149,89 @@ def get_expected_acme_directory(server: str, staging: bool) -> str:
     if staging:
         return LETSENCRYPT_STAGING_DIRECTORY
     return LETSENCRYPT_PRODUCTION_DIRECTORY
+
+
+def run_process_with_timeout(
+    command: List[str],
+    timeout: int,
+    logger,
+    env: Optional[Dict[str, str]] = None,
+) -> int:
+    """Run a process with a timeout and real-time stderr logging.
+
+    Args:
+        command: Command and arguments to execute
+        timeout: Maximum time in seconds to wait for process completion
+        logger: Logger object for output
+        env: Environment variables for the process
+
+    Returns:
+        Process return code
+
+    Raises:
+        TimeoutExpired: If process exceeds timeout
+    """
+    process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=env)
+    start_time = time()
+
+    try:
+        while process.poll() is None:
+            elapsed = time() - start_time
+            remaining = timeout - elapsed
+
+            if remaining <= 0:
+                process.kill()
+                raise TimeoutExpired(command[0], timeout)
+
+            if process.stderr:
+                # select() with a 2-second (or remaining-time) timeout avoids busy-waiting.
+                # We read one line per iteration to keep the log stream flowing in real time
+                # while still checking the timeout on each loop pass.
+                rlist, _, _ = select([process.stderr], [], [], min(remaining, 2))
+                if rlist:
+                    for line in process.stderr:
+                        logger.info(line.strip())
+                        break
+
+        return process.returncode
+    except TimeoutExpired:
+        process.kill()
+        raise
+
+
+def update_renewal_config_authenticator(
+    renewal_dir: Union[str, Path],
+    domain: str,
+    new_authenticator: str,
+    logger,
+) -> bool:
+    """Update the authenticator in a renewal .conf file.
+
+    Args:
+        renewal_dir: Path to renewal directory (containing .conf files)
+        domain: Domain name (certificate name)
+        new_authenticator: New authenticator value (e.g., 'dns-cloudflare', 'webroot')
+        logger: Logger object for output
+
+    Returns:
+        True if updated successfully, False otherwise
+    """
+    renewal_path = Path(renewal_dir) / f"{domain}.conf"
+
+    if not renewal_path.is_file():
+        return False
+
+    try:
+        content = renewal_path.read_text()
+        # flags=8 is re.MULTILINE — needed so ^ and $ match line boundaries, not
+        # just start/end of the entire string (the renewal conf spans many lines).
+        updated_content = sub(r"^authenticator\s*=\s*[^\n]*$", f"authenticator = {new_authenticator}", content, flags=8)
+
+        if updated_content != content:
+            renewal_path.write_text(updated_content)
+            logger.info(f"Updated authenticator for {domain} to '{new_authenticator}'")
+            return True
+        return False
+    except BaseException as e:
+        logger.error(f"Failed to update renewal config for {domain}: {e}")
+        return False
