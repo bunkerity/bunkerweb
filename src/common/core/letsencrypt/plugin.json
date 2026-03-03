@@ -206,7 +206,7 @@
     "LETS_ENCRYPT_PROFILE": {
       "context": "multisite",
       "default": "classic",
-      "help": "Select the certificate profile to use with Let's Encrypt. 'classic' is a general-purpose certificate with 90-day lifetime and broad compatibility. 'tlsserver' is optimized for TLS server authentication with 90-day lifetime and smaller payload. 'shortlived' offers 7-day certificates for enhanced security in automated environments.",
+      "help": "Select the certificate profile to use with Let's Encrypt. 'classic' is a general-purpose certificate with 90-day lifetime and broad compatibility. 'tlsserver' is optimized for TLS server authentication with 90-day lifetime and smaller payload. 'shortlived' offers 7-day certificates for enhanced security in automated environments. Note: certificate profiles are only supported by the Let's Encrypt CA (LETS_ENCRYPT_SERVER=letsencrypt). This setting is ignored when using ZeroSSL.",
       "id": "lets-encrypt-profile",
       "label": "Certificate Profile",
       "regex": "^(classic|tlsserver|shortlived)$",
@@ -216,7 +216,7 @@
     "LETS_ENCRYPT_CUSTOM_PROFILE": {
       "context": "multisite",
       "default": "",
-      "help": "Custom certificate profile to use with ACME servers that support non-standard profiles. Overrides LETS_ENCRYPT_PROFILE if set.",
+      "help": "Custom certificate profile to use with ACME servers that support non-standard profiles. Overrides LETS_ENCRYPT_PROFILE if set. Note: certificate profiles are only supported by the Let's Encrypt CA (LETS_ENCRYPT_SERVER=letsencrypt). This setting is ignored when using ZeroSSL.",
       "id": "lets-encrypt-custom-profile",
       "label": "Custom Certificate Profile (ACME)",
       "regex": "^([a-zA-Z0-9_-]{0,64})$",

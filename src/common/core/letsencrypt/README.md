@@ -22,12 +22,12 @@ Follow these steps to configure and use the Let's Encrypt feature:
 4. **Provide ZeroSSL credentials (if needed):** When using `zerossl`, set `EMAIL_LETS_ENCRYPT` or `LETS_ENCRYPT_ZEROSSL_API_KEY` so `zerossl-bot` can retrieve EAB credentials.
 5. **Choose challenge type:** Select either `http` or `dns` verification with the `LETS_ENCRYPT_CHALLENGE` setting.
 6. **Configure DNS provider:** If using DNS challenges, specify your DNS provider and credentials.
-7. **Select certificate profile:** Choose your preferred certificate profile using the `LETS_ENCRYPT_PROFILE` setting (classic, tlsserver, or shortlived).
+7. **Select certificate profile (Let's Encrypt only):** Choose your preferred certificate profile using the `LETS_ENCRYPT_PROFILE` setting (classic, tlsserver, or shortlived). This setting has no effect when using ZeroSSL.
 8. **Choose certificate key type (optional):** Set `LETS_ENCRYPT_KEY_TYPE` to `ecdsa` (default, recommended) or `rsa` for legacy compatibility. For ECDSA, optionally set `LETS_ENCRYPT_ELLIPTIC_CURVE`. For RSA, optionally set `LETS_ENCRYPT_RSA_KEY_SIZE`.
 9. **Let BunkerWeb handle the rest:** Once configured, certificates are automatically issued, installed, and renewed as needed.
 
-!!! tip "Certificate Profiles"
-    Let's Encrypt provides different certificate profiles for different use cases:
+!!! tip "Certificate Profiles (Let's Encrypt only)"
+    Let's Encrypt provides different certificate profiles for different use cases. **These profiles only apply when `LETS_ENCRYPT_SERVER=letsencrypt`. They are ignored by ZeroSSL.**
 
     - **classic**: General-purpose certificates with 90-day validity (default)
     - **tlsserver**: Optimized for TLS server authentication with 90-day validity and smaller payload
@@ -35,7 +35,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
     - **custom**: If your ACME server supports a different profile, set it using `LETS_ENCRYPT_CUSTOM_PROFILE`.
 
 !!! info "Profile Availability"
-    Note that the `tlsserver` and `shortlived` profiles may not be available in all environments or with all ACME clients at this time. The `classic` profile has the widest compatibility and is recommended for most users. If a selected profile is not available, the system will automatically fall back to the `classic` profile.
+    Note that the `tlsserver` and `shortlived` profiles may not be available in all environments or with all ACME clients at this time. The `classic` profile has the widest compatibility and is recommended for most users. If a selected profile is not available, the system will automatically fall back to the `classic` profile. **Certificate profiles are not supported by ZeroSSL — `LETS_ENCRYPT_PROFILE` and `LETS_ENCRYPT_CUSTOM_PROFILE` are ignored when `LETS_ENCRYPT_SERVER=zerossl`.**
 
 !!! tip "Certificate Key Type"
     BunkerWeb supports two key algorithms for certificates:
@@ -72,8 +72,8 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | `USE_LETS_ENCRYPT_STAGING`                  | `no`          | multisite | no       | **Use Staging:** When set to `yes`, uses Let's Encrypt's staging environment for testing. Staging has higher rate limits but produces certificates that are not trusted by browsers.                                                                                           |
 | `LETS_ENCRYPT_CLEAR_OLD_CERTS`              | `no`          | global    | no       | **Clear Old Certificates:** When set to `yes`, removes old certificates that are no longer needed during renewal.                                                                                                                                                              |
 | `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`          | global    | no       | **Concurrent Requests:** When set to `yes`, certbot-new issues certificate requests concurrently. Use with caution to avoid rate limits.                                                                                                                                       |
-| `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | no       | **Certificate Profile:** Select the certificate profile to use. Options: `classic` (general-purpose), `tlsserver` (optimized for TLS servers), or `shortlived` (7-day certificates).                                                                                           |
-| `LETS_ENCRYPT_CUSTOM_PROFILE`               |               | multisite | no       | **Custom Certificate Profile:** Enter a custom certificate profile if your ACME server supports non-standard profiles. This overrides `LETS_ENCRYPT_PROFILE` if set.                                                                                                           |
+| `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | no       | **Certificate Profile (Let's Encrypt only):** Select the certificate profile to use. Options: `classic` (general-purpose), `tlsserver` (optimized for TLS servers), or `shortlived` (7-day certificates). Ignored when `LETS_ENCRYPT_SERVER=zerossl`.                          |
+| `LETS_ENCRYPT_CUSTOM_PROFILE`               |               | multisite | no       | **Custom Certificate Profile (Let's Encrypt only):** Enter a custom certificate profile if your ACME server supports non-standard profiles. This overrides `LETS_ENCRYPT_PROFILE` if set. Ignored when `LETS_ENCRYPT_SERVER=zerossl`.                                           |
 | `LETS_ENCRYPT_KEY_TYPE`                     | `ecdsa`       | multisite | no       | **Certificate Key Type:** Key algorithm for the certificate. `ecdsa` (default) is recommended for better performance and smaller certificate size. Use `rsa` for compatibility with legacy systems. Changing this setting for an existing certificate forces a renewal.        |
 | `LETS_ENCRYPT_ELLIPTIC_CURVE`               | `secp384r1`   | multisite | no       | **Elliptic Curve:** The elliptic curve to use when `LETS_ENCRYPT_KEY_TYPE` is `ecdsa`. `secp256r1` = P-256 (ECC-256), `secp384r1` = P-384 (ECC-384, default). Ignored for RSA key type.                                                                                       |
 | `LETS_ENCRYPT_RSA_KEY_SIZE`                 | `4096`        | multisite | no       | **RSA Key Size:** Key size in bits when `LETS_ENCRYPT_KEY_TYPE` is `rsa`. Options: `3072`, `4096` (default), `8192`. 8192-bit keys are very slow and only supported by ZeroSSL. Minimum is 3072 bits (2048-bit is obsolete per BSI/NIST guidelines). Ignored for ECDSA.       |
