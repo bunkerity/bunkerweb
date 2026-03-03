@@ -150,7 +150,7 @@
     "LETS_ENCRYPT_DNS_PROPAGATION": {
       "context": "multisite",
       "default": "default",
-      "help": "The time to wait for DNS propagation in seconds for DNS challenges.",
+      "help": "The time to wait for DNS propagation in seconds for DNS challenges. When set to 'default', BunkerWeb automatically scales the wait time by the number of domains in the certificate (10 seconds × domain count), since certbot adds TXT records sequentially and the last record gets the least propagation time. Set an explicit value to override this behaviour.",
       "id": "lets-encrypt-dns-propagation",
       "label": "DNS Propagation",
       "regex": "^(default|\\d+)$",

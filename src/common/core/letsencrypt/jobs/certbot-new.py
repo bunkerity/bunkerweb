@@ -909,9 +909,17 @@ def certbot_new(
         # * Adding DNS challenge hooks
         command.append("--preferred-challenges=dns")
 
-        # * Adding the propagation time to the command
+        # * Adding the propagation time to the command.
+        # certbot adds TXT records sequentially then starts a single shared wait, so the
+        # last record gets the least propagation time. When the user relies on the default,
+        # we scale by domain count (10s × number_of_domains) to compensate.
+        # An explicit value set by the user is passed as-is.
         if config["dns_propagation"] != DNS_PROPAGATION_DEFAULT:
-            command.extend([f"--dns-{config['authenticator']}-propagation-seconds", str(config["dns_propagation"])])
+            propagation_seconds = int(config["dns_propagation"])
+        else:
+            domain_count = len(config["server_names"].split(","))
+            propagation_seconds = 10 * domain_count
+        command.extend([f"--dns-{config['authenticator']}-propagation-seconds", str(propagation_seconds)])
 
         # * Caching the credentials file if not already done
         credentials = config["provider"].get_formatted_credentials()
