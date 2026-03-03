@@ -5,6 +5,15 @@
   "version": "1.0",
   "stream": "yes",
   "settings": {
+        "LETS_ENCRYPT_HOSTNAME_CHECK": {
+          "context": "multisite",
+          "default": "yes",
+          "help": "If set to 'yes', validates that each hostname has a valid A, AAAA, or CNAME DNS record before requesting a certificate with HTTP challenge. Set to 'no' to skip this check (not recommended).",
+          "id": "lets-encrypt-hostname-check",
+          "label": "Check Hostname DNS Records",
+          "regex": "^(yes|no)$",
+          "type": "check"
+        },
     "AUTO_LETS_ENCRYPT": {
       "context": "multisite",
       "default": "no",

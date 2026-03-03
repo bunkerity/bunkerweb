@@ -386,6 +386,74 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
     wildcard = env("USE_LETS_ENCRYPT_WILDCARD", "no").lower() == "yes"
     activated = env("AUTO_LETS_ENCRYPT", "no").lower() == "yes" and env("LETS_ENCRYPT_PASSTHROUGH", "no").lower() == "no"
     staging = env("USE_LETS_ENCRYPT_STAGING", "no").lower() == "yes"
+    hostname_check = env("LETS_ENCRYPT_HOSTNAME_CHECK", "yes").lower() != "no"
+
+    # Now do the DNS check
+    if activated and challenge_val == "http" and hostname_check:
+        try:
+            import dns.resolver
+        except ImportError:
+            dns = None
+        valid_hostnames = []
+        if dns:
+            for hostname in server_names_val.split():
+                found = False
+                for rtype in ("A", "AAAA", "CNAME"):
+                    try:
+                        answers = dns.resolver.resolve(hostname, rtype)
+                        if answers:
+                            found = True
+                            break
+                    except Exception:
+                        continue
+                if not found:
+                    LOGGER.error(
+                        f"[Service: {service}] No A, AAAA, or CNAME record found for {hostname}. "
+                        "If you want to use that hostname for a certificate, please use the DNS challenge or set the A, AAAA, or CNAME entries in your external DNS. "
+                        "Note: If the record exists but is not detected, you may need to clean up your DNS cache or wait a few minutes for DNS propagation."
+                    )
+                else:
+                    valid_hostnames.append(hostname)
+            if not valid_hostnames:
+                LOGGER.error(f"[Service: {service}] No valid hostnames remain after DNS check, skipping certificate generation.")
+                return [], {"activated": False}
+            server_names_val = " ".join(valid_hostnames)
+        else:
+            LOGGER.error(f"[Service: {service}] dnspython is not installed, cannot check DNS records for HTTP challenge.")
+            return [], {"activated": False}
+    def env(key: str, default: Optional[str] = None) -> str:
+        if IS_MULTISITE:
+            # Try service-specific setting first, then fall back to global setting
+            # Exception: SERVER_NAME should not fall back to global (it contains all services)
+            service_val = getenv(f"{service}_{key}")
+            if service_val is not None:
+                return service_val
+            if key == "SERVER_NAME":
+                # For SERVER_NAME, use default (service name itself) rather than global
+                return default or service
+            # Fall back to global setting if service-specific is not set
+            return getenv(key, default)
+        return getenv(key, default)
+
+    authenticator = env("LETS_ENCRYPT_DNS_PROVIDER", "").lower()
+    acme_server = env("LETS_ENCRYPT_SERVER", "letsencrypt").lower()
+    zerossl_api_key = env("LETS_ENCRYPT_ZEROSSL_API_KEY", "").strip()
+    zerossl_api_retry_val = env("LETS_ENCRYPT_ZEROSSL_API_RETRY", "3").strip()
+    zerossl_api_retry_delay_val = env("LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY", "2").strip()
+    zerossl_api_connect_timeout_val = env("LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT", "5").strip()
+    zerossl_api_max_time_val = env("LETS_ENCRYPT_ZEROSSL_API_MAX_TIME", "20").strip()
+    zerossl_api_key_hash = bytes_hash(zerossl_api_key.encode("utf-8"), algorithm="sha256") if zerossl_api_key else ""
+    server_names_val = env("SERVER_NAME", "www.example.com").strip() if IS_MULTISITE else getenv("SERVER_NAME", "www.example.com").strip()
+    email_val = env("EMAIL_LETS_ENCRYPT", "").strip()
+    retries_val = env("LETS_ENCRYPT_MAX_RETRIES", "0")
+    challenge_val = env("LETS_ENCRYPT_CHALLENGE", "http").lower()
+    profile_val = env("LETS_ENCRYPT_PROFILE", "classic").lower()
+    custom_profile = env("LETS_ENCRYPT_CUSTOM_PROFILE", "").lower()
+    dns_propagation_val = env("LETS_ENCRYPT_DNS_PROPAGATION", DNS_PROPAGATION_DEFAULT).lower()
+    decode_base64 = env("LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64", "yes").lower() == "yes"
+    wildcard = env("USE_LETS_ENCRYPT_WILDCARD", "no").lower() == "yes"
+    activated = env("AUTO_LETS_ENCRYPT", "no").lower() == "yes" and env("LETS_ENCRYPT_PASSTHROUGH", "no").lower() == "no"
+    staging = env("USE_LETS_ENCRYPT_STAGING", "no").lower() == "yes"
 
     if acme_server not in ACME_SERVER_TYPES:
         if activated:
@@ -894,12 +962,26 @@ def certbot_new(
 
 
 def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str]) -> bool:
+    def mask_email(email):
+        if not email or "@" not in email:
+            return email or "not provided"
+        user, domain = email.split("@", 1)
+        user_mask = user[:2] + ("*" * max(1, len(user) - 2)) if len(user) > 2 else user + "*"
+        domain_main, *domain_rest = domain.split(".", 1)
+        domain_mask = domain_main[:2] + ("*" * max(1, len(domain_main) - 2))
+        if domain_rest:
+            domain_mask += "." + domain_rest[0]
+        return f"{user_mask}@{domain_mask}"
+
+    masked_email = mask_email(config['email'])
     LOGGER.info(
-        f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email'] or 'not provided'}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile on {config['acme_server']}..."
+        f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {masked_email}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile on {config['acme_server']}..."
     )
     debug_config = config.copy()
     if LOG_LEVEL != "TRACE" and debug_config.get("zerossl_api_key"):
         debug_config["zerossl_api_key"] = "***"
+    if LOG_LEVEL != "TRACE" and debug_config.get("email"):
+        debug_config["email"] = mask_email(debug_config["email"])
     LOGGER.debug(f"Service configuration: {debug_config}")
 
     concurrent_requests = getenv("LETS_ENCRYPT_CONCURRENT_REQUESTS", "no").lower() == "yes"
