@@ -225,6 +225,7 @@ def _check_caa_for_domain(domain: str, ca_identifiers: Set[str], wildcard: bool,
         return False
 
     # No CAA records found at any level — issuance is open.
+    logger.debug(f"No CAA records found for '{domain}'; issuance is open.")
     return True
 
 
