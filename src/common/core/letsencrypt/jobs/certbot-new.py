@@ -9,8 +9,7 @@ from os import environ, getenv, sep
 from os.path import join
 from pathlib import Path
 from re import MULTILINE, match, search
-from select import select
-from subprocess import DEVNULL, PIPE, STDOUT, Popen, TimeoutExpired, run
+from subprocess import DEVNULL, PIPE, STDOUT, TimeoutExpired, run
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from threading import Event, Lock, Thread
@@ -396,7 +395,17 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
     staging = env("USE_LETS_ENCRYPT_STAGING", "no").lower() == "yes"
     hostname_check = env("LETS_ENCRYPT_HOSTNAME_CHECK", "yes").lower() != "no"
 
-    # Now do the DNS check
+    if acme_server not in ACME_SERVER_TYPES:
+        if activated:
+            LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_SERVER '{acme_server}' is invalid. Defaulting to 'letsencrypt'.")
+        acme_server = "letsencrypt"
+
+    # User-friendly checks
+    if activated and not server_names_val:
+        LOGGER.warning(f"[Service: {service}] SERVER_NAME is empty. Please set a valid server name, skipping generation.")
+        activated = False
+
+    # For HTTP challenge, verify DNS resolution to avoid certbot failures on unreachable hostnames.
     if activated and challenge_val == "http" and hostname_check:
         try:
             import dns.resolver
@@ -429,49 +438,6 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
         else:
             LOGGER.error(f"[Service: {service}] dnspython is not installed, cannot check DNS records for HTTP challenge.")
             return [], {"activated": False}
-    def env(key: str, default: Optional[str] = None) -> str:
-        if IS_MULTISITE:
-            # Try service-specific setting first, then fall back to global setting
-            # Exception: SERVER_NAME should not fall back to global (it contains all services)
-            service_val = getenv(f"{service}_{key}")
-            if service_val is not None:
-                return service_val
-            if key == "SERVER_NAME":
-                # For SERVER_NAME, use default (service name itself) rather than global
-                return default or service
-            # Fall back to global setting if service-specific is not set
-            return getenv(key, default)
-        return getenv(key, default)
-
-    authenticator = env("LETS_ENCRYPT_DNS_PROVIDER", "").lower()
-    acme_server = env("LETS_ENCRYPT_SERVER", "letsencrypt").lower()
-    zerossl_api_key = env("LETS_ENCRYPT_ZEROSSL_API_KEY", "").strip()
-    zerossl_api_retry_val = env("LETS_ENCRYPT_ZEROSSL_API_RETRY", "3").strip()
-    zerossl_api_retry_delay_val = env("LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY", "2").strip()
-    zerossl_api_connect_timeout_val = env("LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT", "5").strip()
-    zerossl_api_max_time_val = env("LETS_ENCRYPT_ZEROSSL_API_MAX_TIME", "20").strip()
-    zerossl_api_key_hash = bytes_hash(zerossl_api_key.encode("utf-8"), algorithm="sha256") if zerossl_api_key else ""
-    server_names_val = env("SERVER_NAME", "www.example.com").strip() if IS_MULTISITE else getenv("SERVER_NAME", "www.example.com").strip()
-    email_val = env("EMAIL_LETS_ENCRYPT", "").strip()
-    retries_val = env("LETS_ENCRYPT_MAX_RETRIES", "0")
-    challenge_val = env("LETS_ENCRYPT_CHALLENGE", "http").lower()
-    profile_val = env("LETS_ENCRYPT_PROFILE", "classic").lower()
-    custom_profile = env("LETS_ENCRYPT_CUSTOM_PROFILE", "").lower()
-    dns_propagation_val = env("LETS_ENCRYPT_DNS_PROPAGATION", DNS_PROPAGATION_DEFAULT).lower()
-    decode_base64 = env("LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64", "yes").lower() == "yes"
-    wildcard = env("USE_LETS_ENCRYPT_WILDCARD", "no").lower() == "yes"
-    activated = env("AUTO_LETS_ENCRYPT", "no").lower() == "yes" and env("LETS_ENCRYPT_PASSTHROUGH", "no").lower() == "no"
-    staging = env("USE_LETS_ENCRYPT_STAGING", "no").lower() == "yes"
-
-    if acme_server not in ACME_SERVER_TYPES:
-        if activated:
-            LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_SERVER '{acme_server}' is invalid. Defaulting to 'letsencrypt'.")
-        acme_server = "letsencrypt"
-
-    # User-friendly checks
-    if activated and not server_names_val:
-        LOGGER.warning(f"[Service: {service}] SERVER_NAME is empty. Please set a valid server name, skipping generation.")
-        activated = False
 
     if email_val:
         if "@" not in email_val:
@@ -1365,8 +1331,8 @@ try:
 
         if missing_certs:
             LOGGER.error(f"⚠️ Certificate generation incomplete! Missing certificates for: {', '.join(missing_certs)}")
-            LOGGER.error(f"These services will not work until their certificates are generated successfully.")
-            LOGGER.error(f"Check logs for details on why generation failed. Job will retry on next scheduler run (or manually trigger).")
+            LOGGER.error("These services will not work until their certificates are generated successfully.")
+            LOGGER.error("Check logs for details on why generation failed. Job will retry on next scheduler run (or manually trigger).")
         else:
             activated_services = [s for s, c in services.items() if c.get("activated")]
             if activated_services:
