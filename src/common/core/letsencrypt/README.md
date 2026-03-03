@@ -29,13 +29,13 @@ Follow these steps to configure and use the Let's Encrypt feature:
 !!! tip "Certificate Profiles (Let's Encrypt only)"
     Let's Encrypt provides different certificate profiles for different use cases. **These profiles only apply when `LETS_ENCRYPT_SERVER=letsencrypt`. They are ignored by ZeroSSL.**
 
-    - **classic**: General-purpose certificates with 90-day validity (default)
-    - **tlsserver**: Optimized for TLS server authentication with 90-day validity and smaller payload
-    - **shortlived**: Enhanced security with 7-day validity for automated environments
+    - **classic**: General-purpose certificates with 90-day validity, max 100 SANs (default)
+    - **tlsserver**: 90-day validity, smaller payload (no Common Name, no Subject Key ID), max 25 SANs — recommended for fully automated setups
+    - **shortlived**: ~7-day validity (160 hours), no CRL revocation info (even smaller certs), max 25 SANs — requires reliable automated renewal
     - **custom**: If your ACME server supports a different profile, set it using `LETS_ENCRYPT_CUSTOM_PROFILE`.
 
 !!! info "Profile Availability"
-    Note that the `tlsserver` and `shortlived` profiles may not be available in all environments or with all ACME clients at this time. The `classic` profile has the widest compatibility and is recommended for most users. If a selected profile is not available, the system will automatically fall back to the `classic` profile. **Certificate profiles are not supported by ZeroSSL — `LETS_ENCRYPT_PROFILE` and `LETS_ENCRYPT_CUSTOM_PROFILE` are ignored when `LETS_ENCRYPT_SERVER=zerossl`.**
+    Note that the `tlsserver` and `shortlived` profiles may not be available in all environments or with all ACME clients at this time. The `classic` profile has the widest compatibility and is recommended for most users. If a selected profile is not available, the system will automatically fall back to the `classic` profile. A fourth profile `tlsclient` exists but is being discontinued by Let's Encrypt on May 13, 2026 and should not be used. **Certificate profiles are not supported by ZeroSSL — `LETS_ENCRYPT_PROFILE` and `LETS_ENCRYPT_CUSTOM_PROFILE` are ignored when `LETS_ENCRYPT_SERVER=zerossl`.**
 
 !!! tip "Certificate Key Type"
     BunkerWeb supports two key algorithms for certificates:

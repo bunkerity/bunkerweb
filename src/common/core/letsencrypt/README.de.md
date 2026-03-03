@@ -29,13 +29,13 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 !!! tip "Zertifikatsprofile (nur Let's Encrypt)"
     Let's Encrypt bietet verschiedene Zertifikatsprofile für unterschiedliche Anwendungsfälle. **Diese Profile gelten nur, wenn `LETS_ENCRYPT_SERVER=letsencrypt` gesetzt ist. Sie werden von ZeroSSL ignoriert.**
 
-    - **classic**: Allzweck-Zertifikate mit 90-tägiger Gültigkeit (Standard)
-    - **tlsserver**: Optimiert für die TLS-Server-Authentifizierung mit 90-tägiger Gültigkeit und kleinerem Payload
-    - **shortlived**: Erhöhte Sicherheit mit 7-tägiger Gültigkeit für automatisierte Umgebungen
+    - **classic**: Allzweck-Zertifikate, 90 Tage Gültigkeit, max. 100 SANs (Standard)
+    - **tlsserver**: 90 Tage Gültigkeit, reduzierter Payload (kein Common Name, kein Subject Key ID), max. 25 SANs — empfohlen für vollautomatisierte Setups
+    - **shortlived**: ~7 Tage Gültigkeit (160 Stunden), keine CRL-Widerrufsinformationen (noch kleinere Zertifikate), max. 25 SANs — erfordert zuverlässige automatische Erneuerung
     - **custom**: Wenn Ihr ACME-Server ein anderes Profil unterstützt, legen Sie es mit `LETS_ENCRYPT_CUSTOM_PROFILE` fest.
 
 !!! info "Profilverfügbarkeit"
-    Beachten Sie, dass die Profile `tlsserver` und `shortlived` derzeit möglicherweise nicht in allen Umgebungen oder mit allen ACME-Clients verfügbar sind. Das `classic`-Profil hat die breiteste Kompatibilität und wird für die meisten Benutzer empfohlen. Wenn ein ausgewähltes Profil nicht verfügbar ist, greift das System automatisch auf das `classic`-Profil zurück. **Zertifikatsprofile werden von ZeroSSL nicht unterstützt — `LETS_ENCRYPT_PROFILE` und `LETS_ENCRYPT_CUSTOM_PROFILE` werden ignoriert, wenn `LETS_ENCRYPT_SERVER=zerossl` gesetzt ist.**
+    Beachten Sie, dass die Profile `tlsserver` und `shortlived` derzeit möglicherweise nicht in allen Umgebungen oder mit allen ACME-Clients verfügbar sind. Das `classic`-Profil hat die breiteste Kompatibilität und wird für die meisten Benutzer empfohlen. Wenn ein ausgewähltes Profil nicht verfügbar ist, greift das System automatisch auf das `classic`-Profil zurück. Ein viertes Profil `tlsclient` existiert, wird aber von Let's Encrypt am 13. Mai 2026 eingestellt und sollte nicht verwendet werden. **Zertifikatsprofile werden von ZeroSSL nicht unterstützt — `LETS_ENCRYPT_PROFILE` und `LETS_ENCRYPT_CUSTOM_PROFILE` werden ignoriert, wenn `LETS_ENCRYPT_SERVER=zerossl` gesetzt ist.**
 
 !!! tip "Schlüsseltyp des Zertifikats"
     BunkerWeb unterstützt zwei Schlüsselalgorithmen für Zertifikate:

@@ -129,6 +129,14 @@ KEY_TYPES = ("ecdsa", "rsa")
 ELLIPTIC_CURVES = ("secp256r1", "secp384r1")
 RSA_KEY_SIZES = ("3072", "4096", "8192")
 DNS_PROPAGATION_DEFAULT = "default"
+# Maximum number of SANs (Subject Alternative Names) per profile as defined by Let's Encrypt.
+# classic allows 100; tlsserver and shortlived are capped at 25.
+# Unknown/custom profiles fall back to the classic limit of 100.
+PROFILE_MAX_NAMES: Dict[str, int] = {
+    "classic": 100,
+    "tlsserver": 25,
+    "shortlived": 25,
+}
 
 
 def normalize_server_names(server_names: str) -> Set[str]:
@@ -712,13 +720,37 @@ def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, 
         for base, names in wildcard_groups.items():
             config = base_config.copy()
             config["server_names"] = ",".join(names)
+            _check_san_limit(base, config)
             entries[base] = config
         return entries
 
     config = base_config.copy()
     config["server_names"] = ",".join(server_names)
+    _check_san_limit(service, config)
     entries[service] = config
     return entries
+
+
+def _check_san_limit(cert_name: str, config: Dict) -> None:
+    """Deactivate the config if the number of SANs exceeds the profile's maximum.
+
+    Let's Encrypt enforces per-profile SAN limits: classic allows 100, while
+    tlsserver and shortlived are capped at 25. Exceeding the limit would cause
+    certbot to fail, so we catch it early and log a clear error.
+    """
+    if not config.get("activated"):
+        return
+    domain_count = len(config["server_names"].split(","))
+    profile = config.get("profile", "classic")
+    max_names = PROFILE_MAX_NAMES.get(profile, 100)
+    if domain_count > max_names:
+        LOGGER.error(
+            f"[Service: {cert_name}] Certificate request for {domain_count} domain(s) exceeds the "
+            f"maximum of {max_names} SANs allowed by the '{profile}' profile. "
+            f"Reduce the number of domains or switch to a profile with a higher limit (e.g. 'classic' allows 100). "
+            f"Skipping generation."
+        )
+        config["activated"] = False
 
 
 def _determine_wildcard_bases(labels_list: List[List[str]]) -> Set[str]:
@@ -1043,6 +1075,8 @@ try:
                 if certificate_fingerprint(services[cert_name]) == certificate_fingerprint(config):
                     merged = normalize_server_names(services[cert_name]["server_names"]) | normalize_server_names(config["server_names"])
                     services[cert_name]["server_names"] = format_server_names(merged)
+                    # Re-check the SAN limit after merging — the combined domain count may now exceed the profile maximum.
+                    _check_san_limit(cert_name, services[cert_name])
                     continue
                 LOGGER.warning(f"[Service: {cert_name}] Certificate configuration conflict detected, keeping first occurrence.")
                 continue

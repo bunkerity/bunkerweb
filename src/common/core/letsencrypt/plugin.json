@@ -206,7 +206,7 @@
     "LETS_ENCRYPT_PROFILE": {
       "context": "multisite",
       "default": "classic",
-      "help": "Select the certificate profile to use with Let's Encrypt. 'classic' is a general-purpose certificate with 90-day lifetime and broad compatibility. 'tlsserver' is optimized for TLS server authentication with 90-day lifetime and smaller payload. 'shortlived' offers 7-day certificates for enhanced security in automated environments. Note: certificate profiles are only supported by the Let's Encrypt CA (LETS_ENCRYPT_SERVER=letsencrypt). This setting is ignored when using ZeroSSL.",
+      "help": "Select the certificate profile to use with Let's Encrypt. 'classic' is a general-purpose certificate with 90-day lifetime, max 100 SANs, and broad compatibility. 'tlsserver' is optimized for TLS server authentication with 90-day lifetime, smaller payload (no Common Name, no Subject Key ID), and max 25 SANs. 'shortlived' offers ~7-day certificates (160 hours) with no revocation info (no CRL) and max 25 SANs — requires fully automated renewal. Note: certificate profiles are only supported by the Let's Encrypt CA (LETS_ENCRYPT_SERVER=letsencrypt). This setting is ignored when using ZeroSSL.",
       "id": "lets-encrypt-profile",
       "label": "Certificate Profile",
       "regex": "^(classic|tlsserver|shortlived)$",

@@ -29,13 +29,13 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 !!! tip "Perfiles de Certificado (solo Let's Encrypt)"
     Let's Encrypt proporciona diferentes perfiles de certificado para diferentes casos de uso. **Estos perfiles solo se aplican cuando `LETS_ENCRYPT_SERVER=letsencrypt`. Son ignorados por ZeroSSL.**
 
-    - **classic**: Certificados de propósito general con una validez de 90 días (predeterminado)
-    - **tlsserver**: Optimizado para la autenticación de servidores TLS con una validez de 90 días y una carga útil más pequeña
-    - **shortlived**: Seguridad mejorada con una validez de 7 días para entornos automatizados
+    - **classic**: Certificados de propósito general, validez de 90 días, máx. 100 SAN (predeterminado)
+    - **tlsserver**: Validez de 90 días, carga útil reducida (sin Common Name ni Subject Key ID), máx. 25 SAN — recomendado para configuraciones totalmente automatizadas
+    - **shortlived**: Validez de ~7 días (160 horas), sin información de revocación CRL (certificados aún más pequeños), máx. 25 SAN — requiere renovación automática fiable
     - **custom**: Si su servidor ACME admite un perfil diferente, configúrelo usando `LETS_ENCRYPT_CUSTOM_PROFILE`.
 
 !!! info "Disponibilidad de perfiles"
-    Tenga en cuenta que los perfiles `tlsserver` y `shortlived` pueden no estar disponibles en todos los entornos o con todos los clientes ACME en este momento. El perfil `classic` tiene la compatibilidad más amplia y se recomienda para la mayoría de los usuarios. Si un perfil seleccionado no está disponible, el sistema volverá automáticamente al perfil `classic`. **Los perfiles de certificado no son compatibles con ZeroSSL — `LETS_ENCRYPT_PROFILE` y `LETS_ENCRYPT_CUSTOM_PROFILE` se ignoran cuando `LETS_ENCRYPT_SERVER=zerossl`.**
+    Tenga en cuenta que los perfiles `tlsserver` y `shortlived` pueden no estar disponibles en todos los entornos o con todos los clientes ACME en este momento. El perfil `classic` tiene la compatibilidad más amplia y se recomienda para la mayoría de los usuarios. Si un perfil seleccionado no está disponible, el sistema volverá automáticamente al perfil `classic`. Existe un cuarto perfil `tlsclient`, pero Let's Encrypt lo discontinuará el 13 de mayo de 2026 y no debe usarse. **Los perfiles de certificado no son compatibles con ZeroSSL — `LETS_ENCRYPT_PROFILE` y `LETS_ENCRYPT_CUSTOM_PROFILE` se ignoran cuando `LETS_ENCRYPT_SERVER=zerossl`.**
 
 !!! tip "Tipo de clave del certificado"
     BunkerWeb admite dos algoritmos de clave para los certificados:

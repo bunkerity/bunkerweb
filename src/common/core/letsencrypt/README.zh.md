@@ -29,13 +29,13 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 !!! tip "证书配置文件（仅 Let's Encrypt）"
     Let's Encrypt 为不同的用例提供了不同的证书配置文件。**这些配置文件仅在 `LETS_ENCRYPT_SERVER=letsencrypt` 时生效，ZeroSSL 会忽略此设置。**
 
-    - **classic**：通用证书，有效期为 90 天（默认）
-    - **tlsserver**：针对 TLS 服务器身份验证进行了优化，有效期为 90 天，有效负载更小
-    - **shortlived**：增强安全性，有效期为 7 天，适用于自动化环境
+    - **classic**：通用证书，有效期 90 天，最多 100 个 SAN（默认）
+    - **tlsserver**：有效期 90 天，有效负载更小（无 Common Name 和 Subject Key ID），最多 25 个 SAN — 推荐用于完全自动化的部署
+    - **shortlived**：有效期约 7 天（160 小时），无 CRL 吊销信息（证书体积更小），最多 25 个 SAN — 需要可靠的自动续订
     - **custom**：如果您的 ACME 服务器支持不同的配置文件，请使用 `LETS_ENCRYPT_CUSTOM_PROFILE` 进行设置。
 
 !!! info "配置文件可用性"
-    请注意，`tlsserver` 和 `shortlived` 配置文件目前可能并非在所有环境或所有 ACME 客户端中都可用。`classic` 配置文件具有最广泛的兼容性，推荐给大多数用户。如果所选的配置文件不可用，系统将自动回退到 `classic` 配置文件。**ZeroSSL 不支持证书配置文件 — 当 `LETS_ENCRYPT_SERVER=zerossl` 时，`LETS_ENCRYPT_PROFILE` 和 `LETS_ENCRYPT_CUSTOM_PROFILE` 均被忽略。**
+    请注意，`tlsserver` 和 `shortlived` 配置文件目前可能并非在所有环境或所有 ACME 客户端中都可用。`classic` 配置文件具有最广泛的兼容性，推荐给大多数用户。如果所选的配置文件不可用，系统将自动回退到 `classic` 配置文件。还存在第四个配置文件 `tlsclient`，但 Let's Encrypt 将于 2026 年 5 月 13 日停用该配置文件，不应使用。**ZeroSSL 不支持证书配置文件 — 当 `LETS_ENCRYPT_SERVER=zerossl` 时，`LETS_ENCRYPT_PROFILE` 和 `LETS_ENCRYPT_CUSTOM_PROFILE` 均被忽略。**
 
 !!! tip "证书密钥类型"
     BunkerWeb 支持两种证书密钥算法：
