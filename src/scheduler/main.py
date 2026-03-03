@@ -1032,19 +1032,22 @@ if __name__ == "__main__":
                         response=True,
                     )
                     if not success:
-                        reachable = False
                         LOGGER.debug("Error while reloading all bunkerweb instances")
 
                     LOGGER.debug(responses)
 
+                    responses = responses or {}
+
                     for db_instance in SCHEDULER.db.get_instances():
                         metadata = responses.get(db_instance["hostname"], {})
                         status = metadata.get("status", "down")
+                        msg = str(metadata.get("msg", ""))
+                        config_check_failed = msg.startswith("config check failed")
 
                         if status == "success":
                             success = True
                         else:
-                            message = metadata.get("msg", "couldn't get message")
+                            message = msg or "couldn't get message"
                             if "\n" in message:
                                 message = message.split("\n", 1)[1]
 
@@ -1053,18 +1056,14 @@ if __name__ == "__main__":
 
                         ret = SCHEDULER.db.update_instance(
                             db_instance["hostname"],
-                            (
-                                "up"
-                                if status == "success"
-                                else ("failover" if responses.get(db_instance["hostname"], {}).get("msg") == "config check failed" else "down")
-                            ),
+                            ("up" if status == "success" else ("failover" if config_check_failed else "down")),
                         )
                         if ret:
                             LOGGER.error(
                                 f"Couldn't update instance {db_instance['hostname']} status to {'up' if status == 'success' else 'down'} in the database: {ret}"
                             )
 
-                        if status == "success":
+                        if status == "success" or config_check_failed:
                             found = False
                             for api in SCHEDULER.apis:
                                 if api.endpoint == f"{_instance_endpoint(db_instance)}/":
@@ -1084,6 +1083,10 @@ if __name__ == "__main__":
                                 )
                                 del SCHEDULER.apis[i]
                                 break
+
+                    # "reachable" means we can still talk to at least one instance,
+                    # including instances that failed only due to config checks.
+                    reachable = bool(SCHEDULER.apis)
                 else:
                     for future in task_futures:
                         future.result()
