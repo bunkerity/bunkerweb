@@ -488,9 +488,17 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
 
     # Read and validate RSA key size
     rsa_key_size_val = env("LETS_ENCRYPT_RSA_KEY_SIZE", "4096")
-    if rsa_key_size_val not in RSA_KEY_SIZES:
+    # Only allow 8192 for ZeroSSL, not for Let's Encrypt
+    if acme_server == "letsencrypt":
+        allowed_rsa_key_sizes = ("3072", "4096")
+    else:
+        allowed_rsa_key_sizes = RSA_KEY_SIZES
+    if rsa_key_size_val not in allowed_rsa_key_sizes:
         if activated:
-            LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_RSA_KEY_SIZE '{rsa_key_size_val}' is invalid. Must be one of {RSA_KEY_SIZES!r}. Defaulting to '4096'.")
+            LOGGER.warning(
+                f"[Service: {service}] LETS_ENCRYPT_RSA_KEY_SIZE '{rsa_key_size_val}' is invalid for {acme_server}. "
+                f"Must be one of {allowed_rsa_key_sizes!r}. Defaulting to '4096'."
+            )
         rsa_key_size_val = "4096"
 
     # Validate dns_propagation
