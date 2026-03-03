@@ -145,7 +145,15 @@ def retrieve_certificates():
             "key_size": "Unknown",
         }
         try:
-            cert = x509.load_pem_x509_certificate(cert_file.read_bytes(), default_backend())
+            pem_data = cert_file.read_bytes()
+            # fullchain.pem contains the leaf cert followed by one or more intermediates.
+            # load_pem_x509_certificate only accepts a single block; strip everything
+            # after the first END marker so newer cryptography versions don't raise MalformedFraming.
+            _end_marker = b"-----END CERTIFICATE-----"
+            _first_end = pem_data.find(_end_marker)
+            if _first_end != -1:
+                pem_data = pem_data[: _first_end + len(_end_marker)]
+            cert = x509.load_pem_x509_certificate(pem_data, default_backend())
             subject = cert.subject.get_attributes_for_oid(x509.NameOID.COMMON_NAME)
             if subject:
                 cert_info["common_name"] = subject[0].value
