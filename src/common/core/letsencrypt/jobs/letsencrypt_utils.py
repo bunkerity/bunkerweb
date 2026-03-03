@@ -158,7 +158,8 @@ def get_expected_acme_directory(server: str, staging: bool) -> str:
 # name aliases are currently accepted.
 _CAA_ISSUERS: Dict[str, Set[str]] = {
     "letsencrypt": {"letsencrypt.org"},
-    "zerossl": {"sectigo.com", "comodoca.com", "trust-provider.com", "usertrust.com"},
+    # Sourced from the live ZeroSSL ACME directory's caaIdentities field.
+    "zerossl": {"sectigo.com", "comodoca.com", "comodo.com", "trust-provider.com", "usertrust.com", "entrust.net", "affirmtrust.com"},
 }
 
 
