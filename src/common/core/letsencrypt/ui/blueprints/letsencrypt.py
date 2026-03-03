@@ -53,11 +53,13 @@ DATATABLE_COLUMNS = (
     "serial_number",
     "fingerprint",
     "version",
+    "alt_names",
 )
 
 SEARCHABLE_FIELDS = (
     "domain",
     "common_name",
+    "alt_names",
     "issuer",
     "issuer_server",
     "serial_number",
@@ -73,6 +75,19 @@ SEARCHABLE_FIELDS = (
 )
 
 
+def _ui_tar_members(tar):
+    """Yield only members the UI actually needs (certs, renewal configs).
+
+    Account directories contain private keys with restrictive permissions
+    that the UI process cannot read, and the UI has no use for them.
+    """
+    for member in tar.getmembers():
+        parts = Path(member.name).parts
+        if any(p == "accounts" for p in parts):
+            continue
+        yield member
+
+
 def download_certificates():
     rmtree(DATA_PATH, ignore_errors=True)
     Path(DATA_PATH).mkdir(parents=True, exist_ok=True)
@@ -82,10 +97,11 @@ def download_certificates():
     for cache_file in cache_files:
         if cache_file["file_name"].endswith(".tgz") and cache_file["file_name"].startswith("folder:"):
             with tar_open(fileobj=BytesIO(cache_file["data"]), mode="r:gz") as tar:
+                members = list(_ui_tar_members(tar))
                 try:
-                    tar.extractall(DATA_PATH, filter="fully_trusted")
+                    tar.extractall(DATA_PATH, members=members, filter="fully_trusted")
                 except TypeError:
-                    tar.extractall(DATA_PATH)
+                    tar.extractall(DATA_PATH, members=members)
 
 
 def retrieve_certificates():
@@ -94,6 +110,7 @@ def retrieve_certificates():
     certificates = {
         "domain": [],
         "common_name": [],
+        "alt_names": [],
         "issuer": [],
         "issuer_server": [],
         "valid_from": [],
@@ -113,6 +130,7 @@ def retrieve_certificates():
         certificates["domain"].append(domain)
         cert_info = {
             "common_name": domain,
+            "alt_names": "",
             "issuer": "Unknown",
             "issuer_server": "Unknown",
             "valid_from": None,
@@ -139,9 +157,13 @@ def retrieve_certificates():
             cert_info["serial_number"] = str(cert.serial_number)
             cert_info["fingerprint"] = cert.fingerprint(hashes.SHA256()).hex()
             cert_info["version"] = cert.version.name
-            # key_size returns the actual bit length of the public key regardless of type:
-            # 256 for P-256 ECDSA, 384 for P-384 ECDSA, 4096 for RSA-4096, etc.
             cert_info["key_size"] = str(cert.public_key().key_size)
+            try:
+                san_ext = cert.extensions.get_extension_for_class(x509.SubjectAlternativeName)
+                san_names = san_ext.value.get_values_for_type(x509.DNSName)
+                cert_info["alt_names"] = ", ".join(sorted(san_names))
+            except x509.ExtensionNotFound:
+                pass
         except BaseException as e:
             LOGGER.debug(format_exc())
             LOGGER.error(f"Error while parsing certificate {cert_file}: {e}")
@@ -205,6 +227,7 @@ def letsencrypt_fetch():
                 {
                     "domain": domain,
                     "common_name": certs.get("common_name", [""])[i],
+                    "alt_names": certs.get("alt_names", [""])[i],
                     "issuer": certs.get("issuer", [""])[i],
                     "issuer_server": certs.get("issuer_server", [""])[i],
                     "valid_from": certs.get("valid_from", [""])[i],

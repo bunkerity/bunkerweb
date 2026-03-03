@@ -7,6 +7,7 @@ from shutil import copy2, copyfileobj, copystat, copytree, rmtree
 from subprocess import DEVNULL, PIPE, STDOUT, run
 from tempfile import mkdtemp
 from typing import Dict, List, Optional, Set, Tuple
+from urllib.parse import urlparse
 
 
 @dataclass(frozen=True)
@@ -83,41 +84,64 @@ def _merge_logs(src: Path, dest: Path, logger=None) -> None:
                 continue
 
 
-def select_account_id(accounts_root: Path, staging: bool, email: str) -> Optional[str]:
-    if not accounts_root.is_dir():
-        return None
+def _acme_server_path(acme_server_url: str) -> str:
+    """Derive the certbot accounts subdirectory from an ACME directory URL.
 
-    server_dirs = [path for path in accounts_root.iterdir() if path.is_dir()]
-    if not server_dirs:
-        return None
+    Certbot stores accounts under ``<accounts_root>/<netloc>/<url_path>/``.
+    For Let's Encrypt: ``acme-v02.api.letsencrypt.org/directory``
+    For ZeroSSL:       ``acme.zerossl.com/v2/DV90``
+    """
+    parsed = urlparse(acme_server_url)
+    return f"{parsed.netloc}/{parsed.path.strip('/')}"
 
+
+def _find_accounts(accounts_root: Path, acme_server_url: str, staging: bool) -> Path:
+    """Return the directory that holds individual account folders for the
+    given ACME server, or fall back to a staging/production heuristic.
+
+    When *acme_server_url* is provided the path is computed deterministically
+    from the URL (matching what certbot itself uses).  When it's empty we
+    fall back to scanning top-level server directories and picking by the
+    ``staging`` flag -- but this legacy path only works for servers whose
+    URL path is a single component (e.g. ``directory``).
+    """
+    if acme_server_url:
+        return accounts_root.joinpath(_acme_server_path(acme_server_url))
+
+    # Legacy fallback: scan server_dirs and try the old ``/directory`` subdir.
+    server_dirs = [p for p in accounts_root.iterdir() if p.is_dir()] if accounts_root.is_dir() else []
     if staging:
-        preferred = [path for path in server_dirs if "staging" in path.name]
+        preferred = [p for p in server_dirs if "staging" in p.name]
     else:
-        preferred = [path for path in server_dirs if "staging" not in path.name]
-
+        preferred = [p for p in server_dirs if "staging" not in p.name]
     if preferred:
         server_dirs = preferred
+    for server_dir in server_dirs:
+        candidate = server_dir.joinpath("directory")
+        if candidate.is_dir():
+            return candidate
+    return accounts_root.joinpath("__nonexistent__")
+
+
+def select_account_id(accounts_root: Path, staging: bool, email: str, acme_server_url: str = "") -> Optional[str]:
+    accts_dir = _find_accounts(accounts_root, acme_server_url, staging)
+    if not accts_dir.is_dir():
+        return None
 
     candidates: List[Tuple[Path, str]] = []
-    for server_dir in server_dirs:
-        directory_dir = server_dir.joinpath("directory")
-        if not directory_dir.is_dir():
+    for account_dir in accts_dir.iterdir():
+        if not account_dir.is_dir():
             continue
-        for account_dir in directory_dir.iterdir():
-            if not account_dir.is_dir():
-                continue
-            meta_path = account_dir.joinpath("meta.json")
-            meta_email = ""
-            if meta_path.is_file():
-                try:
-                    meta = loads(meta_path.read_text())
-                    if isinstance(meta, dict):
-                        meta_email = str(meta.get("email") or "")
-                except (OSError, ValueError, KeyError):
-                    # Silently skip corrupted meta.json files
-                    meta_email = ""
-            candidates.append((account_dir, meta_email))
+        meta_path = account_dir.joinpath("meta.json")
+        meta_email = ""
+        if meta_path.is_file():
+            try:
+                meta = loads(meta_path.read_text())
+                if isinstance(meta, dict):
+                    meta_email = str(meta.get("email") or "")
+            except (OSError, ValueError, KeyError):
+                meta_email = ""
+        candidates.append((account_dir, meta_email))
 
     if not candidates:
         return None
@@ -137,42 +161,29 @@ def select_account_id(accounts_root: Path, staging: bool, email: str) -> Optiona
     return newest[0].name
 
 
-def _account_exists(accounts_root: Path, staging: bool, email: str) -> bool:
-    if not accounts_root.is_dir():
+def _account_exists(accounts_root: Path, staging: bool, email: str, acme_server_url: str = "") -> bool:
+    accts_dir = _find_accounts(accounts_root, acme_server_url, staging)
+    if not accts_dir.is_dir():
         return False
 
-    server_dirs = [path for path in accounts_root.iterdir() if path.is_dir()]
-    if not server_dirs:
-        return False
-
-    if staging:
-        server_dirs = [path for path in server_dirs if "staging" in path.name]
-    else:
-        server_dirs = [path for path in server_dirs if "staging" not in path.name]
-
-    for server_dir in server_dirs:
-        directory_dir = server_dir.joinpath("directory")
-        if not directory_dir.is_dir():
+    for account_dir in accts_dir.iterdir():
+        if not account_dir.is_dir():
             continue
-        for account_dir in directory_dir.iterdir():
-            if not account_dir.is_dir():
-                continue
-            meta_path = account_dir.joinpath("meta.json")
-            meta_email = ""
-            if meta_path.is_file():
-                try:
-                    meta = loads(meta_path.read_text())
-                    if isinstance(meta, dict):
-                        meta_email = str(meta.get("email") or "")
-                except (OSError, ValueError, KeyError):
-                    # Silently skip corrupted meta.json files
-                    meta_email = ""
-            if email:
-                if meta_email.lower() == email.lower():
-                    return True
-            else:
-                if not meta_email:
-                    return True
+        meta_path = account_dir.joinpath("meta.json")
+        meta_email = ""
+        if meta_path.is_file():
+            try:
+                meta = loads(meta_path.read_text())
+                if isinstance(meta, dict):
+                    meta_email = str(meta.get("email") or "")
+            except (OSError, ValueError, KeyError):
+                meta_email = ""
+        if email:
+            if meta_email.lower() == email.lower():
+                return True
+        else:
+            if not meta_email:
+                return True
     return False
 
 
@@ -188,7 +199,8 @@ def ensure_accounts(
 ) -> None:
     accounts_root = data_path.joinpath("accounts")
     for staging, email in sorted(requests, key=itemgetter(0, 1)):
-        if _account_exists(accounts_root, staging, email):
+        le_url = "https://acme-staging-v02.api.letsencrypt.org/directory" if staging else "https://acme-v02.api.letsencrypt.org/directory"
+        if _account_exists(accounts_root, staging, email, le_url):
             continue
         command = [
             certbot_bin,
@@ -224,6 +236,75 @@ def ensure_accounts(
                 logger.info(f"Let's Encrypt account already exists (staging={staging}, email={'set' if email else 'empty'}), skipping registration.")
                 continue
             logger.error(f"Failed to register Let's Encrypt account (staging={staging}, email={'set' if email else 'empty'}):\n{proc.stdout}")
+
+
+def ensure_zerossl_accounts(
+    requests: Set[Tuple[str, str]],
+    cmd_env: Dict[str, str],
+    zerossl_bot_script: str,
+    log_level: str,
+    data_path: Path,
+    work_dir: str,
+    logs_dir: str,
+    logger,
+) -> None:
+    """Pre-register a single ZeroSSL ACME account before concurrent certificate runs.
+
+    Each ZeroSSL certbot invocation normally fetches fresh EAB credentials and
+    registers a brand-new account.  When multiple services run in parallel, this
+    creates duplicate accounts that get merged back into the shared config dir.
+    Subsequent runs then fail because certbot finds multiple accounts and cannot
+    auto-select one in non-interactive (``-n``) mode.
+
+    By registering one account here (sequentially, via the zerossl-bot wrapper),
+    every concurrent run inherits the same single account and the collision is
+    avoided.
+
+    *requests* is a set of ``(zerossl_api_key, email)`` tuples -- one entry per
+    unique API-key / email combination found across all pending services.
+    """
+    zerossl_url = "https://acme.zerossl.com/v2/DV90"
+    accounts_root = data_path.joinpath("accounts")
+    for api_key, email in sorted(requests):
+        if _account_exists(accounts_root, False, email, zerossl_url):
+            continue
+        env = dict(cmd_env)
+        if api_key:
+            env["LETS_ENCRYPT_ZEROSSL_API_KEY"] = api_key
+        command = [
+            zerossl_bot_script,
+            "register",
+            "-n",
+            "--agree-tos",
+            "--config-dir",
+            data_path.as_posix(),
+            "--work-dir",
+            work_dir,
+            "--logs-dir",
+            logs_dir,
+        ]
+        if email:
+            command.extend(["--email", email])
+        else:
+            command.append("--register-unsafely-without-email")
+        if log_level == "DEBUG":
+            command.append("-v")
+        proc = run(
+            command,
+            stdin=DEVNULL,
+            stdout=PIPE,
+            stderr=STDOUT,
+            text=True,
+            env=env,
+            check=False,
+        )
+        if proc.returncode != 0:
+            if "existing account" in proc.stdout.lower():
+                logger.info(f"ZeroSSL account already exists (email={'set' if email else 'empty'}), skipping registration.")
+                continue
+            logger.error(f"Failed to register ZeroSSL account (email={'set' if email else 'empty'}):\n{proc.stdout}")
+        else:
+            logger.info(f"ZeroSSL account pre-registered successfully (email={'set' if email else 'empty'}).")
 
 
 def _rewrite_renewal_paths(paths: CertbotPaths, data_path: Path, work_dir: str, logs_dir: str, logger) -> None:

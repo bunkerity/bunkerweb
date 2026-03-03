@@ -190,7 +190,7 @@
           viewTotal: true,
           cascadePanes: true,
           collapse: false,
-          columns: [4, 7, 8, 9], // Issuer, Preferred Profile, Challenge and Key Type
+          columns: [4, 9, 7, 8], // Issuer, Key Type, Preferred Profile and Challenge
         },
       },
       topStart: {},
@@ -424,10 +424,14 @@
         {
           searchPanes: {
             show: true,
-            header: t("searchpane.key_type", "Key Type"),
             combiner: "or",
+            header: t("searchpane.key_type", "Key Type"),
           },
           targets: 9, // Key Type column
+        },
+        {
+          visible: false,
+          targets: 14, // Alt Names: only in responsive expand row
         },
       ];
     }
@@ -490,6 +494,10 @@
           data: "version",
           title: "Version",
         },
+        {
+          data: "alt_names",
+          title: "Alt Names",
+        },
       ];
     }
 
@@ -517,7 +525,7 @@
       tableSelector: "#letsencrypt",
       tableName: "letsencrypt",
       // Columns 0-2 are always visible (checkbox, domain, status).
-      // Upper bound must equal the last toggleable column index + 1.
+      // Column 14 (Alt Names) is always hidden (shown only in responsive expand).
       // Update this when adding/removing columns (currently 3..13 = 11 toggleable columns).
       columnVisibilityCondition: (column) => column > 2 && column < 14,
       dataTableOptions: {

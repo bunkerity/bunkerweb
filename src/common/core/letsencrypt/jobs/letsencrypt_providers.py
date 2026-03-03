@@ -4,7 +4,7 @@ from pathlib import Path
 from sys import path as sys_path
 from typing import Any, List, Literal, Optional, Tuple
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, model_validator  # type: ignore[import-untyped]
 
 # Define paths
 LIB_PATH = Path("/var/lib/bunkerweb/letsencrypt")
@@ -46,7 +46,7 @@ class Provider(BaseModel):
         return "\n".join(f"{key} = {value}" for key, value in items.items()).encode("utf-8")
 
     @staticmethod
-    def get_file_type() -> Literal["ini"]:
+    def get_file_type() -> str:
         """Return the file type that the credentials should be written to."""
         return "ini"
 
@@ -78,7 +78,7 @@ class BunnyNetProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["-a", "dns-bunny"]
 
@@ -113,7 +113,7 @@ class ClouDNSProvider(Provider):
         return self
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["-a", "dns-cloudns"]
 
@@ -161,7 +161,7 @@ class CloudflareProvider(Provider):
         return self
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["--dns-cloudflare"]
 
@@ -178,7 +178,7 @@ class DesecProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["-a", "dns-desec"]
 
@@ -195,7 +195,7 @@ class DigitalOceanProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["--dns-digitalocean"]
 
@@ -212,7 +212,7 @@ class DomainOffensiveProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["-a", "dns-domainoffensive"]
 
@@ -231,7 +231,7 @@ class DomeneshopProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["-a", "dns-domeneshop"]
 
@@ -248,7 +248,7 @@ class DnsimpleProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["--dns-dnsimple"]
 
@@ -267,7 +267,7 @@ class DnsMadeEasyProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["--dns-dnsmadeeasy"]
 
@@ -284,7 +284,7 @@ class DuckDnsProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["-a", "dns-duckdns"]
 
@@ -301,7 +301,7 @@ class DynuProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["-a", "dns-dynu"]
 
@@ -325,7 +325,7 @@ class GandiProvider(Provider):
         return "\n".join(f"{key} = {value}" for key, value in items.items()).encode("utf-8")
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["-a", "dns-gandi"]
 
@@ -344,7 +344,7 @@ class GehirnProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["--dns-gehirn"]
 
@@ -365,7 +365,7 @@ class GoDaddyProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["-a", "dns-godaddy"]
 
@@ -404,12 +404,12 @@ class GoogleProvider(Provider):
         return self.model_dump_json(indent=2, exclude={"file_type"}).encode("utf-8")
 
     @staticmethod
-    def get_file_type() -> Literal["json"]:
+    def get_file_type() -> str:
         """Return the file type that the credentials should be written to."""
         return "json"
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["--dns-google"]
 
@@ -426,7 +426,7 @@ class HetznerProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["-a", "dns-hetzner"]
 
@@ -443,7 +443,7 @@ class InfomaniakProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["-a", "dns-infomaniak", "--rsa-key-size", "4096"]
 
@@ -464,7 +464,7 @@ class IonosProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["-a", "dns-ionos", "--rsa-key-size", "4096"]
 
@@ -481,7 +481,7 @@ class LinodeProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["--dns-linode"]
 
@@ -500,7 +500,7 @@ class LuaDnsProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["--dns-luadns"]
 
@@ -517,7 +517,7 @@ class NjallaProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["-a", "dns-njalla"]
 
@@ -534,7 +534,7 @@ class NSOneProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["--dns-nsone"]
 
@@ -557,7 +557,7 @@ class OvhProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["--dns-ovh"]
 
@@ -580,7 +580,7 @@ class PowerdnsProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["-a", "dns-pdns"]
 
@@ -612,7 +612,7 @@ class Rfc2136Provider(Provider):
         return "\n".join(f"{key} = {value}" for key, value in items.items()).encode("utf-8")
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["--dns-rfc2136"]
 
@@ -639,12 +639,12 @@ class Route53Provider(Provider):
         return "\n".join(lines).encode("utf-8")
 
     @staticmethod
-    def get_file_type() -> Literal["env"]:
+    def get_file_type() -> str:
         """Return the file type that the credentials should be written to."""
         return "env"
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["--dns-route53"]
 
@@ -663,7 +663,7 @@ class SakuraCloudProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["--dns-sakuracloud"]
 
@@ -680,7 +680,7 @@ class ScalewayProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["-a", "dns-scaleway"]
 
@@ -699,6 +699,6 @@ class TransIPProvider(Provider):
     )
 
     @staticmethod
-    def get_extra_args() -> dict:
+    def get_extra_args() -> List[str]:
         """Return additional arguments for the provider."""
         return ["-a", "dns-transip"]
