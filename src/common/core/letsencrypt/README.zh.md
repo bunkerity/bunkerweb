@@ -23,7 +23,8 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 5.  **选择验证类型：** 使用 `LETS_ENCRYPT_CHALLENGE` 设置选择 `http` 或 `dns` 验证。
 6.  **配置 DNS 提供商：** 如果使用 DNS 验证，请指定您的 DNS 提供商和凭据。
 7.  **选择证书配置文件：** 使用 `LETS_ENCRYPT_PROFILE` 设置选择您偏好的证书配置文件（classic、tlsserver 或 shortlived）。
-8.  **让 BunkerWeb 处理其余部分：** 配置完成后，证书将根据需要自动颁发、安装和续订。
+8.  **选择证书密钥类型（可选）：** 将 `LETS_ENCRYPT_KEY_TYPE` 设置为 `ecdsa`（默认，推荐）或 `rsa`（旧版兼容）。对于 ECDSA，可选设置 `LETS_ENCRYPT_ELLIPTIC_CURVE`。对于 RSA，可选设置 `LETS_ENCRYPT_RSA_KEY_SIZE`。
+9.  **让 BunkerWeb 处理其余部分：** 配置完成后，证书将根据需要自动颁发、安装和续订。
 
 !!! tip "证书配置文件"
     Let's Encrypt 为不同的用例提供了不同的证书配置文件：
@@ -35,6 +36,19 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 
 !!! info "配置文件可用性"
     请注意，`tlsserver` 和 `shortlived` 配置文件目前可能并非在所有环境或所有 ACME 客户端中都可用。`classic` 配置文件具有最广泛的兼容性，推荐给大多数用户。如果所选的配置文件不可用，系统将自动回退到 `classic` 配置文件。
+
+!!! tip "证书密钥类型"
+    BunkerWeb 支持两种证书密钥算法：
+
+    - **ECDSA（默认）：** 握手更快，证书体积更小，且在较短密钥长度下具有同等安全性。推荐用于大多数配置。
+      - `secp256r1`（P-256）：ECC-256 — 广泛兼容
+      - `secp384r1`（P-384）：ECC-384 — 稍强，默认值
+    - **RSA：** 需要与不支持 ECDSA 的旧版客户端和系统兼容时使用。
+      - `3072` 位：BSI/NIST 推荐的最低标准（2048 位已过时）
+      - `4096` 位：默认 RSA 密钥大小 — 安全性与速度的良好平衡
+      - `8192` 位：最大值 — 生成速度极慢，仅 ZeroSSL 支持
+
+    如果您为现有证书更改了 `LETS_ENCRYPT_KEY_TYPE` 或相关的曲线/大小设置，BunkerWeb 将自动强制续订。
 
 ### 配置设置
 
@@ -60,7 +74,27 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 | `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`      | global    | 否   | **并发请求：** 设置为 `yes` 时，certbot-new 将并发发起证书请求。请谨慎使用以避免速率限制。                                                                                         |
 | `LETS_ENCRYPT_PROFILE`                      | `classic` | multisite | 否   | **证书配置文件：** 选择要使用的证书配置文件。选项：`classic`（通用）、`tlsserver`（针对 TLS 服务器优化）或 `shortlived`（7 天证书）。                                              |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`               |           | multisite | 否   | **自定义证书配置文件：** 如果您的 ACME 服务器支持非标准配置文件，请输入自定义证书配置文件。如果设置了此项，它将覆盖 `LETS_ENCRYPT_PROFILE`。                                       |
+| `LETS_ENCRYPT_KEY_TYPE`                     | `ecdsa`   | multisite | 否   | **证书密钥类型：** 证书的密钥算法。`ecdsa`（默认）推荐用于更好的性能和更小的证书大小。对于需要兼容旧系统的情况使用 `rsa`。更改现有证书的此设置会强制续订。                                                      |
+| `LETS_ENCRYPT_ELLIPTIC_CURVE`               | `secp384r1` | multisite | 否 | **椭圆曲线：** 当 `LETS_ENCRYPT_KEY_TYPE` 为 `ecdsa` 时使用的椭圆曲线。`secp256r1` = P-256（ECC-256），`secp384r1` = P-384（ECC-384，默认）。RSA 时忽略此项。                                                    |
+| `LETS_ENCRYPT_RSA_KEY_SIZE`                 | `4096`    | multisite | 否   | **RSA 密钥大小：** 使用 RSA 密钥时的密钥位数。选项：`3072`、`4096`（默认）、`8192`。注意：8192 位密钥生成极慢，且仅 ZeroSSL 支持。最小 3072 位（2048 位已过时，不符合 BSI/NIST 标准）。ECDSA 时忽略此项。         |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `3`       | multisite | 否   | **最大重试次数：** 证书生成失败时重试的次数。设置为 `0` 以禁用重试。用于处理临时网络问题或 API 速率限制。                                                                          |
+| `LETS_ENCRYPT_HOSTNAME_CHECK`               | `yes`     | multisite | 否   | **检查主机名 DNS 记录：** 设置为 `yes` 时，在使用 HTTP 验证请求证书之前，验证每个主机名是否具有有效的 A、AAAA 或 CNAME DNS 记录。设置为 `no` 可跳过此检查（不推荐）。                                              |
+
+### 主机名 DNS 记录验证
+
+使用 HTTP 验证时，BunkerWeb 可以在尝试请求证书之前自动检查每个域是否具有有效的 DNS 记录（A、AAAA 或 CNAME）。这有助于防止因 DNS 缺失或配置错误而导致证书请求失败。
+
+- **默认启用：** `LETS_ENCRYPT_HOSTNAME_CHECK` 设置控制此行为。当设置为 `yes`（默认）时，BunkerWeb 将为每个域验证 DNS 记录。如果某个域无法解析为有效的 IP 地址或 CNAME，将显示错误，并跳过该域的证书请求。
+- **禁用检查：** 您可以将 `LETS_ENCRYPT_HOSTNAME_CHECK` 设置为 `no` 以跳过 DNS 验证。除非您确定 DNS 配置正确，否则不建议这样做。
+
+#### 示例
+
+```yaml
+AUTO_LETS_ENCRYPT: "yes"
+LETS_ENCRYPT_CHALLENGE: "http"
+LETS_ENCRYPT_HOSTNAME_CHECK: "yes"  # (默认)
+```
+
 
 !!! info "信息和行为"
     - `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` 设置是一个多选设置，可用于为 DNS 提供商设置多个项目。这些项目将保存为缓存文件，Certbot 将从中读取凭据。

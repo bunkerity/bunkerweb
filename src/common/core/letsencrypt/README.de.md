@@ -23,7 +23,8 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 5.  **Wählen Sie den Challenge-Typ:** Wählen Sie entweder die `http`- oder `dns`-Verifizierung mit der Einstellung `LETS_ENCRYPT_CHALLENGE`.
 6.  **DNS-Anbieter konfigurieren:** Wenn Sie DNS-Challenges verwenden, geben Sie Ihren DNS-Anbieter und Ihre Anmeldeinformationen an.
 7.  **Zertifikatsprofil auswählen:** Wählen Sie Ihr bevorzugtes Zertifikatsprofil mit der Einstellung `LETS_ENCRYPT_PROFILE` (classic, tlsserver oder shortlived).
-8.  **Lassen Sie BunkerWeb den Rest erledigen:** Nach der Konfiguration werden Zertifikate automatisch ausgestellt, installiert und bei Bedarf erneuert.
+8.  **Schlüsseltyp auswählen (optional):** Setzen Sie `LETS_ENCRYPT_KEY_TYPE` auf `ecdsa` (Standard, empfohlen) oder `rsa` für ältere Kompatibilität. Für ECDSA können Sie optional `LETS_ENCRYPT_ELLIPTIC_CURVE` setzen. Für RSA optional `LETS_ENCRYPT_RSA_KEY_SIZE`.
+9.  **Lassen Sie BunkerWeb den Rest erledigen:** Nach der Konfiguration werden Zertifikate automatisch ausgestellt, installiert und bei Bedarf erneuert.
 
 !!! tip "Zertifikatsprofile"
     Let's Encrypt bietet verschiedene Zertifikatsprofile für unterschiedliche Anwendungsfälle:
@@ -35,6 +36,19 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 
 !!! info "Profilverfügbarkeit"
     Beachten Sie, dass die Profile `tlsserver` und `shortlived` derzeit möglicherweise nicht in allen Umgebungen oder mit allen ACME-Clients verfügbar sind. Das `classic`-Profil hat die breiteste Kompatibilität und wird für die meisten Benutzer empfohlen. Wenn ein ausgewähltes Profil nicht verfügbar ist, greift das System automatisch auf das `classic`-Profil zurück.
+
+!!! tip "Schlüsseltyp des Zertifikats"
+    BunkerWeb unterstützt zwei Schlüsselalgorithmen für Zertifikate:
+
+    - **ECDSA (Standard):** Schnellere Handshakes, kleinere Zertifikatsgröße und gleichwertige Sicherheit bei kürzeren Schlüssellängen. Empfohlen für die meisten Setups.
+      - `secp256r1` (P-256): ECC-256 — breite Kompatibilität
+      - `secp384r1` (P-384): ECC-384 — etwas stärker, Standard
+    - **RSA:** Erforderlich für Kompatibilität mit älteren Clients und Systemen, die ECDSA nicht unterstützen.
+      - `3072` Bit: Minimum gemäß BSI/NIST (2048 Bit ist veraltet)
+      - `4096` Bit: Standard-RSA-Schlüsselgröße — gute Balance aus Sicherheit und Geschwindigkeit
+      - `8192` Bit: Maximum — sehr langsame Generierung, nur von ZeroSSL unterstützt
+
+    Wenn Sie `LETS_ENCRYPT_KEY_TYPE` oder die zugehörige Kurven-/Größeneinstellung für ein bestehendes Zertifikat ändern, erzwingt BunkerWeb automatisch eine Erneuerung.
 
 ### Konfigurationseinstellungen
 
@@ -60,7 +74,26 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 | `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`      | global    | nein     | **Parallele Anfragen:** Wenn auf `yes` gesetzt, stellt certbot-new Zertifikatsanfragen parallel. Vorsicht wegen Rate-Limits.                                                                                                                                                                                                                                           |
 | `LETS_ENCRYPT_PROFILE`                      | `classic` | multisite | nein     | **Zertifikatsprofil:** Wählen Sie das zu verwendende Zertifikatsprofil aus. Optionen: `classic` (Allzweck), `tlsserver` (optimiert für TLS-Server) oder `shortlived` (7-Tage-Zertifikate).                                                                                                                                                                             |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`               |           | multisite | nein     | **Benutzerdefiniertes Zertifikatsprofil:** Geben Sie ein benutzerdefiniertes Zertifikatsprofil ein, wenn Ihr ACME-Server nicht standardmäßige Profile unterstützt. Dies überschreibt `LETS_ENCRYPT_PROFILE`, falls gesetzt.                                                                                                                                            |
+| `LETS_ENCRYPT_KEY_TYPE`                     | `ecdsa`   | multisite | nein     | **Schlüsseltyp des Zertifikats:** Schlüsselalgorithmus für das Zertifikat. `ecdsa` (Standard) wird für bessere Performance und kleinere Zertifikatsgröße empfohlen. Verwenden Sie `rsa` für Kompatibilität mit älteren Systemen. Wenn diese Einstellung für ein bestehendes Zertifikat geändert wird, erzwingt BunkerWeb eine Erneuerung. |
+| `LETS_ENCRYPT_ELLIPTIC_CURVE`               | `secp384r1` | multisite | nein   | **Elliptische Kurve:** Die elliptische Kurve für ECDSA-Schlüssel. `secp256r1` = P-256 (ECC-256), `secp384r1` = P-384 (ECC-384, Standard). Wird für RSA ignoriert.                                                                                                                                       |
+| `LETS_ENCRYPT_RSA_KEY_SIZE`                 | `4096`    | multisite | nein     | **RSA-Schlüsselgröße:** Schlüsselgröße in Bit für RSA-Schlüssel. Optionen: `3072`, `4096` (Standard), `8192`. Hinweis: 8192-Bit-Schlüssel sind sehr langsam und werden nur von ZeroSSL unterstützt. Mindestens 3072 Bit (2048 Bit ist gemäß BSI/NIST veraltet). Wird für ECDSA ignoriert.               |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `3`       | multisite | nein     | **Maximale Wiederholungen:** Anzahl der Wiederholungsversuche bei der Zertifikatserstellung bei einem Fehler. Auf `0` setzen, um Wiederholungen zu deaktivieren. Nützlich bei temporären Netzwerkproblemen.                                                                                                                                                            |
+| `LETS_ENCRYPT_HOSTNAME_CHECK`               | `yes`     | multisite | nein     | **DNS-Einträge der Hostnamen prüfen:** Wenn auf `yes` gesetzt, wird vor der Anforderung eines Zertifikats mit HTTP-Challenge überprüft, ob jeder Hostname einen gültigen A-, AAAA- oder CNAME-DNS-Eintrag hat. Auf `no` setzen, um diese Prüfung zu überspringen (nicht empfohlen). |
+
+### Validierung von Hostname-DNS-Einträgen
+
+Bei Verwendung der HTTP-Challenge kann BunkerWeb automatisch überprüfen, ob jede Domain einen gültigen DNS-Eintrag (A, AAAA oder CNAME) hat, bevor ein Zertifikat angefordert wird. Dies hilft, fehlgeschlagene Zertifikatsanfragen aufgrund fehlender oder fehlkonfigurierter DNS zu vermeiden.
+
+- **Standardmäßig aktiviert:** Die Einstellung `LETS_ENCRYPT_HOSTNAME_CHECK` steuert dieses Verhalten. Wenn auf `yes` gesetzt (Standard), validiert BunkerWeb DNS-Einträge für jede Domain. Wenn eine Domain nicht auf eine gültige IP-Adresse oder CNAME auflöst, wird ein Fehler angezeigt und die Zertifikatsanfrage für diese Domain übersprungen.
+- **Deaktivieren der Prüfung:** Setzen Sie `LETS_ENCRYPT_HOSTNAME_CHECK` auf `no`, um die DNS-Validierung zu überspringen. Dies wird nicht empfohlen, es sei denn, Ihr DNS ist korrekt oder Sie debuggen erweiterte Szenarien.
+
+#### Beispiel
+
+```yaml
+AUTO_LETS_ENCRYPT: "yes"
+LETS_ENCRYPT_CHALLENGE: "http"
+LETS_ENCRYPT_HOSTNAME_CHECK: "yes"  # (Standard)
+```
 
 !!! info "Informationen und Verhalten"
     - Die Einstellung `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` ist eine Mehrfacheinstellung und kann verwendet werden, um mehrere Elemente für den DNS-Anbieter festzulegen. Die Elemente werden als Cache-Datei gespeichert, und Certbot liest die Anmeldeinformationen daraus.

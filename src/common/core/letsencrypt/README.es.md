@@ -23,7 +23,8 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 5.  **Elija el tipo de desafío:** Seleccione la verificación `http` o `dns` con el ajuste `LETS_ENCRYPT_CHALLENGE`.
 6.  **Configure el proveedor de DNS:** Si utiliza desafíos DNS, especifique su proveedor de DNS y sus credenciales.
 7.  **Seleccione el perfil del certificado:** Elija su perfil de certificado preferido utilizando el ajuste `LETS_ENCRYPT_PROFILE` (classic, tlsserver o shortlived).
-8.  **Deje que BunkerWeb se encargue del resto:** Una vez configurado, los certificados se emiten, instalan y renuevan automáticamente según sea necesario.
+8.  **Elegir el tipo de clave (opcional):** Establezca `LETS_ENCRYPT_KEY_TYPE` en `ecdsa` (predeterminado, recomendado) o `rsa` para compatibilidad heredada. Para ECDSA, opcionalmente establezca `LETS_ENCRYPT_ELLIPTIC_CURVE`. Para RSA, opcionalmente `LETS_ENCRYPT_RSA_KEY_SIZE`.
+9.  **Deje que BunkerWeb se encargue del resto:** Una vez configurado, los certificados se emiten, instalan y renuevan automáticamente según sea necesario.
 
 !!! tip "Perfiles de Certificado"
     Let's Encrypt proporciona diferentes perfiles de certificado para diferentes casos de uso:
@@ -33,8 +34,21 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
     - **shortlived**: Seguridad mejorada con una validez de 7 días para entornos automatizados
     - **custom**: Si su servidor ACME admite un perfil diferente, configúrelo usando `LETS_ENCRYPT_CUSTOM_PROFILE`.
 
-!!! info "Disponibilidad del Perfil"
+!!! info "Disponibilidad de perfiles"
     Tenga en cuenta que los perfiles `tlsserver` y `shortlived` pueden no estar disponibles en todos los entornos o con todos los clientes ACME en este momento. El perfil `classic` tiene la compatibilidad más amplia y se recomienda para la mayoría de los usuarios. Si un perfil seleccionado no está disponible, el sistema volverá automáticamente al perfil `classic`.
+
+!!! tip "Tipo de clave del certificado"
+    BunkerWeb admite dos algoritmos de clave para los certificados:
+
+    - **ECDSA (predeterminado):** Intercambios más rápidos, menor tamaño de certificado y seguridad equivalente con longitudes de clave más cortas. Recomendado para la mayoría de las configuraciones.
+      - `secp256r1` (P-256): ECC-256 — amplia compatibilidad
+      - `secp384r1` (P-384): ECC-384 — ligeramente más fuerte, predeterminado
+    - **RSA:** Necesario para compatibilidad con clientes y sistemas heredados que no soportan ECDSA.
+      - `3072` bits: Mínimo recomendado por BSI/NIST (2048 bits es obsoleto)
+      - `4096` bits: Tamaño de clave RSA predeterminado — buen equilibrio entre seguridad y velocidad
+      - `8192` bits: Máximo — generación muy lenta, solo compatible con ZeroSSL
+
+    Si cambia `LETS_ENCRYPT_KEY_TYPE` o el ajuste de curva/tamaño asociado para un certificado existente, BunkerWeb forzará automáticamente una renovación.
 
 ### Ajustes de Configuración
 
@@ -60,7 +74,27 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 | `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`              | global    | no       | **Solicitudes concurrentes:** Cuando se establece en `yes`, certbot-new emite solicitudes de certificados de forma concurrente. Úselo con precaución para evitar límites de tasa.                                                                                                                                                                                           |
 | `LETS_ENCRYPT_PROFILE`                      | `classic`         | multisite | no       | **Perfil de certificado:** Seleccione el perfil de certificado a utilizar. Opciones: `classic` (propósito general), `tlsserver` (optimizado para servidores TLS) o `shortlived` (certificados de 7 días).                                                                                                                                                                   |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`               |                   | multisite | no       | **Perfil de certificado personalizado:** Ingrese un perfil de certificado personalizado si su servidor ACME admite perfiles no estándar. Esto anula `LETS_ENCRYPT_PROFILE` si está configurado.                                                                                                                                                                             |
+| `LETS_ENCRYPT_KEY_TYPE`                     | `ecdsa`       | multisite | no       | **Tipo de clave del certificado:** Algoritmo de clave para el certificado. `ecdsa` (predeterminado) se recomienda para mejor rendimiento y menor tamaño de certificado. Use `rsa` para compatibilidad con sistemas heredados. Cambiar este ajuste para un certificado existente fuerza una renovación. |
+| `LETS_ENCRYPT_ELLIPTIC_CURVE`               | `secp384r1`   | multisite | no       | **Curva elíptica:** La curva elíptica a usar cuando `LETS_ENCRYPT_KEY_TYPE` es `ecdsa`. `secp256r1` = P-256 (ECC-256), `secp384r1` = P-384 (ECC-384, predeterminado). Se ignora para RSA.                                                                                       |
+| `LETS_ENCRYPT_RSA_KEY_SIZE`                 | `4096`        | multisite | no       | **Tamaño de clave RSA:** Tamaño de clave en bits para claves RSA. Opciones: `3072`, `4096` (predeterminado), `8192`. Las claves de 8192 bits son muy lentas y solo compatibles con ZeroSSL. Mínimo 3072 bits (2048 bits es obsoleto según BSI/NIST). Se ignora para ECDSA.       |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `3`               | multisite | no       | **Máximo de reintentos:** Número de veces que se reintentará la generación de certificados en caso de fallo. Establezca en `0` para deshabilitar los reintentos. Útil para manejar problemas de red temporales o límites de velocidad de la API.                                                                                                                            |
+| `LETS_ENCRYPT_HOSTNAME_CHECK`               | `yes`         | multisite | no       | **Verificar registros DNS del nombre de host:** Cuando se establece en `yes`, valida que cada nombre de host tenga un registro DNS A, AAAA o CNAME válido antes de solicitar un certificado con el desafío HTTP. Establecer en `no` para omitir esta verificación (no recomendado). |
+
+### Validación de registros DNS del nombre de host
+
+Al usar el desafío HTTP, BunkerWeb puede verificar automáticamente que cada dominio tenga un registro DNS válido (A, AAAA o CNAME) antes de intentar solicitar un certificado. Esto ayuda a prevenir solicitudes de certificados fallidas debido a DNS faltante o mal configurado.
+
+- **Habilitado por defecto:** El ajuste `LETS_ENCRYPT_HOSTNAME_CHECK` controla este comportamiento. Cuando se establece en `yes` (predeterminado), BunkerWeb validará los registros DNS para cada dominio. Si un dominio no resuelve a una dirección IP o CNAME válido, se muestra un error y la solicitud de certificado se omite para ese dominio.
+- **Deshabilitar la verificación:** Puede establecer `LETS_ENCRYPT_HOSTNAME_CHECK` en `no` para omitir la validación de DNS. Esto no se recomienda a menos que esté seguro de que su DNS es correcto.
+
+#### Ejemplo
+
+```yaml
+AUTO_LETS_ENCRYPT: "yes"
+LETS_ENCRYPT_CHALLENGE: "http"
+LETS_ENCRYPT_HOSTNAME_CHECK: "yes"  # (predeterminado)
+```
+
 
 !!! info "Información y comportamiento"
     - El ajuste `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` es un ajuste múltiple y se puede utilizar para establecer varios elementos para el proveedor de DNS. Los elementos se guardarán como un archivo de caché, y Certbot leerá las credenciales de él.
