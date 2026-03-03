@@ -5,7 +5,7 @@ from re import sub
 from select import select
 from subprocess import DEVNULL, PIPE, Popen, TimeoutExpired
 from time import time
-from typing import Dict, List, Mapping, Optional, Union
+from typing import Dict, List, Mapping, Optional, Set, Tuple, Union
 
 CERTBOT_BIN = join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot")
 DEPS_PATH = join(sep, "usr", "share", "bunkerweb", "deps", "python")
@@ -149,6 +149,135 @@ def get_expected_acme_directory(server: str, staging: bool) -> str:
     if staging:
         return LETSENCRYPT_STAGING_DIRECTORY
     return LETSENCRYPT_PRODUCTION_DIRECTORY
+
+
+# CAA property tag values accepted by each supported ACME server.
+# A domain is permitted when at least one governing ``issue`` / ``issuewild``
+# record contains one of these values (RFC 8659 §4).
+# ZeroSSL certificates are backed by Sectigo's CA infrastructure; all four
+# name aliases are currently accepted.
+_CAA_ISSUERS: Dict[str, Set[str]] = {
+    "letsencrypt": {"letsencrypt.org"},
+    "zerossl": {"sectigo.com", "comodoca.com", "trust-provider.com", "usertrust.com"},
+}
+
+
+def _check_caa_for_domain(domain: str, ca_identifiers: Set[str], wildcard: bool, logger) -> bool:
+    """Walk the DNS tree for *domain* checking CAA records (RFC 8659).
+
+    Starts at the domain itself and moves up one label at a time until CAA
+    records are found.  Returns ``True`` when the CA is permitted to issue
+    (including when no CAA records exist anywhere up the tree) and ``False``
+    when records are found that forbid it.
+
+    Callers must ensure dnspython is available before calling this function.
+    """
+    import dns.exception  # type: ignore[import-untyped]
+    import dns.resolver  # type: ignore[import-untyped]
+
+    labels = domain.split(".")
+    for i in range(len(labels)):
+        check_name = ".".join(labels[i:])
+        try:
+            answers = dns.resolver.resolve(check_name, "CAA")
+        except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
+            # No CAA records at this level — walk up.
+            continue
+        except dns.exception.DNSException as exc:
+            logger.debug(f"DNS error querying CAA for '{check_name}': {exc}")
+            continue
+
+        # CAA records found — parse issue / issuewild tags.
+        issue_values: Set[str] = set()
+        issuewild_values: Set[str] = set()
+        for rdata in answers:
+            tag_raw = rdata.tag
+            tag = (tag_raw.decode("ascii") if isinstance(tag_raw, (bytes, bytearray)) else str(tag_raw)).lower()
+            val_raw = rdata.value
+            # Strip surrounding quotes, whitespace, and any parameters after ";".
+            value = (val_raw.decode("ascii") if isinstance(val_raw, (bytes, bytearray)) else str(val_raw)).strip().strip('"').split(";")[0].strip().lower()
+            if tag == "issue":
+                issue_values.add(value)
+            elif tag == "issuewild":
+                issuewild_values.add(value)
+
+        # RFC 8659 §4.1: for wildcard requests issuewild governs when present;
+        # otherwise fall back to issue.  For non-wildcard, only issue governs.
+        governing = issuewild_values if (wildcard and issuewild_values) else issue_values
+
+        if not governing:
+            # Records exist but carry only non-issuance tags (e.g. iodef).
+            # RFC 8659 §4: no restriction on issuance.
+            return True
+
+        matched = ca_identifiers & governing
+        if matched:
+            logger.debug(f"CAA record at '{check_name}' permits issuance (matched: {', '.join(sorted(matched))}).")
+            return True
+
+        # No CA identifier found in the governing set → forbidden.
+        logger.debug(
+            f"CAA record at '{check_name}' for '{domain}' forbids issuance. "
+            f"Governing values: {', '.join(sorted(governing))}. "
+            f"Expected one of: {', '.join(sorted(ca_identifiers))}."
+        )
+        return False
+
+    # No CAA records found at any level — issuance is open.
+    return True
+
+
+def check_caa_records(
+    domains: List[str],
+    acme_server: str,
+    wildcard: bool,
+    logger,
+) -> Tuple[bool, List[str]]:
+    """Check CAA DNS records to verify the CA may issue a certificate.
+
+    For each domain the DNS tree is walked from the domain up to the root,
+    stopping at the first level that carries CAA records.  Behaviour follows
+    RFC 8659:
+
+    * No CAA records found anywhere → issuance permitted.
+    * CAA records exist but no ``issue`` / ``issuewild`` tags → no restriction.
+    * ``issue`` / ``issuewild`` present and CA identifier not listed → forbidden.
+
+    For wildcard requests ``issuewild`` records take precedence over ``issue``
+    when both are present.  If only ``issue`` records exist they govern wildcard
+    requests too (RFC 8659 §4.1).
+
+    If *dnspython* is not installed the check is skipped and all domains pass.
+
+    Args:
+        domains:     Hostnames to check.  Leading ``*.`` wildcard prefixes are
+                     stripped before the DNS lookup.
+        acme_server: ACME server in use (``'letsencrypt'`` or ``'zerossl'``).
+        wildcard:    ``True`` when requesting a wildcard certificate.
+        logger:      Logger instance.
+
+    Returns:
+        ``(all_permitted, blocked)`` where *blocked* is the list of domains
+        whose CAA records forbid the requested CA.
+    """
+    from importlib.util import find_spec
+
+    if find_spec("dns") is None:
+        logger.debug("dnspython is not installed; skipping CAA record check.")
+        return True, []
+
+    ca_identifiers = _CAA_ISSUERS.get(acme_server, set())
+    if not ca_identifiers:
+        logger.debug(f"No CAA identifiers configured for ACME server '{acme_server}'; skipping CAA check.")
+        return True, []
+
+    blocked: List[str] = []
+    for domain in domains:
+        bare = domain.lstrip("*.")
+        if not _check_caa_for_domain(bare, ca_identifiers, wildcard, logger):
+            blocked.append(domain)
+
+    return not bool(blocked), blocked
 
 
 def run_process_with_timeout(

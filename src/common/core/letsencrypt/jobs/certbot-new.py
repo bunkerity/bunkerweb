@@ -78,6 +78,7 @@ from letsencrypt_utils import (
     LETSENCRYPT_WORK_DIR as WORK_DIR,
     ZEROSSL_BOT_SCRIPT,
     build_certbot_env,
+    check_caa_records,
     get_expected_acme_directory,
     prepare_logs_dir,
     resolve_certbot_entrypoint,
@@ -600,6 +601,19 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Any]]:
         if wildcard:
             LOGGER.debug(f"[Service: {service}] Wildcard domains are not supported for HTTP challenges, deactivating wildcard support.")
             wildcard = False
+
+    if activated:
+        _, caa_blocked = check_caa_records(server_names_val.split(), acme_server, wildcard, LOGGER)
+        if caa_blocked:
+            for blocked_domain in caa_blocked:
+                LOGGER.error(
+                    f"[Service: {service}] CAA DNS records for '{blocked_domain}' do not permit certificate "
+                    f"issuance by '{acme_server}'. Add a CAA record that allows this CA or change LETS_ENCRYPT_SERVER."
+                )
+            server_names_val = " ".join(d for d in server_names_val.split() if d not in set(caa_blocked))
+            if not server_names_val:
+                LOGGER.error(f"[Service: {service}] No domains remain after CAA check, skipping certificate generation.")
+                return [], {"activated": False}
 
     server_names: List[str] = list(server_names_val.split())
 
