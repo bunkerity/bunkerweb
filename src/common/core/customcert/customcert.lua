@@ -119,13 +119,24 @@ function customcert:load_data(data, server_name)
 	if not priv_key then
 		return false, "error while parsing pem priv key : " .. err
 	end
-	-- Cache data
+	-- Cache parsed cdata (cert + key) in per-worker LRU for use during TLS handshakes.
+	-- Additionally, store the raw PEM cert chain in the cross-worker "ocsp_stapling"
+	-- shared dict so the background OCSP timer can pre-fetch stapling responses.
+	-- On renewal the PEM changes, so we also delete the old cached OCSP response
+	-- ("resp:<sni>") to force the background timer to re-fetch immediately.
+	-- All shared dict writes are wrapped in pcall and guarded by an existence check
+	-- so they never interfere with certificate loading if OCSP is unavailable.
 	for key in server_name:gmatch("%S+") do
 		local cache_key = "plugin_customcert_" .. key
 		local ok
 		ok, err = self.internalstore:set(cache_key, { cert_chain, priv_key }, nil, true)
 		if not ok then
 			return false, "error while setting data into internalstore : " .. err
+		end
+		local ocsp_cache = ngx.shared.ocsp_stapling
+		if ocsp_cache then
+			pcall(ocsp_cache.set, ocsp_cache, "pem:" .. key, data[1])
+			pcall(ocsp_cache.delete, ocsp_cache, "resp:" .. key)
 		end
 	end
 	return true
