@@ -78,14 +78,14 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | `LETS_ENCRYPT_ELLIPTIC_CURVE`               | `secp384r1`   | multisite | no       | **Elliptic Curve:** The elliptic curve to use when `LETS_ENCRYPT_KEY_TYPE` is `ecdsa`. `secp256r1` = P-256 (ECC-256), `secp384r1` = P-384 (ECC-384, default). Ignored for RSA key type.                                                                                       |
 | `LETS_ENCRYPT_RSA_KEY_SIZE`                 | `4096`        | multisite | no       | **RSA Key Size:** Key size in bits when `LETS_ENCRYPT_KEY_TYPE` is `rsa`. Options: `3072`, `4096` (default), `8192`. 8192-bit keys are very slow and only supported by ZeroSSL. Minimum is 3072 bits (2048-bit is obsolete per BSI/NIST guidelines). Ignored for ECDSA.       |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `3`           | multisite | no       | **Maximum Retries:** Number of times to retry certificate generation on failure. Set to `0` to disable retries. Useful for handling temporary network issues or API rate limits.                                                                                               |
-| `LETS_ENCRYPT_HOSTNAME_CHECK`               | `yes`         | multisite | no       | **Check Hostname DNS Records:** When set to `yes`, validates that each hostname has a valid A, AAAA, or CNAME DNS record before requesting a certificate with HTTP challenge. Set to `no` to skip this check (not recommended). |
+| `LETS_ENCRYPT_HOSTNAME_CHECK`               | `no`          | multisite | no       | **Check Hostname DNS Records:** When set to `yes`, validates that each hostname has a valid A, AAAA, or CNAME DNS record before requesting a certificate with HTTP challenge. Disabled by default as internal or split-horizon DNS may not resolve public hostnames from within the container. |
 
 ### Hostname DNS Record Validation
 
 When using the HTTP challenge, BunkerWeb can automatically check that each domain has a valid DNS record (A, AAAA, or CNAME) before attempting to request a certificate. This helps prevent failed certificate requests due to missing or misconfigured DNS.
 
-- **Enabled by default:** The `LETS_ENCRYPT_HOSTNAME_CHECK` setting controls this behavior. When set to `yes` (default), BunkerWeb will validate DNS records for each domain before proceeding with the HTTP challenge. If a domain does not resolve to a valid IP address or CNAME, an error is shown and the certificate request is skipped for that domain.
-- **Disabling the check:** You can set `LETS_ENCRYPT_HOSTNAME_CHECK` to `no` to skip DNS validation. This is not recommended unless you are certain your DNS is correct or are troubleshooting advanced scenarios.
+- **Disabled by default:** The `LETS_ENCRYPT_HOSTNAME_CHECK` setting controls this behavior. Disabled by default because internal or split-horizon DNS setups may not resolve public hostnames from within the container, causing false negatives.
+- **Enabling the check:** Set `LETS_ENCRYPT_HOSTNAME_CHECK` to `yes` to validate DNS records for each domain before the HTTP challenge. If a domain does not resolve to a valid A, AAAA, or CNAME, an error is shown and the certificate request is skipped for that domain.
 - **User guidance:** If a DNS record is missing, BunkerWeb will provide a clear error message indicating which domain is affected and what action is needed (e.g., "No A/AAAA/CNAME record found for www.example.com. Please ensure the domain points to this server's public IP address.")
 
 #### Example
@@ -93,13 +93,13 @@ When using the HTTP challenge, BunkerWeb can automatically check that each domai
 ```yaml
 AUTO_LETS_ENCRYPT: "yes"
 LETS_ENCRYPT_CHALLENGE: "http"
-LETS_ENCRYPT_HOSTNAME_CHECK: "yes"  # (default)
+LETS_ENCRYPT_HOSTNAME_CHECK: "no"  # (default)
 ```
 
-If you want to skip DNS checks (not recommended):
+If you want to enable DNS pre-checks:
 
 ```yaml
-LETS_ENCRYPT_HOSTNAME_CHECK: "no"
+LETS_ENCRYPT_HOSTNAME_CHECK: "yes"
 ```
 
 This feature helps avoid common misconfigurations and ensures a smoother certificate issuance process.

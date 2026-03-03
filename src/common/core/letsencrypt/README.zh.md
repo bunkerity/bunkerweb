@@ -78,21 +78,21 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 | `LETS_ENCRYPT_ELLIPTIC_CURVE`               | `secp384r1` | multisite | 否 | **椭圆曲线：** 当 `LETS_ENCRYPT_KEY_TYPE` 为 `ecdsa` 时使用的椭圆曲线。`secp256r1` = P-256（ECC-256），`secp384r1` = P-384（ECC-384，默认）。RSA 时忽略此项。                                                    |
 | `LETS_ENCRYPT_RSA_KEY_SIZE`                 | `4096`    | multisite | 否   | **RSA 密钥大小：** 使用 RSA 密钥时的密钥位数。选项：`3072`、`4096`（默认）、`8192`。注意：8192 位密钥生成极慢，且仅 ZeroSSL 支持。最小 3072 位（2048 位已过时，不符合 BSI/NIST 标准）。ECDSA 时忽略此项。         |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `3`       | multisite | 否   | **最大重试次数：** 证书生成失败时重试的次数。设置为 `0` 以禁用重试。用于处理临时网络问题或 API 速率限制。                                                                          |
-| `LETS_ENCRYPT_HOSTNAME_CHECK`               | `yes`     | multisite | 否   | **检查主机名 DNS 记录：** 设置为 `yes` 时，在使用 HTTP 验证请求证书之前，验证每个主机名是否具有有效的 A、AAAA 或 CNAME DNS 记录。设置为 `no` 可跳过此检查（不推荐）。                                              |
+| `LETS_ENCRYPT_HOSTNAME_CHECK`               | `no`      | multisite | 否   | **检查主机名 DNS 记录：** 设置为 `yes` 时，在使用 HTTP 验证请求证书之前，验证每个主机名是否具有有效的 A、AAAA 或 CNAME DNS 记录。默认禁用，因为内部或 split-horizon DNS 配置可能无法从容器内部解析公共主机名。           |
 
 ### 主机名 DNS 记录验证
 
 使用 HTTP 验证时，BunkerWeb 可以在尝试请求证书之前自动检查每个域是否具有有效的 DNS 记录（A、AAAA 或 CNAME）。这有助于防止因 DNS 缺失或配置错误而导致证书请求失败。
 
-- **默认启用：** `LETS_ENCRYPT_HOSTNAME_CHECK` 设置控制此行为。当设置为 `yes`（默认）时，BunkerWeb 将为每个域验证 DNS 记录。如果某个域无法解析为有效的 IP 地址或 CNAME，将显示错误，并跳过该域的证书请求。
-- **禁用检查：** 您可以将 `LETS_ENCRYPT_HOSTNAME_CHECK` 设置为 `no` 以跳过 DNS 验证。除非您确定 DNS 配置正确，否则不建议这样做。
+- **默认禁用：** `LETS_ENCRYPT_HOSTNAME_CHECK` 默认禁用，因为内部或 split-horizon DNS 配置可能无法从容器内部解析公共主机名，从而导致误报。
+- **启用检查：** 将 `LETS_ENCRYPT_HOSTNAME_CHECK` 设置为 `yes` 可在 HTTP 验证前验证每个域的 DNS 记录。如果某个域无法解析为有效的 IP 地址或 CNAME，将显示错误，并跳过该域的证书请求。
 
 #### 示例
 
 ```yaml
 AUTO_LETS_ENCRYPT: "yes"
 LETS_ENCRYPT_CHALLENGE: "http"
-LETS_ENCRYPT_HOSTNAME_CHECK: "yes"  # (默认)
+LETS_ENCRYPT_HOSTNAME_CHECK: "no"  # (默认)
 ```
 
 

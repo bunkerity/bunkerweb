@@ -393,7 +393,7 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
     wildcard = env("USE_LETS_ENCRYPT_WILDCARD", "no").lower() == "yes"
     activated = env("AUTO_LETS_ENCRYPT", "no").lower() == "yes" and env("LETS_ENCRYPT_PASSTHROUGH", "no").lower() == "no"
     staging = env("USE_LETS_ENCRYPT_STAGING", "no").lower() == "yes"
-    hostname_check = env("LETS_ENCRYPT_HOSTNAME_CHECK", "yes").lower() != "no"
+    hostname_check = env("LETS_ENCRYPT_HOSTNAME_CHECK", "no").lower() != "no"
 
     if acme_server not in ACME_SERVER_TYPES:
         if activated:
@@ -1159,11 +1159,18 @@ try:
 
     # ? Check if the services' certificates already exist
     for server_name, config in services.items():
+        # Mark the cert as active as soon as the service is still in the configuration,
+        # regardless of whether it is currently activated. This prevents LETS_ENCRYPT_CLEAR_OLD_CERTS
+        # from deleting certs whose service is still configured but temporarily failing validation
+        # (e.g. hostname check, DNS issue, missing credentials). Only certs for services that are
+        # completely absent from the configuration should ever be deleted.
+        if server_name in existing_certificates:
+            existing_certificates[server_name]["active"] = True
+
         if config["force_renew"] or not config["activated"] or server_name not in existing_certificates:
             continue
 
         existing_cert = existing_certificates[server_name]
-        existing_cert["active"] = True
 
         if not config["disable_psl_check"]:
             if psl_lines is None:

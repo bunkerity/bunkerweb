@@ -78,21 +78,21 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Let's Encrypt 
 | `LETS_ENCRYPT_ELLIPTIC_CURVE`               | `secp384r1` | multisite | no     | **Courbe elliptique :** La courbe elliptique utilisée lorsque `LETS_ENCRYPT_KEY_TYPE` est `ecdsa`. `secp256r1` = P-256 (ECC-256), `secp384r1` = P-384 (ECC-384, par défaut). Ignoré pour RSA.                                                                                   |
 | `LETS_ENCRYPT_RSA_KEY_SIZE`                 | `4096`    | multisite | no       | **Taille de clé RSA :** Taille de clé en bits pour les clés RSA. Options : `3072`, `4096` (par défaut), `8192`. Les clés 8192 bits sont très lentes et uniquement prises en charge par ZeroSSL. Minimum 3072 bits (2048 bits est obsolète selon BSI/NIST). Ignoré pour ECDSA.    |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `3`       | multisite | no       | **Tentatives maximales :** Nombre de tentatives de génération de certificat en cas d'échec. `0` pour désactiver. Utile pour les problèmes réseau temporaires.                                                                                                                                                                |
-| `LETS_ENCRYPT_HOSTNAME_CHECK`               | `yes`     | multisite | no       | **Vérification des enregistrements DNS des noms d'hôtes :** Lorsque défini sur `yes`, valide qu'un enregistrement DNS A, AAAA ou CNAME valide existe pour chaque nom d'hôte avant de demander un certificat avec le défi HTTP. Définir sur `no` pour ignorer cette vérification (non recommandé). |
+| `LETS_ENCRYPT_HOSTNAME_CHECK`               | `no`      | multisite | no       | **Vérification des enregistrements DNS des noms d'hôtes :** Lorsque défini sur `yes`, valide qu'un enregistrement DNS A, AAAA ou CNAME valide existe pour chaque nom d'hôte avant de demander un certificat avec le défi HTTP. Désactivé par défaut car les configurations DNS internes ou split-horizon peuvent ne pas résoudre les noms d'hôtes publics depuis l'intérieur du conteneur. |
 
 ### Validation des enregistrements DNS des noms d'hôtes
 
 Lors de l'utilisation du défi HTTP, BunkerWeb peut vérifier automatiquement que chaque domaine possède un enregistrement DNS valide (A, AAAA ou CNAME) avant de demander un certificat. Cela permet d'éviter les échecs de demandes de certificats dus à une configuration DNS manquante ou incorrecte.
 
-- **Activé par défaut :** Le paramètre `LETS_ENCRYPT_HOSTNAME_CHECK` contrôle ce comportement. Lorsqu'il est défini sur `yes` (par défaut), BunkerWeb valide les enregistrements DNS pour chaque domaine. Si un domaine ne résout pas vers une adresse IP ou un CNAME valide, une erreur est affichée et la demande de certificat pour ce domaine est ignorée.
-- **Désactiver la vérification :** Vous pouvez définir `LETS_ENCRYPT_HOSTNAME_CHECK` sur `no` pour ignorer la validation DNS. Cela n'est pas recommandé sauf si vous êtes certain que votre DNS est correct.
+- **Désactivé par défaut :** Le paramètre `LETS_ENCRYPT_HOSTNAME_CHECK` est désactivé par défaut car les configurations DNS internes ou split-horizon peuvent ne pas résoudre les noms d'hôtes publics depuis l'intérieur du conteneur, ce qui entraînerait des faux négatifs.
+- **Activer la vérification :** Définissez `LETS_ENCRYPT_HOSTNAME_CHECK` sur `yes` pour valider les enregistrements DNS de chaque domaine avant le défi HTTP. Si un domaine ne résout pas vers une adresse IP ou un CNAME valide, une erreur est affichée et la demande de certificat est ignorée pour ce domaine.
 
 #### Exemple
 
 ```yaml
 AUTO_LETS_ENCRYPT: "yes"
 LETS_ENCRYPT_CHALLENGE: "http"
-LETS_ENCRYPT_HOSTNAME_CHECK: "yes"  # (par défaut)
+LETS_ENCRYPT_HOSTNAME_CHECK: "no"  # (par défaut)
 ```
 
 

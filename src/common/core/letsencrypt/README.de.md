@@ -78,21 +78,21 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 | `LETS_ENCRYPT_ELLIPTIC_CURVE`               | `secp384r1` | multisite | nein   | **Elliptische Kurve:** Die elliptische Kurve für ECDSA-Schlüssel. `secp256r1` = P-256 (ECC-256), `secp384r1` = P-384 (ECC-384, Standard). Wird für RSA ignoriert.                                                                                                                                       |
 | `LETS_ENCRYPT_RSA_KEY_SIZE`                 | `4096`    | multisite | nein     | **RSA-Schlüsselgröße:** Schlüsselgröße in Bit für RSA-Schlüssel. Optionen: `3072`, `4096` (Standard), `8192`. Hinweis: 8192-Bit-Schlüssel sind sehr langsam und werden nur von ZeroSSL unterstützt. Mindestens 3072 Bit (2048 Bit ist gemäß BSI/NIST veraltet). Wird für ECDSA ignoriert.               |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `3`       | multisite | nein     | **Maximale Wiederholungen:** Anzahl der Wiederholungsversuche bei der Zertifikatserstellung bei einem Fehler. Auf `0` setzen, um Wiederholungen zu deaktivieren. Nützlich bei temporären Netzwerkproblemen.                                                                                                                                                            |
-| `LETS_ENCRYPT_HOSTNAME_CHECK`               | `yes`     | multisite | nein     | **DNS-Einträge der Hostnamen prüfen:** Wenn auf `yes` gesetzt, wird vor der Anforderung eines Zertifikats mit HTTP-Challenge überprüft, ob jeder Hostname einen gültigen A-, AAAA- oder CNAME-DNS-Eintrag hat. Auf `no` setzen, um diese Prüfung zu überspringen (nicht empfohlen). |
+| `LETS_ENCRYPT_HOSTNAME_CHECK`               | `no`      | multisite | nein     | **DNS-Einträge der Hostnamen prüfen:** Wenn auf `yes` gesetzt, wird vor der Anforderung eines Zertifikats mit HTTP-Challenge überprüft, ob jeder Hostname einen gültigen A-, AAAA- oder CNAME-DNS-Eintrag hat. Standardmäßig deaktiviert, da interne oder Split-Horizon-DNS-Konfigurationen öffentliche Hostnamen möglicherweise nicht vom Container aus auflösen können. |
 
 ### Validierung von Hostname-DNS-Einträgen
 
 Bei Verwendung der HTTP-Challenge kann BunkerWeb automatisch überprüfen, ob jede Domain einen gültigen DNS-Eintrag (A, AAAA oder CNAME) hat, bevor ein Zertifikat angefordert wird. Dies hilft, fehlgeschlagene Zertifikatsanfragen aufgrund fehlender oder fehlkonfigurierter DNS zu vermeiden.
 
-- **Standardmäßig aktiviert:** Die Einstellung `LETS_ENCRYPT_HOSTNAME_CHECK` steuert dieses Verhalten. Wenn auf `yes` gesetzt (Standard), validiert BunkerWeb DNS-Einträge für jede Domain. Wenn eine Domain nicht auf eine gültige IP-Adresse oder CNAME auflöst, wird ein Fehler angezeigt und die Zertifikatsanfrage für diese Domain übersprungen.
-- **Deaktivieren der Prüfung:** Setzen Sie `LETS_ENCRYPT_HOSTNAME_CHECK` auf `no`, um die DNS-Validierung zu überspringen. Dies wird nicht empfohlen, es sei denn, Ihr DNS ist korrekt oder Sie debuggen erweiterte Szenarien.
+- **Standardmäßig deaktiviert:** Die Einstellung `LETS_ENCRYPT_HOSTNAME_CHECK` ist standardmäßig deaktiviert, da interne oder Split-Horizon-DNS-Konfigurationen öffentliche Hostnamen möglicherweise nicht vom Container aus auflösen können, was zu falschen Negativergebnissen führen würde.
+- **Aktivieren der Prüfung:** Setzen Sie `LETS_ENCRYPT_HOSTNAME_CHECK` auf `yes`, um DNS-Einträge für jede Domain vor der HTTP-Challenge zu validieren. Wenn eine Domain nicht auf eine gültige IP-Adresse oder einen CNAME auflöst, wird ein Fehler angezeigt und die Zertifikatsanfrage für diese Domain übersprungen.
 
 #### Beispiel
 
 ```yaml
 AUTO_LETS_ENCRYPT: "yes"
 LETS_ENCRYPT_CHALLENGE: "http"
-LETS_ENCRYPT_HOSTNAME_CHECK: "yes"  # (Standard)
+LETS_ENCRYPT_HOSTNAME_CHECK: "no"  # (Standard)
 ```
 
 !!! info "Informationen und Verhalten"
