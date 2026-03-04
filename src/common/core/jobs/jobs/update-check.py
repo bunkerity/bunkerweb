@@ -23,6 +23,33 @@ from jobs import Job  # type: ignore
 LOGGER = getLogger("UPDATE-CHECK")
 status = 0
 
+
+def normalize_bunkerweb_version(version: str) -> str:
+    """Normalize BunkerWeb version strings for semantic comparison.
+
+    Converts Debian-style pre-release versions such as ``1.6.9~rc2`` to
+    ``1.6.9-rc2`` so they can be parsed by ``packaging.version.Version``.
+    """
+    return version.strip().lower().removeprefix("v").replace("~", "-")
+
+
+def is_newer_version_available(current_version: str, latest_version: str) -> bool:
+    """Return True when the latest version is newer than the current one.
+
+    Falls back to normalized string inequality when semantic parsing fails so
+    behavior stays compatible for non-standard version strings.
+    """
+    current_normalized = normalize_bunkerweb_version(current_version)
+    latest_normalized = normalize_bunkerweb_version(latest_version)
+
+    try:
+        from packaging.version import InvalidVersion, Version
+
+        return Version(current_normalized) < Version(latest_normalized)
+    except (ImportError, InvalidVersion):
+        return current_normalized != latest_normalized
+
+
 try:
     JOB = Job(LOGGER, __file__)
 
@@ -91,7 +118,7 @@ try:
     current_version = get_version()
     latest_version = latest_release["tag_name"].removeprefix("v")
 
-    if current_version != latest_version:
+    if is_newer_version_available(current_version, latest_version):
         # Version details
         latest_version_text = f"\033[1;92m{latest_version}\033[0m"
         current_version_text = f"\033[1;93m{current_version}\033[0m"
@@ -131,7 +158,7 @@ try:
             )
         )
     else:
-        LOGGER.info(f"Latest version is already installed: {current_version}")
+        LOGGER.info(f"No newer stable version available (current: {current_version}, latest stable: {latest_version})")
 except BaseException as e:
     status = 2
     LOGGER.debug(format_exc())

@@ -8,6 +8,7 @@
 - [UI] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.
 - [UI] Tweak plugins headers style to avoid the text moving the buttons out of the page when the header is too long.
 - [API] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.
+- [MISC] Enhance version comparison logic in update check
 - [DEPS] Updated libmaxminddb version to v1.13.2
 - [DEPS] Updated luajit2 version to v2.1-20260227
 - [DEPS] Update coreruleset-v4 version to v4.24.0
