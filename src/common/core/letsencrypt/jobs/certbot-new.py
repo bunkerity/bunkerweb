@@ -589,9 +589,11 @@ def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, 
     if not server_names:
         return {}
 
+    unique_names: Set[str] = normalize_server_names(" ".join(server_names))
+
     entries: Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]] = {}
     if base_config["wildcard"]:
-        wildcard_groups = extract_wildcard_groups(server_names)
+        wildcard_groups = extract_wildcard_groups(list(unique_names))
         if not wildcard_groups and base_config["activated"]:
             LOGGER.warning(f"[Service: {service}] No valid wildcard groups found, skipping generation.")
         for base, names in wildcard_groups.items():
@@ -602,7 +604,7 @@ def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, 
         return entries
 
     config = base_config.copy()
-    config["server_names"] = ",".join(server_names)
+    config["server_names"] = format_server_names(unique_names)
     _check_san_limit(service, config)
     entries[service] = config
     return entries
