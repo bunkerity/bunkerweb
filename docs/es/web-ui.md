@@ -223,15 +223,16 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 
 ### Runtime misceláneo
 
-| Ajuste                          | Descripción                                          | Valores aceptados                           | Predeterminado                                        |
-| ------------------------------- | ---------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------- |
-| `MAX_WORKERS`, `MAX_THREADS`    | Workers/hilos de Gunicorn                            | Entero                                      | `cpu_count()-1` (mín 1), `workers*2`                  |
-| `ENABLE_HEALTHCHECK`            | Exponer `GET /healthcheck`                           | `yes` o `no`                                | `no`                                                  |
-| `FORWARDED_ALLOW_IPS`           | Alias para lista de proxies                          | IPs/CIDRs                                   | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
-| `PROXY_ALLOW_IPS`               | Alias para lista de PROXY                            | IPs/CIDRs                                   | `FORWARDED_ALLOW_IPS`                                 |
-| `DISABLE_CONFIGURATION_TESTING` | Saltar reloads de prueba al aplicar config           | `yes` o `no`                                | `no`                                                  |
-| `IGNORE_REGEX_CHECK`            | Omitir validación regex de ajustes                   | `yes` o `no`                                | `no`                                                  |
-| `MAX_CONTENT_LENGTH`            | Tamaño máximo de subida (Flask `MAX_CONTENT_LENGTH`) | Tamaño con unidad (`50M`, `1G`, `52428800`) | `50MB`                                                |
+| Ajuste                          | Descripción                                                                   | Valores aceptados                           | Predeterminado                                        |
+| ------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------- |
+| `MAX_WORKERS`, `MAX_THREADS`    | Workers/hilos de Gunicorn                                                     | Entero                                      | `cpu_count()-1` (mín 1), `workers*2`                  |
+| `MAX_REQUESTS`                  | Solicitudes antes de reciclar el worker Gunicorn (previene exceso de memoria) | Entero                                      | `1000`                                                |
+| `ENABLE_HEALTHCHECK`            | Exponer `GET /healthcheck`                                                    | `yes` o `no`                                | `no`                                                  |
+| `FORWARDED_ALLOW_IPS`           | Alias para lista de proxies                                                   | IPs/CIDRs                                   | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
+| `PROXY_ALLOW_IPS`               | Alias para lista de PROXY                                                     | IPs/CIDRs                                   | `FORWARDED_ALLOW_IPS`                                 |
+| `DISABLE_CONFIGURATION_TESTING` | Saltar reloads de prueba al aplicar config                                    | `yes` o `no`                                | `no`                                                  |
+| `IGNORE_REGEX_CHECK`            | Omitir validación regex de ajustes                                            | `yes` o `no`                                | `no`                                                  |
+| `MAX_CONTENT_LENGTH`            | Tamaño máximo de subida (Flask `MAX_CONTENT_LENGTH`)                          | Tamaño con unidad (`50M`, `1G`, `52428800`) | `50MB`                                                |
 
 ## Acceso a logs
 

@@ -113,7 +113,8 @@ workers = MAX_WORKERS
 bind = f"{LISTEN_ADDR}:{LISTEN_PORT}"
 worker_class = "gthread"
 threads = int(getenv("MAX_THREADS", MAX_WORKERS * 2))
-max_requests_jitter = min(8, MAX_WORKERS)
+max_requests = int(getenv("UI_MAX_REQUESTS", getenv("MAX_REQUESTS", "1000")))
+max_requests_jitter = min(50, max_requests // 10)
 graceful_timeout = 30
 http_protocols = "h1"  # TODO: add h2 when fixed and h3 when supported
 
@@ -246,10 +247,10 @@ def on_starting(server):
                     if isinstance(parsed_secrets, dict):
                         totp_encryption_keys = parsed_secrets
                     elif isinstance(parsed_secrets, list):
-                        totp_encryption_keys = {f"key-{i+1}": secret for i, secret in enumerate(parsed_secrets)}
+                        totp_encryption_keys = {f"key-{i+1}": secret for i, secret in enumerate(parsed_secrets)}  # noqa: E226
                 except JSONDecodeError:
                     LOGGER.info("TOTP_ENCRYPTION_KEYS (or TOTP_SECRETS) is not valid JSON. Treating as space-separated secrets.")
-                    totp_encryption_keys = {f"key-{i+1}": secret for i, secret in enumerate(totp_encryption_keys_env.split())}
+                    totp_encryption_keys = {f"key-{i+1}": secret for i, secret in enumerate(totp_encryption_keys_env.split())}  # noqa: E226
 
         # * Step 3: Validate and clean secrets
         for key, secret in list(totp_encryption_keys.items()):

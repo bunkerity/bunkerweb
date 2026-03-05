@@ -223,15 +223,16 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
 
 ### Sonstiges Runtime
 
-| Setting                         | Beschreibung                                       | Erlaubte Werte                              | Standard                                              |
-| ------------------------------- | -------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------- |
-| `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn-Worker/Threads                            | Integer                                     | `cpu_count()-1` (min 1), `workers*2`                  |
-| `ENABLE_HEALTHCHECK`            | `GET /healthcheck` bereitstellen                   | `yes` oder `no`                             | `no`                                                  |
-| `FORWARDED_ALLOW_IPS`           | Alias für Proxy-Allowlist                          | IPs/CIDRs                                   | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
-| `PROXY_ALLOW_IPS`               | Alias für PROXY-Allowlist                          | IPs/CIDRs                                   | `FORWARDED_ALLOW_IPS`                                 |
-| `DISABLE_CONFIGURATION_TESTING` | Test-Reloads beim Push skippen                     | `yes` oder `no`                             | `no`                                                  |
-| `IGNORE_REGEX_CHECK`            | Regex-Validierung der Settings überspringen        | `yes` oder `no`                             | `no`                                                  |
-| `MAX_CONTENT_LENGTH`            | Maximale Upload-Größe (Flask `MAX_CONTENT_LENGTH`) | Größe mit Einheit (`50M`, `1G`, `52428800`) | `50MB`                                                |
+| Setting                         | Beschreibung                                                      | Erlaubte Werte                              | Standard                                              |
+| ------------------------------- | ----------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------- |
+| `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn-Worker/Threads                                           | Integer                                     | `cpu_count()-1` (min 1), `workers*2`                  |
+| `MAX_REQUESTS`                  | Anfragen vor Gunicorn-Worker-Recycling (verhindert Speicherbloat) | Integer                                     | `1000`                                                |
+| `ENABLE_HEALTHCHECK`            | `GET /healthcheck` bereitstellen                                  | `yes` oder `no`                             | `no`                                                  |
+| `FORWARDED_ALLOW_IPS`           | Alias für Proxy-Allowlist                                         | IPs/CIDRs                                   | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
+| `PROXY_ALLOW_IPS`               | Alias für PROXY-Allowlist                                         | IPs/CIDRs                                   | `FORWARDED_ALLOW_IPS`                                 |
+| `DISABLE_CONFIGURATION_TESTING` | Test-Reloads beim Push skippen                                    | `yes` oder `no`                             | `no`                                                  |
+| `IGNORE_REGEX_CHECK`            | Regex-Validierung der Settings überspringen                       | `yes` oder `no`                             | `no`                                                  |
+| `MAX_CONTENT_LENGTH`            | Maximale Upload-Größe (Flask `MAX_CONTENT_LENGTH`)                | Größe mit Einheit (`50M`, `1G`, `52428800`) | `50MB`                                                |
 
 ## Log-Zugriff
 

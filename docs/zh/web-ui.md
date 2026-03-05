@@ -223,15 +223,16 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 
 ### 其他运行时
 
-| 设置                            | 描述                                       | 可接受值                                | 默认值                                                |
-| ------------------------------- | ------------------------------------------ | --------------------------------------- | ----------------------------------------------------- |
-| `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn worker/线程数                     | 整数                                    | `cpu_count()-1`（至少 1），`workers*2`                |
-| `ENABLE_HEALTHCHECK`            | 暴露 `GET /healthcheck`                    | `yes` 或 `no`                           | `no`                                                  |
-| `FORWARDED_ALLOW_IPS`           | 代理允许列表的别名                         | IP/CIDR                                 | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
-| `PROXY_ALLOW_IPS`               | PROXY 允许列表的别名                       | IP/CIDR                                 | `FORWARDED_ALLOW_IPS`                                 |
-| `DISABLE_CONFIGURATION_TESTING` | 应用配置时跳过测试 reload                  | `yes` 或 `no`                           | `no`                                                  |
-| `IGNORE_REGEX_CHECK`            | 跳过设置的正则校验                         | `yes` 或 `no`                           | `no`                                                  |
-| `MAX_CONTENT_LENGTH`            | 最大上传大小（Flask `MAX_CONTENT_LENGTH`） | 带单位的大小（`50M`、`1G`、`52428800`） | `50MB`                                                |
+| 设置                            | 描述                                            | 可接受值                                | 默认值                                                |
+| ------------------------------- | ----------------------------------------------- | --------------------------------------- | ----------------------------------------------------- |
+| `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn worker/线程数                          | 整数                                    | `cpu_count()-1`（至少 1），`workers*2`                |
+| `MAX_REQUESTS`                  | Worker 回收前的请求数（Gunicorn，防止内存膨胀） | 整数                                    | `1000`                                                |
+| `ENABLE_HEALTHCHECK`            | 暴露 `GET /healthcheck`                         | `yes` 或 `no`                           | `no`                                                  |
+| `FORWARDED_ALLOW_IPS`           | 代理允许列表的别名                              | IP/CIDR                                 | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
+| `PROXY_ALLOW_IPS`               | PROXY 允许列表的别名                            | IP/CIDR                                 | `FORWARDED_ALLOW_IPS`                                 |
+| `DISABLE_CONFIGURATION_TESTING` | 应用配置时跳过测试 reload                       | `yes` 或 `no`                           | `no`                                                  |
+| `IGNORE_REGEX_CHECK`            | 跳过设置的正则校验                              | `yes` 或 `no`                           | `no`                                                  |
+| `MAX_CONTENT_LENGTH`            | 最大上传大小（Flask `MAX_CONTENT_LENGTH`）      | 带单位的大小（`50M`、`1G`、`52428800`） | `50MB`                                                |
 
 ## 日志访问
 

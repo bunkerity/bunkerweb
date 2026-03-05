@@ -8,6 +8,7 @@
 - [UI] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.
 - [UI] Tweak plugins headers style to avoid the text moving the buttons out of the page when the header is too long.
 - [UI] Add `MAX_CONTENT_LENGTH` setting to configure the maximum upload size (defaults to 50 MB).
+- [UI/API] Add `MAX_REQUESTS` setting to configure Gunicorn max requests before worker restart (defaults to 1000), with `UI_MAX_REQUESTS` / `API_MAX_REQUESTS` as optional overrides.
 - [API] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.
 - [MISC] Enhance version comparison logic in update check
 - [DEPS] Updated libmaxminddb version to v1.13.2

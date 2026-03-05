@@ -244,15 +244,16 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
 ### Misc runtime
 
-| Setting                         | Description                                        | Accepted values                          | Default                                               |
-| ------------------------------- | -------------------------------------------------- | ---------------------------------------- | ----------------------------------------------------- |
-| `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn workers/threads                           | Integer                                  | `cpu_count()-1` (min 1), `workers*2`                  |
-| `ENABLE_HEALTHCHECK`            | Expose `GET /healthcheck`                          | `yes` or `no`                            | `no`                                                  |
-| `FORWARDED_ALLOW_IPS`           | Alias for proxy allowlist                          | IPs/CIDRs                                | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
-| `PROXY_ALLOW_IPS`               | Alias for PROXY allowlist                          | IPs/CIDRs                                | `FORWARDED_ALLOW_IPS`                                 |
-| `DISABLE_CONFIGURATION_TESTING` | Skip test reloads when pushing config to instances | `yes` or `no`                            | `no`                                                  |
-| `IGNORE_REGEX_CHECK`            | Skip regex validation on settings                  | `yes` or `no`                            | `no`                                                  |
-| `MAX_CONTENT_LENGTH`            | Maximum upload size (Flask `MAX_CONTENT_LENGTH`)   | Size with unit (`50M`, `1G`, `52428800`) | `50MB`                                                |
+| Setting                         | Description                                                           | Accepted values                          | Default                                               |
+| ------------------------------- | --------------------------------------------------------------------- | ---------------------------------------- | ----------------------------------------------------- |
+| `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn workers/threads                                              | Integer                                  | `cpu_count()-1` (min 1), `workers*2`                  |
+| `MAX_REQUESTS`                  | Requests before a Gunicorn worker is recycled (prevents memory bloat) | Integer                                  | `1000`                                                |
+| `ENABLE_HEALTHCHECK`            | Expose `GET /healthcheck`                                             | `yes` or `no`                            | `no`                                                  |
+| `FORWARDED_ALLOW_IPS`           | Alias for proxy allowlist                                             | IPs/CIDRs                                | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
+| `PROXY_ALLOW_IPS`               | Alias for PROXY allowlist                                             | IPs/CIDRs                                | `FORWARDED_ALLOW_IPS`                                 |
+| `DISABLE_CONFIGURATION_TESTING` | Skip test reloads when pushing config to instances                    | `yes` or `no`                            | `no`                                                  |
+| `IGNORE_REGEX_CHECK`            | Skip regex validation on settings                                     | `yes` or `no`                            | `no`                                                  |
+| `MAX_CONTENT_LENGTH`            | Maximum upload size (Flask `MAX_CONTENT_LENGTH`)                      | Size with unit (`50M`, `1G`, `52428800`) | `50MB`                                                |
 
 ## Log access
 

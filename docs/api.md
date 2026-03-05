@@ -266,7 +266,7 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------- | ---------------------------------- |
 | `API_DOCS_URL`, `API_REDOC_URL`, `API_OPENAPI_URL` | Paths for Swagger, ReDoc, and OpenAPI schema; set to `off/disabled/none/false/0` to disable | Path or `off`             | `/docs`, `/redoc`, `/openapi.json` |
 | `API_ROOT_PATH`                                    | Mount prefix when reverse-proxying                                                          | Path (e.g. `/api`)        | empty                              |
-| `API_FORWARDED_ALLOW_IPS`                          | Trusted proxy IPs for `X-Forwarded-*`                                                       | Comma-separated IPs/CIDRs | `127.0.0.1,::1` (package default)      |
+| `API_FORWARDED_ALLOW_IPS`                          | Trusted proxy IPs for `X-Forwarded-*`                                                       | Comma-separated IPs/CIDRs | `127.0.0.1,::1` (package default)  |
 | `API_PROXY_ALLOW_IPS`                              | Trusted proxy IPs for PROXY protocol                                                        | Comma-separated IPs/CIDRs | `FORWARDED_ALLOW_IPS`              |
 
 #### Auth, ACL, Biscuit
@@ -338,6 +338,7 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
 | `LOG_SYSLOG_ADDRESS`            | Syslog target (`udp://host:514`, `tcp://host:514`, socket)                        | Host:port, proto-prefixed host, or socket path  | unset                                                              |
 | `LOG_SYSLOG_TAG`                | Syslog tag                                                                        | String                                          | `bw-api`                                                           |
 | `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn workers/threads                                                          | Integer or unset for auto                       | unset                                                              |
+| `MAX_REQUESTS`                  | Requests before a Gunicorn worker is recycled (prevents memory bloat)             | Integer                                         | `1000`                                                             |
 | `CAPTURE_OUTPUT`                | Capture Gunicorn stdout/stderr into the configured handlers                       | `yes` or `no`                                   | `no`                                                               |
 
 ## API surface (capability map)
