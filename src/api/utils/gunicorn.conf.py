@@ -113,7 +113,8 @@ workers = MAX_WORKERS
 bind = f"{LISTEN_ADDR}:{LISTEN_PORT}"
 worker_class = "utils.worker.ApiUvicornWorker"
 threads = int(getenv("MAX_THREADS", MAX_WORKERS * 2))
-max_requests_jitter = min(8, MAX_WORKERS)
+max_requests = int(getenv("API_MAX_REQUESTS", getenv("MAX_REQUESTS", "1000")))
+max_requests_jitter = min(50, max_requests // 10)
 graceful_timeout = 30
 http_protocols = "h3,h2,h1"
 

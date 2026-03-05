@@ -2090,13 +2090,22 @@ Führen Sie die folgenden Schritte aus, um die Datenbankfunktion zu konfiguriere
 
 ### Konfigurationseinstellungen
 
-| Einstellung                     | Standard                                  | Kontext | Mehrfach | Beschreibung                                                                                                                                |
-| ------------------------------- | ----------------------------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | nein     | **Datenbank-URI:** Die primäre Datenbankverbindungszeichenfolge im SQLAlchemy-Format.                                                       |
-| `DATABASE_URI_READONLY`         |                                           | global  | nein     | **Schreibgeschützte Datenbank-URI:** Optionale Datenbank für schreibgeschützte Operationen oder als Failover.                               |
-| `DATABASE_LOG_LEVEL`            | `warning`                                 | global  | nein     | **Protokollierungsstufe:** Die Ausführlichkeitsstufe für Datenbankprotokolle. Optionen: `debug`, `info`, `warn`, `warning` oder `error`.    |
-| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global  | nein     | **Maximale Job-Ausführungen:** Die maximale Anzahl von Job-Ausführungsdatensätzen, die vor der automatischen Bereinigung aufbewahrt werden. |
-| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global  | nein     | **Sitzungsaufbewahrung:** Das maximale Alter (in Tagen) von UI-Benutzersitzungen, bevor sie automatisch bereinigt werden.                   |
+| Einstellung                       | Standard                                  | Kontext | Mehrfach | Beschreibung                                                                                                                                                                                                   |
+| --------------------------------- | ----------------------------------------- | ------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URI`                    | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | nein     | **Datenbank-URI:** Die primäre Datenbankverbindungszeichenfolge im SQLAlchemy-Format.                                                                                                                          |
+| `DATABASE_URI_READONLY`           |                                           | global  | nein     | **Schreibgeschützte Datenbank-URI:** Optionale Datenbank für schreibgeschützte Operationen oder als Failover.                                                                                                  |
+| `DATABASE_LOG_LEVEL`              | `warning`                                 | global  | nein     | **Protokollierungsstufe:** Die Ausführlichkeitsstufe für Datenbankprotokolle. Optionen: `debug`, `info`, `warn`, `warning` oder `error`.                                                                       |
+| `DATABASE_MAX_JOBS_RUNS`          | `10000`                                   | global  | nein     | **Maximale Job-Ausführungen:** Die maximale Anzahl von Job-Ausführungsdatensätzen, die vor der automatischen Bereinigung aufbewahrt werden.                                                                    |
+| `DATABASE_MAX_SESSION_AGE_DAYS`   | `14`                                      | global  | nein     | **Sitzungsaufbewahrung:** Das maximale Alter (in Tagen) von UI-Benutzersitzungen, bevor sie automatisch bereinigt werden.                                                                                      |
+| `DATABASE_POOL_SIZE`              | `40`                                      | global  | nein     | **Pool-Größe:** Die Anzahl der Verbindungen im Datenbankverbindungspool.                                                                                                                                       |
+| `DATABASE_POOL_MAX_OVERFLOW`      | `20`                                      | global  | nein     | **Maximaler Pool-Überlauf:** Die maximale Anzahl zusätzlicher Verbindungen über die Pool-Größe hinaus. `-1` für unbegrenzt.                                                                                    |
+| `DATABASE_POOL_TIMEOUT`           | `5`                                       | global  | nein     | **Pool-Zeitlimit:** Die Anzahl der Sekunden, die auf eine Verbindung aus dem Pool gewartet wird.                                                                                                               |
+| `DATABASE_POOL_RECYCLE`           | `1800`                                    | global  | nein     | **Pool-Recycling:** Die Anzahl der Sekunden, nach denen eine Verbindung automatisch recycelt wird. `-1` zum Deaktivieren.                                                                                      |
+| `DATABASE_POOL_PRE_PING`          | `yes`                                     | global  | nein     | **Pool-Pre-Ping:** Ob Verbindungen bei jeder Entnahme aus dem Pool auf Erreichbarkeit getestet werden.                                                                                                         |
+| `DATABASE_POOL_RESET_ON_RETURN`   |                                           | global  | nein     | **Pool-Reset bei Rückgabe:** Wie Verbindungen bei der Rückgabe in den Pool zurückgesetzt werden. Leer = automatisch (`none` für MySQL/MariaDB, `rollback` für andere). Optionen: `rollback`, `commit`, `none`. |
+| `DATABASE_RETRY_TIMEOUT`          | `60`                                      | global  | nein     | **Wiederholungs-Zeitlimit:** Die maximale Wartezeit in Sekunden auf die Verfügbarkeit der Datenbank beim Start.                                                                                                |
+| `DATABASE_REQUEST_RETRY_ATTEMPTS` | `2`                                       | global  | nein     | **Wiederholungsversuche:** Die Anzahl der Wiederholungsversuche bei vorübergehenden Datenbankfehlern.                                                                                                          |
+| `DATABASE_REQUEST_RETRY_DELAY`    | `0.25`                                    | global  | nein     | **Wiederholungsverzögerung:** Die Verzögerung in Sekunden zwischen Wiederholungsversuchen bei vorübergehenden Datenbankfehlern.                                                                                |
 
 !!! tip "Auswahl der Datenbank" - **SQLite** (Standard): Ideal für Single-Node-Bereitstellungen oder Testumgebungen aufgrund seiner Einfachheit und dateibasierten Natur. - **PostgreSQL**: Empfohlen für Produktionsumgebungen mit mehreren BunkerWeb-Instanzen aufgrund seiner Robustheit und Unterstützung für Gleichzeitigkeit. - **MySQL/MariaDB**: Eine gute Alternative zu PostgreSQL mit ähnlichen produktionsreifen Fähigkeiten. - **Oracle**: Geeignet für Unternehmensumgebungen, in denen Oracle bereits die Standard-Datenbankplattform ist.
 
@@ -5505,23 +5514,22 @@ STREAM-Unterstützung :x:
 
 Enable SSO authentication for the BunkerWeb web interface by reading headers set by upstream authentication proxies (Authentik, Authelia, Keycloak, Traefik Forward Auth, etc.)
 
-| Einstellung                   | Standardwert        | Kontext | Mehrfach | Beschreibung                                                                                     |
-| ----------------------------- | ------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------ |
-| `USE_UI_SSO`                  | `no`                | global  | nein     | Enable or disable UI Single Sign-On authentication for the web interface                         |
-| `UI_SSO_HEADER_USERNAME`      | `X-User`            | global  | nein     | HTTP header containing the authenticated username                                                |
-| `UI_SSO_HEADER_EMAIL`         | `X-Email`           | global  | nein     | HTTP header containing the user's email address                                                  |
-| `UI_SSO_HEADER_GROUPS`        | `X-Groups`          | global  | nein     | HTTP header containing the user's groups (comma or space separated)                              |
-| `UI_SSO_HEADER_NAME`          | `X-Name`            | global  | nein     | HTTP header containing the user's display name                                                   |
-| `UI_SSO_TRUSTED_IPS`          | `127.0.0.1,::1`     | global  | nein     | Comma-separated list of trusted IP addresses or CIDR ranges that are allowed to send SSO headers |
-| `UI_SSO_AUTO_CREATE_USERS`    | `yes`               | global  | nein     | Automatically create new users when they authenticate via SSO for the first time                 |
-| `UI_SSO_DEFAULT_ROLE`         | `reader`            | global  | nein     | Default role assigned to new SSO users when no group mapping matches                             |
-| `UI_SSO_GROUP_ADMIN`          |                     | global  | nein     | Group name that grants admin role (highest priority)                                             |
-| `UI_SSO_GROUP_WRITER`         |                     | global  | nein     | Group name that grants writer role                                                               |
-| `UI_SSO_GROUP_READER`         |                     | global  | nein     | Group name that grants reader role                                                               |
-| `UI_SSO_FALLBACK_TO_LOGIN`    | `yes`               | global  | nein     | Allow users to fall back to normal login when SSO headers are not present                        |
-| `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`               | global  | nein     | Update user information (email, role) from SSO headers on each login                             |
-| `UI_SSO_ACCOUNT_LINKING`      | `username_or_email` | global  | nein     | How to match incoming SSO users to local accounts                                                |
-| `UI_SSO_LOGOUT_REDIRECT_URL`  |                     | global  | nein     | URL to redirect users to after logout (e.g., SSO provider logout endpoint)                       |
+| Einstellung                   | Standardwert    | Kontext | Mehrfach | Beschreibung                                                                                     |
+| ----------------------------- | --------------- | ------- | -------- | ------------------------------------------------------------------------------------------------ |
+| `USE_UI_SSO`                  | `no`            | global  | nein     | Enable or disable UI Single Sign-On authentication for the web interface                         |
+| `UI_SSO_HEADER_USERNAME`      | `X-User`        | global  | nein     | HTTP header containing the authenticated username                                                |
+| `UI_SSO_HEADER_EMAIL`         | `X-Email`       | global  | nein     | HTTP header containing the user's email address                                                  |
+| `UI_SSO_HEADER_GROUPS`        | `X-Groups`      | global  | nein     | HTTP header containing the user's groups (comma or space separated)                              |
+| `UI_SSO_HEADER_NAME`          | `X-Name`        | global  | nein     | HTTP header containing the user's display name                                                   |
+| `UI_SSO_TRUSTED_IPS`          | `127.0.0.1,::1` | global  | nein     | Comma-separated list of trusted IP addresses or CIDR ranges that are allowed to send SSO headers |
+| `UI_SSO_AUTO_CREATE_USERS`    | `yes`           | global  | nein     | Automatically create new users when they authenticate via SSO for the first time                 |
+| `UI_SSO_DEFAULT_ROLE`         | `reader`        | global  | nein     | Default role assigned to new SSO users when no group mapping matches                             |
+| `UI_SSO_GROUP_ADMIN`          |                 | global  | nein     | Group name that grants admin role (highest priority)                                             |
+| `UI_SSO_GROUP_WRITER`         |                 | global  | nein     | Group name that grants writer role                                                               |
+| `UI_SSO_GROUP_READER`         |                 | global  | nein     | Group name that grants reader role                                                               |
+| `UI_SSO_FALLBACK_TO_LOGIN`    | `yes`           | global  | nein     | Allow users to fall back to normal login when SSO headers are not present                        |
+| `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`           | global  | nein     | Update user information (email, role) from SSO headers on each login                             |
+| `UI_SSO_LOGOUT_REDIRECT_URL`  |                 | global  | nein     | URL to redirect users to after logout (e.g., SSO provider logout endpoint)                       |
 
 ## User Manager <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

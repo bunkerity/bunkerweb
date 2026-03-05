@@ -223,15 +223,61 @@ class Database:
             self.logger.error("Oracle database is not supported yet")
             _exit(1)
 
+        # Pool size
+        pool_size = getenv("DATABASE_POOL_SIZE", "40")
+        if pool_size.isdigit() and int(pool_size) >= 0:
+            pool_size = int(pool_size)
+        else:
+            self.logger.warning(f"Invalid DATABASE_POOL_SIZE value: {pool_size}, using default value (40)")
+            pool_size = 40
+
+        # Max overflow
+        max_overflow = getenv("DATABASE_POOL_MAX_OVERFLOW", "20")
+        try:
+            max_overflow = int(max_overflow)
+        except ValueError:
+            self.logger.warning(f"Invalid DATABASE_POOL_MAX_OVERFLOW value: {max_overflow}, using default value (20)")
+            max_overflow = 20
+
+        # Pool timeout
+        pool_timeout = getenv("DATABASE_POOL_TIMEOUT", "5")
+        if pool_timeout.isdigit() and int(pool_timeout) >= 0:
+            pool_timeout = int(pool_timeout)
+        else:
+            self.logger.warning(f"Invalid DATABASE_POOL_TIMEOUT value: {pool_timeout}, using default value (5)")
+            pool_timeout = 5
+
+        # Pool recycle
+        pool_recycle = getenv("DATABASE_POOL_RECYCLE", "1800")
+        try:
+            pool_recycle = int(pool_recycle)
+        except ValueError:
+            self.logger.warning(f"Invalid DATABASE_POOL_RECYCLE value: {pool_recycle}, using default value (1800)")
+            pool_recycle = 1800
+
+        # Pool pre-ping
+        pool_pre_ping = getenv("DATABASE_POOL_PRE_PING", "yes").lower() in ("yes", "true", "1")
+
         self._engine_kwargs = {
             "future": True,
             "poolclass": QueuePool,
-            "pool_pre_ping": True,
-            "pool_recycle": 1800,
-            "pool_size": 40,
-            "max_overflow": 20,
-            "pool_timeout": 5,
+            "pool_pre_ping": pool_pre_ping,
+            "pool_recycle": pool_recycle,
+            "pool_size": pool_size,
+            "max_overflow": max_overflow,
+            "pool_timeout": pool_timeout,
         } | kwargs
+
+        if "pool_reset_on_return" not in kwargs:
+            default_pool_reset = "none" if match and match.group("database").startswith("m") else "rollback"
+            configured_pool_reset = getenv("DATABASE_POOL_RESET_ON_RETURN", default_pool_reset).strip().lower()
+            if configured_pool_reset in ("none", "null", "off", "false", "no"):
+                self._engine_kwargs["pool_reset_on_return"] = None
+            elif configured_pool_reset in ("rollback", "commit"):
+                self._engine_kwargs["pool_reset_on_return"] = configured_pool_reset
+            else:
+                self.logger.warning(f"Invalid DATABASE_POOL_RESET_ON_RETURN value: {configured_pool_reset}, using default value ({default_pool_reset})")
+                self._engine_kwargs["pool_reset_on_return"] = None if default_pool_reset == "none" else default_pool_reset
 
         try:
             self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
@@ -304,6 +350,8 @@ class Database:
 
         if log:
             self.logger.info(f"✅ Database connection established{'' if not self.readonly else ' in read-only mode'}")
+
+        self._session_factory = scoped_session(sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False))
 
         if match.group("database").startswith("sqlite"):
             db_path = Path(match.group("path"))
@@ -425,6 +473,10 @@ class Database:
         self.sql_engine.dispose(close=True)
         self.sql_engine = create_engine(self.database_uri_readonly if fallback else self.database_uri, **self._engine_kwargs | kwargs)
 
+        if self._session_factory is not None:
+            self._session_factory.remove()
+        self._session_factory = scoped_session(sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False))
+
         if fallback or readonly:
             with self.sql_engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
@@ -443,18 +495,18 @@ class Database:
             self.logger.error("The database engine is not initialized")
             _exit(1)
 
-        with LOCK:
-            session = None
-            try:
-                session_factory = sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False)
-                session = scoped_session(session_factory)
-                yield session
-            except BaseException as e:
-                if session:
+        session = None
+        try:
+            session = self._session_factory
+            yield session
+        except BaseException as e:
+            if session:
+                with suppress(Exception):
                     session.rollback()
 
-                if any(error in str(e) for error in self.READONLY_ERROR):
-                    self.logger.warning("The database is read-only, retrying in read-only mode ...")
+            if any(error in str(e) for error in self.READONLY_ERROR):
+                self.logger.warning("The database is read-only, retrying in read-only mode ...")
+                with LOCK:
                     try:
                         self.retry_connection(readonly=True, pool_timeout=1)
                         self.retry_connection(readonly=True, log=False)
@@ -465,15 +517,17 @@ class Database:
                                 self.retry_connection(fallback=True, pool_timeout=1)
                             self.retry_connection(fallback=True, log=False)
                     self.readonly = True
-                elif isinstance(e, (ConnectionRefusedError, OperationalError)) and self.database_uri_readonly:
-                    self.logger.warning("Can't connect to the database, falling back to read-only one ...")
+            elif isinstance(e, (ConnectionRefusedError, OperationalError)) and self.database_uri_readonly:
+                self.logger.warning("Can't connect to the database, falling back to read-only one ...")
+                with LOCK:
                     with suppress(OperationalError, DatabaseError):
                         self.retry_connection(fallback=True, pool_timeout=1)
                         self.retry_connection(fallback=True, log=False)
                         self.readonly = True
-                raise
-            finally:
-                if session:
+            raise
+        finally:
+            if session:
+                with suppress(Exception):
                     session.remove()
 
     def is_valid_setting(
