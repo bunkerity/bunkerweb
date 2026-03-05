@@ -16,39 +16,12 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from requests import get
 from requests.exceptions import ConnectionError, RequestException
 
-from common_utils import get_version  # type: ignore
+from common_utils import get_version, is_newer_version_available  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
 LOGGER = getLogger("UPDATE-CHECK")
 status = 0
-
-
-def normalize_bunkerweb_version(version: str) -> str:
-    """Normalize BunkerWeb version strings for semantic comparison.
-
-    Converts Debian-style pre-release versions such as ``1.6.9~rc2`` to
-    ``1.6.9-rc2`` so they can be parsed by ``packaging.version.Version``.
-    """
-    return version.strip().lower().removeprefix("v").replace("~", "-")
-
-
-def is_newer_version_available(current_version: str, latest_version: str) -> bool:
-    """Return True when the latest version is newer than the current one.
-
-    Falls back to normalized string inequality when semantic parsing fails so
-    behavior stays compatible for non-standard version strings.
-    """
-    current_normalized = normalize_bunkerweb_version(current_version)
-    latest_normalized = normalize_bunkerweb_version(latest_version)
-
-    try:
-        from packaging.version import InvalidVersion, Version
-
-        return Version(current_normalized) < Version(latest_normalized)
-    except (ImportError, InvalidVersion):
-        return current_normalized != latest_normalized
-
 
 try:
     JOB = Job(LOGGER, __file__)
