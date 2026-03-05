@@ -5,6 +5,7 @@ from contextlib import suppress
 from concurrent.futures import Future, ThreadPoolExecutor
 from copy import deepcopy
 from datetime import datetime
+from gc import collect
 from io import BytesIO
 from json import load as json_load
 from logging import Logger
@@ -1189,11 +1190,16 @@ if __name__ == "__main__":
             # infinite schedule for the jobs
             LOGGER.info("Executing job scheduler ...")
             errors = 0
+            _gc_counter = 0
             while RUN and not NEED_RELOAD:
                 try:
                     sleep(3 if SCHEDULER.db.readonly else 1)
                     run_pending()
                     SCHEDULER.run_pending()
+                    _gc_counter += 1
+                    if _gc_counter >= 60:
+                        collect()
+                        _gc_counter = 0
                     current_time = datetime.now().astimezone()
 
                     while DB_LOCK_FILE.is_file() and DB_LOCK_FILE.stat().st_ctime + 30 > current_time.timestamp():
