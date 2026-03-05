@@ -11,6 +11,7 @@
 - [UI/API] Add `MAX_REQUESTS` setting to configure Gunicorn max requests before worker restart (defaults to 1000), with `UI_MAX_REQUESTS` / `API_MAX_REQUESTS` as optional overrides.
 - [API] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.
 - [MISC] Enhance version comparison logic in update check
+- [MISC] Enhance database connection management with configurable pool reset and session handling
 - [DEPS] Updated libmaxminddb version to v1.13.2
 - [DEPS] Updated luajit2 version to v2.1-20260227
 - [DEPS] Update coreruleset-v4 version to v4.24.0

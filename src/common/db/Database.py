@@ -233,6 +233,17 @@ class Database:
             "pool_timeout": 5,
         } | kwargs
 
+        if "pool_reset_on_return" not in kwargs:
+            default_pool_reset = "none" if match and match.group("database").startswith("m") else "rollback"
+            configured_pool_reset = getenv("DATABASE_POOL_RESET_ON_RETURN", default_pool_reset).strip().lower()
+            if configured_pool_reset in ("none", "null", "off", "false", "no"):
+                self._engine_kwargs["pool_reset_on_return"] = None
+            elif configured_pool_reset in ("rollback", "commit"):
+                self._engine_kwargs["pool_reset_on_return"] = configured_pool_reset
+            else:
+                self.logger.warning(f"Invalid DATABASE_POOL_RESET_ON_RETURN value: {configured_pool_reset}, using default value ({default_pool_reset})")
+                self._engine_kwargs["pool_reset_on_return"] = None if default_pool_reset == "none" else default_pool_reset
+
         try:
             self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
         except ArgumentError:
@@ -304,6 +315,8 @@ class Database:
 
         if log:
             self.logger.info(f"✅ Database connection established{'' if not self.readonly else ' in read-only mode'}")
+
+        self._session_factory = scoped_session(sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False))
 
         if match.group("database").startswith("sqlite"):
             db_path = Path(match.group("path"))
@@ -425,6 +438,10 @@ class Database:
         self.sql_engine.dispose(close=True)
         self.sql_engine = create_engine(self.database_uri_readonly if fallback else self.database_uri, **self._engine_kwargs | kwargs)
 
+        if self._session_factory is not None:
+            self._session_factory.remove()
+        self._session_factory = scoped_session(sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False))
+
         if fallback or readonly:
             with self.sql_engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
@@ -443,18 +460,18 @@ class Database:
             self.logger.error("The database engine is not initialized")
             _exit(1)
 
-        with LOCK:
-            session = None
-            try:
-                session_factory = sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False)
-                session = scoped_session(session_factory)
-                yield session
-            except BaseException as e:
-                if session:
+        session = None
+        try:
+            session = self._session_factory
+            yield session
+        except BaseException as e:
+            if session:
+                with suppress(Exception):
                     session.rollback()
 
-                if any(error in str(e) for error in self.READONLY_ERROR):
-                    self.logger.warning("The database is read-only, retrying in read-only mode ...")
+            if any(error in str(e) for error in self.READONLY_ERROR):
+                self.logger.warning("The database is read-only, retrying in read-only mode ...")
+                with LOCK:
                     try:
                         self.retry_connection(readonly=True, pool_timeout=1)
                         self.retry_connection(readonly=True, log=False)
@@ -465,15 +482,17 @@ class Database:
                                 self.retry_connection(fallback=True, pool_timeout=1)
                             self.retry_connection(fallback=True, log=False)
                     self.readonly = True
-                elif isinstance(e, (ConnectionRefusedError, OperationalError)) and self.database_uri_readonly:
-                    self.logger.warning("Can't connect to the database, falling back to read-only one ...")
+            elif isinstance(e, (ConnectionRefusedError, OperationalError)) and self.database_uri_readonly:
+                self.logger.warning("Can't connect to the database, falling back to read-only one ...")
+                with LOCK:
                     with suppress(OperationalError, DatabaseError):
                         self.retry_connection(fallback=True, pool_timeout=1)
                         self.retry_connection(fallback=True, log=False)
                         self.readonly = True
-                raise
-            finally:
-                if session:
+            raise
+        finally:
+            if session:
+                with suppress(Exception):
                     session.remove()
 
     def is_valid_setting(
