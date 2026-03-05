@@ -179,11 +179,16 @@ helpers.order_plugins = function(plugins, variables)
 				end
 			end
 
+			local remaining = {}
 			for id, plugin in pairs(plugins_phases) do
 				if plugin[phase] and not seen[id] then
-					table.insert(build_orders[phase], id)
+					table.insert(remaining, id)
 					plugin[phase] = nil
 				end
+			end
+			table.sort(remaining)
+			for _, id in ipairs(remaining) do
+				table.insert(build_orders[phase], id)
 			end
 		end
 		return build_orders, missing

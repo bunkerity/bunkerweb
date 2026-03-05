@@ -292,8 +292,12 @@ api.global.POST["^/confs$"] = function(self)
 	file:flush()
 	file:close()
 	local cmds = {
-		"rm -rf " .. destination .. "/*",
-		"tar xzf " .. tmp .. " -C " .. destination,
+		"mkdir -p " .. destination .. "_new",
+		"tar xzf " .. tmp .. " -C " .. destination .. "_new",
+		"rm -rf " .. destination .. "_old",
+		"mv " .. destination .. " " .. destination .. "_old",
+		"mv " .. destination .. "_new " .. destination,
+		"rm -rf " .. destination .. "_old",
 		-- Remove the temporary archive once extracted
 		"rm -f " .. tmp,
 	}

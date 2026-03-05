@@ -269,15 +269,15 @@ class Database:
         } | kwargs
 
         if "pool_reset_on_return" not in kwargs:
-            default_pool_reset = "none" if match and match.group("database").startswith("m") else "rollback"
-            configured_pool_reset = getenv("DATABASE_POOL_RESET_ON_RETURN", default_pool_reset).strip().lower()
+            default_pool_reset = "rollback"
+            configured_pool_reset = getenv("DATABASE_POOL_RESET_ON_RETURN", "").strip().lower() or default_pool_reset
             if configured_pool_reset in ("none", "null", "off", "false", "no"):
                 self._engine_kwargs["pool_reset_on_return"] = None
             elif configured_pool_reset in ("rollback", "commit"):
                 self._engine_kwargs["pool_reset_on_return"] = configured_pool_reset
             else:
                 self.logger.warning(f"Invalid DATABASE_POOL_RESET_ON_RETURN value: {configured_pool_reset}, using default value ({default_pool_reset})")
-                self._engine_kwargs["pool_reset_on_return"] = None if default_pool_reset == "none" else default_pool_reset
+                self._engine_kwargs["pool_reset_on_return"] = default_pool_reset
 
         try:
             self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
@@ -364,10 +364,10 @@ class Database:
 
     def __del__(self) -> None:
         """Close the database"""
-        if self._session_factory:
+        if getattr(self, "_session_factory", None):
             self._session_factory.close_all()
 
-        if self.sql_engine:
+        if getattr(self, "sql_engine", None):
             self.sql_engine.dispose()
 
     def _empty_if_none(self, value: Any) -> Any:
