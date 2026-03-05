@@ -22,19 +22,19 @@ Follow these steps to configure and use the Let's Encrypt feature:
 4. **Provide ZeroSSL credentials (if needed):** When using `zerossl`, set `EMAIL_LETS_ENCRYPT` or `LETS_ENCRYPT_ZEROSSL_API_KEY` so `zerossl-bot` can retrieve EAB credentials.
 5. **Choose challenge type:** Select either `http` or `dns` verification with the `LETS_ENCRYPT_CHALLENGE` setting.
 6. **Configure DNS provider:** If using DNS challenges, specify your DNS provider and credentials.
-7. **Select certificate profile:** Choose your preferred certificate profile using the `LETS_ENCRYPT_PROFILE` setting (classic, tlsserver, or shortlived).
+7. **Select certificate profile (Let's Encrypt only):** Choose your preferred certificate profile using the `LETS_ENCRYPT_PROFILE` setting (classic, tlsserver, or shortlived). This setting has no effect when using ZeroSSL.
 8. **Let BunkerWeb handle the rest:** Once configured, certificates are automatically issued, installed, and renewed as needed.
 
-!!! tip "Certificate Profiles"
-    Let's Encrypt provides different certificate profiles for different use cases:
+!!! tip "Certificate Profiles (Let's Encrypt only)"
+    Let's Encrypt provides different certificate profiles for different use cases. **These profiles only apply when `LETS_ENCRYPT_SERVER=letsencrypt`. They are ignored by ZeroSSL.**
 
-    - **classic**: General-purpose certificates with 90-day validity (default)
-    - **tlsserver**: Optimized for TLS server authentication with 90-day validity and smaller payload
-    - **shortlived**: Enhanced security with 7-day validity for automated environments
+    - **classic**: General-purpose certificates with 90-day validity, max 100 SANs (default)
+    - **tlsserver**: 90-day validity, smaller payload (no Common Name, no Subject Key ID), max 25 SANs — recommended for fully automated setups
+    - **shortlived**: ~7-day validity (160 hours), no CRL revocation info (even smaller certs), max 25 SANs — requires reliable automated renewal
     - **custom**: If your ACME server supports a different profile, set it using `LETS_ENCRYPT_CUSTOM_PROFILE`.
 
 !!! info "Profile Availability"
-    Note that the `tlsserver` and `shortlived` profiles may not be available in all environments or with all ACME clients at this time. The `classic` profile has the widest compatibility and is recommended for most users. If a selected profile is not available, the system will automatically fall back to the `classic` profile.
+    Note that the `tlsserver` and `shortlived` profiles may not be available in all environments or with all ACME clients at this time. The `classic` profile has the widest compatibility and is recommended for most users. If a selected profile is not available, the system will automatically fall back to the `classic` profile. A fourth profile `tlsclient` exists but is being discontinued by Let's Encrypt on May 13, 2026 and should not be used. **Certificate profiles are not supported by ZeroSSL — `LETS_ENCRYPT_PROFILE` and `LETS_ENCRYPT_CUSTOM_PROFILE` are ignored when `LETS_ENCRYPT_SERVER=zerossl`.**
 
 ### Configuration Settings
 
@@ -51,20 +51,20 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | `LETS_ENCRYPT_ZEROSSL_API_MAX_TIME`         | `20`          | multisite | no       | **ZeroSSL Request Max Time:** Maximum total time in seconds for each ZeroSSL API call in `zerossl-bot`.                                                                                                                                                                        |
 | `LETS_ENCRYPT_CHALLENGE`                    | `http`        | multisite | no       | **Challenge Type:** Method used to verify domain ownership. Options: `http` or `dns`.                                                                                                                                                                                          |
 | `LETS_ENCRYPT_DNS_PROVIDER`                 |               | multisite | no       | **DNS Provider:** When using DNS challenges, the DNS provider to use (e.g., cloudflare, route53, digitalocean).                                                                                                                                                                |
-| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | no       | **DNS Propagation:** The time to wait for DNS propagation in seconds. If no value is provided, the provider's default propagation time is used.                                                                                                                                |
+| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | no       | **DNS Propagation:** The time to wait for DNS propagation in seconds. When set to `default`, BunkerWeb automatically scales the wait time by domain count (10 seconds × number of domains in the certificate), since certbot adds TXT records sequentially. Set an explicit value in seconds to override.                |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | yes      | **Credential Item:** Configuration items for DNS provider authentication (e.g., `cloudflare_api_token 123456`). Values can be raw text, base64 encoded, or a JSON object.                                                                                                      |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`         | multisite | no       | **Decode Base64 DNS credentials:** Automatically decode base64-encoded DNS provider credentials when set to `yes`. Values matching base64 format are decoded before use (except for the `rfc2136` provider). Set to `no` if your credentials are intentionally base64 strings. |
 | `USE_LETS_ENCRYPT_WILDCARD`                 | `no`          | multisite | no       | **Wildcard Certificates:** When set to `yes`, creates wildcard certificates for all domains. Only available with DNS challenges.                                                                                                                                               |
 | `USE_LETS_ENCRYPT_STAGING`                  | `no`          | multisite | no       | **Use Staging:** When set to `yes`, uses Let's Encrypt's staging environment for testing. Staging has higher rate limits but produces certificates that are not trusted by browsers.                                                                                           |
 | `LETS_ENCRYPT_CLEAR_OLD_CERTS`              | `no`          | global    | no       | **Clear Old Certificates:** When set to `yes`, removes old certificates that are no longer needed during renewal.                                                                                                                                                              |
 | `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`          | global    | no       | **Concurrent Requests:** When set to `yes`, certbot-new issues certificate requests concurrently. Use with caution to avoid rate limits.                                                                                                                                       |
-| `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | no       | **Certificate Profile:** Select the certificate profile to use. Options: `classic` (general-purpose), `tlsserver` (optimized for TLS servers), or `shortlived` (7-day certificates).                                                                                           |
-| `LETS_ENCRYPT_CUSTOM_PROFILE`               |               | multisite | no       | **Custom Certificate Profile:** Enter a custom certificate profile if your ACME server supports non-standard profiles. This overrides `LETS_ENCRYPT_PROFILE` if set.                                                                                                           |
+| `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | no       | **Certificate Profile (Let's Encrypt only):** Select the certificate profile to use. Options: `classic` (general-purpose, max 100 SANs), `tlsserver` (optimized for TLS servers, max 25 SANs), or `shortlived` (~7-day certificates, max 25 SANs). Ignored when `LETS_ENCRYPT_SERVER=zerossl`.                         |
+| `LETS_ENCRYPT_CUSTOM_PROFILE`               |               | multisite | no       | **Custom Certificate Profile (Let's Encrypt only):** Enter a custom certificate profile if your ACME server supports non-standard profiles. This overrides `LETS_ENCRYPT_PROFILE` if set. Ignored when `LETS_ENCRYPT_SERVER=zerossl`.                                          |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `3`           | multisite | no       | **Maximum Retries:** Number of times to retry certificate generation on failure. Set to `0` to disable retries. Useful for handling temporary network issues or API rate limits.                                                                                               |
 
 !!! info "Information and behavior"
     - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file, and Certbot will read the credentials from it.
-    - If no `LETS_ENCRYPT_DNS_PROPAGATION` setting is provided, the provider's default propagation time is used.
+    - When `LETS_ENCRYPT_DNS_PROPAGATION` is set to `default`, BunkerWeb scales the wait time automatically: 10 seconds per domain in the certificate (e.g. 2 domains = 20 seconds). Set an explicit value to override.
     - Full Let's Encrypt automation using the `http` challenge works in stream mode as long as you open the `80/tcp` port from the outside. Use the `LISTEN_STREAM_PORT_SSL` setting to choose your listening SSL/TLS port.
     - If `LETS_ENCRYPT_PASSTHROUGH` is set to `yes`, BunkerWeb will not handle the ACME challenge requests itself but will pass them to the backend web server. This is useful in scenarios where BunkerWeb is acting as a reverse proxy in front of another server that is configured to handle Let's Encrypt challenges
 
