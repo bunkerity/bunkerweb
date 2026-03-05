@@ -1577,7 +1577,7 @@ The Country plugin enables geo-blocking functionality for your website, allowing
 Follow these steps to configure and use the Country feature:
 
 1. **Define your strategy:** Decide whether you want to use a whitelist approach (allow only specific countries) or a blacklist approach (block specific countries).
-2. **Configure country codes:** Add the ISO 3166-1 alpha-2 country codes (two-letter codes like US, GB, FR) to either the `WHITELIST_COUNTRY` or `BLACKLIST_COUNTRY` setting.
+2. **Configure countries or groups:** Add ISO 3166-1 alpha-2 country codes (two-letter codes like US, GB, FR) and/or supported group tokens (like `@EU`, `@SCHENGEN`) to either the `WHITELIST_COUNTRY` or `BLACKLIST_COUNTRY` setting.
 3. **Apply settings:** Once configured, the country-based restrictions will apply to all visitors to your site.
 4. **Monitor effectiveness:** Check the [web UI](web-ui.md) to see statistics on blocked requests by country.
 
@@ -1585,8 +1585,25 @@ Follow these steps to configure and use the Country feature:
 
 | Setting             | Default | Context   | Multiple | Description                                                                                                                     |
 | ------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `WHITELIST_COUNTRY` |         | multisite | no       | **Country Whitelist:** List of country codes (ISO 3166-1 alpha-2 format) separated by spaces. Only these countries are allowed. |
-| `BLACKLIST_COUNTRY` |         | multisite | no       | **Country Blacklist:** List of country codes (ISO 3166-1 alpha-2 format) separated by spaces. These countries are blocked.      |
+| `WHITELIST_COUNTRY` |         | multisite | no       | **Country Whitelist:** List of country codes and/or country-group tokens separated by spaces. Only these countries are allowed. |
+| `BLACKLIST_COUNTRY` |         | multisite | no       | **Country Blacklist:** List of country codes and/or country-group tokens separated by spaces. These countries are blocked.      |
+
+### Supported Country Groups
+
+You can use group tokens prefixed with `@`. They are expanded server-side into their member countries:
+
+- `@EU`: European Union member states.
+- `@SCHENGEN`: Schengen Area countries.
+- `@EEA`: European Economic Area (`@EU` + Iceland, Liechtenstein, Norway).
+- `@BENELUX`: Belgium, Netherlands, Luxembourg.
+- `@DACH`: German-speaking core region (Germany, Austria, Switzerland).
+- `@NORDICS`: Nordic countries (Denmark, Finland, Iceland, Norway, Sweden).
+- `@USMCA`: North American USMCA trade area (United States, Canada, Mexico).
+- `@FIVE_EYES`: Five Eyes intelligence alliance countries.
+- `@ASEAN`: ASEAN member states in Southeast Asia.
+- `@GCC`: Gulf Cooperation Council member states.
+- `@G7`: Group of Seven major advanced economies.
+- `@LATAM`: Latin America set used by this plugin.
 
 !!! tip "Whitelist vs. Blacklist"
     Choose the approach that best fits your needs:
@@ -1623,7 +1640,15 @@ Follow these steps to configure and use the Country feature:
     Allow access only from European Union member states:
 
     ```yaml
-    WHITELIST_COUNTRY: "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE"
+    WHITELIST_COUNTRY: "@EU"
+    ```
+
+=== "Group + Explicit Countries"
+
+    Allow Schengen countries plus the United Kingdom:
+
+    ```yaml
+    WHITELIST_COUNTRY: "@SCHENGEN GB"
     ```
 
 === "High-Risk Countries Blocked"
@@ -2150,13 +2175,22 @@ Follow these steps to configure and use the Database feature:
 
 ### Configuration Settings
 
-| Setting                         | Default                                   | Context | Multiple | Description                                                                                                           |
-| ------------------------------- | ----------------------------------------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | no       | **Database URI:** The primary database connection string in the SQLAlchemy format.                                    |
-| `DATABASE_URI_READONLY`         |                                           | global  | no       | **Read-Only Database URI:** Optional database for read-only operations or as a failover if the main database is down. |
-| `DATABASE_LOG_LEVEL`            | `warning`                                 | global  | no       | **Log Level:** The verbosity level for database logs. Options: `debug`, `info`, `warn`, `warning`, or `error`.        |
-| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global  | no       | **Maximum Job Runs:** The maximum number of job execution records to retain in the database before automatic cleanup. |
-| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global  | no       | **Session Retention:** The maximum age (in days) for UI user sessions before they are purged automatically.           |
+| Setting                           | Default                                   | Context | Multiple | Description                                                                                                                                                                             |
+| --------------------------------- | ----------------------------------------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URI`                    | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | no       | **Database URI:** The primary database connection string in the SQLAlchemy format.                                                                                                      |
+| `DATABASE_URI_READONLY`           |                                           | global  | no       | **Read-Only Database URI:** Optional database for read-only operations or as a failover if the main database is down.                                                                   |
+| `DATABASE_LOG_LEVEL`              | `warning`                                 | global  | no       | **Log Level:** The verbosity level for database logs. Options: `debug`, `info`, `warn`, `warning`, or `error`.                                                                          |
+| `DATABASE_MAX_JOBS_RUNS`          | `10000`                                   | global  | no       | **Maximum Job Runs:** The maximum number of job execution records to retain in the database before automatic cleanup.                                                                   |
+| `DATABASE_MAX_SESSION_AGE_DAYS`   | `14`                                      | global  | no       | **Session Retention:** The maximum age (in days) for UI user sessions before they are purged automatically.                                                                             |
+| `DATABASE_POOL_SIZE`              | `40`                                      | global  | no       | **Pool Size:** The number of connections to keep in the database connection pool.                                                                                                       |
+| `DATABASE_POOL_MAX_OVERFLOW`      | `20`                                      | global  | no       | **Pool Max Overflow:** The maximum number of connections to create above the pool size. Set to `-1` for unlimited overflow.                                                             |
+| `DATABASE_POOL_TIMEOUT`           | `5`                                       | global  | no       | **Pool Timeout:** The number of seconds to wait before giving up on getting a connection from the pool.                                                                                 |
+| `DATABASE_POOL_RECYCLE`           | `1800`                                    | global  | no       | **Pool Recycle:** The number of seconds after which a connection is automatically recycled. Set to `-1` to disable.                                                                     |
+| `DATABASE_POOL_PRE_PING`          | `yes`                                     | global  | no       | **Pool Pre-Ping:** Whether to test connections for liveness upon each checkout from the pool.                                                                                           |
+| `DATABASE_POOL_RESET_ON_RETURN`   |                                           | global  | no       | **Pool Reset on Return:** How connections are reset when returned to the pool. Empty for auto (`none` for MySQL/MariaDB, `rollback` for others). Options: `rollback`, `commit`, `none`. |
+| `DATABASE_RETRY_TIMEOUT`          | `60`                                      | global  | no       | **Retry Timeout:** The maximum number of seconds to wait for the database to be available on startup.                                                                                   |
+| `DATABASE_REQUEST_RETRY_ATTEMPTS` | `2`                                       | global  | no       | **Request Retry Attempts:** The number of retry attempts for transient database errors during operations.                                                                               |
+| `DATABASE_REQUEST_RETRY_DELAY`    | `0.25`                                    | global  | no       | **Request Retry Delay:** The delay in seconds between retry attempts for transient database errors.                                                                                     |
 
 !!! tip "Database Selection"
     - **SQLite** (default): Ideal for single-node deployments or testing environments due to its simplicity and file-based nature.
@@ -3882,7 +3916,7 @@ Follow these steps to configure and use ModSecurity:
 Select a CRS version to best match your security needs:
 
 - **`3`**: Stable [v3.3.8](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8).
-- **`4`**: Stable [v4.23.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.23.0) (**default**).
+- **`4`**: Stable [v4.24.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.24.0) (**default**).
 - **`nightly`**: [Nightly build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) offering the latest rule updates.
 
 !!! example "Nightly Build"

@@ -1,0 +1,145 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Rule 943110: Session Fixation - SessionID Parameter Names
+##!
+##! Description: Detects common session ID parameter names used in
+##! session fixation attacks. These are parameter names that appear in
+##! URLs or POST data that could be used to set session identifiers.
+##!
+##! Note: This rule uses t:lowercase transformation, so all patterns
+##! are in lowercase.
+##!
+##! Documentation: For each pattern, a comment documents the source / framework
+##! the pattern originates from, and any additional useful information.
+##!^ ^
+##!$ $
+
+##! Java/J2EE Session IDs
+##! Source: Java Servlet Specification
+##! Default: 'JSESSIONID'
+jsessionid
+##! Source: Oracle Application Server / JServ
+jservsession
+##! Source: IBM WebSphere / older J2EE servers
+jwsession
+
+##! ASP/ASP.NET Session IDs
+##! Source: Microsoft IIS / Classic ASP
+##! Pattern: ASPSESSIONIDxxxxxxxx (where x is random chars)
+aspsessionid
+##! Source: ASP.NET Framework
+##! Default: 'ASP.NET_SessionId'
+asp\.net_sessionid
+
+##! PHP Session IDs
+##! Source: PHP session.name configuration
+##! Default: 'PHPSESSID' (already covered, phpsession/phpsessid are variants)
+phpsession
+phpsessid
+
+##! Oracle WebLogic
+##! Source: Oracle WebLogic Server documentation
+##! Default: 'JSESSIONID' for standard servlets, 'WLSession' for some configurations
+##! Note: 'weblogicsession' is a common variation
+weblogicsession
+wlsession
+
+##! Generic Session IDs (various platforms)
+##! Common generic session parameter names used across multiple frameworks
+session_id
+session-id
+sessionid
+_session_id
+
+##! ColdFusion Session IDs
+##! Source: Adobe ColdFusion / Lucee documentation
+##! CFID and CFTOKEN are used together to identify sessions
+cfid
+cftoken
+cfsid
+
+##! Python/Flask Session IDs
+##! Source: Flask-Session extension
+##! Default: secure HTTP cookie named 'session', '_flask_session' for custom implementations
+##! The secure cookie 'session' is encrypted in the server, so it is not possible to have session fixation
+_flask_session
+
+##! Node.js Session IDs
+##! Express session
+##! Source: https://github.com/expressjs/session
+##! Default: 'connect.sid' (when using express-session/connect)
+connect\.sid
+##! Sails.js
+##! Source: https://sailsjs.com/documentation/reference/configuration/sails-config-session
+##! Default: 'sails.sid'
+sails\.sid
+
+##! Node.js Framework Session IDs
+##! Koa.js
+##! Source: https://github.com/koajs/session
+##! Default: 'koa.sess' or 'koa:sess' depending on configuration
+koa\.sess
+koa:sess
+
+##! Next.js / NextAuth.js
+##! Source: https://next-auth.js.org/configuration/options#cookies
+##! Default cookie names for NextAuth.js session tokens
+next-auth\.session-token
+__secure-next-auth\.session-token
+__host-next-auth\.session-token
+
+##! Meteor
+##! Source: Meteor Accounts system
+##! Default: 'meteor_login_token' (localStorage and cookie)
+meteor_login_token
+
+##! Ruby/Rails Session IDs
+##! Rails
+##! Source: Ruby on Rails ActionDispatch::Session
+##! Default: '_<app_name>_session', commonly '_rails_session'
+_rails_session
+##! Rack
+##! Source: Rack session middleware
+##! Default: 'rack.session'
+rack\.session
+
+##! Python Framework Session IDs
+##! Django
+##! Source: https://docs.djangoproject.com/en/stable/topics/http/sessions/
+##! Default: 'sessionid' (already covered in generic section)
+
+##! Java Framework Session IDs
+##! Play Framework
+##! Source: https://www.playframework.com/documentation/latest/SettingsSession
+##! Default: 'PLAY_SESSION'
+play_session
+
+##! PHP Framework Session IDs
+##! Laravel
+##! Source: https://github.com/laravel/framework - config/session.php
+##! Default: 'laravel_session'
+laravel_session
+
+##! CakePHP
+##! Source: https://book.cakephp.org/3.x/development/sessions.html
+##! CakePHP 3.x default: 'CAKEPHP'
+##! Source: https://book.cakephp.org/4.x/development/sessions.html
+##! CakePHP 4.x default: Uses PHP's session.name (typically 'PHPSESSID')
+cakephp
+
+##! CodeIgniter
+##! Source: https://codeigniter.com/user_guide/libraries/sessions.html
+##! Default: 'ci_session'
+ci_session
+
+##! Zend
+##! Default session ID parameter name
+zend_session_id
+
+##! Other Framework Session IDs
+
+##! Shiny (R)
+##! Source: RStudio Shiny Server
+##! Authentication token used by Shiny applications
+shiny-token

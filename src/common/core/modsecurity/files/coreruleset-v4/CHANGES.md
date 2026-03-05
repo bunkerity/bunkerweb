@@ -5,6 +5,36 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
+## Version 4.24.0 - 2026-02-28
+
+## What's Changed
+### 🆕 New features and detections 🎉
+* feat(933100): add detection of smarty template php tag by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4447
+### 🧰 Other Changes
+* fix(932130): use lazy regex by @fzipi in https://github.com/coreruleset/coreruleset/pull/3730
+* chore(943110): move to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4431
+* fix(930130): reduce false positive by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4451
+* fix(920650): don't block on method override if it's not actually being overwritten by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4455
+* fix(932340): Add more UNIX FP commands by @ssigwart in https://github.com/coreruleset/coreruleset/pull/4454
+* refactor(951210): convert maxDB leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4468
+* refactor(951190): convert Ingres leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4466
+* refactor(951140): convert EMC leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4464
+* refactor(951110): convert Access leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4463
+* fix: handle multi-byte UTF-8 chars in SQL special char detection by @fzipi in https://github.com/coreruleset/coreruleset/pull/4458
+* refactor(951200): convert Interbase leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4467
+* refactor(951180): convert Informix leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4465
+* refactor(951220): convert MSSQL leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4459
+* refactor(951250): convert SQLite leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4460
+* refactor(951260): convert Sybase leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4461
+* refactor(951130): convert DB2 leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4462
+* fix: don't block json variable names called `profile` on libmodsecurity3/coraza by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4477
+* fix(933100): reduce false positive on Extensible Metadata Platform and xsl-stylesheets by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4445
+* feat: move 932190 to regex-assembly by @theseion in https://github.com/coreruleset/coreruleset/pull/4475
+* fix(942200): FP against comma and single quote in French addresses by @theseion in https://github.com/coreruleset/coreruleset/pull/4476
+
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.23.0...v4.24.0
+
 ## Version 4.23.0 - 2026-03-04
 
 ## What's Changed

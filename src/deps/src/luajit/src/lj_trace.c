@@ -472,7 +472,11 @@ static void trace_start(jit_State *J)
   J->ktrace = 0;
   setgcref(J->cur.startpt, obj2gco(J->pt));
 
-  lj_vmevent_send(J2G(J), TRACE,
+  lj_vmevent_send_(J2G(J), TRACE,
+    TValue savetv = J2G(J)->tmptv;
+    TValue savetv2 = J2G(J)->tmptv2;
+    TraceNo parent = J->parent;
+    ExitNo exitno = J->exitno;
     setstrV(V, V->top++, lj_str_newlit(V, "start"));
     setintV(V->top++, traceno);
     setfuncV(V, V->top++, J->fn);
@@ -487,6 +491,11 @@ static void trace_start(jit_State *J)
 	setintV(V->top++, -1);
       }
     }
+  ,
+    J2G(J)->tmptv = savetv;
+    J2G(J)->tmptv2 = savetv2;
+    J->parent = parent;
+    J->exitno = exitno;
   );
   lj_record_setup(J);
 #ifdef LUA_USE_TRACE_LOGS

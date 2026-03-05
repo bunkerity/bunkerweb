@@ -1543,16 +1543,33 @@ STREAM 支持 :white_check_mark:
 请按照以下步骤配置和使用国家/地区功能：
 
 1.  **定义您的策略：** 决定您是想使用白名单方法（仅允许特定国家/地区）还是黑名单方法（阻止特定国家/地区）。
-2.  **配置国家/地区代码：** 将 ISO 3166-1 alpha-2 国家/地区代码（例如 US、GB、FR 等两位字母代码）添加到 `WHITELIST_COUNTRY` 或 `BLACKLIST_COUNTRY` 设置中。
+2.  **配置国家/地区或分组：** 将 ISO 3166-1 alpha-2 国家/地区代码（例如 US、GB、FR）和/或受支持的分组 token（例如 `@EU`、`@SCHENGEN`）添加到 `WHITELIST_COUNTRY` 或 `BLACKLIST_COUNTRY` 设置中。
 3.  **应用设置：** 配置完成后，基于国家/地区的限制将适用于您网站的所有访问者。
 4.  **监控有效性：** 查看 [web UI](web-ui.md) 以查看按国家/地区阻止的请求统计信息。
 
 ### 配置设置
 
-| 设置                | 默认值 | 上下文    | 多个 | 描述                                                                                                    |
-| ------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------------------------- |
-| `WHITELIST_COUNTRY` |        | multisite | 否   | **国家/地区白名单：** 以空格分隔的国家/地区代码（ISO 3166-1 alpha-2 格式）列表。只允许这些国家/地区。   |
-| `BLACKLIST_COUNTRY` |        | multisite | 否   | **国家/地区黑名单：** 以空格分隔的国家/地区代码（ISO 3166-1 alpha-2 格式）列表。这些国家/地区将被阻止。 |
+| 设置                | 默认值 | 上下文    | 多个 | 描述                                                                                         |
+| ------------------- | ------ | --------- | ---- | -------------------------------------------------------------------------------------------- |
+| `WHITELIST_COUNTRY` |        | multisite | 否   | **国家/地区白名单：** 以空格分隔的国家/地区代码和/或分组 token 列表。只允许这些国家/地区。   |
+| `BLACKLIST_COUNTRY` |        | multisite | 否   | **国家/地区黑名单：** 以空格分隔的国家/地区代码和/或分组 token 列表。这些国家/地区将被阻止。 |
+
+### 支持的国家/地区分组
+
+您可以使用以 `@` 开头的分组 token。它们会在服务端展开为对应的成员国家/地区：
+
+- `@EU`：欧盟成员国。
+- `@SCHENGEN`：申根区国家。
+- `@EEA`：欧洲经济区（`@EU` + 冰岛、列支敦士登、挪威）。
+- `@BENELUX`：比利时、荷兰、卢森堡。
+- `@DACH`：德语核心地区（德国、奥地利、瑞士）。
+- `@NORDICS`：北欧国家（丹麦、芬兰、冰岛、挪威、瑞典）。
+- `@USMCA`：USMCA 区域（美国、加拿大、墨西哥）。
+- `@FIVE_EYES`：五眼情报联盟国家。
+- `@ASEAN`：东南亚国家联盟（ASEAN）成员国。
+- `@GCC`：海湾合作委员会成员国。
+- `@G7`：七国集团（G7）国家。
+- `@LATAM`：本插件使用的拉丁美洲国家集合。
 
 !!! tip "白名单与黑名单"
     选择最适合您需求的方法：
@@ -1589,7 +1606,13 @@ STREAM 支持 :white_check_mark:
     仅允许来自欧盟成员国的访问：
 
     ```yaml
-    WHITELIST_COUNTRY: "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE"
+    WHITELIST_COUNTRY: "@EU"
+    ```
+
+=== "分组 + 显式国家/地区"
+
+    ```yaml
+    WHITELIST_COUNTRY: "@SCHENGEN GB"
     ```
 
 === "高风险国家/地区被阻止"
@@ -2111,13 +2134,22 @@ STREAM 支持 :white_check_mark:
 
 ### 配置设置
 
-| 设置                            | 默认值                                    | 上下文 | 多个 | 描述                                                                                       |
-| ------------------------------- | ----------------------------------------- | ------ | ---- | ------------------------------------------------------------------------------------------ |
-| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global | 否   | **数据库 URI：** SQLAlchemy 格式的主数据库连接字符串。                                     |
-| `DATABASE_URI_READONLY`         |                                           | global | 否   | **只读数据库 URI：** 用于只读操作或在主数据库宕机时作为故障转移的可选数据库。              |
-| `DATABASE_LOG_LEVEL`            | `warning`                                 | global | 否   | **日志级别：** 数据库日志的详细程度。选项：`debug`、`info`、`warn`、`warning` 或 `error`。 |
-| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global | 否   | **最大作业运行次数：** 在自动清理之前，数据库中保留的作业执行记录的最大数量。              |
-| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global | 否   | **会话保留：** UI 用户会话在自动清理前允许存在的最大天数。                                 |
+| 设置                              | 默认值                                    | 上下文 | 多个 | 描述                                                                                                                                        |
+| --------------------------------- | ----------------------------------------- | ------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URI`                    | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global | 否   | **数据库 URI：** SQLAlchemy 格式的主数据库连接字符串。                                                                                      |
+| `DATABASE_URI_READONLY`           |                                           | global | 否   | **只读数据库 URI：** 用于只读操作或在主数据库宕机时作为故障转移的可选数据库。                                                               |
+| `DATABASE_LOG_LEVEL`              | `warning`                                 | global | 否   | **日志级别：** 数据库日志的详细程度。选项：`debug`、`info`、`warn`、`warning` 或 `error`。                                                  |
+| `DATABASE_MAX_JOBS_RUNS`          | `10000`                                   | global | 否   | **最大作业运行次数：** 在自动清理之前，数据库中保留的作业执行记录的最大数量。                                                               |
+| `DATABASE_MAX_SESSION_AGE_DAYS`   | `14`                                      | global | 否   | **会话保留：** UI 用户会话在自动清理前允许存在的最大天数。                                                                                  |
+| `DATABASE_POOL_SIZE`              | `40`                                      | global | 否   | **连接池大小：** 数据库连接池中保持的连接数。                                                                                               |
+| `DATABASE_POOL_MAX_OVERFLOW`      | `20`                                      | global | 否   | **连接池最大溢出：** 超出连接池大小可创建的最大额外连接数。设为 `-1` 表示无限制。                                                           |
+| `DATABASE_POOL_TIMEOUT`           | `5`                                       | global | 否   | **连接池超时：** 从连接池获取连接前等待的最大秒数。                                                                                         |
+| `DATABASE_POOL_RECYCLE`           | `1800`                                    | global | 否   | **连接池回收：** 连接自动回收的时间间隔（秒）。设为 `-1` 禁用。                                                                             |
+| `DATABASE_POOL_PRE_PING`          | `yes`                                     | global | 否   | **连接池预检测：** 每次从连接池取出连接时是否测试其活性。                                                                                   |
+| `DATABASE_POOL_RESET_ON_RETURN`   |                                           | global | 否   | **归还时重置：** 连接归还连接池时的重置方式。留空为自动（MySQL/MariaDB 用 `none`，其他用 `rollback`）。选项：`rollback`、`commit`、`none`。 |
+| `DATABASE_RETRY_TIMEOUT`          | `60`                                      | global | 否   | **重试超时：** 启动时等待数据库可用的最大秒数。                                                                                             |
+| `DATABASE_REQUEST_RETRY_ATTEMPTS` | `2`                                       | global | 否   | **请求重试次数：** 操作中遇到瞬态数据库错误时的重试次数。                                                                                   |
+| `DATABASE_REQUEST_RETRY_DELAY`    | `0.25`                                    | global | 否   | **请求重试延迟：** 瞬态数据库错误重试之间的延迟秒数。                                                                                       |
 
 !!! tip "数据库选择" - **SQLite**（默认）：由于其简单和基于文件的特性，非常适合单节点部署或测试环境。- **PostgreSQL**：由于其健壮性和并发支持，推荐用于具有多个 BunkerWeb 实例的生产环境。- **MySQL/MariaDB**：是 PostgreSQL 的一个很好的替代品，具有类似的生产级功能。- **Oracle**：适用于 Oracle 已经是标准数据库平台的企业环境。
 
@@ -3828,7 +3860,7 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 选择一个 CRS 版本以最符合您的安全需求：
 
 - **`3`**：稳定版 [v3.3.8](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8)。
-- **`4`**：稳定版 [v4.23.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.23.0) (**默认**)。
+- **`4`**：稳定版 [v4.24.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.24.0) (**默认**)。
 - **`nightly`**：[每日构建版](https://github.com/coreruleset/coreruleset/releases/tag/nightly)，提供最新的规则更新。
 
 !!! example "每日构建版"

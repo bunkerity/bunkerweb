@@ -1,6 +1,23 @@
 # Changelog
 
-## v1.6.9~rc2 - 2026/02/??
+## v1.6.9~rc3 - 2026/03/??
+
+- [BUGFIX] Fix issues with the new `multiselect` logic where a custom separator can be used, but the default one (space) was still used if the separator was empty, which caused issues with settings that had an empty string as a value.
+- [BUGFIX] Fix issue with the failover not sending the failover configuration if the reload failed, which caused the failover configuration to not be applied until the next successful reload.
+- [FEATURE] Add field value redaction in Let's Encrypt plugin and update ZeroSSL API key handling to avoid exposing sensitive information in logs and process arguments. (Except in TRACE level logs for debugging purposes)
+- [UI] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.
+- [UI] Tweak plugins headers style to avoid the text moving the buttons out of the page when the header is too long.
+- [UI] Add `MAX_CONTENT_LENGTH` setting to configure the maximum upload size (defaults to 50 MB).
+- [UI/API] Add `MAX_REQUESTS` setting to configure Gunicorn max requests before worker restart (defaults to 1000), with `UI_MAX_REQUESTS` / `API_MAX_REQUESTS` as optional overrides.
+- [API] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.
+- [MISC] Enhance version comparison logic in update check
+- [MISC] Enhance database connection management with configurable pool reset and session handling
+- [MISC] Enhance database configuration options with `DATABASE_POOL_SIZE`, `DATABASE_POOL_MAX_OVERFLOW`, `DATABASE_POOL_TIMEOUT`, `DATABASE_POOL_RECYCLE`, `DATABASE_POOL_PRE_PING`, `DATABASE_POOL_RESET_ON_RETURN`, `DATABASE_RETRY_TIMEOUT`, `DATABASE_REQUEST_RETRY_ATTEMPTS` and `DATABASE_REQUEST_RETRY_DELAY` settings for improved performance, reliability and resilience of database interactions.
+- [DEPS] Updated libmaxminddb version to v1.13.2
+- [DEPS] Updated luajit2 version to v2.1-20260227
+- [DEPS] Update coreruleset-v4 version to v4.24.0
+
+## v1.6.9~rc2 - 2026/02/26
 
 - [BUGFIX] Update reCAPTCHA handling to use ANTIBOT_RECAPTCHA_CLASSIC variable instead of session data to determine whether to use the classic reCAPTCHA response format or the new one, ensuring consistent behavior regardless of session state.
 - [BUGFIX] Rename command argument to plugin_command for clarity and to avoid conflicts with other command arguments with bwcli.
@@ -8,6 +25,7 @@
 - [FEATURE] Add `Gandi` as a DNS provider in the `letsencrypt` plugin
 - [FEATURE] Add `Hetzner` as a DNS provider in the `letsencrypt` plugin
 - [FEATURE] Add certificate authority selection in the `Let's Encrypt` plugin to allow users to choose between `Let's Encrypt` and `ZeroSSL` as the certificate authority for their certificates (Also added ZeroSSL specific settings).
+- [FEATURE] Add the possibility to whitelist/blacklist group of countries in the `Country` plugin.
 - [UI] Add override non-global services functionality in global settings
 - [UI] Make data columns in the reports page non orderable to avoid issues
 - [UI] Add control socket configuration for gunicorn

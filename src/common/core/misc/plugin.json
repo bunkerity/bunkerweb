@@ -29,7 +29,7 @@
       "help": "Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients.",
       "id": "allowed-methods",
       "label": "Allowed methods",
-      "regex": "^(?!\\|)(\\|?[A-Z]{3})+$",
+      "regex": "^(?!\\|)(\\|?[A-Z]{3,})+$",
       "type": "multivalue",
       "separator": "|"
     },

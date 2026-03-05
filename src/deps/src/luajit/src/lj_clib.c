@@ -81,7 +81,7 @@ static const char *clib_extname(lua_State *L, const char *name)
 /* Check for a recognized ld script line. */
 static const char *clib_check_lds(lua_State *L, const char *buf)
 {
-  char *p, *e;
+  const char *p, *e;
   if ((!strncmp(buf, "GROUP", 5) || !strncmp(buf, "INPUT", 5)) &&
       (p = strchr(buf, '('))) {
     while (*++p == ' ') ;

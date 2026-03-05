@@ -225,8 +225,10 @@ pkg update -f
 pkg install -y bash git wget curl gtar pigz gmake pkgconf autoconf automake libtool \
   rust ruby rubygem-fpm nginx sudo lsof unzip openssl sqlite3 pcre2 lmdb ssdeep \
   libxml2 yajl libgd libmaxminddb libffi python311 py311-pip py311-setuptools \
-  py311-wheel py311-sqlite3 postgresql18-client gcc14
+  py311-wheel py311-sqlite3 postgresql18-client
 ```
+
+**Security Note**: The final package has **zero runtime dependencies on compiler toolchains**. Only security-relevant libraries (TLS, XML parsing, GeoIP, etc.) are required at runtime, meeting security requirements for production firewall appliances.
 
 ### Quick build (recommended)
 
@@ -238,10 +240,21 @@ Output:
 
 - `bunkerweb-<VERSION>.pkg` (or `bunkerweb-dev.pkg`, depending on `src/VERSION`) in the repository root
 
-Install test:
+### Installing the package
+
+Before installing the BunkerWeb package on a production system, ensure runtime dependencies are installed:
 
 ```sh
-pkg install -fy ./bunkerweb-<VERSION>.pkg
+pkg install -y bash nginx python311 py311-sqlite3 curl libxml2 yajl libgd \
+  sudo lsof libmaxminddb libffi openssl sqlite3 unzip pcre2 lmdb ssdeep
+```
+
+**Note**: No compiler packages (gcc, clang, etc.) are required at runtime.
+
+Then install BunkerWeb:
+
+```sh
+pkg install -y ./bunkerweb-<VERSION>.pkg
 ```
 
 ## CI Parity (Reference)

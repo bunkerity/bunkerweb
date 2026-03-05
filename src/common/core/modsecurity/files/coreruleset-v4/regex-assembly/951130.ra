@@ -1,0 +1,9 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##!+ i
+
+DB2 SQL error
+\[IBM\]\[CLI Driver\]\[DB2/6000\]
+CLI Driver.*DB2
+db2_\w+\(\)

@@ -244,6 +244,32 @@ def add_dir_to_tar_safely(tar: Any, dir_path: Union[str, Path], arc_root: Option
             # unreadable files are ignored silently
 
 
+def normalize_bunkerweb_version(version: str) -> str:
+    """Normalize BunkerWeb version strings for semantic comparison.
+
+    Converts Debian-style pre-release versions such as ``1.6.9~rc2`` to
+    ``1.6.9-rc2`` so they can be parsed by ``packaging.version.Version``.
+    """
+    return version.strip().lower().removeprefix("v").replace("~", "-")
+
+
+def is_newer_version_available(current_version: str, latest_version: str) -> bool:
+    """Return True when the latest version is newer than the current one.
+
+    Falls back to normalized string inequality when semantic parsing fails so
+    behavior stays compatible for non-standard version strings.
+    """
+    current_normalized = normalize_bunkerweb_version(current_version)
+    latest_normalized = normalize_bunkerweb_version(latest_version)
+
+    try:
+        from packaging.version import Version
+
+        return Version(current_normalized) < Version(latest_normalized)
+    except Exception:
+        return current_normalized != latest_normalized
+
+
 def get_redis_client(
     use_redis: bool = False,
     redis_host: Optional[str] = None,

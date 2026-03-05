@@ -1518,16 +1518,33 @@ So funktioniert's:
 ### Anwendung
 
 1. Strategie: Wählen Sie eine Whitelist (wenige zugelassene Länder) oder eine Blacklist (bestimmte Länder blockieren).
-2. Ländercodes: Fügen Sie ISO 3166-1 Alpha-2 Codes (US, GB, FR) zu `WHITELIST_COUNTRY` oder `BLACKLIST_COUNTRY` hinzu.
+2. Länder oder Gruppen: Fügen Sie ISO 3166-1 Alpha-2 Codes (US, GB, FR) und/oder unterstützte Gruppentokens (wie `@EU`, `@SCHENGEN`) zu `WHITELIST_COUNTRY` oder `BLACKLIST_COUNTRY` hinzu.
 3. Anwendung: Nach der Konfiguration gilt die Beschränkung für alle Besucher.
 4. Überwachung: Konsultieren Sie die [Web-UI](web-ui.md) für Statistiken nach Ländern.
 
 ### Parameter
 
-| Parameter           | Standard | Kontext   | Mehrfach | Beschreibung                                                                                             |
-| :------------------ | :------- | :-------- | :------- | :------------------------------------------------------------------------------------------------------- |
-| `WHITELIST_COUNTRY` |          | Multisite | Nein     | Whitelist: ISO 3166-1 Alpha-2 Ländercodes, durch Leerzeichen getrennt. Nur diese Länder sind zugelassen. |
-| `BLACKLIST_COUNTRY` |          | Multisite | Nein     | Blacklist: ISO 3166-1 Alpha-2 Ländercodes, durch Leerzeichen getrennt. Diese Länder sind blockiert.      |
+| Parameter           | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                 |
+| :------------------ | :------- | :-------- | :------- | :----------------------------------------------------------------------------------------------------------- |
+| `WHITELIST_COUNTRY` |          | Multisite | Nein     | Whitelist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Nur diese Länder sind zugelassen. |
+| `BLACKLIST_COUNTRY` |          | Multisite | Nein     | Blacklist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Diese Länder sind blockiert.      |
+
+### Unterstützte Ländergruppen
+
+Sie können Gruppentokens mit `@` verwenden. Diese werden serverseitig in Mitgliedsländer aufgelöst:
+
+- `@EU`: Mitgliedstaaten der Europäischen Union.
+- `@SCHENGEN`: Länder des Schengen-Raums.
+- `@EEA`: Europäischer Wirtschaftsraum (`@EU` + Island, Liechtenstein, Norwegen).
+- `@BENELUX`: Belgien, Niederlande, Luxemburg.
+- `@DACH`: deutschsprachiger Kernraum (Deutschland, Österreich, Schweiz).
+- `@NORDICS`: nordische Länder (Dänemark, Finnland, Island, Norwegen, Schweden).
+- `@USMCA`: USMCA-Wirtschaftsraum (USA, Kanada, Mexiko).
+- `@FIVE_EYES`: Länder der Five-Eyes-Geheimdienstallianz.
+- `@ASEAN`: ASEAN-Mitgliedstaaten in Südostasien.
+- `@GCC`: Mitgliedstaaten des Golf-Kooperationsrats.
+- `@G7`: Staaten der Gruppe der Sieben.
+- `@LATAM`: in diesem Plugin verwendete Lateinamerika-Gruppe.
 
 !!! tip "Whitelist vs. Blacklist"
     Whitelist: Zugriff auf wenige Länder beschränkt. Blacklist: Problematische Regionen blockieren und den Rest zulassen.
@@ -1555,7 +1572,13 @@ So funktioniert's:
 === "Nur EU"
 
     ```yaml
-    WHITELIST_COUNTRY: "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE"
+    WHITELIST_COUNTRY: "@EU"
+    ```
+
+=== "Gruppe + explizite Länder"
+
+    ```yaml
+    WHITELIST_COUNTRY: "@SCHENGEN GB"
     ```
 
 === "Blockierung von Risikoländern"
@@ -2067,13 +2090,22 @@ Führen Sie die folgenden Schritte aus, um die Datenbankfunktion zu konfiguriere
 
 ### Konfigurationseinstellungen
 
-| Einstellung                     | Standard                                  | Kontext | Mehrfach | Beschreibung                                                                                                                                |
-| ------------------------------- | ----------------------------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | nein     | **Datenbank-URI:** Die primäre Datenbankverbindungszeichenfolge im SQLAlchemy-Format.                                                       |
-| `DATABASE_URI_READONLY`         |                                           | global  | nein     | **Schreibgeschützte Datenbank-URI:** Optionale Datenbank für schreibgeschützte Operationen oder als Failover.                               |
-| `DATABASE_LOG_LEVEL`            | `warning`                                 | global  | nein     | **Protokollierungsstufe:** Die Ausführlichkeitsstufe für Datenbankprotokolle. Optionen: `debug`, `info`, `warn`, `warning` oder `error`.    |
-| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global  | nein     | **Maximale Job-Ausführungen:** Die maximale Anzahl von Job-Ausführungsdatensätzen, die vor der automatischen Bereinigung aufbewahrt werden. |
-| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global  | nein     | **Sitzungsaufbewahrung:** Das maximale Alter (in Tagen) von UI-Benutzersitzungen, bevor sie automatisch bereinigt werden.                   |
+| Einstellung                       | Standard                                  | Kontext | Mehrfach | Beschreibung                                                                                                                                                                                                   |
+| --------------------------------- | ----------------------------------------- | ------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URI`                    | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | nein     | **Datenbank-URI:** Die primäre Datenbankverbindungszeichenfolge im SQLAlchemy-Format.                                                                                                                          |
+| `DATABASE_URI_READONLY`           |                                           | global  | nein     | **Schreibgeschützte Datenbank-URI:** Optionale Datenbank für schreibgeschützte Operationen oder als Failover.                                                                                                  |
+| `DATABASE_LOG_LEVEL`              | `warning`                                 | global  | nein     | **Protokollierungsstufe:** Die Ausführlichkeitsstufe für Datenbankprotokolle. Optionen: `debug`, `info`, `warn`, `warning` oder `error`.                                                                       |
+| `DATABASE_MAX_JOBS_RUNS`          | `10000`                                   | global  | nein     | **Maximale Job-Ausführungen:** Die maximale Anzahl von Job-Ausführungsdatensätzen, die vor der automatischen Bereinigung aufbewahrt werden.                                                                    |
+| `DATABASE_MAX_SESSION_AGE_DAYS`   | `14`                                      | global  | nein     | **Sitzungsaufbewahrung:** Das maximale Alter (in Tagen) von UI-Benutzersitzungen, bevor sie automatisch bereinigt werden.                                                                                      |
+| `DATABASE_POOL_SIZE`              | `40`                                      | global  | nein     | **Pool-Größe:** Die Anzahl der Verbindungen im Datenbankverbindungspool.                                                                                                                                       |
+| `DATABASE_POOL_MAX_OVERFLOW`      | `20`                                      | global  | nein     | **Maximaler Pool-Überlauf:** Die maximale Anzahl zusätzlicher Verbindungen über die Pool-Größe hinaus. `-1` für unbegrenzt.                                                                                    |
+| `DATABASE_POOL_TIMEOUT`           | `5`                                       | global  | nein     | **Pool-Zeitlimit:** Die Anzahl der Sekunden, die auf eine Verbindung aus dem Pool gewartet wird.                                                                                                               |
+| `DATABASE_POOL_RECYCLE`           | `1800`                                    | global  | nein     | **Pool-Recycling:** Die Anzahl der Sekunden, nach denen eine Verbindung automatisch recycelt wird. `-1` zum Deaktivieren.                                                                                      |
+| `DATABASE_POOL_PRE_PING`          | `yes`                                     | global  | nein     | **Pool-Pre-Ping:** Ob Verbindungen bei jeder Entnahme aus dem Pool auf Erreichbarkeit getestet werden.                                                                                                         |
+| `DATABASE_POOL_RESET_ON_RETURN`   |                                           | global  | nein     | **Pool-Reset bei Rückgabe:** Wie Verbindungen bei der Rückgabe in den Pool zurückgesetzt werden. Leer = automatisch (`none` für MySQL/MariaDB, `rollback` für andere). Optionen: `rollback`, `commit`, `none`. |
+| `DATABASE_RETRY_TIMEOUT`          | `60`                                      | global  | nein     | **Wiederholungs-Zeitlimit:** Die maximale Wartezeit in Sekunden auf die Verfügbarkeit der Datenbank beim Start.                                                                                                |
+| `DATABASE_REQUEST_RETRY_ATTEMPTS` | `2`                                       | global  | nein     | **Wiederholungsversuche:** Die Anzahl der Wiederholungsversuche bei vorübergehenden Datenbankfehlern.                                                                                                          |
+| `DATABASE_REQUEST_RETRY_DELAY`    | `0.25`                                    | global  | nein     | **Wiederholungsverzögerung:** Die Verzögerung in Sekunden zwischen Wiederholungsversuchen bei vorübergehenden Datenbankfehlern.                                                                                |
 
 !!! tip "Auswahl der Datenbank" - **SQLite** (Standard): Ideal für Single-Node-Bereitstellungen oder Testumgebungen aufgrund seiner Einfachheit und dateibasierten Natur. - **PostgreSQL**: Empfohlen für Produktionsumgebungen mit mehreren BunkerWeb-Instanzen aufgrund seiner Robustheit und Unterstützung für Gleichzeitigkeit. - **MySQL/MariaDB**: Eine gute Alternative zu PostgreSQL mit ähnlichen produktionsreifen Fähigkeiten. - **Oracle**: Geeignet für Unternehmensumgebungen, in denen Oracle bereits die Standard-Datenbankplattform ist.
 
@@ -3756,7 +3788,7 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
 Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entspricht:
 
 - **`3`**: Stabile [v3.3.8](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8).
-- **`4`**: Stabile [v4.23.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.23.0) (**Standard**).
+- **`4`**: Stabile [v4.24.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.24.0) (**Standard**).
 - **`nightly`**: [Nightly-Build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) mit den neuesten Regel-Updates.
 
 !!! example "Nightly-Build"

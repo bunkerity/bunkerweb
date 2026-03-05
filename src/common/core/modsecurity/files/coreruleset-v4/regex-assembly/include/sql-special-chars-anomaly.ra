@@ -1,0 +1,38 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Shared definitions for the SQL special character anomaly detection rules
+##! (942420, 942421, 942430, 942431, 942432).
+##!
+##! These rules detect SQL injection attempts by counting special characters.
+##!
+##! UTF-8 multi-byte characters (U+00B4, U+2018, U+2019) are specified as
+##! alternations outside character classes to prevent byte-by-byte matching
+##! which causes false positives with non-Latin scripts.
+##! See: https://github.com/coreruleset/coreruleset/issues/3325
+
+##! ASCII special characters commonly used in SQL injection.
+##!> define ascii-special [~!@#\$%\^&\*\(\)\-\+=\{\}\[\]\|:;\"'`<>]
+
+##! Negated ASCII class (multi-byte bytes pass through as non-special)
+##!> define non-special [^~!@#\$%\^&\*\(\)\-\+=\{\}\[\]\|:;\"'`<>]
+
+##! Special character alternation: ASCII class plus UTF-8 quote-like chars
+##!   U+00B4 ACUTE ACCENT           -> \xC2\xB4
+##!   U+2018 LEFT SINGLE QUOTATION  -> \xE2\x80\x98
+##!   U+2019 RIGHT SINGLE QUOTATION -> \xE2\x80\x99
+##!> assemble
+  {{ascii-special}}
+  \xC2\xB4
+  \xE2\x80\x98
+  \xE2\x80\x99
+  ##!=< sql-special-chars
+##!<
+
+##! Full anomaly unit: one special char followed by any non-special chars
+##!> assemble
+  ##!=> sql-special-chars
+  ##!=>
+  {{non-special}}*?
+  ##!=< sql-special-chars-anomaly
+##!<

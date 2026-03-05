@@ -8,12 +8,52 @@
     "BLACKLIST_COUNTRY": {
       "context": "multisite",
       "default": "",
-      "help": "Deny access if the country of the client is in the list (ISO 3166-1 alpha-2 format separated with spaces).",
+      "help": "Deny access if the country of the client is in the list (ISO 3166-1 alpha-2 format separated with spaces). You can also use group tokens like @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH and @BENELUX.",
       "id": "country-blacklist",
       "label": "Country blacklist",
-      "regex": "^( *([A-Z]{2}) *)*$",
+      "regex": "^( *([A-Z]{2}|@[A-Z0-9_]+) *)*$",
       "type": "multiselect",
       "multiselect": [
+        { "id": "@EU", "label": "European Union group (@EU)", "value": "@EU" },
+        {
+          "id": "@SCHENGEN",
+          "label": "Schengen Area group (@SCHENGEN)",
+          "value": "@SCHENGEN"
+        },
+        {
+          "id": "@EEA",
+          "label": "European Economic Area group (@EEA)",
+          "value": "@EEA"
+        },
+        {
+          "id": "@BENELUX",
+          "label": "Benelux group (@BENELUX)",
+          "value": "@BENELUX"
+        },
+        { "id": "@DACH", "label": "DACH group (@DACH)", "value": "@DACH" },
+        {
+          "id": "@NORDICS",
+          "label": "Nordics group (@NORDICS)",
+          "value": "@NORDICS"
+        },
+        { "id": "@USMCA", "label": "USMCA group (@USMCA)", "value": "@USMCA" },
+        {
+          "id": "@FIVE_EYES",
+          "label": "Five Eyes group (@FIVE_EYES)",
+          "value": "@FIVE_EYES"
+        },
+        { "id": "@ASEAN", "label": "ASEAN group (@ASEAN)", "value": "@ASEAN" },
+        {
+          "id": "@GCC",
+          "label": "Gulf Cooperation Council group (@GCC)",
+          "value": "@GCC"
+        },
+        { "id": "@G7", "label": "G7 group (@G7)", "value": "@G7" },
+        {
+          "id": "@LATAM",
+          "label": "Latin America group (@LATAM)",
+          "value": "@LATAM"
+        },
         { "id": "AF", "label": "Afghanistan (AF)", "value": "AF" },
         { "id": "AX", "label": "Åland Islands (AX)", "value": "AX" },
         { "id": "AL", "label": "Albania (AL)", "value": "AL" },
@@ -154,6 +194,7 @@
         { "id": "KI", "label": "Kiribati (KI)", "value": "KI" },
         { "id": "KP", "label": "Korea, North (KP)", "value": "KP" },
         { "id": "KR", "label": "Korea, South (KR)", "value": "KR" },
+        { "id": "XK", "label": "Kosovo (XK)", "value": "XK" },
         { "id": "KW", "label": "Kuwait (KW)", "value": "KW" },
         { "id": "KG", "label": "Kyrgyzstan (KG)", "value": "KG" },
         { "id": "LA", "label": "Laos (LA)", "value": "LA" },
@@ -304,12 +345,52 @@
     "WHITELIST_COUNTRY": {
       "context": "multisite",
       "default": "",
-      "help": "Deny access if the country of the client is not in the list (ISO 3166-1 alpha-2 format separated with spaces).",
+      "help": "Deny access if the country of the client is not in the list (ISO 3166-1 alpha-2 format separated with spaces). You can also use group tokens like @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH and @BENELUX.",
       "id": "country-whitelist",
       "label": "Country whitelist",
-      "regex": "^( *([A-Z]{2}) *)*$",
+      "regex": "^( *([A-Z]{2}|@[A-Z0-9_]+) *)*$",
       "type": "multiselect",
       "multiselect": [
+        { "id": "@EU", "label": "European Union group (@EU)", "value": "@EU" },
+        {
+          "id": "@SCHENGEN",
+          "label": "Schengen Area group (@SCHENGEN)",
+          "value": "@SCHENGEN"
+        },
+        {
+          "id": "@EEA",
+          "label": "European Economic Area group (@EEA)",
+          "value": "@EEA"
+        },
+        {
+          "id": "@BENELUX",
+          "label": "Benelux group (@BENELUX)",
+          "value": "@BENELUX"
+        },
+        { "id": "@DACH", "label": "DACH group (@DACH)", "value": "@DACH" },
+        {
+          "id": "@NORDICS",
+          "label": "Nordics group (@NORDICS)",
+          "value": "@NORDICS"
+        },
+        { "id": "@USMCA", "label": "USMCA group (@USMCA)", "value": "@USMCA" },
+        {
+          "id": "@FIVE_EYES",
+          "label": "Five Eyes group (@FIVE_EYES)",
+          "value": "@FIVE_EYES"
+        },
+        { "id": "@ASEAN", "label": "ASEAN group (@ASEAN)", "value": "@ASEAN" },
+        {
+          "id": "@GCC",
+          "label": "Gulf Cooperation Council group (@GCC)",
+          "value": "@GCC"
+        },
+        { "id": "@G7", "label": "G7 group (@G7)", "value": "@G7" },
+        {
+          "id": "@LATAM",
+          "label": "Latin America group (@LATAM)",
+          "value": "@LATAM"
+        },
         { "id": "AF", "label": "Afghanistan (AF)", "value": "AF" },
         { "id": "AX", "label": "Åland Islands (AX)", "value": "AX" },
         { "id": "AL", "label": "Albania (AL)", "value": "AL" },
@@ -450,6 +531,7 @@
         { "id": "KI", "label": "Kiribati (KI)", "value": "KI" },
         { "id": "KP", "label": "Korea, North (KP)", "value": "KP" },
         { "id": "KR", "label": "Korea, South (KR)", "value": "KR" },
+        { "id": "XK", "label": "Kosovo (XK)", "value": "XK" },
         { "id": "KW", "label": "Kuwait (KW)", "value": "KW" },
         { "id": "KG", "label": "Kyrgyzstan (KG)", "value": "KG" },
         { "id": "LA", "label": "Laos (LA)", "value": "LA" },
