@@ -10,13 +10,12 @@ deps_path = join(sep, "usr", "share", "bunkerweb", "core", "backup")
 if deps_path not in sys_path:
     sys_path.append(deps_path)
 
-from backup import acquire_db_lock, backup_database, BACKUP_DIR, DB_LOCK_FILE, LOGGER, update_cache_file
+from backup import acquire_db_lock, backup_database, BACKUP_DIR, DB_LOCK_FILE, is_sqlite_wal, LOGGER, update_cache_file
+from Database import Database  # type: ignore  # path added by backup module import
 
 status = 0
 
 try:
-    acquire_db_lock()
-
     # Global parser
     parser = ArgumentParser(description="BunkerWeb's backup plugin save command line interface")
 
@@ -44,7 +43,15 @@ try:
         LOGGER.info(f"Creating directory {directory} as it does not exist")
         directory.mkdir(parents=True, exist_ok=True)
 
-    db, _ = backup_database(datetime.now().astimezone(), backup_dir=directory)
+    db = Database(LOGGER)
+
+    wal = is_sqlite_wal(db)
+    if wal:
+        LOGGER.info("SQLite WAL mode detected — running non-blocking dump (no database lock required).")
+        db, _ = backup_database(datetime.now().astimezone(), db=db, backup_dir=directory)
+    else:
+        acquire_db_lock()
+        db, _ = backup_database(datetime.now().astimezone(), db=db, backup_dir=directory, post_dump_hook=DB_LOCK_FILE.unlink)
 
     if directory == BACKUP_DIR:
         update_cache_file(db, directory)

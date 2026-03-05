@@ -2,63 +2,69 @@ El complemento de copia de seguridad proporciona una solución de respaldo autom
 
 **Cómo funciona:**
 
-1.  Su base de datos se respalda automáticamente según el cronograma que establezca (diario, semanal o mensual).
+1.  Su base de datos se respalda automáticamente según el cronograma que establezca (`daily`, `weekly`, `monthly` o `hanoi`).
 2.  Las copias de seguridad se almacenan en un directorio específico de su sistema.
-3.  Las copias de seguridad antiguas se rotan automáticamente según su configuración de retención.
-4.  Puede crear copias de seguridad manualmente, enumerar las copias de seguridad existentes o restaurar desde una copia de seguridad en cualquier momento.
-5.  Antes de cualquier operación de restauración, el estado actual se respalda automáticamente como medida de seguridad.
+3.  Antes de cada copia de seguridad se verifica el espacio libre en disco disponible.
+4.  Cada ZIP contiene el volcado SQL y un archivo de suma de verificación SHA-256 (`.sha256`) para verificar la integridad.
+5.  Las copias de seguridad antiguas se rotan automáticamente. El modo `hanoi` aplica la rotación Torres de Hanói (24 archivos, ~85 días de cobertura).
+6.  Al restaurar, la suma de verificación se comprueba antes de modificar la base de datos activa.
+7.  Puede crear, listar, verificar y restaurar copias de seguridad manualmente en cualquier momento.
+8.  Antes de cualquier operación de restauración, el estado actual se respalda automáticamente como medida de seguridad.
 
 ### Cómo usar
 
-Siga estos pasos para configurar y utilizar la función de copia de seguridad:
-
 1.  **Habilite la función:** La función de copia de seguridad está habilitada por defecto. Si es necesario, puede controlarla con el ajuste `USE_BACKUP`.
-2.  **Configure el cronograma de copia de seguridad:** Elija la frecuencia con la que deben realizarse las copias de seguridad estableciendo el parámetro `BACKUP_SCHEDULE`.
-3.  **Establezca la política de retención:** Especifique cuántas copias de seguridad conservar utilizando el ajuste `BACKUP_ROTATION`.
-4.  **Defina la ubicación de almacenamiento:** Elija dónde se almacenarán las copias de seguridad utilizando el ajuste `BACKUP_DIRECTORY`.
-5.  **Use los comandos de la CLI:** Gestione las copias de seguridad manualmente con los comandos `bwcli plugin backup` cuando sea necesario.
+2.  **Configure el cronograma:** Elija la frecuencia con la que deben realizarse las copias de seguridad estableciendo el parámetro `BACKUP_SCHEDULE`.
+3.  **Establezca la política de retención:** Especifique cuántas copias conservar con `BACKUP_ROTATION` (se ignora si `BACKUP_SCHEDULE=hanoi`).
+4.  **Defina la ubicación:** Elija dónde se almacenarán las copias con `BACKUP_DIRECTORY`.
+5.  **Use los comandos de la CLI:** Gestione las copias manualmente con los comandos `bwcli plugin backup`.
 
 ### Ajustes de configuración
 
-| Ajuste             | Valor por defecto            | Contexto | Múltiple | Descripción                                                                                                                                                                                   |
-| ------------------ | ---------------------------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_BACKUP`       | `yes`                        | global   | no       | **Habilitar copia de seguridad:** Establezca en `yes` para habilitar las copias de seguridad automáticas.                                                                                     |
-| `BACKUP_SCHEDULE`  | `daily`                      | global   | no       | **Frecuencia de la copia de seguridad:** Con qué frecuencia se realizan las copias de seguridad. Opciones: `daily`, `weekly` o `monthly`.                                                     |
-| `BACKUP_ROTATION`  | `7`                          | global   | no       | **Retención de copias de seguridad:** El número de archivos de copia de seguridad que se deben conservar. Las copias de seguridad más antiguas que este número se eliminarán automáticamente. |
-| `BACKUP_DIRECTORY` | `/var/lib/bunkerweb/backups` | global   | no       | **Ubicación de la copia de seguridad:** El directorio donde se almacenarán los archivos de copia de seguridad.                                                                                |
+| Ajuste             | Valor por defecto            | Contexto | Múltiple | Descripción                                                                                                                                                              |
+| ------------------ | ---------------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `USE_BACKUP`       | `yes`                        | global   | no       | **Habilitar copia de seguridad:** Establezca en `yes` para habilitar las copias automáticas.                                                                             |
+| `BACKUP_SCHEDULE`  | `daily`                      | global   | no       | **Frecuencia:** `daily`, `weekly`, `monthly` o `hanoi` (horaria con rotación Torres de Hanói, ~85 días de cobertura).                                                   |
+| `BACKUP_ROTATION`  | `7`                          | global   | no       | **Retención:** Número de archivos a conservar. Se ignora con `hanoi` (la rotación se gestiona automáticamente).                                                          |
+| `BACKUP_DIRECTORY` | `/var/lib/bunkerweb/backups` | global   | no       | **Ubicación:** El directorio donde se almacenarán los archivos de copia de seguridad.                                                                                    |
+| `BACKUP_IGNORE_CHECKSUM_ERROR_ON_DB_RESTORE` | `no` | global | no | **Ignorar error de suma de verificación:** Si `yes`, un error SHA-256 no cancelará la restauración. Úselo solo como último recurso para backups parcialmente corruptos. |
 
 ### Interfaz de línea de comandos
-
-El complemento de copia de seguridad proporciona varios comandos de la CLI para gestionar sus copias de seguridad:
 
 ```bash
 # Listar todas las copias de seguridad disponibles
 bwcli plugin backup list
 
+# Verificar las sumas SHA-256 de todas las copias
+bwcli plugin backup check
+
 # Crear una copia de seguridad manual
 bwcli plugin backup save
 
-# Crear una copia de seguridad en una ubicación personalizada
+# Crear una copia en una ubicación personalizada
 bwcli plugin backup save --directory /ruta/a/ubicacion/personalizada
 
-# Restaurar desde la copia de seguridad más reciente
+# Restaurar desde la copia más reciente
 bwcli plugin backup restore
 
-# Restaurar desde un archivo de copia de seguridad específico
-bwcli plugin backup restore /ruta/a/copia/de/seguridad/backup-sqlite-2023-08-15_12-34-56.zip
+# Restaurar desde un archivo específico
+bwcli plugin backup restore /ruta/a/copia/backup-sqlite-2023-08-15_12-34-56.zip
 ```
 
 !!! tip "La seguridad es lo primero"
-    Antes de cualquier operación de restauración, el complemento de copia de seguridad crea automáticamente una copia de seguridad del estado actual de su base de datos en una ubicación temporal. Esto proporciona una protección adicional en caso de que necesite revertir la operación de restauración.
+    Antes de cualquier restauración, el complemento crea automáticamente una copia del estado actual en una ubicación temporal.
+
+!!! info "Verificación de integridad"
+    Cada ZIP contiene un archivo SHA-256. La suma se verifica automáticamente antes de cualquier restauración. Use `bwcli plugin backup check` para comprobar todas las copias en cualquier momento.
 
 !!! warning "Compatibilidad de la base de datos"
-    El complemento de copia de seguridad es compatible con las bases de datos SQLite, MySQL/MariaDB y PostgreSQL. Las bases de datos de Oracle no son compatibles actualmente para las operaciones de copia de seguridad y restauración.
+    El complemento es compatible con SQLite, MySQL/MariaDB y PostgreSQL. Las bases de datos Oracle no son compatibles actualmente.
 
 ### Configuraciones de ejemplo
 
-=== "Copias de seguridad diarias con retención de 7 días"
+=== "Copias diarias con retención de 7 días"
 
-    Configuración por defecto que crea copias de seguridad diarias y conserva los 7 archivos más recientes:
+    Configuración por defecto:
 
     ```yaml
     USE_BACKUP: "yes"
@@ -67,9 +73,17 @@ bwcli plugin backup restore /ruta/a/copia/de/seguridad/backup-sqlite-2023-08-15_
     BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
     ```
 
-=== "Copias de seguridad semanales con retención extendida"
+=== "Torres de Hanói (~85 días)"
 
-    Configuración para copias de seguridad menos frecuentes con una retención más prolongada:
+    Ejecución horaria con rotación Torres de Hanói. Conserva 24 archivos con ~85 días de cobertura. `BACKUP_ROTATION` se ignora:
+
+    ```yaml
+    USE_BACKUP: "yes"
+    BACKUP_SCHEDULE: "hanoi"
+    BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
+    ```
+
+=== "Copias semanales con retención extendida"
 
     ```yaml
     USE_BACKUP: "yes"
@@ -78,9 +92,7 @@ bwcli plugin backup restore /ruta/a/copia/de/seguridad/backup-sqlite-2023-08-15_
     BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
     ```
 
-=== "Copias de seguridad mensuales en una ubicación personalizada"
-
-    Configuración para copias de seguridad mensuales almacenadas en una ubicación personalizada:
+=== "Copias mensuales en ubicación personalizada"
 
     ```yaml
     USE_BACKUP: "yes"

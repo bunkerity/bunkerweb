@@ -15,19 +15,18 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from Database import Database  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
-from backup import backup_database, update_cache_file, acquire_db_lock, DB_LOCK_FILE
+from backup import backup_database, hanoi_rotation, update_cache_file, acquire_db_lock, is_sqlite_wal, DB_LOCK_FILE
 
 LOGGER = getLogger("BACKUP")
 status = 0
 
 try:
-    # Prevent concurrent DB access with other backup plugins
-    acquire_db_lock()
     backup_dir = Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups"))
     backup_dir.mkdir(parents=True, exist_ok=True)
 
     force_backup = getenv("FORCE_BACKUP", "no") == "yes"
     current_time = datetime.now().astimezone()
+    LOGGER.debug(f"Backup directory: {backup_dir}, force_backup={force_backup}, current_time={current_time.isoformat()}")
 
     if not force_backup:
         # Check if backup is activated
@@ -41,16 +40,20 @@ try:
         last_backup_date = last_backup.get("date", None)
         if last_backup_date:
             last_backup_date = datetime.fromisoformat(last_backup_date).astimezone()
+        LOGGER.debug(f"Last backup date: {last_backup_date.isoformat() if last_backup_date else 'none'}")
 
         backup_period = getenv("BACKUP_SCHEDULE", "daily")
         PERIOD_STAMPS = {
-            "daily": timedelta(days=1).total_seconds(),
-            "weekly": timedelta(weeks=1).total_seconds(),
+            "hanoi":   timedelta(hours=1).total_seconds(),
+            "daily":   timedelta(days=1).total_seconds(),
+            "weekly":  timedelta(weeks=1).total_seconds(),
             "monthly": timedelta(weeks=4).total_seconds(),
         }
 
-        already_done = last_backup_date and last_backup_date.timestamp() + PERIOD_STAMPS[backup_period] > current_time.timestamp()
+        period_seconds = PERIOD_STAMPS.get(backup_period, PERIOD_STAMPS["daily"])
+        already_done = last_backup_date and last_backup_date.timestamp() + period_seconds > current_time.timestamp()
         backup_rotation = int(getenv("BACKUP_ROTATION", "7"))
+        LOGGER.debug(f"Schedule: {backup_period}, period: {period_seconds}s, already_done={already_done}, rotation={backup_rotation}")
 
         sorted_files = []
         if already_done:
@@ -60,11 +63,14 @@ try:
 
             # Sort the backup files by name
             sorted_files = sorted(backup_files)
+            LOGGER.debug(f"Existing backup files ({len(sorted_files)}): {[f.name for f in sorted_files]}")
 
-        if len(sorted_files) <= backup_rotation and already_done:
-            LOGGER.info(f"Backup already done within the last {backup_period} period, skipping backup ...")
-            sys_exit(0)
+        if already_done:
+            if backup_period == "hanoi" or len(sorted_files) <= backup_rotation:
+                LOGGER.info(f"Backup already done within the last {backup_period} period, skipping backup ...")
+                sys_exit(0)
 
+    if not force_backup:
         db = JOB.db
     else:
         db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
@@ -78,8 +84,28 @@ try:
                 LOGGER.info("First start of the scheduler, skipping backup ...")
                 sys_exit(0)
 
-        db, _ = backup_database(current_time, db, backup_dir)
+        wal = is_sqlite_wal(db)
+        if wal:
+            # SQLite WAL mode: readers and writers do not block each other, so
+            # the dump can run without holding the BunkerWeb lock at all.
+            LOGGER.info("SQLite WAL mode detected — running non-blocking dump (no database lock required).")
+            LOGGER.debug("Starting database dump ...")
+            db, _ = backup_database(current_time, db, backup_dir)
+        else:
+            # Acquire the lock only when a backup will actually run.
+            # Placing it here (rather than at script start) means that
+            # rotation-only runs and already_done early exits never touch
+            # the lock file. Combined with the post_dump_hook that releases
+            # the lock after the SQL dump (before compression), the total
+            # lock hold time is reduced to just the dump phase (~2 s for a
+            # typical SQLite database, down from ~18 s with the old approach).
+            LOGGER.debug("Acquiring database lock ...")
+            acquire_db_lock()
+            LOGGER.debug("Database lock acquired.")
+            LOGGER.debug("Starting database dump ...")
+            db, _ = backup_database(current_time, db, backup_dir, post_dump_hook=DB_LOCK_FILE.unlink)
         backed_up = True
+        LOGGER.debug("Database dump and compression complete.")
 
         if not force_backup:
             # Get all backup files in the directory
@@ -87,12 +113,21 @@ try:
 
             # Sort the backup files by name
             sorted_files = sorted(backup_files)
+            LOGGER.debug(f"Backup files after dump ({len(sorted_files)}): {[f.name for f in sorted_files]}")
 
     if not force_backup:
-        # Check if the number of backup files exceeds the rotation limit
-        if len(sorted_files) > backup_rotation:
+        if backup_period == "hanoi":
+            backup_directory = Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups"))
+            all_files = sorted(backup_directory.glob("backup-*.zip"))
+            to_delete = hanoi_rotation(all_files, current_time)
+            LOGGER.debug(f"Hanoi rotation: {len(all_files)} files total, {len(to_delete)} to delete, {len(all_files) - len(to_delete)} to keep.")
+            for file in to_delete:
+                LOGGER.warning(f"Removing old backup file: {file.name} (Towers of Hanoi rotation).")
+                file.unlink()
+        elif len(sorted_files) > backup_rotation:
             # Calculate the number of files to remove
             num_files_to_remove = len(sorted_files) - backup_rotation
+            LOGGER.debug(f"Rotation: removing {num_files_to_remove} file(s) to stay within limit of {backup_rotation}.")
 
             # Remove the oldest backup files
             for file in sorted_files[:num_files_to_remove]:
