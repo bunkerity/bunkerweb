@@ -7,6 +7,7 @@
 - [FEATURE] Add field value redaction in Let's Encrypt plugin and update ZeroSSL API key handling to avoid exposing sensitive information in logs and process arguments. (Except in TRACE level logs for debugging purposes)
 - [UI] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.
 - [UI] Tweak plugins headers style to avoid the text moving the buttons out of the page when the header is too long.
+- [UI] Add `MAX_CONTENT_LENGTH` setting to configure the maximum upload size (defaults to 50 MB).
 - [API] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.
 - [MISC] Enhance version comparison logic in update check
 - [DEPS] Updated libmaxminddb version to v1.13.2

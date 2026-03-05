@@ -185,14 +185,14 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 
 ### Listener y TLS
 
-| Ajuste                              | Descripción                               | Valores aceptados                    | Predeterminado                             |
-| ----------------------------------- | ----------------------------------------- | ------------------------------------ | ------------------------------------------ |
-| `UI_LISTEN_ADDR`                    | Dirección de escucha de la UI             | IP o hostname                        | `0.0.0.0` (Docker) / `127.0.0.1` (paquete) |
-| `UI_LISTEN_PORT`                    | Puerto de escucha de la UI                | Entero                               | `7000`                                     |
-| `LISTEN_ADDR`, `LISTEN_PORT`        | Alternativas si faltan vars de UI         | IP/hostname, entero                  | `0.0.0.0`, `7000`                          |
-| `UI_SSL_ENABLED`                    | Habilitar TLS en el contenedor UI         | `yes` o `no`                         | `no`                                       |
-| `UI_SSL_CERTFILE`, `UI_SSL_KEYFILE` | Rutas de cert/clave PEM con TLS           | Rutas de archivo                     | sin definir                                |
-| `UI_SSL_CA_CERTS`                   | CA/cadena opcional                        | Ruta de archivo                      | sin definir                                |
+| Ajuste                              | Descripción                               | Valores aceptados                    | Predeterminado                                        |
+| ----------------------------------- | ----------------------------------------- | ------------------------------------ | ----------------------------------------------------- |
+| `UI_LISTEN_ADDR`                    | Dirección de escucha de la UI             | IP o hostname                        | `0.0.0.0` (Docker) / `127.0.0.1` (paquete)            |
+| `UI_LISTEN_PORT`                    | Puerto de escucha de la UI                | Entero                               | `7000`                                                |
+| `LISTEN_ADDR`, `LISTEN_PORT`        | Alternativas si faltan vars de UI         | IP/hostname, entero                  | `0.0.0.0`, `7000`                                     |
+| `UI_SSL_ENABLED`                    | Habilitar TLS en el contenedor UI         | `yes` o `no`                         | `no`                                                  |
+| `UI_SSL_CERTFILE`, `UI_SSL_KEYFILE` | Rutas de cert/clave PEM con TLS           | Rutas de archivo                     | sin definir                                           |
+| `UI_SSL_CA_CERTS`                   | CA/cadena opcional                        | Ruta de archivo                      | sin definir                                           |
 | `UI_FORWARDED_ALLOW_IPS`            | Proxies de confianza para `X-Forwarded-*` | IPs/CIDRs separados por espacio/coma | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
 | `UI_PROXY_ALLOW_IPS`                | Proxies de confianza para protocolo PROXY | IPs/CIDRs separados por espacio/coma | `FORWARDED_ALLOW_IPS`                                 |
 
@@ -223,14 +223,15 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 
 ### Runtime misceláneo
 
-| Ajuste                          | Descripción                                | Valores aceptados | Predeterminado                       |
-| ------------------------------- | ------------------------------------------ | ----------------- | ------------------------------------ |
-| `MAX_WORKERS`, `MAX_THREADS`    | Workers/hilos de Gunicorn                  | Entero            | `cpu_count()-1` (mín 1), `workers*2` |
-| `ENABLE_HEALTHCHECK`            | Exponer `GET /healthcheck`                 | `yes` o `no`      | `no`                                 |
-| `FORWARDED_ALLOW_IPS`           | Alias para lista de proxies                | IPs/CIDRs         | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
-| `PROXY_ALLOW_IPS`               | Alias para lista de PROXY                  | IPs/CIDRs         | `FORWARDED_ALLOW_IPS`                                 |
-| `DISABLE_CONFIGURATION_TESTING` | Saltar reloads de prueba al aplicar config | `yes` o `no`      | `no`                                 |
-| `IGNORE_REGEX_CHECK`            | Omitir validación regex de ajustes         | `yes` o `no`      | `no`                                 |
+| Ajuste                          | Descripción                                          | Valores aceptados                           | Predeterminado                                        |
+| ------------------------------- | ---------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------- |
+| `MAX_WORKERS`, `MAX_THREADS`    | Workers/hilos de Gunicorn                            | Entero                                      | `cpu_count()-1` (mín 1), `workers*2`                  |
+| `ENABLE_HEALTHCHECK`            | Exponer `GET /healthcheck`                           | `yes` o `no`                                | `no`                                                  |
+| `FORWARDED_ALLOW_IPS`           | Alias para lista de proxies                          | IPs/CIDRs                                   | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
+| `PROXY_ALLOW_IPS`               | Alias para lista de PROXY                            | IPs/CIDRs                                   | `FORWARDED_ALLOW_IPS`                                 |
+| `DISABLE_CONFIGURATION_TESTING` | Saltar reloads de prueba al aplicar config           | `yes` o `no`                                | `no`                                                  |
+| `IGNORE_REGEX_CHECK`            | Omitir validación regex de ajustes                   | `yes` o `no`                                | `no`                                                  |
+| `MAX_CONTENT_LENGTH`            | Tamaño máximo de subida (Flask `MAX_CONTENT_LENGTH`) | Tamaño con unidad (`50M`, `1G`, `52428800`) | `50MB`                                                |
 
 ## Acceso a logs
 

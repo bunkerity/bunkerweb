@@ -13,7 +13,7 @@ from typing import List, Optional, Union
 from uuid import uuid4
 from zipfile import BadZipFile, ZipFile
 
-from flask import Blueprint, Response, current_app, jsonify, redirect, render_template, request, url_for
+from flask import Blueprint, Response, current_app, g, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from werkzeug.utils import secure_filename
@@ -605,7 +605,7 @@ def custom_plugin_page(plugin: str):
 
             try:
                 # Merge globals and ENV with ENV taking precedence
-                template_vars = {**current_app.jinja_env.globals, **current_app.config["ENV"]}
+                template_vars = {**current_app.jinja_env.globals, **getattr(g, "_env", {})}
 
                 # deepcode ignore Ssti: We trust the plugin template
                 plugin_page = (

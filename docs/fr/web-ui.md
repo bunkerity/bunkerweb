@@ -185,16 +185,16 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 
 ### Écoute et TLS
 
-| Paramètre                           | Description                               | Valeurs acceptées                    | Défaut                                    |
-| ----------------------------------- | ----------------------------------------- | ------------------------------------ | ----------------------------------------- |
-| `UI_LISTEN_ADDR`                    | Adresse d’écoute de l’UI                  | IP ou hostname                       | `0.0.0.0` (Docker) / `127.0.0.1` (paquet) |
-| `UI_LISTEN_PORT`                    | Port d’écoute de l’UI                     | Entier                               | `7000`                                    |
-| `LISTEN_ADDR`, `LISTEN_PORT`        | Substituts si les variables UI manquent   | IP/hostname, entier                  | `0.0.0.0`, `7000`                         |
-| `UI_SSL_ENABLED`                    | Activer le TLS dans le conteneur UI       | `yes` ou `no`                        | `no`                                      |
-| `UI_SSL_CERTFILE`, `UI_SSL_KEYFILE` | Chemins cert/clé PEM si TLS activé        | Chemins de fichier                   | non définis                               |
-| `UI_SSL_CA_CERTS`                   | CA/chaîne optionnelle                     | Chemin de fichier                    | non défini                                |
-| `UI_FORWARDED_ALLOW_IPS`            | Proxies de confiance pour `X-Forwarded-*` | IP/CIDR séparés par espaces/virgules | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
-| `UI_PROXY_ALLOW_IPS`                | Proxies de confiance pour le protocole PROXY | IP/CIDR séparés par espaces/virgules | `FORWARDED_ALLOW_IPS`                                |
+| Paramètre                           | Description                                  | Valeurs acceptées                    | Défaut                                                |
+| ----------------------------------- | -------------------------------------------- | ------------------------------------ | ----------------------------------------------------- |
+| `UI_LISTEN_ADDR`                    | Adresse d’écoute de l’UI                     | IP ou hostname                       | `0.0.0.0` (Docker) / `127.0.0.1` (paquet)             |
+| `UI_LISTEN_PORT`                    | Port d’écoute de l’UI                        | Entier                               | `7000`                                                |
+| `LISTEN_ADDR`, `LISTEN_PORT`        | Substituts si les variables UI manquent      | IP/hostname, entier                  | `0.0.0.0`, `7000`                                     |
+| `UI_SSL_ENABLED`                    | Activer le TLS dans le conteneur UI          | `yes` ou `no`                        | `no`                                                  |
+| `UI_SSL_CERTFILE`, `UI_SSL_KEYFILE` | Chemins cert/clé PEM si TLS activé           | Chemins de fichier                   | non définis                                           |
+| `UI_SSL_CA_CERTS`                   | CA/chaîne optionnelle                        | Chemin de fichier                    | non défini                                            |
+| `UI_FORWARDED_ALLOW_IPS`            | Proxies de confiance pour `X-Forwarded-*`    | IP/CIDR séparés par espaces/virgules | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
+| `UI_PROXY_ALLOW_IPS`                | Proxies de confiance pour le protocole PROXY | IP/CIDR séparés par espaces/virgules | `FORWARDED_ALLOW_IPS`                                 |
 
 ### Auth, sessions et cookies
 
@@ -223,14 +223,15 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 
 ### Divers runtime
 
-| Paramètre                       | Description                                     | Valeurs acceptées | Défaut                               |
-| ------------------------------- | ----------------------------------------------- | ----------------- | ------------------------------------ |
-| `MAX_WORKERS`, `MAX_THREADS`    | Workers/threads Gunicorn                        | Entier            | `cpu_count()-1` (min 1), `workers*2` |
-| `ENABLE_HEALTHCHECK`            | Exposer `GET /healthcheck`                      | `yes` ou `no`     | `no`                                 |
-| `FORWARDED_ALLOW_IPS`           | Alias pour la liste des proxies                 | IP/CIDR           | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
-| `PROXY_ALLOW_IPS`               | Alias pour la liste PROXY                       | IP/CIDR           | `FORWARDED_ALLOW_IPS`                                |
-| `DISABLE_CONFIGURATION_TESTING` | Sauter les reloads de test lors des push config | `yes` ou `no`     | `no`                                 |
-| `IGNORE_REGEX_CHECK`            | Ignorer la validation regex des paramètres      | `yes` ou `no`     | `no`                                 |
+| Paramètre                       | Description                                           | Valeurs acceptées                           | Défaut                                                |
+| ------------------------------- | ----------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------- |
+| `MAX_WORKERS`, `MAX_THREADS`    | Workers/threads Gunicorn                              | Entier                                      | `cpu_count()-1` (min 1), `workers*2`                  |
+| `ENABLE_HEALTHCHECK`            | Exposer `GET /healthcheck`                            | `yes` ou `no`                               | `no`                                                  |
+| `FORWARDED_ALLOW_IPS`           | Alias pour la liste des proxies                       | IP/CIDR                                     | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
+| `PROXY_ALLOW_IPS`               | Alias pour la liste PROXY                             | IP/CIDR                                     | `FORWARDED_ALLOW_IPS`                                 |
+| `DISABLE_CONFIGURATION_TESTING` | Sauter les reloads de test lors des push config       | `yes` ou `no`                               | `no`                                                  |
+| `IGNORE_REGEX_CHECK`            | Ignorer la validation regex des paramètres            | `yes` ou `no`                               | `no`                                                  |
+| `MAX_CONTENT_LENGTH`            | Taille maximale d'upload (Flask `MAX_CONTENT_LENGTH`) | Taille avec unité (`50M`, `1G`, `52428800`) | `50MB`                                                |
 
 ## Accès aux journaux
 
