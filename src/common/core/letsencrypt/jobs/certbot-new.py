@@ -613,20 +613,39 @@ def _check_san_limit(cert_name: str, config: Dict) -> None:
 
     Let's Encrypt enforces per-profile SAN limits: classic allows 100, while
     tlsserver and shortlived are capped at 25. Exceeding the limit would cause
-    certbot to fail, so we catch it early and log a clear error.
+    certbot to fail, so we catch it early and log a clear error. For unknown
+    or custom profiles, a conservative fallback limit of 100 is applied.
+
+    For non-Let's Encrypt CAs (e.g. ZeroSSL), profiles are not applicable,
+    so the classic/100 limit is always used regardless of the profile setting.
     """
     if not config.get("activated"):
         return
-    domain_count = len(config["server_names"].split(","))
+    domain_count = len(normalize_server_names(config["server_names"]))
+    acme_server = (config.get("acme_server") or "").lower()
     profile = config.get("profile", "classic")
-    max_names = PROFILE_MAX_NAMES.get(profile, 100)
+    if acme_server == "letsencrypt":
+        profile_known = profile in PROFILE_MAX_NAMES
+        max_names = PROFILE_MAX_NAMES.get(profile, 100)
+    else:
+        # ZeroSSL and other CAs do not use LE profiles — apply the classic/100 limit
+        profile_known = True
+        max_names = PROFILE_MAX_NAMES["classic"]
     if domain_count > max_names:
-        LOGGER.error(
-            f"[Service: {cert_name}] Certificate request for {domain_count} domain(s) exceeds the "
-            f"maximum of {max_names} SANs allowed by the '{profile}' profile. "
-            f"Reduce the number of domains or switch to a profile with a higher limit (e.g. 'classic' allows 100). "
-            f"Skipping generation."
-        )
+        if profile_known:
+            LOGGER.error(
+                f"[Service: {cert_name}] Certificate request for {domain_count} domain(s) exceeds the "
+                f"maximum of {max_names} SANs allowed by the '{profile}' profile. "
+                f"Reduce the number of domains or switch to a profile with a higher limit (e.g. 'classic' allows 100). "
+                f"Skipping generation."
+            )
+        else:
+            LOGGER.error(
+                f"[Service: {cert_name}] Certificate request for {domain_count} domain(s) exceeds the "
+                f"fallback maximum of {max_names} SANs applied for unrecognized profile '{profile}'. "
+                f"Reduce the number of domains or use a recognized profile ('classic', 'tlsserver', or 'shortlived'). "
+                f"Skipping generation."
+            )
         config["activated"] = False
 
 
