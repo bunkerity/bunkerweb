@@ -5,6 +5,7 @@ permissions: read-all
 on:
   push:
     branches: [staging]
+  workflow_dispatch:
 
 jobs:
   # Build Docker images
