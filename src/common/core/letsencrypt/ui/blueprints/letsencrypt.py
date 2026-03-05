@@ -71,6 +71,19 @@ SEARCHABLE_FIELDS = (
 )
 
 
+def _ui_tar_members(tar):
+    """Yield only members the UI actually needs (certs, renewal configs).
+
+    Account directories contain private keys with restrictive permissions
+    that the UI process cannot read, and the UI has no use for them.
+    """
+    for member in tar.getmembers():
+        parts = Path(member.name).parts
+        if any(p == "accounts" for p in parts):
+            continue
+        yield member
+
+
 def download_certificates():
     rmtree(DATA_PATH, ignore_errors=True)
     Path(DATA_PATH).mkdir(parents=True, exist_ok=True)
@@ -80,10 +93,11 @@ def download_certificates():
     for cache_file in cache_files:
         if cache_file["file_name"].endswith(".tgz") and cache_file["file_name"].startswith("folder:"):
             with tar_open(fileobj=BytesIO(cache_file["data"]), mode="r:gz") as tar:
+                members = list(_ui_tar_members(tar))
                 try:
-                    tar.extractall(DATA_PATH, filter="fully_trusted")
+                    tar.extractall(DATA_PATH, members=members, filter="fully_trusted")
                 except TypeError:
-                    tar.extractall(DATA_PATH)
+                    tar.extractall(DATA_PATH, members=members)
 
 
 def retrieve_certificates():

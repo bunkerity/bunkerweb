@@ -15,10 +15,11 @@ from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from threading import Event, Lock, Thread
 from traceback import format_exc
-from typing import Dict, List, Optional, Set, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Type, Union
 from certbot_concurrency import (
     CertbotPaths,
     ensure_accounts,
+    ensure_zerossl_accounts,
     finalize_certbot_run,
     prepare_certbot_paths,
     select_account_id,
@@ -91,6 +92,7 @@ ZEROSSL_API_KEY_HASHES_PATH = DATA_PATH.joinpath("renewal", ".bw-zerossl-api-key
 MERGE_LOCK = Lock()
 RUNNING_LOCK = Lock()
 RUNNING_CERTBOT = 0
+RUNNING_DOMAINS: set = set()
 MONITOR_STOP = Event()
 MONITOR_THREAD: Optional[Thread] = None
 
@@ -99,8 +101,10 @@ def _monitor_certbot_progress() -> None:
     while not MONITOR_STOP.wait(10):
         with RUNNING_LOCK:
             running = RUNNING_CERTBOT
+            domains = sorted(RUNNING_DOMAINS) if RUNNING_DOMAINS else []  # show what domains are currently in the pipe
         if running > 0:
-            LOGGER.info("⏳ Still generating certificate(s)...")
+            domains_str = ", ".join(domains) if domains else "unknown"
+            LOGGER.info(f"⏳ Still generating certificate(s)... ({running} in progress: {domains_str})")
 
 
 def start_progress_monitor() -> None:
@@ -151,6 +155,21 @@ def parse_certbot_domains(certificate_block: str) -> str:
 
 def normalize_server_url(url: str) -> str:
     return url.strip().rstrip("/")
+
+
+_HTTP_AUTHENTICATORS = frozenset({"manual", "webroot"})
+
+
+def _authenticators_equivalent(a: str, b: str) -> bool:
+    """Return True when two authenticator values represent the same method.
+
+    For HTTP-01 challenges BunkerWeb passes ``manual`` (with auth/cleanup hooks)
+    but certbot writes ``webroot`` into the renewal conf after a successful run.
+    These are functionally identical and must not trigger a forced renewal.
+    """
+    if a == b:
+        return True
+    return a in _HTTP_AUTHENTICATORS and b in _HTTP_AUTHENTICATORS
 
 
 def load_zerossl_api_key_hashes() -> Dict[str, str]:
@@ -348,8 +367,8 @@ def extract_provider(service: str, authenticator: str = "", decode_base64: bool 
         return None
 
 
-def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, bool, int, Dict[str, str]]]]:
-    def env(key: str, default: Optional[str] = None) -> str:
+def build_service_config(service: str) -> Tuple[List[str], Dict[str, Any]]:
+    def env(key: str, default: str = "") -> str:
         if IS_MULTISITE:
             return getenv(f"{service}_{key}", default)
         return getenv(key, default)
@@ -498,7 +517,7 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
             LOGGER.debug(f"[Service: {service}] Wildcard domains are not supported for HTTP challenges, deactivating wildcard support.")
             wildcard = False
 
-    server_names = server_names_val.split()
+    server_names: List[str] = list(server_names_val.split())
 
     return server_names, {
         "server_names": "",
@@ -538,7 +557,7 @@ def extract_wildcard_groups(domains: List[str]) -> Dict[str, List[str]]:
             cleaned_labels.append(labels)
 
     if not cleaned_labels:
-        return []
+        return {}
 
     grouped: Dict[str, List[List[str]]] = defaultdict(list)
     for labels in cleaned_labels:
@@ -556,7 +575,7 @@ def extract_wildcard_groups(domains: List[str]) -> Dict[str, List[str]]:
     return {base: sorted(names, key=lambda value: (0 if value.startswith("*.") else 1, value)) for base, names in groups.items()}
 
 
-def certificate_fingerprint(config: Dict[str, Union[str, bool, int, Dict[str, str]]]) -> Tuple:
+def certificate_fingerprint(config: Dict[str, Any]) -> Tuple:
     provider_hash = ""
     if config.get("challenge") == "dns" and config.get("provider"):
         provider_hash = bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256")
@@ -576,12 +595,12 @@ def certificate_fingerprint(config: Dict[str, Union[str, bool, int, Dict[str, st
     )
 
 
-def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]:
+def build_service_entries(service: str) -> Dict[str, Dict[str, Any]]:
     server_names, base_config = build_service_config(service)
     if not server_names:
         return {}
 
-    entries: Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]] = {}
+    entries: Dict[str, Dict[str, Any]] = {}
     if base_config["wildcard"]:
         wildcard_groups = extract_wildcard_groups(server_names)
         if not wildcard_groups and base_config["activated"]:
@@ -631,7 +650,7 @@ def _determine_wildcard_bases(labels_list: List[List[str]]) -> Set[str]:
     return bases
 
 
-def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
+def certbot_delete(service: str, cmd_env: Optional[Dict[str, str]] = None) -> int:
     # * Building the certbot command
     command = [
         CERTBOT_BIN,
@@ -668,7 +687,7 @@ def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
 
 def certbot_new(
     service: str,
-    config: Dict[str, Union[str, bool, int, Dict[str, str]]],
+    config: Dict[str, Any],
     cmd_env: Dict[str, str],
     paths: CertbotPaths,
 ) -> int:
@@ -709,11 +728,18 @@ def certbot_new(
     else:
         command.append("--register-unsafely-without-email")
 
-    if config.get("acme_server") == "letsencrypt":
-        account_id = select_account_id(paths.config_dir.joinpath("accounts"), bool(config["staging"]), str(config.get("email") or ""))
-        if account_id:
-            command.extend(["--account", account_id])
-    else:
+    # Pin certbot to an existing account when one is available.  This applies
+    # to both Let's Encrypt and ZeroSSL and is essential in concurrent mode:
+    # without it, certbot aborts with "Please choose an account" when multiple
+    # accounts have been merged back from earlier parallel runs.
+    account_id = select_account_id(paths.config_dir.joinpath("accounts"), bool(config.get("staging")), str(config.get("email") or ""), str(config.get("acme_server_url") or ""))
+    if account_id:
+        command.extend(["--account", account_id])
+
+    # Previously only Let's Encrypt received --account; ZeroSSL was excluded.
+    # Replaced with a unified block: both CAs get the flag when an account exists,
+    # preventing "Please choose an account" errors after concurrent runs merge dirs.
+    if config.get("acme_server") != "letsencrypt":
         cmd_env["LETS_ENCRYPT_ZEROSSL_API_RETRY"] = str(config.get("zerossl_api_retry") or 3)
         cmd_env["LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"] = str(config.get("zerossl_api_retry_delay") or 2)
         cmd_env["LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"] = str(config.get("zerossl_api_connect_timeout") or 5)
@@ -793,7 +819,7 @@ def certbot_new(
     return process.returncode
 
 
-def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str]) -> bool:
+def generate_certificate(service: str, config: Dict[str, Any], cmd_env: Dict[str, str]) -> bool:
     LOGGER.info(
         f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email'] or 'not provided'}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile on {config['acme_server']}..."
     )
@@ -818,11 +844,13 @@ def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, D
             with RUNNING_LOCK:
                 global RUNNING_CERTBOT
                 RUNNING_CERTBOT += 1
+                RUNNING_DOMAINS.add(service)
             try:
                 ret = certbot_new(service, config, cmd_env.copy(), paths)
             finally:
                 with RUNNING_LOCK:
                     RUNNING_CERTBOT -= 1
+                    RUNNING_DOMAINS.discard(service)
 
             if ret == 0:
                 LOGGER.info(f"Certificate(s) for {service} generated successfully.")
@@ -980,8 +1008,11 @@ try:
         elif config["challenge"] != existing_cert["challenge"]:
             LOGGER.warning(f"[Service: {server_name}] Challenge type does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
-        elif config["authenticator"] != existing_cert["authenticator"]:
-            LOGGER.warning(f"[Service: {server_name}] DNS provider does not match existing certificate, forcing renewal.")
+        # Replaced direct string equality with _authenticators_equivalent() so that
+        # "manual" (used at request time) and "webroot" (written by certbot into the
+        # renewal conf) are treated as the same method and don't trigger a spurious renewal.
+        elif not _authenticators_equivalent(config["authenticator"], existing_cert["authenticator"]):
+            LOGGER.warning(f"[Service: {server_name}] DNS provider does not match existing certificate (config={config['authenticator']!r}, cert={existing_cert['authenticator']!r}), forcing renewal.")
             config["force_renew"] = True
         elif config["staging"] != existing_cert["staging"]:
             LOGGER.warning(f"[Service: {server_name}] Staging environment does not match existing certificate, forcing renewal.")
@@ -1005,7 +1036,7 @@ try:
 
     # ? generate new certificates and renew existing ones if needed
     concurrent_requests = getenv("LETS_ENCRYPT_CONCURRENT_REQUESTS", "no").lower() == "yes"
-    pending_services: List[Tuple[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]] = []
+    pending_services: List[Tuple[str, Dict[str, Any]]] = []
 
     for service, config in services.items():
         if existing_certificates.get(service, {}).get("active") and not config["force_renew"]:
@@ -1018,12 +1049,24 @@ try:
 
     if pending_services:
         if concurrent_requests:
+            # Pre-register one ACME account per unique (staging, email) or
+            # (api_key, email) combination *before* the concurrent batch starts.
+            # Without this, parallel certbot runs would each register their own
+            # account; the merged result would contain duplicates and later runs
+            # would fail with "Please choose an account" in non-interactive mode.
             required_accounts: Set[Tuple[bool, str]] = set()
+            required_zerossl: Set[Tuple[str, str]] = set()
             for _, config in pending_services:
                 if config.get("acme_server") == "letsencrypt":
                     required_accounts.add((bool(config.get("staging")), str(config.get("email") or "")))
+                elif config.get("acme_server") == "zerossl":
+                    required_zerossl.add((str(config.get("zerossl_api_key") or ""), str(config.get("email") or "")))
             if required_accounts:
                 ensure_accounts(required_accounts, cmd_env.copy(), CERTBOT_BIN, LOG_LEVEL, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER)
+            if required_zerossl and ZEROSSL_BOT_SCRIPT.is_file():
+                zerossl_env = cmd_env.copy()
+                zerossl_env["CERTBOT_BIN"] = CERTBOT_BIN
+                ensure_zerossl_accounts(required_zerossl, zerossl_env, ZEROSSL_BOT_SCRIPT.as_posix(), LOG_LEVEL, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER)
         start_progress_monitor()
         try:
             if concurrent_requests and len(pending_services) > 1:

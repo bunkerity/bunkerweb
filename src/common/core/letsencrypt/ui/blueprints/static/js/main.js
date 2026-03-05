@@ -420,8 +420,8 @@
         {
           searchPanes: {
             show: true,
-            header: t("searchpane.key_type", "Key Type"),
             combiner: "or",
+            header: t("searchpane.key_type", "Key Type"),
           },
           targets: 9, // Key Type column
         },
