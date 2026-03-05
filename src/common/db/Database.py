@@ -223,14 +223,49 @@ class Database:
             self.logger.error("Oracle database is not supported yet")
             _exit(1)
 
+        # Pool size
+        pool_size = getenv("DATABASE_POOL_SIZE", "40")
+        if pool_size.isdigit() and int(pool_size) >= 0:
+            pool_size = int(pool_size)
+        else:
+            self.logger.warning(f"Invalid DATABASE_POOL_SIZE value: {pool_size}, using default value (40)")
+            pool_size = 40
+
+        # Max overflow
+        max_overflow = getenv("DATABASE_POOL_MAX_OVERFLOW", "20")
+        try:
+            max_overflow = int(max_overflow)
+        except ValueError:
+            self.logger.warning(f"Invalid DATABASE_POOL_MAX_OVERFLOW value: {max_overflow}, using default value (20)")
+            max_overflow = 20
+
+        # Pool timeout
+        pool_timeout = getenv("DATABASE_POOL_TIMEOUT", "5")
+        if pool_timeout.isdigit() and int(pool_timeout) >= 0:
+            pool_timeout = int(pool_timeout)
+        else:
+            self.logger.warning(f"Invalid DATABASE_POOL_TIMEOUT value: {pool_timeout}, using default value (5)")
+            pool_timeout = 5
+
+        # Pool recycle
+        pool_recycle = getenv("DATABASE_POOL_RECYCLE", "1800")
+        try:
+            pool_recycle = int(pool_recycle)
+        except ValueError:
+            self.logger.warning(f"Invalid DATABASE_POOL_RECYCLE value: {pool_recycle}, using default value (1800)")
+            pool_recycle = 1800
+
+        # Pool pre-ping
+        pool_pre_ping = getenv("DATABASE_POOL_PRE_PING", "yes").lower() in ("yes", "true", "1")
+
         self._engine_kwargs = {
             "future": True,
             "poolclass": QueuePool,
-            "pool_pre_ping": True,
-            "pool_recycle": 1800,
-            "pool_size": 40,
-            "max_overflow": 20,
-            "pool_timeout": 5,
+            "pool_pre_ping": pool_pre_ping,
+            "pool_recycle": pool_recycle,
+            "pool_size": pool_size,
+            "max_overflow": max_overflow,
+            "pool_timeout": pool_timeout,
         } | kwargs
 
         if "pool_reset_on_return" not in kwargs:
