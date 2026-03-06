@@ -194,7 +194,7 @@ try:
                 deleted, err = JOB.del_cache(file, service_id=file.parent.name)
 
             if not deleted:
-                LOGGER.warning(f"Couldn't delete file {file} from cache : {err}")
+                LOGGER.error(f"Couldn't delete file {file} from cache : {err}")
         sys_exit(0)
 
     urls = set()
@@ -221,7 +221,7 @@ try:
                     LOGGER.warning(f"{service} blacklist for {kind} is cached but no URL is configured, removing from cache...")
                     deleted, err = JOB.del_cache(f"{kind}.list", service_id=service)
                     if not deleted:
-                        LOGGER.warning(f"Couldn't delete {service} {kind}.list from cache : {err}")
+                        LOGGER.error(f"Couldn't delete {service} {kind}.list from cache : {err}")
                 continue
 
             # Track that this service provided URLs for the current kind
@@ -320,7 +320,7 @@ try:
                                     handle_304 = True
                                 elif resp.status_code != 200:
                                     status = 2
-                                    LOGGER.warning(f"Got status code {resp.status_code}, skipping...")
+                                    LOGGER.error(f"Got status code {resp.status_code}, skipping...")
                                     failed_urls.add(url)
                                     if url_file not in urls:
                                         aggregated_recap[kind]["failed_count"] += 1
@@ -340,7 +340,7 @@ try:
                                     # Re-save to bump last_update timestamp so the 1-hour check stays fresh
                                     cached, err = JOB.cache_file(url_file, old_cached_data)
                                     if not cached:
-                                        LOGGER.warning(f"Error while refreshing cache for {url}: {err}")
+                                        LOGGER.error(f"Error while refreshing cache for {url}: {err}")
                                     for line in old_cached_data.split(b"\n"):
                                         line = line.strip()
                                         if not line or line.startswith(b"#"):
@@ -428,7 +428,7 @@ try:
             LOGGER.warning(f"Removing no longer used url file {url_file} ...")
             deleted, err = JOB.del_cache(url_file)
             if not deleted:
-                LOGGER.warning(f"Couldn't delete url file {url_file} from cache : {err}")
+                LOGGER.error(f"Couldn't delete url file {url_file} from cache : {err}")
 except SystemExit as e:
     status = e.code
 except BaseException as e:
