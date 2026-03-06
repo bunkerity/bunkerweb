@@ -15,7 +15,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from requests import get, head
+from requests import get
 from requests.exceptions import ConnectionError
 
 from common_utils import bytes_hash  # type: ignore
@@ -288,16 +288,8 @@ try:
                                     req_headers["If-None-Match"] = meta["etag"]
                                 elif meta["last_modified"]:
                                     req_headers["If-Modified-Since"] = meta["last_modified"]
-                                elif meta["content_length"]:
-                                    # No ETag or Last-Modified: use a HEAD request to check size
-                                    try:
-                                        head_resp = head(url, timeout=10)
-                                        head_resp.close()
-                                        if head_resp.status_code == 200 and head_resp.headers.get("Content-Length", "") == meta["content_length"]:
-                                            LOGGER.debug(f"URL {url} Content-Length unchanged ({meta['content_length']} bytes), skipping download.")
-                                            handle_304 = True
-                                    except Exception as head_exc:
-                                        LOGGER.debug(f"HEAD request for {url} failed, falling back to full GET: {head_exc}")
+                                # No ETag or Last-Modified available: Content-Length alone is not
+                                # a reliable cache validator, so always perform a full GET.
 
                             if not handle_304:
                                 max_retries = 3
@@ -317,6 +309,7 @@ try:
                                 if resp is None:
                                     failed = True
                                 elif resp.status_code == 304:
+                                    resp.close()
                                     handle_304 = True
                                 elif resp.status_code != 200:
                                     status = 2
