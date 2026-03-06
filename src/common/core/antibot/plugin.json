@@ -11,7 +11,7 @@
       "help": "Activate antibot feature.",
       "id": "use-antibot",
       "label": "Antibot challenge",
-      "regex": "^(no|cookie|javascript|captcha|recaptcha|hcaptcha|turnstile|mcaptcha)$",
+      "regex": "^(no|cookie|javascript|captcha|recaptcha|hcaptcha|turnstile|mcaptcha|capjs)$",
       "type": "select",
       "select": [
         "no",
@@ -21,7 +21,8 @@
         "recaptcha",
         "hcaptcha",
         "turnstile",
-        "mcaptcha"
+        "mcaptcha",
+        "capjs"
       ]
     },
     "ANTIBOT_URI": {
@@ -273,6 +274,42 @@
       "label": "mCaptcha domain",
       "regex": "^.*$",
       "type": "text"
+    },
+    "ANTIBOT_CAPJS_FRONTEND_URL": {
+      "context": "multisite",
+      "default": "",
+      "help": "Public URL of the Cap.js server used by the browser to load the widget (e.g. https://cap.example.com).",
+      "id": "antibot-capjs-frontend-url",
+      "label": "Cap.js frontend URL",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "ANTIBOT_CAPJS_BACKEND_URL": {
+      "context": "multisite",
+      "default": "",
+      "help": "Internal URL of the Cap.js server used by BunkerWeb for token verification via the siteverify API (e.g. http://cap-server:3000). If empty, the frontend URL is used.",
+      "id": "antibot-capjs-backend-url",
+      "label": "Cap.js backend URL",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "ANTIBOT_CAPJS_SITEKEY": {
+      "context": "multisite",
+      "default": "",
+      "help": "Sitekey for Cap.js challenge.",
+      "id": "antibot-capjs-sitekey",
+      "label": "Cap.js sitekey",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "ANTIBOT_CAPJS_SECRET": {
+      "context": "multisite",
+      "default": "",
+      "help": "Secret for Cap.js challenge.",
+      "id": "antibot-capjs-secret",
+      "label": "Cap.js secret",
+      "regex": "^.*$",
+      "type": "password"
     }
   }
 }

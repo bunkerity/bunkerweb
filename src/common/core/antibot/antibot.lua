@@ -157,7 +157,20 @@ function antibot:header()
 		return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
 	end
 
+	-- Don't override CSP on error responses (the default error page has its own inline styles)
+	if not self.ctx.bw.antibot_display_content then
+		return self:ret(true, "not overriding CSP on error response")
+	end
+
 	local hdr = ngx.header
+
+	-- Ensure nonces exist (they may not if content() didn't run, e.g. on error responses)
+	if not self.ctx.bw.antibot_nonce_script then
+		self.ctx.bw.antibot_nonce_script = rand(32)
+	end
+	if not self.ctx.bw.antibot_nonce_style then
+		self.ctx.bw.antibot_nonce_style = rand(32)
+	end
 
 	-- Override CSP header
 	local csp_directives = {
@@ -205,6 +218,21 @@ function antibot:header()
 		end
 	elseif self.session_data.type == "mcaptcha" then
 		csp_directives["frame-src"] = self.variables["ANTIBOT_MCAPTCHA_URL"]
+	elseif self.session_data.type == "capjs" then
+		local capjs_url = self.variables["ANTIBOT_CAPJS_FRONTEND_URL"]
+		-- Cap.js needs: no strict-dynamic (workers do dynamic imports from capjs_url),
+		-- no nonce on style-src (widget.js applies inline styles via JS),
+		-- wasm-unsafe-eval (workers execute WASM), no trusted types (widget.js uses innerHTML)
+		csp_directives["script-src"] = "'nonce-"
+			.. self.ctx.bw.antibot_nonce_script
+			.. "' "
+			.. capjs_url
+			.. " 'wasm-unsafe-eval'"
+		csp_directives["style-src"] = "'self' 'nonce-" .. self.ctx.bw.antibot_nonce_style .. "'"
+		csp_directives["connect-src"] = capjs_url
+		csp_directives["frame-src"] = capjs_url
+		csp_directives["worker-src"] = "blob: " .. capjs_url
+		csp_directives["require-trusted-types-for"] = nil
 	end
 	local csp_content = ""
 	for directive, value in pairs(csp_directives) do
@@ -496,6 +524,12 @@ function antibot:display_challenge()
 		template_vars.mcaptcha_url = self.variables["ANTIBOT_MCAPTCHA_URL"]
 	end
 
+	-- Cap.js case
+	if self.session_data.type == "capjs" then
+		template_vars.capjs_url = self.variables["ANTIBOT_CAPJS_FRONTEND_URL"]
+		template_vars.capjs_sitekey = self.variables["ANTIBOT_CAPJS_SITEKEY"]
+	end
+
 	-- Render content
 	render(self.session_data.type .. ".html", template_vars)
 
@@ -759,6 +793,53 @@ function antibot:check_challenge()
 			return nil, "error while decoding JSON from mCaptcha API : " .. mdata, nil
 		end
 		if not mdata.valid then
+			return false, "client failed challenge", nil
+		end
+		self.session_data.resolved = true
+		self.session_data.time_valid = now()
+		self:set_session_data()
+		return true, "resolved", self.session_data.original_uri
+	end
+
+	-- Cap.js case
+	if self.session_data.type == "capjs" then
+		read_body()
+		local args, err = get_post_args(1)
+		if err == "truncated" or not args or not args["token"] then
+			return nil, "missing challenge arg", nil
+		end
+		local httpc, err = get_http_client()
+		if not httpc then
+			return nil, err, nil, nil
+		end
+		local capjs_backend = self.variables["ANTIBOT_CAPJS_BACKEND_URL"]
+		if not capjs_backend or capjs_backend == "" then
+			capjs_backend = self.variables["ANTIBOT_CAPJS_FRONTEND_URL"]
+		end
+		local capjs_verify_url = capjs_backend .. "/" .. self.variables["ANTIBOT_CAPJS_SITEKEY"] .. "/siteverify"
+		self.logger:log(ngx.NOTICE, "Cap.js siteverify URL: " .. capjs_verify_url)
+		local res, err = httpc:request_uri(
+			capjs_verify_url,
+			{
+				method = "POST",
+				body = "secret="
+					.. ngx.escape_uri(self.variables["ANTIBOT_CAPJS_SECRET"])
+					.. "&response="
+					.. ngx.escape_uri(args["token"]),
+				headers = {
+					["Content-Type"] = "application/x-www-form-urlencoded",
+				},
+			}
+		)
+		httpc:close()
+		if not res then
+			return nil, "can't send request to Cap.js API : " .. err, nil
+		end
+		local ok, cdata = pcall(decode, res.body)
+		if not ok then
+			return nil, "error while decoding JSON from Cap.js API : " .. cdata, nil
+		end
+		if not cdata.success then
 			return false, "client failed challenge", nil
 		end
 		self.session_data.resolved = true
