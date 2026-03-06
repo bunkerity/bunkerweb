@@ -1954,6 +1954,24 @@ span.cursor-pointer ~ .reset-setting {
   opacity: 1;
 }
 
+/* Keep plugin headers stable when descriptions are long */
+.plugin-settings-header-content {
+  min-width: 0;
+}
+
+.plugin-settings-description {
+  max-width: 100%;
+  margin-bottom: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 767.98px) {
+  .plugin-settings-actions {
+    width: 100%;
+  }
+}
+
 /* Fade effect for plugin tab panes */
 .plugin-tab-pane {
   opacity: 0;

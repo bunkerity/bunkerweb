@@ -94,12 +94,13 @@ if [ "$FREEBSD_OSVERSION" != "$OSVER_CURRENT" ]; then
 fi
 
 # Runtime dependencies (FreeBSD-native)
+# These are the ONLY packages required on a production firewall.
+# No compilers, debuggers, or development tools may appear here.
 PKG_DEPS="
 bash
 nginx
 python311
 py311-sqlite3
-gcc14
 curl
 libxml2
 yajl
@@ -116,6 +117,7 @@ lmdb
 ssdeep
 "
 
+# Build-only dependencies (never shipped in the package)
 BUILD_DEPS="
 ruby
 rubygem-fpm
@@ -133,7 +135,6 @@ autoconf
 automake
 libtool
 pkgconf
-gcc14
 "
 
 # ------------------------------------------------------------

@@ -10,6 +10,7 @@ from json import dumps, loads
 from operator import itemgetter
 from os import getenv, getpid, sep
 from os.path import abspath, join
+from re import fullmatch
 from secrets import token_urlsafe
 from signal import SIGINT, signal, SIGTERM
 from sys import path as sys_path, modules as sys_modules
@@ -27,14 +28,14 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 filterwarnings("ignore", message=r".*pkg_resources is deprecated.*", category=UserWarning, module="passlib")
 
 from cachelib import FileSystemCache
-from flask import Blueprint, Flask, Response, flash as flask_flash, jsonify, make_response, redirect, render_template, request, session, url_for
+from flask import Blueprint, Flask, Response, flash as flask_flash, g, jsonify, make_response, redirect, render_template, request, session, url_for
 from flask_login import current_user, LoginManager, login_required
 from flask_session import Session
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.routing.exceptions import BuildError
 
-from common_utils import get_redis_client as get_common_redis_client  # type: ignore
+from common_utils import get_redis_client as get_common_redis_client, is_newer_version_available  # type: ignore
 
 from app.models.biscuit import BiscuitMiddleware
 from app.models.reverse_proxied import ReverseProxied
@@ -159,6 +160,9 @@ _db_check_lock = Lock()
 _db_check_future = None
 _db_check_next_allowed = 0.0
 
+_cookie_config_lock = Lock()
+_cookie_config_detected = False
+
 
 def _shutdown_executors():
     """Shutdown all thread pool executors on application exit."""
@@ -169,6 +173,53 @@ def _shutdown_executors():
 
 
 register(_shutdown_executors)
+
+
+SIZE_MULTIPLIERS = {
+    "": 1,
+    "b": 1,
+    "k": 1024,
+    "kb": 1024,
+    "ki": 1024,
+    "kib": 1024,
+    "m": 1024**2,
+    "mb": 1024**2,
+    "mi": 1024**2,
+    "mib": 1024**2,
+    "g": 1024**3,
+    "gb": 1024**3,
+    "gi": 1024**3,
+    "gib": 1024**3,
+    "t": 1024**4,
+    "tb": 1024**4,
+    "ti": 1024**4,
+    "tib": 1024**4,
+}
+
+
+def parse_size_to_bytes(size: str) -> int:
+    """
+    Parse a size string to bytes.
+
+    Examples:
+    - "52428800"
+    - "50M", "50MB", "50 MiB"
+    - "1G", "1GiB"
+    """
+    match = fullmatch(r"\s*(\d+(?:\.\d+)?)\s*([a-zA-Z]*)\s*", size)
+    if not match:
+        raise ValueError("invalid format")
+
+    value = float(match.group(1))
+    unit = match.group(2).lower()
+    multiplier = SIZE_MULTIPLIERS.get(unit)
+    if multiplier is None:
+        raise ValueError("invalid unit")
+
+    bytes_value = int(value * multiplier)
+    if bytes_value <= 0:
+        raise ValueError("non-positive size")
+    return bytes_value
 
 
 class DynamicFlask(Flask):
@@ -535,8 +586,6 @@ with app.app_context():
 
     app.config["BISCUIT_PUBLIC_KEY_PATH"] = BISCUIT_PUBLIC_KEY_FILE.as_posix()
 
-    app.config["ENV"] = {}
-
     app.config["CHECK_PRIVATE_IP"] = getenv("CHECK_PRIVATE_IP", "yes").lower() == "yes"
     app.config["SECRET_KEY"] = FLASK_SECRET
 
@@ -544,13 +593,25 @@ with app.app_context():
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
+    # Secure by default — auto-detection in before_request may downgrade if no proxy detected
+    app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
+    app.config["SESSION_COOKIE_SECURE"] = True
+    app.config["REMEMBER_COOKIE_NAME"] = "__Host-bw_ui_remember_token"
+    app.config["REMEMBER_COOKIE_SECURE"] = True
+
     app.config["REMEMBER_COOKIE_PATH"] = "/"
     app.config["REMEMBER_COOKIE_HTTPONLY"] = True
     app.config["REMEMBER_COOKIE_SAMESITE"] = "Lax"
 
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 86400
-    app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50 MB
-    app.config["SCRIPT_NONCE"] = ""
+    default_max_content_length = 50 * 1024 * 1024  # 50 MB
+    raw_max_content_length = getenv("UI_MAX_CONTENT_LENGTH", getenv("MAX_CONTENT_LENGTH", str(default_max_content_length)))
+    try:
+        max_content_length = parse_size_to_bytes(raw_max_content_length)
+    except ValueError:
+        max_content_length = default_max_content_length
+        LOGGER.warning(f"Invalid MAX_CONTENT_LENGTH value ({raw_max_content_length}), defaulting to {default_max_content_length} bytes (50 MB)")
+    app.config["MAX_CONTENT_LENGTH"] = max_content_length
 
     # Session management
     try:
@@ -657,13 +718,14 @@ with app.app_context():
 
     app.config.update({hook_info["key"]: [] for hook_info in HOOKS.values()})
 
+    DATA.load_from_file()
     DATA.update({"FORCE_RELOAD_PLUGIN": False, "IS_RELOADING_PLUGINS": False})
     refresh_app_context()
 
 
 @app.context_processor
 def inject_variables():
-    app_env = app.config["ENV"].copy()
+    app_env = getattr(g, "_env", {}).copy()
     for hook in app.config["CONTEXT_PROCESSOR_HOOKS"]:
         try:
             resp = hook()
@@ -734,7 +796,7 @@ def inject_variables():
     app_env["extra_styles"] = extra_styles
     app_env["custom_css"] = custom_css
 
-    app.config["ENV"] = app_env
+    g._env = app_env
 
     return app_env
 
@@ -911,23 +973,28 @@ def before_request():
         response.headers["Retry-After"] = 30  # Clients should retry after 30 seconds # type: ignore
         return response
 
-    if request.environ.get("HTTP_X_FORWARDED_FOR") is not None:
-        # Requests from the reverse proxy
-        app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
-        app.config["SESSION_COOKIE_SECURE"] = True
-        app.config["REMEMBER_COOKIE_NAME"] = "__Host-bw_ui_remember_token"
-        app.config["REMEMBER_COOKIE_SECURE"] = True
-    else:
-        # Requests from other sources
-        app.config["SESSION_COOKIE_NAME"] = "bw_ui_session"
-        app.config["SESSION_COOKIE_SECURE"] = False
-        app.config["SESSION_COOKIE_DOMAIN"] = None
-        app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_token"
-        app.config["REMEMBER_COOKIE_SECURE"] = False
-        app.config["REMEMBER_COOKIE_DOMAIN"] = None
-
     metadata = None
-    app.config["SCRIPT_NONCE"] = token_urlsafe(32)
+    g.script_nonce = token_urlsafe(32)
+
+    # Auto-detect cookie config once on the first real request using double-checked locking.
+    # The proxy status never changes during a process's lifetime, so detecting once is correct.
+    global _cookie_config_detected
+    if not _cookie_config_detected:
+        with _cookie_config_lock:
+            if not _cookie_config_detected:
+                if request.environ.get("HTTP_X_FORWARDED_FOR") is not None:
+                    app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
+                    app.config["SESSION_COOKIE_SECURE"] = True
+                    app.config["REMEMBER_COOKIE_NAME"] = "__Host-bw_ui_remember_token"
+                    app.config["REMEMBER_COOKIE_SECURE"] = True
+                else:
+                    app.config["SESSION_COOKIE_NAME"] = "bw_ui_session"
+                    app.config["SESSION_COOKIE_SECURE"] = False
+                    app.config["SESSION_COOKIE_DOMAIN"] = None
+                    app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_token"
+                    app.config["REMEMBER_COOKIE_SECURE"] = False
+                    app.config["REMEMBER_COOKIE_DOMAIN"] = None
+                _cookie_config_detected = True
 
     if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/")):
         metadata = DB.get_metadata()
@@ -943,7 +1010,7 @@ def before_request():
 
         schedule_database_state_check(request.method, request.path)
 
-        DB.readonly = DATA.get("READONLY_MODE", False)
+        DB.readonly = DATA.get("READONLY_MODE", DB.readonly) or not DB.database_uri
 
         if not request.path.startswith(("/check", "/loading", "/login", "/totp")) and DB.readonly and current_user.is_authenticated:
             flask_flash("Database connection is in read-only mode : no modifications possible.", "error")
@@ -988,14 +1055,14 @@ def before_request():
     language_value = current_user.language if current_user.is_authenticated else "en"
     base_env = dict(
         current_endpoint=current_endpoint,
-        script_nonce=app.config["SCRIPT_NONCE"],
+        script_nonce=g.script_nonce,
         supported_languages=SUPPORTED_LANGUAGES,
         theme=theme_value,
         language=language_value,
     )
 
     if request.path.startswith(("/check", "/setup", "/loading", "/login", "/totp")):
-        app.config["ENV"] = base_env
+        g._env = base_env
     else:
         if not metadata:
             metadata = DB.get_metadata()
@@ -1043,9 +1110,10 @@ def before_request():
 
         data = dict(
             current_endpoint=current_endpoint,
-            script_nonce=app.config["SCRIPT_NONCE"],
+            script_nonce=g.script_nonce,
             bw_version=metadata["version"],
             latest_version=DATA.get("LATEST_VERSION", "unknown"),
+            new_version_available=is_newer_version_available(metadata["version"], DATA.get("LATEST_VERSION", "unknown")),
             is_pro_version=metadata["is_pro"],
             pro_status=metadata["pro_status"],
             pro_services=metadata["pro_services"],
@@ -1069,7 +1137,7 @@ def before_request():
         if current_endpoint in COLUMNS_PREFERENCES_DEFAULTS:
             data["columns_preferences"] = DB.get_ui_user_columns_preferences(current_user.get_id(), current_endpoint)
 
-        app.config["ENV"] = data
+        g._env = data
 
     for hook in app.config["BEFORE_REQUEST_HOOKS"]:
         try:
@@ -1098,7 +1166,7 @@ def set_security_headers(response):
         "object-src 'none';"
         + " frame-ancestors 'self';"
         + " default-src https: http: 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com https://api.github.com;"
-        + f" script-src https: http: 'self' 'nonce-{app.config['SCRIPT_NONCE']}' 'strict-dynamic' 'unsafe-inline';"
+        + f" script-src https: http: 'self' 'nonce-{g.script_nonce}' 'strict-dynamic' 'unsafe-inline';"
         + " style-src 'self' 'unsafe-inline';"
         + " img-src 'self' data: blob: https://www.bunkerweb.io https://assets.bunkerity.com https://*.tile.openstreetmap.org;"
         + " font-src 'self' data:;"

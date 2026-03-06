@@ -1770,7 +1770,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.9-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1787,7 +1787,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.9-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -2175,13 +2175,22 @@ Follow these steps to configure and use the Database feature:
 
 ### Configuration Settings
 
-| Setting                         | Default                                   | Context | Multiple | Description                                                                                                           |
-| ------------------------------- | ----------------------------------------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | no       | **Database URI:** The primary database connection string in the SQLAlchemy format.                                    |
-| `DATABASE_URI_READONLY`         |                                           | global  | no       | **Read-Only Database URI:** Optional database for read-only operations or as a failover if the main database is down. |
-| `DATABASE_LOG_LEVEL`            | `warning`                                 | global  | no       | **Log Level:** The verbosity level for database logs. Options: `debug`, `info`, `warn`, `warning`, or `error`.        |
-| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global  | no       | **Maximum Job Runs:** The maximum number of job execution records to retain in the database before automatic cleanup. |
-| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global  | no       | **Session Retention:** The maximum age (in days) for UI user sessions before they are purged automatically.           |
+| Setting                           | Default                                   | Context | Multiple | Description                                                                                                                                                                             |
+| --------------------------------- | ----------------------------------------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URI`                    | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | no       | **Database URI:** The primary database connection string in the SQLAlchemy format.                                                                                                      |
+| `DATABASE_URI_READONLY`           |                                           | global  | no       | **Read-Only Database URI:** Optional database for read-only operations or as a failover if the main database is down.                                                                   |
+| `DATABASE_LOG_LEVEL`              | `warning`                                 | global  | no       | **Log Level:** The verbosity level for database logs. Options: `debug`, `info`, `warn`, `warning`, or `error`.                                                                          |
+| `DATABASE_MAX_JOBS_RUNS`          | `10000`                                   | global  | no       | **Maximum Job Runs:** The maximum number of job execution records to retain in the database before automatic cleanup.                                                                   |
+| `DATABASE_MAX_SESSION_AGE_DAYS`   | `14`                                      | global  | no       | **Session Retention:** The maximum age (in days) for UI user sessions before they are purged automatically.                                                                             |
+| `DATABASE_POOL_SIZE`              | `40`                                      | global  | no       | **Pool Size:** The number of connections to keep in the database connection pool.                                                                                                       |
+| `DATABASE_POOL_MAX_OVERFLOW`      | `20`                                      | global  | no       | **Pool Max Overflow:** The maximum number of connections to create above the pool size. Set to `-1` for unlimited overflow.                                                             |
+| `DATABASE_POOL_TIMEOUT`           | `5`                                       | global  | no       | **Pool Timeout:** The number of seconds to wait before giving up on getting a connection from the pool.                                                                                 |
+| `DATABASE_POOL_RECYCLE`           | `1800`                                    | global  | no       | **Pool Recycle:** The number of seconds after which a connection is automatically recycled. Set to `-1` to disable.                                                                     |
+| `DATABASE_POOL_PRE_PING`          | `yes`                                     | global  | no       | **Pool Pre-Ping:** Whether to test connections for liveness upon each checkout from the pool.                                                                                           |
+| `DATABASE_POOL_RESET_ON_RETURN`   |                                           | global  | no       | **Pool Reset on Return:** How connections are reset when returned to the pool. Empty for auto (`none` for MySQL/MariaDB, `rollback` for others). Options: `rollback`, `commit`, `none`. |
+| `DATABASE_RETRY_TIMEOUT`          | `60`                                      | global  | no       | **Retry Timeout:** The maximum number of seconds to wait for the database to be available on startup.                                                                                   |
+| `DATABASE_REQUEST_RETRY_ATTEMPTS` | `2`                                       | global  | no       | **Request Retry Attempts:** The number of retry attempts for transient database errors during operations.                                                                               |
+| `DATABASE_REQUEST_RETRY_DELAY`    | `0.25`                                    | global  | no       | **Request Retry Delay:** The delay in seconds between retry attempts for transient database errors.                                                                                     |
 
 !!! tip "Database Selection"
     - **SQLite** (default): Ideal for single-node deployments or testing environments due to its simplicity and file-based nature.
@@ -3907,7 +3916,7 @@ Follow these steps to configure and use ModSecurity:
 Select a CRS version to best match your security needs:
 
 - **`3`**: Stable [v3.3.8](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8).
-- **`4`**: Stable [v4.23.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.23.0) (**default**).
+- **`4`**: Stable [v4.24.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.24.0) (**default**).
 - **`nightly`**: [Nightly build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) offering the latest rule updates.
 
 !!! example "Nightly Build"

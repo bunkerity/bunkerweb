@@ -1734,7 +1734,7 @@ Las siguientes secciones desarrollan cada paso.
     services:
       bunkerweb:
         # Este es el nombre que se utilizará para identificar la instancia en el Planificador
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.9-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1751,7 +1751,7 @@ Las siguientes secciones desarrollan cada paso.
             syslog-address: "udp://10.20.30.254:514" # La dirección IP del servicio syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.9-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrese de establecer el nombre de instancia correcto
@@ -2142,13 +2142,22 @@ Siga estos pasos para configurar y utilizar la función de Base de Datos:
 
 ### Ajustes de Configuración
 
-| Ajuste                          | Valor por defecto                         | Contexto | Múltiple | Descripción                                                                                                                                                           |
-| ------------------------------- | ----------------------------------------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global   | no       | **URI de la Base de Datos:** La cadena de conexión de la base de datos principal en formato SQLAlchemy.                                                               |
-| `DATABASE_URI_READONLY`         |                                           | global   | no       | **URI de la Base de Datos de Solo Lectura:** Base de datos opcional para operaciones de solo lectura o como respaldo si la base de datos principal está caída.        |
-| `DATABASE_LOG_LEVEL`            | `warning`                                 | global   | no       | **Nivel de Registro:** El nivel de verbosidad para los registros de la base de datos. Opciones: `debug`, `info`, `warn`, `warning` o `error`.                         |
-| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global   | no       | **Máximo de Ejecuciones de Trabajos:** El número máximo de registros de ejecución de trabajos que se conservarán en la base de datos antes de la limpieza automática. |
-| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global   | no       | **Retención de Sesiones:** La edad máxima (en días) de las sesiones de usuarios de la UI antes de que se purguen automáticamente.                                     |
+| Ajuste                            | Valor por defecto                         | Contexto | Múltiple | Descripción                                                                                                                                                                                 |
+| --------------------------------- | ----------------------------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URI`                    | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global   | no       | **URI de la Base de Datos:** La cadena de conexión de la base de datos principal en formato SQLAlchemy.                                                                                     |
+| `DATABASE_URI_READONLY`           |                                           | global   | no       | **URI de Solo Lectura:** Base de datos opcional para operaciones de solo lectura o como respaldo si la principal está caída.                                                                |
+| `DATABASE_LOG_LEVEL`              | `warning`                                 | global   | no       | **Nivel de Registro:** El nivel de verbosidad para los registros de la base de datos. Opciones: `debug`, `info`, `warn`, `warning` o `error`.                                               |
+| `DATABASE_MAX_JOBS_RUNS`          | `10000`                                   | global   | no       | **Máximo de Ejecuciones:** El número máximo de registros de ejecución de trabajos a conservar antes de la limpieza automática.                                                              |
+| `DATABASE_MAX_SESSION_AGE_DAYS`   | `14`                                      | global   | no       | **Retención de Sesiones:** La edad máxima (en días) de las sesiones de usuarios de la UI antes de que se purguen automáticamente.                                                           |
+| `DATABASE_POOL_SIZE`              | `40`                                      | global   | no       | **Tamaño del Pool:** El número de conexiones a mantener en el pool de conexiones de la base de datos.                                                                                       |
+| `DATABASE_POOL_MAX_OVERFLOW`      | `20`                                      | global   | no       | **Desbordamiento Máximo del Pool:** El número máximo de conexiones adicionales por encima del tamaño del pool. `-1` para ilimitado.                                                         |
+| `DATABASE_POOL_TIMEOUT`           | `5`                                       | global   | no       | **Tiempo de Espera del Pool:** El número de segundos a esperar antes de abandonar la obtención de una conexión del pool.                                                                    |
+| `DATABASE_POOL_RECYCLE`           | `1800`                                    | global   | no       | **Reciclaje del Pool:** El número de segundos tras los cuales una conexión se recicla automáticamente. `-1` para desactivar.                                                                |
+| `DATABASE_POOL_PRE_PING`          | `yes`                                     | global   | no       | **Pre-Ping del Pool:** Si se prueba la conexión al extraerla del pool.                                                                                                                      |
+| `DATABASE_POOL_RESET_ON_RETURN`   |                                           | global   | no       | **Reinicio al Devolver:** Cómo se reinician las conexiones al devolverlas al pool. Vacío = auto (`none` para MySQL/MariaDB, `rollback` para otros). Opciones: `rollback`, `commit`, `none`. |
+| `DATABASE_RETRY_TIMEOUT`          | `60`                                      | global   | no       | **Tiempo de Reintento:** El número máximo de segundos a esperar la disponibilidad de la base de datos al iniciar.                                                                           |
+| `DATABASE_REQUEST_RETRY_ATTEMPTS` | `2`                                       | global   | no       | **Intentos de Reintento:** El número de reintentos en caso de errores transitorios durante las operaciones.                                                                                 |
+| `DATABASE_REQUEST_RETRY_DELAY`    | `0.25`                                    | global   | no       | **Retraso entre Reintentos:** El retraso en segundos entre reintentos en caso de errores transitorios.                                                                                      |
 
 !!! tip "Selección de Base de Datos" - **SQLite** (predeterminado): Ideal para implementaciones de un solo nodo o entornos de prueba debido a su simplicidad y naturaleza basada en archivos. - **PostgreSQL**: Recomendado para entornos de producción con múltiples instancias de BunkerWeb debido a su robustez y soporte de concurrencia. - **MySQL/MariaDB**: Una buena alternativa a PostgreSQL con capacidades similares de nivel de producción. - **Oracle**: Adecuado para entornos empresariales donde Oracle ya es la plataforma de base de datos estándar.
 
@@ -3859,7 +3868,7 @@ Siga estos pasos para configurar y usar ModSecurity:
 Seleccione una versión de CRS que se ajuste mejor a sus necesidades de seguridad:
 
 - **`3`**: Estable [v3.3.8](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8).
-- **`4`**: Estable [v4.23.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.23.0) (**predeterminada**).
+- **`4`**: Estable [v4.24.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.24.0) (**predeterminada**).
 - **`nightly`**: [Compilación nocturna](https://github.com/coreruleset/coreruleset/releases/tag/nightly) que ofrece las últimas actualizaciones de reglas.
 
 !!! example "Compilación Nocturna"

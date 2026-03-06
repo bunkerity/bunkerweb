@@ -542,6 +542,14 @@ local function parse_mask2(mask)
   end
 end
 
+local function parse_condition_mask(mask)
+  local m = parse_number(mask)
+  if m >= 0 and m <= 15 then
+    return m
+  end
+  werror("Mask value should be 0-15: ", m)
+end
+
 local function parse_label(label, def)
   local prefix = sub(label, 1, 2)
   -- =>label (pc label reference)
@@ -728,6 +736,7 @@ map_op = {
   clclu_3 =	"eb000000008fRSY-a",
   clfi_2 =	"c20f00000000RIL-a",
   clg_2 =	"e30000000021RXY-a",
+  clgdbr_3 =    "0000b3ad0000RRF-e",
   clgf_2 =	"e30000000031RXY-a",
   clgfi_2 =	"c20e00000000RIL-a",
   clgfr_2 =	"0000b9310000RRE",
@@ -965,6 +974,7 @@ map_op = {
   lnxr_2 =	"0000b3610000RRE",
   loc_3 =	"eb00000000f2RSY-b",
   locg_3 =	"eb00000000e2RSY-b",
+  locgr_3 =	"0000b9e20000RRF-c",
   lpdbr_2 =	"0000b3100000RRE",
   lpdfr_2 =	"0000b3700000RRE",
   lpdr_2 =	"000000002000RR",
@@ -1328,6 +1338,10 @@ local function parse_template(params, template, nparams, pos)
   elseif p == "RRF-b" then
     wputhw(op1)
     op2 = op2 + shl(parse_reg(params[1]), 4) + shl(parse_reg(params[2]), 12) + parse_reg(params[3]) + shl(parse_mask(params[4]), 8)
+    wputhw(op2)
+  elseif p == "RRF-c" then
+    wputhw(op1)
+    op2 = op2 + shl(parse_reg(params[1]), 4) + parse_reg(params[2]) + shl(parse_condition_mask(params[3]), 12)
     wputhw(op2)
   elseif p == "RRF-e" then
     wputhw(op1)

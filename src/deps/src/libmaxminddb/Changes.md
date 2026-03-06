@@ -1,3 +1,15 @@
+## 1.13.3 - 2026-03-05
+
+- Fixed validation of empty maps and arrays at the end of the metadata section.
+  `MMDB_open` would incorrectly reject databases where a 0-element map or array
+  was the last field in metadata. Reported in vimt/MaxMind-DB-Writer-python#16.
+
+## 1.13.2 - 2026-02-25
+
+- Fixed a compilation failure on macOS 26 (Tahoe) where `sys/endian.h` defines
+  `bswap32` and `bswap64` as macros, conflicting with our function declarations.
+  Reported by Anton Melnikov. GitHub #419.
+
 ## 1.13.1 - 2026-02-24
 
 - Re-release for Ubuntu PPA. No code changes.

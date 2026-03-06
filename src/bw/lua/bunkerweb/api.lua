@@ -291,10 +291,18 @@ api.global.POST["^/confs$"] = function(self)
 	end
 	file:flush()
 	file:close()
+	local staging = "/var/tmp/bunkerweb/staging_" .. self.ctx.bw.uri:sub(2)
 	local cmds = {
-		"rm -rf " .. destination .. "/*",
-		"tar xzf " .. tmp .. " -C " .. destination,
-		-- Remove the temporary archive once extracted
+		-- Extract into a staging area first (validates the archive before touching destination)
+		"rm -rf " .. staging,
+		"mkdir -p " .. staging,
+		"tar xzf " .. tmp .. " -C " .. staging,
+		-- Replace destination contents (can't rename parent-owned dirs, so swap contents instead)
+		"rm -rf "
+			.. destination
+			.. "/*",
+		"cp -R " .. staging .. "/. " .. destination .. "/",
+		"rm -rf " .. staging,
 		"rm -f " .. tmp,
 	}
 	for _, cmd in ipairs(cmds) do

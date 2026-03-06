@@ -38,9 +38,9 @@
     },
     {
       "id": "libmaxminddb",
-      "name": "libmaxminddb v1.13.1",
+      "name": "libmaxminddb v1.13.3",
       "url": "https://github.com/maxmind/libmaxminddb.git",
-      "commit": "de43d4f767f22ea4027892a01d5aec89687757da"
+      "commit": "09a0540fea89a16e5c6a9e21e93ee9aece6639e3"
     },
     {
       "id": "lua-cjson",
@@ -193,9 +193,9 @@
     },
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20260114",
+      "name": "LuaJIT v2.1-20260227",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "ccdd3299da29f6e0148192c7d2b4f11c9b553b7a",
+      "commit": "928290a470d35eb01324d5275b22fb86b13602a2",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {
