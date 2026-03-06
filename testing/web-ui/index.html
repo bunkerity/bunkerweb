@@ -1610,6 +1610,12 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <td><code>cpu_count()-1</code> (min 1), <code>workers*2</code></td>
 </tr>
 <tr>
+<td><code>MAX_REQUESTS</code></td>
+<td>Requests before a Gunicorn worker is recycled (prevents memory bloat)</td>
+<td>Integer</td>
+<td><code>1000</code></td>
+</tr>
+<tr>
 <td><code>ENABLE_HEALTHCHECK</code></td>
 <td>Expose <code>GET /healthcheck</code></td>
 <td><code>yes</code> or <code>no</code></td>
@@ -1638,6 +1644,12 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <td>Skip regex validation on settings</td>
 <td><code>yes</code> or <code>no</code></td>
 <td><code>no</code></td>
+</tr>
+<tr>
+<td><code>MAX_CONTENT_LENGTH</code></td>
+<td>Maximum upload size (Flask <code>MAX_CONTENT_LENGTH</code>)</td>
+<td>Size with unit (<code>50M</code>, <code>1G</code>, <code>52428800</code>)</td>
+<td><code>50MB</code></td>
 </tr>
 </tbody>
 </table>

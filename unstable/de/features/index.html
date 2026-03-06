@@ -1371,6 +1371,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#unterstutzte-landergruppen" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unterstützte Ländergruppen
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#beispiele_1" class="md-nav__link">
     <span class="md-ellipsis">
       Beispiele
@@ -5770,7 +5779,7 @@ TrustedMonitor/\d+\.\d+
 <h3 id="anwendung">Anwendung</h3>
 <ol>
 <li>Strategie: Wählen Sie eine Whitelist (wenige zugelassene Länder) oder eine Blacklist (bestimmte Länder blockieren).</li>
-<li>Ländercodes: Fügen Sie ISO 3166-1 Alpha-2 Codes (US, GB, FR) zu <code>WHITELIST_COUNTRY</code> oder <code>BLACKLIST_COUNTRY</code> hinzu.</li>
+<li>Länder oder Gruppen: Fügen Sie ISO 3166-1 Alpha-2 Codes (US, GB, FR) und/oder unterstützte Gruppentokens (wie <code>@EU</code>, <code>@SCHENGEN</code>) zu <code>WHITELIST_COUNTRY</code> oder <code>BLACKLIST_COUNTRY</code> hinzu.</li>
 <li>Anwendung: Nach der Konfiguration gilt die Beschränkung für alle Besucher.</li>
 <li>Überwachung: Konsultieren Sie die <a href="../web-ui/">Web-UI</a> für Statistiken nach Ländern.</li>
 </ol>
@@ -5791,17 +5800,33 @@ TrustedMonitor/\d+\.\d+
 <td style="text-align: left;"></td>
 <td style="text-align: left;">Multisite</td>
 <td style="text-align: left;">Nein</td>
-<td style="text-align: left;">Whitelist: ISO 3166-1 Alpha-2 Ländercodes, durch Leerzeichen getrennt. Nur diese Länder sind zugelassen.</td>
+<td style="text-align: left;">Whitelist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Nur diese Länder sind zugelassen.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>BLACKLIST_COUNTRY</code></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;">Multisite</td>
 <td style="text-align: left;">Nein</td>
-<td style="text-align: left;">Blacklist: ISO 3166-1 Alpha-2 Ländercodes, durch Leerzeichen getrennt. Diese Länder sind blockiert.</td>
+<td style="text-align: left;">Blacklist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Diese Länder sind blockiert.</td>
 </tr>
 </tbody>
 </table>
+<h3 id="unterstutzte-landergruppen">Unterstützte Ländergruppen</h3>
+<p>Sie können Gruppentokens mit <code>@</code> verwenden. Diese werden serverseitig in Mitgliedsländer aufgelöst:</p>
+<ul>
+<li><code>@EU</code>: Mitgliedstaaten der Europäischen Union.</li>
+<li><code>@SCHENGEN</code>: Länder des Schengen-Raums.</li>
+<li><code>@EEA</code>: Europäischer Wirtschaftsraum (<code>@EU</code> + Island, Liechtenstein, Norwegen).</li>
+<li><code>@BENELUX</code>: Belgien, Niederlande, Luxemburg.</li>
+<li><code>@DACH</code>: deutschsprachiger Kernraum (Deutschland, Österreich, Schweiz).</li>
+<li><code>@NORDICS</code>: nordische Länder (Dänemark, Finnland, Island, Norwegen, Schweden).</li>
+<li><code>@USMCA</code>: USMCA-Wirtschaftsraum (USA, Kanada, Mexiko).</li>
+<li><code>@FIVE_EYES</code>: Länder der Five-Eyes-Geheimdienstallianz.</li>
+<li><code>@ASEAN</code>: ASEAN-Mitgliedstaaten in Südostasien.</li>
+<li><code>@GCC</code>: Mitgliedstaaten des Golf-Kooperationsrats.</li>
+<li><code>@G7</code>: Staaten der Gruppe der Sieben.</li>
+<li><code>@LATAM</code>: in diesem Plugin verwendete Lateinamerika-Gruppe.</li>
+</ul>
 <div class="admonition tip">
 <p class="admonition-title">Whitelist vs. Blacklist</p>
 <p>Whitelist: Zugriff auf wenige Länder beschränkt. Blacklist: Problematische Regionen blockieren und den Rest zulassen.</p>
@@ -5815,7 +5840,7 @@ TrustedMonitor/\d+\.\d+
 <p>BunkerWeb verwendet die mmdb-Datenbank <a href="https://db-ip.com/db/download/ip-to-country-lite">db-ip lite</a>.</p>
 </div>
 <h3 id="beispiele_1">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:4"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><input id="__tabbed_14_4" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Nur Whitelist</label><label for="__tabbed_14_2">Nur Blacklist</label><label for="__tabbed_14_3">Nur EU</label><label for="__tabbed_14_4">Blockierung von Risikoländern</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:5"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><input id="__tabbed_14_4" name="__tabbed_14" type="radio" /><input id="__tabbed_14_5" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Nur Whitelist</label><label for="__tabbed_14_2">Nur Blacklist</label><label for="__tabbed_14_3">Nur EU</label><label for="__tabbed_14_4">Gruppe + explizite Länder</label><label for="__tabbed_14_5">Blockierung von Risikoländern</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">WHITELIST_COUNTRY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;US</span><span class="nv"> </span><span class="s">CA</span><span class="nv"> </span><span class="s">GB&quot;</span>
@@ -5826,7 +5851,11 @@ TrustedMonitor/\d+\.\d+
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nt">WHITELIST_COUNTRY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;AT</span><span class="nv"> </span><span class="s">BE</span><span class="nv"> </span><span class="s">BG</span><span class="nv"> </span><span class="s">HR</span><span class="nv"> </span><span class="s">CY</span><span class="nv"> </span><span class="s">CZ</span><span class="nv"> </span><span class="s">DK</span><span class="nv"> </span><span class="s">EE</span><span class="nv"> </span><span class="s">FI</span><span class="nv"> </span><span class="s">FR</span><span class="nv"> </span><span class="s">DE</span><span class="nv"> </span><span class="s">GR</span><span class="nv"> </span><span class="s">HU</span><span class="nv"> </span><span class="s">IE</span><span class="nv"> </span><span class="s">IT</span><span class="nv"> </span><span class="s">LV</span><span class="nv"> </span><span class="s">LT</span><span class="nv"> </span><span class="s">LU</span><span class="nv"> </span><span class="s">MT</span><span class="nv"> </span><span class="s">NL</span><span class="nv"> </span><span class="s">PL</span><span class="nv"> </span><span class="s">PT</span><span class="nv"> </span><span class="s">RO</span><span class="nv"> </span><span class="s">SK</span><span class="nv"> </span><span class="s">SI</span><span class="nv"> </span><span class="s">ES</span><span class="nv"> </span><span class="s">SE&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nt">WHITELIST_COUNTRY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;@EU&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="nt">WHITELIST_COUNTRY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;@SCHENGEN</span><span class="nv"> </span><span class="s">GB&quot;</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -6536,6 +6565,69 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>global</td>
 <td>nein</td>
 <td><strong>Sitzungsaufbewahrung:</strong> Das maximale Alter (in Tagen) von UI-Benutzersitzungen, bevor sie automatisch bereinigt werden.</td>
+</tr>
+<tr>
+<td><code>DATABASE_POOL_SIZE</code></td>
+<td><code>40</code></td>
+<td>global</td>
+<td>nein</td>
+<td><strong>Pool-Größe:</strong> Die Anzahl der Verbindungen im Datenbankverbindungspool.</td>
+</tr>
+<tr>
+<td><code>DATABASE_POOL_MAX_OVERFLOW</code></td>
+<td><code>20</code></td>
+<td>global</td>
+<td>nein</td>
+<td><strong>Maximaler Pool-Überlauf:</strong> Die maximale Anzahl zusätzlicher Verbindungen über die Pool-Größe hinaus. <code>-1</code> für unbegrenzt.</td>
+</tr>
+<tr>
+<td><code>DATABASE_POOL_TIMEOUT</code></td>
+<td><code>5</code></td>
+<td>global</td>
+<td>nein</td>
+<td><strong>Pool-Zeitlimit:</strong> Die Anzahl der Sekunden, die auf eine Verbindung aus dem Pool gewartet wird.</td>
+</tr>
+<tr>
+<td><code>DATABASE_POOL_RECYCLE</code></td>
+<td><code>1800</code></td>
+<td>global</td>
+<td>nein</td>
+<td><strong>Pool-Recycling:</strong> Die Anzahl der Sekunden, nach denen eine Verbindung automatisch recycelt wird. <code>-1</code> zum Deaktivieren.</td>
+</tr>
+<tr>
+<td><code>DATABASE_POOL_PRE_PING</code></td>
+<td><code>yes</code></td>
+<td>global</td>
+<td>nein</td>
+<td><strong>Pool-Pre-Ping:</strong> Ob Verbindungen bei jeder Entnahme aus dem Pool auf Erreichbarkeit getestet werden.</td>
+</tr>
+<tr>
+<td><code>DATABASE_POOL_RESET_ON_RETURN</code></td>
+<td></td>
+<td>global</td>
+<td>nein</td>
+<td><strong>Pool-Reset bei Rückgabe:</strong> Wie Verbindungen bei der Rückgabe in den Pool zurückgesetzt werden. Leer = automatisch (<code>none</code> für MySQL/MariaDB, <code>rollback</code> für andere). Optionen: <code>rollback</code>, <code>commit</code>, <code>none</code>.</td>
+</tr>
+<tr>
+<td><code>DATABASE_RETRY_TIMEOUT</code></td>
+<td><code>60</code></td>
+<td>global</td>
+<td>nein</td>
+<td><strong>Wiederholungs-Zeitlimit:</strong> Die maximale Wartezeit in Sekunden auf die Verfügbarkeit der Datenbank beim Start.</td>
+</tr>
+<tr>
+<td><code>DATABASE_REQUEST_RETRY_ATTEMPTS</code></td>
+<td><code>2</code></td>
+<td>global</td>
+<td>nein</td>
+<td><strong>Wiederholungsversuche:</strong> Die Anzahl der Wiederholungsversuche bei vorübergehenden Datenbankfehlern.</td>
+</tr>
+<tr>
+<td><code>DATABASE_REQUEST_RETRY_DELAY</code></td>
+<td><code>0.25</code></td>
+<td>global</td>
+<td>nein</td>
+<td><strong>Wiederholungsverzögerung:</strong> Die Verzögerung in Sekunden zwischen Wiederholungsversuchen bei vorübergehenden Datenbankfehlern.</td>
 </tr>
 </tbody>
 </table>
@@ -9437,7 +9529,7 @@ TrustedMonitor/\d+\.\d+
 <p>Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entspricht:</p>
 <ul>
 <li><strong><code>3</code></strong>: Stabile <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8">v3.3.8</a>.</li>
-<li><strong><code>4</code></strong>: Stabile <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.23.0">v4.23.0</a> (<strong>Standard</strong>).</li>
+<li><strong><code>4</code></strong>: Stabile <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.24.0">v4.24.0</a> (<strong>Standard</strong>).</li>
 <li><strong><code>nightly</code></strong>: <a href="https://github.com/coreruleset/coreruleset/releases/tag/nightly">Nightly-Build</a> mit den neuesten Regel-Updates.</li>
 </ul>
 <div class="admonition example">

@@ -1588,6 +1588,12 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <td><code>cpu_count()-1</code> (mín 1), <code>workers*2</code></td>
 </tr>
 <tr>
+<td><code>MAX_REQUESTS</code></td>
+<td>Solicitudes antes de reciclar el worker Gunicorn (previene exceso de memoria)</td>
+<td>Entero</td>
+<td><code>1000</code></td>
+</tr>
+<tr>
 <td><code>ENABLE_HEALTHCHECK</code></td>
 <td>Exponer <code>GET /healthcheck</code></td>
 <td><code>yes</code> o <code>no</code></td>
@@ -1616,6 +1622,12 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <td>Omitir validación regex de ajustes</td>
 <td><code>yes</code> o <code>no</code></td>
 <td><code>no</code></td>
+</tr>
+<tr>
+<td><code>MAX_CONTENT_LENGTH</code></td>
+<td>Tamaño máximo de subida (Flask <code>MAX_CONTENT_LENGTH</code>)</td>
+<td>Tamaño con unidad (<code>50M</code>, <code>1G</code>, <code>52428800</code>)</td>
+<td><code>50MB</code></td>
 </tr>
 </tbody>
 </table>

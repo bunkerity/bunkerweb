@@ -1371,6 +1371,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#supported-country-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Country Groups
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#example-configurations_10" class="md-nav__link">
     <span class="md-ellipsis">
       Example Configurations
@@ -5846,7 +5855,7 @@ TrustedMonitor/\d+\.\d+
 <p>Follow these steps to configure and use the Country feature:</p>
 <ol>
 <li><strong>Define your strategy:</strong> Decide whether you want to use a whitelist approach (allow only specific countries) or a blacklist approach (block specific countries).</li>
-<li><strong>Configure country codes:</strong> Add the ISO 3166-1 alpha-2 country codes (two-letter codes like US, GB, FR) to either the <code>WHITELIST_COUNTRY</code> or <code>BLACKLIST_COUNTRY</code> setting.</li>
+<li><strong>Configure countries or groups:</strong> Add ISO 3166-1 alpha-2 country codes (two-letter codes like US, GB, FR) and/or supported group tokens (like <code>@EU</code>, <code>@SCHENGEN</code>) to either the <code>WHITELIST_COUNTRY</code> or <code>BLACKLIST_COUNTRY</code> setting.</li>
 <li><strong>Apply settings:</strong> Once configured, the country-based restrictions will apply to all visitors to your site.</li>
 <li><strong>Monitor effectiveness:</strong> Check the <a href="../web-ui/">web UI</a> to see statistics on blocked requests by country.</li>
 </ol>
@@ -5867,17 +5876,33 @@ TrustedMonitor/\d+\.\d+
 <td></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Country Whitelist:</strong> List of country codes (ISO 3166-1 alpha-2 format) separated by spaces. Only these countries are allowed.</td>
+<td><strong>Country Whitelist:</strong> List of country codes and/or country-group tokens separated by spaces. Only these countries are allowed.</td>
 </tr>
 <tr>
 <td><code>BLACKLIST_COUNTRY</code></td>
 <td></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Country Blacklist:</strong> List of country codes (ISO 3166-1 alpha-2 format) separated by spaces. These countries are blocked.</td>
+<td><strong>Country Blacklist:</strong> List of country codes and/or country-group tokens separated by spaces. These countries are blocked.</td>
 </tr>
 </tbody>
 </table>
+<h3 id="supported-country-groups">Supported Country Groups</h3>
+<p>You can use group tokens prefixed with <code>@</code>. They are expanded server-side into their member countries:</p>
+<ul>
+<li><code>@EU</code>: European Union member states.</li>
+<li><code>@SCHENGEN</code>: Schengen Area countries.</li>
+<li><code>@EEA</code>: European Economic Area (<code>@EU</code> + Iceland, Liechtenstein, Norway).</li>
+<li><code>@BENELUX</code>: Belgium, Netherlands, Luxembourg.</li>
+<li><code>@DACH</code>: German-speaking core region (Germany, Austria, Switzerland).</li>
+<li><code>@NORDICS</code>: Nordic countries (Denmark, Finland, Iceland, Norway, Sweden).</li>
+<li><code>@USMCA</code>: North American USMCA trade area (United States, Canada, Mexico).</li>
+<li><code>@FIVE_EYES</code>: Five Eyes intelligence alliance countries.</li>
+<li><code>@ASEAN</code>: ASEAN member states in Southeast Asia.</li>
+<li><code>@GCC</code>: Gulf Cooperation Council member states.</li>
+<li><code>@G7</code>: Group of Seven major advanced economies.</li>
+<li><code>@LATAM</code>: Latin America set used by this plugin.</li>
+</ul>
 <div class="admonition tip">
 <p class="admonition-title">Whitelist vs. Blacklist</p>
 <p>Choose the approach that best fits your needs:</p>
@@ -5895,7 +5920,7 @@ TrustedMonitor/\d+\.\d+
 <p>BunkerWeb uses the <a href="https://db-ip.com/db/download/ip-to-country-lite">lite db-ip mmdb database</a> to determine the country of origin based on IP addresses.</p>
 </div>
 <h3 id="example-configurations_10">Example Configurations</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:4"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><input id="__tabbed_14_4" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Whitelist Only</label><label for="__tabbed_14_2">Blacklist Only</label><label for="__tabbed_14_3">EU Access Only</label><label for="__tabbed_14_4">High-Risk Countries Blocked</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:5"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><input id="__tabbed_14_4" name="__tabbed_14" type="radio" /><input id="__tabbed_14_5" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Whitelist Only</label><label for="__tabbed_14_2">Blacklist Only</label><label for="__tabbed_14_3">EU Access Only</label><label for="__tabbed_14_4">Group + Explicit Countries</label><label for="__tabbed_14_5">High-Risk Countries Blocked</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Allow access only from the United States, Canada, and the United Kingdom:</p>
@@ -5909,7 +5934,12 @@ TrustedMonitor/\d+\.\d+
 </div>
 <div class="tabbed-block">
 <p>Allow access only from European Union member states:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">WHITELIST_COUNTRY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;AT</span><span class="nv"> </span><span class="s">BE</span><span class="nv"> </span><span class="s">BG</span><span class="nv"> </span><span class="s">HR</span><span class="nv"> </span><span class="s">CY</span><span class="nv"> </span><span class="s">CZ</span><span class="nv"> </span><span class="s">DK</span><span class="nv"> </span><span class="s">EE</span><span class="nv"> </span><span class="s">FI</span><span class="nv"> </span><span class="s">FR</span><span class="nv"> </span><span class="s">DE</span><span class="nv"> </span><span class="s">GR</span><span class="nv"> </span><span class="s">HU</span><span class="nv"> </span><span class="s">IE</span><span class="nv"> </span><span class="s">IT</span><span class="nv"> </span><span class="s">LV</span><span class="nv"> </span><span class="s">LT</span><span class="nv"> </span><span class="s">LU</span><span class="nv"> </span><span class="s">MT</span><span class="nv"> </span><span class="s">NL</span><span class="nv"> </span><span class="s">PL</span><span class="nv"> </span><span class="s">PT</span><span class="nv"> </span><span class="s">RO</span><span class="nv"> </span><span class="s">SK</span><span class="nv"> </span><span class="s">SI</span><span class="nv"> </span><span class="s">ES</span><span class="nv"> </span><span class="s">SE&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nt">WHITELIST_COUNTRY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;@EU&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Allow Schengen countries plus the United Kingdom:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">WHITELIST_COUNTRY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;@SCHENGEN</span><span class="nv"> </span><span class="s">GB&quot;</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -6628,6 +6658,69 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>global</td>
 <td>no</td>
 <td><strong>Session Retention:</strong> The maximum age (in days) for UI user sessions before they are purged automatically.</td>
+</tr>
+<tr>
+<td><code>DATABASE_POOL_SIZE</code></td>
+<td><code>40</code></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Pool Size:</strong> The number of connections to keep in the database connection pool.</td>
+</tr>
+<tr>
+<td><code>DATABASE_POOL_MAX_OVERFLOW</code></td>
+<td><code>20</code></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Pool Max Overflow:</strong> The maximum number of connections to create above the pool size. Set to <code>-1</code> for unlimited overflow.</td>
+</tr>
+<tr>
+<td><code>DATABASE_POOL_TIMEOUT</code></td>
+<td><code>5</code></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Pool Timeout:</strong> The number of seconds to wait before giving up on getting a connection from the pool.</td>
+</tr>
+<tr>
+<td><code>DATABASE_POOL_RECYCLE</code></td>
+<td><code>1800</code></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Pool Recycle:</strong> The number of seconds after which a connection is automatically recycled. Set to <code>-1</code> to disable.</td>
+</tr>
+<tr>
+<td><code>DATABASE_POOL_PRE_PING</code></td>
+<td><code>yes</code></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Pool Pre-Ping:</strong> Whether to test connections for liveness upon each checkout from the pool.</td>
+</tr>
+<tr>
+<td><code>DATABASE_POOL_RESET_ON_RETURN</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Pool Reset on Return:</strong> How connections are reset when returned to the pool. Empty for auto (<code>none</code> for MySQL/MariaDB, <code>rollback</code> for others). Options: <code>rollback</code>, <code>commit</code>, <code>none</code>.</td>
+</tr>
+<tr>
+<td><code>DATABASE_RETRY_TIMEOUT</code></td>
+<td><code>60</code></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Retry Timeout:</strong> The maximum number of seconds to wait for the database to be available on startup.</td>
+</tr>
+<tr>
+<td><code>DATABASE_REQUEST_RETRY_ATTEMPTS</code></td>
+<td><code>2</code></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Request Retry Attempts:</strong> The number of retry attempts for transient database errors during operations.</td>
+</tr>
+<tr>
+<td><code>DATABASE_REQUEST_RETRY_DELAY</code></td>
+<td><code>0.25</code></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Request Retry Delay:</strong> The delay in seconds between retry attempts for transient database errors.</td>
 </tr>
 </tbody>
 </table>
@@ -9572,7 +9665,7 @@ OPEN_FILE_CACHE_VALID: "60s"</p>
 <p>Select a CRS version to best match your security needs:</p>
 <ul>
 <li><strong><code>3</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8">v3.3.8</a>.</li>
-<li><strong><code>4</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.23.0">v4.23.0</a> (<strong>default</strong>).</li>
+<li><strong><code>4</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.24.0">v4.24.0</a> (<strong>default</strong>).</li>
 <li><strong><code>nightly</code></strong>: <a href="https://github.com/coreruleset/coreruleset/releases/tag/nightly">Nightly build</a> offering the latest rule updates.</li>
 </ul>
 <div class="admonition example">
