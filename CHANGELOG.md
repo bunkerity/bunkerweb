@@ -13,7 +13,7 @@
 - [MISC] Enhance version comparison logic in update check
 - [MISC] Enhance database connection management with configurable pool reset and session handling
 - [MISC] Enhance database configuration options with `DATABASE_POOL_SIZE`, `DATABASE_POOL_MAX_OVERFLOW`, `DATABASE_POOL_TIMEOUT`, `DATABASE_POOL_RECYCLE`, `DATABASE_POOL_PRE_PING`, `DATABASE_POOL_RESET_ON_RETURN`, `DATABASE_RETRY_TIMEOUT`, `DATABASE_REQUEST_RETRY_ATTEMPTS` and `DATABASE_REQUEST_RETRY_DELAY` settings for improved performance, reliability and resilience of database interactions.
-- [DEPS] Updated libmaxminddb version to v1.13.2
+- [DEPS] Updated libmaxminddb version to v1.13.3
 - [DEPS] Updated luajit2 version to v2.1-20260227
 - [DEPS] Update coreruleset-v4 version to v4.24.0
 
