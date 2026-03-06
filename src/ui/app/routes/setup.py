@@ -22,8 +22,6 @@ setup = Blueprint("setup", __name__)
 
 @setup.route("/setup", methods=["GET", "POST"])
 def setup_page():
-    if current_user.is_authenticated:
-        return redirect(url_for("home.home_page"))
     db_config = DB.get_config(
         filtered_settings=(
             "SERVER_NAME",
@@ -71,11 +69,24 @@ def setup_page():
     ui_reverse_proxy_url = None
     for server_name in db_config["SERVER_NAME"].split():
         if server_name and db_config.get(f"{server_name}_USE_UI", db_config.get("USE_UI", "no")) == "yes":
-            if admin_user:
-                return redirect(url_for("login.login_page"), 303)
             ui_reverse_proxy = server_name
             ui_reverse_proxy_url = db_config.get(f"{server_name}_REVERSE_PROXY_URL", db_config.get("REVERSE_PROXY_URL", "/"))
             break
+
+    # Setup fully complete (admin + service exist)
+    if admin_user and ui_reverse_proxy:
+        if current_user.is_authenticated:
+            return redirect(url_for("home.home_page"))
+        return redirect(url_for("login.login_page"), 303)
+
+    # Admin exists (e.g. created via env vars) but no service configured — require login
+    if admin_user and not ui_reverse_proxy:
+        if not current_user.is_authenticated:
+            return redirect(url_for("login.login_page", next=url_for("setup.setup_page")))
+
+    # No admin + authenticated edge case
+    if not admin_user and current_user.is_authenticated:
+        return redirect(url_for("home.home_page"))
 
     if request.method == "POST":
         if DB.readonly:
@@ -319,9 +330,6 @@ def setup_page():
 
 @setup.route("/setup/loading", methods=["GET"])
 def setup_loading():
-    if current_user.is_authenticated:
-        return redirect(url_for("home.home_page"))
-
     DATA.load_from_file()
 
     db_config = DB.get_config(filtered_settings=("SERVER_NAME", "USE_UI", "REVERSE_PROXY_URL"))

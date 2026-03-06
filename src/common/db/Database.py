@@ -362,13 +362,14 @@ class Database:
             except (OSError, IOError) as e:
                 self.logger.warning(f"Could not set file permissions on {db_path}: {e}")
 
-    def __del__(self) -> None:
-        """Close the database"""
+    def close(self) -> None:
+        """Explicitly close all sessions and dispose the engine pool.
+        Only call during controlled shutdown when no other threads are using this instance."""
         if getattr(self, "_session_factory", None):
-            self._session_factory.close_all()
+            self._session_factory.remove()
 
         if getattr(self, "sql_engine", None):
-            self.sql_engine.dispose()
+            self.sql_engine.dispose(close=True)
 
     def _empty_if_none(self, value: Any) -> Any:
         """Return an empty string if the value is None or convert None values in collections"""
