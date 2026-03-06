@@ -19,6 +19,7 @@ from backup import backup_database, hanoi_rotation, update_cache_file, acquire_d
 
 LOGGER = getLogger("BACKUP")
 status = 0
+lock_acquired = False  # Track whether this process holds the DB lock
 
 try:
     backup_dir = Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups"))
@@ -84,26 +85,20 @@ try:
                 LOGGER.info("First start of the scheduler, skipping backup ...")
                 sys_exit(0)
 
-        wal = is_sqlite_wal(db)
-        if wal:
-            # SQLite WAL mode: readers and writers do not block each other, so
-            # the dump can run without holding the BunkerWeb lock at all.
-            LOGGER.info("SQLite WAL mode detected — running non-blocking dump (no database lock required).")
-            LOGGER.debug("Starting database dump ...")
-            db, _ = backup_database(current_time, db, backup_dir)
-        else:
-            # Acquire the lock only when a backup will actually run.
-            # Placing it here (rather than at script start) means that
-            # rotation-only runs and already_done early exits never touch
-            # the lock file. Combined with the post_dump_hook that releases
-            # the lock after the SQL dump (before compression), the total
-            # lock hold time is reduced to just the dump phase (~2 s for a
-            # typical SQLite database, down from ~18 s with the old approach).
-            LOGGER.debug("Acquiring database lock ...")
-            acquire_db_lock()
-            LOGGER.debug("Database lock acquired.")
-            LOGGER.debug("Starting database dump ...")
-            db, _ = backup_database(current_time, db, backup_dir, post_dump_hook=DB_LOCK_FILE.unlink)
+        if is_sqlite_wal(db):
+            LOGGER.info("SQLite WAL mode detected — SQLite readers/writers won't block, but the BunkerWeb lock is still acquired to prevent concurrent backup/restore operations.")
+
+        # Acquire the lock only when a backup will actually run.
+        # Placing it here (rather than at script start) means that
+        # rotation-only runs and already_done early exits never touch
+        # the lock file. The post_dump_hook releases the lock after the
+        # SQL dump but before compression, keeping the hold time minimal.
+        LOGGER.debug("Acquiring database lock ...")
+        acquire_db_lock()
+        lock_acquired = True
+        LOGGER.debug("Database lock acquired.")
+        LOGGER.debug("Starting database dump ...")
+        db, _ = backup_database(current_time, db, backup_dir, post_dump_hook=lambda: DB_LOCK_FILE.unlink(missing_ok=True))
         backed_up = True
         LOGGER.debug("Database dump and compression complete.")
 
@@ -144,7 +139,8 @@ except BaseException as e:
     LOGGER.error(f"Exception while running backup-data.py :\n{e}")
 
 finally:
-    # Always release DB lock
-    DB_LOCK_FILE.unlink(missing_ok=True)
+    # Only release the lock if this process acquired it (WAL mode skips the lock entirely).
+    if lock_acquired:
+        DB_LOCK_FILE.unlink(missing_ok=True)
 
 sys_exit(status)

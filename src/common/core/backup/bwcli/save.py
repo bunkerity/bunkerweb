@@ -14,6 +14,7 @@ from backup import acquire_db_lock, backup_database, BACKUP_DIR, DB_LOCK_FILE, i
 from Database import Database  # type: ignore  # path added by backup module import
 
 status = 0
+lock_acquired = False
 
 try:
     # Global parser
@@ -45,13 +46,12 @@ try:
 
     db = Database(LOGGER)
 
-    wal = is_sqlite_wal(db)
-    if wal:
-        LOGGER.info("SQLite WAL mode detected — running non-blocking dump (no database lock required).")
-        db, _ = backup_database(datetime.now().astimezone(), db=db, backup_dir=directory)
-    else:
-        acquire_db_lock()
-        db, _ = backup_database(datetime.now().astimezone(), db=db, backup_dir=directory, post_dump_hook=DB_LOCK_FILE.unlink)
+    if is_sqlite_wal(db):
+        LOGGER.info("SQLite WAL mode detected — SQLite readers/writers won't block, but the BunkerWeb lock is still acquired to prevent concurrent backup/restore operations.")
+
+    acquire_db_lock()
+    lock_acquired = True
+    db, _ = backup_database(datetime.now().astimezone(), db=db, backup_dir=directory, post_dump_hook=lambda: DB_LOCK_FILE.unlink(missing_ok=True))
 
     if directory == BACKUP_DIR:
         update_cache_file(db, directory)
@@ -61,6 +61,7 @@ except BaseException as e:
     LOGGER.error(f"Error while executing backup save command: {e}")
     status = 1
 finally:
-    DB_LOCK_FILE.unlink(missing_ok=True)
+    if lock_acquired:
+        DB_LOCK_FILE.unlink(missing_ok=True)
 
 sys_exit(status)

@@ -121,16 +121,16 @@ def check_disk_space(database: str, db: "Database", backup_dir: Path, db_path: O
 
 
 HANOI_TIERS: List[Tuple[int, timedelta]] = [
-    (6, timedelta(hours=1)),    # 6 × 1h
-    (2, timedelta(hours=2)),    # 2 × 2h
-    (2, timedelta(hours=4)),    # 2 × 4h
-    (2, timedelta(hours=8)),    # 2 × 8h
-    (2, timedelta(hours=16)),   # 2 × 16h
-    (2, timedelta(hours=32)),   # 2 × 32h
-    (2, timedelta(hours=64)),   # 2 × 64h
-    (2, timedelta(hours=128)),  # 2 × 128h
-    (2, timedelta(hours=256)),  # 2 × 256h (~10.7 days ago)
-    (2, timedelta(hours=512)),  # 2 × 512h (~21–42 days ago)
+    (6, timedelta(hours=1)),    # 6 × 1h   → covers last 0–6h ago
+    (2, timedelta(hours=2)),    # 2 × 2h   → covers 8+10h ago
+    (2, timedelta(hours=4)),    # 2 × 4h   → covers 14+18h ago
+    (2, timedelta(hours=8)),    # 2 × 8h   → covers 26+34h ago (~1.1+1.4d)
+    (2, timedelta(hours=16)),   # 2 × 16h  → covers 50+66h ago (~2.1+2.75d)
+    (2, timedelta(hours=32)),   # 2 × 32h  → covers 98+130h ago (~4.1+5.4d)
+    (2, timedelta(hours=64)),   # 2 × 64h  → covers 194+258h ago (~8.1+10.75d)
+    (2, timedelta(hours=128)),  # 2 × 128h → covers 386+514h ago (~16.1+21.4d)
+    (2, timedelta(hours=256)),  # 2 × 256h → covers 770+1026h ago (~32.1+42.75d)
+    (2, timedelta(hours=512)),  # 2 × 512h → covers 1538+2050h ago (~64.1+85.4d)
 ]
 
 
@@ -363,14 +363,18 @@ def verify_backup_checksum(backup_file: Path) -> bool:
     sql_name = backup_file.with_suffix(".sql").name
     sha256_name = sql_name + ".sha256"
 
-    with ZipFile(backup_file, "r") as zipf:
-        if sha256_name not in zipf.namelist():
-            LOGGER.warning(f"{backup_file.name}: no checksum file found (backup predates checksum support), skipping verification.")
-            return True
+    try:
+        with ZipFile(backup_file, "r") as zipf:
+            if sha256_name not in zipf.namelist():
+                LOGGER.warning(f"{backup_file.name}: no checksum file found (backup predates checksum support), skipping verification.")
+                return True
 
-        stored_line = zipf.read(sha256_name).decode().strip()
-        stored_checksum = stored_line.split()[0] if stored_line else ""
-        sql_data = zipf.read(sql_name)
+            stored_line = zipf.read(sha256_name).decode().strip()
+            stored_checksum = stored_line.split()[0] if stored_line else ""
+            sql_data = zipf.read(sql_name)
+    except Exception as exc:
+        LOGGER.error(f"{backup_file.name}: could not read backup archive: {exc}")
+        return False
 
     computed_checksum = sha256(sql_data).hexdigest()
 
