@@ -9,7 +9,7 @@ from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from tarfile import open as tar_open
 from traceback import format_exc
 
-from common_utils import bytes_hash  # type: ignore
+from common_utils import add_dir_to_tar_safely, bytes_hash  # type: ignore
 
 from app.models.config import Config
 from app.models.instance import InstancesUtils
@@ -48,12 +48,14 @@ def reload_plugins():
 
         target = plugin_path / plugin["id"]
 
-        # If the target exists, compare its checksum.
+        # If the target exists, compare its checksum using an uncompressed tar so the
+        # result is independent of gzip compression level and matches the checksum
+        # stored by the scheduler and download-pro-plugins jobs.
         if target.exists():
             with suppress(StopIteration, IndexError, FileNotFoundError):
                 with BytesIO() as plugin_content:
-                    with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                        tar.add(target, arcname=target.name, recursive=True)
+                    with tar_open(fileobj=plugin_content, mode="w:") as tar:
+                        add_dir_to_tar_safely(tar, target, arc_root=target.name)
                     plugin_content.seek(0, 0)
                     if bytes_hash(plugin_content, algorithm="sha256") == plugin["checksum"]:
                         ignored_plugins.add(target.name)
