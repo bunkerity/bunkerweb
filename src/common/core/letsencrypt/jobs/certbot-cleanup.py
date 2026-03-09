@@ -20,11 +20,15 @@ try:
     # Get env vars
     token = getenv("CERTBOT_TOKEN", "")
     db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
+    # Retrieve API_TOKEN from DB because certbot sanitizes the subprocess environment
+    # and strips non-CERTBOT_* variables, so getenv("API_TOKEN") is empty in hook context.
+    api_token = db.get_non_default_settings(global_only=True, filtered_settings=("API_TOKEN",)).get("API_TOKEN") or getenv("API_TOKEN")
+
     instances = db.get_instances()
 
     LOGGER.info(f"Cleaning challenge from {len(instances)} instances")
     for instance in instances:
-        api = API.from_instance(instance)
+        api = API.from_instance(instance, token=api_token)
         sent, err, status, resp = api.request("DELETE", "/lets-encrypt/challenge", data={"token": token})
         if not sent:
             status = 1
