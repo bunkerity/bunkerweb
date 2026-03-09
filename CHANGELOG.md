@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.9~rc3 - 2026/03/??
+## v1.6.9 - 2026/03/??
+
+- [BUGFIX] Ensure script_nonce is available for security headers to prevent XSS attacks
+
+## v1.6.9~rc3 - 2026/03/06
 
 - [BUGFIX] Fix issues with the new `multiselect` logic where a custom separator can be used, but the default one (space) was still used if the separator was empty, which caused issues with settings that had an empty string as a value.
 - [BUGFIX] Fix issue with the failover not sending the failover configuration if the reload failed, which caused the failover configuration to not be applied until the next successful reload.

@@ -1161,12 +1161,16 @@ def mark_user_access(user, session_id):
 @app.after_request
 def set_security_headers(response):
     """Set the security headers."""
+    # Ensure script_nonce is available even if before_request didn't complete
+    # (e.g., when CSRF validation fails before our before_request runs)
+    script_nonce = getattr(g, "script_nonce", None) or token_urlsafe(32)
+
     # * Content-Security-Policy header to prevent XSS attacks
     response.headers["Content-Security-Policy"] = (
         "object-src 'none';"
         + " frame-ancestors 'self';"
         + " default-src https: http: 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com https://api.github.com;"
-        + f" script-src https: http: 'self' 'nonce-{g.script_nonce}' 'strict-dynamic' 'unsafe-inline';"
+        + f" script-src https: http: 'self' 'nonce-{script_nonce}' 'strict-dynamic' 'unsafe-inline';"
         + " style-src 'self' 'unsafe-inline';"
         + " img-src 'self' data: blob: https://www.bunkerweb.io https://assets.bunkerity.com https://*.tile.openstreetmap.org;"
         + " font-src 'self' data:;"
