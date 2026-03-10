@@ -233,6 +233,20 @@ class Database:
             "pool_timeout": 5,
         } | kwargs
 
+        # Configure pool_reset_on_return unless explicitly overridden in kwargs.
+        if "pool_reset_on_return" not in kwargs:
+            default_pool_reset = "rollback"
+            configured_pool_reset = getenv("DATABASE_POOL_RESET_ON_RETURN", "").strip().lower() or default_pool_reset
+            if configured_pool_reset in ("none", "null", "off", "false", "no"):
+                self._engine_kwargs["pool_reset_on_return"] = None
+            elif configured_pool_reset in ("rollback", "commit"):
+                self._engine_kwargs["pool_reset_on_return"] = configured_pool_reset
+            else:
+                self.logger.warning(
+                    f"Invalid DATABASE_POOL_RESET_ON_RETURN value: {configured_pool_reset}, using default value ({default_pool_reset})"
+                )
+                self._engine_kwargs["pool_reset_on_return"] = default_pool_reset
+
         # Unless explicitly requested via SQLALCHEMY_LOG_LEVEL, keep SQLAlchemy's own
         # loggers quiet (WARNING+) so they don't flood BunkerWeb logs with internal
         # mapper/engine configuration chatter.
