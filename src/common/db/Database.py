@@ -956,7 +956,16 @@ class Database:
                     if path_ui.is_dir():
                         with BytesIO() as plugin_page_content:
                             with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
+                                try:
+                                    tar.add(path_ui, arcname=path_ui.name, recursive=True)
+                                except FileNotFoundError as e:
+                                    # If some files disappeared between discovery and archiving
+                                    # (for example, partially removed or obfuscated UI files),
+                                    # don't fail the whole config saver run; just warn and skip.
+                                    self.logger.warning(
+                                        f"Skipping missing file while archiving UI for plugin '{base_plugin['id']}': {e}"
+                                    )
+                                    continue
                             plugin_page_content.seek(0)
                             checksum = bytes_hash(plugin_page_content, algorithm="sha256")
                             desired_plugin_pages[base_plugin["id"]] = {
