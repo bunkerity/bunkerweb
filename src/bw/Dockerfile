@@ -79,6 +79,7 @@ RUN apk add --no-cache openssl pcre2 bash python3 yajl geoip libxml2 libgd curl 
 
 # Fix CVEs
 RUN apk add --no-cache "libpng>=1.6.55-r0" # CVE-2026-25646
+RUN apk add --no-cache "zlib>=1.3.2-r0" # CVE-2026-22184, CVE-2026-27171
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

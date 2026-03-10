@@ -44,7 +44,7 @@ RUN apk add --no-cache bash tzdata mariadb-connector-c mariadb-client sqlite pos
   adduser -h /usr/share/bunkerweb/autoconf -g autoconf -s /sbin/nologin -G autoconf -D -H -u 101 --disabled-password autoconf
 
 # Fix CVEs
-# There are no CVEs for the following packages
+RUN apk add --no-cache "zlib>=1.3.2-r0" # CVE-2026-22184, CVE-2026-27171
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

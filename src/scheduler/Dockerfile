@@ -47,7 +47,7 @@ RUN apk add --no-cache bash unzip curl libgcc libstdc++ libpq openssl libmagic m
   adduser -h /usr/share/bunkerweb/scheduler -g scheduler -s /sbin/nologin -G scheduler -D -H -u 101 --disabled-password scheduler
 
 # Fix CVEs
-# There are no CVEs for the following packages
+RUN apk add --no-cache "zlib>=1.3.2-r0" # CVE-2026-22184, CVE-2026-27171
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
