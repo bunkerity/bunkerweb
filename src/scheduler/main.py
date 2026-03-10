@@ -197,8 +197,8 @@ def handle_reload(signum, frame):
                 # then emit a second line with detailed diagnostics.
                 LOGGER.error("Config saver failed, configuration will not work as expected...")
                 output = (proc.stdout or "").strip()
-                if len(output) > 8000:
-                    output = output[:8000] + "... [truncated]"
+                if len(output) > 64000:
+                    output = output[:64000] + "... [truncated]"
                 LOGGER.error(
                     "Config saver failed, configuration will not work as expected... "
                     f"returncode={proc.returncode}, args={proc.args!r}, output={output!r}"
@@ -757,8 +757,8 @@ if __name__ == "__main__":
                 # then emit a second line with detailed diagnostics.
                 LOGGER.error("Config saver failed, configuration will not work as expected...")
                 output = (proc.stdout or "").strip()
-                if len(output) > 8000:
-                    output = output[:8000] + "... [truncated]"
+                if len(output) > 64000:
+                    output = output[:64000] + "... [truncated]"
                 LOGGER.error(
                     "Config saver failed, configuration will not work as expected... "
                     f"returncode={proc.returncode}, args={proc.args!r}, output={output!r}"
@@ -842,8 +842,8 @@ if __name__ == "__main__":
                 # then emit a second line with detailed diagnostics.
                 LOGGER.error("Config saver failed, configuration will not work as expected...")
                 output = (proc.stdout or "").strip()
-                if len(output) > 8000:
-                    output = output[:8000] + "... [truncated]"
+                if len(output) > 64000:
+                    output = output[:64000] + "... [truncated]"
                 LOGGER.error(
                     "Config saver failed, configuration will not work as expected... "
                     f"returncode={proc.returncode}, args={proc.args!r}, output={output!r}"
