@@ -258,6 +258,10 @@ class Database:
         # Pool pre-ping
         pool_pre_ping = getenv("DATABASE_POOL_PRE_PING", "yes").lower() in ("yes", "true", "1")
 
+        self.logger.debug(
+            f"Database pool configuration: pool_size={pool_size}, max_overflow={max_overflow}, pool_timeout={pool_timeout}, pool_recycle={pool_recycle}, pool_pre_ping={pool_pre_ping}"
+        )
+
         self._engine_kwargs = {
             "future": True,
             "poolclass": QueuePool,
