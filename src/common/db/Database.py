@@ -258,6 +258,10 @@ class Database:
         # Pool pre-ping
         pool_pre_ping = getenv("DATABASE_POOL_PRE_PING", "yes").lower() in ("yes", "true", "1")
 
+        self.logger.debug(
+            f"Database pool configuration: pool_size={pool_size}, max_overflow={max_overflow}, pool_timeout={pool_timeout}, pool_recycle={pool_recycle}, pool_pre_ping={pool_pre_ping}"
+        )
+
         self._engine_kwargs = {
             "future": True,
             "poolclass": QueuePool,
@@ -625,7 +629,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.9~rc3"
+                return "1.6.9~rc4"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -659,7 +663,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.9~rc3",
+            "version": "1.6.9~rc4",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }

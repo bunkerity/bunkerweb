@@ -60,19 +60,21 @@ def before_request():
 def inject_variables():
     return dict(
         current_endpoint=request.path.split("/")[-1],
-        script_nonce=g.script_nonce,
+        script_nonce=getattr(g, "script_nonce", None) or token_urlsafe(32),
     )
 
 
 @app.after_request
 def set_security_headers(response):
     """Set the security headers."""
+    script_nonce = getattr(g, "script_nonce", None) or token_urlsafe(32)
+
     # * Content-Security-Policy header to prevent XSS attacks
     response.headers["Content-Security-Policy"] = (
         "object-src 'none';"
         + " frame-ancestors 'self';"
         + " default-src 'self'"
-        + f" script-src https: http: 'self' 'nonce-{g.script_nonce}' 'strict-dynamic' 'unsafe-inline';"
+        + f" script-src https: http: 'self' 'nonce-{script_nonce}' 'strict-dynamic' 'unsafe-inline';"
         + " style-src 'self' 'unsafe-inline';"
         + " img-src 'self' data: blob: https://assets.bunkerity.com;"
         + " base-uri 'self';"
