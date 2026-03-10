@@ -843,8 +843,15 @@ def handle_csrf_error(_):
     :return: A template with the error message and a 401 status code.
     """
     LOGGER.debug(format_exc())
-    LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {current_user.get_id()}")
-    if not current_user:
+    try:
+        user_id = current_user.get_id()
+    except (AssertionError, RuntimeError):
+        user_id = "unknown"
+    LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {user_id}")
+    try:
+        if not current_user:
+            return redirect(url_for("setup.setup_page"), 303)
+    except (AssertionError, RuntimeError):
         return redirect(url_for("setup.setup_page"), 303)
     response = logout_page()
     response.status_code = 303
@@ -1217,12 +1224,13 @@ def set_security_headers(response):
 
 @app.teardown_request
 def teardown_request(teardown):
-    if (
-        not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/"))
-        and current_user.is_authenticated
-        and "session_id" in session
-    ):
-        _user_access_executor.submit(mark_user_access, current_user, session["session_id"])
+    with suppress(AssertionError, RuntimeError):
+        if (
+            not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/"))
+            and current_user.is_authenticated
+            and "session_id" in session
+        ):
+            _user_access_executor.submit(mark_user_access, current_user, session["session_id"])
 
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:
         try:
