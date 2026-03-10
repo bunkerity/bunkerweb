@@ -604,8 +604,12 @@ def custom_plugin_page(plugin: str):
 </div>"""
 
             try:
-                # Merge globals and ENV with ENV taking precedence
-                template_vars = {**current_app.jinja_env.globals, **current_app.config["ENV"]}
+                # Merge globals and ENV with ENV taking precedence.
+                # Be defensive in case ENV is not yet initialized in app.config.
+                env_data = current_app.config.get("ENV") or {}
+                if not isinstance(env_data, dict):
+                    env_data = {}
+                template_vars = {**current_app.jinja_env.globals, **env_data}
 
                 # deepcode ignore Ssti: We trust the plugin template
                 plugin_page = (

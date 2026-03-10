@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from functools import wraps
 from io import BytesIO
 from json import JSONDecodeError, loads
-from logging import Logger
+from logging import Logger, WARNING, getLogger
 from os import _exit, getenv, sep
 from os.path import join as os_join
 from pathlib import Path
@@ -232,6 +232,14 @@ class Database:
             "max_overflow": 20,
             "pool_timeout": 5,
         } | kwargs
+
+        # Unless explicitly requested via SQLALCHEMY_LOG_LEVEL, keep SQLAlchemy's own
+        # loggers quiet (WARNING+) so they don't flood BunkerWeb logs with internal
+        # mapper/engine configuration chatter.
+        sqlalchemy_log_level = getenv("SQLALCHEMY_LOG_LEVEL", "").upper()
+        if sqlalchemy_log_level not in {"DEBUG", "INFO"}:
+            for name in ("sqlalchemy", "sqlalchemy.engine", "sqlalchemy.orm", "sqlalchemy.pool"):
+                getLogger(name).setLevel(WARNING)
 
         try:
             self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
@@ -3142,6 +3150,22 @@ class Database:
                 commands = plugin.pop("bwcli", {})
                 if not isinstance(commands, dict):
                     commands = {}
+
+                # Validate settings before importing the plugin into the database.
+                # This helps catch mistakes in plugin.json early (especially missing "regex"
+                # on settings, which would otherwise violate the NOT NULL constraint on
+                # bw_settings.regex). We keep the import logic tolerant (it will still
+                # default missing regex values), but emit a clear, actionable log so that
+                # users can fix their plugin definitions.
+                missing_regex = [name for name, value in settings.items() if not value.get("regex")]
+                if missing_regex:
+                    self.logger.error(
+                        f'Plugin "{plugin.get("id", "<unknown>")}" has settings without a "regex" field: '
+                        f'{", ".join(missing_regex)}. Please add a non-empty "regex" to each of those '
+                        "settings in plugin.json. You can list such settings on your system with a command like:\n"
+                        "jq '.settings | to_entries[] | select(.value.regex == null or .value.regex == \"\" ) | .key' "
+                        f"/etc/bunkerweb/plugins/{plugin.get('id', '<plugin-id>')}/plugin.json"
+                    )
                 plugin["type"] = _type
                 db_plugin = (
                     session.query(Plugins)
@@ -3215,6 +3239,13 @@ class Database:
                     plugin_settings = set()
                     for setting, value in settings.items():
                         value.update({"plugin_id": plugin["id"], "name": value["id"], "id": setting})
+                        # Ensure we always have a non-null regex for settings. Some external plugins
+                        # may omit the "regex" field in their plugin.json; however, the database
+                        # enforces a NOT NULL constraint on bw_settings.regex. Default to a very
+                        # permissive pattern in that case so that those plugins can still be
+                        # imported and managed via the UI.
+                        if not value.get("regex"):
+                            value["regex"] = "^.*$"
                         plugin_settings.add(setting)
 
                         db_setting = (
@@ -3782,6 +3813,12 @@ class Database:
                         continue
 
                     value.update({"plugin_id": plugin["id"], "name": value["id"], "id": setting})
+                    # Ensure we always have a non-null regex for settings when inserting a new plugin.
+                    # This mirrors the behavior in the update path above so that external plugins whose
+                    # plugin.json omit the "regex" field can still be imported without violating the
+                    # NOT NULL constraint on bw_settings.regex.
+                    if not value.get("regex"):
+                        value["regex"] = "^.*$"
 
                     for sel_order, select in enumerate(value.pop("select", []), start=1):
                         local_to_put.append(Selects(setting_id=value["id"], value=self._empty_if_none(select), order=sel_order))

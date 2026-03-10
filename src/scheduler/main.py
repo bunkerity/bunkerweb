@@ -14,7 +14,7 @@ from pathlib import Path
 from shutil import copy, rmtree, copytree
 from signal import SIGINT, SIGTERM, signal, SIGHUP
 from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
-from subprocess import run as subprocess_run, DEVNULL, STDOUT
+from subprocess import run as subprocess_run, DEVNULL, STDOUT, PIPE
 from sys import path as sys_path
 from tarfile import TarFile, open as tar_open
 from threading import Event, Lock
@@ -186,12 +186,23 @@ def handle_reload(signum, frame):
                     join(sep, "etc", "bunkerweb", "variables.env"),
                 ],
                 stdin=DEVNULL,
+                stdout=PIPE,
                 stderr=STDOUT,
+                text=True,
                 check=False,
                 env=cmd_env,
             )
             if proc.returncode != 0:
+                # Keep the legacy one-line error for existing log parsers,
+                # then emit a second line with detailed diagnostics.
                 LOGGER.error("Config saver failed, configuration will not work as expected...")
+                output = (proc.stdout or "").strip()
+                if len(output) > 8000:
+                    output = output[:8000] + "... [truncated]"
+                LOGGER.error(
+                    "Config saver failed, configuration will not work as expected... "
+                    f"returncode={proc.returncode}, args={proc.args!r}, output={output!r}"
+                )
         else:
             LOGGER.warning("Ignored reload operation because scheduler is not running ...")
     except BaseException as e:
@@ -320,6 +331,14 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
         for file in original_path.glob("*"):
             with suppress(StopIteration, IndexError, FileNotFoundError):
                 index = next(i for i, plugin in enumerate(plugins) if plugin["id"] == file.name)
+
+                # For manually managed external plugins, the on-disk folder is the source of truth.
+                # Never delete or overwrite them from the database – they will be pushed *to* the DB
+                # by check_plugin_changes() when their checksum/version changes.
+                if not pro and plugins[index].get("method") == "manual":
+                    LOGGER.debug(f"Skipping removal of manually managed external plugin directory {file} (method=manual)")
+                    ignored_plugins.add(file.name)
+                    continue
 
                 with BytesIO() as plugin_content:
                     with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
@@ -727,12 +746,23 @@ if __name__ == "__main__":
                     env_file_path.as_posix(),
                 ],
                 stdin=DEVNULL,
+                stdout=PIPE,
                 stderr=STDOUT,
+                text=True,
                 check=False,
                 env=cmd_env,
             )
             if proc.returncode != 0:
+                # Keep the legacy one-line error for existing log parsers,
+                # then emit a second line with detailed diagnostics.
                 LOGGER.error("Config saver failed, configuration will not work as expected...")
+                output = (proc.stdout or "").strip()
+                if len(output) > 8000:
+                    output = output[:8000] + "... [truncated]"
+                LOGGER.error(
+                    "Config saver failed, configuration will not work as expected... "
+                    f"returncode={proc.returncode}, args={proc.args!r}, output={output!r}"
+                )
 
         ready = False
         while not ready:
@@ -801,12 +831,23 @@ if __name__ == "__main__":
                     env_file_path.as_posix(),
                 ],
                 stdin=DEVNULL,
+                stdout=PIPE,
                 stderr=STDOUT,
+                text=True,
                 check=False,
                 env=cmd_env,
             )
             if proc.returncode != 0:
+                # Keep the legacy one-line error for existing log parsers,
+                # then emit a second line with detailed diagnostics.
                 LOGGER.error("Config saver failed, configuration will not work as expected...")
+                output = (proc.stdout or "").strip()
+                if len(output) > 8000:
+                    output = output[:8000] + "... [truncated]"
+                LOGGER.error(
+                    "Config saver failed, configuration will not work as expected... "
+                    f"returncode={proc.returncode}, args={proc.args!r}, output={output!r}"
+                )
                 return False
             return True
 
@@ -886,8 +927,27 @@ if __name__ == "__main__":
                     with suppress(StopIteration, IndexError):
                         index = next(i for i, plugin in enumerate(db_plugins) if plugin["id"] == common_data["id"])
 
-                        if checksum == db_plugins[index]["checksum"] or db_plugins[index]["method"] != "manual":
-                            continue
+                        disk_version = common_data.get("version", "")
+                        db_version = db_plugins[index].get("version", "")
+
+                        if disk_version != db_version:
+                            LOGGER.warning(
+                                f"Version mismatch detected for {_type} plugin {common_data['id']}: "
+                                f"plugin.json={disk_version!r}, database={db_version!r} – treating as changed"
+                            )
+                        else:
+                            # No version change: for external plugins, keep the on-disk plugin.json/data
+                            # as source of truth and only treat it as changed if the checksum differs.
+                            # For pro plugins, we also require method == "manual" before we allow the
+                            # on-disk plugin to override what is stored in the database.
+                            if _type == "external":
+                                if checksum == db_plugins[index]["checksum"]:
+                                    continue
+                            else:
+                                # Pro plugin: skip if checksum is unchanged or the existing DB entry
+                                # is not marked as manually managed (method != "manual").
+                                if checksum == db_plugins[index]["checksum"] or db_plugins[index]["method"] != "manual":
+                                    continue
 
                     tmp_external_plugins.append(common_data.copy())
 
