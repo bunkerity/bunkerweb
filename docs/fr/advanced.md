@@ -4316,3 +4316,82 @@ Définissez les valeurs minimales par service protégé :
 Autorisez éventuellement les chemins inconnus pendant le déploiement :
 
 - `OPENAPI_ALLOW_UNSPECIFIED=yes`
+
+## Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+Prise en charge de STREAM :x:
+
+Le plugin Cache PRO active la mise en cache des réponses au niveau du reverse proxy à l'aide des directives NGINX `proxy_cache*`. Il est utile pour absorber les lectures répétées sur du contenu cacheable, soulager les upstreams lors des pics de charge et servir du contenu périmé pendant de courtes indisponibilités du backend.
+
+**Fonctionnement**
+
+1. Chaque valeur globale `CACHE_PATH*` crée une directive `proxy_cache_path` dans le contexte HTTP.
+2. Un service n'utilise le cache que lorsque `CACHE_ZONE` correspond à l'une des zones déclarées dans `CACHE_PATH*`.
+3. Les paramètres au niveau du service contrôlent ensuite la clé de cache, les conditions de bypass/no-cache, le verrouillage, l'utilisation de contenu périmé et les règles de validité.
+4. Si `CACHE_HEADER` est défini, BunkerWeb ajoute un en-tête de réponse exposant `$upstream_cache_status` comme `HIT`, `MISS`, `BYPASS`, `EXPIRED` ou `STALE`.
+
+**Liste des fonctionnalités**
+
+- Mise en cache des réponses du reverse proxy avec chemins et zones configurables.
+- Activation du cache par service via `CACHE_ZONE`.
+- En-tête facultatif exposant l'état du cache avec `$upstream_cache_status`.
+- Contrôles fins pour le bypass, le no-cache, la clé, les méthodes, le verrouillage, le stale et la revalidation.
+- Plusieurs règles de validité via des paramètres `CACHE_VALID*`.
+
+**Liste des paramètres**
+
+| Réglage                     | Défaut                            | Contexte  | Multiple | Description                                                              |
+| --------------------------- | --------------------------------- | --------- | -------- | ------------------------------------------------------------------------ |
+| `CACHE_PATH`                |                                   | global    | oui      | Chemin et paramètres d'un cache.                                         |
+| `CACHE_ZONE`                |                                   | multisite | non      | Nom de la zone de cache à utiliser (définie dans un réglage `CACHE_PATH`). |
+| `CACHE_HEADER`              | `X-Cache`                         | multisite | non      | Ajoute un en-tête exposant l'état du cache.                              |
+| `CACHE_BACKGROUND_UPDATE`   | `no`                              | multisite | non      | Active ou désactive la mise à jour du cache en arrière-plan.             |
+| `CACHE_BYPASS`              |                                   | multisite | non      | Liste de variables déterminant si le cache doit être contourné.          |
+| `CACHE_NO_CACHE`            | `$http_pragma$http_authorization` | multisite | non      | Désactive le stockage en cache si des variables sont définies.           |
+| `CACHE_KEY`                 | `$scheme$proxy_host$request_uri`  | multisite | non      | Clé utilisée pour identifier les éléments mis en cache.                  |
+| `CACHE_CONVERT_HEAD_TO_GET` | `yes`                             | multisite | non      | Convertit les requêtes HEAD en GET lors de la mise en cache.             |
+| `CACHE_LOCK`                | `no`                              | multisite | non      | Verrouille les requêtes concurrentes lors du remplissage du cache.       |
+| `CACHE_LOCK_AGE`            | `5s`                              | multisite | non      | Envoie la requête à l'upstream si le cache est verrouillé depuis ce délai. |
+| `CACHE_LOCK_TIMEOUT`        | `5s`                              | multisite | non      | Envoie la requête à l'upstream si le verrou persiste pendant ce délai.   |
+| `CACHE_METHODS`             | `GET HEAD`                        | multisite | non      | Met en cache uniquement les réponses pour ces méthodes HTTP.             |
+| `CACHE_MIN_USES`            | `1`                               | multisite | non      | Nombre de requêtes avant de stocker la réponse en cache.                 |
+| `CACHE_REVALIDATE`          | `no`                              | multisite | non      | Revalide les éléments expirés via des requêtes conditionnelles.          |
+| `CACHE_USE_STALE`           | `off`                             | multisite | non      | Définit dans quels cas servir un contenu périmé.                         |
+| `CACHE_VALID`               | `10m`                             | multisite | oui      | Définit la durée de cache avec code(s) HTTP optionnel(s).                |
+
+**Exemple d'utilisation**
+
+1. Définissez un chemin global et une zone de cache :
+
+   ```yaml
+   CACHE_PATH: "/var/cache/bunkerweb/proxy levels=1:2 keys_zone=htmlcache:10m max_size=1g inactive=60m use_temp_path=off"
+   ```
+
+2. Activez le reverse proxy et attachez la zone à un service :
+
+   ```yaml
+   www.example.com_USE_REVERSE_PROXY: "yes"
+   www.example.com_REVERSE_PROXY_HOST: "http://app:8080"
+   www.example.com_CACHE_ZONE: "htmlcache"
+   www.example.com_CACHE_HEADER: "X-Cache"
+   www.example.com_CACHE_VALID: "200 301 302 10m"
+   www.example.com_CACHE_VALID_1: "404 1m"
+   ```
+
+3. Ajoutez des contrôles optionnels si nécessaire :
+
+   ```yaml
+   www.example.com_CACHE_BYPASS: "$cookie_nocache $arg_nocache"
+   www.example.com_CACHE_NO_CACHE: "$http_pragma $http_authorization"
+   www.example.com_CACHE_LOCK: "yes"
+   www.example.com_CACHE_BACKGROUND_UPDATE: "yes"
+   www.example.com_CACHE_USE_STALE: "error timeout updating http_500 http_502 http_503 http_504"
+   ```
+
+!!! info "Comportement important"
+    - Ce plugin s'applique uniquement au trafic reverse proxy. Il ne met pas en cache le contenu servi directement depuis des fichiers statiques locaux ni les services stream/TCP.
+    - `CACHE_ZONE` doit correspondre à une zone définie dans une valeur `CACHE_PATH*` via `keys_zone=<nom>:<taille>`.
+    - Si `CACHE_ZONE` est vide pour un service, les directives de cache ne sont pas appliquées à ce service.
+    - Utilisez des suffixes numériques pour les valeurs répétées, par exemple `CACHE_PATH_1`, `CACHE_PATH_2`, `CACHE_VALID_1` et `CACHE_VALID_2`.
+    - Gardez le trafic authentifié ou spécifique à un utilisateur hors cache, sauf si votre `CACHE_KEY` varie explicitement selon cet état.
+    - `CACHE_LOCK=yes` et `CACHE_BACKGROUND_UPDATE=yes` permettent de réduire les rafales de requêtes vers l'origine.
