@@ -197,13 +197,13 @@ class DomainOffensiveProvider(Provider):
 class DomeneshopProvider(Provider):
     """Domeneshop DNS provider."""
 
-    dns_domeneshop_token: str
-    dns_domeneshop_secret: str
+    dns_domeneshop_client_token: str
+    dns_domeneshop_client_secret: str
 
     _validate_aliases = alias_model_validator(
         {
-            "dns_domeneshop_token": ("dns_domeneshop_token", "domeneshop_token", "token"),
-            "dns_domeneshop_secret": ("dns_domeneshop_secret", "domeneshop_secret", "secret"),
+            "dns_domeneshop_client_token": ("dns_domeneshop_client_token", "domeneshop_client_token", "client_token", "token"),
+            "dns_domeneshop_client_secret": ("dns_domeneshop_client_secret", "domeneshop_client_secret", "client_secret", "secret"),
         }
     )
 

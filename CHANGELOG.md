@@ -2,6 +2,10 @@
 
 ## v1.6.9 - 2026/03/??
 
+- [BUGFIX] Fix Domeneshop DNS provider in the `Let's Encrypt` plugin to use the correct credential keys and ensure proper certificate generation.
+
+## v1.6.9~rc4 - 2026/03/10
+
 - [BUGFIX] Ensure script_nonce is available for security headers to prevent XSS attacks
 
 ## v1.6.9~rc3 - 2026/03/06
