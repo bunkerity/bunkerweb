@@ -992,17 +992,20 @@ class Database:
                     path_ui = plugin_path.joinpath("ui")
                     if path_ui.is_dir():
                         with BytesIO() as plugin_page_content:
+                            tar_success = True
                             with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
                                 try:
                                     tar.add(path_ui, arcname=path_ui.name, recursive=True)
                                 except (FileNotFoundError, OSError) as e:
                                     self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
-                            plugin_page_content.seek(0)
-                            checksum = bytes_hash(plugin_page_content, algorithm="sha256")
-                            desired_plugin_pages[base_plugin["id"]] = {
-                                "data": plugin_page_content.getvalue(),
-                                "checksum": checksum,
-                            }
+                                    tar_success = False
+                            if tar_success:
+                                plugin_page_content.seek(0)
+                                checksum = bytes_hash(plugin_page_content, algorithm="sha256")
+                                desired_plugin_pages[base_plugin["id"]] = {
+                                    "data": plugin_page_content.getvalue(),
+                                    "checksum": checksum,
+                                }
 
             for plugins in default_plugins:
                 if not isinstance(plugins, list):
@@ -3470,14 +3473,20 @@ class Database:
                     if path_ui.is_dir():
                         remove = True
                         with BytesIO() as plugin_page_content:
+                            tar_success = True
                             with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
                                 try:
                                     tar.add(path_ui, arcname=path_ui.name, recursive=True)
                                 except (FileNotFoundError, OSError) as e:
                                     self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
-                            plugin_page_content.seek(0)
-                            checksum = bytes_hash(plugin_page_content, algorithm="sha256")
-                            content = plugin_page_content.getvalue()
+                                    tar_success = False
+                            if tar_success:
+                                plugin_page_content.seek(0)
+                                checksum = bytes_hash(plugin_page_content, algorithm="sha256")
+                                content = plugin_page_content.getvalue()
+                            else:
+                                remove = False
+                                continue
 
                         if not db_plugin_page:
                             changes = True
@@ -3894,15 +3903,18 @@ class Database:
                     path_ui = plugin_path.joinpath("ui")
                     if path_ui.is_dir():
                         with BytesIO() as plugin_page_content:
+                            tar_success = True
                             with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
                                 try:
                                     tar.add(path_ui, arcname=path_ui.name, recursive=True)
                                 except (FileNotFoundError, OSError) as e:
                                     self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
-                            plugin_page_content.seek(0)
-                            checksum = bytes_hash(plugin_page_content, algorithm="sha256")
+                                    tar_success = False
+                            if tar_success:
+                                plugin_page_content.seek(0)
+                                checksum = bytes_hash(plugin_page_content, algorithm="sha256")
 
-                            local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=plugin_page_content.getvalue(), checksum=checksum))
+                                local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=plugin_page_content.getvalue(), checksum=checksum))
 
                 for command, file_name in commands.items():
                     if not plugin_path.joinpath("bwcli", file_name).is_file():
