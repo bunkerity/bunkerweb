@@ -148,6 +148,8 @@ def handle_stop(signum, frame):
 
     if SCHEDULER is not None:
         SCHEDULER.clear()
+        with suppress(Exception):
+            SCHEDULER.db.close()
     stop(0)
 
 
@@ -1011,7 +1013,7 @@ if __name__ == "__main__":
                         f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
                         timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split())),
                     )
-                CONFIG_NEED_GENERATION = False
+                    CONFIG_NEED_GENERATION = False
 
             if RUN_JOBS_ONCE:
                 # Only run jobs once
