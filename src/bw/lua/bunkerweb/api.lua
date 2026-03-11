@@ -302,17 +302,31 @@ api.global.POST["^/confs$"] = function(self)
 	file:flush()
 	file:close()
 	local staging = "/var/tmp/bunkerweb/staging_" .. self.ctx.bw.uri:sub(2)
+	local backup = "/var/tmp/bunkerweb/backup_" .. self.ctx.bw.uri:sub(2)
 	local cmds = {
 		-- Extract into a staging area first (validates the archive before touching destination)
 		"rm -rf " .. staging,
 		"mkdir -p " .. staging,
 		"tar xzf " .. tmp .. " -C " .. staging,
-		-- Replace destination contents (can't rename parent-owned dirs, so swap contents instead)
+		-- Create backup of current destination contents
+		"rm -rf " .. backup,
+		"mkdir -p " .. backup,
+		"cp -R " .. destination .. "/. " .. backup .. "/ 2>/dev/null; true",
+		-- Replace destination contents; if cp fails, restore from backup
 		"rm -rf "
 			.. destination
-			.. "/*",
-		"cp -R " .. staging .. "/. " .. destination .. "/",
+			.. "/* && cp -R "
+			.. staging
+			.. "/. "
+			.. destination
+			.. "/ || { cp -R "
+			.. backup
+			.. "/. "
+			.. destination
+			.. "/ 2>/dev/null; false; }",
+		-- Cleanup temporaries
 		"rm -rf " .. staging,
+		"rm -rf " .. backup,
 		"rm -f " .. tmp,
 	}
 	for _, cmd in ipairs(cmds) do
