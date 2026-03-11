@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from os import getenv
 from pathlib import Path
 from sys import path as sys_path
 from typing import Any, List, Literal, Optional, Tuple
@@ -51,7 +50,7 @@ class Provider(BaseModel):
 
     @classmethod
     def _redact_field_value(cls, field_name: str, value: Any) -> Any:
-        if value in ("", None) or getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper() == "TRACE":
+        if value in ("", None):
             return value
         return "***"
 
