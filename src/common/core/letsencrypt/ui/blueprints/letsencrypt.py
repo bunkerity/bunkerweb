@@ -77,13 +77,22 @@ def download_certificates():
 
     cache_files = DB.get_jobs_cache_files(job_name="certbot-renew")
 
+    _ALLOWED_PREFIXES = ("live/", "archive/", "renewal/", "./live/", "./archive/", "./renewal/")
+
+    def _cert_members(tar):
+        for member in tar.getmembers():
+            # Only extract the three subdirectories the UI needs; skip accounts/ and
+            # anything else (e.g. ACME private keys with mode 0600 owned by root).
+            if any(member.name.startswith(prefix) for prefix in _ALLOWED_PREFIXES):
+                yield member
+
     for cache_file in cache_files:
         if cache_file["file_name"].endswith(".tgz") and cache_file["file_name"].startswith("folder:"):
             with tar_open(fileobj=BytesIO(cache_file["data"]), mode="r:gz") as tar:
                 try:
-                    tar.extractall(DATA_PATH, filter="fully_trusted")
+                    tar.extractall(DATA_PATH, members=_cert_members(tar), filter="fully_trusted")
                 except TypeError:
-                    tar.extractall(DATA_PATH)
+                    tar.extractall(DATA_PATH, members=_cert_members(tar))
 
 
 def retrieve_certificates():
