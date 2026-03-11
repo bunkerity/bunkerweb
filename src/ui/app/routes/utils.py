@@ -24,6 +24,11 @@ CUSTOM_CONF_RX = re_compile(
 FILE_SETTING_NAME_RX = re_compile(r"^(?P<setting>.+)__FILE_NAME(?P<suffix>_\d+)?$")
 
 
+def _sanitize_filename(name: str) -> str:
+    """Strip path separators, null bytes, and control characters from an uploaded filename."""
+    return "".join(ch for ch in name if ch >= " " and ch != "\x7f").replace("/", "").replace("\\", "").strip()
+
+
 def wait_applying():
     current_time = datetime.now().astimezone()
     ready = False
@@ -218,6 +223,6 @@ def extract_file_setting_names(variables: Dict[str, str]) -> Dict[str, str]:
             continue
 
         setting_name = match.group("setting") + (match.group("suffix") or "")
-        file_setting_names[setting_name] = variables.pop(key, "").strip()
+        file_setting_names[setting_name] = _sanitize_filename(variables.pop(key, ""))
 
     return file_setting_names
