@@ -993,7 +993,10 @@ class Database:
                     if path_ui.is_dir():
                         with BytesIO() as plugin_page_content:
                             with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
+                                try:
+                                    tar.add(path_ui, arcname=path_ui.name, recursive=True)
+                                except (FileNotFoundError, OSError) as e:
+                                    self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
                             plugin_page_content.seek(0)
                             checksum = bytes_hash(plugin_page_content, algorithm="sha256")
                             desired_plugin_pages[base_plugin["id"]] = {
@@ -3468,7 +3471,10 @@ class Database:
                         remove = True
                         with BytesIO() as plugin_page_content:
                             with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
+                                try:
+                                    tar.add(path_ui, arcname=path_ui.name, recursive=True)
+                                except (FileNotFoundError, OSError) as e:
+                                    self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
                             plugin_page_content.seek(0)
                             checksum = bytes_hash(plugin_page_content, algorithm="sha256")
                             content = plugin_page_content.getvalue()
@@ -3889,7 +3895,10 @@ class Database:
                     if path_ui.is_dir():
                         with BytesIO() as plugin_page_content:
                             with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
+                                try:
+                                    tar.add(path_ui, arcname=path_ui.name, recursive=True)
+                                except (FileNotFoundError, OSError) as e:
+                                    self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
                             plugin_page_content.seek(0)
                             checksum = bytes_hash(plugin_page_content, algorithm="sha256")
 
