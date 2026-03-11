@@ -246,12 +246,15 @@ def services_service_page(service: str):
 
             if clone and service == "new":
                 cloned_service_config = {k: v for k, v in DB.get_config(methods=False, with_drafts=True, service=clone).items()}
+                clone_prefix = f"{clone}_"
 
                 for key, value in cloned_service_config.items():
-                    if key in variables or key in ("SERVER_NAME", "OLD_SERVER_NAME", "IS_DRAFT", "USE_UI"):
+                    # Strip the clone service prefix from keys so they are recognized as valid setting names
+                    stripped_key = key.removeprefix(clone_prefix)
+                    if stripped_key in variables or stripped_key in ("SERVER_NAME", "OLD_SERVER_NAME", "IS_DRAFT", "USE_UI"):
                         continue
 
-                    variables[key] = value
+                    variables[stripped_key] = value
 
             # Edit check fields and remove already existing ones
             if service != "new":
