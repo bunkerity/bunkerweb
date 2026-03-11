@@ -7,8 +7,19 @@ from ..auth.guard import guard
 from ..deps import get_instances_api_caller
 from ..schemas import BanRequest, UnbanRequest
 
-
 router = APIRouter(prefix="/bans", tags=["bans"])
+
+RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default server", ""})
+
+
+def _derive_scope(payload: dict) -> None:
+    """Derive ban_scope from service presence and validate reserved service names."""
+    service = (payload.get("service") or "").strip() if isinstance(payload.get("service"), str) else payload.get("service")
+    if service and service not in RESERVED_SERVICE_NAMES:
+        payload["ban_scope"] = "service"
+    else:
+        payload["ban_scope"] = "global"
+        payload.pop("service", None)
 
 
 @router.get("", dependencies=[Depends(guard)])
@@ -44,14 +55,7 @@ def ban(req: Union[List[BanRequest], BanRequest, str], api_caller=Depends(get_in
     all_ok = True
     for it in items:
         payload = it.model_dump()
-        # Derive ban_scope from service presence: if no service, scope is global
-        service = (payload.get("service") or "").strip() if isinstance(payload.get("service"), str) else payload.get("service")
-        if service:
-            payload["ban_scope"] = "service"
-        else:
-            payload["ban_scope"] = "global"
-            # Remove empty service to avoid ambiguity downstream
-            payload.pop("service", None)
+        _derive_scope(payload)
         ok, _ = api_caller.send_to_apis("POST", "/ban", data=payload)
         all_ok = all_ok and ok
     return JSONResponse(status_code=200 if all_ok else 502, content={"status": "success" if all_ok else "error"})
@@ -81,6 +85,8 @@ def unban(req: Union[List[UnbanRequest], UnbanRequest, str], api_caller=Depends(
 
     all_ok = True
     for it in items:
-        ok, _ = api_caller.send_to_apis("POST", "/unban", data=it.model_dump())
+        payload = it.model_dump()
+        _derive_scope(payload)
+        ok, _ = api_caller.send_to_apis("POST", "/unban", data=payload)
         all_ok = all_ok and ok
     return JSONResponse(status_code=200 if all_ok else 502, content={"status": "success" if all_ok else "error"})
