@@ -163,6 +163,11 @@ _db_check_next_allowed = 0.0
 _cookie_config_lock = Lock()
 _cookie_config_detected = False
 
+_restart_workers_lock = Lock()
+_restart_workers_future = None
+_restart_workers_next_allowed = 0.0
+RESTART_WORKERS_MIN_INTERVAL_SECONDS = 10.0
+
 
 def _shutdown_executors():
     """Shutdown all thread pool executors on application exit."""
@@ -170,6 +175,8 @@ def _shutdown_executors():
     _periodic_tasks_executor.shutdown(wait=False)
     _user_access_executor.shutdown(wait=False)
     _config_tasks_executor.shutdown(wait=False)
+    with suppress(Exception):
+        DB.close()
 
 
 register(_shutdown_executors)
@@ -972,6 +979,18 @@ def schedule_database_state_check(request_method: str, request_path: str):
         _db_check_next_allowed = now + DB_CHECK_MIN_INTERVAL_SECONDS
 
 
+def schedule_restart_workers():
+    global _restart_workers_future, _restart_workers_next_allowed
+    now = time()
+    with _restart_workers_lock:
+        if now < _restart_workers_next_allowed:
+            return
+        if _restart_workers_future and not _restart_workers_future.done():
+            return
+        _restart_workers_future = _periodic_tasks_executor.submit(restart_workers)
+        _restart_workers_next_allowed = now + RESTART_WORKERS_MIN_INTERVAL_SECONDS
+
+
 @app.before_request
 def before_request():
     DATA.load_from_file()
@@ -1009,7 +1028,7 @@ def before_request():
         # Plugin reload trigger
         if not DATA.get("RELOADING", False) and metadata.get("reload_ui_plugins", False):
             safe_reload_plugins()
-            _periodic_tasks_executor.submit(restart_workers)
+            schedule_restart_workers()
 
         if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(hours=1):
             DATA["LATEST_VERSION_LAST_CHECK"] = datetime.now().astimezone().isoformat()
