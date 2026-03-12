@@ -95,6 +95,23 @@
       "label": "SSL Session Cache Size",
       "regex": "^(off|none|[1-9][0-9]*[kKmMgG]?)$",
       "type": "text"
+    },
+    "SSL_USE_OCSP_STAPLING": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Enable OCSP stapling for this site when certificates advertise an OCSP responder. Applies to Let's Encrypt and custom/self-signed certificates that support OCSP.",
+      "id": "ssl-use-ocsp-stapling",
+      "label": "Use OCSP stapling",
+      "regex": "^(yes|no)$",
+      "type": "check"
     }
-  }
+  },
+  "jobs": [
+    {
+      "name": "ocsp-refresh",
+      "file": "ocsp-refresh.py",
+      "every": "hour",
+      "reload": false
+    }
+  ]
 }
