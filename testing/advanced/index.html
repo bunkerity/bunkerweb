@@ -1604,6 +1604,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#cache-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cache (PRO)
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -6337,6 +6346,186 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <ul>
 <li><code>OPENAPI_ALLOW_UNSPECIFIED=yes</code></li>
 </ul>
+<h2 id="cache-pro">Cache <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
+<p>The Cache PRO plugin enables response caching at the reverse proxy level using NGINX <code>proxy_cache*</code> directives. It is useful when you want to absorb repeated reads for cacheable content, shield upstreams from bursts, or serve stale content during short backend failures.</p>
+<p><strong>How it works</strong></p>
+<ol>
+<li>Each global <code>CACHE_PATH*</code> value creates a <code>proxy_cache_path</code> directive in the HTTP context.</li>
+<li>A service starts using the cache only when <code>CACHE_ZONE</code> is set to one of the zones declared in <code>CACHE_PATH*</code>.</li>
+<li>Service-level settings then control the cache key, methods, bypass conditions, stale behavior, locking, and validity rules.</li>
+<li>If <code>CACHE_HEADER</code> is set, BunkerWeb adds a response header exposing <code>$upstream_cache_status</code> such as <code>HIT</code>, <code>MISS</code>, <code>BYPASS</code>, <code>EXPIRED</code>, or <code>STALE</code>.</li>
+</ol>
+<p><strong>List of features</strong></p>
+<ul>
+<li>Reverse-proxy response caching with configurable cache paths and zones.</li>
+<li>Per-service cache activation through <code>CACHE_ZONE</code>.</li>
+<li>Optional cache status response header with <code>$upstream_cache_status</code>.</li>
+<li>Fine-grained cache controls for bypass, no-cache, keying, methods, locking, stale handling, and revalidation.</li>
+<li>Multiple cache validity rules via repeated <code>CACHE_VALID*</code> settings.</li>
+</ul>
+<p><strong>List of settings</strong></p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CACHE_PATH</code></td>
+<td></td>
+<td>global</td>
+<td>yes</td>
+<td>Path and parameters for a cache.</td>
+</tr>
+<tr>
+<td><code>CACHE_ZONE</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Name of cache zone to use (specified in a <code>CACHE_PATH</code> setting).</td>
+</tr>
+<tr>
+<td><code>CACHE_HEADER</code></td>
+<td><code>X-Cache</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Add a header exposing cache status.</td>
+</tr>
+<tr>
+<td><code>CACHE_BACKGROUND_UPDATE</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Refresh expired cache entries in background while serving stale content.</td>
+</tr>
+<tr>
+<td><code>CACHE_BYPASS</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Variables that force a request to skip reading from cache.</td>
+</tr>
+<tr>
+<td><code>CACHE_NO_CACHE</code></td>
+<td><code>$http_pragma$http_authorization</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Variables that prevent storing the upstream response in cache.</td>
+</tr>
+<tr>
+<td><code>CACHE_KEY</code></td>
+<td><code>$scheme$proxy_host$request_uri</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Cache key used to identify objects.</td>
+</tr>
+<tr>
+<td><code>CACHE_CONVERT_HEAD_TO_GET</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Convert <code>HEAD</code> requests to <code>GET</code> when caching.</td>
+</tr>
+<tr>
+<td><code>CACHE_LOCK</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Serialize concurrent misses for the same key.</td>
+</tr>
+<tr>
+<td><code>CACHE_LOCK_AGE</code></td>
+<td><code>5s</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Maximum age of a cache lock before requests are allowed upstream.</td>
+</tr>
+<tr>
+<td><code>CACHE_LOCK_TIMEOUT</code></td>
+<td><code>5s</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Maximum time to wait on a cache lock before bypassing it.</td>
+</tr>
+<tr>
+<td><code>CACHE_METHODS</code></td>
+<td><code>GET HEAD</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>HTTP methods eligible for caching.</td>
+</tr>
+<tr>
+<td><code>CACHE_MIN_USES</code></td>
+<td><code>1</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Number of identical requests before storing the response.</td>
+</tr>
+<tr>
+<td><code>CACHE_REVALIDATE</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Revalidate expired entries with conditional upstream requests.</td>
+</tr>
+<tr>
+<td><code>CACHE_USE_STALE</code></td>
+<td><code>off</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Conditions that allow serving stale content.</td>
+</tr>
+<tr>
+<td><code>CACHE_VALID</code></td>
+<td><code>10m</code></td>
+<td>multisite</td>
+<td>yes</td>
+<td>Cache duration, optionally scoped to one or more status codes.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Usage example</strong></p>
+<ol>
+<li>Define a global cache path and zone:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="nt">CACHE_PATH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/var/cache/bunkerweb/proxy</span><span class="nv"> </span><span class="s">levels=1:2</span><span class="nv"> </span><span class="s">keys_zone=htmlcache:10m</span><span class="nv"> </span><span class="s">max_size=1g</span><span class="nv"> </span><span class="s">inactive=60m</span><span class="nv"> </span><span class="s">use_temp_path=off&quot;</span>
+</code></pre></div>
+<ol>
+<li>Enable the reverse proxy and attach the zone to a service:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="nt">www.example.com_USE_REVERSE_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">www.example.com_REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://app:8080&quot;</span>
+<span class="nt">www.example.com_CACHE_ZONE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;htmlcache&quot;</span>
+<span class="nt">www.example.com_CACHE_HEADER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;X-Cache&quot;</span>
+<span class="nt">www.example.com_CACHE_VALID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;200</span><span class="nv"> </span><span class="s">301</span><span class="nv"> </span><span class="s">302</span><span class="nv"> </span><span class="s">10m&quot;</span>
+<span class="nt">www.example.com_CACHE_VALID_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;404</span><span class="nv"> </span><span class="s">1m&quot;</span>
+</code></pre></div>
+<ol>
+<li>Add optional controls when needed:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="nt">www.example.com_CACHE_BYPASS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;$cookie_nocache</span><span class="nv"> </span><span class="s">$arg_nocache&quot;</span>
+<span class="nt">www.example.com_CACHE_NO_CACHE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;$http_pragma</span><span class="nv"> </span><span class="s">$http_authorization&quot;</span>
+<span class="nt">www.example.com_CACHE_LOCK</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">www.example.com_CACHE_BACKGROUND_UPDATE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">www.example.com_CACHE_USE_STALE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;error</span><span class="nv"> </span><span class="s">timeout</span><span class="nv"> </span><span class="s">updating</span><span class="nv"> </span><span class="s">http_500</span><span class="nv"> </span><span class="s">http_502</span><span class="nv"> </span><span class="s">http_503</span><span class="nv"> </span><span class="s">http_504&quot;</span>
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Important behavior</p>
+<ul>
+<li>This plugin only applies to reverse-proxied traffic. It does not cache content served directly from local static files or stream/TCP services.</li>
+<li><code>CACHE_ZONE</code> must match a zone defined in a <code>CACHE_PATH*</code> value through <code>keys_zone=&lt;name&gt;:&lt;size&gt;</code>.</li>
+<li>If <code>CACHE_ZONE</code> is empty for a service, cache directives are not applied for that service.</li>
+<li>Use numeric suffixes for repeated values such as <code>CACHE_PATH_1</code>, <code>CACHE_PATH_2</code>, <code>CACHE_VALID_1</code>, and <code>CACHE_VALID_2</code>.</li>
+<li>Keep authenticated or user-specific traffic out of cache unless your <code>CACHE_KEY</code> explicitly varies on that state.</li>
+<li><code>CACHE_LOCK=yes</code> and <code>CACHE_BACKGROUND_UPDATE=yes</code> help reduce origin stampedes on hot keys.</li>
+</ul>
+</div>
 
 
 

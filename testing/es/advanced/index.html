@@ -1604,6 +1604,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#cache-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cache (PRO)
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -6325,6 +6334,186 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <ul>
 <li><code>OPENAPI_ALLOW_UNSPECIFIED=yes</code></li>
 </ul>
+<h2 id="cache-pro">Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p>Soporte STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
+<p>El plugin Cache PRO habilita el almacenamiento en caché de respuestas a nivel de reverse proxy usando directivas NGINX <code>proxy_cache*</code>. Es útil para absorber lecturas repetidas de contenido cacheable, proteger a los upstreams durante picos de carga y servir contenido obsoleto durante fallos breves del backend.</p>
+<p><strong>Cómo funciona</strong></p>
+<ol>
+<li>Cada valor global <code>CACHE_PATH*</code> crea una directiva <code>proxy_cache_path</code> en el contexto HTTP.</li>
+<li>Un servicio empieza a usar la caché solo cuando <code>CACHE_ZONE</code> coincide con una de las zonas declaradas en <code>CACHE_PATH*</code>.</li>
+<li>Las configuraciones a nivel de servicio controlan después la clave de caché, las condiciones de bypass/no-cache, el locking, el uso de stale y las reglas de validez.</li>
+<li>Si se define <code>CACHE_HEADER</code>, BunkerWeb añade una cabecera de respuesta que expone <code>$upstream_cache_status</code> como <code>HIT</code>, <code>MISS</code>, <code>BYPASS</code>, <code>EXPIRED</code> o <code>STALE</code>.</li>
+</ol>
+<p><strong>Lista de características</strong></p>
+<ul>
+<li>Caché de respuestas de reverse proxy con rutas y zonas configurables.</li>
+<li>Activación de caché por servicio mediante <code>CACHE_ZONE</code>.</li>
+<li>Cabecera opcional para exponer el estado de la caché con <code>$upstream_cache_status</code>.</li>
+<li>Controles detallados para bypass, no-cache, clave, métodos, locking, stale y revalidación.</li>
+<li>Varias reglas de validez mediante configuraciones <code>CACHE_VALID*</code>.</li>
+</ul>
+<p><strong>Lista de configuraciones</strong></p>
+<table>
+<thead>
+<tr>
+<th>Configuración</th>
+<th>Predeterminado</th>
+<th>Contexto</th>
+<th>Múltiple</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CACHE_PATH</code></td>
+<td></td>
+<td>global</td>
+<td>sí</td>
+<td>Ruta y parámetros para una caché.</td>
+</tr>
+<tr>
+<td><code>CACHE_ZONE</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Nombre de la zona de caché a usar (definida en una configuración <code>CACHE_PATH</code>).</td>
+</tr>
+<tr>
+<td><code>CACHE_HEADER</code></td>
+<td><code>X-Cache</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Añade una cabecera que expone el estado de la caché.</td>
+</tr>
+<tr>
+<td><code>CACHE_BACKGROUND_UPDATE</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Habilita o deshabilita la actualización en segundo plano de la caché.</td>
+</tr>
+<tr>
+<td><code>CACHE_BYPASS</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Lista de variables que determinan si se debe omitir la caché.</td>
+</tr>
+<tr>
+<td><code>CACHE_NO_CACHE</code></td>
+<td><code>$http_pragma$http_authorization</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Evita almacenar en caché si ciertas variables están definidas.</td>
+</tr>
+<tr>
+<td><code>CACHE_KEY</code></td>
+<td><code>$scheme$proxy_host$request_uri</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Clave usada para identificar elementos cacheados.</td>
+</tr>
+<tr>
+<td><code>CACHE_CONVERT_HEAD_TO_GET</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Convierte solicitudes HEAD en GET al cachear.</td>
+</tr>
+<tr>
+<td><code>CACHE_LOCK</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Bloquea solicitudes concurrentes mientras se llena la caché.</td>
+</tr>
+<tr>
+<td><code>CACHE_LOCK_AGE</code></td>
+<td><code>5s</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Pasa la solicitud al upstream si el bloqueo dura ese tiempo.</td>
+</tr>
+<tr>
+<td><code>CACHE_LOCK_TIMEOUT</code></td>
+<td><code>5s</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Pasa la solicitud al upstream si el bloqueo persiste durante ese tiempo.</td>
+</tr>
+<tr>
+<td><code>CACHE_METHODS</code></td>
+<td><code>GET HEAD</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Solo cachea respuestas para estos métodos HTTP.</td>
+</tr>
+<tr>
+<td><code>CACHE_MIN_USES</code></td>
+<td><code>1</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Número de solicitudes antes de guardar la respuesta en caché.</td>
+</tr>
+<tr>
+<td><code>CACHE_REVALIDATE</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Revalida entradas expiradas con solicitudes condicionales al upstream.</td>
+</tr>
+<tr>
+<td><code>CACHE_USE_STALE</code></td>
+<td><code>off</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Determina cuándo se puede servir contenido obsoleto.</td>
+</tr>
+<tr>
+<td><code>CACHE_VALID</code></td>
+<td><code>10m</code></td>
+<td>multisite</td>
+<td>sí</td>
+<td>Define la duración de caché con códigos HTTP opcionales.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo de uso</strong></p>
+<ol>
+<li>Define una ruta global de caché y una zona:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="nt">CACHE_PATH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/var/cache/bunkerweb/proxy</span><span class="nv"> </span><span class="s">levels=1:2</span><span class="nv"> </span><span class="s">keys_zone=htmlcache:10m</span><span class="nv"> </span><span class="s">max_size=1g</span><span class="nv"> </span><span class="s">inactive=60m</span><span class="nv"> </span><span class="s">use_temp_path=off&quot;</span>
+</code></pre></div>
+<ol>
+<li>Habilita el reverse proxy y asocia la zona a un servicio:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="nt">www.example.com_USE_REVERSE_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">www.example.com_REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://app:8080&quot;</span>
+<span class="nt">www.example.com_CACHE_ZONE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;htmlcache&quot;</span>
+<span class="nt">www.example.com_CACHE_HEADER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;X-Cache&quot;</span>
+<span class="nt">www.example.com_CACHE_VALID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;200</span><span class="nv"> </span><span class="s">301</span><span class="nv"> </span><span class="s">302</span><span class="nv"> </span><span class="s">10m&quot;</span>
+<span class="nt">www.example.com_CACHE_VALID_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;404</span><span class="nv"> </span><span class="s">1m&quot;</span>
+</code></pre></div>
+<ol>
+<li>Añade controles opcionales cuando sea necesario:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="nt">www.example.com_CACHE_BYPASS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;$cookie_nocache</span><span class="nv"> </span><span class="s">$arg_nocache&quot;</span>
+<span class="nt">www.example.com_CACHE_NO_CACHE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;$http_pragma</span><span class="nv"> </span><span class="s">$http_authorization&quot;</span>
+<span class="nt">www.example.com_CACHE_LOCK</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">www.example.com_CACHE_BACKGROUND_UPDATE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">www.example.com_CACHE_USE_STALE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;error</span><span class="nv"> </span><span class="s">timeout</span><span class="nv"> </span><span class="s">updating</span><span class="nv"> </span><span class="s">http_500</span><span class="nv"> </span><span class="s">http_502</span><span class="nv"> </span><span class="s">http_503</span><span class="nv"> </span><span class="s">http_504&quot;</span>
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Comportamiento importante</p>
+<ul>
+<li>Este plugin solo se aplica al tráfico reverse proxy. No cachea contenido servido directamente desde archivos estáticos locales ni servicios stream/TCP.</li>
+<li><code>CACHE_ZONE</code> debe coincidir con una zona definida en un valor <code>CACHE_PATH*</code> mediante <code>keys_zone=&lt;nombre&gt;:&lt;tamaño&gt;</code>.</li>
+<li>Si <code>CACHE_ZONE</code> está vacío para un servicio, no se aplican directivas de caché a ese servicio.</li>
+<li>Usa sufijos numéricos para valores repetidos como <code>CACHE_PATH_1</code>, <code>CACHE_PATH_2</code>, <code>CACHE_VALID_1</code> y <code>CACHE_VALID_2</code>.</li>
+<li>Mantén fuera de la caché el tráfico autenticado o específico de usuario salvo que <code>CACHE_KEY</code> varíe explícitamente según ese estado.</li>
+<li><code>CACHE_LOCK=yes</code> y <code>CACHE_BACKGROUND_UPDATE=yes</code> ayudan a reducir estampidas hacia el origen.</li>
+</ul>
+</div>
 
 
 
