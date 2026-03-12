@@ -3290,6 +3290,75 @@ You can also specify a custom backup file for the restore by providing the path 
         docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
         ```
 
+## MCP server
+
+The **BunkerWeb MCP server** enables AI assistants like **Claude Code** and **Claude Desktop** to manage your BunkerWeb installation through the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/).
+
+!!! warning "Requirement"
+    The MCP server requires the **BunkerWeb external API** (`bunkerity/bunkerweb-api`) to be deployed. It communicates with BunkerWeb exclusively through this API.
+
+### Features
+
+- **37 tools** for managing instances, services, configs, bans, plugins, jobs, and cache
+- **MCP resources** for read-only access (`@config://global`, `@bans://active`, etc.)
+- **Multiple transports**: Stdio, HTTP, WebSocket
+
+### Docker Compose Example
+
+A complete example is available in [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples/mcp-stack):
+
+```yaml
+services:
+  bw-api:
+    image: bunkerity/bunkerweb-api:1.6.9
+    environment:
+      API_TOKEN: "my-bearer-token-for-mcp"
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
+      FORWARDED_ALLOW_IPS: "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+    networks:
+      - bw-universe
+      - bw-db
+      - bw-mcp
+
+  bw-mcp:
+    image: bunkerity/bunkerweb-mcp:latest
+    ports:
+      - "8080:8080"
+    environment:
+      BUNKERWEB_BASE_URL: "http://bw-api:8888"
+      BUNKERWEB_API_TOKEN: "my-bearer-token-for-mcp"
+      BUNKERWEB_LOG_LEVEL: INFO
+    networks:
+      - bw-mcp
+```
+
+### Using with Claude Code
+
+=== "Project Configuration"
+
+    Add a `.mcp.json` file to your project root (or to `~/.claude/.mcp.json` for global configuration):
+
+    ```json
+    {
+      "mcpServers": {
+        "bunkerweb": {
+          "type": "http",
+          "url": "http://127.0.0.1:8080/mcp/"
+        }
+      }
+    }
+    ```
+
+Example queries:
+
+```
+> List all BunkerWeb instances
+> Show me the current bans
+> Review @config://global for security improvements
+```
+
+For full documentation, visit the [BunkerWeb MCP repository](https://github.com/bunkerity/mcp-bunkerweb).
+
 ## Migration <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM support :white_check_mark:

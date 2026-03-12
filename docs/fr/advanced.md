@@ -3290,6 +3290,86 @@ Vous pouvez également spécifier un fichier de sauvegarde personnalisé pour la
         docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
         ```
 
+## Serveur MCP
+
+Le **serveur MCP BunkerWeb** permet aux assistants IA comme **Claude Code** et **Claude Desktop** de gérer votre installation BunkerWeb via le [Model Context Protocol (MCP)](https://modelcontextprotocol.io/).
+
+!!! warning "Prérequis"
+    Le serveur MCP nécessite le déploiement de l'**API externe BunkerWeb** (`bunkerity/bunkerweb-api`). Il communique avec BunkerWeb exclusivement via cette API.
+
+### Fonctionnalités
+
+- **37 outils** pour gérer les instances, services, configurations, bans, plugins, jobs et cache
+- **Ressources MCP** pour un accès en lecture seule (`@config://global`, `@bans://active`, etc.)
+- **Plusieurs transports** : Stdio, HTTP, WebSocket
+
+### Exemple Docker Compose
+
+Un exemple complet est disponible dans [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples/mcp-stack) :
+
+```yaml
+services:
+  bw-api:
+    image: bunkerity/bunkerweb-api:1.6.9
+    environment:
+      API_TOKEN: "my-bearer-token-for-mcp"
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
+      FORWARDED_ALLOW_IPS: "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+    networks:
+      - bw-universe
+      - bw-db
+      - bw-mcp
+
+  bw-mcp:
+    image: bunkerity/bunkerweb-mcp:latest
+    ports:
+      - "8080:8080"
+    environment:
+      BUNKERWEB_BASE_URL: "http://bw-api:8888"
+      BUNKERWEB_API_TOKEN: "my-bearer-token-for-mcp"
+      BUNKERWEB_LOG_LEVEL: INFO
+    networks:
+      - bw-mcp
+```
+
+### Utilisation avec Claude Code
+
+=== "Configuration projet"
+
+    Ajoutez un fichier `.mcp.json` à la racine de votre projet (ou dans `~/.claude/.mcp.json` pour une configuration globale) :
+
+    ```json
+    {
+      "mcpServers": {
+        "bunkerweb": {
+          "type": "http",
+          "url": "http://127.0.0.1:8080/mcp/"
+        }
+      }
+    }
+    ```
+
+=== "CLI"
+
+    ```bash
+    # Ajouter le serveur MCP via HTTP
+    claude mcp add --transport http bunkerweb --scope local http://localhost:8080/mcp
+
+    # Ou via stdio (installation locale)
+    pip install mcp-bunkerweb
+    claude mcp add --transport stdio bunkerweb --scope local -- mcp-bunkerweb
+    ```
+
+Exemples de requêtes :
+
+```
+> Liste toutes les instances BunkerWeb
+> Montre-moi les bans actuels
+> Analyse @config://global et suggère des améliorations de sécurité
+```
+
+Pour la documentation complète, visitez le [dépôt BunkerWeb MCP](https://github.com/bunkerity/mcp-bunkerweb).
+
 ## Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Prise en charge STREAM :white_check_mark:
