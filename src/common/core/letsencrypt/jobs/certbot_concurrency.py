@@ -5,7 +5,7 @@ from operator import itemgetter
 from os import readlink, symlink, walk
 from pathlib import Path
 from shutil import copy2, copyfileobj, copystat, copytree, rmtree
-from subprocess import DEVNULL, PIPE, STDOUT, run
+from subprocess import DEVNULL, PIPE, STDOUT, TimeoutExpired, run
 from tempfile import mkdtemp
 from typing import Dict, List, Optional, Set, Tuple
 
@@ -225,15 +225,20 @@ def ensure_accounts(
             command.append("--register-unsafely-without-email")
         if log_level == "DEBUG":
             command.append("-v")
-        proc = run(
-            command,
-            stdin=DEVNULL,
-            stdout=PIPE,
-            stderr=STDOUT,
-            text=True,
-            env=cmd_env,
-            check=False,
-        )
+        try:
+            proc = run(
+                command,
+                stdin=DEVNULL,
+                stdout=PIPE,
+                stderr=STDOUT,
+                text=True,
+                env=cmd_env,
+                check=False,
+                timeout=300,
+            )
+        except TimeoutExpired:
+            logger.error(f"Let's Encrypt account registration timed out after 300s (staging={staging}, email={'set' if email else 'empty'})")
+            continue
         if proc.returncode != 0:
             if "existing account" in proc.stdout.lower():
                 logger.info(f"Let's Encrypt account already exists (staging={staging}, email={'set' if email else 'empty'}), skipping registration.")
@@ -283,15 +288,20 @@ def ensure_zerossl_accounts(
             command.append("--staging")
         if log_level == "DEBUG":
             command.append("-v")
-        proc = run(
-            command,
-            stdin=DEVNULL,
-            stdout=PIPE,
-            stderr=STDOUT,
-            text=True,
-            env=cmd_env,
-            check=False,
-        )
+        try:
+            proc = run(
+                command,
+                stdin=DEVNULL,
+                stdout=PIPE,
+                stderr=STDOUT,
+                text=True,
+                env=cmd_env,
+                check=False,
+                timeout=300,
+            )
+        except TimeoutExpired:
+            logger.error(f"ZeroSSL account registration timed out after 300s (email={'set' if email else 'empty'})")
+            continue
         if proc.returncode != 0:
             if "existing account" in proc.stdout.lower():
                 logger.info(f"ZeroSSL account already exists (email={'set' if email else 'empty'}), skipping registration.")

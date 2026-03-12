@@ -258,6 +258,10 @@ class Database:
         # Pool pre-ping
         pool_pre_ping = getenv("DATABASE_POOL_PRE_PING", "yes").lower() in ("yes", "true", "1")
 
+        self.logger.debug(
+            f"Database pool configuration: pool_size={pool_size}, max_overflow={max_overflow}, pool_timeout={pool_timeout}, pool_recycle={pool_recycle}, pool_pre_ping={pool_pre_ping}"
+        )
+
         self._engine_kwargs = {
             "future": True,
             "poolclass": QueuePool,
@@ -625,7 +629,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.9~rc2"
+                return "1.6.9~rc4"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -659,7 +663,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.9~rc2",
+            "version": "1.6.9~rc4",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -988,14 +992,20 @@ class Database:
                     path_ui = plugin_path.joinpath("ui")
                     if path_ui.is_dir():
                         with BytesIO() as plugin_page_content:
+                            tar_success = True
                             with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
-                            plugin_page_content.seek(0)
-                            checksum = bytes_hash(plugin_page_content, algorithm="sha256")
-                            desired_plugin_pages[base_plugin["id"]] = {
-                                "data": plugin_page_content.getvalue(),
-                                "checksum": checksum,
-                            }
+                                try:
+                                    tar.add(path_ui, arcname=path_ui.name, recursive=True)
+                                except (FileNotFoundError, OSError) as e:
+                                    self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
+                                    tar_success = False
+                            if tar_success:
+                                plugin_page_content.seek(0)
+                                checksum = bytes_hash(plugin_page_content, algorithm="sha256")
+                                desired_plugin_pages[base_plugin["id"]] = {
+                                    "data": plugin_page_content.getvalue(),
+                                    "checksum": checksum,
+                                }
 
             for plugins in default_plugins:
                 if not isinstance(plugins, list):
@@ -3463,11 +3473,20 @@ class Database:
                     if path_ui.is_dir():
                         remove = True
                         with BytesIO() as plugin_page_content:
+                            tar_success = True
                             with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
-                            plugin_page_content.seek(0)
-                            checksum = bytes_hash(plugin_page_content, algorithm="sha256")
-                            content = plugin_page_content.getvalue()
+                                try:
+                                    tar.add(path_ui, arcname=path_ui.name, recursive=True)
+                                except (FileNotFoundError, OSError) as e:
+                                    self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
+                                    tar_success = False
+                            if tar_success:
+                                plugin_page_content.seek(0)
+                                checksum = bytes_hash(plugin_page_content, algorithm="sha256")
+                                content = plugin_page_content.getvalue()
+                            else:
+                                remove = False
+                                continue
 
                         if not db_plugin_page:
                             changes = True
@@ -3884,12 +3903,18 @@ class Database:
                     path_ui = plugin_path.joinpath("ui")
                     if path_ui.is_dir():
                         with BytesIO() as plugin_page_content:
+                            tar_success = True
                             with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
-                            plugin_page_content.seek(0)
-                            checksum = bytes_hash(plugin_page_content, algorithm="sha256")
+                                try:
+                                    tar.add(path_ui, arcname=path_ui.name, recursive=True)
+                                except (FileNotFoundError, OSError) as e:
+                                    self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
+                                    tar_success = False
+                            if tar_success:
+                                plugin_page_content.seek(0)
+                                checksum = bytes_hash(plugin_page_content, algorithm="sha256")
 
-                            local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=plugin_page_content.getvalue(), checksum=checksum))
+                                local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=plugin_page_content.getvalue(), checksum=checksum))
 
                 for command, file_name in commands.items():
                     if not plugin_path.joinpath("bwcli", file_name).is_file():

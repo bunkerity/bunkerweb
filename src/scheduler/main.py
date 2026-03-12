@@ -148,6 +148,8 @@ def handle_stop(signum, frame):
 
     if SCHEDULER is not None:
         SCHEDULER.clear()
+        with suppress(Exception):
+            SCHEDULER.db.close()
     stop(0)
 
 
@@ -992,6 +994,26 @@ if __name__ == "__main__":
             while BACKING_UP_FAILOVER.is_set():
                 LOGGER.warning("Waiting for the failover backup to finish ...")
                 sleep(1)
+
+            # On first start, generate config and reload instances BEFORE running
+            # plugin jobs — plugins need their API endpoints loaded on instances
+            if FIRST_START and CONFIG_NEED_GENERATION and SCHEDULER.apis:
+                LOGGER.info("First start: generating and sending initial configuration before running jobs ...")
+                if generate_configs():
+                    first_start_futures = [
+                        SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CONFIG_PATH, "/confs"),
+                        SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CACHE_PATH, "/cache"),
+                    ]
+                    for future in first_start_futures:
+                        future.result()
+                    first_start_futures.clear()
+
+                    SCHEDULER.send_to_apis(
+                        "POST",
+                        f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
+                        timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split())),
+                    )
+                    CONFIG_NEED_GENERATION = False
 
             if RUN_JOBS_ONCE:
                 # Only run jobs once

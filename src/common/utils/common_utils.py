@@ -256,18 +256,20 @@ def normalize_bunkerweb_version(version: str) -> str:
 def is_newer_version_available(current_version: str, latest_version: str) -> bool:
     """Return True when the latest version is newer than the current one.
 
-    Falls back to normalized string inequality when semantic parsing fails so
-    behavior stays compatible for non-standard version strings.
+    Returns False when semantic parsing fails, since a false negative (missing
+    an update notification) is safer than a false positive.
     """
     current_normalized = normalize_bunkerweb_version(current_version)
     latest_normalized = normalize_bunkerweb_version(latest_version)
 
     try:
-        from packaging.version import Version
+        from packaging.version import InvalidVersion, Version
 
         return Version(current_normalized) < Version(latest_normalized)
-    except Exception:
-        return current_normalized != latest_normalized
+    except InvalidVersion:
+        return False
+    except ImportError:
+        return False
 
 
 def get_redis_client(

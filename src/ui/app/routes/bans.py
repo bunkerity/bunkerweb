@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
+from ipaddress import ip_address as validate_ip_address
 from json import JSONDecodeError, loads
 from math import floor
 from time import time
@@ -10,7 +11,7 @@ from flask import Blueprint, jsonify, redirect, render_template, request, url_fo
 from flask_login import login_required
 
 from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS, DB
-from app.utils import LOGGER, flash
+from app.utils import LOGGER, RESERVED_SERVICE_NAMES, flash
 
 from app.routes.utils import cors_required, get_redis_client, get_remain, handle_error, verify_data_in_form
 
@@ -45,44 +46,48 @@ def bans_fetch():
                 if not data:
                     continue
                 exp = redis_client.ttl(key)
+                raw_value = data.decode("utf-8", "replace")
                 try:
-                    ban_data = loads(data.decode("utf-8", "replace"))
-                    # Ensure consistent scope for frontend display
-                    ban_data["ban_scope"] = "global"
-                    ban_data["permanent"] = ban_data.get("permanent", False) or exp == 0
+                    ban_data = loads(raw_value)
+                except (JSONDecodeError, ValueError) as e:
+                    LOGGER.warning(f"Failed to decode ban data for {ip}, using raw value as reason: {e}")
+                    ban_data = {"reason": raw_value, "service": "unknown", "date": 0, "country": "unknown", "ban_scope": "global", "permanent": False}
 
-                    # Check if this is a permanent ban
-                    if ban_data.get("permanent", False):
-                        exp = 0  # Override TTL for permanent bans
+                # Ensure consistent scope for frontend display
+                ban_data["ban_scope"] = "global"
+                ban_data["permanent"] = ban_data.get("permanent", False) or exp == 0
 
-                    bans.append({"ip": ip, "exp": exp, "permanent": ban_data.get("permanent", False)} | ban_data)
-                except Exception as e:
-                    LOGGER.debug(format_exc())
-                    LOGGER.error(f"Failed to decode ban data for {ip}: {e}")
+                # Check if this is a permanent ban
+                if ban_data.get("permanent", False):
+                    exp = 0  # Override TTL for permanent bans
+
+                bans.append({"ip": ip, "exp": exp, "permanent": ban_data.get("permanent", False)} | ban_data)
 
             # Retrieve service-specific bans from Redis (stored with prefix "bans_service_*_ip_*")
             for key in redis_client.scan_iter("bans_service_*_ip_*"):
                 key_str = key.decode("utf-8", "replace")
-                service, ip = key_str.replace("bans_service_", "").split("_ip_")
+                service, ip = key_str.replace("bans_service_", "").rsplit("_ip_", 1)
                 data = redis_client.get(key)
                 if not data:
                     continue
                 exp = redis_client.ttl(key)
+                raw_value = data.decode("utf-8", "replace")
                 try:
-                    ban_data = loads(data.decode("utf-8", "replace"))
-                    # Ensure consistent scope for frontend display
-                    ban_data["ban_scope"] = "service"
-                    ban_data["service"] = service
-                    ban_data["permanent"] = ban_data.get("permanent", False) or exp == 0
+                    ban_data = loads(raw_value)
+                except (JSONDecodeError, ValueError) as e:
+                    LOGGER.warning(f"Failed to decode ban data for {ip} on service {service}, using raw value as reason: {e}")
+                    ban_data = {"reason": raw_value, "service": service, "date": 0, "country": "unknown", "ban_scope": "service", "permanent": False}
 
-                    # Check if this is a permanent ban
-                    if ban_data.get("permanent", False):
-                        exp = 0  # Override TTL for permanent bans
+                # Ensure consistent scope for frontend display
+                ban_data["ban_scope"] = "service"
+                ban_data["service"] = service
+                ban_data["permanent"] = ban_data.get("permanent", False) or exp == 0
 
-                    bans.append({"ip": ip, "exp": exp, "permanent": ban_data.get("permanent", False)} | ban_data)
-                except Exception as e:
-                    LOGGER.debug(format_exc())
-                    LOGGER.error(f"Failed to decode ban data for {ip} on service {service}: {e}")
+                # Check if this is a permanent ban
+                if ban_data.get("permanent", False):
+                    exp = 0  # Override TTL for permanent bans
+
+                bans.append({"ip": ip, "exp": exp, "permanent": ban_data.get("permanent", False)} | ban_data)
         except BaseException as e:
             LOGGER.debug(format_exc())
             LOGGER.error(f"Couldn't get bans from redis: {e}")
@@ -304,7 +309,7 @@ def bans_fetch():
         # Normalize service to "_" for global bans or when service is None
         if ban.get("ban_scope") == "global" or service is None:
             service = "_"
-        return f"{ban.get('ip','')}|{ban.get('ban_scope','')}|{service}"
+        return f"{ban.get('ip','')}|{ban.get('ban_scope','')}|{service}"  # noqa: E231
 
     filtered_ids = {ban_id(ban) for ban in filtered_bans}
     for ban in bans:
@@ -493,6 +498,13 @@ def bans_ban():
         ban_scope = ban.get("ban_scope", "global")
         service = ban.get("service", "")
 
+        # Validate IP address
+        try:
+            validate_ip_address(ip)
+        except ValueError:
+            flash(f"Invalid IP address: {escape(ip)}", "error")
+            continue
+
         # Check for permanent ban
         if ban.get("end_date") == "0" or ban.get("exp") == 0:
             ban_end = 0
@@ -501,7 +513,7 @@ def bans_ban():
 
         # Validate service name for service-specific bans
         if ban_scope == "service":
-            if not service or service in ("Web UI", "unknown", "bwcli", ""):
+            if not service or service in RESERVED_SERVICE_NAMES:
                 ban_scope = "global"
                 service = "unknown"
 
@@ -549,8 +561,15 @@ def bans_unban():
         ban_scope = unban.get("ban_scope", "global")
         service = unban.get("service")
 
+        # Validate IP address
+        try:
+            validate_ip_address(ip)
+        except ValueError:
+            flash(f"Invalid IP address: {escape(str(ip))}", "error")
+            continue
+
         # Normalize Web UI and default services to global scope
-        if service in ("default server", "Web UI", "unknown"):
+        if service in RESERVED_SERVICE_NAMES:
             ban_scope = "global"
             service = None
 
@@ -612,6 +631,13 @@ def bans_update_duration():
         ban_scope = update.get("ban_scope", "global")
         service = update.get("service", "")
 
+        # Validate IP address
+        try:
+            validate_ip_address(ip)
+        except ValueError:
+            flash(f"Invalid IP address: {escape(ip)}", "error")
+            continue
+
         # Calculate new expiration time based on duration
         if duration == "permanent":
             new_exp = 0
@@ -645,7 +671,7 @@ def bans_update_duration():
 
         # Validate service name for service-specific bans
         if ban_scope == "service":
-            if not service or service in ("Web UI", "unknown", "bwcli", ""):
+            if not service or service in RESERVED_SERVICE_NAMES:
                 ban_scope = "global"
                 service = "unknown"
 

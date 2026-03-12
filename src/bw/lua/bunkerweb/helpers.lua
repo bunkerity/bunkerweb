@@ -318,8 +318,8 @@ helpers.fill_ctx = function(no_ref)
 				data.ip_is_global = ip_global
 			end
 			-- IP data : v4 / v6
-			data.ip_is_ipv4 = is_ipv4(data.ip)
-			data.ip_is_ipv6 = is_ipv6(data.ip)
+			data.ip_is_ipv4 = is_ipv4(data.remote_addr)
+			data.ip_is_ipv6 = is_ipv6(data.remote_addr)
 		end
 		-- Fill ctx
 		ctx.bw = data

@@ -163,6 +163,11 @@ _db_check_next_allowed = 0.0
 _cookie_config_lock = Lock()
 _cookie_config_detected = False
 
+_restart_workers_lock = Lock()
+_restart_workers_future = None
+_restart_workers_next_allowed = 0.0
+RESTART_WORKERS_MIN_INTERVAL_SECONDS = 10.0
+
 
 def _shutdown_executors():
     """Shutdown all thread pool executors on application exit."""
@@ -170,6 +175,8 @@ def _shutdown_executors():
     _periodic_tasks_executor.shutdown(wait=False)
     _user_access_executor.shutdown(wait=False)
     _config_tasks_executor.shutdown(wait=False)
+    with suppress(Exception):
+        DB.close()
 
 
 register(_shutdown_executors)
@@ -843,8 +850,15 @@ def handle_csrf_error(_):
     :return: A template with the error message and a 401 status code.
     """
     LOGGER.debug(format_exc())
-    LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {current_user.get_id()}")
-    if not current_user:
+    try:
+        user_id = current_user.get_id()
+    except (AssertionError, RuntimeError):
+        user_id = "unknown"
+    LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {user_id}")
+    try:
+        if not current_user:
+            return redirect(url_for("setup.setup_page"), 303)
+    except (AssertionError, RuntimeError):
         return redirect(url_for("setup.setup_page"), 303)
     response = logout_page()
     response.status_code = 303
@@ -965,6 +979,18 @@ def schedule_database_state_check(request_method: str, request_path: str):
         _db_check_next_allowed = now + DB_CHECK_MIN_INTERVAL_SECONDS
 
 
+def schedule_restart_workers():
+    global _restart_workers_future, _restart_workers_next_allowed
+    now = time()
+    with _restart_workers_lock:
+        if now < _restart_workers_next_allowed:
+            return
+        if _restart_workers_future and not _restart_workers_future.done():
+            return
+        _restart_workers_future = _periodic_tasks_executor.submit(restart_workers)
+        _restart_workers_next_allowed = now + RESTART_WORKERS_MIN_INTERVAL_SECONDS
+
+
 @app.before_request
 def before_request():
     DATA.load_from_file()
@@ -1002,7 +1028,7 @@ def before_request():
         # Plugin reload trigger
         if not DATA.get("RELOADING", False) and metadata.get("reload_ui_plugins", False):
             safe_reload_plugins()
-            _periodic_tasks_executor.submit(restart_workers)
+            schedule_restart_workers()
 
         if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(hours=1):
             DATA["LATEST_VERSION_LAST_CHECK"] = datetime.now().astimezone().isoformat()
@@ -1161,12 +1187,16 @@ def mark_user_access(user, session_id):
 @app.after_request
 def set_security_headers(response):
     """Set the security headers."""
+    # Ensure script_nonce is available even if before_request didn't complete
+    # (e.g., when CSRF validation fails before our before_request runs)
+    script_nonce = getattr(g, "script_nonce", None) or token_urlsafe(32)
+
     # * Content-Security-Policy header to prevent XSS attacks
     response.headers["Content-Security-Policy"] = (
         "object-src 'none';"
         + " frame-ancestors 'self';"
         + " default-src https: http: 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com https://api.github.com;"
-        + f" script-src https: http: 'self' 'nonce-{g.script_nonce}' 'strict-dynamic' 'unsafe-inline';"
+        + f" script-src https: http: 'self' 'nonce-{script_nonce}' 'strict-dynamic' 'unsafe-inline';"
         + " style-src 'self' 'unsafe-inline';"
         + " img-src 'self' data: blob: https://www.bunkerweb.io https://assets.bunkerity.com https://*.tile.openstreetmap.org;"
         + " font-src 'self' data:;"
@@ -1213,12 +1243,13 @@ def set_security_headers(response):
 
 @app.teardown_request
 def teardown_request(teardown):
-    if (
-        not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/"))
-        and current_user.is_authenticated
-        and "session_id" in session
-    ):
-        _user_access_executor.submit(mark_user_access, current_user, session["session_id"])
+    with suppress(AssertionError, RuntimeError):
+        if (
+            not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/"))
+            and current_user.is_authenticated
+            and "session_id" in session
+        ):
+            _user_access_executor.submit(mark_user_access, current_user, session["session_id"])
 
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:
         try:
