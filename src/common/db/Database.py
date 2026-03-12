@@ -4576,16 +4576,17 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            db_instance = session.query(Instances).filter_by(hostname=hostname).first()
-
-            if db_instance is None:
-                return f"Instance {hostname} does not exist, will not be updated."
-
-            db_instance.status = status
+            # Use a direct UPDATE to avoid race conditions with concurrent threads
+            update_values: dict = {"status": status}
             if status != "down":
-                db_instance.last_seen = datetime.now().astimezone()
+                update_values["last_seen"] = datetime.now().astimezone()
 
             try:
+                result = session.query(Instances).filter_by(hostname=hostname).update(update_values)
+
+                if result == 0:
+                    return f"Instance {hostname} does not exist, will not be updated."
+
                 session.commit()
             except BaseException as e:
                 return f"An error occurred while updating the instance {hostname}.\n{e}"
@@ -4609,31 +4610,32 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            db_instance = session.query(Instances).filter_by(hostname=hostname).first()
-            if db_instance is None:
-                return f"Instance {hostname} does not exist, will not be updated."
-
+            # Use a direct UPDATE to avoid race conditions with concurrent threads
+            # (MariaDB error 1020: "Record has changed since last read")
+            update_values: dict = {}
             if name is not None:
-                db_instance.name = name
+                update_values["name"] = name
             if port is not None:
-                db_instance.port = port
+                update_values["port"] = port
             if listen_https is not None:
-                db_instance.listen_https = listen_https
+                update_values["listen_https"] = listen_https
             if https_port is not None:
-                db_instance.https_port = https_port
+                update_values["https_port"] = https_port
             if server_name is not None:
-                db_instance.server_name = server_name
+                update_values["server_name"] = server_name
             if method is not None:
-                db_instance.method = method
-
-            if changed:
-                with suppress(ProgrammingError, OperationalError):
-                    metadata = session.query(Metadata).get(1)
-                    if metadata is not None:
-                        metadata.instances_changed = True
-                        metadata.last_instances_change = datetime.now().astimezone()
+                update_values["method"] = method
 
             try:
+                if update_values:
+                    result = session.query(Instances).filter_by(hostname=hostname).update(update_values)
+                    if result == 0:
+                        return f"Instance {hostname} does not exist, will not be updated."
+
+                if changed:
+                    with suppress(ProgrammingError, OperationalError):
+                        session.query(Metadata).filter_by(id=1).update({"instances_changed": True, "last_instances_change": datetime.now().astimezone()})
+
                 session.commit()
             except BaseException as e:
                 return f"An error occurred while updating the instance {hostname}.\n{e}"
