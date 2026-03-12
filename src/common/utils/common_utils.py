@@ -2,6 +2,7 @@ from contextlib import suppress
 from hashlib import new as new_hash
 from io import BytesIO
 from os import getenv, sched_getaffinity, sep, access, R_OK, cpu_count
+from packaging.version import InvalidVersion, Version
 from pathlib import Path
 from platform import machine
 from typing import Dict, List, Optional, Union, Any
@@ -263,12 +264,8 @@ def is_newer_version_available(current_version: str, latest_version: str) -> boo
     latest_normalized = normalize_bunkerweb_version(latest_version)
 
     try:
-        from packaging.version import InvalidVersion, Version
-
         return Version(current_normalized) < Version(latest_normalized)
     except InvalidVersion:
-        return False
-    except ImportError:
         return False
 
 
