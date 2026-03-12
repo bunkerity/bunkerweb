@@ -2,7 +2,23 @@
 
 ## v1.6.9 - 2026/03/??
 
+- [SECURITY] Sanitize uploaded filenames in the Web UI to strip path separators, null bytes, and control characters, preventing path traversal attacks.
+- [SECURITY] Add tar extraction path filtering in `Let's Encrypt` certificate handling to only allow expected directories, preventing path traversal. Add 300s timeout to certificate account registration. Use explicit whitelist for API environment variables.
+- [SECURITY] Validate IP addresses and service names across all ban management endpoints (API, Lua, UI, CLI) to prevent invalid data injection. Fix Redis key parsing for service names containing underscores.
 - [BUGFIX] Fix Domeneshop DNS provider in the `Let's Encrypt` plugin to use the correct credential keys and ensure proper certificate generation.
+- [BUGFIX] Handle file-not-found and OS errors gracefully when archiving plugin UI pages in the database, and skip storing content when tar archiving fails to prevent corrupt data.
+- [BUGFIX] Return false instead of a potentially incorrect result when version comparison encounters invalid version strings, preventing spurious update notifications.
+- [BUGFIX] Validate gRPC host setting to only accept empty values or properly prefixed `grpc://` / `grpcs://` URIs.
+- [BUGFIX] Properly close the database connection when the scheduler stops, and fix configuration generation flag to only reset after a successful reload.
+- [BUGFIX] Add backup and rollback mechanism when deploying new configurations to BunkerWeb instances, preventing data loss if the file copy operation fails.
+- [BUGFIX] Generate and deploy initial configuration on first start before running plugin jobs, ensuring API endpoints are available when jobs execute.
+- [BUGFIX] Skip Content-Security-Policy header override in the antibot plugin when nonces are not available (e.g., HEAD requests), preventing malformed CSP headers.
+- [UI] Fix service cloning to correctly strip the source service prefix from configuration keys, preventing settings from being ignored during import.
+- [UI] Rate-limit worker restarts to prevent excessive restarts when multiple plugin reload triggers fire in quick succession.
+- [UI] Fix crashes when CSRF validation or request teardown occurs outside a valid user context, improving stability during edge-case scenarios.
+- [API] Add lifespan handler to properly close database connections on shutdown, preventing connection leaks.
+- [DOCS] Update Domeneshop DNS provider credential key names in documentation to match the corrected `client_token`/`client_secret` keys.
+- [DOCS] Add documentation for the Cache PRO plugin covering response caching configuration and settings.
 
 ## v1.6.9~rc4 - 2026/03/10
 
