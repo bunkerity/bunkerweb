@@ -27,7 +27,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 # This is a known issue in passlib that will be fixed in future versions
 filterwarnings("ignore", message=r".*pkg_resources is deprecated.*", category=UserWarning, module="passlib")
 
-from cachelib import FileSystemCache
+from app.models.safe_session_cache import SafeFileSystemCache
 from flask import Blueprint, Flask, Response, flash as flask_flash, g, jsonify, make_response, redirect, render_template, request, session, url_for
 from flask_login import current_user, LoginManager, login_required
 from flask_session import Session
@@ -162,6 +162,9 @@ _db_check_next_allowed = 0.0
 
 _cookie_config_lock = Lock()
 _cookie_config_detected = False
+
+_SESSION_CLEANUP_INTERVAL_SECONDS = 3600.0
+_session_cleanup_last_run = 0.0
 
 _restart_workers_lock = Lock()
 _restart_workers_future = None
@@ -628,6 +631,7 @@ with app.app_context():
         LOGGER.warning("Invalid SESSION_LIFETIME_HOURS, defaulting to 12h")
 
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=session_lifetime_hours)
+    app.config["SESSION_REFRESH_EACH_REQUEST"] = False
     app.config["SESSION_ID_LENGTH"] = 64
 
     session_cache_dir = LIB_DIR.joinpath("ui_sessions_cache")
@@ -680,7 +684,7 @@ with app.app_context():
 
     if not redis_client:
         app.config["SESSION_TYPE"] = "cachelib"
-        app.config["SESSION_CACHELIB"] = FileSystemCache(threshold=500, default_timeout=session_timeout, cache_dir=session_cache_dir)
+        app.config["SESSION_CACHELIB"] = SafeFileSystemCache(cache_dir=session_cache_dir, threshold=0, default_timeout=session_timeout)
     sess = Session()
     sess.init_app(app)
 
@@ -1033,6 +1037,14 @@ def before_request():
         if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(hours=1):
             DATA["LATEST_VERSION_LAST_CHECK"] = datetime.now().astimezone().isoformat()
             _periodic_tasks_executor.submit(update_latest_stable_release)
+
+        # Periodic expired session file cleanup (FileSystemCache only, where _prune is disabled via threshold=0)
+        if app.config.get("SESSION_TYPE") == "cachelib":
+            global _session_cleanup_last_run
+            now_ts = time()
+            if now_ts - _session_cleanup_last_run > _SESSION_CLEANUP_INTERVAL_SECONDS:
+                _session_cleanup_last_run = now_ts
+                _periodic_tasks_executor.submit(app.config["SESSION_CACHELIB"]._remove_expired, now_ts)
 
         schedule_database_state_check(request.method, request.path)
 
