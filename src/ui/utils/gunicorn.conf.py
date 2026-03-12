@@ -562,6 +562,9 @@ def on_starting(server):
 
     UI_SESSIONS_CACHE.mkdir(parents=True, exist_ok=True)
 
+    if getenv("USE_REDIS", "no").lower() != "yes":
+        LOGGER.warning("Using filesystem session backend — consider enabling Redis (USE_REDIS=yes) for better multi-worker stability")
+
     if TMP_PID_FILE.is_file():
         LOGGER.info("Stopping temporary UI...")
         call(["kill", "-SIGTERM", TMP_PID_FILE.read_text().strip()])
