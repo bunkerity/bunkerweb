@@ -23,6 +23,8 @@ from cryptography.x509 import ocsp as x509_ocsp
 from cryptography.x509.oid import ExtensionOID, AuthorityInformationAccessOID
 
 # Add BunkerWeb Python deps (Job, logger, Database) to path
+# Add current script's parent directory to path for local imports
+sys_path.append(str(Path(__file__).resolve().parent.parent.parent))
 for deps_path in [
     Path(os.sep, "usr", "share", "bunkerweb", *paths).as_posix()
     for paths in (("deps", "python"), ("utils",), ("db",))
@@ -222,8 +224,44 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
             LOG.error("❌ OCSP response status is not successful for %s: %s", cert_name, ocsp_response.response_status)
             return None, 0
 
-        # Extract TTL from response timing fields
-        remaining, total_lifetime = _ocsp_response_lifetimes(ocsp_response)
+        # === SECURE OCSP RESPONSE VERIFICATION ===
+        # Use OpenSSL to cryptographically verify the OCSP response signature.
+        # This prevents an attacker from MITM-ing the HTTP request and feeding a fake "SUCCESSFUL" payload.
+        import tempfile
+        import subprocess
+        from cryptography.hazmat.primitives.serialization import Encoding
+
+        with tempfile.NamedTemporaryFile(suffix=".der", delete=True) as f_der, \
+             tempfile.NamedTemporaryFile(suffix=".pem", mode="w", delete=True) as f_issuer, \
+             tempfile.NamedTemporaryFile(suffix=".pem", mode="w", delete=True) as f_leaf:
+             
+            f_der.write(ocsp_response_data)
+            f_der.flush()
+            
+            f_issuer.write(issuer.public_bytes(Encoding.PEM).decode("utf-8"))
+            f_issuer.flush()
+            
+            f_leaf.write(leaf.public_bytes(Encoding.PEM).decode("utf-8"))
+            f_leaf.flush()
+            
+            # -respin checks the response
+            # -partial_chain allows the issuer to act as a trust anchor even if it's an intermediate
+            cmd = [
+                "openssl", "ocsp",
+                "-respin", f_der.name,
+                "-issuer", f_issuer.name,
+                "-cert", f_leaf.name,
+                "-CAfile", f_issuer.name,
+                "-partial_chain"
+            ]
+            
+            p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if p.returncode != 0:
+                LOG.error("❌ OCSP response cryptographic signature verification failed for %s. Discarding forged/invalid response. OpenSSL Error: %s", cert_name, p.stderr.strip() or p.stdout.strip())
+                return None, 0
+
+        # Extract TTL
+        remaining, _ = _ocsp_response_lifetimes(ocsp_response)
         if remaining is not None:
             ttl = min(remaining, 7 * 24 * 3600)  # Cap to 7 days
         else:
