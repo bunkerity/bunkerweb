@@ -105,7 +105,7 @@ Bitte beachten Sie, dass der Multisite-Modus bei Verwendung der Web-Benutzerober
 
 !!! info "Weiterf체hrende Informationen"
 
-    Konkrete Beispiele f체r den Multisite-Modus finden Sie in den [fortgeschrittenen Nutzungen](advanced.md) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc4/examples)-Verzeichnis des Repositorys.
+    Konkrete Beispiele f체r den Multisite-Modus finden Sie in den [fortgeschrittenen Nutzungen](advanced.md) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples)-Verzeichnis des Repositorys.
 
 ## Benutzerdefinierte Konfigurationen {#custom-configurations}
 
@@ -126,7 +126,7 @@ Die Verwaltung benutzerdefinierter Konfigurationen 체ber die Web-Benutzeroberfl�
 
 !!! info "Weiterf체hrende Informationen"
 
-    Konkrete Beispiele f체r benutzerdefinierte Konfigurationen finden Sie in den [fortgeschrittenen Nutzungen](advanced.md#custom-configurations) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc4/examples)-Verzeichnis des Repositorys.
+    Konkrete Beispiele f체r benutzerdefinierte Konfigurationen finden Sie in den [fortgeschrittenen Nutzungen](advanced.md#custom-configurations) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples)-Verzeichnis des Repositorys.
 
 ## Datenbank
 

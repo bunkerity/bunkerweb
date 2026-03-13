@@ -1,9 +1,9 @@
 publiccodeYmlVersion: 0.5.0
 name: BunkerWeb
 url: https://github.com/bunkerity/bunkerweb
-softwareVersion: 1.6.9~rc4
-releaseDate: 2026-03-10
-logo: https://github.com/bunkerity/bunkerweb/raw/v1.6.9-rc4/misc/logo.png
+softwareVersion: 1.6.9
+releaseDate: 2026-03-13
+logo: https://github.com/bunkerity/bunkerweb/raw/v1.6.9/misc/logo.png
 platforms:
   - linux
 categories:
