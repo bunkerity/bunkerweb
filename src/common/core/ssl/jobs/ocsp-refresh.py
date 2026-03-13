@@ -398,41 +398,76 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
         return None, 0
 
     try:
-        # Build OCSP request
-        builder = x509_ocsp.OCSPRequestBuilder()
-        builder = builder.add_certificate(leaf, issuer, hashes.SHA256())
-        ocsp_request = builder.build()
-        ocsp_request_data = ocsp_request.public_bytes(Encoding.DER)
+        # Try SHA256 first, fallback to SHA1 if responder returns non-successful status (RFC 6960 compatibility)
+        ocsp_der = None
+        for hash_alg, alg_name in [(hashes.SHA256(), "SHA256"), (hashes.SHA1(), "SHA1")]:
+            try:
+                # Build OCSP request
+                builder = x509_ocsp.OCSPRequestBuilder()
+                builder = builder.add_certificate(leaf, issuer, hash_alg)
+                ocsp_request = builder.build()
+                ocsp_request_data = ocsp_request.public_bytes(Encoding.DER)
 
-        # --- Build HTTP request ---
-        if not is_safe_url(ocsp_url):
-            LOG.error("❌ OCSP unsafe responder URL detected: %s", ocsp_url)
+                LOG.debug(
+                    "🌐 OCSP fetching for %s (using %s): serial=%d, issuer=%s, responder=%s",
+                    cert_name, alg_name, leaf.serial_number, issuer.subject.rfc4514_string(), ocsp_url
+                )
+
+                # --- Build HTTP request ---
+                if not is_safe_url(ocsp_url):
+                    LOG.error("❌ OCSP unsafe responder URL detected: %s", ocsp_url)
+                    return None, 0
+
+                req = Request(
+                    ocsp_url,
+                    data=ocsp_request_data,
+                    headers={
+                        "Content-Type": "application/ocsp-request",
+                        "User-Agent": "BunkerWeb OCSP Fetcher (SSRF-Protected)",
+                    },
+                    method="POST",
+                )
+                # Explicitly use default SSL context with certificate verification enabled
+                ssl_context = ssl.create_default_context()
+                with urlopen(req, timeout=timeout, context=ssl_context) as response:
+                    # cap response size at 100KB to prevent memory exhaustion from malicious responder
+                    ocsp_der = response.read(102400)
+        
+                if not ocsp_der:
+                    LOG.warning("⚠️ OCSP empty response from %s for %s", ocsp_url, cert_name)
+                    continue
+
+                # Check if it's a valid OCSP response via cryptography
+                ocsp_response = x509_ocsp.load_der_ocsp_response(ocsp_der)
+                if ocsp_response.response_status != x509_ocsp.OCSPResponseStatus.SUCCESSFUL:
+                    LOG.warning(
+                        "⚠️ OCSP responder returned %s for %s (using %s), retrying if fallback available...",
+                        ocsp_response.response_status, cert_name, alg_name
+                    )
+                    ocsp_der = None
+                    continue
+
+                # If we reached here, we have a SUCCESSFUL response
+                break
+
+            except HTTPError as e:
+                LOG.warning("⚠️ OCSP HTTP %d error for %s using %s: %s", e.code, cert_name, alg_name, e.reason)
+                ocsp_der = None
+                continue
+            except Exception as e:
+                LOG.warning("⚠️ OCSP request failed for %s using %s: %s", cert_name, alg_name, e)
+                ocsp_der = None
+                continue
+        else:
+            # Loop finished without a break: all attempts failed
+            LOG.error("❌ OCSP failed to fetch successful response for %s after trying both SHA256 and SHA1", cert_name)
             return None, 0
 
-        req = Request(
-            ocsp_url,
-            data=ocsp_request_data,
-            headers={
-                "Content-Type": "application/ocsp-request",
-                "User-Agent": "BunkerWeb OCSP Fetcher (SSRF-Protected)",
-            },
-            method="POST",
-        )
-        # Explicitly use default SSL context with certificate verification enabled
-        ssl_context = ssl.create_default_context()
-        response = urlopen(req, timeout=timeout, context=ssl_context)
-        # cap response size at 100KB to prevent memory exhaustion from malicious responder
-        ocsp_der = response.read(102400)
-    
-        if not ocsp_der:
-            LOG.warning("⚠️ OCSP empty response from %s for %s", ocsp_url, cert_name)
-            return None, 0
-
-        # Check if it's a valid OCSP response via cryptography
+        # === SECURE OCSP RESPONSE VERIFICATION ===
+        # Use OpenSSL to cryptographically verify the OCSP response signature.
+        # This prevents an attacker from MITM-ing the HTTP request and feeding a fake "SUCCESSFUL" payload.
+        # At this point, ocsp_der is guaranteed to be set and successful
         ocsp_response = x509_ocsp.load_der_ocsp_response(ocsp_der)
-        if ocsp_response.response_status != x509_ocsp.OCSPResponseStatus.SUCCESSFUL:
-            LOG.error("❌ OCSP response status is not successful for %s: %s", cert_name, ocsp_response.response_status)
-            return None, 0
 
         # === SECURE OCSP RESPONSE VERIFICATION ===
         # Use OpenSSL to cryptographically verify the OCSP response signature.
@@ -908,12 +943,12 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
         LOG.debug("OCSP exception while attempting cache sync: %s", e)
 
 
-def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, stats: Optional[dict] = None, force_fetch: bool = False) -> Tuple[str, Optional[bytes], int, str, bytes]:
+def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, stats: Optional[dict] = None, force_fetch: bool = False) -> Tuple[str, Optional[bytes], int, str, bytes, Optional[str]]:
     """
     Process a single certificate for OCSP stapling. Works with in-memory PEM data.
     If force_fetch is True, skips the cached TTL check and retrieves a new response.
 
-    Returns a tuple of (cert_name, ocsp_der, ttl, cert_checksum, pem_data) for batched database writes.
+    Returns a tuple of (cert_name, ocsp_der, ttl, cert_checksum, pem_data, ocsp_url) for batched database writes.
     If ocsp_der is None, it means the fetch was skipped or failed.
     """
     if stats is None:
@@ -933,7 +968,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
         LOG.debug("🧹 OCSP stapling disabled for service %s, cleaning up cache for %s", service_name, cert_name)
         cleanup_ocsp_cache(db, cert_name)
         stats["le_certs_skipped"] = stats.get("le_certs_skipped", 0) + 1
-        return (cert_name, None, 0, cert_checksum, pem_data)
+        return (cert_name, None, 0, cert_checksum, pem_data, None)
 
     # Check if certificate checksum matches what we have in database
     cached_checksum = None
@@ -950,14 +985,14 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
     try:
         if not pem_data.startswith(b"-----BEGIN"):
             LOG.warning("⚠️ OCSP cert for %s has no PEM BEGIN marker or is invalid after cleaning, skipping", cert_name)
-            return (cert_name, None, 0, cert_checksum, pem_data)
+            return (cert_name, None, 0, cert_checksum, pem_data, None)
 
         # Proceed with extracting OCSP URL using the CLEANED pem_data
         ocsp_url = extract_ocsp_url(pem_data, cert_name)
         if not ocsp_url:
             LOG.debug("ℹ️ OCSP certificate %s has no responder, skipping fetch", cert_name)
             stats["le_certs_no_ocsp"] = stats["le_certs_no_ocsp"] + 1
-            return (cert_name, None, 0, cert_checksum, pem_data)
+            return (cert_name, None, 0, cert_checksum, pem_data, None)
 
         LOG.debug("🌐 OCSP responder for certificate %s: %s", cert_name, ocsp_url)
 
@@ -973,7 +1008,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
                     cert_name, cached_ttl, cached_ttl / 86400.0, MIN_TTL, half_lifetime,
                 )
                 stats["ocsp_cached_responses"] = stats["ocsp_cached_responses"] + 1
-                return (cert_name, None, cached_ttl, cert_checksum, pem_data)
+                return (cert_name, None, cached_ttl, cert_checksum, pem_data, ocsp_url)
             
             if cached_ttl <= MIN_TTL:
                 LOG.info("🔄 OCSP response for %s is near expiration (TTL=%ds < %ds), attempting aggressive refresh", cert_name, cached_ttl, MIN_TTL)
@@ -1009,7 +1044,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
                     cleanup_ocsp_cache(db, cert_name)
 
             stats["errors"] = stats.get("errors", 0) + 1
-            return (cert_name, None, 0, cert_checksum, pem_data)
+            return (cert_name, None, 0, cert_checksum, pem_data, ocsp_url)
 
         # Calculate checksum for integrity verification
         ocsp_checksum = hashlib.sha256(ocsp_der).hexdigest()
@@ -1017,12 +1052,12 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
         LOG.info("⚡ OCSP final TTL for %s is %ds (%s) (checksum=%s)", cert_name, ttl, ttl_readable, ocsp_checksum[:8])
 
         # === Return result for batched database writes ===
-        return (cert_name, ocsp_der, ttl, cert_checksum, pem_data)
+        return (cert_name, ocsp_der, ttl, cert_checksum, pem_data, ocsp_url)
 
     except Exception as e:
         LOG.error("❌ OCSP exception while processing certificate %s: %s", cert_name, e)
         stats["errors"] = stats.get("errors", 0) + 1
-        return (cert_name, None, 0, cert_checksum, pem_data)
+        return (cert_name, None, 0, cert_checksum, pem_data, None)
 
 
 def process_custom_certs(
@@ -1032,11 +1067,11 @@ def process_custom_certs(
     refresh_fn: Optional[Callable[[str], None]] = None,
     timeout_fn: Optional[Callable[[str], bool]] = None,
     skip_unchanged_ttl_checks: bool = False,
-) -> List[Tuple[str, Optional[bytes], int, str, bytes]]:
+) -> List[Tuple[str, Optional[bytes], int, str, bytes, Optional[str]]]:
     """
     Process OCSP for custom certificates using certificate data from the database.
 
-    Returns a list of tuples (cert_name, ocsp_der, ttl, checksum, pem_data) for batched database writes.
+    Returns a list of tuples (cert_name, ocsp_der, ttl, checksum, pem_data, ocsp_url) for batched database writes.
 
     Args:
         db: Database connection
@@ -1048,7 +1083,7 @@ def process_custom_certs(
     if stats is None:
         stats = {}
 
-    results: List[Tuple[str, Optional[bytes], int, str, bytes]] = []
+    results: List[Tuple[str, Optional[bytes], int, str, bytes, Optional[str]]] = []
 
     if not db:
         LOG.info("ℹ️ OCSP database not available, cannot process custom certificates")
@@ -1542,7 +1577,9 @@ def main() -> int:
                     pass
 
         # === Collect all OCSP data for batched database writes ===
-        all_ocsp_results: List[Tuple[str, Optional[bytes], int, str, bytes]] = []
+        all_ocsp_results: List[Tuple[str, Optional[bytes], int, str, bytes, Optional[str]]] = []
+        stashed_failures: List[Tuple[str, bytes]] = []
+
 
         # Process Let's Encrypt certificates from database tarball
         le_certs = _load_le_certs_from_db(db)
@@ -1596,20 +1633,29 @@ def main() -> int:
             for cert_name, pem_data in sorted(new_le_certs.items()):
                 if check_job_timeout(f"new LE cert {cert_name}"): break
                 refresh_job_lock(cert_name)
-                all_ocsp_results.append(_process_cert(cert_name, pem_data, db, stats, force_fetch=True))
+                res = _process_cert(cert_name, pem_data, db, stats, force_fetch=True)
+                all_ocsp_results.append(res)
+                if res[1] is None and res[5]: # ocsp_der is None and ocsp_url is present
+                    stashed_failures.append((cert_name, pem_data))
 
             # 2. Process changed certs (force refresh)
             for cert_name, pem_data in sorted(changed_le_certs.items()):
                 if check_job_timeout(f"changed LE cert {cert_name}"): break
                 refresh_job_lock(cert_name)
-                all_ocsp_results.append(_process_cert(cert_name, pem_data, db, stats, force_fetch=True))
+                res = _process_cert(cert_name, pem_data, db, stats, force_fetch=True)
+                all_ocsp_results.append(res)
+                if res[1] is None and res[5]:
+                    stashed_failures.append((cert_name, pem_data))
 
             # 3. Process unchanged certs (TTL check only)
             if not skip_unchanged_ttl_checks:
                 for cert_name, pem_data in sorted(unchanged_le_certs.items()):
                     if check_job_timeout(f"unchanged LE cert {cert_name}"): break
                     refresh_job_lock(cert_name)
-                    all_ocsp_results.append(_process_cert(cert_name, pem_data, db, stats, force_fetch=False))
+                    res = _process_cert(cert_name, pem_data, db, stats, force_fetch=False)
+                    all_ocsp_results.append(res)
+                    if res[1] is None and res[5]:
+                        stashed_failures.append((cert_name, pem_data))
 
         else:
             LOG.info("ℹ️ OCSP no LE certificates found in database")
@@ -1626,11 +1672,31 @@ def main() -> int:
                 skip_unchanged_ttl_checks=skip_unchanged_ttl_checks
             )
             all_ocsp_results.extend(custom_results)
+            for res in custom_results:
+                if res[1] is None and res[5]:
+                    stashed_failures.append((res[0], res[4])) # cert_name, pem_data
+
+        # === Final deferred retry for stashed failures ===
+        if stashed_failures:
+            LOG.info("⏸️ OCSP stashed %d failed fetch(es), waiting 120 seconds before final retry...", len(stashed_failures))
+            
+            # Use smaller sleeps to stay responsive and allow timeout checks
+            for i in range(120):
+                if check_job_timeout("during stashed retry wait"): break
+                time.sleep(1)
+            
+            if not check_job_timeout("before starting stashed retries"):
+                for cert_name, pem_data in stashed_failures:
+                    if check_job_timeout(f"stashed retry for {cert_name}"): break
+                    LOG.info("🔄 OCSP retrying fetch for stashed failure: %s", cert_name)
+                    refresh_job_lock(cert_name)
+                    # Force fetch for the final retry attempt
+                    all_ocsp_results.append(_process_cert(cert_name, pem_data, db, stats, force_fetch=True))
 
         # === Batch write all OCSP responses and checksums to database ===
         if db and all_ocsp_results:
             LOG.info("🔄 OCSP batching database updates for %d certificate(s)", len(all_ocsp_results))
-            for cert_name, ocsp_der, ttl, cert_checksum, pem_data in all_ocsp_results:
+            for cert_name, ocsp_der, ttl, cert_checksum, pem_data, ocsp_url in all_ocsp_results:
                 sanitized_name = _sanitize_filename(cert_name)
                 # 1. Update OCSP response if we have a new one
                 if ocsp_der and ttl > 0:
@@ -1672,7 +1738,7 @@ def main() -> int:
                     LOG.debug("⚠️ OCSP exception while storing cert checksum for %s: %s", cert_name, e)
 
         # === Batch write all OCSP responses to disk ===
-        for cert_name, ocsp_der, ttl, checksum, pem_data in all_ocsp_results:
+        for cert_name, ocsp_der, ttl, checksum, pem_data, ocsp_url in all_ocsp_results:
             if not ocsp_der:
                 continue
             try:
