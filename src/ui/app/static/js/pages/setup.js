@@ -26,6 +26,11 @@ $(document).ready(() => {
   const $breadcrumbItems = $(".template-steps-container .breadcrumb-item");
   const $csrfTokenInput = $("#csrf_token");
 
+  // PRO unlock effect state
+  const $proLicenseKey = $("#PRO_LICENSE_KEY");
+  const $proCard = $(".pro-card");
+  let proUnlocked = false;
+
   // Utility Functions
 
   /**
@@ -1157,6 +1162,91 @@ $(document).ready(() => {
   setAcmeServerPane($("#LETS_ENCRYPT_SERVER").val());
   $("#LETS_ENCRYPT_CHALLENGE").trigger("change");
   $("#USE_CUSTOM_SSL").trigger("change");
+
+  // PRO License Key unlock effect
+  if ($proLicenseKey.length && $proCard.length) {
+    /**
+     * Loads the canvas-confetti library on demand.
+     * @returns {Promise} Resolves with the confetti function.
+     */
+    const loadConfetti = () => {
+      return new Promise((resolve, reject) => {
+        if (window.confetti) {
+          resolve(window.confetti);
+          return;
+        }
+        const src = $proLicenseKey.data("confetti-src");
+        if (!src) {
+          reject(new Error("No confetti source URL"));
+          return;
+        }
+        const script = document.createElement("script");
+        script.src = src;
+        script.onload = () => resolve(window.confetti);
+        script.onerror = () => reject(new Error("Failed to load confetti"));
+        document.head.appendChild(script);
+      });
+    };
+
+    /**
+     * Fires a confetti burst from the pro-card's position.
+     */
+    const fireProConfetti = async () => {
+      try {
+        const confettiFn = await loadConfetti();
+        const cardRect = $proCard[0].getBoundingClientRect();
+        const x = (cardRect.left + cardRect.width / 2) / window.innerWidth;
+        const y = (cardRect.top + cardRect.height / 4) / window.innerHeight;
+
+        // Main burst — BunkerWeb brand colors
+        confettiFn({
+          particleCount: 60,
+          spread: 70,
+          origin: { x, y },
+          colors: ["#2eac68", "#0b5577", "#0b354a", "#35728e", "#ffffff"],
+          ticks: 120,
+          gravity: 1.2,
+          scalar: 0.9,
+          disableForReducedMotion: true,
+        });
+
+        // Secondary burst slightly delayed for a layered feel
+        setTimeout(() => {
+          confettiFn({
+            particleCount: 30,
+            spread: 100,
+            origin: { x, y: y + 0.05 },
+            colors: ["#2eac68", "#0b5577", "#ffffff"],
+            ticks: 100,
+            gravity: 1.5,
+            scalar: 0.7,
+            disableForReducedMotion: true,
+          });
+        }, 150);
+      } catch (e) {
+        // Confetti is purely decorative — fail silently
+        console.warn("Confetti effect unavailable:", e.message);
+      }
+    };
+
+    $proLicenseKey.on(
+      "input",
+      debounce(function () {
+        const hasValue = $(this).val().length > 0;
+
+        if (hasValue && !proUnlocked) {
+          proUnlocked = true;
+          $(this).addClass("pro-unlocked");
+          $proCard.addClass("pro-card-unlocked");
+          fireProConfetti();
+        } else if (!hasValue && proUnlocked) {
+          proUnlocked = false;
+          $(this).removeClass("pro-unlocked");
+          $proCard.removeClass("pro-card-unlocked");
+        }
+      }, 50),
+    );
+  }
 
   // Initialize the UI based on the initial step
   toggleButtonStates();
