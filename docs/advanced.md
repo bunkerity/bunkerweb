@@ -3321,7 +3321,7 @@ services:
       - bw-mcp
 
   bw-mcp:
-    image: bunkerity/bunkerweb-mcp:latest
+    image: bunkerity/bunkerweb-mcp:v0.1.0
     ports:
       - "8080:8080"
     environment:
@@ -3370,7 +3370,7 @@ mcp:
 
   # Container image configuration
   repository: docker.io/bunkerity/bunkerweb-mcp
-  tag: latest
+  tag: v0.1.0
 
   # MCP server settings
   config:
