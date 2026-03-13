@@ -312,21 +312,22 @@ api.global.POST["^/confs$"] = function(self)
 		"rm -rf " .. backup,
 		"mkdir -p " .. backup,
 		"cp -R " .. destination .. "/. " .. backup .. "/ 2>/dev/null; true",
-		-- Replace destination contents; if cp fails, restore from backup
+		-- Replace destination contents; if cp fails, restore from backup; only cleanup backup on success
 		"rm -rf "
 			.. destination
 			.. "/* && cp -R "
 			.. staging
 			.. "/. "
 			.. destination
-			.. "/ || { cp -R "
+			.. "/ && rm -rf "
+			.. backup
+			.. " || { cp -R "
 			.. backup
 			.. "/. "
 			.. destination
 			.. "/ 2>/dev/null; false; }",
-		-- Cleanup temporaries
+		-- Cleanup temporaries (backup already removed on success above)
 		"rm -rf " .. staging,
-		"rm -rf " .. backup,
 		"rm -f " .. tmp,
 	}
 	for _, cmd in ipairs(cmds) do
