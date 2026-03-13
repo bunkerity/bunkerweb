@@ -799,18 +799,12 @@ def main() -> int:
     try:
         # CRITICAL: Log immediately to confirm script is running
         try:
-            LOG.error("🔄 OCSP DEBUG: script started, initializing Job")
+            LOG.error("🔄 OCSP DEBUG: script started")
         except Exception as e:
             print(f"ERROR: Could not log initial message: {e}", file=_sys.stderr)
 
-        try:
-            job = Job(LOG, __file__)
-            LOG.debug("✓ OCSP Job initialized successfully")
-        except Exception as e:
-            LOG.error("❌ OCSP could not initialize Job: %s", e)
-            return 2
-
-        # Initialize database connection (optional)
+        # Initialize database connection FIRST to ensure we can restore cached responses
+        db = None
         if Database is not None:
             try:
                 db = Database(LOG)
@@ -821,11 +815,24 @@ def main() -> int:
         else:
             LOG.debug("ℹ️ OCSP Database module not available, will use disk-only storage")
 
+        # IMPORTANT: Skip Job initialization (and automatic cleanup) entirely for safety
+        # Keeping cached OCSP files ensures we have data available even if errors occur
+        # The database restoration ensures consistency without needing to delete files
+        # Create a minimal Job-like placeholder object (job parameter is passed to functions but not used)
+        class MinimalJob:
+            def __init__(self, log):
+                self.log = log
+
+        job = MinimalJob(LOG)
+        LOG.debug("✓ OCSP skipping Job initialization (cleanup disabled for data safety)")
+
         if not LIVE_BASE.is_dir():
             LOG.info("ℹ️ OCSP live certificate directory %s does not exist, nothing to do", LIVE_BASE)
             return 0
 
         # Restore cached OCSP responses from database (handles ephemeral storage)
+        # This ensures consistency by restoring from persistent database storage
+        # Particularly important for ephemeral storage (tmpfs) or container restarts
         restore_ocsp_from_database(db)
 
         cert_dirs = [d for d in sorted(LIVE_BASE.iterdir()) if d.is_dir()]
@@ -870,6 +877,6 @@ def main() -> int:
                 pass
 
 
-if __name__ == "__main__":
-    sys_exit(main())
+# run it
+sys_exit(main())
 
