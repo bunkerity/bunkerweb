@@ -133,7 +133,10 @@ def retrieve_certificates():
             "key_type": "Unknown",
         }
         try:
-            cert = x509.load_pem_x509_certificates(cert_file.read_bytes())[0]
+            certs = x509.load_pem_x509_certificates(cert_file.read_bytes())
+            if not certs:
+                raise ValueError(f"No certificates found in {cert_file}")
+            cert = certs[0]
             subject = cert.subject.get_attributes_for_oid(x509.NameOID.COMMON_NAME)
             if subject:
                 cert_info["common_name"] = subject[0].value
