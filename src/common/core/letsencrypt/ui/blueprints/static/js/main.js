@@ -425,6 +425,10 @@
           },
           targets: 9, // Key Type column
         },
+        {
+          className: "none", // Alt Names: hidden in main table, shown in responsive expand row
+          targets: 13,
+        },
       ];
     }
 
@@ -482,6 +486,10 @@
           data: "version",
           title: "Version",
         },
+        {
+          data: "alt_names",
+          title: "Alt Names",
+        },
       ];
     }
 
@@ -508,6 +516,9 @@
     const letsencrypt_config = {
       tableSelector: "#letsencrypt",
       tableName: "letsencrypt",
+      // Columns 0-2 are always visible (checkbox, domain action buttons).
+      // Column 13 (Alt Names) uses className "none" — hidden in main table, shown in responsive expand only.
+      // Update this when adding/removing columns (currently 3..12 = 10 toggleable columns).
       columnVisibilityCondition: (column) => column > 2 && column < 13,
       dataTableOptions: {
         columnDefs: buildColumnDefs(),

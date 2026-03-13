@@ -51,11 +51,13 @@ DATATABLE_COLUMNS = (
     "serial_number",
     "fingerprint",
     "version",
+    "alt_names",
 )
 
 SEARCHABLE_FIELDS = (
     "domain",
     "common_name",
+    "alt_names",
     "issuer",
     "issuer_server",
     "serial_number",
@@ -102,6 +104,7 @@ def retrieve_certificates():
     certificates = {
         "domain": [],
         "common_name": [],
+        "alt_names": [],
         "issuer": [],
         "issuer_server": [],
         "valid_from": [],
@@ -120,6 +123,7 @@ def retrieve_certificates():
         certificates["domain"].append(domain)
         cert_info = {
             "common_name": domain,
+            "alt_names": "",
             "issuer": "Unknown",
             "issuer_server": "Unknown",
             "valid_from": None,
@@ -148,6 +152,12 @@ def retrieve_certificates():
             cert_info["serial_number"] = str(cert.serial_number)
             cert_info["fingerprint"] = cert.fingerprint(hashes.SHA256()).hex()
             cert_info["version"] = cert.version.name
+            try:
+                san_ext = cert.extensions.get_extension_for_class(x509.SubjectAlternativeName)
+                san_names = san_ext.value.get_values_for_type(x509.DNSName)
+                cert_info["alt_names"] = ", ".join(sorted(san_names))
+            except x509.ExtensionNotFound:
+                pass
         except BaseException as e:
             LOGGER.debug(format_exc())
             LOGGER.error(f"Error while parsing certificate {cert_file}: {e}")
@@ -211,6 +221,7 @@ def letsencrypt_fetch():
                 {
                     "domain": domain,
                     "common_name": certs.get("common_name", [""])[i],
+                    "alt_names": certs.get("alt_names", [""])[i],
                     "issuer": certs.get("issuer", [""])[i],
                     "issuer_server": certs.get("issuer_server", [""])[i],
                     "valid_from": certs.get("valid_from", [""])[i],
