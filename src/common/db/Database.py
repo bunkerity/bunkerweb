@@ -51,7 +51,7 @@ for deps_path in [os_join(sep, "usr", "share", "bunkerweb", *paths) for paths in
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from common_utils import bytes_hash  # type: ignore
+from common_utils import bytes_hash, PLUGIN_TAR_COMPRESS_LEVEL  # type: ignore
 
 from pymysql import install_as_MySQLdb
 from sqlalchemy import case, create_engine, event, MetaData as sql_metadata, func, join, select as db_select, text
@@ -994,7 +994,7 @@ class Database:
                     if path_ui.is_dir():
                         with BytesIO() as plugin_page_content:
                             tar_success = True
-                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
+                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=PLUGIN_TAR_COMPRESS_LEVEL) as tar:
                                 try:
                                     tar.add(path_ui, arcname=path_ui.name, recursive=True)
                                 except (FileNotFoundError, OSError) as e:
@@ -3475,7 +3475,7 @@ class Database:
                         remove = True
                         with BytesIO() as plugin_page_content:
                             tar_success = True
-                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
+                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=PLUGIN_TAR_COMPRESS_LEVEL) as tar:
                                 try:
                                     tar.add(path_ui, arcname=path_ui.name, recursive=True)
                                 except (FileNotFoundError, OSError) as e:
@@ -3905,7 +3905,7 @@ class Database:
                     if path_ui.is_dir():
                         with BytesIO() as plugin_page_content:
                             tar_success = True
-                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
+                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=PLUGIN_TAR_COMPRESS_LEVEL) as tar:
                                 try:
                                     tar.add(path_ui, arcname=path_ui.name, recursive=True)
                                 except (FileNotFoundError, OSError) as e:

@@ -18,7 +18,7 @@ from flask_login import login_required
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from werkzeug.utils import secure_filename
 
-from common_utils import bytes_hash  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
 
 from app.dependencies import CORE_PLUGINS_PATH, BW_CONFIG, BW_INSTANCES_UTILS, CONFIG_TASKS_EXECUTOR, DATA, DB, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH
 from app.utils import ALWAYS_USED_PLUGINS, LOGGER, PLUGIN_NAME_RX, PLUGINS_SPECIFICS, TMP_DIR
@@ -324,18 +324,7 @@ def plugins_refresh():
                 )
                 raise Exception
 
-            plugin_content = BytesIO()
-            with tar_open(
-                fileobj=plugin_content,
-                mode="w:gz",
-                compresslevel=9,
-            ) as tar:
-                tar.add(
-                    str(temp_folder_path),
-                    arcname=temp_folder_name,
-                    recursive=True,
-                )
-            plugin_content.seek(0)
+            plugin_content = create_plugin_tar_gz(temp_folder_path, arc_root=temp_folder_name)
             value = plugin_content.getvalue()
 
             new_plugins.append(

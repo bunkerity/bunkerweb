@@ -1,13 +1,17 @@
 from contextlib import suppress
+from gzip import GzipFile
 from hashlib import new as new_hash
 from io import BytesIO
 from os import getenv, sched_getaffinity, sep, access, R_OK, cpu_count
 from packaging.version import InvalidVersion, Version
 from pathlib import Path
 from platform import machine
+from tarfile import open as tar_open
 from typing import Dict, List, Optional, Union, Any
 from math import ceil
 import logging
+
+PLUGIN_TAR_COMPRESS_LEVEL: int = 3
 
 
 def handle_docker_secrets() -> Dict[str, str]:
@@ -243,6 +247,31 @@ def add_dir_to_tar_safely(tar: Any, dir_path: Union[str, Path], arc_root: Option
             elif p.is_file() and access(p.as_posix(), R_OK):
                 tar.add(p.as_posix(), arcname=arcname, recursive=False, filter=plugin_tar_filter)
             # unreadable files are ignored silently
+
+
+def create_plugin_tar_gz(dir_path: Union[str, Path], arc_root: Optional[str] = None) -> BytesIO:
+    """Create a deterministic gzip-compressed tar archive of a plugin directory.
+
+    Uses a fixed gzip mtime of 0 so that the same directory content always
+    produces identical bytes (and therefore the same SHA-256 checksum).
+    The result is a seeked-to-zero BytesIO ready for hashing or reading.
+    """
+    d = Path(dir_path)
+    if arc_root is None:
+        arc_root = d.name
+
+    # 1. Build an uncompressed tar in memory
+    with BytesIO() as raw:
+        with tar_open(fileobj=raw, mode="w") as tar:
+            add_dir_to_tar_safely(tar, d, arc_root=arc_root)
+        raw_bytes = raw.getvalue()
+
+    # 2. Compress with a deterministic gzip header (mtime=0)
+    result = BytesIO()
+    with GzipFile(fileobj=result, mode="wb", compresslevel=PLUGIN_TAR_COMPRESS_LEVEL, mtime=0) as gz:
+        gz.write(raw_bytes)
+    result.seek(0)
+    return result
 
 
 def normalize_bunkerweb_version(version: str) -> str:
