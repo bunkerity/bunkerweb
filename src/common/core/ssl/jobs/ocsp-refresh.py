@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
+import fcntl
 import hashlib
 import io
 import os
 import re
 import shutil
+import ssl
 import subprocess
 import sys as _sys
 import tarfile
@@ -14,7 +16,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from typing import Any, Dict, List, Optional, Tuple
-from urllib.error import URLError
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
@@ -68,11 +70,125 @@ status = 0
 CONFIGS_SSL_BASE = Path(os.sep, "var", "cache", "bunkerweb", "ssl")
 
 
+def _acquire_cert_lock(cert_name: str, timeout: int = 300, stale_threshold: int = 600) -> Optional[int]:
+    """
+    Acquire a file-based lock for a specific certificate to prevent race conditions
+    when multiple scheduler instances fetch OCSP responses concurrently.
+
+    Lock files are stored in /tmp/bunkerweb/ and use timestamp-based staleness detection.
+    If a lock file hasn't been updated in stale_threshold seconds, it's considered stale
+    (indicating the previous process crashed or is hung).
+
+    Args:
+        cert_name: Certificate identifier
+        timeout: Maximum seconds to wait for lock acquisition (default 300 = 5 minutes)
+        stale_threshold: Lock file age (seconds) to consider it stale (default 600 = 10 minutes)
+
+    Returns:
+        File descriptor on success, None if lock unavailable or timed out
+    """
+    lock_dir = Path(os.sep, "tmp", "bunkerweb")
+    try:
+        lock_dir.mkdir(parents=True, exist_ok=True, mode=0o755)
+    except Exception:
+        return None
+
+    lock_file = lock_dir / f"ocsp-{cert_name}.lock"
+    start_time = time.time()
+
+    while time.time() - start_time < timeout:
+        # Check if existing lock file is stale (crashed process)
+        try:
+            if lock_file.exists():
+                mtime = lock_file.stat().st_mtime
+                age = time.time() - mtime
+                if age > stale_threshold:
+                    LOG.warning(
+                        "⚠️ OCSP detected stale lock for %s (age %.0fs > threshold %ds). "
+                        "Previous process may have crashed. Removing stale lock.",
+                        cert_name, age, stale_threshold
+                    )
+                    try:
+                        lock_file.unlink()
+                    except Exception:
+                        pass  # If we can't delete, we'll wait more
+        except Exception:
+            pass
+
+        try:
+            fd = os.open(str(lock_file), os.O_CREAT | os.O_WRONLY, 0o600)
+            # Try non-blocking lock acquisition (LOCK_NB)
+            try:
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                # Lock acquired successfully—write timestamp to detect stale locks
+                try:
+                    os.write(fd, str(int(time.time())).encode())
+                except Exception:
+                    pass  # Non-critical timestamp write
+                return fd
+            except BlockingIOError:
+                # Lock held by another process, close fd and retry after brief delay
+                os.close(fd)
+                time.sleep(0.5)
+                continue
+        except Exception as e:
+            LOG.debug("⚠️ OCSP lock acquisition attempt failed for %s: %s", cert_name, e)
+            time.sleep(0.5)
+
+    # Timeout reached: log warning and proceed without lock
+    LOG.warning(
+        "⚠️ OCSP could not acquire lock for %s after %ds. "
+        "If concurrent OCSP fetches happen, cryptographic verification protects data integrity. "
+        "Consider increasing scheduler interval or timeout if jobs consistently exceed %ds.",
+        cert_name, timeout, timeout
+    )
+    return None
+
+
+def _release_cert_lock(fd: Optional[int]) -> None:
+    """Release a file-based lock."""
+    if fd is not None:
+        try:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+            os.close(fd)
+        except Exception:
+            pass
+
+
+def _refresh_cert_lock(fd: Optional[int], cert_name: str) -> None:
+    """
+    Refresh the lock file timestamp to prove the process is still alive.
+    Call this periodically while holding a lock during long-running operations.
+    Prevents stale lock detection from triggering on jobs that legitimately take >30 seconds.
+
+    Args:
+        fd: File descriptor from _acquire_cert_lock
+        cert_name: Certificate identifier (for logging only)
+    """
+    if fd is None:
+        return
+
+    try:
+        # Seek to start and truncate to update modification time and content
+        os.lseek(fd, 0, os.SEEK_SET)
+        os.ftruncate(fd, 0)
+        timestamp = str(int(time.time())).encode()
+        os.write(fd, timestamp)
+        os.fsync(fd)  # Ensure write is persisted
+        LOG.debug("🔒 OCSP refreshed lock timestamp for %s", cert_name)
+    except Exception as e:
+        LOG.debug("⚠️ OCSP could not refresh lock timestamp for %s: %s", cert_name, e)
+
+
 def is_safe_url(url: str) -> bool:
     """
     Validate that a URL is safe to fetch (HTTP/HTTPS only, no internal/private IPs).
     Prevents Server-Side Request Forgery (SSRF) when fetching OCSP responses or issuer certs
     from URLs embedded in untrusted certificates.
+
+    Security note: Even if DNS rebinding occurs, the OCSP response is cryptographically
+    verified against the issuer's public key (see fetch_ocsp_response). An attacker cannot
+    forge a valid OCSP response without the issuer's private key.
     """
     import socket
     import ipaddress
@@ -167,6 +283,8 @@ def _fetch_issuer_from_aia(leaf: x509.Certificate, cert_name: str = "") -> Optio
                         return x509.load_der_x509_certificate(issuer_der)
                     except Exception:
                         return x509.load_pem_x509_certificate(issuer_der)
+                except HTTPError as e:
+                    LOG.warning("⚠️ OCSP HTTP %d error fetching issuer from AIA for %s from %s: %s", e.code, cert_name, issuer_url, e.reason)
                 except URLError as e:
                     LOG.warning("⚠️ OCSP network error fetching issuer from AIA for %s from %s: %s", cert_name, issuer_url, e)
                 except Exception as e:
@@ -274,7 +392,9 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
             },
             method="POST",
         )
-        response = urlopen(req, timeout=timeout)
+        # Explicitly use default SSL context with certificate verification enabled
+        ssl_context = ssl.create_default_context()
+        response = urlopen(req, timeout=timeout, context=ssl_context)
         ocsp_response_data = response.read(102_400)  # Cap at 100KB — typical OCSP response is 1-4KB
 
         # Parse response and validate status
@@ -331,7 +451,23 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
             ttl = 86400  # RFC standard fallback
 
         return ocsp_response_data, ttl
+    except HTTPError as e:
+        # HTTP error code — OCSP responder returned an error
+        error_desc = f"HTTP {e.code}"
+        if e.code == 404:
+            error_desc += " (Not Found - OCSP responder URL not available)"
+        elif e.code == 503:
+            error_desc += " (Service Unavailable - responder temporarily down)"
+        elif e.code == 500:
+            error_desc += " (Internal Server Error - responder misconfigured)"
+        elif 400 <= e.code < 500:
+            error_desc += f" (Client Error - {e.reason})"
+        elif e.code >= 500:
+            error_desc += f" (Server Error - {e.reason})"
+        LOG.error("❌ OCSP %s from responder for %s at %s", error_desc, cert_name, ocsp_url)
+        return None, 0
     except URLError as e:
+        # Network error — DNS, connection refused, timeout, SSL error, etc.
         LOG.error("❌ OCSP network error fetching response for %s from %s: %s", cert_name, ocsp_url, e)
         return None, 0
     except Exception as e:
@@ -720,36 +856,54 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
             LOG.warning("⚠️ OCSP skipping disk storage for %s due to database storage failure", cert_name)
             return
 
-        # Create the SSL configs directory for this certificate
-        ocsp_cert_dir = CONFIGS_SSL_BASE / cert_name
+        # Acquire lock to prevent race conditions with concurrent OCSP fetches
+        lock_fd = _acquire_cert_lock(cert_name)
         try:
-            ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
-        except Exception as e:
-            LOG.error("❌ OCSP error while creating directory %s: %s", ocsp_cert_dir, e)
-            stats["errors"] = stats.get("errors", 0) + 1
-            return
+            # Create the SSL configs directory for this certificate
+            ocsp_cert_dir = CONFIGS_SSL_BASE / cert_name
+            try:
+                ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
+            except Exception as e:
+                LOG.error("❌ OCSP error while creating directory %s: %s", ocsp_cert_dir, e)
+                stats["errors"] = stats.get("errors", 0) + 1
+                return
 
-        # Write OCSP response to cache/ssl/{cert-name}/ocsp.der
-        ocsp_path = ocsp_cert_dir / "ocsp.der"
-        try:
-            ocsp_path.write_bytes(ocsp_der)
-            ocsp_path.chmod(0o644)  # Readable by nginx
-            LOG.info("✓ OCSP saved response for %s to disk at %s", cert_name, ocsp_path)
-            stats["ocsp_fetched_responses"] = stats.get("ocsp_fetched_responses", 0) + 1
+            # Write OCSP response to cache/ssl/{cert-name}/ocsp.der
+            ocsp_path = ocsp_cert_dir / "ocsp.der"
+            try:
+                ocsp_path.write_bytes(ocsp_der)
+                ocsp_path.chmod(0o644)  # Readable by nginx
+                LOG.info("✓ OCSP saved response for %s to disk at %s", cert_name, ocsp_path)
+                stats["ocsp_fetched_responses"] = stats.get("ocsp_fetched_responses", 0) + 1
 
-            # Create symlinks for each SAN so OCSP is found by any SNI name
-            _create_san_symlinks(pem_data, ocsp_path, cert_name)
-        except Exception as e:
-            LOG.error("❌ OCSP error while writing response for %s to disk: %s", cert_name, e)
-            stats["errors"] = stats.get("errors", 0) + 1
+                # Create symlinks for each SAN so OCSP is found by any SNI name
+                _create_san_symlinks(pem_data, ocsp_path, cert_name)
+            except Exception as e:
+                LOG.error("❌ OCSP error while writing response for %s to disk: %s", cert_name, e)
+                stats["errors"] = stats.get("errors", 0) + 1
+        finally:
+            _release_cert_lock(lock_fd)
     except Exception as e:
         LOG.error("❌ OCSP exception while processing certificate %s: %s", cert_name, e)
         stats["errors"] = stats.get("errors", 0) + 1
 
 
-def process_custom_certs(db: Optional[Any] = None, stats: Optional[dict] = None) -> None:
+def process_custom_certs(
+    db: Optional[Any] = None,
+    stats: Optional[dict] = None,
+    lock_fd: Optional[int] = None,
+    refresh_fn: Optional[callable] = None,
+    timeout_fn: Optional[callable] = None,
+) -> None:
     """
     Process OCSP for custom certificates using certificate data from the database.
+
+    Args:
+        db: Database connection
+        stats: Statistics dictionary
+        lock_fd: Optional file descriptor for lock refresh (for long operations)
+        refresh_fn: Optional callable to refresh lock (prevents stale detection)
+        timeout_fn: Optional callable to check job timeout
     """
     if stats is None:
         stats = {}
@@ -768,6 +922,13 @@ def process_custom_certs(db: Optional[Any] = None, stats: Optional[dict] = None)
         stats["custom_certs_processed"] = len(custom_certs)
 
         for service_name, cert_pem in sorted(custom_certs.items()):
+            # Check timeout before processing each certificate
+            if timeout_fn and timeout_fn(f"processing custom cert {service_name}"):
+                break
+
+            # Refresh lock to prove we're still alive
+            if refresh_fn:
+                refresh_fn(service_name)
             # service_name is e.g. "opdash.net-ecdsa" — strip suffix to get actual service
             svc = _service_name_from_dir(service_name)
             if not _is_ocsp_enabled_for_service(svc):
@@ -798,7 +959,8 @@ def process_custom_certs(db: Optional[Any] = None, stats: Optional[dict] = None)
                     x509.load_pem_x509_certificate(cert_pem)
                 except Exception as e:
                     LOG.warning("⚠️ OCSP custom cert for %s is not a valid PEM certificate (len=%d): %s", service_name, len(cert_pem), e)
-                    LOG.debug("🔍 OCSP custom cert %s raw data (first 200 bytes): %s", service_name, cert_pem[:200])
+                    cert_checksum = hashlib.sha256(cert_pem).hexdigest()
+                    LOG.debug("🔍 OCSP custom cert %s checksum: %s", service_name, cert_checksum)
                     stats["custom_certs_skipped"] = stats.get("custom_certs_skipped", 0) + 1
                     continue
 
@@ -995,7 +1157,7 @@ def cleanup_ocsp_cache(db: Optional[Any] = None, cert_name: Optional[str] = None
         if db and purge_db:
             try:
                 # Remove all OCSP cache entries from database
-                job_cache_files = db.get_jobs_cache_files(plugin_id="ssl")
+                job_cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh")
                 for cache_file in job_cache_files:
                     if cache_file.get("file_name", "").startswith("ocsp/"):
                         try:
@@ -1076,9 +1238,137 @@ def _cleanup_orphaned_ocsp(db: Optional[Any], le_certs: Dict[str, bytes], stats:
         stats["orphaned_cleaned"] = orphaned_count
 
 
+def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dict] = None) -> None:
+    """
+    End-of-job verification: ensure all OCSP files on disk match database checksums.
+    Restores missing files from database to prevent OCSP stapling failures.
+
+    This handles cases where OCSP cache directories are externally deleted or corrupted.
+    Includes sleep before verification to allow concurrent writers to finish.
+    """
+    if stats is None:
+        stats = {}
+
+    if not db:
+        LOG.warning("⚠️ OCSP cannot verify files without database connection")
+        return
+
+    # Sleep briefly to avoid race conditions with concurrent writes to cache directories
+    LOG.debug("💤 OCSP waiting 5s before verification (to allow concurrent writers to finish)...")
+    time.sleep(5)
+
+    verify_count = 0
+    restored_count = 0
+    mismatch_count = 0
+
+    try:
+        # Get all OCSP entries from database
+        cache_entries = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=True)
+        if not cache_entries:
+            LOG.info("ℹ️ OCSP no cache entries in database to verify")
+            return
+
+        LOG.info("🔍 OCSP verifying %d cache entry(ies) from database", len(cache_entries))
+
+        for entry in cache_entries:
+            file_name = entry.get("file_name", "")
+            if not file_name.startswith("ocsp/"):
+                continue
+
+            cert_name = file_name[len("ocsp/"):]
+            data = entry.get("data")
+            db_checksum = entry.get("checksum", "")
+
+            if not data or not db_checksum:
+                LOG.warning("⚠️ OCSP database entry %s has no data or checksum, skipping verification", cert_name)
+                continue
+
+            verify_count += 1
+
+            # Check if file exists on disk
+            ocsp_cert_dir = CONFIGS_SSL_BASE / cert_name
+            ocsp_path = ocsp_cert_dir / "ocsp.der"
+
+            try:
+                if not ocsp_path.is_file():
+                    # File missing: restore from database
+                    LOG.warning("⚠️ OCSP file missing for %s, restoring from database", cert_name)
+                    try:
+                        ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
+                        ocsp_path.write_bytes(data)
+                        ocsp_path.chmod(0o644)
+                        LOG.info("✓ OCSP restored %s from database", cert_name)
+                        restored_count += 1
+                    except Exception as e:
+                        LOG.error("❌ OCSP could not restore %s from database: %s", cert_name, e)
+                        stats["errors"] = stats.get("errors", 0) + 1
+                        continue
+
+                else:
+                    # File exists: verify checksum
+                    file_data = ocsp_path.read_bytes()
+                    file_checksum = hashlib.sha256(file_data).hexdigest()
+
+                    if file_checksum != db_checksum:
+                        LOG.warning(
+                            "⚠️ OCSP checksum mismatch for %s (file=%s, db=%s). "
+                            "Restoring from database.",
+                            cert_name, file_checksum[:8], db_checksum[:8]
+                        )
+                        try:
+                            ocsp_path.write_bytes(data)
+                            ocsp_path.chmod(0o644)
+                            LOG.info("✓ OCSP restored correct version of %s", cert_name)
+                            mismatch_count += 1
+                        except Exception as e:
+                            LOG.error("❌ OCSP could not restore %s: %s", cert_name, e)
+                            stats["errors"] = stats.get("errors", 0) + 1
+                    else:
+                        LOG.debug("✓ OCSP %s checksum verified (matches database)", cert_name)
+
+            except Exception as e:
+                LOG.warning("⚠️ OCSP error verifying %s: %s", cert_name, e)
+                stats["errors"] = stats.get("errors", 0) + 1
+
+        if verify_count > 0:
+            LOG.info(
+                "🔍 OCSP verification complete: %d checked | ✓ %d restored (missing) | 🔄 %d corrected (mismatch)",
+                verify_count, restored_count, mismatch_count
+            )
+            stats["ocsp_verified"] = verify_count
+            stats["ocsp_restored"] = restored_count
+            stats["ocsp_corrected"] = mismatch_count
+
+    except Exception as e:
+        LOG.warning("⚠️ OCSP verification failed: %s", e)
+        stats["errors"] = stats.get("errors", 0) + 1
+
+
 def main() -> int:
     global status
     db: Optional[Any] = None
+
+    # Job-level timeout: exit gracefully if exceeded (prevents deadlock on slow systems)
+    # Responses fetched so far are saved; next run continues where left off
+    JOB_TIMEOUT = 1500  # 25 minutes in seconds
+    job_start_time = time.time()
+    lock_fd_main = None
+
+    def check_job_timeout(phase: str = "") -> bool:
+        """Check if job has exceeded timeout. Returns True if timeout exceeded."""
+        elapsed = time.time() - job_start_time
+        if elapsed > JOB_TIMEOUT:
+            LOG.warning(
+                "⏱️ OCSP job timeout after %.0fs (%.1f minutes) %s. "
+                "Saved responses fetched so far; next run will continue processing remaining certificates.",
+                elapsed, elapsed / 60.0, phase
+            )
+            return True
+        return False
+
+    def refresh_job_lock(cert_name: str = "") -> None:
+        """Refresh the lock to prevent stale detection during long jobs."""
+        _refresh_cert_lock(lock_fd_main, cert_name or "main")
 
     # Statistics tracking
     stats = {
@@ -1094,7 +1384,10 @@ def main() -> int:
     }
 
     try:
-        LOG.info("🔄 OCSP refresh job started")
+        LOG.info("🔄 OCSP refresh job started (timeout in %d minutes)", JOB_TIMEOUT // 60)
+
+        # Acquire main lock for the entire OCSP refresh operation
+        lock_fd_main = _acquire_cert_lock("main", timeout=300, stale_threshold=1800)
 
         # Initialize database connection — this is our primary data source
         db = None
@@ -1132,15 +1425,32 @@ def main() -> int:
             stats["le_certs_processed"] = len(le_certs)
 
             for cert_name, pem_data in sorted(le_certs.items()):
+                # Check timeout before processing each certificate
+                if check_job_timeout(f"processing LE cert {cert_name}"):
+                    break
+
+                # Refresh lock to prove we're still alive
+                refresh_job_lock(cert_name)
+
                 _process_cert(cert_name, pem_data, db, stats)
         else:
             LOG.info("ℹ️ OCSP no LE certificates found in database")
 
-        # Process custom certificates from database
-        process_custom_certs(db, stats)
+        # Check timeout before processing custom certs
+        if not check_job_timeout("before custom cert processing"):
+            # Process custom certificates from database
+            process_custom_certs(db, stats, lock_fd=lock_fd_main, refresh_fn=refresh_job_lock, timeout_fn=check_job_timeout)
 
-        # Clean up orphaned OCSP entries for deleted services
-        _cleanup_orphaned_ocsp(db, le_certs or {}, stats)
+        # Check timeout before cleanup
+        if not check_job_timeout("before orphaned cleanup"):
+            # Clean up orphaned OCSP entries for deleted services
+            _cleanup_orphaned_ocsp(db, le_certs or {}, stats)
+
+        # End-of-job verification: ensure OCSP files match database checksums
+        # Restores missing files from database
+        if not check_job_timeout("before final verification"):
+            LOG.info("🔍 OCSP running end-of-job verification and restoration...")
+            _verify_and_restore_ocsp_files(db, stats)
 
         # Decide exit status based on results
         if stats["errors"] > 0:
@@ -1151,8 +1461,10 @@ def main() -> int:
         else:
             LOG.warning("⚠️ OCSP refresh job completed with %d error(s)", stats["errors"])
 
+        elapsed = time.time() - job_start_time
         LOG.info(
-            "📊 Statistics: 🔐 LE certs=%d (skipped=%d, no OCSP=%d) | 🔐 Custom certs=%d (no OCSP=%d) | 🔄 Fetched=%d | ✓ Cached=%d | 🧹 Orphaned=%d | ❌ Errors=%d",
+            "📊 Statistics (completed in %.0fs): 🔐 LE certs=%d (skipped=%d, no OCSP=%d) | 🔐 Custom certs=%d (no OCSP=%d) | 🔄 Fetched=%d | ✓ Cached=%d | 🧹 Orphaned=%d | 🔍 Verified=%d (restored=%d, corrected=%d) | ❌ Errors=%d",
+            elapsed,
             stats["le_certs_processed"],
             stats["le_certs_skipped"],
             stats["le_certs_no_ocsp"],
@@ -1161,6 +1473,9 @@ def main() -> int:
             stats["ocsp_fetched_responses"],
             stats["ocsp_cached_responses"],
             stats.get("orphaned_cleaned", 0),
+            stats.get("ocsp_verified", 0),
+            stats.get("ocsp_restored", 0),
+            stats.get("ocsp_corrected", 0),
             stats["errors"],
         )
         return status
@@ -1169,7 +1484,8 @@ def main() -> int:
         LOG.error("❌ OCSP exception while running ocsp-refresh.py: %s", e)
         return 2
     finally:
-        pass
+        # Always release the main lock
+        _release_cert_lock(lock_fd_main)
 
 
 # run it
