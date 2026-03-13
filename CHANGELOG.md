@@ -19,6 +19,7 @@
 - [API] Add lifespan handler to properly close database connections on shutdown, preventing connection leaks.
 - [DOCS] Update Domeneshop DNS provider credential key names in documentation to match the corrected `client_token`/`client_secret` keys.
 - [DOCS] Add documentation for the Cache PRO plugin covering response caching configuration and settings.
+- [DEPS] Update coreruleset-v4 version to v4.24.1
 
 ## v1.6.9~rc4 - 2026/03/10
 

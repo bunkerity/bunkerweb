@@ -1,0 +1,15 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Rule 944260: Malicious class-loading payload (Spring4Shell and similar)
+##!
+##! Detects Java class-loading exploit patterns, notably Spring4Shell
+##! (CVE-2022-22965) and Spring Framework XML context loading.
+##!
+##! Ref: https://www.rapid7.com/blog/post/2022/03/30/spring4shell-zero-day-vulnerability-in-spring-framework/
+
+##! Spring4Shell: class.module.classLoader RCE chain
+class\.module\.classLoader\.resources\.context\.parent\.pipeline
+
+##! Spring Framework: XML application context loading from filesystem
+springframework\.context\.support\.FileSystemXmlApplicationContext
