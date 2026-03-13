@@ -1655,7 +1655,7 @@ def main() -> int:
                         stats["errors"] = stats["errors"] + 1
 
                 # 2. ALWAYS store/update certificate content checksum for future differential checks
-                cert_checksum_key = f"cert_checksum/{cert_name}"
+                cert_checksum_key = f"cert_checksum/{sanitized_name}"
                 try:
                     err = db.upsert_job_cache(
                         service_id=None,
@@ -1678,9 +1678,10 @@ def main() -> int:
             try:
                 # Acquire lock to prevent race conditions with concurrent OCSP fetches
                 lock_fd = _acquire_cert_lock(cert_name)
+                sanitized_name = _sanitize_filename(cert_name)
                 try:
                     # Create the SSL configs directory for this certificate
-                    ocsp_cert_dir = CONFIGS_SSL_BASE / cert_name
+                    ocsp_cert_dir = CONFIGS_SSL_BASE / sanitized_name
                     try:
                         ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
                     except Exception as e:
