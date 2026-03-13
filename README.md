@@ -12,9 +12,11 @@
 	<br />
 	<img src="https://img.shields.io/github/actions/workflow/status/bunkerity/bunkerweb/dev.yml?branch=dev&label=CI%2FCD%20dev" />
 	<img src="https://img.shields.io/github/actions/workflow/status/bunkerity/bunkerweb/staging.yml?branch=staging&label=CI%2FCD%20staging" />
+	<br />
 	<a href="https://www.bestpractices.dev/projects/8001">
 		<img src="https://www.bestpractices.dev/projects/8001/badge">
 	</a>
+	<a href="https://gitrated.com/bunkerity/bunkerweb"><img src="https://gitrated.com/bunkerity/bunkerweb/badge" alt="GitRated rating" /></a>
 </p>
 
 <p align="center">
