@@ -593,6 +593,88 @@ def _create_san_symlinks(pem_data: bytes, ocsp_path: Path, cert_name: str) -> No
             LOG.debug("⚠️ OCSP could not create SAN symlink for %s: %s", san, e)
 
 
+def _get_cached_ocsp_certs(db: Any) -> set:
+    """
+    Get the set of certificate names that have cached OCSP responses in the database.
+    Used to identify new vs. existing certificates for differential refresh strategy.
+
+    Returns set of cert_name strings
+    """
+    cached_certs = set()
+
+    if db is None:
+        return cached_certs
+
+    try:
+        cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=False)
+        for entry in cache_files:
+            file_name = entry.get("file_name", "")
+            if file_name.startswith("ocsp/"):
+                cert_name = file_name[len("ocsp/"):]
+                # Prevent path traversal from crafted database entries
+                if re.match(r"^[A-Za-z0-9_.*-]+$", cert_name):
+                    cached_certs.add(cert_name)
+    except Exception as e:
+        LOG.warning("⚠️ OCSP could not retrieve cached certificate list from database: %s", e)
+
+    return cached_certs
+
+
+def _get_cert_checksums(db: Any, cert_names: set) -> Dict[str, str]:
+    """
+    Get previously stored checksums for certificates from the database.
+    Checksums are stored in cache entries like 'cert_checksum/cert_name'.
+
+    Args:
+        db: Database connection
+        cert_names: Set of certificate names to retrieve checksums for
+
+    Returns:
+        Dict of {cert_name: checksum_hex}
+    """
+    checksums = {}
+
+    if db is None or not cert_names:
+        return checksums
+
+    try:
+        cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=False)
+        for entry in cache_files:
+            file_name = entry.get("file_name", "")
+            if file_name.startswith("cert_checksum/"):
+                cert_name = file_name[len("cert_checksum/"):]
+                if cert_name in cert_names:
+                    # Retrieve the actual checksum data
+                    try:
+                        checksum_data = db.get_job_cache_file(
+                            job_name="ocsp-refresh",
+                            file_name=file_name,
+                            with_data=True,
+                            with_info=False,
+                        )
+                        if checksum_data:
+                            checksums[cert_name] = checksum_data.decode("utf-8").strip()
+                    except Exception:
+                        pass  # Checksum entry doesn't exist or couldn't be retrieved
+    except Exception as e:
+        LOG.debug("⚠️ OCSP could not retrieve certificate checksums from database: %s", e)
+
+    return checksums
+
+
+def _calculate_cert_checksum(pem_data: bytes) -> str:
+    """
+    Calculate SHA256 checksum of certificate PEM data.
+
+    Args:
+        pem_data: Certificate PEM content
+
+    Returns:
+        Hex string of SHA256 hash
+    """
+    return hashlib.sha256(pem_data).hexdigest()
+
+
 def _load_le_certs_from_db(db: Any) -> Dict[str, bytes]:
     """
     Load Let's Encrypt fullchain PEM data from the database tarball.
@@ -900,9 +982,35 @@ def process_custom_certs(
             return results
 
         LOG.info("🔄 OCSP loaded %d custom certificate(s) from database", len(custom_certs))
-        stats["custom_certs_processed"] = len(custom_certs)
 
-        for service_name, cert_pem in sorted(custom_certs.items()):
+        # Check which custom certs have changed since last OCSP refresh
+        previous_custom_checksums = _get_cert_checksums(db, set(custom_certs.keys()))
+        changed_custom_certs = {}
+        unchanged_custom_certs = {}
+
+        for cert_name, pem_data in custom_certs.items():
+            current_checksum = _calculate_cert_checksum(pem_data)
+            previous_checksum = previous_custom_checksums.get(cert_name)
+
+            if previous_checksum is None:
+                # No previous checksum, treat as changed
+                changed_custom_certs[cert_name] = pem_data
+                LOG.debug("⚠️ OCSP no previous checksum found for custom cert %s, will refresh", cert_name)
+            elif current_checksum != previous_checksum:
+                # Certificate content has changed
+                changed_custom_certs[cert_name] = pem_data
+                LOG.debug("🔄 OCSP custom certificate content changed for %s", cert_name)
+            else:
+                # Certificate content unchanged
+                unchanged_custom_certs[cert_name] = pem_data
+
+        if unchanged_custom_certs:
+            LOG.info("✓ OCSP found %d unchanged custom certificate(s) (skipping): %s", len(unchanged_custom_certs), ", ".join(sorted(unchanged_custom_certs.keys())))
+            stats["custom_certs_unchanged"] = len(unchanged_custom_certs)
+
+        stats["custom_certs_processed"] = len(changed_custom_certs)
+
+        for service_name, cert_pem in sorted(changed_custom_certs.items()):
             # Check timeout before processing each certificate
             if timeout_fn and timeout_fn(f"processing custom cert {service_name}"):
                 break
@@ -1321,7 +1429,7 @@ def main() -> int:
     }
 
     try:
-        LOG.info("🔄 OCSP refresh job started (timeout in %d minutes)", JOB_TIMEOUT // 60)
+        LOG.info("🔄 OCSP refresh job started with differential update strategy (timeout in %d minutes)", JOB_TIMEOUT // 60)
 
         # Acquire main lock for the entire OCSP refresh operation
         lock_fd_main = _acquire_cert_lock("main", timeout=300, stale_threshold=1800)
@@ -1338,6 +1446,10 @@ def main() -> int:
         else:
             LOG.error("❌ OCSP Database module not available, cannot proceed")
             return 2
+
+        # === Check for previously cached OCSP responses ===
+        previous_ocsp_certs = _get_cached_ocsp_certs(db)
+        LOG.info("ℹ️ OCSP found %d previously cached certificate(s)", len(previous_ocsp_certs))
 
         # === Early validation: check cache directory permissions ===
         try:
@@ -1381,16 +1493,70 @@ def main() -> int:
         le_certs = _load_le_certs_from_db(db)
         if le_certs:
             LOG.info("ℹ️ OCSP loaded %d LE certificate(s) from database", len(le_certs))
+
+            # Separate new certs from existing ones
+            new_le_certs = {k: v for k, v in le_certs.items() if k not in previous_ocsp_certs}
+            existing_le_certs = {k: v for k, v in le_certs.items() if k in previous_ocsp_certs}
+
+            # For existing certs, check if certificate content has changed
+            previous_le_checksums = _get_cert_checksums(db, set(existing_le_certs.keys()))
+            changed_le_certs = {}
+            unchanged_le_certs = {}
+
+            for cert_name, pem_data in existing_le_certs.items():
+                current_checksum = _calculate_cert_checksum(pem_data)
+                previous_checksum = previous_le_checksums.get(cert_name)
+
+                if previous_checksum is None:
+                    # No previous checksum found, treat as changed (data loss or first refresh after upgrade)
+                    changed_le_certs[cert_name] = pem_data
+                    LOG.debug("⚠️ OCSP no previous checksum found for %s, will refresh", cert_name)
+                elif current_checksum != previous_checksum:
+                    # Certificate content has changed
+                    changed_le_certs[cert_name] = pem_data
+                    LOG.debug("🔄 OCSP certificate content changed for %s", cert_name)
+                else:
+                    # Certificate content unchanged
+                    unchanged_le_certs[cert_name] = pem_data
+
+            if new_le_certs:
+                LOG.info("🆕 OCSP found %d newly issued LE certificate(s): %s", len(new_le_certs), ", ".join(sorted(new_le_certs.keys())))
+                stats["le_certs_new"] = len(new_le_certs)
+
+            if changed_le_certs:
+                LOG.info("🔄 OCSP found %d LE certificate(s) with changed content: %s", len(changed_le_certs), ", ".join(sorted(changed_le_certs.keys())))
+                stats["le_certs_changed"] = len(changed_le_certs)
+
+            if unchanged_le_certs:
+                LOG.info("✓ OCSP found %d LE certificate(s) unchanged (skipping): %s", len(unchanged_le_certs), ", ".join(sorted(unchanged_le_certs.keys())))
+                stats["le_certs_skipped"] = len(unchanged_le_certs)
+
             stats["le_certs_processed"] = len(le_certs)
 
-            for cert_name, pem_data in sorted(le_certs.items()):
+            # Process new certs first with full OCSP refresh
+            for cert_name, pem_data in sorted(new_le_certs.items()):
                 # Check timeout before processing each certificate
-                if check_job_timeout(f"processing LE cert {cert_name}"):
+                if check_job_timeout(f"processing new LE cert {cert_name}"):
                     break
 
                 # Refresh lock to prove we're still alive
                 refresh_job_lock(cert_name)
 
+                LOG.debug("🆕 OCSP refreshing new LE certificate: %s", cert_name)
+                result = _process_cert(cert_name, pem_data, db, stats)
+                if result:
+                    all_ocsp_results.append(result)
+
+            # Process changed certs with OCSP refresh
+            for cert_name, pem_data in sorted(changed_le_certs.items()):
+                # Check timeout before processing each certificate
+                if check_job_timeout(f"processing changed LE cert {cert_name}"):
+                    break
+
+                # Refresh lock to prove we're still alive
+                refresh_job_lock(cert_name)
+
+                LOG.debug("🔄 OCSP refreshing changed LE certificate: %s", cert_name)
                 result = _process_cert(cert_name, pem_data, db, stats)
                 if result:
                     all_ocsp_results.append(result)
@@ -1425,6 +1591,22 @@ def main() -> int:
                 except Exception as e:
                     LOG.error("❌ OCSP exception while storing response for %s in database: %s", cert_name, e)
                     stats["errors"] = stats.get("errors", 0) + 1
+
+                # Store certificate content checksum for future differential checks
+                cert_checksum_key = f"cert_checksum/{cert_name}"
+                cert_checksum = _calculate_cert_checksum(pem_data)
+                try:
+                    err = db.upsert_job_cache(
+                        service_id=None,
+                        file_name=cert_checksum_key,
+                        data=cert_checksum.encode("utf-8"),
+                        job_name="ocsp-refresh",
+                        checksum=hashlib.sha256(cert_checksum.encode("utf-8")).hexdigest(),
+                    )
+                    if err:
+                        LOG.debug("⚠️ OCSP could not store cert checksum for %s: %s", cert_name, err)
+                except Exception as e:
+                    LOG.debug("⚠️ OCSP exception while storing cert checksum for %s: %s", cert_name, e)
 
         # === Batch write all OCSP responses to disk ===
         for cert_name, ocsp_der, ttl, checksum, pem_data in all_ocsp_results:
