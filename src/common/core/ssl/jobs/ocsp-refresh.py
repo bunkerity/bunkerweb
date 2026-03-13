@@ -292,13 +292,18 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
         with tempfile.NamedTemporaryFile(suffix=".der", delete=True) as f_der, \
              tempfile.NamedTemporaryFile(suffix=".pem", mode="w", delete=True) as f_issuer, \
              tempfile.NamedTemporaryFile(suffix=".pem", mode="w", delete=True) as f_leaf:
-             
+
+            # Secure temporary files with 0600 permissions (read/write for owner only)
+            os.chmod(f_der.name, 0o600)
+            os.chmod(f_issuer.name, 0o600)
+            os.chmod(f_leaf.name, 0o600)
+
             f_der.write(ocsp_response_data)
             f_der.flush()
-            
+
             f_issuer.write(issuer.public_bytes(Encoding.PEM).decode("utf-8"))
             f_issuer.flush()
-            
+
             f_leaf.write(leaf.public_bytes(Encoding.PEM).decode("utf-8"))
             f_leaf.flush()
             
@@ -531,6 +536,10 @@ def _load_custom_certs_from_db(db: Any) -> Dict[str, bytes]:
             if not service_id:
                 LOG.debug("⚠️ OCSP custom cert entry %s has no service_id, skipping", file_name)
                 continue
+            # Prevent path traversal: validate service_id format
+            if not re.match(r"^[A-Za-z0-9_.*-]+$", service_id):
+                LOG.warning("⚠️ OCSP sanitization: skipping custom cert with invalid service_id: %s", service_id)
+                continue
             data = entry.get("data")
             if not data:
                 LOG.warning("⚠️ OCSP custom cert %s for service %s has no data, skipping", file_name, service_id)
@@ -538,6 +547,10 @@ def _load_custom_certs_from_db(db: Any) -> Dict[str, bytes]:
             # Derive suffix from filename: cert-ecdsa.pem -> -ecdsa, cert.pem -> ""
             suffix = file_name.replace("cert", "").replace(".pem", "")  # e.g. "-ecdsa", "-rsa", ""
             key = f"{service_id}{suffix}"
+            # Double-check derived key is safe (defensive validation)
+            if not re.match(r"^[A-Za-z0-9_.*-]+$", key):
+                LOG.warning("⚠️ OCSP sanitization: skipping custom cert with unsafe derived key: %s", key)
+                continue
             result[key] = data
             LOG.debug("✓ OCSP loaded custom cert for %s from database (file=%s, size=%d)", key, file_name, len(data))
         except Exception as e:
@@ -785,7 +798,7 @@ def process_custom_certs(db: Optional[Any] = None, stats: Optional[dict] = None)
                     x509.load_pem_x509_certificate(cert_pem)
                 except Exception as e:
                     LOG.warning("⚠️ OCSP custom cert for %s is not a valid PEM certificate (len=%d): %s", service_name, len(cert_pem), e)
-                    LOG.debug("🔍 OCSP custom cert %s raw data (first 10000 bytes): %s", service_name, cert_pem[:10000])
+                    LOG.debug("🔍 OCSP custom cert %s raw data (first 200 bytes): %s", service_name, cert_pem[:200])
                     stats["custom_certs_skipped"] = stats.get("custom_certs_skipped", 0) + 1
                     continue
 
