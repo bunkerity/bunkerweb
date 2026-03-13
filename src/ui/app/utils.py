@@ -312,6 +312,7 @@ def flash(message: str, category: str = "success", i18n_key: Optional[str] = Non
 
     if save and "flash_messages" in session:
         session["flash_messages"].append((message, category, datetime.now().astimezone().isoformat()))
+        session.modified = True
 
 
 def human_readable_number(value: Union[str, int]) -> str:
