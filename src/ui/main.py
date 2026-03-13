@@ -985,8 +985,8 @@ def schedule_database_state_check(request_method: str, request_path: str):
 
 def schedule_restart_workers():
     global _restart_workers_future, _restart_workers_next_allowed
-    now = time()
     with _restart_workers_lock:
+        now = time()
         if now < _restart_workers_next_allowed:
             return
         if _restart_workers_future and not _restart_workers_future.done():
