@@ -58,7 +58,7 @@ def _set_plugin_permissions(plugin_path: Path) -> None:
 def _plugin_checksum_matches_database(plugin_path: Path, checksum: str) -> bool:
     try:
         with BytesIO() as plugin_content:
-            with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=3) as tar:
+            with tar_open(fileobj=plugin_content, mode="w:") as tar:
                 add_dir_to_tar_safely(tar, plugin_path, arc_root=plugin_path.name)
             plugin_content.seek(0)
             return bytes_hash(plugin_content, algorithm="sha256") == checksum
@@ -457,15 +457,23 @@ try:
             rmtree(plugin_path, ignore_errors=True)
             continue
 
+        # Checksum is computed from an uncompressed tar so it depends only on file
+        # content/names (via plugin_tar_filter normalization), not on gzip parameters.
+        # The stored data blob uses gzip for space efficiency but is kept separate so
+        # compression level changes never invalidate checksums.
+        with BytesIO() as checksum_content:
+            with tar_open(fileobj=checksum_content, mode="w:") as tar:
+                add_dir_to_tar_safely(tar, plugin_path, arc_root=plugin_path.name)
+            checksum_content.seek(0, 0)
+            checksum = bytes_hash(checksum_content, algorithm="sha256")
+
         with BytesIO() as plugin_content:
             with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=3) as tar:
                 add_dir_to_tar_safely(tar, plugin_path, arc_root=plugin_path.name)
-            plugin_content.seek(0, 0)
 
             with plugin_path.joinpath("plugin.json").open("r", encoding="utf-8") as f:
                 plugin_data = json_load(f)
 
-            checksum = bytes_hash(plugin_content, algorithm="sha256")
             plugin_data.update(
                 {
                     "type": "pro",

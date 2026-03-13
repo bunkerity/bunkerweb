@@ -196,7 +196,14 @@ def plugin_tar_exclude(path: Union[str, Path]) -> bool:
 
 
 def plugin_tar_filter(tarinfo):
-    """Tar filter for plugin archives to drop unwanted entries."""
+    """Tar filter for plugin archives: drops unwanted entries and normalizes metadata.
+
+    Metadata normalization (mtime=0, uid/gid=0, empty uname/gname) ensures that
+    SHA-256 checksums computed from the archive depend only on file content and
+    names, not on filesystem timestamps or ownership.  This makes checksums stable
+    across installs, reinstalls, and extractions — equivalent to passing
+    ``--owner=0 --group=0 --numeric-owner --mtime=0`` to GNU tar.
+    """
     try:
         name = getattr(tarinfo, "name", "")
         p = Path(name)
@@ -206,6 +213,12 @@ def plugin_tar_filter(tarinfo):
             return None
         if p.name in _EXCLUDED_FILE_NAMES:
             return None
+        # Strip variable metadata so the tar stream is deterministic.
+        tarinfo.mtime = 0
+        tarinfo.uid = 0
+        tarinfo.gid = 0
+        tarinfo.uname = ""
+        tarinfo.gname = ""
         return tarinfo
     except Exception:
         return None
@@ -233,7 +246,10 @@ def add_dir_to_tar_safely(tar: Any, dir_path: Union[str, Path], arc_root: Option
         if not plugin_tar_exclude(d):
             tar.add(d.as_posix(), arcname=arc_root, recursive=False, filter=plugin_tar_filter)
 
-    for p in d.rglob("*"):
+    # sorted() ensures a deterministic traversal order across all platforms;
+    # combined with plugin_tar_filter's metadata normalization this makes the
+    # resulting tar stream byte-for-byte identical on every run for the same content.
+    for p in sorted(d.rglob("*")):
         if plugin_tar_exclude(p):
             continue
         arcname = f"{arc_root}/{p.relative_to(d).as_posix()}"

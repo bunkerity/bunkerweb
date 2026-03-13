@@ -319,13 +319,14 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
     # Remove old external/pro plugins files
     LOGGER.info(f"Removing old/changed {'pro ' if pro else ''}external plugins files ...")
     ignored_plugins = set()
+    reinstalled_plugins: list = []
     if original_path.is_dir():
         for file in original_path.glob("*"):
             with suppress(StopIteration, IndexError, FileNotFoundError):
                 index = next(i for i, plugin in enumerate(plugins) if plugin["id"] == file.name)
 
                 with BytesIO() as plugin_content:
-                    with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
+                    with tar_open(fileobj=plugin_content, mode="w:") as tar:
                         if file.is_dir():
                             add_dir_to_tar_safely(tar, file, arc_root=file.name)
                         elif file.is_file():
@@ -371,6 +372,8 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
                         for executable_file in plugin_path.joinpath(subdir).rglob(pattern):
                             if executable_file.stat().st_mode & 0o777 != desired_perms:
                                 executable_file.chmod(desired_perms)
+
+                    reinstalled_plugins.append(plugin)
             except OSError as e:
                 LOGGER.debug(format_exc())
                 if plugin["method"] != "manual":
@@ -378,6 +381,28 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
             except BaseException as e:
                 LOGGER.debug(format_exc())
                 LOGGER.error(f"Error while generating {'pro ' if pro else ''}external plugins \"{plugin['name']}\": {e}")
+
+    # After reinstalling plugins from DB blobs, recompute their checksums using the
+    # same deterministic uncompressed-tar method and write them back to the DB.
+    # This ensures the next startup finds matching hashes even if the previously
+    # stored checksum was computed with a different compression level or before
+    # metadata normalization was introduced (self-healing one-cycle migration).
+    if reinstalled_plugins:
+        _type = "pro" if pro else "external"
+        checksum_updates: dict = {}
+        for plugin in reinstalled_plugins:
+            plugin_path = original_path.joinpath(plugin["id"])
+            with suppress(BaseException):
+                with BytesIO() as buf:
+                    with tar_open(fileobj=buf, mode="w:") as tar:
+                        add_dir_to_tar_safely(tar, plugin_path, arc_root=plugin["id"])
+                    buf.seek(0, 0)
+                    checksum_updates[plugin["id"]] = bytes_hash(buf, algorithm="sha256")
+        if checksum_updates:
+            LOGGER.info(f"Updating checksums for {len(checksum_updates)} reinstalled {'pro ' if pro else ''}plugin(s) ...")
+            updated_plugins = [dict(p, checksum=checksum_updates[p["id"]]) if p["id"] in checksum_updates else p for p in plugins]
+            with suppress(BaseException):
+                SCHEDULER.db.update_external_plugins(updated_plugins, _type=_type, per_plugin_commit=False)
 
     if send and SCHEDULER and SCHEDULER.apis:
         LOGGER.info(f"Sending {'pro ' if pro else ''}external plugins to BunkerWeb")
@@ -866,11 +891,18 @@ if __name__ == "__main__":
             external_plugins = []
             tmp_external_plugins = []
             for file in plugin_path.glob("*/plugin.json"):
-                with BytesIO() as plugin_content:
-                    with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
+                # Checksum uses an uncompressed tar so it is independent of gzip parameters;
+                # the data blob is kept as gzip for efficient DB storage.
+                with BytesIO() as checksum_content:
+                    with tar_open(fileobj=checksum_content, mode="w:") as tar:
                         # Safely pack the plugin directory while excluding caches/pyc and unreadable files
                         add_dir_to_tar_safely(tar, file.parent, arc_root=file.parent.name)
-                    plugin_content.seek(0, 0)
+                    checksum_content.seek(0, 0)
+                    checksum = bytes_hash(checksum_content, algorithm="sha256")
+
+                with BytesIO() as plugin_content:
+                    with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=3) as tar:
+                        add_dir_to_tar_safely(tar, file.parent, arc_root=file.parent.name)
 
                     with file.open("r", encoding="utf-8") as f:
                         plugin_data = json_load(f)
@@ -878,7 +910,6 @@ if __name__ == "__main__":
                     if plugin_data["id"] == "letsencrypt_dns":
                         continue
 
-                    checksum = bytes_hash(plugin_content, algorithm="sha256")
                     common_data = plugin_data | {
                         "type": _type,
                         "page": file.parent.joinpath("ui").is_dir(),
