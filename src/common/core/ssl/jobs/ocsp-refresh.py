@@ -450,9 +450,11 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
         LOG.debug("ℹ️ OCSP database not available, skipping cache restoration")
         return
 
-    LOG.info("🔄 OCSP restoring cached responses from database to disk...")
+    LOG.info("🔄 OCSP syncing cached responses from database to disk...")
     try:
         restored_count = 0
+        replaced_count = 0
+        ok_count = 0
 
         # Get all OCSP cache entries from database for this job
         cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=True)
@@ -462,23 +464,41 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                 continue
 
             cert_name = file_name[len("ocsp/"):]
+            db_data = entry["data"]
+            db_checksum = entry.get("checksum") or hashlib.sha256(db_data).hexdigest()
+
             try:
                 ocsp_cert_dir = CONFIGS_SSL_BASE / cert_name
-                ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
                 ocsp_path = ocsp_cert_dir / "ocsp.der"
-                ocsp_path.write_bytes(entry["data"])
-                ocsp_path.chmod(0o644)
-                restored_count += 1
-                LOG.debug("✓ OCSP restored cached response for %s from database", cert_name)
-            except Exception as e:
-                LOG.debug("⚠️ OCSP could not restore cache for %s: %s", cert_name, e)
 
-        if restored_count > 0:
-            LOG.info("✓ OCSP restored %d cached responses from database to disk", restored_count)
+                if ocsp_path.is_file():
+                    # File exists — compare checksum
+                    disk_checksum = hashlib.sha256(ocsp_path.read_bytes()).hexdigest()
+                    if disk_checksum == db_checksum:
+                        ok_count += 1
+                        LOG.debug("✓ OCSP disk file for %s matches database (checksum=%s)", cert_name, db_checksum[:8])
+                        continue
+                    # Checksum mismatch — replace with database version
+                    LOG.info("🔄 OCSP disk file for %s has wrong checksum (disk=%s, db=%s), replacing", cert_name, disk_checksum[:8], db_checksum[:8])
+                    ocsp_path.write_bytes(db_data)
+                    ocsp_path.chmod(0o644)
+                    replaced_count += 1
+                else:
+                    # File missing — restore from database
+                    ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
+                    ocsp_path.write_bytes(db_data)
+                    ocsp_path.chmod(0o644)
+                    restored_count += 1
+                    LOG.debug("✓ OCSP restored cached response for %s from database", cert_name)
+            except Exception as e:
+                LOG.debug("⚠️ OCSP could not sync cache for %s: %s", cert_name, e)
+
+        if restored_count > 0 or replaced_count > 0:
+            LOG.info("✓ OCSP sync complete: restored=%d, replaced=%d, unchanged=%d", restored_count, replaced_count, ok_count)
         else:
-            LOG.debug("ℹ️ OCSP no cached responses restored from database (cache may be cold)")
+            LOG.debug("ℹ️ OCSP sync complete: all %d disk files match database (restored=0, replaced=0)", ok_count)
     except Exception as e:
-        LOG.debug("OCSP exception while attempting cache restoration: %s", e)
+        LOG.debug("OCSP exception while attempting cache sync: %s", e)
 
 
 def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, stats: Optional[dict] = None) -> None:
@@ -863,6 +883,71 @@ def cleanup_ocsp_cache(db: Optional[Any] = None, cert_name: Optional[str] = None
         LOG.info("🧹 OCSP all stapling caches cleaned up")
 
 
+def _cleanup_orphaned_ocsp(db: Optional[Any], le_certs: Dict[str, bytes], stats: Optional[dict] = None) -> None:
+    """
+    Remove OCSP cache entries (disk + database) for services that no longer have
+    certificates in the database. This handles deleted services.
+    """
+    if stats is None:
+        stats = {}
+
+    # Build set of valid cert names from LE certs
+    valid_cert_names: set = set(le_certs.keys())
+
+    # Add custom cert names (with customcert- prefix)
+    if db:
+        try:
+            custom_certs = _load_custom_certs_from_db(db)
+            for key in custom_certs:
+                valid_cert_names.add(f"customcert-{key}")
+        except Exception as e:
+            LOG.warning("⚠️ OCSP could not load custom certs for orphan check: %s", e)
+            return  # Don't clean up if we can't verify what's valid
+
+    if not valid_cert_names:
+        LOG.debug("ℹ️ OCSP no valid certs found, skipping orphan cleanup to avoid accidental deletion")
+        return
+
+    orphaned_count = 0
+
+    # Check database OCSP entries
+    if db:
+        try:
+            cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=False)
+            for entry in cache_files:
+                file_name = entry.get("file_name", "")
+                if not file_name.startswith("ocsp/"):
+                    continue
+                cert_name = file_name[len("ocsp/"):]
+                if cert_name not in valid_cert_names:
+                    LOG.info("🧹 OCSP removing orphaned entry for deleted service: %s", cert_name)
+                    cleanup_ocsp_cache(db, cert_name)
+                    orphaned_count += 1
+        except Exception as e:
+            LOG.warning("⚠️ OCSP could not check database for orphaned entries: %s", e)
+
+    # Check disk directories for orphaned OCSP files
+    if CONFIGS_SSL_BASE.is_dir():
+        for entry in sorted(CONFIGS_SSL_BASE.iterdir()):
+            if not entry.is_dir():
+                continue
+            ocsp_file = entry / "ocsp.der"
+            if not ocsp_file.is_file() and not ocsp_file.is_symlink():
+                continue
+            cert_name = entry.name
+            if cert_name not in valid_cert_names:
+                # Check if it's a SAN symlink (those are managed by _create_san_symlinks)
+                if ocsp_file.is_symlink():
+                    continue
+                LOG.info("🧹 OCSP removing orphaned disk cache for deleted service: %s", cert_name)
+                cleanup_ocsp_cache(db, cert_name)
+                orphaned_count += 1
+
+    if orphaned_count > 0:
+        LOG.info("🧹 OCSP cleaned up %d orphaned cache entries for deleted services", orphaned_count)
+        stats["orphaned_cleaned"] = orphaned_count
+
+
 def main() -> int:
     global status
     db: Optional[Any] = None
@@ -903,7 +988,13 @@ def main() -> int:
             cleanup_ocsp_cache(db, purge_db=False)
             return 0
 
-        # Restore cached OCSP responses from database (handles ephemeral storage)
+        # Wait for scheduler's directory purge to finish after service restart,
+        # then restore cached OCSP responses from database to disk.
+        # This handles ephemeral storage and post-restart cache directory cleanup.
+        ocsp_files_exist = any((CONFIGS_SSL_BASE / d / "ocsp.der").is_file() for d in CONFIGS_SSL_BASE.iterdir()) if CONFIGS_SSL_BASE.is_dir() else False
+        if not ocsp_files_exist:
+            LOG.info("🔄 OCSP no cached files on disk, waiting 10s for scheduler purge to finish before restoring from database...")
+            time.sleep(10)
         restore_ocsp_from_database(db)
 
         # Process Let's Encrypt certificates from database tarball
@@ -920,6 +1011,9 @@ def main() -> int:
         # Process custom certificates from database
         process_custom_certs(db, stats)
 
+        # Clean up orphaned OCSP entries for deleted services
+        _cleanup_orphaned_ocsp(db, le_certs or {}, stats)
+
         # Decide exit status based on results
         if stats["errors"] > 0:
             status = 2
@@ -930,7 +1024,7 @@ def main() -> int:
             LOG.warning("⚠️ OCSP refresh job completed with %d error(s)", stats["errors"])
 
         LOG.info(
-            "📊 Statistics: 🔐 LE certs=%d (skipped=%d, no OCSP=%d) | 🔐 Custom certs=%d (no OCSP=%d) | 🔄 Fetched=%d | ✓ Cached=%d | ❌ Errors=%d",
+            "📊 Statistics: 🔐 LE certs=%d (skipped=%d, no OCSP=%d) | 🔐 Custom certs=%d (no OCSP=%d) | 🔄 Fetched=%d | ✓ Cached=%d | 🧹 Orphaned=%d | ❌ Errors=%d",
             stats["le_certs_processed"],
             stats["le_certs_skipped"],
             stats["le_certs_no_ocsp"],
@@ -938,6 +1032,7 @@ def main() -> int:
             stats["custom_certs_no_ocsp"],
             stats["ocsp_fetched_responses"],
             stats["ocsp_cached_responses"],
+            stats.get("orphaned_cleaned", 0),
             stats["errors"],
         )
         return status
