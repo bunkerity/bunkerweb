@@ -706,7 +706,7 @@ def _load_le_certs_from_db(db: Any) -> Dict[str, bytes]:
             LOG.debug("✓ OCSP found LE tarball from %s job", job_name)
             break
 
-    if not tgz_data:
+    if tgz_data is None:
         LOG.debug("ℹ️ OCSP no LE tarball found in database (certbot-new cache)")
         return result
 
@@ -940,17 +940,19 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
             # AGGRESSIVE CLEANUP: If we had a cached response that is now below 75 mins (MIN_TTL),
             # and the refresh failed, we MUST remove it now to prevent stapling expired data 
             # soon (since the next job runs in 60 mins).
-            if cached_ttl is not None and cached_ttl <= MIN_TTL:
-                LOG.warning(
-                    "🚨🚨🚨 OCSP CRITICAL WARNING: Cached response for %s is near expiration (TTL=%ds) "
-                    "and refresh failed. Removing response from cache to prevent stapling expired data. "
-                    "Security status: Stapling will be DISABLED for this certificate until refresh succeeds.",
-                    cert_name, cached_ttl
-                )
-                cleanup_ocsp_cache(db, cert_name)
-            elif cached_ttl is not None and cached_ttl <= 0:
-                LOG.warning("🧹 OCSP cached response for %s is already expired and refresh failed. Cleaning up invalid cache.", cert_name)
-                cleanup_ocsp_cache(db, cert_name)
+            if cached_ttl is not None:
+                current_ttl = cast(int, cached_ttl)
+                if current_ttl <= MIN_TTL:
+                    LOG.warning(
+                        "🚨🚨🚨 OCSP CRITICAL WARNING: Cached response for %s is near expiration (TTL=%ds) "
+                        "and refresh failed. Removing response from cache to prevent stapling expired data. "
+                        "Security status: Stapling will be DISABLED for this certificate until refresh succeeds.",
+                        cert_name, current_ttl
+                    )
+                    cleanup_ocsp_cache(db, cert_name)
+                elif current_ttl <= 0:
+                    LOG.warning("🧹 OCSP cached response for %s is already expired and refresh failed. Cleaning up invalid cache.", cert_name)
+                    cleanup_ocsp_cache(db, cert_name)
 
             stats["errors"] = stats.get("errors", 0) + 1
             return None
@@ -1420,9 +1422,10 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
                 "🔍 OCSP verification complete: %d checked | ✓ %d restored (missing) | 🔄 %d corrected (mismatch)",
                 verify_count, restored_count, mismatch_count
             )
-            stats["ocsp_verified"] = stats.get("ocsp_verified", 0) + verify_count
-            stats["ocsp_restored"] = stats.get("ocsp_restored", 0) + restored_count
-            stats["ocsp_corrected"] = stats.get("ocsp_corrected", 0) + mismatch_count
+            if stats is not None:
+                stats["ocsp_verified"] = stats.get("ocsp_verified", 0) + verify_count
+                stats["ocsp_restored"] = stats.get("ocsp_restored", 0) + restored_count
+                stats["ocsp_corrected"] = stats.get("ocsp_corrected", 0) + mismatch_count
 
     except Exception as e:
         LOG.warning("⚠️ OCSP verification failed: %s", e)
@@ -1617,7 +1620,7 @@ def main() -> int:
             all_ocsp_results.extend(custom_results)
 
         # === Batch write all OCSP responses to database ===
-        if all_ocsp_results:
+        if db and all_ocsp_results:
             LOG.info("🔄 OCSP batching %d OCSP response(s) to database", len(all_ocsp_results))
             for cert_name, ocsp_der, ttl, checksum, pem_data in all_ocsp_results:
                 cache_key = f"ocsp/{cert_name}"
