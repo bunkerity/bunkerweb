@@ -5,8 +5,10 @@ import io
 import os
 import re
 import shutil
+import subprocess
 import sys as _sys
 import tarfile
+import tempfile
 import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -159,7 +161,7 @@ def _fetch_issuer_from_aia(leaf: x509.Certificate, cert_name: str = "") -> Optio
                 try:
                     # Use a short timeout so we don't hang
                     with urlopen(req, timeout=10) as response:
-                        issuer_der = response.read()
+                        issuer_der = response.read(1_048_576)  # Cap at 1MB to prevent memory exhaustion
                     # Try DER first (most common for caIssuers), then PEM
                     try:
                         return x509.load_der_x509_certificate(issuer_der)
@@ -273,7 +275,7 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
             method="POST",
         )
         response = urlopen(req, timeout=timeout)
-        ocsp_response_data = response.read()
+        ocsp_response_data = response.read(102_400)  # Cap at 100KB — typical OCSP response is 1-4KB
 
         # Parse response and validate status
         ocsp_response = x509_ocsp.load_der_ocsp_response(ocsp_response_data)
@@ -284,9 +286,8 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
         # === SECURE OCSP RESPONSE VERIFICATION ===
         # Use OpenSSL to cryptographically verify the OCSP response signature.
         # This prevents an attacker from MITM-ing the HTTP request and feeding a fake "SUCCESSFUL" payload.
-        import tempfile
-        import subprocess
-        from cryptography.hazmat.primitives.serialization import Encoding
+        # Verify the OCSP response signature using OpenSSL CLI.
+        # tempfile and subprocess are imported at the top of the file.
 
         with tempfile.NamedTemporaryFile(suffix=".der", delete=True) as f_der, \
              tempfile.NamedTemporaryFile(suffix=".pem", mode="w", delete=True) as f_issuer, \
@@ -474,6 +475,10 @@ def _load_le_certs_from_db(db: Any) -> Dict[str, bytes]:
                 idx = 1 if parts[0] == "." else 0
                 if len(parts) == idx + 3 and parts[idx] == "live" and parts[idx + 2] == "fullchain.pem":
                     cert_name = parts[idx + 1]
+                    # Prevent path traversal from crafted tarball entries
+                    if not re.match(r"^[A-Za-z0-9_.*-]+$", cert_name):
+                        LOG.warning("⚠️ OCSP sanitization: skipping unsafe cert_name from tarball: %s", cert_name)
+                        continue
                     try:
                         f = tar.extractfile(member)
                         if f:
@@ -565,6 +570,10 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                 continue
 
             cert_name = file_name[len("ocsp/"):]
+            # Prevent path traversal from crafted database entries
+            if not re.match(r"^[A-Za-z0-9_.*-]+$", cert_name):
+                LOG.warning("⚠️ OCSP sanitization: skipping unsafe cert_name from database: %s", cert_name)
+                continue
             db_data = entry["data"]
             db_checksum = entry.get("checksum") or hashlib.sha256(db_data).hexdigest()
 
