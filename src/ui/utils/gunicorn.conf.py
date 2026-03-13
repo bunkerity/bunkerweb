@@ -555,6 +555,8 @@ def on_starting(server):
     )
     set_secure_permissions(UI_DATA_FILE)
 
+    DB.close()  # Close local DB connections before fork to prevent fd leaks
+
     LOGGER.info(
         "UI will disconnect users that have their IP address changed during a session"
         + (" except for private IP addresses." if getenv("CHECK_PRIVATE_IP", "yes").lower() == "no" else ".")
@@ -585,6 +587,26 @@ def on_starting(server):
 
 def when_ready(server):
     HEALTH_FILE.write_text("ok", encoding="utf-8")
+
+
+def post_fork(server, worker):
+    """Dispose inherited DB connections after fork.
+
+    The master process opens DB connections during on_starting() (admin/role
+    setup and reload_plugins()). After fork, workers inherit these stale
+    connections via sys.modules. Per SQLAlchemy docs, call dispose(close=False)
+    in the child to replace the pool without closing the parent's physical
+    connections.
+
+    See: https://docs.sqlalchemy.org/en/21/core/pooling.html
+         #using-connection-pools-with-multiprocessing-or-os-fork
+    """
+    from app.dependencies import DB
+
+    if DB._session_factory is not None:
+        DB._session_factory.remove()
+    if DB.sql_engine is not None:
+        DB.sql_engine.dispose(close=False)
 
 
 def on_exit(server):

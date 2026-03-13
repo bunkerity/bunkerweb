@@ -522,6 +522,8 @@ def on_starting(server):
 
     LOGGER.info("API is ready")
 
+    DB.close()  # Close local DB connections before fork to prevent fd leaks
+
 
 def when_ready(server):
     HEALTH_FILE.write_text("ok", encoding="utf-8")
