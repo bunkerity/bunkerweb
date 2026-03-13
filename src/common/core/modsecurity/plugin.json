@@ -35,12 +35,12 @@
     "MODSECURITY_CRS_VERSION": {
       "context": "multisite",
       "default": "4",
-      "help": "Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).",
+      "help": "Version of the OWASP Core Rule Set to use with ModSecurity (3 or 4). Note: nightly is deprecated and will default to v4.",
       "id": "modsecurity-crs-version",
       "label": "Core Rule Set Version",
       "regex": "^(3|4|nightly)$",
       "type": "select",
-      "select": ["3", "4", "nightly"]
+      "select": ["3", "4"]
     },
     "MODSECURITY_CRS_PLUGINS": {
       "context": "multisite",
@@ -117,13 +117,6 @@
     }
   },
   "jobs": [
-    {
-      "name": "coreruleset-nightly",
-      "file": "coreruleset-nightly.py",
-      "every": "day",
-      "reload": true,
-      "async": true
-    },
     {
       "name": "download-crs-plugins",
       "file": "download-crs-plugins.py",

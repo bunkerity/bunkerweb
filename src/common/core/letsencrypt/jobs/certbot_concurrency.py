@@ -1,10 +1,11 @@
+from contextlib import suppress
 from dataclasses import dataclass
 from json import loads
 from operator import itemgetter
 from os import readlink, symlink, walk
 from pathlib import Path
 from shutil import copy2, copyfileobj, copystat, copytree, rmtree
-from subprocess import DEVNULL, PIPE, STDOUT, run
+from subprocess import DEVNULL, PIPE, STDOUT, TimeoutExpired, run
 from tempfile import mkdtemp
 from typing import Dict, List, Optional, Set, Tuple
 
@@ -83,6 +84,24 @@ def _merge_logs(src: Path, dest: Path, logger=None) -> None:
                 continue
 
 
+def _find_directory_dirs(root: Path) -> List[Path]:
+    """Recursively find all subdirectories named 'directory' under root.
+
+    This handles both shallow paths (e.g. Let's Encrypt: accounts/<hostname>/directory/)
+    and deeply nested ones (e.g. ZeroSSL: accounts/acme.zerossl.com/v2/DV90/directory/).
+    """
+    result = []
+    with suppress(OSError):
+        for child in root.iterdir():
+            if not child.is_dir():
+                continue
+            if child.name == "directory":
+                result.append(child)
+            else:
+                result.extend(_find_directory_dirs(child))
+    return result
+
+
 def select_account_id(accounts_root: Path, staging: bool, email: str) -> Optional[str]:
     if not accounts_root.is_dir():
         return None
@@ -101,23 +120,21 @@ def select_account_id(accounts_root: Path, staging: bool, email: str) -> Optiona
 
     candidates: List[Tuple[Path, str]] = []
     for server_dir in server_dirs:
-        directory_dir = server_dir.joinpath("directory")
-        if not directory_dir.is_dir():
-            continue
-        for account_dir in directory_dir.iterdir():
-            if not account_dir.is_dir():
-                continue
-            meta_path = account_dir.joinpath("meta.json")
-            meta_email = ""
-            if meta_path.is_file():
-                try:
-                    meta = loads(meta_path.read_text())
-                    if isinstance(meta, dict):
-                        meta_email = str(meta.get("email") or "")
-                except (OSError, ValueError, KeyError):
-                    # Silently skip corrupted meta.json files
-                    meta_email = ""
-            candidates.append((account_dir, meta_email))
+        for directory_dir in _find_directory_dirs(server_dir):
+            for account_dir in directory_dir.iterdir():
+                if not account_dir.is_dir():
+                    continue
+                meta_path = account_dir.joinpath("meta.json")
+                meta_email = ""
+                if meta_path.is_file():
+                    try:
+                        meta = loads(meta_path.read_text())
+                        if isinstance(meta, dict):
+                            meta_email = str(meta.get("email") or "")
+                    except (OSError, ValueError, KeyError):
+                        # Silently skip corrupted meta.json files
+                        meta_email = ""
+                candidates.append((account_dir, meta_email))
 
     if not candidates:
         return None
@@ -151,28 +168,26 @@ def _account_exists(accounts_root: Path, staging: bool, email: str) -> bool:
         server_dirs = [path for path in server_dirs if "staging" not in path.name]
 
     for server_dir in server_dirs:
-        directory_dir = server_dir.joinpath("directory")
-        if not directory_dir.is_dir():
-            continue
-        for account_dir in directory_dir.iterdir():
-            if not account_dir.is_dir():
-                continue
-            meta_path = account_dir.joinpath("meta.json")
-            meta_email = ""
-            if meta_path.is_file():
-                try:
-                    meta = loads(meta_path.read_text())
-                    if isinstance(meta, dict):
-                        meta_email = str(meta.get("email") or "")
-                except (OSError, ValueError, KeyError):
-                    # Silently skip corrupted meta.json files
-                    meta_email = ""
-            if email:
-                if meta_email.lower() == email.lower():
-                    return True
-            else:
-                if not meta_email:
-                    return True
+        for directory_dir in _find_directory_dirs(server_dir):
+            for account_dir in directory_dir.iterdir():
+                if not account_dir.is_dir():
+                    continue
+                meta_path = account_dir.joinpath("meta.json")
+                meta_email = ""
+                if meta_path.is_file():
+                    try:
+                        meta = loads(meta_path.read_text())
+                        if isinstance(meta, dict):
+                            meta_email = str(meta.get("email") or "")
+                    except (OSError, ValueError, KeyError):
+                        # Silently skip corrupted meta.json files
+                        meta_email = ""
+                if email:
+                    if meta_email.lower() == email.lower():
+                        return True
+                else:
+                    if not meta_email:
+                        return True
     return False
 
 
@@ -210,20 +225,88 @@ def ensure_accounts(
             command.append("--register-unsafely-without-email")
         if log_level == "DEBUG":
             command.append("-v")
-        proc = run(
-            command,
-            stdin=DEVNULL,
-            stdout=PIPE,
-            stderr=STDOUT,
-            text=True,
-            env=cmd_env,
-            check=False,
-        )
+        try:
+            proc = run(
+                command,
+                stdin=DEVNULL,
+                stdout=PIPE,
+                stderr=STDOUT,
+                text=True,
+                env=cmd_env,
+                check=False,
+                timeout=300,
+            )
+        except TimeoutExpired:
+            logger.error(f"Let's Encrypt account registration timed out after 300s (staging={staging}, email={'set' if email else 'empty'})")
+            continue
         if proc.returncode != 0:
             if "existing account" in proc.stdout.lower():
                 logger.info(f"Let's Encrypt account already exists (staging={staging}, email={'set' if email else 'empty'}), skipping registration.")
                 continue
             logger.error(f"Failed to register Let's Encrypt account (staging={staging}, email={'set' if email else 'empty'}):\n{proc.stdout}")
+
+
+def ensure_zerossl_accounts(
+    requests: Set[Tuple[bool, str]],
+    cmd_env: Dict[str, str],
+    zerossl_bot_script: str,
+    log_level: str,
+    data_path: Path,
+    work_dir: str,
+    logs_dir: str,
+    logger,
+) -> None:
+    """Pre-register ZeroSSL accounts sequentially before concurrent certificate generation.
+
+    Mirrors ``ensure_accounts`` for Let's Encrypt but invokes zerossl-bot.sh so that
+    EAB credentials are fetched and the account is registered against the ZeroSSL ACME
+    server.  Running this once before spawning threads guarantees that all concurrent
+    certbot invocations share a single pre-existing account, avoiding the interactive
+    "Please choose an account" prompt that certbot emits when multiple accounts are found.
+    """
+    accounts_root = data_path.joinpath("accounts")
+    for staging, email in sorted(requests, key=itemgetter(0, 1)):
+        if _account_exists(accounts_root, staging, email):
+            continue
+        command = [
+            zerossl_bot_script,
+            "register",
+            "-n",
+            "--agree-tos",
+            "--config-dir",
+            data_path.as_posix(),
+            "--work-dir",
+            work_dir,
+            "--logs-dir",
+            logs_dir,
+        ]
+        if email:
+            command.extend(["--email", email])
+        else:
+            command.append("--register-unsafely-without-email")
+        if staging:
+            command.append("--staging")
+        if log_level == "DEBUG":
+            command.append("-v")
+        try:
+            proc = run(
+                command,
+                stdin=DEVNULL,
+                stdout=PIPE,
+                stderr=STDOUT,
+                text=True,
+                env=cmd_env,
+                check=False,
+                timeout=300,
+            )
+        except TimeoutExpired:
+            logger.error(f"ZeroSSL account registration timed out after 300s (email={'set' if email else 'empty'})")
+            continue
+        if proc.returncode != 0:
+            if "existing account" in proc.stdout.lower():
+                logger.info(f"ZeroSSL account already exists (email={'set' if email else 'empty'}), skipping registration.")
+                continue
+            logger.error(f"Failed to register ZeroSSL account (email={'set' if email else 'empty'}):\n{proc.stdout}")
 
 
 def _rewrite_renewal_paths(paths: CertbotPaths, data_path: Path, work_dir: str, logs_dir: str, logger) -> None:

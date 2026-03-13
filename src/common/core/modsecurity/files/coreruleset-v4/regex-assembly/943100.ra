@@ -1,0 +1,25 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Detects session fixation via cookie manipulation:
+##! - JavaScript document.cookie with expires/domain attributes
+##! - HTML META http-equiv="Set-Cookie"
+
+##!+ i
+
+##!> assemble
+  ##! JS cookie manipulation: document.cookie = "foo=bar; expires=..."
+  ##!> assemble
+    \.cookie\b.*?;\W*?
+    ##!=>
+    ##!> assemble
+      expires
+      domain
+    ##!<
+    ##!=>
+    \W*?=
+    ##!=>
+  ##!<
+  ##! HTML META tag: <meta http-equiv="Set-Cookie" ...>
+  \bhttp-equiv\W+set-cookie\b
+##!<

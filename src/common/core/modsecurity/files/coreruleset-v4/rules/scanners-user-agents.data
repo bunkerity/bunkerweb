@@ -72,6 +72,9 @@ netlab360
 
 netsparker
 
+# OWASP Nettacker
+nettacker
+
 # vuln scanner
 # https://cirt.net/Nikto2
 nikto
@@ -114,6 +117,57 @@ wprecon
 # wordpress vuln scanner
 # https://wpscan.org/
 wpscan
+
+# feroxbuster directory fuzzer
+feroxbuster
+
+# (deprecated) https://github.com/LeakIX/l9explore
+l9explore
+
+# (deprecated) https://github.com/LeakIX/l9tcpid
+l9tcpid
+
+# https://github.com/wapiti-scanner/wapiti
+wapiti
+
+# https://subgraph.com/vega/
+vega
+
+# https://docs.rapid7.com/appspider/
+appspider
+
+# https://github.com/swatv3nub/IronWASP
+ironwasp
+
+# https://github.com/spinkham/skipfish
+skipfish
+
+# https://www.qualys.com/apps/web-app-scanning
+qualysguard
+
+# https://nstalker.com/
+n-stalker
+
+# https://www.acunetix.com/
+acunetix
+
+# https://github.com/dionach/CMSmap
+cmsmap
+
+# https://github.com/xxgrunge/sqlninja
+sqlninja
+
+# https://github.com/s0md3v/XSStrike
+xsstrike
+
+# https://github.com/epsylon/xsser
+xsser
+
+# https://github.com/OWASP/joomscan
+joomscan
+
+# https://github.com/SamJoan/droopescan
+droopescan
 
 # ZGrab scanner (Mozilla/5.0 zgrab/0.x)
 # https://zmap.io

@@ -12,13 +12,14 @@ from re import MULTILINE, match, search
 from select import select
 from subprocess import DEVNULL, PIPE, STDOUT, Popen, run
 from sys import exit as sys_exit, path as sys_path
-from time import sleep
+from time import monotonic, sleep
 from threading import Event, Lock, Thread
 from traceback import format_exc
 from typing import Dict, List, Optional, Set, Tuple, Type, Union
 from certbot_concurrency import (
     CertbotPaths,
     ensure_accounts,
+    ensure_zerossl_accounts,
     finalize_certbot_run,
     prepare_certbot_paths,
     select_account_id,
@@ -125,6 +126,7 @@ CHALLENGE_TYPES = ("http", "dns")
 PROFILE_TYPES = ("classic", "tlsserver", "shortlived")
 ACME_SERVER_TYPES = ("letsencrypt", "zerossl")
 DNS_PROPAGATION_DEFAULT = "default"
+CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
 
 
 def normalize_server_names(server_names: str) -> Set[str]:
@@ -581,9 +583,14 @@ def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, 
     if not server_names:
         return {}
 
+    # Deduplicate server names to avoid sending duplicate domains to the ACME server
+    unique_names = normalize_server_names(",".join(server_names))
+    if len(unique_names) < len(server_names):
+        LOGGER.debug(f"[Service: {service}] Removed {len(server_names) - len(unique_names)} duplicate server name(s).")
+
     entries: Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]] = {}
     if base_config["wildcard"]:
-        wildcard_groups = extract_wildcard_groups(server_names)
+        wildcard_groups = extract_wildcard_groups(list(unique_names))
         if not wildcard_groups and base_config["activated"]:
             LOGGER.warning(f"[Service: {service}] No valid wildcard groups found, skipping generation.")
         for base, names in wildcard_groups.items():
@@ -593,7 +600,7 @@ def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, 
         return entries
 
     config = base_config.copy()
-    config["server_names"] = ",".join(server_names)
+    config["server_names"] = format_server_names(unique_names)
     entries[service] = config
     return entries
 
@@ -655,7 +662,13 @@ def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
 
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
 
+    deadline = monotonic() + CERTBOT_TIMEOUT
     while process.poll() is None:
+        if monotonic() > deadline:
+            LOGGER.error(f"certbot delete for {service} timed out after {CERTBOT_TIMEOUT}s, killing process.")
+            process.kill()
+            process.wait()
+            return 1
         if process.stderr:
             rlist, _, _ = select([process.stderr], [], [], 2)
             if rlist:
@@ -727,7 +740,11 @@ def certbot_new(
 
         zerossl_api_key = str(config.get("zerossl_api_key") or "")
         if zerossl_api_key:
-            command.extend(["--zerossl-api-key", zerossl_api_key])
+            cmd_env["LETS_ENCRYPT_ZEROSSL_API_KEY"] = zerossl_api_key
+
+        account_id = select_account_id(paths.config_dir.joinpath("accounts"), bool(config["staging"]), str(config.get("email") or ""))
+        if account_id:
+            command.extend(["--account", account_id])
 
     if LOG_LEVEL == "DEBUG":
         command.append("-v")
@@ -782,7 +799,13 @@ def certbot_new(
 
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
 
+    deadline = monotonic() + CERTBOT_TIMEOUT
     while process.poll() is None:
+        if monotonic() > deadline:
+            LOGGER.error(f"certbot for {service} timed out after {CERTBOT_TIMEOUT}s, killing process.")
+            process.kill()
+            process.wait()
+            return 1
         if process.stderr:
             rlist, _, _ = select([process.stderr], [], [], 2)
             if rlist:
@@ -798,7 +821,7 @@ def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, D
         f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email'] or 'not provided'}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile on {config['acme_server']}..."
     )
     debug_config = config.copy()
-    if debug_config.get("zerossl_api_key"):
+    if LOG_LEVEL != "TRACE" and debug_config.get("zerossl_api_key"):
         debug_config["zerossl_api_key"] = "***"
     LOGGER.debug(f"Service configuration: {debug_config}")
 
@@ -1019,11 +1042,29 @@ try:
     if pending_services:
         if concurrent_requests:
             required_accounts: Set[Tuple[bool, str]] = set()
+            required_zerossl_accounts: Set[Tuple[bool, str]] = set()
             for _, config in pending_services:
                 if config.get("acme_server") == "letsencrypt":
                     required_accounts.add((bool(config.get("staging")), str(config.get("email") or "")))
+                else:
+                    required_zerossl_accounts.add((bool(config.get("staging")), str(config.get("email") or "")))
             if required_accounts:
                 ensure_accounts(required_accounts, cmd_env.copy(), CERTBOT_BIN, LOG_LEVEL, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER)
+            if required_zerossl_accounts:
+                zerossl_env = cmd_env.copy()
+                zerossl_env["CERTBOT_BIN"] = CERTBOT_BIN
+                # Collect ZeroSSL-specific env vars from any pending ZeroSSL service config
+                for _, config in pending_services:
+                    if config.get("acme_server") != "letsencrypt":
+                        zerossl_api_key = str(config.get("zerossl_api_key") or "")
+                        if zerossl_api_key:
+                            zerossl_env["LETS_ENCRYPT_ZEROSSL_API_KEY"] = zerossl_api_key
+                        zerossl_env["LETS_ENCRYPT_ZEROSSL_API_RETRY"] = str(config.get("zerossl_api_retry") or 3)
+                        zerossl_env["LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"] = str(config.get("zerossl_api_retry_delay") or 2)
+                        zerossl_env["LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"] = str(config.get("zerossl_api_connect_timeout") or 5)
+                        zerossl_env["LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"] = str(config.get("zerossl_api_max_time") or 20)
+                        break
+                ensure_zerossl_accounts(required_zerossl_accounts, zerossl_env, ZEROSSL_BOT_SCRIPT.as_posix(), LOG_LEVEL, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER)
         start_progress_monitor()
         try:
             if concurrent_requests and len(pending_services) > 1:

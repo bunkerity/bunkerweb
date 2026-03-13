@@ -2,7 +2,7 @@ bcrypt<5.0.0
 biscuit-python==0.4.0
 cryptography==46.0.5
 email-validator==2.3.0
-fastapi==0.133.0
+fastapi==0.135.1
 gunicorn[gthread,http2]==25.1.0
 pydantic==2.12.5
 pydantic_settings==2.13.1

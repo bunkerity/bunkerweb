@@ -12,7 +12,6 @@ from tarfile import open as tar_open
 from traceback import format_exc
 
 from cryptography import x509
-from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required
@@ -71,6 +70,16 @@ SEARCHABLE_FIELDS = (
 )
 
 
+def _is_allowed_member(member):
+    """Filter tar members to only extract live/, archive/, renewal/ dirs."""
+    parts = Path(member.name).parts
+    if member.name == ".":
+        return True
+    if parts and parts[0] == ".":
+        parts = parts[1:]
+    return bool(parts) and parts[0] in ("live", "archive", "renewal")
+
+
 def download_certificates():
     rmtree(DATA_PATH, ignore_errors=True)
     Path(DATA_PATH).mkdir(parents=True, exist_ok=True)
@@ -80,10 +89,11 @@ def download_certificates():
     for cache_file in cache_files:
         if cache_file["file_name"].endswith(".tgz") and cache_file["file_name"].startswith("folder:"):
             with tar_open(fileobj=BytesIO(cache_file["data"]), mode="r:gz") as tar:
+                members = [m for m in tar.getmembers() if _is_allowed_member(m)]
                 try:
-                    tar.extractall(DATA_PATH, filter="fully_trusted")
+                    tar.extractall(DATA_PATH, members=members, filter="fully_trusted")
                 except TypeError:
-                    tar.extractall(DATA_PATH)
+                    tar.extractall(DATA_PATH, members=members)
 
 
 def retrieve_certificates():
@@ -123,7 +133,10 @@ def retrieve_certificates():
             "key_type": "Unknown",
         }
         try:
-            cert = x509.load_pem_x509_certificate(cert_file.read_bytes(), default_backend())
+            certs = x509.load_pem_x509_certificates(cert_file.read_bytes())
+            if not certs:
+                raise ValueError(f"No certificates found in {cert_file}")
+            cert = certs[0]
             subject = cert.subject.get_attributes_for_oid(x509.NameOID.COMMON_NAME)
             if subject:
                 cert_info["common_name"] = subject[0].value

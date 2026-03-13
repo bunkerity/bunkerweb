@@ -1,0 +1,20 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Detects IE XSS filter evasion attacks. Matches quoted strings followed
+##! by JavaScript property names (location, name, onerror, valueOf) where
+##! each character can also appear as its JavaScript Unicode escape (\u00XX).
+
+##!+ i
+
+##!^ ["'][ ]*(?:[^a-z0-9~_:' ]|in).*?
+##!$ .*?=
+
+##! location
+(?:l|\x5cu006C)(?:o|\x5cu006F)(?:c|\x5cu0063)(?:a|\x5cu0061)(?:t|\x5cu0074)(?:i|\x5cu0069)(?:o|\x5cu006F)(?:n|\x5cu006E)
+##! name
+(?:n|\x5cu006E)(?:a|\x5cu0061)(?:m|\x5cu006D)(?:e|\x5cu0065)
+##! onerror
+(?:o|\x5cu006F)(?:n|\x5cu006E)(?:e|\x5cu0065)(?:r|\x5cu0072)(?:r|\x5cu0072)(?:o|\x5cu006F)(?:r|\x5cu0072)
+##! valueOf
+(?:v|\x5cu0076)(?:a|\x5cu0061)(?:l|\x5cu006C)(?:u|\x5cu0075)(?:e|\x5cu0065)(?:O|\x5cu004F)(?:f|\x5cu0066)
