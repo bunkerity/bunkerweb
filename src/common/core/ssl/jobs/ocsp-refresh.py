@@ -66,6 +66,45 @@ status = 0
 CONFIGS_SSL_BASE = Path(os.sep, "var", "cache", "bunkerweb", "ssl")
 
 
+def is_safe_url(url: str) -> bool:
+    """
+    Validate that a URL is safe to fetch (HTTP/HTTPS only, no internal/private IPs).
+    Prevents Server-Side Request Forgery (SSRF) when fetching OCSP responses or issuer certs
+    from URLs embedded in untrusted certificates.
+    """
+    import socket
+    import ipaddress
+
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme not in ("http", "https"):
+            LOG.warning("⚠️ SSRF protection: blocked URL with disallowed scheme: %s", url)
+            return False
+
+        hostname = parsed.hostname
+        if not hostname:
+            LOG.warning("⚠️ SSRF protection: blocked URL with no hostname: %s", url)
+            return False
+
+        try:
+            addr_info = socket.getaddrinfo(hostname, None)
+        except socket.gaierror:
+            LOG.warning("⚠️ SSRF protection: DNS resolution failed for %s", hostname)
+            return False
+
+        for info in addr_info:
+            ip_str = info[4][0]
+            ip_obj = ipaddress.ip_address(ip_str)
+            if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local or ip_obj.is_multicast or ip_obj.is_reserved:
+                LOG.warning("⚠️ SSRF protection: blocked request to %s (resolves to internal IP %s)", hostname, ip_str)
+                return False
+
+        return True
+    except Exception as e:
+        LOG.debug("SSRF protection: error validating URL %s: %s", url, e)
+        return False
+
+
 def extract_ocsp_url(pem_data: bytes, cert_name: str = "") -> Optional[str]:
     """
     Extract OCSP responder URL from PEM certificate data using the cryptography library.
