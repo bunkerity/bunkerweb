@@ -22,19 +22,19 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 4.  **提供 ZeroSSL 凭据（如需要）：** 使用 `zerossl` 时，请设置 `EMAIL_LETS_ENCRYPT` 或 `LETS_ENCRYPT_ZEROSSL_API_KEY`，以便 `zerossl-bot` 获取 EAB 凭据。
 5.  **选择验证类型：** 使用 `LETS_ENCRYPT_CHALLENGE` 设置选择 `http` 或 `dns` 验证。
 6.  **配置 DNS 提供商：** 如果使用 DNS 验证，请指定您的 DNS 提供商和凭据。
-7.  **选择证书配置文件：** 使用 `LETS_ENCRYPT_PROFILE` 设置选择您偏好的证书配置文件（classic、tlsserver 或 shortlived）。
+7.  **选择证书配置文件（仅 Let's Encrypt）：** 使用 `LETS_ENCRYPT_PROFILE` 设置选择您偏好的证书配置文件（classic、tlsserver 或 shortlived）。使用 ZeroSSL 时此设置无效。
 8.  **让 BunkerWeb 处理其余部分：** 配置完成后，证书将根据需要自动颁发、安装和续订。
 
-!!! tip "证书配置文件"
-    Let's Encrypt 为不同的用例提供了不同的证书配置文件：
+!!! tip "证书配置文件（仅 Let's Encrypt）"
+    Let's Encrypt 为不同的用例提供了不同的证书配置文件。**这些配置文件仅在 `LETS_ENCRYPT_SERVER=letsencrypt` 时生效，ZeroSSL 会忽略此设置。**
 
-    - **classic**：通用证书，有效期为 90 天（默认）
-    - **tlsserver**：针对 TLS 服务器身份验证进行了优化，有效期为 90 天，有效负载更小
-    - **shortlived**：增强安全性，有效期为 7 天，适用于自动化环境
+    - **classic**：通用证书，有效期 90 天，最多 100 个 SAN（默认）
+    - **tlsserver**：有效期 90 天，有效负载更小（无 Common Name 和 Subject Key ID），最多 25 个 SAN — 推荐用于完全自动化的部署
+    - **shortlived**：有效期约 7 天（160 小时），无 CRL 吊销信息（证书体积更小），最多 25 个 SAN — 需要可靠的自动续订
     - **custom**：如果您的 ACME 服务器支持不同的配置文件，请使用 `LETS_ENCRYPT_CUSTOM_PROFILE` 进行设置。
 
 !!! info "配置文件可用性"
-    请注意，`tlsserver` 和 `shortlived` 配置文件目前可能并非在所有环境或所有 ACME 客户端中都可用。`classic` 配置文件具有最广泛的兼容性，推荐给大多数用户。如果所选的配置文件不可用，系统将自动回退到 `classic` 配置文件。
+    请注意，`tlsserver` 和 `shortlived` 配置文件目前可能并非在所有环境或所有 ACME 客户端中都可用。`classic` 配置文件具有最广泛的兼容性，推荐给大多数用户。如果所选的配置文件不可用，系统将自动回退到 `classic` 配置文件。还存在第四个配置文件 `tlsclient`，但 Let's Encrypt 将于 2026 年 5 月 13 日停用该配置文件，不应使用。**ZeroSSL 不支持证书配置文件 — 当 `LETS_ENCRYPT_SERVER=zerossl` 时，`LETS_ENCRYPT_PROFILE` 和 `LETS_ENCRYPT_CUSTOM_PROFILE` 均被忽略。**
 
 ### 配置设置
 
@@ -51,20 +51,20 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 | `LETS_ENCRYPT_ZEROSSL_API_MAX_TIME`         | `20`      | multisite | 否   | **ZeroSSL API 最大时长：** `zerossl-bot` 中每次 ZeroSSL API 调用允许的最大总时长（秒）。                                                                                         |
 | `LETS_ENCRYPT_CHALLENGE`                    | `http`    | multisite | 否   | **验证类型：** 用于验证域名所有权的方法。选项：`http` 或 `dns`。                                                                                                                   |
 | `LETS_ENCRYPT_DNS_PROVIDER`                 |           | multisite | 否   | **DNS 提供商：** 使用 DNS 验证时，要使用的 DNS 提供商（例如 cloudflare、route53、digitalocean）。                                                                                  |
-| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default` | multisite | 否   | **DNS 传播：** 等待 DNS 传播的时间（秒）。如果未提供值，则使用提供商的默认传播时间。                                                                                               |
+| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default` | multisite | 否   | **DNS 传播：** 等待 DNS 传播的时间（秒）。使用 `default` 时，BunkerWeb 会根据域名数量自动计算等待时间（10 秒 × 域名数量），因为 certbot 会按顺序添加 TXT 记录。设置明确的秒数值可覆盖此行为。 |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |           | multisite | 是   | **凭证项：** 用于 DNS 提供商身份验证的配置项（例如 `cloudflare_api_token 123456`）。值可以是原始文本、base64 编码或 JSON 对象。                                                    |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`     | multisite | 否   | **自动解码 Base64 DNS 凭据：** 启用后自动解码 base64 编码的 DNS 提供商凭据（`rfc2136` 提供商除外）。如果凭据故意为 base64，请设置为 `no`。                                         |
 | `USE_LETS_ENCRYPT_WILDCARD`                 | `no`      | multisite | 否   | **通配符证书：** 设置为 `yes` 时，为所有域名创建通配符证书。仅适用于 DNS 验证。                                                                                                    |
 | `USE_LETS_ENCRYPT_STAGING`                  | `no`      | multisite | 否   | **使用测试环境：** 设置为 `yes` 时，使用 Let's Encrypt 的测试环境进行测试。测试环境的速率限制较高，但生成的证书不受浏览器信任。                                                    |
 | `LETS_ENCRYPT_CLEAR_OLD_CERTS`              | `no`      | global    | 否   | **清除旧证书：** 设置为 `yes` 时，在续订期间删除不再需要的旧证书。                                                                                                                 |
 | `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`      | global    | 否   | **并发请求：** 设置为 `yes` 时，certbot-new 将并发发起证书请求。请谨慎使用以避免速率限制。                                                                                         |
-| `LETS_ENCRYPT_PROFILE`                      | `classic` | multisite | 否   | **证书配置文件：** 选择要使用的证书配置文件。选项：`classic`（通用）、`tlsserver`（针对 TLS 服务器优化）或 `shortlived`（7 天证书）。                                              |
-| `LETS_ENCRYPT_CUSTOM_PROFILE`               |           | multisite | 否   | **自定义证书配置文件：** 如果您的 ACME 服务器支持非标准配置文件，请输入自定义证书配置文件。如果设置了此项，它将覆盖 `LETS_ENCRYPT_PROFILE`。                                       |
+| `LETS_ENCRYPT_PROFILE`                      | `classic` | multisite | 否   | **证书配置文件（仅 Let's Encrypt）：** 选择要使用的配置文件。选项：`classic`（通用，最多 100 个 SAN）、`tlsserver`（TLS 服务器优化，最多 25 个 SAN）或 `shortlived`（~7 天，最多 25 个 SAN）。`LETS_ENCRYPT_SERVER=zerossl` 时忽略。 |
+| `LETS_ENCRYPT_CUSTOM_PROFILE`               |           | multisite | 否   | **自定义证书配置文件（仅 Let's Encrypt）：** 如果您的 ACME 服务器支持非标准配置文件，请输入自定义配置文件。如果设置了此项，它将覆盖 `LETS_ENCRYPT_PROFILE`。`LETS_ENCRYPT_SERVER=zerossl` 时忽略。 |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `3`       | multisite | 否   | **最大重试次数：** 证书生成失败时重试的次数。设置为 `0` 以禁用重试。用于处理临时网络问题或 API 速率限制。                                                                          |
 
 !!! info "信息和行为"
     - `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` 设置是一个多选设置，可用于为 DNS 提供商设置多个项目。这些项目将保存为缓存文件，Certbot 将从中读取凭据。
-    - 如果未提供 `LETS_ENCRYPT_DNS_PROPAGATION` 设置，则使用提供商的默认传播时间。
+    - 当 `LETS_ENCRYPT_DNS_PROPAGATION` 设置为 `default` 时，BunkerWeb 会自动按域名数量缩放等待时间：每个域名 10 秒（例如 2 个域名 = 20 秒）。设置明确的值可覆盖此行为。
     - 只要您从外部打开 `80/tcp` 端口，使用 `http` 验证的完全 Let's Encrypt 自动化就可以在流模式下工作。使用 `LISTEN_STREAM_PORT_SSL` 设置来选择您的侦听 SSL/TLS 端口。
     - 如果 `LETS_ENCRYPT_PASSTHROUGH` 设置为 `yes`，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。
 

@@ -126,6 +126,14 @@ CHALLENGE_TYPES = ("http", "dns")
 PROFILE_TYPES = ("classic", "tlsserver", "shortlived")
 ACME_SERVER_TYPES = ("letsencrypt", "zerossl")
 DNS_PROPAGATION_DEFAULT = "default"
+# Maximum number of SANs (Subject Alternative Names) per profile as defined by Let's Encrypt.
+# classic allows 100; tlsserver and shortlived are capped at 25.
+# Unknown/custom profiles fall back to the classic limit of 100.
+PROFILE_MAX_NAMES: Dict[str, int] = {
+    "classic": 100,
+    "tlsserver": 25,
+    "shortlived": 25,
+}
 CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
 
 
@@ -596,13 +604,56 @@ def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, 
         for base, names in wildcard_groups.items():
             config = base_config.copy()
             config["server_names"] = ",".join(names)
+            _check_san_limit(base, config)
             entries[base] = config
         return entries
 
     config = base_config.copy()
     config["server_names"] = format_server_names(unique_names)
+    _check_san_limit(service, config)
     entries[service] = config
     return entries
+
+
+def _check_san_limit(cert_name: str, config: Dict) -> None:
+    """Deactivate the config if the number of SANs exceeds the profile's maximum.
+
+    Let's Encrypt enforces per-profile SAN limits: classic allows 100, while
+    tlsserver and shortlived are capped at 25. Exceeding the limit would cause
+    certbot to fail, so we catch it early and log a clear error. For unknown
+    or custom profiles, a conservative fallback limit of 100 is applied.
+
+    For non-Let's Encrypt CAs (e.g. ZeroSSL), profiles are not applicable,
+    so the classic/100 limit is always used regardless of the profile setting.
+    """
+    if not config.get("activated"):
+        return
+    domain_count = len(normalize_server_names(config["server_names"]))
+    acme_server = (config.get("acme_server") or "").lower()
+    profile = config.get("profile", "classic")
+    if acme_server == "letsencrypt":
+        profile_known = profile in PROFILE_MAX_NAMES
+        max_names = PROFILE_MAX_NAMES.get(profile, 100)
+    else:
+        # ZeroSSL and other CAs do not use LE profiles — apply the classic/100 limit
+        profile_known = True
+        max_names = PROFILE_MAX_NAMES["classic"]
+    if domain_count > max_names:
+        if profile_known:
+            LOGGER.error(
+                f"[Service: {cert_name}] Certificate request for {domain_count} domain(s) exceeds the "
+                f"maximum of {max_names} SANs allowed by the '{profile}' profile. "
+                f"Reduce the number of domains or switch to a profile with a higher limit (e.g. 'classic' allows 100). "
+                f"Skipping generation."
+            )
+        else:
+            LOGGER.error(
+                f"[Service: {cert_name}] Certificate request for {domain_count} domain(s) exceeds the "
+                f"fallback maximum of {max_names} SANs applied for unrecognized profile '{profile}'. "
+                f"Reduce the number of domains or use a recognized profile ('classic', 'tlsserver', or 'shortlived'). "
+                f"Skipping generation."
+            )
+        config["activated"] = False
 
 
 def _determine_wildcard_bases(labels_list: List[List[str]]) -> Set[str]:
@@ -753,9 +804,17 @@ def certbot_new(
         # * Adding DNS challenge hooks
         command.append("--preferred-challenges=dns")
 
-        # * Adding the propagation time to the command
+        # * Adding the propagation time to the command.
+        # certbot adds TXT records sequentially then starts a single shared wait, so the
+        # last record gets the least propagation time. When the user relies on the default,
+        # we scale by domain count (10s × number_of_domains) to compensate.
+        # An explicit value set by the user is passed as-is.
         if config["dns_propagation"] != DNS_PROPAGATION_DEFAULT:
-            command.extend([f"--dns-{config['authenticator']}-propagation-seconds", str(config["dns_propagation"])])
+            propagation_seconds = int(config["dns_propagation"])
+        else:
+            domain_count = len(config["server_names"].split(","))
+            propagation_seconds = 10 * domain_count
+        command.extend([f"--dns-{config['authenticator']}-propagation-seconds", str(propagation_seconds)])
 
         # * Caching the credentials file if not already done
         credentials = config["provider"].get_formatted_credentials()
@@ -876,6 +935,8 @@ try:
                 if certificate_fingerprint(services[cert_name]) == certificate_fingerprint(config):
                     merged = normalize_server_names(services[cert_name]["server_names"]) | normalize_server_names(config["server_names"])
                     services[cert_name]["server_names"] = format_server_names(merged)
+                    # Re-check the SAN limit after merging — the combined domain count may now exceed the profile maximum.
+                    _check_san_limit(cert_name, services[cert_name])
                     continue
                 LOGGER.warning(f"[Service: {cert_name}] Certificate configuration conflict detected, keeping first occurrence.")
                 continue
