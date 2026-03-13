@@ -76,7 +76,10 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
 
             # * Parsing the certificate
             try:
-                cert = x509.load_pem_x509_certificates(cert_file.read_bytes())[0]
+                certs = x509.load_pem_x509_certificates(cert_file.read_bytes())
+                if not certs:
+                    raise ValueError(f"No certificates found in {cert_file}")
+                cert = certs[0]
 
                 # ? Getting the subject
                 subject = cert.subject.get_attributes_for_oid(x509.NameOID.COMMON_NAME)
