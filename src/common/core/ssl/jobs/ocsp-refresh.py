@@ -15,7 +15,7 @@ import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
@@ -24,6 +24,7 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.serialization import Encoding
 from cryptography.x509 import ocsp as x509_ocsp
+from cryptography.x509 import AuthorityInformationAccess, SubjectAlternativeName
 from cryptography.x509.oid import ExtensionOID, AuthorityInformationAccessOID
 
 # Add BunkerWeb Python deps (Job, logger, Database) to path
@@ -234,7 +235,8 @@ def extract_ocsp_url(pem_data: bytes, cert_name: str = "") -> Optional[str]:
         cert = x509.load_pem_x509_certificate(pem_data)
 
         aia = cert.extensions.get_extension_for_oid(ExtensionOID.AUTHORITY_INFORMATION_ACCESS)
-        for access_description in aia.value:
+        aia_value = cast(AuthorityInformationAccess, aia.value)
+        for access_description in aia_value:
             if access_description.access_method == AuthorityInformationAccessOID.OCSP:
                 url = access_description.access_location.value
                 parsed = urlparse(url)
@@ -261,7 +263,8 @@ def _fetch_issuer_from_aia(leaf: x509.Certificate, cert_name: str = "") -> Optio
     """
     try:
         aia = leaf.extensions.get_extension_for_oid(ExtensionOID.AUTHORITY_INFORMATION_ACCESS)
-        for access_description in aia.value:
+        aia_value = cast(AuthorityInformationAccess, aia.value)
+        for access_description in aia_value:
             if access_description.access_method == AuthorityInformationAccessOID.CA_ISSUERS:
                 issuer_url = access_description.access_location.value
                 parsed = urlparse(issuer_url)
@@ -483,7 +486,8 @@ def extract_san_dns(pem_data: bytes, cert_name: str = "") -> List[str]:
     try:
         cert = x509.load_pem_x509_certificate(pem_data)
         san = cert.extensions.get_extension_for_oid(ExtensionOID.SUBJECT_ALTERNATIVE_NAME)
-        names = san.value.get_values_for_type(x509.DNSName)
+        san_value = cast(SubjectAlternativeName, san.value)
+        names = san_value.get_values_for_type(x509.DNSName)
         return sorted(set(names))
     except x509.ExtensionNotFound:
         return []
@@ -515,6 +519,10 @@ def get_cached_ocsp_ttl(cert_name: str) -> Tuple[Optional[int], Optional[int]]:
         if remaining is None or total_lifetime is None:
             LOG.info("🔄 OCSP could not determine precise lifetime for %s from cached response", cert_name)
             return None, None
+
+        # Type assertion: after None checks above, these are guaranteed to be int
+        assert remaining is not None
+        assert total_lifetime is not None
 
         LOG.info(
             "⚡ OCSP cached response for %s: remaining=%ds (%.1f days), total_lifetime=%ds (%.1f days)",
@@ -892,8 +900,8 @@ def process_custom_certs(
     db: Optional[Any] = None,
     stats: Optional[dict] = None,
     lock_fd: Optional[int] = None,
-    refresh_fn: Optional[callable] = None,
-    timeout_fn: Optional[callable] = None,
+    refresh_fn: Optional[Callable[[str], None]] = None,
+    timeout_fn: Optional[Callable[[str], bool]] = None,
 ) -> None:
     """
     Process OCSP for custom certificates using certificate data from the database.
@@ -1371,7 +1379,7 @@ def main() -> int:
         _refresh_cert_lock(lock_fd_main, cert_name or "main")
 
     # Statistics tracking
-    stats = {
+    stats: Dict[str, int] = {
         "le_certs_processed": 0,
         "le_certs_skipped": 0,
         "le_certs_no_ocsp": 0,
