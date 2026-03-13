@@ -30,6 +30,7 @@ LOGGER = getLogger("LETS-ENCRYPT.RENEW")
 LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.RENEW.CERTBOT")
 status = 0
 
+
 try:
     # Check if we're using let's encrypt
     use_letsencrypt = False
@@ -92,7 +93,7 @@ try:
         status = 2
         LOGGER.error("Certificates renewal failed")
 
-    # Save Let's Encrypt data to db cache
+    # Save Let's Encrypt data to db cache (full directory)
     if DATA_PATH.is_dir() and list(DATA_PATH.iterdir()):
         cached, err = JOB.cache_dir(DATA_PATH)
         if not cached:
@@ -100,9 +101,11 @@ try:
         else:
             LOGGER.info("Successfully saved Let's Encrypt data to db cache")
 
-    # Refresh OCSP stapling after successful renewal
+    # Trigger OCSP refresh after successful renewal (AFTER database save)
+    # OCSP job will compare new certs with cached ones and process differential updates
     if process.returncode == 0 and getenv("SSL_USE_OCSP_STAPLING", "yes").lower() == "yes":
-        LOGGER.info("🔄 OCSP triggering refresh after certificate renewal")
+        LOGGER.info("🔄 OCSP triggering refresh for renewed certificates")
+
         try:
             import sys
 

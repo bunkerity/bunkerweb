@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from os import getenv, sep
+from os import environ, getenv, sep
 from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, run
@@ -159,6 +159,7 @@ try:
         sys_exit(0)
 
     skipped_servers = []
+    changed_domains = []  # Track which domains had certificate changes
     if not multisite:
         all_domains = [all_domains[0]]
         if getenv("USE_CUSTOM_SSL", "no") == "no":
@@ -210,6 +211,7 @@ try:
                 continue
             elif need_reload:
                 LOGGER.info(f"Detected change in {first_server}'s certificate")
+                changed_domains.append(first_server)  # Track this domain as changed
                 status = 1
                 continue
 
@@ -219,23 +221,24 @@ try:
         JOB.del_cache("cert.pem", service_id=first_server)
         JOB.del_cache("key.pem", service_id=first_server)
 
-    # Trigger OCSP stapling refresh when certificates changed
-    if status == 1 and getenv("SSL_USE_OCSP_STAPLING", "yes").lower() == "yes":
-        LOGGER.info("🔄 OCSP triggering refresh after custom certificate change")
+    # Trigger OCSP stapling refresh when certificates changed (AFTER caching)
+    # OCSP job will compare new certs with cached ones and process differential updates
+    if changed_domains and getenv("SSL_USE_OCSP_STAPLING", "yes").lower() == "yes":
+        LOGGER.info(f"🔄 OCSP triggering refresh for {len(changed_domains)} changed custom cert(s): {', '.join(changed_domains)}")
         try:
             import sys
 
             ocsp_script = join(sep, "usr", "share", "bunkerweb", "core", "ssl", "jobs", "ocsp-refresh.py")
             result = run([sys.executable, ocsp_script], stdin=DEVNULL, capture_output=True, text=True, timeout=300)
             if result.returncode == 0:
-                LOGGER.info("✓ OCSP refresh completed successfully after custom cert change")
+                LOGGER.info("✓ OCSP refresh completed successfully after cert change")
             else:
                 LOGGER.warning(f"⚠️ OCSP refresh returned exit code {result.returncode}")
             if result.stderr:
                 for line in result.stderr.strip().splitlines():
                     LOGGER.debug(f"OCSP: {line}")
         except Exception as e:
-            LOGGER.warning(f"⚠️ OCSP post-upload refresh failed (non-fatal): {e}")
+            LOGGER.warning(f"⚠️ OCSP post-change refresh failed (non-fatal): {e}")
 except SystemExit as e:
     status = e.code
 except BaseException as e:
