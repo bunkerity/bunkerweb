@@ -3290,146 +3290,6 @@ Vous pouvez également spécifier un fichier de sauvegarde personnalisé pour la
         docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
         ```
 
-## Serveur MCP
-
-Le **serveur MCP BunkerWeb** permet aux assistants IA comme **Claude Code** et **Claude Desktop** de gérer votre installation BunkerWeb via le [Model Context Protocol (MCP)](https://modelcontextprotocol.io/).
-
-!!! warning "Prérequis"
-    Le serveur MCP nécessite le déploiement de l'**API externe BunkerWeb** (`bunkerity/bunkerweb-api`). Il communique avec BunkerWeb exclusivement via cette API.
-
-### Fonctionnalités
-
-- **37 outils** pour gérer les instances, services, configurations, bans, plugins, jobs et cache
-- **Ressources MCP** pour un accès en lecture seule (`@config://global`, `@bans://active`, etc.)
-- **Plusieurs transports** : Stdio, HTTP, WebSocket
-
-### Exemple Docker Compose
-
-Un exemple complet est disponible dans [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples/mcp-stack) :
-
-```yaml
-services:
-  bw-api:
-    image: bunkerity/bunkerweb-api:1.6.9
-    environment:
-      API_TOKEN: "my-bearer-token-for-mcp"
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
-      FORWARDED_ALLOW_IPS: "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
-    networks:
-      - bw-universe
-      - bw-db
-      - bw-mcp
-
-  bw-mcp:
-    image: bunkerity/bunkerweb-mcp:v0.1.0
-    ports:
-      - "8080:8080"
-    environment:
-      BUNKERWEB_BASE_URL: "http://bw-api:8888"
-      BUNKERWEB_API_TOKEN: "my-bearer-token-for-mcp"
-      BUNKERWEB_LOG_LEVEL: INFO
-    networks:
-      - bw-mcp
-```
-
-### Utilisation avec Claude Code
-
-=== "Configuration projet"
-
-    Ajoutez un fichier `.mcp.json` à la racine de votre projet (ou dans `~/.claude/.mcp.json` pour une configuration globale) :
-
-    ```json
-    {
-      "mcpServers": {
-        "bunkerweb": {
-          "type": "http",
-          "url": "http://127.0.0.1:8080/mcp/"
-        }
-      }
-    }
-    ```
-
-=== "CLI"
-
-    ```bash
-    # Ajouter le serveur MCP via HTTP
-    claude mcp add --transport http bunkerweb --scope local http://localhost:8080/mcp
-
-    # Ou via stdio (installation locale)
-    pip install mcp-bunkerweb
-    claude mcp add --transport stdio bunkerweb --scope local -- mcp-bunkerweb
-    ```
-
-Exemples de requêtes :
-
-```
-> Liste toutes les instances BunkerWeb
-> Montre-moi les bans actuels
-> Analyse @config://global et suggère des améliorations de sécurité
-```
-
-### Intégration Kubernetes
-
-Le serveur MCP peut être déployé aux côtés de BunkerWeb en utilisant le chart Helm officiel. Un exemple complet est disponible dans [`examples/mcp-integration.yaml`](https://github.com/bunkerity/bunkerweb-helm/blob/main/examples/mcp-integration.yaml).
-
-#### Valeurs Helm
-
-```yaml
-mcp:
-  # Activer le serveur MCP
-  enabled: true
-
-  # Configuration de l'image
-  repository: docker.io/bunkerity/bunkerweb-mcp
-  tag: v0.1.0
-
-  # Paramètres du serveur MCP
-  config:
-    logLevel: "INFO"
-    enableDnsRebindingProtection: true
-    allowedHosts: "localhost,127.0.0.1,mcp.example.com"
-    cacheEnabled: true
-
-  # Identifiants pour l'authentification MCP vers l'API BunkerWeb
-  secrets:
-    bunkerwebApiToken: "votre-token-api-securise"
-
-  # Configuration Ingress (optionnel)
-  ingress:
-    enabled: false
-    ingressClassName: "bunkerweb"
-    serverName: "mcp.example.com"
-    annotations:
-      bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
-      bunkerweb.io/USE_REVERSE_PROXY: "yes"
-      bunkerweb.io/REVERSE_PROXY_URL: "/"
-      bunkerweb.io/REVERSE_PROXY_HOST: "http://mcp-bunkerweb.bunkerweb.svc.cluster.local:8080"
-      # SÉCURITÉ : Restreindre l'accès aux IPs de confiance uniquement
-      bunkerweb.io/USE_WHITELIST: "yes"
-      bunkerweb.io/WHITELIST_IP: "10.0.0.0/8 192.168.0.0/16"
-```
-
-#### Déploiement
-
-```bash
-# Déployer BunkerWeb avec MCP activé
-helm install bunkerweb bunkerweb/bunkerweb -f mcp-integration.yaml
-
-# Accéder au MCP localement via port-forward (recommandé pour la sécurité)
-kubectl port-forward svc/mcp-bunkerweb 8080:8080
-
-# Configurer Claude Code avec http://localhost:8080/mcp
-```
-
-!!! warning "Sécurité"
-    Le serveur MCP n'a pas d'authentification intégrée pour le endpoint `/mcp`. Sécurisez l'accès en utilisant :
-
-    - **Liste blanche d'IPs** via les annotations BunkerWeb (`USE_WHITELIST`, `WHITELIST_IP`)
-    - **Politiques réseau** pour restreindre la communication entre pods
-    - **Port-forward** au lieu d'exposer externellement (recommandé pour le développement)
-
-Pour la documentation complète, visitez le [dépôt BunkerWeb MCP](https://github.com/bunkerity/mcp-bunkerweb).
-
 ## Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Prise en charge STREAM :white_check_mark:
@@ -4480,24 +4340,24 @@ Le plugin Cache PRO active la mise en cache des réponses au niveau du reverse p
 
 **Liste des paramètres**
 
-| Réglage                     | Défaut                            | Contexte  | Multiple | Description                                                              |
-| --------------------------- | --------------------------------- | --------- | -------- | ------------------------------------------------------------------------ |
-| `CACHE_PATH`                |                                   | global    | oui      | Chemin et paramètres d'un cache.                                         |
+| Réglage                     | Défaut                            | Contexte  | Multiple | Description                                                                |
+| --------------------------- | --------------------------------- | --------- | -------- | -------------------------------------------------------------------------- |
+| `CACHE_PATH`                |                                   | global    | oui      | Chemin et paramètres d'un cache.                                           |
 | `CACHE_ZONE`                |                                   | multisite | non      | Nom de la zone de cache à utiliser (définie dans un réglage `CACHE_PATH`). |
-| `CACHE_HEADER`              | `X-Cache`                         | multisite | non      | Ajoute un en-tête exposant l'état du cache.                              |
-| `CACHE_BACKGROUND_UPDATE`   | `no`                              | multisite | non      | Active ou désactive la mise à jour du cache en arrière-plan.             |
-| `CACHE_BYPASS`              |                                   | multisite | non      | Liste de variables déterminant si le cache doit être contourné.          |
-| `CACHE_NO_CACHE`            | `$http_pragma$http_authorization` | multisite | non      | Désactive le stockage en cache si des variables sont définies.           |
-| `CACHE_KEY`                 | `$scheme$proxy_host$request_uri`  | multisite | non      | Clé utilisée pour identifier les éléments mis en cache.                  |
-| `CACHE_CONVERT_HEAD_TO_GET` | `yes`                             | multisite | non      | Convertit les requêtes HEAD en GET lors de la mise en cache.             |
-| `CACHE_LOCK`                | `no`                              | multisite | non      | Verrouille les requêtes concurrentes lors du remplissage du cache.       |
+| `CACHE_HEADER`              | `X-Cache`                         | multisite | non      | Ajoute un en-tête exposant l'état du cache.                                |
+| `CACHE_BACKGROUND_UPDATE`   | `no`                              | multisite | non      | Active ou désactive la mise à jour du cache en arrière-plan.               |
+| `CACHE_BYPASS`              |                                   | multisite | non      | Liste de variables déterminant si le cache doit être contourné.            |
+| `CACHE_NO_CACHE`            | `$http_pragma$http_authorization` | multisite | non      | Désactive le stockage en cache si des variables sont définies.             |
+| `CACHE_KEY`                 | `$scheme$proxy_host$request_uri`  | multisite | non      | Clé utilisée pour identifier les éléments mis en cache.                    |
+| `CACHE_CONVERT_HEAD_TO_GET` | `yes`                             | multisite | non      | Convertit les requêtes HEAD en GET lors de la mise en cache.               |
+| `CACHE_LOCK`                | `no`                              | multisite | non      | Verrouille les requêtes concurrentes lors du remplissage du cache.         |
 | `CACHE_LOCK_AGE`            | `5s`                              | multisite | non      | Envoie la requête à l'upstream si le cache est verrouillé depuis ce délai. |
-| `CACHE_LOCK_TIMEOUT`        | `5s`                              | multisite | non      | Envoie la requête à l'upstream si le verrou persiste pendant ce délai.   |
-| `CACHE_METHODS`             | `GET HEAD`                        | multisite | non      | Met en cache uniquement les réponses pour ces méthodes HTTP.             |
-| `CACHE_MIN_USES`            | `1`                               | multisite | non      | Nombre de requêtes avant de stocker la réponse en cache.                 |
-| `CACHE_REVALIDATE`          | `no`                              | multisite | non      | Revalide les éléments expirés via des requêtes conditionnelles.          |
-| `CACHE_USE_STALE`           | `off`                             | multisite | non      | Définit dans quels cas servir un contenu périmé.                         |
-| `CACHE_VALID`               | `10m`                             | multisite | oui      | Définit la durée de cache avec code(s) HTTP optionnel(s).                |
+| `CACHE_LOCK_TIMEOUT`        | `5s`                              | multisite | non      | Envoie la requête à l'upstream si le verrou persiste pendant ce délai.     |
+| `CACHE_METHODS`             | `GET HEAD`                        | multisite | non      | Met en cache uniquement les réponses pour ces méthodes HTTP.               |
+| `CACHE_MIN_USES`            | `1`                               | multisite | non      | Nombre de requêtes avant de stocker la réponse en cache.                   |
+| `CACHE_REVALIDATE`          | `no`                              | multisite | non      | Revalide les éléments expirés via des requêtes conditionnelles.            |
+| `CACHE_USE_STALE`           | `off`                             | multisite | non      | Définit dans quels cas servir un contenu périmé.                           |
+| `CACHE_VALID`               | `10m`                             | multisite | oui      | Définit la durée de cache avec code(s) HTTP optionnel(s).                  |
 
 **Exemple d'utilisation**
 
