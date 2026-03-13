@@ -776,7 +776,9 @@ if __name__ == "__main__":
             if args.variables:
                 env_file_path = deepcopy(tmp_variables_path)
             else:
-                env_content = "\n".join(f"{key}={value}" for key, value in (env | environ).items() if "CUSTOM_CONF" not in key)
+                env_content = "\n".join(
+                    f"{key}={value}" for key, value in (env | {k: v for k, v in environ.items() if k in env}).items() if "CUSTOM_CONF" not in key
+                )
                 env_file_path.write_text(env_content + "\n", encoding="utf-8")
 
             cmd_env = {
