@@ -80,14 +80,22 @@ try:
         ]
         + (["-v"] if getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper() == "DEBUG" else []),
         stdin=DEVNULL,
+        stdout=PIPE,
         stderr=PIPE,
         universal_newlines=True,
         env=cmd_env,
     )
-    while process.poll() is None:
-        if process.stderr:
-            for line in process.stderr:
-                LOGGER_CERTBOT.info(line.strip())
+    stdout, stderr = process.communicate()
+    if stdout:
+        for line in stdout.splitlines():
+            line_str = line.strip()
+            if line_str:
+                LOGGER_CERTBOT.info(line_str)
+                if "(success)" in line_str or "Congratulations" in line_str:
+                    status = 1
+    if stderr:
+        for line in stderr.splitlines():
+            LOGGER_CERTBOT.info(line.strip())
 
     if process.returncode != 0:
         status = 2
@@ -103,14 +111,14 @@ try:
 
     # Trigger OCSP refresh after successful renewal (AFTER database save)
     # OCSP job will compare new certs with cached ones and process differential updates
-    if process.returncode == 0 and getenv("SSL_USE_OCSP_STAPLING", "yes").lower() == "yes":
+    if status == 1 and getenv("SSL_USE_OCSP_STAPLING", "yes").lower() == "yes":
         LOGGER.info("🔄 OCSP triggering refresh for renewed certificates")
 
         try:
             import sys
 
             ocsp_script = join(sep, "usr", "share", "bunkerweb", "core", "ssl", "jobs", "ocsp-refresh.py")
-            result = run([sys.executable, ocsp_script], stdin=DEVNULL, capture_output=True, text=True, timeout=300)
+            result = run([sys.executable, ocsp_script, "--force"], stdin=DEVNULL, capture_output=True, text=True, timeout=300)
             if result.returncode == 0:
                 LOGGER.info("✓ OCSP refresh completed successfully after renewal")
             else:

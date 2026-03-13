@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import fcntl
 import hashlib
 import io
@@ -460,8 +461,8 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
             ttl = 86400  # RFC standard fallback
 
         # Delay after successful fetch to prevent rate limiting
-        LOG.debug("⏸️ OCSP delaying 5 seconds after fetch for %s to prevent rate limiting", cert_name)
-        time.sleep(5)
+        LOG.debug("⏸️ OCSP delaying 2 seconds after fetch for %s to prevent rate limiting", cert_name)
+        time.sleep(2)
 
         return ocsp_der, ttl
     except HTTPError as e:
@@ -952,8 +953,8 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
                 stats["ocsp_fetched_responses"] = stats.get("ocsp_fetched_responses", 0) + 1
                 break
             if attempt == 1:
-                LOG.warning("⚠️ OCSP fetch failed for %s, retrying once after 10 seconds ...", cert_name)
-                time.sleep(10)
+                LOG.warning("⚠️ OCSP fetch failed for %s, retrying once after 2 seconds ...", cert_name)
+                time.sleep(2)
 
         if not ocsp_der:
             LOG.error("❌ OCSP failed to fetch response for %s after retries", cert_name)
@@ -976,7 +977,8 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
 
         # Calculate checksum for integrity verification
         ocsp_checksum = hashlib.sha256(ocsp_der).hexdigest()
-        LOG.info("⚡ OCSP final TTL for %s is %ds (checksum=%s)", cert_name, ttl, ocsp_checksum[:8])
+        ttl_readable = f"{ttl / 86400.0:.1f} days" if ttl >= 86400 else f"{ttl / 3600.0:.1f} hours"
+        LOG.info("⚡ OCSP final TTL for %s is %ds (%s) (checksum=%s)", cert_name, ttl, ttl_readable, ocsp_checksum[:8])
 
         # === Return result for batched database writes ===
         return (cert_name, ocsp_der, ttl, cert_checksum, pem_data)
@@ -993,6 +995,7 @@ def process_custom_certs(
     lock_fd: Optional[int] = None,
     refresh_fn: Optional[Callable[[str], None]] = None,
     timeout_fn: Optional[Callable[[str], bool]] = None,
+    skip_unchanged_ttl_checks: bool = False,
 ) -> List[Tuple[str, Optional[bytes], int, str, bytes]]:
     """
     Process OCSP for custom certificates using certificate data from the database.
@@ -1048,8 +1051,12 @@ def process_custom_certs(
                 unchanged_custom_certs[cert_name] = pem_data
 
         if unchanged_custom_certs:
-            LOG.info("✓ OCSP checking TTL for %d unchanged custom certificate(s): %s", len(unchanged_custom_certs), ", ".join(sorted(unchanged_custom_certs.keys())))
-            stats["custom_certs_unchanged"] = stats.get("custom_certs_unchanged", 0) + len(unchanged_custom_certs)
+            if skip_unchanged_ttl_checks:
+                LOG.info("✓ OCSP skipping TTL checks for %d unchanged custom certificate(s) (recently run)", len(unchanged_custom_certs))
+                stats["custom_certs_skipped"] = stats.get("custom_certs_skipped", 0) + len(unchanged_custom_certs)
+            else:
+                LOG.info("✓ OCSP checking TTL for %d unchanged custom certificate(s): %s", len(unchanged_custom_certs), ", ".join(sorted(unchanged_custom_certs.keys())))
+                stats["custom_certs_unchanged"] = stats.get("custom_certs_unchanged", 0) + len(unchanged_custom_certs)
 
         stats["custom_certs_processed"] = stats.get("custom_certs_processed", 0) + len(custom_certs)
 
@@ -1062,12 +1069,13 @@ def process_custom_certs(
             results.append(_process_cert(cert_name, cert_pem, db, stats, force_fetch=True))
 
         # 2. Process unchanged custom certificates (TTL check only)
-        for cert_name, cert_pem in sorted(unchanged_custom_certs.items()):
-            if callable(timeout_fn) and timeout_fn(f"unchanged custom cert {cert_name}"):
-                break
-            if callable(refresh_fn):
-                refresh_fn(cert_name)
-            results.append(_process_cert(cert_name, cert_pem, db, stats, force_fetch=False))
+        if not skip_unchanged_ttl_checks:
+            for cert_name, cert_pem in sorted(unchanged_custom_certs.items()):
+                if callable(timeout_fn) and timeout_fn(f"unchanged custom cert {cert_name}"):
+                    break
+                if callable(refresh_fn):
+                    refresh_fn(cert_name)
+                results.append(_process_cert(cert_name, cert_pem, db, stats, force_fetch=False))
 
     except Exception as e:
         LOG.error("OCSP exception while processing custom certificates: %s", e)
@@ -1159,19 +1167,20 @@ def cleanup_ocsp_cache(db: Optional[Any] = None, cert_name: Optional[str] = None
 
         if db and purge_db:
             try:
-                # Remove all OCSP cache entries from database
+                # Remove all OCSP-related cache entries from database
                 job_cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh")
                 for cache_file in job_cache_files:
-                    if cache_file.get("file_name", "").startswith("ocsp/"):
+                    file_name = cache_file.get("file_name", "")
+                    if file_name.startswith("ocsp/") or file_name.startswith("cert_checksum/") or file_name == "last_full_refresh":
                         try:
-                            db.delete_job_cache(file_name=cache_file["file_name"], job_name="ocsp-refresh")
-                            LOG.debug("🧹 OCSP removed database entry %s", cache_file["file_name"])
+                            db.delete_job_cache(file_name=file_name, job_name="ocsp-refresh")
+                            LOG.debug("🧹 OCSP removed database entry %s", file_name)
                         except Exception as e:
-                            LOG.debug("🧹 OCSP could not remove database entry %s: %s", cache_file["file_name"], e)
+                            LOG.debug("🧹 OCSP could not remove database entry %s: %s", file_name, e)
             except Exception as e:
                 LOG.debug("🧹 OCSP could not clean database entries: %s", e)
         elif not purge_db:
-            LOG.info("🧹 OCSP disk caches cleaned up (database entries preserved for quick restoration)")
+            LOG.info("🧹 OCSP disk caches cleaned up")
 
         LOG.info("🧹 OCSP all stapling caches cleaned up")
 
@@ -1265,14 +1274,16 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
 
     try:
         # Get all OCSP entries from database
-        cache_entries = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=True)
-        if not cache_entries:
+        # Get all entries and filter for actual OCSP responses
+        all_entries = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=True)
+        ocsp_entries = [e for e in all_entries if e.get("file_name", "").startswith("ocsp/")]
+        if not ocsp_entries:
             LOG.info("ℹ️ OCSP no cache entries in database to verify")
             return
+            
+        LOG.info("🔍 OCSP verifying %d cache entry(ies) from database", len(ocsp_entries))
 
-        LOG.info("🔍 OCSP verifying %d cache entry(ies) from database", len(cache_entries))
-
-        for entry in cache_entries:
+        for entry in ocsp_entries:
             file_name = entry.get("file_name", "")
             if not file_name.startswith("ocsp/"):
                 continue
@@ -1410,8 +1421,15 @@ def main() -> int:
         "orphaned_cleaned": 0,
     }
 
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description="OCSP refresh job for BunkerWeb")
+    parser.add_argument("--force", action="store_true", help="Force full OCSP refresh and TTL checks managed by the job")
+    args, unknown = parser.parse_known_args()
+    force_all = args.force
+
     try:
-        LOG.info("🔄 OCSP refresh job started with differential update strategy (timeout in %d minutes)", JOB_TIMEOUT // 60)
+        LOG.info("🔄 OCSP refresh job started with differential update strategy (timeout in %d minutes%s)", 
+                 JOB_TIMEOUT // 60, " [FORCE]" if force_all else "")
 
         # Acquire main lock for the entire OCSP refresh operation
         lock_fd_main = _acquire_cert_lock("main", timeout=300, stale_threshold=1800)
@@ -1455,8 +1473,8 @@ def main() -> int:
         # Check if OCSP stapling is globally disabled
         ocsp_enabled = os.getenv("SSL_USE_OCSP_STAPLING", "yes").lower()
         if ocsp_enabled != "yes":
-            LOG.info("🧹 OCSP stapling is globally disabled (SSL_USE_OCSP_STAPLING=%s), cleaning up disk caches (preserving database for quick re-enable)", ocsp_enabled)
-            cleanup_ocsp_cache(db, purge_db=False)
+            LOG.info("🧹 OCSP stapling is globally disabled (SSL_USE_OCSP_STAPLING=%s), cleaning up all caches", ocsp_enabled)
+            cleanup_ocsp_cache(db, purge_db=True)
             return 0
 
         # Wait for scheduler's directory purge to finish after service restart,
@@ -1464,9 +1482,25 @@ def main() -> int:
         # This handles ephemeral storage and post-restart cache directory cleanup.
         ocsp_files_exist = any((CONFIGS_SSL_BASE / d / "ocsp.der").is_file() for d in CONFIGS_SSL_BASE.iterdir()) if CONFIGS_SSL_BASE.is_dir() else False
         if not ocsp_files_exist:
-            LOG.info("🔄 OCSP no cached files on disk, waiting 10s for scheduler purge to finish before restoring from database...")
-            time.sleep(10)
+            LOG.info("🔄 OCSP no cached files on disk, waiting 2s for scheduler purge to finish before restoring from database...")
+            time.sleep(2)
         restore_ocsp_from_database(db)
+
+        # === Efficiency optimization: skip full refresh if run recently and no changes detected ===
+        last_refresh_key = "last_full_refresh"
+        now_ts = int(time.time())
+        skip_unchanged_ttl_checks = False
+        
+        if not force_all:
+            last_refresh_entry = db.get_job_cache_file(file_name=last_refresh_key, job_name="ocsp-refresh", with_info=True)
+            if last_refresh_entry and last_refresh_entry.get("data"):
+                try:
+                    last_refresh_time = int(last_refresh_entry["data"].decode("utf-8"))
+                    if now_ts - last_refresh_time < 1800: # 30 minutes window
+                        skip_unchanged_ttl_checks = True
+                        LOG.info("ℹ️ OCSP full refresh was recently run (%ds ago), will only process new/changed certificates", now_ts - last_refresh_time)
+                except Exception:
+                    pass
 
         # === Collect all OCSP data for batched database writes ===
         all_ocsp_results: List[Tuple[str, Optional[bytes], int, str, bytes]] = []
@@ -1511,8 +1545,11 @@ def main() -> int:
                 stats["le_certs_changed"] = len(changed_le_certs)
 
             if unchanged_le_certs:
-                LOG.info("✓ OCSP checking TTL for %d LE certificate(s) unchanged: %s", len(unchanged_le_certs), ", ".join(sorted(unchanged_le_certs.keys())))
-                # stats["le_certs_skipped"] = len(unchanged_le_certs)  <-- Removed, used for disabled status only
+                if skip_unchanged_ttl_checks:
+                    LOG.info("✓ OCSP skipping TTL checks for %d unchanged LE certificate(s) (recently run)", len(unchanged_le_certs))
+                    stats["le_certs_skipped"] = stats.get("le_certs_skipped", 0) + len(unchanged_le_certs)
+                else:
+                    LOG.info("✓ OCSP checking TTL for %d LE certificate(s) unchanged: %s", len(unchanged_le_certs), ", ".join(sorted(unchanged_le_certs.keys())))
 
             stats["le_certs_processed"] = len(le_certs)
 
@@ -1529,10 +1566,11 @@ def main() -> int:
                 all_ocsp_results.append(_process_cert(cert_name, pem_data, db, stats, force_fetch=True))
 
             # 3. Process unchanged certs (TTL check only)
-            for cert_name, pem_data in sorted(unchanged_le_certs.items()):
-                if check_job_timeout(f"unchanged LE cert {cert_name}"): break
-                refresh_job_lock(cert_name)
-                all_ocsp_results.append(_process_cert(cert_name, pem_data, db, stats, force_fetch=False))
+            if not skip_unchanged_ttl_checks:
+                for cert_name, pem_data in sorted(unchanged_le_certs.items()):
+                    if check_job_timeout(f"unchanged LE cert {cert_name}"): break
+                    refresh_job_lock(cert_name)
+                    all_ocsp_results.append(_process_cert(cert_name, pem_data, db, stats, force_fetch=False))
 
         else:
             LOG.info("ℹ️ OCSP no LE certificates found in database")
@@ -1540,7 +1578,14 @@ def main() -> int:
         # Check timeout before processing custom certs
         if not check_job_timeout("before custom cert processing"):
             # Process custom certificates from database
-            custom_results = process_custom_certs(db, stats, lock_fd=lock_fd_main, refresh_fn=refresh_job_lock, timeout_fn=check_job_timeout)
+            custom_results = process_custom_certs(
+                db, 
+                stats, 
+                lock_fd=lock_fd_main, 
+                refresh_fn=refresh_job_lock, 
+                timeout_fn=check_job_timeout,
+                skip_unchanged_ttl_checks=skip_unchanged_ttl_checks
+            )
             all_ocsp_results.extend(custom_results)
 
         # === Batch write all OCSP responses and checksums to database ===
@@ -1626,11 +1671,29 @@ def main() -> int:
             # Clean up orphaned OCSP entries for deleted services
             _cleanup_orphaned_ocsp(db, le_certs or {}, stats)
 
+        # Update last full refresh timestamp if we did a full run or found changes
+        if not skip_unchanged_ttl_checks or any(r[1] is not None for r in all_ocsp_results):
+            try:
+                db.upsert_job_cache(
+                    service_id=None,
+                    file_name=last_refresh_key,
+                    data=str(now_ts).encode("utf-8"),
+                    job_name="ocsp-refresh",
+                    checksum=hashlib.sha256(str(now_ts).encode("utf-8")).hexdigest(),
+                )
+                LOG.debug("✓ OCSP updated last full refresh timestamp to %d", now_ts)
+            except Exception as e:
+                LOG.debug("⚠️ OCSP could not update last full refresh timestamp: %s", e)
+
         # End-of-job verification: ensure OCSP files match database checksums
         # Restores missing files from database
         if not check_job_timeout("before final verification"):
-            LOG.info("🔍 OCSP running end-of-job verification and restoration...")
-            _verify_and_restore_ocsp_files(db, stats)
+            # Skip expensive verification if nothing changed and we were in "skip" mode
+            if skip_unchanged_ttl_checks and not any(r[1] is not None for r in all_ocsp_results):
+                LOG.info("🔍 OCSP skipping final verification (nothing changed and recently run)")
+            else:
+                LOG.info("🔍 OCSP running end-of-job verification and restoration...")
+                _verify_and_restore_ocsp_files(db, stats)
 
         # Decide exit status based on results
         if stats["errors"] > 0:

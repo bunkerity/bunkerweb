@@ -229,7 +229,7 @@ try:
             import sys
 
             ocsp_script = join(sep, "usr", "share", "bunkerweb", "core", "ssl", "jobs", "ocsp-refresh.py")
-            result = run([sys.executable, ocsp_script], stdin=DEVNULL, capture_output=True, text=True, timeout=300)
+            result = run([sys.executable, ocsp_script, "--force"], stdin=DEVNULL, capture_output=True, text=True, timeout=300)
             if result.returncode == 0:
                 LOGGER.info("✓ OCSP refresh completed successfully after cert change")
             else:

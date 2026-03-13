@@ -1110,13 +1110,13 @@ try:
 
         # * Trigger OCSP stapling refresh for newly issued certificates (AFTER database save)
         # OCSP job will compare new certs with cached ones and process differential updates
-        if getenv("SSL_USE_OCSP_STAPLING", "yes").lower() == "yes":
+        if status == 1 and getenv("SSL_USE_OCSP_STAPLING", "yes").lower() == "yes":
             LOGGER.info("🔄 OCSP triggering refresh for newly issued certificates")
             try:
                 import sys
 
                 ocsp_script = join(sep, "usr", "share", "bunkerweb", "core", "ssl", "jobs", "ocsp-refresh.py")
-                result = run([sys.executable, ocsp_script], stdin=DEVNULL, capture_output=True, text=True, timeout=300)
+                result = run([sys.executable, ocsp_script, "--force"], stdin=DEVNULL, capture_output=True, text=True, timeout=300)
                 if result.returncode == 0:
                     LOGGER.info("✓ OCSP refresh completed successfully after issuance")
                 else:
