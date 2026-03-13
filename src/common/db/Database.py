@@ -478,9 +478,10 @@ class Database:
         self.sql_engine.dispose(close=True)
         self.sql_engine = create_engine(self.database_uri_readonly if fallback else self.database_uri, **self._engine_kwargs | kwargs)
 
-        if self._session_factory is not None:
-            self._session_factory.remove()
-        self._session_factory = scoped_session(sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False))
+        with LOCK:
+            if self._session_factory is not None:
+                self._session_factory.remove()
+            self._session_factory = scoped_session(sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False))
 
         if fallback or readonly:
             with self.sql_engine.connect() as conn:
@@ -4582,7 +4583,7 @@ class Database:
                 update_values["last_seen"] = datetime.now().astimezone()
 
             try:
-                result = session.query(Instances).filter_by(hostname=hostname).update(update_values)
+                result = session.query(Instances).filter_by(hostname=hostname).update(update_values, synchronize_session=False)
 
                 if result == 0:
                     return f"Instance {hostname} does not exist, will not be updated."
@@ -4628,7 +4629,7 @@ class Database:
 
             try:
                 if update_values:
-                    result = session.query(Instances).filter_by(hostname=hostname).update(update_values)
+                    result = session.query(Instances).filter_by(hostname=hostname).update(update_values, synchronize_session=False)
                     if result == 0:
                         return f"Instance {hostname} does not exist, will not be updated."
 
