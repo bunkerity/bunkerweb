@@ -3759,7 +3759,7 @@ Das ModSecurity-Plugin integriert die leistungsstarke [ModSecurity](https://mods
 Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu verwenden:
 
 1.  **Aktivieren Sie die Funktion:** ModSecurity ist standardmäßig aktiviert. Dies kann mit der Einstellung `USE_MODSECURITY` gesteuert werden.
-2.  **Wählen Sie eine CRS-Version:** Wählen Sie eine Version des OWASP Core Rule Set (v3, v4 oder nightly).
+2.  **Wählen Sie eine CRS-Version:** Wählen Sie eine Version des OWASP Core Rule Set (v3 oder v4).
 3.  **Plugins hinzufügen:** Aktivieren Sie optional CRS-Plugins, um die Regelabdeckung zu verbessern.
 4.  **Überwachen und anpassen:** Verwenden Sie Protokolle und die [Web-Benutzeroberfläche](web-ui.md), um Falsch-Positive zu identifizieren und die Einstellungen anzupassen.
 
@@ -3769,7 +3769,7 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
 | ------------------------------------- | -------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_MODSECURITY`                     | `yes`          | multisite | nein     | **ModSecurity aktivieren:** Schalten Sie den Schutz der ModSecurity Web Application Firewall ein.                                                                               |
 | `USE_MODSECURITY_CRS`                 | `yes`          | multisite | nein     | **Core Rule Set verwenden:** Aktivieren Sie das OWASP Core Rule Set für ModSecurity.                                                                                            |
-| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | nein     | **CRS-Version:** Die Version des zu verwendenden OWASP Core Rule Set. Optionen: `3`, `4` oder `nightly`.                                                                        |
+| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | nein     | **CRS-Version:** Die Version des zu verwendenden OWASP Core Rule Set. Optionen: `3` oder `4`. Hinweis: `nightly` ist veraltet und verwendet standardmäßig v4.                   |
 | `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | nein     | **Regel-Engine:** Steuern Sie, ob Regeln erzwungen werden. Optionen: `On`, `DetectionOnly` oder `Off`.                                                                          |
 | `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | nein     | **Audit-Engine:** Steuern Sie, wie die Audit-Protokollierung funktioniert. Optionen: `On`, `Off` oder `RelevantOnly`.                                                           |
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`    | multisite | nein     | **Audit-Protokoll-Teile:** Welche Teile von Anfragen/Antworten in Audit-Protokolle aufgenommen werden sollen.                                                                   |
@@ -3789,10 +3789,9 @@ Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entsp
 
 - **`3`**: Stabile [v3.3.8](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8).
 - **`4`**: Stabile [v4.24.1](https://github.com/coreruleset/coreruleset/releases/tag/v4.24.1) (**Standard**).
-- **`nightly`**: [Nightly-Build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) mit den neuesten Regel-Updates.
 
-!!! example "Nightly-Build"
-    Der **Nightly-Build** enthält die aktuellsten Regeln und bietet den neuesten Schutz gegen aufkommende Bedrohungen. Da er jedoch täglich aktualisiert wird und experimentelle oder ungetestete Änderungen enthalten kann, wird empfohlen, den Nightly-Build zunächst in einer **Staging-Umgebung** zu verwenden, bevor er in der Produktion eingesetzt wird.
+!!! warning "Nightly-Build veraltet"
+    Die Option `nightly` für `MODSECURITY_CRS_VERSION` ist veraltet, da das OWASP Core Rule Set-Projekt die Nightly-Releases eingestellt hat. Wenn Ihre Konfiguration noch `nightly` verwendet, wird stattdessen CRS v4 verwendet. Bitte aktualisieren Sie Ihre Konfiguration auf `MODSECURITY_CRS_VERSION=4`.
 
 !!! tip "Paranoia-Stufen"
     Das OWASP Core Rule Set verwendet "Paranoia-Stufen" (PL), um die Strenge der Regeln zu steuern:
@@ -3946,18 +3945,6 @@ Das OWASP Core Rule Set unterstützt auch eine Reihe von **Plugins**, die entwic
     USE_MODSECURITY_CRS: "yes"
     MODSECURITY_CRS_VERSION: "4"
     USE_MODSECURITY_GLOBAL_CRS: "yes"
-    ```
-
-=== "Nightly-Build mit benutzerdefinierten Plugins"
-
-    Konfiguration mit dem Nightly-Build von CRS mit benutzerdefinierten Plugins:
-
-    ```yaml
-    USE_MODSECURITY: "yes"
-    USE_MODSECURITY_CRS: "yes"
-    MODSECURITY_CRS_VERSION: "nightly"
-    USE_MODSECURITY_CRS_PLUGINS: "yes"
-    MODSECURITY_CRS_PLUGINS: "wordpress-rule-exclusions/v1.0.0 https://github.com/coreruleset/dos-protection-plugin-modsecurity/archive/refs/heads/main.zip"
     ```
 
 !!! note "Menschenlesbare Größenwerte"
@@ -5514,22 +5501,23 @@ STREAM-Unterstützung :x:
 
 Enable SSO authentication for the BunkerWeb web interface by reading headers set by upstream authentication proxies (Authentik, Authelia, Keycloak, Traefik Forward Auth, etc.)
 
-| Einstellung                   | Standardwert    | Kontext | Mehrfach | Beschreibung                                                                                     |
-| ----------------------------- | --------------- | ------- | -------- | ------------------------------------------------------------------------------------------------ |
-| `USE_UI_SSO`                  | `no`            | global  | nein     | Enable or disable UI Single Sign-On authentication for the web interface                         |
-| `UI_SSO_HEADER_USERNAME`      | `X-User`        | global  | nein     | HTTP header containing the authenticated username                                                |
-| `UI_SSO_HEADER_EMAIL`         | `X-Email`       | global  | nein     | HTTP header containing the user's email address                                                  |
-| `UI_SSO_HEADER_GROUPS`        | `X-Groups`      | global  | nein     | HTTP header containing the user's groups (comma or space separated)                              |
-| `UI_SSO_HEADER_NAME`          | `X-Name`        | global  | nein     | HTTP header containing the user's display name                                                   |
-| `UI_SSO_TRUSTED_IPS`          | `127.0.0.1,::1` | global  | nein     | Comma-separated list of trusted IP addresses or CIDR ranges that are allowed to send SSO headers |
-| `UI_SSO_AUTO_CREATE_USERS`    | `yes`           | global  | nein     | Automatically create new users when they authenticate via SSO for the first time                 |
-| `UI_SSO_DEFAULT_ROLE`         | `reader`        | global  | nein     | Default role assigned to new SSO users when no group mapping matches                             |
-| `UI_SSO_GROUP_ADMIN`          |                 | global  | nein     | Group name that grants admin role (highest priority)                                             |
-| `UI_SSO_GROUP_WRITER`         |                 | global  | nein     | Group name that grants writer role                                                               |
-| `UI_SSO_GROUP_READER`         |                 | global  | nein     | Group name that grants reader role                                                               |
-| `UI_SSO_FALLBACK_TO_LOGIN`    | `yes`           | global  | nein     | Allow users to fall back to normal login when SSO headers are not present                        |
-| `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`           | global  | nein     | Update user information (email, role) from SSO headers on each login                             |
-| `UI_SSO_LOGOUT_REDIRECT_URL`  |                 | global  | nein     | URL to redirect users to after logout (e.g., SSO provider logout endpoint)                       |
+| Einstellung                   | Standardwert        | Kontext | Mehrfach | Beschreibung                                                                                     |
+| ----------------------------- | ------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------ |
+| `USE_UI_SSO`                  | `no`                | global  | nein     | Enable or disable UI Single Sign-On authentication for the web interface                         |
+| `UI_SSO_HEADER_USERNAME`      | `X-User`            | global  | nein     | HTTP header containing the authenticated username                                                |
+| `UI_SSO_HEADER_EMAIL`         | `X-Email`           | global  | nein     | HTTP header containing the user's email address                                                  |
+| `UI_SSO_HEADER_GROUPS`        | `X-Groups`          | global  | nein     | HTTP header containing the user's groups (comma or space separated)                              |
+| `UI_SSO_HEADER_NAME`          | `X-Name`            | global  | nein     | HTTP header containing the user's display name                                                   |
+| `UI_SSO_TRUSTED_IPS`          | `127.0.0.1,::1`     | global  | nein     | Comma-separated list of trusted IP addresses or CIDR ranges that are allowed to send SSO headers |
+| `UI_SSO_AUTO_CREATE_USERS`    | `yes`               | global  | nein     | Automatically create new users when they authenticate via SSO for the first time                 |
+| `UI_SSO_DEFAULT_ROLE`         | `reader`            | global  | nein     | Default role assigned to new SSO users when no group mapping matches                             |
+| `UI_SSO_GROUP_ADMIN`          |                     | global  | nein     | Group name that grants admin role (highest priority)                                             |
+| `UI_SSO_GROUP_WRITER`         |                     | global  | nein     | Group name that grants writer role                                                               |
+| `UI_SSO_GROUP_READER`         |                     | global  | nein     | Group name that grants reader role                                                               |
+| `UI_SSO_FALLBACK_TO_LOGIN`    | `yes`               | global  | nein     | Allow users to fall back to normal login when SSO headers are not present                        |
+| `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`               | global  | nein     | Update user information (email, role) from SSO headers on each login                             |
+| `UI_SSO_ACCOUNT_LINKING`      | `username_or_email` | global  | nein     | How to match incoming SSO users to local accounts                                                |
+| `UI_SSO_LOGOUT_REDIRECT_URL`  |                     | global  | nein     | URL to redirect users to after logout (e.g., SSO provider logout endpoint)                       |
 
 ## User Manager <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
