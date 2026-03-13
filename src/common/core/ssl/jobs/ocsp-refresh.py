@@ -399,10 +399,15 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
         # Explicitly use default SSL context with certificate verification enabled
         ssl_context = ssl.create_default_context()
         response = urlopen(req, timeout=timeout, context=ssl_context)
-        ocsp_response_data = response.read(102_400)  # Cap at 100KB — typical OCSP response is 1-4KB
+        # cap response size at 100KB to prevent memory exhaustion from malicious responder
+        ocsp_der = response.read(102400)
+    
+        if not ocsp_der:
+            LOG.warning("⚠️ OCSP empty response from %s for %s", ocsp_url, cert_name)
+            return None, 0
 
-        # Parse response and validate status
-        ocsp_response = x509_ocsp.load_der_ocsp_response(ocsp_response_data)
+        # Check if it's a valid OCSP response via cryptography
+        ocsp_response = x509_ocsp.load_der_ocsp_response(ocsp_der)
         if ocsp_response.response_status != x509_ocsp.OCSPResponseStatus.SUCCESSFUL:
             LOG.error("❌ OCSP response status is not successful for %s: %s", cert_name, ocsp_response.response_status)
             return None, 0
@@ -422,7 +427,7 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
             os.chmod(f_issuer.name, 0o600)
             os.chmod(f_leaf.name, 0o600)
 
-            f_der.write(ocsp_response_data)
+            f_der.write(ocsp_der)
             f_der.flush()
 
             f_issuer.write(issuer.public_bytes(Encoding.PEM).decode("utf-8"))
@@ -458,7 +463,7 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
         LOG.debug("⏸️ OCSP delaying 5 seconds after fetch for %s to prevent rate limiting", cert_name)
         time.sleep(5)
 
-        return ocsp_response_data, ttl
+        return ocsp_der, ttl
     except HTTPError as e:
         # HTTP error code — OCSP responder returned an error
         error_desc = f"HTTP {e.code}"
@@ -639,24 +644,19 @@ def _get_cert_checksums(db: Any, cert_names: set) -> Dict[str, str]:
         return checksums
 
     try:
-        cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=False)
+        # Optimization: use with_data=True to fetch all checksums in one go
+        cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=True)
         for entry in cache_files:
             file_name = entry.get("file_name", "")
             if file_name.startswith("cert_checksum/"):
                 cert_name = file_name[len("cert_checksum/"):]
                 if cert_name in cert_names:
-                    # Retrieve the actual checksum data
-                    try:
-                        checksum_data = db.get_job_cache_file(
-                            job_name="ocsp-refresh",
-                            file_name=file_name,
-                            with_data=True,
-                            with_info=False,
-                        )
-                        if checksum_data:
-                            checksums[cert_name] = checksum_data.decode("utf-8").strip()
-                    except Exception:
-                        pass  # Checksum entry doesn't exist or couldn't be retrieved
+                    data = entry.get("data")
+                    if data:
+                        try:
+                            checksums[cert_name] = data.decode("utf-8").strip()
+                        except Exception:
+                            pass
     except Exception as e:
         LOG.debug("⚠️ OCSP could not retrieve certificate checksums from database: %s", e)
 
@@ -868,12 +868,12 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
         LOG.debug("OCSP exception while attempting cache sync: %s", e)
 
 
-def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, stats: Optional[dict] = None) -> Optional[Tuple[str, bytes, int, str, bytes]]:
+def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, stats: Optional[dict] = None) -> Optional[Tuple[str, Optional[bytes], int, str, bytes]]:
     """
     Process a single certificate for OCSP stapling. Works with in-memory PEM data.
 
     Returns a tuple of (cert_name, ocsp_der, ttl, checksum, pem_data) for batched database writes,
-    or None if the cert was skipped/failed/cached.
+    or None if the cert was skipped/failed entirely.
     """
     if stats is None:
         stats = {}
@@ -884,7 +884,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
     if not _is_ocsp_enabled_for_service(service_name):
         LOG.info("🧹 OCSP stapling disabled for service %s, cleaning up cache for %s", service_name, cert_name)
         cleanup_ocsp_cache(db, cert_name)
-        stats["le_certs_skipped"] = stats.get("le_certs_skipped", 0) + 1
+        stats["le_certs_skipped"] = stats["le_certs_skipped"] + 1
         return None
 
     LOG.info("🔄 OCSP processing certificate %s", cert_name)
@@ -893,7 +893,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
         ocsp_url = extract_ocsp_url(pem_data, cert_name)
         if not ocsp_url:
             LOG.info("ℹ️ OCSP certificate %s has no responder, skipping fetch", cert_name)
-            stats["le_certs_no_ocsp"] = stats.get("le_certs_no_ocsp", 0) + 1
+            stats["le_certs_no_ocsp"] = stats["le_certs_no_ocsp"] + 1
             return None
 
         LOG.info("🌐 OCSP responder for certificate %s: %s", cert_name, ocsp_url)
@@ -915,7 +915,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
                     MIN_TTL,
                     half_lifetime,
                 )
-                stats["ocsp_cached_responses"] = stats.get("ocsp_cached_responses", 0) + 1
+                stats["ocsp_cached_responses"] = stats["ocsp_cached_responses"] + 1
                 return None
             
             if cached_ttl <= MIN_TTL:
@@ -978,7 +978,7 @@ def process_custom_certs(
     lock_fd: Optional[int] = None,
     refresh_fn: Optional[Callable[[str], None]] = None,
     timeout_fn: Optional[Callable[[str], bool]] = None,
-) -> List[Tuple[str, bytes, int, str, bytes]]:
+) -> List[Tuple[str, Optional[bytes], int, str, bytes]]:
     """
     Process OCSP for custom certificates using certificate data from the database.
 
@@ -1268,7 +1268,7 @@ def _cleanup_orphaned_ocsp(db: Optional[Any], le_certs: Dict[str, bytes], stats:
         LOG.debug("ℹ️ OCSP no valid certs found, skipping orphan cleanup to avoid accidental deletion")
         return
 
-    orphaned_count = 0
+    orphaned_count: int = 0
 
     # Check database OCSP entries
     if db:
@@ -1282,7 +1282,7 @@ def _cleanup_orphaned_ocsp(db: Optional[Any], le_certs: Dict[str, bytes], stats:
                 if cert_name not in valid_cert_names:
                     LOG.info("🧹 OCSP removing orphaned entry for deleted service: %s", cert_name)
                     cleanup_ocsp_cache(db, cert_name)
-                    orphaned_count += 1
+                    orphaned_count = orphaned_count + 1
         except Exception as e:
             LOG.warning("⚠️ OCSP could not check database for orphaned entries: %s", e)
 
@@ -1301,7 +1301,7 @@ def _cleanup_orphaned_ocsp(db: Optional[Any], le_certs: Dict[str, bytes], stats:
                     continue
                 LOG.info("🧹 OCSP removing orphaned disk cache for deleted service: %s", cert_name)
                 cleanup_ocsp_cache(db, cert_name)
-                orphaned_count += 1
+                orphaned_count = orphaned_count + 1
 
     if orphaned_count > 0:
         LOG.info("🧹 OCSP cleaned up %d orphaned cache entries for deleted services", orphaned_count)
@@ -1537,7 +1537,7 @@ def main() -> int:
         restore_ocsp_from_database(db)
 
         # === Collect all OCSP data for batched database writes ===
-        all_ocsp_results: List[Tuple[str, bytes, int, str, bytes]] = []
+        all_ocsp_results: List[Tuple[str, Optional[bytes], int, str, bytes]] = []
 
         # Process Let's Encrypt certificates from database tarball
         le_certs = _load_le_certs_from_db(db)
@@ -1596,6 +1596,10 @@ def main() -> int:
                 result = _process_cert(cert_name, pem_data, db, stats)
                 if result:
                     all_ocsp_results.append(result)
+                else:
+                    # Still need to return the pem_data for checksum persistence if refresh was skipped
+                    # We use a dummy result tuple (cert_name, None, 0, "", pem_data) to signal "just update checksum"
+                    all_ocsp_results.append((cert_name, None, 0, "", pem_data))
 
             # Process changed certs with OCSP refresh
             for cert_name, pem_data in sorted(changed_le_certs.items()):
@@ -1610,6 +1614,15 @@ def main() -> int:
                 result = _process_cert(cert_name, pem_data, db, stats)
                 if result:
                     all_ocsp_results.append(result)
+                else:
+                    # Still need to return the pem_data for checksum persistence if refresh was skipped
+                    # We use a dummy result tuple (cert_name, None, 0, "", pem_data) to signal "just update checksum"
+                    all_ocsp_results.append((cert_name, None, 0, "", pem_data))
+
+            # For unchanged certs, we still need to return their pem_data for checksum persistence
+            for cert_name, pem_data in unchanged_le_certs.items():
+                all_ocsp_results.append((cert_name, None, 0, "", pem_data))
+
         else:
             LOG.info("ℹ️ OCSP no LE certificates found in database")
 
@@ -1619,30 +1632,33 @@ def main() -> int:
             custom_results = process_custom_certs(db, stats, lock_fd=lock_fd_main, refresh_fn=refresh_job_lock, timeout_fn=check_job_timeout)
             all_ocsp_results.extend(custom_results)
 
-        # === Batch write all OCSP responses to database ===
+        # === Batch write all OCSP responses and checksums to database ===
         if db and all_ocsp_results:
-            LOG.info("🔄 OCSP batching %d OCSP response(s) to database", len(all_ocsp_results))
+            LOG.info("🔄 OCSP batching database updates for %d certificate(s)", len(all_ocsp_results))
             for cert_name, ocsp_der, ttl, checksum, pem_data in all_ocsp_results:
-                cache_key = f"ocsp/{cert_name}"
-                try:
-                    err = db.upsert_job_cache(
-                        service_id=None,  # Global cache entry
-                        file_name=cache_key,
-                        data=ocsp_der,
-                        job_name="ocsp-refresh",
-                        checksum=checksum,
-                    )
+                # 1. Update OCSP response if we have a new one
+                if ocsp_der:
+                    cache_key = f"ocsp/{cert_name}"
+                    try:
+                        err = db.upsert_job_cache(
+                            service_id=None,  # Global cache entry
+                            file_name=cache_key,
+                            data=ocsp_der,
+                            job_name="ocsp-refresh",
+                            checksum=checksum,
+                        )
 
-                    if err:
-                        LOG.error("❌ OCSP error while storing response for %s in database: %s", cert_name, err)
-                        stats["errors"] = stats.get("errors", 0) + 1
-                    else:
-                        LOG.info("✓ OCSP stored response for %s in database (TTL=%ds, checksum=%s)", cert_name, ttl, checksum[:8])
-                except Exception as e:
-                    LOG.error("❌ OCSP exception while storing response for %s in database: %s", cert_name, e)
-                    stats["errors"] = stats.get("errors", 0) + 1
+                        if err:
+                            LOG.error("❌ OCSP error while storing response for %s in database: %s", cert_name, err)
+                            stats["errors"] = stats["errors"] + 1
+                        else:
+                            LOG.info("✓ OCSP stored response for %s in database (TTL=%ds, checksum=%s)", cert_name, ttl, checksum[:8])
+                    except Exception as e:
+                        LOG.error("❌ OCSP exception while storing response for %s in database: %s", cert_name, e)
+                        stats["errors"] = stats["errors"] + 1
 
-                # Store certificate content checksum for future differential checks
+                # 2. ALWAYS store/update certificate content checksum for future differential checks
+                # This ensures that even if OCSP refresh was skipped, we know we've seen this cert version.
                 cert_checksum_key = f"cert_checksum/{cert_name}"
                 cert_checksum = _calculate_cert_checksum(pem_data)
                 try:
@@ -1655,11 +1671,15 @@ def main() -> int:
                     )
                     if err:
                         LOG.debug("⚠️ OCSP could not store cert checksum for %s: %s", cert_name, err)
+                    else:
+                        LOG.debug("✓ OCSP persisted checksum for %s", cert_name)
                 except Exception as e:
                     LOG.debug("⚠️ OCSP exception while storing cert checksum for %s: %s", cert_name, e)
 
         # === Batch write all OCSP responses to disk ===
         for cert_name, ocsp_der, ttl, checksum, pem_data in all_ocsp_results:
+            if not ocsp_der:
+                continue
             try:
                 # Acquire lock to prevent race conditions with concurrent OCSP fetches
                 lock_fd = _acquire_cert_lock(cert_name)
@@ -1670,7 +1690,7 @@ def main() -> int:
                         ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
                     except Exception as e:
                         LOG.error("❌ OCSP error while creating directory %s: %s", ocsp_cert_dir, e)
-                        stats["errors"] = stats.get("errors", 0) + 1
+                        stats["errors"] = stats["errors"] + 1
                         continue
 
                     # Write OCSP response to cache/ssl/{cert-name}/ocsp.der
@@ -1679,7 +1699,7 @@ def main() -> int:
                         ocsp_path.write_bytes(ocsp_der)
                         ocsp_path.chmod(0o644)  # Readable by nginx
                         LOG.info("✓ OCSP saved response for %s to disk at %s", cert_name, ocsp_path)
-                        stats["ocsp_fetched_responses"] = stats.get("ocsp_fetched_responses", 0) + 1
+                        stats["ocsp_fetched_responses"] = stats["ocsp_fetched_responses"] + 1
 
                         # Create symlinks for each SAN so OCSP is found by any SNI name
                         _create_san_symlinks(pem_data, ocsp_path, cert_name)
