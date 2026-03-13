@@ -943,12 +943,12 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
         LOG.debug("OCSP exception while attempting cache sync: %s", e)
 
 
-def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, stats: Optional[dict] = None, force_fetch: bool = False) -> Tuple[str, Optional[bytes], int, str, bytes, Optional[str]]:
+def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, stats: Optional[dict] = None, force_fetch: bool = False) -> Tuple[str, Optional[bytes], int, str, bytes, Optional[str], bool]:
     """
     Process a single certificate for OCSP stapling. Works with in-memory PEM data.
     If force_fetch is True, skips the cached TTL check and retrieves a new response.
 
-    Returns a tuple of (cert_name, ocsp_der, ttl, cert_checksum, pem_data, ocsp_url) for batched database writes.
+    Returns a tuple of (cert_name, ocsp_der, ttl, cert_checksum, pem_data, ocsp_url, was_attempted) for batched database writes.
     If ocsp_der is None, it means the fetch was skipped or failed.
     """
     if stats is None:
@@ -968,7 +968,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
         LOG.debug("🧹 OCSP stapling disabled for service %s, cleaning up cache for %s", service_name, cert_name)
         cleanup_ocsp_cache(db, cert_name)
         stats["le_certs_skipped"] = stats.get("le_certs_skipped", 0) + 1
-        return (cert_name, None, 0, cert_checksum, pem_data, None)
+        return (cert_name, None, 0, cert_checksum, pem_data, None, False)
 
     # Check if certificate checksum matches what we have in database
     cached_checksum = None
@@ -985,14 +985,14 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
     try:
         if not pem_data.startswith(b"-----BEGIN"):
             LOG.warning("⚠️ OCSP cert for %s has no PEM BEGIN marker or is invalid after cleaning, skipping", cert_name)
-            return (cert_name, None, 0, cert_checksum, pem_data, None)
+            return (cert_name, None, 0, cert_checksum, pem_data, None, False)
 
         # Proceed with extracting OCSP URL using the CLEANED pem_data
         ocsp_url = extract_ocsp_url(pem_data, cert_name)
         if not ocsp_url:
             LOG.debug("ℹ️ OCSP certificate %s has no responder, skipping fetch", cert_name)
             stats["le_certs_no_ocsp"] = stats["le_certs_no_ocsp"] + 1
-            return (cert_name, None, 0, cert_checksum, pem_data, None)
+            return (cert_name, None, 0, cert_checksum, pem_data, None, False)
 
         LOG.debug("🌐 OCSP responder for certificate %s: %s", cert_name, ocsp_url)
 
@@ -1008,7 +1008,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
                     cert_name, cached_ttl, cached_ttl / 86400.0, MIN_TTL, half_lifetime,
                 )
                 stats["ocsp_cached_responses"] = stats["ocsp_cached_responses"] + 1
-                return (cert_name, None, cached_ttl, cert_checksum, pem_data, ocsp_url)
+                return (cert_name, None, cached_ttl, cert_checksum, pem_data, ocsp_url, False)
             
             if cached_ttl <= MIN_TTL:
                 LOG.info("🔄 OCSP response for %s is near expiration (TTL=%ds < %ds), attempting aggressive refresh", cert_name, cached_ttl, MIN_TTL)
@@ -1029,22 +1029,32 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
 
         if not ocsp_der:
             LOG.error("❌ OCSP failed to fetch response for %s after retries", cert_name)
-            
+
             if cached_ttl is not None:
                 current_ttl = cast(int, cached_ttl)
-                if current_ttl <= MIN_TTL:
+                if current_ttl <= 0:
                     LOG.warning(
-                        "🚨🚨🚨 OCSP CRITICAL WARNING: Cached response for %s is near expiration (TTL=%ds) "
-                        "and refresh failed. Removing response from cache to prevent stapling expired data.",
-                        cert_name, current_ttl
+                        "🧹 OCSP cached response for %s is already expired and refresh failed. Cleaning up invalid cache.",
+                        cert_name,
                     )
                     cleanup_ocsp_cache(db, cert_name)
-                elif current_ttl <= 0:
-                    LOG.warning("🧹 OCSP cached response for %s is already expired and refresh failed. Cleaning up invalid cache.", cert_name)
+                elif current_ttl <= MIN_TTL:
+                    LOG.warning(
+                        "🚨 OCSP CRITICAL: Cached response for %s is near expiration (TTL=%ds) and refresh failed. "
+                        "Removing from cache to prevent stapling expired data.",
+                        cert_name,
+                        current_ttl,
+                    )
                     cleanup_ocsp_cache(db, cert_name)
+                else:
+                    LOG.warning(
+                        "⚠️ OCSP could NOT refresh response for %s, keeping existing cache (TTL=%ds) for now",
+                        cert_name,
+                        current_ttl,
+                    )
+                return (cert_name, None, current_ttl, cert_checksum, pem_data, ocsp_url, True)
 
-            stats["errors"] = stats.get("errors", 0) + 1
-            return (cert_name, None, 0, cert_checksum, pem_data, ocsp_url)
+            return (cert_name, None, 0, cert_checksum, pem_data, ocsp_url, True)
 
         # Calculate checksum for integrity verification
         ocsp_checksum = hashlib.sha256(ocsp_der).hexdigest()
@@ -1052,12 +1062,12 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
         LOG.info("⚡ OCSP final TTL for %s is %ds (%s) (checksum=%s)", cert_name, ttl, ttl_readable, ocsp_checksum[:8])
 
         # === Return result for batched database writes ===
-        return (cert_name, ocsp_der, ttl, cert_checksum, pem_data, ocsp_url)
+        return (cert_name, ocsp_der, ttl, cert_checksum, pem_data, ocsp_url, True)
 
     except Exception as e:
         LOG.error("❌ OCSP exception while processing certificate %s: %s", cert_name, e)
         stats["errors"] = stats.get("errors", 0) + 1
-        return (cert_name, None, 0, cert_checksum, pem_data, None)
+        return (cert_name, None, 0, cert_checksum, pem_data, None, False)
 
 
 def process_custom_certs(
@@ -1067,11 +1077,11 @@ def process_custom_certs(
     refresh_fn: Optional[Callable[[str], None]] = None,
     timeout_fn: Optional[Callable[[str], bool]] = None,
     skip_unchanged_ttl_checks: bool = False,
-) -> List[Tuple[str, Optional[bytes], int, str, bytes, Optional[str]]]:
+) -> List[Tuple[str, Optional[bytes], int, str, bytes, Optional[str], bool]]:
     """
     Process OCSP for custom certificates using certificate data from the database.
 
-    Returns a list of tuples (cert_name, ocsp_der, ttl, checksum, pem_data, ocsp_url) for batched database writes.
+    Returns a list of tuples (cert_name, ocsp_der, ttl, checksum, pem_data, ocsp_url, was_attempted) for batched database writes.
 
     Args:
         db: Database connection
@@ -1083,7 +1093,7 @@ def process_custom_certs(
     if stats is None:
         stats = {}
 
-    results: List[Tuple[str, Optional[bytes], int, str, bytes, Optional[str]]] = []
+    results: List[Tuple[str, Optional[bytes], int, str, bytes, Optional[str], bool]] = []
 
     if not db:
         LOG.info("ℹ️ OCSP database not available, cannot process custom certificates")
@@ -1577,7 +1587,7 @@ def main() -> int:
                     pass
 
         # === Collect all OCSP data for batched database writes ===
-        all_ocsp_results: List[Tuple[str, Optional[bytes], int, str, bytes, Optional[str]]] = []
+        all_ocsp_results: List[Tuple[str, Optional[bytes], int, str, bytes, Optional[str], bool]] = []
         stashed_failures: List[Tuple[str, bytes]] = []
 
 
@@ -1635,7 +1645,7 @@ def main() -> int:
                 refresh_job_lock(cert_name)
                 res = _process_cert(cert_name, pem_data, db, stats, force_fetch=True)
                 all_ocsp_results.append(res)
-                if res[1] is None and res[5]: # ocsp_der is None and ocsp_url is present
+                if res[1] is None and res[5] and res[6]: # ocsp_der is None AND ocsp_url is present AND was_attempted is True
                     stashed_failures.append((cert_name, pem_data))
 
             # 2. Process changed certs (force refresh)
@@ -1644,7 +1654,7 @@ def main() -> int:
                 refresh_job_lock(cert_name)
                 res = _process_cert(cert_name, pem_data, db, stats, force_fetch=True)
                 all_ocsp_results.append(res)
-                if res[1] is None and res[5]:
+                if res[1] is None and res[5] and res[6]:
                     stashed_failures.append((cert_name, pem_data))
 
             # 3. Process unchanged certs (TTL check only)
@@ -1654,7 +1664,7 @@ def main() -> int:
                     refresh_job_lock(cert_name)
                     res = _process_cert(cert_name, pem_data, db, stats, force_fetch=False)
                     all_ocsp_results.append(res)
-                    if res[1] is None and res[5]:
+                    if res[1] is None and res[5] and res[6]:
                         stashed_failures.append((cert_name, pem_data))
 
         else:
@@ -1673,7 +1683,7 @@ def main() -> int:
             )
             all_ocsp_results.extend(custom_results)
             for res in custom_results:
-                if res[1] is None and res[5]:
+                if res[1] is None and res[5] and res[6]: # ocsp_der is None AND ocsp_url is present AND was_attempted is True
                     stashed_failures.append((res[0], res[4])) # cert_name, pem_data
 
         # === Final deferred retry for stashed failures ===
@@ -1696,7 +1706,7 @@ def main() -> int:
         # === Batch write all OCSP responses and checksums to database ===
         if db and all_ocsp_results:
             LOG.info("🔄 OCSP batching database updates for %d certificate(s)", len(all_ocsp_results))
-            for cert_name, ocsp_der, ttl, cert_checksum, pem_data, ocsp_url in all_ocsp_results:
+            for cert_name, ocsp_der, ttl, cert_checksum, pem_data, ocsp_url, was_attempted in all_ocsp_results:
                 sanitized_name = _sanitize_filename(cert_name)
                 # 1. Update OCSP response if we have a new one
                 if ocsp_der and ttl > 0:
@@ -1738,7 +1748,7 @@ def main() -> int:
                     LOG.debug("⚠️ OCSP exception while storing cert checksum for %s: %s", cert_name, e)
 
         # === Batch write all OCSP responses to disk ===
-        for cert_name, ocsp_der, ttl, checksum, pem_data, ocsp_url in all_ocsp_results:
+        for cert_name, ocsp_der, ttl, checksum, pem_data, ocsp_url, was_attempted in all_ocsp_results:
             if not ocsp_der:
                 continue
             try:
