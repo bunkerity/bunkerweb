@@ -21,6 +21,7 @@ from flask_login import current_user
 from flask import redirect, url_for
 
 from app.routes.logout import logout_page
+from app.utils import BISCUIT_PRIVATE_KEY_FILE
 
 from common_utils import get_version  # type: ignore
 
@@ -28,6 +29,45 @@ OPERATIONS = {
     "GET": "read",
     "POST": "write",
 }
+
+# Some UI endpoints use POST for datatable/query payloads but are read-only operations.
+READ_ONLY_POST_ENDPOINTS = frozenset(
+    {
+        "reports.reports_fetch",
+        "reports.reports_filters",
+        "reports.report_data_fetch",
+    }
+)
+READ_ONLY_POST_RULES = frozenset(
+    {
+        "/reports/fetch",
+        "/reports/filters",
+        "/reports/data",
+    }
+)
+READ_ONLY_POST_PATH_SUFFIXES = (
+    "/reports/fetch",
+    "/reports/filters",
+    "/reports/data",
+)
+
+
+def _normalize_path(path: str) -> str:
+    # Normalize path to tolerate duplicate/trailing slashes (e.g. /reports//fetch/).
+    return "/" + "/".join(segment for segment in path.split("/") if segment)
+
+
+def resolve_operation(method: str, path: str, endpoint: Optional[str] = None, rule: Optional[str] = None) -> str:
+    normalized_path = _normalize_path(path).rstrip("/")
+    normalized_rule = _normalize_path(rule or "").rstrip("/") if rule else ""
+
+    if method == "POST" and endpoint in READ_ONLY_POST_ENDPOINTS:
+        return "read"
+    if method == "POST" and normalized_rule in READ_ONLY_POST_RULES:
+        return "read"
+    if method == "POST" and any(normalized_path.rstrip("/").endswith(suffix) for suffix in READ_ONLY_POST_PATH_SUFFIXES):
+        return "read"
+    return OPERATIONS.get(method, "read")
 
 
 class BiscuitMiddleware:
@@ -75,8 +115,23 @@ class BiscuitMiddleware:
 
         if not token_str:
             if current_user.is_authenticated:
-                return logout_page(), 403
-            return
+                # Token may have been lost due to a session race condition
+                # (concurrent requests on different workers). Try to regenerate it.
+                try:
+                    if BISCUIT_PRIVATE_KEY_FILE.exists():
+                        current_app.logger.warning(f"Biscuit token missing from session for authenticated user {current_user.get_id()}, regenerating")
+                        private_key = PrivateKey(BISCUIT_PRIVATE_KEY_FILE.read_text().strip())
+                        token_factory = BiscuitTokenFactory(private_key)
+                        role = "super_admin" if current_user.admin else current_user.list_roles[0]
+                        token_str = token_factory.create_token_for_role(role, current_user.get_id()).to_base64()
+                        session["biscuit_token"] = token_str
+                    else:
+                        return logout_page(), 403
+                except Exception as e:
+                    current_app.logger.error(f"Failed to regenerate Biscuit token: {e}")
+                    return logout_page(), 403
+            else:
+                return
 
         try:
             token: Biscuit = Biscuit.from_base64(token_str, self.root_public_key)
@@ -114,13 +169,15 @@ class BiscuitMiddleware:
                 current_app.logger.error(f"Unexpected error during version check: {e}")
                 return redirect(url_for("logout.logout_page"))
 
-        operation = OPERATIONS.get(request.method, "read")
+        route_rule = request.url_rule.rule if request.url_rule else None
+        resource_path = route_rule or request.path
+        operation = resolve_operation(request.method, request.path, request.endpoint, route_rule)
 
         for attempt in range(max_retries):
             try:
                 authorizer = AuthorizerBuilder()
 
-                authorizer.add_fact(Fact(f'resource("{request.path}")'))
+                authorizer.add_fact(Fact(f'resource("{resource_path}")'))
                 authorizer.add_fact(Fact(f'operation("{operation}")'))
 
                 authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path.starts_with("/profile")'))
@@ -138,7 +195,9 @@ class BiscuitMiddleware:
                     current_app.logger.warning(f"Datalog execution limits reached, retrying... (attempt {attempt + 1}/{max_retries})")
                     continue
 
-                current_app.logger.warning(f"Biscuit authorization error: {e}")
+                current_app.logger.warning(
+                    f"Biscuit authorization error on {request.method} {request.path} endpoint={request.endpoint} rule={route_rule} (operation={operation}): {e}"
+                )
                 return (
                     render_template(
                         "unauthorized.html",

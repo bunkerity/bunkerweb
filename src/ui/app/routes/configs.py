@@ -8,7 +8,7 @@ from flask_login import login_required
 from werkzeug.utils import secure_filename
 
 from app.dependencies import BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA, DB
-from app.utils import flash
+from app.utils import flash, is_editable_method
 
 from app.routes.utils import handle_error, verify_data_in_form, wait_applying
 
@@ -88,7 +88,7 @@ def configs_convert():
         db_config_map = {(config.get("service_id"), config["type"], config["name"]): config for config in db_configs}
 
         configs_to_convert = set()
-        non_ui_configs = set()
+        non_editable_configs = set()
         non_convertible_configs = set()
         missing_configs = set()
 
@@ -103,16 +103,18 @@ def configs_convert():
             if not db_config:
                 missing_configs.add(config_label)
                 continue
-            if db_config.get("template") or db_config.get("method") != "ui":
-                non_ui_configs.add(config_label)
+            if db_config.get("template") or not is_editable_method(db_config.get("method")):
+                non_editable_configs.add(config_label)
                 continue
             if db_config.get("is_draft", False) == (convert_to == "draft"):
                 non_convertible_configs.add(config_label)
                 continue
             configs_to_convert.add(key)
 
-        for non_ui_config in non_ui_configs:
-            DATA["TO_FLASH"].append({"content": f"Custom config {non_ui_config} is not a UI custom config and will not be converted.", "type": "error"})
+        for non_editable_config in non_editable_configs:
+            DATA["TO_FLASH"].append(
+                {"content": f"Custom config {non_editable_config} is not a UI/API custom config and will not be converted.", "type": "error"}
+            )
 
         for non_convertible_config in non_convertible_configs:
             DATA["TO_FLASH"].append(
@@ -124,7 +126,7 @@ def configs_convert():
 
         if not configs_to_convert:
             DATA["TO_FLASH"].append(
-                {"content": "All selected custom configs could not be found, are not UI custom configs or are already converted.", "type": "error"}
+                {"content": "All selected custom configs could not be found, are not UI/API custom configs or are already converted.", "type": "error"}
             )
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
@@ -190,9 +192,9 @@ def configs_delete():
         wait_applying()
 
         db_configs = DB.get_custom_configs(with_drafts=True)
-        new_db_configs = []
         configs_to_delete = set()
-        non_ui_configs = set()
+        non_editable_configs = set()
+        remaining_configs_by_method: Dict[str, List[Dict[str, str]]] = {"ui": [], "api": []}
 
         for db_config in db_configs:
             key = f"{(db_config['service_id'] + '/') if db_config['service_id'] else ''}{db_config['type']}/{db_config['name']}"
@@ -201,34 +203,39 @@ def configs_delete():
                 # Normalize service comparison: treat "global" string as None
                 config_service = config["service"] if config["service"] != "global" else None
                 if db_config["name"] == config["name"] and db_config["service_id"] == config_service and db_config["type"] == config["type"]:
-                    if db_config["method"] != "ui":
-                        non_ui_configs.add(key)
+                    config_method = db_config.get("method")
+                    if config_method not in remaining_configs_by_method:
+                        non_editable_configs.add(key)
                         continue
                     configs_to_delete.add(key)
                     keep = False
                     break
-            if db_config.pop("template", None) or not keep:
+            if db_config.get("template") or not keep:
                 continue
-            new_db_configs.append(db_config)
+            config_without_template = {k: v for k, v in db_config.items() if k != "template"}
+            config_method = config_without_template.get("method")
+            if config_method in remaining_configs_by_method:
+                remaining_configs_by_method[config_method].append(config_without_template)
 
-        for non_ui_config in non_ui_configs:
+        for non_editable_config in non_editable_configs:
             DATA["TO_FLASH"].append(
                 {
-                    "content": f"Custom config {non_ui_config} is not a UI custom config and will not be deleted.",
+                    "content": f"Custom config {non_editable_config} is not a UI/API custom config and will not be deleted.",
                     "type": "error",
                 }
             )
 
         if not configs_to_delete:
-            DATA["TO_FLASH"].append({"content": "All selected custom configs could not be found or are not UI custom configs.", "type": "error"})
+            DATA["TO_FLASH"].append({"content": "All selected custom configs could not be found or are not UI/API custom configs.", "type": "error"})
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
 
-        error = DB.save_custom_configs(new_db_configs, "ui")
-        if error:
-            DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {error}", "type": "error"})
-            DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
-            return
+        for method, configs_for_method in remaining_configs_by_method.items():
+            error = DB.save_custom_configs(configs_for_method, method)
+            if error:
+                DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {error}", "type": "error"})
+                DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+                return
         DATA["TO_FLASH"].append({"content": f"Deleted config{'s' if len(configs_to_delete) > 1 else ''}: {', '.join(configs_to_delete)}", "type": "success"})
         DATA["RELOADING"] = False
 
@@ -386,9 +393,11 @@ def configs_edit(service: str, config_type: str, name: str):
         if DB.readonly:
             return handle_error("Database is in read-only mode", "configs")
 
-        if not db_config["template"] and db_config["method"] != "ui":
+        if not db_config["template"] and not is_editable_method(db_config["method"]):
             return handle_error(
-                f"Config {config_type}/{name}{' for service ' + service if service else ''} is not a UI custom config and cannot be edited.", "configs", True
+                f"Config {config_type}/{name}{' for service ' + service if service else ''} is not a UI/API custom config and cannot be edited.",
+                "configs",
+                True,
             )
 
         verify_data_in_form(
@@ -454,6 +463,7 @@ def configs_edit(service: str, config_type: str, name: str):
         if no_changes:
             return handle_error("No values were changed.", "configs", True)
 
+        method = db_config["method"] if is_editable_method(db_config.get("method")) else "ui"
         error = DB.upsert_custom_config(
             config_type,
             name,
@@ -462,7 +472,7 @@ def configs_edit(service: str, config_type: str, name: str):
                 "type": new_type,
                 "name": new_name,
                 "data": config_value,
-                "method": "ui",
+                "method": method,
                 "is_draft": new_is_draft,
             },
             service_id=service,

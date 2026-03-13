@@ -9,7 +9,10 @@ PYTHON_BIN=$(get_python_bin)
 export PYTHON_BIN
 
 # Set the PYTHONPATH
-export PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/db
+BW_PYTHONPATH=$(get_bunkerweb_pythonpath)
+export PYTHONPATH="${BW_PYTHONPATH}:/usr/share/bunkerweb/db"
+
+NGINX_CONF_DIR=$(get_nginx_conf_dir)
 
 # Display usage information
 function display_help() {
@@ -25,7 +28,9 @@ function display_help() {
 function start() {
     log "SYSTEMCTL" "ℹ️" "Starting BunkerWeb Scheduler service ..."
 
-    chown -R nginx:nginx /etc/nginx
+    if [ -d "$NGINX_CONF_DIR" ]; then
+        chown -R nginx:nginx "$NGINX_CONF_DIR"
+    fi
 
     # Check if the scheduler is already running
     stop
@@ -268,10 +273,19 @@ function stop() {
 
     if [ -f "/var/run/bunkerweb/scheduler.pid" ] ; then
         scheduler_pid=$(cat "/var/run/bunkerweb/scheduler.pid")
+        if ! kill -0 "$scheduler_pid" >/dev/null 2>&1; then
+            log "SYSTEMCTL" "ℹ️ " "Scheduler PID file is stale, cleaning up"
+            rm -f /var/run/bunkerweb/scheduler.pid
+            return 0
+        fi
         log "SYSTEMCTL" "ℹ️ " "Stopping scheduler..."
         kill -SIGINT "$scheduler_pid"
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
+            if ! kill -0 "$scheduler_pid" >/dev/null 2>&1; then
+                rm -f /var/run/bunkerweb/scheduler.pid
+                return 0
+            fi
             log "SYSTEMCTL" "❌" "Error while sending stop signal to scheduler"
             exit 1
         fi
@@ -281,6 +295,10 @@ function stop() {
     fi
     count=0
     while [ -f "/var/run/bunkerweb/scheduler.pid" ] ; do
+        if ! kill -0 "$scheduler_pid" >/dev/null 2>&1; then
+            rm -f /var/run/bunkerweb/scheduler.pid
+            break
+        fi
         sleep 1
         count=$((count + 1))
         if [ $count -ge 10 ] ; then

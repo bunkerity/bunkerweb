@@ -2582,9 +2582,8 @@ static void build_subroutines(BuildCtx *ctx)
   |    li TISNIL, LJ_TNIL
   |     li TISNUM, LJ_TISNUM		// Setup type comparison constants.
   |    .FPU mtc1 TMP3, TOBIT
-  |  ld TMP1, LFUNC:RB->pc
+  |  ld TMP3, LFUNC:RB->pc
   |   sd r0, DISPATCH_GL(jit_base)(DISPATCH)
-  |  ld KBASE, PC2PROTO(k)(TMP1)
   |    .FPU cvt.d.s TOBIT, TOBIT
   |  // Modified copy of ins_next which handles function header dispatch, too.
   |  lw INS, 0(PC)
@@ -2602,6 +2601,7 @@ static void build_subroutines(BuildCtx *ctx)
   |   decode_RA8a RA, INS
   |    beqz TMP2, >2
   |.  decode_RA8b RA
+  |  ld KBASE, PC2PROTO(k)(TMP3)
   |  jr AT
   |.  decode_RD8b RD
   |2:
@@ -2619,8 +2619,8 @@ static void build_subroutines(BuildCtx *ctx)
   |  dsubu TMP1, BASE, TMP0
   |  ld LFUNC:TMP2, -32(TMP1)
   |  cleartp LFUNC:TMP2
-  |  ld TMP1, LFUNC:TMP2->pc
-  |  ld KBASE, PC2PROTO(k)(TMP1)
+  |  ld TMP3, LFUNC:TMP2->pc
+  |  ld KBASE, PC2PROTO(k)(TMP3)
   |3:
   |  daddiu RC, MULTRES, -8
   |  jr AT
@@ -2639,6 +2639,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  ld AT, GG_DISP2STATIC(TMP0)
   |   decode_RA8a RA, INS
   |   decode_RD8b RD
+  |  ld KBASE, PC2PROTO(k)(TMP3)
   |  jr AT
   |.  decode_RA8b RA
   |

@@ -39,10 +39,28 @@
             </div>
         </div>
         <div class="justify-content-center d-none d-sm-flex">
-            {% if current_endpoint != "global-config" and current_endpoint != "global-settings" %}
-                <div {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
+            {% if current_endpoint == "global-config" or current_endpoint == "global-settings" %}
+                <div>
+                    <input type="hidden"
+                           id="override-non-global-settings"
+                           name="OVERRIDE_NON_GLOBAL_SERVICES"
+                           value="no">
                     <button type="button"
-                            class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}disabled{% endif %}">
+                            id="override-non-global-settings-toggle"
+                            class="btn btn-sm btn-outline-secondary toggle-override-non-global me-3"
+                            aria-pressed="false"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            data-bs-original-title="When enabled, edited global settings also override service values that are not inherited from global settings.">
+                        <i class="bx bx-sm bx-toggle-left"></i>
+                        <span class="d-none d-lg-inline">&nbsp;<span>Override services</span></span>
+                    </button>
+                </div>
+            {% endif %}
+            {% if current_endpoint != "global-config" and current_endpoint != "global-settings" %}
+                <div {% if current_endpoint != 'new' and not is_editable_method(service_method) %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and not is_editable_method(service_method) %}disabled{% endif %}">
                         <i class="bx bx-sm bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
                         <span class="d-none d-md-inline">&nbsp;
                             {% if is_draft == 'yes' %}
@@ -67,10 +85,24 @@
 </div>
 <div class="d-flex justify-content-center position-fixed m-3 d-sm-none"
      id="floating-settings-button">
-    {% if current_endpoint != "global-config" and current_endpoint != "global-settings" %}
-        <div {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
+    {% if current_endpoint == "global-config" or current_endpoint == "global-settings" %}
+        <div>
             <button type="button"
-                    class="btn btn-sm btn-outline-secondary toggle-draft p-1_5 me-1 {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}disabled{% endif %}">
+                    id="override-non-global-settings-toggle-mobile"
+                    class="btn btn-sm btn-outline-secondary rounded-pill toggle-override-non-global p-1_5 me-1"
+                    aria-pressed="false"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    data-bs-original-title="Override non-global service settings when saving edited globals.">
+                <i class="bx bx-xs bx-toggle-left"></i>
+                &nbsp;<span>Override</span>
+            </button>
+        </div>
+    {% endif %}
+    {% if current_endpoint != "global-config" and current_endpoint != "global-settings" %}
+        <div {% if current_endpoint != 'new' and not is_editable_method(service_method) %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary toggle-draft p-1_5 me-1 {% if current_endpoint != 'new' and not is_editable_method(service_method) %}disabled{% endif %}">
                 <i class="bx bx-xs bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
                 &nbsp;
                 {% if is_draft == 'yes' %}
@@ -156,8 +188,8 @@
                      role="tabpanel"
                      aria-labelledby="plugin-nav-{{ plugin }}"
                      data-type="{{ plugin_data['type'] }}">
-                    <div class="card-header d-flex justify-content-between align-items-center mw-100">
-                        <div class="pt-1 flex-grow-1 me-2 min-w-0">
+                    <div class="card-header d-flex justify-content-between align-items-start align-items-md-center mw-100 plugin-settings-header gap-2">
+                        <div class="pt-1 flex-grow-1 me-md-2 plugin-settings-header-content">
                             <h5 class="card-title d-flex align-items-center don-jose{{ plugin_types[plugin_data['type']].get('text-class', '') }}{{ plugin_types[plugin_data['type']].get('title-class', '') }}">
                                 {{ plugin_data["name"] }}&nbsp;－&nbsp;v{{ plugin_data["version"] }}&nbsp;－&nbsp;{{ plugin_types[plugin_data["type"]].get('icon', '<img src="' + pro_diamond_url + '"
      alt="Pro plugin"
@@ -165,9 +197,9 @@
      height="15.5px"
      loading="lazy">') |safe }}
                             </h5>
-                            <p class="card-subtitle text-muted text-truncate mt-1 courier-prime">{{ plugin_data["description"] }}</p>
+                            <p class="card-subtitle text-muted mt-1 courier-prime plugin-settings-description">{{ plugin_data["description"] }}</p>
                         </div>
-                        <div class="d-flex flex-grow-0 flex-shrink-0 justify-content-end align-items-center">
+                        <div class="d-flex flex-wrap flex-grow-0 flex-shrink-0 justify-content-start justify-content-md-end align-items-center gap-2 plugin-settings-actions">
                             <a href="{{ docs_url('/advanced', '#protect-udptcp-applications') }}"
                                class="btn btn-sm btn-outline-{% if plugin_data['stream'] == 'yes' %}bw-green{% elif plugin_data['stream'] == 'partial' %}warning{% else %}danger{% endif %} rounded-pill docs-link"
                                target="_blank"
@@ -187,7 +219,7 @@
                                 {% set plugin_fragment = "" %}
                             {% endif %}
                             <a href="{{ docs_url(plugin_endpoint, plugin_fragment) }}"
-                               class="btn btn-sm btn-primary rounded-pill ms-2 docs-link"
+                               class="btn btn-sm btn-primary rounded-pill docs-link"
                                data-endpoint="{{ plugin_endpoint }}"
                                data-fragment="{{ plugin_fragment }}"
                                target="_blank"
@@ -197,7 +229,7 @@
                             {% if plugin_data["page"] %}
                                 {% set plugin_blueprint = "#" if plugin_data["type"] == "core" else url_for(plugin) %}
                                 <a href="{% if plugin_blueprint == '#' %}{{ url_for("plugins") }}/{{ plugin }}{% else %}{{ plugin_blueprint }}{% endif %}"
-                                   class="btn btn-sm btn-primary rounded-pill ms-2">
+                                   class="btn btn-sm btn-primary rounded-pill">
                                     <i class="bx bxs-file-html"></i><span class="d-none d-md-inline">&nbsp;<span data-i18n="button.plugin_page">Plugin page</span></span>
                                 </a>
                             {% endif %}
@@ -218,7 +250,7 @@
                                 {% set setting_value = setting_config.get("value", setting_default) %}
                                 {% set setting_method = setting_config.get("method", "default") %}
                                 {% set setting_template = setting_config.get("template", "") %}
-                                {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or current_endpoint == "global-settings" or not setting_config.get("global")) %}
+                                {% set disabled = not is_editable_method(setting_method, allow_default=True) and (current_endpoint == "global-config" or current_endpoint == "global-settings" or not setting_config.get("global")) %}
                                 {% if current_endpoint == "new" or clone %}
                                     {% set setting_method = "default" %}
                                     {% set disabled = false %}
@@ -378,7 +410,7 @@
                                                             {% set setting_value = setting_config.get("value", setting_default) %}
                                                             {% set setting_method = setting_config.get("method", "default") %}
                                                             {% set setting_template = setting_config.get("template", "") %}
-                                                            {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or current_endpoint == "global-settings" or not setting_config.get("global")) %}
+                                                            {% set disabled = not is_editable_method(setting_method, allow_default=True) and (current_endpoint == "global-config" or current_endpoint == "global-settings" or not setting_config.get("global")) %}
                                                             {% if current_endpoint == "new" or clone %}
                                                                 {% set setting_method = "default" %}
                                                                 {% set disabled = false %}

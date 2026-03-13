@@ -895,6 +895,8 @@ again:
 	  }
 	  J->base[0] = lj_ir_kint(J, (int32_t)fct->size);
 	  return;  /* Interpreter will throw for newindex. */
+	} else if (cd && cd->ctypeid == CTID_CTYPEID) {
+	  /* Only resolve constants and metamethods for constructors. */
 	} else if (ctype_isbitfield(fct->info)) {
 	  if (ofs)
 	    ptr = emitir(IRT(IR_ADD, IRT_PTR), ptr, lj_ir_kintp(J, ofs));

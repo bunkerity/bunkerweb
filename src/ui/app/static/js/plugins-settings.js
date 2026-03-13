@@ -5,7 +5,8 @@ $(document).ready(() => {
   let toastNum = 0;
   let currentPlugin = "general";
   let currentStep = 1;
-  const isReadOnly = $("#is-read-only").val().trim() === "True";
+  const isReadOnlyValue = $("#is-read-only").val() || "";
+  const isReadOnly = isReadOnlyValue.trim() === "True";
   let isInit = true;
 
   if (isReadOnly && window.location.pathname.endsWith("/new"))
@@ -32,6 +33,295 @@ $(document).ready(() => {
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
   }
+
+  const pendingFileReads = new Set();
+
+  const getValidationTargetInput = ($input) => {
+    if ($input.hasClass("plugin-setting-file-text")) {
+      const manualSelector = $input.data("manualTarget");
+      if (manualSelector) {
+        const $manual = $(manualSelector).first();
+        if ($manual.length && !$manual.hasClass("d-none")) return $manual;
+      }
+
+      const targetSelector = $input.data("uploadTarget");
+      if (targetSelector) {
+        const $target = $(targetSelector);
+        if ($target.length) return $target;
+      }
+      const $fallback = $input
+        .closest(".plugin-file-setting-wrapper")
+        .find(".plugin-setting-file-upload")
+        .first();
+      if ($fallback.length) return $fallback;
+    }
+    return $input;
+  };
+
+  const upsertValidationFeedback = ($target) => {
+    let $feedback = $target.next(".invalid-feedback");
+    if (!$feedback.length) {
+      $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
+        $target,
+      );
+    }
+    return $feedback;
+  };
+
+  const setFieldValidationState = ($input, isValid, errorMessage = "") => {
+    const $target = getValidationTargetInput($input);
+    const isFileSetting = $input.hasClass("plugin-setting-file-text");
+    $target.toggleClass("is-invalid", !isValid);
+    $input.toggleClass("is-invalid", !isValid);
+    if (isFileSetting) {
+      // Keep file controls neutral on success (no green "is-valid" state).
+      $target.removeClass("is-valid");
+      $input.removeClass("is-valid");
+    }
+    const $existingFeedback = $target.next(".invalid-feedback");
+    if (!isValid || $existingFeedback.length) {
+      const $feedback = $existingFeedback.length
+        ? $existingFeedback
+        : upsertValidationFeedback($target);
+      $feedback.text(isValid ? "" : errorMessage);
+    }
+    return $target;
+  };
+
+  const buildValidationRegex = ($input, pattern) => {
+    if ($input.hasClass("plugin-setting-file-text")) {
+      // File settings often contain multiline payloads (PEM/base64 blocks).
+      return new RegExp(pattern, "s");
+    }
+    return new RegExp(pattern);
+  };
+
+  const FILE_NAME_STORAGE_PREFIX = "bw-file-setting-name::";
+
+  const getFileNameStorageKey = ($fileTextInput) => {
+    const settingName = String(
+      $fileTextInput.attr("name") || $fileTextInput.attr("id") || "",
+    ).trim();
+    if (!settingName) return "";
+    return `${FILE_NAME_STORAGE_PREFIX}${window.location.pathname}::${settingName}`;
+  };
+
+  const getStoredFileSettingName = ($fileTextInput) => {
+    const key = getFileNameStorageKey($fileTextInput);
+    if (!key || typeof localStorage === "undefined") return "";
+    try {
+      return String(localStorage.getItem(key) || "");
+    } catch (_err) {
+      return "";
+    }
+  };
+
+  const setStoredFileSettingName = ($fileTextInput, fileName) => {
+    const key = getFileNameStorageKey($fileTextInput);
+    if (!key || typeof localStorage === "undefined") return;
+    try {
+      const normalizedName = String(fileName || "").trim();
+      if (normalizedName) {
+        localStorage.setItem(key, normalizedName);
+      } else {
+        localStorage.removeItem(key);
+      }
+    } catch (_err) {
+      // Ignore storage errors (private mode/quota).
+    }
+  };
+
+  const clearStoredFileSettingName = ($fileTextInput) => {
+    $fileTextInput.removeData("lastFileName");
+    $fileTextInput.attr("data-file-name", "");
+    setStoredFileSettingName($fileTextInput, "");
+  };
+
+  const setCurrentFileSettingName = ($fileTextInput, fileName) => {
+    const normalizedName = String(fileName || "").trim();
+    if (!normalizedName) {
+      clearStoredFileSettingName($fileTextInput);
+      return "";
+    }
+    $fileTextInput.data("lastFileName", normalizedName);
+    $fileTextInput.attr("data-file-name", normalizedName);
+    setStoredFileSettingName($fileTextInput, normalizedName);
+    return normalizedName;
+  };
+
+  const syncPersistedFileNameDisplay = ($fileTextInput) => {
+    const $wrapper = $fileTextInput.closest(".plugin-file-setting-wrapper");
+    const $uploadInput = $wrapper.find(".plugin-setting-file-upload").first();
+    const $display = $wrapper
+      .find(".plugin-setting-file-upload-display")
+      .first();
+    if (!$uploadInput.length || !$display.length) return;
+
+    const uploadEl = $uploadInput.get(0);
+    const hasSelectedFile = Boolean(
+      uploadEl && uploadEl.files && uploadEl.files.length > 0,
+    );
+    const currentMode = String($fileTextInput.data("inputMode") || "upload");
+    const hasContent = String($fileTextInput.val() ?? "").trim() !== "";
+    const rememberedFileName =
+      String($fileTextInput.data("lastFileName") || "").trim() ||
+      String($fileTextInput.attr("data-file-name") || "").trim() ||
+      getStoredFileSettingName($fileTextInput);
+
+    if (
+      currentMode === "manual" ||
+      $uploadInput.hasClass("d-none") ||
+      hasSelectedFile ||
+      !hasContent ||
+      !rememberedFileName
+    ) {
+      $uploadInput.removeClass("has-persisted-name");
+      $display.addClass("d-none").text("");
+      return;
+    }
+
+    $uploadInput.addClass("has-persisted-name");
+    $display.text(rememberedFileName).removeClass("d-none");
+  };
+
+  const setFileSettingStatus = ($fileTextInput, textOverride = null) => {
+    const $wrapper = $fileTextInput.closest(".plugin-file-setting-wrapper");
+    const $status = $wrapper.find(".plugin-setting-file-status").first();
+    if (!$status.length) return;
+
+    const rawValue = $fileTextInput.val();
+    const value =
+      rawValue === undefined || rawValue === null ? "" : String(rawValue);
+    if (textOverride !== null) {
+      $status.text(textOverride);
+      syncPersistedFileNameDisplay($fileTextInput);
+      return;
+    }
+
+    if (value.trim() === "") {
+      clearStoredFileSettingName($fileTextInput);
+      const emptyText = $status.data("emptyText") || "No file selected";
+      $status.text(emptyText);
+      syncPersistedFileNameDisplay($fileTextInput);
+      return;
+    }
+
+    const rememberedFileName =
+      String($fileTextInput.data("lastFileName") || "").trim() ||
+      String($fileTextInput.attr("data-file-name") || "").trim() ||
+      getStoredFileSettingName($fileTextInput);
+    if (rememberedFileName) {
+      setCurrentFileSettingName($fileTextInput, rememberedFileName);
+      $status.text(
+        `Current content loaded from ${rememberedFileName} (${value.length} chars)`,
+      );
+      syncPersistedFileNameDisplay($fileTextInput);
+      return;
+    }
+
+    $status.text(`Current content loaded (${value.length} chars)`);
+    syncPersistedFileNameDisplay($fileTextInput);
+  };
+
+  const syncFileSettingManualInput = ($fileTextInput) => {
+    const manualSelector = $fileTextInput.data("manualTarget");
+    if (!manualSelector) return $();
+    const $manualInput = $(manualSelector).first();
+    if (!$manualInput.length) return $();
+
+    const value = String($fileTextInput.val() ?? "");
+    if ($manualInput.val() !== value) {
+      $manualInput.val(value);
+    }
+    return $manualInput;
+  };
+
+  const setFileSettingMode = ($fileTextInput, mode = "upload") => {
+    const $wrapper = $fileTextInput.closest(".plugin-file-setting-wrapper");
+    if (!$wrapper.length) return;
+
+    const manualSelector = $fileTextInput.data("manualTarget");
+    const uploadSelector = $fileTextInput.data("uploadTarget");
+    const $manualInput = manualSelector ? $(manualSelector).first() : $();
+    const $uploadInput = uploadSelector ? $(uploadSelector).first() : $();
+    const $toggle = $wrapper.find(".plugin-setting-file-mode-toggle").first();
+    const $toggleIcon = $toggle.find("i").first();
+    const $toggleGroup = $toggle.parent();
+
+    const isManual = mode === "manual";
+    $uploadInput.toggleClass("d-none", isManual);
+    $manualInput.toggleClass("d-none", !isManual);
+    $fileTextInput.data("inputMode", isManual ? "manual" : "upload");
+
+    if ($toggleGroup.length) {
+      if (isManual) {
+        $toggleGroup
+          .removeClass("input-group")
+          .addClass("d-flex justify-content-end");
+        $toggle.addClass("btn-sm");
+      } else {
+        $toggleGroup
+          .removeClass("d-flex justify-content-end")
+          .addClass("input-group");
+        $toggle.removeClass("btn-sm");
+      }
+    }
+
+    if ($toggle.length) {
+      const uploadLabel =
+        $toggle.data("uploadLabel") || "Switch to text editor";
+      const manualLabel = $toggle.data("manualLabel") || "Back to file upload";
+      const nextLabel = isManual ? manualLabel : uploadLabel;
+      $toggle.attr("data-mode", isManual ? "manual" : "upload");
+      $toggle.attr("aria-pressed", isManual ? "true" : "false");
+      $toggle.addClass("btn-outline-secondary").removeClass("btn-secondary");
+      if (isManual) {
+        $toggleIcon.removeClass("bx-edit-alt").addClass("bx-upload");
+        $toggle.attr("title", nextLabel);
+        $toggle.attr("aria-label", nextLabel);
+        $toggle.attr("data-bs-original-title", nextLabel);
+      } else {
+        $toggleIcon.removeClass("bx-upload").addClass("bx-edit-alt");
+        $toggle.attr("title", nextLabel);
+        $toggle.attr("aria-label", nextLabel);
+        $toggle.attr("data-bs-original-title", nextLabel);
+      }
+
+      const toggleEl = $toggle.get(0);
+      if (toggleEl && typeof bootstrap !== "undefined" && bootstrap.Tooltip) {
+        const tooltipInstance = bootstrap.Tooltip.getInstance(toggleEl);
+        if (tooltipInstance) {
+          tooltipInstance.hide();
+          tooltipInstance.dispose();
+          new bootstrap.Tooltip(toggleEl);
+        }
+      }
+    }
+
+    syncPersistedFileNameDisplay($fileTextInput);
+  };
+
+  const readFileAsText = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => resolve(String(event.target?.result ?? ""));
+      reader.onerror = () =>
+        reject(new Error("Unable to read the selected file."));
+      reader.readAsText(file);
+    });
+
+  const trackPendingFileRead = (promise) => {
+    pendingFileReads.add(promise);
+    const cleanup = () => pendingFileReads.delete(promise);
+    promise.then(cleanup, cleanup);
+    return promise;
+  };
+
+  const waitForPendingFileReads = async () => {
+    if (pendingFileReads.size === 0) return;
+    await Promise.allSettled(Array.from(pendingFileReads));
+  };
+
   const $templateInput = $("#used-template");
   let usedTemplate = "low";
   if ($templateInput.length) {
@@ -42,6 +332,43 @@ $(document).ready(() => {
   let currentTemplate = normalizeTemplateId($("#selected-template").val());
   let currentMode = normalizeTemplateId($("#selected-mode").val());
   let currentType = normalizeTemplateId($("#selected-type").val());
+
+  const isOverrideNonGlobalEnabled = () =>
+    ($("#override-non-global-settings").val() || "no")
+      .toString()
+      .trim()
+      .toLowerCase() === "yes";
+
+  const setOverrideNonGlobalEnabled = (enabled) => {
+    const value = enabled ? "yes" : "no";
+
+    const $hidden = $("#override-non-global-settings");
+    if ($hidden.length) {
+      $hidden.val(value);
+    }
+
+    const $buttons = $(
+      "#override-non-global-settings-toggle, #override-non-global-settings-toggle-mobile",
+    );
+    $buttons
+      .toggleClass("btn-outline-secondary", !enabled)
+      .toggleClass("btn-primary", enabled)
+      .attr("aria-pressed", enabled ? "true" : "false");
+
+    $buttons.find("i").each(function () {
+      $(this)
+        .toggleClass("bx-toggle-left", !enabled)
+        .toggleClass("bx-toggle-right", enabled);
+    });
+  };
+
+  if ($("#override-non-global-settings").length) {
+    setOverrideNonGlobalEnabled(isOverrideNonGlobalEnabled());
+  }
+
+  $(document).on("click", ".toggle-override-non-global", () => {
+    setOverrideNonGlobalEnabled(!isOverrideNonGlobalEnabled());
+  });
 
   if (!currentTemplate) currentTemplate = usedTemplate;
   if (!currentMode) currentMode = "easy";
@@ -224,32 +551,51 @@ $(document).ready(() => {
       .find(".global-override-badge")
       .addClass("visually-hidden");
     templateContainer.find("input, select").each(function () {
-      const type = $(this).attr("type");
+      const $field = $(this);
+      const type = $field.attr("type");
       const isNewEndpoint = window.location.pathname.endsWith("/new");
       const templateValue = isNewEndpoint
         ? $(`#${this.id}-template`).val()
-        : $(this).data("original");
-      if ($(this).prop("disabled") || type === "hidden") {
+        : $field.data("original");
+
+      if ($field.hasClass("plugin-setting-file-upload")) {
+        $field.val("");
+        return;
+      }
+
+      if (
+        $field.prop("disabled") ||
+        (type === "hidden" && !$field.hasClass("plugin-setting-file-text"))
+      ) {
         return;
       }
 
       // Check for select element
-      if ($(this).is("select")) {
-        $(this)
-          .find("option")
-          .each(function () {
-            $(this).prop("selected", $(this).val() == templateValue);
-          });
+      if ($field.is("select")) {
+        $field.find("option").each(function () {
+          $(this).prop("selected", $(this).val() == templateValue);
+        });
       } else if (type === "checkbox") {
-        $(this).prop("checked", templateValue === "yes");
+        $field.prop("checked", templateValue === "yes");
       } else {
-        $(this).val(templateValue);
+        $field.val(templateValue);
+        if ($field.hasClass("plugin-setting-file-text")) {
+          $field.data("fileReadError", false);
+          const originalFileName = String(
+            $field.data("originalFileName") || "",
+          ).trim();
+          setCurrentFileSettingName($field, originalFileName);
+          setFieldValidationState($field, true, "");
+          syncFileSettingManualInput($field);
+          setFileSettingStatus($field);
+        }
       }
     });
 
     templateContainer.find(".ace-editor").each(function () {
       const editor = ace.edit(this);
-      const editorValue = $(`#${this.id}-default`).val().trim();
+      const editorDefaultElem = $(`#${this.id}-default`).val();
+      const editorValue = editorDefaultElem ? editorDefaultElem.trim() : "";
       editor.setValue(editorValue);
       editor.session.setValue(editorValue);
       editor.gotoLine(0);
@@ -455,7 +801,9 @@ $(document).ready(() => {
     currentStepContainer.find(".plugin-setting").each(function () {
       const $input = $(this);
       let value = $input.val();
-      const isRequired = $input.prop("required");
+      const isRequired =
+        $input.prop("required") ||
+        String($input.data("required") || "false").toLowerCase() === "true";
       const pattern = $input.attr("pattern");
       let $label = $(`label[for="${$input.attr("id")}"]`);
       let fieldName = $input.attr("name") || t("validation.default_field_name");
@@ -495,6 +843,14 @@ $(document).ready(() => {
 
       let errorMessage = "";
       let isValid = true;
+      const hasFileReadError =
+        $input.hasClass("plugin-setting-file-text") &&
+        Boolean($input.data("fileReadError"));
+
+      if (hasFileReadError) {
+        errorMessage = "Unable to read the selected file.";
+        isValid = false;
+      }
 
       // Check if the field is required and not empty
       if (isRequired && !skipRequiredCheck && value === "") {
@@ -505,7 +861,7 @@ $(document).ready(() => {
       // Validate based on pattern if the input is not empty
       if (isValid && pattern && value !== "") {
         try {
-          const regex = new RegExp(pattern);
+          const regex = buildValidationRegex($input, pattern);
           if (!regex.test(value)) {
             errorMessage = patternMessage;
             isValid = false;
@@ -522,28 +878,20 @@ $(document).ready(() => {
         }
       }
 
-      // Toggle valid/invalid classes
-      $input.toggleClass("is-invalid", !isValid);
-
-      // Manage the invalid-feedback element
-      let $feedback = $input.next(".invalid-feedback");
-      if (!$feedback.length) {
-        $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
-          $input,
-        );
-      }
+      const $validationTarget = setFieldValidationState(
+        $input,
+        isValid,
+        errorMessage,
+      );
 
       if (!isValid) {
-        $feedback.text(errorMessage);
         isStepValid = false;
         invalidFieldsCount++;
 
         // Store the first invalid input for focusing later
         if (!firstInvalidInput) {
-          firstInvalidInput = $input;
+          firstInvalidInput = $validationTarget;
         }
-      } else {
-        $feedback.text("");
       }
     });
 
@@ -574,7 +922,17 @@ $(document).ready(() => {
     });
 
     // Helper function to append hidden inputs
-    const appendHiddenInput = (form, name, value) => {
+    const appendHiddenInput = (form, name, value, asTextarea = false) => {
+      if (asTextarea) {
+        const $textarea = $("<textarea>", {
+          name: name,
+          class: "visually-hidden",
+        });
+        $textarea.val(value ?? "");
+        form.append($textarea);
+        return;
+      }
+
       form.append(
         $("<input>", {
           type: "hidden",
@@ -589,15 +947,31 @@ $(document).ready(() => {
         const $this = $(this);
         const settingType = $this.attr("type");
 
-        if (settingType === "hidden") return;
+        if (
+          settingType === "hidden" &&
+          !$this.hasClass("plugin-setting-file-text")
+        ) {
+          return;
+        }
 
         const settingName = $this.attr("name");
+        if (!settingName) return;
         let settingValue = $this.val();
+        const isFileTextSetting = $this.hasClass("plugin-setting-file-text");
 
         if ($this.is("select")) {
           settingValue = $this.val();
         } else if (settingType === "checkbox") {
           settingValue = $this.is(":checked") ? "yes" : "no";
+        }
+
+        if (isFileTextSetting) {
+          const settingFileName = String(
+            $this.data("lastFileName") || $this.attr("data-file-name") || "",
+          ).trim();
+          appendHiddenInput(form, settingName, settingValue, true);
+          appendHiddenInput(form, `${settingName}__FILE_NAME`, settingFileName);
+          return;
         }
 
         appendHiddenInput(form, settingName, settingValue);
@@ -646,23 +1020,13 @@ $(document).ready(() => {
       templateContainer.find(".ace-editor").each(function () {
         const editor = ace.edit(this);
         const editorValue = editor.getValue().trim();
-        const editorDefault = $(`#${this.id}-default`).val().trim();
+        const editorDefaultElem = $(`#${this.id}-default`).val();
+        const editorDefault = editorDefaultElem ? editorDefaultElem.trim() : "";
         if (editorValue !== editorDefault)
           appendHiddenInput(form, $(this).data("name"), editorValue);
       });
-
-      // Append 'IS_DRAFT' if it exists
-      const $draftInput = $("#is-draft");
-      if ($draftInput.length) {
-        appendHiddenInput(form, "IS_DRAFT", $draftInput.val());
-      }
     } else if (currentMode === undefined || currentMode === "advanced") {
       addChildrenToForm(form, $("div[id^='navs-plugins-']"));
-
-      const $draftInput = $("#is-draft");
-      if ($draftInput.length) {
-        appendHiddenInput(form, "IS_DRAFT", $draftInput.val());
-      }
     } else if (currentMode === "raw") {
       // Helper function to parse configuration strings into an object
       const parseConfig = (selector) => {
@@ -709,6 +1073,10 @@ $(document).ready(() => {
             console.warn(`Skipping malformed line: ${line}`);
             return;
           }
+          if (key === "IS_DRAFT") {
+            skippedKeys.add(key);
+            return;
+          }
 
           appendHiddenInput(form, key, value);
           formKeys.add(key);
@@ -732,10 +1100,27 @@ $(document).ready(() => {
       });
     }
 
+    // Always post current draft state, including in raw mode.
+    const $draftInput = $("#is-draft");
+    if ($draftInput.length) {
+      appendHiddenInput(form, "IS_DRAFT", $draftInput.val());
+    }
+
     // Append 'OLD_SERVER_NAME' if it exists
     const $oldServerName = $("#old-server-name");
     if ($oldServerName.length) {
       appendHiddenInput(form, "OLD_SERVER_NAME", $oldServerName.val());
+    }
+
+    const hasOverrideNonGlobalSetting =
+      $("#override-non-global-settings").length > 0;
+    if (hasOverrideNonGlobalSetting) {
+      const overrideNonGlobalServices = isOverrideNonGlobalEnabled();
+      appendHiddenInput(
+        form,
+        "OVERRIDE_NON_GLOBAL_SERVICES",
+        overrideNonGlobalServices ? "yes" : "no",
+      );
     }
 
     return form;
@@ -893,12 +1278,26 @@ $(document).ready(() => {
 
   $(document).on("input", ".plugin-setting", function () {
     debounce(() => {
-      const isValid = $(this).attr("pattern")
-        ? new RegExp($(this).attr("pattern")).test($(this).val())
-        : true;
-      $(this)
-        .toggleClass("is-valid", isValid)
-        .toggleClass("is-invalid", !isValid);
+      const $input = $(this);
+      const pattern = $input.attr("pattern");
+      let isValid = true;
+      if (pattern) {
+        try {
+          isValid = buildValidationRegex($input, pattern).test($input.val());
+        } catch (_err) {
+          isValid = false;
+        }
+      }
+      const $target = getValidationTargetInput($input);
+      if ($input.hasClass("plugin-setting-file-text")) {
+        $target.removeClass("is-valid").toggleClass("is-invalid", !isValid);
+        $input.removeClass("is-valid").toggleClass("is-invalid", !isValid);
+      } else {
+        $target
+          .toggleClass("is-valid", isValid)
+          .toggleClass("is-invalid", !isValid);
+        $input.toggleClass("is-invalid", !isValid);
+      }
     }, 100)();
   });
 
@@ -1134,18 +1533,48 @@ $(document).ready(() => {
       // Safeguard checks for missing attributes
       const originalId = element.attr("id") || "";
       const originalLabelledBy = element.attr("aria-labelledby") || "";
+      const originalName = element.attr("name");
+      const originalFileInputTarget = element.attr("data-file-input") || "";
+      const originalUploadTarget = element.attr("data-upload-target") || "";
+      const originalManualTarget = element.attr("data-manual-target") || "";
 
       // Update IDs and attributes
       const newId = originalId.replace("-0", `-${suffix}`);
       const newLabelledBy = originalLabelledBy.replace("-0", `-${suffix}`);
-      const newName = `${element.attr("name") || ""}_${suffix}`;
+      const newName = originalName ? `${originalName}_${suffix}` : "";
+      const newFileInputTarget = originalFileInputTarget.replace(
+        "-0",
+        `-${suffix}`,
+      );
+      const newUploadTarget = originalUploadTarget.replace("-0", `-${suffix}`);
+      const newManualTarget = originalManualTarget.replace("-0", `-${suffix}`);
 
       element
         .attr("id", newId)
         .attr("aria-labelledby", newLabelledBy)
-        .attr("name", newName)
         .attr("data-original", defaultVal)
         .prop("disabled", false);
+
+      if (originalFileInputTarget) {
+        element.attr("data-file-input", newFileInputTarget);
+      }
+      if (originalUploadTarget) {
+        element.attr("data-upload-target", newUploadTarget);
+      }
+      if (originalManualTarget) {
+        element.attr("data-manual-target", newManualTarget);
+      }
+
+      if (originalName) {
+        element.attr("name", newName);
+      } else {
+        element.removeAttr("name");
+      }
+
+      if (element.hasClass("plugin-setting-file-manual")) {
+        element.val(defaultVal);
+        return;
+      }
 
       // Cache label and description elements to avoid multiple traversals
       const settingLabel = element.next("label");
@@ -1175,11 +1604,29 @@ $(document).ready(() => {
       } else {
         element.val(defaultVal);
       }
+
+      if (element.hasClass("plugin-setting-file-text")) {
+        element.data("fileReadError", false);
+        setCurrentFileSettingName(element, "");
+        setFieldValidationState(element, true, "");
+      }
     };
 
-    // Reset input/select fields inside the clone
-    multipleClone.find("input, select").each(function () {
+    // Reset input/select/textarea fields inside the clone
+    multipleClone.find("input, select, textarea").each(function () {
       resetInputField($(this), suffix);
+    });
+    multipleClone.find(".plugin-setting-file-text").each(function () {
+      syncFileSettingManualInput($(this));
+      setFileSettingMode($(this), "upload");
+      setFileSettingStatus($(this));
+    });
+    multipleClone.find(".plugin-setting-file-mode-toggle").each(function () {
+      const currentTarget = $(this).attr("data-file-input") || "";
+      $(this).attr(
+        "data-file-input",
+        currentTarget.replace("-0", `-${suffix}`),
+      );
     });
 
     // Update the collapse section's ID and remove tooltips
@@ -1351,11 +1798,13 @@ $(document).ready(() => {
     return allValid;
   };
 
-  $(".save-settings").on("click", function () {
+  $(".save-settings").on("click", async function () {
     if (isReadOnly) {
       alert(t("alert.readonly_mode"));
       return;
     }
+
+    await waitForPendingFileReads();
 
     // For easy mode, validate all steps before saving
     if (currentMode === "easy") {
@@ -1403,13 +1852,14 @@ $(document).ready(() => {
         const pluginId = $pluginContainer
           .attr("id")
           .replace("navs-plugins-", "");
-        let pluginHasErrors = false;
 
         // Check all inputs in this plugin
         $pluginContainer.find(".plugin-setting").each(function () {
           const $input = $(this);
           let value = $input.val();
-          const isRequired = $input.prop("required");
+          const isRequired =
+            $input.prop("required") ||
+            String($input.data("required") || "false").toLowerCase() === "true";
           const pattern = $input.attr("pattern");
           let $label = $(`label[for="${$input.attr("id")}"]`);
           let fieldName =
@@ -1448,6 +1898,14 @@ $(document).ready(() => {
 
           let errorMessage = "";
           let isValid = true;
+          const hasFileReadError =
+            $input.hasClass("plugin-setting-file-text") &&
+            Boolean($input.data("fileReadError"));
+
+          if (hasFileReadError) {
+            errorMessage = "Unable to read the selected file.";
+            isValid = false;
+          }
 
           // Check if the field is required and not empty
           if (isRequired && value === "") {
@@ -1458,7 +1916,7 @@ $(document).ready(() => {
           // Validate based on pattern if the input is not empty
           if (isValid && pattern && value !== "") {
             try {
-              const regex = new RegExp(pattern);
+              const regex = buildValidationRegex($input, pattern);
               if (!regex.test(value)) {
                 errorMessage = patternMessage;
                 isValid = false;
@@ -1475,29 +1933,20 @@ $(document).ready(() => {
             }
           }
 
-          // Toggle valid/invalid classes
-          $input.toggleClass("is-invalid", !isValid);
-
-          // Manage the invalid-feedback element
-          let $feedback = $input.next(".invalid-feedback");
-          if (!$feedback.length) {
-            $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
-              $input,
-            );
-          }
+          const $validationTarget = setFieldValidationState(
+            $input,
+            isValid,
+            errorMessage,
+          );
 
           if (!isValid) {
-            $feedback.text(errorMessage);
             allValid = false;
-            pluginHasErrors = true;
 
             // Store the first invalid input for focusing later
             if (!firstInvalidInput) {
-              firstInvalidInput = $input;
+              firstInvalidInput = $validationTarget;
               firstInvalidPlugin = pluginId;
             }
-          } else {
-            $feedback.text("");
           }
         });
       });
@@ -1640,6 +2089,16 @@ $(document).ready(() => {
               $input.val(settingValue).trigger("change");
             } else if (inputType === "checkbox") {
               $input.prop("checked", settingValue === "yes").trigger("change");
+            } else if ($input.hasClass("plugin-setting-file-text")) {
+              $input.data("fileReadError", false);
+              $input.val(settingValue).trigger("input").trigger("change");
+              setCurrentFileSettingName(
+                $input,
+                String(settingData.file_name || "").trim(),
+              );
+              setFieldValidationState($input, true, "");
+              syncFileSettingManualInput($input);
+              setFileSettingStatus($input);
             } else if ($input.hasClass("multivalue-hidden-input")) {
               const $container = $input.closest(".multivalue-container");
               const separator = $container.data("separator") || " ";
@@ -1680,10 +2139,15 @@ $(document).ready(() => {
               $input.closest(".dropdown").find(".multiselect-toggle").length
             ) {
               $input.val(settingValue).trigger("input");
-              const selectedValues = settingValue
-                ? settingValue.split(" ")
-                : [];
               const $dropdown = $input.closest(".dropdown");
+              const separator = $dropdown.data("separator");
+              const separatorValue =
+                separator === undefined ? " " : String(separator);
+              const selectedValues = settingValue
+                ? separatorValue === ""
+                  ? settingValue.split("")
+                  : settingValue.split(separatorValue)
+                : [];
               $dropdown.find(".form-check-input").each(function () {
                 const $checkbox = $(this);
                 const checkboxVal = $checkbox.val();
@@ -2307,6 +2771,25 @@ $(document).ready(() => {
       $settingField.val(valueToSet).trigger("change");
     } else if (settingType === "checkbox") {
       $settingField.prop("checked", valueToSet === "yes").trigger("change");
+    } else if ($settingField.hasClass("plugin-setting-file-text")) {
+      $settingField.data("fileReadError", false);
+      $settingField.val(valueToSet).trigger("input").trigger("change");
+      const fileNameToSet = String(
+        isGlobal
+          ? $settingField.data("originalFileName")
+          : $settingField.data("defaultFileName") || "",
+      ).trim();
+      setCurrentFileSettingName($settingField, fileNameToSet);
+      const $uploadInput = $settingField
+        .closest(".plugin-file-setting-wrapper")
+        .find(".plugin-setting-file-upload")
+        .first();
+      if ($uploadInput.length) {
+        $uploadInput.val("").removeClass("is-valid is-invalid");
+      }
+      setFieldValidationState($settingField, true, "");
+      syncFileSettingManualInput($settingField);
+      setFileSettingStatus($settingField);
     } else if ($settingField.hasClass("multivalue-hidden-input")) {
       // Handle multivalue reset
       const $container = $settingField.closest(".multivalue-container");
@@ -2345,6 +2828,27 @@ $(document).ready(() => {
       });
 
       updateMultivalueHiddenInput($container);
+    } else if (
+      $settingField.closest(".dropdown").find(".multiselect-toggle").length
+    ) {
+      $settingField.val(valueToSet).trigger("input");
+      const $dropdown = $settingField.closest(".dropdown");
+      const separator = $dropdown.data("separator");
+      const separatorValue = separator === undefined ? " " : String(separator);
+      const selectedValues = valueToSet
+        ? separatorValue === ""
+          ? valueToSet.split("")
+          : valueToSet.split(separatorValue)
+        : [];
+
+      $dropdown.find(".form-check-input").each(function () {
+        const $checkbox = $(this);
+        const checkboxVal = $checkbox.val();
+        $checkbox.prop("checked", selectedValues.includes(checkboxVal));
+      });
+      const selectedCount = selectedValues.filter((v) => v).length;
+      const $label = $dropdown.find(".multiselect-toggle label");
+      $label.text(`(${selectedCount} selected)`);
     } else {
       $settingField.val(valueToSet).trigger("input");
     }
@@ -2352,6 +2856,122 @@ $(document).ready(() => {
     // Highlight the field to indicate it's been reset
     const $setting = $settingField.closest(".col-12");
     highlightSettings($setting);
+  });
+
+  $(".plugin-setting-file-text").each(function () {
+    const $fileTextInput = $(this);
+    const persistedFileName = String(
+      $fileTextInput.attr("data-file-name") || "",
+    ).trim();
+    if (persistedFileName) {
+      setCurrentFileSettingName($fileTextInput, persistedFileName);
+    } else {
+      clearStoredFileSettingName($fileTextInput);
+    }
+    syncFileSettingManualInput($fileTextInput);
+    setFileSettingMode($fileTextInput, "upload");
+    setFileSettingStatus($fileTextInput);
+  });
+
+  $(document).on("click", ".plugin-setting-file-mode-toggle", function () {
+    const $toggle = $(this);
+    const hiddenInputSelector = $toggle.data("fileInput");
+    const $fileTextInput = hiddenInputSelector
+      ? $(hiddenInputSelector).first()
+      : $toggle
+          .closest(".plugin-file-setting-wrapper")
+          .find(".plugin-setting-file-text")
+          .first();
+
+    if (!$fileTextInput.length) return;
+
+    const currentMode = String($toggle.attr("data-mode") || "upload");
+    const nextMode = currentMode === "manual" ? "upload" : "manual";
+    setFileSettingMode($fileTextInput, nextMode);
+    if (nextMode === "manual") {
+      const $manualInput = syncFileSettingManualInput($fileTextInput);
+      if ($manualInput.length) {
+        $manualInput.trigger("focus");
+      }
+    }
+  });
+
+  $(document).on("input", ".plugin-setting-file-manual", function () {
+    const $manualInput = $(this);
+    const hiddenInputSelector = $manualInput.data("fileInput");
+    const $fileTextInput = hiddenInputSelector
+      ? $(hiddenInputSelector).first()
+      : $manualInput
+          .closest(".plugin-file-setting-wrapper")
+          .find(".plugin-setting-file-text")
+          .first();
+
+    if (!$fileTextInput.length) return;
+
+    const normalizedContent = String($manualInput.val() ?? "")
+      .replace(/\r\n/g, "\n")
+      .replace(/\r/g, "\n");
+    if ($manualInput.val() !== normalizedContent) {
+      $manualInput.val(normalizedContent);
+    }
+    $fileTextInput.data("fileReadError", false);
+    clearStoredFileSettingName($fileTextInput);
+    $fileTextInput.val(normalizedContent).trigger("input").trigger("change");
+    setFileSettingStatus($fileTextInput);
+  });
+
+  $(document).on("change", ".plugin-setting-file-upload", function () {
+    const $uploadInput = $(this);
+    const hiddenInputSelector = $uploadInput.data("fileInput");
+    const $fileTextInput = hiddenInputSelector
+      ? $(hiddenInputSelector).first()
+      : $uploadInput
+          .closest(".plugin-file-setting-wrapper")
+          .find(".plugin-setting-file-text")
+          .first();
+
+    if (!$fileTextInput.length) return;
+
+    const file = this.files && this.files[0];
+    if (!file) {
+      $fileTextInput.data("fileReadError", false);
+      setFieldValidationState($fileTextInput, true, "");
+      syncFileSettingManualInput($fileTextInput);
+      setFileSettingStatus($fileTextInput);
+      return;
+    }
+
+    const pendingRead = readFileAsText(file)
+      .then((content) => {
+        const normalizedContent = content
+          .replace(/\r\n/g, "\n")
+          .replace(/\r/g, "\n");
+        $fileTextInput.data("fileReadError", false);
+        setCurrentFileSettingName($fileTextInput, file.name);
+        $fileTextInput
+          .val(normalizedContent)
+          .trigger("input")
+          .trigger("change");
+        setFieldValidationState($fileTextInput, true, "");
+        syncFileSettingManualInput($fileTextInput);
+        setFileSettingStatus(
+          $fileTextInput,
+          `Loaded: ${file.name} (${normalizedContent.length} chars)`,
+        );
+      })
+      .catch(() => {
+        $fileTextInput.data("fileReadError", true);
+        setFieldValidationState(
+          $fileTextInput,
+          false,
+          "Unable to read the selected file.",
+        );
+        setFileSettingStatus($fileTextInput, `Unable to read: ${file.name}`);
+        // Clear on failure so the same file can be selected again immediately.
+        $uploadInput.val("");
+      });
+
+    trackPendingFileRead(pendingRead);
   });
 
   isInit = false;
@@ -2385,7 +3005,8 @@ $(document).ready(() => {
     $container.find(".multivalue-input-group").each(function () {
       const $inputGroup = $(this);
       const $input = $inputGroup.find(".multivalue-input");
-      const hasValue = $input.val().trim() !== "";
+      const inputValue = $input.val() || "";
+      const hasValue = inputValue.trim() !== "";
 
       if (hasValue) {
         $inputGroup.addClass("has-value");
@@ -2461,7 +3082,7 @@ $(document).ready(() => {
     const values = [];
 
     $container.find(".multivalue-input").each(function () {
-      const value = $(this).val().trim();
+      const value = ($(this).val() || "").trim();
       if (value) {
         values.push(value);
       }
@@ -2620,7 +3241,7 @@ $(document).ready(() => {
       e.preventDefault();
       const $container = $(this).closest(".multivalue-container");
       const $currentInputGroup = $(this).closest(".multivalue-input-group");
-      const currentValue = $(this).val().trim();
+      const currentValue = ($(this).val() || "").trim();
 
       if (currentValue) {
         addMultivalueItem($container, "", $currentInputGroup);
@@ -2628,22 +3249,44 @@ $(document).ready(() => {
     }
   });
 
-  // Multiselect dropdown functionality
+  // Multiselect dropdown functionality with search
   const updateMultiselectDisplay = ($dropdown) => {
     const $toggle = $dropdown.find(".multiselect-toggle");
-    const $label = $toggle.find("label");
-    const $checkboxes = $dropdown.find('input[type="checkbox"]');
+    const $badge = $toggle.find("[data-selected-badge]");
+    const $countDisplay = $dropdown.find("[data-selected-count]");
+    const $checkboxes = $dropdown.find(
+      '.multiselect-options input[type="checkbox"]',
+    );
 
     const checkedCheckboxes = $checkboxes.filter(":checked");
     const checkedCount = checkedCheckboxes.length;
 
-    // Update the count in the label
-    $label.text(`(${checkedCount} selected)`);
+    // Update the count in the badge
+    if ($badge.length) {
+      $badge.text(checkedCount);
+    }
 
-    // Update the hidden value - space-separated list of selected option IDs
+    // Update the count in the footer
+    if ($countDisplay.length) {
+      $countDisplay
+        .text(
+          t("template.editor.multiselect_summary", {
+            count: checkedCount,
+            defaultValue: `${checkedCount} selected`,
+          }),
+        )
+        .attr("data-i18n-options", JSON.stringify({ count: checkedCount }));
+    }
+
+    // Get separator from dropdown data attribute
+    const separator = $dropdown.data("separator");
+    const separatorValue =
+      separator === undefined || separator === null ? " " : String(separator);
+
+    // Update the hidden value - separated list of selected option IDs
     const selectedIds = checkedCheckboxes
       .map(function () {
-        return $(this).attr("value"); // Use the option ID from the value attribute
+        return $(this).attr("value");
       })
       .get();
 
@@ -2651,119 +3294,218 @@ $(document).ready(() => {
     let $hiddenInput = $dropdown.find('input[type="hidden"]');
     if ($hiddenInput.length === 0) {
       const settingName = $toggle.find(".multiselect-text").text();
-      // Escape the settingName to prevent XSS in attribute context
       $hiddenInput = $(
         `<input type="hidden" name="${escapeAttr(settingName)}" class="plugin-setting">`,
       );
       $dropdown.append($hiddenInput);
     }
 
-    // Save as space-separated list of option IDs
-    $hiddenInput.val(selectedIds.join(" "));
+    // Save as list of option IDs joined by the separator
+    $hiddenInput.val(selectedIds.join(separatorValue));
 
     // Trigger change event for validation
     $hiddenInput.trigger("change");
   };
 
-  // Initialize multiselect dropdowns with custom behavior
-  $(".dropdown")
-    .has(".multiselect-toggle")
-    .each(function () {
-      const $dropdown = $(this);
-      updateMultiselectDisplay($dropdown);
+  // Filter multiselect options based on search input and selected-only mode
+  const filterMultiselectOptions = ($dropdown, searchTerm, selectedOnly) => {
+    const $options = $dropdown.find(".multiselect-option");
+    const $noOptionsMsg = $dropdown.find(".no-options-message");
+    let visibleCount = 0;
 
-      // Initialize Bootstrap dropdown with autoClose disabled
-      const $toggle = $dropdown.find(".multiselect-toggle");
-      if ($toggle.length) {
-        new bootstrap.Dropdown($toggle[0], {
-          autoClose: false,
-        });
+    const lowerTerm = searchTerm.toLowerCase().trim();
+
+    $options.each(function () {
+      const $option = $(this);
+      const label = $option.text().toLowerCase();
+      // data() parses numeric attributes as numbers, so coerce to string first
+      const optionId = String($option.data("option-id") ?? "").toLowerCase();
+      const isChecked = $option.find('input[type="checkbox"]').is(":checked");
+
+      const matchesSearch =
+        label.includes(lowerTerm) || optionId.includes(lowerTerm);
+      const matchesFilter = !selectedOnly || isChecked;
+
+      // Use d-none class toggling instead of show()/hide() because
+      // the options have d-flex which uses !important and overrides inline display:none
+      if ((matchesSearch || !lowerTerm) && matchesFilter) {
+        $option.removeClass("d-none");
+        visibleCount++;
+      } else {
+        $option.addClass("d-none");
       }
     });
 
-  // Handle multiselect toggle button clicks manually
-  $(document).on("click", ".multiselect-toggle", function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const $dropdown = $(this).closest(".dropdown");
-    const $menu = $dropdown.find(".dropdown-menu");
-    const isOpen = $dropdown.hasClass("show");
-
-    // Close all other multiselect dropdowns first
-    $(".dropdown")
-      .has(".multiselect-toggle")
-      .not($dropdown)
-      .each(function () {
-        const $otherDropdown = $(this);
-        const $otherMenu = $otherDropdown.find(".dropdown-menu");
-        const $otherToggle = $otherDropdown.find(".multiselect-toggle");
-
-        $otherDropdown.removeClass("show");
-        $otherMenu.removeClass("show");
-        $otherToggle.attr("aria-expanded", "false");
-      });
-
-    if (isOpen) {
-      // Close this dropdown
-      $dropdown.removeClass("show");
-      $menu.removeClass("show");
-      $(this).attr("aria-expanded", "false");
+    // Show/hide no options message
+    // Use class toggling instead of show()/hide() because d-none uses !important
+    if (visibleCount === 0) {
+      $noOptionsMsg.removeClass("d-none");
     } else {
-      // Open this dropdown
-      $dropdown.addClass("show");
-      $menu.addClass("show");
-      $(this).attr("aria-expanded", "true");
+      $noOptionsMsg.addClass("d-none");
     }
-  });
+  };
 
-  // Handle clicks outside multiselect dropdowns to close them
-  $(document).on("click", function (e) {
-    const $target = $(e.target);
+  // Helper to re-apply current filters on a dropdown
+  const applyMultiselectFilters = ($dropdown) => {
+    const searchTerm = $dropdown.find(".multiselect-search").val() || "";
+    const selectedOnly =
+      $dropdown.find(".multiselect-selected-only-btn").attr("aria-pressed") ===
+      "true";
+    filterMultiselectOptions($dropdown, searchTerm, selectedOnly);
+  };
 
-    // Check if click is outside any multiselect dropdown
-    $(".dropdown")
-      .has(".multiselect-toggle")
-      .each(function () {
-        const $dropdown = $(this);
-        const $menu = $dropdown.find(".dropdown-menu");
-        const $toggle = $dropdown.find(".multiselect-toggle");
+  // Initialize multiselect dropdowns with custom behavior
+  $(".multiselect-container").each(function () {
+    const $dropdown = $(this);
 
-        // If click is outside this dropdown and it's open, close it
-        if (
-          !$dropdown.is($target) &&
-          $dropdown.has($target).length === 0 &&
-          $dropdown.hasClass("show")
-        ) {
-          $dropdown.removeClass("show");
-          $menu.removeClass("show");
-          $toggle.attr("aria-expanded", "false");
+    // Sync checkbox states from the hidden input value (or data-default fallback).
+    // The template may render with no checkboxes checked when setting_value is
+    // None/empty, so we need to initialise from the stored value or the default.
+    const $hiddenInput = $dropdown.find('input[type="hidden"]');
+    if ($hiddenInput.length) {
+      const rawValue = $hiddenInput.val() || $hiddenInput.data("default") || "";
+      const initValue = String(rawValue);
+      if (initValue) {
+        const separator = $dropdown.data("separator");
+        const sepStr = String(separator ?? "");
+        let selectedIds =
+          sepStr === "" ? [...initValue] : initValue.split(sepStr);
+
+        // Fallback: if split produced no matching option IDs, try character-by-character.
+        // This handles the case where DB separator is NULL but plugin.json intended "".
+        if (sepStr !== "") {
+          const optionIds = new Set();
+          $dropdown
+            .find('.multiselect-options input[type="checkbox"]')
+            .each(function () {
+              optionIds.add($(this).attr("value"));
+            });
+          const hasMatch = selectedIds.some((id) => optionIds.has(id));
+          if (!hasMatch && initValue.length > 0) {
+            selectedIds = [...initValue];
+          }
         }
+
+        const selectedSet = new Set(selectedIds);
+        $dropdown
+          .find('.multiselect-options input[type="checkbox"]')
+          .each(function () {
+            $(this).prop("checked", selectedSet.has($(this).attr("value")));
+          });
+      }
+    }
+
+    updateMultiselectDisplay($dropdown);
+
+    // Hide search bar if there are 10 or fewer options
+    const optionCount = $dropdown.find(".multiselect-option").length;
+    if (optionCount <= 10) {
+      $dropdown.find(".multiselect-search-container").addClass("d-none");
+    }
+
+    // Initialize Bootstrap dropdown
+    const $toggle = $dropdown.find(".multiselect-toggle");
+    if ($toggle.length) {
+      new bootstrap.Dropdown($toggle[0], {
+        autoClose: "outside",
       });
+    }
+
+    // Handle search input
+    const $searchInput = $dropdown.find(".multiselect-search");
+    if ($searchInput.length) {
+      $searchInput.on("input", function () {
+        applyMultiselectFilters($dropdown);
+      });
+
+      // Prevent dropdown from closing when clicking search input
+      $searchInput.on("click", function (e) {
+        e.stopPropagation();
+      });
+
+      // Prevent Bootstrap Dropdown from capturing keyboard events (arrow keys,
+      // Escape) that would steal focus away from the search input
+      $searchInput.on("keydown keyup", function (e) {
+        e.stopPropagation();
+      });
+    }
+
+    // Handle "show selected only" toggle
+    const $selectedOnlyBtn = $dropdown.find(".multiselect-selected-only-btn");
+    if ($selectedOnlyBtn.length) {
+      // Dispose any tooltip initialized by main.js global init and reinitialize
+      // with a dynamic title function so applyTranslations() updates are picked
+      // up on every show (Bootstrap 5 Tooltip lacks setContent unlike Popover).
+      const existingTooltip = bootstrap.Tooltip.getInstance(
+        $selectedOnlyBtn[0],
+      );
+      if (existingTooltip) existingTooltip.dispose();
+      const selectedOnlyBtnEl = $selectedOnlyBtn[0];
+      new bootstrap.Tooltip(selectedOnlyBtnEl, {
+        title() {
+          return selectedOnlyBtnEl.getAttribute("data-bs-original-title");
+        },
+      });
+
+      $selectedOnlyBtn.on("click", function (e) {
+        e.stopPropagation();
+        const isActive = $(this).attr("aria-pressed") === "true";
+        $(this).attr("aria-pressed", String(!isActive));
+        $(this).toggleClass("active", !isActive);
+        applyMultiselectFilters($dropdown);
+      });
+    }
   });
 
   // Handle checkbox changes in multiselect dropdowns
-  $(document).on("change", '.dropdown input[type="checkbox"]', function () {
-    const $dropdown = $(this).closest(".dropdown");
-    if ($dropdown.find(".multiselect-toggle").length) {
+  $(document).on(
+    "change",
+    '.multiselect-container input[type="checkbox"]',
+    function () {
+      const $dropdown = $(this).closest(".multiselect-container");
       updateMultiselectDisplay($dropdown);
+      // Re-apply filters so that unchecking in "selected only" mode hides the option
+      applyMultiselectFilters($dropdown);
+    },
+  );
+
+  // Handle clicking on multiselect options - toggle checkbox
+  $(document).on("click", ".multiselect-option", function (e) {
+    e.stopPropagation();
+
+    const $checkbox = $(this).find('input[type="checkbox"]');
+    // Only manually toggle if clicking directly on checkbox
+    // Otherwise, let the native label behavior work
+    if ($(e.target).is('input[type="checkbox"]')) {
+      $checkbox.trigger("change");
     }
   });
 
-  // Handle clicking on dropdown items - toggle checkbox but keep dropdown open
-  $(document).on("click", ".dropdown-menu .dropdown-item", function (e) {
-    // Only handle if this is a multiselect dropdown
-    if ($(this).closest(".dropdown").find(".multiselect-toggle").length) {
-      e.stopPropagation(); // Prevent event bubbling
+  // Prevent closing dropdown when clicking inside options
+  $(document).on("click", ".multiselect-menu", function (e) {
+    e.stopPropagation();
+  });
 
-      if (
-        !$(e.target).is('input[type="checkbox"]') &&
-        !$(e.target).is("label")
-      ) {
-        const $checkbox = $(this).find('input[type="checkbox"]');
-        $checkbox.prop("checked", !$checkbox.prop("checked")).trigger("change");
+  // Prevent Bootstrap Dropdown from capturing keyboard events on any focused
+  // element inside the menu (checkboxes, labels). Without this, ArrowDown/Up
+  // triggers Bootstrap's focus() loop which can crash the browser tab.
+  $(document).on("keydown keyup", ".multiselect-menu", function (e) {
+    e.stopPropagation();
+  });
+
+  // Close multiselect when clicking outside
+  $(document).on("click", function (e) {
+    const $target = $(e.target);
+
+    $(".multiselect-container").each(function () {
+      const $dropdown = $(this);
+      const $toggle = $dropdown.find(".multiselect-toggle");
+      const dropdown = bootstrap.Dropdown.getInstance($toggle[0]);
+
+      if (dropdown && !$dropdown.has($target).length && !$target.is($toggle)) {
+        dropdown.hide();
       }
-    }
+    });
   });
 
   // Sidebar plugin navigation: ensure clicking a plugin shows its pane

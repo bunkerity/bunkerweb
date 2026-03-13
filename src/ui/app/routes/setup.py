@@ -22,8 +22,6 @@ setup = Blueprint("setup", __name__)
 
 @setup.route("/setup", methods=["GET", "POST"])
 def setup_page():
-    if current_user.is_authenticated:
-        return redirect(url_for("home.home_page"))
     db_config = DB.get_config(
         filtered_settings=(
             "SERVER_NAME",
@@ -34,6 +32,12 @@ def setup_page():
             "AUTO_LETS_ENCRYPT",
             "USE_LETS_ENCRYPT_STAGING",
             "EMAIL_LETS_ENCRYPT",
+            "LETS_ENCRYPT_SERVER",
+            "LETS_ENCRYPT_ZEROSSL_API_KEY",
+            "LETS_ENCRYPT_ZEROSSL_API_RETRY",
+            "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY",
+            "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT",
+            "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME",
             "LETS_ENCRYPT_CHALLENGE",
             "LETS_ENCRYPT_PROFILE",
             "LETS_ENCRYPT_CUSTOM_PROFILE",
@@ -65,11 +69,24 @@ def setup_page():
     ui_reverse_proxy_url = None
     for server_name in db_config["SERVER_NAME"].split():
         if server_name and db_config.get(f"{server_name}_USE_UI", db_config.get("USE_UI", "no")) == "yes":
-            if admin_user:
-                return redirect(url_for("login.login_page"), 303)
             ui_reverse_proxy = server_name
             ui_reverse_proxy_url = db_config.get(f"{server_name}_REVERSE_PROXY_URL", db_config.get("REVERSE_PROXY_URL", "/"))
             break
+
+    # Setup fully complete (admin + service exist)
+    if admin_user and ui_reverse_proxy:
+        if current_user.is_authenticated:
+            return redirect(url_for("home.home_page"))
+        return redirect(url_for("login.login_page"), 303)
+
+    # Admin exists (e.g. created via env vars) but no service configured — require login
+    if admin_user and not ui_reverse_proxy:
+        if not current_user.is_authenticated:
+            return redirect(url_for("login.login_page", next=url_for("setup.setup_page")))
+
+    # No admin + authenticated edge case
+    if not admin_user and current_user.is_authenticated:
+        return redirect(url_for("home.home_page"))
 
     if request.method == "POST":
         if DB.readonly:
@@ -86,6 +103,12 @@ def setup_page():
                     "lets_encrypt_staging",
                     "lets_encrypt_wildcard",
                     "email_lets_encrypt",
+                    "lets_encrypt_server",
+                    "lets_encrypt_zerossl_api_key",
+                    "lets_encrypt_zerossl_api_retry",
+                    "lets_encrypt_zerossl_api_retry_delay",
+                    "lets_encrypt_zerossl_api_connect_timeout",
+                    "lets_encrypt_zerossl_api_max_time",
                     "lets_encrypt_challenge",
                     "lets_encrypt_dns_provider",
                     "lets_encrypt_dns_propagation",
@@ -176,6 +199,12 @@ def setup_page():
                 "USE_LETS_ENCRYPT_STAGING": request.form["lets_encrypt_staging"],
                 "USE_LETS_ENCRYPT_WILDCARD": request.form["lets_encrypt_wildcard"],
                 "EMAIL_LETS_ENCRYPT": request.form["email_lets_encrypt"],
+                "LETS_ENCRYPT_SERVER": request.form.get("lets_encrypt_server", "letsencrypt"),
+                "LETS_ENCRYPT_ZEROSSL_API_KEY": request.form.get("lets_encrypt_zerossl_api_key", ""),
+                "LETS_ENCRYPT_ZEROSSL_API_RETRY": request.form.get("lets_encrypt_zerossl_api_retry", "3"),
+                "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": request.form.get("lets_encrypt_zerossl_api_retry_delay", "2"),
+                "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": request.form.get("lets_encrypt_zerossl_api_connect_timeout", "5"),
+                "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": request.form.get("lets_encrypt_zerossl_api_max_time", "20"),
                 "LETS_ENCRYPT_CHALLENGE": request.form["lets_encrypt_challenge"],
                 "LETS_ENCRYPT_PROFILE": request.form["lets_encrypt_profile"],
                 "LETS_ENCRYPT_CUSTOM_PROFILE": request.form["lets_encrypt_custom_profile"],
@@ -266,6 +295,14 @@ def setup_page():
         lets_encrypt_staging=db_config.get("USE_LETS_ENCRYPT_STAGING", getenv("USE_LETS_ENCRYPT_STAGING", "no")),
         lets_encrypt_wildcard=db_config.get("USE_LETS_ENCRYPT_WILDCARD", getenv("USE_LETS_ENCRYPT_WILDCARD", "no")),
         email_lets_encrypt=db_config.get("EMAIL_LETS_ENCRYPT", getenv("EMAIL_LETS_ENCRYPT", "")),
+        lets_encrypt_server=db_config.get("LETS_ENCRYPT_SERVER", getenv("LETS_ENCRYPT_SERVER", "letsencrypt")),
+        lets_encrypt_zerossl_api_key=db_config.get("LETS_ENCRYPT_ZEROSSL_API_KEY", getenv("LETS_ENCRYPT_ZEROSSL_API_KEY", "")),
+        lets_encrypt_zerossl_api_retry=db_config.get("LETS_ENCRYPT_ZEROSSL_API_RETRY", getenv("LETS_ENCRYPT_ZEROSSL_API_RETRY", "3")),
+        lets_encrypt_zerossl_api_retry_delay=db_config.get("LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY", getenv("LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY", "2")),
+        lets_encrypt_zerossl_api_connect_timeout=db_config.get(
+            "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT", getenv("LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT", "5")
+        ),
+        lets_encrypt_zerossl_api_max_time=db_config.get("LETS_ENCRYPT_ZEROSSL_API_MAX_TIME", getenv("LETS_ENCRYPT_ZEROSSL_API_MAX_TIME", "20")),
         lets_encrypt_challenge=db_config.get("LETS_ENCRYPT_CHALLENGE", getenv("LETS_ENCRYPT_CHALLENGE", "http")),
         lets_encrypt_profile=db_config.get("LETS_ENCRYPT_PROFILE", getenv("LETS_ENCRYPT_PROFILE", "classic")),
         lets_encrypt_custom_profile=db_config.get("LETS_ENCRYPT_CUSTOM_PROFILE", getenv("LETS_ENCRYPT_CUSTOM_PROFILE", "")),
@@ -293,9 +330,6 @@ def setup_page():
 
 @setup.route("/setup/loading", methods=["GET"])
 def setup_loading():
-    if current_user.is_authenticated:
-        return redirect(url_for("home.home_page"))
-
     DATA.load_from_file()
 
     db_config = DB.get_config(filtered_settings=("SERVER_NAME", "USE_UI", "REVERSE_PROXY_URL"))

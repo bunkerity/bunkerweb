@@ -5,18 +5,19 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager, suppress
 from copy import deepcopy
 from datetime import datetime, timedelta
+from functools import wraps
 from io import BytesIO
 from json import JSONDecodeError, loads
 from logging import Logger
 from os import _exit, getenv, sep
 from os.path import join as os_join
 from pathlib import Path
-from re import Match, compile as re_compile, escape, error as RegexError, search
+from re import DOTALL, Match, compile as re_compile, escape, error as RegexError, search
 from sys import argv, path as sys_path
 from tarfile import open as tar_open
 from threading import Lock
 from traceback import format_exc
-from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Set, Tuple, TypeVar, Union
 from time import sleep
 from uuid import uuid4
 from warnings import filterwarnings
@@ -50,7 +51,7 @@ for deps_path in [os_join(sep, "usr", "share", "bunkerweb", *paths) for paths in
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from common_utils import bytes_hash  # type: ignore
+from common_utils import bytes_hash, PLUGIN_TAR_COMPRESS_LEVEL  # type: ignore
 
 from pymysql import install_as_MySQLdb
 from sqlalchemy import case, create_engine, event, MetaData as sql_metadata, func, join, select as db_select, text
@@ -82,10 +83,45 @@ def set_sqlite_pragma(dbapi_connection, _):
 
 filterwarnings("ignore", category=SAWarning, message="DELETE statement on table .* expected to delete")
 
+T = TypeVar("T")
+
+
+def retry_on_transient_db_errors(func: Callable[..., T]) -> Callable[..., T]:
+    @wraps(func)
+    def wrapper(self: "Database", *args, **kwargs) -> T:
+        attempts = max(1, getattr(self, "_request_retry_attempts", 1))
+        delay = max(0.0, getattr(self, "_request_retry_delay", 0.0))
+
+        for attempt in range(1, attempts + 1):
+            try:
+                return func(self, *args, **kwargs)
+            except (ConnectionRefusedError, OperationalError, DatabaseError) as e:
+                if attempt >= attempts or not self._is_transient_connection_error(e):
+                    raise
+
+                self.logger.warning(f"Transient database error in {func.__name__} (attempt {attempt}/{attempts}), retrying in {delay:.2f}s ...")
+                if delay:
+                    sleep(delay)
+
+        raise RuntimeError("retry_on_transient_db_errors: unreachable code")
+
+    return wrapper
+
 
 class Database:
     DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?|oracle(\+oracledb)?):/+(?P<path>/[^\s]+)")
     READONLY_ERROR = ("readonly", "read-only", "command denied", "Access denied")
+    TRANSIENT_CONNECTION_ERROR_HINTS = (
+        "connection refused",
+        "can't connect",
+        "lost connection",
+        "server has gone away",
+        "connection reset",
+        "connection aborted",
+        "timed out",
+        "timeout",
+        "connection is closed",
+    )
     RESTRICTED_TEMPLATE_SETTINGS = ("USE_TEMPLATE", "IS_DRAFT")
     MULTISITE_CUSTOM_CONFIG_TYPES = ("server_http", "modsec_crs", "modsec", "server_stream", "crs_plugins_before", "crs_plugins_after")
     SUFFIX_RX = re_compile(r"(?P<setting>.+)_(?P<suffix>\d+)$")
@@ -98,6 +134,20 @@ class Database:
         self.readonly = False
         self.last_connection_retry = None
         self.__ignore_regex_check = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
+        self._request_retry_attempts = 2
+        self._request_retry_delay = 0.25
+
+        request_retry_attempts = getenv("DATABASE_REQUEST_RETRY_ATTEMPTS", "2")
+        if request_retry_attempts.isdigit() and int(request_retry_attempts) > 0:
+            self._request_retry_attempts = int(request_retry_attempts)
+        else:
+            self.logger.warning(f"Invalid DATABASE_REQUEST_RETRY_ATTEMPTS value: {request_retry_attempts}, using default value (2)")
+
+        request_retry_delay = getenv("DATABASE_REQUEST_RETRY_DELAY", "0.25")
+        try:
+            self._request_retry_delay = max(0.0, float(request_retry_delay))
+        except ValueError:
+            self.logger.warning(f"Invalid DATABASE_REQUEST_RETRY_DELAY value: {request_retry_delay}, using default value (0.25)")
 
         if pool:
             self.logger.warning("The pool parameter is deprecated, it will be removed in the next version")
@@ -173,15 +223,65 @@ class Database:
             self.logger.error("Oracle database is not supported yet")
             _exit(1)
 
+        # Pool size
+        pool_size = getenv("DATABASE_POOL_SIZE", "40")
+        if pool_size.isdigit() and int(pool_size) >= 0:
+            pool_size = int(pool_size)
+        else:
+            self.logger.warning(f"Invalid DATABASE_POOL_SIZE value: {pool_size}, using default value (40)")
+            pool_size = 40
+
+        # Max overflow
+        max_overflow = getenv("DATABASE_POOL_MAX_OVERFLOW", "20")
+        try:
+            max_overflow = int(max_overflow)
+        except ValueError:
+            self.logger.warning(f"Invalid DATABASE_POOL_MAX_OVERFLOW value: {max_overflow}, using default value (20)")
+            max_overflow = 20
+
+        # Pool timeout
+        pool_timeout = getenv("DATABASE_POOL_TIMEOUT", "5")
+        if pool_timeout.isdigit() and int(pool_timeout) >= 0:
+            pool_timeout = int(pool_timeout)
+        else:
+            self.logger.warning(f"Invalid DATABASE_POOL_TIMEOUT value: {pool_timeout}, using default value (5)")
+            pool_timeout = 5
+
+        # Pool recycle
+        pool_recycle = getenv("DATABASE_POOL_RECYCLE", "1800")
+        try:
+            pool_recycle = int(pool_recycle)
+        except ValueError:
+            self.logger.warning(f"Invalid DATABASE_POOL_RECYCLE value: {pool_recycle}, using default value (1800)")
+            pool_recycle = 1800
+
+        # Pool pre-ping
+        pool_pre_ping = getenv("DATABASE_POOL_PRE_PING", "yes").lower() in ("yes", "true", "1")
+
+        self.logger.debug(
+            f"Database pool configuration: pool_size={pool_size}, max_overflow={max_overflow}, pool_timeout={pool_timeout}, pool_recycle={pool_recycle}, pool_pre_ping={pool_pre_ping}"
+        )
+
         self._engine_kwargs = {
             "future": True,
             "poolclass": QueuePool,
-            "pool_pre_ping": True,
-            "pool_recycle": 1800,
-            "pool_size": 40,
-            "max_overflow": 20,
-            "pool_timeout": 5,
+            "pool_pre_ping": pool_pre_ping,
+            "pool_recycle": pool_recycle,
+            "pool_size": pool_size,
+            "max_overflow": max_overflow,
+            "pool_timeout": pool_timeout,
         } | kwargs
+
+        if "pool_reset_on_return" not in kwargs:
+            default_pool_reset = "rollback"
+            configured_pool_reset = getenv("DATABASE_POOL_RESET_ON_RETURN", "").strip().lower() or default_pool_reset
+            if configured_pool_reset in ("none", "null", "off", "false", "no"):
+                self._engine_kwargs["pool_reset_on_return"] = None
+            elif configured_pool_reset in ("rollback", "commit"):
+                self._engine_kwargs["pool_reset_on_return"] = configured_pool_reset
+            else:
+                self.logger.warning(f"Invalid DATABASE_POOL_RESET_ON_RETURN value: {configured_pool_reset}, using default value ({default_pool_reset})")
+                self._engine_kwargs["pool_reset_on_return"] = default_pool_reset
 
         try:
             self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
@@ -255,6 +355,8 @@ class Database:
         if log:
             self.logger.info(f"✅ Database connection established{'' if not self.readonly else ' in read-only mode'}")
 
+        self._session_factory = scoped_session(sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False))
+
         if match.group("database").startswith("sqlite"):
             db_path = Path(match.group("path"))
             try:
@@ -264,13 +366,14 @@ class Database:
             except (OSError, IOError) as e:
                 self.logger.warning(f"Could not set file permissions on {db_path}: {e}")
 
-    def __del__(self) -> None:
-        """Close the database"""
-        if self._session_factory:
-            self._session_factory.close_all()
+    def close(self) -> None:
+        """Explicitly close all sessions and dispose the engine pool.
+        Only call during controlled shutdown when no other threads are using this instance."""
+        if getattr(self, "_session_factory", None):
+            self._session_factory.remove()
 
-        if self.sql_engine:
-            self.sql_engine.dispose()
+        if getattr(self, "sql_engine", None):
+            self.sql_engine.dispose(close=True)
 
     def _empty_if_none(self, value: Any) -> Any:
         """Return an empty string if the value is None or convert None values in collections"""
@@ -328,6 +431,23 @@ class Database:
             return True
         return new_method == current_method
 
+    def _is_transient_connection_error(self, error: BaseException) -> bool:
+        """Return True if the exception looks like a temporary DB connectivity issue."""
+        if isinstance(error, ConnectionRefusedError):
+            return True
+
+        if isinstance(error, OperationalError) and getattr(error, "connection_invalidated", False):
+            return True
+
+        if not isinstance(error, (OperationalError, DatabaseError)):
+            return False
+
+        error_text = str(getattr(error, "orig", error)).lower()
+        if not error_text:
+            error_text = str(error).lower()
+
+        return any(hint in error_text for hint in self.TRANSIENT_CONNECTION_ERROR_HINTS)
+
     def test_read(self):
         """Test the read access to the database"""
         self.logger.debug("Testing read access to the database ...")
@@ -358,6 +478,11 @@ class Database:
         self.sql_engine.dispose(close=True)
         self.sql_engine = create_engine(self.database_uri_readonly if fallback else self.database_uri, **self._engine_kwargs | kwargs)
 
+        with LOCK:
+            if self._session_factory is not None:
+                self._session_factory.remove()
+            self._session_factory = scoped_session(sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False))
+
         if fallback or readonly:
             with self.sql_engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
@@ -376,18 +501,18 @@ class Database:
             self.logger.error("The database engine is not initialized")
             _exit(1)
 
-        with LOCK:
-            session = None
-            try:
-                session_factory = sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False)
-                session = scoped_session(session_factory)
-                yield session
-            except BaseException as e:
-                if session:
+        session = None
+        try:
+            session = self._session_factory
+            yield session
+        except BaseException as e:
+            if session:
+                with suppress(Exception):
                     session.rollback()
 
-                if any(error in str(e) for error in self.READONLY_ERROR):
-                    self.logger.warning("The database is read-only, retrying in read-only mode ...")
+            if any(error in str(e) for error in self.READONLY_ERROR):
+                self.logger.warning("The database is read-only, retrying in read-only mode ...")
+                with LOCK:
                     try:
                         self.retry_connection(readonly=True, pool_timeout=1)
                         self.retry_connection(readonly=True, log=False)
@@ -398,15 +523,17 @@ class Database:
                                 self.retry_connection(fallback=True, pool_timeout=1)
                             self.retry_connection(fallback=True, log=False)
                     self.readonly = True
-                elif isinstance(e, (ConnectionRefusedError, OperationalError)) and self.database_uri_readonly:
-                    self.logger.warning("Can't connect to the database, falling back to read-only one ...")
+            elif isinstance(e, (ConnectionRefusedError, OperationalError)) and self.database_uri_readonly:
+                self.logger.warning("Can't connect to the database, falling back to read-only one ...")
+                with LOCK:
                     with suppress(OperationalError, DatabaseError):
                         self.retry_connection(fallback=True, pool_timeout=1)
                         self.retry_connection(fallback=True, log=False)
                         self.readonly = True
-                raise
-            finally:
-                if session:
+            raise
+        finally:
+            if session:
+                with suppress(Exception):
                     session.remove()
 
     def is_valid_setting(
@@ -452,7 +579,8 @@ class Database:
 
                 if value is not None:
                     try:
-                        if not self.__ignore_regex_check and search(db_setting.regex, value) is None:
+                        regex_flags = DOTALL if db_setting.type == "file" else 0
+                        if not self.__ignore_regex_check and search(db_setting.regex, value, regex_flags) is None:
                             return False, f"not matching regex: {db_setting.regex!r}"
                     except RegexError:
                         return False, f"invalid regex: {db_setting.regex!r}"
@@ -502,10 +630,11 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.8"
+                return "1.6.9"
             except BaseException as e:
                 return f"Error: {e}"
 
+    @retry_on_transient_db_errors
     def get_metadata(self) -> Dict[str, Any]:
         """Get the metadata from the database"""
         data = {
@@ -535,7 +664,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.8",
+            "version": "1.6.9",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -864,14 +993,20 @@ class Database:
                     path_ui = plugin_path.joinpath("ui")
                     if path_ui.is_dir():
                         with BytesIO() as plugin_page_content:
-                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
-                            plugin_page_content.seek(0)
-                            checksum = bytes_hash(plugin_page_content, algorithm="sha256")
-                            desired_plugin_pages[base_plugin["id"]] = {
-                                "data": plugin_page_content.getvalue(),
-                                "checksum": checksum,
-                            }
+                            tar_success = True
+                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=PLUGIN_TAR_COMPRESS_LEVEL) as tar:
+                                try:
+                                    tar.add(path_ui, arcname=path_ui.name, recursive=True)
+                                except (FileNotFoundError, OSError) as e:
+                                    self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
+                                    tar_success = False
+                            if tar_success:
+                                plugin_page_content.seek(0)
+                                checksum = bytes_hash(plugin_page_content, algorithm="sha256")
+                                desired_plugin_pages[base_plugin["id"]] = {
+                                    "data": plugin_page_content.getvalue(),
+                                    "checksum": checksum,
+                                }
 
             for plugins in default_plugins:
                 if not isinstance(plugins, list):
@@ -1458,7 +1593,9 @@ class Database:
             return False, ""
         return True, ""
 
-    def save_config(self, config: Dict[str, Any], method: str, changed: Optional[bool] = True) -> Union[str, Set[str]]:
+    def save_config(
+        self, config: Dict[str, Any], method: str, changed: Optional[bool] = True, file_names: Optional[Dict[str, str]] = None
+    ) -> Union[str, Set[str]]:
         """Save the config in the database"""
         to_put = []
         to_update = []
@@ -1470,6 +1607,22 @@ class Database:
         db_config = {}
         if method == "autoconf":
             db_config = self.get_non_default_settings(with_drafts=True)
+
+        normalized_file_names = {k: ("" if v is None else v.strip()) for k, v in (file_names or {}).items()}
+
+        def get_setting_file_name(setting_type: str, original_key: str, value_changed: bool, current_file_name: str = "") -> Tuple[Optional[str], bool]:
+            if setting_type != "file":
+                return None, False
+
+            if original_key in normalized_file_names:
+                file_name = normalized_file_names[original_key]
+                return file_name or None, file_name != current_file_name
+
+            # If value was edited without a file name metadata, clear stale file references.
+            if value_changed and current_file_name:
+                return None, True
+
+            return None, False
 
         def is_default_value(val: str, key: str, setting: dict, template_default: Optional[str] = None, suffix: int = 0, is_global: bool = False) -> bool:
             """
@@ -1667,15 +1820,24 @@ class Database:
                             global_config[key] = value
 
                     # Collect necessary data before threading
-                    settings_data = session.query(Settings.id, Settings.default, Settings.plugin_id).all()
-                    settings_dict = {s.id: {"default": self._empty_if_none(s.default), "plugin_id": s.plugin_id} for s in settings_data}
+                    settings_data = session.query(Settings.id, Settings.default, Settings.plugin_id, Settings.type).all()
+                    settings_dict = {s.id: {"default": self._empty_if_none(s.default), "plugin_id": s.plugin_id, "type": s.type} for s in settings_data}
 
                     # Collect existing service settings
                     existing_service_settings = session.query(
-                        Services_settings.service_id, Services_settings.setting_id, Services_settings.suffix, Services_settings.value, Services_settings.method
+                        Services_settings.service_id,
+                        Services_settings.setting_id,
+                        Services_settings.suffix,
+                        Services_settings.value,
+                        Services_settings.file_name,
+                        Services_settings.method,
                     ).all()
                     existing_service_settings_dict = {
-                        (s.service_id, s.setting_id, s.suffix or 0): {"value": self._empty_if_none(s.value), "method": s.method}
+                        (s.service_id, s.setting_id, s.suffix or 0): {
+                            "value": self._empty_if_none(s.value),
+                            "file_name": self._empty_if_none(s.file_name),
+                            "method": s.method,
+                        }
                         for s in existing_service_settings
                     }
 
@@ -1725,6 +1887,12 @@ class Database:
                                     local_changed_services = True
 
                             service_setting = existing_service_settings_dict.get((server_name, key, suffix))
+                            current_file_name = service_setting["file_name"] if service_setting else ""
+                            value_changed = bool(service_setting and service_setting["value"] != value)
+                            should_update_value = (value_changed and self._methods_are_compatible(method, service_setting["method"])) or (
+                                bool(service_setting) and method == "autoconf" and service_setting["method"] != "autoconf"
+                            )
+                            target_file_name, file_name_changed = get_setting_file_name(setting["type"], original_key, value_changed, current_file_name)
 
                             template_setting_default = None
                             if service_template:
@@ -1738,19 +1906,27 @@ class Database:
 
                                 self.logger.debug(f"Adding setting {key} for service {server_name}")
                                 local_changed_plugins.add(setting["plugin_id"])
-                                local_to_put.append(Services_settings(service_id=server_name, setting_id=key, value=value, suffix=suffix, method=method))
+                                local_to_put.append(
+                                    Services_settings(
+                                        service_id=server_name,
+                                        setting_id=key,
+                                        value=value,
+                                        file_name=target_file_name if setting["type"] == "file" else None,
+                                        suffix=suffix,
+                                        method=method,
+                                    )
+                                )
                                 # Update Services.last_update
                                 local_to_update.append(
                                     {"model": Services, "filter": {"id": server_name}, "values": {"last_update": datetime.now().astimezone()}}
                                 )
                                 if key == "SERVER_NAME":
                                     local_changed_services = True
-                            elif (service_setting["value"] != value and self._methods_are_compatible(method, service_setting["method"])) or (
-                                method == "autoconf" and service_setting["method"] != "autoconf"
-                            ):
-                                local_changed_plugins.add(setting["plugin_id"])
+                            elif should_update_value or file_name_changed:
+                                if should_update_value:
+                                    local_changed_plugins.add(setting["plugin_id"])
 
-                                if check_value(key, value, setting, template_setting_default, suffix):
+                                if should_update_value and check_value(key, value, setting, template_setting_default, suffix):
                                     self.logger.debug(f"Removing setting {key} for service {server_name}")
                                     local_to_delete.append(
                                         {"model": Services_settings, "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix}}
@@ -1758,12 +1934,15 @@ class Database:
                                     continue
 
                                 self.logger.debug(f"Updating setting {key} for service {server_name}")
+                                setting_values = {"value": self._empty_if_none(value), "method": method}
+                                if setting["type"] == "file" and (file_name_changed or value_changed):
+                                    setting_values["file_name"] = target_file_name
                                 local_to_update.extend(
                                     [
                                         {
                                             "model": Services_settings,
                                             "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix},
-                                            "values": {"value": self._empty_if_none(value), "method": method},
+                                            "values": setting_values,
                                         },
                                         {"model": Services, "filter": {"id": server_name}, "values": {"last_update": datetime.now().astimezone()}},
                                     ]
@@ -1792,7 +1971,17 @@ class Database:
                                 self.logger.debug(f"Setting {key} does not exist")
                                 continue
 
-                            global_value = session.query(Global_values.value, Global_values.method).filter_by(setting_id=key, suffix=suffix).first()
+                            global_value = (
+                                session.query(Global_values.value, Global_values.file_name, Global_values.method)
+                                .filter_by(setting_id=key, suffix=suffix)
+                                .first()
+                            )
+                            current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
+                            value_changed = bool(global_value and global_value.value != value)
+                            should_update_value = (value_changed and self._methods_are_compatible(method, global_value.method)) or (
+                                bool(global_value) and method == "autoconf" and global_value.method != "autoconf"
+                            )
+                            target_file_name, file_name_changed = get_setting_file_name(setting["type"], original_key, value_changed, current_file_name)
 
                             template_setting_default = None
                             if template:
@@ -1805,23 +1994,33 @@ class Database:
 
                                 self.logger.debug(f"Adding global setting {key}")
                                 local_changed_plugins.add(setting["plugin_id"])
-                                local_to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
-                            elif (global_value.value != value and self._methods_are_compatible(method, global_value.method)) or (
-                                method == "autoconf" and global_value.method != "autoconf"
-                            ):
-                                local_changed_plugins.add(setting["plugin_id"])
+                                local_to_put.append(
+                                    Global_values(
+                                        setting_id=key,
+                                        value=value,
+                                        file_name=target_file_name if setting["type"] == "file" else None,
+                                        suffix=suffix,
+                                        method=method,
+                                    )
+                                )
+                            elif should_update_value or file_name_changed:
+                                if should_update_value:
+                                    local_changed_plugins.add(setting["plugin_id"])
 
-                                if check_value(key, value, setting, template_setting_default, suffix, True):
+                                if should_update_value and check_value(key, value, setting, template_setting_default, suffix, True):
                                     self.logger.debug(f"Removing global setting {key}")
                                     local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
                                     continue
 
                                 self.logger.debug(f"Updating global setting {key}")
+                                setting_values = {"value": self._empty_if_none(value), "method": method}
+                                if setting["type"] == "file" and (file_name_changed or value_changed):
+                                    setting_values["file_name"] = target_file_name
                                 local_to_update.append(
                                     {
                                         "model": Global_values,
                                         "filter": {"setting_id": key, "suffix": suffix},
-                                        "values": {"value": self._empty_if_none(value), "method": method},
+                                        "values": setting_values,
                                     }
                                 )
 
@@ -1878,23 +2077,28 @@ class Database:
                             )
                             changed_services = True
 
-                    for key, value in config.items():
+                    for original_key, value in config.items():
+                        key = deepcopy(original_key)
                         suffix = 0
                         if self.SUFFIX_RX.search(key):
                             suffix = int(key.split("_")[-1])
                             key = key[: -len(str(suffix)) - 1]
 
-                        setting = session.query(Settings).with_entities(Settings.default, Settings.plugin_id).filter_by(id=key).first()
+                        setting = session.query(Settings).with_entities(Settings.default, Settings.plugin_id, Settings.type).filter_by(id=key).first()
 
                         if not setting:
                             continue
 
                         global_value = (
                             session.query(Global_values)
-                            .with_entities(Global_values.value, Global_values.method)
+                            .with_entities(Global_values.value, Global_values.file_name, Global_values.method)
                             .filter_by(setting_id=key, suffix=suffix)
                             .first()
                         )
+                        current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
+                        value_changed = bool(global_value and global_value.value != value)
+                        should_update_value = bool(global_value and self._methods_are_compatible(method, global_value.method) and value_changed)
+                        target_file_name, file_name_changed = get_setting_file_name(setting.type, original_key, value_changed, current_file_name)
 
                         template_setting = None
                         if template:
@@ -1912,21 +2116,33 @@ class Database:
 
                             self.logger.debug(f"Adding global setting {key}")
                             changed_plugins.add(setting.plugin_id)
-                            to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
-                        elif self._methods_are_compatible(method, global_value.method) and global_value.value != value:
-                            changed_plugins.add(setting.plugin_id)
+                            to_put.append(
+                                Global_values(
+                                    setting_id=key,
+                                    value=value,
+                                    file_name=target_file_name if setting.type == "file" else None,
+                                    suffix=suffix,
+                                    method=method,
+                                )
+                            )
+                        elif should_update_value or file_name_changed:
+                            if should_update_value:
+                                changed_plugins.add(setting.plugin_id)
 
-                            if value == (template_setting.default if template_setting is not None else setting.default):
+                            if should_update_value and value == (template_setting.default if template_setting is not None else setting.default):
                                 self.logger.debug(f"Removing global setting {key}")
                                 to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
                                 continue
 
                             self.logger.debug(f"Updating global setting {key}")
+                            setting_values = {"value": self._empty_if_none(value), "method": method}
+                            if setting.type == "file" and (file_name_changed or value_changed):
+                                setting_values["file_name"] = target_file_name
                             to_update.append(
                                 {
                                     "model": Global_values,
                                     "filter": {"setting_id": key, "suffix": suffix},
-                                    "values": {"value": self._empty_if_none(value), "method": method},
+                                    "values": setting_values,
                                 }
                             )
 
@@ -2076,6 +2292,7 @@ class Database:
 
         return message
 
+    @retry_on_transient_db_errors
     def get_non_default_settings(
         self,
         global_only: bool = False,
@@ -2105,9 +2322,11 @@ class Database:
                 db_select(
                     Settings.id.label("setting_id"),
                     Settings.context,
+                    Settings.type,
                     Settings.default,
                     Settings.multiple,
                     Global_values.value,
+                    Global_values.file_name,
                     Global_values.suffix,
                     Global_values.method,
                 )
@@ -2125,6 +2344,7 @@ class Database:
                 setting_id = global_value.setting_id + (f"_{global_value.suffix}" if global_value.multiple and global_value.suffix > 0 else "")
                 config[setting_id] = {
                     "value": self._empty_if_none(global_value.value),
+                    "file_name": self._empty_if_none(global_value.file_name) if global_value.type == "file" else "",
                     "global": True,
                     "method": global_value.method,
                     "default": self._empty_if_none(global_value.default),
@@ -2167,7 +2387,8 @@ class Database:
                 # This is still O(services * multisite_settings) but avoids deepcopy overhead
                 for service_id, _ in service_list:
                     for key, value in multisite_defaults.items():
-                        config[f"{service_id}_{key}"] = value
+                        # Keep already-materialized service values (notably *_IS_DRAFT from bw_services).
+                        config.setdefault(f"{service_id}_{key}", value)
 
                 # Define the join operation
                 j = join(Services, Services_settings, Services.id == Services_settings.service_id)
@@ -2178,9 +2399,11 @@ class Database:
                     db_select(
                         Services.id.label("service_id"),
                         Settings.id.label("setting_id"),
+                        Settings.type,
                         Settings.default,
                         Settings.multiple,
                         Services_settings.value,
+                        Services_settings.file_name,
                         Services_settings.suffix,
                         Services_settings.method,
                     )
@@ -2209,6 +2432,7 @@ class Database:
 
                     config[f"{result.service_id}_{result.setting_id}" + (f"_{result.suffix}" if result.multiple and result.suffix else "")] = {
                         "value": self._empty_if_none(value),
+                        "file_name": self._empty_if_none(result.file_name) if result.type == "file" else "",
                         "global": False,
                         "method": result.method,
                         "default": self._empty_if_none(config.get(result.setting_id, {"value": self._empty_if_none(result.default)})["value"]),
@@ -2241,6 +2465,7 @@ class Database:
 
             return config
 
+    @retry_on_transient_db_errors
     def get_config(
         self,
         global_only: bool = False,
@@ -2687,6 +2912,7 @@ class Database:
 
         return services
 
+    @retry_on_transient_db_errors
     def get_services(self, *, with_drafts: bool = False) -> List[Dict[str, Any]]:
         """Get the services from the database"""
         services = []
@@ -2966,10 +3192,11 @@ class Database:
                     else:
                         session.query(Plugins).filter(Plugins.id.in_(missing_ids)).update({Plugins.data: None, Plugins.checksum: None})
 
-                    try:
-                        session.commit()
-                    except BaseException as e:
-                        return str(e)
+                    if per_plugin_commit:
+                        try:
+                            session.commit()
+                        except BaseException as e:
+                            return str(e)
 
             db_settings = [setting.id for setting in session.query(Settings).with_entities(Settings.id)]
 
@@ -3067,6 +3294,8 @@ class Database:
                                 Settings.regex,
                                 Settings.type,
                                 Settings.multiple,
+                                Settings.separator,
+                                Settings.accept,
                                 Settings.order,
                             )
                             .filter_by(id=setting)
@@ -3117,6 +3346,12 @@ class Database:
 
                             if value.get("multiple") != db_setting.multiple:
                                 updates[Settings.multiple] = value.get("multiple")
+
+                            if value.get("separator") != db_setting.separator:
+                                updates[Settings.separator] = value.get("separator")
+
+                            if value.get("accept") != db_setting.accept:
+                                updates[Settings.accept] = value.get("accept")
 
                             if order != db_setting.order:
                                 updates[Settings.order] = order
@@ -3239,11 +3474,20 @@ class Database:
                     if path_ui.is_dir():
                         remove = True
                         with BytesIO() as plugin_page_content:
-                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
-                            plugin_page_content.seek(0)
-                            checksum = bytes_hash(plugin_page_content, algorithm="sha256")
-                            content = plugin_page_content.getvalue()
+                            tar_success = True
+                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=PLUGIN_TAR_COMPRESS_LEVEL) as tar:
+                                try:
+                                    tar.add(path_ui, arcname=path_ui.name, recursive=True)
+                                except (FileNotFoundError, OSError) as e:
+                                    self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
+                                    tar_success = False
+                            if tar_success:
+                                plugin_page_content.seek(0)
+                                checksum = bytes_hash(plugin_page_content, algorithm="sha256")
+                                content = plugin_page_content.getvalue()
+                            else:
+                                remove = False
+                                continue
 
                         if not db_plugin_page:
                             changes = True
@@ -3660,12 +3904,18 @@ class Database:
                     path_ui = plugin_path.joinpath("ui")
                     if path_ui.is_dir():
                         with BytesIO() as plugin_page_content:
-                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
-                            plugin_page_content.seek(0)
-                            checksum = bytes_hash(plugin_page_content, algorithm="sha256")
+                            tar_success = True
+                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=PLUGIN_TAR_COMPRESS_LEVEL) as tar:
+                                try:
+                                    tar.add(path_ui, arcname=path_ui.name, recursive=True)
+                                except (FileNotFoundError, OSError) as e:
+                                    self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
+                                    tar_success = False
+                            if tar_success:
+                                plugin_page_content.seek(0)
+                                checksum = bytes_hash(plugin_page_content, algorithm="sha256")
 
-                            local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=plugin_page_content.getvalue(), checksum=checksum))
+                                local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=plugin_page_content.getvalue(), checksum=checksum))
 
                 for command, file_name in commands.items():
                     if not plugin_path.joinpath("bwcli", file_name).is_file():
@@ -3902,6 +4152,7 @@ class Database:
                 return str(e)
         return ""
 
+    @retry_on_transient_db_errors
     def get_plugins(self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False) -> List[Dict[str, Any]]:
         """Get all plugins from the database using batched queries to avoid N+1 issues."""
         with self._db_session() as session:
@@ -3924,9 +4175,9 @@ class Database:
                 query = query.filter(Plugins.type.in_(["external", "ui"]))
             elif _type != "all":
                 query = query.filter_by(type=_type)
+            query = query.order_by(Plugins.id.asc())
 
-            plugins_list = query.all()
-            plugin_ids = [plugin.id for plugin in plugins_list]
+            plugin_ids = [plugin.id for plugin in query]
 
             # Pre-fetch plugin pages.
             pages = session.query(Plugin_pages.plugin_id).filter(Plugin_pages.plugin_id.in_(plugin_ids)).all()
@@ -3966,7 +4217,7 @@ class Database:
 
             # Assemble the plugin data.
             result = []
-            for plugin in plugins_list:
+            for plugin in query:
                 plugin_data: Dict[str, Any] = {
                     "id": plugin.id,
                     "stream": plugin.stream,
@@ -3998,8 +4249,13 @@ class Database:
                         setting_data["select"] = selects_map.get(setting.id, [])
                     elif setting.type == "multiselect":
                         setting_data["multiselect"] = multiselects_map.get(setting.id, [])
+                        sep_value = getattr(setting, "separator", None)
+                        setting_data["separator"] = sep_value if sep_value is not None else " "
                     elif setting.type == "multivalue":
-                        setting_data["separator"] = getattr(setting, "separator", " ")
+                        sep_value = getattr(setting, "separator", None)
+                        setting_data["separator"] = sep_value if sep_value is not None else " "
+                    elif setting.type == "file":
+                        setting_data["accept"] = getattr(setting, "accept", "")
                     plugin_data["settings"][setting.id] = setting_data
 
                 if plugin.id in commands_map:
@@ -4321,16 +4577,17 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            db_instance = session.query(Instances).filter_by(hostname=hostname).first()
-
-            if db_instance is None:
-                return f"Instance {hostname} does not exist, will not be updated."
-
-            db_instance.status = status
+            # Use a direct UPDATE to avoid race conditions with concurrent threads
+            update_values: dict = {"status": status}
             if status != "down":
-                db_instance.last_seen = datetime.now().astimezone()
+                update_values["last_seen"] = datetime.now().astimezone()
 
             try:
+                result = session.query(Instances).filter_by(hostname=hostname).update(update_values, synchronize_session=False)
+
+                if result == 0:
+                    return f"Instance {hostname} does not exist, will not be updated."
+
                 session.commit()
             except BaseException as e:
                 return f"An error occurred while updating the instance {hostname}.\n{e}"
@@ -4354,31 +4611,32 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            db_instance = session.query(Instances).filter_by(hostname=hostname).first()
-            if db_instance is None:
-                return f"Instance {hostname} does not exist, will not be updated."
-
+            # Use a direct UPDATE to avoid race conditions with concurrent threads
+            # (MariaDB error 1020: "Record has changed since last read")
+            update_values: dict = {}
             if name is not None:
-                db_instance.name = name
+                update_values["name"] = name
             if port is not None:
-                db_instance.port = port
+                update_values["port"] = port
             if listen_https is not None:
-                db_instance.listen_https = listen_https
+                update_values["listen_https"] = listen_https
             if https_port is not None:
-                db_instance.https_port = https_port
+                update_values["https_port"] = https_port
             if server_name is not None:
-                db_instance.server_name = server_name
+                update_values["server_name"] = server_name
             if method is not None:
-                db_instance.method = method
-
-            if changed:
-                with suppress(ProgrammingError, OperationalError):
-                    metadata = session.query(Metadata).get(1)
-                    if metadata is not None:
-                        metadata.instances_changed = True
-                        metadata.last_instances_change = datetime.now().astimezone()
+                update_values["method"] = method
 
             try:
+                if update_values:
+                    result = session.query(Instances).filter_by(hostname=hostname).update(update_values, synchronize_session=False)
+                    if result == 0:
+                        return f"Instance {hostname} does not exist, will not be updated."
+
+                if changed:
+                    with suppress(ProgrammingError, OperationalError):
+                        session.query(Metadata).filter_by(id=1).update({"instances_changed": True, "last_instances_change": datetime.now().astimezone()})
+
                 session.commit()
             except BaseException as e:
                 return f"An error occurred while updating the instance {hostname}.\n{e}"

@@ -23,11 +23,11 @@ BEGIN
       VALUE "FileDescription",	"zlib data compression library\0"
       VALUE "FileVersion",	ZLIB_VERSION "\0"
       VALUE "InternalName",	"zlib1.dll\0"
-      VALUE "LegalCopyright",	"(C) 1995-2022 Jean-loup Gailly & Mark Adler\0"
+      VALUE "LegalCopyright",	"(C) 1995-2026 Jean-loup Gailly & Mark Adler\0"
       VALUE "OriginalFilename",	"zlib1.dll\0"
       VALUE "ProductName",	"zlib\0"
       VALUE "ProductVersion",	ZLIB_VERSION "\0"
-      VALUE "Comments",		"For more information visit http://www.zlib.net/\0"
+      VALUE "Comments",		"For more information visit https://www.zlib.net/\0"
     END
   END
   BLOCK "VarFileInfo"

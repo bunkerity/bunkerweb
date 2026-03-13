@@ -9,7 +9,8 @@ PYTHON_BIN=$(get_python_bin)
 export PYTHON_BIN
 
 # Set the PYTHONPATH
-export PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/ui
+BW_PYTHONPATH=$(get_bunkerweb_pythonpath)
+export PYTHONPATH="${BW_PYTHONPATH}:/usr/share/bunkerweb/ui"
 
 # Helper function to extract variables with fallback
 function get_env_var() {
@@ -49,6 +50,7 @@ start() {
             echo "# TOTP_ENCRYPTION_KEYS=changeme"
             echo "LISTEN_ADDR=127.0.0.1"
             echo "# LISTEN_PORT=7000"
+            echo "# MAX_CONTENT_LENGTH=50MB"
             echo "FORWARDED_ALLOW_IPS=127.0.0.1,::1"
             echo "PROXY_ALLOW_IPS=127.0.0.1,::1"
             echo "# ENABLE_HEALTHCHECK=no"
@@ -128,6 +130,7 @@ start() {
     export_env_file /etc/bunkerweb/variables.env
     export_env_file /etc/bunkerweb/ui.env
 
+
     if [ -f "/var/run/bunkerweb/tmp-ui.pid" ]; then
         rm -f /var/run/bunkerweb/tmp-ui.pid
     fi
@@ -161,14 +164,22 @@ stop() {
 
     if [ -f "/var/run/bunkerweb/tmp-ui.pid" ]; then
         pid="$(cat /var/run/bunkerweb/tmp-ui.pid)"
-        kill -s TERM "$pid"
+        if kill -0 "$pid" 2>/dev/null; then
+            kill -s TERM "$pid"
+        else
+            rm -f /var/run/bunkerweb/tmp-ui.pid
+        fi
     else
         echo "Temporary UI service is not running or the pid file doesn't exist."
     fi
 
     if [ -f "/var/run/bunkerweb/ui.pid" ]; then
         pid="$(cat /var/run/bunkerweb/ui.pid)"
-        kill -s TERM "$pid"
+        if kill -0 "$pid" 2>/dev/null; then
+            kill -s TERM "$pid"
+        else
+            rm -f /var/run/bunkerweb/ui.pid
+        fi
     else
         echo "UI service is not running or the pid file doesn't exist."
     fi

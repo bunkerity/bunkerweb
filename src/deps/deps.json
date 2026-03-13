@@ -38,9 +38,9 @@
     },
     {
       "id": "libmaxminddb",
-      "name": "libmaxminddb v1.12.2",
+      "name": "libmaxminddb v1.13.3",
       "url": "https://github.com/maxmind/libmaxminddb.git",
-      "commit": "cba618d6581b7dbe83478c798d9e58faeaa6b582"
+      "commit": "09a0540fea89a16e5c6a9e21e93ee9aece6639e3"
     },
     {
       "id": "lua-cjson",
@@ -193,9 +193,9 @@
     },
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20260114",
+      "name": "LuaJIT v2.1-20260227",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "ccdd3299da29f6e0148192c7d2b4f11c9b553b7a",
+      "commit": "928290a470d35eb01324d5275b22fb86b13602a2",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {
@@ -261,6 +261,13 @@
       "post_install": "rm -r src/deps/src/nginx-1.28.1/docs"
     },
     {
+      "id": "nginx-1.28.0",
+      "name": "Nginx v1.28.0",
+      "url": "https://github.com/nginx/nginx.git",
+      "commit": "481d28cb4e04c8096b9b6134856891dc52ecc68f",
+      "post_install": "rm -r src/deps/src/nginx-1.28.0/docs"
+    },
+    {
       "id": "nginx_cookie_flag_module",
       "name": "Nginx cookie flag module v1.1.0",
       "url": "https://github.com/AirisX/nginx_cookie_flag_module.git",
@@ -289,9 +296,9 @@
     },
     {
       "id": "zlib",
-      "name": "zlib v1.3.1.2",
+      "name": "zlib v1.3.2",
       "url": "https://github.com/madler/zlib.git",
-      "commit": "570720b0c24f9686c33f35a1b3165c1f568b96be",
+      "commit": "da607da739fa6047df13e66a2af6b8bec7c2a498",
       "post_install": "rm -r src/deps/src/zlib/doc src/deps/src/zlib/examples"
     }
   ]

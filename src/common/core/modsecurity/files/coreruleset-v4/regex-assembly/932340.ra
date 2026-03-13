@@ -10,7 +10,7 @@
 ##!$ $
 
 ##!> assemble
-  ##!> include unix-shell-evasion-prefix-start-of-string
+  ##!> include unix-shell-evasion-prefix
 
   ##! The `@` processor is not defined since we're matching the execution of commands with no arguments.
   ##!> include-except unix-shell-noarguments unix-shell-noarguments-fps-pl1 -- ~ \S{1,10}\b

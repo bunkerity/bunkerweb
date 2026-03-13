@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
 from sys import path as sys_path
-from typing import List, Literal, Optional
+from typing import Any, List, Literal, Optional, Tuple
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
@@ -48,6 +48,16 @@ class Provider(BaseModel):
         """Return additional arguments for the provider."""
         return []
 
+    @classmethod
+    def _redact_field_value(cls, field_name: str, value: Any) -> Any:
+        if value in ("", None):
+            return value
+        return "***"
+
+    def __repr_args__(self) -> List[Tuple[str, Any]]:
+        """Redact secret-like fields when a provider is stringified for logs/debug output."""
+        return [(field_name, self._redact_field_value(field_name, value)) for field_name, value in super().__repr_args__()]
+
 
 class BunnyNetProvider(Provider):
     """BunnyNet DNS provider."""
@@ -64,6 +74,40 @@ class BunnyNetProvider(Provider):
     def get_extra_args() -> dict:
         """Return additional arguments for the provider."""
         return ["-a", "dns-bunny"]
+
+
+class ClouDNSProvider(Provider):
+    """ClouDNS DNS provider."""
+
+    dns_cloudns_auth_id: str = ""
+    dns_cloudns_sub_auth_id: str = ""
+    dns_cloudns_sub_auth_user: str = ""
+    dns_cloudns_auth_password: str
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_cloudns_auth_id": ("dns_cloudns_auth_id", "cloudns_auth_id", "auth_id"),
+            "dns_cloudns_sub_auth_id": ("dns_cloudns_sub_auth_id", "cloudns_sub_auth_id", "sub_auth_id"),
+            "dns_cloudns_sub_auth_user": ("dns_cloudns_sub_auth_user", "cloudns_sub_auth_user", "sub_auth_user"),
+            "dns_cloudns_auth_password": ("dns_cloudns_auth_password", "cloudns_auth_password", "auth_password"),
+        }
+    )
+
+    def get_formatted_credentials(self) -> bytes:
+        """Return the formatted credentials, excluding defaults."""
+        return "\n".join(f"{key} = {value}" for key, value in self.model_dump(exclude={"file_type"}, exclude_defaults=True).items()).encode("utf-8")
+
+    @model_validator(mode="after")
+    def validate_cloudns_credentials(self):
+        """Validate ClouDNS credentials."""
+        if not self.dns_cloudns_auth_id and not self.dns_cloudns_sub_auth_id and not self.dns_cloudns_sub_auth_user:
+            raise ValueError("Either 'dns_cloudns_auth_id', 'dns_cloudns_sub_auth_id', or 'dns_cloudns_sub_auth_user' must be provided.")
+        return self
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["-a", "dns-cloudns"]
 
 
 class CloudflareProvider(Provider):
@@ -146,26 +190,26 @@ class DomainOffensiveProvider(Provider):
     @staticmethod
     def get_extra_args() -> dict:
         """Return additional arguments for the provider."""
-        return ["--authenticator", "dns-domainoffensive"]
+        return ["-a", "dns-domainoffensive"]
 
 
 class DomeneshopProvider(Provider):
     """Domeneshop DNS provider."""
 
-    dns_domeneshop_token: str
-    dns_domeneshop_secret: str
+    dns_domeneshop_client_token: str
+    dns_domeneshop_client_secret: str
 
     _validate_aliases = alias_model_validator(
         {
-            "dns_domeneshop_token": ("dns_domeneshop_token", "domeneshop_token", "token"),
-            "dns_domeneshop_secret": ("dns_domeneshop_secret", "domeneshop_secret", "secret"),
+            "dns_domeneshop_client_token": ("dns_domeneshop_client_token", "domeneshop_client_token", "client_token", "token"),
+            "dns_domeneshop_client_secret": ("dns_domeneshop_client_secret", "domeneshop_client_secret", "client_secret", "secret"),
         }
     )
 
     @staticmethod
     def get_extra_args() -> dict:
         """Return additional arguments for the provider."""
-        return ["--authenticator", "dns-domeneshop"]
+        return ["-a", "dns-domeneshop"]
 
 
 class DnsimpleProvider(Provider):
@@ -218,7 +262,7 @@ class DuckDnsProvider(Provider):
     @staticmethod
     def get_extra_args() -> dict:
         """Return additional arguments for the provider."""
-        return ["--authenticator", "dns-duckdns"]
+        return ["-a", "dns-duckdns"]
 
 
 class DynuProvider(Provider):
@@ -235,7 +279,30 @@ class DynuProvider(Provider):
     @staticmethod
     def get_extra_args() -> dict:
         """Return additional arguments for the provider."""
-        return ["--authenticator", "dns-dynu"]
+        return ["-a", "dns-dynu"]
+
+
+class GandiProvider(Provider):
+    """Gandi DNS provider."""
+
+    dns_gandi_token: str
+    dns_gandi_sharing_id: str = ""
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_gandi_token": ("dns_gandi_token", "gandi_token", "token"),
+            "dns_gandi_sharing_id": ("dns_gandi_sharing_id", "gandi_sharing_id", "sharing_id"),
+        }
+    )
+
+    def get_formatted_credentials(self) -> bytes:
+        """Return the formatted credentials, excluding defaults."""
+        return "\n".join(f"{key} = {value}" for key, value in self.model_dump(exclude={"file_type"}, exclude_defaults=True).items()).encode("utf-8")
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["-a", "dns-gandi"]
 
 
 class GehirnProvider(Provider):
@@ -275,7 +342,7 @@ class GoDaddyProvider(Provider):
     @staticmethod
     def get_extra_args() -> dict:
         """Return additional arguments for the provider."""
-        return ["--authenticator", "dns-godaddy"]
+        return ["-a", "dns-godaddy"]
 
 
 class GoogleProvider(Provider):
@@ -320,6 +387,23 @@ class GoogleProvider(Provider):
     def get_extra_args() -> dict:
         """Return additional arguments for the provider."""
         return ["--dns-google"]
+
+
+class HetznerProvider(Provider):
+    """Hetzner DNS provider."""
+
+    dns_hetzner_api_token: str
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_hetzner_api_token": ("dns_hetzner_api_token", "hetzner_api_token", "api_token"),
+        }
+    )
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["-a", "dns-hetzner"]
 
 
 class InfomaniakProvider(Provider):
@@ -473,7 +557,7 @@ class PowerdnsProvider(Provider):
     @staticmethod
     def get_extra_args() -> dict:
         """Return additional arguments for the provider."""
-        return ["--authenticator", "dns-pdns"]
+        return ["-a", "dns-pdns"]
 
 
 class Rfc2136Provider(Provider):

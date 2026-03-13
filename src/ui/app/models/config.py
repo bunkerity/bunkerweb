@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
 from concurrent.futures import ThreadPoolExecutor
-from operator import itemgetter
 from os import getenv, sep
 from flask import flash
 from json import loads as json_loads
 from pathlib import Path
-from re import error as RegexError, search as re_search
+from re import DOTALL, error as RegexError, search as re_search
 from typing import List, Literal, Optional, Set, Tuple, Union
 
 from app.utils import get_blacklisted_settings, is_editable_method
@@ -20,7 +19,14 @@ class Config:
         self.__ignore_regex_check = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
 
     def gen_conf(
-        self, global_conf: dict, services_conf: list[dict], *, check_changes: bool = True, changed_service: Optional[str] = None, override_method: str = "ui"
+        self,
+        global_conf: dict,
+        services_conf: list[dict],
+        *,
+        check_changes: bool = True,
+        changed_service: Optional[str] = None,
+        override_method: str = "ui",
+        file_name_map: Optional[dict[str, str]] = None,
     ) -> Union[str, Set[str]]:
         """Generates the nginx configuration file from the given configuration
 
@@ -62,7 +68,7 @@ class Config:
             conf["SERVER_NAME"] = " ".join(servers)
         conf["DATABASE_URI"] = self.__db.database_uri
 
-        return self.__db.save_config(conf, override_method, changed=check_changes)
+        return self.__db.save_config(conf, override_method, changed=check_changes, file_names=file_name_map)
 
     def get_plugins_settings(self) -> dict:
         return {
@@ -72,7 +78,6 @@ class Config:
 
     def get_plugins(self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False) -> dict:
         db_plugins = self.__db.get_plugins(_type=_type, with_data=with_data)
-        db_plugins.sort(key=itemgetter("name"))
 
         plugins = {"general": {}}
 
@@ -171,7 +176,8 @@ class Config:
 
             # Validate the variable's value against the regex pattern.
             try:
-                if not self.__ignore_regex_check and re_search(plugins_settings[setting]["regex"], value) is None:
+                regex_flags = DOTALL if plugins_settings[setting].get("type") == "file" else 0
+                if not self.__ignore_regex_check and re_search(plugins_settings[setting]["regex"], value, regex_flags) is None:
                     report_error(f"Variable {key} is not valid.")
                     variables.pop(key, None)
             except RegexError as e:
@@ -180,7 +186,14 @@ class Config:
 
         return variables
 
-    def new_service(self, variables: dict, is_draft: bool = False, override_method: str = "ui", check_changes: bool = True) -> Tuple[str, int]:
+    def new_service(
+        self,
+        variables: dict,
+        is_draft: bool = False,
+        override_method: str = "ui",
+        check_changes: bool = True,
+        file_name_map: Optional[dict[str, str]] = None,
+    ) -> Tuple[str, int]:
         """Creates a new service from the given variables
 
         Parameters
@@ -206,14 +219,25 @@ class Config:
 
         services.append(variables | {"IS_DRAFT": "yes" if is_draft else "no"})
         ret = self.gen_conf(
-            self.get_config(methods=False), services, check_changes=False if not check_changes else not is_draft, override_method=override_method
+            self.get_config(methods=False),
+            services,
+            check_changes=False if not check_changes else not is_draft,
+            override_method=override_method,
+            file_name_map=file_name_map,
         )
         if isinstance(ret, str):
             return ret, 1
         return f"Configuration for {variables['SERVER_NAME'].split(' ')[0]} has been generated.", 0
 
     def edit_service(
-        self, old_server_name: str, variables: dict, *, check_changes: bool = True, is_draft: bool = False, override_method: str = "ui"
+        self,
+        old_server_name: str,
+        variables: dict,
+        *,
+        check_changes: bool = True,
+        is_draft: bool = False,
+        override_method: str = "ui",
+        file_name_map: Optional[dict[str, str]] = None,
     ) -> Tuple[str, int]:
         """Edits a service
 
@@ -250,12 +274,21 @@ class Config:
                 if k.startswith(old_server_name_splitted[0]):
                     config.pop(k)
 
-        ret = self.gen_conf(config, services, check_changes=check_changes, changed_service=server_name_splitted[0], override_method=override_method)
+        ret = self.gen_conf(
+            config,
+            services,
+            check_changes=check_changes,
+            changed_service=server_name_splitted[0],
+            override_method=override_method,
+            file_name_map=file_name_map,
+        )
         if isinstance(ret, str):
             return ret, 1
         return f"Configuration for {old_server_name_splitted[0]} has been edited.", 0
 
-    def edit_global_conf(self, variables: dict, *, check_changes: bool = True, override_method: str = "ui") -> Tuple[str, int]:
+    def edit_global_conf(
+        self, variables: dict, *, check_changes: bool = True, override_method: str = "ui", file_name_map: Optional[dict[str, str]] = None
+    ) -> Tuple[str, int]:
         """Edits the global conf
 
         Parameters
@@ -268,7 +301,13 @@ class Config:
         str
             the confirmation message
         """
-        ret = self.gen_conf(variables, self.get_services(methods=False, with_drafts=True), check_changes=check_changes, override_method=override_method)
+        ret = self.gen_conf(
+            variables,
+            self.get_services(methods=False, with_drafts=True),
+            check_changes=check_changes,
+            override_method=override_method,
+            file_name_map=file_name_map,
+        )
         if isinstance(ret, str):
             return ret, 1
         return "The global settings have been edited.", 0

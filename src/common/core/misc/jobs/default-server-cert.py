@@ -24,7 +24,11 @@ try:
     JOB = Job(LOGGER, __file__)
 
     cert_path = Path(sep, "var", "cache", "bunkerweb", "misc")
-    if not JOB.is_cached_file("default-server-cert.pem", "month") or not JOB.is_cached_file("default-server-cert.key", "month"):
+    cert_file = cert_path.joinpath("default-server-cert.pem")
+    key_file = cert_path.joinpath("default-server-cert.key")
+    certs_exist_locally = cert_file.is_file() and key_file.is_file()
+
+    if not JOB.is_cached_file("default-server-cert.pem", "month") or not JOB.is_cached_file("default-server-cert.key", "month") or not certs_exist_locally:
         LOGGER.info("Generating self-signed certificate for default server")
         cert_path.mkdir(parents=True, exist_ok=True)
         tmp_key_path: Optional[Path] = None

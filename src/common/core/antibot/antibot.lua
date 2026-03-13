@@ -157,6 +157,11 @@ function antibot:header()
 		return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
 	end
 
+	-- Don't go further if content is not being displayed (e.g. HEAD requests)
+	if not self.ctx.bw.antibot_nonce_script or not self.ctx.bw.antibot_nonce_style then
+		return self:ret(true, "no nonces available, skipping CSP header override")
+	end
+
 	local hdr = ngx.header
 
 	-- Override CSP header
@@ -624,9 +629,9 @@ function antibot:check_challenge()
 			return nil, "error while decoding JSON from reCAPTCHA API : " .. rdata, nil
 		end
 		local success, score, reason
-		if self.session_data.recaptcha_classic then
+		if self.variables["ANTIBOT_RECAPTCHA_CLASSIC"] == "yes" then
 			success = rdata.success
-			score = rdata.score or 0
+			score = rdata.score or 1
 		else
 			success = rdata.tokenProperties and rdata.tokenProperties.valid
 			score = rdata.riskAnalysis and rdata.riskAnalysis.score or 0

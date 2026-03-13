@@ -1,0 +1,64 @@
+name: contribs
+on: [push, pull_request]
+jobs:
+  ci-cmake:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Ubuntu all contribs
+            os: ubuntu-latest
+            cmake-args: -DZLIB_BUILD_ADA=ON -DZLIB_BUILD_BLAST=ON -DZLIB_BUILD_IOSTREAM3=ON -DZLIB_BUILD_MINIZIP=ON -DZLIB_BUILD_PUFF=ON -DZLIB_WITH_INFBACK9=ON -DZLIB_WITH_CRC32VX=ON -DZLIB_WITH_GVMAT64=ON
+            src_dir: .
+
+          - name: Ubuntu ADA
+            os: ubuntu-latest
+            src_dir: contrib/ada
+            install_zlib: yes
+
+          - name: Ubuntu BLAST
+            os: ubuntu-latest
+            src_dir: contrib/blast
+            install_zlib: yes
+
+          - name: Ubuntu IOSTREAM
+            os: ubuntu-latest
+            src_dir: contrib/iostream3
+            install_zlib: yes
+
+          - name: Ubuntu MINIZIP
+            os: ubuntu-latest
+            src_dir: contrib/minizip
+            install_zlib: yes
+
+          - name: Ubuntu PUFF
+            os: ubuntu-latest
+            src_dir: contrib/puff
+            install_zlib: yes
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install packages
+      run: |
+        sudo apt install gnat libbz2-dev
+
+    - name: Install zlib
+      if: ${{ matrix.install_zlib == 'yes' }}
+      run: |
+        cmake -S . -B ../build-zlib -DCMAKE_BUILD_TYPE=Release
+        cmake --build ../build-zlib --config Release
+        sudo cmake --install ../build-zlib
+
+    - name: Generate project files
+      run: cmake -S ${{ matrix.src_dir }} -B ../build ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Release
+
+    - name: Compile source code
+      run: cmake --build ../build --config Release
+
+    - name: Run test cases
+      run: ctest -C Release --output-on-failure --max-width 120
+      working-directory: ../build

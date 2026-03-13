@@ -25,8 +25,6 @@ If this option is turned on, additional options are available from minizip (see 
 
     ZLIB_PREFIX=OFF -- prefix for all types and library functions, see zconf.h.in
 
-    ZLIB_INSTALL_COMPAT_DLL=ON -- Install a copy as zlib1.dll
-
 This option is only on windows available and may/will be turned off and removed somewhen in the future.
 If you rely cmake for finding and using zlib, this can be turned off, as `zlib1.dll` will never be used.
 
@@ -43,8 +41,6 @@ If you rely cmake for finding and using zlib, this can be turned off, as `zlib1.
 A usable installation of bzip2 is needed or config will fail. Turn this option of in this case.
 
     MINIZIP_INSTALL=ON -- Enable installation of minizip
-
-    MINIZIP_INSTALL_COMPAT_DLL=ON -- Install a copy as libminizip-1.dll
 
 This option is only available on mingw as they tend to name this lib different. Maybe this will also be
 removed in the future as. If you rely cmake for finding and using zlib, this can be turned off, as
@@ -69,7 +65,7 @@ or
     find_package(minizip CONFIG COMPONENTS shared static REQUIRED)
 
 As it's possible to only build the shared or the static lib, you can make sure that everything you need
-is found. If no COMPONENTS are requested, everything that is found will satisfy your request. If the
+is found. If no COMPONENTS are requested, everything needs to be found to satisfy your request. If the
 libraries are optional in you project, you can omit the REQUIRED and check yourself if the targets you
 want to link against are created.
 

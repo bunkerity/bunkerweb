@@ -21,7 +21,7 @@
                     {% set setting_value = "" %}
                 {% endif %}
             {% endif %}
-            {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or current_endpoint == "global-settings" or not setting_config.get("global")) %}
+            {% set disabled = not is_editable_method(setting_method, allow_default=True) and (current_endpoint == "global-config" or current_endpoint == "global-settings" or not setting_config.get("global")) %}
             {% if disabled %}
                 {% set disabled_settings.items = disabled_settings.items + [setting ~ "::" ~ setting_method] %}
             {% endif %}
@@ -41,7 +41,7 @@
                     {% set setting_default = setting_data.get("default", "") %}
                     {% set setting_method = setting_config.get("method", "default") %}
                     {% set setting_value = setting_config.get("value", setting_default) %}
-                    {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or current_endpoint == "global-settings" or not setting_config.get("global")) %}
+                    {% set disabled = not is_editable_method(setting_method, allow_default=True) and (current_endpoint == "global-config" or current_endpoint == "global-settings" or not setting_config.get("global")) %}
                     {% if disabled %}
                         {% set disabled_settings.items = disabled_settings.items + [setting ~ "::" ~ setting_method] %}
                     {% endif %}

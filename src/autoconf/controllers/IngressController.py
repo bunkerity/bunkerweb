@@ -198,9 +198,9 @@ class IngressController(KubernetesController):
             "secret": self._corev1.list_secret_for_all_namespaces,
         }
 
-    def _patch_ingress_status(self, ingress, ip: str) -> bool:
-        if not ip:
-            self._logger.warning("Cannot patch ingress without IP address")
+    def _patch_ingress_status(self, ingress, ips: List[str]) -> bool:
+        if not ips:
+            self._logger.warning("Cannot patch ingress without IP addresses")
             return False
 
         if not ingress or not ingress.metadata:
@@ -215,18 +215,18 @@ class IngressController(KubernetesController):
             return False
 
         patch_body = {"status": {"loadBalancer": {"ingress": []}}}
-        ip_match = self._ip_pattern.match(ip)
 
-        if ip_match:
-            patch_body["status"]["loadBalancer"]["ingress"].append({"ip": ip})
-        else:
-            patch_body["status"]["loadBalancer"]["ingress"].append({"hostname": ip})
+        # Add all IPs to the ingress status
+        for ip in ips:
+            ip_match = self._ip_pattern.match(ip)
+            if ip_match:
+                patch_body["status"]["loadBalancer"]["ingress"].append({"ip": ip})
+            else:
+                patch_body["status"]["loadBalancer"]["ingress"].append({"hostname": ip})
 
         try:
             self._networkingv1.patch_namespaced_ingress_status(name=ingress_name, namespace=ingress_namespace, body=patch_body)
-            self._logger.info(
-                f"Successfully patched status of ingress {ingress_name} in namespace {ingress_namespace} with {'IP' if ip_match else 'hostname'} {ip}"
-            )
+            self._logger.info(f"Successfully patched status of ingress {ingress_name} in namespace {ingress_namespace} with {len(ips)} address(es)")
             return True
         except ApiException as e:
             if e.status == 404:
@@ -245,6 +245,6 @@ class IngressController(KubernetesController):
             self._logger.debug(format_exc())
             return False
 
-    def _patch_controller_status(self, ip: str) -> None:
+    def _patch_controller_status(self, ips: List[str]) -> None:
         for ingress in self._get_controller_services():
-            self._patch_ingress_status(ingress, ip)
+            self._patch_ingress_status(ingress, ips)

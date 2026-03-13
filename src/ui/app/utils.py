@@ -23,6 +23,8 @@ LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
 
 LOGGER = getLogger("UI")
 
+RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default server", ""})
+
 USER_PASSWORD_RX = re_compile(r"^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*\P{Alnum}).{8,}$")
 PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}$")
 
@@ -114,7 +116,6 @@ ALWAYS_USED_PLUGINS = (
     "errors",
     "headers",
     "misc",
-    "php",
     "pro",
     "sessions",
     "ssl",
@@ -126,11 +127,13 @@ PLUGINS_SPECIFICS = {
     "INJECT": {"INJECT_BODY": "", "INJECT_HEAD": ""},
     "LETSENCRYPT": {"AUTO_LETS_ENCRYPT": "no"},
     "LIMIT": {"USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no"},
+    "PHP": {"REMOTE_PHP": "", "LOCAL_PHP": ""},
     "REDIRECT": {"REDIRECT_TO": ""},
     "SELFSIGNED": {"GENERATE_SELF_SIGNED_SSL": "no"},
 }
 
-EDITABLE_METHODS: FrozenSet[str] = frozenset({"ui", "api"})
+UI_API_METHODS: FrozenSet[str] = frozenset({"ui", "api"})
+EDITABLE_METHODS: FrozenSet[str] = UI_API_METHODS | frozenset({"wizard"})
 
 
 def stop(status, _stop: bool = True):
@@ -231,6 +234,11 @@ def is_editable_method(method: Optional[str], *, allow_default: bool = False) ->
     return method in EDITABLE_METHODS
 
 
+def is_ui_api_method(method: Optional[str]) -> bool:
+    """Determine if a method belongs to the UI/API editable family."""
+    return method in UI_API_METHODS
+
+
 def get_filtered_settings(settings: dict, global_config: bool = False) -> Dict[str, dict]:
     multisites = {}
     for setting, data in settings.items():
@@ -304,14 +312,15 @@ def flash(message: str, category: str = "success", i18n_key: Optional[str] = Non
 
     if save and "flash_messages" in session:
         session["flash_messages"].append((message, category, datetime.now().astimezone().isoformat()))
+        session.modified = True
 
 
 def human_readable_number(value: Union[str, int]) -> str:
     value = int(value)
     if value >= 1_000_000:
-        return f"{value/1_000_000:.1f}M"
+        return f"{value/1_000_000:.1f}M"  # noqa: E226
     elif value >= 1_000:
-        return f"{value/1_000:.1f}k"
+        return f"{value/1_000:.1f}k"  # noqa: E226
     return str(value)
 
 

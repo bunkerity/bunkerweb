@@ -92,20 +92,24 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
 
 === "Paramètres réseau et ports"
 
-    | Paramètre       | Valeur par défaut | Contexte | Multiple | Description                                              |
-    | --------------- | ----------------- | -------- | -------- | -------------------------------------------------------- |
-    | `HTTP_PORT`     | `8080`            | global   | Oui      | **Port HTTP :** Numéro de port pour le trafic HTTP.      |
-    | `HTTPS_PORT`    | `8443`            | global   | Oui      | **Port HTTPS :** Numéro de port pour le trafic HTTPS.    |
-    | `USE_IPV6`      | `no`              | global   | Non      | **Support IPv6 :** Active la connectivité IPv6.          |
-    | `DNS_RESOLVERS` | `127.0.0.11`      | global   | Non      | **Résolveurs DNS :** Adresses des résolveurs à utiliser. |
+    | Paramètre               | Valeur par défaut | Contexte | Multiple | Description                                                                          |
+    | ----------------------- | ----------------- | -------- | -------- | ------------------------------------------------------------------------------------ |
+    | `HTTP_PORT`             | `8080`            | global   | Oui      | **Port HTTP :** Numéro de port pour le trafic HTTP. Laisser vide pour désactiver l'écoute HTTP.                                 |
+    | `HTTPS_PORT`            | `8443`            | global   | Oui      | **Port HTTPS :** Numéro de port pour le trafic HTTPS. Laisser vide pour désactiver l'écoute HTTPS.                               |
+    | `USE_IPV6`              | `no`              | global   | Non      | **Support IPv6 :** Active la connectivité IPv6.                                     |
+    | `DNS_RESOLVERS`         | `127.0.0.11`      | global   | Non      | **Résolveurs DNS :** Adresses des résolveurs à utiliser.                            |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`             | global   | Non      | **Timeout corps client :** Délai de lecture du corps de la requête client.          |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`             | global   | Non      | **Timeout en-têtes client :** Délai de lecture des en-têtes de la requête client.   |
+    | `KEEPALIVE_TIMEOUT`     | `15s`             | global   | Non      | **Timeout keepalive :** Délai des connexions client en keepalive.                   |
+    | `SEND_TIMEOUT`          | `10s`             | global   | Non      | **Timeout d'envoi :** Délai maximal de transmission de la réponse au client.        |
 
 === "Paramètres serveur Stream"
 
     | Paramètre                | Valeur par défaut | Contexte  | Multiple | Description                                                     |
     | ------------------------ | ----------------- | --------- | -------- | --------------------------------------------------------------- |
-    | `LISTEN_STREAM`          | `yes`             | multisite | Non      | **Écoute stream :** Active l’écoute non-ssl (pass-through).     |
-    | `LISTEN_STREAM_PORT`     | `1337`            | multisite | Oui      | **Port stream :** Port d’écoute pour le non-ssl (pass-through). |
-    | `LISTEN_STREAM_PORT_SSL` | `4242`            | multisite | Oui      | **Port stream SSL :** Port d’écoute pour le SSL (pass-through). |
+    | `LISTEN_STREAM`          | `yes`             | multisite | Non      | **Écoute stream :** Active l'écoute non-ssl (pass-through).     |
+    | `LISTEN_STREAM_PORT`     | `1337`            | multisite | Oui      | **Port stream :** Port d'écoute pour le non-ssl (pass-through). Laisser vide pour désactiver l'écoute stream non-SSL. |
+    | `LISTEN_STREAM_PORT_SSL` | `4242`            | multisite | Oui      | **Port stream SSL :** Port d'écoute pour le SSL (pass-through). Laisser vide pour désactiver l'écoute stream SSL. |
     | `USE_TCP`                | `yes`             | multisite | Non      | **Écoute TCP :** Active l’écoute TCP (stream).                  |
     | `USE_UDP`                | `no`              | multisite | Non      | **Écoute UDP :** Active l’écoute UDP (stream).                  |
 

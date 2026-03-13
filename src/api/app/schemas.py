@@ -1,3 +1,4 @@
+from ipaddress import ip_address
 from pydantic import BaseModel, Field, field_validator, RootModel, BeforeValidator
 from typing import Optional, List, Dict, Union, Literal, Annotated
 from re import compile as re_compile
@@ -78,10 +79,31 @@ class BanRequest(BaseModel):
     reason: str = Field("api", description="Reason for ban")
     service: Optional[str] = Field(None, description="Service name if service-specific ban")
 
+    @field_validator("ip")
+    @classmethod
+    def validate_ip(cls, v):
+        v = v.strip()
+        ip_address(v)  # Raises ValueError for invalid IPs
+        return v
+
+    @field_validator("exp")
+    @classmethod
+    def validate_exp(cls, v):
+        if v < 0:
+            raise ValueError("exp must be non-negative")
+        return v
+
 
 class UnbanRequest(BaseModel):
     ip: str
     service: Optional[str] = Field(None, description="Service name if service-specific unban")
+
+    @field_validator("ip")
+    @classmethod
+    def validate_ip(cls, v):
+        v = v.strip()
+        ip_address(v)  # Raises ValueError for invalid IPs
+        return v
 
 
 # Instances

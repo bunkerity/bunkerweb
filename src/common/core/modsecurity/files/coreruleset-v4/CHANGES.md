@@ -5,6 +5,80 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
+## Version 4.25.0 - 2026-03-DD - LTS Release
+
+## Version 4.24.1 - 2026-03-09
+
+## What's Changed
+### 🆕 New features and detections 🎉
+* feat(930140): add AI coding assistant artifact protection by @etiennemunnich in https://github.com/coreruleset/coreruleset/pull/4519
+* feat: Expand Scanner Agents by @HackingRepo in https://github.com/coreruleset/coreruleset/pull/4532
+
+## Fixes
+* fix(942480): don't inspect cookies twice by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4524
+* fix(942200): prevent matches against user agent strings by @theseion in https://github.com/coreruleset/coreruleset/pull/4537
+
+### 🧰 Other Changes
+* refactor: create 934130 `.ra` file by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4487
+* refactor: create 941330 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4492
+* refactor: create 944300 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4490
+* refactor: create 941320 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4491
+* refactor: create 921160 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4497
+* refactor: create 921120 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4496
+* refactor: create 921110 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4495
+* feat: move 930110 to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4494
+* refactor: create 941190 .ra file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4499
+* refactor: create 941400 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4517
+* refactor: create 942250 .ra file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4512
+* refactor: create 941370 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4518
+* refactor: create 944260 .ra file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4510
+* feat: move 943100 to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4504
+* refactor: create 944120 .ra file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4508
+* refactor: create 942450 .ra file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4513
+* refactor: create 942510 and 942511 .ra files with shared include by @fzipi in https://github.com/coreruleset/coreruleset/pull/4516
+* refactor: create 944240 .ra file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4509
+* docs: comment on threshold should be more alarming by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4330
+* chore: add missing regex-assembly comment blocks to rules by @fzipi in https://github.com/coreruleset/coreruleset/pull/4523
+* fix(913100): adding OWASP Nettacker to known scanners list by @securestep9 in https://github.com/coreruleset/coreruleset/pull/4529
+* refactor: create 941300 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4521
+
+## New Contributors
+* @etiennemunnich made their first contribution in https://github.com/coreruleset/coreruleset/pull/4519
+* @securestep9 made their first contribution in https://github.com/coreruleset/coreruleset/pull/4529
+* @HackingRepo made their first contribution in https://github.com/coreruleset/coreruleset/pull/4532
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.24.0...v4.24.1
+
+## Version 4.24.0 - 2026-02-28
+
+## What's Changed
+### 🆕 New features and detections 🎉
+* feat(933100): add detection of smarty template php tag by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4447
+### 🧰 Other Changes
+* fix(932130): use lazy regex by @fzipi in https://github.com/coreruleset/coreruleset/pull/3730
+* chore(943110): move to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4431
+* fix(930130): reduce false positive by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4451
+* fix(920650): don't block on method override if it's not actually being overwritten by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4455
+* fix(932340): Add more UNIX FP commands by @ssigwart in https://github.com/coreruleset/coreruleset/pull/4454
+* refactor(951210): convert maxDB leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4468
+* refactor(951190): convert Ingres leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4466
+* refactor(951140): convert EMC leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4464
+* refactor(951110): convert Access leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4463
+* fix: handle multi-byte UTF-8 chars in SQL special char detection by @fzipi in https://github.com/coreruleset/coreruleset/pull/4458
+* refactor(951200): convert Interbase leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4467
+* refactor(951180): convert Informix leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4465
+* refactor(951220): convert MSSQL leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4459
+* refactor(951250): convert SQLite leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4460
+* refactor(951260): convert Sybase leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4461
+* refactor(951130): convert DB2 leakage rule to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4462
+* fix: don't block json variable names called `profile` on libmodsecurity3/coraza by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4477
+* fix(933100): reduce false positive on Extensible Metadata Platform and xsl-stylesheets by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4445
+* feat: move 932190 to regex-assembly by @theseion in https://github.com/coreruleset/coreruleset/pull/4475
+* fix(942200): FP against comma and single quote in French addresses by @theseion in https://github.com/coreruleset/coreruleset/pull/4476
+
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.23.0...v4.24.0
+
 ## Version 4.23.0 - 2026-03-04
 
 ## What's Changed

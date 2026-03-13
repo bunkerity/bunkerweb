@@ -11,7 +11,7 @@ from sqlalchemy.schema import UniqueConstraint
 LargeText = Text().with_variant(MEDIUMTEXT, "mysql").with_variant(MEDIUMTEXT, "mariadb")
 
 CONTEXTS_ENUM = Enum("global", "multisite", name="contexts_enum")
-SETTINGS_TYPES_ENUM = Enum("password", "text", "number", "check", "select", "multiselect", "multivalue", name="settings_types_enum")
+SETTINGS_TYPES_ENUM = Enum("password", "text", "number", "file", "check", "select", "multiselect", "multivalue", name="settings_types_enum")
 METHODS_ENUM = Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum")
 SCHEDULES_ENUM = Enum("once", "minute", "hour", "day", "week", name="schedules_enum")
 CUSTOM_CONFIGS_TYPES_ENUM = Enum(
@@ -80,7 +80,8 @@ class Settings(Base):
     regex = Column(String(1024), nullable=False)
     type = Column(SETTINGS_TYPES_ENUM, nullable=False)
     multiple = Column(String(128), nullable=True)
-    separator = Column(String(10), nullable=True)
+    separator = Column(String(10), default=" ", nullable=True)
+    accept = Column(String(512), nullable=True)
     order = Column(Integer, default=0, nullable=False)
 
     selects = relationship("Selects", back_populates="setting", cascade="all")
@@ -130,6 +131,7 @@ class Global_values(Base):
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
     value = Column(LargeText, nullable=True, default="")
+    file_name = Column(String(512), nullable=True, default=None)
     suffix = Column(Integer, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
@@ -158,6 +160,7 @@ class Services_settings(Base):
     service_id = Column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=False)
     setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
     value = Column(LargeText, nullable=True, default="")
+    file_name = Column(String(512), nullable=True, default=None)
     suffix = Column(Integer, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
@@ -356,7 +359,7 @@ class Metadata(Base):
     failover = Column(Boolean, default=None, nullable=True)
     failover_message = Column(Text, nullable=True, default="")
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.8", nullable=False)
+    version = Column(String(32), default="1.6.9", nullable=False)
 
 
 ## UI Models

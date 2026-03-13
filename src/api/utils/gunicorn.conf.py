@@ -90,12 +90,15 @@ capture_output = CAPTURE_OUTPUT
 limit_request_line = 0
 limit_request_fields = 32768
 limit_request_field_size = 0
-reuse_port = True
+reuse_port = False
 daemon = False
 chdir = join(sep, "usr", "share", "bunkerweb", "api")
 umask = 0x027
 pidfile = PID_FILE.as_posix()
-worker_tmp_dir = join(sep, "dev", "shm")
+control_socket = RUN_DIR.joinpath("api.ctl").as_posix()
+SHM_TMP_DIR = Path(sep, "dev", "shm")
+API_WORKER_TMP_DIR = Path(sep, "tmp", "bunkerweb", "api-workers")
+worker_tmp_dir = SHM_TMP_DIR.as_posix() if SHM_TMP_DIR.is_dir() else API_WORKER_TMP_DIR.as_posix()
 tmp_upload_dir = TMP_UI_DIR.as_posix()
 secure_scheme_headers = {
     "X-FORWARDED-PROTOCOL": "https",
@@ -110,7 +113,8 @@ workers = MAX_WORKERS
 bind = f"{LISTEN_ADDR}:{LISTEN_PORT}"
 worker_class = "utils.worker.ApiUvicornWorker"
 threads = int(getenv("MAX_THREADS", MAX_WORKERS * 2))
-max_requests_jitter = min(8, MAX_WORKERS)
+max_requests = int(getenv("API_MAX_REQUESTS", getenv("MAX_REQUESTS", "1000")))
+max_requests_jitter = min(50, max_requests // 10)
 graceful_timeout = 30
 http_protocols = "h3,h2,h1"
 
@@ -139,6 +143,8 @@ def on_starting(server):
     TMP_UI_DIR.mkdir(parents=True, exist_ok=True)
     RUN_DIR.mkdir(parents=True, exist_ok=True)
     LIB_DIR.mkdir(parents=True, exist_ok=True)
+    if worker_tmp_dir != SHM_TMP_DIR:
+        API_WORKER_TMP_DIR.mkdir(parents=True, exist_ok=True)
 
     # Handle Docker secrets first
     docker_secrets = handle_docker_secrets()
@@ -515,6 +521,8 @@ def on_starting(server):
         exit(1)
 
     LOGGER.info("API is ready")
+
+    DB.close()  # Close local DB connections before fork to prevent fd leaks
 
 
 def when_ready(server):

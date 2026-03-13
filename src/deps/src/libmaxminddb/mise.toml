@@ -1,0 +1,14 @@
+[settings]
+lockfile = true
+locked = true
+
+disable_backends = [
+    "asdf",
+    "vfox",
+]
+
+[tools]
+node = "latest"
+"pipx:clang-format" = "21.1.8"
+"github:houseabsolute/precious" = "latest"
+"npm:prettier" = "latest"

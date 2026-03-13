@@ -5,6 +5,12 @@ $(document).ready(() => {
   const CHECK_STEP = 4;
   const uiUser = $("#ui_user").val() === "yes";
   const uiReverseProxy = $("#ui_reverse_proxy").val() === "yes";
+  const translate = (key, defaultValue, options = {}) => {
+    if (typeof i18next !== "undefined" && typeof i18next.t === "function") {
+      return i18next.t(key, { defaultValue, ...options });
+    }
+    return defaultValue || key;
+  };
 
   // Cache jQuery selectors for performance
   const $window = $(window);
@@ -19,6 +25,11 @@ $(document).ready(() => {
   const $nextStepButton = $(".next-step");
   const $breadcrumbItems = $(".template-steps-container .breadcrumb-item");
   const $csrfTokenInput = $("#csrf_token");
+
+  // PRO unlock effect state
+  const $proLicenseKey = $("#PRO_LICENSE_KEY");
+  const $proCard = $(".pro-card");
+  let proUnlocked = false;
 
   // Utility Functions
 
@@ -192,6 +203,74 @@ $(document).ready(() => {
     return result;
   };
 
+  const storeTooltipAttributes = ($element) => {
+    if (!$element.length || $element.data("tooltip-cached")) return;
+    $element.data("orig-toggle", $element.attr("data-bs-toggle") || null);
+    $element.data("orig-placement", $element.attr("data-bs-placement") || null);
+    $element.data("orig-title", $element.attr("data-bs-original-title") || "");
+    $element.data("orig-i18n", $element.attr("data-i18n") || "");
+    $element.data("tooltip-cached", true);
+  };
+
+  const applyTooltipState = ($element, title, i18nKey = "") => {
+    if (!$element.length) return;
+    storeTooltipAttributes($element);
+    $element
+      .attr("data-bs-toggle", "tooltip")
+      .attr("data-bs-placement", "top")
+      .attr("data-bs-original-title", title)
+      .attr("data-i18n", i18nKey)
+      .tooltip("dispose")
+      .tooltip();
+  };
+
+  const resetTooltipState = ($element) => {
+    if (!$element.length) return;
+    storeTooltipAttributes($element);
+    $element
+      .attr("data-bs-toggle", $element.data("orig-toggle"))
+      .attr("data-bs-placement", $element.data("orig-placement"))
+      .attr("data-bs-original-title", $element.data("orig-title"))
+      .attr("data-i18n", $element.data("orig-i18n"))
+      .tooltip("dispose");
+  };
+
+  const setAcmeServerPane = (server) => {
+    const selectedServer = server === "zerossl" ? "zerossl" : "letsencrypt";
+    const $serverSelect = $("#LETS_ENCRYPT_SERVER");
+    const $letsencryptPane = $("#acme-pane-letsencrypt");
+    const $zerosslPane = $("#acme-pane-zerossl");
+    const $stagingField = $("#USE_LETS_ENCRYPT_STAGING");
+    const $stagingWrapper = $stagingField.closest("[data-le-field='staging']");
+
+    $serverSelect.val(selectedServer);
+    $("#acme-server-tabs [data-acme-server]").each(function () {
+      const isActive = $(this).data("acme-server") === selectedServer;
+      $(this).toggleClass("active", isActive).attr("aria-selected", isActive);
+    });
+
+    $letsencryptPane.toggleClass(
+      "show active",
+      selectedServer === "letsencrypt",
+    );
+    $zerosslPane.toggleClass("show active", selectedServer === "zerossl");
+
+    if (selectedServer === "zerossl") {
+      $stagingField.prop("disabled", true);
+      applyTooltipState(
+        $stagingWrapper,
+        translate(
+          "tooltip.use_lets_encrypt_staging_letsencrypt_only",
+          "Let's Encrypt staging is only available when using the Let's Encrypt server.",
+        ),
+        "tooltip.use_lets_encrypt_staging_letsencrypt_only",
+      );
+    } else {
+      $stagingField.prop("disabled", false);
+      resetTooltipState($stagingWrapper);
+    }
+  };
+
   /**
    * Validates all inputs within the current step.
    * @param {jQuery} $currentStepContainer - The container of the current step.
@@ -225,7 +304,9 @@ $(document).ready(() => {
 
       // Validate based on pattern if the input is not empty
       if (isValid && pattern && value !== "") {
-        const regex = new RegExp(pattern);
+        // File settings may contain multiline payloads (PEM/base64 blocks)
+        const flags = $input.hasClass("plugin-setting-file-text") ? "s" : "";
+        const regex = new RegExp(pattern, flags);
         if (!regex.test(value)) {
           errorMessage = patternMessage;
           isValid = false;
@@ -414,9 +495,34 @@ $(document).ready(() => {
         }
       } else if (!uiReverseProxy && currentStep === 2) {
         const autoLetsEncrypt = $("#AUTO_LETS_ENCRYPT").prop("checked");
+        const letsEncryptServer = $("#LETS_ENCRYPT_SERVER").val();
         const letsEncryptChallenge = $("#LETS_ENCRYPT_CHALLENGE")
           .find(":selected")
           .val();
+        if (autoLetsEncrypt && letsEncryptServer === "zerossl") {
+          const $email = $("#EMAIL_LETS_ENCRYPT");
+          const $zerosslApiKey = $("#LETS_ENCRYPT_ZEROSSL_API_KEY");
+          const zerosslValidationMessage = translate(
+            "validation.zerossl_email_or_api_key_required",
+            "ZeroSSL requires either an email or a ZeroSSL API key.",
+          );
+          if (!$email.val().trim() && !$zerosslApiKey.val().trim()) {
+            $zerosslApiKey.addClass("is-invalid");
+            let $feedback = $zerosslApiKey.siblings(".invalid-feedback");
+            if (!$feedback.length) {
+              const $textSpan = $zerosslApiKey
+                .parent()
+                .find("span.input-group-text");
+              $feedback = $(
+                `<div class="invalid-feedback">${zerosslValidationMessage}</div>`,
+              ).insertAfter($textSpan.length ? $textSpan : $zerosslApiKey);
+            } else {
+              $feedback.text(zerosslValidationMessage);
+            }
+            return;
+          }
+        }
+
         if (autoLetsEncrypt && letsEncryptChallenge === "dns") {
           const $letsEncryptProvider = $("#LETS_ENCRYPT_DNS_PROVIDER");
           if (!$letsEncryptProvider.find(":selected").val()) {
@@ -466,39 +572,49 @@ $(document).ready(() => {
 
         const $customSslCert = $("#CUSTOM_SSL_CERT");
         const $customSslKey = $("#CUSTOM_SSL_KEY");
-        if (
-          $("#USE_CUSTOM_SSL").prop("checked") &&
-          (!$customSslCert.val() || !$customSslKey.val())
-        ) {
-          if (!$customSslCert.val()) {
-            $customSslCert.addClass("is-invalid");
-            let $feedback = $customSslCert.siblings(".invalid-feedback");
-            if (!$feedback.length) {
-              const $textSpan = $customSslCert
-                .parent()
-                .find("span.input-group-text");
-              $feedback = $(
-                '<div class="invalid-feedback">This field is required when using custom SSL.</div>',
-              ).insertAfter($textSpan.length ? $textSpan : $customSslCert);
-            } else {
-              $feedback.text("This field is required when using custom SSL.");
+        const $customSslCertData = $("#CUSTOM_SSL_CERT_DATA");
+        const $customSslKeyData = $("#CUSTOM_SSL_KEY_DATA");
+        if ($("#USE_CUSTOM_SSL").prop("checked")) {
+          const hasPathCert = !!$customSslCert.val();
+          const hasPathKey = !!$customSslKey.val();
+          const hasDataCert = !!$customSslCertData.val();
+          const hasDataKey = !!$customSslKeyData.val();
+          const hasValidPaths = hasPathCert && hasPathKey;
+          const hasValidData = hasDataCert && hasDataKey;
+
+          if (!hasValidPaths && !hasValidData) {
+            const errorMsg =
+              "When using custom SSL, you must set both the certificate and the key (via file path or data upload).";
+            if (!hasPathCert) {
+              $customSslCert.addClass("is-invalid");
+              let $feedback = $customSslCert.siblings(".invalid-feedback");
+              if (!$feedback.length) {
+                const $textSpan = $customSslCert
+                  .parent()
+                  .find("span.input-group-text");
+                $feedback = $(
+                  `<div class="invalid-feedback">${errorMsg}</div>`,
+                ).insertAfter($textSpan.length ? $textSpan : $customSslCert);
+              } else {
+                $feedback.text(errorMsg);
+              }
             }
-          }
-          if (!$customSslKey.val()) {
-            $customSslKey.addClass("is-invalid");
-            let $feedback = $customSslKey.siblings(".invalid-feedback");
-            if (!$feedback.length) {
-              const $textSpan = $customSslKey
-                .parent()
-                .find("span.input-group-text");
-              $feedback = $(
-                '<div class="invalid-feedback">This field is required when using custom SSL.</div>',
-              ).insertAfter($textSpan.length ? $textSpan : $customSslKey);
-            } else {
-              $feedback.text("This field is required when using custom SSL.");
+            if (!hasPathKey) {
+              $customSslKey.addClass("is-invalid");
+              let $feedback = $customSslKey.siblings(".invalid-feedback");
+              if (!$feedback.length) {
+                const $textSpan = $customSslKey
+                  .parent()
+                  .find("span.input-group-text");
+                $feedback = $(
+                  `<div class="invalid-feedback">${errorMsg}</div>`,
+                ).insertAfter($textSpan.length ? $textSpan : $customSslKey);
+              } else {
+                $feedback.text(errorMsg);
+              }
             }
+            return;
           }
-          return;
         }
 
         const result = await checkDNS();
@@ -560,7 +676,8 @@ $(document).ready(() => {
       const $this = $(event.target);
       const pattern = $this.attr("pattern");
       const value = $this.val();
-      const isValid = pattern ? new RegExp(pattern).test(value) : true;
+      const flags = $this.hasClass("plugin-setting-file-text") ? "s" : "";
+      const isValid = pattern ? new RegExp(pattern, flags).test(value) : true;
       $this
         .toggleClass("is-valid", isValid)
         .toggleClass("is-invalid", !isValid);
@@ -637,13 +754,37 @@ $(document).ready(() => {
       );
       formData.append(
         "lets_encrypt_staging",
-        $("#USE_LETS_ENCRYPT_STAGING").prop("checked") ? "yes" : "no",
+        $("#LETS_ENCRYPT_SERVER").val() === "letsencrypt" &&
+          $("#USE_LETS_ENCRYPT_STAGING").prop("checked")
+          ? "yes"
+          : "no",
       );
       formData.append(
         "lets_encrypt_wildcard",
         $("#USE_LETS_ENCRYPT_WILDCARD").prop("checked") ? "yes" : "no",
       );
       formData.append("email_lets_encrypt", $("#EMAIL_LETS_ENCRYPT").val());
+      formData.append("lets_encrypt_server", $("#LETS_ENCRYPT_SERVER").val());
+      formData.append(
+        "lets_encrypt_zerossl_api_key",
+        $("#LETS_ENCRYPT_ZEROSSL_API_KEY").val(),
+      );
+      formData.append(
+        "lets_encrypt_zerossl_api_retry",
+        $("#LETS_ENCRYPT_ZEROSSL_API_RETRY").val(),
+      );
+      formData.append(
+        "lets_encrypt_zerossl_api_retry_delay",
+        $("#LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY").val(),
+      );
+      formData.append(
+        "lets_encrypt_zerossl_api_connect_timeout",
+        $("#LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT").val(),
+      );
+      formData.append(
+        "lets_encrypt_zerossl_api_max_time",
+        $("#LETS_ENCRYPT_ZEROSSL_API_MAX_TIME").val(),
+      );
       formData.append(
         "lets_encrypt_challenge",
         $("#LETS_ENCRYPT_CHALLENGE").find(":selected").val(),
@@ -812,140 +953,71 @@ $(document).ready(() => {
   $("#LETS_ENCRYPT_CHALLENGE").on("change", function () {
     const challenge = $(this).find(":selected").val();
     const $wildcardCheckbox = $("#USE_LETS_ENCRYPT_WILDCARD");
-    const $wildcardCol = $wildcardCheckbox.closest(".col-4");
+    const $wildcardCol = $wildcardCheckbox.closest(
+      "[data-le-field='wildcard']",
+    );
     const $dnsProvider = $("#LETS_ENCRYPT_DNS_PROVIDER");
-    const $dnsProviderParent = $dnsProvider.parent();
+    const $dnsProviderParent = $dnsProvider.closest(
+      "[data-le-field='dns-provider']",
+    );
     const $dnsPropagation = $("#LETS_ENCRYPT_DNS_PROPAGATION");
-    const $dnsPropagationParent = $dnsPropagation.parent();
+    const $dnsPropagationParent = $dnsPropagation.closest(
+      "[data-le-field='dns-propagation']",
+    );
     const $dnsCredentialItems = $("#LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS");
-    const $dnsCredentialItemsParent = $dnsCredentialItems.parent();
-
-    // Store original tooltip/i18n attributes if not already stored
-    if (!$wildcardCol.data("orig-title")) {
-      $wildcardCol.data(
-        "orig-title",
-        $wildcardCol.attr("data-bs-original-title") || "",
-      );
-      $wildcardCol.data("orig-i18n", $wildcardCol.attr("data-i18n") || "");
-    }
-    if (!$dnsProviderParent.data("orig-title")) {
-      $dnsProviderParent.data(
-        "orig-title",
-        $dnsProviderParent.attr("data-bs-original-title") || "",
-      );
-      $dnsProviderParent.data(
-        "orig-i18n",
-        $dnsProviderParent.attr("data-i18n") || "",
-      );
-    }
-    if (!$dnsPropagationParent.data("orig-title")) {
-      $dnsPropagationParent.data(
-        "orig-title",
-        $dnsPropagationParent.attr("data-bs-original-title") || "",
-      );
-      $dnsPropagationParent.data(
-        "orig-i18n",
-        $dnsPropagationParent.attr("data-i18n") || "",
-      );
-    }
-    if (!$dnsCredentialItemsParent.data("orig-title")) {
-      $dnsCredentialItemsParent.data(
-        "orig-title",
-        $dnsCredentialItemsParent.attr("data-bs-original-title") || "",
-      );
-      $dnsCredentialItemsParent.data(
-        "orig-i18n",
-        $dnsCredentialItemsParent.attr("data-i18n") || "",
-      );
-    }
+    const $dnsCredentialItemsParent = $dnsCredentialItems.closest(
+      "[data-le-field='dns-credentials']",
+    );
 
     if (challenge === "http") {
       $wildcardCheckbox.prop("checked", false).prop("disabled", true);
-      $wildcardCol
-        .attr("data-bs-toggle", "tooltip")
-        .attr("data-bs-placement", "top")
-        .attr(
-          "data-bs-original-title",
-          "Wildcard certificates are only supported with DNS challenges.",
-        )
-        .attr("data-i18n", "tooltip.wildcard_dns_only")
-        .tooltip("dispose")
-        .tooltip();
+      applyTooltipState(
+        $wildcardCol,
+        "Wildcard certificates are only supported with DNS challenges.",
+        "tooltip.wildcard_dns_only",
+      );
 
       $dnsProvider.prop("disabled", true);
-      $dnsProviderParent
-        .attr("data-bs-toggle", "tooltip")
-        .attr("data-bs-placement", "top")
-        .attr(
-          "data-bs-original-title",
-          "DNS provider is only supported with DNS challenges.",
-        )
-        .attr("data-i18n", "tooltip.dns_provider_dns_only")
-        .tooltip("dispose")
-        .tooltip();
+      applyTooltipState(
+        $dnsProviderParent,
+        "DNS provider is only supported with DNS challenges.",
+        "tooltip.dns_provider_dns_only",
+      );
 
       $dnsPropagation.prop("disabled", true);
-      $dnsPropagationParent
-        .attr("data-bs-toggle", "tooltip")
-        .attr("data-bs-placement", "top")
-        .attr(
-          "data-bs-original-title",
-          "DNS propagation is only supported with DNS challenges.",
-        )
-        .attr("data-i18n", "tooltip.dns_propagation_dns_only")
-        .tooltip("dispose")
-        .tooltip();
+      applyTooltipState(
+        $dnsPropagationParent,
+        "DNS propagation is only supported with DNS challenges.",
+        "tooltip.dns_propagation_dns_only",
+      );
 
       $dnsCredentialItems.prop("disabled", true);
-      $dnsCredentialItemsParent
-        .attr("data-bs-toggle", "tooltip")
-        .attr("data-bs-placement", "top")
-        .attr(
-          "data-bs-original-title",
-          "Credentials are only supported with DNS challenges.",
-        )
-        .attr("data-i18n", "tooltip.dns_credentials_dns_only")
-        .tooltip("dispose")
-        .tooltip();
+      applyTooltipState(
+        $dnsCredentialItemsParent,
+        "Credentials are only supported with DNS challenges.",
+        "tooltip.dns_credentials_dns_only",
+      );
     } else {
       $wildcardCheckbox.prop("disabled", false);
-      $wildcardCol
-        .attr("data-bs-toggle", null)
-        .attr("data-bs-placement", null)
-        .attr("data-bs-original-title", $wildcardCol.data("orig-title"))
-        .attr("data-i18n", $wildcardCol.data("orig-i18n"));
-      $wildcardCol.tooltip("dispose");
+      resetTooltipState($wildcardCol);
 
       $dnsProvider.prop("disabled", false);
-      $dnsProviderParent
-        .attr("data-bs-toggle", null)
-        .attr("data-bs-placement", null)
-        .attr("data-bs-original-title", $dnsProviderParent.data("orig-title"))
-        .attr("data-i18n", $dnsProviderParent.data("orig-i18n"));
-      $dnsProviderParent.tooltip("dispose");
+      resetTooltipState($dnsProviderParent);
 
       $dnsPropagation.prop("disabled", false);
-      $dnsPropagationParent
-        .attr("data-bs-toggle", null)
-        .attr("data-bs-placement", null)
-        .attr(
-          "data-bs-original-title",
-          $dnsPropagationParent.data("orig-title"),
-        )
-        .attr("data-i18n", $dnsPropagationParent.data("orig-i18n"));
-      $dnsPropagationParent.tooltip("dispose");
+      resetTooltipState($dnsPropagationParent);
 
       $dnsCredentialItems.prop("disabled", false);
-      $dnsCredentialItemsParent
-        .attr("data-bs-toggle", null)
-        .attr("data-bs-placement", null)
-        .attr(
-          "data-bs-original-title",
-          $dnsCredentialItemsParent.data("orig-title"),
-        )
-        .attr("data-i18n", $dnsCredentialItemsParent.data("orig-i18n"));
-      $dnsCredentialItemsParent.tooltip("dispose");
+      resetTooltipState($dnsCredentialItemsParent);
     }
+  });
+
+  $("#acme-server-tabs").on("click", "[data-acme-server]", function () {
+    setAcmeServerPane($(this).data("acme-server"));
+  });
+
+  $("#LETS_ENCRYPT_SERVER").on("change", function () {
+    setAcmeServerPane($(this).val());
   });
 
   $("#USE_CUSTOM_SSL").on("change", function () {
@@ -961,6 +1033,19 @@ $(document).ready(() => {
     $key.prop("disabled", !isChecked);
     $certData.prop("disabled", !isChecked);
     $keyData.prop("disabled", !isChecked);
+
+    // Also disable/enable file upload sub-elements
+    $("#custom-ssl-cert-data-upload, #custom-ssl-key-data-upload").prop(
+      "disabled",
+      !isChecked,
+    );
+    $("#custom-ssl-cert-data-manual, #custom-ssl-key-data-manual").prop(
+      "disabled",
+      !isChecked,
+    );
+    $(
+      '.plugin-setting-file-mode-toggle[data-file-input="#CUSTOM_SSL_CERT_DATA"], .plugin-setting-file-mode-toggle[data-file-input="#CUSTOM_SSL_KEY_DATA"]',
+    ).prop("disabled", !isChecked);
   });
 
   // Fixed: Modify the newsletter form click handler to prevent interference with checkbox
@@ -983,6 +1068,89 @@ $(document).ready(() => {
     $("#email-optional").toggleClass("d-none", this.checked);
   });
 
+  // File setting: read uploaded file content into the hidden input
+  $(document).on("change", ".plugin-setting-file-upload", function () {
+    const $uploadInput = $(this);
+    const hiddenSelector = $uploadInput.data("fileInput");
+    const $hidden = $(hiddenSelector);
+    if (!$hidden.length) return;
+
+    const file = this.files && this.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const content = e.target.result
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n");
+      $hidden.val(content);
+      const $wrapper = $hidden.closest(".plugin-file-setting-wrapper");
+      const $status = $wrapper.find(".plugin-setting-file-status");
+      if ($status.length) {
+        $status.text(
+          "Loaded from " + file.name + " (" + content.length + " chars)",
+        );
+      }
+      const $manual = $wrapper.find(".plugin-setting-file-manual");
+      if ($manual.length) $manual.val(content);
+    };
+    reader.onerror = function () {
+      const $wrapper = $hidden.closest(".plugin-file-setting-wrapper");
+      const $status = $wrapper.find(".plugin-setting-file-status");
+      if ($status.length) $status.text("Error reading file");
+    };
+    reader.readAsText(file);
+  });
+
+  // File setting: toggle between upload and manual text entry
+  $(document).on("click", ".plugin-setting-file-mode-toggle", function () {
+    const $toggle = $(this);
+    const hiddenSelector = $toggle.data("fileInput");
+    const $hidden = $(hiddenSelector);
+    if (!$hidden.length) return;
+
+    const $wrapper = $hidden.closest(".plugin-file-setting-wrapper");
+    const $uploadInput = $wrapper.find(".plugin-setting-file-upload");
+    const $manual = $wrapper.find(".plugin-setting-file-manual");
+    const $icon = $toggle.find("i");
+    const currentMode = $toggle.data("mode");
+
+    if (currentMode === "upload") {
+      $uploadInput.addClass("d-none");
+      $manual.removeClass("d-none");
+      $toggle.data("mode", "manual");
+      $toggle.attr("data-bs-original-title", $toggle.data("manualLabel"));
+      $icon.removeClass("bx-edit-alt").addClass("bx-upload");
+    } else {
+      $uploadInput.removeClass("d-none");
+      $manual.addClass("d-none");
+      $toggle.data("mode", "upload");
+      $toggle.attr("data-bs-original-title", $toggle.data("uploadLabel"));
+      $icon.removeClass("bx-upload").addClass("bx-edit-alt");
+    }
+  });
+
+  // File setting: sync manual textarea edits back to the hidden input
+  $(document).on("input", ".plugin-setting-file-manual", function () {
+    const $manual = $(this);
+    const hiddenSelector = $manual.data("fileInput");
+    const $hidden = $(hiddenSelector);
+    if (!$hidden.length) return;
+
+    const content = $manual.val().replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    $hidden.val(content);
+
+    const $wrapper = $hidden.closest(".plugin-file-setting-wrapper");
+    const $status = $wrapper.find(".plugin-setting-file-status");
+    if ($status.length) {
+      $status.text(
+        content
+          ? "Content entered (" + content.length + " chars)"
+          : $status.data("emptyText") || "No file selected",
+      );
+    }
+  });
+
   // Before Unload Event to Warn Users About Unsaved Changes
   $window.on("beforeunload", function (e) {
     const message =
@@ -990,6 +1158,95 @@ $(document).ready(() => {
     e.returnValue = message; // Standard for most browsers
     return message; // Required for some browsers
   });
+
+  setAcmeServerPane($("#LETS_ENCRYPT_SERVER").val());
+  $("#LETS_ENCRYPT_CHALLENGE").trigger("change");
+  $("#USE_CUSTOM_SSL").trigger("change");
+
+  // PRO License Key unlock effect
+  if ($proLicenseKey.length && $proCard.length) {
+    /**
+     * Loads the canvas-confetti library on demand.
+     * @returns {Promise} Resolves with the confetti function.
+     */
+    const loadConfetti = () => {
+      return new Promise((resolve, reject) => {
+        if (window.confetti) {
+          resolve(window.confetti);
+          return;
+        }
+        const src = $proLicenseKey.data("confetti-src");
+        if (!src) {
+          reject(new Error("No confetti source URL"));
+          return;
+        }
+        const script = document.createElement("script");
+        script.src = src;
+        script.onload = () => resolve(window.confetti);
+        script.onerror = () => reject(new Error("Failed to load confetti"));
+        document.head.appendChild(script);
+      });
+    };
+
+    /**
+     * Fires a confetti burst from the pro-card's position.
+     */
+    const fireProConfetti = async () => {
+      try {
+        const confettiFn = await loadConfetti();
+        const cardRect = $proCard[0].getBoundingClientRect();
+        const x = (cardRect.left + cardRect.width / 2) / window.innerWidth;
+        const y = (cardRect.top + cardRect.height / 4) / window.innerHeight;
+
+        // Main burst — BunkerWeb brand colors
+        confettiFn({
+          particleCount: 60,
+          spread: 70,
+          origin: { x, y },
+          colors: ["#2eac68", "#0b5577", "#0b354a", "#35728e", "#ffffff"],
+          ticks: 120,
+          gravity: 1.2,
+          scalar: 0.9,
+          disableForReducedMotion: true,
+        });
+
+        // Secondary burst slightly delayed for a layered feel
+        setTimeout(() => {
+          confettiFn({
+            particleCount: 30,
+            spread: 100,
+            origin: { x, y: y + 0.05 },
+            colors: ["#2eac68", "#0b5577", "#ffffff"],
+            ticks: 100,
+            gravity: 1.5,
+            scalar: 0.7,
+            disableForReducedMotion: true,
+          });
+        }, 150);
+      } catch (e) {
+        // Confetti is purely decorative — fail silently
+        console.warn("Confetti effect unavailable:", e.message);
+      }
+    };
+
+    $proLicenseKey.on(
+      "input",
+      debounce(function () {
+        const hasValue = $(this).val().length > 0;
+
+        if (hasValue && !proUnlocked) {
+          proUnlocked = true;
+          $(this).addClass("pro-unlocked");
+          $proCard.addClass("pro-card-unlocked");
+          fireProConfetti();
+        } else if (!hasValue && proUnlocked) {
+          proUnlocked = false;
+          $(this).removeClass("pro-unlocked");
+          $proCard.removeClass("pro-card-unlocked");
+        }
+      }, 50),
+    );
+  }
 
   // Initialize the UI based on the initial step
   toggleButtonStates();

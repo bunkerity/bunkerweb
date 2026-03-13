@@ -7,6 +7,111 @@ $(document).ready(function () {
   const baseFlagsUrl = $("#base_flags_url").val().trim();
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   const userReadOnly = $("#user-read-only").val().trim() === "True";
+  const filtersStateCache = new Map();
+  const filtersStateTtlMs = 10000;
+  const filtersStateMaxEntries = 100;
+
+  const collectSearchPaneEntries = (requestData) => {
+    if (!requestData || typeof requestData !== "object") return [];
+
+    const entries = Object.keys(requestData)
+      .filter((key) => key.startsWith("searchPanes["))
+      .map((key) => [key, String(requestData[key] || "")]);
+
+    const flattenNestedPanes = (value, path) => {
+      if (value === null || typeof value === "undefined") return;
+
+      if (Array.isArray(value)) {
+        value.forEach((item, index) =>
+          flattenNestedPanes(item, `${path}[${index}]`),
+        );
+        return;
+      }
+
+      if (typeof value === "object") {
+        Object.keys(value)
+          .sort((a, b) => a.localeCompare(b))
+          .forEach((key) =>
+            flattenNestedPanes(value[key], `${path}[${String(key)}]`),
+          );
+        return;
+      }
+
+      entries.push([path, String(value)]);
+    };
+
+    if (
+      requestData.searchPanes &&
+      typeof requestData.searchPanes === "object"
+    ) {
+      flattenNestedPanes(requestData.searchPanes, "searchPanes");
+    }
+
+    // Remove duplicates while keeping all distinct key/value pairs.
+    const seen = new Set();
+    return entries
+      .filter(([key, value]) => {
+        const signature = `${key}=${value}`;
+        if (seen.has(signature)) return false;
+        seen.add(signature);
+        return true;
+      })
+      .sort((a, b) => a[0].localeCompare(b[0]));
+  };
+
+  const hasActiveSearchPaneSelections = (requestData) =>
+    collectSearchPaneEntries(requestData).some(
+      ([, value]) => value.trim() !== "",
+    );
+
+  const buildFiltersStateKey = (requestData) => {
+    if (!requestData || typeof requestData !== "object") return "default";
+
+    const searchValue =
+      requestData.search && typeof requestData.search.value !== "undefined"
+        ? String(requestData.search.value || "")
+            .trim()
+            .toLowerCase()
+        : "";
+
+    const paneEntries = collectSearchPaneEntries(requestData);
+
+    return JSON.stringify({ search: searchValue, panes: paneEntries });
+  };
+
+  const getCachedFiltersForState = (stateKey) => {
+    const entry = filtersStateCache.get(stateKey);
+    if (!entry) return null;
+    if (Date.now() - entry.ts > filtersStateTtlMs) {
+      filtersStateCache.delete(stateKey);
+      return null;
+    }
+    return entry.payload;
+  };
+
+  const pruneFiltersStateCache = () => {
+    const now = Date.now();
+    for (const [key, entry] of filtersStateCache.entries()) {
+      if (now - entry.ts > filtersStateTtlMs) {
+        filtersStateCache.delete(key);
+      }
+    }
+
+    while (filtersStateCache.size >= filtersStateMaxEntries) {
+      const oldestKey = filtersStateCache.keys().next().value;
+      if (typeof oldestKey === "undefined") {
+        break;
+      }
+      filtersStateCache.delete(oldestKey);
+    }
+  };
+
+  const cacheFiltersForState = (stateKey, payload) => {
+    if (!payload || typeof payload !== "object") return;
+    if (!payload.searchPanes || !payload.searchPanes.options) return;
+    pruneFiltersStateCache();
+    filtersStateCache.set(stateKey, { ts: Date.now(), payload });
+  };
 
   const headers = [
     {
@@ -327,25 +432,32 @@ $(document).ready(function () {
 
   // Custom button for auto-refresh
   let autoRefresh = false;
+  let autoRefreshInterval = null;
   const sessionAutoRefresh = sessionStorage.getItem("reportsAutoRefresh");
+
+  function stopAutoRefreshInterval() {
+    if (autoRefreshInterval) {
+      clearInterval(autoRefreshInterval);
+      autoRefreshInterval = null;
+    }
+  }
 
   function toggleAutoRefresh() {
     autoRefresh = !autoRefresh;
     sessionStorage.setItem("reportsAutoRefresh", autoRefresh);
     if (autoRefresh) {
+      stopAutoRefreshInterval();
       $(".bx-loader")
         .addClass("bx-spin")
         .closest(".btn")
         .removeClass("btn-outline-primary")
         .addClass("btn-primary");
-      const interval = setInterval(() => {
-        if (!autoRefresh) {
-          clearInterval(interval);
-        } else {
-          $("#reports").DataTable().ajax.reload(null, false);
-        }
+      autoRefreshInterval = setInterval(() => {
+        if (!autoRefresh) return;
+        $("#reports").DataTable().ajax.reload(null, false);
       }, 10000); // 10 seconds
     } else {
+      stopAutoRefreshInterval();
       $(".bx-loader")
         .removeClass("bx-spin")
         .closest(".btn")
@@ -505,6 +617,7 @@ $(document).ready(function () {
             header: t("searchpane.data", "Data"),
             combiner: "or",
           },
+          orderable: false,
           targets: 12,
         },
         {
@@ -558,29 +671,116 @@ $(document).ready(function () {
       layout: layout,
       processing: true,
       serverSide: true,
-      ajax: {
-        url: `${window.location.pathname}/fetch`,
-        type: "POST",
-        data: function (d) {
-          d.csrf_token = $("#csrf_token").val(); // Add CSRF token if needed
-          return d;
-        },
-        // Add error handling for ajax requests
-        error: function (jqXHR, textStatus, errorThrown) {
-          console.error("DataTables AJAX error:", textStatus, errorThrown);
-          $("#reports").addClass("d-none");
-          $("#reports-waiting")
-            .removeClass("visually-hidden")
-            .addClass("text-danger")
-            .text(
-              t(
-                "error.reports_load_error",
-                "Error loading reports. Please try refreshing the page.",
-              ),
-            );
-          // Remove any loading indicators
-          $(".dataTables_processing").hide();
-        },
+      ajax: function (d, callback) {
+        d.csrf_token = $("#csrf_token").val();
+        const hasActivePaneSelections = hasActiveSearchPaneSelections(d);
+        const filtersStateKey = buildFiltersStateKey(d);
+        const cachedFiltersPayload = hasActivePaneSelections
+          ? null
+          : getCachedFiltersForState(filtersStateKey);
+        const rowsRequest = $.ajax({
+          url: `${window.location.pathname}/fetch`,
+          type: "POST",
+          data: d,
+        });
+        const filtersRequest =
+          cachedFiltersPayload !== null
+            ? null
+            : $.ajax({
+                url: `${window.location.pathname}/filters`,
+                type: "POST",
+                data: {
+                  ...d,
+                  force: hasActivePaneSelections ? "1" : "0",
+                },
+              });
+
+        let rowsPayload = null;
+        let filtersPayload = cachedFiltersPayload;
+        let rowsDone = false;
+        let filtersDone = cachedFiltersPayload !== null;
+
+        const maybeFinalize = () => {
+          if (!rowsDone || !filtersDone) return;
+          if (!rowsPayload || typeof rowsPayload !== "object") {
+            callback({
+              draw: d.draw || 1,
+              recordsTotal: 0,
+              recordsFiltered: 0,
+              data: [],
+            });
+            return;
+          }
+          if (
+            filtersPayload &&
+            filtersPayload.searchPanes &&
+            filtersPayload.searchPanes.options
+          ) {
+            rowsPayload.searchPanes = filtersPayload.searchPanes;
+          }
+          callback(rowsPayload);
+        };
+
+        rowsRequest
+          .done(function (response) {
+            rowsPayload =
+              response && typeof response === "object"
+                ? response
+                : {
+                    draw: d.draw || 1,
+                    recordsTotal: 0,
+                    recordsFiltered: 0,
+                    data: [],
+                  };
+          })
+          .fail(function (jqXHR, textStatus, errorThrown) {
+            console.error("DataTables AJAX error:", textStatus, errorThrown);
+            $("#reports").addClass("d-none");
+            $("#reports-waiting")
+              .removeClass("visually-hidden")
+              .addClass("text-danger")
+              .text(
+                t(
+                  "error.reports_load_error",
+                  "Error loading reports. Please try refreshing the page.",
+                ),
+              );
+            $(".dataTables_processing").hide();
+            rowsPayload = {
+              draw: d.draw || 1,
+              recordsTotal: 0,
+              recordsFiltered: 0,
+              data: [],
+            };
+          })
+          .always(function () {
+            rowsDone = true;
+            maybeFinalize();
+          });
+
+        if (filtersRequest) {
+          filtersRequest
+            .done(function (response) {
+              filtersPayload =
+                response && typeof response === "object" ? response : null;
+              if (filtersPayload && !hasActivePaneSelections) {
+                cacheFiltersForState(filtersStateKey, filtersPayload);
+              }
+            })
+            .fail(function (xhr, textStatus, errorThrown) {
+              const xhrStatusText =
+                xhr && typeof xhr.statusText === "string" ? xhr.statusText : "";
+              console.warn(
+                "Failed to load reports filters:",
+                textStatus,
+                errorThrown || xhrStatusText,
+              );
+            })
+            .always(function () {
+              filtersDone = true;
+              maybeFinalize();
+            });
+        }
       },
       columns: [
         {
@@ -634,73 +834,24 @@ $(document).ready(function () {
           title: "<span data-i18n='table.header.data'>Data</span>",
           render: function (data, type, row) {
             if (type === "display") {
-              try {
-                // Try to parse the data as JSON if it's a string
-                const jsonData =
-                  typeof data === "string" ? JSON.parse(data) : data;
-
-                // Check if there's meaningful data to display
-                if (jsonData && Object.keys(jsonData).length > 0) {
-                  // Safely encode the data, with fallback for encoding issues
-                  let encodedData;
-                  try {
-                    encodedData = encodeURIComponent(JSON.stringify(jsonData));
-                  } catch (encodeError) {
-                    console.warn(
-                      "Failed to encode data for modal, using fallback:",
-                      encodeError,
-                    );
-                    // Store raw data as base64 as ultimate fallback
-                    encodedData = btoa(JSON.stringify(jsonData || {}));
-                  }
-
-                  return `<a href="#"
-                            class="text-decoration-underline"
-                            data-bs-toggle="modal"
-                            data-bs-target="#dataModal"
-                            data-report-data="${escapeHtmlAttribute(
-                              encodedData,
-                            )}"
-                            data-raw-data="${escapeHtmlAttribute(
-                              JSON.stringify(jsonData),
-                            )}"
-                            style="cursor: pointer;"
-                            data-i18n="button.view_details">
-                            ${t("button.view_details", "View Details")}
-                          </a>`;
-                } else {
-                  return `<span data-i18n="status.no_data">No data</span>`;
-                }
-              } catch (e) {
-                console.warn("Error parsing data JSON:", e);
-                // Even if parsing fails, provide a way to access the raw data
-                const safeData =
-                  typeof data === "string" ? data : String(data || "No data");
-                const fallbackData = JSON.stringify({
-                  error: "Parse error",
-                  raw: safeData,
-                });
-                return `<a href="#"
-                          class="text-decoration-underline"
-                          data-bs-toggle="modal"
-                          data-bs-target="#dataModal"
-                          data-report-data="${escapeHtmlAttribute(
-                            encodeURIComponent(fallbackData),
-                          )}"
-                          data-raw-data="${escapeHtmlAttribute(safeData)}"
-                          style="cursor: pointer;"
-                          data-i18n="button.view_raw_data">
-                          ${t("button.view_raw_data", "View Raw Data")}
-                        </a>`;
+              const hasData = Boolean(row && row.has_data);
+              if (!hasData) {
+                return `<span data-i18n="status.no_data">No data</span>`;
               }
+
+              const reportId = row.request_id || row.id || "";
+
+              return `<a href="#"
+                        class="text-decoration-underline"
+                        data-bs-toggle="modal"
+                        data-bs-target="#dataModal"
+                        data-report-id="${escapeHtmlAttribute(reportId)}"
+                        style="cursor: pointer;"
+                        data-i18n="button.view_details">
+                        ${t("button.view_details", "View Details")}
+                      </a>`;
             } else if (type === "filter") {
-              try {
-                const jsonData =
-                  typeof data === "string" ? JSON.parse(data) : data;
-                return JSON.stringify(jsonData);
-              } catch (e) {
-                return typeof data === "string" ? data : String(data || "");
-              }
+              return row && row.has_data ? "available" : "";
             }
             return data;
           },
@@ -817,179 +968,148 @@ $(document).ready(function () {
   // Handler for the data modal to display formatted security report data
   $("#dataModal").on("show.bs.modal", function (event) {
     const button = $(event.relatedTarget);
-    const reportDataString = button.data("report-data");
-    let rawDataForFallback = null;
-    let reason = "Unknown";
-    let anomalyScore = null;
-    let isModSec = false;
-    let currentServerName = "";
+    const table = $("#reports").DataTable();
+    const $row = button.closest("tr");
+    let rowData = table.row($row).data();
+    if (!rowData) {
+      rowData = table.row($row.prev("tr")).data();
+    }
 
-    try {
-      // First, try to get the reason from row data
-      const $row = button.closest("tr");
-      const table = $("#reports").DataTable();
-      const rowData = table.row($row).data();
-      if (rowData) {
-        if (rowData.reason) {
-          reason = rowData.reason;
-        }
-        if (rowData.server_name) {
-          currentServerName = decodeHtml(rowData.server_name);
-        }
-      }
+    const reason = rowData && rowData.reason ? rowData.reason : "Unknown";
+    const currentServerName =
+      rowData && rowData.server_name ? decodeHtml(rowData.server_name) : "";
+    const reportId =
+      button.data("report-id") ||
+      (rowData ? rowData.request_id || rowData.id : "");
+    const hostname = button.data("hostname") || "";
 
-      // Try to parse the report data
-      let reportData;
-      if (reportDataString) {
-        try {
-          reportData = JSON.parse(decodeURIComponent(reportDataString));
-        } catch (parseError) {
-          console.warn(
-            "Failed to parse report data string, trying direct parsing:",
-            parseError,
-          );
-          try {
-            // Try to parse without decoding
-            reportData = JSON.parse(reportDataString);
-          } catch (directParseError) {
-            console.warn(
-              "Failed direct parsing, trying base64 decode:",
-              directParseError,
-            );
-            try {
-              // Try base64 decode as last resort for encoded data
-              const base64Decoded = atob(reportDataString);
-              reportData = JSON.parse(base64Decoded);
-            } catch (base64Error) {
-              console.warn(
-                "All parsing methods failed, using fallback:",
-                base64Error,
-              );
-              // Create a fallback object with the original data
-              reportData = {
-                error: "Parsing failed",
-                raw: reportDataString,
-                note: "Raw data preserved for access",
-              };
-            }
-          }
-        }
-      } else {
-        // If no report data string, try to get raw data from row
-        reportData = rowData ? rowData.data : {};
-        if (typeof reportData === "string") {
-          try {
-            reportData = JSON.parse(reportData);
-          } catch (rowParseError) {
-            console.warn("Failed to parse row data:", rowParseError);
-            reportData = {
-              error: "Row data parsing failed",
-              raw: reportData,
-              note: "Raw data preserved for access",
-            };
-          }
-        }
-      }
+    const baseTitle = `
+      <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report Details - ${escapeHtml(
+        reason,
+      )}
+    `;
+    $("#dataModalLabel").html(baseTitle);
+    $("#dataContent").html(`
+      <div class="d-flex align-items-center gap-2 text-muted">
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <span>Loading report details...</span>
+      </div>
+    `);
+    $("#dataModal").data("raw-data", null);
 
-      rawDataForFallback = reportData || {};
-      $("#dataModal").data("raw-data", rawDataForFallback);
-
-      // Detect ModSecurity report and extract anomaly score
-      if (
-        reportData &&
-        (reportData.anomaly_score !== undefined ||
-          reportData.ids ||
-          reportData.msgs)
-      ) {
-        isModSec = true;
-        anomalyScore = reportData.anomaly_score;
-      }
-
-      // Update modal title with reason and anomaly score badge if present
-      let modalTitleHtml = `
-        <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report Details - ${escapeHtml(
-          reason,
-        )}
-      `;
-      if (
-        isModSec &&
-        anomalyScore !== undefined &&
-        anomalyScore !== null &&
-        anomalyScore !== ""
-      ) {
-        modalTitleHtml += `<span class="badge bg-danger ms-2 align-middle">Anomaly Score: <span class="fw-bold">${escapeHtml(
-          anomalyScore,
-        )}</span></span>`;
-      }
-      $("#dataModalLabel").html(modalTitleHtml);
-
-      // Generate formatted content with error handling
-      try {
-        const formattedContent = formatSecurityReportData(
-          reportData,
-          reason,
-          currentServerName,
-        );
-        $("#dataContent").html(formattedContent);
-      } catch (formatError) {
-        console.error("Error formatting report data:", formatError);
-        // Show raw data as fallback when formatting fails
-        const rawDataDisplay = createRawDataFallback(rawDataForFallback);
-        $("#dataContent").html(`
-          <div class="alert alert-warning mb-3">
-            <span class="tf-icons bx bx-error-circle me-1"></span>
-            Unable to format data properly. Showing raw data below:
-          </div>
-          ${rawDataDisplay}
-        `);
-      }
-    } catch (e) {
-      console.error("Critical error in data modal:", e);
-
-      // Try to get raw data from the original row as ultimate fallback
-      try {
-        const $row = button.closest("tr");
-        const table = $("#reports").DataTable();
-        const rowData = table.row($row).data();
-        if (rowData && rowData.data) {
-          rawDataForFallback =
-            typeof rowData.data === "string"
-              ? JSON.parse(rowData.data)
-              : rowData.data;
-        } else {
-          rawDataForFallback = {
-            error: "No data available",
-            original: reportDataString || "undefined",
-          };
-        }
-      } catch (fallbackError) {
-        console.error("Even fallback failed:", fallbackError);
-        rawDataForFallback = {
-          error: "Data parsing failed completely",
-          original: reportDataString || "undefined",
-          errorMessage: e.message,
-        };
-      }
-
-      // Ensure raw data is always available for copy
-      $("#dataModal").data("raw-data", rawDataForFallback);
-
-      $("#dataModalLabel").html(`
-        <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report Details - ${escapeHtml(
-          reason,
-        )}
-      `);
-
-      // Show error message with raw data access
-      const rawDataDisplay = createRawDataFallback(rawDataForFallback);
+    if (!reportId) {
+      const fallbackData = { error: "Missing report identifier" };
+      $("#dataModal").data("raw-data", fallbackData);
       $("#dataContent").html(`
         <div class="alert alert-danger mb-3">
           <span class="tf-icons bx bx-error-circle me-1"></span>
-          Error processing report data. Raw data is available below for copying:
+          Unable to load report details: missing report identifier.
         </div>
-        ${rawDataDisplay}
+        ${createRawDataFallback(fallbackData)}
       `);
+      return;
     }
+
+    const requestPayload = {
+      csrf_token: $("#csrf_token").val(),
+      report_id: reportId,
+    };
+    if (hostname) {
+      requestPayload.hostname = hostname;
+    }
+
+    $.ajax({
+      url: `${window.location.pathname}/data`,
+      type: "POST",
+      data: requestPayload,
+      success: function (response) {
+        if (!response || response.status !== "success") {
+          const fallbackData = {
+            error:
+              (response && response.message) ||
+              "Failed to load report details from server",
+            report_id: reportId,
+          };
+          $("#dataModal").data("raw-data", fallbackData);
+          $("#dataContent").html(`
+            <div class="alert alert-danger mb-3">
+              <span class="tf-icons bx bx-error-circle me-1"></span>
+              ${escapeHtml(fallbackData.error)}
+            </div>
+            ${createRawDataFallback(fallbackData)}
+          `);
+          return;
+        }
+
+        let reportData = response.data;
+        if (typeof reportData === "string") {
+          try {
+            reportData = JSON.parse(reportData);
+          } catch (e) {
+            reportData = { raw: reportData };
+          }
+        } else if (!reportData || typeof reportData !== "object") {
+          reportData = { raw: String(reportData || "") };
+        }
+
+        $("#dataModal").data("raw-data", reportData);
+
+        let modalTitleHtml = baseTitle;
+        const isModSec =
+          reportData &&
+          (reportData.anomaly_score !== undefined ||
+            reportData.ids ||
+            reportData.msgs);
+        const anomalyScore = reportData ? reportData.anomaly_score : null;
+        if (
+          isModSec &&
+          anomalyScore !== undefined &&
+          anomalyScore !== null &&
+          anomalyScore !== ""
+        ) {
+          modalTitleHtml += `<span class="badge bg-danger ms-2 align-middle">Anomaly Score: <span class="fw-bold">${escapeHtml(
+            anomalyScore,
+          )}</span></span>`;
+        }
+        $("#dataModalLabel").html(modalTitleHtml);
+
+        try {
+          const formattedContent = formatSecurityReportData(
+            reportData,
+            reason,
+            currentServerName,
+          );
+          $("#dataContent").html(formattedContent);
+        } catch (formatError) {
+          console.error("Error formatting report data:", formatError);
+          $("#dataContent").html(`
+            <div class="alert alert-warning mb-3">
+              <span class="tf-icons bx bx-error-circle me-1"></span>
+              Unable to format data properly. Showing raw data below:
+            </div>
+            ${createRawDataFallback(reportData)}
+          `);
+        }
+      },
+      error: function (xhr) {
+        let errorMessage = "Failed to load report details.";
+        if (xhr && xhr.responseJSON && xhr.responseJSON.message) {
+          errorMessage = xhr.responseJSON.message;
+        }
+        const fallbackData = {
+          error: errorMessage,
+          report_id: reportId,
+        };
+        $("#dataModal").data("raw-data", fallbackData);
+        $("#dataContent").html(`
+          <div class="alert alert-danger mb-3">
+            <span class="tf-icons bx bx-error-circle me-1"></span>
+            ${escapeHtml(errorMessage)}
+          </div>
+          ${createRawDataFallback(fallbackData)}
+        `);
+      },
+    });
   });
 
   const htmlDecoder = document.createElement("textarea");
@@ -1686,6 +1806,11 @@ $(document).ready(function () {
       "",
       value === "10" ? location.pathname : `#${value}`,
     );
+  });
+
+  $(window).on("beforeunload pagehide", function () {
+    autoRefresh = false;
+    stopAutoRefreshInterval();
   });
 
   // Utility function to manage header tooltips

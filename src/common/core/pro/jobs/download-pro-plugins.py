@@ -13,7 +13,6 @@ from traceback import format_exc
 from uuid import uuid4
 from json import JSONDecodeError, load as json_load, loads
 from shutil import copytree, rmtree
-from tarfile import open as tar_open
 from zipfile import ZipFile
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
@@ -23,7 +22,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from requests import get
 from requests.exceptions import ConnectionError
 
-from common_utils import bytes_hash, get_os_info, get_integration, get_version, add_dir_to_tar_safely  # type: ignore
+from common_utils import bytes_hash, get_os_info, get_integration, get_version, create_plugin_tar_gz  # type: ignore
 from Database import Database  # type: ignore
 from logger import getLogger  # type: ignore
 
@@ -40,6 +39,63 @@ LOGGER = getLogger("PRO.DOWNLOAD-PLUGINS")
 status = 0
 existing_pro_plugin_ids = set()
 cleaned_up_plugins = False
+
+
+def _set_plugin_permissions(plugin_path: Path) -> None:
+    # Add u+x permissions to executable files
+    desired_perms = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP  # 0o750
+    for subdir, pattern in (
+        ("jobs", "*"),
+        ("bwcli", "*"),
+        ("ui", "*.py"),
+    ):
+        for executable_file in plugin_path.joinpath(subdir).rglob(pattern):
+            if executable_file.stat().st_mode & 0o777 != desired_perms:
+                executable_file.chmod(desired_perms)
+
+
+def _plugin_checksum_matches_database(plugin_path: Path, checksum: str) -> bool:
+    try:
+        plugin_content = create_plugin_tar_gz(plugin_path, arc_root=plugin_path.name)
+        return bytes_hash(plugin_content, algorithm="sha256") == checksum
+    except BaseException as e:
+        LOGGER.debug(format_exc())
+        LOGGER.warning(f"Could not verify Pro plugin {plugin_path.name} integrity before skipping reinstall: {e}")
+        return False
+
+
+def _cleanup_stale_plugin_dirs() -> None:
+    for pattern in (".*.tmp-*", ".*.bak-*"):
+        for stale_dir in PRO_PLUGINS_DIR.glob(pattern):
+            if stale_dir.is_dir():
+                LOGGER.warning(f"Found stale Pro plugin directory {stale_dir}, cleaning it up ...")
+                rmtree(stale_dir, ignore_errors=True)
+
+
+def _install_plugin_atomically(plugin_path: Path, new_plugin_path: Path) -> None:
+    tmp_plugin_path = new_plugin_path.parent.joinpath(f".{new_plugin_path.name}.tmp-{uuid4()}")
+    backup_plugin_path = new_plugin_path.parent.joinpath(f".{new_plugin_path.name}.bak-{uuid4()}")
+    replaced_existing = False
+
+    try:
+        copytree(plugin_path, tmp_plugin_path)
+        _set_plugin_permissions(tmp_plugin_path)
+
+        if new_plugin_path.is_dir():
+            new_plugin_path.rename(backup_plugin_path)
+            replaced_existing = True
+
+        tmp_plugin_path.rename(new_plugin_path)
+    except BaseException:
+        rmtree(tmp_plugin_path, ignore_errors=True)
+
+        if replaced_existing and backup_plugin_path.is_dir() and not new_plugin_path.exists():
+            with suppress(OSError):
+                backup_plugin_path.rename(new_plugin_path)
+        raise
+    finally:
+        if backup_plugin_path.is_dir() and new_plugin_path.exists():
+            rmtree(backup_plugin_path, ignore_errors=True)
 
 
 def clean_pro_plugins(db) -> None:
@@ -86,42 +142,46 @@ def install_plugin(plugin_path: Path, db, preview: bool = True) -> bool:
     # Don't go further if plugin is already installed
     if new_plugin_path.is_dir():
         old_version = None
+        old_checksum = ""
+        old_method = ""
 
         for plugin in db.get_plugins(_type="pro"):
             if plugin["id"] == metadata["id"]:
                 old_version = plugin["version"]
+                old_checksum = plugin.get("checksum", "")
+                old_method = plugin.get("method", "")
                 break
 
         if not cleaned_up_plugins and old_version == metadata["version"]:
-            LOGGER.warning(
-                f"Skipping installation of {'preview version of ' if preview else ''}Pro plugin {metadata['id']} (version {metadata['version']} already installed)"
-            )
-            return False
+            if old_method != "scheduler":
+                LOGGER.warning(
+                    f"Skipping installation of {'preview version of ' if preview else ''}Pro plugin {metadata['id']} "
+                    f"(version {metadata['version']} already installed by method {old_method or 'unknown'})"
+                )
+                return False
+
+            if old_checksum and _plugin_checksum_matches_database(new_plugin_path, old_checksum):
+                LOGGER.warning(
+                    f"Skipping installation of {'preview version of ' if preview else ''}Pro plugin {metadata['id']} "
+                    f"(version {metadata['version']} already installed)"
+                )
+                return False
+
+            LOGGER.warning(f"Detected an integrity mismatch for {'preview version of ' if preview else ''}Pro plugin {metadata['id']}, reinstalling it...")
 
         if old_version != metadata["version"]:
             LOGGER.warning(
                 f"{'Preview version of ' if preview else ''}Pro plugin {metadata['id']} is already installed but version {metadata['version']} is different from database ({old_version}), updating it..."
             )
-        rmtree(new_plugin_path, ignore_errors=True)
 
-    # Copy the plugin
-    copytree(plugin_path, new_plugin_path)
-    # Add u+x permissions to executable files
-    desired_perms = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP  # 0o750
-    for subdir, pattern in (
-        ("jobs", "*"),
-        ("bwcli", "*"),
-        ("ui", "*.py"),
-    ):
-        for executable_file in new_plugin_path.joinpath(subdir).rglob(pattern):
-            if executable_file.stat().st_mode & 0o777 != desired_perms:
-                executable_file.chmod(desired_perms)
+    _install_plugin_atomically(plugin_path, new_plugin_path)
     LOGGER.info(f"✅ {'Preview version of ' if preview else ''}Pro plugin {metadata['id']} (version {metadata['version']}) installed successfully!")
     return True
 
 
 try:
     db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
+    _cleanup_stale_plugin_dirs()
     db_metadata = db.get_metadata()
     current_date = datetime.now().astimezone()
     pro_license_key = getenv("PRO_LICENSE_KEY", "").strip()
@@ -228,15 +288,24 @@ try:
             LOGGER.info("Skipping the check for BunkerWeb Pro license (already checked today)")
             sys_exit(0)
 
-        default_metadata["last_pro_check"] = current_date
         metadata = default_metadata | metadata
-        db.set_metadata(metadata)
+        err = db.set_metadata(metadata)
+        if err:
+            LOGGER.error(f"Failed to update Pro metadata before plugins download: {err}")
+            status = 2
+            sys_exit(status)
 
         if metadata["is_pro"] != db_metadata["is_pro"]:
             clean_pro_plugins(db)
     else:
         # In force mode, keep current metadata and status
-        metadata = {"is_pro": db_metadata["is_pro"], "pro_overlapped": db_metadata.get("pro_overlapped", False)}
+        metadata = {
+            "is_pro": db_metadata["is_pro"],
+            "pro_overlapped": db_metadata.get("pro_overlapped", False),
+            "pro_status": db_metadata.get("pro_status", "invalid"),
+            "pro_services": db_metadata.get("pro_services", 0),
+            "non_draft_services": db_metadata.get("non_draft_services", int(data["service_number"])),
+        }
         # Ensure Authorization header is present if we have a key
         if pro_license_key:
             headers["Authorization"] = f"Bearer {pro_license_key}"
@@ -369,6 +438,11 @@ try:
 
     if not plugin_nbr:
         LOGGER.info("All Pro plugins are up to date")
+        err = db.set_metadata({"last_pro_check": current_date})
+        if err:
+            LOGGER.error(f"Failed to update last_pro_check after successful Pro plugins check: {err}")
+            status = 2
+            sys_exit(status)
         sys_exit(0)
 
     pro_plugins = []
@@ -379,24 +453,21 @@ try:
             rmtree(plugin_path, ignore_errors=True)
             continue
 
-        with BytesIO() as plugin_content:
-            with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=3) as tar:
-                add_dir_to_tar_safely(tar, plugin_path, arc_root=plugin_path.name)
-            plugin_content.seek(0, 0)
+        plugin_content = create_plugin_tar_gz(plugin_path, arc_root=plugin_path.name)
 
-            with plugin_path.joinpath("plugin.json").open("r", encoding="utf-8") as f:
-                plugin_data = json_load(f)
+        with plugin_path.joinpath("plugin.json").open("r", encoding="utf-8") as f:
+            plugin_data = json_load(f)
 
-            checksum = bytes_hash(plugin_content, algorithm="sha256")
-            plugin_data.update(
-                {
-                    "type": "pro",
-                    "page": plugin_path.joinpath("ui").is_dir(),
-                    "method": "scheduler",
-                    "data": plugin_content.getvalue(),
-                    "checksum": checksum,
-                }
-            )
+        checksum = bytes_hash(plugin_content, algorithm="sha256")
+        plugin_data.update(
+            {
+                "type": "pro",
+                "page": plugin_path.joinpath("ui").is_dir(),
+                "method": "scheduler",
+                "data": plugin_content.getvalue(),
+                "checksum": checksum,
+            }
+        )
 
         pro_plugins.append(plugin_data)
         pro_plugins_ids.append(plugin_data["id"])
@@ -405,7 +476,7 @@ try:
         if plugin["method"] != "scheduler" and plugin["id"] not in pro_plugins_ids:
             pro_plugins.append(plugin)
 
-    err = db.update_external_plugins(pro_plugins, _type="pro")
+    err = db.update_external_plugins(pro_plugins, _type="pro", per_plugin_commit=False)
 
     if err:
         LOGGER.error(f"Couldn't update Pro plugins to database: {err}")
@@ -422,6 +493,12 @@ try:
                     LOGGER.debug(f"Removing Pro plugin directory {plugin_dir} after database update failure.")
                     rmtree(plugin_dir, ignore_errors=True)
         sys_exit(2)
+
+    err = db.set_metadata({"last_pro_check": current_date})
+    if err:
+        LOGGER.error(f"Failed to update last_pro_check after successful Pro plugins update: {err}")
+        status = 2
+        sys_exit(status)
 
     status = 1
     LOGGER.info("🚀 Pro plugins downloaded and installed successfully!")

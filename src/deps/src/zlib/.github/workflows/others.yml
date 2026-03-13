@@ -1,0 +1,153 @@
+name: anyVM-OSes
+
+on: [push, pull_request]
+
+jobs:
+
+  dragonflybsd:
+    runs-on: ubuntu-latest
+    name: DragonflyBSD
+    steps:
+    - uses: actions/checkout@v6
+    - name: DragonflyBSD
+      uses: vmactions/dragonflybsd-vm@v1
+      with:
+        copyback: false
+        prepare: |
+          pkg install -y cmake gcc14 bzip2
+
+        run: |
+          cmake . -B build -DZLIB_BUILD_MINIZIP=ON -DMINIZIP_ENABLE_BZIP2=ON
+          cmake --build build/
+          ctest --test-dir build --output-on-failure
+
+  freebsd:
+    runs-on: ubuntu-latest
+    name: FreeBSD - ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: aarch64
+          - name: x86_64
+    steps:
+    - uses: actions/checkout@v6
+    - name: FreeBSD - ${{ matrix.name }}
+      uses: vmactions/freebsd-vm@v1
+      with:
+        arch: ${{ matrix.name }}
+        copyback: false
+        release: "15.0"
+        prepare: |
+          pkg install -y cmake gcc14 bzip2
+
+        run: |
+          cmake . -B build -DZLIB_BUILD_MINIZIP=ON -DMINIZIP_ENABLE_BZIP2=ON
+          cmake --build build/
+          ctest --test-dir build --output-on-failure -E .*summary
+
+  netbsd:
+    runs-on: ubuntu-latest
+    name: NetBSD - ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: aarch64
+          - name: x86_64
+    steps:
+    - uses: actions/checkout@v6
+    - name: NetBSD - ${{ matrix.name }}
+      uses: vmactions/netbsd-vm@v1
+      with:
+        copyback: false
+        prepare: |
+          export PATH="/usr/pkg/sbin:/usr/pkg/bin:$PATH"
+          export PKG_PATH="https://cdn.NetBSD.org/pub/pkgsrc/packages"
+          export PKG_PATH="$PKG_PATH/$(uname -s)/$(uname -m)/$(uname -r|cut -f '1 2' -d.)/All"
+          /usr/sbin/pkg_add cmake
+          /usr/sbin/pkg_add bzip2
+
+        run: |
+          cmake . -B build -DZLIB_BUILD_MINIZIP=ON -DMINIZIP_ENABLE_BZIP2=ON
+          cmake --build build/
+          ctest --test-dir build --output-on-failure
+
+  omni-os:
+    runs-on: ubuntu-latest
+    name: OmniOS
+    steps:
+    - uses: actions/checkout@v6
+    - name: OmniOS
+      uses: vmactions/omnios-vm@v1
+      with:
+        copyback: false
+        prepare: |
+          pkg install cmake gcc14 make bzip2
+
+        run: |
+          cmake . -B build -DZLIB_BUILD_MINIZIP=ON -DMINIZIP_ENABLE_BZIP2=ON
+          cmake --build build/
+          ctest --test-dir build --output-on-failure
+
+  openbsd:
+    runs-on: ubuntu-latest
+    name: OpenBSD - ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: aarch64
+          - name: x86_64
+          - name: riscv64
+    steps:
+    - uses: actions/checkout@v6
+    - name: OpenBSD - ${{ matrix.name }}
+      uses: vmactions/openbsd-vm@v1
+      with:
+        arch: ${{ matrix.name }}
+        copyback: false
+        prepare: |
+          pkg_add cmake
+          bzip2
+
+        run: |
+          cmake . -B build -DZLIB_BUILD_MINIZIP=ON -DMINIZIP_ENABLE_BZIP2=ON
+          cmake --build build/
+          ctest --test-dir build
+
+#  openindiana:
+#    runs-on: ubuntu-latest
+#    name: OpenIndiana
+#    steps:
+#    - uses: actions/checkout@v6
+#    - name: OpenIndiana
+#      uses: vmactions/openindiana-vm@v0
+#      with:
+#        copyback: false
+#        prepare: |
+#          pkg install cmake gcc-14 make bzip2
+
+#        run: |
+#          cmake . -B build -DZLIB_BUILD_MINIZIP=ON -DMINIZIP_ENABLE_BZIP2=ON
+#          cmake --build build/
+#          ctest --test-dir build --output-on-failure
+
+  solaris:
+    runs-on: ubuntu-latest
+    name: Solaris
+    steps:
+    - uses: actions/checkout@v6
+    - name: Solaris
+      uses: vmactions/solaris-vm@v1
+      with:
+        copyback: false
+        release: "11.4-gcc"
+        prepare: |
+          pkgutil -U
+          pkgutil -y -i cmake bzip2
+
+        run: |
+          cmake . -B build -DZLIB_BUILD_MINIZIP=ON -DMINIZIP_ENABLE_BZIP2=ON
+          cmake --build build/
+          ctest --test-dir build --output-on-failure

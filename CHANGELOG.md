@@ -1,6 +1,100 @@
 # Changelog
 
-## v1.6.8 - 2026/02/??
+## v1.6.9 - 2026/03/??
+
+- [SECURITY] Implement `SafeFileSystemCache` for Web UI session storage with token regeneration on privilege changes, preventing session fixation attacks.
+- [SECURITY] Sanitize uploaded filenames in the Web UI to strip path separators, null bytes, and control characters, preventing path traversal attacks.
+- [SECURITY] Add tar extraction path filtering in `Let's Encrypt` certificate handling to only allow expected directories, preventing path traversal. Add 300s timeout to certificate account registration. Use explicit whitelist for API environment variables.
+- [SECURITY] Validate IP addresses and service names across all ban management endpoints (API, Lua, UI, CLI) to prevent invalid data injection. Fix Redis key parsing for service names containing underscores.
+- [BUGFIX] Close local database connections before forking worker processes to prevent file descriptor leaks and connection pool corruption.
+- [BUGFIX] Fix race condition in instance update logic by using direct SQL `UPDATE` statements instead of ORM session operations.
+- [BUGFIX] Ensure thread safety when managing the session factory by moving instance update operations outside the synchronization lock.
+- [BUGFIX] Handle empty or unreadable certificates gracefully in Let's Encrypt `retrieve_certificates` and `retrieve_certificates_info` functions to prevent crashes during certificate enumeration.
+- [BUGFIX] Enhance error handling for missing server name in SSL certificate functions to avoid crashes when the server name is not yet configured.
+- [BUGFIX] Improve backup cleanup logic when replacing destination files to correctly remove leftover backups after a successful replacement.
+- [BUGFIX] Mark the Flask session as modified when adding flash messages to ensure session data is correctly persisted across redirects.
+- [BUGFIX] Fix Domeneshop DNS provider in the `Let's Encrypt` plugin to use the correct credential keys and ensure proper certificate generation.
+- [BUGFIX] Handle file-not-found and OS errors gracefully when archiving plugin UI pages in the database, and skip storing content when tar archiving fails to prevent corrupt data.
+- [BUGFIX] Return false instead of a potentially incorrect result when version comparison encounters invalid version strings, preventing spurious update notifications.
+- [BUGFIX] Validate gRPC host setting to only accept empty values or properly prefixed `grpc://` / `grpcs://` URIs.
+- [BUGFIX] Properly close the database connection when the scheduler stops, and fix configuration generation flag to only reset after a successful reload.
+- [BUGFIX] Add backup and rollback mechanism when deploying new configurations to BunkerWeb instances, preventing data loss if the file copy operation fails.
+- [BUGFIX] Generate and deploy initial configuration on first start before running plugin jobs, ensuring API endpoints are available when jobs execute.
+- [BUGFIX] Skip Content-Security-Policy header override in the antibot plugin when nonces are not available (e.g., HEAD requests), preventing malformed CSP headers.
+- [UI] Add confetti animation and visual unlock effect when activating a PRO License Key in the Web UI.
+- [UI] Fix service cloning to correctly strip the source service prefix from configuration keys, preventing settings from being ignored during import.
+- [UI] Rate-limit worker restarts to prevent excessive restarts when multiple plugin reload triggers fire in quick succession.
+- [UI] Fix crashes when CSRF validation or request teardown occurs outside a valid user context, improving stability during edge-case scenarios.
+- [API] Add lifespan handler to properly close database connections on shutdown, preventing connection leaks.
+- [DOCS] Update documentation and default configurations to remove the deprecated nightly CRS version and ensure full compatibility with CRS v4.
+- [DOCS] Update Domeneshop DNS provider credential key names in documentation to match the corrected `client_token`/`client_secret` keys.
+- [DOCS] Add documentation for the Cache PRO plugin covering response caching configuration and settings.
+- [DEPS] Update coreruleset-v4 version to v4.24.1
+
+## v1.6.9~rc4 - 2026/03/10
+
+- [BUGFIX] Ensure script_nonce is available for security headers to prevent XSS attacks
+
+## v1.6.9~rc3 - 2026/03/06
+
+- [BUGFIX] Fix issues with the new `multiselect` logic where a custom separator can be used, but the default one (space) was still used if the separator was empty, which caused issues with settings that had an empty string as a value.
+- [BUGFIX] Fix issue with the failover not sending the failover configuration if the reload failed, which caused the failover configuration to not be applied until the next successful reload.
+- [FEATURE] Add field value redaction in Let's Encrypt plugin and update ZeroSSL API key handling to avoid exposing sensitive information in logs and process arguments. (Except in TRACE level logs for debugging purposes)
+- [UI] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.
+- [UI] Tweak plugins headers style to avoid the text moving the buttons out of the page when the header is too long.
+- [UI] Add `MAX_CONTENT_LENGTH` setting to configure the maximum upload size (defaults to 50 MB).
+- [UI/API] Add `MAX_REQUESTS` setting to configure Gunicorn max requests before worker restart (defaults to 1000), with `UI_MAX_REQUESTS` / `API_MAX_REQUESTS` as optional overrides.
+- [API] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.
+- [MISC] Enhance version comparison logic in update check
+- [MISC] Enhance database connection management with configurable pool reset and session handling
+- [MISC] Enhance database configuration options with `DATABASE_POOL_SIZE`, `DATABASE_POOL_MAX_OVERFLOW`, `DATABASE_POOL_TIMEOUT`, `DATABASE_POOL_RECYCLE`, `DATABASE_POOL_PRE_PING`, `DATABASE_POOL_RESET_ON_RETURN`, `DATABASE_RETRY_TIMEOUT`, `DATABASE_REQUEST_RETRY_ATTEMPTS` and `DATABASE_REQUEST_RETRY_DELAY` settings for improved performance, reliability and resilience of database interactions.
+- [DEPS] Updated libmaxminddb version to v1.13.3
+- [DEPS] Updated luajit2 version to v2.1-20260227
+- [DEPS] Update coreruleset-v4 version to v4.24.0
+
+## v1.6.9~rc2 - 2026/02/26
+
+- [BUGFIX] Update reCAPTCHA handling to use ANTIBOT_RECAPTCHA_CLASSIC variable instead of session data to determine whether to use the classic reCAPTCHA response format or the new one, ensuring consistent behavior regardless of session state.
+- [BUGFIX] Rename command argument to plugin_command for clarity and to avoid conflicts with other command arguments with bwcli.
+- [FEATURE] Add new `file` setting type to allow users to upload files directly from the web UI and use their content as values for settings.
+- [FEATURE] Add `Gandi` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add `Hetzner` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add certificate authority selection in the `Let's Encrypt` plugin to allow users to choose between `Let's Encrypt` and `ZeroSSL` as the certificate authority for their certificates (Also added ZeroSSL specific settings).
+- [FEATURE] Add the possibility to whitelist/blacklist group of countries in the `Country` plugin.
+- [UI] Add override non-global services functionality in global settings
+- [UI] Make data columns in the reports page non orderable to avoid issues
+- [UI] Add control socket configuration for gunicorn
+- [UI] Enhance multiselect dropdown functionality and update the type of multiple settings to use it
+- [ALL-IN-ONE] Update CrowdSec version to 1.7.6
+- [AUTOCONF] Update gateway and ingress status patching to handle multiple IP addresses and Handle NodePort services if a load balancer IP is not available.
+- [API] Add control socket configuration for gunicorn
+- [MISC] Change type of `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings to `file` to allow users to upload their certificate and key files directly from the web UI.
+- [MISC] Update default value for Permissions-Policy header to include an additional feature (`gamepad`).
+- [DEPS] Update ApexCharts.js version to v5.6.0
+- [DEPS] Update i18next version to v25.8.10
+- [DEPS] Updated zlib version to v1.3.2
+- [DEPS] Updated libmaxminddb version to v1.13.1
+- [CONTRIBUTION] Thank you [Kn-ut99](https://github.com/Kn-ut99) for your contribution regarding the fix of a typo in the `Let's Encrypt` plugin's documentation.
+
+## v1.6.9~rc1 - 2026/02/13
+
+- [BUGFIX] Ensure variables are only added if they are defined in the environment file and are valid key-value pairs to prevent issues with malformed lines in the variables file.
+- [BUGFIX] Add API token back for certbot hooks in environment configuration
+- [FEATURE] Add `ClouDNS` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add new `CLIENT_BODY_TIMEOUT`, `CLIENT_HEADER_TIMEOUT`, `KEEPALIVE_TIMEOUT` and `SEND_TIMEOUT` settings to control the corresponding NGINX timeouts, allowing better handling of long-lived connections and preventing unintended timeouts.
+- [FEATURE] Add a new `gRPC` plugin to allow proxying gRPC traffic to upstream gRPC services with support for TLS, SNI, custom headers and retry policies.
+- [FEATURE] Make it possible to leave HTTP/HTTPS/STREAM/TLS ports empty to not listen on them.
+- [AUTOCONF] Add experimental support for GRPCRoute in the Kubernetes integration to allow routing gRPC traffic based on Kubernetes Gateway API resources.
+- [LINUX] Updated NGINX version to v1.28.2 for Fedora 42 and 43 integration
+- [UI] Fix status for PHP plugin to not always be shown as activated
+- [UI] Fix dark theme background for datatables actions
+- [UI] Make it possible to edit settings with the `wizard` method in the web UI
+- [UI] Enhance reports functionality with improved filter handling and data fetching
+- [UI] Enhance home dashboard with new IP blocking metrics and improved tooltips
+- [API] Fix redis sentinel issue when a password is set on the master node
+- [MISC] Remove warning for uninitialized variables in default server configuration (as we control the configuration and we know that some variables may be uninitialized in some cases, especially for 400 errors)
+
+## v1.6.8 - 2026/02/06
 
 - [DOCS] Add forward proxy configuration for outgoing traffic
 - [DEPS] Update coreruleset-v4 version to v4.23.0

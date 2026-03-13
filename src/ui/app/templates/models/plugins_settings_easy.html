@@ -66,9 +66,9 @@
         </span>
     </button>
     {% if current_endpoint != "global-config" and current_endpoint != 'global-settings' %}
-        <div {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
+        <div {% if current_endpoint != 'new' and not is_editable_method(service_method) %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
             <button type="button"
-                    class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}disabled{% endif %}">
+                    class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and not is_editable_method(service_method) %}disabled{% endif %}">
                 <i class="bx bx-sm bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
                 <span class="d-none d-md-inline">&nbsp;
                     {% if is_draft == 'yes' %}
@@ -118,7 +118,7 @@
                 </div>
             </div>
             <div class="card-body">
-                {% if template_method in ['ui', 'api'] or not selected_template or template == selected_template %}
+                {% if is_editable_method(template_method) or not selected_template or template == selected_template %}
                     {% if template_data["steps"] %}
                         <div class="row">
                             <div class="col-12 col-lg-3 mb-3 mb-lg-0 ps-0 pe-1">
@@ -193,7 +193,7 @@
                                                         {% set setting_value = setting_config.get("value", setting_default) %}
                                                         {% set setting_method = setting_config.get("method", "default") %}
                                                         {% set setting_template = setting_config.get("template", "") %}
-                                                        {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or current_endpoint == "global-settings" or not setting_config.get("global")) %}
+                                                        {% set disabled = not is_editable_method(setting_method, allow_default=True) and (current_endpoint == "global-config" or current_endpoint == "global-settings" or not setting_config.get("global")) %}
                                                         {% set required = setting == "SERVER_NAME" %}
                                                         {% if current_endpoint == "new" %}
                                                             {% set disabled = false %}

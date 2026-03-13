@@ -132,7 +132,7 @@ Ob Sie HTTP-Methoden einschränken, Anforderungsgrößen verwalten, das Datei-Ca
 
     | Einstellung          | Standard | Kontext   | Mehrfach | Beschreibung                                                                      |
     | -------------------- | -------- | --------- | -------- | --------------------------------------------------------------------------------- |
-    | `LISTEN_HTTP`        | `yes`    | multisite | nein     | **HTTP-Listen:** Auf (unsichere) HTTP-Anfragen antworten, wenn auf `yes` gesetzt. |
+    | `LISTEN_HTTP`        | `yes`    | multisite | nein     | **HTTP-Listen:** Auf (unsichere) HTTP-Anfragen antworten, wenn auf `yes` gesetzt. Kann auch durch Leerlassen von `HTTP_PORT` deaktiviert werden. |
     | `HTTP2`              | `yes`    | multisite | nein     | **HTTP2:** Unterstützt das HTTP2-Protokoll, wenn HTTPS aktiviert ist.             |
     | `HTTP3`              | `yes`    | multisite | nein     | **HTTP3:** Unterstützt das HTTP3-Protokoll, wenn HTTPS aktiviert ist.             |
     | `HTTP3_ALT_SVC_PORT` | `443`    | multisite | nein     | **HTTP3 Alt-Svc Port:** Port, der im Alt-Svc-Header für HTTP3 verwendet wird.     |

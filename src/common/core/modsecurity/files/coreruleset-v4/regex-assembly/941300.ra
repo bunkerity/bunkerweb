@@ -1,0 +1,21 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Rule 941300: IE XSS Filters - detects XSS via OBJECT tag attributes.
+##! Matches <OBJECT> tags with dangerous attributes: type, codetype, classid, code, data.
+
+##!+ i
+
+##!> assemble
+  <OBJECT[\s/+].*?
+  ##!=>
+  ##!> assemble
+    type
+    codetype
+    classid
+    code
+    data
+  ##!<
+  ##!=>
+  [\s/+]*=
+##!<

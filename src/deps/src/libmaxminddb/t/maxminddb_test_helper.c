@@ -1,7 +1,7 @@
 #include "maxminddb_test_helper.h"
 
 #if HAVE_CONFIG_H
-#include <config.h>
+    #include <config.h>
 #endif
 
 #include <assert.h>
@@ -11,10 +11,10 @@
 #include "maxminddb.h"
 
 #ifdef _WIN32
-#include <io.h>
+    #include <io.h>
 #else
-#include <libgen.h>
-#include <unistd.h>
+    #include <libgen.h>
+    #include <unistd.h>
 #endif
 
 void for_all_record_sizes(const char *filename_fmt,
@@ -27,13 +27,13 @@ void for_all_record_sizes(const char *filename_fmt,
 
         char filename[500];
 #if defined(__clang__)
-// This warning seems ok to ignore here in the tests.
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
+    // This warning seems ok to ignore here in the tests.
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wformat-nonliteral"
 #endif
         snprintf(filename, 500, filename_fmt, size);
 #if defined(__clang__)
-#pragma clang diagnostic pop
+    #pragma clang diagnostic pop
 #endif
 
         char description[14];
@@ -66,6 +66,29 @@ char *test_database_path(const char *filename) {
     assert(NULL != path);
 
     snprintf(path, 500, "%s/%s", test_db_dir, filename);
+
+    return path;
+}
+
+char *bad_database_path(const char *filename) {
+    char *bad_db_dir;
+#ifdef _WIN32
+    bad_db_dir = "../t/maxmind-db/bad-data/libmaxminddb";
+#else
+    char cwd[500];
+    char *UNUSED(tmp) = getcwd(cwd, 500);
+
+    if (strcmp(basename(cwd), "t") == 0) {
+        bad_db_dir = "./maxmind-db/bad-data/libmaxminddb";
+    } else {
+        bad_db_dir = "./t/maxmind-db/bad-data/libmaxminddb";
+    }
+#endif
+
+    char *path = malloc(500);
+    assert(NULL != path);
+
+    snprintf(path, 500, "%s/%s", bad_db_dir, filename);
 
     return path;
 }

@@ -21,7 +21,7 @@ Das ModSecurity-Plugin integriert die leistungsstarke [ModSecurity](https://mods
 Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu verwenden:
 
 1.  **Aktivieren Sie die Funktion:** ModSecurity ist standardmäßig aktiviert. Dies kann mit der Einstellung `USE_MODSECURITY` gesteuert werden.
-2.  **Wählen Sie eine CRS-Version:** Wählen Sie eine Version des OWASP Core Rule Set (v3, v4 oder nightly).
+2.  **Wählen Sie eine CRS-Version:** Wählen Sie eine Version des OWASP Core Rule Set (v3 oder v4).
 3.  **Plugins hinzufügen:** Aktivieren Sie optional CRS-Plugins, um die Regelabdeckung zu verbessern.
 4.  **Überwachen und anpassen:** Verwenden Sie Protokolle und die [Web-Benutzeroberfläche](web-ui.md), um Falsch-Positive zu identifizieren und die Einstellungen anzupassen.
 
@@ -31,7 +31,7 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
 | ------------------------------------- | -------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_MODSECURITY`                     | `yes`          | multisite | nein     | **ModSecurity aktivieren:** Schalten Sie den Schutz der ModSecurity Web Application Firewall ein.                                                                               |
 | `USE_MODSECURITY_CRS`                 | `yes`          | multisite | nein     | **Core Rule Set verwenden:** Aktivieren Sie das OWASP Core Rule Set für ModSecurity.                                                                                            |
-| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | nein     | **CRS-Version:** Die Version des zu verwendenden OWASP Core Rule Set. Optionen: `3`, `4` oder `nightly`.                                                                        |
+| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | nein     | **CRS-Version:** Die Version des zu verwendenden OWASP Core Rule Set. Optionen: `3` oder `4`. Hinweis: `nightly` ist veraltet und verwendet standardmäßig v4.                    |
 | `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | nein     | **Regel-Engine:** Steuern Sie, ob Regeln erzwungen werden. Optionen: `On`, `DetectionOnly` oder `Off`.                                                                          |
 | `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | nein     | **Audit-Engine:** Steuern Sie, wie die Audit-Protokollierung funktioniert. Optionen: `On`, `Off` oder `RelevantOnly`.                                                           |
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`    | multisite | nein     | **Audit-Protokoll-Teile:** Welche Teile von Anfragen/Antworten in Audit-Protokolle aufgenommen werden sollen.                                                                   |
@@ -50,11 +50,10 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
 Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entspricht:
 
 - **`3`**: Stabile [v3.3.8](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8).
-- **`4`**: Stabile [v4.23.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.23.0) (**Standard**).
-- **`nightly`**: [Nightly-Build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) mit den neuesten Regel-Updates.
+- **`4`**: Stabile [v4.24.1](https://github.com/coreruleset/coreruleset/releases/tag/v4.24.1) (**Standard**).
 
-!!! example "Nightly-Build"
-    Der **Nightly-Build** enthält die aktuellsten Regeln und bietet den neuesten Schutz gegen aufkommende Bedrohungen. Da er jedoch täglich aktualisiert wird und experimentelle oder ungetestete Änderungen enthalten kann, wird empfohlen, den Nightly-Build zunächst in einer **Staging-Umgebung** zu verwenden, bevor er in der Produktion eingesetzt wird.
+!!! warning "Nightly-Build veraltet"
+    Die Option `nightly` für `MODSECURITY_CRS_VERSION` ist veraltet, da das OWASP Core Rule Set-Projekt die Nightly-Releases eingestellt hat. Wenn Ihre Konfiguration noch `nightly` verwendet, wird stattdessen CRS v4 verwendet. Bitte aktualisieren Sie Ihre Konfiguration auf `MODSECURITY_CRS_VERSION=4`.
 
 !!! tip "Paranoia-Stufen"
     Das OWASP Core Rule Set verwendet "Paranoia-Stufen" (PL), um die Strenge der Regeln zu steuern:
@@ -208,18 +207,6 @@ Das OWASP Core Rule Set unterstützt auch eine Reihe von **Plugins**, die entwic
     USE_MODSECURITY_CRS: "yes"
     MODSECURITY_CRS_VERSION: "4"
     USE_MODSECURITY_GLOBAL_CRS: "yes"
-    ```
-
-=== "Nightly-Build mit benutzerdefinierten Plugins"
-
-    Konfiguration mit dem Nightly-Build von CRS mit benutzerdefinierten Plugins:
-
-    ```yaml
-    USE_MODSECURITY: "yes"
-    USE_MODSECURITY_CRS: "yes"
-    MODSECURITY_CRS_VERSION: "nightly"
-    USE_MODSECURITY_CRS_PLUGINS: "yes"
-    MODSECURITY_CRS_PLUGINS: "wordpress-rule-exclusions/v1.0.0 https://github.com/coreruleset/dos-protection-plugin-modsecurity/archive/refs/heads/main.zip"
     ```
 
 !!! note "Menschenlesbare Größenwerte"

@@ -2,6 +2,181 @@
   min-height: 600px;
 }
 
+.home-chart-tooltip {
+  min-width: 170px;
+  padding: 0.58rem 0.68rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(64, 83, 105, 0.22);
+  background: rgba(255, 255, 255, 0.98);
+  color: #1f2f3c;
+  box-shadow: 0 14px 28px rgba(18, 38, 51, 0.2);
+  backdrop-filter: blur(6px);
+}
+
+/* We render a fully custom tooltip card, so remove Apex's default outer frame. */
+.apexcharts-tooltip,
+.apexcharts-tooltip.apexcharts-theme-light,
+.apexcharts-tooltip.apexcharts-theme-dark {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.apexcharts-tooltip .apexcharts-tooltip-title {
+  display: none !important;
+}
+
+.apexcharts-tooltip .home-chart-tooltip {
+  margin: 0;
+}
+
+/* Remove leftover Apex inner wrappers so only the custom tooltip card is visible. */
+#requests-stats .apexcharts-tooltip-series-group,
+#requests-ips .apexcharts-tooltip-series-group,
+#requests-blocking .apexcharts-tooltip-series-group {
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+#requests-stats .apexcharts-tooltip.apexcharts-active,
+#requests-ips .apexcharts-tooltip.apexcharts-active,
+#requests-blocking .apexcharts-tooltip.apexcharts-active {
+  background: transparent !important;
+}
+
+/* Force clean donut slices without SVG filter shadows on hover/active. */
+#requests-stats .apexcharts-pie-area,
+#requests-ips .apexcharts-pie-area {
+  filter: none !important;
+}
+
+#requests-stats.apexcharts-tooltip-active,
+#requests-ips.apexcharts-tooltip-active {
+  background: transparent !important;
+}
+
+.home-chart-tooltip__row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.3rem;
+  font-size: 0.82rem;
+}
+
+.home-chart-tooltip__dot {
+  width: 0.58rem;
+  height: 0.58rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.home-chart-tooltip__metrics {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.7rem;
+  font-size: 0.76rem;
+  color: #526777;
+}
+
+.dark-style .home-chart-tooltip {
+  border-color: rgba(122, 168, 199, 0.28);
+  background: rgba(13, 26, 36, 0.97);
+  color: #deedf7;
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.45);
+}
+
+.dark-style .home-chart-tooltip__metrics {
+  color: #9fb6c6;
+}
+
+#requests-stats,
+#requests-ips {
+  position: relative;
+  min-height: 260px;
+}
+
+#requests-blocking {
+  border-radius: 14px;
+  background: linear-gradient(
+    180deg,
+    rgba(47, 128, 186, 0.08) 0%,
+    rgba(47, 128, 186, 0.01) 100%
+  );
+}
+
+.dark-style #requests-blocking {
+  background: linear-gradient(
+    180deg,
+    rgba(115, 179, 226, 0.1) 0%,
+    rgba(115, 179, 226, 0.02) 100%
+  );
+}
+
+.home-period-floating {
+  position: sticky;
+  top: 5.25rem;
+  z-index: 12;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+  pointer-events: none;
+}
+
+.home-period-floating__card {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.8rem;
+  border-radius: 0.8rem;
+  background: rgba(224, 246, 255, 0.94);
+  border: 1px solid rgba(0, 145, 214, 0.25);
+  color: #0b4f73;
+  backdrop-filter: blur(4px);
+}
+
+.home-period-floating__icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.home-period-floating__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.home-period-floating__label {
+  font-size: 0.69rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.86;
+}
+
+.home-period-floating__text strong {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.dark-style .home-period-floating__card {
+  background: rgba(7, 39, 58, 0.92);
+  border-color: rgba(46, 173, 236, 0.3);
+  color: #97dcff;
+}
+
+@media (max-width: 767px) {
+  .home-period-floating {
+    top: 4.9rem;
+    justify-content: stretch;
+  }
+
+  .home-period-floating__card {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 .info {
   max-width: 220px;
 }
@@ -13,18 +188,34 @@
   backdrop-filter: blur(6px);
 }
 
+.info .map-hover-card {
+  border: 1px solid rgba(27, 94, 142, 0.2);
+  box-shadow: 0 10px 24px rgba(17, 54, 85, 0.18);
+}
+
+.info .map-hover-empty {
+  border: 1px solid rgba(27, 94, 142, 0.2);
+  margin: 0;
+}
+
 .dark-style .info .card,
 .dark-style .info .alert {
   background: rgba(15, 30, 42, 0.9);
   color: #e5eef5;
 }
 
+.dark-style .info .map-hover-card,
+.dark-style .info .map-hover-empty {
+  border-color: rgba(128, 187, 226, 0.26);
+}
+
 .legend.map-legend {
   color: #21313c;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.94);
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: 14px;
   min-width: 220px;
+  border: 1px solid rgba(16, 79, 116, 0.18);
   box-shadow: 0 8px 18px rgba(11, 53, 74, 0.18);
   backdrop-filter: blur(6px);
 }
@@ -32,6 +223,7 @@
 .dark-style .legend.map-legend {
   background: rgba(10, 22, 32, 0.9);
   color: #dbe6ef;
+  border-color: rgba(130, 184, 219, 0.22);
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
 }
 

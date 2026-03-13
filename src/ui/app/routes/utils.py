@@ -14,7 +14,6 @@ from app.utils import LOGGER, flash
 
 from common_utils import get_redis_client as get_common_redis_client  # type: ignore
 
-
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
 REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
 PLUGIN_KEYS = ["id", "name", "description", "version", "stream", "settings"]
@@ -22,6 +21,12 @@ PLUGIN_ID_RX = re_compile(r"^[\w_-]{1,64}$")
 CUSTOM_CONF_RX = re_compile(
     r"^CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(?P<name>.+)$"
 )
+FILE_SETTING_NAME_RX = re_compile(r"^(?P<setting>.+)__FILE_NAME(?P<suffix>_\d+)?$")
+
+
+def _sanitize_filename(name: str) -> str:
+    """Strip path separators, null bytes, and control characters from an uploaded filename."""
+    return "".join(ch for ch in name if ch >= " " and ch != "\x7f").replace("/", "").replace("\\", "").strip()
 
 
 def wait_applying():
@@ -201,3 +206,23 @@ def get_redis_client():
         flash("Couldn't connect to redis", "error")
 
     return redis_client
+
+
+def extract_file_setting_names(variables: Dict[str, str]) -> Dict[str, str]:
+    """
+    Extract `<SETTING>__FILE_NAME` metadata fields from a form payload.
+
+    Supported keys:
+    - `SETTING__FILE_NAME`
+    - `SETTING__FILE_NAME_<suffix>` (for multiple settings)
+    """
+    file_setting_names: Dict[str, str] = {}
+    for key in list(variables.keys()):
+        match = FILE_SETTING_NAME_RX.match(key)
+        if not match:
+            continue
+
+        setting_name = match.group("setting") + (match.group("suffix") or "")
+        file_setting_names[setting_name] = _sanitize_filename(variables.pop(key, ""))
+
+    return file_setting_names

@@ -467,6 +467,10 @@
       "hover_info": "将鼠标悬停在国家/地区上",
       "legend": "图例",
       "no_data": "无数据"
+    },
+    "window": {
+      "last_days": "最近 {{days}} 天",
+      "title": "仪表板窗口"
     }
   },
   "datatable": {
@@ -634,6 +638,7 @@
       "admin_username": "管理员用户名",
       "auto_lets_encrypt": "自动 Let's Encrypt",
       "ban_scope": "封禁范围",
+      "certificate_authority": "证书颁发机构",
       "certificate_priority": "证书优先级",
       "challenge_type": "质询类型",
       "config_type": "配置类型",
@@ -686,7 +691,12 @@
       "use_proxy_protocol": "使用 PROXY 协议",
       "use_real_ip": "使用真实 IP",
       "username": "用户名",
-      "wildcard_certificates": "通配符证书"
+      "wildcard_certificates": "通配符证书",
+      "zerossl_api_connect_timeout": "ZeroSSL API 连接超时",
+      "zerossl_api_key": "ZeroSSL API 密钥",
+      "zerossl_api_max_time": "ZeroSSL API 最大时长",
+      "zerossl_api_retry": "ZeroSSL API 重试次数",
+      "zerossl_api_retry_delay": "ZeroSSL API 重试延迟"
     },
     "placeholder": {
       "2fa_code": "输入代码",
@@ -1079,11 +1089,18 @@
       "title": "管理员用户"
     },
     "step2": {
+      "lets_encrypt": {
+        "certificate_authority_selector": "证书颁发机构选择器",
+        "letsencrypt_description": "使用 Let's Encrypt 进行标准 ACME 签发。可使用 staging 环境进行测试和集成检查。",
+        "zerossl_api_key_hint": "若留空，ZeroSSL 将使用已配置的邮箱进行账户注册。",
+        "zerossl_description": "使用 zerossl-bot 配合 ZeroSSL。请提供账户邮箱或 API 密钥，用于账户签发和基于密钥的重新签发跟踪。"
+      },
       "section": {
         "custom_certificate": "自定义证书",
         "lets_encrypt": "Let's Encrypt",
         "real_ip": "真实 IP",
-        "reverse_proxy": "反向代理"
+        "reverse_proxy": "反向代理",
+        "zerossl": "ZeroSSL"
       },
       "subtitle": "配置 Web UI 特定设置。",
       "title": "UI 设置"
@@ -1146,6 +1163,7 @@
     "no_history": "无可用历史记录。",
     "no_item": "无项目",
     "no_notifications": "无通知显示。",
+    "no_search_results": "未找到项目。",
     "no_steps": "无可用步骤",
     "no_steps_description": "此模板没有任何可配置的步骤。",
     "online": "在线",
@@ -1284,6 +1302,10 @@
       "missing_configs_upload_label": "上传缺少的配置 (.conf, .cfg, .txt)",
       "missing_configs_upload_partial": "已上传 {{total}} 个配置中的 {{uploaded}} 个。仍然缺少: {{missing}}",
       "missing_configs_upload_success": "已成功上传 {{count}} 个配置文件",
+      "multiselect_placeholder": "选择选项",
+      "multiselect_summary": "已选择 {{count}} 项",
+      "multivalue_add": "添加值",
+      "multivalue_helper": "每行一个值。{{separatorNote}}",
       "panel_overview": "概览",
       "panel_overview_help": "跟踪关键信息并在各部分之间导航。",
       "placeholder_config_data": "数据",
@@ -1307,6 +1329,7 @@
       "raw_configs_title": "自定义配置导入",
       "raw_configs_upload": "上传配置文件 (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "无法读取所选文件之一。",
+      "raw_editor_aria": "原始模板 JSON 编辑器",
       "raw_editor_drop_hint": "拖放模板 JSON 文件（仅限 .json）以替换当前内容。",
       "raw_editor_help": "将完整的模板定义编辑为 JSON。切换回简单模式会验证并重新加载可视化编辑器。",
       "raw_editor_import_success": "模板 JSON 成功导入。",
@@ -1446,6 +1469,7 @@
       "reset_default": "重置为默认值",
       "reset_global": "重置为全局值",
       "run_job": "运行任务 {{job}}",
+      "show_selected_only": "仅显示所选项",
       "stop_instance": "停止实例 {{hostname}}",
       "unban_ip": "解禁 {{ip}}",
       "value_from_global": "来自全局设置的值"
@@ -1496,6 +1520,7 @@
     "lets_encrypt_custom_profile": "用于 Let's Encrypt 的自定义配置文件（例如 'my_custom_profile'）。",
     "lets_encrypt_disable_public_suffixes": "禁用针对符合公共后缀列表的域名的证书请求（推荐）。",
     "lets_encrypt_profile": "用于 Let's Encrypt 的配置文件（classic、tlsserver、shortlived）。",
+    "lets_encrypt_server": "选择您的证书提供商以显示提供商特定设置。",
     "license_key": "您的 BunkerWeb PRO 许可证密钥。",
     "link": {
       "access_plugin_page": "访问 {{name}} 页面",
@@ -1662,13 +1687,19 @@
     "ui_url_security": "使用非标准、难以猜测的 URL 路径可增强安全性。",
     "use_custom_ssl": "是否使用自定义 SSL 证书而不是 Let's Encrypt。",
     "use_lets_encrypt_staging": "是否使用 Let's Encrypt 的 staging 环境进行测试（生成不受信任的证书）。",
+    "use_lets_encrypt_staging_letsencrypt_only": "仅在使用 Let's Encrypt 服务器时才可使用 Let's Encrypt staging。",
     "use_proxy_protocol": "启用 PROXY 协议通信。",
     "use_real_ip": "使用真实 IP",
     "username_length": "用户名必须在 1 到 256 个字符之间。",
     "value_from_global": "来自全局设置的值",
     "view_full_url": "点击查看完整 URL",
     "wildcard_certificates": "生成通配符证书 (*.domain.com)。需要 DNS 质询。",
-    "wildcard_dns_only": "通配符证书仅支持 DNS 质询类型。"
+    "wildcard_dns_only": "通配符证书仅支持 DNS 质询类型。",
+    "zerossl_api_connect_timeout": "ZeroSSL API 调用的连接超时秒数。",
+    "zerossl_api_key": "由 zerossl-bot 使用的可选 ZeroSSL API 密钥。",
+    "zerossl_api_max_time": "每个 ZeroSSL API 请求的最大总时长（秒）。",
+    "zerossl_api_retry": "ZeroSSL API 请求的重试次数（0 表示禁用重试）。",
+    "zerossl_api_retry_delay": "ZeroSSL API 重试之间的延迟秒数。"
   },
   "totp": {
     "prompt": "请输入您的 TOTP 代码。"
@@ -1682,6 +1713,7 @@
     "ip_service_duplicate": "此 IP 地址已针对所选服务 ({{service}}) 被封禁。",
     "pattern": "请输入有效的 {{field}} 值。",
     "required": "{{field}} 是必填项。",
-    "service_required_for_ban": "对于特定于服务的封禁，必须选择一个服务。"
+    "service_required_for_ban": "对于特定于服务的封禁，必须选择一个服务。",
+    "zerossl_email_or_api_key_required": "ZeroSSL 需要邮箱或 ZeroSSL API 密钥。"
   }
 }

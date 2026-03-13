@@ -42,6 +42,7 @@ try:
     if not bunkernet_id:
         LOGGER.info("No BunkerNet ID found in db cache, Registering instance on BunkerNet API ...")
         ok, status, data = register()
+        LOGGER.debug(f"Register API reply - ok: {ok}, status: {status}, data: {data}")
         if not ok:
             LOGGER.error(f"Error while sending register request to BunkerNet API : {data}")
             sys_exit(2)
