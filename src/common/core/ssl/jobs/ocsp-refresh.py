@@ -453,6 +453,10 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
         else:
             ttl = 86400  # RFC standard fallback
 
+        # Delay after successful fetch to prevent rate limiting
+        LOG.debug("⏸️ OCSP delaying 5 seconds after fetch for %s to prevent rate limiting", cert_name)
+        time.sleep(5)
+
         return ocsp_response_data, ttl
     except HTTPError as e:
         # HTTP error code — OCSP responder returned an error
