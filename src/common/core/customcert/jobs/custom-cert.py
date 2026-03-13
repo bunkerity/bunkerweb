@@ -218,6 +218,24 @@ try:
     for first_server in skipped_servers:
         JOB.del_cache("cert.pem", service_id=first_server)
         JOB.del_cache("key.pem", service_id=first_server)
+
+    # Trigger OCSP stapling refresh when certificates changed
+    if status == 1 and getenv("SSL_USE_OCSP_STAPLING", "yes").lower() == "yes":
+        LOGGER.info("🔄 OCSP triggering refresh after custom certificate change")
+        try:
+            import sys
+
+            ocsp_script = join(sep, "usr", "share", "bunkerweb", "core", "ssl", "jobs", "ocsp-refresh.py")
+            result = run([sys.executable, ocsp_script], stdin=DEVNULL, capture_output=True, text=True, timeout=300)
+            if result.returncode == 0:
+                LOGGER.info("✓ OCSP refresh completed successfully after custom cert change")
+            else:
+                LOGGER.warning(f"⚠️ OCSP refresh returned exit code {result.returncode}")
+            if result.stderr:
+                for line in result.stderr.strip().splitlines():
+                    LOGGER.debug(f"OCSP: {line}")
+        except Exception as e:
+            LOGGER.warning(f"⚠️ OCSP post-upload refresh failed (non-fatal): {e}")
 except SystemExit as e:
     status = e.code
 except BaseException as e:

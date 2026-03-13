@@ -2,7 +2,7 @@
 
 from os import getenv, sep
 from os.path import join
-from subprocess import DEVNULL, PIPE, Popen
+from subprocess import DEVNULL, PIPE, Popen, run
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
@@ -99,6 +99,24 @@ try:
             LOGGER.error(f"Error while saving Let's Encrypt data to db cache : {err}")
         else:
             LOGGER.info("Successfully saved Let's Encrypt data to db cache")
+
+    # Refresh OCSP stapling after successful renewal
+    if process.returncode == 0 and getenv("SSL_USE_OCSP_STAPLING", "yes").lower() == "yes":
+        LOGGER.info("🔄 OCSP triggering refresh after certificate renewal")
+        try:
+            import sys
+
+            ocsp_script = join(sep, "usr", "share", "bunkerweb", "core", "ssl", "jobs", "ocsp-refresh.py")
+            result = run([sys.executable, ocsp_script], stdin=DEVNULL, capture_output=True, text=True, timeout=300)
+            if result.returncode == 0:
+                LOGGER.info("✓ OCSP refresh completed successfully after renewal")
+            else:
+                LOGGER.warning(f"⚠️ OCSP refresh returned exit code {result.returncode}")
+            if result.stderr:
+                for line in result.stderr.strip().splitlines():
+                    LOGGER.debug(f"OCSP: {line}")
+        except Exception as e:
+            LOGGER.warning(f"⚠️ OCSP post-renewal refresh failed (non-fatal): {e}")
 except SystemExit as e:
     status = e.code
 except BaseException as e:
