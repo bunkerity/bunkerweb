@@ -69,6 +69,7 @@ status = 0
 
 # Use scheduler-managed cache directory (automatically synced from database on restart)
 CONFIGS_SSL_BASE = Path(os.sep, "var", "cache", "bunkerweb", "ssl")
+MIN_TTL = 4500  # 75 minutes: aggressivly refresh/cleanup if TTL is below this
 
 
 def _acquire_cert_lock(cert_name: str, timeout: int = 300, stale_threshold: int = 600) -> Optional[int]:
@@ -898,21 +899,27 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
         LOG.info("🌐 OCSP responder for certificate %s: %s", cert_name, ocsp_url)
 
         # === Check if cached OCSP response is still fresh ===
-        # Refresh when remaining TTL is at or below 50% of the original lifetime.
+        # Refresh when remaining TTL is at or below 50% of the original lifetime,
+        # OR if it's below the 75-minute threshold (MIN_TTL).
         cached_ttl, total_lifetime = get_cached_ocsp_ttl(cert_name)
-        if cached_ttl is not None and total_lifetime is not None and total_lifetime > 0:
-            half_lifetime = total_lifetime // 2
-            if cached_ttl > half_lifetime:
+        if cached_ttl is not None:
+            half_lifetime = (total_lifetime // 2) if (total_lifetime and total_lifetime > 0) else 0
+            
+            # Skip fetch ONLY if TTL is above MIN_TTL AND above 50% lifetime
+            if cached_ttl > MIN_TTL and cached_ttl > half_lifetime:
                 LOG.info(
-                    "✓ OCSP cached response for %s still valid for %ds (%.1f days), above 50%% lifetime threshold=%ds (%.1f days), skipping fetch",
+                    "✓ OCSP cached response for %s still valid for %ds (%.1f days), above thresholds (MIN_TTL=%ds, 50%% threshold=%ds), skipping fetch",
                     cert_name,
                     cached_ttl,
                     cached_ttl / 86400.0,
+                    MIN_TTL,
                     half_lifetime,
-                    half_lifetime / 86400.0,
                 )
                 stats["ocsp_cached_responses"] = stats.get("ocsp_cached_responses", 0) + 1
                 return None
+            
+            if cached_ttl <= MIN_TTL:
+                LOG.info("🔄 OCSP response for %s is near expiration (TTL=%ds < %ds), attempting aggressive refresh", cert_name, cached_ttl, MIN_TTL)
 
         ocsp_der: Optional[bytes] = None
         ttl: int = 0
@@ -929,6 +936,22 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
 
         if not ocsp_der:
             LOG.error("❌ OCSP failed to fetch response for %s after retries", cert_name)
+            
+            # AGGRESSIVE CLEANUP: If we had a cached response that is now below 75 mins (MIN_TTL),
+            # and the refresh failed, we MUST remove it now to prevent stapling expired data 
+            # soon (since the next job runs in 60 mins).
+            if cached_ttl is not None and cached_ttl <= MIN_TTL:
+                LOG.warning(
+                    "🚨🚨🚨 OCSP CRITICAL WARNING: Cached response for %s is near expiration (TTL=%ds) "
+                    "and refresh failed. Removing response from cache to prevent stapling expired data. "
+                    "Security status: Stapling will be DISABLED for this certificate until refresh succeeds.",
+                    cert_name, cached_ttl
+                )
+                cleanup_ocsp_cache(db, cert_name)
+            elif cached_ttl is not None and cached_ttl <= 0:
+                LOG.warning("🧹 OCSP cached response for %s is already expired and refresh failed. Cleaning up invalid cache.", cert_name)
+                cleanup_ocsp_cache(db, cert_name)
+
             stats["errors"] = stats.get("errors", 0) + 1
             return None
 
@@ -1012,11 +1035,11 @@ def process_custom_certs(
 
         for service_name, cert_pem in sorted(changed_custom_certs.items()):
             # Check timeout before processing each certificate
-            if timeout_fn and timeout_fn(f"processing custom cert {service_name}"):
+            if callable(timeout_fn) and timeout_fn(f"processing custom cert {service_name}"):
                 break
 
             # Refresh lock to prove we're still alive
-            if refresh_fn:
+            if callable(refresh_fn):
                 refresh_fn(service_name)
             # service_name is e.g. "opdash.net-ecdsa" — strip suffix to get actual service
             svc = _service_name_from_dir(service_name)
@@ -1334,6 +1357,23 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
             ocsp_cert_dir = CONFIGS_SSL_BASE / cert_name
             ocsp_path = ocsp_cert_dir / "ocsp.der"
 
+            # Check if database response is already expired
+            try:
+                ocsp_response = x509_ocsp.load_der_ocsp_response(data)
+                remaining, _ = _ocsp_response_lifetimes(ocsp_response)
+                if remaining is not None and remaining <= 0:
+                    LOG.warning("🧹 OCSP response in database for %s is expired (remaining=%ds). Skipping restoration to disk.", cert_name, remaining)
+                    # Optionally remove from database to prevent future attempts
+                    if db:
+                        try:
+                            db.delete_job_cache(file_name=file_name, job_name="ocsp-refresh")
+                            LOG.debug("🧹 OCSP removed expired database entry %s", file_name)
+                        except Exception:
+                            pass
+                    continue
+            except Exception as e:
+                LOG.warning("⚠️ OCSP could not parse response from database for %s during verification: %s", cert_name, e)
+
             try:
                 if not ocsp_path.is_file():
                     # File missing: restore from database
@@ -1380,9 +1420,9 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
                 "🔍 OCSP verification complete: %d checked | ✓ %d restored (missing) | 🔄 %d corrected (mismatch)",
                 verify_count, restored_count, mismatch_count
             )
-            stats["ocsp_verified"] = verify_count
-            stats["ocsp_restored"] = restored_count
-            stats["ocsp_corrected"] = mismatch_count
+            stats["ocsp_verified"] = stats.get("ocsp_verified", 0) + verify_count
+            stats["ocsp_restored"] = stats.get("ocsp_restored", 0) + restored_count
+            stats["ocsp_corrected"] = stats.get("ocsp_corrected", 0) + mismatch_count
 
     except Exception as e:
         LOG.warning("⚠️ OCSP verification failed: %s", e)
@@ -1426,6 +1466,13 @@ def main() -> int:
         "ocsp_cached_responses": 0,
         "ocsp_fetched_responses": 0,
         "errors": 0,
+        "le_certs_new": 0,
+        "le_certs_changed": 0,
+        "custom_certs_unchanged": 0,
+        "ocsp_verified": 0,
+        "ocsp_restored": 0,
+        "ocsp_corrected": 0,
+        "orphaned_cleaned": 0,
     }
 
     try:
