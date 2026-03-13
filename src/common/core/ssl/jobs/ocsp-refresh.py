@@ -323,6 +323,108 @@ def extract_san_dns(fullchain: Path) -> List[str]:
     return sorted(set(names))
 
 
+def get_cached_ocsp_ttl(cert_name: str) -> Optional[int]:
+    """
+    Check if cached OCSP file exists and return its remaining TTL in seconds.
+    Returns None if file doesn't exist or TTL cannot be determined.
+
+    This allows skipping fetch if the cached response is still valid for >3 days.
+    """
+    ocsp_path = CONFIGS_SSL_BASE / cert_name / "ocsp.der"
+    LOG.info("OCSP TTL check: checking cache for %s at %s", cert_name, ocsp_path)
+
+    if not ocsp_path.is_file():
+        LOG.info("OCSP TTL check: cache miss - file not found for %s", cert_name)
+        return None
+
+    LOG.debug("OCSP cached file found for %s, reading TTL...", cert_name)
+    try:
+        # Use openssl ocsp -respin to read cached DER and extract Next Update
+        # Use -noverify to skip signature verification (we only care about the TTL)
+        rc, out, err = run_cmd(
+            ["openssl", "ocsp", "-respin", ocsp_path.as_posix(), "-text", "-noverify"]
+        )
+        if rc != 0:
+            LOG.warning("OCSP failed to read cached DER for %s (rc=%d): %s", cert_name, rc, err.strip())
+            return None
+
+        ttl = parse_next_update_ttl(out)
+        three_days_sec = 259200
+        if ttl > three_days_sec:
+            LOG.info(
+                "OCSP cached response for %s is fresh: TTL=%ds (%.1f days) > 3 days threshold",
+                cert_name,
+                ttl,
+                ttl / 86400.0,
+            )
+        else:
+            LOG.info(
+                "OCSP cached response for %s needs refresh: TTL=%ds (%.1f days) <= 3 days threshold",
+                cert_name,
+                ttl,
+                ttl / 86400.0,
+            )
+        return ttl
+    except Exception as e:
+        LOG.warning("OCSP exception while reading cached TTL for %s: %s", cert_name, e)
+        return None
+
+
+def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
+    """
+    Restore cached OCSP responses from database to disk.
+    Called at startup to ensure disk cache is populated from database.
+    This handles ephemeral storage (tmpfs, etc.) by restoring files on each run.
+    """
+    if not db:
+        LOG.debug("OCSP database not available, skipping cache restoration")
+        return
+
+    LOG.info("OCSP restoring cached responses from database to disk...")
+    try:
+        restored_count = 0
+
+        # Get all possible cert names from live directory and restore from database
+        if LIVE_BASE.is_dir():
+            for cert_dir in sorted(LIVE_BASE.iterdir()):
+                if not cert_dir.is_dir():
+                    continue
+                cert_name = cert_dir.name
+                cache_key = f"ocsp/{cert_name}"
+
+                try:
+                    # Use the Database.get_job_cache_file() method to retrieve cached OCSP response
+                    # Returns bytes directly if found, None if not found
+                    data = db.get_job_cache_file(
+                        job_name="ocsp-refresh",
+                        file_name=cache_key,
+                        with_data=True,
+                        with_info=False,
+                    )
+
+                    if not data:
+                        continue
+
+                    # Restore to disk
+                    ocsp_cert_dir = CONFIGS_SSL_BASE / cert_name
+                    ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
+                    ocsp_path = ocsp_cert_dir / "ocsp.der"
+                    ocsp_path.write_bytes(data)
+                    ocsp_path.chmod(0o644)
+                    restored_count += 1
+                    LOG.debug("OCSP restored cached response for %s from database", cert_name)
+                except Exception as e:
+                    LOG.debug("OCSP could not restore cache for %s: %s", cert_name, e)
+                    continue
+
+        if restored_count > 0:
+            LOG.info("OCSP restored %d cached responses from database to disk", restored_count)
+        else:
+            LOG.debug("OCSP no cached responses restored from database (cache may be cold)")
+    except Exception as e:
+        LOG.debug("OCSP exception while attempting cache restoration: %s", e)
+
+
 def process_one_cert_dir(job: Job, cert_dir: Path, db: Optional[Any] = None) -> None:
     fullchain = cert_dir / "fullchain.pem"
     if not fullchain.is_file():
@@ -337,6 +439,18 @@ def process_one_cert_dir(job: Job, cert_dir: Path, db: Optional[Any] = None) -> 
         return
 
     LOG.info("OCSP responder for certificate %s: %s", cert_name, ocsp_url)
+
+    # === Check if cached OCSP response is still fresh (>3 days TTL) ===
+    # TTL-based optimization: skip fetch if cached response valid for >3 days (259200 seconds)
+    cached_ttl = get_cached_ocsp_ttl(cert_name)
+    if cached_ttl is not None and cached_ttl > 259200:
+        LOG.info(
+            "OCSP cached response for %s still valid for %ds (%.1f days), skipping fetch",
+            cert_name,
+            cached_ttl,
+            cached_ttl / 86400.0,
+        )
+        return
 
     ocsp_der: Optional[bytes] = None
     ttl: int = 0
@@ -360,7 +474,8 @@ def process_one_cert_dir(job: Job, cert_dir: Path, db: Optional[Any] = None) -> 
     # Calculate checksum for integrity verification
     checksum = hashlib.sha256(ocsp_der).hexdigest()
 
-    # === Store OCSP response in database (new) ===
+    # === Store OCSP response in database ===
+    db_stored = False
     if db:
         cache_key = f"ocsp/{cert_name}"
         try:
@@ -378,14 +493,19 @@ def process_one_cert_dir(job: Job, cert_dir: Path, db: Optional[Any] = None) -> 
             else:
                 LOG.info("OCSP stored response for %s in database (TTL=%ds, checksum=%s)",
                          cert_name, ttl, checksum[:8])
+                db_stored = True
         except Exception as e:
             LOG.error("OCSP exception while storing response for %s in database: %s", cert_name, e)
+    else:
+        # If no database available, still proceed with disk storage
+        db_stored = True
 
-    # === Datastore sync would happen via scheduler sync (not needed here) ===
-    # The scheduler will sync OCSP responses from database to datastore on workers
-    # For now, disk storage is sufficient and always works
+    # === Only write to disk AFTER successful database storage ===
+    # This prevents overwriting existing OCSP files if the fetch failed or had issues
+    if not db_stored:
+        LOG.warning("OCSP skipping disk storage for %s due to database storage failure", cert_name)
+        return
 
-    # === Also store on disk as fallback (/etc/bunkerweb/configs/ssl/{cert-name}/ocsp.der) ===
     # Create the SSL configs directory for this certificate
     ocsp_cert_dir = CONFIGS_SSL_BASE / cert_name
     try:
@@ -394,7 +514,7 @@ def process_one_cert_dir(job: Job, cert_dir: Path, db: Optional[Any] = None) -> 
         LOG.error("OCSP error while creating directory %s: %s", ocsp_cert_dir, e)
         return
 
-    # Write OCSP response to configs/ssl/{cert-name}/ocsp.der
+    # Write OCSP response to cache/ssl/{cert-name}/ocsp.der
     ocsp_path = ocsp_cert_dir / "ocsp.der"
     try:
         ocsp_path.write_bytes(ocsp_der)
@@ -435,6 +555,9 @@ def main() -> int:
         if not LIVE_BASE.is_dir():
             LOG.info("OCSP live certificate directory %s does not exist, nothing to do", LIVE_BASE)
             return 0
+
+        # Restore cached OCSP responses from database (handles ephemeral storage)
+        restore_ocsp_from_database(db)
 
         cert_dirs = [d for d in sorted(LIVE_BASE.iterdir()) if d.is_dir()]
         LOG.info("OCSP found %d live certificate directories under %s", len(cert_dirs), LIVE_BASE)
