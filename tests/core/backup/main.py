@@ -1,5 +1,5 @@
 from datetime import datetime
-from os import getenv, sep
+from os import environ, getenv, sep
 from pathlib import Path
 from subprocess import PIPE, Popen
 from time import sleep
@@ -125,6 +125,90 @@ try:
         if len(backup_files) != backup_rotation + 1:
             print(f"❌ Backup files count is not as expected, the rotation failed:\nstdout={result[1]}\nstderr={result[2]}", flush=True)
             exit(1)
+
+    print("ℹ️ Testing checksum verification ...", flush=True)
+
+    # Create a fresh backup dedicated to checksum tests
+    result = exec_command(["bwcli", "plugin", "backup", "save"])
+    if result[0] != 0:
+        print(f"❌ Backup for checksum test failed:\nstdout={result[1]}\nstderr={result[2]}", flush=True)
+        exit(1)
+
+    # Find the most recently created backup file
+    result = exec_command(["ls", "-1t", backup_dir])
+    if result[0] != 0:
+        print(f"❌ Backup directory listing failed:\nstdout={result[1]}\nstderr={result[2]}", flush=True)
+        exit(1)
+
+    checksum_test_files = [f for f in result[1].strip().split("\n") if f.startswith("backup-") and f.endswith(".zip")]
+    if not checksum_test_files:
+        print("❌ No backup files found for checksum test", flush=True)
+        exit(1)
+
+    latest_backup = f"{backup_dir}/{checksum_test_files[0]}"
+
+    # Corrupt the stored .sha256 (replace hash with all-zeros) while keeping the SQL intact.
+    # This ensures 'check' and 'restore' fail on mismatch, but 'restore' with the ignore flag
+    # can actually complete successfully (valid SQL, just a bad hash record).
+    corrupt_script = (
+        "import zipfile; "
+        f"f='{latest_backup}'; "
+        "zin=zipfile.ZipFile(f,'r'); "
+        "names=zin.namelist(); "
+        "contents={n: zin.read(n) for n in names}; "
+        "zin.close(); "
+        "sha=[n for n in names if n.endswith('.sha256')][0]; "
+        "contents[sha]=b'0000000000000000000000000000000000000000000000000000000000000000  ' + sha[:-7].encode() + b'\\n'; "
+        "zout=zipfile.ZipFile(f,'w',compression=zipfile.ZIP_DEFLATED); "
+        "[zout.writestr(n,d) for n,d in contents.items()]; "
+        "zout.close()"
+    )
+    result = exec_command(["python3", "-c", corrupt_script])
+    if result[0] != 0:
+        print(f"❌ Failed to corrupt backup file:\nstdout={result[1]}\nstderr={result[2]}", flush=True)
+        exit(1)
+
+    # Test 1: 'bwcli plugin backup check' must exit non-zero when a checksum is bad
+    print("ℹ️ Verifying that 'bwcli plugin backup check' detects checksum mismatch ...", flush=True)
+    result = exec_command(["bwcli", "plugin", "backup", "check"])
+    if result[0] == 0:
+        print(f"❌ 'bwcli plugin backup check' should have failed but returned 0:\nstdout={result[1]}\nstderr={result[2]}", flush=True)
+        exit(1)
+    print("✅ 'bwcli plugin backup check' correctly detected checksum mismatch", flush=True)
+
+    # Test 2: restore must abort when checksum does not match
+    print("ℹ️ Verifying that restore aborts on checksum mismatch ...", flush=True)
+    result = exec_command(["bwcli", "plugin", "backup", "restore", latest_backup])
+    if result[0] == 0:
+        print(f"❌ 'bwcli plugin backup restore' should have failed but returned 0:\nstdout={result[1]}\nstderr={result[2]}", flush=True)
+        exit(1)
+    print("✅ 'bwcli plugin backup restore' correctly aborted on checksum mismatch", flush=True)
+
+    # Test 3: restore must succeed when BACKUP_IGNORE_CHECKSUM_ERROR_ON_DB_RESTORE=yes
+    print("ℹ️ Verifying that restore proceeds with BACKUP_IGNORE_CHECKSUM_ERROR_ON_DB_RESTORE=yes ...", flush=True)
+    ignore_env = {"BACKUP_IGNORE_CHECKSUM_ERROR_ON_DB_RESTORE": "yes"}
+    if scheduler_instance:
+        result_obj = scheduler_instance.exec_run(
+            ["bwcli", "plugin", "backup", "restore", latest_backup],
+            environment=ignore_env,
+        )
+        rc = result_obj.exit_code
+        out = result_obj.output.decode() if result_obj.output else ""
+    else:
+        proc = Popen(
+            ["bwcli", "plugin", "backup", "restore", latest_backup],
+            stdout=PIPE,
+            stderr=PIPE,
+            universal_newlines=True,
+            text=True,
+            env={**environ, **ignore_env},
+        )
+        out, _ = proc.communicate()
+        rc = proc.returncode
+    if rc != 0:
+        print(f"❌ Restore with BACKUP_IGNORE_CHECKSUM_ERROR_ON_DB_RESTORE=yes failed (exit {rc}):\n{out}", flush=True)
+        exit(1)
+    print("✅ Restore proceeded correctly with BACKUP_IGNORE_CHECKSUM_ERROR_ON_DB_RESTORE=yes", flush=True)
 
     print("✅ Backup tests completed successfully", flush=True)
 except SystemExit as se:
