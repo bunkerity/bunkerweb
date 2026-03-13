@@ -106,19 +106,30 @@ def _fetch_issuer_from_aia(leaf: x509.Certificate, cert_name: str = "") -> Optio
         aia = leaf.extensions.get_extension_for_oid(ExtensionOID.AUTHORITY_INFORMATION_ACCESS)
         for access_description in aia.value:
             if access_description.access_method == AuthorityInformationAccessOID.CA_ISSUERS:
-                url = access_description.access_location.value
-                parsed = urlparse(url)
+                issuer_url = access_description.access_location.value
+                parsed = urlparse(issuer_url)
                 if parsed.scheme not in ("http", "https"):
                     continue
-                LOG.debug("🔄 OCSP fetching issuer for %s from %s", cert_name, url)
-                req = Request(url, headers={"Accept": "application/pkix-cert, application/x-x509-ca-cert"})
-                response = urlopen(req, timeout=10)
-                issuer_data = response.read()
-                # Try DER first (most common for caIssuers), then PEM
+                LOG.info("🌐 OCSP fetching issuer certificate from AIA: %s", issuer_url)
+    
+                if not is_safe_url(issuer_url):
+                    LOG.error("❌ OCSP unsafe AIA issuer URL detected: %s", issuer_url)
+                    return None
+
+                req = Request(issuer_url, headers={"User-Agent": "BunkerWeb OCSP Fetcher (SSRF-Protected)"})
                 try:
-                    return x509.load_der_x509_certificate(issuer_data)
-                except Exception:
-                    return x509.load_pem_x509_certificate(issuer_data)
+                    # Use a short timeout so we don't hang
+                    with urlopen(req, timeout=10) as response:
+                        issuer_der = response.read()
+                    # Try DER first (most common for caIssuers), then PEM
+                    try:
+                        return x509.load_der_x509_certificate(issuer_der)
+                    except Exception:
+                        return x509.load_pem_x509_certificate(issuer_der)
+                except URLError as e:
+                    LOG.warning("⚠️ OCSP network error fetching issuer from AIA for %s from %s: %s", cert_name, issuer_url, e)
+                except Exception as e:
+                    LOG.warning("⚠️ OCSP failed to fetch issuer from AIA for %s from %s: %s", cert_name, issuer_url, e)
     except x509.ExtensionNotFound:
         LOG.debug("🔒 OCSP no AIA extension in leaf cert for %s", cert_name)
     except Exception as e:
@@ -208,11 +219,18 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
         ocsp_request = builder.build()
         ocsp_request_data = ocsp_request.public_bytes(Encoding.DER)
 
-        # Send OCSP request via HTTP POST
+        # --- Build HTTP request ---
+        if not is_safe_url(ocsp_url):
+            LOG.error("❌ OCSP unsafe responder URL detected: %s", ocsp_url)
+            return None, 0
+
         req = Request(
             ocsp_url,
             data=ocsp_request_data,
-            headers={"Content-Type": "application/ocsp-request"},
+            headers={
+                "Content-Type": "application/ocsp-request",
+                "User-Agent": "BunkerWeb OCSP Fetcher (SSRF-Protected)",
+            },
             method="POST",
         )
         response = urlopen(req, timeout=timeout)
@@ -343,6 +361,12 @@ def _create_san_symlinks(pem_data: bytes, ocsp_path: Path, cert_name: str) -> No
     base_name = _service_name_from_dir(cert_name)
 
     for san in sans:
+        # Prevent Path Traversal by validating SAN format
+        # Allow alphanumeric, hyphens, dots, and wildcards (e.g., *.example.com)
+        if not re.match(r"^[A-Za-z0-9_.*-]+$", san):
+            LOG.warning("⚠️ OCSP sanitization: skipping invalid/unsafe SAN %s", san)
+            continue
+
         if san == base_name or san == cert_name:
             continue
 
@@ -853,6 +877,11 @@ def cleanup_ocsp_cache(db: Optional[Any] = None, cert_name: Optional[str] = None
     so cached responses can be quickly restored when OCSP is re-enabled.
     """
     if cert_name:
+        # Prevent Path Traversal during cleanup
+        if not re.match(r"^[A-Za-z0-9_.*-]+$", cert_name):
+            LOG.error("❌ OCSP sanitization: refusing to clean up invalid/unsafe cert_name %s", cert_name)
+            return
+
         # Clean up a single certificate's OCSP cache
         ocsp_dir = CONFIGS_SSL_BASE / cert_name
         if ocsp_dir.is_dir():
