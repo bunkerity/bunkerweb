@@ -738,14 +738,17 @@ if __name__ == "__main__":
                 LOGGER.error("Config saver failed, configuration will not work as expected...")
 
         ready = False
+        _db_wait_iters = 0
         while not ready:
             db_metadata = SCHEDULER.db.get_metadata()
             if isinstance(db_metadata, str) or not db_metadata["is_initialized"]:
-                LOGGER.warning("Database is not initialized, retrying in 5s ...")
+                if _db_wait_iters % 8 == 0:
+                    LOGGER.warning("Database is not initialized, waiting ...")
+                _db_wait_iters += 1
             else:
                 ready = True
                 continue
-            sleep(5)
+            sleep(0.25)
 
         env = SCHEDULER.db.get_config()
         env["DATABASE_URI"] = SCHEDULER.db.database_uri
@@ -1224,9 +1227,12 @@ if __name__ == "__main__":
                         _gc_counter = 0
                     current_time = datetime.now().astimezone()
 
+                    _db_lock_iters = 0
                     while DB_LOCK_FILE.is_file() and DB_LOCK_FILE.stat().st_ctime + 30 > current_time.timestamp():
-                        LOGGER.debug("Database is locked, waiting for it to be unlocked (timeout: 30s) ...")
-                        sleep(1)
+                        if _db_lock_iters % 8 == 0:
+                            LOGGER.debug("Database is locked, waiting for it to be unlocked (timeout: 30s) ...")
+                        _db_lock_iters += 1
+                        sleep(0.25)
 
                     DB_LOCK_FILE.unlink(missing_ok=True)
 

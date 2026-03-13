@@ -311,6 +311,7 @@ class Database:
         current_time = datetime.now().astimezone()
         not_connected = True
         fallback = False
+        _db_connect_iters = 0
 
         while not_connected:
             try:
@@ -337,17 +338,18 @@ class Database:
                     _exit(1)
 
                 if any(error in str(e) for error in self.READONLY_ERROR):
-                    if log:
-                        self.logger.warning("The database is read-only. Retrying in read-only mode in 5 seconds ...")
+                    if log and _db_connect_iters % 8 == 0:
+                        self.logger.warning("The database is read-only. Retrying in read-only mode ...")
                     self.sql_engine.dispose(close=True)
                     self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
                     self.readonly = True
                 if "Unknown table" in str(e):
                     not_connected = False
                     continue
-                elif log:
-                    self.logger.warning("Can't connect to database, retrying in 5 seconds ...")
-                sleep(5)
+                elif log and _db_connect_iters % 8 == 0:
+                    self.logger.warning("Can't connect to database, retrying ...")
+                _db_connect_iters += 1
+                sleep(0.25)
             except BaseException as e:
                 self.logger.error(f"Error when trying to connect to the database: {e}")
                 exit(1)
@@ -799,7 +801,7 @@ class Database:
             except Exception as e:
                 if (datetime.now().astimezone() - current_time).total_seconds() > timeout_seconds:
                     raise e
-                sleep(1)
+                sleep(0.25)
 
         assert isinstance(meta_cls, sql_metadata)
 
