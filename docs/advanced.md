@@ -3357,6 +3357,66 @@ Example queries:
 > Review @config://global for security improvements
 ```
 
+### Kubernetes Integration
+
+The MCP server can be deployed alongside BunkerWeb using the official Helm chart. A complete example is available in [`examples/mcp-integration.yaml`](https://github.com/bunkerity/bunkerweb-helm/blob/main/examples/mcp-integration.yaml).
+
+#### Helm Values
+
+```yaml
+mcp:
+  # Enable the MCP server
+  enabled: true
+
+  # Container image configuration
+  repository: docker.io/bunkerity/bunkerweb-mcp
+  tag: latest
+
+  # MCP server settings
+  config:
+    logLevel: "INFO"
+    enableDnsRebindingProtection: true
+    allowedHosts: "localhost,127.0.0.1,mcp.example.com"
+    cacheEnabled: true
+
+  # Credentials for MCP to authenticate with the BunkerWeb API
+  secrets:
+    bunkerwebApiToken: "your-secure-api-token-here"
+
+  # Ingress configuration (optional)
+  ingress:
+    enabled: false
+    ingressClassName: "bunkerweb"
+    serverName: "mcp.example.com"
+    annotations:
+      bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+      bunkerweb.io/USE_REVERSE_PROXY: "yes"
+      bunkerweb.io/REVERSE_PROXY_URL: "/"
+      bunkerweb.io/REVERSE_PROXY_HOST: "http://mcp-bunkerweb.bunkerweb.svc.cluster.local:8080"
+      # SECURITY: Restrict access to trusted IPs only
+      bunkerweb.io/USE_WHITELIST: "yes"
+      bunkerweb.io/WHITELIST_IP: "10.0.0.0/8 192.168.0.0/16"
+```
+
+#### Deployment
+
+```bash
+# Deploy BunkerWeb with MCP enabled
+helm install bunkerweb bunkerweb/bunkerweb -f mcp-integration.yaml
+
+# Access MCP locally via port-forward (recommended for security)
+kubectl port-forward svc/mcp-bunkerweb 8080:8080
+
+# Configure Claude Code with http://localhost:8080/mcp
+```
+
+!!! warning "Security"
+    The MCP server has no built-in authentication for the `/mcp` endpoint. Secure access using:
+
+    - **IP whitelisting** via BunkerWeb annotations (`USE_WHITELIST`, `WHITELIST_IP`)
+    - **Network policies** to restrict pod-to-pod communication
+    - **Port-forward** instead of exposing externally (recommended for development)
+
 For full documentation, visit the [BunkerWeb MCP repository](https://github.com/bunkerity/mcp-bunkerweb).
 
 ## Migration <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)

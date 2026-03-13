@@ -3369,6 +3369,66 @@ Ejemplos de consultas:
 > Analiza @config://global y sugiere mejoras de seguridad
 ```
 
+### Integración con Kubernetes
+
+El servidor MCP se puede desplegar junto con BunkerWeb utilizando el chart Helm oficial. Un ejemplo completo está disponible en [`examples/mcp-integration.yaml`](https://github.com/bunkerity/bunkerweb-helm/blob/main/examples/mcp-integration.yaml).
+
+#### Valores de Helm
+
+```yaml
+mcp:
+  # Habilitar el servidor MCP
+  enabled: true
+
+  # Configuración de la imagen del contenedor
+  repository: docker.io/bunkerity/bunkerweb-mcp
+  tag: latest
+
+  # Configuración del servidor MCP
+  config:
+    logLevel: "INFO"
+    enableDnsRebindingProtection: true
+    allowedHosts: "localhost,127.0.0.1,mcp.example.com"
+    cacheEnabled: true
+
+  # Credenciales para la autenticación del MCP con la API de BunkerWeb
+  secrets:
+    bunkerwebApiToken: "tu-token-api-seguro"
+
+  # Configuración de Ingress (opcional)
+  ingress:
+    enabled: false
+    ingressClassName: "bunkerweb"
+    serverName: "mcp.example.com"
+    annotations:
+      bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+      bunkerweb.io/USE_REVERSE_PROXY: "yes"
+      bunkerweb.io/REVERSE_PROXY_URL: "/"
+      bunkerweb.io/REVERSE_PROXY_HOST: "http://mcp-bunkerweb.bunkerweb.svc.cluster.local:8080"
+      # SEGURIDAD: Restringir el acceso solo a IPs de confianza
+      bunkerweb.io/USE_WHITELIST: "yes"
+      bunkerweb.io/WHITELIST_IP: "10.0.0.0/8 192.168.0.0/16"
+```
+
+#### Despliegue
+
+```bash
+# Desplegar BunkerWeb con MCP habilitado
+helm install bunkerweb bunkerweb/bunkerweb -f mcp-integration.yaml
+
+# Acceder al MCP localmente via port-forward (recomendado para seguridad)
+kubectl port-forward svc/mcp-bunkerweb 8080:8080
+
+# Configurar Claude Code con http://localhost:8080/mcp
+```
+
+!!! warning "Seguridad"
+    El servidor MCP no tiene autenticación integrada para el endpoint `/mcp`. Asegura el acceso usando:
+
+    - **Lista blanca de IPs** mediante anotaciones de BunkerWeb (`USE_WHITELIST`, `WHITELIST_IP`)
+    - **Políticas de red** para restringir la comunicación entre pods
+    - **Port-forward** en lugar de exponer externamente (recomendado para desarrollo)
+
 Para la documentación completa, visita el [repositorio BunkerWeb MCP](https://github.com/bunkerity/mcp-bunkerweb).
 
 ## Migración <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)

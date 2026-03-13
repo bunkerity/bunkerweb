@@ -3366,6 +3366,66 @@ services:
 > 分析 @config://global 并建议安全改进
 ```
 
+### Kubernetes 集成
+
+MCP 服务器可以使用官方 Helm chart 与 BunkerWeb 一起部署。完整示例可在 [`examples/mcp-integration.yaml`](https://github.com/bunkerity/bunkerweb-helm/blob/main/examples/mcp-integration.yaml) 中找到。
+
+#### Helm 配置值
+
+```yaml
+mcp:
+  # 启用 MCP 服务器
+  enabled: true
+
+  # 容器镜像配置
+  repository: docker.io/bunkerity/bunkerweb-mcp
+  tag: latest
+
+  # MCP 服务器设置
+  config:
+    logLevel: "INFO"
+    enableDnsRebindingProtection: true
+    allowedHosts: "localhost,127.0.0.1,mcp.example.com"
+    cacheEnabled: true
+
+  # MCP 连接 BunkerWeb API 的认证凭据
+  secrets:
+    bunkerwebApiToken: "你的安全API令牌"
+
+  # Ingress 配置（可选）
+  ingress:
+    enabled: false
+    ingressClassName: "bunkerweb"
+    serverName: "mcp.example.com"
+    annotations:
+      bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+      bunkerweb.io/USE_REVERSE_PROXY: "yes"
+      bunkerweb.io/REVERSE_PROXY_URL: "/"
+      bunkerweb.io/REVERSE_PROXY_HOST: "http://mcp-bunkerweb.bunkerweb.svc.cluster.local:8080"
+      # 安全：仅限受信任的 IP 访问
+      bunkerweb.io/USE_WHITELIST: "yes"
+      bunkerweb.io/WHITELIST_IP: "10.0.0.0/8 192.168.0.0/16"
+```
+
+#### 部署
+
+```bash
+# 部署启用 MCP 的 BunkerWeb
+helm install bunkerweb bunkerweb/bunkerweb -f mcp-integration.yaml
+
+# 通过 port-forward 本地访问 MCP（安全推荐）
+kubectl port-forward svc/mcp-bunkerweb 8080:8080
+
+# 使用 http://localhost:8080/mcp 配置 Claude Code
+```
+
+!!! warning "安全"
+    MCP 服务器的 `/mcp` 端点没有内置身份验证。请使用以下方式保护访问：
+
+    - 通过 BunkerWeb 注解配置 **IP 白名单**（`USE_WHITELIST`、`WHITELIST_IP`）
+    - 使用**网络策略**限制 Pod 间通信
+    - 使用 **port-forward** 而不是外部暴露（推荐用于开发环境）
+
 完整文档请访问 [BunkerWeb MCP 仓库](https://github.com/bunkerity/mcp-bunkerweb)。
 
 ## 迁移 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
