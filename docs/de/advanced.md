@@ -3291,6 +3291,146 @@ Sie können auch eine benutzerdefinierte Sicherungsdatei für die Wiederherstell
         docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
         ```
 
+## MCP-Server
+
+Der **BunkerWeb MCP-Server** ermöglicht es KI-Assistenten wie **Claude Code** und **Claude Desktop**, Ihre BunkerWeb-Installation über das [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) zu verwalten.
+
+!!! warning "Voraussetzung"
+    Der MCP-Server erfordert die Bereitstellung der **externen BunkerWeb-API** (`bunkerity/bunkerweb-api`). Er kommuniziert ausschließlich über diese API mit BunkerWeb.
+
+### Funktionen
+
+- **37 Tools** zur Verwaltung von Instanzen, Diensten, Konfigurationen, Sperren, Plugins, Jobs und Cache
+- **MCP-Ressourcen** für schreibgeschützten Zugriff (`@config://global`, `@bans://active`, usw.)
+- **Mehrere Transporte**: Stdio, HTTP, WebSocket
+
+### Docker Compose Beispiel
+
+Ein vollständiges Beispiel ist in [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples/mcp-stack) verfügbar:
+
+```yaml
+services:
+  bw-api:
+    image: bunkerity/bunkerweb-api:1.6.9
+    environment:
+      API_TOKEN: "my-bearer-token-for-mcp"
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
+      FORWARDED_ALLOW_IPS: "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+    networks:
+      - bw-universe
+      - bw-db
+      - bw-mcp
+
+  bw-mcp:
+    image: bunkerity/bunkerweb-mcp:v0.1.0
+    ports:
+      - "8080:8080"
+    environment:
+      BUNKERWEB_BASE_URL: "http://bw-api:8888"
+      BUNKERWEB_API_TOKEN: "my-bearer-token-for-mcp"
+      BUNKERWEB_LOG_LEVEL: INFO
+    networks:
+      - bw-mcp
+```
+
+### Verwendung mit Claude Code
+
+=== "Projektkonfiguration"
+
+    Fügen Sie eine `.mcp.json`-Datei im Projektstammverzeichnis hinzu (oder in `~/.claude/.mcp.json` für eine globale Konfiguration):
+
+    ```json
+    {
+      "mcpServers": {
+        "bunkerweb": {
+          "type": "http",
+          "url": "http://127.0.0.1:8080/mcp/"
+        }
+      }
+    }
+    ```
+
+=== "CLI"
+
+    ```bash
+    # MCP-Server über HTTP hinzufügen
+    claude mcp add --transport http bunkerweb --scope local http://localhost:8080/mcp
+
+    # Oder über stdio (lokale Installation)
+    pip install mcp-bunkerweb
+    claude mcp add --transport stdio bunkerweb --scope local -- mcp-bunkerweb
+    ```
+
+Beispielanfragen:
+
+```
+> Liste alle BunkerWeb-Instanzen auf
+> Zeige mir die aktuellen Sperren
+> Analysiere @config://global und schlage Sicherheitsverbesserungen vor
+```
+
+### Kubernetes-Integration
+
+Der MCP-Server kann zusammen mit BunkerWeb mithilfe des offiziellen Helm-Charts bereitgestellt werden. Ein vollständiges Beispiel ist verfügbar unter [`examples/mcp-integration.yaml`](https://github.com/bunkerity/bunkerweb-helm/blob/main/examples/mcp-integration.yaml).
+
+#### Helm-Werte
+
+```yaml
+mcp:
+  # MCP-Server aktivieren
+  enabled: true
+
+  # Container-Image-Konfiguration
+  repository: docker.io/bunkerity/bunkerweb-mcp
+  tag: v0.1.0
+
+  # MCP-Server-Einstellungen
+  config:
+    logLevel: "INFO"
+    enableDnsRebindingProtection: true
+    allowedHosts: "localhost,127.0.0.1,mcp.example.com"
+    cacheEnabled: true
+
+  # Anmeldedaten für die MCP-Authentifizierung bei der BunkerWeb-API
+  secrets:
+    bunkerwebApiToken: "ihr-sicheres-api-token"
+
+  # Ingress-Konfiguration (optional)
+  ingress:
+    enabled: false
+    ingressClassName: "bunkerweb"
+    serverName: "mcp.example.com"
+    annotations:
+      bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+      bunkerweb.io/USE_REVERSE_PROXY: "yes"
+      bunkerweb.io/REVERSE_PROXY_URL: "/"
+      bunkerweb.io/REVERSE_PROXY_HOST: "http://mcp-bunkerweb.bunkerweb.svc.cluster.local:8080"
+      # SICHERHEIT: Zugriff nur auf vertrauenswürdige IPs beschränken
+      bunkerweb.io/USE_WHITELIST: "yes"
+      bunkerweb.io/WHITELIST_IP: "10.0.0.0/8 192.168.0.0/16"
+```
+
+#### Bereitstellung
+
+```bash
+# BunkerWeb mit aktiviertem MCP bereitstellen
+helm install bunkerweb bunkerweb/bunkerweb -f mcp-integration.yaml
+
+# Lokaler Zugriff auf MCP via Port-Forward (empfohlen für Sicherheit)
+kubectl port-forward svc/mcp-bunkerweb 8080:8080
+
+# Claude Code mit http://localhost:8080/mcp konfigurieren
+```
+
+!!! warning "Sicherheit"
+    Der MCP-Server hat keine integrierte Authentifizierung für den `/mcp`-Endpoint. Sichern Sie den Zugriff mit:
+
+    - **IP-Whitelist** über BunkerWeb-Annotationen (`USE_WHITELIST`, `WHITELIST_IP`)
+    - **Netzwerkrichtlinien** zur Einschränkung der Pod-zu-Pod-Kommunikation
+    - **Port-Forward** anstelle von externem Zugriff (empfohlen für Entwicklung)
+
+Die vollständige Dokumentation finden Sie im [BunkerWeb MCP Repository](https://github.com/bunkerity/mcp-bunkerweb).
+
 ## Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM-Unterstützung :white_check_mark:
