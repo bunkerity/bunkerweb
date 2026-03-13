@@ -79,6 +79,7 @@ from letsencrypt_utils import (
     LETSENCRYPT_WORK_DIR as WORK_DIR,
     ZEROSSL_BOT_SCRIPT,
     build_certbot_env,
+    check_caa_records,
     get_expected_acme_directory,
     prepare_logs_dir,
     resolve_certbot_entrypoint,
@@ -375,6 +376,7 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
     wildcard = env("USE_LETS_ENCRYPT_WILDCARD", "no").lower() == "yes"
     activated = env("AUTO_LETS_ENCRYPT", "no").lower() == "yes" and env("LETS_ENCRYPT_PASSTHROUGH", "no").lower() == "no"
     staging = env("USE_LETS_ENCRYPT_STAGING", "no").lower() == "yes"
+    hostname_check = env("LETS_ENCRYPT_HOSTNAME_CHECK", "no").lower() != "no"
 
     if acme_server not in ACME_SERVER_TYPES:
         if activated:
@@ -385,6 +387,40 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
     if activated and not server_names_val:
         LOGGER.warning(f"[Service: {service}] SERVER_NAME is empty. Please set a valid server name, skipping generation.")
         activated = False
+
+    # For HTTP challenge, verify DNS resolution to avoid certbot failures on unreachable hostnames.
+    if activated and challenge_val == "http" and hostname_check:
+        try:
+            import dns.resolver
+        except ImportError:
+            dns = None
+        valid_hostnames = []
+        if dns:
+            for hostname in server_names_val.split():
+                found = False
+                for rtype in ("A", "AAAA", "CNAME"):
+                    try:
+                        answers = dns.resolver.resolve(hostname, rtype)
+                        if answers:
+                            found = True
+                            break
+                    except Exception:
+                        continue
+                if not found:
+                    LOGGER.error(
+                        f"[Service: {service}] No A, AAAA, or CNAME record found for {hostname}. "
+                        "If you want to use that hostname for a certificate, please use the DNS challenge or set the A, AAAA, or CNAME entries in your external DNS. "
+                        "Note: If the record exists but is not detected, you may need to clean up your DNS cache or wait a few minutes for DNS propagation."
+                    )
+                else:
+                    valid_hostnames.append(hostname)
+            if not valid_hostnames:
+                LOGGER.error(f"[Service: {service}] No valid hostnames remain after DNS check, skipping certificate generation.")
+                return [], {"activated": False}
+            server_names_val = " ".join(valid_hostnames)
+        else:
+            LOGGER.error(f"[Service: {service}] dnspython is not installed, cannot check DNS records for HTTP challenge.")
+            return [], {"activated": False}
 
     if email_val:
         if "@" not in email_val:
@@ -499,6 +535,19 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
         if wildcard:
             LOGGER.debug(f"[Service: {service}] Wildcard domains are not supported for HTTP challenges, deactivating wildcard support.")
             wildcard = False
+
+    if activated:
+        _, caa_blocked = check_caa_records(server_names_val.split(), acme_server, wildcard, LOGGER)
+        if caa_blocked:
+            for blocked_domain in caa_blocked:
+                LOGGER.error(
+                    f"[Service: {service}] CAA DNS records for '{blocked_domain}' do not permit certificate "
+                    f"issuance by '{acme_server}'. Add a CAA record that allows this CA or change LETS_ENCRYPT_SERVER."
+                )
+            server_names_val = " ".join(d for d in server_names_val.split() if d not in set(caa_blocked))
+            if not server_names_val:
+                LOGGER.error(f"[Service: {service}] No domains remain after CAA check, skipping certificate generation.")
+                return [], {"activated": False}
 
     server_names = server_names_val.split()
 
@@ -817,8 +866,20 @@ def certbot_new(
 
 
 def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str]) -> bool:
+    def mask_email(email):
+        if not email or "@" not in email:
+            return email or "not provided"
+        user, domain = email.split("@", 1)
+        user_mask = user[:2] + ("*" * max(1, len(user) - 2)) if len(user) > 2 else user + "*"
+        domain_main, *domain_rest = domain.split(".", 1)
+        domain_mask = domain_main[:2] + ("*" * max(1, len(domain_main) - 2))
+        if domain_rest:
+            domain_mask += "." + domain_rest[0]
+        return f"{user_mask}@{domain_mask}"
+
+    masked_email = mask_email(config["email"])
     LOGGER.info(
-        f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email'] or 'not provided'}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile on {config['acme_server']}..."
+        f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {masked_email}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile on {config['acme_server']}..."
     )
     debug_config = config.copy()
     if LOG_LEVEL != "TRACE" and debug_config.get("zerossl_api_key"):
@@ -973,11 +1034,18 @@ try:
 
     # ? Check if the services' certificates already exist
     for server_name, config in services.items():
+        # Mark the cert as active as soon as the service is still in the configuration,
+        # regardless of whether it is currently activated. This prevents LETS_ENCRYPT_CLEAR_OLD_CERTS
+        # from deleting certs whose service is still configured but temporarily failing validation
+        # (e.g. hostname check, DNS issue, missing credentials). Only certs for services that are
+        # completely absent from the configuration should ever be deleted.
+        if server_name in existing_certificates:
+            existing_certificates[server_name]["active"] = True
+
         if config["force_renew"] or not config["activated"] or server_name not in existing_certificates:
             continue
 
         existing_cert = existing_certificates[server_name]
-        existing_cert["active"] = True
 
         if not config["disable_psl_check"]:
             if psl_lines is None:

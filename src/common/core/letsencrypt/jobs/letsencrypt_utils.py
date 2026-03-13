@@ -1,7 +1,7 @@
 from os import W_OK, X_OK, access, environ, getenv, sep, umask
 from os.path import join
 from pathlib import Path
-from typing import Dict, List, Mapping, Optional, Union
+from typing import Dict, List, Mapping, Optional, Set, Tuple, Union
 
 CERTBOT_BIN = join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot")
 DEPS_PATH = join(sep, "usr", "share", "bunkerweb", "deps", "python")
@@ -144,3 +144,88 @@ def get_expected_acme_directory(server: str, staging: bool) -> str:
     if staging:
         return LETSENCRYPT_STAGING_DIRECTORY
     return LETSENCRYPT_PRODUCTION_DIRECTORY
+
+
+_CAA_ISSUERS: Dict[str, Set[str]] = {
+    "letsencrypt": {"letsencrypt.org"},
+    # Sourced from the live ZeroSSL ACME directory's caaIdentities field.
+    "zerossl": {"sectigo.com", "comodoca.com", "comodo.com", "trust-provider.com", "usertrust.com", "entrust.net", "affirmtrust.com"},
+}
+
+
+def _check_caa_for_domain(domain: str, ca_identifiers: Set[str], wildcard: bool, logger) -> bool:
+    """Walk the DNS tree for *domain* checking CAA records (RFC 8659).
+
+    Returns True if issuance is permitted (no blocking CAA record found),
+    False if a CAA record explicitly denies issuance by the CA.
+    """
+    import dns.exception
+    import dns.resolver
+
+    labels = domain.split(".")
+    for i in range(len(labels)):
+        check_name = ".".join(labels[i:])
+        try:
+            answers = dns.resolver.resolve(check_name, "CAA")
+        except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
+            continue
+        except dns.exception.DNSException as exc:
+            logger.debug(f"DNS error querying CAA for '{check_name}': {exc}")
+            continue
+
+        issue_values: Set[str] = set()
+        issuewild_values: Set[str] = set()
+        for rdata in answers:
+            tag_raw = rdata.tag
+            tag = (tag_raw.decode("ascii") if isinstance(tag_raw, (bytes, bytearray)) else str(tag_raw)).lower()
+            val_raw = rdata.value
+            value = (val_raw.decode("ascii") if isinstance(val_raw, (bytes, bytearray)) else str(val_raw)).strip().strip('"').split(";")[0].strip().lower()
+            if tag == "issue":
+                issue_values.add(value)
+            elif tag == "issuewild":
+                issuewild_values.add(value)
+
+        governing = issuewild_values if (wildcard and issuewild_values) else issue_values
+        if not governing:
+            return True
+
+        matched = ca_identifiers & governing
+        if matched:
+            logger.debug(f"CAA record at '{check_name}' permits issuance (matched: {', '.join(sorted(matched))}).")
+            return True
+
+        logger.debug(
+            f"CAA record at '{check_name}' for '{domain}' forbids issuance. "
+            f"Governing values: {', '.join(sorted(governing))}. "
+            f"Expected one of: {', '.join(sorted(ca_identifiers))}."
+        )
+        return False
+
+    logger.debug(f"No CAA records found for '{domain}'; issuance is open.")
+    return True
+
+
+def check_caa_records(domains: List[str], acme_server: str, wildcard: bool, logger) -> Tuple[bool, List[str]]:
+    """Check CAA DNS records for a list of domains against the given ACME server.
+
+    Returns a tuple of (all_permitted, blocked_domains).
+    If dnspython is not installed the check is skipped and (True, []) is returned.
+    """
+    from importlib.util import find_spec
+
+    if find_spec("dns") is None:
+        logger.debug("dnspython is not installed; skipping CAA record check.")
+        return True, []
+
+    ca_identifiers = _CAA_ISSUERS.get(acme_server, set())
+    if not ca_identifiers:
+        logger.debug(f"No CAA identifiers configured for ACME server '{acme_server}'; skipping CAA check.")
+        return True, []
+
+    blocked: List[str] = []
+    for domain in domains:
+        bare = domain.lstrip("*.")
+        if not _check_caa_for_domain(bare, ca_identifiers, wildcard, logger):
+            blocked.append(domain)
+
+    return not bool(blocked), blocked
