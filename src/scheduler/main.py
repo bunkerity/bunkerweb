@@ -1023,6 +1023,10 @@ if __name__ == "__main__":
                     if SCHEDULER.db.readonly:
                         generate_caches()
                 healthcheck_job_run = False
+                # Jobs may have created files needed by config templates (e.g. api-server-cert.pem)
+                if FIRST_START:
+                    LOGGER.info("First start: regenerating config after once-jobs to pick up files created by jobs (e.g. api-server-cert.pem)")
+                    CONFIG_NEED_GENERATION = True
 
             if CONFIG_NEED_GENERATION:
                 ret = generate_configs()
