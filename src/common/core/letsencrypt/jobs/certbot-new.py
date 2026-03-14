@@ -683,6 +683,25 @@ def _determine_wildcard_bases(labels_list: List[List[str]]) -> Set[str]:
     return bases
 
 
+def resolve_cert_name(
+    service: str,
+    config: Dict[str, Union[str, bool, int, Dict[str, str]]],
+    existing_certificates: Dict[str, dict],
+) -> str:
+    """
+    Return the cert name (directory/renewal name) to use for this service.
+    New certificates use a key-type suffix (-ecdsa or -rsa). Existing certificates
+    keep their current directory naming (no rename).
+    """
+    key_type = config.get("key_type") or "ecdsa"
+    suffixed = f"{service}-{key_type}"
+    if service in existing_certificates:
+        return service
+    if suffixed in existing_certificates:
+        return suffixed
+    return suffixed
+
+
 def display_certificates_overview():
     """Display overview of all certificates with key size/curve details."""
     renewal_dir = DATA_PATH.joinpath("renewal")
@@ -767,7 +786,7 @@ def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
 
 
 def certbot_new(
-    service: str,
+    cert_name: str,
     config: Dict[str, Union[str, bool, int, Dict[str, str]]],
     cmd_env: Dict[str, str],
     paths: CertbotPaths,
@@ -788,7 +807,7 @@ def certbot_new(
         "certonly",
         "-n",
         "--cert-name",
-        service,
+        cert_name,
         "-d",
         config["server_names"],
         "--preferred-profile",
@@ -887,20 +906,20 @@ def certbot_new(
         command.append("--staging")
 
     if config["force_renew"]:
-        renewal_file = DATA_PATH.joinpath("renewal", f"{service}.conf")
+        renewal_file = DATA_PATH.joinpath("renewal", f"{cert_name}.conf")
         if renewal_file.is_file():
-            ret = certbot_delete(service, cmd_env)
+            ret = certbot_delete(cert_name, cmd_env)
             if ret != 0:
-                LOGGER.error(f"Failed to delete certificate for {service}")
+                LOGGER.error(f"Failed to delete certificate for {cert_name}")
         else:
-            LOGGER.info(f"No existing certificate found for {service}, skipping removal.")
+            LOGGER.info(f"No existing certificate found for {cert_name}, skipping removal.")
 
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
 
     deadline = monotonic() + CERTBOT_TIMEOUT
     while process.poll() is None:
         if monotonic() > deadline:
-            LOGGER.error(f"certbot for {service} timed out after {CERTBOT_TIMEOUT}s, killing process.")
+            LOGGER.error(f"certbot for {cert_name} timed out after {CERTBOT_TIMEOUT}s, killing process.")
             process.kill()
             process.wait()
             return 1
@@ -914,7 +933,7 @@ def certbot_new(
     return process.returncode
 
 
-def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str]) -> bool:
+def generate_certificate(cert_name: str, config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str]) -> bool:
     LOGGER.info(
         f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email'] or 'not provided'}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile on {config['acme_server']}..."
     )
@@ -924,7 +943,7 @@ def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, D
     LOGGER.debug(f"Service configuration: {debug_config}")
 
     concurrent_requests = getenv("LETS_ENCRYPT_CONCURRENT_REQUESTS", "no").lower() == "yes"
-    paths, temp_root = prepare_certbot_paths(service, concurrent_requests, CACHE_PATH, DATA_PATH, WORK_DIR, LOGS_DIR)
+    paths, temp_root = prepare_certbot_paths(cert_name, concurrent_requests, CACHE_PATH, DATA_PATH, WORK_DIR, LOGS_DIR)
     success = False
 
     try:
@@ -940,19 +959,19 @@ def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, D
                 global RUNNING_CERTBOT
                 RUNNING_CERTBOT += 1
             try:
-                ret = certbot_new(service, config, cmd_env.copy(), paths)
+                ret = certbot_new(cert_name, config, cmd_env.copy(), paths)
             finally:
                 with RUNNING_LOCK:
                     RUNNING_CERTBOT -= 1
 
             if ret == 0:
-                LOGGER.info(f"Certificate(s) for {service} generated successfully.")
+                LOGGER.info(f"Certificate(s) for {cert_name} generated successfully.")
                 success = True
                 return True
     finally:
         finalize_certbot_run(paths, temp_root, success, MERGE_LOCK, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER)
 
-    LOGGER.error(f"Failed to generate certificate(s) for {service} after {config['retries'] + 1} attempts.")
+    LOGGER.error(f"Failed to generate certificate(s) for {cert_name} after {config['retries'] + 1} attempts.")
     return False
 
 
@@ -1083,10 +1102,13 @@ try:
 
     # ? Check if the services' certificates already exist
     for server_name, config in services.items():
-        if config["force_renew"] or not config["activated"] or server_name not in existing_certificates:
+        if config["force_renew"] or not config["activated"]:
+            continue
+        cert_name = resolve_cert_name(server_name, config, existing_certificates)
+        if cert_name not in existing_certificates:
             continue
 
-        existing_cert = existing_certificates[server_name]
+        existing_cert = existing_certificates[cert_name]
         existing_cert["active"] = True
 
         if not config["disable_psl_check"]:
@@ -1151,22 +1173,24 @@ try:
 
     # ? generate new certificates and renew existing ones if needed
     concurrent_requests = getenv("LETS_ENCRYPT_CONCURRENT_REQUESTS", "no").lower() == "yes"
-    pending_services: List[Tuple[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]] = []
+    # (cert_name for certbot, logical service key for services dict, config)
+    pending_services: List[Tuple[str, str, Dict[str, Union[str, bool, int, Dict[str, str]]]]] = []
 
     for service, config in services.items():
-        if existing_certificates.get(service, {}).get("active") and not config["force_renew"]:
+        cert_name = resolve_cert_name(service, config, existing_certificates)
+        if existing_certificates.get(cert_name, {}).get("active") and not config["force_renew"]:
             LOGGER.info(f"Certificate(s) for {service} already exist, skipping generation.")
             config["exists"] = True
             continue
         if not config["activated"]:
             continue
-        pending_services.append((service, config))
+        pending_services.append((cert_name, service, config))
 
     if pending_services:
         if concurrent_requests:
             required_accounts: Set[Tuple[bool, str]] = set()
             required_zerossl_accounts: Set[Tuple[bool, str]] = set()
-            for _, config in pending_services:
+            for _, _, config in pending_services:
                 if config.get("acme_server") == "letsencrypt":
                     required_accounts.add((bool(config.get("staging")), str(config.get("email") or "")))
                 else:
@@ -1177,7 +1201,7 @@ try:
                 zerossl_env = cmd_env.copy()
                 zerossl_env["CERTBOT_BIN"] = CERTBOT_BIN
                 # Collect ZeroSSL-specific env vars from any pending ZeroSSL service config
-                for _, config in pending_services:
+                for _, _, config in pending_services:
                     if config.get("acme_server") != "letsencrypt":
                         zerossl_api_key = str(config.get("zerossl_api_key") or "")
                         if zerossl_api_key:
@@ -1193,9 +1217,12 @@ try:
             if concurrent_requests and len(pending_services) > 1:
                 max_workers = max(1, min(len(pending_services), effective_cpu_count()))
                 with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                    futures = {executor.submit(generate_certificate, service, config, cmd_env.copy()): service for service, config in pending_services}
+                    futures = {
+                        executor.submit(generate_certificate, cert_name, config, cmd_env.copy()): (cert_name, service, config)
+                        for cert_name, service, config in pending_services
+                    }
                     for future in as_completed(futures):
-                        service = futures[future]
+                        _cert_name, service, _config = futures[future]
                         config = services[service]
                         try:
                             success = future.result()
@@ -1208,8 +1235,8 @@ try:
                         else:
                             status = 2
             else:
-                for service, config in pending_services:
-                    config["exists"] = generate_certificate(service, config, cmd_env)
+                for cert_name, service, config in pending_services:
+                    config["exists"] = generate_certificate(cert_name, config, cmd_env)
                     if config["exists"]:
                         status = 1 if status == 0 else status
                     else:
@@ -1259,7 +1286,8 @@ try:
 
             # If generation failed but an old certificate is still active, keep previous hash
             # so the renewal attempt will be retried on the next run.
-            if not existing_certificates.get(service, {}).get("active"):
+            cert_name = resolve_cert_name(service, config, existing_certificates)
+            if not existing_certificates.get(cert_name, {}).get("active"):
                 updated_zerossl_api_key_hashes.pop(service, None)
 
         save_zerossl_api_key_hashes(updated_zerossl_api_key_hashes)

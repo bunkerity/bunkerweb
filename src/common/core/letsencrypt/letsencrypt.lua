@@ -34,6 +34,24 @@ local sort = table.sort
 local lower = string.lower
 local gsub = string.gsub
 
+local live_prefix = "/var/cache/bunkerweb/letsencrypt/etc/live/"
+
+-- Try key-type suffixed names first (ecdsa, rsa), then legacy name (no suffix).
+local function read_cert_files_by_identifier(identifier)
+	if not identifier or identifier == "" then
+		return false, "empty identifier", nil
+	end
+	local candidates = { identifier .. "-ecdsa", identifier .. "-rsa", identifier }
+	for _, name in ipairs(candidates) do
+		local paths = { live_prefix .. name .. "/fullchain.pem", live_prefix .. name .. "/privkey.pem" }
+		local check, data = read_files(paths)
+		if check then
+			return check, data, name
+		end
+	end
+	return false, "no cert found for " .. identifier, nil
+end
+
 -- Mirror certbot-new wildcard grouping so certificate identifiers stay in sync.
 local function sanitize_domain_labels(domain)
 	if not domain or domain == "" then
@@ -263,10 +281,7 @@ function letsencrypt:init()
 							data = self.internalstore:get("plugin_letsencrypt_" .. base, true)
 							if not data then
 								local check
-								check, data = read_files({
-									"/var/cache/bunkerweb/letsencrypt/etc/live/" .. base .. "/fullchain.pem",
-									"/var/cache/bunkerweb/letsencrypt/etc/live/" .. base .. "/privkey.pem",
-								})
+								check, data = read_cert_files_by_identifier(base)
 								if not check then
 									self.logger:log(ERR, "error while reading files : " .. data)
 									ret_ok = false
@@ -288,10 +303,7 @@ function letsencrypt:init()
 						data = self.internalstore:get("plugin_letsencrypt_" .. cert_identifier, true)
 						if not data then
 							local check
-							check, data = read_files({
-								"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/fullchain.pem",
-								"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/privkey.pem",
-							})
+							check, data = read_cert_files_by_identifier(cert_identifier)
 							if not check then
 								self.logger:log(ERR, "error while reading files : " .. data)
 								ret_ok = false
@@ -357,10 +369,7 @@ function letsencrypt:init()
 					local data = self.internalstore:get("plugin_letsencrypt_" .. base, true)
 					if not data then
 						local check
-						check, data = read_files({
-							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. base .. "/fullchain.pem",
-							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. base .. "/privkey.pem",
-						})
+						check, data = read_cert_files_by_identifier(base)
 						if not check then
 							self.logger:log(ERR, "error while reading files : " .. data)
 							ret_ok = false
@@ -379,10 +388,7 @@ function letsencrypt:init()
 				for _, part in ipairs(server_list) do
 					wildcard_servers[part] = false
 				end
-				local check, data = read_files({
-					"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/fullchain.pem",
-					"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/privkey.pem",
-				})
+				local check, data = read_cert_files_by_identifier(cert_identifier)
 				if not check then
 					self.logger:log(ERR, "error while reading files : " .. data)
 					ret_ok = false
