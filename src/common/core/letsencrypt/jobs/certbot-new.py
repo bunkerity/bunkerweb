@@ -89,6 +89,11 @@ LOGGER = getLogger("LETS-ENCRYPT.NEW")
 LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.NEW.CERTBOT")
 
 ZEROSSL_API_KEY_HASHES_PATH = DATA_PATH.joinpath("renewal", ".bw-zerossl-api-key-hashes.json")
+# Wildcard certs are stored under a distinct cert_name so they don't collide with
+# non-wildcard certs for the same base (e.g. hosts.example.com). This keeps the
+# filesystem layout explicit and makes UI deletion/debugging easier. "_wildcard_"
+# is not a valid hostname, so there will not be any overlaps.
+WILDCARD_CERT_NAME_PREFIX = "_wildcard_."
 MERGE_LOCK = Lock()
 RUNNING_LOCK = Lock()
 RUNNING_CERTBOT = 0
@@ -590,13 +595,16 @@ def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, 
 
     entries: Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]] = {}
     if base_config["wildcard"]:
+        # Wildcard mode is "one cert per wildcard scope" (base). We intentionally store it under
+        # _wildcard_.<base> so it doesn't collide with a non-wildcard cert for <base>.
         wildcard_groups = extract_wildcard_groups(list(unique_names))
         if not wildcard_groups and base_config["activated"]:
             LOGGER.warning(f"[Service: {service}] No valid wildcard groups found, skipping generation.")
         for base, names in wildcard_groups.items():
             config = base_config.copy()
             config["server_names"] = ",".join(names)
-            entries[base] = config
+            cert_name = f"{WILDCARD_CERT_NAME_PREFIX}{base}"
+            entries[cert_name] = config
         return entries
 
     config = base_config.copy()
@@ -606,13 +614,18 @@ def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, 
 
 
 def _determine_wildcard_bases(labels_list: List[List[str]]) -> Set[str]:
+    """
+    Determine the base domain(s) for wildcard cert scope. For *.hosts.example.com the base
+    is hosts.example.com (cert name and coverage); for *.example.com the base is example.com.
+    """
     if not labels_list:
         return set()
 
     if len(labels_list) == 1:
         labels = labels_list[0]
-        if len(labels) > 2:
-            return {".".join(labels[1:])}
+        # Base = full cleaned domain.
+        # This fixes the common pitfall where "*.hosts.example.com" would otherwise incorrectly
+        # produce a base of "example.com" (which does not cover *.hosts.example.com).
         return {".".join(labels)}
 
     min_len = min(len(labels) for labels in labels_list)
@@ -625,17 +638,17 @@ def _determine_wildcard_bases(labels_list: List[List[str]]) -> Set[str]:
         else:
             break
 
-    if len(common_suffix) >= 2 and len(common_suffix) >= (min_len - 1):
-        return {".".join(common_suffix)}
+    # One base only when all entries are the same scope (e.g. *.example.com + example.com)
+    common_base = ".".join(common_suffix)
+    if len(common_suffix) >= 2 and len(common_suffix) >= (min_len - 1) and all(
+        ".".join(labels) == common_base for labels in labels_list
+    ):
+        return {common_base}
 
-    bases: Set[str] = set()
-    for labels in labels_list:
-        if len(labels) > 2:
-            bases.add(".".join(labels[1:]))
-        else:
-            bases.add(".".join(labels))
-
-    return bases
+    # Different scopes (e.g. *.hosts.example.com vs *.api.example.com) must not be merged into
+    # a broader "*.example.com" cert, because that would be a different scope than requested.
+    # We therefore emit one base per scope.
+    return {".".join(labels) for labels in labels_list}
 
 
 def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
