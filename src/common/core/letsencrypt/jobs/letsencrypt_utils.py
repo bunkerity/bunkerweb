@@ -1,3 +1,4 @@
+from configparser import ConfigParser
 from os import W_OK, X_OK, access, environ, getenv, sep, umask
 from os.path import join
 from pathlib import Path
@@ -129,3 +130,146 @@ def get_expected_acme_directory(server: str, staging: bool) -> str:
     if staging:
         return LETSENCRYPT_STAGING_DIRECTORY
     return LETSENCRYPT_PRODUCTION_DIRECTORY
+
+
+def _renewal_config_is_broken(conf: Path) -> bool:
+    """
+    Return True if the renewal config is empty, unparseable, or missing required file references
+    so certbot would fail on it (parsefail / "missing a required file reference").
+    Reissue does not use this file; callers use service definitions from env (load_services) instead.
+    """
+    try:
+        if conf.stat().st_size == 0:
+            return True
+        parser = ConfigParser(interpolation=None)  # paths may contain %; avoid InterpolationError
+        read_ok = parser.read(str(conf), encoding="utf-8")
+        if not read_ok or len(parser.sections()) == 0:
+            return True
+        # Certbot requires at least one section with cert/fullchain/privkey pointing into archive/
+        has_required_ref = False
+        for section in parser.sections():
+            for key in ("cert", "fullchain", "privkey"):
+                if parser.has_option(section, key):
+                    val = parser.get(section, key).strip()
+                    if val and "archive" in val:
+                        has_required_ref = True
+                        break
+            if has_required_ref:
+                break
+        if not has_required_ref:
+            return True
+        # Certbot also fails with "expected .../live/<lineage>/cert.pem to be a symlink" when live/ files are regular files.
+        # Treat as broken so we remove the config and reissue from service definition (repair may have skipped if archive missing).
+        etc_path = conf.parent.parent  # renewal/ -> etc/
+        live_lineage = etc_path.joinpath("live", conf.stem)
+        for name in ("cert.pem", "fullchain.pem", "privkey.pem"):
+            f = live_lineage.joinpath(name)
+            if f.exists() and not f.is_symlink():
+                return True
+        return False
+    except Exception:
+        # Any read/parse error (e.g. InterpolationError, bad INI) = broken; treat as such and let caller remove/reissue.
+        return True
+
+
+def remove_empty_renewal_configs(etc_path: Path, logger) -> List[str]:
+    """
+    Remove broken (0-byte or unparseable) renewal config files so certbot renew does not fail.
+    Returns the list of removed cert names (filename without .conf) so callers can trigger reissue.
+    Reissue uses service definitions from env (load_services), not the failing config file.
+    Cert names can have an -ecdsa or -rsa suffix (e.g. www.example.com-ecdsa).
+
+    Why this exists: after a DB restore or corruption, renewal configs can be empty or invalid INI.
+    Certbot aborts the whole renewal run on one bad file. We remove broken configs and reissue
+    using the service configuration so the certificate is recreated without relying on the bad file.
+    """
+    removed: List[str] = []
+    renewal_dir = etc_path.joinpath("renewal")
+    if not renewal_dir.is_dir():
+        return removed
+    for conf in renewal_dir.glob("*.conf"):
+        try:
+            try:
+                is_broken = _renewal_config_is_broken(conf)
+            except Exception as e:
+                logger.debug(f"Error checking renewal config {conf.name}: {e}, treating as broken.")
+                is_broken = True
+            if not is_broken:
+                continue
+            cert_name = conf.stem
+            conf.unlink()
+            removed.append(cert_name)
+            logger.info(f"Removed broken renewal config {conf.name}; will reissue from service definition.")
+        except OSError as e:
+            logger.debug(f"Could not remove renewal config {conf}: {e}")
+    return removed
+
+
+def repair_live_symlinks(etc_path: Path, logger) -> None:
+    """
+    Ensure live/<domain>/cert.pem, fullchain.pem, privkey.pem (and chain.pem) are symlinks
+    into archive/. After restore from DB, tar extraction may have created regular files
+    instead of symlinks, which breaks certbot renew.
+    <domain> can have an -ecdsa or -rsa suffix (e.g. www.example.com-ecdsa).
+
+    Why this exists: when Let's Encrypt state is restored from a tar archive, symlinks may be
+    materialized as regular files. Certbot expects live/ files to be symlinks into archive/.
+    """
+    live_dir = etc_path.joinpath("live")
+    archive_dir = etc_path.joinpath("archive")
+    renewal_dir = etc_path.joinpath("renewal")
+    if not live_dir.is_dir() or not archive_dir.is_dir():
+        return
+    for live_domain in live_dir.iterdir():
+        if not live_domain.is_dir():
+            continue
+        domain = live_domain.name
+        archive_domain = archive_dir.joinpath(domain)
+        if not archive_domain.is_dir():
+            continue
+        # Resolve target filenames (cert1.pem, fullchain1.pem, etc.) from renewal config or default to 1
+        targets: Dict[str, str] = {}
+        renewal_conf = renewal_dir.joinpath(f"{domain}.conf")
+        if renewal_conf.is_file():
+            try:
+                parser = ConfigParser(interpolation=None)  # paths may contain %
+                parser.read(str(renewal_conf), encoding="utf-8")
+                for section in parser.sections():
+                    for key in ("cert", "privkey", "fullchain", "chain"):
+                        if parser.has_option(section, key):
+                            val = parser.get(section, key).strip()
+                            if val and "archive" in val:
+                                # path is relative to config file (renewal/), e.g. ../../archive/domain/cert1.pem
+                                targets[key] = val
+                                break
+                    if targets:
+                        break
+            except Exception as e:
+                logger.debug(f"Could not parse renewal config {renewal_conf}: {e}")
+        # Fallback: use cert1.pem, fullchain1.pem, privkey1.pem, chain1.pem
+        for key, default in (("cert", "cert1.pem"), ("privkey", "privkey1.pem"), ("fullchain", "fullchain1.pem"), ("chain", "chain1.pem")):
+            if key not in targets:
+                if key == "chain" and not archive_domain.joinpath("chain1.pem").exists():
+                    continue
+                targets[key] = f"../../archive/{domain}/{default}"
+        for live_name, archive_rel in (("cert.pem", targets.get("cert")), ("fullchain.pem", targets.get("fullchain")), ("privkey.pem", targets.get("privkey")), ("chain.pem", targets.get("chain"))):
+            if not archive_rel:
+                continue
+            live_file = live_domain.joinpath(live_name)
+            archive_basename = Path(archive_rel).name
+            archive_file = archive_domain.joinpath(archive_basename)
+            if not archive_file.exists():
+                continue
+            # Symlink from live/domain/ to archive/domain/: use relative path ../../archive/domain/basename
+            link_target = f"../../archive/{domain}/{archive_basename}"
+            try:
+                if live_file.exists():
+                    if live_file.is_symlink():
+                        if live_file.resolve() == archive_file.resolve():
+                            continue
+                        live_file.unlink()
+                    else:
+                        live_file.unlink()
+                live_file.symlink_to(link_target)
+            except OSError as e:
+                logger.debug(f"Could not repair symlink {live_file} -> {link_target}: {e}")

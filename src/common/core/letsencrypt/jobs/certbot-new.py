@@ -80,6 +80,8 @@ from letsencrypt_utils import (
     build_certbot_env,
     get_expected_acme_directory,
     prepare_logs_dir,
+    remove_empty_renewal_configs,
+    repair_live_symlinks,
     resolve_certbot_entrypoint,
 )
 
@@ -93,6 +95,11 @@ RUNNING_LOCK = Lock()
 RUNNING_CERTBOT = 0
 MONITOR_STOP = Event()
 MONITOR_THREAD: Optional[Thread] = None
+# NOTE: certbot-new is executed as a script in normal operation, but certbot-renew
+# imports it (via importlib) to reuse issuance logic when it needs to reissue after
+# repairing a broken renewal state. To keep imports side-effect free, script execution
+# is gated under __main__ and helpers accept an optional job instance.
+JOB = None  # Set by main(); reissue_for_removed_configs passes job explicitly when called from certbot-renew
 
 
 def _monitor_certbot_progress() -> None:
@@ -631,6 +638,61 @@ def _determine_wildcard_bases(labels_list: List[List[str]]) -> Set[str]:
     return bases
 
 
+def load_services() -> Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]:
+    """Build the services dict from SERVER_NAME and per-service env. Used by main() and reissue_for_removed_configs()."""
+    server_names = getenv("SERVER_NAME", "www.example.com").strip()
+    if not server_names:
+        return {}
+    services: Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]] = {}
+    for service in server_names.split():
+        if not service.strip():
+            continue
+        for cert_name, config in build_service_entries(service).items():
+            if cert_name in services:
+                if certificate_fingerprint(services[cert_name]) == certificate_fingerprint(config):
+                    merged = normalize_server_names(services[cert_name]["server_names"]) | normalize_server_names(config["server_names"])
+                    services[cert_name]["server_names"] = format_server_names(merged)
+                    continue
+                LOGGER.warning(f"[Service: {cert_name}] Certificate configuration conflict detected, keeping first occurrence.")
+                continue
+            services[cert_name] = config
+    return services
+
+
+def reissue_for_removed_configs(
+    removed_cert_names: List[str],
+    job,
+    cmd_env: Dict[str, str],
+    logger,
+) -> bool:
+    """
+    Reissue certificates for services whose renewal config was removed (empty or broken).
+    Uses service definitions from env (load_services), not the failing config file.
+    Called from certbot-renew when certbot-new runs only once at init.
+    """
+    services = load_services()
+    if not services:
+        return True
+    to_reissue: List[Tuple[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]] = []
+    for cert_name in removed_cert_names:
+        # Renewal filenames can include certbot profile suffixes (-ecdsa/-rsa). We resolve both
+        # the stripped and unstripped variants to find the correct service key to reissue.
+        service_name = (
+            cert_name[:-6] if cert_name.endswith("-ecdsa") else (cert_name[:-4] if cert_name.endswith("-rsa") else cert_name)
+        )
+        key = service_name if service_name in services else (cert_name if cert_name in services else None)
+        if key is not None and services[key].get("activated"):
+            to_reissue.append((key, services[key]))
+    if not to_reissue:
+        return True
+    for service_name, config in to_reissue:
+        config["force_renew"] = True
+        logger.info(f"Reissuing certificate for {service_name} (broken renewal config was removed, using service definition).")
+        if not generate_certificate(service_name, config, cmd_env, job=job):
+            return False
+    return True
+
+
 def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
     # * Building the certbot command
     command = [
@@ -671,6 +733,7 @@ def certbot_new(
     config: Dict[str, Union[str, bool, int, Dict[str, str]]],
     cmd_env: Dict[str, str],
     paths: CertbotPaths,
+    job=None,
 ) -> int:
     certbot_entrypoint = resolve_certbot_entrypoint(
         str(config.get("acme_server") or "letsencrypt"),
@@ -745,7 +808,7 @@ def certbot_new(
         credentials_file = f"credentials_{bytes_hash(credentials, algorithm='sha256')[:12]}.{config['provider'].get_file_type()}"
         credentials_path = CACHE_PATH.joinpath(credentials_file)
         if not credentials_path.is_file() or config["force_renew"]:
-            JOB.cache_file(credentials_file, credentials)
+            (job or JOB).cache_file(credentials_file, credentials)
         credentials_path.chmod(0o600)  # Set permissions to read/write for owner only
 
         # * Adding the credentials to the command
@@ -793,7 +856,12 @@ def certbot_new(
     return process.returncode
 
 
-def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str]) -> bool:
+def generate_certificate(
+    service: str,
+    config: Dict[str, Union[str, bool, int, Dict[str, str]]],
+    cmd_env: Dict[str, str],
+    job=None,
+) -> bool:
     LOGGER.info(
         f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email'] or 'not provided'}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile on {config['acme_server']}..."
     )
@@ -819,7 +887,7 @@ def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, D
                 global RUNNING_CERTBOT
                 RUNNING_CERTBOT += 1
             try:
-                ret = certbot_new(service, config, cmd_env.copy(), paths)
+                ret = certbot_new(service, config, cmd_env.copy(), paths, job=job)
             finally:
                 with RUNNING_LOCK:
                     RUNNING_CERTBOT -= 1
@@ -835,36 +903,27 @@ def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, D
     return False
 
 
-try:
-    # ? Load services configuration
-    server_names = getenv("SERVER_NAME", "www.example.com").strip()
-
-    if not server_names:
+def main() -> int:
+    status = 0
+    services = load_services()
+    if not services:
         LOGGER.warning("No services found, exiting...")
-        sys_exit(0)
-
-    services = {}
-    for service in server_names.split():
-        if not service.strip():
-            continue
-
-        for cert_name, config in build_service_entries(service).items():
-            if cert_name in services:
-                if certificate_fingerprint(services[cert_name]) == certificate_fingerprint(config):
-                    merged = normalize_server_names(services[cert_name]["server_names"]) | normalize_server_names(config["server_names"])
-                    services[cert_name]["server_names"] = format_server_names(merged)
-                    continue
-                LOGGER.warning(f"[Service: {cert_name}] Certificate configuration conflict detected, keeping first occurrence.")
-                continue
-            services[cert_name] = config
-
+        return 0
     if not any(service["activated"] for service in services.values()):
         LOGGER.info("No services uses Let's Encrypt, skipping generation of new certificates...")
-        sys_exit(0)
+        return 0
 
     prepare_logs_dir(LOGS_DIR, LOGGER)
 
+    global JOB
     JOB = Job(LOGGER, __file__.replace("new", "renew"))
+
+    # Repair live/ symlinks first, then remove broken renewal configs (empty, unparseable, or missing required file reference).
+    # Reissue uses service definitions from env (load_services), not the failing config file.
+    removed_empty_configs: List[str] = []
+    if DATA_PATH.is_dir():
+        repair_live_symlinks(DATA_PATH, LOGGER)
+        removed_empty_configs = remove_empty_renewal_configs(DATA_PATH, LOGGER)
 
     # ? Fetch existing certificates
     cmd_env = build_certbot_env(JOB, DEPS_PATH)
@@ -947,6 +1006,16 @@ try:
 
     zerossl_api_key_hashes = load_zerossl_api_key_hashes()
     LOGGER_CERTBOT.debug(f"Stored ZeroSSL API key hashes: {list(zerossl_api_key_hashes.keys())}")
+
+    # If we removed broken renewal configs, force reissue for the affected services from service definition (cert_name can have -ecdsa/-rsa suffix)
+    for cert_name in removed_empty_configs:
+        service_name = (
+            cert_name[:-6] if cert_name.endswith("-ecdsa") else (cert_name[:-4] if cert_name.endswith("-rsa") else cert_name)
+        )
+        key = service_name if service_name in services else (cert_name if cert_name in services else None)
+        if key is not None and services[key].get("activated"):
+            services[key]["force_renew"] = True
+            LOGGER.info(f"Service {key}: broken renewal config was removed, will reissue certificate from service definition.")
 
     # ? Check if the services' certificates already exist
     for server_name, config in services.items():
@@ -1107,11 +1176,17 @@ try:
                 LOGGER.error(f"Error while saving data to db cache : {err}")
             else:
                 LOGGER.info("Successfully saved data to db cache")
-except SystemExit as e:
-    status = e.code
-except BaseException as e:
-    status = 2
-    LOGGER.debug(format_exc())
-    LOGGER.error(f"Exception while running certbot-new.py :\n{e}")
+    return status
 
-sys_exit(status)
+
+if __name__ == "__main__":
+    status = 0
+    try:
+        status = main()
+    except SystemExit as e:
+        status = e.code if e.code is not None else 0
+    except BaseException as e:
+        status = 2
+        LOGGER.debug(format_exc())
+        LOGGER.error(f"Exception while running certbot-new.py :\n{e}")
+    sys_exit(status)
