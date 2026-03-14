@@ -2,6 +2,7 @@
   {%- set pathlib = import("pathlib") -%}
   {%- set json = import("json") -%}
   {%- set service_id = SERVER_NAME.split(" ")[0] -%}
+  {%- set effective_crs_version = "4" if MODSECURITY_CRS_VERSION == "nightly" else MODSECURITY_CRS_VERSION -%}
 
 # Process rules with disruptive actions
   {% if SECURITY_MODE == "block" -%}
@@ -87,18 +88,13 @@ SecAuditLog /var/log/bunkerweb/modsec_audit.log
 
   {% if USE_MODSECURITY_CRS == "yes" -%}
 # include OWASP CRS configurations
-    {% if MODSECURITY_CRS_VERSION == "nightly" %}
-      {%- if pathlib.Path("/var/cache/bunkerweb/modsecurity/crs/nightly/crs-setup-nightly.conf").is_file() %}
-include /var/cache/bunkerweb/modsecurity/crs/nightly/crs-setup-nightly.conf
-      {%- else %}
-# fallback to the default CRS setup as the nightly one is not available
-include /usr/share/bunkerweb/core/modsecurity/files/crs-setup-v4.conf
-      {%- endif %}
+    {% if effective_crs_version == "3" %}
+include /usr/share/bunkerweb/core/modsecurity/files/crs-setup-v3.conf
     {% else %}
-include /usr/share/bunkerweb/core/modsecurity/files/crs-setup-v{{ MODSECURITY_CRS_VERSION }}.conf
+include /usr/share/bunkerweb/core/modsecurity/files/crs-setup-v4.conf
     {% endif %}
 
-    {% if USE_MODSECURITY_CRS_PLUGINS == "yes" and MODSECURITY_CRS_VERSION != "3" -%}
+    {% if USE_MODSECURITY_CRS_PLUGINS == "yes" and effective_crs_version != "3" -%}
 # custom CRS plugins configurations before loading plugins
       {% if is_custom_conf("/etc/bunkerweb/configs/crs-plugins-before") %}
 include /etc/bunkerweb/configs/crs-plugins-before/*.conf
@@ -168,18 +164,13 @@ SecRule ENV:is_whitelisted "yes" "id:1000,phase:1,allow,nolog,ctl:ruleEngine=Off
     {% endif -%}
 
 # include OWASP CRS rules
-    {% if MODSECURITY_CRS_VERSION == "nightly" %}
-      {%- if pathlib.Path("/var/cache/bunkerweb/modsecurity/crs/nightly/crs-nightly/rules").is_dir() %}
-include /var/cache/bunkerweb/modsecurity/crs/nightly/crs-nightly/rules/*.conf
-      {%- else %}
-# fallback to the default CRS setup as the nightly one is not available
-include /usr/share/bunkerweb/core/modsecurity/files/coreruleset-v4/rules/*.conf
-      {%- endif %}
+    {% if effective_crs_version == "3" %}
+include /usr/share/bunkerweb/core/modsecurity/files/coreruleset-v3/rules/*.conf
     {% else %}
-include /usr/share/bunkerweb/core/modsecurity/files/coreruleset-v{{ MODSECURITY_CRS_VERSION }}/rules/*.conf
+include /usr/share/bunkerweb/core/modsecurity/files/coreruleset-v4/rules/*.conf
     {% endif %}
 
-    {% if USE_MODSECURITY_CRS_PLUGINS == "yes" and MODSECURITY_CRS_VERSION != "3" %}
+    {% if USE_MODSECURITY_CRS_PLUGINS == "yes" and effective_crs_version != "3" %}
 # custom CRS plugins configurations after loading plugins
       {%- if is_custom_conf("/etc/bunkerweb/configs/crs-plugins-after") %}
 include /etc/bunkerweb/configs/crs-plugins-after/*.conf

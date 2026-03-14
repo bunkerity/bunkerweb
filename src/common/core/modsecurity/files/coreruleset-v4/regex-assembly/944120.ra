@@ -1,0 +1,28 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Rule 944120: Java serialization RCE (CVE-2015-4852)
+##!
+##! Detects Java deserialization class/method names commonly abused
+##! in remote code execution attacks via Apache Commons Collections
+##! and related libraries.
+##!
+##! Note: This rule uses t:lowercase transformation, so all patterns
+##! are in lowercase.
+
+##! Apache Commons Collections gadget classes
+clonetransformer
+forclosure
+instantiatefactory
+instantiatetransformer
+invokertransformer
+prototypeclonefactory
+prototypeserializationfactory
+whileclosure
+
+##! Java property/IO classes used in exploitation chains
+getproperty
+filewriter
+
+##! XML deserialization
+xmldecoder

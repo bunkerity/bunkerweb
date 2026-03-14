@@ -4,6 +4,7 @@ from os import getenv, sep
 from os.path import join
 from subprocess import DEVNULL, PIPE, Popen
 from sys import exit as sys_exit, path as sys_path
+from time import monotonic
 from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -28,6 +29,7 @@ from letsencrypt_utils import (
 LOGGER = getLogger("LETS-ENCRYPT.RENEW")
 
 LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.RENEW.CERTBOT")
+CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
 status = 0
 
 try:
@@ -83,12 +85,19 @@ try:
         universal_newlines=True,
         env=cmd_env,
     )
+    deadline = monotonic() + CERTBOT_TIMEOUT
     while process.poll() is None:
+        if monotonic() > deadline:
+            LOGGER.error(f"certbot renew timed out after {CERTBOT_TIMEOUT}s, killing process.")
+            process.kill()
+            process.wait()
+            status = 2
+            break
         if process.stderr:
             for line in process.stderr:
                 LOGGER_CERTBOT.info(line.strip())
 
-    if process.returncode != 0:
+    if process.returncode and process.returncode != 0:
         status = 2
         LOGGER.error("Certificates renewal failed")
 

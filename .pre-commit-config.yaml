@@ -22,7 +22,7 @@ repos:
     hooks:
       - id: black
         name: Black Python Formatter
-        language_version: python3.9
+        language_version: python3.10
 
   - repo: local
     hooks:
