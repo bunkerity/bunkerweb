@@ -444,6 +444,7 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
 
 
 status = 0
+any_success = False  # at least one server had cert/key valid and checked
 
 try:
     all_domains = getenv("SERVER_NAME", "www.example.com") or []
@@ -486,9 +487,12 @@ try:
             key_file = process_ssl_data(key_data if not use_key_file else "", key_file_path if use_key_file else None, "key", first_server)
 
             if not cert_file or not key_file:
+                prefix = f"{first_server}_" if multisite else ""
                 LOGGER.warning(
                     "Variables (CUSTOM_SSL_CERT or CUSTOM_SSL_CERT_DATA) and (CUSTOM_SSL_KEY or CUSTOM_SSL_KEY_DATA) "
-                    f"have to be set and valid to use custom certificates for {first_server}"
+                    f"have to be set and valid to use custom certificates for {first_server}. "
+                    f"For multisite, use prefixed names (e.g. {prefix}CUSTOM_SSL_CERT_DATA and {prefix}CUSTOM_SSL_KEY_DATA). "
+                    "Check the service configuration in the UI or environment."
                 )
                 skipped_servers.append(first_server)
                 status = 2
@@ -509,9 +513,15 @@ try:
             elif need_reload:
                 LOGGER.info(f"Detected change in {first_server}'s certificate")
                 status = 1
+                any_success = True
                 continue
 
+            any_success = True
             LOGGER.info(f"No change in {first_server}'s certificate")
+
+    # Do not fail the whole job if at least one service was processed successfully
+    if any_success and status == 2:
+        status = 0
 
     for first_server in skipped_servers:
         cert_id = normalize_cert_identifier(first_server)
