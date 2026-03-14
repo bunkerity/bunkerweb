@@ -3,7 +3,6 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from copy import deepcopy
 from functools import cache
-from io import BytesIO
 from json import loads
 from logging import Logger
 from os import getenv, listdir, sep
@@ -11,13 +10,12 @@ from os.path import join
 from pathlib import Path
 from re import DOTALL, compile as re_compile, error as RegexError, search as re_search
 from sys import path as sys_path
-from tarfile import open as tar_open
 from typing import Dict, List, Literal, Optional, Tuple, Union
 
 if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
     sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
 
-from common_utils import bytes_hash, add_dir_to_tar_safely  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
 
 
 class Configurator:
@@ -200,12 +198,9 @@ class Configurator:
             data["page"] = "ui" in listdir(file.parent)
 
             if _type != "core":
-                with BytesIO() as plugin_content:
-                    with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                        add_dir_to_tar_safely(tar, file.parent, arc_root=file.parent.name)
-                    plugin_content.seek(0)
-                    checksum = bytes_hash(plugin_content, algorithm="sha256")
-                    value = plugin_content.getvalue()
+                plugin_content = create_plugin_tar_gz(file.parent, arc_root=file.parent.name)
+                checksum = bytes_hash(plugin_content, algorithm="sha256")
+                value = plugin_content.getvalue()
 
                 data.update({"type": _type, "method": "manual", "data": value, "checksum": checksum})
 
@@ -271,7 +266,7 @@ class Configurator:
             if ret:
                 config[variable] = value
             elif variable == "SERVER_NAME":
-                self.__logger.critical(f"Invalid SERVER_NAME (check for duplicates or invalid characters) : {err} - {value = !r}")
+                self.__logger.critical(f"Invalid SERVER_NAME (check for duplicates or invalid characters) : {err} - {value=!r}")
                 exit(1)
             elif (
                 not first_run
@@ -279,7 +274,7 @@ class Configurator:
                 or variable in self.get_plugins_settings("core")
                 or not self.__variables.get("EXTERNAL_PLUGIN_URLS")
             ) or variable == "KUBERNETES_MODE":
-                self.__logger.warning(f"Ignoring variable {variable} : {err} - {value = !r}")
+                self.__logger.warning(f"Ignoring variable {variable} : {err} - {value=!r}")
 
         # Expand variables to each sites if MULTISITE=yes and if not present
         if config.get("MULTISITE", "no") == "yes":

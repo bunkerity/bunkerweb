@@ -14,8 +14,7 @@ from fastapi.responses import JSONResponse
 from ..auth.guard import guard
 from ..utils import get_db
 
-from common_utils import bytes_hash  # type: ignore
-
+from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
 
 router = APIRouter(prefix="/plugins", tags=["plugins"])
 
@@ -213,11 +212,8 @@ async def upload_plugins(files: List[UploadFile] = File(...), method: str = Form
                             _extract_plugin_from_zip(zipf, root, dest)
 
                             # Package full plugin dir to tar.gz bytes
-                            with BytesIO() as buf:
-                                with tar_open(fileobj=buf, mode="w:gz", compresslevel=9) as tf:
-                                    tf.add(dest, arcname=dest.name, recursive=True)
-                                buf.seek(0)
-                                blob = buf.getvalue()
+                            buf = create_plugin_tar_gz(dest, arc_root=dest.name)
+                            blob = buf.getvalue()
                             checksum = bytes_hash(BytesIO(blob), algorithm="sha256")
 
                             # Compute flags and call DB update
@@ -269,11 +265,8 @@ async def upload_plugins(files: List[UploadFile] = File(...), method: str = Form
                         dest.mkdir(parents=True, exist_ok=True)
                         _extract_plugin_from_tar(tarf, root, dest)
 
-                        with BytesIO() as buf:
-                            with tar_open(fileobj=buf, mode="w:gz", compresslevel=9) as tf:
-                                tf.add(dest, arcname=dest.name, recursive=True)
-                            buf.seek(0)
-                            blob = buf.getvalue()
+                        buf = create_plugin_tar_gz(dest, arc_root=dest.name)
+                        blob = buf.getvalue()
                         checksum = bytes_hash(BytesIO(blob), algorithm="sha256")
 
                         page = dest.joinpath("ui").is_dir()

@@ -1,0 +1,20 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Rule 942450: SQL Bin / Hex Evasion Methods
+##!
+##! Detects SQL hex and binary encoding used to evade detection:
+##!   - 0x hex prefix (e.g., 0xf00d)
+##!   - x'...' hex string literal (MySQL/SQLite)
+##!   - b'...' binary string literal (MySQL)
+
+##!+ i
+
+##! hex encoding: 0x followed by 3+ hex digits (word boundary anchored)
+\b0x[a-f\d]{3,}
+
+##! MySQL/SQLite hex string literal: x'...'
+x'[a-f\d]{3,}'
+
+##! MySQL binary string literal: b'...' (10+ binary digits)
+b'[0-1]{10,}'

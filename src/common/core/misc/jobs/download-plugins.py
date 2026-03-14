@@ -32,10 +32,9 @@ from magic import Magic
 from requests import get
 from requests.exceptions import ConnectionError
 
-from common_utils import bytes_hash, add_dir_to_tar_safely  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
 from Database import Database  # type: ignore
 from logger import getLogger  # type: ignore
-
 
 EXTERNAL_PLUGINS_DIR = Path(sep, "etc", "bunkerweb", "plugins")
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb", "plugins")
@@ -58,11 +57,8 @@ def _set_plugin_permissions(plugin_path: Path) -> None:
 
 def _plugin_checksum_matches_database(plugin_path: Path, checksum: str) -> bool:
     try:
-        with BytesIO() as plugin_content:
-            with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=3) as tar:
-                add_dir_to_tar_safely(tar, plugin_path, arc_root=plugin_path.name)
-            plugin_content.seek(0)
-            return bytes_hash(plugin_content, algorithm="sha256") == checksum
+        plugin_content = create_plugin_tar_gz(plugin_path, arc_root=plugin_path.name)
+        return bytes_hash(plugin_content, algorithm="sha256") == checksum
     except BaseException as e:
         LOGGER.debug(format_exc())
         LOGGER.warning(f"Could not verify plugin {plugin_path.name} integrity before skipping reinstall: {e}")
@@ -289,24 +285,21 @@ try:
             rmtree(plugin_path, ignore_errors=True)
             continue
 
-        with BytesIO() as plugin_content:
-            with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=3) as tar:
-                add_dir_to_tar_safely(tar, plugin_path, arc_root=plugin_path.name)
-            plugin_content.seek(0, 0)
+        plugin_content = create_plugin_tar_gz(plugin_path, arc_root=plugin_path.name)
 
-            with plugin_path.joinpath("plugin.json").open("r", encoding="utf-8") as f:
-                plugin_data = json_load(f)
+        with plugin_path.joinpath("plugin.json").open("r", encoding="utf-8") as f:
+            plugin_data = json_load(f)
 
-            checksum = bytes_hash(plugin_content, algorithm="sha256")
-            plugin_data.update(
-                {
-                    "type": "external",
-                    "page": plugin_path.joinpath("ui").is_dir(),
-                    "method": "scheduler",
-                    "data": plugin_content.getvalue(),
-                    "checksum": checksum,
-                }
-            )
+        checksum = bytes_hash(plugin_content, algorithm="sha256")
+        plugin_data.update(
+            {
+                "type": "external",
+                "page": plugin_path.joinpath("ui").is_dir(),
+                "method": "scheduler",
+                "data": plugin_content.getvalue(),
+                "checksum": checksum,
+            }
+        )
 
         external_plugins.append(plugin_data)
         external_plugins_ids.append(plugin_data["id"])

@@ -47,7 +47,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.9
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -62,7 +62,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.9
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -86,7 +86,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.9-rc2
+        image: bunkerity/bunkerweb-ui:1.6.9
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -206,14 +206,14 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
 ### Listener & TLS
 
-| Setting                             | Description                                | Accepted values                 | Default                                    |
-| ----------------------------------- | ------------------------------------------ | ------------------------------- | ------------------------------------------ |
-| `UI_LISTEN_ADDR`                    | Bind address for the UI                    | IP or hostname                  | `0.0.0.0` (Docker) / `127.0.0.1` (package) |
-| `UI_LISTEN_PORT`                    | Bind port for the UI                       | Integer                         | `7000`                                     |
-| `LISTEN_ADDR`, `LISTEN_PORT`        | Fallbacks when UI-specific vars are unset  | IP/hostname, integer            | `0.0.0.0`, `7000`                          |
-| `UI_SSL_ENABLED`                    | Enable TLS in the UI container             | `yes` or `no`                   | `no`                                       |
-| `UI_SSL_CERTFILE`, `UI_SSL_KEYFILE` | PEM cert and key paths when TLS is enabled | File paths                      | unset                                      |
-| `UI_SSL_CA_CERTS`                   | Optional CA/chain                          | File path                       | unset                                      |
+| Setting                             | Description                                | Accepted values                 | Default                                               |
+| ----------------------------------- | ------------------------------------------ | ------------------------------- | ----------------------------------------------------- |
+| `UI_LISTEN_ADDR`                    | Bind address for the UI                    | IP or hostname                  | `0.0.0.0` (Docker) / `127.0.0.1` (package)            |
+| `UI_LISTEN_PORT`                    | Bind port for the UI                       | Integer                         | `7000`                                                |
+| `LISTEN_ADDR`, `LISTEN_PORT`        | Fallbacks when UI-specific vars are unset  | IP/hostname, integer            | `0.0.0.0`, `7000`                                     |
+| `UI_SSL_ENABLED`                    | Enable TLS in the UI container             | `yes` or `no`                   | `no`                                                  |
+| `UI_SSL_CERTFILE`, `UI_SSL_KEYFILE` | PEM cert and key paths when TLS is enabled | File paths                      | unset                                                 |
+| `UI_SSL_CA_CERTS`                   | Optional CA/chain                          | File path                       | unset                                                 |
 | `UI_FORWARDED_ALLOW_IPS`            | Trusted proxy IPs for `X-Forwarded-*`      | Comma/space-separated IPs/CIDRs | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
 | `UI_PROXY_ALLOW_IPS`                | Trusted proxy IPs for PROXY protocol       | Comma/space-separated IPs/CIDRs | `FORWARDED_ALLOW_IPS`                                 |
 
@@ -244,14 +244,16 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
 ### Misc runtime
 
-| Setting                         | Description                                        | Accepted values | Default                              |
-| ------------------------------- | -------------------------------------------------- | --------------- | ------------------------------------ |
-| `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn workers/threads                           | Integer         | `cpu_count()-1` (min 1), `workers*2` |
-| `ENABLE_HEALTHCHECK`            | Expose `GET /healthcheck`                          | `yes` or `no`   | `no`                                 |
-| `FORWARDED_ALLOW_IPS`           | Alias for proxy allowlist                          | IPs/CIDRs       | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
-| `PROXY_ALLOW_IPS`               | Alias for PROXY allowlist                          | IPs/CIDRs       | `FORWARDED_ALLOW_IPS`                                 |
-| `DISABLE_CONFIGURATION_TESTING` | Skip test reloads when pushing config to instances | `yes` or `no`   | `no`                                 |
-| `IGNORE_REGEX_CHECK`            | Skip regex validation on settings                  | `yes` or `no`   | `no`                                 |
+| Setting                         | Description                                                           | Accepted values                          | Default                                               |
+| ------------------------------- | --------------------------------------------------------------------- | ---------------------------------------- | ----------------------------------------------------- |
+| `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn workers/threads                                              | Integer                                  | `cpu_count()-1` (min 1), `workers*2`                  |
+| `MAX_REQUESTS`                  | Requests before a Gunicorn worker is recycled (prevents memory bloat) | Integer                                  | `1000`                                                |
+| `ENABLE_HEALTHCHECK`            | Expose `GET /healthcheck`                                             | `yes` or `no`                            | `no`                                                  |
+| `FORWARDED_ALLOW_IPS`           | Alias for proxy allowlist                                             | IPs/CIDRs                                | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
+| `PROXY_ALLOW_IPS`               | Alias for PROXY allowlist                                             | IPs/CIDRs                                | `FORWARDED_ALLOW_IPS`                                 |
+| `DISABLE_CONFIGURATION_TESTING` | Skip test reloads when pushing config to instances                    | `yes` or `no`                            | `no`                                                  |
+| `IGNORE_REGEX_CHECK`            | Skip regex validation on settings                                     | `yes` or `no`                            | `no`                                                  |
+| `MAX_CONTENT_LENGTH`            | Maximum upload size (Flask `MAX_CONTENT_LENGTH`)                      | Size with unit (`50M`, `1G`, `52428800`) | `50MB`                                                |
 
 ## Log access
 

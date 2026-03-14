@@ -5,6 +5,50 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
+## Version 4.25.0 - 2026-03-DD - LTS Release
+
+## Version 4.24.1 - 2026-03-09
+
+## What's Changed
+### 🆕 New features and detections 🎉
+* feat(930140): add AI coding assistant artifact protection by @etiennemunnich in https://github.com/coreruleset/coreruleset/pull/4519
+* feat: Expand Scanner Agents by @HackingRepo in https://github.com/coreruleset/coreruleset/pull/4532
+
+## Fixes
+* fix(942480): don't inspect cookies twice by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4524
+* fix(942200): prevent matches against user agent strings by @theseion in https://github.com/coreruleset/coreruleset/pull/4537
+
+### 🧰 Other Changes
+* refactor: create 934130 `.ra` file by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4487
+* refactor: create 941330 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4492
+* refactor: create 944300 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4490
+* refactor: create 941320 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4491
+* refactor: create 921160 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4497
+* refactor: create 921120 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4496
+* refactor: create 921110 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4495
+* feat: move 930110 to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4494
+* refactor: create 941190 .ra file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4499
+* refactor: create 941400 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4517
+* refactor: create 942250 .ra file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4512
+* refactor: create 941370 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4518
+* refactor: create 944260 .ra file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4510
+* feat: move 943100 to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4504
+* refactor: create 944120 .ra file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4508
+* refactor: create 942450 .ra file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4513
+* refactor: create 942510 and 942511 .ra files with shared include by @fzipi in https://github.com/coreruleset/coreruleset/pull/4516
+* refactor: create 944240 .ra file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4509
+* docs: comment on threshold should be more alarming by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4330
+* chore: add missing regex-assembly comment blocks to rules by @fzipi in https://github.com/coreruleset/coreruleset/pull/4523
+* fix(913100): adding OWASP Nettacker to known scanners list by @securestep9 in https://github.com/coreruleset/coreruleset/pull/4529
+* refactor: create 941300 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4521
+
+## New Contributors
+* @etiennemunnich made their first contribution in https://github.com/coreruleset/coreruleset/pull/4519
+* @securestep9 made their first contribution in https://github.com/coreruleset/coreruleset/pull/4529
+* @HackingRepo made their first contribution in https://github.com/coreruleset/coreruleset/pull/4532
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.24.0...v4.24.1
+
 ## Version 4.24.0 - 2026-02-28
 
 ## What's Changed

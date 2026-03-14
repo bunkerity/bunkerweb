@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT([libmaxminddb], [1.13.2], [support@maxmind.com])
+AC_INIT([libmaxminddb], [1.13.3], [support@maxmind.com])
 AC_CONFIG_SRCDIR([include/maxminddb.h])
 AC_CONFIG_HEADERS([config.h include/maxminddb_config.h])
 
@@ -11,7 +11,7 @@ m4_ifdef([PKG_INSTALLDIR], [PKG_INSTALLDIR], [AC_SUBST([pkgconfigdir], [${libdir
 AC_CONFIG_FILES([src/libmaxminddb.pc])
 
 LT_INIT
-AM_INIT_AUTOMAKE(foreign m4_esyscmd([case `automake --version | head -n 1` in
+AM_INIT_AUTOMAKE(foreign tar-ustar m4_esyscmd([case `automake --version | head -n 1` in
                                      *1.14*) echo subdir-objects;;
                                      *1.11*);;
                                      *) echo serial-tests;;

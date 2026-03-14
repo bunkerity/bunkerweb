@@ -1,0 +1,10 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Rule 942510: SQLi bypass attempt by backticks - PL2
+##! See also 942511 (single quotes, PL3) which shares the same payload pattern.
+
+##!^ `
+##!$ `
+
+##!> include sqli-tick-payload

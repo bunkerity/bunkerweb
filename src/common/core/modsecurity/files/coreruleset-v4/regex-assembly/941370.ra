@@ -1,0 +1,44 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+##!
+##! Rule 941370: JavaScript global variable found
+##! Detects bypass of 941180 using JavaScript global variables
+##! with bracket notation or comment obfuscation.
+##! e.g. self["document"]["cookie"]
+##! e.g. document /*foo*/ . /*bar*/ cookie
+##! Reference: https://www.secjuice.com/bypass-xss-filters-using-javascript-global-variables/
+
+##! JS global variables
+##!> assemble
+  self
+  document
+  this
+  top
+  window
+  ##!=< js-globals
+##!<
+
+##! Opening delimiter: block comment or bracket/paren
+##!> assemble
+  /\*
+  [\[)]
+  ##!=< opener
+##!<
+
+##! Closing delimiter: bracket close or block comment close
+##!> assemble
+  \]
+  \*/
+  ##!=< closer
+##!<
+
+##!> assemble
+  ##!=> js-globals
+  \s*
+  ##!=> opener
+  .+?
+  ##!=> closer
+##!<

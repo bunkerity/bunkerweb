@@ -1,4 +1,4 @@
-from contextlib import suppress
+from contextlib import asynccontextmanager, suppress
 from functools import lru_cache
 from io import StringIO
 from os import sep
@@ -27,6 +27,17 @@ from .config import api_config
 BUNKERWEB_VERSION = get_version()
 
 
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    yield
+    from .utils import _DB_INSTANCE, _API_DB_INSTANCE
+
+    for db in (_DB_INSTANCE, _API_DB_INSTANCE):
+        if db is not None:
+            with suppress(Exception):
+                db.close()
+
+
 def create_app() -> FastAPI:
     app = FastAPI(
         title="BunkerWeb API",
@@ -40,6 +51,7 @@ def create_app() -> FastAPI:
         redoc_url=api_config.redoc_url,
         openapi_url=api_config.openapi_url,
         root_path=api_config.API_ROOT_PATH or "",
+        lifespan=lifespan,
     )
 
     # Optional IP whitelist (enabled by default, can be disabled)

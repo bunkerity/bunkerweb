@@ -121,7 +121,7 @@ try:
         LOGGER.error(f"Patch script not found: {PATCH_SCRIPT}")
         sys_exit(1)
 
-    # * Check if we're using the 4 or nightly version of the Core Rule Set (CRS)
+    # * Check if we're using a version of the Core Rule Set (CRS) compatible with plugins
     use_right_crs_version = False
     use_modsecurity_crs_plugins = False
 
@@ -163,7 +163,7 @@ try:
         LOGGER.info("No Core Rule Set (CRS) plugins found, skipping download...")
         sys_exit(0)
     elif not use_right_crs_version:
-        LOGGER.warning("No service is using a compatible Core Rule Set (CRS) version with the plugins (4 or nightly), skipping download...")
+        LOGGER.warning("No service is using a compatible Core Rule Set (CRS) version with the plugins (4), skipping download...")
         sys_exit(0)
 
     JOB = Job(LOGGER, __file__)

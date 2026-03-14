@@ -51,7 +51,7 @@ for deps_path in [os_join(sep, "usr", "share", "bunkerweb", *paths) for paths in
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from common_utils import bytes_hash  # type: ignore
+from common_utils import bytes_hash, PLUGIN_TAR_COMPRESS_LEVEL  # type: ignore
 
 from pymysql import install_as_MySQLdb
 from sqlalchemy import case, create_engine, event, MetaData as sql_metadata, func, join, select as db_select, text
@@ -223,15 +223,65 @@ class Database:
             self.logger.error("Oracle database is not supported yet")
             _exit(1)
 
+        # Pool size
+        pool_size = getenv("DATABASE_POOL_SIZE", "40")
+        if pool_size.isdigit() and int(pool_size) >= 0:
+            pool_size = int(pool_size)
+        else:
+            self.logger.warning(f"Invalid DATABASE_POOL_SIZE value: {pool_size}, using default value (40)")
+            pool_size = 40
+
+        # Max overflow
+        max_overflow = getenv("DATABASE_POOL_MAX_OVERFLOW", "20")
+        try:
+            max_overflow = int(max_overflow)
+        except ValueError:
+            self.logger.warning(f"Invalid DATABASE_POOL_MAX_OVERFLOW value: {max_overflow}, using default value (20)")
+            max_overflow = 20
+
+        # Pool timeout
+        pool_timeout = getenv("DATABASE_POOL_TIMEOUT", "5")
+        if pool_timeout.isdigit() and int(pool_timeout) >= 0:
+            pool_timeout = int(pool_timeout)
+        else:
+            self.logger.warning(f"Invalid DATABASE_POOL_TIMEOUT value: {pool_timeout}, using default value (5)")
+            pool_timeout = 5
+
+        # Pool recycle
+        pool_recycle = getenv("DATABASE_POOL_RECYCLE", "1800")
+        try:
+            pool_recycle = int(pool_recycle)
+        except ValueError:
+            self.logger.warning(f"Invalid DATABASE_POOL_RECYCLE value: {pool_recycle}, using default value (1800)")
+            pool_recycle = 1800
+
+        # Pool pre-ping
+        pool_pre_ping = getenv("DATABASE_POOL_PRE_PING", "yes").lower() in ("yes", "true", "1")
+
+        self.logger.debug(
+            f"Database pool configuration: pool_size={pool_size}, max_overflow={max_overflow}, pool_timeout={pool_timeout}, pool_recycle={pool_recycle}, pool_pre_ping={pool_pre_ping}"
+        )
+
         self._engine_kwargs = {
             "future": True,
             "poolclass": QueuePool,
-            "pool_pre_ping": True,
-            "pool_recycle": 1800,
-            "pool_size": 40,
-            "max_overflow": 20,
-            "pool_timeout": 5,
+            "pool_pre_ping": pool_pre_ping,
+            "pool_recycle": pool_recycle,
+            "pool_size": pool_size,
+            "max_overflow": max_overflow,
+            "pool_timeout": pool_timeout,
         } | kwargs
+
+        if "pool_reset_on_return" not in kwargs:
+            default_pool_reset = "rollback"
+            configured_pool_reset = getenv("DATABASE_POOL_RESET_ON_RETURN", "").strip().lower() or default_pool_reset
+            if configured_pool_reset in ("none", "null", "off", "false", "no"):
+                self._engine_kwargs["pool_reset_on_return"] = None
+            elif configured_pool_reset in ("rollback", "commit"):
+                self._engine_kwargs["pool_reset_on_return"] = configured_pool_reset
+            else:
+                self.logger.warning(f"Invalid DATABASE_POOL_RESET_ON_RETURN value: {configured_pool_reset}, using default value ({default_pool_reset})")
+                self._engine_kwargs["pool_reset_on_return"] = default_pool_reset
 
         try:
             self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
@@ -305,6 +355,8 @@ class Database:
         if log:
             self.logger.info(f"✅ Database connection established{'' if not self.readonly else ' in read-only mode'}")
 
+        self._session_factory = scoped_session(sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False))
+
         if match.group("database").startswith("sqlite"):
             db_path = Path(match.group("path"))
             try:
@@ -314,13 +366,14 @@ class Database:
             except (OSError, IOError) as e:
                 self.logger.warning(f"Could not set file permissions on {db_path}: {e}")
 
-    def __del__(self) -> None:
-        """Close the database"""
-        if self._session_factory:
-            self._session_factory.close_all()
+    def close(self) -> None:
+        """Explicitly close all sessions and dispose the engine pool.
+        Only call during controlled shutdown when no other threads are using this instance."""
+        if getattr(self, "_session_factory", None):
+            self._session_factory.remove()
 
-        if self.sql_engine:
-            self.sql_engine.dispose()
+        if getattr(self, "sql_engine", None):
+            self.sql_engine.dispose(close=True)
 
     def _empty_if_none(self, value: Any) -> Any:
         """Return an empty string if the value is None or convert None values in collections"""
@@ -425,6 +478,11 @@ class Database:
         self.sql_engine.dispose(close=True)
         self.sql_engine = create_engine(self.database_uri_readonly if fallback else self.database_uri, **self._engine_kwargs | kwargs)
 
+        with LOCK:
+            if self._session_factory is not None:
+                self._session_factory.remove()
+            self._session_factory = scoped_session(sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False))
+
         if fallback or readonly:
             with self.sql_engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
@@ -443,18 +501,18 @@ class Database:
             self.logger.error("The database engine is not initialized")
             _exit(1)
 
-        with LOCK:
-            session = None
-            try:
-                session_factory = sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False)
-                session = scoped_session(session_factory)
-                yield session
-            except BaseException as e:
-                if session:
+        session = None
+        try:
+            session = self._session_factory
+            yield session
+        except BaseException as e:
+            if session:
+                with suppress(Exception):
                     session.rollback()
 
-                if any(error in str(e) for error in self.READONLY_ERROR):
-                    self.logger.warning("The database is read-only, retrying in read-only mode ...")
+            if any(error in str(e) for error in self.READONLY_ERROR):
+                self.logger.warning("The database is read-only, retrying in read-only mode ...")
+                with LOCK:
                     try:
                         self.retry_connection(readonly=True, pool_timeout=1)
                         self.retry_connection(readonly=True, log=False)
@@ -465,15 +523,17 @@ class Database:
                                 self.retry_connection(fallback=True, pool_timeout=1)
                             self.retry_connection(fallback=True, log=False)
                     self.readonly = True
-                elif isinstance(e, (ConnectionRefusedError, OperationalError)) and self.database_uri_readonly:
-                    self.logger.warning("Can't connect to the database, falling back to read-only one ...")
+            elif isinstance(e, (ConnectionRefusedError, OperationalError)) and self.database_uri_readonly:
+                self.logger.warning("Can't connect to the database, falling back to read-only one ...")
+                with LOCK:
                     with suppress(OperationalError, DatabaseError):
                         self.retry_connection(fallback=True, pool_timeout=1)
                         self.retry_connection(fallback=True, log=False)
                         self.readonly = True
-                raise
-            finally:
-                if session:
+            raise
+        finally:
+            if session:
+                with suppress(Exception):
                     session.remove()
 
     def is_valid_setting(
@@ -570,7 +630,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.9~rc2"
+                return "1.6.9"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -604,7 +664,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.9~rc2",
+            "version": "1.6.9",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -933,14 +993,20 @@ class Database:
                     path_ui = plugin_path.joinpath("ui")
                     if path_ui.is_dir():
                         with BytesIO() as plugin_page_content:
-                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
-                            plugin_page_content.seek(0)
-                            checksum = bytes_hash(plugin_page_content, algorithm="sha256")
-                            desired_plugin_pages[base_plugin["id"]] = {
-                                "data": plugin_page_content.getvalue(),
-                                "checksum": checksum,
-                            }
+                            tar_success = True
+                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=PLUGIN_TAR_COMPRESS_LEVEL) as tar:
+                                try:
+                                    tar.add(path_ui, arcname=path_ui.name, recursive=True)
+                                except (FileNotFoundError, OSError) as e:
+                                    self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
+                                    tar_success = False
+                            if tar_success:
+                                plugin_page_content.seek(0)
+                                checksum = bytes_hash(plugin_page_content, algorithm="sha256")
+                                desired_plugin_pages[base_plugin["id"]] = {
+                                    "data": plugin_page_content.getvalue(),
+                                    "checksum": checksum,
+                                }
 
             for plugins in default_plugins:
                 if not isinstance(plugins, list):
@@ -3408,11 +3474,20 @@ class Database:
                     if path_ui.is_dir():
                         remove = True
                         with BytesIO() as plugin_page_content:
-                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
-                            plugin_page_content.seek(0)
-                            checksum = bytes_hash(plugin_page_content, algorithm="sha256")
-                            content = plugin_page_content.getvalue()
+                            tar_success = True
+                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=PLUGIN_TAR_COMPRESS_LEVEL) as tar:
+                                try:
+                                    tar.add(path_ui, arcname=path_ui.name, recursive=True)
+                                except (FileNotFoundError, OSError) as e:
+                                    self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
+                                    tar_success = False
+                            if tar_success:
+                                plugin_page_content.seek(0)
+                                checksum = bytes_hash(plugin_page_content, algorithm="sha256")
+                                content = plugin_page_content.getvalue()
+                            else:
+                                remove = False
+                                continue
 
                         if not db_plugin_page:
                             changes = True
@@ -3829,12 +3904,18 @@ class Database:
                     path_ui = plugin_path.joinpath("ui")
                     if path_ui.is_dir():
                         with BytesIO() as plugin_page_content:
-                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
-                            plugin_page_content.seek(0)
-                            checksum = bytes_hash(plugin_page_content, algorithm="sha256")
+                            tar_success = True
+                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=PLUGIN_TAR_COMPRESS_LEVEL) as tar:
+                                try:
+                                    tar.add(path_ui, arcname=path_ui.name, recursive=True)
+                                except (FileNotFoundError, OSError) as e:
+                                    self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
+                                    tar_success = False
+                            if tar_success:
+                                plugin_page_content.seek(0)
+                                checksum = bytes_hash(plugin_page_content, algorithm="sha256")
 
-                            local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=plugin_page_content.getvalue(), checksum=checksum))
+                                local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=plugin_page_content.getvalue(), checksum=checksum))
 
                 for command, file_name in commands.items():
                     if not plugin_path.joinpath("bwcli", file_name).is_file():
@@ -4496,16 +4577,17 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            db_instance = session.query(Instances).filter_by(hostname=hostname).first()
-
-            if db_instance is None:
-                return f"Instance {hostname} does not exist, will not be updated."
-
-            db_instance.status = status
+            # Use a direct UPDATE to avoid race conditions with concurrent threads
+            update_values: dict = {"status": status}
             if status != "down":
-                db_instance.last_seen = datetime.now().astimezone()
+                update_values["last_seen"] = datetime.now().astimezone()
 
             try:
+                result = session.query(Instances).filter_by(hostname=hostname).update(update_values, synchronize_session=False)
+
+                if result == 0:
+                    return f"Instance {hostname} does not exist, will not be updated."
+
                 session.commit()
             except BaseException as e:
                 return f"An error occurred while updating the instance {hostname}.\n{e}"
@@ -4529,31 +4611,32 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            db_instance = session.query(Instances).filter_by(hostname=hostname).first()
-            if db_instance is None:
-                return f"Instance {hostname} does not exist, will not be updated."
-
+            # Use a direct UPDATE to avoid race conditions with concurrent threads
+            # (MariaDB error 1020: "Record has changed since last read")
+            update_values: dict = {}
             if name is not None:
-                db_instance.name = name
+                update_values["name"] = name
             if port is not None:
-                db_instance.port = port
+                update_values["port"] = port
             if listen_https is not None:
-                db_instance.listen_https = listen_https
+                update_values["listen_https"] = listen_https
             if https_port is not None:
-                db_instance.https_port = https_port
+                update_values["https_port"] = https_port
             if server_name is not None:
-                db_instance.server_name = server_name
+                update_values["server_name"] = server_name
             if method is not None:
-                db_instance.method = method
-
-            if changed:
-                with suppress(ProgrammingError, OperationalError):
-                    metadata = session.query(Metadata).get(1)
-                    if metadata is not None:
-                        metadata.instances_changed = True
-                        metadata.last_instances_change = datetime.now().astimezone()
+                update_values["method"] = method
 
             try:
+                if update_values:
+                    result = session.query(Instances).filter_by(hostname=hostname).update(update_values, synchronize_session=False)
+                    if result == 0:
+                        return f"Instance {hostname} does not exist, will not be updated."
+
+                if changed:
+                    with suppress(ProgrammingError, OperationalError):
+                        session.query(Metadata).filter_by(id=1).update({"instances_changed": True, "last_instances_change": datetime.now().astimezone()})
+
                 session.commit()
             except BaseException as e:
                 return f"An error occurred while updating the instance {hostname}.\n{e}"
