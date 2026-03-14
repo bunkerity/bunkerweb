@@ -69,15 +69,9 @@ local function check_cert_ttl(cert_pem, server_name, logger)
 	end
 end
 
--- Try key-type suffixes (ecdsa, rsa, ML-DSA, SLH-DSA, pqc), then no suffix. Order matches custom-cert.
-local function read_cert_files_by_identifier(identifier)
-	if not identifier or identifier == "" then
-		return false, "empty identifier", nil
-	end
-	if identifier:sub(1, 2) == "*." then
-		identifier = WILDCARD_CERT_NAME_PREFIX .. identifier:sub(3)
-	end
-	local candidates = {
+-- Candidate dir names per identifier; order matches custom-cert.py CERT_DIR_SUFFIXES then no suffix.
+local function build_candidates(identifier)
+	return {
 		identifier .. "-ecdsa",
 		identifier .. "-rsa",
 		identifier .. "-ML-DSA",
@@ -85,14 +79,51 @@ local function read_cert_files_by_identifier(identifier)
 		identifier .. "-pqc",
 		identifier,
 	}
-	for _, name in ipairs(candidates) do
-		local paths = { customcert_prefix .. name .. "/cert.pem", customcert_prefix .. name .. "/key.pem" }
-		local check, data = read_files(paths)
-		if check then
-			return check, data, name
+end
+
+-- Only two layouts: identifier/cert.pem, key.pem and identifier-TYPE/cert.pem, key.pem.
+-- For a service like mirror.example.com, also try _wildcard_.example.com (wildcard cert for *.example.com).
+-- On failure returns (false, err_msg, nil, searched_dirs) so callers can log all dirs searched.
+local function read_cert_files_by_identifier(identifier)
+	if not identifier or identifier == "" then
+		return false, "empty identifier", nil, {}
+	end
+	local function try_identifier(id, searched_dirs)
+		for _, name in ipairs(build_candidates(id)) do
+			local dir = customcert_prefix .. name
+			searched_dirs[#searched_dirs + 1] = dir
+			local paths = { dir .. "/cert.pem", dir .. "/key.pem" }
+			-- Use pcall to suppress errors during search phase (files may not exist for some candidates)
+			local ok, check, data = pcall(read_files, paths)
+			if ok and check then
+				ngx.log(ngx.DEBUG, "customcert: ✓ found cert files in " .. dir)
+				return check, data, name
+			else
+				ngx.log(ngx.DEBUG, "customcert: cert files not found in " .. dir)
+			end
+		end
+		return nil
+	end
+	local searched_dirs = {}
+	if identifier:sub(1, 2) == "*." then
+		identifier = WILDCARD_CERT_NAME_PREFIX .. identifier:sub(3)
+	end
+	local check, data, name = try_identifier(identifier, searched_dirs)
+	if check then
+		return check, data, name
+	end
+	-- Fallback: wildcard cert for this domain (e.g. mirror.example.com -> _wildcard_.example.com)
+	if identifier:sub(1, #WILDCARD_CERT_NAME_PREFIX) ~= WILDCARD_CERT_NAME_PREFIX then
+		local parent_domain = identifier:match("^[^%.]+%.(.+)$")
+		if parent_domain and parent_domain ~= "" then
+			local wildcard_id = WILDCARD_CERT_NAME_PREFIX .. parent_domain
+			check, data, name = try_identifier(wildcard_id, searched_dirs)
+			if check then
+				return check, data, name
+			end
 		end
 	end
-	return false, "no cert found for " .. identifier, nil
+	return false, "no cert found for " .. identifier, nil, searched_dirs
 end
 
 function customcert:initialize(ctx)
@@ -108,62 +139,105 @@ function customcert:set()
 	return self:ret(true, "set https_configured to " .. https_configured)
 end
 
-function customcert:init()
+-- Load custom certs from disk into internalstore. Used by init() (master) and init_worker() (workers).
+-- Workers run init_worker after cache is synced, so certs are available on reload.
+function customcert:load_certs_from_disk()
 	local ret_ok, ret_err = true, "success"
-	if has_variable("USE_CUSTOM_SSL", "yes") then
-		local multisite, err = get_variable("MULTISITE", false)
-		if not multisite then
-			return self:ret(false, "can't get MULTISITE variable : " .. err)
+	local any_service_with_certs = false  -- Track if any service had USE_CUSTOM_SSL=yes
+	local any_service_loaded = false      -- Track if at least one service successfully loaded certs
+	self.logger:log(ngx.DEBUG, "customcert: load_certs_from_disk() called")
+	local multisite, err = get_variable("MULTISITE", false)
+	if not multisite then
+		return self:ret(false, "can't get MULTISITE variable : " .. err)
+	end
+	-- In multisite mode, allow processing if any service has USE_CUSTOM_SSL=yes
+	-- In single-site mode, require global USE_CUSTOM_SSL=yes
+	if multisite ~= "yes" and not has_variable("USE_CUSTOM_SSL", "yes") then
+		self.logger:log(ngx.DEBUG, "customcert: custom cert is not used (single-site mode, global USE_CUSTOM_SSL is not yes)")
+		return self:ret(true, "custom cert is not used")
+	end
+	if multisite == "yes" then
+		local vars
+		vars, err = get_multiple_variables({ "USE_CUSTOM_SSL", "SERVER_NAME" })
+		if not vars then
+			return self:ret(false, "can't get USE_CUSTOM_SSL variables : " .. err)
 		end
-		if multisite == "yes" then
-			local vars
-			vars, err = get_multiple_variables({ "USE_CUSTOM_SSL", "SERVER_NAME" })
-			if not vars then
-				return self:ret(false, "can't get USE_CUSTOM_SSL variables : " .. err)
+		self.logger:log(ngx.DEBUG, "customcert: processing " .. tostring(#vars) .. " services in multisite mode")
+		for server_name, multisite_vars in pairs(vars) do
+			if server_name ~= "global" then
+				if multisite_vars["USE_CUSTOM_SSL"] == "yes" then
+					any_service_with_certs = true
+					self.logger:log(ngx.INFO, "customcert: loading custom cert for service " .. server_name)
+				else
+					self.logger:log(ngx.DEBUG, "customcert: skipping service " .. server_name .. " (USE_CUSTOM_SSL is not yes)")
+				end
 			end
-			for server_name, multisite_vars in pairs(vars) do
-				if multisite_vars["USE_CUSTOM_SSL"] == "yes" and server_name ~= "global" then
-					local check, data = read_cert_files_by_identifier(server_name)
+			if multisite_vars["USE_CUSTOM_SSL"] == "yes" and server_name ~= "global" then
+				local check, data, cert_dir, searched_dirs = read_cert_files_by_identifier(server_name)
+				if not check then
+					local msg = "customcert: ⚠️ " .. data
+					if searched_dirs and #searched_dirs > 0 then
+						msg = msg .. " (directories searched: " .. table.concat(searched_dirs, ", ") .. ")"
+					end
+					self.logger:log(WARN, msg)
+					-- Don't fail init() if one service's cert is missing - just warn
+					-- But track that we had at least one service with certs enabled
+				else
+					any_service_loaded = true
+					self.logger:log(ngx.INFO, "customcert: ✓ found cert in directory " .. (cert_dir or "unknown") .. " for " .. server_name)
+					pcall(check_cert_ttl, data[1], multisite_vars["SERVER_NAME"] or server_name, self.logger)
+					check, err = self:load_data(data, multisite_vars["SERVER_NAME"])
 					if not check then
-						self.logger:log(ERR, "error while reading files : " .. data)
+						self.logger:log(ERR, "customcert: ❌ error while loading data into internalstore : " .. err)
 						ret_ok = false
-						ret_err = "error reading files"
+						ret_err = "error loading data"
 					else
-						pcall(check_cert_ttl, data[1], multisite_vars["SERVER_NAME"] or server_name, self.logger)
-						check, err = self:load_data(data, multisite_vars["SERVER_NAME"])
-						if not check then
-							self.logger:log(ERR, "error while loading data : " .. err)
-							ret_ok = false
-							ret_err = "error loading data"
-						end
+						self.logger:log(ngx.INFO, "customcert: ✓ loaded custom cert into internalstore for " .. server_name)
 					end
 				end
 			end
-		else
-			local server_name
-			server_name, err = get_variable("SERVER_NAME", false)
-			if not server_name then
-				return self:ret(false, "can't get SERVER_NAME variable : " .. err)
-			end
-			local check, data = read_cert_files_by_identifier(server_name:match("%S+"))
-			if not check then
-				self.logger:log(ERR, "error while reading files : " .. data)
-				ret_ok = false
-				ret_err = "error reading files"
-			else
-				pcall(check_cert_ttl, data[1], server_name, self.logger)
-				check, err = self:load_data(data, server_name)
-				if not check then
-					self.logger:log(ERR, "error while loading data : " .. err)
-					ret_ok = false
-					ret_err = "error loading data"
-				end
-			end
+		end
+		-- In multisite mode, only fail if we expected certs but couldn't load ANY of them
+		if any_service_with_certs and not any_service_loaded then
+			ret_ok = false
+			ret_err = "no custom certificates could be loaded"
 		end
 	else
-		ret_err = "custom cert is not used"
+		local server_name
+		server_name, err = get_variable("SERVER_NAME", false)
+		if not server_name then
+			return self:ret(false, "can't get SERVER_NAME variable : " .. err)
+		end
+		local check, data, _, searched_dirs = read_cert_files_by_identifier(server_name:match("%S+"))
+		if not check then
+			local msg = "customcert: " .. data
+			if searched_dirs and #searched_dirs > 0 then
+				msg = msg .. " (directories searched: " .. table.concat(searched_dirs, ", ") .. ")"
+			end
+			self.logger:log(ERR, msg)
+			ret_ok = false
+			ret_err = "error reading files"
+		else
+			pcall(check_cert_ttl, data[1], server_name, self.logger)
+			check, err = self:load_data(data, server_name)
+			if not check then
+				self.logger:log(ERR, "error while loading data : " .. err)
+				ret_ok = false
+				ret_err = "error loading data"
+			end
+		end
 	end
 	return self:ret(ret_ok, ret_err)
+end
+
+function customcert:init()
+	return self:load_certs_from_disk()
+end
+
+-- Load certs from disk in each worker so custom certs are available after cache sync and reload.
+-- Master init() may run before cache is present on this instance; init_worker runs after workers start.
+function customcert:init_worker()
+	return self:load_certs_from_disk()
 end
 
 function customcert:ssl_certificate()
@@ -174,37 +248,48 @@ function customcert:ssl_certificate()
 		end
 		return self:ret(true, "no SNI provided")
 	end
-	local data
-	data, err = self.internalstore:get("plugin_customcert_" .. server_name, true)
-	if not data and err ~= "not found" then
-		return self:ret(
-			false,
-			"error while getting plugin_customcert_" .. server_name .. " from internalstore : " .. err
-		)
-	elseif data then
-		return self:ret(true, "certificate/key data found", data)
+	-- Normalize SNI (e.g. strip trailing dot) so lookup matches what we stored
+	server_name = server_name:gsub("%.$", ""):match("^%s*(.-)%s*$") or server_name
+	self.logger:log(ngx.INFO, "customcert: ssl_certificate() called for SNI=" .. server_name)
+
+	local cert_pem, key_pem
+	cert_pem, err = self.internalstore:get("plugin_customcert_" .. server_name .. "_cert", false)
+	if not cert_pem or cert_pem == "" then
+		self.logger:log(ngx.DEBUG, "customcert: no cert found in internalstore for " .. server_name .. ", checking LE...")
+		return self:ret(true, "custom certificate is not used")
 	end
-	return self:ret(true, "custom certificate is not used")
+	self.logger:log(ngx.INFO, "customcert: found cert in internalstore for " .. server_name)
+
+	key_pem, err = self.internalstore:get("plugin_customcert_" .. server_name .. "_key", false)
+	if not key_pem or key_pem == "" then
+		self.logger:log(ngx.DEBUG, "customcert: found cert but no key in internalstore for " .. server_name)
+		return self:ret(true, "custom certificate is not used")
+	end
+
+	local cert_chain, _ = parse_pem_cert(cert_pem)
+	local priv_key, _ = parse_pem_priv_key(key_pem)
+	if not cert_chain or not priv_key then
+		self.logger:log(ngx.DEBUG, "customcert: found cert/key but failed to parse for " .. server_name)
+		return self:ret(true, "custom certificate is not used")
+	end
+	self.logger:log(ngx.INFO, "✓ customcert: using custom certificate for " .. server_name)
+	return self:ret(true, "certificate/key data found", { cert_chain, priv_key })
 end
 
 function customcert:load_data(data, server_name)
-	-- Load certificate
-	local cert_chain, err = parse_pem_cert(data[1])
-	if not cert_chain then
-		return false, "error while parsing pem cert : " .. err
-	end
-	-- Load key
-	local priv_key, err = parse_pem_priv_key(data[2])
-	if not priv_key then
-		return false, "error while parsing pem priv key : " .. err
-	end
-	-- Cache data
+	-- Store raw PEM strings in shared dict (worker=false) so all workers see certs without init_worker timing
 	for key in server_name:gmatch("%S+") do
-		local cache_key = "plugin_customcert_" .. key
+		local key_trim = key:gsub("%.$", ""):match("^%s*(.-)%s*$") or key
+		local cert_key = "plugin_customcert_" .. key_trim .. "_cert"
+		local key_key = "plugin_customcert_" .. key_trim .. "_key"
 		local ok
-		ok, err = self.internalstore:set(cache_key, { cert_chain, priv_key }, nil, true)
+		ok, err = self.internalstore:set(cert_key, data[1], nil, false)
 		if not ok then
-			return false, "error while setting data into internalstore : " .. err
+			return false, "error while setting data into internalstore : " .. (err or "")
+		end
+		ok, err = self.internalstore:set(key_key, data[2], nil, false)
+		if not ok then
+			return false, "error while setting data into internalstore : " .. (err or "")
 		end
 	end
 	return true

@@ -356,6 +356,79 @@ def _ensure_pem_bytes(data: bytes, kind: str) -> Tuple[Optional[bytes], Optional
     return None, msg
 
 
+def verify_cert_matches_service(cert: Certificate, service_name: str) -> Tuple[bool, str]:
+    """
+    Verify that the certificate's CN and SAN match the service name.
+    Supports wildcard matching (e.g., *.example.com matches subdomain.example.com).
+
+    Args:
+        cert: Loaded X.509 certificate object
+        service_name: The service name/SNI to verify against
+
+    Returns:
+        Tuple of (is_match, debug_message)
+    """
+    try:
+        from cryptography.x509 import SubjectAlternativeName, DNSName
+        from cryptography.x509.oid import ExtensionOID, NameOID
+
+        cert_domains = set()
+
+        # Extract CN (Common Name) from Subject
+        try:
+            cn = cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
+            if cn:
+                cn_value = str(cn[0].value).lower()
+                cert_domains.add(cn_value)
+                LOGGER.debug(f"📋 Certificate CN: {cn_value}")
+        except Exception as e:
+            LOGGER.debug(f"⚠️ Could not extract CN from certificate: {e}")
+
+        # Extract SAN (Subject Alternative Names)
+        try:
+            san_ext = cert.extensions.get_extension_for_oid(ExtensionOID.SUBJECT_ALTERNATIVE_NAME)
+            if isinstance(san_ext.value, SubjectAlternativeName):
+                for name in san_ext.value:
+                    if isinstance(name, DNSName):
+                        dns_value = str(name.value).lower()
+                        cert_domains.add(dns_value)
+                LOGGER.debug(f"📋 Certificate SANs: {', '.join(sorted(cert_domains))}")
+        except Exception as e:
+            LOGGER.debug(f"⚠️ Could not extract SAN from certificate: {e}")
+
+        if not cert_domains:
+            msg = f"❌ Certificate has no CN or SAN domains configured"
+            return False, msg
+
+        service_lower = service_name.lower()
+
+        # Check exact match
+        if service_lower in cert_domains:
+            msg = f"✓ Certificate matches service: {service_name} found in {', '.join(sorted(cert_domains))}"
+            LOGGER.info(msg)
+            return True, msg
+
+        # Check wildcard match
+        for cert_domain in cert_domains:
+            if cert_domain.startswith("*."):
+                # Wildcard certificate (e.g., *.example.com)
+                wildcard_base = cert_domain[2:]  # Remove "*."
+                if service_lower.endswith("." + wildcard_base) or service_lower == wildcard_base:
+                    msg = f"✓ Certificate wildcard matches service: {cert_domain} matches {service_name}"
+                    LOGGER.info(msg)
+                    return True, msg
+
+        # No match found
+        msg = f"❌ Certificate domain mismatch: service={service_name}, certificate domains={', '.join(sorted(cert_domains))}"
+        LOGGER.warning(msg)
+        return False, msg
+
+    except Exception as e:
+        msg = f"⚠️ Error verifying certificate domains: {e}"
+        LOGGER.warning(msg)
+        return False, msg
+
+
 def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], first_server: str) -> Tuple[bool, Union[str, BaseException]]:
     try:
         ret = False
@@ -399,9 +472,16 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
             LOGGER.warning(err)
             return False, err
 
+        # Verify that the certificate actually matches the service name
+        cert_matches, match_msg = verify_cert_matches_service(cert, first_server)
+        if not cert_matches:
+            LOGGER.error(f"Certificate validation failed for {first_server}: {match_msg}")
+            return False, match_msg
+
         key_type = get_key_type(key_file, cert_file)
         cert_identifier = normalize_cert_identifier(first_server)
         cert_dir = resolve_cert_dir(cert_identifier, key_type)
+        LOGGER.debug(f"📁 Certificate cache directory: {cert_dir}")
 
         # Validate certificate validity/expiry using cryptography
         now = datetime.now(timezone.utc)
@@ -420,22 +500,32 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
         cert_hash = bytes_hash(cert_file)
         old_hash = JOB.cache_hash("cert.pem", service_id=cert_dir)
         cert_path = CUSTOMCERT_CACHE_ROOT / cert_dir / "cert.pem"
+        LOGGER.debug(f"📋 Certificate hash: {cert_hash[:8]}..., Previous hash: {old_hash[:8] if old_hash else 'none'}...")
         if old_hash != cert_hash or not cert_path.is_file():
             ret = True
+            LOGGER.info(f"💾 Uploading certificate for {first_server} to {cert_dir}/cert.pem (hash: {cert_hash[:8]}...)")
             cached, err = JOB.cache_file("cert.pem", cert_file, service_id=cert_dir, checksum=cert_hash, delete_file=False)
             if not cached:
-                LOGGER.error(f"Error while caching custom-cert cert.pem file : {err}")
+                LOGGER.error(f"❌ Error while caching custom-cert cert.pem file for {first_server}: {err}")
                 return False, err
+            LOGGER.info(f"✓ Successfully cached certificate for {first_server}")
+        else:
+            LOGGER.debug(f"✓ Certificate for {first_server} unchanged, skipping cert upload")
 
         key_hash = bytes_hash(key_file)
         old_hash = JOB.cache_hash("key.pem", service_id=cert_dir)
         key_path = CUSTOMCERT_CACHE_ROOT / cert_dir / "key.pem"
+        LOGGER.debug(f"🔑 Key hash: {key_hash[:8]}..., Previous hash: {old_hash[:8] if old_hash else 'none'}...")
         if old_hash != key_hash or not key_path.is_file():
             ret = True
+            LOGGER.info(f"💾 Uploading key for {first_server} to {cert_dir}/key.pem (hash: {key_hash[:8]}...)")
             cached, err = JOB.cache_file("key.pem", key_file, service_id=cert_dir, checksum=key_hash, delete_file=False)
             if not cached:
-                LOGGER.error(f"Error while caching custom-key key.pem file : {err}")
+                LOGGER.error(f"❌ Error while caching custom-key key.pem file for {first_server}: {err}")
                 return False, err
+            LOGGER.info(f"✓ Successfully cached key for {first_server}")
+        else:
+            LOGGER.debug(f"✓ Key for {first_server} unchanged, skipping key upload")
 
         return ret, ""
     except BaseException as e:
