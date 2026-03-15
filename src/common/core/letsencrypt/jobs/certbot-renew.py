@@ -29,8 +29,7 @@ from letsencrypt_utils import (
 LOGGER = getLogger("LETS-ENCRYPT.RENEW")
 
 LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.RENEW.CERTBOT")
-CERTBOT_TIMEOUT = 600  # seconds
-CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
+CERTBOT_TIMEOUT = 900  # 900 seconds (15 minutes) max for a single certbot invocation
 status = 0
 
 
