@@ -4,7 +4,7 @@ from json import dumps, loads
 from pathlib import Path
 
 from cryptography.hazmat.primitives.asymmetric import dsa, ec, rsa
-from cryptography.x509 import load_pem_x509_certificate
+from cryptography.x509 import load_pem_x509_certificate, load_pem_x509_certificates
 from flask import Blueprint, render_template
 from flask_login import login_required
 
@@ -154,7 +154,42 @@ def get_cert_key_type_and_size(cert_pem: bytes) -> tuple[str, int | None]:
 def get_cert_info(cert_pem: bytes) -> dict:
     """Extract certificate information (CN, SANs, TTL, Issuer, OCSP, EKU, not_before)."""
     try:
-        cert = load_pem_x509_certificate(cert_pem)
+        LOGGER.debug(f"get_cert_info: Processing {len(cert_pem)} bytes of certificate data")
+
+        # Normalize PEM: remove commented lines and extra whitespace
+        pem_lines = []
+        original_len = len(cert_pem)
+        has_invalid = False
+        for line in cert_pem.decode('utf-8', errors='ignore').split('\n'):
+            stripped = line.strip()
+            # Keep only valid PEM lines: BEGIN/END markers, base64 data, but skip comments
+            if stripped and not stripped.startswith('#'):
+                pem_lines.append(line)
+            elif stripped.startswith('#'):
+                has_invalid = True
+
+        cert_pem = '\n'.join(pem_lines).encode('utf-8')
+        if has_invalid:
+            LOGGER.debug(f"Found invalid content (comments/etc): removed during normalization ({original_len} -> {len(cert_pem)} bytes)")
+        else:
+            LOGGER.debug(f"PEM normalization complete: {len(cert_pem)} bytes")
+
+        # Try to load as single certificate first, then fallback to chain
+        try:
+            cert = load_pem_x509_certificate(cert_pem)
+            LOGGER.debug("Single certificate load succeeded")
+        except Exception as e:
+            # If single cert fails, try loading as chain and use the first (leaf) certificate
+            LOGGER.debug(f"Single certificate load failed ({type(e).__name__}): {e}, trying chain load...")
+            try:
+                certs = load_pem_x509_certificates(cert_pem)
+                if not certs:
+                    raise ValueError("No certificates found in PEM data")
+                cert = certs[0]  # Use the leaf certificate (first in chain)
+                LOGGER.debug(f"Chain load succeeded, using first certificate from {len(certs)} cert(s)")
+            except Exception as e2:
+                LOGGER.error(f"Chain load also failed ({type(e2).__name__}): {e2}")
+                raise
 
         # Extract CN (Common Name)
         cn = None
@@ -164,8 +199,11 @@ def get_cert_info(cert_pem: bytes) -> dict:
             cn_attrs = cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
             if cn_attrs:
                 cn = str(cn_attrs[0].value)
-        except Exception:
-            pass
+                LOGGER.debug(f"Extracted CN: {cn}")
+            else:
+                LOGGER.debug("No CN attributes found in certificate subject")
+        except Exception as e:
+            LOGGER.error(f"Error extracting CN from certificate: {type(e).__name__}: {e}")
 
         # Extract SANs (Subject Alternative Names)
         sans = []
@@ -178,8 +216,11 @@ def get_cert_info(cert_pem: bytes) -> dict:
                 for name in san_ext.value:
                     if isinstance(name, DNSName):
                         sans.append(str(name.value))
-        except Exception:
-            pass
+                LOGGER.debug(f"Extracted SANs: {sans}")
+            else:
+                LOGGER.debug("SAN extension not a SubjectAlternativeName")
+        except Exception as e:
+            LOGGER.debug(f"No SANs extension or error extracting SANs: {type(e).__name__}: {e}")
 
         # Get validity dates
         now = datetime.now(timezone.utc)
@@ -254,7 +295,9 @@ def get_cert_info(cert_pem: bytes) -> dict:
             "ocsp_urls": [sanitize_cert_field(url) for url in ocsp_urls],
         }
     except Exception as e:
-        LOGGER.warning(f"Could not parse certificate: {e}")
+        LOGGER.error(f"Exception in get_cert_info: {type(e).__name__}: {e}")
+        import traceback
+        LOGGER.debug(f"Traceback: {traceback.format_exc()}")
         return {}
 
 
@@ -274,6 +317,7 @@ def cache_cert_metadata(service_name: str, cert_hash: str, metadata: dict) -> No
         "cert_hash": cert_hash,
         "metadata": metadata,
         "cached_at": datetime.now(timezone.utc).isoformat(),
+        "ttl": 3600,  # 1 hour TTL
     }
     try:
         # Cache in database
@@ -304,8 +348,35 @@ def cache_cert_metadata(service_name: str, cert_hash: str, metadata: dict) -> No
         LOGGER.debug(f"Could not cache metadata in filesystem for {safe_name}: {e}")
 
 
+def delete_cert_metadata(service_name: str) -> None:
+    """Delete cached certificate metadata from filesystem and database."""
+    safe_name = sanitize_service_name(service_name)
+    if not safe_name:
+        return
+
+    # Delete from filesystem
+    try:
+        cache_file = (CUSTOMCERT_METADATA_ROOT / f"{safe_name}.json").resolve()
+        if _path_under_root(cache_file, CUSTOMCERT_METADATA_ROOT) and cache_file.exists():
+            cache_file.unlink()
+            LOGGER.debug(f"Deleted cached metadata for {safe_name} from filesystem")
+    except Exception as e:
+        LOGGER.debug(f"Could not delete filesystem metadata for {safe_name}: {e}")
+
+    # Delete from database
+    try:
+        DB.delete(
+            "cache",
+            "filename",
+            f"customcert-{safe_name}.json",
+        )
+        LOGGER.debug(f"Deleted cached metadata for {safe_name} from database")
+    except Exception as e:
+        LOGGER.debug(f"Could not delete database metadata for {safe_name}: {e}")
+
+
 def get_cached_cert_metadata(service_name: str) -> dict | None:
-    """Retrieve cached certificate metadata from filesystem if available."""
+    """Retrieve cached certificate metadata from filesystem if available and not expired."""
     safe_name = sanitize_service_name(service_name)
     if not safe_name:
         return None
@@ -316,6 +387,14 @@ def get_cached_cert_metadata(service_name: str) -> dict | None:
         if cache_file.exists():
             data = loads(cache_file.read_text())
             if isinstance(data, dict) and "metadata" in data and "cert_hash" in data:
+                # Check if cache has expired (TTL-based)
+                if "cached_at" in data and "ttl" in data:
+                    cached_at = datetime.fromisoformat(data["cached_at"])
+                    ttl = data["ttl"]
+                    age_seconds = (datetime.now(timezone.utc) - cached_at.replace(tzinfo=timezone.utc)).total_seconds()
+                    if age_seconds > ttl:
+                        LOGGER.debug(f"Cached metadata for {safe_name} expired (age: {age_seconds}s, ttl: {ttl}s)")
+                        return None
                 return data
             LOGGER.debug("Cached metadata invalid structure, ignoring")
     except Exception as e:
@@ -477,17 +556,30 @@ def customcert_page():
         if cert_file and cert_file.exists():
             try:
                 cert_pem = cert_file.read_bytes()
+                LOGGER.debug(f"Read certificate file for {safe_name}: {len(cert_pem)} bytes")
+                if len(cert_pem) == 0:
+                    LOGGER.error(f"Certificate file for {safe_name} is empty!")
                 cert_hash = compute_cert_hash(cert_pem)
 
                 # Check if cached metadata is still valid
                 cached_data = get_cached_cert_metadata(service_name)
+                LOGGER.debug(f"Cached data for {safe_name}: {cached_data is not None}")
                 if cached_data and cached_data.get("cert_hash") == cert_hash:
                     cert_info = cached_data.get("metadata", {})
                     LOGGER.debug(f"Using cached metadata for {safe_name}")
                 else:
+                    LOGGER.debug(f"Calling get_cert_info for {safe_name}...")
                     cert_info = get_cert_info(cert_pem)
-                    cache_cert_metadata(service_name, cert_hash, cert_info)
-                    LOGGER.debug(f"Parsed and cached certificate metadata for {safe_name}")
+                    LOGGER.debug(f"get_cert_info returned: {cert_info}")
+
+                    # Only cache metadata if parsing succeeded (non-empty result)
+                    if cert_info:
+                        cache_cert_metadata(service_name, cert_hash, cert_info)
+                        LOGGER.debug(f"Parsed and cached certificate metadata for {safe_name}")
+                    else:
+                        # Parsing failed: delete any existing cached metadata to force re-parsing next time
+                        delete_cert_metadata(service_name)
+                        LOGGER.error(f"Certificate parsing failed for {safe_name}, deleted cached metadata")
 
                 # Validate certificate CN/SANs match the service domain names
                 try:
