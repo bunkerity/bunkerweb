@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
