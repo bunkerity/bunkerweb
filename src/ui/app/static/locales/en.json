@@ -856,6 +856,7 @@
     "bans": "Bans",
     "cache": "Cache",
     "configs": "Configs",
+    "customcert": "Custom Certificates",
     "extra_pages": "Extra Pages",
     "global_settings": "Global Settings",
     "home": "Home",

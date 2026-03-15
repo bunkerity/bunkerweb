@@ -66,6 +66,7 @@ from app.routes.about import about
 from app.routes.bans import bans
 from app.routes.cache import cache
 from app.routes.configs import configs
+from app.routes.customcert import customcert
 from app.routes.global_settings import global_settings
 from app.routes.home import home
 from app.routes.instances import instances
@@ -97,6 +98,7 @@ BLUEPRINTS = (
     global_settings,
     pro,
     cache,
+    customcert,
     logs,
     login,
     configs,
