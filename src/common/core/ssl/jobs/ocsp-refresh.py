@@ -503,8 +503,17 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
                 "-CAfile", f_issuer.name,
                 "-partial_chain"
             ]
-            
-            p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+            try:
+                # Add a timeout so a stuck openssl process cannot hang the whole job
+                p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=30)
+            except subprocess.TimeoutExpired as e:
+                LOG.error(
+                    "❌ OCSP response cryptographic signature verification timed out for %s after %s seconds. Discarding response.",
+                    cert_name,
+                    e.timeout,
+                )
+                return None, 0
             if p.returncode != 0:
                 LOG.error("❌ OCSP response cryptographic signature verification failed for %s. Discarding forged/invalid response. OpenSSL Error: %s", cert_name, p.stderr.strip() or p.stdout.strip())
                 return None, 0
@@ -991,7 +1000,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
         ocsp_url = extract_ocsp_url(pem_data, cert_name)
         if not ocsp_url:
             LOG.debug("ℹ️ OCSP certificate %s has no responder, skipping fetch", cert_name)
-            stats["le_certs_no_ocsp"] = stats["le_certs_no_ocsp"] + 1
+            stats["le_certs_no_ocsp"] = stats.get("le_certs_no_ocsp", 0) + 1
             return (cert_name, None, 0, cert_checksum, pem_data, None, False)
 
         LOG.debug("🌐 OCSP responder for certificate %s: %s", cert_name, ocsp_url)
@@ -1007,7 +1016,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
                     "✓ OCSP cached response for %s still valid for %ds (%.1f days), above thresholds (MIN_TTL=%ds, 50%% threshold=%ds), skipping fetch",
                     cert_name, cached_ttl, cached_ttl / 86400.0, MIN_TTL, half_lifetime,
                 )
-                stats["ocsp_cached_responses"] = stats["ocsp_cached_responses"] + 1
+                stats["ocsp_cached_responses"] = stats.get("ocsp_cached_responses", 0) + 1
                 return (cert_name, None, cached_ttl, cert_checksum, pem_data, ocsp_url, False)
             
             if cached_ttl <= MIN_TTL:
@@ -1160,7 +1169,7 @@ def process_custom_certs(
 
     except Exception as e:
         LOG.error("OCSP exception while processing custom certificates: %s", e)
-        stats["errors"] = stats["errors"] + 1
+        stats["errors"] = stats.get("errors", 0) + 1
 
     return results
 
@@ -1459,6 +1468,116 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
         stats["errors"] = stats.get("errors", 0) + 1
 
 
+def _persist_ocsp_results_to_db(
+    db: Optional[Any],
+    all_ocsp_results: List[Tuple[str, Optional[bytes], int, str, bytes, Optional[str], bool]],
+    stats: Optional[Dict[str, int]] = None,
+) -> None:
+    """
+    Persist OCSP responses and certificate checksums to database.
+    Called both at normal completion and when timeout occurs.
+    """
+    if db is None or not all_ocsp_results:
+        return
+
+    if stats is None:
+        stats = {}
+
+    LOG.info("🔄 OCSP batching database updates for %d certificate(s)", len(all_ocsp_results))
+
+    for cert_name, ocsp_der, ttl, cert_checksum, pem_data, ocsp_url, was_attempted in all_ocsp_results:
+        sanitized_name = _sanitize_filename(cert_name)
+
+        # 1. Update OCSP response if we have a new one
+        if ocsp_der and ttl > 0:
+            cache_key = f"ocsp/{sanitized_name}"
+            try:
+                ocsp_checksum = hashlib.sha256(ocsp_der).hexdigest()
+                err = db.upsert_job_cache(
+                    service_id=None,  # Global cache entry
+                    file_name=cache_key,
+                    data=ocsp_der,
+                    job_name="ocsp-refresh",
+                    checksum=ocsp_checksum,
+                )
+
+                if err:
+                    LOG.error("❌ OCSP error while storing response for %s in database: %s", cert_name, err)
+                    stats["errors"] = stats.get("errors", 0) + 1
+                else:
+                    LOG.info("✓ OCSP stored response for %s in database (TTL=%ds, checksum=%s)", cert_name, ttl, ocsp_checksum[:8])
+            except Exception as e:
+                LOG.error("❌ OCSP exception while storing response for %s in database: %s", cert_name, e)
+                stats["errors"] = stats.get("errors", 0) + 1
+
+        # 2. ALWAYS store/update certificate content checksum for future differential checks
+        cert_checksum_key = f"cert_checksum/{sanitized_name}"
+        try:
+            err = db.upsert_job_cache(
+                service_id=None,
+                file_name=cert_checksum_key,
+                data=cert_checksum.encode("utf-8"),
+                job_name="ocsp-refresh",
+                checksum=hashlib.sha256(cert_checksum.encode("utf-8")).hexdigest(),
+            )
+            if err:
+                LOG.debug("⚠️ OCSP could not store cert checksum for %s: %s", cert_name, err)
+            else:
+                LOG.debug("✓ OCSP persisted checksum for %s", cert_name)
+        except Exception as e:
+            LOG.debug("⚠️ OCSP exception while storing cert checksum for %s: %s", cert_name, e)
+
+
+def _persist_ocsp_results_to_disk(
+    all_ocsp_results: List[Tuple[str, Optional[bytes], int, str, bytes, Optional[str], bool]],
+    stats: Optional[Dict[str, int]] = None,
+) -> None:
+    """
+    Write OCSP responses to disk cache files.
+    Called both at normal completion and when timeout occurs.
+    """
+    if not all_ocsp_results:
+        return
+
+    if stats is None:
+        stats = {}
+
+    for cert_name, ocsp_der, ttl, checksum, pem_data, ocsp_url, was_attempted in all_ocsp_results:
+        if not ocsp_der:
+            continue
+        try:
+            # Acquire lock to prevent race conditions with concurrent OCSP fetches
+            lock_fd = _acquire_cert_lock(cert_name)
+            sanitized_name = _sanitize_filename(cert_name)
+            try:
+                # Create the SSL configs directory for this certificate
+                ocsp_cert_dir = CONFIGS_SSL_BASE / sanitized_name
+                try:
+                    ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
+                except Exception as e:
+                    LOG.error("❌ OCSP error while creating directory %s: %s", ocsp_cert_dir, e)
+                    stats["errors"] = stats.get("errors", 0) + 1
+                    continue
+
+                # Write OCSP response to cache/ssl/{cert-name}/ocsp.der
+                ocsp_path = ocsp_cert_dir / "ocsp.der"
+                try:
+                    ocsp_path.write_bytes(ocsp_der)
+                    ocsp_path.chmod(0o644)  # Readable by nginx
+                    LOG.info("✓ OCSP saved response for %s to disk at %s", cert_name, ocsp_path)
+
+                    # Create symlinks for each SAN so OCSP is found by any SNI name
+                    _create_san_symlinks(pem_data, ocsp_path, cert_name)
+                except Exception as e:
+                    LOG.error("❌ OCSP error while writing response for %s to disk: %s", cert_name, e)
+                    stats["errors"] = stats.get("errors", 0) + 1
+            finally:
+                _release_cert_lock(lock_fd)
+        except Exception as e:
+            LOG.error("❌ OCSP exception while writing response for %s to disk: %s", cert_name, e)
+            stats["errors"] = stats.get("errors", 0) + 1
+
+
 def main() -> int:
     global status
     db: Optional[Any] = None
@@ -1689,12 +1808,12 @@ def main() -> int:
         # === Final deferred retry for stashed failures ===
         if stashed_failures:
             LOG.info("⏸️ OCSP stashed %d failed fetch(es), waiting 120 seconds before final retry...", len(stashed_failures))
-            
+
             # Use smaller sleeps to stay responsive and allow timeout checks
             for i in range(120):
                 if check_job_timeout("during stashed retry wait"): break
                 time.sleep(1)
-            
+
             if not check_job_timeout("before starting stashed retries"):
                 for cert_name, pem_data in stashed_failures:
                     if check_job_timeout(f"stashed retry for {cert_name}"): break
@@ -1703,85 +1822,19 @@ def main() -> int:
                     # Force fetch for the final retry attempt
                     all_ocsp_results.append(_process_cert(cert_name, pem_data, db, stats, force_fetch=True))
 
-        # === Batch write all OCSP responses and checksums to database ===
-        if db and all_ocsp_results:
-            LOG.info("🔄 OCSP batching database updates for %d certificate(s)", len(all_ocsp_results))
-            for cert_name, ocsp_der, ttl, cert_checksum, pem_data, ocsp_url, was_attempted in all_ocsp_results:
-                sanitized_name = _sanitize_filename(cert_name)
-                # 1. Update OCSP response if we have a new one
-                if ocsp_der and ttl > 0:
-                    cache_key = f"ocsp/{sanitized_name}"
-                    try:
-                        ocsp_checksum = hashlib.sha256(ocsp_der).hexdigest()
-                        err = db.upsert_job_cache(
-                            service_id=None,  # Global cache entry
-                            file_name=cache_key,
-                            data=ocsp_der,
-                            job_name="ocsp-refresh",
-                            checksum=ocsp_checksum,
-                        )
+        # === Check if timeout has been reached and save partial results ===
+        if check_job_timeout("after processing phase"):
+            LOG.warning("⏱️ OCSP job timeout during processing. Saving partial results (%d cert(s)) to database and disk.", len(all_ocsp_results))
+            _persist_ocsp_results_to_db(db, all_ocsp_results, stats)
+            _persist_ocsp_results_to_disk(all_ocsp_results, stats)
+            # Return early with partial results saved
+            elapsed = time.time() - job_start_time
+            LOG.warning("📊 OCSP partial job completed in %.3fs with %d results saved", elapsed, len(all_ocsp_results))
+            return status
 
-                        if err:
-                            LOG.error("❌ OCSP error while storing response for %s in database: %s", cert_name, err)
-                            stats["errors"] = stats["errors"] + 1
-                        else:
-                            LOG.info("✓ OCSP stored response for %s in database (TTL=%ds, checksum=%s)", cert_name, ttl, ocsp_checksum[:8])
-                    except Exception as e:
-                        LOG.error("❌ OCSP exception while storing response for %s in database: %s", cert_name, e)
-                        stats["errors"] = stats["errors"] + 1
-
-                # 2. ALWAYS store/update certificate content checksum for future differential checks
-                cert_checksum_key = f"cert_checksum/{sanitized_name}"
-                try:
-                    err = db.upsert_job_cache(
-                        service_id=None,
-                        file_name=cert_checksum_key,
-                        data=cert_checksum.encode("utf-8"),
-                        job_name="ocsp-refresh",
-                        checksum=hashlib.sha256(cert_checksum.encode("utf-8")).hexdigest(),
-                    )
-                    if err:
-                        LOG.debug("⚠️ OCSP could not store cert checksum for %s: %s", cert_name, err)
-                    else:
-                        LOG.debug("✓ OCSP persisted checksum for %s", cert_name)
-                except Exception as e:
-                    LOG.debug("⚠️ OCSP exception while storing cert checksum for %s: %s", cert_name, e)
-
-        # === Batch write all OCSP responses to disk ===
-        for cert_name, ocsp_der, ttl, checksum, pem_data, ocsp_url, was_attempted in all_ocsp_results:
-            if not ocsp_der:
-                continue
-            try:
-                # Acquire lock to prevent race conditions with concurrent OCSP fetches
-                lock_fd = _acquire_cert_lock(cert_name)
-                sanitized_name = _sanitize_filename(cert_name)
-                try:
-                    # Create the SSL configs directory for this certificate
-                    ocsp_cert_dir = CONFIGS_SSL_BASE / sanitized_name
-                    try:
-                        ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
-                    except Exception as e:
-                        LOG.error("❌ OCSP error while creating directory %s: %s", ocsp_cert_dir, e)
-                        stats["errors"] = stats["errors"] + 1
-                        continue
-
-                    # Write OCSP response to cache/ssl/{cert-name}/ocsp.der
-                    ocsp_path = ocsp_cert_dir / "ocsp.der"
-                    try:
-                        ocsp_path.write_bytes(ocsp_der)
-                        ocsp_path.chmod(0o644)  # Readable by nginx
-                        LOG.info("✓ OCSP saved response for %s to disk at %s", cert_name, ocsp_path)
-
-                        # Create symlinks for each SAN so OCSP is found by any SNI name
-                        _create_san_symlinks(pem_data, ocsp_path, cert_name)
-                    except Exception as e:
-                        LOG.error("❌ OCSP error while writing response for %s to disk: %s", cert_name, e)
-                        stats["errors"] = stats.get("errors", 0) + 1
-                finally:
-                    _release_cert_lock(lock_fd)
-            except Exception as e:
-                LOG.error("❌ OCSP exception while writing response for %s to disk: %s", cert_name, e)
-                stats["errors"] = stats.get("errors", 0) + 1
+        # === Persist all OCSP responses to database and disk ===
+        _persist_ocsp_results_to_db(db, all_ocsp_results, stats)
+        _persist_ocsp_results_to_disk(all_ocsp_results, stats)
 
         # Check timeout before cleanup
         if not check_job_timeout("before orphaned cleanup"):
@@ -1789,7 +1842,7 @@ def main() -> int:
             _cleanup_orphaned_ocsp(db, le_certs or {}, stats)
 
         # Update last full refresh timestamp if we did a full run or found changes
-        if not skip_unchanged_ttl_checks or any(r[1] is not None for r in all_ocsp_results):
+        if db is not None and (not skip_unchanged_ttl_checks or any(r[1] is not None for r in all_ocsp_results)):
             try:
                 db.upsert_job_cache(
                     service_id=None,

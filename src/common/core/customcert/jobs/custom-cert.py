@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from os import environ, getenv, sep
+from os import getenv, sep
 from os.path import join
 from pathlib import Path
-from subprocess import DEVNULL, run
+from subprocess import DEVNULL, TimeoutExpired, run
 from sys import exit as sys_exit, path as sys_path
 from base64 import b64decode
 from tempfile import NamedTemporaryFile
@@ -20,6 +20,7 @@ from logger import getLogger  # type: ignore
 
 LOGGER = getLogger("CUSTOM-CERT")
 JOB = Job(LOGGER, __file__)
+OCSP_REFRESH_TIMEOUT = 2100  # 35 minutes max to cover ocsp-refresh job worst-case duration
 
 
 def process_ssl_data(data: str, file_path: Optional[str], data_type: Literal["cert", "key"], server_name: str) -> Union[bytes, Path, None]:
@@ -229,7 +230,7 @@ try:
             import sys
 
             ocsp_script = join(sep, "usr", "share", "bunkerweb", "core", "ssl", "jobs", "ocsp-refresh.py")
-            result = run([sys.executable, ocsp_script, "--force"], stdin=DEVNULL, capture_output=True, text=True, timeout=300)
+            result = run([sys.executable, ocsp_script, "--force"], stdin=DEVNULL, capture_output=True, text=True, timeout=OCSP_REFRESH_TIMEOUT)
             if result.returncode == 0:
                 LOGGER.info("✓ OCSP refresh completed successfully after cert change")
             else:
@@ -237,6 +238,10 @@ try:
             if result.stderr:
                 for line in result.stderr.strip().splitlines():
                     LOGGER.debug(f"OCSP: {line}")
+        except TimeoutExpired as e:
+            LOGGER.warning(
+                f"⚠️ OCSP post-change refresh timed out after {OCSP_REFRESH_TIMEOUT}s (non-fatal): {e}"
+            )
         except Exception as e:
             LOGGER.warning(f"⚠️ OCSP post-change refresh failed (non-fatal): {e}")
 except SystemExit as e:

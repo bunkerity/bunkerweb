@@ -10,7 +10,7 @@ from os.path import join
 from pathlib import Path
 from re import MULTILINE, match, search
 from select import select
-from subprocess import DEVNULL, PIPE, STDOUT, Popen, run
+from subprocess import DEVNULL, PIPE, STDOUT, Popen, TimeoutExpired, run
 from sys import exit as sys_exit, path as sys_path
 from time import monotonic, sleep
 from threading import Event, Lock, Thread
@@ -127,6 +127,7 @@ PROFILE_TYPES = ("classic", "tlsserver", "shortlived")
 ACME_SERVER_TYPES = ("letsencrypt", "zerossl")
 DNS_PROPAGATION_DEFAULT = "default"
 CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
+OCSP_REFRESH_TIMEOUT = 2100  # 35 minutes max to cover ocsp-refresh job worst-case duration
 
 
 def normalize_server_names(server_names: str) -> Set[str]:
@@ -1157,7 +1158,7 @@ try:
                 import sys
 
                 ocsp_script = join(sep, "usr", "share", "bunkerweb", "core", "ssl", "jobs", "ocsp-refresh.py")
-                result = run([sys.executable, ocsp_script, "--force"], stdin=DEVNULL, capture_output=True, text=True, timeout=300)
+                result = run([sys.executable, ocsp_script, "--force"], stdin=DEVNULL, capture_output=True, text=True, timeout=OCSP_REFRESH_TIMEOUT)
                 if result.returncode == 0:
                     LOGGER.info("✓ OCSP refresh completed successfully after issuance")
                 else:
@@ -1165,6 +1166,10 @@ try:
                 if result.stderr:
                     for line in result.stderr.strip().splitlines():
                         LOGGER.debug(f"OCSP: {line}")
+            except TimeoutExpired as e:
+                LOGGER.warning(
+                    f"⚠️ OCSP post-issuance refresh timed out after {OCSP_REFRESH_TIMEOUT}s (non-fatal): {e}"
+                )
             except Exception as e:
                 LOGGER.warning(f"⚠️ OCSP post-issuance refresh failed (non-fatal): {e}")
 except SystemExit as e:

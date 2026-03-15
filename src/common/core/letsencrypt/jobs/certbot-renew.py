@@ -4,7 +4,6 @@ from os import getenv, sep
 from os.path import join
 from subprocess import DEVNULL, PIPE, Popen, TimeoutExpired, run
 from sys import exit as sys_exit, path as sys_path
-from time import monotonic
 from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -30,6 +29,7 @@ LOGGER = getLogger("LETS-ENCRYPT.RENEW")
 
 LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.RENEW.CERTBOT")
 CERTBOT_TIMEOUT = 900  # 900 seconds (15 minutes) max for a single certbot invocation
+OCSP_REFRESH_TIMEOUT = 2100  # 2100 seconds (35 minutes) max to cover ocsp-refresh job worst-case duration
 status = 0
 
 
@@ -104,17 +104,6 @@ try:
     if stderr:
         for line in stderr.splitlines():
             LOGGER_CERTBOT.info(line.strip())
-    deadline = monotonic() + CERTBOT_TIMEOUT
-    while process.poll() is None:
-        if monotonic() > deadline:
-            LOGGER.error(f"certbot renew timed out after {CERTBOT_TIMEOUT}s, killing process.")
-            process.kill()
-            process.wait()
-            status = 2
-            break
-        if process.stderr:
-            for line in process.stderr:
-                LOGGER_CERTBOT.info(line.strip())
 
     if process.returncode and process.returncode != 0:
         status = 2
@@ -137,7 +126,7 @@ try:
             import sys
 
             ocsp_script = join(sep, "usr", "share", "bunkerweb", "core", "ssl", "jobs", "ocsp-refresh.py")
-            result = run([sys.executable, ocsp_script, "--force"], stdin=DEVNULL, capture_output=True, text=True, timeout=300)
+            result = run([sys.executable, ocsp_script, "--force"], stdin=DEVNULL, capture_output=True, text=True, timeout=OCSP_REFRESH_TIMEOUT)
             if result.returncode == 0:
                 LOGGER.info("✓ OCSP refresh completed successfully after renewal")
             else:
@@ -145,6 +134,10 @@ try:
             if result.stderr:
                 for line in result.stderr.strip().splitlines():
                     LOGGER.debug(f"OCSP: {line}")
+        except TimeoutExpired as e:
+            LOGGER.warning(
+                f"⚠️ OCSP post-renewal refresh timed out after {OCSP_REFRESH_TIMEOUT}s (non-fatal): {e}"
+            )
         except Exception as e:
             LOGGER.warning(f"⚠️ OCSP post-renewal refresh failed (non-fatal): {e}")
 except SystemExit as e:
