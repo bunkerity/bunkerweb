@@ -500,13 +500,14 @@ def customcert_page():
                     service_domains = service_domains_str.split() if isinstance(service_domains_str, str) else [service_domains_str]
 
                     # Validate certificate covers all service domains
-                    validation = validate_cert_names(
-                        cert_info.get("cn"),
-                        cert_info.get("sans", []),
-                        service_domains,
-                    )
+                    cert_cn = cert_info.get("cn")
+                    cert_sans = cert_info.get("sans", [])
+                    validation = validate_cert_names(cert_cn, cert_sans, service_domains)
                     cert_info["cert_validation"] = validation
-                    LOGGER.debug(f"Certificate validation for {safe_name}: valid={validation['valid']}")
+                    LOGGER.debug(
+                        f"Certificate validation for {safe_name}: cn={cert_cn}, sans={cert_sans}, "
+                        f"service_domains={service_domains}, valid={validation['valid']}"
+                    )
                 except Exception as e:
                     LOGGER.warning(f"Could not validate certificate names for {safe_name}: {e}")
                     err_msg = sanitize_cert_field(str(e), max_length=200) if str(e) else "Validation failed"
