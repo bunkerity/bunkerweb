@@ -125,6 +125,9 @@ IS_MULTISITE = getenv("MULTISITE", "no") == "yes"
 CHALLENGE_TYPES = ("http", "dns")
 PROFILE_TYPES = ("classic", "tlsserver", "shortlived")
 ACME_SERVER_TYPES = ("letsencrypt", "zerossl")
+KEY_TYPES = ("ecdsa", "rsa")
+ELLIPTIC_CURVES = ("secp256r1", "secp384r1")
+RSA_KEY_SIZES = ("3072", "4096", "8192")  # 8192 only supported on ZeroSSL, not Let's Encrypt
 DNS_PROPAGATION_DEFAULT = "default"
 CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
 
@@ -461,6 +464,36 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
             LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_PROFILE '{profile_val}' is invalid. Must be one of {PROFILE_TYPES!r}. Defaulting to 'classic'.")
         profile_val = "classic"
 
+    # Read and validate key type
+    key_type_val = env("LETS_ENCRYPT_KEY_TYPE", "ecdsa").lower()
+    elliptic_curve_val = env("LETS_ENCRYPT_ELLIPTIC_CURVE", "secp384r1").lower()
+
+    if key_type_val not in KEY_TYPES:
+        if activated:
+            LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_KEY_TYPE '{key_type_val}' is invalid. Must be one of {KEY_TYPES!r}. Defaulting to 'ecdsa'.")
+        key_type_val = "ecdsa"
+
+    if key_type_val == "ecdsa" and elliptic_curve_val not in ELLIPTIC_CURVES:
+        if activated:
+            LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_ELLIPTIC_CURVE '{elliptic_curve_val}' is invalid. Must be one of {ELLIPTIC_CURVES!r}. Defaulting to 'secp384r1'.")
+        elliptic_curve_val = "secp384r1"
+
+    # Read and validate RSA key size
+    rsa_key_size_val = env("LETS_ENCRYPT_RSA_KEY_SIZE", "4096")
+    # 8192 only supported on ZeroSSL; Let's Encrypt allows 3072 and 4096 only.
+    # BSI recommends minimum RSA key size 3072 bits; 2048 is not used.
+    if acme_server == "letsencrypt":
+        allowed_rsa_key_sizes = ("3072", "4096")
+    else:
+        allowed_rsa_key_sizes = RSA_KEY_SIZES
+    if rsa_key_size_val not in allowed_rsa_key_sizes:
+        if activated:
+            LOGGER.warning(
+                f"[Service: {service}] LETS_ENCRYPT_RSA_KEY_SIZE '{rsa_key_size_val}' is invalid for {acme_server}. "
+                f"Must be one of {allowed_rsa_key_sizes!r}. Defaulting to '4096'."
+            )
+        rsa_key_size_val = "4096"
+
     # Validate dns_propagation
     if dns_propagation_val != DNS_PROPAGATION_DEFAULT:
         try:
@@ -521,6 +554,9 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
         "wildcard": wildcard,
         "staging": staging,
         "profile": profile_val,
+        "key_type": key_type_val,
+        "elliptic_curve": elliptic_curve_val,
+        "rsa_key_size": rsa_key_size_val,
         "disable_psl_check": env("LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "no").lower() == "yes",
         "retries": retries_int,
         "exists": False,
@@ -559,6 +595,13 @@ def extract_wildcard_groups(domains: List[str]) -> Dict[str, List[str]]:
 
 
 def certificate_fingerprint(config: Dict[str, Union[str, bool, int, Dict[str, str]]]) -> Tuple:
+    """Return a tuple that uniquely identifies a certificate configuration.
+
+    Two services with identical fingerprints can share the same certificate (their
+    domains are merged into one certbot request). Services that differ in key_type,
+    elliptic_curve, or rsa_key_size must NOT be merged — certbot only issues one
+    key type per certificate name.
+    """
     provider_hash = ""
     if config.get("challenge") == "dns" and config.get("provider"):
         provider_hash = bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256")
@@ -570,6 +613,9 @@ def certificate_fingerprint(config: Dict[str, Union[str, bool, int, Dict[str, st
         config.get("authenticator"),
         config.get("staging"),
         config.get("profile"),
+        config.get("key_type"),       # ecdsa or rsa — different key types cannot share a cert
+        config.get("elliptic_curve"),  # secp256r1 vs secp384r1 — different curves need separate certs
+        config.get("rsa_key_size"),    # 3072/4096/8192 — different RSA sizes need separate certs
         config.get("email"),
         config.get("dns_propagation"),
         config.get("wildcard"),
@@ -596,7 +642,10 @@ def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, 
         for base, names in wildcard_groups.items():
             config = base_config.copy()
             config["server_names"] = ",".join(names)
-            entries[base] = config
+            fp = certificate_fingerprint(config)
+            fp_hash = bytes_hash(repr(fp).encode("utf-8"), algorithm="sha256")[:12]
+            entry_key = f"{base}__{fp_hash}"
+            entries[entry_key] = config
         return entries
 
     config = base_config.copy()
@@ -636,6 +685,67 @@ def _determine_wildcard_bases(labels_list: List[List[str]]) -> Set[str]:
             bases.add(".".join(labels))
 
     return bases
+
+
+def resolve_cert_name(
+    service: str,
+    config: Dict[str, Union[str, bool, int, Dict[str, str]]],
+    existing_certificates: Dict[str, dict],
+) -> str:
+    """
+    Return the cert name (directory/renewal name) to use for this service.
+    New certificates use a key-type suffix (-ecdsa or -rsa). Existing certificates
+    keep their current directory naming (no rename).
+    """
+    key_type = config.get("key_type") or "ecdsa"
+    suffixed = f"{service}-{key_type}"
+    if service in existing_certificates:
+        return service
+    if suffixed in existing_certificates:
+        return suffixed
+    return suffixed
+
+
+def display_certificates_overview():
+    """Display overview of all certificates with key size/curve details."""
+    renewal_dir = DATA_PATH.joinpath("renewal")
+    if not renewal_dir.is_dir():
+        return
+
+    certs_info = []
+    for conf_file in sorted(renewal_dir.glob("*.conf")):
+        service_name = conf_file.stem
+        try:
+            content = conf_file.read_text()
+
+            # Parse key type and size/curve
+            match_key_type = search(r"^key_type\s*=\s*(\S+)$", content, MULTILINE)
+            key_type = match_key_type.group(1) if match_key_type else "Unknown"
+
+            if key_type.lower() == "ecdsa":
+                match_curve = search(r"^elliptic_curve\s*=\s*(\S+)$", content, MULTILINE)
+                curve = match_curve.group(1) if match_curve else "secp256r1"
+                curve_map = {"secp256r1": "P-256", "secp384r1": "P-384"}
+                key_type_display = f"ECDSA ({curve_map.get(curve, curve)})"
+            elif key_type.lower() == "rsa":
+                match_size = search(r"^rsa_key_size\s*=\s*(\S+)$", content, MULTILINE)
+                key_size = match_size.group(1) if match_size else "4096"
+                key_type_display = f"RSA-{key_size}"
+            else:
+                key_type_display = key_type
+
+            certs_info.append((service_name, key_type_display))
+        except Exception as e:
+            LOGGER.debug(f"Failed to parse certificate config {conf_file}: {e}")
+            certs_info.append((service_name, "Unknown"))
+
+    if certs_info:
+        LOGGER.info("=" * 80)
+        LOGGER.info("Certificate Overview")
+        LOGGER.info("=" * 80)
+        for service_name, key_info in certs_info:
+            LOGGER.info(f"  {service_name:<35} Key Type: {key_info}")
+        LOGGER.info("=" * 80)
 
 
 def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
@@ -680,7 +790,7 @@ def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
 
 
 def certbot_new(
-    service: str,
+    cert_name: str,
     config: Dict[str, Union[str, bool, int, Dict[str, str]]],
     cmd_env: Dict[str, str],
     paths: CertbotPaths,
@@ -701,7 +811,7 @@ def certbot_new(
         "certonly",
         "-n",
         "--cert-name",
-        service,
+        cert_name,
         "-d",
         config["server_names"],
         "--preferred-profile",
@@ -716,6 +826,17 @@ def certbot_new(
         "--break-my-certs",
         "--expand",
     ]
+
+    # Pass key type and curve/size flags to certbot.
+    # certbot stores key_type in the renewal .conf, so future `certbot renew` calls
+    # preserve the same key type without needing these flags again.
+    if config.get("key_type"):
+        command.extend(["--key-type", config["key_type"]])
+        if config["key_type"] == "ecdsa" and config.get("elliptic_curve"):
+            # --elliptic-curve only applies to ecdsa; secp256r1=ECC-256, secp384r1=ECC-384
+            command.extend(["--elliptic-curve", config["elliptic_curve"]])
+        elif config["key_type"] == "rsa" and config.get("rsa_key_size"):
+            command.extend(["--rsa-key-size", config["rsa_key_size"]])
 
     if config.get("email"):
         command.extend(["--email", config["email"]])
@@ -789,20 +910,20 @@ def certbot_new(
         command.append("--staging")
 
     if config["force_renew"]:
-        renewal_file = DATA_PATH.joinpath("renewal", f"{service}.conf")
+        renewal_file = DATA_PATH.joinpath("renewal", f"{cert_name}.conf")
         if renewal_file.is_file():
-            ret = certbot_delete(service, cmd_env)
+            ret = certbot_delete(cert_name, cmd_env)
             if ret != 0:
-                LOGGER.error(f"Failed to delete certificate for {service}")
+                LOGGER.error(f"Failed to delete certificate for {cert_name}")
         else:
-            LOGGER.info(f"No existing certificate found for {service}, skipping removal.")
+            LOGGER.info(f"No existing certificate found for {cert_name}, skipping removal.")
 
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
 
     deadline = monotonic() + CERTBOT_TIMEOUT
     while process.poll() is None:
         if monotonic() > deadline:
-            LOGGER.error(f"certbot for {service} timed out after {CERTBOT_TIMEOUT}s, killing process.")
+            LOGGER.error(f"certbot for {cert_name} timed out after {CERTBOT_TIMEOUT}s, killing process.")
             process.kill()
             process.wait()
             return 1
@@ -816,7 +937,7 @@ def certbot_new(
     return process.returncode
 
 
-def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str]) -> bool:
+def generate_certificate(cert_name: str, config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str]) -> bool:
     LOGGER.info(
         f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email'] or 'not provided'}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile on {config['acme_server']}..."
     )
@@ -826,7 +947,7 @@ def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, D
     LOGGER.debug(f"Service configuration: {debug_config}")
 
     concurrent_requests = getenv("LETS_ENCRYPT_CONCURRENT_REQUESTS", "no").lower() == "yes"
-    paths, temp_root = prepare_certbot_paths(service, concurrent_requests, CACHE_PATH, DATA_PATH, WORK_DIR, LOGS_DIR)
+    paths, temp_root = prepare_certbot_paths(cert_name, concurrent_requests, CACHE_PATH, DATA_PATH, WORK_DIR, LOGS_DIR)
     success = False
 
     try:
@@ -842,19 +963,19 @@ def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, D
                 global RUNNING_CERTBOT
                 RUNNING_CERTBOT += 1
             try:
-                ret = certbot_new(service, config, cmd_env.copy(), paths)
+                ret = certbot_new(cert_name, config, cmd_env.copy(), paths)
             finally:
                 with RUNNING_LOCK:
                     RUNNING_CERTBOT -= 1
 
             if ret == 0:
-                LOGGER.info(f"Certificate(s) for {service} generated successfully.")
+                LOGGER.info(f"Certificate(s) for {cert_name} generated successfully.")
                 success = True
                 return True
     finally:
         finalize_certbot_run(paths, temp_root, success, MERGE_LOCK, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER)
 
-    LOGGER.error(f"Failed to generate certificate(s) for {service} after {config['retries'] + 1} attempts.")
+    LOGGER.error(f"Failed to generate certificate(s) for {cert_name} after {config['retries'] + 1} attempts.")
     return False
 
 
@@ -955,6 +1076,15 @@ try:
                 match_server = search(r"^server\s*=\s*(\S+)$", renewal_content, MULTILINE)
                 server = match_server.group(1) if match_server else ""
 
+                match_key_type = search(r"^key_type\s*=\s*(\S+)$", renewal_content, MULTILINE)
+                key_type = match_key_type.group(1) if match_key_type else ""
+
+                match_elliptic_curve = search(r"^elliptic_curve\s*=\s*(\S+)$", renewal_content, MULTILINE)
+                elliptic_curve = match_elliptic_curve.group(1) if match_elliptic_curve else ""
+
+                match_rsa_key_size = search(r"^rsa_key_size\s*=\s*(\S+)$", renewal_content, MULTILINE)
+                rsa_key_size = match_rsa_key_size.group(1) if match_rsa_key_size else ""
+
                 existing_certificates[service].update(
                     {
                         "challenge": challenge,
@@ -962,6 +1092,9 @@ try:
                         "credentials_hash": credentials_hash,
                         "staging": "acme-staging" in server,
                         "profile": profile,
+                        "key_type": key_type,
+                        "elliptic_curve": elliptic_curve,
+                        "rsa_key_size": rsa_key_size,
                         "acme_server_url": normalize_server_url(server),
                     }
                 )
@@ -973,10 +1106,13 @@ try:
 
     # ? Check if the services' certificates already exist
     for server_name, config in services.items():
-        if config["force_renew"] or not config["activated"] or server_name not in existing_certificates:
+        if config["force_renew"] or not config["activated"]:
+            continue
+        cert_name = resolve_cert_name(server_name, config, existing_certificates)
+        if cert_name not in existing_certificates:
             continue
 
-        existing_cert = existing_certificates[server_name]
+        existing_cert = existing_certificates[cert_name]
         existing_cert["active"] = True
 
         if not config["disable_psl_check"]:
@@ -1012,6 +1148,19 @@ try:
         elif config["profile"] != existing_cert["profile"]:
             LOGGER.warning(f"[Service: {server_name}] Profile does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
+        # Trigger renewal when key type / curve / RSA size changes.
+        # certbot does not automatically switch key types on renew — the renewal
+        # .conf stores the original key_type and certbot uses it unchanged.
+        # Setting force_renew=True causes certbot_new() to pass --force-renewal.
+        elif config.get("key_type") and config["key_type"] != existing_cert.get("key_type", ""):
+            LOGGER.warning(f"[Service: {server_name}] Key type does not match existing certificate, forcing renewal.")
+            config["force_renew"] = True
+        elif config.get("key_type") == "rsa" and config.get("rsa_key_size") and config["rsa_key_size"] != existing_cert.get("rsa_key_size", ""):
+            LOGGER.warning(f"[Service: {server_name}] RSA key size does not match existing certificate, forcing renewal.")
+            config["force_renew"] = True
+        elif config.get("key_type") == "ecdsa" and config.get("elliptic_curve") and config["elliptic_curve"] != existing_cert.get("elliptic_curve", ""):
+            LOGGER.warning(f"[Service: {server_name}] Elliptic curve does not match existing certificate, forcing renewal.")
+            config["force_renew"] = True
         elif normalize_server_url(str(config.get("acme_server_url") or "")) != normalize_server_url(str(existing_cert.get("acme_server_url") or "")):
             LOGGER.warning(f"[Service: {server_name}] ACME server does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
@@ -1028,22 +1177,24 @@ try:
 
     # ? generate new certificates and renew existing ones if needed
     concurrent_requests = getenv("LETS_ENCRYPT_CONCURRENT_REQUESTS", "no").lower() == "yes"
-    pending_services: List[Tuple[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]] = []
+    # (cert_name for certbot, logical service key for services dict, config)
+    pending_services: List[Tuple[str, str, Dict[str, Union[str, bool, int, Dict[str, str]]]]] = []
 
     for service, config in services.items():
-        if existing_certificates.get(service, {}).get("active") and not config["force_renew"]:
+        cert_name = resolve_cert_name(service, config, existing_certificates)
+        if existing_certificates.get(cert_name, {}).get("active") and not config["force_renew"]:
             LOGGER.info(f"Certificate(s) for {service} already exist, skipping generation.")
             config["exists"] = True
             continue
         if not config["activated"]:
             continue
-        pending_services.append((service, config))
+        pending_services.append((cert_name, service, config))
 
     if pending_services:
         if concurrent_requests:
             required_accounts: Set[Tuple[bool, str]] = set()
             required_zerossl_accounts: Set[Tuple[bool, str]] = set()
-            for _, config in pending_services:
+            for _, _, config in pending_services:
                 if config.get("acme_server") == "letsencrypt":
                     required_accounts.add((bool(config.get("staging")), str(config.get("email") or "")))
                 else:
@@ -1054,7 +1205,7 @@ try:
                 zerossl_env = cmd_env.copy()
                 zerossl_env["CERTBOT_BIN"] = CERTBOT_BIN
                 # Collect ZeroSSL-specific env vars from any pending ZeroSSL service config
-                for _, config in pending_services:
+                for _, _, config in pending_services:
                     if config.get("acme_server") != "letsencrypt":
                         zerossl_api_key = str(config.get("zerossl_api_key") or "")
                         if zerossl_api_key:
@@ -1070,9 +1221,12 @@ try:
             if concurrent_requests and len(pending_services) > 1:
                 max_workers = max(1, min(len(pending_services), effective_cpu_count()))
                 with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                    futures = {executor.submit(generate_certificate, service, config, cmd_env.copy()): service for service, config in pending_services}
+                    futures = {
+                        executor.submit(generate_certificate, cert_name, config, cmd_env.copy()): (cert_name, service, config)
+                        for cert_name, service, config in pending_services
+                    }
                     for future in as_completed(futures):
-                        service = futures[future]
+                        _cert_name, service, _config = futures[future]
                         config = services[service]
                         try:
                             success = future.result()
@@ -1085,8 +1239,8 @@ try:
                         else:
                             status = 2
             else:
-                for service, config in pending_services:
-                    config["exists"] = generate_certificate(service, config, cmd_env)
+                for cert_name, service, config in pending_services:
+                    config["exists"] = generate_certificate(cert_name, config, cmd_env)
                     if config["exists"]:
                         status = 1 if status == 0 else status
                     else:
@@ -1136,10 +1290,29 @@ try:
 
             # If generation failed but an old certificate is still active, keep previous hash
             # so the renewal attempt will be retried on the next run.
-            if not existing_certificates.get(service, {}).get("active"):
+            cert_name = resolve_cert_name(service, config, existing_certificates)
+            if not existing_certificates.get(cert_name, {}).get("active"):
                 updated_zerossl_api_key_hashes.pop(service, None)
 
         save_zerossl_api_key_hashes(updated_zerossl_api_key_hashes)
+
+        # * Verify all activated services have certificates
+        missing_certs = []
+        for service, config in services.items():
+            if config.get("activated") and not config.get("exists"):
+                missing_certs.append(service)
+
+        if missing_certs:
+            LOGGER.error(f"⚠️ Certificate generation incomplete! Missing certificates for: {', '.join(missing_certs)}")
+            LOGGER.error(f"These services will not work until their certificates are generated successfully.")
+            LOGGER.error(f"Check logs for details on why generation failed. Job will retry on next scheduler run (or manually trigger).")
+        else:
+            activated_services = [s for s, c in services.items() if c.get("activated")]
+            if activated_services:
+                LOGGER.info(f"✓ All {len(activated_services)} activated service(s) have certificates ready.")
+
+        # * Display certificate overview with key sizes
+        display_certificates_overview()
 
         # * Save data to db cache
         if DATA_PATH.is_dir() and list(DATA_PATH.iterdir()):

@@ -34,6 +34,63 @@ local sort = table.sort
 local lower = string.lower
 local gsub = string.gsub
 
+local live_prefix = "/var/cache/bunkerweb/letsencrypt/etc/live/"
+
+-- Build cert directory candidates: respect LETS_ENCRYPT_KEY_TYPE so switching key type uses the right cert.
+local function build_cert_candidates(identifier)
+	local base_id = identifier
+	local explicit_type = nil
+	if match(identifier, "%-ecdsa$") then
+		base_id = sub(identifier, 1, -7)
+		explicit_type = "ecdsa"
+	elseif match(identifier, "%-rsa$") then
+		base_id = sub(identifier, 1, -5)
+		explicit_type = "rsa"
+	end
+	local preferred_type = explicit_type
+	if not preferred_type then
+		local ok, key_type = pcall(get_variable, "LETS_ENCRYPT_KEY_TYPE")
+		if ok and key_type then
+			key_type = lower(tostring(key_type))
+			if key_type == "ecdsa" or key_type == "rsa" then
+				preferred_type = key_type
+			end
+		end
+	end
+	local candidates = {}
+	local function add(name)
+		for _, existing in ipairs(candidates) do
+			if existing == name then return end
+		end
+		insert(candidates, name)
+	end
+	if preferred_type then
+		add(base_id .. "-" .. preferred_type)
+		add(base_id .. "-" .. (preferred_type == "ecdsa" and "rsa" or "ecdsa"))
+	else
+		add(base_id .. "-ecdsa")
+		add(base_id .. "-rsa")
+	end
+	add(base_id)
+	return candidates
+end
+
+-- Try key-type suffixed names (order from build_cert_candidates), then legacy name (no suffix).
+local function read_cert_files_by_identifier(identifier)
+	if not identifier or identifier == "" then
+		return false, "empty identifier", nil
+	end
+	local candidates = build_cert_candidates(identifier)
+	for _, name in ipairs(candidates) do
+		local paths = { live_prefix .. name .. "/fullchain.pem", live_prefix .. name .. "/privkey.pem" }
+		local check, data = read_files(paths)
+		if check then
+			return check, data, name
+		end
+	end
+	return false, "no cert found for " .. identifier, nil
+end
+
 -- Mirror certbot-new wildcard grouping so certificate identifiers stay in sync.
 local function sanitize_domain_labels(domain)
 	if not domain or domain == "" then
@@ -263,10 +320,7 @@ function letsencrypt:init()
 							data = self.internalstore:get("plugin_letsencrypt_" .. base, true)
 							if not data then
 								local check
-								check, data = read_files({
-									"/var/cache/bunkerweb/letsencrypt/etc/live/" .. base .. "/fullchain.pem",
-									"/var/cache/bunkerweb/letsencrypt/etc/live/" .. base .. "/privkey.pem",
-								})
+								check, data = read_cert_files_by_identifier(base)
 								if not check then
 									self.logger:log(ERR, "error while reading files : " .. data)
 									ret_ok = false
@@ -288,10 +342,7 @@ function letsencrypt:init()
 						data = self.internalstore:get("plugin_letsencrypt_" .. cert_identifier, true)
 						if not data then
 							local check
-							check, data = read_files({
-								"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/fullchain.pem",
-								"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/privkey.pem",
-							})
+							check, data = read_cert_files_by_identifier(cert_identifier)
 							if not check then
 								self.logger:log(ERR, "error while reading files : " .. data)
 								ret_ok = false
@@ -357,10 +408,7 @@ function letsencrypt:init()
 					local data = self.internalstore:get("plugin_letsencrypt_" .. base, true)
 					if not data then
 						local check
-						check, data = read_files({
-							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. base .. "/fullchain.pem",
-							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. base .. "/privkey.pem",
-						})
+						check, data = read_cert_files_by_identifier(base)
 						if not check then
 							self.logger:log(ERR, "error while reading files : " .. data)
 							ret_ok = false
@@ -379,10 +427,7 @@ function letsencrypt:init()
 				for _, part in ipairs(server_list) do
 					wildcard_servers[part] = false
 				end
-				local check, data = read_files({
-					"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/fullchain.pem",
-					"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/privkey.pem",
-				})
+				local check, data = read_cert_files_by_identifier(cert_identifier)
 				if not check then
 					self.logger:log(ERR, "error while reading files : " .. data)
 					ret_ok = false
