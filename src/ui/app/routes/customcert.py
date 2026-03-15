@@ -49,9 +49,9 @@ def sanitize_cert_field(value: str, max_length: int = 1024) -> str:
     # Truncate to max length
     value = value[:max_length]
 
-    # Only allow safe characters: alphanumeric, dots, hyphens, underscores, spaces, @, :, /, =, ,
+    # Only allow safe characters: alphanumeric, dots, hyphens, underscores, spaces, @, :, /, =, , ()
     # This covers domain names, IPs, and common certificate formats (RDN attributes use = and ,)
-    safe_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_@ :/*=,")
+    safe_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_@ :/*=,()")
     return "".join(c if c in safe_chars else "?" for c in value)
 
 
