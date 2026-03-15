@@ -110,7 +110,7 @@ def process_ssl_data(data: str, file_path: Optional[str], data_type: Literal["ce
             return decoded
         except BaseException:
             LOGGER.debug(format_exc())
-            LOGGER.warning(f"Failed to decode {data_type} data as base64 for server {server_name}, trying as plain text")
+            LOGGER.debug(f"Failed to decode {data_type} data as base64 for server {server_name}, trying as plain text")
 
             # Fallback: validate and use plaintext data.
             try:
@@ -188,20 +188,20 @@ def _verify_cert_key_match_openssl(cert: Certificate, key_bytes: bytes) -> Tuple
     version = get_openssl_version()
     if version is None:
         msg = "OpenSSL version could not be determined. OpenSSL 3.5 or later is required for PQC certificate verification."
-        LOGGER.warning(msg)
+        LOGGER.debug(msg)
         return False, msg
     if (version[0], version[1]) < OPENSSL_MIN_VERSION:
         msg = (
             f"OpenSSL {OPENSSL_MIN_VERSION[0]}.{OPENSSL_MIN_VERSION[1]} or later is required for PQC certificate verification. Found: {version[0]}.{version[1]}.{version[2]}"
         )
-        LOGGER.warning(msg)
+        LOGGER.debug(msg)
         return False, msg
     env = {"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")}
     try:
         cert_pem = cert.public_bytes(Encoding.PEM)
     except Exception as e:
         msg = f"Could not serialize certificate: {e}"
-        LOGGER.warning(msg)
+        LOGGER.debug(msg)
         return False, msg
     with NamedTemporaryFile(delete=False, suffix=".pem") as cert_tmp, NamedTemporaryFile(delete=False, suffix=".pem") as key_tmp:
         try:
@@ -228,11 +228,11 @@ def _verify_cert_key_match_openssl(cert: Certificate, key_bytes: bytes) -> Tuple
             Path(key_tmp.name).unlink(missing_ok=True)
     if proc_cert.returncode != 0 or proc_key.returncode != 0:
         msg = "Could not verify certificate and key match. For PQC keys, OpenSSL 3.5+ is required."
-        LOGGER.warning(msg)
+        LOGGER.debug(msg)
         return False, msg
     if (proc_cert.stdout or b"") != (proc_key.stdout or b""):
         msg = "Certificate does not match the private key."
-        LOGGER.warning(msg)
+        LOGGER.debug(msg)
         return False, msg
     return True, None
 
@@ -250,11 +250,11 @@ def verify_cert_key_match(cert: Certificate, key_bytes: bytes) -> Tuple[bool, Op
         try:
             if key.public_key().public_numbers() != cert.public_key().public_numbers():
                 msg = "Certificate does not match the private key."
-                LOGGER.warning(msg)
+                LOGGER.debug(msg)
                 return False, msg
         except Exception as e:
             msg = f"Could not verify certificate and key match: {e}"
-            LOGGER.warning(msg)
+            LOGGER.debug(msg)
             return False, msg
         return True, None
     return _verify_cert_key_match_openssl(cert, key_bytes)
@@ -281,18 +281,18 @@ def verify_cert_chain_order(cert_pem_bytes: bytes) -> Tuple[bool, Optional[str]]
         certs = load_pem_x509_certificates(cert_pem_bytes)
     except Exception as e:
         msg = f"Invalid certificate chain: {e}"
-        LOGGER.warning(msg)
+        LOGGER.debug(msg)
         return False, msg
     if not certs:
         msg = "No certificate found."
-        LOGGER.warning(msg)
+        LOGGER.debug(msg)
         return False, msg
     if len(certs) == 1:
         try:
             issuer_str = certs[0].issuer.rfc4514_string()
         except Exception:
             issuer_str = str(certs[0].issuer)
-        LOGGER.warning(
+        LOGGER.debug(
             "Certificate chain contains only the leaf certificate. For best compatibility, include the intermediate(s). "
             "Issuer of leaf cert (download intermediate from your CA): %s",
             issuer_str,
@@ -300,7 +300,7 @@ def verify_cert_chain_order(cert_pem_bytes: bytes) -> Tuple[bool, Optional[str]]
         return True, None
     if certs[0].issuer == certs[0].subject:
         msg = "Certificate chain order is incorrect: leaf certificate must be first (found self-signed root first)."
-        LOGGER.warning(msg)
+        LOGGER.debug(msg)
         return False, msg
     for i in range(len(certs) - 1):
         if certs[i].issuer != certs[i + 1].subject:
@@ -308,7 +308,7 @@ def verify_cert_chain_order(cert_pem_bytes: bytes) -> Tuple[bool, Optional[str]]
                 "Certificate chain order is incorrect: expected leaf cert, then intermediate(s), then root CA. "
                 "Each cert's issuer must match the next cert's subject."
             )
-            LOGGER.warning(msg)
+            LOGGER.debug(msg)
             return False, msg
     return True, None
 
@@ -352,7 +352,7 @@ def _ensure_pem_bytes(data: bytes, kind: str) -> Tuple[Optional[bytes], Optional
         except Exception:
             continue
     msg = f"Invalid {kind} data: expected PEM, base64-encoded PEM, or DER."
-    LOGGER.warning(msg)
+                LOGGER.debug(msg)
     return None, msg
 
 
@@ -405,27 +405,27 @@ def verify_cert_matches_service(cert: Certificate, service_name: str) -> Tuple[b
         # Check exact match
         if service_lower in cert_domains:
             msg = f"✓ Certificate matches service: {service_name} found in {', '.join(sorted(cert_domains))}"
-            LOGGER.info(msg)
+            LOGGER.debug(msg)
             return True, msg
 
         # Check wildcard match
         for cert_domain in cert_domains:
             if cert_domain.startswith("*."):
-                # Wildcard certificate (e.g., *.example.com)
+                # Wildcard certificate (e.g., *.example.com) matches only subdomains, not apex
                 wildcard_base = cert_domain[2:]  # Remove "*."
-                if service_lower.endswith("." + wildcard_base) or service_lower == wildcard_base:
+                if service_lower.endswith("." + wildcard_base):
                     msg = f"✓ Certificate wildcard matches service: {cert_domain} matches {service_name}"
-                    LOGGER.info(msg)
+                    LOGGER.debug(msg)
                     return True, msg
 
         # No match found
         msg = f"❌ Certificate domain mismatch: service={service_name}, certificate domains={', '.join(sorted(cert_domains))}"
-        LOGGER.warning(msg)
+        LOGGER.debug(msg)
         return False, msg
 
     except Exception as e:
         msg = f"⚠️ Error verifying certificate domains: {e}"
-        LOGGER.warning(msg)
+        LOGGER.debug(msg)
         return False, msg
 
 
@@ -434,42 +434,42 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
         ret = False
         if not cert_file or not key_file:
             msg = "Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates"
-            LOGGER.warning(msg)
+            LOGGER.error(msg)
             return False, msg
 
         if isinstance(cert_file, Path):
             if not cert_file.is_file():
                 msg = f"Certificate file {cert_file} is not a valid file, ignoring the custom certificate"
-                LOGGER.warning(msg)
+                LOGGER.error(msg)
                 return False, msg
             cert_file = cert_file.read_bytes()
 
         if isinstance(key_file, Path):
             if not key_file.is_file():
                 msg = f"Key file {key_file} is not a valid file, ignoring the custom certificate"
-                LOGGER.warning(msg)
+                LOGGER.error(msg)
                 return False, msg
             key_file = key_file.read_bytes()
 
         cert_file, err = _ensure_pem_bytes(cert_file, "cert")
         if err:
-            LOGGER.warning(err)
+            LOGGER.error("%s", err)
             return False, err
         key_file, err = _ensure_pem_bytes(key_file, "key")
         if err:
-            LOGGER.warning(err)
+            LOGGER.error("%s", err)
             return False, err
 
         ok, err = verify_cert_chain_order(cert_file)
         if not ok:
-            LOGGER.warning(err)
+            LOGGER.error("%s", err)
             return False, err
 
         cert = load_pem_x509_certificate(cert_file)
         ok, err = verify_cert_key_match(cert, key_file)
         if not ok:
             err = err or "Certificate and key do not match."
-            LOGGER.warning(err)
+            LOGGER.error("%s", err)
             return False, err
 
         # Verify that the certificate actually matches the service name
@@ -495,7 +495,7 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
             LOGGER.critical("Certificate TTL below 1 day (%.2f days). %s", ttl_days, msg)
             return False, msg
         if ttl_seconds < 259200:  # 3 days
-            LOGGER.warning("Certificate TTL below 3 days (%.2f days). Consider renewal.", ttl_days)
+            LOGGER.debug("Certificate TTL below 3 days (%.2f days). Consider renewal.", ttl_days)
 
         cert_hash = bytes_hash(cert_file)
         old_hash = JOB.cache_hash("cert.pem", service_id=cert_dir)
@@ -503,12 +503,12 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
         LOGGER.debug(f"📋 Certificate hash: {cert_hash[:8]}..., Previous hash: {old_hash[:8] if old_hash else 'none'}...")
         if old_hash != cert_hash or not cert_path.is_file():
             ret = True
-            LOGGER.info(f"💾 Uploading certificate for {first_server} to {cert_dir}/cert.pem (hash: {cert_hash[:8]}...)")
+            LOGGER.debug(f"💾 Uploading certificate for {first_server} to {cert_dir}/cert.pem (hash: {cert_hash[:8]}...)")
             cached, err = JOB.cache_file("cert.pem", cert_file, service_id=cert_dir, checksum=cert_hash, delete_file=False)
             if not cached:
                 LOGGER.error(f"❌ Error while caching custom-cert cert.pem file for {first_server}: {err}")
                 return False, err
-            LOGGER.info(f"✓ Successfully cached certificate for {first_server}")
+            LOGGER.debug(f"✓ Successfully cached certificate for {first_server}")
         else:
             LOGGER.debug(f"✓ Certificate for {first_server} unchanged, skipping cert upload")
 
@@ -518,12 +518,12 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
         LOGGER.debug(f"🔑 Key hash: {key_hash[:8]}..., Previous hash: {old_hash[:8] if old_hash else 'none'}...")
         if old_hash != key_hash or not key_path.is_file():
             ret = True
-            LOGGER.info(f"💾 Uploading key for {first_server} to {cert_dir}/key.pem (hash: {key_hash[:8]}...)")
+            LOGGER.debug(f"💾 Uploading key for {first_server} to {cert_dir}/key.pem (hash: {key_hash[:8]}...)")
             cached, err = JOB.cache_file("key.pem", key_file, service_id=cert_dir, checksum=key_hash, delete_file=False)
             if not cached:
                 LOGGER.error(f"❌ Error while caching custom-key key.pem file for {first_server}: {err}")
                 return False, err
-            LOGGER.info(f"✓ Successfully cached key for {first_server}")
+            LOGGER.debug(f"✓ Successfully cached key for {first_server}")
         else:
             LOGGER.debug(f"✓ Key for {first_server} unchanged, skipping key upload")
 
@@ -544,14 +544,14 @@ try:
         all_domains = all_domains.split()
 
     if not all_domains:
-        LOGGER.info("No services found, exiting ...")
+        LOGGER.debug("No services found, exiting ...")
         sys_exit(0)
 
     skipped_servers = []
     if not multisite:
         all_domains = [all_domains[0]]
         if getenv("USE_CUSTOM_SSL", "no") == "no":
-            LOGGER.info("Custom SSL is not enabled, skipping ...")
+            LOGGER.debug("Custom SSL is not enabled, skipping ...")
             skipped_servers = all_domains
 
     if not skipped_servers:
@@ -560,7 +560,7 @@ try:
                 skipped_servers.append(first_server)
                 continue
 
-            LOGGER.info(f"Service {first_server} is using custom SSL certificates, checking ...")
+            LOGGER.debug(f"Service {first_server} is using custom SSL certificates, checking ...")
 
             cert_priority = getenv(f"{first_server}_CUSTOM_SSL_CERT_PRIORITY", "file") if multisite else getenv("CUSTOM_SSL_CERT_PRIORITY", "file")
             cert_file_path = getenv(f"{first_server}_CUSTOM_SSL_CERT", "") if multisite else getenv("CUSTOM_SSL_CERT", "")
@@ -578,7 +578,7 @@ try:
 
             if not cert_file or not key_file:
                 prefix = f"{first_server}_" if multisite else ""
-                LOGGER.warning(
+                LOGGER.error(
                     "Variables (CUSTOM_SSL_CERT or CUSTOM_SSL_CERT_DATA) and (CUSTOM_SSL_KEY or CUSTOM_SSL_KEY_DATA) "
                     f"have to be set and valid to use custom certificates for {first_server}. "
                     f"For multisite, use prefixed names (e.g. {prefix}CUSTOM_SSL_CERT_DATA and {prefix}CUSTOM_SSL_KEY_DATA). "
@@ -588,7 +588,7 @@ try:
                 status = 2
                 continue
 
-            LOGGER.info(f"Checking certificate for {first_server} ...")
+            LOGGER.debug(f"Checking certificate for {first_server} ...")
             need_reload, err = check_cert(cert_file, key_file, first_server)
             if isinstance(err, BaseException):
                 LOGGER.error(f"Exception while checking {first_server}'s certificate, skipping ... \n{err}")
@@ -596,18 +596,18 @@ try:
                 status = 2
                 continue
             elif err:
-                LOGGER.warning(f"Error while checking {first_server}'s certificate : {err}")
+                LOGGER.error(f"Error while checking {first_server}'s certificate: {err}")
                 skipped_servers.append(first_server)
                 status = 2
                 continue
             elif need_reload:
-                LOGGER.info(f"Detected change in {first_server}'s certificate")
+                LOGGER.debug(f"Detected change in {first_server}'s certificate")
                 status = 1
                 any_success = True
                 continue
 
             any_success = True
-            LOGGER.info(f"No change in {first_server}'s certificate")
+            LOGGER.debug(f"No change in {first_server}'s certificate")
 
     # Do not fail the whole job if at least one service was processed successfully
     if any_success and status == 2:
@@ -625,4 +625,7 @@ except BaseException as e:
     LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running custom-cert.py :\n{e}")
 
+status_msg = f"Custom-cert job completed (status={status})"
+print(status_msg)
+LOGGER.info("%s", status_msg)
 sys_exit(status)

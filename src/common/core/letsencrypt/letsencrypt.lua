@@ -36,12 +36,51 @@ local gsub = string.gsub
 
 local live_prefix = "/var/cache/bunkerweb/letsencrypt/etc/live/"
 
--- Try key-type suffixed names first (ecdsa, rsa), then legacy name (no suffix).
+-- Build cert directory candidates: respect LETS_ENCRYPT_KEY_TYPE so switching key type uses the right cert.
+local function build_cert_candidates(identifier)
+	local base_id = identifier
+	local explicit_type = nil
+	if match(identifier, "%-ecdsa$") then
+		base_id = sub(identifier, 1, -7)
+		explicit_type = "ecdsa"
+	elseif match(identifier, "%-rsa$") then
+		base_id = sub(identifier, 1, -5)
+		explicit_type = "rsa"
+	end
+	local preferred_type = explicit_type
+	if not preferred_type then
+		local ok, key_type = pcall(get_variable, "LETS_ENCRYPT_KEY_TYPE")
+		if ok and key_type then
+			key_type = lower(tostring(key_type))
+			if key_type == "ecdsa" or key_type == "rsa" then
+				preferred_type = key_type
+			end
+		end
+	end
+	local candidates = {}
+	local function add(name)
+		for _, existing in ipairs(candidates) do
+			if existing == name then return end
+		end
+		insert(candidates, name)
+	end
+	if preferred_type then
+		add(base_id .. "-" .. preferred_type)
+		add(base_id .. "-" .. (preferred_type == "ecdsa" and "rsa" or "ecdsa"))
+	else
+		add(base_id .. "-ecdsa")
+		add(base_id .. "-rsa")
+	end
+	add(base_id)
+	return candidates
+end
+
+-- Try key-type suffixed names (order from build_cert_candidates), then legacy name (no suffix).
 local function read_cert_files_by_identifier(identifier)
 	if not identifier or identifier == "" then
 		return false, "empty identifier", nil
 	end
-	local candidates = { identifier .. "-ecdsa", identifier .. "-rsa", identifier }
+	local candidates = build_cert_candidates(identifier)
 	for _, name in ipairs(candidates) do
 		local paths = { live_prefix .. name .. "/fullchain.pem", live_prefix .. name .. "/privkey.pem" }
 		local check, data = read_files(paths)

@@ -127,7 +127,7 @@ PROFILE_TYPES = ("classic", "tlsserver", "shortlived")
 ACME_SERVER_TYPES = ("letsencrypt", "zerossl")
 KEY_TYPES = ("ecdsa", "rsa")
 ELLIPTIC_CURVES = ("secp256r1", "secp384r1")
-RSA_KEY_SIZES = ("3072", "4096", "8192")
+RSA_KEY_SIZES = ("3072", "4096", "8192")  # 8192 only supported on ZeroSSL, not Let's Encrypt
 DNS_PROPAGATION_DEFAULT = "default"
 CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
 
@@ -480,7 +480,8 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
 
     # Read and validate RSA key size
     rsa_key_size_val = env("LETS_ENCRYPT_RSA_KEY_SIZE", "4096")
-    # Only allow 8192 for ZeroSSL, not for Let's Encrypt
+    # 8192 only supported on ZeroSSL; Let's Encrypt allows 3072 and 4096 only.
+    # BSI recommends minimum RSA key size 3072 bits; 2048 is not used.
     if acme_server == "letsencrypt":
         allowed_rsa_key_sizes = ("3072", "4096")
     else:
@@ -641,7 +642,10 @@ def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, 
         for base, names in wildcard_groups.items():
             config = base_config.copy()
             config["server_names"] = ",".join(names)
-            entries[base] = config
+            fp = certificate_fingerprint(config)
+            fp_hash = bytes_hash(repr(fp).encode("utf-8"), algorithm="sha256")[:12]
+            entry_key = f"{base}__{fp_hash}"
+            entries[entry_key] = config
         return entries
 
     config = base_config.copy()

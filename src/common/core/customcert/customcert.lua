@@ -184,7 +184,7 @@ function customcert:load_certs_from_disk()
 					-- But track that we had at least one service with certs enabled
 				else
 					any_service_loaded = true
-					self.logger:log(ngx.INFO, "customcert: ✓ found cert in directory " .. (cert_dir or "unknown") .. " for " .. server_name)
+					self.logger:log(ngx.INFO, "customcert: ✓ found cert in " .. (cert_dir or "?") .. " for " .. server_name)
 					pcall(check_cert_ttl, data[1], multisite_vars["SERVER_NAME"] or server_name, self.logger)
 					check, err = self:load_data(data, multisite_vars["SERVER_NAME"])
 					if not check then
@@ -250,20 +250,34 @@ function customcert:ssl_certificate()
 	end
 	-- Normalize SNI (e.g. strip trailing dot) so lookup matches what we stored
 	server_name = server_name:gsub("%.$", ""):match("^%s*(.-)%s*$") or server_name
-	self.logger:log(ngx.INFO, "customcert: ssl_certificate() called for SNI=" .. server_name)
+	self.logger:log(ngx.DEBUG, "customcert: ssl_certificate() called for SNI=" .. server_name)
 
 	local cert_pem, key_pem
-	cert_pem, err = self.internalstore:get("plugin_customcert_" .. server_name .. "_cert", false)
+	cert_pem = self.internalstore:get("plugin_customcert_" .. server_name .. "_cert", false)
 	if not cert_pem or cert_pem == "" then
 		self.logger:log(ngx.DEBUG, "customcert: no cert found in internalstore for " .. server_name .. ", checking LE...")
 		return self:ret(true, "custom certificate is not used")
 	end
-	self.logger:log(ngx.INFO, "customcert: found cert in internalstore for " .. server_name)
+	self.logger:log(ngx.DEBUG, "customcert: found cert in internalstore for " .. server_name)
 
-	key_pem, err = self.internalstore:get("plugin_customcert_" .. server_name .. "_key", false)
+	key_pem = self.internalstore:get("plugin_customcert_" .. server_name .. "_key", false)
 	if not key_pem or key_pem == "" then
 		self.logger:log(ngx.DEBUG, "customcert: found cert but no key in internalstore for " .. server_name)
 		return self:ret(true, "custom certificate is not used")
+	end
+
+	-- Worker-local cache of parsed cert/key to avoid repeated PEM parsing on every handshake
+	local parsed_cache_key = "plugin_customcert_" .. server_name .. "_parsed"
+	local cached_parsed = self.internalstore:get(parsed_cache_key, true)
+	if cached_parsed
+		and type(cached_parsed) == "table"
+		and cached_parsed.cert_pem == cert_pem
+		and cached_parsed.key_pem == key_pem
+		and cached_parsed.cert_chain
+		and cached_parsed.priv_key
+	then
+		self.logger:log(ngx.DEBUG, "customcert: using cached parsed certificate for " .. server_name)
+		return self:ret(true, "certificate/key data found (cached)", { cached_parsed.cert_chain, cached_parsed.priv_key })
 	end
 
 	local cert_chain, _ = parse_pem_cert(cert_pem)
@@ -272,24 +286,34 @@ function customcert:ssl_certificate()
 		self.logger:log(ngx.DEBUG, "customcert: found cert/key but failed to parse for " .. server_name)
 		return self:ret(true, "custom certificate is not used")
 	end
-	self.logger:log(ngx.INFO, "✓ customcert: using custom certificate for " .. server_name)
+
+	local ok_cache, cache_err = self.internalstore:set(parsed_cache_key, {
+		cert_chain = cert_chain,
+		priv_key = priv_key,
+		cert_pem = cert_pem,
+		key_pem = key_pem,
+	}, nil, true)
+	if not ok_cache then
+		self.logger:log(WARN, "customcert: failed to cache parsed cert " .. server_name .. " : " .. (cache_err or "?"))
+	end
+	self.logger:log(ngx.DEBUG, "✓ customcert: using custom certificate for " .. server_name)
 	return self:ret(true, "certificate/key data found", { cert_chain, priv_key })
 end
 
 function customcert:load_data(data, server_name)
-	-- Store raw PEM strings in shared dict (worker=false) so all workers see certs without init_worker timing
+	-- Store raw PEM strings in shared dict (worker=false); set_with_retries overwrites on rotation
 	for key in server_name:gmatch("%S+") do
 		local key_trim = key:gsub("%.$", ""):match("^%s*(.-)%s*$") or key
 		local cert_key = "plugin_customcert_" .. key_trim .. "_cert"
 		local key_key = "plugin_customcert_" .. key_trim .. "_key"
-		local ok
-		ok, err = self.internalstore:set(cert_key, data[1], nil, false)
+		local ok, set_err
+		ok, set_err = self.internalstore:set_with_retries(cert_key, data[1], nil)
 		if not ok then
-			return false, "error while setting data into internalstore : " .. (err or "")
+			return false, "error while setting data into internalstore : " .. (set_err or "")
 		end
-		ok, err = self.internalstore:set(key_key, data[2], nil, false)
+		ok, set_err = self.internalstore:set_with_retries(key_key, data[2], nil)
 		if not ok then
-			return false, "error while setting data into internalstore : " .. (err or "")
+			return false, "error while setting data into internalstore : " .. (set_err or "")
 		end
 	end
 	return true

@@ -236,7 +236,7 @@
     "LETS_ENCRYPT_RSA_KEY_SIZE": {
       "context": "multisite",
       "default": "4096",
-      "help": "RSA key size in bits. Only used when LETS_ENCRYPT_KEY_TYPE is 'rsa'. Minimum 3072 bits (2048 is obsolete per BSI standards). Ignored for ECDSA keys.",
+      "help": "RSA key size in bits. Only used when LETS_ENCRYPT_KEY_TYPE is 'rsa'. 3072 and 4096 supported by Let's Encrypt; 8192 only by ZeroSSL. 2048 is not used. Ignored for ECDSA keys.",
       "id": "lets-encrypt-rsa-key-size",
       "label": "RSA Key Size",
       "regex": "^(3072|4096|8192)$",
