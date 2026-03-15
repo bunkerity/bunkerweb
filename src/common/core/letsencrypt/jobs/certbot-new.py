@@ -10,7 +10,7 @@ from os.path import join
 from pathlib import Path
 from re import MULTILINE, match, search
 from select import select
-from subprocess import DEVNULL, PIPE, STDOUT, Popen, run
+from subprocess import DEVNULL, PIPE, STDOUT, Popen, TimeoutExpired, run
 from sys import exit as sys_exit, path as sys_path
 from time import monotonic, sleep
 from threading import Event, Lock, Thread
@@ -127,6 +127,7 @@ PROFILE_TYPES = ("classic", "tlsserver", "shortlived")
 ACME_SERVER_TYPES = ("letsencrypt", "zerossl")
 DNS_PROPAGATION_DEFAULT = "default"
 CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
+OCSP_REFRESH_TIMEOUT = 2100  # 35 minutes max to cover ocsp-refresh job worst-case duration
 
 
 def normalize_server_names(server_names: str) -> Set[str]:
@@ -1141,13 +1142,36 @@ try:
 
         save_zerossl_api_key_hashes(updated_zerossl_api_key_hashes)
 
-        # * Save data to db cache
+        # * Save data to db cache (full LE directory)
         if DATA_PATH.is_dir() and list(DATA_PATH.iterdir()):
             cached, err = JOB.cache_dir(DATA_PATH)
             if not cached:
                 LOGGER.error(f"Error while saving data to db cache : {err}")
             else:
                 LOGGER.info("Successfully saved data to db cache")
+
+        # * Trigger OCSP stapling refresh for newly issued certificates (AFTER database save)
+        # OCSP job will compare new certs with cached ones and process differential updates
+        if status == 1 and getenv("SSL_USE_OCSP_STAPLING", "yes").lower() == "yes":
+            LOGGER.info("🔄 OCSP triggering refresh for newly issued certificates")
+            try:
+                import sys
+
+                ocsp_script = join(sep, "usr", "share", "bunkerweb", "core", "ssl", "jobs", "ocsp-refresh.py")
+                result = run([sys.executable, ocsp_script, "--force"], stdin=DEVNULL, capture_output=True, text=True, timeout=OCSP_REFRESH_TIMEOUT)
+                if result.returncode == 0:
+                    LOGGER.info("✓ OCSP refresh completed successfully after issuance")
+                else:
+                    LOGGER.warning(f"⚠️ OCSP refresh returned exit code {result.returncode}")
+                if result.stderr:
+                    for line in result.stderr.strip().splitlines():
+                        LOGGER.debug(f"OCSP: {line}")
+            except TimeoutExpired as e:
+                LOGGER.warning(
+                    f"⚠️ OCSP post-issuance refresh timed out after {OCSP_REFRESH_TIMEOUT}s (non-fatal): {e}"
+                )
+            except Exception as e:
+                LOGGER.warning(f"⚠️ OCSP post-issuance refresh failed (non-fatal): {e}")
 except SystemExit as e:
     status = e.code
 except BaseException as e:

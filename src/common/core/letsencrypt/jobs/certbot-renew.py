@@ -2,9 +2,8 @@
 
 from os import getenv, sep
 from os.path import join
-from subprocess import DEVNULL, PIPE, Popen
+from subprocess import DEVNULL, PIPE, Popen, TimeoutExpired, run
 from sys import exit as sys_exit, path as sys_path
-from time import monotonic
 from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -29,8 +28,10 @@ from letsencrypt_utils import (
 LOGGER = getLogger("LETS-ENCRYPT.RENEW")
 
 LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.RENEW.CERTBOT")
-CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
+CERTBOT_TIMEOUT = 900  # 900 seconds (15 minutes) max for a single certbot invocation
+OCSP_REFRESH_TIMEOUT = 2100  # 2100 seconds (35 minutes) max to cover ocsp-refresh job worst-case duration
 status = 0
+
 
 try:
     # Check if we're using let's encrypt
@@ -81,33 +82,64 @@ try:
         ]
         + (["-v"] if getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper() == "DEBUG" else []),
         stdin=DEVNULL,
+        stdout=PIPE,
         stderr=PIPE,
         universal_newlines=True,
         env=cmd_env,
     )
-    deadline = monotonic() + CERTBOT_TIMEOUT
-    while process.poll() is None:
-        if monotonic() > deadline:
-            LOGGER.error(f"certbot renew timed out after {CERTBOT_TIMEOUT}s, killing process.")
-            process.kill()
-            process.wait()
-            status = 2
-            break
-        if process.stderr:
-            for line in process.stderr:
-                LOGGER_CERTBOT.info(line.strip())
+    try:
+        stdout, stderr = process.communicate(timeout=CERTBOT_TIMEOUT)
+    except TimeoutExpired:
+        LOGGER.error(f"certbot renew timed out after {CERTBOT_TIMEOUT}s, killing process.")
+        process.kill()
+        stdout, stderr = process.communicate()
+        status = 2
+    if stdout:
+        for line in stdout.splitlines():
+            line_str = line.strip()
+            if line_str:
+                LOGGER_CERTBOT.info(line_str)
+                if "(success)" in line_str or "Congratulations" in line_str:
+                    status = 1
+    if stderr:
+        for line in stderr.splitlines():
+            LOGGER_CERTBOT.info(line.strip())
 
     if process.returncode and process.returncode != 0:
         status = 2
         LOGGER.error("Certificates renewal failed")
 
-    # Save Let's Encrypt data to db cache
+    # Save Let's Encrypt data to db cache (full directory)
     if DATA_PATH.is_dir() and list(DATA_PATH.iterdir()):
         cached, err = JOB.cache_dir(DATA_PATH)
         if not cached:
             LOGGER.error(f"Error while saving Let's Encrypt data to db cache : {err}")
         else:
             LOGGER.info("Successfully saved Let's Encrypt data to db cache")
+
+    # Trigger OCSP refresh after successful renewal (AFTER database save)
+    # OCSP job will compare new certs with cached ones and process differential updates
+    if status == 1 and getenv("SSL_USE_OCSP_STAPLING", "yes").lower() == "yes":
+        LOGGER.info("🔄 OCSP triggering refresh for renewed certificates")
+
+        try:
+            import sys
+
+            ocsp_script = join(sep, "usr", "share", "bunkerweb", "core", "ssl", "jobs", "ocsp-refresh.py")
+            result = run([sys.executable, ocsp_script, "--force"], stdin=DEVNULL, capture_output=True, text=True, timeout=OCSP_REFRESH_TIMEOUT)
+            if result.returncode == 0:
+                LOGGER.info("✓ OCSP refresh completed successfully after renewal")
+            else:
+                LOGGER.warning(f"⚠️ OCSP refresh returned exit code {result.returncode}")
+            if result.stderr:
+                for line in result.stderr.strip().splitlines():
+                    LOGGER.debug(f"OCSP: {line}")
+        except TimeoutExpired as e:
+            LOGGER.warning(
+                f"⚠️ OCSP post-renewal refresh timed out after {OCSP_REFRESH_TIMEOUT}s (non-fatal): {e}"
+            )
+        except Exception as e:
+            LOGGER.warning(f"⚠️ OCSP post-renewal refresh failed (non-fatal): {e}")
 except SystemExit as e:
     status = e.code
 except BaseException as e:
