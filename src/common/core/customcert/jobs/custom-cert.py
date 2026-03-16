@@ -66,6 +66,20 @@ LOGGER = getLogger("CUSTOM-CERT")
 JOB = Job(LOGGER, __file__)
 
 
+def _truncate_log(msg: str, max_len: int = 2048) -> str:
+    """Truncate log message to max_len characters for safe logging."""
+    if isinstance(msg, str) and len(msg) > max_len:
+        return msg[:max_len - 3] + "..."
+    return str(msg) if msg is not None else ""
+
+
+def _safe_error_msg(exc: BaseException, context: str = "") -> str:
+    """Extract safe error message from exception, avoiding sensitive data like private keys."""
+    exc_str = str(exc)
+    # Truncate to prevent accidentally logging private key material in exception traces
+    return _truncate_log(exc_str, 256)
+
+
 def normalize_cert_identifier(server_name: str) -> str:
     """Use _wildcard_. prefix for wildcard server names (e.g. *.example.com -> _wildcard_.example.com)."""
     if server_name.startswith("*."):
@@ -156,6 +170,38 @@ def get_key_type(key_bytes: bytes, cert_bytes: Optional[bytes] = None) -> str:
         except Exception:
             pass
     return "rsa"
+
+
+def validate_private_key_unencrypted(key_bytes: bytes) -> Tuple[bool, Optional[str]]:
+    """
+    Validate that the private key is unencrypted and parseable.
+    Returns (True, None) on success, (False, error_msg) if encrypted or invalid.
+    Never logs the key material itself, only error descriptions.
+    """
+    try:
+        load_pem_private_key(key_bytes, password=None)
+        return True, None
+    except TypeError as e:
+        # cryptography raises TypeError when key is encrypted and no password given
+        msg = str(e)
+        if "password" in msg.lower() or "encrypt" in msg.lower():
+            return False, "Private key is encrypted (password-protected). Please provide an unencrypted private key."
+        return False, f"Private key type error: {_safe_error_msg(e)}"
+    except ValueError as e:
+        return False, f"Private key is invalid or unsupported format: {_safe_error_msg(e)}"
+    except Exception as e:
+        # May be a PQC key (not RSA/EC) - try load_der_private_key as fallback
+        try:
+            load_der_private_key(key_bytes, password=None)
+            return True, None
+        except TypeError as te:
+            msg = str(te)
+            if "password" in msg.lower() or "encrypt" in msg.lower():
+                return False, "Private key is encrypted (password-protected). Please provide an unencrypted private key."
+            return False, f"Private key type error: {_safe_error_msg(te)}"
+        except Exception:
+            pass
+    return True, None  # Unknown key type (may be PQC) - defer to downstream validation
 
 
 OPENSSL_MIN_VERSION = (3, 5)
@@ -352,7 +398,7 @@ def _ensure_pem_bytes(data: bytes, kind: str) -> Tuple[Optional[bytes], Optional
         except Exception:
             continue
     msg = f"Invalid {kind} data: expected PEM, base64-encoded PEM, or DER."
-                LOGGER.debug(msg)
+    LOGGER.debug(msg)
     return None, msg
 
 
@@ -453,29 +499,34 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
 
         cert_file, err = _ensure_pem_bytes(cert_file, "cert")
         if err:
-            LOGGER.error("%s", err)
+            LOGGER.error("%s", _truncate_log(err))
             return False, err
         key_file, err = _ensure_pem_bytes(key_file, "key")
         if err:
-            LOGGER.error("%s", err)
+            LOGGER.error("%s", _truncate_log(err))
+            return False, err
+
+        ok, err = validate_private_key_unencrypted(key_file)
+        if not ok:
+            LOGGER.error("%s", _truncate_log(err))
             return False, err
 
         ok, err = verify_cert_chain_order(cert_file)
         if not ok:
-            LOGGER.error("%s", err)
+            LOGGER.error("%s", _truncate_log(err))
             return False, err
 
         cert = load_pem_x509_certificate(cert_file)
         ok, err = verify_cert_key_match(cert, key_file)
         if not ok:
             err = err or "Certificate and key do not match."
-            LOGGER.error("%s", err)
+            LOGGER.error("%s", _truncate_log(err))
             return False, err
 
         # Verify that the certificate actually matches the service name
         cert_matches, match_msg = verify_cert_matches_service(cert, first_server)
         if not cert_matches:
-            LOGGER.error(f"Certificate validation failed for {first_server}: {match_msg}")
+            LOGGER.error("Certificate validation failed for %s: %s", first_server, _truncate_log(match_msg))
             return False, match_msg
 
         key_type = get_key_type(key_file, cert_file)
@@ -506,7 +557,7 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
             LOGGER.debug(f"💾 Uploading certificate for {first_server} to {cert_dir}/cert.pem (hash: {cert_hash[:8]}...)")
             cached, err = JOB.cache_file("cert.pem", cert_file, service_id=cert_dir, checksum=cert_hash, delete_file=False)
             if not cached:
-                LOGGER.error(f"❌ Error while caching custom-cert cert.pem file for {first_server}: {err}")
+                LOGGER.error("❌ Error while caching custom-cert cert.pem file for %s: %s", first_server, _truncate_log(err))
                 return False, err
             LOGGER.debug(f"✓ Successfully cached certificate for {first_server}")
         else:
@@ -521,7 +572,7 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
             LOGGER.debug(f"💾 Uploading key for {first_server} to {cert_dir}/key.pem (hash: {key_hash[:8]}...)")
             cached, err = JOB.cache_file("key.pem", key_file, service_id=cert_dir, checksum=key_hash, delete_file=False)
             if not cached:
-                LOGGER.error(f"❌ Error while caching custom-key key.pem file for {first_server}: {err}")
+                LOGGER.error("❌ Error while caching custom-key key.pem file for %s: %s", first_server, _truncate_log(err))
                 return False, err
             LOGGER.debug(f"✓ Successfully cached key for {first_server}")
         else:
@@ -529,7 +580,8 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
 
         return ret, ""
     except BaseException as e:
-        LOGGER.error("Unexpected error while checking certificate: %s", e)
+        # Log only safe error message (truncated), avoid logging exception traces with potential key material
+        LOGGER.error("Unexpected error while checking certificate: %s", _safe_error_msg(e))
         return False, e
 
 
@@ -591,12 +643,12 @@ try:
             LOGGER.debug(f"Checking certificate for {first_server} ...")
             need_reload, err = check_cert(cert_file, key_file, first_server)
             if isinstance(err, BaseException):
-                LOGGER.error(f"Exception while checking {first_server}'s certificate, skipping ... \n{err}")
+                LOGGER.error("Exception while checking %s's certificate, skipping ... %s", first_server, _safe_error_msg(err))
                 skipped_servers.append(first_server)
                 status = 2
                 continue
             elif err:
-                LOGGER.error(f"Error while checking {first_server}'s certificate: {err}")
+                LOGGER.error("Error while checking %s's certificate: %s", first_server, _truncate_log(err))
                 skipped_servers.append(first_server)
                 status = 2
                 continue
@@ -623,7 +675,8 @@ except SystemExit as e:
 except BaseException as e:
     status = 2
     LOGGER.debug(format_exc())
-    LOGGER.error(f"Exception while running custom-cert.py :\n{e}")
+    # Log only safe error message (truncated), avoid logging exception traces with potential key material
+    LOGGER.error("Exception while running custom-cert.py: %s", _safe_error_msg(e))
 
 status_msg = f"Custom-cert job completed (status={status})"
 print(status_msg)
