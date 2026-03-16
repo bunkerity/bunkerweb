@@ -1052,10 +1052,11 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
 def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, stats: Optional[dict] = None, force_fetch: bool = False) -> Tuple[str, Optional[bytes], int, str, bytes, Optional[str], bool]:
     """
     Process a single certificate for OCSP stapling. Works with in-memory PEM data.
-    If force_fetch is True, skips the cached TTL check and retrieves a new response.
+    If force_fetch is True, skips the cached TTL check and retrieves a new response from upstream PKI.
+    On error with force_fetch, returns ocsp_der=None, and disk files are NOT replaced (existing files kept intact).
 
     Returns a tuple of (cert_name, ocsp_der, ttl, cert_checksum, pem_data, ocsp_url, was_attempted) for batched database writes.
-    If ocsp_der is None, it means the fetch was skipped or failed.
+    If ocsp_der is None, it means the fetch was skipped or failed (disk files remain untouched).
     """
     if stats is None:
         stats = {}
@@ -1183,6 +1184,7 @@ def process_custom_certs(
     refresh_fn: Optional[Callable[[str], None]] = None,
     timeout_fn: Optional[Callable[[str], bool]] = None,
     skip_unchanged_ttl_checks: bool = False,
+    force_fetch: bool = False,
 ) -> List[Tuple[str, Optional[bytes], int, str, bytes, Optional[str], bool]]:
     """
     Process OCSP for custom certificates using certificate data from the database.
@@ -1195,6 +1197,7 @@ def process_custom_certs(
         lock_fd: Optional file descriptor for lock refresh (for long operations)
         refresh_fn: Optional callable to refresh lock (prevents stale detection)
         timeout_fn: Optional callable to check job timeout
+        force_fetch: If True, force refetch all OCSP responses from upstream PKI
     """
     if stats is None:
         stats = {}
@@ -1255,14 +1258,14 @@ def process_custom_certs(
                 refresh_fn(cert_name)
             results.append(_process_cert(cert_name, cert_pem, db, stats, force_fetch=True))
 
-        # 2. Process unchanged custom certificates (TTL check only)
+        # 2. Process unchanged custom certificates (TTL check only or force-fetch if requested)
         if not skip_unchanged_ttl_checks:
             for cert_name, cert_pem in sorted(unchanged_custom_certs.items()):
                 if callable(timeout_fn) and timeout_fn(f"unchanged custom cert {cert_name}"):
                     break
                 if callable(refresh_fn):
                     refresh_fn(cert_name)
-                results.append(_process_cert(cert_name, cert_pem, db, stats, force_fetch=False))
+                results.append(_process_cert(cert_name, cert_pem, db, stats, force_fetch=force_fetch))
 
     except Exception as e:
         log_error("OCSP exception while processing custom certificates: %s", e)
@@ -1630,7 +1633,9 @@ def _persist_ocsp_results_to_disk(
     stats: Optional[Dict[str, int]] = None,
 ) -> None:
     """
-    Write OCSP responses to disk cache files.
+    Write OCSP responses to disk cache files (atomic writes with temporary files).
+    Ensures existing files are only replaced when new fetches complete successfully.
+    On any write error, keeps existing OCSP files intact with remaining TTL.
     Called both at normal completion and when timeout occurs.
     """
     if not all_ocsp_results:
@@ -1656,11 +1661,22 @@ def _persist_ocsp_results_to_disk(
                     stats["errors"] = stats.get("errors", 0) + 1
                     continue
 
-                # Write OCSP response to cache/ssl/{cert-name}/ocsp.der
+                # Write OCSP response to cache/ssl/{cert-name}/ocsp.der (atomic write with temp file)
                 ocsp_path = ocsp_cert_dir / "ocsp.der"
                 try:
-                    ocsp_path.write_bytes(ocsp_der)
-                    ocsp_path.chmod(0o644)  # Readable by nginx
+                    # Write to temporary file first, then atomically move to final location
+                    # This ensures existing file is only replaced if write succeeds completely
+                    with tempfile.NamedTemporaryFile(dir=ocsp_cert_dir, delete=False, prefix=".ocsp_", suffix=".tmp") as tmp_file:
+                        tmp_file.write(ocsp_der)
+                        tmp_file.flush()
+                        os.fsync(tmp_file.fileno())  # Ensure write is persisted
+                        tmp_path = Path(tmp_file.name)
+
+                    # Set permissions on temp file before moving
+                    tmp_path.chmod(0o644)  # Readable by nginx
+
+                    # Atomically move temp file to final location (overwrites only on success)
+                    tmp_path.replace(ocsp_path)
                     log_info("✓ OCSP saved response for %s to disk at %s", cert_name, ocsp_path)
 
                     # Write OCSP metadata to cache/ssl/{cert-name}/ocsp.json
@@ -1696,7 +1712,14 @@ def _persist_ocsp_results_to_disk(
                     # Create symlinks for each SAN so OCSP is found by any SNI name
                     _create_san_symlinks(pem_data, ocsp_path, cert_name)
                 except Exception as e:
+                    # Clean up any leftover temp files on error (existing ocsp.der remains intact)
+                    try:
+                        for tmp_file in ocsp_cert_dir.glob(".ocsp_*.tmp"):
+                            tmp_file.unlink()
+                    except Exception:
+                        pass  # Ignore cleanup errors
                     log_error("❌ OCSP error while writing response for %s to disk: %s", cert_name, e)
+                    log_info("ℹ️ OCSP kept existing OCSP response file for %s (new fetch failed)", cert_name)
                     stats["errors"] = stats.get("errors", 0) + 1
             finally:
                 _release_cert_lock(lock_fd)
@@ -1754,12 +1777,19 @@ def main() -> int:
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="OCSP refresh job for BunkerWeb")
     parser.add_argument("--force", action="store_true", help="Force full OCSP refresh and TTL checks managed by the job")
+    parser.add_argument("--force-fetch", action="store_true", help="Force refetch all OCSP responses from upstream PKI, do not replace existing files on error")
     args, unknown = parser.parse_known_args()
     force_all = args.force
+    force_fetch = args.force_fetch
 
     try:
-        log_info("🔄 OCSP refresh job started with differential update strategy (timeout in %d minutes%s)", 
-                 JOB_TIMEOUT // 60, " [FORCE]" if force_all else "")
+        force_flags = ""
+        if force_all:
+            force_flags += " [FORCE]"
+        if force_fetch:
+            force_flags += " [FORCE-FETCH]"
+        log_info("🔄 OCSP refresh job started with differential update strategy (timeout in %d minutes%s)",
+                 JOB_TIMEOUT // 60, force_flags)
 
         # Acquire main lock for the entire OCSP refresh operation
         lock_fd_main = _acquire_cert_lock("main", timeout=300, stale_threshold=1800)
@@ -1799,6 +1829,26 @@ def main() -> int:
         except Exception as e:
             log_error("❌ OCSP could not create cache directory %s: %s", CONFIGS_SSL_BASE, e)
             return 2
+
+        # === Clean up old temporary OCSP files (older than 5 minutes) ===
+        # Removes stale temp files from failed script runs before processing begins
+        try:
+            current_time = time.time()
+            temp_cutoff = current_time - (5 * 60)  # 5 minutes ago
+            cleanup_count = 0
+
+            for tmp_file in CONFIGS_SSL_BASE.glob("**/.ocsp_*.tmp"):
+                try:
+                    if tmp_file.stat().st_mtime < temp_cutoff:
+                        tmp_file.unlink()
+                        cleanup_count += 1
+                except Exception:
+                    pass  # Ignore individual file cleanup errors
+
+            if cleanup_count > 0:
+                log_debug("🧹 OCSP cleaned up %d stale temporary file(s) (older than 5 minutes)", cleanup_count)
+        except Exception as e:
+            log_debug("⚠️ OCSP temporary file cleanup failed: %s", e)
 
         # Check if OCSP stapling is globally disabled
         ocsp_enabled = os.getenv("SSL_USE_OCSP_STAPLING", "yes").lower()
@@ -1903,12 +1953,12 @@ def main() -> int:
                 if res[1] is None and res[5] and res[6]:
                     stashed_failures.append((cert_name, pem_data))
 
-            # 3. Process unchanged certs (TTL check only)
+            # 3. Process unchanged certs (TTL check only or force-fetch if requested)
             if not skip_unchanged_ttl_checks:
                 for cert_name, pem_data in sorted(unchanged_le_certs.items()):
                     if check_job_timeout(f"unchanged LE cert {cert_name}"): break
                     refresh_job_lock(cert_name)
-                    res = _process_cert(cert_name, pem_data, db, stats, force_fetch=False)
+                    res = _process_cert(cert_name, pem_data, db, stats, force_fetch=force_fetch)
                     all_ocsp_results.append(res)
                     if res[1] is None and res[5] and res[6]:
                         stashed_failures.append((cert_name, pem_data))
@@ -1920,12 +1970,13 @@ def main() -> int:
         if not check_job_timeout("before custom cert processing"):
             # Process custom certificates from database
             custom_results = process_custom_certs(
-                db, 
-                stats, 
-                lock_fd=lock_fd_main, 
-                refresh_fn=refresh_job_lock, 
+                db,
+                stats,
+                lock_fd=lock_fd_main,
+                refresh_fn=refresh_job_lock,
                 timeout_fn=check_job_timeout,
-                skip_unchanged_ttl_checks=skip_unchanged_ttl_checks
+                skip_unchanged_ttl_checks=skip_unchanged_ttl_checks,
+                force_fetch=force_fetch
             )
             all_ocsp_results.extend(custom_results)
             for res in custom_results:
