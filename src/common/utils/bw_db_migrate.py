@@ -1826,7 +1826,7 @@ def _save_target_uri_to_env_file(env_file: Path, target_uri: str) -> None:
     new_lines.append("")
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     new_lines.append(f"# Target database configuration (saved by bw_db_migrate at {timestamp}, not yet migrated)")
-    new_lines.append(f"DB_MIGRATION_TARGET_URI=\"{target_uri}\"")
+    new_lines.append(f"DB_MIGRATION_TARGET_URI={target_uri}")
 
     env_file.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
     LOGGER.info("Updated env file %s with target database URI.", env_file)
@@ -1891,7 +1891,7 @@ def _update_env_file_on_success(env_file: Path, target_uri: str) -> None:
 
     new_lines.append("")
     new_lines.append("# Updated by bw_db_migrate after successful migration")
-    new_lines.append(f"DATABASE_URI=\"{target_uri}\"")
+    new_lines.append(f"DATABASE_URI={target_uri}")
 
     env_file.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
     LOGGER.info("Updated env file %s with new DATABASE_URI.", env_file)
