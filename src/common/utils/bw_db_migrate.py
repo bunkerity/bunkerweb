@@ -285,6 +285,19 @@ def _engine_kwargs_from_settings(settings: Dict[str, str]) -> Dict[str, object]:
     }
 
 
+def _mask_uri_password(uri: str) -> str:
+    """Return the URI with the password replaced by '***' for safe logging."""
+    try:
+        from sqlalchemy.engine.url import make_url
+
+        return make_url(uri).__repr__()
+    except Exception:
+        # Fallback: crude regex mask for user:pass@ pattern
+        import re
+
+        return re.sub(r"(://[^:]+:)[^@]+(@)", r"\1***\2", uri)
+
+
 def _normalize_mysql_ssl_in_uri(uri: str) -> str:
     """
     Work around PyMySQL expecting a dict for `ssl` while URLs like ?ssl=true
@@ -1279,7 +1292,7 @@ def _run_tui(default_env_file: str) -> tuple[str, str, str, bool, bool, bool, bo
                 stdscr.clrtoeol()
 
             _item(5, 0, "Env file: ", env_file[: max_x - 20])
-            _item(6, 1, "Source DATABASE_URI: ", source_uri[: max_x - 30])
+            _item(6, 1, "Source DATABASE_URI: ", _mask_uri_password(source_uri)[: max_x - 30])
             _item(7, 2, "Source host: ", source_host[: max_x - 20])
             _item(8, 3, "Source port: ", source_port[: max_x - 20])
 
@@ -2219,8 +2232,8 @@ def main() -> int:
         LOGGER.error("DB_MIGRATION_TARGET_URI is not set (CLI --target-uri, env file, or environment).")
         return 1
 
-    LOGGER.info("Source DATABASE_URI: %r", source_uri)
-    LOGGER.info("Target DB_MIGRATION_TARGET_URI: %r", target_uri)
+    LOGGER.info("Source DATABASE_URI: %r", _mask_uri_password(source_uri))
+    LOGGER.info("Target DB_MIGRATION_TARGET_URI: %r", _mask_uri_password(target_uri))
 
     # Warn about characters that may require manual escaping in env files or URIs.
     for label, uri in (("source", source_uri), ("target", target_uri)):
