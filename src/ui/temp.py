@@ -35,9 +35,13 @@ def stop(status):
 
 
 def handle_stop(signum, frame):
+    # stop() accepts exactly one positional argument (exit status).
+    # Calling stop(0, False) raises TypeError at shutdown:
+    #   TypeError: stop() takes 1 positional argument but 2 were given
+    # The second argument was spurious and has been removed.
     LOGGER.info("Caught stop operation")
     LOGGER.info("Stopping web ui ...")
-    stop(0, False)
+    stop(0)
 
 
 signal(SIGINT, handle_stop)
