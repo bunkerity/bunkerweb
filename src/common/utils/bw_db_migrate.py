@@ -54,7 +54,7 @@ from urllib.parse import urlparse, urlunparse
 LOGGER = getLogger("bw_db_migrate")
 basicConfig(level=INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
-__version__ = "0.5.6"
+__version__ = "0.5.7"
 _MAX_LOG_LEN = 32768  # large enough for full table output (29+ rows × ~170 chars)
 _DUMP_ROOT = Path("/tmp/bunkerweb/bw_db_migrate")
 _PID_FILE = _DUMP_ROOT / "bw_db_migrate.pid"
@@ -430,14 +430,22 @@ def _create_engine(uri: str, *, engine_kwargs: Optional[Dict[str, object]] = Non
     except Exception:
         pass
 
-    # Inject a connect_timeout (seconds) into connect_args for all drivers unless
-    # the caller already set one. Probe/test connections use 2 s; the main migration
-    # engines pass connect_timeout=900 (15 min) via engine_kwargs so large imports
-    # are not interrupted.
+    # Inject a connect_timeout (seconds) into connect_args for drivers that support it.
+    #
+    # - SQLite's DBAPI (`sqlite3.connect`) does not accept `connect_timeout` and will raise
+    #   `TypeError: Connection() got an unexpected keyword argument 'connect_timeout'`.
+    # - MySQL/PyMySQL and Postgres/Psycopg generally accept `connect_timeout`.
     try:
-        connect_args = dict(kwargs.get("connect_args") or {})  # type: ignore[arg-type]
-        connect_args.setdefault("connect_timeout", 2)
-        kwargs["connect_args"] = connect_args
+        _drivername = ""
+        try:
+            _drivername = (make_url(normalized_uri).drivername or "").lower()  # type: ignore[name-defined]
+        except Exception:
+            _drivername = ""
+
+        if "sqlite" not in _drivername:
+            connect_args = dict(kwargs.get("connect_args") or {})  # type: ignore[arg-type]
+            connect_args.setdefault("connect_timeout", 2)
+            kwargs["connect_args"] = connect_args
     except Exception:
         pass
 
