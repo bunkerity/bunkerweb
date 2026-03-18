@@ -93,10 +93,7 @@ end
 function customcert:ssl_certificate()
 	local server_name, err = ssl_server_name()
 	if not server_name then
-		if err then
-			return self:ret(false, "can't get server_name : " .. err)
-		end
-		return self:ret(true, "no SNI provided")
+		return self:ret(false, "can't get server_name : " .. err)
 	end
 	local data
 	data, err = self.internalstore:get("plugin_customcert_" .. server_name, true)

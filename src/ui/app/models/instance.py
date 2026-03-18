@@ -13,7 +13,7 @@ from urllib.parse import quote
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 
-from app.utils import LOGGER, RESERVED_SERVICE_NAMES
+from app.utils import LOGGER
 
 
 class Instance:
@@ -114,8 +114,8 @@ class Instance:
             if ban_scope not in ("global", "service"):
                 ban_scope = "global"
 
-            # If ban_scope is service but no valid service provided, default to global
-            if ban_scope == "service" and (not service or service in RESERVED_SERVICE_NAMES):
+            # If ban_scope is service but no service provided, default to global
+            if ban_scope == "service" and (not service or service == "Web UI"):
                 ban_scope = "global"
 
             result = self.apiCaller.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason, "service": service, "ban_scope": ban_scope})[0]
@@ -131,7 +131,7 @@ class Instance:
         try:
             # Prepare request data
             data = {"ip": ip, "ban_scope": ban_scope}
-            if service and service not in RESERVED_SERVICE_NAMES:
+            if service and service not in ("unknown", "Web UI", "default server"):
                 data["service"] = service
             result = self.apiCaller.send_to_apis("POST", "/unban", data=data)[0]
         except BaseException as e:
