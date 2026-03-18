@@ -1,7 +1,7 @@
 <div class="form-floating mt-1">
     <div class="dropdown multiselect-container"
          data-separator="{{ setting_data.get('separator', ' ') }}">
-        {% set render_value = setting_value if (current_endpoint != 'new' and setting_value is not none and setting_value != '') else setting_default %}
+        {% set render_value = setting_value if (setting_value is not none and setting_value != '') else setting_default %}
         <input type="hidden"
                id="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
                name="{{ setting }}"

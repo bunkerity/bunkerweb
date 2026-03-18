@@ -35,7 +35,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
     Verwenden Sie die veröffentlichten Images und das Layout aus dem [Quickstart-Guide](quickstart-guide.md#__tabbed_1_3). Stack starten, dann den Wizard im Browser abschließen.
 
     ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.9~rc2-rc1/misc/integrations/docker-compose.yml up -d
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.9-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
     Öffnen Sie den Scheduler-Host (z. B. `https://www.example.com/changeme`) und führen Sie den `/setup`-Wizard aus, um UI, Scheduler und Instanz zu konfigurieren.
@@ -52,7 +52,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.9
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.9
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.9-rc2
+        image: bunkerity/bunkerweb-ui:1.6.9
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -185,14 +185,14 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
 
 ### Listener & TLS
 
-| Setting                             | Beschreibung                                  | Erlaubte Werte                         | Standard                                 |
-| ----------------------------------- | --------------------------------------------- | -------------------------------------- | ---------------------------------------- |
-| `UI_LISTEN_ADDR`                    | Bind-Adresse der UI                           | IP oder Hostname                       | `0.0.0.0` (Docker) / `127.0.0.1` (Paket) |
-| `UI_LISTEN_PORT`                    | Bind-Port der UI                              | Integer                                | `7000`                                   |
-| `LISTEN_ADDR`, `LISTEN_PORT`        | Fallbacks, falls UI-Variablen fehlen          | IP/Hostname, Integer                   | `0.0.0.0`, `7000`                        |
-| `UI_SSL_ENABLED`                    | TLS in der UI aktivieren                      | `yes` oder `no`                        | `no`                                     |
-| `UI_SSL_CERTFILE`, `UI_SSL_KEYFILE` | PEM-Zertifikat/Key bei TLS                    | Dateipfade                             | unset                                    |
-| `UI_SSL_CA_CERTS`                   | Optionale CA/Chain                            | Dateipfad                              | unset                                    |
+| Setting                             | Beschreibung                                  | Erlaubte Werte                         | Standard                                              |
+| ----------------------------------- | --------------------------------------------- | -------------------------------------- | ----------------------------------------------------- |
+| `UI_LISTEN_ADDR`                    | Bind-Adresse der UI                           | IP oder Hostname                       | `0.0.0.0` (Docker) / `127.0.0.1` (Paket)              |
+| `UI_LISTEN_PORT`                    | Bind-Port der UI                              | Integer                                | `7000`                                                |
+| `LISTEN_ADDR`, `LISTEN_PORT`        | Fallbacks, falls UI-Variablen fehlen          | IP/Hostname, Integer                   | `0.0.0.0`, `7000`                                     |
+| `UI_SSL_ENABLED`                    | TLS in der UI aktivieren                      | `yes` oder `no`                        | `no`                                                  |
+| `UI_SSL_CERTFILE`, `UI_SSL_KEYFILE` | PEM-Zertifikat/Key bei TLS                    | Dateipfade                             | unset                                                 |
+| `UI_SSL_CA_CERTS`                   | Optionale CA/Chain                            | Dateipfad                              | unset                                                 |
 | `UI_FORWARDED_ALLOW_IPS`            | Vertrauenswürdige Proxies für `X-Forwarded-*` | IPs/CIDRs (Leer- oder Komma-separiert) | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
 | `UI_PROXY_ALLOW_IPS`                | Vertrauenswürdige Proxies für PROXY-Protokoll | IPs/CIDRs (Leer- oder Komma-separiert) | `FORWARDED_ALLOW_IPS`                                 |
 
@@ -223,14 +223,16 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
 
 ### Sonstiges Runtime
 
-| Setting                         | Beschreibung                                | Erlaubte Werte  | Standard                             |
-| ------------------------------- | ------------------------------------------- | --------------- | ------------------------------------ |
-| `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn-Worker/Threads                     | Integer         | `cpu_count()-1` (min 1), `workers*2` |
-| `ENABLE_HEALTHCHECK`            | `GET /healthcheck` bereitstellen            | `yes` oder `no` | `no`                                 |
-| `FORWARDED_ALLOW_IPS`           | Alias für Proxy-Allowlist                   | IPs/CIDRs       | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
-| `PROXY_ALLOW_IPS`               | Alias für PROXY-Allowlist                   | IPs/CIDRs       | `FORWARDED_ALLOW_IPS`                                 |
-| `DISABLE_CONFIGURATION_TESTING` | Test-Reloads beim Push skippen              | `yes` oder `no` | `no`                                 |
-| `IGNORE_REGEX_CHECK`            | Regex-Validierung der Settings überspringen | `yes` oder `no` | `no`                                 |
+| Setting                         | Beschreibung                                                      | Erlaubte Werte                              | Standard                                              |
+| ------------------------------- | ----------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------- |
+| `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn-Worker/Threads                                           | Integer                                     | `cpu_count()-1` (min 1), `workers*2`                  |
+| `MAX_REQUESTS`                  | Anfragen vor Gunicorn-Worker-Recycling (verhindert Speicherbloat) | Integer                                     | `1000`                                                |
+| `ENABLE_HEALTHCHECK`            | `GET /healthcheck` bereitstellen                                  | `yes` oder `no`                             | `no`                                                  |
+| `FORWARDED_ALLOW_IPS`           | Alias für Proxy-Allowlist                                         | IPs/CIDRs                                   | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
+| `PROXY_ALLOW_IPS`               | Alias für PROXY-Allowlist                                         | IPs/CIDRs                                   | `FORWARDED_ALLOW_IPS`                                 |
+| `DISABLE_CONFIGURATION_TESTING` | Test-Reloads beim Push skippen                                    | `yes` oder `no`                             | `no`                                                  |
+| `IGNORE_REGEX_CHECK`            | Regex-Validierung der Settings überspringen                       | `yes` oder `no`                             | `no`                                                  |
+| `MAX_CONTENT_LENGTH`            | Maximale Upload-Größe (Flask `MAX_CONTENT_LENGTH`)                | Größe mit Einheit (`50M`, `1G`, `52428800`) | `50MB`                                                |
 
 ## Log-Zugriff
 

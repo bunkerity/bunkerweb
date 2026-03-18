@@ -10,6 +10,7 @@ from json import dumps, loads
 from operator import itemgetter
 from os import getenv, getpid, sep
 from os.path import abspath, join
+from re import fullmatch
 from secrets import token_urlsafe
 from signal import SIGINT, signal, SIGTERM
 from sys import path as sys_path, modules as sys_modules
@@ -26,15 +27,15 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 # This is a known issue in passlib that will be fixed in future versions
 filterwarnings("ignore", message=r".*pkg_resources is deprecated.*", category=UserWarning, module="passlib")
 
-from cachelib import FileSystemCache
-from flask import Blueprint, Flask, Response, flash as flask_flash, jsonify, make_response, redirect, render_template, request, session, url_for
+from app.models.safe_session_cache import SafeFileSystemCache
+from flask import Blueprint, Flask, Response, flash as flask_flash, g, jsonify, make_response, redirect, render_template, request, session, url_for
 from flask_login import current_user, LoginManager, login_required
 from flask_session import Session
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.routing.exceptions import BuildError
 
-from common_utils import get_redis_client as get_common_redis_client  # type: ignore
+from common_utils import get_redis_client as get_common_redis_client, is_newer_version_available  # type: ignore
 
 from app.models.biscuit import BiscuitMiddleware
 from app.models.reverse_proxied import ReverseProxied
@@ -159,6 +160,17 @@ _db_check_lock = Lock()
 _db_check_future = None
 _db_check_next_allowed = 0.0
 
+_cookie_config_lock = Lock()
+_cookie_config_detected = False
+
+_SESSION_CLEANUP_INTERVAL_SECONDS = 3600.0
+_session_cleanup_last_run = 0.0
+
+_restart_workers_lock = Lock()
+_restart_workers_future = None
+_restart_workers_next_allowed = 0.0
+RESTART_WORKERS_MIN_INTERVAL_SECONDS = 10.0
+
 
 def _shutdown_executors():
     """Shutdown all thread pool executors on application exit."""
@@ -166,9 +178,58 @@ def _shutdown_executors():
     _periodic_tasks_executor.shutdown(wait=False)
     _user_access_executor.shutdown(wait=False)
     _config_tasks_executor.shutdown(wait=False)
+    with suppress(Exception):
+        DB.close()
 
 
 register(_shutdown_executors)
+
+
+SIZE_MULTIPLIERS = {
+    "": 1,
+    "b": 1,
+    "k": 1024,
+    "kb": 1024,
+    "ki": 1024,
+    "kib": 1024,
+    "m": 1024**2,
+    "mb": 1024**2,
+    "mi": 1024**2,
+    "mib": 1024**2,
+    "g": 1024**3,
+    "gb": 1024**3,
+    "gi": 1024**3,
+    "gib": 1024**3,
+    "t": 1024**4,
+    "tb": 1024**4,
+    "ti": 1024**4,
+    "tib": 1024**4,
+}
+
+
+def parse_size_to_bytes(size: str) -> int:
+    """
+    Parse a size string to bytes.
+
+    Examples:
+    - "52428800"
+    - "50M", "50MB", "50 MiB"
+    - "1G", "1GiB"
+    """
+    match = fullmatch(r"\s*(\d+(?:\.\d+)?)\s*([a-zA-Z]*)\s*", size)
+    if not match:
+        raise ValueError("invalid format")
+
+    value = float(match.group(1))
+    unit = match.group(2).lower()
+    multiplier = SIZE_MULTIPLIERS.get(unit)
+    if multiplier is None:
+        raise ValueError("invalid unit")
+
+    bytes_value = int(value * multiplier)
+    if bytes_value <= 0:
+        raise ValueError("non-positive size")
+    return bytes_value
 
 
 class DynamicFlask(Flask):
@@ -535,8 +596,6 @@ with app.app_context():
 
     app.config["BISCUIT_PUBLIC_KEY_PATH"] = BISCUIT_PUBLIC_KEY_FILE.as_posix()
 
-    app.config["ENV"] = {}
-
     app.config["CHECK_PRIVATE_IP"] = getenv("CHECK_PRIVATE_IP", "yes").lower() == "yes"
     app.config["SECRET_KEY"] = FLASK_SECRET
 
@@ -544,13 +603,25 @@ with app.app_context():
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
+    # Secure by default — auto-detection in before_request may downgrade if no proxy detected
+    app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
+    app.config["SESSION_COOKIE_SECURE"] = True
+    app.config["REMEMBER_COOKIE_NAME"] = "__Host-bw_ui_remember_token"
+    app.config["REMEMBER_COOKIE_SECURE"] = True
+
     app.config["REMEMBER_COOKIE_PATH"] = "/"
     app.config["REMEMBER_COOKIE_HTTPONLY"] = True
     app.config["REMEMBER_COOKIE_SAMESITE"] = "Lax"
 
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 86400
-    app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50 MB
-    app.config["SCRIPT_NONCE"] = ""
+    default_max_content_length = 50 * 1024 * 1024  # 50 MB
+    raw_max_content_length = getenv("UI_MAX_CONTENT_LENGTH", getenv("MAX_CONTENT_LENGTH", str(default_max_content_length)))
+    try:
+        max_content_length = parse_size_to_bytes(raw_max_content_length)
+    except ValueError:
+        max_content_length = default_max_content_length
+        LOGGER.warning(f"Invalid MAX_CONTENT_LENGTH value ({raw_max_content_length}), defaulting to {default_max_content_length} bytes (50 MB)")
+    app.config["MAX_CONTENT_LENGTH"] = max_content_length
 
     # Session management
     try:
@@ -560,6 +631,7 @@ with app.app_context():
         LOGGER.warning("Invalid SESSION_LIFETIME_HOURS, defaulting to 12h")
 
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=session_lifetime_hours)
+    app.config["SESSION_REFRESH_EACH_REQUEST"] = False
     app.config["SESSION_ID_LENGTH"] = 64
 
     session_cache_dir = LIB_DIR.joinpath("ui_sessions_cache")
@@ -612,7 +684,7 @@ with app.app_context():
 
     if not redis_client:
         app.config["SESSION_TYPE"] = "cachelib"
-        app.config["SESSION_CACHELIB"] = FileSystemCache(threshold=500, default_timeout=session_timeout, cache_dir=session_cache_dir)
+        app.config["SESSION_CACHELIB"] = SafeFileSystemCache(cache_dir=session_cache_dir, threshold=0, default_timeout=session_timeout)
     sess = Session()
     sess.init_app(app)
 
@@ -657,13 +729,14 @@ with app.app_context():
 
     app.config.update({hook_info["key"]: [] for hook_info in HOOKS.values()})
 
+    DATA.load_from_file()
     DATA.update({"FORCE_RELOAD_PLUGIN": False, "IS_RELOADING_PLUGINS": False})
     refresh_app_context()
 
 
 @app.context_processor
 def inject_variables():
-    app_env = app.config["ENV"].copy()
+    app_env = getattr(g, "_env", {}).copy()
     for hook in app.config["CONTEXT_PROCESSOR_HOOKS"]:
         try:
             resp = hook()
@@ -734,7 +807,7 @@ def inject_variables():
     app_env["extra_styles"] = extra_styles
     app_env["custom_css"] = custom_css
 
-    app.config["ENV"] = app_env
+    g._env = app_env
 
     return app_env
 
@@ -781,8 +854,15 @@ def handle_csrf_error(_):
     :return: A template with the error message and a 401 status code.
     """
     LOGGER.debug(format_exc())
-    LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {current_user.get_id()}")
-    if not current_user:
+    try:
+        user_id = current_user.get_id()
+    except (AssertionError, RuntimeError):
+        user_id = "unknown"
+    LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {user_id}")
+    try:
+        if not current_user:
+            return redirect(url_for("setup.setup_page"), 303)
+    except (AssertionError, RuntimeError):
         return redirect(url_for("setup.setup_page"), 303)
     response = logout_page()
     response.status_code = 303
@@ -903,6 +983,18 @@ def schedule_database_state_check(request_method: str, request_path: str):
         _db_check_next_allowed = now + DB_CHECK_MIN_INTERVAL_SECONDS
 
 
+def schedule_restart_workers():
+    global _restart_workers_future, _restart_workers_next_allowed
+    with _restart_workers_lock:
+        now = time()
+        if now < _restart_workers_next_allowed:
+            return
+        if _restart_workers_future and not _restart_workers_future.done():
+            return
+        _restart_workers_future = _periodic_tasks_executor.submit(restart_workers)
+        _restart_workers_next_allowed = now + RESTART_WORKERS_MIN_INTERVAL_SECONDS
+
+
 @app.before_request
 def before_request():
     DATA.load_from_file()
@@ -911,23 +1003,28 @@ def before_request():
         response.headers["Retry-After"] = 30  # Clients should retry after 30 seconds # type: ignore
         return response
 
-    if request.environ.get("HTTP_X_FORWARDED_FOR") is not None:
-        # Requests from the reverse proxy
-        app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
-        app.config["SESSION_COOKIE_SECURE"] = True
-        app.config["REMEMBER_COOKIE_NAME"] = "__Host-bw_ui_remember_token"
-        app.config["REMEMBER_COOKIE_SECURE"] = True
-    else:
-        # Requests from other sources
-        app.config["SESSION_COOKIE_NAME"] = "bw_ui_session"
-        app.config["SESSION_COOKIE_SECURE"] = False
-        app.config["SESSION_COOKIE_DOMAIN"] = None
-        app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_token"
-        app.config["REMEMBER_COOKIE_SECURE"] = False
-        app.config["REMEMBER_COOKIE_DOMAIN"] = None
-
     metadata = None
-    app.config["SCRIPT_NONCE"] = token_urlsafe(32)
+    g.script_nonce = token_urlsafe(32)
+
+    # Auto-detect cookie config once on the first real request using double-checked locking.
+    # The proxy status never changes during a process's lifetime, so detecting once is correct.
+    global _cookie_config_detected
+    if not _cookie_config_detected:
+        with _cookie_config_lock:
+            if not _cookie_config_detected:
+                if request.environ.get("HTTP_X_FORWARDED_FOR") is not None:
+                    app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
+                    app.config["SESSION_COOKIE_SECURE"] = True
+                    app.config["REMEMBER_COOKIE_NAME"] = "__Host-bw_ui_remember_token"
+                    app.config["REMEMBER_COOKIE_SECURE"] = True
+                else:
+                    app.config["SESSION_COOKIE_NAME"] = "bw_ui_session"
+                    app.config["SESSION_COOKIE_SECURE"] = False
+                    app.config["SESSION_COOKIE_DOMAIN"] = None
+                    app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_token"
+                    app.config["REMEMBER_COOKIE_SECURE"] = False
+                    app.config["REMEMBER_COOKIE_DOMAIN"] = None
+                _cookie_config_detected = True
 
     if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/")):
         metadata = DB.get_metadata()
@@ -935,15 +1032,23 @@ def before_request():
         # Plugin reload trigger
         if not DATA.get("RELOADING", False) and metadata.get("reload_ui_plugins", False):
             safe_reload_plugins()
-            _periodic_tasks_executor.submit(restart_workers)
+            schedule_restart_workers()
 
         if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(hours=1):
             DATA["LATEST_VERSION_LAST_CHECK"] = datetime.now().astimezone().isoformat()
             _periodic_tasks_executor.submit(update_latest_stable_release)
 
+        # Periodic expired session file cleanup (FileSystemCache only, where _prune is disabled via threshold=0)
+        if app.config.get("SESSION_TYPE") == "cachelib":
+            global _session_cleanup_last_run
+            now_ts = time()
+            if now_ts - _session_cleanup_last_run > _SESSION_CLEANUP_INTERVAL_SECONDS:
+                _session_cleanup_last_run = now_ts
+                _periodic_tasks_executor.submit(app.config["SESSION_CACHELIB"]._remove_expired, now_ts)
+
         schedule_database_state_check(request.method, request.path)
 
-        DB.readonly = DATA.get("READONLY_MODE", False)
+        DB.readonly = DATA.get("READONLY_MODE", DB.readonly) or not DB.database_uri
 
         if not request.path.startswith(("/check", "/loading", "/login", "/totp")) and DB.readonly and current_user.is_authenticated:
             flask_flash("Database connection is in read-only mode : no modifications possible.", "error")
@@ -988,14 +1093,14 @@ def before_request():
     language_value = current_user.language if current_user.is_authenticated else "en"
     base_env = dict(
         current_endpoint=current_endpoint,
-        script_nonce=app.config["SCRIPT_NONCE"],
+        script_nonce=g.script_nonce,
         supported_languages=SUPPORTED_LANGUAGES,
         theme=theme_value,
         language=language_value,
     )
 
     if request.path.startswith(("/check", "/setup", "/loading", "/login", "/totp")):
-        app.config["ENV"] = base_env
+        g._env = base_env
     else:
         if not metadata:
             metadata = DB.get_metadata()
@@ -1043,9 +1148,10 @@ def before_request():
 
         data = dict(
             current_endpoint=current_endpoint,
-            script_nonce=app.config["SCRIPT_NONCE"],
+            script_nonce=g.script_nonce,
             bw_version=metadata["version"],
             latest_version=DATA.get("LATEST_VERSION", "unknown"),
+            new_version_available=is_newer_version_available(metadata["version"], DATA.get("LATEST_VERSION", "unknown")),
             is_pro_version=metadata["is_pro"],
             pro_status=metadata["pro_status"],
             pro_services=metadata["pro_services"],
@@ -1069,7 +1175,7 @@ def before_request():
         if current_endpoint in COLUMNS_PREFERENCES_DEFAULTS:
             data["columns_preferences"] = DB.get_ui_user_columns_preferences(current_user.get_id(), current_endpoint)
 
-        app.config["ENV"] = data
+        g._env = data
 
     for hook in app.config["BEFORE_REQUEST_HOOKS"]:
         try:
@@ -1093,12 +1199,16 @@ def mark_user_access(user, session_id):
 @app.after_request
 def set_security_headers(response):
     """Set the security headers."""
+    # Ensure script_nonce is available even if before_request didn't complete
+    # (e.g., when CSRF validation fails before our before_request runs)
+    script_nonce = getattr(g, "script_nonce", None) or token_urlsafe(32)
+
     # * Content-Security-Policy header to prevent XSS attacks
     response.headers["Content-Security-Policy"] = (
         "object-src 'none';"
         + " frame-ancestors 'self';"
         + " default-src https: http: 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com https://api.github.com;"
-        + f" script-src https: http: 'self' 'nonce-{app.config['SCRIPT_NONCE']}' 'strict-dynamic' 'unsafe-inline';"
+        + f" script-src https: http: 'self' 'nonce-{script_nonce}' 'strict-dynamic' 'unsafe-inline';"
         + " style-src 'self' 'unsafe-inline';"
         + " img-src 'self' data: blob: https://www.bunkerweb.io https://assets.bunkerity.com https://*.tile.openstreetmap.org;"
         + " font-src 'self' data:;"
@@ -1145,12 +1255,13 @@ def set_security_headers(response):
 
 @app.teardown_request
 def teardown_request(teardown):
-    if (
-        not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/"))
-        and current_user.is_authenticated
-        and "session_id" in session
-    ):
-        _user_access_executor.submit(mark_user_access, current_user, session["session_id"])
+    with suppress(AssertionError, RuntimeError):
+        if (
+            not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/"))
+            and current_user.is_authenticated
+            and "session_id" in session
+        ):
+            _user_access_executor.submit(mark_user_access, current_user, session["session_id"])
 
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:
         try:

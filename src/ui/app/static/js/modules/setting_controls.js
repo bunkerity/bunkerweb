@@ -392,19 +392,11 @@ class SettingControl {
           });
         }
       });
-      if (entries.length === 0) {
-        this.setContent(
-          toggleLabel,
-          "template.editor.multiselect_placeholder",
-          "Select options",
-        );
-      } else {
-        toggleLabel.textContent = entries
-          .map((entry) => entry.label)
-          .join(", ");
-        toggleLabel.removeAttribute("data-i18n");
-        toggleLabel.removeAttribute("data-i18n-options");
-      }
+      this.setContent(
+        toggleLabel,
+        "template.editor.multiselect_placeholder",
+        "Select options",
+      );
       toggleBadge.textContent = entries.length;
       if (footerText) {
         this.setContent(

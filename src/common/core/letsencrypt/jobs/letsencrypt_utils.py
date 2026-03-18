@@ -18,12 +18,27 @@ LETSENCRYPT_STAGING_DIRECTORY = "https://acme-staging-v02.api.letsencrypt.org/di
 ZEROSSL_DIRECTORY = "https://acme.zerossl.com/v2/DV90"
 
 
+_API_SETTINGS_WHITELIST = frozenset(
+    {
+        "API_HTTP_PORT",
+        "API_HTTPS_PORT",
+        "API_LISTEN_IP",
+        "API_LISTEN_HTTP",
+        "API_LISTEN_HTTPS",
+        "API_SERVER_NAME",
+        "API_TOKEN",
+        "API_WHITELIST_IP",
+    }
+)
+
+
 def add_internal_api_env(cmd_env: Dict[str, str], env_vars: Optional[Mapping[str, str]] = None) -> None:
     """Re-add internal API env vars removed with DB config keys."""
     if env_vars is None:
         env_vars = environ
-    for key, value in env_vars.items():
-        if key.startswith("API_") and value:
+    for key in _API_SETTINGS_WHITELIST:
+        value = env_vars.get(key)
+        if value:
             cmd_env[key] = value
 
 

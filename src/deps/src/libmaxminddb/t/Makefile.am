@@ -19,7 +19,8 @@ check_PROGRAMS = \
 	bad_pointers_t bad_databases_t bad_data_size_t bad_epoch_t bad_indent_t \
 	bad_search_tree_t \
 	basic_lookup_t data_entry_list_t \
-	data-pool-t data_types_t double_close_t dump_t gai_error_t get_value_t \
+	data-pool-t data_types_t double_close_t dump_t empty_container_metadata_t \
+	gai_error_t get_value_t \
 	get_value_pointer_bug_t \
 	ipv4_start_cache_t ipv6_lookup_in_ipv4_t max_depth_t metadata_t \
 	metadata_pointers_t no_map_get_value_t overflow_bounds_t read_node_t \

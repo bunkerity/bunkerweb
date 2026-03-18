@@ -30,6 +30,9 @@
 
 ## Contributors:
 
+- [etiennemunnich](https://github.com/etiennemunnich)
+- [securestep9](https://github.com/securestep9)
+- [HackingRepo](https://github.com/HackingRepo)
 - [disisto](https://github.com/disisto)
 - [touchweb-vincent](https://github.com/touchweb-vincent)
 - [Elnadrion](https://github.com/Elnadrion)

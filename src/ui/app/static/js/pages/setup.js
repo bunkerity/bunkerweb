@@ -26,6 +26,11 @@ $(document).ready(() => {
   const $breadcrumbItems = $(".template-steps-container .breadcrumb-item");
   const $csrfTokenInput = $("#csrf_token");
 
+  // PRO unlock effect state
+  const $proLicenseKey = $("#PRO_LICENSE_KEY");
+  const $proCard = $(".pro-card");
+  let proUnlocked = false;
+
   // Utility Functions
 
   /**
@@ -299,7 +304,9 @@ $(document).ready(() => {
 
       // Validate based on pattern if the input is not empty
       if (isValid && pattern && value !== "") {
-        const regex = new RegExp(pattern);
+        // File settings may contain multiline payloads (PEM/base64 blocks)
+        const flags = $input.hasClass("plugin-setting-file-text") ? "s" : "";
+        const regex = new RegExp(pattern, flags);
         if (!regex.test(value)) {
           errorMessage = patternMessage;
           isValid = false;
@@ -565,39 +572,49 @@ $(document).ready(() => {
 
         const $customSslCert = $("#CUSTOM_SSL_CERT");
         const $customSslKey = $("#CUSTOM_SSL_KEY");
-        if (
-          $("#USE_CUSTOM_SSL").prop("checked") &&
-          (!$customSslCert.val() || !$customSslKey.val())
-        ) {
-          if (!$customSslCert.val()) {
-            $customSslCert.addClass("is-invalid");
-            let $feedback = $customSslCert.siblings(".invalid-feedback");
-            if (!$feedback.length) {
-              const $textSpan = $customSslCert
-                .parent()
-                .find("span.input-group-text");
-              $feedback = $(
-                '<div class="invalid-feedback">This field is required when using custom SSL.</div>',
-              ).insertAfter($textSpan.length ? $textSpan : $customSslCert);
-            } else {
-              $feedback.text("This field is required when using custom SSL.");
+        const $customSslCertData = $("#CUSTOM_SSL_CERT_DATA");
+        const $customSslKeyData = $("#CUSTOM_SSL_KEY_DATA");
+        if ($("#USE_CUSTOM_SSL").prop("checked")) {
+          const hasPathCert = !!$customSslCert.val();
+          const hasPathKey = !!$customSslKey.val();
+          const hasDataCert = !!$customSslCertData.val();
+          const hasDataKey = !!$customSslKeyData.val();
+          const hasValidPaths = hasPathCert && hasPathKey;
+          const hasValidData = hasDataCert && hasDataKey;
+
+          if (!hasValidPaths && !hasValidData) {
+            const errorMsg =
+              "When using custom SSL, you must set both the certificate and the key (via file path or data upload).";
+            if (!hasPathCert) {
+              $customSslCert.addClass("is-invalid");
+              let $feedback = $customSslCert.siblings(".invalid-feedback");
+              if (!$feedback.length) {
+                const $textSpan = $customSslCert
+                  .parent()
+                  .find("span.input-group-text");
+                $feedback = $(
+                  `<div class="invalid-feedback">${errorMsg}</div>`,
+                ).insertAfter($textSpan.length ? $textSpan : $customSslCert);
+              } else {
+                $feedback.text(errorMsg);
+              }
             }
-          }
-          if (!$customSslKey.val()) {
-            $customSslKey.addClass("is-invalid");
-            let $feedback = $customSslKey.siblings(".invalid-feedback");
-            if (!$feedback.length) {
-              const $textSpan = $customSslKey
-                .parent()
-                .find("span.input-group-text");
-              $feedback = $(
-                '<div class="invalid-feedback">This field is required when using custom SSL.</div>',
-              ).insertAfter($textSpan.length ? $textSpan : $customSslKey);
-            } else {
-              $feedback.text("This field is required when using custom SSL.");
+            if (!hasPathKey) {
+              $customSslKey.addClass("is-invalid");
+              let $feedback = $customSslKey.siblings(".invalid-feedback");
+              if (!$feedback.length) {
+                const $textSpan = $customSslKey
+                  .parent()
+                  .find("span.input-group-text");
+                $feedback = $(
+                  `<div class="invalid-feedback">${errorMsg}</div>`,
+                ).insertAfter($textSpan.length ? $textSpan : $customSslKey);
+              } else {
+                $feedback.text(errorMsg);
+              }
             }
+            return;
           }
-          return;
         }
 
         const result = await checkDNS();
@@ -659,7 +676,8 @@ $(document).ready(() => {
       const $this = $(event.target);
       const pattern = $this.attr("pattern");
       const value = $this.val();
-      const isValid = pattern ? new RegExp(pattern).test(value) : true;
+      const flags = $this.hasClass("plugin-setting-file-text") ? "s" : "";
+      const isValid = pattern ? new RegExp(pattern, flags).test(value) : true;
       $this
         .toggleClass("is-valid", isValid)
         .toggleClass("is-invalid", !isValid);
@@ -1015,6 +1033,19 @@ $(document).ready(() => {
     $key.prop("disabled", !isChecked);
     $certData.prop("disabled", !isChecked);
     $keyData.prop("disabled", !isChecked);
+
+    // Also disable/enable file upload sub-elements
+    $("#custom-ssl-cert-data-upload, #custom-ssl-key-data-upload").prop(
+      "disabled",
+      !isChecked,
+    );
+    $("#custom-ssl-cert-data-manual, #custom-ssl-key-data-manual").prop(
+      "disabled",
+      !isChecked,
+    );
+    $(
+      '.plugin-setting-file-mode-toggle[data-file-input="#CUSTOM_SSL_CERT_DATA"], .plugin-setting-file-mode-toggle[data-file-input="#CUSTOM_SSL_KEY_DATA"]',
+    ).prop("disabled", !isChecked);
   });
 
   // Fixed: Modify the newsletter form click handler to prevent interference with checkbox
@@ -1037,6 +1068,89 @@ $(document).ready(() => {
     $("#email-optional").toggleClass("d-none", this.checked);
   });
 
+  // File setting: read uploaded file content into the hidden input
+  $(document).on("change", ".plugin-setting-file-upload", function () {
+    const $uploadInput = $(this);
+    const hiddenSelector = $uploadInput.data("fileInput");
+    const $hidden = $(hiddenSelector);
+    if (!$hidden.length) return;
+
+    const file = this.files && this.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const content = e.target.result
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n");
+      $hidden.val(content);
+      const $wrapper = $hidden.closest(".plugin-file-setting-wrapper");
+      const $status = $wrapper.find(".plugin-setting-file-status");
+      if ($status.length) {
+        $status.text(
+          "Loaded from " + file.name + " (" + content.length + " chars)",
+        );
+      }
+      const $manual = $wrapper.find(".plugin-setting-file-manual");
+      if ($manual.length) $manual.val(content);
+    };
+    reader.onerror = function () {
+      const $wrapper = $hidden.closest(".plugin-file-setting-wrapper");
+      const $status = $wrapper.find(".plugin-setting-file-status");
+      if ($status.length) $status.text("Error reading file");
+    };
+    reader.readAsText(file);
+  });
+
+  // File setting: toggle between upload and manual text entry
+  $(document).on("click", ".plugin-setting-file-mode-toggle", function () {
+    const $toggle = $(this);
+    const hiddenSelector = $toggle.data("fileInput");
+    const $hidden = $(hiddenSelector);
+    if (!$hidden.length) return;
+
+    const $wrapper = $hidden.closest(".plugin-file-setting-wrapper");
+    const $uploadInput = $wrapper.find(".plugin-setting-file-upload");
+    const $manual = $wrapper.find(".plugin-setting-file-manual");
+    const $icon = $toggle.find("i");
+    const currentMode = $toggle.data("mode");
+
+    if (currentMode === "upload") {
+      $uploadInput.addClass("d-none");
+      $manual.removeClass("d-none");
+      $toggle.data("mode", "manual");
+      $toggle.attr("data-bs-original-title", $toggle.data("manualLabel"));
+      $icon.removeClass("bx-edit-alt").addClass("bx-upload");
+    } else {
+      $uploadInput.removeClass("d-none");
+      $manual.addClass("d-none");
+      $toggle.data("mode", "upload");
+      $toggle.attr("data-bs-original-title", $toggle.data("uploadLabel"));
+      $icon.removeClass("bx-upload").addClass("bx-edit-alt");
+    }
+  });
+
+  // File setting: sync manual textarea edits back to the hidden input
+  $(document).on("input", ".plugin-setting-file-manual", function () {
+    const $manual = $(this);
+    const hiddenSelector = $manual.data("fileInput");
+    const $hidden = $(hiddenSelector);
+    if (!$hidden.length) return;
+
+    const content = $manual.val().replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    $hidden.val(content);
+
+    const $wrapper = $hidden.closest(".plugin-file-setting-wrapper");
+    const $status = $wrapper.find(".plugin-setting-file-status");
+    if ($status.length) {
+      $status.text(
+        content
+          ? "Content entered (" + content.length + " chars)"
+          : $status.data("emptyText") || "No file selected",
+      );
+    }
+  });
+
   // Before Unload Event to Warn Users About Unsaved Changes
   $window.on("beforeunload", function (e) {
     const message =
@@ -1048,6 +1162,91 @@ $(document).ready(() => {
   setAcmeServerPane($("#LETS_ENCRYPT_SERVER").val());
   $("#LETS_ENCRYPT_CHALLENGE").trigger("change");
   $("#USE_CUSTOM_SSL").trigger("change");
+
+  // PRO License Key unlock effect
+  if ($proLicenseKey.length && $proCard.length) {
+    /**
+     * Loads the canvas-confetti library on demand.
+     * @returns {Promise} Resolves with the confetti function.
+     */
+    const loadConfetti = () => {
+      return new Promise((resolve, reject) => {
+        if (window.confetti) {
+          resolve(window.confetti);
+          return;
+        }
+        const src = $proLicenseKey.data("confetti-src");
+        if (!src) {
+          reject(new Error("No confetti source URL"));
+          return;
+        }
+        const script = document.createElement("script");
+        script.src = src;
+        script.onload = () => resolve(window.confetti);
+        script.onerror = () => reject(new Error("Failed to load confetti"));
+        document.head.appendChild(script);
+      });
+    };
+
+    /**
+     * Fires a confetti burst from the pro-card's position.
+     */
+    const fireProConfetti = async () => {
+      try {
+        const confettiFn = await loadConfetti();
+        const cardRect = $proCard[0].getBoundingClientRect();
+        const x = (cardRect.left + cardRect.width / 2) / window.innerWidth;
+        const y = (cardRect.top + cardRect.height / 4) / window.innerHeight;
+
+        // Main burst — BunkerWeb brand colors
+        confettiFn({
+          particleCount: 60,
+          spread: 70,
+          origin: { x, y },
+          colors: ["#2eac68", "#0b5577", "#0b354a", "#35728e", "#ffffff"],
+          ticks: 120,
+          gravity: 1.2,
+          scalar: 0.9,
+          disableForReducedMotion: true,
+        });
+
+        // Secondary burst slightly delayed for a layered feel
+        setTimeout(() => {
+          confettiFn({
+            particleCount: 30,
+            spread: 100,
+            origin: { x, y: y + 0.05 },
+            colors: ["#2eac68", "#0b5577", "#ffffff"],
+            ticks: 100,
+            gravity: 1.5,
+            scalar: 0.7,
+            disableForReducedMotion: true,
+          });
+        }, 150);
+      } catch (e) {
+        // Confetti is purely decorative — fail silently
+        console.warn("Confetti effect unavailable:", e.message);
+      }
+    };
+
+    $proLicenseKey.on(
+      "input",
+      debounce(function () {
+        const hasValue = $(this).val().length > 0;
+
+        if (hasValue && !proUnlocked) {
+          proUnlocked = true;
+          $(this).addClass("pro-unlocked");
+          $proCard.addClass("pro-card-unlocked");
+          fireProConfetti();
+        } else if (!hasValue && proUnlocked) {
+          proUnlocked = false;
+          $(this).removeClass("pro-unlocked");
+          $proCard.removeClass("pro-card-unlocked");
+        }
+      }, 50),
+    );
+  }
 
   // Initialize the UI based on the initial step
   toggleButtonStates();

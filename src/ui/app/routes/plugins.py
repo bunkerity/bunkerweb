@@ -13,12 +13,12 @@ from typing import List, Optional, Union
 from uuid import uuid4
 from zipfile import BadZipFile, ZipFile
 
-from flask import Blueprint, Response, current_app, jsonify, redirect, render_template, request, url_for
+from flask import Blueprint, Response, current_app, g, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from werkzeug.utils import secure_filename
 
-from common_utils import bytes_hash  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
 
 from app.dependencies import CORE_PLUGINS_PATH, BW_CONFIG, BW_INSTANCES_UTILS, CONFIG_TASKS_EXECUTOR, DATA, DB, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH
 from app.utils import ALWAYS_USED_PLUGINS, LOGGER, PLUGIN_NAME_RX, PLUGINS_SPECIFICS, TMP_DIR
@@ -324,18 +324,7 @@ def plugins_refresh():
                 )
                 raise Exception
 
-            plugin_content = BytesIO()
-            with tar_open(
-                fileobj=plugin_content,
-                mode="w:gz",
-                compresslevel=9,
-            ) as tar:
-                tar.add(
-                    str(temp_folder_path),
-                    arcname=temp_folder_name,
-                    recursive=True,
-                )
-            plugin_content.seek(0)
+            plugin_content = create_plugin_tar_gz(temp_folder_path, arc_root=temp_folder_name)
             value = plugin_content.getvalue()
 
             new_plugins.append(
@@ -605,7 +594,7 @@ def custom_plugin_page(plugin: str):
 
             try:
                 # Merge globals and ENV with ENV taking precedence
-                template_vars = {**current_app.jinja_env.globals, **current_app.config["ENV"]}
+                template_vars = {**current_app.jinja_env.globals, **getattr(g, "_env", {})}
 
                 # deepcode ignore Ssti: We trust the plugin template
                 plugin_page = (

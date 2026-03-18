@@ -1734,7 +1734,7 @@ Las siguientes secciones desarrollan cada paso.
     services:
       bunkerweb:
         # Este es el nombre que se utilizará para identificar la instancia en el Planificador
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.9
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1751,7 +1751,7 @@ Las siguientes secciones desarrollan cada paso.
             syslog-address: "udp://10.20.30.254:514" # La dirección IP del servicio syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.9
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrese de establecer el nombre de instancia correcto
@@ -2142,13 +2142,22 @@ Siga estos pasos para configurar y utilizar la función de Base de Datos:
 
 ### Ajustes de Configuración
 
-| Ajuste                          | Valor por defecto                         | Contexto | Múltiple | Descripción                                                                                                                                                           |
-| ------------------------------- | ----------------------------------------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global   | no       | **URI de la Base de Datos:** La cadena de conexión de la base de datos principal en formato SQLAlchemy.                                                               |
-| `DATABASE_URI_READONLY`         |                                           | global   | no       | **URI de la Base de Datos de Solo Lectura:** Base de datos opcional para operaciones de solo lectura o como respaldo si la base de datos principal está caída.        |
-| `DATABASE_LOG_LEVEL`            | `warning`                                 | global   | no       | **Nivel de Registro:** El nivel de verbosidad para los registros de la base de datos. Opciones: `debug`, `info`, `warn`, `warning` o `error`.                         |
-| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global   | no       | **Máximo de Ejecuciones de Trabajos:** El número máximo de registros de ejecución de trabajos que se conservarán en la base de datos antes de la limpieza automática. |
-| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global   | no       | **Retención de Sesiones:** La edad máxima (en días) de las sesiones de usuarios de la UI antes de que se purguen automáticamente.                                     |
+| Ajuste                            | Valor por defecto                         | Contexto | Múltiple | Descripción                                                                                                                                                                                 |
+| --------------------------------- | ----------------------------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URI`                    | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global   | no       | **URI de la Base de Datos:** La cadena de conexión de la base de datos principal en formato SQLAlchemy.                                                                                     |
+| `DATABASE_URI_READONLY`           |                                           | global   | no       | **URI de Solo Lectura:** Base de datos opcional para operaciones de solo lectura o como respaldo si la principal está caída.                                                                |
+| `DATABASE_LOG_LEVEL`              | `warning`                                 | global   | no       | **Nivel de Registro:** El nivel de verbosidad para los registros de la base de datos. Opciones: `debug`, `info`, `warn`, `warning` o `error`.                                               |
+| `DATABASE_MAX_JOBS_RUNS`          | `10000`                                   | global   | no       | **Máximo de Ejecuciones:** El número máximo de registros de ejecución de trabajos a conservar antes de la limpieza automática.                                                              |
+| `DATABASE_MAX_SESSION_AGE_DAYS`   | `14`                                      | global   | no       | **Retención de Sesiones:** La edad máxima (en días) de las sesiones de usuarios de la UI antes de que se purguen automáticamente.                                                           |
+| `DATABASE_POOL_SIZE`              | `40`                                      | global   | no       | **Tamaño del Pool:** El número de conexiones a mantener en el pool de conexiones de la base de datos.                                                                                       |
+| `DATABASE_POOL_MAX_OVERFLOW`      | `20`                                      | global   | no       | **Desbordamiento Máximo del Pool:** El número máximo de conexiones adicionales por encima del tamaño del pool. `-1` para ilimitado.                                                         |
+| `DATABASE_POOL_TIMEOUT`           | `5`                                       | global   | no       | **Tiempo de Espera del Pool:** El número de segundos a esperar antes de abandonar la obtención de una conexión del pool.                                                                    |
+| `DATABASE_POOL_RECYCLE`           | `1800`                                    | global   | no       | **Reciclaje del Pool:** El número de segundos tras los cuales una conexión se recicla automáticamente. `-1` para desactivar.                                                                |
+| `DATABASE_POOL_PRE_PING`          | `yes`                                     | global   | no       | **Pre-Ping del Pool:** Si se prueba la conexión al extraerla del pool.                                                                                                                      |
+| `DATABASE_POOL_RESET_ON_RETURN`   |                                           | global   | no       | **Reinicio al Devolver:** Cómo se reinician las conexiones al devolverlas al pool. Vacío = auto (`none` para MySQL/MariaDB, `rollback` para otros). Opciones: `rollback`, `commit`, `none`. |
+| `DATABASE_RETRY_TIMEOUT`          | `60`                                      | global   | no       | **Tiempo de Reintento:** El número máximo de segundos a esperar la disponibilidad de la base de datos al iniciar.                                                                           |
+| `DATABASE_REQUEST_RETRY_ATTEMPTS` | `2`                                       | global   | no       | **Intentos de Reintento:** El número de reintentos en caso de errores transitorios durante las operaciones.                                                                                 |
+| `DATABASE_REQUEST_RETRY_DELAY`    | `0.25`                                    | global   | no       | **Retraso entre Reintentos:** El retraso en segundos entre reintentos en caso de errores transitorios.                                                                                      |
 
 !!! tip "Selección de Base de Datos" - **SQLite** (predeterminado): Ideal para implementaciones de un solo nodo o entornos de prueba debido a su simplicidad y naturaleza basada en archivos. - **PostgreSQL**: Recomendado para entornos de producción con múltiples instancias de BunkerWeb debido a su robustez y soporte de concurrencia. - **MySQL/MariaDB**: Una buena alternativa a PostgreSQL con capacidades similares de nivel de producción. - **Oracle**: Adecuado para entornos empresariales donde Oracle ya es la plataforma de base de datos estándar.
 
@@ -3051,7 +3060,7 @@ El complemento de Let's Encrypt admite una amplia gama de proveedores de DNS par
 | `desec`           | deSEC            | `token`                                                                                                      |                                                                                                                                                                                                                                                                                                      | [Documentación](https://github.com/desec-io/certbot-dns-desec/blob/main/README.md)                    |
 | `digitalocean`    | DigitalOcean     | `token`                                                                                                      |                                                                                                                                                                                                                                                                                                      | [Documentación](https://certbot-dns-digitalocean.readthedocs.io/en/stable/)                           |
 | `domainoffensive` | Domain-Offensive | `api_token`                                                                                                  |                                                                                                                                                                                                                                                                                                      | [Documentación](https://github.com/domainoffensive/certbot-dns-domainoffensive/blob/master/README.md) |
-| `domeneshop`      | Domeneshop       | `token`<br>`secret`                                                                                          |                                                                                                                                                                                                                                                                                                      | [Documentación](https://github.com/domeneshop/certbot-dns-domeneshop/blob/master/README.rst)          |
+| `domeneshop`      | Domeneshop       | `client_token`<br>`client_secret`                                                                            |                                                                                                                                                                                                                                                                                                      | [Documentación](https://github.com/domeneshop/certbot-dns-domeneshop/blob/master/README.rst)          |
 | `dnsimple`        | DNSimple         | `token`                                                                                                      |                                                                                                                                                                                                                                                                                                      | [Documentación](https://certbot-dns-dnsimple.readthedocs.io/en/stable/)                               |
 | `dnsmadeeasy`     | DNS Made Easy    | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                                                                      | [Documentación](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)                            |
 | `duckdns`         | DuckDNS          | `duckdns_token`                                                                                              |                                                                                                                                                                                                                                                                                                      | [Documentación](https://github.com/infinityofspace/certbot_dns_duckdns/blob/main/Readme.md)           |
@@ -3830,7 +3839,7 @@ El complemento ModSecurity integra el potente Firewall de Aplicaciones Web (WAF)
 Siga estos pasos para configurar y usar ModSecurity:
 
 1.  **Habilite la función:** ModSecurity está habilitado por defecto. Esto se puede controlar usando el ajuste `USE_MODSECURITY`.
-2.  **Seleccione una versión de CRS:** Elija una versión del OWASP Core Rule Set (v3, v4 o nightly).
+2.  **Seleccione una versión de CRS:** Elija una versión del OWASP Core Rule Set (v3 o v4).
 3.  **Añada complementos:** Opcionalmente, active los complementos de CRS para mejorar la cobertura de las reglas.
 4.  **Supervise y ajuste:** Utilice los registros y la [interfaz de usuario web](web-ui.md) para identificar falsos positivos y ajustar la configuración.
 
@@ -3840,7 +3849,7 @@ Siga estos pasos para configurar y usar ModSecurity:
 | ------------------------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_MODSECURITY`                     | `yes`             | multisite | no       | **Habilitar ModSecurity:** Active la protección del Firewall de Aplicaciones Web ModSecurity.                                                                                                                                                  |
 | `USE_MODSECURITY_CRS`                 | `yes`             | multisite | no       | **Usar Core Rule Set:** Habilite el OWASP Core Rule Set para ModSecurity.                                                                                                                                                                      |
-| `MODSECURITY_CRS_VERSION`             | `4`               | multisite | no       | **Versión de CRS:** La versión del OWASP Core Rule Set a utilizar. Opciones: `3`, `4` o `nightly`.                                                                                                                                             |
+| `MODSECURITY_CRS_VERSION`             | `4`               | multisite | no       | **Versión de CRS:** La versión del OWASP Core Rule Set a utilizar. Opciones: `3` o `4`. Nota: `nightly` está obsoleto y utiliza v4 por defecto.                                                                                                |
 | `MODSECURITY_SEC_RULE_ENGINE`         | `On`              | multisite | no       | **Motor de Reglas:** Controle si se aplican las reglas. Opciones: `On`, `DetectionOnly` u `Off`.                                                                                                                                               |
 | `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`    | multisite | no       | **Motor de Auditoría:** Controle cómo funciona el registro de auditoría. Opciones: `On`, `Off` o `RelevantOnly`.                                                                                                                               |
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`       | multisite | no       | **Partes del Registro de Auditoría:** Qué partes de las solicitudes/respuestas incluir en los registros de auditoría.                                                                                                                          |
@@ -3859,11 +3868,10 @@ Siga estos pasos para configurar y usar ModSecurity:
 Seleccione una versión de CRS que se ajuste mejor a sus necesidades de seguridad:
 
 - **`3`**: Estable [v3.3.8](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8).
-- **`4`**: Estable [v4.24.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.24.0) (**predeterminada**).
-- **`nightly`**: [Compilación nocturna](https://github.com/coreruleset/coreruleset/releases/tag/nightly) que ofrece las últimas actualizaciones de reglas.
+- **`4`**: Estable [v4.24.1](https://github.com/coreruleset/coreruleset/releases/tag/v4.24.1) (**predeterminada**).
 
-!!! example "Compilación Nocturna"
-    La **compilación nocturna** contiene las reglas más actualizadas, ofreciendo las últimas protecciones contra amenazas emergentes. Sin embargo, dado que se actualiza diariamente y puede incluir cambios experimentales o no probados, se recomienda utilizar primero la compilación nocturna en un **entorno de preproducción** antes de implementarla en producción.
+!!! warning "Compilación Nocturna Obsoleta"
+    La opción `nightly` para `MODSECURITY_CRS_VERSION` está obsoleta ya que el proyecto OWASP Core Rule Set ha descontinuado las versiones nocturnas. Si su configuración aún utiliza `nightly`, se usará CRS v4 en su lugar. Por favor, actualice su configuración para usar `MODSECURITY_CRS_VERSION=4`.
 
 !!! tip "Niveles de Paranoia"
     El OWASP Core Rule Set utiliza "niveles de paranoia" (PL) para controlar la rigurosidad de las reglas:
@@ -4017,18 +4025,6 @@ El OWASP Core Rule Set también admite una gama de **complementos** diseñados p
     USE_MODSECURITY_CRS: "yes"
     MODSECURITY_CRS_VERSION: "4"
     USE_MODSECURITY_GLOBAL_CRS: "yes"
-    ```
-
-=== "Compilación Nocturna con Complementos Personalizados"
-
-    Configuración que utiliza la compilación nocturna de CRS con complementos personalizados:
-
-    ```yaml
-    USE_MODSECURITY: "yes"
-    USE_MODSECURITY_CRS: "yes"
-    MODSECURITY_CRS_VERSION: "nightly"
-    USE_MODSECURITY_CRS_PLUGINS: "yes"
-    MODSECURITY_CRS_PLUGINS: "wordpress-rule-exclusions/v1.0.0 https://github.com/coreruleset/dos-protection-plugin-modsecurity/archive/refs/heads/main.zip"
     ```
 
 !!! note "Valores de tamaño legibles por humanos"

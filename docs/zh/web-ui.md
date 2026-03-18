@@ -35,7 +35,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
     使用已发布镜像与[快速入门](quickstart-guide.md#__tabbed_1_3)的布局启动栈，然后在浏览器完成向导。
 
     ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.9~rc2-rc1/misc/integrations/docker-compose.yml up -d
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.9-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
     访问 scheduler 主机名（如 `https://www.example.com/changeme`），运行 `/setup` 向导以配置 UI、scheduler 与实例。
@@ -52,7 +52,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.9
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.9
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.9-rc2
+        image: bunkerity/bunkerweb-ui:1.6.9
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -185,15 +185,15 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 
 ### 监听与 TLS
 
-| 设置                                | 描述                       | 可接受值              | 默认值                                  |
-| ----------------------------------- | -------------------------- | --------------------- | --------------------------------------- |
-| `UI_LISTEN_ADDR`                    | UI 监听地址                | IP 或主机名           | `0.0.0.0`（Docker） / `127.0.0.1`（包） |
-| `UI_LISTEN_PORT`                    | UI 监听端口                | 整数                  | `7000`                                  |
-| `LISTEN_ADDR`, `LISTEN_PORT`        | UI 变量缺失时的备用        | IP/主机名，整数       | `0.0.0.0`, `7000`                       |
-| `UI_SSL_ENABLED`                    | 在 UI 容器中启用 TLS       | `yes` 或 `no`         | `no`                                    |
-| `UI_SSL_CERTFILE`, `UI_SSL_KEYFILE` | 启用 TLS 时的证书/密钥路径 | 文件路径              | 未设                                    |
-| `UI_SSL_CA_CERTS`                   | 可选 CA/链                 | 文件路径              | 未设                                    |
-| `UI_FORWARDED_ALLOW_IPS`            | 信任的代理 IP/CIDR         | 空格/逗号分隔 IP/CIDR | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
+| 设置                                | 描述                         | 可接受值              | 默认值                                                |
+| ----------------------------------- | ---------------------------- | --------------------- | ----------------------------------------------------- |
+| `UI_LISTEN_ADDR`                    | UI 监听地址                  | IP 或主机名           | `0.0.0.0`（Docker） / `127.0.0.1`（包）               |
+| `UI_LISTEN_PORT`                    | UI 监听端口                  | 整数                  | `7000`                                                |
+| `LISTEN_ADDR`, `LISTEN_PORT`        | UI 变量缺失时的备用          | IP/主机名，整数       | `0.0.0.0`, `7000`                                     |
+| `UI_SSL_ENABLED`                    | 在 UI 容器中启用 TLS         | `yes` 或 `no`         | `no`                                                  |
+| `UI_SSL_CERTFILE`, `UI_SSL_KEYFILE` | 启用 TLS 时的证书/密钥路径   | 文件路径              | 未设                                                  |
+| `UI_SSL_CA_CERTS`                   | 可选 CA/链                   | 文件路径              | 未设                                                  |
+| `UI_FORWARDED_ALLOW_IPS`            | 信任的代理 IP/CIDR           | 空格/逗号分隔 IP/CIDR | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
 | `UI_PROXY_ALLOW_IPS`                | PROXY 协议的可信代理 IP/CIDR | 空格/逗号分隔 IP/CIDR | `FORWARDED_ALLOW_IPS`                                 |
 
 ### 认证、会话与 Cookie
@@ -223,14 +223,16 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 
 ### 其他运行时
 
-| 设置                            | 描述                      | 可接受值      | 默认值                                 |
-| ------------------------------- | ------------------------- | ------------- | -------------------------------------- |
-| `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn worker/线程数    | 整数          | `cpu_count()-1`（至少 1），`workers*2` |
-| `ENABLE_HEALTHCHECK`            | 暴露 `GET /healthcheck`   | `yes` 或 `no` | `no`                                   |
-| `FORWARDED_ALLOW_IPS`           | 代理允许列表的别名        | IP/CIDR       | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
-| `PROXY_ALLOW_IPS`               | PROXY 允许列表的别名      | IP/CIDR       | `FORWARDED_ALLOW_IPS`                                 |
-| `DISABLE_CONFIGURATION_TESTING` | 应用配置时跳过测试 reload | `yes` 或 `no` | `no`                                   |
-| `IGNORE_REGEX_CHECK`            | 跳过设置的正则校验        | `yes` 或 `no` | `no`                                   |
+| 设置                            | 描述                                            | 可接受值                                | 默认值                                                |
+| ------------------------------- | ----------------------------------------------- | --------------------------------------- | ----------------------------------------------------- |
+| `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn worker/线程数                          | 整数                                    | `cpu_count()-1`（至少 1），`workers*2`                |
+| `MAX_REQUESTS`                  | Worker 回收前的请求数（Gunicorn，防止内存膨胀） | 整数                                    | `1000`                                                |
+| `ENABLE_HEALTHCHECK`            | 暴露 `GET /healthcheck`                         | `yes` 或 `no`                           | `no`                                                  |
+| `FORWARDED_ALLOW_IPS`           | 代理允许列表的别名                              | IP/CIDR                                 | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
+| `PROXY_ALLOW_IPS`               | PROXY 允许列表的别名                            | IP/CIDR                                 | `FORWARDED_ALLOW_IPS`                                 |
+| `DISABLE_CONFIGURATION_TESTING` | 应用配置时跳过测试 reload                       | `yes` 或 `no`                           | `no`                                                  |
+| `IGNORE_REGEX_CHECK`            | 跳过设置的正则校验                              | `yes` 或 `no`                           | `no`                                                  |
+| `MAX_CONTENT_LENGTH`            | 最大上传大小（Flask `MAX_CONTENT_LENGTH`）      | 带单位的大小（`50M`、`1G`、`52428800`） | `50MB`                                                |
 
 ## 日志访问
 

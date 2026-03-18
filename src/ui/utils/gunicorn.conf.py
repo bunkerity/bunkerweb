@@ -95,7 +95,7 @@ daemon = False
 chdir = join(sep, "usr", "share", "bunkerweb", "ui")
 umask = 0x027
 pidfile = PID_FILE.as_posix()
-control_socket = RUN_DIR.joinpath("ui.ctl").as_posix()
+control_socket_disable = True
 SHM_TMP_DIR = Path(sep, "dev", "shm")
 UI_WORKER_TMP_DIR = Path(sep, "tmp", "bunkerweb", "ui-workers")
 worker_tmp_dir = SHM_TMP_DIR.as_posix() if SHM_TMP_DIR.is_dir() else UI_WORKER_TMP_DIR.as_posix()
@@ -113,7 +113,8 @@ workers = MAX_WORKERS
 bind = f"{LISTEN_ADDR}:{LISTEN_PORT}"
 worker_class = "gthread"
 threads = int(getenv("MAX_THREADS", MAX_WORKERS * 2))
-max_requests_jitter = min(8, MAX_WORKERS)
+max_requests = int(getenv("UI_MAX_REQUESTS", getenv("MAX_REQUESTS", "1000")))
+max_requests_jitter = min(50, max_requests // 10)
 graceful_timeout = 30
 http_protocols = "h1"  # TODO: add h2 when fixed and h3 when supported
 
@@ -246,10 +247,10 @@ def on_starting(server):
                     if isinstance(parsed_secrets, dict):
                         totp_encryption_keys = parsed_secrets
                     elif isinstance(parsed_secrets, list):
-                        totp_encryption_keys = {f"key-{i+1}": secret for i, secret in enumerate(parsed_secrets)}
+                        totp_encryption_keys = {f"key-{i+1}": secret for i, secret in enumerate(parsed_secrets)}  # noqa: E226
                 except JSONDecodeError:
                     LOGGER.info("TOTP_ENCRYPTION_KEYS (or TOTP_SECRETS) is not valid JSON. Treating as space-separated secrets.")
-                    totp_encryption_keys = {f"key-{i+1}": secret for i, secret in enumerate(totp_encryption_keys_env.split())}
+                    totp_encryption_keys = {f"key-{i+1}": secret for i, secret in enumerate(totp_encryption_keys_env.split())}  # noqa: E226
 
         # * Step 3: Validate and clean secrets
         for key, secret in list(totp_encryption_keys.items()):
@@ -554,12 +555,23 @@ def on_starting(server):
     )
     set_secure_permissions(UI_DATA_FILE)
 
+    # Check if Redis is enabled via environment variable or database before closing DB
+    use_redis = getenv("USE_REDIS", "no").lower() == "yes"
+    if not use_redis:
+        db_config = DB.get_config(global_only=True, methods=False, filtered_settings=("USE_REDIS",))
+        use_redis = db_config.get("USE_REDIS", "no") == "yes"
+
+    DB.close()  # Close local DB connections before fork to prevent fd leaks
+
     LOGGER.info(
         "UI will disconnect users that have their IP address changed during a session"
         + (" except for private IP addresses." if getenv("CHECK_PRIVATE_IP", "yes").lower() == "no" else ".")
     )
 
     UI_SESSIONS_CACHE.mkdir(parents=True, exist_ok=True)
+
+    if not use_redis:
+        LOGGER.warning("Using filesystem session backend — consider enabling Redis (USE_REDIS=yes) for better multi-worker stability")
 
     if TMP_PID_FILE.is_file():
         LOGGER.info("Stopping temporary UI...")
@@ -581,6 +593,26 @@ def on_starting(server):
 
 def when_ready(server):
     HEALTH_FILE.write_text("ok", encoding="utf-8")
+
+
+def post_fork(server, worker):
+    """Dispose inherited DB connections after fork.
+
+    The master process opens DB connections during on_starting() (admin/role
+    setup and reload_plugins()). After fork, workers inherit these stale
+    connections via sys.modules. Per SQLAlchemy docs, call dispose(close=False)
+    in the child to replace the pool without closing the parent's physical
+    connections.
+
+    See: https://docs.sqlalchemy.org/en/21/core/pooling.html
+         #using-connection-pools-with-multiprocessing-or-os-fork
+    """
+    from app.dependencies import DB
+
+    if DB._session_factory is not None:
+        DB._session_factory.remove()
+    if DB.sql_engine is not None:
+        DB.sql_engine.dispose(close=False)
 
 
 def on_exit(server):
