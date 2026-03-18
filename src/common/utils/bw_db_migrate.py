@@ -442,10 +442,14 @@ def _create_engine(uri: str, *, engine_kwargs: Optional[Dict[str, object]] = Non
         except Exception:
             _drivername = ""
 
-        if "sqlite" not in _drivername:
-            connect_args = dict(kwargs.get("connect_args") or {})  # type: ignore[arg-type]
+        connect_args = dict(kwargs.get("connect_args") or {})  # type: ignore[arg-type]
+        if "sqlite" in _drivername:
+            # SQLAlchemy may pass arbitrary engine_kwargs connect args; sqlite3.connect
+            # does not accept connect_timeout.
+            connect_args.pop("connect_timeout", None)
+        else:
             connect_args.setdefault("connect_timeout", 2)
-            kwargs["connect_args"] = connect_args
+        kwargs["connect_args"] = connect_args
     except Exception:
         pass
 
@@ -563,6 +567,47 @@ def _sqlite_path_from_uri(uri: str) -> str:
     if uri.startswith("sqlite:///"):
         return uri[len("sqlite:///") :]
     return ""
+
+
+def _fix_sqlite_permissions(target_uri: str) -> None:
+    """
+    Ensure the SQLite backend is readable/writable by the BunkerWeb runtime user.
+
+    When bw_db_migrate is executed as root, it may create the SQLite file owned by root:root.
+    The BunkerWeb scheduler (often running as `nginx`) needs write access for SQLite journal/WAL
+    state, so we best-effort chown/chmod the DB file and its parent directory.
+    """
+    if not (target_uri or "").lower().startswith("sqlite"):
+        return
+
+    sqlite_fs_path = _sqlite_path_from_uri(target_uri)
+    if not sqlite_fs_path:
+        return
+
+    db_path = Path(sqlite_fs_path)
+    if not db_path.exists():
+        return
+
+    # Use the parent directory owner/group for best compatibility with the
+    # distribution packaging (nginx may run as a different UID/GID).
+    try:
+        st = os.stat(db_path.parent.as_posix())
+        _uid = st.st_uid
+        _gid = st.st_gid
+    except Exception:
+        LOGGER.warning("AUTO-SWITCH: unable to stat parent dir for SQLite permissions fix.")
+        return
+
+    try:
+        os.chown(db_path.as_posix(), _uid, _gid)
+    except Exception as exc:
+        LOGGER.warning("AUTO-SWITCH: unable to chown sqlite db %s: %s", db_path, exc)
+
+    # Apply typical permissions on the DB file only.
+    try:
+        db_path.chmod(0o640)
+    except Exception as exc:
+        LOGGER.warning("AUTO-SWITCH: unable to chmod sqlite paths: %s", exc)
 
 
 def _sqlite_snapshot_if_wal(source_uri: str, dump_dir: Path) -> str:
@@ -2300,12 +2345,33 @@ def _ensure_target_empty(engine: Engine) -> None:
         if non_empty:
             total_rows = sum(non_empty.values())
             table_list = ", ".join(f"{t}({n})" for t, n in sorted(non_empty.items()))
+
+            is_sqlite = (getattr(engine.dialect, "name", "") or "").lower() == "sqlite"
+            sqlite_path = ""
+            ts_example = datetime.now().strftime("%Y%m%d-%H%M%S")
+            if is_sqlite:
+                try:
+                    sqlite_path = _sqlite_path_from_uri(str(engine.url))
+                except Exception:
+                    sqlite_path = ""
+
             LOGGER.error(
                 "Target database already contains BunkerWeb data (%d rows across %d tables: %s).\n"
-                "  → To start a fresh migration, drop and recreate the target database first:\n"
-                "      DROP DATABASE bunkerweb; CREATE DATABASE bunkerweb;\n"
+                "  → To start a fresh migration, prepare an empty target first:\n"
+                "%s\n"
                 "  → Or if this migration already completed successfully, the target is ready to use.",
-                total_rows, len(non_empty), table_list,
+                total_rows,
+                len(non_empty),
+                table_list,
+                (
+                    "      DROP DATABASE bunkerweb; CREATE DATABASE bunkerweb;"
+                    if not is_sqlite
+                    else (
+                        "      Move/rename the existing SQLite DB file"
+                        + (f" at: {sqlite_path}" if sqlite_path else "")
+                        + f"\n      Example: mv /var/lib/bunkerweb/db.sqlite3 /var/lib/bunkerweb/db.sqlite3.bak-{ts_example}"
+                    )
+                ),
             )
             raise RuntimeError("Target database is not empty — see error above for details.")
 
@@ -2771,6 +2837,35 @@ def _import_files_to_target(dump_dir: Path, target_engine: Engine) -> Dict[str, 
     def _deserialise(v: object, col_type=None) -> object:
         if isinstance(v, dict) and "__b64__" in v:
             return base64.b64decode(v["__b64__"])
+
+        # SQLite DateTime columns expect Python `datetime` objects.
+        # During dump we serialize datetime/date/etc as strings, so we need to parse them back.
+        if isinstance(v, str) and col_type is not None:
+            try:
+                py_t = getattr(col_type, "python_type", None)
+            except Exception:
+                py_t = None
+            if py_t is datetime:
+                s = v.strip()
+                # Normalize common variants.
+                if s.endswith("Z"):
+                    s = s[:-1] + "+00:00"
+                try:
+                    return datetime.fromisoformat(s)
+                except ValueError:
+                    pass
+            elif getattr(py_t, "__name__", None) == "date":
+                # Handle DATE columns stored as ISO strings.
+                try:
+                    from datetime import date as _date
+
+                    s = v.strip()
+                    if s.endswith("Z"):
+                        s = s[:-1] + "+00:00"
+                    return _date.fromisoformat(s)
+                except Exception:
+                    pass
+
         # TypeDecorator columns (e.g. custom JSON-as-text) expect a Python object,
         # not a raw JSON string. SQLite stores them as text; parse them back here.
         if isinstance(v, str) and col_type is not None and isinstance(col_type, TypeDecorator):
@@ -3507,18 +3602,26 @@ def _main() -> int:
                         return 1
                 LOGGER.info("Encrypted connection to target database established successfully.")
             else:
-                LOGGER.warning(
-                    "SSL is not enabled in the target URI. The migration will transfer data over an "
-                    "unencrypted connection. It is strongly recommended to enable SSL, e.g.: "
-                    "DB_MIGRATION_TARGET_URI=mysql+pymysql://user:pass@host/db?ssl=true&ssl_ca=/path/to/ca.pem"
-                )
+                _lower_uri = (target_uri or "").lower()
+                if _lower_uri.startswith("sqlite"):
+                    LOGGER.info("Target is SQLite; SSL/TLS is not applicable.")
+                else:
+                    LOGGER.warning(
+                        "SSL is not enabled in the target URI. The migration will transfer data over an "
+                        "unencrypted connection. It is strongly recommended to enable SSL, e.g.: "
+                        "DB_MIGRATION_TARGET_URI=mysql+pymysql://user:pass@host/db?ssl=true&ssl_ca=/path/to/ca.pem"
+                    )
                 # Test that an unencrypted connection actually works.
                 try:
-                        _lower_uri = (target_uri or "").lower()
+                    if _lower_uri.startswith("sqlite"):
+                        # SQLite is local (no SSL/TLS). Just verify we can open it.
+                        _test_engine = _create_engine(target_uri, engine_kwargs=engine_kwargs)
+                        with _test_engine.connect() as _conn:
+                            _conn.execute(text("SELECT 1"))
+                    else:
                         _starttls = "postgres" if ("postgresql" in _lower_uri or "psycopg" in _lower_uri) else "mysql"
                         if _starttls == "postgres":
-                            # Use the already-normalized SQLAlchemy engine, but force a fast connect timeout
-                            # for this best-effort verification step.
+                            # Use a fast connect timeout for this best-effort verification step.
                             _test_engine_kwargs = dict(engine_kwargs or {})
                             _ca = dict(_test_engine_kwargs.get("connect_args") or {})  # type: ignore[arg-type]
                             _ca["connect_timeout"] = 5
@@ -3548,77 +3651,76 @@ def _main() -> int:
                 # Best-effort SSL probe to detect whether the server supports SSL at all.
                 _server_supports_ssl = False
                 _server_ca_pem: Optional[str] = None
-                try:
-                    _verify_mysql_ssl_and_log_details(target_uri, ssl_required=False)
-                    _server_supports_ssl = True
-                    LOGGER.info(
-                        "Target appears to support SSL/TLS; server certificate verified successfully "
-                        "even though SSL is not enabled in the URI."
-                    )
-                except Exception as exc:
-                    # Check if failure was cert-related (server supports SSL but CA unknown)
-                    _exc_str = str(exc)
-                    if "certificate" in _exc_str.lower() or "ssl" in _exc_str.lower():
-                        _server_supports_ssl = True
-                        # Try to extract the PEM from diagnostics that were already logged
+                # Only run the MySQL SSL probe when the target is actually a MySQL/MariaDB
+                # target using the PyMySQL driver. Otherwise, the probe function may no-op
+                # and we would incorrectly treat it as “supports SSL”.
+                if not _lower_uri.startswith("sqlite"):
+                    try:
+                        from sqlalchemy.engine.url import make_url as _mu
+
+                        _drivername = (_mu(target_uri).drivername or "").lower()
+                    except Exception:
+                        _drivername = ""
+
+                    if "mysql+pymysql" in _drivername or "mariadb+pymysql" in _drivername:
                         try:
-                            import pymysql as _pymysql2
-                            from sqlalchemy.engine.url import make_url as _mu2
-                            _u2 = _mu2(target_uri)
-                            _diag_conn = _pymysql2.connect(
-                                host=_u2.host or "",
-                                port=int(_u2.port or 3306),
-                                user=_u2.username or "",
-                                password=_u2.password or "",
-                                database=_u2.database or None,
-                                ssl={"cert_reqs": ssl.CERT_NONE, "check_hostname": False},
-                                connect_timeout=5,
+                            _verify_mysql_ssl_and_log_details(target_uri, ssl_required=False)
+                            _server_supports_ssl = True
+                            LOGGER.info(
+                                "Target appears to support SSL/TLS; server certificate verified successfully "
+                                "even though SSL is not enabled in the URI."
                             )
-                            _sock2 = getattr(_diag_conn, "_sock", None)
-                            if _sock2 and hasattr(_sock2, "getpeercert"):
-                                _der = _sock2.getpeercert(True)
-                                if _der:
-                                    import base64 as _b64
-                                    _pem = "-----BEGIN CERTIFICATE-----\n" + _b64.encodebytes(_der).decode() + "-----END CERTIFICATE-----"
-                                    _server_ca_pem = _pem.strip()
-                                    # Determine whether the retrieved cert is a CA cert or a leaf cert.
-                                    # A CA cert is self-signed (subject == issuer) and has CA:TRUE in BasicConstraints.
-                                    _cert_is_ca = False
-                                    try:
-                                        from cryptography import x509 as _x509
-                                        from cryptography.hazmat.backends import default_backend as _db
-                                        from cryptography.x509.oid import ExtensionOID as _EOID
-                                        _cert_obj = _x509.load_der_x509_certificate(_der, _db())
-                                        # Check BasicConstraints CA flag
-                                        try:
-                                            _bc = _cert_obj.extensions.get_extension_for_oid(_EOID.BASIC_CONSTRAINTS)
-                                            _cert_is_ca = _bc.value.ca
-                                        except Exception:
+                        except Exception as exc:
+                            # Check if failure was cert-related (server supports SSL but CA unknown)
+                            _exc_str = str(exc)
+                            if "certificate" in _exc_str.lower() or "ssl" in _exc_str.lower():
+                                _server_supports_ssl = True
+                                # Try to extract the PEM from diagnostics that were already logged
+                                try:
+                                    import pymysql as _pymysql2
+                                    from sqlalchemy.engine.url import make_url as _mu2
+                                    _u2 = _mu2(target_uri)
+                                    _diag_conn = _pymysql2.connect(
+                                        host=_u2.host or "",
+                                        port=int(_u2.port or 3306),
+                                        user=_u2.username or "",
+                                        password=_u2.password or "",
+                                        database=_u2.database or None,
+                                        ssl={"cert_reqs": ssl.CERT_NONE, "check_hostname": False},
+                                        connect_timeout=5,
+                                    )
+                                    _sock2 = getattr(_diag_conn, "_sock", None)
+                                    if _sock2 and hasattr(_sock2, "getpeercert"):
+                                        _der = _sock2.getpeercert(True)
+                                        if _der:
+                                            import base64 as _b64
+                                            _pem = "-----BEGIN CERTIFICATE-----\n" + _b64.encodebytes(_der).decode() + "-----END CERTIFICATE-----"
+                                            _server_ca_pem = _pem.strip()
                                             _cert_is_ca = False
-                                        # Additionally check self-signed (subject == issuer)
-                                        _self_signed = _cert_obj.subject == _cert_obj.issuer
-                                        if not _cert_is_ca and _self_signed:
-                                            _cert_is_ca = True  # self-signed without explicit BC treated as CA
-                                    except Exception:
-                                        # cryptography not available — fall back to raw subject/issuer comparison via ssl
-                                        try:
-                                            import ssl as _ssl3
-                                            _x = _ssl3.DER_cert_to_PEM_cert(_der)
-                                            _cert_parsed = _ssl3.PEM_cert_to_DER_cert(_x)
-                                            # No easy BasicConstraints via stdlib; mark unknown → treat conservatively as leaf
-                                            _cert_is_ca = False
-                                        except Exception:
-                                            _cert_is_ca = False
-                                    if not _cert_is_ca:
-                                        # Mark pem as leaf so advisory can warn accordingly
-                                        _server_ca_pem = ("__leaf__", _server_ca_pem)  # type: ignore[assignment]
-                            _diag_conn.close()
-                        except Exception:
-                            pass
-                    LOGGER.info(
-                        "Best-effort SSL probe on target failed or is unsupported (SSL disabled in URI): %s",
-                        exc,
-                    )
+                                            try:
+                                                from cryptography import x509 as _x509
+                                                from cryptography.hazmat.backends import default_backend as _db
+                                                from cryptography.x509.oid import ExtensionOID as _EOID
+                                                _cert_obj = _x509.load_der_x509_certificate(_der, _db())
+                                                try:
+                                                    _bc = _cert_obj.extensions.get_extension_for_oid(_EOID.BASIC_CONSTRAINTS)
+                                                    _cert_is_ca = _bc.value.ca
+                                                except Exception:
+                                                    _cert_is_ca = False
+                                                _self_signed = _cert_obj.subject == _cert_obj.issuer
+                                                if not _cert_is_ca and _self_signed:
+                                                    _cert_is_ca = True
+                                            except Exception:
+                                                _cert_is_ca = False
+                                            if not _cert_is_ca:
+                                                _server_ca_pem = ("__leaf__", _server_ca_pem)  # type: ignore[assignment]
+                                    _diag_conn.close()
+                                except Exception:
+                                    pass
+                            LOGGER.info(
+                                "Best-effort SSL probe on target failed or is unsupported (SSL disabled in URI): %s",
+                                exc,
+                            )
             # Verify the target is writable (i.e. a primary, not a standby replica).
             # PostgreSQL standbys allow SELECT but reject all DDL with ReadOnlySqlTransaction.
             # When multiple IPs resolve for the host (HA cluster), probe each node to find
@@ -3760,6 +3862,11 @@ def _main() -> int:
 
         # 5. Verify per-table row counts between source and target
         _verify_all_data(effective_source_engine, target_engine, skipped_orphans=_import_skipped)
+
+        # If the target is SQLite, ensure permissions are correct so the runtime can open it.
+        # This avoids scheduler retry loops when bw_db_migrate runs as root.
+        if target_uri.lower().startswith("sqlite"):
+            _fix_sqlite_permissions(target_uri)
 
         env_updated = False
         if args.tui and update_env_file and not args.test_target and not args.dry_run:
