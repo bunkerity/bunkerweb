@@ -14,9 +14,9 @@
 ##!+ i
 
 ##! Helpers
-##!> define comma-plus ,[^)]*?
+##!> define punctuation-plus ,.*?
 
-##!> define hex-numbers [\da-f]+
+##!> define hex-numbers [)\da-f]
 
 ##!> define ticks \"'`
 
@@ -29,9 +29,7 @@
 ##! Main assembly
 ##!> assemble
   ##!> assemble
-    {{comma-plus}}{{hex-numbers}}
-    {{comma-plus}}\({{hex-numbers}}\)
-    \([^,]+(?:,\s*{{hex-numbers}})+\)
+    {{punctuation-plus}}{{hex-numbers}}
     ##!=>
     $
     {{ticks-class}}$
@@ -42,7 +40,7 @@
     ##!=>
   ##!<
   ##!> assemble
-    {{comma-plus}}{{ticks-class}}{{not-ticks-class}}+{{ticks-class}}
+    {{punctuation-plus}}{{ticks-class}}{{not-ticks-class}}+{{ticks-class}}
   ##!<
 ##!<
 

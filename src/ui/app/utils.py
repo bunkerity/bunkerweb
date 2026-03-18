@@ -23,8 +23,6 @@ LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
 
 LOGGER = getLogger("UI")
 
-RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default server", ""})
-
 USER_PASSWORD_RX = re_compile(r"^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*\P{Alnum}).{8,}$")
 PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}$")
 
@@ -312,15 +310,14 @@ def flash(message: str, category: str = "success", i18n_key: Optional[str] = Non
 
     if save and "flash_messages" in session:
         session["flash_messages"].append((message, category, datetime.now().astimezone().isoformat()))
-        session.modified = True
 
 
 def human_readable_number(value: Union[str, int]) -> str:
     value = int(value)
     if value >= 1_000_000:
-        return f"{value/1_000_000:.1f}M"  # noqa: E226
+        return f"{value/1_000_000:.1f}M"
     elif value >= 1_000:
-        return f"{value/1_000:.1f}k"  # noqa: E226
+        return f"{value/1_000:.1f}k"
     return str(value)
 
 

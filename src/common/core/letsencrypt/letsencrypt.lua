@@ -428,10 +428,7 @@ end
 function letsencrypt:ssl_certificate()
 	local server_name, err = ssl_server_name()
 	if not server_name then
-		if err then
-			return self:ret(false, "can't get server_name : " .. err)
-		end
-		return self:ret(true, "no SNI provided")
+		return self:ret(false, "can't get server_name : " .. err)
 	end
 	local wildcard_servers, err = self.internalstore:get("plugin_letsencrypt_wildcard_servers", true)
 	if not wildcard_servers then
