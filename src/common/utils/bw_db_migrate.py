@@ -385,6 +385,11 @@ def _create_engine(uri: str, *, engine_kwargs: Optional[Dict[str, object]] = Non
     from sqlalchemy.engine.url import make_url
 
     normalized_uri = _normalize_mysql_ssl_in_uri(uri)
+
+    # Normalize bare postgresql:// (no driver suffix) to postgresql+psycopg://
+    # so SQLAlchemy uses psycopg (v3) instead of defaulting to psycopg2 which is not installed.
+    if normalized_uri.startswith("postgresql://") or normalized_uri.startswith("postgres://"):
+        normalized_uri = normalized_uri.replace("postgresql://", "postgresql+psycopg://", 1).replace("postgres://", "postgresql+psycopg://", 1)
     kwargs: Dict[str, object] = dict(engine_kwargs or {"future": True, "pool_pre_ping": True, "pool_recycle": 1800})
 
     try:
@@ -414,6 +419,14 @@ def _create_engine(uri: str, *, engine_kwargs: Optional[Dict[str, object]] = Non
                 query["sslrootcert"] = ssl_rootcert
                 url = url.set(query=query)
                 normalized_uri = str(url)
+            # libpq looks for $HOME/.postgresql/postgresql.crt even when no client cert is
+            # configured. Set sslcert/sslkey to a nonexistent path to skip that lookup.
+            # Reference: https://www.postgresql.org/docs/current/libpq-ssl.html
+            if query.get("sslmode"):
+                connect_args = dict(kwargs.get("connect_args") or {})  # type: ignore[arg-type]
+                connect_args.setdefault("sslcert", "/tmp/.bw-no-client-cert")
+                connect_args.setdefault("sslkey", "/tmp/.bw-no-client-cert")
+                kwargs["connect_args"] = connect_args
     except Exception:
         pass
 
@@ -640,11 +653,13 @@ def _analyze_tls_strength(version: str, cipher_name: str) -> None:
         LOGGER.info("TLS configuration: GOOD – all TLS tests passed with modern protocol and forward-secret cipher.")
 
 
-def _verify_mysql_ssl_and_log_details(target_uri: str) -> None:
+def _verify_mysql_ssl_and_log_details(target_uri: str, *, ssl_required: bool = True) -> None:
     """
     Perform an explicit MySQL SSL/TLS verification handshake using PyMySQL so we can:
     - Verify server certificate (against provided CA or system CAs)
     - Log SSL protocol/cipher and certificate details
+    When ssl_required=False (best-effort probe), failures are logged at WARNING level
+    instead of ERROR so they don't appear as errors when SSL was never configured.
     """
     try:
         from sqlalchemy.engine.url import make_url
@@ -717,12 +732,29 @@ def _verify_mysql_ssl_and_log_details(target_uri: str) -> None:
             pem_body = "\n".join(lines)
             pem_text = "-----BEGIN CERTIFICATE-----\n" + pem_body + "\n-----END CERTIFICATE-----"
 
-            # Log the full PEM in multiple chunks so that our per-message
-            # truncation does not cut the certificate itself.
-            chunk_size = 1800
-            for idx in range(0, len(pem_text), chunk_size):
-                chunk = pem_text[idx : idx + chunk_size]
-                LOGGER.info("%s: server certificate PEM (chunk %d):\n%s", context, idx // chunk_size + 1, chunk)
+            # Only log the PEM if it is a CA certificate (BasicConstraints CA:TRUE or self-signed).
+            # Leaf certificates are not useful as ssl_ca values and should not be printed.
+            _print_pem = False
+            try:
+                from cryptography import x509 as _cx509
+                from cryptography.hazmat.backends import default_backend as _cdb
+                from cryptography.x509.oid import ExtensionOID as _CEOID
+                _cert_obj = _cx509.load_der_x509_certificate(bin_cert, _cdb())
+                try:
+                    _bc = _cert_obj.extensions.get_extension_for_oid(_CEOID.BASIC_CONSTRAINTS)
+                    _print_pem = _bc.value.ca
+                except Exception:
+                    _print_pem = _cert_obj.subject == _cert_obj.issuer  # self-signed fallback
+            except Exception:
+                pass  # cryptography not available — skip PEM printing to be safe
+
+            if _print_pem:
+                chunk_size = 1800
+                for idx in range(0, len(pem_text), chunk_size):
+                    chunk = pem_text[idx : idx + chunk_size]
+                    LOGGER.info("%s: server certificate PEM (chunk %d):\n%s", context, idx // chunk_size + 1, chunk)
+            else:
+                LOGGER.info("%s: server certificate is a leaf cert (not a CA) — PEM not printed", context)
 
             # Decode the PEM using the built-in test helper to extract fields.
             try:
@@ -807,22 +839,34 @@ def _verify_mysql_ssl_and_log_details(target_uri: str) -> None:
         # Verification failed; try a secondary, non-verifying connection solely
         # to inspect and log the certificate chain to help the user locate the
         # correct CA file. Then re-raise the original error.
-        LOGGER.error("SSL verification failed for target database: %s", exc)
-        # Emit a clear warning summarizing why the certificate is considered invalid.
+        _log = LOGGER.error if ssl_required else LOGGER.warning
+        _log("SSL verification failed for target database: %s", exc)
+        # Emit a clear, actionable message summarizing why the certificate is considered invalid.
         reason = str(exc)
-        if "self-signed certificate" in reason:
-            LOGGER.warning(
-                "TLS certificate validation failed: self-signed certificate in chain. "
-                "You likely need to configure the corresponding CA PEM in the TUI."
-            )
+        if "self-signed certificate" in reason or "certificate verify failed" in reason:
+            if not ca_path:
+                _log(
+                    "SSL is enabled on the target database server but no trusted CA file is configured. "
+                    "The server uses a private/self-signed CA that the system trust store does not know. "
+                    "Fix: add the CA certificate path to your target URI, e.g.: "
+                    "DB_MIGRATION_TARGET_URI=mysql+pymysql://user:pass@host/db?ssl=true&ssl_ca=/path/to/ca.pem"
+                )
+            else:
+                _log(
+                    "SSL certificate verification failed: the configured CA file (%s) does not match "
+                    "the certificate chain presented by the target database server. "
+                    "Make sure you are using the correct CA for this database cluster.",
+                    ca_path,
+                )
         elif "certificate has expired" in reason:
-            LOGGER.warning("TLS certificate validation failed: certificate has expired.")
+            _log("SSL certificate verification failed: the server certificate has expired.")
         elif "hostname" in reason or "doesn't match" in reason:
-            LOGGER.warning(
-                "TLS certificate validation failed: hostname mismatch between DB host and certificate subject/SAN."
+            _log(
+                "SSL certificate verification failed: hostname mismatch between the configured DB host "
+                "and the certificate subject/SAN. Check that the hostname in the URI matches the certificate."
             )
         else:
-            LOGGER.warning("TLS certificate validation failed: %s", reason)
+            _log("SSL certificate verification failed: %s", reason)
         try:
             diag_ssl: Dict[str, object] = {"cert_reqs": ssl.CERT_NONE, "check_hostname": False}
             # Reuse explicit CA if one was configured, as it may help expose the full chain.
@@ -1009,6 +1053,30 @@ def _log_ssl_chain(host: str, port: int, *, ca_file: Optional[str] = None, start
                 if resp != b"S":
                     LOGGER.warning("SSL chain probe: PostgreSQL server declined SSL (response=%r)", resp)
                     return
+            elif starttls == "mysql":
+                # MySQL STARTTLS: read the server greeting packet, then send
+                # a minimal ClientSSL packet (4-byte header + capability flags with SSL bit set).
+                # Read initial handshake packet (length-prefixed: 3-byte len + 1-byte seq)
+                _hdr = raw_sock.recv(4)
+                if len(_hdr) < 4:
+                    LOGGER.warning("SSL chain probe: MySQL server sent short greeting header")
+                    return
+                _pkt_len = _hdr[0] | (_hdr[1] << 8) | (_hdr[2] << 16)
+                _greeting = raw_sock.recv(_pkt_len)  # consume the rest of the handshake
+                if not _greeting:
+                    LOGGER.warning("SSL chain probe: MySQL server sent empty greeting")
+                    return
+                # Send a minimal SSL upgrade request:
+                # capabilities = CLIENT_SSL (0x0800) | CLIENT_PROTOCOL_41 (0x0200) | CLIENT_LONG_PASSWORD (0x0001)
+                _cap = 0x0800 | 0x0200 | 0x0001
+                _ssl_req = (
+                    _cap.to_bytes(4, "little")   # capability flags (4 bytes)
+                    + (16384).to_bytes(4, "little")  # max packet size
+                    + b"\x21"                         # charset: utf8mb4
+                    + b"\x00" * 23                    # reserved
+                )
+                _ssl_pkt_len = len(_ssl_req).to_bytes(3, "little") + b"\x01"  # seq=1
+                raw_sock.sendall(_ssl_pkt_len + _ssl_req)
             with ctx.wrap_socket(raw_sock, server_hostname=host) as tls_sock:
                 # TLS cipher/protocol analysis (same checks as MySQL path)
                 cipher = tls_sock.cipher()
@@ -2943,12 +3011,150 @@ def _main() -> int:
 
         # Only touch target when we have a target URI (dry-run can be source-only).
         _all_tls_results: Dict[str, Dict[str, str]] = {}  # ip -> tls_info, populated during SSL probe
+        _server_supports_ssl = False
+        _server_ca_pem: Optional[str] = None
+
+        def _emit_ssl_advisories(ssl_is_enabled: bool, server_supports: Optional[bool], ca_pem: object) -> None:
+            # ca_pem is either None, a PEM string (root CA), or ("__leaf__", pem_str)
+            _is_leaf = isinstance(ca_pem, tuple) and ca_pem[0] == "__leaf__"
+            _pem_str: Optional[str] = ca_pem[1] if _is_leaf else (ca_pem if isinstance(ca_pem, str) else None)  # type: ignore[index]
+
+            if not ssl_is_enabled and server_supports:
+                LOGGER.warning("=" * 60)
+                LOGGER.warning("ADVISORY: SSL is not enabled in your target URI, but the target")
+                LOGGER.warning("database server supports SSL/TLS. Enable SSL to protect data in transit.")
+                if _pem_str and not _is_leaf:
+                    LOGGER.warning("The server's root CA certificate was retrieved during the probe.")
+                    LOGGER.warning("Save it and reference it in your URI:")
+                    LOGGER.warning("  sudo tee /etc/ssl/certs/bw-migration-ca.pem << 'EOF'")
+                    for _line in _pem_str.splitlines():
+                        LOGGER.warning("  %s", _line)
+                    LOGGER.warning("  EOF")
+                    LOGGER.warning("  DB_MIGRATION_TARGET_URI=...?ssl=true&ssl_ca=/etc/ssl/certs/bw-migration-ca.pem")
+                elif _is_leaf:
+                    LOGGER.warning("The server returned a leaf (server) certificate, not a root CA.")
+                    LOGGER.warning("Obtain the root CA PEM from your database administrator or cluster")
+                    LOGGER.warning("configuration and reference it in your URI:")
+                    LOGGER.warning("  DB_MIGRATION_TARGET_URI=...?ssl=true&ssl_ca=/path/to/root-ca.pem")
+                else:
+                    LOGGER.warning("  DB_MIGRATION_TARGET_URI=...?ssl=true&ssl_ca=/path/to/ca.pem")
+                LOGGER.warning("=" * 60)
+            elif ssl_is_enabled and not ca_path:
+                LOGGER.warning("=" * 60)
+                LOGGER.warning("ADVISORY: SSL is enabled but no CA file is set — certificate verification")
+                LOGGER.warning("is relying on the system trust store, which may not include your database")
+                LOGGER.warning("server's private CA. If you see certificate errors, retrieve the root CA")
+                LOGGER.warning("PEM from your database administrator and save it:")
+                LOGGER.warning("  sudo tee /etc/ssl/certs/bw-migration-ca.pem << 'EOF'")
+                LOGGER.warning("  <paste root CA PEM here — not the leaf/server cert>")
+                LOGGER.warning("  EOF")
+                LOGGER.warning("  DB_MIGRATION_TARGET_URI=...?ssl=true&ssl_ca=/etc/ssl/certs/bw-migration-ca.pem")
+                LOGGER.warning("=" * 60)
+
         if target_uri:
             ssl_expected = _uri_uses_ssl(target_uri)
             host, port = _resolve_target_host_port(target_uri)
             ips = _resolve_ips(host)
             ca_path = _extract_ca_from_uri(target_uri)
             cafile, capath = _system_ca_summary()
+
+            # Verify CA file exists and is readable by the nginx user.
+            # This script may run as root, so we check permissions explicitly
+            # against the nginx user rather than relying on open() succeeding.
+            if ca_path:
+                import errno as _errno
+                import pwd as _pwd
+                import grp as _grp
+                import stat as _stat
+
+                _ca_exists = Path(ca_path).exists()
+                if not _ca_exists:
+                    LOGGER.error(
+                        "CA file '%s' does not exist. "
+                        "Verify the path in your URI (ssl_ca= / sslrootcert=) is correct.",
+                        ca_path,
+                    )
+                    return False
+
+                # Determine nginx uid/gid (fall back to current process if nginx user not found)
+                try:
+                    _nginx_pw = _pwd.getpwnam("nginx")
+                    _nginx_uid = _nginx_pw.pw_uid
+                    _nginx_gid = _nginx_pw.pw_gid
+                    _nginx_groups = {g.gr_gid for g in _grp.getgrall() if "nginx" in g.gr_mem}
+                    _nginx_groups.add(_nginx_gid)
+                    _check_user = "nginx"
+                except KeyError:
+                    _nginx_uid = os.getuid()
+                    _nginx_gid = os.getgid()
+                    _nginx_groups = {_nginx_gid}
+                    _check_user = f"uid={_nginx_uid}"
+
+                # Walk from the file up to root, checking execute (x) on each directory
+                # and read (r) on the file itself for the nginx user.
+                def _nginx_can_read(path: str) -> bool:
+                    """Return True if the nginx user can read this file."""
+                    p = Path(path).resolve()
+                    # Check each component for execute permission
+                    for ancestor in list(p.parents)[::-1]:
+                        try:
+                            _st = ancestor.stat()
+                        except OSError:
+                            return False
+                        _m = _st.st_mode
+                        if _st.st_uid == _nginx_uid:
+                            if not _m & _stat.S_IXUSR:
+                                return False
+                        elif _st.st_gid in _nginx_groups:
+                            if not _m & _stat.S_IXGRP:
+                                return False
+                        else:
+                            if not _m & _stat.S_IXOTH:
+                                return False
+                    # Check read permission on the file itself
+                    try:
+                        _st = p.stat()
+                    except OSError:
+                        return False
+                    _m = _st.st_mode
+                    if _st.st_uid == _nginx_uid:
+                        return bool(_m & _stat.S_IRUSR)
+                    elif _st.st_gid in _nginx_groups:
+                        return bool(_m & _stat.S_IRGRP)
+                    else:
+                        return bool(_m & _stat.S_IROTH)
+
+                if not _nginx_can_read(ca_path):
+                    _ca_dir = str(Path(ca_path).parent)
+                    _st = Path(ca_path).stat()
+                    _mode_oct = oct(_st.st_mode)[-4:]
+                    try:
+                        _owner = _pwd.getpwuid(_st.st_uid).pw_name
+                    except KeyError:
+                        _owner = str(_st.st_uid)
+                    try:
+                        _group = _grp.getgrgid(_st.st_gid).gr_name
+                    except KeyError:
+                        _group = str(_st.st_gid)
+                    LOGGER.error(
+                        "CA file '%s' is not readable by user '%s' (file: %s %s:%s).",
+                        ca_path, _check_user, _mode_oct, _owner, _group,
+                    )
+                    LOGGER.error(
+                        "Files in '%s' may have restricted permissions (e.g. mode 710, root:ssl-cert). "
+                        "The nginx user cannot read them.",
+                        _ca_dir,
+                    )
+                    LOGGER.error("Fix: copy the CA file to a location readable by nginx, e.g.:")
+                    LOGGER.error("  sudo cp %s /etc/bunkerweb/ca.pem", ca_path)
+                    LOGGER.error("  sudo chown root:nginx /etc/bunkerweb/ca.pem")
+                    LOGGER.error("  sudo chmod 640 /etc/bunkerweb/ca.pem")
+                    LOGGER.error(
+                        "Then update your URI: ...?ssl=true&ssl_ca=/etc/bunkerweb/ca.pem"
+                    )
+                    return False
+                else:
+                    LOGGER.debug("CA file '%s' is readable by user '%s'.", ca_path, _check_user)
 
             LOGGER.info("Target connect details: host=%s port=%s ips=%s", host or "(unknown)", port or "(unknown)", ",".join(ips) if ips else "(unresolved)")
             LOGGER.info("Target SSL requested: %s", "yes" if ssl_expected else "no")
@@ -3019,7 +3225,7 @@ def _main() -> int:
                 # Fetch and log the full certificate chain including root CA.
                 # When multiple IPs resolve (HA cluster), probe each node so all
                 # certificates are verified — nodes may have different leaf certs.
-                _starttls = "postgres" if ("postgresql" in target_uri.lower() or "psycopg" in target_uri.lower()) else ""
+                _starttls = "postgres" if ("postgresql" in target_uri.lower() or "psycopg" in target_uri.lower()) else "mysql"
                 _probe_ips = ips if ips else [host]
                 _probe_port = int(port) if port else (5432 if _starttls == "postgres" else 3306)
                 if len(_probe_ips) > 1:
@@ -3136,16 +3342,100 @@ def _main() -> int:
                         return 1
                 LOGGER.info("Encrypted connection to target database established successfully.")
             else:
-                # Even when SSL is not explicitly enabled in the URI, try a
-                # best-effort SSL probe. If it fails, log and continue, since
-                # the user did not request SSL.
+                LOGGER.warning(
+                    "SSL is not enabled in the target URI. The migration will transfer data over an "
+                    "unencrypted connection. It is strongly recommended to enable SSL, e.g.: "
+                    "DB_MIGRATION_TARGET_URI=mysql+pymysql://user:pass@host/db?ssl=true&ssl_ca=/path/to/ca.pem"
+                )
+                # Test that an unencrypted connection actually works.
                 try:
-                    _verify_mysql_ssl_and_log_details(target_uri)
+                    import pymysql as _pymysql
+                    from sqlalchemy.engine.url import make_url as _make_url
+                    _url = _make_url(target_uri)
+                    _conn = _pymysql.connect(
+                        host=_url.host or "",
+                        port=int(_url.port or 3306),
+                        user=_url.username or "",
+                        password=_url.password or "",
+                        database=_url.database or None,
+                        ssl=None,
+                        connect_timeout=10,
+                    )
+                    _conn.close()
+                    LOGGER.info("Unencrypted connection to target database established successfully.")
+                except Exception as _exc:
+                    LOGGER.error("Unencrypted connection to target database failed: %s", _exc)
+                    return 1
+                # Best-effort SSL probe to detect whether the server supports SSL at all.
+                _server_supports_ssl = False
+                _server_ca_pem: Optional[str] = None
+                try:
+                    _verify_mysql_ssl_and_log_details(target_uri, ssl_required=False)
+                    _server_supports_ssl = True
                     LOGGER.info(
                         "Target appears to support SSL/TLS; server certificate verified successfully "
                         "even though SSL is not enabled in the URI."
                     )
                 except Exception as exc:
+                    # Check if failure was cert-related (server supports SSL but CA unknown)
+                    _exc_str = str(exc)
+                    if "certificate" in _exc_str.lower() or "ssl" in _exc_str.lower():
+                        _server_supports_ssl = True
+                        # Try to extract the PEM from diagnostics that were already logged
+                        try:
+                            import pymysql as _pymysql2
+                            from sqlalchemy.engine.url import make_url as _mu2
+                            _u2 = _mu2(target_uri)
+                            _diag_conn = _pymysql2.connect(
+                                host=_u2.host or "",
+                                port=int(_u2.port or 3306),
+                                user=_u2.username or "",
+                                password=_u2.password or "",
+                                database=_u2.database or None,
+                                ssl={"cert_reqs": ssl.CERT_NONE, "check_hostname": False},
+                                connect_timeout=5,
+                            )
+                            _sock2 = getattr(_diag_conn, "_sock", None)
+                            if _sock2 and hasattr(_sock2, "getpeercert"):
+                                _der = _sock2.getpeercert(True)
+                                if _der:
+                                    import base64 as _b64
+                                    _pem = "-----BEGIN CERTIFICATE-----\n" + _b64.encodebytes(_der).decode() + "-----END CERTIFICATE-----"
+                                    _server_ca_pem = _pem.strip()
+                                    # Determine whether the retrieved cert is a CA cert or a leaf cert.
+                                    # A CA cert is self-signed (subject == issuer) and has CA:TRUE in BasicConstraints.
+                                    _cert_is_ca = False
+                                    try:
+                                        from cryptography import x509 as _x509
+                                        from cryptography.hazmat.backends import default_backend as _db
+                                        from cryptography.x509.oid import ExtensionOID as _EOID
+                                        _cert_obj = _x509.load_der_x509_certificate(_der, _db())
+                                        # Check BasicConstraints CA flag
+                                        try:
+                                            _bc = _cert_obj.extensions.get_extension_for_oid(_EOID.BASIC_CONSTRAINTS)
+                                            _cert_is_ca = _bc.value.ca
+                                        except Exception:
+                                            _cert_is_ca = False
+                                        # Additionally check self-signed (subject == issuer)
+                                        _self_signed = _cert_obj.subject == _cert_obj.issuer
+                                        if not _cert_is_ca and _self_signed:
+                                            _cert_is_ca = True  # self-signed without explicit BC treated as CA
+                                    except Exception:
+                                        # cryptography not available — fall back to raw subject/issuer comparison via ssl
+                                        try:
+                                            import ssl as _ssl3
+                                            _x = _ssl3.DER_cert_to_PEM_cert(_der)
+                                            _cert_parsed = _ssl3.PEM_cert_to_DER_cert(_x)
+                                            # No easy BasicConstraints via stdlib; mark unknown → treat conservatively as leaf
+                                            _cert_is_ca = False
+                                        except Exception:
+                                            _cert_is_ca = False
+                                    if not _cert_is_ca:
+                                        # Mark pem as leaf so advisory can warn accordingly
+                                        _server_ca_pem = ("__leaf__", _server_ca_pem)  # type: ignore[assignment]
+                            _diag_conn.close()
+                        except Exception:
+                            pass
                     LOGGER.info(
                         "Best-effort SSL probe on target failed or is unsupported (SSL disabled in URI): %s",
                         exc,
@@ -3234,6 +3524,7 @@ def _main() -> int:
                 elapsed,
             )
             _check_source_size(source_engine, source_uri, _DUMP_ROOT)
+            _emit_ssl_advisories(ssl_expected, _server_supports_ssl if not ssl_expected else None, _server_ca_pem if not ssl_expected else None)
             return 0
 
         if args.test_target:
@@ -3241,6 +3532,7 @@ def _main() -> int:
             _check_source_size(source_engine, source_uri, _DUMP_ROOT)
             LOGGER.info("Target database connectivity OK and target appears empty for BunkerWeb tables.")
             LOGGER.info("SUCCESS: target database test passed — ready for migration.")
+            _emit_ssl_advisories(ssl_expected, _server_supports_ssl if not ssl_expected else None, _server_ca_pem if not ssl_expected else None)
             return 0
 
         _mig_start = datetime.now()
@@ -3327,6 +3619,7 @@ def _main() -> int:
         LOGGER.info("  Recommended : sudo reboot")
         LOGGER.info("  Alternative : sudo systemctl restart bunkerweb bunkerweb-scheduler bunkerweb-ui")
         LOGGER.info("=" * 60)
+        _emit_ssl_advisories(ssl_expected, _server_supports_ssl if not ssl_expected else None, _server_ca_pem if not ssl_expected else None)
         _pid_remove()
         return 0
     except KeyboardInterrupt:
@@ -3363,11 +3656,38 @@ def _main() -> int:
 
 
 def main() -> int:
+    import logging as _logging
+    from datetime import datetime as _datetime
+
+    _last_errors: list = []
+
+    class _LastErrorHandler(_logging.Handler):
+        def emit(self, record: _logging.LogRecord) -> None:
+            if record.levelno >= _logging.ERROR:
+                _last_errors.append(self.format(record))
+
+    _err_handler = _LastErrorHandler()
+    _err_handler.setFormatter(_logging.Formatter("%(message)s"))
+    LOGGER.addHandler(_err_handler)
+
     rc = _main()
-    if rc != 0 and rc != 130:
-        LOGGER.error("=" * 60)
-        LOGGER.error("FAILED. See messages above for details.")
-        LOGGER.error("=" * 60)
+
+    LOGGER.removeHandler(_err_handler)
+
+    _ts = _datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    LOGGER.info("=" * 60)
+    if rc == 0:
+        if _last_errors:
+            for _e in _last_errors:
+                LOGGER.error("Error during run: %s", _e)
+        LOGGER.info("Finished: %s — SUCCESS", _ts)
+    elif rc == 130:
+        LOGGER.error("Finished: %s — ABORTED (KeyboardInterrupt)", _ts)
+    else:
+        if _last_errors:
+            LOGGER.error("Last error: %s", _last_errors[-1])
+        LOGGER.error("Finished: %s — FAILED (exit code %d)", _ts, rc)
+    LOGGER.info("=" * 60)
     return rc
 
 
