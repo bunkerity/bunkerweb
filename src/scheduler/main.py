@@ -482,6 +482,321 @@ def generate_configs(logger: Logger = LOGGER) -> bool:
     return True
 
 
+DB_SSL_CHECK_LOGGER = getLogger("DB-SSL-CHECK")
+
+# Guards against overlapping runs if a previous check is still in flight
+# (e.g. a slow cluster node causing the 15-second openssl timeout to stack up).
+_DB_SSL_CHECK_RUNNING = Event()
+
+# Expiry thresholds in days, selected based on the certificate's total lifetime.
+# Short-lived certificates (≤ 30 days total, e.g. ACME 7-day or 90-day auto-renewed)
+# rotate frequently by design, so tighter thresholds are used to catch late renewals
+# before they cause an outage.
+_DB_SSL_WARN_DAYS_LONG = 14    # certs with total lifetime > 30 days: warn when < 14 days left
+_DB_SSL_CRIT_DAYS_LONG = 7     # certs with total lifetime > 30 days: critical when < 7 days left
+_DB_SSL_WARN_DAYS_SHORT = 3    # certs with total lifetime ≤ 30 days: warn when < 3 days left
+_DB_SSL_CRIT_DAYS_SHORT = 1    # certs with total lifetime ≤ 30 days: critical when < 1 day left
+
+
+def _db_ssl_check_pem(pem: str, label: str) -> int:
+    """
+    Parse a PEM-encoded certificate and evaluate its expiry against the configured thresholds.
+
+    Uses `openssl x509 -noout -dates -subject` to extract notBefore, notAfter, and subject
+    from the certificate without requiring the cryptography Python library.
+
+    The threshold tier is chosen based on the certificate's total lifetime:
+      - Total lifetime > 30 days  →  warn at 14 days, critical at 7 days
+      - Total lifetime ≤ 30 days  →  warn at  3 days, critical at 1 day
+
+    Log levels are elevated so alerts are never silently filtered:
+      - WARNING state → logged at ERROR   (visible even at LOG_LEVEL=ERROR)
+      - CRITICAL state → logged at CRITICAL
+
+    Returns:
+      0  certificate is healthy
+      1  certificate is approaching expiry (WARNING)
+      2  certificate is expiring imminently or already expired (CRITICAL)
+    """
+    from datetime import timezone
+    from subprocess import run as _run, PIPE as _PIPE
+
+    try:
+        # Use openssl to parse the dates: outputs "notBefore=...\nnotAfter=..."
+        result = _run(
+            ["openssl", "x509", "-noout", "-dates", "-subject"],
+            input=pem.encode(),
+            stdout=_PIPE, stderr=_PIPE,
+            timeout=5,
+        )
+        if result.returncode != 0:
+            DB_SSL_CHECK_LOGGER.warning("openssl x509 failed for %s: %s", label, result.stderr.decode().strip())
+            return 0
+
+        dates: Dict[str, str] = {}
+        subj = ""
+        for line in result.stdout.decode().splitlines():
+            if "=" in line:
+                k, _, v = line.partition("=")
+                k = k.strip().lower()
+                if k in ("notbefore", "notafter"):
+                    dates[k] = v.strip()
+                elif k == "subject":
+                    subj = v.strip()
+
+        not_before_str = dates.get("notbefore", "")
+        not_after_str = dates.get("notafter", "")
+        if not not_before_str or not not_after_str:
+            DB_SSL_CHECK_LOGGER.warning("Could not parse dates for %s", label)
+            return 0
+
+        # openssl outputs dates like: "Mar 18 00:00:00 2024 GMT"
+        from datetime import datetime as _dt
+        fmt = "%b %d %H:%M:%S %Y %Z"
+        not_before = _dt.strptime(not_before_str, fmt).replace(tzinfo=timezone.utc)
+        not_after = _dt.strptime(not_after_str, fmt).replace(tzinfo=timezone.utc)
+        now = _dt.now(timezone.utc)
+
+        total_days = (not_after - not_before).days
+        remaining = (not_after - now).days
+        DB_SSL_CHECK_LOGGER.debug(
+            "Cert '%s': subject=%s notBefore=%s notAfter=%s total=%dd remaining=%dd",
+            label, subj, not_before.date(), not_after.date(), total_days, remaining,
+        )
+        short_lived = total_days <= 30
+        warn_days = _DB_SSL_WARN_DAYS_SHORT if short_lived else _DB_SSL_WARN_DAYS_LONG
+        crit_days = _DB_SSL_CRIT_DAYS_SHORT if short_lived else _DB_SSL_CRIT_DAYS_LONG
+
+        if remaining < crit_days:
+            # Log at CRITICAL so it is never filtered regardless of LOG_LEVEL
+            DB_SSL_CHECK_LOGGER.critical(
+                "CRITICAL: %s cert expires in %d day(s) on %s [%s]",
+                label, remaining, not_after.date(), subj,
+            )
+            return 2
+        elif remaining < warn_days:
+            # Log at ERROR (not WARNING) so it survives LOG_LEVEL=ERROR deployments
+            DB_SSL_CHECK_LOGGER.error(
+                "WARNING: %s cert expires in %d day(s) on %s [%s]",
+                label, remaining, not_after.date(), subj,
+            )
+            return 1
+        else:
+            DB_SSL_CHECK_LOGGER.info(
+                "OK: %s cert expires %s (%d days remaining, total lifetime %d days) [%s]",
+                label, not_after.date(), remaining, total_days, subj,
+            )
+            return 0
+
+    except Exception as exc:
+        DB_SSL_CHECK_LOGGER.error("Could not check cert '%s': %s", label, exc)
+        return 0
+
+
+def db_ssl_check_job():
+    """Daily SSL certificate expiry check for the configured DATABASE_URI.
+
+    Scheduled once per day via schedule_every(1).day and also runs once immediately
+    on scheduler startup so operators get an alert on the first boot after a cert
+    problem appears.
+
+    Overview
+    --------
+    1. Skips silently for SQLite (no TLS involved).
+    2. Skips with an advisory log if SSL parameters are absent from DATABASE_URI,
+       reminding the operator to enable SSL.
+    3. Checks the local CA file expiry (if ssl_ca= / sslrootcert= is set) using
+       `openssl x509` — no network required.
+    4. Resolves all A records for the database hostname so each node in a
+       multi-master cluster (e.g. Galera/PXC) is tested individually.
+    5. For each resolved IP, connects via `openssl s_client -starttls postgres|mysql`
+       using -servername for correct SNI, then inspects the leaf certificate.
+
+    Thresholds (based on total certificate lifetime):
+      Total lifetime > 30 days  →  WARNING < 14 days remaining, CRITICAL < 7 days remaining
+      Total lifetime ≤ 30 days  →  WARNING <  3 days remaining, CRITICAL < 1 day  remaining
+    """
+    from subprocess import run as _run, PIPE as _PIPE, DEVNULL as _DEVNULL
+    from urllib.parse import urlparse as _urlparse, parse_qsl as _parse_qsl, unquote as _unquote
+    from shutil import which as _which
+
+    if _DB_SSL_CHECK_RUNNING.is_set():
+        DB_SSL_CHECK_LOGGER.debug("DB SSL check already running — previous run has not finished yet, skipping this trigger.")
+        return
+
+    _DB_SSL_CHECK_RUNNING.set()
+    DB_SSL_CHECK_LOGGER.debug("DB SSL cert check started.")
+    try:
+        assert SCHEDULER is not None
+    except AssertionError:
+        DB_SSL_CHECK_LOGGER.debug("Scheduler not yet initialised — deferring DB SSL cert check.")
+        _DB_SSL_CHECK_RUNNING.clear()
+        return
+
+    try:
+        if not _which("openssl"):
+            DB_SSL_CHECK_LOGGER.warning("openssl not found in PATH — skipping DB SSL cert check.")
+            return
+
+        database_uri = getenv("DATABASE_URI", "sqlite:////var/lib/bunkerweb/db.sqlite3")
+        DB_SSL_CHECK_LOGGER.debug("DATABASE_URI scheme: %s", (database_uri or "").split(":")[0])
+
+        if not database_uri or database_uri.startswith("sqlite"):
+            DB_SSL_CHECK_LOGGER.debug("SQLite in use — no DB SSL certificates to check.")
+            return
+
+        lower_uri = database_uri.lower()
+        ssl_enabled = any(m in lower_uri for m in ("sslmode=", "ssl=true", "ssl_ca=", "sslrootcert="))
+        DB_SSL_CHECK_LOGGER.debug("SSL enabled in DATABASE_URI: %s", ssl_enabled)
+        if not ssl_enabled:
+            DB_SSL_CHECK_LOGGER.info(
+                "SSL is not enabled in DATABASE_URI — skipping DB SSL cert expiry check. "
+                "Consider enabling SSL for encrypted DB connections."
+            )
+            return
+
+        # Extract CA file path and host/port from URI query string
+        ca_path: Optional[str] = None
+        try:
+            _parsed = _urlparse(database_uri)
+            host = _parsed.hostname or ""
+            for k, v in _parse_qsl(_parsed.query, keep_blank_values=True):
+                if k.lower() in ("ssl_ca", "sslrootcert") and v:
+                    ca_path = _unquote(v)
+                    break
+        except Exception:
+            host = ""
+
+        proto = "postgres" if any(x in lower_uri for x in ("postgresql", "psycopg", "postgres")) else "mysql"
+        default_port = 5432 if proto == "postgres" else 3306
+        try:
+            port = _urlparse(database_uri).port or default_port
+        except Exception:
+            port = default_port
+
+        DB_SSL_CHECK_LOGGER.debug("Parsed URI: host=%s port=%d proto=%s ca_path=%s", host, port, proto, ca_path)
+        DB_SSL_CHECK_LOGGER.info(
+            "DB SSL cert check: host=%s port=%d starttls=%s ca=%s",
+            host, port, proto, ca_path or "(system bundle)",
+        )
+
+        worst = 0
+
+        # --- Check local CA file expiry (openssl x509 on the file directly, no network) ---
+        if ca_path:
+            DB_SSL_CHECK_LOGGER.debug("Checking CA file expiry: %s", ca_path)
+            if not Path(ca_path).exists():
+                DB_SSL_CHECK_LOGGER.error("CA file '%s' does not exist.", ca_path)
+            else:
+                ca_pem = Path(ca_path).read_text(errors="replace")
+                DB_SSL_CHECK_LOGGER.debug("CA file read OK (%d bytes), parsing with openssl x509.", len(ca_pem))
+                worst = max(worst, _db_ssl_check_pem(ca_pem, f"CA file ({ca_path})"))
+
+        # --- Resolve all A records so each cluster node is checked individually ---
+        # For multi-master setups (e.g. Galera/PXC) each node can have its own
+        # certificate with a different expiry date. A hostname that round-robins
+        # across three nodes could hide a per-node cert problem if only one IP
+        # were probed.
+        import socket as _socket
+        DB_SSL_CHECK_LOGGER.debug("Resolving all A records for '%s'.", host)
+        try:
+            ip_list: List[str] = sorted({
+                addr[4][0]
+                for addr in _socket.getaddrinfo(host, port, proto=_socket.IPPROTO_TCP)
+            })
+        except Exception as exc:
+            DB_SSL_CHECK_LOGGER.warning("Could not resolve '%s': %s — falling back to hostname.", host, exc)
+            ip_list = [host]
+
+        DB_SSL_CHECK_LOGGER.info("Resolved %s → %s (%d node(s))", host, ", ".join(ip_list), len(ip_list))
+
+        # --- Fetch and check the leaf cert from each resolved IP ---
+        # -connect uses the specific IP so we hit each node individually.
+        # -servername passes the original hostname for SNI so the server
+        # presents the correct certificate (required when multiple services
+        # share one IP or when pg_hba.conf checks the hostname).
+        for ip in ip_list:
+            DB_SSL_CHECK_LOGGER.debug("Probing node %s (%s:%d) via openssl s_client -starttls %s.", ip, host, port, proto)
+            cmd = [
+                "openssl", "s_client",
+                "-connect", f"{ip}:{port}",
+                "-servername", host,   # SNI: tell the server which hostname we expect
+                "-starttls", proto,    # perform protocol-specific SSL upgrade (postgres/mysql)
+                "-verify_quiet",       # suppress per-cert verify output; we only care about the PEM
+                "-no_ign_eof",         # treat our empty stdin as end-of-handshake signal
+            ]
+            if ca_path:
+                # Provide our own CA so openssl can verify the chain; failure is
+                # still logged but does not prevent cert expiry from being checked.
+                cmd += ["-CAfile", ca_path]
+
+            DB_SSL_CHECK_LOGGER.debug("Running: %s", " ".join(cmd))
+            try:
+                result = _run(
+                    cmd,
+                    input=b"",      # empty stdin triggers EOF → openssl closes after handshake
+                    stdout=_PIPE,
+                    stderr=_PIPE,
+                    timeout=15,     # generous timeout for slow cluster nodes
+                )
+            except Exception as exc:
+                DB_SSL_CHECK_LOGGER.error("openssl s_client failed for %s (%s:%d) — %s", ip, host, port, exc)
+                continue
+
+            DB_SSL_CHECK_LOGGER.debug(
+                "openssl s_client for %s exited %d; stdout=%d bytes stderr=%d bytes.",
+                ip, result.returncode,
+                len(result.stdout), len(result.stderr),
+            )
+            if result.returncode != 0:
+                DB_SSL_CHECK_LOGGER.debug("openssl s_client stderr for %s:\n%s", ip, result.stderr.decode(errors="replace").strip())
+
+            output = result.stdout.decode(errors="replace")
+
+            # Extract the first PEM block from the output — that is the leaf
+            # certificate presented by this specific server node.
+            pem: List[str] = []
+            in_cert = False
+            leaf_pem = ""
+            for line in output.splitlines():
+                if line.strip() == "-----BEGIN CERTIFICATE-----":
+                    in_cert = True
+                    pem = [line]
+                elif line.strip() == "-----END CERTIFICATE-----" and in_cert:
+                    pem.append(line)
+                    leaf_pem = "\n".join(pem)
+                    break
+                elif in_cert:
+                    pem.append(line)
+
+            if not leaf_pem:
+                DB_SSL_CHECK_LOGGER.warning(
+                    "No certificate returned by %s (%s:%d) — "
+                    "server may not support SSL or -starttls %s failed.\nstderr: %s",
+                    ip, host, port, proto,
+                    result.stderr.decode(errors="replace").strip()[:300],
+                )
+                continue
+
+            DB_SSL_CHECK_LOGGER.debug("Leaf PEM extracted from %s (%d chars), checking expiry.", ip, len(leaf_pem))
+            worst = max(worst, _db_ssl_check_pem(leaf_pem, f"server {ip}"))
+
+        status_label = {0: "OK", 1: "WARNING", 2: "CRITICAL"}.get(worst, "UNKNOWN")
+        DB_SSL_CHECK_LOGGER.debug("Worst severity across all nodes: %d (%s)", worst, status_label)
+        if worst == 2:
+            DB_SSL_CHECK_LOGGER.critical("DB SSL cert check result: %s", status_label)
+        elif worst == 1:
+            DB_SSL_CHECK_LOGGER.error("DB SSL cert check result: %s", status_label)
+        else:
+            DB_SSL_CHECK_LOGGER.info("DB SSL cert check result: %s", status_label)
+
+    except Exception:
+        DB_SSL_CHECK_LOGGER.error("Unexpected error in DB SSL cert check:\n%s", format_exc())
+    finally:
+        DB_SSL_CHECK_LOGGER.debug("DB SSL cert check finished.")
+        _DB_SSL_CHECK_RUNNING.clear()
+
+
 def healthcheck_job():
     if HEALTHCHECK_EVENT.is_set():
         HEALTHCHECK_LOGGER.warning("Healthcheck job is already running, skipping execution ...")
@@ -1181,6 +1496,9 @@ if __name__ == "__main__":
             if not healthcheck_job_run:
                 LOGGER.debug("Scheduling healthcheck job ...")
                 schedule_every(HEALTHCHECK_INTERVAL).seconds.do(healthcheck_job)
+                LOGGER.debug("Scheduling daily DB SSL certificate check ...")
+                schedule_every(1).day.do(db_ssl_check_job)
+                SCHEDULER_TASKS_EXECUTOR.submit(db_ssl_check_job)  # run once immediately on startup
                 healthcheck_job_run = True
 
             # infinite schedule for the jobs
