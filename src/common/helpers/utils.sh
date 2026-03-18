@@ -191,6 +191,47 @@ function spaces_to_lua() {
 	echo "$result"
 }
 
+# convert size value (bytes or human-readable) to bytes
+# supported units: B, K, KB, KiB, M, MB, MiB, G, GB, GiB, T, TB, TiB
+function parse_size_to_bytes() {
+	local raw_value="$1"
+	local normalized number unit multiplier bytes
+
+	normalized=$(echo "$raw_value" | tr -d '[:space:]')
+	[ -n "$normalized" ] || return 1
+
+	if [[ ! "$normalized" =~ ^([0-9]+([.][0-9]+)?)([A-Za-z]*)$ ]]; then
+		return 1
+	fi
+
+	number="${BASH_REMATCH[1]}"
+	unit=$(echo "${BASH_REMATCH[3]}" | tr '[:upper:]' '[:lower:]')
+
+	case "$unit" in
+		"" | "b") multiplier=1 ;;
+		"k" | "kb" | "ki" | "kib") multiplier=1024 ;;
+		"m" | "mb" | "mi" | "mib") multiplier=$((1024 * 1024)) ;;
+		"g" | "gb" | "gi" | "gib") multiplier=$((1024 * 1024 * 1024)) ;;
+		"t" | "tb" | "ti" | "tib") multiplier=$((1024 * 1024 * 1024 * 1024)) ;;
+		*) return 1 ;;
+	esac
+
+	bytes=$(awk -v value="$number" -v factor="$multiplier" 'BEGIN {
+		result = value * factor
+		if (result <= 0) {
+			print 0
+		} else {
+			printf "%d", result
+		}
+	}')
+
+	if [[ ! "$bytes" =~ ^[0-9]+$ ]] || [ "$bytes" -le 0 ]; then
+		return 1
+	fi
+
+	echo "$bytes"
+}
+
 # check if at least one env var (global or multisite) has a specific value
 function has_value() {
 	nginx_conf_dir=$(get_nginx_conf_dir)

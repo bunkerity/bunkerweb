@@ -952,6 +952,11 @@ utils.is_banned = function(ip, server_name)
 end
 
 utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_data)
+	-- Validate IP address
+	if not ip or (not utils.is_ipv4(ip) and not utils.is_ipv6(ip)) then
+		return false, "invalid IP address"
+	end
+
 	-- Determine ban key based on scope
 	local ban_key = "bans_ip_" .. ip
 	if ban_scope == "service" and service then
@@ -1008,6 +1013,11 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_da
 end
 
 utils.remove_ban = function(ip, service, ban_scope)
+	-- Validate IP address
+	if not ip or (not utils.is_ipv4(ip) and not utils.is_ipv6(ip)) then
+		return false, "invalid IP address"
+	end
+
 	-- Set default scope to global
 	if not ban_scope then
 		ban_scope = "global"
@@ -1046,9 +1056,9 @@ utils.remove_ban = function(ip, service, ban_scope)
 		end
 
 		-- Delete all service-specific bans for this IP from datastore and redis
-		-- This is inefficient but it's how it's done in api.lua
+		local suffix = "_ip_" .. ip
 		for _, k in ipairs(datastore:keys()) do
-			if k:find("^bans_service_.-_ip_" .. ip .. "$") then
+			if k:sub(1, 13) == "bans_service_" and k:sub(-#suffix) == suffix then
 				datastore:delete(k)
 				if use_redis then
 					clusterstore:call("del", k)

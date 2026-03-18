@@ -21,6 +21,16 @@ local logger = clogger:new("API")
 local get_country = utils.get_country
 local get_variable = utils.get_variable
 local is_ip_in_networks = utils.is_ip_in_networks
+local is_ipv4 = utils.is_ipv4
+local is_ipv6 = utils.is_ipv6
+
+local RESERVED_SERVICE_NAMES = {
+	["unknown"] = true,
+	["Web UI"] = true,
+	["bwcli"] = true,
+	["default server"] = true,
+	[""] = true,
+}
 -- local run = shell.run
 local NOTICE = ngx.NOTICE
 local ERR = ngx.ERR
@@ -291,10 +301,33 @@ api.global.POST["^/confs$"] = function(self)
 	end
 	file:flush()
 	file:close()
+	local staging = "/var/tmp/bunkerweb/staging_" .. self.ctx.bw.uri:sub(2)
+	local backup = "/var/tmp/bunkerweb/backup_" .. self.ctx.bw.uri:sub(2)
 	local cmds = {
-		"rm -rf " .. destination .. "/*",
-		"tar xzf " .. tmp .. " -C " .. destination,
-		-- Remove the temporary archive once extracted
+		-- Extract into a staging area first (validates the archive before touching destination)
+		"rm -rf " .. staging,
+		"mkdir -p " .. staging,
+		"tar xzf " .. tmp .. " -C " .. staging,
+		-- Create backup of current destination contents
+		"rm -rf " .. backup,
+		"mkdir -p " .. backup,
+		"cp -R " .. destination .. "/. " .. backup .. "/ 2>/dev/null; true",
+		-- Replace destination contents; if cp fails, restore from backup; only cleanup backup on success
+		"rm -rf "
+			.. destination
+			.. "/* && cp -R "
+			.. staging
+			.. "/. "
+			.. destination
+			.. "/ && rm -rf "
+			.. backup
+			.. " || { cp -R "
+			.. backup
+			.. "/. "
+			.. destination
+			.. "/ 2>/dev/null; false; }",
+		-- Cleanup temporaries (backup already removed on success above)
+		"rm -rf " .. staging,
 		"rm -f " .. tmp,
 	}
 	for _, cmd in ipairs(cmds) do
@@ -335,6 +368,11 @@ api.global.POST["^/unban$"] = function(self)
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
 
+	-- Validate IP address
+	if not ip["ip"] or (not is_ipv4(ip["ip"]) and not is_ipv6(ip["ip"])) then
+		return self:response(HTTP_BAD_REQUEST, "error", "invalid IP address")
+	end
+
 	local ban_scope = ip["ban_scope"] or "global"
 	local service = ip["service"]
 	local response_msg = "ip " .. ip["ip"] .. " unbanned"
@@ -347,7 +385,7 @@ api.global.POST["^/unban$"] = function(self)
 
 	-- For service-specific unbans, validate the service
 	if ban_scope == "service" then
-		if not service or service == "unknown" or service == "Web UI" or service == "bwcli" or service == "" then
+		if not service or RESERVED_SERVICE_NAMES[service] then
 			logger:log(ERR, "Invalid service name for service-specific unban, defaulting to global unban")
 			ban_scope = "global"
 			service = nil
@@ -407,6 +445,16 @@ api.global.POST["^/ban$"] = function(self)
 		ban.ban_scope = ip["ban_scope"]
 	end
 
+	-- Validate IP address
+	if not ban.ip or (not is_ipv4(ban.ip) and not is_ipv6(ban.ip)) then
+		return self:response(HTTP_BAD_REQUEST, "error", "invalid IP address")
+	end
+
+	-- Validate expiration
+	if ban.exp and (type(ban.exp) ~= "number" or ban.exp < 0) then
+		return self:response(HTTP_BAD_REQUEST, "error", "exp must be a non-negative number")
+	end
+
 	-- Validate ban scope
 	if ban.ban_scope ~= "global" and ban.ban_scope ~= "service" then
 		logger:log(ERR, "Invalid ban scope: " .. ban.ban_scope .. ", defaulting to global")
@@ -415,7 +463,7 @@ api.global.POST["^/ban$"] = function(self)
 
 	-- Validate service name for service-specific bans
 	if ban.ban_scope == "service" then
-		if ban.service == "unknown" or ban.service == "Web UI" or ban.service == "bwcli" or ban.service == "" then
+		if RESERVED_SERVICE_NAMES[ban.service] then
 			logger:log(ERR, "Invalid service name: " .. ban.service .. ", defaulting to global ban")
 			ban.ban_scope = "global"
 			ban.service = "unknown"

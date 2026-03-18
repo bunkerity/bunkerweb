@@ -118,9 +118,9 @@
                    data-bs-toggle="tooltip"
                    data-bs-placement="bottom"
                    data-bs-original-title="..."
-                   data-i18n="{% if bw_version != latest_version %}tooltip.new_version_available{% else %}tooltip.latest_version_installed{% endif %}">
+                   data-i18n="{% if new_version_available %}tooltip.new_version_available{% else %}tooltip.latest_version_installed{% endif %}">
                     <span data-i18n="navbar.version">Version</span>: {{ bw_version }}
-                    <span class="badge-dot position-absolute top-0 start-100 translate-middle bg-{% if bw_version != latest_version %}danger{% else %}success{% endif %} border border-light rounded-circle">
+                    <span class="badge-dot position-absolute top-0 start-100 translate-middle bg-{% if new_version_available %}danger{% else %}success{% endif %} border border-light rounded-circle">
                         <span class="visually-hidden" data-i18n="badge.new_version">New version</span>
                     </span>
                 </a>

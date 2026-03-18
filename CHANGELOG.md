@@ -2,11 +2,53 @@
 
 ## v1.6.9 - 2026/03/??
 
+- [SECURITY] Implement `SafeFileSystemCache` for Web UI session storage with token regeneration on privilege changes, preventing session fixation attacks.
+- [SECURITY] Sanitize uploaded filenames in the Web UI to strip path separators, null bytes, and control characters, preventing path traversal attacks.
+- [SECURITY] Add tar extraction path filtering in `Let's Encrypt` certificate handling to only allow expected directories, preventing path traversal. Add 300s timeout to certificate account registration. Use explicit whitelist for API environment variables.
+- [SECURITY] Validate IP addresses and service names across all ban management endpoints (API, Lua, UI, CLI) to prevent invalid data injection. Fix Redis key parsing for service names containing underscores.
+- [BUGFIX] Close local database connections before forking worker processes to prevent file descriptor leaks and connection pool corruption.
+- [BUGFIX] Fix race condition in instance update logic by using direct SQL `UPDATE` statements instead of ORM session operations.
+- [BUGFIX] Ensure thread safety when managing the session factory by moving instance update operations outside the synchronization lock.
+- [BUGFIX] Handle empty or unreadable certificates gracefully in Let's Encrypt `retrieve_certificates` and `retrieve_certificates_info` functions to prevent crashes during certificate enumeration.
+- [BUGFIX] Enhance error handling for missing server name in SSL certificate functions to avoid crashes when the server name is not yet configured.
+- [BUGFIX] Improve backup cleanup logic when replacing destination files to correctly remove leftover backups after a successful replacement.
+- [BUGFIX] Mark the Flask session as modified when adding flash messages to ensure session data is correctly persisted across redirects.
+- [BUGFIX] Fix Domeneshop DNS provider in the `Let's Encrypt` plugin to use the correct credential keys and ensure proper certificate generation.
+- [BUGFIX] Handle file-not-found and OS errors gracefully when archiving plugin UI pages in the database, and skip storing content when tar archiving fails to prevent corrupt data.
+- [BUGFIX] Return false instead of a potentially incorrect result when version comparison encounters invalid version strings, preventing spurious update notifications.
+- [BUGFIX] Validate gRPC host setting to only accept empty values or properly prefixed `grpc://` / `grpcs://` URIs.
+- [BUGFIX] Properly close the database connection when the scheduler stops, and fix configuration generation flag to only reset after a successful reload.
+- [BUGFIX] Add backup and rollback mechanism when deploying new configurations to BunkerWeb instances, preventing data loss if the file copy operation fails.
+- [BUGFIX] Generate and deploy initial configuration on first start before running plugin jobs, ensuring API endpoints are available when jobs execute.
+- [BUGFIX] Skip Content-Security-Policy header override in the antibot plugin when nonces are not available (e.g., HEAD requests), preventing malformed CSP headers.
+- [UI] Add confetti animation and visual unlock effect when activating a PRO License Key in the Web UI.
+- [UI] Fix service cloning to correctly strip the source service prefix from configuration keys, preventing settings from being ignored during import.
+- [UI] Rate-limit worker restarts to prevent excessive restarts when multiple plugin reload triggers fire in quick succession.
+- [UI] Fix crashes when CSRF validation or request teardown occurs outside a valid user context, improving stability during edge-case scenarios.
+- [API] Add lifespan handler to properly close database connections on shutdown, preventing connection leaks.
+- [DOCS] Update documentation and default configurations to remove the deprecated nightly CRS version and ensure full compatibility with CRS v4.
+- [DOCS] Update Domeneshop DNS provider credential key names in documentation to match the corrected `client_token`/`client_secret` keys.
+- [DOCS] Add documentation for the Cache PRO plugin covering response caching configuration and settings.
+- [DEPS] Update coreruleset-v4 version to v4.24.1
+
+## v1.6.9~rc4 - 2026/03/10
+
+- [BUGFIX] Ensure script_nonce is available for security headers to prevent XSS attacks
+
+## v1.6.9~rc3 - 2026/03/06
+
 - [BUGFIX] Fix issues with the new `multiselect` logic where a custom separator can be used, but the default one (space) was still used if the separator was empty, which caused issues with settings that had an empty string as a value.
+- [BUGFIX] Fix issue with the failover not sending the failover configuration if the reload failed, which caused the failover configuration to not be applied until the next successful reload.
+- [FEATURE] Add field value redaction in Let's Encrypt plugin and update ZeroSSL API key handling to avoid exposing sensitive information in logs and process arguments. (Except in TRACE level logs for debugging purposes)
 - [UI] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.
 - [UI] Tweak plugins headers style to avoid the text moving the buttons out of the page when the header is too long.
+- [UI] Add `MAX_CONTENT_LENGTH` setting to configure the maximum upload size (defaults to 50 MB).
+- [UI/API] Add `MAX_REQUESTS` setting to configure Gunicorn max requests before worker restart (defaults to 1000), with `UI_MAX_REQUESTS` / `API_MAX_REQUESTS` as optional overrides.
 - [API] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.
-- [DEPS] Updated libmaxminddb version to v1.13.2
+- [MISC] Enhance version comparison logic in update check
+- [MISC] Enhance database connection management with configurable pool reset and session handling
+- [MISC] Enhance database configuration options with `DATABASE_POOL_SIZE`, `DATABASE_POOL_MAX_OVERFLOW`, `DATABASE_POOL_TIMEOUT`, `DATABASE_POOL_RECYCLE`, `DATABASE_POOL_PRE_PING`, `DATABASE_POOL_RESET_ON_RETURN`, `DATABASE_RETRY_TIMEOUT`, `DATABASE_REQUEST_RETRY_ATTEMPTS` and `DATABASE_REQUEST_RETRY_DELAY` settings for improved performance, reliability and resilience of database interactions.
+- [DEPS] Updated libmaxminddb version to v1.13.3
 - [DEPS] Updated luajit2 version to v2.1-20260227
 - [DEPS] Update coreruleset-v4 version to v4.24.0
 

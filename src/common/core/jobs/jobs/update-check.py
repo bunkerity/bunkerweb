@@ -16,7 +16,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from requests import get
 from requests.exceptions import ConnectionError, RequestException
 
-from common_utils import get_version  # type: ignore
+from common_utils import get_version, is_newer_version_available  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
@@ -91,7 +91,7 @@ try:
     current_version = get_version()
     latest_version = latest_release["tag_name"].removeprefix("v")
 
-    if current_version != latest_version:
+    if is_newer_version_available(current_version, latest_version):
         # Version details
         latest_version_text = f"\033[1;92m{latest_version}\033[0m"
         current_version_text = f"\033[1;93m{current_version}\033[0m"
@@ -131,7 +131,7 @@ try:
             )
         )
     else:
-        LOGGER.info(f"Latest version is already installed: {current_version}")
+        LOGGER.info(f"No newer stable version available (current: {current_version}, latest stable: {latest_version})")
 except BaseException as e:
     status = 2
     LOGGER.debug(format_exc())

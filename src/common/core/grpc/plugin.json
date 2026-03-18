@@ -20,7 +20,7 @@
       "help": "Full upstream value used by grpc_pass (for example grpc://app:50051 or grpcs://app:443).",
       "id": "grpc-host",
       "label": "gRPC host",
-      "regex": "^.*$",
+      "regex": "^(grpcs?://.+)?$",
       "type": "text",
       "multiple": "grpc"
     },

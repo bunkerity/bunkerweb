@@ -41,7 +41,7 @@ Choisissez la saveur adaptée à votre environnement.
     services:
       bunkerweb:
         # Nom utilisé par le scheduler pour identifier l’instance
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.9
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -54,7 +54,7 @@ Choisissez la saveur adaptée à votre environnement.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.9
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de mettre le bon nom d’instance
@@ -76,7 +76,7 @@ Choisissez la saveur adaptée à votre environnement.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.9-rc2
+        image: bunkerity/bunkerweb-api:1.6.9
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -143,7 +143,7 @@ Choisissez la saveur adaptée à votre environnement.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.9-rc2
+      bunkerity/bunkerweb-all-in-one:1.6.9
     ```
 
 === "Linux"
@@ -252,9 +252,9 @@ Plus de détails et compromis : [https://limits.readthedocs.io/en/stable/strateg
 
 ### Runtime et fuseau horaire
 
-| Setting | Description                                                                                                      | Valeurs acceptées                                     | Défaut                                          |
-| ------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------- |
-| `TZ`    | Fuseau horaire pour les logs API et les claims basés sur le temps (ex. TTL Biscuit et horodatages de logs)       | Nom de la base TZ (ex. `UTC`, `Europe/Paris`)         | unset (défaut conteneur, généralement UTC)      |
+| Setting | Description                                                                                                | Valeurs acceptées                             | Défaut                                     |
+| ------- | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------ |
+| `TZ`    | Fuseau horaire pour les logs API et les claims basés sur le temps (ex. TTL Biscuit et horodatages de logs) | Nom de la base TZ (ex. `UTC`, `Europe/Paris`) | unset (défaut conteneur, généralement UTC) |
 
 Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`. Activez `API_SSL_ENABLED=yes` avec `API_SSL_CERTFILE` et `API_SSL_KEYFILE` pour terminer TLS dans l’API. En reverse proxy, fixez `API_FORWARDED_ALLOW_IPS` aux IPs du proxy pour que Gunicorn fasse confiance aux `X-Forwarded-*`.
 
@@ -262,83 +262,84 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
 
 #### Surface & docs
 
-| Setting                                            | Description                                                                                  | Valeurs acceptées           | Défaut                             |
-| -------------------------------------------------- | -------------------------------------------------------------------------------------------- | --------------------------- | ---------------------------------- |
-| `API_DOCS_URL`, `API_REDOC_URL`, `API_OPENAPI_URL` | Chemins Swagger, ReDoc et schéma OpenAPI ; mettre `off/disabled/none/false/0` pour désactiver | Chemin ou `off`             | `/docs`, `/redoc`, `/openapi.json` |
-| `API_ROOT_PATH`                                    | Préfixe de montage en reverse proxy                                                          | Chemin (ex. `/api`)         | vide                               |
-| `API_FORWARDED_ALLOW_IPS`                          | IPs proxy de confiance pour `X-Forwarded-*`                                                  | IPs/CIDR séparées par virgule | `127.0.0.1,::1` (défaut paquet)        |
-| `API_PROXY_ALLOW_IPS`                              | IPs proxy de confiance pour le protocole PROXY                                               | IPs/CIDR séparées par virgule | `FORWARDED_ALLOW_IPS`              |
+| Setting                                            | Description                                                                                   | Valeurs acceptées             | Défaut                             |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------- | ----------------------------- | ---------------------------------- |
+| `API_DOCS_URL`, `API_REDOC_URL`, `API_OPENAPI_URL` | Chemins Swagger, ReDoc et schéma OpenAPI ; mettre `off/disabled/none/false/0` pour désactiver | Chemin ou `off`               | `/docs`, `/redoc`, `/openapi.json` |
+| `API_ROOT_PATH`                                    | Préfixe de montage en reverse proxy                                                           | Chemin (ex. `/api`)           | vide                               |
+| `API_FORWARDED_ALLOW_IPS`                          | IPs proxy de confiance pour `X-Forwarded-*`                                                   | IPs/CIDR séparées par virgule | `127.0.0.1,::1` (défaut paquet)    |
+| `API_PROXY_ALLOW_IPS`                              | IPs proxy de confiance pour le protocole PROXY                                                | IPs/CIDR séparées par virgule | `FORWARDED_ALLOW_IPS`              |
 
 #### Auth, ACL, Biscuit
 
-| Setting                                     | Description                                  | Valeurs acceptées                                                  | Défaut                  |
-| ------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------ | ----------------------- |
-| `API_USERNAME`, `API_PASSWORD`              | Utilisateur admin initial                    | Chaînes ; mot de passe fort requis hors debug                      | unset                   |
-| `OVERRIDE_API_CREDS`                        | Réappliquer les creds admin au démarrage     | `yes/no/on/off/true/false/0/1`                                      | `no`                    |
-| `API_TOKEN`                                 | Bearer d’override admin                      | Chaîne opaque                                                     | unset                   |
-| `API_ACL_BOOTSTRAP_FILE`                    | Chemin JSON pour utilisateurs/permissions    | Chemin ou `/var/lib/bunkerweb/api_acl_bootstrap.json` monté         | unset                   |
-| `BISCUIT_PRIVATE_KEY`, `BISCUIT_PUBLIC_KEY` | Clés Biscuit (hex) si pas de fichiers        | Chaînes hex                                                       | auto-générées/persistées |
-| `API_BISCUIT_TTL_SECONDS`                   | Durée de vie du token ; `0/off` désactive    | Secondes entières ou `off/disabled`                                | `3600`                  |
-| `CHECK_PRIVATE_IP`                          | Lier le Biscuit à l’IP cliente (hors privées) | `yes/no/on/off/true/false/0/1`                                     | `yes`                   |
+| Setting                                     | Description                                   | Valeurs acceptées                                           | Défaut                   |
+| ------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------- | ------------------------ |
+| `API_USERNAME`, `API_PASSWORD`              | Utilisateur admin initial                     | Chaînes ; mot de passe fort requis hors debug               | unset                    |
+| `OVERRIDE_API_CREDS`                        | Réappliquer les creds admin au démarrage      | `yes/no/on/off/true/false/0/1`                              | `no`                     |
+| `API_TOKEN`                                 | Bearer d’override admin                       | Chaîne opaque                                               | unset                    |
+| `API_ACL_BOOTSTRAP_FILE`                    | Chemin JSON pour utilisateurs/permissions     | Chemin ou `/var/lib/bunkerweb/api_acl_bootstrap.json` monté | unset                    |
+| `BISCUIT_PRIVATE_KEY`, `BISCUIT_PUBLIC_KEY` | Clés Biscuit (hex) si pas de fichiers         | Chaînes hex                                                 | auto-générées/persistées |
+| `API_BISCUIT_TTL_SECONDS`                   | Durée de vie du token ; `0/off` désactive     | Secondes entières ou `off/disabled`                         | `3600`                   |
+| `CHECK_PRIVATE_IP`                          | Lier le Biscuit à l’IP cliente (hors privées) | `yes/no/on/off/true/false/0/1`                              | `yes`                    |
 
 #### Liste blanche
 
-| Setting                 | Description                               | Valeurs acceptées                | Défaut                 |
-| ----------------------- | ----------------------------------------- | -------------------------------- | ---------------------- |
-| `API_WHITELIST_ENABLED` | Activer/désactiver le middleware d’IP     | `yes/no/on/off/true/false/0/1`   | `yes`                  |
-| `API_WHITELIST_IPS`     | IPs/CIDR séparées par espace/virgule      | IPs/CIDR                         | Plages RFC1918 en code |
+| Setting                 | Description                           | Valeurs acceptées              | Défaut                 |
+| ----------------------- | ------------------------------------- | ------------------------------ | ---------------------- |
+| `API_WHITELIST_ENABLED` | Activer/désactiver le middleware d’IP | `yes/no/on/off/true/false/0/1` | `yes`                  |
+| `API_WHITELIST_IPS`     | IPs/CIDR séparées par espace/virgule  | IPs/CIDR                       | Plages RFC1918 en code |
 
 #### Limitation
 
-| Setting                          | Description                                   | Valeurs acceptées                                           | Défaut        |
-| -------------------------------- | --------------------------------------------- | ----------------------------------------------------------- | ------------- |
-| `API_RATE_LIMIT`                 | Limite globale (chaîne style NGINX)           | `3r/s`, `100/minute`, `500 per 30 minutes`                  | `100r/m`      |
-| `API_RATE_LIMIT_AUTH`            | Limite de `/auth` (ou `off`)                  | idem ou `off/disabled/none/false/0`                         | `10r/m`       |
-| `API_RATE_LIMIT_ENABLED`         | Activer le limiteur                           | `yes/no/on/off/true/false/0/1`                              | `yes`         |
-| `API_RATE_LIMIT_HEADERS_ENABLED` | Injecter les headers de limite                | idem                                                        | `yes`         |
-| `API_RATE_LIMIT_RULES`           | Règles par chemin (CSV/JSON/YAML ou fichier)  | Chaîne ou chemin                                            | unset         |
-| `API_RATE_LIMIT_STRATEGY`        | Algorithme                                    | `fixed-window`, `moving-window`, `sliding-window-counter`   | `fixed-window`|
-| `API_RATE_LIMIT_KEY`             | Sélectionneur de clé                          | `ip`, `header:<Name>`                                       | `ip`          |
-| `API_RATE_LIMIT_EXEMPT_IPS`      | Exempter ces IPs/CIDR des limites             | Séparées par espace/virgule                                 | unset         |
-| `API_RATE_LIMIT_STORAGE_OPTIONS` | JSON fusionné dans la config de stockage      | Chaîne JSON                                                 | unset         |
+| Setting                          | Description                                  | Valeurs acceptées                                         | Défaut         |
+| -------------------------------- | -------------------------------------------- | --------------------------------------------------------- | -------------- |
+| `API_RATE_LIMIT`                 | Limite globale (chaîne style NGINX)          | `3r/s`, `100/minute`, `500 per 30 minutes`                | `100r/m`       |
+| `API_RATE_LIMIT_AUTH`            | Limite de `/auth` (ou `off`)                 | idem ou `off/disabled/none/false/0`                       | `10r/m`        |
+| `API_RATE_LIMIT_ENABLED`         | Activer le limiteur                          | `yes/no/on/off/true/false/0/1`                            | `yes`          |
+| `API_RATE_LIMIT_HEADERS_ENABLED` | Injecter les headers de limite               | idem                                                      | `yes`          |
+| `API_RATE_LIMIT_RULES`           | Règles par chemin (CSV/JSON/YAML ou fichier) | Chaîne ou chemin                                          | unset          |
+| `API_RATE_LIMIT_STRATEGY`        | Algorithme                                   | `fixed-window`, `moving-window`, `sliding-window-counter` | `fixed-window` |
+| `API_RATE_LIMIT_KEY`             | Sélectionneur de clé                         | `ip`, `header:<Name>`                                     | `ip`           |
+| `API_RATE_LIMIT_EXEMPT_IPS`      | Exempter ces IPs/CIDR des limites            | Séparées par espace/virgule                               | unset          |
+| `API_RATE_LIMIT_STORAGE_OPTIONS` | JSON fusionné dans la config de stockage     | Chaîne JSON                                               | unset          |
 
 #### Redis/Valkey (pour les limites)
 
-| Setting                                              | Description               | Valeurs acceptées                | Défaut             |
-| ---------------------------------------------------- | ------------------------ | -------------------------------- | ------------------ |
-| `USE_REDIS`                                          | Activer le backend Redis | `yes/no/on/off/true/false/0/1`   | `no`               |
-| `REDIS_HOST`, `REDIS_PORT`, `REDIS_DATABASE`         | Détails de connexion     | Host, int, int                   | unset, `6379`, `0` |
-| `REDIS_USERNAME`, `REDIS_PASSWORD`                   | Auth                     | Chaînes                          | unset              |
-| `REDIS_SSL`, `REDIS_SSL_VERIFY`                      | TLS et vérification      | `yes/no/on/off/true/false/0/1`   | `no`, `yes`        |
-| `REDIS_TIMEOUT`                                      | Timeout (ms)             | Entier                           | `1000`             |
-| `REDIS_KEEPALIVE_POOL`                               | Keepalive du pool        | Entier                           | `10`               |
-| `REDIS_SENTINEL_HOSTS`                               | Hôtes Sentinel           | `host:port` séparés par espace   | unset              |
-| `REDIS_SENTINEL_MASTER`                              | Nom du master Sentinel   | Chaîne                           | unset              |
-| `REDIS_SENTINEL_USERNAME`, `REDIS_SENTINEL_PASSWORD` | Auth Sentinel            | Chaînes                          | unset              |
+| Setting                                              | Description              | Valeurs acceptées              | Défaut             |
+| ---------------------------------------------------- | ------------------------ | ------------------------------ | ------------------ |
+| `USE_REDIS`                                          | Activer le backend Redis | `yes/no/on/off/true/false/0/1` | `no`               |
+| `REDIS_HOST`, `REDIS_PORT`, `REDIS_DATABASE`         | Détails de connexion     | Host, int, int                 | unset, `6379`, `0` |
+| `REDIS_USERNAME`, `REDIS_PASSWORD`                   | Auth                     | Chaînes                        | unset              |
+| `REDIS_SSL`, `REDIS_SSL_VERIFY`                      | TLS et vérification      | `yes/no/on/off/true/false/0/1` | `no`, `yes`        |
+| `REDIS_TIMEOUT`                                      | Timeout (ms)             | Entier                         | `1000`             |
+| `REDIS_KEEPALIVE_POOL`                               | Keepalive du pool        | Entier                         | `10`               |
+| `REDIS_SENTINEL_HOSTS`                               | Hôtes Sentinel           | `host:port` séparés par espace | unset              |
+| `REDIS_SENTINEL_MASTER`                              | Nom du master Sentinel   | Chaîne                         | unset              |
+| `REDIS_SENTINEL_USERNAME`, `REDIS_SENTINEL_PASSWORD` | Auth Sentinel            | Chaînes                        | unset              |
 
 !!! info "Redis fourni par la BD"
     Si la configuration BunkerWeb en base contient Redis/Valkey, l’API la réutilise automatiquement pour le rate limiting même sans `USE_REDIS` dans l’environnement. Surcharger via variables d’environnement si nécessaire.
 
 #### Listener & TLS
 
-| Setting                               | Description                      | Valeurs acceptées                | Défaut                               |
-| ------------------------------------- | -------------------------------- | -------------------------------- | ------------------------------------ |
-| `API_LISTEN_ADDR`, `API_LISTEN_PORT`  | Adresse/port de bind pour Gunicorn | IP ou hostname, int             | `127.0.0.1`, `8888` (script paquet)  |
-| `API_SSL_ENABLED`                     | Activer TLS dans l’API           | `yes/no/on/off/true/false/0/1`   | `no`                                 |
-| `API_SSL_CERTFILE`, `API_SSL_KEYFILE` | Certificat et clé PEM            | Chemins de fichier               | unset                                |
-| `API_SSL_CA_CERTS`                    | CA/chaîne optionnelle            | Chemin de fichier                | unset                                |
+| Setting                               | Description                        | Valeurs acceptées              | Défaut                              |
+| ------------------------------------- | ---------------------------------- | ------------------------------ | ----------------------------------- |
+| `API_LISTEN_ADDR`, `API_LISTEN_PORT`  | Adresse/port de bind pour Gunicorn | IP ou hostname, int            | `127.0.0.1`, `8888` (script paquet) |
+| `API_SSL_ENABLED`                     | Activer TLS dans l’API             | `yes/no/on/off/true/false/0/1` | `no`                                |
+| `API_SSL_CERTFILE`, `API_SSL_KEYFILE` | Certificat et clé PEM              | Chemins de fichier             | unset                               |
+| `API_SSL_CA_CERTS`                    | CA/chaîne optionnelle              | Chemin de fichier              | unset                               |
 
 #### Logging & runtime (défauts paquet)
 
-| Setting                         | Description                                                                       | Valeurs acceptées                                 | Défaut                                                             |
-| ------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------ |
-| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Niveau de base / override                                                          | `debug`, `info`, `warning`, `error`, `critical`   | `info`                                                             |
-| `LOG_TYPES`                     | Destinations                                                                      | `stderr`/`file`/`syslog` séparés par espaces       | `stderr`                                                           |
-| `LOG_FILE_PATH`                 | Chemin du log (utilisé si `LOG_TYPES` contient `file` ou `CAPTURE_OUTPUT=yes`)     | Chemin de fichier                                 | `/var/log/bunkerweb/api.log` si file/capture, sinon unset          |
-| `LOG_SYSLOG_ADDRESS`            | Cible syslog (`udp://host:514`, `tcp://host:514`, socket)                         | Host:port, host préfixé protocole ou socket       | unset                                                              |
-| `LOG_SYSLOG_TAG`                | Tag syslog                                                                        | Chaîne                                           | `bw-api`                                                           |
-| `MAX_WORKERS`, `MAX_THREADS`    | Workers/threads Gunicorn                                                          | Entier ou unset pour auto                        | unset                                                              |
-| `CAPTURE_OUTPUT`                | Rediriger stdout/stderr Gunicorn vers les handlers configurés                     | `yes` ou `no`                                    | `no`                                                               |
+| Setting                         | Description                                                                    | Valeurs acceptées                               | Défaut                                                    |
+| ------------------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------- | --------------------------------------------------------- |
+| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Niveau de base / override                                                      | `debug`, `info`, `warning`, `error`, `critical` | `info`                                                    |
+| `LOG_TYPES`                     | Destinations                                                                   | `stderr`/`file`/`syslog` séparés par espaces    | `stderr`                                                  |
+| `LOG_FILE_PATH`                 | Chemin du log (utilisé si `LOG_TYPES` contient `file` ou `CAPTURE_OUTPUT=yes`) | Chemin de fichier                               | `/var/log/bunkerweb/api.log` si file/capture, sinon unset |
+| `LOG_SYSLOG_ADDRESS`            | Cible syslog (`udp://host:514`, `tcp://host:514`, socket)                      | Host:port, host préfixé protocole ou socket     | unset                                                     |
+| `LOG_SYSLOG_TAG`                | Tag syslog                                                                     | Chaîne                                          | `bw-api`                                                  |
+| `MAX_WORKERS`, `MAX_THREADS`    | Workers/threads Gunicorn                                                       | Entier ou unset pour auto                       | unset                                                     |
+| `MAX_REQUESTS`                  | Requêtes avant recyclage du worker Gunicorn (évite la fuite mémoire)           | Entier                                          | `1000`                                                    |
+| `CAPTURE_OUTPUT`                | Rediriger stdout/stderr Gunicorn vers les handlers configurés                  | `yes` ou `no`                                   | `no`                                                      |
 
 ## Surface API (carte des capacités)
 

@@ -179,11 +179,16 @@ helpers.order_plugins = function(plugins, variables)
 				end
 			end
 
+			local remaining = {}
 			for id, plugin in pairs(plugins_phases) do
 				if plugin[phase] and not seen[id] then
-					table.insert(build_orders[phase], id)
+					table.insert(remaining, id)
 					plugin[phase] = nil
 				end
+			end
+			table.sort(remaining)
+			for _, id in ipairs(remaining) do
+				table.insert(build_orders[phase], id)
 			end
 		end
 		return build_orders, missing
@@ -313,8 +318,8 @@ helpers.fill_ctx = function(no_ref)
 				data.ip_is_global = ip_global
 			end
 			-- IP data : v4 / v6
-			data.ip_is_ipv4 = is_ipv4(data.ip)
-			data.ip_is_ipv6 = is_ipv6(data.ip)
+			data.ip_is_ipv4 = is_ipv4(data.remote_addr)
+			data.ip_is_ipv6 = is_ipv6(data.remote_addr)
 		end
 		-- Fill ctx
 		ctx.bw = data

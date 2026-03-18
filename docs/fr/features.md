@@ -1543,7 +1543,7 @@ Les sections suivantes détaillent chacune de ces étapes.
     services:
       bunkerweb:
         # C'est le nom qui sera utilisé pour identifier l'instance dans le planificateur
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.9
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1560,7 +1560,7 @@ Les sections suivantes détaillent chacune de ces étapes.
             syslog-address: "udp://10.20.30.254:514" # L'adresse IP du service syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.9
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom correct de l'instance
@@ -1912,47 +1912,56 @@ Comment ça marche :
 
 Prise en charge STREAM :white_check_mark:
 
-Le plugin Base de données fournit une intégration robuste pour BunkerWeb en permettant le stockage centralisé et la gestion des données de configuration, des journaux et d’autres informations essentielles.
+Le plugin Base de données fournit une intégration robuste pour BunkerWeb en permettant le stockage centralisé et la gestion des données de configuration, des journaux et d'autres informations essentielles.
 
-Ce composant cœur prend en charge plusieurs moteurs : SQLite, PostgreSQL, MySQL/MariaDB et Oracle, afin de choisir la solution la mieux adaptée à votre environnement et à vos besoins.
+Ce composant cœur prend en charge plusieurs moteurs : SQLite, PostgreSQL, MySQL/MariaDB et Oracle, afin de choisir la solution la mieux adaptée à votre environnement et à vos besoins.
 
-Comment ça marche :
+Comment ça marche :
 
 1. BunkerWeb se connecte à la base configurée via une URI au format SQLAlchemy.
-2. Les données de configuration critiques, les informations d’exécution et les journaux des jobs sont stockés de manière sécurisée en base.
+2. Les données de configuration critiques, les informations d'exécution et les journaux des jobs sont stockés de manière sécurisée en base.
 3. Des tâches de maintenance automatiques optimisent la base en gérant la croissance et en purgeant les enregistrements excédentaires.
 4. Pour la haute disponibilité, vous pouvez configurer une URI en lecture seule servant de bascule et/ou pour délester les lectures.
 5. Les opérations base de données sont journalisées selon le niveau de log spécifié, offrant la visibilité adaptée.
 
-### Comment l’utiliser
+### Comment l'utiliser
 
-Étapes pour configurer la base de données :
+Étapes pour configurer la base de données :
 
-1. Choisir un moteur : SQLite (par défaut), PostgreSQL, MySQL/MariaDB ou Oracle.
-2. Configurer l’URI : renseignez `DATABASE_URI` (format SQLAlchemy) pour la base principale.
-3. Optionnel : `DATABASE_URI_READONLY` pour les opérations en lecture seule ou en secours.
+1. Choisir un moteur : SQLite (par défaut), PostgreSQL, MySQL/MariaDB ou Oracle.
+2. Configurer l'URI : renseignez `DATABASE_URI` (format SQLAlchemy) pour la base principale.
+3. Optionnel : `DATABASE_URI_READONLY` pour les opérations en lecture seule ou en secours.
 
 ### Paramètres
 
-| Paramètre                       | Défaut                                    | Contexte | Multiple | Description                                                                    |
-| ------------------------------- | ----------------------------------------- | -------- | -------- | ------------------------------------------------------------------------------ |
-| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global   | non      | URI principale de connexion (format SQLAlchemy).                               |
-| `DATABASE_URI_READONLY`         |                                           | global   | non      | URI optionnelle en lecture seule (offload/HA).                                 |
-| `DATABASE_LOG_LEVEL`            | `warning`                                 | global   | non      | Niveau de verbosité des logs DB : `debug`, `info`, `warn`, `warning`, `error`. |
-| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global   | non      | Nombre max d’entrées de runs de jobs conservées avant purge automatique.       |
-| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global   | non      | Durée max de conservation des sessions UI (en jours) avant purge automatique.  |
+| Paramètre                         | Défaut                                    | Contexte | Multiple | Description                                                                                                                                                                                            |
+| --------------------------------- | ----------------------------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `DATABASE_URI`                    | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global   | non      | URI principale de connexion (format SQLAlchemy).                                                                                                                                                       |
+| `DATABASE_URI_READONLY`           |                                           | global   | non      | URI optionnelle en lecture seule (offload/HA).                                                                                                                                                         |
+| `DATABASE_LOG_LEVEL`              | `warning`                                 | global   | non      | Niveau de verbosité des logs DB : `debug`, `info`, `warn`, `warning`, `error`.                                                                                                                         |
+| `DATABASE_MAX_JOBS_RUNS`          | `10000`                                   | global   | non      | Nombre max d'entrées de runs de jobs conservées avant purge automatique.                                                                                                                               |
+| `DATABASE_MAX_SESSION_AGE_DAYS`   | `14`                                      | global   | non      | Durée max de conservation des sessions UI (en jours) avant purge automatique.                                                                                                                          |
+| `DATABASE_POOL_SIZE`              | `40`                                      | global   | non      | **Taille du pool :** Nombre de connexions maintenues dans le pool de connexions.                                                                                                                       |
+| `DATABASE_POOL_MAX_OVERFLOW`      | `20`                                      | global   | non      | **Dépassement max du pool :** Nombre max de connexions supplémentaires au-delà de la taille du pool. `-1` pour illimité.                                                                               |
+| `DATABASE_POOL_TIMEOUT`           | `5`                                       | global   | non      | **Délai d'attente du pool :** Nombre de secondes d'attente avant d'abandonner l'obtention d'une connexion du pool.                                                                                     |
+| `DATABASE_POOL_RECYCLE`           | `1800`                                    | global   | non      | **Recyclage du pool :** Nombre de secondes avant le recyclage automatique d'une connexion. `-1` pour désactiver.                                                                                       |
+| `DATABASE_POOL_PRE_PING`          | `yes`                                     | global   | non      | **Pré-ping du pool :** Tester la vivacité des connexions à chaque extraction du pool.                                                                                                                  |
+| `DATABASE_POOL_RESET_ON_RETURN`   |                                           | global   | non      | **Réinitialisation au retour :** Comment les connexions sont réinitialisées au retour dans le pool. Vide = auto (`none` pour MySQL/MariaDB, `rollback` sinon). Options : `rollback`, `commit`, `none`. |
+| `DATABASE_RETRY_TIMEOUT`          | `60`                                      | global   | non      | **Délai de reconnexion :** Nombre max de secondes d'attente de disponibilité de la base au démarrage.                                                                                                  |
+| `DATABASE_REQUEST_RETRY_ATTEMPTS` | `2`                                       | global   | non      | **Tentatives de réessai :** Nombre de tentatives en cas d'erreurs transitoires lors des opérations.                                                                                                    |
+| `DATABASE_REQUEST_RETRY_DELAY`    | `0.25`                                    | global   | non      | **Délai entre réessais :** Délai en secondes entre les tentatives de réessai en cas d'erreurs transitoires.                                                                                            |
 
-!!! tip "Choix du moteur" - SQLite (défaut) : simple et fichier unique, idéal mono‑nœud/tests. - PostgreSQL : recommandé en production multi‑instances (robustesse, concurrence). - MySQL/MariaDB : alternative solide aux capacités proches de PostgreSQL. - Oracle : adapté aux environnements d’entreprise standardisés sur Oracle.
+!!! tip "Choix du moteur" - SQLite (défaut) : simple et fichier unique, idéal mono‑nœud/tests. - PostgreSQL : recommandé en production multi‑instances (robustesse, concurrence). - MySQL/MariaDB : alternative solide aux capacités proches de PostgreSQL. - Oracle : adapté aux environnements d'entreprise standardisés sur Oracle.
 
-!!! info "Format SQLAlchemy" - SQLite : `sqlite:////chemin/vers/database.sqlite3` - PostgreSQL : `postgresql://user:password@hôte:port/base` - MySQL/MariaDB : `mysql://user:password@hôte:port/base` ou `mariadb://user:password@hôte:port/base` - Oracle : `oracle://user:password@hôte:port/base`
+!!! info "Format SQLAlchemy" - SQLite : `sqlite:////chemin/vers/database.sqlite3` - PostgreSQL : `postgresql://user:password@hôte:port/base` - MySQL/MariaDB : `mysql://user:password@hôte:port/base` ou `mariadb://user:password@hôte:port/base` - Oracle : `oracle://user:password@hôte:port/base`
 
 !!! warning "Maintenance"
-    Des tâches quotidiennes assurent la maintenance automatique :
+    Des tâches quotidiennes assurent la maintenance automatique :
 
-- **Purge des runs de jobs excédentaires** : supprime l’historique au-delà de `DATABASE_MAX_JOBS_RUNS`.
-- **Purge des sessions UI expirées** : enlève les sessions plus anciennes que `DATABASE_MAX_SESSION_AGE_DAYS`.
+- **Purge des runs de jobs excédentaires** : supprime l'historique au-delà de `DATABASE_MAX_JOBS_RUNS`.
+- **Purge des sessions UI expirées** : enlève les sessions plus anciennes que `DATABASE_MAX_SESSION_AGE_DAYS`.
 
-Ces jobs évitent la croissance illimitée tout en conservant un historique d’exploitation pertinent.
+Ces jobs évitent la croissance illimitée tout en conservant un historique d'exploitation pertinent.
 
 ## DNSBL
 
@@ -2722,7 +2731,7 @@ Le plugin Let's Encrypt prend en charge un large éventail de fournisseurs DNS p
 | `desec`           | deSEC            | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/desec-io/certbot-dns-desec/blob/main/README.md)                    |
 | `digitalocean`    | DigitalOcean     | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-digitalocean.readthedocs.io/en/stable/)                           |
 | `domainoffensive` | Domain-Offensive | `api_token`                                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/domainoffensive/certbot-dns-domainoffensive/blob/master/README.md) |
-| `domeneshop`      | Domeneshop       | `token`<br>`secret`                                                                                          |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/domeneshop/certbot-dns-domeneshop/blob/master/README.rst)          |
+| `domeneshop`      | Domeneshop       | `client_token`<br>`client_secret`                                                                            |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/domeneshop/certbot-dns-domeneshop/blob/master/README.rst)          |
 | `dnsimple`        | DNSimple         | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsimple.readthedocs.io/en/stable/)                               |
 | `dnsmadeeasy`     | DNS Made Easy    | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)                            |
 | `duckdns`         | DuckDNS          | `duckdns_token`                                                                                              |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/infinityofspace/certbot_dns_duckdns/blob/main/Readme.md)           |
@@ -3412,7 +3421,7 @@ Le plugin ModSecurity intègre le puissant pare-feu applicatif web (WAF) [ModSec
 Suivez ces étapes pour configurer et utiliser ModSecurity :
 
 1.  **Activer la fonctionnalité :** ModSecurity est activé par défaut. Cela peut être contrôlé via le paramètre `USE_MODSECURITY`.
-2.  **Sélectionner une version du CRS :** Choisissez une version du Jeu de Règles de Base OWASP (v3, v4, ou nightly).
+2.  **Sélectionner une version du CRS :** Choisissez une version du Jeu de Règles de Base OWASP (v3 ou v4).
 3.  **Ajouter des plugins :** Activez optionnellement des plugins CRS pour améliorer la couverture des règles.
 4.  **Surveiller et ajuster :** Utilisez les journaux et l'[interface web](web-ui.md) pour identifier les faux positifs et ajuster les paramètres.
 
@@ -3422,7 +3431,7 @@ Suivez ces étapes pour configurer et utiliser ModSecurity :
 | ------------------------------------- | -------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `USE_MODSECURITY`                     | `yes`          | multisite | no       | **Activer ModSecurity :** Active la protection du pare-feu applicatif web ModSecurity.                                                                                                     |
 | `USE_MODSECURITY_CRS`                 | `yes`          | multisite | no       | **Utiliser le Core Rule Set :** Active le Jeu de Règles de Base OWASP pour ModSecurity.                                                                                                    |
-| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | no       | **Version du CRS :** La version du Jeu de Règles de Base OWASP à utiliser. Options : `3`, `4`, ou `nightly`.                                                                               |
+| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | no       | **Version du CRS :** La version du Jeu de Règles de Base OWASP à utiliser. Options : `3` ou `4`. Note : `nightly` est obsolète et utilise v4 par défaut.                                   |
 | `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | no       | **Moteur de règles :** Contrôle si les règles sont appliquées. Options : `On`, `DetectionOnly`, ou `Off`.                                                                                  |
 | `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | no       | **Moteur d'audit :** Contrôle le fonctionnement de la journalisation d'audit. Options : `On`, `Off`, ou `RelevantOnly`.                                                                    |
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`    | multisite | no       | **Parties du journal d'audit :** Quelles parties des requêtes/réponses inclure dans les journaux d'audit.                                                                                  |
@@ -3441,11 +3450,10 @@ Suivez ces étapes pour configurer et utiliser ModSecurity :
 Sélectionnez une version du CRS pour répondre au mieux à vos besoins de sécurité :
 
 - **`3`** : Stable [v3.3.8](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8).
-- **`4`** : Stable [v4.24.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.24.0) (**par défaut**).
-- **`nightly`** : [Version de nuit](https://github.com/coreruleset/coreruleset/releases/tag/nightly) offrant les dernières mises à jour de règles.
+- **`4`** : Stable [v4.24.1](https://github.com/coreruleset/coreruleset/releases/tag/v4.24.1) (**par défaut**).
 
-!!! example "Version de nuit (Nightly Build)"
-    La **version de nuit** contient les règles les plus à jour, offrant les dernières protections contre les menaces émergentes. Cependant, comme elle est mise à jour quotidiennement et peut inclure des changements expérimentaux ou non testés, il est recommandé d'utiliser d'abord la version de nuit dans un **environnement de pré-production** avant de la déployer en production.
+!!! warning "Version de nuit obsolète"
+    L'option `nightly` pour `MODSECURITY_CRS_VERSION` est obsolète car le projet OWASP Core Rule Set a arrêté les versions de nuit. Si votre configuration utilise encore `nightly`, CRS v4 sera utilisé à la place. Veuillez mettre à jour votre configuration pour utiliser `MODSECURITY_CRS_VERSION=4`.
 
 !!! tip "Niveaux de paranoïa"
     Le Jeu de Règles de Base OWASP utilise des "niveaux de paranoïa" (PL) pour contrôler la rigueur des règles :
@@ -3598,18 +3606,6 @@ Le Jeu de Règles de Base OWASP prend également en charge une gamme de **plugin
     USE_MODSECURITY_CRS: "yes"
     MODSECURITY_CRS_VERSION: "4"
     USE_MODSECURITY_GLOBAL_CRS: "yes"
-    ```
-
-=== "Version de nuit avec plugins personnalisés"
-
-    Configuration utilisant la version de nuit du CRS avec des plugins personnalisés :
-
-    ```yaml
-    USE_MODSECURITY: "yes"
-    USE_MODSECURITY_CRS: "yes"
-    MODSECURITY_CRS_VERSION: "nightly"
-    USE_MODSECURITY_CRS_PLUGINS: "yes"
-    MODSECURITY_CRS_PLUGINS: "wordpress-rule-exclusions/v1.0.0 https://github.com/coreruleset/dos-protection-plugin-modsecurity/archive/refs/heads/main.zip"
     ```
 
 !!! note "Valeurs de taille lisibles"

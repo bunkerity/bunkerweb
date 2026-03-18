@@ -1,8 +1,8 @@
 # Fortgeschrittene Nutzungen
 
-Viele Beispiele für reale Anwendungsfälle sind im Ordner [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2/examples) des GitHub-Repositorys verfügbar.
+Viele Beispiele für reale Anwendungsfälle sind im Ordner [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples) des GitHub-Repositorys verfügbar.
 
-Wir stellen auch zahlreiche Boilerplates zur Verfügung, wie z. B. YAML-Dateien für verschiedene Integrationen und Datenbanktypen. Diese sind im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2/misc/integrations) verfügbar.
+Wir stellen auch zahlreiche Boilerplates zur Verfügung, wie z. B. YAML-Dateien für verschiedene Integrationen und Datenbanktypen. Diese sind im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/misc/integrations) verfügbar.
 
 Dieser Abschnitt konzentriert sich nur auf fortgeschrittene Nutzungen und Sicherheits-Tuning. Informationen zu allen verfügbaren Einstellungen finden Sie im [Features-Abschnitt](features.md) der Dokumentation.
 
@@ -85,7 +85,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.9-rc2
+            bunkerity/bunkerweb-all-in-one:1.6.9
         ```
 
         Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen aktualisiert werden.
@@ -96,7 +96,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.9-rc2
+          image: bunkerity/bunkerweb:1.6.9
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -104,7 +104,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+          image: bunkerity/bunkerweb-scheduler:1.6.9
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -121,7 +121,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.9-rc2
+          image: bunkerity/bunkerweb:1.6.9
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -129,7 +129,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+          image: bunkerity/bunkerweb-scheduler:1.6.9
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -176,7 +176,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.9-rc2
+          image: bunkerity/bunkerweb:1.6.9
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -184,7 +184,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+          image: bunkerity/bunkerweb-scheduler:1.6.9
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -249,7 +249,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.9-rc2
+            bunkerity/bunkerweb-all-in-one:1.6.9
         ```
 
         Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen aktualisiert werden.
@@ -260,7 +260,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.9-rc2
+          image: bunkerity/bunkerweb:1.6.9
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -270,7 +270,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+          image: bunkerity/bunkerweb-scheduler:1.6.9
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -288,7 +288,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.9-rc2
+          image: bunkerity/bunkerweb:1.6.9
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -298,7 +298,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+          image: bunkerity/bunkerweb-scheduler:1.6.9
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -350,7 +350,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.9-rc2
+          image: bunkerity/bunkerweb:1.6.9
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -360,7 +360,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+          image: bunkerity/bunkerweb-scheduler:1.6.9
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -485,8 +485,8 @@ Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank 
 
         ```bash
         # Skript und Checksumme laden
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.9-rc2/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.9-rc2/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.9/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.9/install-bunkerweb.sh.sha256
 
         # Prüfsumme verifizieren
         sha256sum -c install-bunkerweb.sh.sha256
@@ -585,7 +585,7 @@ Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank 
 
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.9
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "192.168.1.11 192.168.1.12" # Ersetzen durch die IPs Ihrer Worker
@@ -604,7 +604,7 @@ Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank 
           - bw-redis
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.9-rc2
+        image: bunkerity/bunkerweb-ui:1.6.9
         ports:
           - "7000:7000" # UI-Port veröffentlichen
         environment:
@@ -687,7 +687,7 @@ Worker sind die Knoten, die den eingehenden Verkehr verarbeiten.
     ```yaml title="docker-compose.yml"
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.9
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -992,7 +992,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.9-rc2
+        bunkerity/bunkerweb-all-in-one:1.6.9
     ```
 
 === "Docker"
@@ -1020,7 +1020,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.9
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1031,7 +1031,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.9
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1145,7 +1145,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.9-rc2
+        bunkerity/bunkerweb-all-in-one:1.6.9
     ```
 
     Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen angewendet werden.
@@ -1185,7 +1185,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.9-rc2
+        bunkerity/bunkerweb-all-in-one:1.6.9
     ```
 
 === "Docker"
@@ -1208,7 +1208,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+      image: bunkerity/bunkerweb-scheduler:1.6.9
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1251,7 +1251,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+      image: bunkerity/bunkerweb-scheduler:1.6.9
       volumes:
         - ./bw-data:/data
       ...
@@ -1321,7 +1321,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+      image: bunkerity/bunkerweb-scheduler:1.6.9
       volumes:
         - ./bw-data:/data
       ...
@@ -1552,7 +1552,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.9-rc2
+        bunkerity/bunkerweb-all-in-one:1.6.9
     ```
 
     Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen angewendet werden.
@@ -1575,7 +1575,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.9
         ports:
           - "80:8080" # Behalten, wenn Sie die Let's Encrypt-Automatisierung mit dem http-Challenge-Typ verwenden möchten
           - "10000:10000" # app1
@@ -1590,7 +1590,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.9
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Diese Einstellung ist obligatorisch, um die BunkerWeb-Instanz anzugeben
@@ -1641,7 +1641,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.9
         ports:
           - "80:8080" # Behalten, wenn Sie die Let's Encrypt-Automatisierung mit dem http-Challenge-Typ verwenden möchten
           - "10000:10000" # app1
@@ -1871,7 +1871,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.9
         ports:
           # Behalten, wenn Sie die Let's Encrypt-Automatisierung mit dem http-Challenge-Typ verwenden möchten
           - published: 80
@@ -2001,7 +2001,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.9-rc2
+        bunkerity/bunkerweb-all-in-one:1.6.9
     ```
 
     Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen angewendet werden.
@@ -2045,7 +2045,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.9
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2060,7 +2060,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.9
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Diese Einstellung ist obligatorisch, um die BunkerWeb-Instanz anzugeben
@@ -2154,7 +2154,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.9
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -2167,7 +2167,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.9
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # Wir müssen die BunkerWeb-Instanz hier nicht angeben, da sie automatisch vom Autoconf-Dienst erkannt werden
@@ -2182,7 +2182,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.9-rc2
+        image: bunkerity/bunkerweb-autoconf:1.6.9
         depends_on:
           - bunkerweb
           - bw-docker
@@ -2422,7 +2422,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.9
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2521,7 +2521,7 @@ Standardmäßig lauscht BunkerWeb nur auf IPv4-Adressen und verwendet kein IPv6 
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.9
         environment:
           USE_IPv6: "yes"
 
@@ -2661,7 +2661,7 @@ LOG_LEVEL_1=error
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifikation der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.9
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2674,7 +2674,7 @@ LOG_LEVEL_1=error
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.9
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen setzen
@@ -2691,7 +2691,7 @@ LOG_LEVEL_1=error
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.9-rc2
+        image: bunkerity/bunkerweb-ui:1.6.9
         environment:
           <<: *bw-env
         volumes:
@@ -2826,7 +2826,7 @@ Sie können den Protokollierungstreiber für Ihre Dienste in Ihrer `docker-compo
 ```yaml
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.9-rc2
+    image: bunkerity/bunkerweb:1.6.9
     logging:
       driver: "json-file"
       options:
@@ -2935,7 +2935,7 @@ Die üblichen Variablen sind:
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.9-rc2
+        bunkerity/bunkerweb-all-in-one:1.6.9
     ```
 
     Wenn der Container bereits existiert, erstellen Sie ihn neu, um die neue Umgebung anzuwenden.
@@ -2946,7 +2946,7 @@ Die üblichen Variablen sind:
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+      image: bunkerity/bunkerweb-scheduler:1.6.9
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -2965,7 +2965,7 @@ Die üblichen Variablen sind:
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+      image: bunkerity/bunkerweb-scheduler:1.6.9
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3008,7 +3008,7 @@ Die üblichen Variablen sind:
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+      image: bunkerity/bunkerweb-scheduler:1.6.9
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3960,11 +3960,11 @@ Vorlagen verwenden Lua-Vorlagensyntax mit den folgenden Trennzeichen:
         ```yaml
         services:
           bunkerweb:
-            image: bunkerity/bunkerweb:1.6.9-rc2
+            image: bunkerity/bunkerweb:1.6.9
             # ... andere Einstellungen (keine Umgebungsvariablen für Custom Pages hier benötigt)
 
           bw-scheduler:
-            image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+            image: bunkerity/bunkerweb-scheduler:1.6.9
             volumes:
               - ./templates:/custom_templates:ro
             environment:
@@ -4047,7 +4047,7 @@ Vorlagen verwenden Lua-Vorlagensyntax mit den folgenden Trennzeichen:
             spec:
               containers:
                 - name: bunkerweb-scheduler
-                  image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+                  image: bunkerity/bunkerweb-scheduler:1.6.9
                   env:
                     - name: CUSTOM_ERROR_PAGE
                       value: "/custom_templates/error.html"
@@ -4317,3 +4317,82 @@ Legen Sie die Mindestwerte pro geschütztem Dienst fest:
 Erlauben Sie optional unbekannte Pfade während der Einführung:
 
 - `OPENAPI_ALLOW_UNSPECIFIED=yes`
+
+## Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+STREAM-Unterstützung :x:
+
+Das Cache-PRO-Plugin aktiviert das Caching von Antworten auf Reverse-Proxy-Ebene mithilfe der NGINX-Direktiven `proxy_cache*`. Es ist nützlich, um wiederholte Zugriffe auf cachebare Inhalte abzufangen, Upstreams bei Lastspitzen zu entlasten und bei kurzen Backend-Ausfällen veraltete Inhalte auszuliefern.
+
+**Funktionsweise**
+
+1. Jeder globale Wert `CACHE_PATH*` erzeugt eine `proxy_cache_path`-Direktive im HTTP-Kontext.
+2. Ein Service verwendet den Cache nur dann, wenn `CACHE_ZONE` auf eine der in `CACHE_PATH*` definierten Zonen gesetzt ist.
+3. Einstellungen auf Service-Ebene steuern anschließend Cache-Key, Bypass-/No-Cache-Bedingungen, Locking, Stale-Verhalten und Gültigkeitsregeln.
+4. Wenn `CACHE_HEADER` gesetzt ist, fügt BunkerWeb einen Response-Header hinzu, der `$upstream_cache_status` wie `HIT`, `MISS`, `BYPASS`, `EXPIRED` oder `STALE` anzeigt.
+
+**Liste der Funktionen**
+
+- Reverse-Proxy-Response-Caching mit konfigurierbaren Cache-Pfaden und Zonen.
+- Aktivierung des Caches pro Service über `CACHE_ZONE`.
+- Optionaler Header zur Anzeige des Cache-Status mit `$upstream_cache_status`.
+- Feingranulare Steuerung für Bypass, No-Cache, Schlüsselbildung, Methoden, Locking, Stale-Nutzung und Revalidierung.
+- Mehrere Gültigkeitsregeln über wiederholte `CACHE_VALID*`-Einstellungen.
+
+**Liste der Einstellungen**
+
+| Einstellung                 | Standard                          | Kontext   | Mehrfach | Beschreibung                                                                       |
+| --------------------------- | --------------------------------- | --------- | -------- | ---------------------------------------------------------------------------------- |
+| `CACHE_PATH`                |                                   | global    | ja       | Pfad und Parameter für einen Cache.                                                |
+| `CACHE_ZONE`                |                                   | multisite | nein     | Name der zu verwendenden Cache-Zone (definiert in einer `CACHE_PATH`-Einstellung). |
+| `CACHE_HEADER`              | `X-Cache`                         | multisite | nein     | Fügt einen Header hinzu, der den Cache-Status anzeigt.                             |
+| `CACHE_BACKGROUND_UPDATE`   | `no`                              | multisite | nein     | Aktiviert oder deaktiviert die Aktualisierung des Caches im Hintergrund.           |
+| `CACHE_BYPASS`              |                                   | multisite | nein     | Liste von Variablen, die den Cache umgehen.                                        |
+| `CACHE_NO_CACHE`            | `$http_pragma$http_authorization` | multisite | nein     | Speichert Antworten nicht im Cache, wenn Variablen gesetzt sind.                   |
+| `CACHE_KEY`                 | `$scheme$proxy_host$request_uri`  | multisite | nein     | Schlüssel zur Identifizierung gecachter Elemente.                                  |
+| `CACHE_CONVERT_HEAD_TO_GET` | `yes`                             | multisite | nein     | Konvertiert HEAD-Anfragen beim Caching zu GET.                                     |
+| `CACHE_LOCK`                | `no`                              | multisite | nein     | Sperrt konkurrierende Anfragen beim Befüllen des Caches.                           |
+| `CACHE_LOCK_AGE`            | `5s`                              | multisite | nein     | Leitet Anfragen an den Upstream weiter, wenn der Cache so lange gesperrt ist.      |
+| `CACHE_LOCK_TIMEOUT`        | `5s`                              | multisite | nein     | Leitet Anfragen an den Upstream weiter, wenn die Sperre so lange anhält.           |
+| `CACHE_METHODS`             | `GET HEAD`                        | multisite | nein     | Cacht Antworten nur für diese HTTP-Methoden.                                       |
+| `CACHE_MIN_USES`            | `1`                               | multisite | nein     | Anzahl gleicher Anfragen, bevor die Antwort gecacht wird.                          |
+| `CACHE_REVALIDATE`          | `no`                              | multisite | nein     | Revalidiert abgelaufene Einträge mit bedingten Upstream-Anfragen.                  |
+| `CACHE_USE_STALE`           | `off`                             | multisite | nein     | Legt fest, wann veraltete Inhalte ausgeliefert werden dürfen.                      |
+| `CACHE_VALID`               | `10m`                             | multisite | ja       | Definiert die Cache-Dauer optional mit einem oder mehreren Statuscodes.            |
+
+**Anwendungsbeispiel**
+
+1. Definieren Sie einen globalen Cache-Pfad und eine Zone:
+
+   ```yaml
+   CACHE_PATH: "/var/cache/bunkerweb/proxy levels=1:2 keys_zone=htmlcache:10m max_size=1g inactive=60m use_temp_path=off"
+   ```
+
+2. Aktivieren Sie den Reverse Proxy und verknüpfen Sie die Zone mit einem Service:
+
+   ```yaml
+   www.example.com_USE_REVERSE_PROXY: "yes"
+   www.example.com_REVERSE_PROXY_HOST: "http://app:8080"
+   www.example.com_CACHE_ZONE: "htmlcache"
+   www.example.com_CACHE_HEADER: "X-Cache"
+   www.example.com_CACHE_VALID: "200 301 302 10m"
+   www.example.com_CACHE_VALID_1: "404 1m"
+   ```
+
+3. Fügen Sie bei Bedarf optionale Steuerungen hinzu:
+
+   ```yaml
+   www.example.com_CACHE_BYPASS: "$cookie_nocache $arg_nocache"
+   www.example.com_CACHE_NO_CACHE: "$http_pragma $http_authorization"
+   www.example.com_CACHE_LOCK: "yes"
+   www.example.com_CACHE_BACKGROUND_UPDATE: "yes"
+   www.example.com_CACHE_USE_STALE: "error timeout updating http_500 http_502 http_503 http_504"
+   ```
+
+!!! info "Wichtiges Verhalten"
+    - Dieses Plugin gilt nur für Reverse-Proxy-Traffic. Direkt aus lokalen statischen Dateien oder über Stream-/TCP-Dienste ausgelieferte Inhalte werden nicht gecacht.
+    - `CACHE_ZONE` muss mit einer in `CACHE_PATH*` definierten Zone über `keys_zone=<name>:<größe>` übereinstimmen.
+    - Wenn `CACHE_ZONE` für einen Service leer ist, werden für diesen Service keine Cache-Direktiven angewendet.
+    - Verwenden Sie numerische Suffixe für wiederholte Werte wie `CACHE_PATH_1`, `CACHE_PATH_2`, `CACHE_VALID_1` und `CACHE_VALID_2`.
+    - Authentifizierter oder benutzerspezifischer Traffic sollte nicht gecacht werden, es sei denn, Ihr `CACHE_KEY` variiert ausdrücklich nach diesem Zustand.
+    - `CACHE_LOCK=yes` und `CACHE_BACKGROUND_UPDATE=yes` helfen, Lastspitzen auf dem Origin zu reduzieren.

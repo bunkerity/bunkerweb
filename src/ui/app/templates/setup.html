@@ -1495,14 +1495,57 @@
                                                                     </span>
                                                                 </div>
                                                             </div>
-                                                            <input id="CUSTOM_SSL_CERT_DATA"
-                                                                   name="CUSTOM_SSL_CERT_DATA"
-                                                                   type="text"
-                                                                   value="{{ custom_ssl_cert_data }}"
-                                                                   class="form-control plugin-setting mt-1"
-                                                                   aria-labelledby="label-CUSTOM_SSL_CERT_DATA"
-                                                                   pattern="{{ plugins_settings.get('CUSTOM_SSL_CERT_DATA', {'regex': '^.*$'})['regex'] }}"
-                                                                   {% if use_custom_ssl == "no" %}disabled{% endif %} />
+                                                            <div class="mt-1 position-relative plugin-file-setting-wrapper">
+                                                                <input id="CUSTOM_SSL_CERT_DATA"
+                                                                       name="CUSTOM_SSL_CERT_DATA"
+                                                                       type="hidden"
+                                                                       class="plugin-setting plugin-setting-file-text"
+                                                                       aria-labelledby="label-CUSTOM_SSL_CERT_DATA"
+                                                                       pattern="{{ plugins_settings.get('CUSTOM_SSL_CERT_DATA', {'regex': '^.*$'})['regex'] }}"
+                                                                       value="{{ custom_ssl_cert_data }}"
+                                                                       data-upload-target="#custom-ssl-cert-data-upload"
+                                                                       data-manual-target="#custom-ssl-cert-data-manual"
+                                                                       {% if use_custom_ssl == "no" %}disabled{% endif %} />
+                                                                <div class="position-relative plugin-setting-file-upload-container">
+                                                                    <div class="input-group">
+                                                                        <input id="custom-ssl-cert-data-upload"
+                                                                               type="file"
+                                                                               class="form-control plugin-setting-file-upload"
+                                                                               data-file-input="#CUSTOM_SSL_CERT_DATA"
+                                                                               aria-labelledby="label-CUSTOM_SSL_CERT_DATA"
+                                                                               accept=".pem,.crt,.cer,.txt"
+                                                                               {% if use_custom_ssl == "no" %}disabled{% endif %} />
+                                                                        <button type="button"
+                                                                                class="btn btn-outline-secondary plugin-setting-file-mode-toggle"
+                                                                                data-file-input="#CUSTOM_SSL_CERT_DATA"
+                                                                                data-mode="upload"
+                                                                                data-upload-label="Switch to text editor"
+                                                                                data-manual-label="Back to file upload"
+                                                                                data-bs-toggle="tooltip"
+                                                                                data-bs-placement="top"
+                                                                                data-bs-original-title="Switch to text editor"
+                                                                                aria-label="Switch to text editor"
+                                                                                {% if use_custom_ssl == "no" %}disabled{% endif %}>
+                                                                            <i class="bx bx-edit-alt"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                                <textarea id="custom-ssl-cert-data-manual"
+                                                                          class="form-control mt-2 d-none plugin-setting-file-manual"
+                                                                          rows="6"
+                                                                          data-file-input="#CUSTOM_SSL_CERT_DATA"
+                                                                          placeholder="Paste or edit the certificate data here..."
+                                                                          aria-labelledby="label-CUSTOM_SSL_CERT_DATA"
+                                                                          {% if use_custom_ssl == "no" %}disabled{% endif %}>{{ custom_ssl_cert_data }}</textarea>
+                                                                <small class="text-muted d-block mt-1 plugin-setting-file-status"
+                                                                       data-empty-text="No file selected">
+                                                                    {% if custom_ssl_cert_data %}
+                                                                        Current content loaded ({{ custom_ssl_cert_data|length }} chars)
+                                                                    {% else %}
+                                                                        No file selected
+                                                                    {% endif %}
+                                                                </small>
+                                                            </div>
                                                         </div>
                                                         <div class="col-12 col-md-6 pb-3">
                                                             <div class="d-flex justify-content-between align-items-center">
@@ -1530,14 +1573,57 @@
                                                                     </span>
                                                                 </div>
                                                             </div>
-                                                            <input id="CUSTOM_SSL_KEY_DATA"
-                                                                   name="CUSTOM_SSL_KEY_DATA"
-                                                                   type="text"
-                                                                   value="{{ custom_ssl_key_data }}"
-                                                                   class="form-control plugin-setting mt-1"
-                                                                   aria-labelledby="label-CUSTOM_SSL_KEY_DATA"
-                                                                   pattern="{{ plugins_settings.get('CUSTOM_SSL_KEY_DATA', {'regex': '^.*$'})['regex'] }}"
-                                                                   {% if use_custom_ssl == "no" %}disabled{% endif %} />
+                                                            <div class="mt-1 position-relative plugin-file-setting-wrapper">
+                                                                <input id="CUSTOM_SSL_KEY_DATA"
+                                                                       name="CUSTOM_SSL_KEY_DATA"
+                                                                       type="hidden"
+                                                                       class="plugin-setting plugin-setting-file-text"
+                                                                       aria-labelledby="label-CUSTOM_SSL_KEY_DATA"
+                                                                       pattern="{{ plugins_settings.get('CUSTOM_SSL_KEY_DATA', {'regex': '^.*$'})['regex'] }}"
+                                                                       value="{{ custom_ssl_key_data }}"
+                                                                       data-upload-target="#custom-ssl-key-data-upload"
+                                                                       data-manual-target="#custom-ssl-key-data-manual"
+                                                                       {% if use_custom_ssl == "no" %}disabled{% endif %} />
+                                                                <div class="position-relative plugin-setting-file-upload-container">
+                                                                    <div class="input-group">
+                                                                        <input id="custom-ssl-key-data-upload"
+                                                                               type="file"
+                                                                               class="form-control plugin-setting-file-upload"
+                                                                               data-file-input="#CUSTOM_SSL_KEY_DATA"
+                                                                               aria-labelledby="label-CUSTOM_SSL_KEY_DATA"
+                                                                               accept=".pem,.key,.txt"
+                                                                               {% if use_custom_ssl == "no" %}disabled{% endif %} />
+                                                                        <button type="button"
+                                                                                class="btn btn-outline-secondary plugin-setting-file-mode-toggle"
+                                                                                data-file-input="#CUSTOM_SSL_KEY_DATA"
+                                                                                data-mode="upload"
+                                                                                data-upload-label="Switch to text editor"
+                                                                                data-manual-label="Back to file upload"
+                                                                                data-bs-toggle="tooltip"
+                                                                                data-bs-placement="top"
+                                                                                data-bs-original-title="Switch to text editor"
+                                                                                aria-label="Switch to text editor"
+                                                                                {% if use_custom_ssl == "no" %}disabled{% endif %}>
+                                                                            <i class="bx bx-edit-alt"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                                <textarea id="custom-ssl-key-data-manual"
+                                                                          class="form-control mt-2 d-none plugin-setting-file-manual"
+                                                                          rows="6"
+                                                                          data-file-input="#CUSTOM_SSL_KEY_DATA"
+                                                                          placeholder="Paste or edit the key data here..."
+                                                                          aria-labelledby="label-CUSTOM_SSL_KEY_DATA"
+                                                                          {% if use_custom_ssl == "no" %}disabled{% endif %}>{{ custom_ssl_key_data }}</textarea>
+                                                                <small class="text-muted d-block mt-1 plugin-setting-file-status"
+                                                                       data-empty-text="No file selected">
+                                                                    {% if custom_ssl_key_data %}
+                                                                        Current content loaded ({{ custom_ssl_key_data|length }} chars)
+                                                                    {% else %}
+                                                                        No file selected
+                                                                    {% endif %}
+                                                                </small>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1617,7 +1703,8 @@
                                                                type="password"
                                                                class="form-control plugin-setting mt-1"
                                                                aria-labelledby="label-PRO_LICENSE_KEY"
-                                                               pattern="^.*$" />
+                                                               pattern="^.*$"
+                                                               data-confetti-src="{{ url_for('static', filename='libs/canvas-confetti/confetti.browser.min.js') }}" />
                                                     </div>
                                                     <div class="pro-card card mb-4 p-0">
                                                         <div class="card-body">

@@ -11,7 +11,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from flask import Flask, render_template, request
+from flask import Flask, g, render_template, request
 
 from logger import getLogger  # type: ignore
 
@@ -50,32 +50,31 @@ with app.app_context():
     PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
     app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
 
-    app.config["ENV"] = {}
-    app.config["SCRIPT_NONCE"] = ""
-
 
 @app.before_request
 def before_request():
-    app.config["SCRIPT_NONCE"] = token_urlsafe(32)
+    g.script_nonce = token_urlsafe(32)
 
 
 @app.context_processor
 def inject_variables():
     return dict(
         current_endpoint=request.path.split("/")[-1],
-        script_nonce=app.config["SCRIPT_NONCE"],
+        script_nonce=getattr(g, "script_nonce", None) or token_urlsafe(32),
     )
 
 
 @app.after_request
 def set_security_headers(response):
     """Set the security headers."""
+    script_nonce = getattr(g, "script_nonce", None) or token_urlsafe(32)
+
     # * Content-Security-Policy header to prevent XSS attacks
     response.headers["Content-Security-Policy"] = (
         "object-src 'none';"
         + " frame-ancestors 'self';"
         + " default-src 'self'"
-        + f" script-src https: http: 'self' 'nonce-{app.config['SCRIPT_NONCE']}' 'strict-dynamic' 'unsafe-inline';"
+        + f" script-src https: http: 'self' 'nonce-{script_nonce}' 'strict-dynamic' 'unsafe-inline';"
         + " style-src 'self' 'unsafe-inline';"
         + " img-src 'self' data: blob: https://assets.bunkerity.com;"
         + " base-uri 'self';"

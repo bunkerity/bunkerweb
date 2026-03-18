@@ -21,6 +21,7 @@ from flask_login import current_user
 from flask import redirect, url_for
 
 from app.routes.logout import logout_page
+from app.utils import BISCUIT_PRIVATE_KEY_FILE
 
 from common_utils import get_version  # type: ignore
 
@@ -114,8 +115,23 @@ class BiscuitMiddleware:
 
         if not token_str:
             if current_user.is_authenticated:
-                return logout_page(), 403
-            return
+                # Token may have been lost due to a session race condition
+                # (concurrent requests on different workers). Try to regenerate it.
+                try:
+                    if BISCUIT_PRIVATE_KEY_FILE.exists():
+                        current_app.logger.warning(f"Biscuit token missing from session for authenticated user {current_user.get_id()}, regenerating")
+                        private_key = PrivateKey(BISCUIT_PRIVATE_KEY_FILE.read_text().strip())
+                        token_factory = BiscuitTokenFactory(private_key)
+                        role = "super_admin" if current_user.admin else current_user.list_roles[0]
+                        token_str = token_factory.create_token_for_role(role, current_user.get_id()).to_base64()
+                        session["biscuit_token"] = token_str
+                    else:
+                        return logout_page(), 403
+                except Exception as e:
+                    current_app.logger.error(f"Failed to regenerate Biscuit token: {e}")
+                    return logout_page(), 403
+            else:
+                return
 
         try:
             token: Biscuit = Biscuit.from_base64(token_str, self.root_public_key)

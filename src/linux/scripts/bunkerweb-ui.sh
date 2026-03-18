@@ -50,6 +50,7 @@ start() {
             echo "# TOTP_ENCRYPTION_KEYS=changeme"
             echo "LISTEN_ADDR=127.0.0.1"
             echo "# LISTEN_PORT=7000"
+            echo "# MAX_CONTENT_LENGTH=50MB"
             echo "FORWARDED_ALLOW_IPS=127.0.0.1,::1"
             echo "PROXY_ALLOW_IPS=127.0.0.1,::1"
             echo "# ENABLE_HEALTHCHECK=no"
@@ -128,6 +129,7 @@ start() {
     # But we keep the above explicit exports to ensure defaults are properly set
     export_env_file /etc/bunkerweb/variables.env
     export_env_file /etc/bunkerweb/ui.env
+
 
     if [ -f "/var/run/bunkerweb/tmp-ui.pid" ]; then
         rm -f /var/run/bunkerweb/tmp-ui.pid

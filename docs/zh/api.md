@@ -41,7 +41,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
     services:
       bunkerweb:
         # 调度器识别实例的名称
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.9
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -54,7 +54,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.9
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保填写正确的实例名
@@ -76,7 +76,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.9-rc2
+        image: bunkerity/bunkerweb-api:1.6.9
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -143,7 +143,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.9-rc2
+      bunkerity/bunkerweb-all-in-one:1.6.9
     ```
 
 === "Linux"
@@ -252,9 +252,9 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
 
 ### 运行时与时区
 
-| Setting | 描述                                                                                      | 接受的值                                       | 默认值                                      |
-| ------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------- |
-| `TZ`    | API 日志和基于时间的声明（如 Biscuit TTL、日志时间戳）的时区                               | TZ 数据库名称（如 `UTC`、`Europe/Paris`)        | unset（容器默认，通常为 UTC）               |
+| Setting | 描述                                                         | 接受的值                                 | 默认值                        |
+| ------- | ------------------------------------------------------------ | ---------------------------------------- | ----------------------------- |
+| `TZ`    | API 日志和基于时间的声明（如 Biscuit TTL、日志时间戳）的时区 | TZ 数据库名称（如 `UTC`、`Europe/Paris`) | unset（容器默认，通常为 UTC） |
 
 将 docs 或 schema 的 URL 设为 `off|disabled|none|false|0` 可禁用它们。设置 `API_SSL_ENABLED=yes` 并提供 `API_SSL_CERTFILE`、`API_SSL_KEYFILE` 以在 API 终止 TLS。反向代理时，将 `API_FORWARDED_ALLOW_IPS` 设为代理 IP，使 Gunicorn 信任 `X-Forwarded-*` 头。
 
@@ -262,83 +262,84 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
 
 #### 表面与文档
 
-| Setting                                            | 描述                                                                                       | 接受的值                 | 默认值                              |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------ | ----------------------------------- |
-| `API_DOCS_URL`, `API_REDOC_URL`, `API_OPENAPI_URL` | Swagger、ReDoc、OpenAPI 的路径；设为 `off/disabled/none/false/0` 可禁用                     | 路径或 `off`             | `/docs`, `/redoc`, `/openapi.json`  |
-| `API_ROOT_PATH`                                    | 反向代理时的挂载前缀                                                                       | 路径（如 `/api`）        | 空                                  |
-| `API_FORWARDED_ALLOW_IPS`                          | 可信的代理 IP（用于 `X-Forwarded-*`）                                                       | 逗号分隔 IP/CIDR         | `127.0.0.1,::1`（包默认值）             |
-| `API_PROXY_ALLOW_IPS`                              | 可信的 PROXY 协议代理 IP                                                                  | 逗号分隔 IP/CIDR         | `FORWARDED_ALLOW_IPS`               |
+| Setting                                            | 描述                                                                    | 接受的值          | 默认值                             |
+| -------------------------------------------------- | ----------------------------------------------------------------------- | ----------------- | ---------------------------------- |
+| `API_DOCS_URL`, `API_REDOC_URL`, `API_OPENAPI_URL` | Swagger、ReDoc、OpenAPI 的路径；设为 `off/disabled/none/false/0` 可禁用 | 路径或 `off`      | `/docs`, `/redoc`, `/openapi.json` |
+| `API_ROOT_PATH`                                    | 反向代理时的挂载前缀                                                    | 路径（如 `/api`） | 空                                 |
+| `API_FORWARDED_ALLOW_IPS`                          | 可信的代理 IP（用于 `X-Forwarded-*`）                                   | 逗号分隔 IP/CIDR  | `127.0.0.1,::1`（包默认值）        |
+| `API_PROXY_ALLOW_IPS`                              | 可信的 PROXY 协议代理 IP                                                | 逗号分隔 IP/CIDR  | `FORWARDED_ALLOW_IPS`              |
 
 #### Auth、ACL、Biscuit
 
-| Setting                                     | 描述                                       | 接受的值                                                      | 默认值                  |
-| ------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------ | ----------------------- |
-| `API_USERNAME`, `API_PASSWORD`              | 引导管理员用户                             | 字符串；非调试环境需强密码                                    | unset                   |
-| `OVERRIDE_API_CREDS`                        | 启动时重新应用管理员凭据                   | `yes/no/on/off/true/false/0/1`                                | `no`                    |
-| `API_TOKEN`                                 | 管理员 override Bearer token               | 不透明字符串                                                  | unset                   |
-| `API_ACL_BOOTSTRAP_FILE`                    | 用户/权限的 JSON 路径                      | 文件路径或挂载的 `/var/lib/bunkerweb/api_acl_bootstrap.json`  | unset                   |
-| `BISCUIT_PRIVATE_KEY`, `BISCUIT_PUBLIC_KEY` | Biscuit 密钥（hex），若不使用文件          | 十六进制字符串                                                | 自动生成并持久化        |
-| `API_BISCUIT_TTL_SECONDS`                   | Token 生命周期；`0/off` 禁用过期           | 整型秒数或 `off/disabled`                                     | `3600`                  |
-| `CHECK_PRIVATE_IP`                          | 将 Biscuit 绑定到客户端 IP（私网除外）     | `yes/no/on/off/true/false/0/1`                                | `yes`                   |
+| Setting                                     | 描述                                   | 接受的值                                                     | 默认值           |
+| ------------------------------------------- | -------------------------------------- | ------------------------------------------------------------ | ---------------- |
+| `API_USERNAME`, `API_PASSWORD`              | 引导管理员用户                         | 字符串；非调试环境需强密码                                   | unset            |
+| `OVERRIDE_API_CREDS`                        | 启动时重新应用管理员凭据               | `yes/no/on/off/true/false/0/1`                               | `no`             |
+| `API_TOKEN`                                 | 管理员 override Bearer token           | 不透明字符串                                                 | unset            |
+| `API_ACL_BOOTSTRAP_FILE`                    | 用户/权限的 JSON 路径                  | 文件路径或挂载的 `/var/lib/bunkerweb/api_acl_bootstrap.json` | unset            |
+| `BISCUIT_PRIVATE_KEY`, `BISCUIT_PUBLIC_KEY` | Biscuit 密钥（hex），若不使用文件      | 十六进制字符串                                               | 自动生成并持久化 |
+| `API_BISCUIT_TTL_SECONDS`                   | Token 生命周期；`0/off` 禁用过期       | 整型秒数或 `off/disabled`                                    | `3600`           |
+| `CHECK_PRIVATE_IP`                          | 将 Biscuit 绑定到客户端 IP（私网除外） | `yes/no/on/off/true/false/0/1`                               | `yes`            |
 
 #### 白名单
 
-| Setting                 | 描述                             | 接受的值                     | 默认值                |
-| ----------------------- | -------------------------------- | --------------------------- | --------------------- |
-| `API_WHITELIST_ENABLED` | 切换 IP 白名单中间件             | `yes/no/on/off/true/false/0/1` | `yes`                 |
-| `API_WHITELIST_IPS`     | 空格/逗号分隔的 IP/CIDR          | IP/CIDR                     | 代码中的 RFC1918 范围 |
+| Setting                 | 描述                    | 接受的值                       | 默认值                |
+| ----------------------- | ----------------------- | ------------------------------ | --------------------- |
+| `API_WHITELIST_ENABLED` | 切换 IP 白名单中间件    | `yes/no/on/off/true/false/0/1` | `yes`                 |
+| `API_WHITELIST_IPS`     | 空格/逗号分隔的 IP/CIDR | IP/CIDR                        | 代码中的 RFC1918 范围 |
 
 #### 速率限制
 
-| Setting                          | 描述                                       | 接受的值                                               | 默认值        |
-| -------------------------------- | ------------------------------------------ | ----------------------------------------------------- | ------------- |
-| `API_RATE_LIMIT`                 | 全局限制（NGINX 风格字符串）               | `3r/s`, `100/minute`, `500 per 30 minutes`            | `100r/m`      |
-| `API_RATE_LIMIT_AUTH`            | `/auth` 限制（或 `off`）                   | 同上或 `off/disabled/none/false/0`                    | `10r/m`       |
-| `API_RATE_LIMIT_ENABLED`         | 启用限流                                   | `yes/no/on/off/true/false/0/1`                        | `yes`         |
-| `API_RATE_LIMIT_HEADERS_ENABLED` | 注入限流头部                               | 同上                                                 | `yes`         |
-| `API_RATE_LIMIT_RULES`           | 路径规则（CSV/JSON/YAML 或文件路径）       | 字符串或路径                                          | unset         |
-| `API_RATE_LIMIT_STRATEGY`        | 算法                                       | `fixed-window`, `moving-window`, `sliding-window-counter` | `fixed-window` |
-| `API_RATE_LIMIT_KEY`             | 键选择器                                   | `ip`, `header:<Name>`                                 | `ip`          |
-| `API_RATE_LIMIT_EXEMPT_IPS`      | 这些 IP/CIDR 跳过限流                      | 空格/逗号分隔                                         | unset         |
-| `API_RATE_LIMIT_STORAGE_OPTIONS` | 合并到存储配置的 JSON                      | JSON 字符串                                           | unset         |
+| Setting                          | 描述                                 | 接受的值                                                  | 默认值         |
+| -------------------------------- | ------------------------------------ | --------------------------------------------------------- | -------------- |
+| `API_RATE_LIMIT`                 | 全局限制（NGINX 风格字符串）         | `3r/s`, `100/minute`, `500 per 30 minutes`                | `100r/m`       |
+| `API_RATE_LIMIT_AUTH`            | `/auth` 限制（或 `off`）             | 同上或 `off/disabled/none/false/0`                        | `10r/m`        |
+| `API_RATE_LIMIT_ENABLED`         | 启用限流                             | `yes/no/on/off/true/false/0/1`                            | `yes`          |
+| `API_RATE_LIMIT_HEADERS_ENABLED` | 注入限流头部                         | 同上                                                      | `yes`          |
+| `API_RATE_LIMIT_RULES`           | 路径规则（CSV/JSON/YAML 或文件路径） | 字符串或路径                                              | unset          |
+| `API_RATE_LIMIT_STRATEGY`        | 算法                                 | `fixed-window`, `moving-window`, `sliding-window-counter` | `fixed-window` |
+| `API_RATE_LIMIT_KEY`             | 键选择器                             | `ip`, `header:<Name>`                                     | `ip`           |
+| `API_RATE_LIMIT_EXEMPT_IPS`      | 这些 IP/CIDR 跳过限流                | 空格/逗号分隔                                             | unset          |
+| `API_RATE_LIMIT_STORAGE_OPTIONS` | 合并到存储配置的 JSON                | JSON 字符串                                               | unset          |
 
 #### Redis/Valkey（用于限流）
 
-| Setting                                              | 描述                 | 接受的值                     | 默认值              |
-| ---------------------------------------------------- | -------------------- | --------------------------- | ------------------- |
-| `USE_REDIS`                                          | 启用 Redis 后端      | `yes/no/on/off/true/false/0/1` | `no`                |
-| `REDIS_HOST`, `REDIS_PORT`, `REDIS_DATABASE`         | 连接信息             | 主机，端口，数据库           | unset, `6379`, `0`  |
-| `REDIS_USERNAME`, `REDIS_PASSWORD`                   | 认证                 | 字符串                       | unset               |
-| `REDIS_SSL`, `REDIS_SSL_VERIFY`                      | TLS 与校验           | `yes/no/on/off/true/false/0/1` | `no`, `yes`         |
-| `REDIS_TIMEOUT`                                      | 超时（毫秒）         | 整数                         | `1000`              |
-| `REDIS_KEEPALIVE_POOL`                               | 连接池 keepalive     | 整数                         | `10`                |
-| `REDIS_SENTINEL_HOSTS`                               | Sentinel 主机        | 空格分隔的 `host:port`       | unset               |
-| `REDIS_SENTINEL_MASTER`                              | Sentinel 主节点名称  | 字符串                       | unset               |
-| `REDIS_SENTINEL_USERNAME`, `REDIS_SENTINEL_PASSWORD` | Sentinel 认证        | 字符串                       | unset               |
+| Setting                                              | 描述                | 接受的值                       | 默认值             |
+| ---------------------------------------------------- | ------------------- | ------------------------------ | ------------------ |
+| `USE_REDIS`                                          | 启用 Redis 后端     | `yes/no/on/off/true/false/0/1` | `no`               |
+| `REDIS_HOST`, `REDIS_PORT`, `REDIS_DATABASE`         | 连接信息            | 主机，端口，数据库             | unset, `6379`, `0` |
+| `REDIS_USERNAME`, `REDIS_PASSWORD`                   | 认证                | 字符串                         | unset              |
+| `REDIS_SSL`, `REDIS_SSL_VERIFY`                      | TLS 与校验          | `yes/no/on/off/true/false/0/1` | `no`, `yes`        |
+| `REDIS_TIMEOUT`                                      | 超时（毫秒）        | 整数                           | `1000`             |
+| `REDIS_KEEPALIVE_POOL`                               | 连接池 keepalive    | 整数                           | `10`               |
+| `REDIS_SENTINEL_HOSTS`                               | Sentinel 主机       | 空格分隔的 `host:port`         | unset              |
+| `REDIS_SENTINEL_MASTER`                              | Sentinel 主节点名称 | 字符串                         | unset              |
+| `REDIS_SENTINEL_USERNAME`, `REDIS_SENTINEL_PASSWORD` | Sentinel 认证       | 字符串                         | unset              |
 
 !!! info "DB 提供的 Redis"
     如果 BunkerWeb 数据库配置中存在 Redis/Valkey 设置，即使未在环境中设置 `USE_REDIS`，API 也会自动复用它们用于限流。需要不同后端时可通过环境变量覆盖。
 
 #### Listener 与 TLS
 
-| Setting                               | 描述                         | 接受的值                     | 默认值                              |
-| ------------------------------------- | ---------------------------- | --------------------------- | ----------------------------------- |
-| `API_LISTEN_ADDR`, `API_LISTEN_PORT`  | Gunicorn 绑定地址/端口       | IP 或主机名，整型           | `127.0.0.1`, `8888`（包脚本）      |
-| `API_SSL_ENABLED`                     | 在 API 内启用 TLS            | `yes/no/on/off/true/false/0/1` | `no`                               |
-| `API_SSL_CERTFILE`, `API_SSL_KEYFILE` | PEM 证书与密钥路径           | 文件路径                     | unset                               |
-| `API_SSL_CA_CERTS`                    | 可选 CA/链                   | 文件路径                     | unset                               |
+| Setting                               | 描述                   | 接受的值                       | 默认值                        |
+| ------------------------------------- | ---------------------- | ------------------------------ | ----------------------------- |
+| `API_LISTEN_ADDR`, `API_LISTEN_PORT`  | Gunicorn 绑定地址/端口 | IP 或主机名，整型              | `127.0.0.1`, `8888`（包脚本） |
+| `API_SSL_ENABLED`                     | 在 API 内启用 TLS      | `yes/no/on/off/true/false/0/1` | `no`                          |
+| `API_SSL_CERTFILE`, `API_SSL_KEYFILE` | PEM 证书与密钥路径     | 文件路径                       | unset                         |
+| `API_SSL_CA_CERTS`                    | 可选 CA/链             | 文件路径                       | unset                         |
 
 #### 日志与运行时（包默认）
 
-| Setting                         | 描述                                                                               | 接受的值                                       | 默认值                                                            |
-| ------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------- | ----------------------------------------------------------------- |
-| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | 基础日志级别 / 覆盖                                                                 | `debug`, `info`, `warning`, `error`, `critical` | `info`                                                           |
-| `LOG_TYPES`                     | 目标                                                                               | 空格分隔的 `stderr`/`file`/`syslog`             | `stderr`                                                         |
-| `LOG_FILE_PATH`                 | 日志文件位置（当 `LOG_TYPES` 含 `file` 或 `CAPTURE_OUTPUT=yes` 时使用）             | 文件路径                                        | 当启用 file/capture 时为 `/var/log/bunkerweb/api.log`，否则 unset |
-| `LOG_SYSLOG_ADDRESS`            | Syslog 目标（`udp://host:514`、`tcp://host:514`、socket）                          | Host:port、带协议前缀的主机或 socket 路径       | unset                                                            |
-| `LOG_SYSLOG_TAG`                | Syslog tag                                                                         | 字符串                                          | `bw-api`                                                         |
-| `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn worker/线程                                                               | 整数或 unset 表示自动                          | unset                                                            |
-| `CAPTURE_OUTPUT`                | 将 Gunicorn stdout/stderr 汇入配置的处理器                                         | `yes` 或 `no`                                  | `no`                                                             |
+| Setting                         | 描述                                                                    | 接受的值                                        | 默认值                                                            |
+| ------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------- | ----------------------------------------------------------------- |
+| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | 基础日志级别 / 覆盖                                                     | `debug`, `info`, `warning`, `error`, `critical` | `info`                                                            |
+| `LOG_TYPES`                     | 目标                                                                    | 空格分隔的 `stderr`/`file`/`syslog`             | `stderr`                                                          |
+| `LOG_FILE_PATH`                 | 日志文件位置（当 `LOG_TYPES` 含 `file` 或 `CAPTURE_OUTPUT=yes` 时使用） | 文件路径                                        | 当启用 file/capture 时为 `/var/log/bunkerweb/api.log`，否则 unset |
+| `LOG_SYSLOG_ADDRESS`            | Syslog 目标（`udp://host:514`、`tcp://host:514`、socket）               | Host:port、带协议前缀的主机或 socket 路径       | unset                                                             |
+| `LOG_SYSLOG_TAG`                | Syslog tag                                                              | 字符串                                          | `bw-api`                                                          |
+| `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn worker/线程                                                    | 整数或 unset 表示自动                           | unset                                                             |
+| `MAX_REQUESTS`                  | Worker 回收前的请求数（Gunicorn，防止内存膨胀）                         | 整数                                            | `1000`                                                            |
+| `CAPTURE_OUTPUT`                | 将 Gunicorn stdout/stderr 汇入配置的处理器                              | `yes` 或 `no`                                   | `no`                                                              |
 
 ## API 面（能力映射）
 
