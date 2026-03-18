@@ -46,6 +46,7 @@ REAL_IP_HEADER=${REAL_IP_HEADER}
 HTTP_PORT=${HTTP_PORT}
 HTTPS_PORT=${HTTPS_PORT}
 KEEP_CONFIG_ON_RESTART=${KEEP_CONFIG_ON_RESTART}
+DATABASE_URI=${DATABASE_URI}
 EOF
 }
 
@@ -146,6 +147,7 @@ function start() {
         [HTTP_PORT]="80"
         [HTTPS_PORT]="443"
         [KEEP_CONFIG_ON_RESTART]="no"
+        [DATABASE_URI]="sqlite:////var/lib/bunkerweb/db.sqlite3"
     )
 
     # File containing the environment variables
