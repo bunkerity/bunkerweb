@@ -54,9 +54,57 @@ from urllib.parse import urlparse, urlunparse
 LOGGER = getLogger("bw_db_migrate")
 basicConfig(level=INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
-__version__ = "0.5"
-_MAX_LOG_LEN = 2048
+__version__ = "0.5.5"
+_MAX_LOG_LEN = 32768  # large enough for full table output (29+ rows × ~170 chars)
 _DUMP_ROOT = Path("/tmp/bunkerweb/bw_db_migrate")
+_PID_FILE = _DUMP_ROOT / "bw_db_migrate.pid"
+
+
+def _pid_write(step: str) -> None:
+    """Write/update the PID file with current PID, timestamp, and step name.
+
+    Updated at each major migration step so operators can tell if a run is
+    active and how far it has progressed. Also used to detect concurrent runs.
+    """
+    try:
+        _DUMP_ROOT.mkdir(parents=True, exist_ok=True)
+        _PID_FILE.write_text(
+            f"pid={os.getpid()}\n"
+            f"time={datetime.now().isoformat(timespec='seconds')}\n"
+            f"step={step}\n",
+            encoding="utf-8",
+        )
+    except Exception:
+        pass
+
+
+def _pid_check_concurrent() -> Optional[str]:
+    """Return a warning string if another instance appears to be running, else None."""
+    try:
+        if not _PID_FILE.exists():
+            return None
+        data = dict(line.split("=", 1) for line in _PID_FILE.read_text(encoding="utf-8").splitlines() if "=" in line)
+        other_pid = int(data.get("pid", 0))
+        step = data.get("step", "unknown")
+        ts = data.get("time", "unknown")
+        if other_pid and other_pid != os.getpid():
+            # Check if the process is actually alive
+            try:
+                os.kill(other_pid, 0)
+                return f"PID {other_pid} (started {ts}, step: {step})"
+            except OSError:
+                return None  # process is dead — stale PID file
+    except Exception:
+        pass
+    return None
+
+
+def _pid_remove() -> None:
+    """Remove the PID file on clean exit."""
+    try:
+        _PID_FILE.unlink(missing_ok=True)
+    except Exception:
+        pass
 
 
 def _sanitize_message(text: object) -> str:
@@ -96,7 +144,7 @@ def _log_truncated(level: int, msg: object, *args, exc_info=None) -> None:
 
     formatted = _sanitize_message(formatted)
     if len(formatted) > _MAX_LOG_LEN:
-        formatted = formatted[:_MAX_LOG_LEN]
+        formatted = formatted[:_MAX_LOG_LEN] + "\n... [LOG MESSAGE TRUNCATED]"
 
     LOGGER.log(level, formatted, exc_info=exc_info)
 
@@ -340,12 +388,15 @@ def _create_engine(uri: str, *, engine_kwargs: Optional[Dict[str, object]] = Non
     kwargs: Dict[str, object] = dict(engine_kwargs or {"future": True, "pool_pre_ping": True, "pool_recycle": 1800})
 
     try:
+        from urllib.parse import unquote
+
         url = make_url(normalized_uri)
         drivername = (url.drivername or "").lower()
         if "pymysql" in drivername:
             query = dict(url.query or {})
             ssl_ca = query.get("ssl_ca") or query.get("sslrootcert")
             if ssl_ca:
+                ssl_ca = unquote(ssl_ca)
                 # PyMySQL requires ssl as a dict in connect_args, not a query string param
                 existing_ssl: dict = {}
                 if isinstance(kwargs.get("connect_args"), dict):
@@ -354,6 +405,26 @@ def _create_engine(uri: str, *, engine_kwargs: Optional[Dict[str, object]] = Non
                 connect_args = dict(kwargs.get("connect_args") or {})  # type: ignore[arg-type]
                 connect_args["ssl"] = existing_ssl
                 kwargs["connect_args"] = connect_args
+        elif "psycopg" in drivername:
+            query = dict(url.query or {})
+            ssl_rootcert = query.get("sslrootcert")
+            if ssl_rootcert:
+                ssl_rootcert = unquote(ssl_rootcert)
+                # Update query with decoded path so psycopg receives the real filesystem path
+                query["sslrootcert"] = ssl_rootcert
+                url = url.set(query=query)
+                normalized_uri = str(url)
+    except Exception:
+        pass
+
+    # Inject a connect_timeout (seconds) into connect_args for all drivers unless
+    # the caller already set one. Probe/test connections use 2 s; the main migration
+    # engines pass connect_timeout=900 (15 min) via engine_kwargs so large imports
+    # are not interrupted.
+    try:
+        connect_args = dict(kwargs.get("connect_args") or {})  # type: ignore[arg-type]
+        connect_args.setdefault("connect_timeout", 2)
+        kwargs["connect_args"] = connect_args
     except Exception:
         pass
 
@@ -523,6 +594,52 @@ def _sqlite_snapshot_if_wal(source_uri: str, dump_dir: Path) -> str:
             pass
 
 
+def _tls_status(version: str, cipher_name: str) -> str:
+    """Return a short status string for a TLS connection (used in the overview table)."""
+    issues = []
+    if not version or not (version.startswith("TLSv1.2") or version.startswith("TLSv1.3")):
+        issues.append(f"old-protocol({version or 'none'})")
+    upper = (cipher_name or "").upper()
+    if version and not version.startswith("TLSv1.3"):
+        if cipher_name and not any(t in upper for t in ("DHE", "ECDHE")):
+            issues.append("no-FS")
+    if "RSA" in upper and "ECDSA" not in upper:
+        issues.append("RSA-cipher")
+    return "WARN: " + ", ".join(issues) if issues else "OK"
+
+
+def _analyze_tls_strength(version: str, cipher_name: str) -> None:
+    """Emit warnings for weak TLS settings and a GOOD line when everything
+    looks strong (modern protocol + forward secrecy)."""
+    weak = False
+    if not version or not (version.startswith("TLSv1.2") or version.startswith("TLSv1.3")):
+        LOGGER.warning(
+            "TLS configuration: WARNING – old or unknown TLS version in use (%s). "
+            "Prefer TLSv1.2 or TLSv1.3.",
+            version or "(none)",
+        )
+        weak = True
+    upper_cipher = cipher_name.upper() if cipher_name else ""
+    if version and not version.startswith("TLSv1.3"):
+        if cipher_name and not any(token in upper_cipher for token in ("DHE", "ECDHE")):
+            LOGGER.warning(
+                "TLS configuration: WARNING – cipher without forward secrecy in use (%s). "
+                "Prefer ECDHE/DHE-based ciphers.",
+                cipher_name,
+            )
+            weak = True
+    if "RSA" in upper_cipher and "ECDSA" not in upper_cipher:
+        LOGGER.warning(
+            "TLS configuration: WARNING – RSA-based cipher negotiated (%s). "
+            "It is recommended to migrate to ECDSA certificates with EC keys "
+            "for stronger security and better performance.",
+            cipher_name or "(unknown)",
+        )
+        weak = True
+    if not weak:
+        LOGGER.info("TLS configuration: GOOD – all TLS tests passed with modern protocol and forward-secret cipher.")
+
+
 def _verify_mysql_ssl_and_log_details(target_uri: str) -> None:
     """
     Perform an explicit MySQL SSL/TLS verification handshake using PyMySQL so we can:
@@ -663,44 +780,6 @@ def _verify_mysql_ssl_and_log_details(target_uri: str) -> None:
             LOGGER.warning("%s: unable to dump server certificate PEM: %s", context, pem_exc)
         return version, cipher_name
 
-    def _analyze_tls_strength(version: str, cipher_name: str) -> None:
-        """
-        Emit warnings for weak TLS settings and a GOOD line when everything
-        looks strong (modern protocol + forward secrecy).
-        """
-        weak = False
-        if not version or not (version.startswith("TLSv1.2") or version.startswith("TLSv1.3")):
-            LOGGER.warning(
-                "TLS configuration: WARNING – old or unknown TLS version in use (%s). "
-                "Prefer TLSv1.2 or TLSv1.3.",
-                version or "(none)",
-            )
-            weak = True
-        # Forward secrecy:
-        # - For TLS 1.3, all standard cipher suites provide FS by design.
-        # - For TLS <= 1.2, require DHE/ECDHE in the cipher name.
-        upper_cipher = cipher_name.upper() if cipher_name else ""
-        if version and not version.startswith("TLSv1.3"):
-            if cipher_name and not any(token in upper_cipher for token in ("DHE", "ECDHE")):
-                LOGGER.warning(
-                    "TLS configuration: WARNING – cipher without forward secrecy in use (%s). "
-                    "Prefer ECDHE/DHE-based ciphers.",
-                    cipher_name,
-                )
-                weak = True
-        # Key type recommendation: if RSA-based cipher is in use, recommend
-        # switching to ECDSA/EC keys in line with modern guidance (e.g. BSI 3072+
-        # RSA or equivalent EC strength).
-        if "RSA" in upper_cipher and "ECDSA" not in upper_cipher:
-            LOGGER.warning(
-                "TLS configuration: WARNING – RSA-based cipher negotiated (%s). "
-                "It is recommended to migrate to ECDSA certificates with EC keys "
-                "for stronger security and better performance.",
-                cipher_name or "(unknown)",
-            )
-            weak = True
-        if not weak:
-            LOGGER.info("TLS configuration: GOOD – all TLS tests passed with modern protocol and forward-secret cipher.")
 
     # First, try with full verification.
     try:
@@ -770,6 +849,324 @@ def _verify_mysql_ssl_and_log_details(target_uri: str) -> None:
         except Exception as diag_exc:
             LOGGER.error("Additional SSL diagnostics connection failed: %s", diag_exc)
         raise
+
+
+_TLS13_CIPHERSUITES = [
+    "TLS_AES_256_GCM_SHA384",
+    "TLS_AES_128_GCM_SHA256",
+    "TLS_CHACHA20_POLY1305_SHA256",
+]
+
+_TLS12_CIPHERS = [
+    # Forward-secret ECDSA (preferred)
+    ("ECDHE-ECDSA-AES256-GCM-SHA384",   True,  False),
+    ("ECDHE-ECDSA-AES128-GCM-SHA256",   True,  False),
+    ("ECDHE-ECDSA-CHACHA20-POLY1305",   True,  False),
+    ("ECDHE-ECDSA-AES256-SHA384",       True,  False),
+    # Forward-secret RSA
+    ("ECDHE-RSA-AES256-GCM-SHA384",     True,  False),
+    ("ECDHE-RSA-AES128-GCM-SHA256",     True,  False),
+    ("ECDHE-RSA-CHACHA20-POLY1305",     True,  False),
+    ("ECDHE-RSA-AES256-SHA384",         True,  False),
+    ("DHE-RSA-AES256-GCM-SHA384",       True,  False),
+    ("DHE-RSA-AES128-GCM-SHA256",       True,  False),
+    # No forward secrecy (RSA key exchange)
+    ("AES256-GCM-SHA384",               False, False),
+    ("AES128-GCM-SHA256",               False, False),
+    ("AES256-SHA256",                   False, False),
+    ("AES128-SHA256",                   False, False),
+    # Weak / legacy
+    ("DES-CBC3-SHA",                    False, True),
+    ("RC4-SHA",                         False, True),
+    ("RC4-MD5",                         False, True),
+    ("EXP-RC4-MD5",                     False, True),
+]
+
+
+def _enumerate_node_ciphers(
+    host: str,
+    port: int,
+    *,
+    ca_file: Optional[str] = None,
+    starttls: str = "",
+    connect_ip: Optional[str] = None,
+) -> None:
+    """Probe host:port for each TLS 1.2 and TLS 1.3 cipher and log which are accepted.
+    Flags ciphers without forward secrecy or known-weak ciphers as warnings."""
+    import ssl as _ssl
+
+    def _try_cipher(tls_version: str, cipher_str: str, tls13: bool) -> Optional[str]:
+        """Attempt a handshake with a single cipher. Returns negotiated cipher name or None."""
+        try:
+            ctx = _ssl.SSLContext(_ssl.PROTOCOL_TLS_CLIENT)
+            ctx.check_hostname = True
+            ctx.verify_mode = _ssl.CERT_REQUIRED
+            if ca_file:
+                ctx.load_verify_locations(cafile=ca_file)
+            else:
+                ctx.load_default_certs()
+                ctx.set_default_verify_paths()
+            if tls13:
+                # Allow TLS 1.2 as minimum so the server can still negotiate —
+                # we pin only the ciphersuite and check the negotiated version afterward.
+                ctx.minimum_version = _ssl.TLSVersion.TLSv1_2
+                ctx.maximum_version = _ssl.TLSVersion.TLSv1_3
+                try:
+                    ctx.set_ciphersuites(cipher_str)
+                    # Disable all TLS 1.2 ciphers so only the TLS 1.3 suite is offered
+                    ctx.set_ciphers("NULL")
+                except Exception:
+                    pass  # set_ciphers("NULL") may fail on some builds; still try
+            else:
+                ctx.minimum_version = _ssl.TLSVersion.TLSv1_2
+                ctx.maximum_version = _ssl.TLSVersion.TLSv1_2
+                try:
+                    ctx.set_ciphers(cipher_str)
+                except Exception:
+                    return None
+            with socket.create_connection((connect_ip or host, port), timeout=1) as raw:
+                if starttls == "postgres":
+                    raw.sendall(b"\x00\x00\x00\x08\x04\xd2\x16\x2f")
+                    if raw.recv(1) != b"S":
+                        return None
+                with ctx.wrap_socket(raw, server_hostname=host) as s:
+                    negotiated = s.cipher()
+                    neg_version = s.version() or ""
+                    neg_name = negotiated[0] if isinstance(negotiated, (tuple, list)) else str(negotiated)
+                    # For TLS 1.3 probes, only count as accepted if TLS 1.3 was actually negotiated
+                    if tls13 and not neg_version.startswith("TLSv1.3"):
+                        return None
+                    return neg_name
+        except (_ssl.SSLError, OSError):
+            return None
+        except Exception:
+            return None
+
+    accepted_fs: list = []
+    accepted_no_fs: list = []
+    accepted_weak: list = []
+
+    for cs in _TLS13_CIPHERSUITES:
+        name = _try_cipher("TLSv1.3", cs, tls13=True)
+        if name:
+            accepted_fs.append(f"  TLSv1.3  {name}")
+
+    for cipher_name, fs, weak in _TLS12_CIPHERS:
+        name = _try_cipher("TLSv1.2", cipher_name, tls13=False)
+        if name:
+            entry = f"  TLSv1.2  {name}"
+            if weak:
+                accepted_weak.append(entry)
+            elif fs:
+                accepted_fs.append(entry)
+            else:
+                accepted_no_fs.append(entry)
+
+    lines = []
+    if accepted_fs:
+        lines.append("  [OK ] Forward-secret ciphers accepted:")
+        lines.extend(f"        {l.strip()}" for l in accepted_fs)
+    if accepted_no_fs:
+        lines.append("  [WARN] Non-forward-secret ciphers accepted (no PFS):")
+        lines.extend(f"        {l.strip()}" for l in accepted_no_fs)
+    if accepted_weak:
+        lines.append("  [CRIT] Weak/legacy ciphers accepted:")
+        lines.extend(f"        {l.strip()}" for l in accepted_weak)
+    if not lines:
+        lines.append("  (no ciphers matched — server may require SNI or mutual TLS)")
+
+    label = connect_ip or host
+    if accepted_weak:
+        LOGGER.warning("Cipher enumeration for %s:%d (%s):\n%s", host, port, label, "\n".join(lines))
+    elif accepted_no_fs:
+        LOGGER.warning("Cipher enumeration for %s:%d (%s):\n%s", host, port, label, "\n".join(lines))
+    else:
+        LOGGER.info("Cipher enumeration for %s:%d (%s):\n%s", host, port, label, "\n".join(lines))
+
+
+def _log_ssl_chain(host: str, port: int, *, ca_file: Optional[str] = None, starttls: str = "", connect_ip: Optional[str] = None) -> Optional[Dict[str, str]]:
+    """Fetch the full TLS certificate chain from host:port and log each certificate's
+    subject, issuer, validity, and SAN.  The root CA issuer is highlighted so operators
+    know which CA PEM to extract if they need to configure one manually.
+
+    starttls: optional protocol hint passed to openssl for STARTTLS handshakes
+    (e.g. "postgres", "mysql").  When empty, a direct TLS connection is used.
+    """
+    import ssl
+    import socket
+
+    try:
+        ctx = ssl.create_default_context(cafile=ca_file)
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE  # we want the chain regardless of validity
+
+        # Connect to the specific IP if given (keeps hostname for SNI/pg_hba matching)
+        with socket.create_connection((connect_ip or host, port), timeout=5) as raw_sock:
+            if starttls == "postgres":
+                # PostgreSQL STARTTLS: send SSLRequest message
+                raw_sock.sendall(b"\x00\x00\x00\x08\x04\xd2\x16\x2f")
+                resp = raw_sock.recv(1)
+                if resp != b"S":
+                    LOGGER.warning("SSL chain probe: PostgreSQL server declined SSL (response=%r)", resp)
+                    return
+            with ctx.wrap_socket(raw_sock, server_hostname=host) as tls_sock:
+                # TLS cipher/protocol analysis (same checks as MySQL path)
+                cipher = tls_sock.cipher()
+                version = tls_sock.version() or ""
+                cipher_name = cipher[0] if isinstance(cipher, (tuple, list)) and cipher else str(cipher)
+                LOGGER.info("SSL probe: protocol=%s cipher=%s", version, cipher)
+                _analyze_tls_strength(version, cipher_name)
+
+                # Fetch DER-encoded chain
+                try:
+                    chain = tls_sock.get_verified_chain()  # Python 3.13+
+                except AttributeError:
+                    chain = None
+
+                root_ca_issuer: Optional[str] = None  # populated from chain root cert below
+                root_ca_pem: Optional[str] = None
+                cert_critical = False
+                cert_expiry: Optional[str] = None
+                cert_ttl_str: Optional[str] = None
+                if chain:
+                    for depth, cert_obj in enumerate(chain):
+                        issuer, is_critical, pem = _log_chain_cert(depth, len(chain), cert_obj)
+                        if issuer is not None:
+                            root_ca_issuer = issuer
+                            root_ca_pem = pem
+                        if depth == 0:
+                            # Always capture expiry from the leaf cert for the TLS overview table
+                            try:
+                                from cryptography.x509 import load_der_x509_certificate as _ldx
+                                from datetime import timezone as _tz2
+                                _c = _ldx(bytes(cert_obj) if isinstance(cert_obj, (bytes, bytearray)) else cert_obj)
+                                _exp = _c.not_valid_after_utc
+                                _rem = _exp - datetime.now(_tz2.utc)
+                                cert_expiry = _exp.strftime("%Y-%m-%d")
+                                _total_secs = int(_rem.total_seconds())
+                                if _total_secs < 3600:
+                                    cert_ttl_str = f"{max(0, _total_secs // 60)}m"
+                                elif _total_secs < 86400:
+                                    cert_ttl_str = f"{_total_secs // 3600}h"
+                                else:
+                                    cert_ttl_str = f"{_total_secs // 86400}d"
+                            except Exception:
+                                pass
+                            if is_critical:
+                                cert_critical = True
+                else:
+                    # Fallback: log only the leaf cert via getpeercert
+                    cert = tls_sock.getpeercert()
+                    if cert:
+                        LOGGER.info("SSL chain: leaf certificate subject=%s", cert.get("subject"))
+                        LOGGER.info("SSL chain: leaf certificate issuer=%s", cert.get("issuer"))
+                        LOGGER.info(
+                            "SSL chain: leaf certificate validity notBefore=%s notAfter=%s",
+                            cert.get("notBefore"), cert.get("notAfter"),
+                        )
+                        LOGGER.info(
+                            "SSL chain: root CA issuer not available (Python < 3.13); "
+                            "run: openssl s_client -connect %s:%d%s 2>/dev/null | openssl x509 -noout -issuer",
+                            host, port,
+                            f" -starttls {starttls}" if starttls else "",
+                        )
+
+                tls_info: Dict[str, str] = {
+                    "version": version,
+                    "cipher": cipher_name,
+                    "root_ca": root_ca_issuer or "",
+                    "root_ca_pem": root_ca_pem or "",
+                    "cert_critical": "1" if cert_critical else "0",
+                    "cert_expiry": cert_expiry or "",
+                    "cert_ttl": cert_ttl_str or "",
+                    "status": _tls_status(version, cipher_name),
+                }
+        return tls_info
+    except Exception as exc:
+        LOGGER.warning("SSL chain probe failed (non-fatal): %s", exc)
+    return None
+
+
+def _log_chain_cert(depth: int, total: int, cert_obj: object) -> tuple[Optional[str], bool]:
+    """Log a single certificate from the chain.
+    cert_obj may be raw DER bytes (Python ssl.get_verified_chain) or a
+    cryptography Certificate object.
+    """
+    try:
+        from cryptography.x509 import load_der_x509_certificate  # type: ignore[import]
+        from cryptography.hazmat.primitives.serialization import Encoding  # type: ignore[import]
+        import base64
+
+        # get_verified_chain() returns DER bytes; load them
+        if isinstance(cert_obj, (bytes, bytearray)):
+            der = bytes(cert_obj)
+        else:
+            der = cert_obj.public_bytes(Encoding.DER)  # type: ignore[attr-defined]
+
+        from datetime import timezone as _tz, timedelta as _td
+
+        c = load_der_x509_certificate(der)
+        is_root = depth == total - 1
+        label = "root CA" if is_root else f"chain[{depth}]"
+        LOGGER.info("SSL chain %s subject: %s", label, c.subject.rfc4514_string())
+        LOGGER.info("SSL chain %s issuer:  %s", label, c.issuer.rfc4514_string())
+        LOGGER.info(
+            "SSL chain %s validity: %s → %s",
+            label,
+            c.not_valid_before_utc.date(),
+            c.not_valid_after_utc.date(),
+        )
+        # Certificate expiry check — warn operators before renewal is urgent.
+        # Short-lived certs (total lifetime < 8 days, e.g. ACME 7-day certs) use
+        # tighter thresholds since they rotate frequently by design.
+        _now = datetime.now(_tz.utc)
+        _issued = c.not_valid_before_utc
+        _expires = c.not_valid_after_utc
+        _total_days = (_expires - _issued).days
+        _remaining = _expires - _now
+        _days = _remaining.days
+        _short_lived = _total_days < 8
+
+        _cert_critical = False
+        if _short_lived:
+            LOGGER.info(
+                "SSL chain %s is a short-lived certificate (total lifetime %d day(s), expires %s).",
+                label, _total_days, _expires.date(),
+            )
+            if _days < 1:
+                _cert_critical = True
+            elif _days <= 3:
+                LOGGER.warning(
+                    "SSL chain %s expires in %d day(s) (%s). Renewal required soon.",
+                    label, _days, _expires.date(),
+                )
+            elif _days <= 5:
+                LOGGER.info(
+                    "SSL chain %s expires in %d day(s) (%s).",
+                    label, _days, _expires.date(),
+                )
+        else:
+            if _days < 1:
+                _cert_critical = True
+            elif _days <= 3:
+                LOGGER.warning(
+                    "SSL chain %s expires in %d day(s) (%s). Urgent renewal required.",
+                    label, _days, _expires.date(),
+                )
+            elif _days <= 7:
+                LOGGER.info(
+                    "SSL chain %s expires in %d day(s) (%s). Renewal recommended soon.",
+                    label, _days, _expires.date(),
+                )
+        if is_root:
+            b64 = base64.b64encode(der).decode("ascii")
+            lines = [b64[i : i + 64] for i in range(0, len(b64), 64)]
+            pem = "-----BEGIN CERTIFICATE-----\n" + "\n".join(lines) + "\n-----END CERTIFICATE-----"
+            return c.issuer.rfc4514_string(), _cert_critical, pem
+        return None, _cert_critical, None
+    except Exception as exc:
+        LOGGER.warning("SSL chain cert[%d] decode failed: %s", depth, exc)
+    return None, False, None
 
 
 def _load_env_file(path: Path) -> Dict[str, str]:
@@ -1676,10 +2073,19 @@ def _ensure_target_empty(engine: Engine) -> None:
                 non_empty[table.name] = count
 
         if non_empty:
-            raise RuntimeError(f"Target database is not empty for BunkerWeb tables: {non_empty}")
+            total_rows = sum(non_empty.values())
+            table_list = ", ".join(f"{t}({n})" for t, n in sorted(non_empty.items()))
+            LOGGER.error(
+                "Target database already contains BunkerWeb data (%d rows across %d tables: %s).\n"
+                "  → To start a fresh migration, drop and recreate the target database first:\n"
+                "      DROP DATABASE bunkerweb; CREATE DATABASE bunkerweb;\n"
+                "  → Or if this migration already completed successfully, the target is ready to use.",
+                total_rows, len(non_empty), table_list,
+            )
+            raise RuntimeError("Target database is not empty — see error above for details.")
 
 
-def _run_alembic_upgrade(target_uri: str) -> None:
+def _run_alembic_upgrade(target_uri: str, *, engine_kwargs: Optional[Dict[str, object]] = None) -> None:
     """
     Run Alembic migrations up to head on the target URI.
     Catches and suppresses SystemExit(0) from Alembic, which is normal behavior.
@@ -1734,7 +2140,7 @@ def _run_alembic_upgrade(target_uri: str) -> None:
     # the base schema already exists. For a fresh target database we must create all
     # tables first, then stamp Alembic at head so future upgrades work correctly.
     LOGGER.info("Creating target schema via Base.metadata.create_all()...")
-    target_engine = _create_engine(target_uri)
+    target_engine = _create_engine(target_uri, engine_kwargs=engine_kwargs)
     Base.metadata.create_all(target_engine, checkfirst=True)
     LOGGER.info("Target schema created successfully.")
 
@@ -1889,25 +2295,37 @@ def _update_env_file_on_success(env_file: Path, target_uri: str) -> None:
         return
 
     lines = env_file.read_text(encoding="utf-8", errors="replace").splitlines()
-    commented_keys = ("DATABASE_URI", "DATABASE_URI_READONLY", "DB_MIGRATION", "DB_MIGRATION_TARGET_URI")
+    # Keys to comment out (old source URI + migration target key replaced by new DATABASE_URI below)
+    comment_keys = ("DATABASE_URI", "DATABASE_URI_READONLY", "DB_MIGRATION_TARGET_URI")
     new_lines = []
+    target_line_commented = False
     for raw in lines:
         stripped = raw.lstrip()
         if stripped.startswith("#"):
             new_lines.append(raw)
             continue
-        if any(stripped.startswith(f"{k}=") or stripped.startswith(f"export {k}=") for k in commented_keys):
-            # Comment out existing DB-related lines with a clear hint
-            new_lines.append(f"# commented out old settings by bw_db_migrate: {raw}")
+        is_old_db = any(stripped.startswith(f"{k}=") or stripped.startswith(f"export {k}=") for k in comment_keys)
+        if is_old_db:
+            is_target = stripped.startswith("DB_MIGRATION_TARGET_URI=") or stripped.startswith("export DB_MIGRATION_TARGET_URI=")
+            if is_target:
+                # Replace this line with DATABASE_URI pointing to the target
+                new_lines.append(f"# migrated by bw_db_migrate (was DB_MIGRATION_TARGET_URI): {raw}")
+                if not target_line_commented:
+                    new_lines.append(f"DATABASE_URI={target_uri}")
+                    target_line_commented = True
+            else:
+                new_lines.append(f"# commented out by bw_db_migrate: {raw}")
         else:
             new_lines.append(raw)
 
-    new_lines.append("")
-    new_lines.append("# Updated by bw_db_migrate after successful migration")
-    new_lines.append(f"DATABASE_URI={target_uri}")
+    # If DB_MIGRATION_TARGET_URI was not in the file, append DATABASE_URI at the end
+    if not target_line_commented:
+        new_lines.append("")
+        new_lines.append("# Added by bw_db_migrate after successful migration")
+        new_lines.append(f"DATABASE_URI={target_uri}")
 
     env_file.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
-    LOGGER.info("Updated env file %s with new DATABASE_URI.", env_file)
+    LOGGER.info("Updated env file %s: DATABASE_URI now points to migrated target.", env_file)
 
 
 def _copy_all_data(source_engine: Engine, target_engine: Engine) -> None:
@@ -1993,25 +2411,74 @@ def _copy_all_data(source_engine: Engine, target_engine: Engine) -> None:
         raise
 
 
-def _verify_all_data(source_engine: Engine, target_engine: Engine) -> None:
+def _verify_all_data(source_engine: Engine, target_engine: Engine, skipped_orphans: Optional[Dict[str, int]] = None) -> None:
     """
     Verify that per-table row counts match between source and target.
+    skipped_orphans: per-table count of intentionally skipped orphaned FK rows (source > target is OK by that amount).
+    Prints a summary table at the end showing source, target, skipped, and status per table.
     """
     tables = list(Base.metadata.sorted_tables)
     total = max(1, len(tables))
+    skipped_orphans = skipped_orphans or {}
+    mismatch_error: Optional[str] = None
+
+    # Collect results for the summary table
+    _results: list[tuple[str, int, int, int, str]] = []  # (table, src, tgt, orphans, status)
+
     with source_engine.connect() as src_conn, target_engine.connect() as tgt_conn:
         start = time.monotonic()
         for idx, table in enumerate(tables, start=1):
             _progress(f"[{idx}/{total}] Verifying {table.name} ...")
-            src_count = src_conn.execute(text(f"SELECT COUNT(1) FROM {table.name}")).scalar_one()
-            tgt_count = tgt_conn.execute(text(f"SELECT COUNT(1) FROM {table.name}")).scalar_one()
-            if src_count != tgt_count:
+            src_count = int(src_conn.execute(text(f"SELECT COUNT(1) FROM {table.name}")).scalar_one())
+            tgt_count = int(tgt_conn.execute(text(f"SELECT COUNT(1) FROM {table.name}")).scalar_one())
+            orphans = skipped_orphans.get(table.name, 0)
+            expected_tgt = src_count - orphans
+            if tgt_count != expected_tgt:
                 _progress_done()
-                raise RuntimeError(f"Row count mismatch for {table.name}: source={src_count}, target={tgt_count}")
-            LOGGER.info("Verified table %s: %s rows", table.name, src_count)
+                status = f"MISMATCH (expected {expected_tgt}, got {tgt_count})"
+                _results.append((table.name, src_count, tgt_count, orphans, status))
+                if not mismatch_error:
+                    if orphans:
+                        mismatch_error = (
+                            f"Row count mismatch for {table.name}: source={src_count}, "
+                            f"skipped_orphans={orphans}, expected_target={expected_tgt}, actual_target={tgt_count}"
+                        )
+                    else:
+                        mismatch_error = f"Row count mismatch for {table.name}: source={src_count}, target={tgt_count}"
+            else:
+                note = f"({orphans} orphans skipped)" if orphans else ""
+                status = f"OK {note}".strip()
+                _results.append((table.name, src_count, tgt_count, orphans, status))
             elapsed = time.monotonic() - start
-            _progress(f"[{idx}/{total}] Verified {table.name} ({src_count} rows) in {elapsed:.1f}s")
+            _progress(f"[{idx}/{total}] Verified {table.name} ({tgt_count} rows) in {elapsed:.1f}s")
     _progress_done()
+
+    # Print summary table
+    _col_tbl = max(len("Table"), max(len(r[0]) for r in _results))
+    _col_src = max(len("Source"), max(len(str(r[1])) for r in _results))
+    _col_tgt = max(len("Target"), max(len(str(r[2])) for r in _results))
+    _col_skip = max(len("Skipped"), max(len(str(r[3])) for r in _results))
+    _col_st = max(len("Status"), max(len(r[4]) for r in _results))
+    _sep = f"+-{'-' * _col_tbl}-+-{'-' * _col_src}-+-{'-' * _col_tgt}-+-{'-' * _col_skip}-+-{'-' * _col_st}-+"
+    _hdr = f"| {'Table':<{_col_tbl}} | {'Source':>{_col_src}} | {'Target':>{_col_tgt}} | {'Skipped':>{_col_skip}} | {'Status':<{_col_st}} |"
+    _rows = []
+    _has_issue = False
+    for _tname, _src, _tgt, _skip, _st in _results:
+        if _st.startswith("MISMATCH"):
+            _has_issue = True
+        _rows.append(f"| {_tname:<{_col_tbl}} | {_src:>{_col_src}} | {_tgt:>{_col_tgt}} | {_skip:>{_col_skip}} | {_st:<{_col_st}} |")
+    _total_src = sum(r[1] for r in _results)
+    _total_tgt = sum(r[2] for r in _results)
+    _total_skip = sum(r[3] for r in _results)
+    _total_st = "MISMATCH" if _has_issue else "OK"
+    _rows.append(_sep.replace("-", "-"))
+    _rows.append(f"| {'TOTAL':<{_col_tbl}} | {_total_src:>{_col_src}} | {_total_tgt:>{_col_tgt}} | {_total_skip:>{_col_skip}} | {_total_st:<{_col_st}} |")
+    _table_str = "\n".join([_sep, _hdr, _sep] + _rows + [_sep])
+    _log_fn = LOGGER.warning if _has_issue else LOGGER.info
+    _log_fn("Row count verification:\n%s", _table_str)
+
+    if mismatch_error:
+        raise RuntimeError(mismatch_error)
 
 
 _DUMP_BATCH_SIZE = 500  # rows per INSERT batch
@@ -2061,7 +2528,7 @@ def _dump_source_to_files(source_engine: Engine, dump_dir: Path) -> None:
     LOGGER.info("Dump complete: %d tables written to %s", total_tables, dump_dir)
 
 
-def _import_files_to_target(dump_dir: Path, target_engine: Engine) -> None:
+def _import_files_to_target(dump_dir: Path, target_engine: Engine) -> Dict[str, int]:
     """
     Import per-table JSONL files into the target database via SQLAlchemy bulk inserts.
     No native client tools required; SSL and auth are handled by the driver.
@@ -2073,6 +2540,8 @@ def _import_files_to_target(dump_dir: Path, target_engine: Engine) -> None:
     total_tables = max(1, len(tables))
 
     from sqlalchemy.sql.type_api import TypeDecorator
+
+    _all_skipped: Dict[str, int] = {}  # table_name -> orphaned rows skipped
 
     def _deserialise(v: object, col_type=None) -> object:
         if isinstance(v, dict) and "__b64__" in v:
@@ -2086,16 +2555,55 @@ def _import_files_to_target(dump_dir: Path, target_engine: Engine) -> None:
                 pass
         return v
 
-    # Detect if the target is MySQL/MariaDB so we can disable FK checks during import.
-    # SQLite source may have orphaned rows that SQLite silently accepted (FK enforcement
-    # is off by default in SQLite). MySQL enforces FK constraints at INSERT time, so we
-    # disable them for the bulk load and re-enable afterwards.
+    # Disable FK constraint enforcement during bulk import on all backends.
+    # The source DB (especially MySQL/SQLite) may have orphaned rows that were silently
+    # accepted because FK enforcement was off or missing on the source.
     is_mysql = target_engine.dialect.name in ("mysql", "mariadb")
+    is_pg    = target_engine.dialect.name == "postgresql"
+
+    # For PostgreSQL: session_replication_role=replica disables FK trigger checks.
+    # Requires the db user to have the REPLICATION attribute or superuser.
+    # If not available, fall back to filtering orphaned FK rows at insert time.
+    pg_fk_disabled = False
 
     with target_engine.connect() as tgt_conn:
         if is_mysql:
             tgt_conn.execute(text("SET FOREIGN_KEY_CHECKS=0"))
             tgt_conn.commit()
+        elif is_pg:
+            try:
+                tgt_conn.execute(text("SET session_replication_role = replica"))
+                tgt_conn.commit()
+                pg_fk_disabled = True
+                LOGGER.info("PostgreSQL FK checks disabled via session_replication_role=replica.")
+            except Exception as _pg_fk_exc:
+                tgt_conn.rollback()  # clear the aborted transaction before any further use
+                LOGGER.warning(
+                    "Could not disable PostgreSQL FK checks (session_replication_role requires REPLICATION privilege): %s. "
+                    "Will filter orphaned rows instead.",
+                    _pg_fk_exc,
+                )
+
+        # Pre-load FK parent sets for orphan filtering (used only when pg_fk_disabled=False)
+        # Maps table_name -> {fk_col -> set(known parent values)}
+        _fk_parent_cache: Dict[str, Dict[str, set]] = {}
+        if is_pg and not pg_fk_disabled:
+            for tbl in tables:
+                for fk in tbl.foreign_keys:
+                    parent_tbl = fk.column.table.name
+                    fk_col     = fk.parent.name
+                    if parent_tbl not in _fk_parent_cache:
+                        _fk_parent_cache[parent_tbl] = {}
+                    dump_file = dump_dir / f"{parent_tbl}.jsonl"
+                    if dump_file.is_file() and fk.column.name not in _fk_parent_cache.get(parent_tbl, {}):
+                        import json as _json2
+                        parent_vals: set = set()
+                        with dump_file.open("r", encoding="utf-8") as _pfh:
+                            for _praw in _pfh:
+                                _praw = _praw.strip()
+                                if _praw:
+                                    parent_vals.add(_json2.loads(_praw).get(fk.column.name))
+                        _fk_parent_cache.setdefault(parent_tbl, {})[fk.column.name] = parent_vals
 
         try:
             for idx, table in enumerate(tables, start=1):
@@ -2116,12 +2624,32 @@ def _import_files_to_target(dump_dir: Path, target_engine: Engine) -> None:
                         tgt_conn.execute(table.insert(), batch)
                         tgt_conn.commit()
 
+                # Build per-table FK filter for orphan detection (fallback when FK checks not disabled)
+                _fk_filters: list = []  # list of (row_col, parent_table, parent_col)
+                if is_pg and not pg_fk_disabled:
+                    for fk in table.foreign_keys:
+                        parent_vals = _fk_parent_cache.get(fk.column.table.name, {}).get(fk.column.name)
+                        if parent_vals is not None:
+                            _fk_filters.append((fk.parent.name, fk.column.table.name, fk.column.name, parent_vals))
+                _orphans_skipped = 0
+
                 with table_file.open("r", encoding="utf-8") as fh:
                     for raw in fh:
                         raw = raw.strip()
                         if not raw:
                             continue
                         row = {k: _deserialise(v, col_types.get(k)) for k, v in json.loads(raw).items()}
+                        # Skip orphaned rows that would violate FK constraints
+                        if _fk_filters:
+                            orphan = False
+                            for row_col, parent_tbl, parent_col, parent_vals in _fk_filters:
+                                val = row.get(row_col)
+                                if val is not None and val not in parent_vals:
+                                    orphan = True
+                                    break
+                            if orphan:
+                                _orphans_skipped += 1
+                                continue
                         batch.append(row)
                         row_count += 1
                         if len(batch) >= _DUMP_BATCH_SIZE:
@@ -2131,22 +2659,144 @@ def _import_files_to_target(dump_dir: Path, target_engine: Engine) -> None:
                                 _progress(f"[{idx}/{total_tables}] Importing {table.name} ({row_count} rows)")
 
                 _flush(batch)
-                LOGGER.info("[%d/%d] Imported %s: %d rows.", idx, total_tables, table.name, row_count)
+                if _orphans_skipped:
+                    _all_skipped[table.name] = _orphans_skipped
+                    LOGGER.warning(
+                        "[%d/%d] Imported %s: %d rows (%d orphaned FK rows skipped — "
+                        "referenced parent rows missing in source data).",
+                        idx, total_tables, table.name, row_count, _orphans_skipped,
+                    )
+                else:
+                    LOGGER.info("[%d/%d] Imported %s: %d rows.", idx, total_tables, table.name, row_count)
 
         finally:
             if is_mysql:
                 tgt_conn.execute(text("SET FOREIGN_KEY_CHECKS=1"))
                 tgt_conn.commit()
+            elif is_pg and pg_fk_disabled:
+                tgt_conn.execute(text("SET session_replication_role = DEFAULT"))
+                tgt_conn.commit()
+                LOGGER.info("PostgreSQL FK checks re-enabled.")
 
     _progress_done()
     LOGGER.info("Import complete: %d tables loaded into target.", total_tables)
+    return _all_skipped
 
 
-def main() -> int:
+def _fmt_bytes(n: int) -> str:
+    for unit in ("B", "KB", "MB", "GB", "TB"):
+        if n < 1024 or unit == "TB":
+            return f"{n:.1f} {unit}" if unit != "B" else f"{n} B"
+        n /= 1024  # type: ignore[assignment]
+    return f"{n:.1f} TB"
+
+
+def _check_source_size(source_engine: Engine, source_uri: str, dump_root: Path) -> None:
+    """Estimate the source DB size and compare against free space in the dump directory.
+    Logs a warning if free space is less than 2× the estimated source size."""
+    try:
+        uri_lower = source_uri.lower()
+        db_bytes: Optional[int] = None
+
+        with source_engine.connect() as conn:
+            if uri_lower.startswith("sqlite"):
+                # SQLite: page_count × page_size gives the actual file size
+                page_count = conn.execute(text("PRAGMA page_count")).scalar()
+                page_size  = conn.execute(text("PRAGMA page_size")).scalar()
+                if page_count and page_size:
+                    db_bytes = int(page_count) * int(page_size)
+            elif "mysql" in uri_lower or "mariadb" in uri_lower:
+                # MySQL/MariaDB: sum data_length + index_length from information_schema
+                row = conn.execute(text(
+                    "SELECT SUM(data_length + index_length) FROM information_schema.tables "
+                    "WHERE table_schema = DATABASE()"
+                )).fetchone()
+                if row and row[0] is not None:
+                    db_bytes = int(row[0])
+            elif "postgresql" in uri_lower or "psycopg" in uri_lower:
+                row = conn.execute(text("SELECT pg_database_size(current_database())")).fetchone()
+                if row and row[0] is not None:
+                    db_bytes = int(row[0])
+
+        if db_bytes is None:
+            LOGGER.info("Source database size: (could not determine)")
+            return
+
+        LOGGER.info("Source database size: %s", _fmt_bytes(db_bytes))
+
+        # Check free space in the dump directory's filesystem
+        try:
+            dump_root.mkdir(parents=True, exist_ok=True)
+            stat = shutil.disk_usage(dump_root)
+            free = stat.free
+            needed = db_bytes * 2  # dump files (JSONL) may expand vs raw binary storage
+            LOGGER.info(
+                "Temp space: %s free in %s (need ~%s for dump, 2× source size)",
+                _fmt_bytes(free), dump_root, _fmt_bytes(needed),
+            )
+            if free < needed:
+                LOGGER.warning(
+                    "LOW DISK SPACE: %s free in %s but ~%s needed (2× source size %s). "
+                    "Migration may fail mid-way. Free up space or point /tmp to a larger filesystem.",
+                    _fmt_bytes(free), dump_root, _fmt_bytes(needed), _fmt_bytes(db_bytes),
+                )
+        except Exception as exc:
+            LOGGER.warning("Could not check free space in %s: %s", dump_root, exc)
+
+    except Exception as exc:
+        LOGGER.warning("Source size check failed (non-fatal): %s", exc)
+
+
+def _print_tls_overview(tls_results: Dict[str, Dict[str, str]]) -> None:
+    """Print a compact TLS summary table for all probed hosts."""
+    if not tls_results:
+        return
+    _col_ip  = max(len("Host/IP"),  max(len(ip) for ip in tls_results))
+    _col_ver = max(len("Protocol"), max(len(i.get("version", "")) for i in tls_results.values()))
+    _col_cip = max(len("Cipher"),   max(len(i.get("cipher",  "")) for i in tls_results.values()))
+    _col_exp = max(len("Expires"),  max(len(i.get("cert_expiry", "")) for i in tls_results.values()))
+    _col_ttl = max(len("TTL"),      max(len(i.get("cert_ttl",    "")) for i in tls_results.values()))
+    _col_ca  = max(len("Root CA"),  max(len(i.get("root_ca",     "")) for i in tls_results.values()))
+    _col_st  = max(len("Status"),   max(len(i.get("status",      "")) for i in tls_results.values()))
+    _hdr = (
+        f"{'Host/IP':<{_col_ip}}  {'Protocol':<{_col_ver}}  {'Cipher':<{_col_cip}}"
+        f"  {'Expires':<{_col_exp}}  {'TTL':<{_col_ttl}}  {'Root CA':<{_col_ca}}  {'Status':<{_col_st}}"
+    )
+    _sep = "-" * len(_hdr)
+    _rows = []
+    _has_warn = False
+    for _ip, _info in tls_results.items():
+        _status = _info.get("status", "")
+        _crit_flag = " !! CRITICAL CERT EXPIRY" if _info.get("cert_critical") == "1" else ""
+        if _status.startswith("WARN") or _status.startswith("FAILED") or _crit_flag:
+            _has_warn = True
+        _rows.append(
+            "%-*s  %-*s  %-*s  %-*s  %-*s  %-*s  %-*s%s" % (
+                _col_ip,  _ip,
+                _col_ver, _info.get("version", ""),
+                _col_cip, _info.get("cipher",  ""),
+                _col_exp, _info.get("cert_expiry", ""),
+                _col_ttl, _info.get("cert_ttl",    ""),
+                _col_ca,  _info.get("root_ca",     ""),
+                _col_st,  _status,
+                _crit_flag,
+            )
+        )
+    _table = "\n".join([_sep, _hdr, _sep] + _rows + [_sep])
+    _log = LOGGER.warning if _has_warn else LOGGER.info
+    _log("TLS overview:\n%s", _table)
+
+
+def _main() -> int:
     """
     Entrypoint for the standalone migration script.
     """
     LOGGER.info("bw_db_migrate version %s running from: %s", __version__, Path(__file__).resolve())
+    concurrent = _pid_check_concurrent()
+    if concurrent:
+        LOGGER.warning("Another bw_db_migrate instance appears to be running: %s", concurrent)
+        LOGGER.warning("If that process is dead, remove %s and retry.", _PID_FILE)
+    _pid_write("startup")
     parser = argparse.ArgumentParser(
         description="Migrate BunkerWeb DB data between supported backends.",
         epilog=(
@@ -2181,7 +2831,38 @@ def main() -> int:
         help="Show what would be migrated (table and row counts) without changing the target database.",
     )
     parser.add_argument("--tui", action="store_true", help="Launch an interactive terminal UI to collect inputs.")
+    parser.add_argument("--debug", action="store_true", help="Enable DEBUG logging (prints all messages).")
     args = parser.parse_args()
+
+    if args.debug:
+        import logging as _logging
+        _logging.getLogger().setLevel(_logging.DEBUG)
+        LOGGER.setLevel(_logging.DEBUG)
+        LOGGER.debug("Debug logging enabled.")
+
+    _log_file: Optional[Path] = None
+    # Always write a full debug log to the temp dir (all levels, regardless of --debug flag)
+    try:
+        import logging as _logging2
+        _log_dir = Path("/tmp/bunkerweb/bw_db_migrate")
+        _log_dir.mkdir(parents=True, exist_ok=True)
+        # Use a timestamped filename so each run gets its own log file.
+        _log_ts = datetime.now().strftime("%Y%m%d-%H%M%S")
+        _log_file = _log_dir / f"bw_db_migrate_{_log_ts}.log"
+        _fh = _logging2.FileHandler(_log_file, mode="w", encoding="utf-8")
+        _fh.setLevel(_logging2.DEBUG)
+        _fh.setFormatter(_logging2.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
+        _logging2.getLogger().addHandler(_fh)
+        LOGGER.info("Debug log file: %s", _log_file)
+        # Prune old logs, keeping only the 5 most recent.
+        _old_logs = sorted(_log_dir.glob("bw_db_migrate_*.log"), key=lambda p: p.stat().st_mtime)
+        for _old in _old_logs[:-5]:
+            try:
+                _old.unlink()
+            except Exception:
+                pass
+    except Exception as _fh_exc:
+        LOGGER.warning("Unable to create debug log file: %s", _fh_exc)
 
     update_env_file = False
     tui_dry_run = False
@@ -2215,12 +2896,19 @@ def main() -> int:
     for k, v in os.environ.items():
         settings[k] = v
     engine_kwargs = _engine_kwargs_from_settings(settings)
+    # Main migration engines get a 15-minute connect timeout so large imports are
+    # not interrupted. Probe/test connections override this back to 2 s themselves.
+    _main_connect_args = dict(engine_kwargs.get("connect_args") or {})  # type: ignore[arg-type]
+    _main_connect_args["connect_timeout"] = 900
+    engine_kwargs["connect_args"] = _main_connect_args
 
-    # Ensure dump root exists and clean up any leftovers from previous runs.
+    # Ensure dump root exists and clean up any stale dump-* subdirs from previous runs.
+    # The root itself is kept so any existing debug log is not deleted.
     try:
-        if _DUMP_ROOT.exists():
-            shutil.rmtree(_DUMP_ROOT)
         _DUMP_ROOT.mkdir(parents=True, exist_ok=True)
+        for _stale in _DUMP_ROOT.glob("dump-*"):
+            if _stale.is_dir():
+                shutil.rmtree(_stale)
     except Exception as exc:
         LOGGER.error("Unable to prepare dump directory %s: %s", _DUMP_ROOT, exc)
         return 1
@@ -2254,6 +2942,7 @@ def main() -> int:
             conn.execute(text("SELECT 1"))
 
         # Only touch target when we have a target URI (dry-run can be source-only).
+        _all_tls_results: Dict[str, Dict[str, str]] = {}  # ip -> tls_info, populated during SSL probe
         if target_uri:
             ssl_expected = _uri_uses_ssl(target_uri)
             host, port = _resolve_target_host_port(target_uri)
@@ -2270,11 +2959,181 @@ def main() -> int:
                 LOGGER.info("SSL verification: verifying server certificate (CA=%s).", ca_path if ca_path else "system-default")
 
             target_engine = _create_engine(target_uri, engine_kwargs=engine_kwargs)
-            with target_engine.connect() as conn:
-                conn.execute(text("SELECT 1"))
+            try:
+                with target_engine.connect() as conn:
+                    conn.execute(text("SELECT 1"))
+            except Exception as ssl_exc:
+                err_str = str(ssl_exc).lower()
+                if ssl_expected and ("certificate" in err_str or "ssl" in err_str or "tls" in err_str):
+                    # SSL cert verification failed — try falling back to system CA bundle
+                    LOGGER.error("SSL certificate verification failed with configured CA: %s", ssl_exc)
+                    try:
+                        from sqlalchemy.engine.url import make_url as _mu
+
+                        _url = _mu(target_uri)
+                        _q = dict(_url.query or {})
+                        _q.pop("sslrootcert", None)  # remove custom CA → use system bundle
+                        _q.pop("ssl_ca", None)
+                        _sysca_uri = str(_url.set(query=_q))
+                        _sysca_engine = _create_engine(_sysca_uri, engine_kwargs=engine_kwargs)
+                        with _sysca_engine.connect() as _conn:
+                            _conn.execute(text("SELECT 1"))
+                        # System CA succeeded — switch to it and continue
+                        LOGGER.error(
+                            "The configured CA file does not match the server certificate, "
+                            "but the system CA bundle validates it successfully. "
+                            "Remove the sslrootcert / ssl_ca parameter from your target URI to use the system CA."
+                        )
+                        target_engine = _sysca_engine
+                        target_uri = _sysca_uri
+                        LOGGER.info("Falling back to system CA bundle for target connection.")
+                    except Exception as sysca_exc:
+                        err_sysca = str(sysca_exc).lower()
+                        if "password" in err_sysca or "authentication" in err_sysca:
+                            # Auth failure means SSL handshake with system CA succeeded
+                            LOGGER.error(
+                                "The configured CA file does not match the server certificate, "
+                                "but the system CA bundle validates it successfully. "
+                                "Remove the sslrootcert / ssl_ca parameter from your target URI to use the system CA."
+                            )
+                            target_engine = _create_engine(_sysca_uri, engine_kwargs=engine_kwargs)
+                            target_uri = _sysca_uri
+                            LOGGER.info("Falling back to system CA bundle for target connection.")
+                        else:
+                            LOGGER.warning("System CA bundle fallback also failed: %s", sysca_exc)
+                            raise ssl_exc
+                else:
+                    _err_lower = str(ssl_exc).lower()
+                    if "password" in _err_lower or "authentication failed" in _err_lower:
+                        LOGGER.error(
+                            "Authentication failed for target database: %s\n"
+                            "  → Check that the user exists and the password in DB_MIGRATION_TARGET_URI is correct.\n"
+                            "  → If you just recreated the user/database, make sure the new password matches.",
+                            _mask_uri_password(target_uri),
+                        )
+                        return 1
+                    raise
             if ssl_expected:
                 # Perform explicit verification and certificate introspection for MySQL/MariaDB+pymysql.
                 _verify_mysql_ssl_and_log_details(target_uri)
+                # Fetch and log the full certificate chain including root CA.
+                # When multiple IPs resolve (HA cluster), probe each node so all
+                # certificates are verified — nodes may have different leaf certs.
+                _starttls = "postgres" if ("postgresql" in target_uri.lower() or "psycopg" in target_uri.lower()) else ""
+                _probe_ips = ips if ips else [host]
+                _probe_port = int(port) if port else (5432 if _starttls == "postgres" else 3306)
+                if len(_probe_ips) > 1:
+                    LOGGER.info(
+                        "HA cluster detected: %d nodes resolved for %s (%s). "
+                        "Probing each node for TLS certificate and cipher verification.",
+                        len(_probe_ips), host, ", ".join(_probe_ips),
+                    )
+                _node_tls_results: Dict[str, Dict[str, str]] = {}
+                for _probe_ip in _probe_ips:  # type: ignore[assignment]
+                    _connect_ip_arg = _probe_ip if _probe_ip != host else None
+                    LOGGER.info("SSL chain probe: node %s (%s:%s)", _probe_ip, host, _probe_port)
+                    _tls_info = _log_ssl_chain(
+                        host or _probe_ip,
+                        _probe_port,
+                        ca_file=ca_path or None,
+                        starttls=_starttls,
+                        connect_ip=_connect_ip_arg,
+                    )
+                    if _tls_info:
+                        _node_tls_results[_probe_ip] = _tls_info
+                        _all_tls_results[_probe_ip] = _tls_info
+                    else:
+                        _failed: Dict[str, str] = {"status": "FAILED: connection error"}
+                        _node_tls_results[_probe_ip] = _failed
+                        _all_tls_results[_probe_ip] = _failed
+                    _enumerate_node_ciphers(
+                        host or _probe_ip,
+                        _probe_port,
+                        ca_file=ca_path or None,
+                        starttls=_starttls,
+                        connect_ip=_connect_ip_arg,
+                    )
+
+                # Compare TLS settings across all nodes
+                _ok_tls_results = {_ip: _info for _ip, _info in _node_tls_results.items() if _info.get("version")}
+                if len(_ok_tls_results) == 1:
+                    # Single node: just print the PEM once
+                    _solo = next(iter(_ok_tls_results.values()))
+                    if _solo.get("root_ca_pem"):
+                        LOGGER.info("Root CA: %s", _solo.get("root_ca", ""))
+                        LOGGER.info("Root CA PEM (save to a .pem file if needed):\n%s", _solo["root_ca_pem"])
+                if len(_ok_tls_results) > 1:
+                    _ref_ip, _ref = next(iter(_ok_tls_results.items()))
+                    _mismatches = [
+                        f"  {_ip}: version={_info['version']} cipher={_info['cipher']} "
+                        f"(expected version={_ref['version']} cipher={_ref['cipher']})"
+                        for _ip, _info in _ok_tls_results.items()
+                        if _info != _ref
+                    ]
+                    if _mismatches:
+                        LOGGER.warning(
+                            "TLS configuration MISMATCH across cluster nodes "
+                            "(reference node %s: version=%s cipher=%s):\n%s",
+                            _ref_ip, _ref["version"], _ref["cipher"],
+                            "\n".join(_mismatches),
+                        )
+                    else:
+                        LOGGER.info(
+                            "TLS configuration consistent across all %d cluster nodes "
+                            "(version=%s cipher=%s).",
+                            len(_ok_tls_results), _ref["version"], _ref["cipher"],
+                        )
+
+                    # Compare root CA issuers across nodes
+                    _ca_map: Dict[str, str] = {_ip: _info["root_ca"] for _ip, _info in _ok_tls_results.items() if _info.get("root_ca")}
+                    _unique_cas = set(_ca_map.values())
+                    if len(_unique_cas) > 1:
+                        LOGGER.warning(
+                            "Root CA MISMATCH across cluster nodes — nodes present certificates "
+                            "from different CAs. This may cause intermittent SSL verification failures "
+                            "depending on which node a client connects to:\n%s",
+                            "\n".join(f"  {_ip}: {_ca}" for _ip, _ca in _ca_map.items()),
+                        )
+                        # Print one PEM block per distinct CA so the operator can identify them
+                        _seen_pems: set = set()
+                        for _ip, _info in _ok_tls_results.items():
+                            _pem = _info.get("root_ca_pem", "")
+                            if _pem and _pem not in _seen_pems:
+                                _seen_pems.add(_pem)
+                                LOGGER.warning(
+                                    "Root CA PEM for %s (%s):\n%s",
+                                    _info.get("root_ca", "(unknown)"), _ip, _pem,
+                                )
+                    elif _unique_cas:
+                        _ca_issuer = next(iter(_unique_cas))
+                        _ca_pem = next((i.get("root_ca_pem", "") for i in _ok_tls_results.values() if i.get("root_ca_pem")), "")
+                        LOGGER.info("Root CA consistent across all %d cluster nodes: %s", len(_ca_map), _ca_issuer)
+                        if _ca_pem:
+                            LOGGER.info("Root CA PEM (save to a .pem file if needed):\n%s", _ca_pem)
+
+                # Block migration if any cluster node is unreachable
+                _failed_nodes = [_ip for _ip, _info in _node_tls_results.items() if _info.get("status", "").startswith("FAILED")]
+                if _failed_nodes:
+                    _print_tls_overview(_all_tls_results)
+                    LOGGER.error(
+                        "CRITICAL ERROR: cluster is unhealthy — %d node(s) could not be reached: %s. "
+                        "All cluster nodes must be reachable before migration. Fix the cluster first.",
+                        len(_failed_nodes), ", ".join(_failed_nodes),
+                    )
+                    return 1
+
+                # Block migration if any node presents a certificate expiring in < 1 day
+                for _crit_ip, _crit_info in _node_tls_results.items():
+                    if _crit_info.get("cert_critical") == "1":
+                        LOGGER.critical(
+                            "CRITICAL ERROR: your database host %s (%s) uses a certificate that will "
+                            "expire on %s which is below 1 day. As your database configuration will stop "
+                            "working in %s we do NOT migrate. You need to fix your database certificates first.",
+                            host, _crit_ip,
+                            _crit_info.get("cert_expiry", "(unknown)"),
+                            _crit_info.get("cert_ttl", "(unknown)"),
+                        )
+                        return 1
                 LOGGER.info("Encrypted connection to target database established successfully.")
             else:
                 # Even when SSL is not explicitly enabled in the URI, try a
@@ -2291,8 +3150,65 @@ def main() -> int:
                         "Best-effort SSL probe on target failed or is unsupported (SSL disabled in URI): %s",
                         exc,
                     )
+            # Verify the target is writable (i.e. a primary, not a standby replica).
+            # PostgreSQL standbys allow SELECT but reject all DDL with ReadOnlySqlTransaction.
+            # When multiple IPs resolve for the host (HA cluster), probe each node to find
+            # the primary and switch the engine/URI to it automatically.
+            if "postgresql" in target_uri.lower() or "psycopg" in target_uri.lower():
+                with target_engine.connect() as _wconn:
+                    is_replica = _wconn.execute(text("SELECT pg_is_in_recovery()")).scalar()
+                    if is_replica:
+                        LOGGER.warning(
+                            "Target PostgreSQL server is a standby replica (pg_is_in_recovery() = true). "
+                            "Multiple IPs resolved for the host — probing each node to find the primary."
+                        )
+                        from sqlalchemy.engine.url import make_url as _mu
+
+                        _url = _mu(target_uri)
+                        _primary_engine = None
+                        _primary_uri = None
+                        for _ip in ips:
+                            try:
+                                # Keep hostname in URI for SSL SNI and pg_hba.conf matching;
+                                # use hostaddr in connect_args to force connection to this specific IP.
+                                _node_kwargs = dict(engine_kwargs or {"future": True, "pool_pre_ping": True, "pool_recycle": 1800})
+                                _node_ca = dict(_node_kwargs.get("connect_args") or {})
+                                _node_ca["hostaddr"] = _ip
+                                _node_ca["connect_timeout"] = 2
+                                _node_kwargs["connect_args"] = _node_ca
+                                _node_engine = _create_engine(target_uri, engine_kwargs=_node_kwargs)
+                                with _node_engine.connect() as _nc:
+                                    _node_replica = _nc.execute(text("SELECT pg_is_in_recovery()")).scalar()
+                                if not _node_replica:
+                                    LOGGER.info("Found primary node at %s — switching target to this node.", _ip)
+                                    _primary_engine = _node_engine
+                                    _primary_uri = target_uri
+                                    break
+                                else:
+                                    LOGGER.info("Node %s is a replica, skipping.", _ip)
+                            except Exception as _probe_exc:
+                                LOGGER.warning("Could not probe node %s: %s", _ip, _probe_exc)
+                        if _primary_engine is None:
+                            LOGGER.error(
+                                "Could not find a writable primary among resolved nodes (%s). "
+                                "Connect directly to the primary port (e.g. HAProxy port 5000 for Patroni) "
+                                "or add ?target_session_attrs=read-write to the URI.",
+                                ", ".join(ips),
+                            )
+                            return 1
+                        target_engine = _primary_engine
+                        target_uri = _primary_uri
+                        # Persist hostaddr so schema creation and data import also hit the primary
+                        engine_kwargs = dict(engine_kwargs or {"future": True, "pool_pre_ping": True, "pool_recycle": 1800})
+                        _ca = dict(engine_kwargs.get("connect_args") or {})
+                        _ca["hostaddr"] = _node_ca["hostaddr"]
+                        engine_kwargs["connect_args"] = _ca
+
             # Ensure target is empty from BunkerWeb's perspective
-            _ensure_target_empty(target_engine)
+            try:
+                _ensure_target_empty(target_engine)
+            except RuntimeError:
+                return 1
 
         if args.dry_run:
             # Summarize what would be migrated and time the read path from the source DB,
@@ -2317,19 +3233,26 @@ def main() -> int:
                 total_rows,
                 elapsed,
             )
+            _check_source_size(source_engine, source_uri, _DUMP_ROOT)
             return 0
 
         if args.test_target:
+            _print_tls_overview(_all_tls_results)
+            _check_source_size(source_engine, source_uri, _DUMP_ROOT)
             LOGGER.info("Target database connectivity OK and target appears empty for BunkerWeb tables.")
+            LOGGER.info("SUCCESS: target database test passed — ready for migration.")
             return 0
 
+        _mig_start = datetime.now()
+        _pid_write("migration-start")
         LOGGER.info("Starting database backend migration (no schema change, backend move only) ...")
 
         # 3. Create schema on target for current BunkerWeb version
         assert target_engine is not None, "Target engine must be initialized for real migration"
+        _pid_write("schema-creation")
         LOGGER.info("Running Alembic schema upgrade...")
         try:
-            _run_alembic_upgrade(target_uri)
+            _run_alembic_upgrade(target_uri, engine_kwargs=engine_kwargs)
             LOGGER.info("Alembic upgrade completed successfully.")
         except SystemExit as exc:
             # Some Alembic environments call sys.exit(0) after upgrade; treat
@@ -2342,6 +3265,7 @@ def main() -> int:
             LOGGER.error("Alembic upgrade failed: %s", e)
             raise
         LOGGER.info("Target schema ready; proceeding with dump/import.")
+        _check_source_size(source_engine, source_uri, _DUMP_ROOT)
 
         # 3b. Durable intermediate dump under /tmp/bunkerweb/bw_db_migrate:
         # source -> files -> target
@@ -2350,6 +3274,7 @@ def main() -> int:
         LOGGER.info("Using intermediate dump directory at %s", dump_dir)
 
         # 4. Phase 1: dump from source into neutral files
+        _pid_write("dump-source")
         LOGGER.info("Phase 1/2: dumping data from source database to intermediate dump files.")
         effective_source_uri = source_uri
         if source_uri.startswith("sqlite:"):
@@ -2358,23 +3283,43 @@ def main() -> int:
         _dump_source_to_files(effective_source_engine, dump_dir)
 
         # 4b. Phase 2: import from files into target
+        _pid_write("import-target")
         LOGGER.info("Phase 2/2: importing data from intermediate dump files into target database.")
-        _import_files_to_target(dump_dir, target_engine)
+        _import_skipped = _import_files_to_target(dump_dir, target_engine)
 
         # 5. Verify per-table row counts between source and target
-        _verify_all_data(effective_source_engine, target_engine)
+        _verify_all_data(effective_source_engine, target_engine, skipped_orphans=_import_skipped)
 
         if args.tui and update_env_file and not args.test_target and not args.dry_run:
             _update_env_file_on_success(Path(args.env_file), target_uri)
 
-        # Clean up dump directory on successful completion.
+        # Clean up only the per-run dump subdirectory on successful completion.
+        # The parent _DUMP_ROOT directory is kept so the debug log file is preserved.
         try:
-            if _DUMP_ROOT.exists():
-                shutil.rmtree(_DUMP_ROOT)
-                LOGGER.info("Cleaned up intermediate dump directory %s.", _DUMP_ROOT)
+            if dump_dir.exists():
+                shutil.rmtree(dump_dir)
+                LOGGER.info("Cleaned up intermediate dump directory %s.", dump_dir)
+                if _log_file:
+                    LOGGER.info("Debug log retained at: %s", _log_file)
         except Exception as exc:
-            LOGGER.warning("Unable to clean up dump directory %s: %s", _DUMP_ROOT, exc)
+            LOGGER.warning("Unable to clean up dump directory %s: %s", dump_dir, exc)
 
+        _print_tls_overview(_all_tls_results)
+        _pid_write("complete")
+        _mig_end = datetime.now()
+        _mig_elapsed = (_mig_end - _mig_start).total_seconds() if "_mig_start" in dir() else None
+        LOGGER.info("=" * 60)
+        LOGGER.info("MIGRATION SUMMARY")
+        LOGGER.info("=" * 60)
+        LOGGER.info("  Source  : %s", _mask_uri_password(source_uri))
+        LOGGER.info("  Target  : %s", _mask_uri_password(target_uri))
+        LOGGER.info("  Finished: %s", _mig_end.strftime("%Y-%m-%d %H:%M:%S"))
+        if _mig_elapsed is not None:
+            _h, _rem = divmod(int(_mig_elapsed), 3600)
+            _m, _s = divmod(_rem, 60)
+            LOGGER.info("  Duration: %02d:%02d:%02d", _h, _m, _s)
+        LOGGER.info("  Result  : SUCCESS")
+        LOGGER.info("=" * 60)
         LOGGER.info("Database backend migration completed successfully.")
         LOGGER.info("You can now point BunkerWeb's DATABASE_URI to the target URI.")
         LOGGER.info("=" * 60)
@@ -2382,8 +3327,10 @@ def main() -> int:
         LOGGER.info("  Recommended : sudo reboot")
         LOGGER.info("  Alternative : sudo systemctl restart bunkerweb bunkerweb-scheduler bunkerweb-ui")
         LOGGER.info("=" * 60)
+        _pid_remove()
         return 0
     except KeyboardInterrupt:
+        _pid_write("aborted")
         LOGGER.error("Database backend migration ABORTED (KeyboardInterrupt).")
         return 130
     except SystemExit as exc:
@@ -2392,10 +3339,13 @@ def main() -> int:
         code = exc.code if isinstance(exc.code, int) else 1
         if code == 0:
             LOGGER.warning("Database backend migration triggered SystemExit(0) unexpectedly; treating as success.")
+            _pid_remove()
             return 0
+        _pid_write("failed")
         LOGGER.exception("Database backend migration FAILED due to SystemExit(%s).", code)
         return code or 1
     except SQLAlchemyError as exc:
+        _pid_write("failed")
         if target_uri and _uri_uses_ssl(target_uri):
             LOGGER.exception(
                 "SQLAlchemy error during DB migration while SSL/TLS was requested for target URI. "
@@ -2406,9 +3356,19 @@ def main() -> int:
         LOGGER.error("Database backend migration FAILED due to SQLAlchemy error.")
         return 1
     except Exception:  # pragma: no cover - generic safety
+        _pid_write("failed")
         LOGGER.exception("Unexpected error during DB migration.")
         LOGGER.error("Database backend migration FAILED due to an unexpected error.")
         return 1
+
+
+def main() -> int:
+    rc = _main()
+    if rc != 0 and rc != 130:
+        LOGGER.error("=" * 60)
+        LOGGER.error("FAILED. See messages above for details.")
+        LOGGER.error("=" * 60)
+    return rc
 
 
 if __name__ == "__main__":
