@@ -233,6 +233,23 @@ class Database:
             "pool_timeout": 5,
         } | kwargs
 
+        # psycopg (libpq) looks for a client certificate at $HOME/.postgresql/postgresql.crt
+        # even when no client cert is configured. When running as a service user without a
+        # real home directory (e.g. nginx with HOME=/root inherited from systemd), libpq
+        # fails with "Permission denied" before attempting the connection.
+        # Explicitly set sslcert/sslkey to empty strings so libpq skips client cert lookup.
+        if sqlalchemy_string and "+psycopg" in sqlalchemy_string and "sslmode" in sqlalchemy_string:
+            # libpq automatically looks for a client certificate at $HOME/.postgresql/postgresql.crt.
+            # When running as a service user with HOME inherited from root (e.g. via setpriv),
+            # this fails with "Permission denied". Setting sslcert/sslkey to a nonexistent path
+            # tells libpq to skip client certificate authentication entirely.
+            _connect_args = dict(self._engine_kwargs.get("connect_args") or {})
+            if "sslcert" not in _connect_args and "sslkey" not in _connect_args:
+                _no_cert = "/var/tmp/bunkerweb/.no-client-cert"
+                _connect_args["sslcert"] = _no_cert
+                _connect_args["sslkey"] = _no_cert
+            self._engine_kwargs["connect_args"] = _connect_args
+
         try:
             self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
         except ArgumentError:

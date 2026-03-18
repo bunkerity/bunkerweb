@@ -680,10 +680,19 @@ if __name__ == "__main__":
 
         tmp_variables_path = Path(args.variables) if args.variables else NGINX_TMP_VARIABLES_PATH
 
-        dotenv_env = {}
-        if tmp_variables_path.is_file():
-            with tmp_variables_path.open() as f:
-                dotenv_env = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#") and "=" in line)
+        def _read_env_file(path: Path) -> dict:
+            if not path.is_file():
+                return {}
+            with path.open() as f:
+                return dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#") and "=" in line)
+
+        # Start with runtime cache, then overlay the authoritative user config so that
+        # changes to /etc/bunkerweb/variables.env (e.g. DATABASE_URI after a migration)
+        # take effect immediately on the next restart without requiring a manual cache update.
+        dotenv_env = _read_env_file(tmp_variables_path)
+        _bw_variables_path = Path(sep, "etc", "bunkerweb", "variables.env")
+        if not args.variables and _bw_variables_path.is_file():
+            dotenv_env.update(_read_env_file(_bw_variables_path))
 
         SCHEDULER = JobScheduler(LOGGER, db=Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))))  # type: ignore
 

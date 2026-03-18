@@ -175,7 +175,7 @@ EOL
     chown root:nginx /tmp/version_check.py
     chmod 640 /tmp/version_check.py
 
-    current_version=$(run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" /tmp/version_check.py)
+    current_version=$(run_as_nginx env PYTHONPATH="$PYTHONPATH" DATABASE_URI="$DATABASE_URI" PGSSLCERT="/dev/null" PGSSLKEY="/dev/null" "$PYTHON_BIN" /tmp/version_check.py)
     # shellcheck disable=SC2181
     if [ $? -ne 0 ]; then
         log "SYSTEMCTL" "❌" "Failed to retrieve database version (nginx user execution error)"
@@ -246,7 +246,7 @@ EOL
             chown root:nginx /tmp/version_update.py
             chmod 640 /tmp/version_update.py
 
-            if ! run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" /tmp/version_update.py; then
+            if ! run_as_nginx env PYTHONPATH="$PYTHONPATH" DATABASE_URI="$DATABASE_URI" PGSSLCERT="/dev/null" PGSSLKEY="/dev/null" "$PYTHON_BIN" /tmp/version_update.py; then
                 log "SYSTEMCTL" "❌" "Failed to update database version (nginx user execution error)"
                 rm -f /tmp/version_update.py
                 exit 1
@@ -259,7 +259,7 @@ EOL
 
     # Execute scheduler
     log "SYSTEMCTL" "ℹ️ " "Executing scheduler ..."
-    if ! run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" /usr/share/bunkerweb/scheduler/main.py \
+    if ! run_as_nginx env PYTHONPATH="$PYTHONPATH" PGSSLCERT="/dev/null" PGSSLKEY="/dev/null" "$PYTHON_BIN" /usr/share/bunkerweb/scheduler/main.py \
         --variables /etc/bunkerweb/variables.env; then
         log "SYSTEMCTL" "❌" "Scheduler execution failed (nginx user execution error)"
         exit 1
