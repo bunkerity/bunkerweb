@@ -54,7 +54,7 @@ from urllib.parse import urlparse, urlunparse
 LOGGER = getLogger("bw_db_migrate")
 basicConfig(level=INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
-__version__ = "0.5.5"
+__version__ = "0.5.6"
 _MAX_LOG_LEN = 32768  # large enough for full table output (29+ rows × ~170 chars)
 _DUMP_ROOT = Path("/tmp/bunkerweb/bw_db_migrate")
 _PID_FILE = _DUMP_ROOT / "bw_db_migrate.pid"
@@ -1409,6 +1409,8 @@ def _run_tui(default_env_file: str) -> tuple[str, str, str, bool, bool, bool, bo
         sql_snippet = ""
 
         selected = 0
+        scroll_offset = 0
+        _layout: dict = {}
         # Navigation indices for bottom action buttons.
         RUN_INDEX = 20
         QUIT_INDEX = 21
@@ -1571,6 +1573,13 @@ def _run_tui(default_env_file: str) -> tuple[str, str, str, bool, bool, bool, bo
             while True:
                 stdscr.erase()
                 max_y, max_x = stdscr.getmaxyx()
+                wrap_w = max(1, max_x - 5)
+
+                # If the terminal is very narrow, the SQL view will quickly run
+                # out of vertical space and cut off content. Warn users early.
+                if wrap_w < 60:
+                    msg = f"ERROR: SQL line width < 60 (current: {wrap_w}). Widen terminal to see all."
+                    stdscr.addstr(0, 0, msg[: max_x - 1], curses.A_BOLD | curses.A_REVERSE)
 
                 # Title
                 title = "SQL Command to Execute"
@@ -1581,19 +1590,33 @@ def _run_tui(default_env_file: str) -> tuple[str, str, str, bool, bool, bool, bo
                 sql_text = unmasked_sql if show_pwd else masked_sql
                 lines = sql_text.splitlines()
                 display_start = 4
-                for i, line in enumerate(lines):
+                # Char-wrap long SQL lines so they don't get truncated.
+                # `_show_sql_modal` prints at x=4, so the available width is max_x - 5 (with a small safety margin).
+                wrapped_lines: list[str] = []
+                if wrap_w < 60:
+                    # Replace SQL lines with the error message for narrow terminals.
+                    err = f"ERROR: SQL width < 60 (current: {wrap_w}). Widen terminal to see all."
+                    for start in range(0, len(err), wrap_w):
+                        wrapped_lines.append(err[start : start + wrap_w])
+                else:
+                    for line in lines:
+                        if line == "":
+                            wrapped_lines.append("")
+                            continue
+                        for start in range(0, len(line), wrap_w):
+                            wrapped_lines.append(line[start : start + wrap_w])
+
+                drawn = 0
+                for i, line in enumerate(wrapped_lines):
                     if display_start + i >= max_y - 2:
                         break
-                    # Wrap long lines
-                    if len(line) > max_x - 6:
-                        # Simple wrapping: just truncate with ellipsis
-                        stdscr.addstr(display_start + i, 4, line[: max_x - 10] + "...", curses.A_NORMAL)
-                    else:
-                        stdscr.addstr(display_start + i, 4, line, curses.A_NORMAL)
+                    stdscr.addstr(display_start + i, 4, line[:wrap_w], curses.A_NORMAL)
                     stdscr.clrtoeol()
+                    drawn += 1
 
                 # Footer
-                if display_start + len(lines) + 2 < max_y:
+                last_text_y = display_start + max(0, drawn - 1)
+                if max_y - 2 > last_text_y:
                     footer = "[x] Show password" if show_pwd else "[ ] Show password"
                     stdscr.addstr(max_y - 2, 2, f"{footer}   Space: toggle   q/Esc: close"[: max_x - 4], checkbox_attr)
 
@@ -1743,147 +1766,263 @@ def _run_tui(default_env_file: str) -> tuple[str, str, str, bool, bool, bool, bo
                         continue
                     return str(chosen)
 
+        def _build_layout(max_x: int) -> dict:
+            """Compute {key: (virtual_y_start, height)} for every item and static row.
+
+            Heights are based on line wrapping at the current terminal width.
+            Virtual row 1-2 = header (fixed).  Content starts at virtual row 5.
+            """
+            usable = max(1, max_x - 6)  # 4 left margin + 2 prefix chars
+
+            indent_len = 4  # must match _item() continuation indent: "    "
+            prefix_len = 3  # worst-case prefix width (selected): "➜ "
+
+            def _h_plain(text: str) -> int:
+                """Lines needed to render *text* wrapped to *usable* columns."""
+                return max(1, (len(text) + usable - 1) // usable)
+
+            def _h_item(label: str, value: str) -> int:
+                """Lines needed to render an `_item()` field.
+
+                `_item()` renders:
+                  - first line using `usable` columns (prefix + label + value)
+                  - continuation lines prefixed with 4 spaces, so each consumes
+                    `usable - indent_len` columns.
+                """
+                full_len = prefix_len + len(label) + len(value)
+                if full_len <= usable:
+                    return 1
+                cont_w = max(1, usable - indent_len)
+                remaining = full_len - usable
+                return 1 + (remaining + cont_w - 1) // cont_w
+
+            pw_vis = target_password if show_password else "*" * len(target_password) if target_password else ""
+            pw_txt = (pw_vis + f"  [{'x' if show_password else ' '}] Show") if target_password else ""
+
+            layout: dict = {}
+            vy = 5
+
+            def _place(key: int, label: str, value: str) -> None:
+                nonlocal vy
+                ht = _h_item(label, value)
+                layout[key] = (vy, ht)
+                vy += ht
+
+            _place(0, "Env file: ", env_file)
+            _place(1, "Source DATABASE_URI: ", _mask_uri_password(source_uri))
+            _place(2, "Source host: ", source_host)
+            _place(3, "Source port: ", source_port)
+            vy += 1  # blank line
+
+            _place(4, "Target DB type: ", target_db_type)
+            _place(5, "Target host: ", target_host)
+            _place(6, "Target port: ", target_port)
+            _place(7, "Target database: ", target_dbname)
+            _place(8, "Target username: ", target_username)
+            _place(9, "Target password: ", pw_txt)
+            gen_lbl = "Generate SQL & password (Enter)" if target_db_type else "[Requires DB type selection]"
+            _place(10, "", gen_lbl)
+            sql_lbl = "Show SQL command (Enter)" if target_db_type else "[Requires DB type selection]"
+            _place(11, "", sql_lbl)
+            _place(12, "Root CA certificate: ", root_ca_cert if root_ca_cert else "(not set)")
+            vy += 1  # blank line
+
+            _place(13, "", f"[{'x' if target_ssl else ' '}] SSL (yes/no)")
+            vy += 1  # blank line
+
+            # URI preview rows (not selectable)
+            layout["preview_label"] = (vy, 1)
+            vy += 1
+            preview_val = _build_target_uri(mask_password=True)
+            ph = _h_plain(preview_val) if preview_val else 1
+            layout["preview_val"] = (vy, ph)
+            vy += ph
+            layout["preview_hint"] = (vy, 1)
+            vy += 1
+            vy += 1  # blank line
+
+            _place(14, "", f"[{'x' if test_target else ' '}] Test target only (no migrations/copy)")
+            _place(15, "", f"[{'x' if update_env_file else ' '}] Update env file on success")
+            _place(16, "", f"[{'x' if dry_run else ' '}] Dry run (no schema or data changes)")
+            _place(17, "", f"[{'x' if write_config_now else ' '}] Write config to env file now (skip migration)")
+            _place(18, "", f"[{'x' if show_password else ' '}] Show password in SQL command")
+            vy += 1  # blank line
+
+            # Action buttons share the same row
+            layout[19] = (vy, 1)
+            layout[20] = (vy, 1)
+            layout[21] = (vy, 1)
+            vy += 1
+            vy += 1  # blank line
+            layout["tip"] = (vy, 1)
+            vy += 1
+            layout["total"] = vy
+            return layout
+
+        def _ensure_visible(idx: int, max_y: int) -> None:
+            """Adjust scroll_offset so item *idx* is fully visible on screen.
+
+            The scrollable content area is rows 4 … max_y-2 (inclusive).
+            Row 3 is reserved for the "↑ more" indicator.
+            The last row (max_y-1) is reserved for the "↓ more" indicator.
+            """
+            nonlocal scroll_offset
+            if idx not in _layout:
+                return
+            vy, height = _layout[idx]
+            top_screen = 4   # first usable content row
+            bot_screen = max_y - 2  # last usable content row
+            item_top_screen = vy - scroll_offset
+            item_bot_screen = vy + height - 1 - scroll_offset
+            if item_top_screen < top_screen:
+                scroll_offset = vy - top_screen
+            elif item_bot_screen > bot_screen:
+                scroll_offset = vy + height - 1 - bot_screen
+            scroll_offset = max(0, scroll_offset)
+
         def _draw() -> None:
+            nonlocal _layout
             stdscr.erase()
             max_y, max_x = stdscr.getmaxyx()
+
+            # Reject terminals that are too narrow to be usable.
+            if max_x < 24:
+                msg = "Terminal too narrow (min 24 cols)"
+                stdscr.addstr(0, 0, msg[: max_x], curses.A_REVERSE)
+                stdscr.refresh()
+                return
+
+            _layout = _build_layout(max_x)
+            usable = max(1, max_x - 6)
+            total_vy = _layout.get("total", 40)
+
+            # ── Fixed header ────────────────────────────────────────────
             stdscr.addstr(1, 2, "BunkerWeb DB migrate (TUI)"[: max_x - 4], highlight_attr)
             stdscr.addstr(2, 2, "Up/Down selects. Enter edits/activates. Space toggles checkbox."[: max_x - 4])
 
-            def _item(y: int, idx: int, label: str, value: str) -> None:
+            # Scroll indicators on row 3 / last row
+            if scroll_offset > 0:
+                stdscr.addstr(3, 2, "↑ more"[: max_x - 4], checkbox_attr)
+            else:
+                stdscr.move(3, 0)
+                stdscr.clrtoeol()
+
+            if total_vy - scroll_offset > max_y - 1:
+                try:
+                    stdscr.addstr(max_y - 1, 2, "↓ more"[: max_x - 4], checkbox_attr)
+                except curses.error:
+                    pass
+
+            # ── Item renderer ────────────────────────────────────────────
+            def _item(idx: int, label: str, value: str, extra_attr=None) -> None:
+                """Render a selectable item, wrapping if the text exceeds terminal width."""
+                vy, _h = _layout[idx]
+                sy = vy - scroll_offset
+                if sy < 4 or sy >= max_y - 1:
+                    return
                 is_sel = selected == idx
                 prefix = "➜ " if is_sel else "  "
-                attr = highlight_attr if is_sel else curses.A_NORMAL
-                stdscr.addstr(y, 2, f"{prefix}{label}{value}", attr)
+                attr = extra_attr if extra_attr is not None else (highlight_attr if is_sel else curses.A_NORMAL)
+                full = prefix + label + value
+                # First line
+                stdscr.addstr(sy, 2, full[:usable], attr)
+                stdscr.clrtoeol()
+                # Continuation lines when wrapping
+                rest = full[usable:]
+                indent = "    "
+                cont_w = max(1, usable - len(indent))
+                line_num = 1
+                while rest and sy + line_num < max_y - 1:
+                    stdscr.addstr(sy + line_num, 2, (indent + rest[:cont_w])[:usable], attr)
+                    stdscr.clrtoeol()
+                    rest = rest[cont_w:]
+                    line_num += 1
+
+            def _static(vy_key: str, text: str, attr=None) -> None:
+                """Render a non-selectable static row (e.g. preview label/hint)."""
+                if vy_key not in _layout:
+                    return
+                vy, _h = _layout[vy_key]
+                sy = vy - scroll_offset
+                if sy < 4 or sy >= max_y - 1:
+                    return
+                a = attr if attr is not None else curses.A_NORMAL
+                stdscr.addstr(sy, 2, text[:usable], a)
                 stdscr.clrtoeol()
 
-            _item(5, 0, "Env file: ", env_file[: max_x - 20])
-            _item(6, 1, "Source DATABASE_URI: ", _mask_uri_password(source_uri)[: max_x - 30])
-            _item(7, 2, "Source host: ", source_host[: max_x - 20])
-            _item(8, 3, "Source port: ", source_port[: max_x - 20])
+            # ── Source section ───────────────────────────────────────────
+            _item(0, "Env file: ", env_file)
+            _item(1, "Source DATABASE_URI: ", _mask_uri_password(source_uri))
+            _item(2, "Source host: ", source_host)
+            _item(3, "Source port: ", source_port)
 
-            _item(10, 4, "Target DB type: ", target_db_type[: max_x - 25])
-            _item(11, 5, "Target host: ", target_host[: max_x - 25])
-            _item(12, 6, "Target port: ", target_port[: max_x - 25])
-            _item(13, 7, "Target database: ", target_dbname[: max_x - 25])
-            _item(14, 8, "Target username: ", target_username[: max_x - 25])
+            # ── Target section ───────────────────────────────────────────
+            _item(4, "Target DB type: ", target_db_type)
+            _item(5, "Target host: ", target_host)
+            _item(6, "Target port: ", target_port)
+            _item(7, "Target database: ", target_dbname)
+            _item(8, "Target username: ", target_username)
             pw_display = ""
             if target_password:
-                # Show either stars or the real password, plus a small checkbox
-                # hint to toggle masking.
                 visible = target_password if show_password else "*" * len(target_password)
-                checkbox = f"  [{'x' if show_password else ' '}] Show"
-                pw_display = (visible + checkbox)[: max_x - 25]
-            _item(15, 9, "Target password: ", pw_display)
+                pw_display = visible + f"  [{'x' if show_password else ' '}] Show"
+            _item(9, "Target password: ", pw_display)
 
-            # Generate password button - only enabled if database type is selected
-            gen_prefix = "➜ " if selected == 10 else "  "
-            gen_label = "Generate SQL & password (Enter)" if target_db_type else "[Requires DB type selection]"
+            # Generate SQL & Show SQL buttons
             gen_attr = highlight_attr if selected == 10 and target_db_type else (curses.A_DIM if not target_db_type else curses.A_NORMAL)
-            stdscr.addstr(16, 2, f"{gen_prefix}{gen_label}"[: max_x - 4], gen_attr)
-            stdscr.clrtoeol()
-
-            # Show SQL button - always available if database type is selected
-            sql_prefix = "➜ " if selected == 11 else "  "
-            sql_label = "Show SQL command (Enter)" if target_db_type else "[Requires DB type selection]"
+            _item(10, "", "Generate SQL & password (Enter)" if target_db_type else "[Requires DB type selection]", extra_attr=gen_attr)
             sql_attr = highlight_attr if selected == 11 and target_db_type else (curses.A_DIM if not target_db_type else curses.A_NORMAL)
-            stdscr.addstr(17, 2, f"{sql_prefix}{sql_label}"[: max_x - 4], sql_attr)
-            stdscr.clrtoeol()
+            _item(11, "", "Show SQL command (Enter)" if target_db_type else "[Requires DB type selection]", extra_attr=sql_attr)
 
-            # Root CA certificate selector
-            root_ca_display = root_ca_cert[: max_x - 25] if root_ca_cert else "(not set)"
-            _item(18, 12, "Root CA certificate: ", root_ca_display)
+            # Root CA cert + SSL checkbox
+            _item(12, "Root CA certificate: ", root_ca_cert if root_ca_cert else "(not set)")
+            _item(13, "", f"[{'x' if target_ssl else ' '}] SSL (yes/no)", extra_attr=highlight_attr if selected == 13 else checkbox_attr)
 
-            ssl_prefix = "➜ " if selected == 13 else "  "
-            if 20 < max_y - 1:
-                ssl_attr = highlight_attr if selected == 13 else checkbox_attr
-                stdscr.addstr(20, 2, f"{ssl_prefix}[{'x' if target_ssl else ' '}] SSL (yes/no)"[: max_x - 4], ssl_attr)
-                stdscr.clrtoeol()
-
+            # URI preview (non-selectable)
+            _static("preview_label", "Target URI preview (password masked):", checkbox_attr)
             preview = _build_target_uri(mask_password=True)
-            if 22 < max_y - 1:
-                stdscr.addstr(22, 2, "Target URI preview (password masked):"[: max_x - 4], checkbox_attr)
-            if 23 < max_y - 1:
-                stdscr.addstr(23, 2, preview[: max(1, max_x - 4)])
-                stdscr.clrtoeol()
-            if 24 < max_y - 1:
-                stdscr.addstr(24, 2, "→ Password is hidden. Use 'Show SQL command' to view and copy."[: max_x - 4], checkbox_attr)
+            if "preview_val" in _layout:
+                vy, _ph = _layout["preview_val"]
+                sy = vy - scroll_offset
+                if 4 <= sy < max_y - 1:
+                    # Wrap the preview URI across multiple lines
+                    rest = preview
+                    line_num = 0
+                    while rest and sy + line_num < max_y - 1:
+                        stdscr.addstr(sy + line_num, 2, rest[:usable])
+                        stdscr.clrtoeol()
+                        rest = rest[usable:]
+                        line_num += 1
+            _static("preview_hint", "→ Password is hidden. Use 'Show SQL command' to view and copy.", checkbox_attr)
 
-            base_y = 26
+            # ── Options checkboxes ───────────────────────────────────────
+            _item(14, "", f"[{'x' if test_target else ' '}] Test target only (no migrations/copy)", extra_attr=highlight_attr if selected == 14 else checkbox_attr)
+            _item(15, "", f"[{'x' if update_env_file else ' '}] Update env file on success", extra_attr=highlight_attr if selected == 15 else checkbox_attr)
+            _item(16, "", f"[{'x' if dry_run else ' '}] Dry run (no schema or data changes)", extra_attr=highlight_attr if selected == 16 else checkbox_attr)
+            _item(17, "", f"[{'x' if write_config_now else ' '}] Write config to env file now (skip migration)", extra_attr=highlight_attr if selected == 17 else checkbox_attr)
+            _item(18, "", f"[{'x' if show_password else ' '}] Show password in SQL command", extra_attr=highlight_attr if selected == 18 else checkbox_attr)
 
-            cb_prefix = "➜ " if selected == 14 else "  "
-            if base_y < max_y - 1:
-                cb_attr = highlight_attr if selected == 14 else checkbox_attr
-                stdscr.addstr(
-                    base_y,
-                    2,
-                    f"{cb_prefix}[{'x' if test_target else ' '}] Test target only (no migrations/copy)"[: max_x - 4],
-                    cb_attr,
-                )
-                stdscr.clrtoeol()
+            # ── Action buttons ───────────────────────────────────────────
+            if 19 in _layout:
+                btn_vy, _ = _layout[19]
+                btn_sy = btn_vy - scroll_offset
+                if 4 <= btn_sy < max_y - 1:
+                    write_prefix = "[WRITE]" if selected == 19 else " WRITE "
+                    run_prefix = "[ RUN ]" if selected == 20 else "  RUN  "
+                    quit_prefix = "[ QUIT ]" if selected == 21 else "  QUIT "
+                    write_attr = highlight_attr if selected == 19 else checkbox_attr
+                    run_attr = highlight_attr if selected == 20 else checkbox_attr
+                    quit_attr = highlight_attr if selected == 21 else checkbox_attr
+                    stdscr.addstr(btn_sy, 2, write_prefix[: max_x - 4], write_attr)
+                    if max_x > 14:
+                        stdscr.addstr(btn_sy, 10, run_prefix[: max_x - 14], run_attr)
+                    if max_x > 24:
+                        stdscr.addstr(btn_sy, 20, quit_prefix[: max_x - 24], quit_attr)
+                    stdscr.clrtoeol()
 
-            upd_prefix = "➜ " if selected == 15 else "  "
-            if base_y + 1 < max_y - 1:
-                upd_attr = highlight_attr if selected == 15 else checkbox_attr
-                stdscr.addstr(
-                    base_y + 1,
-                    2,
-                    f"{upd_prefix}[{'x' if update_env_file else ' '}] Update env file on success"[: max_x - 4],
-                    upd_attr,
-                )
-                stdscr.clrtoeol()
+            # Tip row
+            _static("tip", "Tip: Fill target fields, verify preview, then select RUN and press Enter.", checkbox_attr)
 
-            dry_prefix = "➜ " if selected == 16 else "  "
-            if base_y + 2 < max_y - 1:
-                dry_attr = highlight_attr if selected == 16 else checkbox_attr
-                stdscr.addstr(
-                    base_y + 2,
-                    2,
-                    f"{dry_prefix}[{'x' if dry_run else ' '}] Dry run (no schema or data changes)"[: max_x - 4],
-                    dry_attr,
-                )
-                stdscr.clrtoeol()
-
-            cfg_prefix = "➜ " if selected == 17 else "  "
-            if base_y + 3 < max_y - 1:
-                cfg_attr = highlight_attr if selected == 17 else checkbox_attr
-                stdscr.addstr(
-                    base_y + 3,
-                    2,
-                    f"{cfg_prefix}[{'x' if write_config_now else ' '}] Write config to env file now (skip migration)"[: max_x - 4],
-                    cfg_attr,
-                )
-                stdscr.clrtoeol()
-
-            show_pwd_prefix = "➜ " if selected == 18 else "  "
-            if base_y + 4 < max_y - 1:
-                show_pwd_attr = highlight_attr if selected == 18 else checkbox_attr
-                stdscr.addstr(
-                    base_y + 4,
-                    2,
-                    f"{show_pwd_prefix}[{'x' if show_password else ' '}] Show password in SQL command"[: max_x - 4],
-                    show_pwd_attr,
-                )
-                stdscr.clrtoeol()
-
-            write_prefix = "[WRITE]" if selected == 19 else " WRITE "
-            run_prefix = "[ RUN ]" if selected == 20 else "  RUN  "
-            quit_prefix = "[ QUIT ]" if selected == 21 else "  QUIT "
-            if base_y + 6 < max_y - 1:
-                write_attr = highlight_attr if selected == 19 else checkbox_attr
-                run_attr = highlight_attr if selected == 20 else checkbox_attr
-                quit_attr = highlight_attr if selected == 21 else checkbox_attr
-                stdscr.addstr(base_y + 6, 2, write_prefix[: max_x - 4], write_attr)
-                stdscr.addstr(base_y + 6, 10, run_prefix[: max_x - 14], run_attr)
-                stdscr.addstr(base_y + 6, 20, quit_prefix[: max_x - 24], quit_attr)
-                stdscr.clrtoeol()
-
-            if base_y + 8 < max_y - 1:
-                stdscr.addstr(
-                    base_y + 8,
-                    2,
-                    "Tip: Fill target fields, verify preview, then select RUN and press Enter."[: max_x - 4],
-                    checkbox_attr,
-                )
             stdscr.refresh()
 
         def _edit_line(y: int, label: str, current: str, *, secret: bool = False) -> str:
@@ -1963,9 +2102,11 @@ def _run_tui(default_env_file: str) -> tuple[str, str, str, bool, bool, bool, bo
                 continue
             if key in (curses.KEY_UP, ord("k")):
                 selected = (selected - 1) % total_items
+                _ensure_visible(selected, stdscr.getmaxyx()[0])
                 continue
             if key in (curses.KEY_DOWN, ord("j")):
                 selected = (selected + 1) % total_items
+                _ensure_visible(selected, stdscr.getmaxyx()[0])
                 continue
             if key in (curses.KEY_LEFT, ord('h')):
                 if selected == RUN_INDEX:
@@ -2018,7 +2159,8 @@ def _run_tui(default_env_file: str) -> tuple[str, str, str, bool, bool, bool, bo
                             pass
                     continue
                 if selected == 1:
-                    source_uri = _edit_line(6, "Source DATABASE_URI: ", source_uri)
+                    sy1 = _layout.get(1, (6, 1))[0] - scroll_offset
+                    source_uri = _edit_line(sy1, "Source DATABASE_URI: ", source_uri)
                     if source_uri:
                         try:
                             p = urlparse(source_uri)
@@ -2030,11 +2172,13 @@ def _run_tui(default_env_file: str) -> tuple[str, str, str, bool, bool, bool, bo
                             pass
                     continue
                 if selected == 2:
-                    source_host = _edit_line(7, "Source host: ", source_host)
+                    sy2 = _layout.get(2, (7, 1))[0] - scroll_offset
+                    source_host = _edit_line(sy2, "Source host: ", source_host)
                     _apply_source_host_port()
                     continue
                 if selected == 3:
-                    source_port = _edit_line(8, "Source port: ", source_port)
+                    sy3 = _layout.get(3, (8, 1))[0] - scroll_offset
+                    source_port = _edit_line(sy3, "Source port: ", source_port)
                     _apply_source_host_port()
                     continue
                 if selected == 4:
@@ -2045,19 +2189,24 @@ def _run_tui(default_env_file: str) -> tuple[str, str, str, bool, bool, bool, bo
                         target_port = "3306"
                     continue
                 if selected == 5:
-                    target_host = _edit_line(11, "Target host: ", target_host)
+                    sy5 = _layout.get(5, (11, 1))[0] - scroll_offset
+                    target_host = _edit_line(sy5, "Target host: ", target_host)
                     continue
                 if selected == 6:
-                    target_port = _edit_line(12, "Target port: ", target_port)
+                    sy6 = _layout.get(6, (12, 1))[0] - scroll_offset
+                    target_port = _edit_line(sy6, "Target port: ", target_port)
                     continue
                 if selected == 7:
-                    target_dbname = _edit_line(13, "Target database: ", target_dbname)
+                    sy7 = _layout.get(7, (13, 1))[0] - scroll_offset
+                    target_dbname = _edit_line(sy7, "Target database: ", target_dbname)
                     continue
                 if selected == 8:
-                    target_username = _edit_line(14, "Target username: ", target_username)
+                    sy8 = _layout.get(8, (14, 1))[0] - scroll_offset
+                    target_username = _edit_line(sy8, "Target username: ", target_username)
                     continue
                 if selected == 9:
-                    target_password = _edit_line(15, "Target password: ", "", secret=True) if not target_password else _edit_line(15, "Target password: ", target_password, secret=True)
+                    sy9 = _layout.get(9, (15, 1))[0] - scroll_offset
+                    target_password = _edit_line(sy9, "Target password: ", "", secret=True) if not target_password else _edit_line(sy9, "Target password: ", target_password, secret=True)
                     continue
                 if selected == 10:
                     # Generate password button - requires database type selection
@@ -2898,6 +3047,14 @@ def _main() -> int:
         action="store_true",
         help="Show what would be migrated (table and row counts) without changing the target database.",
     )
+    parser.add_argument(
+        "--auto-switch",
+        action="store_true",
+        help=(
+            "After a successful migration, update DATABASE_URI in --env-file to point to the target URI "
+            "and restart bunkerweb services via systemctl (bunkerweb*, bunkerweb-scheduler, bunkerweb-ui)."
+        ),
+    )
     parser.add_argument("--tui", action="store_true", help="Launch an interactive terminal UI to collect inputs.")
     parser.add_argument("--debug", action="store_true", help="Enable DEBUG logging (prints all messages).")
     args = parser.parse_args()
@@ -3349,20 +3506,34 @@ def _main() -> int:
                 )
                 # Test that an unencrypted connection actually works.
                 try:
-                    import pymysql as _pymysql
-                    from sqlalchemy.engine.url import make_url as _make_url
-                    _url = _make_url(target_uri)
-                    _conn = _pymysql.connect(
-                        host=_url.host or "",
-                        port=int(_url.port or 3306),
-                        user=_url.username or "",
-                        password=_url.password or "",
-                        database=_url.database or None,
-                        ssl=None,
-                        connect_timeout=10,
-                    )
-                    _conn.close()
-                    LOGGER.info("Unencrypted connection to target database established successfully.")
+                        _lower_uri = (target_uri or "").lower()
+                        _starttls = "postgres" if ("postgresql" in _lower_uri or "psycopg" in _lower_uri) else "mysql"
+                        if _starttls == "postgres":
+                            # Use the already-normalized SQLAlchemy engine, but force a fast connect timeout
+                            # for this best-effort verification step.
+                            _test_engine_kwargs = dict(engine_kwargs or {})
+                            _ca = dict(_test_engine_kwargs.get("connect_args") or {})  # type: ignore[arg-type]
+                            _ca["connect_timeout"] = 5
+                            _test_engine_kwargs["connect_args"] = _ca
+                            _test_engine = _create_engine(target_uri, engine_kwargs=_test_engine_kwargs)
+                            with _test_engine.connect() as _conn:
+                                _conn.execute(text("SELECT 1"))
+                        else:
+                            import pymysql as _pymysql
+                            from sqlalchemy.engine.url import make_url as _make_url
+
+                            _url = _make_url(target_uri)
+                            _conn = _pymysql.connect(
+                                host=_url.host or "",
+                                port=int(_url.port or 3306),
+                                user=_url.username or "",
+                                password=_url.password or "",
+                                database=_url.database or None,
+                                ssl=None,
+                                connect_timeout=5,
+                            )
+                            _conn.close()
+                        LOGGER.info("Unencrypted connection to target database established successfully.")
                 except Exception as _exc:
                     LOGGER.error("Unencrypted connection to target database failed: %s", _exc)
                     return 1
@@ -3582,8 +3753,106 @@ def _main() -> int:
         # 5. Verify per-table row counts between source and target
         _verify_all_data(effective_source_engine, target_engine, skipped_orphans=_import_skipped)
 
+        env_updated = False
         if args.tui and update_env_file and not args.test_target and not args.dry_run:
             _update_env_file_on_success(Path(args.env_file), target_uri)
+            env_updated = True
+
+        auto_switch_failed = False
+        if args.auto_switch and not args.test_target and not args.dry_run:
+            # Ensure the runtime config points to the migrated backend.
+            if not env_updated:
+                try:
+                    _update_env_file_on_success(Path(args.env_file), target_uri)
+                    env_updated = True
+                except Exception as exc:
+                    LOGGER.error("AUTO-SWITCH: failed to update %s: %s", args.env_file, exc)
+                    auto_switch_failed = True
+
+            # Restart bunkerweb services so they reload DATABASE_URI.
+            if env_updated and not auto_switch_failed:
+                try:
+                    import subprocess as _subprocess
+                    import shutil as _shutil
+                    from pathlib import Path as _Path
+
+                    service_units = ["bunkerweb", "bunkerweb-scheduler", "bunkerweb-ui"]
+
+                    # Prefer systemd if present.
+                    if _shutil.which("systemctl") and _Path("/run/systemd/system").exists():
+                        # Restart only units that exist (avoid failing if a unit is absent).
+                        existing_units: list[str] = []
+                        for unit in service_units:
+                            unit_name = f"{unit}.service"
+                            _res = _subprocess.run(
+                                ["systemctl", "show", "-p", "Id", unit_name],
+                                stdout=_subprocess.PIPE,
+                                stderr=_subprocess.DEVNULL,
+                                text=True,
+                            )
+                            if _res.returncode == 0:
+                                existing_units.append(unit_name)
+
+                        if not existing_units:
+                            LOGGER.error("AUTO-SWITCH: no matching systemd units found to restart.")
+                            auto_switch_failed = True
+                        else:
+                            _res = _subprocess.run(
+                                ["systemctl", "try-restart", *existing_units],
+                                check=False,
+                                stdout=_subprocess.PIPE,
+                                stderr=_subprocess.STDOUT,
+                                text=True,
+                            )
+                            if _res.returncode != 0:
+                                LOGGER.error(
+                                    "AUTO-SWITCH: systemctl try-restart failed (rc=%s). Output:\n%s",
+                                    _res.returncode,
+                                    (_res.stdout or "").strip(),
+                                )
+                                auto_switch_failed = True
+                            else:
+                                LOGGER.info("AUTO-SWITCH: restarted bunkerweb services successfully (systemd).")
+                    else:
+                        # Fallback for non-systemd init systems.
+                        restarted_any = False
+                        init_dir = _Path("/etc/init.d")
+                        for unit in service_units:
+                            init_script = init_dir / unit
+                            if init_script.exists() and init_script.is_file():
+                                _res = _subprocess.run(
+                                    [str(init_script), "restart"],
+                                    check=False,
+                                    stdout=_subprocess.PIPE,
+                                    stderr=_subprocess.STDOUT,
+                                    text=True,
+                                )
+                                if _res.returncode == 0:
+                                    restarted_any = True
+
+                        # If no init.d scripts existed, try `service <name> restart` (SysV wrapper).
+                        if not restarted_any and _shutil.which("service"):
+                            for unit in service_units:
+                                _res = _subprocess.run(
+                                    ["service", unit, "restart"],
+                                    check=False,
+                                    stdout=_subprocess.PIPE,
+                                    stderr=_subprocess.STDOUT,
+                                    text=True,
+                                )
+                                if _res.returncode == 0:
+                                    restarted_any = True
+
+                        if not restarted_any:
+                            LOGGER.error(
+                                "AUTO-SWITCH: unable to restart bunkerweb services (no systemd units and no init scripts found)."
+                            )
+                            auto_switch_failed = True
+                        else:
+                            LOGGER.info("AUTO-SWITCH: restarted bunkerweb services successfully (non-systemd).")
+                except Exception as exc:
+                    LOGGER.error("AUTO-SWITCH: failed to restart services: %s", exc)
+                    auto_switch_failed = True
 
         # Clean up only the per-run dump subdirectory on successful completion.
         # The parent _DUMP_ROOT directory is kept so the debug log file is preserved.
@@ -3615,12 +3884,19 @@ def _main() -> int:
         LOGGER.info("Database backend migration completed successfully.")
         LOGGER.info("You can now point BunkerWeb's DATABASE_URI to the target URI.")
         LOGGER.info("=" * 60)
-        LOGGER.info("ACTION REQUIRED: reboot this manager to apply the new database backend.")
-        LOGGER.info("  Recommended : sudo reboot")
-        LOGGER.info("  Alternative : sudo systemctl restart bunkerweb bunkerweb-scheduler bunkerweb-ui")
+        if args.auto_switch and not auto_switch_failed:
+            LOGGER.info("AUTO-SWITCH: DATABASE_URI updated and bunkerweb services restarted successfully.")
+            LOGGER.info("  Recommended : no reboot required (services should reload DATABASE_URI).")
+        else:
+            LOGGER.info("ACTION REQUIRED: reboot this manager to apply the new database backend.")
+            LOGGER.info("  Recommended : sudo reboot")
+            LOGGER.info("  Alternative : sudo systemctl restart bunkerweb bunkerweb-scheduler bunkerweb-ui")
         LOGGER.info("=" * 60)
         _emit_ssl_advisories(ssl_expected, _server_supports_ssl if not ssl_expected else None, _server_ca_pem if not ssl_expected else None)
         _pid_remove()
+        if auto_switch_failed:
+            LOGGER.error("AUTO-SWITCH: migration succeeded, but auto-switch (env update and/or restart) failed.")
+            return 1
         return 0
     except KeyboardInterrupt:
         _pid_write("aborted")
