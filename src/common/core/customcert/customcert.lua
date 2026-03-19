@@ -15,6 +15,18 @@ local get_multiple_variables = utils.get_multiple_variables
 local has_variable = utils.has_variable
 local read_files = utils.read_files
 
+-- Convert binary data to lowercase hex (replacement for ngx.encode_base16)
+local function to_hex(bin)
+	if not bin then
+		return nil
+	end
+	local t = {}
+	for i = 1, #bin do
+		t[i] = string.format("%02x", string.byte(bin, i))
+	end
+	return table.concat(t)
+end
+
 function customcert:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "customcert", ctx)
@@ -122,11 +134,30 @@ function customcert:load_data(data, server_name)
 	if not priv_key then
 		return false, "error while parsing pem priv key : " .. err
 	end
-	-- Cache data
+
+	-- Pre-compute leaf certificate fingerprint for OCSP lookup (same strategy as letsencrypt)
+	-- This avoids relying on runtime PEM parsing inside `ssl-certificate-lua.conf`.
+	local cert_fingerprint = nil
+	pcall(function()
+		local x509 = require("resty.openssl.x509")
+		-- Keep in sync with letsencrypt.lua regex: take the first cert PEM block.
+		local leaf_pem = data[1]:match("(%-%-%-%-BEGIN CERTIFICATE%-%-%-%-.-%-%-%-%-END CERTIFICATE%-%-%-%-)")
+		if leaf_pem then
+			local cert_obj = x509.new(leaf_pem)
+			if cert_obj then
+				local digest_bytes = cert_obj:pubkey_digest("sha256")
+				if digest_bytes then
+					cert_fingerprint = to_hex(digest_bytes):lower()
+				end
+			end
+		end
+	end)
+
+	-- Cache data (preserve original PEM strings at indices 3,4 for OCSP fingerprinting)
 	for key in server_name:gmatch("%S+") do
 		local cache_key = "plugin_customcert_" .. key
 		local ok
-		ok, err = self.internalstore:set(cache_key, { cert_chain, priv_key }, nil, true)
+		ok, err = self.internalstore:set(cache_key, { cert_chain, priv_key, data[1], data[2], cert_fingerprint }, nil, true)
 		if not ok then
 			return false, "error while setting data into internalstore : " .. err
 		end

@@ -1591,8 +1591,9 @@ def get_cached_ocsp_ttl(cert_name: str, cert_pem: Optional[bytes] = None, finger
         assert total_lifetime is not None
 
         log_info(
-            "⚡ OCSP cached response for %s: remaining=%ds (%.1f days), total_lifetime=%ds (%.1f days)",
+            "⚡ OCSP cached response for %s: fp=%s remaining=%ds (%.1f days), total_lifetime=%ds (%.1f days)",
             cert_name,
+            (fingerprint[:16] + "...") if fingerprint else "unknown",
             remaining,
             remaining / 86400.0,
             total_lifetime,
@@ -2102,9 +2103,16 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
 
             # Skip fetch ONLY if not forced AND TTL is above refresh_threshold AND above 50% lifetime
             if not force_fetch and cached_ttl > refresh_threshold and cached_ttl > half_lifetime:
+                fp_prefix = (fingerprint[:16] + "...") if fingerprint else "unknown"
                 log_info(
-                    "✓ OCSP cached response for %s still valid for %ds (%.1f days), above thresholds (refresh_threshold=%ds [20%% of %ds], 50%% threshold=%ds), skipping fetch",
-                    cert_name, cached_ttl, cached_ttl / 86400.0, refresh_threshold, total_lifetime, half_lifetime,
+                    "✓ OCSP cached response for %s still valid for %ds (%.1f days) [fp=%s], above thresholds (refresh_threshold=%ds [20%% of %ds], 50%% threshold=%ds), skipping fetch",
+                    cert_name,
+                    cached_ttl,
+                    cached_ttl / 86400.0,
+                    fp_prefix,
+                    refresh_threshold,
+                    total_lifetime,
+                    half_lifetime,
                 )
                 stats["ocsp_cached_responses"] = stats.get("ocsp_cached_responses", 0) + 1
                 return (cert_name, None, cached_ttl, cert_checksum, pem_data, ocsp_url, False)
@@ -2164,7 +2172,14 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
         # Calculate checksum for integrity verification (lowercase for consistency)
         ocsp_checksum = hashlib.sha256(ocsp_der).hexdigest().lower()
         ttl_readable = f"{ttl / 86400.0:.1f} days" if ttl >= 86400 else f"{ttl / 3600.0:.1f} hours"
-        log_info("⚡ OCSP final TTL for %s is %ds (%s) (checksum=%s)", cert_name, ttl, ttl_readable, ocsp_checksum[:8])
+        log_info(
+            "⚡ OCSP final TTL for %s is %ds (%s) [fp=%s] (checksum=%s)",
+            cert_name,
+            ttl,
+            ttl_readable,
+            (fingerprint[:16] + "...") if fingerprint else "unknown",
+            ocsp_checksum[:8],
+        )
 
         # === Return result for batched database writes ===
         return (cert_name, ocsp_der, ttl, cert_checksum, pem_data, ocsp_url, True)
