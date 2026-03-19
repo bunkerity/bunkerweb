@@ -110,7 +110,71 @@ status = 0
 
 # Use scheduler-managed cache directory (automatically synced from database on restart)
 CONFIGS_SSL_BASE = Path(os.sep, "var", "cache", "bunkerweb", "ssl")
-MIN_TTL = 4500  # 75 minutes: aggressivly refresh/cleanup if TTL is below this
+MIN_TTL = 4500  # 75 minutes: minimum safety threshold. Smart refresh uses max(MIN_TTL, 20% of response lifetime)
+
+
+def _get_sharded_ocsp_path(fingerprint: str) -> Path:
+	"""
+	Get sharded directory path for OCSP response storage using two-level hex tree sharding.
+	Creates a tree structure: {hex1}/{hex2}/{fingerprint}/ where hex1 and hex2 are individual
+	hex digits from the fingerprint, distributing 256 subdirectories across 16 first-level dirs.
+
+	Args:
+	    fingerprint: SHA256 fingerprint (lowercase hex string, 64 chars)
+
+	Returns:
+	    Path: /var/cache/bunkerweb/ssl/{hex1}/{hex2}/{full_fingerprint}/
+
+	Example:
+	    fingerprint: 089433bd22ca2b9536b597a9fc7ca86cdd1d1df0193caaa205043b40f1ea435b
+	    returns: /var/cache/bunkerweb/ssl/0/8/089433bd22ca2b9536b597a9fc7ca86cdd1d1df0193caaa205043b40f1ea435b/
+	"""
+	if not fingerprint or len(fingerprint) < 2:
+		return CONFIGS_SSL_BASE / "unknown"
+	# Use first hex digit (0-f) and second hex digit (0-f) as tree levels
+	hex1 = fingerprint[0].lower()
+	hex2 = fingerprint[1].lower()
+	return CONFIGS_SSL_BASE / hex1 / hex2 / fingerprint
+
+
+def _init_sharded_ocsp_directories() -> bool:
+	"""
+	Initialize tree-structured sharded subdirectories for OCSP response distribution.
+	Creates 16 first-level (hex1: 0-f) × 16 second-level (hex2: 0-f) = 256 total directories.
+	Structure: /var/cache/bunkerweb/ssl/{hex1}/{hex2}/
+	Called at job startup to ensure directory structure exists.
+
+	Returns:
+	    True if all directories initialized successfully, False on error
+	"""
+	try:
+		hex_digits = "0123456789abcdef"
+		failed_dirs = []
+
+		# Create tree structure: 16 first-level dirs × 16 second-level dirs = 256 total
+		for hex1 in hex_digits:
+			for hex2 in hex_digits:
+				dir_path = CONFIGS_SSL_BASE / hex1 / hex2
+				try:
+					dir_path.mkdir(parents=True, exist_ok=True)
+				except Exception as e:
+					log_error("❌ OCSP failed to create directory %s: %s", dir_path, e)
+					failed_dirs.append((f"{hex1}/{hex2}", str(e)))
+
+		if failed_dirs:
+			log_warning(
+				"⚠️ OCSP failed to create %d director(ies): %s",
+				len(failed_dirs),
+				", ".join([f"{d[0]}({d[1]})" for d in failed_dirs[:3]])  # Show first 3 failures
+			)
+			return False
+
+		log_debug("✓ OCSP initialized tree-structured directories (16×16) for OCSP caching")
+		return True
+
+	except Exception as e:
+		log_error("❌ OCSP exception during sharded directory initialization: %s", e)
+		return False
 
 
 def _sanitize_filename(name: str) -> str:
@@ -119,6 +183,54 @@ def _sanitize_filename(name: str) -> str:
     Specifically replaces '*' with '_wildcard_' for wildcard certificates.
     """
     return name.replace("*", "_wildcard_")
+
+
+def _get_cert_pubkey_fingerprint(cert_data: bytes) -> Optional[str]:
+    """
+    Compute SHA256 fingerprint of certificate's public key (RFC 7469 format).
+    Used for fingerprint-based OCSP response storage and matching.
+
+    Supports both PEM and DER certificate formats.
+
+    Args:
+        cert_data: Certificate in PEM or DER format (bytes)
+
+    Returns:
+        Lowercase hex string (64 chars) of SHA256 fingerprint, or None on error
+    """
+    if not cert_data:
+        return None
+
+    cert = None
+    try:
+        # Try PEM format first (most common)
+        try:
+            cert = x509.load_pem_x509_certificate(cert_data)
+            log_debug("✓ OCSP parsed certificate as PEM format")
+        except Exception as pem_err:
+            # Fallback to DER format
+            try:
+                cert = x509.load_der_x509_certificate(cert_data)
+                log_debug("✓ OCSP parsed certificate as DER format")
+            except Exception as der_err:
+                log_warning("⚠️ OCSP certificate is neither PEM nor DER format: PEM error: %s, DER error: %s",
+                           str(pem_err)[:100], str(der_err)[:100])
+                return None
+
+        # Extract public key
+        public_key = cert.public_key()
+        # Serialize public key to DER format (standard for fingerprinting)
+        pubkey_der = public_key.public_bytes(
+            encoding=Encoding.DER,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+        # Compute SHA256 fingerprint (lowercase for consistency)
+        fingerprint = hashlib.sha256(pubkey_der).hexdigest().lower()
+        log_debug("✓ OCSP computed certificate fingerprint: %s", fingerprint[:16] + "...")
+        return fingerprint
+    except Exception as e:
+        log_warning("⚠️ OCSP could not compute certificate fingerprint: %s", e)
+        return None
 
 
 def _acquire_cert_lock(cert_name: str, timeout: int = 300, stale_threshold: int = 600) -> Optional[int]:
@@ -179,21 +291,45 @@ def _acquire_cert_lock(cert_name: str, timeout: int = 300, stale_threshold: int 
                     pass  # Non-critical timestamp write
                 return fd
             except BlockingIOError:
-                # Lock held by another process, close fd and retry after brief delay
+                # Lock held by another process, close fd and exit or retry
                 os.close(fd)
-                time.sleep(0.5)
-                continue
+
+                if cert_name == "main":
+                    # For main lock, fail fast: another OCSP job is already running
+                    log_error(
+                        "❌ OCSP job is already running (another instance holds the lock). "
+                        "Exiting to avoid concurrent operations."
+                    )
+                    return None
+
+                # For cert-specific locks, retry with timeout
+                elapsed = time.time() - start_time
+                remaining_time = timeout - elapsed
+                if remaining_time > 0:
+                    log_debug("⏳ OCSP waiting for lock on %s (%.0fs remaining)...", cert_name, remaining_time)
+                    time.sleep(0.5)
+                    continue
+                else:
+                    break
         except Exception as e:
             log_debug("⚠️ OCSP lock acquisition attempt failed for %s: %s", cert_name, e)
             time.sleep(0.5)
 
-    # Timeout reached: log warning and proceed without lock
-    log_warning(
-        "⚠️ OCSP could not acquire lock for %s after %ds. "
-        "If concurrent OCSP fetches happen, cryptographic verification protects data integrity. "
-        "Consider increasing scheduler interval or timeout if jobs consistently exceed %ds.",
-        cert_name, timeout, timeout
-    )
+    # Timeout reached: log clear message based on lock type
+    if cert_name == "main":
+        log_error(
+            "❌ OCSP job timed out waiting for the main lock (%ds timeout). "
+            "Another OCSP job is still running. This may indicate a hung or very slow job. "
+            "Check for stale lock files: rm -f /tmp/bunkerweb/ocsp*.lock",
+            timeout
+        )
+    else:
+        log_warning(
+            "⚠️ OCSP could not acquire lock for %s after %ds. "
+            "If concurrent OCSP fetches happen, cryptographic verification protects data integrity. "
+            "Consider increasing scheduler interval or timeout if jobs consistently exceed %ds.",
+            cert_name, timeout, timeout
+        )
     return None
 
 
@@ -238,6 +374,36 @@ def _refresh_cert_lock(fd: Optional[int], cert_name: str) -> None:
         log_debug("🔒 OCSP refreshed lock timestamp for %s", cert_name)
     except Exception as e:
         log_debug("⚠️ OCSP could not refresh lock timestamp for %s: %s", cert_name, e)
+
+
+def _cleanup_stale_locks(stale_threshold: int = 300) -> None:
+    """
+    Clean up stale lock files from previous crashed/aborted jobs at startup.
+    This is a defensive measure to prevent lock accumulation from crashed processes.
+
+    Args:
+        stale_threshold: Lock age (seconds) to consider stale (default 300 = 5 minutes)
+    """
+    lock_dir = Path(os.sep, "tmp", "bunkerweb")
+    if not lock_dir.exists():
+        return
+
+    current_time = time.time()
+    cleaned = 0
+
+    for lock_file in lock_dir.glob("ocsp-*.lock"):
+        try:
+            mtime = lock_file.stat().st_mtime
+            age = current_time - mtime
+            if age > stale_threshold:
+                lock_file.unlink()
+                cleaned += 1
+                log_debug("🧹 OCSP removed stale lock file %s (age %.0fs)", lock_file.name, age)
+        except Exception as e:
+            log_debug("⚠️ OCSP could not clean lock file %s: %s", lock_file.name, e)
+
+    if cleaned > 0:
+        log_info("🧹 OCSP cleaned up %d stale lock file(s) from previous runs", cleaned)
 
 
 def is_safe_url(url: str) -> bool:
@@ -669,16 +835,31 @@ def extract_san_dns(pem_data: bytes, cert_name: str = "") -> List[str]:
         return []
 
 
-def get_cached_ocsp_ttl(cert_name: str) -> Tuple[Optional[int], Optional[int]]:
+def get_cached_ocsp_ttl(cert_name: str, cert_pem: Optional[bytes] = None, fingerprint: Optional[str] = None) -> Tuple[Optional[int], Optional[int]]:
     """
-    Check if cached OCSP DER file exists and return:
+    Check if cached OCSP DER file exists (using fingerprint-based sharded path) and return:
       - remaining TTL in seconds (until Next Update)
       - total lifetime in seconds (Next Update - This Update)
     Both values are None if they cannot be determined.
+
+    Args:
+        cert_name: Certificate identifier (for logging only)
+        cert_pem: Optional certificate PEM data to compute fingerprint if not provided
+        fingerprint: Optional pre-computed fingerprint. If not provided, computes from cert_pem.
     """
-    sanitized_name = _sanitize_filename(cert_name)
-    ocsp_path = CONFIGS_SSL_BASE / sanitized_name / "ocsp.der"
-    log_debug("⚡ OCSP TTL check: checking cache for %s at %s", cert_name, ocsp_path)
+    # Compute fingerprint if not provided
+    if fingerprint is None:
+        if cert_pem is None:
+            log_debug("⚡ OCSP TTL check: no fingerprint or cert_pem provided for %s", cert_name)
+            return None, None
+        fingerprint = _get_cert_pubkey_fingerprint(cert_pem)
+        if fingerprint is None:
+            log_debug("⚡ OCSP TTL check: could not compute fingerprint for %s", cert_name)
+            return None, None
+
+    # Use sharded fingerprint-based path
+    ocsp_path = _get_sharded_ocsp_path(fingerprint) / "ocsp.der"
+    log_debug("⚡ OCSP TTL check: checking cache for %s at sharded path %s (fingerprint: %s...)", cert_name, ocsp_path, fingerprint[:16])
 
     if not ocsp_path.is_file():
         log_debug("⚡ OCSP TTL check: cache miss - file not found for %s", cert_name)
@@ -791,35 +972,49 @@ def _get_cached_ocsp_certs(db: Any) -> set:
     return cached_certs
 
 
-def _get_cert_checksums(db: Any, cert_names: set) -> Dict[str, str]:
+def _get_cert_checksums(db: Any, cert_data: Dict[str, bytes]) -> Dict[str, str]:
     """
     Get previously stored checksums for certificates from the database.
-    Checksums are stored in cache entries like 'cert_checksum/cert_name'.
+    Checksums are stored in cache entries like 'cert_checksum/{fingerprint}'.
 
     Args:
         db: Database connection
-        cert_names: Set of certificate names to retrieve checksums for
+        cert_data: Dict of {cert_name: pem_data} to retrieve checksums for
 
     Returns:
         Dict of {cert_name: checksum_hex}
     """
     checksums = {}
 
-    if db is None or not cert_names:
+    if db is None or not cert_data:
         return checksums
 
     try:
+        # Build mapping of fingerprints to cert_names for lookup
+        fingerprint_to_name = {}
+        for cert_name, pem_data in cert_data.items():
+            # Clean PEM before fingerprinting (custom certs may have private keys/noise)
+            cleaned_pem = _clean_pem(pem_data)
+            cert_fp = _get_cert_pubkey_fingerprint(cleaned_pem)
+            if cert_fp:
+                fingerprint_to_name[cert_fp] = cert_name
+
+        if not fingerprint_to_name:
+            log_debug("⚠️ OCSP could not compute fingerprints for %d cert(s) when retrieving checksums", len(cert_data))
+            return checksums
+
         # Optimization: use with_data=True to fetch all checksums in one go
         cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=True)
         for entry in cache_files:
             file_name = entry.get("file_name", "")
             if file_name.startswith("cert_checksum/"):
-                cert_name_raw = file_name[len("cert_checksum/"):]
-                if cert_name_raw in cert_names:
+                fingerprint = file_name[len("cert_checksum/"):]
+                if fingerprint in fingerprint_to_name:
+                    cert_name = fingerprint_to_name[fingerprint]
                     data = entry.get("data")
                     if data:
                         try:
-                            checksums[cert_name_raw] = data.decode("utf-8").strip()
+                            checksums[cert_name] = data.decode("utf-8").strip()
                         except Exception:
                             pass
     except Exception as e:
@@ -832,7 +1027,7 @@ def _calculate_cert_checksum(pem_data: bytes) -> str:
     """
     Calculate SHA256 checksum of certificate PEM data.
     """
-    return hashlib.sha256(pem_data).hexdigest()
+    return hashlib.sha256(pem_data).hexdigest().lower()
 
 
 def _clean_pem(pem_data: bytes) -> bytes:
@@ -1013,7 +1208,7 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
             
             sanitized_name = _sanitize_filename(cert_name_raw)
             db_data = entry["data"]
-            db_checksum = entry.get("checksum") or hashlib.sha256(db_data).hexdigest()
+            db_checksum = (entry.get("checksum") or hashlib.sha256(db_data).hexdigest()).lower()
 
             try:
                 ocsp_cert_dir = CONFIGS_SSL_BASE / sanitized_name
@@ -1021,7 +1216,7 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
 
                 if ocsp_path.is_file():
                     # File exists — compare checksum
-                    disk_checksum = hashlib.sha256(ocsp_path.read_bytes()).hexdigest()
+                    disk_checksum = hashlib.sha256(ocsp_path.read_bytes()).hexdigest().lower()
                     if disk_checksum == db_checksum:
                         ok_count += 1
                         log_debug("✓ OCSP disk file for %s matches database (checksum=%s)", cert_name_raw, db_checksum[:8])
@@ -1078,12 +1273,16 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
         return (cert_name, None, 0, cert_checksum, pem_data, None, False)
 
     # Check if certificate checksum matches what we have in database
+    # Checksums are stored by fingerprint (cert_checksum/{fingerprint}), so compute it first
     cached_checksum = None
-    if db:
+    fingerprint_for_checksum = _get_cert_pubkey_fingerprint(pem_data)
+    if db and fingerprint_for_checksum:
         try:
-            checksum_data = db.get_job_cache_file(file_name=f"cert_checksum/{sanitized_name}", job_name="ocsp-refresh")
+            checksum_key = f"cert_checksum/{fingerprint_for_checksum}"
+            checksum_data = db.get_job_cache_file(file_name=checksum_key, job_name="ocsp-refresh")
             if checksum_data:
                 cached_checksum = checksum_data.decode("utf-8").strip()
+                log_debug("✓ OCSP found cached checksum for %s (key=%s)", cert_name, checksum_key[:30])
         except Exception as e:
             log_debug("⚠️ OCSP could not check cached checksum for %s: %s", cert_name, e)
 
@@ -1103,22 +1302,32 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
 
         log_debug("🌐 OCSP responder for certificate %s: %s", cert_name, ocsp_url)
 
-        # === Check if cached OCSP response is still fresh ===
-        cached_ttl, total_lifetime = get_cached_ocsp_ttl(cert_name)
+        # === Compute fingerprint for sharded path lookup ===
+        fingerprint = _get_cert_pubkey_fingerprint(pem_data)
+        if not fingerprint:
+            log_warning("⚠️ OCSP could not compute fingerprint for %s, treating as new fetch", cert_name)
+
+        # === Check if cached OCSP response is still fresh (disk + database) ===
+        # This two-tier check handles aborted downloads, database inconsistencies, and ephemeral storage
+        cached_ttl, total_lifetime = get_cached_ocsp_ttl(cert_name, pem_data, fingerprint)
+
+        # If disk check found valid response, use it (even if database is out of sync)
         if cached_ttl is not None:
             half_lifetime = (total_lifetime // 2) if (total_lifetime and total_lifetime > 0) else 0
-            
-            # Skip fetch ONLY if not forced AND TTL is above MIN_TTL AND above 50% lifetime
-            if not force_fetch and cached_ttl > MIN_TTL and cached_ttl > half_lifetime:
-                log_debug(
-                    "✓ OCSP cached response for %s still valid for %ds (%.1f days), above thresholds (MIN_TTL=%ds, 50%% threshold=%ds), skipping fetch",
-                    cert_name, cached_ttl, cached_ttl / 86400.0, MIN_TTL, half_lifetime,
+            # Smart TTL calculation: use 20% of total lifetime as refresh threshold (or MIN_TTL if larger for safety)
+            refresh_threshold = max(MIN_TTL, int(total_lifetime * 0.20)) if total_lifetime and total_lifetime > 0 else MIN_TTL
+
+            # Skip fetch ONLY if not forced AND TTL is above refresh_threshold AND above 50% lifetime
+            if not force_fetch and cached_ttl > refresh_threshold and cached_ttl > half_lifetime:
+                log_info(
+                    "✓ OCSP cached response for %s still valid for %ds (%.1f days), above thresholds (refresh_threshold=%ds [20%% of %ds], 50%% threshold=%ds), skipping fetch",
+                    cert_name, cached_ttl, cached_ttl / 86400.0, refresh_threshold, total_lifetime, half_lifetime,
                 )
                 stats["ocsp_cached_responses"] = stats.get("ocsp_cached_responses", 0) + 1
                 return (cert_name, None, cached_ttl, cert_checksum, pem_data, ocsp_url, False)
-            
-            if cached_ttl <= MIN_TTL:
-                log_info("🔄 OCSP response for %s is near expiration (TTL=%ds < %ds), attempting aggressive refresh", cert_name, cached_ttl, MIN_TTL)
+
+            if cached_ttl <= refresh_threshold:
+                log_info("🔄 OCSP response for %s is near expiration (TTL=%ds <= refresh_threshold=%ds [20%% of %ds]), attempting aggressive refresh", cert_name, cached_ttl, refresh_threshold, total_lifetime)
 
         ocsp_der: Optional[bytes] = None
         ttl: int = 0
@@ -1139,32 +1348,38 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
 
             if cached_ttl is not None:
                 current_ttl = cast(int, cached_ttl)
+                # Recalculate refresh_threshold for failure handling (same logic as above)
+                current_refresh_threshold = max(MIN_TTL, int(total_lifetime * 0.20)) if total_lifetime and total_lifetime > 0 else MIN_TTL
+
                 if current_ttl <= 0:
                     log_warning(
                         "🧹 OCSP cached response for %s is already expired and refresh failed. Cleaning up invalid cache.",
                         cert_name,
                     )
                     cleanup_ocsp_cache(db, cert_name)
-                elif current_ttl <= MIN_TTL:
+                elif current_ttl <= current_refresh_threshold:
                     log_warning(
-                        "🚨 OCSP CRITICAL: Cached response for %s is near expiration (TTL=%ds) and refresh failed. "
+                        "🚨 OCSP CRITICAL: Cached response for %s is near expiration (TTL=%ds <= refresh_threshold=%ds [20%% of %ds]) and refresh failed. "
                         "Removing from cache to prevent stapling expired data.",
                         cert_name,
                         current_ttl,
+                        current_refresh_threshold,
+                        total_lifetime,
                     )
                     cleanup_ocsp_cache(db, cert_name)
                 else:
                     log_warning(
-                        "⚠️ OCSP could NOT refresh response for %s, keeping existing cache (TTL=%ds) for now",
+                        "⚠️ OCSP could NOT refresh response for %s, keeping existing cache (TTL=%ds, above threshold %ds) for now",
                         cert_name,
                         current_ttl,
+                        current_refresh_threshold,
                     )
                 return (cert_name, None, current_ttl, cert_checksum, pem_data, ocsp_url, True)
 
             return (cert_name, None, 0, cert_checksum, pem_data, ocsp_url, True)
 
-        # Calculate checksum for integrity verification
-        ocsp_checksum = hashlib.sha256(ocsp_der).hexdigest()
+        # Calculate checksum for integrity verification (lowercase for consistency)
+        ocsp_checksum = hashlib.sha256(ocsp_der).hexdigest().lower()
         ttl_readable = f"{ttl / 86400.0:.1f} days" if ttl >= 86400 else f"{ttl / 3600.0:.1f} hours"
         log_info("⚡ OCSP final TTL for %s is %ds (%s) (checksum=%s)", cert_name, ttl, ttl_readable, ocsp_checksum[:8])
 
@@ -1218,7 +1433,7 @@ def process_custom_certs(
 
         # Check which custom certs have changed since last OCSP refresh
         # The names from _load_custom_certs_from_db already include the 'customcert-' prefix
-        previous_custom_checksums = _get_cert_checksums(db, set(custom_certs.keys()))
+        previous_custom_checksums = _get_cert_checksums(db, custom_certs)
         changed_custom_certs = {}
         unchanged_custom_certs = {}
 
@@ -1229,9 +1444,9 @@ def process_custom_certs(
             previous_checksum = previous_custom_checksums.get(cert_name)
 
             if previous_checksum is None:
-                # No previous checksum, treat as changed
+                # No previous checksum, treat as changed (will be recategorized by robustness check if valid disk cache exists)
                 changed_custom_certs[cert_name] = pem_data
-                log_debug("⚠️ OCSP no previous checksum found for custom cert %s, will refresh", cert_name)
+                log_debug("ℹ️ OCSP no previous checksum found for custom cert %s (will check disk cache)", cert_name)
             elif current_checksum != previous_checksum:
                 # Certificate content has changed
                 changed_custom_certs[cert_name] = pem_data
@@ -1250,7 +1465,33 @@ def process_custom_certs(
 
         stats["custom_certs_processed"] = stats.get("custom_certs_processed", 0) + len(custom_certs)
 
-        # 1. Process changed custom certificates (force refresh)
+        # 1. Process changed custom certificates (robustness: skip force-fetch if valid OCSP cached on disk)
+        recategorized_changed_custom = {}
+        for cert_name, cert_pem in list(changed_custom_certs.items()):
+            # Clean PEM before fingerprinting (custom certs may have private keys/noise)
+            cleaned_pem = _clean_pem(cert_pem)
+            fingerprint = _get_cert_pubkey_fingerprint(cleaned_pem)
+            if fingerprint:
+                cached_ttl, _ = get_cached_ocsp_ttl(cert_name, cert_pem, fingerprint)
+                if cached_ttl is not None and cached_ttl > 0:
+                    # Valid OCSP cached on disk - skip force refresh
+                    log_info("ℹ️ OCSP disk file exists for %s (marked changed due to missing checksum): TTL=%ds, skipping force-fetch", cert_name, cached_ttl)
+                    recategorized_changed_custom[cert_name] = cert_pem
+                    del changed_custom_certs[cert_name]
+                    unchanged_custom_certs[cert_name] = cert_pem
+
+        if recategorized_changed_custom:
+            log_info("ℹ️ OCSP recategorized %d custom cert(s) from changed→unchanged due to valid disk cache", len(recategorized_changed_custom))
+            # Add recategorized certs to results so their checksums get persisted to database
+            # (even though we didn't fetch new OCSP responses, we need to record their checksums for future runs)
+            for cert_name, cert_pem in sorted(recategorized_changed_custom.items()):
+                pem_checksum = _calculate_cert_checksum(cert_pem)
+                # Tuple: (cert_name, ocsp_der=None, ttl=0, checksum, pem_data, ocsp_url=None, was_attempted=False)
+                # We're not fetching, just recording the cert's checksum for differential tracking
+                results.append((cert_name, None, 0, pem_checksum, cert_pem, None, False))
+                log_debug("✓ OCSP added recategorized custom cert %s to database persist list (checksum=%s)", cert_name, pem_checksum[:8])
+
+        # Process remaining changed custom certificates with force refresh
         for cert_name, cert_pem in sorted(changed_custom_certs.items()):
             if callable(timeout_fn) and timeout_fn(f"changed custom cert {cert_name}"):
                 break
@@ -1342,20 +1583,33 @@ def cleanup_ocsp_cache(db: Optional[Any] = None, cert_name: Optional[str] = None
             except Exception as e:
                 log_debug("🧹 OCSP could not remove database entry for %s: %s", cert_name, e)
     else:
-        # Clean up ALL OCSP caches (including symlinks)
+        # Clean up ALL OCSP caches (handles both old flat and new tree structures)
         if CONFIGS_SSL_BASE.is_dir():
-            for entry in sorted(CONFIGS_SSL_BASE.iterdir()):
-                if not entry.is_dir():
-                    continue
-                ocsp_file = entry / "ocsp.der"
+            # Recursively find and remove all ocsp.der files
+            for root, dirs, files in os.walk(CONFIGS_SSL_BASE, topdown=False):
+                # Try to remove ocsp.der if it exists
+                ocsp_file = Path(root) / "ocsp.der"
                 if ocsp_file.is_symlink() or ocsp_file.is_file():
-                    ocsp_file.unlink(missing_ok=True)
-                    log_info("🧹 OCSP removed cached response %s", ocsp_file)
-                # Remove the directory if it's now empty
+                    try:
+                        ocsp_file.unlink()
+                        log_info("🧹 OCSP removed cached response %s", ocsp_file)
+                    except Exception:
+                        pass
+
+                # Try to remove ocsp.json metadata if it exists
+                meta_file = Path(root) / "ocsp.json"
+                if meta_file.is_file():
+                    try:
+                        meta_file.unlink()
+                    except Exception:
+                        pass
+
+                # Remove empty directories (walk in reverse order ensures we clean up bottom-up)
                 try:
-                    entry.rmdir()
+                    if root != str(CONFIGS_SSL_BASE):  # Don't remove the base directory
+                        Path(root).rmdir()
                 except OSError:
-                    pass  # Directory not empty, leave it
+                    pass  # Directory not empty or other error, skip
 
         if db and purge_db:
             try:
@@ -1481,7 +1735,6 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
                 continue
 
             cert_name_raw = file_name[len("ocsp/"):]
-            sanitized_name = _sanitize_filename(cert_name_raw)
             data = entry.get("data")
             db_checksum = entry.get("checksum", "")
 
@@ -1489,6 +1742,25 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
                 log_warning("⚠️ OCSP database entry %s has no data or checksum, skipping verification", cert_name_raw)
                 continue
 
+            # Check if this is a marker entry (fingerprint reference) vs actual OCSP response
+            # Marker entries: UTF-8 encoded fingerprints (~64 bytes)
+            # Real OCSP responses: DER-encoded binary (typically 500+ bytes)
+            is_marker = False
+            try:
+                # Try to decode as UTF-8 fingerprint string (marker entries are ~64 hex chars)
+                decoded = data.decode("utf-8", errors="strict")
+                if len(decoded) == 64 and all(c in "0123456789abcdef" for c in decoded):
+                    # This is a marker entry - skip it during verification
+                    log_debug("ℹ️ OCSP skipping marker entry %s (fingerprint reference)", cert_name_raw)
+                    is_marker = True
+            except (UnicodeDecodeError, Exception):
+                pass  # Not a marker, try to parse as OCSP response
+
+            if is_marker:
+                continue
+
+            # At this point, data should be a DER-encoded OCSP response
+            sanitized_name = _sanitize_filename(cert_name_raw)
             verify_count += 1
 
             # Check if file exists on disk
@@ -1520,7 +1792,13 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
                         ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
                         ocsp_path.write_bytes(data)
                         ocsp_path.chmod(0o644)
-                        log_info("✓ OCSP restored %s from database", cert_name_raw)
+                        # Verify checksum after restoration
+                        written_checksum = hashlib.sha256(ocsp_path.read_bytes()).hexdigest().lower()
+                        if written_checksum != db_checksum:
+                            log_error("❌ OCSP checksum mismatch after restoring %s (expected=%s, got=%s)", cert_name_raw, db_checksum[:8], written_checksum[:8])
+                            stats["errors"] = stats.get("errors", 0) + 1
+                            continue
+                        log_info("✓ OCSP restored %s from database (verified)", cert_name_raw)
                         restored_count += 1
                     except Exception as e:
                         log_error("❌ OCSP could not restore %s from database: %s", cert_name_raw, e)
@@ -1528,9 +1806,9 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
                         continue
 
                 else:
-                    # File exists: verify checksum
+                    # File exists: verify checksum (lowercase for consistency)
                     file_data = ocsp_path.read_bytes()
-                    file_checksum = hashlib.sha256(file_data).hexdigest()
+                    file_checksum = hashlib.sha256(file_data).hexdigest().lower()
 
                     if file_checksum != db_checksum:
                         log_warning(
@@ -1541,7 +1819,13 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
                         try:
                             ocsp_path.write_bytes(data)
                             ocsp_path.chmod(0o644)
-                            log_info("✓ OCSP restored correct version of %s", cert_name_raw)
+                            # Verify checksum after restoration
+                            written_checksum = hashlib.sha256(ocsp_path.read_bytes()).hexdigest().lower()
+                            if written_checksum != db_checksum:
+                                log_error("❌ OCSP checksum mismatch after restoring %s (expected=%s, got=%s)", cert_name_raw, db_checksum[:8], written_checksum[:8])
+                                stats["errors"] = stats.get("errors", 0) + 1
+                                continue
+                            log_info("✓ OCSP restored correct version of %s (verified)", cert_name_raw)
                             mismatch_count += 1
                         except Exception as e:
                             log_error("❌ OCSP could not restore %s: %s", cert_name_raw, e)
@@ -1586,13 +1870,19 @@ def _persist_ocsp_results_to_db(
     log_info("🔄 OCSP batching database updates for %d certificate(s)", len(all_ocsp_results))
 
     for cert_name, ocsp_der, ttl, cert_checksum, pem_data, ocsp_url, was_attempted in all_ocsp_results:
-        sanitized_name = _sanitize_filename(cert_name)
+        # Clean PEM before fingerprinting (custom certs may have private keys/noise)
+        cleaned_pem = _clean_pem(pem_data)
+        # Compute certificate fingerprint for storage key
+        cert_fp = _get_cert_pubkey_fingerprint(cleaned_pem)
+        if not cert_fp:
+            log_warning("⚠️ OCSP cannot store database cache for %s: failed to compute fingerprint", cert_name)
+            continue
 
-        # 1. Update OCSP response if we have a new one
+        # 1. Update OCSP response if we have a new one (using fingerprint-based key)
         if ocsp_der and ttl > 0:
-            cache_key = f"ocsp/{sanitized_name}"
+            cache_key = f"ocsp/{cert_fp}"  # Use fingerprint instead of cert_name
             try:
-                ocsp_checksum = hashlib.sha256(ocsp_der).hexdigest()
+                ocsp_checksum = hashlib.sha256(ocsp_der).hexdigest().lower()
                 err = db.upsert_job_cache(
                     service_id=None,  # Global cache entry
                     file_name=cache_key,
@@ -1602,23 +1892,38 @@ def _persist_ocsp_results_to_db(
                 )
 
                 if err:
-                    log_error("❌ OCSP error while storing response for %s in database: %s", cert_name, err)
+                    log_error("❌ OCSP error while storing response for %s (fingerprint: %s) in database: %s", cert_name, cert_fp[:16] + "...", err)
                     stats["errors"] = stats.get("errors", 0) + 1
                 else:
-                    log_info("✓ OCSP stored response for %s in database (TTL=%ds, checksum=%s)", cert_name, ttl, ocsp_checksum[:8])
+                    log_info("✓ OCSP stored response for %s in database (fingerprint: %s, TTL=%ds)", cert_name, cert_fp[:16] + "...", ttl)
+
+                    # Also store a marker entry with cert_name for differential tracking
+                    # This allows _get_cached_ocsp_certs() to identify cached certificates
+                    sanitized_name = _sanitize_filename(cert_name)
+                    try:
+                        db.upsert_job_cache(
+                            service_id=None,
+                            file_name=f"ocsp/{sanitized_name}",
+                            data=cert_fp.encode("utf-8"),  # Store fingerprint reference
+                            job_name="ocsp-refresh",
+                            checksum=hashlib.sha256(cert_fp.encode("utf-8")).hexdigest().lower(),
+                        )
+                        log_debug("✓ OCSP stored cert_name marker for %s (fingerprint: %s)", cert_name, cert_fp[:16] + "...")
+                    except Exception as e:
+                        log_debug("⚠️ OCSP could not store cert_name marker for %s: %s", cert_name, e)
             except Exception as e:
                 log_error("❌ OCSP exception while storing response for %s in database: %s", cert_name, e)
                 stats["errors"] = stats.get("errors", 0) + 1
 
-        # 2. ALWAYS store/update certificate content checksum for future differential checks
-        cert_checksum_key = f"cert_checksum/{sanitized_name}"
+        # 2. ALWAYS store/update certificate content checksum for future differential checks (using fingerprint)
+        cert_checksum_key = f"cert_checksum/{cert_fp}"
         try:
             err = db.upsert_job_cache(
                 service_id=None,
                 file_name=cert_checksum_key,
                 data=cert_checksum.encode("utf-8"),
                 job_name="ocsp-refresh",
-                checksum=hashlib.sha256(cert_checksum.encode("utf-8")).hexdigest(),
+                checksum=hashlib.sha256(cert_checksum.encode("utf-8")).hexdigest().lower(),
             )
             if err:
                 log_debug("⚠️ OCSP could not store cert checksum for %s: %s", cert_name, err)
@@ -1648,20 +1953,27 @@ def _persist_ocsp_results_to_disk(
         if not ocsp_der:
             continue
         try:
+            # Compute certificate public key fingerprint for storage location
+            cert_fp = _get_cert_pubkey_fingerprint(pem_data)
+            if not cert_fp:
+                log_error("❌ OCSP cannot store response for %s: failed to compute fingerprint", cert_name)
+                stats["errors"] = stats.get("errors", 0) + 1
+                continue
+
             # Acquire lock to prevent race conditions with concurrent OCSP fetches
             lock_fd = _acquire_cert_lock(cert_name)
-            sanitized_name = _sanitize_filename(cert_name)
             try:
-                # Create the SSL configs directory for this certificate
-                ocsp_cert_dir = CONFIGS_SSL_BASE / sanitized_name
+                # Create sharded directory using fingerprint (0-f distribution)
+                # Example: /var/cache/bunkerweb/ssl/0/089433bd22ca2b9536b597a9fc7ca86cdd1d1df0193caaa205043b40f1ea435b/ocsp.der
+                ocsp_cert_dir = _get_sharded_ocsp_path(cert_fp)
                 try:
                     ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
                 except Exception as e:
-                    log_error("❌ OCSP error while creating directory %s: %s", ocsp_cert_dir, e)
+                    log_error("❌ OCSP error while creating sharded directory %s: %s", ocsp_cert_dir, e)
                     stats["errors"] = stats.get("errors", 0) + 1
-                    continue
+                    raise  # Let finally block release the lock before skipping this cert
 
-                # Write OCSP response to cache/ssl/{cert-name}/ocsp.der (atomic write with temp file)
+                # Write OCSP response to sharded cache location (atomic write with temp file)
                 ocsp_path = ocsp_cert_dir / "ocsp.der"
                 try:
                     # Write to temporary file first, then atomically move to final location
@@ -1677,40 +1989,31 @@ def _persist_ocsp_results_to_disk(
 
                     # Atomically move temp file to final location (overwrites only on success)
                     tmp_path.replace(ocsp_path)
-                    log_info("✓ OCSP saved response for %s to disk at %s", cert_name, ocsp_path)
+                    log_info("✓ OCSP saved response for %s to disk at %s (fingerprint: %s)", cert_name, ocsp_path, cert_fp[:16] + "...")
 
-                    # Write OCSP metadata to cache/ssl/{cert-name}/ocsp.json
+                    # Write OCSP metadata to cache/ssl/{fingerprint}/ocsp.json
+                    # Metadata includes cert_name, serial, fingerprint, expires, and must_staple flag
                     meta_path = ocsp_cert_dir / "ocsp.json"
                     try:
                         meta = _extract_cert_metadata(pem_data, cert_name)
+                        # Add fingerprint reference for debugging/verification
+                        meta["fingerprint"] = cert_fp
+                        meta["expires"] = datetime.now(timezone.utc).isoformat() + f" + {ttl}s" if ttl else "unknown"
                         meta_path.write_text(json.dumps(meta, separators=(",", ":")), encoding="utf-8")
                         meta_path.chmod(0o644)
                         log_debug(
-                            "✓ OCSP saved metadata for %s (serial=%s, must_staple=%s)",
+                            "✓ OCSP saved metadata for %s (fingerprint: %s, serial=%s, must_staple=%s)",
                             cert_name,
+                            cert_fp[:16] + "...",
                             meta.get("serial") or "unknown",
                             meta.get("must_staple"),
                         )
                     except Exception as e:
                         log_debug("⚠️ OCSP metadata write failed for %s: %s", cert_name, e)
 
-                    # If metadata file is missing, recreate it
-                    if not meta_path.exists():
-                        try:
-                            meta = _extract_cert_metadata(pem_data, cert_name)
-                            meta_path.write_text(json.dumps(meta, separators=(",", ":")), encoding="utf-8")
-                            meta_path.chmod(0o644)
-                            log_info(
-                                "✓ OCSP recreated missing metadata for %s (serial=%s, must_staple=%s)",
-                                cert_name,
-                                meta.get("serial") or "unknown",
-                                meta.get("must_staple"),
-                            )
-                        except Exception as e:
-                            log_warning("⚠️ OCSP failed to recreate metadata for %s: %s", cert_name, e)
-
-                    # Create symlinks for each SAN so OCSP is found by any SNI name
-                    _create_san_symlinks(pem_data, ocsp_path, cert_name)
+                    # Note: With fingerprint-based storage, SAN symlinks are no longer needed
+                    # The NGINX code directly looks up OCSP responses by certificate fingerprint
+                    # (previous implementation left here for reference but not executed)
                 except Exception as e:
                     # Clean up any leftover temp files on error (existing ocsp.der remains intact)
                     try:
@@ -1791,6 +2094,9 @@ def main() -> int:
         log_info("🔄 OCSP refresh job started with differential update strategy (timeout in %d minutes%s)",
                  JOB_TIMEOUT // 60, force_flags)
 
+        # Clean up stale lock files from previous crashed runs (defensive measure)
+        _cleanup_stale_locks()
+
         # Acquire main lock for the entire OCSP refresh operation
         lock_fd_main = _acquire_cert_lock("main", timeout=300, stale_threshold=1800)
 
@@ -1829,6 +2135,11 @@ def main() -> int:
         except Exception as e:
             log_error("❌ OCSP could not create cache directory %s: %s", CONFIGS_SSL_BASE, e)
             return 2
+
+        # === Initialize sharded directory structure (16 subdirectories: 0-9, a-f) ===
+        # This distributes OCSP responses across 16 directories for filesystem performance
+        if not _init_sharded_ocsp_directories():
+            log_warning("⚠️ OCSP sharded directory initialization had issues, will attempt to continue")
 
         # === Clean up old temporary OCSP files (older than 5 minutes) ===
         # Removes stale temp files from failed script runs before processing begins
@@ -1896,8 +2207,25 @@ def main() -> int:
             new_le_certs = {k: v for k, v in le_certs.items() if k not in previous_ocsp_certs}
             existing_le_certs = {k: v for k, v in le_certs.items() if k in previous_ocsp_certs}
 
+            # ROBUSTNESS: Check disk files for "new" certs (database may be out of sync, cache cleared, or download aborted)
+            # If a "new" cert has valid cached OCSP on disk, move it to "existing" to avoid re-fetching
+            recategorized_certs = {}
+            for cert_name, pem_data in list(new_le_certs.items()):
+                fingerprint = _get_cert_pubkey_fingerprint(pem_data)
+                if fingerprint:
+                    cached_ttl, total_lifetime = get_cached_ocsp_ttl(cert_name, pem_data, fingerprint)
+                    if cached_ttl is not None:
+                        # Disk file exists with valid TTL - treat as unchanged, not new
+                        log_info("ℹ️ OCSP disk file exists for %s (marked new in DB): TTL=%ds, recategorizing to existing", cert_name, cached_ttl)
+                        recategorized_certs[cert_name] = pem_data
+                        del new_le_certs[cert_name]
+                        existing_le_certs[cert_name] = pem_data
+
+            if recategorized_certs:
+                log_info("ℹ️ OCSP recategorized %d cert(s) from new→existing due to valid disk cache", len(recategorized_certs))
+
             # For existing certs, check if certificate content has changed
-            previous_le_checksums = _get_cert_checksums(db, set(existing_le_certs.keys()))
+            previous_le_checksums = _get_cert_checksums(db, existing_le_certs)
             changed_le_certs = {}
             unchanged_le_certs = {}
 
@@ -1907,9 +2235,9 @@ def main() -> int:
                 previous_checksum = previous_le_checksums.get(cert_name)
 
                 if previous_checksum is None:
-                    # No previous checksum found, treat as changed (data loss or first refresh after upgrade)
+                    # No previous checksum found, treat as changed (will be recategorized by robustness check if valid disk cache exists)
                     changed_le_certs[cert_name] = pem_data
-                    log_debug("⚠️ OCSP no previous checksum found for %s, will refresh", cert_name)
+                    log_debug("ℹ️ OCSP no previous checksum found for %s (will check disk cache)", cert_name)
                 elif current_checksum != previous_checksum:
                     # Certificate content has changed
                     changed_le_certs[cert_name] = pem_data
@@ -1944,7 +2272,34 @@ def main() -> int:
                 if res[1] is None and res[5] and res[6]: # ocsp_der is None AND ocsp_url is present AND was_attempted is True
                     stashed_failures.append((cert_name, pem_data))
 
-            # 2. Process changed certs (force refresh)
+            # 2. Process changed certs (robustness: skip force-fetch if valid OCSP cached on disk)
+            # This handles cases where checksums are missing but OCSP responses exist with fresh TTL
+            recategorized_changed = {}
+            for cert_name, pem_data in list(changed_le_certs.items()):
+                # Clean PEM before fingerprinting (custom certs may have private keys/noise)
+                cleaned_pem = _clean_pem(pem_data)
+                fingerprint = _get_cert_pubkey_fingerprint(cleaned_pem)
+                if fingerprint:
+                    cached_ttl, total_lifetime = get_cached_ocsp_ttl(cert_name, pem_data, fingerprint)
+                    if cached_ttl is not None and cached_ttl > 0:
+                        # Valid OCSP cached on disk - skip force refresh
+                        log_info("ℹ️ OCSP disk file exists for %s (marked changed due to missing checksum): TTL=%ds, skipping force-fetch", cert_name, cached_ttl)
+                        recategorized_changed[cert_name] = pem_data
+                        del changed_le_certs[cert_name]
+                        unchanged_le_certs[cert_name] = pem_data
+
+            if recategorized_changed:
+                log_info("ℹ️ OCSP recategorized %d cert(s) from changed→unchanged due to valid disk cache", len(recategorized_changed))
+                # Add recategorized certs to all_ocsp_results so their checksums get persisted to database
+                # (even though we didn't fetch new OCSP responses, we need to record their checksums for future runs)
+                for cert_name, pem_data in sorted(recategorized_changed.items()):
+                    pem_checksum = _calculate_cert_checksum(pem_data)
+                    # Tuple: (cert_name, ocsp_der=None, ttl=0, checksum, pem_data, ocsp_url=None, was_attempted=False)
+                    # We're not fetching, just recording the cert's checksum for differential tracking
+                    all_ocsp_results.append((cert_name, None, 0, pem_checksum, pem_data, None, False))
+                    log_debug("✓ OCSP added recategorized cert %s to database persist list (checksum=%s)", cert_name, pem_checksum[:8])
+
+            # Process remaining changed certs with force refresh
             for cert_name, pem_data in sorted(changed_le_certs.items()):
                 if check_job_timeout(f"changed LE cert {cert_name}"): break
                 refresh_job_lock(cert_name)
@@ -1988,7 +2343,7 @@ def main() -> int:
             log_info("⏸️ OCSP stashed %d failed fetch(es), waiting 120 seconds before final retry...", len(stashed_failures))
 
             # Use smaller sleeps to stay responsive and allow timeout checks
-            for i in range(120):
+            for _ in range(120):
                 if check_job_timeout("during stashed retry wait"): break
                 time.sleep(1)
 
@@ -2027,7 +2382,7 @@ def main() -> int:
                     file_name=last_refresh_key,
                     data=str(now_ts).encode("utf-8"),
                     job_name="ocsp-refresh",
-                    checksum=hashlib.sha256(str(now_ts).encode("utf-8")).hexdigest(),
+                    checksum=hashlib.sha256(str(now_ts).encode("utf-8")).hexdigest().lower(),
                 )
                 log_debug("✓ OCSP updated last full refresh timestamp to %d", now_ts)
             except Exception as e:
@@ -2049,6 +2404,9 @@ def main() -> int:
 
         if stats["errors"] == 0:
             log_info("✓ OCSP refresh job completed successfully")
+            # Check if all certificates are up-to-date (no fetches needed)
+            if stats["ocsp_fetched_responses"] == 0 and (stats["le_certs_processed"] + stats["custom_certs_processed"]) > 0:
+                log_info("✅ All OCSP responses are current and valid - no updates needed")
         else:
             log_warning("⚠️ OCSP refresh job completed with %d error(s)", stats["errors"])
 
@@ -2078,7 +2436,7 @@ def main() -> int:
         return 2
     finally:
         # Always release the main lock
-        _release_cert_lock(lock_fd_main)
+        _release_cert_lock(lock_fd_main, "main")
 
 
 # run it
