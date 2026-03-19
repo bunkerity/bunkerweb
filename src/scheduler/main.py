@@ -685,7 +685,28 @@ if __name__ == "__main__":
             with tmp_variables_path.open() as f:
                 dotenv_env = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#") and "=" in line)
 
-        SCHEDULER = JobScheduler(LOGGER, db=Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))))  # type: ignore
+        _db_uri = dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))
+
+        def _db_target_details(uri: str) -> str:
+            if not uri:
+                return "type=(unknown) database=(none) host=(local) user=(none)"
+            try:
+                from sqlalchemy.engine.url import make_url
+
+                u = make_url(uri)
+                driver = (u.drivername or "").split("+", 1)[0]
+                host = u.host or "(local)"
+                user = u.username or "(none)"
+                if driver == "sqlite":
+                    db_name = u.database or "(none)"
+                else:
+                    db_name = (u.database or "(none)")
+                return f"type={driver or '(unknown)'} database={db_name} host={host} user={user}"
+            except Exception:
+                return "type=(unknown) database=(none) host=(local) user=(none)"
+
+        LOGGER.info("Scheduler DB target: %s", _db_target_details(_db_uri or ""))
+        SCHEDULER = JobScheduler(LOGGER, db=Database(LOGGER, sqlalchemy_string=_db_uri))  # type: ignore
 
         JOB = Job(LOGGER, __file__, SCHEDULER.db)
 
