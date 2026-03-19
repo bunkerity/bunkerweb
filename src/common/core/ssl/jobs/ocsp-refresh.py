@@ -3079,7 +3079,12 @@ def main() -> int:
         # Wait for scheduler's directory purge to finish after service restart,
         # then restore cached OCSP responses from database to disk.
         # This handles ephemeral storage and post-restart cache directory cleanup.
-        ocsp_files_exist = any((CONFIGS_SSL_BASE / d / "ocsp.der").is_file() for d in CONFIGS_SSL_BASE.iterdir()) if CONFIGS_SSL_BASE.is_dir() else False
+        # Note: OCSP files may live under legacy flat dirs (ssl/<name>/ocsp.der) or
+        # tree-sharded dirs (ssl/<hex1>/<hex2>/<fingerprint>/ocsp.der). Only checking
+        # direct children of ssl/ misses the sharded layout and falsely logs "no cached files".
+        ocsp_files_exist = (
+            any(CONFIGS_SSL_BASE.rglob("ocsp.der")) if CONFIGS_SSL_BASE.is_dir() else False
+        )
         if not ocsp_files_exist:
             log_info("🔄 OCSP no cached files on disk, waiting 2s for scheduler purge to finish before restoring from database...")
             time.sleep(2)
