@@ -2326,7 +2326,6 @@ def _ensure_target_empty(engine: Engine) -> None:
     """
     Raise if any of the known BunkerWeb tables already contain rows in the target DB.
     """
-    from sqlalchemy import inspect
 
     with engine.connect() as conn:
         inspector = inspect(conn)
@@ -2826,6 +2825,7 @@ def _import_files_to_target(dump_dir: Path, target_engine: Engine) -> Dict[str, 
     """
     import json
     import base64
+    from sqlalchemy import inspect
 
     tables = list(Base.metadata.sorted_tables)
     total_tables = max(1, len(tables))
@@ -2997,6 +2997,24 @@ def _import_files_to_target(dump_dir: Path, target_engine: Engine) -> Dict[str, 
                 tgt_conn.execute(text("SET session_replication_role = DEFAULT"))
                 tgt_conn.commit()
                 LOGGER.info("PostgreSQL FK checks re-enabled.")
+
+    # Resync auto-increment/sequence counters after explicit-id imports.
+    # Without this, nextval()/AUTO_INCREMENT may still return an already used id.
+    if is_pg:
+        with target_engine.connect() as tgt_conn:
+            seq_name = tgt_conn.execute(text("SELECT pg_get_serial_sequence('bw_jobs_runs', 'id')")).scalar()
+            if seq_name:
+                max_id = tgt_conn.execute(text("SELECT COALESCE(MAX(id), 0) FROM bw_jobs_runs")).scalar() or 0
+                # setval() requires sequence name as identifier, not parameter
+                tgt_conn.execute(text(f"SELECT setval('{seq_name}', :val, true)"), {"val": int(max_id)})
+                LOGGER.info("PostgreSQL sequence re-synchronized for bw_jobs_runs.id.")
+            tgt_conn.commit()
+    elif is_mysql:
+        with target_engine.connect() as tgt_conn:
+            max_id = tgt_conn.execute(text("SELECT COALESCE(MAX(id), 0) FROM bw_jobs_runs")).scalar() or 0
+            tgt_conn.execute(text("ALTER TABLE bw_jobs_runs AUTO_INCREMENT = :val"), {"val": int(max_id) + 1})
+            LOGGER.info("MySQL AUTO_INCREMENT re-synchronized for bw_jobs_runs.id.")
+            tgt_conn.commit()
 
     _progress_done()
     LOGGER.info("Import complete: %d tables loaded into target.", total_tables)
