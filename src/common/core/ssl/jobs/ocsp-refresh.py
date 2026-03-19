@@ -16,6 +16,7 @@ import tempfile
 import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+from collections import OrderedDict
 from sys import exit as sys_exit, path as sys_path
 from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 from urllib.error import HTTPError, URLError
@@ -78,31 +79,46 @@ def _truncate_log(msg: str, max_len: int = 2048) -> str:
 # Wrapper functions to enforce 2048 character limit on all log messages
 def log_debug(msg: str, *args: Any, **kwargs: Any) -> None:
     """Log at DEBUG level with 2048 char limit."""
-    formatted = (msg % args) if args else msg
+    try:
+        formatted = (msg % args) if args else msg
+    except Exception:
+        formatted = f"{msg} {args}"
     LOG.debug(_truncate_log(formatted), **kwargs)
 
 
 def log_info(msg: str, *args: Any, **kwargs: Any) -> None:
     """Log at INFO level with 2048 char limit."""
-    formatted = (msg % args) if args else msg
+    try:
+        formatted = (msg % args) if args else msg
+    except Exception:
+        formatted = f"{msg} {args}"
     LOG.info(_truncate_log(formatted), **kwargs)
 
 
 def log_warning(msg: str, *args: Any, **kwargs: Any) -> None:
     """Log at WARNING level with 2048 char limit."""
-    formatted = (msg % args) if args else msg
+    try:
+        formatted = (msg % args) if args else msg
+    except Exception:
+        formatted = f"{msg} {args}"
     LOG.warning(_truncate_log(formatted), **kwargs)
 
 
 def log_error(msg: str, *args: Any, **kwargs: Any) -> None:
     """Log at ERROR level with 2048 char limit."""
-    formatted = (msg % args) if args else msg
+    try:
+        formatted = (msg % args) if args else msg
+    except Exception:
+        formatted = f"{msg} {args}"
     LOG.error(_truncate_log(formatted), **kwargs)
 
 
 def log_critical(msg: str, *args: Any, **kwargs: Any) -> None:
     """Log at CRITICAL level with 2048 char limit."""
-    formatted = (msg % args) if args else msg
+    try:
+        formatted = (msg % args) if args else msg
+    except Exception:
+        formatted = f"{msg} {args}"
     LOG.critical(_truncate_log(formatted), **kwargs)
 
 
@@ -111,6 +127,273 @@ status = 0
 # Use scheduler-managed cache directory (automatically synced from database on restart)
 CONFIGS_SSL_BASE = Path(os.sep, "var", "cache", "bunkerweb", "ssl")
 MIN_TTL = 4500  # 75 minutes: minimum safety threshold. Smart refresh uses max(MIN_TTL, 20% of response lifetime)
+OPENSSL_BIN = "/usr/bin/openssl"
+
+_FINGERPRINT_RE = re.compile(r"^[0-9a-fA-F]{64}$")
+_OCSP_RESPONDER_DNS_CACHE_MAX = 256
+DNS_CACHE_TTL = 300  # 5 minutes: limit poisoning / stale DNS impact during a job
+_OCSP_RESPONDER_DNS_CACHE: "OrderedDict[str, Tuple[List[str], float]]" = OrderedDict()
+
+
+def _is_safe_ip_str(ip_str: str) -> bool:
+    """
+    Check whether an IP string is safe for outbound connections (SSRF defense).
+    Mirrors the allow/deny logic in `is_safe_url()` but for a raw IP.
+    """
+    import ipaddress
+
+    try:
+        ip_obj = ipaddress.ip_address(ip_str)
+        return not (
+            ip_obj.is_unspecified
+            or ip_obj.is_private
+            or ip_obj.is_loopback
+            or ip_obj.is_link_local
+            or ip_obj.is_multicast
+            or ip_obj.is_reserved
+        )
+    except Exception:
+        return False
+
+
+def _normalize_fingerprint(fingerprint: Optional[str]) -> Optional[str]:
+    """
+    Normalize an OCSP cache fingerprint into a lowercase 64-hex string.
+    Returns None if fingerprint does not match the expected format.
+    """
+    if not fingerprint:
+        return None
+    fp = str(fingerprint).strip()
+    if not _FINGERPRINT_RE.match(fp):
+        return None
+    return fp.lower()
+
+
+def _resolve_hostname_to_ips(hostname: str, port: int) -> List[str]:
+    """
+    Resolve `hostname` to a unique list of IP strings (A/AAAA) for `port`.
+    Filters out non-IP / unsafe results (SSRF defense).
+    """
+    import socket
+
+    try:
+        addr_info = socket.getaddrinfo(hostname, port, type=socket.SOCK_STREAM)
+    except Exception:
+        return []
+
+    ips: set = set()
+    for info in addr_info:
+        ip_str = info[4][0]
+        if isinstance(ip_str, str) and _is_safe_ip_str(ip_str):
+            ips.add(ip_str)
+
+    return sorted(ips)
+
+
+def _get_ocsp_responder_ips(ocsp_url: str, default_port: int) -> Tuple[str, List[str]]:
+    """
+    Return (hostname, ips) for a given OCSP responder URL.
+    - hostname is the original DNS name (used for TLS SNI + cert validation).
+    - ips are resolved and safe IPs used for connecting.
+    """
+    parsed = urlparse(ocsp_url)
+    hostname = parsed.hostname or ""
+    if not hostname:
+        return "", []
+
+    if hostname in _OCSP_RESPONDER_DNS_CACHE:
+        # Refresh LRU position
+        ips, cached_at = _OCSP_RESPONDER_DNS_CACHE[hostname]
+        if time.time() - cached_at < DNS_CACHE_TTL:
+            _OCSP_RESPONDER_DNS_CACHE.move_to_end(hostname)
+            return hostname, ips
+        # Expired — re-resolve
+        try:
+            del _OCSP_RESPONDER_DNS_CACHE[hostname]
+        except KeyError:
+            pass
+
+    port = parsed.port or default_port
+    ips = _resolve_hostname_to_ips(hostname, port)
+    _OCSP_RESPONDER_DNS_CACHE[hostname] = (ips, time.time())
+    # Bounded cache to avoid unbounded memory growth.
+    while len(_OCSP_RESPONDER_DNS_CACHE) > _OCSP_RESPONDER_DNS_CACHE_MAX:
+        _OCSP_RESPONDER_DNS_CACHE.popitem(last=False)
+    return hostname, ips
+
+
+def _read_http_response_body(conn: Any, max_body_bytes: int) -> Tuple[int, bytes]:
+    """
+    Read an HTTP response from a (possibly SSL-wrapped) socket-like object.
+    Returns (status_code, body_bytes). Body is capped to `max_body_bytes`.
+    """
+    status_code = 0
+    body = b""
+    buffer = b""
+
+    # Read headers
+    while b"\r\n\r\n" not in buffer:
+        chunk = conn.recv(4096)
+        if not chunk:
+            break
+        buffer += chunk
+        if len(buffer) > 1024 * 1024:
+            # Unreasonably large headers
+            raise RuntimeError("HTTP headers too large")
+
+    if b"\r\n\r\n" not in buffer:
+        raise RuntimeError("Invalid HTTP response (missing header terminator)")
+
+    header_bytes, remainder = buffer.split(b"\r\n\r\n", 1)
+    header_lines = header_bytes.split(b"\r\n")
+    if not header_lines:
+        raise RuntimeError("Invalid HTTP response (no status line)")
+
+    # Example: b"HTTP/1.1 200 OK"
+    parts = header_lines[0].split(b" ", 2)
+    if len(parts) >= 2:
+        try:
+            status_code = int(parts[1].decode("ascii", errors="ignore"))
+        except Exception:
+            status_code = 0
+
+    # Parse Content-Length if present (best-effort)
+    content_length = None
+    for line in header_lines[1:]:
+        if b":" not in line:
+            continue
+        k, v = line.split(b":", 1)
+        if k.strip().lower() == b"content-length":
+            try:
+                content_length = int(v.strip().decode("ascii", errors="ignore"))
+            except Exception:
+                content_length = None
+
+    body = remainder
+    if content_length is not None:
+        # Cap the amount we read to avoid memory issues
+        target = min(content_length, max_body_bytes)
+        while len(body) < target:
+            chunk = conn.recv(min(4096, target - len(body)))
+            if not chunk:
+                break
+            body += chunk
+            if len(body) >= target:
+                body = body[:target]
+                break
+    else:
+        # Read until EOF but cap the total body size
+        while len(body) < max_body_bytes:
+            chunk = conn.recv(min(4096, max_body_bytes - len(body)))
+            if not chunk:
+                break
+            body += chunk
+        body = body[:max_body_bytes]
+
+    return status_code, body
+
+
+def _post_ocsp_over_ip_with_sni(
+    ocsp_url: str,
+    ocsp_request_data: bytes,
+    ocsp_hostname: str,
+    ip_str: str,
+    timeout: int,
+) -> Tuple[Optional[bytes], Optional[int], str]:
+    """
+    Perform an OCSP HTTP POST by connecting to `ip_str` but using TLS SNI and
+    certificate validation for `ocsp_hostname`.
+    """
+    parsed = urlparse(ocsp_url)
+    scheme = parsed.scheme.lower()
+    if scheme not in ("http", "https"):
+        return None, None, ""
+
+    import http.client as http_client
+    import socket
+
+    host_port = parsed.port or (443 if scheme == "https" else 80)
+    path = parsed.path or "/"
+    if parsed.query:
+        path = f"{path}?{parsed.query}"
+
+    headers = {
+        "Content-Type": "application/ocsp-request",
+        "User-Agent": "BunkerWeb OCSP Fetcher (SSRF-Protected)",
+        "Connection": "close",
+    }
+
+    conn: Any = None
+    sock: Optional[socket.socket] = None
+    wrapped_sock: Any = None
+    try:
+        if scheme == "https":
+            ssl_context = ssl.create_default_context()
+            # Use the original hostname for SNI + certificate validation, but connect to the resolved IP.
+            conn = http_client.HTTPSConnection(
+                ocsp_hostname,
+                port=host_port,
+                timeout=timeout,
+                context=ssl_context,
+            )
+            sock = socket.create_connection((ip_str, host_port), timeout=timeout)
+            sock.settimeout(timeout)
+            wrapped_sock = ssl_context.wrap_socket(sock, server_hostname=ocsp_hostname)
+            conn.sock = wrapped_sock
+        else:
+            conn = http_client.HTTPConnection(
+                ocsp_hostname,
+                port=host_port,
+                timeout=timeout,
+            )
+            sock = socket.create_connection((ip_str, host_port), timeout=timeout)
+            sock.settimeout(timeout)
+            conn.sock = sock
+
+        conn.request("POST", path, body=ocsp_request_data, headers=headers)
+        resp = conn.getresponse()
+        status_code = resp.status
+        reason = getattr(resp, "reason", "") or ""
+        body = resp.read(102400)
+        try:
+            resp.close()
+        except Exception:
+            pass
+
+        if status_code < 200 or status_code >= 300:
+            log_warning(
+                "⚠️ OCSP HTTP status %d from %s (%s) for %s",
+                status_code,
+                ocsp_hostname,
+                ip_str,
+                ocsp_url,
+            )
+            return None, status_code, reason
+
+        return body, status_code, reason
+    finally:
+        try:
+            if conn is not None:
+                conn.close()
+        except Exception:
+            pass
+
+
+def _log_ocsp_responder_dns_table() -> None:
+    """
+    Log a consolidated uniq table (OCSP responder hostnames -> resolved IPs).
+    """
+    if not _OCSP_RESPONDER_DNS_CACHE:
+        log_debug("ℹ️ OCSP responder DNS table: no DNS lookups performed")
+        return
+
+    # Print as a Markdown-like table for easy copy/paste
+    rows = []
+    for hostname, (ips, _) in sorted(_OCSP_RESPONDER_DNS_CACHE.items()):
+        ip_list = ", ".join(ips) if ips else ""
+        rows.append(f"| {hostname} | {ip_list} |")
+
+    log_info("📇 OCSP responder DNS table (uniq responders):\n| Responder Hostname | Resolved IPs |\n|---|---|\n%s", "\n".join(rows))
 
 
 def _get_sharded_ocsp_path(fingerprint: str) -> Path:
@@ -129,12 +412,13 @@ def _get_sharded_ocsp_path(fingerprint: str) -> Path:
 	    fingerprint: 089433bd22ca2b9536b597a9fc7ca86cdd1d1df0193caaa205043b40f1ea435b
 	    returns: /var/cache/bunkerweb/ssl/0/8/089433bd22ca2b9536b597a9fc7ca86cdd1d1df0193caaa205043b40f1ea435b/
 	"""
-	if not fingerprint or len(fingerprint) < 2:
+	normalized = _normalize_fingerprint(fingerprint)
+	if not normalized:
 		return CONFIGS_SSL_BASE / "unknown"
 	# Use first hex digit (0-f) and second hex digit (0-f) as tree levels
-	hex1 = fingerprint[0].lower()
-	hex2 = fingerprint[1].lower()
-	return CONFIGS_SSL_BASE / hex1 / hex2 / fingerprint
+	hex1 = normalized[0]
+	hex2 = normalized[1]
+	return CONFIGS_SSL_BASE / hex1 / hex2 / normalized
 
 
 def _init_sharded_ocsp_directories() -> bool:
@@ -238,7 +522,9 @@ def _acquire_cert_lock(cert_name: str, timeout: int = 300, stale_threshold: int 
     Acquire a file-based lock for a specific certificate to prevent race conditions
     when multiple scheduler instances fetch OCSP responses concurrently.
 
-    Lock files are stored in /tmp/bunkerweb/ and use timestamp-based staleness detection.
+    Lock files are stored in a non-world-writable runtime directory (preferred: /run/bunkerweb,
+    then /var/run/bunkerweb, then a safe fallback under /tmp). Timestamp-based staleness detection
+    is used for identifying crashed/abandoned locks.
     If a lock file hasn't been updated in stale_threshold seconds, it's considered stale
     (indicating the previous process crashed or is hung).
 
@@ -250,14 +536,74 @@ def _acquire_cert_lock(cert_name: str, timeout: int = 300, stale_threshold: int 
     Returns:
         File descriptor on success, None if lock unavailable or timed out
     """
-    lock_dir = Path(os.sep, "tmp", "bunkerweb")
-    try:
-        lock_dir.mkdir(parents=True, exist_ok=True, mode=0o755)
-    except Exception:
-        return None
+    # Per-certificate lock is keyed by the certificate public key fingerprint.
+    # This avoids host/cert-name collisions and matches the fingerprint-based OCSP cache layout.
+    cert_fp = _normalize_fingerprint(cert_name)
+    lock_dir: Optional[Path] = None
+    lock_file: Optional[Path] = None
 
-    sanitized_name = _sanitize_filename(cert_name)
-    lock_file = lock_dir / f"ocsp-{sanitized_name}.lock"
+    # Fingerprint-based lock dir: root-folder/ssl/x/x (2-level sharding).
+    if cert_fp and cert_name != "main":
+        lock_dir = CONFIGS_SSL_BASE / cert_fp[0] / cert_fp[1]
+        lock_file = lock_dir / f"ocsp-{cert_fp}.lock"
+        try:
+            lock_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
+            if lock_dir.is_symlink():
+                log_error("❌ OCSP fingerprint lock directory %s is a symlink (refusing).", lock_dir)
+                return None
+            st = lock_dir.stat()
+            if st.st_mode & 0o022:
+                log_error(
+                    "❌ OCSP fingerprint lock directory %s has unsafe permissions (mode=%o).",
+                    lock_dir,
+                    st.st_mode & 0o777,
+                )
+                return None
+        except Exception as e:
+            log_debug("⚠️ OCSP could not prepare fingerprint lock directory %s: %s", lock_dir, e)
+            return None
+
+    # Fallback (e.g. cert_name == "main" or unexpected non-fingerprint input): runtime lock dir.
+    if lock_file is None or lock_dir is None:
+        # Lock directories must not be attacker-controlled.
+        # `/tmp` is world-writable, so we prefer runtime dirs first and only fall back
+        # to `/tmp` if it's not a symlink and has safe permissions.
+        lock_dir_candidates = [
+            Path(os.sep, "run", "bunkerweb"),
+            Path(os.sep, "var", "run", "bunkerweb"),
+            Path(os.sep, "tmp", "bunkerweb"),
+        ]
+
+        for candidate in lock_dir_candidates:
+            try:
+                candidate.mkdir(parents=True, exist_ok=True, mode=0o700)
+            except Exception as e:
+                log_debug("⚠️ OCSP lock candidate mkdir failed for %s: %s", candidate, e)
+                continue
+
+            try:
+                if candidate.is_symlink():
+                    log_error("❌ OCSP lock directory %s is a symlink (refusing).", candidate)
+                    continue
+
+                st = candidate.stat()
+                # Reject world/group-writable directories.
+                if st.st_mode & 0o022:
+                    log_error("❌ OCSP lock directory %s has unsafe permissions (mode=%o).", candidate, st.st_mode & 0o777)
+                    continue
+
+                lock_dir = candidate
+                break
+            except Exception as e:
+                log_debug("⚠️ OCSP lock candidate stat failed for %s: %s", candidate, e)
+                continue
+
+        if not lock_dir:
+            return None
+
+        sanitized_name = _sanitize_filename(cert_name)
+        lock_file = lock_dir / f"ocsp-{sanitized_name}.lock"
+
     start_time = time.time()
 
     while time.time() - start_time < timeout:
@@ -269,15 +615,13 @@ def _acquire_cert_lock(cert_name: str, timeout: int = 300, stale_threshold: int 
                 if age > stale_threshold:
                     log_warning(
                         "⚠️ OCSP detected stale lock for %s (age %.0fs > threshold %ds). "
-                        "Previous process may have crashed. Removing stale lock.",
+                        "Previous process may have crashed. Proceeding without unlinking to avoid a race.",
                         cert_name, age, stale_threshold
                     )
-                    try:
-                        lock_file.unlink()
-                    except Exception:
-                        pass  # If we can't delete, we'll wait more
-        except Exception:
-            pass
+                    # Do not unlink: another process may have just acquired the lock
+                    # after updating mtime, and deleting here would be a race.
+        except Exception as e:
+            log_debug("⚠️ OCSP stale lock detection failed for %s: %s", lock_file, e)
 
         try:
             fd = os.open(str(lock_file), os.O_CREAT | os.O_WRONLY, 0o600)
@@ -287,8 +631,8 @@ def _acquire_cert_lock(cert_name: str, timeout: int = 300, stale_threshold: int 
                 # Lock acquired successfully—write timestamp to detect stale locks
                 try:
                     os.write(fd, str(int(time.time())).encode())
-                except Exception:
-                    pass  # Non-critical timestamp write
+                except Exception as e:
+                    log_debug("⚠️ OCSP could not write lock timestamp for %s: %s", cert_name, e)
                 return fd
             except BlockingIOError:
                 # Lock held by another process, close fd and exit or retry
@@ -317,11 +661,13 @@ def _acquire_cert_lock(cert_name: str, timeout: int = 300, stale_threshold: int 
 
     # Timeout reached: log clear message based on lock type
     if cert_name == "main":
+        chosen_lock_dir = str(lock_dir) if lock_dir else "/tmp/bunkerweb"
         log_error(
             "❌ OCSP job timed out waiting for the main lock (%ds timeout). "
             "Another OCSP job is still running. This may indicate a hung or very slow job. "
-            "Check for stale lock files: rm -f /tmp/bunkerweb/ocsp*.lock",
-            timeout
+            "Check for stale lock files: rm -f %s/ocsp*.lock",
+            chosen_lock_dir,
+            timeout,
         )
     else:
         log_warning(
@@ -340,15 +686,45 @@ def _release_cert_lock(fd: Optional[int], cert_name: str = "undefined") -> None:
     if fd is None:
         return
     
-    sanitized_name = _sanitize_filename(cert_name)
-    lock_file = Path(os.sep, "tmp", "bunkerweb", f"ocsp-{sanitized_name}.lock")
+    cert_fp = _normalize_fingerprint(cert_name)
+    lock_file_name: str
+    lock_file: Optional[Path] = None
+    lock_dir_candidates = [
+        Path(os.sep, "run", "bunkerweb"),
+        Path(os.sep, "var", "run", "bunkerweb"),
+        Path(os.sep, "tmp", "bunkerweb"),
+    ]
+
+    # Fingerprint-based lock location: root-folder/ssl/x/x
+    if cert_fp and cert_name != "main":
+        lock_file = CONFIGS_SSL_BASE / cert_fp[0] / cert_fp[1] / f"ocsp-{cert_fp}.lock"
+    else:
+        sanitized_name = _sanitize_filename(cert_name)
+        lock_file_name = f"ocsp-{sanitized_name}.lock"
     try:
+        # Unlink while still holding the flock to avoid a release race where
+        # another process could acquire the same lock file name before we unlock.
+        if lock_file is not None:
+            try:
+                if lock_file.exists() and not lock_file.is_symlink():
+                    lock_file.unlink()
+            except Exception as e:
+                log_debug("⚠️ OCSP fingerprint lock file unlink failed for %s: %s", lock_file, e)
+        else:
+            for lock_dir in lock_dir_candidates:
+                lock_file = lock_dir / lock_file_name
+                try:
+                    if lock_file.exists() and not lock_file.is_symlink():
+                        lock_file.unlink()
+                        break
+                except Exception as e:
+                    log_debug("⚠️ OCSP lock file unlink failed for %s: %s", lock_file, e)
+                    continue
+
         fcntl.flock(fd, fcntl.LOCK_UN)
         os.close(fd)
-        if lock_file.exists():
-            lock_file.unlink()
-    except Exception:
-        pass
+    except Exception as e:
+        log_debug("⚠️ OCSP could not release lock for %s: %s", cert_name, e)
 
 
 def _refresh_cert_lock(fd: Optional[int], cert_name: str) -> None:
@@ -384,23 +760,124 @@ def _cleanup_stale_locks(stale_threshold: int = 300) -> None:
     Args:
         stale_threshold: Lock age (seconds) to consider stale (default 300 = 5 minutes)
     """
-    lock_dir = Path(os.sep, "tmp", "bunkerweb")
-    if not lock_dir.exists():
-        return
-
     current_time = time.time()
     cleaned = 0
 
-    for lock_file in lock_dir.glob("ocsp-*.lock"):
+    lock_dir_candidates = [
+        Path(os.sep, "run", "bunkerweb"),
+        Path(os.sep, "var", "run", "bunkerweb"),
+        Path(os.sep, "tmp", "bunkerweb"),
+    ]
+
+    for lock_dir in lock_dir_candidates:
+        if not lock_dir.exists():
+            continue
         try:
-            mtime = lock_file.stat().st_mtime
-            age = current_time - mtime
-            if age > stale_threshold:
-                lock_file.unlink()
-                cleaned += 1
-                log_debug("🧹 OCSP removed stale lock file %s (age %.0fs)", lock_file.name, age)
+            if lock_dir.is_symlink():
+                continue
+            st = lock_dir.stat()
+            # Reject world/group-writable directories.
+            if st.st_mode & 0o022:
+                continue
         except Exception as e:
-            log_debug("⚠️ OCSP could not clean lock file %s: %s", lock_file.name, e)
+            log_debug("⚠️ OCSP lock directory stat failed for %s: %s", lock_dir, e)
+            continue
+
+        for lock_file in lock_dir.glob("ocsp-*.lock"):
+            try:
+                mtime = lock_file.stat().st_mtime
+                age = current_time - mtime
+                if age > stale_threshold:
+                    # Only unlink if we can also acquire the lock.
+                    # This avoids the stale-cleanup unlink race where another process
+                    # is legitimately holding the lock.
+                    fd = None
+                    try:
+                        fd = os.open(str(lock_file), os.O_RDWR | os.O_CREAT, 0o600)
+                        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                        # Unlink while the lock is still held to avoid a tiny race
+                        # between unlocking and deleting the file.
+                        try:
+                            lock_file.unlink()
+                        except Exception as e:
+                            log_debug("⚠️ OCSP could not unlink stale lock file %s: %s", lock_file.name, e)
+
+                        cleaned += 1
+                        log_debug("🧹 OCSP removed stale lock file %s (age %.0fs)", lock_file.name, age)
+                        fcntl.flock(fd, fcntl.LOCK_UN)
+                        os.close(fd)
+                        fd = None
+                    except BlockingIOError:
+                        if fd is not None:
+                            try:
+                                os.close(fd)
+                            except Exception as e:
+                                log_debug("⚠️ OCSP could not close stale lock fd: %s", e)
+                        # Another process is holding the lock.
+                        continue
+                    except Exception as e:
+                        if fd is not None:
+                            try:
+                                os.close(fd)
+                            except Exception as close_e:
+                                log_debug("⚠️ OCSP could not close stale lock fd after exception: %s", close_e)
+                        log_debug("⚠️ OCSP failed to unlink stale lock file %s (age %.0fs): %s", lock_file.name, age, e)
+                        continue
+            except Exception as e:
+                log_debug("⚠️ OCSP could not clean lock file %s: %s", lock_file.name, e)
+
+    # Fingerprint-based lock cleanup (root-folder/ssl/x/x)
+    if CONFIGS_SSL_BASE.is_dir():
+        try:
+            for lock_dir in CONFIGS_SSL_BASE.glob("*/*"):
+                try:
+                    if not lock_dir.is_dir() or lock_dir.is_symlink():
+                        continue
+                    st = lock_dir.stat()
+                    if st.st_mode & 0o022:
+                        continue
+                except Exception as e:
+                    log_debug("⚠️ OCSP lock directory stat failed for fingerprint shard %s: %s", lock_dir, e)
+                    continue
+
+                for lock_file in lock_dir.glob("ocsp-*.lock"):
+                    try:
+                        mtime = lock_file.stat().st_mtime
+                        age = current_time - mtime
+                        if age <= stale_threshold:
+                            continue
+
+                        fd = None
+                        try:
+                            fd = os.open(str(lock_file), os.O_RDWR | os.O_CREAT, 0o600)
+                            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                            try:
+                                lock_file.unlink()
+                            except Exception as e:
+                                log_debug("⚠️ OCSP could not unlink stale fingerprint lock file %s: %s", lock_file.name, e)
+
+                            cleaned += 1
+                            fcntl.flock(fd, fcntl.LOCK_UN)
+                            os.close(fd)
+                            fd = None
+                        except BlockingIOError:
+                            if fd is not None:
+                                try:
+                                    os.close(fd)
+                                except Exception as close_e:
+                                    log_debug("⚠️ OCSP could not close stale fingerprint lock fd: %s", close_e)
+                            continue
+                        except Exception as e:
+                            if fd is not None:
+                                try:
+                                    os.close(fd)
+                                except Exception as close_e:
+                                    log_debug("⚠️ OCSP could not close stale fingerprint lock fd after exception: %s", close_e)
+                            log_debug("⚠️ OCSP failed to cleanup stale fingerprint lock file %s: %s", lock_file.name, e)
+                    except Exception as e:
+                        log_debug("⚠️ OCSP could not stat stale fingerprint lock file %s: %s", lock_file, e)
+        except Exception as e:
+            log_debug("⚠️ OCSP fingerprint lock cleanup failed: %s", e)
 
     if cleaned > 0:
         log_info("🧹 OCSP cleaned up %d stale lock file(s) from previous runs", cleaned)
@@ -438,9 +915,8 @@ def is_safe_url(url: str) -> bool:
 
         for info in addr_info:
             ip_str = info[4][0]
-            ip_obj = ipaddress.ip_address(ip_str)
-            if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local or ip_obj.is_multicast or ip_obj.is_reserved:
-                log_warning("⚠️ SSRF protection: blocked request to %s (resolves to internal IP %s)", hostname, ip_str)
+            if not _is_safe_ip_str(ip_str):
+                log_warning("⚠️ SSRF protection: blocked request to %s (resolves to unsafe IP %s)", hostname, ip_str)
                 return False
 
         return True
@@ -497,26 +973,125 @@ def _fetch_issuer_from_aia(leaf: x509.Certificate, cert_name: str = "") -> Optio
                     continue
                 log_debug("🌐 OCSP fetching issuer certificate from AIA: %s", issuer_url)
     
-                if not is_safe_url(issuer_url):
-                    log_error("❌ OCSP unsafe AIA issuer URL detected: %s", issuer_url)
-                    return None
+                # Pin DNS resolution before connecting to mitigate DNS rebinding.
+                # We'll resolve the hostname to safe IPs and connect to those IPs directly
+                # while preserving SNI + certificate validation against the original hostname.
+                issuer_hostname = parsed.hostname
+                if not issuer_hostname:
+                    continue
 
-                req = Request(issuer_url, headers={"User-Agent": "BunkerWeb OCSP Fetcher (SSRF-Protected)"})
-                try:
-                    # Use a short timeout so we don't hang
-                    with urlopen(req, timeout=10) as response:
-                        issuer_der = response.read(1_048_576)  # Cap at 1MB to prevent memory exhaustion
-                    # Try DER first (most common for caIssuers), then PEM
+                default_port = 443 if parsed.scheme == "https" else 80
+                port = parsed.port or default_port
+                ips = _resolve_hostname_to_ips(issuer_hostname, port)
+                if not ips:
+                    log_warning(
+                        "⚠️ OCSP could not resolve safe IPs for AIA issuer hostname %s (%s)",
+                        issuer_hostname,
+                        issuer_url,
+                    )
+                    continue
+
+                path = parsed.path or "/"
+                if parsed.query:
+                    path = f"{path}?{parsed.query}"
+
+                import http.client as http_client
+                import socket
+
+                # Try each resolved IP (first successful response wins).
+                for ip_str in ips:
+                    conn: Any = None
+                    sock: Optional[socket.socket] = None
+                    wrapped_sock: Any = None
                     try:
-                        return x509.load_der_x509_certificate(issuer_der)
-                    except Exception:
-                        return x509.load_pem_x509_certificate(issuer_der)
-                except HTTPError as e:
-                    log_warning("⚠️ OCSP HTTP %d error fetching issuer from AIA for %s from %s: %s", e.code, cert_name, issuer_url, e.reason)
-                except URLError as e:
-                    log_warning("⚠️ OCSP network error fetching issuer from AIA for %s from %s: %s", cert_name, issuer_url, e)
-                except Exception as e:
-                    log_warning("⚠️ OCSP failed to fetch issuer from AIA for %s from %s: %s", cert_name, issuer_url, e)
+                        if parsed.scheme == "https":
+                            ssl_context = ssl.create_default_context()
+                            conn = http_client.HTTPSConnection(
+                                issuer_hostname,
+                                port=port,
+                                timeout=10,
+                                context=ssl_context,
+                            )
+                            sock = socket.create_connection((ip_str, port), timeout=10)
+                            sock.settimeout(10)
+                            wrapped_sock = ssl_context.wrap_socket(sock, server_hostname=issuer_hostname)
+                            conn.sock = wrapped_sock
+                        else:
+                            conn = http_client.HTTPConnection(
+                                issuer_hostname,
+                                port=port,
+                                timeout=10,
+                            )
+                            sock = socket.create_connection((ip_str, port), timeout=10)
+                            sock.settimeout(10)
+                            conn.sock = sock
+
+                        conn.request(
+                            "GET",
+                            path,
+                            headers={"User-Agent": "BunkerWeb OCSP Fetcher (SSRF-Protected)", "Connection": "close"},
+                        )
+                        resp = conn.getresponse()
+                        status_code = resp.status
+                        if status_code < 200 or status_code >= 300:
+                            log_warning(
+                                "⚠️ OCSP AIA issuer HTTP %d for %s from %s (%s -> %s)",
+                                status_code,
+                                cert_name,
+                                issuer_url,
+                                issuer_hostname,
+                                ip_str,
+                            )
+                            try:
+                                resp.close()
+                            except Exception as close_e:
+                                log_debug(
+                                    "⚠️ OCSP AIA issuer: failed to close HTTP response (%s -> %s): %s",
+                                    issuer_hostname,
+                                    ip_str,
+                                    close_e,
+                                )
+                            continue
+
+                        issuer_der = resp.read(1_048_576)  # Cap at 1MB
+                        try:
+                            resp.close()
+                        except Exception as close_e:
+                            log_debug(
+                                "⚠️ OCSP AIA issuer: failed to close HTTP response after read (%s -> %s): %s",
+                                issuer_hostname,
+                                ip_str,
+                                close_e,
+                            )
+
+                        if not issuer_der:
+                            continue
+
+                        # Try DER first (most common for caIssuers), then PEM
+                        try:
+                            return x509.load_der_x509_certificate(issuer_der)
+                        except Exception:
+                            return x509.load_pem_x509_certificate(issuer_der)
+                    except Exception as e:
+                        log_warning(
+                            "⚠️ OCSP failed to fetch issuer from AIA for %s from %s (%s -> %s): %s",
+                            cert_name,
+                            issuer_url,
+                            issuer_hostname,
+                            ip_str,
+                            e,
+                        )
+                    finally:
+                        try:
+                            if conn is not None:
+                                conn.close()
+                        except Exception as close_e:
+                            log_debug(
+                                "⚠️ OCSP AIA issuer: failed to close HTTP connection (%s -> %s): %s",
+                                issuer_hostname,
+                                ip_str,
+                                close_e,
+                            )
     except x509.ExtensionNotFound:
         log_debug("🔒 OCSP no AIA extension in leaf cert for %s", cert_name)
     except Exception as e:
@@ -617,6 +1192,9 @@ def _parse_chain(pem_data: bytes, cert_name: str = "") -> Tuple[x509.Certificate
 # Default OCSP TTL fallback (1 day) if Next Update is missing
 DEFAULT_OCSP_TTL = 86400
 
+# Backoff duration after certain HTTP errors (e.g. responder temporarily bad)
+HTTP_ERROR_BACKOFF_SECONDS = 300  # 5 minutes
+
 
 def _ocsp_response_lifetimes(ocsp_response: x509_ocsp.OCSPResponse) -> Tuple[Optional[int], Optional[int]]:
     """
@@ -649,6 +1227,85 @@ def _ocsp_response_lifetimes(ocsp_response: x509_ocsp.OCSPResponse) -> Tuple[Opt
     return remaining, total_lifetime
 
 
+def _write_ocsp_http_error_backoff(
+    cert_fp: Optional[str],
+    ocsp_url: str,
+    http_code: int,
+    reason: str,
+    backoff_seconds: int = HTTP_ERROR_BACKOFF_SECONDS,
+) -> None:
+    """
+    Persist an HTTP error backoff marker into ocsp.json so we can avoid
+    re-fetching for a short duration.
+
+    This is used by _process_cert() to skip OCSP refresh attempts shortly
+    after certain transient/non-transient HTTP failures (e.g. 400/500).
+    """
+    if not cert_fp:
+        return
+
+    try:
+        ocsp_cert_dir = _get_sharded_ocsp_path(cert_fp)
+        ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
+        meta_path = ocsp_cert_dir / "ocsp.json"
+
+        now = datetime.now(timezone.utc)
+        retry_after = now + timedelta(seconds=backoff_seconds)
+
+        meta = {
+            "fingerprint": cert_fp,
+            "ocsp_url": ocsp_url,
+            "http_error": {"code": http_code, "reason": reason or ""},
+            "retry_after": retry_after.isoformat(),
+            # Keep "expires" for compatibility with the existing success metadata schema/logging.
+            "expires": retry_after.isoformat(),
+            "error_type": "http_backoff",
+        }
+
+        meta_path.write_text(json.dumps(meta, separators=(",", ":")), encoding="utf-8")
+        meta_path.chmod(0o644)
+    except Exception as e:
+        log_debug("⚠️ OCSP could not write http_error backoff metadata: %s", e)
+
+
+def _get_http_error_backoff_remaining(cert_fp: Optional[str]) -> int:
+    """
+    Return remaining seconds for an http_error backoff stored in ocsp.json.
+    Returns 0 if no backoff marker exists or if it is expired/invalid.
+    """
+    if not cert_fp:
+        return 0
+
+    try:
+        meta_path = _get_sharded_ocsp_path(cert_fp) / "ocsp.json"
+        if not meta_path.is_file():
+            return 0
+
+        raw = meta_path.read_text(encoding="utf-8")
+        meta = json.loads(raw) if raw else None
+        if not isinstance(meta, dict):
+            return 0
+
+        # Only trust backoff markers we wrote.
+        if meta.get("error_type") != "http_backoff":
+            return 0
+
+        retry_after = meta.get("retry_after")
+        if not retry_after or not isinstance(retry_after, str):
+            return 0
+
+        # Accept ISO-8601 timestamps produced by .isoformat()
+        retry_dt = datetime.fromisoformat(retry_after)
+        if retry_dt.tzinfo is None:
+            retry_dt = retry_dt.replace(tzinfo=timezone.utc)
+
+        now = datetime.now(timezone.utc)
+        remaining = int((retry_dt - now).total_seconds())
+        return max(0, remaining)
+    except Exception:
+        return 0
+
+
 def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", timeout: int = 10) -> Tuple[Optional[bytes], int]:
     """
     Fetch OCSP response using cryptography + urllib.
@@ -659,6 +1316,9 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
     except Exception as e:
         log_error("❌ OCSP failed to parse chain for %s: %s", cert_name, e)
         return None, 0
+
+    # Used for writing backoff metadata on HTTP errors.
+    cert_fp = _get_cert_pubkey_fingerprint(pem_data)
 
     try:
         # Try SHA256 first, fallback to SHA1 if responder returns non-successful status (RFC 6960 compatibility)
@@ -677,24 +1337,52 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
                 )
 
                 # --- Build HTTP request ---
-                if not is_safe_url(ocsp_url):
-                    log_error("❌ OCSP unsafe responder URL detected: %s", ocsp_url)
+                parsed = urlparse(ocsp_url)
+                scheme = parsed.scheme.lower() if parsed.scheme else ""
+                if scheme not in ("http", "https"):
+                    log_error("❌ OCSP invalid responder scheme %s for %s: %s", scheme, cert_name, ocsp_url)
                     return None, 0
 
-                req = Request(
-                    ocsp_url,
-                    data=ocsp_request_data,
-                    headers={
-                        "Content-Type": "application/ocsp-request",
-                        "User-Agent": "BunkerWeb OCSP Fetcher (SSRF-Protected)",
-                    },
-                    method="POST",
-                )
-                # Explicitly use default SSL context with certificate verification enabled
-                ssl_context = ssl.create_default_context()
-                with urlopen(req, timeout=timeout, context=ssl_context) as response:
-                    # cap response size at 100KB to prevent memory exhaustion from malicious responder
-                    ocsp_der = response.read(102400)
+                default_port = 443 if scheme == "https" else 80
+                ocsp_hostname, ips = _get_ocsp_responder_ips(ocsp_url, default_port=default_port)
+                if not ocsp_hostname or not ips:
+                    log_error("❌ OCSP could not resolve safe IPs for responder %s (host=%s)", cert_name, ocsp_hostname)
+                    return None, 0
+
+                # Fetch by connecting to each resolved IP, while keeping TLS SNI for `ocsp_hostname`.
+                ocsp_der = None
+                for ip_str in ips:
+                    http_code: Optional[int] = None
+                    http_reason: str = ""
+                    try:
+                        ocsp_der, http_code, http_reason = _post_ocsp_over_ip_with_sni(
+                            ocsp_url=ocsp_url,
+                            ocsp_request_data=ocsp_request_data,
+                            ocsp_hostname=ocsp_hostname,
+                            ip_str=ip_str,
+                            timeout=timeout,
+                        )
+                    except Exception as e:
+                        log_warning(
+                            "⚠️ OCSP fetch failed for %s (%s) -> %s using %s: %s",
+                            cert_name,
+                            ocsp_hostname,
+                            ip_str,
+                            alg_name,
+                            e,
+                        )
+                        ocsp_der = None
+                    if ocsp_der:
+                        break
+
+                    # For HTTP 400/500, persist a short retry backoff.
+                    if http_code in (400, 500):
+                        _write_ocsp_http_error_backoff(
+                            cert_fp=cert_fp,
+                            ocsp_url=ocsp_url,
+                            http_code=http_code,
+                            reason=http_reason,
+                        )
         
                 if not ocsp_der:
                     log_warning("⚠️ OCSP empty response from %s for %s", ocsp_url, cert_name)
@@ -715,6 +1403,13 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
 
             except HTTPError as e:
                 log_warning("⚠️ OCSP HTTP %d error for %s using %s: %s", e.code, cert_name, alg_name, e.reason)
+                if e.code in (400, 500):
+                    _write_ocsp_http_error_backoff(
+                        cert_fp=cert_fp,
+                        ocsp_url=ocsp_url,
+                        http_code=e.code,
+                        reason=e.reason or "",
+                    )
                 ocsp_der = None
                 continue
             except Exception as e:
@@ -759,13 +1454,17 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
             # -respin checks the response
             # -partial_chain allows the issuer to act as a trust anchor even if it's an intermediate
             cmd = [
-                "openssl", "ocsp",
+                OPENSSL_BIN, "ocsp",
                 "-respin", f_der.name,
                 "-issuer", f_issuer.name,
                 "-cert", f_leaf.name,
                 "-CAfile", f_issuer.name,
                 "-partial_chain"
             ]
+
+            if not Path(OPENSSL_BIN).is_file():
+                log_error("❌ OCSP verification requires openssl at %s", OPENSSL_BIN)
+                return None, 0
 
             try:
                 # Add a timeout so a stuck openssl process cannot hang the whole job
@@ -807,6 +1506,18 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
         elif e.code >= 500:
             error_desc += f" (Server Error - {e.reason})"
         log_error("❌ OCSP %s from responder for %s at %s", error_desc, cert_name, ocsp_url)
+
+        # For HTTP 400/500, write a short backoff marker into ocsp.json so the job
+        # doesn't immediately retry the same failing responder for every certificate.
+        if e.code in (400, 500):
+            cert_fp = _get_cert_pubkey_fingerprint(pem_data)
+            _write_ocsp_http_error_backoff(
+                cert_fp=cert_fp,
+                ocsp_url=ocsp_url,
+                http_code=e.code,
+                reason=e.reason or "",
+            )
+
         return None, 0
     except URLError as e:
         # Network error — DNS, connection refused, timeout, SSL error, etc.
@@ -1102,6 +1813,63 @@ def _load_le_certs_from_db(db: Any) -> Dict[str, bytes]:
                     if not re.match(r"^[A-Za-z0-9_.*-]+$", cert_name):
                         log_warning("⚠️ OCSP sanitization: skipping unsafe cert_name from tarball: %s", cert_name)
                         continue
+
+                    # Defensive hardening: validate symlink target stays within the expected
+                    # archive/<cert_name>/ subtree. We only read from the in-memory tarball,
+                    # but a malicious tar entry could otherwise point to unexpected content.
+                    try:
+                        linkname = getattr(member, "linkname", "")
+                        if not isinstance(linkname, str) or not linkname:
+                            log_warning("⚠️ OCSP LE tarball: missing/invalid symlink target for %s", cert_name)
+                            continue
+                        # Disallow absolute targets.
+                        if linkname.startswith("/"):
+                            log_warning("⚠️ OCSP LE tarball: symlink target is absolute for %s", cert_name)
+                            continue
+                        # Ensure the normalized resolved target remains within archive/<cert_name>/.
+                        import posixpath
+                        from pathlib import PurePosixPath
+
+                        base_dir = PurePosixPath(member.name).parent
+                        combined = posixpath.normpath(str(base_dir / PurePosixPath(linkname)))
+                        if combined.startswith("./"):
+                            combined = combined[2:]
+                        if combined.startswith("../"):
+                            log_warning("⚠️ OCSP LE tarball: symlink target escapes archive for %s", cert_name)
+                            continue
+
+                        # Be tolerant to tarball prefix differences by validating against the
+                        # extracted cache base where "live/<cert_name>/" comes from.
+                        member_parts = PurePosixPath(member.name).parts
+                        live_idx = None
+                        for i, part in enumerate(member_parts):
+                            if part == "live":
+                                live_idx = i
+                                break
+                        if live_idx is None:
+                            log_warning("⚠️ OCSP LE tarball: could not locate 'live' base for %s", cert_name)
+                            continue
+
+                        root_prefix_parts = [p for p in member_parts[:live_idx] if p not in (".", "")]
+                        root_prefix = "/".join(root_prefix_parts)
+
+                        archive_prefix = (
+                            f"{root_prefix}/archive/{cert_name}/" if root_prefix else f"archive/{cert_name}/"
+                        )
+                        live_prefix = f"{root_prefix}/live/{cert_name}/" if root_prefix else f"live/{cert_name}/"
+
+                        if not (combined.startswith(archive_prefix) or combined.startswith(live_prefix)):
+                            log_warning(
+                                "⚠️ OCSP LE tarball: symlink target not in expected subtree for %s (got=%s, expected_prefixes=%s,%s)",
+                                cert_name,
+                                combined,
+                                archive_prefix,
+                                live_prefix,
+                            )
+                            continue
+                    except Exception as e:
+                        log_warning("⚠️ OCSP LE tarball: failed to validate symlink target for %s: %s", cert_name, e)
+                        continue
                     try:
                         f = tar.extractfile(member)
                         if f:
@@ -1199,19 +1967,19 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
             file_name = entry.get("file_name", "")
             if not file_name.startswith("ocsp/") or not entry.get("data"):
                 continue
-
-            cert_name_raw = file_name[len("ocsp/"):]
-            # Prevent path traversal from crafted database entries
-            if not re.match(r"^[A-Za-z0-9_.*-]+$", cert_name_raw):
-                log_warning("⚠️ OCSP sanitization: skipping unsafe cert_name from database: %s", cert_name_raw)
+            cert_or_fp_raw = file_name[len("ocsp/"):]
+            # We only restore actual OCSP responses from database.
+            # Marker entries are stored as: ocsp/{cert_name} (data contains the fingerprint).
+            # Response entries are stored as: ocsp/{fingerprint}.
+            fingerprint = _normalize_fingerprint(cert_or_fp_raw)
+            if not fingerprint:
                 continue
-            
-            sanitized_name = _sanitize_filename(cert_name_raw)
+
             db_data = entry["data"]
             db_checksum = (entry.get("checksum") or hashlib.sha256(db_data).hexdigest()).lower()
 
             try:
-                ocsp_cert_dir = CONFIGS_SSL_BASE / sanitized_name
+                ocsp_cert_dir = _get_sharded_ocsp_path(fingerprint)
                 ocsp_path = ocsp_cert_dir / "ocsp.der"
 
                 if ocsp_path.is_file():
@@ -1219,10 +1987,10 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                     disk_checksum = hashlib.sha256(ocsp_path.read_bytes()).hexdigest().lower()
                     if disk_checksum == db_checksum:
                         ok_count += 1
-                        log_debug("✓ OCSP disk file for %s matches database (checksum=%s)", cert_name_raw, db_checksum[:8])
+                        log_debug("✓ OCSP disk file for %s matches database (checksum=%s)", fingerprint, db_checksum[:8])
                         continue
                     # Checksum mismatch — replace with database version
-                    log_info("🔄 OCSP disk file for %s has wrong checksum (disk=%s, db=%s), replacing", cert_name_raw, disk_checksum[:8], db_checksum[:8])
+                    log_info("🔄 OCSP disk file for %s has wrong checksum (disk=%s, db=%s), replacing", fingerprint, disk_checksum[:8], db_checksum[:8])
                     ocsp_path.write_bytes(db_data)
                     ocsp_path.chmod(0o644)
                     replaced_count += 1
@@ -1232,9 +2000,9 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                     ocsp_path.write_bytes(db_data)
                     ocsp_path.chmod(0o644)
                     restored_count += 1
-                    log_debug("✓ OCSP restored cached response for %s from database", cert_name_raw)
+                    log_debug("✓ OCSP restored cached response for %s from database", fingerprint)
             except Exception as e:
-                log_debug("⚠️ OCSP could not sync cache for %s: %s", cert_name_raw, e)
+                log_debug("⚠️ OCSP could not sync cache for %s: %s", fingerprint, e)
 
         if restored_count > 0 or replaced_count > 0:
             log_info("✓ OCSP sync complete: restored=%d, replaced=%d, unchanged=%d", restored_count, replaced_count, ok_count)
@@ -1264,18 +2032,19 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
     # uses the normalized/safe version.
     pem_data = _clean_pem(pem_data)
     cert_checksum = _calculate_cert_checksum(pem_data)
+    cert_fp = _get_cert_pubkey_fingerprint(pem_data)
 
     # Check per-service OCSP stapling setting
     if not _is_ocsp_enabled_for_service(service_name):
         log_debug("🧹 OCSP stapling disabled for service %s, cleaning up cache for %s", service_name, cert_name)
-        cleanup_ocsp_cache(db, cert_name)
+        cleanup_ocsp_cache(db, cert_name, fingerprint=cert_fp)
         stats["le_certs_skipped"] = stats.get("le_certs_skipped", 0) + 1
         return (cert_name, None, 0, cert_checksum, pem_data, None, False)
 
     # Check if certificate checksum matches what we have in database
     # Checksums are stored by fingerprint (cert_checksum/{fingerprint}), so compute it first
     cached_checksum = None
-    fingerprint_for_checksum = _get_cert_pubkey_fingerprint(pem_data)
+    fingerprint_for_checksum = cert_fp
     if db and fingerprint_for_checksum:
         try:
             checksum_key = f"cert_checksum/{fingerprint_for_checksum}"
@@ -1303,9 +2072,23 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
         log_debug("🌐 OCSP responder for certificate %s: %s", cert_name, ocsp_url)
 
         # === Compute fingerprint for sharded path lookup ===
-        fingerprint = _get_cert_pubkey_fingerprint(pem_data)
+        fingerprint = cert_fp
         if not fingerprint:
             log_warning("⚠️ OCSP could not compute fingerprint for %s, treating as new fetch", cert_name)
+
+        # === HTTP error backoff (400/500) ===
+        # If we previously got an HTTP 400/500 for this certificate's OCSP responder,
+        # avoid hammering the same endpoint until the backoff expires.
+        if not force_fetch:
+            backoff_remaining = _get_http_error_backoff_remaining(cert_fp)
+            if backoff_remaining > 0:
+                stats["ocsp_http_error_backoff_skipped"] = stats.get("ocsp_http_error_backoff_skipped", 0) + 1
+                log_info(
+                    "⏸️ OCSP HTTP backoff active for %s (ocsp.json retry_after in %ds), skipping fetch",
+                    cert_name,
+                    backoff_remaining,
+                )
+                return (cert_name, None, backoff_remaining, cert_checksum, pem_data, ocsp_url, False)
 
         # === Check if cached OCSP response is still fresh (disk + database) ===
         # This two-tier check handles aborted downloads, database inconsistencies, and ephemeral storage
@@ -1356,7 +2139,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
                         "🧹 OCSP cached response for %s is already expired and refresh failed. Cleaning up invalid cache.",
                         cert_name,
                     )
-                    cleanup_ocsp_cache(db, cert_name)
+                    cleanup_ocsp_cache(db, cert_name, fingerprint=cert_fp)
                 elif current_ttl <= current_refresh_threshold:
                     log_warning(
                         "🚨 OCSP CRITICAL: Cached response for %s is near expiration (TTL=%ds <= refresh_threshold=%ds [20%% of %ds]) and refresh failed. "
@@ -1366,7 +2149,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
                         current_refresh_threshold,
                         total_lifetime,
                     )
-                    cleanup_ocsp_cache(db, cert_name)
+                    cleanup_ocsp_cache(db, cert_name, fingerprint=cert_fp)
                 else:
                     log_warning(
                         "⚠️ OCSP could NOT refresh response for %s, keeping existing cache (TTL=%ds, above threshold %ds) for now",
@@ -1533,7 +2316,12 @@ def _is_ocsp_enabled_for_service(service_name: str) -> bool:
     return value.lower() == "yes"
 
 
-def cleanup_ocsp_cache(db: Optional[Any] = None, cert_name: Optional[str] = None, purge_db: bool = True) -> None:
+def cleanup_ocsp_cache(
+    db: Optional[Any] = None,
+    cert_name: Optional[str] = None,
+    fingerprint: Optional[str] = None,
+    purge_db: bool = True,
+) -> None:
     """
     Remove OCSP stapling leftovers from disk and optionally database.
     If cert_name is provided, only clean up that specific certificate.
@@ -1549,10 +2337,39 @@ def cleanup_ocsp_cache(db: Optional[Any] = None, cert_name: Optional[str] = None
 
         # Clean up a single certificate's OCSP cache
         sanitized_name = _sanitize_filename(cert_name)
-        ocsp_dir = CONFIGS_SSL_BASE / sanitized_name
-        if ocsp_dir.is_dir():
-            shutil.rmtree(ocsp_dir, ignore_errors=True)
-            log_info("🧹 OCSP removed cache directory for %s", cert_name)
+        resolved_fp = _normalize_fingerprint(fingerprint)
+
+        # If fingerprint wasn't provided, try to resolve it from the marker stored in DB.
+        # Marker entries are stored as: ocsp/{cert_name} with data = fingerprint (ASCII hex).
+        if not resolved_fp and db and purge_db:
+            try:
+                marker_data = db.get_job_cache_file(
+                    file_name=f"ocsp/{sanitized_name}",
+                    job_name="ocsp-refresh",
+                )
+                if marker_data:
+                    decoded = marker_data.decode("utf-8", errors="ignore").strip()
+                    resolved_fp = _normalize_fingerprint(decoded)
+            except Exception as e:
+                log_debug("⚠️ OCSP could not resolve fingerprint marker for %s: %s", cert_name, e)
+                resolved_fp = None
+
+        # Disk cleanup: prefer fingerprint-based sharded storage.
+        if resolved_fp:
+            ocsp_fp_dir = _get_sharded_ocsp_path(resolved_fp)
+            if ocsp_fp_dir.is_dir():
+                shutil.rmtree(ocsp_fp_dir, ignore_errors=True)
+                log_info("🧹 OCSP removed sharded cache for %s (fingerprint=%s)", cert_name, resolved_fp[:16] + "...")
+        else:
+            ocsp_dir = CONFIGS_SSL_BASE / sanitized_name
+            if ocsp_dir.is_dir():
+                shutil.rmtree(ocsp_dir, ignore_errors=True)
+                log_info("🧹 OCSP removed cache directory for %s", cert_name)
+
+        # Best-effort legacy flat cache cleanup (kept for backward compatibility).
+        legacy_ocsp_dir = CONFIGS_SSL_BASE / sanitized_name
+        if legacy_ocsp_dir.is_dir():
+            shutil.rmtree(legacy_ocsp_dir, ignore_errors=True)
 
         # Also remove any SAN symlinks that point to this cert's OCSP cache
         if CONFIGS_SSL_BASE.is_dir():
@@ -1571,15 +2388,27 @@ def cleanup_ocsp_cache(db: Optional[Any] = None, cert_name: Optional[str] = None
                                 entry.rmdir()
                             except OSError:
                                 pass
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        log_debug("⚠️ OCSP failed to remove SAN symlink %s: %s", san_ocsp, e)
 
         if db and purge_db:
             try:
-                # Delete both response and checksum from database
-                db.delete_job_cache(file_name=f"ocsp/{sanitized_name}", job_name="ocsp-refresh")
-                db.delete_job_cache(file_name=f"cert_checksum/{sanitized_name}", job_name="ocsp-refresh")
-                log_debug("🧹 OCSP database records removed for %s", cert_name)
+                # Always remove the cert-name marker (differential tracking).
+                db.delete_job_cache(
+                    file_name=f"ocsp/{sanitized_name}",
+                    job_name="ocsp-refresh",
+                )
+                # If we resolved a fingerprint, also remove the corresponding response+checksum.
+                if resolved_fp:
+                    db.delete_job_cache(
+                        file_name=f"ocsp/{resolved_fp}",
+                        job_name="ocsp-refresh",
+                    )
+                    db.delete_job_cache(
+                        file_name=f"cert_checksum/{resolved_fp}",
+                        job_name="ocsp-refresh",
+                    )
+                log_debug("🧹 OCSP database records removed for %s (fingerprint resolved=%s)", cert_name, bool(resolved_fp))
             except Exception as e:
                 log_debug("🧹 OCSP could not remove database entry for %s: %s", cert_name, e)
     else:
@@ -1593,16 +2422,16 @@ def cleanup_ocsp_cache(db: Optional[Any] = None, cert_name: Optional[str] = None
                     try:
                         ocsp_file.unlink()
                         log_info("🧹 OCSP removed cached response %s", ocsp_file)
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        log_debug("⚠️ OCSP failed to unlink ocsp.der file %s: %s", ocsp_file, e)
 
                 # Try to remove ocsp.json metadata if it exists
                 meta_file = Path(root) / "ocsp.json"
                 if meta_file.is_file():
                     try:
                         meta_file.unlink()
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        log_debug("⚠️ OCSP failed to unlink ocsp.json metadata %s: %s", meta_file, e)
 
                 # Remove empty directories (walk in reverse order ensures we clean up bottom-up)
                 try:
@@ -1641,14 +2470,30 @@ def _cleanup_orphaned_ocsp(db: Optional[Any], le_certs: Dict[str, bytes], stats:
 
     # Build set of valid cert names from LE certs
     valid_cert_names: set = set(le_certs.keys())
+    valid_fingerprints: set = set()
+
+    # Build the set of valid OCSP cache fingerprints to safely prune sharded disk entries.
+    for _, pem_data in le_certs.items():
+        try:
+            fp = _get_cert_pubkey_fingerprint(_clean_pem(pem_data))
+            if fp:
+                valid_fingerprints.add(fp)
+        except Exception:
+            continue
 
     # Add custom cert names
     if db:
         try:
             custom_certs = _load_custom_certs_from_db(db)
-            for key in custom_certs:
+            for key, pem_data in custom_certs.items():
                 # key already starts with customcert-
                 valid_cert_names.add(key)
+                try:
+                    fp = _get_cert_pubkey_fingerprint(_clean_pem(pem_data))
+                    if fp:
+                        valid_fingerprints.add(fp)
+                except Exception:
+                    continue
         except Exception as e:
             log_warning("⚠️ OCSP could not load custom certs for orphan check: %s", e)
             return  # Don't clean up if we can't verify what's valid
@@ -1668,10 +2513,38 @@ def _cleanup_orphaned_ocsp(db: Optional[Any], le_certs: Dict[str, bytes], stats:
                 if not file_name.startswith("ocsp/"):
                     continue
                 cert_name_raw = file_name[len("ocsp/"):]
-                if cert_name_raw not in valid_cert_names:
-                    log_info("🧹 OCSP removing orphaned entry for deleted service: %s", cert_name_raw)
+
+                # Database layout:
+                # - marker entries: ocsp/<cert_name> (data = fingerprint)
+                # - response entries: ocsp/<fingerprint> (data = ocsp.der bytes)
+                # Only delete response entries if the fingerprint is not present anymore.
+                if cert_name_raw in valid_cert_names:
+                    continue
+
+                resolved_fp = _normalize_fingerprint(cert_name_raw)
+                if resolved_fp and resolved_fp in valid_fingerprints:
+                    continue
+
+                if resolved_fp:
+                    # Orphaned OCSP response entry: remove DB record + checksum (disk cleanup is fingerprint-aware below).
+                    try:
+                        db.delete_job_cache(
+                            file_name=f"ocsp/{resolved_fp}",
+                            job_name="ocsp-refresh",
+                        )
+                        db.delete_job_cache(
+                            file_name=f"cert_checksum/{resolved_fp}",
+                            job_name="ocsp-refresh",
+                        )
+                        log_info("🧹 OCSP removed orphaned fingerprint DB entries: fp=%s", resolved_fp[:16] + "...")
+                        orphaned_count += 1
+                    except Exception as e:
+                        log_debug("⚠️ OCSP failed to remove orphaned fingerprint DB entries fp=%s: %s", resolved_fp, e)
+                else:
+                    # Orphaned marker entry (deleted service): reuse cleanup logic.
+                    log_info("🧹 OCSP removing orphaned marker entry for deleted service: %s", cert_name_raw)
                     cleanup_ocsp_cache(db, cert_name_raw)
-                    orphaned_count = orphaned_count + 1
+                    orphaned_count += 1
         except Exception as e:
             log_warning("⚠️ OCSP could not check database for orphaned entries: %s", e)
 
@@ -1691,6 +2564,23 @@ def _cleanup_orphaned_ocsp(db: Optional[Any], le_certs: Dict[str, bytes], stats:
                 log_info("🧹 OCSP removing orphaned disk cache for deleted service: %s", cert_name_raw)
                 cleanup_ocsp_cache(db, cert_name_raw)
                 orphaned_count = orphaned_count + 1
+
+    # Check sharded fingerprint cache directories for orphaned OCSP files.
+    # Sharded layout is: /var/cache/bunkerweb/ssl/<hex1>/<hex2>/<fingerprint>/ocsp.der
+    if CONFIGS_SSL_BASE.is_dir() and valid_fingerprints:
+        for root, dirs, files in os.walk(CONFIGS_SSL_BASE, topdown=False):
+            if "ocsp.der" not in files:
+                continue
+            fingerprint = _normalize_fingerprint(Path(root).name)
+            if not fingerprint:
+                continue
+            if fingerprint not in valid_fingerprints:
+                try:
+                    log_info("🧹 OCSP removing orphaned sharded disk cache for fingerprint: %s", fingerprint)
+                    shutil.rmtree(root, ignore_errors=True)
+                    orphaned_count = orphaned_count + 1
+                except Exception:
+                    continue
 
     if orphaned_count > 0:
         log_info("🧹 OCSP cleaned up %d orphaned cache entries for deleted services", orphaned_count)
@@ -1760,11 +2650,13 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
                 continue
 
             # At this point, data should be a DER-encoded OCSP response
-            sanitized_name = _sanitize_filename(cert_name_raw)
+            fingerprint = _normalize_fingerprint(cert_name_raw)
+            if not fingerprint:
+                continue
             verify_count += 1
 
             # Check if file exists on disk
-            ocsp_cert_dir = CONFIGS_SSL_BASE / sanitized_name
+            ocsp_cert_dir = _get_sharded_ocsp_path(fingerprint)
             ocsp_path = ocsp_cert_dir / "ocsp.der"
 
             # Check if database response is already expired
@@ -1778,8 +2670,8 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
                         try:
                             db.delete_job_cache(file_name=file_name, job_name="ocsp-refresh")
                             log_debug("🧹 OCSP removed expired database entry %s", file_name)
-                        except Exception:
-                            pass
+                        except Exception as e:
+                            log_debug("⚠️ OCSP could not remove expired database entry %s: %s", file_name, e)
                     continue
             except Exception as e:
                 log_warning("⚠️ OCSP could not parse response from database for %s during verification: %s", cert_name_raw, e)
@@ -1960,8 +2852,18 @@ def _persist_ocsp_results_to_disk(
                 stats["errors"] = stats.get("errors", 0) + 1
                 continue
 
-            # Acquire lock to prevent race conditions with concurrent OCSP fetches
-            lock_fd = _acquire_cert_lock(cert_name)
+            # Acquire lock to prevent race conditions with concurrent OCSP fetches.
+            # Lock is keyed by certificate public key fingerprint (not hostname/cert_name).
+            lock_fd = _acquire_cert_lock(cert_fp)
+            if lock_fd is None:
+                # Avoid writing ocsp.der / ocsp.json without a lock.
+                stats["errors"] = stats.get("errors", 0) + 1
+                log_warning(
+                    "⏭️ OCSP skipping disk write for %s (fingerprint: %s) due to lock acquisition failure",
+                    cert_name,
+                    cert_fp[:16] + "...",
+                )
+                continue
             try:
                 # Create sharded directory using fingerprint (0-f distribution)
                 # Example: /var/cache/bunkerweb/ssl/0/089433bd22ca2b9536b597a9fc7ca86cdd1d1df0193caaa205043b40f1ea435b/ocsp.der
@@ -2025,7 +2927,8 @@ def _persist_ocsp_results_to_disk(
                     log_info("ℹ️ OCSP kept existing OCSP response file for %s (new fetch failed)", cert_name)
                     stats["errors"] = stats.get("errors", 0) + 1
             finally:
-                _release_cert_lock(lock_fd)
+                if lock_fd is not None:
+                    _release_cert_lock(lock_fd, cert_fp)
         except Exception as e:
             log_error("❌ OCSP exception while writing response for %s to disk: %s", cert_name, e)
             stats["errors"] = stats.get("errors", 0) + 1
@@ -2099,6 +3002,11 @@ def main() -> int:
 
         # Acquire main lock for the entire OCSP refresh operation
         lock_fd_main = _acquire_cert_lock("main", timeout=300, stale_threshold=1800)
+        if lock_fd_main is None:
+            # If we can't acquire the main lock, avoid concurrent refresh runs.
+            # This prevents overlapping disk/database writes and reduces race conditions.
+            log_error("❌ OCSP could not acquire main lock; another instance may be running")
+            return 1
 
         # Initialize database connection — this is our primary data source
         db = None
@@ -2397,6 +3305,9 @@ def main() -> int:
             else:
                 log_info("🔍 OCSP running end-of-job verification and restoration...")
                 _verify_and_restore_ocsp_files(db, stats)
+
+        # Log a consolidated view of all OCSP responders resolved during this run.
+        _log_ocsp_responder_dns_table()
 
         # Decide exit status based on results
         if stats["errors"] > 0:
