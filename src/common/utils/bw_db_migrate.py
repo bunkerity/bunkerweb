@@ -2330,6 +2330,10 @@ def _ensure_target_empty(engine: Engine) -> None:
     """
 
     with engine.connect() as conn:
+        # SQLAlchemy's inspector helper must be imported in this scope.
+        # (Other helper functions import `inspect` locally.)
+        from sqlalchemy import inspect
+
         inspector = inspect(conn)
         existing_tables = {t.lower() for t in inspector.get_table_names()}
 
@@ -2838,27 +2842,44 @@ def _post_copy_rebuild_indexes(target_engine: Engine) -> None:
                 existing_constraints = insp.get_unique_constraints(table.name) or []
                 existing_constraint_col_sets = [set(c.get("column_names", [])) for c in existing_constraints]
 
-                # Get expected unique constraints from model (table_args)
-                if table.table_args and isinstance(table.table_args, tuple):
-                    for arg in table.table_args:
-                        if isinstance(arg, UniqueConstraint):
-                            cols = [c.name for c in arg.columns]
-                            col_set = set(cols)
+                # Get expected multi-column unique constraints from the SQLAlchemy model.
+                # We iterate on `table.constraints` because `table` here is a SQLAlchemy `Table`
+                # object (not a declarative model class), so it doesn't expose `table_args`.
+                for constraint in table.constraints:
+                    if not isinstance(constraint, UniqueConstraint):
+                        continue
+
+                    cols = [c.name for c in constraint.columns]
+                    col_set = set(cols)
+
+                    try:
+                        if col_set not in existing_col_sets and col_set not in existing_constraint_col_sets:
+                            # Index/constraint missing, create it
+                            idx_name = f"ix_{table.name}_{'_'.join(cols)}"
+                            if len(idx_name) > 63:
+                                idx_name = f"ix_{hashlib.sha256('_'.join(cols).encode()).hexdigest()[:8]}"
+                            cols_sql = ", ".join(_pg_quote_ident(c) for c in cols)
                             try:
-                                if col_set not in existing_col_sets and col_set not in existing_constraint_col_sets:
-                                    # Index/constraint missing, create it
-                                    idx_name = f"ix_{table.name}_{'_'.join(cols)}"
-                                    if len(idx_name) > 63:
-                                        idx_name = f"ix_{hashlib.sha256('_'.join(cols).encode()).hexdigest()[:8]}"
-                                    cols_sql = ", ".join(_pg_quote_ident(c) for c in cols)
-                                    try:
-                                        conn.execute(text(f"CREATE INDEX IF NOT EXISTS {_pg_quote_ident(idx_name)} ON {_pg_quote_ident(table.name)} ({cols_sql})"))
-                                        LOGGER.info("PostgreSQL: created missing index %s on %s(%s)", idx_name, table.name, ", ".join(cols))
-                                        indexes_recreated += 1
-                                    except Exception as exc:
-                                        LOGGER.warning("PostgreSQL: failed to create index %s: %s (non-fatal)", idx_name, exc)
+                                conn.execute(
+                                    text(
+                                        f"CREATE INDEX IF NOT EXISTS {_pg_quote_ident(idx_name)} ON {_pg_quote_ident(table.name)} ({cols_sql})"
+                                    )
+                                )
+                                LOGGER.info(
+                                    "PostgreSQL: created missing index %s on %s(%s)",
+                                    idx_name,
+                                    table.name,
+                                    ", ".join(cols),
+                                )
+                                indexes_recreated += 1
                             except Exception as exc:
-                                LOGGER.warning("PostgreSQL: could not check indexes for %s: %s (non-fatal)", table.name, exc)
+                                LOGGER.warning(
+                                    "PostgreSQL: failed to create index %s: %s (non-fatal)",
+                                    idx_name,
+                                    exc,
+                                )
+                    except Exception as exc:
+                        LOGGER.warning("PostgreSQL: could not check indexes for %s: %s (non-fatal)", table.name, exc)
 
                 # Also check for single-column unique=True constraints
                 try:
@@ -2903,25 +2924,41 @@ def _post_copy_rebuild_indexes(target_engine: Engine) -> None:
                 existing_constraints = insp.get_unique_constraints(table.name) or []
                 existing_constraint_col_sets = [set(c.get("column_names", [])) for c in existing_constraints]
 
-                # Get expected unique constraints from model (table_args)
-                if table.table_args and isinstance(table.table_args, tuple):
-                    for arg in table.table_args:
-                        if isinstance(arg, UniqueConstraint):
-                            cols = [c.name for c in arg.columns]
-                            col_set = set(cols)
+                # Get expected multi-column unique constraints from the SQLAlchemy model.
+                # `table` here is a SQLAlchemy `Table` object, so `table_args` isn't available.
+                for constraint in table.constraints:
+                    if not isinstance(constraint, UniqueConstraint):
+                        continue
+
+                    cols = [c.name for c in constraint.columns]
+                    col_set = set(cols)
+
+                    try:
+                        if col_set not in existing_col_sets and col_set not in existing_constraint_col_sets:
+                            # Index/constraint missing, create it
+                            idx_name = f"ix_{table.name}_{'_'.join(cols)}"
+                            cols_sql = ", ".join(_mysql_quote_ident(c) for c in cols)
                             try:
-                                if col_set not in existing_col_sets and col_set not in existing_constraint_col_sets:
-                                    # Index/constraint missing, create it
-                                    idx_name = f"ix_{table.name}_{'_'.join(cols)}"
-                                    cols_sql = ", ".join(_mysql_quote_ident(c) for c in cols)
-                                    try:
-                                        conn.execute(text(f"CREATE UNIQUE INDEX {_mysql_quote_ident(idx_name)} ON {_mysql_quote_ident(table.name)} ({cols_sql})"))
-                                        LOGGER.info("MySQL/MariaDB: created missing index %s on %s(%s)", idx_name, table.name, ", ".join(cols))
-                                        indexes_recreated += 1
-                                    except Exception as exc:
-                                        LOGGER.warning("MySQL/MariaDB: failed to create index %s: %s (non-fatal)", idx_name, exc)
+                                conn.execute(
+                                    text(
+                                        f"CREATE UNIQUE INDEX {_mysql_quote_ident(idx_name)} ON {_mysql_quote_ident(table.name)} ({cols_sql})"
+                                    )
+                                )
+                                LOGGER.info(
+                                    "MySQL/MariaDB: created missing index %s on %s(%s)",
+                                    idx_name,
+                                    table.name,
+                                    ", ".join(cols),
+                                )
+                                indexes_recreated += 1
                             except Exception as exc:
-                                LOGGER.warning("MySQL/MariaDB: could not check indexes for %s: %s (non-fatal)", table.name, exc)
+                                LOGGER.warning(
+                                    "MySQL/MariaDB: failed to create index %s: %s (non-fatal)",
+                                    idx_name,
+                                    exc,
+                                )
+                    except Exception as exc:
+                        LOGGER.warning("MySQL/MariaDB: could not check indexes for %s: %s (non-fatal)", table.name, exc)
 
                 # Also check for single-column unique=True constraints
                 try:
