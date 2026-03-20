@@ -35,7 +35,7 @@ https://github.com/TheophileDiot/certbot-dns-transip/archive/7b4f24d12f6fb21b214
 
 cffi==2.0.0
 cryptography==46.0.5
-importlib-metadata==8.7.1
+importlib-metadata==9.0.0
 maxminddb==3.1.1
 pydantic==2.12.5
 python-magic==0.4.27
