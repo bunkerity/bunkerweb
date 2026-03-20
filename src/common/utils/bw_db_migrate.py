@@ -36,6 +36,7 @@ import argparse
 import sys as _sys
 _sys.dont_write_bytecode = True
 import os
+import hashlib
 import secrets
 import shutil
 import string
@@ -2774,6 +2775,204 @@ def _verify_all_data(source_engine: Engine, target_engine: Engine, skipped_orpha
 _DUMP_BATCH_SIZE = 500  # rows per INSERT batch
 
 
+def _pg_quote_ident(ident: str) -> str:
+    """Quote a PostgreSQL identifier using double-quotes."""
+    return '"' + ident.replace('"', '""') + '"'
+
+
+def _mysql_quote_ident(ident: str) -> str:
+    """Quote a MySQL identifier using backticks."""
+    return '`' + ident.replace('`', '``') + '`'
+
+
+def _pg_pk_constraint_name(table_name: str) -> str:
+    """
+    Generate a deterministic, PostgreSQL-compliant constraint name for a table primary key.
+    PostgreSQL identifier limit is 63 bytes.
+    """
+    base = f"{table_name}_pkey"
+    if len(base) <= 63:
+        return base
+    digest = hashlib.sha256(table_name.encode("utf-8")).hexdigest()[:8]
+    # Keep some prefix for operator readability, ensure total length <= 63
+    prefix = table_name[: max(0, 63 - len(digest) - 2)]  # -2 for '_' + '_'
+    return f"{prefix}_{digest}_pkey"
+
+
+def _post_copy_apply_primary_keys(target_engine: Engine) -> None:
+    """
+    Post-copy step: ensure primary key constraints match the SQLAlchemy model.
+
+    Reads primary keys from `src/common/db/model.py` via the imported SQLAlchemy `Base`
+    metadata, then applies missing (and can repair mismatched) PK constraints on the
+    target database.
+    """
+    dialect_name = (getattr(target_engine.dialect, "name", "") or "").lower()
+    if dialect_name not in ("postgresql", "mysql", "mariadb"):
+        return
+
+    from sqlalchemy import inspect
+
+    def _pg_find_table_schema(conn, table_name: str) -> str:
+        # Prefer `public` when available; otherwise pick the first schema containing the table.
+        row = conn.execute(
+            text(
+                """
+                SELECT n.nspname
+                FROM pg_class c
+                JOIN pg_namespace n ON n.oid = c.relnamespace
+                WHERE c.relname = :t
+                ORDER BY (n.nspname = 'public') DESC
+                LIMIT 1
+                """
+            ),
+            {"t": table_name},
+        ).scalar()
+        return str(row) if row else "public"
+
+    expected_pk_tables = [t for t in Base.metadata.sorted_tables if t.primary_key and t.primary_key.columns]
+    if not expected_pk_tables:
+        return
+
+    def _pg_reverse_fk_count(conn, schema_name: str, table_name: str) -> int:
+        # If any other table has a FK referencing this table, dropping/recreating the PK
+        # is risky (dependency may prevent drop, or FKs may become invalid).
+        row = conn.execute(
+            text(
+                """
+                SELECT COUNT(*)
+                FROM pg_constraint
+                WHERE contype = 'f'
+                  AND confrelid = (:rel)::regclass
+                """
+            ),
+            {"rel": f"{schema_name}.{table_name}"},
+        ).scalar()
+        return int(row or 0)
+
+    with target_engine.begin() as conn:
+        insp = inspect(conn)
+        for table in expected_pk_tables:
+            expected_cols = [col.name for col in table.primary_key.columns]
+            if not expected_cols:
+                continue
+
+            # SQLAlchemy inspector returns primary key constraint info (name + constrained_columns).
+            try:
+                if dialect_name == "postgresql":
+                    schema_name = _pg_find_table_schema(conn, table.name)
+                    pk_info = insp.get_pk_constraint(table.name, schema=schema_name) or {}
+                else:
+                    pk_info = insp.get_pk_constraint(table.name) or {}
+            except Exception as exc:
+                LOGGER.warning("Could not inspect PK for table %s: %s", table.name, exc)
+                pk_info = {}
+
+            existing_cols = list(pk_info.get("constrained_columns") or [])
+            if existing_cols:
+                if existing_cols == expected_cols:
+                    continue
+
+                # PK exists but columns mismatch. Since this runs as a backend migration
+                # (target is not in production yet), we try to repair.
+                LOGGER.warning(
+                    "Primary key mismatch for %s: existing=%s expected=%s (attempting repair).",
+                    table.name,
+                    existing_cols,
+                    expected_cols,
+                )
+
+                try:
+                    if dialect_name == "postgresql":
+                        # Avoid dropping PK when other tables reference it.
+                        if _pg_reverse_fk_count(conn, schema_name, table.name) > 0:
+                            LOGGER.error(
+                                "Cannot repair PK for %s: other tables have FKs referencing this table. Skipping.",
+                                table.name,
+                            )
+                            continue
+
+                        existing_pk_name = pk_info.get("name") or None
+                        if not existing_pk_name:
+                            LOGGER.error("Cannot repair PK for %s: existing PK constraint name not found.", table.name)
+                            continue
+
+                        conn.execute(
+                            text(
+                                f"ALTER TABLE {_pg_quote_ident(schema_name)}.{_pg_quote_ident(table.name)} "
+                                f"DROP CONSTRAINT {_pg_quote_ident(existing_pk_name)}"
+                            )
+                        )
+
+                        constraint_name = _pg_pk_constraint_name(table.name)
+                        cols_sql = ", ".join(_pg_quote_ident(c) for c in expected_cols)
+                        conn.execute(
+                            text(
+                                f"ALTER TABLE {_pg_quote_ident(schema_name)}.{_pg_quote_ident(table.name)} "
+                                f"ADD CONSTRAINT {_pg_quote_ident(constraint_name)} PRIMARY KEY ({cols_sql})"
+                            )
+                        )
+                        LOGGER.info("Repaired PostgreSQL PK for %s.", table.name)
+                    else:
+                        # MySQL/MariaDB: easiest repair is drop/re-add PRIMARY KEY.
+                        conn.execute(text(f"ALTER TABLE {_mysql_quote_ident(table.name)} DROP PRIMARY KEY"))
+                        cols_sql = ", ".join(_mysql_quote_ident(c) for c in expected_cols)
+                        conn.execute(text(f"ALTER TABLE {_mysql_quote_ident(table.name)} ADD PRIMARY KEY ({cols_sql})"))
+                        LOGGER.info("Repaired MySQL/MariaDB PK for %s.", table.name)
+                except Exception as exc:
+                    LOGGER.error("Failed to repair PK for table %s: %s", table.name, exc)
+                    raise
+
+                continue
+            if dialect_name == "postgresql":
+                schema_name = _pg_find_table_schema(conn, table.name)
+                constraint_name = _pg_pk_constraint_name(table.name)
+                cols_sql = ", ".join(_pg_quote_ident(c) for c in expected_cols)
+                ddl = (
+                    f"ALTER TABLE {_pg_quote_ident(schema_name)}.{_pg_quote_ident(table.name)} "
+                    f"ADD CONSTRAINT {_pg_quote_ident(constraint_name)} PRIMARY KEY ({cols_sql})"
+                )
+                LOGGER.info("Adding missing PostgreSQL primary key on %s(%s)", table.name, ", ".join(expected_cols))
+            else:
+                # MySQL/MariaDB: PK name is always PRIMARY, so use ALTER TABLE ... ADD PRIMARY KEY (...)
+                cols_sql = ", ".join(_mysql_quote_ident(c) for c in expected_cols)
+                ddl = f"ALTER TABLE {_mysql_quote_ident(table.name)} ADD PRIMARY KEY ({cols_sql})"
+                LOGGER.info("Adding missing MySQL/MariaDB primary key on %s(%s)", table.name, ", ".join(expected_cols))
+
+            conn.execute(text(ddl))
+
+        # Verify PKs after any add/repair operations.
+        # This makes the migration self-validating even in environments where `tests/`
+        # is not installed (e.g. production images).
+        mismatches: list[str] = []
+        for table in expected_pk_tables:
+            expected_cols = [col.name for col in table.primary_key.columns]
+            if not expected_cols:
+                continue
+
+            try:
+                if dialect_name == "postgresql":
+                    schema_name = _pg_find_table_schema(conn, table.name)
+                    pk_info = insp.get_pk_constraint(table.name, schema=schema_name) or {}
+                else:
+                    pk_info = insp.get_pk_constraint(table.name) or {}
+            except Exception as exc:
+                mismatches.append(f"{table.name}: could not inspect PK ({exc})")
+                continue
+
+            existing_cols = list(pk_info.get("constrained_columns") or [])
+            if not existing_cols:
+                mismatches.append(f"{table.name}: missing primary key (expected {expected_cols})")
+                continue
+
+            if set(existing_cols) != set(expected_cols) or len(existing_cols) != len(expected_cols):
+                mismatches.append(f"{table.name}: existing={existing_cols} expected={expected_cols}")
+
+        if mismatches:
+            # Raising here prevents swapping/using a partially broken schema.
+            raise RuntimeError("Primary key layout verification failed:\n" + "\n".join(mismatches))
+
+
 def _dump_source_to_files(source_engine: Engine, dump_dir: Path) -> None:
     """
     Dump source database to per-table JSONL files using SQLAlchemy.
@@ -2999,15 +3198,23 @@ def _import_files_to_target(dump_dir: Path, target_engine: Engine) -> Dict[str, 
                 LOGGER.info("PostgreSQL FK checks re-enabled.")
 
     # Resync auto-increment/sequence counters after explicit-id imports.
-    # Without this, nextval()/AUTO_INCREMENT may still return an already used id.
+    # Without this, PostgreSQL nextval()/AUTO_INCREMENT may still return an already used id.
     if is_pg:
         with target_engine.connect() as tgt_conn:
-            seq_name = tgt_conn.execute(text("SELECT pg_get_serial_sequence('bw_jobs_runs', 'id')")).scalar()
-            if seq_name:
-                max_id = tgt_conn.execute(text("SELECT COALESCE(MAX(id), 0) FROM bw_jobs_runs")).scalar() or 0
-                # setval() requires sequence name as identifier, not parameter
+            for table in tables:
+                # Only attempt to resync integer identity/serial PKs named `id`.
+                if not hasattr(table, "c") or "id" not in table.c:
+                    continue
+
+                seq_name = tgt_conn.execute(text(f"SELECT pg_get_serial_sequence('{table.name}', 'id')")).scalar()
+                if not seq_name:
+                    continue
+
+                max_id = tgt_conn.execute(text(f"SELECT COALESCE(MAX(id), 0) FROM {table.name}")).scalar() or 0
+                # setval() requires sequence name as identifier, not parameter.
                 tgt_conn.execute(text(f"SELECT setval('{seq_name}', :val, true)"), {"val": int(max_id)})
-                LOGGER.info("PostgreSQL sequence re-synchronized for bw_jobs_runs.id.")
+                LOGGER.info("PostgreSQL sequence re-synchronized for %s.id.", table.name)
+
             tgt_conn.commit()
     elif is_mysql:
         with target_engine.connect() as tgt_conn:
@@ -3015,6 +3222,10 @@ def _import_files_to_target(dump_dir: Path, target_engine: Engine) -> Dict[str, 
             tgt_conn.execute(text("ALTER TABLE bw_jobs_runs AUTO_INCREMENT = :val"), {"val": int(max_id) + 1})
             LOGGER.info("MySQL AUTO_INCREMENT re-synchronized for bw_jobs_runs.id.")
             tgt_conn.commit()
+
+    # Ensure primary key constraints exist after bulk data imports
+    # (applies to both PostgreSQL and MySQL/MariaDB).
+    _post_copy_apply_primary_keys(target_engine)
 
     _progress_done()
     LOGGER.info("Import complete: %d tables loaded into target.", total_tables)
