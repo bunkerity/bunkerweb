@@ -2475,6 +2475,200 @@ def cleanup_ocsp_cache(
         log_info("🧹 OCSP all stapling caches cleaned up")
 
 
+def _cleanup_expired_ocsp_entries(
+    db: Optional[Any] = None,
+    stats: Optional[dict] = None,
+) -> int:
+    """
+    Cleanup expired/stale OCSP response cache entries.
+
+    This job maintains a fingerprint-sharded cache:
+      - /var/cache/bunkerweb/ssl/<hex1>/<hex2>/<fingerprint>/ocsp.der
+      - /var/cache/bunkerweb/ssl/<hex1>/<hex2>/<fingerprint>/ocsp.json
+    and mirrors OCSP response bytes in database cache entries:
+      - file_name="ocsp/<fingerprint>"
+    """
+    if stats is None:
+        stats = {}
+
+    now = datetime.now(timezone.utc)
+
+    # Fingerprints whose ocsp.{json,der} are believed expired.
+    expired_fingerprints: set = set()
+
+    # Fingerprints whose ocsp.json exists but "expires" couldn't be parsed,
+    # so we might need to fall back to parsing ocsp.der.
+    meta_unparseable_fingerprints: set = set()
+
+    expired_cleaned_count: int = 0
+
+    max_disk_meta_checks = 2000
+    max_disk_der_checks = 2000
+    max_db_checks = 500
+
+    def _parse_expires(expires_value: Any) -> Optional[datetime]:
+        """
+        Parse the `expires` value written by this job into a timezone-aware datetime.
+
+        Success metadata format:
+          - "<iso8601 datetime> + <N>s"
+
+        Error/backoff metadata format:
+          - "<iso8601 datetime>"  (retry_after.isoformat())
+        """
+        if not expires_value or not isinstance(expires_value, str):
+            return None
+        raw = expires_value.strip()
+        if not raw or raw.lower() == "unknown":
+            return None
+
+        try:
+            if " + " in raw:
+                base_str, tail_str = raw.rsplit(" + ", 1)
+                # Expected: "<N>s"
+                m = re.match(r"^(\\d+)\\s*s$", tail_str.strip())
+                if not m:
+                    return None
+                ttl_seconds = int(m.group(1))
+                base_dt = datetime.fromisoformat(base_str.strip())
+                if base_dt.tzinfo is None:
+                    base_dt = base_dt.replace(tzinfo=timezone.utc)
+                return base_dt + timedelta(seconds=ttl_seconds)
+
+            dt = datetime.fromisoformat(raw)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return dt
+        except Exception:
+            return None
+
+    def _delete_fingerprint_cache(fingerprint: str) -> None:
+        nonlocal expired_cleaned_count
+        if not fingerprint:
+            return
+        if fingerprint in expired_fingerprints:
+            return
+
+        ocsp_dir = _get_sharded_ocsp_path(fingerprint)
+        try:
+            shutil.rmtree(ocsp_dir, ignore_errors=True)
+        except Exception:
+            pass
+
+        if db:
+            try:
+                db.delete_job_cache(file_name=f"ocsp/{fingerprint}", job_name="ocsp-refresh")
+            except Exception:
+                pass
+
+        expired_fingerprints.add(fingerprint)
+        expired_cleaned_count += 1
+
+    # 1. Disk cleanup using ocsp.json "expires".
+    if CONFIGS_SSL_BASE.is_dir():
+        try:
+            meta_files = list(CONFIGS_SSL_BASE.rglob("ocsp.json"))
+        except Exception:
+            meta_files = []
+
+        for meta_file in meta_files[:max_disk_meta_checks]:
+            try:
+                raw = meta_file.read_text(encoding="utf-8")
+                meta = json.loads(raw) if raw else None
+                if not isinstance(meta, dict):
+                    continue
+
+                fingerprint = _normalize_fingerprint(meta.get("fingerprint")) or _normalize_fingerprint(
+                    meta_file.parent.name
+                )
+                if not fingerprint:
+                    continue
+
+                expires_dt = _parse_expires(meta.get("expires"))
+                if expires_dt is None:
+                    meta_unparseable_fingerprints.add(fingerprint)
+                    continue
+
+                if expires_dt > now:
+                    continue
+
+                _delete_fingerprint_cache(fingerprint)
+            except Exception:
+                # Best-effort: don't fail the job due to a corrupted metadata file.
+                continue
+
+    # 2. Disk cleanup fallback using ocsp.der parsing.
+    # Parse ocsp.der when ocsp.json is missing OR could not be interpreted.
+    if CONFIGS_SSL_BASE.is_dir():
+        try:
+            der_files = list(CONFIGS_SSL_BASE.rglob("ocsp.der"))
+        except Exception:
+            der_files = []
+
+        checked = 0
+        for ocsp_der in der_files:
+            if checked >= max_disk_der_checks:
+                break
+            checked += 1
+
+            try:
+                fingerprint = _normalize_fingerprint(ocsp_der.parent.name)
+                if not fingerprint or fingerprint in expired_fingerprints:
+                    continue
+
+                # Parse only when ocsp.json couldn't be trusted or is missing.
+                ocsp_json = ocsp_der.parent / "ocsp.json"
+                if ocsp_json.is_file() and fingerprint not in meta_unparseable_fingerprints:
+                    continue
+
+                ocsp_data = ocsp_der.read_bytes()
+                ocsp_response = x509_ocsp.load_der_ocsp_response(ocsp_data)
+                remaining, _ = _ocsp_response_lifetimes(ocsp_response)
+                if remaining is not None and remaining <= 0:
+                    _delete_fingerprint_cache(fingerprint)
+            except Exception:
+                continue
+
+    # 3. Database cleanup: delete expired OCSP response entries.
+    if db:
+        try:
+            cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=True)
+        except Exception:
+            cache_files = []
+
+        checked_db = 0
+        for entry in cache_files:
+            try:
+                file_name = entry.get("file_name", "")
+                if not file_name.startswith("ocsp/"):
+                    continue
+                fp_raw = file_name[len("ocsp/"):]
+                fingerprint = _normalize_fingerprint(fp_raw)
+                if not fingerprint or fingerprint in expired_fingerprints:
+                    continue
+
+                data = entry.get("data")
+                if not data:
+                    continue
+
+                if checked_db >= max_db_checks:
+                    break
+                checked_db += 1
+
+                # Marker entries should not reach here (we require a valid fingerprint key).
+                ocsp_response = x509_ocsp.load_der_ocsp_response(data)
+                remaining, _ = _ocsp_response_lifetimes(ocsp_response)
+                if remaining is not None and remaining <= 0:
+                    _delete_fingerprint_cache(fingerprint)
+            except Exception:
+                continue
+
+    stats["expired_cleaned"] = stats.get("expired_cleaned", 0) + expired_cleaned_count
+    if expired_cleaned_count > 0:
+        log_info("🧹 OCSP removed %d expired cache item(s)", expired_cleaned_count)
+    return expired_cleaned_count
+
+
 def _cleanup_orphaned_ocsp(db: Optional[Any], le_certs: Dict[str, bytes], stats: Optional[dict] = None) -> None:
     """
     Remove OCSP cache entries (disk + database) for services that no longer have
@@ -2993,6 +3187,7 @@ def main() -> int:
         "ocsp_restored": 0,
         "ocsp_corrected": 0,
         "orphaned_cleaned": 0,
+        "expired_cleaned": 0,
     }
 
     # Parse command line arguments
@@ -3105,6 +3300,14 @@ def main() -> int:
             time.sleep(2)
         restore_ocsp_from_database(db)
 
+        # Cleanup expired/stale OCSP cache entries early (before TTL-skip optimization).
+        # This prevents expired OCSP responses from staying on disk/db when the job runs in a
+        # "recently refreshed" optimization mode.
+        try:
+            _cleanup_expired_ocsp_entries(db, stats)
+        except Exception as e:
+            log_debug("⚠️ OCSP expired cleanup failed: %s", e)
+
         # === Efficiency optimization: skip full refresh if run recently and no changes detected ===
         last_refresh_key = "last_full_refresh"
         now_ts = int(time.time())
@@ -3112,7 +3315,7 @@ def main() -> int:
         
         if not force_all:
             last_refresh_entry = db.get_job_cache_file(file_name=last_refresh_key, job_name="ocsp-refresh", with_info=True)
-            if last_refresh_entry and last_refresh_entry.get("data"):
+            if last_refresh_entry and last_refresh_entry.get("data") and stats.get("expired_cleaned", 0) == 0:
                 try:
                     last_refresh_time = int(last_refresh_entry["data"].decode("utf-8"))
                     if now_ts - last_refresh_time < 1800: # 30 minutes window
