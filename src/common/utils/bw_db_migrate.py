@@ -272,6 +272,7 @@ if deps_candidate.is_dir() and str(deps_candidate) not in sys.path:
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.schema import UniqueConstraint
 
 
 try:
@@ -2799,6 +2800,160 @@ def _pg_pk_constraint_name(table_name: str) -> str:
     return f"{prefix}_{digest}_pkey"
 
 
+def _post_copy_rebuild_indexes(target_engine: Engine) -> None:
+    """
+    Post-copy step: recreate missing indexes and update index statistics on the target.
+
+    Called after bulk data import to ensure all expected indexes exist and have current stats.
+    - SQLite:       REINDEX (rebuilds all indexes) + ANALYZE (updates stats)
+    - PostgreSQL:   Recreate missing unique constraint indexes, then ANALYZE per table
+    - MySQL/MariaDB: Recreate missing unique constraint indexes, then ANALYZE TABLE batch
+    """
+    from sqlalchemy import inspect
+
+    dialect_name = (getattr(target_engine.dialect, "name", "") or "").lower()
+    tables = list(Base.metadata.sorted_tables)
+    total = len(tables)
+
+    if dialect_name == "sqlite":
+        with target_engine.connect() as conn:
+            LOGGER.info("SQLite: rebuilding indexes (REINDEX) ...")
+            conn.execute(text("REINDEX"))
+            LOGGER.info("SQLite: updating statistics (ANALYZE) ...")
+            conn.execute(text("ANALYZE"))
+            LOGGER.info("SQLite: reclaiming disk space (VACUUM) ...")
+            conn.execute(text("VACUUM"))
+            LOGGER.info("SQLite: optimizing with PRAGMA optimize ...")
+            conn.execute(text("PRAGMA optimize"))
+            conn.commit()
+
+    elif dialect_name == "postgresql":
+        # First pass: recreate missing unique constraint indexes
+        with target_engine.begin() as conn:
+            insp = inspect(conn)
+            indexes_recreated = 0
+            for table in tables:
+                existing_indexes = insp.get_indexes(table.name)
+                existing_col_sets = [set(idx["column_names"]) for idx in existing_indexes]
+                existing_constraints = insp.get_unique_constraints(table.name) or []
+                existing_constraint_col_sets = [set(c.get("column_names", [])) for c in existing_constraints]
+
+                # Get expected unique constraints from model (table_args)
+                if table.table_args and isinstance(table.table_args, tuple):
+                    for arg in table.table_args:
+                        if isinstance(arg, UniqueConstraint):
+                            cols = [c.name for c in arg.columns]
+                            col_set = set(cols)
+                            try:
+                                if col_set not in existing_col_sets and col_set not in existing_constraint_col_sets:
+                                    # Index/constraint missing, create it
+                                    idx_name = f"ix_{table.name}_{'_'.join(cols)}"
+                                    if len(idx_name) > 63:
+                                        idx_name = f"ix_{hashlib.sha256('_'.join(cols).encode()).hexdigest()[:8]}"
+                                    cols_sql = ", ".join(_pg_quote_ident(c) for c in cols)
+                                    try:
+                                        conn.execute(text(f"CREATE INDEX IF NOT EXISTS {_pg_quote_ident(idx_name)} ON {_pg_quote_ident(table.name)} ({cols_sql})"))
+                                        LOGGER.info("PostgreSQL: created missing index %s on %s(%s)", idx_name, table.name, ", ".join(cols))
+                                        indexes_recreated += 1
+                                    except Exception as exc:
+                                        LOGGER.warning("PostgreSQL: failed to create index %s: %s (non-fatal)", idx_name, exc)
+                            except Exception as exc:
+                                LOGGER.warning("PostgreSQL: could not check indexes for %s: %s (non-fatal)", table.name, exc)
+
+                # Also check for single-column unique=True constraints
+                try:
+                    for column in table.columns:
+                        if column.unique:
+                            col_set = {column.name}
+                            if col_set not in existing_col_sets and col_set not in existing_constraint_col_sets:
+                                # Unique index missing on this column, create it
+                                idx_name = f"ix_{table.name}_{column.name}"
+                                try:
+                                    conn.execute(text(f"CREATE UNIQUE INDEX IF NOT EXISTS {_pg_quote_ident(idx_name)} ON {_pg_quote_ident(table.name)} ({_pg_quote_ident(column.name)})"))
+                                    LOGGER.info("PostgreSQL: created missing unique index %s on %s(%s)", idx_name, table.name, column.name)
+                                    indexes_recreated += 1
+                                except Exception as exc:
+                                    LOGGER.warning("PostgreSQL: failed to create unique index %s: %s (non-fatal)", idx_name, exc)
+                except Exception as exc:
+                    LOGGER.warning("PostgreSQL: could not check unique columns for %s: %s (non-fatal)", table.name, exc)
+
+            if indexes_recreated > 0:
+                LOGGER.info("PostgreSQL: recreated %d missing indexes.", indexes_recreated)
+
+        # Second pass: vacuum and update statistics via VACUUM ANALYZE
+        with target_engine.connect() as conn:
+            for idx, table in enumerate(tables, start=1):
+                _progress(f"[{idx}/{total}] VACUUM ANALYZE {table.name}")
+                try:
+                    conn.execute(text(f"VACUUM ANALYZE {_pg_quote_ident(table.name)}"))
+                except Exception as exc:
+                    LOGGER.warning("VACUUM ANALYZE failed for %s: %s (non-fatal)", table.name, exc)
+            conn.commit()
+            _progress_done()
+        LOGGER.info("PostgreSQL: tables vacuumed and index statistics updated via VACUUM ANALYZE on %d tables.", total)
+
+    elif dialect_name in ("mysql", "mariadb"):
+        # First pass: recreate missing unique constraint indexes
+        with target_engine.begin() as conn:
+            insp = inspect(conn)
+            indexes_recreated = 0
+            for table in tables:
+                existing_indexes = insp.get_indexes(table.name)
+                existing_col_sets = [set(idx["column_names"]) for idx in existing_indexes]
+                existing_constraints = insp.get_unique_constraints(table.name) or []
+                existing_constraint_col_sets = [set(c.get("column_names", [])) for c in existing_constraints]
+
+                # Get expected unique constraints from model (table_args)
+                if table.table_args and isinstance(table.table_args, tuple):
+                    for arg in table.table_args:
+                        if isinstance(arg, UniqueConstraint):
+                            cols = [c.name for c in arg.columns]
+                            col_set = set(cols)
+                            try:
+                                if col_set not in existing_col_sets and col_set not in existing_constraint_col_sets:
+                                    # Index/constraint missing, create it
+                                    idx_name = f"ix_{table.name}_{'_'.join(cols)}"
+                                    cols_sql = ", ".join(_mysql_quote_ident(c) for c in cols)
+                                    try:
+                                        conn.execute(text(f"CREATE UNIQUE INDEX {_mysql_quote_ident(idx_name)} ON {_mysql_quote_ident(table.name)} ({cols_sql})"))
+                                        LOGGER.info("MySQL/MariaDB: created missing index %s on %s(%s)", idx_name, table.name, ", ".join(cols))
+                                        indexes_recreated += 1
+                                    except Exception as exc:
+                                        LOGGER.warning("MySQL/MariaDB: failed to create index %s: %s (non-fatal)", idx_name, exc)
+                            except Exception as exc:
+                                LOGGER.warning("MySQL/MariaDB: could not check indexes for %s: %s (non-fatal)", table.name, exc)
+
+                # Also check for single-column unique=True constraints
+                try:
+                    for column in table.columns:
+                        if column.unique:
+                            col_set = {column.name}
+                            if col_set not in existing_col_sets and col_set not in existing_constraint_col_sets:
+                                # Unique index missing on this column, create it
+                                idx_name = f"ix_{table.name}_{column.name}"
+                                try:
+                                    conn.execute(text(f"CREATE UNIQUE INDEX {_mysql_quote_ident(idx_name)} ON {_mysql_quote_ident(table.name)} ({_mysql_quote_ident(column.name)})"))
+                                    LOGGER.info("MySQL/MariaDB: created missing unique index %s on %s(%s)", idx_name, table.name, column.name)
+                                    indexes_recreated += 1
+                                except Exception as exc:
+                                    LOGGER.warning("MySQL/MariaDB: failed to create unique index %s: %s (non-fatal)", idx_name, exc)
+                except Exception as exc:
+                    LOGGER.warning("MySQL/MariaDB: could not check unique columns for %s: %s (non-fatal)", table.name, exc)
+
+            if indexes_recreated > 0:
+                LOGGER.info("MySQL/MariaDB: recreated %d missing indexes.", indexes_recreated)
+
+        # Second pass: update statistics
+        table_list = ", ".join(_mysql_quote_ident(t.name) for t in tables)
+        with target_engine.begin() as conn:
+            LOGGER.info("MySQL/MariaDB: running ANALYZE TABLE on %d tables ...", total)
+            conn.execute(text(f"ANALYZE TABLE {table_list}"))
+        LOGGER.info("MySQL/MariaDB: index statistics updated.")
+
+    else:
+        LOGGER.debug("Index rebuild skipped for dialect %r (not supported).", dialect_name)
+
+
 def _post_copy_apply_primary_keys(target_engine: Engine) -> None:
     """
     Post-copy step: ensure primary key constraints match the SQLAlchemy model.
@@ -3226,6 +3381,10 @@ def _import_files_to_target(dump_dir: Path, target_engine: Engine) -> Dict[str, 
     # Ensure primary key constraints exist after bulk data imports
     # (applies to both PostgreSQL and MySQL/MariaDB).
     _post_copy_apply_primary_keys(target_engine)
+
+    # Rebuild index statistics after bulk data import for optimal query performance.
+    # (applies to all backends).
+    _post_copy_rebuild_indexes(target_engine)
 
     _progress_done()
     LOGGER.info("Import complete: %d tables loaded into target.", total_tables)
