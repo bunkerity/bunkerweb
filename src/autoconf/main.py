@@ -82,7 +82,7 @@ try:
     Path(sep, "var", "tmp", "bunkerweb", "autoconf.healthy").write_text("ok")
     LOGGER.info("Processing events ...")
     controller.process_events()
-except:
+except Exception:
     LOGGER.error(f"Exception while running autoconf :\n{format_exc()}")
     sys_exit(1)
 finally:
