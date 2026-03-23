@@ -248,7 +248,7 @@ if __name__ == "__main__":
                 LOGGER.error(f"An error occurred when setting the changes to checked in the database : {ret}")
     except SystemExit as e:
         sys_exit(e.code)
-    except:
+    except Exception:
         LOGGER.error(f"Exception while executing config saver : {format_exc()}")
         sys_exit(1)
 
