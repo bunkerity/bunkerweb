@@ -353,9 +353,9 @@ packaging==26.0 \
     --hash=sha256:00243ae351a257117b6a241061796684b084ed1c516a08c48a3f7e147a9d80b4 \
     --hash=sha256:b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529
     # via -r requirements.in
-pytz==2026.1 \
-    --hash=sha256:10413c35476919b4c07bda6b9810c6e24d914378c430070bdb1869e18a37eee5 \
-    --hash=sha256:b07ec0ea0aec75b9a5c4632191fa30d79ef6fb42d4a5358ea64552dcac2c8957
+pytz==2026.1.post1 \
+    --hash=sha256:3378dde6a0c3d26719182142c56e60c7f9af7e968076f31aae569d72a0358ee1 \
+    --hash=sha256:f2fd16142fda348286a75e1a524be810bb05d444e5a081f37f7affc635035f7a
     # via -r requirements.in
 redis==7.4.0 \
     --hash=sha256:64a6ea7bf567ad43c964d2c30d82853f8df927c5c9017766c55a1d1ed95d18ad \
