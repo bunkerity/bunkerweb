@@ -276,9 +276,9 @@ python-dateutil==2.9.0.post0 \
     --hash=sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3 \
     --hash=sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427
     # via kubernetes
-pytz==2026.1 \
-    --hash=sha256:10413c35476919b4c07bda6b9810c6e24d914378c430070bdb1869e18a37eee5 \
-    --hash=sha256:b07ec0ea0aec75b9a5c4632191fa30d79ef6fb42d4a5358ea64552dcac2c8957
+pytz==2026.1.post1 \
+    --hash=sha256:3378dde6a0c3d26719182142c56e60c7f9af7e968076f31aae569d72a0358ee1 \
+    --hash=sha256:f2fd16142fda348286a75e1a524be810bb05d444e5a081f37f7affc635035f7a
     # via -r requirements.in
 pyyaml==6.0.3 \
     --hash=sha256:00c4bdeba853cc34e7dd471f16b4114f4162dc03e6b7afcc2128711f0eca823c \
