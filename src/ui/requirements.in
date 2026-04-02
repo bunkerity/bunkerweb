@@ -8,7 +8,7 @@ Flask-WTF==1.2.2
 gunicorn[gthread,http2]==25.1.0
 openpyxl==3.1.5
 passlib==1.7.4
-pillow==12.1.1
+pillow==12.2.0
 psutil==7.2.2
 python_dateutil==2.9.0.post0
 qrcode==8.2
