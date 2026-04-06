@@ -50,7 +50,7 @@ class Configurator:
         self.__compiled_regexes = {}
 
         # Pre-defined exclusion sets for config processing
-        self.__excluded_prefixes = ("_", "PYTHON", "KUBERNETES_", "SVC_", "LB_", "SUPERVISOR_")
+        self.__excluded_prefixes = ("PYTHON", "KUBERNETES_", "NOMAD_", "SVC_", "LB_", "SUPERVISOR_")
         self.__excluded_vars = frozenset(
             {
                 "DOCKER_HOST",
@@ -111,6 +111,12 @@ class Configurator:
             self.__variables = self.__load_variables(Path(variables))
         else:
             self.__variables = variables
+
+        """
+        NOTE: we now allow _1mthe1_... like (domain) variables to support domain names starting with a number.
+        This means we immediately trim off starting _ from variable names here.
+        """
+        self.__variables = {k.lstrip("_"): v for k, v in self.__variables.items()}
 
         self.__multisite = self.__variables.get("MULTISITE", "no") == "yes"
         self.__servers = self.__map_servers()
