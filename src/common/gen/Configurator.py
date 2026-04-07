@@ -112,11 +112,20 @@ class Configurator:
         else:
             self.__variables = variables
 
-        """
-        NOTE: we now allow _1mthe1_... like (domain) variables to support domain names starting with a number.
-        This means we immediately trim off starting _ from variable names here.
-        """
-        self.__variables = {k.lstrip("_"): v for k, v in self.__variables.items()}
+        # Allow a leading underscore prefix on env var names so that domain names
+        # starting with a digit can be configured (bash forbids var names starting
+        # with a digit, e.g. 1nteresting.io).  Users write _1nteresting.io_USE_...
+        # and we strip the single leading underscore here before any other processing.
+        stripped: Dict[str, str] = {}
+        for k, v in self.__variables.items():
+            new_key = k.removeprefix("_")
+            if not new_key:
+                # Skip bare "_" or similar empty-after-strip keys
+                continue
+            if new_key in stripped:
+                self.__logger.warning(f"Variable collision after stripping leading underscore: both {k!r} and {new_key!r} exist, keeping last value")
+            stripped[new_key] = v
+        self.__variables = stripped
 
         self.__multisite = self.__variables.get("MULTISITE", "no") == "yes"
         self.__servers = self.__map_servers()
