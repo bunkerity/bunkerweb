@@ -34,6 +34,18 @@ local sort = table.sort
 local lower = string.lower
 local gsub = string.gsub
 
+-- Convert binary data to lowercase hex (replacement for ngx.encode_base16)
+local function to_hex(bin)
+	if not bin then
+		return nil
+	end
+	local t = {}
+	for i = 1, #bin do
+		t[i] = string.format("%02x", string.byte(bin, i))
+	end
+	return table.concat(t)
+end
+
 -- Mirror certbot-new wildcard grouping so certificate identifiers stay in sync.
 local function sanitize_domain_labels(domain)
 	if not domain or domain == "" then
@@ -485,11 +497,26 @@ function letsencrypt:load_data(data, server_name)
 	if not priv_key then
 		return false, "error while parsing pem priv key : " .. err
 	end
-	-- Cache data
+	-- Pre-compute leaf certificate fingerprint for OCSP lookup (avoids PEM parsing on every TLS handshake)
+	local cert_fingerprint = nil
+	pcall(function()
+		local x509 = require("resty.openssl.x509")
+		local leaf_pem = data[1]:match("(%-%-%-%-%-BEGIN CERTIFICATE%-%-%-%-%-.-%-%-%-%-%-END CERTIFICATE%-%-%-%-%-)")
+		if leaf_pem then
+			local cert_obj = x509.new(leaf_pem)
+			if cert_obj then
+				local digest_bytes = cert_obj:pubkey_digest("sha256")
+				if digest_bytes then
+					cert_fingerprint = to_hex(digest_bytes):lower()
+				end
+			end
+		end
+	end)
+	-- Cache data: {parsed_cert, parsed_key, cert_pem, key_pem, fingerprint}
 	for key in server_name:gmatch("%S+") do
 		local cache_key = "plugin_letsencrypt_" .. key
 		local ok
-		ok, err = self.internalstore:set(cache_key, { cert_chain, priv_key }, nil, true)
+		ok, err = self.internalstore:set(cache_key, { cert_chain, priv_key, data[1], data[2], cert_fingerprint }, nil, true)
 		if not ok then
 			return false, "error while setting data into internalstore : " .. err
 		end

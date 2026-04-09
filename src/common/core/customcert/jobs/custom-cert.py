@@ -3,7 +3,7 @@
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
-from subprocess import DEVNULL, run
+from subprocess import DEVNULL, TimeoutExpired, run
 from sys import exit as sys_exit, path as sys_path
 from base64 import b64decode
 from tempfile import NamedTemporaryFile
@@ -20,6 +20,7 @@ from logger import getLogger  # type: ignore
 
 LOGGER = getLogger("CUSTOM-CERT")
 JOB = Job(LOGGER, __file__)
+OCSP_REFRESH_TIMEOUT = 2100  # 35 minutes max to cover ocsp-refresh job worst-case duration
 
 
 def process_ssl_data(data: str, file_path: Optional[str], data_type: Literal["cert", "key"], server_name: str) -> Union[bytes, Path, None]:
@@ -159,6 +160,7 @@ try:
         sys_exit(0)
 
     skipped_servers = []
+    changed_domains = []  # Track which domains had certificate changes
     if not multisite:
         all_domains = [all_domains[0]]
         if getenv("USE_CUSTOM_SSL", "no") == "no":
@@ -210,6 +212,7 @@ try:
                 continue
             elif need_reload:
                 LOGGER.info(f"Detected change in {first_server}'s certificate")
+                changed_domains.append(first_server)  # Track this domain as changed
                 status = 1
                 continue
 
@@ -218,6 +221,29 @@ try:
     for first_server in skipped_servers:
         JOB.del_cache("cert.pem", service_id=first_server)
         JOB.del_cache("key.pem", service_id=first_server)
+
+    # Trigger OCSP stapling refresh when certificates changed (AFTER caching)
+    # OCSP job will compare new certs with cached ones and process differential updates
+    if changed_domains and getenv("SSL_USE_OCSP_STAPLING", "yes").lower() == "yes":
+        LOGGER.info(f"🔄 OCSP triggering refresh for {len(changed_domains)} changed custom cert(s): {', '.join(changed_domains)}")
+        try:
+            import sys
+
+            ocsp_script = join(sep, "usr", "share", "bunkerweb", "core", "ssl", "jobs", "ocsp-refresh.py")
+            result = run([sys.executable, ocsp_script, "--force"], stdin=DEVNULL, capture_output=True, text=True, timeout=OCSP_REFRESH_TIMEOUT)
+            if result.returncode == 0:
+                LOGGER.info("✓ OCSP refresh completed successfully after cert change")
+            else:
+                LOGGER.warning(f"⚠️ OCSP refresh returned exit code {result.returncode}")
+            if result.stderr:
+                for line in result.stderr.strip().splitlines():
+                    LOGGER.debug(f"OCSP: {line}")
+        except TimeoutExpired as e:
+            LOGGER.warning(
+                f"⚠️ OCSP post-change refresh timed out after {OCSP_REFRESH_TIMEOUT}s (non-fatal): {e}"
+            )
+        except Exception as e:
+            LOGGER.warning(f"⚠️ OCSP post-change refresh failed (non-fatal): {e}")
 except SystemExit as e:
     status = e.code
 except BaseException as e:
