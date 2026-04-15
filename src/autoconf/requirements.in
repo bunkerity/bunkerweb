@@ -1,5 +1,5 @@
 docker==7.1.0
 kubernetes==35.0.0
-packaging==26.0
+packaging==26.1
 pytz==2026.1
 redis[hiredis]==7.4.0
