@@ -6,7 +6,7 @@ fastapi==0.135.1
 gunicorn[gthread,http2]==25.1.0
 pydantic==2.12.5
 pydantic_settings==2.13.1
-python-multipart==0.0.22
+python-multipart==0.0.26
 PyYAML==6.0.3
 regex==2026.2.19
 slowapi==0.1.9
