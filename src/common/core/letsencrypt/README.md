@@ -61,6 +61,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | no       | **Certificate Profile:** Select the certificate profile to use. Options: `classic` (general-purpose), `tlsserver` (optimized for TLS servers), or `shortlived` (7-day certificates).                                                                                           |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`               |               | multisite | no       | **Custom Certificate Profile:** Enter a custom certificate profile if your ACME server supports non-standard profiles. This overrides `LETS_ENCRYPT_PROFILE` if set.                                                                                                           |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `3`           | multisite | no       | **Maximum Retries:** Number of times to retry certificate generation on failure. Set to `0` to disable retries. Useful for handling temporary network issues or API rate limits.                                                                                               |
+| `LETS_ENCRYPT_HOSTNAME_CHECK`               | `no`          | multisite | no       | **Check Hostname DNS Records:** When set to `yes`, validates that each hostname has a valid A, AAAA, or CNAME DNS record before requesting a certificate with HTTP challenge. Disabled by default as internal or split-horizon DNS may not resolve public hostnames from within the container. |
 
 !!! info "Information and behavior"
     - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file, and Certbot will read the credentials from it.
@@ -88,6 +89,30 @@ Follow these steps to configure and use the Let's Encrypt feature:
 !!! warning "Rate Limits"
     Let's Encrypt imposes rate limits on certificate issuance. When testing configurations, use the staging environment by setting `USE_LETS_ENCRYPT_STAGING` to `yes` to avoid hitting production rate limits. Staging certificates are not trusted by browsers but are useful for validating your setup.
 
+
+### Hostname DNS Record Validation
+
+When using the HTTP challenge, BunkerWeb can automatically check that each domain has a valid DNS record (A, AAAA, or CNAME) before attempting to request a certificate. This helps prevent failed certificate requests due to missing or misconfigured DNS.
+
+- **Disabled by default:** The `LETS_ENCRYPT_HOSTNAME_CHECK` setting controls this behavior. Disabled by default because internal or split-horizon DNS setups may not resolve public hostnames from within the container, causing false negatives.
+- **Enabling the check:** Set `LETS_ENCRYPT_HOSTNAME_CHECK` to `yes` to validate DNS records for each domain before the HTTP challenge. If a domain does not resolve to a valid A, AAAA, or CNAME, an error is shown and the certificate request is skipped for that domain.
+- **User guidance:** If a DNS record is missing, BunkerWeb will provide a clear error message indicating which domain is affected and what action is needed (e.g., "No A/AAAA/CNAME record found for www.example.com. Please ensure the domain points to this server's public IP address.")
+
+#### Example
+
+```yaml
+AUTO_LETS_ENCRYPT: "yes"
+LETS_ENCRYPT_CHALLENGE: "http"
+LETS_ENCRYPT_HOSTNAME_CHECK: "no"  # (default)
+```
+
+If you want to enable DNS pre-checks:
+
+```yaml
+LETS_ENCRYPT_HOSTNAME_CHECK: "yes"
+```
+
+This feature helps avoid common misconfigurations and ensures a smoother certificate issuance process.
 
 ### Supported DNS Providers
 
