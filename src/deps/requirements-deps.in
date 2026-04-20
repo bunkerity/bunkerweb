@@ -1,6 +1,6 @@
 importlib-metadata==9.0.0
 pip==26.0.1
-pip-compile-multi==3.3.0
+pip-compile-multi==3.3.1
 pip-tools==7.5.3
 pip-upgrader==2.4.2
 setuptools<81
