@@ -41,9 +41,7 @@ attrs==26.1.0 \
 beautifulsoup4==4.14.3 \
     --hash=sha256:0918bfe44902e6ad8d57732ba310582e98da931428d231a5ecb9e7c703a735bb \
     --hash=sha256:6292b1c5186d356bba669ef9f7f051757099565ad9ada5dd630bd9de5fa7fb86
-    # via
-    #   dns-lexicon
-    #   dns-lexicon-coop
+    # via dns-lexicon
 boto3==1.42.86 \
     --hash=sha256:492c3c7cbbe9842882680064902f50cf711b5ab770d26525549872339ed95d5b \
     --hash=sha256:c87d2a750b1a8cad0384d1a83d3bad6aedf924ae9a14aaba814bcb3297b39c01
@@ -146,9 +144,9 @@ certbot-dns-google==5.5.0 \
     --hash=sha256:062db3c135bb956dd5a00705c2144ec0a35bc6a48104a3ae16ba79fabcfdfdcb \
     --hash=sha256:ee6cd586e83a95ed582b3ff815fc9a7122f8de19d7e8db5628a1dcc3a5a51636
     # via -r requirements.in
-certbot-dns-hetzner==3.0.0 \
-    --hash=sha256:61112172728fa87d33b4e3b6e44c8facb4641075e548373192c9c15c3d795ba2 \
-    --hash=sha256:615323daf854b3fcab3ed0a5b35beae901351e72af20156a2f34a2de00baba2b
+certbot-dns-hetzner==4.0.0 \
+    --hash=sha256:1dd5d43467bb624996d36a416ceeffb4068be7b315a774a6e7fc2b562140743f \
+    --hash=sha256:cc122c13b19e96bac8f9d7f7715887f6e0313b56be253de71e8877a8eacb6e3a
     # via -r requirements.in
 certbot-dns-infomaniak==0.2.4 \
     --hash=sha256:45c2c8c49b7346dc66c7b59bfed46b07543e963d4bb028614cefd7337b171462 \
@@ -496,7 +494,6 @@ cryptography==46.0.7 \
     #   acme
     #   certbot
     #   dns-lexicon
-    #   dns-lexicon-coop
     #   google-auth
     #   josepy
     #   pyopenssl
@@ -521,10 +518,6 @@ dns-lexicon==3.23.2 \
     #   certbot-dns-ovh
     #   certbot-dns-pdns
     #   certbot-dns-sakuracloud
-dns-lexicon-coop==3.24.2 \
-    --hash=sha256:1d7ddc0d3dd035223695a8bb9e19ed4e8c25ad0bef04f694df93c07b8daf078a \
-    --hash=sha256:65b21c86fe0a22b80301c220369e0908c4c0b69cca8ca2616771d60c63c78b36
-    # via certbot-dns-hetzner
 dnspython==2.8.0 \
     --hash=sha256:01d9bbc4a2d76bf0db7c1f729812ded6d912bd318d3b1cf81d30c0f845dbf3af \
     --hash=sha256:181d3c6996452cb1189c4046c61599b84a5a86e099562ffde77d26984ff26d0f
@@ -535,7 +528,6 @@ dnspython==2.8.0 \
     #   certbot-dns-dynu
     #   certbot-dns-rfc2136
     #   dns-lexicon
-    #   dns-lexicon-coop
 domeneshop==0.4.4 \
     --hash=sha256:502c480e7848024c59d68417611c8031d1a052c519e809585f0b312f8f531408 \
     --hash=sha256:60845dd023896f82fc6edd3e4bd1542b37121116a5e44fe28526f6f0af5a8cf3
@@ -568,6 +560,10 @@ googleapis-common-protos==1.74.0 \
     --hash=sha256:57971e4eeeba6aad1163c1f0fc88543f965bb49129b8bb55b2b7b26ecab084f1 \
     --hash=sha256:702216f78610bb510e3f12ac3cafd281b7ac45cc5d86e90ad87e4d301a3426b5
     # via google-api-core
+hcloud==2.17.1 \
+    --hash=sha256:04f1b7d1bb21e05a6b21dafc7fd3632698e2cf0c36d8447880145fd7f412fc13 \
+    --hash=sha256:6b4adb35aed57ef7bedbcdf307df94496a5d15c1b47e9594a936f664589c6016
+    # via certbot-dns-hetzner
 httplib2==0.31.2 \
     --hash=sha256:385e0869d7397484f4eab426197a4c020b606edd43372492337c0b4010ae5d24 \
     --hash=sha256:dbf0c2fa3862acf3c55c078ea9c0bc4481d7dc5117cae71be9514912cf9f8349
@@ -695,9 +691,7 @@ mock==5.2.0 \
 parsedatetime==2.6 \
     --hash=sha256:4cb368fbb18a0b7231f4d76119165451c8d2e35951455dfee97c62a87b04d455 \
     --hash=sha256:cb96edd7016872f58479e35879294258c71437195760746faffedb692aef000b
-    # via
-    #   certbot
-    #   certbot-dns-hetzner
+    # via certbot
 proto-plus==1.27.2 \
     --hash=sha256:6432f75893d3b9e70b9c412f1d2f03f65b11fb164b793d14ae2ca01821d22718 \
     --hash=sha256:b2adde53adadf75737c44d3dcb0104fde65250dfc83ad59168b4aa3e574b6a24
@@ -861,9 +855,7 @@ pyopenssl==26.0.0 \
 pyotp==2.9.0 \
     --hash=sha256:346b6642e0dbdde3b4ff5a930b664ca82abfa116356ed48cc42c7d6590d36f63 \
     --hash=sha256:81c2e5865b8ac55e825b0358e496e1d9387c811e85bb40e71a3b29b288963612
-    # via
-    #   dns-lexicon
-    #   dns-lexicon-coop
+    # via dns-lexicon
 pyparsing==3.3.2 \
     --hash=sha256:850ba148bd908d7e2411587e247a1e4f0327839c40e2e5e6d05a007ecc69911d \
     --hash=sha256:c777f4d763f140633dcb6d8a3eda953bf7a214dc4eff598413c070bcdc117cbc
@@ -877,7 +869,9 @@ pyrfc3339==2.1.0 \
 python-dateutil==2.9.0.post0 \
     --hash=sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3 \
     --hash=sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427
-    # via botocore
+    # via
+    #   botocore
+    #   hcloud
 python-digitalocean==1.17.0 \
     --hash=sha256:0032168e022e85fca314eb3f8dfaabf82087f2ed40839eb28f1eeeeca5afb1fa \
     --hash=sha256:107854fde1aafa21774e8053cf253b04173613c94531f75d5a039ad770562b24
@@ -967,7 +961,6 @@ pyyaml==6.0.3 \
     # via
     #   cloudflare
     #   dns-lexicon
-    #   dns-lexicon-coop
 requests==2.33.1 \
     --hash=sha256:18817f8c57c6263968bc123d237e3b8b08ac046f5456bd1e307ee8f4250d3517 \
     --hash=sha256:4e6d1ef462f3626a1f0a0a9c42dd93c63bad33f9f1c1937509b8c5c8718ab56a
@@ -981,15 +974,14 @@ requests==2.33.1 \
     #   certbot-dns-duckdns
     #   certbot-dns-dynu
     #   certbot-dns-gandi
-    #   certbot-dns-hetzner
     #   certbot-dns-infomaniak
     #   certbot-dns-ionos
     #   certbot-dns-scaleway
     #   cloudflare
     #   cloudns-api
     #   dns-lexicon
-    #   dns-lexicon-coop
     #   google-api-core
+    #   hcloud
     #   python-digitalocean
     #   python-transip
     #   requests-file
@@ -1003,7 +995,6 @@ requests-mock==1.12.1 \
     --hash=sha256:b1e37054004cdd5e56c84454cc7df12b25f90f382159087f4b6915aaeef39563 \
     --hash=sha256:e9e12e333b525156e82a3c852f22016b9158220d2f47454de9cae8a77d371401
     # via
-    #   certbot-dns-hetzner
     #   certbot-dns-infomaniak
     #   certbot-dns-ionos
     #   certbot-dns-scaleway
@@ -1014,15 +1005,6 @@ s3transfer==0.16.0 \
 schedule==1.2.2 \
     --hash=sha256:15fe9c75fe5fd9b9627f3f19cc0ef1420508f9f9a46f45cd0769ef75ede5f0b7 \
     --hash=sha256:5bef4a2a0183abf44046ae0d164cadcac21b1db011bdd8102e4a0c1e91e06a7d
-    # via
-    #   certbot-dns-cloudns
-    #   certbot-dns-domainoffensive
-    #   certbot-dns-domeneshop
-
-# The following packages are considered to be unsafe in a requirements file:
-setuptools==80.10.2 \
-    --hash=sha256:8b0e9d10c784bf7d262c4e5ec5d4ec94127ce206e8738f29a437945fbc219b70 \
-    --hash=sha256:95b30ddfb717250edb492926c92b5221f7ef3fbcc2b07579bcd4a27da21d0173
     # via -r requirements.in
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
@@ -1036,8 +1018,8 @@ tldextract==5.3.1 \
     --hash=sha256:6bfe36d518de569c572062b788e16a659ccaceffc486d243af0484e8ecf432d9 \
     --hash=sha256:a72756ca170b2510315076383ea2993478f7da6f897eef1f4a5400735d5057fb
     # via
+    #   certbot-dns-hetzner
     #   dns-lexicon
-    #   dns-lexicon-coop
 typing-extensions==4.15.0 \
     --hash=sha256:0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466 \
     --hash=sha256:f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548
@@ -1099,12 +1081,20 @@ zope-interface==8.2 \
     --hash=sha256:dfc4f44e8de2ff4eba20af4f0a3ca42d3c43ab24a08e49ccd8558b7a4185b466 \
     --hash=sha256:f777e68c76208503609c83ca021a6864902b646530a1a39abb9ed310d1100664
     # via
+    #   certbot-dns-cloudns
+    #   certbot-dns-domainoffensive
+    #   certbot-dns-domeneshop
+
+# The following packages are considered to be unsafe in a requirements file:
+setuptools==80.10.2 \
+    --hash=sha256:8b0e9d10c784bf7d262c4e5ec5d4ec94127ce206e8738f29a437945fbc219b70 \
+    --hash=sha256:95b30ddfb717250edb492926c92b5221f7ef3fbcc2b07579bcd4a27da21d0173
+    # via
     #   -r requirements.in
     #   certbot-dns-bunny
     #   certbot-dns-desec
     #   certbot-dns-domainoffensive
     #   certbot-dns-domeneshop
-    #   certbot-dns-hetzner
     #   certbot-dns-ionos
     #   certbot-dns-scaleway
     #   certbot-dns-transip
