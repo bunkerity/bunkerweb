@@ -1,10 +1,103 @@
 # Changelog
 
-## v1.6.9 - 2026/03/??
+## v1.6.10~rc5 - 2026/??/??
+
+- [BUGFIX] `errors`: stop closing connections on legitimate intercepted 4xx/5xx responses (e.g. typo'd URI under a non-`/` UI mount, upstream 502) when `DENY_HTTP_STATUS=444`. The 444 short-circuit on `/bwerror*` handlers introduced in rc4 is now gated on the new opt-in multisite setting `INTERCEPTED_ERRORS_CLOSE_CONNECTION` (default `no`) instead of being implicit when `DENY_HTTP_STATUS=444`. Branded BunkerWeb error pages render again by default; admins who want full stealth on intercepted errors set `INTERCEPTED_ERRORS_CLOSE_CONNECTION=yes` (denies still close via `ngx.exit(444)` regardless, since that path bypasses `error_page`).
+- [DEPS] Updated NGINX version to v1.30.0 for all integrations.
+- [DEPS] Updated Modsecurity version to v3.0.15
+- [DEPS] Updated Mbed TLS version to v4.1.0
+- [DEPS] Updated libinjection version to v4.0.0
+
+## v1.6.10~rc4 - 2026/04/29
+
+- [SECURITY] Harden AIO log wrapper: strip C0/C1 control chars from service output to prevent terminal injection in `docker logs`, disable pathname expansion around `HIDE_SERVICE_LOGS` word splitting, and reject `..` path-traversal segments in `LOG_FILE_PATH` validation.
+- [SECURITY] Harden the AIO `logstream.sh` nginx/ModSecurity log forwarder with the same C0/DEL control-character strip as `service-log-wrapper.sh`, so attacker-controlled `access.log`/`error.log`/`modsec_audit.log` content cannot inject ANSI/CSI/OSC escape sequences into `docker logs` output.
+- [SECURITY] `errors`: honor `DENY_HTTP_STATUS=444` on `/bwerror*` handlers — close the connection instead of serving the branded BunkerWeb error page. (Fixes #3448)
+- [BUGFIX] Throttle repeated Redis-failure logs in `metrics`, `sessions`, and `badbehavior` timer hooks: errors of the same kind now log once then recap with a count at 60s window boundaries instead of flooding the error log on every tick.
+- [BUGFIX] Add multisite `SESSIONS_DOMAIN` setting (default empty) that emits a `Domain` attribute on the session cookie per server, allowing antibot/challenge state to be shared across sibling subdomains of the same registrable domain. (Fixes #3415)
+- [BUGFIX] Web UI: launch `tmp-gunicorn` with `env -u LOG_FILE_PATH` so the bootstrap UI falls back to its own `tmp-ui.log` instead of colliding with the main UI's `ui.log`.
+- [BUGFIX] Fix `securitytxt` RFC 9116 compliance: populate the default `Canonical:` URL (was `https:///.well-known/security.txt`), emit `Expires:` as UTC with a trailing `Z`, rename the field to `Acknowledgments:`, and cache the auto-generated expiry per server so the served file is byte-stable across requests.
+- [BUGFIX] Fix `DATABASE_URI` driver injection corrupting hostnames when the host matches the scheme name (e.g. `postgresql://u:p@postgresql:5432/db`). Use SQLAlchemy's `make_url` + `URL.set(drivername=...)` instead of `str.replace` so only the scheme is rewritten. (Fixes #3438)
+- [BUGFIX] `badbehavior`: don't increment the counter for already-banned IPs. Log phase fast-paths on `ctx.bw.is_banned`; timer phase re-checks `is_banned()` authoritatively (Redis reachable) before calling `increase()`. (Fixes #3448)
+- [BUGFIX] Add `REVERSE_PROXY_MODSECURITY` multisite setting (default `yes`) that emits `modsecurity off;` in the per-URL reverse-proxy `location` block when set to `no`, working around the ModSecurity-nginx connector's full-body buffering that causes OOM on large uploads. (Fixes #3154)
+- [FEATURE] Let's Encrypt: new `LETS_ENCRYPT_MAX_LOG_BACKUPS` global setting (default `50`) caps certbot's own log rotation via `--max-log-backups`, preventing the default 1000-file pile-up in every integration mode.
+- [ALL-IN-ONE] Python services (UI, API, scheduler, autoconf) now log to the container's stdout/stderr only. `service-log-wrapper.sh` prefixes each line with `[SERVICE]`, strips control characters, and honors `HIDE_SERVICE_LOGS`; no on-disk files are written. Retention is managed by the container logging driver (`docker logs`, `journald`, ...).
+- [UI] Fix "Blocked Requests by Country" map: an off-by-one in `getColor()` plus an HSL-ramp clip to `#000` collapsed every populated country to the same color.
+- [UI] Add import/export for custom configurations, with an opt-in `.zip` bundle that lets a service export include its attached custom configurations and re-import them in one shot.
+- [AUTOCONF] Fix Kubernetes ingress rules being silently dropped and never recovering when a backend Service isn't visible to a GET at apply time (apiserver watch-vs-GET race seen on AKS). A background worker retries missing backends with exponential backoff and re-triggers the apply once they appear.
+- [AUTOCONF] Relax the empty `SERVER_NAME` guard in `Database.save_config` for `autoconf`: if every existing service is autoconf/scheduler-owned, treat the empty list as a legitimate full-teardown and clear the services instead of aborting. Mixed-ownership DBs still abort.
+- [AUTOCONF] Add `AUTOCONF_DISABLE_CLEANUP` (default `no`): convert services removed from the orchestrator to draft instead of deleting them, and let the Web UI delete drafted autoconf services.
+- [CONTRIBUTION] Thank you [harshadkhetpal](https://github.com/harshadkhetpal) for your contribution regarding exception handling in the `autoconf` entrypoint. (#3421)
+- [CONTRIBUTION] Thank you [Simonmiz](https://github.com/Simonmiz) for your contribution regarding the `German` translation of the web UI. (#3422)
+- [CONTRIBUTION] Thank you [daemon-byte](https://github.com/daemon-byte) for your contribution adding the [Cap.js](https://capjs.js.org/) self-hosted proof-of-work antibot mode. (#3454)
+
+## v1.6.10~rc3 - 2026/04/11
+
+- [API/SECURITY] Fix `PATCH /global_config` accidentally deleting all services, custom configs, and jobs cache.
+- [API/SECURITY] Add data-loss guards in `Database.save_config` and `Database.update_external_plugins`: refuse to delete every global setting for a method when the incoming config would wipe every existing row, refuse to cascade-delete plugins when the incoming plugins list is empty, and skip setting/selects/multiselects pruning on same-content plugin reinstalls (detected via checksum comparison) to prevent user-set values from being wiped.
+- [SECURITY] Updated coreruleset-v3 version to v3.3.9 (fixes CVE-2026-33691) (Fixes #3402)
+- [SECURITY] Updated coreruleset-v4 version to v4.25.0 (fixes CVE-2026-33691) (Fixes #3402)
+- [SECURITY] Harden all tar/zip extraction with centralized `safe_tar_extractall`/`safe_zip_extractall` helpers, pre-extraction member validation, and `Path.is_relative_to()` containment checks (mitigates CVE-2025-4517 on Python < 3.13.4).
+- [BUGFIX] `Configurator` now supplements its internal server list from the database `Services` table in multisite mode so that autoconf-managed services are recognized even when `SERVER_NAME` hasn't been updated in the variables yet at startup.
+- [BUGFIX] Fix `bw_plugin_pages` and `bw_jobs_cache` PostgreSQL table bloat caused by non-deterministic tar archives and unconditional UPDATEs triggering massive TOAST dead tuple accumulation on every scheduler restart.
+- [BUGFIX] Fix scheduler memory leak from unbounded job module cache, broken `sys.modules` cleanup, bulk cache loading, and infrequent garbage collection.
+- [BUGFIX] Fix `cachestore:set()` silently dropping cache writes in non-cosocket phases due to an incorrect guard.
+- [BUGFIX] Fix `cachestore:del_redis()` calling non-existent `clusterstore:del()` method.
+- [BUGFIX] Fix metrics Redis sync cascading failures after a mid-cycle connection drop by adding auto-reconnect with circuit-breaker.
+- [BUGFIX] Fix dead Redis connections being returned to the keepalive pool by tracking connection health in `clusterstore`.
+- [BUGFIX] Move `cachestore:update()` IPC poll from `set_by_lua*` (where `ngx.sleep()` is unavailable) to `access_by_lua*`/`preread_by_lua*` phases, eliminating the `ipc.lua` "could not sleep before retry" warning on every request.
+- [AUTOCONF] Fix multiple Kubernetes Ingress/Route resources for the same hostname overwriting each other instead of merging their paths into a single service configuration.
+- [AUTOCONF] Fix Docker autoconf feedback loop where healthcheck exec events caused endless config regeneration and NGINX reloads by filtering events to container lifecycle actions only.
+- [ALL-IN-ONE] Update CrowdSec version to 1.7.7
+- [UI] Fix multiselect dropdown being clipped in template wizard steps. (Fixes #3401)
+- [UI] Fix Reports page IP hit counts decreasing when clicking through to filter by IP: the precomputed Redis facet counts (unfiltered view) included all stored requests, but the streaming path dropped 5xx/3xx requests via an extra `400 <= status < 500 or security_mode == "detect"` filter. (Fixes #3407)
+- [API] Fix `update_config_upload` resetting a custom config's service scope to global when the caller did not explicitly request a service move.
+- [MISC] Update default value for Permissions-Policy header to include additional features (`local-network`, `local-network-access` and `loopback-network`).
+- [MISC] Accept `g`/`G` suffix on memory size settings (`WORKERLOCK_MEMORY_SIZE`, `DATASTORE_MEMORY_SIZE`, `CACHESTORE_MEMORY_SIZE`, `CACHESTORE_IPC_MEMORY_SIZE`, `CACHESTORE_MISS_MEMORY_SIZE`, `CACHESTORE_LOCKS_MEMORY_SIZE`, `INTERNALSTORE_MEMORY_SIZE`): values are automatically normalized to megabytes at template rendering time since NGINX's `ngx_parse_size()` only supports `k`/`m` for `lua_shared_dict`.
+- [MISC] Allow custom uppercase HTTP methods containing underscores and dashes in `ALLOWED_METHODS` (e.g. `CCM_POST`, `M-SEARCH`) for compatibility with non-standard protocols. (Fixes #3411)
+- [MISC] `JobScheduler` tracks per-job failures better
+
+## v1.6.10~rc2 - 2026/03/28
+
+- [BUGFIX] Add `WORKER_SHUTDOWN_TIMEOUT` setting (default `30s`) to force old NGINX workers to terminate after a config reload, preventing unbounded memory growth when workers linger in "shutting down" state. (Fixes #3153)
+- [BUGFIX] Fix ModSecurity `REQUEST_HEADERS:Host` and `SERVER_NAME` being empty for HTTP/3 requests, causing custom rules with header matching (including chained rules) to silently fail. Patch the ModSecurity-nginx connector to synthesize the `Host` header from the `:authority` pseudo-header on HTTP/3 connections. (Fixes #3298)
+- [BUGFIX] Add `MODSECURITY_SEC_REQUEST_BODY_LIMIT` and `MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION` settings to decouple ModSecurity body inspection from `MAX_CLIENT_SIZE`, preventing OOM kills on large uploads. Also fix missing `SecRequestBodyLimitAction` and broken unit conversion in global CRS templates. (Fixes #3154)
+- [BUGFIX] Add explicit ModSecurity request-body parsing error rules so truncated or malformed bodies are logged consistently and rejected with the correct status when inspection fails.
+- [BUGFIX] Clean orphaned NGINX temp files on startup to prevent unbounded disk usage after OOM kills or ungraceful shutdowns.
+- [BUGFIX] Fix Post-Quantum Cryptography (PQC) auto-detection failing on OpenSSL 3.5+ because Python's `SSLContext.set_ecdh_curve()` does not recognize hybrid KEM groups like `X25519MLKEM768`. Add subprocess fallback probing `openssl list -kem-algorithms` so that `SSL_ECDH_CURVE=auto` (the default) correctly enables PQC key exchange when the system OpenSSL supports it, with graceful fallback to classical curves when it does not.
+- [BUGFIX] Fix BunkerNet `log_stream()` crashing with `attempt to call field 'get_headers' (a nil value)` when reporting blocked IPs in stream (TCP proxy) context, where `ngx.req.get_headers()` is unavailable.
+- [BUGFIX] Fix unbanning IPs not working for stream (TCP/UDP) services due to stale local ban cache not being refreshed from Redis after unban. (Fixes #2516)
+- [BUGFIX] Fix `ngx.exit(nil)` crash when `DENY_HTTP_STATUS` variable is missing from the internal store. (Fixes #2516)
+- [BUGFIX] Fix `robots.txt` and `security.txt` plugins running expensive initialization on every request instead of only on their target URIs, causing severe slowdowns on pages with many parallel assets. (Fixes #3155)
+- [BUGFIX] Fix entrypoint spinning at 100% CPU when nginx/supervisord is OOM-killed, by adding process liveness check and stale PID cleanup in the wait loop.
+- [BUGFIX] Fix `badbehavior:log()` crash caused by `resty.lock` calling `ngx.sleep()` in `log_by_lua*` context, by skipping the mlcache lock path in non-cosocket phases.
+- [BUGFIX] Fix whitelist default-server crash caused by `resty.lock` calling `ngx.sleep()` in `set_by_lua*` context. Use lock-free L1/L2 cache reads in non-cosocket phases instead of silently dropping cached whitelist data. (Fixes #2583)
+- [BUGFIX] Fix `is_cosocket_available()` never matching the SSL certificate phase (`"ssl_certificate"` vs actual `"ssl_cert"`), and add missing yieldable phases `server_rewrite`, `ssl_client_hello` and `ssl_session_fetch`.
+- [UI] Fix service template switching so the newly selected template applies its defaults immediately while preserving fields already customized by the user. (Fixes #3241)
+- [UI] Fix Reports page search not matching on Request ID. The global search field only checked IP, country, method, URL, status, user-agent, reason, and server name, causing searches by Request ID to always return "No matching Reports found" when using the Redis code path.
+- [UI] Prevent reload and worker-restart infinite loops in the Web UI when the database is read-only or when configuration flag reset fails.
+- [DEPS] Updated NGINX version to v1.28.3 for all integrations.
+- [DEPS] Updated LuaJIT version to v2.1-20260311
+- [DEPS] Updated Brotli version to v1.2.0
+- [DEPS] Updated headers-more-nginx-module version to v0.39
+
+## v1.6.10~rc1 - 2026/03/23
+
+- [SECURITY] Replace Trivy with Docker Scout for container image vulnerability scanning in CI/CD pipeline.
+- [BUGFIX] Disable Gunicorn 25.1.0 control socket to prevent worker deadlock caused by fork in multi-threaded master process (UI, TMP-UI, API).
+- [UI/SECURITY] Replace unbounded "All" option in DataTable page length menus with capped values (500, 1000) across all pages, and clamp server-side `length`/`start` parameters to prevent OOM from oversized requests.
+- [UI] Fix multiselect settings not correctly displaying or applying their values in the template editor and the service creation wizard.
+- [UI] Fix multiselect and multivalue settings resetting to default values when all options are unchecked, by preserving empty string as a valid value across Jinja2 rendering, jQuery initialization, and the template editor module.
+- [UI] Check database for `USE_REDIS` setting before showing the filesystem session backend warning, so Redis configured via the Web UI is correctly detected.
+- [AUTOCONF] Fix Docker socket proxy restarts triggering catastrophic deletion of all instances and services by adding guards in `update_instances()` and `save_config()` to refuse empty-list updates when the database has existing data.
+- [AUTOCONF] Fix `_get_controller_containers` and `_get_controller_swarm_services` silently swallowing Docker API errors as empty lists, causing downstream code to treat failures as zero containers.
+- [DOCS] Add llms.txt and llms-full.txt generation via MkDocs post-build hook for AI agent documentation consumption, following the llms.txt standard (llmstxt.org).
+
+## v1.6.9 - 2026/03/13
 
 - [SECURITY] Implement `SafeFileSystemCache` for Web UI session storage with token regeneration on privilege changes, preventing session fixation attacks.
 - [SECURITY] Sanitize uploaded filenames in the Web UI to strip path separators, null bytes, and control characters, preventing path traversal attacks.
-- [SECURITY] Add tar extraction path filtering in `Let's Encrypt` certificate handling to only allow expected directories, preventing path traversal. Add 300s timeout to certificate account registration. Use explicit whitelist for API environment variables.
+- [SECURITY] Add tar extraction path filtering in `Let's Encrypt` certificate handling to only allow expected directories, preventing path traversal. Add 300s timeout to certificate account registration. Use explicit whitelist for API environment variables. (Fixes #3252)
 - [SECURITY] Validate IP addresses and service names across all ban management endpoints (API, Lua, UI, CLI) to prevent invalid data injection. Fix Redis key parsing for service names containing underscores.
 - [BUGFIX] Close local database connections before forking worker processes to prevent file descriptor leaks and connection pool corruption.
 - [BUGFIX] Fix race condition in instance update logic by using direct SQL `UPDATE` statements instead of ORM session operations.
@@ -13,9 +106,9 @@
 - [BUGFIX] Enhance error handling for missing server name in SSL certificate functions to avoid crashes when the server name is not yet configured.
 - [BUGFIX] Improve backup cleanup logic when replacing destination files to correctly remove leftover backups after a successful replacement.
 - [BUGFIX] Mark the Flask session as modified when adding flash messages to ensure session data is correctly persisted across redirects.
-- [BUGFIX] Fix Domeneshop DNS provider in the `Let's Encrypt` plugin to use the correct credential keys and ensure proper certificate generation.
-- [BUGFIX] Handle file-not-found and OS errors gracefully when archiving plugin UI pages in the database, and skip storing content when tar archiving fails to prevent corrupt data.
-- [BUGFIX] Return false instead of a potentially incorrect result when version comparison encounters invalid version strings, preventing spurious update notifications.
+- [BUGFIX] Fix Domeneshop DNS provider in the `Let's Encrypt` plugin to use the correct credential keys and ensure proper certificate generation. (Fixes #3056)
+- [BUGFIX] Handle file-not-found and OS errors gracefully when archiving plugin UI pages in the database, and skip storing content when tar archiving fails to prevent corrupt data. (Fixes #3297)
+- [BUGFIX] Return false instead of a potentially incorrect result when version comparison encounters invalid version strings, preventing spurious update notifications. (Fixes #3259)
 - [BUGFIX] Validate gRPC host setting to only accept empty values or properly prefixed `grpc://` / `grpcs://` URIs.
 - [BUGFIX] Properly close the database connection when the scheduler stops, and fix configuration generation flag to only reset after a successful reload.
 - [BUGFIX] Add backup and rollback mechanism when deploying new configurations to BunkerWeb instances, preventing data loss if the file copy operation fails.
@@ -39,7 +132,7 @@
 
 - [BUGFIX] Fix issues with the new `multiselect` logic where a custom separator can be used, but the default one (space) was still used if the separator was empty, which caused issues with settings that had an empty string as a value.
 - [BUGFIX] Fix issue with the failover not sending the failover configuration if the reload failed, which caused the failover configuration to not be applied until the next successful reload.
-- [FEATURE] Add field value redaction in Let's Encrypt plugin and update ZeroSSL API key handling to avoid exposing sensitive information in logs and process arguments. (Except in TRACE level logs for debugging purposes)
+- [FEATURE] Add field value redaction in Let's Encrypt plugin and update ZeroSSL API key handling to avoid exposing sensitive information in logs and process arguments. (Except in TRACE level logs for debugging purposes) (Fixes #3235, #3237)
 - [UI] Set `reuse_port` setting to `False` with gunicorn to avoid issues with workers not starting.
 - [UI] Tweak plugins headers style to avoid the text moving the buttons out of the page when the header is too long.
 - [UI] Add `MAX_CONTENT_LENGTH` setting to configure the maximum upload size (defaults to 50 MB).
@@ -54,19 +147,19 @@
 
 ## v1.6.9~rc2 - 2026/02/26
 
-- [BUGFIX] Update reCAPTCHA handling to use ANTIBOT_RECAPTCHA_CLASSIC variable instead of session data to determine whether to use the classic reCAPTCHA response format or the new one, ensuring consistent behavior regardless of session state.
-- [BUGFIX] Rename command argument to plugin_command for clarity and to avoid conflicts with other command arguments with bwcli.
+- [BUGFIX] Update reCAPTCHA handling to use ANTIBOT_RECAPTCHA_CLASSIC variable instead of session data to determine whether to use the classic reCAPTCHA response format or the new one, ensuring consistent behavior regardless of session state. (Fixes #2825)
+- [BUGFIX] Rename command argument to plugin_command for clarity and to avoid conflicts with other command arguments with bwcli. (Fixes #3222)
 - [FEATURE] Add new `file` setting type to allow users to upload files directly from the web UI and use their content as values for settings.
-- [FEATURE] Add `Gandi` as a DNS provider in the `letsencrypt` plugin
-- [FEATURE] Add `Hetzner` as a DNS provider in the `letsencrypt` plugin
-- [FEATURE] Add certificate authority selection in the `Let's Encrypt` plugin to allow users to choose between `Let's Encrypt` and `ZeroSSL` as the certificate authority for their certificates (Also added ZeroSSL specific settings).
+- [FEATURE] Add `Gandi` as a DNS provider in the `letsencrypt` plugin (Fixes #3184)
+- [FEATURE] Add `Hetzner` as a DNS provider in the `letsencrypt` plugin (Fixes #3205)
+- [FEATURE] Add certificate authority selection in the `Let's Encrypt` plugin to allow users to choose between `Let's Encrypt` and `ZeroSSL` as the certificate authority for their certificates (Also added ZeroSSL specific settings). (Fixes #2392)
 - [FEATURE] Add the possibility to whitelist/blacklist group of countries in the `Country` plugin.
 - [UI] Add override non-global services functionality in global settings
-- [UI] Make data columns in the reports page non orderable to avoid issues
+- [UI] Make data columns in the reports page non orderable to avoid issues (Fixes #3214)
 - [UI] Add control socket configuration for gunicorn
 - [UI] Enhance multiselect dropdown functionality and update the type of multiple settings to use it
 - [ALL-IN-ONE] Update CrowdSec version to 1.7.6
-- [AUTOCONF] Update gateway and ingress status patching to handle multiple IP addresses and Handle NodePort services if a load balancer IP is not available.
+- [AUTOCONF] Update gateway and ingress status patching to handle multiple IP addresses and Handle NodePort services if a load balancer IP is not available. (Fixes #3216)
 - [API] Add control socket configuration for gunicorn
 - [MISC] Change type of `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings to `file` to allow users to upload their certificate and key files directly from the web UI.
 - [MISC] Update default value for Permissions-Policy header to include an additional feature (`gamepad`).
@@ -79,36 +172,36 @@
 ## v1.6.9~rc1 - 2026/02/13
 
 - [BUGFIX] Ensure variables are only added if they are defined in the environment file and are valid key-value pairs to prevent issues with malformed lines in the variables file.
-- [BUGFIX] Add API token back for certbot hooks in environment configuration
-- [FEATURE] Add `ClouDNS` as a DNS provider in the `letsencrypt` plugin
+- [BUGFIX] Add API token back for certbot hooks in environment configuration (Fixes #3144)
+- [FEATURE] Add `ClouDNS` as a DNS provider in the `letsencrypt` plugin (Fixes #3162)
 - [FEATURE] Add new `CLIENT_BODY_TIMEOUT`, `CLIENT_HEADER_TIMEOUT`, `KEEPALIVE_TIMEOUT` and `SEND_TIMEOUT` settings to control the corresponding NGINX timeouts, allowing better handling of long-lived connections and preventing unintended timeouts.
 - [FEATURE] Add a new `gRPC` plugin to allow proxying gRPC traffic to upstream gRPC services with support for TLS, SNI, custom headers and retry policies.
 - [FEATURE] Make it possible to leave HTTP/HTTPS/STREAM/TLS ports empty to not listen on them.
 - [AUTOCONF] Add experimental support for GRPCRoute in the Kubernetes integration to allow routing gRPC traffic based on Kubernetes Gateway API resources.
 - [LINUX] Updated NGINX version to v1.28.2 for Fedora 42 and 43 integration
-- [UI] Fix status for PHP plugin to not always be shown as activated
+- [UI] Fix status for PHP plugin to not always be shown as activated (Fixes #3152)
 - [UI] Fix dark theme background for datatables actions
 - [UI] Make it possible to edit settings with the `wizard` method in the web UI
 - [UI] Enhance reports functionality with improved filter handling and data fetching
 - [UI] Enhance home dashboard with new IP blocking metrics and improved tooltips
 - [API] Fix redis sentinel issue when a password is set on the master node
-- [MISC] Remove warning for uninitialized variables in default server configuration (as we control the configuration and we know that some variables may be uninitialized in some cases, especially for 400 errors)
+- [MISC] Remove warning for uninitialized variables in default server configuration (as we control the configuration and we know that some variables may be uninitialized in some cases, especially for 400 errors) (Fixes #1963)
 
 ## v1.6.8 - 2026/02/06
 
-- [DOCS] Add forward proxy configuration for outgoing traffic
+- [DOCS] Add forward proxy configuration for outgoing traffic (Fixes #2535)
 - [DEPS] Update coreruleset-v4 version to v4.23.0
 - [DEPS] Updated NGINX version to v1.28.2 (except for Fedora as it is not yet available)
 
 ## v1.6.8~rc3 - 2026/02/02
 
-- [FEATURE] Add new `REVERSE_PROXY_REQUEST_BUFFERING` setting to the `Reverse Proxy` plugin to control request body buffering behavior when proxying requests (default: `on`)
-- [BUGFIX] Initialize is_whitelisted variable to 'no' in configuration files to avoid spam uninitialized messages in logs
-- [BUGFIX] Reorganize insertion logic to prevent foreign key errors and improve order of operations in database when creating/updating plugins
+- [FEATURE] Add new `REVERSE_PROXY_REQUEST_BUFFERING` setting to the `Reverse Proxy` plugin to control request body buffering behavior when proxying requests (default: `on`) (Fixes #3108)
+- [BUGFIX] Initialize is_whitelisted variable to 'no' in configuration files to avoid spam uninitialized messages in logs (Fixes #1963)
+- [BUGFIX] Reorganize insertion logic to prevent foreign key errors and improve order of operations in database when creating/updating plugins (Fixes #3091)
 - [AUTOCONF] Add experimental Gateway API controller support (Gateway/HTTPRoute) and documentation
 - [UI] Change redirect status code from 302 to 303 in the web UI to follow best practices for redirection after form submissions
-- [UI] Fix bug where updating a ban to a custom duration accidentally created a permanent ban
-- [UI] Enhance map legend and color ramp for blocked requests visualization
+- [UI] Fix bug where updating a ban to a custom duration accidentally created a permanent ban (Fixes #3105)
+- [UI] Enhance map legend and color ramp for blocked requests visualization (Fixes #3113)
 - [UI] Enhance dark mode styles for news card elements
 - [UI] Add CIDR annotations support for `FORWARDED_ALLOW_IPS` and `PROXY_ALLOW_IPS` settings and update the default values to common private network ranges
 - [API] Add HTTP/2 support in Gunicorn configuration for improved performance and compatibility
@@ -120,15 +213,15 @@
 
 - [FEATURE] Enhance `Let's Encrypt` plugin to support concurrent certificate generation for multiple services via the new `LETS_ENCRYPT_CONCURRENT_REQUESTS` setting (default: `no`), improving efficiency and reducing wait times during bulk operations
 - [FEATURE] Add `GoDaddy` as a DNS provider in the `letsencrypt` plugin
-- [FEATURE] Add `TransIP` as a DNS provider in the `letsencrypt` plugin
-- [FEATURE] Add `Domeneshop` as a DNS provider in the `letsencrypt` plugin
-- [FEATURE] Add new `KEEP_CONFIG_ON_RESTART` global setting to control whether a temporary configuration should be generated on each restart or preserve the existing one (default: `no`)
-- [BUGFIX] Fix robots.txt and list-based plugins (greylist/whitelist/blacklist/dnsbl) appending duplicate entries on subsequent requests by creating deep copies of internalstore data instead of using shared references
+- [FEATURE] Add `TransIP` as a DNS provider in the `letsencrypt` plugin (Fixes #3070)
+- [FEATURE] Add `Domeneshop` as a DNS provider in the `letsencrypt` plugin (Fixes #3056)
+- [FEATURE] Add new `KEEP_CONFIG_ON_RESTART` global setting to control whether a temporary configuration should be generated on each restart or preserve the existing one (default: `no`) (Fixes #3045)
+- [BUGFIX] Fix robots.txt and list-based plugins (greylist/whitelist/blacklist/dnsbl) appending duplicate entries on subsequent requests by creating deep copies of internalstore data instead of using shared references (Fixes #3012)
 - [LINUX] Enhance Easy Install script to detect if the epel-release should be installed or not for RHEL-family distros
-- [UI] Add security mode in services table
+- [UI] Add security mode in services table (Fixes #3058)
 - [UI] Implement services import functionality with drag-and-drop support
-- [UI] Ensure UI service URL is properly formatted in setup loading route
-- [UI] Enhance Redis report querying with filter parsing and chunked retrieval
+- [UI] Ensure UI service URL is properly formatted in setup loading route (Fixes #3082)
+- [UI] Enhance Redis report querying with filter parsing and chunked retrieval (Fixes #3057)
 - [UI] Update ace editor to version 1.43.5
 - [DEPS] Updated lua-cjson version to v2.1.0.16
 - [CONTRIBUTION] Thank you [rayshoo](https://github.com/rayshoo) for your contribution regarding the `Korean` translation of the web UI.

@@ -42,6 +42,15 @@
         { "id": "503", "label": "503 - Service Unavailable", "value": "503" },
         { "id": "504", "label": "504 - Gateway Timeout", "value": "504" }
       ]
+    },
+    "INTERCEPTED_ERRORS_CLOSE_CONNECTION": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Close the connection (HTTP 444) instead of serving the branded BunkerWeb error page when an upstream or filesystem error is intercepted by BunkerWeb. Useful for full stealth (pair with DENY_HTTP_STATUS=444). Warning: legitimate 404/5xx responses will appear to clients as protocol errors instead of a rendered page.",
+      "id": "intercepted-errors-close-connection",
+      "label": "Close connection on intercepted errors",
+      "regex": "^(yes|no)$",
+      "type": "check"
     }
   }
 }

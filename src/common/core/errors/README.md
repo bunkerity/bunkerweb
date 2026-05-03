@@ -20,10 +20,11 @@ Follow these steps to configure and use the Errors feature:
 
 ### Configuration Settings
 
-| Setting                   | Default                                           | Context   | Multiple | Description                                                                                                                                 |
-| ------------------------- | ------------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ERRORS`                  |                                                   | multisite | no       | **Custom Error Pages:** Map specific error codes to custom HTML files using the format `ERROR_CODE=/path/to/file.html`.                     |
-| `INTERCEPTED_ERROR_CODES` | `400 401 403 404 405 413 429 500 501 502 503 504` | multisite | no       | **Intercepted Errors:** List of HTTP error codes that BunkerWeb should handle with its default error page when no custom page is specified. |
+| Setting                               | Default                                           | Context   | Multiple | Description                                                                                                                                                                                                                           |
+| ------------------------------------- | ------------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ERRORS`                              |                                                   | multisite | no       | **Custom Error Pages:** Map specific error codes to custom HTML files using the format `ERROR_CODE=/path/to/file.html`.                                                                                                               |
+| `INTERCEPTED_ERROR_CODES`             | `400 401 403 404 405 413 429 500 501 502 503 504` | multisite | no       | **Intercepted Errors:** List of HTTP error codes that BunkerWeb should handle with its default error page when no custom page is specified.                                                                                           |
+| `INTERCEPTED_ERRORS_CLOSE_CONNECTION` | `no`                                              | multisite | no       | **Stealth Mode for Intercepted Errors:** When `yes`, close the connection (HTTP 444) instead of the branded BunkerWeb error page on intercepted upstream/filesystem errors. Pair with `DENY_HTTP_STATUS=444` for full stealth mode.   |
 
 !!! tip "Error Page Design"
     The default BunkerWeb error pages are designed to be informative, user-friendly, and professional in appearance. They include:
