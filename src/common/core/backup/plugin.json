@@ -17,12 +17,12 @@
     "BACKUP_SCHEDULE": {
       "context": "global",
       "default": "daily",
-      "help": "The frequency of the backup (daily, weekly or monthly)",
+      "help": "The frequency of the backup. 'hanoi' runs hourly and applies Towers of Hanoi rotation (24 files, ~85 days coverage).",
       "id": "backup-schedule",
       "label": "Backup schedule",
-      "regex": "^(daily|weekly|monthly)$",
+      "regex": "^(daily|weekly|monthly|hanoi)$",
       "type": "select",
-      "select": ["daily", "weekly", "monthly"]
+      "select": ["daily", "weekly", "monthly", "hanoi"]
     },
     "BACKUP_ROTATION": {
       "context": "global",
@@ -41,18 +41,28 @@
       "label": "Backup directory",
       "regex": "^.*$",
       "type": "text"
+    },
+    "BACKUP_IGNORE_CHECKSUM_ERROR_ON_DB_RESTORE": {
+      "context": "global",
+      "default": "no",
+      "help": "If set to 'yes', a failed SHA-256 checksum verification will not abort the restore. Use only as a last resort when the backup file is partially corrupted but you still need to recover data.",
+      "id": "backup-ignore-checksum-error-on-db-restore",
+      "label": "Ignore checksum error on restore",
+      "regex": "^(yes|no)$",
+      "type": "check"
     }
   },
   "jobs": [
     {
       "name": "backup-data",
       "file": "backup-data.py",
-      "every": "day",
+      "every": "hour",
       "reload": false,
       "async": true
     }
   ],
   "bwcli": {
+    "check": "check.py",
     "list": "list.py",
     "save": "save.py",
     "restore": "restore.py"
