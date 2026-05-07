@@ -137,6 +137,13 @@ detect_os() {
         exit 1
     fi
 
+    # Normalize common aliases used by AlmaLinux derivatives.
+    case "$DISTRO_ID" in
+        alma)
+            DISTRO_ID="almalinux"
+            ;;
+    esac
+
     print_status "Detected OS: $DISTRO_ID $DISTRO_VERSION"
 }
 
@@ -705,7 +712,9 @@ show_rhel_database_warning() {
         echo
         echo "This is required for the BunkerWeb Scheduler to connect to your database."
         echo
-        read -p "Press Enter to continue..." -r
+        if [ "$INTERACTIVE_MODE" = "yes" ]; then
+            read -p "Press Enter to continue..." -r
+        fi
     fi
 }
 
@@ -760,10 +769,10 @@ check_supported_os() {
             fi
             NGINX_VERSION="1.28.2"
             ;;
-        "rhel"|"rocky"|"almalinux")
+        "rhel"|"rocky"|"almalinux"|"centos")
             major_version=$(echo "$DISTRO_VERSION" | cut -d. -f1)
             if [[ "$major_version" != "8" && "$major_version" != "9" && "$major_version" != "10" ]]; then
-                print_warning "Only RHEL 8, 9, and 10 are officially supported"
+                print_warning "Only RHEL/CentOS 8, 9, and 10 are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
                     read -p "Continue anyway? (y/N): " -r
                     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -775,7 +784,7 @@ check_supported_os() {
             ;;
         *)
             print_error "Unsupported operating system: $DISTRO_ID"
-            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04, Fedora 42/43, RHEL 8/9/10, FreeBSD 13/14"
+            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04, Fedora 42/43, RHEL/CentOS/Rocky/AlmaLinux 8/9/10, FreeBSD 13/14"
             exit 1
             ;;
     esac
@@ -1270,8 +1279,11 @@ gpgkey=https://nginx.org/keys/nginx_signing.key
 module_hotfixes=true
 EOF
 
+    # Remove existing nginx and conflicting modules before installing new version
+    dnf remove -y nginx nginx-mod-stream nginx-mod-http-image-filter nginx-mod-http-perl nginx-mod-http-xslt-filter nginx-mod-mail 2>/dev/null || true
+
     # Install NGINX
-    run_cmd dnf install -y "nginx-$NGINX_VERSION"
+    run_cmd dnf install -y "nginx-${NGINX_VERSION}"
 
     # Lock NGINX version
     run_cmd dnf versionlock add nginx
@@ -2460,7 +2472,7 @@ main() {
         "fedora")
             install_nginx_fedora
             ;;
-        "rhel"|"rocky"|"almalinux")
+        "rhel"|"rocky"|"almalinux"|"centos")
             install_nginx_rhel
             ;;
         "freebsd")
@@ -2499,7 +2511,7 @@ main() {
         "fedora")
             install_bunkerweb_rpm
             ;;
-        "rhel"|"rocky"|"almalinux")
+        "rhel"|"rocky"|"almalinux"|"centos")
             install_bunkerweb_rpm
             ;;
         "freebsd")
