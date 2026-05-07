@@ -55,6 +55,69 @@ strip_comments() {
   sed -E 's/[[:space:]]+#.*$//; /^[[:space:]]*$/d'
 }
 
+resolve_include_pattern() {
+  local include_pattern="$1"
+  local source_conf="$2"
+  local source_dir
+  source_dir="$(dirname "$source_conf")"
+
+  include_pattern="${include_pattern%\"}"
+  include_pattern="${include_pattern#\"}"
+  include_pattern="${include_pattern%\'}"
+  include_pattern="${include_pattern#\'}"
+
+  if [[ "$include_pattern" = /* ]]; then
+    printf '%s\n' "$include_pattern"
+    return 0
+  fi
+
+  if compgen -G "$source_dir/$include_pattern" >/dev/null 2>&1; then
+    printf '%s\n' "$source_dir/$include_pattern"
+    return 0
+  fi
+
+  printf '%s\n' "$SOURCE_DIR/$include_pattern"
+}
+
+inline_server_includes() {
+  local snippet_file="$1"
+  local source_conf="$2"
+  local expanded_file
+  local include_re
+  expanded_file="${snippet_file}.expanded"
+  include_re='^[[:space:]]*include[[:space:]]+([^;]+)[[:space:]]*;[[:space:]]*$'
+
+  : > "$expanded_file"
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    if [[ "$line" =~ $include_re ]]; then
+      local raw_pattern
+      local resolved_pattern
+      local matched=0
+      raw_pattern="${BASH_REMATCH[1]}"
+      resolved_pattern="$(resolve_include_pattern "$raw_pattern" "$source_conf")"
+
+      while IFS= read -r include_file; do
+        matched=1
+        {
+          echo "# BEGIN included from $include_file"
+          cat "$include_file"
+          echo "# END included from $include_file"
+        } >> "$expanded_file"
+      done < <(compgen -G "$resolved_pattern" || true)
+
+      if [[ "$matched" -eq 0 ]]; then
+        echo "# NOTE: unresolved include preserved for manual migration: include $raw_pattern;" >> "$expanded_file"
+        echo "$line" >> "$expanded_file"
+      fi
+    else
+      echo "$line" >> "$expanded_file"
+    fi
+  done < "$snippet_file"
+
+  mv "$expanded_file" "$snippet_file"
+}
+
 while (($#)); do
   case "$1" in
     --source-dir)
@@ -204,6 +267,8 @@ for block in "$TMP_BLOCK_DIR"/*.conf; do
   safe_name="$(sanitize_name "${first_name:-unnamed-vhost}")"
 
   # Generate starter custom snippet by stripping server wrapper and directives managed by BunkerWeb.
+  snippet_file="$OUTPUT_DIR/snippets/server-http/${safe_name}.conf"
+
   awk '
     BEGIN { depth=0; started=0 }
     {
@@ -234,7 +299,10 @@ for block in "$TMP_BLOCK_DIR"/*.conf; do
         print line
       }
     }
-  ' "$block" > "$OUTPUT_DIR/snippets/server-http/${safe_name}.conf"
+  ' "$block" > "$snippet_file"
+
+  # Inline include files so external bot-control snippets are migrated with the vhost.
+  inline_server_includes "$snippet_file" "$src_file"
 
   echo "\"$src_file\",\"$server_name\",\"$listen_val\",\"$ssl_cert_val\",\"$ssl_key_val\",\"$proxy_pass_val\",\"$root_val\"" >> "$OUTPUT_DIR/reports/vhosts.csv"
 
