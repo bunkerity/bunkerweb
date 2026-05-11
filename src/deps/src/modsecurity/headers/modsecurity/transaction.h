@@ -756,7 +756,7 @@ size_t msc_get_rules_messages_rule_ids(const Transaction *transaction,
     int64_t *ids, size_t ids_len);
 
 /** @ingroup ModSecurity_C_API */
-const char *msc_get_transaction_variable(Transaction *transaction, const char *var_name);
+int msc_get_transaction_variable(Transaction *transaction, const char *var_name, char *buf, size_t *buf_len);
 
 #ifdef __cplusplus
 }
