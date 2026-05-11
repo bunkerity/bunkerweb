@@ -1327,6 +1327,8 @@ static void cp_struct_layout(CPState *cp, CTypeID sid, CTInfo sattr)
 	  ct->info = CTINFO(CT_FIELD, ctype_cid(ct->info));
 	  ct->size = (bofs >> 3);  /* Store field offset. */
 	} else {
+	  if (csz > amask+1 && bsz <= amask+1)
+	    csz = amask+1;  /* Shrink container of packed bitfield. */
 	  ct->info = CTINFO(CT_BITFIELD,
 	    (info & (CTF_QUAL|CTF_UNSIGNED|CTF_BOOL)) +
 	    (csz << (CTSHIFT_BITCSZ-3)) + (bsz << CTSHIFT_BITBSZ));

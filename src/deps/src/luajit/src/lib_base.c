@@ -244,7 +244,9 @@ LJLIB_CF(unpack)
     } else {
       setnilV(L->top++);
     }
-  } while (i++ < e);
+    if (i >= e) break;
+    i++;
+  } while (1);
   return n;
 }
 
