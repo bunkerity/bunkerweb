@@ -12,10 +12,11 @@ Comment ça marche :
 
 ### Comment l’utiliser
 
-1. Activer : `GENERATE_SELF_SIGNED_SSL: yes`.
+1. Activer : mettez le paramètre `GENERATE_SELF_SIGNED_SSL` à `yes`.
 2. Algorithme : choisissez via `SELF_SIGNED_SSL_ALGORITHM`.
 3. Validité : durée en jours via `SELF_SIGNED_SSL_EXPIRY`.
 4. Sujet : champ subject via `SELF_SIGNED_SSL_SUBJ`.
+5. Laisser BunkerWeb faire le reste : une fois configurés, les certificats sont générés et appliqués automatiquement à vos domaines.
 
 !!! tip "Mode stream"
     En mode stream, configurez `LISTEN_STREAM_PORT_SSL` pour définir le port d’écoute SSL/TLS.
@@ -28,6 +29,12 @@ Comment ça marche :
 | `SELF_SIGNED_SSL_ALGORITHM` | `ec-prime256v1`        | multisite | non      | Algorithme : `ec-prime256v1`, `ec-secp384r1`, `rsa-2048`, `rsa-4096`. |
 | `SELF_SIGNED_SSL_EXPIRY`    | `365`                  | multisite | non      | Validité (jours).                                                     |
 | `SELF_SIGNED_SSL_SUBJ`      | `/CN=www.example.com/` | multisite | non      | Sujet du certificat (identifiant le domaine).                         |
+
+!!! tip "Environnements de développement"
+    Les certificats auto-signés conviennent aux environnements de développement et de test où vous pouvez contrôler les certificats de confiance des clients. En production publique, utilisez plutôt une autorité de certification reconnue.
+
+!!! info "Informations du certificat"
+    Le certificat généré inclut les noms de serveur configurés et utilise l’algorithme configuré. Ajustez le sujet du certificat pour refléter le domaine principal.
 
 ### Exemples
 

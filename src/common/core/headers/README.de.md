@@ -1,4 +1,4 @@
-HTTP-Header spielen eine entscheidende Rolle bei der Sicherheit. Das Headers-Plugin bietet eine robuste Verwaltung von Standard- und benutzerdefinierten HTTP-Headern und verbessert so Sicherheit und Funktionalität. Es wendet dynamisch Sicherheitsmaßnahmen an, wie [HSTS](https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Strict-Transport-Security), [CSP](https://developer.mozilla.org/de/docs/Web/HTTP/CSP) (einschließlich eines reinen Berichtsmodus) und die Injektion benutzerdefinierter Header, während es gleichzeitig Informationslecks verhindert.
+HTTP-Header spielen eine entscheidende Rolle bei der Sicherheit. Das Headers-Plugin bietet eine robuste Verwaltung von Standard- und benutzerdefinierten HTTP-Headern und verbessert so Sicherheit und Funktionalität. Es wendet dynamisch Sicherheitsmaßnahmen an, wie [HSTS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security), [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy) (einschließlich eines reinen Berichtsmodus) und die Injektion benutzerdefinierter Header, während es gleichzeitig Informationslecks verhindert.
 
 **Wie es funktioniert**
 
@@ -18,7 +18,7 @@ Führen Sie die folgenden Schritte aus, um die Headers-Funktion zu konfigurieren
 3.  **Unerwünschte Header entfernen:** Verwenden Sie `REMOVE_HEADERS`, um sicherzustellen, dass Header, die Serverdetails preisgeben könnten, entfernt werden.
 4.  **Cookie-Sicherheit einstellen:** Aktivieren Sie eine robuste Cookie-Sicherheit, indem Sie `COOKIE_FLAGS` konfigurieren und `COOKIE_AUTO_SECURE_FLAG` auf `yes` setzen, damit das Secure-Flag bei HTTPS-Verbindungen automatisch hinzugefügt wird.
 5.  **Upstream-Header beibehalten:** Geben Sie mit `KEEP_UPSTREAM_HEADERS` an, welche Upstream-Header beibehalten werden sollen.
-6.  **Bedingte Header-Anwendung nutzen:** Wenn Sie Richtlinien ohne Unterbrechung testen möchten, aktivieren Sie den [CSP Report-Only-Modus](https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Content-Security-Policy-Report-Only) über `CONTENT_SECURITY_POLICY_REPORT_ONLY`.
+6.  **Bedingte Header-Anwendung nutzen:** Wenn Sie Richtlinien ohne Unterbrechung testen möchten, aktivieren Sie den [CSP Report-Only-Modus](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only) über `CONTENT_SECURITY_POLICY_REPORT_ONLY`.
 
 ### Konfigurationsleitfaden
 

@@ -1,19 +1,19 @@
-Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://valkey.io/) in BunkerWeb zur Zwischenspeicherung and für schnellen Datenzugriff. Dies ist unerlässlich in Hochverfügbarkeitsumgebungen, um Sitzungen, Metriken and andere Informationen zwischen mehreren Knoten zu teilen.
+Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://valkey.io/) in BunkerWeb zur Zwischenspeicherung und für schnellen Datenzugriff. Dies ist unerlässlich in Hochverfügbarkeitsumgebungen, um Sitzungen, Metriken und andere Informationen zwischen mehreren Knoten zu teilen.
 
 **Funktionsweise:**
 
 1.  Nach der Aktivierung verbindet sich BunkerWeb mit dem konfigurierten Redis-/Valkey-Server.
 2.  Kritische Daten (Sitzungen, Metriken, Sicherheit) werden dort gespeichert.
 3.  Mehrere Instanzen teilen diese Daten für ein reibungsloses Clustering.
-4.  Unterstützt Standalone-Bereitstellungen, passwortbasierte Authentifizierung, SSL/TLS and Redis Sentinel.
-5.  Automatische Wiederverbindung and konfigurierbare Timeouts sorgen für Robustheit.
+4.  Unterstützt Standalone-Bereitstellungen, passwortbasierte Authentifizierung, SSL/TLS und Redis Sentinel.
+5.  Automatische Wiederverbindung und konfigurierbare Timeouts sorgen für Robustheit.
 
 ### Verwendung
 
-1.  **Aktivieren:** `USE_REDIS: yes`.
-2.  **Verbindung:** Host/IP and Port.
+1.  **Aktivieren:** Setzen Sie den Parameter `USE_REDIS` auf `yes`.
+2.  **Verbindung:** Host/IP und Port.
 3.  **Sicherheit:** Anmeldeinformationen, falls erforderlich.
-4.  **Erweitert:** Datenbank, SSL and Timeouts.
+4.  **Erweitert:** Datenbank, SSL und Timeouts.
 5.  **Hochverfügbarkeit:** Konfigurieren Sie Sentinel, falls verwendet.
 
 ### Parameter

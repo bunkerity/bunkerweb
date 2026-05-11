@@ -10,7 +10,7 @@ Comment ça marche :
 
 ### Comment l’utiliser
 
-1. Activer : `USE_REDIS: yes`.
+1. Activer : mettez le paramètre `USE_REDIS` à `yes`.
 2. Connexion : hôte/IP et port.
 3. Sécurité : identifiants si requis.
 4. Avancé : base, SSL et timeouts.

@@ -12,10 +12,11 @@ So funktioniert's:
 
 ### Verwendung
 
-1.  Aktivieren: `GENERATE_SELF_SIGNED_SSL: yes`.
+1.  Aktivieren: Setzen Sie den Parameter `GENERATE_SELF_SIGNED_SSL` auf `yes`.
 2.  Algorithmus: Wählen Sie über `SELF_SIGNED_SSL_ALGORITHM`.
 3.  Gültigkeit: Dauer in Tagen über `SELF_SIGNED_SSL_EXPIRY`.
 4.  Betreff: Betrefffeld über `SELF_SIGNED_SSL_SUBJ`.
+5.  BunkerWeb den Rest erledigen lassen: Nach der Konfiguration werden Zertifikate automatisch generiert und auf Ihre Domains angewendet.
 
 !!! tip "Stream-Modus"
     Im Stream-Modus konfigurieren Sie `LISTEN_STREAM_PORT_SSL`, um den SSL/TLS-Listening-Port zu definieren.
@@ -28,6 +29,12 @@ So funktioniert's:
 | `SELF_SIGNED_SSL_ALGORITHM` | `ec-prime256v1`        | Multisite | nein     | Algorithmus: `ec-prime256v1`, `ec-secp384r1`, `rsa-2048`, `rsa-4096`. |
 | `SELF_SIGNED_SSL_EXPIRY`    | `365`                  | Multisite | nein     | Gültigkeit (Tage).                                                    |
 | `SELF_SIGNED_SSL_SUBJ`      | `/CN=www.example.com/` | Multisite | nein     | Betreff des Zertifikats (identifiziert die Domain).                   |
+
+!!! tip "Entwicklungsumgebungen"
+    Selbstsignierte Zertifikate eignen sich für Entwicklungs- und Testumgebungen, in denen Sie die vertrauenswürdigen Zertifikate der Clients kontrollieren können. Für öffentliche Produktionsumgebungen sollten Sie eine anerkannte Zertifizierungsstelle verwenden.
+
+!!! info "Zertifikatsinformationen"
+    Das generierte Zertifikat enthält die konfigurierten Servernamen und verwendet den konfigurierten Algorithmus. Passen Sie den Zertifikatsbetreff an, damit er die Hauptdomain widerspiegelt.
 
 ### Beispiele
 
