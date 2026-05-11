@@ -4,7 +4,7 @@ cryptography==48.0.0
 email-validator==2.3.0
 fastapi==0.136.1
 gunicorn[gthread,http2]==25.1.0
-pydantic==2.13.3
+pydantic==2.13.4
 pydantic_settings==2.14.0
 python-multipart==0.0.27
 PyYAML==6.0.3
