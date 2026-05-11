@@ -475,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "选择所有 {{count}} 个匹配的 {{entity}}",
+    "bulk_select_all_done": "所有 {{count}} 个匹配的 {{entity}} 均已选中。",
+    "bulk_select_clear": "清除选择",
+    "bulk_select_page": "此页面上的所有 {{count}} 个 {{entity}} 均已选中。",
     "info_bans": "显示 {{start}} 到 {{end}} 条，共 {{total}} 条封禁",
     "info_cache": "显示 {{start}} 到 {{end}} 条，共 {{total}} 个缓存文件",
     "info_configs": "显示 {{start}} 到 {{end}} 条，共 {{total}} 条自定义配置",

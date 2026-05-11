@@ -1,6 +1,70 @@
 // dataTableInit.js
 
 /**
+ * Escape a single cell value against spreadsheet formula injection (CWE-1236).
+ *
+ * Mirrors the Python ``defusedcsv`` ``_escape`` logic used by the server-side
+ * exports in ``app.utils.csv_writer`` / ``app.utils.csv_safe``: prefix a leading
+ * single quote when the first character is one of ``= + - @ | %`` (and the value
+ * is not a number / numeric-looking string), and additionally backslash-escape
+ * embedded ``|`` characters. ``null``/``undefined`` and numeric values pass
+ * through unchanged.
+ *
+ * Applied globally to every DataTables Buttons CSV / Excel / clipboard export
+ * via the patch immediately below — every ``extend: "csv" | "excel" | "copy"``
+ * button on every page picks this up automatically.
+ *
+ * @param {*} value Raw cell value coming from a DataTables row.
+ * @returns {*} Escaped value safe for CSV / XLSX / clipboard targets.
+ */
+function bwCsvSafe(value) {
+  if (value === null || value === undefined) return value;
+  if (typeof value === "number") return value;
+  let s = String(value);
+  if (s && /^[@+\-=|%]/.test(s) && !/^-?[0-9,.]+$/.test(s)) {
+    s = s.replace(/\|/g, "\\|");
+    s = "'" + s;
+  }
+  return s;
+}
+
+(function patchDataTablesButtonsForFormulaInjection() {
+  if (typeof $ === "undefined" || !$.fn || !$.fn.dataTable) return;
+  const ext = $.fn.dataTable.ext;
+  if (!ext || !ext.buttons) return;
+
+  // Built-in HTML5 export buttons: ``extend: "csv" | "excel" | "copy"`` resolve
+  // to these via DataTables' button alias chain. We patch the per-button
+  // ``action`` instead of ``exportOptions`` defaults because DataTables Buttons'
+  // ``_resolveExtends`` does **not** deep-merge ``exportOptions`` from defaults
+  // when the per-page config supplies its own ``exportOptions`` block, so any
+  // ``format`` we put on the default object gets dropped.
+  //
+  // Wrapping ``action`` lets us mutate the resolved ``config`` immediately
+  // before the export pipeline runs, which is the same call site every export
+  // button (CSV / Excel / clipboard copy) goes through. The mutation is
+  // idempotent because reassigning ``format.body`` to the same ``bwCsvSafe``
+  // reference is a no-op on subsequent clicks.
+  ["csvHtml5", "excelHtml5", "copyHtml5"].forEach(function (name) {
+    const btn = ext.buttons[name];
+    if (!btn || typeof btn.action !== "function" || btn.__bwCsvSafePatched)
+      return;
+    const origAction = btn.action;
+    btn.action = function (e, dt, button, config) {
+      config = config || {};
+      config.exportOptions = config.exportOptions || {};
+      config.exportOptions.format = $.extend(
+        {},
+        config.exportOptions.format || {},
+        { body: bwCsvSafe, header: bwCsvSafe, footer: bwCsvSafe },
+      );
+      return origAction.call(this, e, dt, button, config);
+    };
+    btn.__bwCsvSafePatched = true;
+  });
+})();
+
+/**
  * Initialize a DataTable with i18n and user preferences.
  * @param {Object} config - Configuration object for the DataTable.
  * @returns {DataTable} - The initialized DataTable instance.

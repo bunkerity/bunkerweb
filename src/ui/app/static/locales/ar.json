@@ -475,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "تحديد كل {{count}} {{entity}} المطابقة",
+    "bulk_select_all_done": "تم تحديد كل {{count}} {{entity}} المطابقة.",
+    "bulk_select_clear": "مسح التحديد",
+    "bulk_select_page": "تم تحديد كل {{count}} {{entity}} في هذه الصفحة.",
     "info_bans": "عرض {{start}} إلى {{end}} من أصل {{total}} حظر",
     "info_cache": "عرض {{start}} إلى {{end}} من أصل {{total}} ملفات ذاكرة مؤقتة",
     "info_configs": "عرض {{start}} إلى {{end}} من أصل {{total}} تكوينات مخصصة",

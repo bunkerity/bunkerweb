@@ -2,6 +2,7 @@
 
 ## v1.6.10 - 2026/??/??
 
+- [SECURITY] `ui`: neutralize CSV/XLSX formula injection (CWE-1236) in bans and reports exports. Server-side CSV now goes through `defusedcsv` (new pinned dep) and a shared `csv_safe()` helper escapes openpyxl XLSX cells; client-side DataTables `csv`/`excel`/`copy` buttons inherit the same rule via a global `bwCsvSafe` hook in `dataTableInit.js`. Cells whose first character is `= + - @ | %` are prefixed with `'`, and embedded `|` is backslash-escaped.
 - [UI] List pages: unrestricted `10/25/50/100` page-size dropdown, header checkbox selects current page only, with opt-in "Select all N matching" banner so bulk actions cover every page. (Fixes #3513)
 
 ## v1.6.10~rc6 - 2026/05/07

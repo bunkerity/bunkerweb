@@ -11,6 +11,7 @@ from typing import Any, Dict, FrozenSet, Optional, Set, Union
 from urllib.parse import unquote
 
 from bcrypt import checkpw, gensalt, hashpw
+from defusedcsv.csv import _escape as _defusedcsv_escape, writer as _defusedcsv_writer
 from flask import flash as flask_flash, session
 from regex import compile as re_compile, match
 from requests import get
@@ -368,3 +369,19 @@ def _sanitize_internal_next(next_url, default):
     if any(ord(c) < 32 for c in decoded):
         raise ValueError("control chars not allowed")
     return decoded or default
+
+
+def csv_writer(csvfile, *args, **kwargs):
+    """Return a ``defusedcsv`` writer that escapes spreadsheet formula payloads (CWE-1236).
+
+    Use this for all UI CSV exports instead of ``csv.writer``.
+    """
+    return _defusedcsv_writer(csvfile, *args, **kwargs)
+
+
+def csv_safe(value: Any) -> Any:
+    """Escape one cell value with ``defusedcsv`` formula-injection protection (CWE-1236).
+
+    Use this for user-controlled values written through openpyxl.
+    """
+    return _defusedcsv_escape(value)
