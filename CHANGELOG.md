@@ -3,6 +3,10 @@
 ## v1.6.10 - 2026/??/??
 
 - [SECURITY] `ui`: neutralize CSV/XLSX formula injection (CWE-1236) in bans and reports exports. Server-side CSV now goes through `defusedcsv` (new pinned dep) and a shared `csv_safe()` helper escapes openpyxl XLSX cells; client-side DataTables `csv`/`excel`/`copy` buttons inherit the same rule via a global `bwCsvSafe` hook in `dataTableInit.js`. Cells whose first character is `= + - @ | %` are prefixed with `'`, and embedded `|` is backslash-escaped.
+- [BUGFIX] `metrics`: bound per-worker LRU and per-key event-history arrays via new `MAX_LRU_HISTORY` setting (default `1k`) to close OSS RAM leak under high-cardinality block traffic.
+- [BUGFIX] `metrics`: lower `METRICS_MAX_BLOCKED_REQUESTS_REDIS` default `100000` → `10k`.
+- [BUGFIX] `datastore`: lower shared worker-LRU default `100000` → `1k`, configurable via new `DATASTORE_LRU_SIZE` global setting.
+- [FEATURE] `metrics`/`misc`: `METRICS_MAX_BLOCKED_REQUESTS`, `METRICS_MAX_BLOCKED_REQUESTS_REDIS`, `MAX_LRU_HISTORY`, and `DATASTORE_LRU_SIZE` accept `k`/`m` shorthand.
 - [UI] List pages: unrestricted `10/25/50/100` page-size dropdown, header checkbox selects current page only, with opt-in "Select all N matching" banner so bulk actions cover every page. (Fixes #3513)
 
 ## v1.6.10~rc6 - 2026/05/07
