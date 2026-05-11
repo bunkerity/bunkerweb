@@ -10,6 +10,7 @@
 - [UI] List pages: unrestricted `10/25/50/100` page-size dropdown, header checkbox selects current page only, with opt-in "Select all N matching" banner so bulk actions cover every page. (Fixes #3513)
 - [DEPS] Updated LuaJIT version to v2.1-20260415
 - [DEPS] Updated lua-resty-string version to v0.17
+- [DEPS] Updated lua-cjson version to v2.1.0.17
 
 ## v1.6.10~rc6 - 2026/05/07
 
