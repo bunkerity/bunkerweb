@@ -20,7 +20,6 @@ CUSTOM_CONFIGS_TYPES_ENUM = Enum(
     "server_http",
     "server_stream",
     "default_server_http",
-    "default_server_stream",
     "modsec",
     "modsec_crs",
     "crs_plugins_before",

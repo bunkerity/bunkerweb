@@ -58,7 +58,6 @@ CUSTOM_CONFIGS_DIRS = (
     "server-http",
     "server-stream",
     "default-server-http",
-    "default-server-stream",
     "modsec",
     "modsec-crs",
     "crs-plugins-before",
