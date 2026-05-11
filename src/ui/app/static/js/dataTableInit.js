@@ -545,8 +545,20 @@ function initializeDataTable(config) {
   // so by default it selects only rows on the current page. When more matching rows
   // exist on other pages, surface a banner that lets the user opt-in to selecting
   // the entire filtered set — and, once opted in, opt out via "Clear selection".
+  //
+  // Skipped for `serverSide: true` tables (bans, reports): DataTables only holds
+  // the current page client-side, so `rows({ search: "applied" }).select()` would
+  // not actually select off-page rows. A correct cross-page bulk action on a
+  // server-side table requires submitting the active filter to the server-side
+  // endpoint instead of an explicit row-id list — out of scope for this banner.
+  const isServerSide = !!(
+    dataTable.settings &&
+    dataTable.settings()[0] &&
+    dataTable.settings()[0].oFeatures &&
+    dataTable.settings()[0].oFeatures.bServerSide
+  );
   const $tableWrapper = $(`#${tableName}_wrapper`);
-  if ($tableWrapper.length) {
+  if ($tableWrapper.length && !isServerSide) {
     const $bulkBanner = $(
       '<div class="dt-bulk-select-banner alert alert-primary py-2 px-3 mb-2 d-none align-items-center" role="status">' +
         '<i class="bx bx-info-circle me-2" aria-hidden="true"></i>' +
@@ -648,7 +660,25 @@ function initializeDataTable(config) {
       }
     });
 
-    const scheduleBulkBannerUpdate = () => setTimeout(updateBulkBanner, 0);
+    // Coalesce updates: bulk select operations (e.g.
+    // `dataTable.rows({ search: "applied" }).select()` on a 5k-row table) emit
+    // one `select` event per row. Without batching we'd run `updateBulkBanner`
+    // 5k times in a single tick. A single pending flag plus rAF collapses the
+    // burst to one render per frame.
+    let bulkBannerPending = false;
+    const scheduleBulkBannerUpdate = () => {
+      if (bulkBannerPending) return;
+      bulkBannerPending = true;
+      const flush = () => {
+        bulkBannerPending = false;
+        updateBulkBanner();
+      };
+      if (typeof window.requestAnimationFrame === "function") {
+        window.requestAnimationFrame(flush);
+      } else {
+        setTimeout(flush, 0);
+      }
+    };
     dataTable.on(
       "select deselect draw page length search",
       scheduleBulkBannerUpdate,

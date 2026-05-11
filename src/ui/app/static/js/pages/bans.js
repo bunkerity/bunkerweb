@@ -745,39 +745,45 @@ $(document).ready(function () {
 
   const getSelectedBans = () => {
     const bans = [];
-    $("tr.selected").each(function () {
-      const $row = $(this);
-      const ip = $row.find("td:eq(3)").text().trim();
-      const time_remaining = $row.find("td:eq(9)").text().trim();
-      const scopeHtml = $row.find("td:eq(6)").html();
-      const serviceHtml = $row.find("td:eq(7)").html();
+    if (!$.fn.dataTable.isDataTable("#bans")) return bans;
+    $("#bans")
+      .DataTable()
+      .rows({ selected: true })
+      .nodes()
+      .to$()
+      .each(function () {
+        const $row = $(this);
+        const ip = $row.find("td:eq(3)").text().trim();
+        const time_remaining = $row.find("td:eq(9)").text().trim();
+        const scopeHtml = $row.find("td:eq(6)").html();
+        const serviceHtml = $row.find("td:eq(7)").html();
 
-      // Extract scope text, handling potential badge structure
-      const scopeText = $(scopeHtml).find("span[data-i18n]").length
-        ? $(scopeHtml).find("span[data-i18n]").text().trim()
-        : $(scopeHtml).text().trim();
+        // Extract scope text, handling potential badge structure
+        const scopeText = $(scopeHtml).find("span[data-i18n]").length
+          ? $(scopeHtml).find("span[data-i18n]").text().trim()
+          : $(scopeHtml).text().trim();
 
-      // Extract service text, handling potential links or static text
-      const serviceText = $(serviceHtml).find("strong").length
-        ? $(serviceHtml).find("strong").text().trim()
-        : $(serviceHtml).find("span[data-i18n]").length
-          ? $(serviceHtml).find("span[data-i18n]").text().trim()
-          : $(serviceHtml).text().trim();
+        // Extract service text, handling potential links or static text
+        const serviceText = $(serviceHtml).find("strong").length
+          ? $(serviceHtml).find("strong").text().trim()
+          : $(serviceHtml).find("span[data-i18n]").length
+            ? $(serviceHtml).find("span[data-i18n]").text().trim()
+            : $(serviceHtml).text().trim();
 
-      const ban_scope =
-        scopeText === t("scope.global", "Global") ? "global" : "service";
-      const service =
-        serviceText === t("scope.all_services", "All services")
-          ? null
-          : serviceText;
+        const ban_scope =
+          scopeText === t("scope.global", "Global") ? "global" : "service";
+        const service =
+          serviceText === t("scope.all_services", "All services")
+            ? null
+            : serviceText;
 
-      bans.push({
-        ip: ip,
-        time_remaining: time_remaining,
-        ban_scope: ban_scope,
-        service: service,
+        bans.push({
+          ip: ip,
+          time_remaining: time_remaining,
+          ban_scope: ban_scope,
+          service: service,
+        });
       });
-    });
     return bans;
   };
 

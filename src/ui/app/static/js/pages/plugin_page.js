@@ -87,18 +87,9 @@
       };
 
       if (tableLength > 10) {
-        const menu = [10];
-        if (tableLength > 25) {
-          menu.push(25);
-        }
-        if (tableLength > 50) {
-          menu.push(50);
-        }
-        if (tableLength > 100) {
-          menu.push(100);
-        }
-        if (tableLength > 500) menu.push(500);
-        if (tableLength > 1000) menu.push(1000);
+        const menu = [10, 25, 50, 100];
+        if (tableLength > 100) menu.push(500);
+        if (tableLength > 500) menu.push(1000);
         layout.topStart.pageLength = {
           menu: menu,
         };
