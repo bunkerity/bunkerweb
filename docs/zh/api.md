@@ -108,7 +108,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:

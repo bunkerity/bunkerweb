@@ -108,7 +108,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:

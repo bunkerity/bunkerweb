@@ -165,7 +165,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
     ```
 
     恢复码在 UI 中仅显示一次；若丢失加密密钥，将清除已存的 TOTP 秘钥。
-- 会话：默认 12 小时（`SESSION_LIFETIME_HOURS`）。绑定 IP 与 User-Agent；`CHECK_PRIVATE_IP=no` 仅对私网放宽 IP 检查。`ALWAYS_REMEMBER=yes` 始终启用持久 Cookie。
+- 会话：默认空闲时长 12 小时（`SESSION_LIFETIME_HOURS`），每次请求刷新。`SESSION_ABSOLUTE_HOURS`（默认 `168` = 7 天）设定绝对上限——无论是否活跃，超过即强制登出。可选的会话 ID 轮换（`SESSION_ROLLING_HOURS`，默认 `0` = 关闭）按该间隔重新生成会话 ID。会话绑定 IP 与 User-Agent；`CHECK_PRIVATE_IP=no` 仅对私网放宽 IP 检查。`ALWAYS_REMEMBER=yes` 始终启用持久 Cookie。
 - 若多级代理附加 `X-Forwarded-*`，请设置 `PROXY_NUMBERS`。
 
 ## 配置来源与优先级
@@ -205,7 +205,9 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 | `FLASK_SECRET`                              | 会话签名密钥（存于 `/var/lib/bunkerweb/.flask_secret`） | 十六进制/Base64/不透明字符串 | 自动生成       |
 | `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | TOTP 秘钥加密键（空格或 JSON）                          | 字符串 / JSON                | 缺失时自动生成 |
 | `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Biscuit 密钥（hex），用于 UI token                      | Hex 字符串                   | 自动生成并存储 |
-| `SESSION_LIFETIME_HOURS`                    | 会话时长                                                | 数值（小时）                 | `12`           |
+| `SESSION_LIFETIME_HOURS`                    | 会话空闲时长（滑动 TTL，每次请求刷新）                  | 数值（小时）                 | `12`           |
+| `SESSION_ABSOLUTE_HOURS`                    | 与活动无关的绝对会话上限                                | 数值（小时）                 | `168`          |
+| `SESSION_ROLLING_HOURS`                     | 会话 ID 轮换间隔（`0` 关闭轮换）                        | 数值（小时）                 | `0`            |
 | `ALWAYS_REMEMBER`                           | 总是启用 “remember me”                                  | `yes` 或 `no`                | `no`           |
 | `CHECK_PRIVATE_IP`                          | 绑定会话到 IP（`no` 时放宽私网变更）                    | `yes` 或 `no`                | `yes`          |
 | `PROXY_NUMBERS`                             | 信任的 `X-Forwarded-*` 代理层数                         | 整数                         | `1`            |

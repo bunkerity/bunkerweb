@@ -165,7 +165,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
     ```
 
     Los códigos de recuperación se muestran una sola vez; si pierdes las llaves de cifrado, se eliminan los secretos TOTP almacenados.
-- Sesiones: duración por defecto 12 h (`SESSION_LIFETIME_HOURS`). Sesiones fijadas a IP y User-Agent; `CHECK_PRIVATE_IP=no` relaja el control de IP solo en rangos privados. `ALWAYS_REMEMBER=yes` fuerza cookies persistentes.
+- Sesiones: duración de inactividad por defecto 12 h (`SESSION_LIFETIME_HOURS`), refrescada en cada petición. Se aplica un límite absoluto vía `SESSION_ABSOLUTE_HOURS` (por defecto `168` = 7 días) — superado ese tiempo, los usuarios son desconectados aunque sigan activos. Rotación opcional del identificador de sesión (`SESSION_ROLLING_HOURS`, por defecto `0` = deshabilitada) regenera el ID de sesión en ese intervalo. Sesiones fijadas a IP y User-Agent; `CHECK_PRIVATE_IP=no` relaja el control de IP solo en rangos privados. `ALWAYS_REMEMBER=yes` fuerza cookies persistentes.
 - Ajusta `PROXY_NUMBERS` si varios proxies añaden `X-Forwarded-*`.
 
 ## Fuentes de configuración y prioridad
@@ -205,7 +205,9 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 | `FLASK_SECRET`                              | Secreto de firma de sesión (persistido en `/var/lib/bunkerweb/.flask_secret`) | Cadena hex/base64/opaca | generado automáticamente  |
 | `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | Claves para cifrar TOTP (espacio o JSON)                                      | Cadenas / JSON          | generadas si faltan       |
 | `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Claves Biscuit (hex) para tokens de UI                                        | Cadenas hex             | autogeneradas y guardadas |
-| `SESSION_LIFETIME_HOURS`                    | Duración de sesión                                                            | Número (horas)          | `12`                      |
+| `SESSION_LIFETIME_HOURS`                    | Duración de inactividad de sesión (TTL deslizante, refrescada por petición)   | Número (horas)          | `12`                      |
+| `SESSION_ABSOLUTE_HOURS`                    | Límite absoluto de sesión independiente de la actividad                       | Número (horas)          | `168`                     |
+| `SESSION_ROLLING_HOURS`                     | Intervalo de rotación del ID de sesión (`0` deshabilita la rotación)          | Número (horas)          | `0`                       |
 | `ALWAYS_REMEMBER`                           | Activar siempre “remember me”                                                 | `yes` o `no`            | `no`                      |
 | `CHECK_PRIVATE_IP`                          | Ligar sesión a IP (relaja en redes privadas con `no`)                         | `yes` o `no`            | `yes`                     |
 | `PROXY_NUMBERS`                             | Saltos de proxy confiables para `X-Forwarded-*`                               | Entero                  | `1`                       |
