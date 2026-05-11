@@ -48,7 +48,10 @@
 
     
     
-    <script async defer data-domain="docs.bunkerweb.io" src="https://data.bunkerity.com/js/script.js"></script>
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', (e) => {
@@ -63,7 +66,7 @@
       })
     </script>
 
-    <script src="../../assets/external/cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
 
     <script defer>
   // Lazy load images and embed youtube videos
@@ -83,8 +86,8 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#services">professional services</a>.</p>'},
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
 
@@ -203,7 +206,9 @@
             
             
     📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
-    <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc" style="color: #3f6ec6;&#10;              text-decoration: underline">BunkerWeb Panel</a>
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
     for more information on our enterprise offers.
 
           </div>
@@ -3092,6 +3097,10 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <li>它仅监听容器的回环接口，因此只能被容器内部的进程访问，其他容器或宿主机无法直接访问。</li>
 <li>仅当你已经准备好外部 Redis/Valkey 终端时才覆盖 <code>REDIS_HOST</code>，否则内置实例将不会启动。</li>
 <li>若要完全禁用 Redis，请设置 <code>USE_REDIS=no</code>。</li>
+<li><strong>配置优先级（重要）：</strong> 内置 Redis 从 <code>/var/lib/bunkerweb/redis-runtime.conf</code> 启动，该文件在启动时通过复制 <code>/etc/redis.conf</code> 并<strong>仅为配置文件未指定的指令</strong>追加环境变量驱动的默认值生成。因此挂载的自定义 <code>/etc/redis.conf</code> 始终优先；下列环境变量仅用于填补缺失。</li>
+<li><strong>内存调优：</strong> 默认值遵循 <a href="../features/#redis-best-practices">Redis 最佳实践</a>——<code>maxmemory 256mb</code> 与 <code>maxmemory-policy volatile-lru</code>。当配置文件未固定这些值时，可通过 <code>REDIS_MAXMEMORY</code> 和 <code>REDIS_MAXMEMORY_POLICY</code> 覆盖。</li>
+<li><strong>持久化覆盖：</strong> <code>REDIS_APPENDONLY=yes|no</code> 切换 AOF（默认 <code>yes</code>）；RDB 快照通过 <code>REDIS_SAVE</code> 以及可选的 <code>REDIS_SAVE_0</code>、<code>REDIS_SAVE_1</code>、…… 配置，每个变量提供一对 <code>save &lt;秒&gt; &lt;变更&gt;</code>（例如 <code>REDIS_SAVE_0="900 1"</code>、<code>REDIS_SAVE_1="300 10"</code>）。一旦设置其中任意一个，就会替换内置的 <code>900 1 / 300 10 / 60 10000</code> 默认集；空值会写出 <code>save ""</code>，禁用 RDB。当配置文件自身已声明 <code>save</code> 时忽略。</li>
+<li><strong>认证：</strong> 当 <code>REDIS_PASSWORD</code> 被设置且配置文件尚未定义 <code>requirepass</code> 时，内置 Redis 将以 <code>requirepass</code> 启动，使 BunkerWeb 客户端和服务端保持一致。内置服务端仅支持默认用户——仅当连接启用 ACL 的外部 Redis 时才设置 <code>REDIS_USERNAME</code>。</li>
 <li>Redis 日志在 Docker 日志和 <code>/var/log/bunkerweb/redis.log</code> 中以 <code>[REDIS]</code> 前缀出现。</li>
 </ul>
 <h3 id="crowdsec-integration">CrowdSec 集成</h3>
@@ -6675,12 +6684,12 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 要部署虚拟机，您需要 Microsoft.Compute/virtualMachines/write 和 Microsoft.Resources/deployments/* 权限。what-if 操作具有相同的权限要求。</p>
 </div>
 <p>部署 ARM 模板：</p>
-<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fbunkerity%2Fbunkerweb%2Fmaster%2Fmisc%2Fintegrations%2Fazure-arm-template.json" target="_blank" rel="noopener"><img alt="部署到 Azure" src="../../assets/img/integration-azure-deploy.svg" /></a></p>
+<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fbunkerity%2Fbunkerweb%2Fmaster%2Fmisc%2Fintegrations%2Fazure-arm-template.json" target="_blank"><img alt="部署到 Azure" src="../../assets/img/integration-azure-deploy.svg" /></a></p>
 </div>
 <div class="tabbed-block">
-<p>登录到 <a href="https://portal.azure.com" target="_blank" rel="noopener">Azure 门户</a>。</p>
-<p>从<a href="https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/bunkerity.bunkerweb" target="_blank" rel="noopener">创建资源菜单</a>获取 BunkerWeb。</p>
-<p>您也可以通过 <a href="https://azuremarketplace.microsoft.com/fr-fr/marketplace/apps/bunkerity.bunkerweb?tab=Overview" target="_blank" rel="noopener">Marketplace</a>。</p>
+<p>登录到 <a href="https://portal.azure.com" target="_blank">Azure 门户</a>。</p>
+<p>从<a href="https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/bunkerity.bunkerweb" target="_blank">创建资源菜单</a>获取 BunkerWeb。</p>
+<p>您也可以通过 <a href="https://azuremarketplace.microsoft.com/fr-fr/marketplace/apps/bunkerity.bunkerweb?tab=Overview" target="_blank">Marketplace</a>。</p>
 </div>
 </div>
 </div>

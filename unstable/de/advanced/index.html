@@ -48,7 +48,10 @@
 
     
     
-    <script async defer data-domain="docs.bunkerweb.io" src="https://data.bunkerity.com/js/script.js"></script>
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', (e) => {
@@ -63,7 +66,7 @@
       })
     </script>
 
-    <script src="../../assets/external/cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
 
     <script defer>
   // Lazy load images and embed youtube videos
@@ -83,8 +86,8 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#services">professional services</a>.</p>'},
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
 
@@ -203,7 +206,9 @@
             
             
     📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
-    <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc" style="color: #3f6ec6;&#10;              text-decoration: underline">BunkerWeb Panel</a>
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
     for more information on our enterprise offers.
 
           </div>
@@ -3012,7 +3017,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
 <span class="w">      </span><span class="no">redis-server</span>
 <span class="w">      </span><span class="no">--maxmemory 256mb</span>
-<span class="w">      </span><span class="no">--maxmemory-policy allkeys-lru</span>
+<span class="w">      </span><span class="no">--maxmemory-policy volatile-lru</span>
 <span class="w">      </span><span class="no">--save 60 1000</span>
 <span class="w">      </span><span class="no">--appendonly yes</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
@@ -4867,7 +4872,7 @@ LOG_LEVEL_1=error
 <span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
 <span class="w">      </span><span class="no">redis-server</span>
 <span class="w">      </span><span class="no">--maxmemory 256mb</span>
-<span class="w">      </span><span class="no">--maxmemory-policy allkeys-lru</span>
+<span class="w">      </span><span class="no">--maxmemory-policy volatile-lru</span>
 <span class="w">      </span><span class="no">--save 60 1000</span>
 <span class="w">      </span><span class="no">--appendonly yes</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
@@ -5150,7 +5155,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 <h2 id="uberwachung-und-berichterstattung">Überwachung und Berichterstattung</h2>
 <h3 id="uberwachung-pro">Überwachung <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Das Überwachungs-Plugin ermöglicht es Ihnen, Metriken über BunkerWeb zu sammeln und abzurufen. Durch die Aktivierung beginnen Ihre Instanz(en), verschiedene Daten zu Angriffen, Anfragen und Leistung zu sammeln. Sie können sie dann durch Aufrufen des API-Endpunkts <code>/monitoring</code> regelmäßig abrufen oder andere Plugins wie den Prometheus-Exporter verwenden.</p>
 <p><strong>Liste der Funktionen</strong></p>
 <ul>
@@ -5195,7 +5200,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tbody>
 </table>
 <h3 id="prometheus-exporter-pro">Prometheus-Exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Das Prometheus-Exporter-Plugin fügt einen <a href="https://prometheus.io/docs/instrumenting/exporters/">Prometheus-Exporter</a> zu Ihrer/n BunkerWeb-Instanz(en) hinzu. Wenn aktiviert, können Sie Ihre Prometheus-Instanz(en) so konfigurieren, dass sie einen bestimmten Endpunkt auf BunkerWeb abrufen und interne Metriken sammeln.</p>
 <p>Wir stellen auch ein <a href="https://grafana.com/grafana/dashboards/20755-bunkerweb/">Grafana-Dashboard</a> zur Verfügung, das Sie in Ihre eigene Instanz importieren und mit Ihrer eigenen Prometheus-Datenquelle verbinden können.</p>
 <p><strong>Bitte beachten Sie, dass die Verwendung des Prometheus-Exporter-Plugins die Aktivierung des Überwachungs-Plugins erfordert (<code>USE_MONITORING=yes</code>)</strong></p>
@@ -5255,7 +5260,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tbody>
 </table>
 <h3 id="berichterstattung-pro">Berichterstattung <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <div class="admonition warning">
 <p class="admonition-title">Überwachungs-Plugin erforderlich</p>
 <p>Dieses Plugin erfordert, dass das Monitoring Pro-Plugin installiert und mit der Einstellung <code>USE_MONITORING</code> auf <code>yes</code> gesetzt ist.</p>
@@ -5364,7 +5369,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 <h2 id="sicherung-und-wiederherstellung">Sicherung und Wiederherstellung</h2>
 <h3 id="sicherung-s3-pro">Sicherung S3 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Das Backup S3-Tool automatisiert nahtlos den Datenschutz, ähnlich dem Community-Backup-Plugin. Es zeichnet sich jedoch dadurch aus, dass es Backups direkt und sicher in einem S3-Bucket speichert.</p>
 <p>Durch die Aktivierung dieser Funktion schützen Sie proaktiv die <strong>Integrität Ihrer Daten</strong>. Das Speichern von Backups <strong>remote</strong> schützt wichtige Informationen vor Bedrohungen wie <strong>Hardwareausfällen</strong>, <strong>Cyberangriffen</strong> oder <strong>Naturkatastrophen</strong>. Dies gewährleistet sowohl <strong>Sicherheit</strong> als auch <strong>Verfügbarkeit</strong>, ermöglicht eine schnelle Wiederherstellung bei <strong>unerwarteten Ereignissen</strong>, bewahrt die <strong>betriebliche Kontinuität</strong> und sorgt für <strong>Sorgenfreiheit</strong>.</p>
 <details class="warning">
@@ -5712,7 +5717,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </div>
 <p>Die vollständige Dokumentation finden Sie im <a href="https://github.com/bunkerity/mcp-bunkerweb">BunkerWeb MCP Repository</a>.</p>
 <h2 id="migration-pro">Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Das Migrations-Plugin <strong>revolutioniert</strong> die Übertragung von BunkerWeb-Konfigurationen zwischen Instanzen mit seiner <strong>benutzerfreundlichen Weboberfläche</strong>, die den gesamten Migrationsprozess vereinfacht. Ob Sie Systeme aufrüsten, die Infrastruktur skalieren oder Umgebungen wechseln, dieses Tool ermöglicht es Ihnen, <strong>Einstellungen, Präferenzen und Daten</strong> mühelos und mit unübertroffener Leichtigkeit und Zuversicht zu übertragen. Verabschieden Sie sich von umständlichen manuellen Prozessen und begrüßen Sie ein <strong>nahtloses, problemloses Migrationserlebnis</strong>.</p>
 <p><strong>Liste der Funktionen</strong></p>
 <ul>
@@ -5819,7 +5824,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </div>
 <p>Dieser Befehl migriert Ihre BunkerWeb-Daten nahtlos, um genau der in der Migrationsdatei beschriebenen Konfiguration zu entsprechen.</p>
 <h2 id="anti-ddos-pro">Anti-DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Das <strong>Anti-DDoS</strong>-Plugin bietet fortschrittlichen Schutz gegen Distributed Denial of Service (DDoS)-Angriffe, indem es verdächtigen Verkehr in Echtzeit überwacht, analysiert und filtert.</p>
 <p>Durch die Verwendung eines <strong>gleitenden Fenstermechanismus</strong> unterhält das Plugin ein In-Memory-Wörterbuch mit Zeitstempeln von Anfragen, um anormale Verkehrsspitzen von einzelnen IP-Adressen zu erkennen. Basierend auf dem konfigurierten Sicherheitsmodus kann es entweder die beleidigenden Verbindungen blockieren oder die verdächtige Aktivität zur weiteren Überprüfung protokollieren.</p>
 <h3 id="funktionen_1">Funktionen</h3>
@@ -5896,7 +5901,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <li><strong>Überwachung:</strong> Analysieren Sie Protokolle und Metriken regelmäßig, um die Einstellungen zu optimieren und den Gesamtschutz zu verbessern.</li>
 </ul>
 <h2 id="user-manager-pro">User Manager <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="User Manager" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
@@ -5948,7 +5953,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <figcaption>User Manager - Aktivitätenseite</figcaption>
 </figure>
 <h2 id="ui-single-sign-on-pro">UI Single Sign-On <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Das <strong>UI Single Sign-On</strong> Plugin ermöglicht SSO-Authentifizierung für die BunkerWeb-Weboberfläche, indem es Header liest, die von einem vorgeschalteten Authentifizierungs-Proxy (wie Authentik, Authelia, Keycloak oder Traefik Forward Auth) gesetzt werden.</p>
 <p>Anstatt separate Zugangsdaten für BunkerWeb zu verwalten, können Administratoren die Authentifizierung an einen bestehenden Identity Provider delegieren. Der Authentifizierungs-Proxy übernimmt die Benutzeranmeldung und injiziert Identity-Header, bevor er Anfragen an die BunkerWeb-Weboberfläche weiterleitet.</p>
 <div class="admonition danger">
@@ -7270,7 +7275,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><strong>Multi-Instance-Deployments</strong>: <code>USE_REDIS=yes</code> aktivieren und <code>REDIS_HOST</code> (oder Sentinel) konfigurieren, damit Sessions geteilt werden.</li>
 </ul>
 <h2 id="ldap-sso-pro">LDAP SSO <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Das <strong>LDAP SSO</strong> Plugin fügt LDAP-basiertes Single Sign-On zu Ihren BunkerWeb-Diensten hinzu. Es stellt ein Login-Formular bereit, authentifiziert Benutzer gegen ein LDAP-Verzeichnis, erstellt eine Session und leitet optional den authentifizierten Benutzernamen über einen konfigurierbaren Header an Ihren Upstream weiter.</p>
 <p>Das Plugin unterstützt zwei Authentifizierungsmodi:</p>
 <ul>
@@ -7715,7 +7720,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><code>OPENAPI_ALLOW_UNSPECIFIED=yes</code></li>
 </ul>
 <h2 id="cache-pro">Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Das Cache-PRO-Plugin aktiviert das Caching von Antworten auf Reverse-Proxy-Ebene mithilfe der NGINX-Direktiven <code>proxy_cache*</code>. Es ist nützlich, um wiederholte Zugriffe auf cachebare Inhalte abzufangen, Upstreams bei Lastspitzen zu entlasten und bei kurzen Backend-Ausfällen veraltete Inhalte auszuliefern.</p>
 <p><strong>Funktionsweise</strong></p>
 <ol>
@@ -7895,7 +7900,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 </ul>
 </div>
 <h2 id="acme">ACME <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Das <strong>ACME</strong> Plugin bietet erweiterte Zertifikatsverwaltung über das ACME-Protokoll mit Unterstützung für benutzerdefinierte Certificate Authorities (Step CA, Vault PKI, Sectigo, Google Trust Services usw.). Es ergänzt das integrierte Let's Encrypt Plugin um benutzerdefinierte CA-Unterstützung, DNS-01- und TLS-ALPN-01-Challenges, Wildcard-Zertifikate, Zertifikatsüberwachung mit Ablaufwarnungen, Certificate Transparency Log-Überwachung und erweitertes OCSP-Stapling.</p>
 <div class="admonition tip">
 <p class="admonition-title">Wann ACME statt des integrierten Let's Encrypt Plugins verwenden</p>
@@ -8355,7 +8360,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <li><strong>Zertifikat wird nicht erneuert</strong>: Überprüfen Sie <code>ACME_RENEWAL_DAYS</code> und die Scheduler-Logs. Der Job <code>acme-renew</code> läuft täglich und erneuert Zertifikate, die innerhalb des konfigurierten Schwellenwerts liegen.</li>
 </ul>
 <h2 id="wildcard-pro">Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Das <strong>Wildcard</strong>-Plugin ermöglicht es einem einzelnen BunkerWeb-Dienst, auf Folgendes zu antworten:</p>
 <ul>
 <li>seinen exakten Hostnamen</li>

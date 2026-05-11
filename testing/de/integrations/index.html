@@ -48,7 +48,10 @@
 
     
     
-    <script async defer data-domain="docs.bunkerweb.io" src="https://data.bunkerity.com/js/script.js"></script>
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', (e) => {
@@ -63,7 +66,7 @@
       })
     </script>
 
-    <script src="../../assets/external/cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
 
     <script defer>
   // Lazy load images and embed youtube videos
@@ -83,8 +86,8 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#services">professional services</a>.</p>'},
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
 
@@ -203,7 +206,9 @@
             
             
     📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
-    <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc" style="color: #3f6ec6;&#10;              text-decoration: underline">BunkerWeb Panel</a>
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
     for more information on our enterprise offers.
 
           </div>
@@ -3081,6 +3086,10 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <li>Er lauscht auf dem Loopback-Interface des Containers und ist daher nur aus dem Container heraus erreichbar – nicht von anderen Containern oder vom Host.</li>
 <li>Überschreiben Sie <code>REDIS_HOST</code> nur, wenn ein externer Redis-/Valkey-Endpunkt verfügbar ist; andernfalls wird die eingebettete Instanz nicht gestartet.</li>
 <li>Um Redis vollständig zu deaktivieren, setzen Sie <code>USE_REDIS=no</code>.</li>
+<li><strong>Konfigurationsvorrang (wichtig):</strong> Das eingebettete Redis wird aus <code>/var/lib/bunkerweb/redis-runtime.conf</code> gestartet. Diese Datei wird beim Boot erzeugt, indem <code>/etc/redis.conf</code> kopiert und um env-getriebene Defaults <strong>nur für Direktiven ergänzt wird, zu denen die Konfigurationsdatei schweigt</strong>. Eine eingehängte eigene <code>/etc/redis.conf</code> hat daher immer Vorrang; die unten genannten Umgebungsvariablen füllen lediglich Lücken.</li>
+<li><strong>Speicher-Tuning:</strong> Die Standardwerte folgen den <a href="../features/#redis-best-practices">Redis Best Practices</a> – <code>maxmemory 256mb</code> und <code>maxmemory-policy volatile-lru</code>. Überschreiben Sie diese über <code>REDIS_MAXMEMORY</code> und <code>REDIS_MAXMEMORY_POLICY</code>, sofern die Konfigurationsdatei sie nicht festschreibt.</li>
+<li><strong>Persistenz-Overrides:</strong> <code>REDIS_APPENDONLY=yes|no</code> schaltet AOF um (Standard <code>yes</code>); RDB-Snapshots werden mit <code>REDIS_SAVE</code> sowie optional <code>REDIS_SAVE_0</code>, <code>REDIS_SAVE_1</code>, … konfiguriert, die jeweils ein <code>save &lt;Sekunden&gt; &lt;Änderungen&gt;</code>-Paar liefern (z. B. <code>REDIS_SAVE_0="900 1"</code>, <code>REDIS_SAVE_1="300 10"</code>). Sobald eine dieser Variablen gesetzt ist, ersetzen sie die eingebauten Defaults <code>900 1 / 300 10 / 60 10000</code>; ein leerer Wert erzeugt <code>save ""</code> und deaktiviert RDB. Wird ignoriert, sobald die Konfigurationsdatei selbst <code>save</code> setzt.</li>
+<li><strong>Authentifizierung:</strong> Wird <code>REDIS_PASSWORD</code> gesetzt und die Konfigurationsdatei deklariert noch kein <code>requirepass</code>, startet das eingebettete Redis mit <code>requirepass</code>, sodass BunkerWeb-Client und -Server konsistent bleiben. Der eingebettete Server unterstützt nur den Default-Benutzer – setzen Sie <code>REDIS_USERNAME</code> ausschließlich beim Anbinden eines externen Redis mit ACLs.</li>
 <li>Redis-Protokolle erscheinen mit dem Präfix <code>[REDIS]</code> in den Docker-Protokollen sowie in <code>/var/log/bunkerweb/redis.log</code>.</li>
 </ul>
 <h3 id="crowdsec-integration">CrowdSec-Integration</h3>
@@ -6653,12 +6662,12 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 Um eine virtuelle Maschine bereitzustellen, benötigen Sie die Berechtigungen Microsoft.Compute/virtualMachines/write und Microsoft.Resources/deployments/*. Die What-if-Operation hat dieselben Berechtigungsanforderungen.</p>
 </div>
 <p>Stellen Sie die ARM-Vorlage bereit:</p>
-<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fbunkerity%2Fbunkerweb%2Fmaster%2Fmisc%2Fintegrations%2Fazure-arm-template.json" target="_blank" rel="noopener"><img alt="Bereitstellen in Azure" src="../../assets/img/integration-azure-deploy.svg" /></a></p>
+<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fbunkerity%2Fbunkerweb%2Fmaster%2Fmisc%2Fintegrations%2Fazure-arm-template.json" target="_blank"><img alt="Bereitstellen in Azure" src="../../assets/img/integration-azure-deploy.svg" /></a></p>
 </div>
 <div class="tabbed-block">
-<p>Melden Sie sich im <a href="https://portal.azure.com" target="_blank" rel="noopener">Azure-Portal</a> an.</p>
-<p>Holen Sie sich BunkerWeb über das Menü <a href="https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/bunkerity.bunkerweb" target="_blank" rel="noopener">Ressource erstellen</a>.</p>
-<p>Sie können auch über den <a href="https://azuremarketplace.microsoft.com/fr-fr/marketplace/apps/bunkerity.bunkerweb?tab=Overview" target="_blank" rel="noopener">Marketplace</a> gehen.</p>
+<p>Melden Sie sich im <a href="https://portal.azure.com" target="_blank">Azure-Portal</a> an.</p>
+<p>Holen Sie sich BunkerWeb über das Menü <a href="https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/bunkerity.bunkerweb" target="_blank">Ressource erstellen</a>.</p>
+<p>Sie können auch über den <a href="https://azuremarketplace.microsoft.com/fr-fr/marketplace/apps/bunkerity.bunkerweb?tab=Overview" target="_blank">Marketplace</a> gehen.</p>
 </div>
 </div>
 </div>

@@ -48,7 +48,10 @@
 
     
     
-    <script async defer data-domain="docs.bunkerweb.io" src="https://data.bunkerity.com/js/script.js"></script>
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', (e) => {
@@ -63,7 +66,7 @@
       })
     </script>
 
-    <script src="../../assets/external/cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
 
     <script defer>
   // Lazy load images and embed youtube videos
@@ -83,8 +86,8 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#services">professional services</a>.</p>'},
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
 
@@ -203,7 +206,9 @@
             
             
     📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
-    <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc" style="color: #3f6ec6;&#10;              text-decoration: underline">BunkerWeb Panel</a>
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
     for more information on our enterprise offers.
 
           </div>
@@ -1463,7 +1468,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from passlib import totp; print(totp.generate_secret())&quot;</span>
 </code></pre></div>
 <p>Les codes de récupération sont affichés une seule fois dans l’UI ; perdre les clés de chiffrement supprime les secrets TOTP stockés.
-- Sessions : durée par défaut 12 h (<code>SESSION_LIFETIME_HOURS</code>). Sessions liées à l’IP et au User-Agent ; <code>CHECK_PRIVATE_IP=no</code> relâche le contrôle d’IP pour les plages privées uniquement. <code>ALWAYS_REMEMBER=yes</code> force les cookies persistants.
+- Sessions : durée d’inactivité par défaut 12 h (<code>SESSION_LIFETIME_HOURS</code>), rafraîchie à chaque requête. Un plafond absolu est imposé par <code>SESSION_ABSOLUTE_HOURS</code> (par défaut <code>168</code> = 7 jours) — au-delà, les utilisateurs sont déconnectés quelle que soit leur activité. Rotation optionnelle de l’identifiant de session (<code>SESSION_ROLLING_HOURS</code>, par défaut <code>0</code> = désactivée) régénère le SID à cet intervalle. Sessions liées à l’IP et au User-Agent ; <code>CHECK_PRIVATE_IP=no</code> relâche le contrôle d’IP pour les plages privées uniquement. <code>ALWAYS_REMEMBER=yes</code> force les cookies persistants.
 - Pensez à régler <code>PROXY_NUMBERS</code> si plusieurs proxies ajoutent des <code>X-Forwarded-*</code>.</p>
 </li>
 </ul>
@@ -1598,9 +1603,21 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 <tr>
 <td><code>SESSION_LIFETIME_HOURS</code></td>
-<td>Durée de session</td>
+<td>Durée d’inactivité de session (TTL glissante, rafraîchie à chaque requête)</td>
 <td>Nombre (heures)</td>
 <td><code>12</code></td>
+</tr>
+<tr>
+<td><code>SESSION_ABSOLUTE_HOURS</code></td>
+<td>Plafond absolu de session indépendant de l’activité</td>
+<td>Nombre (heures)</td>
+<td><code>168</code></td>
+</tr>
+<tr>
+<td><code>SESSION_ROLLING_HOURS</code></td>
+<td>Intervalle de rotation du SID (<code>0</code> désactive la rotation)</td>
+<td>Nombre (heures)</td>
+<td><code>0</code></td>
 </tr>
 <tr>
 <td><code>ALWAYS_REMEMBER</code></td>

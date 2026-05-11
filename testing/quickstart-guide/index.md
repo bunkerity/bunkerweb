@@ -148,7 +148,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/vtesting/e
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:
@@ -273,7 +273,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/vtesting/e
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:

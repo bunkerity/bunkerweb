@@ -48,7 +48,10 @@
 
     
     
-    <script async defer data-domain="docs.bunkerweb.io" src="https://data.bunkerity.com/js/script.js"></script>
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', (e) => {
@@ -63,7 +66,7 @@
       })
     </script>
 
-    <script src="../../assets/external/cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
 
     <script defer>
   // Lazy load images and embed youtube videos
@@ -83,8 +86,8 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#services">professional services</a>.</p>'},
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
 
@@ -203,7 +206,9 @@
             
             
     📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
-    <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc" style="color: #3f6ec6;&#10;              text-decoration: underline">BunkerWeb Panel</a>
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
     for more information on our enterprise offers.
 
           </div>
@@ -1463,7 +1468,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from passlib import totp; print(totp.generate_secret())&quot;</span>
 </code></pre></div>
 <p>恢复码在 UI 中仅显示一次；若丢失加密密钥，将清除已存的 TOTP 秘钥。
-- 会话：默认 12 小时（<code>SESSION_LIFETIME_HOURS</code>）。绑定 IP 与 User-Agent；<code>CHECK_PRIVATE_IP=no</code> 仅对私网放宽 IP 检查。<code>ALWAYS_REMEMBER=yes</code> 始终启用持久 Cookie。
+- 会话：默认空闲时长 12 小时（<code>SESSION_LIFETIME_HOURS</code>），每次请求刷新。<code>SESSION_ABSOLUTE_HOURS</code>（默认 <code>168</code> = 7 天）设定绝对上限——无论是否活跃，超过即强制登出。可选的会话 ID 轮换（<code>SESSION_ROLLING_HOURS</code>，默认 <code>0</code> = 关闭）按该间隔重新生成会话 ID。会话绑定 IP 与 User-Agent；<code>CHECK_PRIVATE_IP=no</code> 仅对私网放宽 IP 检查。<code>ALWAYS_REMEMBER=yes</code> 始终启用持久 Cookie。
 - 若多级代理附加 <code>X-Forwarded-*</code>，请设置 <code>PROXY_NUMBERS</code>。</p>
 </li>
 </ul>
@@ -1598,9 +1603,21 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 <tr>
 <td><code>SESSION_LIFETIME_HOURS</code></td>
-<td>会话时长</td>
+<td>会话空闲时长（滑动 TTL，每次请求刷新）</td>
 <td>数值（小时）</td>
 <td><code>12</code></td>
+</tr>
+<tr>
+<td><code>SESSION_ABSOLUTE_HOURS</code></td>
+<td>与活动无关的绝对会话上限</td>
+<td>数值（小时）</td>
+<td><code>168</code></td>
+</tr>
+<tr>
+<td><code>SESSION_ROLLING_HOURS</code></td>
+<td>会话 ID 轮换间隔（<code>0</code> 关闭轮换）</td>
+<td>数值（小时）</td>
+<td><code>0</code></td>
 </tr>
 <tr>
 <td><code>ALWAYS_REMEMBER</code></td>

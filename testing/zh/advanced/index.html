@@ -48,7 +48,10 @@
 
     
     
-    <script async defer data-domain="docs.bunkerweb.io" src="https://data.bunkerity.com/js/script.js"></script>
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', (e) => {
@@ -63,7 +66,7 @@
       })
     </script>
 
-    <script src="../../assets/external/cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
 
     <script defer>
   // Lazy load images and embed youtube videos
@@ -83,8 +86,8 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#services">professional services</a>.</p>'},
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
 
@@ -203,7 +206,9 @@
             
             
     📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
-    <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc" style="color: #3f6ec6;&#10;              text-decoration: underline">BunkerWeb Panel</a>
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
     for more information on our enterprise offers.
 
           </div>
@@ -3012,7 +3017,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
 <span class="w">      </span><span class="no">redis-server</span>
 <span class="w">      </span><span class="no">--maxmemory 256mb</span>
-<span class="w">      </span><span class="no">--maxmemory-policy allkeys-lru</span>
+<span class="w">      </span><span class="no">--maxmemory-policy volatile-lru</span>
 <span class="w">      </span><span class="no">--save 60 1000</span>
 <span class="w">      </span><span class="no">--appendonly yes</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
@@ -4864,7 +4869,7 @@ LOG_LEVEL_1=error
 <span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
 <span class="w">      </span><span class="no">redis-server</span>
 <span class="w">      </span><span class="no">--maxmemory 256mb</span>
-<span class="w">      </span><span class="no">--maxmemory-policy allkeys-lru</span>
+<span class="w">      </span><span class="no">--maxmemory-policy volatile-lru</span>
 <span class="w">      </span><span class="no">--save 60 1000</span>
 <span class="w">      </span><span class="no">--appendonly yes</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
@@ -5147,7 +5152,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 <h2 id="_8">监控和报告</h2>
 <h3 id="pro">监控 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>监控插件让您可以收集和检索关于 BunkerWeb 的指标。启用它后，您的实例将开始收集与攻击、请求和性能相关的各种数据。然后，您可以通过定期调用 <code>/monitoring</code> API 端点或使用其他插件（如 Prometheus 导出器）来检索它们。</p>
 <p><strong>功能列表</strong></p>
 <ul>
@@ -5192,7 +5197,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tbody>
 </table>
 <h3 id="prometheus-pro">Prometheus 导出器 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Prometheus 导出器插件在您的 BunkerWeb 实例上添加了一个 <a href="https://prometheus.io/docs/instrumenting/exporters/">Prometheus 导出器</a>。启用后，您可以配置您的 Prometheus 实例来抓取 BunkerWeb 上的特定端点并收集内部指标。</p>
 <p>我们还提供了一个 <a href="https://grafana.com/grafana/dashboards/20755-bunkerweb/">Grafana 仪表板</a>，您可以将其导入到自己的实例中，并连接到您自己的 Prometheus 数据源。</p>
 <p><strong>请注意，使用 Prometheus 导出器插件需要启用监控插件 (<code>USE_MONITORING=yes</code>)</strong></p>
@@ -5252,7 +5257,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tbody>
 </table>
 <h3 id="pro_1">报告 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <div class="admonition warning">
 <p class="admonition-title">需要监控插件</p>
 </div>
@@ -5361,7 +5366,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </ul>
 <h2 id="_9">备份和恢复</h2>
 <h3 id="s3-pro">S3 备份 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>S3 备份工具可以无缝地自动化数据保护，类似于社区备份插件。然而，它的突出之处在于将备份直接安全地存储在 S3 存储桶中。</p>
 <p>通过激活此功能，您正在主动保护您的<strong>数据完整性</strong>。将备份<strong>远程</strong>存储可以保护关键信息免受<strong>硬件故障</strong>、<strong>网络攻击</strong>或<strong>自然灾害</strong>等威胁。这确保了<strong>安全</strong>和<strong>可用性</strong>，能够在<strong>意外事件</strong>期间快速恢复，维护<strong>运营连续性</strong>，并确保<strong>高枕无忧</strong>。</p>
 <details class="warning">
@@ -5709,7 +5714,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </div>
 <p>完整文档请访问 <a href="https://github.com/bunkerity/mcp-bunkerweb">BunkerWeb MCP 仓库</a>。</p>
 <h2 id="migration-pro">迁移 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>迁移插件通过其<strong>用户友好的 Web 界面</strong>，彻底改变了 BunkerWeb 实例之间的配置传输，简化了整个迁移过程。无论您是升级系统、扩展基础设施还是转换环境，此工具都能让您轻松自信地传输<strong>设置、首选项和数据</strong>。告别繁琐的手动流程，迎接<strong>无缝、无忧的迁移体验</strong>。</p>
 <p><strong>功能列表</strong></p>
 <ul>
@@ -5816,7 +5821,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </div>
 <p>此命令将您的 BunkerWeb 数据无缝迁移，以精确匹配迁移文件中概述的配置。</p>
 <h2 id="anti-ddos-pro">Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p><strong>Anti DDoS</strong> 插件通过实时监控、分析和过滤可疑流量，提供针对分布式拒绝服务 (DDoS) 攻击的高级保护。</p>
 <p>通过采用<strong>滑动窗口机制</strong>，该插件在内存中维护一个请求时间戳字典，以检测来自单个 IP 地址的异常流量峰值。根据配置的安全模式，它可以阻止违规连接或记录可疑活动以供进一步审查。</p>
 <h3 id="_16">功能</h3>
@@ -5893,7 +5898,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <li><strong>监控：</strong> 定期分析日志和指标以微调设置并提高整体保护。</li>
 </ul>
 <h2 id="user-manager-pro">用户管理器 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="User Manager" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
@@ -5945,7 +5950,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <figcaption>用户管理器 - 活动页面</figcaption>
 </figure>
 <h2 id="ui-single-sign-on-pro">UI 单点登录 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p><strong>UI 单点登录</strong>插件通过读取放置在 Web UI 前方的外部认证代理（如 Authentik、Authelia、Keycloak 或 Traefik Forward Auth）设置的请求头，为 BunkerWeb Web 界面启用 SSO 认证。</p>
 <p>管理员无需为 BunkerWeb 单独管理凭据，可以将认证委托给现有的身份提供方。认证代理完成用户登录后，在将请求转发到 BunkerWeb Web UI 之前注入身份头信息。</p>
 <div class="admonition danger">
@@ -7267,7 +7272,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><strong>多实例部署</strong>：启用 <code>USE_REDIS=yes</code> 并配置 <code>REDIS_HOST</code>（或 Sentinel）以共享会话。</li>
 </ul>
 <h2 id="ldap-sso-pro">LDAP SSO <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p><strong>LDAP SSO</strong> 插件为 BunkerWeb 服务添加基于 LDAP 的单点登录功能。它提供登录表单、通过 LDAP 目录认证用户、创建会话，并可选地通过可配置的请求头将已认证的用户名传递给上游。</p>
 <p>该插件支持两种认证模式：</p>
 <ul>
@@ -7712,7 +7717,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><code>OPENAPI_ALLOW_UNSPECIFIED=yes</code></li>
 </ul>
 <h2 id="cache-pro">Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Cache PRO 插件使用 NGINX <code>proxy_cache*</code> 指令在反向代理层启用响应缓存。它适合用于吸收对可缓存内容的重复读取、在流量高峰期保护上游服务，以及在后端短暂故障期间提供陈旧缓存内容。</p>
 <p><strong>工作原理</strong></p>
 <ol>
@@ -7892,7 +7897,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 </ul>
 </div>
 <h2 id="acme">ACME <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p><strong>ACME</strong> 插件通过 ACME 协议提供高级证书管理功能，支持自定义证书颁发机构（Step CA、Vault PKI、Sectigo、Google Trust Services 等）。它作为内置 Let's Encrypt 插件的补充，增加了自定义 CA 支持、DNS-01 和 TLS-ALPN-01 挑战、通配符证书、带过期告警的证书监控、证书透明度日志监控以及增强的 OCSP Stapling。</p>
 <div class="admonition tip">
 <p class="admonition-title">何时使用 ACME 而非内置 Let's Encrypt 插件</p>
@@ -8352,7 +8357,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <li><strong>证书未续期</strong>：检查 <code>ACME_RENEWAL_DAYS</code> 和调度器日志。<code>acme-renew</code> 作业每天运行，续期处于配置阈值内的证书。</li>
 </ul>
 <h2 id="wildcard-pro">Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p><strong>Wildcard</strong> 插件允许单个 BunkerWeb 服务响应：</p>
 <ul>
 <li>其精确主机名</li>

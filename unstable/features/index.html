@@ -48,7 +48,10 @@
 
     
     
-    <script async defer data-domain="docs.bunkerweb.io" src="https://data.bunkerity.com/js/script.js"></script>
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', (e) => {
@@ -63,7 +66,7 @@
       })
     </script>
 
-    <script src="../assets/external/cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
 
     <script defer>
   // Lazy load images and embed youtube videos
@@ -83,8 +86,8 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#services">professional services</a>.</p>'},
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
 
@@ -203,7 +206,9 @@
             
             
     📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
-    <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc" style="color: #3f6ec6;&#10;              text-decoration: underline">BunkerWeb Panel</a>
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
     for more information on our enterprise offers.
 
           </div>
@@ -3556,7 +3561,7 @@
 <h1 id="features">Features</h1>
 <p>This section contains the full list of settings supported by BunkerWeb. If you are not yet familiar with BunkerWeb, you should first read the <a href="../concepts/">concepts</a> section of the documentation. Please follow the instructions for your own <a href="../integrations/">integration</a> on how to apply the settings.</p>
 <h2 id="global-settings">Global settings</h2>
-<p>STREAM support <img alt="⚠" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM support <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>The General plugin provides the core configuration framework for BunkerWeb, allowing you to define essential settings that control how your web services are protected and delivered. This foundational plugin manages fundamental aspects like security modes, server defaults, logging behavior, and critical operational parameters for the entire BunkerWeb ecosystem.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -3933,6 +3938,13 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><strong>Datastore Memory Size:</strong> Size of the internal datastore (for example <code>8192</code>, <code>64k</code>, <code>64m</code>).</td>
 </tr>
 <tr>
+<td><code>DATASTORE_LRU_SIZE</code></td>
+<td><code>1k</code></td>
+<td>global</td>
+<td>No</td>
+<td><strong>Datastore LRU Size:</strong> Slot count for the shared per-worker datastore LRU. Accepts a plain integer or <code>k</code>/<code>m</code> shorthand (for example <code>1k</code>, <code>10k</code>, <code>1m</code>).</td>
+</tr>
+<tr>
 <td><code>CACHESTORE_MEMORY_SIZE</code></td>
 <td><code>64m</code></td>
 <td>global</td>
@@ -4164,7 +4176,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </div>
 <h2 id="acme-pro">ACME <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>For a more detailed guide, see the <a href="../advanced/#acme">advanced usages</a> documentation.</p>
-<p>STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Advanced ACME certificate management with custom CA support, certificate monitoring dashboard, expiry alerting, CT log monitoring, and enhanced OCSP stapling. Complements the built-in Let's Encrypt plugin.</p>
 <table>
 <thead>
@@ -4440,7 +4452,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </table>
 <h2 id="anti-ddos-pro">Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>For a more detailed guide, see the <a href="../advanced/#anti-ddos-pro">advanced usages</a> documentation.</p>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides enhanced protection against DDoS attacks by analyzing and filtering suspicious traffic.</p>
 <table>
 <thead>
@@ -4498,7 +4510,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tbody>
 </table>
 <h2 id="antibot">Antibot</h2>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Attackers often use automated tools (bots) to try and exploit your website. To protect against this, BunkerWeb includes an "Antibot" feature that challenges users to prove they are human. If a user successfully completes the challenge, they are granted access to your website. This feature is disabled by default.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -5175,7 +5187,7 @@ For the new version, create a reCAPTCHA key in your Google Cloud project and use
 </div>
 </div>
 <h2 id="auth-basic">Auth basic</h2>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>The Auth Basic plugin provides HTTP basic authentication to protect your website or specific resources. This feature adds an extra layer of security by requiring users to enter a username and password before accessing protected content. This type of authentication is simple to implement and widely supported by browsers.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -5293,7 +5305,7 @@ For the new version, create a reCAPTCHA key in your Google Cloud project and use
 </div>
 </div>
 <h2 id="backup">Backup</h2>
-<p>STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>The Backup plugin provides an automated backup solution to protect your BunkerWeb data. This feature ensures the safety and availability of your important database by creating regular backups according to your preferred schedule. Backups are stored in a designated location and can be easily managed through both automated processes and manual commands.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -5409,7 +5421,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 </div>
 <h2 id="backup-s3-pro">Backup S3 <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
-<p>STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Automatically backup your data to an S3 bucket</p>
 <table>
 <thead>
@@ -5495,7 +5507,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </tbody>
 </table>
 <h2 id="bad-behavior">Bad behavior</h2>
-<p>STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>The Bad Behavior plugin protects your website by automatically detecting and banning IP addresses that generate too many errors or "bad" HTTP status codes within a specified period of time. This helps defend against brute force attacks, web scrapers, vulnerability scanners, and other malicious activities that might generate numerous error responses.</p>
 <p>Attackers often generate "suspicious" HTTP status codes when probing for or exploiting vulnerabilities—codes that a typical user is unlikely to trigger within a given time frame. By detecting this behavior, BunkerWeb can automatically ban the offending IP address, forcing the attacker to use a new IP address to continue their attempts.</p>
 <p><strong>How it works:</strong></p>
@@ -5639,7 +5651,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 </div>
 <h2 id="blacklist">Blacklist</h2>
-<p>STREAM support <img alt="⚠" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM support <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>The Blacklist plugin provides robust protection for your website by blocking access based on various client attributes. This feature defends against known malicious entities, scanners, and suspicious visitors by denying access based on IP addresses, networks, reverse DNS entries, ASNs, user agents, and specific URI patterns.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -6046,7 +6058,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 TrustedMonitor/\d+\.\d+
 </code></pre></div>
 <h2 id="brotli">Brotli</h2>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>The Brotli plugin enables efficient compression of HTTP responses using the Brotli algorithm. This feature helps reduce bandwidth usage and improve page load times by compressing web content before it is sent to the client's browser.</p>
 <p>Compared to other compression methods like gzip, Brotli typically achieves higher compression ratios, resulting in smaller file sizes and faster content delivery.</p>
 <p><strong>How it works:</strong></p>
@@ -6146,7 +6158,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="bunkernet">BunkerNet</h2>
-<p>STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>The BunkerNet plugin enables collective threat intelligence sharing between BunkerWeb instances, creating a powerful network of protection against malicious actors. By participating in BunkerNet, your instance both benefits from and contributes to a global database of known threats, enhancing security for the entire BunkerWeb community.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -6276,7 +6288,7 @@ TrustedMonitor/\d+\.\d+
 </figure>
 <h2 id="cache-pro">Cache <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>For a more detailed guide, see the <a href="../advanced/#cache-pro">advanced usages</a> documentation.</p>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides caching functionality at the reverse proxy level.</p>
 <table>
 <thead>
@@ -6404,7 +6416,7 @@ TrustedMonitor/\d+\.\d+
 </tbody>
 </table>
 <h2 id="client-cache">Client cache</h2>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>The Client Cache plugin optimizes website performance by controlling how browsers cache static content. It reduces bandwidth usage, lowers server load, and improves page load times by instructing browsers to store and reuse static assets—such as images, CSS, and JavaScript files—locally instead of requesting them on every page visit.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -6503,7 +6515,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="cors">CORS</h2>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>The CORS plugin enables Cross-Origin Resource Sharing for your website, allowing controlled access to your resources from different domains. This feature helps you safely share your content with trusted third-party websites while maintaining security by explicitly defining which origins, methods, and headers are permitted.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -6691,7 +6703,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="country">Country</h2>
-<p>STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>The Country plugin enables geo-blocking functionality for your website, allowing you to restrict access based on the geographic location of your visitors. This feature helps you comply with regional regulations, prevent fraudulent activities often associated with high-risk regions, and implement content restrictions based on geographic boundaries.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -6800,7 +6812,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="crowdsec">CrowdSec</h2>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <figure>
 <p><img align="center," alt="Overview" src="../assets/img/crowdsec.svg" width="600" /></p>
 </figure>
@@ -7232,7 +7244,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </ul>
 <h2 id="custom-pages-pro">Custom Pages <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>For a more detailed guide, see the <a href="../advanced/#custom-pages-pro">advanced usages</a> documentation.</p>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Tweak BunkerWeb error/antibot/default pages with custom HTML.</p>
 <table>
 <thead>
@@ -7311,7 +7323,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tbody>
 </table>
 <h2 id="custom-ssl-certificate">Custom SSL certificate</h2>
-<p>STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>The Custom SSL certificate plugin allows you to use your own SSL/TLS certificates with BunkerWeb instead of the automatically generated ones. This feature is particularly useful if you have existing certificates from a trusted Certificate Authority (CA), need to use certificates with specific configurations, or want to maintain consistent certificate management across your infrastructure.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -7452,7 +7464,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 <h2 id="database">Database</h2>
-<p>STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>The Database plugin provides a robust database integration for BunkerWeb by enabling centralized storage and management of configuration data, logs, and other essential information.</p>
 <p>This core component supports multiple database engines, including SQLite, PostgreSQL, MySQL/MariaDB, and Oracle, allowing you to choose the database solution that best fits your environment and requirements.</p>
 <p><strong>How it works:</strong></p>
@@ -7611,7 +7623,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p>Together, these jobs prevent unbounded database growth while preserving useful operational history.</p>
 </div>
 <h2 id="dnsbl">DNSBL</h2>
-<p>STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>The DNSBL (Domain Name System Blacklist) plugin provides protection against known malicious IP addresses by checking client IP addresses against external DNSBL servers. This feature helps guard your website against spam, botnets, and various types of cyber threats by leveraging community-maintained lists of problematic IP addresses.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -7758,10 +7770,10 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/45vX0WJqjxo' title='Easy Resolve' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>For a more detailed guide, see the <a href="../advanced/#easy-resolve-pro">advanced usages</a> documentation.</p>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides a simpler way to fix false positives in reports.</p>
 <h2 id="errors">Errors</h2>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>The Errors plugin provides customizable error handling for your website, letting you configure how HTTP error responses appear to users. This feature helps you present user-friendly, branded error pages that enhance the user experience during error scenarios, rather than displaying default server error pages, which can seem technical and confusing to visitors.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -7848,7 +7860,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 <h2 id="greylist">Greylist</h2>
-<p>STREAM support <img alt="⚠" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM support <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>The Greylist plugin provides a flexible security approach that allows visitors access while still maintaining essential security features.</p>
 <p>Unlike traditional <a href="#blacklist">blacklist</a>/<a href="#whitelist">whitelist</a> approaches—that completely block or allow access—greylisting creates a middle ground by granting access to certain visitors while still subjecting them to security checks.</p>
 <p><strong>How it works:</strong></p>
@@ -8136,7 +8148,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 TrustedMonitor/\d+\.\d+
 </code></pre></div>
 <h2 id="grpc">gRPC</h2>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>The gRPC plugin lets BunkerWeb proxy gRPC services through HTTP/2 using <code>grpc_pass</code>. It is designed for multisite setups where each virtual host can expose one or more gRPC backends under specific paths.</p>
 <div class="admonition example">
 <p class="admonition-title">Experimental feature</p>
@@ -8350,7 +8362,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="gzip">Gzip</h2>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>The GZIP plugin enhances website performance by compressing HTTP responses using the GZIP algorithm. This feature reduces bandwidth usage and improves page load times by compressing web content before it is sent to the client's browser, resulting in faster delivery and an improved user experience.</p>
 <h3 id="how-it-works">How It Works</h3>
 <ol>
@@ -8471,7 +8483,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="headers">Headers</h2>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Headers play a crucial role in HTTP security. The Headers plugin provides robust management of both standard and custom HTTP headers—enhancing security and functionality. It dynamically applies security measures, such as <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security">HSTS</a>, <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy">CSP</a> (including a reporting mode), and custom header injection, while preventing information leakage.</p>
 <p><strong>How it works</strong></p>
 <ol>
@@ -8731,7 +8743,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="html-injection">HTML injection</h2>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>The HTML Injection plugin enables you to seamlessly add custom HTML code to your website's pages before either the closing <code>&lt;/body&gt;</code> or <code>&lt;/head&gt;</code> tags. This feature is particularly useful for adding analytics scripts, tracking pixels, custom JavaScript, CSS styles, or other third-party integrations without modifying your website's source code.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -8826,7 +8838,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 <h2 id="ldap-sso-pro">LDAP SSO <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>For a more detailed guide, see the <a href="../advanced/#ldap-sso-pro">advanced usages</a> documentation.</p>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>LDAP-based single sign-on plugin with session-backed authentication.</p>
 <table>
 <thead>
@@ -9059,7 +9071,7 @@ TrustedMonitor/\d+\.\d+
 </tbody>
 </table>
 <h2 id="lets-encrypt">Let's Encrypt</h2>
-<p>STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>The Let's Encrypt plugin simplifies SSL/TLS certificate management by automating the creation, renewal, and configuration of free certificates from Let's Encrypt. This feature enables secure HTTPS connections for your websites without the complexity of manual certificate management, reducing both cost and administrative overhead.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -9585,11 +9597,11 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="limit">Limit</h2>
-<p>STREAM support <img alt="⚠" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM support <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting policies on your website, ensuring fair usage and protecting your resources from abuse, denial-of-service attacks, and excessive resource consumption. These policies include:</p>
 <ul>
-<li><strong>Number of connections per IP address</strong> (STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:">)</li>
-<li><strong>Number of requests per IP address and URL within a specific time period</strong> (STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:">)</li>
+<li><strong>Number of connections per IP address</strong> (STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" />)</li>
+<li><strong>Number of requests per IP address and URL within a specific time period</strong> (STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" />)</li>
 </ul>
 <h3 id="how-it-works_1">How it Works</h3>
 <ol>
@@ -9802,7 +9814,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="metrics">Metrics</h2>
-<p>STREAM support <img alt="⚠" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM support <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>The Metrics plugin provides comprehensive monitoring and data collection capabilities for your BunkerWeb instance. This feature enables you to track various performance indicators, security events, and system statistics, giving you valuable insights into the behavior and health of your protected websites and services.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -9912,17 +9924,24 @@ TrustedMonitor/\d+\.\d+
 </tr>
 <tr>
 <td><code>METRICS_MAX_BLOCKED_REQUESTS</code></td>
-<td><code>1000</code></td>
+<td><code>1k</code></td>
 <td>global</td>
 <td>no</td>
-<td><strong>Max Blocked Requests:</strong> Maximum number of blocked requests to store per worker.</td>
+<td><strong>Max Blocked Requests:</strong> Maximum number of blocked requests to store per worker. Accepts <code>k</code>/<code>m</code> shorthand.</td>
 </tr>
 <tr>
 <td><code>METRICS_MAX_BLOCKED_REQUESTS_REDIS</code></td>
-<td><code>100000</code></td>
+<td><code>10k</code></td>
 <td>global</td>
 <td>no</td>
-<td><strong>Max Redis Blocked Requests:</strong> Maximum number of blocked requests to store in Redis.</td>
+<td><strong>Max Redis Blocked Requests:</strong> Maximum number of blocked requests to store in Redis. Accepts <code>k</code>/<code>m</code> shorthand.</td>
+</tr>
+<tr>
+<td><code>MAX_LRU_HISTORY</code></td>
+<td><code>1k</code></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Max LRU History:</strong> Per-worker LRU slot count and per-key event-history array cap (block trails, auth trails, etc.). Accepts <code>k</code>/<code>m</code> shorthand.</td>
 </tr>
 <tr>
 <td><code>METRICS_SAVE_TO_REDIS</code></td>
@@ -9956,8 +9975,9 @@ TrustedMonitor/\d+\.\d+
 <p>Default configuration suitable for most deployments:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_METRICS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">METRICS_MEMORY_SIZE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;16m&quot;</span>
-<span class="nt">METRICS_MAX_BLOCKED_REQUESTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1000&quot;</span>
-<span class="nt">METRICS_MAX_BLOCKED_REQUESTS_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;100000&quot;</span>
+<span class="nt">METRICS_MAX_BLOCKED_REQUESTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1k&quot;</span>
+<span class="nt">METRICS_MAX_BLOCKED_REQUESTS_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;10k&quot;</span>
+<span class="nt">MAX_LRU_HISTORY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1k&quot;</span>
 <span class="nt">METRICS_SAVE_TO_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 </code></pre></div>
 </div>
@@ -9967,6 +9987,7 @@ TrustedMonitor/\d+\.\d+
 <span class="nt">METRICS_MEMORY_SIZE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;8m&quot;</span>
 <span class="nt">METRICS_MAX_BLOCKED_REQUESTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;500&quot;</span>
 <span class="nt">METRICS_MAX_BLOCKED_REQUESTS_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;10000&quot;</span>
+<span class="nt">MAX_LRU_HISTORY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;500&quot;</span>
 <span class="nt">METRICS_SAVE_TO_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
 </code></pre></div>
 </div>
@@ -9976,6 +9997,7 @@ TrustedMonitor/\d+\.\d+
 <span class="nt">METRICS_MEMORY_SIZE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;64m&quot;</span>
 <span class="nt">METRICS_MAX_BLOCKED_REQUESTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5000&quot;</span>
 <span class="nt">METRICS_MAX_BLOCKED_REQUESTS_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;500000&quot;</span>
+<span class="nt">MAX_LRU_HISTORY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5k&quot;</span>
 <span class="nt">METRICS_SAVE_TO_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 </code></pre></div>
 </div>
@@ -9988,10 +10010,10 @@ TrustedMonitor/\d+\.\d+
 </div>
 <h2 id="migration-pro">Migration <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>For a more detailed guide, see the <a href="../advanced/#migration-pro">advanced usages</a> documentation.</p>
-<p>STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Migration of BunkerWeb configuration between instances made easy via the web UI</p>
 <h2 id="miscellaneous">Miscellaneous</h2>
-<p>STREAM support <img alt="⚠" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM support <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>The Miscellaneous plugin provides <strong>essential baseline settings</strong> that help maintain the security and functionality of your website. This core component offers comprehensive controls for:</p>
 <ul>
 <li><strong>Server behavior</strong> - Configure how your server responds to various requests</li>
@@ -10493,17 +10515,17 @@ TrustedMonitor/\d+\.\d+
 </div>
 <div class="tabbed-block">
 <p>Example configuration for enabling and optimizing file caching:</p>
-<p>```yaml
-USE_OPEN_FILE_CACHE: "yes"
-OPEN_FILE_CACHE: "max=2000 inactive=30s"
-OPEN_FILE_CACHE_ERRORS: "yes"
-OPEN_FILE_CACHE_MIN_USES: "3"
-OPEN_FILE_CACHE_VALID: "60s"</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_OPEN_FILE_CACHE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">OPEN_FILE_CACHE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;max=2000</span><span class="nv"> </span><span class="s">inactive=30s&quot;</span>
+<span class="nt">OPEN_FILE_CACHE_ERRORS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">OPEN_FILE_CACHE_MIN_USES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3&quot;</span>
+<span class="nt">OPEN_FILE_CACHE_VALID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;60s&quot;</span>
+</code></pre></div>
 </div>
 </div>
 </div>
 <h2 id="modsecurity">ModSecurity</h2>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>The ModSecurity plugin integrates the powerful <a href="https://modsecurity.org">ModSecurity</a> Web Application Firewall (WAF) into BunkerWeb. This integration delivers robust protection against a wide range of web attacks by leveraging the <a href="https://coreruleset.org">OWASP Core Rule Set (CRS)</a> to detect and block threats such as SQL injection, cross-site scripting (XSS), local file inclusion, and more.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -10775,7 +10797,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>For size settings like <code>MODSECURITY_REQ_BODY_NO_FILES_LIMIT</code>, the suffixes <code>k</code>, <code>m</code>, and <code>g</code> (case-insensitive) are supported and represent kibibytes, mebibytes, and gibibytes (multiples of 1024). Examples: <code>256k</code> = 262144, <code>1m</code> = 1048576, <code>2g</code> = 2147483648.</p>
 </div>
 <h2 id="monitoring-pro">Monitoring <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.</p>
 <table>
 <thead>
@@ -10826,7 +10848,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="mutual-tls">Mutual TLS</h2>
-<p>STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>The Mutual TLS (mTLS) plugin protects sensitive applications by requiring visiting clients to present certificates issued by authorities you trust. With it enabled, BunkerWeb authenticates callers before their requests reach your services, keeping internal tools and partner integrations locked down.</p>
 <p>BunkerWeb evaluates each handshake against the CA bundle and policy you configure. Clients that fail the verification rules are stopped, while compliant connections can optionally pass certificate details to upstream applications for deeper authorization decisions.</p>
 <p><strong>How it works:</strong></p>
@@ -10956,7 +10978,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/3oZOO1XdSlc' title='OpenAPI Validator' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>For a more detailed guide, see the <a href="../advanced/#openapi-validator-pro">advanced usages</a> documentation.</p>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Validates incoming HTTP requests against an OpenAPI / Swagger specification.</p>
 <table>
 <thead>
@@ -11031,7 +11053,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/0e4lcXTIIfs' title='OpenID Connect' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>For a more detailed guide, see the <a href="../advanced/#openid-connect-pro">advanced usages</a> documentation.</p>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>OpenID Connect authentication plugin providing SSO capabilities with identity providers.</p>
 <table>
 <thead>
@@ -11327,7 +11349,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="php">PHP</h2>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>The PHP plugin provides seamless integration with PHP-FPM for BunkerWeb, enabling dynamic PHP processing for your websites. This feature supports both local PHP-FPM instances running on the same machine and remote PHP-FPM servers, giving you flexibility in how you configure your PHP environment.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -11442,7 +11464,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="pro">Pro</h2>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>The Pro plugin bundles advanced features and enhancements for enterprise deployments of BunkerWeb. It unlocks additional capabilities, premium plugins, and extended functionality that complement the core BunkerWeb platform. It delivers enhanced security, performance, and management options for enterprise-grade deployments.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -11505,18 +11527,18 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 <h3 id="frequently-asked-questions">Frequently Asked Questions</h3>
 <p><strong>Q: What happens if my Pro license expires?</strong></p>
-<p>A: If your Pro license expires, access to premium features and plugins will be disabled. However, your BunkerWeb installation will continue to operate with all community edition features intact. To regain access to Pro features, simply renew your license.</p>
+<p><strong>A:</strong> If your Pro license expires, access to premium features and plugins will be disabled. However, your BunkerWeb installation will continue to operate with all community edition features intact. To regain access to Pro features, simply renew your license.</p>
 <p><strong>Q: Will Pro features disrupt my existing configuration?</strong></p>
-<p>A: No, Pro features are designed to integrate seamlessly with your current BunkerWeb setup. They enhance functionality without altering or interfering with your existing configuration, ensuring a smooth and reliable experience.</p>
+<p><strong>A:</strong> No, Pro features are designed to integrate seamlessly with your current BunkerWeb setup. They enhance functionality without altering or interfering with your existing configuration, ensuring a smooth and reliable experience.</p>
 <p><strong>Q: Can I try Pro features before committing to a purchase?</strong></p>
-<p>A: Absolutely! BunkerWeb offers two Pro plans to suit your needs:</p>
+<p><strong>A:</strong> Absolutely! BunkerWeb offers two Pro plans to suit your needs:</p>
 <ul>
 <li><strong>BunkerWeb PRO Standard:</strong> Full access to Pro features without technical support.</li>
 <li><strong>BunkerWeb PRO Enterprise:</strong> Full access to Pro features with dedicated technical support.</li>
 </ul>
 <p>You can explore Pro features with a free 1-month trial by using the promo code <code>freetrial</code>. Visit the <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> to activate your trial and learn more about flexible pricing options based on the number of services protected by BunkerWeb PRO.</p>
 <h2 id="prometheus-exporter-pro">Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Prometheus exporter for BunkerWeb internal metrics.</p>
 <table>
 <thead>
@@ -11567,7 +11589,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="real-ip">Real IP</h2>
-<p>STREAM support <img alt="⚠" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM support <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>The Real IP plugin ensures that BunkerWeb correctly identifies the client’s IP address even when behind proxies. This is essential for applying security rules, rate limiting, and logging properly; without it, all requests would appear to come from your proxy's IP rather than the client's actual IP.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -11717,7 +11739,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="redirect">Redirect</h2>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>The Redirect plugin provides simple and efficient HTTP redirection capabilities for your BunkerWeb-protected websites. This feature enables you to easily redirect visitors from one URL to another, supporting both full-domain redirects, specific path redirects and path-preserving redirections.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -11862,7 +11884,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="redis">Redis</h2>
-<p>STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>The Redis plugin integrates <a href="https://redis.io/">Redis</a> or <a href="https://valkey.io/">Valkey</a> into BunkerWeb for caching and fast data retrieval. This feature is essential for deploying BunkerWeb in high-availability environments where session data, metrics, and other shared information must be accessible across multiple nodes.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -12071,7 +12093,8 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <h4 id="memory-management">Memory Management</h4>
 <ul>
 <li><strong>Monitor memory usage:</strong> Configure Redis with appropriate <code>maxmemory</code> settings to prevent out-of-memory errors</li>
-<li><strong>Set an eviction policy:</strong> Use <code>maxmemory-policy</code> (e.g., <code>volatile-lru</code> or <code>allkeys-lru</code>) appropriate for your use case</li>
+<li><strong>Set an eviction policy:</strong> Use <code>maxmemory-policy</code> (e.g., <code>volatile-lru</code> for general use or <code>allkeys-lru</code> for cache-heavy workloads) appropriate for your use case</li>
+<li><strong>All-in-one defaults:</strong> The AIO Docker image ships Redis with <code>maxmemory=256mb</code> and <code>maxmemory-policy=volatile-lru</code>; override via the <code>REDIS_MAXMEMORY</code> and <code>REDIS_MAXMEMORY_POLICY</code> environment variables. With <code>volatile-lru</code>, transient counters (rate-limit, bad-behavior) are evicted before keys with TTLs that matter for sessions and timed bans, and keys without an expiry (permanent bans) are immune. The same policy is recommended for external Redis or Valkey servers used by BunkerWeb.</li>
 <li><strong>Avoid large keys:</strong> Ensure individual Redis keys are kept to a reasonable size to prevent performance degradation</li>
 </ul>
 <h4 id="data-persistence">Data Persistence</h4>
@@ -12095,7 +12118,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><a href="https://redis.io/topics/persistence">Redis Persistence</a></li>
 </ul>
 <h2 id="reporting-pro">Reporting <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.</p>
 <table>
 <thead>
@@ -12202,7 +12225,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="reverse-proxy">Reverse proxy</h2>
-<p>STREAM support <img alt="⚠" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM support <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>The Reverse Proxy plugin provides seamless proxying capabilities for BunkerWeb, allowing you to route requests to backend servers and services. This feature enables BunkerWeb to act as a secure frontend for your applications while providing additional benefits such as SSL termination and security filtering.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -12294,7 +12317,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><code>1.1</code></td>
 <td>multisite</td>
 <td>yes</td>
-<td><strong>HTTP Version:</strong> Protocol version used to talk to the upstream (<code>1.0</code>, <code>1.1</code>, or <code>2</code>). WebSocket locations are pinned to 1.1 regardless.</td>
+<td><strong>HTTP Version:</strong> Protocol version used to talk to the upstream (<code>1.0</code>, <code>1.1</code>, or <code>2</code>). Set to <code>2</code> for HTTP/2 multiplexing on the upstream leg. WebSocket locations stay on 1.1 regardless.</td>
 </tr>
 <tr>
 <td><code>REVERSE_PROXY_CUSTOM_HOST</code></td>
@@ -12857,7 +12880,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="reverse-scan">Reverse scan</h2>
-<p>STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>The Reverse Scan plugin robustly protects against proxy bypass attempts by scanning clients' ports to detect whether they are running proxy servers or other network services. This feature helps identify and block potential threats from clients that may be attempting to hide their true identity or origin, thereby enhancing your website's security posture.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -12961,7 +12984,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="robotstxt">Robots.txt</h2>
-<p>STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>The Robots.txt plugin manages the <a href="https://www.robotstxt.org/">robots.txt</a> file for your website. This file tells web crawlers and robots which parts of your site they can or cannot access.</p>
 <p><strong>How it works:</strong></p>
 <p>When enabled, BunkerWeb dynamically generates the <code>/robots.txt</code> file at the root of your website. The rules within this file are aggregated from multiple sources in the following order:</p>
@@ -13115,7 +13138,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <hr />
 <p>For more information, see the <a href="https://www.robotstxt.org/robotstxt.html">robots.txt documentation</a>.</p>
 <h2 id="securitytxt">Security.txt</h2>
-<p>STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>The Security.txt plugin implements the <a href="https://securitytxt.org/">Security.txt</a> standard (<a href="https://www.rfc-editor.org/rfc/rfc9116">RFC 9116</a>) for your website. This feature helps security researchers access your security policies and provides a standardized way for them to report security vulnerabilities they discover in your systems.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -13274,7 +13297,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="self-signed-certificate">Self-signed certificate</h2>
-<p>STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>The Self-signed Certificate plugin automatically generates and manages SSL/TLS certificates directly within BunkerWeb, enabling secure HTTPS connections without requiring an external certificate authority. This feature is particularly useful in development environments, internal networks, or whenever you need to quickly deploy HTTPS without configuring external certificates.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -13381,7 +13404,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="sessions">Sessions</h2>
-<p>STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>The Sessions plugin provides robust HTTP session management for BunkerWeb, enabling secure and reliable user session tracking across requests. This core feature is essential for maintaining user state, authentication persistence, and supporting other features that require identity continuity, such as <a href="#antibot">anti‑bot</a> protection and user authentication systems.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -13565,7 +13588,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="ssl">SSL</h2>
-<p>STREAM support <img alt="✅" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>The SSL plugin provides robust SSL/TLS encryption capabilities for your BunkerWeb-protected websites. This core component enables secure HTTPS connections by configuring and optimizing cryptographic protocols, ciphers, and related security settings to protect data in transit between clients and your web services.</p>
 <p><strong>How it works:</strong></p>
 <ol>
@@ -13701,7 +13724,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="ui">UI</h2>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Integrate easily the BunkerWeb UI.</p>
 <table>
 <thead>
@@ -13732,7 +13755,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </table>
 <h2 id="ui-single-sign-on-pro">UI Single Sign-On <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>For a more detailed guide, see the <a href="../advanced/#ui-single-sign-on-pro">advanced usages</a> documentation.</p>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Enable SSO authentication for the BunkerWeb web interface by reading headers set by upstream authentication proxies (Authentik, Authelia, Keycloak, Traefik Forward Auth, etc.)</p>
 <table>
 <thead>
@@ -13877,7 +13900,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/EIohiUf9Fg4' title='User Manager' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>For a more detailed guide, see the <a href="../advanced/#user-manager-pro">advanced usages</a> documentation.</p>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Add the possibility to manage users on the web interface</p>
 <table>
 <thead>
@@ -13900,7 +13923,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="whitelist">Whitelist</h2>
-<p>STREAM support <img alt="⚠" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM support <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>The Whitelist plugin lets you define a list of trusted IP addresses that bypass other security filters.
 For blocking unwanted clients instead, refer to the <a href="#blacklist">Blacklist plugin</a>.</p>
 <p>The Whitelist plugin provides a comprehensive approach to explicitly allow access to your website based on various client attributes. This feature provides a security mechanism: visitors matching specific criteria are granted immediate access, while all others must pass regular security checks.</p>
@@ -14266,7 +14289,7 @@ TrustedMonitor/\d+\.\d+
 </code></pre></div>
 <h2 id="wildcard-pro">Wildcard <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>For a more detailed guide, see the <a href="../advanced/#wildcard-pro">advanced usages</a> documentation.</p>
-<p>STREAM support <img alt="❌" class="twemoji" src="../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Adds wildcard server_name support (*.domain) for services.</p>
 <table>
 <thead>

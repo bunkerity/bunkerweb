@@ -48,7 +48,10 @@
 
     
     
-    <script async defer data-domain="docs.bunkerweb.io" src="https://data.bunkerity.com/js/script.js"></script>
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', (e) => {
@@ -63,7 +66,7 @@
       })
     </script>
 
-    <script src="../../assets/external/cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
 
     <script defer>
   // Lazy load images and embed youtube videos
@@ -83,8 +86,8 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#services">professional services</a>.</p>'},
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
 
@@ -203,7 +206,9 @@
             
             
     📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
-    <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc" style="color: #3f6ec6;&#10;              text-decoration: underline">BunkerWeb Panel</a>
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
     for more information on our enterprise offers.
 
           </div>
@@ -3556,7 +3561,7 @@
 <h1 id="funktionen">Funktionen</h1>
 <p>Dieser Abschnitt enthält die vollständige Liste der von BunkerWeb unterstützten Einstellungen. Wenn Sie mit BunkerWeb noch nicht vertraut sind, lesen Sie zuerst den Abschnitt <a href="../concepts/">Konzepte</a> der Dokumentation. Befolgen Sie anschließend die Anweisungen für Ihre <a href="../integrations/">Integration</a>, um die Einstellungen anzuwenden.</p>
 <h2 id="globale-einstellungen">Globale Einstellungen</h2>
-<p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Das Allgemein-Plugin stellt das zentrale Konfigurations-Framework für BunkerWeb bereit und ermöglicht es Ihnen, wesentliche Einstellungen zu definieren, die steuern, wie Ihre Webdienste geschützt und bereitgestellt werden. Dieses grundlegende Plugin verwaltet fundamentale Aspekte wie Sicherheitsmodi, Server-Standardeinstellungen, Protokollierungsverhalten und kritische Betriebsparameter für das gesamte BunkerWeb-Ökosystem.</p>
 <p><strong>So funktioniert es:</strong></p>
 <ol>
@@ -3933,6 +3938,13 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><strong>Datastore-Speichergröße:</strong> Größe des internen Datastores.</td>
 </tr>
 <tr>
+<td><code>DATASTORE_LRU_SIZE</code></td>
+<td><code>1k</code></td>
+<td>global</td>
+<td>Nein</td>
+<td><strong>Datastore-LRU-Größe:</strong> Anzahl der Slots im geteilten per-Worker-Datastore-LRU. Akzeptiert eine Ganzzahl oder <code>k</code>/<code>m</code>-Kurzform (z. B. <code>1k</code>, <code>10k</code>, <code>1m</code>).</td>
+</tr>
+<tr>
 <td><code>CACHESTORE_MEMORY_SIZE</code></td>
 <td><code>64m</code></td>
 <td>global</td>
@@ -4164,7 +4176,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </div>
 <h2 id="acme-pro">ACME <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#acme">erweiterten Nutzung</a>.</p>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Advanced ACME certificate management with custom CA support, certificate monitoring dashboard, expiry alerting, CT log monitoring, and enhanced OCSP stapling. Complements the built-in Let's Encrypt plugin.</p>
 <table>
 <thead>
@@ -4440,7 +4452,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </table>
 <h2 id="anti-ddos-pro">Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#anti-ddos-pro">erweiterten Nutzung</a>.</p>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides enhanced protection against DDoS attacks by analyzing and filtering suspicious traffic.</p>
 <table>
 <thead>
@@ -4498,7 +4510,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tbody>
 </table>
 <h2 id="antibot">Antibot</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Angreifer nutzen oft automatisierte Tools (Bots), um zu versuchen, Ihre Website auszunutzen. Zum Schutz davor enthält BunkerWeb eine „Antibot“-Funktion, die Benutzer auffordert, zu beweisen, dass sie menschlich sind. Wenn ein Benutzer die Herausforderung besteht, erhält er Zugriff auf Ihre Website. Diese Funktion ist standardmäßig deaktiviert.</p>
 <p>So funktioniert es:</p>
 <ol>
@@ -4704,6 +4716,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
+<p>Weitere Optionen finden Sie in den <a href="#allgemeine-parameter">Allgemeinen Parametern</a>.</p>
 </div>
 <div class="tabbed-block">
 <p>Die JavaScript-Herausforderung fordert den Client auf, eine Rechenaufgabe mithilfe von JavaScript zu lösen. Dieser Mechanismus stellt sicher, dass der Client JavaScript aktiviert hat und den erforderlichen Code ausführen kann, was für die meisten Bots in der Regel nicht möglich ist.</p>
@@ -4739,6 +4752,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
+<p>Weitere Optionen finden Sie in den <a href="#allgemeine-parameter">Allgemeinen Parametern</a>.</p>
 </div>
 <div class="tabbed-block">
 <p>Die Captcha-Herausforderung ist ein hauseigener Mechanismus, der bildbasierte Herausforderungen generiert, die vollständig in Ihrer BunkerWeb-Umgebung gehostet werden. Er testet die Fähigkeit der Benutzer, zufällige Zeichen zu erkennen und zu interpretieren, wodurch sichergestellt wird, dass automatisierte Bots effektiv blockiert werden, ohne auf externe Dienste angewiesen zu sein.</p>
@@ -4790,6 +4804,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
+<p>Weitere Optionen finden Sie in den <a href="#allgemeine-parameter">Allgemeinen Parametern</a>.</p>
 </div>
 <div class="tabbed-block">
 <p>Googles reCAPTCHA bietet eine Benutzervalidierung, die im Hintergrund (v3) ausgeführt wird, um eine Verhaltensbewertung zuzuweisen. Eine Bewertung unterhalb des konfigurierten Schwellenwerts löst eine zusätzliche Überprüfung aus oder blockiert die Anfrage. Bei sichtbaren Herausforderungen (v2) müssen Benutzer mit dem reCAPTCHA-Widget interagieren, bevor sie fortfahren können.</p>
@@ -4875,6 +4890,7 @@ Für die neue Version erstellen Sie einen reCAPTCHA-Schlüssel in Ihrem Google C
 </tr>
 </tbody>
 </table>
+<p>Weitere Optionen finden Sie in den <a href="#allgemeine-parameter">Allgemeinen Parametern</a>.</p>
 </div>
 <div class="tabbed-block">
 <p>Wenn aktiviert, bietet hCaptcha eine effektive Alternative zu reCAPTCHA, indem es Benutzerinteraktionen überprüft, ohne auf einen Bewertungsmechanismus angewiesen zu sein. Es fordert Benutzer mit einem einfachen, interaktiven Test heraus, um ihre Legitimität zu bestätigen.</p>
@@ -4914,6 +4930,7 @@ Für die neue Version erstellen Sie einen reCAPTCHA-Schlüssel in Ihrem Google C
 </tr>
 </tbody>
 </table>
+<p>Weitere Optionen finden Sie in den <a href="#allgemeine-parameter">Allgemeinen Parametern</a>.</p>
 </div>
 <div class="tabbed-block">
 <p>Turnstile ist ein moderner, datenschutzfreundlicher Herausforderungsmechanismus, der auf der Technologie von Cloudflare basiert, um automatisierten Traffic zu erkennen und zu blockieren. Er validiert Benutzerinteraktionen transparent und im Hintergrund, wodurch die Reibung für legitime Benutzer reduziert und Bots effektiv abgeschreckt werden.</p>
@@ -4953,6 +4970,7 @@ Für die neue Version erstellen Sie einen reCAPTCHA-Schlüssel in Ihrem Google C
 </tr>
 </tbody>
 </table>
+<p>Weitere Optionen finden Sie in den <a href="#allgemeine-parameter">Allgemeinen Parametern</a>.</p>
 </div>
 <div class="tabbed-block">
 <p>mCaptcha ist ein alternativer CAPTCHA-Herausforderungsmechanismus, der die Legitimität von Benutzern überprüft, indem er einen interaktiven Test präsentiert, ähnlich wie andere Antibot-Lösungen. Wenn aktiviert, fordert es Benutzer mit einem von mCaptcha bereitgestellten CAPTCHA heraus, um sicherzustellen, dass nur authentische Benutzer die automatisierten Sicherheitskontrollen umgehen.</p>
@@ -5000,7 +5018,7 @@ Für die neue Version erstellen Sie einen reCAPTCHA-Schlüssel in Ihrem Google C
 </tr>
 </tbody>
 </table>
-<p>Siehe Allgemeine Parameter für zusätzliche Optionen.</p>
+<p>Weitere Optionen finden Sie in den <a href="#allgemeine-parameter">Allgemeinen Parametern</a>.</p>
 </div>
 <div class="tabbed-block">
 <p><a href="https://capjs.js.org/">Cap.js</a> ist ein selbst gehostetes, quelloffenes, datenschutzfreundliches Proof-of-Work-CAPTCHA. Statt die Überprüfung an einen Drittanbieter auszulagern, betreiben Sie den Cap.js-Server selbst; BunkerWeb prüft die Tokens gegen diesen Server.</p>
@@ -5062,7 +5080,7 @@ Für die neue Version erstellen Sie einen reCAPTCHA-Schlüssel in Ihrem Google C
 <li>Setzen Sie <code>ANTIBOT_CAPJS_FRONTEND_URL</code> und <code>ANTIBOT_CAPJS_BACKEND_URL</code> nur auf den Origin: Schema, Host und optionaler Port, ohne Pfad.</li>
 </ul>
 </div>
-<p>Siehe Allgemeine Parameter für zusätzliche Optionen.</p>
+<p>Weitere Optionen finden Sie in den <a href="#allgemeine-parameter">Allgemeinen Parametern</a>.</p>
 </div>
 </div>
 </div>
@@ -5162,7 +5180,7 @@ Für die neue Version erstellen Sie einen reCAPTCHA-Schlüssel in Ihrem Google C
 </div>
 </div>
 <h2 id="auth-basic">Auth basic</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Das Auth Basic-Plugin bietet eine HTTP-Basisauthentifizierung zum Schutz Ihrer Website oder bestimmter Ressourcen. Diese Funktion fügt eine zusätzliche Sicherheitsebene hinzu, indem sie von den Benutzern die Eingabe eines Benutzernamens und eines Passworts verlangt, bevor sie auf geschützte Inhalte zugreifen können. Diese Art der Authentifizierung ist einfach zu implementieren und wird von den Browsern weitgehend unterstützt.</p>
 <p><strong>So funktioniert es:</strong></p>
 <ol>
@@ -5280,7 +5298,7 @@ Für die neue Version erstellen Sie einen reCAPTCHA-Schlüssel in Ihrem Google C
 </div>
 </div>
 <h2 id="backup">Backup</h2>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Das Backup-Plugin bietet eine automatisierte Backup-Lösung zum Schutz Ihrer BunkerWeb-Daten. Diese Funktion gewährleistet die Sicherheit und Verfügbarkeit Ihrer wichtigen Datenbank, indem sie regelmäßige Backups nach Ihrem bevorzugten Zeitplan erstellt. Backups werden an einem bestimmten Ort gespeichert und können sowohl durch automatisierte Prozesse als auch durch manuelle Befehle einfach verwaltet werden.</p>
 <p><strong>So funktioniert es:</strong></p>
 <ol>
@@ -5396,7 +5414,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 </div>
 <h2 id="backup-s3-pro">Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Automatically backup your data to an S3 bucket</p>
 <table>
 <thead>
@@ -5482,7 +5500,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </tbody>
 </table>
 <h2 id="bad-behavior">Bad behavior</h2>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Das Bad Behavior-Plugin schützt Ihre Website, indem es IP-Adressen, die innerhalb eines bestimmten Zeitraums zu viele Fehler oder „schlechte“ HTTP-Statuscodes erzeugen, automatisch erkennt und sperrt. Dies hilft bei der Abwehr von Brute-Force-Angriffen, Web-Scrapern, Schwachstellen-Scannern und anderen böswilligen Aktivitäten, die zahlreiche Fehlerantworten erzeugen könnten.</p>
 <p>Angreifer erzeugen oft „verdächtige“ HTTP-Statuscodes, wenn sie nach Schwachstellen suchen oder diese ausnutzen – Codes, die ein typischer Benutzer innerhalb eines bestimmten Zeitrahmens wahrscheinlich nicht auslösen würde. Durch die Erkennung dieses Verhaltens kann BunkerWeb die betreffende IP-Adresse automatisch sperren und den Angreifer zwingen, eine neue IP-Adresse zu verwenden, um seine Versuche fortzusetzen.</p>
 <p><strong>So funktioniert es:</strong></p>
@@ -5626,7 +5644,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 </div>
 <h2 id="blacklist">Blacklist</h2>
-<p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Das Blacklist-Plugin schützt Ihre Website, indem es den Zugriff basierend auf verschiedenen Client-Attributen blockiert. Diese Funktion wehrt bekannte bösartige Entitäten, Scanner und verdächtige Besucher ab, indem sie den Zugriff basierend auf IP-Adressen, Netzwerken, Reverse-DNS-Einträgen (rDNS), ASNs, User-Agents und spezifischen URI-Mustern verweigert.</p>
 <p><strong>So funktioniert's:</strong></p>
 <ol>
@@ -6033,23 +6051,24 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 TrustedMonitor/\d+\.\d+
 </code></pre></div>
 <h2 id="brotli">Brotli</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
-<p>Das Brotli-Plugin aktiviert die Komprimierung von HTTP-Antworten mit dem Brotli-Algorithmus. Es reduziert die Bandbreitennutzung and beschleunigt das Laden, indem es Inhalte vor dem Senden an den Browser komprimiert.</p>
-<p>Im Vergleich zu Gzip erreicht Brotli in der Regel bessere Kompressionsraten, was zu kleineren Dateien and einer schnelleren Bereitstellung führt.</p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
+<p>Das Brotli-Plugin aktiviert die Komprimierung von HTTP-Antworten mit dem Brotli-Algorithmus. Es reduziert die Bandbreitennutzung und beschleunigt das Laden, indem es Inhalte vor dem Senden an den Browser komprimiert.</p>
+<p>Im Vergleich zu Gzip erreicht Brotli in der Regel bessere Kompressionsraten, was zu kleineren Dateien und einer schnelleren Bereitstellung führt.</p>
 <p>So funktioniert's:</p>
 <ol>
 <li>Auf Anfrage eines Clients prüft BunkerWeb, ob der Browser Brotli unterstützt.</li>
-<li>Wenn ja, wird die Antwort auf dem konfigurierten Niveau (<code>BROTLI_COMP_LEVEL</code>) komprimiert.</li>
+<li>Wenn ja, wird die Antwort auf dem konfigurierten Niveau komprimiert.</li>
 <li>Die entsprechenden Header zeigen die Brotli-Komprimierung an.</li>
 <li>Der Browser dekomprimiert vor der Anzeige.</li>
-<li>Bandbreite and Ladezeiten nehmen ab.</li>
+<li>Bandbreite und Ladezeiten nehmen ab.</li>
 </ol>
 <h3 id="so-wirds-verwendet">So wird's verwendet</h3>
 <ol>
-<li>Aktivieren: <code>USE_BROTLI: yes</code> (standardmäßig deaktiviert).</li>
+<li>Aktivieren: Setzen Sie den Parameter <code>USE_BROTLI</code> auf <code>yes</code> (standardmäßig deaktiviert).</li>
 <li>MIME-Typen: Definieren Sie die zu komprimierenden Inhalte über <code>BROTLI_TYPES</code>.</li>
 <li>Mindestgröße: <code>BROTLI_MIN_LENGTH</code>, um die Komprimierung kleiner Antworten zu vermeiden.</li>
-<li>Komprimierungsstufe: <code>BROTLI_COMP_LEVEL</code> für das Gleichgewicht zwischen Geschwindigkeit and Verhältnis.</li>
+<li>Komprimierungsstufe: <code>BROTLI_COMP_LEVEL</code> für das Gleichgewicht zwischen Geschwindigkeit und Verhältnis.</li>
+<li>BunkerWeb den Rest erledigen lassen: Nach der Konfiguration wird die Komprimierung automatisch auf geeignete Antworten angewendet.</li>
 </ol>
 <h3 id="parameter">Parameter</h3>
 <table>
@@ -6095,7 +6114,11 @@ TrustedMonitor/\d+\.\d+
 </table>
 <div class="admonition tip">
 <p class="admonition-title">Komprimierungsstufe</p>
-<p><code>6</code> bietet einen guten Kompromiss. Für statische Inhalte and verfügbare CPU: 9–11. Für dynamische Inhalte oder bei CPU-Einschränkungen: 4–5.</p>
+<p><code>6</code> bietet einen guten Kompromiss. Für statische Inhalte und verfügbare CPU: 9–11. Für dynamische Inhalte oder bei CPU-Einschränkungen: 4–5.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Browser-Unterstützung</p>
+<p>Brotli wird von allen modernen Browsern unterstützt. Clients ohne Brotli-Unterstützung erhalten unkomprimierte Antworten oder eine andere verfügbare Codierung.</p>
 </div>
 <h3 id="beispiele">Beispiele</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Basis</label><label for="__tabbed_10_2">Maximale Komprimierung</label><label for="__tabbed_10_3">Ausgewogene Leistung</label></div>
@@ -6124,7 +6147,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="bunkernet">BunkerNet</h2>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Das BunkerNet-Plugin ermöglicht den kollektiven Austausch von Bedrohungsdaten zwischen BunkerWeb-Instanzen und schafft so ein leistungsstarkes Schutznetzwerk gegen böswillige Akteure. Durch die Teilnahme an BunkerNet profitiert Ihre Instanz von einer globalen Datenbank bekannter Bedrohungen und trägt gleichzeitig dazu bei, die Sicherheit der gesamten BunkerWeb-Community zu verbessern.</p>
 <p><strong>So funktioniert es:</strong></p>
 <ol>
@@ -6254,7 +6277,7 @@ TrustedMonitor/\d+\.\d+
 </figure>
 <h2 id="cache-pro">Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#cache-pro">erweiterten Nutzung</a>.</p>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides caching functionality at the reverse proxy level.</p>
 <table>
 <thead>
@@ -6382,7 +6405,7 @@ TrustedMonitor/\d+\.\d+
 </tbody>
 </table>
 <h2 id="client-cache">Client cache</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Das Client-Cache-Plugin optimiert die Leistung von Websites, indem es steuert, wie Browser statische Inhalte zwischenspeichern. Es reduziert die Bandbreitennutzung, senkt die Serverlast und verbessert die Ladezeiten von Seiten, indem es Browser anweist, statische Assets wie Bilder, CSS- und JavaScript-Dateien lokal zu speichern und wiederzuverwenden, anstatt sie bei jedem Seitenbesuch erneut anzufordern.</p>
 <p><strong>So funktioniert es:</strong></p>
 <ol>
@@ -6446,7 +6469,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="cors">CORS</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Das CORS-Plugin ermöglicht Cross-Origin Resource Sharing (Ressourcenfreigabe zwischen verschiedenen Ursprüngen) für Ihre Website und erlaubt so den kontrollierten Zugriff auf Ihre Ressourcen von verschiedenen Domains aus. Diese Funktion hilft Ihnen, Ihre Inhalte sicher mit vertrauenswürdigen Drittanbieter-Websites zu teilen, während die Sicherheit durch die explizite Definition der erlaubten Ursprünge, Methoden und Header gewährleistet wird.</p>
 <p><strong>So funktioniert es:</strong></p>
 <ol>
@@ -6454,7 +6477,7 @@ TrustedMonitor/\d+\.\d+
 <li>BunkerWeb prüft, ob der anfragende Ursprung basierend auf Ihrer Konfiguration zulässig ist.</li>
 <li>Wenn dies der Fall ist, antwortet BunkerWeb mit den entsprechenden CORS-Headern, die definieren, was die anfragende Website tun darf.</li>
 <li>Bei nicht zulässigen Ursprüngen kann die Anfrage entweder komplett verweigert oder ohne CORS-Header ausgeliefert werden.</li>
-<li>Zusätzliche Cross-Origin-Richtlinien wie <a href="https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy">COEP</a>, <a href="https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy">COOP</a> und <a href="https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy">CORP</a> können konfiguriert werden, um die Sicherheit weiter zu erhöhen.</li>
+<li>Zusätzliche Cross-Origin-Richtlinien wie <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy">COEP</a>, <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy">COOP</a> und <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy">CORP</a> können konfiguriert werden, um die Sicherheit weiter zu erhöhen.</li>
 </ol>
 <h3 id="wie-man-es-benutzt_5">Wie man es benutzt</h3>
 <p>Führen Sie die folgenden Schritte aus, um die CORS-Funktion zu konfigurieren und zu verwenden:</p>
@@ -6634,7 +6657,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="country">Country</h2>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Das Länder-Plugin aktiviert Geoblocking und ermöglicht die Einschränkung des Zugriffs basierend auf dem geografischen Standort der Besucher. Dies ist nützlich für die Einhaltung regionaler Vorschriften, zur Begrenzung von Betrug in Risikogebieten und zur Anwendung von Inhaltsbeschränkungen über Ländergrenzen hinweg.</p>
 <p>So funktioniert's:</p>
 <ol>
@@ -6697,7 +6720,11 @@ TrustedMonitor/\d+\.\d+
 </ul>
 <div class="admonition tip">
 <p class="admonition-title">Whitelist vs. Blacklist</p>
-<p>Whitelist: Zugriff auf wenige Länder beschränkt. Blacklist: Problematische Regionen blockieren und den Rest zulassen.</p>
+<p>Wählen Sie den Ansatz, der zu Ihren Anforderungen passt:</p>
+<ul>
+<li>Verwenden Sie die Whitelist, wenn Sie den Zugriff auf wenige Länder beschränken möchten.</li>
+<li>Verwenden Sie die Blacklist, wenn Sie bestimmte problematische Regionen blockieren und alle anderen zulassen möchten.</li>
+</ul>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Priorität</p>
@@ -6733,7 +6760,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="crowdsec">CrowdSec</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <figure>
 <p><img align="center," alt="Overview" src="../../assets/img/crowdsec.svg" width="600" /></p>
 </figure>
@@ -6980,7 +7007,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 <h3 id="schritt-2-bunkerweb-einstellungen-konfigurieren">Schritt&nbsp;2 – BunkerWeb-Einstellungen konfigurieren</h3>
-<p>Wenden Sie die folgenden Umgebungsvariablen (oder Scheduler-Werte) an, damit die BunkerWeb-Instanz mit der CrowdSec Local API kommunizieren kann. Mindestens <code>USE_CROWDSEC</code>, <code>CROWDSEC_API</code> und ein gültiger mit <code>cscli bouncers add</code> erzeugter Schlüssel werden benötigt.</p>
+<p>Wenden Sie die folgenden Umgebungsvariablen (oder Scheduler-Werte) an, damit die BunkerWeb-Instanz mit der CrowdSec Local API kommunizieren kann. Mindestens <code>USE_CROWDSEC</code>, <code>CROWDSEC_API</code> und <code>CROWDSEC_API_KEY</code> mit einem gültigen per <code>cscli bouncers add</code> erzeugten Schlüssel werden benötigt.</p>
 <table>
 <thead>
 <tr>
@@ -7120,7 +7147,13 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 </tbody>
 </table>
-<p>!!! info "Über die Betriebsmodi" - Der <strong>Live-Modus</strong> fragt die CrowdSec-API für jede eingehende Anfrage ab und bietet Echtzeitschutz auf Kosten einer höheren Latenz. - Der <strong>Stream-Modus</strong> lädt periodisch alle Entscheidungen von der CrowdSec-API herunter und speichert sie lokal im Cache, wodurch die Latenz mit einer leichten Verzögerung bei der Anwendung neuer Entscheidungen reduziert wird.</p>
+<div class="admonition info">
+<p class="admonition-title">Über die Betriebsmodi</p>
+<ul>
+<li>Der <strong>Live-Modus</strong> fragt die CrowdSec-API für jede eingehende Anfrage ab und bietet Echtzeitschutz auf Kosten einer höheren Latenz.</li>
+<li>Der <strong>Stream-Modus</strong> lädt periodisch alle Entscheidungen von der CrowdSec-API herunter und speichert sie lokal im Cache, wodurch die Latenz mit einer leichten Verzögerung bei der Anwendung neuer Entscheidungen reduziert wird.</li>
+</ul>
+</div>
 <h3 id="konfigurationsbeispiele_2">Konfigurationsbeispiele</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Basiskonfiguration</label><label for="__tabbed_16_2">Erweiterte Konfiguration mit AppSec</label></div>
 <div class="tabbed-content">
@@ -7154,16 +7187,11 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <ul>
 <li>Suchen Sie in den Scheduler-Protokollen nach den Einträgen <code>CrowdSec configuration successfully generated</code> und <code>CrowdSec bouncer denied request</code>, um zu überprüfen, dass das Plugin aktiv ist.</li>
 <li>Überwachen Sie auf CrowdSec-Seite <code>cscli metrics show</code> oder die CrowdSec-Konsole, um sicherzugehen, dass BunkerWeb-Entscheidungen wie erwartet erscheinen.</li>
-<li>Öffnen Sie in der BunkerWeb-Oberfläche die CrowdSec-Plugin-Seite, um den Status der Integration zu sehen.
-    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
-    CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
-    CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
-    CROWDSEC_APPSEC_SSL_VERIFY: "yes"
-    ```</li>
+<li>Öffnen Sie in der BunkerWeb-Oberfläche die CrowdSec-Plugin-Seite, um den Status der Integration zu sehen.</li>
 </ul>
 <h2 id="custom-pages-pro">Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#custom-pages-pro">erweiterten Nutzung</a>.</p>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Tweak BunkerWeb error/antibot/default pages with custom HTML.</p>
 <table>
 <thead>
@@ -7242,7 +7270,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tbody>
 </table>
 <h2 id="custom-ssl-certificate">Custom SSL certificate</h2>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Das Plugin für benutzerdefinierte SSL-Zertifikate ermöglicht die Verwendung Ihrer eigenen SSL/TLS-Zertifikate mit BunkerWeb, anstelle der automatisch generierten. Dies ist nützlich, wenn Sie bereits Zertifikate von einer vertrauenswürdigen CA besitzen, spezifische Anforderungen haben oder die Zertifikatsverwaltung zentralisieren.</p>
 <p>So funktioniert's:</p>
 <ol>
@@ -7254,14 +7282,15 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </ol>
 <div class="admonition info">
 <p class="admonition-title">Automatische Überwachung</p>
-<p>Mit <code>USE_CUSTOM_SSL: yes</code> überwacht BunkerWeb das Zertifikat <code>CUSTOM_SSL_CERT</code>, erkennt Änderungen und lädt NGINX bei Bedarf neu.</p>
+<p>Wenn Sie den Parameter <code>USE_CUSTOM_SSL</code> auf <code>yes</code> setzen, überwacht BunkerWeb das Zertifikat <code>CUSTOM_SSL_CERT</code>, erkennt Änderungen und lädt NGINX bei Bedarf neu.</p>
 </div>
 <h3 id="verwendung">Verwendung</h3>
 <ol>
-<li>Aktivieren: <code>USE_CUSTOM_SSL: yes</code>.</li>
+<li>Aktivieren: Setzen Sie den Parameter <code>USE_CUSTOM_SSL</code> auf <code>yes</code>.</li>
 <li>Methode: Dateien vs. Daten, Priorität über <code>CUSTOM_SSL_CERT_PRIORITY</code>.</li>
 <li>Dateien: Geben Sie die Pfade zum Zertifikat und zum privaten Schlüssel an.</li>
 <li>Daten: Geben Sie die base64- oder Klartext-PEM-Strings an.</li>
+<li>BunkerWeb den Rest erledigen lassen: Nach der Konfiguration werden Ihre benutzerdefinierten Zertifikate automatisch für HTTPS-Verbindungen verwendet.</li>
 </ol>
 <div class="admonition tip">
 <p class="admonition-title">Stream-Modus</p>
@@ -7377,7 +7406,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 <h2 id="database">Database</h2>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Das Datenbank-Plugin bietet eine robuste Datenbankintegration für BunkerWeb, indem es die zentrale Speicherung und Verwaltung von Konfigurationsdaten, Protokollen und anderen wichtigen Informationen ermöglicht.</p>
 <p>Diese Kernkomponente unterstützt mehrere Datenbank-Engines, darunter SQLite, PostgreSQL, MySQL/MariaDB und Oracle, sodass Sie die Datenbanklösung wählen können, die am besten zu Ihrer Umgebung und Ihren Anforderungen passt.</p>
 <p><strong>So funktioniert es:</strong></p>
@@ -7507,7 +7536,15 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 </tbody>
 </table>
-<p>!!! tip "Auswahl der Datenbank" - <strong>SQLite</strong> (Standard): Ideal für Single-Node-Bereitstellungen oder Testumgebungen aufgrund seiner Einfachheit und dateibasierten Natur. - <strong>PostgreSQL</strong>: Empfohlen für Produktionsumgebungen mit mehreren BunkerWeb-Instanzen aufgrund seiner Robustheit und Unterstützung für Gleichzeitigkeit. - <strong>MySQL/MariaDB</strong>: Eine gute Alternative zu PostgreSQL mit ähnlichen produktionsreifen Fähigkeiten. - <strong>Oracle</strong>: Geeignet für Unternehmensumgebungen, in denen Oracle bereits die Standard-Datenbankplattform ist.</p>
+<div class="admonition tip">
+<p class="admonition-title">Auswahl der Datenbank</p>
+<ul>
+<li><strong>SQLite</strong> (Standard): Ideal für Single-Node-Bereitstellungen oder Testumgebungen aufgrund seiner Einfachheit und dateibasierten Natur.</li>
+<li><strong>PostgreSQL</strong>: Empfohlen für Produktionsumgebungen mit mehreren BunkerWeb-Instanzen aufgrund seiner Robustheit und Unterstützung für Gleichzeitigkeit.</li>
+<li><strong>MySQL/MariaDB</strong>: Eine gute Alternative zu PostgreSQL mit ähnlichen produktionsreifen Fähigkeiten.</li>
+<li><strong>Oracle</strong>: Geeignet für Unternehmensumgebungen, in denen Oracle bereits die Standard-Datenbankplattform ist.</li>
+</ul>
+</div>
 <div class="admonition info">
 <p class="admonition-title">SQLAlchemy-URI-Format</p>
 <p>Die Datenbank-URI folgt dem SQLAlchemy-Format:</p>
@@ -7521,14 +7558,14 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <div class="admonition warning">
 <p class="admonition-title">Datenbankwartung</p>
 <p>Das Plugin führt automatisch tägliche Wartungsjobs aus:</p>
-</div>
 <ul>
 <li><strong>Bereinigung überschüssiger Job-Ausführungen:</strong> Entfernt Historien, die über dem Wert von <code>DATABASE_MAX_JOBS_RUNS</code> liegen.</li>
 <li><strong>Bereinigung abgelaufener UI-Sitzungen:</strong> Löscht UI-Benutzersitzungen, die älter sind als <code>DATABASE_MAX_SESSION_AGE_DAYS</code>.</li>
 </ul>
 <p>Diese Aufgaben verhindern ein unbegrenztes Datenbankwachstum und bewahren gleichzeitig eine nützliche Betriebshistorie.</p>
+</div>
 <h2 id="dnsbl">DNSBL</h2>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Das DNSBL (Domain Name System Blacklist) Plugin bietet Schutz vor bekannten bösartigen IP-Adressen, indem es die IP-Adressen von Clients mit externen DNSBL-Servern abgleicht. Diese Funktion schützt Ihre Website vor Spam, Botnetzen und verschiedenen Arten von Cyber-Bedrohungen, indem sie auf von der Community gepflegte Listen problematischer IP-Adressen zurückgreift.</p>
 <p><strong>So funktioniert es:</strong></p>
 <ol>
@@ -7675,26 +7712,26 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/45vX0WJqjxo' title='Easy Resolve' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#easy-resolve-pro">erweiterten Nutzung</a>.</p>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides a simpler way to fix false positives in reports.</p>
 <h2 id="errors">Errors</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
-<p>Das Errors-Plugin bietet eine anpassbare Verwaltung von HTTP-Fehlern, um das Erscheinungsbild der Fehlerantworten für Ihre Benutzer zu definieren. So können Sie klare and konsistente Fehlerseiten anzeigen, die Ihrer Identität entsprechen, anstatt der technischen Standardseiten des Servers.</p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
+<p>Das Errors-Plugin bietet eine anpassbare Verwaltung von HTTP-Fehlern, um das Erscheinungsbild der Fehlerantworten für Ihre Benutzer zu definieren. So können Sie klare und konsistente Fehlerseiten anzeigen, die Ihrer Identität entsprechen, anstatt der technischen Standardseiten des Servers.</p>
 <p><strong>So funktioniert's:</strong></p>
 <ol>
 <li>Wenn ein HTTP-Fehler auftritt (z.B. 400, 404, 500), fängt BunkerWeb die Antwort ab.</li>
-<li>Anstelle der Standardseite zeigt BunkerWeb eine angepasste and sorgfältig gestaltete Seite an.</li>
+<li>Anstelle der Standardseite zeigt BunkerWeb eine angepasste und sorgfältig gestaltete Seite an.</li>
 <li>Die Fehlerseiten sind konfigurierbar: Sie können für jeden Fehlercode eine HTML-Datei bereitstellen. Die Dateien müssen in dem durch <code>ROOT_FOLDER</code> definierten Verzeichnis abgelegt werden (siehe Misc-Plugin).<ul>
 <li>Standardmäßig ist <code>ROOT_FOLDER</code> auf <code>/var/www/html/{server_name}</code> gesetzt.</li>
 <li>Im Multisite-Modus hat jede Site ihren eigenen <code>ROOT_FOLDER</code>; platzieren Sie die Fehlerseiten im entsprechenden Ordner für jede Site.</li>
 </ul>
 </li>
-<li>Die Standardseiten erklären das Problem klar and schlagen mögliche Maßnahmen vor.</li>
+<li>Die Standardseiten erklären das Problem klar und schlagen mögliche Maßnahmen vor.</li>
 </ol>
 <h3 id="verwendung_1">Verwendung</h3>
 <ol>
 <li><strong>Benutzerdefinierte Seiten definieren:</strong> Verwenden Sie <code>ERRORS</code>, um HTTP-Codes mit HTML-Dateien (im <code>ROOT_FOLDER</code>) zu verknüpfen.</li>
-<li><strong>Ihre Seiten konfigurieren:</strong> Verwenden Sie die Standardseiten von BunkerWeb oder Ihre eigenen Dateien.</li>
+<li><strong>Ihre Seiten konfigurieren:</strong> Verwenden Sie die Standardseiten von BunkerWeb oder Ihre eigenen Dateien (im passenden <code>ROOT_FOLDER</code>).</li>
 <li><strong>Abgefangene Codes definieren:</strong> Wählen Sie mit <code>INTERCEPTED_ERROR_CODES</code> die Codes aus, die immer von BunkerWeb verwaltet werden sollen.</li>
 <li><strong>Lassen Sie BunkerWeb den Rest erledigen:</strong> Die Fehlerverwaltung wird automatisch angewendet.</li>
 </ol>
@@ -7728,15 +7765,22 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </table>
 <div class="admonition tip">
 <p class="admonition-title">Seiten-Design</p>
-<p>Die Standardseiten sind klar and lehrreich: Fehlerbeschreibung, mögliche Ursachen, vorgeschlagene Maßnahmen and visuelle Anhaltspunkte.</p>
+<p>Die Standard-Fehlerseiten von BunkerWeb sind informativ, benutzerfreundlich und professionell gestaltet. Sie enthalten:</p>
+<ul>
+<li>Klare Fehlerbeschreibungen</li>
+<li>Informationen zu möglichen Ursachen des Fehlers</li>
+<li>Vorgeschlagene Maßnahmen zur Behebung des Problems</li>
+<li>Visuelle Hinweise, die erkennen lassen, ob das Problem client- oder serverseitig ist</li>
+</ul>
 </div>
 <div class="admonition info">
 <p class="admonition-title">Fehlertypen</p>
-</div>
+<p>Fehlercodes werden nach Typ kategorisiert:</p>
 <ul>
-<li>4xx (Client-seitig): Ungültige Anfragen, nicht existierende Ressource, fehlende Authentifizierung…</li>
-<li>5xx (Server-seitig): Unmöglichkeit, eine gültige Anfrage zu bearbeiten (interner Fehler, vorübergehende Nichtverfügbarkeit…).</li>
+<li><strong>4xx-Fehler (Client-seitig):</strong> Ungültige Anfragen, nicht existierende Ressource, fehlende Authentifizierung…</li>
+<li><strong>5xx-Fehler (Server-seitig):</strong> Unmöglichkeit, eine gültige Anfrage zu bearbeiten (interner Fehler, vorübergehende Nichtverfügbarkeit…).</li>
 </ul>
+</div>
 <h3 id="beispiele_3">Beispiele</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Standardverwaltung</label><label for="__tabbed_19_2">Benutzerdefinierte Seiten</label><label for="__tabbed_19_3">Selektive Verwaltung</label></div>
 <div class="tabbed-content">
@@ -7756,7 +7800,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 <h2 id="greylist">Greylist</h2>
-<p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Das Greylist-Plugin bietet einen flexiblen Sicherheitsansatz, der Besuchern den Zugriff ermöglicht, während wesentliche Sicherheitsfunktionen weiterhin aktiv bleiben.</p>
 <p>Im Gegensatz zu traditionellen <a href="#blacklist">Blacklist</a>/<a href="#whitelist">Whitelist</a>-Ansätzen, die den Zugriff vollständig blockieren oder erlauben, schafft die Greylist einen Mittelweg, indem sie bestimmten Besuchern den Zugriff gewährt, sie aber dennoch Sicherheitsprüfungen unterzieht.</p>
 <p><strong>So funktioniert es:</strong></p>
@@ -8044,7 +8088,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 TrustedMonitor/\d+\.\d+
 </code></pre></div>
 <h2 id="grpc">gRPC</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Das gRPC-Plugin ermöglicht BunkerWeb, gRPC-Dienste über HTTP/2 mit <code>grpc_pass</code> zu proxien. Es ist für Multisite-Setups konzipiert, bei denen jeder virtuelle Host einen oder mehrere gRPC-Backends unter bestimmten Pfaden bereitstellen kann.</p>
 <div class="admonition example">
 <p class="admonition-title">Experimentelle Funktion</p>
@@ -8258,7 +8302,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="gzip">Gzip</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Der GZIP-Plugin komprimiert HTTP-Antworten mit dem GZIP-Algorithmus, um die Bandbreite zu reduzieren und das Laden von Seiten zu beschleunigen.</p>
 <h3 id="funktionsweise">Funktionsweise</h3>
 <ol>
@@ -8266,10 +8310,11 @@ TrustedMonitor/\d+\.\d+
 <li>Falls ja, wird die Antwort auf dem konfigurierten Niveau komprimiert.</li>
 <li>Die Header zeigen die Verwendung von GZIP an.</li>
 <li>Der Browser dekomprimiert vor der Anzeige.</li>
+<li>Bandbreite und Ladezeiten werden reduziert, wodurch sich die Gesamtleistung der Website verbessert.</li>
 </ol>
 <h3 id="verwendung_3">Verwendung</h3>
 <ol>
-<li>Aktivieren: <code>USE_GZIP: yes</code> (standardmäßig deaktiviert).</li>
+<li>Aktivieren: Setzen Sie den Parameter <code>USE_GZIP</code> auf <code>yes</code> (standardmäßig deaktiviert).</li>
 <li>MIME-Typen: <code>GZIP_TYPES</code> definieren.</li>
 <li>Mindestgröße: <code>GZIP_MIN_LENGTH</code>, um sehr kleine Dateien zu vermeiden.</li>
 <li>Kompressionsstufe: <code>GZIP_COMP_LEVEL</code> (1–9).</li>
@@ -8328,6 +8373,14 @@ TrustedMonitor/\d+\.\d+
 <p class="admonition-title">Kompressionsstufe</p>
 <p><code>5</code> ist ein guter Kompromiss. Statisch/CPU verfügbar: 7–9. Dynamisch/CPU begrenzt: 1–3.</p>
 </div>
+<div class="admonition info">
+<p class="admonition-title">Browser-Unterstützung</p>
+<p>GZIP wird von allen modernen Browsern unterstützt und ist seit vielen Jahren die Standardmethode für die Komprimierung von HTTP-Antworten, was eine sehr gute Kompatibilität über Geräte und Browser hinweg sicherstellt.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Komprimierung vs. CPU-Nutzung</p>
+<p>GZIP-Komprimierung reduziert Bandbreite und Ladezeiten, höhere Komprimierungsstufen verbrauchen jedoch mehr CPU-Ressourcen. Für stark frequentierte Websites sollten Sie das richtige Gleichgewicht zwischen Komprimierungseffizienz und Serverleistung finden.</p>
+</div>
 <h3 id="beispiele_4">Beispiele</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="23:4"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><input id="__tabbed_23_3" name="__tabbed_23" type="radio" /><input id="__tabbed_23_4" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">Standard</label><label for="__tabbed_23_2">Maximale Kompression</label><label for="__tabbed_23_3">Ausgewogene Leistung</label><label for="__tabbed_23_4">Proxied-Inhalt</label></div>
 <div class="tabbed-content">
@@ -8365,8 +8418,8 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="headers">Headers</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
-<p>HTTP-Header spielen eine entscheidende Rolle bei der Sicherheit. Das Headers-Plugin bietet eine robuste Verwaltung von Standard- und benutzerdefinierten HTTP-Headern und verbessert so Sicherheit und Funktionalität. Es wendet dynamisch Sicherheitsmaßnahmen an, wie <a href="https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Strict-Transport-Security">HSTS</a>, <a href="https://developer.mozilla.org/de/docs/Web/HTTP/CSP">CSP</a> (einschließlich eines reinen Berichtsmodus) und die Injektion benutzerdefinierter Header, während es gleichzeitig Informationslecks verhindert.</p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
+<p>HTTP-Header spielen eine entscheidende Rolle bei der Sicherheit. Das Headers-Plugin bietet eine robuste Verwaltung von Standard- und benutzerdefinierten HTTP-Headern und verbessert so Sicherheit und Funktionalität. Es wendet dynamisch Sicherheitsmaßnahmen an, wie <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security">HSTS</a>, <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy">CSP</a> (einschließlich eines reinen Berichtsmodus) und die Injektion benutzerdefinierter Header, während es gleichzeitig Informationslecks verhindert.</p>
 <p><strong>Wie es funktioniert</strong></p>
 <ol>
 <li>Wenn ein Client Inhalte von Ihrer Website anfordert, verarbeitet BunkerWeb die Antwort-Header.</li>
@@ -8384,7 +8437,7 @@ TrustedMonitor/\d+\.\d+
 <li><strong>Unerwünschte Header entfernen:</strong> Verwenden Sie <code>REMOVE_HEADERS</code>, um sicherzustellen, dass Header, die Serverdetails preisgeben könnten, entfernt werden.</li>
 <li><strong>Cookie-Sicherheit einstellen:</strong> Aktivieren Sie eine robuste Cookie-Sicherheit, indem Sie <code>COOKIE_FLAGS</code> konfigurieren und <code>COOKIE_AUTO_SECURE_FLAG</code> auf <code>yes</code> setzen, damit das Secure-Flag bei HTTPS-Verbindungen automatisch hinzugefügt wird.</li>
 <li><strong>Upstream-Header beibehalten:</strong> Geben Sie mit <code>KEEP_UPSTREAM_HEADERS</code> an, welche Upstream-Header beibehalten werden sollen.</li>
-<li><strong>Bedingte Header-Anwendung nutzen:</strong> Wenn Sie Richtlinien ohne Unterbrechung testen möchten, aktivieren Sie den <a href="https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Content-Security-Policy-Report-Only">CSP Report-Only-Modus</a> über <code>CONTENT_SECURITY_POLICY_REPORT_ONLY</code>.</li>
+<li><strong>Bedingte Header-Anwendung nutzen:</strong> Wenn Sie Richtlinien ohne Unterbrechung testen möchten, aktivieren Sie den <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only">CSP Report-Only-Modus</a> über <code>CONTENT_SECURITY_POLICY_REPORT_ONLY</code>.</li>
 </ol>
 <h3 id="konfigurationsleitfaden">Konfigurationsleitfaden</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="24:3"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><input id="__tabbed_24_3" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">Sicherheits-Header</label><label for="__tabbed_24_2">Cookie-Einstellungen</label><label for="__tabbed_24_3">Benutzerdefinierte Header</label></div>
@@ -8625,7 +8678,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="html-injection">HTML injection</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Das HTML-Injection-Plugin ermöglicht es Ihnen, nahtlos benutzerdefinierten HTML-Code zu den Seiten Ihrer Website vor den schließenden <code>&lt;/body&gt;</code>- oder <code>&lt;/head&gt;</code>-Tags hinzuzufügen. Diese Funktion ist besonders nützlich, um Analyses-Skripte, Tracking-Pixel, benutzerdefiniertes JavaScript, CSS-Stile oder andere Integrationen von Drittanbietern hinzuzufügen, ohne den Quellcode Ihrer Website ändern zu müssen.</p>
 <p><strong>So funktioniert es:</strong></p>
 <ol>
@@ -8671,8 +8724,24 @@ TrustedMonitor/\d+\.\d+
 </tr>
 </tbody>
 </table>
-<p>!!! tip "Bewährte Praktiken" - Aus Leistungsgründen sollten Sie JavaScript-Dateien am Ende des Body platzieren, um das Rendern nicht zu blockieren. - Platzieren Sie CSS und kritisches JavaScript im Head-Bereich, um ein Aufblitzen von ungestyltem Inhalt zu vermeiden. - Seien Sie vorsichtig mit eingefügtem Inhalt, der die Funktionalität Ihrer Website beeinträchtigen könnte.</p>
-<p>!!! info "Häufige Anwendungsfälle" - Hinzufügen von Analyses-Skripten (wie Google Analytics, Matomo) - Integration von Chat-Widgets oder Kundensupport-Tools - Einbinden von Tracking-Pixeln für Marketingkampagnen - Hinzufügen von benutzerdefinierten CSS-Stilen oder JavaScript-Funktionen - Einbinden von Bibliotheken von Drittanbietern, ohne den Anwendungscode zu ändern</p>
+<div class="admonition tip">
+<p class="admonition-title">Bewährte Praktiken</p>
+<ul>
+<li>Aus Leistungsgründen sollten Sie JavaScript-Dateien am Ende des Body platzieren, um das Rendern nicht zu blockieren.</li>
+<li>Platzieren Sie CSS und kritisches JavaScript im Head-Bereich, um ein Aufblitzen von ungestyltem Inhalt zu vermeiden.</li>
+<li>Seien Sie vorsichtig mit eingefügtem Inhalt, der die Funktionalität Ihrer Website beeinträchtigen könnte.</li>
+</ul>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Häufige Anwendungsfälle</p>
+<ul>
+<li>Hinzufügen von Analyses-Skripten (wie Google Analytics, Matomo)</li>
+<li>Integration von Chat-Widgets oder Kundensupport-Tools</li>
+<li>Einbinden von Tracking-Pixeln für Marketingkampagnen</li>
+<li>Hinzufügen von benutzerdefinierten CSS-Stilen oder JavaScript-Funktionen</li>
+<li>Einbinden von Bibliotheken von Drittanbietern, ohne den Anwendungscode zu ändern</li>
+</ul>
+</div>
 <h3 id="beispielkonfigurationen_11">Beispielkonfigurationen</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="26:4"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><input id="__tabbed_26_3" name="__tabbed_26" type="radio" /><input id="__tabbed_26_4" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Google Analytics</label><label for="__tabbed_26_2">Benutzerdefinierte Stile</label><label for="__tabbed_26_3">Mehrere Integrationen</label><label for="__tabbed_26_4">Cookie-Einwilligungsbanner</label></div>
 <div class="tabbed-content">
@@ -8704,7 +8773,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 <h2 id="ldap-sso-pro">LDAP SSO <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#ldap-sso-pro">erweiterten Nutzung</a>.</p>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>LDAP-based single sign-on plugin with session-backed authentication.</p>
 <table>
 <thead>
@@ -8937,7 +9006,7 @@ TrustedMonitor/\d+\.\d+
 </tbody>
 </table>
 <h2 id="lets-encrypt">Let's Encrypt</h2>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Das Let's Encrypt-Plugin vereinfacht die Verwaltung von SSL/TLS-Zertifikaten durch die Automatisierung der Erstellung, Erneuerung und Konfiguration von kostenlosen Zertifikaten von Let's Encrypt. Diese Funktion ermöglicht sichere HTTPS-Verbindungen für Ihre Websites ohne die Komplexität der manuellen Zertifikatsverwaltung, was sowohl Kosten als auch administrativen Aufwand reduziert.</p>
 <p><strong>Wie es funktioniert:</strong></p>
 <ol>
@@ -9463,11 +9532,11 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="limit">Limit</h2>
-<p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Begrenzungsrichtlinien auf Ihrer Website, um eine faire Nutzung zu gewährleisten und Ihre Ressourcen vor Missbrauch, Denial-of-Service-Angriffen und übermäßigem Ressourcenverbrauch zu schützen. Diese Richtlinien umfassen:</p>
 <ul>
-<li><strong>Anzahl der Verbindungen pro IP-Adresse</strong> (STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:">)</li>
-<li><strong>Anzahl der Anfragen pro IP-Adresse und URL innerhalb eines bestimmten Zeitraums</strong> (STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:">)</li>
+<li><strong>Anzahl der Verbindungen pro IP-Adresse</strong> (STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" />)</li>
+<li><strong>Anzahl der Anfragen pro IP-Adresse und URL innerhalb eines bestimmten Zeitraums</strong> (STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" />)</li>
 </ul>
 <h3 id="wie-es-funktioniert">Wie es funktioniert</h3>
 <ol>
@@ -9483,7 +9552,7 @@ TrustedMonitor/\d+\.\d+
 <li><strong>Wirksamkeit überwachen:</strong> Verwenden Sie die <a href="../web-ui/">Web-Benutzeroberfläche</a>, um Statistiken über begrenzte Anfragen und Verbindungen anzuzeigen.</li>
 </ol>
 <h3 id="konfigurationseinstellungen_13">Konfigurationseinstellungen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="28:1"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Anforderungsratenbegrenzung</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="28:2"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Anforderungsratenbegrenzung</label><label for="__tabbed_28_2">Verbindungsbegrenzung</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <table>
@@ -9520,9 +9589,6 @@ TrustedMonitor/\d+\.\d+
 </tr>
 </tbody>
 </table>
-</div>
-</div>
-</div>
 <div class="admonition tip">
 <p class="admonition-title">Format der Ratenbegrenzung</p>
 <p>Das Format der Ratenbegrenzung wird als <code>Nr/t</code> angegeben, wobei:</p>
@@ -9534,8 +9600,7 @@ TrustedMonitor/\d+\.\d+
 </ul>
 <p>Zum Beispiel bedeutet <code>5r/m</code>, dass 5 Anfragen pro Minute von jeder IP-Adresse erlaubt sind.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="29:1"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">Verbindungsbegrenzung</label></div>
-<div class="tabbed-content">
+</div>
 <div class="tabbed-block">
 <table>
 <thead>
@@ -9590,18 +9655,18 @@ TrustedMonitor/\d+\.\d+
 </div>
 <div class="admonition info">
 <p class="admonition-title">Verbindungs- vs. Anforderungsbegrenzung</p>
-</div>
 <ul>
 <li><strong>Verbindungsbegrenzung</strong> beschränkt die Anzahl der gleichzeitigen Verbindungen, die eine einzelne IP-Adresse aufrechterhalten kann.</li>
 <li><strong>Anforderungsratenbegrenzung</strong> beschränkt die Anzahl der Anfragen, die eine IP-Adresse innerhalb eines definierten Zeitraums stellen kann.</li>
 </ul>
 <p>Die Verwendung beider Methoden bietet einen umfassenden Schutz gegen verschiedene Arten von Missbrauch.</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">Festlegen angemessener Grenzwerte</p>
 <p>Zu restriktive Grenzwerte können legitime Benutzer beeinträchtigen, insbesondere bei HTTP/2 und HTTP/3, wo Browser oft mehrere Streams verwenden. Die Standardwerte sind für die meisten Anwendungsfälle ausgewogen, aber erwägen Sie, sie je nach den Bedürfnissen Ihrer Anwendung und dem Benutzerverhalten anzupassen.</p>
 </div>
 <h3 id="beispielkonfigurationen_13">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="30:4"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><input id="__tabbed_30_4" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">Grundschutz</label><label for="__tabbed_30_2">Schutz spezifischer Endpunkte</label><label for="__tabbed_30_3">Konfiguration für eine Website mit hohem Verkehrsaufkommen</label><label for="__tabbed_30_4">Konfiguration für einen API-Server</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="29:4"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><input id="__tabbed_29_2" name="__tabbed_29" type="radio" /><input id="__tabbed_29_3" name="__tabbed_29" type="radio" /><input id="__tabbed_29_4" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">Grundschutz</label><label for="__tabbed_29_2">Schutz spezifischer Endpunkte</label><label for="__tabbed_29_3">Konfiguration für eine Website mit hohem Verkehrsaufkommen</label><label for="__tabbed_29_4">Konfiguration für einen API-Server</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration mit Standardeinstellungen zum Schutz Ihrer gesamten Website:</p>
@@ -9684,7 +9749,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="metrics">Metrics</h2>
-<p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Das Metrics-Plugin bietet umfassende Überwachungs- und Datenerfassungsfunktionen für Ihre BunkerWeb-Instanz. Mit dieser Funktion können Sie verschiedene Leistungsindikatoren, Sicherheitsereignisse und Systemstatistiken verfolgen und erhalten so wertvolle Einblicke in das Verhalten und den Zustand Ihrer geschützten Websites und Dienste.</p>
 <p><strong>So funktioniert es:</strong></p>
 <ol>
@@ -9794,17 +9859,24 @@ TrustedMonitor/\d+\.\d+
 </tr>
 <tr>
 <td><code>METRICS_MAX_BLOCKED_REQUESTS</code></td>
-<td><code>1000</code></td>
+<td><code>1k</code></td>
 <td>global</td>
 <td>nein</td>
-<td><strong>Max. blockierte Anfragen:</strong> Maximale Anzahl blockierter Anfragen, die pro Worker gespeichert werden sollen.</td>
+<td><strong>Max. blockierte Anfragen:</strong> Maximale Anzahl blockierter Anfragen, die pro Worker gespeichert werden sollen. Akzeptiert die Kurzschreibweise <code>k</code>/<code>m</code>.</td>
 </tr>
 <tr>
 <td><code>METRICS_MAX_BLOCKED_REQUESTS_REDIS</code></td>
-<td><code>100000</code></td>
+<td><code>10k</code></td>
 <td>global</td>
 <td>nein</td>
-<td><strong>Max. Redis-blockierte Anfragen:</strong> Maximale Anzahl blockierter Anfragen, die in Redis gespeichert werden sollen.</td>
+<td><strong>Max. Redis-blockierte Anfragen:</strong> Maximale Anzahl blockierter Anfragen, die in Redis gespeichert werden sollen. Akzeptiert die Kurzschreibweise <code>k</code>/<code>m</code>.</td>
+</tr>
+<tr>
+<td><code>MAX_LRU_HISTORY</code></td>
+<td><code>1k</code></td>
+<td>global</td>
+<td>nein</td>
+<td><strong>Max. LRU-Verlauf:</strong> Anzahl der LRU-Slots pro Worker und Limit des Ereignisverlaufsarrays pro Schlüssel (Blockierungsverläufe, Authentifizierungsverläufe usw.). Akzeptiert die Kurzschreibweise <code>k</code>/<code>m</code>.</td>
 </tr>
 <tr>
 <td><code>METRICS_SAVE_TO_REDIS</code></td>
@@ -9832,14 +9904,15 @@ TrustedMonitor/\d+\.\d+
 <p>Jeder NGINX-Worker verwaltet seine eigenen Metriken im Speicher. Beim Zugriff auf Metriken über die API werden die Daten aller Worker automatisch aggregiert, um eine vollständige Ansicht zu erhalten.</p>
 </div>
 <h3 id="beispielkonfigurationen_14">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="31:4"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><input id="__tabbed_31_4" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">Grundlegende Konfiguration</label><label for="__tabbed_31_2">Umgebung mit geringen Ressourcen</label><label for="__tabbed_31_3">Umgebung mit hohem Verkehrsaufkommen</label><label for="__tabbed_31_4">Metriken deaktiviert</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="30:4"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><input id="__tabbed_30_4" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">Grundlegende Konfiguration</label><label for="__tabbed_30_2">Umgebung mit geringen Ressourcen</label><label for="__tabbed_30_3">Umgebung mit hohem Verkehrsaufkommen</label><label for="__tabbed_30_4">Metriken deaktiviert</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Standardkonfiguration, die für die meisten Bereitstellungen geeignet ist:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_METRICS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">METRICS_MEMORY_SIZE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;16m&quot;</span>
-<span class="nt">METRICS_MAX_BLOCKED_REQUESTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1000&quot;</span>
-<span class="nt">METRICS_MAX_BLOCKED_REQUESTS_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;100000&quot;</span>
+<span class="nt">METRICS_MAX_BLOCKED_REQUESTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1k&quot;</span>
+<span class="nt">METRICS_MAX_BLOCKED_REQUESTS_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;10k&quot;</span>
+<span class="nt">MAX_LRU_HISTORY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1k&quot;</span>
 <span class="nt">METRICS_SAVE_TO_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 </code></pre></div>
 </div>
@@ -9849,6 +9922,7 @@ TrustedMonitor/\d+\.\d+
 <span class="nt">METRICS_MEMORY_SIZE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;8m&quot;</span>
 <span class="nt">METRICS_MAX_BLOCKED_REQUESTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;500&quot;</span>
 <span class="nt">METRICS_MAX_BLOCKED_REQUESTS_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;10000&quot;</span>
+<span class="nt">MAX_LRU_HISTORY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;500&quot;</span>
 <span class="nt">METRICS_SAVE_TO_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
 </code></pre></div>
 </div>
@@ -9858,6 +9932,7 @@ TrustedMonitor/\d+\.\d+
 <span class="nt">METRICS_MEMORY_SIZE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;64m&quot;</span>
 <span class="nt">METRICS_MAX_BLOCKED_REQUESTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5000&quot;</span>
 <span class="nt">METRICS_MAX_BLOCKED_REQUESTS_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;500000&quot;</span>
+<span class="nt">MAX_LRU_HISTORY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5k&quot;</span>
 <span class="nt">METRICS_SAVE_TO_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 </code></pre></div>
 </div>
@@ -9870,10 +9945,10 @@ TrustedMonitor/\d+\.\d+
 </div>
 <h2 id="migration-pro">Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#migration-pro">erweiterten Nutzung</a>.</p>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Migration of BunkerWeb configuration between instances made easy via the web UI</p>
 <h2 id="miscellaneous">Miscellaneous</h2>
-<p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Das Plugin "Verschiedenes" (Miscellaneous) bietet <strong>wesentliche Grundeinstellungen</strong>, die helfen, die Sicherheit und Funktionalität Ihrer Website aufrechtzuerhalten. Diese Kernkomponente bietet umfassende Kontrollen für:</p>
 <ul>
 <li><strong>Serververhalten</strong> - Konfigurieren Sie, wie Ihr Server auf verschiedene Anfragen reagiert</li>
@@ -9931,7 +10006,7 @@ TrustedMonitor/\d+\.\d+
 </tbody>
 </table>
 <h3 id="konfigurationsanleitung">Konfigurationsanleitung</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="32:8"><input checked="checked" id="__tabbed_32_1" name="__tabbed_32" type="radio" /><input id="__tabbed_32_2" name="__tabbed_32" type="radio" /><input id="__tabbed_32_3" name="__tabbed_32" type="radio" /><input id="__tabbed_32_4" name="__tabbed_32" type="radio" /><input id="__tabbed_32_5" name="__tabbed_32" type="radio" /><input id="__tabbed_32_6" name="__tabbed_32" type="radio" /><input id="__tabbed_32_7" name="__tabbed_32" type="radio" /><input id="__tabbed_32_8" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="__tabbed_32_1">Sicherheit des Standardservers</label><label for="__tabbed_32_2">HTTP-Status bei Ablehnung</label><label for="__tabbed_32_3">HTTP-Methoden</label><label for="__tabbed_32_4">Größenbeschränkungen für Anfragen</label><label for="__tabbed_32_5">Protokollunterstützung</label><label for="__tabbed_32_6">Bereitstellung statischer Dateien</label><label for="__tabbed_32_7">Systemeinstellungen</label><label for="__tabbed_32_8">Datei-Caching</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="31:8"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><input id="__tabbed_31_4" name="__tabbed_31" type="radio" /><input id="__tabbed_31_5" name="__tabbed_31" type="radio" /><input id="__tabbed_31_6" name="__tabbed_31" type="radio" /><input id="__tabbed_31_7" name="__tabbed_31" type="radio" /><input id="__tabbed_31_8" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">Sicherheit des Standardservers</label><label for="__tabbed_31_2">HTTP-Status bei Ablehnung</label><label for="__tabbed_31_3">HTTP-Methoden</label><label for="__tabbed_31_4">Größenbeschränkungen für Anfragen</label><label for="__tabbed_31_5">Protokollunterstützung</label><label for="__tabbed_31_6">Bereitstellung statischer Dateien</label><label for="__tabbed_31_7">Systemeinstellungen</label><label for="__tabbed_31_8">Datei-Caching</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Steuerung des Standardservers</strong></p>
@@ -10337,7 +10412,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h3 id="beispielkonfigurationen_15">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="33:7"><input checked="checked" id="__tabbed_33_1" name="__tabbed_33" type="radio" /><input id="__tabbed_33_2" name="__tabbed_33" type="radio" /><input id="__tabbed_33_3" name="__tabbed_33" type="radio" /><input id="__tabbed_33_4" name="__tabbed_33" type="radio" /><input id="__tabbed_33_5" name="__tabbed_33" type="radio" /><input id="__tabbed_33_6" name="__tabbed_33" type="radio" /><input id="__tabbed_33_7" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="__tabbed_33_1">Sicherheit des Standardservers</label><label for="__tabbed_33_2">HTTP-Status bei Ablehnung</label><label for="__tabbed_33_3">HTTP-Methoden</label><label for="__tabbed_33_4">Größenbeschränkungen für Anfragen</label><label for="__tabbed_33_5">Protokollunterstützung</label><label for="__tabbed_33_6">Bereitstellung statischer Dateien</label><label for="__tabbed_33_7">Datei-Caching</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="32:7"><input checked="checked" id="__tabbed_32_1" name="__tabbed_32" type="radio" /><input id="__tabbed_32_2" name="__tabbed_32" type="radio" /><input id="__tabbed_32_3" name="__tabbed_32" type="radio" /><input id="__tabbed_32_4" name="__tabbed_32" type="radio" /><input id="__tabbed_32_5" name="__tabbed_32" type="radio" /><input id="__tabbed_32_6" name="__tabbed_32" type="radio" /><input id="__tabbed_32_7" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="__tabbed_32_1">Sicherheit des Standardservers</label><label for="__tabbed_32_2">HTTP-Status bei Ablehnung</label><label for="__tabbed_32_3">HTTP-Methoden</label><label for="__tabbed_32_4">Größenbeschränkungen für Anfragen</label><label for="__tabbed_32_5">Protokollunterstützung</label><label for="__tabbed_32_6">Bereitstellung statischer Dateien</label><label for="__tabbed_32_7">Datei-Caching</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Beispielkonfiguration zum Deaktivieren des Standardservers und Erzwingen von striktem SNI:</p>
@@ -10385,7 +10460,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="modsecurity">ModSecurity</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Das ModSecurity-Plugin integriert die leistungsstarke <a href="https://modsecurity.org">ModSecurity</a> Web Application Firewall (WAF) in BunkerWeb. Diese Integration bietet robusten Schutz gegen eine Vielzahl von Webangriffen, indem sie das <a href="https://coreruleset.org">OWASP Core Rule Set (CRS)</a> nutzt, um Bedrohungen wie SQL-Injection, Cross-Site-Scripting (XSS), Local File Inclusion und mehr zu erkennen und zu blockieren.</p>
 <p><strong>So funktioniert es:</strong></p>
 <ol>
@@ -10603,7 +10678,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Höhere Sicherheitseinstellungen können legitimen Verkehr blockieren. Beginnen Sie mit den Standardeinstellungen und überwachen Sie die Protokolle, bevor Sie die Sicherheitsstufen erhöhen. Seien Sie bereit, Ausnahmeregeln für die spezifischen Anforderungen Ihrer Anwendung hinzuzufügen.</p>
 </div>
 <h3 id="beispielkonfigurationen_16">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="34:5"><input checked="checked" id="__tabbed_34_1" name="__tabbed_34" type="radio" /><input id="__tabbed_34_2" name="__tabbed_34" type="radio" /><input id="__tabbed_34_3" name="__tabbed_34" type="radio" /><input id="__tabbed_34_4" name="__tabbed_34" type="radio" /><input id="__tabbed_34_5" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="__tabbed_34_1">Grundlegende Konfiguration</label><label for="__tabbed_34_2">Nur-Erkennungsmodus</label><label for="__tabbed_34_3">Erweiterte Konfiguration mit Plugins</label><label for="__tabbed_34_4">Legacy-Konfiguration</label><label for="__tabbed_34_5">Globales ModSecurity</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="33:5"><input checked="checked" id="__tabbed_33_1" name="__tabbed_33" type="radio" /><input id="__tabbed_33_2" name="__tabbed_33" type="radio" /><input id="__tabbed_33_3" name="__tabbed_33" type="radio" /><input id="__tabbed_33_4" name="__tabbed_33" type="radio" /><input id="__tabbed_33_5" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="__tabbed_33_1">Grundlegende Konfiguration</label><label for="__tabbed_33_2">Nur-Erkennungsmodus</label><label for="__tabbed_33_3">Erweiterte Konfiguration mit Plugins</label><label for="__tabbed_33_4">Legacy-Konfiguration</label><label for="__tabbed_33_5">Globales ModSecurity</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine Standardkonfiguration mit aktiviertem ModSecurity und CRS v4:</p>
@@ -10657,7 +10732,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Für Größeneinstellungen wie <code>MODSECURITY_REQ_BODY_NO_FILES_LIMIT</code> werden die Suffixe <code>k</code>, <code>m</code> und <code>g</code> (Groß- und Kleinschreibung wird nicht beachtet) unterstützt und stehen für Kibibyte, Mebibyte und Gibibyte (Vielfache von 1024). Beispiele: <code>256k</code> = 262144, <code>1m</code> = 1048576, <code>2g</code> = 2147483648.</p>
 </div>
 <h2 id="monitoring-pro">Monitoring <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.</p>
 <table>
 <thead>
@@ -10708,7 +10783,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="mutual-tls">Mutual TLS</h2>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Das Mutual-TLS-Plugin (mTLS) schützt sensible Anwendungen, indem nur Clients mit Zertifikaten akzeptiert werden, die von Ihren vertrauenswürdigen Zertifizierungsstellen ausgestellt wurden. Mit aktivem Plugin authentifiziert BunkerWeb jede Anfrage bereits an der Perimeter-Grenze und hält interne Tools sowie Partner-Integrationen abgeschirmt.</p>
 <p>BunkerWeb bewertet jeden TLS-Handshake anhand des von Ihnen bereitgestellten CA-Bundles und Ihrer Richtlinien. Clients, die diese Vorgaben nicht erfüllen, werden abgeblockt, während konforme Verbindungen ihre Zertifikatsdetails an nachgelagerte Anwendungen weitergeben können.</p>
 <p><strong>Funktionsweise:</strong></p>
@@ -10806,7 +10881,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>BunkerWeb nutzt dasselbe CA-Bundle sowohl für die Client-Prüfung als auch für den Aufbau der Vertrauenskette, damit OCSP/CRL-Checks konsistent bleiben.</p>
 </div>
 <h3 id="konfigurationsbeispiele_3">Konfigurationsbeispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="35:3"><input checked="checked" id="__tabbed_35_1" name="__tabbed_35" type="radio" /><input id="__tabbed_35_2" name="__tabbed_35" type="radio" /><input id="__tabbed_35_3" name="__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="__tabbed_35_1">Strikte Zugriffskontrolle</label><label for="__tabbed_35_2">Optionale Client-Authentifizierung</label><label for="__tabbed_35_3">Diagnose ohne CA</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="34:3"><input checked="checked" id="__tabbed_34_1" name="__tabbed_34" type="radio" /><input id="__tabbed_34_2" name="__tabbed_34" type="radio" /><input id="__tabbed_34_3" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="__tabbed_34_1">Strikte Zugriffskontrolle</label><label for="__tabbed_34_2">Optionale Client-Authentifizierung</label><label for="__tabbed_34_3">Diagnose ohne CA</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Verlangen Sie gültige Client-Zertifikate Ihrer privaten CA und leiten Sie die Verifizierungsergebnisse an das Backend weiter:</p>
@@ -10838,7 +10913,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/3oZOO1XdSlc' title='OpenAPI Validator' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#openapi-validator-pro">erweiterten Nutzung</a>.</p>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Validates incoming HTTP requests against an OpenAPI / Swagger specification.</p>
 <table>
 <thead>
@@ -10913,7 +10988,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/0e4lcXTIIfs' title='OpenID Connect' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#openid-connect-pro">erweiterten Nutzung</a>.</p>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>OpenID Connect authentication plugin providing SSO capabilities with identity providers.</p>
 <table>
 <thead>
@@ -11209,7 +11284,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="php">PHP</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Das PHP-Plugin bietet eine nahtlose Integration mit PHP-FPM für BunkerWeb und ermöglicht die dynamische PHP-Verarbeitung für Ihre Websites. Diese Funktion unterstützt sowohl lokale PHP-FPM-Instanzen, die auf derselben Maschine laufen, als auch entfernte PHP-FPM-Server, was Ihnen Flexibilität bei der Konfiguration Ihrer PHP-Umgebung gibt.</p>
 <p><strong>So funktioniert es:</strong></p>
 <ol>
@@ -11293,7 +11368,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Das PHP-Plugin konfiguriert automatisch die URL-Umschreibung, um moderne PHP-Anwendungen zu unterstützen. Anfragen für nicht existierende Dateien werden an <code>index.php</code> weitergeleitet, wobei die ursprüngliche Anfrage-URI als Abfrageparameter verfügbar ist.</p>
 </div>
 <h3 id="beispielkonfigurationen_17">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="36:4"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">Lokale PHP-FPM-Konfiguration</label><label for="__tabbed_36_2">Entfernte PHP-FPM-Konfiguration</label><label for="__tabbed_36_3">Konfiguration mit benutzerdefiniertem Port</label><label for="__tabbed_36_4">WordPress-Konfiguration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="35:4"><input checked="checked" id="__tabbed_35_1" name="__tabbed_35" type="radio" /><input id="__tabbed_35_2" name="__tabbed_35" type="radio" /><input id="__tabbed_35_3" name="__tabbed_35" type="radio" /><input id="__tabbed_35_4" name="__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="__tabbed_35_1">Lokale PHP-FPM-Konfiguration</label><label for="__tabbed_35_2">Entfernte PHP-FPM-Konfiguration</label><label for="__tabbed_35_3">Konfiguration mit benutzerdefiniertem Port</label><label for="__tabbed_35_4">WordPress-Konfiguration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Konfiguration für die Verwendung einer lokalen PHP-FPM-Instanz:</p>
@@ -11324,7 +11399,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="pro">Pro</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Das Pro-Plugin bündelt erweiterte Funktionen und Verbesserungen für Unternehmensbereitstellungen von BunkerWeb. Es schaltet zusätzliche Funktionen, Premium-Plugins und erweiterte Funktionalität frei, die die Kernplattform von BunkerWeb ergänzen. Es bietet verbesserte Sicherheit, Leistung und Verwaltungsoptionen für unternehmenstaugliche Bereitstellungen.</p>
 <p><strong>So funktioniert es:</strong></p>
 <ol>
@@ -11387,18 +11462,18 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 <h3 id="haufig-gestellte-fragen">Häufig gestellte Fragen</h3>
 <p><strong>F: Was passiert, wenn meine Pro-Lizenz abläuft?</strong></p>
-<p>A: Wenn Ihre Pro-Lizenz abläuft, wird der Zugriff auf Premium-Funktionen und -Plugins deaktiviert. Ihre BunkerWeb-Installation wird jedoch weiterhin mit allen Funktionen der Community-Edition betrieben. Um wieder Zugriff auf die Pro-Funktionen zu erhalten, erneuern Sie einfach Ihre Lizenz.</p>
+<p><strong>A:</strong> Wenn Ihre Pro-Lizenz abläuft, wird der Zugriff auf Premium-Funktionen und -Plugins deaktiviert. Ihre BunkerWeb-Installation wird jedoch weiterhin mit allen Funktionen der Community-Edition betrieben. Um wieder Zugriff auf die Pro-Funktionen zu erhalten, erneuern Sie einfach Ihre Lizenz.</p>
 <p><strong>F: Werden die Pro-Funktionen meine bestehende Konfiguration stören?</strong></p>
-<p>A: Nein, die Pro-Funktionen sind so konzipiert, dass sie sich nahtlos in Ihr aktuelles BunkerWeb-Setup integrieren. Sie erweitern die Funktionalität, ohne Ihre bestehende Konfiguration zu verändern oder zu stören, und gewährleisten so ein reibungsloses und zuverlässiges Erlebnis.</p>
+<p><strong>A:</strong> Nein, die Pro-Funktionen sind so konzipiert, dass sie sich nahtlos in Ihr aktuelles BunkerWeb-Setup integrieren. Sie erweitern die Funktionalität, ohne Ihre bestehende Konfiguration zu verändern oder zu stören, und gewährleisten so ein reibungsloses und zuverlässiges Erlebnis.</p>
 <p><strong>F: Kann ich die Pro-Funktionen vor dem Kauf ausprobieren?</strong></p>
-<p>A: Auf jeden Fall! BunkerWeb bietet zwei Pro-Pläne, die Ihren Bedürfnissen entsprechen:</p>
+<p><strong>A:</strong> Auf jeden Fall! BunkerWeb bietet zwei Pro-Pläne, die Ihren Bedürfnissen entsprechen:</p>
 <ul>
 <li><strong>BunkerWeb PRO Standard:</strong> Voller Zugriff auf die Pro-Funktionen ohne technischen Support.</li>
 <li><strong>BunkerWeb PRO Enterprise:</strong> Voller Zugriff auf die Pro-Funktionen mit dediziertem technischen Support.</li>
 </ul>
 <p>Sie können die Pro-Funktionen mit einer kostenlosen 1-monatigen Testversion erkunden, indem Sie den Promo-Code <code>freetrial</code> verwenden. Besuchen Sie das <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a>, um Ihre Testversion zu aktivieren und mehr über flexible Preisoptionen basierend auf der Anzahl der von BunkerWeb PRO geschützten Dienste zu erfahren.</p>
 <h2 id="prometheus-exporter-pro">Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Prometheus exporter for BunkerWeb internal metrics.</p>
 <table>
 <thead>
@@ -11449,20 +11524,20 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="real-ip">Real IP</h2>
-<p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
-<p>Das Real IP Plugin stellt sicher, dass BunkerWeb die IP-Adresse des Clients auch hinter Proxys korrekt identifiziert. Dies ist unerlässlich für die Anwendung von Sicherheitsregeln, Ratenbegrenzung and zuverlässige Protokolle; andernfalls würden alle Anfragen von der IP des Proxys zu kommen scheinen.</p>
+<p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
+<p>Das Real IP Plugin stellt sicher, dass BunkerWeb die IP-Adresse des Clients auch hinter Proxys korrekt identifiziert. Dies ist unerlässlich für die Anwendung von Sicherheitsregeln, Ratenbegrenzung und zuverlässige Protokolle; andernfalls würden alle Anfragen von der IP des Proxys zu kommen scheinen.</p>
 <p>So funktioniert's:</p>
 <ol>
 <li>Nach der Aktivierung prüft BunkerWeb die Header (z.B. <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For"><code>X-Forwarded-For</code></a>), die die ursprüngliche IP enthalten.</li>
 <li>Es wird überprüft, ob die Quell-IP in <code>REAL_IP_FROM</code> (Liste vertrauenswürdiger Proxys) enthalten ist, um nur legitime Proxys zu akzeptieren.</li>
-<li>Die Client-IP wird aus dem Header <code>REAL_IP_HEADER</code> extrahiert and für die Sicherheitsbewertung and Protokollierung verwendet.</li>
-<li>Bei IP-Ketten kann eine rekursive Suche über <code>REAL_IP_RECURSIVE</code> die ursprüngliche IP ermitteln.</li>
+<li>Die Client-IP wird aus dem Header <code>REAL_IP_HEADER</code> extrahiert und für die Sicherheitsbewertung und Protokollierung verwendet.</li>
+<li>Bei IP-Ketten kann eine rekursive Suche die ursprüngliche IP ermitteln.</li>
 <li>Die Unterstützung für das <a href="https://netnut.io/what-is-proxy-protocol-and-how-does-it-work/">PROXY-Protokoll</a> kann aktiviert werden, um die Client-IP direkt von kompatiblen Proxys (z.B. <a href="https://www.haproxy.org/">HAProxy</a>) zu empfangen.</li>
 <li>Listen mit vertrauenswürdigen Proxy-IPs können automatisch über URLs heruntergeladen werden.</li>
 </ol>
 <h3 id="verwendung_4">Verwendung</h3>
 <ol>
-<li>Aktivieren: <code>USE_REAL_IP: yes</code>.</li>
+<li>Aktivieren: Setzen Sie den Parameter <code>USE_REAL_IP</code> auf <code>yes</code>.</li>
 <li>Vertrauenswürdige Proxys: Geben Sie IP/Bereiche in <code>REAL_IP_FROM</code> ein.</li>
 <li>Header: Geben Sie an, welcher Header die echte IP über <code>REAL_IP_HEADER</code> enthält.</li>
 <li>Rekursiv: Aktivieren Sie <code>REAL_IP_RECURSIVE</code> bei Bedarf.</li>
@@ -11542,18 +11617,63 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Mit <code>REAL_IP_RECURSIVE</code> wird, wenn der Header mehrere IPs enthält, die erste IP, die nicht als vertrauenswürdiger Proxy aufgeführt ist, als Client-IP verwendet.</p>
 </div>
 <h3 id="beispiele_5">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="37:1"><input checked="checked" id="__tabbed_37_1" name="__tabbed_37" type="radio" /><div class="tabbed-labels"><label for="__tabbed_37_1">Basis (hinter Reverse Proxy)</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="36:6"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><input id="__tabbed_36_5" name="__tabbed_36" type="radio" /><input id="__tabbed_36_6" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">Basis (hinter Reverse Proxy)</label><label for="__tabbed_36_2">Cloud Load Balancer</label><label for="__tabbed_36_3">PROXY-Protokoll</label><label for="__tabbed_36_4">Mehrere Proxy-Quellen mit URLs</label><label for="__tabbed_36_5">CDN-Konfiguration</label><label for="__tabbed_36_6">Hinter Cloudflare</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
+<p>Einfache Konfiguration für eine Website hinter einem Reverse Proxy:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">REAL_IP_FROM</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.1.0/24</span><span class="nv"> </span><span class="s">10.0.0.5&quot;</span>
 <span class="nt">REAL_IP_HEADER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;X-Forwarded-For&quot;</span>
+<span class="nt">REAL_IP_RECURSIVE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Konfiguration für eine Website hinter einem Cloud Load Balancer:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">REAL_IP_FROM</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.0.0/16</span><span class="nv"> </span><span class="s">172.16.0.0/12</span><span class="nv"> </span><span class="s">10.0.0.0/8&quot;</span>
+<span class="nt">REAL_IP_HEADER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;X-Forwarded-For&quot;</span>
+<span class="nt">REAL_IP_RECURSIVE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Konfiguration mit PROXY-Protokoll und einem kompatiblen Load Balancer:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">REAL_IP_FROM</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.1.0/24&quot;</span>
+<span class="nt">REAL_IP_HEADER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;proxy_protocol&quot;</span>
+<span class="nt">USE_PROXY_PROTOCOL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Erweiterte Konfiguration mit automatisch aktualisierten Proxy-IP-Listen:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">REAL_IP_FROM</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.0.0/16</span><span class="nv"> </span><span class="s">172.16.0.0/12</span><span class="nv"> </span><span class="s">10.0.0.0/8&quot;</span>
+<span class="nt">REAL_IP_HEADER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;X-Real-IP&quot;</span>
+<span class="nt">REAL_IP_RECURSIVE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">REAL_IP_FROM_URLS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/proxy-ips.txt</span><span class="nv"> </span><span class="s">file:///etc/bunkerweb/custom-proxies.txt&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Konfiguration für eine Website hinter einem CDN:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">REAL_IP_FROM</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.0.0/16</span><span class="nv"> </span><span class="s">172.16.0.0/12</span><span class="nv"> </span><span class="s">10.0.0.0/8&quot;</span>
+<span class="nt">REAL_IP_FROM_URLS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://cdn-provider.com/ip-ranges.txt&quot;</span>
+<span class="nt">REAL_IP_HEADER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;CF-Connecting-IP&quot;</span><span class="w">  </span><span class="c1"># Beispiel für Cloudflare</span>
+<span class="nt">REAL_IP_RECURSIVE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span><span class="w">  </span><span class="c1"># Bei Headern mit einzelner IP nicht erforderlich</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Konfiguration für eine Website hinter Cloudflare:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">REAL_IP_FROM</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="c1"># Wir vertrauen nur Cloudflare-IPs</span>
+<span class="nt">REAL_IP_FROM_URLS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://www.cloudflare.com/ips-v4/</span><span class="nv"> </span><span class="s">https://www.cloudflare.com/ips-v6/&quot;</span><span class="w"> </span><span class="c1"># Cloudflare-IPs automatisch herunterladen</span>
+<span class="nt">REAL_IP_HEADER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;CF-Connecting-IP&quot;</span><span class="w">  </span><span class="c1"># Cloudflare-Header für Client-IP</span>
+<span class="nt">REAL_IP_RECURSIVE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 </code></pre></div>
 </div>
 </div>
 </div>
 <h2 id="redirect">Redirect</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Das Redirect-Plugin bietet einfache und effiziente HTTP-Umleitungsfunktionen für Ihre von BunkerWeb geschützten Websites. Mit dieser Funktion können Sie Besucher problemlos von einer URL zu einer anderen umleiten und dabei sowohl Umleitungen für die gesamte Domain als auch für bestimmte Pfade mit Beibehaltung des Pfades unterstützen.</p>
 <p><strong>So funktioniert es:</strong></p>
 <ol>
@@ -11629,7 +11749,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Wenn <code>REDIRECT_TO_REQUEST_URI</code> auf <code>yes</code> gesetzt ist, behält BunkerWeb den ursprünglichen Anfragepfad bei. Wenn ein Benutzer beispielsweise <code>https://old-domain.com/blog/post-1</code> besucht und Sie eine Umleitung zu <code>https://new-domain.com</code> eingerichtet haben, wird er zu <code>https://new-domain.com/blog/post-1</code> umgeleitet.</p>
 </div>
 <h3 id="beispielkonfigurationen_18">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="38:7"><input checked="checked" id="__tabbed_38_1" name="__tabbed_38" type="radio" /><input id="__tabbed_38_2" name="__tabbed_38" type="radio" /><input id="__tabbed_38_3" name="__tabbed_38" type="radio" /><input id="__tabbed_38_4" name="__tabbed_38" type="radio" /><input id="__tabbed_38_5" name="__tabbed_38" type="radio" /><input id="__tabbed_38_6" name="__tabbed_38" type="radio" /><input id="__tabbed_38_7" name="__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="__tabbed_38_1">Umleitung mehrerer Pfade</label><label for="__tabbed_38_2">Einfache Domain-Umleitung</label><label for="__tabbed_38_3">Pfadbeibehaltende Umleitung</label><label for="__tabbed_38_4">Temporäre Umleitung</label><label for="__tabbed_38_5">Subdomain-Konsolidierung</label><label for="__tabbed_38_6">API-Endpunkt-Migration</label><label for="__tabbed_38_7">Nach Formularübermittlung</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="37:7"><input checked="checked" id="__tabbed_37_1" name="__tabbed_37" type="radio" /><input id="__tabbed_37_2" name="__tabbed_37" type="radio" /><input id="__tabbed_37_3" name="__tabbed_37" type="radio" /><input id="__tabbed_37_4" name="__tabbed_37" type="radio" /><input id="__tabbed_37_5" name="__tabbed_37" type="radio" /><input id="__tabbed_37_6" name="__tabbed_37" type="radio" /><input id="__tabbed_37_7" name="__tabbed_37" type="radio" /><div class="tabbed-labels"><label for="__tabbed_37_1">Umleitung mehrerer Pfade</label><label for="__tabbed_37_2">Einfache Domain-Umleitung</label><label for="__tabbed_37_3">Pfadbeibehaltende Umleitung</label><label for="__tabbed_37_4">Temporäre Umleitung</label><label for="__tabbed_37_5">Subdomain-Konsolidierung</label><label for="__tabbed_37_6">API-Endpunkt-Migration</label><label for="__tabbed_37_7">Nach Formularübermittlung</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine Konfiguration, die mehrere Pfade an verschiedene Ziele umleitet:</p>
@@ -11698,22 +11818,22 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="redis">Redis</h2>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
-<p>Der Redis-Plugin integriert <a href="https://redis.io/">Redis</a> oder <a href="https://valkey.io/">Valkey</a> in BunkerWeb zur Zwischenspeicherung and für schnellen Datenzugriff. Dies ist unerlässlich in Hochverfügbarkeitsumgebungen, um Sitzungen, Metriken and andere Informationen zwischen mehreren Knoten zu teilen.</p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
+<p>Der Redis-Plugin integriert <a href="https://redis.io/">Redis</a> oder <a href="https://valkey.io/">Valkey</a> in BunkerWeb zur Zwischenspeicherung und für schnellen Datenzugriff. Dies ist unerlässlich in Hochverfügbarkeitsumgebungen, um Sitzungen, Metriken und andere Informationen zwischen mehreren Knoten zu teilen.</p>
 <p><strong>Funktionsweise:</strong></p>
 <ol>
 <li>Nach der Aktivierung verbindet sich BunkerWeb mit dem konfigurierten Redis-/Valkey-Server.</li>
 <li>Kritische Daten (Sitzungen, Metriken, Sicherheit) werden dort gespeichert.</li>
 <li>Mehrere Instanzen teilen diese Daten für ein reibungsloses Clustering.</li>
-<li>Unterstützt Standalone-Bereitstellungen, passwortbasierte Authentifizierung, SSL/TLS and Redis Sentinel.</li>
-<li>Automatische Wiederverbindung and konfigurierbare Timeouts sorgen für Robustheit.</li>
+<li>Unterstützt Standalone-Bereitstellungen, passwortbasierte Authentifizierung, SSL/TLS und Redis Sentinel.</li>
+<li>Automatische Wiederverbindung und konfigurierbare Timeouts sorgen für Robustheit.</li>
 </ol>
 <h3 id="verwendung_5">Verwendung</h3>
 <ol>
-<li><strong>Aktivieren:</strong> <code>USE_REDIS: yes</code>.</li>
-<li><strong>Verbindung:</strong> Host/IP and Port.</li>
+<li><strong>Aktivieren:</strong> Setzen Sie den Parameter <code>USE_REDIS</code> auf <code>yes</code>.</li>
+<li><strong>Verbindung:</strong> Host/IP und Port.</li>
 <li><strong>Sicherheit:</strong> Anmeldeinformationen, falls erforderlich.</li>
-<li><strong>Erweitert:</strong> Datenbank, SSL and Timeouts.</li>
+<li><strong>Erweitert:</strong> Datenbank, SSL und Timeouts.</li>
 <li><strong>Hochverfügbarkeit:</strong> Konfigurieren Sie Sentinel, falls verwendet.</li>
 </ol>
 <h3 id="parameter_6">Parameter</h3>
@@ -11858,7 +11978,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </ul>
 </div>
 <h3 id="beispiele_6">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="39:4"><input checked="checked" id="__tabbed_39_1" name="__tabbed_39" type="radio" /><input id="__tabbed_39_2" name="__tabbed_39" type="radio" /><input id="__tabbed_39_3" name="__tabbed_39" type="radio" /><input id="__tabbed_39_4" name="__tabbed_39" type="radio" /><div class="tabbed-labels"><label for="__tabbed_39_1">Basiskonfiguration</label><label for="__tabbed_39_2">Sichere Konfiguration</label><label for="__tabbed_39_3">Redis Sentinel</label><label for="__tabbed_39_4">Erweitertes Tuning</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="38:4"><input checked="checked" id="__tabbed_38_1" name="__tabbed_38" type="radio" /><input id="__tabbed_38_2" name="__tabbed_38" type="radio" /><input id="__tabbed_38_3" name="__tabbed_38" type="radio" /><input id="__tabbed_38_4" name="__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="__tabbed_38_1">Basiskonfiguration</label><label for="__tabbed_38_2">Sichere Konfiguration</label><label for="__tabbed_38_3">Redis Sentinel</label><label for="__tabbed_38_4">Erweitertes Tuning</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration für die Verbindung zu einem Redis- oder Valkey-Server auf dem lokalen Computer:</p>
@@ -11905,7 +12025,8 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <h4 id="speicherverwaltung">Speicherverwaltung</h4>
 <ul>
 <li><strong>Speichernutzung überwachen:</strong> Konfigurieren Sie Redis mit geeigneten <code>maxmemory</code>-Einstellungen, um Fehler wegen unzureichendem Speicher zu vermeiden</li>
-<li><strong>Verdrängungsrichtlinie festlegen:</strong> Verwenden Sie eine für Ihren Anwendungsfall geeignete <code>maxmemory-policy</code> (z. B. <code>volatile-lru</code> oder <code>allkeys-lru</code>)</li>
+<li><strong>Verdrängungsrichtlinie festlegen:</strong> Verwenden Sie eine für Ihren Anwendungsfall geeignete <code>maxmemory-policy</code> (z. B. <code>volatile-lru</code> für den allgemeinen Einsatz oder <code>allkeys-lru</code> für stark cache-lastige Workloads)</li>
+<li><strong>All-in-One-Standards:</strong> Das AIO-Docker-Image liefert Redis bereits mit <code>maxmemory=256mb</code> und <code>maxmemory-policy=volatile-lru</code> aus; überschreiben Sie dies über die Umgebungsvariablen <code>REDIS_MAXMEMORY</code> und <code>REDIS_MAXMEMORY_POLICY</code>. Mit <code>volatile-lru</code> werden temporäre Zähler (Rate-Limit, Bad-Behavior) vor Schlüsseln mit für Sessions und befristete Sperren wichtigen TTLs verdrängt, und Schlüssel ohne Ablaufzeit (dauerhafte Sperren) bleiben unangetastet. Dieselbe Richtlinie wird auch für externe Redis- oder Valkey-Server empfohlen.</li>
 <li><strong>Große Schlüssel vermeiden:</strong> Stellen Sie sicher, dass einzelne Redis-Schlüssel eine angemessene Größe behalten, um Leistungseinbußen zu vermeiden</li>
 </ul>
 <h4 id="datenpersistenz">Datenpersistenz</h4>
@@ -11929,7 +12050,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><a href="https://redis.io/topics/persistence">Redis-Persistenz</a></li>
 </ul>
 <h2 id="reporting-pro">Reporting <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.</p>
 <table>
 <thead>
@@ -12036,7 +12157,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="reverse-proxy">Reverse proxy</h2>
-<p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Das Reverse-Proxy-Plugin bietet nahtlose Proxy-Funktionen für BunkerWeb, mit denen Sie Anfragen an Backend-Server und -Dienste weiterleiten können. Mit dieser Funktion kann BunkerWeb als sicheres Frontend für Ihre Anwendungen fungieren und gleichzeitig zusätzliche Vorteile wie SSL-Terminierung und Sicherheitsfilterung bieten.</p>
 <p><strong>So funktioniert es:</strong></p>
 <ol>
@@ -12056,7 +12177,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>Caching einrichten (optional):</strong> Aktivieren und konfigurieren Sie das Proxy-Caching, um die Leistung für häufig aufgerufene Inhalte zu verbessern.</li>
 </ol>
 <h3 id="konfigurationsanleitung_1">Konfigurationsanleitung</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="40:8"><input checked="checked" id="__tabbed_40_1" name="__tabbed_40" type="radio" /><input id="__tabbed_40_2" name="__tabbed_40" type="radio" /><input id="__tabbed_40_3" name="__tabbed_40" type="radio" /><input id="__tabbed_40_4" name="__tabbed_40" type="radio" /><input id="__tabbed_40_5" name="__tabbed_40" type="radio" /><input id="__tabbed_40_6" name="__tabbed_40" type="radio" /><input id="__tabbed_40_7" name="__tabbed_40" type="radio" /><input id="__tabbed_40_8" name="__tabbed_40" type="radio" /><div class="tabbed-labels"><label for="__tabbed_40_1">Grundlegende Konfiguration</label><label for="__tabbed_40_2">Verbindungseinstellungen</label><label for="__tabbed_40_3">SSL/TLS-Konfiguration</label><label for="__tabbed_40_4">Protokollunterstützung</label><label for="__tabbed_40_5">Header-Verwaltung</label><label for="__tabbed_40_6">Authentifizierung</label><label for="__tabbed_40_7">Erweiterte Konfiguration</label><label for="__tabbed_40_8">Caching-Konfiguration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="39:8"><input checked="checked" id="__tabbed_39_1" name="__tabbed_39" type="radio" /><input id="__tabbed_39_2" name="__tabbed_39" type="radio" /><input id="__tabbed_39_3" name="__tabbed_39" type="radio" /><input id="__tabbed_39_4" name="__tabbed_39" type="radio" /><input id="__tabbed_39_5" name="__tabbed_39" type="radio" /><input id="__tabbed_39_6" name="__tabbed_39" type="radio" /><input id="__tabbed_39_7" name="__tabbed_39" type="radio" /><input id="__tabbed_39_8" name="__tabbed_39" type="radio" /><div class="tabbed-labels"><label for="__tabbed_39_1">Grundlegende Konfiguration</label><label for="__tabbed_39_2">Verbindungseinstellungen</label><label for="__tabbed_39_3">SSL/TLS-Konfiguration</label><label for="__tabbed_39_4">Protokollunterstützung</label><label for="__tabbed_39_5">Header-Verwaltung</label><label for="__tabbed_39_6">Authentifizierung</label><label for="__tabbed_39_7">Erweiterte Konfiguration</label><label for="__tabbed_39_8">Caching-Konfiguration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Kerneinstellungen</strong></p>
@@ -12128,7 +12249,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><code>1.1</code></td>
 <td>multisite</td>
 <td>ja</td>
-<td><strong>HTTP-Version:</strong> HTTP-Protokollversion für die Kommunikation mit dem Upstream (<code>1.0</code>, <code>1.1</code> oder <code>2</code>). Der WebSocket-Zweig verwendet immer 1.1.</td>
+<td><strong>HTTP-Version:</strong> HTTP-Protokollversion für die Kommunikation mit dem Upstream (<code>1.0</code>, <code>1.1</code> oder <code>2</code>). Auf <code>2</code> setzen, um HTTP/2-Multiplexing auf der Upstream-Verbindung zu aktivieren. Der WebSocket-Zweig verwendet immer 1.1.</td>
 </tr>
 <tr>
 <td><code>REVERSE_PROXY_CUSTOM_HOST</code></td>
@@ -12608,7 +12729,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Ohne diese Maskierung versucht Docker Compose, diese Variablen durch Umgebungsvariablen zu ersetzen, die normalerweise nicht existieren, was zu leeren Werten in Ihrer NGINX-Konfiguration führt.</p>
 </div>
 <h3 id="beispielkonfigurationen_19">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="41:6"><input checked="checked" id="__tabbed_41_1" name="__tabbed_41" type="radio" /><input id="__tabbed_41_2" name="__tabbed_41" type="radio" /><input id="__tabbed_41_3" name="__tabbed_41" type="radio" /><input id="__tabbed_41_4" name="__tabbed_41" type="radio" /><input id="__tabbed_41_5" name="__tabbed_41" type="radio" /><input id="__tabbed_41_6" name="__tabbed_41" type="radio" /><div class="tabbed-labels"><label for="__tabbed_41_1">Grundlegender HTTP-Proxy</label><label for="__tabbed_41_2">WebSocket-Anwendung</label><label for="__tabbed_41_3">Mehrere Standorte</label><label for="__tabbed_41_4">Caching-Konfiguration</label><label for="__tabbed_41_5">Erweiterte Header-Verwaltung</label><label for="__tabbed_41_6">Authentifizierungsintegration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="40:6"><input checked="checked" id="__tabbed_40_1" name="__tabbed_40" type="radio" /><input id="__tabbed_40_2" name="__tabbed_40" type="radio" /><input id="__tabbed_40_3" name="__tabbed_40" type="radio" /><input id="__tabbed_40_4" name="__tabbed_40" type="radio" /><input id="__tabbed_40_5" name="__tabbed_40" type="radio" /><input id="__tabbed_40_6" name="__tabbed_40" type="radio" /><div class="tabbed-labels"><label for="__tabbed_40_1">Grundlegender HTTP-Proxy</label><label for="__tabbed_40_2">WebSocket-Anwendung</label><label for="__tabbed_40_3">Mehrere Standorte</label><label for="__tabbed_40_4">Caching-Konfiguration</label><label for="__tabbed_40_5">Erweiterte Header-Verwaltung</label><label for="__tabbed_40_6">Authentifizierungsintegration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration zum Weiterleiten von HTTP-Anfragen an einen Backend-Anwendungsserver:</p>
@@ -12691,7 +12812,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="reverse-scan">Reverse scan</h2>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Das Reverse Scan-Plugin schützt robust vor Proxy-Umgehungsversuchen, indem es die Ports der Clients scannt, um festzustellen, ob sie Proxyserver oder andere Netzwerkdienste betreiben. Diese Funktion hilft dabei, potenzielle Bedrohungen von Clients zu identifizieren und zu blockieren, die möglicherweise versuchen, ihre wahre Identität oder Herkunft zu verbergen, und verbessert so die Sicherheitslage Ihrer Website.</p>
 <p><strong>So funktioniert es:</strong></p>
 <ol>
@@ -12762,7 +12883,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Die Standardkonfiguration umfasst gängige Ports, die von Proxyservern (80, 443, 8080, 3128) und SSH (22) verwendet werden. Sie können diese Liste basierend auf Ihrem Bedrohungsmodell anpassen.</p>
 </div>
 <h3 id="beispielkonfigurationen_20">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="42:4"><input checked="checked" id="__tabbed_42_1" name="__tabbed_42" type="radio" /><input id="__tabbed_42_2" name="__tabbed_42" type="radio" /><input id="__tabbed_42_3" name="__tabbed_42" type="radio" /><input id="__tabbed_42_4" name="__tabbed_42" type="radio" /><div class="tabbed-labels"><label for="__tabbed_42_1">Grundlegende Konfiguration</label><label for="__tabbed_42_2">Umfassendes Scannen</label><label for="__tabbed_42_3">Leistungsoptimierte Konfiguration</label><label for="__tabbed_42_4">Hochsicherheitskonfiguration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="41:4"><input checked="checked" id="__tabbed_41_1" name="__tabbed_41" type="radio" /><input id="__tabbed_41_2" name="__tabbed_41" type="radio" /><input id="__tabbed_41_3" name="__tabbed_41" type="radio" /><input id="__tabbed_41_4" name="__tabbed_41" type="radio" /><div class="tabbed-labels"><label for="__tabbed_41_1">Grundlegende Konfiguration</label><label for="__tabbed_41_2">Umfassendes Scannen</label><label for="__tabbed_41_3">Leistungsoptimierte Konfiguration</label><label for="__tabbed_41_4">Hochsicherheitskonfiguration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration zum Aktivieren des Client-Port-Scannens:</p>
@@ -12795,7 +12916,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="robotstxt">Robots.txt</h2>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Das Robots.txt-Plugin verwaltet die Datei <a href="https://www.robotstxt.org/">robots.txt</a> für Ihre Website. Diese Datei teilt Web-Crawlern und Robotern mit, auf welche Teile Ihrer Website sie zugreifen dürfen und auf welche nicht.</p>
 <p><strong>So funktioniert es:</strong></p>
 <p>Wenn aktiviert, generiert BunkerWeb dynamisch die <code>/robots.txt</code>-Datei im Stammverzeichnis Ihrer Website. Die Regeln in dieser Datei werden in der folgenden Reihenfolge aus mehreren Quellen zusammengefasst:</p>
@@ -12944,14 +13065,12 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <span class="nt">ROBOTSTXT_RULE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">*&quot;</span>
 <span class="nt">ROBOTSTXT_RULE_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Disallow:</span><span class="nv"> </span><span class="s">/private&quot;</span>
 <span class="nt">ROBOTSTXT_FOOTER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;#</span><span class="nv"> </span><span class="s">Dies</span><span class="nv"> </span><span class="s">ist</span><span class="nv"> </span><span class="s">eine</span><span class="nv"> </span><span class="s">benutzerdefinierte</span><span class="nv"> </span><span class="s">Fußzeile&quot;</span>
-<span class="nt">ROBOTSTXT_SITEMAP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/sitemap.xml&quot;</span><span class="err">```</span>
-
-<span class="nn">---</span>
-
-<span class="l l-Scalar l-Scalar-Plain">Weitere Informationen finden Sie in der [robots.txt-Dokumentation](https://www.robotstxt.org/robotstxt.html).</span>
+<span class="nt">ROBOTSTXT_SITEMAP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/sitemap.xml&quot;</span>
 </code></pre></div>
+<hr />
+<p>Weitere Informationen finden Sie in der <a href="https://www.robotstxt.org/robotstxt.html">robots.txt-Dokumentation</a>.</p>
 <h2 id="securitytxt">Security.txt</h2>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Das Security.txt-Plugin implementiert den <a href="https://securitytxt.org/">Security.txt</a>-Standard (<a href="https://www.rfc-editor.org/rfc/rfc9116">RFC 9116</a>) für Ihre Website. Diese Funktion erleichtert Sicherheitsforschern den Zugriff auf Ihre Sicherheitsrichtlinien und bietet eine standardisierte Möglichkeit, Sicherheitslücken zu melden, die sie in Ihren Systemen entdecken.</p>
 <p><strong>So funktioniert es:</strong></p>
 <ol>
@@ -13073,7 +13192,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Gemäß RFC 9116 MÜSSEN alle URLs in der security.txt-Datei (außer <code>mailto:</code>- und <code>tel:</code>-Links) HTTPS verwenden. Nicht-HTTPS-URLs werden von BunkerWeb automatisch in HTTPS konvertiert, um die Einhaltung des Standards zu gewährleisten.</p>
 </div>
 <h3 id="beispielkonfigurationen_22">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="43:3"><input checked="checked" id="__tabbed_43_1" name="__tabbed_43" type="radio" /><input id="__tabbed_43_2" name="__tabbed_43" type="radio" /><input id="__tabbed_43_3" name="__tabbed_43" type="radio" /><div class="tabbed-labels"><label for="__tabbed_43_1">Grundlegende Konfiguration</label><label for="__tabbed_43_2">Umfassende Konfiguration</label><label for="__tabbed_43_3">Konfiguration mit mehreren Kontakten</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="42:3"><input checked="checked" id="__tabbed_42_1" name="__tabbed_42" type="radio" /><input id="__tabbed_42_2" name="__tabbed_42" type="radio" /><input id="__tabbed_42_3" name="__tabbed_42" type="radio" /><div class="tabbed-labels"><label for="__tabbed_42_1">Grundlegende Konfiguration</label><label for="__tabbed_42_2">Umfassende Konfiguration</label><label for="__tabbed_42_3">Konfiguration mit mehreren Kontakten</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine minimale Konfiguration mit nur Kontaktinformationen:</p>
@@ -13110,7 +13229,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="self-signed-certificate">Self-signed certificate</h2>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Das Plugin "Selbstsigniertes Zertifikat" generiert und verwaltet automatisch SSL/TLS-Zertifikate direkt in BunkerWeb, um HTTPS ohne externe Zertifizierungsstelle zu aktivieren. Ideal für die Entwicklung, interne Netzwerke oder schnelle HTTPS-Bereitstellungen.</p>
 <p>So funktioniert's:</p>
 <ol>
@@ -13125,10 +13244,11 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 <h3 id="verwendung_6">Verwendung</h3>
 <ol>
-<li>Aktivieren: <code>GENERATE_SELF_SIGNED_SSL: yes</code>.</li>
+<li>Aktivieren: Setzen Sie den Parameter <code>GENERATE_SELF_SIGNED_SSL</code> auf <code>yes</code>.</li>
 <li>Algorithmus: Wählen Sie über <code>SELF_SIGNED_SSL_ALGORITHM</code>.</li>
 <li>Gültigkeit: Dauer in Tagen über <code>SELF_SIGNED_SSL_EXPIRY</code>.</li>
 <li>Betreff: Betrefffeld über <code>SELF_SIGNED_SSL_SUBJ</code>.</li>
+<li>BunkerWeb den Rest erledigen lassen: Nach der Konfiguration werden Zertifikate automatisch generiert und auf Ihre Domains angewendet.</li>
 </ol>
 <div class="admonition tip">
 <p class="admonition-title">Stream-Modus</p>
@@ -13176,8 +13296,16 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tr>
 </tbody>
 </table>
+<div class="admonition tip">
+<p class="admonition-title">Entwicklungsumgebungen</p>
+<p>Selbstsignierte Zertifikate eignen sich für Entwicklungs- und Testumgebungen, in denen Sie die vertrauenswürdigen Zertifikate der Clients kontrollieren können. Für öffentliche Produktionsumgebungen sollten Sie eine anerkannte Zertifizierungsstelle verwenden.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Zertifikatsinformationen</p>
+<p>Das generierte Zertifikat enthält die konfigurierten Servernamen und verwendet den konfigurierten Algorithmus. Passen Sie den Zertifikatsbetreff an, damit er die Hauptdomain widerspiegelt.</p>
+</div>
 <h3 id="beispiele_7">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="44:3"><input checked="checked" id="__tabbed_44_1" name="__tabbed_44" type="radio" /><input id="__tabbed_44_2" name="__tabbed_44" type="radio" /><input id="__tabbed_44_3" name="__tabbed_44" type="radio" /><div class="tabbed-labels"><label for="__tabbed_44_1">Standard</label><label for="__tabbed_44_2">Kurzzeit-Zertifikate</label><label for="__tabbed_44_3">Test in RSA</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="43:3"><input checked="checked" id="__tabbed_43_1" name="__tabbed_43" type="radio" /><input id="__tabbed_43_2" name="__tabbed_43" type="radio" /><input id="__tabbed_43_3" name="__tabbed_43" type="radio" /><div class="tabbed-labels"><label for="__tabbed_43_1">Standard</label><label for="__tabbed_43_2">Kurzzeit-Zertifikate</label><label for="__tabbed_43_3">Test in RSA</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">GENERATE_SELF_SIGNED_SSL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -13204,7 +13332,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="sessions">Sessions</h2>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Das Sessions-Plugin bietet eine robuste HTTP-Sitzungsverwaltung für BunkerWeb und ermöglicht eine sichere und zuverlässige Verfolgung von Benutzersitzungen über Anfragen hinweg. Diese Kernfunktion ist unerlässlich für die Aufrechterhaltung des Benutzerstatus, die Persistenz der Authentifizierung und die Unterstützung anderer Funktionen, die eine Kontinuität der Identität erfordern, wie z. B. der <a href="#antibot">Anti-Bot-Schutz</a> und Benutzerauthentifizierungssysteme.</p>
 <p><strong>So funktioniert es:</strong></p>
 <ol>
@@ -13315,7 +13443,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </ol>
 </div>
 <h3 id="beispielkonfigurationen_23">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="45:6"><input checked="checked" id="__tabbed_45_1" name="__tabbed_45" type="radio" /><input id="__tabbed_45_2" name="__tabbed_45" type="radio" /><input id="__tabbed_45_3" name="__tabbed_45" type="radio" /><input id="__tabbed_45_4" name="__tabbed_45" type="radio" /><input id="__tabbed_45_5" name="__tabbed_45" type="radio" /><input id="__tabbed_45_6" name="__tabbed_45" type="radio" /><div class="tabbed-labels"><label for="__tabbed_45_1">Grundlegende Konfiguration</label><label for="__tabbed_45_2">Erhöhte Sicherheit</label><label for="__tabbed_45_3">Cluster-Umgebung mit Redis</label><label for="__tabbed_45_4">Langlebige Sitzungen</label><label for="__tabbed_45_5">Subdomain-übergreifende Sitzungen (ein Mandant)</label><label for="__tabbed_45_6">Subdomain-übergreifende Sitzungen (gemischte Mandanten)</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="44:6"><input checked="checked" id="__tabbed_44_1" name="__tabbed_44" type="radio" /><input id="__tabbed_44_2" name="__tabbed_44" type="radio" /><input id="__tabbed_44_3" name="__tabbed_44" type="radio" /><input id="__tabbed_44_4" name="__tabbed_44" type="radio" /><input id="__tabbed_44_5" name="__tabbed_44" type="radio" /><input id="__tabbed_44_6" name="__tabbed_44" type="radio" /><div class="tabbed-labels"><label for="__tabbed_44_1">Grundlegende Konfiguration</label><label for="__tabbed_44_2">Erhöhte Sicherheit</label><label for="__tabbed_44_3">Cluster-Umgebung mit Redis</label><label for="__tabbed_44_4">Langlebige Sitzungen</label><label for="__tabbed_44_5">Subdomain-übergreifende Sitzungen (ein Mandant)</label><label for="__tabbed_44_6">Subdomain-übergreifende Sitzungen (gemischte Mandanten)</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration für eine einzelne BunkerWeb-Instanz:</p>
@@ -13388,7 +13516,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="ssl">SSL</h2>
-<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Das SSL-Plugin bietet eine robuste SSL/TLS-Verschlüsselung für Ihre durch BunkerWeb geschützten Websites. Es ermöglicht sichere HTTPS-Verbindungen durch die Konfiguration von Protokollen, kryptografischen Suiten und zugehörigen Parametern.</p>
 <p>So funktioniert's:</p>
 <ol>
@@ -13397,6 +13525,15 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>Optimierte Sitzungsparameter verbessern die Leistung, ohne die Sicherheit zu beeinträchtigen.</li>
 <li>Die Präsentation der Zertifikate folgt Best Practices für Kompatibilität und Sicherheit.</li>
 </ol>
+<div class="admonition success">
+<p class="admonition-title">Sicherheitsvorteile</p>
+<ul>
+<li><strong>Datenschutz:</strong> Verschlüsselt Daten während der Übertragung und verhindert Abhören sowie Man-in-the-Middle-Angriffe.</li>
+<li><strong>Authentifizierung:</strong> Bestätigt Clients die Identität Ihres Servers.</li>
+<li><strong>Integrität:</strong> Stellt sicher, dass Daten während der Übertragung nicht manipuliert wurden.</li>
+<li><strong>Moderne Standards:</strong> Auf bewährte Verfahren und Sicherheitsstandards der Branche ausgerichtet.</li>
+</ul>
+</div>
 <h3 id="verwendung_7">Verwendung</h3>
 <ol>
 <li><strong>Protokolle</strong>: Wählen Sie die Versionen über <code>SSL_PROTOCOLS</code>.</li>
@@ -13475,7 +13612,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>SSLv3, TLSv1.0 und TLSv1.1 sind standardmäßig deaktiviert (bekannte Schwachstellen). Aktivieren Sie diese nur bei Bedarf für ältere Clients.</p>
 </div>
 <h3 id="beispiele_8">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="46:4"><input checked="checked" id="__tabbed_46_1" name="__tabbed_46" type="radio" /><input id="__tabbed_46_2" name="__tabbed_46" type="radio" /><input id="__tabbed_46_3" name="__tabbed_46" type="radio" /><input id="__tabbed_46_4" name="__tabbed_46" type="radio" /><div class="tabbed-labels"><label for="__tabbed_46_1">Moderne Sicherheit (Standard)</label><label for="__tabbed_46_2">Maximale Sicherheit</label><label for="__tabbed_46_3">Legacy-Kompatibilität</label><label for="__tabbed_46_4">Benutzerdefinierte Suiten</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="45:4"><input checked="checked" id="__tabbed_45_1" name="__tabbed_45" type="radio" /><input id="__tabbed_45_2" name="__tabbed_45" type="radio" /><input id="__tabbed_45_3" name="__tabbed_45" type="radio" /><input id="__tabbed_45_4" name="__tabbed_45" type="radio" /><div class="tabbed-labels"><label for="__tabbed_45_1">Moderne Sicherheit (Standard)</label><label for="__tabbed_45_2">Maximale Sicherheit</label><label for="__tabbed_45_3">Legacy-Kompatibilität</label><label for="__tabbed_45_4">Benutzerdefinierte Suiten</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">LISTEN_HTTPS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -13510,7 +13647,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="ui">UI</h2>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Integrate easily the BunkerWeb UI.</p>
 <table>
 <thead>
@@ -13541,7 +13678,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </table>
 <h2 id="ui-single-sign-on-pro">UI Single Sign-On <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#ui-single-sign-on-pro">erweiterten Nutzung</a>.</p>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Enable SSO authentication for the BunkerWeb web interface by reading headers set by upstream authentication proxies (Authentik, Authelia, Keycloak, Traefik Forward Auth, etc.)</p>
 <table>
 <thead>
@@ -13686,7 +13823,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/EIohiUf9Fg4' title='User Manager' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#user-manager-pro">erweiterten Nutzung</a>.</p>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Add the possibility to manage users on the web interface</p>
 <table>
 <thead>
@@ -13709,7 +13846,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="whitelist">Whitelist</h2>
-<p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Das Whitelist-Plugin ermöglicht es Ihnen, eine Liste vertrauenswürdiger IP-Adressen zu definieren, die andere Sicherheitsfilter umgehen.
 Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blacklist">Blacklist-Plugin</a>.</p>
 <p>Das Whitelist-Plugin bietet einen umfassenden Ansatz, um den Zugriff auf Ihre Website basierend auf verschiedenen Client-Attributen explizit zu erlauben. Diese Funktion bietet einen Sicherheitsmechanismus: Besuchern, die bestimmte Kriterien erfüllen, wird sofortiger Zugriff gewährt, während alle anderen reguläre Sicherheitsprüfungen durchlaufen müssen.</p>
@@ -13756,7 +13893,7 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="47:5"><input checked="checked" id="__tabbed_47_1" name="__tabbed_47" type="radio" /><input id="__tabbed_47_2" name="__tabbed_47" type="radio" /><input id="__tabbed_47_3" name="__tabbed_47" type="radio" /><input id="__tabbed_47_4" name="__tabbed_47" type="radio" /><input id="__tabbed_47_5" name="__tabbed_47" type="radio" /><div class="tabbed-labels"><label for="__tabbed_47_1">IP-Adresse</label><label for="__tabbed_47_2">Reverse DNS</label><label for="__tabbed_47_3">ASN</label><label for="__tabbed_47_4">User-Agent</label><label for="__tabbed_47_5">URI</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="46:5"><input checked="checked" id="__tabbed_46_1" name="__tabbed_46" type="radio" /><input id="__tabbed_46_2" name="__tabbed_46" type="radio" /><input id="__tabbed_46_3" name="__tabbed_46" type="radio" /><input id="__tabbed_46_4" name="__tabbed_46" type="radio" /><input id="__tabbed_46_5" name="__tabbed_46" type="radio" /><div class="tabbed-labels"><label for="__tabbed_46_1">IP-Adresse</label><label for="__tabbed_46_2">Reverse DNS</label><label for="__tabbed_46_3">ASN</label><label for="__tabbed_46_4">User-Agent</label><label for="__tabbed_46_5">URI</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Was dies bewirkt:</strong> Setzt Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk auf die Whitelist. Diese Besucher umgehen alle Sicherheitsprüfungen.</p>
@@ -14000,7 +14137,7 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 <p>Auf der Whitelist stehende Besucher <strong>umgehen vollständig alle anderen Sicherheitsprüfungen</strong> in BunkerWeb, einschließlich WAF-Regeln, Ratenbegrenzung, Erkennung bösartiger Bots und aller anderen Sicherheitsmechanismen. Verwenden Sie die Whitelist nur für vertrauenswürdige Quellen, bei denen Sie absolut sicher sind.</p>
 </div>
 <h3 id="beispielkonfigurationen_24">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="48:5"><input checked="checked" id="__tabbed_48_1" name="__tabbed_48" type="radio" /><input id="__tabbed_48_2" name="__tabbed_48" type="radio" /><input id="__tabbed_48_3" name="__tabbed_48" type="radio" /><input id="__tabbed_48_4" name="__tabbed_48" type="radio" /><input id="__tabbed_48_5" name="__tabbed_48" type="radio" /><div class="tabbed-labels"><label for="__tabbed_48_1">Grundlegender Organisationszugriff</label><label for="__tabbed_48_2">Erweiterte Konfiguration</label><label for="__tabbed_48_3">Verwendung lokaler Dateien</label><label for="__tabbed_48_4">API-Zugriffsmuster</label><label for="__tabbed_48_5">Bekannte Crawler</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="47:5"><input checked="checked" id="__tabbed_47_1" name="__tabbed_47" type="radio" /><input id="__tabbed_47_2" name="__tabbed_47" type="radio" /><input id="__tabbed_47_3" name="__tabbed_47" type="radio" /><input id="__tabbed_47_4" name="__tabbed_47" type="radio" /><input id="__tabbed_47_5" name="__tabbed_47" type="radio" /><div class="tabbed-labels"><label for="__tabbed_47_1">Grundlegender Organisationszugriff</label><label for="__tabbed_47_2">Erweiterte Konfiguration</label><label for="__tabbed_47_3">Verwendung lokaler Dateien</label><label for="__tabbed_47_4">API-Zugriffsmuster</label><label for="__tabbed_47_5">Bekannte Crawler</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration, die die IP-Adressen des Unternehmensbüros auf die Whitelist setzt:</p>
@@ -14075,7 +14212,7 @@ TrustedMonitor/\d+\.\d+
 </code></pre></div>
 <h2 id="wildcard-pro">Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#wildcard-pro">erweiterten Nutzung</a>.</p>
-<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Adds wildcard server_name support (*.domain) for services.</p>
 <table>
 <thead>

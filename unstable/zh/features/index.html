@@ -48,7 +48,10 @@
 
     
     
-    <script async defer data-domain="docs.bunkerweb.io" src="https://data.bunkerity.com/js/script.js"></script>
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', (e) => {
@@ -63,7 +66,7 @@
       })
     </script>
 
-    <script src="../../assets/external/cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
 
     <script defer>
   // Lazy load images and embed youtube videos
@@ -83,8 +86,8 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#services">professional services</a>.</p>'},
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
 
@@ -203,7 +206,9 @@
             
             
     📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
-    <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc" style="color: #3f6ec6;&#10;              text-decoration: underline">BunkerWeb Panel</a>
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
     for more information on our enterprise offers.
 
           </div>
@@ -3556,7 +3561,7 @@
 <h1 id="_1">功能</h1>
 <p>本节包含 BunkerWeb 支持的完整设置列表。若尚未熟悉 BunkerWeb，建议先阅读文档中的<a href="../concepts/">概念</a>部分。请根据您的<a href="../integrations/">集成</a>说明应用相应的设置。</p>
 <h2 id="_2">全局设置</h2>
-<p>STREAM 支持 <img alt="⚠" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM 支持 <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>通用插件为 BunkerWeb 提供了核心配置框架，允许您定义控制 Web 服务如何受保护和交付的基本设置。这个基础插件管理着整个 BunkerWeb 生态系统的基本方面，如安全模式、服务器默认值、日志记录行为和关键操作参数。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -3935,6 +3940,13 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><strong>数据存储内存大小：</strong> 内部数据存储的大小。</td>
 </tr>
 <tr>
+<td><code>DATASTORE_LRU_SIZE</code></td>
+<td><code>1k</code></td>
+<td>global</td>
+<td>否</td>
+<td><strong>数据存储 LRU 大小：</strong> 每个工作进程共享数据存储 LRU 的槽数。接受整数或 <code>k</code>/<code>m</code> 简写（例如 <code>1k</code>、<code>10k</code>、<code>1m</code>）。</td>
+</tr>
+<tr>
 <td><code>CACHESTORE_MEMORY_SIZE</code></td>
 <td><code>64m</code></td>
 <td>global</td>
@@ -4166,7 +4178,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </div>
 <h2 id="acme-pro">ACME <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>如需更详细的指南，请参阅<a href="../advanced/#acme">高级用法</a>文档。</p>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Advanced ACME certificate management with custom CA support, certificate monitoring dashboard, expiry alerting, CT log monitoring, and enhanced OCSP stapling. Complements the built-in Let's Encrypt plugin.</p>
 <table>
 <thead>
@@ -4442,7 +4454,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </table>
 <h2 id="anti-ddos-pro">Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>如需更详细的指南，请参阅<a href="../advanced/#anti-ddos-pro">高级用法</a>文档。</p>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides enhanced protection against DDoS attacks by analyzing and filtering suspicious traffic.</p>
 <table>
 <thead>
@@ -4500,7 +4512,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tbody>
 </table>
 <h2 id="antibot">Antibot</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>攻击者通常使用自动化工具（机器人）来尝试利用您的网站。为了防止这种情况，BunkerWeb 包含一个“Antibot”功能，它会挑战用户以证明他们是人类。如果用户成功完成挑战，他们将被授予访问您网站的权限。此功能默认禁用。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -4706,6 +4718,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
+<p>有关其他配置选项，请参阅<a href="#通用设置">通用设置</a>。</p>
 </div>
 <div class="tabbed-block">
 <p>JavaScript 挑战要求客户端使用 JavaScript 解决一个计算任务。这种机制确保客户端启用了 JavaScript 并且可以执行所需的代码，这通常超出了大多数机器人的能力。</p>
@@ -4741,6 +4754,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
+<p>有关其他配置选项，请参阅<a href="#通用设置">通用设置</a>。</p>
 </div>
 <div class="tabbed-block">
 <p>Captcha 挑战是一种自制的机制，它可以在您的 BunkerWeb 环境中完全托管生成基于图像的挑战。它测试用户识别和解释随机字符的能力，确保在不依赖外部服务的情况下有效阻止自动化机器人。</p>
@@ -4792,6 +4806,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
+<p>有关其他配置选项，请参阅<a href="#通用设置">通用设置</a>。</p>
 </div>
 <div class="tabbed-block">
 <p>启用后，reCAPTCHA 会在后台运行 (v3)，根据用户行为分配一个分数。低于配置阈值的分数将提示进一步验证或阻止请求。对于可见的挑战 (v2)，用户必须与 reCAPTCHA 小部件交互才能继续。</p>
@@ -4877,6 +4892,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
+<p>有关其他配置选项，请参阅<a href="#通用设置">通用设置</a>。</p>
 </div>
 <div class="tabbed-block">
 <p>启用后，hCaptcha 提供了一个有效的 reCAPTCHA 替代方案，它通过验证用户交互而无需依赖评分机制。它用一个简单的交互式测试来挑战用户，以确认他们的合法性。</p>
@@ -4916,6 +4932,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
+<p>有关其他配置选项，请参阅<a href="#通用设置">通用设置</a>。</p>
 </div>
 <div class="tabbed-block">
 <p>Turnstile 是一种现代、注重隐私的挑战机制，它利用 Cloudflare 的技术来检测和阻止自动化流量。它以一种无缝、后台的方式验证用户交互，为合法用户减少了摩擦，同时有效地阻止了机器人。</p>
@@ -4955,6 +4972,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
+<p>有关其他配置选项，请参阅<a href="#通用设置">通用设置</a>。</p>
 </div>
 <div class="tabbed-block">
 <p>mCaptcha 是一种替代的 CAPTCHA 挑战机制，它通过呈现一个与其他 antibot 解决方案类似的交互式测试来验证用户的合法性。启用后，它会用 mCaptcha 提供的 CAPTCHA 来挑战用户，确保只有真正的用户才能绕过自动安全检查。</p>
@@ -5002,6 +5020,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
+<p>有关其他配置选项，请参阅<a href="#通用设置">通用设置</a>。</p>
 </div>
 <div class="tabbed-block">
 <p><a href="https://capjs.js.org/">Cap.js</a> 是一种自托管、开源、注重隐私的工作量证明 CAPTCHA。它不把验证交给第三方服务，而是由您自己运行 Cap.js 服务器，BunkerWeb 会向该服务器验证令牌。</p>
@@ -5063,6 +5082,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <li>将 <code>ANTIBOT_CAPJS_FRONTEND_URL</code> 和 <code>ANTIBOT_CAPJS_BACKEND_URL</code> 都设置为仅 origin：scheme、host 和可选端口，不包含路径。</li>
 </ul>
 </div>
+<p>有关其他配置选项，请参阅<a href="#通用设置">通用设置</a>。</p>
 </div>
 </div>
 </div>
@@ -5169,7 +5189,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </div>
 </div>
 <h2 id="auth-basic">Auth basic</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Auth Basic 插件提供 HTTP 基本认证来保护您的网站或特定资源。此功能通过要求用户在访问受保护内容之前输入用户名和密码来增加额外的安全层。这种类型的身份验证实现简单，并得到浏览器的广泛支持。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -5287,7 +5307,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </div>
 </div>
 <h2 id="backup">Backup</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>备份插件提供了一个自动备份解决方案来保护您的 BunkerWeb 数据。此功能通过根据您首选的时间表创建定期备份，确保您重要数据库的安全性和可用性。备份存储在指定位置，并且可以通过自动化流程和手动命令轻松管理。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -5403,7 +5423,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 </div>
 <h2 id="backup-s3-pro">Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Automatically backup your data to an S3 bucket</p>
 <table>
 <thead>
@@ -5489,7 +5509,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </tbody>
 </table>
 <h2 id="bad-behavior">Bad behavior</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>不良行为插件通过自动检测并封禁在指定时间段内产生过多错误或“不良”HTTP 状态码的 IP 地址来保护您的网站。这有助于防御暴力破解攻击、网络爬虫、漏洞扫描器以及其他可能产生大量错误响应的恶意活动。</p>
 <p>攻击者在探测或利用漏洞时，通常会产生“可疑”的 HTTP 状态码——这些代码是普通用户在给定时间范围内不太可能触发的。通过检测这种行为，BunkerWeb 可以自动封禁违规的 IP 地址，迫使攻击者使用新的 IP 地址才能继续尝试。</p>
 <p><strong>工作原理：</strong></p>
@@ -5633,7 +5653,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 </div>
 <h2 id="blacklist">Blacklist</h2>
-<p>STREAM 支持 <img alt="⚠" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM 支持 <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>黑名单插件通过根据各种客户端属性阻止访问来为您的网站提供强大的保护。此功能通过根据 IP 地址、网络、反向 DNS 条目、ASN、用户代理和特定的 URI 模式拒绝访问来防御已知的恶意实体、扫描器和可疑访问者。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -6040,7 +6060,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 TrustedMonitor/\d+\.\d+
 </code></pre></div>
 <h2 id="brotli">Brotli</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Brotli 插件使用 Brotli 算法实现对 HTTP 响应的高效压缩。此功能通过在将 Web 内容发送到客户端浏览器之前对其进行压缩，帮助减少带宽使用并缩短页面加载时间。</p>
 <p>与其他压缩方法（如 gzip）相比，Brotli 通常能实现更高的压缩率，从而减小文件大小，加快内容交付速度。</p>
 <p><strong>工作原理：</strong></p>
@@ -6140,7 +6160,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="bunkernet">BunkerNet</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创建了一个强大的恶意行为者防护网络。通过参与 BunkerNet，您的实例不仅受益于全球已知威胁数据库，同时也为其做出贡献，从而增强了整个 BunkerWeb 社区的安全性。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -6270,7 +6290,7 @@ TrustedMonitor/\d+\.\d+
 </figure>
 <h2 id="cache-pro">Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>如需更详细的指南，请参阅<a href="../advanced/#cache-pro">高级用法</a>文档。</p>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides caching functionality at the reverse proxy level.</p>
 <table>
 <thead>
@@ -6398,7 +6418,7 @@ TrustedMonitor/\d+\.\d+
 </tbody>
 </table>
 <h2 id="client-cache">Client cache</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>客户端缓存插件通过控制浏览器如何缓存静态内容来优化网站性能。它通过指示浏览器在本地存储和重用静态资产（例如图像、CSS 和 JavaScript 文件），而不是在每次页面访问时都请求它们，从而减少了带宽使用量，降低了服务器负载，并缩短了页面加载时间。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -6497,7 +6517,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="cors">CORS</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>CORS 插件为您的网站启用跨源资源共享，允许从不同域受控地访问您的资源。此功能通过明确定义允许哪些源、方法和标头，帮助您安全地与受信任的第三方网站共享您的内容，同时维护安全性。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -6685,7 +6705,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="country">Country</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>国家/地区插件为您的网站启用地理封锁功能，允许您根据访问者的地理位置限制访问。此功能可帮助您遵守区域法规、防止通常与高风险地区相关的欺诈活动，并根据地理边界实施内容限制。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -6793,7 +6813,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="crowdsec_1">CrowdSec</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <figure>
 <p><img align="center," alt="概述" src="../../assets/img/crowdsec.svg" width="600" /></p>
 </figure>
@@ -7040,7 +7060,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 <h3 id="2-bunkerweb">第&nbsp;2&nbsp;步 – 配置 BunkerWeb 参数</h3>
-<p>应用以下环境变量（或通过调度器设置的值），让 BunkerWeb 实例能够与 CrowdSec 本地 API 通信。至少需要设置 <code>USE_CROWDSEC</code>、<code>CROWDSEC_API</code> 以及通过 <code>cscli bouncers add</code> 生成的有效密钥。</p>
+<p>应用以下环境变量（或通过调度器设置的值），让 BunkerWeb 实例能够与 CrowdSec 本地 API 通信。至少需要设置 <code>USE_CROWDSEC</code>、<code>CROWDSEC_API</code> 和 <code>CROWDSEC_API_KEY</code>，并使用通过 <code>cscli bouncers add</code> 生成的有效密钥。</p>
 <table>
 <thead>
 <tr>
@@ -7180,7 +7200,13 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 </tbody>
 </table>
-<p>!!! info "关于操作模式" - <strong>实时模式</strong>会为每个传入的请求查询 CrowdSec API，提供实时的保护，但会增加延迟。- <strong>流模式</strong>会定期从 CrowdSec API 下载所有决策并将其本地缓存，从而减少延迟，但应用新决策会略有延迟。</p>
+<div class="admonition info">
+<p class="admonition-title">关于操作模式</p>
+<ul>
+<li><strong>实时模式</strong>会为每个传入的请求查询 CrowdSec API，提供实时的保护，但会增加延迟。</li>
+<li><strong>流模式</strong>会定期从 CrowdSec API 下载所有决策并将其本地缓存，从而减少延迟，但应用新决策会略有延迟。</li>
+</ul>
+</div>
 <h3 id="_43">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">基本配置</label><label for="__tabbed_16_2">带有 AppSec 的高级配置</label></div>
 <div class="tabbed-content">
@@ -7218,7 +7244,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </ul>
 <h2 id="custom-pages-pro">Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>如需更详细的指南，请参阅<a href="../advanced/#custom-pages-pro">高级用法</a>文档。</p>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Tweak BunkerWeb error/antibot/default pages with custom HTML.</p>
 <table>
 <thead>
@@ -7297,7 +7323,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tbody>
 </table>
 <h2 id="custom-ssl-certificate">Custom SSL certificate</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>自定义 SSL 证书插件允许您在 BunkerWeb 中使用您自己的 SSL/TLS 证书，而不是自动生成的证书。如果您拥有来自受信任的证书颁发机构 (CA) 的现有证书、需要使用具有特定配置的证书，或者希望在整个基础设施中保持一致的证书管理，此功能特别有用。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -7438,7 +7464,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 <h2 id="database">Database</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>数据库插件通过启用配置数据、日志和其他基本信息的集中存储和管理，为 BunkerWeb 提供了强大的数据库集成。</p>
 <p>这个核心组件支持多种数据库引擎，包括 SQLite、PostgreSQL、MySQL/MariaDB 和 Oracle，让您可以选择最适合您的环境和需求的数据库解决方案。</p>
 <p><strong>工作原理：</strong></p>
@@ -7568,7 +7594,15 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 </tbody>
 </table>
-<p>!!! tip "数据库选择" - <strong>SQLite</strong>（默认）：由于其简单和基于文件的特性，非常适合单节点部署或测试环境。- <strong>PostgreSQL</strong>：由于其健壮性和并发支持，推荐用于具有多个 BunkerWeb 实例的生产环境。- <strong>MySQL/MariaDB</strong>：是 PostgreSQL 的一个很好的替代品，具有类似的生产级功能。- <strong>Oracle</strong>：适用于 Oracle 已经是标准数据库平台的企业环境。</p>
+<div class="admonition tip">
+<p class="admonition-title">数据库选择</p>
+<ul>
+<li><strong>SQLite</strong>（默认）：由于其简单和基于文件的特性，非常适合单节点部署或测试环境。</li>
+<li><strong>PostgreSQL</strong>：由于其健壮性和并发支持，推荐用于具有多个 BunkerWeb 实例的生产环境。</li>
+<li><strong>MySQL/MariaDB</strong>：是 PostgreSQL 的一个很好的替代品，具有类似的生产级功能。</li>
+<li><strong>Oracle</strong>：适用于 Oracle 已经是标准数据库平台的企业环境。</li>
+</ul>
+</div>
 <div class="admonition info">
 <p class="admonition-title">SQLAlchemy URI 格式</p>
 <p>数据库 URI 遵循 SQLAlchemy 格式：</p>
@@ -7582,14 +7616,14 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <div class="admonition warning">
 <p class="admonition-title">数据库维护</p>
 <p>该插件会自动运行每日维护作业：</p>
-</div>
 <ul>
 <li><strong>清理多余的作业运行记录：</strong> 根据 <code>DATABASE_MAX_JOBS_RUNS</code> 限制清除超出的历史。</li>
 <li><strong>清理过期的 UI 会话：</strong> 删除超过 <code>DATABASE_MAX_SESSION_AGE_DAYS</code> 的 UI 用户会话。</li>
 </ul>
 <p>这些作业可以防止数据库无限增长，同时保留有价值的运行历史。</p>
+</div>
 <h2 id="dnsbl">DNSBL</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>DNSBL（域名系统黑名单）插件通过对照外部 DNSBL 服务器检查客户端 IP 地址，为您的网站提供针对已知恶意 IP 地址的保护。此功能通过利用社区维护的有问题的 IP 地址列表，帮助保护您的网站免受垃圾邮件、僵尸网络和各种类型的网络威胁。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -7736,10 +7770,10 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/45vX0WJqjxo' title='Easy Resolve' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>如需更详细的指南，请参阅<a href="../advanced/#easy-resolve-pro">高级用法</a>文档。</p>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides a simpler way to fix false positives in reports.</p>
 <h2 id="errors">Errors</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>错误插件为您的网站提供了可定制的错误处理，让您可以配置 HTTP 错误响应如何向用户显示。此功能通过呈现用户友好、带有品牌标识的错误页面，在错误场景中增强了用户体验，而不是显示默认的服务器错误页面，后者对访问者来说可能显得技术性且令人困惑。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -7828,7 +7862,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 <h2 id="greylist">Greylist</h2>
-<p>STREAM 支持 <img alt="⚠" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM 支持 <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Greylist 插件提供了一种灵活的安全方法，允许访问者访问，同时仍然保持必要的安全功能。</p>
 <p>与传统的<a href="#blacklist">黑名单</a>/<a href="#whitelist">白名单</a>方法——完全阻止或允许访问——不同，灰名单通过授予某些访问者访问权限，同时仍然对他们进行安全检查，创造了一个中间地带。</p>
 <p><strong>工作原理：</strong></p>
@@ -8116,7 +8150,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 TrustedMonitor/\d+\.\d+
 </code></pre></div>
 <h2 id="grpc">gRPC</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>gRPC 插件允许 BunkerWeb 通过 HTTP/2 使用 <code>grpc_pass</code> 代理 gRPC 服务。它适用于多站点场景，每个虚拟主机都可以在特定路径下暴露一个或多个 gRPC 后端。</p>
 <div class="admonition example">
 <p class="admonition-title">实验性功能</p>
@@ -8330,7 +8364,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="gzip">Gzip</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>GZIP 插件通过使用 GZIP 算法压缩 HTTP 响应来增强网站性能。此功能通过在将 Web 内容发送到客户端浏览器之前对其进行压缩，减少了带宽使用并缩短了页面加载时间，从而实现了更快的交付和更好的用户体验。</p>
 <h3 id="_62">工作原理</h3>
 <ol>
@@ -8451,7 +8485,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="headers">Headers</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>请求头在 HTTP 安全中扮演着至关重要的角色。请求头插件提供了对标准和自定义 HTTP 请求头的强大管理功能——增强了安全性和功能性。它动态地应用安全措施，例如 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security">HSTS</a>、<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy">CSP</a>（包括报告模式）和自定义请求头注入，同时防止信息泄露。</p>
 <p><strong>工作原理</strong></p>
 <ol>
@@ -8711,7 +8745,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="html-injection">HTML injection</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>HTML 注入插件允许您无缝地将自定义 HTML 代码添加到您网站页面的 <code>&lt;/body&gt;</code> 或 <code>&lt;/head&gt;</code> 结束标签之前。此功能对于添加分析脚本、跟踪像素、自定义 JavaScript、CSS 样式或其他第三方集成非常有用，而无需修改您网站的源代码。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -8757,8 +8791,24 @@ TrustedMonitor/\d+\.\d+
 </tr>
 </tbody>
 </table>
-<p>!!! tip "最佳实践" - 出于性能考虑，请将 JavaScript 文件放在 body 的末尾，以防止渲染阻塞。- 将 CSS 和关键的 JavaScript 放在 head 部分，以避免出现无样式内容的闪烁。- 请谨慎处理可能破坏您网站功能的注入内容。</p>
-<p>!!! info "常见用例" - 添加分析脚本（如 Google Analytics, Matomo）- 集成聊天小部件或客户支持工具 - 为营销活动添加跟踪像素 - 添加自定义 CSS 样式或 JavaScript 功能 - 无需修改应用程序代码即可引入第三方库</p>
+<div class="admonition tip">
+<p class="admonition-title">最佳实践</p>
+<ul>
+<li>出于性能考虑，请将 JavaScript 文件放在 body 的末尾，以防止渲染阻塞。</li>
+<li>将 CSS 和关键的 JavaScript 放在 head 部分，以避免出现无样式内容的闪烁。</li>
+<li>请谨慎处理可能破坏您网站功能的注入内容。</li>
+</ul>
+</div>
+<div class="admonition info">
+<p class="admonition-title">常见用例</p>
+<ul>
+<li>添加分析脚本（如 Google Analytics、Matomo）</li>
+<li>集成聊天小部件或客户支持工具</li>
+<li>为营销活动添加跟踪像素</li>
+<li>添加自定义 CSS 样式或 JavaScript 功能</li>
+<li>无需修改应用程序代码即可引入第三方库</li>
+</ul>
+</div>
 <h3 id="_71">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="26:4"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><input id="__tabbed_26_3" name="__tabbed_26" type="radio" /><input id="__tabbed_26_4" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">谷歌分析</label><label for="__tabbed_26_2">自定义样式</label><label for="__tabbed_26_3">多个集成</label><label for="__tabbed_26_4">Cookie 同意横幅</label></div>
 <div class="tabbed-content">
@@ -8790,7 +8840,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 <h2 id="ldap-sso-pro">LDAP SSO <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>如需更详细的指南，请参阅<a href="../advanced/#ldap-sso-pro">高级用法</a>文档。</p>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>LDAP-based single sign-on plugin with session-backed authentication.</p>
 <table>
 <thead>
@@ -9023,7 +9073,7 @@ TrustedMonitor/\d+\.\d+
 </tbody>
 </table>
 <h2 id="lets-encrypt">Let's Encrypt</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 的免费证书，简化了 SSL/TLS 证书管理。此功能可为您的网站启用安全的 HTTPS 连接，无需手动管理证书的复杂性，从而降低成本和管理开销。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -9549,11 +9599,11 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="limit">Limit</h2>
-<p>STREAM 支持 <img alt="⚠" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM 支持 <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>BunkerWeb 中的限制插件提供了强大的功能来对您的网站强制执行限制策略，确保公平使用并保护您的资源免受滥用、拒绝服务攻击和过度的资源消耗。这些策略包括：</p>
 <ul>
-<li><strong>每个 IP 地址的连接数</strong> (流支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:">)</li>
-<li><strong>在特定时间段内每个 IP 地址和 URL 的请求数</strong> (流支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:">)</li>
+<li><strong>每个 IP 地址的连接数</strong> (流支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" />)</li>
+<li><strong>在特定时间段内每个 IP 地址和 URL 的请求数</strong> (流支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" />)</li>
 </ul>
 <h3 id="_75">工作原理</h3>
 <ol>
@@ -9670,9 +9720,14 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
-<p>!!! info "连接限制与请求限制" - <strong>连接限制</strong> 限制单个 IP 地址可以维持的并发连接数。- <strong>请求速率限制</strong> 限制一个 IP 地址在定义的时间段内可以发出的请求数。</p>
-<pre><code>同时使用这两种方法可以全面防护各种类型的滥用。
-</code></pre>
+<div class="admonition info">
+<p class="admonition-title">连接限制与请求限制</p>
+<ul>
+<li><strong>连接限制</strong> 限制单个 IP 地址可以维持的并发连接数。</li>
+<li><strong>请求速率限制</strong> 限制一个 IP 地址在定义的时间段内可以发出的请求数。</li>
+</ul>
+<p>同时使用这两种方法可以全面防护各种类型的滥用。</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">设置适当的限制</p>
 <p>设置过于严格的限制可能会影响合法用户，特别是对于 HTTP/2 和 HTTP/3，浏览器通常会使用多个流。默认值在大多数用例中是平衡的，但请考虑根据您的应用程序需求和用户行为进行调整。</p>
@@ -9761,7 +9816,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="metrics">Metrics</h2>
-<p>STREAM 支持 <img alt="⚠" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM 支持 <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>指标插件为您的 BunkerWeb 实例提供全面的监控和数据收集功能。此功能使您能够跟踪各种性能指标、安全事件和系统统计信息，从而为您提供有关受保护网站和服务行为及健康状况的宝贵见解。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -9871,17 +9926,24 @@ TrustedMonitor/\d+\.\d+
 </tr>
 <tr>
 <td><code>METRICS_MAX_BLOCKED_REQUESTS</code></td>
-<td><code>1000</code></td>
+<td><code>1k</code></td>
 <td>global</td>
 <td>否</td>
-<td><strong>最大被阻止请求数：</strong> 每个工作进程要存储的最大被阻止请求数。</td>
+<td><strong>最大被阻止请求数：</strong> 每个工作进程要存储的最大被阻止请求数。支持 <code>k</code>/<code>m</code> 简写。</td>
 </tr>
 <tr>
 <td><code>METRICS_MAX_BLOCKED_REQUESTS_REDIS</code></td>
-<td><code>100000</code></td>
+<td><code>10k</code></td>
 <td>global</td>
 <td>否</td>
-<td><strong>Redis 最大被阻止请求数：</strong> 在 Redis 中要存储的最大被阻止请求数。</td>
+<td><strong>Redis 最大被阻止请求数：</strong> 在 Redis 中要存储的最大被阻止请求数。支持 <code>k</code>/<code>m</code> 简写。</td>
+</tr>
+<tr>
+<td><code>MAX_LRU_HISTORY</code></td>
+<td><code>1k</code></td>
+<td>global</td>
+<td>否</td>
+<td><strong>最大 LRU 历史：</strong> 每个工作进程的 LRU 槽位数量，以及每个键的事件历史数组上限（阻止轨迹、身份验证轨迹等）。支持 <code>k</code>/<code>m</code> 简写。</td>
 </tr>
 <tr>
 <td><code>METRICS_SAVE_TO_REDIS</code></td>
@@ -9915,8 +9977,9 @@ TrustedMonitor/\d+\.\d+
 <p>适用于大多数部署的默认配置：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_METRICS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">METRICS_MEMORY_SIZE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;16m&quot;</span>
-<span class="nt">METRICS_MAX_BLOCKED_REQUESTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1000&quot;</span>
-<span class="nt">METRICS_MAX_BLOCKED_REQUESTS_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;100000&quot;</span>
+<span class="nt">METRICS_MAX_BLOCKED_REQUESTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1k&quot;</span>
+<span class="nt">METRICS_MAX_BLOCKED_REQUESTS_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;10k&quot;</span>
+<span class="nt">MAX_LRU_HISTORY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1k&quot;</span>
 <span class="nt">METRICS_SAVE_TO_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 </code></pre></div>
 </div>
@@ -9926,6 +9989,7 @@ TrustedMonitor/\d+\.\d+
 <span class="nt">METRICS_MEMORY_SIZE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;8m&quot;</span>
 <span class="nt">METRICS_MAX_BLOCKED_REQUESTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;500&quot;</span>
 <span class="nt">METRICS_MAX_BLOCKED_REQUESTS_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;10000&quot;</span>
+<span class="nt">MAX_LRU_HISTORY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;500&quot;</span>
 <span class="nt">METRICS_SAVE_TO_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
 </code></pre></div>
 </div>
@@ -9935,6 +9999,7 @@ TrustedMonitor/\d+\.\d+
 <span class="nt">METRICS_MEMORY_SIZE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;64m&quot;</span>
 <span class="nt">METRICS_MAX_BLOCKED_REQUESTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5000&quot;</span>
 <span class="nt">METRICS_MAX_BLOCKED_REQUESTS_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;500000&quot;</span>
+<span class="nt">MAX_LRU_HISTORY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5k&quot;</span>
 <span class="nt">METRICS_SAVE_TO_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 </code></pre></div>
 </div>
@@ -9947,10 +10012,10 @@ TrustedMonitor/\d+\.\d+
 </div>
 <h2 id="migration-pro">Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>如需更详细的指南，请参阅<a href="../advanced/#migration-pro">高级用法</a>文档。</p>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Migration of BunkerWeb configuration between instances made easy via the web UI</p>
 <h2 id="miscellaneous">Miscellaneous</h2>
-<p>STREAM 支持 <img alt="⚠" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM 支持 <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>杂项插件提供了<strong>必要的基准设置</strong>，有助于维护您网站的安全性和功能性。这个核心组件提供了全面的控制，包括：</p>
 <ul>
 <li><strong>服务器行为</strong> - 配置您的服务器如何响应各种请求</li>
@@ -10462,7 +10527,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 <h2 id="modsecurity">ModSecurity</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>ModSecurity 插件将功能强大的 <a href="https://modsecurity.org">ModSecurity</a> Web 应用程序防火墙 (WAF) 集成到 BunkerWeb 中。通过利用 <a href="https://coreruleset.org">OWASP 核心规则集 (CRS)</a>，此集成可检测并阻止 SQL 注入、跨站脚本 (XSS)、本地文件包含等威胁，从而提供针对各种 Web 攻击的强大防护。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -10734,7 +10799,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>对于像 <code>MODSECURITY_REQ_BODY_NO_FILES_LIMIT</code> 这样的 大小设置，支持 <code>k</code>、<code>m</code> 和 <code>g</code>（不区分大小写）后缀，分别代表 kibibytes、mebibytes 和 gibibytes（1024 的倍数）。例如：<code>256k</code> = 262144，<code>1m</code> = 1048576，<code>2g</code> = 2147483648。</p>
 </div>
 <h2 id="monitoring-pro">Monitoring <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.</p>
 <table>
 <thead>
@@ -10785,7 +10850,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="mutual-tls">Mutual TLS</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Mutual TLS（mTLS）插件可在关键站点上强制执行客户端证书认证，确保只有受信任实体才能访问敏感资源。启用后，BunkerWeb 会在请求进入业务前完成身份鉴别，从而保护内部工具与合作伙伴集成。</p>
 <p>BunkerWeb 会基于您配置的 CA 证书包和策略评估每一次 TLS 握手。未满足规则的客户端会被拦截，通过验证的连接则可以将证书细节传递给后端应用，以便执行更精细的授权控制。</p>
 <p><strong>工作原理：</strong></p>
@@ -10915,7 +10980,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/3oZOO1XdSlc' title='OpenAPI Validator' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>如需更详细的指南，请参阅<a href="../advanced/#openapi-validator-pro">高级用法</a>文档。</p>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Validates incoming HTTP requests against an OpenAPI / Swagger specification.</p>
 <table>
 <thead>
@@ -10990,7 +11055,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/0e4lcXTIIfs' title='OpenID Connect' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>如需更详细的指南，请参阅<a href="../advanced/#openid-connect-pro">高级用法</a>文档。</p>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>OpenID Connect authentication plugin providing SSO capabilities with identity providers.</p>
 <table>
 <thead>
@@ -11286,7 +11351,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="php">PHP</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>PHP 插件为 BunkerWeb 提供了与 PHP-FPM 的无缝集成，从而为您的网站启用动态 PHP 处理。此功能支持在同一台机器上运行的本地 PHP-FPM 实例和远程 PHP-FPM 服务器，让您在配置 PHP 环境时拥有灵活性。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -11401,7 +11466,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="pro">Pro</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Pro 插件为 BunkerWeb 的企业部署捆绑了高级功能和增强功能。它解锁了额外的功能、高级插件和扩展功能，以补充核心 BunkerWeb 平台。它为企业级部署提供了增强的安全性、性能和管理选项。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -11475,7 +11540,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </ul>
 <p>您可以使用促销码 <code>freetrial</code> 免费试用 Pro 功能 1 个月。请访问 <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a> 激活您的试用，并了解更多关于基于 BunkerWeb PRO 保护的服务数量的灵活定价选项。</p>
 <h2 id="prometheus-exporter-pro">Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Prometheus exporter for BunkerWeb internal metrics.</p>
 <table>
 <thead>
@@ -11526,11 +11591,11 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="real-ip">Real IP</h2>
-<p>STREAM 支持 <img alt="⚠" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM 支持 <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Real IP 插件可确保 BunkerWeb 即使在代理后面也能正确识别客户端的 IP 地址。这对于正确应用安全规则、速率限制和日志记录至关重要；没有它，所有请求都将看起来来自您的代理 IP，而不是客户端的实际 IP。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
-<li>启用后，BunkerWeb 会检查传入请求中是否包含特定标头（如 <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Reference/Headers/X-Forwarded-For"><code>X-Forwarded-For</code></a>），这些标头包含客户端的原始 IP 地址。</li>
+<li>启用后，BunkerWeb 会检查传入请求中是否包含特定标头（如 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For"><code>X-Forwarded-For</code></a>），这些标头包含客户端的原始 IP 地址。</li>
 <li>BunkerWeb 会检查传入的 IP 是否在您的受信任代理列表 (<code>REAL_IP_FROM</code>) 中，确保只有合法的代理才能传递客户端 IP。</li>
 <li>从指定的标头 (<code>REAL_IP_HEADER</code>) 中提取原始客户端 IP，并用于所有安全评估和日志记录。</li>
 <li>对于递归 IP 链，BunkerWeb 可以追溯多个代理跃点以确定始发客户端 IP。</li>
@@ -11676,7 +11741,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="redirect">Redirect</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>重定向插件为受 BunkerWeb 保护的网站提供了简单高效的 HTTP 重定向功能。此功能使您能够轻松地将访问者从一个 URL 重定向到另一个 URL，支持全域名重定向、特定路径重定向和路径保留重定向。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -11821,7 +11886,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="redis">Redis</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Redis 插件将 <a href="https://redis.io/">Redis</a> 或 <a href="https://valkey.io/">Valkey</a> 集成到 BunkerWeb 中，用于缓存和快速数据检索。此功能对于在需要跨多个节点访问会话数据、指标和其他共享信息的高可用性环境中部署 BunkerWeb 至关重要。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -12030,7 +12095,8 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <h4 id="_108">内存管理</h4>
 <ul>
 <li><strong>监控内存使用情况：</strong> 使用适当的 <code>maxmemory</code> 设置配置 Redis，以防止内存不足错误</li>
-<li><strong>设置淘汰策略：</strong> 使用适合您用例的 <code>maxmemory-policy</code>（例如 <code>volatile-lru</code> 或 <code>allkeys-lru</code>）</li>
+<li><strong>设置淘汰策略：</strong> 使用适合您用例的 <code>maxmemory-policy</code>（例如通用场景使用 <code>volatile-lru</code>，缓存密集型场景使用 <code>allkeys-lru</code>）</li>
+<li><strong>All-in-One 默认值：</strong> AIO Docker 镜像默认将 Redis 配置为 <code>maxmemory=256mb</code> 和 <code>maxmemory-policy=volatile-lru</code>；可通过环境变量 <code>REDIS_MAXMEMORY</code> 和 <code>REDIS_MAXMEMORY_POLICY</code> 覆盖。在 <code>volatile-lru</code> 策略下，瞬时计数器（速率限制、不良行为）会先于会话和限时封禁等带 TTL 的关键键被淘汰，而无过期时间的键（永久封禁）则免于被淘汰。建议为 BunkerWeb 使用的外部 Redis 或 Valkey 服务器采用同样的策略。</li>
 <li><strong>避免大键：</strong> 确保将单个 Redis 键保持在合理的大小，以防止性能下降</li>
 </ul>
 <h4 id="_109">数据持久性</h4>
@@ -12054,7 +12120,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><a href="https://redis.io/topics/persistence">Redis 持久性</a></li>
 </ul>
 <h2 id="reporting-pro">Reporting <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.</p>
 <table>
 <thead>
@@ -12161,7 +12227,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="reverse-proxy">Reverse proxy</h2>
-<p>STREAM 支持 <img alt="⚠" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM 支持 <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>反向代理插件为 BunkerWeb 提供了无缝的代理功能，允许您将请求路由到后端服务器和服务。此功能使 BunkerWeb 能够充当您应用程序的安全前端，同时提供 SSL 终止和安全过滤等额外的好处。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -12253,7 +12319,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td><code>1.1</code></td>
 <td>multisite</td>
 <td>是</td>
-<td><strong>HTTP 版本：</strong> 用于与上游通信的 HTTP 协议版本（<code>1.0</code>、<code>1.1</code> 或 <code>2</code>）。WebSocket 位置始终固定为 1.1。</td>
+<td><strong>HTTP 版本：</strong> 用于与上游通信的 HTTP 协议版本（<code>1.0</code>、<code>1.1</code> 或 <code>2</code>）。设为 <code>2</code> 可在上游连接上启用 HTTP/2 多路复用。WebSocket 位置始终固定为 1.1。</td>
 </tr>
 <tr>
 <td><code>REVERSE_PROXY_CUSTOM_HOST</code></td>
@@ -12816,7 +12882,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="reverse-scan">Reverse scan</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>反向扫描插件通过扫描客户端端口来检测其是否正在运行代理服务器或其他网络服务，从而有力地防止代理绕过企图。此功能有助于识别和阻止可能试图隐藏其真实身份或来源的客户端带来的潜在威胁，从而增强您网站的安全状况。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -12920,7 +12986,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="robotstxt">Robots.txt</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Robots.txt 插件为您的网站管理 <a href="https://www.robotstxt.org/">robots.txt</a> 文件。此文件告知网络爬虫和机器人它们可以或不可以访问您网站的哪些部分。</p>
 <p><strong>工作原理：</strong></p>
 <p>启用后，BunkerWeb 会在您网站的根目录下动态生成 <code>/robots.txt</code> 文件。此文件中的规则按以下顺序从多个来源聚合而成：</p>
@@ -13044,16 +13110,14 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <div class="highlight"><pre><span></span><code><span class="nt">USE_ROBOTSTXT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">ROBOTSTXT_RULE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">*&quot;</span>
 <span class="nt">ROBOTSTXT_RULE_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Disallow:</span><span class="nv"> </span><span class="s">/private&quot;</span>
-<span class="nt">ROBOTSTXT_SITEMAP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/sitemap.xml&quot;</span><span class="err">```</span>
-
-<span class="err">*</span><span class="nv">*使用动态源</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(DarkVisitors &amp; 社区列表)**</span>
-
-<span class="err">```</span><span class="l l-Scalar l-Scalar-Plain">yaml</span>
-<span class="nt">USE_ROBOTSTXT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">ROBOTSTXT_SITEMAP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/sitemap.xml&quot;</span>
+</code></pre></div>
+<p><strong>使用动态源 (DarkVisitors &amp; 社区列表)</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_ROBOTSTXT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">ROBOTSTXT_DARKVISITORS_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;your-darkvisitors-token-here&quot;</span>
 <span class="nt">ROBOTSTXT_DARKVISITORS_AGENT_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;AI</span><span class="nv"> </span><span class="s">Data</span><span class="nv"> </span><span class="s">Scraper&quot;</span>
 <span class="nt">ROBOTSTXT_COMMUNITY_LISTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;robots-disallowed&quot;</span>
-<span class="nt">ROBOTSTT_IGNORE_RULE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">Googlebot-Image&quot;</span>
+<span class="nt">ROBOTSTXT_IGNORE_RULE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">Googlebot-Image&quot;</span>
 </code></pre></div>
 <p><strong>组合配置</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_ROBOTSTXT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -13062,7 +13126,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <span class="nt">ROBOTSTXT_URLS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/my-custom-rules.txt&quot;</span>
 <span class="nt">ROBOTSTXT_RULE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">MyOwnBot&quot;</span>
 <span class="nt">ROBOTSTXT_RULE_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Disallow:</span><span class="nv"> </span><span class="s">/admin&quot;</span>
-<span class="nt">ROBOTSTT_IGNORE_RULE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">Googlebot-Image&quot;</span>
+<span class="nt">ROBOTSTXT_IGNORE_RULE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">Googlebot-Image&quot;</span>
 <span class="nt">ROBOTSTXT_SITEMAP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/sitemap.xml&quot;</span>
 </code></pre></div>
 <p><strong>带页眉和页脚</strong></p>
@@ -13076,7 +13140,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <hr />
 <p>更多信息，请参阅 <a href="https://www.robotstxt.org/robotstxt.html">robots.txt 文档</a>。</p>
 <h2 id="securitytxt">Security.txt</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Security.txt 插件为您的网站实施 <a href="https://securitytxt.org/">Security.txt</a> 标准 (<a href="https://www.rfc-editor.org/rfc/rfc9116">RFC 9116</a>)。此功能可帮助安全研究人员访问您的安全策略，并为他们提供一种标准化的方式来报告他们在您的系统中发现的安全漏洞。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -13235,7 +13299,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="self-signed-certificate">Self-signed certificate</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>自签名证书插件可直接在 BunkerWeb 中自动生成和管理 SSL/TLS 证书，无需外部证书颁发机构即可启用安全的 HTTPS 连接。此功能在开发环境、内部网络或需要快速部署 HTTPS 而无需配置外部证书时特别有用。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -13342,7 +13406,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="sessions">Sessions</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>会话插件为 BunkerWeb 提供了强大的 HTTP 会话管理功能，可在请求之间实现安全可靠的用户会话跟踪。此核心功能对于维护用户状态、身份验证持久性以及支持需要身份连续性的其他功能（例如<a href="#antibot">反机器人</a>保护和用户身份验证系统）至关重要。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -13526,7 +13590,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="ssl">SSL</h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:"></p>
+<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>SSL 插件为您的 BunkerWeb 保护的网站提供强大的 SSL/TLS 加密功能。这个核心组件通过配置和优化加密协议、密码套件以及相关的安全设置来启用安全的 HTTPS 连接，以保护客户端和您的 Web 服务之间传输中的数据。</p>
 <p><strong>工作原理：</strong></p>
 <ol>
@@ -13535,7 +13599,15 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>优化的 SSL 会话参数可在不牺牲安全性的情况下提高连接性能。</li>
 <li>证书的呈现根据最佳实践进行配置，以确保兼容性和安全性。</li>
 </ol>
-<p>!!! success "安全优势" - <strong>数据保护：</strong> 加密传输中的数据，防止窃听和中间人攻击 - <strong>身份验证：</strong> 向客户端验证您服务器的身份 - <strong>完整性：</strong> 确保数据在传输过程中未被篡改 - <strong>现代标准：</strong> 配置符合行业最佳实践和安全标准</p>
+<div class="admonition success">
+<p class="admonition-title">安全优势</p>
+<ul>
+<li><strong>数据保护：</strong> 加密传输中的数据，防止窃听和中间人攻击</li>
+<li><strong>身份验证：</strong> 向客户端验证您服务器的身份</li>
+<li><strong>完整性：</strong> 确保数据在传输过程中未被篡改</li>
+<li><strong>现代标准：</strong> 配置符合行业最佳实践和安全标准</li>
+</ul>
+</div>
 <h3 id="_130">如何使用</h3>
 <p>请按照以下步骤配置和使用 SSL 功能：</p>
 <ol>
@@ -13654,7 +13726,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 <h2 id="ui">UI</h2>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Integrate easily the BunkerWeb UI.</p>
 <table>
 <thead>
@@ -13685,7 +13757,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </table>
 <h2 id="ui-single-sign-on-pro">UI Single Sign-On <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>如需更详细的指南，请参阅<a href="../advanced/#ui-single-sign-on-pro">高级用法</a>文档。</p>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Enable SSO authentication for the BunkerWeb web interface by reading headers set by upstream authentication proxies (Authentik, Authelia, Keycloak, Traefik Forward Auth, etc.)</p>
 <table>
 <thead>
@@ -13830,7 +13902,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/EIohiUf9Fg4' title='User Manager' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>如需更详细的指南，请参阅<a href="../advanced/#user-manager-pro">高级用法</a>文档。</p>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Add the possibility to manage users on the web interface</p>
 <table>
 <thead>
@@ -13853,7 +13925,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="whitelist">Whitelist</h2>
-<p>STREAM 支持 <img alt="⚠" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:"></p>
+<p>STREAM 支持 <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>白名单插件允许您定义一个受信任的 IP 地址列表，这些地址可以绕过其他安全过滤器。
 要阻止不需要的客户端，请参考 <a href="#blacklist">黑名单插件</a>。</p>
 <p>白名单插件提供了一种全面的方法，可以根据各种客户端属性明确允许访问您的网站。此功能提供了一种安全机制：符合特定条件的访问者将被授予立即访问权限，而所有其他访问者则必须通过常规的安全检查。</p>
@@ -14219,7 +14291,7 @@ TrustedMonitor/\d+\.\d+
 </code></pre></div>
 <h2 id="wildcard-pro">Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>如需更详细的指南，请参阅<a href="../advanced/#wildcard-pro">高级用法</a>文档。</p>
-<p>STREAM 支持 <img alt="❌" class="twemoji" src="../../assets/external/cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:"></p>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Adds wildcard server_name support (*.domain) for services.</p>
 <table>
 <thead>
