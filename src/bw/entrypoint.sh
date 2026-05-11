@@ -3,10 +3,14 @@
 # shellcheck disable=SC1091
 . /usr/share/bunkerweb/helpers/utils.sh
 
-shopt -s nullglob
-ascii_array=(/usr/share/bunkerweb/misc/*.ascii)
-shopt -u nullglob
-cat "${ascii_array[$((RANDOM % ${#ascii_array[@]}))]}"
+if [[ $(echo "${SKIP_ASCII_BANNER:-no}" | awk '{print tolower($0)}') != "yes" ]] ; then
+	shopt -s nullglob
+	ascii_array=(/usr/share/bunkerweb/misc/*.ascii)
+	shopt -u nullglob
+	if [ ${#ascii_array[@]} -gt 0 ] ; then
+		cat "${ascii_array[$((RANDOM % ${#ascii_array[@]}))]}"
+	fi
+fi
 
 log "ENTRYPOINT" "ℹ️" "Starting BunkerWeb v$(cat /usr/share/bunkerweb/VERSION) ..."
 
