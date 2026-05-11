@@ -476,6 +476,122 @@ function initializeDataTable(config) {
     }
   });
 
+  // Cross-page selection affordance.
+  // The header checkbox is configured (per-page) with `headerCheckbox: "select-page"`,
+  // so by default it selects only rows on the current page. When more matching rows
+  // exist on other pages, surface a banner that lets the user opt-in to selecting
+  // the entire filtered set — and, once opted in, opt out via "Clear selection".
+  const $tableWrapper = $(`#${tableName}_wrapper`);
+  if ($tableWrapper.length) {
+    const $bulkBanner = $(
+      '<div class="dt-bulk-select-banner alert alert-primary py-2 px-3 mb-2 d-none align-items-center" role="status">' +
+        '<i class="bx bx-info-circle me-2" aria-hidden="true"></i>' +
+        '<span class="dt-bulk-select-message flex-grow-1"></span>' +
+        '<button type="button" class="btn btn-sm btn-link p-0 ms-2 dt-bulk-select-action"></button>' +
+        "</div>",
+    );
+    $tableWrapper.prepend($bulkBanner);
+
+    const setBannerVisible = (visible) => {
+      $bulkBanner
+        .toggleClass("d-none", !visible)
+        .toggleClass("d-flex", visible);
+    };
+
+    const updateBulkBanner = () => {
+      const pageCount = dataTable.rows({ page: "current" }).count();
+      const filteredCount = dataTable.rows({ search: "applied" }).count();
+      const selectedCount = dataTable.rows({ selected: true }).count();
+      const selectedOnPage = dataTable
+        .rows({ page: "current", selected: true })
+        .count();
+
+      // Only meaningful when filtered set spans more than one page
+      if (filteredCount <= pageCount) {
+        setBannerVisible(false);
+        return;
+      }
+
+      const $msg = $bulkBanner.find(".dt-bulk-select-message");
+      const $action = $bulkBanner.find(".dt-bulk-select-action");
+
+      if (
+        selectedOnPage === pageCount &&
+        pageCount > 0 &&
+        selectedCount < filteredCount
+      ) {
+        const msgKey = "datatable.bulk_select_page";
+        const actionKey = "datatable.bulk_select_all_filtered";
+        const msgOpts = { count: selectedOnPage, entity: entityName };
+        const actionOpts = { count: filteredCount, entity: entityName };
+        $msg
+          .attr("data-i18n", msgKey)
+          .attr("data-i18n-options", JSON.stringify(msgOpts))
+          .text(
+            t(
+              msgKey,
+              `All ${selectedOnPage} ${entityName} on this page are selected.`,
+              msgOpts,
+            ),
+          );
+        $action
+          .attr("data-i18n", actionKey)
+          .attr("data-i18n-options", JSON.stringify(actionOpts))
+          .data("action", "select-all-filtered")
+          .text(
+            t(
+              actionKey,
+              `Select all ${filteredCount} matching ${entityName}`,
+              actionOpts,
+            ),
+          );
+        setBannerVisible(true);
+        return;
+      }
+
+      if (selectedCount >= filteredCount && filteredCount > 0) {
+        const msgKey = "datatable.bulk_select_all_done";
+        const actionKey = "datatable.bulk_select_clear";
+        const msgOpts = { count: filteredCount, entity: entityName };
+        $msg
+          .attr("data-i18n", msgKey)
+          .attr("data-i18n-options", JSON.stringify(msgOpts))
+          .text(
+            t(
+              msgKey,
+              `All ${filteredCount} matching ${entityName} are selected.`,
+              msgOpts,
+            ),
+          );
+        $action
+          .attr("data-i18n", actionKey)
+          .removeAttr("data-i18n-options")
+          .data("action", "clear")
+          .text(t(actionKey, "Clear selection"));
+        setBannerVisible(true);
+        return;
+      }
+
+      setBannerVisible(false);
+    };
+
+    $bulkBanner.on("click", ".dt-bulk-select-action", function () {
+      const action = $(this).data("action");
+      if (action === "select-all-filtered") {
+        dataTable.rows({ search: "applied" }).select();
+      } else if (action === "clear") {
+        dataTable.rows().deselect();
+      }
+    });
+
+    const scheduleBulkBannerUpdate = () => setTimeout(updateBulkBanner, 0);
+    dataTable.on(
+      "select deselect draw page length search",
+      scheduleBulkBannerUpdate,
+    );
+    scheduleBulkBannerUpdate();
+  }
+
   // Note: colvisRestore handling moved earlier to respect defaults
 
   dataTable.columns.adjust().responsive.recalc();
