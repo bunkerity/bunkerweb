@@ -2384,54 +2384,68 @@ extern "C" size_t msc_get_rules_messages_rule_ids(const Transaction *transaction
     return written;
 }
 
-extern "C" const char *msc_get_transaction_variable(Transaction *transaction, const char *var_name){
-    std::vector<const VariableValue *> l;
+extern "C" int msc_get_transaction_variable(Transaction *transaction, const char *var_name, char *buf, size_t *buf_len) {
     modsecurity::collection::Collection *c = NULL;
     std::string cn;
     const char *p = NULL;
 
-    if (var_name == NULL ){
-        return NULL;
+    if (transaction == NULL || var_name == NULL || buf_len == NULL) {
+        return -1;
     }
 
-    p = strchr(var_name,':');
+    p = strchr(var_name, ':');
 
-    if ( p == NULL ){
-        return NULL;
+    if (p == NULL) {
+        return -1;
     }
 
-    cn = std::string(var_name,p-var_name);
-    transform(cn.begin(),cn.end(),cn.begin(),::tolower);
+    cn = std::string(var_name, p - var_name);
+    transform(cn.begin(), cn.end(), cn.begin(), ::tolower);
 
-    if ( cn.compare("global") == 0){
+    if (cn.compare("global") == 0) {
         c = transaction->m_collections.m_global_collection;
-    }else if ( cn.compare("ip") == 0){
+    } else if (cn.compare("ip") == 0) {
         c = transaction->m_collections.m_ip_collection;
-    }else if ( cn.compare("session") == 0){
+    } else if (cn.compare("session") == 0) {
         c = transaction->m_collections.m_session_collection;
-    }else if ( cn.compare("user") == 0){
+    } else if (cn.compare("user") == 0) {
         c = transaction->m_collections.m_user_collection;
-    }else if ( cn.compare("resource") == 0){
+    } else if (cn.compare("resource") == 0) {
         c = transaction->m_collections.m_resource_collection;
-    }else if( cn.compare("tx") == 0){
+    } else if (cn.compare("tx") == 0) {
         c = transaction->m_collections.m_tx_collection;
     }
 
-    if(c == NULL){
-        return NULL;
+    if (c == NULL) {
+        return 0;
     }
 
     ++p;
     cn = std::string(p);
-    transform(cn.begin(),cn.end(),cn.begin(),::tolower);
+    transform(cn.begin(), cn.end(), cn.begin(), ::tolower);
 
-    c->resolveSingleMatch(cn.c_str(),&l);
+    auto value = c->resolveFirst(cn);
 
-    if ( l.size() < 1){
-        return NULL;
+    if (value == nullptr) {
+        return 0;
     }
 
-    return l[0]->getValue().c_str();
+    const size_t value_len = value->size();
+
+    if (buf == NULL) {
+        *buf_len = value_len;
+        return 1;
+    }
+
+    if (*buf_len < value_len) {
+        *buf_len = value_len;
+        return -2;
+    }
+
+    memcpy(buf, value->data(), value_len);
+    *buf_len = value_len;
+
+    return 1;
 }
 
 }  // namespace modsecurity

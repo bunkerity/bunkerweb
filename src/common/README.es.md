@@ -128,6 +128,7 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     | ------------------------------ | ----------------- | -------- | -------- | -------------------------------------------------------------------------------------------------- |
     | `WORKERLOCK_MEMORY_SIZE`       | `48k`             | global   | No       | **Tamaño de Memoria de Workerlock:** Tamaño de lua_shared_dict para los workers de inicialización. |
     | `DATASTORE_MEMORY_SIZE`        | `64m`             | global   | No       | **Tamaño de Memoria del Datastore:** Tamaño del datastore interno.                                 |
+    | `DATASTORE_LRU_SIZE`           | `1k`              | global   | No       | **Tamaño del LRU del Datastore:** Número de ranuras del LRU del datastore compartido por worker. Acepta un entero o los sufijos `k`/`m` (por ejemplo `1k`, `10k`, `1m`). |
     | `CACHESTORE_MEMORY_SIZE`       | `64m`             | global   | No       | **Tamaño de Memoria del Cachestore:** Tamaño del cachestore interno.                               |
     | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`             | global   | No       | **Tamaño de Memoria IPC del Cachestore:** Tamaño del cachestore interno (ipc).                     |
     | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`             | global   | No       | **Tamaño de Memoria de Fallos del Cachestore:** Tamaño del cachestore interno (fallos).            |

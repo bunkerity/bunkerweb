@@ -1,6 +1,21 @@
 # Changelog
 
-## v1.6.10~rc6 - 2026/??/??
+## v1.6.10~rc7 - 2026/??/??
+
+- [SECURITY] `ui`: neutralize CSV/XLSX formula injection (CWE-1236) in bans and reports exports. Server-side CSV now goes through `defusedcsv` (new pinned dep) and a shared `csv_safe()` helper escapes openpyxl XLSX cells; client-side DataTables `csv`/`excel`/`copy` buttons inherit the same rule via a global `bwCsvSafe` hook in `dataTableInit.js`. Cells whose first character is `= + - @ | %` are prefixed with `'`, and embedded `|` is backslash-escaped.
+- [BUGFIX] `metrics`: bound per-worker LRU and per-key event-history arrays via new `MAX_LRU_HISTORY` setting (default `1k`) to close OSS RAM leak under high-cardinality block traffic.
+- [BUGFIX] `metrics`: lower `METRICS_MAX_BLOCKED_REQUESTS_REDIS` default `100000` → `10k`.
+- [BUGFIX] `datastore`: lower shared worker-LRU default `100000` → `1k`, configurable via new `DATASTORE_LRU_SIZE` global setting.
+- [FEATURE] `metrics`/`misc`: `METRICS_MAX_BLOCKED_REQUESTS`, `METRICS_MAX_BLOCKED_REQUESTS_REDIS`, `MAX_LRU_HISTORY`, and `DATASTORE_LRU_SIZE` accept `k`/`m` shorthand.
+- [UI] List pages: unrestricted `10/25/50/100` page-size dropdown, header checkbox selects current page only, with opt-in "Select all N matching" banner so bulk actions cover every page. (Fixes #3513)
+- [FEATURE] `all-in-one`: embedded Redis now boots from a generated `/var/lib/bunkerweb/redis-runtime.conf` (copy of `/etc/redis.conf` + env-driven defaults for directives the conf is silent about). `.conf` always prevails; env vars `REDIS_MAXMEMORY`, `REDIS_MAXMEMORY_POLICY`, `REDIS_APPENDONLY`, `REDIS_SAVE`/`REDIS_SAVE_<N>` (BunkerWeb multi-value pattern; empty disables RDB) and `REDIS_PASSWORD` (wired to `requirepass`) only fill the gaps. Defaults follow the documented Redis Best Practices.
+- [FEATURE] `all-in-one`/`misc`: default `maxmemory-policy` flipped from `allkeys-lru` to `volatile-lru` in the AIO entrypoint, the Linux installer, all bundled compose examples, and the Redis Best Practices docs. Transient counters (rate-limit, bad-behavior) now evict before keys with TTLs that matter for sessions and timed bans; permanent bans (no TTL) are immune.
+- [FEATURE] `ui`: align Web UI session handling with the Lua `sessions` plugin three-tier model. `SESSION_LIFETIME_HOURS` (default `12`) now drives a sliding idling TTL refreshed on every request, new `SESSION_ABSOLUTE_HOURS` (default `168` = 7 days) enforces a hard cap regardless of activity, and new `SESSION_ROLLING_HOURS` (default `0` = disabled) optionally regenerates the session ID at a fixed interval. Combined with `volatile-lru`, recently active UI sessions are kept across Redis memory pressure.
+- [DEPS] Updated LuaJIT version to v2.1-20260415
+- [DEPS] Updated lua-resty-string version to v0.17
+- [DEPS] Updated lua-cjson version to v2.1.0.17
+
+## v1.6.10~rc6 - 2026/05/07
 
 - [BUGFIX] `misc`: fix per-service HTTPS handshakes aborting with `no ssl_client_hello_by_lua* defined in server <name>` under `DISABLE_DEFAULT_SERVER_STRICT_SNI=yes` after the rc5 NGINX 1.30.0 bump, by emitting a no-op `ssl_client_hello_by_lua_block` in per-service blocks. Unknown-SNI rejection on the default server is unchanged.
 - [BUGFIX] `database`: add a `__del__` safety net on the SQLAlchemy `Database` wrapper so per-job engines dispose cleanly on GC. Without it, scheduler jobs reloaded via `importlib.reload` dropped their pool connections without sending `COM_QUIT` (MariaDB/MySQL) or the protocol `Terminate` (PostgreSQL), producing a burst of `Aborted connection ... (Got an error reading communication packets)` warnings every cycle.

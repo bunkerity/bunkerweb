@@ -95,10 +95,6 @@ plugins:
         color: "white"
   - mike:
       canonical_version: latest
-  - privacy:
-      assets_exclude:
-        - "*.bunkerweb.io/*"
-        - "*.bunkerity.com/*"
   - optimize
   - print-site:
       add_table_of_contents: false

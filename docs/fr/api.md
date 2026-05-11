@@ -108,7 +108,7 @@ Choisissez la saveur adaptée à votre environnement.
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:

@@ -6,10 +6,11 @@ Le plugin GZIP compresse les réponses HTTP avec l’algorithme gzip pour rédui
 2. Si oui, la réponse est compressée au niveau configuré.
 3. Les en‑têtes indiquent l’usage de gzip.
 4. Le navigateur décompresse avant l’affichage.
+5. La bande passante et les temps de chargement diminuent, améliorant les performances globales du site.
 
 ### Comment l’utiliser
 
-1. Activer : `USE_GZIP: yes` (désactivé par défaut).
+1. Activer : mettez le paramètre `USE_GZIP` à `yes` (désactivé par défaut).
 2. Types MIME : définir `GZIP_TYPES`.
 3. Taille minimale : `GZIP_MIN_LENGTH` pour éviter les très petits fichiers.
 4. Niveau de compression : `GZIP_COMP_LEVEL` (1–9).
@@ -27,6 +28,12 @@ Le plugin GZIP compresse les réponses HTTP avec l’algorithme gzip pour rédui
 
 !!! tip "Niveau de compression"
     `5` est un bon compromis. Statique/CPU dispo : 7–9. Dynamique/CPU limité : 1–3.
+
+!!! info "Compatibilité navigateurs"
+    GZIP est pris en charge par tous les navigateurs modernes et constitue depuis longtemps la méthode de compression standard des réponses HTTP, avec une excellente compatibilité entre appareils et navigateurs.
+
+!!! warning "Compression vs utilisation CPU"
+    La compression GZIP réduit la bande passante et améliore les temps de chargement, mais les niveaux de compression élevés consomment plus de CPU. Pour les sites à fort trafic, trouvez le bon équilibre entre efficacité de compression et performance serveur.
 
 ### Exemples
 

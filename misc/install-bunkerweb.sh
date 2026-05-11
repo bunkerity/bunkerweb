@@ -37,7 +37,7 @@ REDIS_AUTOPASS="yes"
 REDIS_REQUIREPASS_LOCAL=""
 REDIS_FLAVOR=""               # "redis" | "valkey" — both are wire-compatible
 REDIS_MAXMEMORY_MB=""         # 0 = unlimited (distro default); >0 = applied as <N>mb
-REDIS_MAXMEMORY_POLICY="allkeys-lru"  # WAF cache best practice — bounded + LRU eviction across all keys
+REDIS_MAXMEMORY_POLICY="volatile-lru" # Bounded eviction targeting keys with TTL — protects permanent bans and unexpiring config keys while transient counters evict first
 DB_INSTALL=""
 DB_NAME_INPUT="bw_db"
 DB_USER_INPUT="bunkerweb"
@@ -993,16 +993,18 @@ ask_user_preferences() {
                 fi
 
                 # Memory cap prompt — runs for BOTH manager and full-stack local installs.
-                # Best practice: bound memory + use allkeys-lru so the WAF cache evicts cleanly
-                # under pressure instead of OOM-ing or rejecting writes (default = noeviction).
+                # Best practice: bound memory + use volatile-lru so transient WAF counters evict
+                # cleanly under pressure while permanent bans and unexpiring keys are preserved
+                # (default Redis policy = noeviction, which rejects writes when full).
                 if [ "$REDIS_INSTALL" = "yes" ] && [ -z "$REDIS_MAXMEMORY_MB" ]; then
                     echo
                     echo -e "${BLUE}----------------------------------------${NC}"
                     echo -e "${BLUE}🧠 ${_flavor_label:-Redis/Valkey} Memory Cap${NC}"
                     echo -e "${BLUE}----------------------------------------${NC}"
                     echo "Without a cap, ${_flavor_label:-Redis/Valkey} grows until the kernel OOM-kills it."
-                    echo "The installer will apply maxmemory-policy=allkeys-lru (best practice for"
-                    echo "the WAF cache pattern — evicts the least-recently-used keys when full)."
+                    echo "The installer will apply maxmemory-policy=volatile-lru (recommended for"
+                    echo "the WAF cache pattern — evicts the least-recently-used keys with TTL first,"
+                    echo "preserving permanent bans and protecting recently active sessions)."
                     echo
                     echo "Pick a maximum memory size:"
                     echo "  1. 128 MB    — small/dev VMs (≤ 2 GB RAM)"
@@ -1264,7 +1266,7 @@ ask_user_preferences() {
                     if [ "$REDIS_MAXMEMORY_MB" = "0" ]; then
                         echo "  🧠 Memory cap: Unlimited (distro default — not recommended)"
                     else
-                        echo "  🧠 Memory cap: ${REDIS_MAXMEMORY_MB} MB (policy: ${REDIS_MAXMEMORY_POLICY:-allkeys-lru})"
+                        echo "  🧠 Memory cap: ${REDIS_MAXMEMORY_MB} MB (policy: ${REDIS_MAXMEMORY_POLICY:-volatile-lru})"
                     fi
                 fi
             elif [ -n "$REDIS_HOST_INPUT" ]; then
@@ -2414,8 +2416,8 @@ install_redis() {
         local memory_summary=""
         if [ -n "$REDIS_MAXMEMORY_MB" ] && [ "$REDIS_MAXMEMORY_MB" != "0" ]; then
             _redis_conf_set "$conf" "maxmemory" "${REDIS_MAXMEMORY_MB}mb"
-            _redis_conf_set "$conf" "maxmemory-policy" "${REDIS_MAXMEMORY_POLICY:-allkeys-lru}"
-            memory_summary=" maxmemory=${REDIS_MAXMEMORY_MB}mb policy=${REDIS_MAXMEMORY_POLICY:-allkeys-lru}"
+            _redis_conf_set "$conf" "maxmemory-policy" "${REDIS_MAXMEMORY_POLICY:-volatile-lru}"
+            memory_summary=" maxmemory=${REDIS_MAXMEMORY_MB}mb policy=${REDIS_MAXMEMORY_POLICY:-volatile-lru}"
         fi
 
         chmod 640 "$conf" 2>/dev/null || true
@@ -3133,7 +3135,7 @@ usage() {
     echo "  --redis-bind IP          Redis bind address for local install (manager mode; default 0.0.0.0)"
     echo "  --redis-no-password      Skip the auto-generated REQUIREPASS when binding ≠ loopback"
     echo "  --redis-maxmemory MB     Memory cap in MB (e.g. 128, 256, 512, 1024); 0/unlimited keeps distro default"
-    echo "  --redis-maxmemory-policy POLICY  Eviction policy (default allkeys-lru). Other valid: volatile-lru, volatile-ttl, noeviction, …"
+    echo "  --redis-maxmemory-policy POLICY  Eviction policy (default volatile-lru). Other valid: allkeys-lru, volatile-ttl, noeviction, …"
     echo "  --redis-ssl              Enable SSL/TLS for Redis connection"
     echo "  --redis-no-ssl           Disable SSL/TLS for Redis connection"
     echo "  --redis-ssl-verify       Verify Redis SSL certificate"

@@ -37,7 +37,7 @@ cffi==2.0.0
 cryptography==48.0.0
 importlib-metadata==9.0.0
 maxminddb==3.1.1
-pydantic==2.13.3
+pydantic==2.13.4
 python-magic==0.4.27
 requests==2.33.1
 schedule==1.2.2

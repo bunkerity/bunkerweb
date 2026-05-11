@@ -637,7 +637,7 @@ Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank 
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:
@@ -2724,7 +2724,7 @@ LOG_LEVEL_1=error
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:

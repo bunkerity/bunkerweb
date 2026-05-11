@@ -475,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "Выбрать все {{count}} совпадающих {{entity}}",
+    "bulk_select_all_done": "Все {{count}} совпадающих {{entity}} выбраны.",
+    "bulk_select_clear": "Очистить выбор",
+    "bulk_select_page": "Все {{count}} {{entity}} на этой странице выбраны.",
     "info_bans": "Показано с {{start}} по {{end}} из {{total}} банов",
     "info_cache": "Показано с {{start}} по {{end}} из {{total}} файлов кэша",
     "info_configs": "Показано с {{start}} по {{end}} из {{total}} кастомных конфигураций",

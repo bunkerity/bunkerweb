@@ -148,12 +148,9 @@ $(document).ready(function () {
   };
 
   if (serviceNumber > 10) {
-    const menu = [10];
-    [25, 50, 100].forEach((num) => {
-      if (serviceNumber > num) menu.push(num);
-    });
-    if (serviceNumber > 500) menu.push(500);
-    if (serviceNumber > 1000) menu.push(1000);
+    const menu = [10, 25, 50, 100];
+    if (serviceNumber > 100) menu.push(500);
+    if (serviceNumber > 500) menu.push(1000);
     layout.bottomStart = {
       pageLength: {
         menu: menu,
@@ -314,12 +311,18 @@ $(document).ready(function () {
     bootstrap.Modal.getInstance($modal[0]).hide();
   });
 
-  const getSelectedServices = () =>
-    $("tr.selected")
+  const getSelectedServices = () => {
+    if (!$.fn.dataTable.isDataTable("#services")) return [];
+    return $("#services")
+      .DataTable()
+      .rows({ selected: true })
+      .nodes()
+      .to$()
       .map(function () {
         return $(this).find("td:eq(2) a").text().trim();
       })
       .get();
+  };
 
   $.fn.dataTable.ext.buttons.create_service = {
     text: `<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline" data-i18n="button.create_service"> ${t(
@@ -687,7 +690,7 @@ $(document).ready(function () {
       select: {
         style: "multi+shift",
         selector: "td:nth-child(2)",
-        headerCheckbox: true,
+        headerCheckbox: "select-page",
       },
       layout: layout,
       initComplete: function () {

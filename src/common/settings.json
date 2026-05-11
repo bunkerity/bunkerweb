@@ -163,6 +163,15 @@
     "regex": "^\\d+(?:[kKmMgG])?$",
     "type": "text"
   },
+  "DATASTORE_LRU_SIZE": {
+    "context": "global",
+    "default": "1k",
+    "help": "Slot count for the shared per-worker datastore LRU (used by internalstore and plugin worker-local caches). Accepts a plain integer or `k`/`m` shorthand (e.g., `1k`, `10k`, `1m`).",
+    "id": "datastore-lru-size",
+    "label": "Datastore LRU size",
+    "regex": "^\\d+[kKmM]?$",
+    "type": "text"
+  },
   "CACHESTORE_MEMORY_SIZE": {
     "context": "global",
     "default": "64m",

@@ -165,7 +165,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
     ```
 
     Recovery-Codes werden einmalig angezeigt; gehen die Verschlüsselungs-Keys verloren, werden gespeicherte TOTP-Secrets verworfen.
-- Sessions: Standard-Lebensdauer 12 h (`SESSION_LIFETIME_HOURS`). Sessions an IP und User-Agent gebunden; `CHECK_PRIVATE_IP=no` lockert die IP-Prüfung nur für private Netze. `ALWAYS_REMEMBER=yes` erzwingt persistente Cookies.
+- Sessions: Standard-Leerlauf-Lebensdauer 12 h (`SESSION_LIFETIME_HOURS`), bei jeder Anfrage erneuert. Ein hartes Absolutlimit gilt über `SESSION_ABSOLUTE_HOURS` (Standard `168` = 7 Tage) — danach werden Nutzer unabhängig von Aktivität ausgeloggt. Optionale Session-ID-Rotation (`SESSION_ROLLING_HOURS`, Standard `0` = deaktiviert) erzeugt in diesem Intervall eine neue Session-ID. Sessions an IP und User-Agent gebunden; `CHECK_PRIVATE_IP=no` lockert die IP-Prüfung nur für private Netze. `ALWAYS_REMEMBER=yes` erzwingt persistente Cookies.
 - `PROXY_NUMBERS` setzen, wenn mehrere Proxies `X-Forwarded-*` anhängen.
 
 ## Konfigurationsquellen und Priorität
@@ -205,7 +205,9 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
 | `FLASK_SECRET`                              | Session-Signing-Secret (persistiert in `/var/lib/bunkerweb/.flask_secret`) | Hex/Base64/opaque | auto-generiert               |
 | `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | Verschlüsselungs-Keys für TOTP (Leerzeichen oder JSON)                     | Strings / JSON    | auto-generiert falls fehlend |
 | `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Biscuit-Keys (hex) für UI-Tokens                                           | Hex-Strings       | auto-generiert & gespeichert |
-| `SESSION_LIFETIME_HOURS`                    | Session-Lebensdauer                                                        | Zahl (Stunden)    | `12`                         |
+| `SESSION_LIFETIME_HOURS`                    | Leerlauf-Lebensdauer der Session (gleitende TTL, pro Anfrage erneuert)     | Zahl (Stunden)    | `12`                         |
+| `SESSION_ABSOLUTE_HOURS`                    | Absolute Obergrenze der Session unabhängig von Aktivität                   | Zahl (Stunden)    | `168`                        |
+| `SESSION_ROLLING_HOURS`                     | Intervall für Session-ID-Rotation (`0` deaktiviert die Rotation)           | Zahl (Stunden)    | `0`                          |
 | `ALWAYS_REMEMBER`                           | „Remember me“-Cookies immer setzen                                         | `yes` oder `no`   | `no`                         |
 | `CHECK_PRIVATE_IP`                          | Sessions an IP binden (locker für private Netze bei `no`)                  | `yes` oder `no`   | `yes`                        |
 | `PROXY_NUMBERS`                             | Anzahl vertrauenswürdiger Proxy-Hops für `X-Forwarded-*`                   | Integer           | `1`                          |

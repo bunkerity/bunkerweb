@@ -637,7 +637,7 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:
@@ -2721,7 +2721,7 @@ LOG_LEVEL_1=error
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:

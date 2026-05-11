@@ -8,7 +8,6 @@ from math import floor
 from time import time
 from traceback import format_exc
 from html import escape, unescape
-import csv
 
 from flask import Blueprint, Response, jsonify, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
@@ -16,7 +15,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 
 from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS, DB
-from app.utils import LOGGER, RESERVED_SERVICE_NAMES, flash
+from app.utils import LOGGER, RESERVED_SERVICE_NAMES, csv_safe, csv_writer, flash
 
 from app.routes.utils import (
     cors_required,
@@ -537,7 +536,7 @@ def bans_export_csv():
         return jsonify({"error": "Failed to export bans"}), 500
 
     output = StringIO()
-    writer = csv.writer(output)
+    writer = csv_writer(output)
     writer.writerow(_BAN_EXPORT_HEADERS)
     for row in rows:
         writer.writerow([row[field] for field in _BAN_EXPORT_FIELDS])
@@ -575,7 +574,7 @@ def bans_export_excel():
         cell.fill = header_fill
 
     for row in rows:
-        ws.append([row[field] for field in _BAN_EXPORT_FIELDS])
+        ws.append([csv_safe(row[field]) for field in _BAN_EXPORT_FIELDS])
 
     for column in ws.columns:
         max_length = 0

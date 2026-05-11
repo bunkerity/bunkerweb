@@ -44,9 +44,9 @@
     },
     {
       "id": "lua-cjson",
-      "name": "lua-cjson v2.1.0.16",
+      "name": "lua-cjson v2.1.0.17",
       "url": "https://github.com/openresty/lua-cjson.git",
-      "commit": "e6daf3cdfac61055af3f7d88d9886942ff0de6e6"
+      "commit": "617164a0fe3bb647128178f9caefb304b8573bb6"
     },
     {
       "id": "lua-ffi-zlib",
@@ -166,9 +166,9 @@
     },
     {
       "id": "lua-resty-string",
-      "name": "lua-resty-string v0.16",
+      "name": "lua-resty-string v0.17",
       "url": "https://github.com/openresty/lua-resty-string.git",
-      "commit": "7be2e1d907744f965af115819cca9e6580f2e760",
+      "commit": "ac0967a020e7d05475ae53808ebf685232fe1c1d",
       "post_install": "rm -r src/deps/src/lua-resty-string/t"
     },
     {
@@ -193,9 +193,9 @@
     },
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20260311",
+      "name": "LuaJIT v2.1-20260415",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "3640b6c590f9c383ffa5d0955f35e646f684a1da",
+      "commit": "7fcf52f5bc7a91d938312ed76b18f3d76cb78483",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {

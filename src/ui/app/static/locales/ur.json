@@ -475,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "مماثل {{entity}} میں سے تمام {{count}} منتخب کریں",
+    "bulk_select_all_done": "مماثل {{entity}} میں سے تمام {{count}} منتخب ہو چکے ہیں۔",
+    "bulk_select_clear": "انتخاب صاف کریں",
+    "bulk_select_page": "اس صفحے پر موجود تمام {{count}} {{entity}} منتخب ہو چکے ہیں۔",
     "info_bans": "{{total}} پابندیوں میں سے {{start}} سے {{end}} دکھا رہا ہے",
     "info_cache": "{{total}} کیشے فائلوں میں سے {{start}} سے {{end}} دکھا رہا ہے",
     "info_configs": "{{total}} کسٹم کنفیگریشنز میں سے {{start}} سے {{end}} دکھا رہا ہے",

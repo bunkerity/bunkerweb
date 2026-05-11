@@ -293,3 +293,4 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
     OPEN_FILE_CACHE_ERRORS: "yes"
     OPEN_FILE_CACHE_MIN_USES: "3"
     OPEN_FILE_CACHE_VALID: "60s"
+    ```

@@ -475,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "Selecionar todos os {{count}} {{entity}} correspondentes",
+    "bulk_select_all_done": "Todos os {{count}} {{entity}} correspondentes estão selecionados.",
+    "bulk_select_clear": "Limpar seleção",
+    "bulk_select_page": "Todos os {{count}} {{entity}} desta página estão selecionados.",
     "info_bans": "Mostrando de {{start}} a {{end}} de {{total}} Bloqueios",
     "info_cache": "Mostrando de {{start}} a {{end}} de {{total}} Arquivos de Cache",
     "info_configs": "Mostrando de {{start}} a {{end}} de {{total}} Configurações Personalizadas",
