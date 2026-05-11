@@ -22,6 +22,7 @@ function bwCsvSafe(value) {
   if (typeof value === "number") return value;
   let s = String(value);
   if (s && /^[@+\-=|%]/.test(s) && !/^-?[0-9,.]+$/.test(s)) {
+    s = s.replace(/\\/g, "\\\\");
     s = s.replace(/\|/g, "\\|");
     s = "'" + s;
   }
