@@ -78,6 +78,9 @@
 
             Wenn die Überprüfung der Prüfsumme fehlschlägt, **führen Sie das Skript nicht aus** – es könnte unsicher sein.
 
+    !!! tip "Interaktive Upgrade-Oberfläche"
+        Der Upgrade-Ablauf verwendet dieselbe TUI wie Neuinstallationen: Inline-Eingabeaufforderungen mit [gum](https://github.com/charmbracelet/gum), mit Rückfall auf `whiptail`-Dialogboxen und schließlich auf Klartext-Eingaben, falls gum nicht bezogen werden kann. Das `gum`-Binary wird aus der offiziellen [GitHub-Release](https://github.com/charmbracelet/gum/releases) heruntergeladen (SHA256-gepinnt, cosign-verifiziert, wenn cosign installiert ist) und aus einem Temp-Verzeichnis ausgeführt, das beim Beenden entfernt wird — es wird kein Systempaket installiert und keine apt/dnf-Quelle hinzugefügt. Übergeben Sie `--no-tui` (oder setzen Sie `BW_INSTALL_TUI=no`), um alle TUI-Ebenen zu überspringen, oder `--tui`, um eine funktionierende TUI zu erzwingen. Für vollständig unbeaufsichtigte Upgrades übergeben Sie `-y` / `--yes` mit den entsprechenden Flags – Pipe-Aufrufe (`curl … | bash`) brechen mit einer klaren Fehlermeldung ab, statt jede Vorgabe stillschweigend zu übernehmen. **Air-gapped-Upgrades**: kombinieren Sie `--no-tui --yes`, damit für die TUI-Schicht kein Netzwerkaufruf ausgeführt wird.
+
     * **Wie es funktioniert**:
 
         Das gleiche vielseitige Installationsskript, das für Neuinstallationen verwendet wird, kann auch ein In-Place-Upgrade durchführen. Wenn es eine bestehende Installation und eine andere Zielversion erkennt, wechselt es in den Upgrade-Modus und wendet den folgenden Arbeitsablauf an:
@@ -128,6 +131,8 @@
         | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
         | `-v, --version <X.Y.Z>` | Ziel-BunkerWeb-Version, auf die aktualisiert werden soll.                                                                      |
         | `-y, --yes`             | Nicht-interaktiv (geht von Upgrade-Bestätigung aus und aktiviert die automatische Sicherung, es sei denn, `--no-auto-backup`). |
+        | `--tui`                 | Erzwingt eine TUI (gum oder whiptail). Bricht ab, wenn keine installiert werden kann.            |
+        | `--no-tui`              | Überspringt alle TUI-Ebenen und verwendet Klartext-Eingaben. Entspricht `BW_INSTALL_TUI=no`.     |
         | `--backup-dir <PFAD>`   | Ziel für die automatische Pre-Upgrade-Sicherung. Wird erstellt, wenn es fehlt.                                                 |
         | `--no-auto-backup`      | Überspringt die automatische Sicherung (NICHT empfohlen). Sie müssen eine manuelle Sicherung haben.                            |
         | `-q, --quiet`           | Unterdrückt die Ausgabe (mit Protokollierung / Überwachung kombinieren).                                                       |

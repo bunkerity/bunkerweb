@@ -2020,7 +2020,24 @@ Le script d'installation facile est un outil puissant conçu pour rationaliser l
 
 #### Installation interactive
 
-Lorsqu'il est exécuté sans aucune option, le script passe en mode interactif qui vous guide tout au long du processus d'installation. Il vous sera demandé de faire les choix suivants :
+Lorsqu'il est exécuté sans aucune option, le script passe en mode interactif qui vous guide tout au long du processus d'installation. Le flux interactif utilise une TUI en ligne via [gum](https://github.com/charmbracelet/gum) — menus à flèches avec curseur `❯` et champs de mot de passe masqués.
+
+!!! info "gum est récupéré de façon éphémère au premier lancement interactif"
+    L'installateur télécharge gum la première fois qu'une invite interactive est nécessaire et l'exécute depuis un répertoire temporaire pendant la durée du script — **rien n'est installé à l'échelle du système** :
+
+    - Télécharge le binaire `gum_${VERSION}_${ARCH}.tar.gz` officiel depuis la [release GitHub](https://github.com/charmbracelet/gum/releases) via HTTPS (TLS 1.2+, refuse les redirections HTTP, timeout connexion 10 s / total 30 s).
+    - Vérifie l'archive contre un **SHA256 épinglé dans ce script** (le point de confiance local — la somme de contrôle du script lui-même et celle du binaire gum doivent toutes deux correspondre).
+    - Si `cosign` est installé : vérifie également le `checksums.txt` amont contre l'identité OIDC GitHub-Actions de Charm (`https://github.com/charmbracelet/gum/...`) en défense en profondeur, et croise-vérifie que le hash épinglé correspond à la valeur publiée par Charm pour cette archive.
+    - Extrait le binaire dans un répertoire temporaire exécutable (`/var/tmp/bw-gum.XXXXXX` par défaut ; `/tmp`, `$XDG_RUNTIME_DIR` ou `$HOME/.cache` quand `/var/tmp` est monté `noexec`).
+    - Ajoute le répertoire temporaire au `PATH` pour la durée du script et le supprime à la sortie (via un trap `EXIT`, même en cas d'échec sous `set -e` ou de signal).
+
+    **Ce qui reste sur le disque après la fin de l'installateur :** rien. Pas de `/etc/apt/sources.list.d/charm.list`, pas de clé GPG dans `apt`/`rpm`, pas de binaire `gum` dans `/usr/bin`/`/usr/local/bin`, aucune entrée de paquet. L'installateur n'enregistre jamais de source apt ou dnf tierce.
+
+    Si gum ne peut pas être téléchargé — hôte hors réseau, panne réseau, somme SHA256 incorrecte — l'installateur utilise un `whiptail` déjà présent sur le système (souvent préinstallé sur les images cloud Debian/Ubuntu via le paquet `newt`). À défaut, il bascule sur les **invites en texte brut**.
+
+Passez `--no-tui` (ou définissez `BW_INSTALL_TUI=no`) pour ignorer tous les niveaux de TUI, ou `--tui` pour abandonner si aucune TUI ne peut s'afficher. **Installations isolées (air-gapped)** : combinez `--no-tui` avec `--yes` et les drapeaux `--*` / variables `*_INPUT` appropriés ; aucun appel réseau n'est effectué pour la couche TUI.
+
+Il vous sera demandé de faire les choix suivants :
 
 1.  **Type d'installation**: sélectionnez les composants que vous souhaitez installer.
     *   **Full Stack (par défaut)**: une installation tout-en-un comprenant BunkerWeb, le Scheduler et l'interface utilisateur Web.
@@ -2051,6 +2068,8 @@ Pour les configurations non interactives ou automatisées, le script peut être 
 | `--api`, `--enable-api` | Active le service API (FastAPI) systemd (désactivé par défaut).                                          |
 | `--no-api`              | Désactive explicitement le service API.                                                                  |
 | `-y, --yes`             | S'exécute en mode non interactif en utilisant les réponses par défaut pour toutes les invites.           |
+| `--tui`                 | Force une TUI (gum ou whiptail). Échec immédiat si aucune des deux ne peut être installée.                |
+| `--no-tui`              | Désactive toutes les couches de TUI et utilise les invites en texte brut. Équivaut à `BW_INSTALL_TUI=no`. |
 | `-f, --force`           | Force l'installation à se poursuivre même sur une version du système d'exploitation non prise en charge. |
 | `-q, --quiet`           | Installation silencieuse (suppression de la sortie).                                                     |
 | `-h, --help`            | Affiche le message d'aide avec toutes les options disponibles.                                           |

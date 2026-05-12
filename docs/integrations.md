@@ -2026,7 +2026,26 @@ The easy install script is a powerful tool designed to streamline the setup of B
 
 #### Interactive Installation
 
-When run without any options, the script enters an interactive mode that guides you through the setup process. You will be asked to make the following choices:
+When run without any options, the script enters an interactive mode that guides you through the setup process. The interactive flow uses an inline TUI — arrow-key menus with a `❯` cursor and masked password fields — provided by [gum](https://github.com/charmbracelet/gum) (Charmbracelet, MIT, ~5 MB static binary).
+
+!!! info "gum is fetched ephemerally on first interactive run"
+    The installer fetches gum the first time it needs an interactive prompt and runs it from a tempdir for the duration of the script — **nothing is installed system-wide**:
+
+    - Downloads the official `gum_${VERSION}_${ARCH}.tar.gz` from the [GitHub release](https://github.com/charmbracelet/gum/releases) over HTTPS (TLS 1.2+, refuses HTTP redirects, connect-timeout 10 s / total-timeout 30 s).
+    - Verifies the tarball against a **SHA256 pinned in this script** (the local trust anchor — both the script's own checksum and the gum binary must match).
+    - If `cosign` is installed: also verifies the upstream `checksums.txt` against Charm's GitHub-Actions OIDC identity (`https://github.com/charmbracelet/gum/...`) as defense-in-depth, and cross-checks that the pinned hash is the value Charm published for this exact tarball.
+    - Extracts the binary into an exec-capable tempdir (`/var/tmp/bw-gum.XXXXXX` by default; `/tmp`, `$XDG_RUNTIME_DIR`, or `$HOME/.cache` when `/var/tmp` is mounted `noexec`).
+    - Adds the tempdir to `PATH` for the rest of the run and removes it on script exit (via an `EXIT` trap, even on `set -e` failures or signals).
+
+    **What stays on disk after the installer exits:** nothing. No `/etc/apt/sources.list.d/charm.list`, no GPG key in `apt`/`rpm`, no `gum` binary in `/usr/bin`/`/usr/local/bin`, no package-db entry. The installer never registers a third-party apt or dnf source.
+
+    If gum cannot be downloaded — air-gapped host, network failure, SHA256 mismatch — the installer uses any `whiptail` already present on the system (commonly preinstalled on Debian/Ubuntu cloud images via the `newt` package). If neither gum nor whiptail is available, it falls back to **plain text prompts**.
+
+Pass `--no-tui` (or set `BW_INSTALL_TUI=no`) to skip every TUI tier, or `--tui` to abort if no TUI tier can render. **Air-gapped installs**: pass `--no-tui` together with `--yes` and the relevant `--*` flags / `*_INPUT` env vars; no network call is made for the TUI layer.
+
+If the installer is piped (`curl … | bash`) or stdin is otherwise not a TTY, it exits with a clear error rather than falling through every default — use `--yes` together with the appropriate `--*` flags for non-interactive installs in that case.
+
+You will be asked to make the following choices:
 
 1.  **Installation Type**: Select the components you want to install.
     *   **Full Stack (default)**: An all-in-one installation including BunkerWeb, the Scheduler, and the Web UI.
@@ -2058,6 +2077,8 @@ For non-interactive or automated setups, the script can be controlled with comma
 | `-w, --enable-wizard`   | Enables the setup wizard.                                             |
 | `-n, --no-wizard`       | Disables the setup wizard.                                            |
 | `-y, --yes`             | Runs in non-interactive mode using default answers for all prompts.   |
+| `--tui`                 | Force a TUI (gum or whiptail). Hard fail if neither can be installed. |
+| `--no-tui`              | Disable all TUI tiers and use the legacy plain-text prompts. Equivalent to `BW_INSTALL_TUI=no`. |
 | `-f, --force`           | Forces the installation to proceed even on an unsupported OS version. |
 | `-q, --quiet`           | Silent installation (suppress output).                                |
 | `--api`, `--enable-api` | Enables the API (FastAPI) systemd service (disabled by default).      |

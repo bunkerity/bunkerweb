@@ -499,16 +499,19 @@ Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank 
         !!! danger "Sicherheitshinweis"
             Überprüfen Sie immer die Integrität des Skripts mit der bereitgestellten Prüfsumme, bevor Sie es ausführen.
 
-    2. **Option 2) Manager** wählen und den Anweisungen folgen:
+    2. **Manager** im Installationstyp-Menü auswählen (mit ↑/↓ navigieren, dann Enter), und den Anweisungen folgen:
 
-        | Eingabe                   | Aktion                                                                                                               |
-        | :------------------------ | :------------------------------------------------------------------------------------------------------------------- |
-        | **BunkerWeb-Instanzen**   | Geben Sie die IPs Ihrer Worker-Knoten mit Leerzeichen getrennt an (z. B. `192.168.10.11 192.168.10.12`).             |
-        | **Whitelist IP**          | Übernehmen Sie die erkannte IP oder geben Sie ein Subnetz ein (z. B. `192.168.10.0/24`), um API-Zugriff zu erlauben. |
-        | **DNS-Resolver**          | Drücken Sie `N` für den Standardwert oder geben Sie eigene an.                                                       |
-        | **HTTPS für interne API** | **Empfohlen:** `Y`, um Zertifikate zu erzeugen und die Manager-Worker-Kommunikation zu sichern.                      |
-        | **Web-UI-Dienst**         | `Y`, um die Weboberfläche zu aktivieren (stark empfohlen).                                                           |
-        | **API-Dienst**            | `N`, sofern Sie die öffentliche REST-API nicht benötigen.                                                            |
+        | Eingabe                   | Aktion                                                                                                                  |
+        | :------------------------ | :---------------------------------------------------------------------------------------------------------------------- |
+        | **BunkerWeb-Instanzen**   | Geben Sie die IPs Ihrer Worker-Knoten mit Leerzeichen getrennt an (z. B. `192.168.10.11 192.168.10.12`).                |
+        | **Whitelist IP**          | Übernehmen Sie die erkannte IP oder geben Sie ein Subnetz ein (z. B. `192.168.10.0/24`), um API-Zugriff zu erlauben.    |
+        | **DNS-Resolver**          | Wählen Sie **Nein**, um die Standardwerte zu behalten, oder geben Sie eigene an.                                         |
+        | **HTTPS für interne API** | **Empfohlen:** wählen Sie **Ja**, um Zertifikate zu erzeugen und die Manager-Worker-Kommunikation zu sichern.            |
+        | **Web-UI-Dienst**         | Wählen Sie **Ja**, um die Weboberfläche zu aktivieren (stark empfohlen).                                                 |
+        | **API-Dienst**            | Wählen Sie **Nein**, sofern Sie die öffentliche REST-API nicht benötigen.                                                |
+
+        !!! note "Eingabeaufforderungs-Oberfläche"
+            Der Installer verwendet die [gum](https://github.com/charmbracelet/gum)-TUI. Beim ersten interaktiven Lauf lädt er das offizielle `gum`-Binary aus der GitHub-Release herunter (SHA256-gepinnt), führt es aus einem Temp-Verzeichnis aus und entfernt das Temp-Verzeichnis beim Beenden — es wird kein Systempaket installiert. Verwenden Sie Pfeiltasten + Enter zur Beantwortung. Übergeben Sie `--no-tui`, wenn Sie Klartext-Eingaben bevorzugen.
 
     #### UI absichern und bereitstellen
 
@@ -543,7 +546,7 @@ Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank 
 
         Für bessere Isolation können Sie die UI auf einem separaten Knoten installieren.
 
-        1. Führen Sie den Installer aus und wählen Sie **Option 5) Web UI Only**.
+        1. Führen Sie den Installer aus und wählen Sie den Installationstyp **Web UI Only**.
         2. Bearbeiten Sie `/etc/bunkerweb/ui.env`, um die Verbindung zur Manager-Datenbank herzustellen:
 
             ```ini

@@ -499,16 +499,19 @@ The Manager is the brain of the cluster. It runs the Scheduler, Database, and op
         !!! danger "Security Notice"
             Always verify the script integrity with the provided checksum before executing it.
 
-    2. **Select Option 2) Manager** and follow the prompts:
+    2. **Select Manager** at the installation-type prompt (use ↑/↓ then Enter), then follow the prompts:
 
-        | Prompt                     | Action                                                                                      |
-        | :------------------------- | :------------------------------------------------------------------------------------------ |
-        | **BunkerWeb instances**    | Enter space-separated IPs of your worker nodes (e.g., `192.168.10.11 192.168.10.12`).       |
-        | **Whitelist IP**           | Accept the detected IP or enter a subnet (e.g., `192.168.10.0/24`) to allow API access.     |
-        | **DNS resolvers**          | Press `N` for default or provide custom ones.                                               |
-        | **HTTPS for internal API** | **Recommended:** `Y` to auto-generate certificates for secure manager-worker communication. |
-        | **Web UI service**         | `Y` to enable the web interface (highly recommended).                                       |
-        | **API service**            | `N` unless you need the public REST API for external tools.                                 |
+        | Prompt                     | Action                                                                                                  |
+        | :------------------------- | :------------------------------------------------------------------------------------------------------ |
+        | **BunkerWeb instances**    | Enter space-separated IPs of your worker nodes (e.g., `192.168.10.11 192.168.10.12`).                   |
+        | **Whitelist IP**           | Accept the detected IP or enter a subnet (e.g., `192.168.10.0/24`) to allow API access.                 |
+        | **DNS resolvers**          | Choose **No** to keep the defaults, or provide custom ones.                                              |
+        | **HTTPS for internal API** | **Recommended:** choose **Yes** to auto-generate certificates for secure manager-worker communication. |
+        | **Web UI service**         | Choose **Yes** to enable the web interface (highly recommended).                                        |
+        | **API service**            | Choose **No** unless you need the public REST API for external tools.                                   |
+
+        !!! note "Prompt UI"
+            The installer uses the [gum](https://github.com/charmbracelet/gum) TUI. On first interactive run it downloads the official `gum` binary from the GitHub release (SHA256-pinned), runs it from a tempdir, and removes the tempdir on exit — no system package is installed. Use arrow keys + Enter to answer prompts. Pass `--no-tui` if you prefer plain text prompts.
 
     #### Secure and Expose the UI
 
@@ -543,7 +546,7 @@ The Manager is the brain of the cluster. It runs the Scheduler, Database, and op
 
         For better isolation, install the UI on a separate node.
 
-        1. Run the installer and choose **Option 5) Web UI Only**.
+        1. Run the installer and select the **Web UI Only** installation type.
         2. Edit `/etc/bunkerweb/ui.env` to connect to the Manager's database:
 
             ```ini

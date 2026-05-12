@@ -82,6 +82,9 @@
 
             Si la vérification de la somme échoue, **n'exécutez pas le script** — il pourrait être dangereux.
 
+    !!! tip "Interface de mise à niveau interactive"
+        Le flux de mise à niveau utilise la même TUI que les nouvelles installations : invites en ligne avec [gum](https://github.com/charmbracelet/gum), avec un repli sur les boîtes de dialogue `whiptail` puis sur les invites en texte brut si gum ne peut pas être obtenu. Le binaire `gum` est téléchargé depuis la [release GitHub](https://github.com/charmbracelet/gum/releases) officielle (SHA256 épinglé, signature cosign vérifiée si cosign est installé) et exécuté depuis un répertoire temporaire supprimé à la fin du script — aucun paquet système n'est installé et aucune source apt/dnf n'est ajoutée. Passez `--no-tui` (ou définissez `BW_INSTALL_TUI=no`) pour ignorer toutes les couches de TUI, ou `--tui` pour exiger une TUI fonctionnelle. Pour des mises à niveau entièrement automatisées, passez `-y` / `--yes` avec les drapeaux pertinents — les invocations en pipe (`curl … | bash`) s'arrêtent avec une erreur claire au lieu d'accepter silencieusement chaque valeur par défaut. **Mises à niveau hors réseau (air-gapped)** : combinez `--no-tui --yes` pour qu'aucun appel réseau ne soit fait pour la couche TUI.
+
       * **Comment ça marche** :
 
         Le même script d'installation polyvalent utilisé pour les nouvelles installations peut également effectuer une mise à niveau sur place. Lorsqu'il détecte une installation existante et une version cible différente, il passe en mode mise à niveau et applique le flux de travail suivant :
@@ -132,6 +135,8 @@
         | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
         | `-v, --version <X.Y.Z>` | Ciblez la version de BunkerWeb à mettre à niveau.                                                                             |
         | `-y, --yes`             | Non interactif (suppose la confirmation de la mise à niveau et active la sauvegarde automatique, sauf si `--no-auto-backup`). |
+        | `--tui`                 | Force une TUI (gum ou whiptail). Abandonne si aucune des deux ne peut être installée.            |
+        | `--no-tui`              | Ignore toutes les couches de TUI et utilise les invites en texte brut. Équivaut à `BW_INSTALL_TUI=no`. |
         | `--backup-dir <PATH>`   | Destination de la sauvegarde automatique de pré-mise à niveau. Créé s'il est manquant.                                        |
         | `--no-auto-backup`      | Ignorez la sauvegarde automatique (NON recommandé). Vous devez disposer d'une sauvegarde manuelle.                            |
         | `-q, --quiet`           | Suppression de la sortie (combinée avec l'enregistrement/la surveillance).                                                    |

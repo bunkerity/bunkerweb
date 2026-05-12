@@ -5,6 +5,19 @@
 
 set -e
 
+# Script-wide cleanup hook. Runs on every exit path (normal completion,
+# error, signal). Defined here so it covers the entire run, including
+# anything that exits via `set -e`. Individual cleanup functions hook
+# in by being called from here; keep them idempotent.
+_bw_install_cleanup() {
+    # Defined later in the script; guard so early-exit before sourcing
+    # doesn't error on missing function.
+    if declare -F _gum_cleanup >/dev/null 2>&1; then
+        _gum_cleanup
+    fi
+}
+trap _bw_install_cleanup EXIT
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -63,6 +76,36 @@ BACKUP_DIRECTORY=""
 AUTO_BACKUP="yes"
 SYSTEM_ARCH=""
 INSTALL_EPEL="auto"
+# TUI preference: auto | yes | no
+#   auto: use gum if available/installable, fall back to whiptail, then plain read
+#   yes : require a TUI (hard error if neither gum nor whiptail can be installed)
+#   no  : never use a TUI; always use the legacy read-based prompts
+USE_TUI="${BW_INSTALL_TUI:-auto}"
+
+# Pre-declared with safe defaults so callers can reference them even before
+# tui_init() has had a chance to detect the terminal's UTF-8 capability.
+TUI_CURSOR_GLYPH="❯"
+TUI_SECTION_GLYPH="▸"
+# Runtime detection flags, set by tui_init()
+GUM_AVAILABLE="no"
+WHIPTAIL_AVAILABLE="no"
+# Backtitle shown at the top of every whiptail dialog
+TUI_BACKTITLE="BunkerWeb — Powerful Protection, Simplified."
+# ---------------------------------------------------------------------------
+# gum bootstrap constants — pinned for reproducibility and supply-chain safety
+# Update these together when bumping GUM_VERSION:
+#   1. download https://github.com/charmbracelet/gum/releases/download/v$VER/checksums.txt
+#   2. record each Linux_/Freebsd_ SHA256 below
+# ---------------------------------------------------------------------------
+readonly GUM_VERSION="0.17.0"
+readonly GUM_GH_RELEASE="https://github.com/charmbracelet/gum/releases/download/v${GUM_VERSION}"
+# Per-arch SHA256s pinned against Charm's official `checksums.txt`. cosign
+# verification of `checksums.txt.sig` is preferred when the host has cosign
+# installed; otherwise these pins are the trust anchor.
+readonly GUM_SHA256_LINUX_X86_64="69ee169bd6387331928864e94d47ed01ef649fbfe875baed1bbf27b5377a6fdb"
+readonly GUM_SHA256_LINUX_ARM64="b0b9ed95cbf7c8b7073f17b9591811f5c001e33c7cfd066ca83ce8a07c576f9c"
+readonly GUM_SHA256_FREEBSD_X86_64="9b155543613a3293558ad01f21b9593d38401613a7398bd14fc115810859f39c"
+readonly GUM_SHA256_FREEBSD_ARM64="722c2933c7f91a947463c4d3601f00957ca5313963248ffc133632996bd1e65d"
 
 # Function to print colored output
 print_status() {
@@ -89,6 +132,723 @@ run_cmd() {
         exit 1
     fi
 }
+
+# ---------------------------------------------------------------------------
+# TUI (whiptail) helper layer
+# ---------------------------------------------------------------------------
+# All interactive prompts route through the tui_* helpers below. Each helper
+# dispatches: gum (when GUM_AVAILABLE=yes), then whiptail (when
+# WHIPTAIL_AVAILABLE=yes), then the legacy plain-read fallback. tui_init()
+# decides the order once per run.
+
+# Returns 0 when the value is one of the accepted truthy spellings
+# (case-insensitive): yes / y / 1 / true / on. Used for boolean-ish env vars
+# like NO_CHARM_REPO.
+_is_truthy() {
+    case "${1,,}" in
+        yes|y|1|true|on) return 0 ;;
+        *)               return 1 ;;
+    esac
+}
+
+# Pick the cursor/section glyphs based on the runtime terminal's ability to
+# render Unicode. Default PuTTY ships with "Use Unicode line drawing" OFF
+# and a non-UTF-8 remote charset, so `❯` / `▸` would come out as `?` /
+# mojibake. Fall back to ASCII so the prompt is still legible.
+_tui_pick_glyphs() {
+    local _charmap
+    _charmap=$(locale charmap 2>/dev/null || true)
+    case "$_charmap" in
+        UTF-8|utf-8|UTF8|utf8) ;;   # keep Unicode glyphs (already set above)
+        *) TUI_CURSOR_GLYPH=">"; TUI_SECTION_GLYPH=">" ;;
+    esac
+}
+
+# Map uname output to the segment Charm uses in their release artifact names
+# (e.g. `gum_${VER}_Linux_x86_64.tar.gz`). Returns the segment on stdout.
+_detect_gum_arch() {
+    local _os _machine
+    _os=$(uname -s 2>/dev/null)
+    _machine=$(uname -m 2>/dev/null)
+    case "$_os/$_machine" in
+        Linux/x86_64|Linux/amd64)      echo "Linux_x86_64"   ;;
+        Linux/aarch64|Linux/arm64)     echo "Linux_arm64"    ;;
+        FreeBSD/x86_64|FreeBSD/amd64)  echo "Freebsd_x86_64" ;;
+        FreeBSD/aarch64|FreeBSD/arm64) echo "Freebsd_arm64"  ;;
+        *) return 1 ;;
+    esac
+}
+
+# Path to the tempdir holding the ephemerally-installed gum binary; cleaned
+# on script exit via an EXIT trap registered when install_gum_silent succeeds.
+_GUM_EPHEMERAL_DIR=""
+
+# Cleanup hook invoked from the script-wide EXIT trap. Removes the ephemeral
+# gum tempdir and unsets PATH addition. Safe to call multiple times.
+_gum_cleanup() {
+    if [ -n "${_GUM_EPHEMERAL_DIR:-}" ] && [ -d "$_GUM_EPHEMERAL_DIR" ]; then
+        rm -rf "$_GUM_EPHEMERAL_DIR"
+        _GUM_EPHEMERAL_DIR=""
+    fi
+}
+
+# Install gum (Charmbracelet) ephemerally:
+#   - Download the official GitHub-release tarball for the host arch
+#   - Verify against pinned SHA256 (cosign-verify the upstream
+#     `checksums.txt` if cosign is present)
+#   - Extract the binary into a tempdir, add the tempdir to PATH so gum is
+#     callable for the rest of the run
+#   - Cleanup at script EXIT removes the tempdir — no /usr/local/bin/gum,
+#     no apt source, no package-db entry left behind.
+# Non-fatal: returns 1 on any failure so tui_init() can fall through to
+# whiptail.
+install_gum_silent() {
+    local _arch _tarball _hash_pin
+    if ! _arch=$(_detect_gum_arch); then
+        print_warning "Unsupported architecture for gum tarball"
+        return 1
+    fi
+    _tarball="gum_${GUM_VERSION}_${_arch}.tar.gz"
+    case "$_arch" in
+        Linux_x86_64)   _hash_pin="$GUM_SHA256_LINUX_X86_64"   ;;
+        Linux_arm64)    _hash_pin="$GUM_SHA256_LINUX_ARM64"    ;;
+        Freebsd_x86_64) _hash_pin="$GUM_SHA256_FREEBSD_X86_64" ;;
+        Freebsd_arm64)  _hash_pin="$GUM_SHA256_FREEBSD_ARM64"  ;;
+        *) return 1 ;;
+    esac
+
+    # Find an exec-capable tempdir. `/tmp` is mounted `noexec` on some
+    # hardened systems (Docker hardened images, CIS-aligned servers), in
+    # which case the gum binary would chmod fine but `exec` would fail.
+    # Try a few standard candidates and verify with a probe.
+    local _tmp _cand _probe
+    for _cand in /var/tmp /tmp "${XDG_RUNTIME_DIR:-}" "${HOME:-/root}/.cache"; do
+        [ -d "$_cand" ] || continue
+        _tmp=$(mktemp -d -p "$_cand" bw-gum.XXXXXX 2>/dev/null) || continue
+        _probe="$_tmp/.exec-probe"
+        printf '#!/bin/sh\nexit 0\n' > "$_probe" 2>/dev/null \
+            && chmod +x "$_probe" 2>/dev/null \
+            && "$_probe" 2>/dev/null \
+            && { rm -f "$_probe"; break; }
+        rm -rf "$_tmp"
+        _tmp=""
+    done
+    if [ -z "$_tmp" ] || [ ! -d "$_tmp" ]; then
+        print_warning "No exec-capable tempdir found for gum bootstrap"
+        return 1
+    fi
+    # On any return path before we hand the tempdir off to the EXIT trap,
+    # nuke it via a local RETURN trap.
+    # shellcheck disable=SC2064
+    trap "rm -rf '$_tmp'; trap - RETURN" RETURN
+
+    print_status "Fetching gum ${GUM_VERSION} (${_arch}) from GitHub releases…"
+    if ! curl --proto '=https' --tlsv1.2 --fail --silent --show-error \
+              --connect-timeout 10 --max-time 30 -L \
+              -o "$_tmp/$_tarball" "$GUM_GH_RELEASE/$_tarball"; then
+        print_warning "gum tarball download failed"
+        return 1
+    fi
+
+    # ---------------------------------------------------------------
+    # Safety: TWO independent verification layers — both MUST pass.
+    #   1. Pinned SHA256 baked into this script (local trust anchor —
+    #      means an attacker would have to compromise BOTH the GitHub
+    #      release artifact AND this script's checksum to slip through).
+    #   2. cosign verify-blob of the upstream `checksums.txt`, when cosign
+    #      is installed (defense-in-depth: detects key rotation and
+    #      bit-for-bit identity drift before extraction). cosign absence
+    #      degrades to layer 1 only — never a silent skip-and-trust.
+    # ---------------------------------------------------------------
+    local _got
+    _got=$(sha256sum "$_tmp/$_tarball" | awk '{print $1}')
+    if [ "$_got" != "$_hash_pin" ]; then
+        print_error "SHA256 mismatch on $_tarball"
+        print_error "  got:    $_got"
+        print_error "  expect: $_hash_pin"
+        return 1
+    fi
+
+    if command -v cosign >/dev/null 2>&1; then
+        curl --proto '=https' --tlsv1.2 --fail --silent --show-error --connect-timeout 10 --max-time 30 -L \
+             -o "$_tmp/checksums.txt"     "$GUM_GH_RELEASE/checksums.txt"     || return 1
+        curl --proto '=https' --tlsv1.2 --fail --silent --show-error --connect-timeout 10 --max-time 30 -L \
+             -o "$_tmp/checksums.txt.sig" "$GUM_GH_RELEASE/checksums.txt.sig" || return 1
+        curl --proto '=https' --tlsv1.2 --fail --silent --show-error --connect-timeout 10 --max-time 30 -L \
+             -o "$_tmp/checksums.txt.pem" "$GUM_GH_RELEASE/checksums.txt.pem" || return 1
+        if ! ( cd "$_tmp" && cosign verify-blob \
+                  --certificate checksums.txt.pem \
+                  --signature checksums.txt.sig \
+                  --certificate-identity-regexp '^https://github\.com/charmbracelet/gum/' \
+                  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+                  checksums.txt >/dev/null 2>&1 ); then
+            print_error "cosign verification of upstream checksums.txt failed"
+            return 1
+        fi
+        # Cross-check: the pinned hash MUST be the value Charm published
+        # for this exact tarball in the cosign-signed checksums.txt.
+        # Catches a desynced pin where our SHA constant lags upstream.
+        if ! grep -qE "^${_hash_pin}  ${_tarball}\$" "$_tmp/checksums.txt"; then
+            print_error "Pinned SHA256 is not present in cosign-verified checksums.txt for $_tarball"
+            print_error "  pinned: $_hash_pin"
+            print_error "  upstream values (filtered):"
+            grep " ${_tarball}\$" "$_tmp/checksums.txt" | sed 's/^/    /' >&2 || true
+            return 1
+        fi
+    fi
+
+    # Charm tarballs embed the binary one level deep:
+    # `gum_0.17.0_Linux_x86_64/gum`. Strip the leading dir so the binary
+    # lands at $_tmp/gum directly. Limit extraction to a known safe pattern.
+    if ! tar -xzf "$_tmp/$_tarball" -C "$_tmp" --strip-components=1 \
+         "gum_${GUM_VERSION}_${_arch}/gum" 2>/dev/null; then
+        # Fall back to a full extract + locate (defensive, in case Charm
+        # ever changes layout). Still safe because the tempdir is empty
+        # apart from our own downloads.
+        tar -xzf "$_tmp/$_tarball" -C "$_tmp" || return 1
+        local _found
+        _found=$(find "$_tmp" -maxdepth 3 -name gum -type f 2>/dev/null | head -1)
+        if [ -n "$_found" ] && [ "$_found" != "$_tmp/gum" ]; then
+            mv "$_found" "$_tmp/gum"
+        fi
+    fi
+    [ -f "$_tmp/gum" ] || { print_warning "gum binary not found in tarball"; return 1; }
+    chmod 0755 "$_tmp/gum"
+
+    # Hand the tempdir over to the script-wide EXIT trap and put gum on
+    # PATH for the rest of the run.
+    _GUM_EPHEMERAL_DIR="$_tmp"
+    PATH="$_tmp:$PATH"
+    export PATH
+    trap - RETURN
+    return 0
+}
+
+# NOTE: install_newt_silent() was removed in v1.6.10~rc6 — the installer
+# never installs whiptail on its own anymore. If whiptail is already
+# present on the system, it is used as a fallback TUI tier; if not, the
+# installer falls straight to plain-`read` prompts. Keeps the run
+# zero-package-mgr-trace.
+
+# Select a UTF-8 locale and export LC_ALL/LANG so whiptail/newt can render
+# multibyte glyphs (em-dash, bullet, emoji). Without this, sudo-stripped LANG
+# leaves the locale at C, and newt prints raw byte escapes like `<80><94>`.
+# Tries the well-known UTF-8 locales in order of portability; gives up
+# silently if none are present (Alpine, minimal busybox), leaving the caller
+# to handle degraded glyph rendering.
+_tui_force_utf8_locale() {
+    # If we already have a UTF-8 locale, nothing to do.
+    case "${LC_ALL:-${LANG:-}}" in
+        *.UTF-8|*.utf8|*.UTF8) return 0 ;;
+    esac
+    local cand have
+    have=$(locale -a 2>/dev/null || true)
+    for cand in C.UTF-8 C.utf8 en_US.UTF-8 en_US.utf8 en_GB.UTF-8 en_GB.utf8; do
+        if printf '%s\n' "$have" | grep -qxiF "$cand"; then
+            export LC_ALL="$cand" LANG="$cand"
+            return 0
+        fi
+    done
+    return 1
+}
+
+# Initialise the TUI: pick a mode (gum → whiptail → plain read), install gum
+# and/or whiptail when needed, export NEWT_COLORS for the whiptail tier.
+# Must be called after detect_os() so $DISTRO_ID is set.
+tui_init() {
+    GUM_AVAILABLE="no"
+    WHIPTAIL_AVAILABLE="no"
+
+    # --no-tui or BW_INSTALL_TUI=no — never use any TUI
+    if [ "$USE_TUI" = "no" ]; then
+        return 0
+    fi
+
+    # Non-interactive mode — no prompts, no TUI either
+    if [ "$INTERACTIVE_MODE" != "yes" ]; then
+        return 0
+    fi
+
+    # Stdin must be a TTY for any interactive flow to work safely.
+    # `curl … | bash` would silently fall through every default otherwise.
+    if [ ! -t 0 ]; then
+        print_error "No TTY detected on stdin (likely piped install)."
+        print_error "Interactive installation cannot proceed."
+        print_error "Either re-run from a real terminal, or use:"
+        print_error "    $0 --yes [other-flags]"
+        print_error "to drive the installer non-interactively from CLI flags/env vars."
+        exit 1
+    fi
+
+    # TERM=dumb (or unset) — neither gum nor whiptail render well; plain read
+    if [ -z "${TERM:-}" ] || [ "$TERM" = "dumb" ]; then
+        if [ "$USE_TUI" = "yes" ]; then
+            print_error "TERM is '${TERM:-unset}'; no TUI can render. Re-run without --tui."
+            exit 1
+        fi
+        return 0
+    fi
+
+    # Tier 1: gum (modern inline prompts). Either already on PATH or
+    # fetched ephemerally from the official GitHub release tarball.
+    if command -v gum >/dev/null 2>&1; then
+        GUM_AVAILABLE="yes"
+    elif install_gum_silent; then
+        GUM_AVAILABLE="yes"
+    fi
+
+    # Tier 2: whiptail (modal dialog) — only used when ALREADY present on
+    # the system. We deliberately do NOT install it: keeping the installer
+    # zero-package-mgr-trace is the safer default, and a pre-installed
+    # whiptail (common on Debian/Ubuntu cloud images) is still recognised.
+    if command -v whiptail >/dev/null 2>&1; then
+        WHIPTAIL_AVAILABLE="yes"
+    fi
+
+    if [ "$GUM_AVAILABLE" = "no" ] && [ "$WHIPTAIL_AVAILABLE" = "no" ]; then
+        if [ "$USE_TUI" = "yes" ]; then
+            print_error "Neither gum nor whiptail could be installed and --tui was requested."
+            exit 1
+        fi
+        print_warning "No TUI available; falling back to plain text prompts."
+        return 0
+    fi
+
+    # Force a UTF-8 locale — the whiptail tier needs it for em-dash/bullet
+    # glyphs, and gum's box-drawing also benefits. `sudo` strips LANG by
+    # default; without this the backtitle and dialog bodies can render as
+    # raw byte escapes (`<80><94>`).
+    if ! _tui_force_utf8_locale; then
+        # Only warn when the whiptail tier is active — gum's termenv
+        # degrades to ASCII borders silently.
+        if [ "$GUM_AVAILABLE" = "no" ] && [ "$WHIPTAIL_AVAILABLE" = "yes" ]; then
+            print_warning "No UTF-8 locale available; whiptail glyphs may render incorrectly."
+        fi
+    fi
+    # Pick cursor / section glyphs after the locale has been (possibly)
+    # upgraded so PuTTY-without-Unicode operators still get a legible TUI.
+    _tui_pick_glyphs
+
+    # BunkerWeb palette for the whiptail tier — only relevant when gum is
+    # unavailable and we fall back to newt. newt only consumes 16 ANSI
+    # colors, so brand hexes (#0b354a/#2eac68) map to their closest
+    # ANSI equivalents. gum reads hex directly per-call via --foreground etc.
+    if [ "$WHIPTAIL_AVAILABLE" = "yes" ]; then
+        export NEWT_COLORS='
+root=white,blue
+window=white,black
+shadow=,black
+border=brightblue,black
+title=brightcyan,black
+button=black,brightgreen
+actbutton=white,brightgreen
+checkbox=brightblue,black
+actcheckbox=black,brightgreen
+entry=white,black
+disentry=gray,black
+label=brightblue,black
+listbox=white,black
+actlistbox=black,brightgreen
+sellistbox=black,brightgreen
+actsellistbox=white,brightblue
+textbox=white,black
+acttextbox=black,brightgreen
+helpline=white,blue
+roottext=brightblue,white
+emptyscale=,black
+fullscale=,brightgreen
+'
+    fi
+}
+
+# Normalize a TUI tool's exit code to 0=ok, 1=cancel/no.
+# gum exits 130 on Ctrl-C/ESC, whiptail exits 1 on No and 255 on ESC.
+# Any other non-zero is treated as cancel + logged as unexpected.
+_tui_normalize_rc() {
+    case "$1" in
+        0)        return 0 ;;
+        1|130|255) return 1 ;;
+        *) print_warning "TUI helper unexpected exit code: $1"; return 1 ;;
+    esac
+}
+
+# tui_yesno TITLE PROMPT DEFAULT(yes|no)
+# Returns 0 on Yes, 1 on No or Cancel/ESC.
+tui_yesno() {
+    local title="$1" prompt="$2" default="${3:-yes}"
+    if [ "$GUM_AVAILABLE" = "yes" ]; then
+        local _gum_default _rc=0
+        [ "$default" = "no" ] && _gum_default=false || _gum_default=true
+        gum confirm "$prompt" --default="$_gum_default" \
+            --prompt.foreground "#2eac68" \
+            --affirmative "Yes" --negative "No" || _rc=$?
+        _tui_normalize_rc "$_rc"
+        return $?
+    fi
+    if [ "$WHIPTAIL_AVAILABLE" = "yes" ]; then
+        local defarg="" _rc=0
+        [ "$default" = "no" ] && defarg="--defaultno"
+        whiptail --backtitle "$TUI_BACKTITLE" --title "$title" \
+                 $defarg --yesno "$prompt" 12 70 || _rc=$?
+        _tui_normalize_rc "$_rc"
+        return $?
+    fi
+    local hint reply
+    if [ "$default" = "no" ]; then hint="[y/N]"; else hint="[Y/n]"; fi
+    while true; do
+        # Write the prompt to stderr so a (hypothetical) future caller that
+        # captures stdout via $(tui_yesno …) doesn't pick up the prompt text.
+        echo -e "${YELLOW}${prompt} ${hint}:${NC} " >&2
+        IFS= read -r reply
+        case "${reply:-}" in
+            [Yy]*) return 0 ;;
+            [Nn]*) return 1 ;;
+            "")    [ "$default" = "no" ] && return 1 || return 0 ;;
+            *)     echo "Please answer yes (y) or no (n)." >&2 ;;
+        esac
+    done
+}
+
+# tui_input TITLE PROMPT [DEFAULT]
+# Echoes the entered value to stdout. Returns 1 on Cancel.
+# Fallback path writes the prompt to stderr so callers using $(...) capture
+# the value only, not the prompt text.
+tui_input() {
+    local title="$1" prompt="$2" default="${3:-}"
+    if [ "$GUM_AVAILABLE" = "yes" ]; then
+        # Build the gum args. --value pre-fills the field; --placeholder is
+        # only useful when no default was supplied. Let gum auto-size the
+        # input to the terminal width. Header foreground inherits the
+        # terminal default so contrast holds on both dark and light themes.
+        local _gum_out _rc=0
+        local _gum_args=(--header "$prompt"
+                         --prompt "${TUI_CURSOR_GLYPH} "
+                         --prompt.foreground "#2eac68")
+        if [ -n "$default" ]; then
+            _gum_args+=(--value "$default")
+        else
+            _gum_args+=(--placeholder "Type here...")
+        fi
+        _gum_out=$(gum input "${_gum_args[@]}") || _rc=$?
+        if ! _tui_normalize_rc "$_rc"; then
+            return 1
+        fi
+        printf '%s' "$_gum_out"
+        return 0
+    fi
+    if [ "$WHIPTAIL_AVAILABLE" = "yes" ]; then
+        local _wt_out _rc=0
+        _wt_out=$(whiptail --backtitle "$TUI_BACKTITLE" --title "$title" \
+                           --inputbox "$prompt" 12 70 "$default" \
+                           3>&1 1>&2 2>&3) || _rc=$?
+        if ! _tui_normalize_rc "$_rc"; then
+            return 1
+        fi
+        printf '%s' "$_wt_out"
+        return 0
+    fi
+    local reply
+    if [ -n "$default" ]; then
+        echo -e "${YELLOW}${prompt} [${default}]:${NC} " >&2
+    else
+        echo -e "${YELLOW}${prompt}:${NC} " >&2
+    fi
+    IFS= read -r reply
+    printf '%s' "${reply:-$default}"
+}
+
+# tui_password TITLE PROMPT
+# Echoes the entered password to stdout. Returns 1 on Cancel.
+# Security notes:
+#   - gum / whiptail args appear in `ps`. NEVER pass a default password as
+#     a positional arg — we always omit it.
+#   - Keystrokes are fully hidden (no echo, no asterisks) on gum (bullets in
+#     v0.17.0) and whiptail. We do NOT use any insecure-display flag.
+#   - We disable xtrace inside the helper and restore it explicitly on every
+#     exit path so the captured value never lands in a trace stream. We
+#     deliberately do NOT use `trap … RETURN` because the bash 4 RETURN
+#     trap also fires on every nested function return — including the
+#     `_tui_normalize_rc` call below — which would re-enable xtrace BEFORE
+#     `printf '%s' "$_result"` and leak the password.
+#   - Caller hygiene: even with the safeguards above, a caller that runs with
+#     `set -x` will still see the bash trace expand `var=$(tui_password …)`
+#     and print the captured value. If you need full secrecy under xtrace,
+#     wrap the call site itself in `set +x` / `set -x`.
+tui_password() {
+    local title="$1" prompt="$2"
+    local _had_xtrace=0
+    case $- in *x*) _had_xtrace=1; set +x ;; esac
+    local _result _rc=0
+    if [ "$GUM_AVAILABLE" = "yes" ]; then
+        # gum input --password masks keystrokes with bullets, never echoes
+        # the captured value to the terminal, never passes it in argv.
+        _result=$(gum input --password \
+                            --header "$prompt" \
+                            --prompt "${TUI_CURSOR_GLYPH} " \
+                            --prompt.foreground "#2eac68") || _rc=$?
+    elif [ "$WHIPTAIL_AVAILABLE" = "yes" ]; then
+        _result=$(whiptail --backtitle "$TUI_BACKTITLE" --title "$title" \
+                           --passwordbox "$prompt" 12 70 3>&1 1>&2 2>&3) || _rc=$?
+    else
+        local reply
+        echo -e "${YELLOW}${prompt}:${NC} " >&2
+        IFS= read -r -s reply
+        echo >&2
+        _result=$reply
+        _rc=0
+    fi
+    # Inline cancel check — must NOT delegate to a function call so xtrace
+    # stays disabled across the rc evaluation.
+    case "$_rc" in
+        0)        : ;;
+        1|130|255)
+            _result=""
+            [ "$_had_xtrace" -eq 1 ] && set -x
+            return 1
+            ;;
+        *) print_warning "TUI helper unexpected exit code: $_rc"
+           _result=""
+           [ "$_had_xtrace" -eq 1 ] && set -x
+           return 1 ;;
+    esac
+    printf '%s' "$_result"
+    [ "$_had_xtrace" -eq 1 ] && set -x
+    return 0
+}
+
+# tui_menu TITLE PROMPT DEFAULT_TAG TAG1 DESC1 [TAG2 DESC2 ...]
+# Echoes the selected tag to stdout. Returns 1 on Cancel.
+# In fallback mode renders a numbered list; the legacy "1) … 2) …" UX.
+# All prompt/list output goes to stderr so $(tui_menu …) captures only the tag.
+tui_menu() {
+    local title="$1" prompt="$2" default_tag="$3"
+    shift 3
+    # Defensive guard: every menu item is a (tag, description) pair. An odd
+    # remaining arg count means a caller dropped a description, which whiptail
+    # itself would silently render with an off-by-one. Fail loud instead.
+    if [ $(( $# % 2 )) -ne 0 ]; then
+        print_error "tui_menu: odd argument count ($#) — every tag needs a description."
+        return 2
+    fi
+    # Parse the (tag, desc) pairs once so all backends share the same
+    # bookkeeping. tags and descs are positional siblings.
+    local i=1 tag desc default_idx=1 default_label="" tags=() descs=()
+    while [ $# -ge 2 ]; do
+        tag="$1"; desc="$2"; shift 2
+        tags+=("$tag"); descs+=("$desc")
+        if [ "$tag" = "$default_tag" ]; then
+            default_idx=$i
+            default_label="$desc"
+        fi
+        i=$((i + 1))
+    done
+
+    if [ "$GUM_AVAILABLE" = "yes" ]; then
+        # gum choose returns the literal label, not a tag — map it back.
+        # Build the arg vector dynamically: --selected is only valid when
+        # default_label actually matches an item, otherwise gum 0.17 prints
+        # a stray empty-string match warning.
+        local _gum_args=(
+            --header        "$prompt"
+            --cursor        "${TUI_CURSOR_GLYPH} "
+            --cursor.foreground "#2eac68"
+        )
+        if [ -n "$default_label" ]; then
+            _gum_args+=(--selected "$default_label")
+        fi
+        local _gum_out _rc=0
+        _gum_out=$(gum choose "${_gum_args[@]}" "${descs[@]}") || _rc=$?
+        if ! _tui_normalize_rc "$_rc"; then
+            return 1
+        fi
+        local _idx
+        for ((_idx=0; _idx<${#descs[@]}; _idx++)); do
+            if [ "${descs[$_idx]}" = "$_gum_out" ]; then
+                printf '%s' "${tags[$_idx]}"
+                return 0
+            fi
+        done
+        # Treat lookup miss as a hard error rather than silently returning
+        # the default — callers MUST be able to distinguish "user picked
+        # default" from "gum returned something we don't recognise".
+        print_warning "tui_menu: gum returned an unrecognised label: $_gum_out"
+        return 1
+    fi
+
+    if [ "$WHIPTAIL_AVAILABLE" = "yes" ]; then
+        local item_count=${#tags[@]}
+        # Rebuild flat (tag desc tag desc ...) array for whiptail
+        local _wt_args=() _i
+        for ((_i=0; _i<item_count; _i++)); do
+            _wt_args+=("${tags[$_i]}" "${descs[$_i]}")
+        done
+        local _wt_out _rc=0
+        _wt_out=$(whiptail --backtitle "$TUI_BACKTITLE" --title "$title" \
+                           --default-item "$default_tag" \
+                           --menu "$prompt" $((10 + item_count)) 78 "$item_count" \
+                           "${_wt_args[@]}" 3>&1 1>&2 2>&3) || _rc=$?
+        if ! _tui_normalize_rc "$_rc"; then
+            return 1
+        fi
+        printf '%s' "$_wt_out"
+        return 0
+    fi
+    {
+        echo -e "${YELLOW}${prompt}${NC}"
+        for ((i=0; i<${#tags[@]}; i++)); do
+            printf "  %d) %s\n" "$((i + 1))" "${descs[$i]}"
+        done
+    } >&2
+    local reply
+    while true; do
+        echo -e "${YELLOW}Select option [${default_idx}]:${NC} " >&2
+        IFS= read -r reply
+        reply="${reply:-$default_idx}"
+        if [[ "$reply" =~ ^[0-9]+$ ]] && [ "$reply" -ge 1 ] && [ "$reply" -le "${#tags[@]}" ]; then
+            printf '%s' "${tags[$((reply - 1))]}"
+            return 0
+        fi
+        echo "Invalid option. Please choose a number between 1 and ${#tags[@]}." >&2
+    done
+}
+
+# tui_msgbox TITLE TEXT [HEIGHT]
+# Blocking acknowledgement dialog. Height auto-sized from line count if not
+# provided, clamped to the actual terminal height (minus chrome) so long
+# content never gets truncated below the OK button. Adds --scrolltext so
+# anything that still exceeds the box scrolls instead of being cut off.
+# In fallback mode prints + waits for Enter.
+# All fallback output is on stderr so the function is safe in $(…) contexts
+# even though it returns no captured value.
+tui_msgbox() {
+    local title="$1" text="$2" height="${3:-}"
+    if [ "$GUM_AVAILABLE" = "yes" ]; then
+        # Render the title + body inside a rounded box, then wait for one
+        # keystroke. Border + title accent stay green for brand recognition,
+        # body text inherits the terminal default so contrast holds on both
+        # light and dark themes (navy #0b354a is unreadable on most dark
+        # terminals and degrades to ANSI 4 on PuTTY default).
+        local _term_w _box_w
+        _term_w=$(tput cols 2>/dev/null || echo 80)
+        _box_w=$(( _term_w > 84 ? 78 : _term_w - 6 ))
+        [ "$_box_w" -lt 40 ] && _box_w=40
+        local _bordered_title
+        _bordered_title=$(gum style --bold --foreground "#2eac68" "$title")
+        gum style \
+            --border rounded --padding "0 1" \
+            --border-foreground "#2eac68" \
+            --width "$_box_w" \
+            "$(printf '%s\n\n%s' "$_bordered_title" "$text")"
+        gum input --placeholder "Press Enter to continue" \
+                  --prompt "" >/dev/null 2>&1 || true
+        return 0
+    fi
+    if [ -z "$height" ]; then
+        local _lines _term_h _max_h
+        _lines=$(printf '%s' "$text" | awk 'END {print NR}')
+        _term_h=$(tput lines 2>/dev/null || echo 24)
+        _max_h=$(( _term_h - 2 ))
+        [ "$_max_h" -lt 10 ] && _max_h=10
+        height=$(( _lines + 7 ))
+        [ "$height" -lt 8 ]         && height=8
+        [ "$height" -gt "$_max_h" ] && height="$_max_h"
+    fi
+    if [ "$WHIPTAIL_AVAILABLE" = "yes" ]; then
+        whiptail --backtitle "$TUI_BACKTITLE" --title "$title" \
+                 --scrolltext --msgbox "$text" "$height" 78
+        return 0
+    fi
+    print_warning "$title" >&2
+    echo "$text" >&2
+    if [ "$INTERACTIVE_MODE" = "yes" ]; then
+        echo -e "${YELLOW}Press Enter to continue…${NC}" >&2
+        IFS= read -r _
+    fi
+}
+
+# tui_section TITLE [SUBTITLE]
+# - gum mode: bold green inline section marker (modern inquirer feel).
+# - whiptail mode: no-op (dialog title bar already carries the section name).
+# - plain-read mode: legacy "===" banner.
+tui_section() {
+    if [ "$GUM_AVAILABLE" = "yes" ]; then
+        printf '\n' >&2
+        gum style --bold --foreground "#2eac68" "${TUI_SECTION_GLYPH} $1" >&2
+        if [ -n "${2:-}" ]; then
+            # Subtitle text — let the terminal default control body color so
+            # navy/dark-blue does not collapse to ~1.4:1 on dark themes.
+            gum style --faint "  $2" >&2
+        fi
+        return 0
+    fi
+    [ "$WHIPTAIL_AVAILABLE" = "yes" ] && return 0
+    echo
+    echo -e "${BLUE}========================================${NC}"
+    echo -e "${BLUE}$1${NC}"
+    echo -e "${BLUE}========================================${NC}"
+    if [ -n "${2:-}" ]; then
+        echo "$2"
+    fi
+}
+
+# tui_infobox TITLE TEXT
+# Non-blocking status line.
+tui_infobox() {
+    local title="$1" text="$2"
+    if [ "$GUM_AVAILABLE" = "yes" ]; then
+        # Single-line inline status with the section-cursor styling.
+        gum style --foreground "#2eac68" "${TUI_SECTION_GLYPH} $title — $text" >&2
+        return 0
+    fi
+    if [ "$WHIPTAIL_AVAILABLE" = "yes" ]; then
+        whiptail --backtitle "$TUI_BACKTITLE" --title "$title" --infobox "$text" 8 70
+        return 0
+    fi
+    print_status "$title — $text"
+}
+# ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Modern ANSI install-step helpers (Homebrew / rustup / pnpm pattern).
+#
+# These are ADDITIVE — they do NOT replace `print_status` / `print_step` /
+# `print_warning` / `print_error`. Existing call sites keep their current
+# stdout/stderr targets so `tee log` / `2>err.log` workflows are unchanged.
+# New install-step code may use these for a sleeker, inquirer-style look:
+#
+#   ohai "Installing nginx"            # bold blue ==> prefix
+#       ok "package installed"         # green tick
+#     info "Restarting service…"       # dimmed indent
+#   warn "fallback engaged"            # yellow Warning: (stderr)
+#    err "package not found"           # red Error: (stderr)
+#
+# Colors auto-disappear when stdout is not a TTY (`./install … | tee log`)
+# and when NO_COLOR is set, matching the modern installer convention.
+# ---------------------------------------------------------------------------
+_tty_setup() {
+    if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+        _C_BLUE=$'\033[1;34m'
+        _C_GREEN=$'\033[1;32m'
+        _C_YELLOW=$'\033[1;33m'
+        _C_RED=$'\033[1;31m'
+        _C_DIM=$'\033[2m'
+        _C_RESET=$'\033[0m'
+    else
+        _C_BLUE=''
+        _C_GREEN=''
+        _C_YELLOW=''
+        _C_RED=''
+        _C_DIM=''
+        _C_RESET=''
+    fi
+}
+_tty_setup
+
+ohai() { printf '%s==>%s %s\n'      "$_C_BLUE"   "$_C_RESET" "$*"; }
+ok()   { printf '    %s✓%s %s\n'    "$_C_GREEN"  "$_C_RESET" "$*"; }
+info() { printf '    %s%s%s\n'      "$_C_DIM"    "$*"        "$_C_RESET"; }
+warn() { printf '%sWarning:%s %s\n' "$_C_YELLOW" "$_C_RESET" "$*" >&2; }
+err()  { printf '%sError:%s %s\n'   "$_C_RED"    "$_C_RESET" "$*" >&2; }
 
 set_config_kv() {
     local config_file="$1"
@@ -430,8 +1190,8 @@ detect_architecture() {
         *)
             print_warning "Architecture $SYSTEM_ARCH has not been validated with the easy install script."
             if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
-                read -p "Continue anyway? (y/N): " -r
-                if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                if ! tui_yesno "Unsupported Architecture" \
+                    "Architecture '$SYSTEM_ARCH' has not been validated. Continue anyway?" "no"; then
                     exit 1
                 fi
             fi
@@ -449,46 +1209,24 @@ ask_user_preferences() {
 
         # Ask about installation type
         if [ -z "$INSTALL_TYPE" ]; then
-            echo -e "${BLUE}========================================${NC}"
-            echo -e "${BLUE}📦 Installation Type${NC}"
-            echo -e "${BLUE}========================================${NC}"
-            echo "Choose the type of installation based on your needs:"
-            echo "  1) Full Stack (default): All-in-one installation (BunkerWeb, Scheduler, UI)."
-            echo "  2) Manager: Installs Scheduler and UI to manage remote BunkerWeb workers."
-            echo "  3) Worker: Installs only the BunkerWeb instance, to be managed remotely."
-            echo "  4) Scheduler Only: Installs only the Scheduler component."
-            echo "  5) Web UI Only: Installs only the Web UI component."
-            echo "  6) API Only: Installs only the API service component."
-            echo
-            while true; do
-                echo -e "${YELLOW}Select installation type (1-6) [1]:${NC} "
-                read -p "" -r
-                REPLY=${REPLY:-1}
-                case $REPLY in
-                    1) INSTALL_TYPE="full"; break ;;
-                    2) INSTALL_TYPE="manager"; break ;;
-                    3) INSTALL_TYPE="worker"; break ;;
-                    4) INSTALL_TYPE="scheduler"; break ;;
-                    5) INSTALL_TYPE="ui"; break ;;
-                    6) INSTALL_TYPE="api"; break ;;
-                    *) echo "Invalid option. Please choose a number between 1 and 6." ;;
-                esac
-            done
+            tui_section "📦 Installation Type" "Choose the type of installation based on your needs."
+            INSTALL_TYPE=$(tui_menu "Installation Type" \
+                "Choose the type of installation based on your needs:" \
+                "full" \
+                "full"      "Full Stack (default) — BunkerWeb + Scheduler + UI" \
+                "manager"   "Manager — Scheduler and UI to manage remote workers" \
+                "worker"    "Worker — only the BunkerWeb instance, managed remotely" \
+                "scheduler" "Scheduler only" \
+                "ui"        "Web UI only" \
+                "api"       "API service only") || { print_error "Installation cancelled."; exit 1; }
         fi
 
         if [[ "$INSTALL_TYPE" = "manager" || "$INSTALL_TYPE" = "scheduler" ]]; then
             if [ -z "$BUNKERWEB_INSTANCES_INPUT" ]; then
-                echo
-                echo -e "${BLUE}========================================${NC}"
-                echo -e "${BLUE}🔗 BunkerWeb Instances Configuration${NC}"
-                echo -e "${BLUE}========================================${NC}"
-                echo "Please provide the list of BunkerWeb instances (workers) to manage."
-                echo "Format: a space-separated list of IP addresses or hostnames."
-                echo "Example: 192.168.1.10 192.168.1.11"
-                echo "Leave empty to add workers later."
-                echo
-                echo -e "${YELLOW}Enter BunkerWeb instances (or press Enter to skip):${NC} "
-                read -p "" -r BUNKERWEB_INSTANCES_INPUT
+                tui_section "🔗 BunkerWeb Instances Configuration"
+                BUNKERWEB_INSTANCES_INPUT=$(tui_input "BunkerWeb Instances" \
+                    "Space-separated list of BunkerWeb workers (IPs or hostnames).\nExample: 192.168.1.10 192.168.1.11\nLeave empty to add workers later." \
+                    "") || BUNKERWEB_INSTANCES_INPUT=""
                 if [ -z "$BUNKERWEB_INSTANCES_INPUT" ]; then
                     print_warning "No instances configured. You can add workers later."
                     print_status "See: https://docs.bunkerweb.io/latest/advanced/#3-manage-workers"
@@ -498,249 +1236,160 @@ ask_user_preferences() {
 
         if [ "$INSTALL_TYPE" = "manager" ] && [ -z "$MANAGER_IP_INPUT" ]; then
             local detected_ip=""
-            echo
-            echo -e "${BLUE}========================================${NC}"
-            echo -e "${BLUE}🌐 Manager API Binding${NC}"
-            echo -e "${BLUE}========================================${NC}"
-            echo "The manager listens on 0.0.0.0 but only whitelists explicit local IPs for API access."
-            echo "We'll detect the best local IPv4 to whitelist, or you can provide one manually."
-            echo
+            tui_section "🌐 Manager API Binding" \
+                "The manager listens on 0.0.0.0 but only whitelists explicit local IPs."
             detected_ip=$(get_primary_ipv4)
             if [ -n "$detected_ip" ]; then
-                while true; do
-                    echo -e "${YELLOW}Whitelist detected IP $detected_ip for API access? (Y/n):${NC}"
-                    read -p "" -r
-                    case $REPLY in
-                        [Yy]*|"")
-                            MANAGER_IP_INPUT="$detected_ip"
-                            break
-                            ;;
-                        [Nn]*)
-                            echo
-                            echo -e "${BLUE}----------------------------------------${NC}"
-                            echo -e "${BLUE}✍️  Manual Manager IP Entry${NC}"
-                            echo -e "${BLUE}----------------------------------------${NC}"
-                            echo "Enter the IPv4 address you want to whitelist for manager API access."
-                            prompt_for_local_ipv4 MANAGER_IP_INPUT
-                            break
-                            ;;
-                        *)
-                            echo "Please answer yes (y) or no (n)."
-                            ;;
-                    esac
-                done
+                if tui_yesno "Manager API Binding" \
+                    "Whitelist detected IP $detected_ip for API access?" "yes"; then
+                    MANAGER_IP_INPUT="$detected_ip"
+                else
+                    tui_section "✍️  Manual Manager IP Entry"
+                    prompt_for_local_ipv4 MANAGER_IP_INPUT || {
+                        print_error "Manager IP is required."; exit 1; }
+                fi
             else
                 print_warning "Unable to detect a local IPv4 automatically."
-                echo -e "${BLUE}----------------------------------------${NC}"
-                echo -e "${BLUE}✍️  Manual Manager IP Entry${NC}"
-                echo -e "${BLUE}----------------------------------------${NC}"
-                echo "Enter the IPv4 address you want to whitelist for manager API access."
-                prompt_for_local_ipv4 MANAGER_IP_INPUT
+                tui_section "✍️  Manual Manager IP Entry"
+                prompt_for_local_ipv4 MANAGER_IP_INPUT || {
+                    print_error "Manager IP is required."; exit 1; }
             fi
         fi
 
         if [ "$INSTALL_TYPE" = "worker" ] && [ -z "$MANAGER_IP_INPUT" ]; then
-            echo
-            echo -e "${BLUE}========================================${NC}"
-            echo -e "${BLUE}🛡️  Manager API Access${NC}"
-            echo -e "${BLUE}========================================${NC}"
-            echo "Provide the IP address (or space-separated list) of the manager/scheduler that will control this worker."
-            echo "The worker API listens on 0.0.0.0, and these IPs will be whitelisted automatically."
-            echo
+            tui_section "🛡️  Manager API Access" \
+                "Provide the IP(s) of the manager/scheduler that controls this worker."
             while true; do
-                echo -e "${YELLOW}Enter manager IP address(es):${NC} "
-                read -p "" -r MANAGER_IP_INPUT
+                MANAGER_IP_INPUT=$(tui_input "Manager API Access" \
+                    "Enter manager IP address(es) (space-separated):" "") || {
+                    print_error "Manager IP is required for worker installs."; exit 1; }
                 if [ -n "$MANAGER_IP_INPUT" ]; then
                     break
-                else
-                    print_warning "This field cannot be empty for Worker installations."
                 fi
+                tui_msgbox "Manager API Access" \
+                    "This field cannot be empty for Worker installations."
             done
         fi
 
         # Ask about custom DNS resolvers for full, manager, or worker installations
         if [[ "$INSTALL_TYPE" = "full" || "$INSTALL_TYPE" = "manager" || "$INSTALL_TYPE" = "worker" ]] && [ -z "$DNS_RESOLVERS_INPUT" ]; then
-            echo
-            echo -e "${BLUE}========================================${NC}"
-            echo -e "${BLUE}🔍 DNS Resolvers Configuration${NC}"
-            echo -e "${BLUE}========================================${NC}"
-            echo "BunkerWeb needs DNS resolvers for domain resolution."
-            echo "Default: 9.9.9.9 149.112.112.112 8.8.8.8 8.8.4.4 (Quad9 and Google DNS)"
-            echo
-            while true; do
-                echo -e "${YELLOW}Use custom DNS resolvers? (y/N):${NC} "
-                read -p "" -r
-                case $REPLY in
-                    [Yy]*)
-                        echo -e "${YELLOW}Enter space-separated DNS resolver IPs:${NC} "
-                        read -p "" -r DNS_RESOLVERS_INPUT
-                        if [ -n "$DNS_RESOLVERS_INPUT" ]; then
-                            break
-                        else
-                            print_warning "DNS resolvers cannot be empty. Please enter at least one resolver."
-                        fi
-                        ;;
-                    [Nn]*|"")
-                        DNS_RESOLVERS_INPUT="9.9.9.9 149.112.112.112 8.8.8.8 8.8.4.4"
+            tui_section "🔍 DNS Resolvers Configuration" \
+                "Default: 9.9.9.9 149.112.112.112 8.8.8.8 8.8.4.4 (Quad9 and Google DNS)"
+            if tui_yesno "DNS Resolvers" "Use custom DNS resolvers?" "no"; then
+                while true; do
+                    DNS_RESOLVERS_INPUT=$(tui_input "DNS Resolvers" \
+                        "Space-separated DNS resolver IPs:" "") || DNS_RESOLVERS_INPUT=""
+                    if [ -n "$DNS_RESOLVERS_INPUT" ]; then
                         break
-                        ;;
-                    *)
-                        echo "Please answer yes (y) or no (n)."
-                        ;;
-                esac
-            done
+                    fi
+                    tui_msgbox "DNS Resolvers" \
+                        "DNS resolvers cannot be empty. Please enter at least one resolver."
+                done
+            else
+                DNS_RESOLVERS_INPUT="9.9.9.9 149.112.112.112 8.8.8.8 8.8.4.4"
+            fi
         fi
 
         # Ask about internal API HTTPS communication for full, manager, or worker installations
         if [[ "$INSTALL_TYPE" = "full" || "$INSTALL_TYPE" = "manager" || "$INSTALL_TYPE" = "worker" ]] && [ -z "$API_LISTEN_HTTPS_INPUT" ]; then
-            echo
-            echo -e "${BLUE}========================================${NC}"
-            echo -e "${BLUE}🔒 Internal API HTTPS Communication${NC}"
-            echo -e "${BLUE}========================================${NC}"
-            echo "The scheduler/manager can communicate with BunkerWeb/worker instances via HTTPS"
-            echo "for internal API communication (not the public API service)."
-            echo "Default: HTTP only (no HTTPS)"
-            echo
-            while true; do
-                echo -e "${YELLOW}Enable HTTPS for internal API communication? (y/N):${NC} "
-                read -p "" -r
-                case $REPLY in
-                    [Yy]*)
-                        API_LISTEN_HTTPS_INPUT="yes"
-                        break
-                        ;;
-                    [Nn]*|"")
-                        API_LISTEN_HTTPS_INPUT="no"
-                        break
-                        ;;
-                    *)
-                        echo "Please answer yes (y) or no (n)."
-                        ;;
-                esac
-            done
+            tui_section "🔒 Internal API HTTPS Communication" \
+                "Scheduler/manager can talk to workers over HTTPS instead of HTTP. Default: HTTP."
+            if tui_yesno "Internal API HTTPS" \
+                "Enable HTTPS for internal API communication?" "no"; then
+                API_LISTEN_HTTPS_INPUT="yes"
+            else
+                API_LISTEN_HTTPS_INPUT="no"
+            fi
         fi
 
         # Ask about setup wizard
         if [ "$INSTALL_TYPE" = "manager" ]; then
-            echo
-            echo -e "${BLUE}========================================${NC}"
-            echo -e "${BLUE}🧙 Setup Wizard Not Available${NC}"
-            echo -e "${BLUE}========================================${NC}"
             if [ "$ENABLE_WIZARD" = "yes" ]; then
-                print_warning "Setup wizard cannot be enabled for manager mode; it will be disabled."
+                tui_msgbox "Setup Wizard Not Available" \
+                    "Manager installations are not compatible with the setup wizard; it will be disabled. The UI can still be started normally."
             fi
-            echo "Manager installations are not compatible with the setup wizard."
-            echo "The UI can still be started normally without the wizard."
             ENABLE_WIZARD="no"
         elif [ -z "$ENABLE_WIZARD" ]; then
             if [ "$INSTALL_TYPE" = "worker" ] || [ "$INSTALL_TYPE" = "scheduler" ] || [ "$INSTALL_TYPE" = "api" ]; then
                 ENABLE_WIZARD="no"
             else
-                echo -e "${BLUE}========================================${NC}"
-                echo -e "${BLUE}🧙 BunkerWeb Setup Wizard${NC}"
-                echo -e "${BLUE}========================================${NC}"
-                echo "The BunkerWeb setup wizard provides a web-based interface to:"
-                echo "  • Complete initial configuration easily"
-                echo "  • Set up your first protected service"
-                echo "  • Configure SSL/TLS certificates"
-                echo "  • Access the management interface"
-                echo
-                while true; do
-                    echo -e "${YELLOW}Would you like to enable the setup wizard? (Y/n):${NC} "
-                    read -p "" -r
-                    case $REPLY in
-                        [Yy]*|"")
-                            ENABLE_WIZARD="yes"
-                            break
-                            ;;
-                        [Nn]*)
-                            ENABLE_WIZARD="no"
-                            break
-                            ;;
-                        *)
-                            echo "Please answer yes (y) or no (n)."
-                            ;;
-                    esac
-                done
+                tui_section "🧙 BunkerWeb Setup Wizard" \
+                    "Web-based interface to complete initial configuration and access management."
+                if tui_yesno "BunkerWeb Setup Wizard" \
+"The BunkerWeb setup wizard provides a web-based interface to:
+  • Complete initial configuration easily
+  • Set up your first protected service
+  • Configure SSL/TLS certificates
+  • Access the management interface
+
+Enable the setup wizard?" "yes"; then
+                    ENABLE_WIZARD="yes"
+                else
+                    ENABLE_WIZARD="no"
+                fi
             fi
         fi
 
         if [ "$INSTALL_TYPE" = "manager" ] && [ -z "$SERVICE_UI" ]; then
-            echo
-            echo -e "${BLUE}========================================${NC}"
-            echo -e "${BLUE}🖥  Manager Web UI${NC}"
-            echo -e "${BLUE}========================================${NC}"
-            echo "The setup wizard is disabled, but you can still start the Web UI service."
-            echo "Do you want the Web UI to run after installation?"
-            while true; do
-                echo -e "${YELLOW}Start the Web UI service? (Y/n):${NC} "
-                read -p "" -r
-                case $REPLY in
-                    [Nn]*)
-                        export SERVICE_UI="no"
-                        break
-                        ;;
-                    [Yy]*|"")
-                        export SERVICE_UI="yes"
-                        break
-                        ;;
-                    *)
-                        echo "Please answer yes (y) or no (n)."
-                        ;;
-                esac
-            done
+            tui_section "🖥  Manager Web UI" \
+                "Wizard is disabled in manager mode, but the Web UI service can still run."
+            if tui_yesno "Manager Web UI" \
+                "Start the Web UI service after installation?" "yes"; then
+                export SERVICE_UI="yes"
+            else
+                export SERVICE_UI="no"
+            fi
         fi
 
         # Manager-mode UI hardening: opt-in admin user creation.
         if [ "$INSTALL_TYPE" = "manager" ] && [ "${SERVICE_UI:-yes}" != "no" ] && [ -z "$UI_ADMIN_CREATE" ]; then
-            echo
-            echo -e "${BLUE}========================================${NC}"
-            echo -e "${BLUE}👤 Manager Web UI Admin User${NC}"
-            echo -e "${BLUE}========================================${NC}"
-            echo "The setup wizard is disabled in manager mode. The installer can create the first"
-            echo "admin user for you now and provision the credentials directly into /etc/bunkerweb/ui.env."
-            echo
-            echo "Note: the Web UI listens on 127.0.0.1:7000 by default — keep it behind a reverse"
-            echo "proxy or an SSH tunnel for remote access. (Local-only listening is the BunkerWeb"
-            echo "package default; the installer does not change it.)"
-            echo
-            while true; do
-                echo -e "${YELLOW}Create admin user now? (Y/n):${NC} "
-                read -p "" -r
-                case $REPLY in
-                    [Nn]*)
-                        UI_ADMIN_CREATE="no"
-                        break
-                        ;;
-                    [Yy]*|"")
-                        UI_ADMIN_CREATE="yes"
-                        break
-                        ;;
-                    *)
-                        echo "Please answer yes (y) or no (n)."
-                        ;;
-                esac
-            done
+            tui_section "👤 Manager Web UI Admin User"
+            if tui_yesno "Manager Web UI Admin User" \
+"The setup wizard is disabled in manager mode. The installer can create the first \
+admin user now and provision the credentials into /etc/bunkerweb/ui.env.
+
+Note: the Web UI listens on 127.0.0.1:7000 by default — keep it behind a reverse \
+proxy or SSH tunnel for remote access.
+
+Create admin user now?" "yes"; then
+                UI_ADMIN_CREATE="yes"
+            else
+                UI_ADMIN_CREATE="no"
+            fi
 
             if [ "$UI_ADMIN_CREATE" = "yes" ]; then
                 if [ -z "$UI_ADMIN_USERNAME_INPUT" ]; then
-                    echo -e "${YELLOW}Username [admin]:${NC} "
-                    read -p "" -r UI_ADMIN_USERNAME_INPUT
+                    UI_ADMIN_USERNAME_INPUT=$(tui_input "Web UI Admin User" \
+                        "Username:" "admin") || UI_ADMIN_USERNAME_INPUT="admin"
                     UI_ADMIN_USERNAME_INPUT=${UI_ADMIN_USERNAME_INPUT:-admin}
                 fi
 
                 if [ -z "$UI_ADMIN_PASSWORD_INPUT" ]; then
-                    echo "Password rules: 8+ chars, at least one lowercase, one uppercase, one digit, one special."
                     while true; do
-                        echo -e "${YELLOW}Password (leave empty to auto-generate):${NC} "
-                        read -p "" -r UI_ADMIN_PASSWORD_INPUT
+                        local _pw_rc
+                        UI_ADMIN_PASSWORD_INPUT=$(tui_password "Web UI Admin Password" \
+"Password rules: 8+ chars, at least one lowercase, one uppercase, one digit, one special.
+Leave empty to auto-generate.")
+                        _pw_rc=$?
+                        if [ "$_pw_rc" -ne 0 ]; then
+                            # ESC / Cancel: don't silently coerce to auto-generate.
+                            # Ask the operator what they actually want.
+                            UI_ADMIN_PASSWORD_INPUT=""
+                            if tui_yesno "Web UI Admin Password" \
+                                "Cancel password entry and auto-generate a random one instead?" "yes"; then
+                                break
+                            fi
+                            continue
+                        fi
                         if [ -z "$UI_ADMIN_PASSWORD_INPUT" ]; then
+                            # Empty intentional → auto-generate.
                             break
                         fi
                         if validate_ui_admin_password "$UI_ADMIN_PASSWORD_INPUT"; then
                             break
                         fi
-                        print_warning "Password does not meet the rules. Try again or leave empty to auto-generate."
+                        tui_msgbox "Web UI Admin Password" \
+                            "Password does not meet the rules. Try again, or leave empty to auto-generate."
                         UI_ADMIN_PASSWORD_INPUT=""
                     done
                 fi
@@ -749,62 +1398,34 @@ ask_user_preferences() {
 
         # Manager-mode UI hardening: opt-in self-signed HTTPS.
         if [ "$INSTALL_TYPE" = "manager" ] && [ "${SERVICE_UI:-yes}" != "no" ] && [ -z "$UI_SELFSIGNED_INPUT" ]; then
-            echo
-            echo -e "${BLUE}========================================${NC}"
-            echo -e "${BLUE}🔒 Manager Web UI HTTPS (self-signed)${NC}"
-            echo -e "${BLUE}========================================${NC}"
-            echo "Enable HTTPS on the local Web UI listener with a self-signed certificate?"
-            echo "This is gunicorn-native TLS — no BunkerWeb in front needed."
-            echo "  Cert: /var/lib/bunkerweb/ui-tls/cert.pem"
-            echo "  Key:  /var/lib/bunkerweb/ui-tls/key.pem"
-            echo "  CN:   \$(hostname -f)   Validity: 365 days   RSA 2048"
-            echo
-            while true; do
-                echo -e "${YELLOW}Enable self-signed HTTPS? (Y/n):${NC} "
-                read -p "" -r
-                case $REPLY in
-                    [Nn]*)
-                        UI_SELFSIGNED_INPUT="no"
-                        break
-                        ;;
-                    [Yy]*|"")
-                        UI_SELFSIGNED_INPUT="yes"
-                        break
-                        ;;
-                    *)
-                        echo "Please answer yes (y) or no (n)."
-                        ;;
-                esac
-            done
+            tui_section "🔒 Manager Web UI HTTPS (self-signed)"
+            if tui_yesno "Web UI Self-signed HTTPS" \
+"Enable HTTPS on the local Web UI listener with a self-signed certificate?
+This is gunicorn-native TLS — no BunkerWeb in front needed.
+
+  Cert: /var/lib/bunkerweb/ui-tls/cert.pem
+  Key:  /var/lib/bunkerweb/ui-tls/key.pem
+  CN:   \$(hostname -f)   Validity: 365 days   RSA 2048" "yes"; then
+                UI_SELFSIGNED_INPUT="yes"
+            else
+                UI_SELFSIGNED_INPUT="no"
+            fi
         fi
 
         # Ask about CrowdSec installation
         if [[ "$INSTALL_TYPE" != "worker" && "$INSTALL_TYPE" != "scheduler" && "$INSTALL_TYPE" != "ui" && "$INSTALL_TYPE" != "manager" && "$INSTALL_TYPE" != "api" ]]; then
             if [ -z "$CROWDSEC_INSTALL" ] || [ "$CROWDSEC_INSTALL" = "no" ]; then
-                echo
-                echo -e "${BLUE}========================================${NC}"
-                echo -e "${BLUE}🦙 CrowdSec Intrusion Prevention${NC}"
-                echo -e "${BLUE}========================================${NC}"
-                echo "CrowdSec is a community-powered, open-source intrusion prevention engine that analyzes logs in real time to detect, block and share intelligence on malicious IPs."
-                echo "It seamlessly integrates with BunkerWeb for automated threat remediation."
-                echo
-                while true; do
-                    echo -e "${YELLOW}Would you like to automatically install and configure CrowdSec? (Y/n):${NC} "
-                    read -p "" -r
-                    case $REPLY in
-                        [Yy]*|"")
-                            CROWDSEC_INSTALL="yes"
-                            break
-                            ;;
-                        [Nn]*)
-                            CROWDSEC_INSTALL="no"
-                            break
-                            ;;
-                        *)
-                            echo "Please answer yes (y) or no (n)."
-                            ;;
-                    esac
-                done
+                tui_section "🦙 CrowdSec Intrusion Prevention"
+                if tui_yesno "CrowdSec" \
+"CrowdSec is a community-powered, open-source intrusion prevention engine that analyzes \
+logs in real time to detect, block, and share intelligence on malicious IPs. It \
+integrates with BunkerWeb for automated threat remediation.
+
+Automatically install and configure CrowdSec?" "yes"; then
+                    CROWDSEC_INSTALL="yes"
+                else
+                    CROWDSEC_INSTALL="no"
+                fi
             fi
         else
             # CrowdSec not applicable for manager, worker, scheduler-only, ui-only, or api-only installations
@@ -813,23 +1434,17 @@ ask_user_preferences() {
 
         # Ask about API service enablement (not applicable for worker, scheduler-only, ui-only, or api-only)
         if [[ "$INSTALL_TYPE" != "worker" && "$INSTALL_TYPE" != "scheduler" && "$INSTALL_TYPE" != "ui" && "$INSTALL_TYPE" != "api" ]] && [ -z "$SERVICE_API" ]; then
-            echo
-            echo -e "${BLUE}========================================${NC}"
-            echo -e "${BLUE}🧩 BunkerWeb API Service${NC}"
-            echo -e "${BLUE}========================================${NC}"
-            echo "The BunkerWeb API provides a programmatic interface (FastAPI) to manage instances,"
-            echo "perform actions (reload/stop), and integrate with external systems."
-            echo "It is optional and disabled by default on Linux installations."
-            echo
-            while true; do
-                echo -e "${YELLOW}Enable the API service? (y/N):${NC} "
-                read -p "" -r
-                case $REPLY in
-                    [Yy]*) SERVICE_API=yes; break ;;
-                    ""|[Nn]*) SERVICE_API=no; break ;;
-                    *) echo "Please answer yes (y) or no (n)." ;;
-                esac
-            done
+            tui_section "🧩 BunkerWeb API Service"
+            if tui_yesno "BunkerWeb API Service" \
+"The BunkerWeb API provides a programmatic interface (FastAPI) to manage instances, \
+perform actions (reload/stop), and integrate with external systems. Optional, \
+disabled by default on Linux installations.
+
+Enable the API service?" "no"; then
+                SERVICE_API=yes
+            else
+                SERVICE_API=no
+            fi
         elif [[ "$INSTALL_TYPE" = "worker" || "$INSTALL_TYPE" = "scheduler" || "$INSTALL_TYPE" = "ui" || "$INSTALL_TYPE" = "api" ]]; then
             # API service not applicable for these installation types
             SERVICE_API=no
@@ -837,135 +1452,72 @@ ask_user_preferences() {
 
         # Ask about AppSec installation if CrowdSec is chosen
         if [ "$CROWDSEC_INSTALL" = "yes" ]; then
-            echo
-            echo -e "${BLUE}========================================${NC}"
-            echo -e "${BLUE}🛡️ CrowdSec Application Security (AppSec)${NC}"
-            echo -e "${BLUE}========================================${NC}"
-            echo "CrowdSec Application Security Component (AppSec) adds advanced application security, turning CrowdSec into a full WAF."
-            echo "It's optional, installs alongside CrowdSec, and integrates seamlessly with the engine."
-            echo
-            while true; do
-                echo -e "${YELLOW}Would you like to install and configure the CrowdSec AppSec Component? (Y/n):${NC} "
-                read -p "" -r
-                case $REPLY in
-                    [Yy]*|"")
-                        CROWDSEC_APPSEC_INSTALL="yes"
-                        break
-                        ;;
-                    [Nn]*)
-                        CROWDSEC_APPSEC_INSTALL="no"
-                        break
-                        ;;
-                    *)
-                        echo "Please answer yes (y) or no (n)."
-                        ;;
-                esac
-            done
+            tui_section "🛡️ CrowdSec Application Security (AppSec)"
+            if tui_yesno "CrowdSec AppSec" \
+"The CrowdSec Application Security Component (AppSec) adds advanced application \
+security, turning CrowdSec into a full WAF. Optional, installs alongside CrowdSec, \
+and integrates seamlessly with the engine.
+
+Install and configure the AppSec Component?" "yes"; then
+                CROWDSEC_APPSEC_INSTALL="yes"
+            else
+                CROWDSEC_APPSEC_INSTALL="no"
+            fi
         fi
 
         # Ask about Redis configuration
         if [[ "$INSTALL_TYPE" = "full" || "$INSTALL_TYPE" = "manager" || -z "$INSTALL_TYPE" ]]; then
             if [ -z "$REDIS_INSTALL" ] || [ "$REDIS_INSTALL" = "no" ]; then
-                echo
-                echo -e "${BLUE}========================================${NC}"
-                echo -e "${BLUE}🧠 Redis (HA persistence + worker sync)${NC}"
-                echo -e "${BLUE}========================================${NC}"
-                echo "Redis/Valkey is what makes BunkerWeb production-ready:"
-                echo "  • Persists metrics and bans across restarts (otherwise kept in memory only)"
-                echo "  • Synchronises bans/reports between workers in HA setups"
-                echo "  • Stores UI session data so logged-in users survive a UI restart"
-                echo "Without Redis this state is lost on restart and not shared between BunkerWeb instances."
-                echo "For HA, you can also use Redis Sentinel for automatic failover."
-                echo "You can install Redis locally or point to an existing Redis server."
-                echo
-                while true; do
-                    echo -e "${YELLOW}Enable Redis integration? (y/N):${NC} "
-                    read -p "" -r
-                    case $REPLY in
-                        [Yy]*)
-                            REDIS_INSTALL="yes"
-                            break
-                            ;;
-                        [Nn]*|"")
-                            REDIS_INSTALL="no"
-                            break
-                            ;;
-                        *)
-                            echo "Please answer yes (y) or no (n)."
-                            ;;
-                    esac
-                done
+                tui_section "🧠 Redis (HA persistence + worker sync)"
+                if tui_yesno "Redis Integration" \
+"Redis/Valkey makes BunkerWeb production-ready:
+  • Persists metrics and bans across restarts
+  • Synchronises bans/reports between workers in HA setups
+  • Stores UI session data so users survive a UI restart
+
+Without Redis this state is lost on restart and not shared between instances.
+For HA, Redis Sentinel can also be used for automatic failover.
+You can install Redis locally or point to an existing Redis server.
+
+Enable Redis integration?" "no"; then
+                    REDIS_INSTALL="yes"
+                else
+                    REDIS_INSTALL="no"
+                fi
             fi
 
             if [ "$REDIS_INSTALL" = "yes" ]; then
-                echo
-                echo -e "${BLUE}----------------------------------------${NC}"
-                echo -e "${BLUE}🗄️  Redis Instance${NC}"
-                echo -e "${BLUE}----------------------------------------${NC}"
-                while true; do
-                    echo -e "${YELLOW}Install Redis locally on this host? (Y/n):${NC} "
-                    read -p "" -r
-                    case $REPLY in
-                        [Nn]*)
-                            REDIS_INSTALL="no"
-                            break
-                            ;;
-                        [Yy]*|"")
-                            REDIS_INSTALL="yes"
-                            break
-                            ;;
-                        *)
-                            echo "Please answer yes (y) or no (n)."
-                            ;;
-                    esac
-                done
+                tui_section "🗄️  Redis Instance"
+                if tui_yesno "Redis Instance" \
+                    "Install Redis locally on this host?\n(Choose No to connect to an existing Redis server.)" "yes"; then
+                    REDIS_INSTALL="yes"
+                else
+                    REDIS_INSTALL="no"
+                fi
 
                 # When installing locally, let the user pick redis vs valkey.
                 # Both are wire-compatible — BunkerWeb's USE_REDIS path works with either.
                 if [ "$REDIS_INSTALL" = "yes" ] && [ -z "$REDIS_FLAVOR" ]; then
-                    echo
-                    echo -e "${BLUE}----------------------------------------${NC}"
-                    echo -e "${BLUE}🔀 Server: Redis or Valkey${NC}"
-                    echo -e "${BLUE}----------------------------------------${NC}"
-                    echo "Both speak the same wire protocol — BunkerWeb works with either."
-                    echo "  1. redis  (widest distro coverage; default)"
-                    echo "  2. valkey (open-source fork under the Linux Foundation)"
-                    echo "If the chosen package is missing from your distro repos, the installer"
-                    echo "will warn and fall back to the other one."
-                    echo
-                    while true; do
-                        echo -e "${YELLOW}Choice [1]:${NC} "
-                        read -p "" -r
-                        case $REPLY in
-                            ""|"1"|"redis"|"Redis")
-                                REDIS_FLAVOR="redis"
-                                break
-                                ;;
-                            "2"|"valkey"|"Valkey")
-                                REDIS_FLAVOR="valkey"
-                                break
-                                ;;
-                            *)
-                                echo "Please answer 1 or 2."
-                                ;;
-                        esac
-                    done
+                    tui_section "🔀 Server: Redis or Valkey"
+                    REDIS_FLAVOR=$(tui_menu "Redis or Valkey" \
+"Both speak the same wire protocol — BunkerWeb works with either.
+If the chosen package is missing from your distro repos, the installer \
+will warn and fall back to the other one." \
+                        "redis" \
+                        "redis"  "redis  (widest distro coverage; default)" \
+                        "valkey" "valkey (open-source fork under the Linux Foundation)") || REDIS_FLAVOR="redis"
                 fi
 
                 # Manager mode: ask which interface Redis should bind to so workers can reach it.
                 # Full stack: Redis stays on 127.0.0.1 — no prompt.
                 if [ "$REDIS_INSTALL" = "yes" ] && [ "$INSTALL_TYPE" = "manager" ] && [ -z "$REDIS_BIND_INPUT" ]; then
-                    echo
-                    echo -e "${BLUE}----------------------------------------${NC}"
-                    echo -e "${BLUE}🌐 Redis Bind Address${NC}"
-                    echo -e "${BLUE}----------------------------------------${NC}"
-                    echo "Workers connect to this Redis from the network."
-                    echo "  • 0.0.0.0       — accept connections on every interface (default for HA, requires firewall + password)"
-                    echo "  • 10.x.y.z      — pin Redis to a specific private interface (recommended for VPC/LAN setups)"
-                    echo "  • 127.0.0.1     — local only; workers will NOT be able to reach it"
-                    echo
-                    echo -e "${YELLOW}Bind address [0.0.0.0]:${NC} "
-                    read -p "" -r REDIS_BIND_INPUT
+                    tui_section "🌐 Redis Bind Address"
+                    REDIS_BIND_INPUT=$(tui_input "Redis Bind Address" \
+"Workers connect to this Redis from the network.
+  • 0.0.0.0     — accept on every interface (HA default; needs firewall + password)
+  • 10.x.y.z    — pin to a specific private interface (recommended for VPC/LAN)
+  • 127.0.0.1   — local only; workers will NOT reach it" \
+                        "0.0.0.0") || REDIS_BIND_INPUT="0.0.0.0"
                     REDIS_BIND_INPUT=${REDIS_BIND_INPUT:-0.0.0.0}
 
                     if [ "$REDIS_BIND_INPUT" = "0.0.0.0" ]; then
@@ -974,23 +1526,12 @@ ask_user_preferences() {
                     fi
 
                     if [ "$REDIS_BIND_INPUT" != "127.0.0.1" ] && [ -z "$REDIS_PASSWORD_INPUT" ] && [ "$REDIS_AUTOPASS" = "yes" ]; then
-                        while true; do
-                            echo -e "${YELLOW}Generate a random password and set REQUIREPASS automatically? (Y/n):${NC} "
-                            read -p "" -r
-                            case $REPLY in
-                                [Nn]*)
-                                    REDIS_AUTOPASS="no"
-                                    break
-                                    ;;
-                                [Yy]*|"")
-                                    REDIS_AUTOPASS="yes"
-                                    break
-                                    ;;
-                                *)
-                                    echo "Please answer yes (y) or no (n)."
-                                    ;;
-                            esac
-                        done
+                        if tui_yesno "Redis Password" \
+                            "Generate a random password and set REQUIREPASS automatically?" "yes"; then
+                            REDIS_AUTOPASS="yes"
+                        else
+                            REDIS_AUTOPASS="no"
+                        fi
                     fi
                 fi
 
@@ -999,108 +1540,90 @@ ask_user_preferences() {
                 # cleanly under pressure while permanent bans and unexpiring keys are preserved
                 # (default Redis policy = noeviction, which rejects writes when full).
                 if [ "$REDIS_INSTALL" = "yes" ] && [ -z "$REDIS_MAXMEMORY_MB" ]; then
-                    echo
-                    echo -e "${BLUE}----------------------------------------${NC}"
-                    echo -e "${BLUE}🧠 ${_flavor_label:-Redis/Valkey} Memory Cap${NC}"
-                    echo -e "${BLUE}----------------------------------------${NC}"
-                    echo "Without a cap, ${_flavor_label:-Redis/Valkey} grows until the kernel OOM-kills it."
-                    echo "The installer will apply maxmemory-policy=volatile-lru (recommended for"
-                    echo "the WAF cache pattern — evicts the least-recently-used keys with TTL first,"
-                    echo "preserving permanent bans and protecting recently active sessions)."
-                    echo
-                    echo "Pick a maximum memory size:"
-                    echo "  1. 128 MB    — small/dev VMs (≤ 2 GB RAM)"
-                    echo "  2. 256 MB    — recommended for most installs (4–8 GB RAM)"
-                    echo "  3. 512 MB    — high-traffic / dedicated nodes (8 GB+ RAM)"
-                    echo "  4. Custom    — enter your own value in MB"
-                    echo "  5. Unlimited — keep distro defaults (NOT recommended)"
-                    echo
-                    while true; do
-                        echo -e "${YELLOW}Choice [2]:${NC} "
-                        read -p "" -r
-                        case ${REPLY:-2} in
-                            1) REDIS_MAXMEMORY_MB="128"; break ;;
-                            2) REDIS_MAXMEMORY_MB="256"; break ;;
-                            3) REDIS_MAXMEMORY_MB="512"; break ;;
-                            4)
-                                while true; do
-                                    echo -e "${YELLOW}Memory cap in MB (e.g. 1024):${NC} "
-                                    read -p "" -r _custom_mb
-                                    if [[ "$_custom_mb" =~ ^[1-9][0-9]*$ ]]; then
-                                        REDIS_MAXMEMORY_MB="$_custom_mb"
-                                        break
-                                    fi
-                                    echo "Please enter a positive integer (MB)."
-                                done
-                                break
-                                ;;
-                            5)
-                                REDIS_MAXMEMORY_MB="0"
-                                print_warning "Skipping memory cap — ${_flavor_label:-Redis/Valkey} may consume all system RAM under load."
-                                break
-                                ;;
-                            *)
-                                echo "Please answer 1, 2, 3, 4 or 5."
-                                ;;
-                        esac
-                    done
+                    # Derive a human-readable flavor label from the previously
+                    # chosen REDIS_FLAVOR. _flavor_label was previously
+                    # referenced before any caller set it and always rendered
+                    # the literal "Redis/Valkey" fallback.
+                    local _flavor_label
+                    case "${REDIS_FLAVOR:-redis}" in
+                        valkey) _flavor_label="Valkey" ;;
+                        redis|*) _flavor_label="Redis" ;;
+                    esac
+                    tui_section "🧠 ${_flavor_label} Memory Cap"
+                    local _mem_choice
+                    _mem_choice=$(tui_menu "${_flavor_label} Memory Cap" \
+"Without a cap, ${_flavor_label} grows until the kernel OOM-kills it.
+The installer will apply maxmemory-policy=volatile-lru — evicts the least-recently-used \
+keys with TTL first, preserving permanent bans and active sessions." \
+                        "256" \
+                        "128"        "128 MB    — small/dev VMs (≤ 2 GB RAM)" \
+                        "256"        "256 MB    — recommended for most installs (4–8 GB)" \
+                        "512"        "512 MB    — high-traffic / dedicated nodes (8 GB+)" \
+                        "custom"     "Custom    — enter your own value in MB" \
+                        "unlimited"  "Unlimited — keep distro defaults (NOT recommended)") \
+                        || _mem_choice="256"
+                    case "$_mem_choice" in
+                        128|256|512) REDIS_MAXMEMORY_MB="$_mem_choice" ;;
+                        custom)
+                            while true; do
+                                local _custom_mb
+                                _custom_mb=$(tui_input "${_flavor_label} Memory Cap" \
+                                    "Memory cap in MB (e.g. 1024):" "1024") || _custom_mb=""
+                                if [[ "$_custom_mb" =~ ^[1-9][0-9]*$ ]]; then
+                                    REDIS_MAXMEMORY_MB="$_custom_mb"
+                                    break
+                                fi
+                                tui_msgbox "${_flavor_label} Memory Cap" \
+                                    "Please enter a positive integer (MB)."
+                            done
+                            ;;
+                        unlimited)
+                            REDIS_MAXMEMORY_MB="0"
+                            print_warning "Skipping memory cap — ${_flavor_label} may consume all system RAM under load."
+                            ;;
+                    esac
                 fi
 
                 if [ "$REDIS_INSTALL" = "no" ]; then
-                    echo
-                    echo -e "${BLUE}----------------------------------------${NC}"
-                    echo -e "${BLUE}✍️  Existing Redis Configuration${NC}"
-                    echo -e "${BLUE}----------------------------------------${NC}"
-                    echo "Provide connection details for your existing Redis server."
-                    echo
-                    echo -e "${YELLOW}Redis host [127.0.0.1]:${NC} "
-                    read -p "" -r REDIS_HOST_INPUT
+                    tui_section "✍️  Existing Redis Configuration" \
+                        "Provide connection details for your existing Redis server."
+                    REDIS_HOST_INPUT=$(tui_input "Existing Redis — Host" "Redis host:" "127.0.0.1") || REDIS_HOST_INPUT=""
                     REDIS_HOST_INPUT=${REDIS_HOST_INPUT:-127.0.0.1}
-                    echo -e "${YELLOW}Redis port [6379]:${NC} "
-                    read -p "" -r REDIS_PORT_INPUT
+                    REDIS_PORT_INPUT=$(tui_input "Existing Redis — Port" "Redis port:" "6379") || REDIS_PORT_INPUT=""
                     REDIS_PORT_INPUT=${REDIS_PORT_INPUT:-6379}
-                    echo -e "${YELLOW}Redis database [0]:${NC} "
-                    read -p "" -r REDIS_DATABASE_INPUT
+                    REDIS_DATABASE_INPUT=$(tui_input "Existing Redis — Database" "Redis database number:" "0") || REDIS_DATABASE_INPUT=""
                     REDIS_DATABASE_INPUT=${REDIS_DATABASE_INPUT:-0}
-                    echo -e "${YELLOW}Redis username (optional):${NC} "
-                    read -p "" -r REDIS_USERNAME_INPUT
-                    echo -e "${YELLOW}Redis password (optional):${NC} "
-                    read -p "" -r REDIS_PASSWORD_INPUT
+                    REDIS_USERNAME_INPUT=$(tui_input "Existing Redis — Username" "Redis username (optional):" "") || REDIS_USERNAME_INPUT=""
+                    # Existing-Redis password: distinguish ESC/Cancel from "no
+                    # password" so an accidental cancel doesn't silently
+                    # produce an empty REQUIREPASS the user thinks was typed.
                     while true; do
-                        echo -e "${YELLOW}Use SSL/TLS for Redis connection? (y/N):${NC} "
-                        read -p "" -r
-                        case $REPLY in
-                            [Yy]*)
-                                REDIS_SSL_INPUT="yes"
+                        local _redis_pw_rc
+                        REDIS_PASSWORD_INPUT=$(tui_password "Existing Redis — Password" \
+                            "Redis password (leave empty if the server requires none):")
+                        _redis_pw_rc=$?
+                        if [ "$_redis_pw_rc" -ne 0 ]; then
+                            REDIS_PASSWORD_INPUT=""
+                            if tui_yesno "Existing Redis — Password" \
+                                "Connect to the Redis server WITHOUT a password?" "no"; then
                                 break
-                                ;;
-                            [Nn]*|"")
-                                REDIS_SSL_INPUT="no"
-                                break
-                                ;;
-                            *)
-                                echo "Please answer yes (y) or no (n)."
-                                ;;
-                        esac
+                            fi
+                            continue
+                        fi
+                        break
                     done
+                    if tui_yesno "Existing Redis — SSL" "Use SSL/TLS for Redis connection?" "no"; then
+                        REDIS_SSL_INPUT="yes"
+                    else
+                        REDIS_SSL_INPUT="no"
+                    fi
                     if [ "$REDIS_SSL_INPUT" = "yes" ]; then
-                        while true; do
-                            echo -e "${YELLOW}Verify Redis SSL certificate? (Y/n):${NC} "
-                            read -p "" -r
-                            case $REPLY in
-                                [Nn]*)
-                                    REDIS_SSL_VERIFY_INPUT="no"
-                                    break
-                                    ;;
-                                [Yy]*|"")
-                                    REDIS_SSL_VERIFY_INPUT="yes"
-                                    break
-                                    ;;
-                                *)
-                                    echo "Please answer yes (y) or no (n)."
-                                    ;;
-                            esac
-                        done
+                        if tui_yesno "Existing Redis — SSL Verify" \
+                            "Verify Redis SSL certificate?" "yes"; then
+                            REDIS_SSL_VERIFY_INPUT="yes"
+                        else
+                            REDIS_SSL_VERIFY_INPUT="no"
+                        fi
                     fi
                 fi
             fi
@@ -1112,39 +1635,16 @@ ask_user_preferences() {
         # Database auto-install (full + manager only)
         if [[ "$INSTALL_TYPE" = "full" || "$INSTALL_TYPE" = "manager" || -z "$INSTALL_TYPE" ]]; then
             if [ -z "$DB_INSTALL" ]; then
-                echo
-                echo -e "${BLUE}========================================${NC}"
-                echo -e "${BLUE}🗄️  Database${NC}"
-                echo -e "${BLUE}========================================${NC}"
-                echo "BunkerWeb stores configuration, services and jobs in a database."
-                echo "Without a choice it falls back to SQLite — safe for single-node trials,"
-                echo "not recommended for HA or any setup with more than one BunkerWeb instance."
-                echo
-                echo "  1. MariaDB (recommended)"
-                echo "  2. PostgreSQL"
-                echo "  3. Skip (keep SQLite, or configure DATABASE_URI manually later)"
-                echo
-                while true; do
-                    echo -e "${YELLOW}Database choice [1]:${NC} "
-                    read -p "" -r
-                    case $REPLY in
-                        ""|"1"|"mariadb"|"MariaDB")
-                            DB_INSTALL="mariadb"
-                            break
-                            ;;
-                        "2"|"postgresql"|"postgres"|"PostgreSQL")
-                            DB_INSTALL="postgresql"
-                            break
-                            ;;
-                        "3"|"skip"|"none"|"sqlite"|"SQLite")
-                            DB_INSTALL="none"
-                            break
-                            ;;
-                        *)
-                            echo "Please answer 1, 2 or 3."
-                            ;;
-                    esac
-                done
+                tui_section "🗄️  Database"
+                DB_INSTALL=$(tui_menu "Database" \
+"BunkerWeb stores configuration, services and jobs in a database.
+SQLite is safe for single-node trials but not recommended for HA \
+or any setup with more than one BunkerWeb instance." \
+                    "mariadb" \
+                    "mariadb"    "MariaDB (recommended)" \
+                    "postgresql" "PostgreSQL" \
+                    "none"       "Skip (keep SQLite or set DATABASE_URI manually later)") \
+                    || DB_INSTALL="mariadb"
             fi
 
             if [ "$DB_INSTALL" = "mariadb" ] || [ "$DB_INSTALL" = "postgresql" ]; then
@@ -1160,166 +1660,257 @@ ask_user_preferences() {
             fi
 
             if [ "$DB_INSTALL" = "mariadb" ] || [ "$DB_INSTALL" = "postgresql" ]; then
-                echo
-                echo -e "${BLUE}----------------------------------------${NC}"
-                echo -e "${BLUE}✍️  Database Configuration${NC}"
-                echo -e "${BLUE}----------------------------------------${NC}"
-                echo -e "${YELLOW}Database name [${DB_NAME_INPUT}]:${NC} "
-                read -p "" -r _db_answer
+                local _db_answer
+                tui_section "✍️  Database Configuration"
+                _db_answer=$(tui_input "Database — Name" "Database name:" "$DB_NAME_INPUT") || _db_answer=""
                 DB_NAME_INPUT=${_db_answer:-$DB_NAME_INPUT}
-                echo -e "${YELLOW}Database user [${DB_USER_INPUT}]:${NC} "
-                read -p "" -r _db_answer
+                _db_answer=$(tui_input "Database — User" "Database user:" "$DB_USER_INPUT") || _db_answer=""
                 DB_USER_INPUT=${_db_answer:-$DB_USER_INPUT}
                 if [ -z "$DB_PASSWORD_INPUT" ]; then
-                    while true; do
-                        echo -e "${YELLOW}Generate a random database password? (Y/n):${NC} "
-                        read -p "" -r
-                        case $REPLY in
-                            [Yy]*|"")
-                                DB_PASSWORD_INPUT=""
+                    if tui_yesno "Database — Password" \
+                        "Generate a random database password automatically?" "yes"; then
+                        DB_PASSWORD_INPUT=""
+                    else
+                        # Use a real passwordbox so the value never echoes to
+                        # the terminal, never lands in shell history and is not
+                        # visible in ps output.
+                        while true; do
+                            DB_PASSWORD_INPUT=$(tui_password "Database — Password" \
+                                "Database password (avoid quotes and backslashes):") || DB_PASSWORD_INPUT=""
+                            if [ -n "$DB_PASSWORD_INPUT" ]; then
                                 break
-                                ;;
-                            [Nn]*)
-                                echo -e "${YELLOW}Database password (avoid quotes/backslashes):${NC} "
-                                read -p "" -r DB_PASSWORD_INPUT
-                                if [ -z "$DB_PASSWORD_INPUT" ]; then
-                                    echo "Empty password is not allowed."
-                                    continue
-                                fi
-                                break
-                                ;;
-                            *)
-                                echo "Please answer yes (y) or no (n)."
-                                ;;
-                        esac
-                    done
+                            fi
+                            tui_msgbox "Database — Password" "Empty password is not allowed."
+                        done
+                    fi
                 fi
             fi
         else
             DB_INSTALL="none"
         fi
 
-        echo
-        print_status "Configuration summary:"
-        echo "  🛡 BunkerWeb version: $BUNKERWEB_VERSION"
-        case "$INSTALL_TYPE" in
-            "full"|"") echo "  📦 Installation type: Full Stack" ;;
-            "manager") echo "  📦 Installation type: Manager" ;;
-            "worker") echo "  📦 Installation type: Worker" ;;
-            "scheduler") echo "  📦 Installation type: Scheduler Only" ;;
-            "ui") echo "  📦 Installation type: Web UI Only" ;;
-            "api") echo "  📦 Installation type: API Only" ;;
-        esac
-        if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
-            echo "  🔗 BunkerWeb instances: $BUNKERWEB_INSTANCES_INPUT"
-        fi
-        if [ -n "$MANAGER_IP_INPUT" ]; then
-            echo "  📡 Manager API whitelist: $MANAGER_IP_INPUT"
-        fi
-        if [ -n "$DNS_RESOLVERS_INPUT" ]; then
-            echo "  🔍 DNS resolvers: $DNS_RESOLVERS_INPUT"
-        fi
-        if [ -n "$API_LISTEN_HTTPS_INPUT" ] && [ "$API_LISTEN_HTTPS_INPUT" = "yes" ]; then
-            echo "  🔒 Internal API HTTPS: Enabled"
-        fi
-        if [ "$INSTALL_TYPE" = "manager" ]; then
-            echo "  🖥 Web UI service: $([ "${SERVICE_UI:-yes}" = "no" ] && echo "Disabled" || echo "Enabled")"
-            echo "  🧙 Setup wizard: Disabled (not supported in manager mode)"
+        # Build the configuration summary once into a string and route it
+        # through the active TUI tier:
+        #   - gum:      gum style rounded panel (or gum pager if it overflows)
+        #   - whiptail: tui_msgbox (auto-height)
+        #   - plain:    print to stdout, preserves terminal scrollback
+        local _summary
+        _summary=$(_build_configuration_summary)
+        if [ "$GUM_AVAILABLE" = "yes" ]; then
+            _present_summary_gum "$_summary"
+        elif [ "$WHIPTAIL_AVAILABLE" = "yes" ]; then
+            tui_msgbox "Configuration Summary" "$_summary"
         else
-            echo "  🧙 Setup wizard: $([ "$ENABLE_WIZARD" = "yes" ] && echo "Enabled" || echo "Disabled")"
+            echo
+            print_status "Configuration summary:"
+            echo "$_summary"
+            echo
         fi
-        if [[ "$INSTALL_TYPE" = "worker" || "$INSTALL_TYPE" = "scheduler" || "$INSTALL_TYPE" = "ui" ]]; then
-            echo "  🔌 API service: Not available for this mode"
-        elif [ "${SERVICE_API:-no}" = "yes" ]; then
-            echo "  🔌 API service: Enabled"
-        else
-            echo "  🔌 API service: Disabled"
-        fi
-        echo "  🖥 Operating system: $DISTRO_ID $DISTRO_VERSION"
-        echo "  ⚙️ Architecture: ${SYSTEM_ARCH:-unknown}"
-        echo "  🟢 NGINX version: $NGINX_VERSION"
-        if [ "$INSTALL_TYPE" = "manager" ] || [ "$INSTALL_TYPE" = "worker" ] || [ "$INSTALL_TYPE" = "api" ]; then
-            echo "  🦙 CrowdSec: Not available for this mode"
-        else
-            if [ "$CROWDSEC_INSTALL" = "yes" ]; then
-                if [ "$CROWDSEC_APPSEC_INSTALL" = "yes" ]; then
-                    echo "  🦙 CrowdSec: Will be installed (with AppSec Component)"
-                else
-                    echo "  🦙 CrowdSec: Will be installed (without AppSec Component)"
-                fi
-            else
-                echo "  🦙 CrowdSec: Not installed"
-            fi
-        fi
-        if [[ "$INSTALL_TYPE" != "full" && "$INSTALL_TYPE" != "manager" && -n "$INSTALL_TYPE" ]]; then
-            echo "  🧠 Redis: Not available for this mode"
-        else
-            if [ "$REDIS_INSTALL" = "yes" ]; then
-                _flavor_label="${REDIS_FLAVOR:-redis}"
-                if [ "$INSTALL_TYPE" = "manager" ]; then
-                    echo "  🧠 ${_flavor_label}: Will be installed locally, bind ${REDIS_BIND_INPUT:-0.0.0.0}"
-                else
-                    echo "  🧠 ${_flavor_label}: Will be installed and configured locally"
-                fi
-                if [ "$REDIS_AUTOPASS" = "yes" ] && [ "${REDIS_BIND_INPUT:-127.0.0.1}" != "127.0.0.1" ]; then
-                    echo "  🔑 Redis password: Auto-generated (REQUIREPASS)"
-                fi
-                if [ -n "$REDIS_MAXMEMORY_MB" ]; then
-                    if [ "$REDIS_MAXMEMORY_MB" = "0" ]; then
-                        echo "  🧠 Memory cap: Unlimited (distro default — not recommended)"
-                    else
-                        echo "  🧠 Memory cap: ${REDIS_MAXMEMORY_MB} MB (policy: ${REDIS_MAXMEMORY_POLICY:-volatile-lru})"
-                    fi
-                fi
-            elif [ -n "$REDIS_HOST_INPUT" ]; then
-                echo "  🧠 Redis: Will use existing server at $REDIS_HOST_INPUT:${REDIS_PORT_INPUT:-6379}"
-            else
-                echo "  🧠 Redis: Not installed (metrics + bans will be in-memory only, lost on restart)"
-            fi
-        fi
-        if [[ "$INSTALL_TYPE" != "full" && "$INSTALL_TYPE" != "manager" && -n "$INSTALL_TYPE" ]]; then
-            : # DB auto-install only relevant for full/manager
-        else
-            case "$DB_INSTALL" in
-                "mariadb")
-                    echo "  🗄️  Database: MariaDB (auto-installed locally, db=${DB_NAME_INPUT}, user=${DB_USER_INPUT})"
-                    ;;
-                "postgresql")
-                    echo "  🗄️  Database: PostgreSQL (auto-installed locally, db=${DB_NAME_INPUT}, user=${DB_USER_INPUT})"
-                    ;;
-                ""|"none")
-                    echo "  🗄️  Database: SQLite (default — set DATABASE_URI later for production)"
-                    ;;
-            esac
-        fi
-        if [ "$INSTALL_TYPE" = "manager" ] && [ "${SERVICE_UI:-yes}" != "no" ]; then
-            if [ "$UI_ADMIN_CREATE" = "yes" ]; then
-                echo "  👤 UI admin user: Will be created (${UI_ADMIN_USERNAME_INPUT:-admin})"
-            fi
-            if [ "$UI_SELFSIGNED_INPUT" = "yes" ]; then
-                echo "  🔒 UI HTTPS: Self-signed certificate will be generated"
-            fi
-        fi
-        echo
     fi
 }
 
-# Function to show RHEL database warning
+# Render the configuration summary via gum. Body text inherits the terminal
+# default (no fixed foreground hex) so contrast holds on both dark and light
+# themes. Border + title accent stay green for brand continuity.
+# When the styled box would not fit on the operator's terminal, render it
+# first, then pipe through `gum pager --show-line-numbers=false` so the
+# rounded box survives pagination.
+_present_summary_gum() {
+    local _summary="$1"
+    local _summary_h _term_h _term_w _box_w
+    _summary_h=$(printf '%s\n' "$_summary" | wc -l)
+    _term_h=$(tput lines 2>/dev/null || echo 24)
+    _term_w=$(tput cols  2>/dev/null || echo 80)
+    _box_w=$(( _term_w > 84 ? 78 : _term_w - 6 ))
+    [ "$_box_w" -lt 40 ] && _box_w=40
+
+    local _title
+    _title=$(gum style --bold --foreground "#2eac68" "Configuration Summary")
+    local _styled
+    _styled=$(gum style \
+        --border rounded --padding "0 1" \
+        --border-foreground "#2eac68" \
+        --width "$_box_w" \
+        --margin "1 0" \
+        "$(printf '%s\n%s' "$_title" "$_summary")")
+
+    if [ "$_summary_h" -gt $(( _term_h - 6 )) ]; then
+        printf '%s\n' "$_styled" | gum pager --show-line-numbers=false
+    else
+        printf '%s\n' "$_styled"
+    fi
+}
+
+# Build a multi-line configuration recap string with section dividers and
+# dot-padded "Label .......... Value" alignment. No I/O — caller decides
+# presentation. UTF-8 box-drawing glyphs are safe because tui_init forces
+# a UTF-8 locale before whiptail runs.
+_build_configuration_summary() {
+    local out=""
+    # Render a section divider: "── Section ──────────────────────"
+    _section() {
+        local title="$1" pad_len pad
+        pad_len=$(( 70 - ${#title} - 4 ))
+        [ "$pad_len" -lt 4 ] && pad_len=4
+        pad=$(printf '%*s' "$pad_len" "")
+        pad="${pad// /─}"
+        out+=$'\n'"── ${title} ${pad}"$'\n'
+    }
+    # Aligned field: "  Label .......... Value"
+    _field() {
+        local label="$1" value="$2" pad_len pad
+        pad_len=$(( 26 - ${#label} ))
+        [ "$pad_len" -lt 2 ] && pad_len=2
+        pad=$(printf '%*s' "$pad_len" "")
+        pad="${pad// /.}"
+        out+="  ${label} ${pad} ${value}"$'\n'
+    }
+
+    # ── Core ──
+    _section "Core"
+    _field "BunkerWeb version" "$BUNKERWEB_VERSION"
+    local _type_label
+    case "$INSTALL_TYPE" in
+        "full"|"") _type_label="Full Stack" ;;
+        "manager")   _type_label="Manager" ;;
+        "worker")    _type_label="Worker" ;;
+        "scheduler") _type_label="Scheduler Only" ;;
+        "ui")        _type_label="Web UI Only" ;;
+        "api")       _type_label="API Only" ;;
+    esac
+    _field "Installation type" "$_type_label"
+    _field "Operating system"  "$DISTRO_ID $DISTRO_VERSION"
+    _field "Architecture"      "${SYSTEM_ARCH:-unknown}"
+    _field "NGINX version"     "$NGINX_VERSION"
+
+    # ── Networking ──
+    if [ -n "$BUNKERWEB_INSTANCES_INPUT" ] \
+        || [ -n "$MANAGER_IP_INPUT" ] \
+        || [ -n "$DNS_RESOLVERS_INPUT" ] \
+        || [ "$API_LISTEN_HTTPS_INPUT" = "yes" ]; then
+        _section "Networking"
+        if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
+            _field "BunkerWeb instances" "$BUNKERWEB_INSTANCES_INPUT"
+        fi
+        if [ -n "$MANAGER_IP_INPUT" ]; then
+            _field "Manager API whitelist" "$MANAGER_IP_INPUT"
+        fi
+        if [ -n "$DNS_RESOLVERS_INPUT" ]; then
+            _field "DNS resolvers" "$DNS_RESOLVERS_INPUT"
+        fi
+        if [ "$API_LISTEN_HTTPS_INPUT" = "yes" ]; then
+            _field "Internal API HTTPS" "Enabled"
+        fi
+    fi
+
+    # ── Services ──
+    _section "Services"
+    if [ "$INSTALL_TYPE" = "manager" ]; then
+        _field "Web UI service" "$([ "${SERVICE_UI:-yes}" = "no" ] && echo "Disabled" || echo "Enabled")"
+        _field "Setup wizard"   "Disabled (manager mode)"
+    else
+        _field "Setup wizard" "$([ "$ENABLE_WIZARD" = "yes" ] && echo "Enabled" || echo "Disabled")"
+    fi
+    if [[ "$INSTALL_TYPE" = "worker" || "$INSTALL_TYPE" = "scheduler" || "$INSTALL_TYPE" = "ui" ]]; then
+        _field "API service" "n/a (this mode)"
+    elif [ "${SERVICE_API:-no}" = "yes" ]; then
+        _field "API service" "Enabled"
+    else
+        _field "API service" "Disabled"
+    fi
+
+    # ── Security ──
+    _section "Security"
+    if [ "$INSTALL_TYPE" = "manager" ] || [ "$INSTALL_TYPE" = "worker" ] || [ "$INSTALL_TYPE" = "api" ]; then
+        _field "CrowdSec" "n/a (this mode)"
+    elif [ "$CROWDSEC_INSTALL" = "yes" ]; then
+        if [ "$CROWDSEC_APPSEC_INSTALL" = "yes" ]; then
+            _field "CrowdSec" "Will install (with AppSec)"
+        else
+            _field "CrowdSec" "Will install (no AppSec)"
+        fi
+    else
+        _field "CrowdSec" "Not installed"
+    fi
+
+    # ── Storage ──
+    _section "Storage"
+    if [[ "$INSTALL_TYPE" != "full" && "$INSTALL_TYPE" != "manager" && -n "$INSTALL_TYPE" ]]; then
+        _field "Database" "n/a (this mode)"
+        _field "Redis"    "n/a (this mode)"
+    else
+        case "$DB_INSTALL" in
+            "mariadb")    _field "Database" "MariaDB (local, db=${DB_NAME_INPUT}, user=${DB_USER_INPUT})" ;;
+            "postgresql") _field "Database" "PostgreSQL (local, db=${DB_NAME_INPUT}, user=${DB_USER_INPUT})" ;;
+            ""|"none")    _field "Database" "SQLite (set DATABASE_URI later for production)" ;;
+        esac
+        if [ "$REDIS_INSTALL" = "yes" ]; then
+            local _flavor_label
+            case "${REDIS_FLAVOR:-redis}" in
+                valkey) _flavor_label="Valkey" ;;
+                redis|*) _flavor_label="Redis" ;;
+            esac
+            if [ "$INSTALL_TYPE" = "manager" ]; then
+                _field "$_flavor_label" "Local, bind ${REDIS_BIND_INPUT:-0.0.0.0}"
+            else
+                _field "$_flavor_label" "Local, default config"
+            fi
+            if [ "$REDIS_AUTOPASS" = "yes" ] && [ "${REDIS_BIND_INPUT:-127.0.0.1}" != "127.0.0.1" ]; then
+                _field "Redis password" "Auto-generated (REQUIREPASS)"
+            fi
+            if [ -n "$REDIS_MAXMEMORY_MB" ]; then
+                if [ "$REDIS_MAXMEMORY_MB" = "0" ]; then
+                    _field "Memory cap" "Unlimited (NOT recommended)"
+                else
+                    _field "Memory cap" "${REDIS_MAXMEMORY_MB} MB (${REDIS_MAXMEMORY_POLICY:-volatile-lru})"
+                fi
+            fi
+        elif [ -n "$REDIS_HOST_INPUT" ]; then
+            _field "Redis" "Existing — $REDIS_HOST_INPUT:${REDIS_PORT_INPUT:-6379}"
+        else
+            _field "Redis" "Not installed (in-memory only)"
+        fi
+    fi
+
+    # ── Manager UI hardening ──
+    if [ "$INSTALL_TYPE" = "manager" ] && [ "${SERVICE_UI:-yes}" != "no" ] \
+        && { [ "$UI_ADMIN_CREATE" = "yes" ] || [ "$UI_SELFSIGNED_INPUT" = "yes" ]; }; then
+        _section "Manager UI hardening"
+        if [ "$UI_ADMIN_CREATE" = "yes" ]; then
+            _field "UI admin user" "Will be created (${UI_ADMIN_USERNAME_INPUT:-admin})"
+        fi
+        if [ "$UI_SELFSIGNED_INPUT" = "yes" ]; then
+            _field "UI HTTPS" "Self-signed cert (gunicorn TLS)"
+        fi
+    fi
+
+    # Strip the leading and trailing newline so dialogs don't render
+    # empty top/bottom lines.
+    out="${out#$'\n'}"
+    printf '%s' "${out%$'\n'}"
+}
+
+# Function to show RHEL database warning.
+# Bug fix: the previous version called `read` unconditionally, which blocked
+# non-interactive installs on RHEL forever. Now gated on INTERACTIVE_MODE and
+# routed through tui_msgbox (whiptail when available, fall-through echo + Enter
+# otherwise; the helper itself skips the blocking read when INTERACTIVE_MODE=no).
 show_rhel_database_warning() {
     if [[ "$DISTRO_ID" =~ ^(rhel|centos|fedora|rocky|almalinux|redhat)$ ]]; then
-        echo
-        print_warning "Important information for RHEL-based systems:"
-        echo
-        echo "If you plan to use an external database (recommended for production),"
-        echo "you'll need to install the appropriate database client:"
-        echo
-        echo "  For MariaDB: dnf install mariadb"
-        echo "  For MySQL:   dnf install mysql"
-        echo "  For PostgreSQL: dnf install postgresql"
-        echo
-        echo "This is required for the BunkerWeb Scheduler to connect to your database."
-        echo
-        read -p "Press Enter to continue..." -r
+        local msg="If you plan to use an external database (recommended for production), \
+install the appropriate database client first:
+
+  • MariaDB:    dnf install mariadb
+  • MySQL:      dnf install mysql
+  • PostgreSQL: dnf install postgresql
+
+This is required for the BunkerWeb Scheduler to connect to your database."
+        if [ "$INTERACTIVE_MODE" = "yes" ]; then
+            tui_msgbox "RHEL-based systems — Database client" "$msg"
+        else
+            print_warning "Important information for RHEL-based systems:"
+            echo "$msg"
+        fi
     fi
 }
 
@@ -1330,8 +1921,8 @@ check_supported_os() {
             if [[ "$major_version" != "13" && "$major_version" != "14" ]]; then
                 print_warning "Only FreeBSD 13 and 14 are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
-                    read -p "Continue anyway? (y/N): " -r
-                    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                    if ! tui_yesno "Unsupported OS" \
+                        "Only FreeBSD 13 and 14 are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
                         exit 1
                     fi
                 fi
@@ -1342,8 +1933,8 @@ check_supported_os() {
             if [[ "$DISTRO_VERSION" != "12" && "$DISTRO_VERSION" != "13" ]]; then
                 print_warning "Only Debian 12 (Bookworm) and 13 (Trixie) are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
-                    read -p "Continue anyway? (y/N): " -r
-                    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                    if ! tui_yesno "Unsupported OS" \
+                        "Only Debian 12 (Bookworm) and 13 (Trixie) are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
                         exit 1
                     fi
                 fi
@@ -1354,8 +1945,8 @@ check_supported_os() {
             if [[ "$DISTRO_VERSION" != "22.04" && "$DISTRO_VERSION" != "24.04" ]]; then
                 print_warning "Only Ubuntu 22.04 (Jammy) and 24.04 (Noble) are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
-                    read -p "Continue anyway? (y/N): " -r
-                    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                    if ! tui_yesno "Unsupported OS" \
+                        "Only Ubuntu 22.04 (Jammy) and 24.04 (Noble) are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
                         exit 1
                     fi
                 fi
@@ -1366,8 +1957,8 @@ check_supported_os() {
             if [[ "$DISTRO_VERSION" != "42" && "$DISTRO_VERSION" != "43" && "$DISTRO_VERSION" != "44" ]]; then
                 print_warning "Only Fedora 42, 43 and 44 are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
-                    read -p "Continue anyway? (y/N): " -r
-                    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                    if ! tui_yesno "Unsupported OS" \
+                        "Only Fedora 42, 43 and 44 are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
                         exit 1
                     fi
                 fi
@@ -1379,8 +1970,8 @@ check_supported_os() {
             if [[ "$major_version" != "8" && "$major_version" != "9" && "$major_version" != "10" ]]; then
                 print_warning "Only RHEL 8, 9, and 10 are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
-                    read -p "Continue anyway? (y/N): " -r
-                    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                    if ! tui_yesno "Unsupported OS" \
+                        "Only RHEL 8, 9, and 10 are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
                         exit 1
                     fi
                 fi
@@ -1404,8 +1995,8 @@ check_ports() {
                 print_warning "Common conflict: Apache/httpd running."
                 print_warning "Please stop conflicting services before proceeding."
                 if [ "$INTERACTIVE_MODE" = "yes" ]; then
-                    read -p "Continue anyway? (y/N): " -r
-                    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                    if ! tui_yesno "Port Conflict Detected" \
+                        "Port 80 or 443 appears to be in use (commonly Apache/httpd).\nStop the conflicting service first, then re-run.\n\nContinue anyway?" "no"; then
                         exit 1
                     fi
                 fi
@@ -1476,21 +2067,26 @@ extract_first_ipv4() {
     return 0
 }
 
-# Prompt interactively for a local IPv4 address
+# Prompt interactively for a local IPv4 address.
+# Returns 0 on success (target var set), 1 on user cancel — callers decide
+# whether cancel is fatal (manager IP, required) or recoverable (manual-IP
+# fallback inside resolve_display_server_ip).
 prompt_for_local_ipv4() {
     local -n __target_var="$1"
     local answer=""
     local ip=""
 
     while true; do
-        echo -e "${YELLOW}Enter the local IPv4 address to use:${NC} "
-        read -p "" -r answer
+        if ! answer=$(tui_input "Local IPv4 Address" \
+            "Enter the local IPv4 address to use:" ""); then
+            return 1
+        fi
         ip=$(extract_first_ipv4 "$answer")
         if [ -n "$ip" ]; then
             __target_var="$ip"
             return 0
         fi
-        print_warning "Invalid IPv4 address. Please try again."
+        tui_msgbox "Local IPv4 Address" "Invalid IPv4 address. Please try again."
     done
 }
 
@@ -1719,45 +2315,44 @@ resolve_display_server_ip() {
         return 0
     fi
 
-    echo
-    echo -e "${BLUE}========================================${NC}"
-    echo -e "${BLUE}🌐 Server IP for the post-install URLs${NC}"
-    echo -e "${BLUE}========================================${NC}"
-    echo "Multiple IPv4 addresses detected. Select the one clients will use to reach this server:"
+    tui_section "🌐 Server IP for the post-install URLs"
 
-    local i=1 ip iface
+    # Build a tui_menu argument list dynamically: one tag per candidate IP
+    # (the IP itself, so the selected tag IS the answer), plus a literal
+    # "__manual__" tag for the manual-entry fallback.
+    local menu_args=() ip iface default_tag=""
+    local i=0
     for line in "${candidates[@]}"; do
         ip=${line%% *}
         iface=${line##* }
-        if [ "$i" = "1" ]; then
-            printf '  %d) %-18s on %-10s (default)\n' "$i" "$ip" "$iface"
+        [ "$i" -eq 0 ] && default_tag="$ip"
+        if [ "$i" -eq 0 ]; then
+            menu_args+=("$ip" "$ip on $iface (default)")
         else
-            printf '  %d) %-18s on %-10s\n' "$i" "$ip" "$iface"
+            menu_args+=("$ip" "$ip on $iface")
         fi
         i=$((i + 1))
     done
-    printf '  %d) Enter manually\n' "$i"
-    local manual=$i
-    echo
+    menu_args+=("__manual__" "Enter manually")
 
     local picked manual_ip=""
-    while true; do
-        echo -en "${YELLOW}Choice [1]: ${NC}"
-        read -r picked
-        picked=${picked:-1}
-        if ! [[ $picked =~ ^[0-9]+$ ]] || [ "$picked" -lt 1 ] || [ "$picked" -gt "$manual" ]; then
-            print_warning "Invalid selection, please choose 1-${manual}"
-            continue
-        fi
-        if [ "$picked" = "$manual" ]; then
-            prompt_for_local_ipv4 manual_ip
+    picked=$(tui_menu "Server IP" \
+        "Multiple IPv4 addresses detected. Select the one clients will use to reach this server:" \
+        "$default_tag" "${menu_args[@]}") || picked="$default_tag"
+
+    if [ "$picked" = "__manual__" ]; then
+        # If the user ESCs out of the manual-entry box, fall back to the
+        # default kernel choice rather than killing the entire installer.
+        if prompt_for_local_ipv4 manual_ip; then
             RESOLVED_SERVER_IP="$manual_ip"
-            return 0
+        else
+            print_warning "Manual IP entry cancelled; using detected $default_tag."
+            RESOLVED_SERVER_IP="$default_tag"
         fi
-        line=${candidates[$((picked - 1))]}
-        RESOLVED_SERVER_IP="${line%% *}"
-        return 0
-    done
+    else
+        RESOLVED_SERVER_IP="$picked"
+    fi
+    return 0
 }
 
 should_apply_redis_config() {
@@ -1856,7 +2451,10 @@ configure_manager_api_defaults() {
     if [ -z "$whitelist_ip" ]; then
         if [ "$INTERACTIVE_MODE" = "yes" ]; then
             print_warning "Unable to detect a local network IP automatically."
-            prompt_for_local_ipv4 whitelist_ip
+            prompt_for_local_ipv4 whitelist_ip || {
+                print_error "A local network IP is required for the manager API whitelist."
+                exit 1
+            }
             MANAGER_IP_INPUT="$whitelist_ip"
         else
             print_error "Unable to detect a local network IP. Provide it with --manager-ip <IP>."
@@ -2189,8 +2787,8 @@ install_bunkerweb_rpm() {
             print_warning "EPEL repository not installed; continuing without epel-release."
         elif [ "$INTERACTIVE_MODE" = "yes" ]; then
             print_warning "EPEL repository is not installed."
-            read -p "Install epel-release? (y/N): " -r
-            if [[ $REPLY =~ ^[Yy]$ ]]; then
+            if tui_yesno "EPEL Repository" \
+                "The EPEL repository is not installed. Install epel-release now?" "no"; then
                 INSTALL_EPEL="yes"
                 print_step "Installing EPEL repository (epel-release)"
                 run_cmd dnf install -y epel-release
@@ -3312,6 +3910,8 @@ usage() {
     echo "  -w, --enable-wizard      Enable the setup wizard (default in interactive mode)"
     echo "  -n, --no-wizard          Disable the setup wizard"
     echo "  -y, --yes                Non-interactive mode, use defaults"
+    echo "      --tui                Force a TUI (gum or whiptail). Hard fail if neither can be installed."
+    echo "      --no-tui             Disable all TUI layers and use the legacy plain-read prompts."
     echo "      --api, --enable-api  Enable the API service (disabled by default on Linux)"
     echo "      --no-api             Explicitly disable the API service"
     echo "  -f, --force              Force installation on unsupported OS versions"
@@ -3416,6 +4016,14 @@ while [[ $# -gt 0 ]]; do
         -y|--yes)
             INTERACTIVE_MODE="no"
             ENABLE_WIZARD="yes"  # Default to wizard in non-interactive mode
+            shift
+            ;;
+        --tui)
+            USE_TUI="yes"
+            shift
+            ;;
+        --no-tui)
+            USE_TUI="no"
             shift
             ;;
         -f|--force)
@@ -3771,22 +4379,21 @@ check_existing_installation() {
         print_status "Detected existing BunkerWeb installation (version ${INSTALLED_VERSION})"
         if [ "$INSTALLED_VERSION" = "$BUNKERWEB_VERSION" ]; then
             if [ "$INTERACTIVE_MODE" = "yes" ]; then
-                echo
-                read -p "BunkerWeb ${INSTALLED_VERSION} already installed. Show status and exit? (Y/n): " -r
-                case $REPLY in
-                    [Nn]*) print_status "Nothing to do."; exit 0 ;;
-                    *) show_final_info; exit 0 ;;
-                esac
+                if tui_yesno "BunkerWeb Already Installed" \
+                    "BunkerWeb ${INSTALLED_VERSION} is already installed.\nShow status and exit?" "yes"; then
+                    show_final_info; exit 0
+                fi
+                print_status "Nothing to do."; exit 0
             else
                 print_status "BunkerWeb ${INSTALLED_VERSION} already installed. Nothing to do."; exit 0
             fi
         else
             print_warning "Requested version ${BUNKERWEB_VERSION} differs from installed version ${INSTALLED_VERSION}. Upgrade will be attempted."
             if [ "$INTERACTIVE_MODE" = "yes" ]; then
-                read -p "Proceed with upgrade? (Y/n): " -r
-                case $REPLY in
-                    [Nn]*) print_status "Upgrade cancelled."; exit 0 ;;
-                esac
+                if ! tui_yesno "Upgrade BunkerWeb" \
+                    "Upgrade BunkerWeb from ${INSTALLED_VERSION} to ${BUNKERWEB_VERSION}?\nProceed with upgrade?" "yes"; then
+                    print_status "Upgrade cancelled."; exit 0
+                fi
             fi
             UPGRADE_SCENARIO="yes"
         fi
@@ -3866,40 +4473,41 @@ upgrade_only() {
         # Interactive confirmation about backup (optional, enabled by default)
         if [ "$INTERACTIVE_MODE" = "yes" ]; then
             if [ "$AUTO_BACKUP" = "yes" ]; then
-                echo
-                echo -e "${BLUE}========================================${NC}"
-                echo -e "${BLUE}💾 Pre-upgrade Backup${NC}"
-                echo -e "${BLUE}========================================${NC}"
-                echo "A pre-upgrade backup is recommended to preserve configuration and database."
-                echo "You can change the destination directory or accept the default."
                 DEFAULT_BACKUP_DIR="/var/tmp/bunkerweb-backup-$(date +%Y%m%d-%H%M%S)"
-                echo
-                echo -e "${YELLOW}Create automatic backup before upgrade? (Y/n):${NC} "
-                read -p "" -r
-                case $REPLY in
-                    [Nn]*) AUTO_BACKUP="no" ;;
-                    *)
-                        echo -e "${YELLOW}Backup directory [${DEFAULT_BACKUP_DIR}]:${NC} "
-                        read -p "" -r BACKUP_DIRECTORY_INPUT
-                        if [ -n "$BACKUP_DIRECTORY_INPUT" ]; then
+                tui_section "💾 Pre-upgrade Backup"
+                if tui_yesno "Pre-upgrade Backup" \
+                    "A pre-upgrade backup is recommended to preserve configuration and database.\n\nCreate automatic backup before upgrade?" "yes"; then
+                    # Validate the backup path to prevent obvious footguns:
+                    # - must be absolute (start with /), so we never write to
+                    #   a cwd-relative location whose meaning depends on where
+                    #   the operator launched the installer.
+                    # - reject `..` traversal segments.
+                    # - restrict to a portable character class so a stray $VAR
+                    #   or shell-special char doesn't end up as a literal path
+                    #   component once it's used by `tar`/`mkdir`/`bwcli`.
+                    while true; do
+                        BACKUP_DIRECTORY_INPUT=$(tui_input "Pre-upgrade Backup" \
+                            "Backup directory (absolute path; allowed chars: A-Z a-z 0-9 . _ - / ):" \
+                            "$DEFAULT_BACKUP_DIR") || BACKUP_DIRECTORY_INPUT=""
+                        BACKUP_DIRECTORY_INPUT="${BACKUP_DIRECTORY_INPUT:-$DEFAULT_BACKUP_DIR}"
+                        if [[ "$BACKUP_DIRECTORY_INPUT" == /* ]] \
+                            && [[ "$BACKUP_DIRECTORY_INPUT" != *..* ]] \
+                            && [[ "$BACKUP_DIRECTORY_INPUT" =~ ^[A-Za-z0-9._/-]+$ ]]; then
                             BACKUP_DIRECTORY="$BACKUP_DIRECTORY_INPUT"
-                        else
-                            BACKUP_DIRECTORY="${BACKUP_DIRECTORY:-$DEFAULT_BACKUP_DIR}"
+                            break
                         fi
-                        ;;
-                esac
+                        tui_msgbox "Pre-upgrade Backup" \
+                            "Invalid backup path. Requirements:\n  • absolute (must start with /)\n  • no '..' traversal segments\n  • only [A-Za-z0-9._/-]"
+                    done
+                else
+                    AUTO_BACKUP="no"
+                fi
             else
-                echo
-                echo -e "${BLUE}========================================${NC}"
-                echo -e "${BLUE}⚠️  Backup Confirmation${NC}"
-                echo -e "${BLUE}========================================${NC}"
-                echo "Automatic backup is disabled. Make sure you already performed a manual backup as described in the documentation."
-                echo
-                echo -e "${YELLOW}Confirm manual backup was performed? (y/N):${NC} "
-                read -p "" -r
-                case $REPLY in
-                    [Yy]*) ;; * ) print_error "Upgrade aborted until backup is confirmed."; exit 1 ;;
-                esac
+                tui_section "⚠️  Backup Confirmation"
+                if ! tui_yesno "Backup Confirmation" \
+                    "Automatic backup is disabled.\nMake sure you already performed a manual backup as described in the documentation.\n\nConfirm a manual backup was performed?" "no"; then
+                    print_error "Upgrade aborted until backup is confirmed."; exit 1
+                fi
             fi
         fi
     fi
@@ -3962,6 +4570,12 @@ main() {
     # Preliminary checks
     check_root
     detect_os
+    # Initialise the TUI layer right after $DISTRO_ID is known, so every
+    # subsequent interactive prompt (including the "Continue anyway?" guards
+    # in detect_architecture/check_supported_os) routes through the helpers.
+    # tui_init enforces the TTY/INTERACTIVE_MODE/TERM contract and installs
+    # newt/whiptail when needed.
+    tui_init
     detect_architecture
     check_supported_os
     # New: check if already installed (after OS detection)
@@ -4019,15 +4633,57 @@ main() {
     print_status "Installing BunkerWeb $BUNKERWEB_VERSION"
     echo
 
-    # Confirmation prompt in interactive mode
+    # Confirmation prompt in interactive mode. Embed the configuration
+    # recap in the dialog body so the operator confirms exactly what they
+    # are about to install on a single screen.
     if [ "$INTERACTIVE_MODE" = "yes" ] && [ "$FORCE_INSTALL" != "yes" ]; then
-        read -p "Continue with installation? (Y/n): " -r
-        case $REPLY in
-            [Nn]*)
+        if [ "$GUM_AVAILABLE" = "yes" ]; then
+            # The recap was already rendered as a styled box at the end of
+            # ask_user_preferences. Show only the install/cancel prompt
+            # immediately below it so the two appear as one screen.
+            local _rc=0
+            gum confirm \
+                "Install BunkerWeb $BUNKERWEB_VERSION with this configuration?" \
+                --default=true \
+                --affirmative "Install" --negative "Cancel" \
+                --prompt.foreground "#2eac68" \
+                || _rc=$?
+            if ! _tui_normalize_rc "$_rc"; then
                 print_status "Installation cancelled"
                 exit 0
-                ;;
-        esac
+            fi
+        elif [ "$WHIPTAIL_AVAILABLE" = "yes" ]; then
+            # Whiptail tier — recap is embedded inside the confirm body so
+            # the operator confirms exactly what they are about to install
+            # on a single screen.
+            local _confirm_body _summary
+            _summary=$(_build_configuration_summary)
+            _confirm_body="${_summary}
+
+Install BunkerWeb $BUNKERWEB_VERSION with this configuration?"
+            local _lines _h _term_h _max_h
+            _lines=$(printf '%s' "$_confirm_body" | awk 'END {print NR}')
+            _term_h=$(tput lines 2>/dev/null || echo 24)
+            _max_h=$(( _term_h - 2 ))
+            [ "$_max_h" -lt 14 ] && _max_h=14
+            _h=$(( _lines + 8 ))
+            [ "$_h" -gt "$_max_h" ] && _h="$_max_h"
+            [ "$_h" -lt 14 ] && _h=14
+            if ! whiptail --backtitle "$TUI_BACKTITLE" \
+                          --title "Confirm Installation" \
+                          --yes-button "Install" --no-button "Cancel" \
+                          --scrolltext \
+                          --yesno "$_confirm_body" "$_h" 78; then
+                print_status "Installation cancelled"
+                exit 0
+            fi
+        else
+            if ! tui_yesno "Confirm Installation" \
+                "Install BunkerWeb $BUNKERWEB_VERSION (type: ${INSTALL_TYPE:-full}) with the chosen configuration?" "yes"; then
+                print_status "Installation cancelled"
+                exit 0
+            fi
+        fi
     fi
 
     # If upgrading, remove holds/versionlocks so upgrade can proceed

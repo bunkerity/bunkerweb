@@ -499,16 +499,19 @@ El Manager es el cerebro del clúster. Ejecuta el Scheduler, la base de datos y,
         !!! danger "Aviso de seguridad"
             Comprueba siempre la integridad del script con el checksum proporcionado antes de ejecutarlo.
 
-    2. **Selecciona la opción 2) Manager** y sigue las indicaciones:
+    2. **Selecciona Manager** en el menú de tipo de instalación (usa ↑/↓ y luego Enter), y sigue las indicaciones:
 
-        | Pregunta                      | Acción                                                                                                  |
-        | :---------------------------- | :------------------------------------------------------------------------------------------------------ |
-        | **Instancias BunkerWeb**      | Introduce las IP de tus nodos worker separadas por espacios (ej.: `192.168.10.11 192.168.10.12`).       |
-        | **Whitelist IP**              | Acepta la IP detectada o introduce un subnet (ej.: `192.168.10.0/24`) para permitir el acceso a la API. |
-        | **Resolutores DNS**           | Pulsa `N` para usar el valor por defecto o indica los tuyos.                                            |
-        | **HTTPS para la API interna** | **Recomendado:** `Y` para generar certificados y asegurar la comunicación manager-worker.               |
-        | **Servicio Web UI**           | `Y` para activar la interfaz web (muy recomendado).                                                     |
-        | **Servicio API**              | `N` salvo que necesites la API REST pública para herramientas externas.                                 |
+        | Pregunta                      | Acción                                                                                                      |
+        | :---------------------------- | :---------------------------------------------------------------------------------------------------------- |
+        | **Instancias BunkerWeb**      | Introduce las IP de tus nodos worker separadas por espacios (ej.: `192.168.10.11 192.168.10.12`).           |
+        | **Whitelist IP**              | Acepta la IP detectada o introduce un subnet (ej.: `192.168.10.0/24`) para permitir el acceso a la API.     |
+        | **Resolutores DNS**           | Elige **No** para mantener los valores predeterminados, o indica los tuyos.                                  |
+        | **HTTPS para la API interna** | **Recomendado:** elige **Sí** para generar certificados y asegurar la comunicación manager-worker.           |
+        | **Servicio Web UI**           | Elige **Sí** para activar la interfaz web (muy recomendado).                                                 |
+        | **Servicio API**              | Elige **No** salvo que necesites la API REST pública para herramientas externas.                             |
+
+        !!! note "Interfaz de indicaciones"
+            El instalador usa la TUI [gum](https://github.com/charmbracelet/gum). En la primera ejecución interactiva descarga el binario `gum` oficial desde la release de GitHub (SHA256 fijado), lo ejecuta desde un directorio temporal y elimina ese directorio al salir — no se instala ningún paquete del sistema. Usa las flechas + Enter para responder. Pasa `--no-tui` si prefieres indicaciones de texto plano.
 
     #### Asegurar y exponer la UI
 
@@ -543,7 +546,7 @@ El Manager es el cerebro del clúster. Ejecuta el Scheduler, la base de datos y,
 
         Para más aislamiento, instala la UI en un nodo independiente.
 
-        1. Ejecuta el instalador y elige **Opción 5) Web UI Only**.
+        1. Ejecuta el instalador y selecciona el tipo de instalación **Web UI Only**.
         2. Edita `/etc/bunkerweb/ui.env` para apuntar a la base de datos del Manager:
 
             ```ini

@@ -2012,7 +2012,24 @@ El script de instalación fácil es una herramienta poderosa diseñada para simp
 
 #### Instalación interactiva
 
-Cuando se ejecuta sin ninguna opción, el script entra en un modo interactivo que te guía a través del proceso de configuración. Se te pedirá que tomes las siguientes decisiones:
+Cuando se ejecuta sin ninguna opción, el script entra en un modo interactivo que te guía a través del proceso de configuración. El flujo interactivo usa una TUI en línea mediante [gum](https://github.com/charmbracelet/gum) — menús con flechas y cursor `❯`, campos de contraseña enmascarados.
+
+!!! info "gum se obtiene de forma efímera en la primera ejecución interactiva"
+    El instalador descarga gum la primera vez que se necesita una indicación interactiva y lo ejecuta desde un directorio temporal durante el script — **no se instala nada a nivel del sistema**:
+
+    - Descarga el `gum_${VERSION}_${ARCH}.tar.gz` oficial desde la [release de GitHub](https://github.com/charmbracelet/gum/releases) por HTTPS (TLS 1.2+, rechaza redirecciones HTTP, timeout de conexión 10 s / total 30 s).
+    - Verifica el tarball contra un **SHA256 fijado en este script** (ancla de confianza local — tanto la suma del propio script como la del binario gum deben coincidir).
+    - Si `cosign` está instalado: también verifica el `checksums.txt` ascendente contra la identidad OIDC de GitHub-Actions de Charm (`https://github.com/charmbracelet/gum/...`) como defensa en profundidad, y cruza-verifica que el hash fijado coincide con el valor que Charm publicó para este tarball exacto.
+    - Extrae el binario en un directorio temporal con permiso de ejecución (`/var/tmp/bw-gum.XXXXXX` por defecto; `/tmp`, `$XDG_RUNTIME_DIR` o `$HOME/.cache` cuando `/var/tmp` está montado `noexec`).
+    - Añade el directorio temporal al `PATH` para el resto de la ejecución y lo elimina al salir del script (a través de un trap `EXIT`, incluso ante fallos con `set -e` o señales).
+
+    **Lo que queda en disco al salir el instalador:** nada. Sin `/etc/apt/sources.list.d/charm.list`, sin clave GPG en `apt`/`rpm`, sin binario `gum` en `/usr/bin`/`/usr/local/bin`, sin entrada en la base de paquetes. El instalador nunca registra una fuente apt o dnf de terceros.
+
+    Si gum no se puede descargar — anfitrión aislado, fallo de red, SHA256 incorrecto — el instalador usa un `whiptail` ya presente en el sistema (comúnmente preinstalado en imágenes cloud Debian/Ubuntu vía el paquete `newt`). Si no hay ni gum ni whiptail disponibles, recurre a **indicaciones de texto plano**.
+
+Pasa `--no-tui` (o establece `BW_INSTALL_TUI=no`) para saltar todos los niveles de TUI, o `--tui` para abortar si ningún nivel de TUI puede renderizar. **Instalaciones aisladas (air-gapped)**: combina `--no-tui` con `--yes` y los flags `--*` / variables `*_INPUT` apropiados; no se hace ninguna llamada de red para la capa de TUI.
+
+Se te pedirá que tomes las siguientes decisiones:
 
 1.  **Tipo de instalación**: Selecciona los componentes que quieres instalar.
     *   **Pila completa (predeterminado)**: Una instalación todo en uno que incluye BunkerWeb, el Programador y la Interfaz de Usuario Web.
@@ -2044,6 +2061,8 @@ Para configuraciones no interactivas o automatizadas, el script se puede control
 | `-w, --enable-wizard`   | Habilita el asistente de configuración.                                                           |
 | `-n, --no-wizard`       | Deshabilita el asistente de configuración.                                                        |
 | `-y, --yes`             | Se ejecuta en modo no interactivo usando las respuestas predeterminadas para todas las preguntas. |
+| `--tui`                 | Fuerza una TUI (gum o whiptail). Aborta si ninguna puede instalarse.                              |
+| `--no-tui`              | Deshabilita todos los niveles de TUI y usa indicaciones de texto plano. Equivale a `BW_INSTALL_TUI=no`. |
 | `-f, --force`           | Fuerza a que la instalación continúe incluso en una versión de SO no compatible.                  |
 | `-q, --quiet`           | Instalación silenciosa (suprime la salida).                                                       |
 | `--api`, `--enable-api` | Habilita el servicio systemd de la API (FastAPI) (deshabilitado por defecto).                     |

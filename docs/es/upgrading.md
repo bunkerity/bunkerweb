@@ -82,6 +82,9 @@
 
             Si la verificación de la suma de verificación falla, **no ejecutes el script**—puede no ser seguro.
 
+    !!! tip "Interfaz de actualización interactiva"
+        El flujo de actualización usa la misma TUI que las instalaciones nuevas: indicaciones en línea con [gum](https://github.com/charmbracelet/gum), con respaldo en los diálogos `whiptail` y, finalmente, en indicaciones de texto plano si gum no puede obtenerse. El binario `gum` se descarga desde la [release de GitHub](https://github.com/charmbracelet/gum/releases) oficial (SHA256 fijado, verificación cosign cuando cosign está instalado) y se ejecuta desde un directorio temporal que se elimina al salir — no se instala ningún paquete del sistema y no se añade ninguna fuente apt/dnf. Pasa `--no-tui` (o establece `BW_INSTALL_TUI=no`) para saltar todos los niveles de TUI, o `--tui` para exigir una TUI operativa. Para actualizaciones totalmente desatendidas, pasa `-y` / `--yes` con los flags relevantes — las invocaciones por tubería (`curl … | bash`) salen con un error claro en lugar de aceptar silenciosamente cada valor predeterminado. **Actualizaciones aisladas (air-gapped)**: combina `--no-tui --yes` para que no se haga ninguna llamada de red para la capa de TUI.
+
     * **Cómo funciona**:
 
         El mismo script de instalación multipropósito utilizado para instalaciones nuevas también puede realizar una actualización in situ. Cuando detecta una instalación existente y una versión de destino diferente, cambia al modo de actualización y aplica el siguiente flujo de trabajo:
@@ -132,6 +135,8 @@
         | :---------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
         | `-v, --version <X.Y.Z>` | Versión de BunkerWeb de destino a la que actualizar.                                                                                          |
         | `-y, --yes`             | No interactivo (asume la confirmación de la actualización y habilita la copia de seguridad automática a menos que se use `--no-auto-backup`). |
+        | `--tui`                 | Fuerza una TUI (gum o whiptail). Aborta si ninguna puede instalarse.                            |
+        | `--no-tui`              | Salta todos los niveles de TUI y usa indicaciones de texto plano. Equivale a `BW_INSTALL_TUI=no`. |
         | `--backup-dir <RUTA>`   | Destino para la copia de seguridad automática previa a la actualización. Se crea si no existe.                                                |
         | `--no-auto-backup`      | Omitir la copia de seguridad automática (NO recomendado). Debes tener una copia de seguridad manual.                                          |
         | `-q, --quiet`           | Suprimir la salida (combinar con registro / monitoreo).                                                                                       |

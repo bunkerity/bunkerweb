@@ -68,6 +68,9 @@
     #### Easy Install 亮点
 
     - 在更改系统之前，会预先检测您的 Linux 发行版和 CPU 架构，并在超出支持矩阵时发出警告。
+    - 交互提示采用由 [gum](https://github.com/charmbracelet/gum) 提供的内联 TUI —— 支持方向键菜单（带 `❯` 光标）、掩码密码字段。首次进入交互模式时，脚本会从 [GitHub 发布页](https://github.com/charmbracelet/gum/releases)下载官方 `gum` 二进制（SHA256 已固定校验；若已安装 cosign，则额外校验 cosign 签名），从临时目录运行，并在脚本退出时删除该临时目录 —— **不会安装任何系统包，不会添加 apt/dnf 源，不会在系统上残留任何二进制**。若无法获取 gum，安装器会使用系统中已存在的 `whiptail`；二者都不可用时退化到纯文本提示。
+    - 两个标志控制 TUI：`--no-tui`（或 `BW_INSTALL_TUI=no`）跳过所有 TUI 层级，使用纯文本提示；`--tui` 要求必须有可用的 TUI，若 gum 与 whiptail 都无法安装则中止。
+    - 当安装器通过管道运行（`curl … | bash`）或 stdin 不是 TTY 时，会以清晰的错误退出，而不会静默接受每个默认值。对于非交互式安装，请使用 `--yes` 配合相应的 `--*` 标志 / `*_INPUT` 环境变量。
     - 交互式流程允许选择安装配置（全栈、manager、worker 等）；manager 模式始终将 API 绑定到 `0.0.0.0`、禁用设置向导并要求提供白名单 IP（非交互式运行可通过 `--manager-ip` 传入），而 worker 模式会强制收集 manager IP 以填充其白名单。
     - 即使向导被禁用，Manager 安装仍可决定是否启动 Web UI 服务。
     - 汇总信息会显示 FastAPI 服务是否会启动，便于使用 `--api` / `--no-api` 明确启用或禁用它。

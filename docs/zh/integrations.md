@@ -2011,7 +2011,24 @@ sudo ./install-bunkerweb.sh
 
 #### 交互式安装
 
-当不带任何选项运行时，脚本会进入一个交互模式，引导您完成设置过程。您将被要求做出以下选择：
+当不带任何选项运行时，脚本会进入一个交互模式，引导您完成设置过程。交互流程采用由 [gum](https://github.com/charmbracelet/gum) 提供的内联 TUI —— 方向键菜单（带 `❯` 光标）、掩码密码字段。
+
+!!! info "首次交互运行时以临时方式获取 gum"
+    在首次需要交互提示时，安装器会下载 gum，并在脚本运行期间从临时目录执行 —— **不会进行任何系统级安装**：
+
+    - 通过 HTTPS（TLS 1.2+，拒绝 HTTP 重定向，连接超时 10 秒 / 总超时 30 秒）从 [GitHub 发布页](https://github.com/charmbracelet/gum/releases) 下载官方 `gum_${VERSION}_${ARCH}.tar.gz`。
+    - 使用**脚本中固定的 SHA256**（本地信任锚 —— 脚本本身的校验和与 gum 二进制必须同时匹配）校验该归档。
+    - 若已安装 `cosign`：还会针对 Charm 的 GitHub-Actions OIDC 身份（`https://github.com/charmbracelet/gum/...`）校验上游 `checksums.txt` 作为纵深防御，并交叉确认所固定的哈希与 Charm 为此归档发布的值一致。
+    - 将二进制解压到可执行的临时目录（默认 `/var/tmp/bw-gum.XXXXXX`；当 `/var/tmp` 被挂载为 `noexec` 时则使用 `/tmp`、`$XDG_RUNTIME_DIR` 或 `$HOME/.cache`）。
+    - 在脚本运行期间将该临时目录加入 `PATH`，并在脚本退出时通过 `EXIT` trap 删除（在 `set -e` 失败或信号中断时同样有效）。
+
+    **安装器退出后磁盘上保留的内容：** 没有。无 `/etc/apt/sources.list.d/charm.list`、`apt`/`rpm` 中没有 GPG 密钥、`/usr/bin`/`/usr/local/bin` 中没有 `gum` 二进制、没有包数据库记录。安装器从不注册任何第三方 apt 或 dnf 源。
+
+    若无法下载 gum —— 离线主机、网络故障、SHA256 不匹配 —— 安装器会使用系统中已经存在的 `whiptail`（在 Debian/Ubuntu 云镜像上通常通过 `newt` 包预装）。若 gum 与 whiptail 均不可用，则回退到**纯文本提示**。
+
+使用 `--no-tui`（或设置 `BW_INSTALL_TUI=no`）跳过所有 TUI 层级；使用 `--tui` 在无可用 TUI 时中止。**离线（air-gapped）安装**：组合 `--no-tui` 与 `--yes` 以及相应的 `--*` 标志 / `*_INPUT` 环境变量；TUI 层不会发起任何网络调用。
+
+您将被要求做出以下选择：
 
 1.  **安装类型**：选择您想要安装的组件。
     *   **完整堆栈（默认）**：一个一体化的安装，包括 BunkerWeb、调度器和 Web UI。
@@ -2043,6 +2060,8 @@ sudo ./install-bunkerweb.sh
 | `-w, --enable-wizard`   | 启用设置向导。                                     |
 | `-n, --no-wizard`       | 禁用设置向导。                                     |
 | `-y, --yes`             | 以非交互模式运行，对所有提示使用默认答案。         |
+| `--tui`                 | 强制使用 TUI（gum 或 whiptail）。若两者都无法安装则中止。 |
+| `--no-tui`              | 禁用所有 TUI 层级并使用纯文本提示。等同于 `BW_INSTALL_TUI=no`。 |
 | `-f, --force`           | 即使在不受支持的操作系统版本上，也强制继续安装。   |
 | `-q, --quiet`           | 静默安装（抑制输出）。                             |
 | `--api`, `--enable-api` | 启用 API (FastAPI) systemd 服务（默认禁用）。      |
