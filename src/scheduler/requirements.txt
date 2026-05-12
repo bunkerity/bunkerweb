@@ -4,9 +4,9 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --strip-extras requirements.in
 #
-acme==5.5.0 \
-    --hash=sha256:0c237fe013a5406e9ea8b8bb04d6b753a0ed30005df1315175cb99d9c8f2248d \
-    --hash=sha256:4a7f653952300053765c92359575992bc644f6253f4c95ff197681b2830d971e
+acme==5.6.0 \
+    --hash=sha256:23f706ef1c437fc743b2f90704b97f263a56d83198b3af1c25c7dd42c4b463e4 \
+    --hash=sha256:fbf7ee8880485f2339942a2eff9a87deb79b74a8dcac4a572c08e7e640f046cd
     # via
     #   certbot
     #   certbot-dns-bunny
@@ -52,9 +52,9 @@ botocore==1.43.6 \
     # via
     #   boto3
     #   s3transfer
-certbot==5.5.0 \
-    --hash=sha256:921acc125fdaf3efa91b057cf5d6fcbb44d9bd511de8f9febd1260847cd40ae0 \
-    --hash=sha256:c72c813c4c8646a9658bc7a9530c757c76067503fa2f5d7eb12027e8bbf798d7
+certbot==5.6.0 \
+    --hash=sha256:81ea876500ba60022a98a3e92fe4230088c7792b9d375357bb23c58741d2b0da \
+    --hash=sha256:89052854e28cd2fcac72a8857aad6dfc6b02ba992f4b8f255062fe29c8aed3ee
     # via
     #   -r requirements.in
     #   certbot-dns-bunny
@@ -1009,15 +1009,6 @@ s3transfer==0.17.0 \
 schedule==1.2.2 \
     --hash=sha256:15fe9c75fe5fd9b9627f3f19cc0ef1420508f9f9a46f45cd0769ef75ede5f0b7 \
     --hash=sha256:5bef4a2a0183abf44046ae0d164cadcac21b1db011bdd8102e4a0c1e91e06a7d
-    # via
-    #   certbot-dns-cloudns
-    #   certbot-dns-domainoffensive
-    #   certbot-dns-domeneshop
-
-# The following packages are considered to be unsafe in a requirements file:
-setuptools==80.10.2 \
-    --hash=sha256:8b0e9d10c784bf7d262c4e5ec5d4ec94127ce206e8738f29a437945fbc219b70 \
-    --hash=sha256:95b30ddfb717250edb492926c92b5221f7ef3fbcc2b07579bcd4a27da21d0173
     # via -r requirements.in
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
@@ -1097,6 +1088,15 @@ zope-interface==8.4 \
     --hash=sha256:f00fd65343d2a241a2b17688a12f5e815aa704ed64f9ca375de5f9e0ae9c9bda \
     --hash=sha256:f1f854bef8bc137519e4413bcc1322d55faad28b20b3ca39f7bec49d2f1b26df \
     --hash=sha256:fa0a26d5767087170b3da9ff503221d535ea266bf61b522d0afa2590fd05db0a
+    # via
+    #   certbot-dns-cloudns
+    #   certbot-dns-domainoffensive
+    #   certbot-dns-domeneshop
+
+# The following packages are considered to be unsafe in a requirements file:
+setuptools==80.10.2 \
+    --hash=sha256:8b0e9d10c784bf7d262c4e5ec5d4ec94127ce206e8738f29a437945fbc219b70 \
+    --hash=sha256:95b30ddfb717250edb492926c92b5221f7ef3fbcc2b07579bcd4a27da21d0173
     # via
     #   -r requirements.in
     #   certbot-dns-bunny
