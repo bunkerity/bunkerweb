@@ -54,6 +54,8 @@ FULL_API_DEFERRED=""
 INSTALL_TYPE=""
 BUNKERWEB_INSTANCES_INPUT=""
 MANAGER_IP_INPUT=""
+SERVER_IP_INPUT=""
+RESOLVED_SERVER_IP=""
 DNS_RESOLVERS_INPUT=""
 API_LISTEN_HTTPS_INPUT=""
 UPGRADE_SCENARIO="no"
@@ -1434,6 +1436,27 @@ is_private_ipv4() {
     return 1
 }
 
+# Reject loopback (127.0.0.0/8) and link-local (169.254.0.0/16) addresses.
+# Used as a last-resort filter when picking up public IPv4s on cloud hosts.
+is_loopback_or_link_local_ipv4() {
+    local ip="$1"
+    local o1 o2 _o3 _o4
+
+    if [[ ! $ip =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
+        return 1
+    fi
+
+    IFS='.' read -r o1 o2 _o3 _o4 <<< "$ip"
+
+    if [ "$o1" -eq 127 ]; then
+        return 0
+    elif [ "$o1" -eq 169 ] && [ "$o2" -eq 254 ]; then
+        return 0
+    fi
+
+    return 1
+}
+
 # Extract the first IPv4 address from a whitespace-separated list
 extract_first_ipv4() {
     local input="$1"
@@ -1483,12 +1506,36 @@ get_primary_ipv4() {
     local line=""
     local candidate=""
 
+    # Best-practice: ask the kernel directly which source address it would use
+    # to reach an external destination. This is a pure routing-table lookup
+    # (no packet sent), respects policy routing / VRFs / multiple routing
+    # tables, and reflects the address the host actually uses for outbound
+    # traffic. TEST-NET-1 (RFC 5737, 192.0.2.0/24) is reserved for
+    # documentation and is guaranteed to never route to a real host.
+    if command -v ip >/dev/null 2>&1; then
+        route_output=$(ip -4 route get 192.0.2.1 2>/dev/null || true)
+        if [ -n "$route_output" ]; then
+            prev=""
+            for token in $route_output; do
+                if [ "$prev" = "src" ]; then
+                    candidate="$token"
+                    if [[ $candidate =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! is_loopback_or_link_local_ipv4 "$candidate"; then
+                        echo "$candidate"
+                        return 0
+                    fi
+                fi
+                prev="$token"
+            done
+        fi
+    fi
+
     if command -v ip >/dev/null 2>&1; then
         route_output=$(ip -4 route show default 2>/dev/null || true)
         if [ -z "$route_output" ]; then
             route_output=$(ip route show default 2>/dev/null || true)
         fi
         if [ -n "$route_output" ]; then
+            prev=""
             for token in $route_output; do
                 if [ "$prev" = "src" ]; then
                     candidate="$token"
@@ -1532,7 +1579,185 @@ get_primary_ipv4() {
         fi
     fi
 
+    # Fallback: no RFC1918 candidate found — accept any non-loopback, non-link-local
+    # IPv4 (covers cloud VMs that only have public addresses).
+    if [ -z "$primary_ip" ] && command -v ip >/dev/null 2>&1; then
+        prev=""
+        route_output=$(ip -4 route show default 2>/dev/null || true)
+        if [ -z "$route_output" ]; then
+            route_output=$(ip route show default 2>/dev/null || true)
+        fi
+        if [ -n "$route_output" ]; then
+            for token in $route_output; do
+                if [ "$prev" = "src" ]; then
+                    candidate="$token"
+                    if [[ $candidate =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! is_loopback_or_link_local_ipv4 "$candidate"; then
+                        primary_ip="$candidate"
+                        break
+                    fi
+                fi
+                prev="$token"
+            done
+        fi
+
+        if [ -z "$primary_ip" ]; then
+            addr_output=$(ip -4 addr show scope global 2>/dev/null || true)
+            if [ -n "$addr_output" ]; then
+                while IFS= read -r line; do
+                    case "$line" in
+                        *inet\ *)
+                            line=${line#*inet }
+                            candidate=${line%%/*}
+                            if [[ $candidate =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! is_loopback_or_link_local_ipv4 "$candidate"; then
+                                primary_ip="$candidate"
+                                break
+                            fi
+                            ;;
+                    esac
+                done <<< "$addr_output"
+            fi
+        fi
+    fi
+
+    if [ -z "$primary_ip" ] && command -v hostname >/dev/null 2>&1; then
+        host_output=$(hostname -I 2>/dev/null || true)
+        if [ -n "$host_output" ]; then
+            for token in $host_output; do
+                if [[ $token =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! is_loopback_or_link_local_ipv4 "$token"; then
+                    primary_ip="$token"
+                    break
+                fi
+            done
+        fi
+    fi
+
     echo "$primary_ip"
+}
+
+# Enumerate global-scope IPv4 addresses with their interface names. Filters
+# out loopback and link-local. Output format: "<ip> <iface>", one per line,
+# with the kernel-chosen primary IP first when known.
+enumerate_global_ipv4_candidates() {
+    local addr_output line ip iface kernel_choice=""
+
+    if ! command -v ip >/dev/null 2>&1; then
+        return 0
+    fi
+
+    addr_output=$(ip -4 addr show scope global 2>/dev/null || true)
+    if [ -z "$addr_output" ]; then
+        return 0
+    fi
+
+    kernel_choice=$(get_primary_ipv4)
+
+    if [ -n "$kernel_choice" ]; then
+        while IFS= read -r line; do
+            case "$line" in
+                *inet\ *)
+                    ip=${line#*inet }
+                    ip=${ip%%/*}
+                    iface=${line##* }
+                    if [ "$ip" = "$kernel_choice" ]; then
+                        printf '%s %s\n' "$ip" "$iface"
+                        break
+                    fi
+                    ;;
+            esac
+        done <<< "$addr_output"
+    fi
+
+    while IFS= read -r line; do
+        case "$line" in
+            *inet\ *)
+                ip=${line#*inet }
+                ip=${ip%%/*}
+                iface=${line##* }
+                if [[ $ip =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] \
+                   && ! is_loopback_or_link_local_ipv4 "$ip" \
+                   && [ "$ip" != "$kernel_choice" ]; then
+                    printf '%s %s\n' "$ip" "$iface"
+                fi
+                ;;
+        esac
+    done <<< "$addr_output"
+}
+
+# Decide which IP to advertise in the post-install "Next steps" URLs.
+# Order of precedence:
+#   1. Explicit operator override (--server-ip / $SERVER_IP_INPUT)
+#   2. Single global IPv4 on the host -> use it silently
+#   3. No global IPv4 -> empty (caller falls back to the literal placeholder)
+#   4. Multiple global IPv4s, non-interactive install -> kernel-chosen primary
+#   5. Multiple global IPv4s, interactive install -> menu prompt with the
+#      kernel-chosen primary preselected as default
+#
+# Result is published in $RESOLVED_SERVER_IP (a global, so menu prompts stay
+# on stdout for the operator instead of being captured by a $(...) caller).
+resolve_display_server_ip() {
+    RESOLVED_SERVER_IP=""
+
+    local provided
+    provided=$(extract_first_ipv4 "${SERVER_IP_INPUT:-}")
+    if [ -n "$provided" ]; then
+        RESOLVED_SERVER_IP="$provided"
+        return 0
+    fi
+
+    local kernel_choice
+    kernel_choice=$(get_primary_ipv4)
+
+    local candidates=() count=0 line
+    while IFS= read -r line; do
+        [ -z "$line" ] && continue
+        candidates+=("$line")
+        count=$((count + 1))
+    done < <(enumerate_global_ipv4_candidates)
+
+    if [ "$count" -le 1 ] || [ "$INTERACTIVE_MODE" != "yes" ]; then
+        RESOLVED_SERVER_IP="$kernel_choice"
+        return 0
+    fi
+
+    echo
+    echo -e "${BLUE}========================================${NC}"
+    echo -e "${BLUE}🌐 Server IP for the post-install URLs${NC}"
+    echo -e "${BLUE}========================================${NC}"
+    echo "Multiple IPv4 addresses detected. Select the one clients will use to reach this server:"
+
+    local i=1 ip iface
+    for line in "${candidates[@]}"; do
+        ip=${line%% *}
+        iface=${line##* }
+        if [ "$i" = "1" ]; then
+            printf '  %d) %-18s on %-10s (default)\n' "$i" "$ip" "$iface"
+        else
+            printf '  %d) %-18s on %-10s\n' "$i" "$ip" "$iface"
+        fi
+        i=$((i + 1))
+    done
+    printf '  %d) Enter manually\n' "$i"
+    local manual=$i
+    echo
+
+    local picked manual_ip=""
+    while true; do
+        echo -en "${YELLOW}Choice [1]: ${NC}"
+        read -r picked
+        picked=${picked:-1}
+        if ! [[ $picked =~ ^[0-9]+$ ]] || [ "$picked" -lt 1 ] || [ "$picked" -gt "$manual" ]; then
+            print_warning "Invalid selection, please choose 1-${manual}"
+            continue
+        fi
+        if [ "$picked" = "$manual" ]; then
+            prompt_for_local_ipv4 manual_ip
+            RESOLVED_SERVER_IP="$manual_ip"
+            return 0
+        fi
+        line=${candidates[$((picked - 1))]}
+        RESOLVED_SERVER_IP="${line%% *}"
+        return 0
+    done
 }
 
 should_apply_redis_config() {
@@ -2851,8 +3076,12 @@ show_final_info() {
         echo
     fi
 
-    # Display next steps based on installation type and wizard status
-    local _ui_scheme="http" _ui_host="your-server-ip"
+    # Display next steps based on installation type and wizard status.
+    # Honour explicit --server-ip / $SERVER_IP_INPUT, otherwise auto-detect
+    # and prompt only when the host has multiple global IPv4 candidates.
+    resolve_display_server_ip
+    local _server_ip="${RESOLVED_SERVER_IP:-your-server-ip}"
+    local _ui_scheme="http" _ui_host="$_server_ip"
     if [ "$UI_SELFSIGNED_INPUT" = "yes" ]; then
         _ui_scheme="https"
         _ui_host="127.0.0.1"
@@ -2935,7 +3164,7 @@ show_final_info() {
             else
                 echo "  2. Restart the UI: systemctl restart bunkerweb-ui"
             fi
-            echo "  3. Access the Web UI at: http://your-server-ip:7000"
+            echo "  3. Access the Web UI at: http://${_server_ip}:7000"
             echo
             echo "📝 UI-only mode information:"
             echo "  • The UI must connect to the same database as the scheduler"
@@ -2952,7 +3181,7 @@ show_final_info() {
             else
                 echo "  3. Restart the API: systemctl restart bunkerweb-api"
             fi
-            echo "  4. The API will be available at: http://your-server-ip:8000"
+            echo "  4. The API will be available at: http://${_server_ip}:8000"
             echo
             echo "📝 API-only mode information:"
             echo "  • The API service provides programmatic access to BunkerWeb"
@@ -2963,7 +3192,7 @@ show_final_info() {
         "full"|*)
             if [ "$ENABLE_WIZARD" = "yes" ]; then
                 echo "Next steps:"
-                echo "  1. Access the setup wizard at: https://your-server-ip/setup"
+                echo "  1. Access the setup wizard at: https://${_server_ip}/setup"
                 echo "  2. Follow the configuration wizard to complete setup"
                 echo
                 echo "📝 Setup wizard information:"
@@ -2996,7 +3225,7 @@ show_final_info() {
                 else
                     echo "  • Check logs: journalctl -u bunkerweb -f"
                 fi
-                echo "  • Access Web UI (if enabled): http://your-server-ip:7000"
+                echo "  • Access Web UI (if enabled): http://${_server_ip}:7000"
                 if [ "$REDIS_INSTALL" = "yes" ]; then
                     echo "  • ${REDIS_FLAVOR:-redis} is configured: metrics and bans persist across restarts and are shared between workers"
                 fi
@@ -3123,6 +3352,7 @@ usage() {
     echo "  --instances \"IP1 IP2\"    Space-separated list of BunkerWeb instances"
     echo "                           (optional for --manager and --scheduler-only)"
     echo "  --manager-ip IPs         Manager/Scheduler IPs to whitelist (required for --worker in non-interactive mode, overrides auto-detect for --manager)"
+    echo "  --server-ip IP           IP printed in the post-install URLs (overrides auto-detection; can also be set via SERVER_IP_INPUT env var)"
     echo "  --dns-resolvers \"IP1 IP2\"  Custom DNS resolver IPs (for --full, --manager, --worker)"
     echo "  --api-https              Enable HTTPS for internal API communication (default: HTTP only)"
     echo "  --backup-dir PATH        Directory to store automatic backup before upgrade"
@@ -3380,6 +3610,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --manager-ip)
             MANAGER_IP_INPUT="$2"
+            shift 2
+            ;;
+        --server-ip)
+            SERVER_IP_INPUT="$2"
             shift 2
             ;;
         --dns-resolvers)
