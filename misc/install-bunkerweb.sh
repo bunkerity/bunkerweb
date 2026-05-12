@@ -137,6 +137,13 @@ detect_os() {
         exit 1
     fi
 
+    # Normalize common aliases used by AlmaLinux derivatives.
+    case "$DISTRO_ID" in
+        alma)
+            DISTRO_ID="almalinux"
+            ;;
+    esac
+
     print_status "Detected OS: $DISTRO_ID $DISTRO_VERSION"
 }
 
@@ -579,7 +586,8 @@ ask_user_preferences() {
                     echo -e "${YELLOW}Redis username (optional):${NC} "
                     read -p "" -r REDIS_USERNAME_INPUT
                     echo -e "${YELLOW}Redis password (optional):${NC} "
-                    read -p "" -r REDIS_PASSWORD_INPUT
+                    read -s -p "" -r REDIS_PASSWORD_INPUT
+                    echo
                     while true; do
                         echo -e "${YELLOW}Use SSL/TLS for Redis connection? (y/N):${NC} "
                         read -p "" -r
@@ -705,7 +713,9 @@ show_rhel_database_warning() {
         echo
         echo "This is required for the BunkerWeb Scheduler to connect to your database."
         echo
-        read -p "Press Enter to continue..." -r
+        if [ "$INTERACTIVE_MODE" = "yes" ]; then
+            read -p "Press Enter to continue..." -r
+        fi
     fi
 }
 
@@ -760,10 +770,10 @@ check_supported_os() {
             fi
             NGINX_VERSION="1.28.2"
             ;;
-        "rhel"|"rocky"|"almalinux")
+        "rhel"|"rocky"|"almalinux"|"centos")
             major_version=$(echo "$DISTRO_VERSION" | cut -d. -f1)
             if [[ "$major_version" != "8" && "$major_version" != "9" && "$major_version" != "10" ]]; then
-                print_warning "Only RHEL 8, 9, and 10 are officially supported"
+                print_warning "Only RHEL/CentOS 8, 9, and 10 are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
                     read -p "Continue anyway? (y/N): " -r
                     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -775,7 +785,7 @@ check_supported_os() {
             ;;
         *)
             print_error "Unsupported operating system: $DISTRO_ID"
-            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04, Fedora 42/43, RHEL 8/9/10, FreeBSD 13/14"
+            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04, Fedora 42/43, RHEL/CentOS/Rocky/AlmaLinux 8/9/10, FreeBSD 13/14"
             exit 1
             ;;
     esac
@@ -1270,8 +1280,11 @@ gpgkey=https://nginx.org/keys/nginx_signing.key
 module_hotfixes=true
 EOF
 
+    # Remove existing nginx and conflicting modules before installing new version
+    dnf remove -y nginx nginx-mod-stream nginx-mod-http-image-filter nginx-mod-http-perl nginx-mod-http-xslt-filter nginx-mod-mail 2>/dev/null || true
+
     # Install NGINX
-    run_cmd dnf install -y "nginx-$NGINX_VERSION"
+    run_cmd dnf install -y "nginx-${NGINX_VERSION}"
 
     # Lock NGINX version
     run_cmd dnf versionlock add nginx
@@ -1473,8 +1486,8 @@ install_crowdsec() {
     print_step "Installing CrowdSec security engine"
 
     # Ensure required dependencies
-    for dep in curl gnupg2 ca-certificates; do
-        if ! command -v $dep >/dev/null 2>&1; then
+    for dep in curl gpg ca-certificates; do
+        if ! command -v "$dep" >/dev/null 2>&1; then
             print_status "Installing missing dependency: $dep"
             case "$DISTRO_ID" in
                 "debian"|"ubuntu")
@@ -1496,7 +1509,7 @@ install_crowdsec() {
 
     echo -e "${YELLOW}--- Step 1: Add CrowdSec repository and install engine ---${NC}"
     print_step "Adding CrowdSec repository and installing engine"
-    run_cmd curl -s https://install.crowdsec.net | sh
+    run_cmd curl -fsSL https://install.crowdsec.net | sh
     case "$DISTRO_ID" in
         "debian"|"ubuntu")
             run_cmd apt install -y crowdsec
@@ -1939,7 +1952,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         -y|--yes)
             INTERACTIVE_MODE="no"
-            ENABLE_WIZARD="yes"  # Default to wizard in non-interactive mode
+            ENABLE_WIZARD="no"  # Non-interactive: no wizard by default (use -w/--enable-wizard to override)
             shift
             ;;
         -f|--force)
@@ -2423,35 +2436,6 @@ main() {
         esac
     fi
 
-    # If upgrading, remove holds/versionlocks so upgrade can proceed
-    if [ "$UPGRADE_SCENARIO" = "yes" ]; then
-        case "$DISTRO_ID" in
-            debian|ubuntu)
-                if command -v apt-mark >/dev/null 2>&1; then
-                    print_status "Removing holds on bunkerweb & nginx (upgrade scenario)"
-                    apt-mark unhold bunkerweb nginx >/dev/null 2>&1 || true
-                fi
-                ;;
-            fedora|rhel|rocky|almalinux)
-                if command -v dnf >/dev/null 2>&1; then
-                    print_status "Removing versionlock on bunkerweb & nginx (upgrade scenario)"
-                    dnf versionlock delete bunkerweb nginx >/dev/null 2>&1 || true
-                fi
-                ;;
-        esac
-        # Stop services before upgrading (per upgrading.md procedure)
-        print_step "Stopping BunkerWeb services before upgrade"
-        for svc in bunkerweb bunkerweb-ui bunkerweb-scheduler; do
-            if systemctl list-units --type=service --all | grep -q "^${svc}.service"; then
-                if systemctl is-active --quiet "$svc"; then
-                    run_cmd systemctl stop "$svc"
-                else
-                    print_status "Service $svc not active, skipping stop"
-                fi
-            fi
-        done
-    fi
-
     # Install NGINX based on distribution
     case "$DISTRO_ID" in
         "debian"|"ubuntu")
@@ -2460,7 +2444,7 @@ main() {
         "fedora")
             install_nginx_fedora
             ;;
-        "rhel"|"rocky"|"almalinux")
+        "rhel"|"rocky"|"almalinux"|"centos")
             install_nginx_rhel
             ;;
         "freebsd")
@@ -2499,7 +2483,7 @@ main() {
         "fedora")
             install_bunkerweb_rpm
             ;;
-        "rhel"|"rocky"|"almalinux")
+        "rhel"|"rocky"|"almalinux"|"centos")
             install_bunkerweb_rpm
             ;;
         "freebsd")
