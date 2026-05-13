@@ -7,6 +7,7 @@
 - [BUGFIX] `metrics`: bound per-worker LRU and per-key event-history arrays via new `MAX_LRU_HISTORY` setting (default `1k`) to close OSS RAM leak under high-cardinality block traffic.
 - [BUGFIX] `metrics`: lower `METRICS_MAX_BLOCKED_REQUESTS_REDIS` default `100000` → `10k`.
 - [BUGFIX] `datastore`: lower shared worker-LRU default `100000` → `1k`, configurable via new `DATASTORE_LRU_SIZE` global setting.
+- [BUGFIX] `modsec` : fix memory leak in variables retrieval from modsecurity to lua
 - [FEATURE] `metrics`/`misc`: `METRICS_MAX_BLOCKED_REQUESTS`, `METRICS_MAX_BLOCKED_REQUESTS_REDIS`, `MAX_LRU_HISTORY`, and `DATASTORE_LRU_SIZE` accept `k`/`m` shorthand.
 - [UI] List pages: unrestricted `10/25/50/100` page-size dropdown, header checkbox selects current page only, with opt-in "Select all N matching" banner so bulk actions cover every page. (Fixes #3513)
 - [FEATURE] `all-in-one`: embedded Redis now boots from a generated `/var/lib/bunkerweb/redis-runtime.conf` (copy of `/etc/redis.conf` + env-driven defaults for directives the conf is silent about). `.conf` always prevails; env vars `REDIS_MAXMEMORY`, `REDIS_MAXMEMORY_POLICY`, `REDIS_APPENDONLY`, `REDIS_SAVE`/`REDIS_SAVE_<N>` (BunkerWeb multi-value pattern; empty disables RDB) and `REDIS_PASSWORD` (wired to `requirepass`) only fill the gaps. Defaults follow the documented Redis Best Practices.
