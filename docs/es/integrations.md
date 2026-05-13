@@ -2079,7 +2079,7 @@ Para configuraciones no interactivas o automatizadas, el script se puede control
 | `--worker`         | Instala solo la instancia de BunkerWeb.                                               |
 | `--scheduler-only` | Instala solo el componente del Programador.                                           |
 | `--ui-only`        | Instala solo el componente de la Interfaz de Usuario Web.                             |
-| `--api-only`       | Instala solo el servicio API (puerto 8000).                                           |
+| `--api-only`       | Instala solo el servicio API (puerto 8888).                                           |
 
 **Integraciones de seguridad:**
 
@@ -2171,7 +2171,7 @@ sudo ./install-bunkerweb.sh --yes --api
 
     **Disponibilidad del servicio API:**
 
-    - El servicio API externo (puerto 8000) está disponible para los tipos de instalación `--full` y `--manager`
+    - El servicio API externo (puerto 8888) está disponible para los tipos de instalación `--full` y `--manager`
     - No está disponible para instalaciones `--worker`, `--scheduler-only` o `--ui-only`
     - Usa `--api-only` para una instalación dedicada del servicio API
 

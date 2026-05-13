@@ -119,9 +119,9 @@
 
     * **Mode-aware behavior**:
 
-        - The installer reuses the same installation-type logic during upgrades: manager mode keeps the setup wizard disabled, binds the API to `0.0.0.0`, and requires a whitelist IP (pass `--manager-ip` for unattended runs), while worker mode still enforces the manager IP list.
+        - The installer reuses the same installation-type logic during upgrades: manager mode keeps the setup wizard disabled, binds the internal API listener to `0.0.0.0`, and requires a whitelist IP (pass `--manager-ip` for unattended runs), while worker mode still enforces the manager IP list.
         - Manager upgrades can opt to start or skip the Web UI service, and the summary explicitly reports the API service state so you can decide whether to enable it via `--api` / `--no-api`.
-        - CrowdSec options remain limited to full-stack upgrades, and the script continues to validate both the operating system and CPU architecture before touching packages, gating unsupported combinations behind `--force`.
+        - CrowdSec is prompted interactively for Full Stack upgrades. The CLI flags remain valid for Full Stack and Manager upgrades, and the script continues to reject CrowdSec for Worker, Scheduler-only, UI-only, and API-only modes.
 
         Rollback summary:
 
@@ -135,7 +135,7 @@
         | ----------------------- | ------------------------------------------------------------------------------------------------- |
         | `-v, --version <X.Y.Z>` | Target BunkerWeb version to upgrade to.                                                           |
         | `-y, --yes`             | Non‑interactive (assumes upgrade confirmation and enables auto backup unless `--no-auto-backup`). |
-        | `--tui`                 | Force a TUI (gum or whiptail). Aborts if neither can be installed.                                |
+        | `--tui`                 | Force a TUI (downloaded gum or existing whiptail). Aborts if no TUI tier can render.              |
         | `--no-tui`              | Skip every TUI tier and use plain text prompts. Equivalent to `BW_INSTALL_TUI=no`.                |
         | `--backup-dir <PATH>`   | Destination for the automatic pre‑upgrade backup. Created if missing.                             |
         | `--no-auto-backup`      | Skip automatic backup (NOT recommended). You must have a manual backup.                           |

@@ -503,23 +503,25 @@ The Manager is the brain of the cluster. It runs the Scheduler, Database, and op
 
         | Prompt                     | Action                                                                                                  |
         | :------------------------- | :------------------------------------------------------------------------------------------------------ |
-        | **BunkerWeb instances**    | Enter space-separated IPs of your worker nodes (e.g., `192.168.10.11 192.168.10.12`).                   |
-        | **Whitelist IP**           | Accept the detected IP or enter a subnet (e.g., `192.168.10.0/24`) to allow API access.                 |
+        | **BunkerWeb instances**    | Optionally enter space-separated IPs of your worker nodes (e.g., `192.168.10.11 192.168.10.12`), or leave empty and add workers later. |
+        | **Whitelist IP**           | Accept the detected IP or enter a subnet (e.g., `192.168.10.0/24`) to allow internal API access.        |
         | **DNS resolvers**          | Choose **No** to keep the defaults, or provide custom ones.                                              |
         | **HTTPS for internal API** | **Recommended:** choose **Yes** to auto-generate certificates for secure manager-worker communication. |
         | **Web UI service**         | Choose **Yes** to enable the web interface (highly recommended).                                        |
+        | **Web UI admin user**      | Create an initial admin user when the wizard is disabled. Manager mode disables the wizard, so this is recommended unless you configure credentials another way. |
+        | **Web UI HTTPS**           | Optionally generate a self-signed certificate for the Manager UI listener.                              |
         | **API service**            | Choose **No** unless you need the public REST API for external tools.                                   |
 
         !!! note "Prompt UI"
-            The installer uses the [gum](https://github.com/charmbracelet/gum) TUI. On first interactive run it downloads the official `gum` binary from the GitHub release (SHA256-pinned), runs it from a tempdir, and removes the tempdir on exit — no system package is installed. Use arrow keys + Enter to answer prompts. Pass `--no-tui` if you prefer plain text prompts.
+            The installer uses the [gum](https://github.com/charmbracelet/gum) TUI. On first interactive run it downloads the official `gum` binary from the GitHub release (SHA256-pinned), runs it from a tempdir, and removes the tempdir on exit — no system package is installed. If gum cannot be fetched, it uses an existing `whiptail`; if neither is available, it falls back to plain text prompts. Use arrow keys + Enter to answer prompts. Pass `--no-tui` if you prefer plain text prompts.
 
     #### Secure and Expose the UI
 
-    If you enabled the Web UI, you should secure it. You can host it on the Manager or a separate machine.
+    If you enabled the Web UI, keep it reachable only by administrators. The installer can create the initial admin user and prints any generated password at the end of the run. The Manager UI listens on `127.0.0.1:7000` by default; expose it through a reverse proxy or SSH tunnel, or change `LISTEN_ADDR` intentionally.
 
     === "Hosted on Manager"
 
-        1. Edit `/etc/bunkerweb/ui.env` to set strong credentials:
+        1. If you skipped admin creation during install, edit `/etc/bunkerweb/ui.env` to set strong credentials. Set `LISTEN_ADDR=0.0.0.0` only when you intentionally expose the UI directly:
 
         ```ini
         # OVERRIDE_ADMIN_CREDS=no
@@ -533,8 +535,8 @@ The Manager is the brain of the cluster. It runs the Scheduler, Database, and op
         # ENABLE_HEALTHCHECK=no
         ```
 
-        !!! warning "Change default credentials"
-            Replace `admin` and `changeme` with strong credentials before starting the UI service in production.
+        !!! warning "Use real credentials"
+            Replace the placeholder username and password before starting the UI service in production.
 
         2. Restart the UI:
 

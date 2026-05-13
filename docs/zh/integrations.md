@@ -2078,7 +2078,7 @@ sudo ./install-bunkerweb.sh
 | `--worker`         | 仅安装 BunkerWeb 实例。                               |
 | `--scheduler-only` | 仅安装调度器组件。                                    |
 | `--ui-only`        | 仅安装 Web UI 组件。                                  |
-| `--api-only`       | 仅安装 API 服务（端口 8000）。                        |
+| `--api-only`       | 仅安装 API 服务（端口 8888）。                        |
 
 **安全集成：**
 
@@ -2170,7 +2170,7 @@ sudo ./install-bunkerweb.sh --yes --api
 
     **API 服务可用性：**
 
-    - 外部 API 服务（端口 8000）适用于 `--full` 和 `--manager` 安装类型
+    - 外部 API 服务（端口 8888）适用于 `--full` 和 `--manager` 安装类型
     - 它不适用于 `--worker`, `--scheduler-only` 或 `--ui-only` 安装
     - 使用 `--api-only` 进行专用的 API 服务安装
 

@@ -1290,7 +1290,7 @@ The All-In-One image comes with several built-in services, which can be controll
 
 - `SERVICE_UI=yes` (default) - Enables the web UI service
 - `SERVICE_SCHEDULER=yes` (default) - Enables the Scheduler service
-- `SERVICE_API=no` (default) - Enables the API service (FastAPI control plane)
+- `SERVICE_API=no` (default) - Disables the API service (FastAPI control plane)
 - `AUTOCONF_MODE=no` (default) - Enables the autoconf service
 - `USE_REDIS=yes` (default) - Enables the built-in [Redis](#redis-integration) instance
 - `USE_CROWDSEC=no` (default) - [CrowdSec](#crowdsec-integration) integration is disabled by default
@@ -2017,8 +2017,8 @@ sudo ./install-bunkerweb.sh
 The easy install script is a powerful tool designed to streamline the setup of BunkerWeb on a fresh Linux system. It automates the following key steps:
 
 1.  **System Analysis**: Detects your operating system and verifies it against the list of supported distributions.
-2.  **Installation Customization**: In interactive mode, it prompts you to choose an installation type (All-In-One, Manager, Worker, etc.) and decide whether to enable the web-based setup wizard.
-3.  **Optional Integrations**: Offers to automatically install and configure the [CrowdSec Security Engine](#crowdsec-integration-with-the-script) and Redis/Valkey for shared cache/session data.
+2.  **Installation Customization**: In interactive mode, it prompts you to choose an installation type (Full Stack, Manager, Worker, etc.) and decide whether to enable the web-based setup wizard when the selected mode supports it.
+3.  **Optional Integrations**: Offers to automatically install and configure the [CrowdSec Security Engine](#crowdsec-integration-with-the-script) and Redis/Valkey when they are compatible with the selected installation type.
 4.  **Dependency Management**: Installs the correct version of NGINX required by BunkerWeb from official sources and locks the version to prevent unintended upgrades.
 5.  **BunkerWeb Installation**: Adds the BunkerWeb package repository, installs the necessary packages, and locks the version.
 6.  **Service Configuration**: Sets up and enables the `systemd` services corresponding to your chosen installation type.
@@ -2054,16 +2054,18 @@ You will be asked to make the following choices:
     *   **Scheduler Only**: Installs only the Scheduler component.
     *   **Web UI Only**: Installs only the Web UI component.
     *   **API Only**: Installs only the API service for programmatic access.
-2.  **Setup Wizard**: Choose whether to enable the web-based configuration wizard. This is highly recommended for first-time users.
-3.  **CrowdSec Integration**: Opt-in to install the CrowdSec security engine for advanced, real-time threat protection. Available for Full Stack installations only.
+2.  **Setup Wizard**: Choose whether to enable the web-based configuration wizard when the selected mode includes the Web UI and supports the wizard. Manager mode always disables the wizard.
+3.  **CrowdSec Integration**: Opt-in to install the CrowdSec security engine for advanced, real-time threat protection. The interactive prompt is shown for Full Stack installations only; CLI flags can also enable CrowdSec for Manager installations.
 4.  **CrowdSec AppSec**: If you choose to install CrowdSec, you can also enable the Application Security (AppSec) component, which adds WAF capabilities.
 5.  **Redis/Valkey Integration**: Enable Redis/Valkey to share session data, metrics, and security data across nodes for seamless clustering and load balancing. You can install locally or point to an existing server. Available for Full Stack and Manager installations only.
-5.  **DNS Resolvers**: For Full Stack, Manager, and Worker installations, you can optionally specify custom DNS resolver IPs.
-6.  **Internal API HTTPS**: For Full Stack, Manager, and Worker installations, choose whether to enable HTTPS for internal API communication between the scheduler/manager and BunkerWeb/worker instances (default: HTTP only).
-7.  **API Service**: For Full Stack and Manager installations, choose whether to enable the optional external API service. It is disabled by default on Linux installations.
+6.  **Database**: For Full Stack and Manager installations, choose SQLite, a local MariaDB/PostgreSQL install, or an existing external database.
+7.  **Web UI Admin User**: For UI-bearing installations, choose whether to pre-create the first admin user. The installer defaults to creating one when the wizard is disabled.
+8.  **DNS Resolvers**: For Full Stack, Manager, and Worker installations, you can optionally specify custom DNS resolver IPs.
+9.  **Internal API HTTPS**: For Full Stack, Manager, and Worker installations, choose whether to enable HTTPS for internal API communication between the scheduler/manager and BunkerWeb/worker instances (default: HTTP only).
+10. **API Service**: For Full Stack and Manager installations, choose whether to enable the optional external API service. It is disabled by default on Linux installations.
 
 !!! info "Manager and Scheduler installations"
-    If you choose the **Manager** or **Scheduler Only** installation type, you will also be prompted to provide the IP addresses or hostnames of your BunkerWeb worker instances.
+    If you choose the **Manager** or **Scheduler Only** installation type, you will also be prompted for the IP addresses or hostnames of your BunkerWeb worker instances. This list is optional during install; if you leave it empty, the installer warns and you can add workers later.
 
 #### Command-Line Options
 
@@ -2077,12 +2079,16 @@ For non-interactive or automated setups, the script can be controlled with comma
 | `-w, --enable-wizard`   | Enables the setup wizard.                                             |
 | `-n, --no-wizard`       | Disables the setup wizard.                                            |
 | `-y, --yes`             | Runs in non-interactive mode using default answers for all prompts.   |
-| `--tui`                 | Force a TUI (gum or whiptail). Hard fail if neither can be installed. |
+| `--tui`                 | Require a TUI (downloaded gum or existing whiptail) and abort if no TUI tier can render. |
 | `--no-tui`              | Disable all TUI tiers and use the legacy plain-text prompts. Equivalent to `BW_INSTALL_TUI=no`. |
 | `-f, --force`           | Forces the installation to proceed even on an unsupported OS version. |
-| `-q, --quiet`           | Silent installation (suppress output).                                |
+| `--force-type-change`   | Allow `--<type>` to differ from the detected install type on upgrade (intentional HA migrations only). |
+| `-q, --quiet`           | Silent installation (suppress output; implies `--yes`).               |
 | `--api`, `--enable-api` | Enables the API (FastAPI) systemd service (disabled by default).      |
 | `--no-api`              | Explicitly disables the API service.                                  |
+| `--server-ip IP`        | IP printed in post-install URLs. Overrides auto-detection and can also be set with `SERVER_IP_INPUT`. |
+| `--epel`                | Install `epel-release` on RHEL-family distributions if it is missing. |
+| `--no-epel`             | Do not install `epel-release` on RHEL-family distributions.           |
 | `-h, --help`            | Displays the help message with all available options.                 |
 | `--dry-run`             | Show what would be installed without doing it.                        |
 
@@ -2095,7 +2101,7 @@ For non-interactive or automated setups, the script can be controlled with comma
 | `--worker`         | Installs only the BunkerWeb instance.                                    |
 | `--scheduler-only` | Installs only the Scheduler component.                                   |
 | `--ui-only`        | Installs only the Web UI component.                                      |
-| `--api-only`       | Installs only the API service (port 8000).                               |
+| `--api-only`       | Installs only the API service (port 8888).                               |
 
 **Security Integrations:**
 
@@ -2106,12 +2112,13 @@ For non-interactive or automated setups, the script can be controlled with comma
 | `--crowdsec-appsec` | Install CrowdSec with AppSec component (includes WAF capabilities). |
 | `--redis`           | Install and configure Redis locally.                                |
 | `--no-redis`        | Skip Redis integration.                                             |
+| `--redis-flavor FLAVOR` | Local install flavor: `redis` (default) or `valkey`.             |
 
 **Advanced Options:**
 
 | Option                      | Description                                                                         |
 | --------------------------- | ----------------------------------------------------------------------------------- |
-| `--instances "IP1 IP2"`     | Space-separated list of BunkerWeb instances (required for manager/scheduler modes). |
+| `--instances "IP1 IP2"`     | Space-separated list of BunkerWeb instances (optional for manager/scheduler modes; you can add workers later). |
 | `--manager-ip IPs`          | Manager/Scheduler IPs to whitelist (required for worker in non-interactive mode).   |
 | `--dns-resolvers "IP1 IP2"` | Custom DNS resolver IPs (for full, manager, or worker installations).               |
 | `--api-https`               | Enable HTTPS for internal API communication (default: HTTP only).                   |
@@ -2122,10 +2129,50 @@ For non-interactive or automated setups, the script can be controlled with comma
 | `--redis-database DB`       | Redis database number.                                                              |
 | `--redis-username USER`     | Redis username (Redis 6+).                                                          |
 | `--redis-password PASS`     | Redis password.                                                                     |
+| `--redis-bind IP`           | Redis/Valkey bind address for a local Manager install (default prompt: `0.0.0.0`).  |
+| `--redis-no-password`       | Skip the auto-generated `requirepass` when binding Redis/Valkey beyond loopback.    |
+| `--redis-maxmemory MB`      | Memory cap in MB; `0` or `unlimited` keeps the distribution default.                |
+| `--redis-maxmemory-policy POLICY` | Eviction policy for local Redis/Valkey (default: `volatile-lru`).             |
 | `--redis-ssl`               | Enable SSL/TLS for Redis connection.                                                |
 | `--redis-no-ssl`            | Disable SSL/TLS for Redis connection.                                               |
 | `--redis-ssl-verify`        | Verify Redis SSL certificate.                                                       |
 | `--redis-no-ssl-verify`     | Do not verify Redis SSL certificate.                                                |
+
+**Database Options (`--full` / `--manager` only):**
+
+| Option                  | Description                                                                                                       |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `--database ENGINE`     | Strategy: `mariadb` or `postgresql` (auto-install locally), `external` (use an existing remote DB), `none` (SQLite). |
+| `--db-engine ENGINE`    | External-DB engine: `mariadb`, `mysql`, or `postgresql`. Implies `--database external` when set on its own.       |
+| `--db-host HOST`        | External DB host (FQDN or IP).                                                                                    |
+| `--db-port PORT`        | External DB TCP port (defaults: 3306 for `mariadb`/`mysql`, 5432 for `postgresql`).                               |
+| `--db-name NAME`        | Database name (default: `bw_db`).                                                                                 |
+| `--db-user USER`        | Database user (default: `bunkerweb`).                                                                             |
+| `--db-password PASS`    | Database password — required for `--database external`. Rules: 8+ chars, no quotes/backslash/backtick.            |
+| `--db-ssl`              | Use SSL/TLS for the external DB connection.                                                                       |
+| `--db-no-ssl`           | Do not use SSL/TLS for the external DB connection.                                                                |
+| `--db-ssl-verify`       | Verify the external DB server certificate.                                                                        |
+| `--db-no-ssl-verify`    | Use SSL but skip certificate verification.                                                                        |
+| `--db-skip-probe`       | Do not probe external DB connectivity from this host. Useful when the engine client is not installed locally, or when the DB is only reachable from the scheduler's network segment. |
+
+**Web UI Admin User (`--full` / `--manager` / `--ui-only` only):**
+
+When no UI admin flag is provided, the interactive installer offers a Web UI admin-user prompt for UI-bearing install types. The default answer flips based on wizard state: **Yes** when the wizard is disabled (manager mode always; other modes when `--no-wizard` is passed) because otherwise the UI has no initial login. **No** when the wizard is enabled because the wizard collects the admin user on first boot. Operators can still opt in to pre-create the admin even with the wizard enabled, which skips the wizard's admin step.
+
+| Option                      | Description                                                                                              |
+| --------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `--ui-admin-user NAME`      | Pre-create the first Web UI admin user with this name (skips the setup wizard for the admin step).       |
+| `--ui-admin-password PASS`  | Password for the admin user. Implies admin creation; the username defaults to `admin` if omitted. Auto-generated when omitted. Rules: 8+ chars, lower/upper/digit/special. |
+| `--no-ui-admin`             | Skip the admin-user creation prompt entirely. If the wizard is disabled, the UI remains without an initial login until credentials are configured another way. |
+| `--ui-https-selfsigned`     | (`--manager` only) Generate a self-signed cert and enable HTTPS on the Web UI listener.                  |
+| `--no-ui-https-selfsigned`  | (`--manager` only) Disable manager UI self-signed HTTPS.                                                 |
+
+!!! warning "External database notes"
+
+    - `--database external` requires `--db-engine`, `--db-host`, and `--db-password` in non-interactive mode. `--db-name` and `--db-user` have defaults.
+    - For production, always pair `--db-ssl` with `--db-ssl-verify`. `--db-no-ssl-verify` accepts unauthenticated certificates and leaves the channel open to active MitM.
+    - The installer probes connectivity once the DSN is built. If the engine client (`mariadb` / `mysql` / `psql`) is not installed locally, it warns and skips the probe. If the probe runs and fails, interactive mode asks whether to write the DSN anyway; non-interactive mode aborts unless `--db-skip-probe` is set.
+    - Replace `YourStrongDbPassword` / `YourStrongUiPassw0rd!` in the examples below with values from a secrets manager before running the command.
 
 **Example Usage:**
 
@@ -2136,13 +2183,13 @@ sudo ./install-bunkerweb.sh
 # Non-interactive installation with defaults (full stack, wizard enabled)
 sudo ./install-bunkerweb.sh --yes
 
-# Install a Worker node without the setup wizard
+# Install a Worker node interactively without the setup wizard
 sudo ./install-bunkerweb.sh --worker --no-wizard
 
 # Install a specific version
 sudo ./install-bunkerweb.sh --version 1.6.10~rc6
 
-# Manager setup with remote worker instances (instances required)
+# Manager setup with remote worker instances (optional at install time)
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
 
 # Manager with HTTPS internal API communication
@@ -2154,8 +2201,29 @@ sudo ./install-bunkerweb.sh --worker --dns-resolvers "1.1.1.1 1.0.0.1" --api-htt
 # Full installation with CrowdSec and AppSec
 sudo ./install-bunkerweb.sh --crowdsec-appsec
 
+# Manager installation with CrowdSec enabled from the CLI
+sudo ./install-bunkerweb.sh --manager --crowdsec
+
 # Full installation using an existing Redis server
 sudo ./install-bunkerweb.sh --redis-host redis.example.com --redis-password "your-strong-password"
+
+# Full installation against an existing external MariaDB
+sudo ./install-bunkerweb.sh --yes --no-wizard \
+    --database external --db-engine mariadb \
+    --db-host mariadb.example.com --db-port 3306 \
+    --db-name bw_db --db-user bunkerweb --db-password 'YourStrongDbPassword' \
+    --db-ssl --db-ssl-verify \
+    --ui-admin-user admin --ui-admin-password 'YourStrongUiPassw0rd!'
+
+# Full installation against an existing external PostgreSQL
+sudo ./install-bunkerweb.sh --yes --no-wizard \
+    --database external --db-engine postgresql \
+    --db-host pg.example.com --db-port 5432 \
+    --db-name bw_db --db-user bunkerweb --db-password 'YourStrongDbPassword' \
+    --ui-admin-user admin --ui-admin-password 'YourStrongUiPassw0rd!'
+
+# Pre-create the admin user on a full install (random password printed at the end)
+sudo ./install-bunkerweb.sh --no-wizard --ui-admin-user admin
 
 # Silent non-interactive installation
 sudo ./install-bunkerweb.sh --quiet --yes
@@ -2172,8 +2240,8 @@ sudo ./install-bunkerweb.sh --yes --api
 # Error: API service not available for worker installations
 # sudo ./install-bunkerweb.sh --worker --api  # This will fail
 
-# Error: Instances required for manager in non-interactive mode
-# sudo ./install-bunkerweb.sh --manager --yes  # This will fail without --instances
+# Manager non-interactive install without initial workers (the installer warns; add workers later)
+sudo ./install-bunkerweb.sh --manager --yes
 
 # Install API-only mode
 sudo ./install-bunkerweb.sh --api-only
@@ -2186,8 +2254,9 @@ sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --
 
     **CrowdSec Limitations:**
 
-    - CrowdSec options (`--crowdsec`, `--crowdsec-appsec`) are only compatible with `--full` (default) installation type
-    - They cannot be used with `--manager`, `--worker`, `--scheduler-only`, `--ui-only`, or `--api-only` installations
+    - CrowdSec options (`--crowdsec`, `--crowdsec-appsec`) are compatible with `--full` (default) and `--manager` installation types
+    - The interactive CrowdSec prompt is shown for Full Stack only; use CLI flags for Manager
+    - They cannot be used with `--worker`, `--scheduler-only`, `--ui-only`, or `--api-only` installations
 
     **Redis Limitations:**
 
@@ -2196,24 +2265,24 @@ sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --
 
     **API Service Availability:**
 
-    - The external API service (port 8000) is available for `--full` and `--manager` installation types
+    - The external API service (port 8888) is available for `--full` and `--manager` installation types
     - It is not available for `--worker`, `--scheduler-only`, or `--ui-only` installations
     - Use `--api-only` for a dedicated API service installation
 
     **Instances Requirements:**
 
     - The `--instances` option is only valid with `--manager` and `--scheduler-only` installation types
-    - When using `--manager` or `--scheduler-only` with `--yes` (non-interactive mode), the `--instances` option is mandatory
+    - The list is optional during install; if it is empty, the installer warns and you can add workers later
     - Format: `--instances "192.168.1.10 192.168.1.11 192.168.1.12"`
 
     **Interactive vs Non-Interactive:**
 
     - Interactive mode (default) will prompt for missing required values
-    - Non-interactive mode (`--yes`) requires all necessary options to be provided via command line
+    - Non-interactive mode (`--yes`) still requires values that cannot be safely defaulted, such as `--manager-ip` for Worker installs and the minimum external database fields (`--db-engine`, `--db-host`, and `--db-password`)
 
 #### CrowdSec Integration with the Script {#crowdsec-integration-with-the-script}
 
-If you opt to install CrowdSec during the interactive setup, the script fully automates its integration with BunkerWeb:
+If you opt to install CrowdSec during the interactive setup or with the CLI flags, the script fully automates its integration with BunkerWeb:
 
 - It adds the official CrowdSec repository and installs the agent.
 - It creates a new acquisition file to make CrowdSec parse BunkerWeb's logs (`access.log`, `error.log`, and `modsec_audit.log`).
@@ -2249,16 +2318,16 @@ Once installation is complete, the script provides mode-specific next steps to h
 
 | Mode           | Components                 | Ports                                                                              | Configuration Files                                                                                                         |
 | -------------- | -------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Full Stack     | BunkerWeb + Scheduler + UI | HTTP/HTTPS (80/443), UI (7000), Internal API (5000), Optional: External API (8000) | `/etc/bunkerweb/variables.env`, `/etc/bunkerweb/scheduler.env`, `/etc/bunkerweb/ui.env`, Optional: `/etc/bunkerweb/api.env` |
-| Manager        | Scheduler + UI             | UI (7000), Internal API (5000), Optional: External API (8000)                      | `/etc/bunkerweb/scheduler.env`, `/etc/bunkerweb/ui.env`, `/etc/bunkerweb/variables.env`, Optional: `/etc/bunkerweb/api.env` |
+| Full Stack     | BunkerWeb + Scheduler + UI | HTTP/HTTPS (80/443), UI (7000), Internal API (5000), Optional: External API (8888) | `/etc/bunkerweb/variables.env`, `/etc/bunkerweb/scheduler.env`, `/etc/bunkerweb/ui.env`, Optional: `/etc/bunkerweb/api.env` |
+| Manager        | Scheduler + UI             | UI (7000), Internal API (5000), Optional: External API (8888)                      | `/etc/bunkerweb/scheduler.env`, `/etc/bunkerweb/ui.env`, `/etc/bunkerweb/variables.env`, Optional: `/etc/bunkerweb/api.env` |
 | Worker         | BunkerWeb only             | HTTP/HTTPS (80/443)                                                                | `/etc/bunkerweb/variables.env`                                                                                              |
 | Scheduler Only | Scheduler                  | Internal API (5000)                                                                | `/etc/bunkerweb/scheduler.env`, `/etc/bunkerweb/variables.env`                                                              |
 | UI Only        | Web UI                     | UI (7000)                                                                          | `/etc/bunkerweb/ui.env`                                                                                                     |
-| API Only       | External API               | API (8000)                                                                         | `/etc/bunkerweb/api.env`                                                                                                    |
+| API Only       | External API               | API (8888)                                                                         | `/etc/bunkerweb/api.env`                                                                                                    |
 
-**With setup wizard enabled (Full Stack or Manager):**
+**With setup wizard enabled (Full Stack only):**
 
-1. Access the setup wizard at: `https://your-server-ip/setup` (Full Stack) or `http://your-server-ip:7000/setup` (Manager)
+1. Access the setup wizard at: `https://your-server-ip/setup`
 2. Follow the guided configuration to set up your first protected service
 3. Configure SSL/TLS certificates and other security settings
 
@@ -2266,15 +2335,15 @@ Once installation is complete, the script provides mode-specific next steps to h
 
 Depending on your installation type:
 
-- **Full Stack**: Edit `/etc/bunkerweb/variables.env` for BunkerWeb settings, then restart: `sudo systemctl restart bunkerweb-scheduler`
-- **Manager**: Configure the database connection (`DATABASE_URI`) in `/etc/bunkerweb/scheduler.env` and manage worker instances via the Web UI at `http://your-server-ip:7000`
+- **Full Stack**: Edit `/etc/bunkerweb/variables.env` for BunkerWeb settings, then restart: `sudo systemctl restart bunkerweb bunkerweb-scheduler`
+- **Manager**: If you did not configure a database during install, configure the shared database connection (`DATABASE_URI`) for the Scheduler and Web UI. The Web UI listens on `127.0.0.1:7000` by default; expose it intentionally through a reverse proxy, SSH tunnel, or by changing `LISTEN_ADDR`.
 - **Worker**: Edit `/etc/bunkerweb/variables.env` for BunkerWeb settings, then restart: `sudo systemctl restart bunkerweb`
 - **Scheduler Only**: Configure `DATABASE_URI` in `/etc/bunkerweb/scheduler.env`, then restart: `sudo systemctl restart bunkerweb-scheduler`
 - **UI Only**: Configure `DATABASE_URI` in `/etc/bunkerweb/ui.env`, then restart: `sudo systemctl restart bunkerweb-ui`
 - **API Only**: Configure `DATABASE_URI` in `/etc/bunkerweb/api.env`, then restart: `sudo systemctl restart bunkerweb-api`
 
 !!! info "Database Configuration"
-    For Manager, Scheduler, UI, and API installations, you must configure a shared database using the `DATABASE_URI` setting. The format is: `mariadb+pymysql://user:password@host:port/database` (or `postgresql://`, `mysql+pymysql://`, `sqlite:////path/to/db.sqlite`).
+    Standalone Manager, Scheduler, UI, and API deployments need a shared database using the `DATABASE_URI` setting. When the easy install script installs or wires a database for Full Stack or Manager mode, it writes `DATABASE_URI` to `/etc/bunkerweb/variables.env`; otherwise set it manually in the service environment files. The format is: `mariadb+pymysql://user:password@host:port/database` (or `postgresql://`, `mysql+pymysql://`, `sqlite:////path/to/db.sqlite`).
 
 ### Installation using package manager
 

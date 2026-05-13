@@ -2078,7 +2078,7 @@ Für nicht-interaktive oder automatisierte Setups kann das Skript mit Befehlszei
 | `--worker`         | Installiert nur die BunkerWeb-Instanz.                                             |
 | `--scheduler-only` | Installiert nur die Scheduler-Komponente.                                          |
 | `--ui-only`        | Installiert nur die Web-UI-Komponente.                                             |
-| `--api-only`       | Installiert nur den API-Dienst (Port 8000).                                        |
+| `--api-only`       | Installiert nur den API-Dienst (Port 8888).                                        |
 
 **Sicherheitsintegrationen:**
 
@@ -2170,7 +2170,7 @@ sudo ./install-bunkerweb.sh --yes --api
 
     **Verfügbarkeit des API-Dienstes:**
 
-    - Der externe API-Dienst (Port 8000) ist für die Installationstypen `--full` und `--manager` verfügbar
+    - Der externe API-Dienst (Port 8888) ist für die Installationstypen `--full` und `--manager` verfügbar
     - Er ist nicht verfügbar für `--worker`, `--scheduler-only` oder `--ui-only` Installationen
     - Verwenden Sie `--api-only` für eine dedizierte API-Dienst-Installation
 

@@ -69,12 +69,12 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.10-rc
 
     - Detects your Linux distribution and CPU architecture up front and warns if you are outside the supported matrix before making any change.
     - Interactive prompts use an inline TUI via [gum](https://github.com/charmbracelet/gum) — arrow-key menus with a `❯` cursor, masked password fields. On first interactive run the installer downloads the official `gum` binary from the [GitHub release](https://github.com/charmbracelet/gum/releases) (SHA256-pinned, with optional cosign signature verification when cosign is installed), runs it from a tempdir, and removes the tempdir on exit — **no system package is installed, no apt/dnf source is added, no binary is left behind**. If gum cannot be obtained, the installer uses any pre-installed `whiptail` for boxed dialogs; if neither is available it falls back to plain text prompts.
-    - TUI behavior is controlled by two flags: `--no-tui` (or `BW_INSTALL_TUI=no`) skips every TUI tier and uses plain text prompts; `--tui` requires a working TUI and aborts if neither gum nor whiptail can be installed.
+    - TUI behavior is controlled by two flags: `--no-tui` (or `BW_INSTALL_TUI=no`) skips every TUI tier and uses plain text prompts; `--tui` requires a working TUI and aborts if gum cannot be fetched and no existing whiptail is available.
     - When the installer is piped (`curl … | bash`) or stdin is not a TTY, it exits with a clear error instead of falling through every default. Use `--yes` together with the appropriate `--*` flags / `*_INPUT` env vars for non-interactive installs.
-    - The interactive flow lets you pick the installation profile (full stack, manager, worker, etc.); manager mode always exposes the API on `0.0.0.0`, disables the setup wizard, and asks for the whitelist IP (pass it with `--manager-ip` for non-interactive runs), while worker mode requires the manager IPs for its whitelist.
+    - The interactive flow lets you pick the installation profile (Full Stack, Manager, Worker, etc.); Manager mode binds the internal API listener to `0.0.0.0`, disables the setup wizard, and asks for the whitelist IP (pass it with `--manager-ip` for non-interactive runs), while Worker mode requires the Manager IPs for its whitelist.
     - Manager installations can still decide whether the Web UI service should start even though the wizard remains disabled.
     - The summary now shows whether the FastAPI service will run so you can intentionally enable or disable it with `--api` / `--no-api`.
-    - CrowdSec options are only available for full-stack installs; manager/worker modes skip them automatically so the workflow stays focused on remote control.
+    - CrowdSec is prompted interactively for Full Stack installs. On the CLI, `--crowdsec` and `--crowdsec-appsec` are valid for Full Stack and Manager installs; Worker, Scheduler-only, UI-only, and API-only modes reject them.
 
     For advanced installation methods (package manager, installation types, non-interactive flags, CrowdSec integration, etc.), see the [Linux Integration](integrations.md#linux).
 
