@@ -64,18 +64,6 @@ def upgrade() -> None:
 
     conn = op.get_bind()
 
-    # Drop the redundant unique index on bw_ui_users.username (mirrors the PK
-    # on MySQL/MariaDB and is referenced by FKs from 4 child tables — autogen
-    # keeps proposing it, but errno 150 makes it unsafe to drop without
-    # neutralising the FKs first; left in place historically, removed here).
-    if _index_exists(conn, "bw_ui_users", "username"):
-        op.drop_index("username", table_name="bw_ui_users")
-
-    # Idempotent index creation: skip any index that already exists. MariaDB's
-    # InnoDB auto-creates an index for FK columns, so several entries in
-    # INDEX_TARGETS may already be covered with a different name — but we still
-    # add an explicit `ix_*` index for cross-backend parity and to remove
-    # optimizer ambiguity reported in the slow log (#3368).
     for table_name, index_name, columns in INDEX_TARGETS:
         if not _index_exists(conn, table_name, index_name):
             op.create_index(index_name, table_name, columns)
@@ -90,6 +78,3 @@ def downgrade() -> None:
     for table_name, index_name, _ in reversed(INDEX_TARGETS):
         if _index_exists(conn, table_name, index_name):
             op.drop_index(index_name, table_name=table_name)
-
-    if not _index_exists(conn, "bw_ui_users", "username"):
-        op.create_index("username", "bw_ui_users", ["username"], unique=True)
