@@ -475,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "Sélectionner les {{count}} {{entity}} correspondants",
+    "bulk_select_all_done": "Les {{count}} {{entity}} correspondants sont sélectionnés.",
+    "bulk_select_clear": "Effacer la sélection",
+    "bulk_select_page": "Tous les {{count}} {{entity}} de cette page sont sélectionnés.",
     "info_bans": "Affichage de {{start}} à {{end}} sur {{total}} Bannissements",
     "info_cache": "Affichage de {{start}} à {{end}} sur {{total}} Fichiers Cache",
     "info_configs": "Affichage de {{start}} à {{end}} sur {{total}} Configurations Personnalisées",

@@ -475,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "Alle {{count}} passenden {{entity}} auswählen",
+    "bulk_select_all_done": "Alle {{count}} passenden {{entity}} sind ausgewählt.",
+    "bulk_select_clear": "Auswahl löschen",
+    "bulk_select_page": "Alle {{count}} {{entity}} auf dieser Seite sind ausgewählt.",
     "info_bans": "Zeige {{start}} bis {{end}} von {{total}} Sperren",
     "info_cache": "Zeige {{start}} bis {{end}} von {{total}} Cache-Dateien",
     "info_configs": "Zeige {{start}} bis {{end}} von {{total}} benutzerdefinierten Konfigurationen",

@@ -5,7 +5,6 @@ from json import dumps, loads
 from traceback import format_exc
 from html import escape
 from io import StringIO, BytesIO
-import csv
 from time import monotonic
 
 
@@ -15,7 +14,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 
 from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS
-from app.utils import LOGGER
+from app.utils import LOGGER, csv_safe, csv_writer
 
 from app.routes.utils import cors_required, parse_search_panes
 
@@ -411,7 +410,7 @@ def reports_export_csv():
 
         # Create CSV in memory
         output = StringIO()
-        writer = csv.writer(output)
+        writer = csv_writer(output)
 
         # Write header
         writer.writerow(
@@ -547,18 +546,18 @@ def reports_export_excel():
 
             ws.append(
                 [
-                    datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A",
-                    str(report.get("id", "N/A")),
-                    str(report.get("ip", "N/A")),
-                    str(report.get("country", "N/A")),
-                    str(report.get("method", "N/A")),
-                    str(report.get("url", "N/A")),
-                    str(report.get("status", "N/A")),
-                    str(report.get("user_agent", "N/A")),
-                    str(report.get("reason", "N/A")),
-                    str(report.get("server_name", "N/A")),
-                    data_output,
-                    str(report.get("security_mode", "N/A")),
+                    csv_safe(datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A"),
+                    csv_safe(report.get("id", "N/A")),
+                    csv_safe(report.get("ip", "N/A")),
+                    csv_safe(report.get("country", "N/A")),
+                    csv_safe(report.get("method", "N/A")),
+                    csv_safe(report.get("url", "N/A")),
+                    csv_safe(report.get("status", "N/A")),
+                    csv_safe(report.get("user_agent", "N/A")),
+                    csv_safe(report.get("reason", "N/A")),
+                    csv_safe(report.get("server_name", "N/A")),
+                    csv_safe(data_output),
+                    csv_safe(report.get("security_mode", "N/A")),
                 ]
             )
 

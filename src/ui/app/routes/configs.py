@@ -33,10 +33,6 @@ CONFIG_TYPES = {
     },
     "STREAM": {"context": "global", "description": "Configurations at the Stream level of NGINX."},
     "SERVER_STREAM": {"context": "multisite", "description": "Configurations at the Stream/Server level of NGINX."},
-    "DEFAULT_SERVER_STREAM": {
-        "context": "global",
-        "description": 'Configurations at the Stream/Server level of NGINX, specifically for the "default server" when the supplied client name doesn\'t match any server name in SERVER_NAME.',
-    },
     "CRS_PLUGINS_BEFORE": {"context": "multisite", "description": "Configurations applied before the OWASP Core Rule Set plugins are loaded."},
     "CRS_PLUGINS_AFTER": {"context": "multisite", "description": "Configurations applied after the OWASP Core Rule Set plugins are loaded."},
 }
@@ -485,7 +481,6 @@ def configs_new():
                 "MODSEC",
                 "STREAM",
                 "SERVER_STREAM",
-                "DEFAULT_SERVER_STREAM",
                 "CRS_PLUGINS_BEFORE",
                 "CRS_PLUGINS_AFTER",
             ],

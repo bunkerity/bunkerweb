@@ -26,15 +26,15 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
     | `LIMIT_REQ_URL`  | `/`      | multisite | ja       | **URL-Muster:** URL-Muster (PCRE-Regex), auf das die Ratenbegrenzung angewendet wird; verwenden Sie `/`, um es für alle Anfragen anzuwenden.                             |
     | `LIMIT_REQ_RATE` | `2r/s`   | multisite | ja       | **Ratenbegrenzung:** Maximale Anfragerate im Format `Nr/t`, wobei N die Anzahl der Anfragen und t die Zeiteinheit ist: s (Sekunde), m (Minute), h (Stunde) oder d (Tag). |
 
-!!! tip "Format der Ratenbegrenzung"
-    Das Format der Ratenbegrenzung wird als `Nr/t` angegeben, wobei:
+    !!! tip "Format der Ratenbegrenzung"
+        Das Format der Ratenbegrenzung wird als `Nr/t` angegeben, wobei:
 
-    - `N` die Anzahl der erlaubten Anfragen ist
-    - `r` ein literales 'r' ist (für 'requests')
-    - `/` ein literaler Schrägstrich ist
-    - `t` die Zeiteinheit ist: `s` (Sekunde), `m` (Minute), `h` (Stunde) oder `d` (Tag)
+        - `N` die Anzahl der erlaubten Anfragen ist
+        - `r` ein literales 'r' ist (für 'requests')
+        - `/` ein literaler Schrägstrich ist
+        - `t` die Zeiteinheit ist: `s` (Sekunde), `m` (Minute), `h` (Stunde) oder `d` (Tag)
 
-    Zum Beispiel bedeutet `5r/m`, dass 5 Anfragen pro Minute von jeder IP-Adresse erlaubt sind.
+        Zum Beispiel bedeutet `5r/m`, dass 5 Anfragen pro Minute von jeder IP-Adresse erlaubt sind.
 
 === "Verbindungsbegrenzung"
 
@@ -48,10 +48,10 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
 
 !!! info "Verbindungs- vs. Anforderungsbegrenzung"
 
-- **Verbindungsbegrenzung** beschränkt die Anzahl der gleichzeitigen Verbindungen, die eine einzelne IP-Adresse aufrechterhalten kann.
-- **Anforderungsratenbegrenzung** beschränkt die Anzahl der Anfragen, die eine IP-Adresse innerhalb eines definierten Zeitraums stellen kann.
+    - **Verbindungsbegrenzung** beschränkt die Anzahl der gleichzeitigen Verbindungen, die eine einzelne IP-Adresse aufrechterhalten kann.
+    - **Anforderungsratenbegrenzung** beschränkt die Anzahl der Anfragen, die eine IP-Adresse innerhalb eines definierten Zeitraums stellen kann.
 
-  Die Verwendung beider Methoden bietet einen umfassenden Schutz gegen verschiedene Arten von Missbrauch.
+    Die Verwendung beider Methoden bietet einen umfassenden Schutz gegen verschiedene Arten von Missbrauch.
 
 !!! warning "Festlegen angemessener Grenzwerte"
     Zu restriktive Grenzwerte können legitime Benutzer beeinträchtigen, insbesondere bei HTTP/2 und HTTP/3, wo Browser oft mehrere Streams verwenden. Die Standardwerte sind für die meisten Anwendungsfälle ausgewogen, aber erwägen Sie, sie je nach den Bedürfnissen Ihrer Anwendung und dem Benutzerverhalten anzupassen.

@@ -475,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "मिलान करने वाले सभी {{count}} {{entity}} चुनें",
+    "bulk_select_all_done": "मिलान करने वाले सभी {{count}} {{entity}} चुने गए हैं।",
+    "bulk_select_clear": "चयन साफ़ करें",
+    "bulk_select_page": "इस पेज पर सभी {{count}} {{entity}} चुने गए हैं।",
     "info_bans": "दिखा रहा है {{start}} से {{end}} तक {{total}} प्रतिबंधों में से",
     "info_cache": "दिखा रहा है {{start}} से {{end}} तक {{total}} कैश फ़ाइलों में से",
     "info_configs": "दिखा रहा है {{start}} से {{end}} तक {{total}} कस्टम कॉन्फ़िगरेशन में से",

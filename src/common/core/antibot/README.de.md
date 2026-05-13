@@ -95,6 +95,8 @@ Beispiele:
     | :------------ | :------- | :-------- | :------- | :---------------------------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`     | Multisite | nein     | Antibot aktivieren: Auf `cookie` setzen, um diesen Mechanismus zu aktivieren. |
 
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
+
 === "JavaScript"
 
     Die JavaScript-Herausforderung fordert den Client auf, eine Rechenaufgabe mithilfe von JavaScript zu lösen. Dieser Mechanismus stellt sicher, dass der Client JavaScript aktiviert hat und den erforderlichen Code ausführen kann, was für die meisten Bots in der Regel nicht möglich ist.
@@ -115,6 +117,8 @@ Beispiele:
     | Parameter     | Standard | Kontext   | Mehrfach | Beschreibung                                                                      |
     | :------------ | :------- | :-------- | :------- | :-------------------------------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`     | Multisite | nein     | Antibot aktivieren: Auf `javascript` setzen, um diesen Mechanismus zu aktivieren. |
+
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
 
 === "Captcha"
 
@@ -149,6 +153,8 @@ Beispiele:
     | `USE_ANTIBOT`              | `no`                                                   | Multisite | nein     | **Antibot aktivieren:** Auf `captcha` setzen, um diesen Mechanismus zu aktivieren.                                                                                                                                                                        |
     | `ANTIBOT_CAPTCHA_ALPHABET` | `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ` | Multisite | nein     | **Captcha-Alphabet:** Eine Zeichenkette, die zur Generierung des CAPTCHAs verwendet werden soll. Unterstützte Zeichen: alle Buchstaben (a-z, A-Z), die Ziffern 2-9 (schließt 0 und 1 aus) und die Sonderzeichen: ```+-/=%"'&_(),.;:?!§`^ÄÖÜßäöüé''‚""„``` |
 
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
+
 === "reCAPTCHA"
 
     Googles reCAPTCHA bietet eine Benutzervalidierung, die im Hintergrund (v3) ausgeführt wird, um eine Verhaltensbewertung zuzuweisen. Eine Bewertung unterhalb des konfigurierten Schwellenwerts löst eine zusätzliche Überprüfung aus oder blockiert die Anfrage. Bei sichtbaren Herausforderungen (v2) müssen Benutzer mit dem reCAPTCHA-Widget interagieren, bevor sie fortfahren können.
@@ -174,6 +180,8 @@ Beispiele:
     | `ANTIBOT_RECAPTCHA_JA4`        |          | Multisite | nein     | Optionaler JA4 TLS-Fingerabdruck, der in Enterprise-Bewertungen enthalten sein soll.                                             |
     | `ANTIBOT_RECAPTCHA_SCORE`      | `0.7`    | Multisite | nein     | Mindestpunktzahl, die zum Bestehen erforderlich ist (gilt für klassische v3 und die neue Version).                               |
 
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
+
 === "hCaptcha"
 
     Wenn aktiviert, bietet hCaptcha eine effektive Alternative zu reCAPTCHA, indem es Benutzerinteraktionen überprüft, ohne auf einen Bewertungsmechanismus angewiesen zu sein. Es fordert Benutzer mit einem einfachen, interaktiven Test heraus, um ihre Legitimität zu bestätigen.
@@ -188,6 +196,8 @@ Beispiele:
     | `ANTIBOT_HCAPTCHA_SITEKEY` |          | Multisite | nein     | hCaptcha Site-Schlüssel.                                                        |
     | `ANTIBOT_HCAPTCHA_SECRET`  |          | Multisite | nein     | hCaptcha Geheimschlüssel.                                                       |
 
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
+
 === "Turnstile"
 
     Turnstile ist ein moderner, datenschutzfreundlicher Herausforderungsmechanismus, der auf der Technologie von Cloudflare basiert, um automatisierten Traffic zu erkennen und zu blockieren. Er validiert Benutzerinteraktionen transparent und im Hintergrund, wodurch die Reibung für legitime Benutzer reduziert und Bots effektiv abgeschreckt werden.
@@ -201,6 +211,8 @@ Beispiele:
     | `USE_ANTIBOT`               | `no`     | Multisite | nein     | Antibot aktivieren: Auf `turnstile` setzen, um diesen Mechanismus zu aktivieren. |
     | `ANTIBOT_TURNSTILE_SITEKEY` |          | Multisite | nein     | Turnstile Site-Schlüssel (Cloudflare).                                           |
     | `ANTIBOT_TURNSTILE_SECRET`  |          | Multisite | nein     | Turnstile Geheimschlüssel (Cloudflare).                                          |
+
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
 
 === "mCaptcha"
 
@@ -219,7 +231,7 @@ Beispiele:
     | `ANTIBOT_MCAPTCHA_SECRET`  |                             | Multisite | nein     | mCaptcha Geheimschlüssel.                                                       |
     | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | Multisite | nein     | Zu verwendende Domain für mCaptcha.                                             |
 
-    Siehe Allgemeine Parameter für zusätzliche Optionen.
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
 
 === "Cap.js"
 
@@ -242,7 +254,7 @@ Beispiele:
         - Konfigurieren Sie CORS für den Cap.js-Site-Schlüssel, damit der geschützte Origin erlaubt ist.
         - Setzen Sie `ANTIBOT_CAPJS_FRONTEND_URL` und `ANTIBOT_CAPJS_BACKEND_URL` nur auf den Origin: Schema, Host und optionaler Port, ohne Pfad.
 
-    Siehe Allgemeine Parameter für zusätzliche Optionen.
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
 
 ### Konfigurationsbeispiele
 

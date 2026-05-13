@@ -12,7 +12,13 @@ local INFO = ngx.INFO
 local null = ngx.null
 local unescape_uri = ngx.unescape_uri
 
-local lru, err_lru = lrucache.new(100000)
+-- Default cap for the per-worker LRU: governs both the slot count (distinct
+-- counter/table keys held) and the per-key event-history array length. Overridden
+-- per-worker from the MAX_LRU_HISTORY global setting once init_worker() runs and
+-- self.variables is populated.
+local DEFAULT_MAX_LRU_HISTORY = 1000
+
+local lru, err_lru = lrucache.new(DEFAULT_MAX_LRU_HISTORY)
 if not lru then
 	require "bunkerweb.logger":new("METRICS"):log(ERR, "failed to instantiate LRU cache : " .. err_lru)
 end
@@ -39,6 +45,29 @@ local table_insert = table.insert
 local table_remove = table.remove
 
 local REQUEST_FACET_FIELDS = { "ip", "country", "method", "url", "status", "reason", "server_name", "security_mode" }
+
+-- Parse a count value with optional SI shorthand suffix: "100", "1k", "10K", "1m", "5M".
+-- k/K = x1000, m/M = x1_000_000. Returns the integer count, or nil if value is missing
+-- or unparsable.
+local function parse_count(value)
+	if value == nil or value == "" then
+		return nil
+	end
+	local num_str, suffix = match(tostring(value), "^(%d+)([kKmM]?)$")
+	if not num_str then
+		return nil
+	end
+	local num = tonumber(num_str)
+	if not num then
+		return nil
+	end
+	if suffix == "k" or suffix == "K" then
+		return num * 1000
+	elseif suffix == "m" or suffix == "M" then
+		return num * 1000000
+	end
+	return num
+end
 
 local function get_request_facet_value(request, field)
 	local value = request[field]
@@ -178,7 +207,7 @@ local function initialize_request_facets(self)
 end
 
 local function enforce_redis_requests_cap(self)
-	local max_requests = tonumber(self.variables["METRICS_MAX_BLOCKED_REQUESTS_REDIS"]) or 0
+	local max_requests = parse_count(self.variables["METRICS_MAX_BLOCKED_REQUESTS_REDIS"]) or 0
 	if max_requests < 0 then
 		max_requests = 0
 	end
@@ -240,6 +269,27 @@ function metrics:initialize(ctx)
 		dict = shared.metrics_datastore_stream
 	end
 	self.metrics_datastore = datastore:new(dict)
+end
+
+function metrics:init_worker()
+	-- Resize the per-worker LRU using the configured MAX_LRU_HISTORY (global setting).
+	-- Until this runs, the module-level default LRU sized at DEFAULT_MAX_LRU_HISTORY is
+	-- used. The resize is skipped when the configured value matches the default to avoid
+	-- dropping any entries collected between module load and init_worker.
+	local max_lru_history = parse_count(self.variables["MAX_LRU_HISTORY"]) or DEFAULT_MAX_LRU_HISTORY
+	if max_lru_history < 1 then
+		max_lru_history = DEFAULT_MAX_LRU_HISTORY
+	end
+	if max_lru_history == DEFAULT_MAX_LRU_HISTORY then
+		return self:ret(true, "metrics LRU using default size (MAX_LRU_HISTORY=" .. max_lru_history .. ")")
+	end
+	local new_lru, err = lrucache.new(max_lru_history)
+	if not new_lru then
+		self.logger:log(ERR, "failed to resize metrics LRU to " .. max_lru_history .. " slots : " .. err)
+		return self:ret(true, "kept default LRU size")
+	end
+	lru = new_lru
+	return self:ret(true, "metrics LRU sized to " .. max_lru_history .. " slots")
 end
 
 -- Call Redis with one automatic reconnect attempt on connection error.
@@ -311,7 +361,7 @@ function metrics:log(bypass_checks)
 		table_insert(requests, request)
 
 		-- Remove old requests if needed
-		local max_requests = tonumber(self.variables["METRICS_MAX_BLOCKED_REQUESTS"])
+		local max_requests = parse_count(self.variables["METRICS_MAX_BLOCKED_REQUESTS"]) or 1000
 		while #requests > max_requests do
 			table_remove(requests, 1)
 		end
@@ -340,9 +390,14 @@ function metrics:log(bypass_checks)
 					end
 				-- Add table entries
 				elseif kind == "tables" then
+					local max_lru_history = parse_count(self.variables["MAX_LRU_HISTORY"]) or DEFAULT_MAX_LRU_HISTORY
 					for metric_key, metric_value in pairs(kind_metrics) do
 						local lru_key = plugin_id .. "_table_" .. metric_key
 						local metric_table = lru:get(lru_key) or {}
+						-- Cap event history per (plugin, key) — drop oldest first
+						while #metric_table >= max_lru_history do
+							table_remove(metric_table, 1)
+						end
 						-- Add value to table
 						table_insert(metric_table, metric_value)
 						-- Update LRU cache

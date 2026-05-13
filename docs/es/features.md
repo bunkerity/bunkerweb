@@ -133,14 +133,15 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
 
 === "Ajustes de Memoria"
 
-    | Parámetro                      | Valor por defecto | Contexto | Múltiple | Descripción                                                                                        |
-    | ------------------------------ | ----------------- | -------- | -------- | -------------------------------------------------------------------------------------------------- |
-    | `WORKERLOCK_MEMORY_SIZE`       | `48k`             | global   | No       | **Tamaño de Memoria de Workerlock:** Tamaño de lua_shared_dict para los workers de inicialización. |
-    | `DATASTORE_MEMORY_SIZE`        | `64m`             | global   | No       | **Tamaño de Memoria del Datastore:** Tamaño del datastore interno.                                 |
-    | `CACHESTORE_MEMORY_SIZE`       | `64m`             | global   | No       | **Tamaño de Memoria del Cachestore:** Tamaño del cachestore interno.                               |
-    | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`             | global   | No       | **Tamaño de Memoria IPC del Cachestore:** Tamaño del cachestore interno (ipc).                     |
-    | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`             | global   | No       | **Tamaño de Memoria de Fallos del Cachestore:** Tamaño del cachestore interno (fallos).            |
-    | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`             | global   | No       | **Tamaño de Memoria de Bloqueos del Cachestore:** Tamaño del cachestore interno (bloqueos).        |
+    | Parámetro                      | Valor por defecto | Contexto | Múltiple | Descripción                                                                                                                                                              |
+    | ------------------------------ | ----------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | `WORKERLOCK_MEMORY_SIZE`       | `48k`             | global   | No       | **Tamaño de Memoria de Workerlock:** Tamaño de lua_shared_dict para los workers de inicialización.                                                                       |
+    | `DATASTORE_MEMORY_SIZE`        | `64m`             | global   | No       | **Tamaño de Memoria del Datastore:** Tamaño del datastore interno.                                                                                                       |
+    | `DATASTORE_LRU_SIZE`           | `1k`              | global   | No       | **Tamaño del LRU del Datastore:** Número de ranuras del LRU del datastore compartido por worker. Acepta un entero o los sufijos `k`/`m` (por ejemplo `1k`, `10k`, `1m`). |
+    | `CACHESTORE_MEMORY_SIZE`       | `64m`             | global   | No       | **Tamaño de Memoria del Cachestore:** Tamaño del cachestore interno.                                                                                                     |
+    | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`             | global   | No       | **Tamaño de Memoria IPC del Cachestore:** Tamaño del cachestore interno (ipc).                                                                                           |
+    | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`             | global   | No       | **Tamaño de Memoria de Fallos del Cachestore:** Tamaño del cachestore interno (fallos).                                                                                  |
+    | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`             | global   | No       | **Tamaño de Memoria de Bloqueos del Cachestore:** Tamaño del cachestore interno (bloqueos).                                                                              |
 
 === "Ajustes de Registro"
 
@@ -1807,6 +1808,8 @@ Las siguientes secciones desarrollan cada paso.
 
     **Componente de Seguridad de Aplicaciones (*opcional*)**
 
+    CrowdSec también proporciona un [Componente de Seguridad de Aplicaciones](https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs) que se puede usar para proteger su aplicación frente a ataques. Si desea utilizarlo, debe crear otro archivo de adquisición para el Componente AppSec:
+
     ```yaml
     appsec_config: crowdsecurity/appsec-default
     labels:
@@ -1851,7 +1854,7 @@ Las siguientes secciones desarrollan cada paso.
     services:
       bunkerweb:
         # Este es el nombre que se utilizará para identificar la instancia en el Planificador
-        image: bunkerity/bunkerweb:1.6.10-rc6
+        image: bunkerity/bunkerweb:1.6.10-rc7
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1868,7 +1871,7 @@ Las siguientes secciones desarrollan cada paso.
             syslog-address: "udp://10.20.30.254:514" # La dirección IP del servicio syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.10-rc6
+        image: bunkerity/bunkerweb-scheduler:1.6.10-rc7
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrese de establecer el nombre de instancia correcto
@@ -2039,7 +2042,7 @@ Las siguientes secciones desarrollan cada paso.
 
 ### Paso&nbsp;2 – Configurar los ajustes de BunkerWeb
 
-Aplica las siguientes variables de entorno (o valores del scheduler) para que la instancia de BunkerWeb pueda comunicarse con la API local de CrowdSec. Como mínimo necesitas `USE_CROWDSEC`, `CROWDSEC_API` y una clave válida creada con `cscli bouncers add`.
+Aplica las siguientes variables de entorno (o valores del scheduler) para que la instancia de BunkerWeb pueda comunicarse con la API local de CrowdSec. Como mínimo necesitas `USE_CROWDSEC`, `CROWDSEC_API` y `CROWDSEC_API_KEY` con una clave válida creada mediante `cscli bouncers add`.
 
 | Ajuste                      | Valor por defecto      | Contexto  | Múltiple | Descripción                                                                                                                                   |
 | --------------------------- | ---------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -2065,7 +2068,9 @@ Aplica las siguientes variables de entorno (o valores del scheduler) para que la
 | `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`              | global   | no       | **Enviar Siempre:** Establezca en `yes` para enviar siempre las solicitudes a AppSec, incluso si hay una decisión a nivel de IP. |
 | `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`              | global   | no       | **Verificar SSL:** Establezca en `yes` para verificar el certificado SSL del Componente AppSec.                                  |
 
-!!! info "Sobre los Modos de Operación" - **Modo `live`** consulta la API de CrowdSec para cada solicitud entrante, proporcionando protección en tiempo real a costa de una mayor latencia. - **Modo `stream`** descarga periódicamente todas las decisiones de la API de CrowdSec y las almacena en caché localmente, reduciendo la latencia con un ligero retraso en la aplicación de nuevas decisiones.
+!!! info "Sobre los Modos de Operación"
+    - **Modo `live`** consulta la API de CrowdSec para cada solicitud entrante, proporcionando protección en tiempo real a costa de una mayor latencia.
+    - **Modo `stream`** descarga periódicamente todas las decisiones de la API de CrowdSec y las almacena en caché localmente, reduciendo la latencia con un ligero retraso en la aplicación de nuevas decisiones.
 
 ### Configuraciones de Ejemplo
 
@@ -2104,12 +2109,6 @@ Aplica las siguientes variables de entorno (o valores del scheduler) para que la
 - En los registros del scheduler, busque las entradas `CrowdSec configuration successfully generated` y `CrowdSec bouncer denied request` para verificar que el complemento esté activo.
 - En el lado de CrowdSec, supervise `cscli metrics show` o la CrowdSec Console para asegurarse de que las decisiones de BunkerWeb aparezcan como se espera.
 - En la interfaz de BunkerWeb, abra la página del complemento CrowdSec para ver el estado de la integración.
-    # Configuración de AppSec
-    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
-    CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
-    CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
-    CROWDSEC_APPSEC_SSL_VERIFY: "yes"
-    ```
 
 ## Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -2279,7 +2278,11 @@ Siga estos pasos para configurar y utilizar la función de Base de Datos:
 | `DATABASE_REQUEST_RETRY_ATTEMPTS` | `2`                                       | global   | no       | **Intentos de Reintento:** El número de reintentos en caso de errores transitorios durante las operaciones.                                                                                 |
 | `DATABASE_REQUEST_RETRY_DELAY`    | `0.25`                                    | global   | no       | **Retraso entre Reintentos:** El retraso en segundos entre reintentos en caso de errores transitorios.                                                                                      |
 
-!!! tip "Selección de Base de Datos" - **SQLite** (predeterminado): Ideal para implementaciones de un solo nodo o entornos de prueba debido a su simplicidad y naturaleza basada en archivos. - **PostgreSQL**: Recomendado para entornos de producción con múltiples instancias de BunkerWeb debido a su robustez y soporte de concurrencia. - **MySQL/MariaDB**: Una buena alternativa a PostgreSQL con capacidades similares de nivel de producción. - **Oracle**: Adecuado para entornos empresariales donde Oracle ya es la plataforma de base de datos estándar.
+!!! tip "Selección de Base de Datos"
+    - **SQLite** (predeterminado): Ideal para implementaciones de un solo nodo o entornos de prueba debido a su simplicidad y naturaleza basada en archivos.
+    - **PostgreSQL**: Recomendado para entornos de producción con múltiples instancias de BunkerWeb debido a su robustez y soporte de concurrencia.
+    - **MySQL/MariaDB**: Una buena alternativa a PostgreSQL con capacidades similares de nivel de producción.
+    - **Oracle**: Adecuado para entornos empresariales donde Oracle ya es la plataforma de base de datos estándar.
 
 !!! info "Formato de URI de SQLAlchemy"
     El URI de la base de datos sigue el formato de SQLAlchemy:
@@ -2292,10 +2295,10 @@ Siga estos pasos para configurar y utilizar la función de Base de Datos:
 !!! warning "Mantenimiento de la Base de Datos"
     El complemento ejecuta automáticamente trabajos de mantenimiento diarios:
 
-- **Limpiar Ejecuciones de Trabajos en Exceso:** Purga el historial que supera el límite `DATABASE_MAX_JOBS_RUNS`.
-- **Limpiar Sesiones de UI Caducadas:** Elimina las sesiones de usuarios de la UI que superan `DATABASE_MAX_SESSION_AGE_DAYS`.
+    - **Limpiar Ejecuciones de Trabajos en Exceso:** Purga el historial que supera el límite `DATABASE_MAX_JOBS_RUNS`.
+    - **Limpiar Sesiones de UI Caducadas:** Elimina las sesiones de usuarios de la UI que superan `DATABASE_MAX_SESSION_AGE_DAYS`.
 
-Estas tareas evitan el crecimiento ilimitado de la base de datos mientras conservan un historial operativo útil.
+    Estas tareas evitan el crecimiento ilimitado de la base de datos mientras conservan un historial operativo útil.
 
 ## DNSBL
 
@@ -3036,9 +3039,17 @@ Siga estos pasos para configurar y usar la función de Inyección de HTML:
 | `INJECT_HEAD` |                   | multisite | no       | **Código HTML de la Cabecera:** El código HTML para inyectar antes de la etiqueta `</head>`. |
 | `INJECT_BODY` |                   | multisite | no       | **Código HTML del Cuerpo:** El código HTML para inyectar antes de la etiqueta `</body>`.     |
 
-!!! tip "Mejores Prácticas" - Por razones de rendimiento, coloque los archivos de JavaScript al final del cuerpo para evitar el bloqueo del renderizado. - Coloque CSS y JavaScript crítico en la sección de la cabecera para evitar un "destello" de contenido sin estilo (FOUC). - Tenga cuidado con el contenido inyectado que podría potencialmente romper la funcionalidad de su sitio.
+!!! tip "Mejores Prácticas"
+    - Por razones de rendimiento, coloque los archivos de JavaScript al final del cuerpo para evitar el bloqueo del renderizado.
+    - Coloque CSS y JavaScript crítico en la sección de la cabecera para evitar un "destello" de contenido sin estilo (FOUC).
+    - Tenga cuidado con el contenido inyectado que podría potencialmente romper la funcionalidad de su sitio.
 
-!!! info "Casos de Uso Comunes" - Agregar scripts de análisis (como Google Analytics, Matomo) - Integrar widgets de chat o herramientas de soporte al cliente - Incluir píxeles de seguimiento para campañas de marketing - Agregar estilos CSS personalizados o funcionalidad de JavaScript - Incluir bibliotecas de terceros sin modificar el código de su aplicación
+!!! info "Casos de Uso Comunes"
+    - Agregar scripts de análisis (como Google Analytics, Matomo)
+    - Integrar widgets de chat o herramientas de soporte al cliente
+    - Incluir píxeles de seguimiento para campañas de marketing
+    - Agregar estilos CSS personalizados o funcionalidad de JavaScript
+    - Incluir bibliotecas de terceros sin modificar el código de su aplicación
 
 ### Configuraciones de Ejemplo
 
@@ -3384,7 +3395,9 @@ El complemento de Límite en BunkerWeb proporciona capacidades robustas para apl
     | `LIMIT_CONN_MAX_HTTP3`  | `100`             | multisite | no       | **Flujos HTTP/3:** Número máximo de flujos HTTP/3 concurrentes por dirección IP.                                   |
     | `LIMIT_CONN_MAX_STREAM` | `10`              | multisite | no       | **Conexiones de Flujo:** Número máximo de conexiones de flujo concurrentes por dirección IP.                       |
 
-!!! info "Limitación de Conexiones vs. Solicitudes" - **La limitación de conexiones** restringe el número de conexiones simultáneas que una sola dirección IP puede mantener. - **La limitación de tasa de solicitudes** restringe el número de solicitudes que una dirección IP puede hacer dentro de un período de tiempo definido.
+!!! info "Limitación de Conexiones vs. Solicitudes"
+    - **La limitación de conexiones** restringe el número de conexiones simultáneas que una sola dirección IP puede mantener.
+    - **La limitación de tasa de solicitudes** restringe el número de solicitudes que una dirección IP puede hacer dentro de un período de tiempo definido.
 
     El uso de ambos métodos proporciona una protección completa contra varios tipos de abuso.
 
@@ -3576,13 +3589,14 @@ Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes blo
 
 ### Ajustes de Configuración
 
-| Ajuste                               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                        |
-| ------------------------------------ | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_METRICS`                        | `yes`             | multisite | no       | **Habilitar Métricas:** Establezca en `yes` para habilitar la recolección y recuperación de métricas.                                              |
-| `METRICS_MEMORY_SIZE`                | `16m`             | global    | no       | **Tamaño de la Memoria:** Tamaño del almacenamiento interno para las métricas (p. ej., `8192`, `16m`, `32m`).                                      |
-| `METRICS_MAX_BLOCKED_REQUESTS`       | `1000`            | global    | no       | **Máximo de Solicitudes Bloqueadas:** Número máximo de solicitudes bloqueadas para almacenar por trabajador.                                       |
-| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `100000`          | global    | no       | **Máximo de Solicitudes Bloqueadas en Redis:** Número máximo de solicitudes bloqueadas para almacenar en Redis.                                    |
-| `METRICS_SAVE_TO_REDIS`              | `yes`             | global    | no       | **Guardar Métricas en Redis:** Establezca en `yes` para guardar las métricas (contadores y tablas) en Redis para la agregación en todo el clúster. |
+| Ajuste                               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                     |
+| ------------------------------------ | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_METRICS`                        | `yes`             | multisite | no       | **Habilitar Métricas:** Establezca en `yes` para habilitar la recolección y recuperación de métricas.                                                                                                           |
+| `METRICS_MEMORY_SIZE`                | `16m`             | global    | no       | **Tamaño de la Memoria:** Tamaño del almacenamiento interno para las métricas (p. ej., `8192`, `16m`, `32m`).                                                                                                   |
+| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`              | global    | no       | **Máximo de Solicitudes Bloqueadas:** Número máximo de solicitudes bloqueadas para almacenar por trabajador. Acepta la notación abreviada `k`/`m`.                                                              |
+| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`             | global    | no       | **Máximo de Solicitudes Bloqueadas en Redis:** Número máximo de solicitudes bloqueadas para almacenar en Redis. Acepta la notación abreviada `k`/`m`.                                                           |
+| `MAX_LRU_HISTORY`                    | `1k`              | global    | no       | **Historial LRU Máximo:** Número de ranuras LRU por trabajador y límite del arreglo de historial de eventos por clave (trazas de bloqueo, trazas de autenticación, etc.). Acepta la notación abreviada `k`/`m`. |
+| `METRICS_SAVE_TO_REDIS`              | `yes`             | global    | no       | **Guardar Métricas en Redis:** Establezca en `yes` para guardar las métricas (contadores y tablas) en Redis para la agregación en todo el clúster.                                                              |
 
 !!! tip "Dimensionamiento de la Asignación de Memoria"
     El ajuste `METRICS_MEMORY_SIZE` debe ajustarse en función de su volumen de tráfico y el número de instancias. Se admiten valores brutos en bytes y sufijos `k`/`m`. Para sitios de alto tráfico, considere aumentar este valor para garantizar que todas las métricas se capturen sin pérdida de datos.
@@ -3605,8 +3619,9 @@ Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes blo
     ```yaml
     USE_METRICS: "yes"
     METRICS_MEMORY_SIZE: "16m"
-    METRICS_MAX_BLOCKED_REQUESTS: "1000"
-    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "100000"
+    METRICS_MAX_BLOCKED_REQUESTS: "1k"
+    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10k"
+    MAX_LRU_HISTORY: "1k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 
@@ -3619,6 +3634,7 @@ Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes blo
     METRICS_MEMORY_SIZE: "8m"
     METRICS_MAX_BLOCKED_REQUESTS: "500"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10000"
+    MAX_LRU_HISTORY: "500"
     METRICS_SAVE_TO_REDIS: "no"
     ```
 
@@ -3631,6 +3647,7 @@ Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes blo
     METRICS_MEMORY_SIZE: "64m"
     METRICS_MAX_BLOCKED_REQUESTS: "5000"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "500000"
+    MAX_LRU_HISTORY: "5k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 
@@ -4489,15 +4506,15 @@ Siga estos pasos para configurar y usar las características Pro:
 
 **P: ¿Qué sucede si mi licencia Pro expira?**
 
-R: Si su licencia Pro expira, se desactivará el acceso a las características y complementos premium. Sin embargo, su instalación de BunkerWeb seguirá funcionando con todas las características de la edición comunitaria intactas. Para recuperar el acceso a las características Pro, simplemente renueve su licencia.
+**R:** Si su licencia Pro expira, se desactivará el acceso a las características y complementos premium. Sin embargo, su instalación de BunkerWeb seguirá funcionando con todas las características de la edición comunitaria intactas. Para recuperar el acceso a las características Pro, simplemente renueve su licencia.
 
 **P: ¿Las características Pro interrumpirán mi configuración existente?**
 
-R: No, las características Pro están diseñadas para integrarse sin problemas con su configuración actual de BunkerWeb. Mejoran la funcionalidad sin alterar ni interferir con su configuración existente, garantizando una experiencia fluida y confiable.
+**R:** No, las características Pro están diseñadas para integrarse sin problemas con su configuración actual de BunkerWeb. Mejoran la funcionalidad sin alterar ni interferir con su configuración existente, garantizando una experiencia fluida y confiable.
 
 **P: ¿Puedo probar las características Pro antes de comprometerme a una compra?**
 
-R: ¡Absolutamente! BunkerWeb ofrece dos planes Pro para satisfacer sus necesidades:
+**R:** ¡Absolutamente! BunkerWeb ofrece dos planes Pro para satisfacer sus necesidades:
 
 - **BunkerWeb PRO Standard:** Acceso completo a las características Pro sin soporte técnico.
 - **BunkerWeb PRO Enterprise:** Acceso completo a las características Pro con soporte técnico dedicado.
@@ -4890,7 +4907,8 @@ Cuando utilice Redis o Valkey con BunkerWeb, considere estas mejores prácticas 
 #### Gestión de la Memoria
 
 - **Supervise el uso de la memoria:** Configure Redis con los ajustes `maxmemory` apropiados para evitar errores de falta de memoria
-- **Establezca una política de desalojo:** Utilice `maxmemory-policy` (p. ej., `volatile-lru` o `allkeys-lru`) apropiada para su caso de uso
+- **Establezca una política de desalojo:** Utilice `maxmemory-policy` (p. ej., `volatile-lru` para uso general o `allkeys-lru` para cargas de trabajo de caché intensivo) apropiada para su caso de uso
+- **Valores predeterminados del all-in-one:** La imagen Docker AIO configura Redis con `maxmemory=256mb` y `maxmemory-policy=volatile-lru`; sobrescriba estos valores mediante las variables de entorno `REDIS_MAXMEMORY` y `REDIS_MAXMEMORY_POLICY`. Con `volatile-lru`, los contadores transitorios (límite de tasa, mal comportamiento) se desalojan antes que las claves con TTL importantes para las sesiones y los baneos temporales, y las claves sin expiración (baneos permanentes) quedan exentas. Se recomienda la misma política para servidores Redis o Valkey externos utilizados por BunkerWeb.
 - **Evite claves grandes:** Asegúrese de que las claves individuales de Redis se mantengan en un tamaño razonable para evitar la degradación del rendimiento
 
 #### Persistencia de Datos
@@ -4903,7 +4921,7 @@ Cuando utilice Redis o Valkey con BunkerWeb, considere estas mejores prácticas 
 
 - **Agrupación de conexiones:** BunkerWeb ya implementa esto, pero asegúrese de que otras aplicaciones sigan esta práctica
 - **Canalización:** Cuando sea posible, utilice la canalización para operaciones masivas para reducir la sobrecarga de la red
-- **Evite operaciones costosas:** Tenga cuidado con comandos como `KEYS` en entornos de producción
+- **Evite operaciones costosas:** Tenga cuidado con comandos como KEYS en entornos de producción
 - **Compare su carga de trabajo:** Utilice `redis-benchmark` para probar sus patrones de carga de trabajo específicos
 
 ### Recursos Adicionales
@@ -4974,17 +4992,17 @@ Siga estos pasos para configurar y usar la función de Proxy Inverso:
         - **Manejo de Protocolos:** Soporte para HTTP, HTTPS, WebSockets y otros protocolos
         - **Interceptación de Errores:** Personalice las páginas de error para una experiencia de usuario consistente
 
-| Ajuste                            | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                |
-| --------------------------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_REVERSE_PROXY`               | `no`              | multisite | no       | **Habilitar Proxy Inverso:** Establezca en `yes` para habilitar la funcionalidad de proxy inverso.                                                                         |
-| `REVERSE_PROXY_HOST`              |                   | multisite | yes      | **Host de Backend:** URL completa del recurso al que se hace proxy (proxy_pass).                                                                                           |
-| `REVERSE_PROXY_URL`               | `/`               | multisite | yes      | **URL de Ubicación:** Ruta que se enviará al servidor de backend.                                                                                                          |
-| `REVERSE_PROXY_BUFFERING`         | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Respuesta:** Habilite o deshabilite el almacenamiento en búfer de las respuestas del recurso al que se hace proxy.                            |
-| `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Solicitudes:** Habilite o deshabilite el almacenamiento en búfer de las solicitudes al recurso al que se hace proxy.                          |
-| `REVERSE_PROXY_KEEPALIVE`         | `no`              | multisite | yes      | **Keep-Alive:** Habilite o deshabilite las conexiones keepalive con el recurso al que se hace proxy.                                                                       |
-| `REVERSE_PROXY_HTTP_VERSION`      | `1.1`             | multisite | yes      | **Versión HTTP:** Versión del protocolo HTTP utilizada para hablar con el upstream (`1.0`, `1.1` o `2`). Las ubicaciones WebSocket están fijadas a 1.1 independientemente. |
-| `REVERSE_PROXY_CUSTOM_HOST`       |                   | multisite | no       | **Host Personalizado:** Anule el encabezado Host enviado al servidor upstream.                                                                                             |
-| `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`             | multisite | no       | **Interceptar Errores:** Si se deben interceptar y reescribir las respuestas de error del backend.                                                                         |
+| Ajuste                            | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                     |
+| --------------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_REVERSE_PROXY`               | `no`              | multisite | no       | **Habilitar Proxy Inverso:** Establezca en `yes` para habilitar la funcionalidad de proxy inverso.                                                                                                                                              |
+| `REVERSE_PROXY_HOST`              |                   | multisite | yes      | **Host de Backend:** URL completa del recurso al que se hace proxy (proxy_pass).                                                                                                                                                                |
+| `REVERSE_PROXY_URL`               | `/`               | multisite | yes      | **URL de Ubicación:** Ruta que se enviará al servidor de backend.                                                                                                                                                                               |
+| `REVERSE_PROXY_BUFFERING`         | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Respuesta:** Habilite o deshabilite el almacenamiento en búfer de las respuestas del recurso al que se hace proxy.                                                                                                 |
+| `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Solicitudes:** Habilite o deshabilite el almacenamiento en búfer de las solicitudes al recurso al que se hace proxy.                                                                                               |
+| `REVERSE_PROXY_KEEPALIVE`         | `no`              | multisite | yes      | **Keep-Alive:** Habilite o deshabilite las conexiones keepalive con el recurso al que se hace proxy.                                                                                                                                            |
+| `REVERSE_PROXY_HTTP_VERSION`      | `1.1`             | multisite | yes      | **Versión HTTP:** Versión del protocolo HTTP utilizada para hablar con el upstream (`1.0`, `1.1` o `2`). Establezca a `2` para multiplexación HTTP/2 en la conexión upstream. Las ubicaciones WebSocket están fijadas a 1.1 independientemente. |
+| `REVERSE_PROXY_CUSTOM_HOST`       |                   | multisite | no       | **Host Personalizado:** Anule el encabezado Host enviado al servidor upstream.                                                                                                                                                                  |
+| `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`             | multisite | no       | **Interceptar Errores:** Si se deben interceptar y reescribir las respuestas de error del backend.                                                                                                                                              |
 
     !!! tip "Mejores Prácticas"
         - Siempre especifique la URL completa en `REVERSE_PROXY_HOST`, incluido el protocolo (http:// o https://)
@@ -5786,7 +5804,11 @@ El complemento SSL proporciona capacidades robustas de cifrado SSL/TLS para sus 
 3.  Los parámetros de sesión SSL optimizados mejoran el rendimiento de la conexión sin sacrificar la seguridad.
 4.  La presentación de certificados se configura de acuerdo con las mejores prácticas para garantizar la compatibilidad y la seguridad.
 
-!!! success "Beneficios de Seguridad" - **Protección de Datos:** Cifra los datos en tránsito, previniendo la interceptación y los ataques de intermediario (man-in-the-middle). - **Autenticación:** Verifica la identidad de su servidor a los clientes. - **Integridad:** Asegura que los datos no han sido manipulados durante la transmisión. - **Estándares Modernos:** Configurado para cumplir con las mejores prácticas y los estándares de seguridad de la industria.
+!!! success "Beneficios de Seguridad"
+    - **Protección de Datos:** Cifra los datos en tránsito, previniendo la interceptación y los ataques de intermediario (man-in-the-middle).
+    - **Autenticación:** Verifica la identidad de su servidor a los clientes.
+    - **Integridad:** Asegura que los datos no han sido manipulados durante la transmisión.
+    - **Estándares Modernos:** Configurado para cumplir con las mejores prácticas y los estándares de seguridad de la industria.
 
 ### Cómo usar
 

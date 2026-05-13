@@ -215,12 +215,9 @@ $(document).ready(function () {
   };
 
   if (instanceNumber > 10) {
-    const menu = [10];
-    if (instanceNumber > 25) menu.push(25);
-    if (instanceNumber > 50) menu.push(50);
-    if (instanceNumber > 100) menu.push(100);
-    if (instanceNumber > 500) menu.push(500);
-    if (instanceNumber > 1000) menu.push(1000);
+    const menu = [10, 25, 50, 100];
+    if (instanceNumber > 100) menu.push(500);
+    if (instanceNumber > 500) menu.push(1000);
     layout.bottomStart = {
       pageLength: { menu: menu },
       info: true,
@@ -349,9 +346,15 @@ $(document).ready(function () {
   // Function to get selected instance hostnames
   const getSelectedInstances = () => {
     const instances = [];
-    $("tr.selected").each(function () {
-      instances.push($(this).find("td:eq(2)").text().trim()); // Assuming hostname is in 3rd column (index 2)
-    });
+    if (!$.fn.dataTable.isDataTable("#instances")) return instances;
+    $("#instances")
+      .DataTable()
+      .rows({ selected: true })
+      .nodes()
+      .to$()
+      .each(function () {
+        instances.push($(this).find("td:eq(2)").text().trim()); // Assuming hostname is in 3rd column (index 2)
+      });
     return instances;
   };
 
@@ -653,7 +656,7 @@ $(document).ready(function () {
       select: {
         style: "multi+shift",
         selector: "td:nth-child(2)",
-        headerCheckbox: true,
+        headerCheckbox: "select-page",
       },
       layout: layout,
       initComplete: function (settings, json) {

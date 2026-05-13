@@ -91,8 +91,9 @@ Par exemple, `/metrics/requests` renvoie des informations sur les requêtes bloq
 | ------------------------------------ | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `USE_METRICS`                        | `yes`    | multisite | non      | **Activer les métriques :** mettez `yes` pour activer la collecte et la récupération des métriques.                                         |
 | `METRICS_MEMORY_SIZE`                | `16m`    | global    | non      | **Taille mémoire :** taille du stockage interne des métriques (par exemple `8192`, `16m`, `32m`).                                          |
-| `METRICS_MAX_BLOCKED_REQUESTS`       | `1000`   | global    | non      | **Maximum de requêtes bloquées :** nombre maximal de requêtes bloquées à stocker par worker.                                               |
-| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `100000` | global    | non      | **Maximum Redis de requêtes bloquées :** nombre maximal de requêtes bloquées à stocker dans Redis.                                         |
+| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`     | global    | non      | **Maximum de requêtes bloquées :** nombre maximal de requêtes bloquées à stocker par worker. Accepte la notation abrégée `k`/`m`.          |
+| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`    | global    | non      | **Maximum Redis de requêtes bloquées :** nombre maximal de requêtes bloquées à stocker dans Redis. Accepte la notation abrégée `k`/`m`.    |
+| `MAX_LRU_HISTORY`                    | `1k`     | global    | non      | **Historique LRU maximal :** nombre d'emplacements LRU par worker et limite du tableau d'historique des événements par clé (traces de blocage, traces d'authentification, etc.). Accepte la notation abrégée `k`/`m`. |
 | `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | non      | **Enregistrer les métriques dans Redis :** mettez `yes` pour stocker les métriques (compteurs et tableaux) dans Redis pour l'agrégation. |
 
 !!! tip "Dimensionner l'allocation mémoire"
@@ -116,8 +117,9 @@ Par exemple, `/metrics/requests` renvoie des informations sur les requêtes bloq
     ```yaml
     USE_METRICS: "yes"
     METRICS_MEMORY_SIZE: "16m"
-    METRICS_MAX_BLOCKED_REQUESTS: "1000"
-    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "100000"
+    METRICS_MAX_BLOCKED_REQUESTS: "1k"
+    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10k"
+    MAX_LRU_HISTORY: "1k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 
@@ -130,6 +132,7 @@ Par exemple, `/metrics/requests` renvoie des informations sur les requêtes bloq
     METRICS_MEMORY_SIZE: "8m"
     METRICS_MAX_BLOCKED_REQUESTS: "500"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10000"
+    MAX_LRU_HISTORY: "500"
     METRICS_SAVE_TO_REDIS: "no"
     ```
 
@@ -142,6 +145,7 @@ Par exemple, `/metrics/requests` renvoie des informations sur les requêtes bloq
     METRICS_MEMORY_SIZE: "64m"
     METRICS_MAX_BLOCKED_REQUESTS: "5000"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "500000"
+    MAX_LRU_HISTORY: "5k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 

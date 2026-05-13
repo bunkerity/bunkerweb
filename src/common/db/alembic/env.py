@@ -6,7 +6,7 @@ from sqlalchemy import pool
 
 from alembic import context
 from alembic.autogenerate import renderers
-from alembic.operations.ops import AlterColumnOp, CreateIndexOp, DropIndexOp, ExecuteSQLOp, OpContainer
+from alembic.operations.ops import AlterColumnOp, CreateIndexOp, CreateUniqueConstraintOp, DropConstraintOp, DropIndexOp, ExecuteSQLOp, OpContainer
 from alembic.script import ScriptDirectory
 
 # this is the Alembic Config object, which provides
@@ -37,10 +37,12 @@ if "DATABASE_URI" in environ:
 # misc/migration/entrypoint.sh so the version-bump SQL gets auto-injected.
 _VERSION_MESSAGE_RE = re.compile(r"Upgrade to version (\S+)")
 
-# (table, column) pairs whose alter_column ops are spurious autogenerate noise
-# on MySQL/MariaDB (LONGBLOB <-> LargeBinary(2**32-1) round-trip, INT(11)
-# display-width, pre-applied nullability) and must be stripped from generated
-# migrations. Add a pair here when a recurring false-positive needs silencing.
+# (table, column) pairs whose alter_column ops are spurious autogenerate noise:
+# - MySQL/MariaDB: LONGBLOB <-> LargeBinary(2**32-1) round-trip, INT(11)
+#   display-width, pre-applied nullability
+# - PostgreSQL: TIMESTAMP <-> DateTime(timezone=True) on columns created
+#   pre-v1.6 as sa.DateTime(); MariaDB/MySQL/SQLite cannot store timezones so
+#   leaving PG as TIMESTAMP keeps schemas symmetric across backends
 _IGNORED_ALTER_COLUMNS = frozenset(
     {
         ("bw_custom_configs", "data"),
@@ -49,6 +51,13 @@ _IGNORED_ALTER_COLUMNS = frozenset(
         ("bw_plugins", "data"),
         ("bw_template_custom_configs", "step_id"),
         ("bw_template_custom_configs", "data"),
+        ("bw_metadata", "pro_expire"),
+        ("bw_metadata", "last_pro_check"),
+        ("bw_metadata", "last_custom_configs_change"),
+        ("bw_metadata", "last_external_plugins_change"),
+        ("bw_metadata", "last_pro_plugins_change"),
+        ("bw_metadata", "last_instances_change"),
+        ("bw_plugins", "last_config_change"),
     }
 )
 
@@ -59,6 +68,18 @@ _IGNORED_INDEXES = frozenset(
     {
         ("bw_ui_users", "username"),
         ("bw_settings", "id"),
+    }
+)
+
+# (table, constraint_name) pairs whose create_unique_constraint/drop_constraint
+# ops are spurious. PostgreSQL emits a separate `<table>_<col>_key` unique
+# constraint for each column that was promoted to PK or already had a unique
+# index — the equivalent redundancy on MySQL/MariaDB is filtered via
+# _IGNORED_INDEXES.
+_IGNORED_CONSTRAINTS = frozenset(
+    {
+        ("bw_settings", "bw_settings_id_key"),
+        ("bw_ui_users", "bw_ui_users_username_key"),
     }
 )
 
@@ -91,6 +112,8 @@ def _strip_ignored_ops(container):
         if isinstance(op, AlterColumnOp) and (op.table_name, op.column_name) in _IGNORED_ALTER_COLUMNS:
             continue
         if isinstance(op, (DropIndexOp, CreateIndexOp)) and (op.table_name, op.index_name) in _IGNORED_INDEXES:
+            continue
+        if isinstance(op, (DropConstraintOp, CreateUniqueConstraintOp)) and (op.table_name, op.constraint_name) in _IGNORED_CONSTRAINTS:
             continue
         if isinstance(op, OpContainer):
             _strip_ignored_ops(op)

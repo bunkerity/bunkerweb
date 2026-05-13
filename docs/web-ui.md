@@ -47,7 +47,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.10-rc6
+        image: bunkerity/bunkerweb:1.6.10-rc7
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -62,7 +62,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.10-rc6
+        image: bunkerity/bunkerweb-scheduler:1.6.10-rc7
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -86,7 +86,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.10-rc6
+        image: bunkerity/bunkerweb-ui:1.6.10-rc7
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -186,7 +186,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
     ```
 
     Recovery codes are shown once in the UI; losing the encryption keys wipes stored TOTP secrets.
-- Sessions: default lifetime is 12h (`SESSION_LIFETIME_HOURS`). Sessions are pinned to IP and User-Agent; `CHECK_PRIVATE_IP=no` relaxes the IP check for private ranges only. `ALWAYS_REMEMBER=yes` always sets persistent cookies.
+- Sessions: default idling lifetime is 12h (`SESSION_LIFETIME_HOURS`), refreshed on every request. A hard absolute cap is enforced by `SESSION_ABSOLUTE_HOURS` (default `168` = 7 days) — past it, users are logged out regardless of activity. Optional session ID rotation (`SESSION_ROLLING_HOURS`, default `0` = disabled) regenerates the session ID at that interval. Sessions are pinned to IP and User-Agent; `CHECK_PRIVATE_IP=no` relaxes the IP check for private ranges only. `ALWAYS_REMEMBER=yes` always sets persistent cookies.
 - Remember to set `PROXY_NUMBERS` if multiple proxies append `X-Forwarded-*` headers.
 
 ## Configuration sources and precedence
@@ -226,7 +226,9 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 | `FLASK_SECRET`                              | Session signing secret (persisted to `/var/lib/bunkerweb/.flask_secret`) | Hex/base64/opaque string | auto-generated            |
 | `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | Encryption keys for TOTP secrets (space-separated or JSON map)           | Strings / JSON           | auto-generated if missing |
 | `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Optional Biscuit keys (hex) used to mint UI tokens                       | Hex strings              | auto-generated & stored   |
-| `SESSION_LIFETIME_HOURS`                    | Session lifetime                                                         | Number (hours)           | `12`                      |
+| `SESSION_LIFETIME_HOURS`                    | Idling session lifetime (sliding TTL, refreshed on every request)        | Number (hours)           | `12`                      |
+| `SESSION_ABSOLUTE_HOURS`                    | Absolute session cap regardless of activity (logout after this many hours since login) | Number (hours)  | `168`                     |
+| `SESSION_ROLLING_HOURS`                     | Session ID rotation interval (`0` disables rotation)                     | Number (hours)           | `0`                       |
 | `ALWAYS_REMEMBER`                           | Always enable "remember me" cookies                                      | `yes` or `no`            | `no`                      |
 | `CHECK_PRIVATE_IP`                          | Enforce IP pinning (skips change inside private ranges when `no`)        | `yes` or `no`            | `yes`                     |
 | `PROXY_NUMBERS`                             | Number of proxy hops to trust for `X-Forwarded-*`                        | Integer                  | `1`                       |

@@ -475,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "選取所有 {{count}} 個符合條件的 {{entity}}",
+    "bulk_select_all_done": "所有 {{count}} 個符合條件的 {{entity}} 均已選取。",
+    "bulk_select_clear": "清除選取",
+    "bulk_select_page": "此頁面上的所有 {{count}} 個 {{entity}} 均已選取。",
     "info_bans": "顯示 {{start}} 到 {{end}} 個封鎖，共 {{total}} 個",
     "info_cache": "顯示 {{start}} 到 {{end}} 個快取檔案，共 {{total}} 個",
     "info_configs": "顯示 {{start}} 到 {{end}} 個自訂設定，共 {{total}} 個",

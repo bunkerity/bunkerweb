@@ -20,7 +20,6 @@ CUSTOM_CONFIGS_TYPES_ENUM = Enum(
     "server_http",
     "server_stream",
     "default_server_http",
-    "default_server_stream",
     "modsec",
     "modsec_crs",
     "crs_plugins_before",
@@ -359,7 +358,7 @@ class Metadata(Base):
     failover = Column(Boolean, default=None, nullable=True)
     failover_message = Column(Text, nullable=True, default="")
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.10~rc6", nullable=False)
+    version = Column(String(32), default="1.6.10~rc7", nullable=False)
 
 
 ## UI Models

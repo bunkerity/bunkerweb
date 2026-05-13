@@ -91,8 +91,9 @@ Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes blo
 | ------------------------------------ | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_METRICS`                        | `yes`             | multisite | no       | **Habilitar Métricas:** Establezca en `yes` para habilitar la recolección y recuperación de métricas.                                              |
 | `METRICS_MEMORY_SIZE`                | `16m`             | global    | no       | **Tamaño de la Memoria:** Tamaño del almacenamiento interno para las métricas (p. ej., `8192`, `16m`, `32m`).                                      |
-| `METRICS_MAX_BLOCKED_REQUESTS`       | `1000`            | global    | no       | **Máximo de Solicitudes Bloqueadas:** Número máximo de solicitudes bloqueadas para almacenar por trabajador.                                       |
-| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `100000`          | global    | no       | **Máximo de Solicitudes Bloqueadas en Redis:** Número máximo de solicitudes bloqueadas para almacenar en Redis.                                    |
+| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`              | global    | no       | **Máximo de Solicitudes Bloqueadas:** Número máximo de solicitudes bloqueadas para almacenar por trabajador. Acepta la notación abreviada `k`/`m`. |
+| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`             | global    | no       | **Máximo de Solicitudes Bloqueadas en Redis:** Número máximo de solicitudes bloqueadas para almacenar en Redis. Acepta la notación abreviada `k`/`m`. |
+| `MAX_LRU_HISTORY`                    | `1k`              | global    | no       | **Historial LRU Máximo:** Número de ranuras LRU por trabajador y límite del arreglo de historial de eventos por clave (trazas de bloqueo, trazas de autenticación, etc.). Acepta la notación abreviada `k`/`m`. |
 | `METRICS_SAVE_TO_REDIS`              | `yes`             | global    | no       | **Guardar Métricas en Redis:** Establezca en `yes` para guardar las métricas (contadores y tablas) en Redis para la agregación en todo el clúster. |
 
 !!! tip "Dimensionamiento de la Asignación de Memoria"
@@ -116,8 +117,9 @@ Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes blo
     ```yaml
     USE_METRICS: "yes"
     METRICS_MEMORY_SIZE: "16m"
-    METRICS_MAX_BLOCKED_REQUESTS: "1000"
-    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "100000"
+    METRICS_MAX_BLOCKED_REQUESTS: "1k"
+    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10k"
+    MAX_LRU_HISTORY: "1k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 
@@ -130,6 +132,7 @@ Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes blo
     METRICS_MEMORY_SIZE: "8m"
     METRICS_MAX_BLOCKED_REQUESTS: "500"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10000"
+    MAX_LRU_HISTORY: "500"
     METRICS_SAVE_TO_REDIS: "no"
     ```
 
@@ -142,6 +145,7 @@ Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes blo
     METRICS_MEMORY_SIZE: "64m"
     METRICS_MAX_BLOCKED_REQUESTS: "5000"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "500000"
+    MAX_LRU_HISTORY: "5k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 

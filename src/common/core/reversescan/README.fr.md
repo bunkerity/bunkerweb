@@ -7,9 +7,17 @@ Comment ça marche :
 3. Si des ports ouverts sont détectés (signe d’un proxy), la connexion est refusée.
 4. Cela ajoute une couche contre bots/outils automatisés et utilisateurs malveillants.
 
+!!! success "Avantages clés"
+
+      1. **Détection de proxy :** identifie les clients qui exposent des ports de proxy courants.
+      2. **Protection contre le contournement :** limite les tentatives de masquage d’origine via proxys ouverts.
+      3. **Configuration flexible :** personnalisez les ports et délais selon votre modèle de menace.
+      4. **Défense automatisée :** bloque les clients suspects sans vérification manuelle.
+      5. **Intégration transparente :** fonctionne avec vos couches de sécurité existantes.
+
 ### Comment l’utiliser
 
-1. Activer : `USE_REVERSE_SCAN: yes`.
+1. Activer : mettez le paramètre `USE_REVERSE_SCAN` à `yes`.
 2. Ports : personnalisez `REVERSE_SCAN_PORTS`.
 3. Timeout : ajustez `REVERSE_SCAN_TIMEOUT` pour l’équilibre sécurité/performance.
 4. Suivi : consultez les logs et la [web UI](web-ui.md).

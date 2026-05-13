@@ -293,3 +293,4 @@ Que vous ayez besoin de restreindre les méthodes HTTP, de gérer la taille des 
     OPEN_FILE_CACHE_ERRORS: "yes"
     OPEN_FILE_CACHE_MIN_USES: "3"
     OPEN_FILE_CACHE_VALID: "60s"
+    ```

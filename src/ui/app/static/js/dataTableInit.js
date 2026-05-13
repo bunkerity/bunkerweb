@@ -1,6 +1,71 @@
 // dataTableInit.js
 
 /**
+ * Escape a single cell value against spreadsheet formula injection (CWE-1236).
+ *
+ * Mirrors the Python ``defusedcsv`` ``_escape`` logic used by the server-side
+ * exports in ``app.utils.csv_writer`` / ``app.utils.csv_safe``: prefix a leading
+ * single quote when the first character is one of ``= + - @ | %`` (and the value
+ * is not a number / numeric-looking string), and additionally backslash-escape
+ * embedded ``|`` characters. ``null``/``undefined`` and numeric values pass
+ * through unchanged.
+ *
+ * Applied globally to every DataTables Buttons CSV / Excel / clipboard export
+ * via the patch immediately below — every ``extend: "csv" | "excel" | "copy"``
+ * button on every page picks this up automatically.
+ *
+ * @param {*} value Raw cell value coming from a DataTables row.
+ * @returns {*} Escaped value safe for CSV / XLSX / clipboard targets.
+ */
+function bwCsvSafe(value) {
+  if (value === null || value === undefined) return value;
+  if (typeof value === "number") return value;
+  let s = String(value);
+  if (s && /^[@+\-=|%]/.test(s) && !/^-?[0-9,.]+$/.test(s)) {
+    s = s.replace(/\\/g, "\\\\");
+    s = s.replace(/\|/g, "\\|");
+    s = "'" + s;
+  }
+  return s;
+}
+
+(function patchDataTablesButtonsForFormulaInjection() {
+  if (typeof $ === "undefined" || !$.fn || !$.fn.dataTable) return;
+  const ext = $.fn.dataTable.ext;
+  if (!ext || !ext.buttons) return;
+
+  // Built-in HTML5 export buttons: ``extend: "csv" | "excel" | "copy"`` resolve
+  // to these via DataTables' button alias chain. We patch the per-button
+  // ``action`` instead of ``exportOptions`` defaults because DataTables Buttons'
+  // ``_resolveExtends`` does **not** deep-merge ``exportOptions`` from defaults
+  // when the per-page config supplies its own ``exportOptions`` block, so any
+  // ``format`` we put on the default object gets dropped.
+  //
+  // Wrapping ``action`` lets us mutate the resolved ``config`` immediately
+  // before the export pipeline runs, which is the same call site every export
+  // button (CSV / Excel / clipboard copy) goes through. The mutation is
+  // idempotent because reassigning ``format.body`` to the same ``bwCsvSafe``
+  // reference is a no-op on subsequent clicks.
+  ["csvHtml5", "excelHtml5", "copyHtml5"].forEach(function (name) {
+    const btn = ext.buttons[name];
+    if (!btn || typeof btn.action !== "function" || btn.__bwCsvSafePatched)
+      return;
+    const origAction = btn.action;
+    btn.action = function (e, dt, button, config) {
+      config = config || {};
+      config.exportOptions = config.exportOptions || {};
+      config.exportOptions.format = $.extend(
+        {},
+        config.exportOptions.format || {},
+        { body: bwCsvSafe, header: bwCsvSafe, footer: bwCsvSafe },
+      );
+      return origAction.call(this, e, dt, button, config);
+    };
+    btn.__bwCsvSafePatched = true;
+  });
+})();
+
+/**
  * Initialize a DataTable with i18n and user preferences.
  * @param {Object} config - Configuration object for the DataTable.
  * @returns {DataTable} - The initialized DataTable instance.
@@ -475,6 +540,152 @@ function initializeDataTable(config) {
           .tooltip();
     }
   });
+
+  // Cross-page selection affordance.
+  // The header checkbox is configured (per-page) with `headerCheckbox: "select-page"`,
+  // so by default it selects only rows on the current page. When more matching rows
+  // exist on other pages, surface a banner that lets the user opt-in to selecting
+  // the entire filtered set — and, once opted in, opt out via "Clear selection".
+  //
+  // Skipped for `serverSide: true` tables (bans, reports): DataTables only holds
+  // the current page client-side, so `rows({ search: "applied" }).select()` would
+  // not actually select off-page rows. A correct cross-page bulk action on a
+  // server-side table requires submitting the active filter to the server-side
+  // endpoint instead of an explicit row-id list — out of scope for this banner.
+  const isServerSide = !!(
+    dataTable.settings &&
+    dataTable.settings()[0] &&
+    dataTable.settings()[0].oFeatures &&
+    dataTable.settings()[0].oFeatures.bServerSide
+  );
+  const $tableWrapper = $(`#${tableName}_wrapper`);
+  if ($tableWrapper.length && !isServerSide) {
+    const $bulkBanner = $(
+      '<div class="dt-bulk-select-banner alert alert-primary py-2 px-3 mb-2 d-none align-items-center" role="status">' +
+        '<i class="bx bx-info-circle me-2" aria-hidden="true"></i>' +
+        '<span class="dt-bulk-select-message flex-grow-1"></span>' +
+        '<button type="button" class="btn btn-sm btn-link p-0 ms-2 dt-bulk-select-action"></button>' +
+        "</div>",
+    );
+    $tableWrapper.prepend($bulkBanner);
+
+    const setBannerVisible = (visible) => {
+      $bulkBanner
+        .toggleClass("d-none", !visible)
+        .toggleClass("d-flex", visible);
+    };
+
+    const updateBulkBanner = () => {
+      const pageCount = dataTable.rows({ page: "current" }).count();
+      const filteredCount = dataTable.rows({ search: "applied" }).count();
+      const selectedCount = dataTable.rows({ selected: true }).count();
+      const selectedOnPage = dataTable
+        .rows({ page: "current", selected: true })
+        .count();
+
+      // Only meaningful when filtered set spans more than one page
+      if (filteredCount <= pageCount) {
+        setBannerVisible(false);
+        return;
+      }
+
+      const $msg = $bulkBanner.find(".dt-bulk-select-message");
+      const $action = $bulkBanner.find(".dt-bulk-select-action");
+
+      if (
+        selectedOnPage === pageCount &&
+        pageCount > 0 &&
+        selectedCount < filteredCount
+      ) {
+        const msgKey = "datatable.bulk_select_page";
+        const actionKey = "datatable.bulk_select_all_filtered";
+        const msgOpts = { count: selectedOnPage, entity: entityName };
+        const actionOpts = { count: filteredCount, entity: entityName };
+        $msg
+          .attr("data-i18n", msgKey)
+          .attr("data-i18n-options", JSON.stringify(msgOpts))
+          .text(
+            t(
+              msgKey,
+              `All ${selectedOnPage} ${entityName} on this page are selected.`,
+              msgOpts,
+            ),
+          );
+        $action
+          .attr("data-i18n", actionKey)
+          .attr("data-i18n-options", JSON.stringify(actionOpts))
+          .data("action", "select-all-filtered")
+          .text(
+            t(
+              actionKey,
+              `Select all ${filteredCount} matching ${entityName}`,
+              actionOpts,
+            ),
+          );
+        setBannerVisible(true);
+        return;
+      }
+
+      if (selectedCount >= filteredCount && filteredCount > 0) {
+        const msgKey = "datatable.bulk_select_all_done";
+        const actionKey = "datatable.bulk_select_clear";
+        const msgOpts = { count: filteredCount, entity: entityName };
+        $msg
+          .attr("data-i18n", msgKey)
+          .attr("data-i18n-options", JSON.stringify(msgOpts))
+          .text(
+            t(
+              msgKey,
+              `All ${filteredCount} matching ${entityName} are selected.`,
+              msgOpts,
+            ),
+          );
+        $action
+          .attr("data-i18n", actionKey)
+          .removeAttr("data-i18n-options")
+          .data("action", "clear")
+          .text(t(actionKey, "Clear selection"));
+        setBannerVisible(true);
+        return;
+      }
+
+      setBannerVisible(false);
+    };
+
+    $bulkBanner.on("click", ".dt-bulk-select-action", function () {
+      const action = $(this).data("action");
+      if (action === "select-all-filtered") {
+        dataTable.rows({ search: "applied" }).select();
+      } else if (action === "clear") {
+        dataTable.rows().deselect();
+      }
+    });
+
+    // Coalesce updates: bulk select operations (e.g.
+    // `dataTable.rows({ search: "applied" }).select()` on a 5k-row table) emit
+    // one `select` event per row. Without batching we'd run `updateBulkBanner`
+    // 5k times in a single tick. A single pending flag plus rAF collapses the
+    // burst to one render per frame.
+    let bulkBannerPending = false;
+    const scheduleBulkBannerUpdate = () => {
+      if (bulkBannerPending) return;
+      bulkBannerPending = true;
+      const flush = () => {
+        bulkBannerPending = false;
+        updateBulkBanner();
+      };
+      if (typeof window.requestAnimationFrame === "function") {
+        window.requestAnimationFrame(flush);
+      } else {
+        setTimeout(flush, 0);
+      }
+    };
+    dataTable.on(
+      "select deselect draw page length search",
+      scheduleBulkBannerUpdate,
+    );
+    scheduleBulkBannerUpdate();
+  }
 
   // Note: colvisRestore handling moved earlier to respect defaults
 
