@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.10~rc7 - 2026/??/??
+## v1.6.10
+
+- [SECURITY] `nginx` : update nginx to 1.30.1 to fix various CVEs
+
+## v1.6.10~rc7 - 2026/05/15
 
 - [FEATURE] `installer`: `misc/install-bunkerweb.sh` interactive prompts now use a modern inline TUI via [gum](https://github.com/charmbracelet/gum) (`--tui` / `--no-tui` / `BW_INSTALL_TUI`). Three-tier dispatch — gum → whiptail (only if pre-installed) → plain `read` — keeps every host usable.
 - [SECURITY] `ui`: neutralize CSV/XLSX formula injection (CWE-1236) in bans and reports exports. Server-side CSV now goes through `defusedcsv` (new pinned dep) and a shared `csv_safe()` helper escapes openpyxl XLSX cells; client-side DataTables `csv`/`excel`/`copy` buttons inherit the same rule via a global `bwCsvSafe` hook in `dataTableInit.js`. Cells whose first character is `= + - @ | %` are prefixed with `'`, and embedded `|` is backslash-escaped.
