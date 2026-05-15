@@ -25,16 +25,16 @@
             ```yaml
             services:
                 bunkerweb:
-                    image: bunkerity/bunkerweb:1.6.10-rc7
+                    image: bunkerity/bunkerweb:1.6.10
                     ...
                 bw-scheduler:
-                    image: bunkerity/bunkerweb-scheduler:1.6.10-rc7
+                    image: bunkerity/bunkerweb-scheduler:1.6.10
                     ...
                 bw-autoconf:
-                    image: bunkerity/bunkerweb-autoconf:1.6.10-rc7
+                    image: bunkerity/bunkerweb-autoconf:1.6.10
                     ...
                 bw-ui:
-                    image: bunkerity/bunkerweb-ui:1.6.10-rc7
+                    image: bunkerity/bunkerweb-ui:1.6.10
                     ...
             ```
 
@@ -146,20 +146,20 @@
         Examples:
 
         ```bash
-        # Upgrade to 1.6.10~rc7 interactively (will prompt for backup)
-        sudo ./install-bunkerweb.sh --version 1.6.10~rc7
+        # Upgrade to 1.6.10 interactively (will prompt for backup)
+        sudo ./install-bunkerweb.sh --version 1.6.10
 
         # Non-interactive upgrade with automatic backup to custom directory
-        sudo ./install-bunkerweb.sh -v 1.6.10~rc7 --backup-dir /var/backups/bw-2025-01 -y
+        sudo ./install-bunkerweb.sh -v 1.6.10 --backup-dir /var/backups/bw-2025-01 -y
 
         # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
-        sudo ./install-bunkerweb.sh -v 1.6.10~rc7 -y -q
+        sudo ./install-bunkerweb.sh -v 1.6.10 -y -q
 
         # Perform a dry run (plan) without applying changes
-        sudo ./install-bunkerweb.sh -v 1.6.10~rc7 --dry-run
+        sudo ./install-bunkerweb.sh -v 1.6.10 --dry-run
 
         # Upgrade skipping automatic backup (NOT recommended)
-        sudo ./install-bunkerweb.sh -v 1.6.10~rc7 --no-auto-backup -y
+        sudo ./install-bunkerweb.sh -v 1.6.10 --no-auto-backup -y
         ```
 
         !!! warning "Skipping backups"
@@ -239,7 +239,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.10~rc7
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.10
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -265,7 +265,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.10~rc7
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.10
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
@@ -662,16 +662,16 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.10-rc7
+                        image: bunkerity/bunkerweb:1.6.10
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.10-rc7
+                        image: bunkerity/bunkerweb-scheduler:1.6.10
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.10-rc7
+                        image: bunkerity/bunkerweb-autoconf:1.6.10
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.10-rc7
+                        image: bunkerity/bunkerweb-ui:1.6.10
                         ...
                 ```
 
@@ -706,7 +706,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.10~rc7
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.10
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -732,7 +732,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.10~rc7
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.10
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
