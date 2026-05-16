@@ -16,7 +16,6 @@ class LinuxTest(Test):
             "ubuntu",
             "debian-bookworm",
             "debian-trixie",
-            "fedora-42",
             "fedora-43",
             "fedora-44",
             "centos",
