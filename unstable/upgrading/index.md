@@ -82,6 +82,9 @@
 
             If the checksum verification fails, **do not execute the script**—it may be unsafe.
 
+    !!! tip "Interactive upgrade UI"
+        The upgrade flow uses the same TUI as fresh installs: arrow-key inline prompts via [gum](https://github.com/charmbracelet/gum), with `whiptail` boxed-dialog and plain-text fallbacks if gum cannot be obtained. The `gum` binary is fetched from the official [GitHub release](https://github.com/charmbracelet/gum/releases) (SHA256-pinned, cosign-verified when cosign is installed) and runs from a tempdir that is removed on exit — no system package is installed and no apt/dnf source is added. Pass `--no-tui` (or set `BW_INSTALL_TUI=no`) to skip every TUI tier, or `--tui` to require a working TUI. For fully unattended upgrades pass `-y` / `--yes` with the relevant flags — piped invocations (`curl … | bash`) exit with a clear error instead of silently accepting every default. **Air-gapped upgrades**: combine `--no-tui --yes` so no network call is made for the TUI layer.
+
     * **How it works**:
 
         The same multi‑purpose install script used for fresh installs can also perform an in‑place upgrade. When it detects an existing installation and a different target version, it switches to upgrade mode and applies the following workflow:
@@ -116,9 +119,9 @@
 
     * **Mode-aware behavior**:
 
-        - The installer reuses the same installation-type logic during upgrades: manager mode keeps the setup wizard disabled, binds the API to `0.0.0.0`, and requires a whitelist IP (pass `--manager-ip` for unattended runs), while worker mode still enforces the manager IP list.
+        - The installer reuses the same installation-type logic during upgrades: manager mode keeps the setup wizard disabled, binds the internal API listener to `0.0.0.0`, and requires a whitelist IP (pass `--manager-ip` for unattended runs), while worker mode still enforces the manager IP list.
         - Manager upgrades can opt to start or skip the Web UI service, and the summary explicitly reports the API service state so you can decide whether to enable it via `--api` / `--no-api`.
-        - CrowdSec options remain limited to full-stack upgrades, and the script continues to validate both the operating system and CPU architecture before touching packages, gating unsupported combinations behind `--force`.
+        - CrowdSec is prompted interactively for Full Stack upgrades. The CLI flags remain valid for Full Stack and Manager upgrades, and the script continues to reject CrowdSec for Worker, Scheduler-only, UI-only, and API-only modes.
 
         Rollback summary:
 
@@ -132,6 +135,8 @@
         | ----------------------- | ------------------------------------------------------------------------------------------------- |
         | `-v, --version <X.Y.Z>` | Target BunkerWeb version to upgrade to.                                                           |
         | `-y, --yes`             | Non‑interactive (assumes upgrade confirmation and enables auto backup unless `--no-auto-backup`). |
+        | `--tui`                 | Force a TUI (downloaded gum or existing whiptail). Aborts if no TUI tier can render.              |
+        | `--no-tui`              | Skip every TUI tier and use plain text prompts. Equivalent to `BW_INSTALL_TUI=no`.                |
         | `--backup-dir <PATH>`   | Destination for the automatic pre‑upgrade backup. Created if missing.                             |
         | `--no-auto-backup`      | Skip automatic backup (NOT recommended). You must have a manual backup.                           |
         | `-q, --quiet`           | Suppress output (combine with logging / monitoring).                                              |

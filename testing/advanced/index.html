@@ -2854,7 +2854,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </li>
 <li>
-<p><strong>Select Option 2) Manager</strong> and follow the prompts:</p>
+<p><strong>Select Manager</strong> at the installation-type prompt (use ↑/↓ then Enter), then follow the prompts:</p>
 <table>
 <thead>
 <tr>
@@ -2865,39 +2865,51 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <tbody>
 <tr>
 <td style="text-align: left;"><strong>BunkerWeb instances</strong></td>
-<td style="text-align: left;">Enter space-separated IPs of your worker nodes (e.g., <code>192.168.10.11 192.168.10.12</code>).</td>
+<td style="text-align: left;">Optionally enter space-separated IPs of your worker nodes (e.g., <code>192.168.10.11 192.168.10.12</code>), or leave empty and add workers later.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Whitelist IP</strong></td>
-<td style="text-align: left;">Accept the detected IP or enter a subnet (e.g., <code>192.168.10.0/24</code>) to allow API access.</td>
+<td style="text-align: left;">Accept the detected IP or enter a subnet (e.g., <code>192.168.10.0/24</code>) to allow internal API access.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>DNS resolvers</strong></td>
-<td style="text-align: left;">Press <code>N</code> for default or provide custom ones.</td>
+<td style="text-align: left;">Choose <strong>No</strong> to keep the defaults, or provide custom ones.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>HTTPS for internal API</strong></td>
-<td style="text-align: left;"><strong>Recommended:</strong> <code>Y</code> to auto-generate certificates for secure manager-worker communication.</td>
+<td style="text-align: left;"><strong>Recommended:</strong> choose <strong>Yes</strong> to auto-generate certificates for secure manager-worker communication.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Web UI service</strong></td>
-<td style="text-align: left;"><code>Y</code> to enable the web interface (highly recommended).</td>
+<td style="text-align: left;">Choose <strong>Yes</strong> to enable the web interface (highly recommended).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Web UI admin user</strong></td>
+<td style="text-align: left;">Create an initial admin user when the wizard is disabled. Manager mode disables the wizard, so this is recommended unless you configure credentials another way.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Web UI HTTPS</strong></td>
+<td style="text-align: left;">Optionally generate a self-signed certificate for the Manager UI listener.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>API service</strong></td>
-<td style="text-align: left;"><code>N</code> unless you need the public REST API for external tools.</td>
+<td style="text-align: left;">Choose <strong>No</strong> unless you need the public REST API for external tools.</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="admonition-title">Prompt UI</p>
+<p>The installer uses the <a href="https://github.com/charmbracelet/gum">gum</a> TUI. On first interactive run it downloads the official <code>gum</code> binary from the GitHub release (SHA256-pinned), runs it from a tempdir, and removes the tempdir on exit — no system package is installed. If gum cannot be fetched, it uses an existing <code>whiptail</code>; if neither is available, it falls back to plain text prompts. Use arrow keys + Enter to answer prompts. Pass <code>--no-tui</code> if you prefer plain text prompts.</p>
+</div>
 </li>
 </ol>
 <h4 id="secure-and-expose-the-ui">Secure and Expose the UI</h4>
-<p>If you enabled the Web UI, you should secure it. You can host it on the Manager or a separate machine.</p>
+<p>If you enabled the Web UI, keep it reachable only by administrators. The installer can create the initial admin user and prints any generated password at the end of the run. The Manager UI listens on <code>127.0.0.1:7000</code> by default; expose it through a reverse proxy or SSH tunnel, or change <code>LISTEN_ADDR</code> intentionally.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Hosted on Manager</label><label for="__tabbed_5_2">External Host</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
-<li>Edit <code>/etc/bunkerweb/ui.env</code> to set strong credentials:</li>
+<li>If you skipped admin creation during install, edit <code>/etc/bunkerweb/ui.env</code> to set strong credentials. Set <code>LISTEN_ADDR=0.0.0.0</code> only when you intentionally expose the UI directly:</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="c1"># OVERRIDE_ADMIN_CREDS=no</span>
 <span class="na">ADMIN_USERNAME</span><span class="o">=</span><span class="s">admin</span>
@@ -2910,8 +2922,8 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="c1"># ENABLE_HEALTHCHECK=no</span>
 </code></pre></div>
 <div class="admonition warning">
-<p class="admonition-title">Change default credentials</p>
-<p>Replace <code>admin</code> and <code>changeme</code> with strong credentials before starting the UI service in production.</p>
+<p class="admonition-title">Use real credentials</p>
+<p>Replace the placeholder username and password before starting the UI service in production.</p>
 </div>
 <ol>
 <li>Restart the UI:</li>
@@ -2922,7 +2934,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <div class="tabbed-block">
 <p>For better isolation, install the UI on a separate node.</p>
 <ol>
-<li>Run the installer and choose <strong>Option 5) Web UI Only</strong>.</li>
+<li>Run the installer and select the <strong>Web UI Only</strong> installation type.</li>
 <li>
 <p>Edit <code>/etc/bunkerweb/ui.env</code> to connect to the Manager's database:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Database configuration (must match your manager&#39;s database)</span>

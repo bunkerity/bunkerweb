@@ -2854,7 +2854,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </li>
 <li>
-<p><strong>Option 2) Manager</strong> wählen und den Anweisungen folgen:</p>
+<p><strong>Manager</strong> im Installationstyp-Menü auswählen (mit ↑/↓ navigieren, dann Enter), und den Anweisungen folgen:</p>
 <table>
 <thead>
 <tr>
@@ -2873,22 +2873,26 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </tr>
 <tr>
 <td style="text-align: left;"><strong>DNS-Resolver</strong></td>
-<td style="text-align: left;">Drücken Sie <code>N</code> für den Standardwert oder geben Sie eigene an.</td>
+<td style="text-align: left;">Wählen Sie <strong>Nein</strong>, um die Standardwerte zu behalten, oder geben Sie eigene an.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>HTTPS für interne API</strong></td>
-<td style="text-align: left;"><strong>Empfohlen:</strong> <code>Y</code>, um Zertifikate zu erzeugen und die Manager-Worker-Kommunikation zu sichern.</td>
+<td style="text-align: left;"><strong>Empfohlen:</strong> wählen Sie <strong>Ja</strong>, um Zertifikate zu erzeugen und die Manager-Worker-Kommunikation zu sichern.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Web-UI-Dienst</strong></td>
-<td style="text-align: left;"><code>Y</code>, um die Weboberfläche zu aktivieren (stark empfohlen).</td>
+<td style="text-align: left;">Wählen Sie <strong>Ja</strong>, um die Weboberfläche zu aktivieren (stark empfohlen).</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>API-Dienst</strong></td>
-<td style="text-align: left;"><code>N</code>, sofern Sie die öffentliche REST-API nicht benötigen.</td>
+<td style="text-align: left;">Wählen Sie <strong>Nein</strong>, sofern Sie die öffentliche REST-API nicht benötigen.</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="admonition-title">Eingabeaufforderungs-Oberfläche</p>
+<p>Der Installer verwendet die <a href="https://github.com/charmbracelet/gum">gum</a>-TUI. Beim ersten interaktiven Lauf lädt er das offizielle <code>gum</code>-Binary aus der GitHub-Release herunter (SHA256-gepinnt), führt es aus einem Temp-Verzeichnis aus und entfernt das Temp-Verzeichnis beim Beenden — es wird kein Systempaket installiert. Verwenden Sie Pfeiltasten + Enter zur Beantwortung. Übergeben Sie <code>--no-tui</code>, wenn Sie Klartext-Eingaben bevorzugen.</p>
+</div>
 </li>
 </ol>
 <h4 id="ui-absichern-und-bereitstellen">UI absichern und bereitstellen</h4>
@@ -2922,7 +2926,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <div class="tabbed-block">
 <p>Für bessere Isolation können Sie die UI auf einem separaten Knoten installieren.</p>
 <ol>
-<li>Führen Sie den Installer aus und wählen Sie <strong>Option 5) Web UI Only</strong>.</li>
+<li>Führen Sie den Installer aus und wählen Sie den Installationstyp <strong>Web UI Only</strong>.</li>
 <li>
 <p>Bearbeiten Sie <code>/etc/bunkerweb/ui.env</code>, um die Verbindung zur Manager-Datenbank herzustellen:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Datenbank-Konfiguration (muss zur Manager-Datenbank passen)</span>

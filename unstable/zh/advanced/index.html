@@ -2854,7 +2854,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </li>
 <li>
-<p><strong>选择 2) Manager</strong> 并按提示操作：</p>
+<p>在安装类型菜单中<strong>选择 Manager</strong>（使用 ↑/↓ 然后按回车），并按提示操作：</p>
 <table>
 <thead>
 <tr>
@@ -2873,22 +2873,26 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </tr>
 <tr>
 <td style="text-align: left;"><strong>DNS 解析器</strong></td>
-<td style="text-align: left;">按 <code>N</code> 使用默认值，或指定自定义解析器。</td>
+<td style="text-align: left;">选择 <strong>否</strong> 以保留默认值，或指定自定义解析器。</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>内部 API 启用 HTTPS</strong></td>
-<td style="text-align: left;"><strong>推荐：</strong> 选择 <code>Y</code> 生成证书，保护 Manager-Worker 通信。</td>
+<td style="text-align: left;"><strong>推荐：</strong> 选择 <strong>是</strong> 自动生成证书，保护 Manager-Worker 通信。</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Web UI 服务</strong></td>
-<td style="text-align: left;">选择 <code>Y</code> 启用界面（强烈推荐）。</td>
+<td style="text-align: left;">选择 <strong>是</strong> 启用界面（强烈推荐）。</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>API 服务</strong></td>
-<td style="text-align: left;">除非需要公共 REST API，否则选择 <code>N</code>。</td>
+<td style="text-align: left;">除非需要公共 REST API，否则选择 <strong>否</strong>。</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="admonition-title">提示交互界面</p>
+<p>安装器使用 <a href="https://github.com/charmbracelet/gum">gum</a> TUI。首次交互运行时，会从 GitHub 发布页下载官方 <code>gum</code> 二进制（SHA256 已固定），从临时目录运行，并在脚本退出时删除该临时目录 —— 不会安装任何系统包。使用方向键 + 回车作答。若希望使用纯文本提示，请传入 <code>--no-tui</code>。</p>
+</div>
 </li>
 </ol>
 <h4 id="ui">保护并暴露 UI</h4>
@@ -2922,7 +2926,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <div class="tabbed-block">
 <p>为了更好的隔离，可在单独节点安装 UI。</p>
 <ol>
-<li>运行安装器并选择 <strong>5) Web UI Only</strong>。</li>
+<li>运行安装器并选择 <strong>Web UI Only</strong> 安装类型。</li>
 <li>
 <p>编辑 <code>/etc/bunkerweb/ui.env</code> 指向 Manager 的数据库：</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># 数据库配置（需与 Manager 数据库一致）</span>

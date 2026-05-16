@@ -1271,6 +1271,12 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p>Si la verificación de la suma de verificación falla, <strong>no ejecutes el script</strong>—puede no ser seguro.</p>
 </div>
 </li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Interfaz de actualización interactiva</p>
+<p>El flujo de actualización usa la misma TUI que las instalaciones nuevas: indicaciones en línea con <a href="https://github.com/charmbracelet/gum">gum</a>, con respaldo en los diálogos <code>whiptail</code> y, finalmente, en indicaciones de texto plano si gum no puede obtenerse. El binario <code>gum</code> se descarga desde la <a href="https://github.com/charmbracelet/gum/releases">release de GitHub</a> oficial (SHA256 fijado, verificación cosign cuando cosign está instalado) y se ejecuta desde un directorio temporal que se elimina al salir — no se instala ningún paquete del sistema y no se añade ninguna fuente apt/dnf. Pasa <code>--no-tui</code> (o establece <code>BW_INSTALL_TUI=no</code>) para saltar todos los niveles de TUI, o <code>--tui</code> para exigir una TUI operativa. Para actualizaciones totalmente desatendidas, pasa <code>-y</code> / <code>--yes</code> con los flags relevantes — las invocaciones por tubería (<code>curl … | bash</code>) salen con un error claro en lugar de aceptar silenciosamente cada valor predeterminado. <strong>Actualizaciones aisladas (air-gapped)</strong>: combina <code>--no-tui --yes</code> para que no se haga ninguna llamada de red para la capa de TUI.</p>
+</div>
+<ul>
 <li>
 <p><strong>Cómo funciona</strong>:</p>
 <p>El mismo script de instalación multipropósito utilizado para instalaciones nuevas también puede realizar una actualización in situ. Cuando detecta una instalación existente y una versión de destino diferente, cambia al modo de actualización y aplica el siguiente flujo de trabajo:</p>
@@ -1348,6 +1354,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <tr>
 <td style="text-align: left;"><code>-y, --yes</code></td>
 <td style="text-align: left;">No interactivo (asume la confirmación de la actualización y habilita la copia de seguridad automática a menos que se use <code>--no-auto-backup</code>).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>--tui</code></td>
+<td style="text-align: left;">Fuerza una TUI (gum o whiptail). Aborta si ninguna puede instalarse.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>--no-tui</code></td>
+<td style="text-align: left;">Salta todos los niveles de TUI y usa indicaciones de texto plano. Equivale a <code>BW_INSTALL_TUI=no</code>.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>--backup-dir &lt;RUTA&gt;</code></td>

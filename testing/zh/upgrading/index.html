@@ -1271,6 +1271,12 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p>如果校验和验证失败，<strong>请不要执行该脚本</strong>——它可能不安全。</p>
 </div>
 </li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">交互式升级界面</p>
+<p>升级流程使用与全新安装相同的 TUI：通过 <a href="https://github.com/charmbracelet/gum">gum</a> 提供的内联提示；若无法获取 gum，则回退到 <code>whiptail</code> 对话框，最终退化为纯文本提示。<code>gum</code> 二进制从官方 <a href="https://github.com/charmbracelet/gum/releases">GitHub 发布页</a> 下载（SHA256 已固定，若已安装 cosign 则进行 cosign 校验），从临时目录运行，并在脚本退出时删除该目录 —— 不会安装任何系统包，也不会添加 apt/dnf 源。使用 <code>--no-tui</code>（或设置 <code>BW_INSTALL_TUI=no</code>）跳过所有 TUI 层级；使用 <code>--tui</code> 在无可用 TUI 时中止。对于完全无人值守的升级，请使用 <code>-y</code> / <code>--yes</code> 配合相应标志 —— 通过管道调用（<code>curl … | bash</code>）会以清晰的错误退出，而不会静默接受每个默认值。<strong>离线（air-gapped）升级</strong>：组合 <code>--no-tui --yes</code>，TUI 层不会发起任何网络调用。</p>
+</div>
+<ul>
 <li>
 <p><strong>工作原理</strong>：</p>
 <p>用于全新安装的多功能安装脚本也可以执行原地升级。当它检测到现有安装和不同的目标版本时，它会切换到升级模式并应用以下工作流程：</p>
@@ -1348,6 +1354,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <tr>
 <td><code>-y, --yes</code></td>
 <td>非交互式（假定升级确认并启用自动备份，除非使用 <code>--no-auto-backup</code>）。</td>
+</tr>
+<tr>
+<td><code>--tui</code></td>
+<td>强制使用 TUI（gum 或 whiptail）。若两者都无法安装则中止。</td>
+</tr>
+<tr>
+<td><code>--no-tui</code></td>
+<td>跳过所有 TUI 层级并使用纯文本提示。等同于 <code>BW_INSTALL_TUI=no</code>。</td>
 </tr>
 <tr>
 <td><code>--backup-dir &lt;PATH&gt;</code></td>

@@ -2854,7 +2854,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </li>
 <li>
-<p><strong>Selecciona la opción 2) Manager</strong> y sigue las indicaciones:</p>
+<p><strong>Selecciona Manager</strong> en el menú de tipo de instalación (usa ↑/↓ y luego Enter), y sigue las indicaciones:</p>
 <table>
 <thead>
 <tr>
@@ -2873,22 +2873,26 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Resolutores DNS</strong></td>
-<td style="text-align: left;">Pulsa <code>N</code> para usar el valor por defecto o indica los tuyos.</td>
+<td style="text-align: left;">Elige <strong>No</strong> para mantener los valores predeterminados, o indica los tuyos.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>HTTPS para la API interna</strong></td>
-<td style="text-align: left;"><strong>Recomendado:</strong> <code>Y</code> para generar certificados y asegurar la comunicación manager-worker.</td>
+<td style="text-align: left;"><strong>Recomendado:</strong> elige <strong>Sí</strong> para generar certificados y asegurar la comunicación manager-worker.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Servicio Web UI</strong></td>
-<td style="text-align: left;"><code>Y</code> para activar la interfaz web (muy recomendado).</td>
+<td style="text-align: left;">Elige <strong>Sí</strong> para activar la interfaz web (muy recomendado).</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Servicio API</strong></td>
-<td style="text-align: left;"><code>N</code> salvo que necesites la API REST pública para herramientas externas.</td>
+<td style="text-align: left;">Elige <strong>No</strong> salvo que necesites la API REST pública para herramientas externas.</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="admonition-title">Interfaz de indicaciones</p>
+<p>El instalador usa la TUI <a href="https://github.com/charmbracelet/gum">gum</a>. En la primera ejecución interactiva descarga el binario <code>gum</code> oficial desde la release de GitHub (SHA256 fijado), lo ejecuta desde un directorio temporal y elimina ese directorio al salir — no se instala ningún paquete del sistema. Usa las flechas + Enter para responder. Pasa <code>--no-tui</code> si prefieres indicaciones de texto plano.</p>
+</div>
 </li>
 </ol>
 <h4 id="asegurar-y-exponer-la-ui">Asegurar y exponer la UI</h4>
@@ -2922,7 +2926,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <div class="tabbed-block">
 <p>Para más aislamiento, instala la UI en un nodo independiente.</p>
 <ol>
-<li>Ejecuta el instalador y elige <strong>Opción 5) Web UI Only</strong>.</li>
+<li>Ejecuta el instalador y selecciona el tipo de instalación <strong>Web UI Only</strong>.</li>
 <li>
 <p>Edita <code>/etc/bunkerweb/ui.env</code> para apuntar a la base de datos del Manager:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Configuración de base de datos (debe coincidir con la del Manager)</span>

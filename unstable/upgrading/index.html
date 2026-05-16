@@ -1271,6 +1271,12 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p>If the checksum verification fails, <strong>do not execute the script</strong>—it may be unsafe.</p>
 </div>
 </li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Interactive upgrade UI</p>
+<p>The upgrade flow uses the same TUI as fresh installs: arrow-key inline prompts via <a href="https://github.com/charmbracelet/gum">gum</a>, with <code>whiptail</code> boxed-dialog and plain-text fallbacks if gum cannot be obtained. The <code>gum</code> binary is fetched from the official <a href="https://github.com/charmbracelet/gum/releases">GitHub release</a> (SHA256-pinned, cosign-verified when cosign is installed) and runs from a tempdir that is removed on exit — no system package is installed and no apt/dnf source is added. Pass <code>--no-tui</code> (or set <code>BW_INSTALL_TUI=no</code>) to skip every TUI tier, or <code>--tui</code> to require a working TUI. For fully unattended upgrades pass <code>-y</code> / <code>--yes</code> with the relevant flags — piped invocations (<code>curl … | bash</code>) exit with a clear error instead of silently accepting every default. <strong>Air-gapped upgrades</strong>: combine <code>--no-tui --yes</code> so no network call is made for the TUI layer.</p>
+</div>
+<ul>
 <li>
 <p><strong>How it works</strong>:</p>
 <p>The same multi‑purpose install script used for fresh installs can also perform an in‑place upgrade. When it detects an existing installation and a different target version, it switches to upgrade mode and applies the following workflow:</p>
@@ -1321,9 +1327,9 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <li>
 <p><strong>Mode-aware behavior</strong>:</p>
 <ul>
-<li>The installer reuses the same installation-type logic during upgrades: manager mode keeps the setup wizard disabled, binds the API to <code>0.0.0.0</code>, and requires a whitelist IP (pass <code>--manager-ip</code> for unattended runs), while worker mode still enforces the manager IP list.</li>
+<li>The installer reuses the same installation-type logic during upgrades: manager mode keeps the setup wizard disabled, binds the internal API listener to <code>0.0.0.0</code>, and requires a whitelist IP (pass <code>--manager-ip</code> for unattended runs), while worker mode still enforces the manager IP list.</li>
 <li>Manager upgrades can opt to start or skip the Web UI service, and the summary explicitly reports the API service state so you can decide whether to enable it via <code>--api</code> / <code>--no-api</code>.</li>
-<li>CrowdSec options remain limited to full-stack upgrades, and the script continues to validate both the operating system and CPU architecture before touching packages, gating unsupported combinations behind <code>--force</code>.</li>
+<li>CrowdSec is prompted interactively for Full Stack upgrades. The CLI flags remain valid for Full Stack and Manager upgrades, and the script continues to reject CrowdSec for Worker, Scheduler-only, UI-only, and API-only modes.</li>
 </ul>
 <p>Rollback summary:</p>
 <ul>
@@ -1348,6 +1354,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <tr>
 <td><code>-y, --yes</code></td>
 <td>Non‑interactive (assumes upgrade confirmation and enables auto backup unless <code>--no-auto-backup</code>).</td>
+</tr>
+<tr>
+<td><code>--tui</code></td>
+<td>Force a TUI (downloaded gum or existing whiptail). Aborts if no TUI tier can render.</td>
+</tr>
+<tr>
+<td><code>--no-tui</code></td>
+<td>Skip every TUI tier and use plain text prompts. Equivalent to <code>BW_INSTALL_TUI=no</code>.</td>
 </tr>
 <tr>
 <td><code>--backup-dir &lt;PATH&gt;</code></td>

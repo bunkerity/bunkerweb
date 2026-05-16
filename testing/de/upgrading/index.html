@@ -1267,6 +1267,12 @@ sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.
 <p>Wenn die Überprüfung der Prüfsumme fehlschlägt, <strong>führen Sie das Skript nicht aus</strong> – es könnte unsicher sein.</p>
 </div>
 </li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Interaktive Upgrade-Oberfläche</p>
+<p>Der Upgrade-Ablauf verwendet dieselbe TUI wie Neuinstallationen: Inline-Eingabeaufforderungen mit <a href="https://github.com/charmbracelet/gum">gum</a>, mit Rückfall auf <code>whiptail</code>-Dialogboxen und schließlich auf Klartext-Eingaben, falls gum nicht bezogen werden kann. Das <code>gum</code>-Binary wird aus der offiziellen <a href="https://github.com/charmbracelet/gum/releases">GitHub-Release</a> heruntergeladen (SHA256-gepinnt, cosign-verifiziert, wenn cosign installiert ist) und aus einem Temp-Verzeichnis ausgeführt, das beim Beenden entfernt wird — es wird kein Systempaket installiert und keine apt/dnf-Quelle hinzugefügt. Übergeben Sie <code>--no-tui</code> (oder setzen Sie <code>BW_INSTALL_TUI=no</code>), um alle TUI-Ebenen zu überspringen, oder <code>--tui</code>, um eine funktionierende TUI zu erzwingen. Für vollständig unbeaufsichtigte Upgrades übergeben Sie <code>-y</code> / <code>--yes</code> mit den entsprechenden Flags – Pipe-Aufrufe (<code>curl … | bash</code>) brechen mit einer klaren Fehlermeldung ab, statt jede Vorgabe stillschweigend zu übernehmen. <strong>Air-gapped-Upgrades</strong>: kombinieren Sie <code>--no-tui --yes</code>, damit für die TUI-Schicht kein Netzwerkaufruf ausgeführt wird.</p>
+</div>
+<ul>
 <li>
 <p><strong>Wie es funktioniert</strong>:</p>
 <p>Das gleiche vielseitige Installationsskript, das für Neuinstallationen verwendet wird, kann auch ein In-Place-Upgrade durchführen. Wenn es eine bestehende Installation und eine andere Zielversion erkennt, wechselt es in den Upgrade-Modus und wendet den folgenden Arbeitsablauf an:</p>
@@ -1344,6 +1350,14 @@ sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.
 <tr>
 <td><code>-y, --yes</code></td>
 <td>Nicht-interaktiv (geht von Upgrade-Bestätigung aus und aktiviert die automatische Sicherung, es sei denn, <code>--no-auto-backup</code>).</td>
+</tr>
+<tr>
+<td><code>--tui</code></td>
+<td>Erzwingt eine TUI (gum oder whiptail). Bricht ab, wenn keine installiert werden kann.</td>
+</tr>
+<tr>
+<td><code>--no-tui</code></td>
+<td>Überspringt alle TUI-Ebenen und verwendet Klartext-Eingaben. Entspricht <code>BW_INSTALL_TUI=no</code>.</td>
 </tr>
 <tr>
 <td><code>--backup-dir &lt;PFAD&gt;</code></td>

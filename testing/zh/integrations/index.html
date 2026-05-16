@@ -3755,7 +3755,22 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <li><strong>安装后指导</strong>：提供清晰的后续步骤，帮助您开始使用新的 BunkerWeb 实例。</li>
 </ol>
 <h4 id="_51">交互式安装</h4>
-<p>当不带任何选项运行时，脚本会进入一个交互模式，引导您完成设置过程。您将被要求做出以下选择：</p>
+<p>当不带任何选项运行时，脚本会进入一个交互模式，引导您完成设置过程。交互流程采用由 <a href="https://github.com/charmbracelet/gum">gum</a> 提供的内联 TUI —— 方向键菜单（带 <code>❯</code> 光标）、掩码密码字段。</p>
+<div class="admonition info">
+<p class="admonition-title">首次交互运行时以临时方式获取 gum</p>
+<p>在首次需要交互提示时，安装器会下载 gum，并在脚本运行期间从临时目录执行 —— <strong>不会进行任何系统级安装</strong>：</p>
+<ul>
+<li>通过 HTTPS（TLS 1.2+，拒绝 HTTP 重定向，连接超时 10 秒 / 总超时 30 秒）从 <a href="https://github.com/charmbracelet/gum/releases">GitHub 发布页</a> 下载官方 <code>gum_${VERSION}_${ARCH}.tar.gz</code>。</li>
+<li>使用<strong>脚本中固定的 SHA256</strong>（本地信任锚 —— 脚本本身的校验和与 gum 二进制必须同时匹配）校验该归档。</li>
+<li>若已安装 <code>cosign</code>：还会针对 Charm 的 GitHub-Actions OIDC 身份（<code>https://github.com/charmbracelet/gum/...</code>）校验上游 <code>checksums.txt</code> 作为纵深防御，并交叉确认所固定的哈希与 Charm 为此归档发布的值一致。</li>
+<li>将二进制解压到可执行的临时目录（默认 <code>/var/tmp/bw-gum.XXXXXX</code>；当 <code>/var/tmp</code> 被挂载为 <code>noexec</code> 时则使用 <code>/tmp</code>、<code>$XDG_RUNTIME_DIR</code> 或 <code>$HOME/.cache</code>）。</li>
+<li>在脚本运行期间将该临时目录加入 <code>PATH</code>，并在脚本退出时通过 <code>EXIT</code> trap 删除（在 <code>set -e</code> 失败或信号中断时同样有效）。</li>
+</ul>
+<p><strong>安装器退出后磁盘上保留的内容：</strong> 没有。无 <code>/etc/apt/sources.list.d/charm.list</code>、<code>apt</code>/<code>rpm</code> 中没有 GPG 密钥、<code>/usr/bin</code>/<code>/usr/local/bin</code> 中没有 <code>gum</code> 二进制、没有包数据库记录。安装器从不注册任何第三方 apt 或 dnf 源。</p>
+<p>若无法下载 gum —— 离线主机、网络故障、SHA256 不匹配 —— 安装器会使用系统中已经存在的 <code>whiptail</code>（在 Debian/Ubuntu 云镜像上通常通过 <code>newt</code> 包预装）。若 gum 与 whiptail 均不可用，则回退到<strong>纯文本提示</strong>。</p>
+</div>
+<p>使用 <code>--no-tui</code>（或设置 <code>BW_INSTALL_TUI=no</code>）跳过所有 TUI 层级；使用 <code>--tui</code> 在无可用 TUI 时中止。<strong>离线（air-gapped）安装</strong>：组合 <code>--no-tui</code> 与 <code>--yes</code> 以及相应的 <code>--*</code> 标志 / <code>*_INPUT</code> 环境变量；TUI 层不会发起任何网络调用。</p>
+<p>您将被要求做出以下选择：</p>
 <ol>
 <li><strong>安装类型</strong>：选择您想要安装的组件。<ul>
 <li><strong>完整堆栈（默认）</strong>：一个一体化的安装，包括 BunkerWeb、调度器和 Web UI。</li>
@@ -3804,6 +3819,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <tr>
 <td><code>-y, --yes</code></td>
 <td>以非交互模式运行，对所有提示使用默认答案。</td>
+</tr>
+<tr>
+<td><code>--tui</code></td>
+<td>强制使用 TUI（gum 或 whiptail）。若两者都无法安装则中止。</td>
+</tr>
+<tr>
+<td><code>--no-tui</code></td>
+<td>禁用所有 TUI 层级并使用纯文本提示。等同于 <code>BW_INSTALL_TUI=no</code>。</td>
 </tr>
 <tr>
 <td><code>-f, --force</code></td>
@@ -3862,7 +3885,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </tr>
 <tr>
 <td><code>--api-only</code></td>
-<td>仅安装 API 服务（端口 8000）。</td>
+<td>仅安装 API 服务（端口 8888）。</td>
 </tr>
 </tbody>
 </table>
@@ -4025,7 +4048,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--yes<
 </ul>
 <p><strong>API 服务可用性：</strong></p>
 <ul>
-<li>外部 API 服务（端口 8000）适用于 <code>--full</code> 和 <code>--manager</code> 安装类型</li>
+<li>外部 API 服务（端口 8888）适用于 <code>--full</code> 和 <code>--manager</code> 安装类型</li>
 <li>它不适用于 <code>--worker</code>, <code>--scheduler-only</code> 或 <code>--ui-only</code> 安装</li>
 <li>使用 <code>--api-only</code> 进行专用的 API 服务安装</li>
 </ul>

@@ -2854,7 +2854,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </li>
 <li>
-<p><strong>Choisissez l'option 2) Manager</strong> et suivez les invites :</p>
+<p><strong>Sélectionnez Manager</strong> au menu du type d'installation (utilisez ↑/↓ puis Entrée), puis suivez les invites :</p>
 <table>
 <thead>
 <tr>
@@ -2873,22 +2873,26 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Résolveurs DNS</strong></td>
-<td style="text-align: left;">Appuyez sur <code>N</code> pour la valeur par défaut ou fournissez les vôtres.</td>
+<td style="text-align: left;">Choisissez <strong>Non</strong> pour conserver les valeurs par défaut, ou fournissez les vôtres.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>HTTPS pour l'API interne</strong></td>
-<td style="text-align: left;"><strong>Recommandé :</strong> <code>Y</code> pour générer automatiquement des certificats et sécuriser les échanges manager-worker.</td>
+<td style="text-align: left;"><strong>Recommandé :</strong> choisissez <strong>Oui</strong> pour générer automatiquement des certificats et sécuriser les échanges manager-worker.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Service Web UI</strong></td>
-<td style="text-align: left;"><code>Y</code> pour activer l'interface Web (fortement recommandé).</td>
+<td style="text-align: left;">Choisissez <strong>Oui</strong> pour activer l'interface Web (fortement recommandé).</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Service API</strong></td>
-<td style="text-align: left;"><code>N</code> sauf besoin d'API REST publique pour des outils externes.</td>
+<td style="text-align: left;">Choisissez <strong>Non</strong> sauf besoin d'API REST publique pour des outils externes.</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="admonition-title">Interface des invites</p>
+<p>L'installateur utilise la TUI <a href="https://github.com/charmbracelet/gum">gum</a>. Au premier lancement interactif, il télécharge le binaire <code>gum</code> officiel depuis la release GitHub (SHA256 épinglé), l'exécute depuis un répertoire temporaire et supprime ce répertoire à la fin — aucun paquet système n'est installé. Utilisez les flèches + Entrée pour répondre aux invites. Passez <code>--no-tui</code> si vous préférez les invites en texte brut.</p>
+</div>
 </li>
 </ol>
 <h4 id="securiser-et-exposer-lui">Sécuriser et exposer l'UI</h4>
@@ -2922,7 +2926,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <div class="tabbed-block">
 <p>Pour plus d'isolation, installez l'UI sur un nœud séparé.</p>
 <ol>
-<li>Lancez l'installateur et choisissez <strong>Option 5) Web UI Only</strong>.</li>
+<li>Lancez l'installateur et sélectionnez le type d'installation <strong>Web UI Only</strong>.</li>
 <li>
 <p>Éditez <code>/etc/bunkerweb/ui.env</code> pour pointer vers la base du Manager :</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Configuration base de données (doit correspondre à celle du Manager)</span>

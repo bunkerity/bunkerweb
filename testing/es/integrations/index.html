@@ -3758,7 +3758,22 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <li><strong>Guía post-instalación</strong>: Proporciona los siguientes pasos claros para ayudarte a empezar con tu nueva instancia de BunkerWeb.</li>
 </ol>
 <h4 id="instalacion-interactiva">Instalación interactiva</h4>
-<p>Cuando se ejecuta sin ninguna opción, el script entra en un modo interactivo que te guía a través del proceso de configuración. Se te pedirá que tomes las siguientes decisiones:</p>
+<p>Cuando se ejecuta sin ninguna opción, el script entra en un modo interactivo que te guía a través del proceso de configuración. El flujo interactivo usa una TUI en línea mediante <a href="https://github.com/charmbracelet/gum">gum</a> — menús con flechas y cursor <code>❯</code>, campos de contraseña enmascarados.</p>
+<div class="admonition info">
+<p class="admonition-title">gum se obtiene de forma efímera en la primera ejecución interactiva</p>
+<p>El instalador descarga gum la primera vez que se necesita una indicación interactiva y lo ejecuta desde un directorio temporal durante el script — <strong>no se instala nada a nivel del sistema</strong>:</p>
+<ul>
+<li>Descarga el <code>gum_${VERSION}_${ARCH}.tar.gz</code> oficial desde la <a href="https://github.com/charmbracelet/gum/releases">release de GitHub</a> por HTTPS (TLS 1.2+, rechaza redirecciones HTTP, timeout de conexión 10 s / total 30 s).</li>
+<li>Verifica el tarball contra un <strong>SHA256 fijado en este script</strong> (ancla de confianza local — tanto la suma del propio script como la del binario gum deben coincidir).</li>
+<li>Si <code>cosign</code> está instalado: también verifica el <code>checksums.txt</code> ascendente contra la identidad OIDC de GitHub-Actions de Charm (<code>https://github.com/charmbracelet/gum/...</code>) como defensa en profundidad, y cruza-verifica que el hash fijado coincide con el valor que Charm publicó para este tarball exacto.</li>
+<li>Extrae el binario en un directorio temporal con permiso de ejecución (<code>/var/tmp/bw-gum.XXXXXX</code> por defecto; <code>/tmp</code>, <code>$XDG_RUNTIME_DIR</code> o <code>$HOME/.cache</code> cuando <code>/var/tmp</code> está montado <code>noexec</code>).</li>
+<li>Añade el directorio temporal al <code>PATH</code> para el resto de la ejecución y lo elimina al salir del script (a través de un trap <code>EXIT</code>, incluso ante fallos con <code>set -e</code> o señales).</li>
+</ul>
+<p><strong>Lo que queda en disco al salir el instalador:</strong> nada. Sin <code>/etc/apt/sources.list.d/charm.list</code>, sin clave GPG en <code>apt</code>/<code>rpm</code>, sin binario <code>gum</code> en <code>/usr/bin</code>/<code>/usr/local/bin</code>, sin entrada en la base de paquetes. El instalador nunca registra una fuente apt o dnf de terceros.</p>
+<p>Si gum no se puede descargar — anfitrión aislado, fallo de red, SHA256 incorrecto — el instalador usa un <code>whiptail</code> ya presente en el sistema (comúnmente preinstalado en imágenes cloud Debian/Ubuntu vía el paquete <code>newt</code>). Si no hay ni gum ni whiptail disponibles, recurre a <strong>indicaciones de texto plano</strong>.</p>
+</div>
+<p>Pasa <code>--no-tui</code> (o establece <code>BW_INSTALL_TUI=no</code>) para saltar todos los niveles de TUI, o <code>--tui</code> para abortar si ningún nivel de TUI puede renderizar. <strong>Instalaciones aisladas (air-gapped)</strong>: combina <code>--no-tui</code> con <code>--yes</code> y los flags <code>--*</code> / variables <code>*_INPUT</code> apropiados; no se hace ninguna llamada de red para la capa de TUI.</p>
+<p>Se te pedirá que tomes las siguientes decisiones:</p>
 <ol>
 <li><strong>Tipo de instalación</strong>: Selecciona los componentes que quieres instalar.<ul>
 <li><strong>Pila completa (predeterminado)</strong>: Una instalación todo en uno que incluye BunkerWeb, el Programador y la Interfaz de Usuario Web.</li>
@@ -3807,6 +3822,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <tr>
 <td style="text-align: left;"><code>-y, --yes</code></td>
 <td style="text-align: left;">Se ejecuta en modo no interactivo usando las respuestas predeterminadas para todas las preguntas.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>--tui</code></td>
+<td style="text-align: left;">Fuerza una TUI (gum o whiptail). Aborta si ninguna puede instalarse.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>--no-tui</code></td>
+<td style="text-align: left;">Deshabilita todos los niveles de TUI y usa indicaciones de texto plano. Equivale a <code>BW_INSTALL_TUI=no</code>.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>-f, --force</code></td>
@@ -3865,7 +3888,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </tr>
 <tr>
 <td style="text-align: left;"><code>--api-only</code></td>
-<td style="text-align: left;">Instala solo el servicio API (puerto 8000).</td>
+<td style="text-align: left;">Instala solo el servicio API (puerto 8888).</td>
 </tr>
 </tbody>
 </table>
@@ -4028,7 +4051,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--yes<
 </ul>
 <p><strong>Disponibilidad del servicio API:</strong></p>
 <ul>
-<li>El servicio API externo (puerto 8000) está disponible para los tipos de instalación <code>--full</code> y <code>--manager</code></li>
+<li>El servicio API externo (puerto 8888) está disponible para los tipos de instalación <code>--full</code> y <code>--manager</code></li>
 <li>No está disponible para instalaciones <code>--worker</code>, <code>--scheduler-only</code> o <code>--ui-only</code></li>
 <li>Usa <code>--api-only</code> para una instalación dedicada del servicio API</li>
 </ul>

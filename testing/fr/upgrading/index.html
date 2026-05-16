@@ -1271,6 +1271,12 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p>Si la vérification de la somme échoue, <strong>n'exécutez pas le script</strong> — il pourrait être dangereux.</p>
 </div>
 </li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Interface de mise à niveau interactive</p>
+<p>Le flux de mise à niveau utilise la même TUI que les nouvelles installations : invites en ligne avec <a href="https://github.com/charmbracelet/gum">gum</a>, avec un repli sur les boîtes de dialogue <code>whiptail</code> puis sur les invites en texte brut si gum ne peut pas être obtenu. Le binaire <code>gum</code> est téléchargé depuis la <a href="https://github.com/charmbracelet/gum/releases">release GitHub</a> officielle (SHA256 épinglé, signature cosign vérifiée si cosign est installé) et exécuté depuis un répertoire temporaire supprimé à la fin du script — aucun paquet système n'est installé et aucune source apt/dnf n'est ajoutée. Passez <code>--no-tui</code> (ou définissez <code>BW_INSTALL_TUI=no</code>) pour ignorer toutes les couches de TUI, ou <code>--tui</code> pour exiger une TUI fonctionnelle. Pour des mises à niveau entièrement automatisées, passez <code>-y</code> / <code>--yes</code> avec les drapeaux pertinents — les invocations en pipe (<code>curl … | bash</code>) s'arrêtent avec une erreur claire au lieu d'accepter silencieusement chaque valeur par défaut. <strong>Mises à niveau hors réseau (air-gapped)</strong> : combinez <code>--no-tui --yes</code> pour qu'aucun appel réseau ne soit fait pour la couche TUI.</p>
+</div>
+<ul>
 <li>
 <p><strong>Comment ça marche</strong> :</p>
 <p>Le même script d'installation polyvalent utilisé pour les nouvelles installations peut également effectuer une mise à niveau sur place. Lorsqu'il détecte une installation existante et une version cible différente, il passe en mode mise à niveau et applique le flux de travail suivant :</p>
@@ -1348,6 +1354,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <tr>
 <td><code>-y, --yes</code></td>
 <td>Non interactif (suppose la confirmation de la mise à niveau et active la sauvegarde automatique, sauf si <code>--no-auto-backup</code>).</td>
+</tr>
+<tr>
+<td><code>--tui</code></td>
+<td>Force une TUI (gum ou whiptail). Abandonne si aucune des deux ne peut être installée.</td>
+</tr>
+<tr>
+<td><code>--no-tui</code></td>
+<td>Ignore toutes les couches de TUI et utilise les invites en texte brut. Équivaut à <code>BW_INSTALL_TUI=no</code>.</td>
 </tr>
 <tr>
 <td><code>--backup-dir &lt;PATH&gt;</code></td>
