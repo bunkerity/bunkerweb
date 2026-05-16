@@ -2231,7 +2231,7 @@ sudo ./install-bunkerweb.sh --yes --api
 
 ### 使用软件包管理器安装
 
-请确保在安装 BunkerWeb 之前**已经安装了 NGINX 1.30.0**。对于所有发行版，强制要求使用来自[官方 NGINX 仓库](https://nginx.org/en/linux_packages.html)的预构建包。从源代码编译 NGINX 或使用来自不同仓库的包将无法与 BunkerWeb 的官方预构建包一起工作。但是，您可以选择从源代码构建 BunkerWeb。
+请确保在安装 BunkerWeb 之前**已经安装了 NGINX 1.30.1**。对于所有发行版，强制要求使用来自[官方 NGINX 仓库](https://nginx.org/en/linux_packages.html)的预构建包。从源代码编译 NGINX 或使用来自不同仓库的包将无法与 BunkerWeb 的官方预构建包一起工作。但是，您可以选择从源代码构建 BunkerWeb。
 
 === "Debian Bookworm/Trixie"
 
@@ -2246,11 +2246,11 @@ sudo ./install-bunkerweb.sh --yes --api
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    您现在应该能够安装 NGINX 1.30.0：
+    您现在应该能够安装 NGINX 1.30.1：
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.0-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.1-1~$(lsb_release -cs)
     ```
 
     !!! warning "测试/开发版本"
@@ -2294,11 +2294,11 @@ sudo ./install-bunkerweb.sh --yes --api
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    您现在应该能够安装 NGINX 1.30.0：
+    您现在应该能够安装 NGINX 1.30.1：
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.0-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.1-1~$(lsb_release -cs)
     ```
 
     !!! warning "测试/开发版本"
@@ -2338,10 +2338,10 @@ sudo ./install-bunkerweb.sh --yes --api
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora 已经提供了我们支持的 NGINX 1.30.0
+    Fedora 已经提供了我们支持的 NGINX 1.30.1
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.0
+    sudo dnf install -y --allowerasing nginx-1.30.1
     ```
 
     !!! example "禁用设置向导"
@@ -2388,10 +2388,10 @@ sudo ./install-bunkerweb.sh --yes --api
     module_hotfixes=true
     ```
 
-    您现在应该能够安装 NGINX 1.30.0：
+    您现在应该能够安装 NGINX 1.30.1：
 
     ```shell
-    sudo dnf install --allowerasing nginx-1.30.0
+    sudo dnf install --allowerasing nginx-1.30.1
     ```
 
     !!! example "禁用设置向导"

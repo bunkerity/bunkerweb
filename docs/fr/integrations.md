@@ -2234,7 +2234,7 @@ En fonction de vos choix lors de l'installation :
 
 ### Installation à l'aide du gestionnaire de paquets
 
-Veuillez vous assurer que **NGINX 1.30.0 est installé avant d'installer BunkerWeb**. Pour toutes les distributions, il est obligatoire d'utiliser des paquets préconstruits à partir du [dépôt officiel NGINX](https://nginx.org/en/linux_packages.html). La compilation de NGINX à partir des sources ou l'utilisation de paquets provenant de différents dépôts ne fonctionnera pas avec les paquets officiels préconstruits de BunkerWeb. Cependant, vous avez la possibilité de construire BunkerWeb à partir des sources.
+Veuillez vous assurer que **NGINX 1.30.1 est installé avant d'installer BunkerWeb**. Pour toutes les distributions, il est obligatoire d'utiliser des paquets préconstruits à partir du [dépôt officiel NGINX](https://nginx.org/en/linux_packages.html). La compilation de NGINX à partir des sources ou l'utilisation de paquets provenant de différents dépôts ne fonctionnera pas avec les paquets officiels préconstruits de BunkerWeb. Cependant, vous avez la possibilité de construire BunkerWeb à partir des sources.
 
 === "Debian Bookworm/Trixie"
 
@@ -2249,11 +2249,11 @@ Veuillez vous assurer que **NGINX 1.30.0 est installé avant d'installer BunkerW
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    Vous devriez maintenant pouvoir installer NGINX 1.30.0 :
+    Vous devriez maintenant pouvoir installer NGINX 1.30.1 :
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.0-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.1-1~$(lsb_release -cs)
     ```
 
     !!! warning "Version testing/dev"
@@ -2297,11 +2297,11 @@ Veuillez vous assurer que **NGINX 1.30.0 est installé avant d'installer BunkerW
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    Vous devriez maintenant pouvoir installer NGINX 1.30.0 :
+    Vous devriez maintenant pouvoir installer NGINX 1.30.1 :
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.0-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.1-1~$(lsb_release -cs)
     ```
 
     !!! warning "Version testing/dev"
@@ -2341,10 +2341,10 @@ Veuillez vous assurer que **NGINX 1.30.0 est installé avant d'installer BunkerW
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora fournit déjà NGINX 1.30.0, que nous prenons en charge
+    Fedora fournit déjà NGINX 1.30.1, que nous prenons en charge
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.0
+    sudo dnf install -y --allowerasing nginx-1.30.1
     ```
 
     !!! example "Désactiver l'assistant d'installation"
@@ -2391,10 +2391,10 @@ Veuillez vous assurer que **NGINX 1.30.0 est installé avant d'installer BunkerW
     module_hotfixes=true
     ```
 
-    Vous devriez maintenant pouvoir installer NGINX 1.30.0 :
+    Vous devriez maintenant pouvoir installer NGINX 1.30.1 :
 
     ```shell
-    sudo dnf install --allowerasing nginx-1.30.0
+    sudo dnf install --allowerasing nginx-1.30.1
     ```
 
     !!! example "Désactiver l'assistant d'installation"
