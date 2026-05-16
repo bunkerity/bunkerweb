@@ -59,6 +59,8 @@ RUN apk add --no-cache bash unzip curl libgcc libstdc++ libpq openssl libmagic m
 # Fix CVEs
 RUN apk add --no-cache "nghttp2-libs>=1.68.1" # CVE-2026-27135
 RUN apk add --no-cache "xz-libs>=5.8.3-r0" # CVE-2026-34743
+RUN apk add --no-cache "postgresql18-client>=18.4-r0"
+RUN apk add --no-cache "curl>=8.19.0-r0" # CVE-2026-34744
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -87,7 +89,7 @@ COPY --chown=root:scheduler --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/
 COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.10~rc6"
+LABEL version="1.6.10"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="scheduler"
 

@@ -172,7 +172,7 @@ RUN umask 027
 RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 python3 py3-pip sed sqlite postgresql-client tzdata unzip yajl supervisor brotli lmdb libfuzzy2
 
 # Fix CVEs
-RUN apk add --no-cache "nghttp2-libs>=1.68.1" # CVE-2026-27135
+RUN apk add --no-cache "nghttp2-libs>=1.68.1" "postgresql18-client>=18.4-r0" "curl>=8.19.0-r0"
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
@@ -239,7 +239,7 @@ COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.
 COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.10~rc6"
+LABEL version="1.6.10"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="all-in-one"
 

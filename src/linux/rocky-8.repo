@@ -20,3 +20,4 @@ gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-8
 # perl and git so this Devel repo only contributes packages that aren't already
 # available upstream (geoip-devel, lmdb-devel, ssdeep-devel, etc.).
 excludepkgs = perl perl-* git git-*
+module_hotfixes = 1

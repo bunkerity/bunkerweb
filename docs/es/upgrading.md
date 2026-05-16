@@ -25,16 +25,16 @@
             ```yaml
             services:
                 bunkerweb:
-                    image: bunkerity/bunkerweb:1.6.10-rc6
+                    image: bunkerity/bunkerweb:1.6.10
                     ...
                 bw-scheduler:
-                    image: bunkerity/bunkerweb-scheduler:1.6.10-rc6
+                    image: bunkerity/bunkerweb-scheduler:1.6.10
                     ...
                 bw-autoconf:
-                    image: bunkerity/bunkerweb-autoconf:1.6.10-rc6
+                    image: bunkerity/bunkerweb-autoconf:1.6.10
                     ...
                 bw-ui:
-                    image: bunkerity/bunkerweb-ui:1.6.10-rc6
+                    image: bunkerity/bunkerweb-ui:1.6.10
                     ...
             ```
 
@@ -81,6 +81,9 @@
             Descarga el archivo de suma de verificación y usa una herramienta como `sha256sum` para confirmar que el script no ha sido alterado o manipulado.
 
             Si la verificación de la suma de verificación falla, **no ejecutes el script**—puede no ser seguro.
+
+    !!! tip "Interfaz de actualización interactiva"
+        El flujo de actualización usa la misma TUI que las instalaciones nuevas: indicaciones en línea con [gum](https://github.com/charmbracelet/gum), con respaldo en los diálogos `whiptail` y, finalmente, en indicaciones de texto plano si gum no puede obtenerse. El binario `gum` se descarga desde la [release de GitHub](https://github.com/charmbracelet/gum/releases) oficial (SHA256 fijado, verificación cosign cuando cosign está instalado) y se ejecuta desde un directorio temporal que se elimina al salir — no se instala ningún paquete del sistema y no se añade ninguna fuente apt/dnf. Pasa `--no-tui` (o establece `BW_INSTALL_TUI=no`) para saltar todos los niveles de TUI, o `--tui` para exigir una TUI operativa. Para actualizaciones totalmente desatendidas, pasa `-y` / `--yes` con los flags relevantes — las invocaciones por tubería (`curl … | bash`) salen con un error claro en lugar de aceptar silenciosamente cada valor predeterminado. **Actualizaciones aisladas (air-gapped)**: combina `--no-tui --yes` para que no se haga ninguna llamada de red para la capa de TUI.
 
     * **Cómo funciona**:
 
@@ -132,6 +135,8 @@
         | :---------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
         | `-v, --version <X.Y.Z>` | Versión de BunkerWeb de destino a la que actualizar.                                                                                          |
         | `-y, --yes`             | No interactivo (asume la confirmación de la actualización y habilita la copia de seguridad automática a menos que se use `--no-auto-backup`). |
+        | `--tui`                 | Fuerza una TUI (gum o whiptail). Aborta si ninguna puede instalarse.                            |
+        | `--no-tui`              | Salta todos los niveles de TUI y usa indicaciones de texto plano. Equivale a `BW_INSTALL_TUI=no`. |
         | `--backup-dir <RUTA>`   | Destino para la copia de seguridad automática previa a la actualización. Se crea si no existe.                                                |
         | `--no-auto-backup`      | Omitir la copia de seguridad automática (NO recomendado). Debes tener una copia de seguridad manual.                                          |
         | `-q, --quiet`           | Suprimir la salida (combinar con registro / monitoreo).                                                                                       |
@@ -141,20 +146,20 @@
         Ejemplos:
 
         ```bash
-        # Actualizar a 1.6.10~rc6 interactivamente (pedirá confirmación para la copia de seguridad)
-        sudo ./install-bunkerweb.sh --version 1.6.10~rc6
+        # Actualizar a 1.6.10 interactivamente (pedirá confirmación para la copia de seguridad)
+        sudo ./install-bunkerweb.sh --version 1.6.10
 
         # Actualización no interactiva con copia de seguridad automática a un directorio personalizado
-        sudo ./install-bunkerweb.sh -v 1.6.10~rc6 --backup-dir /var/backups/bw-2025-01 -y
+        sudo ./install-bunkerweb.sh -v 1.6.10 --backup-dir /var/backups/bw-2025-01 -y
 
         # Actualización desatendida silenciosa (salida suprimida) – depende de la copia de seguridad automática predeterminada
-        sudo ./install-bunkerweb.sh -v 1.6.10~rc6 -y -q
+        sudo ./install-bunkerweb.sh -v 1.6.10 -y -q
 
         # Realizar una ejecución de prueba (plan) sin aplicar cambios
-        sudo ./install-bunkerweb.sh -v 1.6.10~rc6 --dry-run
+        sudo ./install-bunkerweb.sh -v 1.6.10 --dry-run
 
         # Actualizar omitiendo la copia de seguridad automática (NO recomendado)
-        sudo ./install-bunkerweb.sh -v 1.6.10~rc6 --no-auto-backup -y
+        sudo ./install-bunkerweb.sh -v 1.6.10 --no-auto-backup -y
         ```
 
         !!! warning "Omitir copias de seguridad"
@@ -234,7 +239,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.10~rc6
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.10
                     ```
 
                     Para evitar que el paquete de BunkerWeb se actualice al ejecutar `apt upgrade`, puedes usar el siguiente comando:
@@ -260,7 +265,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.10~rc6
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.10
                     ```
 
                     Para evitar que el paquete de BunkerWeb se actualice al ejecutar `dnf upgrade`, puedes usar el siguiente comando:
@@ -657,16 +662,16 @@ Hemos añadido una característica de **espacio de nombres** a las integraciones
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.10-rc6
+                        image: bunkerity/bunkerweb:1.6.10
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.10-rc6
+                        image: bunkerity/bunkerweb-scheduler:1.6.10
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.10-rc6
+                        image: bunkerity/bunkerweb-autoconf:1.6.10
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.10-rc6
+                        image: bunkerity/bunkerweb-ui:1.6.10
                         ...
                 ```
 
@@ -701,7 +706,7 @@ Hemos añadido una característica de **espacio de nombres** a las integraciones
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.10~rc6
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.10
                     ```
 
                     Para evitar que el paquete de BunkerWeb se actualice al ejecutar `apt upgrade`, puedes usar el siguiente comando:
@@ -727,7 +732,7 @@ Hemos añadido una característica de **espacio de nombres** a las integraciones
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.10~rc6
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.10
                     ```
 
                     Para evitar que el paquete de BunkerWeb se actualice al ejecutar `dnf upgrade`, puedes usar el siguiente comando:
