@@ -483,6 +483,11 @@ _tui_normalize_rc() {
     esac
 }
 
+_tui_expand_newlines() {
+    local _value="$1"
+    printf '%s' "${_value//\\n/$'\n'}"
+}
+
 # Echo a one-line scrollback trace for a TUI answer. Stays on stderr so $(...) captures stay clean.
 # Args: $1 = label, $2 = answer (caller redacts secrets).
 _tui_log_choice() {
@@ -497,7 +502,8 @@ _tui_log_choice() {
 # Render multi-line explanatory text before a tui_yesno/tui_menu. gum confirm crops on narrow terms,
 # so we wrap via `fold -s` (gum style doesn't word-wrap on its own).
 _tui_explain() {
-    local body="$1"
+    local body
+    body=$(_tui_expand_newlines "$1")
     # Skip empty body — would render an empty rounded box under gum.
     [ -n "$body" ] || return 0
     local _term_w _box_w _wrap_w
@@ -529,6 +535,7 @@ _tui_explain() {
 # tui_yesno TITLE PROMPT DEFAULT(yes|no) — 0 Yes, 1 No/Cancel/ESC.
 tui_yesno() {
     local title="$1" prompt="$2" default="${3:-yes}"
+    prompt=$(_tui_expand_newlines "$prompt")
     local _rc=0 _final
     if [ "$GUM_AVAILABLE" = "yes" ]; then
         local _gum_default
@@ -566,6 +573,7 @@ tui_yesno() {
 # tui_input TITLE PROMPT [DEFAULT] — echoes value on stdout, 1 on Cancel.
 tui_input() {
     local title="$1" prompt="$2" default="${3:-}"
+    prompt=$(_tui_expand_newlines "$prompt")
     local _rc=0 _value=""
     if [ "$GUM_AVAILABLE" = "yes" ]; then
         # --value pre-fills, --placeholder only when no default.
@@ -614,6 +622,7 @@ tui_input() {
 #     For full secrecy under xtrace, wrap the call site itself in `set +x`/`set -x`.
 tui_password() {
     local title="$1" prompt="$2"
+    prompt=$(_tui_expand_newlines "$prompt")
     local _had_xtrace=0
     case $- in *x*) _had_xtrace=1; set +x ;; esac
     local _result _rc=0
@@ -663,6 +672,7 @@ tui_password() {
 # Fallback: numbered list on stderr (kept out of $(...) captures).
 tui_menu() {
     local title="$1" prompt="$2" default_tag="$3"
+    prompt=$(_tui_expand_newlines "$prompt")
     shift 3
     # Items come in (tag, desc) pairs — odd count = dropped description (whiptail would silently mis-render).
     if [ $(( $# % 2 )) -ne 0 ]; then
@@ -760,6 +770,7 @@ tui_menu() {
 # Fallback: prints + waits for Enter, all output on stderr ($(...) safe).
 tui_msgbox() {
     local title="$1" text="$2" height="${3:-}"
+    text=$(_tui_expand_newlines "$text")
     if [ "$GUM_AVAILABLE" = "yes" ]; then
         # Rounded box + 1-keystroke wait. Body inherits terminal default — navy collapses on dark themes.
         local _term_w _box_w
@@ -803,18 +814,20 @@ tui_msgbox() {
 # tui_section TITLE [SUBTITLE] — gum: bold green marker; whiptail: no-op; fallback: "===" banner.
 # Subtitle pre-wrapped (gum style doesn't word-wrap).
 tui_section() {
+    local title="$1" subtitle="${2:-}"
+    subtitle=$(_tui_expand_newlines "$subtitle")
     if [ "$GUM_AVAILABLE" = "yes" ]; then
         printf '\n' >&2
-        gum style --bold --foreground "#2eac68" "${TUI_SECTION_GLYPH} $1" >&2
-        if [ -n "${2:-}" ]; then
+        gum style --bold --foreground "#2eac68" "${TUI_SECTION_GLYPH} $title" >&2
+        if [ -n "$subtitle" ]; then
             local _term_w _sub_w _sub
             _term_w=$(tput cols 2>/dev/null || echo 80)
             _sub_w=$(( _term_w - 4 ))
             [ "$_sub_w" -lt 36 ] && _sub_w=36
             if command -v fold >/dev/null 2>&1; then
-                _sub=$(printf '%s' "$2" | fold -s -w "$_sub_w")
+                _sub=$(printf '%s' "$subtitle" | fold -s -w "$_sub_w")
             else
-                _sub="$2"
+                _sub="$subtitle"
             fi
             # Body inherits terminal default (avoid navy collapse on dark themes); 2-sp indent for nesting.
             printf '%s\n' "$_sub" | sed 's/^/  /' | gum style --faint >&2
@@ -824,13 +837,13 @@ tui_section() {
     [ "$WHIPTAIL_AVAILABLE" = "yes" ] && return 0
     echo
     echo -e "${BLUE}========================================${NC}"
-    echo -e "${BLUE}$1${NC}"
+    echo -e "${BLUE}$title${NC}"
     echo -e "${BLUE}========================================${NC}"
-    if [ -n "${2:-}" ]; then
+    if [ -n "$subtitle" ]; then
         if command -v fold >/dev/null 2>&1; then
-            printf '%s\n' "$2" | fold -s -w "$(($(tput cols 2>/dev/null || echo 80) - 4))"
+            printf '%s\n' "$subtitle" | fold -s -w "$(($(tput cols 2>/dev/null || echo 80) - 4))"
         else
-            echo "$2"
+            echo "$subtitle"
         fi
     fi
 }
@@ -838,6 +851,7 @@ tui_section() {
 # tui_infobox TITLE TEXT — non-blocking status line.
 tui_infobox() {
     local title="$1" text="$2"
+    text=$(_tui_expand_newlines "$text")
     if [ "$GUM_AVAILABLE" = "yes" ]; then
         gum style --foreground "#2eac68" "${TUI_SECTION_GLYPH} $title — $text" >&2
         return 0
@@ -4181,11 +4195,70 @@ start_manager_ui() {
     fi
 }
 
+get_current_bunkerweb_version() {
+    local _version=""
+    if [ -f /usr/share/bunkerweb/VERSION ]; then
+        _version=$(cat /usr/share/bunkerweb/VERSION 2>/dev/null || true)
+    fi
+    printf '%s' "${_version:-${BUNKERWEB_VERSION:-unknown}}"
+}
+
+get_installed_nginx_version() {
+    local _raw="" _version=""
+    if command -v nginx >/dev/null 2>&1; then
+        _raw=$(nginx -v 2>&1 || true)
+        _version="${_raw#nginx version: nginx/}"
+        if [ -n "$_version" ] && [ "$_version" != "$_raw" ]; then
+            printf '%s' "$_version"
+            return 0
+        fi
+    fi
+
+    case "$DISTRO_ID" in
+        "debian"|"ubuntu")
+            if command -v dpkg-query >/dev/null 2>&1; then
+                _version=$(dpkg-query -W -f='${Version}' nginx 2>/dev/null || true)
+            fi
+            ;;
+        "fedora"|"rhel"|"rocky"|"almalinux")
+            if command -v rpm >/dev/null 2>&1; then
+                if rpm -q nginx >/dev/null 2>&1; then
+                    _version=$(rpm -q --qf '%{VERSION}-%{RELEASE}' nginx 2>/dev/null || true)
+                fi
+            fi
+            ;;
+        "freebsd")
+            if command -v pkg >/dev/null 2>&1; then
+                _version=$(pkg info -q nginx 2>/dev/null || true)
+                _version="${_version#nginx-}"
+            fi
+            ;;
+    esac
+
+    printf '%s' "${_version:-unknown}"
+}
+
 show_final_info() {
+    local _current_bw_version="" _nginx_version=""
+
     echo
     echo "========================================="
-    echo -e "${GREEN}BunkerWeb Installation Complete!${NC}"
+    if [ "$UPGRADE_SCENARIO" = "yes" ]; then
+        _current_bw_version=$(get_current_bunkerweb_version)
+        _nginx_version=$(get_installed_nginx_version)
+
+        echo -e "${GREEN}BunkerWeb Upgrade Complete!${NC}"
+    else
+        echo -e "${GREEN}BunkerWeb Installation Complete!${NC}"
+    fi
     echo "========================================="
+    if [ "$UPGRADE_SCENARIO" = "yes" ]; then
+        echo
+        echo "Upgrade summary:"
+        echo "  - Previous BunkerWeb version: ${INSTALLED_VERSION:-unknown}"
+        echo "  - New BunkerWeb version: ${_current_bw_version:-unknown}"
+        echo "  - Current NGINX version: ${_nginx_version:-unknown}"
+    fi
     echo
     echo "Services status:"
 
