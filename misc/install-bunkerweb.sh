@@ -43,7 +43,11 @@ _bw_install_interrupt() {
     # Move past any half-rendered TUI line.
     printf '\n' >&2
     if declare -F print_warning >/dev/null 2>&1; then
-        print_warning "Installation aborted (SIG${signal}). Partial state may remain — re-run the installer to resume."
+        if [ -f "${_BW_STATE_FILE:-}" ]; then
+            print_warning "Installation aborted (SIG${signal}). Progress was saved — re-run the installer and it will offer to resume."
+        else
+            print_warning "Installation aborted (SIG${signal}). Partial state may remain — re-run the installer to start over."
+        fi
     else
         printf 'Installation aborted (SIG%s).\n' "$signal" >&2
     fi
@@ -150,6 +154,53 @@ INSTALL_EPEL="auto"
 # TUI mode: auto (gum→whiptail→read) | yes (hard error if none) | no (read only).
 USE_TUI="${BW_INSTALL_TUI:-auto}"
 
+# ---------------------------------------------------------------------------
+# Save-state / resume — checkpoints the fresh-install flow so a crash or Ctrl+C
+# can be resumed from the last completed phase instead of restarting from
+# scratch. Fresh-install path only; upgrade_only() is short and not checkpointed.
+# ---------------------------------------------------------------------------
+# State lives in a 0700 root-owned directory, not a bare /var/tmp file: a
+# directory an unprivileged user cannot enter closes the entire symlink/TOCTOU
+# attack class for every file created inside it. /var/tmp is used (not /run) so
+# the state survives a reboot mid-install.
+_BW_STATE_DIR="/var/tmp/bunkerweb-install.d"
+_BW_STATE_FILE="${_BW_STATE_DIR}/state"
+# Not readonly: the state file carries an `_BW_STATE_SCHEMA=` line, so a resume
+# `source` re-assigns it — a readonly here would abort the installer.
+_BW_STATE_SCHEMA=1
+# A state file older than this is treated as a dead install and discarded
+# rather than offered for resume (its generated secrets would be stale).
+_BW_STATE_MAX_AGE_DAYS=7
+RESTART_INSTALL="no"        # --restart-install: discard any saved state, no prompt
+_BW_RESUMING="no"
+_BW_RESUME_AFTER=""         # last completed phase when resuming
+_BW_START_OVER="no"         # explicit "start over": fresh install over an interrupted one
+LAST_COMPLETED_PHASE=""     # persisted: "preferences" then each _BW_PHASES entry
+# Ordered install phases (the gate phase "preferences" is handled separately).
+_BW_PHASES=(nginx crowdsec redis database host_config package configure)
+# Installer config globals persisted to the state file so a resumed run does
+# not re-prompt. NOTE for maintainers: any new install-affecting global that
+# ask_user_preferences/CLI flags can set MUST be added here, or resume will
+# silently lose it.
+_BW_STATE_VARS=(
+    INSTALL_TYPE BUNKERWEB_VERSION NGINX_VERSION ENABLE_WIZARD
+    FORCE_INSTALL FORCE_TYPE_CHANGE QUIET_MODE INTERACTIVE_MODE
+    CROWDSEC_INSTALL CROWDSEC_APPSEC_INSTALL CROWDSEC_API_KEY
+    REDIS_INSTALL REDIS_HOST_INPUT REDIS_PORT_INPUT REDIS_DATABASE_INPUT
+    REDIS_USERNAME_INPUT REDIS_PASSWORD_INPUT REDIS_SSL_INPUT
+    REDIS_SSL_VERIFY_INPUT REDIS_BIND_INPUT REDIS_AUTOPASS
+    REDIS_REQUIREPASS_LOCAL REDIS_PASSWORD_GENERATED REDIS_FLAVOR
+    REDIS_MAXMEMORY_MB REDIS_MAXMEMORY_POLICY DB_INSTALL DB_NAME_INPUT
+    DB_USER_INPUT DB_PASSWORD_INPUT DB_PASSWORD_GENERATED DB_DSN_GENERATED
+    DB_EXTERNAL_ENGINE DB_HOST_INPUT DB_PORT_INPUT DB_SSL_INPUT
+    DB_SSL_VERIFY_INPUT DB_SKIP_PROBE UI_ADMIN_USERNAME_INPUT
+    UI_ADMIN_PASSWORD_INPUT UI_ADMIN_PASSWORD_GENERATED UI_ADMIN_CREATE
+    UI_SELFSIGNED_INPUT MANAGER_UI_DEFERRED FULL_API_DEFERRED
+    BUNKERWEB_INSTANCES_INPUT MANAGER_IP_INPUT SERVER_IP_INPUT
+    RESOLVED_SERVER_IP DNS_RESOLVERS_INPUT API_LISTEN_HTTPS_INPUT
+    BACKUP_DIRECTORY AUTO_BACKUP INSTALL_EPEL SERVICE_API SERVICE_UI
+)
+
 # Safe defaults so callers can reference glyphs before tui_init() runs.
 TUI_CURSOR_GLYPH="❯"
 TUI_SECTION_GLYPH="▸"
@@ -202,6 +253,243 @@ run_cmd() {
         print_error "Command failed: $*"
         exit 1
     fi
+}
+
+# ---------------------------------------------------------------------------
+# Save-state / resume helpers — see the globals block above.
+# ---------------------------------------------------------------------------
+
+# stat(1) wrappers — GNU first, BSD fallback. Echo "" when the path is gone.
+_bw_stat_owner() {
+    stat -c '%u' "$1" 2>/dev/null || stat -f '%u' "$1" 2>/dev/null || echo ""
+}
+_bw_stat_mode() {
+    stat -c '%a' "$1" 2>/dev/null || stat -f '%Lp' "$1" 2>/dev/null || echo ""
+}
+
+# Ensure the state directory exists as a directory owned by the current (root)
+# user with mode 0700. A 0700 dir an unprivileged attacker cannot enter removes
+# the symlink/TOCTOU risk for every file inside it. `mkdir` without `-p` fails
+# (EEXIST) if the path was pre-seeded — so an attacker-planted symlink or dir is
+# rejected, never adopted. Returns 1 when the directory cannot be trusted.
+_bw_state_dir_ensure() {
+    local _me
+    _me=$(id -u 2>/dev/null || echo "")
+    if [ -e "$_BW_STATE_DIR" ] || [ -L "$_BW_STATE_DIR" ]; then
+        # Must be a real directory (not a symlink), owned by us, mode 0700.
+        if [ -L "$_BW_STATE_DIR" ] || [ ! -d "$_BW_STATE_DIR" ] \
+            || [ "$(_bw_stat_owner "$_BW_STATE_DIR")" != "$_me" ] \
+            || [ "$(_bw_stat_mode "$_BW_STATE_DIR")" != "700" ]; then
+            return 1
+        fi
+        return 0
+    fi
+    mkdir -m 0700 "$_BW_STATE_DIR" 2>/dev/null || return 1
+    # mkdir's mode can be weakened by a restrictive umask on some shells.
+    chmod 0700 "$_BW_STATE_DIR" 2>/dev/null || true
+    return 0
+}
+
+# Atomically (re)write the state file with the current phase + config snapshot.
+# 0600, inside the 0700 state dir. Non-fatal on failure — a read-only /var/tmp
+# must not abort an otherwise-fine install. No-op under --dry-run.
+_bw_state_save() {
+    [ "${DRY_RUN:-no}" = "yes" ] && return 0
+    if ! _bw_state_dir_ensure; then
+        print_warning "Could not create a secure state directory ($_BW_STATE_DIR); resume will be unavailable."
+        return 0
+    fi
+    local _tmp _v
+    # mktemp inside the 0700 dir → unpredictable name, O_EXCL create, no race.
+    _tmp=$(mktemp "${_BW_STATE_DIR}/state.XXXXXX" 2>/dev/null) || {
+        print_warning "Could not write install state file; resume will be unavailable."
+        return 0
+    }
+    {
+        printf '_BW_STATE_SCHEMA=%s\n' "$_BW_STATE_SCHEMA"
+        printf 'LAST_COMPLETED_PHASE=%q\n' "${LAST_COMPLETED_PHASE:-}"
+        for _v in "${_BW_STATE_VARS[@]}"; do
+            printf '%s=%q\n' "$_v" "${!_v-}"
+        done
+    } >> "$_tmp" 2>/dev/null || {
+        print_warning "Could not write install state file; resume will be unavailable."
+        rm -f "$_tmp" 2>/dev/null || true
+        return 0
+    }
+    chmod 0600 "$_tmp" 2>/dev/null || true
+    mv -f "$_tmp" "$_BW_STATE_FILE" 2>/dev/null || {
+        print_warning "Could not finalize install state file; resume will be unavailable."
+        rm -f "$_tmp" 2>/dev/null || true
+        return 0
+    }
+}
+
+# Mark a phase complete and persist the snapshot.
+_bw_phase_done() {
+    LAST_COMPLETED_PHASE="$1"
+    _bw_state_save
+}
+
+# 1-based index of a phase in _BW_PHASES; "preferences" -> 0; unknown -> -1.
+_bw_phase_index() {
+    local _p="$1" _i
+    [ "$_p" = "preferences" ] && { echo 0; return 0; }
+    for _i in "${!_BW_PHASES[@]}"; do
+        if [ "${_BW_PHASES[$_i]}" = "$_p" ]; then
+            echo $(( _i + 1 ))
+            return 0
+        fi
+    done
+    echo -1
+}
+
+# Return 0 (run the phase) on a fresh install, or when resuming and the phase
+# sits AFTER the last completed phase. Return 1 (skip) otherwise.
+_bw_phase_pending() {
+    local _p="$1" _want _done
+    if [ "$_BW_RESUMING" != "yes" ]; then
+        return 0
+    fi
+    _want=$(_bw_phase_index "$_p")
+    _done=$(_bw_phase_index "$_BW_RESUME_AFTER")
+    if [ "$_want" -gt "$_done" ]; then
+        return 0
+    fi
+    print_status "Skipping ${_p} phase (already completed in the interrupted run)."
+    return 1
+}
+
+# Securely remove the state file and its directory. Idempotent. Called on
+# success or discard — NOT from the EXIT trap (the file must survive a crash so
+# resume can work).
+_bw_state_clear() {
+    if [ -e "$_BW_STATE_FILE" ]; then
+        shred -u "$_BW_STATE_FILE" 2>/dev/null || rm -f "$_BW_STATE_FILE" 2>/dev/null || true
+    fi
+    # rmdir only succeeds when empty — leaves the dir if a concurrent tempfile exists.
+    rmdir "$_BW_STATE_DIR" 2>/dev/null || true
+}
+
+# Detect a state file left by an interrupted run and decide what to do with it.
+# Sets _BW_RESUMING / _BW_RESUME_AFTER / _BW_START_OVER. Must run before
+# check_existing_installation (which would otherwise early-exit "already
+# installed" once the package phase had landed).
+_bw_state_load_and_prompt() {
+    [ -f "$_BW_STATE_FILE" ] || return 0
+
+    # The state dir must itself be a trusted 0700 root-owned directory before we
+    # trust anything inside it.
+    if ! _bw_state_dir_ensure; then
+        print_warning "Ignoring saved install state — $_BW_STATE_DIR is not a secure root-owned 0700 directory."
+        return 0
+    fi
+
+    # --restart-install: discard the saved state and re-install over the
+    # interrupted leftovers (a state file only ever exists mid fresh-install).
+    if [ "$RESTART_INSTALL" = "yes" ]; then
+        print_status "Discarding saved install state (--restart-install)."
+        _bw_state_clear
+        _BW_START_OVER="yes"
+        return 0
+    fi
+
+    # Safety gate before sourcing: a regular file (not a symlink), owned by the
+    # current root user, mode 0600.
+    if [ -L "$_BW_STATE_FILE" ]; then
+        print_warning "Ignoring saved install state at $_BW_STATE_FILE (unexpected symlink)."
+        _bw_state_clear
+        return 0
+    fi
+    local _me
+    _me=$(id -u 2>/dev/null || echo "")
+    if [ "$(_bw_stat_owner "$_BW_STATE_FILE")" != "$_me" ] \
+        || [ "$(_bw_stat_mode "$_BW_STATE_FILE")" != "600" ]; then
+        print_warning "Ignoring saved install state at $_BW_STATE_FILE (unexpected owner/permissions)."
+        _bw_state_clear
+        return 0
+    fi
+
+    # Staleness: a state file older than _BW_STATE_MAX_AGE_DAYS describes a dead
+    # install — do not offer to resume it (its generated secrets are stale).
+    if [ -n "$(find "$_BW_STATE_FILE" -maxdepth 0 -mtime "+${_BW_STATE_MAX_AGE_DAYS}" 2>/dev/null)" ]; then
+        print_warning "Saved install state is older than ${_BW_STATE_MAX_AGE_DAYS} days — discarding as stale."
+        _bw_state_clear
+        return 0
+    fi
+
+    # Schema check before sourcing — refuse a file from an incompatible script.
+    local _schema
+    _schema=$(grep -E '^_BW_STATE_SCHEMA=' "$_BW_STATE_FILE" 2>/dev/null | head -1 | cut -d= -f2)
+    if [ "$_schema" != "$_BW_STATE_SCHEMA" ]; then
+        print_warning "Saved install state has an incompatible schema — discarding."
+        _bw_state_clear
+        return 0
+    fi
+
+    local _choice="resume"
+    if [ "$INTERACTIVE_MODE" = "yes" ]; then
+        tui_section "🔄 Resume Previous Installation" \
+            "A previous BunkerWeb installation was interrupted and can be resumed."
+        _choice=$(tui_menu "Resume Installation" \
+            "An interrupted BunkerWeb installation was found. What would you like to do?" \
+            "resume" \
+            "resume" "Resume — continue from where it stopped" \
+            "fresh"  "Start over — discard saved state and install from the beginning" \
+            "cancel" "Cancel — exit without changing anything") || _choice="cancel"
+    else
+        print_status "Interrupted installation detected — resuming (pass --restart-install to start over)."
+    fi
+
+    case "$_choice" in
+        cancel)
+            print_status "Installation cancelled. Saved state kept at $_BW_STATE_FILE."
+            exit 0
+            ;;
+        fresh)
+            print_status "Discarding saved install state — starting from the beginning."
+            _bw_state_clear
+            _BW_START_OVER="yes"
+            ;;
+        resume|*)
+            # Root-owned 0600 file written by this script; symlink/owner/mode/schema
+            # already validated above.
+            # shellcheck disable=SC1090
+            . "$_BW_STATE_FILE"
+            _BW_RESUMING="yes"
+            _BW_RESUME_AFTER="${LAST_COMPLETED_PHASE:-preferences}"
+            ;;
+    esac
+}
+
+# Dump systemd status + recent journal for a failed unit so the real cause
+# is visible instead of a bare "[ERROR] Command failed".
+# NOTE: only call on units whose secrets live in a config file, not on argv —
+# `systemctl status` echoes ExecStart, so a `--requirepass <value>` style unit
+# would leak the password to the terminal.
+_dump_service_diagnostics() {
+    local unit="$1"
+    echo
+    echo -e "${YELLOW}--- systemctl status ${unit} ---${NC}"
+    systemctl status "$unit" --no-pager -l 2>&1 | tail -n 20 || true
+    echo -e "${YELLOW}--- journalctl -xeu ${unit} (last 30 lines) ---${NC}"
+    journalctl -xeu "$unit" --no-pager -n 30 2>&1 || true
+    echo
+}
+
+# Enable + start an OPTIONAL systemd unit. Unlike run_cmd this never exits the
+# installer: a failed optional daemon (e.g. local Valkey/Redis) must not abort
+# the whole BunkerWeb install. Returns non-zero on failure; caller decides.
+# Caller is responsible for any prior `systemctl daemon-reload`.
+start_optional_service() {
+    local unit="$1"
+    local label="${2:-$unit}"
+    echo -e "${BLUE}[CMD]${NC} systemctl enable --now $unit"
+    if systemctl enable --now "$unit"; then
+        return 0
+    fi
+    print_warning "${label} service (${unit}) failed to start."
+    _dump_service_diagnostics "$unit"
+    return 1
 }
 
 # ---------------------------------------------------------------------------
@@ -3622,7 +3910,7 @@ _redis_conf_set() {
 }
 
 install_redis() {
-    local label conf service
+    local label conf service redis_started="no"
     label="${REDIS_FLAVOR:-redis}"
 
     echo
@@ -3639,19 +3927,34 @@ install_redis() {
     label="${REDIS_FLAVOR:-redis}"
 
     if [ "$DISTRO_ID" = "freebsd" ]; then
+        # FreeBSD rc service name (also used in the remediation hints below).
         if [ "$REDIS_FLAVOR" = "valkey" ]; then
+            service="valkey"
             sysrc valkey_enable=YES >/dev/null 2>&1
-            service valkey start || true
         else
+            service="redis"
             sysrc redis_enable=YES >/dev/null 2>&1
-            service redis start || true
         fi
-        print_status "${label^} service enabled and started"
+        if service "$service" start; then
+            redis_started="yes"
+            print_status "${label^} service enabled and started"
+        else
+            print_warning "${label^} service ($service) failed to start."
+        fi
     else
+        # Refresh systemd's unit view BEFORE locating the unit — the dpkg
+        # postinst may have failed to reach systemd (deb-systemd-invoke
+        # "Could not execute systemctl"), leaving the just-installed unit
+        # unregistered. Must run before _locate_redis_service, not inside
+        # start_optional_service (which is skipped when the locator fails).
+        systemctl daemon-reload 2>/dev/null || true
         service=$(_locate_redis_service || true)
         if [ -n "$service" ]; then
-            run_cmd systemctl enable --now "$service"
-            print_status "${label^} service enabled and started ($service)"
+            # Optional daemon — a start failure must not abort the install.
+            if start_optional_service "$service" "${label^}"; then
+                redis_started="yes"
+                print_status "${label^} service enabled and started ($service)"
+            fi
         else
             print_warning "${label^} service name not found; start it manually if needed."
         fi
@@ -3694,14 +3997,22 @@ install_redis() {
 
         # Restart to pick up new bind/password.
         if [ "$DISTRO_ID" = "freebsd" ]; then
-            if [ "$REDIS_FLAVOR" = "valkey" ]; then
-                service valkey restart || true
+            if service "$service" restart; then
+                redis_started="yes"
             else
-                service redis restart || true
+                redis_started="no"
+                print_warning "${label^} service ($service) failed to restart after configuration."
             fi
         else
             if [ -n "$service" ]; then
-                run_cmd systemctl restart "$service"
+                echo -e "${BLUE}[CMD]${NC} systemctl restart $service"
+                if systemctl restart "$service"; then
+                    redis_started="yes"
+                else
+                    redis_started="no"
+                    print_warning "${label^} service ($service) failed to restart after configuration."
+                    _dump_service_diagnostics "$service"
+                fi
             fi
         fi
     fi
@@ -3723,9 +4034,29 @@ install_redis() {
     fi
 
     echo
-    echo -e "${GREEN}${label^} installed and configured successfully${NC}"
-    echo "Used by BunkerWeb to persist metrics and bans across restarts and to sync state between workers."
-    echo "See BunkerWeb docs for more: https://docs.bunkerweb.io/latest/features/#redis"
+    if [ "$redis_started" = "yes" ]; then
+        echo -e "${GREEN}${label^} installed and configured successfully${NC}"
+        echo "Used by BunkerWeb to persist metrics and bans across restarts and to sync state between workers."
+        echo "See BunkerWeb docs for more: https://docs.bunkerweb.io/latest/features/#redis"
+    else
+        # Optional daemon down — install continues. BunkerWeb still runs without
+        # Redis (in-memory only); USE_REDIS=yes points at a server not yet up.
+        print_warning "${label^} is installed and configured but the local server is NOT running."
+        print_warning "BunkerWeb is set to use it (USE_REDIS=yes), but until it is started:"
+        print_warning "  - bans and rate-limit counters are NOT shared between workers/instances"
+        print_warning "  - that state is lost on every reload/restart (no HA persistence)"
+        print_warning "Start it manually to close this gap:"
+        if [ "$DISTRO_ID" = "freebsd" ]; then
+            print_warning "  service $service status    # see why it failed"
+            print_warning "  service $service start     # start once fixed"
+        elif [ -n "$service" ]; then
+            print_warning "  systemctl status $service    # see why it failed"
+            print_warning "  journalctl -xeu $service     # full error log"
+            print_warning "  systemctl start $service     # start once fixed"
+        else
+            print_warning "  check the local ${label} service status and start it manually"
+        fi
+    fi
     echo -e "${BLUE}========================================${NC}"
 }
 
@@ -4657,6 +4988,7 @@ usage() {
     echo "  -q, --quiet              Silent installation (suppress output; implies --yes)"
     echo "  -h, --help               Show this help message"
     echo "      --dry-run            Show what would be installed without doing it"
+    echo "      --restart-install    Discard any saved state from an interrupted run and start fresh"
     echo
     echo "Installation types:"
     echo "  --full                   Full stack installation (default)"
@@ -4791,6 +5123,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --force-type-change)
             FORCE_TYPE_CHANGE="yes"
+            shift
+            ;;
+        --restart-install)
+            RESTART_INSTALL="yes"
             shift
             ;;
         -h|--help)
@@ -5812,17 +6148,38 @@ main() {
     tui_init
     detect_architecture
     check_supported_os
-    check_existing_installation
 
-    if [ "$UPGRADE_SCENARIO" = "yes" ]; then
-        upgrade_only
+    # Resume detection — before check_existing_installation, which would otherwise
+    # early-exit "already installed" once the package phase has run.
+    _bw_state_load_and_prompt
+
+    if [ "$_BW_START_OVER" = "yes" ]; then
+        # Explicit start-over: an interrupted install left partial packages on
+        # disk. Skip the "already installed" guard (check_existing_installation)
+        # — the operator asked to redo the install — but still collect fresh
+        # configuration and run every phase. A state file is only ever written
+        # by this fresh-install path (upgrade_only never checkpoints), so a
+        # discarded state file always implies an interrupted fresh install, not
+        # an upgrade; running this as a non-upgrade fresh install is correct.
+        print_status "Starting a fresh installation over the interrupted one."
+        show_rhel_database_warning
+        ask_user_preferences
+        check_ports
+    elif [ "$_BW_RESUMING" = "yes" ]; then
+        print_status "Resuming interrupted installation (completed through: ${_BW_RESUME_AFTER})."
+    else
+        check_existing_installation
+
+        if [ "$UPGRADE_SCENARIO" = "yes" ]; then
+            upgrade_only
+        fi
+
+        show_rhel_database_warning
+        ask_user_preferences
+        check_ports
     fi
 
-    show_rhel_database_warning
-    ask_user_preferences
-    check_ports
-
-    # Env vars per install type.
+    # Env vars per install type — ALWAYS runs (fresh + resume); pure variable work.
     case "$INSTALL_TYPE" in
         "manager")
             export MANAGER_MODE=yes
@@ -5860,7 +6217,8 @@ main() {
     echo
 
     # Interactive confirm — embed recap in dialog body (single confirm screen).
-    if [ "$INTERACTIVE_MODE" = "yes" ] && [ "$FORCE_INSTALL" != "yes" ]; then
+    # Skipped on resume: the configuration was already confirmed in the original run.
+    if [ "$_BW_RESUMING" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ] && [ "$FORCE_INSTALL" != "yes" ]; then
         if [ "$GUM_AVAILABLE" = "yes" ]; then
             # Recap already rendered after ask_user_preferences; show only install/cancel.
             local _rc=0
@@ -5906,75 +6264,105 @@ Install BunkerWeb $BUNKERWEB_VERSION with this configuration?"
         fi
     fi
 
+    # Gate phase complete — persists the full config snapshot used for resume.
+    [ "$_BW_RESUMING" = "yes" ] || _bw_phase_done preferences
+
     # upgrade_only() exits earlier — everything below runs only on a FRESH install.
+    # Each install phase below is checkpointed: on resume the completed phases
+    # are skipped and the interrupted one re-runs from scratch (the install
+    # functions are idempotent).
 
-    case "$DISTRO_ID" in
-        "debian"|"ubuntu")
-            install_nginx_debian
-            ;;
-        "fedora")
-            install_nginx_fedora
-            ;;
-        "rhel"|"rocky"|"almalinux")
-            install_nginx_rhel
-            ;;
-        "freebsd")
-            install_nginx_freebsd
-            ;;
-    esac
-
-    if [ "$CROWDSEC_INSTALL" = "yes" ]; then
-        install_crowdsec
+    if _bw_phase_pending nginx; then
+        case "$DISTRO_ID" in
+            "debian"|"ubuntu")
+                install_nginx_debian
+                ;;
+            "fedora")
+                install_nginx_fedora
+                ;;
+            "rhel"|"rocky"|"almalinux")
+                install_nginx_rhel
+                ;;
+            "freebsd")
+                install_nginx_freebsd
+                ;;
+        esac
+        _bw_phase_done nginx
     fi
 
-    if [ "$REDIS_INSTALL" = "yes" ]; then
-        install_redis
+    if _bw_phase_pending crowdsec; then
+        if [ "$CROWDSEC_INSTALL" = "yes" ]; then
+            install_crowdsec
+        fi
+        _bw_phase_done crowdsec
     fi
 
-    # Wire DATABASE_URI into variables.env BEFORE postinstall runs the scheduler.
-    if [ "$DB_INSTALL" = "mariadb" ] || [ "$DB_INSTALL" = "postgresql" ] || [ "$DB_INSTALL" = "external" ]; then
-        install_database
+    if _bw_phase_pending redis; then
+        if [ "$REDIS_INSTALL" = "yes" ]; then
+            install_redis
+        fi
+        _bw_phase_done redis
     fi
 
-    # Wire UI_HOST for every UI-bearing install. Without it the default-server-http/ui.conf
-    # template is empty → /setup, /login, /logout unreachable via the BunkerWeb listener.
-    case "${INSTALL_TYPE:-full}" in
-        full|ui|"")
-            apply_ui_host_config
-            ;;
-        manager)
-            if [ "${SERVICE_UI:-yes}" != "no" ] || [ "${MANAGER_UI_DEFERRED:-no}" = "yes" ]; then
+    if _bw_phase_pending database; then
+        # Wire DATABASE_URI into variables.env BEFORE postinstall runs the scheduler.
+        if [ "$DB_INSTALL" = "mariadb" ] || [ "$DB_INSTALL" = "postgresql" ] || [ "$DB_INSTALL" = "external" ]; then
+            install_database
+        fi
+        _bw_phase_done database
+    fi
+
+    if _bw_phase_pending host_config; then
+        # Wire UI_HOST for every UI-bearing install. Without it the default-server-http/ui.conf
+        # template is empty → /setup, /login, /logout unreachable via the BunkerWeb listener.
+        case "${INSTALL_TYPE:-full}" in
+            full|ui|"")
                 apply_ui_host_config
-            fi
-            ;;
-        scheduler)
-            # Pre-create templates so postinst's minimal versions don't win (writers are idempotent).
-            write_default_variables_env_template /etc/bunkerweb/variables.env
-            write_default_scheduler_env_template /etc/bunkerweb/scheduler.env
-            # Persist --instances / --dns-resolvers / --api-https (no configure_* runs for scheduler-only).
-            set_config_kv /etc/bunkerweb/variables.env "SERVER_NAME" ""
-            if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
-                set_config_kv /etc/bunkerweb/variables.env "BUNKERWEB_INSTANCES" "$BUNKERWEB_INSTANCES_INPUT"
-            fi
-            if [ -n "$DNS_RESOLVERS_INPUT" ]; then
-                set_config_kv /etc/bunkerweb/variables.env "DNS_RESOLVERS" "$DNS_RESOLVERS_INPUT"
-            fi
-            if [ "$API_LISTEN_HTTPS_INPUT" = "yes" ]; then
-                set_config_kv /etc/bunkerweb/variables.env "API_LISTEN_HTTPS" "yes"
-            fi
-            # Redis/CrowdSec → variables.env (else `--scheduler-only --redis` would silently drop USE_REDIS).
-            apply_optional_integrations /etc/bunkerweb/variables.env
-            ;;
-        api)
-            # api.env template carries the FastAPI/biscuit/TLS commented docs the postinst's minimal file lacks.
-            write_default_variables_env_template /etc/bunkerweb/variables.env
-            write_default_api_env_template /etc/bunkerweb/api.env
-            # FastAPI rate limiter reads USE_REDIS/REDIS_HOST from variables.env.
-            apply_optional_integrations /etc/bunkerweb/variables.env
-            ;;
-    esac
+                ;;
+            manager)
+                if [ "${SERVICE_UI:-yes}" != "no" ] || [ "${MANAGER_UI_DEFERRED:-no}" = "yes" ]; then
+                    apply_ui_host_config
+                fi
+                ;;
+            scheduler)
+                # Pre-create templates so postinst's minimal versions don't win (writers are idempotent).
+                write_default_variables_env_template /etc/bunkerweb/variables.env
+                write_default_scheduler_env_template /etc/bunkerweb/scheduler.env
+                # Persist --instances / --dns-resolvers / --api-https (no configure_* runs for scheduler-only).
+                set_config_kv /etc/bunkerweb/variables.env "SERVER_NAME" ""
+                if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
+                    set_config_kv /etc/bunkerweb/variables.env "BUNKERWEB_INSTANCES" "$BUNKERWEB_INSTANCES_INPUT"
+                fi
+                if [ -n "$DNS_RESOLVERS_INPUT" ]; then
+                    set_config_kv /etc/bunkerweb/variables.env "DNS_RESOLVERS" "$DNS_RESOLVERS_INPUT"
+                fi
+                if [ "$API_LISTEN_HTTPS_INPUT" = "yes" ]; then
+                    set_config_kv /etc/bunkerweb/variables.env "API_LISTEN_HTTPS" "yes"
+                fi
+                # Redis/CrowdSec → variables.env (else `--scheduler-only --redis` would silently drop USE_REDIS).
+                apply_optional_integrations /etc/bunkerweb/variables.env
+                ;;
+            api)
+                # api.env template carries the FastAPI/biscuit/TLS commented docs the postinst's minimal file lacks.
+                write_default_variables_env_template /etc/bunkerweb/variables.env
+                write_default_api_env_template /etc/bunkerweb/api.env
+                # FastAPI rate limiter reads USE_REDIS/REDIS_HOST from variables.env.
+                apply_optional_integrations /etc/bunkerweb/variables.env
+                ;;
+        esac
+
+        # Pre-create UI admin in ui.env BEFORE bunkerweb-ui starts (gunicorn pre-fork picks it up).
+        # Manager's deferred-start path goes through start_manager_ui below. Idempotent.
+        if [ "$UI_ADMIN_CREATE" = "yes" ] \
+            && { [ "$INSTALL_TYPE" = "full" ] || [ "$INSTALL_TYPE" = "ui" ] || [ -z "$INSTALL_TYPE" ]; }; then
+            create_ui_admin_user
+        fi
+        _bw_phase_done host_config
+    fi
 
     # Prevent postinstall from starting services we still need to configure.
+    # ALWAYS runs (fresh + resume): pure SERVICE_* env derivation consumed by the
+    # package phase below; SERVICE_* values are not persisted in the state file.
     if [ "$INSTALL_TYPE" = "manager" ]; then
         export SERVICE_SCHEDULER=no
         # Defer UI start when admin creds / self-signed TLS still to provision.
@@ -5999,60 +6387,61 @@ Install BunkerWeb $BUNKERWEB_VERSION with this configuration?"
         fi
     fi
 
-    # Pre-create UI admin in ui.env BEFORE bunkerweb-ui starts (gunicorn pre-fork picks it up).
-    # Manager's deferred-start path goes through start_manager_ui below. Idempotent.
-    if [ "$UI_ADMIN_CREATE" = "yes" ] \
-        && { [ "$INSTALL_TYPE" = "full" ] || [ "$INSTALL_TYPE" = "ui" ] || [ -z "$INSTALL_TYPE" ]; }; then
-        create_ui_admin_user
+    if _bw_phase_pending package; then
+        case "$DISTRO_ID" in
+            "debian"|"ubuntu")
+                install_bunkerweb_debian
+                ;;
+            "fedora")
+                install_bunkerweb_rpm
+                ;;
+            "rhel"|"rocky"|"almalinux")
+                install_bunkerweb_rpm
+                ;;
+            "freebsd")
+                install_bunkerweb_freebsd
+                ;;
+        esac
+        _bw_phase_done package
     fi
-
-    case "$DISTRO_ID" in
-        "debian"|"ubuntu")
-            install_bunkerweb_debian
-            ;;
-        "fedora")
-            install_bunkerweb_rpm
-            ;;
-        "rhel"|"rocky"|"almalinux")
-            install_bunkerweb_rpm
-            ;;
-        "freebsd")
-            install_bunkerweb_freebsd
-            ;;
-    esac
 
     # UI_HOST + MULTISITE already written pre-install via apply_ui_host_config;
     # postinstall.sh:189 skips its own template on populated variables.env.
 
-    if [ "$INSTALL_TYPE" = "manager" ]; then
-        configure_manager_api_defaults
-        if [ "$MANAGER_UI_DEFERRED" = "yes" ]; then
-            unset SERVICE_UI
-            start_manager_ui
-        elif [ "$UI_ADMIN_CREATE" = "yes" ] || [ "$UI_SELFSIGNED_INPUT" = "yes" ]; then
-            # Hardening opted in via flags after UI started — apply + restart.
-            start_manager_ui
+    if _bw_phase_pending configure; then
+        if [ "$INSTALL_TYPE" = "manager" ]; then
+            configure_manager_api_defaults
+            if [ "$MANAGER_UI_DEFERRED" = "yes" ]; then
+                unset SERVICE_UI
+                start_manager_ui
+            elif [ "$UI_ADMIN_CREATE" = "yes" ] || [ "$UI_SELFSIGNED_INPUT" = "yes" ]; then
+                # Hardening opted in via flags after UI started — apply + restart.
+                start_manager_ui
+            fi
+        elif [ "$INSTALL_TYPE" = "worker" ]; then
+            configure_worker_api_whitelist
+        elif [ "$INSTALL_TYPE" = "full" ] || [ -z "$INSTALL_TYPE" ]; then
+            configure_full_config
         fi
-    elif [ "$INSTALL_TYPE" = "worker" ]; then
-        configure_worker_api_whitelist
-    elif [ "$INSTALL_TYPE" = "full" ] || [ -z "$INSTALL_TYPE" ]; then
-        configure_full_config
-    fi
 
-    if [ "$CROWDSEC_INSTALL" = "yes" ]; then
-        if [ "$DISTRO_ID" = "freebsd" ]; then
-            sysrc crowdsec_enable=YES >/dev/null 2>&1
-            service crowdsec restart || service crowdsec start || print_warning "Could not start crowdsec"
-            sleep 2
-            service crowdsec status >/dev/null 2>&1 || print_warning "CrowdSec may not be running"
-        else
-            run_cmd systemctl restart crowdsec
-            sleep 2
-            systemctl status crowdsec --no-pager -l || print_warning "CrowdSec may not be running"
+        if [ "$CROWDSEC_INSTALL" = "yes" ]; then
+            if [ "$DISTRO_ID" = "freebsd" ]; then
+                sysrc crowdsec_enable=YES >/dev/null 2>&1
+                service crowdsec restart || service crowdsec start || print_warning "Could not start crowdsec"
+                sleep 2
+                service crowdsec status >/dev/null 2>&1 || print_warning "CrowdSec may not be running"
+            else
+                run_cmd systemctl restart crowdsec
+                sleep 2
+                systemctl status crowdsec --no-pager -l || print_warning "CrowdSec may not be running"
+            fi
         fi
+        _bw_phase_done configure
     fi
 
     show_final_info
+    # Install finished — wipe the (secret-bearing) state file.
+    _bw_state_clear
 }
 
 main "$@"
