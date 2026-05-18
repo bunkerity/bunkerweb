@@ -110,6 +110,7 @@ REDIS_SSL_VERIFY_INPUT=""
 REDIS_BIND_INPUT=""
 REDIS_AUTOPASS="yes"
 REDIS_REQUIREPASS_LOCAL=""
+REDIS_PASSWORD_GENERATED=""   # set to the value only when auto-generated (controls end-of-install print)
 REDIS_FLAVOR=""               # "redis" | "valkey" — wire-compatible
 REDIS_MAXMEMORY_MB=""         # 0 = unlimited; >0 = applied as <N>mb
 REDIS_MAXMEMORY_POLICY="volatile-lru" # TTL-only eviction: protects permanent bans, evicts transient counters first
@@ -964,6 +965,22 @@ validate_db_password() {
     return 0
 }
 
+# Redis requirepass — written into redis.conf via _redis_conf_set.
+# Reject whitespace and chars that break the config line or shell/DSN assembly.
+validate_redis_password() {
+    local pw="$1"
+
+    if [ -z "$pw" ] || [ "${#pw}" -lt 8 ]; then
+        return 1
+    fi
+    # Reject ' " \ ` # and whitespace — break redis.conf requirepass line, DSN, shell history.
+    if [[ "$pw" == *\'* ]] || [[ "$pw" == *\"* ]] || [[ "$pw" == *\\* ]] || [[ "$pw" == *\`* ]] \
+        || [[ "$pw" == *"#"* ]] || [[ "$pw" =~ [[:space:]] ]]; then
+        return 1
+    fi
+    return 0
+}
+
 # DB identifier — SQL-safe ASCII that survives a URL path component intact.
 # Matches MariaDB/Postgres unquoted-identifier rules.
 validate_db_identifier() {
@@ -1679,13 +1696,64 @@ will warn and fall back to the other one." \
                         print_warning "Strongly recommended: firewall port 6379 to your worker subnet, and set a Redis password."
                     fi
 
-                    if [ "$REDIS_BIND_INPUT" != "127.0.0.1" ] && [ -z "$REDIS_PASSWORD_INPUT" ] && [ "$REDIS_AUTOPASS" = "yes" ]; then
-                        if tui_yesno "Redis Password" \
-                            "Generate a random password and set REQUIREPASS automatically?" "yes"; then
-                            REDIS_AUTOPASS="yes"
-                        else
-                            REDIS_AUTOPASS="no"
+                fi
+
+                # Local Redis password (REQUIREPASS): opt-in gate, then a
+                # DB/UI-style prompt — type a password or leave empty to
+                # auto-generate. Runs for every local install (full + manager).
+                if [ "$REDIS_AUTOPASS" != "no" ] && [ -z "$REDIS_REQUIREPASS_LOCAL" ]; then
+                    tui_section "🔑 Redis Password"
+                    local _redis_flavor_label="${REDIS_FLAVOR:-redis}"
+                    local _redis_pw_default="yes"
+                    # Loopback-only Redis is unreachable from the network → password optional.
+                    [ "${REDIS_BIND_INPUT:-127.0.0.1}" = "127.0.0.1" ] && _redis_pw_default="no"
+                    _tui_explain "Protecting ${_redis_flavor_label} with a password (REQUIREPASS) is
+strongly recommended whenever it is reachable from the network.
+Leave the password empty to auto-generate a strong random one
+(printed at the end of install)."
+                    if tui_yesno "Redis Password" \
+                        "🔑 Protect the local ${_redis_flavor_label} server with a password?" "$_redis_pw_default"; then
+                        REDIS_AUTOPASS="yes"
+                        local _redis_pw_rc _redis_pw_confirm
+                        while true; do
+                            REDIS_REQUIREPASS_LOCAL=$(tui_password "Redis Password" \
+                                "🔑 Enter password (or leave empty to auto-generate):")
+                            _redis_pw_rc=$?
+                            if [ "$_redis_pw_rc" -ne 0 ]; then
+                                # ESC/Cancel: don't silently coerce; ask explicitly.
+                                REDIS_REQUIREPASS_LOCAL=""
+                                if tui_yesno "Redis Password" \
+                                    "Cancel password entry and auto-generate a random one instead?" "yes"; then
+                                    break
+                                fi
+                                continue
+                            fi
+                            if [ -z "$REDIS_REQUIREPASS_LOCAL" ]; then
+                                # Empty → auto-generate after the loop.
+                                break
+                            fi
+                            if ! validate_redis_password "$REDIS_REQUIREPASS_LOCAL"; then
+                                tui_msgbox "Redis Password" \
+                                    "Password must be 8+ characters with no whitespace, quotes, backslash, backtick or '#'. Try again, or leave empty to auto-generate."
+                                REDIS_REQUIREPASS_LOCAL=""
+                                continue
+                            fi
+                            _redis_pw_confirm=$(tui_password "Redis Password (confirm)" \
+                                "Re-type the password:") || _redis_pw_confirm=""
+                            if [ "$REDIS_REQUIREPASS_LOCAL" != "$_redis_pw_confirm" ]; then
+                                tui_msgbox "Redis Password" "Passwords don't match. Try again."
+                                REDIS_REQUIREPASS_LOCAL=""
+                                continue
+                            fi
+                            break
+                        done
+                        # Empty after the loop → auto-generate now (works for loopback too).
+                        if [ -z "$REDIS_REQUIREPASS_LOCAL" ]; then
+                            REDIS_REQUIREPASS_LOCAL=$(generate_secret 32)
+                            REDIS_PASSWORD_GENERATED="$REDIS_REQUIREPASS_LOCAL"
                         fi
+                    else
+                        REDIS_AUTOPASS="no"
                     fi
                 fi
 
@@ -2168,7 +2236,15 @@ _build_configuration_summary() {
             else
                 _field "$_flavor_label" "Local, default config"
             fi
-            if [ "$REDIS_AUTOPASS" = "yes" ] && [ "${REDIS_BIND_INPUT:-127.0.0.1}" != "127.0.0.1" ]; then
+            # States: opted out / interactive auto-gen / interactive typed /
+            # non-interactive auto-gen (bind ≠ loopback, settled at apply time).
+            if [ "$REDIS_AUTOPASS" = "no" ]; then
+                _field "Redis password" "None (REQUIREPASS not set)"
+            elif [ -n "$REDIS_PASSWORD_GENERATED" ]; then
+                _field "Redis password" "Auto-generated (REQUIREPASS)"
+            elif [ -n "$REDIS_REQUIREPASS_LOCAL" ]; then
+                _field "Redis password" "Set (provided)"
+            elif [ "${REDIS_BIND_INPUT:-127.0.0.1}" != "127.0.0.1" ]; then
                 _field "Redis password" "Auto-generated (REQUIREPASS)"
             fi
             if [ -n "$REDIS_MAXMEMORY_MB" ]; then
@@ -3590,8 +3666,11 @@ install_redis() {
         bind_addr="${REDIS_BIND_INPUT:-127.0.0.1}"
 
         # Auto-gen password if user opted in and bind ≠ loopback.
+        # Non-interactive fallback only — the interactive prompt sets
+        # REDIS_REQUIREPASS_LOCAL itself (and its own REDIS_PASSWORD_GENERATED).
         if [ "$bind_addr" != "127.0.0.1" ] && [ -z "$REDIS_REQUIREPASS_LOCAL" ] && [ "$REDIS_AUTOPASS" = "yes" ]; then
             REDIS_REQUIREPASS_LOCAL=$(generate_secret 32)
+            REDIS_PASSWORD_GENERATED="$REDIS_REQUIREPASS_LOCAL"
         fi
 
         _redis_conf_set "$conf" "bind" "$bind_addr"
@@ -4534,10 +4613,16 @@ show_final_info() {
 
     if [ -n "$REDIS_REQUIREPASS_LOCAL" ]; then
         {
-        echo "🔑 ${REDIS_FLAVOR:-redis} REQUIREPASS (auto-generated):"
-        echo "  Password: ${REDIS_REQUIREPASS_LOCAL}"
-        echo "  Stored in the ${REDIS_FLAVOR:-redis} config and in /etc/bunkerweb/variables.env."
-        echo "  ⚠️  Save it now and restrict port 6379 to your worker subnet."
+        echo "🔑 ${REDIS_FLAVOR:-redis} REQUIREPASS:"
+        if [ -n "$REDIS_PASSWORD_GENERATED" ]; then
+            echo "  Password: ${REDIS_PASSWORD_GENERATED}   (auto-generated)"
+            echo "  Stored in the ${REDIS_FLAVOR:-redis} config and in /etc/bunkerweb/variables.env."
+            echo "  ⚠️  Save it now and restrict port 6379 to your worker subnet."
+        else
+            echo "  Password: (the value you provided)"
+            echo "  Stored in the ${REDIS_FLAVOR:-redis} config and in /etc/bunkerweb/variables.env."
+            echo "  ⚠️  Restrict port 6379 to your worker subnet."
+        fi
         echo "       Example (ufw): sudo ufw allow from 10.0.0.0/24 to any port 6379"
         echo
         } >&"${_BW_OUT_FD:-1}"
@@ -5275,7 +5360,7 @@ if [ "$DRY_RUN" = "yes" ]; then
         if [ -n "$REDIS_BIND_INPUT" ]; then
             echo "Redis bind: $REDIS_BIND_INPUT"
         fi
-        echo "Redis auto-password: ${REDIS_AUTOPASS}"
+        echo "Redis password: ${REDIS_AUTOPASS}"
     elif [ -n "$REDIS_HOST_INPUT" ]; then
         echo "Redis: yes (existing server)"
     else
