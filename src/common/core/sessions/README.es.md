@@ -2,34 +2,36 @@ El complemento de Sesiones proporciona una gestión robusta de sesiones HTTP par
 
 **Cómo funciona:**
 
-1.  Cuando un usuario interactúa por primera vez con su sitio web, BunkerWeb crea un identificador de sesión único.
-2.  Este identificador se almacena de forma segura en una cookie en el navegador del usuario.
-3.  En solicitudes posteriores, BunkerWeb recupera el identificador de sesión de la cookie y lo utiliza para acceder a los datos de la sesión del usuario.
-4.  Los datos de la sesión se pueden almacenar localmente o en [Redis](#redis) para entornos distribuidos con múltiples instancias de BunkerWeb.
-5.  Las sesiones se gestionan automáticamente con tiempos de espera configurables, lo que garantiza la seguridad y la facilidad de uso.
-6.  La seguridad criptográfica de las sesiones se garantiza mediante una clave secreta que se utiliza para firmar las cookies de sesión.
+1. Cuando un usuario interactúa por primera vez con su sitio web, BunkerWeb crea un identificador de sesión único.
+2. Este identificador se almacena de forma segura en una cookie en el navegador del usuario.
+3. En solicitudes posteriores, BunkerWeb recupera el identificador de sesión de la cookie y lo utiliza para acceder a los datos de la sesión del usuario.
+4. Los datos de la sesión se pueden almacenar localmente o en [Redis](#redis) para entornos distribuidos con múltiples instancias de BunkerWeb.
+5. Las sesiones se gestionan automáticamente con tiempos de espera configurables, lo que garantiza la seguridad y la facilidad de uso.
+6. La seguridad criptográfica de las sesiones se garantiza mediante una clave secreta que se utiliza para firmar las cookies de sesión.
 
 ### Cómo usar
 
 Siga estos pasos para configurar y usar la función de Sesiones:
 
-1.  **Configure la seguridad de la sesión:** Establezca un `SESSIONS_SECRET` fuerte y único para garantizar que las cookies de sesión no puedan ser falsificadas. (El valor predeterminado es "random", lo que hace que BunkerWeb genere una clave secreta aleatoria).
-2.  **Elija un nombre de sesión:** Opcionalmente, personalice el `SESSIONS_NAME` para definir cómo se llamará su cookie de sesión en el navegador. (El valor predeterminado es "random", lo que hace que BunkerWeb genere un nombre aleatorio).
-3.  **Establezca los tiempos de espera de la sesión:** Configure cuánto tiempo permanecen válidas las sesiones con los ajustes de tiempo de espera (`SESSIONS_IDLING_TIMEOUT`, `SESSIONS_ROLLING_TIMEOUT`, `SESSIONS_ABSOLUTE_TIMEOUT`).
-4.  **Configure la integración con Redis:** Para entornos distribuidos, establezca `USE_REDIS` en "yes" y configure su [conexión Redis](#redis) para compartir los datos de la sesión entre múltiples nodos de BunkerWeb.
-5.  **Deje que BunkerWeb se encargue del resto:** Una vez configurado, la gestión de sesiones se realiza automáticamente para su sitio web.
+1. **Configure la seguridad de la sesión:** Establezca un `SESSIONS_SECRET` fuerte y único para garantizar que las cookies de sesión no puedan ser falsificadas. (El valor predeterminado es "random", lo que hace que BunkerWeb genere una clave secreta aleatoria).
+2. **Elija un nombre de sesión:** Opcionalmente, personalice el `SESSIONS_NAME` para definir cómo se llamará su cookie de sesión en el navegador. (El valor predeterminado es "random", lo que hace que BunkerWeb genere un nombre aleatorio).
+3. **Establezca los tiempos de espera de la sesión:** Configure cuánto tiempo permanecen válidas las sesiones con los ajustes de tiempo de espera (`SESSIONS_IDLING_TIMEOUT`, `SESSIONS_ROLLING_TIMEOUT`, `SESSIONS_ABSOLUTE_TIMEOUT`).
+4. **Comparta la cookie entre subdominios (opcional, por servidor):** De forma predeterminada, la cookie de sesión está limitada al host. Si un servidor determinado aloja varios subdominios del mismo dominio registrable (por ejemplo `a.example.com` y `b.example.com`) y desea que el estado de anti-bot/desafío se comparta, configure `SESSIONS_DOMAIN` con el dominio padre (`example.com`) **solo en ese servidor**. `SESSIONS_DOMAIN` es un ajuste multisite, por lo que los tenants no relacionados en la misma instancia de BunkerWeb nunca reciben un atributo `Domain` compartido entre tenants.
+5. **Configure la integración con Redis:** Para entornos distribuidos, establezca `USE_REDIS` en "yes" y configure su [conexión Redis](#redis) para compartir los datos de la sesión entre múltiples nodos de BunkerWeb.
+6. **Deje que BunkerWeb se encargue del resto:** Una vez configurado, la gestión de sesiones se realiza automáticamente para su sitio web.
 
 ### Ajustes de Configuración
 
-| Ajuste                      | Valor por defecto | Contexto | Múltiple | Descripción                                                                                                                                         |
-| --------------------------- | ----------------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SESSIONS_SECRET`           | `random`          | global   | no       | **Secreto de sesión:** Clave criptográfica utilizada para firmar las cookies de sesión. Debe ser una cadena fuerte y aleatoria única para su sitio. |
-| `SESSIONS_NAME`             | `random`          | global   | no       | **Nombre de la cookie:** El nombre de la cookie que almacenará el identificador de sesión.                                                          |
-| `SESSIONS_IDLING_TIMEOUT`   | `1800`            | global   | no       | **Tiempo de espera por inactividad:** Tiempo máximo (en segundos) de inactividad antes de que la sesión se invalide.                                |
-| `SESSIONS_ROLLING_TIMEOUT`  | `3600`            | global   | no       | **Tiempo de espera renovable:** Tiempo máximo (en segundos) antes de que una sesión deba renovarse.                                                 |
-| `SESSIONS_ABSOLUTE_TIMEOUT` | `86400`           | global   | no       | **Tiempo de espera absoluto:** Tiempo máximo (en segundos) antes de que una sesión se destruya independientemente de la actividad.                  |
-| `SESSIONS_CHECK_IP`         | `yes`             | global   | no       | **Comprobar IP:** Cuando se establece en `yes`, destruye la sesión si la dirección IP del cliente cambia.                                           |
-| `SESSIONS_CHECK_USER_AGENT` | `yes`             | global   | no       | **Comprobar User-Agent:** Cuando se establece en `yes`, destruye la sesión si el User-Agent del cliente cambia.                                     |
+| Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                      |
+| --------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SESSIONS_SECRET`           | `random`          | global    | no       | **Secreto de sesión:** Clave criptográfica utilizada para firmar las cookies de sesión. Debe ser una cadena fuerte y aleatoria única para su sitio.                                                                                            |
+| `SESSIONS_NAME`             | `random`          | global    | no       | **Nombre de la cookie:** El nombre de la cookie que almacenará el identificador de sesión.                                                                                                                                                       |
+| `SESSIONS_DOMAIN`           |                   | multisite | no       | **Dominio de la cookie:** Atributo `Domain` opcional aplicado a la cookie de sesión (por ejemplo `example.com`). Déjelo vacío para mantener la cookie limitada al host. Configúrelo por servidor para compartir el estado de sesión entre subdominios hermanos del mismo dominio registrable. |
+| `SESSIONS_IDLING_TIMEOUT`   | `1800`            | global    | no       | **Tiempo de espera por inactividad:** Tiempo máximo (en segundos) de inactividad antes de que la sesión se invalide.                                                                                                                             |
+| `SESSIONS_ROLLING_TIMEOUT`  | `3600`            | global    | no       | **Tiempo de espera renovable:** Tiempo máximo (en segundos) antes de que una sesión deba renovarse.                                                                                                                                              |
+| `SESSIONS_ABSOLUTE_TIMEOUT` | `86400`           | global    | no       | **Tiempo de espera absoluto:** Tiempo máximo (en segundos) antes de que una sesión se destruya independientemente de la actividad.                                                                                                               |
+| `SESSIONS_CHECK_IP`         | `yes`             | global    | no       | **Comprobar IP:** Cuando se establece en `yes`, destruye la sesión si la dirección IP del cliente cambia.                                                                                                                                        |
+| `SESSIONS_CHECK_USER_AGENT` | `yes`             | global    | no       | **Comprobar User-Agent:** Cuando se establece en `yes`, destruye la sesión si el User-Agent del cliente cambia.                                                                                                                                  |
 
 !!! warning "Consideraciones de Seguridad"
     El ajuste `SESSIONS_SECRET` es fundamental para la seguridad. En entornos de producción:
@@ -99,3 +101,36 @@ Siga estos pasos para configurar y usar la función de Sesiones:
     SESSIONS_ROLLING_TIMEOUT: "172800"  # 2 días
     SESSIONS_ABSOLUTE_TIMEOUT: "604800"  # 7 días
     ```
+
+=== "Sesiones entre subdominios (tenant único)"
+
+    Comparta la cookie de sesión entre todos los subdominios de `example.com` para que el estado de anti-bot/desafío se resuelva una sola vez para todo el sitio:
+
+    ```yaml
+    SERVER_NAME: "app.example.com api.example.com shop.example.com"
+    SESSIONS_SECRET: "your-strong-random-secret-key-here"
+    SESSIONS_NAME: "crossdomainsession"
+    # SESSIONS_DOMAIN es un ajuste multisite: anteponga el nombre del servidor para que solo se aplique a los hosts coincidentes
+    app.example.com_SESSIONS_DOMAIN: "example.com"
+    api.example.com_SESSIONS_DOMAIN: "example.com"
+    shop.example.com_SESSIONS_DOMAIN: "example.com"
+    USE_ANTIBOT: "turnstile"
+    ```
+
+=== "Sesiones entre subdominios (tenants mixtos)"
+
+    Cuando la misma instancia de BunkerWeb aloja varios dominios registrables no relacionados, limite `SESSIONS_DOMAIN` únicamente a los servidores que deben compartirlo. Los servidores sin esta configuración conservan la cookie limitada al host por defecto, de modo que los tenants permanecen aislados:
+
+    ```yaml
+    SERVER_NAME: "app.example.com api.example.com billing.acme.org www.unrelated.io"
+    SESSIONS_SECRET: "your-strong-random-secret-key-here"
+    SESSIONS_NAME: "tenantsession"
+    # Comparta la cookie solo entre los subdominios de example.com
+    app.example.com_SESSIONS_DOMAIN: "example.com"
+    api.example.com_SESSIONS_DOMAIN: "example.com"
+    # billing.acme.org y www.unrelated.io se dejan intencionalmente limitados al host
+    USE_ANTIBOT: "turnstile"
+    ```
+
+    !!! note
+        `SESSIONS_DOMAIN` siempre debe ser un dominio padre del servidor al que se aplica; por ejemplo, `example.com` es válido tanto para `example.com` como para cualquier host `*.example.com`, y un punto inicial (`.example.com`) se tolera por compatibilidad heredada. Si se establece en un dominio registrable no relacionado, los navegadores rechazarán la cookie.

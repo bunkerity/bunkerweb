@@ -12,10 +12,11 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from common_utils import handle_docker_secrets  # type: ignore
-from logger import setup_logger  # type: ignore
-from SwarmController import SwarmController
-from IngressController import IngressController
-from DockerController import DockerController
+from logger import getLogger  # type: ignore
+from controllers.SwarmController import SwarmController
+from controllers.IngressController import IngressController
+from controllers.DockerController import DockerController
+from controllers.GatewayController import GatewayController
 
 # Get variables
 # Handle Docker secrets first
@@ -24,13 +25,14 @@ if docker_secrets:
     # Update environment with secrets
     environ.update(docker_secrets)
 
-LOGGER = setup_logger("Autoconf", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+LOGGER = getLogger("AUTOCONF")
 
 if docker_secrets:
     LOGGER.info(f"Loaded {len(docker_secrets)} Docker secrets")
 
 swarm = getenv("SWARM_MODE", "no").lower() == "yes"
-kubernetes = getenv("KUBERNETES_MODE", "no").lower() == "yes"
+gateway_api = getenv("KUBERNETES_GATEWAY_MODE", "no").lower() == "yes"
+kubernetes = gateway_api or getenv("KUBERNETES_MODE", "no").lower() == "yes"
 docker_host = getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
 wait_retry_interval = getenv("WAIT_RETRY_INTERVAL", "5")
 
@@ -55,13 +57,17 @@ try:
         LOGGER.info("Swarm mode detected")
         controller = SwarmController(docker_host)
     elif kubernetes:
-        LOGGER.info("Kubernetes mode detected")
-        controller = IngressController()
+        if gateway_api:
+            LOGGER.info("Kubernetes Gateway API mode detected")
+            controller = GatewayController()
+        else:
+            LOGGER.info("Kubernetes mode detected")
+            controller = IngressController()
     else:
         LOGGER.info("Docker mode detected")
         controller = DockerController(docker_host)
 
-    # Wait for instances
+    # Wait for DB init + instances to be ready.
     LOGGER.info("Waiting for BunkerWeb instances ...")
     instances = controller.wait(wait_retry_interval)
     LOGGER.info("BunkerWeb instances are ready 🚀")
@@ -70,13 +76,14 @@ try:
         LOGGER.info(f"Instance #{i} : {instance['name']}")
         i += 1
 
-    controller.wait_applying(True)
+    # Push a first config so the scheduler's next reload picks it up.
+    controller.initial_apply()
 
     # Process events
     Path(sep, "var", "tmp", "bunkerweb", "autoconf.healthy").write_text("ok")
     LOGGER.info("Processing events ...")
     controller.process_events()
-except:
+except Exception:
     LOGGER.error(f"Exception while running autoconf :\n{format_exc()}")
     sys_exit(1)
 finally:

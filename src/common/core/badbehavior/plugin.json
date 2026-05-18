@@ -21,8 +21,78 @@
       "id": "bad-behavior-status-code",
       "label": "Bad status codes",
       "regex": "^( *[1-5]\\d{2} *)+$",
-      "type": "multivalue",
-      "separator": " "
+      "type": "multiselect",
+      "multiselect": [
+        { "id": "400", "label": "400 - Bad Request", "value": "400" },
+        { "id": "401", "label": "401 - Unauthorized", "value": "401" },
+        { "id": "402", "label": "402 - Payment Required", "value": "402" },
+        { "id": "403", "label": "403 - Forbidden", "value": "403" },
+        { "id": "404", "label": "404 - Not Found", "value": "404" },
+        { "id": "405", "label": "405 - Method Not Allowed", "value": "405" },
+        { "id": "406", "label": "406 - Not Acceptable", "value": "406" },
+        {
+          "id": "407",
+          "label": "407 - Proxy Authentication Required",
+          "value": "407"
+        },
+        { "id": "408", "label": "408 - Request Timeout", "value": "408" },
+        { "id": "409", "label": "409 - Conflict", "value": "409" },
+        { "id": "410", "label": "410 - Gone", "value": "410" },
+        { "id": "411", "label": "411 - Length Required", "value": "411" },
+        { "id": "412", "label": "412 - Precondition Failed", "value": "412" },
+        { "id": "413", "label": "413 - Content Too Large", "value": "413" },
+        { "id": "414", "label": "414 - URI Too Long", "value": "414" },
+        {
+          "id": "415",
+          "label": "415 - Unsupported Media Type",
+          "value": "415"
+        },
+        { "id": "416", "label": "416 - Range Not Satisfiable", "value": "416" },
+        { "id": "417", "label": "417 - Expectation Failed", "value": "417" },
+        { "id": "418", "label": "418 - I'm a Teapot", "value": "418" },
+        { "id": "421", "label": "421 - Misdirected Request", "value": "421" },
+        { "id": "422", "label": "422 - Unprocessable Content", "value": "422" },
+        { "id": "423", "label": "423 - Locked", "value": "423" },
+        { "id": "424", "label": "424 - Failed Dependency", "value": "424" },
+        { "id": "425", "label": "425 - Too Early", "value": "425" },
+        { "id": "426", "label": "426 - Upgrade Required", "value": "426" },
+        { "id": "428", "label": "428 - Precondition Required", "value": "428" },
+        { "id": "429", "label": "429 - Too Many Requests", "value": "429" },
+        {
+          "id": "431",
+          "label": "431 - Request Header Fields Too Large",
+          "value": "431"
+        },
+        { "id": "444", "label": "444 - No Response (NGINX)", "value": "444" },
+        {
+          "id": "451",
+          "label": "451 - Unavailable For Legal Reasons",
+          "value": "451"
+        },
+        { "id": "500", "label": "500 - Internal Server Error", "value": "500" },
+        { "id": "501", "label": "501 - Not Implemented", "value": "501" },
+        { "id": "502", "label": "502 - Bad Gateway", "value": "502" },
+        { "id": "503", "label": "503 - Service Unavailable", "value": "503" },
+        { "id": "504", "label": "504 - Gateway Timeout", "value": "504" },
+        {
+          "id": "505",
+          "label": "505 - HTTP Version Not Supported",
+          "value": "505"
+        },
+        {
+          "id": "506",
+          "label": "506 - Variant Also Negotiates",
+          "value": "506"
+        },
+        { "id": "507", "label": "507 - Insufficient Storage", "value": "507" },
+        { "id": "508", "label": "508 - Loop Detected", "value": "508" },
+        { "id": "510", "label": "510 - Not Extended", "value": "510" },
+        {
+          "id": "511",
+          "label": "511 - Network Authentication Required",
+          "value": "511"
+        }
+      ]
     },
     "BAD_BEHAVIOR_THRESHOLD": {
       "context": "multisite",

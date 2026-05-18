@@ -1,6 +1,6 @@
 /*
 ** Definitions for ARM64 CPUs.
-** Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2026 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #ifndef _LJ_TARGET_ARM64_H
@@ -110,6 +110,7 @@ typedef struct {
 static LJ_AINLINE uint32_t *exitstub_trace_addr_(uint32_t *p, uint32_t exitno)
 {
   while (*p == (LJ_LE ? 0xd503201f : 0x1f2003d5)) p++;  /* Skip A64I_NOP. */
+  if ((LJ_LE ? p[1] >> 28 : p[1] & 0xf) == 0xf) p++;  /* Skip A64I_LDRx. */
   return p + 3 + exitno;
 }
 /* Avoid dependence on lj_jit.h if only including lj_target.h. */

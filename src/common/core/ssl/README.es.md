@@ -7,7 +7,11 @@ El complemento SSL proporciona capacidades robustas de cifrado SSL/TLS para sus 
 3.  Los parámetros de sesión SSL optimizados mejoran el rendimiento de la conexión sin sacrificar la seguridad.
 4.  La presentación de certificados se configura de acuerdo con las mejores prácticas para garantizar la compatibilidad y la seguridad.
 
-!!! success "Beneficios de Seguridad" - **Protección de Datos:** Cifra los datos en tránsito, previniendo la interceptación y los ataques de intermediario (man-in-the-middle). - **Autenticación:** Verifica la identidad de su servidor a los clientes. - **Integridad:** Asegura que los datos no han sido manipulados durante la transmisión. - **Estándares Modernos:** Configurado para cumplir con las mejores prácticas y los estándares de seguridad de la industria.
+!!! success "Beneficios de Seguridad"
+    - **Protección de Datos:** Cifra los datos en tránsito, previniendo la interceptación y los ataques de intermediario (man-in-the-middle).
+    - **Autenticación:** Verifica la identidad de su servidor a los clientes.
+    - **Integridad:** Asegura que los datos no han sido manipulados durante la transmisión.
+    - **Estándares Modernos:** Configurado para cumplir con las mejores prácticas y los estándares de seguridad de la industria.
 
 ### Cómo usar
 
@@ -26,6 +30,8 @@ Siga estos pasos para configurar y usar la función SSL:
 | `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | multisite | no       | **Protocolos SSL:** Lista de protocolos SSL/TLS a admitir, separados por espacios.                                                                  |
 | `SSL_CIPHERS_LEVEL`           | `modern`          | multisite | no       | **Nivel de Cifrados SSL:** Nivel de seguridad preestablecido para los conjuntos de cifrado (`modern`, `intermediate` o `old`).                      |
 | `SSL_CIPHERS_CUSTOM`          |                   | multisite | no       | **Cifrados SSL Personalizados:** Lista de conjuntos de cifrado separados por dos puntos para usar en las conexiones SSL/TLS (sobrescribe el nivel). |
+| `SSL_ECDH_CURVE`              | `auto`            | multisite | no       | **Curvas ECDH SSL:** Lista separada por `:` de curvas ECDH (grupos TLS) o `auto` para selección inteligente (PQC con OpenSSL 3.5+).                 |
+| `SSL_SESSION_CACHE_SIZE`      | `10m`             | multisite | no       | **Tamaño de Caché de Sesión SSL:** Tamaño de la caché de sesión SSL (ej., `10m`, `512k`). Establecer a `off` o `none` para desactivar.              |
 
 !!! tip "Pruebas de SSL Labs"
     Después de configurar sus ajustes de SSL, utilice la [Prueba de Servidor de SSL Labs de Qualys](https://www.ssllabs.com/ssltest/) para verificar su configuración y buscar posibles problemas de seguridad. Una configuración de SSL adecuada de BunkerWeb debería obtener una calificación A+.

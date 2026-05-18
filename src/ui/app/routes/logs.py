@@ -11,7 +11,6 @@ from werkzeug.utils import secure_filename
 
 from app.routes.utils import error_message
 
-
 logs = Blueprint("logs", __name__)
 
 

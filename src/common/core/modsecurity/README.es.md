@@ -21,7 +21,7 @@ El complemento ModSecurity integra el potente Firewall de Aplicaciones Web (WAF)
 Siga estos pasos para configurar y usar ModSecurity:
 
 1.  **Habilite la función:** ModSecurity está habilitado por defecto. Esto se puede controlar usando el ajuste `USE_MODSECURITY`.
-2.  **Seleccione una versión de CRS:** Elija una versión del OWASP Core Rule Set (v3, v4 o nightly).
+2.  **Seleccione una versión de CRS:** Elija una versión del OWASP Core Rule Set (v3 o v4).
 3.  **Añada complementos:** Opcionalmente, active los complementos de CRS para mejorar la cobertura de las reglas.
 4.  **Supervise y ajuste:** Utilice los registros y la [interfaz de usuario web](web-ui.md) para identificar falsos positivos y ajustar la configuración.
 
@@ -31,7 +31,7 @@ Siga estos pasos para configurar y usar ModSecurity:
 | ------------------------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_MODSECURITY`                     | `yes`             | multisite | no       | **Habilitar ModSecurity:** Active la protección del Firewall de Aplicaciones Web ModSecurity.                                                                                                                                                  |
 | `USE_MODSECURITY_CRS`                 | `yes`             | multisite | no       | **Usar Core Rule Set:** Habilite el OWASP Core Rule Set para ModSecurity.                                                                                                                                                                      |
-| `MODSECURITY_CRS_VERSION`             | `4`               | multisite | no       | **Versión de CRS:** La versión del OWASP Core Rule Set a utilizar. Opciones: `3`, `4` o `nightly`.                                                                                                                                             |
+| `MODSECURITY_CRS_VERSION`             | `4`               | multisite | no       | **Versión de CRS:** La versión del OWASP Core Rule Set a utilizar. Opciones: `3` o `4`. Nota: `nightly` está obsoleto y utiliza v4 por defecto.                                                                                                |
 | `MODSECURITY_SEC_RULE_ENGINE`         | `On`              | multisite | no       | **Motor de Reglas:** Controle si se aplican las reglas. Opciones: `On`, `DetectionOnly` u `Off`.                                                                                                                                               |
 | `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`    | multisite | no       | **Motor de Auditoría:** Controle cómo funciona el registro de auditoría. Opciones: `On`, `Off` o `RelevantOnly`.                                                                                                                               |
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`       | multisite | no       | **Partes del Registro de Auditoría:** Qué partes de las solicitudes/respuestas incluir en los registros de auditoría.                                                                                                                          |
@@ -45,16 +45,20 @@ Siga estos pasos para configurar y usar ModSecurity:
 
     El equipo de CRS mantiene activamente una lista de exclusiones para aplicaciones populares como WordPress, Nextcloud, Drupal y Cpanel, lo que facilita la integración sin afectar la funcionalidad. Los beneficios de seguridad superan con creces el mínimo esfuerzo de configuración necesario para solucionar los falsos positivos.
 
+!!! warning "Recomendación de seguridad para cargas grandes"
+    ModSecurity almacena en memoria el cuerpo completo de la solicitud y no puede limitarlo para cargas de varios GB, lo que puede provocar OOM en el worker. Si — **y solo si** — una URL de proxy inverso se usa *exclusivamente* para cargas de archivos (por ejemplo, un endpoint `/upload` dedicado), establezca `REVERSE_PROXY_MODSECURITY_N: "no"` en esa URL para emitir `modsecurity off;` en su bloque `location`. No lo deshabilite en URL de uso mixto: perdería la cobertura del WAF en todo lo servido por esa ubicación.
+
+    Para mantener protegidas las cargas después de omitir ModSecurity, combínelo con un plugin de análisis de archivos como [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) o [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal); inspeccionan el archivo cargado en sí en lugar del cuerpo bruto de la solicitud.
+
 ### Versiones de CRS Disponibles
 
 Seleccione una versión de CRS que se ajuste mejor a sus necesidades de seguridad:
 
-- **`3`**: Estable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`**: Estable [v4.20.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.20.0) (**predeterminada**).
-- **`nightly`**: [Compilación nocturna](https://github.com/coreruleset/coreruleset/releases/tag/nightly) que ofrece las últimas actualizaciones de reglas.
+- **`3`**: Estable [v3.3.9](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.9).
+- **`4`**: Estable [v4.25.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.25.0) (**predeterminada**).
 
-!!! example "Compilación Nocturna"
-    La **compilación nocturna** contiene las reglas más actualizadas, ofreciendo las últimas protecciones contra amenazas emergentes. Sin embargo, dado que se actualiza diariamente y puede incluir cambios experimentales o no probados, se recomienda utilizar primero la compilación nocturna en un **entorno de preproducción** antes de implementarla en producción.
+!!! warning "Compilación Nocturna Obsoleta"
+    La opción `nightly` para `MODSECURITY_CRS_VERSION` está obsoleta ya que el proyecto OWASP Core Rule Set ha descontinuado las versiones nocturnas. Si su configuración aún utiliza `nightly`, se usará CRS v4 en su lugar. Por favor, actualice su configuración para usar `MODSECURITY_CRS_VERSION=4`.
 
 !!! tip "Niveles de Paranoia"
     El OWASP Core Rule Set utiliza "niveles de paranoia" (PL) para controlar la rigurosidad de las reglas:
@@ -208,18 +212,6 @@ El OWASP Core Rule Set también admite una gama de **complementos** diseñados p
     USE_MODSECURITY_CRS: "yes"
     MODSECURITY_CRS_VERSION: "4"
     USE_MODSECURITY_GLOBAL_CRS: "yes"
-    ```
-
-=== "Compilación Nocturna con Complementos Personalizados"
-
-    Configuración que utiliza la compilación nocturna de CRS con complementos personalizados:
-
-    ```yaml
-    USE_MODSECURITY: "yes"
-    USE_MODSECURITY_CRS: "yes"
-    MODSECURITY_CRS_VERSION: "nightly"
-    USE_MODSECURITY_CRS_PLUGINS: "yes"
-    MODSECURITY_CRS_PLUGINS: "wordpress-rule-exclusions/v1.0.0 https://github.com/coreruleset/dos-protection-plugin-modsecurity/archive/refs/heads/main.zip"
     ```
 
 !!! note "Valores de tamaño legibles por humanos"

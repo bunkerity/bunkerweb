@@ -13,6 +13,8 @@
  *
  */
 
+#include <ngx_config.h>
+
 #ifndef MODSECURITY_DDEBUG
 #define MODSECURITY_DDEBUG 0
 #endif
@@ -44,7 +46,7 @@ ngx_http_modsecurity_rewrite_handler(ngx_http_request_t *r)
 
     dd("catching a new _rewrite_ phase handler");
 
-    ctx = ngx_http_get_module_ctx(r, ngx_http_modsecurity_module);
+    ctx = ngx_http_modsecurity_get_module_ctx(r);
 
     dd("recovering ctx: %p", ctx);
 
@@ -83,6 +85,45 @@ ngx_http_modsecurity_rewrite_handler(ngx_http_request_t *r)
         if (client_addr == (char*)-1) {
             return NGX_HTTP_INTERNAL_SERVER_ERROR;
         }
+
+#if defined(MODSECURITY_CHECK_VERSION)
+#if MODSECURITY_VERSION_NUM >= 30130100
+        ngx_str_t hostname;
+        hostname.len = 0;
+        // first check if Nginx received a Host header and it's usable
+        // (i.e. not empty)
+        // if yes, we can use that
+        if (r->headers_in.server.len > 0) {
+            hostname.len = r->headers_in.server.len;
+            hostname.data = r->headers_in.server.data;
+        }
+        else {
+            // otherwise we try to use the server config, namely the
+            // server_name $SERVER_NAME
+            // directive
+            // for eg. in default config, server_name is "_"
+            // possible all requests without a Host header will be
+            // handled by this server block
+            ngx_http_core_srv_conf_t  *cscf;
+            cscf = ngx_http_get_module_srv_conf(r, ngx_http_core_module);
+            if (cscf->server_name.len > 0) {
+                hostname.len = cscf->server_name.len;
+                hostname.data = cscf->server_name.data;
+            }
+        }
+        if (hostname.len > 0) {
+            const char *host_name = ngx_str_to_char(hostname, r->pool);
+            if (host_name == (char*)-1 || host_name == NULL) {
+                return NGX_HTTP_INTERNAL_SERVER_ERROR;
+            }
+            else {
+                // set the hostname in the transaction
+                // this function is only available in ModSecurity 3.0.13 and later
+                msc_set_request_hostname(ctx->modsec_transaction, (const unsigned char *)host_name);
+            }
+        }
+#endif
+#endif
 
         ngx_str_t s;
         u_char addr[NGX_SOCKADDR_STRLEN];
@@ -137,6 +178,11 @@ ngx_http_modsecurity_rewrite_handler(ngx_http_request_t *r)
                 http_version = "2.0";
                 break;
 #endif
+#if defined(nginx_version) && nginx_version >= 1025000
+            case NGX_HTTP_VERSION_30 :
+                http_version = "3.0";
+                break;
+#endif
             default :
                 http_version = ngx_str_to_char(r->http_protocol, r->pool);
                 if (http_version == (char*)-1) {
@@ -174,6 +220,24 @@ ngx_http_modsecurity_rewrite_handler(ngx_http_request_t *r)
          * Since incoming request headers are already in place, lets send it to ModSecurity
          *
          */
+
+#if defined(nginx_version) && nginx_version >= 1025000
+        /*
+         * HTTP/3 uses the :authority pseudo-header instead of Host.
+         * NGINX parses :authority into r->headers_in.server but does not
+         * add a Host entry to r->headers_in.headers, so ModSecurity never
+         * sees it.  Synthesize Host from :authority here.
+         */
+        if (r->http_version == NGX_HTTP_VERSION_30
+            && r->headers_in.host == NULL
+            && r->headers_in.server.len > 0) {
+            msc_add_n_request_header(ctx->modsec_transaction,
+                (const unsigned char *)"Host", 4,
+                (const unsigned char *)r->headers_in.server.data,
+                r->headers_in.server.len);
+        }
+#endif
+
         ngx_list_part_t *part = &r->headers_in.headers.part;
         ngx_table_elt_t *data = part->elts;
         ngx_uint_t i = 0;

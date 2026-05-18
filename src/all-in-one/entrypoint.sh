@@ -25,7 +25,34 @@ if [ "${USE_REDIS}" = "yes" ]; then
 	fi
 fi
 
+# Ensure CrowdSec data directory exists when running the AIO image
+if [ "${USE_CROWDSEC}" = "yes" ]; then
+	crowdsec_dir="/var/lib/crowdsec"
+	if [ -L "$crowdsec_dir" ]; then
+		crowdsec_dir="$(readlink "$crowdsec_dir")"
+	fi
+	if [ ! -d "$crowdsec_dir" ]; then
+		if mkdir -p "$crowdsec_dir"; then
+			# Align permissions with build-time defaults
+			chmod 770 "$crowdsec_dir"
+			chown root:nginx "$crowdsec_dir"
+			log "ENTRYPOINT" "✅" "Created CrowdSec data directory at $crowdsec_dir"
+		else
+			log "ENTRYPOINT" "❌" "Failed to create CrowdSec data directory at $crowdsec_dir (check /data permissions)"
+			exit 1
+		fi
+	fi
+fi
+
 handle_docker_secrets
+
+if [[ $(echo "$SWARM_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
+	echo "Swarm" > /usr/share/bunkerweb/INTEGRATION
+elif [[ $(echo "$KUBERNETES_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
+	echo "Kubernetes" > /usr/share/bunkerweb/INTEGRATION
+elif [[ $(echo "$AUTOCONF_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
+	echo "Autoconf" > /usr/share/bunkerweb/INTEGRATION
+fi
 
 # trap SIGTERM and SIGINT
 # shellcheck disable=SC2329
@@ -225,6 +252,22 @@ if [ "${USE_CROWDSEC}" = "yes" ] && [[ "${CROWDSEC_API:-http://127.0.0.1:8000}" 
 	fi
 	log "ENTRYPOINT" "ℹ️" "[CROWDSEC] The CrowdSec service is enabled. Starting configuration..."
 
+	# Ensure the symlink is properly set up
+	if [ ! -L "/var/lib/crowdsec" ]; then
+		if [ -d "/var/lib/crowdsec" ]; then
+			# It's a directory, not a symlink - remove it if it's empty or convert via /data/crowdsec
+			if [ -d "/data/crowdsec" ]; then
+				rm -rf /var/lib/crowdsec
+				ln -s /data/crowdsec /var/lib/crowdsec
+				log "ENTRYPOINT" "✅" "Fixed CrowdSec symlink"
+			fi
+		elif [ ! -e "/var/lib/crowdsec" ]; then
+			# Doesn't exist at all - create the symlink
+			ln -s /data/crowdsec /var/lib/crowdsec
+			log "ENTRYPOINT" "✅" "Created CrowdSec symlink"
+		fi
+	fi
+
 	# Enable autorestart for CrowdSec service
 	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/crowdsec.ini
 	log "ENTRYPOINT" "✅" "Enabled autorestart for CrowdSec service"
@@ -324,8 +367,75 @@ else
 fi
 
 if [ "${USE_REDIS}" = "yes" ] && { [ "${REDIS_HOST:-127.0.0.1}" = "127.0.0.1" ] || [ "${REDIS_HOST:-127.0.0.1}" = "localhost" ]; }; then
-	mkdir -p /var/lib/redis
+	# Ensure the symlink is properly set up
+	if [ ! -L "/var/lib/redis" ]; then
+		if [ -d "/var/lib/redis" ]; then
+			# It's a directory, not a symlink - remove it if it's empty or convert via /data/redis
+			if [ -d "/data/redis" ]; then
+				rm -rf /var/lib/redis
+				ln -s /data/redis /var/lib/redis
+				log "ENTRYPOINT" "✅" "Fixed Redis symlink"
+			fi
+		elif [ ! -e "/var/lib/redis" ]; then
+			# Doesn't exist at all - create the symlink
+			ln -s /data/redis /var/lib/redis
+			log "ENTRYPOINT" "✅" "Created Redis symlink"
+		fi
+	fi
 	export REDIS_HOST="${REDIS_HOST:-127.0.0.1}"
+
+	# Build the runtime Redis config: /etc/redis.conf (bundled or mounted) wins;
+	# env-driven directives only fill the gaps for tunables the operator did not
+	# specify themselves. This keeps a mounted custom redis.conf authoritative.
+	# Target lives under /var/lib/bunkerweb (nginx-writable, persisted per container).
+	RUNTIME_REDIS_CONF="/var/lib/bunkerweb/redis-runtime.conf"
+	cp /etc/redis.conf "${RUNTIME_REDIS_CONF}"
+
+	_redis_conf_has() {
+		grep -Eq "^[[:space:]]*${1}([[:space:]]|$)" /etc/redis.conf
+	}
+
+	_redis_conf_has maxmemory || printf 'maxmemory %s\n' "${REDIS_MAXMEMORY:-256mb}" >> "${RUNTIME_REDIS_CONF}"
+	_redis_conf_has maxmemory-policy || printf 'maxmemory-policy %s\n' "${REDIS_MAXMEMORY_POLICY:-volatile-lru}" >> "${RUNTIME_REDIS_CONF}"
+	_redis_conf_has appendonly || printf 'appendonly %s\n' "${REDIS_APPENDONLY:-yes}" >> "${RUNTIME_REDIS_CONF}"
+
+	if ! _redis_conf_has save; then
+		_save_emitted=0
+		# Base REDIS_SAVE (no suffix). Treat empty as explicit "disable RDB".
+		if [ -n "${REDIS_SAVE+x}" ]; then
+			if [ -z "${REDIS_SAVE}" ]; then
+				printf 'save ""\n' >> "${RUNTIME_REDIS_CONF}"
+			else
+				printf 'save %s\n' "${REDIS_SAVE}" >> "${RUNTIME_REDIS_CONF}"
+			fi
+			_save_emitted=1
+		fi
+		# Numeric-suffixed siblings REDIS_SAVE_0, REDIS_SAVE_1, ... applied in order.
+		while IFS= read -r _save_var; do
+			_save_val="${!_save_var}"
+			if [ -z "${_save_val}" ]; then
+				printf 'save ""\n' >> "${RUNTIME_REDIS_CONF}"
+			else
+				printf 'save %s\n' "${_save_val}" >> "${RUNTIME_REDIS_CONF}"
+			fi
+			_save_emitted=1
+		done < <(compgen -v | grep -E '^REDIS_SAVE_[0-9]+$' | sort -t_ -k3 -n)
+		if [ "${_save_emitted}" -eq 0 ]; then
+			printf 'save 900 1\nsave 300 10\nsave 60 10000\n' >> "${RUNTIME_REDIS_CONF}"
+		fi
+		unset _save_emitted _save_var _save_val
+	fi
+
+	if [ -n "${REDIS_PASSWORD}" ] && ! _redis_conf_has requirepass; then
+		printf 'requirepass %s\n' "${REDIS_PASSWORD}" >> "${RUNTIME_REDIS_CONF}"
+		log "ENTRYPOINT" "🔒" "Embedded Redis: requirepass enabled via REDIS_PASSWORD"
+	fi
+
+	chmod 600 "${RUNTIME_REDIS_CONF}"
+	log "ENTRYPOINT" "ℹ️" "Built ${RUNTIME_REDIS_CONF} (env overrides applied only where /etc/redis.conf was silent)"
+	unset RUNTIME_REDIS_CONF
+	unset -f _redis_conf_has
+
 	# Enable autorestart for Redis service
 	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/redis.ini
 	log "ENTRYPOINT" "✅" "Enabled autorestart for Redis service"
@@ -333,6 +443,17 @@ else
 	sed -i 's/autostart=true/autostart=false/' /etc/supervisor.d/redis.ini
 	log "ENTRYPOINT" "ℹ️" "Redis service is disabled, autostart not enabled"
 fi
+
+# Clean orphaned NGINX temp files from previous runs
+for dir in client_temp proxy_temp fastcgi_temp uwsgi_temp scgi_temp; do
+	target="/var/tmp/bunkerweb/$dir"
+	if [ -d "$target" ] && [ ! -L "$target" ]; then
+		if [ -n "$(find "$target" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; then
+			log "ENTRYPOINT" "ℹ️" "Cleaning orphaned temp files from $dir"
+		fi
+		find "$target" -mindepth 1 -delete 2>/dev/null || true
+	fi
+done
 
 # start supervisord in foreground
 log "ENTRYPOINT" "ℹ️" "Starting services ..."
@@ -342,7 +463,9 @@ pid="$!"
 # wait while supervisor is running
 wait "$pid"
 while [ -f "/var/run/bunkerweb/supervisord.pid" ] ; do
-	wait "$pid"
+	# Break if the process is no longer alive (e.g. killed by OOM without cleaning up the PID file)
+	kill -0 "$pid" 2>/dev/null || { rm -f "/var/run/bunkerweb/supervisord.pid" ; break ; }
+	sleep 1
 done
 
 log "ENTRYPOINT" "ℹ️" "BunkerWeb AIO stopped"

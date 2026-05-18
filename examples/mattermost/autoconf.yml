@@ -84,6 +84,7 @@ services:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
       - POSTGRES_DB
+      - PGDATA=/var/lib/postgresql/data/pgdata
 
 networks:
   bw-services:

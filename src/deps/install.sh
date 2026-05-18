@@ -47,13 +47,11 @@ echo "ℹ️ Compiling and installing ModSecurity"
 do_and_check_cmd mv /tmp/bunkerweb/deps/src/libinjection /tmp/bunkerweb/deps/src/modsecurity/others/libinjection
 do_and_check_cmd mv /tmp/bunkerweb/deps/src/mbedtls /tmp/bunkerweb/deps/src/modsecurity/others/mbedtls
 export CHANGE_DIR="/tmp/bunkerweb/deps/src/modsecurity"
+export CXXFLAGS="${CXXFLAGS} -include cstdint"
 do_and_check_cmd chmod +x "build.sh"
 do_and_check_cmd ./build.sh
 do_and_check_cmd sh build.sh
-ARGS="--disable-dependency-tracking --disable-static --disable-examples --disable-doxygen-doc --disable-doxygen-html --disable-valgrind-memcheck --disable-valgrind-helgrind --prefix=/usr/share/bunkerweb/deps --with-maxmind=/usr/share/bunkerweb/deps"
-if { [ "$OS" == "rhel" ] && [ "$OS_VERSION" == "10" ]; } || { [ "$OS" == "debian" ] && [ "$OS_VERSION" == "13" ]; }; then
-	ARGS="$ARGS --with-pcre2"
-fi
+ARGS="--disable-dependency-tracking --disable-static --disable-examples --disable-doxygen-doc --disable-doxygen-html --disable-valgrind-memcheck --disable-valgrind-helgrind --prefix=/usr/share/bunkerweb/deps --with-maxmind=/usr/share/bunkerweb/deps --with-pcre2"
 # shellcheck disable=SC2086
 do_and_check_cmd ./configure $ARGS
 do_and_check_cmd make -j "$NTASK"
@@ -210,15 +208,11 @@ do_and_check_cmd mv /tmp/bunkerweb/deps/src/brotli /tmp/bunkerweb/deps/src/ngx_b
 echo "ℹ️ Compiling and installing dynamic modules"
 CONFARGS="$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p')"
 CONFARGS="${CONFARGS/-Os -fomit-frame-pointer -g/-Os}"
-if { [ "$OS" == "rhel" ] && [ "$OS_VERSION" == "10" ]; } || { [ "$OS" == "debian" ] && [ "$OS_VERSION" == "13" ]; }; then
+if [ "$OS" = "fedora" ] ; then
+	CONFARGS="$(echo -n "$CONFARGS" | sed "s/--with-ld-opt='.*'/--with-ld-opt='-lpcre2-8 -Wl'/" | sed "s/--with-cc-opt='.*'//" | sed "s/--without-engine//")"
+else
 	CONFARGS="$(echo -n "$CONFARGS" | sed "s/--with-ld-opt=-Wl/--with-ld-opt='-lpcre2-8 -Wl'/")"
 	CONFARGS="$(echo -n "$CONFARGS" | sed "s/--with-ld-opt='-Wl/--with-ld-opt='-lpcre2-8 -Wl/")"
-else
-	CONFARGS="$(echo -n "$CONFARGS" | sed "s/--with-ld-opt=-Wl/--with-ld-opt='-lpcre -Wl'/")"
-	CONFARGS="$(echo -n "$CONFARGS" | sed "s/--with-ld-opt='-Wl/--with-ld-opt='-lpcre -Wl/")"
-fi
-if [ "$OS" = "fedora" ] ; then
-	CONFARGS="$(echo -n "$CONFARGS" | sed "s/--with-ld-opt='.*'/--with-ld-opt=-lpcre/" | sed "s/--with-cc-opt='.*'//" | sed "s/--without-engine//")"
 fi
 
 # Set CFALGS
@@ -226,8 +220,8 @@ export CFLAGS="$CFLAGS -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1"
 
 export CHANGE_DIR="/tmp/bunkerweb/deps/src/nginx"
 do_and_check_cmd mv auto/configure ./
-echo '#!/bin/bash' > "/tmp/bunkerweb/deps/src/nginx/configure-fix.sh"
-echo "./configure $CONFARGS --add-dynamic-module=/tmp/bunkerweb/deps/src/headers-more-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/nginx_cookie_flag_module --add-dynamic-module=/tmp/bunkerweb/deps/src/lua-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/ngx_brotli --add-dynamic-module=/tmp/bunkerweb/deps/src/ngx_devel_kit --add-dynamic-module=/tmp/bunkerweb/deps/src/stream-lua-nginx-module" --add-dynamic-module=/tmp/bunkerweb/deps/src/modsecurity-nginx --add-dynamic-module=/tmp/bunkerweb/deps/src/lua-upstream-nginx-module >> "/tmp/bunkerweb/deps/src/nginx/configure-fix.sh"
+echo '#!/bin/bash' > "${CHANGE_DIR}/configure-fix.sh"
+echo "./configure $CONFARGS --add-dynamic-module=/tmp/bunkerweb/deps/src/headers-more-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/nginx_cookie_flag_module --add-dynamic-module=/tmp/bunkerweb/deps/src/lua-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/ngx_brotli --add-dynamic-module=/tmp/bunkerweb/deps/src/ngx_devel_kit --add-dynamic-module=/tmp/bunkerweb/deps/src/stream-lua-nginx-module" --add-dynamic-module=/tmp/bunkerweb/deps/src/modsecurity-nginx --add-dynamic-module=/tmp/bunkerweb/deps/src/lua-upstream-nginx-module >> "${CHANGE_DIR}/configure-fix.sh"
 
 do_and_check_cmd chmod +x "configure"
 do_and_check_cmd chmod +x "configure-fix.sh"

@@ -18,7 +18,7 @@ support = Blueprint("support", __name__)
 def support_page():
     return render_template(
         "support.html",
-        services=BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split(" "),
+        services=BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split(),
     )
 
 
@@ -69,7 +69,7 @@ def support_config():
     service = request.args.get("service")
 
     if service:
-        if service not in BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split(" "):
+        if service not in BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split():
             return "Service not found", 404
 
         service_config = DB.get_config(methods=True, with_drafts=True, service=service)

@@ -20,6 +20,7 @@
 #define NGX_HTTP_V3_HEADER_METHOD_GET                17
 #define NGX_HTTP_V3_HEADER_SCHEME_HTTP               22
 #define NGX_HTTP_V3_HEADER_SCHEME_HTTPS              23
+#define NGX_HTTP_V3_HEADER_STATUS_103                24
 #define NGX_HTTP_V3_HEADER_STATUS_200                25
 #define NGX_HTTP_V3_HEADER_ACCEPT_ENCODING           31
 #define NGX_HTTP_V3_HEADER_CONTENT_TYPE_TEXT_PLAIN   53
@@ -36,6 +37,7 @@ typedef struct {
 
 
 static ngx_int_t ngx_http_v3_header_filter(ngx_http_request_t *r);
+static ngx_int_t ngx_http_v3_early_hints_filter(ngx_http_request_t *r);
 static ngx_int_t ngx_http_v3_body_filter(ngx_http_request_t *r,
     ngx_chain_t *in);
 static ngx_chain_t *ngx_http_v3_create_trailers(ngx_http_request_t *r,
@@ -75,6 +77,7 @@ ngx_module_t  ngx_http_v3_filter_module = {
 
 
 static ngx_http_output_header_filter_pt  ngx_http_next_header_filter;
+static ngx_http_output_header_filter_pt  ngx_http_next_early_hints_filter;
 static ngx_http_output_body_filter_pt    ngx_http_next_body_filter;
 
 
@@ -589,6 +592,150 @@ ngx_http_v3_header_filter(ngx_http_request_t *r)
 
 
 static ngx_int_t
+ngx_http_v3_early_hints_filter(ngx_http_request_t *r)
+{
+    size_t                  len, n;
+    ngx_buf_t              *b;
+    ngx_uint_t              i;
+    ngx_chain_t            *out, *hl, *cl;
+    ngx_list_part_t        *part;
+    ngx_table_elt_t        *header;
+    ngx_http_v3_session_t  *h3c;
+
+    if (r->http_version != NGX_HTTP_VERSION_30) {
+        return ngx_http_next_early_hints_filter(r);
+    }
+
+    if (r != r->main) {
+        return NGX_OK;
+    }
+
+    len = 0;
+
+    part = &r->headers_out.headers.part;
+    header = part->elts;
+
+    for (i = 0; /* void */; i++) {
+
+        if (i >= part->nelts) {
+            if (part->next == NULL) {
+                break;
+            }
+
+            part = part->next;
+            header = part->elts;
+            i = 0;
+        }
+
+        if (header[i].hash == 0) {
+            continue;
+        }
+
+        len += ngx_http_v3_encode_field_l(NULL, &header[i].key,
+                                          &header[i].value);
+    }
+
+    if (len == 0) {
+        return NGX_OK;
+    }
+
+    len += ngx_http_v3_encode_field_section_prefix(NULL, 0, 0, 0);
+
+    len += ngx_http_v3_encode_field_ri(NULL, 0, NGX_HTTP_V3_HEADER_STATUS_103);
+
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+                   "http3 header len:%uz", len);
+
+    b = ngx_create_temp_buf(r->pool, len);
+    if (b == NULL) {
+        return NGX_ERROR;
+    }
+
+    b->last = (u_char *) ngx_http_v3_encode_field_section_prefix(b->last,
+                                                                 0, 0, 0);
+
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+                   "http3 output header: \":status: %03ui\"",
+                   (ngx_uint_t) NGX_HTTP_EARLY_HINTS);
+
+    b->last = (u_char *) ngx_http_v3_encode_field_ri(b->last, 0,
+                                                NGX_HTTP_V3_HEADER_STATUS_103);
+
+    part = &r->headers_out.headers.part;
+    header = part->elts;
+
+    for (i = 0; /* void */; i++) {
+
+        if (i >= part->nelts) {
+            if (part->next == NULL) {
+                break;
+            }
+
+            part = part->next;
+            header = part->elts;
+            i = 0;
+        }
+
+        if (header[i].hash == 0) {
+            continue;
+        }
+
+        ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+                       "http3 output header: \"%V: %V\"",
+                       &header[i].key, &header[i].value);
+
+        b->last = (u_char *) ngx_http_v3_encode_field_l(b->last,
+                                                        &header[i].key,
+                                                        &header[i].value);
+    }
+
+    b->flush = 1;
+
+    cl = ngx_alloc_chain_link(r->pool);
+    if (cl == NULL) {
+        return NGX_ERROR;
+    }
+
+    cl->buf = b;
+    cl->next = NULL;
+
+    n = b->last - b->pos;
+
+    h3c = ngx_http_v3_get_session(r->connection);
+    h3c->payload_bytes += n;
+
+    len = ngx_http_v3_encode_varlen_int(NULL, NGX_HTTP_V3_FRAME_HEADERS)
+          + ngx_http_v3_encode_varlen_int(NULL, n);
+
+    b = ngx_create_temp_buf(r->pool, len);
+    if (b == NULL) {
+        return NGX_ERROR;
+    }
+
+    b->last = (u_char *) ngx_http_v3_encode_varlen_int(b->last,
+                                                    NGX_HTTP_V3_FRAME_HEADERS);
+    b->last = (u_char *) ngx_http_v3_encode_varlen_int(b->last, n);
+
+    hl = ngx_alloc_chain_link(r->pool);
+    if (hl == NULL) {
+        return NGX_ERROR;
+    }
+
+    hl->buf = b;
+    hl->next = cl;
+
+    out = hl;
+
+    for (cl = out; cl; cl = cl->next) {
+        h3c->total_bytes += cl->buf->last - cl->buf->pos;
+        r->header_size += cl->buf->last - cl->buf->pos;
+    }
+
+    return ngx_http_write_filter(r, out);
+}
+
+
+static ngx_int_t
 ngx_http_v3_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
 {
     u_char                    *chunk;
@@ -844,6 +991,9 @@ ngx_http_v3_filter_init(ngx_conf_t *cf)
 {
     ngx_http_next_header_filter = ngx_http_top_header_filter;
     ngx_http_top_header_filter = ngx_http_v3_header_filter;
+
+    ngx_http_next_early_hints_filter = ngx_http_top_early_hints_filter;
+    ngx_http_top_early_hints_filter = ngx_http_v3_early_hints_filter;
 
     ngx_http_next_body_filter = ngx_http_top_body_filter;
     ngx_http_top_body_filter = ngx_http_v3_body_filter;

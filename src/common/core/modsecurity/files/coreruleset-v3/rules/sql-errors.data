@@ -3,7 +3,7 @@ Server message
 SQL error
 Oracle error
 JET Database Engine
-Procedure or function 
+Procedure or function
 SQLite.Exception
 [IBM][CLI Driver][DB2/6000]
 the used select statements have different number of columns
@@ -55,7 +55,7 @@ PostgreSQL
 org.hsqldb.jdbc
 ADODB.Field (0x800A0BCD)
 SQL syntax
-Exception 
+Exception
 System.Data.SqlClient.SqlException
 Data type mismatch in criteria expression.
 Driver

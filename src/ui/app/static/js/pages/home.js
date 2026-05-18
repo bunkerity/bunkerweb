@@ -21,148 +21,253 @@ $(function () {
 
   const requestsMapData = JSON.parse($("#requests-map-data").text());
 
-  // Initialize the map
+  // Initialize the map — no tile layer, ocean is a flat brand-tinted surface
+  // sourced from --bw-map-ocean in overrides.css.
+  const baseUrl = window.location.href.split("/home")[0];
   const map = L.map("requests-map", {
     minZoom: 2,
     maxZoom: 4,
-    center: [40, 0], // Initial center
-    zoom: 2, // Initial zoom level
+    center: [30, 10],
+    zoom: 2,
+    worldCopyJump: false,
+    zoomControl: true,
+    attributionControl: false,
     maxBounds: [
-      [-85, -180], // Southwest corner of the bounding box
-      [85, 180], // Northeast corner of the bounding box
+      [-85, -180],
+      [85, 180],
     ],
-    maxBoundsViscosity: 1.0, // Controls how hard it is to drag out of bounds (1.0 = strict)
+    maxBoundsViscosity: 1.0,
   });
 
-  // Add a tile layer (OpenStreetMap)
-  const baseUrl = window.location.href.split("/home")[0];
-  L.tileLayer(`${baseUrl}/img/tiles/{z}/{x}/{y}.png`, {
-    attribution: "&copy; OpenStreetMap contributors",
-  }).addTo(map);
-
-  // Control to display country info on hover
-  const info = L.control({ position: "topright" });
-
-  info.onAdd = function () {
-    this._div = L.DomUtil.create("div", "info"); // Create a div with class "info"
-    return this._div;
+  // Read the brand-driven choropleth palette from CSS so the map flips with
+  // data-bs-theme without any JS recompute.
+  const mapCssVar = (name, fallback) => {
+    const value = getComputedStyle(document.documentElement)
+      .getPropertyValue(name)
+      .trim();
+    return value || fallback;
   };
 
-  // Method to update the control based on feature properties
-  info.update = function (props) {
-    this._div.innerHTML = props
-      ? `
-          <div class="card shadow-none p-1">
-              <div class="card-header p-1 pb-0">
-                  <h5 class="card-title mb-0">${props.ADMIN}</h5>
-              </div>
-              <div class="card-body p-1 pt-1">
-                  <p class="card-text">${t(
-                    "dashboard.map.blocked_requests",
-                  )}: ${props.blocked}</p>
-              </div>
-          </div>
-      `
-      : `
-          <div class="alert alert-primary" role="alert">
-              ${t("dashboard.map.hover_info")}
-          </div>
-      `;
-  };
+  // Palette values are mutable so a data-bs-theme flip can hot-swap them
+  // without a full page reload (see MutationObserver near the bottom).
+  let noDataColor = mapCssVar("--bw-map-land", "#d9dfe4");
+  let landBorderColor = mapCssVar("--bw-map-land-border", "#7c8890");
+  let borderColor = mapCssVar("--bw-map-border", "#ffffff");
+  let mapSteps = [
+    mapCssVar("--bw-map-step-1", "#6a8999"),
+    mapCssVar("--bw-map-step-2", "#3f6c88"),
+    mapCssVar("--bw-map-step-3", "#215778"),
+    mapCssVar("--bw-map-step-4", "#114360"),
+    mapCssVar("--bw-map-step-5", "#0b354a"),
+  ];
 
-  info.addTo(map);
-
-  // Function to adjust lightness of a base color
-  function adjustColor(hex, percent) {
-    let num = parseInt(hex.slice(1), 16),
-      amt = Math.round(2.55 * percent),
-      R = (num >> 16) + amt,
-      G = ((num >> 8) & 0x00ff) + amt,
-      B = (num & 0x0000ff) + amt;
-
-    return (
-      "#" +
-      (
-        0x1000000 +
-        (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
-        (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
-        (B < 255 ? (B < 1 ? 0 : B) : 255)
-      )
-        .toString(16)
-        .slice(1)
-    );
+  function refreshPalette() {
+    noDataColor = mapCssVar("--bw-map-land", "#d9dfe4");
+    landBorderColor = mapCssVar("--bw-map-land-border", "#7c8890");
+    borderColor = mapCssVar("--bw-map-border", "#ffffff");
+    mapSteps = [
+      mapCssVar("--bw-map-step-1", "#6a8999"),
+      mapCssVar("--bw-map-step-2", "#3f6c88"),
+      mapCssVar("--bw-map-step-3", "#215778"),
+      mapCssVar("--bw-map-step-4", "#114360"),
+      mapCssVar("--bw-map-step-5", "#0b354a"),
+    ];
   }
 
-  // Function to get color based on data value, using a gradient of "#0b354a"
-  function getColor(d) {
-    if (d == null || d === 0) {
-      return "transparent"; // No data, make it transparent
+  const blockedValues = Object.values(requestsMapData)
+    .map((item) => parseInt(item?.blocked ?? 0, 10))
+    .filter((value) => Number.isFinite(value) && value > 0);
+
+  function niceStep(value) {
+    const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
+    const residual = value / magnitude;
+    if (residual <= 1) return 1 * magnitude;
+    if (residual <= 2) return 2 * magnitude;
+    if (residual <= 5) return 5 * magnitude;
+    return 10 * magnitude;
+  }
+
+  function buildLegendGrades(values) {
+    if (!values.length) {
+      return [0, 1];
     }
 
-    // Calculate shades based on data range
-    if (d > 1000) {
-      return adjustColor("#0b354a", -30); // Even darker
-    } else if (d > 500) {
-      return adjustColor("#0b354a", -20); // Darker shade
-    } else if (d > 200) {
-      return adjustColor("#0b354a", -10); // Slightly dark
-    } else if (d > 100) {
-      return adjustColor("#0b354a", 0); // Base color
-    } else if (d > 50) {
-      return adjustColor("#0b354a", 10); // Slightly light
-    } else if (d > 20) {
-      return adjustColor("#0b354a", 20); // Lighter shade
-    } else if (d > 10) {
-      return adjustColor("#0b354a", 30); // Even lighter
-    } else {
-      return adjustColor("#0b354a", 40); // Very light shade
+    const maxValue = Math.max(...values);
+    const targetBuckets = 5;
+    const step = Math.max(1, Math.round(niceStep(maxValue / targetBuckets)));
+    const grades = [0];
+
+    for (let current = step; current < maxValue; current += step) {
+      grades.push(current);
     }
+
+    if (grades[grades.length - 1] !== maxValue) {
+      grades.push(maxValue);
+    }
+
+    return grades;
+  }
+
+  const legendGrades = buildLegendGrades(blockedValues);
+  const numberFormatter = new Intl.NumberFormat();
+  const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  function formatNumber(value) {
+    return numberFormatter.format(value);
+  }
+
+  function sanitizeDonutSliceEffects(chartSelector) {
+    const chartRoot = document.querySelector(chartSelector);
+    if (!chartRoot) {
+      return;
+    }
+
+    chartRoot.classList.remove("apexcharts-tooltip-active");
+    chartRoot.querySelectorAll(".apexcharts-pie-area").forEach((slice) => {
+      slice.removeAttribute("filter");
+      slice.removeAttribute("selected");
+      slice.style.filter = "none";
+    });
+  }
+
+  function queueDonutSliceSanitize(chartSelector) {
+    window.setTimeout(() => {
+      window.requestAnimationFrame(() =>
+        sanitizeDonutSliceEffects(chartSelector),
+      );
+    }, 0);
+  }
+
+  function attachDonutSanitizer(chartSelector) {
+    const chartRoot = document.querySelector(chartSelector);
+    if (!chartRoot || chartRoot.dataset.donutSanitizerAttached === "1") {
+      return;
+    }
+
+    const runSanitizer = () => queueDonutSliceSanitize(chartSelector);
+    chartRoot.addEventListener("mousemove", runSanitizer, { passive: true });
+    chartRoot.addEventListener("mouseenter", runSanitizer, { passive: true });
+    chartRoot.addEventListener("mouseleave", runSanitizer, { passive: true });
+    chartRoot.dataset.donutSanitizerAttached = "1";
+  }
+
+  function getChartSurfaceColor() {
+    return theme === "dark" ? "#1b2732" : "#ffffff";
+  }
+
+  function getChartGridBorderColor() {
+    return theme === "dark"
+      ? "rgba(181, 206, 226, 0.18)"
+      : "rgba(92, 114, 137, 0.16)";
+  }
+
+  // Discrete 5-step brand ramp pulled from CSS. Bucket count tracks the grade
+  // builder (max 5 buckets), so indexing never walks off the palette.
+  function buildColorRamp(steps) {
+    if (steps <= 1) return [mapSteps[mapSteps.length - 1]];
+    if (steps >= mapSteps.length) return mapSteps.slice();
+    // Even stride across the full palette so sparse datasets still span
+    // light→dark rather than clustering at the light end.
+    const stride = (mapSteps.length - 1) / (steps - 1);
+    const ramp = [];
+    for (let i = 0; i < steps; i++) {
+      ramp.push(mapSteps[Math.round(i * stride)]);
+    }
+    return ramp;
+  }
+
+  let colorRamp = buildColorRamp(Math.max(legendGrades.length - 1, 1));
+
+  // Function to get color based on blocked requests value
+  function getColor(d) {
+    if (d == null || d === 0) {
+      return noDataColor;
+    }
+
+    for (let i = legendGrades.length - 1; i > 0; i--) {
+      if (d >= legendGrades[i]) {
+        return colorRamp[Math.min(i, colorRamp.length - 1)];
+      }
+    }
+
+    return colorRamp[0];
   }
 
   // Function to style each feature
   function style(feature) {
+    const blockedValue = feature.properties.value;
+    const hasData = blockedValue > 0;
+
     return {
-      fillColor: getColor(feature.properties.value),
-      weight: 1,
+      fillColor: getColor(blockedValue),
+      // Data countries get a bright hairline (brand border) so adjacent fills
+      // don't bleed. No-data countries get a darker land-border that carries
+      // the WCAG 1.4.11 shape cue for their subtle fill.
+      weight: hasData ? 0.6 : 0.5,
       opacity: 1,
-      color: "white",
-      dashArray: "3",
-      fillOpacity:
-        feature.properties.value == null || feature.properties.value === 0
-          ? 0
-          : 0.7,
+      color: hasData ? borderColor : landBorderColor,
+      dashArray: "",
+      fillOpacity: hasData ? 0.95 : 1,
+      // No-data countries are visual-only: opt them out of Leaflet's pointer
+      // events so the cursor stays default and no listeners fire.
+      interactive: hasData,
     };
   }
 
-  // Highlight feature on hover
+  // Hover state — lift the country with a crisp brand-tinted outline rather
+  // than the previous dashed white + grey stroke combo.
   function highlightFeature(e) {
     const layer = e.target;
-
     layer.setStyle({
-      weight: 2,
-      color: "#666",
-      dashArray: "",
-      fillOpacity: 0.7,
+      weight: 1.6,
+      color: mapSteps[mapSteps.length - 1],
+      fillOpacity: 1,
     });
-
     layer.bringToFront();
-
-    info.update(layer.feature.properties);
   }
 
-  // Reset highlight
   function resetHighlight(e) {
     geojson.resetStyle(e.target);
-    info.update();
   }
 
-  // Zoom to feature on click
   function zoomToFeature(e) {
     map.fitBounds(e.target.getBounds());
   }
 
-  // Define what happens on each feature
+  // Format the per-country tooltip. Only emitted for countries with blocks —
+  // no-data countries stay silent on hover for a calmer cursor journey.
+  function tooltipHtml(props) {
+    const name = props?.ADMIN || props?.name || "—";
+    const count = props?.blocked ?? 0;
+    const countStr = Number.isFinite(count)
+      ? new Intl.NumberFormat().format(count)
+      : "0";
+    return `
+      <div class="bw-map-tooltip__name">${name}</div>
+      <div class="bw-map-tooltip__row">
+        <span class="bw-map-tooltip__label">${t("dashboard.map.blocked_requests")}</span>
+        <span class="bw-map-tooltip__value">${countStr}</span>
+      </div>`;
+  }
+
   function onEachFeature(feature, layer) {
+    // No-data countries are fully inert: no tooltip, no hover outline, no
+    // click-to-zoom — hovering them shouldn't promise interactivity that
+    // leads nowhere.
+    if ((feature.properties.blocked ?? 0) <= 0) return;
+
+    layer.bindTooltip(() => tooltipHtml(feature.properties), {
+      sticky: true,
+      direction: "top",
+      offset: L.point(0, -6),
+      className: "bw-map-tooltip",
+      opacity: 1,
+    });
     layer.on({
       mouseover: highlightFeature,
       mouseout: resetHighlight,
@@ -342,11 +447,16 @@ $(function () {
     // Assign value to each country from requestsMapData
     geojsonData.features.forEach((feature) => {
       const isoCode = feature.properties.ISO_A2;
-      feature.properties.value =
-        (requestsMapData[isoCode] || {})["request"] || 0; // Assign 0 if not found
-      feature.properties.blocked =
-        (requestsMapData[isoCode] || {})["blocked"] || 0; // Assign 0 if not found
+      const requestStats = requestsMapData[isoCode] || {};
+      feature.properties.value = requestStats["blocked"] || 0; // Assign 0 if not found
+      feature.properties.blocked = requestStats["blocked"] || 0; // Assign 0 if not found
     });
+
+    // Replace the previous layer so old geometry/event listeners can be GC'ed.
+    if (geojson) {
+      map.removeLayer(geojson);
+      geojson = null;
+    }
 
     // Add GeoJSON layer to the map once the file is loaded
     geojson = L.geoJson(geojsonData, {
@@ -370,11 +480,15 @@ $(function () {
   function processGeoJSONData(geojsonData) {
     geojsonData.features.forEach((feature) => {
       const isoCode = feature.properties.ISO_A2;
-      feature.properties.value =
-        (requestsMapData[isoCode] || {})["request"] || 0;
-      feature.properties.blocked =
-        (requestsMapData[isoCode] || {})["blocked"] || 0;
+      const requestStats = requestsMapData[isoCode] || {};
+      feature.properties.value = requestStats["blocked"] || 0;
+      feature.properties.blocked = requestStats["blocked"] || 0;
     });
+
+    if (geojson) {
+      map.removeLayer(geojson);
+      geojson = null;
+    }
 
     geojson = L.geoJson(geojsonData, {
       style: style,
@@ -389,42 +503,140 @@ $(function () {
   const legend = L.control({ position: "bottomright" });
 
   legend.onAdd = function () {
-    const div = L.DomUtil.create("div", "legend shadow"),
-      grades = [0, 10, 20, 50, 100, 200, 500, 1000],
-      labels = [
-        `<i style="background:transparent"></i> ${t("dashboard.map.no_data")}`,
-      ];
+    const div = L.DomUtil.create("div", "legend map-legend shadow-sm");
+    const grades = legendGrades;
+    const bucketRows = [];
 
-    div.innerHTML =
-      '<div class="card mb-1"><div class="card-body text-center p-1"><strong>' +
-      t("dashboard.map.legend") +
-      "</strong><br>";
+    // When there's no blocked traffic the grade builder falls back to [0, 1],
+    // which would render a meaningless "1–1" bucket. Skip the buckets entirely
+    // in that case and show only the "No data" chip.
+    const hasBlockedTraffic = blockedValues.length > 0;
 
-    for (let i = 0; i < grades.length; i++) {
-      const from = grades[i];
-      const to = grades[i + 1];
-
-      labels.push(
-        '<i style="background:' +
-          getColor(from + 1) +
-          '"></i> ' +
-          from +
-          (to ? "&ndash;" + to : "+"),
-      );
+    if (hasBlockedTraffic && grades.length > 1) {
+      for (let i = 0; i < grades.length - 1; i++) {
+        const from = grades[i];
+        const to = grades[i + 1];
+        const labelFrom = from === 0 ? 1 : from;
+        const range = `${formatNumber(labelFrom)}–${formatNumber(to)}`;
+        const swatch = colorRamp[Math.min(i, colorRamp.length - 1)];
+        bucketRows.push(`
+          <div class="map-legend__swatch">
+            <span class="map-legend__chip" style="background:${swatch}"></span>
+            <span class="map-legend__range">${range}</span>
+          </div>
+        `);
+      }
     }
 
-    div.innerHTML += labels.join("<br>") + "</div></div>";
+    // Emit data-i18n attributes so the global applyTranslations() pass
+    // resolves labels even when the legend is built before i18next is ready.
+    div.innerHTML = `
+      <div class="map-legend__title" data-i18n="dashboard.map.legend">${t("dashboard.map.legend")}</div>
+      <div class="map-legend__swatches">
+        <div class="map-legend__swatch map-legend__swatch--muted">
+          <span class="map-legend__chip" style="background:${noDataColor}"></span>
+          <span class="map-legend__range" data-i18n="dashboard.map.no_data">${t("dashboard.map.no_data")}</span>
+        </div>
+        ${bucketRows.join("")}
+      </div>
+    `;
+
     return div;
   };
 
   legend.addTo(map);
 
+  // Re-render the legend when i18next initializes later or the user switches
+  // language — Leaflet controls don't participate in the global data-i18n walk
+  // automatically when built before translations load.
+  const rerenderLegend = () => {
+    legend.remove();
+    legend.addTo(map);
+  };
+  if (typeof i18next !== "undefined") {
+    if (!i18next.isInitialized) i18next.on("initialized", rerenderLegend);
+    i18next.on("languageChanged", rerenderLegend);
+  }
+
+  // Re-theme the map when the user toggles light/dark. SVG fills are set
+  // inline from CSS vars at build time, so a pure CSS switch leaves the paths
+  // frozen in the previous palette until the page reloads. Re-reading the
+  // tokens and calling setStyle() flushes fresh fills without a reload.
+  const applyTheme = () => {
+    refreshPalette();
+    colorRamp = buildColorRamp(Math.max(legendGrades.length - 1, 1));
+    if (geojson) geojson.setStyle(style);
+    rerenderLegend();
+  };
+  new MutationObserver(applyTheme).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-bs-theme", "class"],
+  });
+
+  // Blocking timeline raw data.
+  const blockingData = JSON.parse($("#requests-blocking-data").text());
+
   // Requests stats chart
 
-  const requestsData = JSON.parse($("#requests-data").text());
+  const requestsDataRaw = JSON.parse($("#requests-data").text());
+  const requestStatusEntries = Object.entries(requestsDataRaw)
+    .map(([status, count]) => [String(status), parseInt(count, 10) || 0])
+    .filter(([, count]) => count > 0);
+
+  const requestsData = Object.fromEntries(requestStatusEntries);
+  const requestStatusCodes = requestStatusEntries.map(([status]) => status);
+  const requestStatusSeries = requestStatusEntries.map(([, count]) => count);
+
+  function getStatusColor(statusCodeRaw) {
+    const statusCode = parseInt(statusCodeRaw, 10);
+    if (!Number.isFinite(statusCode)) {
+      return "#8592a3"; // neutral
+    }
+
+    // Explicit mappings requested
+    if (statusCode === 200) return "#71dd37"; // green
+    if (statusCode === 403) return "#ff3e1d"; // red
+    if (statusCode === 429) return "#ffab00"; // yellow
+
+    // Fallback by status class
+    if (statusCode >= 500) return "#d7263d"; // dark red
+    if (statusCode >= 400) return "#ff6b6b"; // light red
+    if (statusCode >= 300) return "#03c3ec"; // blue
+    if (statusCode >= 200) return "#71dd37"; // green
+    if (statusCode >= 100) return "#8a8d93"; // gray
+    return "#8592a3";
+  }
+
+  function getStatusLabel(statusCodeRaw) {
+    const statusCode = parseInt(statusCodeRaw, 10);
+    if (!Number.isFinite(statusCode)) {
+      return String(statusCodeRaw);
+    }
+    if (statusCode === 200) return "200 OK";
+    if (statusCode === 301) return "301 Moved";
+    if (statusCode === 302) return "302 Redirect";
+    if (statusCode === 304) return "304 Not Modified";
+    if (statusCode === 401) return "401 Unauthorized";
+    if (statusCode === 403) return "403 Blocked";
+    if (statusCode === 404) return "404 Not Found";
+    if (statusCode === 429) return "429 Rate Limited";
+    if (statusCode >= 500) return `${statusCode} Server Error`;
+    if (statusCode >= 400) return `${statusCode} Client Error`;
+    if (statusCode >= 300) return `${statusCode} Redirect`;
+    if (statusCode >= 200) return `${statusCode} Success`;
+    return `HTTP ${statusCode}`;
+  }
+
+  const requestStatusLabels = requestStatusCodes.map((statusCode) =>
+    getStatusLabel(statusCode),
+  );
+
+  const requestStatusColors = requestStatusCodes.map((statusCode) =>
+    getStatusColor(statusCode),
+  );
 
   // Ensure each value is properly converted to a number
-  const totalRequests = Object.values(requestsData).reduce(
+  const totalRequests = requestStatusSeries.reduce(
     (acc, curr) => acc + parseInt(curr, 10), // Parse as integer
     0, // Initial value for the accumulator
   );
@@ -436,20 +648,49 @@ $(function () {
     return acc;
   }, 0); // Initial value for blocked requests accumulator
 
-  const blockedRequestsPercent = (
-    (blockedRequests / totalRequests) *
-    100
-  ).toFixed(2);
+  const blockedRequestsPercent =
+    totalRequests > 0
+      ? ((blockedRequests / totalRequests) * 100).toFixed(2)
+      : "0.00";
 
   var requestsChart;
 
   function renderStatsChart() {
+    const chartSurfaceColor = getChartSurfaceColor();
+
     const requestsOptions = {
       chart: {
         type: "donut",
+        animations: {
+          enabled: true,
+          easing: "easeinout",
+          speed: 520,
+        },
+        events: {
+          mounted: function () {
+            queueDonutSliceSanitize("#requests-stats");
+          },
+          updated: function () {
+            queueDonutSliceSanitize("#requests-stats");
+          },
+          dataPointMouseEnter: function () {
+            queueDonutSliceSanitize("#requests-stats");
+          },
+          dataPointMouseLeave: function () {
+            queueDonutSliceSanitize("#requests-stats");
+          },
+          dataPointSelection: function (event) {
+            if (event) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+            queueDonutSliceSanitize("#requests-stats");
+          },
+        },
       },
-      labels: Object.keys(requestsData),
-      series: Object.values(requestsData).map((value) => parseInt(value, 10)),
+      labels: requestStatusLabels,
+      series: requestStatusSeries,
+      colors: requestStatusColors,
       responsive: [
         {
           breakpoint: 480,
@@ -489,14 +730,16 @@ $(function () {
       },
       plotOptions: {
         pie: {
+          expandOnClick: false,
           donut: {
-            size: "75%",
+            size: "72%",
+            background: chartSurfaceColor,
             labels: {
               show: true,
               value: {
-                fontSize: "18px",
+                fontSize: "20px",
                 fontFamily: "Public Sans",
-                fontWeight: 500,
+                fontWeight: 700,
                 color: headingColor,
                 offsetY: -17,
                 formatter: function (val) {
@@ -508,6 +751,15 @@ $(function () {
               name: {
                 offsetY: 17,
                 fontFamily: "Public Sans",
+                color: headingColor,
+                fontWeight: 600,
+                formatter: function (_label, opt) {
+                  if (!opt || typeof opt.seriesIndex !== "number") {
+                    return "";
+                  }
+                  const code = requestStatusCodes[opt.seriesIndex] || "";
+                  return code ? `HTTP ${code}` : "";
+                },
               },
               total: {
                 show: true,
@@ -522,8 +774,36 @@ $(function () {
           },
         },
       },
+      stroke: {
+        show: true,
+        width: 4,
+        colors: [chartSurfaceColor],
+      },
       tooltip: {
         theme: theme,
+        fillSeriesColor: false,
+        custom: function ({ series, seriesIndex }) {
+          const code = requestStatusCodes[seriesIndex] || "";
+          const label = requestStatusLabels[seriesIndex] || code || "Status";
+          const color = requestStatusColors[seriesIndex] || "#8592a3";
+          const value = parseInt(series[seriesIndex], 10) || 0;
+          const percent =
+            totalRequests > 0
+              ? ((value / totalRequests) * 100).toFixed(2)
+              : "0.00";
+          return `
+            <div class="home-chart-tooltip">
+              <div class="home-chart-tooltip__row">
+                <span class="home-chart-tooltip__dot" style="background:${color}"></span>
+                <strong>${label}</strong>
+              </div>
+              <div class="home-chart-tooltip__metrics">
+                <span>${formatNumber(value)} requests</span>
+                <span>${percent}%</span>
+              </div>
+            </div>
+          `;
+        },
       },
     };
 
@@ -532,6 +812,8 @@ $(function () {
       requestsOptions,
     );
     requestsChart.render();
+    attachDonutSanitizer("#requests-stats");
+    queueDonutSliceSanitize("#requests-stats");
   }
 
   renderStatsChart();
@@ -543,30 +825,81 @@ $(function () {
   var ipsChart;
 
   function renderIpsChart() {
-    const requestsIpsData = JSON.parse($("#requests-ips-data").text());
+    const chartSurfaceColor = getChartSurfaceColor();
+    const requestsIpsDataRaw = JSON.parse($("#requests-ips-data").text());
+    const getBlockedCount = (entry) => {
+      if (entry && typeof entry === "object") {
+        return parseInt(entry.blocked || 0, 10) || 0;
+      }
+      return parseInt(entry || 0, 10) || 0;
+    };
+    const requestsIpsData = { ...requestsIpsDataRaw };
 
-    // Build Top 10 by blocked count, preserving counts for accurate percentages
+    // Backend now provides only top blocked IPs; keep sorting as a safety net.
     const topIpsEntries = Object.entries(requestsIpsData)
-      .sort((a, b) => b[1]["blocked"] - a[1]["blocked"])
+      .sort((a, b) => getBlockedCount(b[1]) - getBlockedCount(a[1]))
       .slice(0, 10);
 
     const topIpsData = topIpsEntries.reduce((obj, [key, value]) => {
-      obj[key] = value["blocked"]; // only blocked requests are charted
+      obj[key] = getBlockedCount(value); // only blocked requests are charted
       return obj;
     }, {});
+    const topIpsLabels = Object.keys(topIpsData);
+    const topIpsSeries = Object.values(topIpsData).map((value) =>
+      parseInt(value, 10),
+    );
+    const topIpsColors = [
+      "#0ea5e9",
+      "#22c55e",
+      "#f59e0b",
+      "#ef4444",
+      "#8b5cf6",
+      "#14b8a6",
+      "#f97316",
+      "#6366f1",
+      "#84cc16",
+      "#06b6d4",
+    ].slice(0, Math.max(topIpsLabels.length, 1));
 
     // Total blocked requests represented in the donut (Top 10 only)
     const topBlockedTotal = topIpsEntries.reduce(
-      (sum, [, value]) => sum + (parseInt(value["blocked"], 10) || 0),
+      (sum, [, value]) => sum + getBlockedCount(value),
       0,
     );
 
     const ipsOptions = {
       chart: {
         type: "donut",
+        animations: {
+          enabled: true,
+          easing: "easeinout",
+          speed: 520,
+        },
+        events: {
+          mounted: function () {
+            queueDonutSliceSanitize("#requests-ips");
+          },
+          updated: function () {
+            queueDonutSliceSanitize("#requests-ips");
+          },
+          dataPointMouseEnter: function () {
+            queueDonutSliceSanitize("#requests-ips");
+          },
+          dataPointMouseLeave: function () {
+            queueDonutSliceSanitize("#requests-ips");
+          },
+          dataPointSelection: function (event) {
+            if (event) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+            queueDonutSliceSanitize("#requests-ips");
+          },
+        },
       },
-      labels: Object.keys(topIpsData),
-      series: Object.values(topIpsData).map((value) => parseInt(value, 10)),
+      labels: topIpsLabels,
+      series: topIpsSeries,
+      colors: topIpsColors,
       responsive: [
         {
           breakpoint: 480,
@@ -603,14 +936,16 @@ $(function () {
       },
       plotOptions: {
         pie: {
+          expandOnClick: false,
           donut: {
-            size: "75%",
+            size: "72%",
+            background: chartSurfaceColor,
             labels: {
               show: true,
               value: {
-                fontSize: "18px",
+                fontSize: "20px",
                 fontFamily: "Public Sans",
-                fontWeight: 500,
+                fontWeight: 700,
                 color: headingColor,
                 offsetY: -17,
                 formatter: function (val) {
@@ -622,6 +957,8 @@ $(function () {
               name: {
                 offsetY: 17,
                 fontFamily: "Public Sans",
+                color: headingColor,
+                fontWeight: 600,
               },
               total: {
                 show: true,
@@ -630,23 +967,40 @@ $(function () {
                 label: t("dashboard.chart.top_blocked_ips.most_blocked"),
                 formatter: function () {
                   const topIP = Object.keys(topIpsData)[0];
-                  return `${topIP}`;
+                  return topIP || "N/A";
                 },
               },
             },
           },
         },
       },
+      stroke: {
+        show: true,
+        width: 4,
+        colors: [chartSurfaceColor],
+      },
       tooltip: {
         theme: theme,
-        y: {
-          formatter: function (val) {
-            const v = parseInt(val, 10) || 0;
-            const pct = topBlockedTotal
-              ? ((v / topBlockedTotal) * 100).toFixed(1)
-              : "0.0";
-            return `${v} blocked (${pct}% of Top 10)`;
-          },
+        fillSeriesColor: false,
+        custom: function ({ series, seriesIndex }) {
+          const ipLabel = topIpsLabels[seriesIndex] || "Unknown";
+          const color = topIpsColors[seriesIndex] || "#0ea5e9";
+          const value = parseInt(series[seriesIndex], 10) || 0;
+          const pct = topBlockedTotal
+            ? ((value / topBlockedTotal) * 100).toFixed(1)
+            : "0.0";
+          return `
+            <div class="home-chart-tooltip">
+              <div class="home-chart-tooltip__row">
+                <span class="home-chart-tooltip__dot" style="background:${color}"></span>
+                <strong>${ipLabel}</strong>
+              </div>
+              <div class="home-chart-tooltip__metrics">
+                <span>${formatNumber(value)} blocked</span>
+                <span>${pct}% of Top 10</span>
+              </div>
+            </div>
+          `;
         },
       },
     };
@@ -656,6 +1010,8 @@ $(function () {
       ipsOptions,
     );
     ipsChart.render();
+    attachDonutSanitizer("#requests-ips");
+    queueDonutSliceSanitize("#requests-ips");
   }
 
   if ($ipsData.length) {
@@ -664,44 +1020,53 @@ $(function () {
 
   // Requests Blocking status
 
-  const blockingData = JSON.parse($("#requests-blocking-data").text());
+  const blockingSeriesData = Object.entries(blockingData)
+    .map(([timestamp, value]) => ({
+      x: new Date(timestamp).getTime(),
+      y: parseInt(value, 10) || 0,
+    }))
+    .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y))
+    .sort((a, b) => a.x - b.x);
 
-  const dataValues = Object.values(blockingData).map((value) =>
-    parseInt(value, 10),
-  );
-  const categories = Object.keys(blockingData).map((key) =>
-    new Date(key).toLocaleTimeString([], {
-      hour: "numeric",
-      minute: undefined,
-      hour12: true,
-    }),
-  );
-
-  const minValue = Math.min(...dataValues);
-  const maxValue = Math.max(...dataValues);
-
-  // Function to map a ratio to a color from green to red
-  function getColorFromRatio(ratio) {
-    const hue = (1 - ratio) * 120; // 120 (green) to 0 (red)
-    return `hsl(${hue}, 100%, 50%)`;
-  }
-
-  // Generate colors for each data point
-  const colorValues = dataValues.map((value) => {
-    const ratio = (value - minValue) / (maxValue - minValue);
-    return getColorFromRatio(ratio);
-  });
+  const blockingTickAmount =
+    blockingSeriesData.length > 96
+      ? 12
+      : Math.min(12, Math.max(4, Math.floor(blockingSeriesData.length / 8)));
+  const blockingSeries = [
+    {
+      name: t("dashboard.chart.blocking_status.blocked_requests"),
+      data: blockingSeriesData,
+    },
+  ];
+  const blockingLineColor = getStatusColor(403);
+  const peakBlockingPoint =
+    blockingSeriesData.length > 0
+      ? blockingSeriesData.reduce((maxPoint, currentPoint) =>
+          currentPoint.y > maxPoint.y ? currentPoint : maxPoint,
+        )
+      : null;
 
   var blockingChart;
 
   function renderBlockingStatus() {
+    const markerStrokeColor = theme === "dark" ? "#162430" : "#ffffff";
+    const chartGridBorderColor = getChartGridBorderColor();
+
     const blockingOptions = {
       chart: {
-        type: "bar",
+        type: "line",
         width: "100%",
         height: 400,
         toolbar: {
           show: false,
+        },
+        zoom: {
+          enabled: false,
+        },
+        animations: {
+          enabled: true,
+          easing: "easeinout",
+          speed: 520,
         },
         fontFamily: "Public Sans, sans-serif",
       },
@@ -713,29 +1078,74 @@ $(function () {
           fontFamily: "Public Sans, sans-serif",
         },
       },
-      series: [
-        {
-          name: t("dashboard.chart.blocking_status.blocked_requests"),
-          data: dataValues,
+      series: blockingSeries,
+      colors: [blockingLineColor],
+      stroke: {
+        curve: "straight",
+        width: 2.8,
+        lineCap: "round",
+      },
+      markers: {
+        size: 0,
+        hover: {
+          size: 6,
+          sizeOffset: 2,
         },
-      ],
-      colors: colorValues,
-      plotOptions: {
-        bar: {
-          distributed: true,
-        },
+      },
+      dataLabels: {
+        enabled: false,
       },
       tooltip: {
         theme: theme,
-        style: {
-          fontFamily: "Public Sans, sans-serif",
+        fillSeriesColor: false,
+        shared: false,
+        intersect: false,
+        custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+          const value = parseInt(series[seriesIndex][dataPointIndex], 10) || 0;
+          const timestamp =
+            w?.globals?.seriesX?.[seriesIndex]?.[dataPointIndex];
+          const dateLabel = timestamp
+            ? dateTimeFormatter.format(new Date(timestamp))
+            : "";
+
+          return `
+            <div class="home-chart-tooltip">
+              <div class="home-chart-tooltip__row">
+                <span class="home-chart-tooltip__dot" style="background:${blockingLineColor}"></span>
+                <strong>${dateLabel || t("dashboard.chart.blocking_status.time")}</strong>
+              </div>
+              <div class="home-chart-tooltip__metrics">
+                <span>${formatNumber(value)} blocked</span>
+              </div>
+            </div>
+          `;
         },
       },
+      annotations: peakBlockingPoint
+        ? {
+            points: [
+              {
+                x: peakBlockingPoint.x,
+                y: peakBlockingPoint.y,
+                marker: {
+                  size: 4,
+                  fillColor: blockingLineColor,
+                  strokeColor: markerStrokeColor,
+                  strokeWidth: 2,
+                },
+              },
+            ],
+          }
+        : undefined,
       xaxis: {
-        categories: categories,
+        type: "datetime",
+        tickAmount: blockingTickAmount,
+        tooltip: {
+          enabled: false,
+        },
         labels: {
-          rotate: -45,
-          hideOverlappingLabels: true,
+          datetimeUTC: false,
+          rotate: -30,
           style: {
             colors: headingColor,
             fontFamily: "Public Sans, sans-serif",
@@ -750,6 +1160,8 @@ $(function () {
         },
       },
       yaxis: {
+        min: 0,
+        forceNiceScale: true,
         title: {
           text: t("dashboard.chart.blocking_status.count"),
           style: {
@@ -758,7 +1170,11 @@ $(function () {
           },
         },
         labels: {
+          formatter: function (value) {
+            return formatNumber(Math.round(value || 0));
+          },
           style: {
+            colors: headingColor,
             fontFamily: "Public Sans, sans-serif",
           },
         },
@@ -767,7 +1183,12 @@ $(function () {
         show: false,
         fontFamily: "Public Sans, sans-serif",
       },
+      noData: {
+        text: t("status.no_data"),
+      },
       grid: {
+        borderColor: chartGridBorderColor,
+        strokeDashArray: 4,
         padding: {
           top: 0,
           bottom: 0,

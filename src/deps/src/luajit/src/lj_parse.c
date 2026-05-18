@@ -1,6 +1,6 @@
 /*
 ** Lua parser (source code -> bytecode).
-** Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2026 Mike Pall. See Copyright Notice in luajit.h
 **
 ** Major portions taken verbatim or adapted from the Lua interpreter.
 ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
@@ -522,9 +522,9 @@ static void expr_toreg_nobranch(FuncState *fs, ExpDesc *e, BCReg reg)
       ins = BCINS_AD(BC_KSHORT, reg, (BCReg)(uint16_t)intV(tv));
     else
 #else
-    lua_Number n = expr_numberV(e);
-    int32_t k = lj_num2int(n);
-    if (checki16(k) && n == (lua_Number)k)
+    int64_t i64;
+    int32_t k;
+    if (lj_num2int_cond(expr_numberV(e), i64, k, checki16((int32_t)i64)))
       ins = BCINS_AD(BC_KSHORT, reg, (BCReg)(uint16_t)k);
     else
 #endif
@@ -782,8 +782,9 @@ static int foldarith(BinOpr opr, ExpDesc *e1, ExpDesc *e2)
   setnumV(&o, n);
   if (tvisnan(&o) || tvismzero(&o)) return 0;  /* Avoid NaN and -0 as consts. */
   if (LJ_DUALNUM) {
-    int32_t k = lj_num2int(n);
-    if ((lua_Number)k == n) {
+    int64_t i64;
+    int32_t k;
+    if (lj_num2int_check(n, i64, k)) {
       setintV(&e1->u.nval, k);
       return 1;
     }
@@ -1386,10 +1387,10 @@ static void fs_fixup_k(FuncState *fs, GCproto *pt, void *kptr)
       if (tvisnum(&n->key)) {
 	TValue *tv = &((TValue *)kptr)[kidx];
 	if (LJ_DUALNUM) {
-	  lua_Number nn = numV(&n->key);
-	  int32_t k = lj_num2int(nn);
+	  int64_t i64;
+	  int32_t k;
 	  lj_assertFS(!tvismzero(&n->key), "unexpected -0 key");
-	  if ((lua_Number)k == nn)
+	  if (lj_num2int_check(numV(&n->key), i64, k))
 	    setintV(tv, k);
 	  else
 	    *tv = n->key;
@@ -1593,8 +1594,8 @@ static GCproto *fs_finish(LexState *ls, BCLine line)
   fs_fixup_line(fs, pt, (void *)((char *)pt + ofsli), numline);
   fs_fixup_var(ls, pt, (uint8_t *)((char *)pt + ofsdbg), ofsvar);
 
-  lj_vmevent_send(L, BC,
-    setprotoV(L, L->top++, pt);
+  lj_vmevent_send(G(L), BC,
+    setprotoV(V, V->top++, pt);
   );
 
   L->top--;  /* Pop table of constants. */
@@ -1656,9 +1657,9 @@ static void expr_index(FuncState *fs, ExpDesc *t, ExpDesc *e)
       }
     }
 #else
-    lua_Number n = expr_numberV(e);
-    int32_t k = lj_num2int(n);
-    if (checku8(k) && n == (lua_Number)k) {
+    int64_t i64;
+    int32_t k;
+    if (lj_num2int_cond(expr_numberV(e), i64, k, checku8((int32_t)i64))) {
       t->u.s.aux = BCMAX_C+1+(uint32_t)k;  /* 256..511: const byte key */
       return;
     }

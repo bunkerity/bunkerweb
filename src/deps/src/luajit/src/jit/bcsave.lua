@@ -1,7 +1,7 @@
 ----------------------------------------------------------------------------
 -- LuaJIT module to save/list bytecode.
 --
--- Copyright (C) 2005-2025 Mike Pall. All rights reserved.
+-- Copyright (C) 2005-2026 Mike Pall. All rights reserved.
 -- Released under the MIT license. See Copyright Notice in luajit.h
 ----------------------------------------------------------------------------
 --
@@ -96,6 +96,8 @@ local map_arch = {
   arm64 =	{ e = "le", b = 64, m = 183, p = 0xaa64, },
   arm64be =	{ e = "be", b = 64, m = 183, },
   ppc =		{ e = "be", b = 32, m = 20, },
+  ppc64 =	{ e = "be", b = 64, m = 21, },
+  ppc64le =	{ e = "le", b = 64, m = 21, },
   mips =	{ e = "be", b = 32, m = 8, f = 0x50001006, },
   mipsel =	{ e = "le", b = 32, m = 8, f = 0x50001006, },
   mips64 =	{ e = "be", b = 64, m = 8, f = 0x80000007, },
@@ -167,6 +169,8 @@ extern "C"
 #endif
 #ifdef _WIN32
 __declspec(dllexport)
+#elif (defined(__ELF__) || defined(__MACH__) || defined(__psp2__)) && !((defined(__sun__) && defined(__svr4__)) || defined(__CELLOS_LV2__))
+__attribute__((visibility("default")))
 #endif
 const unsigned char %s%s[] = {
 ]], LJBC_PREFIX, ctx.modname))
@@ -467,9 +471,11 @@ typedef struct {
   mach_segment_command_64 seg;
   mach_section_64 sec;
   mach_symtab_command sym;
+} mach_obj_64;
+typedef struct {
   mach_nlist_64 sym_entry;
   uint8_t space[4096];
-} mach_obj_64;
+} mach_obj_64_tail;
 ]]
   local symname = '_'..LJBC_PREFIX..ctx.modname
   local cputype, cpusubtype = 0x01000007, 3
@@ -481,7 +487,10 @@ typedef struct {
 
   -- Create Mach-O object and fill in header.
   local o = ffi.new("mach_obj_64")
-  local mach_size = aligned(ffi.offsetof(o, "space")+#symname+2, 8)
+  local t = ffi.new("mach_obj_64_tail")
+  local ofs_bc = ffi.sizeof(o)
+  local sz_bc = aligned(#s, 8)
+  local ofs_sym = ofs_bc + sz_bc
 
   -- Fill in sections and symbols.
   o.hdr.magic = 0xfeedfacf
@@ -493,7 +502,7 @@ typedef struct {
   o.seg.cmd = 0x19
   o.seg.cmdsize = ffi.sizeof(o.seg)+ffi.sizeof(o.sec)
   o.seg.vmsize = #s
-  o.seg.fileoff = mach_size
+  o.seg.fileoff = ofs_bc
   o.seg.filesize = #s
   o.seg.maxprot = 1
   o.seg.initprot = 1
@@ -501,22 +510,23 @@ typedef struct {
   ffi.copy(o.sec.sectname, "__data")
   ffi.copy(o.sec.segname, "__DATA")
   o.sec.size = #s
-  o.sec.offset = mach_size
+  o.sec.offset = ofs_bc
   o.sym.cmd = 2
   o.sym.cmdsize = ffi.sizeof(o.sym)
-  o.sym.symoff = ffi.offsetof(o, "sym_entry")
+  o.sym.symoff = ofs_sym
   o.sym.nsyms = 1
-  o.sym.stroff = ffi.offsetof(o, "sym_entry")+ffi.sizeof(o.sym_entry)
+  o.sym.stroff = ofs_sym + ffi.offsetof(t, "space")
   o.sym.strsize = aligned(#symname+2, 8)
-  o.sym_entry.type = 0xf
-  o.sym_entry.sect = 1
-  o.sym_entry.strx = 1
-  ffi.copy(o.space+1, symname)
+  t.sym_entry.type = 0xf
+  t.sym_entry.sect = 1
+  t.sym_entry.strx = 1
+  ffi.copy(t.space+1, symname)
 
   -- Write Mach-O object file.
   local fp = savefile(output, "wb")
-  fp:write(ffi.string(o, mach_size))
-  bcsave_tail(fp, output, s)
+  fp:write(ffi.string(o, ofs_bc))
+  fp:write(s, ("\0"):rep(sz_bc - #s))
+  bcsave_tail(fp, output, ffi.string(t, ffi.offsetof(t, "space") + o.sym.strsize))
 end
 
 local function bcsave_obj(ctx, output, s)

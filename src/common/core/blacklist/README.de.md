@@ -1,11 +1,11 @@
 Das Blacklist-Plugin schützt Ihre Website, indem es den Zugriff basierend auf verschiedenen Client-Attributen blockiert. Diese Funktion wehrt bekannte bösartige Entitäten, Scanner und verdächtige Besucher ab, indem sie den Zugriff basierend auf IP-Adressen, Netzwerken, Reverse-DNS-Einträgen (rDNS), ASNs, User-Agents und spezifischen URI-Mustern verweigert.
 
-**So funktioniert's:**[1][2][3]
+**So funktioniert's:**
 
 1.  Das Plugin überprüft eingehende Anfragen anhand mehrerer Blacklist-Kriterien (IP-Adressen, Netzwerke, rDNS, ASN, User-Agent oder URI-Muster).
 2.  Blacklists können direkt in Ihrer Konfiguration angegeben oder von externen URLs geladen werden.
 3.  Wenn ein Besucher einer Blacklist-Regel entspricht (und keiner Ignorier-Regel), wird der Zugriff verweigert.
-4.  Blacklists werden automatisch in regelmäßigen Abständen von den konfigurierten URLs aktualisiert.[4][5][6][7][8]
+4.  Blacklists werden automatisch in regelmäßigen Abständen von den konfigurierten URLs aktualisiert.
 5.  Sie können genau anpassen, welche Kriterien überprüft und ignoriert werden, basierend auf Ihren spezifischen Sicherheitsanforderungen.
 
 ### So verwenden Sie es
@@ -15,13 +15,13 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
 1.  **Funktion aktivieren:** Die Blacklist-Funktion ist standardmäßig aktiviert. Bei Bedarf können Sie sie mit dem Parameter `USE_BLACKLIST` steuern.
 2.  **Blockierregeln konfigurieren:** Definieren Sie, welche IPs, Netzwerke, rDNS-Muster, ASNs, User-Agents oder URIs blockiert werden sollen.
 3.  **Ignorierregeln einrichten:** Geben Sie Ausnahmen an, die die Blacklist-Überprüfungen umgehen sollen.
-4.  **Externe Quellen hinzufügen:** Konfigurieren Sie URLs, um Blacklist-Daten automatisch herunterzuladen und zu aktualisieren.[4][5][6][7][8]
+4.  **Externe Quellen hinzufügen:** Konfigurieren Sie URLs, um Blacklist-Daten automatisch herunterzuladen und zu aktualisieren.
 5.  **Effektivität überwachen:** Konsultieren Sie die [Web-Oberfläche](web-ui.md), um Statistiken über blockierte Anfragen anzuzeigen.
 
 !!! info "Stream-Modus"
     Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.
 
-### Konfigurationsparameter[9][10][11][12][13][14][15][16][17]
+### Konfigurationsparameter
 
 **Allgemein**
 
@@ -35,11 +35,12 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
 
     Der Parameter `BLACKLIST_COMMUNITY_LISTS` ermöglicht Ihnen die Auswahl aus ausgewählten Blacklist-Quellen. Die verfügbaren Optionen umfassen:
 
-    | ID                                        | Beschreibung                                                                                                                                                                                                              | Quelle                                                                                                                         |
-    | :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------- |
-    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist. DST = Europa                                                                                                                                                                                  | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`   |
-    | `ip:danmeuk-tor-exit`                     | IP-Adressen von Tor-Exit-Nodes (dan.me.uk)                                                                                                                                                                                | `https://www.dan.me.uk/torlist/?exit`                                                                                          |
-    | `ua:mitchellkrogza-bad-user-agents`       | Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, mit Anti-DDOS, Wordpress Theme Detector Blocking und Fail2Ban Jail für Wiederholungstäter | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` |
+    | ID                                        | Beschreibung                                                                                                                                                                                                              | Quelle                                                                                                                                |
+    | :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------ |
+    | `ip:danmeuk-tor-exit`                     | IP-Adressen von Tor-Exit-Nodes (dan.me.uk)                                                                                                                                                                                | `https://www.dan.me.uk/torlist/?exit`                                                                                                 |
+    | `ua:mitchellkrogza-bad-user-agents`       | Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, mit Anti-DDOS, Wordpress Theme Detector Blocking und Fail2Ban Jail für Wiederholungstäter | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`        |
+    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist - Laurent M. - Für Web Apps, WordPress, VPS (Apache/Nginx)                                                                                                                                     | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`          |
+    | `ip:laurent-minne-data-shield-critical`   | Data-Shield IPv4 Blocklist - Laurent M. - Für DMZs, SaaS, API & Kritische Assets                                                                                                                                          | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_critical_data-shield_ipv4_blocklist.txt` |
 
     **Konfiguration:** Geben Sie mehrere Listen durch Leerzeichen getrennt an. Zum Beispiel:
     ```yaml
@@ -49,7 +50,10 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
     !!! tip "Community-Listen vs. manuelle Konfiguration"
         Community-Blacklists bieten eine bequeme Möglichkeit, mit bewährten Blacklist-Quellen zu beginnen. Sie können diese parallel zu manuellen URL-Konfigurationen für maximale Flexibilität verwenden.
 
-=== "IP-Adresse"[18][19][20][21][22]
+    !!! note "Danksagung"
+        Vielen Dank an Laurent Minne für den Beitrag der [Data-Shield-Blocklisten](https://duggytuxy.github.io/#)!
+
+=== "IP-Adresse"
     **Was es bewirkt:** Blockiert Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk.
 
     | Parameter                  | Standard                              | Kontext   | Mehrfach | Beschreibung                                                                                                                 |
@@ -61,7 +65,7 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
 
     Der Standardparameter `BLACKLIST_IP_URLS` enthält eine URL, die eine **Liste bekannter Tor-Exit-Nodes** bereitstellt. Dies ist eine häufige Quelle für bösartigen Datenverkehr und ein guter Ausgangspunkt für viele Websites.
 
-=== "Reverse DNS"[23][24][25][26][27]
+=== "Reverse DNS"
     **Was es bewirkt:** Blockiert Besucher basierend auf ihrem Reverse-Domain-Namen. Dies ist nützlich, um bekannte Scanner und Crawler basierend auf ihren Organisationsdomänen zu blockieren.
 
     | Parameter                    | Standard                | Kontext   | Mehrfach | Beschreibung                                                                                               |
@@ -84,7 +88,7 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
     | `BLACKLIST_ASN_URLS`        |          | Multisite | Nein     | **ASN-Blacklist-URLs:** Liste von URLs, die zu blockierende ASNs enthalten.                      |
     | `BLACKLIST_IGNORE_ASN_URLS` |          | Multisite | Nein     | **ASN-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende ASNs enthalten.                 |
 
-=== "User-Agent"[28][29][30][31][32]
+=== "User-Agent"
     **Was es bewirkt:** Blockiert Besucher basierend auf dem Browser oder Tool, das sie angeblich verwenden. Dies ist effektiv gegen Bots, die sich ehrlich identifizieren (wie "ScannerBot" oder "WebHarvestTool").
 
     | Parameter                          | Standard                                                                                                                       | Kontext   | Mehrfach | Beschreibung                                                                                                       |
@@ -96,7 +100,7 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
 
     Der Standardparameter `BLACKLIST_USER_AGENT_URLS` enthält eine URL, die eine **Liste bekannter bösartiger User-Agents** bereitstellt. Diese werden oft von bösartigen Bots und Scannern verwendet, um anfällige Websites zu identifizieren.
 
-=== "URI"[33][34][35][36][37]
+=== "URI"
     **Was es bewirkt:** Blockiert Anfragen an spezifische URLs auf Ihrer Website. Dies ist nützlich, um Zugriffsversuche auf Admin-Seiten, Anmeldeformulare oder andere sensible Bereiche zu blockieren, die angegriffen werden könnten.
 
     | Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                                      |
@@ -109,10 +113,10 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
 !!! info "Unterstützung von URL-Formaten"
     Alle `*_URLS`-Parameter unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade unter Verwendung des Präfixes `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
 
-!!! tip "Regelmäßige Updates"[4][5][6][7][8]
+!!! tip "Regelmäßige Updates"
     Blacklists von URLs werden automatisch stündlich heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz gegen die neuesten Bedrohungen auf dem neuesten Stand bleibt.
 
-### Konfigurationsbeispiele[38]
+### Konfigurationsbeispiele
 
 === "Grundlegender Schutz durch IP und User-Agent"
 

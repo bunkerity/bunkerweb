@@ -2,6 +2,11 @@
 
 All notable changes to `lua-resty-session` will be documented in this file.
 
+## [4.1.5] - 2025-11-24
+### Changed
+- fix(*): timeout remember cookies instead of deleting
+
+
 ## [4.1.4] - 2025-08-11
 ### Fixed
 - fix(redis-cluster): correctly pass username and password

@@ -19,7 +19,7 @@ from requests import get
 from requests.exceptions import ConnectionError
 
 from common_utils import bytes_hash  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
 rdns_rx = re_compile(rb"^[^ ]+$")
@@ -53,7 +53,7 @@ def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
     return False, b""
 
 
-LOGGER = setup_logger("GREYLIST")
+LOGGER = getLogger("GREYLIST")
 status = 0
 
 KINDS = ("IP", "RDNS", "ASN", "USER_AGENT", "URI")
@@ -68,7 +68,7 @@ try:
         LOGGER.warning("No services found, exiting...")
         sys_exit(0)
 
-    services = services.split(" ")
+    services = services.split()
     services_greylist_urls = {}
 
     # Multisite case
@@ -81,9 +81,8 @@ try:
                 services_greylist_urls[first_server] = {}
                 for kind in KINDS:
                     services_greylist_urls[first_server][kind] = set()
-                    for url in getenv(f"{first_server}_GREYLIST_{kind}_URLS", "").strip().split(" "):
-                        if url:
-                            services_greylist_urls[first_server][kind].add(url)
+                    for url in getenv(f"{first_server}_GREYLIST_{kind}_URLS", "").strip().split():
+                        services_greylist_urls[first_server][kind].add(url)
     # Singlesite case
     elif getenv("USE_GREYLIST", "no") == "yes":
         greylist_activated = True
@@ -92,9 +91,8 @@ try:
         services_greylist_urls[services[0]] = {}
         for kind in KINDS:
             services_greylist_urls[services[0]][kind] = set()
-            for url in getenv(f"GREYLIST_{kind}_URLS", "").strip().split(" "):
-                if url:
-                    services_greylist_urls[services[0]][kind].add(url)
+            for url in getenv(f"GREYLIST_{kind}_URLS", "").strip().split():
+                services_greylist_urls[services[0]][kind].add(url)
 
     if not greylist_activated:
         LOGGER.info("Greylist is not activated, skipping downloads...")

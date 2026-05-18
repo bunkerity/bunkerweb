@@ -36,6 +36,35 @@ function redis:init_worker()
 	return self:ret(true, "success")
 end
 
+-- function redis:timer()
+-- 	-- Check if metrics is used
+-- 	local is_needed, err = has_variable("USE_REDIS", "yes")
+-- 	if is_needed == nil then
+-- 		return self:ret(false, "can't check USE_REDIS variable : " .. err)
+-- 	end
+-- 	if not is_needed then
+-- 		return self:ret(true, "redis not used")
+-- 	end
+-- 	-- Return values
+-- 	local ret = true
+-- 	local ret_err = "redis is working"
+-- 	-- Check redis connection
+-- 	local ok, err = self.clusterstore:connect(true)
+-- 	if not ok then
+-- 		self.
+-- 		return self:ret(false, "redis connect error : " .. err)
+-- 	end
+-- 	-- Send ping
+-- 	local ok, err = self.clusterstore:call("ping")
+-- 	self.clusterstore:close()
+-- 	if err then
+-- 		return self:ret(false, "error while sending ping command to redis server : " .. err)
+-- 	end
+-- 	if not ok then
+-- 		return self:ret(false, "redis ping command failed")
+-- 	end
+-- end
+
 function redis:api()
 	if self.ctx.bw.uri == "/redis/ping" and self.ctx.bw.request_method == "POST" then
 		if self.variables["USE_REDIS"] ~= "yes" then

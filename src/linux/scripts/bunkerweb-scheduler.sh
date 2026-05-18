@@ -9,29 +9,10 @@ PYTHON_BIN=$(get_python_bin)
 export PYTHON_BIN
 
 # Set the PYTHONPATH
-export PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/db
+BW_PYTHONPATH=$(get_bunkerweb_pythonpath)
+export PYTHONPATH="${BW_PYTHONPATH}:/usr/share/bunkerweb/db"
 
-# Helper function to extract variables with fallback
-function get_env_var() {
-    local var_name=$1
-    local default_value=$2
-    local value
-
-    # First try scheduler.env
-    value=$(grep "^${var_name}=" /etc/bunkerweb/scheduler.env 2>/dev/null | cut -d '=' -f 2-)
-
-    # If not found, try variables.env
-    if [ -z "$value" ] && [ -f /etc/bunkerweb/variables.env ]; then
-        value=$(grep "^${var_name}=" /etc/bunkerweb/variables.env 2>/dev/null | cut -d '=' -f 2-)
-    fi
-
-    # Return default if still not found
-    if [ -z "$value" ]; then
-        echo "$default_value"
-    else
-        echo "$value"
-    fi
-}
+NGINX_CONF_DIR=$(get_nginx_conf_dir)
 
 # Display usage information
 function display_help() {
@@ -47,7 +28,9 @@ function display_help() {
 function start() {
     log "SYSTEMCTL" "ℹ️" "Starting BunkerWeb Scheduler service ..."
 
-    chown -R nginx:nginx /etc/nginx
+    if [ -d "$NGINX_CONF_DIR" ]; then
+        chown -R nginx:nginx "$NGINX_CONF_DIR"
+    fi
 
     # Check if the scheduler is already running
     stop
@@ -56,7 +39,8 @@ function start() {
     if [ ! -f /etc/bunkerweb/scheduler.env ]; then
         {
             echo "LOG_LEVEL=info"
-            echo "LOG_TO_FILE=yes"
+            echo "LOG_TYPES=file"
+            echo "# LOG_FILE_PATH=/var/log/bunkerweb/scheduler.log"
             echo "# in seconds"
             echo "HEALTHCHECK_INTERVAL=30"
             echo ""
@@ -83,19 +67,63 @@ function start() {
         log "SYSTEMCTL" "ℹ️" "Created dummy variables.env file"
     fi
 
-    # Extract environment variables with fallback
-    CUSTOM_LOG_LEVEL=$(get_env_var "LOG_LEVEL" "INFO")
-    export CUSTOM_LOG_LEVEL
-
-    SCHEDULER_LOG_TO_FILE=$(get_env_var "SCHEDULER_LOG_TO_FILE" "")
-    if [ -z "$SCHEDULER_LOG_TO_FILE" ]; then
-        SCHEDULER_LOG_TO_FILE=$(get_env_var "LOG_TO_FILE" "yes")
+    # Create PID folder
+    if [ ! -f /var/run/bunkerweb ] ; then
+        mkdir -p /var/run/bunkerweb
+        chown nginx:nginx /var/run/bunkerweb
     fi
-    export SCHEDULER_LOG_TO_FILE
 
-    # Extract DATABASE_URI with fallback
-    DATABASE_URI=$(get_env_var "DATABASE_URI" "sqlite:////var/lib/bunkerweb/db.sqlite3")
-    export DATABASE_URI
+    # Create TMP folder
+    if [ ! -f /var/tmp/bunkerweb ] ; then
+        mkdir -p /var/tmp/bunkerweb
+        chown nginx:nginx /var/tmp/bunkerweb
+        chmod 2770 /var/tmp/bunkerweb
+    fi
+
+    # Create LOG folder
+    if [ ! -f /var/log/bunkerweb ] ; then
+        mkdir -p /var/log/bunkerweb
+        chown nginx:nginx /var/log/bunkerweb
+    fi
+
+    # Export variables from env files (scheduler overrides variables.env)
+    export_env_file /etc/bunkerweb/variables.env
+    export_env_file /etc/bunkerweb/scheduler.env
+
+    : "${LOG_LEVEL:=INFO}"
+    : "${CUSTOM_LOG_LEVEL:=$LOG_LEVEL}"
+
+    if [ -n "${SCHEDULER_LOG_TYPES:-}" ]; then
+        LOG_TYPES="$SCHEDULER_LOG_TYPES"
+    else
+        : "${LOG_TYPES:=file}"
+    fi
+
+    if [ -n "${SCHEDULER_LOG_FILE_PATH:-}" ]; then
+        LOG_FILE_PATH="$SCHEDULER_LOG_FILE_PATH"
+    else
+        : "${LOG_FILE_PATH:=/var/log/bunkerweb/scheduler.log}"
+    fi
+
+    if [ -n "${SCHEDULER_LOG_SYSLOG_TAG:-}" ]; then
+        LOG_SYSLOG_TAG="$SCHEDULER_LOG_SYSLOG_TAG"
+    else
+        : "${LOG_SYSLOG_TAG:=bw-scheduler}"
+    fi
+
+    : "${LOG_SYSLOG_ADDRESS:=}"
+    : "${HEALTHCHECK_INTERVAL:=30}"
+    : "${RELOAD_MIN_TIMEOUT:=5}"
+    : "${DISABLE_CONFIGURATION_TESTING:=no}"
+    : "${IGNORE_FAIL_SENDING_CONFIG:=no}"
+    : "${IGNORE_REGEX_CHECK:=no}"
+    : "${DATABASE_URI:=sqlite:////var/lib/bunkerweb/db.sqlite3}"
+    : "${DATABASE_RETRY_TIMEOUT:=60}"
+    : "${DATABASE_LOG_LEVEL:=WARNING}"
+
+    export LOG_LEVEL CUSTOM_LOG_LEVEL LOG_TYPES LOG_FILE_PATH LOG_SYSLOG_TAG LOG_SYSLOG_ADDRESS
+    export HEALTHCHECK_INTERVAL RELOAD_MIN_TIMEOUT DISABLE_CONFIGURATION_TESTING IGNORE_FAIL_SENDING_CONFIG IGNORE_REGEX_CHECK
+    export DATABASE_URI DATABASE_RETRY_TIMEOUT DATABASE_LOG_LEVEL
 
     # Database migration section
     log "SYSTEMCTL" "ℹ️" "Checking database configuration..."
@@ -118,9 +146,9 @@ import sqlalchemy as sa
 from traceback import format_exc
 
 from Database import Database
-from logger import setup_logger
+from logger import getLogger
 
-LOGGER = setup_logger("Scheduler", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+LOGGER = getLogger("SCHEDULER.SYSTEMD")
 
 db = None
 try:
@@ -175,7 +203,7 @@ EOL
             if sed -i "s|^version_locations =.*$|version_locations = ${DATABASE}_versions|" alembic.ini; then
                 # Find the corresponding Alembic revision by scanning migration files
                 MIGRATION_DIR="/usr/share/bunkerweb/db/alembic/${DATABASE}_versions"
-                NORMALIZED_VERSION=$(echo "$current_version" | tr '.' '_' | tr '-' '_')
+                NORMALIZED_VERSION=$(echo "$current_version" | tr '.' '_' | tr '-' '_' | tr '~' '_')
                 REVISION=$(find "$MIGRATION_DIR" -maxdepth 1 -type f -name "*_upgrade_to_version_${NORMALIZED_VERSION}.py" -exec basename {} \; | awk -F_ '{print $1}')
 
                 if [ -z "$REVISION" ]; then
@@ -206,9 +234,9 @@ import sqlalchemy as sa
 from os import getenv
 
 from Database import Database
-from logger import setup_logger
+from logger import getLogger
 
-LOGGER = setup_logger('Scheduler', getenv('CUSTOM_LOG_LEVEL', getenv('LOG_LEVEL', 'INFO')))
+LOGGER = getLogger('SCHEDULER.SYSTEMD')
 
 db = Database(LOGGER)
 with db.sql_engine.connect() as conn:
@@ -245,10 +273,19 @@ function stop() {
 
     if [ -f "/var/run/bunkerweb/scheduler.pid" ] ; then
         scheduler_pid=$(cat "/var/run/bunkerweb/scheduler.pid")
+        if ! kill -0 "$scheduler_pid" >/dev/null 2>&1; then
+            log "SYSTEMCTL" "ℹ️ " "Scheduler PID file is stale, cleaning up"
+            rm -f /var/run/bunkerweb/scheduler.pid
+            return 0
+        fi
         log "SYSTEMCTL" "ℹ️ " "Stopping scheduler..."
         kill -SIGINT "$scheduler_pid"
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
+            if ! kill -0 "$scheduler_pid" >/dev/null 2>&1; then
+                rm -f /var/run/bunkerweb/scheduler.pid
+                return 0
+            fi
             log "SYSTEMCTL" "❌" "Error while sending stop signal to scheduler"
             exit 1
         fi
@@ -258,6 +295,10 @@ function stop() {
     fi
     count=0
     while [ -f "/var/run/bunkerweb/scheduler.pid" ] ; do
+        if ! kill -0 "$scheduler_pid" >/dev/null 2>&1; then
+            rm -f /var/run/bunkerweb/scheduler.pid
+            break
+        fi
         sleep 1
         count=$((count + 1))
         if [ $count -ge 10 ] ; then

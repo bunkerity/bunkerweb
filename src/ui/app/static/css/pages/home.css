@@ -1,24 +1,364 @@
 #requests-map {
   min-height: 600px;
+  border-radius: 0.75rem;
+  overflow: hidden;
 }
 
-.info {
-  padding: 10px;
-  max-width: 200px;
+/* Ocean = flat brand-tinted surface. Zero tiles, zero OSM chrome. */
+#requests-map.leaflet-container {
+  background: var(--bw-map-ocean);
+  font-family: inherit;
+  outline: none;
 }
 
-.legend {
-  line-height: 18px;
-  color: #555;
-  background: rgba(255, 255, 255, 0.8);
-  padding: 10px;
-  border-radius: 5px;
+#requests-map .leaflet-control-attribution {
+  display: none;
 }
 
-.legend i {
-  width: 18px;
-  height: 18px;
-  float: left;
-  margin-right: 8px;
-  opacity: 0.7;
+#requests-map .leaflet-bar {
+  border: 1px solid rgba(11, 53, 74, 0.18);
+  box-shadow: 0 4px 10px rgba(11, 53, 74, 0.08);
+}
+
+#requests-map .leaflet-bar a {
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--bs-primary);
+  border-bottom-color: rgba(11, 53, 74, 0.1);
+}
+
+#requests-map .leaflet-bar a:hover {
+  background: #ffffff;
+  color: var(--bs-bw-blue);
+}
+
+.dark-style #requests-map .leaflet-bar {
+  border-color: rgba(130, 184, 219, 0.22);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.dark-style #requests-map .leaflet-bar a {
+  background: rgba(15, 30, 42, 0.94);
+  color: #dbe6ef;
+  border-bottom-color: rgba(130, 184, 219, 0.14);
+}
+
+.dark-style #requests-map .leaflet-bar a:hover {
+  background: rgba(20, 40, 56, 1);
+  color: #ffffff;
+}
+
+/* Cursor-anchored tooltip — replaces the old top-right pinned card. */
+.leaflet-tooltip.bw-map-tooltip {
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(11, 53, 74, 0.18);
+  border-radius: 10px;
+  box-shadow: 0 12px 24px rgba(11, 53, 74, 0.18);
+  color: #14303f;
+  padding: 0.55rem 0.7rem;
+  min-width: 160px;
+  backdrop-filter: blur(6px);
+  font-family: inherit;
+  line-height: 1.3;
+}
+
+.leaflet-tooltip.bw-map-tooltip::before {
+  border-top-color: rgba(255, 255, 255, 0.97);
+}
+
+.bw-map-tooltip__name {
+  font-weight: 600;
+  font-size: 0.86rem;
+  margin-bottom: 0.3rem;
+  color: var(--bs-primary);
+}
+
+.bw-map-tooltip__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.bw-map-tooltip__label {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #607684;
+}
+
+.bw-map-tooltip__value {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--bs-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.dark-style .leaflet-tooltip.bw-map-tooltip {
+  background: rgba(12, 24, 34, 0.96);
+  border-color: rgba(130, 184, 219, 0.26);
+  color: #e5eef5;
+  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.45);
+}
+
+.dark-style .leaflet-tooltip.bw-map-tooltip::before {
+  border-top-color: rgba(12, 24, 34, 0.96);
+}
+
+.dark-style .bw-map-tooltip__name,
+.dark-style .bw-map-tooltip__value {
+  color: #cfe4f3;
+}
+
+.dark-style .bw-map-tooltip__label {
+  color: #8ba6b8;
+}
+
+.home-chart-tooltip {
+  min-width: 170px;
+  padding: 0.58rem 0.68rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(64, 83, 105, 0.22);
+  background: rgba(255, 255, 255, 0.98);
+  color: #1f2f3c;
+  box-shadow: 0 14px 28px rgba(18, 38, 51, 0.2);
+  backdrop-filter: blur(6px);
+}
+
+/* We render a fully custom tooltip card, so remove Apex's default outer frame. */
+.apexcharts-tooltip,
+.apexcharts-tooltip.apexcharts-theme-light,
+.apexcharts-tooltip.apexcharts-theme-dark {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.apexcharts-tooltip .apexcharts-tooltip-title {
+  display: none !important;
+}
+
+.apexcharts-tooltip .home-chart-tooltip {
+  margin: 0;
+}
+
+/* Remove leftover Apex inner wrappers so only the custom tooltip card is visible. */
+#requests-stats .apexcharts-tooltip-series-group,
+#requests-ips .apexcharts-tooltip-series-group,
+#requests-blocking .apexcharts-tooltip-series-group {
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+#requests-stats .apexcharts-tooltip.apexcharts-active,
+#requests-ips .apexcharts-tooltip.apexcharts-active,
+#requests-blocking .apexcharts-tooltip.apexcharts-active {
+  background: transparent !important;
+}
+
+/* Force clean donut slices without SVG filter shadows on hover/active. */
+#requests-stats .apexcharts-pie-area,
+#requests-ips .apexcharts-pie-area {
+  filter: none !important;
+}
+
+#requests-stats.apexcharts-tooltip-active,
+#requests-ips.apexcharts-tooltip-active {
+  background: transparent !important;
+}
+
+.home-chart-tooltip__row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.3rem;
+  font-size: 0.82rem;
+}
+
+.home-chart-tooltip__dot {
+  width: 0.58rem;
+  height: 0.58rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.home-chart-tooltip__metrics {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.7rem;
+  font-size: 0.76rem;
+  color: #526777;
+}
+
+.dark-style .home-chart-tooltip {
+  border-color: rgba(122, 168, 199, 0.28);
+  background: rgba(13, 26, 36, 0.97);
+  color: #deedf7;
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.45);
+}
+
+.dark-style .home-chart-tooltip__metrics {
+  color: #9fb6c6;
+}
+
+#requests-stats,
+#requests-ips {
+  position: relative;
+  min-height: 260px;
+}
+
+#requests-blocking {
+  border-radius: 14px;
+  background: linear-gradient(
+    180deg,
+    rgba(47, 128, 186, 0.08) 0%,
+    rgba(47, 128, 186, 0.01) 100%
+  );
+}
+
+.dark-style #requests-blocking {
+  background: linear-gradient(
+    180deg,
+    rgba(115, 179, 226, 0.1) 0%,
+    rgba(115, 179, 226, 0.02) 100%
+  );
+}
+
+.home-period-floating {
+  position: sticky;
+  top: 5.25rem;
+  z-index: 12;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+  pointer-events: none;
+}
+
+.home-period-floating__card {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.8rem;
+  border-radius: 0.8rem;
+  background: rgba(224, 246, 255, 0.94);
+  border: 1px solid rgba(0, 145, 214, 0.25);
+  color: #0b4f73;
+  backdrop-filter: blur(4px);
+}
+
+.home-period-floating__icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.home-period-floating__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.home-period-floating__label {
+  font-size: 0.69rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.86;
+}
+
+.home-period-floating__text strong {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.dark-style .home-period-floating__card {
+  background: rgba(7, 39, 58, 0.92);
+  border-color: rgba(46, 173, 236, 0.3);
+  color: #97dcff;
+}
+
+@media (max-width: 767px) {
+  .home-period-floating {
+    top: 4.9rem;
+    justify-content: stretch;
+  }
+
+  .home-period-floating__card {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Compact choropleth legend — title + one row per bucket. The old
+   gradient bar + min/max ticks + range list collapsed into a single
+   swatches column. */
+.legend.map-legend {
+  color: #21313c;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.7rem;
+  min-width: 156px;
+  border: 1px solid rgba(16, 79, 116, 0.16);
+  box-shadow: 0 8px 18px rgba(11, 53, 74, 0.16);
+  backdrop-filter: blur(6px);
+  font-family: inherit;
+}
+
+.dark-style .legend.map-legend {
+  background: rgba(10, 22, 32, 0.92);
+  color: #dbe6ef;
+  border-color: rgba(130, 184, 219, 0.22);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.38);
+}
+
+.map-legend__title {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 10px;
+  margin-bottom: 0.5rem;
+  color: var(--bs-primary);
+}
+
+.dark-style .map-legend__title {
+  color: #9fc3dc;
+}
+
+.map-legend__swatches {
+  display: grid;
+  gap: 0.28rem;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.map-legend__swatch {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.map-legend__swatch--muted {
+  opacity: 0.8;
+  padding-bottom: 0.28rem;
+  margin-bottom: 0.12rem;
+  border-bottom: 1px dashed rgba(16, 79, 116, 0.18);
+}
+
+.dark-style .map-legend__swatch--muted {
+  border-bottom-color: rgba(130, 184, 219, 0.2);
+}
+
+.map-legend__chip {
+  width: 14px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(15, 30, 42, 0.12);
+}
+
+.dark-style .map-legend__chip {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.map-legend__range {
+  font-variant-numeric: tabular-nums;
 }

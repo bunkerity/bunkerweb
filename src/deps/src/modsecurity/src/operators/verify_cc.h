@@ -16,7 +16,7 @@
 #ifndef SRC_OPERATORS_VERIFY_CC_H_
 #define SRC_OPERATORS_VERIFY_CC_H_
 
-#if WITH_PCRE2
+#ifndef WITH_PCRE
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include <pcre2.h>
 #else
@@ -38,12 +38,12 @@ class VerifyCC : public Operator {
     /** @ingroup ModSecurity_Operator */
     explicit VerifyCC(std::unique_ptr<RunTimeString> param)
         : Operator("VerifyCC", std::move(param)),
-#if WITH_PCRE2
-        m_pc(NULL),
+#ifndef WITH_PCRE
+        m_pc(nullptr),
         m_pcje(PCRE2_ERROR_JIT_BADOPTION) { }
 #else
-        m_pc(NULL),
-        m_pce(NULL) { }
+        m_pc(nullptr),
+        m_pce(nullptr) { }
 #endif
     ~VerifyCC() override;
 
@@ -52,7 +52,7 @@ class VerifyCC : public Operator {
         RuleMessage &ruleMessage)  override;
     bool init(const std::string &param, std::string *error) override;
  private:
-#if WITH_PCRE2
+#ifndef WITH_PCRE
     pcre2_code *m_pc;
     int m_pcje;
 #else

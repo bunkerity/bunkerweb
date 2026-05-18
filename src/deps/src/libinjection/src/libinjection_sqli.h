@@ -19,6 +19,8 @@ extern "C" {
  */
 #include <string.h>
 
+#include "libinjection_error.h"
+
 enum sqli_flags {
     FLAG_NONE = 0,
     FLAG_QUOTE_NONE = 1,   /* 1 << 0 */
@@ -35,7 +37,7 @@ enum lookup_type {
     LOOKUP_FINGERPRINT = 4
 };
 
-struct libinjection_sqli_token {
+struct libinjection_sqli_token { // cppcheck-suppress syntaxError
 #ifdef SWIG
 %immutable;
 #endif
@@ -201,9 +203,10 @@ void libinjection_sqli_init(struct libinjection_sqli_state *sf, const char *s,
  *
  * \param sql_state core data structure
  *
- * \return 1 (true) if SQLi, 0 (false) if benign
+ * \return injection_result_t
  */
-int libinjection_is_sqli(struct libinjection_sqli_state *sql_state);
+injection_result_t
+libinjection_is_sqli(struct libinjection_sqli_state *sql_state);
 
 /*  FOR HACKERS ONLY
  *   provides deep hooks into the decision making process
@@ -214,7 +217,8 @@ void libinjection_sqli_callback(struct libinjection_sqli_state *sf,
 /*
  * Resets state, but keeps initial string and callbacks
  */
-void libinjection_sqli_reset(struct libinjection_sqli_state *sf, int flags);
+static void libinjection_sqli_reset(struct libinjection_sqli_state *sf,
+                                    int flags);
 
 /**
  *
@@ -239,9 +243,9 @@ libinjection_sqli_fingerprint(struct libinjection_sqli_state *sql_state,
  * The default "word" to token-type or fingerprint function.  This
  * uses a ASCII case-insensitive binary tree.
  */
-char libinjection_sqli_lookup_word(struct libinjection_sqli_state *sql_state,
-                                   int lookup_type, const char *str,
-                                   size_t len);
+static char
+libinjection_sqli_lookup_word(struct libinjection_sqli_state *sql_state,
+                              int lookup_type, const char *str, size_t len);
 
 /* Streaming tokenization interface.
  *
@@ -275,14 +279,16 @@ int libinjection_sqli_check_fingerprint(
  *
  * \return TRUE if sqli, false otherwise
  */
-int libinjection_sqli_blacklist(struct libinjection_sqli_state *sql_state);
+static int
+libinjection_sqli_blacklist(struct libinjection_sqli_state *sql_state);
 
 /* Given a positive match for a pattern (i.e. pattern is SQLi), this function
  * does additional analysis to reduce false positives.
  *
  * \return TRUE if SQLi, false otherwise
  */
-int libinjection_sqli_not_whitelist(struct libinjection_sqli_state *sql_state);
+static int
+libinjection_sqli_not_whitelist(struct libinjection_sqli_state *sql_state);
 
 #ifdef __cplusplus
 }

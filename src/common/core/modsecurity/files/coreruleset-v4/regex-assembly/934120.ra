@@ -11,13 +11,19 @@
 ##!> assemble
   ##!> include url-schemes
   ##!=>
-  ://
+  ##! Per https://github.com/coreruleset/coreruleset/issues/4384,
+  ##! some malformed urls can be normalized by parsers, creating a bypass.
+  ##! Changed to have optional slashes.
+  :/?/?
   ##!=>
 
   ##! http://425.510.425.510/ Dotted decimal with overflow (already covered by RFI rule 931100)
-  ##! http://2852039166/ Dotless decimal
-  ##! http://7147006462/ Dotless decimal with overflow
-  \d{10}
+  ##! http://2852039166/ Dotless decimal (10 digits)
+  ##! http://7147006462/ Dotless decimal with overflow (10 digits)
+  ##! http://123456789/ Dotless decimal (9 digits) - converts to 7.91.205.21
+  ##! Browsers accept any decimal that fits in 32-bit unsigned int (up to 4,294,967,295)
+  ##! Using 7-10 digits to catch most SSRF attempts while reducing false positives
+  \d{7,10}
 
   ##! http://0xA9.0xFE.0xA9.0xFE/ Dotted hexadecimal
   (?:0x[a-f0-9]{2}\.){3}0x[a-f0-9]{2}

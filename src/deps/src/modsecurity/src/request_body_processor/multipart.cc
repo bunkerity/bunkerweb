@@ -362,11 +362,11 @@ int Multipart::parse_content_disposition(const char *c_d_value, int offset) {
             const char* start_of_filename = p;
             while ((*p != '\0') && (*p != ';')) {
                 if (*p == '%') {
-                    if ((*(p+1) == '\0') || (!isxdigit(*(p+1))) || (!isxdigit(*(p+2)))) {
+                    if ((*(p+1) == '\0') || (*(p+2) == '\0') || (!isxdigit(static_cast<unsigned char>(*(p+1)))) || (!isxdigit(static_cast<unsigned char>(*(p+2))))) {
                         return -18;
                     }
                     p += 3;
-                } else if (isalnum(*p) || strchr(attr_char_special, *p)) {
+                } else if (isalnum(static_cast<unsigned char>(*p)) || strchr(attr_char_special, *p)) {
                     p++;
                 } else {
                     return -19;
@@ -415,7 +415,12 @@ int Multipart::parse_content_disposition(const char *c_d_value, int offset) {
                 value.append((p++), 1);
             }
 
-            p++; /* go over the quote at the end */
+            if (*p == quote) {
+                p++; /* go over the quote at the end */
+            } else {
+                m_flag_invalid_quoting = 1;
+                return -15; /* closing quote not found */
+            }
 
         } else {
             /* not quoted */
@@ -580,7 +585,7 @@ int Multipart::process_part_data(std::string *error, size_t offset) {
                 m_mpp->m_tmp_file->Open();
 
                 /* do we have an opened file? */
-                if (!m_mpp->m_tmp_file || m_mpp->m_tmp_file->getFd() < 0) {
+                if (m_mpp->m_tmp_file->getFd() < 0) {
                     ms_dbg_a(m_transaction, 1,
                         "Multipart: Failed to create file: " \
                         + m_mpp->m_tmp_file->getFilename());
@@ -1638,7 +1643,7 @@ bool Multipart::process(const std::string& data, std::string *error,
                     }
                 } else { /* It looks like a boundary but */
                          /* we couldn't match it. */
-                    char *p = NULL;
+                    const char *p = NULL;
 
                     /* Check if an attempt to use quotes around the
                      * boundary was made. */

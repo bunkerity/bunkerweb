@@ -32,3 +32,4 @@ tests/.env
 
 # Ignore Go-FTW configuration file
 .ftw.yaml
+crs-toolchain

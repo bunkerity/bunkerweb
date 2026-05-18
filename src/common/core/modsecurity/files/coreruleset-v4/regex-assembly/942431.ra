@@ -1,0 +1,17 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Rule 942431: Restricted SQL Character Anomaly Detection (args)
+##! Stricter sibling of rule 942430 (PL3).
+##! Matches when 6 or more special characters appear.
+##! Also triggered by: SAP CRM Java vulnerability CVE-2018-2380
+##! See: https://github.com/coreruleset/coreruleset/issues/3325
+
+##!> include sql-special-chars-anomaly
+
+##!^ (
+##!$ {6})
+
+##!> assemble
+  ##!=> sql-special-chars-anomaly
+##!<

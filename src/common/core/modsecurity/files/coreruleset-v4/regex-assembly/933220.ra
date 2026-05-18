@@ -1,0 +1,27 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! PHP Session File Access Detection
+##! This rule detects attempts to upload or create PHP session files, which can be used for PHP session deserialization attacks.
+##! Session files are stored with prefix "sess_" followed by the session ID.
+##!
+##! PHP session ID character sets (based on session.sid_bits_per_character):
+##!   4 bits: 0-9a-f (hex, legacy)
+##!   5 bits: 0-9a-v
+##!   6 bits: 0-9a-zA-Z,- (after t:lowercase becomes 0-9a-z,-)
+##!
+##! Session ID length: 22-256 characters (session.sid_length, default 32)
+##! Using 20 as minimum for some legacy/edge cases.
+##!
+##! References:
+##!   - PHP session.save_handler documentation
+##!   - https://www.php.net/manual/en/session.configuration.php
+
+##! Prefix: Match start of string OR path separator (Unix / or Windows \)
+##!^ (?:^|[/\x5c])
+
+##! Suffix: Match end of string
+##!$ $
+
+##! Main pattern: sess_ followed by valid session ID characters
+sess_[0-9a-z,-]{20,256}

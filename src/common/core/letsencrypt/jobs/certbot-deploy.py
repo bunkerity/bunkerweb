@@ -12,10 +12,10 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from Database import Database  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from API import API  # type: ignore
 
-LOGGER = setup_logger("Lets-encrypt.deploy")
+LOGGER = getLogger("LETS-ENCRYPT.DEPLOY")
 status = 0
 
 try:
@@ -35,7 +35,7 @@ try:
     db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
 
     instances = db.get_instances()
-    services = db.get_non_default_settings(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split(" ")
+    services = db.get_non_default_settings(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split()
 
     reload_min_timeout = getenv("RELOAD_MIN_TIMEOUT", "5")
 

@@ -21,8 +21,7 @@ namespace modsecurity::actions::transformations {
 
 
 bool Md5::transform(std::string &value, const Transaction *trans) const {
-    value = Utils::Md5::digest(value);
-    return true;
+    return Utils::Md5::digestReplace(&value);
 }
 
 

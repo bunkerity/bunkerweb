@@ -62,17 +62,19 @@ bool RxGlobal::evaluate(Transaction *transaction, RuleWithActions *rule,
 
     // FIXME: DRY regex error reporting. This logic is currently duplicated in other operators.
     if (regex_result != Utils::RegexResult::Ok) {
-        transaction->m_variableMscPcreError.set("1", transaction->m_variableOffset);
+        if (transaction) {
+            transaction->m_variableMscPcreError.set("1", transaction->m_variableOffset);
 
-        std::string regex_error_str = "OTHER";
-        if (regex_result == Utils::RegexResult::ErrorMatchLimit) {
-            regex_error_str = "MATCH_LIMIT";
-            transaction->m_variableMscPcreLimitsExceeded.set("1", transaction->m_variableOffset);
-            transaction->m_collections.m_tx_collection->storeOrUpdateFirst("MSC_PCRE_LIMITS_EXCEEDED", "1");
-            ms_dbg_a(transaction, 7, "Set TX.MSC_PCRE_LIMITS_EXCEEDED to 1");
+            std::string regex_error_str = "OTHER";
+            if (regex_result == Utils::RegexResult::ErrorMatchLimit) {
+                regex_error_str = "MATCH_LIMIT";
+                transaction->m_variableMscPcreLimitsExceeded.set("1", transaction->m_variableOffset);
+                transaction->m_collections.m_tx_collection->storeOrUpdateFirst("MSC_PCRE_LIMITS_EXCEEDED", "1");
+                ms_dbg_a(transaction, 7, "Set TX.MSC_PCRE_LIMITS_EXCEEDED to 1");
+            }
+
+            ms_dbg_a(transaction, 1, "rxGlobal: regex error '" + regex_error_str + "' for pattern '" + re->pattern + "'");
         }
-
-        ms_dbg_a(transaction, 1, "rxGlobal: regex error '" + regex_error_str + "' for pattern '" + re->pattern + "'");
 
         return false;
     }

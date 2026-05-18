@@ -1,6 +1,6 @@
 /*
 ** MIPS instruction emitter.
-** Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2026 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #if LJ_64
@@ -79,6 +79,9 @@ static void emit_tsml(ASMState *as, MIPSIns mi, Reg rt, Reg rs, uint32_t msb,
 #endif
 
 /* -- Emit loads/stores --------------------------------------------------- */
+
+#define jglofs(as, k) \
+  (((uintptr_t)(k) - (uintptr_t)J2G(as->J) - 32768) & 0xffff)
 
 /* Prefer rematerialization of BASE/L from global_State over spills. */
 #define emit_canremat(ref)	((ref) <= REF_BASE)

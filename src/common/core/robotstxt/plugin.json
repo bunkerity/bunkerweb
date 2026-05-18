@@ -42,8 +42,7 @@
       "id": "robotstxt-urls",
       "label": "Robots.txt URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
-      "type": "multivalue",
-      "separator": " "
+      "type": "multivalue"
     },
     "ROBOTSTXT_RULE": {
       "context": "multisite",

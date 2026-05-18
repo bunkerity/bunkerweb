@@ -32,20 +32,25 @@
         - **协议处理：** 支持 HTTP、HTTPS、WebSockets 和其他协议
         - **错误拦截：** 自定义错误页面以获得一致的用户体验
 
-    | 设置                             | 默认值 | 上下文    | 多选 | 描述                                                 |
-    | -------------------------------- | ------ | --------- | ---- | ---------------------------------------------------- |
-    | `USE_REVERSE_PROXY`              | `no`   | multisite | 否   | **启用反向代理：** 设置为 `yes` 以启用反向代理功能。 |
-    | `REVERSE_PROXY_HOST`             |        | multisite | 是   | **后端主机：** 代理资源的完整 URL (proxy_pass)。     |
-    | `REVERSE_PROXY_URL`              | `/`    | multisite | 是   | **位置 URL：** 将被代理到后端服务器的路径。          |
-    | `REVERSE_PROXY_BUFFERING`        | `yes`  | multisite | 是   | **响应缓冲：** 启用或禁用来自代理资源的响应缓冲。    |
-    | `REVERSE_PROXY_KEEPALIVE`        | `no`   | multisite | 是   | **保持连接：** 启用或禁用与代理资源的保持连接。      |
-    | `REVERSE_PROXY_CUSTOM_HOST`      |        | multisite | 否   | **自定义主机：** 覆盖发送到上游服务器的 Host 标头。  |
-    | `REVERSE_PROXY_INTERCEPT_ERRORS` | `yes`  | multisite | 否   | **拦截错误：** 是否拦截和重写来自后端的错误响应。    |
+    | 设置                              | 默认值 | 上下文    | 多选 | 描述                                                                                                                                               |
+    | --------------------------------- | ------ | --------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_REVERSE_PROXY`               | `no`   | multisite | 否   | **启用反向代理：** 设置为 `yes` 以启用反向代理功能。                                                                                               |
+    | `REVERSE_PROXY_HOST`              |        | multisite | 是   | **后端主机：** 代理资源的完整 URL (proxy_pass)。                                                                                                   |
+    | `REVERSE_PROXY_URL`               | `/`    | multisite | 是   | **位置 URL：** 将被代理到后端服务器的路径。                                                                                                        |
+    | `REVERSE_PROXY_BUFFERING`         | `yes`  | multisite | 是   | **响应缓冲：** 启用或禁用来自代理资源的响应缓冲。                                                                                                  |
+    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`  | multisite | 是   | **请求缓冲：** 启用或禁用向代理资源发送请求时的缓冲。                                                                                              |
+    | `REVERSE_PROXY_KEEPALIVE`         | `no`   | multisite | 是   | **保持连接：** 启用或禁用与代理资源的保持连接。                                                                                                    |
+    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`  | multisite | 是   | **HTTP 版本：** 用于与上游通信的 HTTP 协议版本（`1.0`、`1.1` 或 `2`）。设为 `2` 可在上游连接上启用 HTTP/2 多路复用。WebSocket 位置始终固定为 1.1。 |
+    | `REVERSE_PROXY_CUSTOM_HOST`       |        | multisite | 否   | **自定义主机：** 覆盖发送到上游服务器的 Host 标头。                                                                                                |
+    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`  | multisite | 否   | **拦截错误：** 是否拦截和重写来自后端的错误响应。                                                                                                  |
 
     !!! tip "最佳实践"
         - 始终在 `REVERSE_PROXY_HOST` 中指定完整的 URL，包括协议（http:// 或 https://）
         - 使用 `REVERSE_PROXY_INTERCEPT_ERRORS` 在您所有服务中提供一致的错误页面
         - 当配置多个后端时，使用带编号的后缀格式（例如，`REVERSE_PROXY_HOST_2`、`REVERSE_PROXY_URL_2`）
+
+    !!! warning "请求缓冲行为"
+        禁用 `REVERSE_PROXY_REQUEST_BUFFERING` 仅在 ModSecurity 被禁用时才会生效，因为否则会强制执行请求缓冲。
 
 === "连接设置"
 
@@ -180,13 +185,19 @@
         - **性能优化：** 针对特定用例微调请求处理
         - **灵活性：** 通过专门的配置适应独特的应用程序需求
 
-    | 设置                              | 默认值 | 上下文    | 多选 | 描述                                            |
-    | --------------------------------- | ------ | --------- | ---- | ----------------------------------------------- |
-    | `REVERSE_PROXY_INCLUDES`          |        | multisite | 是   | **附加配置：** 在 location 块中包含额外的配置。 |
-    | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`  | multisite | 是   | **传递请求体：** 启用或禁用传递请求体。         |
+    | 设置                              | 默认值 | 上下文    | 多选 | 描述                                                                                                                                                  |
+    | --------------------------------- | ------ | --------- | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_INCLUDES`          |        | multisite | 是   | **附加配置：** 在 location 块中包含额外的配置。                                                                                                       |
+    | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`  | multisite | 是   | **传递请求体：** 启用或禁用传递请求体。                                                                                                               |
+    | `REVERSE_PROXY_MODSECURITY`       | `yes`  | multisite | 是   | **ModSecurity（按 location）：** 设置为 `no` 可在此 location 中生成 `modsecurity off;`，从而在大文件上传端点上绕过 WAF 以避免 OOM（请参阅下方说明）。 |
 
     !!! warning "安全注意事项"
         包含自定义配置片段时请小心，因为如果配置不当，它们可能会覆盖 BunkerWeb 的安全设置或引入漏洞。
+
+    !!! warning "大文件上传的安全建议"
+        ModSecurity 会将完整请求体缓冲到内存中，并且无法为数 GB 的上传设置上限，这可能导致 worker OOM。如果——**并且仅当**——某个反向代理 URL *专门* 用于文件上传（例如专用的 `/upload` 端点），请在该 URL 上设置 `REVERSE_PROXY_MODSECURITY_N: "no"`。不要在混合用途的 URL 上禁用它：否则该 location 提供的所有内容都会失去 WAF 覆盖。
+
+        为了在绕过 ModSecurity 后仍保护上传内容，请将其与文件扫描插件配合使用，例如 [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) 或 [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)——它们检查上传文件本身，而不是原始请求体。
 
 === "缓存配置"
 

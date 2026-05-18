@@ -19,8 +19,4 @@ src/ui/client/static
 src/ui/client/templates
 src/ui/static
 src/ui/templates
-src/ui/builder
-src/ui/client/builder/*.json
-src/ui/client/builder/*.txt
-
-sync-fork.sh
+.DS_Store

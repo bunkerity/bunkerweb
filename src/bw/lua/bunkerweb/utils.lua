@@ -16,7 +16,7 @@ local ERR = ngx.ERR
 local INFO = ngx.INFO
 local WARN = ngx.WARN
 local HTTP_FORBIDDEN = ngx.HTTP_FORBIDDEN
-local HTTP_CLOSED = ngx.HTTP_CLOSED
+local HTTP_CLOSE = ngx.HTTP_CLOSE or 444
 local null = ngx.null
 local re_match = ngx.re.match
 local subsystem = ngx.config.subsystem
@@ -32,16 +32,28 @@ local bytes = random.bytes
 local char = string.char
 local session_start = session.start
 local tonumber = tonumber
-local getenv = os.getenv
+
+local shared = ngx.shared
+local math_min = math.min
+local math_max = math.max
 
 local datastore = cdatastore:new()
 local internalstore
 
 if subsystem == "http" then
-	internalstore = cdatastore:new(ngx.shared.internalstore)
+	internalstore = cdatastore:new(shared.internalstore)
 else
-	internalstore = cdatastore:new(ngx.shared.internalstore_stream)
+	internalstore = cdatastore:new(shared.internalstore_stream)
 end
+
+-- Cross-subsystem datastore for ban synchronization:
+-- When running in HTTP, try to access the stream datastore (and vice versa).
+-- Will be nil if the other subsystem's shared dict is not accessible.
+local other_dict = subsystem == "http" and shared.datastore_stream or shared.datastore
+local other_datastore = other_dict and cdatastore:new(other_dict) or nil
+
+-- Short TTL for locally cached bans so unbans propagate from Redis within this window
+local BAN_LOCAL_CACHE_TTL = 30
 
 local utils = {}
 
@@ -300,10 +312,14 @@ end
 
 utils.get_reason = function(ctx)
 	-- ngx.ctx
-	local security_mode = utils.get_security_mode(ctx)
-	if ctx and ctx.bw and ctx.bw.reason then
-		return ctx.bw.reason, ctx.bw.reason_data or {}, security_mode
+	local security_mode
+	if ctx and ctx.bw then
+		security_mode = ctx.bw.security_mode or utils.get_security_mode(ctx)
+		if ctx.bw.reason then
+			return ctx.bw.reason, ctx.bw.reason_data or {}, security_mode
+		end
 	end
+	security_mode = security_mode or utils.get_security_mode(ctx)
 	-- ngx.var
 	local var_reason = var.reason
 	if var_reason and var_reason ~= "" then
@@ -317,12 +333,12 @@ utils.get_reason = function(ctx)
 		end
 		return var_reason, reason_data, security_mode
 	end
-	-- os.getenv / modsecurity
-	if getenv("REASON") == "modsecurity" then
+	-- ngx.var / modsecurity
+	if ngx.var.modsecurity_reason == "modsecurity" then
 		local reason_data = {}
 
 		-- Handle IDs
-		local env_reason_data_ids = getenv("REASON_DATA_RULES")
+		local env_reason_data_ids = ngx.var.modsecurity_rules
 		if env_reason_data_ids and env_reason_data_ids ~= "" and env_reason_data_ids ~= "none" then
 			if env_reason_data_ids:sub(1, 1) == " " then
 				env_reason_data_ids = env_reason_data_ids:sub(2)
@@ -334,16 +350,16 @@ utils.get_reason = function(ctx)
 		end
 
 		-- Handle messages, matched_vars, and matched_var_names
-		local env_unique_id_separator = getenv("REASON_DATA_UNIQUE_ID")
+		local env_unique_id_separator = ngx.var.modsecurity_unique_id
 		local data_types = {
-			{ key = "msgs", env_var = "REASON_DATA_MSGS" },
-			{ key = "matched_vars", env_var = "REASON_DATA_MATCHED_VARS" },
-			{ key = "matched_var_names", env_var = "REASON_DATA_MATCHED_VAR_NAMES" },
-			{ key = "anomaly_score", env_var = "REASON_DATA_ANOMALY_SCORE" },
+			{ key = "msgs", env_var = "modsecurity_msgs" },
+			{ key = "matched_vars", env_var = "modsecurity_matched_vars" },
+			{ key = "matched_var_names", env_var = "modsecurity_matched_var_names" },
+			{ key = "anomaly_score", env_var = "modsecurity_anomaly_score" },
 		}
 
 		for _, data_type in ipairs(data_types) do
-			local env_data = getenv(data_type.env_var)
+			local env_data = ngx.var[data_type.env_var]
 			if env_data and env_data ~= "" and env_data ~= "none" and env_unique_id_separator then
 				-- Remove leading |separator| if present
 				local separator_pattern = "|" .. env_unique_id_separator .. "|"
@@ -570,7 +586,7 @@ utils.get_rdns = function(ip, ctx, pool)
 	-- Do rDNS query
 	local answers, err = rdns:reverse_query(ip)
 	if not answers then
-		logger:log(ERR, "error while doing reverse DNS query for " .. ip .. " : " .. err)
+		logger:log(WARN, "error while doing reverse DNS query for " .. ip .. " : " .. err)
 		ret_err = err
 	else
 		if answers.errcode then
@@ -738,9 +754,9 @@ utils.get_deny_status = function()
 			logger:log(ERR, "can't get variables from internalstore : " .. err)
 			return HTTP_FORBIDDEN
 		end
-		return tonumber(variables["global"]["DENY_HTTP_STATUS"])
+		return tonumber(variables["global"]["DENY_HTTP_STATUS"]) or HTTP_FORBIDDEN
 	end
-	return HTTP_CLOSED
+	return HTTP_CLOSE
 end
 
 utils.get_security_mode = function(ctx)
@@ -756,9 +772,19 @@ utils.get_session = function(ctx)
 	if ctx.bw.sessions_session then
 		return ctx.bw.sessions_session
 	end
+	-- Resolve per-server cookie domain from the multisite SESSIONS_DOMAIN setting. An empty value
+	-- must leave cookie_domain nil so lua-resty-session keeps the host-only default, and the
+	-- multisite lookup guarantees unrelated tenants never receive a cross-tenant Domain attribute.
+	local start_config
+	local sessions_domain, sessions_domain_err = utils.get_variable("SESSIONS_DOMAIN", true, ctx)
+	if sessions_domain == nil then
+		logger:log(ERR, "error while getting variable SESSIONS_DOMAIN : " .. (sessions_domain_err or ""))
+	elseif sessions_domain ~= "" then
+		start_config = { cookie_domain = sessions_domain }
+	end
 	-- Open/create and do an optional refresh
 	local err, exists, refreshed
-	session, err, exists, refreshed = session_start()
+	session, err, exists, refreshed = session_start(start_config)
 	if not session then
 		return nil, err
 	end
@@ -899,8 +925,11 @@ utils.is_banned = function(ip, server_name)
 		elseif data.err then
 			return nil, "redis script error: " .. data.err, nil, nil
 		elseif data[1] ~= null then
-			-- Update local cache with the full JSON payload
-			local ok_cache, cache_err = datastore:set_with_retries(key, data[1], data[2])
+			-- Cache locally with a short TTL so unbans propagate within BAN_LOCAL_CACHE_TTL seconds.
+			-- For permanent bans (redis_ttl <= 0), also use BAN_LOCAL_CACHE_TTL to re-validate periodically.
+			local redis_ttl = data[2]
+			local cache_ttl = redis_ttl > 0 and math_min(redis_ttl, BAN_LOCAL_CACHE_TTL) or BAN_LOCAL_CACHE_TTL
+			local ok_cache, cache_err = datastore:set_with_retries(key, data[1], cache_ttl)
 			if not ok_cache then
 				logger:log(WARN, "datastore:set_with_retries() error: " .. cache_err)
 			end
@@ -914,12 +943,8 @@ utils.is_banned = function(ip, server_name)
 				reason_data = ban_data.reason_data
 			end
 
-			local ttl = data[2]
-			-- Redis TTL for permanent keys is -1. Normalize to 0 for consistency.
-			if ttl < 0 then
-				ttl = 0
-			end
-			return true, reason, ttl, reason_data
+			-- Redis TTL for permanent keys is -1; normalize to 0
+			return true, reason, math_max(redis_ttl, 0), reason_data
 		end
 
 		return false, "not banned", nil, nil
@@ -949,6 +974,11 @@ utils.is_banned = function(ip, server_name)
 end
 
 utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_data)
+	-- Validate IP address
+	if not ip or (not utils.is_ipv4(ip) and not utils.is_ipv6(ip)) then
+		return false, "invalid IP address"
+	end
+
 	-- Determine ban key based on scope
 	local ban_key = "bans_ip_" .. ip
 	if ban_scope == "service" and service then
@@ -972,6 +1002,16 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_da
 	local ok, err = datastore:set_with_retries(ban_key, ban_data, effective_ttl)
 	if not ok then
 		return false, "datastore:set_with_retries() error : " .. err
+	end
+
+	-- Also write to the other subsystem's datastore (e.g., stream when called from HTTP).
+	-- This ensures bans are immediately visible in both HTTP and stream contexts without
+	-- waiting for a Redis cache refresh cycle.
+	if other_datastore then
+		local ok2, err2 = other_datastore:set_with_retries(ban_key, ban_data, effective_ttl)
+		if not ok2 then
+			logger:log(WARN, "other datastore set_with_retries() error: " .. err2)
+		end
 	end
 
 	-- Set on redis
@@ -1005,57 +1045,71 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_da
 end
 
 utils.remove_ban = function(ip, service, ban_scope)
+	-- Validate IP address
+	if not ip or (not utils.is_ipv4(ip) and not utils.is_ipv6(ip)) then
+		return false, "invalid IP address"
+	end
+
 	-- Set default scope to global
 	if not ban_scope then
 		ban_scope = "global"
 	end
 
-	-- Connect to redis if needed
-	local use_redis, err = utils.get_variable("USE_REDIS", false)
-	if not use_redis then
-		return nil, "can't get USE_REDIS variable : " .. err
-	end
-	use_redis = use_redis == "yes"
-
-	local clusterstore
-	if use_redis then
-		clusterstore = require "bunkerweb.clusterstore":new()
-		local ok, connect_err = clusterstore:connect()
-		if not ok then
-			return false, "can't connect to redis: " .. connect_err
+	-- Helper: delete a ban key from all local datastores
+	local function delete_local(key)
+		datastore:delete(key)
+		if other_datastore then
+			other_datastore:delete(key)
 		end
 	end
 
-	-- Handle service-specific unban
+	-- Collect keys to delete and remove from local datastores FIRST.
+	-- This ensures unbans take effect locally even if Redis is unreachable.
+	local keys_to_delete = {}
 	if ban_scope == "service" and service then
 		local ban_key = "bans_service_" .. service .. "_ip_" .. ip
-		datastore:delete(ban_key)
-		if use_redis then
-			clusterstore:call("del", ban_key)
-		end
-	-- Handle global unban
+		keys_to_delete[#keys_to_delete + 1] = ban_key
+		delete_local(ban_key)
 	else
-		-- Delete global ban from datastore and redis
-		local global_ban_key = "bans_ip_" .. ip
-		datastore:delete(global_ban_key)
-		if use_redis then
-			clusterstore:call("del", global_ban_key)
-		end
+		-- Delete global ban
+		local global_key = "bans_ip_" .. ip
+		keys_to_delete[#keys_to_delete + 1] = global_key
+		delete_local(global_key)
 
-		-- Delete all service-specific bans for this IP from datastore and redis
-		-- This is inefficient but it's how it's done in api.lua
+		-- Delete all service-specific bans for this IP
+		local suffix = "_ip_" .. ip
 		for _, k in ipairs(datastore:keys()) do
-			if k:find("^bans_service_.-_ip_" .. ip .. "$") then
-				datastore:delete(k)
-				if use_redis then
-					clusterstore:call("del", k)
+			if k:sub(1, 13) == "bans_service_" and k:sub(-#suffix) == suffix then
+				keys_to_delete[#keys_to_delete + 1] = k
+				delete_local(k)
+			end
+		end
+		if other_datastore then
+			for _, k in ipairs(other_datastore:keys()) do
+				if k:sub(1, 13) == "bans_service_" and k:sub(-#suffix) == suffix then
+					keys_to_delete[#keys_to_delete + 1] = k
+					delete_local(k)
 				end
 			end
 		end
 	end
 
-	if clusterstore then
-		clusterstore:close()
+	-- Now delete from Redis (best-effort — local unbans already applied above)
+	local use_redis, err = utils.get_variable("USE_REDIS", false)
+	if not use_redis then
+		return nil, "can't get USE_REDIS variable : " .. err
+	end
+	if use_redis == "yes" then
+		local clusterstore = require "bunkerweb.clusterstore":new()
+		local ok, connect_err = clusterstore:connect()
+		if not ok then
+			logger:log(ERR, "can't connect to redis for unban: " .. connect_err)
+		else
+			for _, key in ipairs(keys_to_delete) do
+				clusterstore:call("del", key)
+			end
+			clusterstore:close()
+		end
 	end
 
 	return true, "success"
@@ -1095,6 +1149,7 @@ utils.get_phases = function()
 		"rewrite",
 		"access",
 		"content",
+		"ssl_client_hello_default",
 		"ssl_certificate",
 		"header",
 		"log",
@@ -1110,9 +1165,12 @@ utils.is_cosocket_available = function()
 	local phases = {
 		"timer",
 		"rewrite",
+		"server_rewrite",
 		"access",
 		"content",
-		"ssl_certificate",
+		"ssl_cert",
+		"ssl_client_hello",
+		"ssl_session_fetch",
 		"preread",
 	}
 	local current_phase = get_phase()
@@ -1122,6 +1180,11 @@ utils.is_cosocket_available = function()
 		end
 	end
 	return false
+end
+
+utils.is_connection_error = function(err)
+	return err
+		and (err:find("closed", 1, true) or err:find("broken pipe", 1, true) or err:find("connection reset", 1, true))
 end
 
 utils.kill_all_threads = function(threads)

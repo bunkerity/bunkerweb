@@ -1,17 +1,21 @@
-from contextlib import suppress
+from contextlib import asynccontextmanager, suppress
+from functools import lru_cache
+from io import StringIO
 from os import sep
 from os.path import join
+from re import split
 from sys import path as sys_path
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from traceback import format_exc
 from ipaddress import ip_address, ip_network, IPv4Network, IPv6Network
-import re
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
+
+from yaml import safe_dump as yaml_dump
 
 from common_utils import get_version  # type: ignore
 
@@ -21,6 +25,17 @@ from .rate_limit import setup_rate_limiter, limiter_dep_dynamic
 from .config import api_config
 
 BUNKERWEB_VERSION = get_version()
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    yield
+    from .utils import _DB_INSTANCE, _API_DB_INSTANCE
+
+    for db in (_DB_INSTANCE, _API_DB_INSTANCE):
+        if db is not None:
+            with suppress(Exception):
+                db.close()
 
 
 def create_app() -> FastAPI:
@@ -36,6 +51,7 @@ def create_app() -> FastAPI:
         redoc_url=api_config.redoc_url,
         openapi_url=api_config.openapi_url,
         root_path=api_config.API_ROOT_PATH or "",
+        lifespan=lifespan,
     )
 
     # Optional IP whitelist (enabled by default, can be disabled)
@@ -43,7 +59,7 @@ def create_app() -> FastAPI:
     if api_config.whitelist_enabled:
         raw_whitelist = api_config.API_WHITELIST_IPS.strip()
         if raw_whitelist:
-            for tok in re.split(r"[\s,]+", raw_whitelist):
+            for tok in split(r"[\s,]+", raw_whitelist):
                 if not tok:
                     continue
                 try:
@@ -107,20 +123,28 @@ def create_app() -> FastAPI:
             LOGGER.debug(f"Unhandled exception: {exc}\n{format_exc()}")
         return JSONResponse(status_code=500, content={"status": "error", "message": "internal error"})
 
+    @app.get("/openapi.yaml", include_in_schema=False)
+    @lru_cache()
+    def read_openapi_yaml():
+        openapi_json = app.openapi()
+        yaml_s = StringIO()
+        yaml_dump(openapi_json, yaml_s)
+        return Response(yaml_s.getvalue(), media_type="text/yaml")
+
     return app
 
 
 description = (
-    """# BunkerWeb Internal API
+    """# BunkerWeb API
 
-This API is the internal control plane for BunkerWeb. It manages configuration, instances, plugins, bans, and scheduler artefacts and should remain on a trusted network.
+This API is the control plane for BunkerWeb. It manages configuration, instances, plugins, bans, and scheduler artefacts and should remain on a trusted network.
 
 ## Feature overview
 
 - Core: `/ping` and `/health` offer lightweight liveness probes.
 - Auth: `POST /auth` exchanges Basic credentials or the admin override token for a Biscuit; admin users may also authenticate with HTTP Basic directly.
 - Instances: register, list, update, and remove instances or broadcast `/ping`, `/reload`, and `/stop` to all or specific hosts.
-- Global config: `GET`/`PATCH /global_config` read or update API-owned global settings without touching other sources.
+- Global settings: `GET`/`PATCH /global_settings` read or update API-owned global settings without touching other sources.
 - Services: create, rename, toggle draft/online modes, convert, and delete services while keeping prefixed variables consistent.
 - Custom configs: manage HTTP/stream/ModSecurity/CRS snippets via JSON payloads or uploads with `GET`/`POST`/`PATCH`/`DELETE /configs`.
 - Bans: aggregate current bans and orchestrate ban/unban operations across instances with flexible bulk payloads.
@@ -166,7 +190,7 @@ tags_metadata = [
     {"name": "auth", "description": "Authentication and Biscuit issuance"},
     {"name": "bans", "description": "Operations related to ban management"},
     {"name": "instances", "description": "Operations related to instance management"},
-    {"name": "global_config", "description": "Operations related to global configuration"},
+    {"name": "global_settings", "description": "Operations related to global settings"},
     {"name": "services", "description": "Operations related to service management"},
     {"name": "configs", "description": "Operations related to custom NGINX configs"},
     {"name": "plugins", "description": "Operations related to plugin management"},

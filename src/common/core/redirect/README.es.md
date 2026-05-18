@@ -20,14 +20,19 @@ Siga estos pasos para configurar y utilizar la función de Redirección:
 
 ### Ajustes de Configuración
 
-| Ajuste                    | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                          |
-| ------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `REDIRECT_FROM`           | `/`               | multisite | yes      | **Ruta desde la que redirigir:** La ruta que se redirigirá.                                                                          |
-| `REDIRECT_TO`             |                   | multisite | yes      | **URL de destino:** La URL de destino a la que se redirigirá a los visitantes. Deje en blanco para deshabilitar la redirección.      |
-| `REDIRECT_TO_REQUEST_URI` | `no`              | multisite | yes      | **Preservar ruta:** Cuando se establece en `yes`, agrega el URI de la solicitud original a la URL de destino.                        |
-| `REDIRECT_TO_STATUS_CODE` | `301`             | multisite | yes      | **Código de estado HTTP:** El código de estado HTTP a utilizar para la redirección. Opciones: `301` (permanente) o `302` (temporal). |
+| Ajuste                    | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                     |
+| ------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `REDIRECT_FROM`           | `/`               | multisite | yes      | **Ruta desde la que redirigir:** La ruta que se redirigirá.                                                                     |
+| `REDIRECT_TO`             |                   | multisite | yes      | **URL de destino:** La URL de destino a la que se redirigirá a los visitantes. Deje en blanco para deshabilitar la redirección. |
+| `REDIRECT_TO_REQUEST_URI` | `no`              | multisite | yes      | **Preservar ruta:** Cuando se establece en `yes`, agrega el URI de la solicitud original a la URL de destino.                   |
+| `REDIRECT_TO_STATUS_CODE` | `301`             | multisite | yes      | **Código de estado HTTP:** El código de estado HTTP a utilizar. Opciones: `301`, `302`, `303`, `307` o `308`.                   |
 
-!!! tip "Elegir el Código de Estado Correcto" - Use `301` (Movido Permanentemente) cuando la redirección es permanente, como para migraciones de dominio o para establecer URL canónicas. Esto ayuda a los motores de búsqueda a actualizar sus índices. - Use `302` (Encontrado/Redirección Temporal) cuando la redirección es temporal o si desea reutilizar la URL original en el futuro.
+!!! tip "Elegir el Código de Estado Correcto"
+    - **`301` (Moved Permanently):** Redirección permanente, almacenada en caché por navegadores. Puede cambiar POST a GET. Ideal para migraciones de dominio.
+    - **`302` (Found):** Redirección temporal. Puede cambiar POST a GET.
+    - **`303` (See Other):** Siempre redirige usando el método GET. Útil después de envíos de formularios.
+    - **`307` (Temporary Redirect):** Redirección temporal que preserva el método HTTP. Ideal para APIs.
+    - **`308` (Permanent Redirect):** Redirección permanente que preserva el método HTTP. Para migraciones permanentes de API.
 
 !!! info "Preservación de la Ruta"
     Cuando `REDIRECT_TO_REQUEST_URI` se establece en `yes`, BunkerWeb preserva la ruta de la solicitud original. Por ejemplo, si un usuario visita `https://dominio-antiguo.com/blog/post-1` y ha configurado una redirección a `https://dominio-nuevo.com`, será redirigido a `https://dominio-nuevo.com/blog/post-1`.
@@ -96,4 +101,25 @@ Siga estos pasos para configurar y utilizar la función de Redirección:
     REDIRECT_TO: "https://example.com/support"
     REDIRECT_TO_REQUEST_URI: "yes"
     REDIRECT_TO_STATUS_CODE: "301"
+    ```
+
+=== "Migración de Endpoint de API"
+
+    Una configuración para redirigir permanentemente un endpoint de API preservando el método HTTP:
+
+    ```yaml
+    REDIRECT_FROM: "/api/v1/"
+    REDIRECT_TO: "https://api.example.com/v2/"
+    REDIRECT_TO_REQUEST_URI: "yes"
+    REDIRECT_TO_STATUS_CODE: "308"
+    ```
+
+=== "Redirección Post-Formulario"
+
+    Una configuración para redirigir después del envío de un formulario usando el método GET:
+
+    ```yaml
+    REDIRECT_TO: "https://example.com/gracias"
+    REDIRECT_TO_REQUEST_URI: "no"
+    REDIRECT_TO_STATUS_CODE: "303"
     ```

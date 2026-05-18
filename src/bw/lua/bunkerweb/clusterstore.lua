@@ -10,6 +10,7 @@ local logger = clogger:new("CLUSTERSTORE")
 
 local get_variable = utils.get_variable
 local is_cosocket_available = utils.is_cosocket_available
+local is_connection_error = utils.is_connection_error
 local ERR = ngx.ERR
 local WARN = ngx.WARN
 local INFO = ngx.INFO
@@ -142,6 +143,7 @@ function clusterstore:connect(readonly)
 		redis_client, err, previous_errors = self.redis_connector:connect()
 	end
 	self.redis_client = redis_client
+	self.healthy = redis_client ~= nil
 	if not self.redis_client then
 		if previous_errors then
 			err = err .. " ( previous errors : "
@@ -156,6 +158,7 @@ function clusterstore:connect(readonly)
 	local times
 	times, err = self.redis_client:get_reused_times()
 	if times == nil then
+		self.healthy = false
 		self:close()
 		return false, "error while getting reused times : " .. err
 	end
@@ -173,16 +176,23 @@ function clusterstore:close()
 	if not self.redis_client then
 		return false, "client is not instantiated"
 	end
-	-- Pool case
+	-- Only return healthy connections to the keepalive pool.
+	-- Unhealthy connections (or non-pooled) are closed directly to avoid
+	-- the unnecessary DISCARD command that the connector sends before keepalive.
 	local ok, err
-	if self.pool then
+	if self.pool and self.healthy then
 		ok, err = self.redis_connector:set_keepalive(self.redis_client)
-		-- No pool
+		-- If keepalive fails (e.g., socket already closed at the C level),
+		-- fall back to a hard close so the socket is fully released.
+		if not ok then
+			logger:log(WARN, "set_keepalive failed: " .. (err or "unknown") .. ", closing connection")
+			self.redis_client:close()
+		end
 	else
 		ok, err = self.redis_client:close()
 	end
 	self.redis_client = nil
-	if err then
+	if not ok and err then
 		logger:log(ERR, "error while closing redis_client : " .. err)
 	end
 	return ok ~= nil, err
@@ -193,8 +203,12 @@ function clusterstore:call(method, ...)
 	if not self.redis_client then
 		return false, "client is not instantiated"
 	end
-	-- Call method
-	return self.redis_client[method](self.redis_client, ...)
+	-- Call method (res is nil for socket errors, false for Redis RESP errors)
+	local res, err = self.redis_client[method](self.redis_client, ...)
+	if res == nil and is_connection_error(err) then
+		self.healthy = false
+	end
+	return res, err
 end
 
 function clusterstore:multi(calls)

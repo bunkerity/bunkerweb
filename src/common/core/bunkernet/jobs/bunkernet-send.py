@@ -19,10 +19,10 @@ from heapq import merge
 
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
-LOGGER = setup_logger("BUNKERNET.send")
+LOGGER = getLogger("BUNKERNET.SEND")
 exit_status = 0
 
 BATCH_SIZE = 100
@@ -32,7 +32,7 @@ try:
     bunkernet_activated = False
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
-        for first_server in getenv("SERVER_NAME", "www.example.com").split(" "):
+        for first_server in getenv("SERVER_NAME", "www.example.com").split():
             if getenv(f"{first_server}_USE_BUNKERNET", "yes") == "yes":
                 bunkernet_activated = True
                 break
@@ -106,6 +106,7 @@ try:
 
         LOGGER.info(f"Sending {len(batch)} / {remaining} reports to BunkerNet API ...")
         ok, status, data = send_reports(batch)
+        LOGGER.debug(f"Send reports API reply - ok: {ok}, status: {status}, data: {data}")
 
         if not ok or status in (429, 403):
             reports = batch + reports  # Add batch back to reports

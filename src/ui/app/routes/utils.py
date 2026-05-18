@@ -1,4 +1,5 @@
 from base64 import b64encode
+from collections import defaultdict
 from datetime import datetime
 from functools import wraps
 from io import BytesIO
@@ -14,7 +15,6 @@ from app.utils import LOGGER, flash
 
 from common_utils import get_redis_client as get_common_redis_client  # type: ignore
 
-
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
 REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
 PLUGIN_KEYS = ["id", "name", "description", "version", "stream", "settings"]
@@ -22,6 +22,12 @@ PLUGIN_ID_RX = re_compile(r"^[\w_-]{1,64}$")
 CUSTOM_CONF_RX = re_compile(
     r"^CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(?P<name>.+)$"
 )
+FILE_SETTING_NAME_RX = re_compile(r"^(?P<setting>.+)__FILE_NAME(?P<suffix>_\d+)?$")
+
+
+def _sanitize_filename(name: str) -> str:
+    """Strip path separators, null bytes, and control characters from an uploaded filename."""
+    return "".join(ch for ch in name if ch >= " " and ch != "\x7f").replace("/", "").replace("\\", "").strip()
 
 
 def wait_applying():
@@ -166,7 +172,7 @@ def get_redis_client():
             "USE_REDIS",
             "REDIS_HOST",
             "REDIS_PORT",
-            "REDIS_DB",
+            "REDIS_DATABASE",
             "REDIS_TIMEOUT",
             "REDIS_KEEPALIVE_POOL",
             "REDIS_SSL",
@@ -185,7 +191,7 @@ def get_redis_client():
         use_redis=use_redis,
         redis_host=db_config.get("REDIS_HOST"),
         redis_port=db_config.get("REDIS_PORT", "6379"),
-        redis_db=db_config.get("REDIS_DB", "0"),
+        redis_db=db_config.get("REDIS_DATABASE", "0"),
         redis_timeout=db_config.get("REDIS_TIMEOUT", "1000.0"),
         redis_keepalive_pool=db_config.get("REDIS_KEEPALIVE_POOL", "10"),
         redis_ssl=db_config.get("REDIS_SSL", "no") == "yes",
@@ -201,3 +207,64 @@ def get_redis_client():
         flash("Couldn't connect to redis", "error")
 
     return redis_client
+
+
+def extract_file_setting_names(variables: Dict[str, str]) -> Dict[str, str]:
+    """
+    Extract `<SETTING>__FILE_NAME` metadata fields from a form payload.
+
+    Supported keys:
+    - `SETTING__FILE_NAME`
+    - `SETTING__FILE_NAME_<suffix>` (for multiple settings)
+    """
+    file_setting_names: Dict[str, str] = {}
+    for key in list(variables.keys()):
+        match = FILE_SETTING_NAME_RX.match(key)
+        if not match:
+            continue
+
+        setting_name = match.group("setting") + (match.group("suffix") or "")
+        file_setting_names[setting_name] = _sanitize_filename(variables.pop(key, ""))
+
+    return file_setting_names
+
+
+def parse_search_panes(source, *, sort_values: bool = False) -> str:
+    """Parse `searchPanes[field][i]=value` keys from a Werkzeug MultiDict-like
+    source (request.form, request.args, ...) into the `field1:value1,value2;field2:value3`
+    format expected by data-collection helpers (BW_INSTANCES_UTILS.get_reports_query, etc.)."""
+    search_panes = defaultdict(list)
+    for key, value in source.items():
+        if not key.startswith("searchPanes["):
+            continue
+        try:
+            field = key.split("[", 1)[1].split("]", 1)[0]
+        except IndexError:
+            continue
+        if field:
+            search_panes[field].append(value)
+
+    if not search_panes:
+        return ""
+
+    if sort_values:
+        items = sorted(search_panes.items())
+        return ";".join(f"{field}:{','.join(sorted(values))}" for field, values in items)
+
+    return ";".join(f"{field}:{','.join(values)}" for field, values in search_panes.items())
+
+
+def parse_search_panes_dict(source) -> Dict[str, list]:
+    """Same as `parse_search_panes` but returns the parsed mapping for callers
+    that need to apply the filter in-process rather than forwarding a string."""
+    parsed: Dict[str, list] = defaultdict(list)
+    for key, value in source.items():
+        if not key.startswith("searchPanes["):
+            continue
+        try:
+            field = key.split("[", 1)[1].split("]", 1)[0]
+        except IndexError:
+            continue
+        if field:
+            parsed[field].append(value)
+    return parsed

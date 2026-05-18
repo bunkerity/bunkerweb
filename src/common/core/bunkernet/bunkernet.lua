@@ -213,7 +213,9 @@ function bunkernet:log(bypass_checks)
 			["data"] = reason_data,
 			["method"] = self.ctx.bw.request_method,
 			["url"] = self.ctx.bw.request_uri,
-			["headers"] = ngx.req.get_headers(),
+			["headers"] = self.ctx.bw.kind == "http" and ngx.req.get_headers(
+				tonumber((utils.get_variable("MAX_HEADERS", false))) or 100
+			) or {},
 			["server_name"] = self.ctx.bw.server_name,
 			["date"] = os.date("!%Y-%m-%dT%H:%M:%SZ", ngx.time()),
 		}

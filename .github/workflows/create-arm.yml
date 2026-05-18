@@ -33,10 +33,10 @@ jobs:
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Get ARM availabilities
         id: availabilities
-        uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
+        uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
         with:
           args: instance server-type get zone=fr-par-2
           export-config: true
@@ -46,14 +46,14 @@ jobs:
           default-organization-id: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
       - name: Extract ARM type
         run: |
-          TYPE=$(echo "$JSON" | jq '.servers | with_entries(select(.key | contains("COPARM1-"))) | with_entries(select(.value.availability != "shortage")) | keys[] | select(. | test("^COPARM1-[0-9]+C-[0-9]+G$"))' | sed 's/"//g' | cut -d '-' -f 2,3 | sort -g | tail -n 1 | xargs -I {} echo "COPARM1-{}")
+          TYPE=$(echo "$JSON" | jq -r '.servers | to_entries | map(select(.key | test("^BASIC2-A[0-9]+C-[0-9]+G$"))) | map(select(.value.availability != "shortage")) | map(. + {cores: (.key | capture("A(?<n>[0-9]+)C") | .n | tonumber), ram: (.key | capture("C-(?<n>[0-9]+)G") | .n | tonumber)}) | sort_by(.cores, .ram) | last.key')
           echo "Type is $TYPE"
           echo "TYPE=$TYPE" >> "$GITHUB_ENV"
         env:
           JSON: ${{ steps.availabilities.outputs.json }}
       - name: Create ARM VM
         id: scw
-        uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
+        uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
         with:
           args: instance server create zone=fr-par-2 type=${{ env.TYPE }} root-volume=block:100GB
       - name: Get info
@@ -62,7 +62,7 @@ jobs:
           echo "id=${{ fromJson(steps.scw.outputs.json).id }}" >> "$GITHUB_OUTPUT"
           echo "ip=${{ fromJson(steps.scw.outputs.json).public_ip.address }}" >> "$GITHUB_OUTPUT"
       - name: Wait for VM
-        uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
+        uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
         with:
           args: instance server wait ${{ fromJson(steps.scw.outputs.json).ID }} zone=fr-par-2
       - name: Wait for SSH

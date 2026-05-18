@@ -20,8 +20,8 @@ Balloc() allocation exceeds list boundary
 Balloc() failed to allocate memory
 Base lambda function for closure not found
 Call to a member function
-Call to private 
-Call to protected 
+Call to private
+Call to protected
 Call to undefined function
 Call to undefined method
 Can only throw objects
@@ -34,25 +34,25 @@ Cannot access static:: when no class scope is active
 Cannot access undefined property for object with overloaded property access
 Cannot assign by reference to overloaded object
 Cannot break/continue %d level%s
-Cannot call abstract method 
+Cannot call abstract method
 Cannot call constructor
 Cannot call forward_static_call() when no class scope is active
 Cannot call non static method
 Cannot call overloaded function for non-object
-Cannot call private 
+Cannot call private
 Cannot create references to/from string offsets
 Cannot create references to/from string offsets nor overloaded objects
-Cannot declare self-referencing constant 
+Cannot declare self-referencing constant
 Cannot destroy active lambda function
-Cannot get arguments for 
+Cannot get arguments for
 Cannot increment/decrement overloaded objects nor string offsets
-Cannot instantiate abstract class 
-Cannot instantiate interface 
-Cannot instantiate trait 
-Cannot override final 
-Cannot pass parameter 
-Cannot redeclare 
-Cannot redeclare class 
+Cannot instantiate abstract class
+Cannot instantiate interface
+Cannot instantiate trait
+Cannot override final
+Cannot pass parameter
+Cannot redeclare
+Cannot redeclare class
 Cannot register a reverse output handler conflict outside of MINIT
 Cannot register an output handler alias outside of MINIT
 Cannot register an output handler conflict outside of MINIT
@@ -63,7 +63,7 @@ Cannot unset string offsets
 Cannot use [] for reading
 Cannot use assign-op operators with overloaded objects nor string offsets
 Cannot use object as array
-Cannot use object of type 
+Cannot use object of type
 Cannot use string offset as an array
 Cannot use string offset as an object
 Cannot yield from finally in a force-closed generator
@@ -78,25 +78,25 @@ EXTREMELY fatal error: jmpbuf unrecoverable; terminating
 EXTREMELY fatal error: jmpbuf unrecoverable; terminating.
 EXTREMELY fatal error: longjmp returned control; terminating
 Encoding: '*' may only be first arraySize value in list
-Encoding: Attribute 
+Encoding: Attribute
 Encoding: Can't decode apache map, missing key
 Encoding: Can't decode apache map, missing value
 Encoding: Can't decode apache map, only Strings or Longs are allowd as keys
 Encoding: Cannot find encoding
-Encoding: Element 
+Encoding: Element
 Encoding: Error calling from_xml callback
 Encoding: Error calling to_xml callback
-Encoding: External reference 
+Encoding: External reference
 Encoding: Internal Error
-Encoding: Invalid timestamp 
+Encoding: Invalid timestamp
 Encoding: SoapVar has no 'enc_type' property
-Encoding: Unresolved reference 
+Encoding: Unresolved reference
 Encoding: Violation of encoding rules
-Encoding: Violation of id and ref information items 
+Encoding: Violation of id and ref information items
 Encoding: object has no '
 Encoding: object has no 'any' property
 Encoding: string '
-Error installing signal handler for 
+Error installing signal handler for
 Exception thrown without a stack frame
 Exceptions must be valid objects derived from the Exception base class
 Failed to clone SpoofChecker object
@@ -107,7 +107,7 @@ Failed to register ResourceBundle class
 Field width %d is too long
 First array member is not a valid class name or object
 Function name must be a string
-Illegal length modifier specified 
+Illegal length modifier specified
 Illegal offset type
 Input string is too long
 Invalid RelaxNG Validation Context
@@ -123,17 +123,17 @@ Nesting level too deep - recursive dependency?
 NumberFormatter class not defined
 Object does not support method calls
 Only variables can be passed by reference
-PDO: driver 
+PDO: driver
 Parsing Schema: <restriction> or <extension> expected in complexContent
 Parsing Schema: attribute
 Parsing Schema: attribute has both 'ref' and 'type' attributes
 Parsing Schema: attribute has both 'ref' attribute and subtype
 Parsing Schema: attribute has both 'type' attribute and subtype
 Parsing Schema: attribute has no 'name' nor 'ref' attributes
-Parsing Schema: attributeGroup 
+Parsing Schema: attributeGroup
 Parsing Schema: attributeGroup has both 'ref' attribute and subattribute
 Parsing Schema: attributeGroup has no 'name' nor 'ref' attributes
-Parsing Schema: can't import schema from 
+Parsing Schema: can't import schema from
 Parsing Schema: complexType has no 'name' attribute
 Parsing Schema: element has both 'default' and 'fixed' attributes
 Parsing Schema: element has both 'itemType' attribute and subtype
@@ -154,38 +154,38 @@ Parsing Schema: redefine has no 'schemaLocation' attribute
 Parsing Schema: restriction has no 'base' attribute
 Parsing Schema: simpleType has no 'name' attribute
 Parsing Schema: unexpected
-Parsing Schema: unresolved element 'ref' attribute 
-Parsing Schema: unresolved group 'ref' attribute 
-Parsing WSDL: <binding> 
+Parsing Schema: unresolved element 'ref' attribute
+Parsing Schema: unresolved group 'ref' attribute
+Parsing WSDL: <binding>
 Parsing WSDL: <binding> has no name attribute
-Parsing WSDL: <fault> with name 
+Parsing WSDL: <fault> with name
 Parsing WSDL: <message> has no name attribute
-Parsing WSDL: <portType> 
+Parsing WSDL: <portType>
 Parsing WSDL: <portType> has no name attribute
-Parsing WSDL: <service> 
+Parsing WSDL: <service>
 Parsing WSDL: <service> has no name attribute
 Parsing WSDL: Could not find any usable binding services in WSDL.
 Parsing WSDL: Couldn't bind to service
-Parsing WSDL: Couldn't find <definitions> in 
-Parsing WSDL: Couldn't load from 
+Parsing WSDL: Couldn't find <definitions> in
+Parsing WSDL: Couldn't load from
 Parsing WSDL: Missing 'name' attribute for <binding>
 Parsing WSDL: Missing 'name' attribute for <operation>
 Parsing WSDL: Missing 'type' attribute for <binding>
-Parsing WSDL: Missing <message> with name 
-Parsing WSDL: Missing <portType> with name 
-Parsing WSDL: Missing <portType>/<operation> with name 
+Parsing WSDL: Missing <message> with name
+Parsing WSDL: Missing <portType> with name
+Parsing WSDL: Missing <portType>/<operation> with name
 Parsing WSDL: Missing message attribute for <header>
-Parsing WSDL: Missing name for <fault> of 
-Parsing WSDL: Missing name for <input> of 
-Parsing WSDL: Missing name for <output> of 
+Parsing WSDL: Missing name for <fault> of
+Parsing WSDL: Missing name for <input> of
+Parsing WSDL: Missing name for <output> of
 Parsing WSDL: Missing part '%s' in <message>
 Parsing WSDL: Missing part attribute for <header>
-Parsing WSDL: No <binding> element with name 
+Parsing WSDL: No <binding> element with name
 Parsing WSDL: No address associated with <port>
 Parsing WSDL: No binding associated with <port>
 Parsing WSDL: No location associated with <port>
-Parsing WSDL: No name associated with <part> 
-Parsing WSDL: The fault message 
+Parsing WSDL: No name associated with <part>
+Parsing WSDL: The fault message
 Parsing WSDL: Unexpected WSDL element <
 Parsing WSDL: Unexpected extensibility element <
 Parsing WSDL: Unknown encodingStyle '
@@ -197,12 +197,12 @@ Spoofchecker class not defined
 String size overflow
 The object to be iterated is in an invalid state: "
 Trying to clone an uncloneable object
-Trying to clone an uncloneable object of class 
-Unable to call 
+Trying to clone an uncloneable object of class
+Unable to call
 Unable to cast node to string
 Undefined class constant '
 Undefined constant '
-Undefined offset for object of type 
+Undefined offset for object of type
 Unexpected inconsistency in create_function()
 Unknown SOAP version
 Unknown typehint
@@ -214,6 +214,6 @@ You MUST load PDO before loading any PDO drivers
 [] operator not supported for strings
 and must therefore be declared abstract or implement the remaining methods
 namespace must not match the enclosing schema 'targetNamespace'
-requires PDO API version 
-PDO Connection Error: SQLSTATE[HY000] 
-(HY000/2002): Connection refused 
+requires PDO API version
+PDO Connection Error: SQLSTATE[HY000]
+(HY000/2002): Connection refused

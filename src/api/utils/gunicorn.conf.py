@@ -1,7 +1,7 @@
 from datetime import datetime
 from hashlib import sha256
 from json import JSONDecodeError, dump, loads
-from os import cpu_count, environ, getenv, sep
+from os import environ, getenv, sep
 from os.path import join
 from pathlib import Path
 from secrets import token_hex
@@ -16,8 +16,8 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from biscuit_auth import KeyPair, PublicKey, PrivateKey
 
-from common_utils import handle_docker_secrets  # type: ignore
-from logger import setup_logger  # type: ignore
+from common_utils import effective_cpu_count, handle_docker_secrets  # type: ignore
+from logger import getLogger, log_types  # type: ignore
 
 from app.models.api_database import APIDatabase
 from app.utils import BISCUIT_PRIVATE_KEY_FILE, BISCUIT_PUBLIC_KEY_FILE, USER_PASSWORD_RX, check_password, gen_password_hash
@@ -37,18 +37,26 @@ PID_FILE = RUN_DIR.joinpath("api.pid")
 BISCUIT_PUBLIC_KEY_HASH_FILE = BISCUIT_PUBLIC_KEY_FILE.with_suffix(".hash")  # File to store hash of Biscuit public key
 BISCUIT_PRIVATE_KEY_HASH_FILE = BISCUIT_PRIVATE_KEY_FILE.with_suffix(".hash")  # File to store hash of Biscuit private key
 
-MAX_WORKERS = int(getenv("MAX_WORKERS", max((cpu_count() or 1) - 1, 1)))
+MAX_WORKERS = int(getenv("MAX_WORKERS", max(effective_cpu_count() - 1, 1)))
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "info"))
-LISTEN_ADDR = getenv("API_LISTEN_ADDR", getenv("LISTEN_ADDR", "0.0.0.0"))
+LISTEN_ADDR = getenv(
+    "API_LISTEN_ADDR", getenv("LISTEN_ADDR", "0.0.0.0")
+)  # nosec B104 - 0.0.0.0 is the documented containerized default; operators override via API_LISTEN_ADDR / LISTEN_ADDR.
 LISTEN_PORT = getenv("API_LISTEN_PORT", getenv("LISTEN_PORT", "8888"))
 """
 Trusted proxies / forwarded headers
 
-Default to trusting only the local machine (127.0.0.1). This assumes there is
-no load balancer or WAF in front of the API. Operators can override via
-API_FORWARDED_ALLOW_IPS or FORWARDED_ALLOW_IPS.
+Default to local/private networks for container installs so reverse proxies on
+typical Docker networks can be trusted without opening this to the world.
+Linux packages set FORWARDED_ALLOW_IPS explicitly (127.0.0.1) via service
+scripts. Operators can override via API_FORWARDED_ALLOW_IPS or
+FORWARDED_ALLOW_IPS.
 """
-FORWARDED_ALLOW_IPS = getenv("API_FORWARDED_ALLOW_IPS", getenv("FORWARDED_ALLOW_IPS", "127.0.0.1"))
+FORWARDED_ALLOW_IPS = getenv(
+    "API_FORWARDED_ALLOW_IPS",
+    getenv("FORWARDED_ALLOW_IPS", "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"),
+)
+PROXY_ALLOW_IPS = getenv("API_PROXY_ALLOW_IPS", getenv("PROXY_ALLOW_IPS", FORWARDED_ALLOW_IPS))
 
 """
 TLS/SSL support
@@ -63,33 +71,54 @@ API_SSL_CA_CERTS = getenv("API_SSL_CA_CERTS", getenv("SSL_CA_CERTS", ""))
 
 CAPTURE_OUTPUT = getenv("CAPTURE_OUTPUT", "no").lower() == "yes"
 
+if CAPTURE_OUTPUT or "file" in log_types:
+    errorlog = getenv("LOG_FILE_PATH", join(sep, "var", "log", "bunkerweb", "api.log"))
+    accesslog = f"{errorlog.rsplit('.', 1)[0]}-access.log"
+else:
+    errorlog = "-"
+    accesslog = "-"
+
+if "syslog" in log_types:
+    syslog = True
+    syslog_addr = getenv("LOG_SYSLOG_ADDRESS", "").strip()
+    if not syslog_addr.startswith(("/", "udp://", "tcp://")):
+        syslog_addr = f"udp://{syslog_addr}"
+    syslog_prefix = getenv("LOG_SYSLOG_TAG", "bw-api")
+
 wsgi_app = "app.main:app"
 proc_name = "bunkerweb-api"
-accesslog = join(sep, "var", "log", "bunkerweb", "api-access.log") if CAPTURE_OUTPUT else "-"
 access_log_format = '%({x-forwarded-for}i)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
-errorlog = join(sep, "var", "log", "bunkerweb", "api.log") if CAPTURE_OUTPUT else "-"
 capture_output = CAPTURE_OUTPUT
 limit_request_line = 0
 limit_request_fields = 32768
 limit_request_field_size = 0
-reuse_port = True
+reuse_port = False
 daemon = False
 chdir = join(sep, "usr", "share", "bunkerweb", "api")
 umask = 0x027
 pidfile = PID_FILE.as_posix()
-worker_tmp_dir = join(sep, "dev", "shm")
+control_socket_disable = True
+SHM_TMP_DIR = Path(sep, "dev", "shm")
+API_WORKER_TMP_DIR = Path(sep, "tmp", "bunkerweb", "api-workers")
+worker_tmp_dir = SHM_TMP_DIR.as_posix() if SHM_TMP_DIR.is_dir() else API_WORKER_TMP_DIR.as_posix()
 tmp_upload_dir = TMP_UI_DIR.as_posix()
-secure_scheme_headers = {}
+secure_scheme_headers = {
+    "X-FORWARDED-PROTOCOL": "https",
+    "X-FORWARDED-PROTO": "https",
+    "X-FORWARDED-SSL": "on",
+}
 forwarded_allow_ips = FORWARDED_ALLOW_IPS
 pythonpath = join(sep, "usr", "share", "bunkerweb", "deps", "python") + "," + join(sep, "usr", "share", "bunkerweb", "api")
-proxy_allow_ips = FORWARDED_ALLOW_IPS
+proxy_allow_ips = PROXY_ALLOW_IPS
 casefold_http_method = True
 workers = MAX_WORKERS
 bind = f"{LISTEN_ADDR}:{LISTEN_PORT}"
 worker_class = "utils.worker.ApiUvicornWorker"
 threads = int(getenv("MAX_THREADS", MAX_WORKERS * 2))
-max_requests_jitter = min(8, MAX_WORKERS)
+max_requests = int(getenv("API_MAX_REQUESTS", getenv("MAX_REQUESTS", "1000")))
+max_requests_jitter = min(50, max_requests // 10)
 graceful_timeout = 30
+http_protocols = "h3,h2,h1"
 
 DEBUG = getenv("DEBUG", False)
 
@@ -116,13 +145,15 @@ def on_starting(server):
     TMP_UI_DIR.mkdir(parents=True, exist_ok=True)
     RUN_DIR.mkdir(parents=True, exist_ok=True)
     LIB_DIR.mkdir(parents=True, exist_ok=True)
+    if worker_tmp_dir != SHM_TMP_DIR:
+        API_WORKER_TMP_DIR.mkdir(parents=True, exist_ok=True)
 
     # Handle Docker secrets first
     docker_secrets = handle_docker_secrets()
     if docker_secrets:
         environ.update(docker_secrets)
 
-    LOGGER = setup_logger("API", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+    LOGGER = getLogger("API")
 
     if docker_secrets:
         LOGGER.info(f"Loaded {len(docker_secrets)} Docker secrets")
@@ -141,14 +172,14 @@ def on_starting(server):
         # * Step 1: Load Biscuit keys from files and validate
         if BISCUIT_PUBLIC_KEY_FILE.is_file() and BISCUIT_PRIVATE_KEY_FILE.is_file():
             try:
-                pub_hex = BISCUIT_PUBLIC_KEY_FILE.read_text(encoding="utf-8").strip()
-                priv_hex = BISCUIT_PRIVATE_KEY_FILE.read_text(encoding="utf-8").strip()
+                pub_hex = BISCUIT_PUBLIC_KEY_FILE.read_text().strip()
+                priv_hex = BISCUIT_PRIVATE_KEY_FILE.read_text().strip()
                 if not pub_hex or not priv_hex:
                     raise ValueError("One or both Biscuit key files are empty.")
 
                 # Validate by attempting to load
-                PublicKey.from_hex(pub_hex)
-                PrivateKey.from_hex(priv_hex)
+                PublicKey(pub_hex)
+                PrivateKey(priv_hex)
                 biscuit_public_key_hex = pub_hex
                 biscuit_private_key_hex = priv_hex
                 keys_loaded = True
@@ -165,8 +196,8 @@ def on_starting(server):
             if pub_hex_env and priv_hex_env:
                 try:
                     # Validate by attempting to load
-                    PublicKey.from_hex(pub_hex_env)
-                    PrivateKey.from_hex(priv_hex_env)
+                    PublicKey(pub_hex_env)
+                    PrivateKey(priv_hex_env)
                     biscuit_public_key_hex = pub_hex_env
                     biscuit_private_key_hex = priv_hex_env
                     keys_loaded = True
@@ -183,8 +214,8 @@ def on_starting(server):
             keypair = KeyPair()
             biscuit_private_key_obj = keypair.private_key
             biscuit_public_key_obj = keypair.public_key
-            biscuit_private_key_hex = biscuit_private_key_obj.to_hex()
-            biscuit_public_key_hex = biscuit_public_key_obj.to_hex()
+            biscuit_private_key_hex = repr(biscuit_private_key_obj)
+            biscuit_public_key_hex = repr(biscuit_public_key_obj)
             keys_generated = True
             LOGGER.info("Generated new Biscuit key pair.")
 
@@ -492,6 +523,8 @@ def on_starting(server):
         exit(1)
 
     LOGGER.info("API is ready")
+
+    DB.close()  # Close local DB connections before fork to prevent fd leaks
 
 
 def when_ready(server):

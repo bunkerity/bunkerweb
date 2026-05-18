@@ -140,6 +140,7 @@
                         <td class="instance-last-seen-date">{{ instance.last_seen.astimezone().isoformat() }}</td>
                         <td>
                             <div class="d-flex justify-content-evenly">
+                                {% set can_delete_instance = is_ui_api_method(instance['method']) %}
                                 <button type="button"
                                         class="btn btn-primary btn-sm me-1 ping-instance"
                                         data-instance="{{ instance['hostname'] }}"
@@ -172,8 +173,8 @@
                                         <i class="bx bx-stop bx-xs"></i>
                                     </button>
                                 </div>
-                                {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if instance['method'] != 'ui' else 'tooltip.button.delete_instance')) %}
-                                {% set delete_tooltip_options = '{"method": "' ~ instance['method'] ~ '"}' if instance['method'] != 'ui' and not is_readonly else '{"hostname": "' ~ instance['hostname'] ~ '"}' %}
+                                {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if not can_delete_instance else 'tooltip.button.delete_instance')) %}
+                                {% set delete_tooltip_options = '{"method": "' ~ instance['method'] ~ '"}' if not can_delete_instance and not is_readonly else '{"hostname": "' ~ instance['hostname'] ~ '"}' %}
                                 <div data-bs-toggle="tooltip"
                                      data-bs-placement="bottom"
                                      data-bs-original-title="..."
@@ -181,7 +182,7 @@
                                      data-i18n-options='{{ delete_tooltip_options }}'>
                                     <button type="button"
                                             data-instance="{{ instance['hostname'] }}"
-                                            class="btn btn-outline-danger btn-sm me-1 delete-instance{% if instance['method'] != 'ui' or is_readonly %} disabled{% endif %}">
+                                            class="btn btn-outline-danger btn-sm me-1 delete-instance{% if not can_delete_instance or is_readonly %} disabled{% endif %}">
                                         <i class="bx bx-trash bx-xs"></i>
                                     </button>
                                 </div>

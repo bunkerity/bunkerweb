@@ -4,6 +4,8 @@
 ##! This list excludes command words that are prone to cause false positives
 ##! at paranoia level 1.
 
+##! Additions to this list should also result in an addition to this one: regex-assembly/942410.ra
+
 convert
 degrees
 elt

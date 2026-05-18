@@ -1,6 +1,6 @@
 |// Low-level VM code for x64 CPUs in LJ_GC64 mode.
 |// Bytecode interpreter, fast functions and helper functions.
-|// Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
+|// Copyright (C) 2005-2026 Mike Pall. See Copyright Notice in luajit.h
 |
 |.arch x64
 |.section code_op, code_sub
@@ -2638,6 +2638,49 @@ static void build_subroutines(BuildCtx *ctx)
   |  ret
   |
   |//-----------------------------------------------------------------------
+  |//-- Number conversion functions ----------------------------------------
+  |//-----------------------------------------------------------------------
+  |
+  |// int64_t lj_vm_num2int_check(double x)
+  |->vm_num2int_check:
+  |  cvttsd2si eax, xmm0
+  |  xorps xmm1, xmm1
+  |  cvtsi2sd xmm1, eax
+  |  ucomisd xmm1, xmm0
+  |  jp >1
+  |  jne >1
+  |  ret
+  |1:
+  |  mov64 rax, U64x(80000000,80000000)
+  |  ret
+  |
+  |// int64_t lj_vm_num2i64(double x)
+  |->vm_num2i64:
+  |  cvttsd2si rax, xmm0
+  |  ret
+  |
+  |// uint64_t lj_vm_num2u64(double x)
+  |->vm_num2u64:
+  |  cvttsd2si rax, xmm0		// Convert [-2^63..2^63) range.
+  |  cmp rax, 1	// Indefinite result -0x8000000000000000LL - 1 sets overflow.
+  |  jo >1
+  |  ret
+  |1:
+  |  mov64 rdx, U64x(c3f00000,00000000)	// -0x1p64 (double).
+  |  movd xmm1, rdx
+  |  addsd xmm0,  xmm1
+  |  cvttsd2si rax, xmm0		// Convert [2^63..2^64+2^63) range.
+  |  // Note that -0x1p63 converts to -0x8000000000000000LL either way.
+  |  ret
+  |
+  |// int32_t lj_vm_tobit(double x)
+  |->vm_tobit:
+  |  sseconst_tobit xmm1, RC
+  |  addsd xmm0, xmm1
+  |  movd eax, xmm0
+  |  ret
+  |
+  |//-----------------------------------------------------------------------
   |//-- Miscellaneous functions --------------------------------------------
   |//-----------------------------------------------------------------------
   |
@@ -3236,11 +3279,15 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |.if DUALNUM
     |  checkint RB, >5
     |  neg RBd
+    |  jz >3
     |  jo >4
     |  setint RB
     |9:
     |  mov [BASE+RA*8], RB
     |  ins_next
+    |3:
+    |  mov64 RB, U64x(80000000,00000000)  // -0.
+    |  jmp <9
     |4:
     |  mov64 RB, U64x(41e00000,00000000)  // 2^31.
     |  jmp <9

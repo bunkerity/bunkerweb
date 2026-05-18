@@ -1,0 +1,36 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Rule 942220: Integer overflow and PHP magic number crash detection
+##!
+##! Detects known magic numbers used in integer overflow attacks
+##! (from skipfish) and the PHP strtod crash (CVE-2011-0753).
+##!
+##! Ref: https://www.exploringbinary.com/php-hangs-on-numeric-value-2-2250738585072011e-308/
+
+##!+ i
+
+##!^ ^
+##!$ $
+
+##! 32-bit unsigned integer max / max+1
+4294967295
+4294967296
+
+##! 32-bit signed integer max / min / (max+1/min-1)
+2147483647
+2147483648
+-2147483648
+-2147483649
+
+##! leading-zero padded integers (skipfish probes)
+0000012345
+0000023456
+-0000023456
+
+##! PHP strtod crash: magic floating-point numbers (CVE-2011-0753)
+2.2250738585072007e-308
+2.2250738585072011e-308
+
+##! infinity trigger
+1e309

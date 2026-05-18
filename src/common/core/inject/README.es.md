@@ -24,9 +24,17 @@ Siga estos pasos para configurar y usar la función de Inyección de HTML:
 | `INJECT_HEAD` |                   | multisite | no       | **Código HTML de la Cabecera:** El código HTML para inyectar antes de la etiqueta `</head>`. |
 | `INJECT_BODY` |                   | multisite | no       | **Código HTML del Cuerpo:** El código HTML para inyectar antes de la etiqueta `</body>`.     |
 
-!!! tip "Mejores Prácticas" - Por razones de rendimiento, coloque los archivos de JavaScript al final del cuerpo para evitar el bloqueo del renderizado. - Coloque CSS y JavaScript crítico en la sección de la cabecera para evitar un "destello" de contenido sin estilo (FOUC). - Tenga cuidado con el contenido inyectado que podría potencialmente romper la funcionalidad de su sitio.
+!!! tip "Mejores Prácticas"
+    - Por razones de rendimiento, coloque los archivos de JavaScript al final del cuerpo para evitar el bloqueo del renderizado.
+    - Coloque CSS y JavaScript crítico en la sección de la cabecera para evitar un "destello" de contenido sin estilo (FOUC).
+    - Tenga cuidado con el contenido inyectado que podría potencialmente romper la funcionalidad de su sitio.
 
-!!! info "Casos de Uso Comunes" - Agregar scripts de análisis (como Google Analytics, Matomo) - Integrar widgets de chat o herramientas de soporte al cliente - Incluir píxeles de seguimiento para campañas de marketing - Agregar estilos CSS personalizados o funcionalidad de JavaScript - Incluir bibliotecas de terceros sin modificar el código de su aplicación
+!!! info "Casos de Uso Comunes"
+    - Agregar scripts de análisis (como Google Analytics, Matomo)
+    - Integrar widgets de chat o herramientas de soporte al cliente
+    - Incluir píxeles de seguimiento para campañas de marketing
+    - Agregar estilos CSS personalizados o funcionalidad de JavaScript
+    - Incluir bibliotecas de terceros sin modificar el código de su aplicación
 
 ### Configuraciones de Ejemplo
 

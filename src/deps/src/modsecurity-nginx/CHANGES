@@ -1,3 +1,25 @@
+v1.0.4 - 2025-May-21
+--------------------
+
+  - feat: set correct hostname in log produced by Nginx
+    [PR #353 - @airween]
+  - chore: fix build error with newer GCC's
+    [PR #352 - @airween]
+  - fix: recovery context after internal redirect, re-add #273
+    [PR #346 - @liudongmiao, @airween]
+  - feat: Add more tests for CI
+    [PR #345 - @theseion, @airween]
+  - Add support to build ModSecurity-nginx on Windows
+    [PR #321 - @eduar-hte]
+  - fix: Added missing header for conftest
+    [PR #320 - @liudongmiao, @airween]
+  - feat: Add engine info to startup log
+    [PR #319 - @airween]
+  - feat: added initial Github CI workflow
+    [PR #318 - @theseion, @airween]
+  - Add editorconfig to help OSS contributors
+    [PR #302 - @brandonpayton]
+
 v1.0.3 - 2022-May-24
 --------------------
 

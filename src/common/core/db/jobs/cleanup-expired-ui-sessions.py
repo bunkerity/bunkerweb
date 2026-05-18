@@ -10,9 +10,9 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from Database import Database  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 
-LOGGER = setup_logger("DB.CLEANUP-EXPIRED-UI-SESSIONS")
+LOGGER = getLogger("DB.CLEANUP-EXPIRED-UI-SESSIONS")
 status = 0
 
 try:

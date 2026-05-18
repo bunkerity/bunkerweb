@@ -5,7 +5,7 @@
 ##! `Accept` header by following the specification as far as
 ##! necessary, while restricting the `charset` parameter
 ##! to a list of explicitly allowed values.
-##! Where possible, the expression matches tokens "loosely", 
+##! Where possible, the expression matches tokens "loosely",
 ##! to reduce complexity and the risk of false positives.
 
 ##! Specifications:

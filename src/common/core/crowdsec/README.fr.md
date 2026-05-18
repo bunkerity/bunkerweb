@@ -68,7 +68,7 @@ Les sections suivantes détaillent chacune de ces étapes.
     Pour les intégrations basées sur des conteneurs, nous recommandons de rediriger les journaux du conteneur BunkerWeb vers un service syslog afin que CrowdSec puisse y accéder facilement. Voici un exemple de configuration pour syslog-ng qui stockera les journaux bruts provenant de BunkerWeb dans un fichier local `/var/log/bunkerweb.log` :
 
     ```syslog
-    @version: 4.8
+    @version: 4.10
 
     source s_net {
         udp(
@@ -82,7 +82,7 @@ Les sections suivantes détaillent chacune de ces étapes.
     };
 
     destination d_file {
-        file("/var/log/bunkerweb.log" template(t_imp));
+        file("/var/log/bunkerweb.log" template(t_imp) logrotate(enable(yes), size(100MB), rotations(7)));
     };
 
     log {
@@ -103,7 +103,7 @@ Les sections suivantes détaillent chacune de ces étapes.
     services:
       bunkerweb:
         # C'est le nom qui sera utilisé pour identifier l'instance dans le planificateur
-        image: bunkerity/bunkerweb:1.6.6
+        image: bunkerity/bunkerweb:1.6.10
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -120,7 +120,7 @@ Les sections suivantes détaillent chacune de ces étapes.
             syslog-address: "udp://10.20.30.254:514" # L'adresse IP du service syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6
+        image: bunkerity/bunkerweb-scheduler:1.6.10
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom correct de l'instance
@@ -154,7 +154,7 @@ Les sections suivantes détaillent chacune de ces étapes.
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.3 # Utilisez la dernière version mais épinglez toujours la version pour une meilleure stabilité/sécurité
+        image: crowdsecurity/crowdsec:v1.7.7 # Utilisez la dernière version mais épinglez toujours la version pour une meilleure stabilité/sécurité
         volumes:
           - cs-data:/var/lib/crowdsec/data # Pour persister les données de CrowdSec
           - bw-logs:/var/log:ro # Les journaux de BunkerWeb à analyser par CrowdSec
@@ -168,7 +168,7 @@ Les sections suivantes détaillent chacune de ces étapes.
           - bw-universe
 
       syslog:
-        image: balabit/syslog-ng:4.9.0
+        image: balabit/syslog-ng:4.10.2
         cap_add:
           - NET_BIND_SERVICE  # Lier aux ports bas
           - NET_BROADCAST  # Envoyer des diffusions
@@ -291,7 +291,7 @@ Les sections suivantes détaillent chacune de ces étapes.
 
 ### Étape&nbsp;2 – Configurer les paramètres de BunkerWeb
 
-Appliquez les variables d’environnement suivantes (ou leurs équivalents via le scheduler) pour permettre à votre instance BunkerWeb de communiquer avec l’API locale CrowdSec. Au minimum, `USE_CROWDSEC`, `CROWDSEC_API` et une clé valide générée avec `cscli bouncers add` sont nécessaires.
+Appliquez les variables d’environnement suivantes (ou leurs équivalents via le scheduler) pour permettre à votre instance BunkerWeb de communiquer avec l’API locale CrowdSec. Au minimum, `USE_CROWDSEC`, `CROWDSEC_API` et `CROWDSEC_API_KEY` avec une clé valide générée via `cscli bouncers add` sont nécessaires.
 
 | Paramètre                   | Valeur par défaut      | Contexte  | Multiple | Description                                                                                                                                    |
 | --------------------------- | ---------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -317,7 +317,9 @@ Appliquez les variables d’environnement suivantes (ou leurs équivalents via l
 | `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`              | global   | no       | **Toujours envoyer :** Mettre à `yes` pour toujours envoyer les requêtes à AppSec, même s'il y a une décision au niveau de l'IP. |
 | `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`              | global   | no       | **Vérification SSL :** Mettre à `yes` pour vérifier le certificat SSL du composant AppSec.                                       |
 
-!!! info "À propos des modes de fonctionnement" - Le **mode Live** interroge l'API CrowdSec pour chaque requête entrante, offrant une protection en temps réel au prix d'une latence plus élevée. - Le **mode Stream** télécharge périodiquement toutes les décisions de l'API CrowdSec et les met en cache localement, réduisant la latence avec un léger retard dans l'application des nouvelles décisions.
+!!! info "À propos des modes de fonctionnement"
+    - Le **mode Live** interroge l'API CrowdSec pour chaque requête entrante, offrant une protection en temps réel au prix d'une latence plus élevée.
+    - Le **mode Stream** télécharge périodiquement toutes les décisions de l'API CrowdSec et les met en cache localement, réduisant la latence avec un léger retard dans l'application des nouvelles décisions.
 
 ### Exemples de configurations
 

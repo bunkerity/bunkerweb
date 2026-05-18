@@ -2,8 +2,9 @@
 
 from base64 import b64decode
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
-from json import loads
+from json import dumps, loads
 from os import environ, getenv, sep
 from os.path import join
 from pathlib import Path
@@ -11,10 +12,18 @@ from re import MULTILINE, match, search
 from select import select
 from subprocess import DEVNULL, PIPE, STDOUT, Popen, run
 from sys import exit as sys_exit, path as sys_path
-from time import sleep
+from time import monotonic, sleep
+from threading import Event, Lock, Thread
 from traceback import format_exc
 from typing import Dict, List, Optional, Set, Tuple, Type, Union
-
+from certbot_concurrency import (
+    CertbotPaths,
+    ensure_accounts,
+    ensure_zerossl_accounts,
+    finalize_certbot_run,
+    prepare_certbot_paths,
+    select_account_id,
+)
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
@@ -23,22 +32,27 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from pydantic import ValidationError
 from requests import get
 
-from common_utils import bytes_hash, file_hash  # type: ignore
+from common_utils import bytes_hash, effective_cpu_count, file_hash  # type: ignore
 from jobs import Job  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 
 from letsencrypt_providers import (
     BunnyNetProvider,
+    ClouDNSProvider,
     CloudflareProvider,
     DesecProvider,
     DigitalOceanProvider,
     DomainOffensiveProvider,
     DnsimpleProvider,
     DnsMadeEasyProvider,
+    DomeneshopProvider,
     DuckDnsProvider,
     DynuProvider,
+    GandiProvider,
     GehirnProvider,
+    GoDaddyProvider,
     GoogleProvider,
+    HetznerProvider,
     InfomaniakProvider,
     IonosProvider,
     LinodeProvider,
@@ -52,38 +66,137 @@ from letsencrypt_providers import (
     Route53Provider,
     SakuraCloudProvider,
     ScalewayProvider,
+    TransIPProvider,
+)
+from letsencrypt_utils import (
+    CERTBOT_BIN,
+    DEPS_PATH,
+    LETSENCRYPT_CACHE_PATH as CACHE_PATH,
+    LETSENCRYPT_DATA_PATH as DATA_PATH,
+    LETSENCRYPT_JOBS_PATH as JOBS_PATH,
+    LETSENCRYPT_LOGS_DIR as LOGS_DIR,
+    LETSENCRYPT_WORK_DIR as WORK_DIR,
+    certbot_log_backup_flags,
+    ZEROSSL_BOT_SCRIPT,
+    build_certbot_env,
+    get_expected_acme_directory,
+    prepare_logs_dir,
+    resolve_certbot_entrypoint,
 )
 
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper()
-LOGGER = setup_logger("LETS-ENCRYPT.new")
-LOGGER_CERTBOT = setup_logger("LETS-ENCRYPT.new.certbot")
+LOGGER = getLogger("LETS-ENCRYPT.NEW")
+LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.NEW.CERTBOT")
 
-CERTBOT_BIN = join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot")
-DEPS_PATH = join(sep, "usr", "share", "bunkerweb", "deps", "python")
-PLUGIN_PATH = Path(sep, "usr", "share", "bunkerweb", "core", "letsencrypt")
-JOBS_PATH = PLUGIN_PATH.joinpath("jobs")
-CACHE_PATH = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
-DATA_PATH = CACHE_PATH.joinpath("etc")
-WORK_DIR = join(sep, "var", "lib", "bunkerweb", "letsencrypt")
-LOGS_DIR = join(sep, "var", "log", "bunkerweb", "letsencrypt")
+ZEROSSL_API_KEY_HASHES_PATH = DATA_PATH.joinpath("renewal", ".bw-zerossl-api-key-hashes.json")
+MERGE_LOCK = Lock()
+RUNNING_LOCK = Lock()
+RUNNING_CERTBOT = 0
+MONITOR_STOP = Event()
+MONITOR_THREAD: Optional[Thread] = None
+
+
+def _monitor_certbot_progress() -> None:
+    while not MONITOR_STOP.wait(10):
+        with RUNNING_LOCK:
+            running = RUNNING_CERTBOT
+        if running > 0:
+            LOGGER.info("⏳ Still generating certificate(s)...")
+
+
+def start_progress_monitor() -> None:
+    global MONITOR_THREAD
+    if MONITOR_THREAD and MONITOR_THREAD.is_alive():
+        return
+    MONITOR_STOP.clear()
+    MONITOR_THREAD = Thread(target=_monitor_certbot_progress, daemon=True)
+    MONITOR_THREAD.start()
+
+
+def stop_progress_monitor() -> None:
+    global MONITOR_THREAD
+    MONITOR_STOP.set()
+    if MONITOR_THREAD:
+        MONITOR_THREAD.join(timeout=2)
+        MONITOR_THREAD = None
+
 
 IS_MULTISITE = getenv("MULTISITE", "no") == "yes"
 CHALLENGE_TYPES = ("http", "dns")
 PROFILE_TYPES = ("classic", "tlsserver", "shortlived")
+ACME_SERVER_TYPES = ("letsencrypt", "zerossl")
 DNS_PROPAGATION_DEFAULT = "default"
+CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
+
+
+def normalize_server_names(server_names: str) -> Set[str]:
+    """Return a normalized set of server names split on comma/space, lowercased and trimmed."""
+    return {part.strip().lower() for part in server_names.replace(",", " ").split() if part.strip()}
+
+
+def filter_wildcard_names(names: Set[str]) -> Set[str]:
+    """Drop wildcard entries (e.g. '*.example.com') from a set of server names."""
+    return {name for name in names if not name.startswith("*.")}
+
+
+def format_server_names(names: Set[str]) -> str:
+    """Return a deterministic, certbot-friendly server names string."""
+    return ",".join(sorted(names, key=lambda value: (0 if value.startswith("*.") else 1, value)))
+
+
+def parse_certbot_domains(certificate_block: str) -> str:
+    match = search(r"^\s*(Domains|Identifiers):\s+(.+)$", certificate_block, MULTILINE)
+    if not match:
+        return ""
+    return " ".join(match.group(2).split()).replace(" ", ",")
+
+
+def normalize_server_url(url: str) -> str:
+    return url.strip().rstrip("/")
+
+
+def load_zerossl_api_key_hashes() -> Dict[str, str]:
+    if not ZEROSSL_API_KEY_HASHES_PATH.is_file():
+        return {}
+
+    try:
+        data = loads(ZEROSSL_API_KEY_HASHES_PATH.read_text())
+        if not isinstance(data, dict):
+            return {}
+        return {str(key): str(value) for key, value in data.items()}
+    except BaseException as e:
+        LOGGER.warning(f"Failed to read ZeroSSL API key hash file {ZEROSSL_API_KEY_HASHES_PATH}: {e}")
+        return {}
+
+
+def save_zerossl_api_key_hashes(hashes: Dict[str, str]) -> None:
+    try:
+        ZEROSSL_API_KEY_HASHES_PATH.parent.mkdir(parents=True, exist_ok=True)
+        if not hashes:
+            ZEROSSL_API_KEY_HASHES_PATH.unlink(missing_ok=True)
+            return
+        ZEROSSL_API_KEY_HASHES_PATH.write_text(dumps(hashes, sort_keys=True))
+    except BaseException as e:
+        LOGGER.warning(f"Failed to persist ZeroSSL API key hashes to {ZEROSSL_API_KEY_HASHES_PATH}: {e}")
+
 
 PROVIDERS: Dict[str, Type[Provider]] = {
     "bunny": BunnyNetProvider,
+    "cloudns": ClouDNSProvider,
     "cloudflare": CloudflareProvider,
     "desec": DesecProvider,
     "digitalocean": DigitalOceanProvider,
     "domainoffensive": DomainOffensiveProvider,
+    "domeneshop": DomeneshopProvider,
     "dnsimple": DnsimpleProvider,
     "dnsmadeeasy": DnsMadeEasyProvider,
     "duckdns": DuckDnsProvider,
     "dynu": DynuProvider,
+    "gandi": GandiProvider,
     "gehirn": GehirnProvider,
+    "godaddy": GoDaddyProvider,
     "google": GoogleProvider,
+    "hetzner": HetznerProvider,
     "infomaniak": InfomaniakProvider,
     "ionos": IonosProvider,
     "linode": LinodeProvider,
@@ -96,6 +209,7 @@ PROVIDERS: Dict[str, Type[Provider]] = {
     "route53": Route53Provider,
     "sakuracloud": SakuraCloudProvider,
     "scaleway": ScalewayProvider,
+    "transip": TransIPProvider,
 }
 
 status = 0
@@ -182,7 +296,7 @@ def check_psl_blacklist(domains: List[str], psl_rules: Dict, service_name: str) 
     return False
 
 
-def extract_provider(service: str, authenticator: str = "") -> Optional[Provider]:
+def extract_provider(service: str, authenticator: str = "", decode_base64: bool = True) -> Optional[Provider]:
     credential_key = f"{service}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
     credential_items = {}
 
@@ -201,7 +315,7 @@ def extract_provider(service: str, authenticator: str = "") -> Optional[Provider
     # Handle JSON data
     if "json_data" in credential_items:
         value = credential_items.pop("json_data")
-        if not credential_items and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
+        if decode_base64 and not credential_items and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
             try:
                 decoded = b64decode(value).decode("utf-8")
                 json_data = loads(decoded)
@@ -214,7 +328,7 @@ def extract_provider(service: str, authenticator: str = "") -> Optional[Provider
                 LOGGER.debug(format_exc())
 
     # Process base64 encoded credentials (except for rfc2136)
-    if credential_items:
+    if decode_base64 and credential_items:
         for key, value in credential_items.items():
             if authenticator != "rfc2136" and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
                 try:
@@ -236,22 +350,36 @@ def extract_provider(service: str, authenticator: str = "") -> Optional[Provider
         return None
 
 
-def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]:
+def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, bool, int, Dict[str, str]]]]:
     def env(key: str, default: Optional[str] = None) -> str:
         if IS_MULTISITE:
             return getenv(f"{service}_{key}", default)
         return getenv(key, default)
 
     authenticator = env("LETS_ENCRYPT_DNS_PROVIDER", "").lower()
+    acme_server = env("LETS_ENCRYPT_SERVER", "letsencrypt").lower()
+    zerossl_api_key = env("LETS_ENCRYPT_ZEROSSL_API_KEY", "").strip()
+    zerossl_api_retry_val = env("LETS_ENCRYPT_ZEROSSL_API_RETRY", "3").strip()
+    zerossl_api_retry_delay_val = env("LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY", "2").strip()
+    zerossl_api_connect_timeout_val = env("LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT", "5").strip()
+    zerossl_api_max_time_val = env("LETS_ENCRYPT_ZEROSSL_API_MAX_TIME", "20").strip()
+    zerossl_api_key_hash = bytes_hash(zerossl_api_key.encode("utf-8"), algorithm="sha256") if zerossl_api_key else ""
     server_names_val = env("SERVER_NAME", "www.example.com").strip() if IS_MULTISITE else getenv("SERVER_NAME", "www.example.com").strip()
     email_val = env("EMAIL_LETS_ENCRYPT", "").strip()
-    retries_val = env("LETS_ENCRYPT_RETRIES", "0")
+    retries_val = env("LETS_ENCRYPT_MAX_RETRIES", "0")
     challenge_val = env("LETS_ENCRYPT_CHALLENGE", "http").lower()
     profile_val = env("LETS_ENCRYPT_PROFILE", "classic").lower()
     custom_profile = env("LETS_ENCRYPT_CUSTOM_PROFILE", "").lower()
     dns_propagation_val = env("LETS_ENCRYPT_DNS_PROPAGATION", DNS_PROPAGATION_DEFAULT).lower()
+    decode_base64 = env("LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64", "yes").lower() == "yes"
     wildcard = env("USE_LETS_ENCRYPT_WILDCARD", "no").lower() == "yes"
     activated = env("AUTO_LETS_ENCRYPT", "no").lower() == "yes" and env("LETS_ENCRYPT_PASSTHROUGH", "no").lower() == "no"
+    staging = env("USE_LETS_ENCRYPT_STAGING", "no").lower() == "yes"
+
+    if acme_server not in ACME_SERVER_TYPES:
+        if activated:
+            LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_SERVER '{acme_server}' is invalid. Defaulting to 'letsencrypt'.")
+        acme_server = "letsencrypt"
 
     # User-friendly checks
     if activated and not server_names_val:
@@ -266,16 +394,61 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
     elif activated:
         LOGGER.warning(f"[Service: {service}] EMAIL_LETS_ENCRYPT is not set. Proceeding without a contact email.")
 
+    if acme_server == "zerossl" and not email_val and not zerossl_api_key and activated:
+        LOGGER.warning(f"[Service: {service}] ZeroSSL requires EMAIL_LETS_ENCRYPT or LETS_ENCRYPT_ZEROSSL_API_KEY. Skipping generation.")
+        activated = False
+
+    if acme_server == "zerossl" and staging:
+        if activated:
+            LOGGER.warning(f"[Service: {service}] USE_LETS_ENCRYPT_STAGING is ignored when LETS_ENCRYPT_SERVER is set to 'zerossl'.")
+        staging = False
+
     try:
         retries_int = int(retries_val)
         if retries_int < 0:
             if activated:
-                LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_RETRIES is negative. Defaulting to 0.")
+                LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_MAX_RETRIES is negative. Defaulting to 0.")
             retries_int = 0
     except Exception:
         if activated:
-            LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_RETRIES is not a valid integer. Defaulting to 0.")
+            LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_MAX_RETRIES is not a valid integer. Defaulting to 0.")
         retries_int = 0
+
+    try:
+        zerossl_api_retry_int = int(zerossl_api_retry_val)
+        if zerossl_api_retry_int < 0:
+            raise ValueError("negative")
+    except Exception:
+        if activated and acme_server == "zerossl":
+            LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_ZEROSSL_API_RETRY must be >= 0. Defaulting to 3.")
+        zerossl_api_retry_int = 3
+
+    try:
+        zerossl_api_retry_delay_int = int(zerossl_api_retry_delay_val)
+        if zerossl_api_retry_delay_int < 0:
+            raise ValueError("negative")
+    except Exception:
+        if activated and acme_server == "zerossl":
+            LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY must be >= 0. Defaulting to 2.")
+        zerossl_api_retry_delay_int = 2
+
+    try:
+        zerossl_api_connect_timeout_int = int(zerossl_api_connect_timeout_val)
+        if zerossl_api_connect_timeout_int <= 0:
+            raise ValueError("non-positive")
+    except Exception:
+        if activated and acme_server == "zerossl":
+            LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT must be > 0. Defaulting to 5.")
+        zerossl_api_connect_timeout_int = 5
+
+    try:
+        zerossl_api_max_time_int = int(zerossl_api_max_time_val)
+        if zerossl_api_max_time_int <= 0:
+            raise ValueError("non-positive")
+    except Exception:
+        if activated and acme_server == "zerossl":
+            LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_ZEROSSL_API_MAX_TIME must be > 0. Defaulting to 20.")
+        zerossl_api_max_time_int = 20
 
     if activated and challenge_val not in CHALLENGE_TYPES:
         LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_CHALLENGE '{challenge_val}' is invalid. Must be one of {CHALLENGE_TYPES!r}, skipping generation.")
@@ -318,7 +491,7 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
                 )
             activated = False
         else:
-            provider = extract_provider(service, authenticator)
+            provider = extract_provider(service, authenticator, decode_base64)
             if not provider:
                 activated = False
     else:
@@ -327,22 +500,26 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
             LOGGER.debug(f"[Service: {service}] Wildcard domains are not supported for HTTP challenges, deactivating wildcard support.")
             wildcard = False
 
-    server_names = server_names_val.split(" ")
-    server_name = service
-    if wildcard:
-        server_names = extract_wildcards_from_domains(server_names)
-        server_name = server_names[-1] if server_names else service
+    server_names = server_names_val.split()
 
-    return server_name, {
-        "server_names": ",".join(server_names),
+    return server_names, {
+        "server_names": "",
         "activated": activated,
+        "acme_server": acme_server,
+        "acme_server_url": get_expected_acme_directory(acme_server, staging),
+        "zerossl_api_key": zerossl_api_key,
+        "zerossl_api_key_hash": zerossl_api_key_hash,
+        "zerossl_api_retry": zerossl_api_retry_int,
+        "zerossl_api_retry_delay": zerossl_api_retry_delay_int,
+        "zerossl_api_connect_timeout": zerossl_api_connect_timeout_int,
+        "zerossl_api_max_time": zerossl_api_max_time_int,
         "email": email_val,
         "challenge": challenge_val,
         "authenticator": authenticator or "manual",
         "dns_propagation": dns_propagation_val,
         "provider": provider,
         "wildcard": wildcard,
-        "staging": env("USE_LETS_ENCRYPT_STAGING", "no").lower() == "yes",
+        "staging": staging,
         "profile": profile_val,
         "disable_psl_check": env("LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "no").lower() == "yes",
         "retries": retries_int,
@@ -351,7 +528,7 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
     }
 
 
-def extract_wildcards_from_domains(domains: List[str]) -> List[str]:
+def extract_wildcard_groups(domains: List[str]) -> Dict[str, List[str]]:
     cleaned_labels: List[List[str]] = []
 
     for domain in domains:
@@ -370,19 +547,62 @@ def extract_wildcards_from_domains(domains: List[str]) -> List[str]:
         key = ".".join(labels[-2:]) if len(labels) >= 2 else ".".join(labels)
         grouped[key].append(labels)
 
-    bases: Set[str] = set()
+    groups: Dict[str, Set[str]] = {}
     for labels_list in grouped.values():
-        bases.update(_determine_wildcard_bases(labels_list))
+        for base in _determine_wildcard_bases(labels_list):
+            base = base.strip(".")
+            if not base:
+                continue
+            groups.setdefault(base, set()).update({f"*.{base}", base})
 
-    results = set()
-    for base in bases:
-        base = base.strip(".")
-        if not base:
-            continue
-        results.add(f"*.{base}")
-        results.add(base)
+    return {base: sorted(names, key=lambda value: (0 if value.startswith("*.") else 1, value)) for base, names in groups.items()}
 
-    return sorted(results, key=lambda value: (0 if value.startswith("*.") else 1, value))
+
+def certificate_fingerprint(config: Dict[str, Union[str, bool, int, Dict[str, str]]]) -> Tuple:
+    provider_hash = ""
+    if config.get("challenge") == "dns" and config.get("provider"):
+        provider_hash = bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256")
+    return (
+        config.get("acme_server"),
+        config.get("acme_server_url"),
+        config.get("zerossl_api_key_hash"),
+        config.get("challenge"),
+        config.get("authenticator"),
+        config.get("staging"),
+        config.get("profile"),
+        config.get("email"),
+        config.get("dns_propagation"),
+        config.get("wildcard"),
+        config.get("disable_psl_check"),
+        provider_hash,
+    )
+
+
+def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]:
+    server_names, base_config = build_service_config(service)
+    if not server_names:
+        return {}
+
+    # Deduplicate server names to avoid sending duplicate domains to the ACME server
+    unique_names = normalize_server_names(",".join(server_names))
+    if len(unique_names) < len(server_names):
+        LOGGER.debug(f"[Service: {service}] Removed {len(server_names) - len(unique_names)} duplicate server name(s).")
+
+    entries: Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]] = {}
+    if base_config["wildcard"]:
+        wildcard_groups = extract_wildcard_groups(list(unique_names))
+        if not wildcard_groups and base_config["activated"]:
+            LOGGER.warning(f"[Service: {service}] No valid wildcard groups found, skipping generation.")
+        for base, names in wildcard_groups.items():
+            config = base_config.copy()
+            config["server_names"] = ",".join(names)
+            entries[base] = config
+        return entries
+
+    config = base_config.copy()
+    config["server_names"] = format_server_names(unique_names)
+    entries[service] = config
+    return entries
 
 
 def _determine_wildcard_bases(labels_list: List[List[str]]) -> Set[str]:
@@ -432,6 +652,7 @@ def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
         WORK_DIR,
         "--logs-dir",
         LOGS_DIR,
+        *certbot_log_backup_flags(cmd_env),
     ]
 
     if LOG_LEVEL == "DEBUG":
@@ -442,7 +663,13 @@ def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
 
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
 
+    deadline = monotonic() + CERTBOT_TIMEOUT
     while process.poll() is None:
+        if monotonic() > deadline:
+            LOGGER.error(f"certbot delete for {service} timed out after {CERTBOT_TIMEOUT}s, killing process.")
+            process.kill()
+            process.wait()
+            return 1
         if process.stderr:
             rlist, _, _ = select([process.stderr], [], [], 2)
             if rlist:
@@ -453,23 +680,41 @@ def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
     return process.returncode
 
 
-def certbot_new(config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str] = None) -> int:
-    # * Building the certbot command
-    command = [
+def certbot_new(
+    service: str,
+    config: Dict[str, Union[str, bool, int, Dict[str, str]]],
+    cmd_env: Dict[str, str],
+    paths: CertbotPaths,
+) -> int:
+    certbot_entrypoint = resolve_certbot_entrypoint(
+        str(config.get("acme_server") or "letsencrypt"),
         CERTBOT_BIN,
+        ZEROSSL_BOT_SCRIPT,
+        LOGGER,
+        cmd_env=cmd_env,
+        fallback_to_certbot=False,
+    )
+    if not certbot_entrypoint:
+        return 2
+
+    # * Building the certbot command
+    command = certbot_entrypoint + [
         "certonly",
         "-n",
+        "--cert-name",
+        service,
         "-d",
         config["server_names"],
         "--preferred-profile",
         config["profile"],
         "--agree-tos",
         "--config-dir",
-        DATA_PATH.as_posix(),
+        paths.config_dir.as_posix(),
         "--work-dir",
-        WORK_DIR,
+        paths.work_dir.as_posix(),
         "--logs-dir",
-        LOGS_DIR,
+        paths.logs_dir.as_posix(),
+        *certbot_log_backup_flags(cmd_env),
         "--break-my-certs",
         "--expand",
     ]
@@ -479,11 +724,32 @@ def certbot_new(config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_en
     else:
         command.append("--register-unsafely-without-email")
 
+    if config.get("acme_server") == "letsencrypt":
+        account_id = select_account_id(paths.config_dir.joinpath("accounts"), bool(config["staging"]), str(config.get("email") or ""))
+        if account_id:
+            command.extend(["--account", account_id])
+    else:
+        cmd_env["LETS_ENCRYPT_ZEROSSL_API_RETRY"] = str(config.get("zerossl_api_retry") or 3)
+        cmd_env["LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"] = str(config.get("zerossl_api_retry_delay") or 2)
+        cmd_env["LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"] = str(config.get("zerossl_api_connect_timeout") or 5)
+        cmd_env["LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"] = str(config.get("zerossl_api_max_time") or 20)
+
+        # Backward compatible env names consumed by zerossl-bot.
+        cmd_env["ZEROSSL_API_RETRY"] = cmd_env["LETS_ENCRYPT_ZEROSSL_API_RETRY"]
+        cmd_env["ZEROSSL_API_RETRY_DELAY"] = cmd_env["LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"]
+        cmd_env["ZEROSSL_API_CONNECT_TIMEOUT"] = cmd_env["LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"]
+        cmd_env["ZEROSSL_API_MAX_TIME"] = cmd_env["LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"]
+
+        zerossl_api_key = str(config.get("zerossl_api_key") or "")
+        if zerossl_api_key:
+            cmd_env["LETS_ENCRYPT_ZEROSSL_API_KEY"] = zerossl_api_key
+
+        account_id = select_account_id(paths.config_dir.joinpath("accounts"), bool(config["staging"]), str(config.get("email") or ""))
+        if account_id:
+            command.extend(["--account", account_id])
+
     if LOG_LEVEL == "DEBUG":
         command.append("-v")
-
-    if not cmd_env:
-        cmd_env = {}
 
     if config["challenge"] == "dns":
         # * Adding DNS challenge hooks
@@ -533,10 +799,15 @@ def certbot_new(config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_en
         else:
             LOGGER.info(f"No existing certificate found for {service}, skipping removal.")
 
-    current_date = datetime.now()
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
 
+    deadline = monotonic() + CERTBOT_TIMEOUT
     while process.poll() is None:
+        if monotonic() > deadline:
+            LOGGER.error(f"certbot for {service} timed out after {CERTBOT_TIMEOUT}s, killing process.")
+            process.kill()
+            process.wait()
+            return 1
         if process.stderr:
             rlist, _, _ = select([process.stderr], [], [], 2)
             if rlist:
@@ -544,13 +815,49 @@ def certbot_new(config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_en
                     LOGGER_CERTBOT.info(line.strip())
                     break
 
-        if datetime.now() - current_date > timedelta(seconds=5):
-            LOGGER.info(
-                "⏳ Still generating certificate(s)" + (" (this may take a while depending on the provider)" if config["challenge"] == "dns" else "") + "..."
-            )
-            current_date = datetime.now()
-
     return process.returncode
+
+
+def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str]) -> bool:
+    LOGGER.info(
+        f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email'] or 'not provided'}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile on {config['acme_server']}..."
+    )
+    debug_config = config.copy()
+    if LOG_LEVEL != "TRACE" and debug_config.get("zerossl_api_key"):
+        debug_config["zerossl_api_key"] = "***"
+    LOGGER.debug(f"Service configuration: {debug_config}")
+
+    concurrent_requests = getenv("LETS_ENCRYPT_CONCURRENT_REQUESTS", "no").lower() == "yes"
+    paths, temp_root = prepare_certbot_paths(service, concurrent_requests, CACHE_PATH, DATA_PATH, WORK_DIR, LOGS_DIR)
+    success = False
+
+    try:
+        for attempts in range(1, config["retries"] + 2):
+            if attempts > 1:
+                LOGGER.warning(f"Certificate generation failed, retrying... (attempt {attempts}/{config['retries'] + 1})")
+                # Wait before retrying (exponential backoff: 30s, 60s, 120s...)
+                wait_time = min(30 * (2 ** (attempts - 2)), 300)  # Cap at 5 minutes
+                LOGGER.info(f"Waiting {wait_time} seconds before retry...")
+                sleep(wait_time)
+
+            with RUNNING_LOCK:
+                global RUNNING_CERTBOT
+                RUNNING_CERTBOT += 1
+            try:
+                ret = certbot_new(service, config, cmd_env.copy(), paths)
+            finally:
+                with RUNNING_LOCK:
+                    RUNNING_CERTBOT -= 1
+
+            if ret == 0:
+                LOGGER.info(f"Certificate(s) for {service} generated successfully.")
+                success = True
+                return True
+    finally:
+        finalize_certbot_run(paths, temp_root, success, MERGE_LOCK, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER)
+
+    LOGGER.error(f"Failed to generate certificate(s) for {service} after {config['retries'] + 1} attempts.")
+    return False
 
 
 try:
@@ -562,32 +869,30 @@ try:
         sys_exit(0)
 
     services = {}
-    for service in server_names.split(" "):
+    for service in server_names.split():
         if not service.strip():
             continue
 
-        server_name, config = build_service_config(service)
-        if config["wildcard"] and server_name in services:
-            continue
-        services[server_name] = config
+        for cert_name, config in build_service_entries(service).items():
+            if cert_name in services:
+                if certificate_fingerprint(services[cert_name]) == certificate_fingerprint(config):
+                    merged = normalize_server_names(services[cert_name]["server_names"]) | normalize_server_names(config["server_names"])
+                    services[cert_name]["server_names"] = format_server_names(merged)
+                    continue
+                LOGGER.warning(f"[Service: {cert_name}] Certificate configuration conflict detected, keeping first occurrence.")
+                continue
+            services[cert_name] = config
 
     if not any(service["activated"] for service in services.values()):
         LOGGER.info("No services uses Let's Encrypt, skipping generation of new certificates...")
         sys_exit(0)
 
+    prepare_logs_dir(LOGS_DIR, LOGGER)
+
     JOB = Job(LOGGER, __file__.replace("new", "renew"))
 
     # ? Fetch existing certificates
-    cmd_env = environ.copy()
-
-    db_config = JOB.db.get_config()
-    for key in db_config:
-        if key in cmd_env:
-            del cmd_env[key]
-
-    cmd_env["PYTHONPATH"] = cmd_env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in cmd_env["PYTHONPATH"] else "")
-    if getenv("DATABASE_URI", ""):
-        cmd_env["DATABASE_URI"] = getenv("DATABASE_URI", "")
+    cmd_env = build_certbot_env(JOB, DEPS_PATH)
 
     proc = run(
         [
@@ -600,6 +905,7 @@ try:
             WORK_DIR,
             "--logs-dir",
             LOGS_DIR,
+            *certbot_log_backup_flags(cmd_env),
         ],
         stdin=DEVNULL,
         stdout=PIPE,
@@ -624,11 +930,10 @@ try:
             if not certificate_lines:
                 continue
 
-            service = certificate_lines[0].split(" ")[0].strip()
-            match_domains = search(r"Domains:\s+(.+)$", certificate_block, MULTILINE)
-            domains = match_domains.group(1).strip().replace(" ", ",") if match_domains else ""
+            service = certificate_lines[0].split()[0].strip()
+            domains = parse_certbot_domains(certificate_block)
 
-            existing_certificates[service] = {"active": False, "server_names": domains}
+            existing_certificates[service] = {"active": False, "server_names": domains, "server_names_set": normalize_server_names(domains)}
 
             renewal_file = DATA_PATH.joinpath("renewal", f"{service}.conf")
             if renewal_file.is_file():
@@ -660,10 +965,14 @@ try:
                         "credentials_hash": credentials_hash,
                         "staging": "acme-staging" in server,
                         "profile": profile,
+                        "acme_server_url": normalize_server_url(server),
                     }
                 )
 
         LOGGER_CERTBOT.debug(f"Existing certificates: {existing_certificates}")
+
+    zerossl_api_key_hashes = load_zerossl_api_key_hashes()
+    LOGGER_CERTBOT.debug(f"Stored ZeroSSL API key hashes: {list(zerossl_api_key_hashes.keys())}")
 
     # ? Check if the services' certificates already exist
     for server_name, config in services.items():
@@ -679,65 +988,114 @@ try:
             if psl_rules is None:
                 psl_rules = parse_psl(psl_lines)
 
-            if check_psl_blacklist(config["server_names"].split(","), psl_rules, server_name):
+            if check_psl_blacklist(list(normalize_server_names(config["server_names"])), psl_rules, server_name):
                 config["activated"] = False
                 continue
 
-        if set(config["server_names"].split(",")) != set(existing_cert["server_names"].split(",")):
-            LOGGER.warning(f"[Service: {service}] Server names do not match existing certificate, forcing renewal.")
+        config_server_names = normalize_server_names(config["server_names"])
+        existing_server_names = existing_cert["server_names_set"]
+        wildcard_valid = config["wildcard"] and config["challenge"] == "dns"
+
+        if not wildcard_valid:
+            config_server_names = filter_wildcard_names(config_server_names)
+            existing_server_names = filter_wildcard_names(existing_server_names)
+
+        if config_server_names != existing_server_names:
+            LOGGER.warning(f"[Service: {server_name}] Server names do not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["challenge"] != existing_cert["challenge"]:
-            LOGGER.warning(f"[Service: {service}] Challenge type does not match existing certificate, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] Challenge type does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["authenticator"] != existing_cert["authenticator"]:
-            LOGGER.warning(f"[Service: {service}] DNS provider does not match existing certificate, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] DNS provider does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["staging"] != existing_cert["staging"]:
-            LOGGER.warning(f"[Service: {service}] Staging environment does not match existing certificate, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] Staging environment does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["profile"] != existing_cert["profile"]:
-            LOGGER.warning(f"[Service: {service}] Profile does not match existing certificate, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] Profile does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
+        elif normalize_server_url(str(config.get("acme_server_url") or "")) != normalize_server_url(str(existing_cert.get("acme_server_url") or "")):
+            LOGGER.warning(f"[Service: {server_name}] ACME server does not match existing certificate, forcing renewal.")
+            config["force_renew"] = True
+        elif config.get("acme_server") == "zerossl":
+            configured_api_key_hash = str(config.get("zerossl_api_key_hash") or "")
+            previous_api_key_hash = str(zerossl_api_key_hashes.get(server_name, ""))
+            if server_name in zerossl_api_key_hashes and configured_api_key_hash != previous_api_key_hash:
+                LOGGER.warning(f"[Service: {server_name}] ZeroSSL API key changed, forcing renewal.")
+                config["force_renew"] = True
 
         if config["challenge"] == "dns" and bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256") != existing_cert["credentials_hash"]:
-            LOGGER.warning(f"[Service: {service}] DNS credentials have changed, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] DNS credentials have changed, forcing renewal.")
             config["force_renew"] = True
 
     # ? generate new certificates and renew existing ones if needed
+    concurrent_requests = getenv("LETS_ENCRYPT_CONCURRENT_REQUESTS", "no").lower() == "yes"
+    pending_services: List[Tuple[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]] = []
+
     for service, config in services.items():
         if existing_certificates.get(service, {}).get("active") and not config["force_renew"]:
             LOGGER.info(f"Certificate(s) for {service} already exist, skipping generation.")
             config["exists"] = True
             continue
-        elif not config["activated"]:
+        if not config["activated"]:
             continue
+        pending_services.append((service, config))
 
-        LOGGER.info(
-            f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email'] or 'not provided'}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile..."
-        )
-        LOGGER.debug(f"Service configuration: {config}")
-
-        for attempts in range(1, config["retries"] + 2):
-            if attempts > 1:
-                LOGGER.warning(f"Certificate generation failed, retrying... (attempt {attempts}/{config['retries'] + 1})")
-                # Wait before retrying (exponential backoff: 30s, 60s, 120s...)
-                wait_time = min(30 * (2 ** (attempts - 2)), 300)  # Cap at 5 minutes
-                LOGGER.info(f"Waiting {wait_time} seconds before retry...")
-                sleep(wait_time)
-
-            ret = certbot_new(config, cmd_env.copy())
-
-            if ret == 0:
-                LOGGER.info(f"Certificate(s) for {service} generated successfully.")
-                config["exists"] = True
-                status = 1 if status == 0 else status
-                break
-
-            attempts += 1
-
-        if not config["exists"]:
-            status = 2
-            LOGGER.error(f"Failed to generate certificate(s) for {service} after {config['retries'] + 1} attempts.")
+    if pending_services:
+        if concurrent_requests:
+            required_accounts: Set[Tuple[bool, str]] = set()
+            required_zerossl_accounts: Set[Tuple[bool, str]] = set()
+            for _, config in pending_services:
+                if config.get("acme_server") == "letsencrypt":
+                    required_accounts.add((bool(config.get("staging")), str(config.get("email") or "")))
+                else:
+                    required_zerossl_accounts.add((bool(config.get("staging")), str(config.get("email") or "")))
+            if required_accounts:
+                ensure_accounts(required_accounts, cmd_env.copy(), CERTBOT_BIN, LOG_LEVEL, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER)
+            if required_zerossl_accounts:
+                zerossl_env = cmd_env.copy()
+                zerossl_env["CERTBOT_BIN"] = CERTBOT_BIN
+                # Collect ZeroSSL-specific env vars from any pending ZeroSSL service config
+                for _, config in pending_services:
+                    if config.get("acme_server") != "letsencrypt":
+                        zerossl_api_key = str(config.get("zerossl_api_key") or "")
+                        if zerossl_api_key:
+                            zerossl_env["LETS_ENCRYPT_ZEROSSL_API_KEY"] = zerossl_api_key
+                        zerossl_env["LETS_ENCRYPT_ZEROSSL_API_RETRY"] = str(config.get("zerossl_api_retry") or 3)
+                        zerossl_env["LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"] = str(config.get("zerossl_api_retry_delay") or 2)
+                        zerossl_env["LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"] = str(config.get("zerossl_api_connect_timeout") or 5)
+                        zerossl_env["LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"] = str(config.get("zerossl_api_max_time") or 20)
+                        break
+                ensure_zerossl_accounts(required_zerossl_accounts, zerossl_env, ZEROSSL_BOT_SCRIPT.as_posix(), LOG_LEVEL, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER)
+        start_progress_monitor()
+        try:
+            if concurrent_requests and len(pending_services) > 1:
+                max_workers = max(1, min(len(pending_services), effective_cpu_count()))
+                with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                    futures = {executor.submit(generate_certificate, service, config, cmd_env.copy()): service for service, config in pending_services}
+                    for future in as_completed(futures):
+                        service = futures[future]
+                        config = services[service]
+                        try:
+                            success = future.result()
+                        except BaseException as e:
+                            LOGGER.error(f"Unexpected error while generating certificate(s) for {service}: {e}")
+                            success = False
+                        config["exists"] = success
+                        if success:
+                            status = 1 if status == 0 else status
+                        else:
+                            status = 2
+            else:
+                for service, config in pending_services:
+                    config["exists"] = generate_certificate(service, config, cmd_env)
+                    if config["exists"]:
+                        status = 1 if status == 0 else status
+                    else:
+                        status = 2
+        finally:
+            stop_progress_monitor()
 
     if CACHE_PATH.is_dir():
         # * Clean up unused credential files
@@ -767,8 +1125,37 @@ try:
                     else:
                         LOGGER.info(f"Certificate for {service} deleted successfully.")
 
+        # * Persist ZeroSSL API key hash tracking (for change-triggered renewals)
+        updated_zerossl_api_key_hashes = {key: value for key, value in zerossl_api_key_hashes.items() if key in services}
+        for service, config in services.items():
+            if config.get("acme_server") != "zerossl":
+                updated_zerossl_api_key_hashes.pop(service, None)
+                continue
+
+            configured_hash = str(config.get("zerossl_api_key_hash") or "")
+            if config.get("exists"):
+                updated_zerossl_api_key_hashes[service] = configured_hash
+                continue
+
+            # If generation failed but an old certificate is still active, keep previous hash
+            # so the renewal attempt will be retried on the next run.
+            if not existing_certificates.get(service, {}).get("active"):
+                updated_zerossl_api_key_hashes.pop(service, None)
+
+        save_zerossl_api_key_hashes(updated_zerossl_api_key_hashes)
+
         # * Save data to db cache
-        if DATA_PATH.is_dir() and list(DATA_PATH.iterdir()):
+        # Guards: only re-cache if the initial restore succeeded AND we actually have
+        # live certs on disk. Without these guards, a failed restore leaves DATA_PATH
+        # empty (rmtree runs before extraction in Job.restore_cache) and a blind
+        # cache_dir() call would overwrite the good DB row with empty state, losing
+        # the certs from both disk and DB.
+        if not JOB.restore_ok:
+            LOGGER.error("Skipping db cache update: initial cache restore failed, refusing to overwrite good DB state with current disk state.")
+            status = 2
+        elif not DATA_PATH.is_dir() or not any(DATA_PATH.glob("live/*/fullchain.pem")):
+            LOGGER.warning("Skipping db cache update: no live certificates found under DATA_PATH/live/*/fullchain.pem.")
+        else:
             cached, err = JOB.cache_dir(DATA_PATH)
             if not cached:
                 LOGGER.error(f"Error while saving data to db cache : {err}")

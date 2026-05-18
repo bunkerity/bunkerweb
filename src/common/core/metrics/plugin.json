@@ -20,7 +20,7 @@
       "help": "Size of the internal storage for metrics.",
       "id": "metrics-memory-size",
       "label": "Metrics memory size",
-      "regex": "^\\d+[kKmMgG]?$",
+      "regex": "^\\d+(?:[kKmMgG])?$",
       "type": "text"
     },
     "METRICS_MEMORY_MAX_RETRIES": {
@@ -34,21 +34,30 @@
     },
     "METRICS_MAX_BLOCKED_REQUESTS": {
       "context": "global",
-      "default": "1000",
-      "help": "Maximum number of blocked requests to store (per worker).",
+      "default": "1k",
+      "help": "Maximum number of blocked requests to store (per worker). Accepts a plain integer or `k`/`m` shorthand (e.g., `1000`, `1k`, `10k`, `1m`).",
       "id": "metrics-max-blocked-requests",
       "label": "Metrics max blocked requests",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+[kKmM]?$",
+      "type": "text"
     },
     "METRICS_MAX_BLOCKED_REQUESTS_REDIS": {
       "context": "global",
-      "default": "100000",
-      "help": "Maximum number of blocked requests to store in Redis.",
+      "default": "10k",
+      "help": "Maximum number of blocked requests to store in Redis. Accepts a plain integer or `k`/`m` shorthand (e.g., `10000`, `10k`, `100k`, `1m`).",
       "id": "metrics-max-blocked-requests-redis",
       "label": "Metrics max blocked requests Redis",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+[kKmM]?$",
+      "type": "text"
+    },
+    "MAX_LRU_HISTORY": {
+      "context": "global",
+      "default": "1k",
+      "help": "Caps the per-worker LRU event history: bounds both the LRU slot count and the per-key event-history array length (block trails, auth trails, etc.). Accepts a plain integer or `k`/`m` shorthand (e.g., `1k`, `10k`, `1m`). Caps unbounded growth from high-cardinality sources like spoofed-IP floods.",
+      "id": "max-lru-history",
+      "label": "Max LRU history",
+      "regex": "^\\d+[kKmM]?$",
+      "type": "text"
     },
     "METRICS_SAVE_TO_REDIS": {
       "context": "global",

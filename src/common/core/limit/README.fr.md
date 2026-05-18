@@ -26,15 +26,15 @@ Le plugin Limit permet d’appliquer des politiques de limitation pour garantir 
     | `LIMIT_REQ_URL`  | `/`    | multisite | oui      | **Motif d’URL :** Motif d’URL (regex PCRE) auquel la limite de débit sera appliquée ; utilisez `/` pour l'appliquer à toutes les requêtes.                                   |
     | `LIMIT_REQ_RATE` | `2r/s` | multisite | oui      | **Limite de débit :** Taux de requêtes maximal au format `Nr/t`, où N est le nombre de requêtes et t est l'unité de temps : s (seconde), m (minute), h (heure), ou d (jour). |
 
-!!! tip "Format de la limitation de débit"
-    Le format de la limite de débit est spécifié comme `Nr/t` où :
+    !!! tip "Format de la limitation de débit"
+        Le format de la limite de débit est spécifié comme `Nr/t` où :
 
-    - `N` est le nombre de requêtes autorisées
-    - `r` est la lettre littérale 'r' (pour 'requêtes')
-    - `/` est une barre oblique littérale
-    - `t` est l'unité de temps : `s` (seconde), `m` (minute), `h` (heure), ou `d` (jour)
+        - `N` est le nombre de requêtes autorisées
+        - `r` est la lettre littérale 'r' (pour 'requêtes')
+        - `/` est une barre oblique littérale
+        - `t` est l'unité de temps : `s` (seconde), `m` (minute), `h` (heure), ou `d` (jour)
 
-    Par exemple, `5r/m` signifie que 5 requêtes par minute sont autorisées pour chaque adresse IP.
+        Par exemple, `5r/m` signifie que 5 requêtes par minute sont autorisées pour chaque adresse IP.
 
 === "Limitation de connexions"
 
@@ -46,7 +46,9 @@ Le plugin Limit permet d’appliquer des politiques de limitation pour garantir 
     | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | non      | **Flux HTTP/3 :** Nombre maximal de flux HTTP/3 simultanés par adresse IP.                                     |
     | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | non      | **Connexions Stream :** Nombre maximal de connexions stream simultanées par adresse IP.                        |
 
-!!! info "Limitation de connexions vs de requêtes" - La **limitation de connexions** restreint le nombre de connexions simultanées qu'une seule adresse IP peut maintenir. - La **limitation de débit de requêtes** restreint le nombre de requêtes qu'une adresse IP peut effectuer dans une période de temps définie.
+!!! info "Limitation de connexions vs de requêtes"
+    - La **limitation de connexions** restreint le nombre de connexions simultanées qu'une seule adresse IP peut maintenir.
+    - La **limitation de débit de requêtes** restreint le nombre de requêtes qu'une adresse IP peut effectuer dans une période de temps définie.
 
     L'utilisation des deux méthodes offre une protection complète contre divers types d'abus.
 

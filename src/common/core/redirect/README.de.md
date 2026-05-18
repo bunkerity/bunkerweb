@@ -20,17 +20,19 @@ Führen Sie die folgenden Schritte aus, um die Umleitungsfunktion zu konfigurier
 
 ### Konfigurationseinstellungen
 
-| Einstellung               | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                  |
-| ------------------------- | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `REDIRECT_FROM`           | `/`      | multisite | ja       | **Pfad, von dem umgeleitet wird:** Der Pfad, der umgeleitet wird.                                                             |
-| `REDIRECT_TO`             |          | multisite | ja       | **Ziel-URL:** Die Ziel-URL, zu der Besucher umgeleitet werden. Leer lassen, um die Umleitung zu deaktivieren.                 |
-| `REDIRECT_TO_REQUEST_URI` | `no`     | multisite | ja       | **Pfad beibehalten:** Wenn auf `yes` gesetzt, wird die ursprüngliche Anfrage-URI an die Ziel-URL angehängt.                   |
-| `REDIRECT_TO_STATUS_CODE` | `301`    | multisite | ja       | **HTTP-Statuscode:** Der für die Umleitung zu verwendende HTTP-Statuscode. Optionen: `301` (permanent) oder `302` (temporär). |
+| Einstellung               | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                |
+| ------------------------- | -------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `REDIRECT_FROM`           | `/`      | multisite | ja       | **Pfad, von dem umgeleitet wird:** Der Pfad, der umgeleitet wird.                                                           |
+| `REDIRECT_TO`             |          | multisite | ja       | **Ziel-URL:** Die Ziel-URL, zu der Besucher umgeleitet werden. Leer lassen, um die Umleitung zu deaktivieren.               |
+| `REDIRECT_TO_REQUEST_URI` | `no`     | multisite | ja       | **Pfad beibehalten:** Wenn auf `yes` gesetzt, wird die ursprüngliche Anfrage-URI an die Ziel-URL angehängt.                 |
+| `REDIRECT_TO_STATUS_CODE` | `301`    | multisite | ja       | **HTTP-Statuscode:** Der für die Umleitung zu verwendende HTTP-Statuscode. Optionen: `301`, `302`, `303`, `307` oder `308`. |
 
 !!! tip "Wahl des richtigen Statuscodes"
-
-- Verwenden Sie `301` (Moved Permanently), wenn die Umleitung dauerhaft ist, z. B. bei Domain-Migrationen oder zur Einrichtung kanonischer URLs. Dies hilft Suchmaschinen, ihre Indizes zu aktualisieren.
-- Verwenden Sie `302` (Found/Temporary Redirect), wenn die Umleitung vorübergehend ist oder wenn Sie die ursprüngliche URL in Zukunft möglicherweise wiederverwenden möchten.
+    - **`301` (Moved Permanently):** Permanente Umleitung, wird von Browsern zwischengespeichert. Kann POST zu GET ändern. Ideal für Domain-Migrationen.
+    - **`302` (Found):** Temporäre Umleitung. Kann POST zu GET ändern.
+    - **`303` (See Other):** Leitet immer mit GET-Methode um. Nützlich nach Formularübermittlungen.
+    - **`307` (Temporary Redirect):** Temporäre Umleitung, die die HTTP-Methode beibehält. Ideal für API-Umleitungen.
+    - **`308` (Permanent Redirect):** Permanente Umleitung, die die HTTP-Methode beibehält. Für permanente API-Migrationen.
 
 !!! info "Beibehaltung des Pfades"
     Wenn `REDIRECT_TO_REQUEST_URI` auf `yes` gesetzt ist, behält BunkerWeb den ursprünglichen Anfragepfad bei. Wenn ein Benutzer beispielsweise `https://old-domain.com/blog/post-1` besucht und Sie eine Umleitung zu `https://new-domain.com` eingerichtet haben, wird er zu `https://new-domain.com/blog/post-1` umgeleitet.
@@ -99,4 +101,25 @@ Führen Sie die folgenden Schritte aus, um die Umleitungsfunktion zu konfigurier
     REDIRECT_TO: "https://example.com/support"
     REDIRECT_TO_REQUEST_URI: "yes"
     REDIRECT_TO_STATUS_CODE: "301"
+    ```
+
+=== "API-Endpunkt-Migration"
+
+    Eine Konfiguration für die permanente Umleitung eines API-Endpunkts unter Beibehaltung der HTTP-Methode:
+
+    ```yaml
+    REDIRECT_FROM: "/api/v1/"
+    REDIRECT_TO: "https://api.example.com/v2/"
+    REDIRECT_TO_REQUEST_URI: "yes"
+    REDIRECT_TO_STATUS_CODE: "308"
+    ```
+
+=== "Nach Formularübermittlung"
+
+    Eine Konfiguration zur Umleitung nach einer Formularübermittlung mit GET-Methode:
+
+    ```yaml
+    REDIRECT_TO: "https://example.com/danke"
+    REDIRECT_TO_REQUEST_URI: "no"
+    REDIRECT_TO_STATUS_CODE: "303"
     ```

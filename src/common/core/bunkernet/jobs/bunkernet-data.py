@@ -11,11 +11,11 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from bunkernet import data
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 from common_utils import bytes_hash  # type: ignore
 
-LOGGER = setup_logger("BUNKERNET.data")
+LOGGER = getLogger("BUNKERNET.DATA")
 exit_status = 0
 
 try:
@@ -23,7 +23,7 @@ try:
     bunkernet_activated = False
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
-        for first_server in getenv("SERVER_NAME", "www.example.com").split(" "):
+        for first_server in getenv("SERVER_NAME", "www.example.com").split():
             if getenv(f"{first_server}_USE_BUNKERNET", "yes") == "yes":
                 bunkernet_activated = True
                 break
@@ -68,6 +68,7 @@ try:
     # Download data
     LOGGER.info("Downloading BunkerNet data ...")
     ok, status, data = data()
+    LOGGER.debug(f"Data API reply - ok: {ok}, status: {status}, data: {data}")
     if not ok:
         LOGGER.error(f"Error while sending data request to BunkerNet API : {data}")
         sys_exit(2)

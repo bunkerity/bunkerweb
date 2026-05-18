@@ -7722,11 +7722,11 @@ static int bswap(lua_State*L){
 UB b=barg(L,1);b=(b>>24)|((b>>8)&0xff00)|((b&0xff00)<<8)|(b<<24);BRET(b)}
 static int tohex(lua_State*L){
 UB b=barg(L,1);
-int n=lua_isnone(L,2)?8:(int)barg(L,2);
+UB n=lua_isnone(L,2)?8:barg(L,2);
 const char*hexdigits="0123456789abcdef";
 char buf[8];
 int i;
-if(n<0){n=-n;hexdigits="0123456789ABCDEF";}
+if((int)n<0){n=~n+1;hexdigits="0123456789ABCDEF";}
 if(n>8)n=8;
 for(i=(int)n;--i>=0;){buf[i]=hexdigits[b&15];b>>=4;}
 lua_pushlstring(L,buf,(size_t)n);

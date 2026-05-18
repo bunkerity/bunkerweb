@@ -5,6 +5,7 @@ permissions: read-all
 on:
   push:
     branches: [staging]
+  workflow_dispatch:
 
 jobs:
   # Build Docker images
@@ -52,8 +53,8 @@ jobs:
             ubuntu,
             debian-bookworm,
             debian-trixie,
-            fedora-41,
-            fedora-42,
+            fedora-43,
+            fedora-44,
             rhel-8,
             rhel-9,
             rhel-10,
@@ -66,9 +67,9 @@ jobs:
             package: deb
           - linux: debian-trixie
             package: deb
-          - linux: fedora-41
+          - linux: fedora-43
             package: rpm
-          - linux: fedora-42
+          - linux: fedora-44
             package: rpm
           - linux: rhel-8
             package: rpm
@@ -152,12 +153,12 @@ jobs:
       packages: write
     steps:
       - name: Login to Docker Hub
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to ghcr
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -185,8 +186,8 @@ jobs:
             ubuntu,
             debian-bookworm,
             debian-trixie,
-            fedora-41,
-            fedora-42,
+            fedora-43,
+            fedora-44,
             el-8,
             el-9,
             el-10,
@@ -214,17 +215,17 @@ jobs:
             suffix: ""
             version: trixie
             package: deb
-          - linux: fedora-41
+          - linux: fedora-43
             package_arch: x86_64
             separator: "-"
             suffix: "1."
-            version: 41
+            version: 43
             package: rpm
-          - linux: fedora-42
+          - linux: fedora-44
             package_arch: x86_64
             separator: "-"
             suffix: "1."
-            version: 42
+            version: 44
             package: rpm
           - linux: el-8
             package_arch: x86_64

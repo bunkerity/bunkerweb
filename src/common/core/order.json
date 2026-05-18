@@ -6,17 +6,17 @@
     "greylist",
     "bunkernet",
     "limit",
+    "authbasic",
     "securitytxt",
-    "robotstxt"
-  ],
-  "init_worker": [
-    "redis",
-    "bunkernet",
+    "robotstxt",
+    "crowdsec",
     "dnsbl",
+    "headers",
     "customcert",
     "letsencrypt",
     "selfsigned"
   ],
+  "init_worker": ["redis", "bunkernet", "dnsbl"],
   "set": [
     "sessions",
     "whitelist",
@@ -25,6 +25,7 @@
     "selfsigned",
     "ui"
   ],
+  "ssl_client_hello_default": ["misc"],
   "ssl_certificate": ["customcert", "letsencrypt", "selfsigned"],
   "access": [
     "ssl",
@@ -34,23 +35,18 @@
     "greylist",
     "country",
     "dnsbl",
+    "crowdsec",
     "bunkernet",
     "reversescan",
     "limit",
+    "authbasic",
     "misc",
     "cors",
     "securitytxt",
     "robotstxt",
     "antibot"
   ],
-  "headers": [
-    "headers",
-    "cors",
-    "reverseproxy",
-    "clientcache",
-    "antibot",
-    "misc"
-  ],
+  "headers": ["headers", "cors", "antibot", "misc"],
   "log": ["badbehavior", "bunkernet", "errors", "metrics"],
   "preread": [
     "whitelist",
@@ -61,7 +57,7 @@
     "reversescan"
   ],
   "log_stream": ["badbehavior", "bunkernet"],
-  "log_default": ["badbehavior", "bunkernet", "errors", "misc", "metrics"],
-  "timer": ["metrics", "badbehavior", "bunkernet", "sessions"],
+  "log_default": ["badbehavior", "bunkernet", "misc", "metrics"],
+  "timer": ["metrics", "badbehavior", "sessions"],
   "init_workers": []
 }

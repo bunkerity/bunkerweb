@@ -19,12 +19,12 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from sqlalchemy.engine.url import make_url
 
-from common_utils import bytes_hash  # type: ignore
+from common_utils import bytes_hash, safe_zip_extractall  # type: ignore
 from Database import Database  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from model import Base  # type: ignore
 
-LOGGER = setup_logger("BACKUP")
+LOGGER = getLogger("BACKUP")
 
 BACKUP_DIR = Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups"))
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
@@ -225,7 +225,7 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
 
         tmp_file = Path(sep, "var", "tmp", "bunkerweb", backup_file.with_suffix(".sql").name)
         with ZipFile(backup_file, "r") as zipf:
-            zipf.extractall(path=tmp_file.parent)
+            safe_zip_extractall(zipf, tmp_file.parent)
 
         proc = run(
             ["sqlite3", db_path.as_posix(), f".read {tmp_file.as_posix()}"],

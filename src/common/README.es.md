@@ -8,7 +8,7 @@ El plugin General proporciona el marco de configuración principal para BunkerWe
 4. Los parámetros de registro controlan qué información se graba y cómo se formatea.
 5. Estos ajustes crean la base sobre la que operan todos los demás plugins y funcionalidades de BunkerWeb.
 
-### Modo Multisite
+### Modo Multisite {#multisite-mode}
 
 Cuando `MULTISITE` se establece en `yes`, BunkerWeb puede alojar y proteger múltiples sitios web, cada uno con su propia configuración única. Esta característica es particularmente útil para escenarios como:
 
@@ -23,7 +23,7 @@ En el modo multisitio, cada sitio se identifica por un `SERVER_NAME` único. Par
 
 Este enfoque asegura que los ajustes se apliquen al sitio correcto en un entorno multisitio.
 
-### Ajustes Múltiples
+### Ajustes Múltiples {#multiple-settings}
 
 Algunos ajustes en BunkerWeb admiten múltiples configuraciones para la misma característica. Para definir múltiples grupos de ajustes, añade un sufijo numérico al nombre del ajuste. Por ejemplo:
 
@@ -31,6 +31,14 @@ Algunos ajustes en BunkerWeb admiten múltiples configuraciones para la misma ca
 - `REVERSE_PROXY_URL_2=/anotherdir` y `REVERSE_PROXY_HOST_2=http://myhost2` configuran el segundo proxy inverso.
 
 Este patrón te permite gestionar múltiples configuraciones para características como proxies inversos, puertos u otros ajustes que requieren valores distintos para diferentes casos de uso.
+
+### Orden de ejecución de plugins {#plugin-order}
+
+Puede ajustar el orden con listas separadas por espacios:
+
+- Fases globales: `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_TIMER`.
+- Fases por sitio: `PLUGINS_ORDER_SET`, `PLUGINS_ORDER_ACCESS`, `PLUGINS_ORDER_SSL_CERTIFICATE`, `PLUGINS_ORDER_HEADER`, `PLUGINS_ORDER_LOG`, `PLUGINS_ORDER_PREREAD`, `PLUGINS_ORDER_LOG_STREAM`, `PLUGINS_ORDER_LOG_DEFAULT`.
+- Semántica: los plugins listados se ejecutan primero en esa fase; el resto se ejecuta después en su secuencia normal. Separe los IDs solo con espacios.
 
 ### Modos de Seguridad {#security-modes}
 
@@ -84,30 +92,35 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
 
 === "Ajustes de Red y Puertos"
 
-    | Parámetro       | Valor por defecto | Contexto | Múltiple | Descripción                                                     |
-    | --------------- | ----------------- | -------- | -------- | --------------------------------------------------------------- |
-    | `HTTP_PORT`     | `8080`            | global   | Sí       | **Puerto HTTP:** Número de puerto para el tráfico HTTP.         |
-    | `HTTPS_PORT`    | `8443`            | global   | Sí       | **Puerto HTTPS:** Número de puerto para el tráfico HTTPS.       |
-    | `USE_IPV6`      | `no`              | global   | No       | **Soporte IPv6:** Habilita la conectividad IPv6.                |
-    | `DNS_RESOLVERS` | `127.0.0.11`      | global   | No       | **Resolutores DNS:** Direcciones DNS de los resolutores a usar. |
+    | Parámetro               | Valor por defecto | Contexto | Múltiple | Descripción                                                                                              |
+    | ----------------------- | ----------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`            | global   | Sí       | **Puerto HTTP:** Número de puerto para el tráfico HTTP. Dejar vacío para desactivar la escucha HTTP.     |
+    | `HTTPS_PORT`            | `8443`            | global   | Sí       | **Puerto HTTPS:** Número de puerto para el tráfico HTTPS. Dejar vacío para desactivar la escucha HTTPS.  |
+    | `USE_IPV6`              | `no`              | global   | No       | **Soporte IPv6:** Habilita la conectividad IPv6.                                                         |
+    | `DNS_RESOLVERS`         | `127.0.0.11`      | global   | No       | **Resolutores DNS:** Direcciones DNS de los resolutores a usar.                                          |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`             | global   | No       | **Timeout del cuerpo del cliente:** Tiempo límite para leer el cuerpo de la solicitud del cliente.       |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`             | global   | No       | **Timeout de cabeceras del cliente:** Tiempo límite para leer las cabeceras de la solicitud del cliente. |
+    | `KEEPALIVE_TIMEOUT`     | `15s`             | global   | No       | **Timeout keepalive:** Tiempo límite para conexiones keepalive del cliente.                              |
+    | `SEND_TIMEOUT`          | `10s`             | global   | No       | **Timeout de envío:** Tiempo límite para transmitir una respuesta al cliente.                            |
 
 === "Ajustes del Servidor de Stream"
 
-    | Parámetro                | Valor por defecto | Contexto  | Múltiple | Descripción                                                           |
-    | ------------------------ | ----------------- | --------- | -------- | --------------------------------------------------------------------- |
-    | `LISTEN_STREAM`          | `yes`             | multisite | No       | **Escucha de Stream:** Habilita la escucha para no-ssl (passthrough). |
-    | `LISTEN_STREAM_PORT`     | `1337`            | multisite | Sí       | **Puerto de Stream:** Puerto de escucha para no-ssl (passthrough).    |
-    | `LISTEN_STREAM_PORT_SSL` | `4242`            | multisite | Sí       | **Puerto SSL de Stream:** Puerto de escucha para ssl (passthrough).   |
-    | `USE_TCP`                | `yes`             | multisite | No       | **Escucha TCP:** Habilita la escucha TCP (stream).                    |
-    | `USE_UDP`                | `no`              | multisite | No       | **Escucha UDP:** Habilita la escucha UDP (stream).                    |
+    | Parámetro                | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                               |
+    | ------------------------ | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
+    | `LISTEN_STREAM`          | `yes`             | multisite | No       | **Escucha de Stream:** Habilita la escucha para no-ssl (passthrough).                                                     |
+    | `LISTEN_STREAM_PORT`     | `1337`            | multisite | Sí       | **Puerto de Stream:** Puerto de escucha para no-ssl (passthrough). Dejar vacío para desactivar la escucha stream non-SSL. |
+    | `LISTEN_STREAM_PORT_SSL` | `4242`            | multisite | Sí       | **Puerto SSL de Stream:** Puerto de escucha para ssl (passthrough). Dejar vacío para desactivar la escucha stream SSL.    |
+    | `USE_TCP`                | `yes`             | multisite | No       | **Escucha TCP:** Habilita la escucha TCP (stream).                                                                        |
+    | `USE_UDP`                | `no`              | multisite | No       | **Escucha UDP:** Habilita la escucha UDP (stream).                                                                        |
 
 === "Ajustes de Workers"
 
-    | Parámetro              | Valor por defecto | Contexto | Múltiple | Descripción                                                                                              |
-    | ---------------------- | ----------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------- |
-    | `WORKER_PROCESSES`     | `auto`            | global   | No       | **Procesos Worker:** Número de procesos worker. Establécelo en `auto` para usar los núcleos disponibles. |
-    | `WORKER_CONNECTIONS`   | `1024`            | global   | No       | **Conexiones por Worker:** Número máximo de conexiones por worker.                                       |
-    | `WORKER_RLIMIT_NOFILE` | `2048`            | global   | No       | **Límite de Descriptores de Archivo:** Número máximo de archivos abiertos por worker.                    |
+    | Parámetro                 | Valor por defecto | Contexto | Múltiple | Descripción                                                                                                                                                                                            |
+    | ------------------------- | ----------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | `WORKER_PROCESSES`        | `auto`            | global   | No       | **Procesos Worker:** Número de procesos worker. Establécelo en `auto` para usar los núcleos disponibles.                                                                                               |
+    | `WORKER_CONNECTIONS`      | `1024`            | global   | No       | **Conexiones por Worker:** Número máximo de conexiones por worker.                                                                                                                                     |
+    | `WORKER_RLIMIT_NOFILE`    | `2048`            | global   | No       | **Límite de Descriptores de Archivo:** Número máximo de archivos abiertos por worker.                                                                                                                  |
+    | `WORKER_SHUTDOWN_TIMEOUT` | `30s`             | global   | No       | **Tiempo de espera de apagado de Workers:** Tiempo de espera para el apagado ordenado de los procesos worker. Los workers antiguos se terminan forzosamente después de este plazo durante una recarga. |
 
 === "Ajustes de Memoria"
 
@@ -115,6 +128,7 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     | ------------------------------ | ----------------- | -------- | -------- | -------------------------------------------------------------------------------------------------- |
     | `WORKERLOCK_MEMORY_SIZE`       | `48k`             | global   | No       | **Tamaño de Memoria de Workerlock:** Tamaño de lua_shared_dict para los workers de inicialización. |
     | `DATASTORE_MEMORY_SIZE`        | `64m`             | global   | No       | **Tamaño de Memoria del Datastore:** Tamaño del datastore interno.                                 |
+    | `DATASTORE_LRU_SIZE`           | `1k`              | global   | No       | **Tamaño del LRU del Datastore:** Número de ranuras del LRU del datastore compartido por worker. Acepta un entero o los sufijos `k`/`m` (por ejemplo `1k`, `10k`, `1m`). |
     | `CACHESTORE_MEMORY_SIZE`       | `64m`             | global   | No       | **Tamaño de Memoria del Cachestore:** Tamaño del cachestore interno.                               |
     | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`             | global   | No       | **Tamaño de Memoria IPC del Cachestore:** Tamaño del cachestore interno (ipc).                     |
     | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`             | global   | No       | **Tamaño de Memoria de Fallos del Cachestore:** Tamaño del cachestore interno (fallos).            |
@@ -122,11 +136,13 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
 
 === "Ajustes de Registro"
 
-    | Parámetro          | Valor por defecto                                                                                                                          | Contexto | Múltiple | Descripción                                                                                                                                                       |
-    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global   | No       | **Formato de Registro:** El formato a usar para los registros de acceso.                                                                                          |
-    | `LOG_LEVEL`        | `notice`                                                                                                                                   | global   | No       | **Nivel de Registro:** Nivel de verbosidad para los registros de errores. Opciones: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`.         |
-    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global   | No       | **Nivel de Registro de Temporizadores:** Nivel de registro para los temporizadores. Opciones: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`. |
+    | Parámetro          | Valor por defecto                                                                                                                          | Contexto | Múltiple | Descripción                                                                                                                                                                 |
+    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global   | No       | **Formato de Registro:** El formato a usar para los registros de acceso.                                                                                                    |
+    | `ACCESS_LOG`       | `/var/log/bunkerweb/access.log`                                                                                                            | global   | Sí       | **Ruta de Registro de Acceso:** Archivo, `syslog:server=host[:port][,param=valor]` o búfer compartido `memory:nombre:tamaño`; establezca `off` para desactivar el registro. |
+    | `ERROR_LOG`        | `/var/log/bunkerweb/error.log`                                                                                                             | global   | Sí       | **Ruta de Registro de Errores:** Archivo, `stderr`, `syslog:server=host[:port][,param=valor]` o `memory:tamaño`.                                                            |
+    | `LOG_LEVEL`        | `notice`                                                                                                                                   | global   | Sí       | **Nivel de Registro:** Nivel de verbosidad para los registros de errores. Opciones: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`.                   |
+    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global   | No       | **Nivel de Registro de Temporizadores:** Nivel de registro para los temporizadores. Opciones: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.           |
 
     !!! tip "Mejores Prácticas de Registro"
         - Para entornos de producción, usa los niveles de registro `notice`, `warn`, o `error` para minimizar el volumen de registros.
@@ -134,12 +150,13 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
 
 === "Ajustes de Integración"
 
-    | Parámetro         | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                 |
-    | ----------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
-    | `AUTOCONF_MODE`   | `no`              | global    | No       | **Modo Autoconf:** Habilita la integración con Docker Autoconf.                                                             |
-    | `SWARM_MODE`      | `no`              | global    | No       | **Modo Swarm:** Habilita la integración con Docker Swarm.                                                                   |
-    | `KUBERNETES_MODE` | `no`              | global    | No       | **Modo Kubernetes:** Habilita la integración con Kubernetes.                                                                |
-    | `USE_TEMPLATE`    |                   | multisite | No       | **Usar Plantilla:** Plantilla de configuración a usar que sobrescribirá los valores predeterminados de ajustes específicos. |
+    | Parámetro                | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                           |
+    | ------------------------ | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `AUTOCONF_MODE`          | `no`              | global    | No       | **Modo Autoconf:** Habilita la integración con Docker Autoconf.                                                                                                       |
+    | `SWARM_MODE`             | `no`              | global    | No       | **Modo Swarm:** Habilita la integración con Docker Swarm.                                                                                                             |
+    | `KUBERNETES_MODE`        | `no`              | global    | No       | **Modo Kubernetes:** Habilita la integración con Kubernetes.                                                                                                          |
+    | `KEEP_CONFIG_ON_RESTART` | `no`              | global    | No       | **Mantener Configuración al Reiniciar:** Mantener la configuración al reiniciar. Establecer a 'yes' para evitar el restablecimiento de la configuración al reiniciar. |
+    | `USE_TEMPLATE`           |                   | multisite | No       | **Usar Plantilla:** Plantilla de configuración a usar que sobrescribirá los valores predeterminados de ajustes específicos.                                           |
 
 === "Ajustes de Nginx"
 
@@ -197,4 +214,26 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     LISTEN_STREAM_PORT: "1337"
     USE_TCP: "yes"
     USE_UDP: "no"
+    ```
+
+=== "Desactivar modos de escucha"
+
+    Puede desactivar modos de escucha específicos dejando vacíos los ajustes de puerto:
+
+    ```yaml
+    # Desactivar la escucha HTTP (solo HTTPS)
+    HTTP_PORT: ""
+    HTTPS_PORT: "8443"
+
+    # Desactivar la escucha HTTPS (solo HTTP)
+    HTTP_PORT: "8080"
+    HTTPS_PORT: ""
+
+    # Stream: desactivar la escucha no SSL (solo SSL)
+    LISTEN_STREAM_PORT: ""
+    LISTEN_STREAM_PORT_SSL: "4242"
+
+    # Stream: desactivar la escucha SSL (solo no SSL)
+    LISTEN_STREAM_PORT: "1337"
+    LISTEN_STREAM_PORT_SSL: ""
     ```

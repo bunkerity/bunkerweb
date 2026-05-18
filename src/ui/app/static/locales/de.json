@@ -18,16 +18,18 @@
   "aria": {
     "label": {
       "close": "Schließen",
-      "raw_configuration": "Rohkonfiguration"
+      "configs_dropzone": "Eine Exportdatei für benutzerdefinierte Konfigurationen auswählen oder hier ablegen",
+      "raw_configuration": "Rohkonfiguration",
+      "services_dropzone": "Eine Dienste-Exportdatei auswählen oder hier ablegen"
     }
   },
   "badge": {
     "from_template": "Von Vorlage",
+    "managed_via_api": "Verwaltet über API",
     "new_version": "Neue Version",
     "no_template": "Keine Vorlage",
     "unread_news": "Ungelesene Nachrichten",
-    "unread_notifications": "Ungelesene Benachrichtigungen",
-    "managed_via_api": "Verwaltet über API"
+    "unread_notifications": "Ungelesene Benachrichtigungen"
   },
   "banner": {
     "community": "Werde Teil der Bunker-Community, indem du dem <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">Discord-Chat</a> beitrittst und uns auf <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a> folgst.",
@@ -43,7 +45,7 @@
     "cache": "Cache",
     "configs": "Konfigurationen",
     "extra_pages": "Zusätzliche Seiten",
-    "global_config": "Globale Konfiguration",
+    "global_settings": "Globale Einstellungen",
     "home": "Startseite",
     "instances": "Instanzen",
     "jobs": "Aufgaben",
@@ -76,6 +78,8 @@
     "clear": "LÖSCHEN",
     "close": "Schließen",
     "columns": "Spalten",
+    "convert_configs": "Konfigurationen konvertieren",
+    "convert_configs_to": "In {{state}} konvertieren",
     "convert_services": "Dienste konvertieren",
     "copy": "Kopieren",
     "copy_codes": "Codes kopieren",
@@ -92,17 +96,19 @@
     "enable_totp": "TOTP aktivieren",
     "entire_config": "Gesamte Konfiguration",
     "export": "Exportieren",
-    "export_csv_all": "CSV (Alle)",
-    "export_csv_visible": "CSV (Sichtbar)",
-    "export_excel_all": "Excel (Alle)",
-    "export_excel_visible": "Excel (Sichtbar)",
-    "fetch_global": "Globale Konfiguration abrufen",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
+    "fetch_global": "Globale Einstellungen abrufen",
     "filters_suffix": " Filter",
     "follow": "Folgen",
+    "force_check": "Überprüfung erzwingen",
+    "force_update": "Aktualisierung erzwingen",
     "github_stars": "Sterne",
     "go_back": "Zurück",
     "hide": "Ausblenden",
     "history": "Verlauf",
+    "import_configs": "Benutzerdefinierte Konfigurationen importieren",
+    "import_services": "Dienste importieren",
     "login": "Anmelden",
     "multiple_add": "HINZUFÜGEN",
     "multiple_hide": "AUSBLENDEN",
@@ -122,7 +128,7 @@
     "reset_columns": "Spalten zurücksetzen",
     "return_to_safety": "Zurück zur Sicherheit",
     "run": "Ausführen",
-    "run_selected_jobs": "Ausgewählte Aufträge ausführen",
+    "run_selected_jobs": "Ausgewählte Aufgaben ausführen",
     "save": "Speichern",
     "save_changes": "Änderungen speichern",
     "select_file": "Datei auswählen",
@@ -143,9 +149,7 @@
     "upload_photo": "Neues Foto hochladen",
     "view_details": "Details anzeigen",
     "view_raw_data": "Rohdaten anzeigen",
-    "wipe_other_sessions": "Andere Sitzungen löschen",
-    "force_update": "Aktualisierung erzwingen",
-    "force_check": "Überprüfung erzwingen"
+    "wipe_other_sessions": "Andere Sitzungen löschen"
   },
   "country": {
     "AD": "Andorra",
@@ -444,29 +448,37 @@
         "title": "Blockierte Anfragen nach Land"
       },
       "blocking_status": {
-        "title": "Blockierungsstatus über Zeit",
-        "subtitle": "Blockierte Anfragen im Zeitverlauf",
         "blocked_requests": "Blockierte Anfragen",
+        "count": "Anzahl",
+        "subtitle": "Blockierte Anfragen im Zeitverlauf",
         "time": "Zeit",
-        "count": "Anzahl"
+        "title": "Blockierungsstatus über Zeit"
       },
       "request_status": {
-        "title": "Verteilung der Anfragestatus",
-        "blocked": "Blockierte Anfragen"
+        "blocked": "Blockierte Anfragen",
+        "title": "Verteilung der Anfragestatus"
       },
       "top_blocked_ips": {
-        "title": "Top 10 blockierte IPs",
-        "most_blocked": "Meistblockierte IP"
+        "most_blocked": "Meistblockierte IP",
+        "title": "Top 10 blockierte IPs"
       }
     },
     "map": {
       "blocked_requests": "Blockierte Anfragen",
       "hover_info": "Fahre mit der Maus über ein Land",
-      "no_data": "Keine Daten",
-      "legend": "Legende"
+      "legend": "Legende",
+      "no_data": "Keine Daten"
+    },
+    "window": {
+      "last_days": "Letzte {{days}} Tage",
+      "title": "Dashboard-Fenster"
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "Alle {{count}} passenden {{entity}} auswählen",
+    "bulk_select_all_done": "Alle {{count}} passenden {{entity}} sind ausgewählt.",
+    "bulk_select_clear": "Auswahl löschen",
+    "bulk_select_page": "Alle {{count}} {{entity}} auf dieser Seite sind ausgewählt.",
     "info_bans": "Zeige {{start}} bis {{end}} von {{total}} Sperren",
     "info_cache": "Zeige {{start}} bis {{end}} von {{total}} Cache-Dateien",
     "info_configs": "Zeige {{start}} bis {{end}} von {{total}} benutzerdefinierten Konfigurationen",
@@ -475,35 +487,39 @@
     "info_empty_configs": "Keine benutzerdefinierten Konfigurationen verfügbar",
     "info_empty_instances": "Keine Instanzen verfügbar",
     "info_empty_items": "Keine Elemente verfügbar",
-    "info_empty_jobs": "Keine Aufträge verfügbar",
+    "info_empty_jobs": "Keine Aufgaben verfügbar",
     "info_empty_plugins": "Keine Plugins verfügbar",
     "info_empty_reports": "Keine Berichte verfügbar",
     "info_empty_services": "Keine Dienste verfügbar",
+    "info_empty_templates": "Keine Vorlagen verfügbar",
     "info_filtered_bans": "(gefiltert aus _MAX_ gesamten Sperren)",
     "info_filtered_cache": "(gefiltert aus _MAX_ gesamten Cache-Dateien)",
     "info_filtered_configs": "(gefiltert aus _MAX_ gesamten benutzerdefinierten Konfigurationen)",
     "info_filtered_instances": "(gefiltert aus _MAX_ gesamten Instanzen)",
     "info_filtered_items": "(gefiltert aus _MAX_ gesamten Elementen)",
-    "info_filtered_jobs": "(gefiltert aus _MAX_ gesamten Aufträgen)",
+    "info_filtered_jobs": "(gefiltert aus _MAX_ gesamten Aufgaben)",
     "info_filtered_plugins": "(gefiltert aus _MAX_ gesamten Plugins)",
     "info_filtered_reports": "(gefiltert aus _MAX_ gesamten Berichten)",
     "info_filtered_services": "(gefiltert aus _MAX_ gesamten Diensten)",
+    "info_filtered_templates": "(gefiltert aus _MAX_ gesamten Vorlagen)",
     "info_instances": "Zeige {{start}} bis {{end}} von {{total}} Instanzen",
     "info_items": "Zeige {{start}} bis {{end}} von {{total}} Elementen",
-    "info_jobs": "Zeige {{start}} bis {{end}} von {{total}} Aufträgen",
+    "info_jobs": "Zeige {{start}} bis {{end}} von {{total}} Aufgaben",
     "info_plugins": "Zeige {{start}} bis {{end}} von {{total}} Plugins",
     "info_reports": "Zeige {{start}} bis {{end}} von {{total}} Berichten",
     "info_services": "Zeige {{start}} bis {{end}} von {{total}} Diensten",
+    "info_templates": "Zeige {{start}} bis {{end}} von {{total}} Vorlagen",
     "length_all": "Alle",
     "length_menu_bans": "Zeige _MENU_ Sperren",
     "length_menu_cache": "Zeige _MENU_ Cache-Dateien",
     "length_menu_configs": "Zeige _MENU_ benutzerdefinierte Konfigurationen",
     "length_menu_instances": "Zeige _MENU_ Instanzen",
     "length_menu_items": "Zeige _MENU_ Elemente",
-    "length_menu_jobs": "Zeige _MENU_ Aufträge",
+    "length_menu_jobs": "Zeige _MENU_ Aufgaben",
     "length_menu_plugins": "Zeige _MENU_ Plugins",
     "length_menu_reports": "Zeige _MENU_ Berichte",
     "length_menu_services": "Zeige _MENU_ Dienste",
+    "length_menu_templates": "Zeige _MENU_ Vorlagen",
     "paginate": {
       "first": "Erste",
       "last": "Letzte",
@@ -527,9 +543,9 @@
     "select_rows_items_0": "Keine Elemente ausgewählt",
     "select_rows_items_1": "1 Element ausgewählt",
     "select_rows_items_plural": "%d Elemente ausgewählt",
-    "select_rows_jobs_0": "Keine Aufträge ausgewählt",
+    "select_rows_jobs_0": "Keine Aufgaben ausgewählt",
     "select_rows_jobs_1": "1 Auftrag ausgewählt",
-    "select_rows_jobs_plural": "%d Aufträge ausgewählt",
+    "select_rows_jobs_plural": "%d Aufgaben ausgewählt",
     "select_rows_plugins_0": "Keine Plugins ausgewählt",
     "select_rows_plugins_1": "1 Plugin ausgewählt",
     "select_rows_plugins_plural": "%d Plugins ausgewählt",
@@ -539,22 +555,18 @@
     "select_rows_services_0": "Keine Dienste ausgewählt",
     "select_rows_services_1": "1 Dienst ausgewählt",
     "select_rows_services_plural": "%d Dienste ausgewählt",
+    "select_rows_templates_0": "Keine Vorlagen ausgewählt",
+    "select_rows_templates_1": "1 Vorlage ausgewählt",
+    "select_rows_templates_plural": "%d Vorlagen ausgewählt",
     "zero_records_bans": "Keine übereinstimmenden Sperren gefunden",
     "zero_records_cache": "Keine übereinstimmenden Cache-Dateien gefunden",
     "zero_records_configs": "Keine übereinstimmenden benutzerdefinierten Konfigurationen gefunden",
     "zero_records_instances": "Keine übereinstimmenden Instanzen gefunden",
     "zero_records_items": "Keine übereinstimmenden Elemente gefunden",
-    "zero_records_jobs": "Keine übereinstimmenden Aufträge gefunden",
+    "zero_records_jobs": "Keine übereinstimmenden Aufgaben gefunden",
     "zero_records_plugins": "Keine übereinstimmenden Plugins gefunden",
     "zero_records_reports": "Keine übereinstimmenden Berichte gefunden",
     "zero_records_services": "Keine übereinstimmenden Dienste gefunden",
-    "info_empty_templates": "Keine Vorlagen verfügbar",
-    "info_filtered_templates": "(gefiltert aus _MAX_ gesamten Vorlagen)",
-    "info_templates": "Zeige {{start}} bis {{end}} von {{total}} Vorlagen",
-    "length_menu_templates": "Zeige _MENU_ Vorlagen",
-    "select_rows_templates_0": "Keine Vorlagen ausgewählt",
-    "select_rows_templates_1": "1 Vorlage ausgewählt",
-    "select_rows_templates_plural": "%d Vorlagen ausgewählt",
     "zero_records_templates": "Keine passenden Vorlagen gefunden"
   },
   "dev_log": {
@@ -613,6 +625,8 @@
   },
   "form": {
     "checkbox": {
+      "include_attached_configs": "Angehängte benutzerdefinierte Konfigurationen einschließen",
+      "overwrite_existing_configs": "Vorhandene benutzerdefinierte UI/API-Konfigurationen überschreiben",
       "remember_me": "Angemeldet bleiben"
     },
     "help": {
@@ -631,6 +645,7 @@
       "admin_username": "Admin-Benutzername",
       "auto_lets_encrypt": "Auto Let's Encrypt",
       "ban_scope": "Sperrbereich",
+      "certificate_authority": "Zertifizierungsstelle",
       "certificate_priority": "Zertifikatspriorität",
       "challenge_type": "Challenge-Typ",
       "config_type": "Konfigurationstyp",
@@ -673,8 +688,8 @@
       "secret_token": "Geheimer Token",
       "server_name": "Servername",
       "service_name": "Dienstname",
-      "theme": "Theme",
       "template_id": "Vorlagen-ID",
+      "theme": "Theme",
       "type": "Typ",
       "ui_host": "UI-Host",
       "ui_url": "UI-URL",
@@ -683,7 +698,12 @@
       "use_proxy_protocol": "PROXY-Protokoll verwenden",
       "use_real_ip": "Echte IP verwenden",
       "username": "Benutzername",
-      "wildcard_certificates": "Wildcard-Zertifikate"
+      "wildcard_certificates": "Wildcard-Zertifikate",
+      "zerossl_api_key": "ZeroSSL-API-Schlüssel",
+      "zerossl_api_retry": "ZeroSSL-API-Wiederholungen",
+      "zerossl_api_retry_delay": "ZeroSSL-API-Wiederholungsverzögerung",
+      "zerossl_api_connect_timeout": "ZeroSSL-API-Verbindungs-Timeout",
+      "zerossl_api_max_time": "ZeroSSL-API-Maximalzeit"
     },
     "placeholder": {
       "2fa_code": "Code eingeben",
@@ -730,14 +750,6 @@
     "locked_settings_annotation": "Gesperrt ({{method}})",
     "locked_settings_hint": "Gesperrte Einstellungen sind hervorgehoben"
   },
-  "logs": {
-    "eventsource_failed": "EventSource-Verbindung fehlgeschlagen",
-    "parse_error": "Fehler beim Parsen der Stream-Daten: {{error}}",
-    "stream_error": "Stream-Fehler: {{message}}",
-    "stream_init": "Stream initialisiert, Dateigröße: {{size}}",
-    "stream_initialized": "Stream mit Aktualisierung initialisiert, Dateigröße: {{size}}",
-    "trimmed_notice": "--- {{count}} ältere Log-Zeilen wurden aus Performancegründen entfernt ---"
-  },
   "link": {
     "back_to_login": "Zurück zum Login",
     "forgot_password": "Passwort vergessen?",
@@ -749,11 +761,21 @@
     "see_more": "Mehr sehen",
     "upgrade": "Upgraden?"
   },
+  "logs": {
+    "eventsource_failed": "EventSource-Verbindung fehlgeschlagen",
+    "parse_error": "Fehler beim Parsen der Stream-Daten: {{error}}",
+    "stream_error": "Stream-Fehler: {{message}}",
+    "stream_init": "Stream initialisiert, Dateigröße: {{size}}",
+    "stream_initialized": "Stream mit Aktualisierung initialisiert, Dateigröße: {{size}}",
+    "trimmed_notice": "--- {{count}} ältere Log-Zeilen wurden aus Performancegründen entfernt ---"
+  },
   "modal": {
     "body": {
       "add_plugin_dropzone": "Ziehen Sie Ihr Plugin-Archiv hierher oder klicken Sie, um Dateien auszuwählen.",
       "confirm_cache_deletion_alert": "Sind Sie sicher, dass Sie die ausgewählte Cache-Datei löschen möchten?",
       "confirm_cache_deletion_alert_plural": "Sind Sie sicher, dass Sie die ausgewählten Cache-Dateien löschen möchten?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "Möchten Sie die ausgewählten benutzerdefinierten Konfigurationen in {{state}} konvertieren?",
       "confirm_configs_deletion_alert": "Sind Sie sicher, dass Sie die ausgewählte benutzerdefinierte Konfiguration löschen möchten?",
       "confirm_configs_deletion_alert_plural": "Sind Sie sicher, dass Sie die ausgewählten benutzerdefinierten Konfigurationen löschen möchten?",
       "confirm_conversion_confirmation": "Sind Sie sicher, dass Sie die ausgewählten Dienste konvertieren möchten?",
@@ -764,6 +786,21 @@
       "confirmation_instance_deletion": "Sind Sie sicher, dass Sie die ausgewählte Instanz löschen möchten?",
       "delete_confirmation_alert": "Sind Sie sicher, dass Sie die ausgewählte Instanz löschen möchten?",
       "delete_confirmation_alert_plural": "Sind Sie sicher, dass Sie die ausgewählten Instanzen löschen möchten?",
+      "delete_confirmation_template_used": "Eine oder mehrere der ausgewählten Vorlagen sind Diensten zugewiesen (insgesamt {{services_count}} Dienst(e)). Das Entfernen wird diese Zuweisungen löschen. Möchten Sie fortfahren?",
+      "delete_step_confirmation": "Sind Sie sicher, dass Sie diesen Schritt löschen möchten?",
+      "delete_step_content_label": "Inhalt",
+      "delete_step_name_label": "Schritt",
+      "delete_template_global_usage": "Verwendet von den globalen Einstellungen",
+      "delete_template_services_list": "Verwendet von Diensten: {{services}}",
+      "fetch_global_settings_bold": "Dies ruft die globalen Einstellungen ab und wendet sie auf die aktuelle Vorlage an.",
+      "fetch_global_settings_point_1": "Nur in dieser Vorlage vorhandene Einstellungen werden aktualisiert.",
+      "fetch_global_settings_point_2": "Werte, die den Standardwerten entsprechen, werden ignoriert.",
+      "fetch_global_settings_point_3": "SERVER_NAME wird nie überschrieben.",
+      "export_services_intro": "Die ausgewählten Dienste werden exportiert. Aktivieren Sie die Option unten, um ihre angehängten benutzerdefinierten Konfigurationen in ein .zip-Archiv zu bündeln.",
+      "import_configs_dropzone": "Ziehen Sie Ihre Exportdatei für benutzerdefinierte Konfigurationen hierher oder klicken Sie, um eine Datei auszuwählen.",
+      "import_configs_warning": "Benutzerdefinierte Konfigurationen, die von scheduler, autoconf oder templates erstellt wurden, bleiben immer erhalten. Nur UI/API-Konfigurationen können überschrieben werden.",
+      "import_services_dropzone": "Ziehen Sie Ihre Dienste-Exportdatei hierher oder klicken Sie, um eine Datei auszuwählen.",
+      "import_services_warning": "Durch das Importieren von Diensten werden neue UI-Dienste aus der Exportdatei erstellt. Vorhandene Dienste werden übersprungen.",
       "instance_creation_alert": "Sie müssen den Port oder den Servernamen nicht angeben; die Werte von `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` und `API_SERVER_NAME` werden für die Instanzkonfiguration verwendet.",
       "next_step_in_case_of_issue": "Bei Problemen können Sie das unsichere Zertifikat manuell akzeptieren:",
       "recovery_codes_save_alert": "Bitte speichern Sie diese Wiederherstellungscodes an einem sicheren Ort (wie einem Passwort-Manager oder Tresor). Sie können sie verwenden, um auf Ihr Konto zuzugreifen, wenn Sie Ihr Authentifizierungsgerät verlieren.",
@@ -772,18 +809,11 @@
       "services_deletion_confirmation": "Sind Sie sicher, dass Sie die ausgewählten Dienste löschen möchten?",
       "unban_confirmation_alert": "Sind Sie sicher, dass Sie die Sperre für die ausgewählte IP-Adresse aufheben möchten?",
       "unban_confirmation_alert_plural": "Sind Sie sicher, dass Sie die Sperre für die ausgewählten IP-Adressen aufheben möchten?",
-      "update_duration_alert": "Wählen Sie eine neue Dauer für die ausgewählten Sperren:",
-      "fetch_global_config_bold": "Dies ruft die globale Konfiguration ab und wendet sie auf die aktuelle Vorlage an.",
-      "fetch_global_config_point_1": "Nur in dieser Vorlage vorhandene Einstellungen werden aktualisiert.",
-      "fetch_global_config_point_2": "Werte, die den Standardwerten entsprechen, werden ignoriert.",
-      "fetch_global_config_point_3": "SERVER_NAME wird nie überschrieben.",
-      "delete_step_confirmation": "Sind Sie sicher, dass Sie diesen Schritt löschen möchten?",
-      "delete_step_name_label": "Schritt",
-      "delete_step_content_label": "Inhalt"
+      "update_duration_alert": "Wählen Sie eine neue Dauer für die ausgewählten Sperren:"
     },
     "button": {
-      "reset_template_confirm": "Vorlagenkonfiguration zurücksetzen",
-      "fetch_global_config_confirm": "Globale Einstellungen anwenden"
+      "fetch_global_settings_confirm": "Globale Einstellungen anwenden",
+      "reset_template_confirm": "Vorlagenkonfiguration zurücksetzen"
     },
     "section": {
       "ban_details": "Sperrdetails",
@@ -799,18 +829,21 @@
       "create_new_instance": "Neue Instanz erstellen",
       "create_template": "Vorlage erstellen",
       "delete_instance": "Instanzen löschen",
+      "delete_step": "Schritt löschen",
       "delete_template": "Vorlagen löschen",
+      "edit_template": "Vorlage bearbeiten: {{name}}",
+      "fetch_global_settings": "Globale Einstellungen anwenden?",
+      "export_services": "Dienste exportieren",
       "from_plugin": "von Plugin",
       "full_url": "Vollständige URL",
+      "import_configs": "Benutzerdefinierte Konfigurationen importieren",
+      "import_services": "Dienste importieren",
       "job_history": "Letzte 10 Auftragsausführungen",
       "job_history_count": "Letzte {{count}} Ausführungen von Auftrag",
       "recovery_codes": "Wiederherstellungscodes",
       "reset_template_config": "Vorlagenkonfiguration zurücksetzen?",
-      "fetch_global_config": "Globale Einstellungen anwenden?",
       "server_name_not_unique": "Servername ist nicht eindeutig",
-      "update_duration": "Sperrdauer aktualisieren",
-      "delete_step": "Schritt löschen",
-      "edit_template": "Vorlage bearbeiten: {{name}}"
+      "update_duration": "Sperrdauer aktualisieren"
     }
   },
   "mode": {
@@ -836,10 +869,10 @@
     "cache": "Cache",
     "configs": "Konfigurationen",
     "extra_pages": "Zusätzliche Seiten",
-    "global_config": "Globale Konfiguration",
+    "global_settings": "Globale Einstellungen",
     "home": "Startseite",
     "instances": "Instanzen",
-    "jobs": "Aufträge",
+    "jobs": "Aufgaben",
     "logs": "Logs",
     "misc": "Verschiedenes",
     "mode_selection": "Modusauswahl",
@@ -905,12 +938,12 @@
       "unknown": "Unbekanntes Ablaufdatum"
     },
     "force_check": {
-      "title": "Überprüfung erzwingen",
-      "description": "Erzwingt eine neue Überprüfung der PRO-Plugins. Dadurch werden neue Versionen automatisch heruntergeladen, falls verfügbar."
+      "description": "Erzwingt eine neue Überprüfung der PRO-Plugins. Dadurch werden neue Versionen automatisch heruntergeladen, falls verfügbar.",
+      "title": "Überprüfung erzwingen"
     },
     "force_update": {
-      "title": "Aktualisierung erzwingen",
-      "description": "Überspringt Überprüfungen und erzwingt den Download der PRO-Plugins. Ist dies nicht möglich, bleibt der aktuelle Zustand erhalten."
+      "description": "Überspringt Überprüfungen und erzwingt den Download der PRO-Plugins. Ist dies nicht möglich, bleibt der aktuelle Zustand erhalten.",
+      "title": "Aktualisierung erzwingen"
     },
     "key": {
       "title": {
@@ -1008,7 +1041,6 @@
     "last_30d": "Letzte 30 Tage",
     "last_7d": "Letzte 7 Tage",
     "last_run": "Letzter Lauf",
-    "last_run_state": "Status des letzten Laufs",
     "last_seen": "Zuletzt gesehen",
     "last_update": "Letzte Aktualisierung",
     "loading": "Suchbereiche werden geladen...",
@@ -1017,6 +1049,7 @@
     "next_30d": "Nächste 30 Tage",
     "next_7d": "Nächste 7 Tage",
     "older_30d": "Älter als 30 Tage",
+    "one_or_more": "Ein oder mehrere",
     "permanent": "Dauerhaft",
     "plugin": "Plugin",
     "reason": "Grund",
@@ -1027,7 +1060,9 @@
     "service": "Dienst",
     "show_message": "Alle anzeigen",
     "start_date": "Startdatum",
+    "status": "Status",
     "status_code": "Statuscode",
+    "steps": "Schritte",
     "stream": "Stream-Unterstützung",
     "template": "Vorlage",
     "title_0": "Keine aktiven Filter",
@@ -1036,9 +1071,11 @@
     "type": "Typ",
     "url": "URL",
     "version": "Version",
-    "steps": "Schritte",
-    "zero": "Keine",
-    "one_or_more": "Ein oder mehrere"
+    "zero": "Keine"
+  },
+  "security_mode": {
+    "block": "Blockieren",
+    "detect": "Erkennen"
   },
   "settings": {
     "custom_config": {
@@ -1050,14 +1087,28 @@
     }
   },
   "setup": {
+    "status": {
+      "admin_user_exists": "🧑‍🚀 Ein Admin-Benutzer existiert bereits. Bitte fahren Sie mit dem nächsten Schritt fort.",
+      "pro_license_key_exists": "⭐ Ein PRO-Lizenzschlüssel ist bereits konfiguriert, bitte fahren Sie mit dem nächsten Schritt fort.",
+      "reverse_proxy_configured": "↪️ Ein Reverse Proxy ist bereits für die Web-Oberfläche konfiguriert. Bitte fahren Sie mit dem nächsten Schritt fort.",
+      "secure_password": "Sicheres Passwort",
+      "unique_server_name": "Eindeutiger Servername"
+    },
     "step1": {
       "subtitle": "Erstellen Sie Ihr Administratorkonto.",
       "title": "Admin-Benutzer"
     },
     "step2": {
+      "lets_encrypt": {
+        "certificate_authority_selector": "Auswahl der Zertifizierungsstelle",
+        "letsencrypt_description": "Verwenden Sie Let's Encrypt für die standardmäßige ACME-Ausstellung. Staging ist für Tests und Integrationsprüfungen verfügbar.",
+        "zerossl_api_key_hint": "Wenn leer, verwendet ZeroSSL die konfigurierte E-Mail-Adresse zur Kontoregistrierung.",
+        "zerossl_description": "Verwenden Sie ZeroSSL mit zerossl-bot. Geben Sie eine Konto-E-Mail oder einen API-Schlüssel für die Kontoausstellung und die schlüsselbasierte Neu-Ausstellungsverfolgung an."
+      },
       "section": {
         "custom_certificate": "Benutzerdefiniertes Zertifikat",
         "lets_encrypt": "Let's Encrypt",
+        "zerossl": "ZeroSSL",
         "real_ip": "Echte IP",
         "reverse_proxy": "Reverse Proxy"
       },
@@ -1065,19 +1116,19 @@
       "title": "UI-Einstellungen"
     },
     "step3": {
-      "title": "Auf PRO upgraden",
-      "subtitle": "Schalten Sie erweiterte Funktionen frei und holen Sie das Beste aus BunkerWeb heraus.",
       "label": {
         "pro_benefits": "PRO-Vorteile"
       },
-      "pro_benefit_1_title": "Zugriff auf alle PRO-Funktionen",
       "pro_benefit_1_description": "Schalten Sie alle erweiterten Funktionen frei, einschließlich verbesserter Sicherheit, Leistung und Verwaltungstools.",
-      "pro_benefit_2_title": "Technischer Support von den Maintainern",
+      "pro_benefit_1_title": "Zugriff auf alle PRO-Funktionen",
       "pro_benefit_2_description": "Erhalten Sie priorisierten Support vom BunkerWeb-Team für alle Probleme oder Fragen, die Sie haben.",
-      "pro_benefit_3_title": "Benutzerdefinierte Entwicklung",
+      "pro_benefit_2_title": "Technischer Support von den Maintainern",
       "pro_benefit_3_description": "Maßgeschneiderte Lösungen, um Ihre spezifischen Bedürfnisse zu erfüllen.",
+      "pro_benefit_3_title": "Benutzerdefinierte Entwicklung",
+      "pro_benefit_4_description": "Expertenrat zur Optimierung Ihres BunkerWeb-Setups.",
       "pro_benefit_4_title": "Benutzerdefinierte Beratung",
-      "pro_benefit_4_description": "Expertenrat zur Optimierung Ihres BunkerWeb-Setups."
+      "subtitle": "Schalten Sie erweiterte Funktionen frei und holen Sie das Beste aus BunkerWeb heraus.",
+      "title": "Auf PRO upgraden"
     },
     "step4": {
       "label": {
@@ -1085,13 +1136,6 @@
       },
       "subtitle": "Überprüfen Sie Ihre Einstellungen, bevor Sie die Einrichtung abschließen.",
       "title": "Übersicht"
-    },
-    "status": {
-      "admin_user_exists": "🧑‍🚀 Ein Admin-Benutzer existiert bereits. Bitte fahren Sie mit dem nächsten Schritt fort.",
-      "pro_license_key_exists": "⭐ Ein PRO-Lizenzschlüssel ist bereits konfiguriert, bitte fahren Sie mit dem nächsten Schritt fort.",
-      "reverse_proxy_configured": "↪️ Ein Reverse Proxy ist bereits für die Web-Oberfläche konfiguriert. Bitte fahren Sie mit dem nächsten Schritt fort.",
-      "secure_password": "Sicheres Passwort",
-      "unique_server_name": "Eindeutiger Servername"
     },
     "subtitle": "Folgen Sie den Schritten, um den Einrichtungsassistenten abzuschließen.",
     "title": "Einrichtungsassistent"
@@ -1102,8 +1146,12 @@
     "default_server": "Standardserver",
     "down": "Inaktiv",
     "draft": "Entwurf",
+    "error_deleting_template": "Beim Löschen der Vorlage ist ein Fehler aufgetreten.",
     "error_loading_bans": "Fehler beim Laden der Sperren. Bitte versuchen Sie, die Seite neu zu laden.",
+    "error_loading_template": "Vorlagendaten können nicht geladen werden.",
+    "error_saving_template": "Beim Speichern der Vorlage ist ein Fehler aufgetreten.",
     "failed": "Fehlgeschlagen",
+    "invalid_json_payload": "Ungültige JSON-Nutzlast.",
     "loading": "Laden...",
     "loading_bans": "Sperren werden geladen...",
     "loading_cache_file": "Cache-Datei wird geladen...",
@@ -1112,18 +1160,20 @@
     "loading_custom_configs": "Benutzerdefinierte Konfigurationen werden geladen...",
     "loading_instances": "Instanzen werden geladen...",
     "loading_items": "Elemente werden geladen...",
-    "loading_jobs": "Aufträge werden geladen...",
+    "loading_jobs": "Aufgaben werden geladen...",
     "loading_logs": "Logs werden geladen...",
     "loading_plugins": "Plugins werden geladen...",
     "loading_reports": "Berichte werden geladen...",
     "loading_services": "Dienste werden geladen...",
     "loading_templates": "Vorlagen werden geladen...",
+    "missing_template_information": "Vorlageninformationen fehlen.",
     "news_connection_error": "Verbindung zum Blog für Nachrichten konnte nicht hergestellt werden.",
     "no": "Nein",
     "no_data": "Keine Daten",
     "no_history": "Kein Verlauf verfügbar.",
     "no_item": "Kein Element",
     "no_notifications": "Keine Benachrichtigungen zum Anzeigen.",
+    "no_search_results": "Keine Elemente gefunden.",
     "no_steps": "Keine Schritte verfügbar",
     "no_steps_description": "Diese Vorlage hat keine Schritte zum Konfigurieren.",
     "online": "Online",
@@ -1144,12 +1194,7 @@
     "template_in_use_description": "Änderungen außerhalb der aktuellen Vorlage sind nicht erlaubt. Bitte nehmen Sie Änderungen mit der aktuellen Vorlage vor oder wechseln Sie in den Erweitert/Roh-Modus.",
     "unique_server_name": "Eindeutiger Servername",
     "up": "Aktiv",
-    "yes": "Ja",
-    "missing_template_information": "Vorlageninformationen fehlen.",
-    "error_loading_template": "Vorlagendaten können nicht geladen werden.",
-    "error_saving_template": "Beim Speichern der Vorlage ist ein Fehler aufgetreten.",
-    "error_deleting_template": "Beim Löschen der Vorlage ist ein Fehler aufgetreten.",
-    "invalid_json_payload": "Ungültige JSON-Nutzlast."
+    "yes": "Ja"
   },
   "step": {
     "next": "Weiter",
@@ -1209,20 +1254,20 @@
       "service": "Dienst",
       "service_name": "Dienstname",
       "settings": "Einstellungen",
+      "status": "Status",
       "status_code": "Statuscode",
       "steps": "Schritte",
       "stream": "Stream",
       "template": "Vorlage",
+      "templates": "Vorlagen",
       "time_left": "Verbleibende Zeit",
       "type": "Typ",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "Version",
-      "templates": "Vorlagen"
+      "version": "Version"
     }
   },
   "template": {
-    "none": "Keine Vorlage",
     "editor": {
       "button_add_config": "Konfiguration hinzufügen",
       "button_add_setting": "Einstellung hinzufügen",
@@ -1231,7 +1276,6 @@
       "button_move_up": "Nach oben verschieben",
       "button_remove": "Entfernen",
       "clone_badge": "Geklont von {{template}}",
-      "setting_toggle_enabled": "Aktiviert",
       "configs": "Benutzerdefinierte Konfigurationen",
       "configs_help": "Fügen Sie dieser Vorlage optionale benutzerdefinierte Konfigurationsschnipsel hinzu.",
       "delete_step_confirm": "Sind Sie sicher, dass Sie diesen Schritt löschen möchten?",
@@ -1255,6 +1299,23 @@
       "label_step_settings": "Einstellungen in diesem Schritt",
       "label_step_subtitle": "Schritt-Untertitel",
       "label_step_title": "Schritt-Titel",
+      "missing_configs_body": "Die importierte Vorlage verweist auf benutzerdefinierte Konfigurationen, die noch nicht hochgeladen wurden. Bitte importieren Sie diese Konfigurationen, um die Vorlageneinrichtung abzuschließen:",
+      "missing_configs_browse": "Dateien durchsuchen",
+      "missing_configs_done": "Fertig",
+      "missing_configs_drop_hint": "Konfigurationsdateien hierher ziehen und ablegen (.conf, .cfg, .txt)",
+      "missing_configs_drop_or": "oder",
+      "missing_configs_hint_body": "Hochgeladene Dateien werden automatisch zu Ihrer Vorlage hinzugefügt. Stellen Sie sicher, dass die Dateinamen mit den oben aufgeführten fehlenden Konfigurationen übereinstimmen.",
+      "missing_configs_hint_title": "Tipp:",
+      "missing_configs_resolved": "Alle fehlenden Konfigurationen wurden hochgeladen! Vorlage erfolgreich importiert.",
+      "missing_configs_title": "Fehlende benutzerdefinierte Konfigurationen",
+      "missing_configs_upload_failed": "Fehler beim Hochladen der Konfigurationsdateien",
+      "missing_configs_upload_label": "Fehlende Konfigurationen hochladen (.conf, .cfg, .txt)",
+      "missing_configs_upload_partial": "{{uploaded}} von {{total}} Konfigurationen hochgeladen. Noch fehlend: {{missing}}",
+      "missing_configs_upload_success": "{{count}} Konfigurationsdatei(en) erfolgreich hochgeladen",
+      "multiselect_placeholder": "Optionen auswählen",
+      "multiselect_summary": "{{count}} ausgewählt",
+      "multivalue_add": "Wert hinzufügen",
+      "multivalue_helper": "Ein Wert pro Zeile.{{separatorNote}}",
       "panel_overview": "Übersicht",
       "panel_overview_help": "Verfolgen Sie wichtige Informationen und navigieren Sie zwischen den Abschnitten.",
       "placeholder_config_data": "Daten",
@@ -1266,6 +1327,47 @@
       "placeholder_step_title": "Schritt-Titel",
       "placeholder_template_id": "vorlagen-id",
       "placeholder_template_name": "Meine Vorlage",
+      "raw_configs_browse": "Dateien durchsuchen",
+      "raw_configs_drop_hint": "Konfigurationsdateien hierher ziehen oder klicken, um zu suchen (.conf, .cfg, .txt)",
+      "raw_configs_drop_supported": "Unterstützte Formate: .conf, .cfg, .txt",
+      "raw_configs_empty": "Noch keine importierten Konfigurationsdateien. Neue Dateien werden unten angezeigt.",
+      "raw_configs_help": "Laden Sie Konfigurationsdateien (.conf, .cfg, .txt) hoch, um Einträge an <code>configs</code> anzuhängen. Typen standardmäßig auf <code>server_http</code>; passen Sie diese bei Bedarf im JSON an.",
+      "raw_configs_import_invalid": "Konfigurationen konnten nicht importiert werden, da das aktuelle JSON ungültig ist.",
+      "raw_configs_import_none": "Es wurden keine Konfigurationen importiert.",
+      "raw_configs_import_success": "{{count}} Konfigurationsdatei(en) importiert.",
+      "raw_configs_note": "Importierte Dateien werden dem JSON-Editor hinzugefügt. Überprüfen und passen Sie sie vor dem Speichern an.",
+      "raw_configs_title": "Benutzerdefinierte Konfigurationsimporte",
+      "raw_configs_upload": "Konfigurationsdateien hochladen (.conf, .cfg, .txt)",
+      "raw_configs_upload_failed": "Eine der ausgewählten Dateien konnte nicht gelesen werden.",
+      "raw_editor_drop_hint": "Legen Sie eine Vorlagen-JSON-Datei (.json nur) ab, um den aktuellen Inhalt zu ersetzen.",
+      "raw_editor_aria": "Editor für rohes Vorlagen-JSON",
+      "raw_editor_help": "Bearbeiten Sie die gesamte Vorlagendefinition als JSON. Das Zurückschalten in den Einfach-Modus validiert und lädt den visuellen Editor neu.",
+      "raw_editor_import_success": "Vorlagen-JSON erfolgreich importiert.",
+      "raw_editor_override_body": "Das Importieren dieser Datei ersetzt die aktuelle Vorlagen-JSON vollständig. Im Editor vorgenommene Änderungen gehen verloren. Möchten Sie fortfahren?",
+      "raw_editor_override_confirm": "Vorlage ersetzen",
+      "raw_editor_override_title": "Vorlagen-JSON ersetzen?",
+      "raw_editor_title": "Rohes Vorlagen-JSON",
+      "raw_editor_upload_empty": "Hochgeladene Datei ist leer.",
+      "raw_editor_upload_failed": "Die ausgewählte Datei konnte nicht gelesen werden.",
+      "raw_editor_upload_template": "Vorlagen-JSON hochladen (.json nur)",
+      "raw_validation_config_definition": "Ungültige Konfigurationsdefinition.",
+      "raw_validation_config_object": "Konfigurationseinträge müssen Objekte sein.",
+      "raw_validation_configs_unassigned": "Konfigurationen {{configs}} sind keinem Schritt zugeordnet.",
+      "raw_validation_empty": "Vorlagen-JSON darf nicht leer sein.",
+      "raw_validation_invalid_json": "Ungültige JSON-Nutzlast: {{error}}",
+      "raw_validation_object": "Vorlagen-Nutzlast muss ein JSON-Objekt sein.",
+      "raw_validation_setting_key": "Einstellungsschlüssel müssen nicht leere Zeichenketten sein.",
+      "raw_validation_settings_object": "Einstellungen müssen als Objekt bereitgestellt werden.",
+      "raw_validation_settings_unassigned": "Einstellungen {{settings}} sind keinem Schritt zugeordnet.",
+      "raw_validation_step_config_duplicate": "Konfiguration {{config}} ist mehreren Schritten zugeordnet.",
+      "raw_validation_step_config_reference": "Schritt {{index}} enthält eine ungültige Konfigurationsreferenz.",
+      "raw_validation_step_config_unknown": "Schritt {{index}} verweist auf unbekannte Konfiguration {{config}}.",
+      "raw_validation_step_object": "Schritt {{index}} muss ein Objekt sein.",
+      "raw_validation_step_setting_duplicate": "Einstellung {{setting}} ist mehreren Schritten zugeordnet.",
+      "raw_validation_step_setting_reference": "Schritt {{index}} enthält eine ungültige Einstellungsreferenz.",
+      "raw_validation_step_setting_unknown": "Schritt {{index}} verweist auf unbekannte Einstellung {{setting}}.",
+      "raw_validation_step_title": "Schritt {{index}} muss einen Titel haben.",
+      "raw_validation_steps_required": "Eine Vorlage muss mindestens einen Schritt enthalten.",
       "readonly_db": "Die Datenbank ist derzeit schreibgeschützt. Vorlagen können nicht geändert werden.",
       "readonly_method": "Diese Vorlage wurde durch den {{method}}-Prozess erstellt und kann nicht über die Benutzeroberfläche bearbeitet werden.",
       "readonly_title": "Schreibgeschützt",
@@ -1273,8 +1375,6 @@
       "select_config_placeholder": "Wählen Sie eine Konfiguration",
       "select_config_type_placeholder": "Wählen Sie einen Typ",
       "select_setting_placeholder": "Wählen Sie eine Einstellung",
-      "settings": "Einstellungen",
-      "settings_help": "Definieren Sie die von dieser Vorlage bereitgestellten Einstellungen und deren Standardwerte.",
       "setting_remove_confirm": "Sind Sie sicher, dass Sie diese Einstellung aus der Vorlage entfernen möchten?",
       "setting_remove_key": "Einstellung",
       "setting_remove_title": "Einstellung entfernen",
@@ -1298,6 +1398,9 @@
       "setting_selector_pattern": "Muster",
       "setting_selector_search_label": "Eine Multisite-Einstellung finden",
       "setting_selector_search_placeholder": "Nach Bezeichnung, Schlüssel oder Plugin suchen",
+      "setting_toggle_enabled": "Aktiviert",
+      "settings": "Einstellungen",
+      "settings_help": "Definieren Sie die von dieser Vorlage bereitgestellten Einstellungen und deren Standardwerte.",
       "step_configs_empty": "Diesem Schritt wurden noch keine Konfigurationen hinzugefügt.",
       "step_configs_selection_title": "Vorhandene Konfigurationen auswählen",
       "step_default_title": "Unbenannter Schritt",
@@ -1327,61 +1430,9 @@
       "validation_configs_unique": "Jeder Konfigurationsname muss eindeutig sein.",
       "validation_id_required": "Vorlagen-ID ist erforderlich.",
       "validation_setting_key": "Jede Einstellung muss einen Schlüssel haben.",
-      "validation_settings_unique": "Jeder Einstellungsschlüssel muss eindeutig sein.",
-      "raw_configs_help": "Laden Sie Konfigurationsdateien (.conf, .cfg, .txt) hoch, um Einträge an <code>configs</code> anzuhängen. Typen standardmäßig auf <code>server_http</code>; passen Sie diese bei Bedarf im JSON an.",
-      "raw_configs_import_invalid": "Konfigurationen konnten nicht importiert werden, da das aktuelle JSON ungültig ist.",
-      "raw_configs_import_none": "Es wurden keine Konfigurationen importiert.",
-      "raw_configs_import_success": "{{count}} Konfigurationsdatei(en) importiert.",
-      "raw_configs_note": "Importierte Dateien werden dem JSON-Editor hinzugefügt. Überprüfen und passen Sie sie vor dem Speichern an.",
-      "raw_configs_title": "Benutzerdefinierte Konfigurationsimporte",
-      "raw_configs_upload": "Konfigurationsdateien hochladen (.conf, .cfg, .txt)",
-      "raw_configs_upload_failed": "Eine der ausgewählten Dateien konnte nicht gelesen werden.",
-      "raw_configs_browse": "Dateien durchsuchen",
-      "raw_configs_drop_hint": "Konfigurationsdateien hierher ziehen oder klicken, um zu suchen (.conf, .cfg, .txt)",
-      "raw_configs_drop_supported": "Unterstützte Formate: .conf, .cfg, .txt",
-      "raw_configs_empty": "Noch keine importierten Konfigurationsdateien. Neue Dateien werden unten angezeigt.",
-      "raw_editor_help": "Bearbeiten Sie die gesamte Vorlagendefinition als JSON. Das Zurückschalten in den Einfach-Modus validiert und lädt den visuellen Editor neu.",
-      "raw_editor_import_success": "Vorlagen-JSON erfolgreich importiert.",
-      "raw_editor_title": "Rohes Vorlagen-JSON",
-      "raw_editor_upload_empty": "Hochgeladene Datei ist leer.",
-      "raw_editor_upload_failed": "Die ausgewählte Datei konnte nicht gelesen werden.",
-      "raw_editor_upload_template": "Vorlagen-JSON hochladen (.json nur)",
-      "raw_validation_configs_unassigned": "Konfigurationen {{configs}} sind keinem Schritt zugeordnet.",
-      "raw_validation_config_definition": "Ungültige Konfigurationsdefinition.",
-      "raw_validation_config_object": "Konfigurationseinträge müssen Objekte sein.",
-      "raw_validation_empty": "Vorlagen-JSON darf nicht leer sein.",
-      "raw_validation_invalid_json": "Ungültige JSON-Nutzlast: {{error}}",
-      "raw_validation_object": "Vorlagen-Nutzlast muss ein JSON-Objekt sein.",
-      "raw_validation_setting_key": "Einstellungsschlüssel müssen nicht leere Zeichenketten sein.",
-      "raw_validation_settings_object": "Einstellungen müssen als Objekt bereitgestellt werden.",
-      "raw_validation_step_config_duplicate": "Konfiguration {{config}} ist mehreren Schritten zugeordnet.",
-      "raw_validation_step_config_reference": "Schritt {{index}} enthält eine ungültige Konfigurationsreferenz.",
-      "raw_validation_step_config_unknown": "Schritt {{index}} verweist auf unbekannte Konfiguration {{config}}.",
-      "raw_validation_step_object": "Schritt {{index}} muss ein Objekt sein.",
-      "raw_validation_step_setting_duplicate": "Einstellung {{setting}} ist mehreren Schritten zugeordnet.",
-      "raw_validation_step_setting_reference": "Schritt {{index}} enthält eine ungültige Einstellungsreferenz.",
-      "raw_validation_step_setting_unknown": "Schritt {{index}} verweist auf unbekannte Einstellung {{setting}}.",
-      "raw_validation_step_title": "Schritt {{index}} muss einen Titel haben.",
-      "raw_validation_steps_required": "Eine Vorlage muss mindestens einen Schritt enthalten.",
-      "raw_validation_settings_unassigned": "Einstellungen {{settings}} sind keinem Schritt zugeordnet.",
-      "raw_editor_drop_hint": "Legen Sie eine Vorlagen-JSON-Datei (.json nur) ab, um den aktuellen Inhalt zu ersetzen.",
-      "raw_editor_override_title": "Vorlagen-JSON ersetzen?",
-      "raw_editor_override_body": "Das Importieren dieser Datei ersetzt die aktuelle Vorlagen-JSON vollständig. Im Editor vorgenommene Änderungen gehen verloren. Möchten Sie fortfahren?",
-      "raw_editor_override_confirm": "Vorlage ersetzen",
-      "missing_configs_title": "Fehlende benutzerdefinierte Konfigurationen",
-      "missing_configs_body": "Die importierte Vorlage verweist auf benutzerdefinierte Konfigurationen, die noch nicht hochgeladen wurden. Bitte importieren Sie diese Konfigurationen, um die Vorlageneinrichtung abzuschließen:",
-      "missing_configs_hint_title": "Tipp:",
-      "missing_configs_hint_body": "Hochgeladene Dateien werden automatisch zu Ihrer Vorlage hinzugefügt. Stellen Sie sicher, dass die Dateinamen mit den oben aufgeführten fehlenden Konfigurationen übereinstimmen.",
-      "missing_configs_upload_label": "Fehlende Konfigurationen hochladen (.conf, .cfg, .txt)",
-      "missing_configs_drop_hint": "Konfigurationsdateien hierher ziehen und ablegen (.conf, .cfg, .txt)",
-      "missing_configs_drop_or": "oder",
-      "missing_configs_browse": "Dateien durchsuchen",
-      "missing_configs_done": "Fertig",
-      "missing_configs_upload_success": "{{count}} Konfigurationsdatei(en) erfolgreich hochgeladen",
-      "missing_configs_upload_partial": "{{uploaded}} von {{total}} Konfigurationen hochgeladen. Noch fehlend: {{missing}}",
-      "missing_configs_upload_failed": "Fehler beim Hochladen der Konfigurationsdateien",
-      "missing_configs_resolved": "Alle fehlenden Konfigurationen wurden hochgeladen! Vorlage erfolgreich importiert."
-    }
+      "validation_settings_unique": "Jeder Einstellungsschlüssel muss eindeutig sein."
+    },
+    "none": "Keine Vorlage"
   },
   "theme": {
     "dark": "Dunkel",
@@ -1396,19 +1447,22 @@
     },
     "copied": "Kopiert!",
     "disclaimer_title": "Haftungsausschluss",
+    "global_settings_applied_body": "Die globalen Einstellungen wurden erfolgreich abgerufen und auf das aktuelle Formular angewendet.",
+    "global_settings_applied_title": "Globale Einstellungen angewendet",
+    "global_settings_failed_body": "Beim Abrufen der globalen Einstellungen ist ein Fehler aufgetreten.",
+    "global_settings_failed_title": "Abrufen der globalen Einstellungen fehlgeschlagen",
     "header": {
       "ping_failed": "Ping fehlgeschlagen",
       "ping_succeed": "Ping erfolgreich"
     },
-    "ip_unbanned": "IP-Adresse erfolgreich entsperrt!",
-    "global_settings_applied_title": "Globale Einstellungen angewendet",
-    "global_settings_applied_body": "Die globalen Einstellungen wurden erfolgreich abgerufen und auf das aktuelle Formular angewendet.",
-    "global_settings_failed_title": "Abrufen der globalen Einstellungen fehlgeschlagen",
-    "global_settings_failed_body": "Beim Abrufen der globalen Einstellungen ist ein Fehler aufgetreten."
+    "ip_unbanned": "IP-Adresse erfolgreich entsperrt!"
   },
   "tooltip": {
     "auto_lets_encrypt": "Ob automatisch ein Let's Encrypt-Zertifikat angefordert werden soll.",
     "button": {
+      "ban_ip": "Diese IP-Adresse sperren",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "Dienst {{name}} in Entwurf konvertieren",
       "convert_service_to_online": "Dienst {{name}} in Online konvertieren",
       "delete_config": "Benutzerdefinierte Konfiguration {{name}} löschen",
@@ -1417,20 +1471,17 @@
       "delete_plugin": "Plugin {{name}} löschen",
       "delete_service": "Dienst {{name}} löschen",
       "delete_template": "Vorlage {{name}} löschen",
+      "force_check": "Prüfung planen; lädt nur bei verfügbaren Updates herunter.",
+      "force_update": "Überspringt Prüfungen und erzwingt den Download von PRO-Plugins; behält aktuellen Zustand bei Fehler bei.",
       "ping_instance": "Instanz {{hostname}} pingen",
       "reload_instance": "Instanz {{hostname}} neu laden",
       "reset_default": "Auf Standardwert zurücksetzen",
-      "edit_template": "Vorlage {{template}} bearbeiten",
-      "view_template": "Vorlage {{template}} anzeigen",
-      "clone_template": "Vorlage {{template}} klonen",
       "reset_global": "Auf globalen Wert zurücksetzen",
-      "value_from_global": "Wert aus globaler Konfiguration",
       "run_job": "Auftrag {{job}} ausführen",
+      "show_selected_only": "Nur ausgewählte anzeigen",
       "stop_instance": "Instanz {{hostname}} stoppen",
       "unban_ip": "{{ip}} entsperren",
-      "ban_ip": "Diese IP-Adresse sperren",
-      "force_check": "Prüfung planen; lädt nur bei verfügbaren Updates herunter.",
-      "force_update": "Überspringt Prüfungen und erzwingt den Download von PRO-Plugins; behält aktuellen Zustand bei Fehler bei."
+      "value_from_global": "Wert aus globalen Einstellungen"
     },
     "cannot_delete_original_ban": "Der ursprüngliche Sperreintrag kann nicht gelöscht werden.",
     "cannot_remove_disabled": "Kann nicht entfernt werden, da eine oder mehrere Einstellungen deaktiviert sind.",
@@ -1468,31 +1519,34 @@
     "dns_provider_dns_only": "Die Auswahl des DNS-Anbieters ist nur für DNS-Challenges relevant.",
     "download_file": "Datei herunterladen",
     "draft_toggle_disabled": "Der Entwurfsmodus kann nur für Dienste umgeschaltet werden, die über die UI erstellt wurden.",
-    "email_lets_encrypt": "Die E-Mail-Adresse zur Registrierung bei Let's Encrypt für Zertifikatsverwaltung und Benachrichtigungen.",
     "email_length": "Die E-Mail muss zwischen 1 und 256 Zeichen lang sein.",
-    "follow_latest_page_only": "Der Folgemodus ist nur auf der letzten Seite verfügbar",
+    "email_lets_encrypt": "Die E-Mail-Adresse zur Registrierung bei Let's Encrypt für Zertifikatsverwaltung und Benachrichtigungen.",
     "fetch_global_settings": "Globale Einstellungen abrufen und auf die aktuelle Vorlage anwenden",
-    "global_config_source": "Wert von globaler Konfiguration geerbt.",
+    "follow_latest_page_only": "Der Folgemodus ist nur auf der letzten Seite verfügbar",
+    "global_settings_source": "Wert von globalen Einstellungen geerbt.",
     "instance_not_up": "Instanz {{hostname}} antwortet derzeit nicht ('up').",
+    "latest_version_installed": "Sie verwenden die neueste Version.",
     "lets_encrypt_custom_profile": "Das benutzerdefinierte Profil, das für Let's Encrypt verwendet werden soll (z. B. 'mein_benutzerdefiniertes_profil').",
     "lets_encrypt_disable_public_suffixes": "Zertifikatsanfragen für Domains, die mit der Public Suffix List übereinstimmen, deaktivieren (empfohlen).",
+    "lets_encrypt_server": "Wählen Sie Ihren Zertifikatsanbieter, um anbieterspezifische Einstellungen anzuzeigen.",
     "lets_encrypt_profile": "Das Profil, das für Let's Encrypt verwendet werden soll (classic, tlsserver, shortlived).",
-    "latest_version_installed": "Sie verwenden die neueste Version.",
     "license_key": "Ihr BunkerWeb PRO Lizenzschlüssel.",
     "link": {
       "access_plugin_page": "Zugriff auf Seite {{name}}",
       "access_service": "Zugriff auf Dienst {{name}}",
       "clone_config": "Benutzerdefinierte Konfiguration {{name}} klonen",
       "clone_service": "Dienst {{name}} klonen",
+      "clone_template": "Vorlage {{template}} klonen",
       "download_file": "{{filename}} herunterladen",
       "edit_config": "Benutzerdefinierte Konfiguration {{name}} bearbeiten",
-      "edit_template": "Vorlage {{template}} bearbeiten",
       "edit_service": "Dienst {{service}} bearbeiten",
+      "edit_template": "Vorlage {{template}} bearbeiten",
+      "export_config": "Benutzerdefinierte Konfiguration {{name}} exportieren",
       "export_service": "Dienstkonfiguration {{name}} exportieren",
       "view_config": "Benutzerdefinierte Konfiguration {{name}} anzeigen",
       "view_file": "{{filename}} anzeigen",
-      "view_template": "Vorlage {{template}} anzeigen",
-      "view_service": "Dienst {{service}} anzeigen"
+      "view_service": "Dienst {{service}} anzeigen",
+      "view_template": "Vorlage {{template}} anzeigen"
     },
     "modal": {
       "title": {
@@ -1523,20 +1577,6 @@
       "yes": "Unterstützt STREAM-Modus."
     },
     "table": {
-      "templates": {
-        "actions": "Verfügbare Aktionen für diese Vorlage",
-        "details": "Vorlagendetails anzeigen",
-        "select_all": "Alle Vorlagen auswählen",
-        "id": "Die ID der Vorlage",
-        "name": "Der vom Benutzer definierte oder automatisch generierte Vorlagenname",
-        "plugin": "Das Plugin, das die Vorlage enthält",
-        "steps": "Anzahl der Schritte der Vorlage",
-        "settings": "Anzahl der Einstellungen der Vorlage",
-        "configs": "Anzahl der benutzerdefinierten Konfigurationen der Vorlage",
-        "method": "Erstellungsmethode der Vorlage",
-        "created": "Erstellungsdatum der Vorlage",
-        "last_update": "Datum der letzten Aktualisierung der Vorlage"
-      },
       "bans": {
         "actions": "Für diese Sperre verfügbare Aktionen",
         "country": "Land der gesperrten IP-Adresse",
@@ -1568,6 +1608,7 @@
         "name": "Name der benutzerdefinierten Konfiguration",
         "select_all": "Alle benutzerdefinierten Konfigurationen auswählen",
         "service": "Dienst, der mit der benutzerdefinierten Konfiguration verbunden ist (oder Global)",
+        "status": "Entwurfsstatus der benutzerdefinierten Konfiguration",
         "template": "Gibt an, ob die benutzerdefinierte Konfiguration aus einer Vorlage stammt",
         "type": "Typ oder Kontext der benutzerdefinierten Konfiguration (z. B. HTTP, MODSEC)"
       },
@@ -1592,7 +1633,7 @@
         "name": "Name des Auftrags",
         "plugin": "Mit dem Auftrag verbundenes Plugin",
         "reload": "Gibt an, ob der Auftrag einen BunkerWeb-Neustart auslöst",
-        "select_all": "Alle Aufträge auswählen"
+        "select_all": "Alle Aufgaben auswählen"
       },
       "plugins": {
         "actions": "Für dieses Plugin verfügbare Aktionen",
@@ -1631,9 +1672,24 @@
         "last_update": "Datum und Uhrzeit der letzten Aktualisierung des Dienstes",
         "method": "Erstellungsmethode des Dienstes (z. B. ui, file)",
         "name": "Name des Dienstes",
+        "security_mode": "Der Sicherheitsmodus des Dienstes (Blockieren oder Erkennen)",
         "select_all": "Alle Dienste auswählen",
         "template": "Die vom Dienst verwendete Vorlage",
         "type": "Diensttyp (Online/Entwurf)"
+      },
+      "templates": {
+        "actions": "Verfügbare Aktionen für diese Vorlage",
+        "configs": "Anzahl der benutzerdefinierten Konfigurationen der Vorlage",
+        "created": "Erstellungsdatum der Vorlage",
+        "details": "Vorlagendetails anzeigen",
+        "id": "Die ID der Vorlage",
+        "last_update": "Datum der letzten Aktualisierung der Vorlage",
+        "method": "Erstellungsmethode der Vorlage",
+        "name": "Der vom Benutzer definierte oder automatisch generierte Vorlagenname",
+        "plugin": "Das Plugin, das die Vorlage enthält",
+        "select_all": "Alle Vorlagen auswählen",
+        "settings": "Anzahl der Einstellungen der Vorlage",
+        "steps": "Anzahl der Schritte der Vorlage"
       }
     },
     "ui_host": "Der Hostname oder die IP-Adresse, die die BunkerWeb-UI über den Reverse-Proxy bereitstellt.",
@@ -1641,13 +1697,19 @@
     "ui_url_security": "Die Verwendung eines nicht standardmäßigen, schwer zu erratenden URL-Pfads erhöht die Sicherheit.",
     "use_custom_ssl": "Ob anstelle von Let's Encrypt ein benutzerdefiniertes SSL-Zertifikat verwendet werden soll.",
     "use_lets_encrypt_staging": "Ob die Let's Encrypt Staging-Umgebung für Tests verwendet werden soll (erzeugt nicht vertrauenswürdige Zertifikate).",
+    "use_lets_encrypt_staging_letsencrypt_only": "Let's Encrypt Staging ist nur verfügbar, wenn der Let's Encrypt-Server verwendet wird.",
     "use_proxy_protocol": "PROXY-Protokoll-Kommunikation aktivieren.",
     "use_real_ip": "Echte IP verwenden",
     "username_length": "Der Benutzername muss zwischen 1 und 256 Zeichen lang sein.",
-    "value_from_global": "Wert aus der globalen Konfiguration",
+    "value_from_global": "Wert aus den globalen Einstellungen",
     "view_full_url": "Klicken, um die vollständige URL anzuzeigen",
     "wildcard_certificates": "Wildcard-Zertifikate generieren (*.domain.com). Erfordert DNS-Challenge.",
-    "wildcard_dns_only": "Wildcard-Zertifikate werden nur mit dem DNS-Challenge-Typ unterstützt."
+    "wildcard_dns_only": "Wildcard-Zertifikate werden nur mit dem DNS-Challenge-Typ unterstützt.",
+    "zerossl_api_key": "Optionaler ZeroSSL-API-Schlüssel, der von zerossl-bot verwendet wird.",
+    "zerossl_api_retry": "Anzahl der Wiederholungen für ZeroSSL-API-Anfragen (0 deaktiviert Wiederholungen).",
+    "zerossl_api_retry_delay": "Verzögerung in Sekunden zwischen ZeroSSL-API-Wiederholungen.",
+    "zerossl_api_connect_timeout": "Verbindungs-Timeout in Sekunden für ZeroSSL-API-Aufrufe.",
+    "zerossl_api_max_time": "Maximale Gesamtzeit in Sekunden pro ZeroSSL-API-Anfrage."
   },
   "totp": {
     "prompt": "Bitte geben Sie Ihren TOTP-Code ein."
@@ -1661,6 +1723,7 @@
     "ip_service_duplicate": "Diese IP-Adresse ist bereits für den ausgewählten Dienst ({{service}}) gesperrt.",
     "pattern": "Bitte geben Sie einen gültigen Wert für {{field}} ein.",
     "required": "{{field}} ist erforderlich.",
-    "service_required_for_ban": "Für eine dienstspezifische Sperre muss ein Dienst ausgewählt werden."
+    "service_required_for_ban": "Für eine dienstspezifische Sperre muss ein Dienst ausgewählt werden.",
+    "zerossl_email_or_api_key_required": "ZeroSSL erfordert entweder eine E-Mail-Adresse oder einen ZeroSSL-API-Schlüssel."
   }
 }

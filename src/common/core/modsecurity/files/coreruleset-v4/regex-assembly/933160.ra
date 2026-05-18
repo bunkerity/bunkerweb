@@ -41,6 +41,7 @@ md5
 mkdir
 opendir
 passthru
+phpinfo
 popen
 printf
 readfile
@@ -53,9 +54,11 @@ usort
 ##! English words, or potential snippets of them, are added here to perform a regex match.
 ##! Compared to the parallel match performed by 933150, fewer false positives will be generated.
 exp
+intval
 ord
 prev
 stat
 substr
 system
 unlink
+unserialize

@@ -14,6 +14,7 @@ from ..utils import get_db, LOGGER
 
 
 router = APIRouter(prefix="/instances", tags=["instances"])
+UI_API_METHODS = {"ui", "api"}
 
 
 # ---------- Instance actions broadcasted to all instances ----------
@@ -272,8 +273,8 @@ def delete_instance(hostname: str) -> JSONResponse:
     inst = db.get_instance(hostname)
     if not inst:
         return JSONResponse(status_code=404, content={"status": "error", "message": f"Instance {hostname} not found"})
-    if inst.get("method") != "api":
-        return JSONResponse(status_code=400, content={"status": "error", "message": f"Instance {hostname} is not an API instance"})
+    if inst.get("method") not in UI_API_METHODS:
+        return JSONResponse(status_code=400, content={"status": "error", "message": f"Instance {hostname} is not a UI/API instance"})
 
     err = db.delete_instance(hostname)
     if err:
@@ -292,7 +293,7 @@ def delete_instances(req: InstancesDeleteRequest) -> JSONResponse:
     """
     db = get_db()
 
-    # Only delete instances created via API
+    # Only delete instances created via UI/API
     existing = {inst["hostname"]: inst for inst in db.get_instances()}
 
     to_delete: List[str] = []
@@ -302,7 +303,7 @@ def delete_instances(req: InstancesDeleteRequest) -> JSONResponse:
         if not inst:
             skipped.append(h)
             continue
-        if inst.get("method") != "api":
+        if inst.get("method") not in UI_API_METHODS:
             skipped.append(h)
             continue
         to_delete.append(h)
@@ -312,7 +313,7 @@ def delete_instances(req: InstancesDeleteRequest) -> JSONResponse:
             status_code=404,
             content={
                 "status": "error",
-                "message": "No deletable API instances found among selection",
+                "message": "No deletable UI/API instances found among selection",
                 "skipped": skipped,
             },
         )

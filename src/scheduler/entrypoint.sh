@@ -37,6 +37,8 @@ elif [[ $(echo "$AUTOCONF_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
 	echo "Autoconf" > /usr/share/bunkerweb/INTEGRATION
 fi
 
+export LOG_SYSLOG_TAG="${LOG_SYSLOG_TAG:-bw-scheduler}"
+
 # Database migration section
 log "ENTRYPOINT" "ℹ️" "Checking database configuration..."
 cd /usr/share/bunkerweb/db/alembic || {
@@ -58,9 +60,9 @@ import sqlalchemy as sa
 from traceback import format_exc
 
 from Database import Database
-from logger import setup_logger
+from logger import getLogger
 
-LOGGER = setup_logger('Scheduler', getenv('CUSTOM_LOG_LEVEL', getenv('LOG_LEVEL', 'INFO')))
+LOGGER = getLogger('SCHEDULER.ENTRYPOINT')
 
 db = None
 try:
@@ -103,7 +105,7 @@ if [ "$current_version" != "$installed_version" ]; then
 		if sed -i "s|^version_locations =.*$|version_locations = ${DATABASE}_versions|" alembic.ini; then
 			# Find the corresponding Alembic revision by scanning migration files
 			MIGRATION_DIR="/usr/share/bunkerweb/db/alembic/${DATABASE}_versions"
-			NORMALIZED_VERSION=$(echo "$current_version" | tr '.' '_' | tr '-' '_')
+			NORMALIZED_VERSION=$(echo "$current_version" | tr '.' '_' | tr '-' '_' | tr '~' '_')
 			REVISION=$(find "$MIGRATION_DIR" -maxdepth 1 -type f -name "*_upgrade_to_version_${NORMALIZED_VERSION}.py" -exec basename {} \; | awk -F_ '{print $1}')
 
 			if [ -z "$REVISION" ]; then
@@ -132,9 +134,9 @@ import sqlalchemy as sa
 from os import getenv
 
 from Database import Database
-from logger import setup_logger
+from logger import getLogger
 
-LOGGER = setup_logger('Scheduler', getenv('CUSTOM_LOG_LEVEL', getenv('LOG_LEVEL', 'INFO')))
+LOGGER = getLogger('SCHEDULER')
 
 db = Database(LOGGER)
 with db.sql_engine.connect() as conn:

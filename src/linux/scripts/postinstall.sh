@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# Detect if running on FreeBSD and delegate to FreeBSD-specific script
+if [ "$(uname)" = "FreeBSD" ]; then
+    if [ -f /usr/share/bunkerweb/scripts/postinstall-freebsd.sh ]; then
+        exec /usr/share/bunkerweb/scripts/postinstall-freebsd.sh "$@"
+    else
+        echo "❌ FreeBSD postinstall script not found"
+        exit 1
+    fi
+fi
+
 # Function to run a command and check its return code
 function do_and_check_cmd() {
     output=$("$@" 2>&1)
@@ -74,6 +84,7 @@ migrate_file "/var/tmp/variables.env" "/etc/bunkerweb/variables.env"
 migrate_file "/var/tmp/scheduler.env" "/etc/bunkerweb/scheduler.env"
 migrate_file "/var/tmp/ui.env" "/etc/bunkerweb/ui.env"
 migrate_file "/var/tmp/api.env" "/etc/bunkerweb/api.env"
+migrate_file "/var/tmp/api.yml" "/etc/bunkerweb/api.yml"
 migrate_file "/var/tmp/db.sqlite3" "/var/lib/bunkerweb/db.sqlite3"
 
 # Create /var/www/html if needed
@@ -247,22 +258,6 @@ elif systemctl is-active --quiet bunkerweb-api; then
     do_and_check_cmd systemctl disable --now bunkerweb-api
 else
     echo "ℹ️ BunkerWeb API service is not enabled in the current configuration."
-fi
-
-# Fetch CrowdSec config from /var/tmp/crowdsec.env and merge into variables.env if present
-if [ -f /var/tmp/crowdsec.env ] && [ -f /etc/bunkerweb/variables.env ]; then
-    echo "Adding CrowdSec configuration from the easy-install script to /etc/bunkerweb/variables.env ..."
-    while IFS= read -r line; do
-        key="${line%%=*}"
-        value="${line#*=}"
-        if grep -q "^${key}=" /etc/bunkerweb/variables.env; then
-            sed -i "s|^${key}=.*|${key}=${value}|" /etc/bunkerweb/variables.env
-        else
-            echo "${key}=${value}" >> /etc/bunkerweb/variables.env
-        fi
-    done < /var/tmp/crowdsec.env
-    echo "✔️ CrowdSec configuration added to /etc/bunkerweb/variables.env"
-    rm -f /var/tmp/crowdsec.env
 fi
 
 if [ -f /var/tmp/bunkerweb_upgrade ]; then

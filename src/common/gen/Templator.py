@@ -1,35 +1,102 @@
 #!/usr/bin/env python3
 
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from contextlib import suppress
+from functools import lru_cache
 from importlib import import_module
 from glob import glob
 from math import ceil
-from os import cpu_count, getenv
+import multiprocessing as mp
 from os.path import basename, join, sep
 from pathlib import Path
 from random import choice
+from ssl import PROTOCOL_TLS_SERVER, SSLContext
 from string import ascii_letters, digits
+from re import search as re_search, escape as re_escape
+from subprocess import run
 from sys import path as sys_path
+from time import perf_counter
 from typing import Any, Dict, List, Optional, Type
 
-# Correct the sys.path modification logic
 deps_path = join("usr", "share", "bunkerweb", "deps", "python")
 if deps_path not in sys_path:
     sys_path.append(deps_path)
 
-from logger import setup_logger  # type: ignore
+from common_utils import effective_cpu_count  # type: ignore
+from logger import getLogger  # type: ignore
 
 from jinja2 import Environment, FileSystemBytecodeCache, FileSystemLoader, Undefined
 
-# Configure logging
-logger = setup_logger("Templator", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+logger = getLogger("TEMPLATOR")
+_ssl_ecdh_curve_resolution_logged = False
+
+
+@lru_cache(maxsize=32)
+def _supports_tls_group(name: str) -> bool:
+    with suppress(BaseException):
+        ctx = SSLContext(PROTOCOL_TLS_SERVER)
+        ctx.set_ecdh_curve(name)
+        return True
+
+    # Fall through to subprocess probe below
+
+    # Python's ssl module doesn't recognize hybrid PQC groups (e.g. X25519MLKEM768)
+    # via set_ecdh_curve() even when OpenSSL supports them. Fall back to CLI probe.
+    try:
+        logger.debug(f"Python ssl module does not support TLS group '{name}', trying openssl CLI fallback")
+        result = run(["openssl", "list", "-kem-algorithms"], capture_output=True, text=True, timeout=5)
+        if result.returncode == 0 and re_search(r"\b" + re_escape(name) + r"\b", result.stdout):
+            logger.debug(f"OpenSSL CLI confirms TLS group '{name}' is supported")
+            return True
+    except BaseException:
+        logger.debug(f"OpenSSL CLI fallback failed for TLS group '{name}'")
+
+    return False
+
+
+@lru_cache(maxsize=1)
+def _best_ssl_ecdh_curve() -> Optional[str]:
+    preferred = ("X25519MLKEM768", "X25519", "prime256v1", "secp384r1")
+    aliases = {"prime256v1": ("P-256",), "secp384r1": ("P-384",)}
+
+    selected = []
+    for name in preferred:
+        if _supports_tls_group(name):
+            selected.append(name)
+            continue
+        for alias in aliases.get(name, []):
+            if _supports_tls_group(alias):
+                selected.append(alias)
+                break
+
+    if not selected:
+        return None
+
+    return ":".join(selected)
+
+
+def resolve_ssl_ecdh_curve(value: str, fallback: str = "X25519:prime256v1:secp384r1") -> str:
+    global _ssl_ecdh_curve_resolution_logged
+
+    if value and value != "auto":
+        return value
+
+    best_curve = _best_ssl_ecdh_curve()
+    if best_curve:
+        if not _ssl_ecdh_curve_resolution_logged:
+            logger.debug(f"Resolved ssl_ecdh_curve (auto-detect): {best_curve}")
+            _ssl_ecdh_curve_resolution_logged = True
+        return best_curve
+
+    if not _ssl_ecdh_curve_resolution_logged:
+        logger.warning(f"Resolved ssl_ecdh_curve (fallback): {fallback}")
+        _ssl_ecdh_curve_resolution_logged = True
+    return fallback
 
 
 class ConfigurableCustomUndefined(Undefined):
     """A custom undefined class that can access configuration values."""
 
-    # Class variable to store the config dictionary
     _config_dict = {}
 
     @classmethod
@@ -38,13 +105,11 @@ class ConfigurableCustomUndefined(Undefined):
         cls._config_dict = config_dict
 
     def __getattr__(self, name: str) -> Any:
-        # First check if the original undefined name exists in config_dict
         if self._undefined_name and self._undefined_name in self._config_dict:
             base_value = self._config_dict[self._undefined_name]
             if hasattr(base_value, name):
                 return getattr(base_value, name)
 
-        # Check if the attribute access creates a valid config key
         if self._undefined_name:
             attr_key = f"{self._undefined_name}.{name}"
         else:
@@ -53,18 +118,15 @@ class ConfigurableCustomUndefined(Undefined):
         if attr_key in self._config_dict:
             return self._config_dict[attr_key]
 
-        # Return a new instance for chaining
         return self.__class__(name=attr_key)
 
     def __getitem__(self, key: str) -> Any:
-        # First check if the original undefined name exists in config_dict
         if self._undefined_name and self._undefined_name in self._config_dict:
             base_value = self._config_dict[self._undefined_name]
             if hasattr(base_value, "__getitem__"):
                 with suppress(KeyError, TypeError, IndexError):
                     return base_value[key]
 
-        # Check if the item access creates a valid config key
         if self._undefined_name:
             item_key = f"{self._undefined_name}[{key}]"
         else:
@@ -73,7 +135,6 @@ class ConfigurableCustomUndefined(Undefined):
         if item_key in self._config_dict:
             return self._config_dict[item_key]
 
-        # Return a new instance for chaining
         return self.__class__(name=item_key)
 
     def __eq__(self, other: Any) -> bool:
@@ -177,6 +238,13 @@ def create_custom_undefined_class(default_config: Dict[str, Any]):
     return ConfigurableCustomUndefined
 
 
+def _ensure_fork_start_method() -> None:
+    """Force fork start method when available so child processes inherit globals."""
+    with suppress(RuntimeError):
+        if mp.get_start_method(allow_none=True) != "fork":
+            mp.set_start_method("fork")
+
+
 class Templator:
     """A class to render configuration files using Jinja2 templates."""
 
@@ -231,34 +299,184 @@ class Templator:
         self._default_config = default_config
         self._full_config = full_config
         self._custom_undefined = create_custom_undefined_class(default_config)
+
+        if config.get("MULTISITE", "no") == "yes":
+            server_names = config.get("SERVER_NAME", "www.example.com").strip().split()
+            self._server_prefixes = frozenset(f"{s}_" for s in server_names)
+            self._server_names_set = frozenset(server_names)
+
+            def is_global_key(key: str) -> bool:
+                """Check if a key is a global setting (not prefixed by any server name)."""
+                idx = 0
+                while True:
+                    underscore_pos = key.find("_", idx)
+                    if underscore_pos == -1:
+                        return True
+                    potential_server = key[:underscore_pos]
+                    if potential_server in self._server_names_set:
+                        return False
+                    idx = underscore_pos + 1
+
+            self._global_only_config = {k: v for k, v in config.items() if is_global_key(k)}
+            self._global_only_full_config = {k: v for k, v in full_config.items() if is_global_key(k)}
+            self._global_only_default_config = {k: v for k, v in default_config.items() if is_global_key(k)}
+
+            self._server_specific_config: Dict[str, Dict[str, Any]] = {s: {} for s in server_names}
+            self._server_specific_full_config: Dict[str, Dict[str, Any]] = {s: {} for s in server_names}
+            self._server_specific_default_config: Dict[str, Dict[str, Any]] = {s: {} for s in server_names}
+
+            def extract_server_and_key(key: str) -> tuple:
+                """Efficiently extract server name and stripped key from a prefixed config key."""
+                idx = 0
+                while True:
+                    underscore_pos = key.find("_", idx)
+                    if underscore_pos == -1:
+                        return None, None
+                    potential_server = key[:underscore_pos]
+                    if potential_server in self._server_names_set:
+                        return potential_server, key[underscore_pos + 1 :]  # noqa: E203
+                    idx = underscore_pos + 1
+
+            for key, value in config.items():
+                server, stripped_key = extract_server_and_key(key)
+                if server:
+                    self._server_specific_config[server][stripped_key] = value
+
+            for key, value in full_config.items():
+                server, stripped_key = extract_server_and_key(key)
+                if server:
+                    self._server_specific_full_config[server][stripped_key] = value
+
+            for key, value in default_config.items():
+                server, stripped_key = extract_server_and_key(key)
+                if server:
+                    self._server_specific_default_config[server][stripped_key] = value
+        else:
+            self._server_prefixes = frozenset()
+            self._server_names_set = frozenset()
+            self._global_only_config = config
+            self._global_only_full_config = full_config
+            self._global_only_default_config = default_config
+            self._server_specific_config = {}
+            self._server_specific_full_config = {}
+            self._server_specific_default_config = {}
+
         self._jinja_env = self._load_jinja_env()
         self.__all_templates = frozenset(self._jinja_env.list_templates())
+
         self._template_path_cache = {}
 
-        # Pre-categorize templates for faster lookup
         self._categorized_templates = self._categorize_templates()
 
-        # Cache common template variables to avoid recreation
         self._base_template_vars = {
             "is_custom_conf": Templator.is_custom_conf,
             "has_variable": Templator.has_variable,
             "random": Templator.random,
             "read_lines": Templator.read_lines,
             "import": import_module,
+            "resolve_ssl_ecdh_curve": resolve_ssl_ecdh_curve,
+            "normalize_memory_size": Templator._normalize_memory_size,
         }
+
+        self._server_env_cache: Dict[str, Environment] = {}
 
     def render(self) -> None:
         """Render the templates based on the provided configuration."""
+        global _ssl_ecdh_curve_resolution_logged
+
+        _ensure_fork_start_method()
+        _ssl_ecdh_curve_resolution_logged = False
+        if self._uses_auto_ssl_ecdh_curve():
+            resolve_ssl_ecdh_curve("auto")
         self._render_global()
         servers = [self._config.get("SERVER_NAME", "www.example.com").strip()]
         if self._config.get("MULTISITE", "no") == "yes":
-            servers = self._config.get("SERVER_NAME", "www.example.com").strip().split(" ")
+            servers = self._config.get("SERVER_NAME", "www.example.com").strip().split()
 
-        max_workers = min(ceil(max(1, (cpu_count() or 1) * 0.75)), len(servers))
+        effective_cpus = effective_cpu_count()
+        if len(servers) >= effective_cpus * 2:
+            worker_target = effective_cpus
+        else:
+            worker_target = min(effective_cpus, max(1, ceil(effective_cpus * 0.75)))
+        max_workers = min(worker_target, len(servers)) or 1
+        batch_size = max(1, ceil(len(servers) / max_workers))
+
+        server_start = perf_counter()
         with ProcessPoolExecutor(max_workers=max_workers) as executor:
-            futures = [executor.submit(self._render_server, server) for server in servers]
-            for future in futures:
-                future.result()
+            future_to_batch = {}
+            for i in range(0, len(servers), batch_size):
+                batch = servers[i : i + batch_size]  # noqa: E203
+                future = executor.submit(self._render_server_batch, batch)
+                future_to_batch[future] = len(batch)
+
+            completed_servers = 0
+            show_progress = len(servers) >= 100
+            for future in as_completed(future_to_batch):
+                future.result()  # Raise any exceptions
+                completed_servers += future_to_batch[future]
+                if show_progress:
+                    progress_pct = (completed_servers / len(servers)) * 100
+                    elapsed = perf_counter() - server_start
+                    logger.info(f"Progress: {completed_servers}/{len(servers)} servers ({progress_pct:.1f}%) in {elapsed:.1f}s")
+
+    def __getstate__(self) -> Dict[str, Any]:
+        state = self.__dict__.copy()
+        state.pop("_jinja_env", None)
+        state.pop("_custom_undefined", None)
+        return state
+
+    def __setstate__(self, state: Dict[str, Any]) -> None:
+        self.__dict__.update(state)
+        self._custom_undefined = create_custom_undefined_class(self._default_config)
+        if not hasattr(self, "_jinja_env") or self._jinja_env is None:
+            self._jinja_env = self._load_jinja_env()
+            self.__all_templates = frozenset(self._jinja_env.list_templates())
+            self._template_path_cache = {}
+            if not hasattr(self, "_categorized_templates"):
+                self._categorized_templates = self._categorize_templates()
+            if not hasattr(self, "_server_env_cache"):
+                self._server_env_cache = {}
+
+            self._template_basename_map = {}
+            for template in self.__all_templates:
+                base = basename(template)
+                if base in self._global_templates:
+                    self._template_basename_map[template] = base
+
+    @staticmethod
+    def _is_auto_ssl_ecdh_curve(value: Any) -> bool:
+        return not value or value == "auto"
+
+    def _uses_auto_ssl_ecdh_curve(self) -> bool:
+        global_value = self._config.get("SSL_ECDH_CURVE", self._default_config.get("SSL_ECDH_CURVE"))
+        if Templator._is_auto_ssl_ecdh_curve(global_value):
+            return True
+
+        if self._config.get("MULTISITE", "no") != "yes":
+            return False
+
+        global_default = self._global_only_config.get("SSL_ECDH_CURVE", self._global_only_default_config.get("SSL_ECDH_CURVE"))
+        for server_config in self._server_specific_config.values():
+            if Templator._is_auto_ssl_ecdh_curve(server_config.get("SSL_ECDH_CURVE", global_default)):
+                return True
+
+        return False
+
+    @staticmethod
+    def _normalize_memory_size(value: str) -> str:
+        """Convert g/G suffix to megabytes for NGINX lua_shared_dict compatibility.
+
+        NGINX's ngx_parse_size() only supports k/m suffixes. The g/G suffix is only
+        supported by ngx_parse_offset() (used for file/body sizes, not memory allocations).
+
+        Uses ``float()`` so the converter still works if the upstream regex is ever
+        relaxed to accept decimal values (e.g. ``1.5g``); the result is rounded down
+        to an integer megabyte count because NGINX's ``m`` suffix requires an integer.
+        """
+        value = value.strip()
+        if value.endswith(("g", "G")):
+            return f"{int(float(value[:-1]) * 1024)}m"
+        return value
 
     def _load_jinja_env(self) -> Environment:
         """Load the Jinja2 environment with the appropriate search paths.
@@ -268,7 +486,7 @@ class Templator:
         """
         searchpath = [self._templates]
         searchpath.extend(p.as_posix() for p in (*self._core.glob("*/confs"), *self._plugins.glob("*/confs"), *self._pro_plugins.glob("*/confs")) if p.is_dir())
-        return Environment(
+        return Environment(  # nosec B701 - rendering NGINX config files (not HTML); HTML autoescape would corrupt valid NGINX syntax.
             loader=FileSystemLoader(searchpath=searchpath),
             lstrip_blocks=True,
             trim_blocks=True,
@@ -323,12 +541,10 @@ class Templator:
 
         templates = []
 
-        # Use pre-categorized templates for faster lookup
         for context in contexts:
             if context in self._categorized_templates:
                 templates.extend(self._categorized_templates[context])
 
-        # Remove duplicates while preserving order
         seen = set()
         result = []
         for template in templates:
@@ -344,37 +560,37 @@ class Templator:
         real_path = self._output / "variables.env"
         try:
             real_path.parent.mkdir(parents=True, exist_ok=True)
-            # Use more efficient string joining for large configs
             config_lines = [f"{k}={v}\n" for k, v in self._full_config.items()]
             real_path.write_text("".join(config_lines))
         except IOError as e:
             logger.error(f"Error writing configuration to {real_path}: {e}")
 
-    def _get_server_config(self, server: str, config: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_server_config(self, server: str, global_only_config: Dict[str, Any], server_specific_config: Dict[str, Any]) -> Dict[str, Any]:
         """Get the configuration for a specific server.
 
         Args:
             server (str): Server name.
+            global_only_config (Dict[str, Any]): Pre-filtered global-only settings.
+            server_specific_config (Dict[str, Any]): Pre-grouped server-specific settings (already stripped).
 
         Returns:
-            Dict[str, Any]: Configuration dictionary for the server.
+            Dict[str, Any]: Configuration dictionary for the server (filtered).
         """
-        prefix = f"{server}_"
-        prefix_len = len(prefix)
-        config["NGINX_PREFIX"] = f"{join(self._target, server)}/"
+        filtered_config = global_only_config.copy()
 
-        # Efficient single-pass override of server-specific values
-        for key, value in ((k, v) for k, v in config.copy().items() if k.startswith(prefix)):
-            config[key[prefix_len:]] = value
+        filtered_config.update(server_specific_config)
 
-        # Set default SERVER_NAME if not explicitly defined
-        if f"{prefix}SERVER_NAME" not in config:
-            config["SERVER_NAME"] = server
+        filtered_config["NGINX_PREFIX"] = f"{join(self._target, server)}/"
 
-        return config
+        if "SERVER_NAME" not in filtered_config:
+            filtered_config["SERVER_NAME"] = server
+
+        return filtered_config
 
     def _render_global(self) -> None:
         """Render global templates."""
+        global_start = perf_counter()
+
         self._write_config()
         templates = self._find_templates(
             [
@@ -385,16 +601,22 @@ class Templator:
             ]
         )
 
-        # Create template variables once and reuse
-        template_vars = self._base_template_vars
+        template_vars = self._base_template_vars.copy()
         template_vars["all"] = self._full_config
         template_vars.update(self._config)
 
-        max_workers = min(ceil(max(1, (cpu_count() or 1) * 0.75)), len(templates))
-        with ProcessPoolExecutor(max_workers=max_workers) as executor:
-            futures = [executor.submit(self._render_template, template, template_vars) for template in templates]
-            for future in futures:
-                future.result()
+        for template in templates:
+            self._render_template(template, template_vars)
+        logger.debug(f"Global rendering completed in {perf_counter() - global_start:.3f}s")
+
+    def _render_server_batch(self, servers: List[str]) -> None:
+        """Render templates for a batch of servers.
+
+        Args:
+            servers (List[str]): List of server names to render.
+        """
+        for server in servers:
+            self._render_server(server)
 
     def _render_server(self, server: str) -> None:
         """Render templates for a specific server.
@@ -402,7 +624,6 @@ class Templator:
         Args:
             server (str): Server name.
         """
-        # Step 1: Find all relevant templates
         templates = self._find_templates(
             [
                 "modsec",
@@ -414,20 +635,19 @@ class Templator:
             ]
         )
 
-        # Step 2: Handle multisite configuration if applicable
         subpath = None
         config = self._config.copy()
         full_config = self._full_config.copy()
         default_config = self._default_config.copy()
         if self._config.get("MULTISITE", "no") == "yes":
             subpath = server
-            config = self._get_server_config(server, config)
-            full_config = self._get_server_config(server, full_config)
-            default_config = self._get_server_config(server, default_config)
+            config = self._get_server_config(server, self._global_only_config, self._server_specific_config.get(server, {}))
+            full_config = self._get_server_config(server, self._global_only_full_config, self._server_specific_full_config.get(server, {}))
+            default_config = self._get_server_config(server, self._global_only_default_config, self._server_specific_default_config.get(server, {}))
 
         server_custom_undefined = create_custom_undefined_class(default_config)
 
-        template_vars = self._base_template_vars
+        template_vars = self._base_template_vars.copy()
         template_vars["all"] = full_config
         template_vars.update(config)
 
@@ -454,23 +674,28 @@ class Templator:
         real_path = Path(self._output, subpath or "", name or template)
         try:
             if custom_undefined:
-                temp_env = Environment(
-                    loader=self._jinja_env.loader,
-                    lstrip_blocks=True,
-                    trim_blocks=True,
-                    keep_trailing_newline=True,
-                    bytecode_cache=self._jinja_env.bytecode_cache,
-                    auto_reload=False,
-                    cache_size=-1,
-                    undefined=custom_undefined,
-                )
-                jinja_template = temp_env.get_template(template)
+                cache_key = "server_env"
+                if cache_key not in self._server_env_cache:
+                    self._server_env_cache[cache_key] = (
+                        Environment(  # nosec B701 - rendering NGINX config files (not HTML); HTML autoescape would corrupt valid NGINX syntax.
+                            loader=self._jinja_env.loader,
+                            lstrip_blocks=True,
+                            trim_blocks=True,
+                            keep_trailing_newline=True,
+                            bytecode_cache=self._jinja_env.bytecode_cache,
+                            auto_reload=False,
+                            cache_size=-1,
+                            undefined=custom_undefined,
+                        )
+                    )
+                jinja_template = self._server_env_cache[cache_key].get_template(template)
             else:
                 jinja_template = self._jinja_env.get_template(template)
 
             real_path.parent.mkdir(parents=True, exist_ok=True)
-            with real_path.open("w") as f:
-                f.write(jinja_template.render(template_vars))
+
+            rendered_content = jinja_template.render(template_vars)
+            real_path.write_text(rendered_content)
         except Exception as e:
             logger.error(f"Error rendering template {template}: {e}")
 

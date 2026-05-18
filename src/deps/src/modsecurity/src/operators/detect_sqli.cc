@@ -17,45 +17,84 @@
 
 #include <string>
 #include <list>
+#include <array>
 
 #include "src/operators/operator.h"
-#include "libinjection/src/libinjection.h"
+#include "src/operators/libinjection_utils.h"
+#include "src/operators/libinjection_adapter.h"
+#include "src/utils/string.h"
+#include "libinjection/src/libinjection_error.h"
 
-namespace modsecurity {
-namespace operators {
-
+namespace modsecurity::operators {
 
 bool DetectSQLi::evaluate(Transaction *t, RuleWithActions *rule,
     const std::string& input, RuleMessage &ruleMessage) {
-    char fingerprint[8];
-    int issqli;
+#ifndef NO_LOGS
+    const std::string loggable_input =
+        utils::string::limitTo(80, utils::string::toHexIfNeeded(input));
+#endif
 
-    issqli = libinjection_sqli(input.c_str(), input.length(), fingerprint);
+    std::array<char, 8> fingerprint{};
 
-    if (!t) {
-        goto tisempty;
+    const injection_result_t sqli_result =
+        runLibinjectionSQLi(input.c_str(), input.length(), fingerprint.data());
+
+    if (t == nullptr) {
+        return isMaliciousLibinjectionResult(sqli_result);
     }
 
-    if (issqli) {
-        t->m_matched.push_back(fingerprint);
-        ms_dbg_a(t, 4, "detected SQLi using libinjection with " \
-            "fingerprint '" + std::string(fingerprint) + "' at: '" +
-            input + "'");
-        if (rule && rule->hasCaptureAction()) {
-            t->m_collections.m_tx_collection->storeOrUpdateFirst(
-                "0", std::string(fingerprint));
-            ms_dbg_a(t, 7, "Added DetectSQLi match TX.0: " + \
-                std::string(fingerprint));
-        }
-    } else {
-        ms_dbg_a(t, 9, "detected SQLi: not able to find an " \
-            "inject on '" + input + "'");
+    switch (sqli_result) {
+        case LIBINJECTION_RESULT_TRUE:
+            t->m_matched.emplace_back(fingerprint.data());
+
+#ifndef NO_LOGS
+            ms_dbg_a(t, 4,
+                std::string("detected SQLi using libinjection with fingerprint '")
+                + fingerprint.data() + "' at: '" + loggable_input + "'");
+#endif
+
+            if (rule != nullptr && rule->hasCaptureAction()) {
+                t->m_collections.m_tx_collection->storeOrUpdateFirst(
+                    "0", std::string(fingerprint.data()));
+
+                ms_dbg_a(t, 7,
+                    std::string("Added DetectSQLi match TX.0: ")
+                    + fingerprint.data());
+            }
+            break;
+
+        case LIBINJECTION_RESULT_ERROR:
+#ifndef NO_LOGS
+            ms_dbg_a(t, 4,
+                std::string("libinjection parser error during SQLi analysis (")
+                + libinjectionResultToString(sqli_result)
+                + "); treating as match (fail-safe). Input: '"
+                + loggable_input + "'");
+#endif
+
+            if (rule != nullptr && rule->hasCaptureAction()) {
+                t->m_collections.m_tx_collection->storeOrUpdateFirst(
+                    "0", input);
+
+                ms_dbg_a(t, 7,
+                    std::string("Added DetectSQLi error input TX.0: ")
+                    + input);
+            }
+
+            // Keep m_matched untouched for parser-error paths to avoid
+            // introducing synthetic fingerprints for non-TRUE results.
+            break;
+
+        case LIBINJECTION_RESULT_FALSE:
+#ifndef NO_LOGS
+            ms_dbg_a(t, 9,
+                std::string("libinjection was not able to find any SQLi in: ")
+                + loggable_input);
+#endif
+            break;
     }
 
-tisempty:
-    return issqli != 0;
+    return isMaliciousLibinjectionResult(sqli_result);
 }
 
-
-}  // namespace operators
-}  // namespace modsecurity
+}  // namespace modsecurity::operators

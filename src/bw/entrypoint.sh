@@ -3,10 +3,14 @@
 # shellcheck disable=SC1091
 . /usr/share/bunkerweb/helpers/utils.sh
 
-shopt -s nullglob
-ascii_array=(/usr/share/bunkerweb/misc/*.ascii)
-shopt -u nullglob
-cat "${ascii_array[$((RANDOM % ${#ascii_array[@]}))]}"
+if [[ $(echo "${SKIP_ASCII_BANNER:-no}" | awk '{print tolower($0)}') != "yes" ]] ; then
+	shopt -s nullglob
+	ascii_array=(/usr/share/bunkerweb/misc/*.ascii)
+	shopt -u nullglob
+	if [ ${#ascii_array[@]} -gt 0 ] ; then
+		cat "${ascii_array[$((RANDOM % ${#ascii_array[@]}))]}"
+	fi
+fi
 
 log "ENTRYPOINT" "ℹ️" "Starting BunkerWeb v$(cat /usr/share/bunkerweb/VERSION) ..."
 
@@ -14,6 +18,16 @@ log "ENTRYPOINT" "ℹ️" "Starting BunkerWeb v$(cat /usr/share/bunkerweb/VERSIO
 /usr/share/bunkerweb/helpers/data.sh "ENTRYPOINT"
 
 handle_docker_secrets
+
+if [[ $(echo "$SWARM_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
+	echo "Swarm" > /usr/share/bunkerweb/INTEGRATION
+elif [[ $(echo "$KUBERNETES_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
+	echo "Kubernetes" > /usr/share/bunkerweb/INTEGRATION
+elif [[ $(echo "$AUTOCONF_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
+	echo "Autoconf" > /usr/share/bunkerweb/INTEGRATION
+fi
+
+export LOG_SYSLOG_TAG="${LOG_SYSLOG_TAG:-bunkerweb-entrypoint}"
 
 # trap SIGTERM and SIGINT
 # shellcheck disable=SC2329
@@ -47,13 +61,79 @@ function trap_reload() {
 }
 trap "trap_reload" HUP
 
+function generate_tmp_env_content() {
+	cat <<EOF
+IS_LOADING=yes
+USE_BUNKERNET=no
+SEND_ANONYMOUS_REPORT=no
+SERVER_NAME=
+MODSECURITY_CRS_VERSION=${MODSECURITY_CRS_VERSION:-4}
+API_LISTEN_HTTP=${API_LISTEN_HTTP:-yes}
+API_HTTP_PORT=${API_HTTP_PORT:-5000}
+API_LISTEN_HTTPS=${API_LISTEN_HTTPS:-no}
+API_HTTPS_PORT=${API_HTTPS_PORT:-5443}
+API_SERVER_NAME=${API_SERVER_NAME:-bwapi}
+API_WHITELIST_IP=${API_WHITELIST_IP:-127.0.0.0/8}
+API_TOKEN=${API_TOKEN:-}
+USE_REAL_IP=${USE_REAL_IP:-no}
+USE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL:-no}
+REAL_IP_FROM=${REAL_IP_FROM:-192.168.0.0/16 172.16.0.0/12 10.0.0.0/8}
+REAL_IP_HEADER=${REAL_IP_HEADER:-X-Forwarded-For}
+HTTP_PORT=${HTTP_PORT:-8080}
+HTTPS_PORT=${HTTPS_PORT:-8443}
+KEEP_CONFIG_ON_RESTART=${KEEP_CONFIG_ON_RESTART:-no}
+EOF
+}
+
+function set_loading_state() {
+	local nginx_variables_path="$1"
+	if [ ! -f "$nginx_variables_path" ] ; then
+		return 1
+	fi
+
+	if grep -q "^IS_LOADING=" "$nginx_variables_path" ; then
+		sed -i "s/^IS_LOADING=.*/IS_LOADING=yes/" "$nginx_variables_path"
+	else
+		echo "IS_LOADING=yes" >> "$nginx_variables_path"
+	fi
+
+	return 0
+}
+
 # generate "temp" config
-echo -e "IS_LOADING=yes\nUSE_BUNKERNET=no\nSEND_ANONYMOUS_REPORT=no\nSERVER_NAME=\nMODSECURITY_CRS_VERSION=${MODSECURITY_CRS_VERSION:-4}\nAPI_LISTEN_HTTP=${API_LISTEN_HTTP:-yes}\nAPI_HTTP_PORT=${API_HTTP_PORT:-5000}\nAPI_LISTEN_HTTPS=${API_LISTEN_HTTPS:-no}\nAPI_HTTPS_PORT=${API_HTTPS_PORT:-5443}\nAPI_SERVER_NAME=${API_SERVER_NAME:-bwapi}\nAPI_WHITELIST_IP=${API_WHITELIST_IP:-127.0.0.0/8}\nAPI_TOKEN=${API_TOKEN:-}\nUSE_REAL_IP=${USE_REAL_IP:-no}\nUSE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL:-no}\nREAL_IP_FROM=${REAL_IP_FROM:-192.168.0.0/16 172.16.0.0/12 10.0.0.0/8}\nREAL_IP_HEADER=${REAL_IP_HEADER:-X-Forwarded-For}\nHTTP_PORT=${HTTP_PORT:-8080}\nHTTPS_PORT=${HTTPS_PORT:-8443}" > /tmp/variables.env
-python3 /usr/share/bunkerweb/gen/main.py --variables /tmp/variables.env
+tmp_env_path="/tmp/variables.env"
+tmp_env_content="$(generate_tmp_env_content)"
+regenerate_temp_config=false
+
+if [[ "$KEEP_CONFIG_ON_RESTART" == "no" ]] || [[ ! -f "$tmp_env_path" ]] ; then
+	regenerate_temp_config=true
+else
+	log "ENTRYPOINT" "ℹ️" "Preserving current config on restart, forcing loading state to receive latest config ..."
+	if ! set_loading_state "/etc/nginx/variables.env" ; then
+		log "ENTRYPOINT" "⚠️" "Couldn't set IS_LOADING=yes because /etc/nginx/variables.env is missing"
+	fi
+fi
+
+printf "%s\n" "$tmp_env_content" > "$tmp_env_path"
+
+if [[ "$regenerate_temp_config" == "true" ]] ; then
+  python3 /usr/share/bunkerweb/gen/main.py --variables "$tmp_env_path"
+fi
 
 if [ -f /var/tmp/bunkerweb_reloading ] ; then
 	rm -f /var/tmp/bunkerweb_reloading
 fi
+
+# Clean orphaned NGINX temp files from previous runs
+for dir in client_temp proxy_temp fastcgi_temp uwsgi_temp scgi_temp; do
+	target="/var/tmp/bunkerweb/$dir"
+	if [ -d "$target" ] && [ ! -L "$target" ]; then
+		if [ -n "$(find "$target" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; then
+			log "ENTRYPOINT" "ℹ️" "Cleaning orphaned temp files from $dir"
+		fi
+		find "$target" -mindepth 1 -delete 2>/dev/null || true
+	fi
+done
 
 # start nginx
 log "ENTRYPOINT" "ℹ️" "Starting nginx ..."
@@ -63,7 +143,9 @@ pid="$!"
 # wait while nginx is running
 wait "$pid"
 while [ -f "/var/run/bunkerweb/nginx.pid" ] ; do
-	wait "$pid"
+	# Break if the process is no longer alive (e.g. killed by OOM without cleaning up the PID file)
+	kill -0 "$pid" 2>/dev/null || { rm -f "/var/run/bunkerweb/nginx.pid" ; break ; }
+	sleep 1
 done
 
 log "ENTRYPOINT" "ℹ️" "BunkerWeb stopped"

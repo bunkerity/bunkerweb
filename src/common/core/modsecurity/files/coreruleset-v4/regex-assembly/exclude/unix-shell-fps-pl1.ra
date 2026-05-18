@@ -64,10 +64,6 @@
 ##! EOF
 ##! echo "${result}" | sort | uniq >> regex-assembly/exclude/unix-shell-fps-pl1.ra
 
-##! Note: As part of the effort to reduce FPs mid-term (https://github.com/coreruleset/coreruleset/pull/3735)
-##!       we've decided to exclude some commands for which only the exact match is an issue
-##!       (mostly for 933236).
-
 GET
 GET@
 GET~
@@ -149,6 +145,7 @@ c99
 cancel
 cancel@
 cancel~
+cargo@
 capsh@
 cat
 cat@
@@ -352,9 +349,6 @@ go
 go@
 go~
 grc
-group
-group@
-group~
 gtester
 hash
 hash@
@@ -415,6 +409,8 @@ knife
 knife@
 knife~
 ksshell
+l@
+la@
 last
 last@
 last~
@@ -432,6 +428,7 @@ less~
 links
 links@
 links~
+ll@
 ln
 ln@
 local
@@ -521,9 +518,6 @@ npm@
 nroff
 nsenter
 nslookup
-null
-null@
-null~
 octave
 octave@
 octave~
@@ -558,9 +552,7 @@ perms@
 perms~
 pf
 pf@
-pg
 pg@
-pg~
 php
 php@
 php~
@@ -594,10 +586,6 @@ puppet
 puppet@
 puppet~
 pushd
-##! excluded as part of PR #3735
-pwd
-pwd@
-pwd~
 python
 python@
 python~
@@ -644,6 +632,7 @@ ruby@
 ruby~
 run-mailcap
 run-parts
+rust@
 rview
 rvim
 sash
@@ -669,12 +658,7 @@ set~
 sg
 sg@
 sg~
-shadow
-shadow@
-shadow~
-shells
-shells@
-shells~
+shred@
 shuf
 shutdown
 shutdown@
@@ -727,10 +711,7 @@ taskset
 task~
 tbl
 tclsh
-tcp
-tcp@
 tcpdump
-tcp~
 tee
 tee@
 tee~
@@ -745,10 +726,6 @@ time
 time@
 time~
 timedatectl
-##! excluded as part of PR #3735
-timeout
-timeout@
-timeout~
 tmux
 top
 top@
@@ -761,10 +738,6 @@ tshark
 ul
 ul@
 ulimit@
-##! excluded as part of PR #3735
-uname
-uname@
-uname~
 uncompress
 uncompress@
 uncompress~
@@ -813,9 +786,6 @@ whiptail@
 whiptail~
 who
 who@
-whois
-whois@
-whois~
 who~
 wireshark
 wish
@@ -840,9 +810,6 @@ yes@
 yes~
 yum
 zathura
-zero
-zero@
-zero~
 zip
 zip@
 zip~

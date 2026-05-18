@@ -46,7 +46,7 @@ static inline bool encode(std::string &value) {
         int unicode_len = 0;
         unsigned int d = 0;
         unsigned char c;
-        auto utf = &input[i];
+        const auto* utf = &input[i];
 
         c = *utf;
 

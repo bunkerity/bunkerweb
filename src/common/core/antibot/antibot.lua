@@ -44,12 +44,55 @@ end
 
 local antibot = class("antibot", plugin)
 local CACHE_PREFIX = "plugin_antibot_"
+-- Asset-like extensions used to avoid redirecting clients back to static files after solving the challenge
+local STATIC_EXTENSIONS = {
+	["avif"] = true,
+	["css"] = true,
+	["gif"] = true,
+	["ico"] = true,
+	["jpeg"] = true,
+	["jpg"] = true,
+	["js"] = true,
+	["map"] = true,
+	["mjs"] = true,
+	["otf"] = true,
+	["png"] = true,
+	["svg"] = true,
+	["ttf"] = true,
+	["webm"] = true,
+	["webp"] = true,
+	["woff"] = true,
+	["woff2"] = true,
+}
+
+local function normalize_host(host)
+	if not host or host == "" then
+		return nil
+	end
+	return host:match("^([^:]+)")
+end
+
+local function is_static_like(uri)
+	if not uri or uri == "" then
+		return false
+	end
+	local path = uri:match("^[^?]+") or uri
+	if path == "/favicon.ico" then
+		return true
+	end
+	local ext = path:match("%.([%w]+)$")
+	if not ext then
+		return false
+	end
+	return STATIC_EXTENSIONS[ext:lower()] == true
+end
 
 local function get_http_client()
 	local httpc, err = http_new()
 	if not httpc then
 		return nil, "can't instantiate http object: " .. err
 	end
+	httpc:set_timeouts(5000, 5000, 5000)
 	return httpc
 end
 
@@ -115,6 +158,16 @@ function antibot:header()
 		return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
 	end
 
+	-- Don't go further if content is not being displayed (e.g. HEAD requests)
+	if not self.ctx.bw.antibot_nonce_script or not self.ctx.bw.antibot_nonce_style then
+		return self:ret(true, "no nonces available, skipping CSP header override")
+	end
+
+	-- Don't override CSP on error responses (the default error page has its own inline styles)
+	if not self.ctx.bw.antibot_display_content then
+		return self:ret(true, "not overriding CSP on error response")
+	end
+
 	local hdr = ngx.header
 
 	-- Override CSP header
@@ -163,6 +216,20 @@ function antibot:header()
 		end
 	elseif self.session_data.type == "mcaptcha" then
 		csp_directives["frame-src"] = self.variables["ANTIBOT_MCAPTCHA_URL"]
+	elseif self.session_data.type == "capjs" then
+		local capjs_url = self.variables["ANTIBOT_CAPJS_FRONTEND_URL"]
+		-- Cap.js needs: no strict-dynamic (workers do dynamic imports from capjs_url),
+		-- 'unsafe-inline' on script-src (the sandboxed instrumentation iframe's srcdoc
+		-- cannot carry a nonce; per CSP3, adding 'unsafe-inline' implies dropping the
+		-- nonce), wasm-unsafe-eval (workers execute WASM), no trusted types (widget.js
+		-- uses innerHTML). The widget's inline <style> is nonced via window.CAP_CSS_NONCE
+		-- (see capjs.html), so style-src stays strict.
+		csp_directives["script-src"] = "'unsafe-inline' " .. capjs_url .. " 'wasm-unsafe-eval'"
+		csp_directives["style-src"] = "'self' 'nonce-" .. self.ctx.bw.antibot_nonce_style .. "'"
+		csp_directives["connect-src"] = capjs_url
+		csp_directives["frame-src"] = capjs_url
+		csp_directives["worker-src"] = "blob: " .. capjs_url
+		csp_directives["require-trusted-types-for"] = nil
 	end
 	local csp_content = ""
 	for directive, value in pairs(csp_directives) do
@@ -375,6 +442,7 @@ end
 
 function antibot:prepare_challenge()
 	if not self.session_data.prepared then
+		local original_uri = self:get_original_uri()
 		-- Set all session data at once instead of multiple individual assignments
 		local now_time = now()
 		local session_update = {
@@ -382,7 +450,7 @@ function antibot:prepare_challenge()
 			time_resolve = now_time,
 			type = self.variables["USE_ANTIBOT"],
 			resolved = false,
-			original_uri = self.ctx.bw.uri == self.variables["ANTIBOT_URI"] and "/" or self.ctx.bw.request_uri,
+			original_uri = original_uri,
 		}
 
 		-- Set type-specific fields
@@ -451,6 +519,12 @@ function antibot:display_challenge()
 	if self.session_data.type == "mcaptcha" then
 		template_vars.mcaptcha_sitekey = self.variables["ANTIBOT_MCAPTCHA_SITEKEY"]
 		template_vars.mcaptcha_url = self.variables["ANTIBOT_MCAPTCHA_URL"]
+	end
+
+	-- Cap.js case
+	if self.session_data.type == "capjs" then
+		template_vars.capjs_url = self.variables["ANTIBOT_CAPJS_FRONTEND_URL"]
+		template_vars.capjs_sitekey = self.variables["ANTIBOT_CAPJS_SITEKEY"]
 	end
 
 	-- Render content
@@ -581,9 +655,9 @@ function antibot:check_challenge()
 			return nil, "error while decoding JSON from reCAPTCHA API : " .. rdata, nil
 		end
 		local success, score, reason
-		if self.session_data.recaptcha_classic then
+		if self.variables["ANTIBOT_RECAPTCHA_CLASSIC"] == "yes" then
 			success = rdata.success
-			score = rdata.score or 0
+			score = rdata.score or 1
 		else
 			success = rdata.tokenProperties and rdata.tokenProperties.valid
 			score = rdata.riskAnalysis and rdata.riskAnalysis.score or 0
@@ -617,11 +691,11 @@ function antibot:check_challenge()
 		local res, err = httpc:request_uri("https://hcaptcha.com/siteverify", {
 			method = "POST",
 			body = "secret="
-				.. self.variables["ANTIBOT_HCAPTCHA_SECRET"]
+				.. ngx.escape_uri(self.variables["ANTIBOT_HCAPTCHA_SECRET"])
 				.. "&response="
-				.. args["token"]
+				.. ngx.escape_uri(args["token"])
 				.. "&remoteip="
-				.. self.ctx.bw.remote_addr,
+				.. ngx.escape_uri(self.ctx.bw.remote_addr),
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded",
 			},
@@ -657,11 +731,11 @@ function antibot:check_challenge()
 		local res, err = httpc:request_uri("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
 			method = "POST",
 			body = "secret="
-				.. self.variables["ANTIBOT_TURNSTILE_SECRET"]
+				.. ngx.escape_uri(self.variables["ANTIBOT_TURNSTILE_SECRET"])
 				.. "&response="
-				.. args["token"]
+				.. ngx.escape_uri(args["token"])
 				.. "&remoteip="
-				.. self.ctx.bw.remote_addr,
+				.. ngx.escape_uri(self.ctx.bw.remote_addr),
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded",
 			},
@@ -724,7 +798,91 @@ function antibot:check_challenge()
 		return true, "resolved", self.session_data.original_uri
 	end
 
+	-- Cap.js case
+	if self.session_data.type == "capjs" then
+		read_body()
+		local args, err = get_post_args(1)
+		if err == "truncated" or not args or not args["token"] then
+			return nil, "missing challenge arg", nil
+		end
+		local httpc, err = get_http_client()
+		if not httpc then
+			return nil, err, nil, nil
+		end
+		local capjs_backend = self.variables["ANTIBOT_CAPJS_BACKEND_URL"]
+		if not capjs_backend or capjs_backend == "" then
+			capjs_backend = self.variables["ANTIBOT_CAPJS_FRONTEND_URL"]
+		end
+		capjs_backend = capjs_backend:gsub("/+$", "")
+		local capjs_verify_url = capjs_backend .. "/" .. self.variables["ANTIBOT_CAPJS_SITEKEY"] .. "/siteverify"
+		local res, err = httpc:request_uri(capjs_verify_url, {
+			method = "POST",
+			body = "secret="
+				.. ngx.escape_uri(self.variables["ANTIBOT_CAPJS_SECRET"])
+				.. "&response="
+				.. ngx.escape_uri(args["token"]),
+			headers = {
+				["Content-Type"] = "application/x-www-form-urlencoded",
+			},
+		})
+		httpc:close()
+		if not res then
+			return nil, "can't send request to Cap.js API : " .. err, nil
+		end
+		local ok, cdata = pcall(decode, res.body)
+		if not ok then
+			return nil, "error while decoding JSON from Cap.js API : " .. cdata, nil
+		end
+		if not cdata.success then
+			return false, "client failed challenge", nil
+		end
+		self.session_data.resolved = true
+		self.session_data.time_valid = now()
+		self:set_session_data()
+		return true, "resolved", self.session_data.original_uri
+	end
+
 	return nil, "unknown", nil
+end
+
+function antibot:get_referer_path()
+	local referer = self.ctx.bw.http_referer or ngx.var.http_referer
+	if not referer or referer == "" then
+		return nil
+	end
+	if referer:sub(1, 1) == "/" then
+		return referer
+	end
+	local host, path = referer:match("^https?://([^/]+)(/.*)$")
+	if not host or not path then
+		return nil
+	end
+	local current_host = normalize_host(self.ctx.bw.http_host or self.ctx.bw.server_name)
+	local referer_host = normalize_host(host)
+	if current_host and referer_host and current_host == referer_host then
+		return path
+	end
+	return nil
+end
+
+function antibot:get_original_uri()
+	local antibot_uri = self.variables["ANTIBOT_URI"]
+	if self.ctx.bw.uri == antibot_uri then
+		return "/"
+	end
+	local request_uri = self.ctx.bw.request_uri or "/"
+	local uri_path = self.ctx.bw.uri or request_uri
+
+	if not is_static_like(uri_path) then
+		return request_uri
+	end
+
+	local referer_path = self:get_referer_path()
+	if referer_path and referer_path ~= antibot_uri and not is_static_like(referer_path) then
+		return referer_path
+	end
+
+	return "/"
 end
 
 function antibot:kind_to_ele(kind)

@@ -1,31 +1,37 @@
 #!/usr/bin/env python3
 
-from os import environ, getenv, sep
+from os import getenv, sep
 from os.path import join
-from pathlib import Path
 from subprocess import DEVNULL, PIPE, Popen
 from sys import exit as sys_exit, path as sys_path
+from time import monotonic
 from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
+from letsencrypt_utils import (
+    CERTBOT_BIN,
+    DEPS_PATH,
+    LETSENCRYPT_DATA_PATH as DATA_PATH,
+    LETSENCRYPT_LOGS_DIR as LOGS_DIR,
+    LETSENCRYPT_WORK_DIR as WORK_DIR,
+    ZEROSSL_BOT_SCRIPT,
+    build_certbot_env,
+    certbot_log_backup_flags,
+    is_zerossl_used_in_env,
+    prepare_logs_dir,
+    resolve_certbot_entrypoint,
+)
 
-LOGGER = setup_logger("LETS-ENCRYPT.renew")
-LIB_PATH = Path(sep, "var", "lib", "bunkerweb", "letsencrypt")
-CERTBOT_BIN = join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot")
-DEPS_PATH = join(sep, "usr", "share", "bunkerweb", "deps", "python")
+LOGGER = getLogger("LETS-ENCRYPT.RENEW")
 
-LOGGER_CERTBOT = setup_logger("LETS-ENCRYPT.renew.certbot")
+LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.RENEW.CERTBOT")
+CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
 status = 0
-
-CACHE_PATH = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
-DATA_PATH = CACHE_PATH.joinpath("etc")
-WORK_DIR = join(sep, "var", "lib", "bunkerweb", "letsencrypt")
-LOGS_DIR = join(sep, "var", "log", "bunkerweb", "letsencrypt")
 
 try:
     # Check if we're using let's encrypt
@@ -34,7 +40,7 @@ try:
     if getenv("MULTISITE", "no") == "no":
         use_letsencrypt = getenv("AUTO_LETS_ENCRYPT", "no") == "yes"
     else:
-        for first_server in getenv("SERVER_NAME", "www.example.com").split(" "):
+        for first_server in getenv("SERVER_NAME", "www.example.com").split():
             if first_server and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") == "yes":
                 use_letsencrypt = True
                 break
@@ -43,22 +49,27 @@ try:
         LOGGER.info("Let's Encrypt is not activated, skipping renew...")
         sys_exit(0)
 
+    prepare_logs_dir(LOGS_DIR, LOGGER)
+
     JOB = Job(LOGGER, __file__)
 
-    cmd_env = environ.copy()
-
-    db_config = JOB.db.get_config()
-    for key in db_config:
-        if key in cmd_env:
-            del cmd_env[key]
-
-    cmd_env["PYTHONPATH"] = cmd_env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in cmd_env["PYTHONPATH"] else "")
-    if getenv("DATABASE_URI", ""):
-        cmd_env["DATABASE_URI"] = getenv("DATABASE_URI", "")
+    cmd_env = build_certbot_env(JOB, DEPS_PATH)
+    acme_server = "zerossl" if is_zerossl_used_in_env() else "letsencrypt"
+    certbot_entrypoint = resolve_certbot_entrypoint(
+        acme_server,
+        CERTBOT_BIN,
+        ZEROSSL_BOT_SCRIPT,
+        LOGGER,
+        cmd_env=cmd_env,
+        fallback_to_certbot=True,
+    )
+    certbot_bin = certbot_entrypoint[0]
+    if acme_server == "zerossl" and certbot_bin != CERTBOT_BIN:
+        LOGGER.info("Using zerossl-bot wrapper for certificate renewal.")
 
     process = Popen(
         [
-            CERTBOT_BIN,
+            certbot_bin,
             "renew",
             "-n",
             "--no-random-sleep-on-renew",
@@ -68,6 +79,7 @@ try:
             WORK_DIR,
             "--logs-dir",
             LOGS_DIR,
+            *certbot_log_backup_flags(cmd_env),
         ]
         + (["-v"] if getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper() == "DEBUG" else []),
         stdin=DEVNULL,
@@ -75,17 +87,34 @@ try:
         universal_newlines=True,
         env=cmd_env,
     )
+    deadline = monotonic() + CERTBOT_TIMEOUT
     while process.poll() is None:
+        if monotonic() > deadline:
+            LOGGER.error(f"certbot renew timed out after {CERTBOT_TIMEOUT}s, killing process.")
+            process.kill()
+            process.wait()
+            status = 2
+            break
         if process.stderr:
             for line in process.stderr:
                 LOGGER_CERTBOT.info(line.strip())
 
-    if process.returncode != 0:
+    if process.returncode and process.returncode != 0:
         status = 2
         LOGGER.error("Certificates renewal failed")
 
-    # Save Let's Encrypt data to db cache
-    if DATA_PATH.is_dir() and list(DATA_PATH.iterdir()):
+    # Save Let's Encrypt data to db cache.
+    # Guards: only re-cache if the initial restore succeeded AND we actually have live
+    # certs on disk. Without these guards, a failed restore leaves DATA_PATH empty
+    # (rmtree runs before extraction in Job.restore_cache) and a blind cache_dir() call
+    # would overwrite the good DB row with the empty post-rmtree state, losing the certs
+    # from both disk and DB.
+    if not JOB.restore_ok:
+        LOGGER.error("Skipping db cache update: initial cache restore failed, refusing to overwrite good DB state with current disk state.")
+        status = 2
+    elif not DATA_PATH.is_dir() or not any(DATA_PATH.glob("live/*/fullchain.pem")):
+        LOGGER.warning("Skipping db cache update: no live certificates found under DATA_PATH/live/*/fullchain.pem.")
+    else:
         cached, err = JOB.cache_dir(DATA_PATH)
         if not cached:
             LOGGER.error(f"Error while saving Let's Encrypt data to db cache : {err}")

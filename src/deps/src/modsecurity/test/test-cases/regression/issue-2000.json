@@ -1,35 +1,42 @@
 [
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing audit log part H should output when deny - issue-2000",
-    "expected":{
-      "http_code":200
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing audit log part H should output when deny - issue-2000",
+    "client": {
+      "ip": "127.0.0.1",
+      "port": 123
     },
-    "client":{
-      "ip":"127.0.0.1",
-      "port":123
+    "server": {
+      "ip": "127.0.0.1",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
       },
-      "uri":"index.php?foo=bar&a=xxx",
-      "method":"GET",
-      "body": ""
+      "uri": "index.php?foo=bar&a=xxx",
+      "method": "GET",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
     },
     "expected": {
-      "http_code": 403,
-      "audit_log": "id \"1234"
+      "audit_log": "id \"1234",
+      "http_code": 403
     },
-
-    "server":{
-      "ip":"127.0.0.1",
-      "port":80
-    },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecAuditLogParts ABIJDEFHZ",
       "SecAuditEngine RelevantOnly",

@@ -1,0 +1,148 @@
+services:
+  # APPLICATIONS
+  app1:
+    image: nginxdemos/nginx-hello
+    networks:
+      bw-services:
+        aliases:
+          - app1
+    labels:
+      - bunkerweb.SERVER_NAME=app1.example.com
+      - bunkerweb.USE_REVERSE_PROXY=yes
+      - bunkerweb.REVERSE_PROXY_URL=/
+      - bunkerweb.REVERSE_PROXY_HOST=http://app1:8080
+      # Drop 401 from intercepted codes so Authentik's 401 bubbles up to the
+      # parent location where REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL rewrites
+      # it to a 302 redirect to the sign-in flow.
+      - bunkerweb.INTERCEPTED_ERROR_CODES=400 403 404 405 413 429 500 501 502 503 504
+      - bunkerweb.REVERSE_PROXY_AUTH_REQUEST=/outpost.goauthentik.io/auth/nginx
+      - bunkerweb.REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL=https://app1.example.com/outpost.goauthentik.io/start?rd=$$scheme%3A%2F%2F$$host$$request_uri
+      - bunkerweb.REVERSE_PROXY_AUTH_REQUEST_SET=$$auth_cookie $$upstream_http_set_cookie;$$authentik_username $$upstream_http_x_authentik_username;$$authentik_groups $$upstream_http_x_authentik_groups;$$authentik_entitlements $$upstream_http_x_authentik_entitlements;$$authentik_email $$upstream_http_x_authentik_email;$$authentik_name $$upstream_http_x_authentik_name;$$authentik_uid $$upstream_http_x_authentik_uid
+      - bunkerweb.REVERSE_PROXY_HEADERS_CLIENT=Set-Cookie $$auth_cookie
+      - bunkerweb.REVERSE_PROXY_HEADERS=X-authentik-username $$authentik_username;X-authentik-groups $$authentik_groups;X-authentik-entitlements $$authentik_entitlements;X-authentik-email $$authentik_email;X-authentik-name $$authentik_name;X-authentik-uid $$authentik_uid
+      - bunkerweb.REVERSE_PROXY_URL_999=/outpost.goauthentik.io
+      - bunkerweb.REVERSE_PROXY_HOST_999=http://server:9000
+      - bunkerweb.REVERSE_PROXY_HEADERS_999=X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length ""
+      - bunkerweb.REVERSE_PROXY_HEADERS_CLIENT_999=Set-Cookie $$auth_cookie
+      - bunkerweb.REVERSE_PROXY_AUTH_REQUEST_SET_999=$$auth_cookie $$upstream_http_set_cookie
+      - bunkerweb.REVERSE_PROXY_PASS_REQUEST_BODY_999=no
+
+  app2:
+    image: nginxdemos/nginx-hello
+    networks:
+      bw-services:
+        aliases:
+          - app2
+    labels:
+      - bunkerweb.SERVER_NAME=app2.example.com
+      - bunkerweb.USE_REVERSE_PROXY=yes
+      - bunkerweb.REVERSE_PROXY_URL=/
+      - bunkerweb.REVERSE_PROXY_HOST=http://app2:8080
+      - bunkerweb.INTERCEPTED_ERROR_CODES=400 403 404 405 413 429 500 501 502 503 504
+      - bunkerweb.REVERSE_PROXY_AUTH_REQUEST=/outpost.goauthentik.io/auth/nginx
+      - bunkerweb.REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL=https://app2.example.com/outpost.goauthentik.io/start?rd=$$scheme%3A%2F%2F$$host$$request_uri
+      - bunkerweb.REVERSE_PROXY_AUTH_REQUEST_SET=$$auth_cookie $$upstream_http_set_cookie;$$authentik_username $$upstream_http_x_authentik_username;$$authentik_groups $$upstream_http_x_authentik_groups;$$authentik_entitlements $$upstream_http_x_authentik_entitlements;$$authentik_email $$upstream_http_x_authentik_email;$$authentik_name $$upstream_http_x_authentik_name;$$authentik_uid $$upstream_http_x_authentik_uid
+      - bunkerweb.REVERSE_PROXY_HEADERS_CLIENT=Set-Cookie $$auth_cookie
+      - bunkerweb.REVERSE_PROXY_HEADERS=X-authentik-username $$authentik_username;X-authentik-groups $$authentik_groups;X-authentik-entitlements $$authentik_entitlements;X-authentik-email $$authentik_email;X-authentik-name $$authentik_name;X-authentik-uid $$authentik_uid
+      - bunkerweb.REVERSE_PROXY_URL_999=/outpost.goauthentik.io
+      - bunkerweb.REVERSE_PROXY_HOST_999=http://server:9000
+      - bunkerweb.REVERSE_PROXY_HEADERS_999=X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length ""
+      - bunkerweb.REVERSE_PROXY_HEADERS_CLIENT_999=Set-Cookie $$auth_cookie
+      - bunkerweb.REVERSE_PROXY_AUTH_REQUEST_SET_999=$$auth_cookie $$upstream_http_set_cookie
+      - bunkerweb.REVERSE_PROXY_PASS_REQUEST_BODY_999=no
+
+  # AUTHENTIK SERVICES
+  postgresql:
+    image: docker.io/library/postgres:16-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    volumes:
+      - database:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: ${PG_PASS:?database password required}
+      POSTGRES_USER: ${PG_USER:-authentik}
+      POSTGRES_DB: ${PG_DB:-authentik}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    env_file:
+      - .env
+    networks:
+      - authentik-net
+
+  server:
+    image: ${AUTHENTIK_IMAGE:-ghcr.io/goauthentik/server}:${AUTHENTIK_TAG:-2026.2.2}
+    restart: unless-stopped
+    command: server
+    shm_size: 512mb
+    environment:
+      AUTHENTIK_POSTGRESQL__HOST: postgresql
+      AUTHENTIK_POSTGRESQL__USER: ${PG_USER:-authentik}
+      AUTHENTIK_POSTGRESQL__NAME: ${PG_DB:-authentik}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${PG_PASS}
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:?secret key required}
+    volumes:
+      - ak-data:/data
+      - custom-templates:/templates
+      - ./blueprints:/blueprints/custom:ro
+    env_file:
+      - .env
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    networks:
+      - authentik-net
+      - bw-services
+    labels:
+      - bunkerweb.SERVER_NAME=auth.example.com
+      - bunkerweb.USE_REVERSE_PROXY=yes
+      - bunkerweb.REVERSE_PROXY_URL=/
+      - bunkerweb.REVERSE_PROXY_HOST=http://server:9000
+      - bunkerweb.REVERSE_PROXY_WS=yes
+      - bunkerweb.LIMIT_REQ_URL_1=^/api/
+      - bunkerweb.LIMIT_REQ_RATE_1=5r/s
+      - bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no
+      - bunkerweb.ALLOWED_METHODS=GET|POST|HEAD|PUT|DELETE|PATCH
+      - bunkerweb.COOKIE_FLAGS=* SameSite=Lax
+
+  worker:
+    image: ${AUTHENTIK_IMAGE:-ghcr.io/goauthentik/server}:${AUTHENTIK_TAG:-2026.2.2}
+    restart: unless-stopped
+    command: worker
+    shm_size: 512mb
+    environment:
+      AUTHENTIK_POSTGRESQL__HOST: postgresql
+      AUTHENTIK_POSTGRESQL__USER: ${PG_USER:-authentik}
+      AUTHENTIK_POSTGRESQL__NAME: ${PG_DB:-authentik}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${PG_PASS}
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:?secret key required}
+    user: root
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ak-data:/data
+      - certs:/certs
+      - custom-templates:/templates
+      - ./blueprints:/blueprints/custom:ro
+    env_file:
+      - .env
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    networks:
+      - authentik-net
+
+networks:
+  bw-services:
+    external: true
+    name: bw-services
+  authentik-net:
+    name: authentik-net
+
+volumes:
+  database:
+  ak-data:
+  certs:
+  custom-templates:

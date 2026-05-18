@@ -1,37 +1,45 @@
-certbot==5.1.0
+certbot==5.5.0
 
 # Official certbot plugins
-certbot-dns-cloudflare==5.1.0
-certbot-dns-digitalocean==5.1.0
-certbot-dns-dnsimple==5.1.0
-certbot-dns-dnsmadeeasy==5.1.0
-certbot-dns-gehirn==5.1.0
-certbot-dns-google==5.1.0
-certbot-dns-linode==5.1.0
-certbot-dns-luadns==5.1.0
-certbot-dns-nsone==5.1.0
-certbot-dns-ovh==5.1.0
-certbot-dns-rfc2136==5.1.0
-certbot-dns-route53==5.1.0
-certbot-dns-sakuracloud==5.1.0
+certbot-dns-cloudflare==5.5.0
+certbot-dns-digitalocean==5.5.0
+certbot-dns-dnsimple==5.5.0
+certbot-dns-dnsmadeeasy==5.5.0
+certbot-dns-gehirn==5.5.0
+certbot-dns-google==5.5.0
+certbot-dns-linode==5.5.0
+certbot-dns-luadns==5.5.0
+certbot-dns-nsone==5.5.0
+certbot-dns-ovh==5.5.0
+certbot-dns-rfc2136==5.5.0
+certbot-dns-route53==5.5.0
+certbot-dns-sakuracloud==5.5.0
 
 # Third-party certbot plugins
 certbot-dns-bunny==3.0.0
+certbot-dns-cloudns==0.7.0
 certbot-dns-desec==1.3.2
 certbot-dns-domainoffensive==2.0.0
-certbot-dns-duckdns==1.7.0
+certbot-dns-domeneshop==0.2.9
+certbot-dns-duckdns==1.8.0
 certbot-dns-dynu==0.0.6.post2502111739272536
+https://github.com/TheophileDiot/certbot-plugin-gandi/archive/da4655bc6d39941b44de2a7c049163a7e34a5a39.zip#egg=certbot-dns-gandi # 1.6.1
+certbot-dns-godaddy==2.8.0
+certbot-dns-hetzner==4.0.0
 certbot-dns-infomaniak==0.2.4
 certbot-dns-ionos==2024.11.9
 certbot-dns-njalla==2.0.2
 certbot-dns-pdns==0.1.1
 certbot-dns-scaleway==0.0.7
+https://github.com/TheophileDiot/certbot-dns-transip/archive/7b4f24d12f6fb21b2145912a8de75ad356cb584f.zip#egg=certbot-dns-transip # 0.5.2
 
-cryptography==46.0.3
-importlib-metadata==8.7.0
-maxminddb==3.0.0
-pydantic==2.12.4
+cffi==2.0.0
+cryptography==48.0.0
+importlib-metadata==9.0.0
+maxminddb==3.1.1
+pydantic==2.13.4
 python-magic==0.4.27
-requests==2.32.5
+requests==2.33.1
 schedule==1.2.2
-urllib3<2.4.0
+
+setuptools<81

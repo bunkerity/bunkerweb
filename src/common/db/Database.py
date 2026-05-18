@@ -5,18 +5,17 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager, suppress
 from copy import deepcopy
 from datetime import datetime, timedelta
-from io import BytesIO
+from functools import wraps
 from json import JSONDecodeError, loads
 from logging import Logger
 from os import _exit, getenv, sep
 from os.path import join as os_join
 from pathlib import Path
-from re import Match, compile as re_compile, escape, error as RegexError, search
+from re import DOTALL, Match, compile as re_compile, escape, error as RegexError, search
 from sys import argv, path as sys_path
-from tarfile import open as tar_open
 from threading import Lock
 from traceback import format_exc
-from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Set, Tuple, TypeVar, Union
 from time import sleep
 from uuid import uuid4
 from warnings import filterwarnings
@@ -50,11 +49,12 @@ for deps_path in [os_join(sep, "usr", "share", "bunkerweb", *paths) for paths in
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from common_utils import bytes_hash  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
 
 from pymysql import install_as_MySQLdb
 from sqlalchemy import case, create_engine, event, MetaData as sql_metadata, func, join, select as db_select, text
 from sqlalchemy.engine import Engine
+from sqlalchemy.engine.url import make_url
 from sqlalchemy.exc import (
     ArgumentError,
     DatabaseError,
@@ -63,7 +63,7 @@ from sqlalchemy.exc import (
     SAWarning,
     SQLAlchemyError,
 )
-from sqlalchemy.orm import joinedload, scoped_session, sessionmaker
+from sqlalchemy.orm import joinedload, scoped_session, sessionmaker, aliased
 from sqlalchemy.pool import QueuePool
 from sqlite3 import Connection as SQLiteConnection
 
@@ -82,12 +82,51 @@ def set_sqlite_pragma(dbapi_connection, _):
 
 filterwarnings("ignore", category=SAWarning, message="DELETE statement on table .* expected to delete")
 
+T = TypeVar("T")
+
+
+def retry_on_transient_db_errors(func: Callable[..., T]) -> Callable[..., T]:
+    @wraps(func)
+    def wrapper(self: "Database", *args, **kwargs) -> T:
+        attempts = max(1, getattr(self, "_request_retry_attempts", 1))
+        delay = max(0.0, getattr(self, "_request_retry_delay", 0.0))
+
+        for attempt in range(1, attempts + 1):
+            try:
+                return func(self, *args, **kwargs)
+            except (ConnectionRefusedError, OperationalError, DatabaseError) as e:
+                if attempt >= attempts or not self._is_transient_connection_error(e):
+                    raise
+
+                self.logger.warning(f"Transient database error in {func.__name__} (attempt {attempt}/{attempts}), retrying in {delay:.2f}s ...")
+                if delay:
+                    sleep(delay)
+
+        raise RuntimeError("retry_on_transient_db_errors: unreachable code")
+
+    return wrapper
+
 
 class Database:
     DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?|oracle(\+oracledb)?):/+(?P<path>/[^\s]+)")
     READONLY_ERROR = ("readonly", "read-only", "command denied", "Access denied")
+    TRANSIENT_CONNECTION_ERROR_HINTS = (
+        "connection refused",
+        "can't connect",
+        "lost connection",
+        "server has gone away",
+        "connection reset",
+        "connection aborted",
+        "timed out",
+        "timeout",
+        "connection is closed",
+    )
     RESTRICTED_TEMPLATE_SETTINGS = ("USE_TEMPLATE", "IS_DRAFT")
     MULTISITE_CUSTOM_CONFIG_TYPES = ("server_http", "modsec_crs", "modsec", "server_stream", "crs_plugins_before", "crs_plugins_after")
+    GLOBAL_CRS_SERVICE_SCOPED_MODSEC_CRS_ERROR = (
+        "Service-scoped modsec-crs configs are not supported when USE_MODSECURITY_GLOBAL_CRS is enabled. "
+        "Create a global modsec-crs config and scope it with a Host rule instead."
+    )
     SUFFIX_RX = re_compile(r"(?P<setting>.+)_(?P<suffix>\d+)$")
 
     def __init__(
@@ -98,6 +137,20 @@ class Database:
         self.readonly = False
         self.last_connection_retry = None
         self.__ignore_regex_check = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
+        self._request_retry_attempts = 2
+        self._request_retry_delay = 0.25
+
+        request_retry_attempts = getenv("DATABASE_REQUEST_RETRY_ATTEMPTS", "2")
+        if request_retry_attempts.isdigit() and int(request_retry_attempts) > 0:
+            self._request_retry_attempts = int(request_retry_attempts)
+        else:
+            self.logger.warning(f"Invalid DATABASE_REQUEST_RETRY_ATTEMPTS value: {request_retry_attempts}, using default value (2)")
+
+        request_retry_delay = getenv("DATABASE_REQUEST_RETRY_DELAY", "0.25")
+        try:
+            self._request_retry_delay = max(0.0, float(request_retry_delay))
+        except ValueError:
+            self.logger.warning(f"Invalid DATABASE_REQUEST_RETRY_DELAY value: {request_retry_delay}, using default value (0.25)")
 
         if pool:
             self.logger.warning("The pool parameter is deprecated, it will be removed in the next version")
@@ -143,13 +196,22 @@ class Database:
                     path.parent.mkdir(parents=True, exist_ok=True)
                 return db_string, match
 
-            # Add recommended drivers for MySQL/MariaDB and PostgreSQL
-            if db_type.startswith("m") and not db_type.endswith("+pymysql"):
-                return db_string.replace(db_type, f"{db_type}+pymysql"), match
-            elif db_type.startswith("postgresql") and not db_type.endswith("+psycopg"):
-                return db_string.replace(db_type, f"{db_type}+psycopg"), match
-            elif db_type.startswith("oracle") and not db_type.endswith("+oracledb"):
-                return db_string.replace(db_type, f"{db_type}+oracledb"), match
+            # Inject the recommended driver via SQLAlchemy's URL parser so only the drivername component is rewritten.
+            recommended_driver = {
+                "postgresql": "psycopg",
+                "mysql": "pymysql",
+                "mariadb": "pymysql",
+                "oracle": "oracledb",
+            }.get(db_type)
+            if recommended_driver is not None:
+                try:
+                    url = make_url(db_string)
+                except ArgumentError:
+                    self.logger.error(f"Invalid database string provided: {db_string}, exiting...")
+                    _exit(1)
+                if "+" not in url.drivername:
+                    url = url.set(drivername=f"{url.drivername}+{recommended_driver}")
+                    return url.render_as_string(hide_password=False), match
 
             return db_string, match
 
@@ -173,15 +235,65 @@ class Database:
             self.logger.error("Oracle database is not supported yet")
             _exit(1)
 
+        # Pool size
+        pool_size = getenv("DATABASE_POOL_SIZE", "40")
+        if pool_size.isdigit() and int(pool_size) >= 0:
+            pool_size = int(pool_size)
+        else:
+            self.logger.warning(f"Invalid DATABASE_POOL_SIZE value: {pool_size}, using default value (40)")
+            pool_size = 40
+
+        # Max overflow
+        max_overflow = getenv("DATABASE_POOL_MAX_OVERFLOW", "20")
+        try:
+            max_overflow = int(max_overflow)
+        except ValueError:
+            self.logger.warning(f"Invalid DATABASE_POOL_MAX_OVERFLOW value: {max_overflow}, using default value (20)")
+            max_overflow = 20
+
+        # Pool timeout
+        pool_timeout = getenv("DATABASE_POOL_TIMEOUT", "5")
+        if pool_timeout.isdigit() and int(pool_timeout) >= 0:
+            pool_timeout = int(pool_timeout)
+        else:
+            self.logger.warning(f"Invalid DATABASE_POOL_TIMEOUT value: {pool_timeout}, using default value (5)")
+            pool_timeout = 5
+
+        # Pool recycle
+        pool_recycle = getenv("DATABASE_POOL_RECYCLE", "1800")
+        try:
+            pool_recycle = int(pool_recycle)
+        except ValueError:
+            self.logger.warning(f"Invalid DATABASE_POOL_RECYCLE value: {pool_recycle}, using default value (1800)")
+            pool_recycle = 1800
+
+        # Pool pre-ping
+        pool_pre_ping = getenv("DATABASE_POOL_PRE_PING", "yes").lower() in ("yes", "true", "1")
+
+        self.logger.debug(
+            f"Database pool configuration: pool_size={pool_size}, max_overflow={max_overflow}, pool_timeout={pool_timeout}, pool_recycle={pool_recycle}, pool_pre_ping={pool_pre_ping}"
+        )
+
         self._engine_kwargs = {
             "future": True,
             "poolclass": QueuePool,
-            "pool_pre_ping": True,
-            "pool_recycle": 1800,
-            "pool_size": 40,
-            "max_overflow": 20,
-            "pool_timeout": 5,
+            "pool_pre_ping": pool_pre_ping,
+            "pool_recycle": pool_recycle,
+            "pool_size": pool_size,
+            "max_overflow": max_overflow,
+            "pool_timeout": pool_timeout,
         } | kwargs
+
+        if "pool_reset_on_return" not in kwargs:
+            default_pool_reset = "rollback"
+            configured_pool_reset = getenv("DATABASE_POOL_RESET_ON_RETURN", "").strip().lower() or default_pool_reset
+            if configured_pool_reset in ("none", "null", "off", "false", "no"):
+                self._engine_kwargs["pool_reset_on_return"] = None
+            elif configured_pool_reset in ("rollback", "commit"):
+                self._engine_kwargs["pool_reset_on_return"] = configured_pool_reset
+            else:
+                self.logger.warning(f"Invalid DATABASE_POOL_RESET_ON_RETURN value: {configured_pool_reset}, using default value ({default_pool_reset})")
+                self._engine_kwargs["pool_reset_on_return"] = default_pool_reset
 
         try:
             self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
@@ -255,6 +367,8 @@ class Database:
         if log:
             self.logger.info(f"✅ Database connection established{'' if not self.readonly else ' in read-only mode'}")
 
+        self._session_factory = scoped_session(sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False))
+
         if match.group("database").startswith("sqlite"):
             db_path = Path(match.group("path"))
             try:
@@ -264,13 +378,19 @@ class Database:
             except (OSError, IOError) as e:
                 self.logger.warning(f"Could not set file permissions on {db_path}: {e}")
 
-    def __del__(self) -> None:
-        """Close the database"""
-        if self._session_factory:
-            self._session_factory.close_all()
+    def close(self) -> None:
+        """Explicitly close all sessions and dispose the engine pool.
+        Only call during controlled shutdown when no other threads are using this instance."""
+        if getattr(self, "_session_factory", None):
+            self._session_factory.remove()
 
-        if self.sql_engine:
-            self.sql_engine.dispose()
+        if getattr(self, "sql_engine", None):
+            self.sql_engine.dispose(close=True)
+
+    def __del__(self) -> None:
+        """Best-effort close on GC so reloaded jobs still send COM_QUIT."""
+        with suppress(Exception):
+            self.close()
 
     def _empty_if_none(self, value: Any) -> Any:
         """Return an empty string if the value is None or convert None values in collections"""
@@ -328,6 +448,23 @@ class Database:
             return True
         return new_method == current_method
 
+    def _is_transient_connection_error(self, error: BaseException) -> bool:
+        """Return True if the exception looks like a temporary DB connectivity issue."""
+        if isinstance(error, ConnectionRefusedError):
+            return True
+
+        if isinstance(error, OperationalError) and getattr(error, "connection_invalidated", False):
+            return True
+
+        if not isinstance(error, (OperationalError, DatabaseError)):
+            return False
+
+        error_text = str(getattr(error, "orig", error)).lower()
+        if not error_text:
+            error_text = str(error).lower()
+
+        return any(hint in error_text for hint in self.TRANSIENT_CONNECTION_ERROR_HINTS)
+
     def test_read(self):
         """Test the read access to the database"""
         self.logger.debug("Testing read access to the database ...")
@@ -358,6 +495,11 @@ class Database:
         self.sql_engine.dispose(close=True)
         self.sql_engine = create_engine(self.database_uri_readonly if fallback else self.database_uri, **self._engine_kwargs | kwargs)
 
+        with LOCK:
+            if self._session_factory is not None:
+                self._session_factory.remove()
+            self._session_factory = scoped_session(sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False))
+
         if fallback or readonly:
             with self.sql_engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
@@ -376,19 +518,18 @@ class Database:
             self.logger.error("The database engine is not initialized")
             _exit(1)
 
-        with LOCK:
-            session = None
-            try:
-                with self.sql_engine.connect() as conn:
-                    session_factory = sessionmaker(bind=conn, autoflush=True, expire_on_commit=False)
-                    session = scoped_session(session_factory)
-                    yield session
-            except BaseException as e:
-                if session:
+        session = None
+        try:
+            session = self._session_factory
+            yield session
+        except BaseException as e:
+            if session:
+                with suppress(Exception):
                     session.rollback()
 
-                if any(error in str(e) for error in self.READONLY_ERROR):
-                    self.logger.warning("The database is read-only, retrying in read-only mode ...")
+            if any(error in str(e) for error in self.READONLY_ERROR):
+                self.logger.warning("The database is read-only, retrying in read-only mode ...")
+                with LOCK:
                     try:
                         self.retry_connection(readonly=True, pool_timeout=1)
                         self.retry_connection(readonly=True, log=False)
@@ -399,15 +540,17 @@ class Database:
                                 self.retry_connection(fallback=True, pool_timeout=1)
                             self.retry_connection(fallback=True, log=False)
                     self.readonly = True
-                elif isinstance(e, (ConnectionRefusedError, OperationalError)) and self.database_uri_readonly:
-                    self.logger.warning("Can't connect to the database, falling back to read-only one ...")
+            elif isinstance(e, (ConnectionRefusedError, OperationalError)) and self.database_uri_readonly:
+                self.logger.warning("Can't connect to the database, falling back to read-only one ...")
+                with LOCK:
                     with suppress(OperationalError, DatabaseError):
                         self.retry_connection(fallback=True, pool_timeout=1)
                         self.retry_connection(fallback=True, log=False)
                         self.readonly = True
-                raise
-            finally:
-                if session:
+            raise
+        finally:
+            if session:
+                with suppress(Exception):
                     session.remove()
 
     def is_valid_setting(
@@ -453,7 +596,8 @@ class Database:
 
                 if value is not None:
                     try:
-                        if not self.__ignore_regex_check and search(db_setting.regex, value) is None:
+                        regex_flags = DOTALL if db_setting.type == "file" else 0
+                        if not self.__ignore_regex_check and search(db_setting.regex, value, regex_flags) is None:
                             return False, f"not matching regex: {db_setting.regex!r}"
                     except RegexError:
                         return False, f"invalid regex: {db_setting.regex!r}"
@@ -503,15 +647,16 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.6"
+                return "1.6.10~rc7"
             except BaseException as e:
                 return f"Error: {e}"
 
+    @retry_on_transient_db_errors
     def get_metadata(self) -> Dict[str, Any]:
         """Get the metadata from the database"""
         data = {
             "is_initialized": False,
-            "is_pro": "no",
+            "is_pro": False,
             "pro_license": "",
             "pro_expire": None,
             "pro_status": "invalid",
@@ -536,7 +681,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.6",
+            "version": "1.6.10~rc7",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -675,11 +820,14 @@ class Database:
 
         assert isinstance(meta_cls, sql_metadata)
 
-        # Fetch old data
+        # Fetch old data (skip bw_plugin_pages data column to avoid loading large binary blobs)
         old_data = {}
         with self._db_session() as session:
             for table_name in Base.metadata.tables.keys():
-                old_data[table_name] = session.query(meta_cls.tables[table_name]).all()
+                if table_name == "bw_plugin_pages":
+                    old_data[table_name] = session.query(Plugin_pages).with_entities(Plugin_pages.plugin_id, Plugin_pages.checksum).all()
+                else:
+                    old_data[table_name] = session.query(meta_cls.tables[table_name]).all()
 
         # Prepare structures to track changes
         to_put = []
@@ -864,15 +1012,15 @@ class Database:
                     )
                     path_ui = plugin_path.joinpath("ui")
                     if path_ui.is_dir():
-                        with BytesIO() as plugin_page_content:
-                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
-                            plugin_page_content.seek(0)
+                        try:
+                            plugin_page_content = create_plugin_tar_gz(path_ui)
                             checksum = bytes_hash(plugin_page_content, algorithm="sha256")
                             desired_plugin_pages[base_plugin["id"]] = {
                                 "data": plugin_page_content.getvalue(),
                                 "checksum": checksum,
                             }
+                        except (FileNotFoundError, OSError) as e:
+                            self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
 
             for plugins in default_plugins:
                 if not isinstance(plugins, list):
@@ -1038,8 +1186,9 @@ class Database:
             # Plugins to delete
             for pid in old_plugin_ids - new_plugin_ids:
                 old_p = old_plugins[pid]
-                self.logger.warning(f'{old_p.type.title()} plugin "{pid}" has been removed, deleting it')
-                to_delete.append({"type": "plugin", "filter": {"id": pid}})
+                if old_p.method == "manual":
+                    self.logger.warning(f'{old_p.type.title()} plugin "{pid}" has been removed, deleting it')
+                    to_delete.append({"type": "plugin", "filter": {"id": pid}})
 
             # SETTINGS
             old_setting_keys = set(old_settings.keys())
@@ -1329,7 +1478,77 @@ class Database:
                     elif t == "plugin":
                         session.query(Plugins).filter_by(**delete["filter"]).delete()
 
-                session.add_all(to_put)
+                # Insert parents before children to avoid FK errors on some DBs.
+                to_put_by_type = {
+                    "plugins": [],
+                    "settings": [],
+                    "selects": [],
+                    "multiselects": [],
+                    "templates": [],
+                    "template_steps": [],
+                    "template_settings": [],
+                    "template_configs": [],
+                    "jobs": [],
+                    "plugin_pages": [],
+                    "cli_commands": [],
+                    "other": [],
+                }
+
+                for item in to_put:
+                    if isinstance(item, Plugins):
+                        to_put_by_type["plugins"].append(item)
+                    elif isinstance(item, Settings):
+                        to_put_by_type["settings"].append(item)
+                    elif isinstance(item, Selects):
+                        to_put_by_type["selects"].append(item)
+                    elif isinstance(item, Multiselects):
+                        to_put_by_type["multiselects"].append(item)
+                    elif isinstance(item, Templates):
+                        to_put_by_type["templates"].append(item)
+                    elif isinstance(item, Template_steps):
+                        to_put_by_type["template_steps"].append(item)
+                    elif isinstance(item, Template_settings):
+                        to_put_by_type["template_settings"].append(item)
+                    elif isinstance(item, Template_custom_configs):
+                        to_put_by_type["template_configs"].append(item)
+                    elif isinstance(item, Jobs):
+                        to_put_by_type["jobs"].append(item)
+                    elif isinstance(item, Plugin_pages):
+                        to_put_by_type["plugin_pages"].append(item)
+                    elif isinstance(item, Bw_cli_commands):
+                        to_put_by_type["cli_commands"].append(item)
+                    else:
+                        to_put_by_type["other"].append(item)
+
+                if to_put_by_type["plugins"]:
+                    session.add_all(to_put_by_type["plugins"])
+                if to_put_by_type["settings"]:
+                    session.add_all(to_put_by_type["settings"])
+                if to_put_by_type["plugins"] or to_put_by_type["settings"]:
+                    session.flush()
+
+                if to_put_by_type["selects"]:
+                    session.add_all(to_put_by_type["selects"])
+                if to_put_by_type["multiselects"]:
+                    session.add_all(to_put_by_type["multiselects"])
+
+                if to_put_by_type["templates"]:
+                    session.add_all(to_put_by_type["templates"])
+                if to_put_by_type["template_steps"]:
+                    session.add_all(to_put_by_type["template_steps"])
+                if to_put_by_type["template_settings"]:
+                    session.add_all(to_put_by_type["template_settings"])
+                if to_put_by_type["template_configs"]:
+                    session.add_all(to_put_by_type["template_configs"])
+
+                if to_put_by_type["jobs"]:
+                    session.add_all(to_put_by_type["jobs"])
+                if to_put_by_type["plugin_pages"]:
+                    session.add_all(to_put_by_type["plugin_pages"])
+                if to_put_by_type["cli_commands"]:
+                    session.add_all(to_put_by_type["cli_commands"])
+                if to_put_by_type["other"]:
+                    session.add_all(to_put_by_type["other"])
 
                 # Apply updates
                 for update in to_update:
@@ -1388,8 +1607,30 @@ class Database:
             return False, ""
         return True, ""
 
-    def save_config(self, config: Dict[str, Any], method: str, changed: Optional[bool] = True) -> Union[str, Set[str]]:
-        """Save the config in the database"""
+    def save_config(
+        self,
+        config: Dict[str, Any],
+        method: str,
+        changed: Optional[bool] = True,
+        file_names: Optional[Dict[str, str]] = None,
+        *,
+        skip_service_management: bool = False,
+        disable_cleanup: bool = False,
+    ) -> Union[str, Set[str]]:
+        """Save the config in the database.
+
+        Args:
+            skip_service_management: When True, the entire service-management block is
+                                     skipped — service settings cleanup, the SERVER_NAME
+                                     reconciliation that adds/draftifies/deletes Services
+                                     rows, and the multisite per-service settings pass.
+                                     Use this when the caller only intends to update
+                                     global settings and must not touch any service rows.
+                                     The historical name was ``global_only`` which was
+                                     misleading: it does not restrict input to global
+                                     settings, it only disables the service-management
+                                     side-effects.
+        """
         to_put = []
         to_update = []
         to_delete = []
@@ -1400,6 +1641,22 @@ class Database:
         db_config = {}
         if method == "autoconf":
             db_config = self.get_non_default_settings(with_drafts=True)
+
+        normalized_file_names = {k: ("" if v is None else v.strip()) for k, v in (file_names or {}).items()}
+
+        def get_setting_file_name(setting_type: str, original_key: str, value_changed: bool, current_file_name: str = "") -> Tuple[Optional[str], bool]:
+            if setting_type != "file":
+                return None, False
+
+            if original_key in normalized_file_names:
+                file_name = normalized_file_names[original_key]
+                return file_name or None, file_name != current_file_name
+
+            # If value was edited without a file name metadata, clear stale file references.
+            if value_changed and current_file_name:
+                return None, True
+
+            return None, False
 
         def is_default_value(val: str, key: str, setting: dict, template_default: Optional[str] = None, suffix: int = 0, is_global: bool = False) -> bool:
             """
@@ -1434,7 +1691,7 @@ class Database:
             original key. For suffix values, if the base value (using key) is not default, the check passes;
             otherwise, the suffix value must also be default (using original_key).
             """
-            if not is_global and key == "SERVER_NAME":
+            if key == "SERVER_NAME":
                 return False
 
             return is_default_value(value, key, setting, template_default, suffix, is_global)
@@ -1445,10 +1702,28 @@ class Database:
 
             self.logger.debug(f"Saving config for method {method}")
 
+            # When the autoconf disable_cleanup flag is on, precompute the set of existing
+            # autoconf services missing from the incoming SERVER_NAME so the services_settings
+            # cleanup pass below leaves their rows in place (the service itself will be flipped
+            # to is_draft=True further down instead of being deleted).
+            drafted_service_ids: Set[str] = set()
+            if disable_cleanup and method == "autoconf" and not skip_service_management:
+                server_name_value = config.get("SERVER_NAME", "")
+                if isinstance(server_name_value, str):
+                    incoming_service_ids = {s for s in server_name_value.strip().split() if s}
+                elif isinstance(server_name_value, list):
+                    incoming_service_ids = {s for s in server_name_value if s}
+                else:
+                    incoming_service_ids = set()
+                existing_autoconf_services = session.query(Services.id).filter_by(method="autoconf").all()
+                drafted_service_ids = {row.id for row in existing_autoconf_services if row.id not in incoming_service_ids}
+
             self.logger.debug(f"Cleaning up {method} old global settings")
             # Collect global settings to delete
             global_settings_to_delete = []
+            global_method_total = 0
             for db_global_config in session.query(Global_values).filter_by(method=method).all():
+                global_method_total += 1
                 key = db_global_config.setting_id
                 if db_global_config.suffix:
                     key = f"{key}_{db_global_config.suffix}"
@@ -1473,10 +1748,34 @@ class Database:
                     self.logger.warning(f"Error processing global config {db_global_config.setting_id}: {e}")
                     continue
 
+            # Data-loss guard (mirror of the SERVER_NAME guard below): refuse the cleanup pass
+            # when it would wipe every single existing global value for this method. A 100% wipe
+            # is almost always a transient state issue — an empty or partially-loaded variables.env
+            # at scheduler startup, a race with the plugin download jobs, or a caller that forgot
+            # to include the current config in its payload — rather than a legitimate intent to
+            # purge everything. Callers that really want to clear all scheduler-method globals
+            # can do so explicitly by deleting individual rows or using the admin API.
+            if method == "scheduler" and global_method_total > 0 and len(global_settings_to_delete) == global_method_total:
+                self.logger.warning(
+                    f"Refusing to delete all {global_method_total} scheduler-method global setting(s) via "
+                    f"save_config — the incoming config would wipe every existing row for method {method!r}. "
+                    f"This almost always indicates a transient variables.env or environment race at scheduler "
+                    f"startup. Aborting save_config to prevent data loss."
+                )
+                return changed_plugins
+
             self.logger.debug(f"Cleaning up {method} old services settings")
-            # Collect service settings to delete
+            # Collect service settings to delete (skip entirely when skip_service_management to avoid deleting service settings)
             service_settings_to_delete = []
-            for db_service_config in session.query(Services_settings).filter_by(method=method).all():
+            # Track per-service totals so we can detect would-wipe-the-whole-service deletions below.
+            service_method_total: Dict[str, int] = defaultdict(int)
+            service_method_to_delete: Dict[str, int] = defaultdict(int)
+            for db_service_config in [] if skip_service_management else session.query(Services_settings).filter_by(method=method).all():
+                # Preserve settings of services about to be drafted by the autoconf disable_cleanup path
+                # so they can be re-published when the orchestration object returns.
+                if db_service_config.service_id in drafted_service_ids:
+                    continue
+                service_method_total[db_service_config.service_id] += 1
                 key = f"{db_service_config.service_id}_{db_service_config.setting_id}"
                 if db_service_config.suffix:
                     key = f"{key}_{db_service_config.suffix}"
@@ -1487,6 +1786,7 @@ class Database:
 
                     if should_delete:
                         service_settings_to_delete.append(db_service_config)
+                        service_method_to_delete[db_service_config.service_id] += 1
                         # Get plugin ID with safer query and null checking
                         plugin_query = session.query(Settings).with_entities(Settings.plugin_id).filter_by(id=db_service_config.setting_id).first()
                         if plugin_query:
@@ -1503,102 +1803,210 @@ class Database:
                     self.logger.warning(f"Error processing service config {db_service_config.setting_id}: {e}")
                     continue
 
+            # Data-loss guard (mirror of the scheduler global guard above): refuse the cleanup
+            # when a ui/api save_config would wipe every method-owned row of an existing service
+            # while the service itself is still listed in SERVER_NAME. A 100% wipe with the
+            # service still alive almost always means the caller submitted an incomplete config
+            # (Advanced-mode form post missing keys, JS form rebuild race, plugin tab that failed
+            # to render). Genuine service deletion drops the id from SERVER_NAME and flows
+            # through the removal path further down, so this guard never blocks legitimate deletes.
+            if method in ("ui", "api") and service_method_to_delete and not skip_service_management:
+                incoming_server_name = config.get("SERVER_NAME", "")
+                if isinstance(incoming_server_name, str):
+                    incoming_service_ids = {s for s in incoming_server_name.strip().split() if s}
+                elif isinstance(incoming_server_name, list):
+                    incoming_service_ids = {s for s in incoming_server_name if s}
+                else:
+                    incoming_service_ids = set()
+
+                refused_service_ids = sorted(
+                    sid
+                    for sid, total in service_method_total.items()
+                    if total > 0 and service_method_to_delete.get(sid, 0) == total and sid in incoming_service_ids
+                )
+                if refused_service_ids:
+                    self.logger.warning(
+                        f"Refusing save_config: incoming method={method!r} payload would wipe every "
+                        f"{method}-method setting row for service(s) {refused_service_ids} while the "
+                        f"service(s) are still present in SERVER_NAME. This indicates the caller "
+                        f"submitted an incomplete config (e.g. an Advanced-mode form post missing keys). "
+                        f"Aborting save_config to prevent data loss."
+                    )
+                    return changed_plugins
+
             if config:
                 config.pop("DATABASE_URI", None)
 
-                self.logger.debug("Checking if the services have changed")
-                db_services = session.query(Services).with_entities(Services.id, Services.method, Services.is_draft).all()
-                db_ids: Dict[str, dict] = {service.id: {"method": service.method, "is_draft": service.is_draft} for service in db_services}
-                missing_ids = []
-                services = config.get("SERVER_NAME", [])
-
-                if isinstance(services, str):
-                    services = services.strip().split(" ")
-
-                services = [service for service in services if service]  # Clean up empty strings
-
-                if db_services:
-                    missing_ids = [
-                        service.id
-                        for service in db_services
-                        if (service.method == method or (service.method in ("ui", "api") and method in ("ui", "api"))) and service.id not in services
-                    ]
-
-                    if missing_ids:
-                        self.logger.debug(f"Removing {len(missing_ids)} services that are no longer in the list")
-                        # Remove services that are no longer in the list
-                        session.query(Services).filter(Services.id.in_(missing_ids)).delete(synchronize_session=False)
-                        session.query(Services_settings).filter(Services_settings.service_id.in_(missing_ids)).delete(synchronize_session=False)
-                        session.query(Custom_configs).filter(Custom_configs.service_id.in_(missing_ids)).delete(synchronize_session=False)
-                        session.query(Jobs_cache).filter(Jobs_cache.service_id.in_(missing_ids)).delete(synchronize_session=False)
-                        session.query(Metadata).filter_by(id=1).update(
-                            {Metadata.custom_configs_changed: True, Metadata.last_custom_configs_change: datetime.now().astimezone()}
-                        )
-                        changed_services = True
-                        if any(config.get(f"{sid}_USE_TEMPLATE", "") for sid in missing_ids):
-                            service_template_change = True
-
-                self.logger.debug("Checking if the drafts have changed")
-                drafts = {service for service in services if config.pop(f"{service}_IS_DRAFT", "no") == "yes"}
-                db_drafts = {service.id for service in db_services if service.is_draft}
-
-                if db_drafts:
-                    missing_drafts = [
-                        service.id
-                        for service in db_services
-                        if (service.method == method or (service.method in ("ui", "api") and method in ("ui", "api")))
-                        and service.id not in drafts
-                        and service.id not in missing_ids
-                    ]
-
-                    if missing_drafts:
-                        self.logger.debug(f"Removing {len(missing_drafts)} drafts that are no longer in the list")
-                        # Update services to remove draft status
-                        session.query(Services).filter(Services.id.in_(missing_drafts)).update({Services.is_draft: False}, synchronize_session=False)
-                        changed_services = True
-
-                for draft in drafts:
-                    if draft not in db_drafts:
-                        current_time = datetime.now().astimezone()
-                        if draft not in db_ids:
-                            self.logger.debug(f"Adding draft {draft}")
-                            to_put.append(Services(id=draft, method=method, is_draft=True, creation_date=current_time, last_update=current_time))
-                            db_ids[draft] = {"method": method, "is_draft": True}
-                        elif db_ids[draft]["method"] == method or (db_ids[draft]["method"] in ("ui", "api") and method in ("ui", "api")):
-                            self.logger.debug(f"Updating draft {draft}")
-                            to_update.append({"model": Services, "filter": {"id": draft}, "values": {"is_draft": True, "last_update": current_time}})
-                            changed_services = True
-
                 template = config.get("USE_TEMPLATE", "")
 
-                if config.get("MULTISITE", "no") == "yes":
+                if not skip_service_management:
+                    self.logger.debug("Checking if the services have changed")
+                    db_services = session.query(Services).with_entities(Services.id, Services.method, Services.is_draft).all()
+                    db_ids: Dict[str, dict] = {service.id: {"method": service.method, "is_draft": service.is_draft} for service in db_services}
+                    missing_ids = []
+                    services = config.get("SERVER_NAME", [])
+
+                    if isinstance(services, str):
+                        services = services.strip().split()
+
+                    services = [service for service in services if service]  # Clean up empty strings
+
+                    # Only meaningful for the autoconf method.
+                    disable_cleanup = disable_cleanup and method == "autoconf"
+
+                    if db_services:
+                        # Guard: if an empty services list is received but DB has services for this method,
+                        # abort the entire save_config to prevent catastrophic data loss.
+                        # For autoconf: only guard when existing DB services were created by a *different*
+                        # method (ui/api/manual). If every existing service was itself created by autoconf,
+                        # an empty SERVER_NAME is a legitimate "all ingresses removed" signal and clearing
+                        # those services is the correct behaviour. Without this relaxation, tearing down
+                        # the last Ingress and re-applying a new one gets stuck with stale services in the DB.
+                        # For other methods: protects against callers that omit SERVER_NAME entirely
+                        # (e.g. a global-only config update that forgot to set skip_service_management=True).
+                        method_services = [s for s in db_services if s.method == method or (s.method in ("ui", "api") and method in ("ui", "api"))]
+                        if not services and method_services and (method == "autoconf" or "SERVER_NAME" not in config):
+                            if method == "autoconf":
+                                foreign_services = [s for s in db_services if s.method not in ("autoconf", "scheduler")]
+                                if not foreign_services:
+                                    self.logger.debug(
+                                        f"Received empty SERVER_NAME for autoconf and all {len(method_services)} existing service(s) are autoconf-owned; "
+                                        "proceeding with removal"
+                                    )
+                                    missing_ids = [service.id for service in method_services]
+                                else:
+                                    self.logger.warning(
+                                        f"Received empty SERVER_NAME for method 'autoconf' but database has {len(foreign_services)} non-autoconf service(s), "
+                                        "skipping entire config save to prevent data loss"
+                                    )
+                                    return changed_plugins
+                            else:
+                                self.logger.warning(
+                                    f"Received empty SERVER_NAME for method '{method}' but database has {len(method_services)} existing service(s), "
+                                    "skipping entire config save to prevent data loss"
+                                )
+                                return changed_plugins
+                        else:
+                            missing_ids = [
+                                service.id
+                                for service in db_services
+                                if (service.method == method or (service.method in ("ui", "api") and method in ("ui", "api"))) and service.id not in services
+                            ]
+
+                        if missing_ids:
+                            # When AUTOCONF_DISABLE_CLEANUP is on, convert removed autoconf services to draft
+                            # instead of hard-deleting them so that settings / custom configs / job caches
+                            # survive and the service can be republished by bringing the orchestration object
+                            # back. Services owned by other methods (shouldn't happen when method=autoconf but
+                            # kept defensively) still follow the legacy cascade-delete path.
+                            draftable_ids = [sid for sid in missing_ids if db_ids.get(sid, {}).get("method") == "autoconf"] if disable_cleanup else []
+                            hard_delete_ids = [sid for sid in missing_ids if sid not in draftable_ids]
+
+                            if draftable_ids:
+                                self.logger.debug(f"Converting {len(draftable_ids)} autoconf services to draft instead of deleting them")
+                                session.query(Services).filter(Services.id.in_(draftable_ids)).update(
+                                    {Services.is_draft: True, Services.last_update: datetime.now().astimezone()},
+                                    synchronize_session=False,
+                                )
+                                session.query(Custom_configs).filter(Custom_configs.service_id.in_(draftable_ids)).update(
+                                    {Custom_configs.is_draft: True}, synchronize_session=False
+                                )
+                                session.query(Metadata).filter_by(id=1).update(
+                                    {Metadata.custom_configs_changed: True, Metadata.last_custom_configs_change: datetime.now().astimezone()}
+                                )
+                                changed_services = True
+                                if any(config.get(f"{sid}_USE_TEMPLATE", "") for sid in draftable_ids):
+                                    service_template_change = True
+
+                            if hard_delete_ids:
+                                self.logger.debug(f"Removing {len(hard_delete_ids)} services that are no longer in the list")
+                                # Remove services that are no longer in the list
+                                session.query(Services).filter(Services.id.in_(hard_delete_ids)).delete(synchronize_session=False)
+                                session.query(Services_settings).filter(Services_settings.service_id.in_(hard_delete_ids)).delete(synchronize_session=False)
+                                session.query(Custom_configs).filter(Custom_configs.service_id.in_(hard_delete_ids)).delete(synchronize_session=False)
+                                session.query(Jobs_cache).filter(Jobs_cache.service_id.in_(hard_delete_ids)).delete(synchronize_session=False)
+                                session.query(Metadata).filter_by(id=1).update(
+                                    {Metadata.custom_configs_changed: True, Metadata.last_custom_configs_change: datetime.now().astimezone()}
+                                )
+                                changed_services = True
+                                if any(config.get(f"{sid}_USE_TEMPLATE", "") for sid in hard_delete_ids):
+                                    service_template_change = True
+
+                    self.logger.debug("Checking if the drafts have changed")
+                    drafts = {service for service in services if config.pop(f"{service}_IS_DRAFT", "no") == "yes"}
+                    db_drafts = {service.id for service in db_services if service.is_draft}
+
+                    if db_drafts:
+                        missing_drafts = [
+                            service.id
+                            for service in db_services
+                            if (service.method == method or (service.method in ("ui", "api") and method in ("ui", "api")))
+                            and service.id not in drafts
+                            and service.id not in missing_ids
+                        ]
+
+                        if missing_drafts:
+                            self.logger.debug(f"Removing {len(missing_drafts)} drafts that are no longer in the list")
+                            # Update services to remove draft status
+                            session.query(Services).filter(Services.id.in_(missing_drafts)).update({Services.is_draft: False}, synchronize_session=False)
+                            changed_services = True
+
+                    for draft in drafts:
+                        if draft not in db_drafts:
+                            current_time = datetime.now().astimezone()
+                            if draft not in db_ids:
+                                self.logger.debug(f"Adding draft {draft}")
+                                to_put.append(Services(id=draft, method=method, is_draft=True, creation_date=current_time, last_update=current_time))
+                                db_ids[draft] = {"method": method, "is_draft": True}
+                            elif db_ids[draft]["method"] == method or (db_ids[draft]["method"] in ("ui", "api") and method in ("ui", "api")):
+                                self.logger.debug(f"Updating draft {draft}")
+                                to_update.append({"model": Services, "filter": {"id": draft}, "values": {"is_draft": True, "last_update": current_time}})
+                                changed_services = True
+
+                if not skip_service_management and config.get("MULTISITE", "no") == "yes":
                     self.logger.debug("Checking if the multisite settings have changed")
 
                     service_configs = defaultdict(dict)
                     global_config = {}
 
+                    services_set = set(services)
+
                     for key, value in config.items():
                         matched = False
-                        for service in services:
-                            prefix = f"{service}_"
-                            if key.startswith(prefix):
-                                stripped_key = key[len(prefix) :]  # noqa: E203
-                                service_configs[service][stripped_key] = value
+                        underscore_pos = 0
+                        while True:
+                            underscore_pos = key.find("_", underscore_pos)
+                            if underscore_pos == -1:
+                                break
+                            potential_service = key[:underscore_pos]
+                            if potential_service in services_set:
+                                stripped_key = key[underscore_pos + 1 :]  # noqa: E203
+                                service_configs[potential_service][stripped_key] = value
                                 matched = True
                                 break
+                            underscore_pos += 1
                         if not matched:
                             global_config[key] = value
 
                     # Collect necessary data before threading
-                    settings_data = session.query(Settings.id, Settings.default, Settings.plugin_id).all()
-                    settings_dict = {s.id: {"default": self._empty_if_none(s.default), "plugin_id": s.plugin_id} for s in settings_data}
+                    settings_data = session.query(Settings.id, Settings.default, Settings.plugin_id, Settings.type).all()
+                    settings_dict = {s.id: {"default": self._empty_if_none(s.default), "plugin_id": s.plugin_id, "type": s.type} for s in settings_data}
 
                     # Collect existing service settings
                     existing_service_settings = session.query(
-                        Services_settings.service_id, Services_settings.setting_id, Services_settings.suffix, Services_settings.value, Services_settings.method
+                        Services_settings.service_id,
+                        Services_settings.setting_id,
+                        Services_settings.suffix,
+                        Services_settings.value,
+                        Services_settings.file_name,
+                        Services_settings.method,
                     ).all()
                     existing_service_settings_dict = {
-                        (s.service_id, s.setting_id, s.suffix or 0): {"value": self._empty_if_none(s.value), "method": s.method}
+                        (s.service_id, s.setting_id, s.suffix or 0): {
+                            "value": self._empty_if_none(s.value),
+                            "file_name": self._empty_if_none(s.file_name),
+                            "method": s.method,
+                        }
                         for s in existing_service_settings
                     }
 
@@ -1648,6 +2056,12 @@ class Database:
                                     local_changed_services = True
 
                             service_setting = existing_service_settings_dict.get((server_name, key, suffix))
+                            current_file_name = service_setting["file_name"] if service_setting else ""
+                            value_changed = bool(service_setting and service_setting["value"] != value)
+                            should_update_value = (value_changed and self._methods_are_compatible(method, service_setting["method"])) or (
+                                bool(service_setting) and method == "autoconf" and service_setting["method"] != "autoconf"
+                            )
+                            target_file_name, file_name_changed = get_setting_file_name(setting["type"], original_key, value_changed, current_file_name)
 
                             template_setting_default = None
                             if service_template:
@@ -1661,19 +2075,27 @@ class Database:
 
                                 self.logger.debug(f"Adding setting {key} for service {server_name}")
                                 local_changed_plugins.add(setting["plugin_id"])
-                                local_to_put.append(Services_settings(service_id=server_name, setting_id=key, value=value, suffix=suffix, method=method))
+                                local_to_put.append(
+                                    Services_settings(
+                                        service_id=server_name,
+                                        setting_id=key,
+                                        value=value,
+                                        file_name=target_file_name if setting["type"] == "file" else None,
+                                        suffix=suffix,
+                                        method=method,
+                                    )
+                                )
                                 # Update Services.last_update
                                 local_to_update.append(
                                     {"model": Services, "filter": {"id": server_name}, "values": {"last_update": datetime.now().astimezone()}}
                                 )
                                 if key == "SERVER_NAME":
                                     local_changed_services = True
-                            elif (service_setting["value"] != value and self._methods_are_compatible(method, service_setting["method"])) or (
-                                method == "autoconf" and service_setting["method"] != "autoconf"
-                            ):
-                                local_changed_plugins.add(setting["plugin_id"])
+                            elif should_update_value or file_name_changed:
+                                if should_update_value:
+                                    local_changed_plugins.add(setting["plugin_id"])
 
-                                if check_value(key, value, setting, template_setting_default, suffix):
+                                if should_update_value and check_value(key, value, setting, template_setting_default, suffix):
                                     self.logger.debug(f"Removing setting {key} for service {server_name}")
                                     local_to_delete.append(
                                         {"model": Services_settings, "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix}}
@@ -1681,12 +2103,15 @@ class Database:
                                     continue
 
                                 self.logger.debug(f"Updating setting {key} for service {server_name}")
+                                setting_values = {"value": self._empty_if_none(value), "method": method}
+                                if setting["type"] == "file" and (file_name_changed or value_changed):
+                                    setting_values["file_name"] = target_file_name
                                 local_to_update.extend(
                                     [
                                         {
                                             "model": Services_settings,
                                             "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix},
-                                            "values": {"value": self._empty_if_none(value), "method": method},
+                                            "values": setting_values,
                                         },
                                         {"model": Services, "filter": {"id": server_name}, "values": {"last_update": datetime.now().astimezone()}},
                                     ]
@@ -1715,7 +2140,17 @@ class Database:
                                 self.logger.debug(f"Setting {key} does not exist")
                                 continue
 
-                            global_value = session.query(Global_values.value, Global_values.method).filter_by(setting_id=key, suffix=suffix).first()
+                            global_value = (
+                                session.query(Global_values.value, Global_values.file_name, Global_values.method)
+                                .filter_by(setting_id=key, suffix=suffix)
+                                .first()
+                            )
+                            current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
+                            value_changed = bool(global_value and global_value.value != value)
+                            should_update_value = (value_changed and self._methods_are_compatible(method, global_value.method)) or (
+                                bool(global_value) and method == "autoconf" and global_value.method != "autoconf"
+                            )
+                            target_file_name, file_name_changed = get_setting_file_name(setting["type"], original_key, value_changed, current_file_name)
 
                             template_setting_default = None
                             if template:
@@ -1728,23 +2163,33 @@ class Database:
 
                                 self.logger.debug(f"Adding global setting {key}")
                                 local_changed_plugins.add(setting["plugin_id"])
-                                local_to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
-                            elif (global_value.value != value and self._methods_are_compatible(method, global_value.method)) or (
-                                method == "autoconf" and global_value.method != "autoconf"
-                            ):
-                                local_changed_plugins.add(setting["plugin_id"])
+                                local_to_put.append(
+                                    Global_values(
+                                        setting_id=key,
+                                        value=value,
+                                        file_name=target_file_name if setting["type"] == "file" else None,
+                                        suffix=suffix,
+                                        method=method,
+                                    )
+                                )
+                            elif should_update_value or file_name_changed:
+                                if should_update_value:
+                                    local_changed_plugins.add(setting["plugin_id"])
 
-                                if check_value(key, value, setting, template_setting_default, suffix, True):
+                                if should_update_value and check_value(key, value, setting, template_setting_default, suffix, True):
                                     self.logger.debug(f"Removing global setting {key}")
                                     local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
                                     continue
 
                                 self.logger.debug(f"Updating global setting {key}")
+                                setting_values = {"value": self._empty_if_none(value), "method": method}
+                                if setting["type"] == "file" and (file_name_changed or value_changed):
+                                    setting_values["file_name"] = target_file_name
                                 local_to_update.append(
                                     {
                                         "model": Global_values,
                                         "filter": {"setting_id": key, "suffix": suffix},
-                                        "values": {"value": self._empty_if_none(value), "method": method},
+                                        "values": setting_values,
                                     }
                                 )
 
@@ -1780,44 +2225,56 @@ class Database:
                     # Non-multisite configuration
                     self.logger.debug("Checking if non-multisite settings have changed")
 
-                    server_name = config.get("SERVER_NAME", None)
-                    if template and server_name is None:
-                        server_name = (
-                            session.query(Template_settings)
-                            .with_entities(Template_settings.value)
-                            .filter_by(template_id=template, setting_id="SERVER_NAME")
-                            .first()
-                        )
-
-                    if server_name is None or server_name:
-                        server_name = server_name or "www.example.com"
-                        first_server = server_name.split(" ")[0]
-
-                        if not session.query(Services).with_entities(Services.id).filter_by(id=first_server).first():
-                            self.logger.debug(f"Adding service {first_server}")
-                            current_time = datetime.now().astimezone()
-                            to_put.append(
-                                Services(id=first_server, method=method, is_draft=first_server in drafts, creation_date=current_time, last_update=current_time)
+                    if not skip_service_management:
+                        server_name = config.get("SERVER_NAME", None)
+                        if template and server_name is None:
+                            server_name = (
+                                session.query(Template_settings)
+                                .with_entities(Template_settings.value)
+                                .filter_by(template_id=template, setting_id="SERVER_NAME")
+                                .first()
                             )
-                            changed_services = True
 
-                    for key, value in config.items():
+                        if server_name is None or server_name:
+                            server_name = server_name or "www.example.com"
+                            first_server = server_name.split(" ")[0]
+
+                            if not session.query(Services).with_entities(Services.id).filter_by(id=first_server).first():
+                                self.logger.debug(f"Adding service {first_server}")
+                                current_time = datetime.now().astimezone()
+                                to_put.append(
+                                    Services(
+                                        id=first_server,
+                                        method=method,
+                                        is_draft=first_server in drafts,
+                                        creation_date=current_time,
+                                        last_update=current_time,
+                                    )
+                                )
+                                changed_services = True
+
+                    for original_key, value in config.items():
+                        key = deepcopy(original_key)
                         suffix = 0
                         if self.SUFFIX_RX.search(key):
                             suffix = int(key.split("_")[-1])
                             key = key[: -len(str(suffix)) - 1]
 
-                        setting = session.query(Settings).with_entities(Settings.default, Settings.plugin_id).filter_by(id=key).first()
+                        setting = session.query(Settings).with_entities(Settings.default, Settings.plugin_id, Settings.type).filter_by(id=key).first()
 
                         if not setting:
                             continue
 
                         global_value = (
                             session.query(Global_values)
-                            .with_entities(Global_values.value, Global_values.method)
+                            .with_entities(Global_values.value, Global_values.file_name, Global_values.method)
                             .filter_by(setting_id=key, suffix=suffix)
                             .first()
                         )
+                        current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
+                        value_changed = bool(global_value and global_value.value != value)
+                        should_update_value = bool(global_value and self._methods_are_compatible(method, global_value.method) and value_changed)
+                        target_file_name, file_name_changed = get_setting_file_name(setting.type, original_key, value_changed, current_file_name)
 
                         template_setting = None
                         if template:
@@ -1835,21 +2292,33 @@ class Database:
 
                             self.logger.debug(f"Adding global setting {key}")
                             changed_plugins.add(setting.plugin_id)
-                            to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
-                        elif self._methods_are_compatible(method, global_value.method) and global_value.value != value:
-                            changed_plugins.add(setting.plugin_id)
+                            to_put.append(
+                                Global_values(
+                                    setting_id=key,
+                                    value=value,
+                                    file_name=target_file_name if setting.type == "file" else None,
+                                    suffix=suffix,
+                                    method=method,
+                                )
+                            )
+                        elif should_update_value or file_name_changed:
+                            if should_update_value:
+                                changed_plugins.add(setting.plugin_id)
 
-                            if value == (template_setting.default if template_setting is not None else setting.default):
+                            if should_update_value and value == (template_setting.default if template_setting is not None else setting.default):
                                 self.logger.debug(f"Removing global setting {key}")
                                 to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
                                 continue
 
                             self.logger.debug(f"Updating global setting {key}")
+                            setting_values = {"value": self._empty_if_none(value), "method": method}
+                            if setting.type == "file" and (file_name_changed or value_changed):
+                                setting_values["file_name"] = target_file_name
                             to_update.append(
                                 {
                                     "model": Global_values,
                                     "filter": {"setting_id": key, "suffix": suffix},
-                                    "values": {"value": self._empty_if_none(value), "method": method},
+                                    "values": setting_values,
                                 }
                             )
 
@@ -1915,21 +2384,51 @@ class Database:
         ],
         method: str,
         changed: Optional[bool] = True,
+        *,
+        disable_cleanup: bool = False,
     ) -> str:
         """Save the custom configs in the database"""
         message = ""
+        # Materialize once: callers may pass dict_values or a generator, and the
+        # data-loss guard below needs to count items before the for-loop consumes them.
+        custom_configs = [*custom_configs]
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            # Delete all the old config
-            session.query(Custom_configs).filter(Custom_configs.method == method).delete()
+            # Only meaningful for the autoconf method.
+            disable_cleanup = disable_cleanup and method == "autoconf"
+
+            if not disable_cleanup:
+                # Data-loss guard (mirror of the save_config guards above): refuse the
+                # cleanup when a ui/api save_custom_configs call would wipe every
+                # method-owned custom config row while supplying nothing to replace
+                # them. An empty incoming list with existing rows almost always means
+                # the caller built an incomplete payload (route exception, form rebuild
+                # race, missing in-memory state). Genuine "remove all custom configs"
+                # actions delete rows individually through the UI/API, so by the time
+                # an empty payload reaches save_custom_configs there is nothing left
+                # to wipe and this guard is a no-op.
+                if method in ("ui", "api") and not custom_configs:
+                    existing_count = session.query(Custom_configs).filter(Custom_configs.method == method).count()
+                    if existing_count > 0:
+                        self.logger.warning(
+                            f"Refusing save_custom_configs: incoming method={method!r} payload is empty while {existing_count} "
+                            f"{method}-method custom config row(s) exist in the database. This indicates the caller submitted "
+                            f"an incomplete payload (e.g. a service edit that lost its in-memory custom-config map). Aborting "
+                            f"save_custom_configs to prevent data loss."
+                        )
+                        return message
+                # Delete all the old config
+                session.query(Custom_configs).filter(Custom_configs.method == method).delete()
+
+            expected_keys: Set[Tuple[str, str, Optional[str]]] = set()
 
             to_put = []
             endl = "\n"
             for custom_config in custom_configs:
                 if "exploded" in custom_config:
-                    config = {"data": custom_config["value"], "method": method}
+                    config = {"data": custom_config["value"], "method": method, "is_draft": bool(custom_config.get("is_draft", False))}
 
                     if custom_config["exploded"][0]:
                         if not session.query(Services).with_entities(Services.id).filter_by(id=custom_config["exploded"][0]).first():
@@ -1953,6 +2452,7 @@ class Database:
                     custom_config = config
 
                 custom_config["type"] = custom_config["type"].strip().replace("-", "_").lower()  # type: ignore
+                custom_config["is_draft"] = bool(custom_config.get("is_draft", False))
                 custom_config["data"] = custom_config["data"].encode("utf-8") if isinstance(custom_config["data"], str) else custom_config["data"]
                 custom_config["checksum"] = custom_config.get("checksum", bytes_hash(custom_config["data"], algorithm="sha256"))  # type: ignore
 
@@ -1962,15 +2462,37 @@ class Database:
                     "name": custom_config["name"],
                     "service_id": service_id,
                 }
+                expected_keys.add((custom_config["type"], custom_config["name"], service_id))
 
-                custom_conf = session.query(Custom_configs).with_entities(Custom_configs.checksum, Custom_configs.method).filter_by(**filters).first()
+                custom_conf = session.query(Custom_configs).filter_by(**filters).first()
 
                 if not custom_conf:
                     to_put.append(Custom_configs(**custom_config))
-                elif custom_config["checksum"] != custom_conf.checksum and self._methods_are_compatible(method, custom_conf.method):
-                    custom_conf.data = custom_config["data"]
-                    custom_conf.checksum = custom_config["checksum"]
-                    custom_conf.method = method
+                elif method == "manual" and custom_conf.method in {"manual", "ui", "api"}:
+                    should_update_data = custom_config["checksum"] != custom_conf.checksum
+                    if should_update_data:
+                        custom_conf.data = custom_config["data"]
+                        custom_conf.checksum = custom_config["checksum"]
+                    if custom_conf.is_draft != custom_config["is_draft"] or should_update_data:
+                        custom_conf.is_draft = custom_config["is_draft"]
+                elif self._methods_are_compatible(method, custom_conf.method):
+                    should_update_data = custom_config["checksum"] != custom_conf.checksum
+                    if should_update_data:
+                        custom_conf.data = custom_config["data"]
+                        custom_conf.checksum = custom_config["checksum"]
+                    if custom_conf.is_draft != custom_config["is_draft"] or should_update_data:
+                        custom_conf.is_draft = custom_config["is_draft"]
+                        custom_conf.method = method
+                    custom_conf.is_draft = custom_config["is_draft"]
+
+            if disable_cleanup:
+                # Mark autoconf custom configs that are no longer emitted by the orchestrator as draft
+                # so they survive the removal and follow the service they belong to.
+                orphan_configs = session.query(Custom_configs).filter(Custom_configs.method == "autoconf", Custom_configs.is_draft.is_(False)).all()
+                for orphan in orphan_configs:
+                    if (orphan.type, orphan.name, orphan.service_id) not in expected_keys:
+                        orphan.is_draft = True
+
             if changed:
                 with suppress(ProgrammingError, OperationalError):
                     metadata = session.query(Metadata).get(1)
@@ -1986,6 +2508,7 @@ class Database:
 
         return message
 
+    @retry_on_transient_db_errors
     def get_non_default_settings(
         self,
         global_only: bool = False,
@@ -2015,9 +2538,11 @@ class Database:
                 db_select(
                     Settings.id.label("setting_id"),
                     Settings.context,
+                    Settings.type,
                     Settings.default,
                     Settings.multiple,
                     Global_values.value,
+                    Global_values.file_name,
                     Global_values.suffix,
                     Global_values.method,
                 )
@@ -2035,6 +2560,7 @@ class Database:
                 setting_id = global_value.setting_id + (f"_{global_value.suffix}" if global_value.multiple and global_value.suffix > 0 else "")
                 config[setting_id] = {
                     "value": self._empty_if_none(global_value.value),
+                    "file_name": self._empty_if_none(global_value.file_name) if global_value.type == "file" else "",
                     "global": True,
                     "method": global_value.method,
                     "default": self._empty_if_none(global_value.default),
@@ -2052,21 +2578,33 @@ class Database:
                 services = services.filter_by(is_draft=False)
 
             if not global_only and is_multisite:
-                servers = ""
+                # Build list of service IDs and their draft status efficiently
+                service_list = []
+                is_draft_default = self._empty_if_none(config.get("IS_DRAFT", {"value": "no"})["value"])
                 for db_service in services:
                     if service and db_service.id != service:
                         continue
-                    for key in multisite:
-                        config[f"{db_service.id}_{key}"] = config[key]
+                    service_list.append((db_service.id, db_service.is_draft))
                     config[f"{db_service.id}_IS_DRAFT"] = {
                         "value": "yes" if db_service.is_draft else "no",
                         "global": False,
                         "method": "default",
-                        "default": self._empty_if_none(config.get("IS_DRAFT", {"value": "no"})["value"]),
+                        "default": is_draft_default,
                         "template": None,
                     }
-                    servers += f"{db_service.id} "
-                servers = servers.strip()
+
+                servers = " ".join(s[0] for s in service_list)
+
+                # Pre-build multisite defaults mapping for efficient lookup
+                # Share the same dictionary objects instead of creating copies
+                multisite_defaults = {key: config[key] for key in multisite if key in config}
+
+                # Populate service-specific entries using shared references
+                # This is still O(services * multisite_settings) but avoids deepcopy overhead
+                for service_id, _ in service_list:
+                    for key, value in multisite_defaults.items():
+                        # Keep already-materialized service values (notably *_IS_DRAFT from bw_services).
+                        config.setdefault(f"{service_id}_{key}", value)
 
                 # Define the join operation
                 j = join(Services, Services_settings, Services.id == Services_settings.service_id)
@@ -2077,9 +2615,11 @@ class Database:
                     db_select(
                         Services.id.label("service_id"),
                         Settings.id.label("setting_id"),
+                        Settings.type,
                         Settings.default,
                         Settings.multiple,
                         Services_settings.value,
+                        Services_settings.file_name,
                         Services_settings.suffix,
                         Services_settings.method,
                     )
@@ -2102,12 +2642,13 @@ class Database:
                     value = self._empty_if_none(result.value)
 
                     if result.setting_id == "SERVER_NAME" and search(r"^" + escape(result.service_id) + r"( |$)", value) is None:
-                        split = set(value.split(" "))
+                        split = set(value.split())
                         split.discard(result.service_id)
                         value = result.service_id + " " + " ".join(split)
 
                     config[f"{result.service_id}_{result.setting_id}" + (f"_{result.suffix}" if result.multiple and result.suffix else "")] = {
                         "value": self._empty_if_none(value),
+                        "file_name": self._empty_if_none(result.file_name) if result.type == "file" else "",
                         "global": False,
                         "method": result.method,
                         "default": self._empty_if_none(config.get(result.setting_id, {"value": self._empty_if_none(result.default)})["value"]),
@@ -2125,7 +2666,8 @@ class Database:
             }
 
             if service:
-                for key in config.copy().keys():
+                # Use list() to avoid modifying dict during iteration, more efficient than copy()
+                for key in list(config.keys()):
                     if (original_config is None or key not in ("SERVER_NAME", "MULTISITE", "USE_TEMPLATE")) and not key.startswith(f"{service}_"):
                         del config[key]
                         continue
@@ -2133,11 +2675,13 @@ class Database:
                         config[key.replace(f"{service}_", "")] = config.pop(key)
 
             if not methods:
-                for key, value in config.copy().items():
-                    config[key] = value["value"]
+                # Avoid full dictionary copy - iterate over keys and update in place
+                for key in list(config.keys()):
+                    config[key] = config[key]["value"]
 
             return config
 
+    @retry_on_transient_db_errors
     def get_config(
         self,
         global_only: bool = False,
@@ -2222,37 +2766,58 @@ class Database:
                     }
 
             if not global_only and config["MULTISITE"]["value"] == "yes":
-                for service_id in config["SERVER_NAME"]["value"].split(" "):
+                server_names = config["SERVER_NAME"]["value"].split()
+
+                # Collect all unique templates used by services
+                service_templates = {}
+                for service_id in server_names:
                     service_template_used = config.get(f"{service_id}_USE_TEMPLATE", {"value": self._empty_if_none(template_used)})["value"]
                     if service_template_used:
                         templates[service_id] = service_template_used
+                        service_templates.setdefault(service_template_used, []).append(service_id)
 
-                        query = (
-                            session.query(Template_settings)
-                            .with_entities(Template_settings.setting_id, Template_settings.default, Template_settings.suffix)
-                            .filter_by(template_id=service_template_used)
-                            .order_by(Template_settings.order)
-                        )
+                # Batch query: fetch all template settings for all used templates at once
+                if service_templates:
+                    template_ids = list(service_templates.keys())
+                    query = (
+                        session.query(Template_settings)
+                        .with_entities(Template_settings.template_id, Template_settings.setting_id, Template_settings.default, Template_settings.suffix)
+                        .filter(Template_settings.template_id.in_(template_ids))
+                        .order_by(Template_settings.order)
+                    )
 
-                        if filtered_settings:
-                            query = query.filter(Template_settings.setting_id.in_(filtered_settings))
+                    if filtered_settings:
+                        query = query.filter(Template_settings.setting_id.in_(filtered_settings))
 
-                        for setting in query:
-                            key = f"{service_id}_{setting.setting_id}" + (f"_{setting.suffix}" if setting.suffix > 0 else "")
-                            if key in config and config[key]["method"] != "default" and not config[key]["global"]:
-                                continue
+                    # Group template settings by template_id for efficient lookup
+                    template_settings_map = {}
+                    for setting in query:
+                        template_settings_map.setdefault(setting.template_id, []).append(setting)
 
-                            config[key] = {
-                                "value": self._empty_if_none(setting.default),
-                                "global": False,
-                                "method": "default",
-                                "default": self._empty_if_none(setting.default),
-                                "template": service_template_used,
-                            }
+                    # Apply template settings to each service that uses them
+                    for tmpl_id, service_ids in service_templates.items():
+                        tmpl_settings = template_settings_map.get(tmpl_id, [])
+                        for service_id in service_ids:
+                            for setting in tmpl_settings:
+                                key = f"{service_id}_{setting.setting_id}" + (f"_{setting.suffix}" if setting.suffix > 0 else "")
+                                if key in config and config[key]["method"] != "default" and not config[key]["global"]:
+                                    continue
+
+                                config[key] = {
+                                    "value": self._empty_if_none(setting.default),
+                                    "global": False,
+                                    "method": "default",
+                                    "default": self._empty_if_none(setting.default),
+                                    "template": tmpl_id,
+                                }
 
         multiple = {}
-        services = config["SERVER_NAME"]["value"].split(" ")
-        for key, data in config.copy().items():
+        services = config["SERVER_NAME"]["value"].split()
+        services_set = set(services)  # O(1) lookup for service prefix matching
+
+        # Process config items - use list(items()) which is more memory efficient than copy().items()
+        # for large dicts since it creates a list of tuples, not a full dict copy
+        for key, data in list(config.items()):
             new_value = None
             if service:
                 data = config.pop(key)
@@ -2269,11 +2834,18 @@ class Database:
                 window = "global"
                 matched_group = multiple_groups.get(match.group("setting"), None)
                 if matched_group is None:
-                    for db_service in services:
-                        if key.startswith(f"{db_service}_"):
-                            window = db_service
-                            matched_group = multiple_groups.get(match.group("setting").replace(f"{db_service}_", ""), None)
+                    # Use set lookup and underscore scanning instead of O(n) service iteration
+                    underscore_pos = 0
+                    while True:
+                        underscore_pos = key.find("_", underscore_pos)
+                        if underscore_pos == -1:
                             break
+                        potential_service = key[:underscore_pos]
+                        if potential_service in services_set:
+                            window = potential_service
+                            matched_group = multiple_groups.get(match.group("setting").replace(f"{potential_service}_", ""), None)
+                            break
+                        underscore_pos += 1
 
                 if matched_group is not None:
                     multiple.setdefault(matched_group, {}).setdefault(window, set()).add(int(match.group("suffix")))
@@ -2327,12 +2899,27 @@ class Database:
         db_config = self.get_non_default_settings(with_drafts=with_drafts, filtered_settings=("USE_TEMPLATE",))
 
         with self._db_session() as session:
-            entities = [Custom_configs.service_id, Custom_configs.type, Custom_configs.name, Custom_configs.checksum, Custom_configs.method]
+            services = session.query(Services).with_entities(Services.id, Services.is_draft).all()
+            allowed_services = {srv.id for srv in services if with_drafts or not srv.is_draft}
+
+            entities = [
+                Custom_configs.service_id,
+                Custom_configs.type,
+                Custom_configs.name,
+                Custom_configs.checksum,
+                Custom_configs.method,
+                Custom_configs.is_draft,
+            ]
             if with_data:
                 entities.append(Custom_configs.data)
 
             custom_configs = []
             for custom_config in session.query(Custom_configs).with_entities(*entities):
+                if custom_config.service_id and custom_config.service_id not in allowed_services:
+                    continue
+                if custom_config.is_draft and not with_drafts:
+                    continue
+
                 data = {
                     "service_id": custom_config.service_id,
                     "type": custom_config.type,
@@ -2340,6 +2927,7 @@ class Database:
                     "checksum": custom_config.checksum,
                     "method": custom_config.method,
                     "template": None,
+                    "is_draft": custom_config.is_draft,
                 }
                 if with_data:
                     data["data"] = custom_config.data
@@ -2359,9 +2947,9 @@ class Database:
             if with_data:
                 template_entities.append(Template_custom_configs.data)
 
-            for service in session.query(Services).with_entities(Services.id).all():
+            for service_id in allowed_services:
                 for key, value in db_config.items():
-                    if key.startswith(f"{service.id}_"):
+                    if key.startswith(f"{service_id}_"):
                         for template_config in (
                             session.query(Template_custom_configs)
                             .with_entities(*template_entities)
@@ -2370,18 +2958,19 @@ class Database:
                         ):
                             config_type = template_config.type.replace("_", "-").replace(".conf", "").strip()
                             if not any(
-                                custom_config["service_id"] == service.id
+                                custom_config["service_id"] == service_id
                                 and custom_config["type"] == config_type
                                 and custom_config["name"] == template_config.name
                                 for custom_config in custom_configs
                             ):
                                 custom_config = {
-                                    "service_id": service.id,
+                                    "service_id": service_id,
                                     "type": config_type,
                                     "name": template_config.name,
                                     "checksum": template_config.checksum,
                                     "method": "default",
                                     "template": value,
+                                    "is_draft": False,
                                 }
                                 if with_data:
                                     custom_config["data"] = template_config.data
@@ -2400,7 +2989,14 @@ class Database:
         """Get a custom config from the database"""
         config_type = config_type.strip().replace("-", "_").lower()
         with self._db_session() as session:
-            entities = [Custom_configs.service_id, Custom_configs.type, Custom_configs.name, Custom_configs.checksum, Custom_configs.method]
+            entities = [
+                Custom_configs.service_id,
+                Custom_configs.type,
+                Custom_configs.name,
+                Custom_configs.checksum,
+                Custom_configs.method,
+                Custom_configs.is_draft,
+            ]
             if with_data:
                 entities.append(Custom_configs.data)
 
@@ -2424,6 +3020,7 @@ class Database:
                                 "checksum": template_config.checksum,
                                 "method": "default",
                                 "template": service_config.get(f"{service_id}_USE_TEMPLATE"),
+                                "is_draft": False,
                             }
                             if with_data:
                                 custom_config["data"] = template_config.data
@@ -2437,11 +3034,26 @@ class Database:
             "checksum": db_config.checksum,
             "method": db_config.method,
             "template": None,
+            "is_draft": getattr(db_config, "is_draft", False),
         }
         if with_data:
             custom_config["data"] = db_config.data
 
         return custom_config
+
+    def get_custom_config_compatibility_error(self, config_type: str, *, service_id: Optional[str] = None, with_drafts: bool = True) -> str:
+        """Return a validation error when a custom config is incompatible with current global settings."""
+        normalized_type = config_type.strip().replace("-", "_").lower()
+        if normalized_type != "modsec_crs" or service_id in (None, "", "global"):
+            return ""
+
+        use_global_crs = self.get_config(global_only=True, methods=False, with_drafts=with_drafts, filtered_settings=("USE_MODSECURITY_GLOBAL_CRS",)).get(
+            "USE_MODSECURITY_GLOBAL_CRS", "no"
+        )
+        if isinstance(use_global_crs, dict):
+            use_global_crs = use_global_crs.get("value", "no")
+
+        return self.GLOBAL_CRS_SERVICE_SCOPED_MODSEC_CRS_ERROR if use_global_crs == "yes" else ""
 
     def upsert_custom_config(self, config_type: str, name: str, config: Dict[str, Any], *, service_id: Optional[str] = None, new: bool = False) -> str:
         """Update or insert a custom config in the database"""
@@ -2459,6 +3071,7 @@ class Database:
 
             data = config["data"].encode("utf-8") if isinstance(config["data"], str) else config["data"]
             checksum = config.get("checksum", bytes_hash(data, algorithm="sha256"))
+            is_draft = bool(config.get("is_draft", False))
 
             if not custom_config:
                 session.add(
@@ -2469,6 +3082,7 @@ class Database:
                         data=data,
                         checksum=checksum,
                         method=config["method"],
+                        is_draft=is_draft,
                     )
                 )
             else:
@@ -2477,6 +3091,7 @@ class Database:
                 custom_config.service_id = config.get("service_id")
                 custom_config.data = data
                 custom_config.checksum = checksum
+                custom_config.is_draft = is_draft
                 for key in ("type", "name", "method"):
                     if key in config:
                         setattr(custom_config, key, config[key])
@@ -2498,7 +3113,7 @@ class Database:
         """Get the services' configs from the database"""
         services = []
         config = self.get_config(methods=methods, with_drafts=with_drafts)
-        service_names = config["SERVER_NAME"]["value"].split(" ") if methods else config["SERVER_NAME"].split(" ")
+        service_names = config["SERVER_NAME"]["value"].split() if methods else config["SERVER_NAME"].split()
         for service in service_names:
             service_settings = []
             tmp_config = config.copy()
@@ -2527,33 +3142,82 @@ class Database:
 
         return services
 
+    @retry_on_transient_db_errors
     def get_services(self, *, with_drafts: bool = False) -> List[Dict[str, Any]]:
         """Get the services from the database"""
         services = []
         with self._db_session() as session:
-            db_services = (
-                session.query(Services).with_entities(Services.id, Services.method, Services.is_draft, Services.creation_date, Services.last_update).all()
+            # Fetch all services with their USE_TEMPLATE and SECURITY_MODE settings in a single optimized query
+            # This avoids N+1 query problem when loading many services
+            template_alias = aliased(Services_settings)
+            security_mode_alias = aliased(Services_settings)
+
+            query = (
+                session.query(Services)
+                .outerjoin(template_alias, (Services.id == template_alias.service_id) & (template_alias.setting_id == "USE_TEMPLATE"))
+                .outerjoin(security_mode_alias, (Services.id == security_mode_alias.service_id) & (security_mode_alias.setting_id == "SECURITY_MODE"))
+                .with_entities(
+                    Services.id,
+                    Services.method,
+                    Services.is_draft,
+                    Services.creation_date,
+                    Services.last_update,
+                    template_alias.value.label("template"),
+                    security_mode_alias.value.label("security_mode"),
+                )
             )
 
+            if not with_drafts:
+                query = query.filter(Services.is_draft == False)  # noqa: E712
+
+            db_services = query.all()
+
         for service in db_services:
-            if with_drafts or not service.is_draft:
-                service_settings = self.get_non_default_settings(
-                    with_drafts=with_drafts,
-                    filtered_settings=("USE_TEMPLATE",),
-                    service=service.id,
-                )
-                services.append(
-                    {
-                        "id": service.id,
-                        "method": service.method,
-                        "is_draft": service.is_draft,
-                        "creation_date": service.creation_date,
-                        "last_update": service.last_update,
-                        "template": service_settings.get("USE_TEMPLATE", ""),
-                    }
-                )
+            services.append(
+                {
+                    "id": service.id,
+                    "method": service.method,
+                    "is_draft": service.is_draft,
+                    "creation_date": service.creation_date,
+                    "last_update": service.last_update,
+                    "template": service.template or "",
+                    "security_mode": service.security_mode or "block",
+                }
+            )
 
         return services
+
+    @retry_on_transient_db_errors
+    def delete_services(self, service_ids: List[str]) -> str:
+        """Hard-delete services and all their related rows (settings, custom configs, job caches).
+
+        Bypasses the method-based protection in ``save_config`` and is intended for callers
+        that have already authorised the deletion (e.g. the UI deleting a drafted autoconf
+        service). Returns an empty string on success, or an error message.
+        """
+        if not service_ids:
+            return ""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            session.query(Services_settings).filter(Services_settings.service_id.in_(service_ids)).delete(synchronize_session=False)
+            session.query(Custom_configs).filter(Custom_configs.service_id.in_(service_ids)).delete(synchronize_session=False)
+            session.query(Jobs_cache).filter(Jobs_cache.service_id.in_(service_ids)).delete(synchronize_session=False)
+            session.query(Services).filter(Services.id.in_(service_ids)).delete(synchronize_session=False)
+
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).get(1)
+                if metadata is not None:
+                    now = datetime.now().astimezone()
+                    metadata.custom_configs_changed = True
+                    metadata.last_custom_configs_change = now
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+        return ""
 
     def add_job_run(self, job_name: str, success: bool, start_date: datetime, end_date: Optional[datetime] = None) -> str:
         """Add a job run."""
@@ -2652,9 +3316,13 @@ class Database:
                     )
                 )
             else:
-                cache.data = data
-                cache.last_update = datetime.now().astimezone()
-                cache.checksum = checksum
+                if checksum is None or cache.checksum != checksum:
+                    cache.data = data
+                    cache.last_update = datetime.now().astimezone()
+                    cache.checksum = checksum
+                else:
+                    # Data unchanged — refresh timestamp to reset expiry window
+                    cache.last_update = datetime.now().astimezone()
 
             try:
                 session.commit()
@@ -2679,6 +3347,81 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
+            def _add_ordered(items: List[Any]) -> None:
+                if not items:
+                    return
+
+                buckets = {
+                    "plugins": [],
+                    "settings": [],
+                    "selects": [],
+                    "multiselects": [],
+                    "templates": [],
+                    "template_steps": [],
+                    "template_settings": [],
+                    "template_configs": [],
+                    "jobs": [],
+                    "plugin_pages": [],
+                    "cli_commands": [],
+                    "other": [],
+                }
+
+                for item in items:
+                    if isinstance(item, Plugins):
+                        buckets["plugins"].append(item)
+                    elif isinstance(item, Settings):
+                        buckets["settings"].append(item)
+                    elif isinstance(item, Selects):
+                        buckets["selects"].append(item)
+                    elif isinstance(item, Multiselects):
+                        buckets["multiselects"].append(item)
+                    elif isinstance(item, Templates):
+                        buckets["templates"].append(item)
+                    elif isinstance(item, Template_steps):
+                        buckets["template_steps"].append(item)
+                    elif isinstance(item, Template_settings):
+                        buckets["template_settings"].append(item)
+                    elif isinstance(item, Template_custom_configs):
+                        buckets["template_configs"].append(item)
+                    elif isinstance(item, Jobs):
+                        buckets["jobs"].append(item)
+                    elif isinstance(item, Plugin_pages):
+                        buckets["plugin_pages"].append(item)
+                    elif isinstance(item, Bw_cli_commands):
+                        buckets["cli_commands"].append(item)
+                    else:
+                        buckets["other"].append(item)
+
+                if buckets["plugins"]:
+                    session.add_all(buckets["plugins"])
+                if buckets["settings"]:
+                    session.add_all(buckets["settings"])
+                if buckets["plugins"] or buckets["settings"]:
+                    session.flush()
+
+                if buckets["selects"]:
+                    session.add_all(buckets["selects"])
+                if buckets["multiselects"]:
+                    session.add_all(buckets["multiselects"])
+
+                if buckets["templates"]:
+                    session.add_all(buckets["templates"])
+                if buckets["template_steps"]:
+                    session.add_all(buckets["template_steps"])
+                if buckets["template_settings"]:
+                    session.add_all(buckets["template_settings"])
+                if buckets["template_configs"]:
+                    session.add_all(buckets["template_configs"])
+
+                if buckets["jobs"]:
+                    session.add_all(buckets["jobs"])
+                if buckets["plugin_pages"]:
+                    session.add_all(buckets["plugin_pages"])
+                if buckets["cli_commands"]:
+                    session.add_all(buckets["cli_commands"])
+                if buckets["other"]:
+                    session.add_all(buckets["other"])
+
             db_plugins = session.query(Plugins).with_entities(Plugins.id).filter_by(type=_type).all()
 
             db_ids = []
@@ -2688,6 +3431,25 @@ class Database:
                 missing_ids = [plugin for plugin in db_ids if plugin not in ids]
 
                 if missing_ids:
+                    # Data-loss guard: refuse the destructive plugin-wide cascade (Settings +
+                    # Global_values + Services_settings + Jobs + Templates + Plugin_pages) when
+                    # the incoming plugins list is entirely empty. An empty list almost always
+                    # signals a transient failure at the caller — a filesystem glob race during
+                    # `check_plugin_changes`, a read-only database window that returned no data,
+                    # a download job that failed after a `clean_pro_plugins` call — rather than a
+                    # legitimate mass-uninstall. Callers that genuinely want to wipe everything
+                    # should use `only_clear_metadata=True`, which is the explicit clean-up path
+                    # and is not affected by this guard.
+                    if not only_clear_metadata and not ids:
+                        self.logger.warning(
+                            f"Refusing to cascade-delete {len(missing_ids)} {_type} plugin(s) via "
+                            f"delete_missing=True because the incoming plugins list is empty. "
+                            f"Aborting update_external_plugins to prevent catastrophic data loss. "
+                            f"Use only_clear_metadata=True for explicit wipe operations. "
+                            f"missing_ids={sorted(missing_ids)}"
+                        )
+                        return ""
+
                     changes = True
                     # Remove plugins that are no longer in the list
                     if not only_clear_metadata:
@@ -2715,10 +3477,11 @@ class Database:
                     else:
                         session.query(Plugins).filter(Plugins.id.in_(missing_ids)).update({Plugins.data: None, Plugins.checksum: None})
 
-                    try:
-                        session.commit()
-                    except BaseException as e:
-                        return str(e)
+                    if per_plugin_commit:
+                        try:
+                            session.commit()
+                        except BaseException as e:
+                            return str(e)
 
             db_settings = [setting.id for setting in session.query(Settings).with_entities(Settings.id)]
 
@@ -2790,14 +3553,37 @@ class Database:
                     missing_ids = [setting for setting in db_ids if setting not in setting_ids]
 
                     if missing_ids:
-                        changes = True
-                        # Remove settings that are no longer in the list
-                        session.query(Settings).filter(Settings.id.in_(missing_ids)).delete()
-                        session.query(Selects).filter(Selects.setting_id.in_(missing_ids)).delete()
-                        session.query(Multiselects).filter(Multiselects.setting_id.in_(missing_ids)).delete()
-                        session.query(Services_settings).filter(Services_settings.setting_id.in_(missing_ids)).delete()
-                        session.query(Global_values).filter(Global_values.setting_id.in_(missing_ids)).delete()
-                        session.query(Template_settings).filter(Template_settings.setting_id.in_(missing_ids)).delete()
+                        # Data-loss guard: same-content reinstalls must never wipe user-set values.
+                        # We detect them by comparing the freshly-computed plugin checksum against
+                        # the one currently stored in the database. Identical checksums mean the
+                        # plugin archive is byte-for-byte the same as what we already have — i.e. a
+                        # spurious re-ingest (non-deterministic tar false positive, idempotent
+                        # re-upload, download-plugins re-run, etc.). A genuine plugin update always
+                        # changes the archive bytes, which flips the checksum and lets the cleanup
+                        # proceed to prune settings that have been truly removed from plugin.json.
+                        # The check is method-agnostic on purpose: checksum equality is a stronger
+                        # signal than any caller-supplied method/version string.
+                        incoming_checksum = plugin.get("checksum")
+                        db_checksum = db_plugin.checksum
+                        preserve_missing = bool(incoming_checksum) and bool(db_checksum) and incoming_checksum == db_checksum
+
+                        if preserve_missing:
+                            missing_preview = sorted(missing_ids)[:10]
+                            overflow = f" ... (+{len(missing_ids) - 10} more)" if len(missing_ids) > 10 else ""
+                            self.logger.info(
+                                f"Plugin {plugin['id']!r} re-ingested with an identical checksum; "
+                                f"preserving {len(missing_ids)} existing setting(s) to avoid data loss "
+                                f"(missing from plugin.json: {missing_preview}{overflow})"
+                            )
+                        else:
+                            changes = True
+                            # Remove settings that are no longer in the list
+                            session.query(Settings).filter(Settings.id.in_(missing_ids)).delete()
+                            session.query(Selects).filter(Selects.setting_id.in_(missing_ids)).delete()
+                            session.query(Multiselects).filter(Multiselects.setting_id.in_(missing_ids)).delete()
+                            session.query(Services_settings).filter(Services_settings.setting_id.in_(missing_ids)).delete()
+                            session.query(Global_values).filter(Global_values.setting_id.in_(missing_ids)).delete()
+                            session.query(Template_settings).filter(Template_settings.setting_id.in_(missing_ids)).delete()
 
                     order = 0
                     plugin_settings = set()
@@ -2816,6 +3602,8 @@ class Database:
                                 Settings.regex,
                                 Settings.type,
                                 Settings.multiple,
+                                Settings.separator,
+                                Settings.accept,
                                 Settings.order,
                             )
                             .filter_by(id=setting)
@@ -2866,6 +3654,12 @@ class Database:
 
                             if value.get("multiple") != db_setting.multiple:
                                 updates[Settings.multiple] = value.get("multiple")
+
+                            if value.get("separator") != db_setting.separator:
+                                updates[Settings.separator] = value.get("separator")
+
+                            if value.get("accept") != db_setting.accept:
+                                updates[Settings.accept] = value.get("accept")
 
                             if order != db_setting.order:
                                 updates[Settings.order] = order
@@ -2987,12 +3781,14 @@ class Database:
 
                     if path_ui.is_dir():
                         remove = True
-                        with BytesIO() as plugin_page_content:
-                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
-                            plugin_page_content.seek(0)
+                        try:
+                            plugin_page_content = create_plugin_tar_gz(path_ui)
                             checksum = bytes_hash(plugin_page_content, algorithm="sha256")
                             content = plugin_page_content.getvalue()
+                        except (FileNotFoundError, OSError) as e:
+                            self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
+                            remove = False
+                            continue
 
                         if not db_plugin_page:
                             changes = True
@@ -3326,7 +4122,7 @@ class Database:
                     try:
                         if per_plugin_commit:
                             if local_to_put:
-                                session.add_all(local_to_put)
+                                _add_ordered(local_to_put)
                             # Commit also captures any .update() / .delete() executed above.
                             session.commit()
                         else:
@@ -3408,13 +4204,12 @@ class Database:
                 if page:
                     path_ui = plugin_path.joinpath("ui")
                     if path_ui.is_dir():
-                        with BytesIO() as plugin_page_content:
-                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
-                            plugin_page_content.seek(0)
+                        try:
+                            plugin_page_content = create_plugin_tar_gz(path_ui)
                             checksum = bytes_hash(plugin_page_content, algorithm="sha256")
-
                             local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=plugin_page_content.getvalue(), checksum=checksum))
+                        except (FileNotFoundError, OSError) as e:
+                            self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
 
                 for command, file_name in commands.items():
                     if not plugin_path.joinpath("bwcli", file_name).is_file():
@@ -3570,7 +4365,7 @@ class Database:
                 try:
                     if per_plugin_commit:
                         if local_to_put:
-                            session.add_all(local_to_put)
+                            _add_ordered(local_to_put)
                         # Commit also captures any .update() / .delete() executed above.
                         session.commit()
                     else:
@@ -3594,7 +4389,7 @@ class Database:
 
             try:
                 if not per_plugin_commit and to_put:
-                    session.add_all(to_put)
+                    _add_ordered(to_put)
                 session.commit()
             except BaseException as e:
                 session.rollback()
@@ -3651,6 +4446,7 @@ class Database:
                 return str(e)
         return ""
 
+    @retry_on_transient_db_errors
     def get_plugins(self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False) -> List[Dict[str, Any]]:
         """Get all plugins from the database using batched queries to avoid N+1 issues."""
         with self._db_session() as session:
@@ -3673,9 +4469,9 @@ class Database:
                 query = query.filter(Plugins.type.in_(["external", "ui"]))
             elif _type != "all":
                 query = query.filter_by(type=_type)
+            query = query.order_by(Plugins.id.asc())
 
-            plugins_list = query.all()
-            plugin_ids = [plugin.id for plugin in plugins_list]
+            plugin_ids = [plugin.id for plugin in query]
 
             # Pre-fetch plugin pages.
             pages = session.query(Plugin_pages.plugin_id).filter(Plugin_pages.plugin_id.in_(plugin_ids)).all()
@@ -3715,7 +4511,7 @@ class Database:
 
             # Assemble the plugin data.
             result = []
-            for plugin in plugins_list:
+            for plugin in query:
                 plugin_data: Dict[str, Any] = {
                     "id": plugin.id,
                     "stream": plugin.stream,
@@ -3747,8 +4543,13 @@ class Database:
                         setting_data["select"] = selects_map.get(setting.id, [])
                     elif setting.type == "multiselect":
                         setting_data["multiselect"] = multiselects_map.get(setting.id, [])
+                        sep_value = getattr(setting, "separator", None)
+                        setting_data["separator"] = sep_value if sep_value is not None else " "
                     elif setting.type == "multivalue":
-                        setting_data["separator"] = getattr(setting, "separator", " ")
+                        sep_value = getattr(setting, "separator", None)
+                        setting_data["separator"] = sep_value if sep_value is not None else " "
+                    elif setting.type == "file":
+                        setting_data["accept"] = getattr(setting, "accept", "")
                     plugin_data["settings"][setting.id] = setting_data
 
                 if plugin.id in commands_map:
@@ -4011,6 +4812,15 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
+            if not instances and method == "autoconf":
+                existing_count = session.query(Instances).filter(Instances.method == method).count()
+                if existing_count > 0:
+                    self.logger.warning(
+                        f"Received empty instances list for method 'autoconf' but database has {existing_count} existing instance(s), "
+                        "skipping deletion to prevent data loss"
+                    )
+                    return ""
+
             session.query(Instances).filter(Instances.method == method).delete()
 
             for instance in instances:
@@ -4070,16 +4880,17 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            db_instance = session.query(Instances).filter_by(hostname=hostname).first()
-
-            if db_instance is None:
-                return f"Instance {hostname} does not exist, will not be updated."
-
-            db_instance.status = status
+            # Use a direct UPDATE to avoid race conditions with concurrent threads
+            update_values: dict = {"status": status}
             if status != "down":
-                db_instance.last_seen = datetime.now().astimezone()
+                update_values["last_seen"] = datetime.now().astimezone()
 
             try:
+                result = session.query(Instances).filter_by(hostname=hostname).update(update_values, synchronize_session=False)
+
+                if result == 0:
+                    return f"Instance {hostname} does not exist, will not be updated."
+
                 session.commit()
             except BaseException as e:
                 return f"An error occurred while updating the instance {hostname}.\n{e}"
@@ -4103,31 +4914,32 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            db_instance = session.query(Instances).filter_by(hostname=hostname).first()
-            if db_instance is None:
-                return f"Instance {hostname} does not exist, will not be updated."
-
+            # Use a direct UPDATE to avoid race conditions with concurrent threads
+            # (MariaDB error 1020: "Record has changed since last read")
+            update_values: dict = {}
             if name is not None:
-                db_instance.name = name
+                update_values["name"] = name
             if port is not None:
-                db_instance.port = port
+                update_values["port"] = port
             if listen_https is not None:
-                db_instance.listen_https = listen_https
+                update_values["listen_https"] = listen_https
             if https_port is not None:
-                db_instance.https_port = https_port
+                update_values["https_port"] = https_port
             if server_name is not None:
-                db_instance.server_name = server_name
+                update_values["server_name"] = server_name
             if method is not None:
-                db_instance.method = method
-
-            if changed:
-                with suppress(ProgrammingError, OperationalError):
-                    metadata = session.query(Metadata).get(1)
-                    if metadata is not None:
-                        metadata.instances_changed = True
-                        metadata.last_instances_change = datetime.now().astimezone()
+                update_values["method"] = method
 
             try:
+                if update_values:
+                    result = session.query(Instances).filter_by(hostname=hostname).update(update_values, synchronize_session=False)
+                    if result == 0:
+                        return f"Instance {hostname} does not exist, will not be updated."
+
+                if changed:
+                    with suppress(ProgrammingError, OperationalError):
+                        session.query(Metadata).filter_by(id=1).update({"instances_changed": True, "last_instances_change": datetime.now().astimezone()})
+
                 session.commit()
             except BaseException as e:
                 return f"An error occurred while updating the instance {hostname}.\n{e}"
@@ -4697,6 +5509,12 @@ class Database:
                 {Plugins.config_changed: True}, synchronize_session=False
             )
 
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).get(1)
+                if metadata is not None:
+                    metadata.custom_configs_changed = True
+                    metadata.last_custom_configs_change = datetime.now().astimezone()
+
             try:
                 session.commit()
             except BaseException as e:
@@ -4717,7 +5535,7 @@ class Database:
 
             global_reference = session.query(Global_values.id).filter_by(setting_id="USE_TEMPLATE", value=template_id).first()
             if global_reference:
-                return "Template is currently used by the global configuration"
+                return "Template is currently used by the global settings"
 
             service_reference = session.query(Services_settings.id).filter_by(setting_id="USE_TEMPLATE", value=template_id).first()
             if service_reference:
@@ -4727,6 +5545,12 @@ class Database:
             session.query(Plugins).filter(Plugins.id.in_(set(plugin.id for plugin in session.query(Plugins).with_entities(Plugins.id).all()))).update(
                 {Plugins.config_changed: True}, synchronize_session=False
             )
+
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).get(1)
+                if metadata is not None:
+                    metadata.custom_configs_changed = True
+                    metadata.last_custom_configs_change = datetime.now().astimezone()
 
             try:
                 session.commit()

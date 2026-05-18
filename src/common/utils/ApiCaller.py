@@ -3,7 +3,7 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from copy import deepcopy
 from io import BytesIO
-from os import getenv, sep
+from os import sep
 from os.path import join
 from sys import path as sys_path
 from tarfile import open as tar_open
@@ -16,13 +16,13 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from API import API  # type: ignore
-from logger import setup_logger
+from logger import getLogger
 
 
 class ApiCaller:
     def __init__(self, apis: Optional[List[API]] = None):
         self.apis = apis or []
-        self.__logger = setup_logger("Api", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+        self.__logger = getLogger("API.CALLER")
 
     def send_to_apis(
         self,

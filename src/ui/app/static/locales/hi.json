@@ -18,16 +18,18 @@
   "aria": {
     "label": {
       "close": "बंद करें",
-      "raw_configuration": "रॉ कॉन्फ़िगरेशन"
+      "configs_dropzone": "कस्टम कॉन्फ़िगरेशन एक्सपोर्ट फ़ाइल चुनें या उसे यहाँ ड्रॉप करें",
+      "raw_configuration": "रॉ कॉन्फ़िगरेशन",
+      "services_dropzone": "सेवाओं की एक्सपोर्ट फ़ाइल चुनें या उसे यहाँ ड्रॉप करें"
     }
   },
   "badge": {
     "from_template": "टेम्पलेट से",
+    "managed_via_api": "API के माध्यम से प्रबंधित",
     "new_version": "नया संस्करण",
     "no_template": "कोई टेम्पलेट नहीं",
     "unread_news": "अपठित समाचार",
-    "unread_notifications": "अपठित सूचनाएं",
-    "managed_via_api": "API के माध्यम से प्रबंधित"
+    "unread_notifications": "अपठित सूचनाएं"
   },
   "banner": {
     "community": "Bunker समुदाय का हिस्सा बनें, <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">Discord चैट</a> में शामिल हों और <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a> पर हमें फॉलो करें।",
@@ -43,7 +45,7 @@
     "cache": "कैश",
     "configs": "कॉन्फ़िगरेशन",
     "extra_pages": "अतिरिक्त पृष्ठ",
-    "global_config": "वैश्विक कॉन्फ़िगरेशन",
+    "global_settings": "ग्लोबल सेटिंग्स",
     "home": "होम",
     "instances": "इंस्टेंस",
     "jobs": "कार्य",
@@ -76,6 +78,8 @@
     "clear": "साफ़ करें",
     "close": "बंद करें",
     "columns": "कॉलम",
+    "convert_configs": "कॉन्फ़िग रूपांतरित करें",
+    "convert_configs_to": "{{state}} में रूपांतरित करें",
     "convert_services": "सेवाएं बदलें",
     "copy": "कॉपी करें",
     "copy_codes": "कोड कॉपी करें",
@@ -92,17 +96,19 @@
     "enable_totp": "TOTP सक्षम करें",
     "entire_config": "संपूर्ण कॉन्फ़िगरेशन",
     "export": "निर्यात करें",
-    "export_csv_all": "CSV (सभी)",
-    "export_csv_visible": "CSV (दृश्यमान)",
-    "export_excel_all": "Excel (सभी)",
-    "export_excel_visible": "Excel (दृश्यमान)",
-    "fetch_global": "ग्लोबल कॉन्फ़िगरेशन लाएँ",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
+    "fetch_global": "ग्लोबल सेटिंग्स लाएँ",
     "filters_suffix": " फ़िल्टर",
     "follow": "अनुसरण करें",
+    "force_check": "Force check",
+    "force_update": "Force update",
     "github_stars": "स्टार्स",
     "go_back": "वापस जाओ",
     "hide": "छिपाएं",
     "history": "इतिहास",
+    "import_configs": "कस्टम कॉन्फ़िगरेशन आयात करें",
+    "import_services": "सेवाएं आयात करें",
     "login": "लॉगिन करें",
     "multiple_add": "जोड़ें",
     "multiple_hide": "छिपाएं",
@@ -143,8 +149,7 @@
     "upload_photo": "नई फ़ोटो अपलोड करें",
     "view_details": "विवरण देखें",
     "view_raw_data": "रॉ डेटा देखें",
-    "wipe_other_sessions": "अन्य सत्र साफ़ करें",
-    "force_update": "Force update"
+    "wipe_other_sessions": "अन्य सत्र साफ़ करें"
   },
   "country": {
     "AD": "अंडोरा",
@@ -443,29 +448,37 @@
         "title": "देश द्वारा अवरुद्ध अनुरोध"
       },
       "blocking_status": {
-        "title": "समय के साथ अवरुद्ध स्थिति",
-        "subtitle": "समय के साथ अवरुद्ध अनुरोध",
         "blocked_requests": "अवरुद्ध अनुरोध",
+        "count": "संख्या",
+        "subtitle": "समय के साथ अवरुद्ध अनुरोध",
         "time": "समय",
-        "count": "संख्या"
+        "title": "समय के साथ अवरुद्ध स्थिति"
       },
       "request_status": {
-        "title": "अनुरोध स्थिति वितरण",
-        "blocked": "अवरुद्ध अनुरोध"
+        "blocked": "अवरुद्ध अनुरोध",
+        "title": "अनुरोध स्थिति वितरण"
       },
       "top_blocked_ips": {
-        "title": "शीर्ष 10 अवरुद्ध आईपी",
-        "most_blocked": "सर्वाधिक अवरुद्ध आईपी"
+        "most_blocked": "सर्वाधिक अवरुद्ध आईपी",
+        "title": "शीर्ष 10 अवरुद्ध आईपी"
       }
     },
     "map": {
       "blocked_requests": "अवरुद्ध अनुरोध",
       "hover_info": "किसी देश पर होवर करें",
-      "no_data": "कोई डेटा नहीं",
-      "legend": "लीजेंड"
+      "legend": "लीजेंड",
+      "no_data": "कोई डेटा नहीं"
+    },
+    "window": {
+      "last_days": "Last {{days}} days",
+      "title": "Dashboard window"
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "मिलान करने वाले सभी {{count}} {{entity}} चुनें",
+    "bulk_select_all_done": "मिलान करने वाले सभी {{count}} {{entity}} चुने गए हैं।",
+    "bulk_select_clear": "चयन साफ़ करें",
+    "bulk_select_page": "इस पेज पर सभी {{count}} {{entity}} चुने गए हैं।",
     "info_bans": "दिखा रहा है {{start}} से {{end}} तक {{total}} प्रतिबंधों में से",
     "info_cache": "दिखा रहा है {{start}} से {{end}} तक {{total}} कैश फ़ाइलों में से",
     "info_configs": "दिखा रहा है {{start}} से {{end}} तक {{total}} कस्टम कॉन्फ़िगरेशन में से",
@@ -478,6 +491,7 @@
     "info_empty_plugins": "कोई प्लगइन उपलब्ध नहीं है",
     "info_empty_reports": "कोई रिपोर्ट उपलब्ध नहीं है",
     "info_empty_services": "कोई सेवा उपलब्ध नहीं है",
+    "info_empty_templates": "कोई टेम्प्लेट उपलब्ध नहीं है",
     "info_filtered_bans": "(कुल _MAX_ प्रतिबंधों में से फ़िल्टर किया गया)",
     "info_filtered_cache": "(कुल _MAX_ कैश फ़ाइलों में से फ़िल्टर किया गया)",
     "info_filtered_configs": "(कुल _MAX_ कस्टम कॉन्फ़िगरेशन में से फ़िल्टर किया गया)",
@@ -487,12 +501,14 @@
     "info_filtered_plugins": "(कुल _MAX_ प्लगइन्स में से फ़िल्टर किया गया)",
     "info_filtered_reports": "(कुल _MAX_ रिपोर्टों में से फ़िल्टर किया गया)",
     "info_filtered_services": "(कुल _MAX_ सेवाओं में से फ़िल्टर किया गया)",
+    "info_filtered_templates": "(_MAX_ कुल टेम्प्लेट से फ़िल्टर किया गया)",
     "info_instances": "दिखा रहा है {{start}} से {{end}} तक {{total}} इंस्टेंस में से",
     "info_items": "दिखा रहा है {{start}} से {{end}} तक {{total}} आइटम में से",
     "info_jobs": "दिखा रहा है {{start}} से {{end}} तक {{total}} कार्यों में से",
     "info_plugins": "दिखा रहा है {{start}} से {{end}} तक {{total}} प्लगइन्स में से",
     "info_reports": "दिखा रहा है {{start}} से {{end}} तक {{total}} रिपोर्टों में से",
     "info_services": "दिखा रहा है {{start}} से {{end}} तक {{total}} सेवाओं में से",
+    "info_templates": "{{total}} टेम्प्लेट में से {{start}} से {{end}} दिखा रहा है",
     "length_all": "सभी",
     "length_menu_bans": "दिखाएं _MENU_ प्रतिबंध",
     "length_menu_cache": "दिखाएं _MENU_ कैश फ़ाइलें",
@@ -503,6 +519,7 @@
     "length_menu_plugins": "दिखाएं _MENU_ प्लगइन्स",
     "length_menu_reports": "दिखाएं _MENU_ रिपोर्ट",
     "length_menu_services": "दिखाएं _MENU_ सेवाएं",
+    "length_menu_templates": "_MENU_ टेम्प्लेट प्रदर्शित करें",
     "paginate": {
       "first": "पहला",
       "last": "अंतिम",
@@ -538,6 +555,9 @@
     "select_rows_services_0": "कोई सेवा चयनित नहीं",
     "select_rows_services_1": "1 सेवा चयनित",
     "select_rows_services_plural": "%d सेवाएं चयनित",
+    "select_rows_templates_0": "कोई टेम्प्लेट चयनित नहीं",
+    "select_rows_templates_1": "1 टेम्प्लेट चयनित",
+    "select_rows_templates_plural": "%d टेम्प्लेट चयनित",
     "zero_records_bans": "कोई मेल खाने वाला प्रतिबंध नहीं मिला",
     "zero_records_cache": "कोई मेल खाने वाली कैश फ़ाइल नहीं मिली",
     "zero_records_configs": "कोई मेल खाने वाली कस्टम कॉन्फ़िगरेशन नहीं मिली",
@@ -546,7 +566,8 @@
     "zero_records_jobs": "कोई मेल खाने वाला कार्य नहीं मिला",
     "zero_records_plugins": "कोई मेल खाने वाला प्लगइन नहीं मिला",
     "zero_records_reports": "कोई मेल खाने वाली रिपोर्ट नहीं मिली",
-    "zero_records_services": "कोई मेल खाने वाली सेवा नहीं मिली"
+    "zero_records_services": "कोई मेल खाने वाली सेवा नहीं मिली",
+    "zero_records_templates": "कोई मेल खाते टेम्प्लेट नहीं मिले"
   },
   "dev_log": {
     "copy_failed": "पाठ कॉपी करने में विफल:",
@@ -604,6 +625,8 @@
   },
   "form": {
     "checkbox": {
+      "include_attached_configs": "संलग्न कस्टम कॉन्फ़िगरेशन शामिल करें",
+      "overwrite_existing_configs": "मौजूदा UI/API कस्टम कॉन्फ़िगरेशन ओवरराइट करें",
       "remember_me": "मुझे याद रखें"
     },
     "help": {
@@ -622,6 +645,7 @@
       "admin_username": "व्यवस्थापक उपयोगकर्ता नाम",
       "auto_lets_encrypt": "स्वतः Let's Encrypt",
       "ban_scope": "प्रतिबंध का दायरा",
+      "certificate_authority": "प्रमाणपत्र प्राधिकरण",
       "certificate_priority": "प्रमाणपत्र प्राथमिकता",
       "challenge_type": "चुनौती प्रकार",
       "config_type": "कॉन्फ़िगरेशन प्रकार",
@@ -664,8 +688,8 @@
       "secret_token": "गुप्त टोकन",
       "server_name": "सर्वर का नाम",
       "service_name": "सेवा का नाम",
-      "theme": "थीम",
       "template_id": "टेम्पलेट आईडी",
+      "theme": "थीम",
       "type": "प्रकार",
       "ui_host": "UI होस्ट",
       "ui_url": "UI URL",
@@ -674,7 +698,12 @@
       "use_proxy_protocol": "PROXY प्रोटोकॉल का उपयोग करें",
       "use_real_ip": "वास्तविक आईपी का उपयोग करें",
       "username": "उपयोगकर्ता नाम",
-      "wildcard_certificates": "वाइल्डकार्ड प्रमाणपत्र"
+      "wildcard_certificates": "वाइल्डकार्ड प्रमाणपत्र",
+      "zerossl_api_key": "ZeroSSL API कुंजी",
+      "zerossl_api_retry": "ZeroSSL API पुनः प्रयास",
+      "zerossl_api_retry_delay": "ZeroSSL API पुनः प्रयास विलंब",
+      "zerossl_api_connect_timeout": "ZeroSSL API कनेक्शन टाइमआउट",
+      "zerossl_api_max_time": "ZeroSSL API अधिकतम समय"
     },
     "placeholder": {
       "2fa_code": "कोड दर्ज करें",
@@ -745,6 +774,8 @@
       "add_plugin_dropzone": "अपना प्लगइन संग्रह यहाँ खींचें और छोड़ें या फ़ाइलें चुनने के लिए क्लिक करें।",
       "confirm_cache_deletion_alert": "क्या आप वाकई चयनित कैश फ़ाइल हटाना चाहते हैं?",
       "confirm_cache_deletion_alert_plural": "क्या आप वाकई चयनित कैश फ़ाइलें हटाना चाहते हैं?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "क्या आप सुनिश्चित हैं कि चयनित कस्टम कॉन्फ़िगरेशन को {{state}} में रूपांतरित करना चाहते हैं?",
       "confirm_configs_deletion_alert": "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन हटाना चाहते हैं?",
       "confirm_configs_deletion_alert_plural": "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन हटाना चाहते हैं?",
       "confirm_conversion_confirmation": "क्या आप वाकई चयनित सेवाओं को कनवर्ट करना चाहते हैं?",
@@ -755,6 +786,21 @@
       "confirmation_instance_deletion": "क्या आप वाकई चयनित इंस्टेंस हटाना चाहते हैं?",
       "delete_confirmation_alert": "क्या आप वाकई चयनित इंस्टेंस हटाना चाहते हैं?",
       "delete_confirmation_alert_plural": "क्या आप वाकई चयनित इंस्टेंस हटाना चाहते हैं?",
+      "delete_confirmation_template_used": "एक या अधिक चयनित टेम्प्लेट सेवाओं (कुल {{services_count}} सेवा(एं)) को सौंपे गए हैं। उन्हें हटाने से वे असाइनमेंट साफ़ हो जाएंगे। क्या आप जारी रखना चाहते हैं?",
+      "delete_step_confirmation": "क्या आप वाकई इस चरण को हटाना चाहते हैं?",
+      "delete_step_content_label": "सामग्री",
+      "delete_step_name_label": "चरण",
+      "delete_template_global_usage": "वैश्विक सेटिंग्स द्वारा उपयोग किया जाता है",
+      "delete_template_services_list": "सेवाओं द्वारा उपयोग किया जाता है: {{services}}",
+      "fetch_global_settings_bold": "यह ग्लोबल सेटिंग्स को प्राप्त करेगा और वर्तमान टेम्पलेट पर लागू करेगा।",
+      "fetch_global_settings_point_1": "केवल इस टेम्पलेट में मौजूद सेटिंग्स अपडेट होती हैं।",
+      "fetch_global_settings_point_2": "जो मान डिफ़ॉल्ट के समान हैं उन्हें नज़रअंदाज़ किया जाता है।",
+      "fetch_global_settings_point_3": "SERVER_NAME कभी ओवरराइट नहीं किया जाता है।",
+      "export_services_intro": "चयनित सेवाएँ निर्यात की जाएँगी। उनके संलग्न कस्टम कॉन्फ़िगरेशन को .zip आर्काइव में शामिल करने के लिए नीचे दिया गया विकल्प सक्षम करें।",
+      "import_configs_dropzone": "अपनी कस्टम कॉन्फ़िगरेशन एक्सपोर्ट फ़ाइल को यहाँ खींचकर छोड़ें या फ़ाइल चुनने के लिए क्लिक करें।",
+      "import_configs_warning": "scheduler, autoconf, या templates द्वारा बनाए गए कस्टम कॉन्फ़िगरेशन हमेशा सुरक्षित रखे जाते हैं। केवल UI/API कॉन्फ़िगरेशन ओवरराइट किए जा सकते हैं।",
+      "import_services_dropzone": "अपनी सेवाओं की निर्यात फ़ाइल को यहाँ खींचें और छोड़ें (Drag and drop) या फ़ाइल चुनने के लिए क्लिक करें।",
+      "import_services_warning": "सेवाओं को आयात करने से निर्यात फ़ाइल से नई UI सेवाएँ बन जाएँगी। मौजूदा सेवाओं को छोड़ दिया जाता है।",
       "instance_creation_alert": "आपको पोर्ट या सर्वर नाम प्रदान करने की आवश्यकता नहीं है; इंस्टेंस कॉन्फ़िगरेशन के लिए `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` और `API_SERVER_NAME` के मानों का उपयोग किया जाएगा।",
       "next_step_in_case_of_issue": "यदि आपको समस्याएँ आती हैं, तो आप मैन्युअल रूप से असुरक्षित प्रमाणपत्र स्वीकार कर सकते हैं:",
       "recovery_codes_save_alert": "कृपया इन पुनर्प्राप्ति कोड को सुरक्षित स्थान (जैसे पासवर्ड मैनेजर या बंकर) पर सहेजें। यदि आप अपना प्रमाणीकरण उपकरण खो देते हैं तो आप इनका उपयोग अपने खाते तक पहुँचने के लिए कर सकते हैं।",
@@ -763,18 +809,11 @@
       "services_deletion_confirmation": "क्या आप वाकई चयनित सेवाओं को हटाना चाहते हैं?",
       "unban_confirmation_alert": "क्या आप वाकई चयनित आईपी पते का प्रतिबंध हटाना चाहते हैं?",
       "unban_confirmation_alert_plural": "क्या आप वाकई चयनित आईपी पतों का प्रतिबंध हटाना चाहते हैं?",
-      "update_duration_alert": "चयनित प्रतिबंधों के लिए एक नई अवधि का चयन करें:",
-      "fetch_global_config_bold": "यह वैश्विक कॉन्फ़िगरेशन को प्राप्त करेगा और वर्तमान टेम्पलेट पर लागू करेगा।",
-      "fetch_global_config_point_1": "केवल इस टेम्पलेट में मौजूद सेटिंग्स अपडेट होती हैं।",
-      "fetch_global_config_point_2": "जो मान डिफ़ॉल्ट के समान हैं उन्हें नज़रअंदाज़ किया जाता है।",
-      "fetch_global_config_point_3": "SERVER_NAME कभी ओवरराइट नहीं किया जाता है।",
-      "delete_step_confirmation": "क्या आप वाकई इस चरण को हटाना चाहते हैं?",
-      "delete_step_name_label": "चरण",
-      "delete_step_content_label": "सामग्री"
+      "update_duration_alert": "चयनित प्रतिबंधों के लिए एक नई अवधि का चयन करें:"
     },
     "button": {
-      "reset_template_confirm": "टेम्पलेट कॉन्फ़िगरेशन रीसेट करें",
-      "fetch_global_config_confirm": "ग्लोबल सेटिंग्स लागू करें"
+      "fetch_global_settings_confirm": "ग्लोबल सेटिंग्स लागू करें",
+      "reset_template_confirm": "टेम्पलेट कॉन्फ़िगरेशन रीसेट करें"
     },
     "section": {
       "ban_details": "प्रतिबंध विवरण",
@@ -790,17 +829,21 @@
       "create_new_instance": "नया इंस्टेंस बनाएं",
       "create_template": "टेम्पलेट बनाएं",
       "delete_instance": "इंस्टेंस हटाएं",
+      "delete_step": "चरण हटाएं",
       "delete_template": "टेम्पलेट हटाएं",
+      "edit_template": "टेम्प्लेट संपादित करें: {{name}}",
+      "fetch_global_settings": "ग्लोबल सेटिंग्स लागू करें?",
+      "export_services": "सेवाएँ निर्यात करें",
       "from_plugin": "प्लगइन से",
       "full_url": "पूर्ण URL",
+      "import_configs": "कस्टम कॉन्फ़िगरेशन आयात करें",
+      "import_services": "सेवाएं आयात करें",
       "job_history": "पिछले 10 कार्य निष्पादन",
       "job_history_count": "कार्य {{count}} निष्पादन",
       "recovery_codes": "पुनर्प्राप्ति कोड",
       "reset_template_config": "टेम्पलेट कॉन्फ़िगरेशन रीसेट करें?",
-      "fetch_global_config": "ग्लोबल सेटिंग्स लागू करें?",
       "server_name_not_unique": "सर्वर का नाम अद्वितीय नहीं है",
-      "update_duration": "प्रतिबंध अवधि अपडेट करें",
-      "delete_step": "चरण हटाएं"
+      "update_duration": "प्रतिबंध अवधि अपडेट करें"
     }
   },
   "mode": {
@@ -826,7 +869,7 @@
     "cache": "कैश",
     "configs": "कॉन्फ़िगरेशन",
     "extra_pages": "अतिरिक्त पृष्ठ",
-    "global_config": "वैश्विक कॉन्फ़िगरेशन",
+    "global_settings": "ग्लोबल सेटिंग्स",
     "home": "होम",
     "instances": "इंस्टेंस",
     "jobs": "कार्य",
@@ -895,12 +938,12 @@
       "unknown": "अज्ञात समाप्ति तिथि"
     },
     "force_check": {
-      "title": "Force check",
-      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
+      "title": "Force check"
     },
     "force_update": {
-      "title": "Force update",
-      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept.",
+      "title": "Force update"
     },
     "key": {
       "title": {
@@ -1000,11 +1043,13 @@
     "last_run": "अंतिम रन स्थिति",
     "last_seen": "अंतिम बार देखा गया",
     "last_update": "अंतिम अपडेट",
+    "loading": "खोज पैन लोड हो रहे हैं...",
     "method": "विधि",
     "next_24h": "अगले 24 घंटे",
     "next_30d": "अगले 30 दिन",
     "next_7d": "अगले 7 दिन",
     "older_30d": "30 दिनों से अधिक पुराना",
+    "one_or_more": "एक या अधिक",
     "permanent": "स्थायी",
     "plugin": "प्लगइन",
     "reason": "कारण",
@@ -1015,7 +1060,9 @@
     "service": "सेवा",
     "show_message": "सभी दिखाएं",
     "start_date": "प्रारंभ तिथि",
+    "status": "स्थिति",
     "status_code": "स्थिति कोड",
+    "steps": "चरण",
     "stream": "स्ट्रीम समर्थन",
     "template": "टेम्पलेट",
     "title_0": "कोई सक्रिय फ़िल्टर नहीं",
@@ -1023,7 +1070,12 @@
     "title_plural": "सक्रिय फ़िल्टर - %d",
     "type": "प्रकार",
     "url": "URL",
-    "version": "संस्करण"
+    "version": "संस्करण",
+    "zero": "कोई नहीं"
+  },
+  "security_mode": {
+    "block": "ब्लॉक",
+    "detect": "पता लगाना"
   },
   "settings": {
     "custom_config": {
@@ -1035,14 +1087,28 @@
     }
   },
   "setup": {
+    "status": {
+      "admin_user_exists": "🧑‍🚀 एक व्यवस्थापक उपयोगकर्ता पहले से मौजूद है। कृपया अगले चरण पर जाएं।",
+      "pro_license_key_exists": "⭐ एक प्रो लाइसेंस कुंजी पहले से कॉन्फ़िगर है, कृपया अगले चरण पर जाएं।",
+      "reverse_proxy_configured": "↪️ वेब इंटरफ़ेस के लिए एक रिवर्स प्रॉक्सी पहले से कॉन्फ़िगर है। कृपया अगले चरण पर जाएं।",
+      "secure_password": "सुरक्षित पासवर्ड",
+      "unique_server_name": "अद्वितीय सर्वर नाम"
+    },
     "step1": {
       "subtitle": "अपना व्यवस्थापक खाता बनाएं।",
       "title": "व्यवस्थापक उपयोगकर्ता"
     },
     "step2": {
+      "lets_encrypt": {
+        "certificate_authority_selector": "प्रमाणपत्र प्राधिकरण चयनकर्ता",
+        "letsencrypt_description": "मानक ACME जारी करने के लिए Let's Encrypt का उपयोग करें। परीक्षण और इंटीग्रेशन जांच के लिए स्टेजिंग उपलब्ध है।",
+        "zerossl_api_key_hint": "खाली होने पर, ZeroSSL खाते के पंजीकरण के लिए कॉन्फ़िगर किया गया ईमेल उपयोग करेगा।",
+        "zerossl_description": "zerossl-bot के साथ ZeroSSL का उपयोग करें। खाते के जारीकरण और कुंजी-आधारित पुनःजारी ट्रैकिंग के लिए खाता ईमेल या API कुंजी दें।"
+      },
       "section": {
         "custom_certificate": "कस्टम प्रमाणपत्र",
         "lets_encrypt": "Let's Encrypt",
+        "zerossl": "ZeroSSL",
         "real_ip": "वास्तविक आईपी",
         "reverse_proxy": "रिवर्स प्रॉक्सी"
       },
@@ -1050,19 +1116,19 @@
       "title": "UI सेटिंग्स"
     },
     "step3": {
-      "title": "प्रो में अपग्रेड करें",
-      "subtitle": "उन्नत सुविधाओं को अनलॉक करें और BunkerWeb का अधिकतम लाभ उठाएं।",
       "label": {
         "pro_benefits": "प्रो लाभ"
       },
-      "pro_benefit_1_title": "सभी प्रो सुविधाओं तक पहुंच",
       "pro_benefit_1_description": "उन्नत सुरक्षा, प्रदर्शन और प्रबंधन टूल सहित सभी उन्नत सुविधाओं को अनलॉक करें।",
-      "pro_benefit_2_title": "रखरखाव करने वालों से तकनीकी सहायता",
+      "pro_benefit_1_title": "सभी प्रो सुविधाओं तक पहुंच",
       "pro_benefit_2_description": "आपके किसी भी मुद्दे या प्रश्न के लिए BunkerWeb टीम से प्राथमिकता सहायता प्राप्त करें।",
-      "pro_benefit_3_title": "कस्टम विकास",
+      "pro_benefit_2_title": "रखरखाव करने वालों से तकनीकी सहायता",
       "pro_benefit_3_description": "आपकी विशिष्ट आवश्यकताओं को पूरा करने के लिए अनुकूलित समाधान।",
+      "pro_benefit_3_title": "कस्टम विकास",
+      "pro_benefit_4_description": "आपके BunkerWeb सेटअप को अनुकूलित करने के लिए विशेषज्ञ सलाह।",
       "pro_benefit_4_title": "कस्टम परामर्श",
-      "pro_benefit_4_description": "आपके BunkerWeb सेटअप को अनुकूलित करने के लिए विशेषज्ञ सलाह।"
+      "subtitle": "उन्नत सुविधाओं को अनलॉक करें और BunkerWeb का अधिकतम लाभ उठाएं।",
+      "title": "प्रो में अपग्रेड करें"
     },
     "step4": {
       "label": {
@@ -1070,13 +1136,6 @@
       },
       "subtitle": "सेटअप पूरा करने से पहले अपनी सेटिंग्स की समीक्षा करें।",
       "title": "अवलोकन"
-    },
-    "status": {
-      "admin_user_exists": "🧑‍🚀 एक व्यवस्थापक उपयोगकर्ता पहले से मौजूद है। कृपया अगले चरण पर जाएं।",
-      "pro_license_key_exists": "⭐ एक प्रो लाइसेंस कुंजी पहले से कॉन्फ़िगर है, कृपया अगले चरण पर जाएं।",
-      "reverse_proxy_configured": "↪️ वेब इंटरफ़ेस के लिए एक रिवर्स प्रॉक्सी पहले से कॉन्फ़िगर है। कृपया अगले चरण पर जाएं।",
-      "secure_password": "सुरक्षित पासवर्ड",
-      "unique_server_name": "अद्वितीय सर्वर नाम"
     },
     "subtitle": "सेटअप विज़ार्ड पूरा करने के लिए चरणों का पालन करें।",
     "title": "सेटअप विज़ार्ड"
@@ -1087,8 +1146,12 @@
     "default_server": "डिफ़ॉल्ट सर्वर",
     "down": "बंद",
     "draft": "ड्राफ्ट",
+    "error_deleting_template": "टेम्प्लेट हटाते समय एक त्रुटि हुई।",
     "error_loading_bans": "प्रतिबंध लोड करने में त्रुटि। कृपया पृष्ठ को ताज़ा करने का प्रयास करें।",
+    "error_loading_template": "टेम्प्लेट डेटा लोड करने में असमर्थ।",
+    "error_saving_template": "टेम्प्लेट सहेजते समय एक त्रुटि हुई।",
     "failed": "विफल",
+    "invalid_json_payload": "अमान्य JSON पेलोड।",
     "loading": "लोड हो रहा है...",
     "loading_bans": "प्रतिबंध लोड हो रहे हैं...",
     "loading_cache_file": "कैश फ़ाइल लोड हो रही है...",
@@ -1103,12 +1166,14 @@
     "loading_reports": "रिपोर्ट लोड हो रही हैं...",
     "loading_services": "सेवाएं लोड हो रही हैं...",
     "loading_templates": "टेम्पलेट लोड हो रहे हैं...",
+    "missing_template_information": "टेम्प्लेट जानकारी गायब है।",
     "news_connection_error": "समाचार अपडेट के लिए ब्लॉग से कनेक्ट नहीं हो सका।",
     "no": "नहीं",
     "no_data": "कोई डेटा नहीं",
     "no_history": "कोई इतिहास उपलब्ध नहीं।",
     "no_item": "कोई आइटम नहीं",
     "no_notifications": "दिखाने के लिए कोई सूचना नहीं।",
+    "no_search_results": "कोई आइटम नहीं मिला।",
     "no_steps": "कोई चरण उपलब्ध नहीं",
     "no_steps_description": "इस टेम्पलेट में कॉन्फ़िगर करने के लिए कोई चरण नहीं हैं।",
     "online": "ऑनलाइन",
@@ -1189,10 +1254,12 @@
       "service": "सेवा",
       "service_name": "सेवा का नाम",
       "settings": "सेटिंग्स",
+      "status": "स्थिति",
       "status_code": "स्थिति कोड",
       "steps": "चरण",
       "stream": "स्ट्रीम",
       "template": "टेम्पलेट",
+      "templates": "टेम्प्लेट्स",
       "time_left": "शेष समय",
       "type": "प्रकार",
       "url": "URL",
@@ -1201,7 +1268,6 @@
     }
   },
   "template": {
-    "none": "कोई टेम्पलेट नहीं",
     "editor": {
       "button_add_config": "कॉन्फ़िगरेशन जोड़ें",
       "button_add_setting": "सेटिंग जोड़ें",
@@ -1210,7 +1276,6 @@
       "button_move_up": "ऊपर ले जाएं",
       "button_remove": "हटाएं",
       "clone_badge": "{{template}} से क्लोन किया गया",
-      "setting_toggle_enabled": "सक्षम",
       "configs": "कस्टम कॉन्फ़िगरेशन",
       "configs_help": "इस टेम्पलेट में वैकल्पिक कस्टम कॉन्फ़िगरेशन स्निपेट संलग्न करें।",
       "delete_step_confirm": "क्या आप वाकई इस चरण को हटाना चाहते हैं?",
@@ -1234,6 +1299,23 @@
       "label_step_settings": "इस चरण में सेटिंग्स",
       "label_step_subtitle": "चरण उपशीर्षक",
       "label_step_title": "चरण शीर्षक",
+      "missing_configs_body": "आयातित टेम्पलेट कस्टम कॉन्फ़िगरेशन को संदर्भित करता है जो अभी तक अपलोड नहीं किए गए हैं। टेम्पलेट सेटअप को पूरा करने के लिए कृपया इन कॉन्फ़िगरेशन को आयात करें:",
+      "missing_configs_browse": "फ़ाइलें ब्राउज़ करें",
+      "missing_configs_done": "हो गया",
+      "missing_configs_drop_hint": "कॉन्फ़िग फ़ाइलों को यहाँ खींचें और छोड़ें (.conf, .cfg, .txt)",
+      "missing_configs_drop_or": "या",
+      "missing_configs_hint_body": "अपलोड की गई फ़ाइलें स्वचालित रूप से आपके टेम्पलेट में जोड़ दी जाएंगी। सुनिश्चित करें कि फ़ाइल नाम ऊपर सूचीबद्ध लुप्त कॉन्फ़िगरेशन से मेल खाते हैं।",
+      "missing_configs_hint_title": "टिप:",
+      "missing_configs_resolved": "सभी लुप्त कॉन्फ़िगरेशन अपलोड किए गए हैं! टेम्पलेट सफलतापूर्वक आयात किया गया।",
+      "missing_configs_title": "लुप्त कस्टम कॉन्फ़िगरेशन",
+      "missing_configs_upload_failed": "कॉन्फ़िग फ़ाइलें अपलोड करने में विफल",
+      "missing_configs_upload_label": "लुप्त कॉन्फ़िगरेशन अपलोड करें (.conf, .cfg, .txt)",
+      "missing_configs_upload_partial": "{{total}} कॉन्फ़िग में से {{uploaded}} अपलोड किए गए। अभी भी लुप्त: {{missing}}",
+      "missing_configs_upload_success": "{{count}} कॉन्फ़िग फ़ाइलें सफलतापूर्वक अपलोड की गईं",
+      "multiselect_placeholder": "विकल्प चुनें",
+      "multiselect_summary": "{{count}} चयनित",
+      "multivalue_add": "मान जोड़ें",
+      "multivalue_helper": "प्रति पंक्ति एक मान।{{separatorNote}}",
       "panel_overview": "अवलोकन",
       "panel_overview_help": "मुख्य जानकारी ट्रैक करें और अनुभागों के बीच नेविगेट करें।",
       "placeholder_config_data": "डेटा",
@@ -1245,6 +1327,47 @@
       "placeholder_step_title": "चरण शीर्षक",
       "placeholder_template_id": "टेम्पलेट-आईडी",
       "placeholder_template_name": "मेरा टेम्पलेट",
+      "raw_configs_browse": "फ़ाइलें ब्राउज़ करें",
+      "raw_configs_drop_hint": "कॉन्फ़िग फ़ाइलों को यहाँ खींचें और छोड़ें या ब्राउज़ करने के लिए क्लिक करें (.conf, .cfg, .txt)",
+      "raw_configs_drop_supported": "समर्थित प्रारूप: .conf, .cfg, .txt",
+      "raw_configs_empty": "अभी तक कोई आयातित कॉन्फ़िग फ़ाइल नहीं है। नई फ़ाइलें नीचे दिखाई देंगी।",
+      "raw_configs_help": "<code>configs</code> में प्रविष्टियां जोड़ने के लिए कॉन्फ़िग फाइलें (.conf, .cfg, .txt) अपलोड करें। प्रकार डिफ़ॉल्ट रूप से <code>server_http</code> पर सेट हैं; यदि आवश्यक हो तो JSON में समायोजित करें।",
+      "raw_configs_import_invalid": "वर्तमान JSON अमान्य होने के कारण कॉन्फ़िगरेशन आयात करने में असमर्थ।",
+      "raw_configs_import_none": "कोई कॉन्फ़िगरेशन आयात नहीं किया गया।",
+      "raw_configs_import_success": "{{count}} कॉन्फ़िग फ़ाइलें आयात की गईं।",
+      "raw_configs_note": "आयातित फ़ाइलें JSON संपादक में जोड़ी जाती हैं। सहेजने से पहले समीक्षा करें और समायोजित करें।",
+      "raw_configs_title": "कस्टम कॉन्फ़िग आयात",
+      "raw_configs_upload": "कॉन्फ़िग फाइलें अपलोड करें (.conf, .cfg, .txt)",
+      "raw_configs_upload_failed": "चयनित फ़ाइलों में से एक को पढ़ने में असमर्थ।",
+      "raw_editor_drop_hint": "वर्तमान सामग्री को बदलने के लिए एक टेम्पलेट JSON फ़ाइल (.json केवल) छोड़ें।",
+      "raw_editor_aria": "रॉ टेम्पलेट JSON एडिटर",
+      "raw_editor_help": "संपूर्ण टेम्पलेट परिभाषा को JSON के रूप में संपादित करें। आसान मोड पर वापस स्विच करने से विज़ुअल संपादक मान्य और पुनः लोड हो जाता है।",
+      "raw_editor_import_success": "टेम्पलेट JSON सफलतापूर्वक आयात किया गया।",
+      "raw_editor_override_body": "इस फ़ाइल को आयात करने से वर्तमान टेम्पलेट JSON पूरी तरह से बदल जाएगा। संपादक में किए गए परिवर्तन खो जाएंगे। क्या आप जारी रखना चाहते हैं?",
+      "raw_editor_override_confirm": "टेम्पलेट बदलें",
+      "raw_editor_override_title": "टेम्पलेट JSON बदलें?",
+      "raw_editor_title": "रॉ टेम्पलेट JSON",
+      "raw_editor_upload_empty": "अपलोड की गई फ़ाइल खाली है।",
+      "raw_editor_upload_failed": "चयनित फ़ाइल को पढ़ने में असमर्थ।",
+      "raw_editor_upload_template": "टेम्पलेट JSON अपलोड करें (.json केवल)",
+      "raw_validation_config_definition": "अमान्य कॉन्फ़िग परिभाषा।",
+      "raw_validation_config_object": "कॉन्फ़िगरेशन प्रविष्टियां ऑब्जेक्ट होनी चाहिए।",
+      "raw_validation_configs_unassigned": "कॉन्फ़िगरेशन {{configs}} किसी भी चरण को असाइन नहीं किए गए हैं।",
+      "raw_validation_empty": "टेम्पलेट JSON खाली नहीं हो सकता।",
+      "raw_validation_invalid_json": "अमान्य JSON पेलोड: {{error}}",
+      "raw_validation_object": "टेम्पलेट पेलोड एक JSON ऑब्जेक्ट होना चाहिए।",
+      "raw_validation_setting_key": "सेटिंग कुंजी गैर-रिक्त स्ट्रिंग होनी चाहिए।",
+      "raw_validation_settings_object": "सेटिंग्स को एक ऑब्जेक्ट के रूप में प्रदान किया जाना चाहिए।",
+      "raw_validation_settings_unassigned": "सेटिंग्स {{settings}} किसी भी चरण को असाइन नहीं की गई हैं।",
+      "raw_validation_step_config_duplicate": "कॉन्फ़िगरेशन {{config}} कई चरणों को असाइन किया गया है।",
+      "raw_validation_step_config_reference": "चरण {{index}} में एक अमान्य कॉन्फ़िग संदर्भ शामिल है।",
+      "raw_validation_step_config_unknown": "चरण {{index}} अज्ञात कॉन्फ़िग {{config}} को संदर्भित करता है।",
+      "raw_validation_step_object": "चरण {{index}} एक ऑब्जेक्ट होना चाहिए।",
+      "raw_validation_step_setting_duplicate": "सेटिंग {{setting}} कई चरणों को असाइन की गई है।",
+      "raw_validation_step_setting_reference": "चरण {{index}} में एक अमान्य सेटिंग संदर्भ शामिल है।",
+      "raw_validation_step_setting_unknown": "चरण {{index}} अज्ञात सेटिंग {{setting}} को संदर्भित करता है।",
+      "raw_validation_step_title": "चरण {{index}} का एक शीर्षक होना चाहिए।",
+      "raw_validation_steps_required": "एक टेम्पलेट में कम से कम एक चरण होना चाहिए।",
       "readonly_db": "डेटाबेस वर्तमान में केवल-पढ़ने के लिए है। टेम्पलेट नहीं बदले जा सकते।",
       "readonly_method": "यह टेम्पलेट {{method}} प्रक्रिया द्वारा बनाया गया था और इसे UI से संपादित नहीं किया जा सकता है।",
       "readonly_title": "केवल-पढ़ने के लिए",
@@ -1252,8 +1375,6 @@
       "select_config_placeholder": "एक कॉन्फ़िगरेशन चुनें",
       "select_config_type_placeholder": "एक प्रकार चुनें",
       "select_setting_placeholder": "एक सेटिंग चुनें",
-      "settings": "सेटिंग्स",
-      "settings_help": "इस टेम्पलेट द्वारा उजागर की गई सेटिंग्स और उनके डिफ़ॉल्ट मानों को परिभाषित करें।",
       "setting_remove_confirm": "क्या आप वाकई इस टेम्पलेट से यह सेटिंग हटाना चाहते हैं?",
       "setting_remove_key": "सेटिंग",
       "setting_remove_title": "सेटिंग हटाएं",
@@ -1277,6 +1398,9 @@
       "setting_selector_pattern": "पैटर्न",
       "setting_selector_search_label": "एक मल्टीसाइट सेटिंग खोजें",
       "setting_selector_search_placeholder": "लेबल, कुंजी, या प्लगइन द्वारा खोजें",
+      "setting_toggle_enabled": "सक्षम",
+      "settings": "सेटिंग्स",
+      "settings_help": "इस टेम्पलेट द्वारा उजागर की गई सेटिंग्स और उनके डिफ़ॉल्ट मानों को परिभाषित करें।",
       "step_configs_empty": "इस चरण में अभी तक कोई कॉन्फ़िगरेशन नहीं जोड़ा गया है।",
       "step_configs_selection_title": "मौजूदा कॉन्फ़िगरेशन चुनें",
       "step_default_title": "शीर्षकहीन चरण",
@@ -1306,61 +1430,9 @@
       "validation_configs_unique": "प्रत्येक कॉन्फ़िगरेशन नाम अद्वितीय होना चाहिए।",
       "validation_id_required": "टेम्पलेट आईडी आवश्यक है।",
       "validation_setting_key": "प्रत्येक सेटिंग में एक कुंजी होनी चाहिए।",
-      "validation_settings_unique": "प्रत्येक सेटिंग कुंजी अद्वितीय होनी चाहिए।",
-      "raw_configs_help": "<code>configs</code> में प्रविष्टियां जोड़ने के लिए कॉन्फ़िग फाइलें (.conf, .cfg, .txt) अपलोड करें। प्रकार डिफ़ॉल्ट रूप से <code>server_http</code> पर सेट हैं; यदि आवश्यक हो तो JSON में समायोजित करें।",
-      "raw_configs_import_invalid": "वर्तमान JSON अमान्य होने के कारण कॉन्फ़िगरेशन आयात करने में असमर्थ।",
-      "raw_configs_import_none": "कोई कॉन्फ़िगरेशन आयात नहीं किया गया।",
-      "raw_configs_import_success": "{{count}} कॉन्फ़िग फ़ाइलें आयात की गईं।",
-      "raw_configs_note": "आयातित फ़ाइलें JSON संपादक में जोड़ी जाती हैं। सहेजने से पहले समीक्षा करें और समायोजित करें।",
-      "raw_configs_title": "कस्टम कॉन्फ़िग आयात",
-      "raw_configs_upload": "कॉन्फ़िग फाइलें अपलोड करें (.conf, .cfg, .txt)",
-      "raw_configs_upload_failed": "चयनित फ़ाइलों में से एक को पढ़ने में असमर्थ।",
-      "raw_configs_browse": "फ़ाइलें ब्राउज़ करें",
-      "raw_configs_drop_hint": "कॉन्फ़िग फ़ाइलों को यहाँ खींचें और छोड़ें या ब्राउज़ करने के लिए क्लिक करें (.conf, .cfg, .txt)",
-      "raw_configs_drop_supported": "समर्थित प्रारूप: .conf, .cfg, .txt",
-      "raw_configs_empty": "अभी तक कोई आयातित कॉन्फ़िग फ़ाइल नहीं है। नई फ़ाइलें नीचे दिखाई देंगी।",
-      "raw_editor_help": "संपूर्ण टेम्पलेट परिभाषा को JSON के रूप में संपादित करें। आसान मोड पर वापस स्विच करने से विज़ुअल संपादक मान्य और पुनः लोड हो जाता है।",
-      "raw_editor_import_success": "टेम्पलेट JSON सफलतापूर्वक आयात किया गया।",
-      "raw_editor_title": "रॉ टेम्पलेट JSON",
-      "raw_editor_upload_empty": "अपलोड की गई फ़ाइल खाली है।",
-      "raw_editor_upload_failed": "चयनित फ़ाइल को पढ़ने में असमर्थ।",
-      "raw_editor_upload_template": "टेम्पलेट JSON अपलोड करें (.json केवल)",
-      "raw_validation_configs_unassigned": "कॉन्फ़िगरेशन {{configs}} किसी भी चरण को असाइन नहीं किए गए हैं।",
-      "raw_validation_config_definition": "अमान्य कॉन्फ़िग परिभाषा।",
-      "raw_validation_config_object": "कॉन्फ़िगरेशन प्रविष्टियां ऑब्जेक्ट होनी चाहिए।",
-      "raw_validation_empty": "टेम्पलेट JSON खाली नहीं हो सकता।",
-      "raw_validation_invalid_json": "अमान्य JSON पेलोड: {{error}}",
-      "raw_validation_object": "टेम्पलेट पेलोड एक JSON ऑब्जेक्ट होना चाहिए।",
-      "raw_validation_setting_key": "सेटिंग कुंजी गैर-रिक्त स्ट्रिंग होनी चाहिए।",
-      "raw_validation_settings_object": "सेटिंग्स को एक ऑब्जेक्ट के रूप में प्रदान किया जाना चाहिए।",
-      "raw_validation_step_config_duplicate": "कॉन्फ़िगरेशन {{config}} कई चरणों को असाइन किया गया है।",
-      "raw_validation_step_config_reference": "चरण {{index}} में एक अमान्य कॉन्फ़िग संदर्भ शामिल है।",
-      "raw_validation_step_config_unknown": "चरण {{index}} अज्ञात कॉन्फ़िग {{config}} को संदर्भित करता है।",
-      "raw_validation_step_object": "चरण {{index}} एक ऑब्जेक्ट होना चाहिए।",
-      "raw_validation_step_setting_duplicate": "सेटिंग {{setting}} कई चरणों को असाइन की गई है।",
-      "raw_validation_step_setting_reference": "चरण {{index}} में एक अमान्य सेटिंग संदर्भ शामिल है।",
-      "raw_validation_step_setting_unknown": "चरण {{index}} अज्ञात सेटिंग {{setting}} को संदर्भित करता है।",
-      "raw_validation_step_title": "चरण {{index}} का एक शीर्षक होना चाहिए।",
-      "raw_validation_steps_required": "एक टेम्पलेट में कम से कम एक चरण होना चाहिए।",
-      "raw_validation_settings_unassigned": "सेटिंग्स {{settings}} किसी भी चरण को असाइन नहीं की गई हैं।",
-      "raw_editor_drop_hint": "वर्तमान सामग्री को बदलने के लिए एक टेम्पलेट JSON फ़ाइल (.json केवल) छोड़ें।",
-      "raw_editor_override_title": "टेम्पलेट JSON बदलें?",
-      "raw_editor_override_body": "इस फ़ाइल को आयात करने से वर्तमान टेम्पलेट JSON पूरी तरह से बदल जाएगा। संपादक में किए गए परिवर्तन खो जाएंगे। क्या आप जारी रखना चाहते हैं?",
-      "raw_editor_override_confirm": "टेम्पलेट बदलें",
-      "missing_configs_title": "लुप्त कस्टम कॉन्फ़िगरेशन",
-      "missing_configs_body": "आयातित टेम्पलेट कस्टम कॉन्फ़िगरेशन को संदर्भित करता है जो अभी तक अपलोड नहीं किए गए हैं। टेम्पलेट सेटअप को पूरा करने के लिए कृपया इन कॉन्फ़िगरेशन को आयात करें:",
-      "missing_configs_hint_title": "टिप:",
-      "missing_configs_hint_body": "अपलोड की गई फ़ाइलें स्वचालित रूप से आपके टेम्पलेट में जोड़ दी जाएंगी। सुनिश्चित करें कि फ़ाइल नाम ऊपर सूचीबद्ध लुप्त कॉन्फ़िगरेशन से मेल खाते हैं।",
-      "missing_configs_upload_label": "लुप्त कॉन्फ़िगरेशन अपलोड करें (.conf, .cfg, .txt)",
-      "missing_configs_drop_hint": "कॉन्फ़िग फ़ाइलों को यहाँ खींचें और छोड़ें (.conf, .cfg, .txt)",
-      "missing_configs_drop_or": "या",
-      "missing_configs_browse": "फ़ाइलें ब्राउज़ करें",
-      "missing_configs_done": "हो गया",
-      "missing_configs_upload_success": "{{count}} कॉन्फ़िग फ़ाइलें सफलतापूर्वक अपलोड की गईं",
-      "missing_configs_upload_partial": "{{total}} कॉन्फ़िग में से {{uploaded}} अपलोड किए गए। अभी भी लुप्त: {{missing}}",
-      "missing_configs_upload_failed": "कॉन्फ़िग फ़ाइलें अपलोड करने में विफल",
-      "missing_configs_resolved": "सभी लुप्त कॉन्फ़िगरेशन अपलोड किए गए हैं! टेम्पलेट सफलतापूर्वक आयात किया गया।"
-    }
+      "validation_settings_unique": "प्रत्येक सेटिंग कुंजी अद्वितीय होनी चाहिए।"
+    },
+    "none": "कोई टेम्पलेट नहीं"
   },
   "theme": {
     "dark": "डार्क",
@@ -1375,19 +1447,22 @@
     },
     "copied": "कॉपी किया गया!",
     "disclaimer_title": "अस्वीकरण",
+    "global_settings_applied_body": "ग्लोबल सेटिंग्स सफलतापूर्वक प्राप्त की गईं और वर्तमान फ़ॉर्म पर लागू की गईं।",
+    "global_settings_applied_title": "ग्लोबल सेटिंग्स लागू की गईं",
+    "global_settings_failed_body": "ग्लोबल सेटिंग्स प्राप्त करते समय एक त्रुटि हुई।",
+    "global_settings_failed_title": "ग्लोबल सेटिंग्स प्राप्त करने में विफल",
     "header": {
       "ping_failed": "पिंग विफल",
       "ping_succeed": "पिंग सफल"
     },
-    "ip_unbanned": "आईपी पते का प्रतिबंध सफलतापूर्वक हटाया गया!",
-    "global_settings_applied_title": "ग्लोबल सेटिंग्स लागू की गईं",
-    "global_settings_applied_body": "ग्लोबल सेटिंग्स सफलतापूर्वक प्राप्त की गईं और वर्तमान फ़ॉर्म पर लागू की गईं।",
-    "global_settings_failed_title": "ग्लोबल सेटिंग्स प्राप्त करने में विफल",
-    "global_settings_failed_body": "ग्लोबल सेटिंग्स प्राप्त करते समय एक त्रुटि हुई।"
+    "ip_unbanned": "आईपी पते का प्रतिबंध सफलतापूर्वक हटाया गया!"
   },
   "tooltip": {
     "auto_lets_encrypt": "क्या स्वचालित रूप से Let's Encrypt प्रमाणपत्र का अनुरोध करना है।",
     "button": {
+      "ban_ip": "इस IP पते को प्रतिबंधित करें",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "सेवा {{name}} को ड्राफ्ट में बदलें",
       "convert_service_to_online": "सेवा {{name}} को ऑनलाइन में बदलें",
       "delete_config": "कस्टम कॉन्फ़िगरेशन {{name}} हटाएं",
@@ -1396,17 +1471,17 @@
       "delete_plugin": "प्लगइन {{name}} हटाएं",
       "delete_service": "सेवा {{name}} हटाएं",
       "delete_template": "टेम्पलेट {{name}} हटाएं",
+      "force_check": "एक जांच शेड्यूल करता है; केवल अपडेट होने पर डाउनलोड करता है।",
+      "force_update": "जांचों को छोड़कर PRO प्लगइन्स का फोर्स डाउनलोड; विफल होने पर वर्तमान स्थिति बनी रहती है।",
       "ping_instance": "पिंग इंस्टेंस {{hostname}}",
       "reload_instance": "इंस्टेंस {{hostname}} पुनः लोड करें",
       "reset_default": "डिफ़ॉल्ट मान पर रीसेट करें",
       "reset_global": "वैश्विक मान पर रीसेट करें",
-      "value_from_global": "ग्लोबल कॉन्फ़िगरेशन से मान",
       "run_job": "कार्य {{job}} चलाएं",
+      "show_selected_only": "केवल चयनित दिखाएं",
       "stop_instance": "इंस्टेंस {{hostname}} रोकें",
       "unban_ip": "{{ip}} का प्रतिबंध हटाएं",
-      "ban_ip": "इस IP पते को प्रतिबंधित करें",
-      "force_check": "एक जांच शेड्यूल करता है; केवल अपडेट होने पर डाउनलोड करता है।",
-      "force_update": "जांचों को छोड़कर PRO प्लगइन्स का फोर्स डाउनलोड; विफल होने पर वर्तमान स्थिति बनी रहती है।"
+      "value_from_global": "ग्लोबल सेटिंग्स से मान"
     },
     "cannot_delete_original_ban": "मूल प्रतिबंध प्रविष्टि को हटाया नहीं जा सकता।",
     "cannot_remove_disabled": "हटाया नहीं जा सकता क्योंकि एक या अधिक सेटिंग्स अक्षम हैं।",
@@ -1444,15 +1519,16 @@
     "dns_provider_dns_only": "DNS प्रदाता चयन केवल DNS चुनौतियों के लिए लागू होता है।",
     "download_file": "फ़ाइल डाउनलोड करें",
     "draft_toggle_disabled": "ड्राफ्ट मोड केवल UI के माध्यम से बनाई गई सेवाओं पर टॉगल किया जा सकता है।",
-    "email_lets_encrypt": "प्रमाणपत्र प्रबंधन और सूचनाओं के लिए Let's Encrypt के साथ पंजीकरण करने हेतु ईमेल पता।",
     "email_length": "ईमेल 1 और 256 वर्णों के बीच होना चाहिए।",
-    "follow_latest_page_only": "फ़ॉलो मोड केवल नवीनतम पृष्ठ पर उपलब्ध है",
+    "email_lets_encrypt": "प्रमाणपत्र प्रबंधन और सूचनाओं के लिए Let's Encrypt के साथ पंजीकरण करने हेतु ईमेल पता।",
     "fetch_global_settings": "ग्लोबल सेटिंग्स लाएँ और उन्हें वर्तमान टेम्पलेट पर लागू करें",
-    "global_config_source": "मान वैश्विक कॉन्फ़िगरेशन से विरासत में मिला है।",
+    "follow_latest_page_only": "फ़ॉलो मोड केवल नवीनतम पृष्ठ पर उपलब्ध है",
+    "global_settings_source": "मान ग्लोबल सेटिंग्स से विरासत में मिला है।",
     "instance_not_up": "इंस्टेंस {{hostname}} वर्तमान में प्रतिक्रिया नहीं दे रहा है ('up')।",
     "latest_version_installed": "आप नवीनतम संस्करण चला रहे हैं।",
     "lets_encrypt_custom_profile": "Let's Encrypt के लिए उपयोग करने हेतु कस्टम प्रोफ़ाइल (जैसे 'my_custom_profile')।",
     "lets_encrypt_disable_public_suffixes": "सार्वजनिक प्रत्यय सूची से मेल खाने वाले डोमेन के लिए प्रमाणपत्र अनुरोध अक्षम करें (अनुशंसित)।",
+    "lets_encrypt_server": "प्रदाता-विशिष्ट सेटिंग्स दिखाने के लिए अपना प्रमाणपत्र प्रदाता चुनें।",
     "lets_encrypt_profile": "Let's Encrypt के लिए उपयोग करने हेतु प्रोफ़ाइल (classic, tlsserver, shortlived)।",
     "license_key": "आपकी BunkerWeb PRO लाइसेंस कुंजी।",
     "link": {
@@ -1460,16 +1536,17 @@
       "access_service": "एक्सेस सेवा {{name}}",
       "clone_config": "क्लोन कस्टम कॉन्फ़िगरेशन {{name}}",
       "clone_service": "क्लोन सेवा {{name}}",
+      "clone_template": "टेम्पलेट {{template}} क्लोन करें",
       "download_file": "डाउनलोड {{filename}}",
       "edit_config": "कस्टम कॉन्फ़िगरेशन {{name}} संपादित करें",
       "edit_service": "सेवा {{service}} संपादित करें",
+      "edit_template": "टेम्पलेट {{template}} संपादित करें",
+      "export_config": "कस्टम कॉन्फ़िगरेशन {{name}} निर्यात करें",
       "export_service": "सेवा {{name}} कॉन्फ़िगरेशन निर्यात करें",
       "view_config": "कस्टम कॉन्फ़िगरेशन {{name}} देखें",
       "view_file": "देखें {{filename}}",
       "view_service": "सेवा {{service}} देखें",
-      "edit_template": "टेम्पलेट {{template}} संपादित करें",
-      "view_template": "टेम्पलेट {{template}} देखें",
-      "clone_template": "टेम्पलेट {{template}} क्लोन करें"
+      "view_template": "टेम्पलेट {{template}} देखें"
     },
     "modal": {
       "title": {
@@ -1500,20 +1577,6 @@
       "yes": "STREAM मोड का समर्थन करता।"
     },
     "table": {
-      "templates": {
-        "actions": "इस टेम्पलेट के लिए उपलब्ध क्रियाएँ",
-        "details": "टेम्पलेट विवरण दिखाएँ",
-        "select_all": "सभी टेम्पलेट चुनें",
-        "id": "टेम्पलेट का आईडी",
-        "name": "उपयोगकर्ता-परिभाषित या स्वतः निर्मित टेम्पलेट नाम",
-        "plugin": "टेम्पलेट वाला प्लगइन",
-        "steps": "टेम्पलेट के चरणों की संख्या",
-        "settings": "टेम्पलेट की सेटिंग्स की संख्या",
-        "configs": "टेम्पलेट के कॉन्फ़िग्स की संख्या",
-        "method": "टेम्पलेट बनाने की विधि",
-        "created": "टेम्पलेट बनाने की तारीख",
-        "last_update": "टेम्पलेट का अंतिम अपडेट"
-      },
       "bans": {
         "actions": "इस प्रतिबंध के लिए उपलब्ध कार्रवाइयाँ",
         "country": "प्रतिबंधित आईपी पते का देश",
@@ -1545,6 +1608,7 @@
         "name": "कस्टम कॉन्फ़िगरेशन का नाम",
         "select_all": "सभी कस्टम कॉन्फ़िगरेशन चुनें",
         "service": "कस्टम कॉन्फ़िगरेशन से जुड़ी सेवा (या वैश्विक)",
+        "status": "कस्टम कॉन्फ़िगरेशन की ड्राफ़्ट स्थिति",
         "template": "इंगित करता है कि कस्टम कॉन्फ़िगरेशन एक टेम्पलेट से उत्पन्न हुआ है या नहीं",
         "type": "कस्टम कॉन्फ़िगरेशन का प्रकार या संदर्भ (उदाहरण के लिए, HTTP, MODSEC)"
       },
@@ -1608,9 +1672,24 @@
         "last_update": "सेवा को अंतिम बार अपडेट करने की तारीख और समय",
         "method": "सेवा की निर्माण विधि (उदाहरण के लिए, ui, file)",
         "name": "सेवा का नाम",
+        "security_mode": "सेवा का सुरक्षा मोड (ब्लॉक या पता लगाना)",
         "select_all": "सभी सेवाएं चुनें",
         "template": "सेवा द्वारा उपयोग किया गया टेम्पलेट",
         "type": "सेवा प्रकार (ऑनलाइन/ड्राफ्ट)"
+      },
+      "templates": {
+        "actions": "इस टेम्पलेट के लिए उपलब्ध क्रियाएँ",
+        "configs": "टेम्पलेट के कॉन्फ़िग्स की संख्या",
+        "created": "टेम्पलेट बनाने की तारीख",
+        "details": "टेम्पलेट विवरण दिखाएँ",
+        "id": "टेम्पलेट का आईडी",
+        "last_update": "टेम्पलेट का अंतिम अपडेट",
+        "method": "टेम्पलेट बनाने की विधि",
+        "name": "उपयोगकर्ता-परिभाषित या स्वतः निर्मित टेम्पलेट नाम",
+        "plugin": "टेम्पलेट वाला प्लगइन",
+        "select_all": "सभी टेम्पलेट चुनें",
+        "settings": "टेम्पलेट की सेटिंग्स की संख्या",
+        "steps": "टेम्पलेट के चरणों की संख्या"
       }
     },
     "ui_host": "वह होस्टनाम या आईपी पता जो रिवर्स प्रॉक्सी के माध्यम से BunkerWeb UI परोसगा।",
@@ -1618,13 +1697,19 @@
     "ui_url_security": "एक गैर-मानक, अनुमान लगाने में मुश्किल URL पथ का उपयोग सुरक्षा बढ़ाता है।",
     "use_custom_ssl": "क्या Let's Encrypt के बजाय कस्टम SSL प्रमाणपत्र का उपयोग करना है।",
     "use_lets_encrypt_staging": "क्या परीक्षण के लिए Let's Encrypt स्टेजिंग वातावरण का उपयोग करना है (अविश्वसनीय प्रमाणपत्र उत्पन्न करता है)।",
+    "use_lets_encrypt_staging_letsencrypt_only": "Let's Encrypt स्टेजिंग केवल तब उपलब्ध है जब Let's Encrypt सर्वर का उपयोग किया जाता है।",
     "use_proxy_protocol": "PROXY प्रोटोकॉल संचार सक्षम करें।",
     "use_real_ip": "वास्तविक आईपी का उपयोग करें",
     "username_length": "उपयोगकर्ता नाम 1 और 256 वर्णों के बीच होना चाहिए।",
-    "value_from_global": "ग्लोबल कॉन्फ़िगरेशन से मान लाएँ",
+    "value_from_global": "ग्लोबल सेटिंग्स से मान लाएँ",
     "view_full_url": "पूर्ण URL देखने के लिए क्लिक करें",
     "wildcard_certificates": "वाइल्डकार्ड प्रमाणपत्र (*.domain.com) उत्पन्न करें। DNS चुनौती की आवश्यकता है।",
-    "wildcard_dns_only": "वाइल्डकार्ड प्रमाणपत्र केवल DNS चुनौती प्रकार के साथ समर्थित हैं।"
+    "wildcard_dns_only": "वाइल्डकार्ड प्रमाणपत्र केवल DNS चुनौती प्रकार के साथ समर्थित हैं।",
+    "zerossl_api_key": "zerossl-bot द्वारा उपयोग की जाने वाली वैकल्पिक ZeroSSL API कुंजी।",
+    "zerossl_api_retry": "ZeroSSL API अनुरोधों के लिए पुनः प्रयासों की संख्या (0 पुनः प्रयास बंद करता है)।",
+    "zerossl_api_retry_delay": "ZeroSSL API पुनः प्रयासों के बीच सेकंड में विलंब।",
+    "zerossl_api_connect_timeout": "ZeroSSL API कॉल के लिए सेकंड में कनेक्शन टाइमआउट।",
+    "zerossl_api_max_time": "प्रत्येक ZeroSSL API अनुरोध के लिए सेकंड में अधिकतम कुल समय।"
   },
   "totp": {
     "prompt": "कृपया अपना TOTP कोड दर्ज करें।"
@@ -1638,6 +1723,7 @@
     "ip_service_duplicate": "यह आईपी पता चयनित सेवा ({{service}}) के लिए पहले से ही प्रतिबंधित है।",
     "pattern": "कृपया {{field}} के लिए एक मान्य मान दर्ज करें।",
     "required": "{{field}} आवश्यक है।",
-    "service_required_for_ban": "सेवा-विशिष्ट प्रतिबंध के लिए एक सेवा का चयन किया जाना चाहिए।"
+    "service_required_for_ban": "सेवा-विशिष्ट प्रतिबंध के लिए एक सेवा का चयन किया जाना चाहिए।",
+    "zerossl_email_or_api_key_required": "ZeroSSL के लिए ईमेल या ZeroSSL API कुंजी में से एक आवश्यक है।"
   }
 }

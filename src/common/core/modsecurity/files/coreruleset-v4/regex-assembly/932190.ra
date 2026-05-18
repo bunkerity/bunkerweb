@@ -1,0 +1,19 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Detect glob evasion in shell paths, e.g.,
+##! - /bin/cat: /???/??t
+##! - /etc/passwd: /???/??ss??
+##! - /bin/bash: /???/b??h
+
+##! Look for something that looks like a path (leading forward slash),
+##! followed by one of the glob meta characters and them valid command
+##! name and path components. Also look for the meta characters in later
+##! positions than at the beginning.
+
+##!+ i
+
+/
+##!=>
+[?*]+[\w/]
+[\w/]+[?*]

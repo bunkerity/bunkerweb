@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# Detect if running on FreeBSD and delegate to FreeBSD-specific script
+if [ "$(uname)" = "FreeBSD" ]; then
+    if [ -f /usr/share/bunkerweb/scripts/afterRemoveFreeBSD.sh ]; then
+        exec /usr/share/bunkerweb/scripts/afterRemoveFreeBSD.sh "$@"
+    else
+        echo "❌ FreeBSD afterRemove script not found"
+        exit 1
+    fi
+fi
+
 # Function to run a command and check its return code
 function do_and_check_cmd() {
     output=$("$@" 2>&1)
@@ -168,6 +178,9 @@ case "$1" in
         fi
         if [ -f /etc/bunkerweb/api.env ]; then
             do_and_check_cmd cp -f /etc/bunkerweb/api.env /var/tmp/api.env
+        fi
+        if [ -f /etc/bunkerweb/api.yml ]; then
+            do_and_check_cmd cp -f /etc/bunkerweb/api.yml /var/tmp/api.yml
         fi
         if [ -f /var/lib/bunkerweb/db.sqlite3 ]; then
             do_and_check_cmd cp -f /var/lib/bunkerweb/db.sqlite3 /var/tmp/db.sqlite3

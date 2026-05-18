@@ -1,4 +1,4 @@
-FROM python:3.10-alpine@sha256:24cab748bf7bd8e3d2f9bb4e5771f17b628417527a4e1f2c59c370c2a8a27f1c
+FROM python:3.11-alpine@sha256:d174db33fa506083fbd941b265f7bae699e7c338c77c415f85dddff4f176d1de
 
 # Install python dependencies
 RUN apk add --no-cache --virtual .build-deps \
@@ -13,14 +13,15 @@ WORKDIR /usr/share/migration
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
-  pip install --no-cache-dir --require-hashes -r /tmp/req/requirements-db.txt
+  pip install --no-cache-dir --require-hashes -r /tmp/req/requirements-db.txt && \
+  pip install psycopg2
 
 # Install dependencies
 RUN apk add --no-cache bash sed curl mariadb-connector-c mariadb-client postgresql-client sqlite tzdata
 
 # Cleanup
 RUN apk del .build-deps && \
-rm -rf /var/cache/apk/*
+  rm -rf /var/cache/apk/*
 
 # Copy files
 COPY src/common/db/alembic/alembic.ini alembic.ini

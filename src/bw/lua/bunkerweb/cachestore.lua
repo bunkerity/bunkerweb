@@ -103,8 +103,14 @@ function cachestore:get(key)
 	local value, err, hit_level
 	if self.use_redis and is_cosocket_available() then
 		value, err, hit_level = cache:get(key, nil, callback, key, self.clusterstore)
-	else
+	elseif is_cosocket_available() then
 		value, err, hit_level = cache:get(key, nil, callback_no_miss)
+	else
+		-- Phases like set_by_lua* and log_by_lua* don't support cosocket APIs
+		-- (ngx.sleep), which mlcache's resty.lock uses internally on contention.
+		-- Passing nil as callback skips the lock/callback path entirely while
+		-- still checking L1 (worker LRU) and L2 (shared dict).
+		value, err, hit_level = cache:get(key, nil, nil)
 	end
 	if value == nil and err ~= nil then
 		return false, err
@@ -122,6 +128,8 @@ function cachestore:set(key, value, ex)
 			logger:log(ERR, err)
 		end
 	end
+	-- mlcache:set() only uses shared dict + IPC broadcast (no locks or ngx.sleep),
+	-- so it is safe to call in any NGINX phase including set_by_lua* and log_by_lua*.
 	if ex then
 		ok, err = cache:set(key, { ttl = ex }, value)
 	else
@@ -174,8 +182,8 @@ function cachestore:del_redis(key)
 	if not ok then
 		return false, "can't connect to redis : " .. err
 	end
-	-- Set value with ttl
-	local _, err = self.clusterstore:del(key)
+	-- Delete key
+	local _, err = self.clusterstore:call("del", key)
 	if err then
 		self.clusterstore:close()
 		return false, "DEL failed : " .. err
@@ -191,6 +199,11 @@ end
 
 -- luacheck: ignore 212
 function cachestore:update()
+	-- mlcache:update() polls IPC events via ipc.lua which calls ngx.sleep().
+	-- This is not available in set_by_lua* / log_by_lua* contexts.
+	if not is_cosocket_available() then
+		return true
+	end
 	return cache:update()
 end
 

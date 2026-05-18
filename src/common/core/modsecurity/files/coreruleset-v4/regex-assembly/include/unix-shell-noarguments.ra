@@ -1,0 +1,34 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! This list contains a curated set of commands that can be meaningfully executed with no arguments.
+
+aptitude
+df
+dir
+dmesg
+env
+history
+hostname
+htop
+id
+iostat
+last
+ls
+mysql
+mysql~
+ps
+psql
+pwd
+reboot
+screen
+set
+shutdown
+su
+top
+uname
+vmstat
+w
+who
+whoami
+whois

@@ -1,46 +1,25 @@
 from contextlib import suppress
-from typing import Any, Dict, List, Optional
-from re import compile as re_compile, sub as re_sub
+from typing import Annotated, Any, Dict, List, Optional
+from re import sub as re_sub
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, UploadFile, File, Form
+from fastapi import APIRouter, Depends, UploadFile, File, Form, Path as PathParam, Query
 from fastapi.responses import JSONResponse
 
 from ..auth.guard import guard
 from ..utils import get_db
-from ..schemas import ConfigCreateRequest, ConfigUpdateRequest, ConfigsDeleteRequest, ConfigKey
-
+from ..schemas import (
+    ConfigCreateRequest,
+    ConfigUpdateRequest,
+    ConfigsDeleteRequest,
+    ConfigKey,
+    ConfigType,
+    OptionalConfigType,
+    validate_config_name,
+)
 
 router = APIRouter(prefix="/configs", tags=["configs"])
-
-_NAME_RX = re_compile(r"^[\w_-]{1,255}$")
-
-# Accepted config types (normalized form).
-_CONFIG_TYPES = {
-    # HTTP-level
-    "http",
-    "server_http",
-    "default_server_http",
-    # ModSecurity
-    "modsec_crs",
-    "modsec",
-    # Stream
-    "stream",
-    "server_stream",
-    # CRS plugins
-    "crs_plugins_before",
-    "crs_plugins_after",
-}
-
-
-def _normalize_type(t: str) -> str:
-    return t.strip().replace("-", "_").lower()
-
-
-def _validate_name(name: str) -> Optional[str]:
-    if not name or not _NAME_RX.match(name):
-        return "Invalid name: must match ^[\\w_-]{1,255}$"
-    return None
+EDITABLE_METHODS = {"api", "ui"}
 
 
 def _sanitize_name_from_filename(filename: str) -> str:
@@ -58,7 +37,7 @@ def _service_exists(service: Optional[str]) -> bool:
     db = get_db()
     try:
         conf = db.get_config(global_only=True, methods=False, with_drafts=True)
-        return service in (conf.get("SERVER_NAME", "") or "").split(" ")
+        return service in (conf.get("SERVER_NAME", "www.example.com") or "").split()
     except Exception:
         return False
 
@@ -74,7 +53,12 @@ def _decode_data(val: bytes | str | None) -> str:
 
 
 @router.get("", dependencies=[Depends(guard)])
-def list_configs(service: Optional[str] = None, type: Optional[str] = None, with_drafts: bool = True, with_data: bool = False) -> JSONResponse:  # noqa: A002
+def list_configs(
+    service: Optional[str] = None,
+    type: Annotated[OptionalConfigType, Query(description="Config type filter")] = None,  # noqa: A002
+    with_drafts: bool = True,
+    with_data: bool = False,
+) -> JSONResponse:
     """List custom configs.
 
     Query params:
@@ -85,7 +69,7 @@ def list_configs(service: Optional[str] = None, type: Optional[str] = None, with
     """
     db = get_db()
     s_filter = None if (service in (None, "", "global")) else service
-    t_filter = _normalize_type(type) if type else None  # type: ignore[arg-type]
+    t_filter = type  # Already normalized by Pydantic
     items = db.get_custom_configs(with_drafts=with_drafts, with_data=with_data)
 
     out: List[Dict[str, Any]] = []
@@ -99,6 +83,7 @@ def list_configs(service: Optional[str] = None, type: Optional[str] = None, with
             data["data"] = _decode_data(it.get("data"))
         # Normalize global service presentation
         data["service"] = data.pop("service_id", None) or "global"
+        data["is_draft"] = bool(it.get("is_draft", False))
         out.append(data)
 
     return JSONResponse(status_code=200, content={"status": "success", "configs": out})
@@ -108,7 +93,8 @@ def list_configs(service: Optional[str] = None, type: Optional[str] = None, with
 async def upload_configs(
     files: List[UploadFile] = File(..., description="One or more config files to create"),
     service: Optional[str] = Form(None, description='Service id; use "global" or leave empty for global'),
-    type: str = Form(..., description="Config type, e.g., http, server_http, modsec, ..."),  # noqa: A002
+    type: Annotated[ConfigType, Form(description="Config type")] = ...,  # noqa: A002
+    is_draft: bool = Form(False, description="Mark uploaded custom configs as draft"),
 ) -> JSONResponse:
     """Create new custom configs from uploaded files (method="api").
 
@@ -121,9 +107,7 @@ async def upload_configs(
         type: Config type
     """
     s_id = None if service in (None, "", "global") else service
-    ctype = _normalize_type(type)
-    if ctype not in _CONFIG_TYPES:
-        return JSONResponse(status_code=422, content={"status": "error", "message": "Invalid type"})
+    ctype = type  # Already normalized by Pydantic
     if not _service_exists(s_id):
         return JSONResponse(status_code=404, content={"status": "error", "message": "Service not found"})
 
@@ -135,7 +119,7 @@ async def upload_configs(
         try:
             filename = f.filename or ""
             name = _sanitize_name_from_filename(filename)
-            err = _validate_name(name)
+            err = validate_config_name(name)
             if err:
                 errors.append({"file": filename or name, "error": err})
                 continue
@@ -156,7 +140,7 @@ async def upload_configs(
             error = db.upsert_custom_config(
                 ctype,
                 name,
-                {"service_id": s_id, "type": ctype, "name": name, "data": config_content, "method": "api"},
+                {"service_id": s_id, "type": ctype, "name": name, "data": config_content, "method": "api", "is_draft": is_draft},
                 service_id=s_id,
                 new=True,
             )
@@ -177,7 +161,12 @@ async def upload_configs(
 
 
 @router.get("/{service}/{config_type}/{name}", dependencies=[Depends(guard)])
-def get_config(service: str, config_type: str, name: str, with_data: bool = True) -> JSONResponse:
+def get_config(
+    service: str,
+    config_type: Annotated[ConfigType, PathParam(description="Config type")],
+    name: str,
+    with_data: bool = True,
+) -> JSONResponse:
     """Get a specific custom config.
 
     Args:
@@ -188,7 +177,7 @@ def get_config(service: str, config_type: str, name: str, with_data: bool = True
     """
     db = get_db()
     s_id = None if service in (None, "", "global") else service
-    ctype = _normalize_type(config_type)
+    ctype = config_type  # Already normalized by Pydantic
     item = db.get_custom_config(ctype, name, service_id=s_id, with_data=with_data)
     if not item:
         return JSONResponse(status_code=404, content={"status": "error", "message": "Config not found"})
@@ -196,6 +185,7 @@ def get_config(service: str, config_type: str, name: str, with_data: bool = True
     if with_data:
         data["data"] = _decode_data(item.get("data"))
     data["service"] = data.pop("service_id", None) or "global"
+    data["is_draft"] = bool(item.get("is_draft", False))
     return JSONResponse(status_code=200, content={"status": "success", "config": data})
 
 
@@ -213,13 +203,14 @@ def create_config(req: ConfigCreateRequest) -> JSONResponse:
     ctype = req.type
     name = req.name
     data = req.data
+    is_draft = req.is_draft
     if not _service_exists(service):
         return JSONResponse(status_code=404, content={"status": "error", "message": "Service not found"})
 
     error = get_db().upsert_custom_config(
         ctype,
         name,
-        {"service_id": service, "type": ctype, "name": name, "data": data, "method": "api"},
+        {"service_id": service, "type": ctype, "name": name, "data": data, "method": "api", "is_draft": is_draft},
         service_id=service,
         new=True,
     )
@@ -230,44 +221,57 @@ def create_config(req: ConfigCreateRequest) -> JSONResponse:
 
 
 @router.patch("/{service}/{config_type}/{name}", dependencies=[Depends(guard)])
-def update_config(service: str, config_type: str, name: str, req: ConfigUpdateRequest) -> JSONResponse:
-    """Update or move a custom config. Only configs managed by method "api" or template-derived ones can be edited via API."""
+def update_config(
+    service: str,
+    config_type: Annotated[ConfigType, PathParam(description="Config type")],
+    name: str,
+    req: ConfigUpdateRequest,
+) -> JSONResponse:
+    """Update or move a custom config. Only configs managed by method "api"/"ui" or template-derived ones can be edited via API."""
     s_orig = None if service in (None, "", "global") else service
-    ctype_orig = _normalize_type(config_type)
+    ctype_orig = config_type  # Already normalized by Pydantic
     name_orig = name
 
     db = get_db()
     current = db.get_custom_config(ctype_orig, name_orig, service_id=s_orig, with_data=True)
     if not current:
         return JSONResponse(status_code=404, content={"status": "error", "message": "Config not found"})
-    # Enforce ownership similar to UI: allow editing only if current method is "api" or the item is template-derived
-    if not current.get("template") and current.get("method") != "api":
-        return JSONResponse(status_code=403, content={"status": "error", "message": "Config is not API-managed and cannot be edited"})
+    # Enforce ownership similar to UI: allow editing only if current method is "api" or "ui", or template-derived
+    if not current.get("template") and current.get("method") not in EDITABLE_METHODS:
+        return JSONResponse(status_code=403, content={"status": "error", "message": "Config is not UI/API-managed and cannot be edited"})
 
     # New values (optional)
     service_new = req.service
     type_new = req.type if req.type is not None else current.get("type")
     name_new = req.name if req.name is not None else current.get("name")
     data_new = req.data if req.data is not None else _decode_data(current.get("data"))
+    is_draft_new = req.is_draft if req.is_draft is not None else current.get("is_draft", False)
 
     # Disallow renaming (changing the name) for template-derived configs; content edits are allowed
     if current.get("template") and name_new != current.get("name"):
         return JSONResponse(status_code=403, content={"status": "error", "message": "Renaming a template-based custom config is not allowed"})
     if not _service_exists(service_new):
         return JSONResponse(status_code=404, content={"status": "error", "message": "Service not found"})
-
     if (
         current.get("type") == type_new
         and current.get("name") == name_new
         and current.get("service_id") == service_new
         and _decode_data(current.get("data")) == data_new
+        and bool(current.get("is_draft", False)) == bool(is_draft_new)
     ):
         return JSONResponse(status_code=400, content={"status": "error", "message": "No values were changed"})
 
     error = db.upsert_custom_config(
         ctype_orig,
         name_orig,
-        {"service_id": service_new, "type": type_new, "name": name_new, "data": data_new, "method": "api"},
+        {
+            "service_id": service_new,
+            "type": type_new,
+            "name": name_new,
+            "data": data_new,
+            "method": current.get("method", "api"),
+            "is_draft": is_draft_new,
+        },
         service_id=s_orig,
     )
     if error:
@@ -279,30 +283,32 @@ def update_config(service: str, config_type: str, name: str, req: ConfigUpdateRe
 @router.patch("/{service}/{config_type}/{name}/upload", dependencies=[Depends(guard)])
 async def update_config_upload(
     service: str,
-    config_type: str,
+    config_type: Annotated[ConfigType, PathParam(description="Config type")],
     name: str,
     file: UploadFile = File(...),
     new_service: Optional[str] = Form(None),
-    new_type: Optional[str] = Form(None),
+    new_type: Annotated[OptionalConfigType, Form(description="New config type")] = None,
     new_name: Optional[str] = Form(None),
+    new_is_draft: Optional[bool] = Form(None),
 ) -> JSONResponse:
     """Update an existing custom config using an uploaded file.
 
     Optional form fields `new_service`, `new_type`, `new_name` allow moving/renaming.
     """
     s_orig = None if service in (None, "", "global") else service
-    ctype_orig = _normalize_type(config_type)
+    ctype_orig = config_type  # Already normalized by Pydantic
     name_orig = name
 
     db = get_db()
     current = db.get_custom_config(ctype_orig, name_orig, service_id=s_orig, with_data=True)
     if not current:
         return JSONResponse(status_code=404, content={"status": "error", "message": "Config not found"})
-    if not current.get("template") and current.get("method") != "api":
-        return JSONResponse(status_code=403, content={"status": "error", "message": "Config is not API-managed and cannot be edited"})
+    if not current.get("template") and current.get("method") not in EDITABLE_METHODS:
+        return JSONResponse(status_code=403, content={"status": "error", "message": "Config is not UI/API-managed and cannot be edited"})
 
-    s_new = None if new_service in (None, "", "global") else new_service
-    t_new = _normalize_type(new_type) if new_type else current.get("type")
+    # Preserve the current service unless the caller explicitly requests a move.
+    s_new = current.get("service_id") if new_service is None else (None if new_service in ("", "global") else new_service)
+    t_new = new_type or current.get("type")  # Already normalized by Pydantic if provided
     n_new = new_name.strip() if isinstance(new_name, str) and new_name else current.get("name")
     if n_new == current.get("name") and not new_name:
         # If no explicit new_name, derive name from uploaded file if different
@@ -318,27 +324,37 @@ async def update_config_upload(
     if current.get("template") and new_name and n_new != current.get("name"):
         return JSONResponse(status_code=403, content={"status": "error", "message": "Renaming a template-based custom config is not allowed"})
 
-    if t_new not in _CONFIG_TYPES:
-        return JSONResponse(status_code=422, content={"status": "error", "message": "Invalid type"})
-    err = _validate_name(n_new)
+    err = validate_config_name(n_new)
     if err:
         return JSONResponse(status_code=422, content={"status": "error", "message": err})
     if not _service_exists(s_new):
         return JSONResponse(status_code=404, content={"status": "error", "message": "Service not found"})
-
     content_bytes = await file.read()
     try:
         content = content_bytes.decode("utf-8", errors="replace")
     except Exception:
         content = ""
 
-    if current.get("type") == t_new and current.get("name") == n_new and current.get("service_id") == s_new and _decode_data(current.get("data")) == content:
+    if (
+        current.get("type") == t_new
+        and current.get("name") == n_new
+        and current.get("service_id") == s_new
+        and _decode_data(current.get("data")) == content
+        and (new_is_draft is None or bool(current.get("is_draft", False)) == bool(new_is_draft))
+    ):
         return JSONResponse(status_code=400, content={"status": "error", "message": "No values were changed"})
 
     error = db.upsert_custom_config(
         ctype_orig,
         name_orig,
-        {"service_id": s_new, "type": t_new, "name": n_new, "data": content, "method": "api"},
+        {
+            "service_id": s_new,
+            "type": t_new,
+            "name": n_new,
+            "data": content,
+            "method": current.get("method", "api"),
+            "is_draft": bool(new_is_draft) if new_is_draft is not None else current.get("is_draft", False),
+        },
         service_id=s_orig,
     )
     if error:
@@ -349,11 +365,11 @@ async def update_config_upload(
 
 @router.delete("", dependencies=[Depends(guard)])
 def delete_configs(req: ConfigsDeleteRequest) -> JSONResponse:
-    """Delete multiple API-managed custom configs.
+    """Delete multiple UI/API-managed custom configs.
 
     Body example:
     {"configs": [{"service": "global", "type": "http", "name": "my_snippet"}, ...]}
-    Only configs with method == "api" will be deleted; others are ignored.
+    Only configs with method in {"api", "ui"} will be deleted; others are ignored.
     """
     configs = req.configs
 
@@ -364,45 +380,55 @@ def delete_configs(req: ConfigsDeleteRequest) -> JSONResponse:
         return JSONResponse(status_code=422, content={"status": "error", "message": "No valid configs to delete"})
 
     db = get_db()
-    # Keep only API-managed configs not in to_del
+    # Keep only UI/API-managed configs not in to_del
     current = db.get_custom_configs(with_drafts=True, with_data=True)
-    keep: List[Dict[str, Any]] = []
+    keep_by_method: Dict[str, List[Dict[str, Any]]] = {"api": [], "ui": []}
     skipped: List[str] = []
+    deleted: List[str] = []
     for it in current:
         key = (it.get("service_id"), it.get("type"), it.get("name"))
-        if it.get("method") != "api":
-            # Not API-managed: ignore deletions for these
+        method = it.get("method")
+        if method not in keep_by_method:
             if key in to_del:
                 skipped.append(f"{(it.get('service_id') or 'global')}/{it.get('type')}/{it.get('name')}")
             continue
         if key in to_del:
             # delete -> skip adding to keep
+            deleted.append(f"{(it.get('service_id') or 'global')}/{it.get('type')}/{it.get('name')}")
             continue
-        # Convert to expected format for save_custom_configs
-        keep.append(
+        keep_by_method[method].append(
             {
                 "service_id": it.get("service_id") or None,
                 "type": it.get("type"),
                 "name": it.get("name"),
                 "data": it.get("data") or b"",
-                "method": "api",
+                "method": method,
+                "is_draft": bool(it.get("is_draft", False)),
             }
         )
 
-    err = db.save_custom_configs(keep, "api")
-    if err:
-        return JSONResponse(status_code=500, content={"status": "error", "message": err})
+    if not deleted:
+        return JSONResponse(status_code=404, content={"status": "error", "message": "No deletable UI/API configs found among selection", "skipped": skipped})
+
+    for method, keep in keep_by_method.items():
+        err = db.save_custom_configs(keep, method)
+        if err:
+            return JSONResponse(status_code=500, content={"status": "error", "message": err, "skipped": skipped})
 
     content: Dict[str, Any] = {"status": "success"}
+    content["deleted"] = deleted
     if skipped:
         content["skipped"] = skipped
     return JSONResponse(status_code=200, content=content)
 
 
 @router.delete("/{service}/{config_type}/{name}", dependencies=[Depends(guard)])
-def delete_config(service: str, config_type: str, name: str) -> JSONResponse:
-    """Delete a single API-managed custom config by replacing the API set without the selected item."""
+def delete_config(
+    service: str,
+    config_type: Annotated[ConfigType, PathParam(description="Config type")],
+    name: str,
+) -> JSONResponse:
+    """Delete a single UI/API-managed custom config."""
     s_id = None if service in (None, "", "global") else service
-    ctype = _normalize_type(config_type)
-    # Reuse batch deletion logic
-    return delete_configs(ConfigsDeleteRequest(configs=[ConfigKey(service=s_id or "global", type=ctype, name=name)]))
+    # config_type is already normalized by Pydantic
+    return delete_configs(ConfigsDeleteRequest(configs=[ConfigKey(service=s_id or "global", type=config_type, name=name)]))

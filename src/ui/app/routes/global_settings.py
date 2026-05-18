@@ -1,0 +1,122 @@
+from contextlib import suppress
+from time import time
+from typing import Dict
+
+from flask import Blueprint, redirect, render_template, request, url_for
+from flask_login import login_required
+
+from app.dependencies import BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA, DB
+from app.utils import get_blacklisted_settings
+
+from app.routes.utils import extract_file_setting_names, handle_error, wait_applying
+
+
+global_settings = Blueprint("global_settings", __name__)
+
+
+@global_settings.route("/global-config", methods=["GET", "POST"])
+@global_settings.route("/global-settings", methods=["GET", "POST"])
+@login_required
+def global_settings_page():
+    global_config = DB.get_config(global_only=True, methods=True)
+
+    if request.method == "POST":
+        if DB.readonly:
+            return handle_error("Database is in read-only mode", "global_settings")
+        DATA.load_from_file()
+
+        # Check variables
+        variables = request.form.to_dict().copy()
+        del variables["csrf_token"]
+        file_setting_names = extract_file_setting_names(variables)
+        override_non_global_services = variables.pop("OVERRIDE_NON_GLOBAL_SERVICES", variables.pop("OVERRIDE_TEMPLATE_SERVICES", "no")) == "yes"
+
+        def update_global_config(variables: Dict[str, str], override_non_global_services: bool, file_setting_names: Dict[str, str]):
+            wait_applying()
+
+            # Edit check fields and remove already existing ones
+            config = DB.get_config(methods=True, with_drafts=True)
+            services = config["SERVER_NAME"]["value"].split()
+            variables_to_check = variables.copy()
+            has_file_name_changes = False
+
+            for variable, value in variables.items():
+                setting = config.get(variable, {"value": None, "global": True})
+                if setting["global"] and value == setting["value"]:
+                    del variables_to_check[variable]
+
+            for setting_name, file_name in file_setting_names.items():
+                current_file_name = str(config.get(setting_name, {}).get("file_name", "") or "").strip()
+                if file_name != current_file_name:
+                    has_file_name_changes = True
+                    break
+
+            variables = BW_CONFIG.check_variables(variables, config, variables_to_check, global_config=True, threaded=True)
+            changed_variables = {key: value for key, value in variables.items() if key in variables_to_check}
+
+            no_removed_settings = True
+            blacklist = get_blacklisted_settings(True)
+            for setting in global_config:
+                if setting not in blacklist and setting not in variables:
+                    no_removed_settings = False
+                    break
+
+            if no_removed_settings and not variables_to_check and not has_file_name_changes:
+                content = "The global settings were not edited because no values were changed."
+                DATA["TO_FLASH"].append({"content": content, "type": "warning"})
+                DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+                return
+
+            if "PRO_LICENSE_KEY" in variables:
+                DATA["PRO_LOADING"] = True
+
+            for variable, value in changed_variables.items():
+                for service in services:
+                    setting = config.get(f"{service}_{variable}", None)
+                    if (
+                        setting
+                        and (setting["global"] or override_non_global_services)
+                        and (setting["value"] != value or setting["value"] == config.get(variable, {"value": None})["value"])
+                    ):
+                        variables[f"{service}_{variable}"] = value
+
+            with suppress(BaseException):
+                if config["PRO_LICENSE_KEY"]["value"] != variables["PRO_LICENSE_KEY"]:
+                    DATA["TO_FLASH"].append({"content": "Checking license key to upgrade.", "type": "success", "save": False})
+
+            operation, error = BW_CONFIG.edit_global_conf(variables, check_changes=True, file_name_map=file_setting_names)
+
+            if not error:
+                operation = "Global settings successfully saved."
+
+            if operation:
+                if operation.startswith(("Can't", "The database is read-only")):
+                    DATA["TO_FLASH"].append({"content": operation, "type": "error"})
+                else:
+                    DATA["TO_FLASH"].append({"content": operation, "type": "success"})
+                    DATA["TO_FLASH"].append({"content": "The Scheduler will be in charge of applying the changes.", "type": "success", "save": False})
+
+            DATA["RELOADING"] = False
+
+        DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
+        CONFIG_TASKS_EXECUTOR.submit(update_global_config, variables, override_non_global_services, file_setting_names)
+
+        arguments = {}
+        if request.args.get("mode", "advanced") != "advanced":
+            arguments["mode"] = request.args["mode"]
+        if request.args.get("type", "all") != "all":
+            arguments["type"] = request.args["type"]
+
+        return redirect(
+            url_for(
+                "loading",
+                next=url_for("global_settings.global_settings_page") + f"?{'&'.join([f'{k}={v}' for k, v in arguments.items()])}",
+                message="Saving global settings",
+            )
+        )
+    elif request.args.get("as_json", "false").lower() == "true":
+        return global_config
+
+    mode = request.args.get("mode", "advanced")
+    search_type = request.args.get("type", "all")
+    return render_template("global_settings.html", mode=mode, type=search_type)

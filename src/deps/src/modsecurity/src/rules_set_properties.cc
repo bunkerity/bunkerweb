@@ -32,7 +32,6 @@ void ConfigUnicodeMap::loadConfig(std::string f, double configCodePage,
     char *hmap = NULL;
     const char *p = NULL;
     char *savedptr = NULL;
-    const char *ucode = NULL;
     int found = 0;
     int length = 0;
     int processing = 0;
@@ -99,7 +98,7 @@ void ConfigUnicodeMap::loadConfig(std::string f, double configCodePage,
             processing = 1;
 
             if (mapping != NULL) {
-                ucode = strtok_r(mapping, ":", &hmap);
+                const char *ucode = strtok_r(mapping, ":", &hmap);
                 int code = strtol(ucode, nullptr, 16);
                 int map = strtol(hmap, nullptr, 16);
                 if (code >= 0 && code <= 65535)    {

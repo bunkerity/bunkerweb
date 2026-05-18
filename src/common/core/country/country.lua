@@ -9,13 +9,154 @@ local get_country = utils.get_country
 local get_deny_status = utils.get_deny_status
 local decode = cjson.decode
 local encode = cjson.encode
+local WARN = ngx.WARN
 
 -- Helper function to convert space-separated string to a set
-local function string_to_set(str)
+local COUNTRY_GROUPS = {
+	EU = {
+		"AT",
+		"BE",
+		"BG",
+		"HR",
+		"CY",
+		"CZ",
+		"DK",
+		"EE",
+		"FI",
+		"FR",
+		"DE",
+		"GR",
+		"HU",
+		"IE",
+		"IT",
+		"LV",
+		"LT",
+		"LU",
+		"MT",
+		"NL",
+		"PL",
+		"PT",
+		"RO",
+		"SK",
+		"SI",
+		"ES",
+		"SE",
+	},
+	EEA = {
+		"AT",
+		"BE",
+		"BG",
+		"HR",
+		"CY",
+		"CZ",
+		"DK",
+		"EE",
+		"FI",
+		"FR",
+		"DE",
+		"GR",
+		"HU",
+		"IE",
+		"IT",
+		"LV",
+		"LT",
+		"LU",
+		"MT",
+		"NL",
+		"PL",
+		"PT",
+		"RO",
+		"SK",
+		"SI",
+		"ES",
+		"SE",
+		"IS",
+		"LI",
+		"NO",
+	},
+	SCHENGEN = {
+		"AT",
+		"BE",
+		"BG",
+		"HR",
+		"CZ",
+		"DK",
+		"EE",
+		"FI",
+		"FR",
+		"DE",
+		"GR",
+		"HU",
+		"IS",
+		"IT",
+		"LV",
+		"LI",
+		"LT",
+		"LU",
+		"MT",
+		"NL",
+		"NO",
+		"PL",
+		"PT",
+		"RO",
+		"SK",
+		"SI",
+		"ES",
+		"SE",
+		"CH",
+	},
+	BENELUX = { "BE", "NL", "LU" },
+	DACH = { "DE", "AT", "CH" },
+	NORDICS = { "DK", "FI", "IS", "NO", "SE" },
+	USMCA = { "US", "CA", "MX" },
+	FIVE_EYES = { "AU", "CA", "NZ", "GB", "US" },
+	ASEAN = { "BN", "KH", "ID", "LA", "MY", "MM", "PH", "SG", "TH", "VN" },
+	GCC = { "BH", "KW", "OM", "QA", "SA", "AE" },
+	G7 = { "CA", "FR", "DE", "IT", "JP", "GB", "US" },
+	LATAM = {
+		"AR",
+		"BO",
+		"BR",
+		"CL",
+		"CO",
+		"CR",
+		"CU",
+		"DO",
+		"EC",
+		"SV",
+		"GT",
+		"HN",
+		"MX",
+		"NI",
+		"PA",
+		"PY",
+		"PE",
+		"PR",
+		"UY",
+		"VE",
+	},
+}
+
+local function string_to_set(str, logger)
 	local set = {}
 	if str and str ~= "" then
 		for item in str:gmatch("%S+") do
-			set[item] = true
+			local token = item:upper()
+			if token:sub(1, 1) == "@" then
+				local group = COUNTRY_GROUPS[token:sub(2)]
+				if group then
+					for _, country_code in ipairs(group) do
+						set[country_code] = true
+					end
+				else
+					set[token] = true
+					if logger then
+						logger:log(WARN, "unknown country group " .. token .. " in country setting")
+					end
+				end
+			else
+				set[token] = true
+			end
 		end
 	end
 	return set
@@ -26,8 +167,8 @@ function country:initialize(ctx)
 	plugin.initialize(self, "country", ctx)
 
 	-- Initialize whitelist and blacklist sets once
-	self.whitelist = string_to_set(self.variables["WHITELIST_COUNTRY"])
-	self.blacklist = string_to_set(self.variables["BLACKLIST_COUNTRY"])
+	self.whitelist = string_to_set(self.variables["WHITELIST_COUNTRY"], self.logger)
+	self.blacklist = string_to_set(self.variables["BLACKLIST_COUNTRY"], self.logger)
 end
 
 function country:access()

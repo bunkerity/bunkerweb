@@ -1,6 +1,6 @@
 /*
 ** FFI library.
-** Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2026 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lib_ffi_c
@@ -758,6 +758,9 @@ LJLIB_CF(ffi_abi)	LJLIB_REC(.)
 #endif
 #if LJ_GC64
     "\004gc64"
+#endif
+#if LJ_DUALNUM
+    "\007dualnum"
 #endif
   ) >= 0;
   setboolV(L->top-1, b);

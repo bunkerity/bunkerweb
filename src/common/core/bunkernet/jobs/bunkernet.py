@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from logging import getLogger
 from os import getenv, sep
 from pathlib import Path
 from traceback import format_exc
@@ -8,6 +7,7 @@ from requests import request as requests_request, ReadTimeout
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 from common_utils import get_os_info, get_integration, get_version  # type: ignore
+from logger import getLogger  # type: ignore
 
 
 def request(

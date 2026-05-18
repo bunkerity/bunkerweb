@@ -20,7 +20,7 @@ patterns:
     # - &|: logical operators in headers, e.g., `a=nc&&$a -nlvp 555`
     # - ): subshell, e.g, `(ifconfig)`
     unix: |
-      (?:[\s<>&|),]|$).*
+      [\s<>&|),].*
     # "more foo", "more,foo", "more;foo", "more.com", "more/e",
     # "more<foo", "more>foo"
     windows: |
@@ -41,11 +41,11 @@ patterns:
     # It will _not_ match:
     # python foo
     #
-    # (?:[<>&|),]|$){1,10}: anti-evasion suffix without space, limited to 10 matches
+    # [<>&|),]{1,10}: anti-evasion suffix without space, limited to 10 matches
     # (?:[\w\d._-][\x5c'\"\[)]*(?:(?:(?:\|\||&&)\s*)?\$[a-z0-9_@?!#{(*-]*)?\x5c?){1,10}: non-whitespace followed by anti-evasion pattern, limited to 10 matches
-    # (?:[\s<>&|),}]|$){1,10}): anti-evasion suffix, including `}` (to match command names within expansions, e.g. `${gcc7.4}gcc7.4`), limited to 10 matches
+    # [\s<>&|),}]{1,10}): anti-evasion suffix, including `}` (to match command names within expansions, e.g. `${gcc7.4}gcc7.4`), limited to 10 matches
     unix: |
-      (?:(?:[<>&|),]|$){1,10}|(?:[\w\d._-][\x5c'\"\[)]*(?:(?:(?:\|\||&&)\s*)?\$[a-z0-9_@?!#{(*-]*)?\x5c?){1,10}(?:[\s<>&|),}]|$){1,10})
+      (?:[<>&|),]{1,10}|(?:[\w\d._-][\x5c'\"\[)]*(?:(?:(?:\|\||&&)\s*)?\$[a-z0-9_@?!#{(*-]*)?\x5c?){1,10}[\s<>&|),}]{1,10})
     # This will match:
     #
     # python,foo

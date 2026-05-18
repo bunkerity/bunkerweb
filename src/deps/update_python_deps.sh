@@ -9,7 +9,7 @@ echo "Creating virtual environment"
 python3 -m venv tmp_venv && source tmp_venv/bin/activate
 
 # Upgrade pip first for security
-pip install --upgrade "pip<25.3" setuptools wheel
+pip install --upgrade "pip<25.3" "setuptools<81" wheel
 
 pip install --force-reinstall --no-cache-dir --require-hashes -r requirements-deps.txt
 
@@ -38,15 +38,22 @@ function update_python_deps() {
     cd - || return
 }
 
+pip install --upgrade "pip<25.3" "setuptools<81"
+
 update_python_deps requirements-deps.in
 
-pip install --no-cache-dir --require-hashes -r requirements-deps.txt
+pip install --upgrade "pip<25.3" "setuptools<81"
+
+# pip install --no-cache-dir --require-hashes -r requirements-deps.txt
+
+update_python_deps requirements.in
+
+pip install "pip<25.3"
 
 echo "Updating python requirements files"
 
 # Use array for explicit file list
 files=(
-    "requirements.in"
     "../api/requirements.in"
     "../autoconf/requirements.in"
     "../scheduler/requirements.in"
@@ -60,7 +67,7 @@ while IFS= read -r -d '' file; do
     if [[ "$file" != *"ansible"* ]]; then
         files+=("$file")
     fi
-done < <(find ../common ../docs ../misc -type f -name 'requirements*.in' -print0 2>/dev/null)
+done < <(find ../common ../../docs ../../misc -type f -name 'requirements*.in' -print0 2>/dev/null)
 
 # Process each file
 for file in "${files[@]}"; do

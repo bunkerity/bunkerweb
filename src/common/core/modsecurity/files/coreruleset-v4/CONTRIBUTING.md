@@ -234,6 +234,12 @@ Lazy and greedy matching change the order in which a regular expression engine p
 
 Possessive quantifiers (e.g., `x++`) and atomic groups (e.g., `(?>x)`) are tools that can be used to prevent a backtracking engine from backtracking. They _can_ be used for performance optimization but are only supported by backtracking engines and, therefore, are not permitted in CRS rules.
 
+### Curly braces
+
+Curly braces are used for repetition quantifiers (`{m}`, `{m,}`, `{m,n}`). When a brace is intended as a literal character, especially an opening brace, it must be escaped (`\{`) so it is not parsed as the start of a quantifier. Some regex engines treat an unescaped `{` that does not form a valid quantifier as a syntax error rather than a literal.
+
+Inside character classes (`[...]`), braces are literal characters and must not be escaped, as escaping is unnecessary and may reduce readability or portability.
+
 ### Writing Regular Expressions for Non-Backtracking Compatibility
 
 Traditional regular expression engines use backtracking to solve some additional problems, such as finding a string that is preceded or followed by another string. While this functionality can certainly come in handy and has its place in certain applications, it can also lead to performance issues and, in uncontrolled environments, open up possibilities for attacks (the term "[ReDoS](https://en.wikipedia.org/wiki/ReDoS)" is often used to describe an attack that exhausts process or system resources due to excessive backtracking).

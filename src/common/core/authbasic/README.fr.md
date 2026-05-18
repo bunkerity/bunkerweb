@@ -5,30 +5,31 @@ Comment ça marche :
 1. Sur une zone protégée, le serveur envoie un défi d’authentification.
 2. Le navigateur affiche une boîte de connexion.
 3. L’utilisateur saisit ses identifiants, envoyés au serveur.
-4. Valides ? Accès accordé. Invalides ? Réponse 401 Unauthorized.
+4. Si les identifiants sont valides, l’accès au contenu demandé est accordé.
+5. Si les identifiants sont invalides, une erreur 401 Unauthorized est renvoyée.
 
 ### Comment l’utiliser
 
-1. Activer : `USE_AUTH_BASIC: yes`.
-2. Portée : `AUTH_BASIC_LOCATION` = `sitewide` (tout le site) ou un chemin (ex. `/admin`).
-3. Identifiants : configurez `AUTH_BASIC_USER` et `AUTH_BASIC_PASSWORD` (plusieurs paires possibles).
+1. Activer : mettez le paramètre `USE_AUTH_BASIC` à `yes`.
+2. Portée : configurez le paramètre `AUTH_BASIC_LOCATION` avec `sitewide` (tout le site) ou un chemin (ex. `/admin`).
+3. Identifiants : configurez les paramètres `AUTH_BASIC_USER` et `AUTH_BASIC_PASSWORD` (plusieurs paires possibles).
 4. Message : optionnel, ajustez `AUTH_BASIC_TEXT`.
 
 ### Paramètres
 
-| Paramètre             | Défaut            | Contexte  | Multiple | Description                                                                         |
-| --------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------- |
-| `USE_AUTH_BASIC`      | `no`              | multisite | non      | Activer l’authentification Basic.                                                   |
-| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | non      | Portée : `sitewide` ou un chemin (ex. `/admin`).                                    |
-| `AUTH_BASIC_USER`     | `changeme`        | multisite | oui      | Nom d’utilisateur. Plusieurs paires peuvent être définies.                          |
-| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | oui      | Mot de passe. Les mots de passe sont hachés avec bcrypt pour une sécurité maximale. |
-| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | non      | Message affiché dans l'invite d'authentification.                                   |
+| Paramètre             | Défaut            | Contexte  | Multiple | Description                                                                                                                              |
+| --------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_AUTH_BASIC`      | `no`              | multisite | non      | Activer l’authentification Basic.                                                                                                        |
+| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | non      | Portée : `sitewide` ou un chemin (ex. `/admin`). Vous pouvez également utiliser des modificateurs de style Nginx (`=`, `~`, `~*`, `^~`). |
+| `AUTH_BASIC_USER`     | `changeme`        | multisite | oui      | Nom d’utilisateur. Plusieurs paires peuvent être définies.                                                                               |
+| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | oui      | Mot de passe. Les mots de passe sont hachés avec scrypt pour une sécurité maximale.                                                      |
+| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | non      | Message affiché dans l'invite d'authentification.                                                                                        |
 
 !!! warning "Sécurité"
     Les identifiants sont encodés Base64, pas chiffrés. Utilisez toujours HTTPS avec l’authentification Basic.
 
 !!! tip "Plusieurs comptes"
-    Définissez des paires `AUTH_BASIC_USER[_n]`/`AUTH_BASIC_PASSWORD[_n]` pour gérer plusieurs utilisateurs.
+    Vous pouvez configurer plusieurs paires identifiant/mot de passe pour l'accès. Chaque paramètre `AUTH_BASIC_USER` doit avoir un paramètre `AUTH_BASIC_PASSWORD` correspondant.
 
 ### Exemples
 

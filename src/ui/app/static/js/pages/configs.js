@@ -6,6 +6,7 @@ $(document).ready(function () {
       : (key, fallback) => fallback || key; // Fallback
 
   var actionLock = false;
+  let toastNum = 0;
   const configNumber = parseInt($("#configs_number").val());
   const services = ($("#services").val() || "").trim().split(" ");
   const templates = ($("#templates").val() || "").trim().split(" ");
@@ -16,6 +17,10 @@ $(document).ready(function () {
     .toUpperCase();
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   const userReadOnly = $("#user-read-only").val().trim() === "True";
+
+  const importDragArea = $("#configs-drag-area");
+  const importFileInput = $("#configs-import-file");
+  const importFileList = $("#configs-import-file-list");
 
   const servicesSearchPanesOptions = [
     {
@@ -32,7 +37,7 @@ $(document).ready(function () {
         "template.none",
         "no template",
       )}</span>`,
-      value: (rowData) => rowData[6].includes("template.none"),
+      value: (rowData) => rowData[7].includes("template.none"),
     },
   ];
 
@@ -48,17 +53,33 @@ $(document).ready(function () {
     if (template) {
       templatesSearchPanesOptions.push({
         label: template,
-        value: (rowData) => $(rowData[6]).text().trim() === template,
+        value: (rowData) => $(rowData[7]).text().trim() === template,
       });
     }
   });
 
-  const setupDeletionModal = (configs) => {
-    const delete_modal = $("#modal-delete-configs");
-    const $modalBody = $("#selected-configs-delete");
-    $modalBody.empty(); // Clear previous content
+  const getConfigId = (config) =>
+    `${(config.type || "").toLowerCase()}-${(config.service || "global").replaceAll(".", "_")}-${
+      config.name
+    }`;
 
-    // Create and append the header row with translated headers
+  const getStatusValue = (cellData) => {
+    if (!cellData) return "";
+    const $wrapper = $("<div>").html(cellData);
+    const value = $wrapper.find("[data-value]").data("value");
+    if (value) return value;
+    const text = $wrapper.text().trim();
+    if (!text) return "";
+    const normalized = text.toLowerCase();
+    if (normalized === t("status.online", "Online").toLowerCase())
+      return "online";
+    if (normalized === t("status.draft", "Draft").toLowerCase()) return "draft";
+    return normalized;
+  };
+
+  const buildConfigsList = (configs, $container) => {
+    $container.empty();
+
     const $header = $(`
       <ul class="list-group list-group-horizontal w-100">
         <li class="list-group-item bg-secondary text-white" style="flex: 1 1 0;">
@@ -82,14 +103,12 @@ $(document).ready(function () {
           )}</div>
         </li>
       </ul>`);
-    $modalBody.append($header);
+    $container.append($header);
 
     configs.forEach((config) => {
       const list = $(
         `<ul class="list-group list-group-horizontal w-100"></ul>`,
       );
-
-      // Create the list item using template literals
       const listItem = $(`<li class="list-group-item" style="flex: 1 1 0;">
           <div class="ms-2 me-auto">
             <div class="fw-bold">${config.name}</div>
@@ -97,11 +116,8 @@ $(document).ready(function () {
         </li>`);
       list.append(listItem);
 
-      const id = `${config.type.toLowerCase()}-${(
-        config.service || "global"
-      ).replaceAll(".", "_")}-${config.name}`;
+      const id = getConfigId(config);
 
-      // Clone the type element and append it to the list item
       const typeClone = $(`#type-${id}`).clone();
       const typeListItem = $(
         `<li class="list-group-item" style="flex: 1 1 0;"></li>`,
@@ -109,7 +125,6 @@ $(document).ready(function () {
       typeListItem.append(typeClone.removeClass("highlight"));
       list.append(typeListItem);
 
-      // Clone the service element and append it to the list item
       const serviceClone = $(`#service-${id}`).clone();
       const serviceListItem = $(
         `<li class="list-group-item" style="flex: 1 1 0;"></li>`,
@@ -119,14 +134,49 @@ $(document).ready(function () {
       serviceClone
         .find('[data-bs-toggle="tooltip"]')
         .tooltip("dispose")
-        .tooltip(); // Reinitialize tooltip
+        .tooltip();
 
-      $modalBody.append(list);
+      $container.append(list);
     });
+  };
+
+  const setupConversionModal = (configs, conversionType = "draft") => {
+    const convertModal = $("#modal-convert-configs");
+    buildConfigsList(configs, $("#selected-configs-convert"));
+
+    const alertText = t(
+      "modal.body.confirm_configs_conversion_to",
+      `Are you sure you want to convert the selected config${
+        configs.length > 1 ? "s" : ""
+      } to ${conversionType}?`,
+      { state: conversionType },
+    );
+    convertModal.find(".alert").text(alertText);
+    const buttonLabel = t(
+      "button.convert_configs_to",
+      `Convert to ${conversionType}`,
+      { state: conversionType },
+    );
+    convertModal.find("button[type=submit]").text(buttonLabel);
+    $("#conversion-type").val(conversionType);
+
+    const configsToSubmit = configs.map((cfg) => ({
+      ...cfg,
+      type: (cfg.type || "").toLowerCase(),
+      service: cfg.service === t("scope.global", "global") ? null : cfg.service,
+    }));
+    $("#selected-configs-input-convert").val(JSON.stringify(configsToSubmit));
+
+    const modalInstance = new bootstrap.Modal(convertModal[0]);
+    modalInstance.show();
+  };
+
+  const setupDeletionModal = (configs) => {
+    const delete_modal = $("#modal-delete-configs");
+    buildConfigsList(configs, $("#selected-configs-delete"));
 
     const modalInstance = new bootstrap.Modal(delete_modal[0]);
 
-    // Update the alert text using i18next
     const alertTextKey =
       configs.length > 1
         ? "modal.body.delete_confirmation_alert_plural"
@@ -143,9 +193,6 @@ $(document).ready(function () {
       );
     modalInstance.show();
 
-    // Prepare data for submission
-    // - Normalize type to lowercase to match backend storage
-    // - Convert translated 'global' label to null
     const configsToSubmit = configs.map((cfg) => ({
       ...cfg,
       type: (cfg.type || "").toLowerCase(),
@@ -160,7 +207,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [3, 4, 5, 6],
+        columns: [3, 4, 5, 6, 7],
       },
     },
     topStart: {},
@@ -180,11 +227,9 @@ $(document).ready(function () {
   };
 
   if (configNumber > 10) {
-    const menu = [10];
-    if (configNumber > 25) menu.push(25);
-    if (configNumber > 50) menu.push(50);
-    if (configNumber > 100) menu.push(100);
-    menu.push({ label: t("datatable.length_all", "All"), value: -1 });
+    const menu = [10, 25, 50, 100];
+    if (configNumber > 100) menu.push(500);
+    if (configNumber > 500) menu.push(1000);
     layout.bottomStart = {
       pageLength: { menu: menu },
       info: true,
@@ -195,6 +240,9 @@ $(document).ready(function () {
   layout.topStart.buttons = [
     {
       extend: "create_config",
+    },
+    {
+      extend: "import_configs",
     },
     {
       extend: "colvis",
@@ -279,6 +327,20 @@ $(document).ready(function () {
       className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [
         {
+          extend: "convert_configs",
+          text: '<span class="tf-icons bx bx-globe bx-18px me-2"></span>Convert to<span class="d-none d-md-inline"> online</span>',
+          attr: { "data-convert-to": "online" },
+        },
+        {
+          extend: "convert_configs",
+          text: '<span class="tf-icons bx bx-file-blank bx-18px me-2"></span>Convert to<span class="d-none d-md-inline"> draft</span>',
+          attr: { "data-convert-to": "draft" },
+        },
+        {
+          extend: "export_configs",
+          text: '<span class="tf-icons bx bx-export bx-18px me-2"></span>Export',
+        },
+        {
           extend: "delete_configs",
           className: "text-danger",
         },
@@ -294,32 +356,103 @@ $(document).ready(function () {
     }
   });
 
-  $("#modal-delete-configs").on("hidden.bs.modal", function () {
-    $("#selected-configs-delete").empty();
-    $("#selected-configs-input-delete").val("");
+  $("#modal-delete-configs, #modal-convert-configs").on(
+    "hidden.bs.modal",
+    function () {
+      $("#selected-configs-delete, #selected-configs-convert").empty();
+      $("#selected-configs-input-delete, #selected-configs-input-convert").val(
+        "",
+      );
+      $("#conversion-type").val("draft");
+    },
+  );
+
+  $("#modal-import-configs").on("hidden.bs.modal", function () {
+    importFileInput.val("");
+    importFileList.empty();
+    $("#configs-import-overwrite").prop("checked", false);
+    importDragArea.addClass("border-dashed");
+    importDragArea.removeClass("bg-primary text-white");
+    importDragArea.find("i").addClass("text-primary");
   });
 
   const getSelectedConfigs = () => {
     const configs = [];
-    $("tr.selected").each(function () {
-      const $row = $(this);
-      const name = $row.find("td:eq(2)").find("a").text().trim();
-      const type = $row.find("td:eq(3)").text().trim();
-      let service;
-      const $serviceCell = $row.find("td:eq(5)");
-      const $serviceLink = $serviceCell.find("a");
-      if ($serviceLink.length > 0) {
-        service = $serviceLink.text().trim();
-      } else {
-        const $serviceSpan = $serviceCell.find("span[data-i18n]");
-        service = $serviceSpan.length
-          ? $serviceSpan.text().trim()
-          : $serviceCell.text().trim();
+    if (!$.fn.dataTable.isDataTable("#configs")) return configs;
+    $("#configs")
+      .DataTable()
+      .rows({ selected: true })
+      .nodes()
+      .to$()
+      .each(function () {
+        const $row = $(this);
+        const name = $row.find("td:eq(2)").find("a").text().trim();
+        const type = $row.find("td:eq(3)").text().trim();
+        let service;
+        const $serviceCell = $row.find("td:eq(5)");
+        const $serviceLink = $serviceCell.find("a");
+        if ($serviceLink.length > 0) {
+          service = $serviceLink.text().trim();
+        } else {
+          const $serviceSpan = $serviceCell.find("span[data-i18n]");
+          service = $serviceSpan.length
+            ? $serviceSpan.text().trim()
+            : $serviceCell.text().trim();
+        }
+
+        const normalizedService =
+          service === t("scope.global", "global") ? "global" : service;
+
+        configs.push({ name: name, type: type, service: normalizedService });
+      });
+    return configs;
+  };
+
+  $.fn.dataTable.ext.buttons.import_configs = {
+    text: `<span class="tf-icons bx bx-import bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.import_configs">${t(
+      "button.import_configs",
+      "Import custom configurations",
+    )}</span>`,
+    className: `btn btn-sm rounded btn-outline-bw-green me-2${
+      isReadOnly ? " disabled" : ""
+    }`,
+    action: function () {
+      if (isReadOnly) {
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
+        return;
+      }
+      importFileInput.val("");
+      importFileList.empty();
+      $("#configs-import-overwrite").prop("checked", false);
+      const modalInstance = new bootstrap.Modal(
+        document.getElementById("modal-import-configs"),
+      );
+      modalInstance.show();
+    },
+  };
+
+  $.fn.dataTable.ext.buttons.export_configs = {
+    action: function () {
+      if (actionLock) return;
+      actionLock = true;
+      $(".dt-button-background").click();
+
+      const configs = getSelectedConfigs();
+      if (configs.length === 0) {
+        actionLock = false;
+        return;
       }
 
-      configs.push({ name: name, type: type, service: service });
-    });
-    return configs;
+      const baseUrl = `${window.location.origin}${window.location.pathname}`;
+      const payload = encodeURIComponent(JSON.stringify(configs));
+      window.open(`${baseUrl}/export?configs=${payload}`, "_blank");
+      actionLock = false;
+    },
   };
 
   $.fn.dataTable.ext.buttons.create_config = {
@@ -327,7 +460,7 @@ $(document).ready(function () {
       "button.create_config",
       "Create new custom config",
     )}</span>`,
-    className: `btn btn-sm rounded me-4 btn-bw-green${
+    className: `btn btn-sm rounded me-2 btn-bw-green${
       isReadOnly ? " disabled" : ""
     }`,
     action: function (e, dt, node, config) {
@@ -341,6 +474,54 @@ $(document).ready(function () {
         return;
       }
       window.location.href = `${window.location.pathname}/new`;
+    },
+  };
+
+  $.fn.dataTable.ext.buttons.convert_configs = {
+    action: function (e, dt, node, config) {
+      if (isReadOnly) {
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
+        return;
+      }
+      if (actionLock) return;
+      actionLock = true;
+      $(".dt-button-background").click();
+
+      const conversionType =
+        $(node).data("convert-to") ||
+        $(node).text().trim().split(" ").pop().toLowerCase();
+      const configs = getSelectedConfigs();
+      if (configs.length === 0) {
+        actionLock = false;
+        return;
+      }
+
+      const filteredConfigs = configs.filter((cfg) => {
+        const statusValue = $(`#status-${getConfigId(cfg)}`).data("value");
+        return statusValue !== conversionType;
+      });
+
+      if (filteredConfigs.length === 0) {
+        const feedbackToast = $("#feedback-toast")
+          .clone()
+          .attr("id", `feedback-toast-${toastNum++}`)
+          .removeClass("d-none");
+        feedbackToast.find("span").text("Conversion failed");
+        feedbackToast
+          .find("div.toast-body")
+          .text("The selected configs are already in the desired state.");
+        feedbackToast.appendTo("#feedback-toast-container").toast("show");
+        actionLock = false;
+        return;
+      }
+
+      setupConversionModal(filteredConfigs, conversionType);
+      actionLock = false;
     },
   };
 
@@ -376,13 +557,13 @@ $(document).ready(function () {
   const configs_config = {
     tableSelector: "#configs",
     tableName: "configs",
-    columnVisibilityCondition: (column) => column > 2 && column < 8,
+    columnVisibilityCondition: (column) => column > 2 && column < 9,
     dataTableOptions: {
       columnDefs: [
         { orderable: false, className: "dtr-control", targets: 0 },
         { orderable: false, render: DataTable.render.select(), targets: 1 },
         { orderable: false, targets: -1 },
-        { visible: false, targets: 7 },
+        { visible: false, targets: 8 },
         {
           searchPanes: {
             show: true,
@@ -433,6 +614,15 @@ $(document).ready(function () {
               },
               {
                 label:
+                  '<i class="bx bx-xs bx-network-chart"></i>DEFAULT_SERVER_STREAM',
+                value: function (rowData, rowIdx) {
+                  return (
+                    $(rowData[3]).text().trim() === "DEFAULT_SERVER_STREAM"
+                  );
+                },
+              },
+              {
+                label:
                   '<i class="bx bx-xs bx-shield-alt"></i>CRS_PLUGINS_BEFORE',
                 value: function (rowData, rowIdx) {
                   return $(rowData[3]).text().trim() === "CRS_PLUGINS_BEFORE";
@@ -472,11 +662,33 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
+            header: t("searchpane.status", "Status"),
+            combiner: "or",
+            options: [
+              {
+                label: `<span data-i18n="status.online">${t("status.online", "Online")}</span>`,
+                value: function (rowData) {
+                  return getStatusValue(rowData[6]) === "online";
+                },
+              },
+              {
+                label: `<span data-i18n="status.draft">${t("status.draft", "Draft")}</span>`,
+                value: function (rowData) {
+                  return getStatusValue(rowData[6]) === "draft";
+                },
+              },
+            ],
+          },
+          targets: 6,
+        },
+        {
+          searchPanes: {
+            show: true,
             header: t("searchpane.template", "Template"),
             combiner: "or",
             options: templatesSearchPanesOptions,
           },
-          targets: 6,
+          targets: 7,
         },
       ],
       order: [[2, "asc"]],
@@ -485,7 +697,7 @@ $(document).ready(function () {
       select: {
         style: "multi+shift",
         selector: "td:nth-child(2)",
-        headerCheckbox: true,
+        headerCheckbox: "select-page",
       },
       layout: layout,
       initComplete: function (settings, json) {
@@ -509,41 +721,60 @@ $(document).ready(function () {
     },
   };
 
-  // Trigger initial search pane selections if applicable
-  if (configTypeSelection) {
-    const typeLabelElement = $(
-      `#DataTables_Table_0 span[data-i18n='${configTypeMap[configTypeSelection]?.key}']`,
-    );
-    if (typeLabelElement.length) {
-      typeLabelElement.closest("span.dtsp-name").trigger("click"); // Click the parent span which has the DT handler
-    } else {
-      console.warn(
-        `Could not find search pane option for type: ${configTypeSelection}`,
-      );
-    }
-  }
+  const applyInitialFilters = (dt) => {
+    const container = dt.searchPanes?.container?.();
+    if (!container) return;
 
-  if (configServiceSelection) {
-    const serviceLabelElement = $(
-      `#DataTables_Table_2 span:contains('${configServiceSelection}')`,
-    );
-    if (serviceLabelElement.length) {
-      const targetElement = serviceLabelElement.filter(
-        (_, el) => $(el).text().trim() === configServiceSelection,
-      );
-      if (targetElement.length) {
-        targetElement.closest("span.dtsp-name").trigger("click");
+    const $container = $(container);
+    const clickPaneOption = (selector, description) => {
+      const $match = $container.find(selector).first();
+      if ($match.length) {
+        const $target = $match.closest("span.dtsp-name");
+        ($target.length ? $target : $match).trigger("click");
+        return true;
+      }
+      console.warn(`Could not find search pane option for ${description}`);
+      return false;
+    };
+
+    if (configTypeSelection) {
+      const typeSelector = "span.dtsp-name";
+      const $typeMatch = $container
+        .find(typeSelector)
+        .filter((_, el) => $(el).text().trim() === configTypeSelection)
+        .first();
+      if ($typeMatch.length) {
+        $typeMatch.trigger("click");
       } else {
         console.warn(
-          `Could not find exact match for service pane option: ${configServiceSelection}`,
+          `Could not find search pane option for type: ${configTypeSelection}`,
         );
       }
-    } else {
-      console.warn(
-        `Could not find any search pane option containing: ${configServiceSelection}`,
-      );
     }
-  }
+
+    if (configServiceSelection) {
+      const isGlobal = configServiceSelection.toLowerCase() === "global";
+      if (isGlobal) {
+        clickPaneOption(
+          "span.dtsp-name [data-i18n='scope.global']",
+          `service: ${configServiceSelection}`,
+        );
+      } else {
+        const serviceSelector = "span.dtsp-name";
+        const $serviceMatch = $container
+          .find(serviceSelector)
+          .filter((_, el) => $(el).text().trim() === configServiceSelection)
+          .first();
+        if ($serviceMatch.length) {
+          $serviceMatch.trigger("click");
+        } else {
+          console.warn(
+            `Could not find search pane option for service: ${configServiceSelection}`,
+          );
+        }
+      }
+    }
+  };
 
   // Wait for window.i18nextReady = true before continuing
   if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
@@ -558,6 +789,7 @@ $(document).ready(function () {
       waitForI18next(resolve);
     }).then(() => {
       const dt = initializeDataTable(configs_config);
+      applyInitialFilters(dt);
       // Show/hide filters based on initial selections
       if (configTypeSelection || configServiceSelection) {
         dt.searchPanes.container().show();
@@ -591,5 +823,85 @@ $(document).ready(function () {
       service: service === "global" ? null : service,
     };
     setupDeletionModal([config]);
+  });
+
+  $(document).on("click", ".convert-config", function () {
+    if (isReadOnly) {
+      alert(
+        t(
+          "alert.readonly_mode",
+          "This action is not allowed in read-only mode.",
+        ),
+      );
+      return;
+    }
+    const service = $(this).data("config-service");
+    const config = {
+      name: $(this).data("config-name"),
+      type: $(this).data("config-type"),
+      service: service || "global",
+    };
+    const conversionType = $(this).data("value");
+    setupConversionModal([config], conversionType);
+  });
+
+  const validateImportFile = (file) => {
+    if (!file) return false;
+    const name = (file.name || "").toLowerCase();
+    if (name.endsWith(".json")) return true;
+    return (file.type || "").toLowerCase().includes("json");
+  };
+
+  importDragArea.on("click", function () {
+    importFileInput.click();
+  });
+
+  importDragArea.on("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+      e.preventDefault();
+      importFileInput.click();
+    }
+  });
+
+  importDragArea.on("dragover", function (e) {
+    e.preventDefault();
+    importDragArea.removeClass("border-dashed");
+    importDragArea.addClass("bg-primary text-white");
+    importDragArea.find("i").removeClass("text-primary");
+  });
+
+  importDragArea.on("dragleave", function (e) {
+    e.preventDefault();
+    importDragArea.addClass("border-dashed");
+    importDragArea.removeClass("bg-primary text-white");
+    importDragArea.find("i").addClass("text-primary");
+  });
+
+  importFileInput.on("change", function () {
+    const file = this.files[0];
+    importFileList.empty();
+    if (!file) return;
+    if (!validateImportFile(file)) {
+      alert(
+        t(
+          "alert.configs_import_invalid_file",
+          "Please upload a valid custom configurations export file (.json).",
+        ),
+      );
+      importFileInput.val("");
+      return;
+    }
+    importFileList.append(
+      `<div class="alert alert-info text-center" role="alert">${file.name}</div>`,
+    );
+  });
+
+  importDragArea.on("drop", function (e) {
+    e.preventDefault();
+    importDragArea.addClass("border-dashed");
+    importDragArea.removeClass("bg-primary text-white");
+    importDragArea.find("i").addClass("text-primary");
+    importFileInput.prop("files", e.originalEvent.dataTransfer.files);
+    importFileInput.trigger("change");
   });
 });

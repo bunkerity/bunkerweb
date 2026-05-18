@@ -40,7 +40,16 @@ fi
 type="deb"
 if [[ "$linux" = fedora* ]] || [ "$linux" = "centos" ] || [[ "$linux" = rhel* ]] ; then
 	type="rpm"
+elif [[ "$linux" = freebsd* ]] ; then
+	type="freebsd"
 fi
+
+# FreeBSD packages cannot be built in Docker - show instructions
+if [ "$type" = "freebsd" ] ; then
+	echo "⚠️  FreeBSD packages cannot be built in Docker."
+	exit 0
+fi
+
 do_and_check_cmd docker run --rm -v "${package_dir}:/data" "local/bunkerweb-${linux}:latest" "$type"
 name="bunkerweb_${version}-1_${arch}"
 if [ "$type" = "rpm" ] ; then

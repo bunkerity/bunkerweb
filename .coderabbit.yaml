@@ -1,0 +1,385 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "en-GB"
+tone_instructions: "Be direct, technical, and actionable. Cite exact lines.
+  Prefer concrete guidance over vague suggestions. Use British English."
+early_access: false
+
+knowledge_base:
+  opt_out: false
+  web_search:
+    enabled: false
+  code_guidelines:
+    enabled: true
+
+code_generation:
+  docstrings:
+    language: "en-GB"
+
+reviews:
+  profile: "assertive"
+  request_changes_workflow: true
+  high_level_summary: true
+  high_level_summary_in_walkthrough: true
+  high_level_summary_instructions: |
+    Summarise the PR by BunkerWeb component (`src/api`, `src/ui`, `src/common`, `src/bw`, `src/linux`, `.github`, `tests`, `docs`, `examples`).
+    Always call out: security impact, user-visible behaviour changes, configuration or schema changes, packaging or deployment impact, and whether documentation/tests were updated.
+    Keep the summary terse, technical, and suitable for maintainers reviewing a security-critical WAF project.
+  review_status: true
+  review_details: true
+  collapse_walkthrough: false
+  changed_files_summary: true
+  sequence_diagrams: false
+  estimate_code_review_effort: true
+  assess_linked_issues: true
+  related_issues: true
+  related_prs: true
+  suggested_labels: false
+  suggested_reviewers: false
+  enable_prompt_for_ai_agents: true
+  # Fun features — keep CodeRabbit cheerful
+  poem: true
+  in_progress_fortune: true
+  commit_status: true
+  fail_commit_status: false
+  abort_on_close: true
+  auto_review:
+    enabled: true
+    drafts: false
+    auto_incremental_review: true
+    auto_pause_after_reviewed_commits: 8
+    base_branches:
+      - "staging"
+      - "rc"
+      - "dev"
+    ignore_title_keywords:
+      - "WIP"
+      - "[WIP]"
+      - "RFC"
+      - "DO NOT REVIEW"
+    ignore_usernames:
+      - "dependabot[bot]"
+      - "TheophileDiot"
+      - "fl0ppy-d1sk"
+
+  slop_detection:
+    enabled: true
+    label: "needs-review"
+
+  pre_merge_checks:
+    title:
+      mode: "warning"
+      requirements: |
+        Use Conventional Commits or the "<component> - description" format already used in BunkerWeb history.
+        Examples: "feat: add bunkernet retry backoff", "fix(ui): escape next param", "docs: update advanced guide", "bunkernet - harden anonymous report".
+        Keep titles under ~70 characters; put detail in the description.
+    description:
+      mode: "warning"
+    issue_assessment:
+      mode: "off"
+    docstrings:
+      mode: "off"
+
+  finishing_touches:
+    # Auto-generated tests risk false confidence on a WAF; contributors write them.
+    unit_tests:
+      enabled: false
+
+  path_filters:
+    - "**"
+    # Override CodeRabbit's default !**/gen/** block — src/common/gen/ is BunkerWeb's settings engine
+    - "**/gen/**"
+    - "!src/deps/**"
+    # Vendored OWASP Core Rule Set — upstream files, leave crs-setup-v*.conf reviewable
+    - "!src/common/core/modsecurity/files/coreruleset-v*/**"
+    # Vendored third-party UI libraries (bootstrap, ace, datatables, jquery, purify, etc.)
+    - "!src/ui/app/static/libs/**"
+    # BunkerWeb runtime assets: root CA + MaxMind GeoIP databases (asn.mmdb, country.mmdb)
+    - "!src/bw/misc/**"
+    - "!src/VERSION"
+    - "!examples/community/**"
+    # Mkdocs site chrome
+    - "!docs/assets/**"
+    - "!docs/overrides/**"
+    - "!docs/misc/**"
+    - "!**/node_modules/**"
+    - "!**/.venv/**"
+    - "!**/venv/**"
+    - "!**/.pytest_cache/**"
+    - "!**/__pycache__/**"
+    - "!**/dist/**"
+    - "!**/build/**"
+    - "!**/*.min.js"
+    - "!**/*.pkg"
+    - "!**/*.log.txt"
+    - "!**/*.svg"
+    - "!**/*.drawio"
+    - "!**/*.patch*"
+    - "!**/*.ascii"
+    - "!**/*.tf"
+    - "!**/*.tftpl"
+    - "!**/*.key"
+    - "!.claude/**"
+    - "!.gemini/**"
+    - "!misc/generated/**"
+
+  path_instructions:
+    - path: "**/*.py"
+      instructions: |
+        Follow BunkerWeb's Python standards and security posture:
+          - Use snake_case for functions and variables, PascalCase for classes, and provide concise, accurate docstrings for public classes, functions, and methods.
+          - Respect Black formatting with a 160-character line limit and the existing pre-commit conventions. Do not insist on adding type annotations to previously untyped code, but accept them when added consistently.
+          - Catch specific exceptions; never use bare `except:`. Catching `Exception` is acceptable only at explicit process boundaries (for example scheduler loops, outer job runners, worker entrypoints, or graceful-shutdown boundaries) when the code logs enough context and either re-raises, returns an error status, or terminates safely.
+          - Never use `os.system`, `subprocess.*(..., shell=True)`, `eval`, or `exec`. Pass subprocess arguments as a list and prefer explicit binary paths for privileged operations.
+          - Do not use unsafe deserialisers (`pickle`, `marshal`, `shelve`, `jsonpickle`, `dill`) for untrusted data. Use `yaml.safe_load()` rather than unsafe YAML loading.
+          - Open files with an explicit encoding (normally `utf-8`) and use `with` statements for files, sockets, database sessions, and temporary resources.
+          - Use `secrets` for token generation and `hmac.compare_digest` for token, HMAC, or signature comparisons.
+          - For HTTP clients (`requests`, `httpx`): always set an explicit timeout, validate destination URLs to block RFC1918/loopback/link-local ranges (SSRF), disable automatic redirects to internal hosts, and be careful with proxy settings.
+          - For filesystem operations: resolve paths with `Path.resolve()` and verify they remain under the intended base directory before reading or writing (path traversal).
+          - Use `defusedxml` rather than stdlib XML parsers for untrusted XML.
+          - For SQLAlchemy, use bound parameters and safe query construction. Never call `text()` with f-strings or `.format()`, and flag `.execute()` calls built from string concatenation. Do not recommend Django-specific APIs such as `full_clean()`, `select_related()`, or `prefetch_related()` — BunkerWeb uses SQLAlchemy, not Django.
+          - For Jinja2, keep autoescaping enabled and never apply `|safe` to user-controlled data.
+          - Scrub secrets, tokens, cookies, database URIs, and `Authorization` headers from logs. Use the logging framework rather than `print()`.
+          - Secrets, API keys, and credentials must never be hard-coded; use environment variables, Docker secrets, or configuration templates.
+
+    - path: "src/api/**/*.py"
+      instructions: |
+        `src/api/` is the FastAPI service:
+          - Avoid blocking I/O in async endpoints and background tasks.
+          - Validate request models strictly and return precise HTTP status codes.
+          - Authentication, authorisation, CORS, and rate-limiting changes must preserve secure defaults.
+          - Propagate bounded timeouts to any outbound calls and avoid retry loops without caps, jitter, and logging.
+          - Be careful with streaming responses, file downloads, and proxy-like behaviour: validate content types, filenames, and upstream destinations.
+
+    - path: "src/ui/**/*.py"
+      instructions: |
+        `src/ui/` is the admin UI and related backend:
+          - State-changing routes must enforce CSRF protection where browser sessions are used.
+          - Session, remember-me, and auth-cookie changes must preserve `Secure`, `HttpOnly`, and appropriate `SameSite` behaviour.
+          - Redirect targets such as `next` parameters must be validated against an allowlist or local-path policy.
+          - For templates and forms, escape user-controlled data, validate uploads by type and size, and keep files outside the web root unless there is a deliberate reviewed exception.
+          - BunkerWeb uses `bcrypt`; flag any move towards weak password hashing or plaintext credential handling.
+
+    - path: "src/common/gen/**/*.py"
+      instructions: |
+        `src/common/gen/` drives settings validation and config generation:
+          - Preserve determinism: the same validated settings should render the same output.
+          - Do not bypass the configurator or validation layer when introducing new settings.
+          - Any template change that depends on a new setting should come with the corresponding schema or plugin metadata update.
+          - Be careful with escaping and quoting so user-supplied settings cannot break out of generated directives or file formats.
+
+    - path: "src/common/db/alembic/**/*.py"
+      instructions: |
+        Alembic migrations must be safe across supported databases:
+          - Make schema changes forward-safe, and keep downgrades sane when practical.
+          - Avoid long-running table rewrites or irreversible destructive operations without a strong justification in the PR.
+          - Backfills must be idempotent and chunked when data volume could be significant.
+          - Do not import current ORM models into old migrations; use explicit table definitions or migration-time constructs.
+
+    - path: "**/tests/**/*.py"
+      instructions: |
+        Tests should verify observable behaviour, not incidental implementation details:
+          - Prefer Arrange-Act-Assert structure and descriptive test names.
+          - Avoid broad exception swallowing, arbitrary sleeps, and unnecessary mocks.
+          - Prefer local containers, fixtures, and deterministic inputs over external services.
+          - When a PR fixes a regression, ask for a regression test that fails before the fix and passes after it.
+
+    - path: "**/plugin.json"
+      instructions: |
+        `plugin.json` files define the settings schema that the configurator depends on:
+          - Ensure setting IDs remain stable unless there is an intentional breaking change.
+          - Each setting should declare the expected metadata (`context`, `type`, defaults, help text, validation rules) and keep backwards compatibility in mind.
+          - Regex validators must be anchored where appropriate, compile cleanly, and avoid catastrophic backtracking. Default values must satisfy their own validators.
+          - When `jobs` are declared, verify schedule values, referenced scripts, and reload behaviour. Script paths must exist under the plugin tree.
+          - If a PR changes a setting ID, type, context, accepted value shape, or compatibility behaviour, require migration notes and any necessary Alembic or config-migration work.
+
+    - path: "**/*.lua"
+      instructions: |
+        Lua code runs on OpenResty and often sits on the request hot path:
+          - Use local variables and local module tables; avoid globals.
+          - Cache `ngx.var.*` and `ngx.req.*` values in locals instead of re-reading them repeatedly.
+          - Precompile regular expressions in module-level locals; never compile inside request loops. For `ngx.re.match`/`find`/`gmatch`/`sub`, pass the option string `"jo"` (`j` enables PCRE JIT, `o` compiles the pattern once and caches it), anchor patterns with `^...$` when a full match is intended, and cap input length before matching to prevent ReDoS.
+          - Validate and sanitise all request-derived input. Never evaluate request-derived code via `load`, `loadstring`, or similar mechanisms.
+          - Avoid blocking file I/O or synchronous network calls in request handlers. Use OpenResty-safe APIs and bounded caches.
+          - Shared-dictionary read-modify-write sequences are race-prone; prefer atomic operations such as `incr` or explicit locking where correctness matters.
+          - Never log request bodies, cookies, bearer tokens, or other secrets.
+          - Use `pcall` or explicit error handling at safe boundaries so a malformed request or upstream failure does not crash worker processes.
+          - Use `cjson` safely for JSON encode/decode and do not build JSON by string concatenation.
+
+    - path: "**/*.sh"
+      instructions: |
+        Shell scripts must match BunkerWeb's portability expectations:
+          - If the script is POSIX shell, prefer `set -eu`; if it explicitly requires Bash, use `set -euo pipefail`.
+          - Quote variables and command substitutions consistently and prefer `${var}` when concatenating.
+          - Do not use Bash-only features in `/bin/sh` scripts.
+          - Handle failures explicitly, use `trap` for cleanup where temporary files are created, and use `mktemp` safely.
+          - Never use `curl | sh` or `wget | sh`; verify downloads by checksum or signature and avoid `-k` / `--insecure`.
+          - Do not rely on inherited `PATH` in privileged contexts; set it explicitly where needed.
+          - Avoid `eval` and unsafe command construction from untrusted data.
+
+    - path: "src/ui/**/*.js"
+      instructions: |
+        UI JavaScript should remain framework-light, secure, and accessible:
+          - Prefer `const` / `let`, strict equality, explicit null checks, and clear error handling for async flows.
+          - Never use `eval`, the `Function` constructor, or string forms of `setTimeout` / `setInterval`.
+          - Do not assign dynamic content to `innerHTML` or `outerHTML`; prefer DOM construction APIs (`createElement` + `appendChild`). When untrusted HTML is unavoidable, sanitise via the DOMPurify build already shipped at `src/ui/app/static/libs/purify/purify.min.js` (referenced from `utils.js`, `dataTableInit.js`, `pages/profile.js`).
+          - Validate `postMessage` origins, avoid `"*"` target origins, and be careful with storage APIs and cross-window communication.
+          - Maintain keyboard accessibility, ARIA correctness, and sensible focus management for interactive UI changes.
+
+    - path: "src/ui/**/*.html"
+      instructions: |
+        HTML templates and UI fragments must be semantic and safe:
+          - Maintain a correct heading hierarchy and use semantic layout elements where they improve clarity.
+          - Provide labels, `alt` text, and ARIA attributes where needed for accessibility.
+          - Do not add inline scripts or inline event handlers unless there is a strong reviewed reason.
+          - Escape user-controlled values and avoid markup patterns that weaken CSP or enable DOM XSS.
+          - Any new external asset should justify trust, integrity, and loading behaviour.
+
+    - path: "src/ui/**/*.css"
+      instructions: |
+        CSS should work with the existing UI stack rather than fight it:
+          - Respect the existing Bootstrap-oriented approach and prefer small, targeted overrides over large bespoke frameworks.
+          - Flag hand-written rules that duplicate existing utilities, rely on `!important`, or create unnecessary specificity wars.
+          - Prefer CSS custom properties and reusable patterns over copy-pasted values.
+          - Keep responsiveness and accessibility in mind, especially focus states, contrast, and reduced-motion behaviour where relevant.
+
+    - path: ".github/workflows/**/*.yml"
+      instructions: &github_actions_instructions |
+        GitHub Actions workflows must be reproducible and safe:
+          - Pin third-party actions by commit SHA, not floating tags.
+          - Declare an explicit top-level `permissions:` block and keep it minimal by default.
+          - Be extremely careful with `pull_request_target`: do not combine untrusted PR code with repository secrets.
+          - Do not interpolate `${{ github.event.* }}` values directly inside `run:` scripts; assign them via `env:` first to reduce script-injection risk.
+          - Use `concurrency` intentionally: cancel superseded PR jobs, but avoid cancelling release or deployment jobs that should run to completion.
+
+    - path: ".github/workflows/**/*.yaml"
+      instructions: *github_actions_instructions
+
+    - path: ".pre-commit-config.yaml"
+      instructions: |
+        Keep the pre-commit stack aligned with repository reality:
+          - Hook revisions should stay pinned immutably.
+          - Exclusions for vendored, generated, minified, or upstream files should stay deliberate and in sync with CodeRabbit's own exclusions where practical.
+          - New hooks must not silently reformat or reject large swathes of historical code without an agreed migration plan.
+
+    - path: "**/*.yaml"
+      instructions: &yaml_instructions |
+        YAML files (CI, Compose, Kubernetes, app config, docs config) must be structured and reproducible:
+          - Use consistent indentation, stable key ordering where the project already has one, and avoid duplicate keys.
+          - Pin container images, dependency versions, and GitHub Actions rather than using `latest`.
+          - Never commit secrets in plaintext; use secret managers, encrypted values, or template/example files.
+          - Docker Compose changes should prefer `read_only`, `no-new-privileges`, dropped capabilities, and minimal mounts where compatible.
+          - Kubernetes manifests should prefer `runAsNonRoot`, `allowPrivilegeEscalation: false`, `seccompProfile: RuntimeDefault`, dropped capabilities, and explicit resource requests/limits.
+
+    - path: "**/*.yml"
+      instructions: *yaml_instructions
+
+    - path: "**/Dockerfile*"
+      instructions: |
+        Dockerfiles must be hardened and reproducible:
+          - Do not use `latest`; pin base images precisely, ideally by digest when the workflow supports it.
+          - Prefer multi-stage builds and keep the runtime image small.
+          - Install packages in a single `RUN` layer and clean the package cache in that same layer. BunkerWeb ships all three families under `src/linux/Dockerfile-*`:
+              - Debian/Ubuntu: `apt-get update && apt-get install -y --no-install-recommends <packages> && apt-get clean && rm -rf /var/lib/apt/lists/*`
+              - Alpine: `apk add --no-cache <packages>`
+              - Fedora/RHEL: `dnf install -y <packages> && dnf clean all && rm -rf /var/cache/dnf`
+          - Prefer `COPY` over `ADD`, avoid passing secrets via `ARG`, and use BuildKit secrets for sensitive material.
+          - The final runtime stage should run as a non-root user unless there is a documented reason not to.
+          - Exposing 80 and 443 is expected for BunkerWeb and should not be flagged as a problem by itself.
+
+    - path: "src/common/**/confs/**/*"
+      instructions: |
+        This tree contains Jinja2-templated NGINX configuration rendered by `src/common/gen/Templator.py`. Files mix `{% ... %}` and `{{ ... }}` blocks with NGINX directives. Apply these rules to the rendered NGINX intent, NOT to Jinja control blocks:
+          - Enforce TLS 1.2 and 1.3 only; disable TLS 1.0/1.1. Specify strong cipher suites and `ssl_prefer_server_ciphers on`.
+          - Enable OCSP stapling (`ssl_stapling on; ssl_stapling_verify on;`) with a `resolver` that sets `valid=` and avoids external resolvers like `8.8.8.8` unless the user explicitly configures one.
+          - Use HSTS (`add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;`). Only add `preload` if the domain is actually submitted to the HSTS preload list.
+          - Set `client_body_timeout`, `client_header_timeout`, `keepalive_timeout`, and `proxy_read_timeout` explicitly (typically 60s or less); do not hard-code values that bypass the settings engine.
+          - Define `client_max_body_size` appropriately and limit connections and requests per IP with `limit_conn` and `limit_req_zone`.
+          - Set `server_tokens off` and strip `Server`/`X-Powered-By` headers.
+          - Recommend security headers: `X-Content-Type-Options nosniff`, `X-Frame-Options DENY` or `SAMEORIGIN`, `Referrer-Policy`, `Content-Security-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy: same-origin`, and `Cross-Origin-Resource-Policy: same-site` on UI responses. Do not flag their absence on reverse-proxied upstream responses. Do NOT require `X-XSS-Protection`; the legacy filter is deprecated — set it to `0` if set at all and rely on CSP.
+          - `proxy_http_version 1.1` with explicit hop-by-hop header handling to avoid request smuggling. Strip client-supplied `X-Forwarded-*` headers and repopulate them from the trusted real-IP source only.
+          - Never `proxy_pass` to an upstream constructed from a request variable (SSRF).
+          - Prefer prefix `location` blocks over regex locations when possible; avoid fragile nested `if` logic.
+          - `proxy_intercept_errors on` to avoid leaking upstream error pages.
+          - Do not hard-code values that should come from the settings engine or validated plugin metadata. Template changes that rely on new settings require a matching `plugin.json` update and Configurator validation (`src/common/gen/Configurator.py`).
+          - Ensure any variable interpolation is safe: values come from the settings engine and are pre-validated, but double-check that user-supplied strings cannot break directive syntax or smuggle extra directives.
+          - Remove sensitive information (passwords, keys) from configuration files. Comments must not expose internal details.
+
+    - path: "src/common/core/modsecurity/**/*.modsec"
+      instructions: &modsec_instructions |
+        ModSecurity rules and config must preserve protection without unnecessary false positives:
+          - Keep the OWASP Core Rule Set wiring intact unless there is a clearly justified change.
+          - Document rule exclusions and paranoia-level adjustments with a concrete reason.
+          - Request-body limits, audit logging, and parsing behaviour should remain explicit and secure.
+          - Do not weaken inspection, disable whole rule classes, or broaden allowlists without a strong, specific reason.
+
+    - path: "src/common/core/modsecurity/**/*.conf"
+      instructions: *modsec_instructions
+
+    - path: "src/linux/fpm-*"
+      instructions: |
+        Packaging metadata should remain distribution-aware and idempotent:
+          - Dependencies must correspond to real package names for the target distribution and version.
+          - Post-install and pre-remove logic should be safe to run repeatedly.
+          - Ownership, permissions, service enablement, and directory creation must be explicit and conservative.
+          - Do not remove user data on uninstall unless the operation is explicitly a purge.
+
+    - path: "**/*.service"
+      instructions: |
+        systemd units should be hardened where compatible with the service:
+          - Prefer dedicated `User=` / `Group=` accounts, `NoNewPrivileges=true`, `PrivateTmp=true`, and tight filesystem protections.
+          - Add `ReadWritePaths=` only for legitimate writable locations.
+          - Restart behaviour should be explicit and sensible for long-running services.
+          - Recommend additional sandboxing directives only when they are compatible with the service's actual needs.
+
+    - path: "**/*.md"
+      instructions: |
+        Documentation should be concise, accurate, and written in British English:
+          - Keep the structure clear with a sensible heading hierarchy.
+          - Prefer concrete instructions, accurate examples, and explicit prerequisites.
+          - Check that commands, paths, and references still match the codebase and supported deployment modes.
+          - When a PR changes behaviour, defaults, packaging, or security posture, ask for the corresponding documentation update.
+
+  tools:
+    github-checks:
+      enabled: true
+      timeout_ms: 120000
+    languagetool:
+      enabled: true
+      level: "default"
+    gitleaks:
+      enabled: true
+    luacheck:
+      enabled: true
+    shellcheck:
+      enabled: true
+    hadolint:
+      enabled: true
+    yamllint:
+      enabled: true
+    actionlint:
+      enabled: true
+    markdownlint:
+      enabled: true
+    checkov:
+      enabled: true
+    osvScanner:
+      enabled: true
+    htmlhint:
+      enabled: true
+    dotenvLint:
+      enabled: true
+    flake8:
+      enabled: false
+    ruff:
+      enabled: false
+    eslint:
+      enabled: false
+    stylelint:
+      enabled: false
+    semgrep:
+      enabled: false
+    biome:
+      enabled: false
+
+chat:
+  auto_reply: true

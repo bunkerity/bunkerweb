@@ -55,6 +55,8 @@ markdown_extensions:
   - admonition
   - tables
   - pymdownx.details
+  - toc:
+      toc_depth: 3
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
@@ -93,6 +95,7 @@ plugins:
         color: "white"
   - mike:
       canonical_version: latest
+  - optimize
   - print-site:
       add_table_of_contents: false
       add_cover_page: false

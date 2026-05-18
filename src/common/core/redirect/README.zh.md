@@ -20,14 +20,19 @@
 
 ### 配置设置
 
-| 设置                      | 默认值 | 上下文    | 多选 | 描述                                                                              |
-| ------------------------- | ------ | --------- | ---- | --------------------------------------------------------------------------------- |
-| `REDIRECT_FROM`           | `/`    | multisite | 是   | **要重定向的源路径：** 将被重定向的路径。                                         |
-| `REDIRECT_TO`             |        | multisite | 是   | **目标 URL：** 访问者将被重定向到的目标 URL。留空以禁用重定向。                   |
-| `REDIRECT_TO_REQUEST_URI` | `no`   | multisite | 是   | **保留路径：** 设置为 `yes` 时，将原始请求 URI 附加到目标 URL。                   |
-| `REDIRECT_TO_STATUS_CODE` | `301`  | multisite | 是   | **HTTP 状态码：** 用于重定向的 HTTP 状态码。选项：`301`（永久）或 `302`（临时）。 |
+| 设置                      | 默认值 | 上下文    | 多选 | 描述                                                                                    |
+| ------------------------- | ------ | --------- | ---- | --------------------------------------------------------------------------------------- |
+| `REDIRECT_FROM`           | `/`    | multisite | 是   | **要重定向的源路径：** 将被重定向的路径。                                               |
+| `REDIRECT_TO`             |        | multisite | 是   | **目标 URL：** 访问者将被重定向到的目标 URL。留空以禁用重定向。                         |
+| `REDIRECT_TO_REQUEST_URI` | `no`   | multisite | 是   | **保留路径：** 设置为 `yes` 时，将原始请求 URI 附加到目标 URL。                         |
+| `REDIRECT_TO_STATUS_CODE` | `301`  | multisite | 是   | **HTTP 状态码：** 用于重定向的 HTTP 状态码。选项：`301`、`302`、`303`、`307` 或 `308`。 |
 
-!!! tip "选择正确的状态码" - 当重定向是永久性的时，例如域名迁移或建立规范 URL，请使用 `301`（永久移动）。这有助于搜索引擎更新其索引。- 当重定向是临时性的，或者如果您将来可能想重新使用原始 URL，请使用 `302`（找到/临时重定向）。
+!!! tip "选择正确的状态码"
+    - **`301`（永久移动）：** 永久重定向，被浏览器缓存。可能将 POST 更改为 GET。适用于域名迁移。
+    - **`302`（找到）：** 临时重定向。可能将 POST 更改为 GET。
+    - **`303`（参见其他）：** 始终使用 GET 方法重定向。适用于表单提交后的重定向。
+    - **`307`（临时重定向）：** 保留 HTTP 方法的临时重定向。适用于 API 重定向。
+    - **`308`（永久重定向）：** 保留 HTTP 方法的永久重定向。适用于永久性 API 端点迁移。
 
 !!! info "路径保留"
     当 `REDIRECT_TO_REQUEST_URI` 设置为 `yes` 时，BunkerWeb 会保留原始请求路径。例如，如果用户访问 `https://old-domain.com/blog/post-1`，并且您已设置为重定向到 `https://new-domain.com`，他们将被重定向到 `https://new-domain.com/blog/post-1`。
@@ -96,4 +101,25 @@
     REDIRECT_TO: "https://example.com/support"
     REDIRECT_TO_REQUEST_URI: "yes"
     REDIRECT_TO_STATUS_CODE: "301"
+    ```
+
+=== "API 端点迁移"
+
+    永久重定向 API 端点并保留 HTTP 方法的配置：
+
+    ```yaml
+    REDIRECT_FROM: "/api/v1/"
+    REDIRECT_TO: "https://api.example.com/v2/"
+    REDIRECT_TO_REQUEST_URI: "yes"
+    REDIRECT_TO_STATUS_CODE: "308"
+    ```
+
+=== "表单提交后重定向"
+
+    使用 GET 方法在表单提交后重定向的配置：
+
+    ```yaml
+    REDIRECT_TO: "https://example.com/thank-you"
+    REDIRECT_TO_REQUEST_URI: "no"
+    REDIRECT_TO_STATUS_CODE: "303"
     ```

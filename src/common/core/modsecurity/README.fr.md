@@ -21,7 +21,7 @@ Le plugin ModSecurity intègre le puissant pare-feu applicatif web (WAF) [ModSec
 Suivez ces étapes pour configurer et utiliser ModSecurity :
 
 1.  **Activer la fonctionnalité :** ModSecurity est activé par défaut. Cela peut être contrôlé via le paramètre `USE_MODSECURITY`.
-2.  **Sélectionner une version du CRS :** Choisissez une version du Jeu de Règles de Base OWASP (v3, v4, ou nightly).
+2.  **Sélectionner une version du CRS :** Choisissez une version du Jeu de Règles de Base OWASP (v3 ou v4).
 3.  **Ajouter des plugins :** Activez optionnellement des plugins CRS pour améliorer la couverture des règles.
 4.  **Surveiller et ajuster :** Utilisez les journaux et l'[interface web](web-ui.md) pour identifier les faux positifs et ajuster les paramètres.
 
@@ -31,7 +31,7 @@ Suivez ces étapes pour configurer et utiliser ModSecurity :
 | ------------------------------------- | -------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `USE_MODSECURITY`                     | `yes`          | multisite | no       | **Activer ModSecurity :** Active la protection du pare-feu applicatif web ModSecurity.                                                                                                     |
 | `USE_MODSECURITY_CRS`                 | `yes`          | multisite | no       | **Utiliser le Core Rule Set :** Active le Jeu de Règles de Base OWASP pour ModSecurity.                                                                                                    |
-| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | no       | **Version du CRS :** La version du Jeu de Règles de Base OWASP à utiliser. Options : `3`, `4`, ou `nightly`.                                                                               |
+| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | no       | **Version du CRS :** La version du Jeu de Règles de Base OWASP à utiliser. Options : `3` ou `4`. Note : `nightly` est obsolète et utilise v4 par défaut.                                    |
 | `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | no       | **Moteur de règles :** Contrôle si les règles sont appliquées. Options : `On`, `DetectionOnly`, ou `Off`.                                                                                  |
 | `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | no       | **Moteur d'audit :** Contrôle le fonctionnement de la journalisation d'audit. Options : `On`, `Off`, ou `RelevantOnly`.                                                                    |
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`    | multisite | no       | **Parties du journal d'audit :** Quelles parties des requêtes/réponses inclure dans les journaux d'audit.                                                                                  |
@@ -45,16 +45,20 @@ Suivez ces étapes pour configurer et utiliser ModSecurity :
 
     L'équipe du CRS maintient activement une liste d'exclusions pour des applications populaires telles que WordPress, Nextcloud, Drupal et Cpanel, facilitant ainsi l'intégration sans impacter la fonctionnalité. Les avantages en matière de sécurité l'emportent de loin sur l'effort de configuration minimal requis pour traiter les faux positifs.
 
+!!! warning "Recommandation de sécurité pour les gros téléversements"
+    ModSecurity met en mémoire tampon le corps complet de la requête et ne peut pas le plafonner pour les téléversements de plusieurs Go, ce qui peut provoquer un OOM du worker. Si — **et seulement si** — une URL de reverse proxy est utilisée *exclusivement* pour les téléversements de fichiers (par exemple un point de terminaison `/upload` dédié), définissez `REVERSE_PROXY_MODSECURITY_N: "no"` sur cette URL afin d'émettre `modsecurity off;` dans son bloc `location`. Ne le désactivez pas sur des URL à usage mixte : vous perdriez la couverture WAF sur tout ce qui est servi par cette location.
+
+    Pour conserver une protection des téléversements après le contournement de ModSecurity, associez cela à un plugin d'analyse de fichiers comme [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) ou [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) — ils inspectent le fichier téléversé lui-même plutôt que le corps brut de la requête.
+
 ### Versions du CRS disponibles
 
 Sélectionnez une version du CRS pour répondre au mieux à vos besoins de sécurité :
 
-- **`3`** : Stable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`** : Stable [v4.20.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.20.0) (**par défaut**).
-- **`nightly`** : [Version de nuit](https://github.com/coreruleset/coreruleset/releases/tag/nightly) offrant les dernières mises à jour de règles.
+- **`3`** : Stable [v3.3.9](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.9).
+- **`4`** : Stable [v4.25.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.25.0) (**par défaut**).
 
-!!! example "Version de nuit (Nightly Build)"
-    La **version de nuit** contient les règles les plus à jour, offrant les dernières protections contre les menaces émergentes. Cependant, comme elle est mise à jour quotidiennement et peut inclure des changements expérimentaux ou non testés, il est recommandé d'utiliser d'abord la version de nuit dans un **environnement de pré-production** avant de la déployer en production.
+!!! warning "Version de nuit obsolète"
+    L'option `nightly` pour `MODSECURITY_CRS_VERSION` est obsolète car le projet OWASP Core Rule Set a arrêté les versions de nuit. Si votre configuration utilise encore `nightly`, CRS v4 sera utilisé à la place. Veuillez mettre à jour votre configuration pour utiliser `MODSECURITY_CRS_VERSION=4`.
 
 !!! tip "Niveaux de paranoïa"
     Le Jeu de Règles de Base OWASP utilise des "niveaux de paranoïa" (PL) pour contrôler la rigueur des règles :
@@ -207,18 +211,6 @@ Le Jeu de Règles de Base OWASP prend également en charge une gamme de **plugin
     USE_MODSECURITY_CRS: "yes"
     MODSECURITY_CRS_VERSION: "4"
     USE_MODSECURITY_GLOBAL_CRS: "yes"
-    ```
-
-=== "Version de nuit avec plugins personnalisés"
-
-    Configuration utilisant la version de nuit du CRS avec des plugins personnalisés :
-
-    ```yaml
-    USE_MODSECURITY: "yes"
-    USE_MODSECURITY_CRS: "yes"
-    MODSECURITY_CRS_VERSION: "nightly"
-    USE_MODSECURITY_CRS_PLUGINS: "yes"
-    MODSECURITY_CRS_PLUGINS: "wordpress-rule-exclusions/v1.0.0 https://github.com/coreruleset/dos-protection-plugin-modsecurity/archive/refs/heads/main.zip"
     ```
 
 !!! note "Valeurs de taille lisibles"

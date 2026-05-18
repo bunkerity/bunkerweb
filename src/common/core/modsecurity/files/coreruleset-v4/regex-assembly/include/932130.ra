@@ -1,16 +1,26 @@
 ##! Please refer to the documentation at
 ##! https://coreruleset.org/docs/development/regex_assembly/.
 
-\$\(.*\)
-\$\{.*\}
-<\(.*\)
->\(.*\)
+##! Test strings to be used for regex matching:
+##! $(abc)
+##! ${a}
+##! <(lorem)
+##! >(ipsum)
+##! $(( a + b ))
+##! $[ c - d ]
+##! /e[t]c
+##! /etc/[p//]asswd
+
+\$\([^)]+\)
+\$\{[^}]+\}
+<\([^)]+\)
+>\([^)]+\)
 ##! arithmetic expansion
-\$\(\(.*\)\)
-##! arithmetic expansion (deprecated in bash, but exists in other shells, like zsh) 
-\$\[.*\]
+\$\(\([^)]+\)\)
+##! arithmetic expansion (deprecated in bash, but exists in other shells, like zsh)
+\$\[[^\]]*\]
 
 ##! Find wordlist bypasses using [ ] glob characters, like: /e[t]c
+##! Catches also subdirectory globbing, example: cat /etc/[p//]asswd
 ##! Require a / in front to prevent false positives like [text in brackets]
-/\w*\[!.+\]
-/\w*\[.+\]
+/\w*\[[^\]]+\]

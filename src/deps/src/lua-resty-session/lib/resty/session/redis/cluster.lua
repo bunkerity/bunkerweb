@@ -9,7 +9,6 @@ local redis = require "resty.rediscluster"
 
 
 local setmetatable = setmetatable
-local error = error
 local null = ngx.null
 
 
@@ -50,11 +49,6 @@ local metatable = {}
 metatable.__index = metatable
 
 
-function metatable.__newindex()
-  error("attempt to update a read-only table", 2)
-end
-
-
 ---
 -- Store session data.
 --
@@ -67,7 +61,6 @@ end
 -- @tparam[opt] string old_key old session id
 -- @tparam string stale_ttl stale ttl
 -- @tparam[opt] table metadata table of metadata
--- @tparam boolean remember whether storing persistent session or not
 -- @treturn true|nil ok
 -- @treturn string error message
 function metatable:set(...)
@@ -207,6 +200,8 @@ function storage.new(configuration)
   local ssl_verify              = configuration and configuration.ssl_verify
   local server_name             = configuration and configuration.server_name
 
+  local force_auth              = configuration and configuration.force_auth
+
 
   local auth
   if not username then
@@ -236,6 +231,7 @@ function storage.new(configuration)
         auth = auth,
         username = username,
         password = password,
+        force_auth = force_auth,
         connect_opts = {
           ssl = ssl,
           ssl_verify = ssl_verify,
@@ -267,6 +263,7 @@ function storage.new(configuration)
       auth = auth,
       username = username,
       password = password,
+      force_auth = force_auth,
     },
   }, metatable)
 end

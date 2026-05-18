@@ -2,6 +2,7 @@ from collections import defaultdict
 from datetime import datetime
 from html import escape
 from os import getenv
+from re import fullmatch
 from subprocess import DEVNULL, PIPE, STDOUT, run
 from os.path import dirname, join, sep
 from pathlib import Path
@@ -11,11 +12,11 @@ from tarfile import open as tar_open
 from traceback import format_exc
 
 from cryptography import x509
-from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required
 
+from common_utils import safe_tar_extractall  # type: ignore
 from app.dependencies import DB  # type: ignore
 from app.utils import LOGGER  # type: ignore
 from app.routes.utils import cors_required  # type: ignore
@@ -70,6 +71,16 @@ SEARCHABLE_FIELDS = (
 )
 
 
+def _is_allowed_member(member):
+    """Filter tar members to only extract live/, archive/, renewal/ dirs."""
+    parts = Path(member.name).parts
+    if member.name == ".":
+        return True
+    if parts and parts[0] == ".":
+        parts = parts[1:]
+    return bool(parts) and parts[0] in ("live", "archive", "renewal")
+
+
 def download_certificates():
     rmtree(DATA_PATH, ignore_errors=True)
     Path(DATA_PATH).mkdir(parents=True, exist_ok=True)
@@ -79,10 +90,8 @@ def download_certificates():
     for cache_file in cache_files:
         if cache_file["file_name"].endswith(".tgz") and cache_file["file_name"].startswith("folder:"):
             with tar_open(fileobj=BytesIO(cache_file["data"]), mode="r:gz") as tar:
-                try:
-                    tar.extractall(DATA_PATH, filter="fully_trusted")
-                except TypeError:
-                    tar.extractall(DATA_PATH)
+                members = [m for m in tar.getmembers() if _is_allowed_member(m)]
+                safe_tar_extractall(tar, DATA_PATH, tar_filter="tar", members=members)
 
 
 def retrieve_certificates():
@@ -122,7 +131,10 @@ def retrieve_certificates():
             "key_type": "Unknown",
         }
         try:
-            cert = x509.load_pem_x509_certificate(cert_file.read_bytes(), default_backend())
+            certs = x509.load_pem_x509_certificates(cert_file.read_bytes())
+            if not certs:
+                raise ValueError(f"No certificates found in {cert_file}")
+            cert = certs[0]
             subject = cert.subject.get_attributes_for_oid(x509.NameOID.COMMON_NAME)
             if subject:
                 cert_info["common_name"] = subject[0].value
@@ -346,11 +358,19 @@ def letsencrypt_delete():
     cert_name = request.json.get("cert_name")
     if not cert_name:
         return jsonify({"status": "ko", "message": "Missing cert_name"}), 400
+    # Only allow cert_name with alphanumerics, dash, dot, underscore (no slashes, backslashes, or traversal)
+    if not fullmatch(r"[A-Za-z0-9._-]+", cert_name):
+        return jsonify({"status": "ko", "message": "Invalid cert_name"}), 400
 
     download_certificates()
 
     cmd_env = {"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")}
     cmd_env["PYTHONPATH"] = cmd_env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in cmd_env["PYTHONPATH"] else "")
+
+    try:
+        max_log_backups = max(0, int(getenv("LETS_ENCRYPT_MAX_LOG_BACKUPS", "50").strip()))
+    except ValueError:
+        max_log_backups = 50
 
     delete_proc = run(
         [
@@ -362,6 +382,8 @@ def letsencrypt_delete():
             WORK_DIR,
             "--logs-dir",
             LOGS_DIR,
+            "--max-log-backups",
+            str(max_log_backups),
             "--cert-name",
             cert_name,
             "-n",  # non-interactive

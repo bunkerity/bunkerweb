@@ -1,11 +1,18 @@
+from contextlib import suppress
+from gzip import GzipFile
 from hashlib import new as new_hash
 from io import BytesIO
-from os import getenv, sep, access, R_OK
+from os import getenv, sched_getaffinity, sep, access, R_OK, cpu_count
+from os.path import join as path_join, normpath
+from packaging.version import InvalidVersion, Version
 from pathlib import Path
 from platform import machine
+from tarfile import open as tar_open
 from typing import Dict, List, Optional, Union, Any
+from math import ceil
 import logging
-from contextlib import suppress
+
+PLUGIN_TAR_COMPRESS_LEVEL: int = 3
 
 
 def handle_docker_secrets() -> Dict[str, str]:
@@ -90,6 +97,38 @@ def get_os_info() -> Dict[str, str]:
     return os_data
 
 
+def _cgroup_cpu_limit() -> Optional[int]:
+    with suppress(Exception):
+        cpu_max = Path("/sys/fs/cgroup/cpu.max").read_text().strip()
+        quota, period = cpu_max.split()
+        if quota != "max":
+            quota_value = int(quota)
+            period_value = int(period)
+            if quota_value > 0 and period_value > 0:
+                return max(1, ceil(quota_value / period_value))
+
+    with suppress(Exception):
+        quota_value = int(Path("/sys/fs/cgroup/cpu/cpu.cfs_quota_us").read_text().strip())
+        period_value = int(Path("/sys/fs/cgroup/cpu/cpu.cfs_period_us").read_text().strip())
+        if quota_value > 0 and period_value > 0:
+            return max(1, ceil(quota_value / period_value))
+
+    return None
+
+
+def effective_cpu_count() -> int:
+    candidates = [cpu_count() or 1]
+
+    with suppress(Exception):
+        candidates.append(len(sched_getaffinity(0)))
+
+    cgroup_limit = _cgroup_cpu_limit()
+    if cgroup_limit:
+        candidates.append(cgroup_limit)
+
+    return max(1, min(candidates))
+
+
 def file_hash(file: Union[str, Path], *, algorithm: str = "sha512") -> str:
     _hash = new_hash(algorithm)
     if not isinstance(file, Path):
@@ -172,6 +211,11 @@ def plugin_tar_filter(tarinfo):
             return None
         if p.name in _EXCLUDED_FILE_NAMES:
             return None
+        tarinfo.mtime = 0
+        tarinfo.uid = 0
+        tarinfo.gid = 0
+        tarinfo.uname = "root"
+        tarinfo.gname = "root"
         return tarinfo
     except Exception:
         return None
@@ -199,7 +243,7 @@ def add_dir_to_tar_safely(tar: Any, dir_path: Union[str, Path], arc_root: Option
         if not plugin_tar_exclude(d):
             tar.add(d.as_posix(), arcname=arc_root, recursive=False, filter=plugin_tar_filter)
 
-    for p in d.rglob("*"):
+    for p in sorted(d.rglob("*")):
         if plugin_tar_exclude(p):
             continue
         arcname = f"{arc_root}/{p.relative_to(d).as_posix()}"
@@ -209,6 +253,131 @@ def add_dir_to_tar_safely(tar: Any, dir_path: Union[str, Path], arc_root: Option
             elif p.is_file() and access(p.as_posix(), R_OK):
                 tar.add(p.as_posix(), arcname=arcname, recursive=False, filter=plugin_tar_filter)
             # unreadable files are ignored silently
+
+
+def create_plugin_tar_gz(dir_path: Union[str, Path], arc_root: Optional[str] = None) -> BytesIO:
+    """Create a deterministic gzip-compressed tar archive of a plugin directory.
+
+    Uses a fixed gzip mtime of 0 so that the same directory content always
+    produces identical bytes (and therefore the same SHA-256 checksum).
+    The result is a seeked-to-zero BytesIO ready for hashing or reading.
+    """
+    d = Path(dir_path)
+    if arc_root is None:
+        arc_root = d.name
+
+    # 1. Build an uncompressed tar in memory
+    with BytesIO() as raw:
+        with tar_open(fileobj=raw, mode="w") as tar:
+            add_dir_to_tar_safely(tar, d, arc_root=arc_root)
+        raw_bytes = raw.getvalue()
+
+    # 2. Compress with a deterministic gzip header (mtime=0)
+    result = BytesIO()
+    with GzipFile(fileobj=result, mode="wb", compresslevel=PLUGIN_TAR_COMPRESS_LEVEL, mtime=0) as gz:
+        gz.write(raw_bytes)
+    result.seek(0)
+    return result
+
+
+def _validate_tar_members(members, *, allow_symlinks=False):
+    """Pre-validate tar members before extraction (defense-in-depth against CVE-2025-4517).
+
+    Checks archive metadata only — no disk access — so PATH_MAX symlink chain attacks are impossible.
+    When allow_symlinks is False, all symlinks/hardlinks are rejected (matching filter="data").
+    When allow_symlinks is True, symlinks are permitted but their targets are still validated.
+    """
+    for member in members:
+        # Block absolute paths
+        if member.name.startswith("/"):
+            raise ValueError(f"Tar member {member.name!r} has absolute path")
+        # Block path traversal in member name
+        if ".." in Path(member.name).parts:
+            raise ValueError(f"Tar member {member.name!r} contains '..'")
+        # Block device files and pipes
+        if member.isdev() or member.isfifo():
+            raise ValueError(f"Tar member {member.name!r} is a device or pipe")
+        # Check symlinks/hardlinks
+        if member.issym() or member.islnk():
+            if not allow_symlinks:
+                raise ValueError(f"Tar member {member.name!r} is a symlink/hardlink (not permitted)")
+            # Even when symlinks are allowed, validate their targets
+            if Path(member.linkname).is_absolute():
+                raise ValueError(f"Tar member {member.name!r} links to absolute path {member.linkname!r}")
+            # Normalize to collapse valid .. segments, then check if any remain (= escaping)
+            normalized = normpath(path_join(str(Path(member.name).parent), member.linkname))
+            if ".." in Path(normalized).parts:
+                raise ValueError(f"Tar member {member.name!r} links outside target directory")
+
+
+def safe_tar_extractall(tar, path, *, tar_filter="data", **kwargs):
+    """Extract a tar archive safely with pre-validation and Python 3.12+ filter.
+
+    Pre-validates all members before extraction to defend against CVE-2025-4517
+    (PATH_MAX symlink chain bypass of tarfile filters). Then applies the filter
+    as additional defense-in-depth.
+
+    Use tar_filter="tar" instead of "data" when symlinks must be preserved
+    (e.g. Let's Encrypt certs). Use tar_filter="auto" to let the helper pick
+    "tar" only when the archive actually contains symlink/hardlink members,
+    and fall back to the stricter "data" filter otherwise — useful for
+    restoring trusted cache archives that may or may not contain links
+    depending on the plugin.
+    """
+    members_to_check = kwargs.get("members")
+    if members_to_check is None:
+        members_to_check = tar.getmembers()
+    if tar_filter == "auto":
+        tar_filter = "tar" if any(m.issym() or m.islnk() for m in members_to_check) else "data"
+    _validate_tar_members(members_to_check, allow_symlinks=(tar_filter != "data"))
+    try:
+        tar.extractall(path, filter=tar_filter, **kwargs)
+    except TypeError:
+        tar.extractall(path, **kwargs)
+
+
+def safe_zip_extractall(zf, path):
+    """Extract a zip archive safely, rejecting members with absolute paths or path traversal."""
+    dest = Path(path).resolve()
+    for member in zf.namelist():
+        member_path = (dest / member).resolve()
+        # Path.is_relative_to() was added in Python 3.9; fall back to relative_to()
+        # for older interpreters so this helper still raises on traversal attempts.
+        try:
+            contained = member_path.is_relative_to(dest)
+        except AttributeError:
+            try:
+                member_path.relative_to(dest)
+                contained = True
+            except ValueError:
+                contained = False
+        if not contained:
+            raise ValueError(f"Zip member {member!r} would escape target directory")
+    zf.extractall(path)
+
+
+def normalize_bunkerweb_version(version: str) -> str:
+    """Normalize BunkerWeb version strings for semantic comparison.
+
+    Converts Debian-style pre-release versions such as ``1.6.9~rc2`` to
+    ``1.6.9-rc2`` so they can be parsed by ``packaging.version.Version``.
+    """
+    return version.strip().lower().removeprefix("v").replace("~", "-")
+
+
+def is_newer_version_available(current_version: str, latest_version: str) -> bool:
+    """Return True when the latest version is newer than the current one.
+
+    Returns False when semantic parsing fails, since a false negative (missing
+    an update notification) is safer than a false positive.
+    """
+    current_normalized = normalize_bunkerweb_version(current_version)
+    latest_normalized = normalize_bunkerweb_version(latest_version)
+
+    try:
+        return Version(current_normalized) < Version(latest_normalized)
+    except InvalidVersion:
+        return False
 
 
 def get_redis_client(

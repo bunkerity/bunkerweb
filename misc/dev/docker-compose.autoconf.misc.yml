@@ -4,6 +4,8 @@ x-env: &env
   AUTOCONF_MODE: "yes"
   LOG_LEVEL: "info"
   CUSTOM_LOG_LEVEL: "debug"
+  USE_REDIS: "yes"
+  REDIS_HOST: "redis"
 
 services:
   bunkerweb:
@@ -114,8 +116,22 @@ services:
         aliases:
           - bw-docker
 
+  redis: # Redis service for the persistence of reports/bans/stats
+    image: redis:8-alpine
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 60 1000
+      --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
   app1:
-    image: nginxdemos/nginx-hello
+    image: bunkerity/bunkerweb-hello:v1.0
     restart: "unless-stopped"
     networks:
       bw-services:
@@ -130,6 +146,7 @@ services:
 volumes:
   bw-data:
   bw-storage:
+  redis-data:
 
 networks:
   bw-universe:

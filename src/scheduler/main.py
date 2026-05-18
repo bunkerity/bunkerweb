@@ -5,6 +5,7 @@ from contextlib import suppress
 from concurrent.futures import Future, ThreadPoolExecutor
 from copy import deepcopy
 from datetime import datetime
+from gc import collect
 from io import BytesIO
 from json import load as json_load
 from logging import Logger
@@ -20,7 +21,7 @@ from tarfile import TarFile, open as tar_open
 from threading import Event, Lock
 from time import sleep
 from traceback import format_exc
-from typing import Any, Dict, List, Literal, Optional, Union, cast
+from typing import Any, Dict, List, Literal, Optional, Set, Union, cast
 
 BUNKERWEB_PATH = Path(sep, "usr", "share", "bunkerweb")
 
@@ -30,8 +31,8 @@ for deps_path in [BUNKERWEB_PATH.joinpath(*paths).as_posix() for paths in (("dep
 
 from schedule import every as schedule_every, run_pending
 
-from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets, add_dir_to_tar_safely, plugin_tar_exclude, plugin_tar_filter  # type: ignore
-from logger import setup_logger  # type: ignore
+from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets, create_plugin_tar_gz, plugin_tar_exclude, safe_tar_extractall  # type: ignore
+from logger import getLogger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
 from jobs import Job, _write_atomic  # type: ignore
@@ -57,7 +58,6 @@ CUSTOM_CONFIGS_DIRS = (
     "server-http",
     "server-stream",
     "default-server-http",
-    "default-server-stream",
     "modsec",
     "modsec-crs",
     "crs-plugins-before",
@@ -86,7 +86,7 @@ FAILOVER_PATH.mkdir(parents=True, exist_ok=True)
 HEALTHY_PATH = TMP_PATH.joinpath("scheduler.healthy")
 
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
-LOGGER = setup_logger("Scheduler", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+LOGGER = getLogger("SCHEDULER")
 
 HEALTHCHECK_INTERVAL = getenv("HEALTHCHECK_INTERVAL", "30")
 
@@ -96,7 +96,7 @@ if not HEALTHCHECK_INTERVAL.isdigit():
 
 HEALTHCHECK_INTERVAL = int(HEALTHCHECK_INTERVAL)
 HEALTHCHECK_EVENT = Event()
-HEALTHCHECK_LOGGER = setup_logger("Scheduler.Healthcheck", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+HEALTHCHECK_LOGGER = getLogger("SCHEDULER.HEALTHCHECK")
 
 # Shared executor to reuse worker threads across scheduler tasks
 SCHEDULER_TASKS_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-scheduler-tasks")
@@ -147,6 +147,8 @@ def handle_stop(signum, frame):
 
     if SCHEDULER is not None:
         SCHEDULER.clear()
+        with suppress(Exception):
+            SCHEDULER.db.close()
     stop(0)
 
 
@@ -169,6 +171,9 @@ def handle_reload(signum, frame):
                 "LOG_LEVEL": getenv("LOG_LEVEL", ""),
                 "DATABASE_URI": getenv("DATABASE_URI", ""),
             }
+
+            if getenv("TZ"):
+                cmd_env["TZ"] = getenv("TZ")
 
             for key, value in environ.items():
                 if "CUSTOM_CONF" in key:
@@ -272,6 +277,20 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
         original_path.mkdir(parents=True, exist_ok=True)
         for custom_config in configs:
             try:
+                if custom_config.get("is_draft"):
+                    continue
+                if SCHEDULER:
+                    compatibility_error = SCHEDULER.db.get_custom_config_compatibility_error(
+                        custom_config["type"],
+                        service_id=custom_config.get("service_id"),
+                        with_drafts=True,
+                    )
+                    if compatibility_error:
+                        LOGGER.warning(
+                            f"Ignoring incompatible custom config \"{custom_config['name']}\""
+                            f"{' for service ' + custom_config['service_id'] if custom_config['service_id'] else ''}: {compatibility_error}"
+                        )
+                        continue
                 if custom_config["data"]:
                     tmp_path = original_path.joinpath(
                         custom_config["type"].replace("_", "-"),
@@ -316,20 +335,19 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
             with suppress(StopIteration, IndexError, FileNotFoundError):
                 index = next(i for i, plugin in enumerate(plugins) if plugin["id"] == file.name)
 
-                with BytesIO() as plugin_content:
-                    with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                        if file.is_dir():
-                            add_dir_to_tar_safely(tar, file, arc_root=file.name)
-                        elif file.is_file():
-                            if not plugin_tar_exclude(file.as_posix()) and access(file.as_posix(), R_OK):
-                                tar.add(file.as_posix(), arcname=file.name, recursive=False, filter=plugin_tar_filter)
-                            else:
-                                LOGGER.debug(f"Excluding file from tar: {file}")
-                    plugin_content.seek(0, 0)
-                    if bytes_hash(plugin_content, algorithm="sha256") == plugins[index]["checksum"]:
-                        ignored_plugins.add(file.name)
+                if file.is_dir():
+                    plugin_content = create_plugin_tar_gz(file, arc_root=file.name)
+                elif file.is_file():
+                    if plugin_tar_exclude(file.as_posix()) or not access(file.as_posix(), R_OK):
+                        LOGGER.debug(f"Excluding file from tar: {file}")
                         continue
-                    LOGGER.debug(f"Checksum of {file} has changed, removing it ...")
+                    plugin_content = create_plugin_tar_gz(file, arc_root=file.name)
+                else:
+                    continue
+                if bytes_hash(plugin_content, algorithm="sha256") == plugins[index]["checksum"]:
+                    ignored_plugins.add(file.name)
+                    continue
+                LOGGER.debug(f"Checksum of {file} has changed, removing it ...")
 
             if file.is_symlink() or file.is_file():
                 with suppress(OSError):
@@ -347,10 +365,7 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
             try:
                 if plugin["data"]:
                     with tar_open(fileobj=BytesIO(plugin["data"]), mode="r:gz") as tar:
-                        try:
-                            tar.extractall(original_path, filter="fully_trusted")
-                        except TypeError:
-                            tar.extractall(original_path)
+                        safe_tar_extractall(tar, original_path)
 
                     # Add u+x permissions to executable files
                     plugin_path = original_path.joinpath(plugin["id"])
@@ -376,46 +391,96 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
         send_file_to_bunkerweb(original_path, "/pro_plugins" if original_path.as_posix().endswith("/pro/plugins") else "/plugins")
 
 
-def generate_caches():
+def generate_caches() -> Set[str]:
+    """Restore all ``bw_jobs_cache`` rows to disk.
+
+    Returns a set of ``plugin_id/job_name`` identifiers for any cache files whose
+    extraction or write failed. Callers can use this to avoid downstream actions
+    (e.g. re-caching empty state) for affected plugins.
+    """
     assert SCHEDULER is not None
 
-    job_cache_files = SCHEDULER.db.get_jobs_cache_files()
+    # Fetch metadata only (no binary data) to avoid loading GBs into memory
+    job_cache_files = SCHEDULER.db.get_jobs_cache_files(with_data=False)
     plugin_cache_files = set()
     ignored_dirs = set()
+    failed_restores: Set[str] = set()
 
     for job_cache_file in job_cache_files:
         job_path = Path(sep, "var", "cache", "bunkerweb", job_cache_file["plugin_id"])
         cache_path = job_path.joinpath(job_cache_file["service_id"] or "", job_cache_file["file_name"])
         plugin_cache_files.add(cache_path)
+        failure_id = f"{job_cache_file['plugin_id']}/{job_cache_file['job_name']}"
 
         try:
+            # Fetch binary data for this single file to keep memory usage bounded
+            data = SCHEDULER.db.get_job_cache_file(job_cache_file["job_name"], job_cache_file["file_name"], service_id=job_cache_file["service_id"] or "")
+            if data is None:
+                LOGGER.warning(f"Cache file {job_cache_file['file_name']} not found in database, skipping")
+                continue
+
             if job_cache_file["file_name"].endswith(".tgz"):
                 extract_path = cache_path.parent
                 if job_cache_file["file_name"].startswith("folder:"):
                     extract_path = Path(job_cache_file["file_name"].split("folder:", 1)[1].rsplit(".tgz", 1)[0])
                 ignored_dirs.add(extract_path.as_posix())
+                # Stage extraction in a sibling directory so a failed extract does not
+                # leave an empty target on disk (which would then be re-cached as empty
+                # state by downstream jobs — the root of the Let's Encrypt data-loss
+                # cascade). On success we swap atomically via rename; on failure we
+                # drop the staging dir and leave the previous cache untouched.
+                staging_path = extract_path.with_name(f".{extract_path.name}.staging")
+                # Reject symlinks at the staging path: rmtree refuses to follow them,
+                # but a subsequent mkdir(exist_ok=True) + extractall() would happily
+                # write into the symlink target. Unlink unconditionally with
+                # missing_ok=True so a check-then-act race window between is_symlink()
+                # and unlink() cannot let an attacker swap in a symlink we already
+                # decided to leave alone — if it's a symlink we drop it, if it's a
+                # regular file we drop it too, and if it doesn't exist we move on.
+                # Real directories are handled by rmtree() on the next line.
+                with suppress(IsADirectoryError, PermissionError):
+                    staging_path.unlink(missing_ok=True)
+                rmtree(staging_path, ignore_errors=True)
+                staging_path.mkdir(parents=True, exist_ok=True)
+                try:
+                    with tar_open(fileobj=BytesIO(data), mode="r:gz") as tar:
+                        assert isinstance(tar, TarFile)
+                        # tar_filter="auto" preserves symlinks when the archive contains
+                        # them (e.g. Let's Encrypt live/* → archive/*) while still
+                        # applying the stricter "data" filter to link-free archives.
+                        safe_tar_extractall(tar, staging_path, tar_filter="auto")
+                except Exception as e:
+                    LOGGER.error(
+                        f"Error extracting tar file for job '{job_cache_file['job_name']}' "
+                        f"(plugin '{job_cache_file['plugin_id']}', file '{job_cache_file['file_name']}'): {e}"
+                    )
+                    rmtree(staging_path, ignore_errors=True)
+                    failed_restores.add(failure_id)
+                    continue
+
                 rmtree(extract_path, ignore_errors=True)
-                extract_path.mkdir(parents=True, exist_ok=True)
-                with tar_open(fileobj=BytesIO(job_cache_file["data"]), mode="r:gz") as tar:
-                    assert isinstance(tar, TarFile)
-                    try:
-                        try:
-                            tar.extractall(extract_path, filter="fully_trusted")
-                        except TypeError:
-                            tar.extractall(extract_path)
-                    except Exception as e:
-                        LOGGER.error(f"Error extracting tar file: {e}")
+                try:
+                    staging_path.rename(extract_path)
+                except OSError as e:
+                    LOGGER.error(f"Error swapping staged cache into place for job '{job_cache_file['job_name']}' (plugin '{job_cache_file['plugin_id']}'): {e}")
+                    rmtree(staging_path, ignore_errors=True)
+                    failed_restores.add(failure_id)
+                    continue
                 LOGGER.debug(f"Restored cache directory {extract_path}")
                 continue
-            _write_atomic(cache_path, job_cache_file["data"])
+            _write_atomic(cache_path, data)
             desired_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
             if cache_path.stat().st_mode & 0o777 != desired_perms:
                 cache_path.chmod(desired_perms)
             LOGGER.debug(f"Restored cache file {job_cache_file['file_name']}")
         except BaseException as e:
-            LOGGER.error(f"Exception while restoring cache file {job_cache_file['file_name']} :\n{e}")
+            LOGGER.error(
+                f"Exception while restoring cache file '{job_cache_file['file_name']}' "
+                f"for job '{job_cache_file['job_name']}' (plugin '{job_cache_file['plugin_id']}') :\n{e}"
+            )
+            failed_restores.add(failure_id)
 
-    if job_path.is_dir():
+    if job_cache_files and job_path.is_dir():
         for resource_path in list(job_path.rglob("*")):
             if resource_path.as_posix().startswith(tuple(ignored_dirs)):
                 continue
@@ -439,8 +504,21 @@ def generate_caches():
             if resource_path.stat().st_mode & 0o777 != desired_perms:
                 resource_path.chmod(desired_perms)
 
+    return failed_restores
+
 
 def generate_configs(logger: Logger = LOGGER) -> bool:
+    cmd_env = {
+        "PATH": getenv("PATH", ""),
+        "PYTHONPATH": getenv("PYTHONPATH", ""),
+        "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
+        "LOG_LEVEL": getenv("LOG_LEVEL", ""),
+        "DATABASE_URI": getenv("DATABASE_URI", ""),
+    }
+
+    if getenv("TZ"):
+        cmd_env["TZ"] = getenv("TZ")
+
     # run the generator
     proc = subprocess_run(
         [
@@ -455,13 +533,7 @@ def generate_configs(logger: Logger = LOGGER) -> bool:
         stdin=DEVNULL,
         stderr=STDOUT,
         check=False,
-        env={
-            "PATH": getenv("PATH", ""),
-            "PYTHONPATH": getenv("PYTHONPATH", ""),
-            "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-            "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-            "DATABASE_URI": getenv("DATABASE_URI", ""),
-        },
+        env=cmd_env,
     )
 
     if proc.returncode != 0:
@@ -586,7 +658,7 @@ def healthcheck_job():
                 if not api_caller.send_to_apis(
                     "POST",
                     f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
-                    timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split(" "))),
+                    timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split())),
                 )[0]:
                     HEALTHCHECK_LOGGER.error(f"Error while reloading instance {bw_instance.endpoint}")
                     ret = SCHEDULER.db.update_instance(db_instance["hostname"], "loading")
@@ -699,6 +771,9 @@ if __name__ == "__main__":
                 "DATABASE_URI": getenv("DATABASE_URI", ""),
             }
 
+            if getenv("TZ"):
+                cmd_env["TZ"] = getenv("TZ")
+
             for key, value in environ.items():
                 if "CUSTOM_CONF" in key:
                     cmd_env[key] = value
@@ -751,6 +826,54 @@ if __name__ == "__main__":
 
         LOGGER.info("Scheduler started ...")
 
+        def run_config_saver(log_message: str) -> bool:
+            if SCHEDULER.db.readonly:
+                LOGGER.warning("The database is read-only, no need to save plugins settings changes as they will not be saved")
+                return False
+
+            LOGGER.info(log_message)
+            env_file_path = deepcopy(NGINX_TMP_VARIABLES_PATH)
+            if args.variables:
+                env_file_path = deepcopy(tmp_variables_path)
+            else:
+                env_content = "\n".join(
+                    f"{key}={value}" for key, value in (env | {k: v for k, v in environ.items() if k in env}).items() if "CUSTOM_CONF" not in key
+                )
+                env_file_path.write_text(env_content + "\n", encoding="utf-8")
+
+            cmd_env = {
+                "PATH": getenv("PATH", ""),
+                "PYTHONPATH": getenv("PYTHONPATH", ""),
+                "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
+                "LOG_LEVEL": getenv("LOG_LEVEL", ""),
+                "DATABASE_URI": getenv("DATABASE_URI", ""),
+            }
+
+            if getenv("TZ"):
+                cmd_env["TZ"] = getenv("TZ")
+
+            for key, value in environ.items():
+                if "CUSTOM_CONF" in key:
+                    cmd_env[key] = value
+
+            proc = subprocess_run(
+                [
+                    BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
+                    "--settings",
+                    BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
+                    "--variables",
+                    env_file_path.as_posix(),
+                ],
+                stdin=DEVNULL,
+                stderr=STDOUT,
+                check=False,
+                env=cmd_env,
+            )
+            if proc.returncode != 0:
+                LOGGER.error("Config saver failed, configuration will not work as expected...")
+                return False
+            return True
+
         def check_configs_changes():
             # Checking if any custom config has been created by the user
             assert SCHEDULER is not None, "SCHEDULER is not defined"
@@ -780,7 +903,7 @@ if __name__ == "__main__":
                     changes = not from_template
 
                 if saving:
-                    custom_configs.append({"value": content, "exploded": (service_id, config_type, file.stem)})
+                    custom_configs.append({"value": content, "exploded": (service_id, config_type, file.stem), "is_draft": False})
 
             changes = changes or {hash(dict_to_frozenset(d)) for d in custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs}
 
@@ -799,46 +922,43 @@ if __name__ == "__main__":
             assert SCHEDULER is not None, "SCHEDULER is not defined"
             LOGGER.info(f"Checking if there are any changes in {_type} plugins ...")
             plugin_path = PRO_PLUGINS_PATH if _type == "pro" else EXTERNAL_PLUGINS_PATH
+            plugins_before = {file.parent.name for file in plugin_path.glob("*/plugin.json")}
             db_plugins = SCHEDULER.db.get_plugins(_type=_type)
             external_plugins = []
             tmp_external_plugins = []
             for file in plugin_path.glob("*/plugin.json"):
-                with BytesIO() as plugin_content:
-                    with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                        # Safely pack the plugin directory while excluding caches/pyc and unreadable files
-                        add_dir_to_tar_safely(tar, file.parent, arc_root=file.parent.name)
-                    plugin_content.seek(0, 0)
+                plugin_content = create_plugin_tar_gz(file.parent, arc_root=file.parent.name)
 
-                    with file.open("r", encoding="utf-8") as f:
-                        plugin_data = json_load(f)
+                with file.open("r", encoding="utf-8") as f:
+                    plugin_data = json_load(f)
 
-                    if plugin_data["id"] == "letsencrypt_dns":
+                if plugin_data["id"] == "letsencrypt_dns":
+                    continue
+
+                checksum = bytes_hash(plugin_content, algorithm="sha256")
+                common_data = plugin_data | {
+                    "type": _type,
+                    "page": file.parent.joinpath("ui").is_dir(),
+                    "checksum": checksum,
+                }
+                jobs = common_data.pop("jobs", [])
+
+                with suppress(StopIteration, IndexError):
+                    index = next(i for i, plugin in enumerate(db_plugins) if plugin["id"] == common_data["id"])
+
+                    if checksum == db_plugins[index]["checksum"] or db_plugins[index]["method"] != "manual":
                         continue
 
-                    checksum = bytes_hash(plugin_content, algorithm="sha256")
-                    common_data = plugin_data | {
-                        "type": _type,
-                        "page": file.parent.joinpath("ui").is_dir(),
-                        "checksum": checksum,
+                tmp_external_plugins.append(common_data.copy())
+
+                external_plugins.append(
+                    common_data
+                    | {
+                        "method": "manual",
+                        "data": plugin_content.getvalue(),
                     }
-                    jobs = common_data.pop("jobs", [])
-
-                    with suppress(StopIteration, IndexError):
-                        index = next(i for i, plugin in enumerate(db_plugins) if plugin["id"] == common_data["id"])
-
-                        if checksum == db_plugins[index]["checksum"] or db_plugins[index]["method"] != "manual":
-                            continue
-
-                    tmp_external_plugins.append(common_data.copy())
-
-                    external_plugins.append(
-                        common_data
-                        | {
-                            "method": "manual",
-                            "data": plugin_content.getvalue(),
-                        }
-                        | ({"jobs": jobs} if jobs else {})
-                    )
+                    | ({"jobs": jobs} if jobs else {})
+                )
 
             changes = False
             if tmp_external_plugins:
@@ -852,11 +972,15 @@ if __name__ == "__main__":
                     except BaseException as e:
                         LOGGER.error(f"Error while saving {_type} plugins to database: {e}")
                 else:
-                    return send_file_to_bunkerweb(plugin_path, "/pro_plugins" if _type == "pro" else "/plugins")
+                    send_file_to_bunkerweb(plugin_path, "/pro_plugins" if _type == "pro" else "/plugins")
+                    return False
 
             generate_external_plugins(plugin_path)
+            plugins_after = {file.parent.name for file in plugin_path.glob("*/plugin.json")}
+            return plugins_before != plugins_after
 
         check_configs_changes()
+        plugins_refreshed = []
         task_futures.extend(
             [
                 SCHEDULER_TASKS_EXECUTOR.submit(check_plugin_changes, "external"),
@@ -865,12 +989,26 @@ if __name__ == "__main__":
         )
 
         for future in task_futures:
-            future.result()
+            plugins_refreshed.append(bool(future.result()))
 
         task_futures.clear()
 
+        if any(plugins_refreshed):
+            if run_config_saver("Running config saver after restoring plugin files from database ..."):
+                SCHEDULER.update_jobs()
+                env = SCHEDULER.db.get_config()
+                env["DATABASE_URI"] = SCHEDULER.db.database_uri
+                tz = getenv("TZ")
+                if tz:
+                    env["TZ"] = tz
+
         LOGGER.info("Running plugins download jobs ...")
-        SCHEDULER.run_once(["misc", "pro"])
+        if not SCHEDULER.run_once(["misc", "pro"]):
+            failed = SCHEDULER.failed_jobs
+            if failed:
+                LOGGER.error(f"Plugin download jobs failed: {', '.join(failed)}")
+            else:
+                LOGGER.error("At least one plugin download job failed (no failed-job names captured)")
 
         db_metadata = SCHEDULER.db.get_metadata()
         if db_metadata["pro_plugins_changed"] or db_metadata["external_plugins_changed"]:
@@ -889,43 +1027,7 @@ if __name__ == "__main__":
             if SCHEDULER.db.readonly:
                 LOGGER.warning("The database is read-only, no need to look for changes in the plugins settings as they will not be saved")
             else:
-                # run the config saver to save potential ignored external plugins settings
-                LOGGER.info("Running config saver to save potential ignored external plugins settings ...")
-
-                env_file_path = deepcopy(NGINX_TMP_VARIABLES_PATH)
-                if args.variables:
-                    env_file_path = deepcopy(tmp_variables_path)
-                else:
-                    env_content = "\n".join(f"{key}={value}" for key, value in (env | environ).items() if "CUSTOM_CONF" not in key)
-                    env_file_path.write_text(env_content + "\n", encoding="utf-8")
-
-                cmd_env = {
-                    "PATH": getenv("PATH", ""),
-                    "PYTHONPATH": getenv("PYTHONPATH", ""),
-                    "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-                    "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-                    "DATABASE_URI": getenv("DATABASE_URI", ""),
-                }
-
-                for key, value in environ.items():
-                    if "CUSTOM_CONF" in key:
-                        cmd_env[key] = value
-
-                proc = subprocess_run(
-                    [
-                        BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
-                        "--settings",
-                        BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
-                        "--variables",
-                        env_file_path.as_posix(),
-                    ],
-                    stdin=DEVNULL,
-                    stderr=STDOUT,
-                    check=False,
-                    env=cmd_env,
-                )
-                if proc.returncode != 0:
-                    LOGGER.error("Config saver failed, configuration will not work as expected...")
+                run_config_saver("Running config saver to save potential ignored external plugins settings ...")
 
             SCHEDULER.update_jobs()
             env = SCHEDULER.db.get_config()
@@ -955,6 +1057,26 @@ if __name__ == "__main__":
                 LOGGER.warning("Waiting for the failover backup to finish ...")
                 sleep(1)
 
+            # On first start, generate config and reload instances BEFORE running
+            # plugin jobs — plugins need their API endpoints loaded on instances
+            if FIRST_START and CONFIG_NEED_GENERATION and SCHEDULER.apis:
+                LOGGER.info("First start: generating and sending initial configuration before running jobs ...")
+                if generate_configs():
+                    first_start_futures = [
+                        SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CONFIG_PATH, "/confs"),
+                        SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CACHE_PATH, "/cache"),
+                    ]
+                    for future in first_start_futures:
+                        future.result()
+                    first_start_futures.clear()
+
+                    SCHEDULER.send_to_apis(
+                        "POST",
+                        f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
+                        timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split())),
+                    )
+                    CONFIG_NEED_GENERATION = False
+
             if RUN_JOBS_ONCE:
                 # Only run jobs once
                 if not SCHEDULER.reload(
@@ -962,12 +1084,25 @@ if __name__ == "__main__":
                     changed_plugins=changed_plugins,
                     ignore_plugins=["misc", "pro"] if FIRST_START else None,
                 ):
-                    LOGGER.error("At least one job in run_once() failed")
+                    failed = SCHEDULER.failed_jobs
+                    if failed:
+                        LOGGER.error(f"Jobs failed in run_once(): {', '.join(failed)}")
+                    else:
+                        LOGGER.error("At least one job in run_once() failed (no failed-job names captured)")
                 else:
                     LOGGER.info("All jobs in run_once() were successful")
                     if SCHEDULER.db.readonly:
-                        generate_caches()
+                        failed_restores = generate_caches()
+                        if failed_restores:
+                            LOGGER.error(
+                                f"generate_caches() failed to restore: {', '.join(sorted(failed_restores))}. "
+                                "Affected plugins will run with stale or empty on-disk cache."
+                            )
                 healthcheck_job_run = False
+                # Jobs may have created files needed by config templates (e.g. api-server-cert.pem)
+                if FIRST_START:
+                    LOGGER.info("First start: regenerating config after once-jobs to pick up files created by jobs (e.g. api-server-cert.pem)")
+                    CONFIG_NEED_GENERATION = True
 
             if CONFIG_NEED_GENERATION:
                 ret = generate_configs()
@@ -991,23 +1126,26 @@ if __name__ == "__main__":
                     success, responses = SCHEDULER.send_to_apis(
                         "POST",
                         f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
-                        timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split(" "))),
+                        timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split())),
                         response=True,
                     )
                     if not success:
-                        reachable = False
                         LOGGER.debug("Error while reloading all bunkerweb instances")
 
                     LOGGER.debug(responses)
 
+                    responses = responses or {}
+
                     for db_instance in SCHEDULER.db.get_instances():
                         metadata = responses.get(db_instance["hostname"], {})
                         status = metadata.get("status", "down")
+                        msg = str(metadata.get("msg", ""))
+                        config_check_failed = msg.startswith("config check failed")
 
                         if status == "success":
                             success = True
                         else:
-                            message = metadata.get("msg", "couldn't get message")
+                            message = msg or "couldn't get message"
                             if "\n" in message:
                                 message = message.split("\n", 1)[1]
 
@@ -1016,18 +1154,14 @@ if __name__ == "__main__":
 
                         ret = SCHEDULER.db.update_instance(
                             db_instance["hostname"],
-                            (
-                                "up"
-                                if status == "success"
-                                else ("failover" if responses.get(db_instance["hostname"], {}).get("msg") == "config check failed" else "down")
-                            ),
+                            ("up" if status == "success" else ("failover" if config_check_failed else "down")),
                         )
                         if ret:
                             LOGGER.error(
                                 f"Couldn't update instance {db_instance['hostname']} status to {'up' if status == 'success' else 'down'} in the database: {ret}"
                             )
 
-                        if status == "success":
+                        if status == "success" or config_check_failed:
                             found = False
                             for api in SCHEDULER.apis:
                                 if api.endpoint == f"{_instance_endpoint(db_instance)}/":
@@ -1047,6 +1181,10 @@ if __name__ == "__main__":
                                 )
                                 del SCHEDULER.apis[i]
                                 break
+
+                    # "reachable" means we can still talk to at least one instance,
+                    # including instances that failed only due to config checks.
+                    reachable = bool(SCHEDULER.apis)
                 else:
                     for future in task_futures:
                         future.result()
@@ -1096,7 +1234,7 @@ if __name__ == "__main__":
                         if not SCHEDULER.send_to_apis(
                             "POST",
                             f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
-                            timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split(" "))),
+                            timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split())),
                         )[0]:
                             LOGGER.error("Error while reloading bunkerweb with failover configuration, skipping ...")
                 elif not reachable:
@@ -1149,11 +1287,16 @@ if __name__ == "__main__":
             # infinite schedule for the jobs
             LOGGER.info("Executing job scheduler ...")
             errors = 0
+            _gc_counter = 0
             while RUN and not NEED_RELOAD:
                 try:
                     sleep(3 if SCHEDULER.db.readonly else 1)
                     run_pending()
                     SCHEDULER.run_pending()
+                    _gc_counter += 1
+                    if _gc_counter >= 10:
+                        collect()
+                        _gc_counter = 0
                     current_time = datetime.now().astimezone()
 
                     while DB_LOCK_FILE.is_file() and DB_LOCK_FILE.stat().st_ctime + 30 > current_time.timestamp():

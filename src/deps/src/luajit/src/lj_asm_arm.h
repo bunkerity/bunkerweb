@@ -1,6 +1,6 @@
 /*
 ** ARM IR assembler (SSA IR -> machine code).
-** Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2026 Mike Pall. See Copyright Notice in luajit.h
 */
 
 /* -- Register allocator extensions --------------------------------------- */
@@ -79,18 +79,43 @@ static Reg ra_alloc2(ASMState *as, IRIns *ir, RegSet allow)
 /* Generate an exit stub group at the bottom of the reserved MCode memory. */
 static MCode *asm_exitstub_gen(ASMState *as, ExitNo group)
 {
+  ExitNo i;
+  int ind = 0;
+  MCode *target = (MCode *)(void *)lj_vm_exit_handler;
   MCode *mxp = as->mcbot;
-  int i;
-  if (mxp + 4*4+4*EXITSTUBS_PER_GROUP >= as->mctop)
+  if (mxp + 6+EXITSTUBS_PER_GROUP >= as->mctop)
     asm_mclimit(as);
-  /* str lr, [sp]; bl ->vm_exit_handler; .long DISPATCH_address, group. */
-  *mxp++ = ARMI_STR|ARMI_LS_P|ARMI_LS_U|ARMF_D(RID_LR)|ARMF_N(RID_SP);
-  *mxp = ARMI_BL|((((MCode *)(void *)lj_vm_exit_handler-mxp)-2)&0x00ffffffu);
-  mxp++;
+  if ((((target - mxp - 2) + 0x00800000u) >> 24) == 0) {
+    /* str lr, [sp]; bl ->vm_exit_handler;
+    ** .long DISPATCH_address, group.
+    */
+    *mxp++ = ARMI_STR | ARMI_LS_P | ARMI_LS_U | ARMF_D(RID_LR) | ARMF_N(RID_SP);
+    *mxp = ARMI_BL | ((target - mxp - 2) & 0x00ffffffu); mxp++;
+  } else if ((as->flags & JIT_F_ARMV6T2)) {
+    /*
+    ** str lr, [sp]; movw/movt lr, vm_exit_handler; blx lr;
+    ** .long DISPATCH_address, group;
+    */
+    *mxp++ = ARMI_STR | ARMI_LS_P | ARMI_LS_U | ARMF_D(RID_LR) | ARMF_N(RID_SP);
+    *mxp++ = emit_movw_k((uint32_t)target) | ARMF_D(RID_LR);
+    *mxp++ = emit_movt_k((uint32_t)target) | ARMF_D(RID_LR);
+    *mxp++ = ARMI_BLXr | ARMF_M(RID_LR);
+    ind = 2;
+  } else {
+    /* .long vm_exit_handler;
+    ** str lr, [sp]; ldr lr, [pc, #-16]; blx lr;
+    ** .long DISPATCH_address, group;
+    */
+    *mxp++ = (MCode)target;
+    *mxp++ = ARMI_STR | ARMI_LS_P | ARMI_LS_U | ARMF_D(RID_LR) | ARMF_N(RID_SP);
+    *mxp++ = ARMI_LDRL | ARMF_D(RID_LR) | 16;
+    *mxp++ = ARMI_BLXr | ARMF_M(RID_LR);
+    ind = 1;
+  }
   *mxp++ = (MCode)i32ptr(J2GG(as->J)->dispatch);  /* DISPATCH address */
   *mxp++ = group*EXITSTUBS_PER_GROUP;
   for (i = 0; i < EXITSTUBS_PER_GROUP; i++)
-    *mxp++ = ARMI_B|((-6-i)&0x00ffffffu);
+    *mxp++ = ARMI_B | ((-6-ind-i) & 0x00ffffffu);
   lj_mcode_sync(as->mcbot, mxp);
   lj_mcode_commitbot(as->J, mxp);
   as->mcbot = mxp;
@@ -599,10 +624,9 @@ static void asm_conv(ASMState *as, IRIns *ir)
       Reg tmp = ra_scratch(as, rset_exclude(RSET_FPR, left));
       Reg dest = ra_dest(as, ir, RSET_GPR);
       ARMIns ai;
+      lj_assertA(!irt_isu32(ir->t), "bad CONV u32.fp emitted");
       emit_dn(as, ARMI_VMOV_R_S, dest, (tmp & 15));
-      ai = irt_isint(ir->t) ?
-	(st == IRT_NUM ? ARMI_VCVT_S32_F64 : ARMI_VCVT_S32_F32) :
-	(st == IRT_NUM ? ARMI_VCVT_U32_F64 : ARMI_VCVT_U32_F32);
+      ai = st == IRT_NUM ? ARMI_VCVT_S32_F64 : ARMI_VCVT_S32_F32;
       emit_dm(as, ai, (tmp & 15), (left & 15));
     }
   } else
@@ -2210,33 +2234,46 @@ static Reg asm_head_side_base(ASMState *as, IRIns *irp)
 /* Fixup the tail code. */
 static void asm_tail_fixup(ASMState *as, TraceNo lnk)
 {
-  MCode *p = as->mctop;
-  MCode *target;
+  MCode *target = lnk ? traceref(as->J, lnk)->mcode : (MCode *)(void *)lj_vm_exit_interp;
+  MCode *mcp = as->mctail;
   int32_t spadj = as->T->spadjust;
-  if (spadj == 0) {
-    as->mctop = --p;
-  } else {
-    /* Patch stack adjustment. */
+  if (spadj) {  /* Emit stack adjustment. */
     uint32_t k = emit_isk12(ARMI_ADD, spadj);
     lj_assertA(k, "stack adjustment %d does not fit in K12", spadj);
-    p[-2] = (ARMI_ADD^k) | ARMF_D(RID_SP) | ARMF_N(RID_SP);
+    *mcp++ = (ARMI_ADD^k) | ARMF_D(RID_SP) | ARMF_N(RID_SP);
   }
-  /* Patch exit branch. */
-  target = lnk ? traceref(as->J, lnk)->mcode : (MCode *)lj_vm_exit_interp;
-  p[-1] = ARMI_B|(((target-p)-1)&0x00ffffffu);
+  if ((((target - mcp - 2) + 0x00800000u) >> 24) == 0) {
+    *mcp = ARMI_B | ((target - mcp - 2) & 0x00ffffffu); mcp++;
+  } else if ((as->flags & JIT_F_ARMV6T2)) {
+    *mcp++ = emit_movw_k((uint32_t)target) | ARMF_D(RID_LR);
+    *mcp++ = emit_movt_k((uint32_t)target) | ARMF_D(RID_LR);
+    *mcp++ = ARMI_BX | ARMF_M(RID_LR);
+  } else {
+    *mcp++ = ARMI_LDRL | ARMI_LS_U | ARMF_D(RID_LR) | 0;
+    *mcp++ = ARMI_BX | ARMF_M(RID_LR);
+    *mcp++ = (MCode)target;
+  }
+  while (as->mctop > mcp) *--as->mctop = ARMI_NOP;
 }
 
 /* Prepare tail of code. */
-static void asm_tail_prep(ASMState *as)
+static void asm_tail_prep(ASMState *as, TraceNo lnk)
 {
   MCode *p = as->mctop - 1;  /* Leave room for exit branch. */
   if (as->loopref) {
     as->invmcp = as->mcp = p;
   } else {
-    as->mcp = p-1;  /* Leave room for stack pointer adjustment. */
+    if (!lnk) {
+      MCode *target = (MCode *)(void *)lj_vm_exit_interp;
+      if ((((target - p - 2) + 0x00800000u) >> 24) ||
+	  (((target - p - 1) + 0x00800000u) >> 24)) p -= 2;
+    }
+    p--;  /* Leave room for stack pointer adjustment. */
+    as->mcp = p;
     as->invmcp = NULL;
   }
   *p = 0;  /* Prevent load/store merging. */
+  as->mctail = p;
 }
 
 /* -- Trace setup --------------------------------------------------------- */

@@ -1,215 +1,126 @@
 # API
 
-## Übersicht
+## Rolle der API
 
-Die BunkerWeb API ist die Steuerungsebene, die zur programmatischen Verwaltung von BunkerWeb-Instanzen verwendet wird: Auflisten und Verwalten von Instanzen, Neuladen/Stoppen, Handhabung von Sperren, Plugins, Jobs, Konfigurationen und mehr. Sie stellt eine dokumentierte FastAPI-Anwendung mit starker Authentifizierung, Autorisierung und Ratenbegrenzung bereit.
+Die BunkerWeb API ist die Steuerungsebene zum Verwalten von Instanzen, Diensten, Sperren, Plugins, Jobs und benutzerdefinierten Konfigurationen. Sie läuft als FastAPI-Anwendung hinter Gunicorn und sollte in einem vertrauenswürdigen Netz bleiben. Interaktive Doku unter `/docs` (oder `<API_ROOT_PATH>/docs`); das OpenAPI-Schema unter `/openapi.json`.
 
-Öffnen Sie die interaktive Dokumentation unter `/docs` (oder `<root_path>/docs`, wenn Sie `API_ROOT_PATH` gesetzt haben). Das OpenAPI-Schema ist unter `/openapi.json` verfügbar.
+!!! warning "Privat halten"
+    Exponieren Sie die API nicht direkt ins Internet. Halten Sie sie in einem internen Netz, beschränken Sie Quell-IPs und verlangen Sie Authentifizierung.
 
-!!! warning "Sicherheit"
-    Die API ist eine privilegierte Steuerungsebene. Setzen Sie sie nicht ohne zusätzliche Schutzmaßnahmen im öffentlichen Internet aus.
+!!! info "Kurzinfos"
+    - Health-Endpoints: `GET /ping` und `GET /health`
+    - Root-Pfad: setzen Sie `API_ROOT_PATH`, wenn per Reverse Proxy auf einem Unterpfad veröffentlicht, damit Docs und OpenAPI-Links funktionieren
+    - Auth ist Pflicht: Biscuit-Tokens, Admin-Basic oder ein override-Bearer-Token
+    - IP-Allowlist standardmäßig auf RFC1918-Bereiche (`API_WHITELIST_IPS`); nur deaktivieren, wenn Upstream den Zugang kontrolliert
+    - Ratenbegrenzung standardmäßig an; `/auth` hat immer eigenes Limit
 
-    Beschränken Sie mindestens die Quell-IPs (`API_WHITELIST_IPS`), aktivieren Sie die Authentifizierung (`API_TOKEN` oder API-Benutzer + Biscuit) und erwägen Sie, sie hinter BunkerWeb mit einem nicht erratbaren Pfad und zusätzlichen Zugriffskontrollen zu platzieren.
+## Sicherheits-Checkliste
 
-## Voraussetzungen
+- Netzwerk: Traffic intern halten; an Loopback oder internes Interface binden und Quell-IPs per `API_WHITELIST_IPS` (standardmäßig aktiv) begrenzen.
+- Auth vorhanden: `API_USERNAME`/`API_PASSWORD` (Admin) setzen und bei Bedarf `API_ACL_BOOTSTRAP_FILE` für weitere Nutzer/ACLs; ein Override `API_TOKEN` nur als Notfall behalten.
+- Pfad verbergen: beim Reverse Proxy einen nicht offensichtlichen `API_ROOT_PATH` wählen und auf dem Proxy spiegeln.
+- Ratenbegrenzung: aktiviert lassen, außer eine andere Schicht erzwingt gleichwertige Limits; `/auth` ist immer begrenzt.
+- TLS: am Proxy terminieren oder `API_SSL_ENABLED=yes` mit Zertifikat/Key setzen.
 
-Der API-Dienst benötigt Zugriff auf die BunkerWeb-Datenbank (`DATABASE_URI`). Er wird in der Regel zusammen mit dem Scheduler und optional der Web-UI bereitgestellt. Die empfohlene Einrichtung besteht darin, BunkerWeb als Reverse-Proxy davor zu schalten und die API in einem internen Netzwerk zu isolieren.
+## Ausführen
 
-Siehe den Schnellstart-Assistenten und die Architekturhinweise im [Schnellstart-Leitfaden](quickstart-guide.md).
-
-## Empfohlenes Deployment (Dedizierte Container)
-
-Für Produktionsumgebungen führen Sie die API als eigenen Container neben dem BunkerWeb-Datenpfad und dem Scheduler aus. Binden Sie die API an das interne Control-Plane-Netz und veröffentlichen Sie sie ausschließlich über BunkerWeb als Reverse-Proxy. Dieses Setup entspricht der [Docker-Integrationsreferenz](integrations.md#networks) und stellt sicher, dass Scheduler, BunkerWeb und die API dieselben Einstellungen verwenden.
-
-```yaml
-x-bw-env: &bw-env
-  # Wir verwenden einen Anker, um dieselben Einstellungen nicht für beide Dienste wiederholen zu müssen
-  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Stellen Sie sicher, dass der Scheduler die Konfiguration an die Instanz senden kann, indem Sie den richtigen IP-Bereich festlegen
-  DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Verwenden Sie ein stärkeres Passwort für die Datenbank
-
-services:
-  bunkerweb:
-    # Name, unter dem der Scheduler die Instanz identifiziert
-    image: bunkerity/bunkerweb:1.6.6
-    ports:
-      - "80:8080/tcp"
-      - "443:8443/tcp"
-      - "443:8443/udp" # Für QUIC-/HTTP3-Unterstützung
-    environment:
-      <<: *bw-env # Wir nutzen den Anker, um dieselbe Konfiguration nicht bei allen Diensten zu wiederholen
-    restart: "unless-stopped"
-    networks:
-      - bw-universe
-      - bw-services
-
-  bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.6
-    environment:
-      <<: *bw-env
-      BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass der Instanzname korrekt ist
-      SERVER_NAME: "api.example.com" # Passen Sie ihn bei Bedarf an
-      MULTISITE: "yes"
-      USE_REDIS: "yes"
-      REDIS_HOST: "redis"
-      api.example.com_USE_TEMPLATE: "bw-api"
-      api.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
-      api.example.com_USE_REVERSE_PROXY: "yes"
-      api.example.com_REVERSE_PROXY_URL: "/"
-      api.example.com_REVERSE_PROXY_HOST: "http://bw-api:8888"
-    volumes:
-      - bw-storage:/data # Dient zur Persistierung des Caches und anderer Daten wie Backups
-    restart: "unless-stopped"
-    networks:
-      - bw-universe
-      - bw-db
-
-  bw-api:
-    image: bunkerity/bunkerweb-api:1.6.6
-    environment:
-      <<: *bw-env
-      API_USERNAME: "admin"
-      API_PASSWORD: "Str0ng&P@ss!" # Verwenden Sie ein stärkeres Passwort für den Administrator
-      DEBUG: "1"
-    restart: "unless-stopped"
-    networks:
-      bw-universe:
-        aliases:
-          - bw-api
-      bw-db:
-        aliases:
-          - bw-api
-
-  bw-db:
-    image: mariadb:11
-    # Legt die maximale Paketgröße fest, um Probleme mit großen Abfragen zu vermeiden
-    command: --max-allowed-packet=67108864
-    environment:
-      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-      MYSQL_DATABASE: "db"
-      MYSQL_USER: "bunkerweb"
-      MYSQL_PASSWORD: "changeme" # Verwenden Sie ein stärkeres Passwort für die Datenbank
-    volumes:
-      - bw-data:/var/lib/mysql
-    restart: "unless-stopped"
-    networks:
-      - bw-db
-
-  redis: # Redis-Dienst zur Persistierung von Berichten/Sperren/Statistiken
-    image: redis:7-alpine
-    command: >
-      redis-server
-      --maxmemory 256mb
-      --maxmemory-policy allkeys-lru
-      --save 60 1000
-      --appendonly yes
-    volumes:
-      - redis-data:/data
-    restart: "unless-stopped"
-    networks:
-      - bw-universe
-
-volumes:
-  bw-data:
-  bw-storage:
-  redis-data:
-
-networks:
-  bw-universe:
-    name: bw-universe
-    ipam:
-      driver: default
-      config:
-        - subnet: 10.20.30.0/24 # Stellen Sie sicher, dass der Scheduler die Konfiguration an die Instanz senden kann, indem Sie den richtigen IP-Bereich festlegen
-  bw-services:
-    name: bw-services
-  bw-db:
-    name: bw-db
-```
-
-Dadurch wird die API hinter BunkerWeb isoliert, der Traffic bleibt auf vertrauenswürdigen Netzen und Sie können Authentifizierung, Zulassungslisten und Ratenbegrenzungen sowohl auf der Control Plane als auch auf dem exponierten Hostnamen durchsetzen.
-
-## Highlights
-
-- Instanz-bewusst: sendet operative Aktionen an entdeckte Instanzen.
-- Starke Authentifizierung: Basic für Admins, Bearer-Admin-Überschreibung oder Biscuit-ACL für feingranulare Berechtigungen.
-- IP-Zulassungsliste und flexible Ratenbegrenzung pro Route.
-- Standardmäßige Zustands-/Bereitschaftssignale und Sicherheitsprüfungen beim Start.
-
-## Compose-Vorlagen
+Wählen Sie die Variante, die zu Ihrer Umgebung passt.
 
 === "Docker"
 
-    Reverse-Proxy der API unter `/api` mit BunkerWeb.
+    Minimaler Compose-ähnlicher Aufbau mit der API hinter BunkerWeb. Versionen und Passwörter vor Nutzung anpassen.
 
     ```yaml
     x-bw-env: &bw-env
-      # Geteilte Zulassungsliste der Instanz-Steuerungsebene für BunkerWeb/Scheduler
-      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      # Wir nutzen einen Anker, um dieselben Einstellungen nicht doppelt zu schreiben
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Korrekte IP-Range setzen, damit der Scheduler die Konfiguration an die Instanz senden kann (interne BunkerWeb API)
+      # Optional: API-Token setzen und in beiden Containern spiegeln (interne BunkerWeb API)
+      API_TOKEN: ""
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Stärkeres Datenbank-Passwort setzen
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6
+        # Name, unter dem die Instanz im Scheduler erscheint
+        image: bunkerity/bunkerweb:1.6.10
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
-          - "443:8443/udp"  # QUIC
+          - "443:8443/udp" # Für QUIC / HTTP3
         environment:
-          <<: *bw-env
-        restart: unless-stopped
+          <<: *bw-env # Anker wiederverwenden, um Dopplungen zu vermeiden
+        restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6
+        image: bunkerity/bunkerweb-scheduler:1.6.10
         environment:
           <<: *bw-env
-          BUNKERWEB_INSTANCES: "bunkerweb"  # Entspricht dem Dienstnamen der Instanz
-          SERVER_NAME: "www.example.com"
+          BUNKERWEB_INSTANCES: "bunkerweb" # Instanznamen korrekt setzen
+          SERVER_NAME: "api.example.com"
           MULTISITE: "yes"
-          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
+          USE_REDIS: "yes"
+          REDIS_HOST: "redis"
           DISABLE_DEFAULT_SERVER: "yes"
-          # Reverse-Proxy der API auf /api
-          www.example.com_USE_REVERSE_PROXY: "yes"
-          www.example.com_REVERSE_PROXY_URL: "/api"
-          www.example.com_REVERSE_PROXY_HOST: "http://bw-api:8888"
+          AUTO_LETS_ENCRYPT: "yes"
+          api.example.com_USE_TEMPLATE: "api"
+          api.example.com_USE_REVERSE_PROXY: "yes"
+          api.example.com_REVERSE_PROXY_URL: "/"
+          api.example.com_REVERSE_PROXY_HOST: "http://bw-api:8888"
         volumes:
-          - bw-storage:/data
-        restart: unless-stopped
+          - bw-storage:/data # Cache und Backups persistent halten
+        restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.6
+        image: bunkerity/bunkerweb-api:1.6.10
         environment:
-          DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"  # Verwenden Sie ein starkes Passwort
-          API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"                      # API-Zulassungsliste
-          API_TOKEN: "secret"                                                 # Optionaler Admin-Überschreibungstoken
-          API_ROOT_PATH: "/api"                                               # Entspricht dem Reverse-Proxy-Pfad
-        restart: unless-stopped
+          <<: *bw-env
+          API_USERNAME: "admin"
+          API_PASSWORD: "Str0ng&P@ss!"
+          # API_TOKEN: "admin-override-token" # optional
+          FORWARDED_ALLOW_IPS: "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16" # Vorsicht: nur setzen, wenn sicher nur der Reverse Proxy Zugriff hat
+          API_ROOT_PATH: "/"
         networks:
           - bw-universe
           - bw-db
 
       bw-db:
         image: mariadb:11
-        # Probleme mit großen Abfragen vermeiden
+        # Größeres max allowed packet, um Probleme mit großen Queries zu vermeiden
         command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
           MYSQL_USER: "bunkerweb"
-          MYSQL_PASSWORD: "changeme"  # Verwenden Sie ein starkes Passwort
+          MYSQL_PASSWORD: "changeme" # Stärkeres DB-Passwort setzen
         volumes:
           - bw-data:/var/lib/mysql
-        restart: unless-stopped
+        restart: "unless-stopped"
         networks:
           - bw-db
+
+      redis: # Redis-Service zur Persistenz von Reports/Bans/Stats
+        image: redis:8-alpine
+        command: >
+          redis-server
+          --maxmemory 256mb
+          --maxmemory-policy volatile-lru
+          --save 60 1000
+          --appendonly yes
+        volumes:
+          - redis-data:/data
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
 
     volumes:
       bw-data:
       bw-storage:
+      redis-data:
 
     networks:
       bw-universe:
@@ -217,409 +128,267 @@ Dadurch wird die API hinter BunkerWeb isoliert, der Traffic bleibt auf vertrauen
         ipam:
           driver: default
           config:
-            - subnet: 10.20.30.0/24
+            - subnet: 10.20.30.0/24 # Korrekte IP-Range setzen, damit der Scheduler die Konfiguration an die Instanz senden kann
       bw-services:
         name: bw-services
       bw-db:
         name: bw-db
     ```
 
-=== "Docker Autoconf"
+=== "All-in-One"
 
-    Dasselbe wie oben, aber unter Nutzung des Autoconf-Dienstes, um Dienste automatisch zu entdecken und zu konfigurieren. Die API wird unter `/api` über Labels auf dem API-Container bereitgestellt.
-
-    ```yaml
-    x-api-env: &api-env
-      AUTOCONF_MODE: "yes"
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"  # Verwenden Sie ein starkes Passwort
-
-    services:
-      bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6
-        ports:
-          - "80:8080/tcp"
-          - "443:8443/tcp"
-          - "443:8443/udp"  # QUIC
-        environment:
-          AUTOCONF_MODE: "yes"
-          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
-        restart: unless-stopped
-        networks:
-          - bw-universe
-          - bw-services
-
-      bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6
-        environment:
-          <<: *api-env
-          BUNKERWEB_INSTANCES: ""    # Von Autoconf entdeckt
-          SERVER_NAME: ""            # Über Labels gefüllt
-          MULTISITE: "yes"           # Mit Autoconf obligatorisch
-          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
-        volumes:
-          - bw-storage:/data
-        restart: unless-stopped
-        networks:
-          - bw-universe
-          - bw-db
-
-      bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.6
-        depends_on:
-          - bunkerweb
-          - bw-docker
-        environment:
-          <<: *api-env
-          DOCKER_HOST: "tcp://bw-docker:2375"
-        restart: unless-stopped
-        networks:
-          - bw-universe
-          - bw-docker
-          - bw-db
-
-      bw-api:
-        image: bunkerity/bunkerweb-api:1.6.6
-        environment:
-          <<: *api-env
-          API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"
-          API_TOKEN: "secret"
-          API_ROOT_PATH: "/api"
-        labels:
-          - "bunkerweb.SERVER_NAME=www.example.com"
-          - "bunkerweb.USE_REVERSE_PROXY=yes"
-          - "bunkerweb.REVERSE_PROXY_URL=/api"
-          - "bunkerweb.REVERSE_PROXY_HOST=http://bw-api:8888"
-        restart: unless-stopped
-        networks:
-          - bw-universe
-          - bw-db
-
-      bw-db:
-        image: mariadb:11
-        command: --max-allowed-packet=67108864
-        environment:
-          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-          MYSQL_DATABASE: "db"
-          MYSQL_USER: "bunkerweb"
-          MYSQL_PASSWORD: "changeme"
-        volumes:
-          - bw-data:/var/lib/mysql
-        restart: unless-stopped
-        networks:
-          - bw-db
-
-      bw-docker:
-        image: tecnativa/docker-socket-proxy:nightly
-        environment:
-          CONTAINERS: "1"
-          LOG_LEVEL: "warning"
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock:ro
-        restart: unless-stopped
-        networks:
-          - bw-docker
-
-    volumes:
-      bw-data:
-      bw-storage:
-
-    networks:
-      bw-universe:
-        name: bw-universe
-        ipam:
-          driver: default
-          config:
-            - subnet: 10.20.30.0/24
-      bw-services:
-        name: bw-services
-      bw-db:
-        name: bw-db
-      bw-docker:
-        name: bw-docker
+    ```bash
+    docker run -d \
+      --name bunkerweb-aio \
+      -e SERVICE_API=yes \
+      -e API_WHITELIST_IPS="127.0.0.0/8" \
+      -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
+      bunkerity/bunkerweb-all-in-one:1.6.10
     ```
 
-!!! warning "Reverse-Proxy-Pfad"
-    Halten Sie den API-Pfad unerratbar und kombinieren Sie ihn mit der API-Zulassungsliste und Authentifizierung.
+=== "Linux"
 
-    Wenn Sie bereits eine andere App auf demselben Servernamen mit einer Vorlage (z. B. `USE_TEMPLATE`) bereitstellen, bevorzugen Sie einen separaten Hostnamen für die API, um Konflikte zu vermeiden.
+    Die DEB/RPM-Pakete bringen `bunkerweb-api.service`, verwaltet über `/usr/share/bunkerweb/scripts/bunkerweb-api.sh`.
 
-### All-in-One
+    - Aktivieren/Starten: `sudo systemctl enable --now bunkerweb-api.service`
+    - Reload: `sudo systemctl reload bunkerweb-api.service`
+    - Logs: Journal plus `/var/log/bunkerweb/api.log`
+    - Standard-Liste: `127.0.0.1:8888` mit `API_WHITELIST_IPS=127.0.0.1`
+    - Konfigurationsdateien: `/etc/bunkerweb/api.env` (bei erstem Start mit kommentierten Defaults erzeugt) und `/etc/bunkerweb/api.yml`
+    - Umgebungsquellen: `api.env`, `variables.env`, `/run/secrets/<VAR>` und dann exportiert in den Gunicorn-Prozess
 
-Wenn Sie das All-in-One-Image verwenden, kann die API durch Setzen von `SERVICE_API=yes` aktiviert werden:
+    Bearbeiten Sie `/etc/bunkerweb/api.env`, um `API_USERNAME`/`API_PASSWORD`, Allowlist, TLS, Ratenlimits oder `API_ROOT_PATH` zu setzen, dann `systemctl reload bunkerweb-api`.
 
-```bash
-docker run -d \
-  --name bunkerweb-aio \
-  -e SERVICE_API=yes \
-  -e API_WHITELIST_IPS="127.0.0.0/8" \
-  -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.6
-```
+## Authentifizierung und Autorisierung
 
-## Authentifizierung
+- `/auth` gibt Biscuit-Tokens aus. Zugangsdaten können per Basic Auth, Formularfeldern, JSON-Body oder Bearer-Header gleich `API_TOKEN` (Admin-Override) kommen.
+- Admins können geschützte Routen auch direkt mit HTTP Basic aufrufen (kein Biscuit nötig).
+- Stimmt der Bearer-Token mit `API_TOKEN` überein, besteht voller/Admin-Zugriff. Sonst erzwingt der Biscuit-Guard ACLs.
+- Biscuit-Payload enthält Benutzer, Zeit, Client-IP, Host, Version, eine grobe `role("api_user", ["read", "write"])` und entweder `admin(true)` oder feingranulare `api_perm(resource_type, resource_id|*, permission)`.
+- TTL: `API_BISCUIT_TTL_SECONDS` (0/off deaktiviert Ablauf). Schlüssel liegen unter `/var/lib/bunkerweb/.api_biscuit_private_key` und `.api_biscuit_public_key`, sofern nicht via `BISCUIT_PRIVATE_KEY`/`BISCUIT_PUBLIC_KEY` gesetzt.
+- Auth-Endpoints sind nur verfügbar, wenn mindestens ein API-User in der Datenbank existiert.
 
-Unterstützte Wege zur Authentifizierung von Anfragen:
+!!! tip "Auth-Quickstart"
+    1. `API_USERNAME` und `API_PASSWORD` setzen (und `OVERRIDE_API_CREDS=yes`, wenn neu seeds nötig sind).
+    2. `POST /auth` mit Basic Auth aufrufen; `.token` aus der Antwort lesen.
+    3. `Authorization: Bearer <token>` bei folgenden Aufrufen nutzen.
 
-- Basic admin: Wenn Anmeldeinformationen zu einem Admin-API-Benutzer gehören, akzeptieren geschützte Endpunkte `Authorization: Basic <base64(username:password)>`.
-- Admin Bearer override: Wenn `API_TOKEN` konfiguriert ist, gewährt `Authorization: Bearer <API_TOKEN>` vollen Zugriff.
-- Biscuit-Token (empfohlen): Erhalten Sie ein Token von `POST /auth` unter Verwendung von Basic-Anmeldeinformationen oder einem JSON-/Formular-Body, der `username` und `password` enthält. Verwenden Sie das zurückgegebene Token als `Authorization: Bearer <token>` bei nachfolgenden Aufrufen.
+## Berechtigungen und ACL
 
-Beispiel: Holen Sie sich ein Biscuit, listen Sie Instanzen auf und laden Sie dann alle Instanzen neu.
+- Grobe Rolle: GET/HEAD/OPTIONS brauchen `read`; schreibende Verben brauchen `write`.
+- Feingranulare ACL greift, wenn Routen Berechtigungen deklarieren; `admin(true)` umgeht Checks.
+- Ressourcentypen: `instances`, `global_settings`, `services`, `configs`, `plugins`, `cache`, `bans`, `jobs`.
+- Berechtigungsnamen:
+  - `instances_*`: `instances_read`, `instances_update`, `instances_delete`, `instances_create`, `instances_execute`
+  - `global_settings_*`: `global_settings_read`, `global_settings_update`
+  - `services`: `service_read`, `service_create`, `service_update`, `service_delete`, `service_convert`, `service_export`
+  - `configs`: `configs_read`, `config_read`, `config_create`, `config_update`, `config_delete`
+  - `plugins`: `plugin_read`, `plugin_create`, `plugin_delete`
+  - `cache`: `cache_read`, `cache_delete`
+  - `bans`: `ban_read`, `ban_update`, `ban_delete`, `ban_created`
+  - `jobs`: `job_read`, `job_run`
+- `resource_id` ist meist die zweite Pfadkomponente (z. B. `/services/{id}`); "*" gewährt globalen Zugriff.
+- Nicht-Admin-Nutzer und Grants per `API_ACL_BOOTSTRAP_FILE` oder gemounteter `/var/lib/bunkerweb/api_acl_bootstrap.json` bootstrappen. Passwörter dürfen Klartext oder bcrypt-Hashes sein.
 
-```bash
-# 1) Holen Sie sich ein Biscuit-Token mit Admin-Anmeldeinformationen
-TOKEN=$(curl -s -X POST -u admin:changeme http://api.example.com/auth | jq -r .token)
-
-# 2) Instanzen auflisten
-curl -H "Authorization: Bearer $TOKEN" http://api.example.com/instances
-
-# 3) Konfiguration über alle Instanzen hinweg neu laden (kein Test)
-curl -X POST -H "Authorization: Bearer $TOKEN" \
-     "http://api.example.com/instances/reload?test=no"
-```
-
-### Biscuit Fakten und Prüfungen
-
-Tokens enthalten Fakten wie `user(<username>)`, `client_ip(<ip>)`, `domain(<host>)` und eine grobe Rolle `role("api_user", ["read", "write"])`, die von den DB-Berechtigungen abgeleitet ist. Admins enthalten `admin(true)`, während Nicht-Admins feingranulare Fakten wie `api_perm(<resource_type>, <resource_id|*>, <permission>)` tragen.
-
-Die Autorisierung ordnet die Route/Methode den erforderlichen Berechtigungen zu; `admin(true)` wird immer akzeptiert. Wenn feingranulare Fakten fehlen, greift der Wächter auf die grobe Rolle zurück: GET/HEAD/OPTIONS erfordern `read`; Schreibverben erfordern `write`.
-
-Schlüssel werden unter `/var/lib/bunkerweb/.api_biscuit_private_key` und `/var/lib/bunkerweb/.api_biscuit_public_key` gespeichert. Sie können `BISCUIT_PUBLIC_KEY`/`BISCUIT_PRIVATE_KEY` auch über Umgebungsvariablen bereitstellen; wenn weder Dateien noch Umgebungsvariablen gesetzt sind, generiert die API beim Start ein Schlüsselpaar und speichert es sicher.
-
-## Berechtigungen (ACL)
-
-Diese API unterstützt zwei Autorisierungsebenen:
-
--   Grobe Rolle: Tokens tragen `role("api_user", ["read"[, "write"]])` für Endpunkte ohne feingranulare Zuordnung. Lesen wird auf GET/HEAD/OPTIONS abgebildet; Schreiben wird auf POST/PUT/PATCH/DELETE abgebildet.
--   Feingranulare ACL: Tokens enthalten `api_perm(<resource_type>, <resource_id|*>, <permission>)` und Routen deklarieren, was sie benötigen. `admin(true)` umgeht alle Prüfungen.
-
-Unterstützte Ressourcentypen: `instances`, `global_config`, `services`, `configs`, `plugins`, `cache`, `bans`, `jobs`.
-
-Berechtigungsnamen nach Ressourcentyp:
-
--   instances: `instances_read`, `instances_update`, `instances_delete`, `instances_create`, `instances_execute`
--   global_config: `global_config_read`, `global_config_update`
--   services: `service_read`, `service_create`, `service_update`, `service_delete`, `service_convert`, `service_export`
--   configs: `configs_read`, `config_read`, `config_create`, `config_update`, `config_delete`
--   plugins: `plugin_read`, `plugin_create`, `plugin_delete`
--   cache: `cache_read`, `cache_delete`
--   bans: `ban_read`, `ban_update`, `ban_delete`, `ban_created`
--   jobs: `job_read`, `job_run`
-
-Ressourcen-IDs: Für feingranulare Prüfungen wird das zweite Pfadsegment als `resource_id` behandelt, wenn es sinnvoll ist. Beispiele: `/services/{service}` -> `{service}`; `/configs/{service}/...` -> `{service}`. Verwenden Sie `"*"` (oder lassen Sie es weg), um global für einen Ressourcentyp zu gewähren.
-
-Benutzer- und ACL-Konfiguration:
-
--   Admin-Benutzer: Setzen Sie `API_USERNAME` und `API_PASSWORD`, um den ersten Admin beim Start zu erstellen. Um Anmeldeinformationen später zu rotieren, setzen Sie `OVERRIDE_API_CREDS=yes` (oder stellen Sie sicher, dass der Admin mit der Methode `manual` erstellt wurde). Es gibt nur einen Admin; zusätzliche Versuche fallen auf die Erstellung von Nicht-Admin-Benutzern zurück.
--   Nicht-Admin-Benutzer und Berechtigungen: Geben Sie `API_ACL_BOOTSTRAP_FILE` an, das auf eine JSON-Datei verweist, oder mounten Sie `/var/lib/bunkerweb/api_acl_bootstrap.json`. Die API liest sie beim Start, um Benutzer und Berechtigungen zu erstellen/aktualisieren.
--   ACL-Cache-Datei: Eine schreibgeschützte Zusammenfassung wird beim Start unter `/var/lib/bunkerweb/api_acl.json` zur Introspektion geschrieben; die Autorisierung wertet DB-gestützte Berechtigungen aus, die in das Biscuit-Token eingebettet sind.
-
-Bootstrap-JSON-Beispiele (beide Formen werden unterstützt):
-
-```json
-{
-  "users": {
-    "ci": {
-      "admin": false,
-      "password": "Str0ng&P@ss!",
-      "permissions": {
-        "services": {
-          "*": { "service_read": true },
-          "app-frontend": { "service_update": true, "service_delete": false }
-        },
-        "configs": {
-          "app-frontend": { "config_read": true, "config_update": true }
+??? example "Minimales ACL-Bootstrap"
+    ```json
+    {
+      "users": {
+        "ci": {
+          "admin": false,
+          "password": "Str0ng&P@ss!",
+          "permissions": {
+            "services": { "*": { "service_read": true } },
+            "configs": { "*": { "config_read": true, "config_update": true } }
+          }
         }
       }
-    },
-    "ops": {
-      "admin": false,
-      "password_hash": "$2b$13$...bcrypt-hash...",
-      "permissions": {
-        "instances": { "*": { "instances_execute": true } },
-        "jobs": { "*": { "job_run": true } }
-      }
     }
-  }
-}
-```
-
-Oder Listenform:
-
-```json
-{
-  "users": [
-    {
-      "username": "ci",
-      "password": "Str0ng&P@ss!",
-      "permissions": [
-        { "resource_type": "services", "resource_id": "*", "permission": "service_read" },
-        { "resource_type": "services", "resource_id": "app-frontend", "permission": "service_update" }
-      ]
-    }
-  ]
-}
-```
-
-Hinweise:
-
--   Passwörter können im Klartext (`password`) oder bcrypt (`password_hash` / `password_bcrypt`) sein. Schwache Klartext-Passwörter werden in Nicht-Debug-Builds abgelehnt; wenn sie fehlen, wird ein zufälliges generiert und eine Warnung protokolliert.
--   `resource_id: "*"` (oder null/leer) gewährt global für diesen Ressourcentyp.
--   Bestehende Benutzer können Passwörter aktualisieren und zusätzliche Berechtigungen über Bootstrap erhalten.
-
-## Funktionsreferenz
-
-Die API ist nach ressourcenorientierten Routern organisiert. Verwenden Sie die folgenden Abschnitte als Fähigkeitskarte; das interaktive Schema unter `/docs` dokumentiert Anfrage-/Antwortmodelle im Detail.
-
-### Kern und Authentifizierung
-
--   `GET /ping`, `GET /health`: leichtgewichtige Liveness-Probes für den API-Dienst selbst.
--   `POST /auth`: tauschen Sie Basic-Anmeldeinformationen (oder den Admin-Überschreibungstoken) gegen ein Biscuit. Akzeptiert JSON-, Formular- oder `Authorization`-Header. Admins können bei Bedarf auch weiterhin HTTP Basic direkt auf geschützten Routen verwenden.
-
-### Instanzen-Steuerungsebene
-
--   `GET /instances`: listet registrierte Instanzen auf, einschließlich Erstellungs-/Zuletzt-gesehen-Zeitstempel, Registrierungsmethode und Metadaten.
--   `POST /instances`: registriert eine neue API-verwaltete Instanz (Hostname, optionaler Port, Servername, Anzeigename, Methode).
--   `GET /instances/{hostname}` / `PATCH /instances/{hostname}` / `DELETE /instances/{hostname}`: inspizieren, aktualisieren Sie veränderbare Felder oder entfernen Sie API-verwaltete Instanzen.
--   `DELETE /instances`: Massenentfernung; überspringt Nicht-API-Instanzen und meldet sie in `skipped`.
--   `GET /instances/ping` und `GET /instances/{hostname}/ping`: Zustandsprüfungen über alle oder einzelne Instanzen hinweg.
--   `POST /instances/reload?test=yes|no`, `POST /instances/{hostname}/reload`: löst Konfigurationsneuladungen aus (Testmodus führt eine Trockenlaufvalidierung durch).
--   `POST /instances/stop`, `POST /instances/{hostname}/stop`: leitet Stopp-Befehle an Instanzen weiter.
-
-### Globale Konfiguration
-
--   `GET /global_config`: ruft nicht standardmäßige Einstellungen ab (verwenden Sie `full=true` für die gesamte Konfiguration, `methods=true`, um die Herkunft einzuschließen).
--   `PATCH /global_config`: aktualisiert oder fügt API-eigene (`method="api"`) globale Einstellungen ein; Validierungsfehler weisen auf unbekannte oder schreibgeschützte Schlüssel hin.
-
-### Dienstlebenszyklus
-
--   `GET /services`: listet Dienste mit Metadaten auf, einschließlich Entwurfsstatus und Zeitstempeln.
--   `GET /services/{service}`: ruft nicht standardmäßige Overlays (`full=false`) oder den vollständigen Konfigurations-Snapshot (`full=true`) für einen Dienst ab.
--   `POST /services`: erstellt Dienste, optional als Entwurf, und initialisiert präfixierte Variablen (`{service}_{KEY}`). Aktualisiert die `SERVER_NAME`-Liste atomar.
--   `PATCH /services/{service}`: benennt Dienste um, schaltet Entwurfs-Flags um und aktualisiert präfixierte Variablen. Ignoriert aus Sicherheitsgründen direkte Bearbeitungen von `SERVER_NAME` innerhalb von `variables`.
--   `DELETE /services/{service}`: entfernt einen Dienst und seine abgeleiteten Konfigurationsschlüssel.
--   `POST /services/{service}/convert?convert_to=online|draft`: wechselt schnell zwischen Entwurfs-/Online-Status, ohne andere Variablen zu ändern.
-
-### Benutzerdefinierte Konfigurations-Snippets
-
--   `GET /configs`: listet benutzerdefinierte Konfigurationsfragmente (HTTP/Server/Stream/ModSecurity/CRS-Hooks) für einen Dienst auf (`service=global` standardmäßig). `with_data=true` bettet UTF-8-Inhalt ein, wenn er druckbar ist.
--   `POST /configs` und `POST /configs/upload`: erstellt neue Snippets aus JSON-Payloads oder hochgeladenen Dateien. Akzeptierte Typen sind `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream` und CRS-Plugin-Hooks. Namen müssen mit `^[\w_-]{1,255}$` übereinstimmen.
--   `GET /configs/{service}/{type}/{name}`: ruft ein Snippet mit optionalem Inhalt ab (`with_data=true`).
--   `PATCH /configs/{service}/{type}/{name}` und `PATCH .../upload`: aktualisiert oder verschiebt API-verwaltete Snippets; vorlagen- oder dateiverwaltete Einträge bleiben schreibgeschützt.
--   `DELETE /configs` und `DELETE /configs/{service}/{type}/{name}`: entfernt API-verwaltete Snippets unter Beibehaltung von vorlagenverwalteten, wobei eine `skipped`-Liste für ignorierte Einträge zurückgegeben wird.
-
-### Sperren-Orchestrierung
-
--   `GET /bans`: aggregiert aktive Sperren, die von allen Instanzen gemeldet werden.
--   `POST /bans` oder `POST /bans/ban`: wendet eine oder mehrere Sperren an. Payloads können JSON-Objekte, Arrays oder stringifizierte JSON sein. `service` ist optional; wenn es weggelassen wird, ist die Sperre global.
--   `POST /bans/unban` oder `DELETE /bans`: entfernt Sperren global oder pro Dienst unter Verwendung derselben flexiblen Payloads.
-
-### Plugin-Verwaltung
-
--   `GET /plugins?type=all|external|ui|pro`: listet Plugins mit Metadaten auf; `with_data=true` schließt verpackte Bytes ein, wenn verfügbar.
--   `POST /plugins/upload`: installiert UI-Plugins aus `.zip`, `.tar.gz` oder `.tar.xz` Archiven. Archive können mehrere Plugins bündeln, solange jedes eine `plugin.json` enthält.
--   `DELETE /plugins/{id}`: entfernt ein UI-Plugin nach ID (`^[\w.-]{4,64}$`).
-
-### Job-Cache und Ausführung
-
--   `GET /cache`: listet gecachte Artefakte auf, die von Scheduler-Jobs erstellt wurden, gefiltert nach Dienst, Plugin-ID oder Job-Namen. `with_data=true` schließt druckbaren Dateiinhalt ein.
--   `GET /cache/{service}/{plugin}/{job}/{file}`: ruft eine bestimmte Cache-Datei ab (`download=true` streamt einen Anhang).
--   `DELETE /cache` oder `DELETE /cache/{service}/{plugin}/{job}/{file}`: löscht Cache-Dateien und benachrichtigt den Scheduler über betroffene Plugins.
--   `GET /jobs`: inspiziert bekannte Jobs, ihre Zeitplan-Metadaten und Cache-Zusammenfassungen.
--   `POST /jobs/run`: fordert die Ausführung eines Jobs an, indem die zugehörigen Plugins als geändert markiert werden.
-
-### Betriebshinweise
-
--   Schreibendpunkte persistieren in der gemeinsamen Datenbank; Instanzen übernehmen Änderungen über Scheduler-Sync oder nach einem `/instances/reload`.
--   Fehler werden auf `{ "status": "error", "message": "..." }` normalisiert mit entsprechenden HTTP-Statuscodes (422 Validierung, 404 nicht gefunden, 403 ACL, 5xx Upstream-Fehler).
+    ```
 
 ## Ratenbegrenzung
 
-Die Ratenbegrenzung pro Client wird von SlowAPI gehandhabt. Aktivieren/deaktivieren Sie sie und gestalten Sie die Limits über Umgebungsvariablen oder `/etc/bunkerweb/api.yml`.
+Standardmäßig aktiv mit zwei Strings: `API_RATE_LIMIT` (global, Standard `100r/m`) und `API_RATE_LIMIT_AUTH` (Standard `10r/m` oder `off`). Raten akzeptieren NGINX-Notation (`3r/s`, `40r/m`, `200r/h`) oder ausgeschriebene Formen (`100/minute`, `200 per 30 minutes`). Konfigurieren über:
 
--   `API_RATE_LIMIT_ENABLED` (Standard: `yes`)
--   Standardlimit: `API_RATE_LIMIT_TIMES` pro `API_RATE_LIMIT_SECONDS` (z. B. `100` pro `60`)
--   `API_RATE_LIMIT_RULES`: inline JSON/CSV oder ein Pfad zu einer YAML/JSON-Datei mit Regeln pro Route
--   Speicher-Backend: In-Memory oder Redis/Valkey, wenn `USE_REDIS=yes` und `REDIS_*`-Variablen bereitgestellt werden (Sentinel unterstützt)
--   Header: `API_RATE_LIMIT_HEADERS_ENABLED` (Standard: `yes`)
+- `API_RATE_LIMIT`, `API_RATE_LIMIT_AUTH`
+- `API_RATE_LIMIT_ENABLED`, `API_RATE_LIMIT_HEADERS_ENABLED`
+- `API_RATE_LIMIT_RULES` (CSV/JSON/YAML-String oder Dateipfad)
+- `API_RATE_LIMIT_STRATEGY`, `API_RATE_LIMIT_KEY`, `API_RATE_LIMIT_EXEMPT_IPS`
+- Speicherung: In-Memory oder Redis/Valkey bei `USE_REDIS=yes` plus `REDIS_*` (Sentinel unterstützt).
 
-`POST /auth` erzwingt immer sein eigenes Limit von `API_RATE_LIMIT_AUTH_TIMES` pro `API_RATE_LIMIT_AUTH_SECONDS` (Standard `10` pro `60`). Setzen Sie einen der Werte auf `0` oder fügen Sie eine benutzerdefinierte `/auth`-Regel hinzu, um dies zu überschreiben oder zu deaktivieren. Diese integrierte Regel läuft über dasselbe SlowAPI-Backend (Memory oder Redis/Valkey), sodass das Limit konsistent über alle Replikate hinweg erzwungen wird.
+Limiter-Strategien (bereitgestellt von `limits`):
 
-Beispiel YAML (gemountet unter `/etc/bunkerweb/api.yml`):
+- `fixed-window` (Standard): Bucket wird an jeder Intervallgrenze zurückgesetzt; am günstigsten und ausreichend für grobe Limits.
+- `moving-window`: echtes gleitendes Fenster mit präzisen Zeitstempeln; glatter, aber speicherintensiver in den Operationen.
+- `sliding-window-counter`: Hybrid, der mit gewichteten Zählungen des vorherigen Fensters glättet; leichter als moving, glatter als fixed.
 
-```yaml
-API_RATE_LIMIT_ENABLED: yes
-API_RATE_LIMIT_DEFAULTS: ["200/minute"]
-API_RATE_LIMIT_RULES:
-  - path: "/auth"
-    methods: "POST"
-    times: 10
-    seconds: 60
-  - path: "/instances*"
-    methods: "GET|POST"
-    times: 100
-    seconds: 60
-```
+Mehr Details und Abwägungen: [https://limits.readthedocs.io/en/stable/strategies.html](https://limits.readthedocs.io/en/stable/strategies.html)
 
-## Konfiguration
+??? example "Inline-CSV"
+    ```
+    API_RATE_LIMIT_RULES='POST /auth 10r/m, GET /instances* 200r/m, POST|PATCH /services* 40r/m'
+    ```
 
-Sie können die API über Umgebungsvariablen, Docker-Secrets und die optionalen Dateien `/etc/bunkerweb/api.yml` oder `/etc/bunkerweb/api.env` konfigurieren. Wichtige Einstellungen:
+??? example "YAML-Datei"
+    ```yaml
+    API_RATE_LIMIT: 200r/m
+    API_RATE_LIMIT_AUTH: 15r/m
+    API_RATE_LIMIT_RULES:
+      - path: "/auth"
+        methods: "POST"
+        rate: "10r/m"
+      - path: "/instances*"
+        methods: "GET|POST"
+        rate: "100r/m"
+    ```
 
--   Dokumentation & Schema: `API_DOCS_URL`, `API_REDOC_URL`, `API_OPENAPI_URL`, `API_ROOT_PATH`.
--   Grundlagen der Authentifizierung: `API_TOKEN` (Admin-Überschreibung Bearer), `API_USERNAME`/`API_PASSWORD` (Admin erstellen/aktualisieren), `OVERRIDE_API_CREDS`.
--   ACL und Benutzer: `API_ACL_BOOTSTRAP_FILE` (JSON-Pfad).
--   Biscuit-Richtlinie: `API_BISCUIT_TTL_SECONDS` (0/off deaktiviert TTL), `CHECK_PRIVATE_IP` (bindet Token an Client-IP, es sei denn, es ist privat).
--   IP-Zulassungsliste: `API_WHITELIST_ENABLED`, `API_WHITELIST_IPS`.
--   Ratenbegrenzung (Kern): `API_RATE_LIMIT_ENABLED`, `API_RATE_LIMIT_TIMES`, `API_RATE_LIMIT_SECONDS`, `API_RATE_LIMIT_HEADERS_ENABLED`.
--   Ratenbegrenzung (fortgeschritten): `API_RATE_LIMIT_AUTH_TIMES`, `API_RATE_LIMIT_AUTH_SECONDS`, `API_RATE_LIMIT_RULES`, `API_RATE_LIMIT_DEFAULTS`, `API_RATE_LIMIT_APPLICATION_LIMITS`, `API_RATE_LIMIT_STRATEGY`, `API_RATE_LIMIT_KEY`, `API_RATE_LIMIT_EXEMPT_IPS`, `API_RATE_LIMIT_STORAGE_OPTIONS`.
--   Speicher für Ratenbegrenzung: In-Memory oder Redis/Valkey, wenn `USE_REDIS=yes` und Redis-Einstellungen wie `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`, `REDIS_DATABASE`, `REDIS_SSL` oder Sentinel-Variablen gesetzt sind. Siehe die Redis-Einstellungstabelle in `docs/features.md`.
--   Netzwerk/TLS: `API_LISTEN_ADDR`, `API_LISTEN_PORT`, `API_FORWARDED_ALLOW_IPS`, `API_SSL_ENABLED`, `API_SSL_CERTFILE`, `API_SSL_KEYFILE`, `API_SSL_CA_CERTS`.
+## Konfigurationsquellen und Priorität
 
-### Wie die Konfiguration geladen wird
+1. Umgebungsvariablen (inkl. Docker/Compose `environment:`)
+2. Secrets in `/run/secrets/<VAR>` (Docker)
+3. YAML unter `/etc/bunkerweb/api.yml`
+4. Env-Datei unter `/etc/bunkerweb/api.env`
+5. Eingebaute Defaults
 
-Priorität von höchster zu niedrigster:
+### Laufzeit & Zeitzone
 
--   Umgebungsvariablen (z. B. `environment:` im Container oder exportierte Shell-Variablen)
--   Secrets-Dateien unter `/run/secrets` (Docker/K8s-Secrets; Dateinamen entsprechen Variablennamen)
--   YAML-Datei unter `/etc/bunkerweb/api.yml`
--   Env-Datei unter `/etc/bunkerweb/api.env` (key=value Zeilen)
--   Eingebaute Standardwerte
+| Setting | Beschreibung                                                                                     | Akzeptierte Werte                               | Standard                             |
+| ------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------- | ------------------------------------ |
+| `TZ`    | Zeitzone für API-Logs und zeitbasierte Claims (z. B. Biscuit-TTL-Auswertung und Log-Zeitstempel) | TZ-Datenbank-Name (z. B. `UTC`, `Europe/Paris`) | unset (Container-Default, meist UTC) |
 
-Hinweise:
+Docs oder Schema deaktivieren, indem die zugehörigen URLs auf `off|disabled|none|false|0` gesetzt werden. Setzen Sie `API_SSL_ENABLED=yes` mit `API_SSL_CERTFILE` und `API_SSL_KEYFILE`, um TLS direkt in der API zu terminieren. Beim Reverse-Proxy `API_FORWARDED_ALLOW_IPS` auf die Proxy-IPs setzen, damit Gunicorn `X-Forwarded-*` vertraut.
 
--   YAML unterstützt das Einbetten von Secret-Dateien mit `<file:relative/path>`; der Pfad wird relativ zu `/run/secrets` aufgelöst.
--   Setzen Sie Doc-URLs auf `off`/`disabled`/`none`, um Endpunkte zu deaktivieren (z. B. `API_DOCS_URL=off`).
--   Wenn `API_SSL_ENABLED=yes`, müssen Sie auch `API_SSL_CERTFILE` und `API_SSL_KEYFILE` setzen.
--   Wenn Redis aktiviert ist (`USE_REDIS=yes`), geben Sie Redis-Details an; siehe Redis-Abschnitt in `docs/features.md`.
+### Konfigurationsreferenz (Power User)
 
-### Authentifizierung und Benutzer
+#### Oberfläche & Docs
 
--   Admin-Bootstrap: Setzen Sie `API_USERNAME` und `API_PASSWORD`, um den ersten Admin zu erstellen. Um später erneut anzuwenden, setzen Sie `OVERRIDE_API_CREDS=yes`.
--   Nicht-Admins und Berechtigungen: Geben Sie `API_ACL_BOOTSTRAP_FILE` mit einem JSON-Pfad an (oder mounten Sie auf `/var/lib/bunkerweb/api_acl_bootstrap.json`). Die Datei kann Benutzer und feingranulare Berechtigungen auflisten.
--   Biscuit-Schlüssel: Setzen Sie entweder `BISCUIT_PUBLIC_KEY`/`BISCUIT_PRIVATE_KEY` oder mounten Sie Dateien unter `/var/lib/bunkerweb/.api_biscuit_public_key` und `/var/lib/bunkerweb/.api_biscuit_private_key`. Wenn keine bereitgestellt werden, generiert und speichert die API beim Start ein Schlüsselpaar.
+| Setting                                            | Beschreibung                                                                                  | Akzeptierte Werte        | Standard                           |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------ | ---------------------------------- |
+| `API_DOCS_URL`, `API_REDOC_URL`, `API_OPENAPI_URL` | Pfade für Swagger, ReDoc und OpenAPI; auf `off/disabled/none/false/0` setzen zum Deaktivieren | Pfad oder `off`          | `/docs`, `/redoc`, `/openapi.json` |
+| `API_ROOT_PATH`                                    | Mount-Prefix bei Reverse Proxy                                                                | Pfad (z. B. `/api`)      | leer                               |
+| `API_FORWARDED_ALLOW_IPS`                          | Vertrauenswürdige Proxy-IPs für `X-Forwarded-*`                                               | Kommagetrennte IPs/CIDRs | `127.0.0.1,::1` (Package-Default)  |
+| `API_PROXY_ALLOW_IPS`                              | Vertrauenswürdige Proxy-IPs für PROXY-Protokoll                                               | Kommagetrennte IPs/CIDRs | `FORWARDED_ALLOW_IPS`              |
 
-### TLS und Netzwerk
+#### Auth, ACL, Biscuit
 
--   Bindungsadresse/-port: `API_LISTEN_ADDR` (Standard `0.0.0.0`), `API_LISTEN_PORT` (Standard `8888`).
--   Reverse-Proxys: Setzen Sie `API_FORWARDED_ALLOW_IPS` auf die Proxy-IPs, damit Gunicorn `X-Forwarded-*`-Headern vertraut.
--   TLS-Terminierung in der API: `API_SSL_ENABLED=yes` plus `API_SSL_CERTFILE` und `API_SSL_KEYFILE`; optional `API_SSL_CA_CERTS`
+| Setting                                     | Beschreibung                                  | Akzeptierte Werte                                                      | Standard                  |
+| ------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------- | ------------------------- |
+| `API_USERNAME`, `API_PASSWORD`              | Bootstrap-Admin-Nutzer                        | Strings; starkes Passwort außerhalb Debug erforderlich                 | unset                     |
+| `OVERRIDE_API_CREDS`                        | Admin-Creds beim Start erneut anwenden        | `yes/no/on/off/true/false/0/1`                                         | `no`                      |
+| `API_TOKEN`                                 | Admin-Override-Bearer-Token                   | Opaquer String                                                         | unset                     |
+| `API_ACL_BOOTSTRAP_FILE`                    | Pfad zu JSON für Nutzer/Berechtigungen        | Dateipfad oder gemountetes `/var/lib/bunkerweb/api_acl_bootstrap.json` | unset                     |
+| `BISCUIT_PRIVATE_KEY`, `BISCUIT_PUBLIC_KEY` | Biscuit-Schlüssel (Hex), falls keine Dateien  | Hex-Strings                                                            | auto-generiert/persistent |
+| `API_BISCUIT_TTL_SECONDS`                   | Token-Lebensdauer; `0/off` deaktiviert Ablauf | Integer Sekunden oder `off/disabled`                                   | `3600`                    |
+| `CHECK_PRIVATE_IP`                          | Biscuit an Client-IP binden (außer private)   | `yes/no/on/off/true/false/0/1`                                         | `yes`                     |
 
-### Schnelle Rezepte zur Ratenbegrenzung
+#### Allowlist
 
--   Global deaktivieren: `API_RATE_LIMIT_ENABLED=no`
--   Einfaches globales Limit setzen: `API_RATE_LIMIT_TIMES=100`, `API_RATE_LIMIT_SECONDS=60`
--   Regeln pro Route: Setzen Sie `API_RATE_LIMIT_RULES` auf einen JSON/YAML-Dateipfad oder inline YAML in `/etc/bunkerweb/api.yml`.
+| Setting                 | Beschreibung                        | Akzeptierte Werte              | Standard                 |
+| ----------------------- | ----------------------------------- | ------------------------------ | ------------------------ |
+| `API_WHITELIST_ENABLED` | IP-Allowlist-Middleware umschalten  | `yes/no/on/off/true/false/0/1` | `yes`                    |
+| `API_WHITELIST_IPS`     | Leer- oder kommagetrennte IPs/CIDRs | IPs/CIDRs                      | RFC1918-Bereiche im Code |
 
-!!! warning "Startsicherheit"
-    Die API wird beendet, wenn kein Authentifizierungspfad konfiguriert ist (keine Biscuit-Schlüssel, kein Admin-Benutzer und kein `API_TOKEN`). Stellen Sie sicher, dass mindestens eine Methode vor dem Start festgelegt ist.
+#### Ratenbegrenzung
 
-Startsicherheit: Die API wird beendet, wenn kein Authentifizierungspfad verfügbar ist (keine Biscuit-Schlüssel, kein Admin-API-Benutzer und kein `API_TOKEN`). Stellen Sie sicher, dass mindestens einer konfiguriert ist.
+| Setting                          | Beschreibung                                  | Akzeptierte Werte                                         | Standard       |
+| -------------------------------- | --------------------------------------------- | --------------------------------------------------------- | -------------- |
+| `API_RATE_LIMIT`                 | Globales Limit (NGINX-String)                 | `3r/s`, `100/minute`, `500 per 30 minutes`                | `100r/m`       |
+| `API_RATE_LIMIT_AUTH`            | `/auth`-Limit (oder `off`)                    | wie oben oder `off/disabled/none/false/0`                 | `10r/m`        |
+| `API_RATE_LIMIT_ENABLED`         | Limiter aktivieren                            | `yes/no/on/off/true/false/0/1`                            | `yes`          |
+| `API_RATE_LIMIT_HEADERS_ENABLED` | Rate-Limit-Header injizieren                  | wie oben                                                  | `yes`          |
+| `API_RATE_LIMIT_RULES`           | Pfadregeln (CSV/JSON/YAML oder Dateipfad)     | String oder Pfad                                          | unset          |
+| `API_RATE_LIMIT_STRATEGY`        | Algorithmus                                   | `fixed-window`, `moving-window`, `sliding-window-counter` | `fixed-window` |
+| `API_RATE_LIMIT_KEY`             | Schlüssel-Selektion                           | `ip`, `header:<Name>`                                     | `ip`           |
+| `API_RATE_LIMIT_EXEMPT_IPS`      | Limits für diese IPs/CIDRs überspringen       | Leer- oder kommagetrennt                                  | unset          |
+| `API_RATE_LIMIT_STORAGE_OPTIONS` | JSON, das in die Storage-Konfig gemerged wird | JSON-String                                               | unset          |
 
-!!! info "Root-Pfad und Proxys"
-    Wenn Sie die API hinter BunkerWeb auf einem Unterpfad bereitstellen, setzen Sie `API_ROOT_PATH` auf diesen Pfad, damit `/docs` und relative Routen bei der Proxy-Weiterleitung korrekt funktionieren.
+#### Redis/Valkey (für Rate Limits)
 
-## Betrieb
+| Setting                                              | Beschreibung             | Akzeptierte Werte                 | Standard           |
+| ---------------------------------------------------- | ------------------------ | --------------------------------- | ------------------ |
+| `USE_REDIS`                                          | Redis-Backend aktivieren | `yes/no/on/off/true/false/0/1`    | `no`               |
+| `REDIS_HOST`, `REDIS_PORT`, `REDIS_DATABASE`         | Verbindungsdetails       | Host, int, int                    | unset, `6379`, `0` |
+| `REDIS_USERNAME`, `REDIS_PASSWORD`                   | Auth                     | Strings                           | unset              |
+| `REDIS_SSL`, `REDIS_SSL_VERIFY`                      | TLS und Verifizierung    | `yes/no/on/off/true/false/0/1`    | `no`, `yes`        |
+| `REDIS_TIMEOUT`                                      | Timeout (ms)             | Integer                           | `1000`             |
+| `REDIS_KEEPALIVE_POOL`                               | Pool-Keepalive           | Integer                           | `10`               |
+| `REDIS_SENTINEL_HOSTS`                               | Sentinel-Hosts           | Leerzeichen-getrennte `host:port` | unset              |
+| `REDIS_SENTINEL_MASTER`                              | Sentinel-Mastername      | String                            | unset              |
+| `REDIS_SENTINEL_USERNAME`, `REDIS_SENTINEL_PASSWORD` | Sentinel-Auth            | Strings                           | unset              |
 
--   Zustand: `GET /health` gibt `{"status":"ok"}` zurück, wenn der Dienst betriebsbereit ist.
--   Linux-Dienst: eine `systemd`-Einheit namens `bunkerweb-api.service` ist enthalten. Passen Sie sie über `/etc/bunkerweb/api.env` an und verwalten Sie sie mit `systemctl`.
--   Startsicherheit: Die API schlägt schnell fehl, wenn kein Authentifizierungspfad verfügbar ist (keine Biscuit-Schlüssel, kein Admin-Benutzer, kein `API_TOKEN`). Fehler werden nach `/var/tmp/bunkerweb/api.error` geschrieben.
+!!! info "DB-Redis"
+    Wenn Redis/Valkey-Einstellungen in der BunkerWeb-Datenbank vorhanden sind, nutzt die API sie automatisch fürs Rate Limiting, auch ohne `USE_REDIS` in der Umgebung. Bei Bedarf per Umgebungsvariablen überschreiben.
+
+#### Listener & TLS
+
+| Setting                               | Beschreibung                   | Akzeptierte Werte              | Standard                             |
+| ------------------------------------- | ------------------------------ | ------------------------------ | ------------------------------------ |
+| `API_LISTEN_ADDR`, `API_LISTEN_PORT`  | Bind-Adresse/Port für Gunicorn | IP oder Hostname, int          | `127.0.0.1`, `8888` (Package-Skript) |
+| `API_SSL_ENABLED`                     | TLS in der API aktivieren      | `yes/no/on/off/true/false/0/1` | `no`                                 |
+| `API_SSL_CERTFILE`, `API_SSL_KEYFILE` | PEM-Zertifikat und -Schlüssel  | Dateipfade                     | unset                                |
+| `API_SSL_CA_CERTS`                    | Optionale CA/Chain             | Dateipfad                      | unset                                |
+
+#### Logging & Laufzeit (Package-Defaults)
+
+| Setting                         | Beschreibung                                                                 | Akzeptierte Werte                               | Standard                                                            |
+| ------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------- |
+| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Basis-Log-Level / Override                                                   | `debug`, `info`, `warning`, `error`, `critical` | `info`                                                              |
+| `LOG_TYPES`                     | Ziele                                                                        | Leerzeichen-getrennt `stderr`/`file`/`syslog`   | `stderr`                                                            |
+| `LOG_FILE_PATH`                 | Log-Dateipfad (bei `LOG_TYPES` mit `file` oder `CAPTURE_OUTPUT=yes` genutzt) | Dateipfad                                       | `/var/log/bunkerweb/api.log`, falls file/capture aktiv, sonst unset |
+| `LOG_SYSLOG_ADDRESS`            | Syslog-Ziel (`udp://host:514`, `tcp://host:514`, Socket)                     | Host:Port, Protokoll-präfixter Host oder Socket | unset                                                               |
+| `LOG_SYSLOG_TAG`                | Syslog-Tag                                                                   | String                                          | `bw-api`                                                            |
+| `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn-Worker/Threads                                                      | Integer oder unset für Auto                     | unset                                                               |
+| `MAX_REQUESTS`                  | Anfragen vor Gunicorn-Worker-Recycling (verhindert Speicherbloat)            | Integer                                         | `1000`                                                              |
+| `CAPTURE_OUTPUT`                | Gunicorn stdout/stderr in die konfigurierten Handler umlenken                | `yes` oder `no`                                 | `no`                                                                |
+
+## API-Fläche (Capabilities)
+
+- **Core**
+  - `GET /ping`, `GET /health`: Liveness-Checks für die API selbst.
+- **Auth**
+  - `POST /auth`: Biscuit-Tokens ausgeben; akzeptiert Basic, Formular, JSON oder Bearer-Override bei passendem `API_TOKEN`.
+- **Instances**
+  - `GET /instances`: Instanzen mit Erstellungs-/Last-seen-Metadaten auflisten.
+  - `POST /instances`: Instanz registrieren (hostname/port/server_name/method).
+  - `GET/PATCH/DELETE /instances/{hostname}`: inspizieren, veränderbare Felder updaten oder API-gemanagte Instanzen löschen.
+  - `DELETE /instances`: API-gemanagte Instanzen en masse löschen; Einträge außerhalb der API werden übersprungen.
+  - Health/Aktionen: `GET /instances/ping`, `GET /instances/{hostname}/ping`, `POST /instances/reload?test=yes|no`, `POST /instances/{hostname}/reload`, `POST /instances/stop`, `POST /instances/{hostname}/stop`.
+- **Global settings**
+  - `GET /global_settings`: standardmäßig nur Nicht-Defaults; `full=true` für alle Settings, `methods=true` für Herkunft.
+  - `PATCH /global_settings`: API-eigene Globals upserten; read-only Keys werden abgelehnt.
+- **Services**
+  - `GET /services`: Dienste auflisten (Drafts standardmäßig enthalten).
+  - `GET /services/{service}`: Nicht-Defaults oder volle Config holen (`full=true`); `methods=true` fügt Herkunft hinzu.
+  - `POST /services`: Dienst anlegen (Draft oder online), Variablen setzen und `SERVER_NAME`-Roster atomar aktualisieren.
+  - `PATCH /services/{service}`: umbenennen, Variablen updaten, Draft toggeln.
+  - `DELETE /services/{service}`: Dienst und abgeleitete Config-Keys entfernen.
+  - `POST /services/{service}/convert?convert_to=online|draft`: Draft/Online schnell umschalten.
+- **Custom configs**
+  - `GET /configs`: Snippets auflisten (Default-Service `global`); `with_data=true` bettet druckbaren Inhalt ein.
+  - `POST /configs`, `POST /configs/upload`: Snippets via JSON oder File-Upload erstellen.
+  - `GET /configs/{service}/{type}/{name}`: Snippet holen; `with_data=true` für Inhalt.
+  - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload`: API-gemanagte Snippets aktualisieren oder verschieben.
+  - `DELETE /configs` oder `DELETE /configs/{service}/{type}/{name}`: API-gemanagte Snippets löschen; template-gemanagte werden übersprungen.
+  - Unterstützte Typen: `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, CRS/Plugin-Hooks.
+- **Bans**
+  - `GET /bans`: aktive Bans aus Instanzen aggregieren.
+  - `POST /bans` oder `/bans/ban`: einen oder mehrere Bans anwenden; Payload darf Objekt, Array oder JSON-String sein.
+  - `POST /bans/unban` oder `DELETE /bans`: Bans global oder pro Service entfernen.
+- **Plugins (UI-Plugins)**
+  - `GET /plugins`: Plugins auflisten; `with_data=true` enthält Paket-Bytes, sofern verfügbar.
+  - `POST /plugins/upload`: UI-Plugins aus `.zip`, `.tar.gz`, `.tar.xz` installieren.
+  - `DELETE /plugins/{id}`: Plugin per ID entfernen.
+- **Cache (Job-Artefakte)**
+  - `GET /cache`: Cache-Dateien mit Filtern (`service`, `plugin`, `job_name`) auflisten; `with_data=true` bettet druckbaren Inhalt ein.
+  - `GET /cache/{service}/{plugin}/{job}/{file}`: spezifische Cache-Datei holen/herunterladen (`download=true`).
+  - `DELETE /cache` oder `DELETE /cache/{service}/{plugin}/{job}/{file}`: Cache-Dateien löschen und Scheduler benachrichtigen.
+- **Jobs**
+  - `GET /jobs`: Jobs, Zeitpläne und Cache-Zusammenfassungen auflisten.
+  - `POST /jobs/run`: Plugins als geändert markieren, um zugehörige Jobs auszulösen.
+
+## Betriebsverhalten
+
+- Fehlermeldungen sind normalisiert zu `{"status": "error", "message": "..."}` mit passenden HTTP-Statuscodes.
+- Schreiboperationen landen in der gemeinsamen Datenbank; Instanzen übernehmen Änderungen per Scheduler-Sync oder nach einem Reload.
+- `API_ROOT_PATH` muss dem Reverse-Proxy-Pfad entsprechen, damit `/docs` und Links funktionieren.
+- Start schlägt fehl, wenn kein Auth-Pfad existiert (keine Biscuit-Schlüssel, kein Admin-User und kein `API_TOKEN`); Fehler werden in `/var/tmp/bunkerweb/api.error` geloggt.

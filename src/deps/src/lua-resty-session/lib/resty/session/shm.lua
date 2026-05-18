@@ -121,10 +121,9 @@ end
 -- @tparam[opt] string old_key old session id
 -- @tparam string stale_ttl stale ttl
 -- @tparam[opt] table metadata table of metadata
--- @tparam boolean remember whether storing persistent session or not
 -- @treturn true|nil ok
 -- @treturn string error message
-function metatable:set(name, key, value, ttl, current_time, old_key, stale_ttl, metadata, remember)
+function metatable:set(name, key, value, ttl, current_time, old_key, stale_ttl, metadata)
   local dict = self.dict
   if not metadata and not old_key then
     local ok, err = dict:set(get_name(self, name, key), value, ttl)
@@ -138,9 +137,7 @@ function metatable:set(name, key, value, ttl, current_time, old_key, stale_ttl, 
   local old_name, old_ttl
   if old_key then
     old_name = get_name(self, name, old_key)
-    if not remember then
-      old_ttl = dict:ttl(old_name)
-    end
+    old_ttl = dict:ttl(old_name)
   end
 
   local ok, err = dict:set(get_name(self, name, key), value, ttl)
@@ -148,15 +145,10 @@ function metatable:set(name, key, value, ttl, current_time, old_key, stale_ttl, 
     return nil, err
   end
 
-  if old_name then
-    if remember then
-      dict:delete(old_name)
-
-    elseif (not old_ttl or old_ttl > stale_ttl) then
-      local ok, err = dict:expire(old_name, stale_ttl)
-      if not ok then
-        log(WARN, "[session] ", errmsg(err, "failed to touch old session"))
-      end
+  if old_name and (not old_ttl or old_ttl > stale_ttl) then
+    local ok, err = dict:expire(old_name, stale_ttl)
+    if not ok then
+      log(WARN, "[session] ", errmsg(err, "failed to touch old session"))
     end
   end
 

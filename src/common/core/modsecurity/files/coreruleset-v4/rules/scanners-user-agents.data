@@ -36,6 +36,10 @@ fimap
 # https://github.com/ffuf/ffuf
 fuzz faster
 
+# WhatWaf, fingerprint and bypass WAFs
+# https://github.com/Ekultek/WhatWaf
+whatwaf
+
 # Scanner that looks for existing or hidden web objects
 # https://github.com/OJ/gobuster
 gobuster
@@ -61,6 +65,9 @@ morfeus
 # https://trunc.org/learning/the-mozlila-user-agent-bot
 Mozlila
 
+# Typo of Mozilla/5.0 user-agent
+Mozilla/5.g
+
 # Nessus
 # http://www.tenable.com/products/nessus-vulnerability-scanner
 nessus
@@ -68,6 +75,9 @@ nessus
 netlab360
 
 netsparker
+
+# OWASP Nettacker
+nettacker
 
 # vuln scanner
 # https://cirt.net/Nikto2
@@ -80,6 +90,9 @@ nuclei
 
 # http://www.openvas.org/
 openvas
+
+# https://aws.amazon.com/fr/security-agent/
+securityagent
 
 sitelockspider
 
@@ -112,8 +125,117 @@ wprecon
 # https://wpscan.org/
 wpscan
 
+# feroxbuster directory fuzzer
+feroxbuster
+
+# (deprecated) https://github.com/LeakIX/l9explore
+l9explore
+
+# (deprecated) https://github.com/LeakIX/l9tcpid
+l9tcpid
+
+# https://github.com/wapiti-scanner/wapiti
+wapiti
+
+# https://subgraph.com/vega/
+vega
+
+# https://docs.rapid7.com/appspider/
+appspider
+
+# https://github.com/swatv3nub/IronWASP
+ironwasp
+
+# https://github.com/spinkham/skipfish
+skipfish
+
+# https://www.qualys.com/apps/web-app-scanning
+qualysguard
+
+# https://nstalker.com/
+n-stalker
+
+# https://www.acunetix.com/
+acunetix
+
+# https://github.com/dionach/CMSmap
+cmsmap
+
+# https://github.com/xxgrunge/sqlninja
+sqlninja
+
+# https://github.com/s0md3v/XSStrike
+xsstrike
+
+# https://github.com/epsylon/xsser
+xsser
+
+# https://github.com/OWASP/joomscan
+joomscan
+
+# https://github.com/SamJoan/droopescan
+droopescan
+
 # ZGrab scanner (Mozilla/5.0 zgrab/0.x)
 # https://zmap.io
 zgrab
 
+# Ghauri SQL Injection
+Ghauri
+
 zmeu
+
+# https://github.com/Chocapikk/wpprobe
+WPProbe
+
+# SSTIMap
+# https://github.com/vladko312/SSTImap
+SSTIMap
+
+# Hydra
+Mozilla/4.0 (Hydra)
+
+# (deprecated) https://github.com/epinna/tplmap
+tplmap
+
+# https://github.com/wireghoul/dotdotpwn
+DotDotPwn
+
+# https://github.com/bitquark/shortscan
+shortscan
+
+# (deprecated) https://github.com/P0cL4bs/Kadimus
+Kadimus
+
+# https://github.com/D35m0nd142/LFISuite
+LFISuite
+
+# https://github.com/lightos/Panoptic
+Mozilla/5.0 (compatible; Panoptic
+
+# https://github.com/hansmach1ne/LFImap
+LFImap
+
+# https://github.com/dolevf/graphw00f
+graphw00f
+
+# https://github.com/dolevf/graphql-cop
+graphql-cop
+
+# https://github.com/ron190/jsql-injection
+jSQL
+
+# https://github.com/praetorian-inc/noseyparker
+noseyparker
+
+# TruffleHog
+TruffleHog
+
+# https://www.yeswehack.com/
+YesWeHack-Hunter
+
+# https://github.com/Hackmanit/TInjA
+TInjA
+
+# IBM Security AppScan
+Mozilla/5.0 (compatible; AppScan;

@@ -21,6 +21,8 @@ new\s+Function\s*\(
 this\.constructor
 module\.exports=
 \(\s*\Wchild_process\W\s*\)
+constructor:constructor
+Module:prototype
 
 
 ##!> assemble
@@ -108,6 +110,7 @@ module\.exports=
   debug
   error
   info
+  log
   trace
   warn
   ##!=< console-funcs

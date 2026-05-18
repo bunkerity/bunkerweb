@@ -1,0 +1,33 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+##!
+##! Rule 941400: XSS JavaScript function without parentheses
+##! Detects attempts to invoke JavaScript functions via tagged template literals
+##! without parentheses, using Array/Reflect method chaining.
+##! e.g. [].sort.call`${alert}1337`
+##! e.g. Reflect.apply.call`${navigation.navigate}${navigation}${[name]}`
+##! Reference: https://portswigger.net/research/the-seventh-way-to-call-a-javascript-function-without-parentheses
+
+##!> assemble
+  \[[^\]]*\][^.]*\.
+  Reflect[^.]*\.
+  ##!=< array-or-reflect
+##!<
+
+##!> assemble
+  map
+  sort
+  apply
+  ##!=< js-methods
+##!<
+
+##!> assemble
+  (
+  ##!=> array-or-reflect
+  ).*
+  ##!=> js-methods
+  [^.]*\..*call[^`]*`.*`
+##!<

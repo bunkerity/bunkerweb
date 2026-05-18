@@ -4,27 +4,47 @@
 ##!+ i
 
 ##!> assemble
+  ##! Always start with the short tag <?
   <\?
   ##!=>
   ##!> assemble
-    [^x]
-    x[^m]
-    xm[^l]
-    xml[^\s]
-    ##! With [^a-z] we are looking for `:` as in `<?xml :echo 1;`
+    ##! Standard PHP tag (requires whitespace per PHP spec)
+    php\s
+    ##! Short echo tag <?= (no whitespace required)
+    =
+    ##! Short tag with whitespace: <? echo, <? system
+    \s
+    ##! Polyglot attack: <?xml :echo 1; (whitespace + non-letter catches the colon)
+    ##! Excludes legitimate XML like <?xml version="1.0"?> where letter follows whitespace
     xml\s+[^a-z]
-    xml$
+    ##! Polyglot attack: <?xml:echo 1; (colon without space)
+    xml:
+    ##! Standalone <? at end of input (potential injection start)
     $
-    php
   ##!<
 ##!<
 
+##! BBCode-style PHP tags: [php], [/php], [\php]
+##! Used by forum software (e.g., phpBB, vBulletin) to embed PHP code blocks
 ##!> assemble
   \[
   ##!=>
   ##!> assemble
-    php\]
-    /php\]
-    \x5cphp\]
+    php
+    /php
+    \x5cphp
+  ##!<
+  ##!=>
+  \]
+##!<
+
+##! Smarty template engine PHP tags: {php}, {/php}
+##! Deprecated since Smarty 3.1.0 but still exploitable in older installations
+##!> assemble
+  \{
+  ##!=>
+  ##!> assemble
+    php\}
+    /php\}
   ##!<
 ##!<

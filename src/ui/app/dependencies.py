@@ -9,7 +9,7 @@ from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from tarfile import open as tar_open
 from traceback import format_exc
 
-from common_utils import bytes_hash  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, safe_tar_extractall  # type: ignore
 
 from app.models.config import Config
 from app.models.instance import InstancesUtils
@@ -51,14 +51,11 @@ def reload_plugins():
         # If the target exists, compare its checksum.
         if target.exists():
             with suppress(StopIteration, IndexError, FileNotFoundError):
-                with BytesIO() as plugin_content:
-                    with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                        tar.add(target, arcname=target.name, recursive=True)
-                    plugin_content.seek(0, 0)
-                    if bytes_hash(plugin_content, algorithm="sha256") == plugin["checksum"]:
-                        ignored_plugins.add(target.name)
-                        continue
-                    DB.logger.debug(f"Checksum of {target} has changed, removing it ...")
+                plugin_content = create_plugin_tar_gz(target, arc_root=target.name)
+                if bytes_hash(plugin_content, algorithm="sha256") == plugin["checksum"]:
+                    ignored_plugins.add(target.name)
+                    continue
+                DB.logger.debug(f"Checksum of {target} has changed, removing it ...")
 
             if target.is_symlink() or target.is_file():
                 with suppress(OSError):
@@ -69,10 +66,7 @@ def reload_plugins():
         try:
             if plugin["data"]:
                 with tar_open(fileobj=BytesIO(plugin["data"]), mode="r:gz") as tar:
-                    try:
-                        tar.extractall(plugin_path, filter="fully_trusted")
-                    except TypeError:
-                        tar.extractall(plugin_path)
+                    safe_tar_extractall(tar, plugin_path)
 
                 plugin_folder = plugin_path / plugin["id"]
                 # Add u+x permissions to executable files

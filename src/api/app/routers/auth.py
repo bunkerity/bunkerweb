@@ -108,10 +108,10 @@ async def login(request: Request, credentials: HTTPBasicCredentials | None = Dep
             fine_grained.append((str(rtype), str(rid), str(name)))
 
     try:
-        priv_hex = BISCUIT_PRIVATE_KEY_FILE.read_text(encoding="utf-8").strip()
+        priv_hex = BISCUIT_PRIVATE_KEY_FILE.read_text().strip()
         if not priv_hex:
             raise RuntimeError("Biscuit private key not found")
-        private_key = PrivateKey.from_hex(priv_hex)
+        private_key = PrivateKey(priv_hex)
     except Exception as e:
         LOGGER.error(f"/login: failed to load Biscuit private key: {e}")
         raise HTTPException(status_code=500, detail="Authentication service unavailable")

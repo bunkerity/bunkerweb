@@ -18,17 +18,18 @@
   "aria": {
     "label": {
       "close": "Закрыть",
-      "view_template": "Просмотреть Шаблон {{template}}",
-      "raw_configuration": "Необработанная конфигурация"
+      "configs_dropzone": "Выберите файл экспорта пользовательских конфигураций или перетащите его сюда",
+      "raw_configuration": "Необработанная конфигурация",
+      "services_dropzone": "Выберите файл экспорта служб или перетащите его сюда"
     }
   },
   "badge": {
     "from_template": "Из шаблона",
+    "managed_via_api": "Управляется через API",
     "new_version": "Новая версия",
     "no_template": "Нет шаблона",
     "unread_news": "Непрочитанные новости",
-    "unread_notifications": "Непрочитанные уведомления",
-    "managed_via_api": "Управляется через API"
+    "unread_notifications": "Непрочитанные уведомления"
   },
   "banner": {
     "community": "Станьте частью сообщества Bunker, присоединившись к <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">чату Discord</a> и подписавшись на нас в <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a>.",
@@ -44,7 +45,7 @@
     "cache": "Кэш",
     "configs": "Конфигурации",
     "extra_pages": "Дополнительные страницы",
-    "global_config": "Глобальная конфигурация",
+    "global_settings": "Глобальные настройки",
     "home": "Главная",
     "instances": "Экземпляры",
     "jobs": "Задачи",
@@ -77,6 +78,8 @@
     "clear": "ОЧИСТИТЬ",
     "close": "Закрыть",
     "columns": "Столбцы",
+    "convert_configs": "Преобразовать конфиги",
+    "convert_configs_to": "Преобразовать в {{state}}",
     "convert_services": "Конвертировать сервисы",
     "copy": "Копировать",
     "copy_codes": "Копировать коды",
@@ -93,17 +96,19 @@
     "enable_totp": "Включить TOTP",
     "entire_config": "Вся конфигурация",
     "export": "Экспорт",
-    "export_csv_all": "CSV (Все)",
-    "export_csv_visible": "CSV (Видимые)",
-    "export_excel_all": "Excel (Все)",
-    "export_excel_visible": "Excel (Видимые)",
-    "fetch_global": "Получить глобальную конфигурацию",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
+    "fetch_global": "Получить глобальные настройки",
     "filters_suffix": " Фильтры",
     "follow": "Следить",
+    "force_check": "Принудительная проверка",
+    "force_update": "Force update",
     "github_stars": "Звезды",
     "go_back": "Вернуться",
     "hide": "Скрыть",
     "history": "История",
+    "import_configs": "Импорт пользовательских конфигураций",
+    "import_services": "Импорт служб",
     "login": "Войти",
     "multiple_add": "ДОБАВИТЬ",
     "multiple_hide": "СКРЫТЬ",
@@ -144,8 +149,7 @@
     "upload_photo": "Загрузить новое фото",
     "view_details": "Просмотреть детали",
     "view_raw_data": "Просмотреть необработанные данные",
-    "wipe_other_sessions": "Очистить другие сессии",
-    "force_update": "Force update"
+    "wipe_other_sessions": "Очистить другие сессии"
   },
   "country": {
     "AD": "Андорра",
@@ -444,29 +448,37 @@
         "title": "Заблокированные запросы по странам"
       },
       "blocking_status": {
-        "title": "Статус блокировки по времени",
-        "subtitle": "Заблокированные запросы с течением времени",
         "blocked_requests": "Заблокированные запросы",
+        "count": "Количество",
+        "subtitle": "Заблокированные запросы с течением времени",
         "time": "Время",
-        "count": "Количество"
+        "title": "Статус блокировки по времени"
       },
       "request_status": {
-        "title": "Распределение статусов запросов",
-        "blocked": "Заблокированные запросы"
+        "blocked": "Заблокированные запросы",
+        "title": "Распределение статусов запросов"
       },
       "top_blocked_ips": {
-        "title": "Топ 10 заблокированных IP",
-        "most_blocked": "Самый блокируемый IP"
+        "most_blocked": "Самый блокируемый IP",
+        "title": "Топ 10 заблокированных IP"
       }
     },
     "map": {
       "blocked_requests": "Заблокированные запросы",
       "hover_info": "Наведите курсор на страну",
-      "no_data": "Нет данных",
-      "legend": "Легенда"
+      "legend": "Легенда",
+      "no_data": "Нет данных"
+    },
+    "window": {
+      "last_days": "Последние {{days}} дней",
+      "title": "Окно дашборда"
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "Выбрать все {{count}} совпадающих {{entity}}",
+    "bulk_select_all_done": "Все {{count}} совпадающих {{entity}} выбраны.",
+    "bulk_select_clear": "Очистить выбор",
+    "bulk_select_page": "Все {{count}} {{entity}} на этой странице выбраны.",
     "info_bans": "Показано с {{start}} по {{end}} из {{total}} банов",
     "info_cache": "Показано с {{start}} по {{end}} из {{total}} файлов кэша",
     "info_configs": "Показано с {{start}} по {{end}} из {{total}} кастомных конфигураций",
@@ -479,6 +491,7 @@
     "info_empty_plugins": "Плагины отсутствуют",
     "info_empty_reports": "Отчеты отсутствуют",
     "info_empty_services": "Сервисы отсутствуют",
+    "info_empty_templates": "Нет доступных шаблонов",
     "info_filtered_bans": "(отфильтровано из _MAX_ всего банов)",
     "info_filtered_cache": "(отфильтровано из _MAX_ всего файлов кэша)",
     "info_filtered_configs": "(отфильтровано из _MAX_ всего кастомных конфигураций)",
@@ -488,12 +501,14 @@
     "info_filtered_plugins": "(отфильтровано из _MAX_ всего плагинов)",
     "info_filtered_reports": "(отфильтровано из _MAX_ всего отчетов)",
     "info_filtered_services": "(отфильтровано из _MAX_ всего сервисов)",
+    "info_filtered_templates": "(отфильтровано из _MAX_ шаблонов)",
     "info_instances": "Показано с {{start}} по {{end}} из {{total}} экземпляров",
     "info_items": "Показано с {{start}} по {{end}} из {{total}} элементов",
     "info_jobs": "Показано с {{start}} по {{end}} из {{total}} задач",
     "info_plugins": "Показано с {{start}} по {{end}} из {{total}} плагинов",
     "info_reports": "Показано с {{start}} по {{end}} из {{total}} отчетов",
     "info_services": "Показано с {{start}} по {{end}} из {{total}} сервисов",
+    "info_templates": "Показано от {{start}} до {{end}} из {{total}} шаблонов",
     "length_all": "Все",
     "length_menu_bans": "Показывать _MENU_ банов",
     "length_menu_cache": "Показывать _MENU_ файлов кэша",
@@ -504,6 +519,7 @@
     "length_menu_plugins": "Показывать _MENU_ плагинов",
     "length_menu_reports": "Показывать _MENU_ отчетов",
     "length_menu_services": "Показывать _MENU_ сервисов",
+    "length_menu_templates": "Показать _MENU_ шаблонов",
     "paginate": {
       "first": "Первая",
       "last": "Последняя",
@@ -539,6 +555,9 @@
     "select_rows_services_0": "Сервисы не выбраны",
     "select_rows_services_1": "Выбран 1 сервис",
     "select_rows_services_plural": "Выбрано %d сервисов",
+    "select_rows_templates_0": "Шаблоны не выбраны",
+    "select_rows_templates_1": "Выбран 1 шаблон",
+    "select_rows_templates_plural": "Выбрано %d шаблонов",
     "zero_records_bans": "Совпадающих банов не найдено",
     "zero_records_cache": "Совпадающих файлов кэша не найдено",
     "zero_records_configs": "Совпадающих кастомных конфигураций не найдено",
@@ -547,7 +566,8 @@
     "zero_records_jobs": "Совпадающих задач не найдено",
     "zero_records_plugins": "Совпадающих плагинов не найдено",
     "zero_records_reports": "Совпадающих отчетов не найдено",
-    "zero_records_services": "Совпадающих сервисов не найдено"
+    "zero_records_services": "Совпадающих сервисов не найдено",
+    "zero_records_templates": "Совпадающих шаблонов не найдено"
   },
   "dev_log": {
     "copy_failed": "Не удалось скопировать текст:",
@@ -605,6 +625,8 @@
   },
   "form": {
     "checkbox": {
+      "include_attached_configs": "Включить прикрепленные пользовательские конфигурации",
+      "overwrite_existing_configs": "Перезаписать существующие пользовательские конфигурации UI/API",
       "remember_me": "Запомнить меня"
     },
     "help": {
@@ -623,6 +645,7 @@
       "admin_username": "Имя пользователя администратора",
       "auto_lets_encrypt": "Авто Let's Encrypt",
       "ban_scope": "Область бана",
+      "certificate_authority": "Центр сертификации",
       "certificate_priority": "Приоритет сертификата",
       "challenge_type": "Тип вызова",
       "config_type": "Тип конфигурации",
@@ -675,7 +698,12 @@
       "use_proxy_protocol": "Использовать протокол PROXY",
       "use_real_ip": "Использовать реальный IP",
       "username": "Имя пользователя",
-      "wildcard_certificates": "Wildcard-сертификаты"
+      "wildcard_certificates": "Wildcard-сертификаты",
+      "zerossl_api_key": "API-ключ ZeroSSL",
+      "zerossl_api_retry": "Повторы API ZeroSSL",
+      "zerossl_api_retry_delay": "Задержка повтора API ZeroSSL",
+      "zerossl_api_connect_timeout": "Таймаут подключения API ZeroSSL",
+      "zerossl_api_max_time": "Максимальное время API ZeroSSL"
     },
     "placeholder": {
       "2fa_code": "Введите код",
@@ -746,6 +774,8 @@
       "add_plugin_dropzone": "Перетащите архив плагина сюда или нажмите, чтобы выбрать файлы.",
       "confirm_cache_deletion_alert": "Вы уверены, что хотите удалить выбранный файл кэша?",
       "confirm_cache_deletion_alert_plural": "Вы уверены, что хотите удалить выбранные файлы кэша?",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "Вы уверены, что хотите преобразовать выбранные пользовательские конфигурации в {{state}}?",
       "confirm_configs_deletion_alert": "Вы уверены, что хотите удалить выбранную пользовательскую конфигурацию?",
       "confirm_configs_deletion_alert_plural": "Вы уверены, что хотите удалить выбранные пользовательские конфигурации?",
       "confirm_conversion_confirmation": "Вы уверены, что хотите конвертировать выбранные сервисы?",
@@ -756,6 +786,21 @@
       "confirmation_instance_deletion": "Вы уверены, что хотите удалить выбранный экземпляр?",
       "delete_confirmation_alert": "Вы уверены, что хотите удалить выбранный экземпляр?",
       "delete_confirmation_alert_plural": "Вы уверены, что хотите удалить выбранные экземпляры?",
+      "delete_confirmation_template_used": "Один или несколько выбранных шаблонов назначены сервисам (всего {{services_count}} сервисов). Их удаление приведет к очистке этих назначений. Вы хотите продолжить?",
+      "delete_step_confirmation": "Вы уверены, что хотите удалить этот шаг?",
+      "delete_step_content_label": "Содержимое",
+      "delete_step_name_label": "Шаг",
+      "delete_template_global_usage": "Используется глобальными настройками",
+      "delete_template_services_list": "Используется сервисами: {{services}}",
+      "fetch_global_settings_bold": "Это загрузит глобальные настройки и применит их к текущему шаблону.",
+      "fetch_global_settings_point_1": "Обновляются только параметры, присутствующие в этом шаблоне.",
+      "fetch_global_settings_point_2": "Значения, совпадающие со значениями по умолчанию, игнорируются.",
+      "fetch_global_settings_point_3": "SERVER_NAME никогда не перезаписывается.",
+      "export_services_intro": "Выбранные службы будут экспортированы. Включите параметр ниже, чтобы добавить их прикрепленные пользовательские конфигурации в архив .zip.",
+      "import_configs_dropzone": "Перетащите сюда файл экспорта пользовательских конфигураций или нажмите, чтобы выбрать файл.",
+      "import_configs_warning": "Пользовательские конфигурации, созданные scheduler, autoconf или templates, всегда сохраняются. Перезаписать можно только конфигурации UI/API.",
+      "import_services_dropzone": "Перетащите файл экспорта служб сюда или нажмите, чтобы выбрать файл.",
+      "import_services_warning": "Импорт служб создаст новые службы пользовательского интерфейса из файла экспорта. Существующие службы пропускаются.",
       "instance_creation_alert": "Вам не нужно указывать порт или имя сервера; для конфигурации экземпляра будут использованы значения `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` и `API_SERVER_NAME`.",
       "next_step_in_case_of_issue": "Если возникнут проблемы, вы можете вручную принять небезопасный сертификат:",
       "recovery_codes_save_alert": "Пожалуйста, сохраните эти коды восстановления в безопасном месте (например, в менеджере паролей или сейфе). Вы можете использовать их для доступа к своей учетной записи, если потеряете устройство аутентификации.",
@@ -764,18 +809,11 @@
       "services_deletion_confirmation": "Вы уверены, что хотите удалить выбранные сервисы?",
       "unban_confirmation_alert": "Вы уверены, что хотите разбанить выбранный IP-адрес?",
       "unban_confirmation_alert_plural": "Вы уверены, что хотите разбанить выбранные IP-адреса?",
-      "update_duration_alert": "Выберите новую продолжительность для выбранных банов:",
-      "fetch_global_config_bold": "Это загрузит глобальную конфигурацию и применит её к текущему шаблону.",
-      "fetch_global_config_point_1": "Обновляются только параметры, присутствующие в этом шаблоне.",
-      "fetch_global_config_point_2": "Значения, совпадающие со значениями по умолчанию, игнорируются.",
-      "fetch_global_config_point_3": "SERVER_NAME никогда не перезаписывается.",
-      "delete_step_confirmation": "Вы уверены, что хотите удалить этот шаг?",
-      "delete_step_name_label": "Шаг",
-      "delete_step_content_label": "Содержимое"
+      "update_duration_alert": "Выберите новую продолжительность для выбранных банов:"
     },
     "button": {
-      "reset_template_confirm": "Сбросить конфигурацию шаблона",
-      "fetch_global_config_confirm": "Применить глобальные настройки"
+      "fetch_global_settings_confirm": "Применить глобальные настройки",
+      "reset_template_confirm": "Сбросить конфигурацию шаблона"
     },
     "section": {
       "ban_details": "Детали бана",
@@ -791,17 +829,21 @@
       "create_new_instance": "Создать новый экземпляр",
       "create_template": "Создать шаблон",
       "delete_instance": "Удалить экземпляры",
+      "delete_step": "Удалить шаг",
       "delete_template": "Удалить шаблоны",
+      "edit_template": "Редактировать шаблон: {{name}}",
+      "fetch_global_settings": "Применить глобальные настройки?",
+      "export_services": "Экспорт служб",
       "from_plugin": "из плагина",
       "full_url": "Полный URL",
+      "import_configs": "Импорт пользовательских конфигураций",
+      "import_services": "Импорт служб",
       "job_history": "Последние 10 выполнений задачи",
       "job_history_count": "Последние {{count}} выполнений задачи",
       "recovery_codes": "Коды восстановления",
       "reset_template_config": "Сбросить конфигурацию шаблона?",
-      "fetch_global_config": "Применить глобальные настройки?",
       "server_name_not_unique": "Имя сервера не уникально",
-      "update_duration": "Обновить срок бана",
-      "delete_step": "Удалить шаг"
+      "update_duration": "Обновить срок бана"
     }
   },
   "mode": {
@@ -827,7 +869,7 @@
     "cache": "Кэш",
     "configs": "Конфигурации",
     "extra_pages": "Дополнительные страницы",
-    "global_config": "Глобальная конфигурация",
+    "global_settings": "Глобальные настройки",
     "home": "Главная",
     "instances": "Экземпляры",
     "jobs": "Задачи",
@@ -835,7 +877,6 @@
     "misc": "Разное",
     "mode_selection": "Выбор режима",
     "more": "Ещё...",
-    "new": "Новый",
     "plugin_activated": "Плагин активирован",
     "plugin_activated_global": "Плагин активирован глобально",
     "plugin_deactivated": "Плагин деактивирован",
@@ -897,12 +938,12 @@
       "unknown": "Неизвестная дата истечения"
     },
     "force_check": {
-      "title": "Force check",
-      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
+      "title": "Force check"
     },
     "force_update": {
-      "title": "Force update",
-      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept.",
+      "title": "Force update"
     },
     "key": {
       "title": {
@@ -1002,11 +1043,13 @@
     "last_run": "Состояние последнего запуска",
     "last_seen": "Последний раз замечен",
     "last_update": "Последнее обновление",
+    "loading": "Загрузка панелей поиска...",
     "method": "Метод",
     "next_24h": "Следующие 24 часа",
     "next_30d": "Следующие 30 дней",
     "next_7d": "Следующие 7 дней",
     "older_30d": "Более 30 дней назад",
+    "one_or_more": "Один или несколько",
     "permanent": "Постоянный",
     "plugin": "Плагин",
     "reason": "Причина",
@@ -1017,7 +1060,9 @@
     "service": "Сервис",
     "show_message": "Показать все",
     "start_date": "Дата начала",
+    "status": "Статус",
     "status_code": "Код состояния",
+    "steps": "Шаги",
     "stream": "Поддержка Stream",
     "template": "Шаблон",
     "title_0": "Нет активных фильтров",
@@ -1025,7 +1070,12 @@
     "title_plural": "Активные фильтры - %d",
     "type": "Тип",
     "url": "URL",
-    "version": "Версия"
+    "version": "Версия",
+    "zero": "Нет"
+  },
+  "security_mode": {
+    "block": "Блокировка",
+    "detect": "Обнаружение"
   },
   "settings": {
     "custom_config": {
@@ -1037,14 +1087,28 @@
     }
   },
   "setup": {
+    "status": {
+      "admin_user_exists": "🧑‍🚀 Пользователь администратора уже существует. Пожалуйста, перейдите к следующему шагу.",
+      "pro_license_key_exists": "⭐ Лицензионный ключ PRO уже настроен, пожалуйста, перейдите к следующему шагу.",
+      "reverse_proxy_configured": "↪️ Обратный прокси уже настроен для веб-интерфейса. Пожалуйста, перейдите к следующему шагу.",
+      "secure_password": "Надежный пароль",
+      "unique_server_name": "Уникальное имя сервера"
+    },
     "step1": {
       "subtitle": "Создайте свою учетную запись администратора.",
       "title": "Пользователь администратора"
     },
     "step2": {
+      "lets_encrypt": {
+        "certificate_authority_selector": "Выбор центра сертификации",
+        "letsencrypt_description": "Используйте Let's Encrypt для стандартной выдачи ACME. Режим staging доступен для тестирования и проверок интеграции.",
+        "zerossl_api_key_hint": "Если поле пустое, ZeroSSL будет использовать настроенный email для регистрации аккаунта.",
+        "zerossl_description": "Используйте ZeroSSL с zerossl-bot. Укажите email аккаунта или API-ключ для выпуска аккаунта и отслеживания перевыпуска по ключу."
+      },
       "section": {
         "custom_certificate": "Пользовательский сертификат",
         "lets_encrypt": "Let's Encrypt",
+        "zerossl": "ZeroSSL",
         "real_ip": "Реальный IP",
         "reverse_proxy": "Обратный прокси"
       },
@@ -1052,19 +1116,19 @@
       "title": "Настройки UI"
     },
     "step3": {
-      "title": "Обновить до PRO",
-      "subtitle": "Разблокируйте расширенные функции и получите максимум от BunkerWeb.",
       "label": {
         "pro_benefits": "Преимущества PRO"
       },
-      "pro_benefit_1_title": "Доступ ко всем функциям PRO",
       "pro_benefit_1_description": "Разблокируйте все расширенные функции, включая улучшенную безопасность, производительность и инструменты управления.",
-      "pro_benefit_2_title": "Техническая поддержка от разработчиков",
+      "pro_benefit_1_title": "Доступ ко всем функциям PRO",
       "pro_benefit_2_description": "Получите приоритетную поддержку от команды BunkerWeb по любым вопросам или проблемам.",
-      "pro_benefit_3_title": "Индивидуальная разработка",
+      "pro_benefit_2_title": "Техническая поддержка от разработчиков",
       "pro_benefit_3_description": "Индивидуальные решения для удовлетворения ваших конкретных потребностей.",
+      "pro_benefit_3_title": "Индивидуальная разработка",
+      "pro_benefit_4_description": "Экспертные советы для оптимизации вашей установки BunkerWeb.",
       "pro_benefit_4_title": "Индивидуальная консультация",
-      "pro_benefit_4_description": "Экспертные советы для оптимизации вашей установки BunkerWeb."
+      "subtitle": "Разблокируйте расширенные функции и получите максимум от BunkerWeb.",
+      "title": "Обновить до PRO"
     },
     "step4": {
       "label": {
@@ -1072,13 +1136,6 @@
       },
       "subtitle": "Проверьте свои настройки перед завершением установки.",
       "title": "Обзор"
-    },
-    "status": {
-      "admin_user_exists": "🧑‍🚀 Пользователь администратора уже существует. Пожалуйста, перейдите к следующему шагу.",
-      "pro_license_key_exists": "⭐ Лицензионный ключ PRO уже настроен, пожалуйста, перейдите к следующему шагу.",
-      "reverse_proxy_configured": "↪️ Обратный прокси уже настроен для веб-интерфейса. Пожалуйста, перейдите к следующему шагу.",
-      "secure_password": "Надежный пароль",
-      "unique_server_name": "Уникальное имя сервера"
     },
     "subtitle": "Следуйте шагам для завершения мастера установки.",
     "title": "Мастер установки"
@@ -1089,8 +1146,12 @@
     "default_server": "сервер по умолчанию",
     "down": "Не в сети",
     "draft": "Черновик",
+    "error_deleting_template": "Произошла ошибка при удалении шаблона.",
     "error_loading_bans": "Ошибка загрузки банов. Пожалуйста, попробуйте обновить страницу.",
+    "error_loading_template": "Не удалось загрузить данные шаблона.",
+    "error_saving_template": "Произошла ошибка при сохранении шаблона.",
     "failed": "Неудачно",
+    "invalid_json_payload": "Неверный формат JSON.",
     "loading": "Загрузка...",
     "loading_bans": "Загрузка банов...",
     "loading_cache_file": "Загрузка файла кэша...",
@@ -1105,12 +1166,14 @@
     "loading_reports": "Загрузка отчетов...",
     "loading_services": "Загрузка сервисов...",
     "loading_templates": "Загрузка шаблонов...",
+    "missing_template_information": "Отсутствует информация о шаблоне.",
     "news_connection_error": "Не удалось подключиться к блогу для получения новостей.",
     "no": "Нет",
     "no_data": "Нет данных",
     "no_history": "История недоступна.",
     "no_item": "Нет элементов",
     "no_notifications": "Нет уведомлений для отображения.",
+    "no_search_results": "Элементы не найдены.",
     "no_steps": "Нет доступных шагов",
     "no_steps_description": "Этот шаблон не имеет шагов для настройки.",
     "online": "В сети",
@@ -1191,10 +1254,12 @@
       "service": "Сервис",
       "service_name": "Имя сервиса",
       "settings": "Настройки",
+      "status": "Статус",
       "status_code": "Код состояния",
       "steps": "Шаги",
       "stream": "Stream",
       "template": "Шаблон",
+      "templates": "Шаблоны",
       "time_left": "Оставшееся время",
       "type": "Тип",
       "url": "URL",
@@ -1203,7 +1268,6 @@
     }
   },
   "template": {
-    "none": "Нет шаблона",
     "editor": {
       "button_add_config": "Добавить конфигурацию",
       "button_add_setting": "Добавить настройку",
@@ -1212,7 +1276,6 @@
       "button_move_up": "Переместить вверх",
       "button_remove": "Удалить",
       "clone_badge": "Клонировано из {{template}}",
-      "setting_toggle_enabled": "Включено",
       "configs": "Пользовательские конфигурации",
       "configs_help": "Прикрепите к этому шаблону необязательные фрагменты пользовательской конфигурации.",
       "delete_step_confirm": "Вы уверены, что хотите удалить этот шаг?",
@@ -1236,6 +1299,23 @@
       "label_step_settings": "Настройки на этом шаге",
       "label_step_subtitle": "Подзаголовок шага",
       "label_step_title": "Заголовок шага",
+      "missing_configs_body": "Импортированный шаблон ссылается на пользовательские конфигурации, которые еще не были загружены. Пожалуйста, импортируйте эти конфигурации для завершения настройки шаблона:",
+      "missing_configs_browse": "Обзор файлов",
+      "missing_configs_done": "Готово",
+      "missing_configs_drop_hint": "Перетащите файлы конфигурации сюда (.conf, .cfg, .txt)",
+      "missing_configs_drop_or": "или",
+      "missing_configs_hint_body": "Загруженные файлы будут автоматически добавлены в ваш шаблон. Убедитесь, что имена файлов совпадают с отсутствующими конфигурациями, перечисленными выше.",
+      "missing_configs_hint_title": "Подсказка:",
+      "missing_configs_resolved": "Все отсутствующие конфигурации загружены! Шаблон успешно импортирован.",
+      "missing_configs_title": "Отсутствующие пользовательские конфигурации",
+      "missing_configs_upload_failed": "Не удалось загрузить файлы конфигурации",
+      "missing_configs_upload_label": "Загрузить отсутствующие конфигурации (.conf, .cfg, .txt)",
+      "missing_configs_upload_partial": "Загружено {{uploaded}} из {{total}} конфигураций. Все еще отсутствуют: {{missing}}",
+      "missing_configs_upload_success": "Загружено {{count}} файл(ов) конфигурации успешно",
+      "multiselect_placeholder": "Выберите опции",
+      "multiselect_summary": "Выбрано: {{count}}",
+      "multivalue_add": "Добавить значение",
+      "multivalue_helper": "Одно значение в строке.{{separatorNote}}",
       "panel_overview": "Обзор",
       "panel_overview_help": "Отслеживайте ключевую информацию и перемещайтесь по разделам.",
       "placeholder_config_data": "Данные",
@@ -1247,6 +1327,47 @@
       "placeholder_step_title": "Заголовок шага",
       "placeholder_template_id": "id-шаблона",
       "placeholder_template_name": "Мой шаблон",
+      "raw_configs_browse": "Обзор файлов",
+      "raw_configs_drop_hint": "Перетащите файлы конфигурации сюда или нажмите для обзора (.conf, .cfg, .txt)",
+      "raw_configs_drop_supported": "Поддерживаемые форматы: .conf, .cfg, .txt",
+      "raw_configs_empty": "Пока нет импортированных файлов конфигурации. Новые файлы появятся ниже.",
+      "raw_configs_help": "Загрузите файлы конфигурации (.conf, .cfg, .txt), чтобы добавить записи в <code>configs</code>. Типы по умолчанию — <code>server_http</code>; при необходимости скорректируйте в JSON.",
+      "raw_configs_import_invalid": "Невозможно импортировать конфигурации, поскольку текущий JSON недействителен.",
+      "raw_configs_import_none": "Конфигурации не были импортированы.",
+      "raw_configs_import_success": "Импортировано {{count}} файл(ов) конфигурации.",
+      "raw_configs_note": "Импортированные файлы добавляются в редактор JSON. Просмотрите и скорректируйте перед сохранением.",
+      "raw_configs_title": "Импорт пользовательских конфигураций",
+      "raw_configs_upload": "Загрузить файлы конфигурации (.conf, .cfg, .txt)",
+      "raw_configs_upload_failed": "Не удалось прочитать один из выбранных файлов.",
+      "raw_editor_drop_hint": "Перетащите файл JSON шаблона (только .json), чтобы заменить текущее содержимое.",
+      "raw_editor_aria": "Редактор необработанного JSON шаблона",
+      "raw_editor_help": "Редактировать полное определение шаблона как JSON. Переключение обратно в простой режим проверяет и перезагружает визуальный редактор.",
+      "raw_editor_import_success": "Шаблон JSON успешно импортирован.",
+      "raw_editor_override_body": "Импорт этого файла полностью заменит текущий JSON шаблона. Изменения, внесенные в редактор, будут потеряны. Вы хотите продолжить?",
+      "raw_editor_override_confirm": "Заменить шаблон",
+      "raw_editor_override_title": "Заменить JSON шаблона?",
+      "raw_editor_title": "Необработанный JSON шаблона",
+      "raw_editor_upload_empty": "Загруженный файл пуст.",
+      "raw_editor_upload_failed": "Не удалось прочитать выбранный файл.",
+      "raw_editor_upload_template": "Загрузить шаблон JSON (только .json)",
+      "raw_validation_config_definition": "Недействительное определение конфигурации.",
+      "raw_validation_config_object": "Записи конфигурации должны быть объектами.",
+      "raw_validation_configs_unassigned": "Конфигурации {{configs}} не назначены ни одному шагу.",
+      "raw_validation_empty": "JSON шаблона не может быть пустым.",
+      "raw_validation_invalid_json": "Недействительный JSON-пакет: {{error}}",
+      "raw_validation_object": "Пакет шаблона должен быть объектом JSON.",
+      "raw_validation_setting_key": "Ключи настроек должны быть непустыми строками.",
+      "raw_validation_settings_object": "Настройки должны быть предоставлены как объект.",
+      "raw_validation_settings_unassigned": "Настройки {{settings}} не назначены ни одному шагу.",
+      "raw_validation_step_config_duplicate": "Конфигурация {{config}} назначена нескольким шагам.",
+      "raw_validation_step_config_reference": "Шаг {{index}} содержит недействительную ссылку на конфигурацию.",
+      "raw_validation_step_config_unknown": "Шаг {{index}} ссылается на неизвестную конфигурацию {{config}}.",
+      "raw_validation_step_object": "Шаг {{index}} должен быть объектом.",
+      "raw_validation_step_setting_duplicate": "Настройка {{setting}} назначена нескольким шагам.",
+      "raw_validation_step_setting_reference": "Шаг {{index}} содержит недействительную ссылку на настройку.",
+      "raw_validation_step_setting_unknown": "Шаг {{index}} ссылается на неизвестную настройку {{setting}}.",
+      "raw_validation_step_title": "Шаг {{index}} должен иметь заголовок.",
+      "raw_validation_steps_required": "Шаблон должен содержать хотя бы один шаг.",
       "readonly_db": "База данных в настоящее время находится в режиме только для чтения. Шаблоны не могут быть изменены.",
       "readonly_method": "Этот шаблон был создан процессом {{method}} и не может быть отредактирован через пользовательский интерфейс.",
       "readonly_title": "Только для чтения",
@@ -1254,8 +1375,6 @@
       "select_config_placeholder": "Выберите конфигурацию",
       "select_config_type_placeholder": "Выберите тип",
       "select_setting_placeholder": "Выберите настройку",
-      "settings": "Настройки",
-      "settings_help": "Определите настройки, предоставляемые этим шаблоном, и их значения по умолчанию.",
       "setting_remove_confirm": "Вы уверены, что хотите удалить эту настройку из шаблона?",
       "setting_remove_key": "Настройка",
       "setting_remove_title": "Удалить настройку",
@@ -1279,6 +1398,9 @@
       "setting_selector_pattern": "Шаблон",
       "setting_selector_search_label": "Найти мультисайтовую настройку",
       "setting_selector_search_placeholder": "Искать по метке, ключу или плагину",
+      "setting_toggle_enabled": "Включено",
+      "settings": "Настройки",
+      "settings_help": "Определите настройки, предоставляемые этим шаблоном, и их значения по умолчанию.",
       "step_configs_empty": "К этому шагу еще не добавлено ни одной конфигурации.",
       "step_configs_selection_title": "Выберите существующие конфигурации",
       "step_default_title": "Шаг без названия",
@@ -1308,61 +1430,9 @@
       "validation_configs_unique": "Каждое имя конфигурации должно быть уникальным.",
       "validation_id_required": "Требуется ID шаблона.",
       "validation_setting_key": "Каждая настройка должна иметь ключ.",
-      "validation_settings_unique": "Каждый ключ настройки должен быть уникальным.",
-      "raw_configs_help": "Загрузите файлы конфигурации (.conf, .cfg, .txt), чтобы добавить записи в <code>configs</code>. Типы по умолчанию — <code>server_http</code>; при необходимости скорректируйте в JSON.",
-      "raw_configs_import_invalid": "Невозможно импортировать конфигурации, поскольку текущий JSON недействителен.",
-      "raw_configs_import_none": "Конфигурации не были импортированы.",
-      "raw_configs_import_success": "Импортировано {{count}} файл(ов) конфигурации.",
-      "raw_configs_note": "Импортированные файлы добавляются в редактор JSON. Просмотрите и скорректируйте перед сохранением.",
-      "raw_configs_title": "Импорт пользовательских конфигураций",
-      "raw_configs_upload": "Загрузить файлы конфигурации (.conf, .cfg, .txt)",
-      "raw_configs_upload_failed": "Не удалось прочитать один из выбранных файлов.",
-      "raw_configs_browse": "Обзор файлов",
-      "raw_configs_drop_hint": "Перетащите файлы конфигурации сюда или нажмите для обзора (.conf, .cfg, .txt)",
-      "raw_configs_drop_supported": "Поддерживаемые форматы: .conf, .cfg, .txt",
-      "raw_configs_empty": "Пока нет импортированных файлов конфигурации. Новые файлы появятся ниже.",
-      "raw_editor_help": "Редактировать полное определение шаблона как JSON. Переключение обратно в простой режим проверяет и перезагружает визуальный редактор.",
-      "raw_editor_import_success": "Шаблон JSON успешно импортирован.",
-      "raw_editor_title": "Необработанный JSON шаблона",
-      "raw_editor_upload_empty": "Загруженный файл пуст.",
-      "raw_editor_upload_failed": "Не удалось прочитать выбранный файл.",
-      "raw_editor_upload_template": "Загрузить шаблон JSON (только .json)",
-      "raw_validation_configs_unassigned": "Конфигурации {{configs}} не назначены ни одному шагу.",
-      "raw_validation_config_definition": "Недействительное определение конфигурации.",
-      "raw_validation_config_object": "Записи конфигурации должны быть объектами.",
-      "raw_validation_empty": "JSON шаблона не может быть пустым.",
-      "raw_validation_invalid_json": "Недействительный JSON-пакет: {{error}}",
-      "raw_validation_object": "Пакет шаблона должен быть объектом JSON.",
-      "raw_validation_setting_key": "Ключи настроек должны быть непустыми строками.",
-      "raw_validation_settings_object": "Настройки должны быть предоставлены как объект.",
-      "raw_validation_step_config_duplicate": "Конфигурация {{config}} назначена нескольким шагам.",
-      "raw_validation_step_config_reference": "Шаг {{index}} содержит недействительную ссылку на конфигурацию.",
-      "raw_validation_step_config_unknown": "Шаг {{index}} ссылается на неизвестную конфигурацию {{config}}.",
-      "raw_validation_step_object": "Шаг {{index}} должен быть объектом.",
-      "raw_validation_step_setting_duplicate": "Настройка {{setting}} назначена нескольким шагам.",
-      "raw_validation_step_setting_reference": "Шаг {{index}} содержит недействительную ссылку на настройку.",
-      "raw_validation_step_setting_unknown": "Шаг {{index}} ссылается на неизвестную настройку {{setting}}.",
-      "raw_validation_step_title": "Шаг {{index}} должен иметь заголовок.",
-      "raw_validation_steps_required": "Шаблон должен содержать хотя бы один шаг.",
-      "raw_validation_settings_unassigned": "Настройки {{settings}} не назначены ни одному шагу.",
-      "raw_editor_drop_hint": "Перетащите файл JSON шаблона (только .json), чтобы заменить текущее содержимое.",
-      "raw_editor_override_title": "Заменить JSON шаблона?",
-      "raw_editor_override_body": "Импорт этого файла полностью заменит текущий JSON шаблона. Изменения, внесенные в редактор, будут потеряны. Вы хотите продолжить?",
-      "raw_editor_override_confirm": "Заменить шаблон",
-      "missing_configs_title": "Отсутствующие пользовательские конфигурации",
-      "missing_configs_body": "Импортированный шаблон ссылается на пользовательские конфигурации, которые еще не были загружены. Пожалуйста, импортируйте эти конфигурации для завершения настройки шаблона:",
-      "missing_configs_hint_title": "Подсказка:",
-      "missing_configs_hint_body": "Загруженные файлы будут автоматически добавлены в ваш шаблон. Убедитесь, что имена файлов совпадают с отсутствующими конфигурациями, перечисленными выше.",
-      "missing_configs_upload_label": "Загрузить отсутствующие конфигурации (.conf, .cfg, .txt)",
-      "missing_configs_drop_hint": "Перетащите файлы конфигурации сюда (.conf, .cfg, .txt)",
-      "missing_configs_drop_or": "или",
-      "missing_configs_browse": "Обзор файлов",
-      "missing_configs_done": "Готово",
-      "missing_configs_upload_success": "Загружено {{count}} файл(ов) конфигурации успешно",
-      "missing_configs_upload_partial": "Загружено {{uploaded}} из {{total}} конфигураций. Все еще отсутствуют: {{missing}}",
-      "missing_configs_upload_failed": "Не удалось загрузить файлы конфигурации",
-      "missing_configs_resolved": "Все отсутствующие конфигурации загружены! Шаблон успешно импортирован."
-    }
+      "validation_settings_unique": "Каждый ключ настройки должен быть уникальным."
+    },
+    "none": "Нет шаблона"
   },
   "theme": {
     "dark": "Темная",
@@ -1377,19 +1447,22 @@
     },
     "copied": "Скопировано!",
     "disclaimer_title": "Отказ от ответственности",
+    "global_settings_applied_body": "Глобальные параметры были успешно получены и применены к форме.",
+    "global_settings_applied_title": "Применены глобальные настройки",
+    "global_settings_failed_body": "Произошла ошибка при получении глобальных настроек.",
+    "global_settings_failed_title": "Не удалось получить глобальные настройки",
     "header": {
       "ping_failed": "Пинг не удался",
       "ping_succeed": "Пинг успешен"
     },
-    "ip_unbanned": "IP-адрес успешно разбанен!",
-    "global_settings_applied_title": "Применены глобальные настройки",
-    "global_settings_applied_body": "Глобальные параметры были успешно получены и применены к форме.",
-    "global_settings_failed_title": "Не удалось получить глобальные настройки",
-    "global_settings_failed_body": "Произошла ошибка при получении глобальных параметров."
+    "ip_unbanned": "IP-адрес успешно разбанен!"
   },
   "tooltip": {
     "auto_lets_encrypt": "Автоматически запрашивать сертификат Let's Encrypt.",
     "button": {
+      "ban_ip": "Забанить этот IP-адрес",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "Конвертировать сервис {{name}} в черновик",
       "convert_service_to_online": "Конвертировать сервис {{name}} в онлайн",
       "delete_config": "Удалить кастомную конфигурацию {{name}}",
@@ -1398,20 +1471,17 @@
       "delete_plugin": "Удалить плагин {{name}}",
       "delete_service": "Удалить сервис {{name}}",
       "delete_template": "Удалить Шаблон {{name}}",
+      "force_check": "Запланировать проверку; загрузка только при наличии обновлений.",
+      "force_update": "Пропускает проверки и принудительно скачивает PRO-плагины; сохраняет текущее состояние при сбое.",
       "ping_instance": "Пинговать экземпляр {{hostname}}",
-      "view_file": "Просмотр {{filename}}",
-      "view_service": "Просмотр Сервиса {{service}}",
-      "edit_template": "Редактировать Шаблон {{template}}",
-      "view_template": "Просмотреть Шаблон {{template}}",
-      "clone_template": "Клонировать Шаблон {{template}}",
+      "reload_instance": "Перезагрузить экземпляр {{hostname}}",
+      "reset_default": "Сбросить на значение по умолчанию",
       "reset_global": "Сбросить до глобального значения",
-      "value_from_global": "Значение из глобальной конфигурации",
       "run_job": "Запустить задачу {{job}}",
+      "show_selected_only": "Показывать только выбранные",
       "stop_instance": "Остановить экземпляр {{hostname}}",
       "unban_ip": "Разбанить {{ip}}",
-      "ban_ip": "Забанить этот IP-адрес",
-      "force_check": "Запланировать проверку; загрузка только при наличии обновлений.",
-      "force_update": "Пропускает проверки и принудительно скачивает PRO-плагины; сохраняет текущее состояние при сбое."
+      "value_from_global": "Значение из глобальных настроек"
     },
     "cannot_delete_original_ban": "Невозможно удалить исходную запись бана.",
     "cannot_remove_disabled": "Невозможно удалить, так как одна или несколько настроек отключены.",
@@ -1449,15 +1519,16 @@
     "dns_provider_dns_only": "Выбор DNS-провайдера применим только для DNS-вызовов.",
     "download_file": "Скачать файл",
     "draft_toggle_disabled": "Режим черновика можно переключить только для сервисов, созданных через UI.",
-    "email_lets_encrypt": "Адрес электронной почты для регистрации в Let's Encrypt для управления сертификатами и уведомлениями.",
     "email_length": "Email должен содержать от 1 до 256 символов.",
-    "follow_latest_page_only": "Режим слежения доступен только на последней странице",
+    "email_lets_encrypt": "Адрес электронной почты для регистрации в Let's Encrypt для управления сертификатами и уведомлениями.",
     "fetch_global_settings": "Получить глобальные настройки и применить их к текущему шаблону",
-    "global_config_source": "Значение унаследовано из глобальной конфигурации.",
+    "follow_latest_page_only": "Режим слежения доступен только на последней странице",
+    "global_settings_source": "Значение унаследовано от глобальных настроек.",
     "instance_not_up": "Экземпляр {{hostname}} в настоящее время не отвечает ('up').",
     "latest_version_installed": "Вы используете последнюю версию.",
     "lets_encrypt_custom_profile": "Пользовательский профиль, который будет использоваться для Let's Encrypt (например, 'my_custom_profile').",
     "lets_encrypt_disable_public_suffixes": "Отключить запросы сертификатов для доменов, соответствующих Public Suffix List (рекомендуется).",
+    "lets_encrypt_server": "Выберите поставщика сертификатов, чтобы показать настройки для выбранного поставщика.",
     "lets_encrypt_profile": "Профиль, который будет использоваться для Let's Encrypt (classic, tlsserver, shortlived).",
     "license_key": "Ваш лицензионный ключ BunkerWeb PRO.",
     "link": {
@@ -1465,16 +1536,17 @@
       "access_service": "Перейти к сервису {{name}}",
       "clone_config": "Клонировать кастомную конфигурацию {{name}}",
       "clone_service": "Клонировать сервис {{name}}",
+      "clone_template": "Клонировать Шаблон {{template}}",
       "download_file": "Скачать {{filename}}",
       "edit_config": "Редактировать кастомную конфигурацию {{name}}",
-      "edit_template": "Редактировать Шаблон {{template}}",
       "edit_service": "Редактировать сервис {{service}}",
+      "edit_template": "Редактировать Шаблон {{template}}",
+      "export_config": "Экспортировать пользовательскую конфигурацию {{name}}",
       "export_service": "Экспортировать конфигурацию сервиса {{name}}",
       "view_config": "Просмотреть кастомную конфигурацию {{name}}",
       "view_file": "Просмотреть {{filename}}",
-      "view_template": "Просмотреть Шаблон {{template}}",
       "view_service": "Просмотреть сервис {{service}}",
-      "clone_template": "Клонировать Шаблон {{template}}"
+      "view_template": "Просмотреть Шаблон {{template}}"
     },
     "modal": {
       "title": {
@@ -1505,20 +1577,6 @@
       "yes": "Поддерживает режим STREAM."
     },
     "table": {
-      "templates": {
-        "actions": "Доступные действия для этого Шаблона",
-        "details": "Показать детали Шаблона",
-        "select_all": "Выбрать все Шаблоны",
-        "id": "ID Шаблона",
-        "name": "Имя Шаблона, заданное пользователем или сгенерированное автоматически",
-        "plugin": "Плагин, содержащий Шаблон",
-        "steps": "Количество шагов Шаблона",
-        "settings": "Количество настроек Шаблона",
-        "configs": "Количество пользовательских конфигураций Шаблона",
-        "method": "Метод создания Шаблона",
-        "created": "Дата создания Шаблона",
-        "last_update": "Дата последнего обновления Шаблона"
-      },
       "bans": {
         "actions": "Действия, доступные для этого бана",
         "country": "Страна забаненного IP-адреса",
@@ -1550,6 +1608,7 @@
         "name": "Имя кастомной конфигурации",
         "select_all": "Выбрать все кастомные конфигурации",
         "service": "Сервис, связанный с кастомной конфигурацией (или Глобальный)",
+        "status": "Статус черновика пользовательской конфигурации",
         "template": "Указывает, происходит ли кастомная конфигурация из шаблона",
         "type": "Тип или контекст кастомной конфигурации (например, HTTP, MODSEC)"
       },
@@ -1613,9 +1672,24 @@
         "last_update": "Дата и время последнего обновления сервиса",
         "method": "Метод создания сервиса (например, ui, file)",
         "name": "Имя сервиса",
+        "security_mode": "Режим безопасности сервиса (Блокировка или Обнаружение)",
         "select_all": "Выбрать все Сервисы",
         "template": "Шаблон, используемый Сервисом",
         "type": "Тип Сервиса (Онлайн/Черновик)"
+      },
+      "templates": {
+        "actions": "Доступные действия для этого Шаблона",
+        "configs": "Количество пользовательских конфигураций Шаблона",
+        "created": "Дата создания Шаблона",
+        "details": "Показать детали Шаблона",
+        "id": "ID Шаблона",
+        "last_update": "Дата последнего обновления Шаблона",
+        "method": "Метод создания Шаблона",
+        "name": "Имя Шаблона, заданное пользователем или сгенерированное автоматически",
+        "plugin": "Плагин, содержащий Шаблон",
+        "select_all": "Выбрать все Шаблоны",
+        "settings": "Количество настроек Шаблона",
+        "steps": "Количество шагов Шаблона"
       }
     },
     "ui_host": "Имя хоста или IP-адрес, который будет обслуживать UI BunkerWeb через обратный прокси.",
@@ -1623,13 +1697,19 @@
     "ui_url_security": "Использование нестандартного, трудно угадываемого пути URL повышает безопасность.",
     "use_custom_ssl": "Использовать ли пользовательский SSL-сертификат вместо Let's Encrypt.",
     "use_lets_encrypt_staging": "Использовать ли среду staging Let's Encrypt для тестирования (генерирует недоверенные сертификаты).",
+    "use_lets_encrypt_staging_letsencrypt_only": "Staging Let's Encrypt доступен только при использовании сервера Let's Encrypt.",
     "use_proxy_protocol": "Включить связь по протоколу PROXY.",
     "use_real_ip": "Использовать реальный IP",
     "username_length": "Имя пользователя должно содержать от 1 до 256 символов.",
-    "value_from_global": "Значение из глобальной конфигурации",
+    "value_from_global": "Значение из глобальных настроек",
     "view_full_url": "Нажмите, чтобы просмотреть полный URL",
     "wildcard_certificates": "Генерировать wildcard-сертификаты (*.domain.com). Требуется DNS-вызов.",
-    "wildcard_dns_only": "Wildcard-сертификаты поддерживаются только с типом вызова DNS."
+    "wildcard_dns_only": "Wildcard-сертификаты поддерживаются только с типом вызова DNS.",
+    "zerossl_api_key": "Необязательный API-ключ ZeroSSL, используемый zerossl-bot.",
+    "zerossl_api_retry": "Количество повторов для запросов API ZeroSSL (0 отключает повторы).",
+    "zerossl_api_retry_delay": "Задержка в секундах между повторами API ZeroSSL.",
+    "zerossl_api_connect_timeout": "Таймаут подключения в секундах для вызовов API ZeroSSL.",
+    "zerossl_api_max_time": "Максимальное общее время в секундах для каждого запроса API ZeroSSL."
   },
   "totp": {
     "prompt": "Пожалуйста, введите ваш TOTP-код."
@@ -1643,6 +1723,7 @@
     "ip_service_duplicate": "Этот IP-адрес уже забанен для выбранного сервиса ({{service}}).",
     "pattern": "Пожалуйста, введите допустимое значение для {{field}}.",
     "required": "{{field}} обязательно для заполнения.",
-    "service_required_for_ban": "Для бана, специфичного для сервиса, необходимо выбрать сервис."
+    "service_required_for_ban": "Для бана, специфичного для сервиса, необходимо выбрать сервис.",
+    "zerossl_email_or_api_key_required": "ZeroSSL требует либо email, либо API-ключ ZeroSSL."
   }
 }

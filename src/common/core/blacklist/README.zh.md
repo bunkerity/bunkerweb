@@ -35,12 +35,12 @@
 
     `BLACKLIST_COMMUNITY_LISTS` 设置允许您从精选的黑名单源中进行选择。可用选项包括：
 
-    | ID                                                                                                                           | 描述                                                                                                                                                                        | 来源                                                                                                                           |
-    | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-    | `ip:laurent-minne-data-shield-aggressive`                                                                                    | Data-Shield IPv4 黑名单。DST = 欧洲                                                                                                                                         |
-    | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt` |
-    | `ip:danmeuk-tor-exit`                                                                                                        | Tor 出口节点 IP (dan.me.uk)                                                                                                                                                 | `https://www.dan.me.uk/torlist/?exit`                                                                                          |
-    | `ua:mitchellkrogza-bad-user-agents`                                                                                          | Nginx 阻止不良机器人、垃圾邮件引荐来源、漏洞扫描器、用户代理、恶意软件、广告软件、勒索软件、恶意网站，具有反 DDOS、Wordpress 主题检测器阻止和针对重复违规者的 Fail2Ban Jail | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` |
+    | ID                                        | 描述                                                                                                                                                                        | 来源                                                                                                                                  |
+    | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+    | `ip:danmeuk-tor-exit`                     | Tor 出口节点 IP (dan.me.uk)                                                                                                                                                 | `https://www.dan.me.uk/torlist/?exit`                                                                                                 |
+    | `ua:mitchellkrogza-bad-user-agents`       | Nginx 阻止不良机器人、垃圾邮件引荐来源、漏洞扫描器、用户代理、恶意软件、广告软件、勒索软件、恶意网站，具有反 DDOS、Wordpress 主题检测器阻止和针对重复违规者的 Fail2Ban Jail | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`        |
+    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist - Laurent M. - 适用于 Web 应用, WordPress, VPS (Apache/Nginx)                                                                                    | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`          |
+    | `ip:laurent-minne-data-shield-critical`   | Data-Shield IPv4 Blocklist - Laurent M. - 适用于 DMZs, SaaS, API 和关键资产                                                                                                 | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_critical_data-shield_ipv4_blocklist.txt` |
 
     **配置：** 指定多个列表，以空格分隔。例如：
     ```yaml
@@ -49,6 +49,9 @@
 
     !!! tip "社区与手动配置"
         社区黑名单提供了一种方便的方式来开始使用经过验证的黑名单源。您可以将它们与手动 URL 配置一起使用，以实现最大的灵活性。
+
+    !!! note "致谢"
+        感谢 Laurent Minne 贡献了 [Data-Shield 阻止列表](https://duggytuxy.github.io/#)！
 
 === "IP 地址"
     **这是做什么的：** 根据访问者的 IP 地址或网络阻止访问。

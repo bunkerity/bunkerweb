@@ -13,6 +13,8 @@
 *.gcno
 *.gcov
 
+/zconf.h
+/Makefile
 /example
 /example64
 /examplesh
@@ -22,6 +24,7 @@
 /minigzipsh
 /zlib.pc
 /configure.log
+/build
 
 .DS_Store
 .vs
@@ -34,3 +37,15 @@ contrib/vstudio/vc143/arm64
 contrib/nuget/bin
 contrib/nuget/obj
 *.included
+
+# Bazel directories
+/bazel-*
+/bazel-bin
+/bazel-genfiles
+/bazel-out
+/bazel-testlogs
+user.bazelrc
+
+# MODULE.bazel.lock is ignored for now as per this recommendation:
+# https://github.com/bazelbuild/bazel/issues/20369
+MODULE.bazel.lock

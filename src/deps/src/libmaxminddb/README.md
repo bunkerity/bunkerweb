@@ -6,8 +6,8 @@ designed to facilitate fast lookups of IP addresses while allowing for great
 flexibility in the type of data associated with an address.
 
 The MaxMind DB format is an open format. The spec is available at
-https://maxmind.github.io/MaxMind-DB/. This spec is licensed under the
-Creative Commons Attribution-ShareAlike 3.0 Unported License.
+https://maxmind.github.io/MaxMind-DB/. This spec is licensed under the Creative
+Commons Attribution-ShareAlike 3.0 Unported License.
 
 See https://dev.maxmind.com/ for more details about MaxMind's GeoIP2 products.
 
@@ -23,9 +23,9 @@ This library is licensed under the Apache License, Version 2.
 tarballs on the [Releases](https://github.com/maxmind/libmaxminddb/releases)
 page (e.g. `libmaxminddb-*.tar.gz`).
 
-This code is known to work with GCC 4.4+ and clang 3.2+. It should also work
-on other compilers that supports C99, POSIX.1-2001, and the `-fms-extensions
-flag` (or equivalent). The latter is needed to allow an anonymous union in a
+This code is known to work with GCC 4.4+ and clang 3.2+. It should also work on
+other compilers that support C99, POSIX.1-2001, and the `-fms-extensions flag`
+(or equivalent). The latter is needed to allow an anonymous union in a
 structure.
 
 To install this code, run the following commands:
@@ -56,16 +56,16 @@ ldconfig
 
 ## From a GitHub "Source Code" Archive / Git Repo Clone (Achtung!)
 
-**NOTE:** These instructions are for installation from the GitHub "Source
-Code" archives also available on the
+**NOTE:** These instructions are for installation from the GitHub "Source Code"
+archives also available on the
 [Releases](https://github.com/maxmind/libmaxminddb/releases) page (e.g.
-`X.Y.Z.zip` or `X.Y.Z.tar.gz`), as well as installation directly from a clone
-of the [Git repo](https://github.com/maxmind/libmaxminddb). Installation from
-these sources are possible but will present challenges to users not
-comfortable with manual dependency resolution.
+`X.Y.Z.zip` or `X.Y.Z.tar.gz`), as well as installation directly from a clone of
+the [Git repo](https://github.com/maxmind/libmaxminddb). Installation from these
+sources is possible but will present challenges to users not comfortable with
+manual dependency resolution.
 
-You will need `automake`, `autoconf`, and `libtool` installed
-in addition to `make` and a compiler.
+You will need `automake`, `autoconf`, and `libtool` installed in addition to
+`make` and a compiler.
 
 You can clone this repository and build it by running:
 
@@ -74,8 +74,8 @@ git clone --recursive https://github.com/maxmind/libmaxminddb
 ```
 
 After cloning, run `./bootstrap` from the `libmaxminddb` directory and then
-follow the instructions for installing from a named release tarball as
-described above.
+follow the instructions for installing from a named release tarball as described
+above.
 
 ## Using CMake
 
@@ -91,8 +91,8 @@ ctest -V .
 cmake --build . --target install
 ```
 
-When building with Visual Studio, you may build a multithreaded (MT/MTd)
-runtime library, using the `MSVC_STATIC_RUNTIME` setting:
+When building with Visual Studio, you may build a multithreaded (MT/MTd) runtime
+library, using the `MSVC_STATIC_RUNTIME` setting:
 
 ```bash
 cmake -DMSVC_STATIC_RUNTIME=ON -DBUILD_SHARED_LIBS=OFF ..
@@ -106,8 +106,8 @@ cmake --build . --target uninstall
 
 ## On Ubuntu via PPA
 
-MaxMind provides a PPA for recent version of Ubuntu. To add the PPA to your
-APT sources, run:
+MaxMind provides a PPA for recent version of Ubuntu. To add the PPA to your APT
+sources, run:
 
 ```bash
 sudo add-apt-repository ppa:maxmind/ppa
@@ -136,8 +136,8 @@ sudo port install libmaxminddb
 
 # Requirements
 
-libmaxminddb requires a minimum of POSIX.1-2001 support. If not specified
-at compilation time, it defaults to requesting POSIX.1-2008 support.
+libmaxminddb requires a minimum of POSIX.1-2001 support. If not specified at
+compilation time, it defaults to requesting POSIX.1-2008 support.
 
 # Bug Reports
 
@@ -150,16 +150,15 @@ Use `make safedist` to check the resulting tarball.
 
 # Copyright and License
 
-Copyright 2013-2025 MaxMind, Inc.
+Copyright 2013-2026 MaxMind, Inc.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at
 
     https://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.

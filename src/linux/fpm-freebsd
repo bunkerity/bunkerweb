@@ -1,0 +1,13 @@
+-s dir
+--name bunkerweb
+--license agpl3
+--version %VERSION%
+--architecture %ARCH%
+--depends bash --depends nginx --depends python311 --depends libxml2 --depends yajl --depends libgd --depends sudo --depends lsof --depends libmaxminddb --depends libffi --depends openssl --depends sqlite3 --depends unzip --depends pcre2 --depends lmdb --depends ssdeep --depends curl
+--description "BunkerWeb %VERSION% for FreeBSD"
+--url "https://www.bunkerweb.io"
+--maintainer "Bunkerity <contact at bunkerity dot com>"
+--before-install /usr/share/bunkerweb/scripts/beforeInstallFreeBSD.sh
+--after-install /usr/share/bunkerweb/scripts/postinstall-freebsd.sh
+--after-remove /usr/share/bunkerweb/scripts/afterRemoveFreeBSD.sh
+/usr/share/bunkerweb/=/usr/share/bunkerweb/ /usr/share/bunkerweb/rc.d/=/usr/share/bunkerweb/rc.d/ /usr/bin/bwcli=/usr/bin/bwcli /etc/bunkerweb/=/etc/bunkerweb /var/log/bunkerweb/=/var/log/bunkerweb /var/cache/bunkerweb/=/var/cache/bunkerweb /var/lib/bunkerweb/=/var/lib/bunkerweb /var/tmp/bunkerweb/=/var/tmp/bunkerweb /var/run/bunkerweb/=/var/run/bunkerweb /etc/newsyslog.conf.d/bunkerweb.conf=/etc/newsyslog.conf.d/bunkerweb.conf

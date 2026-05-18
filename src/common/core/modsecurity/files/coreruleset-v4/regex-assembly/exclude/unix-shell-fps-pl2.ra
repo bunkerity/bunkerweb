@@ -11,152 +11,33 @@
 ##! `awk@` to `awk~`, this list would not have to be updated.
 ##! See also unix-shell-fps-pl1.ra.
 
-##! Note: As part of the effort to reduce FPs mid-term (https://github.com/coreruleset/coreruleset/pull/3735)
-##!       we've decided to exclude some commands for which only the exact match is an issure
-##!       (mostly for 933236).
-
 aptitude
 aptitude@
 aptitude~
-##! excluded as part of PR #3735
-cron
-cron@
-cron~
-date
-date@
-date~
-##! excluded as part of PR #3735
-dir
-dir@
-dir~
 dnf
 dnf@
 dnf~
-##! excluded as part of PR #3735
-ed
-ed@
-ed~
-##! excluded as part of PR #3735
-file
-file@
-file~
-##! excluded as part of PR #3735
-GET
-GET@
-GET~
-##! excluded as part of PR #3735
-hash
-hash@
-hash~
-##! excluded as part of PR #3735
-HEAD
-HEAD@
-HEAD~
-##! excluded as part of PR #3735
-id
-id@
-id~
-##! excluded as part of PR #3735
-install
-install@
-install~
-##! excluded as part of PR #3735
-java
-java@
-java~
-##! excluded as part of PR #3735
-mail
-mail@
-mail~
 more
 more@
 more~
-##! excluded as part of PR #3735
-null
-null@
-null~
 pacman
 pacman@
 pacman~
 ps
 ps@
 ps~
-##! excluded as part of PR #3735
-pg
-pg@
-pg~
-##! excluded as part of PR #3735
-php
-php@
-php~
-##! excluded as part of PR #3735
-POST
-POST@
-POST~
-##! excluded as part of PR #3735
-rename
-rename@
-rename~
-##! excluded as part of PR #3735
-repeat
-repeat@
-repeat~
-##! excluded as part of PR #3735
-screen
-screen@
-screen~
-##! excluded as part of PR #3735
-sort
-sort@
-sort~
-##! excluded as part of PR #3735
-ss
-ss@
-ss~
-##! excluded as part of PR #3735
-source
-source@
-source~
-##! excluded as part of PR #3735
-task
-task@
-task~
 time
 time@
 time~
-##! excluded as part of PR #3735
-timeout
-timeout@
-timeout~
-##! excluded as part of PR #3735
-uname
-uname@
-uname~
 up2date
 up2date@
 up2date~
 vi
 vi@
 vi~
-##! excluded as part of PR #3735
-wall
-wall@
-wall~
-##! excluded as part of PR #3735
-view
-view@
-view~
 who
 who@
 who~
-##! excluded as part of PR #3735
-whois
-whois@
-whois~
 w
 w@
 w~
-##! excluded as part of PR #3735
-yes
-yes@
-yes~

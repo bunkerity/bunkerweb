@@ -9,7 +9,8 @@
 ##!+ i
 
 ##!> define operator_syntax_start \[?\$
-##!> define operator_syntax_end \]?
+##! Use word boundary to prevent matching operator prefixes in cookies/GraphQL
+##!> define operator_syntax_end \b\]?
 
 ##!> assemble
   {{operator_syntax_start}}

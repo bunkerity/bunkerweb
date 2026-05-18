@@ -1,0 +1,77 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! -=[ LDAP Injection ]=-
+##!
+##! This rule attempts to detect LDAP injection attacks.
+##! It is based on a BlackHat presentation by Alonso Parada
+##! and regex writing by Denis Kolegov.
+##!
+##! References:
+##! * https://www.blackhat.com/presentations/bh-europe-08/Alonso-Parada/Whitepaper/bh-eu-08-alonso-parada-WP.pdf
+##! * https://www.sonarsource.com/blog/joomla-takeover-in-20-seconds-with-ldap-injection-cve-2017-14596/
+##! * https://github.com/SpiderLabs/owasp-modsecurity-crs/issues/276#issue-126581660
+##!
+##! LDAP filter syntax (RFC 4515):
+##!   filter     = "(" filtercomp ")"
+##!   filtercomp = and / or / not / item
+##!   and        = "&" filterlist
+##!   or         = "|" filterlist
+##!   not        = "!" filter
+##!   filterlist = 1*filter
+##!   item       = simple / present / substring / extensible
+##!   simple     = attr filtertype assertionvalue
+##!   filtertype = equal / approx / greaterorequal / lessorequal
+##!   equal      = "="
+##!   approx     = "~="
+##!   greaterorequal = ">="
+##!   lessorequal    = "<="
+##!
+##! Attack patterns detected:
+##! 1. Closing parenthesis followed by filter opening: )(...
+##! 2. Boolean operator injection: &, |, ! operators
+##! 3. Filter attribute manipulation with comparison operators: attr>=, attr<=, attr~=
+##!
+##! The regex detects attempts to break out of LDAP filter context by:
+##! - Injecting closing parenthesis followed by new filter constructs
+##! - Injecting boolean operators (&, |, !) to modify filter logic
+##! - Injecting comparison operators (=, >=, <=, ~=) with attributes
+
+##! Character class definitions for LDAP special characters
+##! Note: Using \x3c for < and \x3e for > to prevent invalid range issues
+##!       when the assembler reorders characters (< = 0x3c, = = 0x3d, > = 0x3e)
+##!       Template variable definitions ({{...}}) do NOT work in prefix/suffix markers;
+##!       those markers are literal with respect to {{define}} substitution, but standard
+##!       regex escape sequences (such as \x3c and \x3e) still apply.
+##!
+##! Different positions in the original regex used different character sets:
+##! - ldap-prefix-chars: excludes colon (:) and special chars, but NOT comma (used in prefix and pattern 3 suffix)
+##! - ldap-pattern-chars: excludes comma (,) and equals (=), but NOT colon (used in patterns 1 and 3)
+##!> define ldap-prefix-chars :\(\)&\|\!\x3c\x3e~
+##!> define ldap-pattern-chars ,=\(\)&\|\!\x3c\x3e~
+##!> define ldap-bool-ops &!\|
+##!> define comparison-prefix \x3c\x3e~
+
+##! Prefix: Match any characters that are NOT LDAP special characters at the start,
+##! followed by a closing parenthesis. This represents breaking out of a filter value.
+##! Note: Must be literal here with respect to {{define}} substitutions, as template
+##!       variables cannot be used in the prefix marker (but normal regex escapes can)
+##! ldap-prefix-chars = : ( ) & | ! < > ~ (NO comma)
+##!^ ^[^:\(\)&\|\!\x3c\x3e~]*\)\s*
+
+##! Pattern 1: Opening parenthesis followed by either:
+##!   a) An attribute name followed by optional comparison modifier and equals sign
+##!   b) Whitespace and boolean operator with optional parenthesis
+##! Example attacks: )(uid=*, )(&(objectClass=*), )(|(cn=admin
+##! Uses ldap-pattern-chars which excludes: , ( ) = & | ! < > ~ (NO colon)
+\((?:[^{{ldap-pattern-chars}}]+[{{comparison-prefix}}]?=|\s*[{{ldap-bool-ops}}]\s*[\(\)]?\s*)
+
+##! Pattern 2: Closing parenthesis followed by opening parenthesis with boolean operator
+##! Example attacks: ))((&, ))((|, ))((!
+\)\s*\(\s*[{{ldap-bool-ops}}]\s*
+
+##! Pattern 3: Boolean operator followed by opening parenthesis and attribute with comparison
+##! Example attacks: &(uid>=admin, |(cn<=test, !(sn~=value
+##! First char class uses ldap-pattern-chars (excludes comma, NOT colon)
+##! Second char class uses ldap-prefix-chars (excludes colon, NOT comma)
+[{{ldap-bool-ops}}]\s*\([^{{ldap-pattern-chars}}]+[{{comparison-prefix}}]?=[^{{ldap-prefix-chars}}]*

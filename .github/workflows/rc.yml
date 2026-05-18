@@ -110,8 +110,8 @@ jobs:
             ubuntu,
             debian-bookworm,
             debian-trixie,
-            fedora-41,
-            fedora-42,
+            fedora-43,
+            fedora-44,
             rhel-8,
             rhel-9,
             rhel-10,
@@ -126,9 +126,9 @@ jobs:
             package: deb
           - linux: debian-trixie
             package: deb
-          - linux: fedora-41
+          - linux: fedora-43
             package: rpm
-          - linux: fedora-42
+          - linux: fedora-44
             package: rpm
           - linux: rhel-8
             package: rpm
@@ -161,13 +161,17 @@ jobs:
       versionrpm: ${{ steps.getversionrpm.outputs.versionrpm }}
     steps:
       - name: Checkout source code
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Get VERSION
         id: getversion
         run: echo "version=$(cat src/VERSION | tr -d '\n')" >> "$GITHUB_OUTPUT"
       - name: Get VERSION (for RPM based)
         id: getversionrpm
-        run: echo "versionrpm=$(cat src/VERSION | tr -d '\n' | sed 's/-/_/g')" >> "$GITHUB_OUTPUT"
+        run: |
+          VERSION="$(tr -d '\n' < src/VERSION)"
+          # RPM packaging: replace hyphens with underscores to avoid release parsing issues
+          RPM_VERSION="$(echo "$VERSION" | sed 's/-/_/g')"
+          echo "versionrpm=${RPM_VERSION}" >> "$GITHUB_OUTPUT"
 
   # Push Docker images
   push-images:
@@ -229,8 +233,8 @@ jobs:
             ubuntu,
             debian-bookworm,
             debian-trixie,
-            fedora-41,
-            fedora-42,
+            fedora-43,
+            fedora-44,
             el-8,
             el-9,
             el-10,
@@ -255,15 +259,15 @@ jobs:
             suffix: ""
             version: trixie
             package: deb
-          - linux: fedora-41
+          - linux: fedora-43
             separator: "-"
             suffix: "1."
-            version: 41
+            version: 43
             package: rpm
-          - linux: fedora-42
+          - linux: fedora-44
             separator: "-"
             suffix: "1."
-            version: 42
+            version: 44
             package: rpm
           - linux: el-8
             separator: "-"
@@ -294,10 +298,10 @@ jobs:
           - linux: debian-trixie
             arch: amd64
             package_arch: amd64
-          - linux: fedora-41
+          - linux: fedora-43
             arch: amd64
             package_arch: x86_64
-          - linux: fedora-42
+          - linux: fedora-44
             arch: amd64
             package_arch: x86_64
           - linux: el-8
@@ -321,10 +325,10 @@ jobs:
           - linux: debian-trixie
             arch: arm64
             package_arch: arm64
-          - linux: fedora-41
+          - linux: fedora-43
             arch: arm64
             package_arch: aarch64
-          - linux: fedora-42
+          - linux: fedora-44
             arch: arm64
             package_arch: aarch64
           - linux: el-8

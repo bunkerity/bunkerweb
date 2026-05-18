@@ -24,8 +24,9 @@ for deps_path in [os.path.join(os.sep, "usr", "share", "bunkerweb", *paths) for 
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from common_utils import effective_cpu_count  # type: ignore
 from Database import Database  # type: ignore
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 
 
@@ -39,15 +40,19 @@ class JobScheduler(ApiCaller):
         apis: Optional[list] = None,
     ):
         super().__init__(apis or [])
-        self.__logger = logger or setup_logger("Scheduler", os.getenv("CUSTOM_LOG_LEVEL", os.getenv("LOG_LEVEL", "INFO")))
+        self.__logger = logger or getLogger("SCHEDULER.JOB_SCHEDULER")
         self.db = db or Database(self.__logger)
         # Store only essential environment variables to reduce memory usage
         self.__base_env = os.environ.copy()
         self.__lock = lock
         self.__thread_lock = Lock()
         self.__job_success = True
+        # Names of jobs that failed in the most recent run_once/run_pending batch. Exposed
+        # via the ``failed_jobs`` property so callers can log which specific jobs failed
+        # instead of only knowing that "at least one" did.
+        self.__failed_jobs: List[str] = []
         self.__job_reload = False
-        self.__executor = ThreadPoolExecutor(max_workers=min(8, (os.cpu_count() or 1) * 4))
+        self.__executor = ThreadPoolExecutor(max_workers=min(8, effective_cpu_count() * 4))
         self.__compiled_regexes = self.__compile_regexes()
         self.__module_paths = set()
         self.__module_paths_lock = Lock()  # Dedicated lock for module paths
@@ -150,7 +155,7 @@ class JobScheduler(ApiCaller):
         reload_success = self.send_to_apis(
             "POST",
             f"/reload?test={'no' if self.env.get('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
-            timeout=max(int(reload_min_timeout), 3 * len(self.env.get("SERVER_NAME", "www.example.com").split(" "))),
+            timeout=max(int(reload_min_timeout), 3 * len(self.env.get("SERVER_NAME", "www.example.com").split())),
         )[0]
         if reload_success:
             self.__logger.info("Successfully reloaded nginx")
@@ -199,6 +204,7 @@ class JobScheduler(ApiCaller):
 
         # Register in sys.modules to allow proper imports
         qualified_name = f"bw_job_{name}_{hash(module_key) & 0x7FFFFFFF}"
+        module.__bw_qualified_name__ = qualified_name
         sys_modules[qualified_name] = module
 
         # Execute the module
@@ -223,6 +229,7 @@ class JobScheduler(ApiCaller):
             self.__logger.error(f"Exception while executing job '{name}' from plugin '{plugin}': {e}")
             with self.__thread_lock:
                 self.__job_success = False
+                self.__failed_jobs.append(f"{plugin}/{name}")
         end_date = datetime.now().astimezone()
 
         if ret == 1:
@@ -234,6 +241,7 @@ class JobScheduler(ApiCaller):
             self.__logger.error(f"Error while executing job '{name}' from plugin '{plugin}'")
             with self.__thread_lock:
                 self.__job_success = False
+                self.__failed_jobs.append(f"{plugin}/{name}")
 
         # Use the executor to manage threads
         self.__executor.submit(self.__add_job_run, name, success, start_date, end_date)
@@ -296,7 +304,9 @@ class JobScheduler(ApiCaller):
             self.__logger.error("Database is in read-only mode, pending jobs will not be executed")
             return True
 
-        self.__job_success = True
+        with self.__thread_lock:
+            self.__job_success = True
+            self.__failed_jobs = []
         self.__job_reload = False
 
         try:
@@ -336,6 +346,9 @@ class JobScheduler(ApiCaller):
             # Reset flag for next batch
             self.__cache_permissions_updated = False
 
+            # Clean up cached modules to free memory
+            self.cleanup_modules()
+
             # Clean up module paths thread-safely
             with self.__module_paths_lock:
                 for module_path in self.__module_paths.copy():
@@ -345,12 +358,20 @@ class JobScheduler(ApiCaller):
 
             self.__update_cache_permissions()
 
+    @property
+    def failed_jobs(self) -> List[str]:
+        """Names of jobs (``plugin/name``) that failed in the most recent run batch."""
+        with self.__thread_lock:
+            return self.__failed_jobs.copy()
+
     def run_once(self, plugins: Optional[List[str]] = None, ignore_plugins: Optional[List[str]] = None) -> bool:
         if self.try_database_readonly():
             self.__logger.error("Database is in read-only mode, jobs will not be executed")
             return True
 
-        self.__job_success = True
+        with self.__thread_lock:
+            self.__job_success = True
+            self.__failed_jobs = []
         self.__job_reload = False
 
         plugins = plugins or []
@@ -387,6 +408,9 @@ class JobScheduler(ApiCaller):
         finally:
             # Reset flag for next batch
             self.__cache_permissions_updated = False
+
+            # Clean up cached modules to free memory
+            self.cleanup_modules()
 
             with self.__module_paths_lock:
                 for module_path in self.__module_paths.copy():
@@ -453,13 +477,17 @@ class JobScheduler(ApiCaller):
         """Clean up cached modules to free memory."""
         with self.__module_cache_lock:
             for module_key, module in self.__module_cache.items():
-                # Try to get the qualified name from sys.modules and remove it
-                qualified_name = f"bw_job_{getattr(module, '__name__', 'unknown')}_{hash(module_key) & 0x7FFFFFFF}"
+                # Use the stored qualified name for reliable cleanup
+                qualified_name = getattr(module, "__bw_qualified_name__", None)
+                if qualified_name is None:
+                    qualified_name = f"bw_job_{getattr(module, '__name__', 'unknown')}_{hash(module_key) & 0x7FFFFFFF}"
                 if qualified_name in sys_modules:
                     del sys_modules[qualified_name]
 
+            module_count = len(self.__module_cache)
             self.__module_cache.clear()
-            self.__logger.info(f"Cleared {len(self.__module_cache)} cached job modules")
+            if module_count > 0:
+                self.__logger.debug(f"Cleared {module_count} cached job modules")
 
     def __del__(self):
         """Destructor to clean up resources."""

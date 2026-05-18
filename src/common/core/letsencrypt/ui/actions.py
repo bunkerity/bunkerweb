@@ -10,9 +10,19 @@ from traceback import format_exc
 from typing import Tuple
 from uuid import uuid4
 
+from common_utils import safe_tar_extractall  # type: ignore
 from cryptography import x509
-from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
+
+
+def _is_allowed_member(member):
+    """Filter tar members to only extract live/, archive/, renewal/ dirs."""
+    parts = Path(member.name).parts
+    if member.name == ".":
+        return True
+    if parts and parts[0] == ".":
+        parts = parts[1:]
+    return bool(parts) and parts[0] in ("live", "archive", "renewal")
 
 
 def extract_cache(folder_path, cache_files):
@@ -21,10 +31,8 @@ def extract_cache(folder_path, cache_files):
     for cache_file in cache_files:
         if cache_file["file_name"].endswith(".tgz") and cache_file["file_name"].startswith("folder:"):
             with tar_open(fileobj=BytesIO(cache_file["data"]), mode="r:gz") as tar:
-                try:
-                    tar.extractall(folder_path, filter="fully_trusted")
-                except TypeError:
-                    tar.extractall(folder_path)
+                members = [m for m in tar.getmembers() if _is_allowed_member(m)]
+                safe_tar_extractall(tar, folder_path, tar_filter="tar", members=members)
 
 
 def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
@@ -66,7 +74,10 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
 
             # * Parsing the certificate
             try:
-                cert = x509.load_pem_x509_certificate(cert_file.read_bytes(), default_backend())
+                certs = x509.load_pem_x509_certificates(cert_file.read_bytes())
+                if not certs:
+                    raise ValueError(f"No certificates found in {cert_file}")
+                cert = certs[0]
 
                 # ? Getting the subject
                 subject = cert.subject.get_attributes_for_oid(x509.NameOID.COMMON_NAME)

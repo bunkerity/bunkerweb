@@ -34,7 +34,7 @@
                    rel="noopener"
                    class="footer-link me-4"
                    data-i18n="footer.support">Support</a>
-                <a href="https://github.com/bunkerity/bunkerweb/blob/{% if bw_version != 'dev' and bw_version != 'testing' %}v{% endif %}{{ bw_version }}/LICENSE.md"
+                <a href="https://github.com/bunkerity/bunkerweb/blob/{% if bw_version != 'dev' and bw_version != 'testing' %}v{% endif %}{{ bw_version | replace('~', '-') }}/LICENSE.md"
                    class="footer-link"
                    target="_blank"
                    rel="noreferrer"

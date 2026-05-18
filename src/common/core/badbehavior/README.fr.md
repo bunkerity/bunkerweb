@@ -10,13 +10,21 @@ Comment ça marche :
 4. Le bannissement peut être au niveau service (site) ou global (tous les sites).
 5. Les bans expirent après la durée configurée (ou sont permanents avec `0`).
 
+!!! success "Avantages clés"
+
+      1. **Protection automatique :** détecte et bloque les clients potentiellement malveillants sans intervention manuelle.
+      2. **Règles personnalisables :** adaptez ce qui constitue un « mauvais comportement » à vos besoins.
+      3. **Économie de ressources :** empêche les acteurs malveillants de consommer les ressources serveur avec des requêtes invalides répétées.
+      4. **Portée flexible :** choisissez si les bans s’appliquent seulement au service courant ou globalement à tous les services.
+      5. **Contrôle de durée :** configurez des bans temporaires qui expirent automatiquement ou des bans permanents jusqu’à suppression manuelle.
+
 ### Comment l’utiliser
 
 1. Activation : `USE_BAD_BEHAVIOR` (activé par défaut).
 2. Codes à compter : `BAD_BEHAVIOR_STATUS_CODES`.
 3. Seuil : `BAD_BEHAVIOR_THRESHOLD`.
 4. Fenêtre et durée de ban : `BAD_BEHAVIOR_COUNT_TIME`, `BAD_BEHAVIOR_BAN_TIME`.
-5. Portée : `BAD_BEHAVIOR_BAN_SCOPE` (`service` ou `global`).
+5. Portée : `BAD_BEHAVIOR_BAN_SCOPE` (`service` ou `global`). Quand le trafic arrive sur le serveur par défaut (nom de serveur `_`), les bans sont toujours appliqués globalement pour bloquer l’IP partout.
 
 !!! tip "Mode stream"
     En mode stream, seul `444` est considéré comme « mauvais ».
@@ -30,10 +38,13 @@ Comment ça marche :
 | `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | non      | Seuil de réponses « mauvaises » avant bannissement.            |
 | `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | non      | Fenêtre de comptage (secondes).                                |
 | `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | non      | Durée du ban en secondes (`0` = permanent).                    |
-| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | non      | Portée du ban : site courant (`service`) ou global (`global`). |
+| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | non      | Portée du ban : site courant (`service`) ou global (`global`). Sur le serveur par défaut (`_`), les bans sont toujours globaux. |
 
 !!! warning "Faux positifs"
     Un seuil/fenêtre trop bas peut bannir des utilisateurs légitimes. Démarrez conservateur et ajustez.
+
+!!! tip "Ajuster votre configuration"
+    Commencez avec des paramètres prudents (seuil plus élevé, durée de ban plus courte), puis adaptez-les selon vos besoins et vos modèles de trafic. Surveillez vos journaux pour vérifier que les utilisateurs légitimes ne sont pas bannis par erreur.
 
 ### Exemples
 

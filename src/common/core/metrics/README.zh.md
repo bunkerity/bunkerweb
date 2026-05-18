@@ -90,13 +90,14 @@
 | 设置                                 | 默认值   | 上下文    | 多选 | 描述                                                                                             |
 | ------------------------------------ | -------- | --------- | ---- | ------------------------------------------------------------------------------------------------ |
 | `USE_METRICS`                        | `yes`    | multisite | 否   | **启用指标：** 设置为 `yes` 以启用指标的收集和检索。                                             |
-| `METRICS_MEMORY_SIZE`                | `16m`    | global    | 否   | **内存大小：** 指标内部存储的大小（例如，`16m`、`32m`）。                                        |
-| `METRICS_MAX_BLOCKED_REQUESTS`       | `1000`   | global    | 否   | **最大被阻止请求数：** 每个工作进程要存储的最大被阻止请求数。                                    |
-| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `100000` | global    | 否   | **Redis 最大被阻止请求数：** 在 Redis 中要存储的最大被阻止请求数。                               |
+| `METRICS_MEMORY_SIZE`                | `16m`    | global    | 否   | **内存大小：** 指标内部存储的大小（例如，`8192`、`16m`、`32m`）。                                |
+| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`     | global    | 否   | **最大被阻止请求数：** 每个工作进程要存储的最大被阻止请求数。支持 `k`/`m` 简写。                 |
+| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`    | global    | 否   | **Redis 最大被阻止请求数：** 在 Redis 中要存储的最大被阻止请求数。支持 `k`/`m` 简写。            |
+| `MAX_LRU_HISTORY`                    | `1k`     | global    | 否   | **最大 LRU 历史：** 每个工作进程的 LRU 槽位数量，以及每个键的事件历史数组上限（阻止轨迹、身份验证轨迹等）。支持 `k`/`m` 简写。 |
 | `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | 否   | **将指标保存到 Redis：** 设置为 `yes` 以将指标（计数器和表）保存到 Redis，以实现集群范围的聚合。 |
 
 !!! tip "调整内存分配大小"
-    应根据您的流量和实例数量调整 `METRICS_MEMORY_SIZE` 设置。对于高流量网站，请考虑增加此值以确保所有指标都能被捕获而不会丢失数据。
+    应根据您的流量和实例数量调整 `METRICS_MEMORY_SIZE` 设置。支持原始字节值以及 `k`/`m` 后缀。对于高流量网站，请考虑增加此值以确保所有指标都能被捕获而不会丢失数据。
 
 !!! info "Redis 集成"
     当 BunkerWeb 配置为使用[Redis](#redis)时，指标插件将自动将被阻止的请求数据同步到 Redis 服务器。这提供了跨多个 BunkerWeb 实例的安全事件的集中视图。
@@ -116,8 +117,9 @@
     ```yaml
     USE_METRICS: "yes"
     METRICS_MEMORY_SIZE: "16m"
-    METRICS_MAX_BLOCKED_REQUESTS: "1000"
-    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "100000"
+    METRICS_MAX_BLOCKED_REQUESTS: "1k"
+    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10k"
+    MAX_LRU_HISTORY: "1k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 
@@ -130,6 +132,7 @@
     METRICS_MEMORY_SIZE: "8m"
     METRICS_MAX_BLOCKED_REQUESTS: "500"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10000"
+    MAX_LRU_HISTORY: "500"
     METRICS_SAVE_TO_REDIS: "no"
     ```
 
@@ -142,6 +145,7 @@
     METRICS_MEMORY_SIZE: "64m"
     METRICS_MAX_BLOCKED_REQUESTS: "5000"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "500000"
+    MAX_LRU_HISTORY: "5k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 

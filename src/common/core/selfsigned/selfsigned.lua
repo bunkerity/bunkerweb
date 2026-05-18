@@ -93,7 +93,10 @@ end
 function selfsigned:ssl_certificate()
 	local server_name, err = ssl_server_name()
 	if not server_name then
-		return self:ret(false, "can't get server_name : " .. err)
+		if err then
+			return self:ret(false, "can't get server_name : " .. err)
+		end
+		return self:ret(true, "no SNI provided")
 	end
 	local data
 	data, err = self.internalstore:get("plugin_selfsigned_" .. server_name, true)

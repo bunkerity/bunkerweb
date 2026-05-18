@@ -34,7 +34,8 @@ from magic import Magic
 from requests import get, head
 from requests.exceptions import ConnectionError
 
-from logger import setup_logger  # type: ignore
+from common_utils import safe_tar_extractall, safe_zip_extractall  # type: ignore
+from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
 PLUGIN_NAME_RX = re_compile(r"^# Plugin name: (?P<name>.+)$", MULTILINE)
@@ -44,7 +45,7 @@ CRS_PLUGINS_DIR = Path(sep, "var", "cache", "bunkerweb", "modsecurity", "crs", "
 NEW_PLUGINS_DIR = Path(sep, "var", "tmp", "bunkerweb", "crs-new-plugins")
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb", "crs-plugins")
 PATCH_SCRIPT = Path(sep, "usr", "share", "bunkerweb", "core", "modsecurity", "misc", "patch.sh")
-LOGGER = setup_logger("modsecurity.download-crs-plugins")
+LOGGER = getLogger("MODSECURITY.DOWNLOAD.CRS_PLUGINS")
 status = 0
 
 
@@ -121,7 +122,7 @@ try:
         LOGGER.error(f"Patch script not found: {PATCH_SCRIPT}")
         sys_exit(1)
 
-    # * Check if we're using the 4 or nightly version of the Core Rule Set (CRS)
+    # * Check if we're using a version of the Core Rule Set (CRS) compatible with plugins
     use_right_crs_version = False
     use_modsecurity_crs_plugins = False
 
@@ -131,7 +132,7 @@ try:
         LOGGER.warning("No services found, exiting...")
         sys_exit(0)
 
-    services = services.split(" ")
+    services = services.split()
     services_plugins = {}
 
     if getenv("MULTISITE", "no") == "yes":
@@ -144,7 +145,7 @@ try:
 
             service_plugins = getenv(f"{first_server}_MODSECURITY_CRS_PLUGINS", "").strip()
             if service_plugins:
-                services_plugins[first_server] = set(service_plugins.split(" "))
+                services_plugins[first_server] = set(service_plugins.split())
     else:
         if getenv("MODSECURITY_CRS_VERSION", "4") != "3":
             use_right_crs_version = True
@@ -154,7 +155,7 @@ try:
 
         plugins = getenv("MODSECURITY_CRS_PLUGINS", "").strip()
         if plugins:
-            services_plugins[services[0]] = set(plugins.split(" "))
+            services_plugins[services[0]] = set(plugins.split())
 
     if not use_modsecurity_crs_plugins:
         LOGGER.info("Core Rule Set (CRS) plugins are disabled, skipping download...")
@@ -163,7 +164,7 @@ try:
         LOGGER.info("No Core Rule Set (CRS) plugins found, skipping download...")
         sys_exit(0)
     elif not use_right_crs_version:
-        LOGGER.warning("No service is using a compatible Core Rule Set (CRS) version with the plugins (4 or nightly), skipping download...")
+        LOGGER.warning("No service is using a compatible Core Rule Set (CRS) version with the plugins (4), skipping download...")
         sys_exit(0)
 
     JOB = Job(LOGGER, __file__)
@@ -389,7 +390,7 @@ try:
                     if file_type == "application/zip" or crs_plugin.endswith(".zip"):
                         try:
                             with ZipFile(content) as zf:
-                                zf.extractall(path=temp_dir)
+                                safe_zip_extractall(zf, temp_dir)
                             LOGGER.info(f"Successfully extracted ZIP file to {temp_dir}")
                         except BadZipFile as e:
                             LOGGER.debug(format_exc())
@@ -409,7 +410,7 @@ try:
                                 tar_mode = "r:xz"
 
                             with tar_open(fileobj=content, mode=tar_mode) as tar:
-                                tar.extractall(path=temp_dir)
+                                safe_tar_extractall(tar, temp_dir)
                             LOGGER.info(f"Successfully extracted TAR file to {temp_dir}")
                         except TarError as e:
                             LOGGER.debug(format_exc())

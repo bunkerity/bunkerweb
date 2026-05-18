@@ -1,9 +1,8 @@
-importlib-metadata==8.7.0
-pip<25.3
-pip-compile-multi==3.2.2
-pip-tools==7.5.2
-pip-upgrader==1.4.15
-setuptools==80.9.0
-tomli==2.3.0
-urllib3<2.4.0
-wheel==0.46.1
+importlib-metadata==9.0.0
+pip==26.1.1
+pip-compile-multi==3.3.1
+pip-tools==7.5.3
+pip-upgrader==2.4.5
+setuptools<81
+tomli==2.4.1
+wheel==0.47.0

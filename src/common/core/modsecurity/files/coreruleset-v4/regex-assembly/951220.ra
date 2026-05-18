@@ -1,0 +1,40 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##!+ i
+
+##! .NET Exception Classes
+System\.Data\.OleDb\.OleDbException
+\[SqlException
+System\.Data\.SqlClient\.SqlException
+Exception.*\WSystem\.Data\.SqlClient\.
+
+##! ODBC/JDBC Drivers
+\[Microsoft\]\[ODBC SQL Server Driver\]
+\[Macromedia\]\[SQLServer JDBC Driver\]
+Driver.*SQL[ _-]*Server
+
+##! OLE DB Providers
+Microsoft OLE DB Provider for ODBC Drivers
+Microsoft OLE DB Provider for SQL Server
+OLE DB.*SQL Server
+
+##! SQL Syntax Errors
+Incorrect syntax near
+Sintaxis incorrecta cerca de
+Syntax error in string in query expression
+Syntax error .* in query expression
+Unclosed quotation mark after the character string
+Unclosed quotation mark before the character string
+Procedure or function '.{1,128}' expects parameter
+Data type mismatch in criteria expression\.
+
+##! Error Codes and Messages
+'80040e14'
+ADODB\.Field \(0x800A0BCD\)
+the used select statements have different number of columns
+Conversion failed when converting the varchar value .*? to data type int\.
+
+##! PHP Warnings
+mssql_query\(\)
+Warning.*mssql_.*

@@ -15,7 +15,7 @@ main(int argc, char *argv[])
 		if (error != 0) {
 			printf ("1 exec error %d: OK", error);
 		} else if (!*output) {
-			printf ("1 exec empty: OK"); 
+			printf ("1 exec empty: OK");
 		}
 		else {
 		    colon = strstr(output, ":");
@@ -40,7 +40,7 @@ main(int argc, char *argv[])
 			else if (keyword = strstr(colon, "Can't access file ")) {
 				printf ("0 invalid file %s", keyword+18);
 			}
-			else { 
+			else {
 				printf ("0 unable to parse clamdscan output [%s] for cmd [%s]", output, cmd);
 			}
 		}

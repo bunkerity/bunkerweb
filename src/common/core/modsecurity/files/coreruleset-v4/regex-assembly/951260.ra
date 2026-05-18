@@ -1,0 +1,8 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##!+ i
+
+Sybase message:
+Sybase.*Server message
+Warning.{2,20}sybase

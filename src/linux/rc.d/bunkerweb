@@ -1,0 +1,74 @@
+#!/bin/sh
+
+# PROVIDE: bunkerweb
+# REQUIRE: LOGIN DAEMON NETWORKING
+# KEYWORD: shutdown
+#
+# Add the following line to /etc/rc.conf to enable bunkerweb:
+#
+# bunkerweb_enable="YES"
+#
+
+. /etc/rc.subr
+
+name="bunkerweb"
+rcvar="${name}_enable"
+desc="BunkerWeb Web Application Firewall service"
+
+load_rc_config $name
+
+: ${bunkerweb_enable:="NO"}
+: ${bunkerweb_user:="root"}
+: ${bunkerweb_group:="nginx"}
+: ${bunkerweb_pidfile:="/var/run/bunkerweb/nginx.pid"}
+: ${bunkerweb_wrapper_pidfile:="/var/run/bunkerweb/bunkerweb-wrapper.pid"}
+
+pidfile="${bunkerweb_pidfile}"
+start_cmd="${name}_start"
+stop_cmd="${name}_stop"
+reload_cmd="${name}_reload"
+status_cmd="${name}_status"
+extra_commands="reload"
+
+bunkerweb_start()
+{
+    echo "Starting ${name}."
+    mkdir -p /var/run/bunkerweb
+    /usr/sbin/daemon -f -p "${bunkerweb_wrapper_pidfile}" /usr/local/bin/bash /usr/share/bunkerweb/scripts/start.sh start
+}
+
+bunkerweb_stop()
+{
+    if [ -f "${pidfile}" ]; then
+        echo "Stopping ${name}."
+        /usr/local/bin/bash /usr/share/bunkerweb/scripts/start.sh stop
+    else
+        echo "${name} is not running."
+    fi
+    if [ -f "${bunkerweb_wrapper_pidfile}" ]; then
+        wrapper_pid=$(cat "${bunkerweb_wrapper_pidfile}" 2>/dev/null)
+        [ -n "${wrapper_pid}" ] && kill "${wrapper_pid}" 2>/dev/null || true
+        rm -f "${bunkerweb_wrapper_pidfile}"
+    fi
+}
+
+bunkerweb_reload()
+{
+    echo "Reloading ${name}."
+    /usr/local/bin/bash /usr/share/bunkerweb/scripts/start.sh reload
+}
+
+bunkerweb_status()
+{
+    if [ -f "${pidfile}" ]; then
+        pid=$(cat "${pidfile}")
+        if kill -0 "${pid}" 2>/dev/null; then
+            echo "${name} is running as pid ${pid}."
+            return 0
+        fi
+    fi
+    echo "${name} is not running."
+    return 1
+}
+
+run_rc_command "$1"

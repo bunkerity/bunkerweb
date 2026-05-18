@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field, field_validator, RootModel
-from typing import Optional, List, Dict, Union
+from ipaddress import ip_address
+from pydantic import BaseModel, Field, field_validator, RootModel, BeforeValidator
+from typing import Optional, List, Dict, Union, Literal, Annotated
 from re import compile as re_compile
 
 # Shared helpers for Configs
@@ -16,7 +17,31 @@ def validate_config_name(name: str) -> Optional[str]:
     return None
 
 
-# Accepted config types (normalized form)
+# Accepted config types - Literal includes both underscore and hyphen variants for OpenAPI docs
+# Normalized form uses underscores internally
+ConfigTypeLiteral = Literal[
+    # HTTP-level
+    "http",
+    "server_http",
+    "server-http",
+    "default_server_http",
+    "default-server-http",
+    # ModSecurity
+    "modsec_crs",
+    "modsec-crs",
+    "modsec",
+    # Stream
+    "stream",
+    "server_stream",
+    "server-stream",
+    # CRS plugins
+    "crs_plugins_before",
+    "crs-plugins-before",
+    "crs_plugins_after",
+    "crs-plugins-after",
+]
+
+# Set of normalized config types for validation
 CONFIG_TYPES = {
     # HTTP-level
     "http",
@@ -34,16 +59,51 @@ CONFIG_TYPES = {
 }
 
 
+def _normalize_and_validate_config_type(v: str) -> str:
+    """Normalize and validate config type, raising ValueError if invalid."""
+    if not isinstance(v, str):
+        raise ValueError("type must be a string")
+    normalized = normalize_config_type(v)
+    if normalized not in CONFIG_TYPES:
+        raise ValueError(f"Invalid type: must be one of {', '.join(sorted(CONFIG_TYPES))}")
+    return normalized
+
+
+# Annotated type that normalizes input and validates against CONFIG_TYPES
+ConfigType = Annotated[ConfigTypeLiteral, BeforeValidator(_normalize_and_validate_config_type)]
+
+
 class BanRequest(BaseModel):
     ip: str
     exp: int = Field(86400, description="Expiration in seconds (0 means permanent)")
     reason: str = Field("api", description="Reason for ban")
     service: Optional[str] = Field(None, description="Service name if service-specific ban")
 
+    @field_validator("ip")
+    @classmethod
+    def validate_ip(cls, v):
+        v = v.strip()
+        ip_address(v)  # Raises ValueError for invalid IPs
+        return v
+
+    @field_validator("exp")
+    @classmethod
+    def validate_exp(cls, v):
+        if v < 0:
+            raise ValueError("exp must be non-negative")
+        return v
+
 
 class UnbanRequest(BaseModel):
     ip: str
     service: Optional[str] = Field(None, description="Service name if service-specific unban")
+
+    @field_validator("ip")
+    @classmethod
+    def validate_ip(cls, v):
+        v = v.strip()
+        ip_address(v)  # Raises ValueError for invalid IPs
+        return v
 
 
 # Instances
@@ -86,22 +146,15 @@ class ServiceUpdateRequest(BaseModel):
 # Configs
 class ConfigCreateRequest(BaseModel):
     service: Optional[str] = Field(None, description='Service id; use "global" or leave empty for global')
-    type: str = Field(..., description="Config type, e.g., http, server_http, modsec, ...")
+    type: ConfigType = Field(..., description="Config type")
     name: str = Field(..., description=r"Config name (^[\\w_-]{1,255}$)")
     data: str = Field(..., description="Config content as UTF-8 string")
+    is_draft: bool = Field(False, description="Mark custom config as draft")
 
     @field_validator("service")
     @classmethod
     def _normalize_service(cls, v: Optional[str]) -> Optional[str]:
         return None if v in (None, "", "global") else v
-
-    @field_validator("type")
-    @classmethod
-    def _normalize_and_check_type(cls, v: str) -> str:
-        t = normalize_config_type(v)
-        if t not in CONFIG_TYPES:
-            raise ValueError("Invalid type")
-        return t
 
     @field_validator("name")
     @classmethod
@@ -113,26 +166,28 @@ class ConfigCreateRequest(BaseModel):
         return v
 
 
+def _normalize_optional_config_type(v: Optional[str]) -> Optional[str]:
+    """Normalize and validate optional config type."""
+    if v is None:
+        return None
+    return _normalize_and_validate_config_type(v)
+
+
+# Optional ConfigType for update requests
+OptionalConfigType = Annotated[Optional[ConfigTypeLiteral], BeforeValidator(_normalize_optional_config_type)]
+
+
 class ConfigUpdateRequest(BaseModel):
     service: Optional[str] = Field(None, description='New service id; use "global" or leave empty for global')
-    type: Optional[str] = Field(None, description="New config type")
+    type: OptionalConfigType = Field(None, description="New config type")
     name: Optional[str] = Field(None, description="New config name")
     data: Optional[str] = Field(None, description="New config content as UTF-8 string")
+    is_draft: Optional[bool] = Field(None, description="Update draft flag")
 
     @field_validator("service")
     @classmethod
     def _normalize_service(cls, v: Optional[str]) -> Optional[str]:
         return None if v in (None, "", "global") else v
-
-    @field_validator("type")
-    @classmethod
-    def _normalize_and_check_type(cls, v: Optional[str]) -> Optional[str]:
-        if v is None:
-            return v
-        t = normalize_config_type(v)
-        if t not in CONFIG_TYPES:
-            raise ValueError("Invalid type")
-        return t
 
     @field_validator("name")
     @classmethod
@@ -148,21 +203,13 @@ class ConfigUpdateRequest(BaseModel):
 
 class ConfigKey(BaseModel):
     service: Optional[str] = Field(None, description='Service id; use "global" or leave empty for global')
-    type: str
+    type: ConfigType
     name: str
 
     @field_validator("service")
     @classmethod
     def _normalize_service(cls, v: Optional[str]) -> Optional[str]:
         return None if v in (None, "", "global") else v
-
-    @field_validator("type")
-    @classmethod
-    def _normalize_and_check_type(cls, v: str) -> str:
-        t = normalize_config_type(v)
-        if t not in CONFIG_TYPES:
-            raise ValueError("Invalid type")
-        return t
 
     @field_validator("name")
     @classmethod
@@ -221,11 +268,11 @@ class RunJobsRequest(BaseModel):
     jobs: List[JobItem] = Field(..., min_length=1)
 
 
-# Global config
+# Global settings
 Scalar = Union[str, int, float, bool, None]
 
 
-class GlobalConfigUpdate(RootModel[Dict[str, Scalar]]):
+class GlobalSettingsUpdate(RootModel[Dict[str, Scalar]]):
     @field_validator("root")
     @classmethod
     def _validate_scalars(cls, v: Dict[str, Scalar]) -> Dict[str, Scalar]:

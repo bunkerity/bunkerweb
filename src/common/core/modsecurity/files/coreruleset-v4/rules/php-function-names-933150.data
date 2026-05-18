@@ -98,13 +98,11 @@ imagegd2
 ini_get
 ini_get_all
 ini_set
-intval
 iptcembed
 is_array
 is_dir
 is_executable
 is_file
-is_int
 is_null
 is_numeric
 is_object
@@ -149,7 +147,6 @@ pg_prepare
 pg_query
 php_strip_whitespace
 php_uname
-phpinfo
 phpversion
 posix_getegid
 posix_geteuid
@@ -231,7 +228,6 @@ strtoupper
 uasort
 ucfirst
 uksort
-unserialize
 urldecode
 urlencode
 var_dump

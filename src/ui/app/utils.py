@@ -7,21 +7,23 @@ from pathlib import Path
 from string import printable
 from subprocess import PIPE, Popen, call
 from time import sleep
-from typing import Dict, FrozenSet, Optional, Set, Union
+from typing import Any, Dict, FrozenSet, Optional, Set, Union
 from urllib.parse import unquote
 
 from bcrypt import checkpw, gensalt, hashpw
+from defusedcsv.csv import _escape as _defusedcsv_escape, writer as _defusedcsv_writer
 from flask import flash as flask_flash, session
 from regex import compile as re_compile, match
 from requests import get
 
-from logger import setup_logger  # type: ignore
-
+from logger import getLogger  # type: ignore
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
 
-LOGGER = setup_logger("UI")
+LOGGER = getLogger("UI")
+
+RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default server", ""})
 
 USER_PASSWORD_RX = re_compile(r"^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*\P{Alnum}).{8,}$")
 PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}$")
@@ -50,7 +52,8 @@ COLUMNS_PREFERENCES_DEFAULTS = {
         "4": True,
         "5": True,
         "6": True,
-        "7": False,
+        "7": True,
+        "8": False,
     },
     "instances": {
         "3": False,
@@ -113,7 +116,6 @@ ALWAYS_USED_PLUGINS = (
     "errors",
     "headers",
     "misc",
-    "php",
     "pro",
     "sessions",
     "ssl",
@@ -125,11 +127,13 @@ PLUGINS_SPECIFICS = {
     "INJECT": {"INJECT_BODY": "", "INJECT_HEAD": ""},
     "LETSENCRYPT": {"AUTO_LETS_ENCRYPT": "no"},
     "LIMIT": {"USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no"},
+    "PHP": {"REMOTE_PHP": "", "LOCAL_PHP": ""},
     "REDIRECT": {"REDIRECT_TO": ""},
     "SELFSIGNED": {"GENERATE_SELF_SIGNED_SSL": "no"},
 }
 
-EDITABLE_METHODS: FrozenSet[str] = frozenset({"ui", "api"})
+UI_API_METHODS: FrozenSet[str] = frozenset({"ui", "api"})
+EDITABLE_METHODS: FrozenSet[str] = UI_API_METHODS | frozenset({"wizard"})
 
 
 def stop(status, _stop: bool = True):
@@ -230,6 +234,19 @@ def is_editable_method(method: Optional[str], *, allow_default: bool = False) ->
     return method in EDITABLE_METHODS
 
 
+def is_ui_api_method(method: Optional[str]) -> bool:
+    """Determine if a method belongs to the UI/API editable family."""
+    return method in UI_API_METHODS
+
+
+def can_delete_service(service: Dict[str, Any]) -> bool:
+    """Services deletable from the UI: ui/api methods always, autoconf only when drafted."""
+    method = service.get("method")
+    if is_ui_api_method(method):
+        return True
+    return method == "autoconf" and bool(service.get("is_draft"))
+
+
 def get_filtered_settings(settings: dict, global_config: bool = False) -> Dict[str, dict]:
     multisites = {}
     for setting, data in settings.items():
@@ -303,14 +320,15 @@ def flash(message: str, category: str = "success", i18n_key: Optional[str] = Non
 
     if save and "flash_messages" in session:
         session["flash_messages"].append((message, category, datetime.now().astimezone().isoformat()))
+        session.modified = True
 
 
 def human_readable_number(value: Union[str, int]) -> str:
     value = int(value)
     if value >= 1_000_000:
-        return f"{value/1_000_000:.1f}M"
+        return f"{value/1_000_000:.1f}M"  # noqa: E226
     elif value >= 1_000:
-        return f"{value/1_000:.1f}k"
+        return f"{value/1_000:.1f}k"  # noqa: E226
     return str(value)
 
 
@@ -351,3 +369,19 @@ def _sanitize_internal_next(next_url, default):
     if any(ord(c) < 32 for c in decoded):
         raise ValueError("control chars not allowed")
     return decoded or default
+
+
+def csv_writer(csvfile, *args, **kwargs):
+    """Return a ``defusedcsv`` writer that escapes spreadsheet formula payloads (CWE-1236).
+
+    Use this for all UI CSV exports instead of ``csv.writer``.
+    """
+    return _defusedcsv_writer(csvfile, *args, **kwargs)
+
+
+def csv_safe(value: Any) -> Any:
+    """Escape one cell value with ``defusedcsv`` formula-injection protection (CWE-1236).
+
+    Use this for user-controlled values written through openpyxl.
+    """
+    return _defusedcsv_escape(value)

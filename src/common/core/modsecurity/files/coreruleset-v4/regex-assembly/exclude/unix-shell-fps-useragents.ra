@@ -16,10 +16,6 @@
 ##! `curl@` to `curl~`, this list would not have to be updated.
 ##! See also unix-shell-fps-pl1.ra.
 
-# CPanel client (https://cpanel.net): Cpanel-HTTP-Client/1.0
-cpan
-cpan@
-cpan~
 # curl (https://curl.se): curl/8.1.2
 curl
 curl@

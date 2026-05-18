@@ -2126,16 +2126,8 @@ static void build_subroutines(BuildCtx *ctx)
   |// Value to round is in f0. May clobber f0-f7 and r0. Return address is r14.
   |.macro vm_round, name, mask
   |->name:
-  |  ldr f4, f0
-  |  lghi r0, 1
-  |  cdfbr f1, r0
-  |  didbr f0, f2, f1, mask // f0=remainder, f2=quotient.
-  |  fidbra f4, mask, f4, 0
-  |  ldr f0, f4
-  |  jnle >1
+  |  fidbra f0, mask, f0, 0
   |  br r14
-  |1: // partial remainder (sanity check)
-  |  stg r0, 0
   |.endmacro
   |
   |  vm_round vm_floor, 7 // Round towards -inf.
@@ -2146,6 +2138,41 @@ static void build_subroutines(BuildCtx *ctx)
   |->vm_mod: // NYI.
   |  stg r0, 0
   |  stg r0, 0
+  |
+  |// int64_t lj_vm_num2int_check(double x)
+  |->vm_num2int_check:
+  |  llihh r2, 0x8000
+  |  oilh r2, 0x8000
+  |  cfdbr r1, 5, f0
+  |  llgfr r0, r1
+  |  cdfbr f2, r1
+  |  cdbr f2, f0
+  |  locgr r2, r0, 8
+  |  br r14
+  |
+  |// int64_t lj_vm_num2i64(double x)
+  |->vm_num2i64:
+  |  cgdbr r2, 5, f0
+  |  br r14
+  |
+  |// uint64_t lj_vm_num2u64(double x)
+  |->vm_num2u64:
+  |  llihh r0, 0x8000
+  |  oill r0, 1
+  |  clgdbr r1, 5, f0
+  |  cgdbr r2, 5, f0   // Overflow: (1 << 63) - 1 or 1 << 63
+  |  agr r0, r2        // Add (1 << 63) + 1
+  |  clgfi r0, 2       // Overflow: 0 or 1
+  |  locgr r2, r1, 4
+  |  br r14
+  |
+  |// int32_t lj_vm_tobit(double x)
+  |->vm_tobit:
+  |  bfpconst_tobit f2, r2
+  |  adbr f0, f2
+  |  lgdr r2, f0
+  |  lgfr r2, r2
+  |  br r14
   |
   |//-----------------------------------------------------------------------
   |//-- Assertions ---------------------------------------------------------

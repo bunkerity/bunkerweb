@@ -93,8 +93,7 @@
       "id": "redis-sentinel-hosts",
       "label": "Redis sentinel hosts",
       "regex": "^.*$",
-      "type": "multivalue",
-      "separator": " "
+      "type": "multivalue"
     },
     "REDIS_SENTINEL_USERNAME": {
       "context": "global",

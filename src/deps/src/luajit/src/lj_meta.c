@@ -1,6 +1,6 @@
 /*
 ** Metamethod handling.
-** Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2026 Mike Pall. See Copyright Notice in luajit.h
 **
 ** Portions taken verbatim or adapted from the Lua interpreter.
 ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
@@ -465,7 +465,8 @@ void LJ_FASTCALL lj_meta_for(lua_State *L, TValue *o)
       if (tvisint(o+i)) {
 	k[i] = intV(o+i); nint++;
       } else {
-	k[i] = lj_num2int(numV(o+i)); nint += ((lua_Number)k[i] == numV(o+i));
+	int64_t i64;
+	if (lj_num2int_check(numV(o+i), i64, k[i])) nint++;
       }
     }
     if (nint == 3) {  /* Narrow to integers. */

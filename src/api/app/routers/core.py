@@ -7,7 +7,7 @@ from ..utils import get_api_db
 router = APIRouter(tags=["core"])  # Utils-only (ping, health)
 from .auth import router as auth_router
 from .instances import router as instances_router
-from .global_config import router as global_config_router
+from .global_settings import router as global_settings_router, config_router as global_settings_config_router
 from .bans import router as bans_router
 from .services import router as services_router
 from .configs import router as configs_router
@@ -42,7 +42,8 @@ if _has_api_user:
 
 router.include_router(instances_router)
 router.include_router(bans_router)
-router.include_router(global_config_router)
+router.include_router(global_settings_router)
+router.include_router(global_settings_config_router)
 router.include_router(services_router)
 router.include_router(configs_router)
 router.include_router(plugins_router)

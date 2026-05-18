@@ -19,11 +19,11 @@ from maxminddb import open_database
 from requests import RequestException, Response, get
 from requests.exceptions import ConnectionError
 
-from logger import setup_logger  # type: ignore
+from logger import getLogger  # type: ignore
 from common_utils import bytes_hash, file_hash  # type: ignore
 from jobs import Job  # type: ignore
 
-LOGGER = setup_logger("JOBS.mmdb-asn")
+LOGGER = getLogger("JOBS.MMDB-ASN")
 status = 0
 
 

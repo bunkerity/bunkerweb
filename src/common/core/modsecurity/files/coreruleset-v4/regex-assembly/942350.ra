@@ -19,6 +19,7 @@ create\s+function\s.+\sreturns
   insert
   load
   rename
+  replace
   select
   truncate
   update

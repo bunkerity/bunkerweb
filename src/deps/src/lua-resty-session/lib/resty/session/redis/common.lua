@@ -26,10 +26,9 @@ local ipairs = ipairs
 -- @tparam[opt] string old_key old session id
 -- @tparam string stale_ttl stale ttl
 -- @tparam[opt] table metadata table of metadata
--- @tparam table remember whether storing persistent session or not
 -- @treturn true|nil ok
 -- @treturn string error message
-local function SET(storage, red, name, key, value, ttl, current_time, old_key, stale_ttl, metadata, remember)
+local function SET(storage, red, name, key, value, ttl, current_time, old_key, stale_ttl, metadata)
   if not metadata and not old_key then
     return red:set(get_name(storage, name, key), value, "EX", ttl)
   end
@@ -38,31 +37,21 @@ local function SET(storage, red, name, key, value, ttl, current_time, old_key, s
   local old_ttl
   if old_key then
     old_name = get_name(storage, name, old_key)
-    if not remember then
-      -- redis < 7.0
-      old_ttl = red:ttl(old_name)
-    end
+    -- redis < 7.0
+    old_ttl = red:ttl(old_name)
   end
 
   red:init_pipeline()
   red:set(get_name(storage, name, key), value, "EX", ttl)
 
   -- redis < 7.0
-  if old_name then
-    if remember then
-      red:unlink(old_name)
-    elseif not old_ttl or old_ttl > stale_ttl then
-      red:expire(old_name, stale_ttl)
-    end
+  if old_name and (not old_ttl or old_ttl > stale_ttl) then
+    red:expire(old_name, stale_ttl)
   end
 
   -- redis >= 7.0
   --if old_key then
-  --  if remember then
-  --    red:unlink(get_name(storage, name, old_key))
-  --  else
-  --    red:expire(get_name(storage, name, old_key), stale_ttl, "LT")
-  --  end
+  --  red:expire(get_name(storage, name, old_key), stale_ttl, "LT")
   --end
 
   if metadata then

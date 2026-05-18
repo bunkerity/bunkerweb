@@ -53,6 +53,8 @@ Las siguientes secciones desarrollan cada paso.
 
     **Componente de Seguridad de Aplicaciones (*opcional*)**
 
+    CrowdSec también proporciona un [Componente de Seguridad de Aplicaciones](https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs) que se puede usar para proteger su aplicación frente a ataques. Si desea utilizarlo, debe crear otro archivo de adquisición para el Componente AppSec:
+
     ```yaml
     appsec_config: crowdsecurity/appsec-default
     labels:
@@ -64,7 +66,7 @@ Las siguientes secciones desarrollan cada paso.
     **Syslog**
 
     ```syslog
-    @version: 4.8
+    @version: 4.10
 
     source s_net {
         udp(
@@ -78,7 +80,7 @@ Las siguientes secciones desarrollan cada paso.
     };
 
     destination d_file {
-        file("/var/log/bunkerweb.log" template(t_imp));
+        file("/var/log/bunkerweb.log" template(t_imp) logrotate(enable(yes), size(100MB), rotations(7)));
     };
 
     log {
@@ -97,7 +99,7 @@ Las siguientes secciones desarrollan cada paso.
     services:
       bunkerweb:
         # Este es el nombre que se utilizará para identificar la instancia en el Planificador
-        image: bunkerity/bunkerweb:1.6.6
+        image: bunkerity/bunkerweb:1.6.10
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -114,7 +116,7 @@ Las siguientes secciones desarrollan cada paso.
             syslog-address: "udp://10.20.30.254:514" # La dirección IP del servicio syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6
+        image: bunkerity/bunkerweb-scheduler:1.6.10
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrese de establecer el nombre de instancia correcto
@@ -148,7 +150,7 @@ Las siguientes secciones desarrollan cada paso.
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.3 # Use la última versión pero siempre fije la versión para una mejor estabilidad/seguridad
+        image: crowdsecurity/crowdsec:v1.7.7 # Use la última versión pero siempre fije la versión para una mejor estabilidad/seguridad
         volumes:
           - cs-data:/var/lib/crowdsec/data # Para persistir los datos de CrowdSec
           - bw-logs:/var/log:ro # Los registros de BunkerWeb para que CrowdSec los analice
@@ -162,7 +164,7 @@ Las siguientes secciones desarrollan cada paso.
           - bw-universe
 
       syslog:
-        image: balabit/syslog-ng:4.9.0
+        image: balabit/syslog-ng:4.10.2
         cap_add:
           - NET_BIND_SERVICE  # Vincular a puertos bajos
           - NET_BROADCAST  # Enviar difusiones
@@ -285,7 +287,7 @@ Las siguientes secciones desarrollan cada paso.
 
 ### Paso&nbsp;2 – Configurar los ajustes de BunkerWeb
 
-Aplica las siguientes variables de entorno (o valores del scheduler) para que la instancia de BunkerWeb pueda comunicarse con la API local de CrowdSec. Como mínimo necesitas `USE_CROWDSEC`, `CROWDSEC_API` y una clave válida creada con `cscli bouncers add`.
+Aplica las siguientes variables de entorno (o valores del scheduler) para que la instancia de BunkerWeb pueda comunicarse con la API local de CrowdSec. Como mínimo necesitas `USE_CROWDSEC`, `CROWDSEC_API` y `CROWDSEC_API_KEY` con una clave válida creada mediante `cscli bouncers add`.
 
 | Ajuste                      | Valor por defecto      | Contexto  | Múltiple | Descripción                                                                                                                                   |
 | --------------------------- | ---------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -311,7 +313,9 @@ Aplica las siguientes variables de entorno (o valores del scheduler) para que la
 | `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`              | global   | no       | **Enviar Siempre:** Establezca en `yes` para enviar siempre las solicitudes a AppSec, incluso si hay una decisión a nivel de IP. |
 | `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`              | global   | no       | **Verificar SSL:** Establezca en `yes` para verificar el certificado SSL del Componente AppSec.                                  |
 
-!!! info "Sobre los Modos de Operación" - **Modo `live`** consulta la API de CrowdSec para cada solicitud entrante, proporcionando protección en tiempo real a costa de una mayor latencia. - **Modo `stream`** descarga periódicamente todas las decisiones de la API de CrowdSec y las almacena en caché localmente, reduciendo la latencia con un ligero retraso en la aplicación de nuevas decisiones.
+!!! info "Sobre los Modos de Operación"
+    - **Modo `live`** consulta la API de CrowdSec para cada solicitud entrante, proporcionando protección en tiempo real a costa de una mayor latencia.
+    - **Modo `stream`** descarga periódicamente todas las decisiones de la API de CrowdSec y las almacena en caché localmente, reduciendo la latencia con un ligero retraso en la aplicación de nuevas decisiones.
 
 ### Configuraciones de Ejemplo
 
@@ -350,9 +354,3 @@ Aplica las siguientes variables de entorno (o valores del scheduler) para que la
 - En los registros del scheduler, busque las entradas `CrowdSec configuration successfully generated` y `CrowdSec bouncer denied request` para verificar que el complemento esté activo.
 - En el lado de CrowdSec, supervise `cscli metrics show` o la CrowdSec Console para asegurarse de que las decisiones de BunkerWeb aparezcan como se espera.
 - En la interfaz de BunkerWeb, abra la página del complemento CrowdSec para ver el estado de la integración.
-    # Configuración de AppSec
-    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
-    CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
-    CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
-    CROWDSEC_APPSEC_SSL_VERIFY: "yes"
-    ```

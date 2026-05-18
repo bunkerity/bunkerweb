@@ -1,0 +1,14 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Rule 941310: US-ASCII Malformed Encoding XSS Filter - open tag detection.
+##! Detects HTML-like tags using US-ASCII encoding where:
+##!   \xBC (¼) substitutes for < and \xBE (¾) substitutes for >
+##! Matches either:
+##!   - \xBC ... (\xBE or >)  — malformed open bracket, normal or malformed close
+##!   - < ... \xBE             — normal open bracket, malformed close
+
+##!> assemble
+  \xbc[^\xbe>]*[\xbe>]
+  <[^\xbe]*\xbe
+##!<

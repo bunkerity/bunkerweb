@@ -1,15 +1,7 @@
 ##! Please refer to the documentation at
 ##! https://coreruleset.org/docs/development/regex_assembly/.
 
-##! The text describes a performance issue with a simple regular expression "@{.*}" used for searching. The problem arises because the ".*" part matches any character zero or more times, which can lead to inefficient searching in some engines.
+##! Find Perl string interpolation that tries to execute shell commands, e.g., `"...@{[system 'whoami']}...".
+##! We simply look for the sequence `@{[`, taking into account potential white space. The pattern should be specific enough to avoid most FPs, while not causing issues with backtracking.
 
-##! We want to reduce the possibility of impacting performance by removing the strings we can match before the one we are looking, "@{"
-##! This regex avoids the double backtracking problem and ensures it finds the first "@{" efficiently.
-
-##! The prefix here to prevent backtracking is:
-##! - something that is not an '@'
-##! - or something that is an '@', but is not followed by '{'
-
-##!^ ^(?:[^@]|@[^{])*
-
-@+{[^}]*}
+@+\{\s*\[

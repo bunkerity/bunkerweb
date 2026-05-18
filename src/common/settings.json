@@ -20,20 +20,20 @@
   "HTTP_PORT": {
     "context": "global",
     "default": "8080",
-    "help": "HTTP port number which bunkerweb binds to.",
+    "help": "HTTP port number which bunkerweb binds to. Leave empty to disable HTTP listening.",
     "id": "http-port",
     "label": "HTTP port",
-    "regex": "^\\d+$",
+    "regex": "^\\d*$",
     "type": "number",
     "multiple": "listen-http-ports"
   },
   "HTTPS_PORT": {
     "context": "global",
     "default": "8443",
-    "help": "HTTPS port number which bunkerweb binds to.",
+    "help": "HTTPS port number which bunkerweb binds to. Leave empty to disable HTTPS listening.",
     "id": "https-port",
     "label": "HTTPS port",
-    "regex": "^\\d+$",
+    "regex": "^\\d*$",
     "type": "number",
     "multiple": "listen-https-ports"
   },
@@ -82,33 +82,14 @@
     "regex": "^\\d+$",
     "type": "number"
   },
-  "LOG_FORMAT": {
+  "WORKER_SHUTDOWN_TIMEOUT": {
     "context": "global",
-    "default": "$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"",
-    "help": "The format to use for access logs.",
-    "id": "log-format",
-    "label": "Log format",
-    "regex": "^.*$",
+    "default": "30s",
+    "help": "Timeout for a graceful shutdown of worker processes. After this delay, old workers are forcefully terminated during a reload to prevent memory growth.",
+    "id": "worker-shutdown-timeout",
+    "label": "Worker shutdown timeout",
+    "regex": "^\\d+(ms?|[shdwMy])?$",
     "type": "text"
-  },
-  "LOG_LEVEL": {
-    "context": "global",
-    "default": "notice",
-    "help": "The level to use for error logs.",
-    "id": "log-level",
-    "label": "Log level",
-    "regex": "^(debug|info|notice|warn|error|crit|alert|emerg)$",
-    "type": "select",
-    "select": [
-      "debug",
-      "info",
-      "notice",
-      "warn",
-      "error",
-      "crit",
-      "alert",
-      "emerg"
-    ]
   },
   "DNS_RESOLVERS": {
     "context": "global",
@@ -117,8 +98,43 @@
     "id": "dns-resolvers",
     "label": "DNS resolvers",
     "regex": "^(?! )(( *[^ ]+)(?!.*\\2))*$",
-    "type": "multivalue",
-    "separator": " "
+    "type": "multivalue"
+  },
+  "CLIENT_BODY_TIMEOUT": {
+    "context": "global",
+    "default": "10s",
+    "help": "Timeout for reading the client request body.",
+    "id": "client-body-timeout",
+    "label": "Client body timeout",
+    "regex": "^\\d+(ms?|[shdwMy])?$",
+    "type": "text"
+  },
+  "CLIENT_HEADER_TIMEOUT": {
+    "context": "global",
+    "default": "10s",
+    "help": "Timeout for reading the client request header.",
+    "id": "client-header-timeout",
+    "label": "Client header timeout",
+    "regex": "^\\d+(ms?|[shdwMy])?$",
+    "type": "text"
+  },
+  "KEEPALIVE_TIMEOUT": {
+    "context": "global",
+    "default": "15s",
+    "help": "Timeout for keep-alive client connections.",
+    "id": "keepalive-timeout",
+    "label": "Keepalive timeout",
+    "regex": "^\\d+(ms?|[shdwMy])?$",
+    "type": "text"
+  },
+  "SEND_TIMEOUT": {
+    "context": "global",
+    "default": "10s",
+    "help": "Timeout for transmitting a response to the client.",
+    "id": "send-timeout",
+    "label": "Send timeout",
+    "regex": "^\\d+(ms?|[shdwMy])?$",
+    "type": "text"
   },
   "WORKERLOCK_MEMORY_SIZE": {
     "context": "global",
@@ -126,7 +142,7 @@
     "help": "Size of lua_shared_dict for initialization workers",
     "id": "workerlock-memory-size",
     "label": "Initialization Workerlock memory size",
-    "regex": "^\\d+[kKmMgG]?$",
+    "regex": "^\\d+(?:[kKmMgG])?$",
     "type": "text"
   },
   "INTERNALSTORE_MEMORY_SIZE": {
@@ -135,7 +151,7 @@
     "help": "Size of the internal internalstore.",
     "id": "internalstore-memory-size",
     "label": "Internalstore memory size",
-    "regex": "^\\d+[kKmMgG]?$",
+    "regex": "^\\d+(?:[kKmMgG])?$",
     "type": "text"
   },
   "DATASTORE_MEMORY_SIZE": {
@@ -144,7 +160,16 @@
     "help": "Size of the internal datastore.",
     "id": "datastore-memory-size",
     "label": "Datastore memory size",
-    "regex": "^\\d+[kKmMgG]?$",
+    "regex": "^\\d+(?:[kKmMgG])?$",
+    "type": "text"
+  },
+  "DATASTORE_LRU_SIZE": {
+    "context": "global",
+    "default": "1k",
+    "help": "Slot count for the shared per-worker datastore LRU (used by internalstore and plugin worker-local caches). Accepts a plain integer or `k`/`m` shorthand (e.g., `1k`, `10k`, `1m`).",
+    "id": "datastore-lru-size",
+    "label": "Datastore LRU size",
+    "regex": "^\\d+[kKmM]?$",
     "type": "text"
   },
   "CACHESTORE_MEMORY_SIZE": {
@@ -153,7 +178,7 @@
     "help": "Size of the internal cachestore.",
     "id": "cachestore-memory-size",
     "label": "Cachestore memory size",
-    "regex": "^\\d+[kKmMgG]?$",
+    "regex": "^\\d+(?:[kKmMgG])?$",
     "type": "text"
   },
   "CACHESTORE_IPC_MEMORY_SIZE": {
@@ -162,7 +187,7 @@
     "help": "Size of the internal cachestore (ipc).",
     "id": "cachestore-ipc-memory-size",
     "label": "Cachestore ipc memory size",
-    "regex": "^\\d+[kKmMgG]?$",
+    "regex": "^\\d+(?:[kKmMgG])?$",
     "type": "text"
   },
   "CACHESTORE_MISS_MEMORY_SIZE": {
@@ -171,7 +196,7 @@
     "help": "Size of the internal cachestore (miss).",
     "id": "cachestore-miss-memory-size",
     "label": "Cachestore miss memory size",
-    "regex": "^\\d+[kKmMgG]?$",
+    "regex": "^\\d+(?:[kKmMgG])?$",
     "type": "text"
   },
   "CACHESTORE_LOCKS_MEMORY_SIZE": {
@@ -180,7 +205,7 @@
     "help": "Size of the internal cachestore (locks).",
     "id": "cachestore-locks-memory-size",
     "label": "Cachestore locks memory size",
-    "regex": "^\\d+[kKmMgG]?$",
+    "regex": "^\\d+(?:[kKmMgG])?$",
     "type": "text"
   },
   "USE_API": {
@@ -262,8 +287,7 @@
     "id": "api-whitelist-ip",
     "label": "API whitelist IP",
     "regex": "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
-    "type": "multivalue",
-    "separator": " "
+    "type": "multivalue"
   },
   "AUTOCONF_MODE": {
     "context": "global",
@@ -314,20 +338,20 @@
   "LISTEN_STREAM_PORT": {
     "context": "multisite",
     "default": "1337",
-    "help": "Listening port for non-ssl (passthrough).",
+    "help": "Listening port for non-ssl (passthrough). Leave empty to disable non-SSL stream listening.",
     "id": "listen-stream-port",
     "label": "Listen stream port",
-    "regex": "^[0-9]+$",
+    "regex": "^[0-9]*$",
     "type": "text",
     "multiple": "listen-stream-ports"
   },
   "LISTEN_STREAM_PORT_SSL": {
     "context": "multisite",
     "default": "4242",
-    "help": "Listening port for ssl (passthrough).",
+    "help": "Listening port for ssl (passthrough). Leave empty to disable SSL stream listening.",
     "id": "listen-stream-port-ssl",
     "label": "Listen stream port ssl",
-    "regex": "^[0-9]+$",
+    "regex": "^[0-9]*$",
     "type": "text",
     "multiple": "listen-stream-ports-ssl"
   },
@@ -367,6 +391,15 @@
     "regex": "^(yes|no)$",
     "type": "check"
   },
+  "KEEP_CONFIG_ON_RESTART": {
+    "context": "global",
+    "default": "no",
+    "help": "Keep the configuration on restart. Set to 'yes' to prevent config reset on restart.",
+    "id": "keep-config-on-restart",
+    "label": "Keep config on restart",
+    "regex": "^(yes|no)$",
+    "type": "check"
+  },
   "TIMERS_LOG_LEVEL": {
     "context": "global",
     "default": "debug",
@@ -393,8 +426,7 @@
     "id": "bunkerweb-instances",
     "label": "BunkerWeb instances",
     "regex": "^.*$",
-    "type": "multivalue",
-    "separator": " "
+    "type": "multivalue"
   },
   "USE_TEMPLATE": {
     "context": "multisite",
@@ -423,5 +455,163 @@
     "label": "Server names hash bucket size",
     "regex": "^.*$",
     "type": "text"
+  },
+  "LOG_FORMAT": {
+    "context": "global",
+    "default": "$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"",
+    "help": "The format to use for access logs.",
+    "id": "log-format",
+    "label": "Access log format",
+    "regex": "^.*$",
+    "type": "text",
+    "multiple": "access-logs"
+  },
+  "ACCESS_LOG": {
+    "context": "global",
+    "default": "/var/log/bunkerweb/access.log",
+    "help": "Path to use for NGINX access logs (file path, syslog:server=host[:port][,param=value], or memory:name:size; set to off to disable).",
+    "id": "access-log",
+    "label": "Access log path",
+    "regex": "^(off|syslog:[^\\s]+|memory:[^\\s]+|\\S+)$",
+    "type": "text",
+    "multiple": "access-logs"
+  },
+  "ERROR_LOG": {
+    "context": "global",
+    "default": "/var/log/bunkerweb/error.log",
+    "help": "Path to use for NGINX error logs (file path, stderr, syslog:server=host[:port][,param=value], or memory:size).",
+    "id": "error-log",
+    "label": "Error log path",
+    "regex": "^(stderr|syslog:[^\\s]+|memory:[^\\s]+|\\S+)$",
+    "type": "text",
+    "multiple": "error-logs"
+  },
+  "PLUGINS_ORDER_INIT": {
+    "context": "global",
+    "default": "sessions whitelist blacklist greylist bunkernet limit authbasic securitytxt robotstxt crowdsec dnsbl headers customcert letsencrypt selfsigned",
+    "help": "Plugins that should run first during the init phase (engine bootstrap, runs once). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-init",
+    "label": "Plugins order (init)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue"
+  },
+  "PLUGINS_ORDER_INIT_WORKER": {
+    "context": "global",
+    "default": "redis bunkernet dnsbl",
+    "help": "Plugins that should run first during the init_worker phase (per-worker bootstrap). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-init-worker",
+    "label": "Plugins order (init_worker)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue"
+  },
+  "PLUGINS_ORDER_SET": {
+    "context": "multisite",
+    "default": "sessions whitelist letsencrypt customcert selfsigned ui",
+    "help": "Plugins that should run first during the set phase for this site (variable setup before rewrite/access). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-set",
+    "label": "Plugins order (set)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue"
+  },
+  "PLUGINS_ORDER_ACCESS": {
+    "context": "multisite",
+    "default": "ssl whitelist letsencrypt blacklist greylist country dnsbl bunkernet crowdsec reversescan limit authbasic misc cors securitytxt robotstxt antibot",
+    "help": "Plugins that should run first during the access phase for this site (request admission/control). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-access",
+    "label": "Plugins order (access)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue"
+  },
+  "PLUGINS_ORDER_SSL_CERTIFICATE": {
+    "context": "multisite",
+    "default": "customcert letsencrypt selfsigned",
+    "help": "Plugins that should run first during the ssl_certificate phase for this site (TLS certificate selection/issuance). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-ssl-certificate",
+    "label": "Plugins order (ssl_certificate)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue"
+  },
+  "PLUGINS_ORDER_HEADER": {
+    "context": "multisite",
+    "default": "headers cors antibot misc",
+    "help": "Plugins that should run first during the header phase for this site (response header filtering). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-header",
+    "label": "Plugins order (header)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue"
+  },
+  "PLUGINS_ORDER_LOG": {
+    "context": "multisite",
+    "default": "badbehavior bunkernet errors metrics",
+    "help": "Plugins that should run first during the log phase for this site (HTTP log processing after response). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-log",
+    "label": "Plugins order (log)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue"
+  },
+  "PLUGINS_ORDER_PREREAD": {
+    "context": "multisite",
+    "default": "whitelist blacklist greylist country dnsbl reversescan",
+    "help": "Plugins that should run first during the preread phase for this site (TCP preread checks before proxying). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-preread",
+    "label": "Plugins order (preread)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue"
+  },
+  "PLUGINS_ORDER_LOG_STREAM": {
+    "context": "multisite",
+    "default": "badbehavior bunkernet",
+    "help": "Plugins that should run first during the log_stream phase for this site (stream log processing). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-log-stream",
+    "label": "Plugins order (log_stream)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue"
+  },
+  "PLUGINS_ORDER_LOG_DEFAULT": {
+    "context": "multisite",
+    "default": "badbehavior bunkernet misc metrics",
+    "help": "Plugins that should run first during the log_default phase for this site (default vhost log processing). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-log-default",
+    "label": "Plugins order (log_default)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue"
+  },
+  "PLUGINS_ORDER_TIMER": {
+    "context": "global",
+    "default": "metrics badbehavior sessions",
+    "help": "Plugins that should run first during the timer phase (background timers). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-timer",
+    "label": "Plugins order (timer)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue"
+  },
+  "PLUGINS_ORDER_INIT_WORKERS": {
+    "context": "global",
+    "default": "",
+    "help": "Comma or space separated plugin IDs to run during the init_workers phase.",
+    "id": "plugins-order-init-workers",
+    "label": "Plugins order (init_workers)",
+    "regex": "^$|^[A-Za-z0-9._-]+([ ]+[A-Za-z0-9._-]+)*$",
+    "type": "multivalue"
+  },
+  "LOG_LEVEL": {
+    "context": "global",
+    "default": "notice",
+    "help": "The level to use for error logs.",
+    "id": "log-level",
+    "label": "Log level",
+    "regex": "^(debug|info|notice|warn|error|crit|alert|emerg)$",
+    "type": "select",
+    "select": [
+      "debug",
+      "info",
+      "notice",
+      "warn",
+      "error",
+      "crit",
+      "alert",
+      "emerg"
+    ],
+    "multiple": "error-logs"
   }
 }

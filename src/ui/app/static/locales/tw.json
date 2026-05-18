@@ -18,16 +18,18 @@
   "aria": {
     "label": {
       "close": "關閉",
-      "raw_configuration": "原始設定"
+      "configs_dropzone": "選取自訂設定匯出檔，或將檔案拖放到這裡",
+      "raw_configuration": "原始設定",
+      "services_dropzone": "選取服務匯出檔，或將檔案拖放到這裡"
     }
   },
   "badge": {
     "from_template": "來自範本",
+    "managed_via_api": "透過 API 管理",
     "new_version": "新版本",
     "no_template": "無範本",
     "unread_news": "未讀新聞",
-    "unread_notifications": "未讀通知",
-    "managed_via_api": "透過 API 管理"
+    "unread_notifications": "未讀通知"
   },
   "banner": {
     "community": "加入 Bunker 社群，加入 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">Discord 聊天</a>並在 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a> 上關注我們。",
@@ -40,15 +42,10 @@
   "breadcrumb": {
     "about": "關於",
     "bans": "封鎖",
-    "link": {
-      "edit_template": "編輯範本 {{template}}",
-      "view_template": "檢視範本 {{template}}",
-      "clone_template": "複製範本 {{template}}"
-    },
     "cache": "快取",
     "configs": "設定",
     "extra_pages": "附加頁面",
-    "global_config": "全域設定",
+    "global_settings": "全域設定",
     "home": "首頁",
     "instances": "執行個體",
     "jobs": "任務",
@@ -81,6 +78,8 @@
     "clear": "清除",
     "close": "關閉",
     "columns": "欄",
+    "convert_configs": "轉換設定",
+    "convert_configs_to": "轉換為 {{state}}",
     "convert_services": "轉換服務",
     "copy": "複製",
     "copy_codes": "複製代碼",
@@ -97,17 +96,19 @@
     "enable_totp": "啟用 TOTP",
     "entire_config": "完整設定",
     "export": "匯出",
-    "export_csv_all": "CSV（全部）",
-    "export_csv_visible": "CSV（可見）",
-    "export_excel_all": "Excel（全部）",
-    "export_excel_visible": "Excel（可見）",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
     "fetch_global": "取得全域設定",
     "filters_suffix": " 過濾器",
     "follow": "追蹤",
+    "force_check": "強制檢查",
+    "force_update": "Force update",
     "github_stars": "星號",
     "go_back": "返回",
     "hide": "隱藏",
     "history": "歷史記錄",
+    "import_configs": "匯入自訂設定",
+    "import_services": "匯入服務",
     "login": "登入",
     "multiple_add": "新增",
     "multiple_hide": "隱藏",
@@ -148,8 +149,7 @@
     "upload_photo": "上傳新相片",
     "view_details": "檢視詳情",
     "view_raw_data": "檢視原始資料",
-    "wipe_other_sessions": "清除其他工作階段",
-    "force_update": "Force update"
+    "wipe_other_sessions": "清除其他工作階段"
   },
   "country": {
     "AD": "安道爾",
@@ -448,29 +448,37 @@
         "title": "按國家/地區封鎖的請求"
       },
       "blocking_status": {
-        "title": "封鎖狀態隨時間變化",
-        "subtitle": "隨時間變化的已封鎖請求",
         "blocked_requests": "已封鎖的請求",
+        "count": "數量",
+        "subtitle": "隨時間變化的已封鎖請求",
         "time": "時間",
-        "count": "數量"
+        "title": "封鎖狀態隨時間變化"
       },
       "request_status": {
-        "title": "請求狀態分佈",
-        "blocked": "已封鎖的請求"
+        "blocked": "已封鎖的請求",
+        "title": "請求狀態分佈"
       },
       "top_blocked_ips": {
-        "title": "前 10 名被封鎖的 IP",
-        "most_blocked": "被封鎖最多的 IP"
+        "most_blocked": "被封鎖最多的 IP",
+        "title": "前 10 名被封鎖的 IP"
       }
     },
     "map": {
       "blocked_requests": "已封鎖的請求",
       "hover_info": "將滑鼠懸停在國家/地區上",
-      "no_data": "無資料",
-      "legend": "圖例"
+      "legend": "圖例",
+      "no_data": "無資料"
+    },
+    "window": {
+      "last_days": "最近 {{days}} 天",
+      "title": "儀表板視窗"
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "選取所有 {{count}} 個符合條件的 {{entity}}",
+    "bulk_select_all_done": "所有 {{count}} 個符合條件的 {{entity}} 均已選取。",
+    "bulk_select_clear": "清除選取",
+    "bulk_select_page": "此頁面上的所有 {{count}} 個 {{entity}} 均已選取。",
     "info_bans": "顯示 {{start}} 到 {{end}} 個封鎖，共 {{total}} 個",
     "info_cache": "顯示 {{start}} 到 {{end}} 個快取檔案，共 {{total}} 個",
     "info_configs": "顯示 {{start}} 到 {{end}} 個自訂設定，共 {{total}} 個",
@@ -483,6 +491,7 @@
     "info_empty_plugins": "無可用外掛程式",
     "info_empty_reports": "無可用報告",
     "info_empty_services": "無可用服務",
+    "info_empty_templates": "沒有可用的模板",
     "info_filtered_bans": "（從 _MAX_ 個總封鎖中篩選）",
     "info_filtered_cache": "（從 _MAX_ 個總快取檔案中篩選）",
     "info_filtered_configs": "（從 _MAX_ 個總自訂設定中篩選）",
@@ -492,12 +501,14 @@
     "info_filtered_plugins": "（從 _MAX_ 個總外掛程式中篩選）",
     "info_filtered_reports": "（從 _MAX_ 個總報告中篩選）",
     "info_filtered_services": "（從 _MAX_ 個總服務中篩選）",
+    "info_filtered_templates": "（從 _MAX_ 個總模板中篩選）",
     "info_instances": "顯示 {{start}} 到 {{end}} 個執行個體，共 {{total}} 個",
     "info_items": "顯示 {{start}} 到 {{end}} 個項目，共 {{total}} 個",
     "info_jobs": "顯示 {{start}} 到 {{end}} 個任務，共 {{total}} 個",
     "info_plugins": "顯示 {{start}} 到 {{end}} 個外掛程式，共 {{total}} 個",
     "info_reports": "顯示 {{start}} 到 {{end}} 個報告，共 {{total}} 個",
     "info_services": "顯示 {{start}} 到 {{end}} 個服務，共 {{total}} 個",
+    "info_templates": "顯示 {{start}} 到 {{end}} 個模板，共 {{total}} 個",
     "length_all": "全部",
     "length_menu_bans": "顯示 _MENU_ 個封鎖",
     "length_menu_cache": "顯示 _MENU_ 個快取檔案",
@@ -508,6 +519,7 @@
     "length_menu_plugins": "顯示 _MENU_ 個外掛程式",
     "length_menu_reports": "顯示 _MENU_ 個報告",
     "length_menu_services": "顯示 _MENU_ 個服務",
+    "length_menu_templates": "顯示 _MENU_ 個模板",
     "paginate": {
       "first": "第一頁",
       "last": "最後一頁",
@@ -543,6 +555,9 @@
     "select_rows_services_0": "未選取服務",
     "select_rows_services_1": "已選取 1 個服務",
     "select_rows_services_plural": "已選取 %d 個服務",
+    "select_rows_templates_0": "未選擇模板",
+    "select_rows_templates_1": "選擇了 1 個模板",
+    "select_rows_templates_plural": "選擇了 %d 個模板",
     "zero_records_bans": "找不到相符的封鎖",
     "zero_records_cache": "找不到相符的快取檔案",
     "zero_records_configs": "找不到相符的自訂設定",
@@ -551,7 +566,8 @@
     "zero_records_jobs": "找不到相符的任務",
     "zero_records_plugins": "找不到相符的外掛程式",
     "zero_records_reports": "找不到相符的報告",
-    "zero_records_services": "找不到相符的服務"
+    "zero_records_services": "找不到相符的服務",
+    "zero_records_templates": "未找到匹配的模板"
   },
   "dev_log": {
     "copy_failed": "複製文字失敗：",
@@ -609,6 +625,8 @@
   },
   "form": {
     "checkbox": {
+      "include_attached_configs": "包含附加的自訂設定",
+      "overwrite_existing_configs": "覆寫現有 UI/API 自訂設定",
       "remember_me": "記住我"
     },
     "help": {
@@ -627,6 +645,7 @@
       "admin_username": "管理員使用者名稱",
       "auto_lets_encrypt": "自動 Let's Encrypt",
       "ban_scope": "封鎖範圍",
+      "certificate_authority": "憑證授權單位",
       "certificate_priority": "憑證優先順序",
       "challenge_type": "挑戰類型",
       "config_type": "設定類型",
@@ -679,7 +698,12 @@
       "use_proxy_protocol": "使用 PROXY 協定",
       "use_real_ip": "使用真實 IP",
       "username": "使用者名稱",
-      "wildcard_certificates": "萬用字元憑證"
+      "wildcard_certificates": "萬用字元憑證",
+      "zerossl_api_key": "ZeroSSL API 金鑰",
+      "zerossl_api_retry": "ZeroSSL API 重試次數",
+      "zerossl_api_retry_delay": "ZeroSSL API 重試延遲",
+      "zerossl_api_connect_timeout": "ZeroSSL API 連線逾時",
+      "zerossl_api_max_time": "ZeroSSL API 最長時間"
     },
     "placeholder": {
       "2fa_code": "輸入代碼",
@@ -726,14 +750,6 @@
     "locked_settings_annotation": "已鎖定 ({{method}})",
     "locked_settings_hint": "鎖定的設定會反白顯示"
   },
-  "logs": {
-    "eventsource_failed": "EventSource 連線失敗",
-    "parse_error": "解析串流資料失敗：{{error}}",
-    "stream_error": "串流錯誤：{{message}}",
-    "stream_init": "串流已初始化，檔案大小：{{size}}",
-    "stream_initialized": "串流已初始化並重新整理，檔案大小：{{size}}",
-    "trimmed_notice": "--- 為了效能，已移除 {{count}} 筆較舊的日誌行 ---"
-  },
   "link": {
     "back_to_login": "返回登入",
     "forgot_password": "忘記密碼？",
@@ -745,11 +761,21 @@
     "see_more": "查看更多",
     "upgrade": "升級？"
   },
+  "logs": {
+    "eventsource_failed": "EventSource 連線失敗",
+    "parse_error": "解析串流資料失敗：{{error}}",
+    "stream_error": "串流錯誤：{{message}}",
+    "stream_init": "串流已初始化，檔案大小：{{size}}",
+    "stream_initialized": "串流已初始化並重新整理，檔案大小：{{size}}",
+    "trimmed_notice": "--- 為了效能，已移除 {{count}} 筆較舊的日誌行 ---"
+  },
   "modal": {
     "body": {
       "add_plugin_dropzone": "將您的外掛程式封存拖放到此處或點擊以選取檔案。",
       "confirm_cache_deletion_alert": "您確定要刪除選定的快取檔案嗎？",
       "confirm_cache_deletion_alert_plural": "您確定要刪除選定的快取檔案嗎？",
+      "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
+      "confirm_configs_conversion_to": "確定將所選自訂設定轉換為 {{state}} 嗎？",
       "confirm_configs_deletion_alert": "您確定要刪除選定的自訂設定嗎？",
       "confirm_configs_deletion_alert_plural": "您確定要刪除選定的自訂設定嗎？",
       "confirm_conversion_confirmation": "您確定要轉換選定的服務嗎？",
@@ -760,6 +786,21 @@
       "confirmation_instance_deletion": "您確定要刪除選定的執行個體嗎？",
       "delete_confirmation_alert": "您確定要刪除選定的執行個體嗎？",
       "delete_confirmation_alert_plural": "您確定要刪除選定的執行個體嗎？",
+      "delete_confirmation_template_used": "一個或多個選定的模板已分配給服務（總共 {{services_count}} 個服務）。刪除它們將清除這些分配。您想繼續嗎？",
+      "delete_step_confirmation": "您確定要刪除此步驟嗎？",
+      "delete_step_content_label": "內容",
+      "delete_step_name_label": "步驟",
+      "delete_template_global_usage": "由全域設定使用",
+      "delete_template_services_list": "由服務使用：{{services}}",
+      "fetch_global_settings_bold": "這將取得全域設定並套用到目前的樣板。",
+      "fetch_global_settings_point_1": "只會更新此樣板中存在的設定。",
+      "fetch_global_settings_point_2": "與預設值相同的數值會被忽略。",
+      "fetch_global_settings_point_3": "SERVER_NAME 永不會被覆寫。",
+      "export_services_intro": "將匯出所選服務。啟用下方選項，可將其附加的自訂設定打包到 .zip 封存檔中。",
+      "import_configs_dropzone": "將您的自訂設定匯出檔拖放到這裡，或按一下以選取檔案。",
+      "import_configs_warning": "由 scheduler、autoconf 或 templates 建立的自訂設定一律會保留。只有 UI/API 設定可以被覆寫。",
+      "import_services_dropzone": "將您的服務匯出檔案拖放到此處，或按一下以選取檔案。",
+      "import_services_warning": "匯入服務將從匯出檔案建立新的 UI 服務。現有服務將被略過。",
       "instance_creation_alert": "您不需要提供連接埠或伺服器名稱；`API_HTTP_PORT`、`API_LISTEN_HTTPS`、`API_HTTPS_PORT` 和 `API_SERVER_NAME` 的值將用於執行個體設定。",
       "next_step_in_case_of_issue": "如果遇到問題，您可以手動接受不安全的憑證：",
       "recovery_codes_save_alert": "請將這些恢復碼儲存在安全的位置（例如密碼管理器或保險箱）。如果遺失驗證裝置，您可以使用它們存取您的帳戶。",
@@ -768,18 +809,11 @@
       "services_deletion_confirmation": "您確定要刪除選定的服務嗎？",
       "unban_confirmation_alert": "您確定要解除封鎖選定的 IP 位址嗎？",
       "unban_confirmation_alert_plural": "您確定要解除封鎖選定的 IP 位址嗎？",
-      "update_duration_alert": "請為選定的封鎖選擇新的期限：",
-      "fetch_global_config_bold": "這將取得全域設定並套用到目前的樣板。",
-      "fetch_global_config_point_1": "只會更新此樣板中存在的設定。",
-      "fetch_global_config_point_2": "與預設值相同的數值會被忽略。",
-      "fetch_global_config_point_3": "SERVER_NAME 永不會被覆寫。",
-      "delete_step_confirmation": "您確定要刪除此步驟嗎？",
-      "delete_step_name_label": "步驟",
-      "delete_step_content_label": "內容"
+      "update_duration_alert": "請為選定的封鎖選擇新的期限："
     },
     "button": {
-      "reset_template_confirm": "重設範本設定",
-      "fetch_global_config_confirm": "套用全域設定"
+      "fetch_global_settings_confirm": "套用全域設定",
+      "reset_template_confirm": "重設範本設定"
     },
     "section": {
       "ban_details": "封鎖詳情",
@@ -795,17 +829,21 @@
       "create_new_instance": "建立新執行個體",
       "create_template": "建立範本",
       "delete_instance": "刪除執行個體",
+      "delete_step": "刪除步驟",
       "delete_template": "刪除範本",
+      "edit_template": "編輯模板：{{name}}",
+      "fetch_global_settings": "要套用全域設定嗎？",
+      "export_services": "匯出服務",
       "from_plugin": "來自外掛程式",
       "full_url": "完整 URL",
+      "import_configs": "匯入自訂設定",
+      "import_services": "匯入服務",
       "job_history": "最近 10 次任務執行",
       "job_history_count": "任務 {{count}} 次執行",
       "recovery_codes": "恢復碼",
       "reset_template_config": "重設範本設定？",
-      "fetch_global_config": "要套用全域設定嗎？",
       "server_name_not_unique": "伺服器名稱不是唯一的",
-      "update_duration": "更新封鎖期限",
-      "delete_step": "刪除步驟"
+      "update_duration": "更新封鎖期限"
     }
   },
   "mode": {
@@ -831,7 +869,7 @@
     "cache": "快取",
     "configs": "設定",
     "extra_pages": "附加頁面",
-    "global_config": "全域設定",
+    "global_settings": "全域設定",
     "home": "首頁",
     "instances": "執行個體",
     "jobs": "任務",
@@ -839,7 +877,6 @@
     "misc": "雜項",
     "mode_selection": "模式選擇",
     "more": "更多...",
-    "new": "新增",
     "plugin_activated": "外掛程式已啟用",
     "plugin_activated_global": "外掛程式已全域啟用",
     "plugin_deactivated": "外掛程式已停用",
@@ -901,12 +938,12 @@
       "unknown": "未知的到期日期"
     },
     "force_check": {
-      "title": "Force check",
-      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
+      "title": "Force check"
     },
     "force_update": {
-      "title": "Force update",
-      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept.",
+      "title": "Force update"
     },
     "key": {
       "title": {
@@ -1012,6 +1049,7 @@
     "next_30d": "未來 30 天",
     "next_7d": "未來 7 天",
     "older_30d": "超過 30 天前",
+    "one_or_more": "一個或多個",
     "permanent": "永久",
     "plugin": "外掛程式",
     "reason": "原因",
@@ -1022,7 +1060,9 @@
     "service": "服務",
     "show_message": "全部顯示",
     "start_date": "開始日期",
+    "status": "狀態",
     "status_code": "狀態碼",
+    "steps": "步驟",
     "stream": "串流支援",
     "template": "範本",
     "title_0": "無啟用中篩選器",
@@ -1030,7 +1070,12 @@
     "title_plural": "啟用中篩選器 - %d",
     "type": "類型",
     "url": "URL",
-    "version": "版本"
+    "version": "版本",
+    "zero": "無"
+  },
+  "security_mode": {
+    "block": "封鎖",
+    "detect": "偵測"
   },
   "settings": {
     "custom_config": {
@@ -1042,14 +1087,28 @@
     }
   },
   "setup": {
+    "status": {
+      "admin_user_exists": "🧑‍🚀 管理員使用者已存在。請繼續下一步。",
+      "pro_license_key_exists": "⭐ PRO 授權金鑰已設定，請繼續下一步。",
+      "reverse_proxy_configured": "↪️ Web 介面已設定反向代理。請繼續下一步。",
+      "secure_password": "安全密碼",
+      "unique_server_name": "唯一伺服器名稱"
+    },
     "step1": {
       "subtitle": "建立您的管理員帳戶。",
       "title": "管理員使用者"
     },
     "step2": {
+      "lets_encrypt": {
+        "certificate_authority_selector": "憑證授權單位選擇器",
+        "letsencrypt_description": "使用 Let's Encrypt 進行標準 ACME 簽發。可使用 staging 環境進行測試與整合檢查。",
+        "zerossl_api_key_hint": "若留空，ZeroSSL 會使用已設定的電子郵件進行帳戶註冊。",
+        "zerossl_description": "搭配 zerossl-bot 使用 ZeroSSL。請提供帳戶電子郵件或 API 金鑰，以進行帳戶簽發與基於金鑰的重新簽發追蹤。"
+      },
       "section": {
         "custom_certificate": "自訂憑證",
         "lets_encrypt": "Let's Encrypt",
+        "zerossl": "ZeroSSL",
         "real_ip": "真實 IP",
         "reverse_proxy": "反向代理"
       },
@@ -1057,19 +1116,19 @@
       "title": "UI 設定"
     },
     "step3": {
-      "title": "升級至 PRO",
-      "subtitle": "解鎖進階功能，充分利用 BunkerWeb。",
       "label": {
         "pro_benefits": "PRO 方案優勢"
       },
-      "pro_benefit_1_title": "存取所有 PRO 功能",
       "pro_benefit_1_description": "解鎖所有進階功能，包括強化的安全性、效能和管理工具。",
-      "pro_benefit_2_title": "由維護人員提供技術支援",
+      "pro_benefit_1_title": "存取所有 PRO 功能",
       "pro_benefit_2_description": "對於您可能遇到的任何問題或疑問，從 BunkerWeb 團隊獲得優先支援。",
-      "pro_benefit_3_title": "客製化開發",
+      "pro_benefit_2_title": "由維護人員提供技術支援",
       "pro_benefit_3_description": "量身打造的解決方案，以滿足您的特定需求。",
+      "pro_benefit_3_title": "客製化開發",
+      "pro_benefit_4_description": "優化您的 BunkerWeb 設定的專家建議。",
       "pro_benefit_4_title": "客製化諮詢",
-      "pro_benefit_4_description": "優化您的 BunkerWeb 設定的專家建議。"
+      "subtitle": "解鎖進階功能，充分利用 BunkerWeb。",
+      "title": "升級至 PRO"
     },
     "step4": {
       "label": {
@@ -1077,13 +1136,6 @@
       },
       "subtitle": "在完成設定前檢查您的設定。",
       "title": "概觀"
-    },
-    "status": {
-      "admin_user_exists": "🧑‍🚀 管理員使用者已存在。請繼續下一步。",
-      "pro_license_key_exists": "⭐ PRO 授權金鑰已設定，請繼續下一步。",
-      "reverse_proxy_configured": "↪️ Web 介面已設定反向代理。請繼續下一步。",
-      "secure_password": "安全密碼",
-      "unique_server_name": "唯一伺服器名稱"
     },
     "subtitle": "按照步驟完成設定精靈。",
     "title": "設定精靈"
@@ -1094,8 +1146,12 @@
     "default_server": "預設伺服器",
     "down": "已停止",
     "draft": "草稿",
+    "error_deleting_template": "刪除模板時發生錯誤。",
     "error_loading_bans": "載入封鎖時發生錯誤。請嘗試重新整理頁面。",
+    "error_loading_template": "無法載入模板資料。",
+    "error_saving_template": "儲存模板時發生錯誤。",
     "failed": "失敗",
+    "invalid_json_payload": "無效的 JSON 負載。",
     "loading": "載入中...",
     "loading_bans": "正在載入封鎖...",
     "loading_cache_file": "正在載入快取檔案...",
@@ -1110,12 +1166,14 @@
     "loading_reports": "正在載入報告...",
     "loading_services": "正在載入服務...",
     "loading_templates": "正在載入範本...",
+    "missing_template_information": "缺少模板資訊。",
     "news_connection_error": "無法連線至部落格以取得新聞更新。",
     "no": "否",
     "no_data": "無資料",
     "no_history": "無可用歷史記錄。",
     "no_item": "無項目",
     "no_notifications": "無通知可顯示。",
+    "no_search_results": "找不到項目。",
     "no_steps": "無可用步驟",
     "no_steps_description": "此範本沒有任何可設定的步驟。",
     "online": "線上",
@@ -1196,10 +1254,12 @@
       "service": "服務",
       "service_name": "服務名稱",
       "settings": "設定",
+      "status": "狀態",
       "status_code": "狀態碼",
       "steps": "步驟",
       "stream": "串流",
       "template": "範本",
+      "templates": "模板",
       "time_left": "剩餘時間",
       "type": "類型",
       "url": "URL",
@@ -1208,7 +1268,6 @@
     }
   },
   "template": {
-    "none": "無範本",
     "editor": {
       "button_add_config": "新增設定檔",
       "button_add_setting": "新增設定",
@@ -1217,7 +1276,6 @@
       "button_move_up": "上移",
       "button_remove": "移除",
       "clone_badge": "從 {{template}} 複製",
-      "setting_toggle_enabled": "已啟用",
       "configs": "自訂設定",
       "configs_help": "為此範本附加選用的自訂設定片段。",
       "delete_step_confirm": "您確定要刪除此步驟嗎？",
@@ -1241,6 +1299,23 @@
       "label_step_settings": "此步驟中的設定",
       "label_step_subtitle": "步驟副標題",
       "label_step_title": "步驟標題",
+      "missing_configs_body": "匯入的範本參考了尚未上傳的自訂設定檔。請匯入這些設定檔以完成範本設定：",
+      "missing_configs_browse": "瀏覽檔案",
+      "missing_configs_done": "完成",
+      "missing_configs_drop_hint": "將設定檔拖曳至此處 (.conf, .cfg, .txt)",
+      "missing_configs_drop_or": "或",
+      "missing_configs_hint_body": "上傳的檔案將自動新增到您的範本中。請確保檔案名稱與上面列出的缺少設定檔相符。",
+      "missing_configs_hint_title": "提示:",
+      "missing_configs_resolved": "所有缺少的設定檔都已上傳！範本成功匯入。",
+      "missing_configs_title": "缺少自訂設定檔",
+      "missing_configs_upload_failed": "上傳設定檔失敗",
+      "missing_configs_upload_label": "上傳缺少的設定檔 (.conf, .cfg, .txt)",
+      "missing_configs_upload_partial": "已上傳 {{total}} 個設定檔中的 {{uploaded}} 個。仍缺少: {{missing}}",
+      "missing_configs_upload_success": "成功上傳 {{count}} 個設定檔",
+      "multiselect_placeholder": "選擇選項",
+      "multiselect_summary": "已選擇 {{count}} 項",
+      "multivalue_add": "新增值",
+      "multivalue_helper": "每行一個值。{{separatorNote}}",
       "panel_overview": "總覽",
       "panel_overview_help": "追蹤關鍵資訊並在各區塊間導覽。",
       "placeholder_config_data": "資料",
@@ -1252,6 +1327,47 @@
       "placeholder_step_title": "步驟標題",
       "placeholder_template_id": "範本ID",
       "placeholder_template_name": "我的範本",
+      "raw_configs_browse": "瀏覽檔案",
+      "raw_configs_drop_hint": "將設定檔拖曳至此處或點擊以瀏覽 (.conf, .cfg, .txt)",
+      "raw_configs_drop_supported": "支援的格式: .conf, .cfg, .txt",
+      "raw_configs_empty": "尚無匯入的設定檔。新檔案將顯示在下方。",
+      "raw_configs_help": "上傳設定檔 (.conf, .cfg, .txt) 以將項目附加到 <code>configs</code>。類型預設為 <code>server_http</code>；如果需要，請在 JSON 中進行調整。",
+      "raw_configs_import_invalid": "由於目前的 JSON 無效，無法匯入設定檔。",
+      "raw_configs_import_none": "未匯入任何設定檔。",
+      "raw_configs_import_success": "已匯入 {{count}} 個設定檔。",
+      "raw_configs_note": "匯入的檔案會新增到 JSON 編輯器。儲存前請檢視和調整。",
+      "raw_configs_title": "自訂設定檔匯入",
+      "raw_configs_upload": "上傳設定檔 (.conf, .cfg, .txt)",
+      "raw_configs_upload_failed": "無法讀取其中一個選定的檔案。",
+      "raw_editor_drop_hint": "拖曳範本 JSON 檔案 (僅 .json) 以取代目前的內容。",
+      "raw_editor_aria": "原始模板 JSON 編輯器",
+      "raw_editor_help": "將完整的範本定義編輯為 JSON。切換回簡易模式會驗證並重新載入視覺化編輯器。",
+      "raw_editor_import_success": "範本 JSON 成功匯入。",
+      "raw_editor_override_body": "匯入此檔案將完全取代目前的範本 JSON。在編輯器中所做的變更將會遺失。您要繼續嗎？",
+      "raw_editor_override_confirm": "取代範本",
+      "raw_editor_override_title": "取代範本 JSON 嗎？",
+      "raw_editor_title": "原始範本 JSON",
+      "raw_editor_upload_empty": "上傳的檔案是空的。",
+      "raw_editor_upload_failed": "無法讀取選定的檔案。",
+      "raw_editor_upload_template": "上傳範本 JSON (僅 .json)",
+      "raw_validation_config_definition": "無效的設定檔定義。",
+      "raw_validation_config_object": "設定檔項目必須是物件。",
+      "raw_validation_configs_unassigned": "設定檔 {{configs}} 未分配給任何步驟。",
+      "raw_validation_empty": "範本 JSON 不能為空。",
+      "raw_validation_invalid_json": "無效的 JSON 酬載: {{error}}",
+      "raw_validation_object": "範本酬載必須是 JSON 物件。",
+      "raw_validation_setting_key": "設定鍵必須是非空字串。",
+      "raw_validation_settings_object": "設定必須以物件形式提供。",
+      "raw_validation_settings_unassigned": "設定 {{settings}} 未分配給任何步驟。",
+      "raw_validation_step_config_duplicate": "設定檔 {{config}} 已分配給多個步驟。",
+      "raw_validation_step_config_reference": "步驟 {{index}} 包含無效的設定檔參考。",
+      "raw_validation_step_config_unknown": "步驟 {{index}} 參考了未知設定檔 {{config}}。",
+      "raw_validation_step_object": "步驟 {{index}} 必須是一個物件。",
+      "raw_validation_step_setting_duplicate": "設定 {{setting}} 已分配給多個步驟。",
+      "raw_validation_step_setting_reference": "步驟 {{index}} 包含無效的設定參考。",
+      "raw_validation_step_setting_unknown": "步驟 {{index}} 參考了未知設定 {{setting}}。",
+      "raw_validation_step_title": "步驟 {{index}} 必須有一個標題。",
+      "raw_validation_steps_required": "範本必須至少包含一個步驟。",
       "readonly_db": "資料庫目前為唯讀。無法變更範本。",
       "readonly_method": "此範本由 {{method}} 流程建立，無法從 UI 編輯。",
       "readonly_title": "唯讀",
@@ -1259,8 +1375,6 @@
       "select_config_placeholder": "選擇一個設定檔",
       "select_config_type_placeholder": "選擇類型",
       "select_setting_placeholder": "選擇一個設定",
-      "settings": "設定",
-      "settings_help": "定義此範本公開的設定與其預設值。",
       "setting_remove_confirm": "您確定要從範本中移除此設定嗎？",
       "setting_remove_key": "設定",
       "setting_remove_title": "移除設定",
@@ -1284,6 +1398,9 @@
       "setting_selector_pattern": "模式",
       "setting_selector_search_label": "尋找多站台設定",
       "setting_selector_search_placeholder": "依標籤、鍵或外掛程式搜尋",
+      "setting_toggle_enabled": "已啟用",
+      "settings": "設定",
+      "settings_help": "定義此範本公開的設定與其預設值。",
       "step_configs_empty": "此步驟尚未新增任何設定檔。",
       "step_configs_selection_title": "選擇現有設定檔",
       "step_default_title": "未命名步驟",
@@ -1313,61 +1430,9 @@
       "validation_configs_unique": "每個設定檔名稱必須唯一。",
       "validation_id_required": "範本 ID 為必填。",
       "validation_setting_key": "每個設定必須有鍵。",
-      "validation_settings_unique": "每個設定鍵必須唯一。",
-      "raw_configs_help": "上傳設定檔 (.conf, .cfg, .txt) 以將項目附加到 <code>configs</code>。類型預設為 <code>server_http</code>；如果需要，請在 JSON 中進行調整。",
-      "raw_configs_import_invalid": "由於目前的 JSON 無效，無法匯入設定檔。",
-      "raw_configs_import_none": "未匯入任何設定檔。",
-      "raw_configs_import_success": "已匯入 {{count}} 個設定檔。",
-      "raw_configs_note": "匯入的檔案會新增到 JSON 編輯器。儲存前請檢視和調整。",
-      "raw_configs_title": "自訂設定檔匯入",
-      "raw_configs_upload": "上傳設定檔 (.conf, .cfg, .txt)",
-      "raw_configs_upload_failed": "無法讀取其中一個選定的檔案。",
-      "raw_configs_browse": "瀏覽檔案",
-      "raw_configs_drop_hint": "將設定檔拖曳至此處或點擊以瀏覽 (.conf, .cfg, .txt)",
-      "raw_configs_drop_supported": "支援的格式: .conf, .cfg, .txt",
-      "raw_configs_empty": "尚無匯入的設定檔。新檔案將顯示在下方。",
-      "raw_editor_help": "將完整的範本定義編輯為 JSON。切換回簡易模式會驗證並重新載入視覺化編輯器。",
-      "raw_editor_import_success": "範本 JSON 成功匯入。",
-      "raw_editor_title": "原始範本 JSON",
-      "raw_editor_upload_empty": "上傳的檔案是空的。",
-      "raw_editor_upload_failed": "無法讀取選定的檔案。",
-      "raw_editor_upload_template": "上傳範本 JSON (僅 .json)",
-      "raw_validation_configs_unassigned": "設定檔 {{configs}} 未分配給任何步驟。",
-      "raw_validation_config_definition": "無效的設定檔定義。",
-      "raw_validation_config_object": "設定檔項目必須是物件。",
-      "raw_validation_empty": "範本 JSON 不能為空。",
-      "raw_validation_invalid_json": "無效的 JSON 酬載: {{error}}",
-      "raw_validation_object": "範本酬載必須是 JSON 物件。",
-      "raw_validation_setting_key": "設定鍵必須是非空字串。",
-      "raw_validation_settings_object": "設定必須以物件形式提供。",
-      "raw_validation_step_config_duplicate": "設定檔 {{config}} 已分配給多個步驟。",
-      "raw_validation_step_config_reference": "步驟 {{index}} 包含無效的設定檔參考。",
-      "raw_validation_step_config_unknown": "步驟 {{index}} 參考了未知設定檔 {{config}}。",
-      "raw_validation_step_object": "步驟 {{index}} 必須是一個物件。",
-      "raw_validation_step_setting_duplicate": "設定 {{setting}} 已分配給多個步驟。",
-      "raw_validation_step_setting_reference": "步驟 {{index}} 包含無效的設定參考。",
-      "raw_validation_step_setting_unknown": "步驟 {{index}} 參考了未知設定 {{setting}}。",
-      "raw_validation_step_title": "步驟 {{index}} 必須有一個標題。",
-      "raw_validation_steps_required": "範本必須至少包含一個步驟。",
-      "raw_validation_settings_unassigned": "設定 {{settings}} 未分配給任何步驟。",
-      "raw_editor_drop_hint": "拖曳範本 JSON 檔案 (僅 .json) 以取代目前的內容。",
-      "raw_editor_override_title": "取代範本 JSON 嗎？",
-      "raw_editor_override_body": "匯入此檔案將完全取代目前的範本 JSON。在編輯器中所做的變更將會遺失。您要繼續嗎？",
-      "raw_editor_override_confirm": "取代範本",
-      "missing_configs_title": "缺少自訂設定檔",
-      "missing_configs_body": "匯入的範本參考了尚未上傳的自訂設定檔。請匯入這些設定檔以完成範本設定：",
-      "missing_configs_hint_title": "提示:",
-      "missing_configs_hint_body": "上傳的檔案將自動新增到您的範本中。請確保檔案名稱與上面列出的缺少設定檔相符。",
-      "missing_configs_upload_label": "上傳缺少的設定檔 (.conf, .cfg, .txt)",
-      "missing_configs_drop_hint": "將設定檔拖曳至此處 (.conf, .cfg, .txt)",
-      "missing_configs_drop_or": "或",
-      "missing_configs_browse": "瀏覽檔案",
-      "missing_configs_done": "完成",
-      "missing_configs_upload_success": "成功上傳 {{count}} 個設定檔",
-      "missing_configs_upload_partial": "已上傳 {{total}} 個設定檔中的 {{uploaded}} 個。仍缺少: {{missing}}",
-      "missing_configs_upload_failed": "上傳設定檔失敗",
-      "missing_configs_resolved": "所有缺少的設定檔都已上傳！範本成功匯入。"
-    }
+      "validation_settings_unique": "每個設定鍵必須唯一。"
+    },
+    "none": "無範本"
   },
   "theme": {
     "dark": "深色",
@@ -1382,19 +1447,22 @@
     },
     "copied": "已複製！",
     "disclaimer_title": "免責聲明",
+    "global_settings_applied_body": "已成功取得全域設定並套用到目前的表單。",
+    "global_settings_applied_title": "全域設定已套用",
+    "global_settings_failed_body": "取得全域設定時發生錯誤。",
+    "global_settings_failed_title": "取得全域設定失敗",
     "header": {
       "ping_failed": "Ping 失敗",
       "ping_succeed": "Ping 成功"
     },
-    "ip_unbanned": "IP 位址已成功解除封鎖！",
-    "global_settings_applied_title": "全域設定已套用",
-    "global_settings_applied_body": "已成功取得全域設定並套用到目前的表單。",
-    "global_settings_failed_title": "取得全域設定失敗",
-    "global_settings_failed_body": "取得全域設定時發生錯誤。"
+    "ip_unbanned": "IP 位址已成功解除封鎖！"
   },
   "tooltip": {
     "auto_lets_encrypt": "是否自動請求 Let's Encrypt 憑證。",
     "button": {
+      "ban_ip": "封鎖此 IP 位址",
+      "convert_config_to_draft": "Convert Config {{name}} to Draft",
+      "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "將服務 {{name}} 轉換為草稿",
       "convert_service_to_online": "將服務 {{name}} 轉換為線上",
       "delete_config": "刪除自訂設定 {{name}}",
@@ -1403,20 +1471,17 @@
       "delete_plugin": "刪除外掛程式 {{name}}",
       "delete_service": "刪除服務 {{name}}",
       "delete_template": "刪除範本 {{name}}",
+      "force_check": "排程檢查；僅在有更新時下載。",
+      "force_update": "略過檢查並強制下載 PRO 外掛；失敗時保留目前狀態。",
       "ping_instance": "Ping 執行個體 {{hostname}}",
       "reload_instance": "重新載入執行個體 {{hostname}}",
       "reset_default": "重設為預設值",
-      "edit_template": "編輯範本 {{template}}",
-      "view_template": "檢視範本 {{template}}",
-      "clone_template": "複製範本 {{template}}",
       "reset_global": "重設為全域值",
-      "value_from_global": "來自全域設定的值",
       "run_job": "執行任務 {{job}}",
+      "show_selected_only": "僅顯示所選項目",
       "stop_instance": "停止執行個體 {{hostname}}",
       "unban_ip": "解除封鎖 {{ip}}",
-      "ban_ip": "封鎖此 IP 位址",
-      "force_check": "排程檢查；僅在有更新時下載。",
-      "force_update": "略過檢查並強制下載 PRO 外掛；失敗時保留目前狀態。"
+      "value_from_global": "來自全域設定的值"
     },
     "cannot_delete_original_ban": "無法刪除原始封鎖項目。",
     "cannot_remove_disabled": "無法移除，因為一或多個設定已停用。",
@@ -1454,32 +1519,34 @@
     "dns_provider_dns_only": "DNS 提供者選擇僅適用於 DNS 挑戰。",
     "download_file": "下載檔案",
     "draft_toggle_disabled": "草稿模式只能在透過 UI 建立的服務上切換。",
-    "email_lets_encrypt": "用於向 Let's Encrypt 註冊以進行憑證管理和通知的電子郵件地址。",
     "email_length": "電子郵件必須在 1 到 256 個字元之間。",
-    "follow_latest_page_only": "追蹤模式僅在最新頁面可用",
+    "email_lets_encrypt": "用於向 Let's Encrypt 註冊以進行憑證管理和通知的電子郵件地址。",
     "fetch_global_settings": "取得全域設定並應用於當前範本",
-    "global_config_source": "值繼承自全域設定。",
+    "follow_latest_page_only": "追蹤模式僅在最新頁面可用",
+    "global_settings_source": "值繼承自全域設定。",
     "instance_not_up": "執行個體 {{hostname}} 目前未回應 ('up')。",
     "latest_version_installed": "您正在執行最新版本。",
     "lets_encrypt_custom_profile": "用於 Let's Encrypt 的自訂設定檔（例如 'my_custom_profile'）。",
     "lets_encrypt_disable_public_suffixes": "停用符合公共字尾清單（PSL）的網域的憑證請求（建議啟用）。",
+    "lets_encrypt_server": "選擇您的憑證供應商以顯示供應商專屬設定。",
     "lets_encrypt_profile": "用於 Let's Encrypt 的設定檔（classic、tlsserver、shortlived）。",
     "license_key": "您的 BunkerWeb PRO 授權金鑰。",
     "link": {
       "access_plugin_page": "存取 {{name}} 頁面",
       "access_service": "存取服務 {{name}}",
-      "clone_template": "複製範本 {{template}}",
       "clone_config": "複製自訂設定 {{name}}",
       "clone_service": "複製服務 {{name}}",
+      "clone_template": "複製範本 {{template}}",
       "download_file": "下載 {{filename}}",
       "edit_config": "編輯自訂設定 {{name}}",
-      "edit_template": "編輯範本 {{template}}",
       "edit_service": "編輯服務 {{service}}",
+      "edit_template": "編輯範本 {{template}}",
+      "export_config": "匯出自訂設定 {{name}}",
       "export_service": "匯出服務 {{name}} 設定",
       "view_config": "檢視自訂設定 {{name}}",
       "view_file": "檢視 {{filename}}",
-      "view_template": "檢視範本 {{template}}",
-      "view_service": "檢視服務 {{service}}"
+      "view_service": "檢視服務 {{service}}",
+      "view_template": "檢視範本 {{template}}"
     },
     "modal": {
       "title": {
@@ -1510,20 +1577,6 @@
       "yes": "支援 STREAM 模式。"
     },
     "table": {
-      "templates": {
-        "actions": "此範本可用的操作",
-        "details": "顯示範本詳情",
-        "select_all": "選取所有範本",
-        "id": "範本 ID",
-        "name": "使用者定義或自動產生的範本名稱",
-        "plugin": "包含此範本的外掛",
-        "steps": "範本的步驟數",
-        "settings": "範本的設定數量",
-        "configs": "範本的設定檔數量",
-        "method": "範本的建立方式",
-        "created": "範本的建立日期",
-        "last_update": "範本的最後更新日期"
-      },
       "bans": {
         "actions": "此封鎖可用的操作",
         "country": "被封鎖 IP 位址的國家/地區",
@@ -1555,6 +1608,7 @@
         "name": "自訂設定的名稱",
         "select_all": "選取所有自訂設定",
         "service": "與自訂設定關聯的服務（或全域）",
+        "status": "自訂設定的草稿狀態",
         "template": "指示自訂設定是否源自範本",
         "type": "自訂設定的類型或上下文（例如，HTTP, MODSEC）"
       },
@@ -1618,9 +1672,24 @@
         "last_update": "服務最後更新的日期和時間",
         "method": "服務的建立方法（例如，ui, file）",
         "name": "服務的名稱",
+        "security_mode": "服務的安全模式（封鎖或偵測）",
         "select_all": "選擇所有服務",
         "template": "服務使用的範本",
         "type": "服務類型 (線上/草稿)"
+      },
+      "templates": {
+        "actions": "此範本可用的操作",
+        "configs": "範本的設定檔數量",
+        "created": "範本的建立日期",
+        "details": "顯示範本詳情",
+        "id": "範本 ID",
+        "last_update": "範本的最後更新日期",
+        "method": "範本的建立方式",
+        "name": "使用者定義或自動產生的範本名稱",
+        "plugin": "包含此範本的外掛",
+        "select_all": "選取所有範本",
+        "settings": "範本的設定數量",
+        "steps": "範本的步驟數"
       }
     },
     "ui_host": "將透過反向代理提供 BunkerWeb UI 的主機名稱或 IP 位址。",
@@ -1628,13 +1697,19 @@
     "ui_url_security": "使用非標準、難以猜測的 URL 路徑可增強安全性。",
     "use_custom_ssl": "是否使用自訂 SSL 憑證而不是 Let's Encrypt。",
     "use_lets_encrypt_staging": "是否使用 Let's Encrypt 的 staging 環境進行測試（產生不受信任的憑證）。",
+    "use_lets_encrypt_staging_letsencrypt_only": "只有在使用 Let's Encrypt 伺服器時，才可使用 Let's Encrypt staging。",
     "use_proxy_protocol": "啟用 PROXY 協定通訊。",
     "use_real_ip": "使用真實 IP",
     "username_length": "使用者名稱必須在 1 到 256 個字元之間。",
     "value_from_global": "來自全域設定的值",
     "view_full_url": "點擊檢視完整 URL",
     "wildcard_certificates": "產生萬用字元憑證 (*.domain.com)。需要 DNS 挑戰。",
-    "wildcard_dns_only": "萬用字元憑證僅支援 DNS 挑戰類型。"
+    "wildcard_dns_only": "萬用字元憑證僅支援 DNS 挑戰類型。",
+    "zerossl_api_key": "由 zerossl-bot 使用的可選 ZeroSSL API 金鑰。",
+    "zerossl_api_retry": "ZeroSSL API 請求的重試次數（0 代表停用重試）。",
+    "zerossl_api_retry_delay": "ZeroSSL API 重試之間的延遲秒數。",
+    "zerossl_api_connect_timeout": "ZeroSSL API 呼叫的連線逾時秒數。",
+    "zerossl_api_max_time": "每個 ZeroSSL API 請求的最大總秒數。"
   },
   "totp": {
     "prompt": "請輸入您的 TOTP 代碼。"
@@ -1648,6 +1723,7 @@
     "ip_service_duplicate": "此 IP 位址已針對所選服務 ({{service}}) 被封鎖。",
     "pattern": "請輸入有效的 {{field}} 值。",
     "required": "{{field}} 是必填項。",
-    "service_required_for_ban": "對於特定於服務的封鎖，必須選取一個服務。"
+    "service_required_for_ban": "對於特定於服務的封鎖，必須選取一個服務。",
+    "zerossl_email_or_api_key_required": "ZeroSSL 需要電子郵件或 ZeroSSL API 金鑰。"
   }
 }

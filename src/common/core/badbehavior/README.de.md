@@ -26,7 +26,7 @@ Führen Sie die folgenden Schritte aus, um die Bad Behavior-Funktion zu konfigur
 2.  **Statuscodes konfigurieren:** Definieren Sie mit der Einstellung `BAD_BEHAVIOR_STATUS_CODES`, welche HTTP-Statuscodes als „schlecht“ gelten sollen.
 3.  **Schwellenwerte festlegen:** Bestimmen Sie mit der Einstellung `BAD_BEHAVIOR_THRESHOLD`, wie viele „schlechte“ Antworten eine Sperre auslösen sollen.
 4.  **Zeiträume konfigurieren:** Geben Sie die Dauer für die Zählung schlechter Antworten und die Sperrdauer mit den Einstellungen `BAD_BEHAVIOR_COUNT_TIME` und `BAD_BEHAVIOR_BAN_TIME` an.
-5.  **Sperrbereich wählen:** Entscheiden Sie mit der Einstellung `BAD_BEHAVIOR_BAN_SCOPE`, ob die Sperren nur für den aktuellen Dienst oder global für alle Dienste gelten sollen.
+5.  **Sperrbereich wählen:** Entscheiden Sie mit der Einstellung `BAD_BEHAVIOR_BAN_SCOPE`, ob die Sperren nur für den aktuellen Dienst oder global für alle Dienste gelten sollen. Trifft der Traffic auf den Standardserver (Servername `_`), werden Sperren immer global gesetzt, damit die IP überall blockiert wird.
 
 !!! tip "Stream-Modus"
     Im **Stream-Modus** wird nur der Statuscode `444` als „schlecht“ angesehen und löst dieses Verhalten aus.
@@ -40,7 +40,7 @@ Führen Sie die folgenden Schritte aus, um die Bad Behavior-Funktion zu konfigur
 | `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | nein     | **Schwellenwert:** Die Anzahl der „schlechten“ Statuscodes, die eine IP innerhalb des Zählzeitraums erzeugen kann, bevor sie gesperrt wird.                                  |
 | `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | nein     | **Zählzeitraum:** Das Zeitfenster (in Sekunden), in dem schlechte Statuscodes auf den Schwellenwert angerechnet werden.                                                      |
 | `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | nein     | **Sperrdauer:** Wie lange (in Sekunden) eine IP nach Überschreiten des Schwellenwerts gesperrt bleibt. Standard ist 24 Stunden (86400 Sekunden). `0` für permanente Sperren. |
-| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | nein     | **Sperrbereich:** Legt fest, ob Sperren nur für den aktuellen Dienst (`service`) oder für alle Dienste (`global`) gelten.                                                    |
+| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | nein     | **Sperrbereich:** Legt fest, ob Sperren nur für den aktuellen Dienst (`service`) oder für alle Dienste (`global`) gelten. Auf dem Standardserver (`_`) sind Sperren immer global. |
 
 !!! warning "Falsch-Positive"
     Seien Sie vorsichtig bei der Einstellung des Schwellenwerts und der Zählzeit. Zu niedrige Werte können versehentlich legitime Benutzer sperren, die beim Surfen auf Ihrer Website auf Fehler stoßen.

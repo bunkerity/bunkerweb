@@ -34,13 +34,16 @@ function robotstxt:initialize(ctx)
 		footer = {},
 		sitemap = {},
 	}
-	if get_phase() ~= "init" and self:is_needed() then
+	if get_phase() ~= "init" and self.ctx.bw.uri == "/robots.txt" and self:is_needed() then
 		local server_name = self.ctx.bw.server_name
 		local robots_rules, err = self.internalstore:get("plugin_robotstxt_rules_" .. server_name, true)
 		if not robots_rules then
 			self.logger:log(ERR, err)
 		else
-			self.policies.rule = robots_rules
+			-- Create a copy of the table to avoid modifying the shared internalstore reference
+			for _, rule in ipairs(robots_rules) do
+				table.insert(self.policies.rule, rule)
+			end
 		end
 
 		-- Get all rules and sitemaps from environment variables

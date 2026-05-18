@@ -1,0 +1,176 @@
+{
+  "id": "grpc",
+  "name": "gRPC",
+  "description": "Manage gRPC reverse proxy configurations.",
+  "version": "1.0",
+  "stream": "no",
+  "settings": {
+    "USE_GRPC": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Activate gRPC reverse proxy mode.",
+      "id": "use-grpc",
+      "label": "Use gRPC",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "GRPC_HOST": {
+      "context": "multisite",
+      "default": "",
+      "help": "Full upstream value used by grpc_pass (for example grpc://app:50051 or grpcs://app:443).",
+      "id": "grpc-host",
+      "label": "gRPC host",
+      "regex": "^(grpcs?://.+)?$",
+      "type": "text",
+      "multiple": "grpc"
+    },
+    "GRPC_URL": {
+      "context": "multisite",
+      "default": "/",
+      "help": "Location URL that will be proxied to a gRPC upstream.",
+      "id": "grpc-url",
+      "label": "gRPC URL",
+      "regex": "^.+$",
+      "type": "text",
+      "multiple": "grpc"
+    },
+    "GRPC_CUSTOM_HOST": {
+      "context": "multisite",
+      "default": "",
+      "help": "Override Host header sent to gRPC upstream.",
+      "id": "grpc-custom-host",
+      "label": "gRPC custom host",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "GRPC_HEADERS": {
+      "context": "multisite",
+      "default": "",
+      "help": "List of headers to send to gRPC upstream separated with semicolons (values for grpc_set_header directive).",
+      "id": "grpc-headers",
+      "label": "gRPC headers",
+      "regex": "^(?![; ])(;? ?([\\w\\-]+) [^;]+)*$",
+      "type": "multivalue",
+      "separator": ";",
+      "multiple": "grpc"
+    },
+    "GRPC_HIDE_HEADERS": {
+      "context": "multisite",
+      "default": "",
+      "help": "List of headers to hide from clients when received from gRPC upstream (values for grpc_hide_header directive).",
+      "id": "grpc-hide-headers",
+      "label": "gRPC hide headers",
+      "regex": "^.*$",
+      "type": "text",
+      "multiple": "grpc"
+    },
+    "GRPC_INTERCEPT_ERRORS": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Intercept and rewrite gRPC upstream errors.",
+      "id": "grpc-intercept-errors",
+      "label": "Intercept errors",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "GRPC_CONNECT_TIMEOUT": {
+      "context": "multisite",
+      "default": "60s",
+      "help": "Timeout when connecting to the gRPC upstream.",
+      "id": "grpc-connect-timeout",
+      "label": "gRPC connect timeout",
+      "regex": "^\\d+(ms?|[shdwMy])$",
+      "type": "text",
+      "multiple": "grpc"
+    },
+    "GRPC_READ_TIMEOUT": {
+      "context": "multisite",
+      "default": "60s",
+      "help": "Timeout when reading from the gRPC upstream.",
+      "id": "grpc-read-timeout",
+      "label": "gRPC read timeout",
+      "regex": "^\\d+(ms?|[shdwMy])$",
+      "type": "text",
+      "multiple": "grpc"
+    },
+    "GRPC_SEND_TIMEOUT": {
+      "context": "multisite",
+      "default": "60s",
+      "help": "Timeout when sending to the gRPC upstream.",
+      "id": "grpc-send-timeout",
+      "label": "gRPC send timeout",
+      "regex": "^\\d+(ms?|[shdwMy])$",
+      "type": "text",
+      "multiple": "grpc"
+    },
+    "GRPC_SOCKET_KEEPALIVE": {
+      "context": "multisite",
+      "default": "off",
+      "help": "Enable or disable keepalive for gRPC upstream sockets.",
+      "id": "grpc-socket-keepalive",
+      "label": "gRPC socket keepalive",
+      "regex": "^(on|off)$",
+      "type": "select",
+      "select": ["off", "on"],
+      "multiple": "grpc"
+    },
+    "GRPC_SSL_SNI": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Enable or disable sending SNI to gRPC upstream server.",
+      "id": "grpc-ssl-server-name",
+      "label": "SSL SNI",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "GRPC_SSL_SNI_NAME": {
+      "context": "multisite",
+      "default": "",
+      "help": "Sets the SNI host to send to gRPC upstream server.",
+      "id": "grpc-ssl-sni-name",
+      "label": "SSL SNI name",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "GRPC_NEXT_UPSTREAM": {
+      "context": "multisite",
+      "default": "",
+      "help": "Conditions for selecting the next gRPC upstream server.",
+      "id": "grpc-next-upstream",
+      "label": "gRPC next upstream",
+      "regex": "^.*$",
+      "type": "text",
+      "multiple": "grpc"
+    },
+    "GRPC_NEXT_UPSTREAM_TIMEOUT": {
+      "context": "multisite",
+      "default": "",
+      "help": "Time limit for passing a request to the next gRPC upstream server.",
+      "id": "grpc-next-upstream-timeout",
+      "label": "gRPC next upstream timeout",
+      "regex": "^(\\d+(ms?|[shdwMy]))?$",
+      "type": "text",
+      "multiple": "grpc"
+    },
+    "GRPC_NEXT_UPSTREAM_TRIES": {
+      "context": "multisite",
+      "default": "",
+      "help": "Maximum number of attempts for passing a request to the next gRPC upstream server.",
+      "id": "grpc-next-upstream-tries",
+      "label": "gRPC next upstream tries",
+      "regex": "^([1-9]\\d*)?$",
+      "type": "number",
+      "multiple": "grpc"
+    },
+    "GRPC_INCLUDES": {
+      "context": "multisite",
+      "default": "",
+      "help": "Additional configuration to include in the gRPC location block, separated with spaces.",
+      "id": "grpc-includes",
+      "label": "gRPC includes",
+      "regex": "^(?! )( ?([^ ]))*$",
+      "type": "multivalue",
+      "multiple": "grpc"
+    }
+  }
+}

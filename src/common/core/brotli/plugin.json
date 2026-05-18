@@ -21,8 +21,7 @@
       "id": "brotli-types",
       "label": "MIME types",
       "regex": "^( *[\\-\\w.]+/[\\-\\w.+]+ *)+$",
-      "type": "multivalue",
-      "separator": " "
+      "type": "multivalue"
     },
     "BROTLI_MIN_LENGTH": {
       "context": "multisite",
