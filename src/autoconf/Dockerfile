@@ -39,7 +39,7 @@ FROM python:3.13-alpine@sha256:420cd0bf0f3998275875e02ecd5808168cf0843cbb4d3c536
 RUN umask 027
 
 # Install bash and create autoconf user
-RUN apk add --no-cache bash tzdata mariadb-connector-c mariadb-client sqlite postgresql-client && \
+RUN apk add --no-cache bash tzdata mariadb-connector-c mariadb-client sqlite && \
   addgroup -g 101 autoconf && \
   adduser -h /usr/share/bunkerweb/autoconf -g autoconf -s /sbin/nologin -G autoconf -D -H -u 101 --disabled-password autoconf
 
