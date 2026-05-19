@@ -725,10 +725,9 @@ def configs_export():
     selection_set = set(selection) if selection else None
 
     for db_config in db_configs:
-        if db_config.get("template"):
-            continue
         service_id = db_config.get("service_id") or None
-        config_type = db_config["type"]
+        # Normalize: template-provided configs carry hyphenated types (see get_custom_configs), real rows use the underscore enum form.
+        config_type = db_config["type"].strip().replace("-", "_").lower()
         config_name = db_config["name"]
         if selection_set is not None and (service_id, config_type, config_name) not in selection_set:
             continue
