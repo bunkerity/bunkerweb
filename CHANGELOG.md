@@ -5,6 +5,7 @@
 - [SECURITY] `nginx` : update nginx to 1.30.1 to fix various CVEs
 - [BUGFIX] `reverseproxy`: pin a `USE_UI=yes` service upstream to HTTP/1.1 so a global `REVERSE_PROXY_HTTP_VERSION=2` no longer locks out the web UI. (Fixes #3550)
 - [BUGFIX] `autoconf`: fix Docker/Podman instance discovery looping on `No instance found`. Container conversion no longer assumes the inspect payload exposes `State.Health` (Podman/no-`HEALTHCHECK` may omit it): health falls back to run-state, env parsing is hardened, and the wait loop logs the exception instead of swallowing it.
+- [ALL-IN-ONE] Update CrowdSec version to 1.7.8
 
 ## v1.6.10~rc7 - 2026/05/15
 
