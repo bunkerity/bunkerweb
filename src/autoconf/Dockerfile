@@ -45,6 +45,7 @@ RUN apk add --no-cache bash tzdata mariadb-connector-c mariadb-client sqlite pos
 
 # Fix CVEs
 RUN apk add --no-cache "xz-libs>=5.8.3-r0" # CVE-2026-34743
+RUN apk add --no-cache "postgresql18>=18.4-r0" # CVE-2026-6637 CVE-2026-6477 CVE-2026-6475 CVE-2026-6473 CVE-2026-6479 CVE-2026-6476 CVE-2026-6478 CVE-2026-6472 CVE-2026-6575 CVE-2026-6474 CVE-2026-6638
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
