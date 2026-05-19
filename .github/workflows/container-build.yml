@@ -136,7 +136,7 @@ jobs:
           image: local/${{ inputs.IMAGE }}
           only-package-types: apk,golang
           only-fixed: true
-          exit-code: false
+          exit-code: true
           summary: true
       # Push image
       - name: Push image
