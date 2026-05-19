@@ -3,6 +3,7 @@
 from abc import abstractmethod
 from os import getenv
 from time import sleep
+from traceback import format_exc
 
 from Config import Config
 
@@ -41,6 +42,7 @@ class Controller(Config):
             try:
                 self._instances = self.get_instances()
             except Exception:
+                self._logger.error(f"Error while fetching instances:\n{format_exc()}")
                 self._instances = []
             if not self._instances:
                 self._logger.warning(f"No instance found, waiting {wait_time}s ...")

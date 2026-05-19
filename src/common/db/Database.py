@@ -2957,9 +2957,12 @@ class Database:
                             .order_by(Template_custom_configs.order)
                         ):
                             config_type = template_config.type.replace("_", "-").replace(".conf", "").strip()
+                            # Real custom_configs rows use the underscore enum form while config_type is hyphenated here;
+                            # normalize both sides so an overriding row correctly suppresses the template-provided config.
+                            normalized_config_type = config_type.replace("-", "_")
                             if not any(
                                 custom_config["service_id"] == service_id
-                                and custom_config["type"] == config_type
+                                and custom_config["type"].replace("-", "_") == normalized_config_type
                                 and custom_config["name"] == template_config.name
                                 for custom_config in custom_configs
                             ):
