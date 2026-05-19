@@ -3,6 +3,7 @@
 ## v1.6.10
 
 - [SECURITY] `nginx` : update nginx to 1.30.1 to fix various CVEs
+- [BUGFIX] `reverseproxy`: pin a `USE_UI=yes` service upstream to HTTP/1.1 so a global `REVERSE_PROXY_HTTP_VERSION=2` no longer locks out the web UI. (Fixes #3550)
 
 ## v1.6.10~rc7 - 2026/05/15
 
