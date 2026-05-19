@@ -57,6 +57,13 @@
     }
   },
   {
+    "version": "1.6.10",
+    "title": "1.6.10",
+    "aliases": [
+      "latest"
+    ]
+  },
+  {
     "version": "1.6.9~rc4",
     "title": "1.6.9~rc4",
     "aliases": [],
@@ -91,9 +98,7 @@
   {
     "version": "1.6.9",
     "title": "1.6.9",
-    "aliases": [
-      "latest"
-    ]
+    "aliases": []
   },
   {
     "version": "1.6.8~rc3",
