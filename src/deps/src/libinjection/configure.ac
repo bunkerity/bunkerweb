@@ -157,6 +157,7 @@ AM_CONDITIONAL([FUZZERS], [test x"$enable_fuzzers" = "xyes"])
 if test "$enable_fuzzers" = yes; then
   AX_CHECK_COMPILE_FLAG([-fsanitize=fuzzer],,[AC_MSG_ERROR("Fuzzing not supported by the compiler; you must use clang")])
   LIB_FUZZING_ENGINE=-fsanitize=fuzzer
+  fuzzers_flags="-fsanitize=fuzzer-no-link"
   BUILD_FUZZTARGETS=1
 fi
 AM_CONDITIONAL([BUILD_FUZZTARGETS], [test "x$enable_fuzzers" = "xyes"])

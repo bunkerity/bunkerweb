@@ -34,6 +34,7 @@ from magic import Magic
 from requests import get, head
 from requests.exceptions import ConnectionError
 
+from common_utils import safe_tar_extractall, safe_zip_extractall  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
@@ -389,7 +390,7 @@ try:
                     if file_type == "application/zip" or crs_plugin.endswith(".zip"):
                         try:
                             with ZipFile(content) as zf:
-                                zf.extractall(path=temp_dir)
+                                safe_zip_extractall(zf, temp_dir)
                             LOGGER.info(f"Successfully extracted ZIP file to {temp_dir}")
                         except BadZipFile as e:
                             LOGGER.debug(format_exc())
@@ -409,7 +410,7 @@ try:
                                 tar_mode = "r:xz"
 
                             with tar_open(fileobj=content, mode=tar_mode) as tar:
-                                tar.extractall(path=temp_dir)
+                                safe_tar_extractall(tar, temp_dir)
                             LOGGER.info(f"Successfully extracted TAR file to {temp_dir}")
                         except TarError as e:
                             LOGGER.debug(format_exc())

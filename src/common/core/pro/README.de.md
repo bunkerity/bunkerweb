@@ -44,15 +44,15 @@ Führen Sie die folgenden Schritte aus, um die Pro-Funktionen zu konfigurieren u
 
 **F: Was passiert, wenn meine Pro-Lizenz abläuft?**
 
-A: Wenn Ihre Pro-Lizenz abläuft, wird der Zugriff auf Premium-Funktionen und -Plugins deaktiviert. Ihre BunkerWeb-Installation wird jedoch weiterhin mit allen Funktionen der Community-Edition betrieben. Um wieder Zugriff auf die Pro-Funktionen zu erhalten, erneuern Sie einfach Ihre Lizenz.
+**A:** Wenn Ihre Pro-Lizenz abläuft, wird der Zugriff auf Premium-Funktionen und -Plugins deaktiviert. Ihre BunkerWeb-Installation wird jedoch weiterhin mit allen Funktionen der Community-Edition betrieben. Um wieder Zugriff auf die Pro-Funktionen zu erhalten, erneuern Sie einfach Ihre Lizenz.
 
 **F: Werden die Pro-Funktionen meine bestehende Konfiguration stören?**
 
-A: Nein, die Pro-Funktionen sind so konzipiert, dass sie sich nahtlos in Ihr aktuelles BunkerWeb-Setup integrieren. Sie erweitern die Funktionalität, ohne Ihre bestehende Konfiguration zu verändern oder zu stören, und gewährleisten so ein reibungsloses und zuverlässiges Erlebnis.
+**A:** Nein, die Pro-Funktionen sind so konzipiert, dass sie sich nahtlos in Ihr aktuelles BunkerWeb-Setup integrieren. Sie erweitern die Funktionalität, ohne Ihre bestehende Konfiguration zu verändern oder zu stören, und gewährleisten so ein reibungsloses und zuverlässiges Erlebnis.
 
 **F: Kann ich die Pro-Funktionen vor dem Kauf ausprobieren?**
 
-A: Auf jeden Fall! BunkerWeb bietet zwei Pro-Pläne, die Ihren Bedürfnissen entsprechen:
+**A:** Auf jeden Fall! BunkerWeb bietet zwei Pro-Pläne, die Ihren Bedürfnissen entsprechen:
 
 - **BunkerWeb PRO Standard:** Voller Zugriff auf die Pro-Funktionen ohne technischen Support.
 - **BunkerWeb PRO Enterprise:** Voller Zugriff auf die Pro-Funktionen mit dediziertem technischen Support.

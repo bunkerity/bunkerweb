@@ -7,16 +7,16 @@ from pathlib import Path
 from string import printable
 from subprocess import PIPE, Popen, call
 from time import sleep
-from typing import Dict, FrozenSet, Optional, Set, Union
+from typing import Any, Dict, FrozenSet, Optional, Set, Union
 from urllib.parse import unquote
 
 from bcrypt import checkpw, gensalt, hashpw
+from defusedcsv.csv import _escape as _defusedcsv_escape, writer as _defusedcsv_writer
 from flask import flash as flask_flash, session
 from regex import compile as re_compile, match
 from requests import get
 
 from logger import getLogger  # type: ignore
-
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
@@ -239,6 +239,14 @@ def is_ui_api_method(method: Optional[str]) -> bool:
     return method in UI_API_METHODS
 
 
+def can_delete_service(service: Dict[str, Any]) -> bool:
+    """Services deletable from the UI: ui/api methods always, autoconf only when drafted."""
+    method = service.get("method")
+    if is_ui_api_method(method):
+        return True
+    return method == "autoconf" and bool(service.get("is_draft"))
+
+
 def get_filtered_settings(settings: dict, global_config: bool = False) -> Dict[str, dict]:
     multisites = {}
     for setting, data in settings.items():
@@ -361,3 +369,19 @@ def _sanitize_internal_next(next_url, default):
     if any(ord(c) < 32 for c in decoded):
         raise ValueError("control chars not allowed")
     return decoded or default
+
+
+def csv_writer(csvfile, *args, **kwargs):
+    """Return a ``defusedcsv`` writer that escapes spreadsheet formula payloads (CWE-1236).
+
+    Use this for all UI CSV exports instead of ``csv.writer``.
+    """
+    return _defusedcsv_writer(csvfile, *args, **kwargs)
+
+
+def csv_safe(value: Any) -> Any:
+    """Escape one cell value with ``defusedcsv`` formula-injection protection (CWE-1236).
+
+    Use this for user-controlled values written through openpyxl.
+    """
+    return _defusedcsv_escape(value)

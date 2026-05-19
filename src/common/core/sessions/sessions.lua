@@ -232,7 +232,7 @@ function sessions:timer()
 	sessions_config.storage = storage
 
 	if storage ~= "redis" then
-		self.logger:log(ERR, "redis not available, falling back to cookie storage")
+		self:log_throttled(ERR, "redis_unavailable", "redis not available, falling back to cookie storage")
 	else
 		-- Added NOTICE log when redis becomes available again
 		if prev_storage ~= "redis" then
@@ -248,6 +248,9 @@ function sessions:timer()
 		self.logger:log(ERR, "failed to set storage_sessions_STORAGE: " .. err_set)
 	end
 	self.internalstore:set("storage_sessions_CHANGE", change)
+
+	-- Flush any end-of-window recaps for errors that stopped repeating.
+	self:flush_log_recaps()
 
 	return self:ret(ret, ret_err)
 end

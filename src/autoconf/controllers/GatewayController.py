@@ -182,6 +182,7 @@ class GatewayController(KubernetesController):
 
                 routes.append(route)
 
+        routes.sort(key=lambda r: ((r.get("metadata") or {}).get("namespace", ""), (r.get("metadata") or {}).get("name", "")))
         self._gateways_cache = gateways
         return routes
 
@@ -492,7 +493,7 @@ class GatewayController(KubernetesController):
                     self._logger.warning(f"Ignoring HTTPRoute {namespace}/{name} without hostnames")
                     return []
 
-            service: Dict[str, Any] = {"SERVER_NAME": " ".join(hostnames)}
+            service: Dict[str, Any] = {"SERVER_NAME": " ".join(hostnames), "NAMESPACE": namespace}
             location = self._reverse_proxy_suffix_start
             listener_protocol = self._get_listener_protocol(controller_service, hostnames[0], allowed_protocols=["HTTP", "HTTPS", "TLS"])
             if not listener_protocol:
@@ -558,7 +559,7 @@ class GatewayController(KubernetesController):
 
             grpc_scheme = "grpcs" if self._service_protocol == "https" else "grpc"
             location = self._reverse_proxy_suffix_start
-            service: Dict[str, Any] = {"SERVER_NAME": " ".join(hostnames), "USE_GRPC": "yes"}
+            service: Dict[str, Any] = {"SERVER_NAME": " ".join(hostnames), "NAMESPACE": namespace, "USE_GRPC": "yes"}
 
             if rules:
                 for rule in rules:
@@ -602,7 +603,7 @@ class GatewayController(KubernetesController):
                 hostnames = [default_name]
                 self._logger.warning(f"TLSRoute {namespace}/{name} has no hostnames, using {default_name}")
 
-            service = {"SERVER_NAME": " ".join(hostnames), "SERVER_TYPE": "stream", "USE_TCP": "yes", "USE_UDP": "no"}
+            service = {"SERVER_NAME": " ".join(hostnames), "NAMESPACE": namespace, "SERVER_TYPE": "stream", "USE_TCP": "yes", "USE_UDP": "no"}
             listener_port = self._get_listener_port(controller_service, hostname=hostnames[0], protocols=["TLS"])
             if listener_port:
                 service["LISTEN_STREAM_PORT_SSL"] = str(listener_port)
@@ -642,6 +643,7 @@ class GatewayController(KubernetesController):
             listener_port = self._get_listener_port(controller_service, protocols=[protocol])
             service = {
                 "SERVER_NAME": " ".join(hostnames),
+                "NAMESPACE": namespace,
                 "SERVER_TYPE": "stream",
                 "USE_TCP": "yes" if protocol == "TCP" else "no",
                 "USE_UDP": "yes" if protocol == "UDP" else "no",

@@ -34,7 +34,7 @@ function robotstxt:initialize(ctx)
 		footer = {},
 		sitemap = {},
 	}
-	if get_phase() ~= "init" and self:is_needed() then
+	if get_phase() ~= "init" and self.ctx.bw.uri == "/robots.txt" and self:is_needed() then
 		local server_name = self.ctx.bw.server_name
 		local robots_rules, err = self.internalstore:get("plugin_robotstxt_rules_" .. server_name, true)
 		if not robots_rules then

@@ -16,9 +16,9 @@
 #include <yajl/yajl_tree.h>
 
 #include <iostream>
-#include <unordered_map>
 #include <vector>
 #include <string>
+#include <memory>
 
 #ifndef TEST_UNIT_UNIT_TEST_H_
 #define TEST_UNIT_UNIT_TEST_H_
@@ -33,7 +33,7 @@ class UnitTestResult {
 
 class UnitTest {
  public:
-    static UnitTest *from_yajl_node(const yajl_val &);
+    static std::unique_ptr<UnitTest> from_yajl_node(const yajl_val &);
 
     std::string print() const;
 
@@ -44,7 +44,9 @@ class UnitTest {
     std::string type;
     std::string filename;
     std::string output;
+    std::string libinjection_override;
     int ret;
+    int capture;
     int skipped;
     UnitTestResult result;
 };

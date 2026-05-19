@@ -10,17 +10,31 @@ SecRuleEngine {{ MODSECURITY_SEC_RULE_ENGINE }}
 SecRuleEngine DetectionOnly
   {% endif %}
 
-# Maximum data size (Generated from MAX_CLIENT_SIZE)
-  {% if MAX_CLIENT_SIZE.endswith("k") or MAX_CLIENT_SIZE.endswith("K") -%}
-SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 }}
-  {% elif MAX_CLIENT_SIZE.endswith("m") or MAX_CLIENT_SIZE.endswith("M") -%}
-SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 * 1024 }}
-  {% elif MAX_CLIENT_SIZE.endswith("g") or MAX_CLIENT_SIZE.endswith("G") -%}
-SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 * 1024 * 1024 }}
-  {% elif MAX_CLIENT_SIZE.isdigit() -%}
-SecRequestBodyLimit {{ MAX_CLIENT_SIZE }}
-  {% else -%}
+# Maximum data size
+  {% if MODSECURITY_SEC_REQUEST_BODY_LIMIT -%}
+    {% if MODSECURITY_SEC_REQUEST_BODY_LIMIT.endswith("k") or MODSECURITY_SEC_REQUEST_BODY_LIMIT.endswith("K") -%}
+SecRequestBodyLimit {{ MODSECURITY_SEC_REQUEST_BODY_LIMIT[:-1] | int * 1024 }}
+    {% elif MODSECURITY_SEC_REQUEST_BODY_LIMIT.endswith("m") or MODSECURITY_SEC_REQUEST_BODY_LIMIT.endswith("M") -%}
+SecRequestBodyLimit {{ MODSECURITY_SEC_REQUEST_BODY_LIMIT[:-1] | int * 1024 * 1024 }}
+    {% elif MODSECURITY_SEC_REQUEST_BODY_LIMIT.endswith("g") or MODSECURITY_SEC_REQUEST_BODY_LIMIT.endswith("G") -%}
+SecRequestBodyLimit {{ MODSECURITY_SEC_REQUEST_BODY_LIMIT[:-1] | int * 1024 * 1024 * 1024 }}
+    {% elif MODSECURITY_SEC_REQUEST_BODY_LIMIT.isdigit() -%}
+SecRequestBodyLimit {{ MODSECURITY_SEC_REQUEST_BODY_LIMIT }}
+    {% else -%}
 SecRequestBodyLimit 13107200
+    {% endif -%}
+  {% else -%}
+    {% if MAX_CLIENT_SIZE.endswith("k") or MAX_CLIENT_SIZE.endswith("K") -%}
+SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 }}
+    {% elif MAX_CLIENT_SIZE.endswith("m") or MAX_CLIENT_SIZE.endswith("M") -%}
+SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 * 1024 }}
+    {% elif MAX_CLIENT_SIZE.endswith("g") or MAX_CLIENT_SIZE.endswith("G") -%}
+SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 * 1024 * 1024 }}
+    {% elif MAX_CLIENT_SIZE.isdigit() -%}
+SecRequestBodyLimit {{ MAX_CLIENT_SIZE }}
+    {% else -%}
+SecRequestBodyLimit 13107200
+    {% endif -%}
   {% endif %}
 
 # Maximum data size for requests without files (Generated from MODSECURITY_REQ_BODY_NO_FILES_LIMIT)
@@ -34,6 +48,23 @@ SecRequestBodyNoFilesLimit {{ MODSECURITY_REQ_BODY_NO_FILES_LIMIT[:-1] | int * 1
 SecRequestBodyNoFilesLimit {{ MODSECURITY_REQ_BODY_NO_FILES_LIMIT }}
   {% else -%}
 SecRequestBodyNoFilesLimit 13107200
+  {% endif %}
+
+# Action when request body exceeds the limit
+SecRequestBodyLimitAction {{ MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION }}
+
+# Reject if we can't process the body
+  {% if MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION == "ProcessPartial" -%}
+SecRule REQBODY_ERROR "!@eq 0" \
+  "id:'200002', phase:2,t:none,log,pass,msg:'Request body truncated at the configured inspection limit.',logdata:'%{reqbody_error_msg}',severity:2,chain"
+SecRule INBOUND_DATA_ERROR "@eq 1"
+
+SecRule REQBODY_ERROR "!@eq 0" \
+  "id:'200005', phase:2,t:none,log,deny,status:400,msg:'Failed to parse request body.',logdata:'%{reqbody_error_msg}',severity:2,chain"
+SecRule INBOUND_DATA_ERROR "!@eq 1"
+  {% else -%}
+SecRule REQBODY_ERROR "!@eq 0" \
+  "id:'200002', phase:2,t:none,log,deny,status:400,msg:'Failed to parse request body.',logdata:'%{reqbody_error_msg}',severity:2"
   {% endif %}
 
 # custom rules after loading the CRS

@@ -550,11 +550,14 @@ $(document).ready(() => {
     templateContainer
       .find(".global-override-badge")
       .addClass("visually-hidden");
+    const useTemplateDefaults =
+      window.location.pathname.endsWith("/new") ||
+      normalizedTemplate !== usedTemplate;
+
     templateContainer.find("input, select").each(function () {
       const $field = $(this);
       const type = $field.attr("type");
-      const isNewEndpoint = window.location.pathname.endsWith("/new");
-      const templateValue = isNewEndpoint
+      const templateValue = useTemplateDefaults
         ? $(`#${this.id}-template`).val()
         : $field.data("original");
 
@@ -566,6 +569,14 @@ $(document).ready(() => {
       if (
         $field.prop("disabled") ||
         (type === "hidden" && !$field.hasClass("plugin-setting-file-text"))
+      ) {
+        return;
+      }
+
+      // Skip multiselect option checkboxes — handled separately below
+      if (
+        type === "checkbox" &&
+        $field.closest(".multiselect-options").length
       ) {
         return;
       }
@@ -590,6 +601,83 @@ $(document).ready(() => {
           setFileSettingStatus($field);
         }
       }
+    });
+
+    // Reset multiselect fields (hidden input + option checkboxes)
+    templateContainer
+      .find(".multiselect-container input.plugin-setting[type='hidden']")
+      .each(function () {
+        const $input = $(this);
+        if ($input.prop("disabled")) return;
+        const templateValue = useTemplateDefaults
+          ? $(`#${this.id}-template`).val()
+          : $input.data("original");
+        if (templateValue === undefined) return;
+
+        $input.val(templateValue).trigger("input");
+        const $dropdown = $input.closest(".dropdown");
+        const separator = $dropdown.data("separator");
+        const separatorValue =
+          separator === undefined ? " " : String(separator);
+        const selectedValues = templateValue
+          ? separatorValue === ""
+            ? templateValue.split("")
+            : templateValue.split(separatorValue)
+          : [];
+        $dropdown.find(".form-check-input").each(function () {
+          const $checkbox = $(this);
+          $checkbox.prop("checked", selectedValues.includes($checkbox.val()));
+        });
+        const selectedCount = selectedValues.filter((v) => v).length;
+        $dropdown
+          .find("[data-selected-count]")
+          .text(`${selectedCount} selected`);
+        $dropdown.find("[data-selected-badge]").text(selectedCount);
+      });
+
+    // Reset multivalue fields (hidden input + visible text inputs)
+    templateContainer.find(".multivalue-hidden-input").each(function () {
+      const $input = $(this);
+      if ($input.prop("disabled")) return;
+      const templateValue = useTemplateDefaults
+        ? $(`#${this.id}-template`).val()
+        : $input.data("original");
+      if (templateValue === undefined) return;
+
+      const $container = $input.closest(".multivalue-container");
+      const separator = $container.data("separator") || " ";
+      const values = templateValue ? templateValue.split(separator) : [""];
+      $container.find(".multivalue-input-group").remove();
+      $container.find(".multivalue-toggle").remove();
+
+      const $inputsContainer = $container.find(".multivalue-inputs");
+      values.forEach((value, index) => {
+        const $inputGroup = $("<div>", {
+          class: "input-group mb-2 multivalue-input-group",
+        });
+        const $input = $("<input>", {
+          type: "text",
+          class: "form-control multivalue-input",
+        });
+        $input.val(value.trim());
+        $inputGroup.append($input);
+        $inputGroup.append(
+          `<button type="button"
+                    class="btn btn-outline-success add-multivalue-item">
+              <i class="bx bx-plus"></i>
+            </button>`,
+        );
+        if (index > 0 || values.length > 1) {
+          $inputGroup.append(
+            `<button type="button"
+                    class="btn btn-outline-danger remove-multivalue-item">
+              <i class="bx bx-x"></i>
+            </button>`,
+          );
+        }
+        $inputsContainer.append($inputGroup);
+      });
+      updateMultivalueHiddenInput($container);
     });
 
     templateContainer.find(".ace-editor").each(function () {
@@ -726,7 +814,17 @@ $(document).ready(() => {
       if (nextTemplateId)
         setCurrentTemplate(nextTemplateId, { clearType: true });
 
-      if (!isInit) resetTemplateConfig(previousTemplate);
+      if (!isInit) {
+        resetTemplateConfig(previousTemplate);
+        // On existing services, apply the new template's defaults
+        // so the user sees what the switched-to template provides
+        if (
+          !window.location.pathname.endsWith("/new") &&
+          currentTemplate !== usedTemplate
+        ) {
+          resetTemplateConfig(currentTemplate);
+        }
+      }
     }
 
     return true; // Tab change is allowed
@@ -1993,14 +2091,39 @@ $(document).ready(() => {
   $(".toggle-draft").on("click", function () {
     const draftInput = $("#is-draft");
     const isDraft = draftInput.val() === "yes";
+    const newValue = isDraft ? "no" : "yes";
 
-    draftInput.val(isDraft ? "no" : "yes");
+    draftInput.val(newValue);
     const newStatusKey = isDraft ? "status.online" : "status.draft";
     $(".toggle-draft").html(
       `<i class="bx bx-sm bx-${
         isDraft ? "globe" : "file-blank"
       }"></i>&nbsp; <span data-i18n="${newStatusKey}">${t(newStatusKey)}</span>`,
     );
+
+    // Keep the raw editor's IS_DRAFT line in sync with the toggle button. Without
+    // this the raw editor would still display the previous IS_DRAFT value after
+    // toggling, and a subsequent direct edit in the editor (which is the source
+    // of truth in raw mode through the editor->#is-draft change handler) would
+    // overwrite the toggle's new value with the stale editor line.
+    const rawEditor = editorRegistry["raw-config-editor"];
+    if (rawEditor) {
+      const lines = rawEditor.getValue().split("\n");
+      let mutated = false;
+      for (let i = 0; i < lines.length; i++) {
+        if (/^\s*IS_DRAFT\s*=/.test(lines[i])) {
+          const replacement = `IS_DRAFT=${newValue}`;
+          if (lines[i] !== replacement) {
+            lines[i] = replacement;
+            mutated = true;
+          }
+          break;
+        }
+      }
+      if (mutated) {
+        rawEditor.setValue(lines.join("\n"), -1);
+      }
+    }
   });
 
   $(".copy-settings").on("click", function () {
@@ -2110,28 +2233,30 @@ $(document).ready(() => {
 
               const $inputsContainer = $container.find(".multivalue-inputs");
               values.forEach((value, index) => {
-                const inputGroupHtml = `
-                  <div class="input-group mb-2 multivalue-input-group">
-                    <input type="text"
-                           class="form-control multivalue-input"
-                           value="${value.trim()}">
-                    <button type="button"
+                const $inputGroup = $("<div>", {
+                  class: "input-group mb-2 multivalue-input-group",
+                });
+                const $input = $("<input>", {
+                  type: "text",
+                  class: "form-control multivalue-input",
+                });
+                $input.val(value.trim());
+                $inputGroup.append($input);
+                $inputGroup.append(
+                  `<button type="button"
                             class="btn btn-outline-success add-multivalue-item">
                       <i class="bx bx-plus"></i>
-                    </button>
-                    ${
-                      index > 0 || values.length > 1
-                        ? `
-                    <button type="button"
+                    </button>`,
+                );
+                if (index > 0 || values.length > 1) {
+                  $inputGroup.append(
+                    `<button type="button"
                             class="btn btn-outline-danger remove-multivalue-item">
                       <i class="bx bx-x"></i>
-                    </button>
-                    `
-                        : ""
-                    }
-                  </div>
-                `;
-                $inputsContainer.append(inputGroupHtml);
+                    </button>`,
+                  );
+                }
+                $inputsContainer.append($inputGroup);
               });
               updateMultivalueHiddenInput($container);
             } else if (
@@ -2468,6 +2593,33 @@ $(document).ready(() => {
         });
       }
 
+      // Mirror direct edits to the IS_DRAFT line back into the canonical
+      // #is-draft hidden input (and the visible toggle button). The form-build
+      // path posts IS_DRAFT from #is-draft, so without this sync a user typing
+      // IS_DRAFT=yes directly in the raw editor would never reach the route.
+      const syncDraftFromEditor = () => {
+        const $draftInput = $("#is-draft");
+        if (!$draftInput.length) return;
+        const draftLine = editor
+          .getValue()
+          .split("\n")
+          .map((l) => l.trim())
+          .find((l) => /^IS_DRAFT\s*=/.test(l));
+        if (!draftLine) return;
+        const value = draftLine.split("=").slice(1).join("=").trim();
+        if (value !== "yes" && value !== "no") return;
+        if ($draftInput.val() === value) return;
+        $draftInput.val(value);
+        const statusKey = value === "yes" ? "status.draft" : "status.online";
+        $(".toggle-draft").html(
+          `<i class="bx bx-sm bx-${
+            value === "yes" ? "file-blank" : "globe"
+          }"></i>&nbsp; <span data-i18n="${statusKey}">${t(statusKey)}</span>`,
+        );
+      };
+      syncDraftFromEditor();
+      editor.on("change", syncDraftFromEditor);
+
       setupRawDisabledHighlight(editor);
     }
 
@@ -2801,30 +2953,30 @@ $(document).ready(() => {
       // Add inputs for each value
       const $inputsContainer = $container.find(".multivalue-inputs");
       values.forEach((value, index) => {
-        const inputGroupHtml = `
-          <div class="input-group mb-2 multivalue-input-group">
-            <input type="text"
-                   class="form-control multivalue-input"
-                   value="${value.trim()}">
-
-            <button type="button"
+        const $inputGroup = $("<div>", {
+          class: "input-group mb-2 multivalue-input-group",
+        });
+        const $input = $("<input>", {
+          type: "text",
+          class: "form-control multivalue-input",
+        });
+        $input.val(value.trim());
+        $inputGroup.append($input);
+        $inputGroup.append(
+          `<button type="button"
                     class="btn btn-outline-success add-multivalue-item">
               <i class="bx bx-plus"></i>
-            </button>
-
-            ${
-              index > 0 || values.length > 1
-                ? `
-            <button type="button"
+            </button>`,
+        );
+        if (index > 0 || values.length > 1) {
+          $inputGroup.append(
+            `<button type="button"
                     class="btn btn-outline-danger remove-multivalue-item">
               <i class="bx bx-x"></i>
-            </button>
-            `
-                : ""
-            }
-          </div>
-        `;
-        $inputsContainer.append(inputGroupHtml);
+            </button>`,
+          );
+        }
+        $inputsContainer.append($inputGroup);
       });
 
       updateMultivalueHiddenInput($container);
@@ -3109,31 +3261,37 @@ $(document).ready(() => {
     const newIndex = currentCount + 1;
     const inputId = `${baseId}_${newIndex}`;
 
-    const inputGroupHtml = `
-      <div class="form-floating multivalue-input-group">
-        <div class="input-group">
-          <input type="text"
-                 class="form-control multivalue-input"
-                 value="${value}"
-                 id="${inputId}">
-          <button type="button"
-                  class="btn btn-outline-success add-multivalue-item">
+    const $inputGroup = $("<div>", {
+      class: "form-floating multivalue-input-group",
+    });
+    const $innerGroup = $("<div>", { class: "input-group" });
+    const $input = $("<input>", {
+      type: "text",
+      class: "form-control multivalue-input",
+      id: inputId,
+    });
+    $input.val(value);
+    $innerGroup.append($input);
+    $innerGroup.append(
+      `<button type="button"
+                class="btn btn-outline-success add-multivalue-item">
             <i class="bx bx-plus"></i>
           </button>
           <button type="button"
-                  class="btn btn-outline-danger remove-multivalue-item">
+                class="btn btn-outline-danger remove-multivalue-item">
             <i class="bx bx-x"></i>
-          </button>
-        </div>
-        <label for="${inputId}" class="text-truncate">Temporary</label>
-      </div>
-    `;
+          </button>`,
+    );
+    $inputGroup.append($innerGroup);
+    $inputGroup.append(
+      $("<label>", { for: inputId, class: "text-truncate", text: "Temporary" }),
+    );
 
     if ($insertAfter && $insertAfter.length) {
-      $insertAfter.after(inputGroupHtml);
+      $insertAfter.after($inputGroup);
     } else {
       const $inputsContainer = $container.find(".multivalue-inputs");
-      $inputsContainer.append(inputGroupHtml);
+      $inputsContainer.append($inputGroup);
     }
 
     // Update margin bottom for all input groups
@@ -3363,7 +3521,11 @@ $(document).ready(() => {
     // None/empty, so we need to initialise from the stored value or the default.
     const $hiddenInput = $dropdown.find('input[type="hidden"]');
     if ($hiddenInput.length) {
-      const rawValue = $hiddenInput.val() || $hiddenInput.data("default") || "";
+      const hiddenVal = $hiddenInput.val();
+      // An empty string is a valid multiselect value (no options selected).
+      // Only fall back to data-default when the value is truly absent.
+      const rawValue =
+        hiddenVal != null ? hiddenVal : $hiddenInput.data("default") || "";
       const initValue = String(rawValue);
       if (initValue) {
         const separator = $dropdown.data("separator");
@@ -3408,6 +3570,18 @@ $(document).ready(() => {
     if ($toggle.length) {
       new bootstrap.Dropdown($toggle[0], {
         autoClose: "outside",
+        popperConfig: {
+          strategy: "fixed",
+          modifiers: [
+            {
+              name: "preventOverflow",
+              options: {
+                boundary: "viewport",
+                padding: { top: 80 },
+              },
+            },
+          ],
+        },
       });
     }
 

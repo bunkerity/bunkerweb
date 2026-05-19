@@ -197,17 +197,9 @@ $(document).ready(function () {
   };
 
   if (pluginNumber > 10) {
-    const menu = [10];
-    if (pluginNumber > 25) {
-      menu.push(25);
-    }
-    if (pluginNumber > 50) {
-      menu.push(50);
-    }
-    if (pluginNumber > 100) {
-      menu.push(100);
-    }
-    menu.push({ label: "All", value: -1 });
+    const menu = [10, 25, 50, 100];
+    if (pluginNumber > 100) menu.push(500);
+    if (pluginNumber > 500) menu.push(1000);
     layout.bottomStart = {
       pageLength: {
         menu: menu,
@@ -319,12 +311,18 @@ $(document).ready(function () {
 
   const getSelectedPlugins = () => {
     const plugins = [];
-    $("tr.selected").each(function () {
-      const plugin = $(this).find("td:eq(2)").data("id");
-      if (plugin) {
-        plugins.push(plugin);
-      }
-    });
+    if (!$.fn.dataTable.isDataTable("#plugins")) return plugins;
+    $("#plugins")
+      .DataTable()
+      .rows({ selected: true })
+      .nodes()
+      .to$()
+      .each(function () {
+        const plugin = $(this).find("td:eq(2)").data("id");
+        if (plugin) {
+          plugins.push(plugin);
+        }
+      });
     return plugins;
   };
 
@@ -513,7 +511,7 @@ $(document).ready(function () {
       select: {
         style: "multi+shift",
         selector: "td:nth-child(2)",
-        headerCheckbox: true,
+        headerCheckbox: "select-page",
       },
       layout: layout,
       initComplete: function (settings, json) {

@@ -25,6 +25,7 @@
     "REVERSE_PROXY_HOST": "http://bw-api:8888",
     "REVERSE_PROXY_URL": "/",
     "REVERSE_PROXY_INTERCEPT_ERRORS": "no",
+    "REVERSE_PROXY_KEEPALIVE": "yes",
     "USE_LIMIT_REQ": "no",
     "LIMIT_REQ_URL": "/",
     "LIMIT_REQ_RATE": "8r/s",
@@ -73,7 +74,8 @@
         "USE_REVERSE_PROXY",
         "REVERSE_PROXY_HOST",
         "REVERSE_PROXY_URL",
-        "REVERSE_PROXY_INTERCEPT_ERRORS"
+        "REVERSE_PROXY_INTERCEPT_ERRORS",
+        "REVERSE_PROXY_KEEPALIVE"
       ]
     },
     {

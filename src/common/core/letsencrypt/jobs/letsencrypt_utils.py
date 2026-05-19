@@ -18,6 +18,20 @@ LETSENCRYPT_STAGING_DIRECTORY = "https://acme-staging-v02.api.letsencrypt.org/di
 ZEROSSL_DIRECTORY = "https://acme.zerossl.com/v2/DV90"
 
 
+def certbot_log_backup_flags(env_vars: Optional[Mapping[str, str]] = None) -> List[str]:
+    """Return `--max-log-backups N` to cap certbot's per-invocation log rotations.
+
+    Certbot defaults to backupCount=1000, which piles up ~1000 rotation files per logs-dir.
+    Operators tune this via `LETS_ENCRYPT_MAX_LOG_BACKUPS` (default 50).
+    """
+    raw = (env_vars or environ).get("LETS_ENCRYPT_MAX_LOG_BACKUPS", "50").strip()
+    try:
+        value = max(0, int(raw))
+    except ValueError:
+        value = 50
+    return ["--max-log-backups", str(value)]
+
+
 _API_SETTINGS_WHITELIST = frozenset(
     {
         "API_HTTP_PORT",

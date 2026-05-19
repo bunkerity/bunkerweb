@@ -18,6 +18,33 @@
   --bs-link-color-rgb: 11, 53, 74;
   --bs-link-hover-color: #2eac68;
   --bs-link-hover-color-rgb: 46, 172, 104;
+
+  /* Country-choropleth palette — derived from --bs-primary / --bs-bw-blue.
+     Consumed by static/js/pages/home.js via getComputedStyle().
+     Steps 1–2 and --bw-map-land-border target ≥3:1 vs --bw-map-ocean
+     (WCAG 1.4.11); --bw-map-land stays subtle because the land-border hairline
+     carries the shape cue. */
+  --bw-map-ocean: #eef3f6;
+  --bw-map-land: #d9dfe4;
+  --bw-map-land-border: #7c8890;
+  --bw-map-border: #ffffff;
+  --bw-map-step-1: #6a8999;
+  --bw-map-step-2: #3f6c88;
+  --bw-map-step-3: #215778;
+  --bw-map-step-4: #114360;
+  --bw-map-step-5: #0b354a;
+}
+
+[data-bs-theme="dark"] {
+  --bw-map-ocean: #08141c;
+  --bw-map-land: #1b2e3a;
+  --bw-map-land-border: #4e6a7a;
+  --bw-map-border: #0a1a24;
+  --bw-map-step-1: #537185;
+  --bw-map-step-2: #6a92ab;
+  --bw-map-step-3: #87b2cc;
+  --bw-map-step-4: #abcde3;
+  --bw-map-step-5: #d1e6f3;
 }
 
 body {
@@ -2467,7 +2494,7 @@ span.cursor-pointer ~ .reset-setting {
   border: 1px solid #dee2e6;
   min-width: 300px;
   max-width: 450px;
-  z-index: 1071;
+  z-index: 1081;
 }
 
 .multiselect-menu .multiselect-search {
@@ -3724,4 +3751,12 @@ code.bad-behavior-event__value {
     width: 100%;
     justify-content: center;
   }
+}
+
+/* Keyboard focus ring for the import dropzones (role=button divs).
+   Bootstrap does not add a focus style to these; make it visible for a11y. */
+#configs-drag-area:focus-visible,
+#services-drag-area:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
 }

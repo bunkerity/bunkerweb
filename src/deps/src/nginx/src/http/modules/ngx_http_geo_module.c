@@ -63,6 +63,7 @@ typedef struct {
     unsigned                         allow_binary_include:1;
     unsigned                         binary_include:1;
     unsigned                         proxy_recursive:1;
+    unsigned                         no_cacheable:1;
 } ngx_http_geo_conf_ctx_t;
 
 
@@ -463,6 +464,7 @@ ngx_http_geo_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
                   + sizeof(ngx_http_variable_value_t)
                   + 0x10000 * sizeof(ngx_http_geo_range_t *);
     ctx.allow_binary_include = 1;
+    ctx.no_cacheable = 0;
 
     save = *cf;
     cf->pool = pool;
@@ -476,6 +478,10 @@ ngx_http_geo_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     if (rv != NGX_CONF_OK) {
         goto failed;
+    }
+
+    if (ctx.no_cacheable) {
+        var->flags |= NGX_HTTP_VAR_NOCACHEABLE;
     }
 
     geo->proxies = ctx.proxies;
@@ -623,6 +629,12 @@ ngx_http_geo(ngx_conf_t *cf, ngx_command_t *dummy, void *conf)
             rv = NGX_CONF_OK;
             goto done;
         }
+
+        else if (ngx_strcmp(value[0].data, "volatile") == 0) {
+            ctx->no_cacheable = 1;
+            rv = NGX_CONF_OK;
+            goto done;
+        }
     }
 
     if (cf->args->nelts != 2) {
@@ -633,7 +645,12 @@ ngx_http_geo(ngx_conf_t *cf, ngx_command_t *dummy, void *conf)
 
     if (ngx_strcmp(value[0].data, "include") == 0) {
 
-        rv = ngx_http_geo_include(cf, ctx, &value[1]);
+        if (strpbrk((char *) value[1].data, "*?[") == NULL) {
+            rv = ngx_http_geo_include(cf, ctx, &value[1]);
+
+        } else {
+            rv = ngx_conf_include(cf, dummy, conf);
+        }
 
         goto done;
 

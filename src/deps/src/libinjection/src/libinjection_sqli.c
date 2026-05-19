@@ -21,9 +21,11 @@
 #include "libinjection_sqli.h"
 #include "libinjection_sqli_data.h"
 
-#ifdef __clang_analyzer__
-// make clang analyzer happy by defining a dummy version
-#define LIBINJECTION_VERSION "undefined"
+#ifndef LIBINJECTION_VERSION
+/* Default version for embedding without autotools.
+ * Autotools and custom builds can override via -DLIBINJECTION_VERSION=\"...\"
+ */
+#define LIBINJECTION_VERSION "4.0.0"
 #endif
 
 #define LIBINJECTION_SQLI_TOKEN_SIZE sizeof(((stoken_t *)(0))->val)
@@ -44,7 +46,7 @@
 /* faster than calling out to libc isdigit */
 #define ISDIGIT(a) ((unsigned)((a) - '0') <= 9)
 
-#if 0
+#ifdef DEBUG
 #define FOLD_DEBUG                                                             \
     printf("%d \t more=%d  pos=%d left=%d\n", __LINE__, more, (int)pos,        \
            (int)left);
@@ -89,6 +91,9 @@ typedef enum {
     ,
     TYPE_BACKSLASH = (int)'\\'
 } sqli_token_types;
+
+// prototype for is_backslash_escaped()
+static int is_backslash_escaped(const char *end, const char *start);
 
 /**
  * Initializes parsing state
@@ -340,7 +345,8 @@ static int st_is_unary_op(const stoken_t *st) {
  *
  */
 
-static size_t parse_white(struct libinjection_sqli_state *sf) {
+static size_t parse_white(struct libinjection_sqli_state
+                              *sf) { // cppcheck-suppress constParameterCallback
     return sf->pos + 1;
 }
 
@@ -1168,16 +1174,22 @@ static size_t parse_number(struct libinjection_sqli_state *sf) {
         }
     }
 
-    if (have_e == 1 && have_exp == 0) {
-        /* very special form of
-         * "1234.e"
-         * "10.10E"
-         * ".E"
-         * this is a WORD not a number!! */
-        st_assign(sf->current, TYPE_BAREWORD, start, pos - start, cs + start);
-    } else {
+    /* very special form of
+     * "1234.e"
+     * "10.10E"
+     * ".E"
+     *
+     * https://gosecure.ai/blog/2021/10/19/a-scientific-notation-bug-in-mysql-left-aws-waf-clients-vulnerable-to-sql-injection/
+     * In this blog post, we can see that 1.e or 1.E is a risky SQLI. The SQL
+     * parser ignores it during parsing. For example, "1.e(1)" => (1), 1 1.e/1
+     * => 1/1, etc. So, if a payload like "1' or 1.e(1)" bypasses SQLI
+     * detection, which is really risky, then we should detect such SQLI
+     * injection in case of WAF bypass.
+     */
+    if (!(have_e == 1 && have_exp == 0)) {
         st_assign(sf->current, TYPE_NUMBER, start, pos - start, cs + start);
     }
+
     return pos;
 }
 
@@ -1200,7 +1212,8 @@ int libinjection_sqli_tokenize(struct libinjection_sqli_state *sf) {
     }
 
     st_clear(current);
-    sf->current = current;
+    sf->current = // cppcheck-suppress[redundantAssignment,unmatchedSuppression]
+        current;
 
     /*
      * if we are at beginning of string
@@ -1256,7 +1269,8 @@ void libinjection_sqli_init(struct libinjection_sqli_state *sf, const char *s,
     sf->current = &(sf->tokenvec[0]);
 }
 
-void libinjection_sqli_reset(struct libinjection_sqli_state *sf, int flags) {
+static void libinjection_sqli_reset(struct libinjection_sqli_state *sf,
+                                    int flags) {
     void *userdata = sf->userdata;
     ptr_lookup_fn lookup = sf->lookup;
 
@@ -1295,8 +1309,9 @@ void libinjection_sqli_callback(struct libinjection_sqli_state *sf,
  *  This is just:  multikeywords[token.value + ' ' + token2.value]
  *
  */
-static int syntax_merge_words(struct libinjection_sqli_state *sf, stoken_t *a,
-                              stoken_t *b) {
+static int
+syntax_merge_words(struct libinjection_sqli_state *sf, stoken_t *a,
+                   stoken_t *b) { // cppcheck-suppress constParameterPointer
     size_t sz1;
     size_t sz2;
     size_t sz3;
@@ -1956,9 +1971,9 @@ int libinjection_sqli_check_fingerprint(
            libinjection_sqli_not_whitelist(sql_state);
 }
 
-char libinjection_sqli_lookup_word(struct libinjection_sqli_state *sql_state,
-                                   int lookup_type, const char *str,
-                                   size_t len) {
+static char
+libinjection_sqli_lookup_word(struct libinjection_sqli_state *sql_state,
+                              int lookup_type, const char *str, size_t len) {
     if (lookup_type == LOOKUP_FINGERPRINT) {
         return libinjection_sqli_check_fingerprint(sql_state) ? 'X' : '\0';
     } else {
@@ -1966,7 +1981,8 @@ char libinjection_sqli_lookup_word(struct libinjection_sqli_state *sql_state,
     }
 }
 
-int libinjection_sqli_blacklist(struct libinjection_sqli_state *sql_state) {
+static int
+libinjection_sqli_blacklist(struct libinjection_sqli_state *sql_state) {
     /*
      * use minimum of 8 bytes to make sure gcc -fstack-protector
      * works correctly
@@ -2018,7 +2034,8 @@ int libinjection_sqli_blacklist(struct libinjection_sqli_state *sql_state) {
 /*
  * return TRUE if SQLi, false is benign
  */
-int libinjection_sqli_not_whitelist(struct libinjection_sqli_state *sql_state) {
+static int
+libinjection_sqli_not_whitelist(struct libinjection_sqli_state *sql_state) {
     /*
      * We assume we got a SQLi match
      * This next part just helps reduce false positives.
@@ -2218,7 +2235,9 @@ int libinjection_sqli_not_whitelist(struct libinjection_sqli_state *sql_state) {
  *
  *
  */
-static int reparse_as_mysql(struct libinjection_sqli_state *sql_state) {
+static int
+reparse_as_mysql(struct libinjection_sqli_state
+                     *sql_state) { // cppcheck-suppress constParameterPointer
     return sql_state->stats_comment_ddx || sql_state->stats_comment_hash;
 }
 
@@ -2307,7 +2326,8 @@ int libinjection_is_sqli(struct libinjection_sqli_state *sql_state) {
     return FALSE;
 }
 
-int libinjection_sqli(const char *s, size_t slen, char fingerprint[]) {
+injection_result_t libinjection_sqli(const char *s, size_t slen,
+                                     char fingerprint[]) {
     int issqli;
     struct libinjection_sqli_state state;
 

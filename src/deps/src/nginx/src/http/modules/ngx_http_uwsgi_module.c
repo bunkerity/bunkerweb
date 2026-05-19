@@ -629,9 +629,18 @@ static ngx_str_t ngx_http_uwsgi_hide_headers[] = {
 };
 
 
+static ngx_keyval_t  ngx_http_uwsgi_headers[] = {
+    { ngx_string("HTTP_HOST"),
+      ngx_string("$host$is_request_port$request_port") },
+    { ngx_null_string, ngx_null_string }
+};
+
+
 #if (NGX_HTTP_CACHE)
 
 static ngx_keyval_t  ngx_http_uwsgi_cache_headers[] = {
+    { ngx_string("HTTP_HOST"),
+      ngx_string("$host$is_request_port$request_port") },
     { ngx_string("HTTP_IF_MODIFIED_SINCE"),
       ngx_string("$upstream_cache_last_modified") },
     { ngx_string("HTTP_IF_UNMODIFIED_SINCE"), ngx_string("") },
@@ -1258,6 +1267,10 @@ ngx_http_uwsgi_process_status_line(ngx_http_request_t *r)
 
     u = r->upstream;
 
+    if (r->state == 0) {
+        r->header_name_start = u->buffer.pos;
+    }
+
     rc = ngx_http_parse_status_line(r, &u->buffer, status);
 
     if (rc == NGX_AGAIN) {
@@ -1266,6 +1279,8 @@ ngx_http_uwsgi_process_status_line(ngx_http_request_t *r)
 
     if (rc == NGX_ERROR) {
         u->process_header = ngx_http_uwsgi_process_header;
+        u->buffer.pos = r->header_name_start;
+        r->state = 0;
         return ngx_http_uwsgi_process_header(r);
     }
 
@@ -1995,7 +2010,8 @@ ngx_http_uwsgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
         conf->params_source = prev->params_source;
     }
 
-    rc = ngx_http_uwsgi_init_params(cf, conf, &conf->params, NULL);
+    rc = ngx_http_uwsgi_init_params(cf, conf, &conf->params,
+                                    ngx_http_uwsgi_headers);
     if (rc != NGX_OK) {
         return NGX_CONF_ERROR;
     }

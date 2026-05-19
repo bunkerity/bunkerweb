@@ -2,16 +2,16 @@
   "git_repository": [
     {
       "id": "coreruleset-v3",
-      "name": "Coreruleset v3.3.8",
+      "name": "Coreruleset v3.3.9",
       "url": "https://github.com/coreruleset/coreruleset.git",
-      "commit": "83011c4512d9c91713629561c31c255da71d6bf7",
+      "commit": "29240641f78ddb535313eec2a322a89e6520b7e5",
       "post_install": "rm -rf files/coreruleset-v3/tests files/coreruleset-v3/.github files/coreruleset-v3/docs && mv files/coreruleset-v3/crs-setup.conf.example files/crs-setup-v3.conf && ./misc/patch.sh 3"
     },
     {
       "id": "coreruleset-v4",
-      "name": "Coreruleset v4.24.1",
+      "name": "Coreruleset v4.26.0",
       "url": "https://github.com/coreruleset/coreruleset.git",
-      "commit": "c33857083f26bb7b57e4a29b1de6952be7ef12a5",
+      "commit": "955649c1221633cc3ea63674904e94fbc5fb6356",
       "post_install": "rm -rf files/coreruleset-v4/tests files/coreruleset-v4/.github files/coreruleset-v4/docs && mv files/coreruleset-v4/crs-setup.conf.example files/crs-setup-v4.conf && ./misc/patch.sh 4"
     }
   ]

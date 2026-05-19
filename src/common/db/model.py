@@ -20,7 +20,6 @@ CUSTOM_CONFIGS_TYPES_ENUM = Enum(
     "server_http",
     "server_stream",
     "default_server_http",
-    "default_server_stream",
     "modsec",
     "modsec_crs",
     "crs_plugins_before",
@@ -57,7 +56,7 @@ class Plugins(Base):
     method = Column(METHODS_ENUM, default="manual", nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), default=None, nullable=True)
     checksum = Column(String(128), default=None, nullable=True)
-    config_changed = Column(Boolean, default=False, nullable=True)
+    config_changed = Column(Boolean, default=False, nullable=True, index=True)
     last_config_change = Column(DateTime(timezone=True), nullable=True)
 
     settings = relationship("Settings", back_populates="plugin", cascade="all, delete-orphan")
@@ -72,7 +71,7 @@ class Settings(Base):
 
     id = Column(String(256), primary_key=True)
     name = Column(String(256), unique=True, nullable=False)
-    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
     context = Column(CONTEXTS_ENUM, nullable=False)
     default = Column(Text, nullable=True, default="")
     help = Column(String(512), nullable=False)
@@ -100,7 +99,7 @@ class Selects(Base):
     )
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
     value = Column(String(256), nullable=True, default="")
     order = Column(Integer, default=0, nullable=False)
 
@@ -115,7 +114,7 @@ class Multiselects(Base):
     )
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
     option_id = Column(String(256), nullable=False)
     label = Column(String(256), nullable=False)
     value = Column(Text, nullable=True, default="")
@@ -143,7 +142,7 @@ class Services(Base):
 
     id = Column(String(256), primary_key=True)
     method = Column(METHODS_ENUM, nullable=False)
-    is_draft = Column(Boolean, default=False, nullable=False)
+    is_draft = Column(Boolean, default=False, nullable=False, index=True)
     creation_date = Column(DateTime(timezone=True), nullable=False)
     last_update = Column(DateTime(timezone=True), nullable=False)
 
@@ -158,7 +157,7 @@ class Services_settings(Base):
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     service_id = Column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
     value = Column(LargeText, nullable=True, default="")
     file_name = Column(String(512), nullable=True, default=None)
     suffix = Column(Integer, nullable=True, default=0)
@@ -172,7 +171,7 @@ class Jobs(Base):
     __tablename__ = "bw_jobs"
 
     name = Column(String(128), primary_key=True)
-    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"))
+    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), index=True)
     file_name = Column(String(256), nullable=False)
     every = Column(SCHEDULES_ENUM, nullable=False)
     reload = Column(Boolean, default=False, nullable=False)
@@ -198,8 +197,8 @@ class Jobs_cache(Base):
     __tablename__ = "bw_jobs_cache"
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    job_name = Column(String(128), ForeignKey("bw_jobs.name", onupdate="cascade", ondelete="cascade"), nullable=False)
-    service_id = Column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=True)
+    job_name = Column(String(128), ForeignKey("bw_jobs.name", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
+    service_id = Column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=True, index=True)
     file_name = Column(String(256), nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=True)
     last_update = Column(DateTime(timezone=True), nullable=True)
@@ -213,7 +212,7 @@ class Jobs_runs(Base):
     __tablename__ = "bw_jobs_runs"
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    job_name = Column(String(128), ForeignKey("bw_jobs.name", onupdate="cascade", ondelete="cascade"), nullable=False)
+    job_name = Column(String(128), ForeignKey("bw_jobs.name", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
     success = Column(Boolean, nullable=True, default=False)
     start_date = Column(DateTime(timezone=True), nullable=False)
     end_date = Column(DateTime(timezone=True), nullable=False)
@@ -270,7 +269,7 @@ class Templates(Base):
 
     id = Column(String(256), primary_key=True)
     name = Column(String(256), unique=True, nullable=False)
-    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=True)
+    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=True, index=True)
     method = Column(METHODS_ENUM, nullable=False, default="manual")
     creation_date = Column(DateTime(timezone=True), nullable=False)
     last_update = Column(DateTime(timezone=True), nullable=False)
@@ -301,7 +300,7 @@ class Template_settings(Base):
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
     step_id = Column(Integer, nullable=False)
     default = Column(Text, nullable=True, default="")
     suffix = Column(Integer, nullable=True, default=0)
@@ -359,7 +358,7 @@ class Metadata(Base):
     failover = Column(Boolean, default=None, nullable=True)
     failover_message = Column(Text, nullable=True, default="")
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.9", nullable=False)
+    version = Column(String(32), default="1.6.10~rc7", nullable=False)
 
 
 ## UI Models
@@ -403,7 +402,7 @@ class Users(Base):
     email = Column(String(256), unique=True, nullable=True)
     password = Column(String(60), nullable=False)
     method = Column(METHODS_ENUM, nullable=False, default="manual")
-    admin = Column(Boolean, nullable=False, default=False)
+    admin = Column(Boolean, nullable=False, default=False, index=True)
     theme = Column(THEMES_ENUM, nullable=False, default="light")
     language = Column(String(2), nullable=False, default="en")
 
@@ -437,7 +436,7 @@ class RolesUsers(Base):
     __tablename__ = "bw_ui_roles_users"
 
     user_name = Column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), primary_key=True)
-    role_name = Column(String(64), ForeignKey("bw_ui_roles.name", onupdate="cascade", ondelete="cascade"), primary_key=True)
+    role_name = Column(String(64), ForeignKey("bw_ui_roles.name", onupdate="cascade", ondelete="cascade"), primary_key=True, index=True)
 
     user = relationship("Users", back_populates="roles")
     role = relationship("Roles", back_populates="users")
@@ -447,7 +446,7 @@ class UserRecoveryCodes(Base):
     __tablename__ = "bw_ui_user_recovery_codes"
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    user_name = Column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), nullable=False)
+    user_name = Column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
     code = Column(UnicodeText, nullable=False)
 
     user = relationship("Users", back_populates="recovery_codes")
@@ -457,7 +456,7 @@ class RolesPermissions(Base):
     __tablename__ = "bw_ui_roles_permissions"
 
     role_name = Column(String(64), ForeignKey("bw_ui_roles.name", onupdate="cascade", ondelete="cascade"), primary_key=True)
-    permission_name = Column(String(64), ForeignKey("bw_ui_permissions.name", onupdate="cascade", ondelete="cascade"), primary_key=True)
+    permission_name = Column(String(64), ForeignKey("bw_ui_permissions.name", onupdate="cascade", ondelete="cascade"), primary_key=True, index=True)
 
     role = relationship("Roles", back_populates="permissions")
     permission = relationship("Permissions", back_populates="roles")
@@ -475,7 +474,7 @@ class UserSessions(Base):
     __tablename__ = "bw_ui_user_sessions"
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    user_name = Column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), nullable=False)
+    user_name = Column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
     ip = Column(String(39), nullable=False)
     user_agent = Column(Text, nullable=True, default="")
     creation_date = Column(DateTime(timezone=True), nullable=False)
@@ -569,7 +568,7 @@ class API_permissions(Base):
     __tablename__ = "bw_api_user_permissions"
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    api_user = Column(String(256), ForeignKey("bw_api_users.username", onupdate="cascade", ondelete="cascade"), nullable=False)
+    api_user = Column(String(256), ForeignKey("bw_api_users.username", onupdate="cascade", ondelete="cascade"), nullable=False, index=True)
     resource_type = Column(API_RESOURCE_ENUM, nullable=False)
     resource_id = Column(String(256), nullable=True)
     permission = Column(String(512), nullable=False)

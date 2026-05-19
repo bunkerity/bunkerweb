@@ -16,7 +16,7 @@ size_t modp_rtrim(char *str, size_t len);
 size_t print_string(char *buf, size_t len, stoken_t *t);
 size_t print_var(char *buf, size_t len, stoken_t *t);
 size_t print_token(char *buf, size_t len, stoken_t *t);
-int read_file(const char *fname, int flags, int testtype);
+static int read_file(const char *fname, int flags, int testtype);
 const char *h5_type_to_string(enum html5_type x);
 size_t print_html5_token(char *buf, size_t len, h5_state_t *hs);
 
@@ -33,24 +33,26 @@ size_t modp_rtrim(char *str, size_t len) {
     return len;
 }
 
-size_t print_string(char *buf, size_t len, stoken_t *t) {
+size_t print_string(char *buf, size_t len,
+                    stoken_t *t) { // cppcheck-suppress constParameterPointer
     int slen = 0;
 
     /* print opening quote */
     if (t->str_open != '\0') {
-        slen = snprintf(buf + len, sizeof(t->str_open), "%c", t->str_open);
+        slen = snprintf(buf + len, sizeof(t->str_open) + 1, "%c", t->str_open);
         assert(slen >= 0);
         len += (size_t)slen;
     }
 
     /* print content */
-    slen = snprintf(buf + len, sizeof(t->val), "%s", t->val);
+    slen = snprintf(buf + len, sizeof(t->val) + 1, "%s", t->val);
     assert(slen >= 0);
     len += (size_t)slen;
 
     /* print closing quote */
     if (t->str_close != '\0') {
-        slen = snprintf(buf + len, sizeof(t->str_close), "%c", t->str_close);
+        slen =
+            snprintf(buf + len, sizeof(t->str_close) + 1, "%c", t->str_close);
         assert(slen >= 0);
         len += (size_t)slen;
     }
@@ -61,12 +63,12 @@ size_t print_string(char *buf, size_t len, stoken_t *t) {
 size_t print_var(char *buf, size_t len, stoken_t *t) {
     int slen;
     if (t->count >= 1) {
-        slen = snprintf(buf + len, sizeof(char), "%c", '@');
+        slen = snprintf(buf + len, sizeof(char) + 1, "%c", '@');
         assert(slen >= 0);
         len += (size_t)slen;
     }
     if (t->count == 2) {
-        slen = snprintf(buf + len, sizeof(char), "%c", '@');
+        slen = snprintf(buf + len, sizeof(char) + 1, "%c", '@');
         assert(slen >= 0);
         len += (size_t)slen;
     }
@@ -101,7 +103,9 @@ const char *h5_type_to_string(enum html5_type x) {
     return "";
 }
 
-size_t print_html5_token(char *buf, size_t len, h5_state_t *hs) {
+size_t
+print_html5_token(char *buf, size_t len,
+                  h5_state_t *hs) { // cppcheck-suppress constParameterPointer
     int slen;
     char *tmp = (char *)malloc(hs->token_len + 1);
 
@@ -119,7 +123,7 @@ size_t print_html5_token(char *buf, size_t len, h5_state_t *hs) {
 size_t print_token(char *buf, size_t len, stoken_t *t) {
     int slen;
 
-    slen = snprintf(buf + len, sizeof(t->type), "%c ", t->type);
+    slen = snprintf(buf + len, sizeof(t->type) + 2, "%c ", t->type);
     assert(slen >= 0);
     len += (size_t)slen;
     switch (t->type) {
@@ -134,13 +138,13 @@ size_t print_token(char *buf, size_t len, stoken_t *t) {
         assert(slen >= 0);
         len += (size_t)slen;
     }
-    slen = snprintf(buf + len, sizeof(char), "%c", '\n');
+    slen = snprintf(buf + len, sizeof(char) + 1, "%c", '\n');
     assert(slen >= 0);
     len += (size_t)slen;
     return len;
 }
 
-int read_file(const char *fname, int flags, int testtype) {
+static int read_file(const char *fname, int flags, int testtype) {
     int count = 0;
     FILE *fp = NULL;
     char linebuf[8192];
@@ -159,6 +163,10 @@ int read_file(const char *fname, int flags, int testtype) {
     g_expected[0] = '\0';
 
     fp = fopen(fname, "r");
+    if (fp == NULL) {
+        fprintf(stderr, "could not open file: %s\n", fname);
+        return 1;
+    }
     while (fgets(linebuf, sizeof(linebuf), fp) != NULL) {
         if (count == 0 && strcmp(linebuf, "--TEST--\n") == 0) {
             bufptr = g_test;

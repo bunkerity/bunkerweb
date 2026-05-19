@@ -150,6 +150,10 @@ class MultipartPart {
 class Multipart {
  public:
     Multipart(const std::string &header, Transaction *transaction);
+
+    Multipart(const Multipart&) = delete;
+    Multipart& operator=(const Multipart&) = delete;
+
     ~Multipart();
 
     bool init(std::string *err);

@@ -103,7 +103,6 @@ is_array
 is_dir
 is_executable
 is_file
-is_int
 is_null
 is_numeric
 is_object

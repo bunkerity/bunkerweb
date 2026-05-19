@@ -16,6 +16,7 @@ from cryptography.hazmat.primitives import hashes
 from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required
 
+from common_utils import safe_tar_extractall  # type: ignore
 from app.dependencies import DB  # type: ignore
 from app.utils import LOGGER  # type: ignore
 from app.routes.utils import cors_required  # type: ignore
@@ -90,10 +91,7 @@ def download_certificates():
         if cache_file["file_name"].endswith(".tgz") and cache_file["file_name"].startswith("folder:"):
             with tar_open(fileobj=BytesIO(cache_file["data"]), mode="r:gz") as tar:
                 members = [m for m in tar.getmembers() if _is_allowed_member(m)]
-                try:
-                    tar.extractall(DATA_PATH, members=members, filter="fully_trusted")
-                except TypeError:
-                    tar.extractall(DATA_PATH, members=members)
+                safe_tar_extractall(tar, DATA_PATH, tar_filter="tar", members=members)
 
 
 def retrieve_certificates():
@@ -369,6 +367,11 @@ def letsencrypt_delete():
     cmd_env = {"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")}
     cmd_env["PYTHONPATH"] = cmd_env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in cmd_env["PYTHONPATH"] else "")
 
+    try:
+        max_log_backups = max(0, int(getenv("LETS_ENCRYPT_MAX_LOG_BACKUPS", "50").strip()))
+    except ValueError:
+        max_log_backups = 50
+
     delete_proc = run(
         [
             CERTBOT_BIN,
@@ -379,6 +382,8 @@ def letsencrypt_delete():
             WORK_DIR,
             "--logs-dir",
             LOGS_DIR,
+            "--max-log-backups",
+            str(max_log_backups),
             "--cert-name",
             cert_name,
             "-n",  # non-interactive

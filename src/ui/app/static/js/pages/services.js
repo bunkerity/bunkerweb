@@ -148,11 +148,9 @@ $(document).ready(function () {
   };
 
   if (serviceNumber > 10) {
-    const menu = [10];
-    [25, 50, 100].forEach((num) => {
-      if (serviceNumber > num) menu.push(num);
-    });
-    menu.push({ label: t("datatable.length_all", "All"), value: -1 });
+    const menu = [10, 25, 50, 100];
+    if (serviceNumber > 100) menu.push(500);
+    if (serviceNumber > 500) menu.push(1000);
     layout.bottomStart = {
       pageLength: {
         menu: menu,
@@ -295,14 +293,36 @@ $(document).ready(function () {
     importDragArea.addClass("border-dashed");
     importDragArea.removeClass("bg-primary text-white");
     importDragArea.find("i").addClass("text-primary");
+    $("#services-import-configs-options").addClass("d-none");
+    $("#services-import-overwrite-configs").prop("checked", false);
   });
 
-  const getSelectedServices = () =>
-    $("tr.selected")
+  $("#modal-export-services").on("hidden.bs.modal", function () {
+    $("#selected-services-export").empty();
+    $("#services-export-include-configs").prop("checked", false);
+  });
+
+  $("#services-export-confirm").on("click", function () {
+    const $modal = $("#modal-export-services");
+    const services = ($modal.data("services") || []).filter(Boolean);
+    if (services.length === 0) return;
+    const includeConfigs = $("#services-export-include-configs").is(":checked");
+    window.open(buildExportUrl(services, includeConfigs), "_blank");
+    bootstrap.Modal.getInstance($modal[0]).hide();
+  });
+
+  const getSelectedServices = () => {
+    if (!$.fn.dataTable.isDataTable("#services")) return [];
+    return $("#services")
+      .DataTable()
+      .rows({ selected: true })
+      .nodes()
+      .to$()
       .map(function () {
         return $(this).find("td:eq(2) a").text().trim();
       })
       .get();
+  };
 
   $.fn.dataTable.ext.buttons.create_service = {
     text: `<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline" data-i18n="button.create_service"> ${t(
@@ -401,6 +421,43 @@ $(document).ready(function () {
     },
   };
 
+  const servicesWithConfigs = new Set(
+    ($("#services_with_configs").val() || "")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean),
+  );
+
+  const buildExportUrl = (services, includeConfigs) => {
+    const baseUrl = `${window.location.origin}${window.location.pathname}`;
+    const params = new URLSearchParams({ services: services.join(",") });
+    if (includeConfigs) params.set("include_configs", "1");
+    return `${baseUrl}/export?${params.toString()}`;
+  };
+
+  const openExportModal = (services) => {
+    if (!services || services.length === 0) return;
+    const hasConfigs = services.some((service) =>
+      servicesWithConfigs.has(service),
+    );
+    if (!hasConfigs) {
+      // No attached custom configs — skip the modal and download the .env directly.
+      window.open(buildExportUrl(services, false), "_blank");
+      return;
+    }
+    const $modal = $("#modal-export-services");
+    $modal.data("services", services);
+    const $list = $("#selected-services-export");
+    $list.empty();
+    services.forEach((service) => {
+      $list.append(
+        `<span class="badge rounded-pill bg-label-primary me-1 mb-1">${service}</span>`,
+      );
+    });
+    $("#services-export-include-configs").prop("checked", false);
+    new bootstrap.Modal($modal[0]).show();
+  };
+
   $.fn.dataTable.ext.buttons.export_services = {
     action: function () {
       if (actionLock) return;
@@ -413,12 +470,16 @@ $(document).ready(function () {
         return;
       }
 
-      const baseUrl = window.location.href;
-      const exportUrl = `${baseUrl}/export?services=${services.join(",")}`;
-      window.open(exportUrl, "_blank");
+      openExportModal(services);
       actionLock = false;
     },
   };
+
+  $(document).on("click", ".export-service", function () {
+    const serviceId = $(this).data("service-id");
+    if (!serviceId) return;
+    openExportModal([String(serviceId)]);
+  });
 
   $.fn.dataTable.ext.buttons.delete_services = {
     text: '<span class="tf-icons bx bx-trash bx-18px me-2"></span>Delete',
@@ -629,7 +690,7 @@ $(document).ready(function () {
       select: {
         style: "multi+shift",
         selector: "td:nth-child(2)",
-        headerCheckbox: true,
+        headerCheckbox: "select-page",
       },
       layout: layout,
       initComplete: function () {
@@ -700,11 +761,32 @@ $(document).ready(function () {
 
   const validateImportFile = (file) => {
     const fileName = file.name.toLowerCase();
-    return fileName.endsWith(".env") || fileName.endsWith(".txt");
+    return (
+      fileName.endsWith(".env") ||
+      fileName.endsWith(".txt") ||
+      fileName.endsWith(".zip")
+    );
+  };
+
+  const toggleConfigsImportOptions = (file) => {
+    const $options = $("#services-import-configs-options");
+    if (file && file.name.toLowerCase().endsWith(".zip")) {
+      $options.removeClass("d-none");
+    } else {
+      $options.addClass("d-none");
+      $("#services-import-overwrite-configs").prop("checked", false);
+    }
   };
 
   importDragArea.on("click", function () {
     importFileInput.click();
+  });
+
+  importDragArea.on("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+      e.preventDefault();
+      importFileInput.click();
+    }
   });
 
   importDragArea.on("dragover", function (e) {
@@ -724,12 +806,14 @@ $(document).ready(function () {
   importFileInput.on("change", function () {
     const file = this.files && this.files[0];
     importFileList.empty();
+    toggleConfigsImportOptions(file);
     if (!file) {
       return;
     }
     if (!validateImportFile(file)) {
-      alert("Please upload a valid services export file (.env).");
+      alert("Please upload a valid services export file (.env or .zip).");
       importFileInput.val("");
+      toggleConfigsImportOptions(null);
       return;
     }
     const fileSize = (file.size / 1024).toFixed(2);

@@ -10,6 +10,7 @@ from traceback import format_exc
 from typing import Tuple
 from uuid import uuid4
 
+from common_utils import safe_tar_extractall  # type: ignore
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
 
@@ -31,10 +32,7 @@ def extract_cache(folder_path, cache_files):
         if cache_file["file_name"].endswith(".tgz") and cache_file["file_name"].startswith("folder:"):
             with tar_open(fileobj=BytesIO(cache_file["data"]), mode="r:gz") as tar:
                 members = [m for m in tar.getmembers() if _is_allowed_member(m)]
-                try:
-                    tar.extractall(folder_path, members=members, filter="fully_trusted")
-                except TypeError:
-                    tar.extractall(folder_path, members=members)
+                safe_tar_extractall(tar, folder_path, tar_filter="tar", members=members)
 
 
 def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:

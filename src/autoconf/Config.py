@@ -2,6 +2,7 @@
 
 from contextlib import suppress
 from datetime import datetime
+from os import getenv
 from time import sleep
 from typing import Any, Dict, List, Literal, Optional, Union
 
@@ -30,6 +31,10 @@ class Config:
         self.__configs = {config_type: {} for config_type in self._supported_config_types}
         self.__config = {}
         self.__extra_config = {}
+
+        # When enabled, services / custom configs removed from the orchestrator are converted
+        # to draft in the DB instead of being hard-deleted, so they can be republished later.
+        self._disable_cleanup = getenv("AUTOCONF_DISABLE_CLEANUP", "no").strip().lower() == "yes"
 
         self._db = Database(self.__logger)
 
@@ -133,22 +138,18 @@ class Config:
             )
         )
 
-    def wait_applying(self, startup: bool = False):
+    def wait_applying(self):
+        # Ready when DB is initialized and no scheduler apply is in flight.
         current_time = datetime.now().astimezone()
         ready = False
         while not ready and (datetime.now().astimezone() - current_time).seconds < 240:
             db_metadata = self._db.get_metadata()
             if isinstance(db_metadata, str):
-                if not startup:
-                    self.__logger.error(f"An error occurred when checking for changes in the database : {db_metadata}")
-            elif (
-                db_metadata["is_initialized"]
-                and db_metadata["first_config_saved"]
-                and not any(
-                    v
-                    for k, v in db_metadata.items()
-                    if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
-                )
+                self.__logger.error(f"An error occurred when checking for changes in the database : {db_metadata}")
+            elif db_metadata["is_initialized"] and not any(
+                v
+                for k, v in db_metadata.items()
+                if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
             ):
                 ready = True
                 continue
@@ -225,7 +226,7 @@ class Config:
         changed_plugins = []
         if "config" in changes:
             self.__logger.debug(f"Saving config in database: {self.__config}")
-            err = self._db.save_config(self.__config, "autoconf", changed=False)
+            err = self._db.save_config(self.__config, "autoconf", changed=False, disable_cleanup=self._disable_cleanup)
             if isinstance(err, str):
                 success = False
                 self.__logger.error(f"Can't save config in database: {err}, config may not work as expected")
@@ -234,7 +235,7 @@ class Config:
         # save custom configs to database
         if "custom_configs" in changes:
             self.__logger.debug(f"Saving custom configs in database: {custom_configs}")
-            err = self._db.save_custom_configs(custom_configs, "autoconf", changed=False)
+            err = self._db.save_custom_configs(custom_configs, "autoconf", changed=False, disable_cleanup=self._disable_cleanup)
             if err:
                 success = False
                 self.__logger.error(f"Can't save autoconf custom configs in database: {err}, custom configs may not work as expected")

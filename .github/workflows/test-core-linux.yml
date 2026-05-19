@@ -38,7 +38,7 @@ jobs:
           export DEBIAN_FRONTEND=noninteractive
           sudo -E apt install --no-install-recommends -y openssl git nodejs tar bzip2 wget curl grep libx11-xcb1 libappindicator3-1 libasound2t64 libdbus-glib-1-2 libxtst6 libxt6 php-fpm unzip firefox
       - name: Download geckodriver
-        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
         with:
           max_attempts: 3
           timeout_minutes: 20
@@ -49,7 +49,7 @@ jobs:
             sudo chmod +x /usr/local/bin/geckodriver
             rm -f geckodriver.tar.gz
       - name: Login to ghcr
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -76,7 +76,7 @@ jobs:
           curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
           echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" | sudo tee /etc/apt/sources.list.d/nginx.list
           sudo apt update
-          sudo -E apt install -y nginx=1.26.3-1~noble
+          sudo -E apt install -y nginx=1.30.0-1~noble
       - name: Fix version without a starting number
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == '1.5'
         run: echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg

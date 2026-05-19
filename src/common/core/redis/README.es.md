@@ -115,7 +115,8 @@ Cuando utilice Redis o Valkey con BunkerWeb, considere estas mejores prácticas 
 #### Gestión de la Memoria
 
 - **Supervise el uso de la memoria:** Configure Redis con los ajustes `maxmemory` apropiados para evitar errores de falta de memoria
-- **Establezca una política de desalojo:** Utilice `maxmemory-policy` (p. ej., `volatile-lru` o `allkeys-lru`) apropiada para su caso de uso
+- **Establezca una política de desalojo:** Utilice `maxmemory-policy` (p. ej., `volatile-lru` para uso general o `allkeys-lru` para cargas de trabajo de caché intensivo) apropiada para su caso de uso
+- **Valores predeterminados del all-in-one:** La imagen Docker AIO configura Redis con `maxmemory=256mb` y `maxmemory-policy=volatile-lru`; sobrescriba estos valores mediante las variables de entorno `REDIS_MAXMEMORY` y `REDIS_MAXMEMORY_POLICY`. Con `volatile-lru`, los contadores transitorios (límite de tasa, mal comportamiento) se desalojan antes que las claves con TTL importantes para las sesiones y los baneos temporales, y las claves sin expiración (baneos permanentes) quedan exentas. Se recomienda la misma política para servidores Redis o Valkey externos utilizados por BunkerWeb.
 - **Evite claves grandes:** Asegúrese de que las claves individuales de Redis se mantengan en un tamaño razonable para evitar la degradación del rendimiento
 
 #### Persistencia de Datos
@@ -128,7 +129,7 @@ Cuando utilice Redis o Valkey con BunkerWeb, considere estas mejores prácticas 
 
 - **Agrupación de conexiones:** BunkerWeb ya implementa esto, pero asegúrese de que otras aplicaciones sigan esta práctica
 - **Canalización:** Cuando sea posible, utilice la canalización para operaciones masivas para reducir la sobrecarga de la red
-- **Evite operaciones costosas:** Tenga cuidado con comandos como `KEYS` en entornos de producción
+- **Evite operaciones costosas:** Tenga cuidado con comandos como KEYS en entornos de producción
 - **Compare su carga de trabajo:** Utilice `redis-benchmark` para probar sus patrones de carga de trabajo específicos
 
 ### Recursos Adicionales

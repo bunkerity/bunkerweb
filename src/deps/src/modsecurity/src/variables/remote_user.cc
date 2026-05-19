@@ -42,6 +42,11 @@ void RemoteUser::evaluate(Transaction *transaction,
     std::vector<const VariableValue *> l2;
 
     transaction->m_variableRequestHeaders.resolve("authorization", &l2);
+    std::vector<std::unique_ptr<const VariableValue>> l2Owners;
+    l2Owners.reserve(l2.size());
+    for (const auto &a : l2) {
+        l2Owners.emplace_back(a);
+    }
 
     if (!l2.empty()) {
         const auto *v = l2[0];
@@ -54,10 +59,13 @@ void RemoteUser::evaluate(Transaction *transaction,
             base64 = std::string(header, 6, header.length());
         }
 
-        base64 = Utils::Base64::decode(base64);
+        std::string decodedAuthorization;
+        if (!Utils::Base64::decode(base64, &decodedAuthorization)) {
+            return;
+        }
 
-        if (const auto pos{base64.find(":")}; pos != std::string::npos) {
-            transaction->m_variableRemoteUser.assign(std::string(base64, 0, pos));
+        if (const auto pos{decodedAuthorization.find(":")}; pos != std::string::npos) {
+            transaction->m_variableRemoteUser.assign(std::string(decodedAuthorization, 0, pos));
 
             auto var = std::make_unique<VariableValue>(&v->getKeyWithCollection(),
                 &transaction->m_variableRemoteUser);
@@ -69,9 +77,6 @@ void RemoteUser::evaluate(Transaction *transaction,
             l->push_back(var.release());
         }
 
-        for (auto &a : l2) {
-            delete a;
-        }
     }
 }
 

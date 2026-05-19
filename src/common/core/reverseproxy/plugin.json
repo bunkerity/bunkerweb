@@ -74,6 +74,17 @@
       "type": "check",
       "multiple": "reverse-proxy"
     },
+    "REVERSE_PROXY_HTTP_VERSION": {
+      "context": "multisite",
+      "default": "1.1",
+      "help": "HTTP protocol version used to talk to the upstream (1.0, 1.1, or 2). Set to 2 to enable HTTP/2 multiplexing on the upstream leg for compatible backends. WebSocket locations are pinned to 1.1 regardless.",
+      "id": "reverse-proxy-http-version",
+      "label": "Reverse proxy HTTP version",
+      "regex": "^(1\\.0|1\\.1|2)$",
+      "type": "select",
+      "select": ["1.0", "1.1", "2"],
+      "multiple": "reverse-proxy"
+    },
     "REVERSE_PROXY_CUSTOM_HOST": {
       "context": "multisite",
       "default": "",
@@ -232,6 +243,16 @@
       "type": "check",
       "multiple": "reverse-proxy"
     },
+    "REVERSE_PROXY_MODSECURITY": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Enable or disable ModSecurity for this reverse proxy location. Set to no for endpoints that accept very large uploads (e.g. video, backup, object storage) — the ModSecurity-nginx connector buffers the full request body in memory regardless of SecRequestBodyLimit and can trigger OOM on multi-GB uploads. Emits 'modsecurity off;' inside the location block.",
+      "id": "reverse-proxy-modsecurity",
+      "label": "Reverse proxy ModSecurity",
+      "regex": "^(yes|no)$",
+      "type": "check",
+      "multiple": "reverse-proxy"
+    },
     "USE_PROXY_CACHE": {
       "context": "multisite",
       "default": "no",
@@ -256,7 +277,7 @@
       "help": "Maximum size of cached metadata when caching proxied resources.",
       "id": "proxy-cache-path-zone-size",
       "label": "Reverse proxy cache zone size",
-      "regex": "^\\d+[kKmMgG]?$",
+      "regex": "^\\d+[kKmM]$",
       "type": "text"
     },
     "PROXY_CACHE_PATH_PARAMS": {

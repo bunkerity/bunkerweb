@@ -126,11 +126,9 @@ $(document).ready(function () {
   };
 
   if (templateNumber > 10) {
-    const menu = [10];
-    if (templateNumber > 25) menu.push(25);
-    if (templateNumber > 50) menu.push(50);
-    if (templateNumber > 100) menu.push(100);
-    menu.push({ label: t("datatable.length_all", "All"), value: -1 }); // Translate "All"
+    const menu = [10, 25, 50, 100];
+    if (templateNumber > 100) menu.push(500);
+    if (templateNumber > 500) menu.push(1000);
     layout.bottomStart = {
       pageLength: { menu: menu },
       info: true,
@@ -242,9 +240,15 @@ $(document).ready(function () {
   // Function to get selected template ids
   const getSelectedTemplates = () => {
     const templates = [];
-    $("tr.selected").each(function () {
-      templates.push($(this).find("td:eq(2)").text().trim()); // Assuming id is in 3rd column (index 2)
-    });
+    if (!$.fn.dataTable.isDataTable("#templates")) return templates;
+    $("#templates")
+      .DataTable()
+      .rows({ selected: true })
+      .nodes()
+      .to$()
+      .each(function () {
+        templates.push($(this).find("td:eq(2)").text().trim()); // Assuming id is in 3rd column (index 2)
+      });
     return templates;
   };
 
@@ -432,7 +436,7 @@ $(document).ready(function () {
       select: {
         style: "multi+shift",
         selector: "td:nth-child(2)",
-        headerCheckbox: true,
+        headerCheckbox: "select-page",
       },
       layout: layout,
       initComplete: function (settings, json) {

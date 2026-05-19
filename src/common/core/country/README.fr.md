@@ -40,7 +40,10 @@ Vous pouvez utiliser des tokens de groupe préfixés par `@`. Ils sont étendus 
 - `@LATAM` : ensemble Amérique latine utilisé par ce plugin.
 
 !!! tip "Liste blanche vs noire"
-    Liste blanche : accès restreint à quelques pays. Liste noire : bloquer des régions problématiques et autoriser le reste.
+    Choisissez l’approche adaptée à vos besoins :
+
+    - Utilisez la liste blanche pour restreindre l’accès à un petit nombre de pays.
+    - Utilisez la liste noire pour bloquer des régions problématiques tout en autorisant le reste.
 
 !!! warning "Priorité"
     Si une liste blanche et une liste noire sont définies, la liste blanche a priorité : si le pays n’y figure pas, l’accès est refusé.

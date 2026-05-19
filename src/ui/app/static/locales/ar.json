@@ -18,7 +18,9 @@
   "aria": {
     "label": {
       "close": "إغلاق",
-      "raw_configuration": "التكوين الخام"
+      "configs_dropzone": "حدد ملف تصدير التكوينات المخصصة أو أفلت واحدًا هنا",
+      "raw_configuration": "التكوين الخام",
+      "services_dropzone": "حدد ملف تصدير الخدمات أو أفلت واحدًا هنا"
     }
   },
   "badge": {
@@ -94,10 +96,8 @@
     "enable_totp": "تمكين TOTP",
     "entire_config": "التكوين الكامل",
     "export": "تصدير",
-    "export_csv_all": "CSV (الكل)",
-    "export_csv_visible": "CSV (مرئي)",
-    "export_excel_all": "Excel (الكل)",
-    "export_excel_visible": "Excel (مرئي)",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
     "fetch_global": "جلب الإعدادات العامة",
     "filters_suffix": " مرشحات",
     "follow": "متابعة",
@@ -107,6 +107,7 @@
     "go_back": "الرجوع",
     "hide": "إخفاء",
     "history": "السجل",
+    "import_configs": "استيراد التكوينات المخصصة",
     "import_services": "استيراد الخدمات",
     "login": "تسجيل الدخول",
     "multiple_add": "إضافة",
@@ -474,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "تحديد كل {{count}} {{entity}} المطابقة",
+    "bulk_select_all_done": "تم تحديد كل {{count}} {{entity}} المطابقة.",
+    "bulk_select_clear": "مسح التحديد",
+    "bulk_select_page": "تم تحديد كل {{count}} {{entity}} في هذه الصفحة.",
     "info_bans": "عرض {{start}} إلى {{end}} من أصل {{total}} حظر",
     "info_cache": "عرض {{start}} إلى {{end}} من أصل {{total}} ملفات ذاكرة مؤقتة",
     "info_configs": "عرض {{start}} إلى {{end}} من أصل {{total}} تكوينات مخصصة",
@@ -504,7 +509,6 @@
     "info_reports": "عرض {{start}} إلى {{end}} من أصل {{total}} تقارير",
     "info_services": "عرض {{start}} إلى {{end}} من أصل {{total}} خدمات",
     "info_templates": "عرض {{start}} إلى {{end}} من أصل {{total}} قوالب",
-    "last_run_state": "حالة آخر تشغيل",
     "length_all": "الكل",
     "length_menu_bans": "عرض _MENU_ حظر",
     "length_menu_cache": "عرض _MENU_ ملفات ذاكرة مؤقتة",
@@ -516,8 +520,6 @@
     "length_menu_reports": "عرض _MENU_ تقارير",
     "length_menu_services": "عرض _MENU_ خدمات",
     "length_menu_templates": "عرض _MENU_ قوالب",
-    "loading": "جار تحميل جداول البيانات...",
-    "one_or_more": "واحد أو أكثر",
     "paginate": {
       "first": "الأول",
       "last": "الأخير",
@@ -556,8 +558,6 @@
     "select_rows_templates_0": "لم يتم تحديد أي قوالب",
     "select_rows_templates_1": "تم تحديد 1 قالب",
     "select_rows_templates_plural": "تم تحديد %d قوالب",
-    "steps": "الخطوات",
-    "zero": "صفر",
     "zero_records_bans": "لم يتم العثور على حظر مطابق",
     "zero_records_cache": "لم يتم العثور على ملفات ذاكرة مؤقتة مطابقة",
     "zero_records_configs": "لم يتم العثور على تكوينات مخصصة مطابقة",
@@ -625,6 +625,8 @@
   },
   "form": {
     "checkbox": {
+      "include_attached_configs": "تضمين التكوينات المخصصة المرفقة",
+      "overwrite_existing_configs": "استبدال تكوينات UI/API المخصصة الحالية",
       "remember_me": "تذكرني"
     },
     "help": {
@@ -697,11 +699,11 @@
       "use_real_ip": "استخدام IP الحقيقي",
       "username": "اسم المستخدم",
       "wildcard_certificates": "شهادات Wildcard",
-      "zerossl_api_connect_timeout": "مهلة الاتصال لواجهة برمجة تطبيقات ZeroSSL",
       "zerossl_api_key": "مفتاح واجهة برمجة تطبيقات ZeroSSL",
-      "zerossl_api_max_time": "الوقت الأقصى لواجهة برمجة تطبيقات ZeroSSL",
       "zerossl_api_retry": "محاولات إعادة واجهة برمجة تطبيقات ZeroSSL",
-      "zerossl_api_retry_delay": "مهلة إعادة المحاولة لواجهة برمجة تطبيقات ZeroSSL"
+      "zerossl_api_retry_delay": "مهلة إعادة المحاولة لواجهة برمجة تطبيقات ZeroSSL",
+      "zerossl_api_connect_timeout": "مهلة الاتصال لواجهة برمجة تطبيقات ZeroSSL",
+      "zerossl_api_max_time": "الوقت الأقصى لواجهة برمجة تطبيقات ZeroSSL"
     },
     "placeholder": {
       "2fa_code": "أدخل الرمز",
@@ -794,6 +796,9 @@
       "fetch_global_settings_point_1": "يتم تحديث الإعدادات الموجودة في هذا القالب فقط.",
       "fetch_global_settings_point_2": "يتم تجاهل القيم المطابقة للقيم الافتراضية.",
       "fetch_global_settings_point_3": "لن يتم الكتابة فوق SERVER_NAME مطلقًا.",
+      "export_services_intro": "سيتم تصدير الخدمات المحددة. فعّل الخيار أدناه لتضمين التكوينات المخصصة المرفقة بها في أرشيف .zip.",
+      "import_configs_dropzone": "اسحب وأفلت ملف تصدير التكوينات المخصصة هنا أو انقر لتحديد ملف.",
+      "import_configs_warning": "يتم دائمًا الاحتفاظ بالتكوينات المخصصة التي أنشأها scheduler أو autoconf أو templates. يمكن فقط استبدال تكوينات UI/API.",
       "import_services_dropzone": "قم بسحب وإسقاط ملف تصدير الخدمات هنا أو انقر لتحديد ملف.",
       "import_services_warning": "سيؤدي استيراد الخدمات إلى إنشاء خدمات واجهة مستخدم جديدة من ملف التصدير. يتم تخطي الخدمات الموجودة.",
       "instance_creation_alert": "لا تحتاج إلى توفير المنفذ أو اسم الخادم؛ سيتم استخدام قيم `API_HTTP_PORT` و`API_LISTEN_HTTPS` و`API_HTTPS_PORT` و`API_SERVER_NAME` لتكوين المثيل.",
@@ -828,8 +833,10 @@
       "delete_template": "حذف القوالب",
       "edit_template": "تعديل القالب: {{name}}",
       "fetch_global_settings": "تطبيق الإعدادات العامة؟",
+      "export_services": "تصدير الخدمات",
       "from_plugin": "من الإضافة",
       "full_url": "URL كامل",
+      "import_configs": "استيراد التكوينات المخصصة",
       "import_services": "استيراد الخدمات",
       "job_history": "آخر 10 عمليات تنفيذ للمهام",
       "job_history_count": "آخر {{count}} عمليات تنفيذ للمهمة",
@@ -1034,7 +1041,6 @@
     "last_30d": "آخر 30 يومًا",
     "last_7d": "آخر 7 أيام",
     "last_run": "حالة التشغيل الأخير",
-    "last_run_state": "حالة التشغيل الأخير",
     "last_seen": "آخر مشاهدة",
     "last_update": "آخر تحديث",
     "loading": "جار التحميل...",
@@ -1102,9 +1108,9 @@
       "section": {
         "custom_certificate": "شهادة مخصصة",
         "lets_encrypt": "Let's Encrypt",
+        "zerossl": "ZeroSSL",
         "real_ip": "IP الحقيقي",
-        "reverse_proxy": "وكيل عكسي",
-        "zerossl": "ZeroSSL"
+        "reverse_proxy": "وكيل عكسي"
       },
       "subtitle": "قم بتكوين الإعدادات الخاصة بواجهة المستخدم على الويب.",
       "title": "إعدادات واجهة المستخدم"
@@ -1333,8 +1339,8 @@
       "raw_configs_title": "استيراد التكوينات المخصصة",
       "raw_configs_upload": "تحميل ملفات التكوين (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "تعذر قراءة أحد الملفات المحددة.",
-      "raw_editor_aria": "محرر JSON للقالب الخام",
       "raw_editor_drop_hint": "أسقط ملف JSON قالب (.json فقط) لاستبدال المحتوى الحالي.",
+      "raw_editor_aria": "محرر JSON للقالب الخام",
       "raw_editor_help": "تعديل تعريف القالب الكامل بصيغة JSON. يؤدي التبديل مرة أخرى إلى الوضع السهل إلى التحقق من الصحة وإعادة تحميل المحرر المرئي.",
       "raw_editor_import_success": "تم استيراد JSON القالب بنجاح.",
       "raw_editor_override_body": "سيؤدي استيراد هذا الملف إلى استبدال JSON القالب الحالي بالكامل. سيتم فقدان التغييرات التي تم إجراؤها في المحرر. هل تريد المتابعة؟",
@@ -1522,8 +1528,8 @@
     "latest_version_installed": "أنت تستخدم أحدث إصدار.",
     "lets_encrypt_custom_profile": "ملف التعريف المخصص الذي سيتم استخدامه لـ Let's Encrypt (مثل 'my_custom_profile').",
     "lets_encrypt_disable_public_suffixes": "تعطيل طلبات الشهادات للنطاقات التي تطابق قائمة Public Suffix List (موصى به).",
-    "lets_encrypt_profile": "ملف التعريف الذي سيتم استخدامه لـ Let's Encrypt (classic، tlsserver، shortlived).",
     "lets_encrypt_server": "اختر موفر الشهادات لعرض الإعدادات الخاصة بكل موفر.",
+    "lets_encrypt_profile": "ملف التعريف الذي سيتم استخدامه لـ Let's Encrypt (classic، tlsserver، shortlived).",
     "license_key": "مفتاح ترخيص BunkerWeb PRO الخاص بك.",
     "link": {
       "access_plugin_page": "الوصول إلى صفحة {{name}}",
@@ -1535,6 +1541,7 @@
       "edit_config": "تحرير التكوين المخصص {{name}}",
       "edit_service": "تحرير الخدمة {{service}}",
       "edit_template": "تحرير القالب {{template}}",
+      "export_config": "تصدير التكوين المخصص {{name}}",
       "export_service": "تصدير تكوين الخدمة {{name}}",
       "view_config": "عرض التكوين المخصص {{name}}",
       "view_file": "عرض {{filename}}",
@@ -1698,11 +1705,11 @@
     "view_full_url": "انقر لعرض URL الكامل",
     "wildcard_certificates": "إنشاء شهادات wildcard (*.domain.com). يتطلب تحدي DNS.",
     "wildcard_dns_only": "شهادات Wildcard مدعومة فقط مع نوع تحدي DNS.",
-    "zerossl_api_connect_timeout": "مهلة الاتصال بالثواني لطلبات واجهة برمجة تطبيقات ZeroSSL.",
     "zerossl_api_key": "مفتاح API اختياري لـ ZeroSSL يستخدمه zerossl-bot.",
-    "zerossl_api_max_time": "الوقت الإجمالي الأقصى بالثواني لكل طلب واجهة برمجة تطبيقات ZeroSSL.",
     "zerossl_api_retry": "عدد محاولات إعادة طلبات واجهة برمجة تطبيقات ZeroSSL (القيمة 0 تعطل إعادة المحاولة).",
-    "zerossl_api_retry_delay": "التأخير بالثواني بين محاولات إعادة واجهة برمجة تطبيقات ZeroSSL."
+    "zerossl_api_retry_delay": "التأخير بالثواني بين محاولات إعادة واجهة برمجة تطبيقات ZeroSSL.",
+    "zerossl_api_connect_timeout": "مهلة الاتصال بالثواني لطلبات واجهة برمجة تطبيقات ZeroSSL.",
+    "zerossl_api_max_time": "الوقت الإجمالي الأقصى بالثواني لكل طلب واجهة برمجة تطبيقات ZeroSSL."
   },
   "totp": {
     "prompt": "يرجى إدخال رمز TOTP الخاص بك."

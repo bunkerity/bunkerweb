@@ -145,6 +145,7 @@ c99
 cancel
 cancel@
 cancel~
+cargo@
 capsh@
 cat
 cat@
@@ -408,6 +409,8 @@ knife
 knife@
 knife~
 ksshell
+l@
+la@
 last
 last@
 last~
@@ -425,6 +428,7 @@ less~
 links
 links@
 links~
+ll@
 ln
 ln@
 local
@@ -548,6 +552,7 @@ perms@
 perms~
 pf
 pf@
+pg@
 php
 php@
 php~
@@ -627,6 +632,7 @@ ruby@
 ruby~
 run-mailcap
 run-parts
+rust@
 rview
 rvim
 sash
@@ -652,6 +658,7 @@ set~
 sg
 sg@
 sg~
+shred@
 shuf
 shutdown
 shutdown@

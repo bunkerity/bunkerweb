@@ -18,7 +18,9 @@
   "aria": {
     "label": {
       "close": "بند کریں",
-      "raw_configuration": "خام کنفیگریشن"
+      "configs_dropzone": "کسٹم کنفیگریشنز کی برآمد فائل منتخب کریں یا اسے یہاں چھوڑیں",
+      "raw_configuration": "خام کنفیگریشن",
+      "services_dropzone": "خدمات کی برآمد فائل منتخب کریں یا اسے یہاں چھوڑیں"
     }
   },
   "badge": {
@@ -94,10 +96,8 @@
     "enable_totp": "TOTP فعال کریں",
     "entire_config": "مکمل کنفیگریشن",
     "export": "برآمد کریں",
-    "export_csv_all": "CSV (تمام)",
-    "export_csv_visible": "CSV (مرئی)",
-    "export_excel_all": "Excel (تمام)",
-    "export_excel_visible": "Excel (مرئی)",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
     "fetch_global": "عالمی سیٹنگز حاصل کریں",
     "filters_suffix": " فلٹرز",
     "follow": "فالو کریں",
@@ -107,6 +107,7 @@
     "go_back": "پیچھے جائیں",
     "hide": "چھپائیں",
     "history": "تاریخچہ",
+    "import_configs": "کسٹم کنفیگریشنز درآمد کریں",
     "import_services": "خدمات درآمد کریں",
     "login": "لاگ ان کریں",
     "multiple_add": "شامل کریں",
@@ -474,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "مماثل {{entity}} میں سے تمام {{count}} منتخب کریں",
+    "bulk_select_all_done": "مماثل {{entity}} میں سے تمام {{count}} منتخب ہو چکے ہیں۔",
+    "bulk_select_clear": "انتخاب صاف کریں",
+    "bulk_select_page": "اس صفحے پر موجود تمام {{count}} {{entity}} منتخب ہو چکے ہیں۔",
     "info_bans": "{{total}} پابندیوں میں سے {{start}} سے {{end}} دکھا رہا ہے",
     "info_cache": "{{total}} کیشے فائلوں میں سے {{start}} سے {{end}} دکھا رہا ہے",
     "info_configs": "{{total}} کسٹم کنفیگریشنز میں سے {{start}} سے {{end}} دکھا رہا ہے",
@@ -620,6 +625,8 @@
   },
   "form": {
     "checkbox": {
+      "include_attached_configs": "منسلک کسٹم کنفیگریشنز شامل کریں",
+      "overwrite_existing_configs": "موجودہ UI/API کسٹم کنفیگریشنز کو اوور رائٹ کریں",
       "remember_me": "مجھے یاد رکھیں"
     },
     "help": {
@@ -692,11 +699,11 @@
       "use_real_ip": "اصل IP استعمال کریں",
       "username": "صارف نام",
       "wildcard_certificates": "وائلڈ کارڈ سرٹیفکیٹس",
-      "zerossl_api_connect_timeout": "ZeroSSL API کنکشن ٹائم آؤٹ",
       "zerossl_api_key": "ZeroSSL API کلید",
-      "zerossl_api_max_time": "ZeroSSL API زیادہ سے زیادہ وقت",
       "zerossl_api_retry": "ZeroSSL API دوبارہ کوششیں",
-      "zerossl_api_retry_delay": "ZeroSSL API دوبارہ کوشش میں تاخیر"
+      "zerossl_api_retry_delay": "ZeroSSL API دوبارہ کوشش میں تاخیر",
+      "zerossl_api_connect_timeout": "ZeroSSL API کنکشن ٹائم آؤٹ",
+      "zerossl_api_max_time": "ZeroSSL API زیادہ سے زیادہ وقت"
     },
     "placeholder": {
       "2fa_code": "کوڈ درج کریں",
@@ -789,6 +796,9 @@
       "fetch_global_settings_point_1": "صرف وہ سیٹنگز اپڈیٹ ہوتی ہیں جو اس ٹیمپلیٹ میں موجود ہیں۔",
       "fetch_global_settings_point_2": "جو قدریں ڈیفالٹ کے برابر ہوں انہیں نظر انداز کیا جاتا ہے۔",
       "fetch_global_settings_point_3": "SERVER_NAME کو کبھی اوور رائٹ نہیں کیا جاتا۔",
+      "export_services_intro": "منتخب کردہ خدمات برآمد کی جائیں گی۔ ان کی منسلک کسٹم کنفیگریشنز کو .zip آرکائیو میں شامل کرنے کے لیے نیچے دیا گیا اختیار فعال کریں۔",
+      "import_configs_dropzone": "اپنی کسٹم کنفیگریشنز کی برآمد فائل کو یہاں گھسیٹیں اور چھوڑیں یا فائل منتخب کرنے کے لیے کلک کریں۔",
+      "import_configs_warning": "scheduler، autoconf، یا templates کے ذریعے بنائی گئی کسٹم کنفیگریشنز ہمیشہ محفوظ رہتی ہیں۔ صرف UI/API کنفیگریشنز کو اوور رائٹ کیا جا سکتا ہے۔",
       "import_services_dropzone": "اپنی خدمات کی برآمد فائل کو یہاں گھسیٹیں اور چھوڑیں یا فائل کو منتخب کرنے کے لیے کلک کریں۔",
       "import_services_warning": "خدمات درآمد کرنے سے برآمد فائل سے نئی UI خدمات بن جائیں گی۔ موجودہ خدمات کو چھوڑ دیا گیا ہے۔",
       "instance_creation_alert": "آپ کو پورٹ یا سرور کا نام فراہم کرنے کی ضرورت نہیں ہے؛ انسٹینس کنفیگریشن کے لیے `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` اور `API_SERVER_NAME` کی قدریں استعمال ہوں گی۔",
@@ -823,8 +833,10 @@
       "delete_template": "ٹیمپلیٹس حذف کریں",
       "edit_template": "ٹیمپلیٹ میں ترمیم کریں: {{name}}",
       "fetch_global_settings": "گلوبل سیٹنگز لاگو کی جائیں؟",
+      "export_services": "خدمات برآمد کریں",
       "from_plugin": "پلگ ان سے",
       "full_url": "مکمل URL",
+      "import_configs": "کسٹم کنفیگریشنز درآمد کریں",
       "import_services": "خدمات درآمد کریں",
       "job_history": "آخری 10 ٹاسک ایگزیکیوشنز",
       "job_history_count": "ٹاسک کی آخری {{count}} ایگزیکیوشنز",
@@ -865,7 +877,6 @@
     "misc": "متفرق",
     "mode_selection": "موڈ کا انتخاب",
     "more": "مزید...",
-    "new": "نیا",
     "plugin_activated": "پلگ ان فعال ہو گیا",
     "plugin_activated_global": "پلگ ان عالمی طور پر فعال ہو گیا",
     "plugin_deactivated": "پلگ ان غیر فعال ہو گیا",
@@ -1032,6 +1043,7 @@
     "last_run": "آخری رن کی حالت",
     "last_seen": "آخری بار دیکھا گیا",
     "last_update": "آخری اپ ڈیٹ",
+    "loading": "تلاش کے پینل لوڈ ہو رہے ہیں...",
     "method": "طریقہ",
     "next_24h": "اگلے 24 گھنٹے",
     "next_30d": "اگلے 30 دن",
@@ -1096,9 +1108,9 @@
       "section": {
         "custom_certificate": "حسب ضرورت سرٹیفکیٹ",
         "lets_encrypt": "Let's Encrypt",
+        "zerossl": "ZeroSSL",
         "real_ip": "اصل IP",
-        "reverse_proxy": "ریورس پراکسی",
-        "zerossl": "ZeroSSL"
+        "reverse_proxy": "ریورس پراکسی"
       },
       "subtitle": "ویب UI مخصوص سیٹنگز کنفیگر کریں۔",
       "title": "UI سیٹنگز"
@@ -1327,8 +1339,8 @@
       "raw_configs_title": "حسب ضرورت کنفیگ درآمدات",
       "raw_configs_upload": "کنفیگ فائلیں اپ لوڈ کریں (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "منتخب کردہ فائلوں میں سے ایک کو پڑھنے سے قاصر۔",
-      "raw_editor_aria": "را ٹیمپلیٹ JSON ایڈیٹر",
       "raw_editor_drop_hint": "موجودہ مواد کو تبدیل کرنے کے لیے ایک ٹیمپلیٹ JSON فائل (صرف .json) ڈراپ کریں۔",
+      "raw_editor_aria": "را ٹیمپلیٹ JSON ایڈیٹر",
       "raw_editor_help": "مکمل ٹیمپلیٹ تعریف کو JSON کے طور پر ترمیم کریں۔ آسان موڈ پر واپس جانے سے بصری ایڈیٹر کی توثیق اور دوبارہ لوڈنگ ہوتی ہے۔",
       "raw_editor_import_success": "ٹیمپلیٹ JSON کامیابی سے درآمد کیا گیا۔",
       "raw_editor_override_body": "اس فائل کو درآمد کرنے سے موجودہ ٹیمپلیٹ JSON مکمل طور پر تبدیل ہو جائے گا۔ ایڈیٹر میں کی گئی تبدیلیاں ضائع ہو جائیں گی۔ کیا آپ جاری رکھنا چاہتے ہیں؟",
@@ -1516,8 +1528,8 @@
     "latest_version_installed": "آپ تازہ ترین ورژن چلا رہے ہیں۔",
     "lets_encrypt_custom_profile": "Let's Encrypt کے لیے استعمال ہونے والا کسٹم پروفائل (مثلاً 'my_custom_profile')۔",
     "lets_encrypt_disable_public_suffixes": "پبلک سفکس لسٹ سے ملنے والے ڈومینز کے لیے سرٹیفکیٹ کی درخواستیں غیر فعال کریں (تجویز کردہ)۔",
-    "lets_encrypt_profile": "Let's Encrypt کے لیے استعمال ہونے والا پروفائل (classic، tlsserver، shortlived)۔",
     "lets_encrypt_server": "فراہم کنندہ مخصوص ترتیبات دکھانے کے لیے اپنا سرٹیفکیٹ فراہم کنندہ منتخب کریں۔",
+    "lets_encrypt_profile": "Let's Encrypt کے لیے استعمال ہونے والا پروفائل (classic، tlsserver، shortlived)۔",
     "license_key": "آپ کی BunkerWeb PRO لائسنس کلید۔",
     "link": {
       "access_plugin_page": "{{name}} صفحہ تک رسائی حاصل کریں",
@@ -1529,6 +1541,7 @@
       "edit_config": "کسٹم کنفیگریشن {{name}} میں ترمیم کریں",
       "edit_service": "سروس {{service}} میں ترمیم کریں",
       "edit_template": "ٹیمپلیٹ {{template}} میں ترمیم کریں",
+      "export_config": "کسٹم کنفیگریشن {{name}} برآمد کریں",
       "export_service": "سروس {{name}} کنفیگریشن برآمد کریں",
       "view_config": "کسٹم کنفیگریشن {{name}} دیکھیں",
       "view_file": "{{filename}} دیکھیں",
@@ -1692,11 +1705,11 @@
     "view_full_url": "مکمل URL دیکھنے کے لیے کلک کریں",
     "wildcard_certificates": "وائلڈ کارڈ سرٹیفکیٹس (*.domain.com) بنائیں۔ DNS چیلنج درکار ہے۔",
     "wildcard_dns_only": "وائلڈ کارڈ سرٹیفکیٹس صرف DNS چیلنج قسم کے ساتھ معاون ہیں۔",
-    "zerossl_api_connect_timeout": "ZeroSSL API کالز کے لیے سیکنڈ میں کنکشن ٹائم آؤٹ۔",
     "zerossl_api_key": "zerossl-bot کے استعمال کے لیے اختیاری ZeroSSL API کلید۔",
-    "zerossl_api_max_time": "ہر ZeroSSL API درخواست کے لیے سیکنڈ میں زیادہ سے زیادہ کل وقت۔",
     "zerossl_api_retry": "ZeroSSL API درخواستوں کے لیے دوبارہ کوششوں کی تعداد (0 دوبارہ کوشش غیر فعال کرتا ہے)۔",
-    "zerossl_api_retry_delay": "ZeroSSL API کی دوبارہ کوششوں کے درمیان سیکنڈ میں تاخیر۔"
+    "zerossl_api_retry_delay": "ZeroSSL API کی دوبارہ کوششوں کے درمیان سیکنڈ میں تاخیر۔",
+    "zerossl_api_connect_timeout": "ZeroSSL API کالز کے لیے سیکنڈ میں کنکشن ٹائم آؤٹ۔",
+    "zerossl_api_max_time": "ہر ZeroSSL API درخواست کے لیے سیکنڈ میں زیادہ سے زیادہ کل وقت۔"
   },
   "totp": {
     "prompt": "براہ کرم اپنا TOTP کوڈ درج کریں۔"

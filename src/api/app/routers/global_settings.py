@@ -7,7 +7,6 @@ from ..auth.guard import guard
 from ..utils import get_db
 from ..schemas import GlobalSettingsUpdate
 
-
 config_router = APIRouter(prefix="/global_config", tags=["global_settings"])
 router = APIRouter(prefix="/global_settings", tags=["global_settings"])
 
@@ -61,7 +60,7 @@ def update_global_settings(payload: GlobalSettingsUpdate) -> JSONResponse:
 
     base = _current_api_global_overrides()
     base.update(to_set)
-    ret = get_db().save_config(base, "api", changed=True)
+    ret = get_db().save_config(base, "api", changed=True, skip_service_management=True)
     if isinstance(ret, str):
         code = 400 if ret and ("read-only" in ret or "already exists" in ret or "doesn't exist" in ret) else (200 if ret == "" else 500)
         status = "success" if code == 200 else "error"

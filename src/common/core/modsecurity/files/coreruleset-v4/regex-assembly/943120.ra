@@ -1,0 +1,55 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+##!
+##! Rule 943120: Session Fixation - SessionID Parameter Name with No Referer
+##!
+##! Description: Detects common session ID parameter names used in
+##! session fixation attacks when no Referer header is present.
+##! Chained with a check for missing Referer header.
+##!
+##! Note: This rule uses t:lowercase transformation, so all patterns
+##! are in lowercase.
+##!
+##! Note: Rule 943110 has a superset of these session names.
+##! A shared include could be created in a future refactor.
+##!^ ^
+##!$ $
+
+##! Java/J2EE Session IDs
+jsessionid
+jservsession
+jwsession
+
+##! ASP/ASP.NET Session IDs
+aspsessionid
+asp\.net_sessionid
+
+##! PHP Session IDs
+phpsession
+phpsessid
+
+##! Oracle WebLogic
+weblogicsession
+
+##! Generic Session IDs
+session_id
+session-id
+sessionid
+_session_id
+
+##! ColdFusion Session IDs
+cfid
+cftoken
+cfsid
+
+##! Python/Flask
+_flask_session
+
+##! Node.js / Express
+connect\.sid
+
+##! Laravel
+laravel_session

@@ -42,7 +42,7 @@ bool Serial::write(Transaction *transaction, int parts, std::string *error) {
     } else {
         std::string boundary;
         generateBoundary(&boundary);
-        msg = transaction->toOldAuditLogFormat(parts, "-" + boundary + "--");
+        msg = transaction->toOldAuditLogFormat(parts, "-" + boundary + "--", m_audit->m_prefix);
     }
 
     return utils::SharedFiles::getInstance().write(m_audit->m_path1, msg,

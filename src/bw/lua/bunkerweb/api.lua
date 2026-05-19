@@ -103,7 +103,7 @@ function api:is_allowed_token()
 	if not self.api_token or self.api_token == "" then
 		return true, "ok"
 	end
-	local headers = ngx_req.get_headers()
+	local headers = ngx_req.get_headers(tonumber((get_variable("MAX_HEADERS", false))) or 100)
 	local auth = headers["authorization"] or headers["Authorization"]
 	local provided = auth and auth:match("^[Bb]earer%s+(.+)$") or nil
 	if not provided then

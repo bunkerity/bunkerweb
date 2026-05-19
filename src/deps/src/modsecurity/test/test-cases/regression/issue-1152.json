@@ -4,7 +4,7 @@
     "version_min": 209000,
     "version_max": -1,
     "title": "Should libmodsec pass action clear m_actions?",
-    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1152",
+    "url": "https://github.com/SpiderLabs/ModSecurity/issues/1152",
     "client": {
       "ip": "200.249.12.31",
       "port": 2313
@@ -16,8 +16,8 @@
     "request": {
       "headers": {
         "Host": "net.tutsplus.com",
-        "User-Agent": "Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
-        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "User-Agent": "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-us,en;q=0.5",
         "Accept-Encoding": "gzip,deflate",
         "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
@@ -25,18 +25,24 @@
         "Connection": "keep-alive",
         "Cookie": "PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120",
         "Pragma": "no-cache",
-        "Cache-Control": "no-cache"
+        "Cache-Control": "no-cache",
+        "Content-Length": "0"
       },
-      "uri": "\/test.pl?foo=bar",
+      "uri": "/test.pl?foo=bar",
       "method": "GET",
       "http_version": 1.1,
-      "body": ""
+      "body": [
+        ""
+      ]
     },
     "response": {
       "headers": {
-        "Content-Type": "text\/xml; charset=utf-8\n\r",
-        "Content-Length": "length\n\r"
-      }
+        "Content-Type": "text/xml; charset=utf-8\n\r",
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
     },
     "expected": {
       "http_code": 403
@@ -52,7 +58,7 @@
     "version_min": 209000,
     "version_max": -1,
     "title": "Should libmodsec pass action clear m_actions?",
-    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1152",
+    "url": "https://github.com/SpiderLabs/ModSecurity/issues/1152",
     "client": {
       "ip": "200.249.12.31",
       "port": 2313
@@ -64,8 +70,8 @@
     "request": {
       "headers": {
         "Host": "net.tutsplus.com",
-        "User-Agent": "Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
-        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "User-Agent": "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-us,en;q=0.5",
         "Accept-Encoding": "gzip,deflate",
         "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
@@ -73,19 +79,23 @@
         "Connection": "keep-alive",
         "Cookie": "PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120",
         "Pragma": "no-cache",
-        "Cache-Control": "no-cache"
+        "Cache-Control": "no-cache",
+        "Content-Length": "0"
       },
-      "uri": "\/test.pl?foo=bar",
+      "uri": "/test.pl?foo=bar",
       "method": "GET",
       "http_version": 1.1,
-      "body": ""
+      "body": [
+        ""
+      ]
     },
     "response": {
       "headers": {
-        "Content-Type": "text\/xml; charset=utf-8\n\r",
-        "Content-Length": "length\n\r"
+        "Content-Type": "text/xml; charset=utf-8\n\r",
+        "Content-Length": "0"
       },
       "body": [
+        ""
       ]
     },
     "expected": {
@@ -102,7 +112,7 @@
     "version_min": 209000,
     "version_max": -1,
     "title": "Should libmodsec pass action clear m_actions?",
-    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1152",
+    "url": "https://github.com/SpiderLabs/ModSecurity/issues/1152",
     "client": {
       "ip": "200.249.12.31",
       "port": 2313
@@ -114,8 +124,8 @@
     "request": {
       "headers": {
         "Host": "net.tutsplus.com",
-        "User-Agent": "Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
-        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "User-Agent": "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-us,en;q=0.5",
         "Accept-Encoding": "gzip,deflate",
         "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
@@ -123,19 +133,23 @@
         "Connection": "keep-alive",
         "Cookie": "PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120",
         "Pragma": "no-cache",
-        "Cache-Control": "no-cache"
+        "Cache-Control": "no-cache",
+        "Content-Length": "0"
       },
-      "uri": "\/test.pl?foo=bar",
+      "uri": "/test.pl?foo=bar",
       "method": "GET",
       "http_version": 1.1,
-      "body": ""
+      "body": [
+        ""
+      ]
     },
     "response": {
       "headers": {
-        "Content-Type": "text\/xml; charset=utf-8\n\r",
-        "Content-Length": "length\n\r"
+        "Content-Type": "text/xml; charset=utf-8\n\r",
+        "Content-Length": "0"
       },
       "body": [
+        ""
       ]
     },
     "expected": {
@@ -152,7 +166,7 @@
     "version_min": 209000,
     "version_max": -1,
     "title": "Should libmodsec pass action clear m_actions?",
-    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1152",
+    "url": "https://github.com/SpiderLabs/ModSecurity/issues/1152",
     "client": {
       "ip": "200.249.12.31",
       "port": 2313
@@ -164,8 +178,8 @@
     "request": {
       "headers": {
         "Host": "net.tutsplus.com",
-        "User-Agent": "Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
-        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "User-Agent": "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-us,en;q=0.5",
         "Accept-Encoding": "gzip,deflate",
         "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
@@ -173,24 +187,28 @@
         "Connection": "keep-alive",
         "Cookie": "PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120",
         "Pragma": "no-cache",
-        "Cache-Control": "no-cache"
+        "Cache-Control": "no-cache",
+        "Content-Length": "0"
       },
-      "uri": "\/test.pl?a=test&b=test&c=test&d=test",
+      "uri": "/test.pl?a=test&b=test&c=test&d=test",
       "method": "GET",
       "http_version": 1.1,
-      "body": ""
+      "body": [
+        ""
+      ]
     },
     "response": {
       "headers": {
-        "Content-Type": "text\/xml; charset=utf-8\n\r",
-        "Content-Length": "length\n\r"
+        "Content-Type": "text/xml; charset=utf-8\n\r",
+        "Content-Length": "0"
       },
       "body": [
+        ""
       ]
     },
     "expected": {
-      "http_code": 200,
-      "debug_log": "Target value: \"4\" \\(Variable: TX:test\\)"
+      "debug_log": "Target value: \"4\" \\(Variable: TX:test\\)",
+      "http_code": 200
     },
     "rules": [
       "SecRuleEngine On",

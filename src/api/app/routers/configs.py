@@ -18,7 +18,6 @@ from ..schemas import (
     validate_config_name,
 )
 
-
 router = APIRouter(prefix="/configs", tags=["configs"])
 EDITABLE_METHODS = {"api", "ui"}
 
@@ -253,7 +252,6 @@ def update_config(
         return JSONResponse(status_code=403, content={"status": "error", "message": "Renaming a template-based custom config is not allowed"})
     if not _service_exists(service_new):
         return JSONResponse(status_code=404, content={"status": "error", "message": "Service not found"})
-
     if (
         current.get("type") == type_new
         and current.get("name") == name_new
@@ -308,7 +306,8 @@ async def update_config_upload(
     if not current.get("template") and current.get("method") not in EDITABLE_METHODS:
         return JSONResponse(status_code=403, content={"status": "error", "message": "Config is not UI/API-managed and cannot be edited"})
 
-    s_new = None if new_service in (None, "", "global") else new_service
+    # Preserve the current service unless the caller explicitly requests a move.
+    s_new = current.get("service_id") if new_service is None else (None if new_service in ("", "global") else new_service)
     t_new = new_type or current.get("type")  # Already normalized by Pydantic if provided
     n_new = new_name.strip() if isinstance(new_name, str) and new_name else current.get("name")
     if n_new == current.get("name") and not new_name:
@@ -330,7 +329,6 @@ async def update_config_upload(
         return JSONResponse(status_code=422, content={"status": "error", "message": err})
     if not _service_exists(s_new):
         return JSONResponse(status_code=404, content={"status": "error", "message": "Service not found"})
-
     content_bytes = await file.read()
     try:
         content = content_bytes.decode("utf-8", errors="replace")

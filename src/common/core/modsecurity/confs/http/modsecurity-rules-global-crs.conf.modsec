@@ -18,28 +18,14 @@ SecRule REQUEST_HEADERS:Content-Type "(?:application(?:/soap\+|/)|text/)xml" \
 SecRule REQUEST_HEADERS:Content-Type "application/json" \
   "id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON"
 
-# Maximum data size (Generated from MAX_CLIENT_SIZE)
-  {% if MAX_CLIENT_SIZE.endswith("k") or MAX_CLIENT_SIZE.endswith("K") -%}
-SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 }}
-  {% elif MAX_CLIENT_SIZE.endswith("m") or MAX_CLIENT_SIZE.endswith("M") -%}
-SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 * 1024 }}
-  {% elif MAX_CLIENT_SIZE.endswith("g") or MAX_CLIENT_SIZE.endswith("G") -%}
-SecRequestBodyLimit {{ MAX_CLIENT_SIZE[:-1] | int * 1024 * 1024 * 1024 }}
-  {% elif MAX_CLIENT_SIZE.isdigit() -%}
-SecRequestBodyLimit {{ MAX_CLIENT_SIZE }}
-  {% else -%}
-SecRequestBodyLimit 13107200
-  {% endif %}
-
-# Maximum data size for requests without files
-SecRequestBodyNoFilesLimit {{ MODSECURITY_REQ_BODY_NO_FILES_LIMIT }}
-
-# Reject requests if bigger than max data size
-SecRequestBodyLimitAction Reject
-
-# Reject if we can't process the body
-SecRule REQBODY_ERROR "!@eq 0" \
-  "id:'200002', phase:2,t:none,log,deny,status:400,msg:'Failed to parse request body.',logdata:'%{reqbody_error_msg}',severity:2"
+# NOTE: SecRequestBodyLimit, SecRequestBodyLimitAction and the REQBODY_ERROR
+# handling rules (ids 200002 / 200005) are intentionally NOT emitted at http
+# scope in global CRS mode so multisite services can keep their own per-server
+# ModSecurity values. They are rendered at server scope from the matching
+# server-http template:
+#   src/common/core/modsecurity/confs/server-http/modsecurity-rules-global-crs.conf.modsec
+# Both templates MUST stay in sync — if you remove the body-limit block from
+# one, also remove/update it in the other.
 
 # Be strict with multipart/form-data body
 SecRule MULTIPART_STRICT_ERROR "!@eq 0" \

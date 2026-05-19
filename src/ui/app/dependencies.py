@@ -9,7 +9,7 @@ from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from tarfile import open as tar_open
 from traceback import format_exc
 
-from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, safe_tar_extractall  # type: ignore
 
 from app.models.config import Config
 from app.models.instance import InstancesUtils
@@ -66,10 +66,7 @@ def reload_plugins():
         try:
             if plugin["data"]:
                 with tar_open(fileobj=BytesIO(plugin["data"]), mode="r:gz") as tar:
-                    try:
-                        tar.extractall(plugin_path, filter="fully_trusted")
-                    except TypeError:
-                        tar.extractall(plugin_path)
+                    safe_tar_extractall(tar, plugin_path)
 
                 plugin_folder = plugin_path / plugin["id"]
                 # Add u+x permissions to executable files

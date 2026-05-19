@@ -1,0 +1,165 @@
+# Shared Authentik outpost reverse-proxy slot (`_999`) applied globally so
+# every site inherits `/outpost.goauthentik.io`. Per-site Ingresses below
+# only carry their own forward-auth settings.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bw-authentik-outpost
+  annotations:
+    bunkerweb.io/CONFIG_TYPE: "settings"
+data:
+  AUTO_LETS_ENCRYPT: "yes"
+  REVERSE_PROXY_URL_999: "/outpost.goauthentik.io"
+  REVERSE_PROXY_HOST_999: "http://authentik-server.default.svc.cluster.local"
+  REVERSE_PROXY_HEADERS_999: 'X-Original-URL $scheme://$http_host$request_uri;Content-Length ""'
+  REVERSE_PROXY_HEADERS_CLIENT_999: "Set-Cookie $auth_cookie"
+  REVERSE_PROXY_AUTH_REQUEST_SET_999: "$auth_cookie $upstream_http_set_cookie"
+  REVERSE_PROXY_PASS_REQUEST_BODY_999: "no"
+---
+# One Ingress per host so the BW controller auto-scopes each unprefixed
+# annotation to its single server_name (IngressController.py:120-126),
+# keeping annotation name parts under Kubernetes' 63-byte limit.
+#
+# Authentik server — login, admin, flows.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-auth
+  annotations:
+    bunkerweb.io/REVERSE_PROXY_WS_1: "yes"
+    bunkerweb.io/LIMIT_REQ_URL_1: "^/api/"
+    bunkerweb.io/LIMIT_REQ_RATE_1: "5r/s"
+    bunkerweb.io/REVERSE_PROXY_INTERCEPT_ERRORS: "no"
+    bunkerweb.io/ALLOWED_METHODS: "GET|POST|HEAD|PUT|DELETE|PATCH"
+    bunkerweb.io/COOKIE_FLAGS: "* SameSite=Lax"
+spec:
+  rules:
+    - host: auth.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: authentik-server
+                port:
+                  number: 80
+---
+# app1 — protected by Authentik forward-auth. `_1` targets `location /`.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-app1
+  annotations:
+    # Drop 401 from intercepted codes so Authentik's 401 reaches the signin redirect.
+    bunkerweb.io/INTERCEPTED_ERROR_CODES: "400 403 404 405 413 429 500 501 502 503 504"
+    bunkerweb.io/REVERSE_PROXY_AUTH_REQUEST_1: "/outpost.goauthentik.io/auth/nginx"
+    bunkerweb.io/REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL_1: "https://app1.example.com/outpost.goauthentik.io/start?rd=$scheme%3A%2F%2F$host$request_uri"
+    bunkerweb.io/REVERSE_PROXY_AUTH_REQUEST_SET_1: "$auth_cookie $upstream_http_set_cookie;$authentik_username $upstream_http_x_authentik_username;$authentik_groups $upstream_http_x_authentik_groups;$authentik_entitlements $upstream_http_x_authentik_entitlements;$authentik_email $upstream_http_x_authentik_email;$authentik_name $upstream_http_x_authentik_name;$authentik_uid $upstream_http_x_authentik_uid"
+    bunkerweb.io/REVERSE_PROXY_HEADERS_CLIENT_1: "Set-Cookie $auth_cookie"
+    bunkerweb.io/REVERSE_PROXY_HEADERS_1: "X-authentik-username $authentik_username;X-authentik-groups $authentik_groups;X-authentik-entitlements $authentik_entitlements;X-authentik-email $authentik_email;X-authentik-name $authentik_name;X-authentik-uid $authentik_uid"
+spec:
+  rules:
+    - host: app1.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-app1
+                port:
+                  number: 80
+---
+# app2 — same forward-auth pattern as app1.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-app2
+  annotations:
+    bunkerweb.io/INTERCEPTED_ERROR_CODES: "400 403 404 405 413 429 500 501 502 503 504"
+    bunkerweb.io/REVERSE_PROXY_AUTH_REQUEST_1: "/outpost.goauthentik.io/auth/nginx"
+    bunkerweb.io/REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL_1: "https://app2.example.com/outpost.goauthentik.io/start?rd=$scheme%3A%2F%2F$host$request_uri"
+    bunkerweb.io/REVERSE_PROXY_AUTH_REQUEST_SET_1: "$auth_cookie $upstream_http_set_cookie;$authentik_username $upstream_http_x_authentik_username;$authentik_groups $upstream_http_x_authentik_groups;$authentik_entitlements $upstream_http_x_authentik_entitlements;$authentik_email $upstream_http_x_authentik_email;$authentik_name $upstream_http_x_authentik_name;$authentik_uid $upstream_http_x_authentik_uid"
+    bunkerweb.io/REVERSE_PROXY_HEADERS_CLIENT_1: "Set-Cookie $auth_cookie"
+    bunkerweb.io/REVERSE_PROXY_HEADERS_1: "X-authentik-username $authentik_username;X-authentik-groups $authentik_groups;X-authentik-entitlements $authentik_entitlements;X-authentik-email $authentik_email;X-authentik-name $authentik_name;X-authentik-uid $authentik_uid"
+spec:
+  rules:
+    - host: app2.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-app2
+                port:
+                  number: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app1
+  labels:
+    app: app1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app1
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      containers:
+        - name: app1
+          image: nginxdemos/nginx-hello
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-app1
+spec:
+  selector:
+    app: app1
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app2
+  labels:
+    app: app2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app2
+  template:
+    metadata:
+      labels:
+        app: app2
+    spec:
+      containers:
+        - name: app2
+          image: nginxdemos/nginx-hello
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-app2
+spec:
+  selector:
+    app: app2
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

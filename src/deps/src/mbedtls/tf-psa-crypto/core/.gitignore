@@ -1,0 +1,7 @@
+###START_GENERATED_FILES###
+/psa_crypto_driver_wrappers.h
+/psa_crypto_driver_wrappers_no_static.c
+/tf_psa_crypto_config_check_before.h
+/tf_psa_crypto_config_check_final.h
+/tf_psa_crypto_config_check_user.h
+###END_GENERATED_FILES###

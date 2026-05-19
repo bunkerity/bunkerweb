@@ -95,6 +95,7 @@ plugins:
         color: "white"
   - mike:
       canonical_version: latest
+  - optimize
   - print-site:
       add_table_of_contents: false
       add_cover_page: false

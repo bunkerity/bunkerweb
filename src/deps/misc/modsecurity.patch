@@ -1,4 +1,5 @@
-@@ -322,12 +322,12 @@
+@@ -306,14 +306,14 @@
+ 
  
  # Decide if we want to build the tests or not.
 -buildTestUtilities=false
@@ -15,3 +16,4 @@
 +# fi
  
  
+ AM_CONDITIONAL([TEST_UTILITIES], [test $buildTestUtilities = true])

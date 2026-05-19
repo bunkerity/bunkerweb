@@ -204,6 +204,17 @@ function start() {
         rm -f /var/tmp/bunkerweb_reloading
     fi
 
+    # Clean orphaned NGINX temp files from previous runs
+    for dir in client_temp proxy_temp fastcgi_temp uwsgi_temp scgi_temp; do
+        target="/var/tmp/bunkerweb/$dir"
+        if [ -d "$target" ] && [ ! -L "$target" ]; then
+            if [ -n "$(find "$target" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; then
+                log "SYSTEMCTL" "ℹ️" "Cleaning orphaned temp files from $dir"
+            fi
+            find "$target" -mindepth 1 -delete 2>/dev/null || true
+        fi
+    done
+
     # Start nginx
     log "SYSTEMCTL" "ℹ️" "Starting nginx ..."
     if [ "$(uname)" = "FreeBSD" ]; then
@@ -237,6 +248,12 @@ function start() {
     log "SYSTEMCTL" "ℹ️" "BunkerWeb service started ..."
 
     while [ -f /var/run/bunkerweb/nginx.pid ] ; do
+        # Break if the process is no longer alive (e.g. killed by OOM without cleaning up the PID file)
+        nginx_pid=$(cat /var/run/bunkerweb/nginx.pid 2>/dev/null)
+        if [ -n "$nginx_pid" ] && ! kill -0 "$nginx_pid" 2>/dev/null ; then
+            rm -f /var/run/bunkerweb/nginx.pid
+            break
+        fi
         sleep 1
     done
 }

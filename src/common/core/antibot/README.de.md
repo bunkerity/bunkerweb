@@ -11,9 +11,9 @@ So funktioniert es:
 
 Befolgen Sie diese Schritte, um Antibot zu aktivieren und zu konfigurieren:
 
-1. Wählen Sie einen Herausforderungstyp: Entscheiden Sie sich für den zu verwendenden Mechanismus (z. B. [captcha](#__tabbed_3_3), [hcaptcha](#__tabbed_3_5), [javascript](#__tabbed_3_2)).
+1. Wählen Sie einen Herausforderungstyp: Entscheiden Sie sich für den zu verwendenden Mechanismus (z. B. [captcha](#__tabbed_3_3), [hcaptcha](#__tabbed_3_5), [capjs](#__tabbed_3_8), [javascript](#__tabbed_3_2)).
 2. Aktivieren Sie die Funktion: Setzen Sie den Parameter `USE_ANTIBOT` in Ihrer BunkerWeb-Konfiguration auf den gewählten Typ.
-3. Konfigurieren Sie die Einstellungen: Passen Sie bei Bedarf andere `ANTIBOT_*`-Parameter an. Für reCAPTCHA, hCaptcha, Turnstile und mCaptcha erstellen Sie ein Konto beim gewählten Dienst und erhalten Sie API-Schlüssel.
+3. Konfigurieren Sie die Einstellungen: Passen Sie bei Bedarf andere `ANTIBOT_*`-Parameter an. Für reCAPTCHA, hCaptcha und Turnstile erstellen Sie ein Konto beim gewählten Dienst und erhalten Sie API-Schlüssel. Für mCaptcha und Cap.js können Sie den Anbieter selbst hosten oder einen gehosteten Dienst nutzen und anschließend den erforderlichen Site-Schlüssel und Geheimschlüssel konfigurieren.
 4. Wichtig: Stellen Sie sicher, dass `ANTIBOT_URI` eine eindeutige URL Ihrer Website ist und nirgendwo anders verwendet wird.
 
 !!! important "Über den Parameter `ANTIBOT_URI`"
@@ -50,6 +50,9 @@ BunkerWeb ermöglicht es, bestimmte Benutzer, IPs oder Anfragen anzugeben, die d
 !!! note "Verhalten der länderspezifischen Einstellungen"
       - Wenn sowohl `ANTIBOT_IGNORE_COUNTRY` als auch `ANTIBOT_ONLY_COUNTRY` gesetzt sind, hat die Ignore-Liste Vorrang – Länder, die in beiden Listen stehen, umgehen die Herausforderung.
       - Private oder unbekannte IP-Adressen umgehen die Herausforderung, wenn `ANTIBOT_ONLY_COUNTRY` gesetzt ist, da kein Ländercode ermittelt werden kann.
+
+!!! tip "Challenge-Zustand über Subdomains hinweg teilen"
+    Der Antibot-Zustand (einschließlich `turnstile`, `hcaptcha`, `recaptcha`, `mcaptcha`, `captcha`, `javascript` und `cookie`) wird im BunkerWeb-[Sitzungs-Cookie](#sessions) gespeichert. Standardmäßig ist dieses Cookie auf genau den Host beschränkt, der es gesetzt hat. Das bedeutet: Wenn ein Benutzer die Herausforderung auf `a.example.com` löst, muss er sie auf `b.example.com` erneut lösen. Damit die Herausforderung einmal für alle gleichrangigen Subdomains derselben registrierbaren Domain gelöst werden kann, setzen Sie [`SESSIONS_DOMAIN`](#sessions) **für jeden relevanten Server** auf die Parent-Domain (zum Beispiel `example.com`). `SESSIONS_DOMAIN` ist eine Multisite-Einstellung – konfigurieren Sie sie pro Server, damit nicht verwandte Mandanten auf derselben BunkerWeb-Instanz niemals ein mandantenübergreifendes `Domain`-Attribut erhalten.
 
 Beispiele:
 
@@ -92,6 +95,8 @@ Beispiele:
     | :------------ | :------- | :-------- | :------- | :---------------------------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`     | Multisite | nein     | Antibot aktivieren: Auf `cookie` setzen, um diesen Mechanismus zu aktivieren. |
 
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
+
 === "JavaScript"
 
     Die JavaScript-Herausforderung fordert den Client auf, eine Rechenaufgabe mithilfe von JavaScript zu lösen. Dieser Mechanismus stellt sicher, dass der Client JavaScript aktiviert hat und den erforderlichen Code ausführen kann, was für die meisten Bots in der Regel nicht möglich ist.
@@ -112,6 +117,8 @@ Beispiele:
     | Parameter     | Standard | Kontext   | Mehrfach | Beschreibung                                                                      |
     | :------------ | :------- | :-------- | :------- | :-------------------------------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`     | Multisite | nein     | Antibot aktivieren: Auf `javascript` setzen, um diesen Mechanismus zu aktivieren. |
+
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
 
 === "Captcha"
 
@@ -146,6 +153,8 @@ Beispiele:
     | `USE_ANTIBOT`              | `no`                                                   | Multisite | nein     | **Antibot aktivieren:** Auf `captcha` setzen, um diesen Mechanismus zu aktivieren.                                                                                                                                                                        |
     | `ANTIBOT_CAPTCHA_ALPHABET` | `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ` | Multisite | nein     | **Captcha-Alphabet:** Eine Zeichenkette, die zur Generierung des CAPTCHAs verwendet werden soll. Unterstützte Zeichen: alle Buchstaben (a-z, A-Z), die Ziffern 2-9 (schließt 0 und 1 aus) und die Sonderzeichen: ```+-/=%"'&_(),.;:?!§`^ÄÖÜßäöüé''‚""„``` |
 
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
+
 === "reCAPTCHA"
 
     Googles reCAPTCHA bietet eine Benutzervalidierung, die im Hintergrund (v3) ausgeführt wird, um eine Verhaltensbewertung zuzuweisen. Eine Bewertung unterhalb des konfigurierten Schwellenwerts löst eine zusätzliche Überprüfung aus oder blockiert die Anfrage. Bei sichtbaren Herausforderungen (v2) müssen Benutzer mit dem reCAPTCHA-Widget interagieren, bevor sie fortfahren können.
@@ -171,6 +180,8 @@ Beispiele:
     | `ANTIBOT_RECAPTCHA_JA4`        |          | Multisite | nein     | Optionaler JA4 TLS-Fingerabdruck, der in Enterprise-Bewertungen enthalten sein soll.                                             |
     | `ANTIBOT_RECAPTCHA_SCORE`      | `0.7`    | Multisite | nein     | Mindestpunktzahl, die zum Bestehen erforderlich ist (gilt für klassische v3 und die neue Version).                               |
 
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
+
 === "hCaptcha"
 
     Wenn aktiviert, bietet hCaptcha eine effektive Alternative zu reCAPTCHA, indem es Benutzerinteraktionen überprüft, ohne auf einen Bewertungsmechanismus angewiesen zu sein. Es fordert Benutzer mit einem einfachen, interaktiven Test heraus, um ihre Legitimität zu bestätigen.
@@ -185,6 +196,8 @@ Beispiele:
     | `ANTIBOT_HCAPTCHA_SITEKEY` |          | Multisite | nein     | hCaptcha Site-Schlüssel.                                                        |
     | `ANTIBOT_HCAPTCHA_SECRET`  |          | Multisite | nein     | hCaptcha Geheimschlüssel.                                                       |
 
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
+
 === "Turnstile"
 
     Turnstile ist ein moderner, datenschutzfreundlicher Herausforderungsmechanismus, der auf der Technologie von Cloudflare basiert, um automatisierten Traffic zu erkennen und zu blockieren. Er validiert Benutzerinteraktionen transparent und im Hintergrund, wodurch die Reibung für legitime Benutzer reduziert und Bots effektiv abgeschreckt werden.
@@ -198,6 +211,8 @@ Beispiele:
     | `USE_ANTIBOT`               | `no`     | Multisite | nein     | Antibot aktivieren: Auf `turnstile` setzen, um diesen Mechanismus zu aktivieren. |
     | `ANTIBOT_TURNSTILE_SITEKEY` |          | Multisite | nein     | Turnstile Site-Schlüssel (Cloudflare).                                           |
     | `ANTIBOT_TURNSTILE_SECRET`  |          | Multisite | nein     | Turnstile Geheimschlüssel (Cloudflare).                                          |
+
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
 
 === "mCaptcha"
 
@@ -216,7 +231,30 @@ Beispiele:
     | `ANTIBOT_MCAPTCHA_SECRET`  |                             | Multisite | nein     | mCaptcha Geheimschlüssel.                                                       |
     | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | Multisite | nein     | Zu verwendende Domain für mCaptcha.                                             |
 
-    Siehe Allgemeine Parameter für zusätzliche Optionen.
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
+
+=== "Cap.js"
+
+    [Cap.js](https://capjs.js.org/) ist ein selbst gehostetes, quelloffenes, datenschutzfreundliches Proof-of-Work-CAPTCHA. Statt die Überprüfung an einen Drittanbieter auszulagern, betreiben Sie den Cap.js-Server selbst; BunkerWeb prüft die Tokens gegen diesen Server.
+
+    Verwenden Sie die Frontend-URL für den browserseitig erreichbaren Endpunkt, der das Widget ausliefert. Wenn BunkerWeb den Cap.js-Server über eine interne Adresse erreicht, setzen Sie die Backend-URL auf diesen internen Endpunkt; andernfalls lassen Sie sie leer, und BunkerWeb nutzt die Frontend-URL für `/siteverify`.
+
+    **Parameter:**
+
+    | Parameter                    | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                         |
+    | :--------------------------- | :------- | :-------- | :------- | :------------------------------------------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`                | `no`     | Multisite | nein     | Antibot aktivieren: Auf `capjs` setzen, um diesen Mechanismus zu aktivieren.                                         |
+    | `ANTIBOT_CAPJS_FRONTEND_URL` |          | Multisite | nein     | Browserseitig erreichbare URL des Cap.js-Servers, der das Widget ausliefert.                                         |
+    | `ANTIBOT_CAPJS_BACKEND_URL`  |          | Multisite | nein     | Optionale interne URL, die BunkerWeb für `/siteverify` nutzt; fällt auf die Frontend-URL zurück, wenn sie leer ist.  |
+    | `ANTIBOT_CAPJS_SITEKEY`      |          | Multisite | nein     | Cap.js Site-Schlüssel.                                                                                               |
+    | `ANTIBOT_CAPJS_SECRET`       |          | Multisite | nein     | Cap.js Geheimschlüssel, mit dem BunkerWeb Tokens überprüft.                                                          |
+
+    !!! note "Anforderungen an den Betrieb"
+        - Verwenden Sie in Produktion HTTPS für `ANTIBOT_CAPJS_FRONTEND_URL`. Der Browser-Worker benötigt `crypto.subtle` in einem sicheren Kontext, und HTTPS verhindert MITM-Manipulationen am Widget.
+        - Konfigurieren Sie CORS für den Cap.js-Site-Schlüssel, damit der geschützte Origin erlaubt ist.
+        - Setzen Sie `ANTIBOT_CAPJS_FRONTEND_URL` und `ANTIBOT_CAPJS_BACKEND_URL` nur auf den Origin: Schema, Host und optionaler Port, ohne Pfad.
+
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
 
 ### Konfigurationsbeispiele
 
@@ -313,6 +351,19 @@ Beispiele:
     ANTIBOT_MCAPTCHA_SITEKEY: "your-site-key"
     ANTIBOT_MCAPTCHA_SECRET: "your-secret-key"
     ANTIBOT_MCAPTCHA_URL: "https://demo.mcaptcha.org"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
+=== "Cap.js-Herausforderung"
+
+    ```yaml
+    USE_ANTIBOT: "capjs"
+    ANTIBOT_CAPJS_FRONTEND_URL: "https://cap.example.com"
+    ANTIBOT_CAPJS_BACKEND_URL: "http://cap-server:3000"
+    ANTIBOT_CAPJS_SITEKEY: "your-site-key"
+    ANTIBOT_CAPJS_SECRET: "your-secret-key"
     ANTIBOT_URI: "/challenge"
     ANTIBOT_TIME_RESOLVE: "60"
     ANTIBOT_TIME_VALID: "86400"

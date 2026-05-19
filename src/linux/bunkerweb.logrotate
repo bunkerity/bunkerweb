@@ -13,15 +13,3 @@
     dateformat -%Y-%m-%d
     create 0640 nginx nginx
 }
-
-/var/log/bunkerweb/letsencrypt/*.log \
-/var/log/bunkerweb/letsencrypt/*.log.[0-9]+ {
-    su nginx nginx
-    daily
-    rotate 0
-    maxage 7
-    missingok
-    compress
-    delaycompress
-    create 0660 nginx nginx
-}

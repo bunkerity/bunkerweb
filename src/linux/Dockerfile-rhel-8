@@ -1,7 +1,7 @@
-FROM redhat/ubi8:8.10@sha256:7dee295fba93ab1a9dfcb6e94e47e1050c6b51242449c33421ea3244d977e802 AS builder
+FROM redhat/ubi8:8.10@sha256:1551c9a922dbb31c5688380fd955ef57f0f00b395bacb36856bc386eba82897b AS builder
 
 ENV OS=rhel
-ENV NGINX_VERSION=1.28.2
+ENV NGINX_VERSION=1.30.1
 
 # Copy rocky repo
 COPY src/linux/rocky-8.repo /etc/yum.repos.d/rocky.repo
@@ -16,7 +16,7 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-8
 # Install Nginx, fpm and dependencies
 RUN dnf install -y wget make yum-utils && \
   dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
-  dnf install -y --setopt=install_weak_deps=False readline-devel python3.11 python3.11-devel python3.11-setuptools brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ curl znc-modtcl gawk libtool pcre2-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-devel ssdeep-devel cargo && \
+  dnf install -y --setopt=install_weak_deps=False readline-devel python3.11 python3.11-devel python3.11-setuptools brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ curl znc-modtcl gawk libtool pcre2-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-devel ssdeep-devel cargo patch && \
   dnf install -y https://nginx.org/packages/rhel/8/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el8.ngx.$(uname -m).rpm
 
 WORKDIR /tmp/bunkerweb/deps
@@ -46,6 +46,13 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
   python3.11 -m ensurepip && \
   python3.11 -m pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
   python3.11 -m pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
+
+# Apply BunkerWeb patches to vendored Python deps before they are tarballed (DNS alias / CNAME delegation for certbot).
+COPY src/deps/misc/certbot-dns-alias.patch /tmp/certbot-dns-alias.patch
+RUN patch -p1 -F0 --dry-run -d /usr/share/bunkerweb/deps/python < /tmp/certbot-dns-alias.patch && \
+  patch -p1 -F0 --no-backup-if-mismatch -d /usr/share/bunkerweb/deps/python < /tmp/certbot-dns-alias.patch && \
+  grep -q '_load_domain_aliases' /usr/share/bunkerweb/deps/python/certbot/plugins/dns_common.py && \
+  rm -f /tmp/certbot-dns-alias.patch
 
 RUN dnf install -y pigz && \
   tar --use-compress-program="pigz -1 -p$(nproc)" -cf deps.tar.gz deps && \
@@ -135,7 +142,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
   echo "Skipping HTML minification"; \
   fi
 
-FROM redhat/ubi8:8.10@sha256:7dee295fba93ab1a9dfcb6e94e47e1050c6b51242449c33421ea3244d977e802
+FROM redhat/ubi8:8.10@sha256:1551c9a922dbb31c5688380fd955ef57f0f00b395bacb36856bc386eba82897b
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -159,7 +166,7 @@ WORKDIR /usr/share/bunkerweb
 RUN install -m 755 helpers/bwcli /usr/bin/bwcli && \
   echo "Linux" > INTEGRATION && \
   mkdir -p /etc/bunkerweb/configs /etc/bunkerweb/plugins /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/lib/bunkerweb /var/www/html && \
-  for dir in $(echo "plugins pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
+  for dir in $(echo "plugins pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
   touch /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log /var/log/bunkerweb/modsec_audit.log
 
 COPY --chmod=660 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb

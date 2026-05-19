@@ -21,9 +21,9 @@ typedef enum { MODE_SQLI, MODE_XSS } detect_mode_t;
 
 static void usage(const char *program_name);
 size_t modp_rtrim(char *str, size_t len);
-void modp_toprint(char *str, size_t len);
-void test_positive(FILE *fd, const char *fname, detect_mode_t mode,
-                   int flag_invert, int flag_true, int flag_quiet);
+static void modp_toprint(char *str, size_t len);
+static void test_positive(FILE *fd, const char *fname, detect_mode_t mode,
+                          int flag_invert, int flag_true, int flag_quiet);
 
 int urlcharmap(char ch);
 size_t modp_url_decode(char *dest, const char *s, size_t len);
@@ -109,7 +109,7 @@ size_t modp_url_decode(char *dest, const char *s, size_t len) {
     return (size_t)(dest - deststart); /* compute "strlen" of dest */
 }
 
-void modp_toprint(char *str, size_t len) {
+static void modp_toprint(char *str, size_t len) {
     size_t i;
     for (i = 0; i < len; ++i) {
         if (str[i] < 32 || str[i] > 126) {
@@ -130,8 +130,8 @@ size_t modp_rtrim(char *str, size_t len) {
     return len;
 }
 
-void test_positive(FILE *fd, const char *fname, detect_mode_t mode,
-                   int flag_invert, int flag_true, int flag_quiet) {
+static void test_positive(FILE *fd, const char *fname, detect_mode_t mode,
+                          int flag_invert, int flag_true, int flag_quiet) {
     char linebuf[8192];
     int issqli = 0;
     int linenum = 0;

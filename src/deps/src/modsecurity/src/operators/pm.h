@@ -40,6 +40,10 @@ class Pm : public Operator {
         : Operator(n, std::move(param)) {
         m_p = acmp_create(0);
     }
+
+    Pm(const Pm&) = delete;
+    Pm& operator=(const Pm&) = delete;
+
     ~Pm() override;
     bool evaluate(Transaction *transaction, RuleWithActions *rule,
         const std::string &str,

@@ -44,15 +44,15 @@ Follow these steps to configure and use the Pro features:
 
 **Q: What happens if my Pro license expires?**
 
-A: If your Pro license expires, access to premium features and plugins will be disabled. However, your BunkerWeb installation will continue to operate with all community edition features intact. To regain access to Pro features, simply renew your license.
+**A:** If your Pro license expires, access to premium features and plugins will be disabled. However, your BunkerWeb installation will continue to operate with all community edition features intact. To regain access to Pro features, simply renew your license.
 
 **Q: Will Pro features disrupt my existing configuration?**
 
-A: No, Pro features are designed to integrate seamlessly with your current BunkerWeb setup. They enhance functionality without altering or interfering with your existing configuration, ensuring a smooth and reliable experience.
+**A:** No, Pro features are designed to integrate seamlessly with your current BunkerWeb setup. They enhance functionality without altering or interfering with your existing configuration, ensuring a smooth and reliable experience.
 
 **Q: Can I try Pro features before committing to a purchase?**
 
-A: Absolutely! BunkerWeb offers two Pro plans to suit your needs:
+**A:** Absolutely! BunkerWeb offers two Pro plans to suit your needs:
 
 - **BunkerWeb PRO Standard:** Full access to Pro features without technical support.
 - **BunkerWeb PRO Enterprise:** Full access to Pro features with dedicated technical support.

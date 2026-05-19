@@ -67,7 +67,7 @@ void AnchoredSetVariable::set(const std::string &key,
 
 
 void AnchoredSetVariable::resolve(
-    std::vector<const VariableValue *> *l) {
+    std::vector<const VariableValue *> *l) const {
     for (const auto& x : *this) {
         l->insert(l->begin(), new VariableValue(x.second));
     }
@@ -75,8 +75,14 @@ void AnchoredSetVariable::resolve(
 
 
 void AnchoredSetVariable::resolve(
+    std::vector<const VariableValue *> *l) {
+    static_cast<const AnchoredSetVariable&>(*this).resolve(l);
+}
+
+
+void AnchoredSetVariable::resolve(
     std::vector<const VariableValue *> *l,
-    variables::KeyExclusions &ke) {
+    const variables::KeyExclusions &ke) const {
     for (const auto& x : *this) {
         if (!ke.toOmit(x.first)) {
             l->insert(l->begin(), new VariableValue(x.second));
@@ -85,6 +91,13 @@ void AnchoredSetVariable::resolve(
                 + " from target value.");
         }
     }
+}
+
+
+void AnchoredSetVariable::resolve(
+    std::vector<const VariableValue *> *l,
+    variables::KeyExclusions &ke) {  // cppcheck-suppress constParameterReference
+    static_cast<const AnchoredSetVariable&>(*this).resolve(l, ke);
 }
 
 
@@ -109,7 +122,7 @@ std::unique_ptr<std::string> AnchoredSetVariable::resolveFirst(
 
 
 void AnchoredSetVariable::resolveRegularExpression(Utils::Regex *r,
-    std::vector<const VariableValue *> *l) {
+    std::vector<const VariableValue *> *l) const {
     for (const auto& x : *this) {
         int ret = Utils::regex_search(x.first, *r);
         if (ret <= 0) {
@@ -121,8 +134,14 @@ void AnchoredSetVariable::resolveRegularExpression(Utils::Regex *r,
 
 
 void AnchoredSetVariable::resolveRegularExpression(Utils::Regex *r,
+    std::vector<const VariableValue *> *l) {
+    static_cast<const AnchoredSetVariable&>(*this).resolveRegularExpression(r, l);
+}
+
+
+void AnchoredSetVariable::resolveRegularExpression(Utils::Regex *r,
     std::vector<const VariableValue *> *l,
-    variables::KeyExclusions &ke) {
+    const variables::KeyExclusions &ke) const {
     for (const auto& x : *this) {
         int ret = Utils::regex_search(x.first, *r);
         if (ret <= 0) {
@@ -135,6 +154,13 @@ void AnchoredSetVariable::resolveRegularExpression(Utils::Regex *r,
                 + " from target value.");
         }
     }
+}
+
+
+void AnchoredSetVariable::resolveRegularExpression(Utils::Regex *r,
+    std::vector<const VariableValue *> *l,
+    variables::KeyExclusions &ke) {  // cppcheck-suppress constParameterReference
+    static_cast<const AnchoredSetVariable&>(*this).resolveRegularExpression(r, l, ke);
 }
 
 

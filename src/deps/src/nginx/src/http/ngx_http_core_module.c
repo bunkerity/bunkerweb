@@ -252,6 +252,13 @@ static ngx_command_t  ngx_http_core_commands[] = {
       offsetof(ngx_http_core_srv_conf_t, large_client_header_buffers),
       NULL },
 
+    { ngx_string("max_headers"),
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_num_slot,
+      NGX_HTTP_SRV_CONF_OFFSET,
+      offsetof(ngx_http_core_srv_conf_t, max_headers),
+      NULL },
+
     { ngx_string("ignore_invalid_headers"),
       NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_FLAG,
       ngx_conf_set_flag_slot,
@@ -668,6 +675,13 @@ static ngx_command_t  ngx_http_core_commands[] = {
       ngx_conf_set_flag_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_core_loc_conf_t, etag),
+      NULL },
+
+    { ngx_string("early_hints"),
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_1MORE,
+      ngx_http_set_predicate_slot,
+      NGX_HTTP_LOC_CONF_OFFSET,
+      offsetof(ngx_http_core_loc_conf_t, early_hints),
       NULL },
 
     { ngx_string("error_page"),
@@ -1858,6 +1872,37 @@ ngx_http_send_header(ngx_http_request_t *r)
 
 
 ngx_int_t
+ngx_http_send_early_hints(ngx_http_request_t *r)
+{
+    ngx_int_t                  rc;
+    ngx_http_core_loc_conf_t  *clcf;
+
+    if (r->post_action) {
+        return NGX_OK;
+    }
+
+    if (r->header_sent) {
+        ngx_log_error(NGX_LOG_ALERT, r->connection->log, 0,
+                      "header already sent");
+        return NGX_ERROR;
+    }
+
+    clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
+
+    rc = ngx_http_test_predicates(r, clcf->early_hints);
+
+    if (rc != NGX_DECLINED) {
+        return rc;
+    }
+
+    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+                   "http send early hints \"%V?%V\"", &r->uri, &r->args);
+
+    return ngx_http_top_early_hints_filter(r);
+}
+
+
+ngx_int_t
 ngx_http_output_filter(ngx_http_request_t *r, ngx_chain_t *in)
 {
     ngx_int_t          rc;
@@ -2407,6 +2452,8 @@ ngx_http_subrequest(ngx_http_request_t *r,
 
     sr->method = NGX_HTTP_GET;
     sr->http_version = r->http_version;
+
+    sr->port = r->port;
 
     sr->request_line = r->request_line;
     sr->uri = *uri;
@@ -3473,6 +3520,7 @@ ngx_http_core_create_srv_conf(ngx_conf_t *cf)
     cscf->request_pool_size = NGX_CONF_UNSET_SIZE;
     cscf->client_header_timeout = NGX_CONF_UNSET_MSEC;
     cscf->client_header_buffer_size = NGX_CONF_UNSET_SIZE;
+    cscf->max_headers = NGX_CONF_UNSET_UINT;
     cscf->ignore_invalid_headers = NGX_CONF_UNSET;
     cscf->merge_slashes = NGX_CONF_UNSET;
     cscf->underscores_in_headers = NGX_CONF_UNSET;
@@ -3513,6 +3561,8 @@ ngx_http_core_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
                            "equal to or greater than \"connection_pool_size\"");
         return NGX_CONF_ERROR;
     }
+
+    ngx_conf_merge_uint_value(conf->max_headers, prev->max_headers, 1000);
 
     ngx_conf_merge_value(conf->ignore_invalid_headers,
                               prev->ignore_invalid_headers, 1);
@@ -3637,6 +3687,7 @@ ngx_http_core_create_loc_conf(ngx_conf_t *cf)
     clcf->chunked_transfer_encoding = NGX_CONF_UNSET;
     clcf->etag = NGX_CONF_UNSET;
     clcf->server_tokens = NGX_CONF_UNSET_UINT;
+    clcf->early_hints = NGX_CONF_UNSET_PTR;
     clcf->types_hash_max_size = NGX_CONF_UNSET_UINT;
     clcf->types_hash_bucket_size = NGX_CONF_UNSET_UINT;
 
@@ -3917,6 +3968,8 @@ ngx_http_core_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_conf_merge_uint_value(conf->server_tokens, prev->server_tokens,
                               NGX_HTTP_SERVER_TOKENS_ON);
 
+    ngx_conf_merge_ptr_value(conf->early_hints, prev->early_hints, NULL);
+
     ngx_conf_merge_ptr_value(conf->open_file_cache,
                               prev->open_file_cache, NULL);
 
@@ -4182,6 +4235,19 @@ ngx_http_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
             continue;
         }
 
+        if (ngx_strcmp(value[n].data, "multipath") == 0) {
+#ifdef IPPROTO_MPTCP
+            lsopt.protocol = IPPROTO_MPTCP;
+            lsopt.set = 1;
+            lsopt.bind = 1;
+#else
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
+                               "multipath is not supported "
+                               "on this platform, ignored");
+#endif
+            continue;
+        }
+
         if (ngx_strcmp(value[n].data, "ssl") == 0) {
 #if (NGX_HTTP_SSL)
             lsopt.ssl = 1;
@@ -4345,6 +4411,12 @@ ngx_http_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 #if (NGX_HAVE_DEFERRED_ACCEPT && defined TCP_DEFER_ACCEPT)
         if (lsopt.deferred_accept) {
             return "\"deferred\" parameter is incompatible with \"quic\"";
+        }
+#endif
+
+#ifdef IPPROTO_MPTCP
+        if (lsopt.protocol == IPPROTO_MPTCP) {
+             return "\"multipath\" parameter is incompatible with \"quic\"";
         }
 #endif
 

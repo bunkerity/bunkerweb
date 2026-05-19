@@ -22,7 +22,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from requests import get
 from requests.exceptions import ConnectionError
 
-from common_utils import bytes_hash, get_os_info, get_integration, get_version, create_plugin_tar_gz  # type: ignore
+from common_utils import bytes_hash, get_os_info, get_integration, get_version, create_plugin_tar_gz, safe_zip_extractall  # type: ignore
 from Database import Database  # type: ignore
 from logger import getLogger  # type: ignore
 
@@ -416,7 +416,7 @@ try:
         plugin_content.seek(0)
 
         with ZipFile(plugin_content) as zf:
-            zf.extractall(path=temp_dir)
+            safe_zip_extractall(zf, temp_dir)
 
     existing_pro_plugin_ids = {plugin["id"] for plugin in db.get_plugins(_type="pro")}
 

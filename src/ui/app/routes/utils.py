@@ -1,4 +1,5 @@
 from base64 import b64encode
+from collections import defaultdict
 from datetime import datetime
 from functools import wraps
 from io import BytesIO
@@ -226,3 +227,44 @@ def extract_file_setting_names(variables: Dict[str, str]) -> Dict[str, str]:
         file_setting_names[setting_name] = _sanitize_filename(variables.pop(key, ""))
 
     return file_setting_names
+
+
+def parse_search_panes(source, *, sort_values: bool = False) -> str:
+    """Parse `searchPanes[field][i]=value` keys from a Werkzeug MultiDict-like
+    source (request.form, request.args, ...) into the `field1:value1,value2;field2:value3`
+    format expected by data-collection helpers (BW_INSTANCES_UTILS.get_reports_query, etc.)."""
+    search_panes = defaultdict(list)
+    for key, value in source.items():
+        if not key.startswith("searchPanes["):
+            continue
+        try:
+            field = key.split("[", 1)[1].split("]", 1)[0]
+        except IndexError:
+            continue
+        if field:
+            search_panes[field].append(value)
+
+    if not search_panes:
+        return ""
+
+    if sort_values:
+        items = sorted(search_panes.items())
+        return ";".join(f"{field}:{','.join(sorted(values))}" for field, values in items)
+
+    return ";".join(f"{field}:{','.join(values)}" for field, values in search_panes.items())
+
+
+def parse_search_panes_dict(source) -> Dict[str, list]:
+    """Same as `parse_search_panes` but returns the parsed mapping for callers
+    that need to apply the filter in-process rather than forwarding a string."""
+    parsed: Dict[str, list] = defaultdict(list)
+    for key, value in source.items():
+        if not key.startswith("searchPanes["):
+            continue
+        try:
+            field = key.split("[", 1)[1].split("]", 1)[0]
+        except IndexError:
+            continue
+        if field:
+            parsed[field].append(value)
+    return parsed

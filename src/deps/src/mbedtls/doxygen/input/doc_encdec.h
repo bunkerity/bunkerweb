@@ -39,8 +39,6 @@
  *     and \c mbedtls_des3_crypt_cbc()).
  *   - GCM (AES-GCM and CAMELLIA-GCM) (see \c mbedtls_gcm_init())
  * - Asymmetric:
- *   - Diffie-Hellman-Merkle (see \c mbedtls_dhm_read_public(), \c mbedtls_dhm_make_public()
- *     and \c mbedtls_dhm_calc_secret()).
  *   - RSA (see \c mbedtls_rsa_public() and \c mbedtls_rsa_private()).
  *   - Elliptic Curves over GF(p) (see \c mbedtls_ecp_point_init()).
  *   - Elliptic Curve Digital Signature Algorithm (ECDSA) (see \c mbedtls_ecdsa_init()).

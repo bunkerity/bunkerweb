@@ -18,7 +18,9 @@
   "aria": {
     "label": {
       "close": "Close",
-      "raw_configuration": "Raw configuration"
+      "configs_dropzone": "Select a custom configurations export file or drop one here",
+      "raw_configuration": "Raw configuration",
+      "services_dropzone": "Select a services export file or drop one here"
     }
   },
   "badge": {
@@ -94,10 +96,8 @@
     "enable_totp": "Enable TOTP",
     "entire_config": "Entire Config",
     "export": "Export",
-    "export_csv_all": "CSV (All)",
-    "export_csv_visible": "CSV (Visible)",
-    "export_excel_all": "Excel (All)",
-    "export_excel_visible": "Excel (Visible)",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
     "fetch_global": "Fetch Global Settings",
     "filters_suffix": " Filters",
     "follow": "Follow",
@@ -107,6 +107,7 @@
     "go_back": "Go Back",
     "hide": "Hide",
     "history": "History",
+    "import_configs": "Import custom configurations",
     "import_services": "Import services",
     "login": "Login",
     "multiple_add": "ADD",
@@ -474,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "Select all {{count}} matching {{entity}}",
+    "bulk_select_all_done": "All {{count}} matching {{entity}} are selected.",
+    "bulk_select_clear": "Clear selection",
+    "bulk_select_page": "All {{count}} {{entity}} on this page are selected.",
     "info_bans": "Showing {{start}} to {{end}} of {{total}} Bans",
     "info_cache": "Showing {{start}} to {{end}} of {{total}} Cache Files",
     "info_configs": "Showing {{start}} to {{end}} of {{total}} Custom Configs",
@@ -620,6 +625,8 @@
   },
   "form": {
     "checkbox": {
+      "include_attached_configs": "Include attached custom configurations",
+      "overwrite_existing_configs": "Overwrite existing UI/API custom configurations",
       "remember_me": "Remember Me"
     },
     "help": {
@@ -789,8 +796,11 @@
       "fetch_global_settings_point_1": "Only settings present in this template are updated.",
       "fetch_global_settings_point_2": "Values identical to defaults are ignored.",
       "fetch_global_settings_point_3": "SERVER_NAME is never overridden.",
+      "export_services_intro": "The selected services will be exported. Enable the option below to bundle their attached custom configurations into a .zip archive.",
+      "import_configs_dropzone": "Drag and drop your custom configurations export file here or click to select a file.",
+      "import_configs_warning": "Custom configurations created by the scheduler, autoconf, or templates are always preserved. Only UI/API configurations can be overwritten.",
       "import_services_dropzone": "Drag and drop your services export file here or click to select a file.",
-      "import_services_warning": "Importing services will create new UI services from the export file. Existing services are skipped.",
+      "import_services_warning": "Importing services will create new UI services from the export file. Existing services are skipped. A .zip archive exported with custom configurations is also accepted.",
       "instance_creation_alert": "You don't need to provide the port or the server name; the values of `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT`, and `API_SERVER_NAME` will be used for the instance configuration.",
       "next_step_in_case_of_issue": "If you encounter issues, you can manually accept the unsafe certificate:",
       "recovery_codes_save_alert": "Please save these recovery codes in a secure location (like a password manager or bunker). You can use them to access your account if you lose your authentication device.",
@@ -823,8 +833,10 @@
       "delete_template": "Delete template",
       "edit_template": "Edit template: {{name}}",
       "fetch_global_settings": "Apply Global Settings?",
+      "export_services": "Export services",
       "from_plugin": "from plugin",
       "full_url": "Full URL",
+      "import_configs": "Import custom configurations",
       "import_services": "Import services",
       "job_history": "Last 10 Job Executions",
       "job_history_count": "Last {{count}} executions of Job",
@@ -1031,6 +1043,7 @@
     "last_run": "Last Run State",
     "last_seen": "Last Seen",
     "last_update": "Last Update",
+    "loading": "Loading search panes...",
     "method": "Method",
     "next_24h": "Next 24 hours",
     "next_30d": "Next 30 days",
@@ -1528,6 +1541,7 @@
       "edit_config": "Edit Custom Config {{name}}",
       "edit_service": "Edit Service {{service}}",
       "edit_template": "Edit Template {{template}}",
+      "export_config": "Export Custom Config {{name}}",
       "export_service": "Export Service {{service}} Configuration",
       "view_config": "View Custom Config {{name}}",
       "view_file": "View {{filename}}",

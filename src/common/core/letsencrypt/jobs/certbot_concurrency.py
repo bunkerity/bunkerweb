@@ -9,6 +9,8 @@ from subprocess import DEVNULL, PIPE, STDOUT, TimeoutExpired, run
 from tempfile import mkdtemp
 from typing import Dict, List, Optional, Set, Tuple
 
+from letsencrypt_utils import certbot_log_backup_flags
+
 
 @dataclass(frozen=True)
 class CertbotPaths:
@@ -216,6 +218,7 @@ def ensure_accounts(
             work_dir,
             "--logs-dir",
             logs_dir,
+            *certbot_log_backup_flags(cmd_env),
         ]
         if staging:
             command.append("--staging")
@@ -279,6 +282,7 @@ def ensure_zerossl_accounts(
             work_dir,
             "--logs-dir",
             logs_dir,
+            *certbot_log_backup_flags(cmd_env),
         ]
         if email:
             command.extend(["--email", email])

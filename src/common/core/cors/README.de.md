@@ -6,7 +6,7 @@ Das CORS-Plugin ermöglicht Cross-Origin Resource Sharing (Ressourcenfreigabe zw
 2.  BunkerWeb prüft, ob der anfragende Ursprung basierend auf Ihrer Konfiguration zulässig ist.
 3.  Wenn dies der Fall ist, antwortet BunkerWeb mit den entsprechenden CORS-Headern, die definieren, was die anfragende Website tun darf.
 4.  Bei nicht zulässigen Ursprüngen kann die Anfrage entweder komplett verweigert oder ohne CORS-Header ausgeliefert werden.
-5.  Zusätzliche Cross-Origin-Richtlinien wie [COEP](https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy), [COOP](https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy) und [CORP](https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy) können konfiguriert werden, um die Sicherheit weiter zu erhöhen.
+5.  Zusätzliche Cross-Origin-Richtlinien wie [COEP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy), [COOP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy) und [CORP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy) können konfiguriert werden, um die Sicherheit weiter zu erhöhen.
 
 ### Wie man es benutzt
 
