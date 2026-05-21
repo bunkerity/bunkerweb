@@ -51,9 +51,21 @@ remove_path() {
     fi
 }
 
+print_leftover_hint() {
+    echo "[INFO] Logs and upgrade backups are NEVER auto-removed."
+    echo "[INFO]   Logs:    rm -rf /var/log/bunkerweb"
+    echo "[INFO]   Backups: rm -f /var/tmp/variables.env /var/tmp/ui.env /var/tmp/scheduler.env \\"
+    echo "[INFO]              /var/tmp/api.env /var/tmp/api.yml /var/tmp/db.sqlite3 \\"
+    echo "[INFO]              /var/tmp/bunkerweb_upgrade"
+}
+
 # Perform actions for package removal
 remove() {
     echo "[INFO] Package is being uninstalled"
+
+    # Retro-tighten 0644 backups left by pre-fix versions.
+    chmod 0600 /var/tmp/variables.env /var/tmp/ui.env /var/tmp/scheduler.env \
+               /var/tmp/api.env /var/tmp/api.yml /var/tmp/db.sqlite3 2>/dev/null || true
 
     # Stop nginx if it is active
     if service nginx status >/dev/null 2>&1; then
@@ -64,16 +76,18 @@ remove() {
     # Dynamically remove all related rc.d services
     remove_rcd_services "bunkerweb"
 
-    # Remove associated paths
+    # /etc, /var/lib, /var/log, /var/tmp backups preserved — admin disposes.
     remove_path "/usr/share/bunkerweb" "application files"
     remove_path "/usr/local/etc/sudoers.d/bunkerweb-nginx-reload" "BunkerWeb sudoers reload rule"
     remove_path "/var/tmp/bunkerweb" "temporary files"
     remove_path "/var/run/bunkerweb" "runtime files"
-    remove_path "/var/log/bunkerweb" "log files"
     remove_path "/var/cache/bunkerweb" "cache files"
     remove_path "/usr/bin/bwcli" "CLI binary"
 
     echo "[INFO] BunkerWeb successfully uninstalled"
+    echo "[INFO] Preserved: /etc/bunkerweb, /var/lib/bunkerweb"
+    echo "[INFO] To purge configs + data run: rm -rf /etc/bunkerweb /var/lib/bunkerweb"
+    print_leftover_hint
 }
 
 # Perform actions for package purge
@@ -81,11 +95,12 @@ purge() {
     echo "[INFO] Package is being purged"
     remove
 
-    # Remove additional paths during purge
+    # Logs and /var/tmp backups deliberately kept on purge — admin disposes.
     remove_path "/var/lib/bunkerweb" "data files"
     remove_path "/etc/bunkerweb" "configuration files"
 
     echo "[INFO] BunkerWeb successfully purged"
+    print_leftover_hint
 }
 
 # Check for root privileges
@@ -136,23 +151,24 @@ case "$1" in
         remove_path "/var/tmp/scheduler.env" "Scheduler environment variables"
         remove_path "/var/tmp/api.env" "API environment variables"
         remove_path "/var/tmp/db.sqlite3" "database"
+        # install -m 0600 (atomic) — /var/tmp is mode 1777, must not leak creds.
         if [ -f /etc/bunkerweb/variables.env ]; then
-            do_and_check_cmd cp -f /etc/bunkerweb/variables.env /var/tmp/variables.env
+            do_and_check_cmd install -m 0600 -o root -g wheel /etc/bunkerweb/variables.env /var/tmp/variables.env
         fi
         if [ -f /etc/bunkerweb/ui.env ]; then
-            do_and_check_cmd cp -f /etc/bunkerweb/ui.env /var/tmp/ui.env
+            do_and_check_cmd install -m 0600 -o root -g wheel /etc/bunkerweb/ui.env /var/tmp/ui.env
         fi
         if [ -f /etc/bunkerweb/scheduler.env ]; then
-            do_and_check_cmd cp -f /etc/bunkerweb/scheduler.env /var/tmp/scheduler.env
+            do_and_check_cmd install -m 0600 -o root -g wheel /etc/bunkerweb/scheduler.env /var/tmp/scheduler.env
         fi
         if [ -f /etc/bunkerweb/api.env ]; then
-            do_and_check_cmd cp -f /etc/bunkerweb/api.env /var/tmp/api.env
+            do_and_check_cmd install -m 0600 -o root -g wheel /etc/bunkerweb/api.env /var/tmp/api.env
         fi
         if [ -f /etc/bunkerweb/api.yml ]; then
-            do_and_check_cmd cp -f /etc/bunkerweb/api.yml /var/tmp/api.yml
+            do_and_check_cmd install -m 0600 -o root -g wheel /etc/bunkerweb/api.yml /var/tmp/api.yml
         fi
         if [ -f /var/lib/bunkerweb/db.sqlite3 ]; then
-            do_and_check_cmd cp -f /var/lib/bunkerweb/db.sqlite3 /var/tmp/db.sqlite3
+            do_and_check_cmd install -m 0600 -o root -g wheel /var/lib/bunkerweb/db.sqlite3 /var/tmp/db.sqlite3
         fi
         do_and_check_cmd touch /var/tmp/bunkerweb_upgrade
         ;;

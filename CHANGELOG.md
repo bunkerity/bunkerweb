@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.10
+## v1.6.11~rc1 - ????/??/??
+
+- [SECURITY] `linux`: `after-remove` hooks now preserve `/var/log/bunkerweb`, `/etc/bunkerweb`, `/var/lib/bunkerweb` and `/var/tmp` upgrade backups on plain uninstall (only purge wipes configs + DB; logs and backups always kept, disposal commands printed); upgrade backups are written via `install -m 0600 -o root -g root` (atomic) and any pre-existing world-readable backups are retro-tightened, closing a local-read window on admin credentials and the SQLite DB.
+
+## v1.6.10 - 2026/05/19
 
 - [SECURITY] `nginx` : update nginx to 1.30.1 to fix various CVEs
 - [BUGFIX] `reverseproxy`: pin a `USE_UI=yes` service upstream to HTTP/1.1 so a global `REVERSE_PROXY_HTTP_VERSION=2` no longer locks out the web UI. (Fixes #3550)
