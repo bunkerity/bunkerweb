@@ -16,7 +16,16 @@ from cryptography.hazmat.primitives import hashes
 
 
 def _is_allowed_member(member):
-    """Filter tar members to only extract live/, archive/, renewal/ dirs."""
+    """Filter tar members to only extract live/, archive/, renewal/ dirs.
+
+    SAFE to use here because extract_cache() targets a per-request tmp UUID dir
+    that is rmtree'd in pre_render's finally block — the filtered state never
+    flows back into the canonical DB cache row. DO NOT reuse this filter on any
+    path that re-tars and writes back to the cache: dropping accounts/ from the
+    snapshot poisons renewals with certbot AccountNotFound. The canonical
+    restore lives in blueprints/letsencrypt.py:download_certificates() and is
+    intentionally unfiltered.
+    """
     parts = Path(member.name).parts
     if member.name == ".":
         return True
