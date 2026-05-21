@@ -249,6 +249,7 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
         - Use HTTPS para `ANTIBOT_CAPJS_FRONTEND_URL` en producción. El worker del navegador requiere `crypto.subtle` en un contexto seguro, y HTTPS evita cambios MITM en el widget.
         - Configure CORS en la clave de sitio de Cap.js para permitir el origen protegido.
         - Defina `ANTIBOT_CAPJS_FRONTEND_URL` y `ANTIBOT_CAPJS_BACKEND_URL` solo como orígenes: esquema, host y puerto opcional, sin ruta.
+        - Use el widget de Cap.js **0.1.48 o posterior**. BunkerWeb sirve una CSP estricta basada en nonce; los widgets anteriores rompen los desafíos de instrumentación porque el `<script>` inline del iframe `srcdoc` aislado no propaga el nonce. Si autoaloja `tiago2/cap`, fije una etiqueta reciente (p. ej. `tiago2/cap:3.1.2` o posterior) o establezca `WIDGET_VERSION` en `0.1.48` o posterior.
 
     Consulte los [Ajustes comunes](#configuraciones-comunes) para opciones de configuración adicionales.
 
