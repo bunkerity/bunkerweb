@@ -85,6 +85,15 @@ filterwarnings("ignore", category=SAWarning, message="DELETE statement on table 
 T = TypeVar("T")
 
 
+# DATABASE_POOL_* env-var defaults. Exported so callers (e.g. JobScheduler.py) reuse the
+# same fallback values and stay aligned if these change.
+DEFAULT_POOL_SIZE = 40
+DEFAULT_POOL_MAX_OVERFLOW = 20
+DEFAULT_POOL_TIMEOUT = 5
+DEFAULT_POOL_RECYCLE = 1800
+DEFAULT_POOL_PRE_PING = True
+
+
 def retry_on_transient_db_errors(func: Callable[..., T]) -> Callable[..., T]:
     @wraps(func)
     def wrapper(self: "Database", *args, **kwargs) -> T:
@@ -236,39 +245,39 @@ class Database:
             _exit(1)
 
         # Pool size
-        pool_size = getenv("DATABASE_POOL_SIZE", "40")
+        pool_size = getenv("DATABASE_POOL_SIZE", str(DEFAULT_POOL_SIZE))
         if pool_size.isdigit() and int(pool_size) >= 0:
             pool_size = int(pool_size)
         else:
-            self.logger.warning(f"Invalid DATABASE_POOL_SIZE value: {pool_size}, using default value (40)")
-            pool_size = 40
+            self.logger.warning(f"Invalid DATABASE_POOL_SIZE value: {pool_size}, using default value ({DEFAULT_POOL_SIZE})")
+            pool_size = DEFAULT_POOL_SIZE
 
         # Max overflow
-        max_overflow = getenv("DATABASE_POOL_MAX_OVERFLOW", "20")
+        max_overflow = getenv("DATABASE_POOL_MAX_OVERFLOW", str(DEFAULT_POOL_MAX_OVERFLOW))
         try:
             max_overflow = int(max_overflow)
         except ValueError:
-            self.logger.warning(f"Invalid DATABASE_POOL_MAX_OVERFLOW value: {max_overflow}, using default value (20)")
-            max_overflow = 20
+            self.logger.warning(f"Invalid DATABASE_POOL_MAX_OVERFLOW value: {max_overflow}, using default value ({DEFAULT_POOL_MAX_OVERFLOW})")
+            max_overflow = DEFAULT_POOL_MAX_OVERFLOW
 
         # Pool timeout
-        pool_timeout = getenv("DATABASE_POOL_TIMEOUT", "5")
+        pool_timeout = getenv("DATABASE_POOL_TIMEOUT", str(DEFAULT_POOL_TIMEOUT))
         if pool_timeout.isdigit() and int(pool_timeout) >= 0:
             pool_timeout = int(pool_timeout)
         else:
-            self.logger.warning(f"Invalid DATABASE_POOL_TIMEOUT value: {pool_timeout}, using default value (5)")
-            pool_timeout = 5
+            self.logger.warning(f"Invalid DATABASE_POOL_TIMEOUT value: {pool_timeout}, using default value ({DEFAULT_POOL_TIMEOUT})")
+            pool_timeout = DEFAULT_POOL_TIMEOUT
 
         # Pool recycle
-        pool_recycle = getenv("DATABASE_POOL_RECYCLE", "1800")
+        pool_recycle = getenv("DATABASE_POOL_RECYCLE", str(DEFAULT_POOL_RECYCLE))
         try:
             pool_recycle = int(pool_recycle)
         except ValueError:
-            self.logger.warning(f"Invalid DATABASE_POOL_RECYCLE value: {pool_recycle}, using default value (1800)")
-            pool_recycle = 1800
+            self.logger.warning(f"Invalid DATABASE_POOL_RECYCLE value: {pool_recycle}, using default value ({DEFAULT_POOL_RECYCLE})")
+            pool_recycle = DEFAULT_POOL_RECYCLE
 
         # Pool pre-ping
-        pool_pre_ping = getenv("DATABASE_POOL_PRE_PING", "yes").lower() in ("yes", "true", "1")
+        pool_pre_ping = getenv("DATABASE_POOL_PRE_PING", "yes" if DEFAULT_POOL_PRE_PING else "no").lower() in ("yes", "true", "1")
 
         self.logger.debug(
             f"Database pool configuration: pool_size={pool_size}, max_overflow={max_overflow}, pool_timeout={pool_timeout}, pool_recycle={pool_recycle}, pool_pre_ping={pool_pre_ping}"

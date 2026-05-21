@@ -1777,6 +1777,7 @@ volumes:
 | `DISABLE_CONFIGURATION_TESTING` | 应用前跳过配置测试                               | `yes` 或 `no`                           | `no`                          |
 | `IGNORE_FAIL_SENDING_CONFIG`    | 即便部分实例未收到配置也继续                     | `yes` 或 `no`                           | `no`                          |
 | `IGNORE_REGEX_CHECK`            | 跳过设置的正则校验（与 autoconf 共享）           | `yes` 或 `no`                           | `no`                          |
+| `SCHEDULER_MAX_WORKERS`         | 调度器作业执行器的最大工作线程数。每个运行线程可占用一个数据库连接，从而限制调度器侧的连接池压力。若解析值超过 `DATABASE_POOL_SIZE` + `DATABASE_POOL_MAX_OVERFLOW`，启动时会输出警告。 | 正整数                                  | `min(8, max(2, cpu_count*2))` |
 | `TZ`                            | 调度器日志、类 cron 任务、备份和时间戳使用的时区 | TZ 数据库名（如 `UTC`、`Europe/Paris`） | unset（容器默认，通常为 UTC） |
 
 ##### 数据库
