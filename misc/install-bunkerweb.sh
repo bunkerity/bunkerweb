@@ -2891,7 +2891,7 @@ ask_deployment_platform() {
         "linux"  "Linux — install BunkerWeb as host packages (systemd services)" \
         "docker" "Docker — generate a docker-compose stack and run containers") \
         || { print_error "Installation cancelled."; exit 1; }
-    [ "$_platform" = "docker" ] && DOCKER_MODE="yes"
+    if [ "$_platform" = "docker" ]; then DOCKER_MODE="yes"; fi
 }
 
 ask_user_preferences() {

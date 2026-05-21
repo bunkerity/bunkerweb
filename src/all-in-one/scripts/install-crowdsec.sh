@@ -10,7 +10,7 @@ echo "ℹ️ Cloning CrowdSec from $URL (commit $COMMIT)"
 git_clone_commit crowdsec "$URL" "$COMMIT"
 
 echo "ℹ️ Patching CrowdSec Go dependencies for CVE fixes"
-go get github.com/slack-go/slack@v0.23.0 # GHSA-gxhx-2686-5h9g
+go get github.com/slack-go/slack@v0.23.1 # GHSA-gxhx-2686-5h9g
 go mod tidy
 
 echo "ℹ️ Building CrowdSec"

@@ -9,6 +9,8 @@ from flask import Blueprint, redirect, render_template, request, send_file, url_
 from flask_login import login_required
 from werkzeug.utils import secure_filename
 
+from common_utils import bytes_hash  # type: ignore
+
 from app.dependencies import BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA, DB
 from app.utils import flash, is_editable_method
 
@@ -126,8 +128,9 @@ def apply_imported_configs(parsed_configs: List[Dict], overwrite: bool, parse_er
     services_value = BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",)).get("SERVER_NAME", "")
     existing_services = set(services_value.split()) if services_value else set()
 
+    # Key on the normalized (underscore) type: template-provided configs carry the hyphenated form.
     existing_configs = {
-        (db_config.get("service_id") or None, db_config["type"], db_config["name"]): db_config
+        (db_config.get("service_id") or None, db_config["type"].strip().replace("-", "_").lower(), db_config["name"]): db_config
         for db_config in DB.get_custom_configs(with_drafts=True, with_data=False)
     }
 
@@ -145,10 +148,18 @@ def apply_imported_configs(parsed_configs: List[Dict], overwrite: bool, parse_er
         is_new = existing is None
 
         if existing is not None:
-            if existing.get("template") or not is_editable_method(existing.get("method")):
+            if existing.get("template"):
+                # The target serves this config from a template. Honor the change-detection rule:
+                # only materialize a real UI override when the imported data differs from the
+                # template default; identical data stays template-managed (no shadowing row).
+                if bytes_hash(entry["data"], algorithm="sha256") == existing.get("checksum"):
+                    results["skipped"].append(f"{label} (unchanged from template)")
+                    continue
+                is_new = True
+            elif not is_editable_method(existing.get("method")):
                 results["skipped"].append(f"{label} (non-editable method: {existing.get('method')})")
                 continue
-            if not overwrite:
+            elif not overwrite:
                 results["skipped"].append(f"{label} (already exists; enable 'Overwrite existing' to replace)")
                 continue
 
