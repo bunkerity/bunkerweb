@@ -1,4 +1,8 @@
-#!/usr/bin/env bash
+#!/bin/bash
+# Fixed PATH: this script is typically run as root against /etc/nginx and
+# /etc/letsencrypt, so do not trust the caller's PATH for command lookups.
+PATH='/usr/sbin:/usr/bin:/sbin:/bin'
+export PATH
 set -euo pipefail
 
 # Semi-automated Nginx -> BunkerWeb migration scaffold.
@@ -26,7 +30,7 @@ fi
 BUNKERWEB_VERSION="${BUNKERWEB_VERSION:-1.6.9}"
 
 usage() {
-  cat <<'EOF'
+  cat <<EOF
 Usage:
   ./nginx2bw.sh [options]
 
@@ -34,7 +38,7 @@ Options:
   --source-dir PATH        Source Nginx directory (default: /etc/nginx)
   --output-dir PATH        Output folder (default: ./bunkerweb-migration-YYYYmmdd-HHMMSS)
   --project-name NAME      Docker compose project name (default: bunkerweb-migrated)
-  --bunkerweb-version VER  BunkerWeb image tag (default: 1.6.9)
+  --bunkerweb-version VER  BunkerWeb image tag (default: ${BUNKERWEB_VERSION})
   --domain-filter REGEX    Only include vhosts matching regex on server_name
   --copy-certs             Copy matching cert/key files from /etc/letsencrypt/live into output/certs
   --force                  Overwrite output dir if it exists
@@ -132,25 +136,40 @@ inline_server_includes() {
   mv "$expanded_file" "$snippet_file"
 }
 
+# Reject a value-taking option that was given no value, so "--output-dir" with
+# nothing after it fails with a clear message instead of a raw set -u error.
+require_arg() {
+  if [[ "$#" -lt 2 ]]; then
+    echo "Missing value for $1" >&2
+    usage
+    exit 1
+  fi
+}
+
 while (($#)); do
   case "$1" in
     --source-dir)
+      require_arg "$@"
       SOURCE_DIR="$2"
       shift 2
       ;;
     --output-dir)
+      require_arg "$@"
       OUTPUT_DIR="$2"
       shift 2
       ;;
     --project-name)
+      require_arg "$@"
       PROJECT_NAME="$2"
       shift 2
       ;;
     --bunkerweb-version)
+      require_arg "$@"
       BUNKERWEB_VERSION="$2"
       shift 2
       ;;
     --domain-filter)
+      require_arg "$@"
       DOMAIN_FILTER="$2"
       shift 2
       ;;
@@ -261,7 +280,7 @@ while IFS= read -r conf_file; do
               # Nested brace or a quote (\47 = single quote) on the opener line — a
               # quoted value may contain ";" or braces (e.g.
               # add_header Set-Cookie "a=1; path=/"), so keep it verbatim instead of
-              # splitting inside a string. The depth counter still tracks any braces.
+              # splitting inside a string.
               print rest >> outfile
             } else {
               # Split ";"-separated inline directives onto their own lines so each
@@ -274,6 +293,16 @@ while IFS= read -r conf_file; do
                 if (d != "") { print d ";" >> outfile }
               }
             }
+            # Account for braces the opener line already consumed after its "{".
+            # Without this a one-liner "server { ...; }" leaves in_server set and
+            # swallows the following block. (Quoted-brace miscount remains a known
+            # limitation, same as the in_server counter below.)
+            rcnt=rest
+            sub(/#.*/, "", rcnt)
+            ropens=gsub(/\{/, "{", rcnt)
+            rcloses=gsub(/\}/, "}", rcnt)
+            depth += (ropens - rcloses)
+            if (depth <= 0) { in_server=0 }
           }
         }
         pending_server=0
@@ -445,6 +474,8 @@ for block in "$TMP_BLOCK_DIR"/*.conf; do
     fi
     if [[ -f "$ssl_key_val" ]]; then
       cp -f "$ssl_key_val" "$OUTPUT_DIR/certs/${cert_name}.privkey.pem"
+      # Private key: restrict to owner-only, don't leave it at the umask default.
+      chmod 0600 "$OUTPUT_DIR/certs/${cert_name}.privkey.pem"
     fi
   fi
 done
