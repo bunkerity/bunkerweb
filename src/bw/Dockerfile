@@ -1,4 +1,4 @@
-FROM nginx:1.30.0-alpine-slim@sha256:2fb5d772cea6ef1a8dab525df1b9485289eee167d26af9613fce27a12c060caa AS builder
+FROM nginx:1.30.2-alpine-slim@sha256:6c40c4072983550d756dde5a68474b460756624b7813de20a83ec09bb8271e5a AS builder
 
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre2-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip python3-dev cargo lmdb-dev libfuzzy2-dev pkgconfig ca-certificates coreutils libc-dev
@@ -69,7 +69,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
   echo "Skipping HTML minification"; \
   fi
 
-FROM nginx:1.30.0-alpine-slim@sha256:2fb5d772cea6ef1a8dab525df1b9485289eee167d26af9613fce27a12c060caa
+FROM nginx:1.30.2-alpine-slim@sha256:6c40c4072983550d756dde5a68474b460756624b7813de20a83ec09bb8271e5a
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -108,7 +108,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
   ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.10~rc7"
+LABEL version="1.6.11~rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="bunkerweb"
 LABEL bunkerweb.INSTANCE="bunkerweb"

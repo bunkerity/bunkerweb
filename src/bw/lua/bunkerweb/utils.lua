@@ -1149,6 +1149,7 @@ utils.get_phases = function()
 		"rewrite",
 		"access",
 		"content",
+		"ssl_client_hello_default",
 		"ssl_certificate",
 		"header",
 		"log",

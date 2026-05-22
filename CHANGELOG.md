@@ -1,12 +1,30 @@
 # Changelog
 
-## v1.6.10~rc7 - 2026/??/??
+## v1.6.11~rc1 - ????/??/??
+
+- [SECURITY] `nginx`: update nginx to 1.30.2 (except for Fedora as it is not yet available) to fix CVE-2026-9256 — a heap buffer overflow in `ngx_http_rewrite_module` with overlapping captures that could lead to worker-process arbitrary code execution.
+- [SECURITY] `antibot`: Cap.js `script-src` now uses a strict per-request nonce (no more `'unsafe-inline'`); every challenge response also sends `Cache-Control: no-store`. Requires Cap.js widget `0.1.48`+.
+- [SECURITY] `letsencrypt` (UI): harden delete + new heal flow — per-request scratch dir, `fcntl.flock`, `.`/`..` rejected in `cert_name`, DOMPurify + `markupsafe.escape` at every HTML sink, 500 on persistence failure; new `/letsencrypt/{orphans,accounts,cache-status,heal}` endpoints, per-row Heal button, sidebar orphan toast.
+- [SECURITY] `linux`: `after-remove` hooks now preserve `/var/log/bunkerweb`, `/etc/bunkerweb`, `/var/lib/bunkerweb` and `/var/tmp` upgrade backups on plain uninstall (only purge wipes configs + DB; logs and backups always kept, disposal commands printed); upgrade backups are written via `install -m 0600 -o root -g root` (atomic) and any pre-existing world-readable backups are retro-tightened, closing a local-read window on admin credentials and the SQLite DB.
+- [BUGFIX] `letsencrypt` (core): fix self-propagating cache poisoning that caused fleet-wide `certbot AccountNotFound`; add CA-agnostic consistency gate (LE + ZeroSSL paths), server-scoped `select_account_id`, auto-purge + re-register when the ACME server reports a pinned `--account` as deleted (stale-account JWS recovery), redacted-value `Configurator` WARN logs.
+- [FEATURE] `scheduler`: new `SCHEDULER_MAX_WORKERS` env var caps the job-executor thread pool to bound DB-pool pressure on shared MariaDB/MySQL/PostgreSQL; auto default tightened from `min(8, cpu*4)` to `min(8, max(2, cpu*2))` and a warning is emitted when the resolved value exceeds `DATABASE_POOL_SIZE` + `DATABASE_POOL_MAX_OVERFLOW`.
+- [FEATURE] `ui`: `ADMIN_PASSWORD` now also accepts a pre-hashed bcrypt value (`$2a$`/`$2b$`/`$2y$`), stored as-is so the plaintext never lands in env files or secrets (env create + `OVERRIDE_ADMIN_CREDS` paths only; wizard and profile still take plaintext). The strength policy is skipped for a hash, a cost factor below 12 logs a warning.
+
+## v1.6.10 - 2026/05/19
+
+- [SECURITY] `nginx` : update nginx to 1.30.1 to fix various CVEs
+- [BUGFIX] `reverseproxy`: pin a `USE_UI=yes` service upstream to HTTP/1.1 so a global `REVERSE_PROXY_HTTP_VERSION=2` no longer locks out the web UI. (Fixes #3550)
+- [BUGFIX] `autoconf`: fix Docker/Podman instance discovery looping on `No instance found`. Container conversion no longer assumes the inspect payload exposes `State.Health` (Podman/no-`HEALTHCHECK` may omit it): health falls back to run-state, env parsing is hardened, and the wait loop logs the exception instead of swallowing it.
+- [ALL-IN-ONE] Update CrowdSec version to 1.7.8
+
+## v1.6.10~rc7 - 2026/05/15
 
 - [FEATURE] `installer`: `misc/install-bunkerweb.sh` interactive prompts now use a modern inline TUI via [gum](https://github.com/charmbracelet/gum) (`--tui` / `--no-tui` / `BW_INSTALL_TUI`). Three-tier dispatch — gum → whiptail (only if pre-installed) → plain `read` — keeps every host usable.
 - [SECURITY] `ui`: neutralize CSV/XLSX formula injection (CWE-1236) in bans and reports exports. Server-side CSV now goes through `defusedcsv` (new pinned dep) and a shared `csv_safe()` helper escapes openpyxl XLSX cells; client-side DataTables `csv`/`excel`/`copy` buttons inherit the same rule via a global `bwCsvSafe` hook in `dataTableInit.js`. Cells whose first character is `= + - @ | %` are prefixed with `'`, and embedded `|` is backslash-escaped.
 - [BUGFIX] `metrics`: bound per-worker LRU and per-key event-history arrays via new `MAX_LRU_HISTORY` setting (default `1k`) to close OSS RAM leak under high-cardinality block traffic.
 - [BUGFIX] `metrics`: lower `METRICS_MAX_BLOCKED_REQUESTS_REDIS` default `100000` → `10k`.
 - [BUGFIX] `datastore`: lower shared worker-LRU default `100000` → `1k`, configurable via new `DATASTORE_LRU_SIZE` global setting.
+- [BUGFIX] `modsec` : fix memory leak in variables retrieval from modsecurity to lua
 - [FEATURE] `metrics`/`misc`: `METRICS_MAX_BLOCKED_REQUESTS`, `METRICS_MAX_BLOCKED_REQUESTS_REDIS`, `MAX_LRU_HISTORY`, and `DATASTORE_LRU_SIZE` accept `k`/`m` shorthand.
 - [UI] List pages: unrestricted `10/25/50/100` page-size dropdown, header checkbox selects current page only, with opt-in "Select all N matching" banner so bulk actions cover every page. (Fixes #3513)
 - [FEATURE] `all-in-one`: embedded Redis now boots from a generated `/var/lib/bunkerweb/redis-runtime.conf` (copy of `/etc/redis.conf` + env-driven defaults for directives the conf is silent about). `.conf` always prevails; env vars `REDIS_MAXMEMORY`, `REDIS_MAXMEMORY_POLICY`, `REDIS_APPENDONLY`, `REDIS_SAVE`/`REDIS_SAVE_<N>` (BunkerWeb multi-value pattern; empty disables RDB) and `REDIS_PASSWORD` (wired to `requirepass`) only fill the gaps. Defaults follow the documented Redis Best Practices.

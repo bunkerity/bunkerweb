@@ -1,4 +1,4 @@
-FROM nginx:1.30.0-alpine-slim@sha256:2fb5d772cea6ef1a8dab525df1b9485289eee167d26af9613fce27a12c060caa AS builder
+FROM nginx:1.30.2-alpine-slim@sha256:6c40c4072983550d756dde5a68474b460756624b7813de20a83ec09bb8271e5a  AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -163,7 +163,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM nginx:1.30.0-alpine-slim@sha256:2fb5d772cea6ef1a8dab525df1b9485289eee167d26af9613fce27a12c060caa
+FROM nginx:1.30.2-alpine-slim@sha256:6c40c4072983550d756dde5a68474b460756624b7813de20a83ec09bb8271e5a
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -172,7 +172,7 @@ RUN umask 027
 RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 python3 py3-pip sed sqlite postgresql-client tzdata unzip yajl supervisor brotli lmdb libfuzzy2
 
 # Fix CVEs
-RUN apk add --no-cache "nghttp2-libs>=1.68.1" # CVE-2026-27135
+# There are no CVEs for the following packages
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
@@ -239,7 +239,7 @@ COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.
 COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.10~rc7"
+LABEL version="1.6.11~rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="all-in-one"
 

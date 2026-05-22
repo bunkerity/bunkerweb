@@ -51,13 +51,7 @@ def parse_services_export(content: str) -> Tuple[Dict[str, Dict[str, str]], List
 @services.route("/services", methods=["GET"])
 @login_required
 def services_page():
-    services_with_configs = sorted(
-        {
-            config["service_id"]
-            for config in DB.get_custom_configs(with_drafts=True, with_data=False)
-            if config.get("service_id") and not config.get("template") and is_editable_method(config.get("method"))
-        }
-    )
+    services_with_configs = sorted({config["service_id"] for config in DB.get_custom_configs(with_drafts=True, with_data=False) if config.get("service_id")})
     return render_template(
         "services.html",
         services=DB.get_services(with_drafts=True),
@@ -665,8 +659,6 @@ def services_service_export():
     db_configs = DB.get_custom_configs(with_drafts=True, with_data=True)
     configs_payload: List[Dict] = []
     for db_config_row in db_configs:
-        if db_config_row.get("template"):
-            continue
         service_id = db_config_row.get("service_id") or None
         if service_id not in selected_services:
             continue
@@ -681,7 +673,7 @@ def services_service_export():
         configs_payload.append(
             {
                 "service_id": service_id,
-                "type": db_config_row["type"],
+                "type": db_config_row["type"].strip().replace("-", "_").lower(),
                 "name": db_config_row["name"],
                 "data": data_str,
                 "is_draft": bool(db_config_row.get("is_draft", False)),

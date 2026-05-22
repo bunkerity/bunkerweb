@@ -291,6 +291,8 @@
       window.CAP_CUSTOM_WASM_URL = "{*capjs_url*}/assets/cap_wasm_bg.wasm";
       // Stamp the widget's injected <style> with our style nonce so strict CSP allows it.
       window.CAP_CSS_NONCE = "{*nonce_style*}";
+      // Stamp the widget's inline <script> tags (instrumentation srcdoc iframe and pako fallback) with our script nonce. Requires cap.js widget >= 0.1.48.
+      window.CAP_SCRIPT_NONCE = "{*nonce_script*}";
     </script>
     <script
       src="{*capjs_url*}/assets/widget.js"

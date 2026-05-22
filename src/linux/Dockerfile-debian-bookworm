@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim@sha256:f9c6a2fd2ddbc23e336b6257a5245e31f996953ef06cd13a59fa0a1df2d5c252 AS builder
+FROM debian:bookworm-slim@sha256:0104b334637a5f19aa9c983a91b54c89887c0984081f2068983107a6f6c21eeb AS builder
 
 # Install Nginx and dependencies
 RUN apt update && \
@@ -6,7 +6,7 @@ RUN apt update && \
     bash curl libssl-dev git libpcre2-dev zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libbrotli-dev libgd-dev liblmdb-dev libfuzzy-dev cargo coreutils python3.11 python3.11-dev python3-pip -y
 
 ENV OS=debian
-ENV NGINX_VERSION=1.30.0
+ENV NGINX_VERSION=1.30.2
 ENV EXPECTED_FPR=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
 
 # Install Nginx
@@ -126,7 +126,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM debian:bookworm-slim@sha256:f9c6a2fd2ddbc23e336b6257a5245e31f996953ef06cd13a59fa0a1df2d5c252
+FROM debian:bookworm-slim@sha256:0104b334637a5f19aa9c983a91b54c89887c0984081f2068983107a6f6c21eeb
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

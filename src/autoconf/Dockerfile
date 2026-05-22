@@ -39,12 +39,13 @@ FROM python:3.13-alpine@sha256:420cd0bf0f3998275875e02ecd5808168cf0843cbb4d3c536
 RUN umask 027
 
 # Install bash and create autoconf user
-RUN apk add --no-cache bash tzdata mariadb-connector-c mariadb-client sqlite postgresql-client && \
+RUN apk add --no-cache bash tzdata mariadb-connector-c mariadb-client sqlite && \
   addgroup -g 101 autoconf && \
   adduser -h /usr/share/bunkerweb/autoconf -g autoconf -s /sbin/nologin -G autoconf -D -H -u 101 --disabled-password autoconf
 
 # Fix CVEs
 RUN apk add --no-cache "xz-libs>=5.8.3-r0" # CVE-2026-34743
+RUN apk add --no-cache "postgresql18>=18.4-r0" # CVE-2026-6637 CVE-2026-6477 CVE-2026-6475 CVE-2026-6473 CVE-2026-6479 CVE-2026-6476 CVE-2026-6478 CVE-2026-6472 CVE-2026-6575 CVE-2026-6474 CVE-2026-6638
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -67,7 +68,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.10~rc7"
+LABEL version="1.6.11~rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="autoconf"
 

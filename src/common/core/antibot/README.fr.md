@@ -253,6 +253,7 @@ Exemples :
         - Utilisez HTTPS pour `ANTIBOT_CAPJS_FRONTEND_URL` en production. Le worker du navigateur exige `crypto.subtle` dans un contexte sécurisé, et HTTPS empêche les modifications MITM du widget.
         - Configurez CORS sur la clé de site Cap.js pour autoriser l’origine protégée.
         - Définissez `ANTIBOT_CAPJS_FRONTEND_URL` et `ANTIBOT_CAPJS_BACKEND_URL` uniquement sur des origines : schéma, hôte et port optionnel, sans chemin.
+        - Utilisez le widget Cap.js **0.1.48 ou ultérieur**. BunkerWeb diffuse une CSP stricte basée sur un nonce ; les widgets antérieurs cassent les défis d’instrumentation parce que le `<script>` inline injecté dans l’iframe `srcdoc` isolée ne propage pas le nonce. Si vous auto-hébergez `tiago2/cap`, épinglez une version récente (par ex. `tiago2/cap:3.1.2` ou plus récente) ou définissez `WIDGET_VERSION` à `0.1.48` ou plus.
 
     Reportez‑vous aux [Paramètres communs](#paramètres-communs) pour les options supplémentaires.
 

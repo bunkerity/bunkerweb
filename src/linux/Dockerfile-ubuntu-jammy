@@ -1,4 +1,4 @@
-FROM ubuntu:jammy@sha256:962f6cadeae0ea6284001009daa4cc9a8c37e75d1f5191cf0eb83fe565b63dd7 AS builder
+FROM ubuntu:jammy@sha256:4f838adc7181d9039ac795a7d0aba05a9bd9ecd480d294483169c5def983b64d AS builder
 
 # Install Nginx and dependencies
 RUN apt update && \
@@ -6,7 +6,7 @@ RUN apt update && \
     bash libssl-dev git zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre2-dev libbrotli-dev libgd-dev liblmdb-dev libfuzzy-dev cargo coreutils python3.11 python3.11-dev python3.11-venv python3-pip -y
 
 ENV OS=ubuntu
-ENV NGINX_VERSION=1.30.0
+ENV NGINX_VERSION=1.30.2
 ENV EXPECTED_FPR=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
 
 # Install Nginx
@@ -135,7 +135,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM ubuntu:jammy@sha256:962f6cadeae0ea6284001009daa4cc9a8c37e75d1f5191cf0eb83fe565b63dd7
+FROM ubuntu:jammy@sha256:4f838adc7181d9039ac795a7d0aba05a9bd9ecd480d294483169c5def983b64d
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

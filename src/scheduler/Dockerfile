@@ -52,12 +52,11 @@ FROM python:3.13-alpine@sha256:420cd0bf0f3998275875e02ecd5808168cf0843cbb4d3c536
 RUN umask 027
 
 # Install runtime dependencies and add scheduler user
-RUN apk add --no-cache bash unzip curl libgcc libstdc++ libpq openssl libmagic mariadb-connector-c mariadb-client sqlite postgresql-client tzdata sed grep && \
+RUN apk add --no-cache bash unzip curl libgcc libstdc++ libpq openssl libmagic mariadb-connector-c mariadb-client postgresql-client sqlite tzdata sed grep && \
   addgroup -g 101 scheduler && \
   adduser -h /usr/share/bunkerweb/scheduler -g scheduler -s /sbin/nologin -G scheduler -D -H -u 101 --disabled-password scheduler
 
 # Fix CVEs
-RUN apk add --no-cache "nghttp2-libs>=1.68.1" # CVE-2026-27135
 RUN apk add --no-cache "xz-libs>=5.8.3-r0" # CVE-2026-34743
 
 # Copy dependencies
@@ -87,7 +86,7 @@ COPY --chown=root:scheduler --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/
 COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.10~rc7"
+LABEL version="1.6.11~rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="scheduler"
 

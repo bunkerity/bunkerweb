@@ -41,7 +41,7 @@ jobs:
       - name: Install test dependencies
         run: PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --no-cache-dir --require-hashes --no-deps -r tests/requirements.txt
       - name: Install Terraform
-        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
         if: inputs.TYPE == 'k8s'
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -81,9 +81,6 @@ jobs:
       - name: Pull BW linux debian Trixie test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/debian-trixie-tests:testing && docker tag ghcr.io/bunkerity/debian-trixie-tests:testing local/debian-trixie:latest
-      - name: Pull BW linux fedora 42 test image
-        if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/fedora-42-tests:testing && docker tag ghcr.io/bunkerity/fedora-42-tests:testing local/fedora-42:latest
       - name: Pull BW linux fedora 43 test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/fedora-43-tests:testing && docker tag ghcr.io/bunkerity/fedora-43-tests:testing local/fedora-43:latest
@@ -139,12 +136,6 @@ jobs:
       - name: Run Linux debian Trixie tests
         if: inputs.TYPE == 'linux'
         run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "debian-trixie"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux fedora 42 tests
-        if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "fedora-42"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}

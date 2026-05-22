@@ -43,7 +43,11 @@ _bw_install_interrupt() {
     # Move past any half-rendered TUI line.
     printf '\n' >&2
     if declare -F print_warning >/dev/null 2>&1; then
-        print_warning "Installation aborted (SIG${signal}). Partial state may remain — re-run the installer to resume."
+        if [ -f "${_BW_STATE_FILE:-}" ]; then
+            print_warning "Installation aborted (SIG${signal}). Progress was saved — re-run the installer and it will offer to resume."
+        else
+            print_warning "Installation aborted (SIG${signal}). Partial state may remain — re-run the installer to start over."
+        fi
     else
         printf 'Installation aborted (SIG%s).\n' "$signal" >&2
     fi
@@ -86,7 +90,7 @@ fi
 
 # Default values
 # Hardcoded default version (immutable reference)
-DEFAULT_BUNKERWEB_VERSION="1.6.10~rc7"
+DEFAULT_BUNKERWEB_VERSION="1.6.11~rc1"
 # Mutable effective version (can be overridden by --version)
 BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 NGINX_VERSION=""
@@ -110,6 +114,7 @@ REDIS_SSL_VERIFY_INPUT=""
 REDIS_BIND_INPUT=""
 REDIS_AUTOPASS="yes"
 REDIS_REQUIREPASS_LOCAL=""
+REDIS_PASSWORD_GENERATED=""   # set to the value only when auto-generated (controls end-of-install print)
 REDIS_FLAVOR=""               # "redis" | "valkey" — wire-compatible
 REDIS_MAXMEMORY_MB=""         # 0 = unlimited; >0 = applied as <N>mb
 REDIS_MAXMEMORY_POLICY="volatile-lru" # TTL-only eviction: protects permanent bans, evicts transient counters first
@@ -148,6 +153,89 @@ SYSTEM_ARCH=""
 INSTALL_EPEL="auto"
 # TUI mode: auto (gum→whiptail→read) | yes (hard error if none) | no (read only).
 USE_TUI="${BW_INSTALL_TUI:-auto}"
+
+# ---------------------------------------------------------------------------
+# Docker deployment platform — when DOCKER_MODE=yes the installer generates a
+# docker-compose stack (inspired by docs/quickstart-guide.md and docs/advanced.md)
+# in the current working directory and brings it up, instead of installing host
+# packages. INSTALL_TYPE keeps its six normal values (full/manager/worker/
+# scheduler/ui/api) for BOTH platforms. Docker mode never touches the
+# save-state/resume machinery (only the package phases checkpoint), so none of
+# these need to be in _BW_STATE_VARS.
+# ---------------------------------------------------------------------------
+DOCKER_MODE="no"                   # "yes" when the docker-compose deployment path is selected
+DOCKER_AUTOCONF=""                 # "yes" | "no" — autoconf integration variant (full only)
+DOCKER_IMAGE_TAG=""                # explicit Docker Hub tag; empty = derive from BUNKERWEB_VERSION
+DOCKER_PROJECT_DIR=""              # dir that receives docker-compose.yml + .env
+DOCKER_COMPOSE_FILE=""             # $DOCKER_PROJECT_DIR/docker-compose.yml
+DOCKER_ENV_FILE=""                 # $DOCKER_PROJECT_DIR/.env
+DOCKER_OVERWRITE_EXISTING="no"     # --overwrite-compose: back up + overwrite existing files
+DOCKER_AUTO_INSTALL=""             # "yes" (--install-docker): install Docker if missing, no prompt
+DOCKER_NEED_INSTALL="no"           # "yes" when check_docker_prereqs deferred a Docker install to after the confirm
+DOCKER_PULL="yes"                  # --no-pull sets this to "no"
+DOCKER_WAIT_TIMEOUT=180            # seconds to wait for the stack to become ready
+DOCKER_DB_PASSWORD_GENERATED=""    # MariaDB bunkerweb-user password (operator-set or generated)
+DOCKER_TOTP_KEY_GENERATED=""       # TOTP_ENCRYPTION_KEYS value
+DOCKER_API_TOKEN_GENERATED=""      # API_TOKEN value (generated for full/ui/api, prompted for manager/worker/scheduler)
+DOCKER_FLASK_SECRET_GENERATED=""   # UI FLASK_SECRET value
+DOCKER_DATABASE_URI=""             # external DATABASE_URI for scheduler/ui/api docker types
+API_USERNAME_INPUT=""              # FastAPI admin username (api docker type)
+API_PASSWORD_INPUT=""              # FastAPI admin password (api docker type)
+# Host ports published by the generated stack. Defaults match a standalone
+# deploy; override (--http-port etc.) so several stacks can co-exist on one
+# host (e.g. a manager plus several workers in one test VM, one folder each).
+DOCKER_HTTP_PORT="80"              # bunkerweb HTTP      (container 8080)
+DOCKER_HTTPS_PORT="443"            # bunkerweb HTTPS+QUIC (container 8443 tcp+udp)
+DOCKER_API_PORT="5000"             # worker internal API (container 5000)
+DOCKER_UI_PORT="7000"              # manager/ui Web UI   (container 7000)
+DOCKER_FASTAPI_PORT="8888"         # api FastAPI service (container 8888)
+
+# ---------------------------------------------------------------------------
+# Save-state / resume — checkpoints the fresh-install flow so a crash or Ctrl+C
+# can be resumed from the last completed phase instead of restarting from
+# scratch. Fresh-install path only; upgrade_only() is short and not checkpointed.
+# ---------------------------------------------------------------------------
+# State lives in a 0700 root-owned directory, not a bare /var/tmp file: a
+# directory an unprivileged user cannot enter closes the entire symlink/TOCTOU
+# attack class for every file created inside it. /var/tmp is used (not /run) so
+# the state survives a reboot mid-install.
+_BW_STATE_DIR="/var/tmp/bunkerweb-install.d"
+_BW_STATE_FILE="${_BW_STATE_DIR}/state"
+# Not readonly: the state file carries an `_BW_STATE_SCHEMA=` line, so a resume
+# `source` re-assigns it — a readonly here would abort the installer.
+_BW_STATE_SCHEMA=1
+# A state file older than this is treated as a dead install and discarded
+# rather than offered for resume (its generated secrets would be stale).
+_BW_STATE_MAX_AGE_DAYS=7
+RESTART_INSTALL="no"        # --restart-install: discard any saved state, no prompt
+_BW_RESUMING="no"
+_BW_RESUME_AFTER=""         # last completed phase when resuming
+_BW_START_OVER="no"         # explicit "start over": fresh install over an interrupted one
+LAST_COMPLETED_PHASE=""     # persisted: "preferences" then each _BW_PHASES entry
+# Ordered install phases (the gate phase "preferences" is handled separately).
+_BW_PHASES=(nginx crowdsec redis database host_config package configure)
+# Installer config globals persisted to the state file so a resumed run does
+# not re-prompt. NOTE for maintainers: any new install-affecting global that
+# ask_user_preferences/CLI flags can set MUST be added here, or resume will
+# silently lose it.
+_BW_STATE_VARS=(
+    INSTALL_TYPE BUNKERWEB_VERSION NGINX_VERSION ENABLE_WIZARD
+    FORCE_INSTALL FORCE_TYPE_CHANGE QUIET_MODE INTERACTIVE_MODE
+    CROWDSEC_INSTALL CROWDSEC_APPSEC_INSTALL CROWDSEC_API_KEY
+    REDIS_INSTALL REDIS_HOST_INPUT REDIS_PORT_INPUT REDIS_DATABASE_INPUT
+    REDIS_USERNAME_INPUT REDIS_PASSWORD_INPUT REDIS_SSL_INPUT
+    REDIS_SSL_VERIFY_INPUT REDIS_BIND_INPUT REDIS_AUTOPASS
+    REDIS_REQUIREPASS_LOCAL REDIS_PASSWORD_GENERATED REDIS_FLAVOR
+    REDIS_MAXMEMORY_MB REDIS_MAXMEMORY_POLICY DB_INSTALL DB_NAME_INPUT
+    DB_USER_INPUT DB_PASSWORD_INPUT DB_PASSWORD_GENERATED DB_DSN_GENERATED
+    DB_EXTERNAL_ENGINE DB_HOST_INPUT DB_PORT_INPUT DB_SSL_INPUT
+    DB_SSL_VERIFY_INPUT DB_SKIP_PROBE UI_ADMIN_USERNAME_INPUT
+    UI_ADMIN_PASSWORD_INPUT UI_ADMIN_PASSWORD_GENERATED UI_ADMIN_CREATE
+    UI_SELFSIGNED_INPUT MANAGER_UI_DEFERRED FULL_API_DEFERRED
+    BUNKERWEB_INSTANCES_INPUT MANAGER_IP_INPUT SERVER_IP_INPUT
+    RESOLVED_SERVER_IP DNS_RESOLVERS_INPUT API_LISTEN_HTTPS_INPUT
+    BACKUP_DIRECTORY AUTO_BACKUP INSTALL_EPEL SERVICE_API SERVICE_UI
+)
 
 # Safe defaults so callers can reference glyphs before tui_init() runs.
 TUI_CURSOR_GLYPH="❯"
@@ -201,6 +289,243 @@ run_cmd() {
         print_error "Command failed: $*"
         exit 1
     fi
+}
+
+# ---------------------------------------------------------------------------
+# Save-state / resume helpers — see the globals block above.
+# ---------------------------------------------------------------------------
+
+# stat(1) wrappers — GNU first, BSD fallback. Echo "" when the path is gone.
+_bw_stat_owner() {
+    stat -c '%u' "$1" 2>/dev/null || stat -f '%u' "$1" 2>/dev/null || echo ""
+}
+_bw_stat_mode() {
+    stat -c '%a' "$1" 2>/dev/null || stat -f '%Lp' "$1" 2>/dev/null || echo ""
+}
+
+# Ensure the state directory exists as a directory owned by the current (root)
+# user with mode 0700. A 0700 dir an unprivileged attacker cannot enter removes
+# the symlink/TOCTOU risk for every file inside it. `mkdir` without `-p` fails
+# (EEXIST) if the path was pre-seeded — so an attacker-planted symlink or dir is
+# rejected, never adopted. Returns 1 when the directory cannot be trusted.
+_bw_state_dir_ensure() {
+    local _me
+    _me=$(id -u 2>/dev/null || echo "")
+    if [ -e "$_BW_STATE_DIR" ] || [ -L "$_BW_STATE_DIR" ]; then
+        # Must be a real directory (not a symlink), owned by us, mode 0700.
+        if [ -L "$_BW_STATE_DIR" ] || [ ! -d "$_BW_STATE_DIR" ] \
+            || [ "$(_bw_stat_owner "$_BW_STATE_DIR")" != "$_me" ] \
+            || [ "$(_bw_stat_mode "$_BW_STATE_DIR")" != "700" ]; then
+            return 1
+        fi
+        return 0
+    fi
+    mkdir -m 0700 "$_BW_STATE_DIR" 2>/dev/null || return 1
+    # mkdir's mode can be weakened by a restrictive umask on some shells.
+    chmod 0700 "$_BW_STATE_DIR" 2>/dev/null || true
+    return 0
+}
+
+# Atomically (re)write the state file with the current phase + config snapshot.
+# 0600, inside the 0700 state dir. Non-fatal on failure — a read-only /var/tmp
+# must not abort an otherwise-fine install. No-op under --dry-run.
+_bw_state_save() {
+    [ "${DRY_RUN:-no}" = "yes" ] && return 0
+    if ! _bw_state_dir_ensure; then
+        print_warning "Could not create a secure state directory ($_BW_STATE_DIR); resume will be unavailable."
+        return 0
+    fi
+    local _tmp _v
+    # mktemp inside the 0700 dir → unpredictable name, O_EXCL create, no race.
+    _tmp=$(mktemp "${_BW_STATE_DIR}/state.XXXXXX" 2>/dev/null) || {
+        print_warning "Could not write install state file; resume will be unavailable."
+        return 0
+    }
+    {
+        printf '_BW_STATE_SCHEMA=%s\n' "$_BW_STATE_SCHEMA"
+        printf 'LAST_COMPLETED_PHASE=%q\n' "${LAST_COMPLETED_PHASE:-}"
+        for _v in "${_BW_STATE_VARS[@]}"; do
+            printf '%s=%q\n' "$_v" "${!_v-}"
+        done
+    } >> "$_tmp" 2>/dev/null || {
+        print_warning "Could not write install state file; resume will be unavailable."
+        rm -f "$_tmp" 2>/dev/null || true
+        return 0
+    }
+    chmod 0600 "$_tmp" 2>/dev/null || true
+    mv -f "$_tmp" "$_BW_STATE_FILE" 2>/dev/null || {
+        print_warning "Could not finalize install state file; resume will be unavailable."
+        rm -f "$_tmp" 2>/dev/null || true
+        return 0
+    }
+}
+
+# Mark a phase complete and persist the snapshot.
+_bw_phase_done() {
+    LAST_COMPLETED_PHASE="$1"
+    _bw_state_save
+}
+
+# 1-based index of a phase in _BW_PHASES; "preferences" -> 0; unknown -> -1.
+_bw_phase_index() {
+    local _p="$1" _i
+    [ "$_p" = "preferences" ] && { echo 0; return 0; }
+    for _i in "${!_BW_PHASES[@]}"; do
+        if [ "${_BW_PHASES[$_i]}" = "$_p" ]; then
+            echo $(( _i + 1 ))
+            return 0
+        fi
+    done
+    echo -1
+}
+
+# Return 0 (run the phase) on a fresh install, or when resuming and the phase
+# sits AFTER the last completed phase. Return 1 (skip) otherwise.
+_bw_phase_pending() {
+    local _p="$1" _want _done
+    if [ "$_BW_RESUMING" != "yes" ]; then
+        return 0
+    fi
+    _want=$(_bw_phase_index "$_p")
+    _done=$(_bw_phase_index "$_BW_RESUME_AFTER")
+    if [ "$_want" -gt "$_done" ]; then
+        return 0
+    fi
+    print_status "Skipping ${_p} phase (already completed in the interrupted run)."
+    return 1
+}
+
+# Securely remove the state file and its directory. Idempotent. Called on
+# success or discard — NOT from the EXIT trap (the file must survive a crash so
+# resume can work).
+_bw_state_clear() {
+    if [ -e "$_BW_STATE_FILE" ]; then
+        shred -u "$_BW_STATE_FILE" 2>/dev/null || rm -f "$_BW_STATE_FILE" 2>/dev/null || true
+    fi
+    # rmdir only succeeds when empty — leaves the dir if a concurrent tempfile exists.
+    rmdir "$_BW_STATE_DIR" 2>/dev/null || true
+}
+
+# Detect a state file left by an interrupted run and decide what to do with it.
+# Sets _BW_RESUMING / _BW_RESUME_AFTER / _BW_START_OVER. Must run before
+# check_existing_installation (which would otherwise early-exit "already
+# installed" once the package phase had landed).
+_bw_state_load_and_prompt() {
+    [ -f "$_BW_STATE_FILE" ] || return 0
+
+    # The state dir must itself be a trusted 0700 root-owned directory before we
+    # trust anything inside it.
+    if ! _bw_state_dir_ensure; then
+        print_warning "Ignoring saved install state — $_BW_STATE_DIR is not a secure root-owned 0700 directory."
+        return 0
+    fi
+
+    # --restart-install: discard the saved state and re-install over the
+    # interrupted leftovers (a state file only ever exists mid fresh-install).
+    if [ "$RESTART_INSTALL" = "yes" ]; then
+        print_status "Discarding saved install state (--restart-install)."
+        _bw_state_clear
+        _BW_START_OVER="yes"
+        return 0
+    fi
+
+    # Safety gate before sourcing: a regular file (not a symlink), owned by the
+    # current root user, mode 0600.
+    if [ -L "$_BW_STATE_FILE" ]; then
+        print_warning "Ignoring saved install state at $_BW_STATE_FILE (unexpected symlink)."
+        _bw_state_clear
+        return 0
+    fi
+    local _me
+    _me=$(id -u 2>/dev/null || echo "")
+    if [ "$(_bw_stat_owner "$_BW_STATE_FILE")" != "$_me" ] \
+        || [ "$(_bw_stat_mode "$_BW_STATE_FILE")" != "600" ]; then
+        print_warning "Ignoring saved install state at $_BW_STATE_FILE (unexpected owner/permissions)."
+        _bw_state_clear
+        return 0
+    fi
+
+    # Staleness: a state file older than _BW_STATE_MAX_AGE_DAYS describes a dead
+    # install — do not offer to resume it (its generated secrets are stale).
+    if [ -n "$(find "$_BW_STATE_FILE" -maxdepth 0 -mtime "+${_BW_STATE_MAX_AGE_DAYS}" 2>/dev/null)" ]; then
+        print_warning "Saved install state is older than ${_BW_STATE_MAX_AGE_DAYS} days — discarding as stale."
+        _bw_state_clear
+        return 0
+    fi
+
+    # Schema check before sourcing — refuse a file from an incompatible script.
+    local _schema
+    _schema=$(grep -E '^_BW_STATE_SCHEMA=' "$_BW_STATE_FILE" 2>/dev/null | head -1 | cut -d= -f2)
+    if [ "$_schema" != "$_BW_STATE_SCHEMA" ]; then
+        print_warning "Saved install state has an incompatible schema — discarding."
+        _bw_state_clear
+        return 0
+    fi
+
+    local _choice="resume"
+    if [ "$INTERACTIVE_MODE" = "yes" ]; then
+        tui_section "🔄 Resume Previous Installation" \
+            "A previous BunkerWeb installation was interrupted and can be resumed."
+        _choice=$(tui_menu "Resume Installation" \
+            "An interrupted BunkerWeb installation was found. What would you like to do?" \
+            "resume" \
+            "resume" "Resume — continue from where it stopped" \
+            "fresh"  "Start over — discard saved state and install from the beginning" \
+            "cancel" "Cancel — exit without changing anything") || _choice="cancel"
+    else
+        print_status "Interrupted installation detected — resuming (pass --restart-install to start over)."
+    fi
+
+    case "$_choice" in
+        cancel)
+            print_status "Installation cancelled. Saved state kept at $_BW_STATE_FILE."
+            exit 0
+            ;;
+        fresh)
+            print_status "Discarding saved install state — starting from the beginning."
+            _bw_state_clear
+            _BW_START_OVER="yes"
+            ;;
+        resume|*)
+            # Root-owned 0600 file written by this script; symlink/owner/mode/schema
+            # already validated above.
+            # shellcheck disable=SC1090
+            . "$_BW_STATE_FILE"
+            _BW_RESUMING="yes"
+            _BW_RESUME_AFTER="${LAST_COMPLETED_PHASE:-preferences}"
+            ;;
+    esac
+}
+
+# Dump systemd status + recent journal for a failed unit so the real cause
+# is visible instead of a bare "[ERROR] Command failed".
+# NOTE: only call on units whose secrets live in a config file, not on argv —
+# `systemctl status` echoes ExecStart, so a `--requirepass <value>` style unit
+# would leak the password to the terminal.
+_dump_service_diagnostics() {
+    local unit="$1"
+    echo
+    echo -e "${YELLOW}--- systemctl status ${unit} ---${NC}"
+    systemctl status "$unit" --no-pager -l 2>&1 | tail -n 20 || true
+    echo -e "${YELLOW}--- journalctl -xeu ${unit} (last 30 lines) ---${NC}"
+    journalctl -xeu "$unit" --no-pager -n 30 2>&1 || true
+    echo
+}
+
+# Enable + start an OPTIONAL systemd unit. Unlike run_cmd this never exits the
+# installer: a failed optional daemon (e.g. local Valkey/Redis) must not abort
+# the whole BunkerWeb install. Returns non-zero on failure; caller decides.
+# Caller is responsible for any prior `systemctl daemon-reload`.
+start_optional_service() {
+    local unit="$1"
+    local label="${2:-$unit}"
+    echo -e "${BLUE}[CMD]${NC} systemctl enable --now $unit"
+    if systemctl enable --now "$unit"; then
+        return 0
+    fi
+    print_warning "${label} service (${unit}) failed to start."
+    _dump_service_diagnostics "$unit"
+    return 1
 }
 
 # ---------------------------------------------------------------------------
@@ -373,6 +698,30 @@ _tui_force_utf8_locale() {
     return 1
 }
 
+# Probe whether the controlling terminal answers control-sequence queries.
+# gum (bubbletea) queries the terminal on every prompt — Primary Device
+# Attributes / background color — and waits for the reply before drawing.
+# Terminals that never answer (some VM consoles, serial links, ssh through
+# certain proxies) make each of the installer's ~25 gum prompts stall for the
+# query timeout, so the whole TUI feels seconds-slow per screen. whiptail
+# issues no such query. Detect the unresponsive case ONCE here (cost: one
+# ~1s timeout, only on a terminal that would otherwise stall every prompt)
+# so tui_init can skip the gum tier and fall through to whiptail.
+# Returns 0 = terminal answered, 1 = no answer / probe unavailable.
+_tui_terminal_answers_queries() {
+    [ -e /dev/tty ] || return 1
+    local _saved _reply="" _da1_end="c"
+    _saved=$(stty -g </dev/tty 2>/dev/null) || return 1
+    # Raw, no echo — so the DA1 reply lands in `read`, not on screen.
+    stty -echo -icanon min 0 time 0 </dev/tty 2>/dev/null || { stty "$_saved" </dev/tty 2>/dev/null; return 1; }
+    # ESC[c = Primary Device Attributes request. Any VT100-class terminal
+    # answers `ESC[?…c`; bubbletea uses this exact reply as its sync sentinel.
+    printf '\033[c' >/dev/tty 2>/dev/null
+    IFS= read -r -t 1 -d "$_da1_end" _reply </dev/tty 2>/dev/null
+    stty "$_saved" </dev/tty 2>/dev/null
+    [ -n "$_reply" ]
+}
+
 # Pick TUI mode (gum → whiptail → plain read) and export NEWT_COLORS.
 # Must run after detect_os() sets $DISTRO_ID.
 tui_init() {
@@ -409,10 +758,15 @@ tui_init() {
     fi
 
     # Tier 1: gum (inline prompts) — PATH or ephemeral GH release fetch.
-    if command -v gum >/dev/null 2>&1; then
-        GUM_AVAILABLE="yes"
-    elif install_gum_silent; then
-        GUM_AVAILABLE="yes"
+    # Only on terminals that answer control-sequence queries: gum stalls on
+    # every prompt waiting for query replies a silent terminal never sends.
+    # Probing first also skips a pointless gum download on such terminals.
+    if _tui_terminal_answers_queries; then
+        if command -v gum >/dev/null 2>&1; then
+            GUM_AVAILABLE="yes"
+        elif install_gum_silent; then
+            GUM_AVAILABLE="yes"
+        fi
     fi
 
     # Tier 2: whiptail — used only when pre-installed (we don't install it; zero-pkgmgr-trace).
@@ -483,6 +837,11 @@ _tui_normalize_rc() {
     esac
 }
 
+_tui_expand_newlines() {
+    local _value="$1"
+    printf '%s' "${_value//\\n/$'\n'}"
+}
+
 # Echo a one-line scrollback trace for a TUI answer. Stays on stderr so $(...) captures stay clean.
 # Args: $1 = label, $2 = answer (caller redacts secrets).
 _tui_log_choice() {
@@ -497,7 +856,8 @@ _tui_log_choice() {
 # Render multi-line explanatory text before a tui_yesno/tui_menu. gum confirm crops on narrow terms,
 # so we wrap via `fold -s` (gum style doesn't word-wrap on its own).
 _tui_explain() {
-    local body="$1"
+    local body
+    body=$(_tui_expand_newlines "$1")
     # Skip empty body — would render an empty rounded box under gum.
     [ -n "$body" ] || return 0
     local _term_w _box_w _wrap_w
@@ -529,6 +889,7 @@ _tui_explain() {
 # tui_yesno TITLE PROMPT DEFAULT(yes|no) — 0 Yes, 1 No/Cancel/ESC.
 tui_yesno() {
     local title="$1" prompt="$2" default="${3:-yes}"
+    prompt=$(_tui_expand_newlines "$prompt")
     local _rc=0 _final
     if [ "$GUM_AVAILABLE" = "yes" ]; then
         local _gum_default
@@ -566,6 +927,7 @@ tui_yesno() {
 # tui_input TITLE PROMPT [DEFAULT] — echoes value on stdout, 1 on Cancel.
 tui_input() {
     local title="$1" prompt="$2" default="${3:-}"
+    prompt=$(_tui_expand_newlines "$prompt")
     local _rc=0 _value=""
     if [ "$GUM_AVAILABLE" = "yes" ]; then
         # --value pre-fills, --placeholder only when no default.
@@ -614,6 +976,7 @@ tui_input() {
 #     For full secrecy under xtrace, wrap the call site itself in `set +x`/`set -x`.
 tui_password() {
     local title="$1" prompt="$2"
+    prompt=$(_tui_expand_newlines "$prompt")
     local _had_xtrace=0
     case $- in *x*) _had_xtrace=1; set +x ;; esac
     local _result _rc=0
@@ -663,6 +1026,7 @@ tui_password() {
 # Fallback: numbered list on stderr (kept out of $(...) captures).
 tui_menu() {
     local title="$1" prompt="$2" default_tag="$3"
+    prompt=$(_tui_expand_newlines "$prompt")
     shift 3
     # Items come in (tag, desc) pairs — odd count = dropped description (whiptail would silently mis-render).
     if [ $(( $# % 2 )) -ne 0 ]; then
@@ -760,6 +1124,7 @@ tui_menu() {
 # Fallback: prints + waits for Enter, all output on stderr ($(...) safe).
 tui_msgbox() {
     local title="$1" text="$2" height="${3:-}"
+    text=$(_tui_expand_newlines "$text")
     if [ "$GUM_AVAILABLE" = "yes" ]; then
         # Rounded box + 1-keystroke wait. Body inherits terminal default — navy collapses on dark themes.
         local _term_w _box_w
@@ -803,18 +1168,20 @@ tui_msgbox() {
 # tui_section TITLE [SUBTITLE] — gum: bold green marker; whiptail: no-op; fallback: "===" banner.
 # Subtitle pre-wrapped (gum style doesn't word-wrap).
 tui_section() {
+    local title="$1" subtitle="${2:-}"
+    subtitle=$(_tui_expand_newlines "$subtitle")
     if [ "$GUM_AVAILABLE" = "yes" ]; then
         printf '\n' >&2
-        gum style --bold --foreground "#2eac68" "${TUI_SECTION_GLYPH} $1" >&2
-        if [ -n "${2:-}" ]; then
+        gum style --bold --foreground "#2eac68" "${TUI_SECTION_GLYPH} $title" >&2
+        if [ -n "$subtitle" ]; then
             local _term_w _sub_w _sub
             _term_w=$(tput cols 2>/dev/null || echo 80)
             _sub_w=$(( _term_w - 4 ))
             [ "$_sub_w" -lt 36 ] && _sub_w=36
             if command -v fold >/dev/null 2>&1; then
-                _sub=$(printf '%s' "$2" | fold -s -w "$_sub_w")
+                _sub=$(printf '%s' "$subtitle" | fold -s -w "$_sub_w")
             else
-                _sub="$2"
+                _sub="$subtitle"
             fi
             # Body inherits terminal default (avoid navy collapse on dark themes); 2-sp indent for nesting.
             printf '%s\n' "$_sub" | sed 's/^/  /' | gum style --faint >&2
@@ -824,13 +1191,13 @@ tui_section() {
     [ "$WHIPTAIL_AVAILABLE" = "yes" ] && return 0
     echo
     echo -e "${BLUE}========================================${NC}"
-    echo -e "${BLUE}$1${NC}"
+    echo -e "${BLUE}$title${NC}"
     echo -e "${BLUE}========================================${NC}"
-    if [ -n "${2:-}" ]; then
+    if [ -n "$subtitle" ]; then
         if command -v fold >/dev/null 2>&1; then
-            printf '%s\n' "$2" | fold -s -w "$(($(tput cols 2>/dev/null || echo 80) - 4))"
+            printf '%s\n' "$subtitle" | fold -s -w "$(($(tput cols 2>/dev/null || echo 80) - 4))"
         else
-            echo "$2"
+            echo "$subtitle"
         fi
     fi
 }
@@ -838,6 +1205,7 @@ tui_section() {
 # tui_infobox TITLE TEXT — non-blocking status line.
 tui_infobox() {
     local title="$1" text="$2"
+    text=$(_tui_expand_newlines "$text")
     if [ "$GUM_AVAILABLE" = "yes" ]; then
         gum style --foreground "#2eac68" "${TUI_SECTION_GLYPH} $title — $text" >&2
         return 0
@@ -890,6 +1258,801 @@ ensure_config_file() {
 
     chown root:nginx "$config_file" 2>/dev/null || true
     chmod 660 "$config_file" 2>/dev/null || true
+}
+
+# ---------------------------------------------------------------------------
+# Docker install mode — compose/.env rendering, stack lifecycle, orchestration.
+# Reached only when INSTALL_TYPE=docker; see docker_install_flow().
+# ---------------------------------------------------------------------------
+
+# Reject values that cannot live safely in the docker-compose .env file:
+# a literal '$' would be taken as interpolation, a "'" breaks any quoting we
+# might add later, a trailing '\' is a line continuation in some .env parsers,
+# a newline splits the KEY=VALUE line. Returns 0 if safe.
+validate_docker_env_value() {
+    local v="$1"
+    case "$v" in
+        *'$'*|*"'"*|*\\*) return 1 ;;
+        *$'\n'*)          return 1 ;;
+    esac
+    return 0
+}
+
+# Thin wrapper so every compose call targets the same project. --project-directory
+# pins where the .env file is read from, ignoring any stray .env / override file
+# or COMPOSE_* env var in the operator's current working directory.
+_docker_compose() {
+    docker compose --project-directory "$DOCKER_PROJECT_DIR" -f "$DOCKER_COMPOSE_FILE" "$@"
+}
+
+# Derive a Compose project name from the compose directory's basename, so each
+# folder is an isolated stack (its containers, networks and volumes are all
+# prefixed with it). This is what lets a manager and several workers co-exist
+# on one host — one folder each. Sanitized to the Compose project-name grammar.
+_docker_project_name() {
+    local b
+    b=$(basename "$DOCKER_PROJECT_DIR" 2>/dev/null | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9_-' '-')
+    b=${b#-}; b=${b%-}
+    [ -z "$b" ] && b="bunkerweb"
+    case "$b" in [a-z0-9]*) : ;; *) b="bw-${b}" ;; esac
+    printf '%s' "$b"
+}
+
+# The Web UI credential + secret block, shared by the full/manager/ui .env.
+# stdout — called inside render_docker_env's redirected { } block.
+_docker_env_admin_block() {
+    printf 'ADMIN_USERNAME=%s\n' "$UI_ADMIN_USERNAME_INPUT"
+    printf 'ADMIN_PASSWORD=%s\n' "$UI_ADMIN_PASSWORD_INPUT"
+    printf 'FLASK_SECRET=%s\n' "$DOCKER_FLASK_SECRET_GENERATED"
+    printf '# TOTP_ENCRYPTION_KEYS encrypts 2FA secrets at rest.\n'
+    printf 'TOTP_ENCRYPTION_KEYS=%s\n' "$DOCKER_TOTP_KEY_GENERATED"
+    printf '# OVERRIDE_ADMIN_CREDS=yes makes the UI reset the admin password from\n'
+    printf '# ADMIN_PASSWORD on every restart. Set it to "no" after first login if\n'
+    printf '# you intend to change the admin password from inside the UI.\n'
+    printf 'OVERRIDE_ADMIN_CREDS=yes\n'
+}
+
+# Write the .env file consumed by docker-compose.yml interpolation. 0600 — it
+# holds the DB password / API token / admin password / UI secrets. The key set
+# is per-INSTALL_TYPE (worker has no DB; scheduler/ui/api use an external
+# DATABASE_URI; etc). Every value is guaranteed '$'-, "'"- and backslash-free
+# (generated alnum, or operator input filtered through validate_docker_env_value).
+render_docker_env() {
+    local tmp
+    # API_WHITELIST_IP for the distributed types — broad private ranges, per
+    # docs/advanced.md; the API_TOKEN is the real cross-host authentication.
+    local _docker_whitelist="127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+    # mktemp always creates with mode 0600 — no world-readable window.
+    tmp=$(mktemp "${DOCKER_ENV_FILE}.XXXXXX") || {
+        print_error "Cannot create a temporary file in $DOCKER_PROJECT_DIR."
+        exit 1
+    }
+    _bw_register_secret_tmpfile "$tmp"
+    {
+        printf '# BunkerWeb Docker stack (%s) — generated by install-bunkerweb.sh\n' "$INSTALL_TYPE"
+        # shellcheck disable=SC2016  # ${VAR} is literal text written into the .env comment.
+        printf '# Docker Compose interpolates ${VAR} in docker-compose.yml from this file.\n'
+        printf '# Contains secrets — keep it readable by root only (mode 0600).\n'
+        printf '\n'
+        printf 'COMPOSE_PROJECT_NAME=%s\n' "$(_docker_project_name)"
+        printf 'BW_TAG=%s\n' "$DOCKER_IMAGE_TAG"
+        case "$INSTALL_TYPE" in
+            full)
+                printf 'MARIADB_PASSWORD=%s\n' "$DOCKER_DB_PASSWORD_GENERATED"
+                printf 'API_TOKEN=%s\n' "$DOCKER_API_TOKEN_GENERATED"
+                printf 'API_WHITELIST_IP=%s\n' "$_docker_whitelist"
+                printf 'HTTP_PORT=%s\n' "$DOCKER_HTTP_PORT"
+                printf 'HTTPS_PORT=%s\n' "$DOCKER_HTTPS_PORT"
+                _docker_env_admin_block
+                ;;
+            manager)
+                printf 'MARIADB_PASSWORD=%s\n' "$DOCKER_DB_PASSWORD_GENERATED"
+                printf 'API_TOKEN=%s\n' "$DOCKER_API_TOKEN_GENERATED"
+                printf 'API_WHITELIST_IP=%s\n' "$_docker_whitelist"
+                printf 'BUNKERWEB_INSTANCES=%s\n' "$BUNKERWEB_INSTANCES_INPUT"
+                printf 'UI_PORT=%s\n' "$DOCKER_UI_PORT"
+                _docker_env_admin_block
+                ;;
+            worker)
+                printf 'API_TOKEN=%s\n' "$DOCKER_API_TOKEN_GENERATED"
+                # Whitelist the manager IP(s) — only they may call the worker API.
+                printf 'API_WHITELIST_IP=%s\n' "127.0.0.0/8 ${MANAGER_IP_INPUT}"
+                printf 'HTTP_PORT=%s\n' "$DOCKER_HTTP_PORT"
+                printf 'HTTPS_PORT=%s\n' "$DOCKER_HTTPS_PORT"
+                printf 'API_PORT=%s\n' "$DOCKER_API_PORT"
+                ;;
+            scheduler)
+                printf 'DATABASE_URI=%s\n' "$DOCKER_DATABASE_URI"
+                printf 'API_TOKEN=%s\n' "$DOCKER_API_TOKEN_GENERATED"
+                printf 'API_WHITELIST_IP=%s\n' "$_docker_whitelist"
+                printf 'BUNKERWEB_INSTANCES=%s\n' "$BUNKERWEB_INSTANCES_INPUT"
+                ;;
+            ui)
+                printf 'DATABASE_URI=%s\n' "$DOCKER_DATABASE_URI"
+                printf 'UI_PORT=%s\n' "$DOCKER_UI_PORT"
+                _docker_env_admin_block
+                ;;
+            api)
+                printf 'DATABASE_URI=%s\n' "$DOCKER_DATABASE_URI"
+                printf 'API_USERNAME=%s\n' "$API_USERNAME_INPUT"
+                printf 'API_PASSWORD=%s\n' "$API_PASSWORD_INPUT"
+                printf 'FASTAPI_PORT=%s\n' "$DOCKER_FASTAPI_PORT"
+                ;;
+        esac
+    } >> "$tmp"
+    mv -f "$tmp" "$DOCKER_ENV_FILE"
+    chmod 600 "$DOCKER_ENV_FILE" 2>/dev/null || true
+    print_status "Wrote $DOCKER_ENV_FILE (mode 0600)."
+}
+
+# Standard stack — bunkerweb + scheduler + ui + mariadb + redis.
+# Mirrors docs/quickstart-guide.md (Docker tab); image tags and secrets are
+# '${VAR}' placeholders resolved by Compose from the sibling .env file.
+render_docker_compose_standard() {
+    cat > "$DOCKER_COMPOSE_FILE" <<'COMPOSE'
+# BunkerWeb Docker stack (standard) — generated by install-bunkerweb.sh.
+# Values like ${BW_TAG} are interpolated by Docker Compose from the .env file
+# next to this file. Edit .env to rotate secrets, then: docker compose up -d
+x-bw-env: &bw-env
+  API_WHITELIST_IP: "${API_WHITELIST_IP}"
+  API_TOKEN: "${API_TOKEN}"
+  DATABASE_URI: "mariadb+pymysql://bunkerweb:${MARIADB_PASSWORD}@bw-db:3306/db"
+
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:${BW_TAG}
+    ports:
+      - "${HTTP_PORT}:8080/tcp"
+      - "${HTTPS_PORT}:8443/tcp"
+      - "${HTTPS_PORT}:8443/udp" # QUIC / HTTP3
+    environment:
+      <<: *bw-env
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:${BW_TAG}
+    environment:
+      <<: *bw-env
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: ""
+      MULTISITE: "yes"
+      UI_HOST: "http://bw-ui:7000"
+      USE_REDIS: "yes"
+      REDIS_HOST: "redis"
+    volumes:
+      - bw-storage:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-ui:
+    image: bunkerity/bunkerweb-ui:${BW_TAG}
+    environment:
+      <<: *bw-env
+      ADMIN_USERNAME: "${ADMIN_USERNAME}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
+      OVERRIDE_ADMIN_CREDS: "${OVERRIDE_ADMIN_CREDS}"
+      FLASK_SECRET: "${FLASK_SECRET}"
+      TOTP_ENCRYPTION_KEYS: "${TOTP_ENCRYPTION_KEYS}"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-db:
+    image: mariadb:11
+    command: --max-allowed-packet=67108864
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "${MARIADB_PASSWORD}"
+    volumes:
+      - bw-data:/var/lib/mysql
+    restart: "unless-stopped"
+    networks:
+      - bw-db
+
+  redis:
+    image: redis:8-alpine
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy volatile-lru
+      --save 60 1000
+      --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+volumes:
+  bw-data:
+  bw-storage:
+  redis-data:
+
+# Networks are project-scoped (Compose prefixes them with COMPOSE_PROJECT_NAME)
+# and use Docker-assigned subnets, so several stacks co-exist on one host.
+networks:
+  bw-universe:
+  bw-services:
+  bw-db:
+COMPOSE
+}
+
+# Autoconf stack — adds bw-autoconf + bw-docker (socket proxy) so containers
+# labelled bunkerweb.* are configured automatically. Mirrors the
+# "Docker autoconf" tab of docs/quickstart-guide.md.
+render_docker_compose_autoconf() {
+    cat > "$DOCKER_COMPOSE_FILE" <<'COMPOSE'
+# BunkerWeb Docker stack (autoconf) — generated by install-bunkerweb.sh.
+# Values like ${BW_TAG} are interpolated by Docker Compose from the .env file
+# next to this file. Edit .env to rotate secrets, then: docker compose up -d
+x-ui-env: &bw-ui-env
+  AUTOCONF_MODE: "yes"
+  DATABASE_URI: "mariadb+pymysql://bunkerweb:${MARIADB_PASSWORD}@bw-db:3306/db"
+
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:${BW_TAG}
+    ports:
+      - "${HTTP_PORT}:8080/tcp"
+      - "${HTTPS_PORT}:8443/tcp"
+      - "${HTTPS_PORT}:8443/udp" # QUIC / HTTP3
+    labels:
+      - "bunkerweb.INSTANCE=yes" # Lets bw-autoconf discover this instance.
+    environment:
+      AUTOCONF_MODE: "yes"
+      API_WHITELIST_IP: "${API_WHITELIST_IP}"
+      API_TOKEN: "${API_TOKEN}"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:${BW_TAG}
+    environment:
+      <<: *bw-ui-env
+      BUNKERWEB_INSTANCES: ""
+      SERVER_NAME: ""
+      API_WHITELIST_IP: "${API_WHITELIST_IP}"
+      API_TOKEN: "${API_TOKEN}"
+      MULTISITE: "yes"
+      UI_HOST: "http://bw-ui:7000"
+      USE_REDIS: "yes"
+      REDIS_HOST: "redis"
+    volumes:
+      - bw-storage:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-autoconf:
+    image: bunkerity/bunkerweb-autoconf:${BW_TAG}
+    depends_on:
+      - bw-docker
+    environment:
+      <<: *bw-ui-env
+      DOCKER_HOST: "tcp://bw-docker:2375"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-docker
+      - bw-db
+
+  bw-docker:
+    image: tecnativa/docker-socket-proxy:nightly
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      CONTAINERS: "1"
+      LOG_LEVEL: "warning"
+    networks:
+      - bw-docker
+
+  bw-ui:
+    image: bunkerity/bunkerweb-ui:${BW_TAG}
+    environment:
+      <<: *bw-ui-env
+      ADMIN_USERNAME: "${ADMIN_USERNAME}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
+      OVERRIDE_ADMIN_CREDS: "${OVERRIDE_ADMIN_CREDS}"
+      FLASK_SECRET: "${FLASK_SECRET}"
+      TOTP_ENCRYPTION_KEYS: "${TOTP_ENCRYPTION_KEYS}"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-db:
+    image: mariadb:11
+    command: --max-allowed-packet=67108864
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "${MARIADB_PASSWORD}"
+    volumes:
+      - bw-data:/var/lib/mysql
+    restart: "unless-stopped"
+    networks:
+      - bw-db
+
+  redis:
+    image: redis:8-alpine
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy volatile-lru
+      --save 60 1000
+      --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+volumes:
+  bw-data:
+  bw-storage:
+  redis-data:
+
+# Networks are project-scoped (Compose prefixes them with COMPOSE_PROJECT_NAME)
+# and use Docker-assigned subnets, so several stacks co-exist on one host.
+networks:
+  bw-universe:
+  bw-services:
+  bw-docker:
+  bw-db:
+COMPOSE
+}
+
+# Manager stack — bw-scheduler + bw-ui + bw-db + redis. Manages the remote
+# BunkerWeb workers listed in BUNKERWEB_INSTANCES. Mirrors docs/advanced.md.
+render_docker_compose_manager() {
+    cat > "$DOCKER_COMPOSE_FILE" <<'COMPOSE'
+# BunkerWeb Docker stack (manager) — generated by install-bunkerweb.sh.
+# Runs the Scheduler + Web UI and manages the remote BunkerWeb workers listed
+# in BUNKERWEB_INSTANCES (.env). ${VAR} placeholders are interpolated by Docker
+# Compose from the .env file next to this file.
+x-bw-env: &bw-env
+  API_WHITELIST_IP: "${API_WHITELIST_IP}"
+  API_TOKEN: "${API_TOKEN}"
+  DATABASE_URI: "mariadb+pymysql://bunkerweb:${MARIADB_PASSWORD}@bw-db:3306/db"
+
+services:
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:${BW_TAG}
+    environment:
+      <<: *bw-env
+      BUNKERWEB_INSTANCES: "${BUNKERWEB_INSTANCES}"
+      SERVER_NAME: ""
+      MULTISITE: "yes"
+      UI_HOST: "http://bw-ui:7000"
+      USE_REDIS: "yes"
+      REDIS_HOST: "redis"
+    volumes:
+      - bw-storage:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-ui:
+    image: bunkerity/bunkerweb-ui:${BW_TAG}
+    ports:
+      - "${UI_PORT}:7000/tcp"
+    environment:
+      <<: *bw-env
+      ADMIN_USERNAME: "${ADMIN_USERNAME}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
+      OVERRIDE_ADMIN_CREDS: "${OVERRIDE_ADMIN_CREDS}"
+      FLASK_SECRET: "${FLASK_SECRET}"
+      TOTP_ENCRYPTION_KEYS: "${TOTP_ENCRYPTION_KEYS}"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-db:
+    image: mariadb:11
+    command: --max-allowed-packet=67108864
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "${MARIADB_PASSWORD}"
+    volumes:
+      - bw-data:/var/lib/mysql
+    restart: "unless-stopped"
+    networks:
+      - bw-db
+
+  redis:
+    image: redis:8-alpine
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy volatile-lru
+      --save 60 1000
+      --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+volumes:
+  bw-data:
+  bw-storage:
+  redis-data:
+
+# Networks are project-scoped (Compose prefixes them with COMPOSE_PROJECT_NAME)
+# and use Docker-assigned subnets, so several stacks co-exist on one host.
+networks:
+  bw-universe:
+  bw-db:
+COMPOSE
+}
+
+# Worker stack — a lone BunkerWeb instance managed by a remote Scheduler.
+# The manager pushes configuration over the internal API on TCP port 5000.
+render_docker_compose_worker() {
+    cat > "$DOCKER_COMPOSE_FILE" <<'COMPOSE'
+# BunkerWeb Docker stack (worker) — generated by install-bunkerweb.sh.
+# A lone BunkerWeb instance managed by a remote Scheduler/Manager, which pushes
+# configuration over the internal API on TCP port 5000.
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:${BW_TAG}
+    ports:
+      - "${HTTP_PORT}:8080/tcp"
+      - "${HTTPS_PORT}:8443/tcp"
+      - "${HTTPS_PORT}:8443/udp" # QUIC / HTTP3
+      - "${API_PORT}:5000/tcp" # Internal API — firewall this to the manager IP(s) only.
+    environment:
+      API_WHITELIST_IP: "${API_WHITELIST_IP}"
+      API_TOKEN: "${API_TOKEN}"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
+
+# Networks are project-scoped (Compose prefixes them with COMPOSE_PROJECT_NAME)
+# and use Docker-assigned subnets, so several stacks co-exist on one host.
+networks:
+  bw-universe:
+  bw-services:
+COMPOSE
+}
+
+# Scheduler stack — bw-scheduler + redis, connecting to a shared external
+# database via DATABASE_URI and managing the remote workers.
+render_docker_compose_scheduler() {
+    cat > "$DOCKER_COMPOSE_FILE" <<'COMPOSE'
+# BunkerWeb Docker stack (scheduler) — generated by install-bunkerweb.sh.
+# Runs only the Scheduler; it connects to the shared database via DATABASE_URI
+# and manages the remote BunkerWeb workers listed in BUNKERWEB_INSTANCES.
+services:
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:${BW_TAG}
+    environment:
+      DATABASE_URI: "${DATABASE_URI}"
+      BUNKERWEB_INSTANCES: "${BUNKERWEB_INSTANCES}"
+      API_WHITELIST_IP: "${API_WHITELIST_IP}"
+      API_TOKEN: "${API_TOKEN}"
+      SERVER_NAME: ""
+      MULTISITE: "yes"
+      USE_REDIS: "yes"
+      REDIS_HOST: "redis"
+    volumes:
+      - bw-storage:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+  redis:
+    image: redis:8-alpine
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy volatile-lru
+      --save 60 1000
+      --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+volumes:
+  bw-storage:
+  redis-data:
+
+# Network is project-scoped (Compose prefixes it with COMPOSE_PROJECT_NAME) and
+# uses a Docker-assigned subnet, so several stacks co-exist on one host.
+networks:
+  bw-universe:
+COMPOSE
+}
+
+# Web UI stack — bw-ui only, connecting to a shared external database.
+render_docker_compose_ui() {
+    cat > "$DOCKER_COMPOSE_FILE" <<'COMPOSE'
+# BunkerWeb Docker stack (ui) — generated by install-bunkerweb.sh.
+# Runs only the Web UI; it connects to the shared database via DATABASE_URI.
+services:
+  bw-ui:
+    image: bunkerity/bunkerweb-ui:${BW_TAG}
+    ports:
+      - "${UI_PORT}:7000/tcp"
+    environment:
+      DATABASE_URI: "${DATABASE_URI}"
+      ADMIN_USERNAME: "${ADMIN_USERNAME}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
+      OVERRIDE_ADMIN_CREDS: "${OVERRIDE_ADMIN_CREDS}"
+      FLASK_SECRET: "${FLASK_SECRET}"
+      TOTP_ENCRYPTION_KEYS: "${TOTP_ENCRYPTION_KEYS}"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+# Network is project-scoped (Compose prefixes it with COMPOSE_PROJECT_NAME) and
+# uses a Docker-assigned subnet, so several stacks co-exist on one host.
+networks:
+  bw-universe:
+COMPOSE
+}
+
+# FastAPI stack — bw-api only, connecting to a shared external database.
+render_docker_compose_api() {
+    cat > "$DOCKER_COMPOSE_FILE" <<'COMPOSE'
+# BunkerWeb Docker stack (api) — generated by install-bunkerweb.sh.
+# Runs only the FastAPI control service; it connects to the shared database via
+# DATABASE_URI. Put it behind a BunkerWeb instance before exposing it publicly.
+services:
+  bw-api:
+    image: bunkerity/bunkerweb-api:${BW_TAG}
+    ports:
+      - "${FASTAPI_PORT}:8888/tcp"
+    environment:
+      DATABASE_URI: "${DATABASE_URI}"
+      API_USERNAME: "${API_USERNAME}"
+      API_PASSWORD: "${API_PASSWORD}"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+# Network is project-scoped (Compose prefixes it with COMPOSE_PROJECT_NAME) and
+# uses a Docker-assigned subnet, so several stacks co-exist on one host.
+networks:
+  bw-universe:
+COMPOSE
+}
+
+# Render the compose file for the chosen install type, then ask Compose to
+# validate it (catches a malformed .env or YAML before we ever call 'up').
+render_docker_compose() {
+    case "$INSTALL_TYPE" in
+        full)
+            if [ "$DOCKER_AUTOCONF" = "yes" ]; then
+                render_docker_compose_autoconf
+            else
+                render_docker_compose_standard
+            fi
+            ;;
+        manager)   render_docker_compose_manager   ;;
+        worker)    render_docker_compose_worker    ;;
+        scheduler) render_docker_compose_scheduler ;;
+        ui)        render_docker_compose_ui        ;;
+        api)       render_docker_compose_api       ;;
+        *)
+            print_error "Internal error: no Docker compose renderer for install type '$INSTALL_TYPE'."
+            exit 1
+            ;;
+    esac
+    chmod 644 "$DOCKER_COMPOSE_FILE" 2>/dev/null || true
+    print_status "Wrote $DOCKER_COMPOSE_FILE."
+    if ! _docker_compose config -q >/dev/null 2>&1; then
+        print_error "Generated docker-compose.yml failed validation ('docker compose config'):"
+        # Re-run WITHOUT -q so the parse error reaches the operator (stdout to
+        # /dev/null — only the diagnostic on stderr matters here).
+        _docker_compose config >/dev/null || true
+        exit 1
+    fi
+}
+
+# Poll until every service reports 'running', or DOCKER_WAIT_TIMEOUT elapses.
+# Returns 0 when ready, 1 on timeout (caller surfaces a logs hint, not fatal).
+wait_for_docker_stack_ready() {
+    local deadline=$(( $(date +%s) + DOCKER_WAIT_TIMEOUT ))
+    local total running=0
+    total=$(_docker_compose ps --services 2>/dev/null | grep -c . || echo 0)
+    [ "$total" -gt 0 ] || total=5
+    print_status "Waiting for $total services to start (timeout ${DOCKER_WAIT_TIMEOUT}s)..."
+    while [ "$(date +%s)" -lt "$deadline" ]; do
+        running=$(_docker_compose ps --services --status running 2>/dev/null | grep -c . || echo 0)
+        if [ "$running" -ge "$total" ]; then
+            print_status "All $total services are running."
+            return 0
+        fi
+        sleep 3
+    done
+    print_warning "Timed out waiting for the stack ($running/$total services running)."
+    return 1
+}
+
+# Post-install summary — per-type entry point, management hints. Secrets are
+# NEVER printed; the operator is pointed at the 0600 .env file that holds them.
+show_docker_final_info() {
+    resolve_display_server_ip
+    local ip="${RESOLVED_SERVER_IP:-your-server-ip}"
+    local env_file="$DOCKER_ENV_FILE"
+    # HTTPS URL port suffix — omitted when the port is the scheme default (443).
+    local _https_sfx=""
+    [ "$DOCKER_HTTPS_PORT" != "443" ] && _https_sfx=":${DOCKER_HTTPS_PORT}"
+    {
+        echo
+        echo "========================================="
+        echo "  🐳 BunkerWeb Docker stack is up!"
+        echo "========================================="
+        echo
+        echo "  📂 Compose directory : $DOCKER_PROJECT_DIR"
+        echo "  📦 Installation type : $INSTALL_TYPE"
+        [ "$INSTALL_TYPE" = "full" ] && \
+            echo "  🧩 Variant           : $([ "$DOCKER_AUTOCONF" = "yes" ] && echo "autoconf" || echo "standard")"
+        echo "  🏷️  Image tag         : $DOCKER_IMAGE_TAG"
+        echo
+        echo "  🔑 Secrets (admin password, API token, DB password, ...) are stored in"
+        echo "     the generated env file — readable by root only (mode 0600):"
+        echo "       $env_file"
+        echo "     Inspect a single value with, e.g.:"
+        echo "       grep '^ADMIN_PASSWORD=' \"$env_file\""
+        echo
+        case "$INSTALL_TYPE" in
+            full)
+                echo "  🧙 Finish setup in the web wizard:"
+                echo "       https://${ip}${_https_sfx}/setup"
+                echo "     (self-signed certificate on first boot — accept the browser warning)"
+                echo
+                echo "  👤 Web UI admin username : ${UI_ADMIN_USERNAME_INPUT}"
+                echo "  🔑 Web UI admin password : see ADMIN_PASSWORD in $env_file"
+                [ "$DOCKER_AUTOCONF" = "yes" ] && {
+                    echo
+                    echo "  🤖 Autoconf is active — label your service containers with"
+                    echo "     'bunkerweb.*' labels and they are configured automatically."
+                }
+                ;;
+            manager)
+                echo "  🌐 Web UI:  http://${ip}:${DOCKER_UI_PORT}"
+                echo
+                echo "  👤 Web UI admin username : ${UI_ADMIN_USERNAME_INPUT}"
+                echo "  🔑 Web UI admin password : see ADMIN_PASSWORD in $env_file"
+                echo
+                echo "  🔗 Managed worker instances: ${BUNKERWEB_INSTANCES_INPUT:-<none yet>}"
+                echo "  🔑 Shared API token: see API_TOKEN in $env_file"
+                echo "     Set the SAME API_TOKEN value on every worker host."
+                ;;
+            worker)
+                echo "  🛰️  This worker is managed by a remote Scheduler/Manager."
+                echo "  🔗 Manager IP(s) allowed to push config: ${MANAGER_IP_INPUT}"
+                echo
+                echo "  ⚠️  Host TCP port ${DOCKER_API_PORT} (internal API) is published on 0.0.0.0."
+                echo "     Firewall it so ONLY the manager IP(s) above can reach it."
+                echo
+                echo "  🔑 Shared API token: see API_TOKEN in $env_file"
+                echo "     It must match the manager's API_TOKEN exactly."
+                ;;
+            scheduler)
+                echo "  🧠 Headless Scheduler — no Web UI on this host."
+                echo "  🔗 Managed worker instances: ${BUNKERWEB_INSTANCES_INPUT:-<none yet>}"
+                echo "  🔑 Shared API token: see API_TOKEN in $env_file"
+                echo "     Set the SAME API_TOKEN value on every worker host."
+                echo "  🗄️  Database: see DATABASE_URI in $env_file"
+                ;;
+            ui)
+                echo "  🌐 Web UI:  http://${ip}:${DOCKER_UI_PORT}"
+                echo
+                echo "  👤 Web UI admin username : ${UI_ADMIN_USERNAME_INPUT}"
+                echo "  🔑 Web UI admin password : see ADMIN_PASSWORD in $env_file"
+                echo
+                echo "  🗄️  This UI shares the database — see DATABASE_URI in $env_file"
+                ;;
+            api)
+                echo "  🌐 FastAPI service:  http://${ip}:${DOCKER_FASTAPI_PORT}"
+                echo
+                echo "  👤 FastAPI admin username : ${API_USERNAME_INPUT}"
+                echo "  🔑 FastAPI admin password : see API_PASSWORD in $env_file"
+                echo
+                echo "  🛡️  Put this API behind a BunkerWeb instance before exposing it publicly."
+                ;;
+        esac
+        echo
+        echo "  ⚙️  Manage the stack (run from $DOCKER_PROJECT_DIR):"
+        echo "       docker compose ps           # status"
+        echo "       docker compose logs -f      # follow logs"
+        echo "       docker compose down         # stop"
+        case "$INSTALL_TYPE" in
+            full|manager)
+                echo
+                echo "  🗄️  The MariaDB root password is randomized at first boot; it is not"
+                echo "     needed for BunkerWeb. Retrieve it once with:"
+                echo "       docker compose logs bw-db | grep -i 'GENERATED ROOT PASSWORD'"
+                ;;
+        esac
+        echo "========================================="
+        echo
+    } >&"${_BW_OUT_FD:-1}"
+}
+
+# Back up a file that is about to be overwritten. Secrets stay 0600.
+_docker_backup_file() {
+    local f="$1" bak
+    [ -f "$f" ] || return 0
+    bak="${f}.bak.$(date +%s)"
+    cp -p "$f" "$bak" 2>/dev/null || cp "$f" "$bak"
+    chmod 600 "$bak" 2>/dev/null || true
+    print_warning "Backed up existing $(basename "$f") to $(basename "$bak")"
+}
+
+# Guard against clobbering an existing stack in the target directory.
+# Aborts unless the operator opts in (interactive prompt, or --overwrite-compose).
+_docker_check_existing() {
+    local existing=""
+    [ -f "$DOCKER_COMPOSE_FILE" ] && existing="docker-compose.yml"
+    [ -f "$DOCKER_ENV_FILE" ] && existing="${existing:+$existing, }.env"
+    [ -n "$existing" ] || return 0
+
+    print_warning "Found existing files in $DOCKER_PROJECT_DIR: $existing"
+    if [ "$DOCKER_OVERWRITE_EXISTING" = "yes" ]; then
+        print_status "Proceeding with overwrite (--overwrite-compose)."
+    elif [ "$INTERACTIVE_MODE" = "yes" ]; then
+        if ! tui_yesno "Existing Stack Files" \
+            "Existing files in $DOCKER_PROJECT_DIR: ${existing}.\nThey will be backed up (.bak.<timestamp>) and overwritten.\n\nContinue?" "no"; then
+            print_error "Aborted — existing files left untouched."
+            exit 0
+        fi
+    else
+        print_error "Existing compose files present. Re-run with --overwrite-compose to replace them."
+        exit 1
+    fi
+    _docker_backup_file "$DOCKER_COMPOSE_FILE"
+    _docker_backup_file "$DOCKER_ENV_FILE"
+}
+
+# Orchestrator for INSTALL_TYPE=docker. Renders files, brings the stack up,
+# waits for readiness, prints the summary. Called from main(); exits the script.
+docker_install_flow() {
+    # Runs only after the operator confirmed the configuration. _docker_ensure_runtime
+    # performs any Docker install that check_docker_prereqs deferred — so the first
+    # system mutation of the Docker path happens here, post-confirm, exactly like
+    # the Linux phases run only after the same confirm screen.
+    _docker_ensure_runtime
+
+    print_step "🐳 Generating the BunkerWeb Docker stack in $DOCKER_PROJECT_DIR"
+    _docker_check_existing
+    render_docker_env
+    render_docker_compose
+
+    if [ "$DOCKER_PULL" = "yes" ]; then
+        print_step "📥 Pulling container images"
+        run_cmd _docker_compose pull
+    fi
+
+    print_step "🚀 Starting the stack"
+    run_cmd _docker_compose up -d
+
+    wait_for_docker_stack_ready || \
+        print_warning "Check progress with: cd $DOCKER_PROJECT_DIR && docker compose ps"
+
+    show_docker_final_info
 }
 
 # Generate a URL-safe random secret of N characters (default 32).
@@ -950,6 +2113,22 @@ validate_db_password() {
     return 0
 }
 
+# Redis requirepass — written into redis.conf via _redis_conf_set.
+# Reject whitespace and chars that break the config line or shell/DSN assembly.
+validate_redis_password() {
+    local pw="$1"
+
+    if [ -z "$pw" ] || [ "${#pw}" -lt 8 ]; then
+        return 1
+    fi
+    # Reject ' " \ ` # and whitespace — break redis.conf requirepass line, DSN, shell history.
+    if [[ "$pw" == *\'* ]] || [[ "$pw" == *\"* ]] || [[ "$pw" == *\\* ]] || [[ "$pw" == *\`* ]] \
+        || [[ "$pw" == *"#"* ]] || [[ "$pw" =~ [[:space:]] ]]; then
+        return 1
+    fi
+    return 0
+}
+
 # DB identifier — SQL-safe ASCII that survives a URL path component intact.
 # Matches MariaDB/Postgres unquoted-identifier rules.
 validate_db_identifier() {
@@ -976,6 +2155,28 @@ validate_ui_admin_username() {
     [ -n "$s" ] || return 1
     [ "${#s}" -le 64 ] || return 1
     [[ "$s" =~ ^[A-Za-z0-9._-]+$ ]]
+}
+
+# Docker image tag — Docker Hub tag grammar: first char alnum or '_', then
+# alnum/'.'/'_'/'-', 1–128 chars. A leading '.' or '-' is invalid.
+# Rejects ':' and '/' so callers always form "${image}:${tag}" themselves.
+validate_docker_image_tag() {
+    local s="$1"
+    [ -n "$s" ] || return 1
+    [ "${#s}" -le 128 ] || return 1
+    [[ "$s" =~ ^[A-Za-z0-9_][A-Za-z0-9._-]*$ ]]
+}
+
+# Turn a BunkerWeb version into a Docker-Hub-safe image tag.
+# Debian-style versions use '~' (e.g. 1.6.10~rc7) which Docker tags forbid → '-'.
+# Empty input falls back to "latest".
+derive_docker_image_tag() {
+    local v="${1:-}"
+    if [ -z "$v" ]; then
+        printf 'latest'
+        return 0
+    fi
+    printf '%s' "${v//\~/-}"
 }
 
 # URL-encode for SQLAlchemy DSN user:password — escapes @ : / % ? # & cleanly.
@@ -1261,6 +2462,13 @@ detect_os() {
         exit 1
     fi
 
+    # Normalize legacy distro ID aliases: some AlmaLinux derivatives report "alma",
+    # and the /etc/redhat-release fallback above sets "redhat" on os-release-less boxes.
+    case "$DISTRO_ID" in
+        alma) DISTRO_ID="almalinux" ;;
+        redhat) DISTRO_ID="rhel" ;;
+    esac
+
     print_status "Detected OS: $(distro_display_name "$DISTRO_ID") $DISTRO_VERSION"
 }
 
@@ -1294,14 +2502,439 @@ detect_architecture() {
     export NORMALIZED_ARCH
 }
 
-# Function to ask user preferences
+# --- ask_docker_preferences helpers --------------------------------------
+# Each helper is a no-op when its target value is already set (by a CLI flag);
+# under --yes it fills a safe default or aborts when a value cannot be defaulted.
+
+# Image tag — all types. derive_docker_image_tag always maps '~' → '-' so a
+# Debian-style version (1.6.10~rc7) becomes a valid Docker Hub tag (1.6.10-rc7),
+# whether it came from --image-tag, the interactive prompt, or BUNKERWEB_VERSION.
+_docker_ask_image_tag() {
+    local _default_tag
+    _default_tag=$(derive_docker_image_tag "$BUNKERWEB_VERSION")
+    if [ -n "$DOCKER_IMAGE_TAG" ]; then
+        # Flag-provided — still normalize '~' → '-'.
+        DOCKER_IMAGE_TAG=$(derive_docker_image_tag "$DOCKER_IMAGE_TAG")
+        return 0
+    fi
+    if [ "$INTERACTIVE_MODE" != "yes" ]; then
+        DOCKER_IMAGE_TAG="$_default_tag"
+        return 0
+    fi
+    tui_section "🏷️  BunkerWeb Image Tag"
+    while true; do
+        DOCKER_IMAGE_TAG=$(tui_input "Image Tag" \
+            "Docker Hub tag for the BunkerWeb images:" "$_default_tag") \
+            || DOCKER_IMAGE_TAG="$_default_tag"
+        [ -z "$DOCKER_IMAGE_TAG" ] && DOCKER_IMAGE_TAG="$_default_tag"
+        # Normalize '~' → '-' before validating so a typed Debian-style version works.
+        DOCKER_IMAGE_TAG=$(derive_docker_image_tag "$DOCKER_IMAGE_TAG")
+        validate_docker_image_tag "$DOCKER_IMAGE_TAG" && break
+        tui_msgbox "Invalid Tag" "Image tags allow letters, digits, '.', '_' and '-' only."
+        DOCKER_IMAGE_TAG=""
+    done
+}
+
+# Web UI admin username + password — full/manager/ui.
+_docker_ask_admin() {
+    if [ -z "$UI_ADMIN_USERNAME_INPUT" ]; then
+        if [ "$INTERACTIVE_MODE" = "yes" ]; then
+            tui_section "👤 Web UI Admin Account"
+            while true; do
+                UI_ADMIN_USERNAME_INPUT=$(tui_input "Admin Username" \
+                    "Username for the first Web UI admin:" "admin") \
+                    || UI_ADMIN_USERNAME_INPUT="admin"
+                [ -z "$UI_ADMIN_USERNAME_INPUT" ] && UI_ADMIN_USERNAME_INPUT="admin"
+                validate_ui_admin_username "$UI_ADMIN_USERNAME_INPUT" && break
+                tui_msgbox "Invalid Username" "Use letters, digits, '.', '_' and '-' (1–64 chars)."
+                UI_ADMIN_USERNAME_INPUT=""
+            done
+        else
+            UI_ADMIN_USERNAME_INPUT="admin"
+        fi
+    fi
+    if [ -z "$UI_ADMIN_PASSWORD_INPUT" ]; then
+        if [ "$INTERACTIVE_MODE" = "yes" ]; then
+            while true; do
+                UI_ADMIN_PASSWORD_INPUT=$(tui_password "Admin Password" \
+                    "Web UI admin password (leave empty to auto-generate):") \
+                    || UI_ADMIN_PASSWORD_INPUT=""
+                if [ -z "$UI_ADMIN_PASSWORD_INPUT" ]; then
+                    UI_ADMIN_PASSWORD_INPUT=$(generate_ui_admin_password)
+                    break
+                fi
+                if validate_ui_admin_password "$UI_ADMIN_PASSWORD_INPUT" \
+                    && validate_docker_env_value "$UI_ADMIN_PASSWORD_INPUT"; then
+                    break
+                fi
+                tui_msgbox "Invalid Password" "Need 8+ chars with a lowercase, uppercase, digit and special character — and no '\$', single quote or backslash."
+                UI_ADMIN_PASSWORD_INPUT=""
+            done
+        else
+            UI_ADMIN_PASSWORD_INPUT=$(generate_ui_admin_password)
+        fi
+    fi
+}
+
+# MariaDB 'bunkerweb' user password — full/manager (bundled bw-db).
+_docker_ask_db_password() {
+    [ -n "$DOCKER_DB_PASSWORD_GENERATED" ] && return 0
+    if [ "$INTERACTIVE_MODE" != "yes" ]; then
+        DOCKER_DB_PASSWORD_GENERATED=$(generate_secret 32)
+        return 0
+    fi
+    while true; do
+        DOCKER_DB_PASSWORD_GENERATED=$(tui_password "Database Password" \
+            "MariaDB password for the 'bunkerweb' user (leave empty to auto-generate):") \
+            || DOCKER_DB_PASSWORD_GENERATED=""
+        if [ -z "$DOCKER_DB_PASSWORD_GENERATED" ]; then
+            DOCKER_DB_PASSWORD_GENERATED=$(generate_secret 32)
+            break
+        fi
+        if validate_db_password "$DOCKER_DB_PASSWORD_GENERATED" \
+            && validate_docker_env_value "$DOCKER_DB_PASSWORD_GENERATED"; then
+            break
+        fi
+        tui_msgbox "Invalid Password" "Need 8+ chars and no quotes, backslash, backtick or '\$'."
+        DOCKER_DB_PASSWORD_GENERATED=""
+    done
+}
+
+# Shared API token — manager/worker/scheduler. MUST be identical on every host,
+# so it is operator-provided (never auto-generated for these types).
+_docker_ask_shared_token() {
+    [ -n "$DOCKER_API_TOKEN_GENERATED" ] && return 0
+    if [ "$INTERACTIVE_MODE" != "yes" ]; then
+        print_error "--api-token is required for a non-interactive --docker ${INSTALL_TYPE} install."
+        print_error "The token must be IDENTICAL on the manager and every worker/scheduler host."
+        exit 1
+    fi
+    tui_section "🔑 Shared API Token" \
+        "Authenticates the manager↔worker API. Use the SAME value on every host of this cluster."
+    while true; do
+        DOCKER_API_TOKEN_GENERATED=$(tui_password "Shared API Token" \
+            "API token shared across the manager and all workers:") \
+            || DOCKER_API_TOKEN_GENERATED=""
+        if [ -z "$DOCKER_API_TOKEN_GENERATED" ]; then
+            tui_msgbox "Token Required" "A shared API token is mandatory for manager/worker/scheduler installs."
+            continue
+        fi
+        validate_docker_env_value "$DOCKER_API_TOKEN_GENERATED" && break
+        tui_msgbox "Invalid Token" "The token must not contain '\$', a single quote or a backslash."
+        DOCKER_API_TOKEN_GENERATED=""
+    done
+}
+
+# Remote worker IPs (BUNKERWEB_INSTANCES) — manager/scheduler. May be empty.
+_docker_ask_instances() {
+    [ -n "$BUNKERWEB_INSTANCES_INPUT" ] && return 0
+    if [ "$INTERACTIVE_MODE" != "yes" ]; then
+        print_warning "No worker instances configured (--instances); add them later via the scheduler."
+        return 0
+    fi
+    tui_section "🔗 Remote Worker Instances" \
+        "Space-separated IPs/hostnames of the BunkerWeb worker hosts this ${INSTALL_TYPE} controls."
+    BUNKERWEB_INSTANCES_INPUT=$(tui_input "Worker Instances" \
+        "Worker IPs/hostnames (space-separated, leave empty to add later):" "") \
+        || BUNKERWEB_INSTANCES_INPUT=""
+}
+
+# Manager IP(s) for a worker — required (the worker whitelists them).
+_docker_ask_manager_ip() {
+    [ -n "$MANAGER_IP_INPUT" ] && return 0
+    if [ "$INTERACTIVE_MODE" != "yes" ]; then
+        print_error "--manager-ip is required for a non-interactive --docker worker install."
+        exit 1
+    fi
+    tui_section "🛡️  Manager API Access" \
+        "IP(s) of the manager/scheduler allowed to push configuration to this worker."
+    while true; do
+        MANAGER_IP_INPUT=$(tui_input "Manager IP" \
+            "Manager IP address(es) (space-separated):" "") \
+            || MANAGER_IP_INPUT=""
+        [ -n "$MANAGER_IP_INPUT" ] && break
+        tui_msgbox "Manager IP Required" "A worker must know the IP of its manager."
+    done
+}
+
+# External DATABASE_URI — scheduler/ui/api (they share one database).
+_docker_ask_database_uri() {
+    [ -n "$DOCKER_DATABASE_URI" ] && return 0
+    if [ "$INTERACTIVE_MODE" != "yes" ]; then
+        print_error "--database-uri is required for a non-interactive --docker ${INSTALL_TYPE} install."
+        exit 1
+    fi
+    tui_section "🗄️  Shared Database" \
+        "This ${INSTALL_TYPE} container connects to the database shared by the rest of the deployment."
+    while true; do
+        DOCKER_DATABASE_URI=$(tui_input "Database URI" \
+            "DATABASE_URI of the shared database (e.g. mariadb+pymysql://bunkerweb:pass@10.0.0.5:3306/db):" "") \
+            || DOCKER_DATABASE_URI=""
+        if [ -z "$DOCKER_DATABASE_URI" ]; then
+            tui_msgbox "URI Required" "A DATABASE_URI is mandatory for this type."
+            continue
+        fi
+        validate_docker_env_value "$DOCKER_DATABASE_URI" && break
+        tui_msgbox "Invalid URI" "The URI must not contain '\$', a single quote or a backslash (avoid those in the DB password)."
+        DOCKER_DATABASE_URI=""
+    done
+}
+
+# FastAPI admin credentials — api type.
+_docker_ask_api_creds() {
+    if [ -z "$API_USERNAME_INPUT" ]; then
+        if [ "$INTERACTIVE_MODE" = "yes" ]; then
+            tui_section "👤 FastAPI Admin Account"
+            while true; do
+                API_USERNAME_INPUT=$(tui_input "API Username" \
+                    "Username for the FastAPI admin:" "admin") || API_USERNAME_INPUT="admin"
+                [ -z "$API_USERNAME_INPUT" ] && API_USERNAME_INPUT="admin"
+                validate_ui_admin_username "$API_USERNAME_INPUT" \
+                    && validate_docker_env_value "$API_USERNAME_INPUT" && break
+                tui_msgbox "Invalid Username" "Use letters, digits, '.', '_' and '-' (1–64 chars)."
+                API_USERNAME_INPUT=""
+            done
+        else
+            API_USERNAME_INPUT="admin"
+        fi
+    fi
+    if [ -z "$API_PASSWORD_INPUT" ]; then
+        if [ "$INTERACTIVE_MODE" = "yes" ]; then
+            while true; do
+                API_PASSWORD_INPUT=$(tui_password "API Password" \
+                    "FastAPI admin password (leave empty to auto-generate):") \
+                    || API_PASSWORD_INPUT=""
+                if [ -z "$API_PASSWORD_INPUT" ]; then
+                    API_PASSWORD_INPUT=$(generate_ui_admin_password)
+                    break
+                fi
+                if validate_ui_admin_password "$API_PASSWORD_INPUT" \
+                    && validate_docker_env_value "$API_PASSWORD_INPUT"; then
+                    break
+                fi
+                tui_msgbox "Invalid Password" "Need 8+ chars with a lowercase, uppercase, digit and special character — and no '\$', single quote or backslash."
+                API_PASSWORD_INPUT=""
+            done
+        else
+            API_PASSWORD_INPUT=$(generate_ui_admin_password)
+        fi
+    fi
+}
+
+# Pre-load secrets from an existing .env so a re-run keeps the values tied to
+# persistent state (the MariaDB password baked into the bw-data volume, the
+# TOTP key that decrypts stored 2FA secrets, the Flask session secret, ...)
+# instead of rotating them. Only fills globals that are still empty — an
+# explicit CLI flag always wins.
+_docker_load_existing_env() {
+    [ -f "$DOCKER_ENV_FILE" ] || return 0
+    local _loaded="no" _pair _k _v
+    while IFS= read -r _pair || [ -n "$_pair" ]; do
+        case "$_pair" in ''|'#'*) continue ;; esac
+        _k=${_pair%%=*}
+        _v=${_pair#*=}
+        case "$_k" in
+            MARIADB_PASSWORD)     [ -z "$DOCKER_DB_PASSWORD_GENERATED" ]  && { DOCKER_DB_PASSWORD_GENERATED="$_v";  _loaded="yes"; } ;;
+            TOTP_ENCRYPTION_KEYS) [ -z "$DOCKER_TOTP_KEY_GENERATED" ]     && { DOCKER_TOTP_KEY_GENERATED="$_v";     _loaded="yes"; } ;;
+            FLASK_SECRET)         [ -z "$DOCKER_FLASK_SECRET_GENERATED" ] && { DOCKER_FLASK_SECRET_GENERATED="$_v"; _loaded="yes"; } ;;
+            API_TOKEN)            [ -z "$DOCKER_API_TOKEN_GENERATED" ]    && { DOCKER_API_TOKEN_GENERATED="$_v";    _loaded="yes"; } ;;
+            ADMIN_USERNAME)       [ -z "$UI_ADMIN_USERNAME_INPUT" ]       && { UI_ADMIN_USERNAME_INPUT="$_v";       _loaded="yes"; } ;;
+            ADMIN_PASSWORD)       [ -z "$UI_ADMIN_PASSWORD_INPUT" ]       && { UI_ADMIN_PASSWORD_INPUT="$_v";       _loaded="yes"; } ;;
+            API_USERNAME)         [ -z "$API_USERNAME_INPUT" ]           && { API_USERNAME_INPUT="$_v";            _loaded="yes"; } ;;
+            API_PASSWORD)         [ -z "$API_PASSWORD_INPUT" ]           && { API_PASSWORD_INPUT="$_v";            _loaded="yes"; } ;;
+            DATABASE_URI)         [ -z "$DOCKER_DATABASE_URI" ]          && { DOCKER_DATABASE_URI="$_v";           _loaded="yes"; } ;;
+        esac
+    done < "$DOCKER_ENV_FILE"
+    if [ "$_loaded" = "yes" ]; then
+        print_warning "Reusing existing secrets from $DOCKER_ENV_FILE so a re-run keeps the DB/UI/2FA values that persisted data depends on."
+        print_warning "Delete that file first if you intend to rotate them."
+    fi
+    return 0
+}
+
+# Collect every Docker-mode setting: install type, image tag, autoconf variant,
+# per-type credentials / remote IPs / shared secrets. Called by
+# docker_install_flow() for both interactive and non-interactive (--yes) runs.
+ask_docker_preferences() {
+    # Compose directory — current working directory unless --compose-dir set it.
+    if [ -z "$DOCKER_PROJECT_DIR" ]; then
+        DOCKER_PROJECT_DIR=$(pwd -P)
+    else
+        # --compose-dir: create if missing, then resolve to an absolute path.
+        mkdir -p "$DOCKER_PROJECT_DIR" 2>/dev/null || {
+            print_error "Cannot create compose directory: $DOCKER_PROJECT_DIR"
+            exit 1
+        }
+        DOCKER_PROJECT_DIR=$(cd "$DOCKER_PROJECT_DIR" 2>/dev/null && pwd -P) || {
+            print_error "Compose directory is not accessible: $DOCKER_PROJECT_DIR"
+            exit 1
+        }
+    fi
+    DOCKER_COMPOSE_FILE="$DOCKER_PROJECT_DIR/docker-compose.yml"
+    DOCKER_ENV_FILE="$DOCKER_PROJECT_DIR/.env"
+    if [ "$DOCKER_PROJECT_DIR" = "/root" ]; then
+        print_warning "Compose files will be written to /root — consider re-running from a dedicated directory (e.g. --compose-dir /opt/bunkerweb-docker)."
+    fi
+
+    # Re-run idempotency — adopt secrets from an existing .env before prompting.
+    _docker_load_existing_env
+
+    # Install type — picked by the shared install-type menu in
+    # ask_user_preferences (interactive) or a --full/--manager/... flag;
+    # defaults to full for a non-interactive run with no type flag.
+    [ -z "$INSTALL_TYPE" ] && INSTALL_TYPE="full"
+    case "$INSTALL_TYPE" in
+        full|manager|worker|scheduler|ui|api) : ;;
+        *) print_error "Unsupported install type for Docker mode: '$INSTALL_TYPE'."; exit 1 ;;
+    esac
+
+    _docker_ask_image_tag
+
+    # Autoconf integration — only meaningful for the full stack.
+    if [ "$INSTALL_TYPE" = "full" ]; then
+        if [ -z "$DOCKER_AUTOCONF" ]; then
+            if [ "$INTERACTIVE_MODE" = "yes" ]; then
+                tui_section "🐳 Docker Autoconf Integration" \
+                    "Autoconf configures BunkerWeb automatically from labels on your other containers."
+                if tui_yesno "Autoconf Integration" \
+                    "Enable the autoconf integration? (adds bw-autoconf + a Docker socket proxy)" "no"; then
+                    DOCKER_AUTOCONF="yes"
+                else
+                    DOCKER_AUTOCONF="no"
+                fi
+            else
+                DOCKER_AUTOCONF="no"
+            fi
+        fi
+    else
+        if [ "$DOCKER_AUTOCONF" = "yes" ]; then
+            print_warning "--autoconf only applies to the full stack; ignoring it for the '$INSTALL_TYPE' type."
+        fi
+        DOCKER_AUTOCONF="no"
+    fi
+
+    # Per-type input collection.
+    case "$INSTALL_TYPE" in
+        full)
+            _docker_ask_admin
+            _docker_ask_db_password
+            ;;
+        manager)
+            _docker_ask_instances
+            _docker_ask_admin
+            _docker_ask_db_password
+            _docker_ask_shared_token
+            ;;
+        worker)
+            _docker_ask_manager_ip
+            _docker_ask_shared_token
+            ;;
+        scheduler)
+            _docker_ask_instances
+            _docker_ask_database_uri
+            _docker_ask_shared_token
+            ;;
+        ui)
+            _docker_ask_admin
+            _docker_ask_database_uri
+            ;;
+        api)
+            _docker_ask_api_creds
+            _docker_ask_database_uri
+            ;;
+    esac
+
+    # Validate flag-provided values that may have skipped the interactive guards.
+    if ! validate_docker_image_tag "$DOCKER_IMAGE_TAG"; then
+        print_error "Invalid image tag '$DOCKER_IMAGE_TAG' (letters/digits/'.'/'_'/'-', first char alphanumeric or '_')."
+        exit 1
+    fi
+    if [ -n "$UI_ADMIN_USERNAME_INPUT" ] && ! validate_ui_admin_username "$UI_ADMIN_USERNAME_INPUT"; then
+        print_error "Invalid admin username '$UI_ADMIN_USERNAME_INPUT'."
+        exit 1
+    fi
+    # Every operator-supplied string that lands in the .env file must be safe.
+    local _v
+    for _v in "$UI_ADMIN_PASSWORD_INPUT" "$DOCKER_DB_PASSWORD_GENERATED" \
+              "$DOCKER_API_TOKEN_GENERATED" "$DOCKER_DATABASE_URI" \
+              "$API_USERNAME_INPUT" "$API_PASSWORD_INPUT" \
+              "$BUNKERWEB_INSTANCES_INPUT" "$MANAGER_IP_INPUT"; do
+        if [ -n "$_v" ] && ! validate_docker_env_value "$_v"; then
+            print_error "A supplied value contains a '\$', single quote or backslash, which the Docker .env file cannot carry safely."
+            exit 1
+        fi
+    done
+
+    # Infrastructure secrets — generated only for the types that need them, and
+    # only when still empty (a value reused from an existing .env via
+    # _docker_load_existing_env is kept, so a re-run does not rotate it).
+    case "$INSTALL_TYPE" in
+        full|manager|ui)
+            [ -z "$DOCKER_TOTP_KEY_GENERATED" ] && DOCKER_TOTP_KEY_GENERATED=$(generate_secret 64)
+            [ -z "$DOCKER_FLASK_SECRET_GENERATED" ] && DOCKER_FLASK_SECRET_GENERATED=$(generate_secret 48)
+            ;;
+    esac
+    # API_TOKEN: full generates its own (single host); manager/worker/scheduler
+    # already have the operator-provided shared token; ui/api do not use one.
+    if [ "$INSTALL_TYPE" = "full" ] && [ -z "$DOCKER_API_TOKEN_GENERATED" ]; then
+        DOCKER_API_TOKEN_GENERATED=$(generate_secret 48)
+    fi
+}
+
+# Step 0 of the install — choose the deployment platform (Linux host packages
+# vs Docker compose stack) BEFORE any host-capability gate, so a distro that is
+# unsupported for host packages can still be used for a Docker deployment.
+ask_deployment_platform() {
+    [ "$DOCKER_MODE" = "yes" ] && return 0          # --docker already chose it
+    [ "$INTERACTIVE_MODE" != "yes" ] && return 0    # non-interactive: --docker, else Linux
+    local _platform=""
+    echo
+    print_step "Deployment Platform"
+    echo
+    tui_section "🚀 Deployment Platform" "Choose how BunkerWeb will run on this host."
+    _platform=$(tui_menu "Deployment Platform" \
+        "How do you want to deploy BunkerWeb?" \
+        "linux" \
+        "linux"  "Linux — install BunkerWeb as host packages (systemd services)" \
+        "docker" "Docker — generate a docker-compose stack and run containers") \
+        || { print_error "Installation cancelled."; exit 1; }
+    if [ "$_platform" = "docker" ]; then DOCKER_MODE="yes"; fi
+}
+
 ask_user_preferences() {
+    # Docker mode — same step sequence as the Linux path: installation type,
+    # per-type configuration, then the shared configuration recap. The stack is
+    # generated/started later by docker_install_flow(), after the confirm
+    # screen, mirroring how the Linux phases run after the same confirm.
+    if [ "$DOCKER_MODE" = "yes" ]; then
+        if [ "$INTERACTIVE_MODE" = "yes" ]; then
+            echo
+            print_step "Configuration Options"
+            echo
+            if [ -z "$INSTALL_TYPE" ]; then
+                tui_section "📦 Installation Type" "Choose the type of installation based on your needs."
+                INSTALL_TYPE=$(tui_menu "Installation Type" \
+                    "Choose the type of installation based on your needs:" \
+                    "full" \
+                    "full"      "Full Stack (default) — BunkerWeb + Scheduler + UI" \
+                    "manager"   "Manager — Scheduler and UI to manage remote workers" \
+                    "worker"    "Worker — only the BunkerWeb instance, managed remotely" \
+                    "scheduler" "Scheduler only" \
+                    "ui"        "Web UI only" \
+                    "api"       "API service only") || { print_error "Installation cancelled."; exit 1; }
+            fi
+        fi
+        ask_docker_preferences
+        [ "$INTERACTIVE_MODE" = "yes" ] && present_configuration_summary
+        return 0
+    fi
+
     if [ "$INTERACTIVE_MODE" = "yes" ]; then
         echo
         print_step "Configuration Options"
         echo
 
-        # Ask about installation type
+        # Ask about installation type (Linux platform).
         if [ -z "$INSTALL_TYPE" ]; then
             tui_section "📦 Installation Type" "Choose the type of installation based on your needs."
             INSTALL_TYPE=$(tui_menu "Installation Type" \
@@ -1665,13 +3298,64 @@ will warn and fall back to the other one." \
                         print_warning "Strongly recommended: firewall port 6379 to your worker subnet, and set a Redis password."
                     fi
 
-                    if [ "$REDIS_BIND_INPUT" != "127.0.0.1" ] && [ -z "$REDIS_PASSWORD_INPUT" ] && [ "$REDIS_AUTOPASS" = "yes" ]; then
-                        if tui_yesno "Redis Password" \
-                            "Generate a random password and set REQUIREPASS automatically?" "yes"; then
-                            REDIS_AUTOPASS="yes"
-                        else
-                            REDIS_AUTOPASS="no"
+                fi
+
+                # Local Redis password (REQUIREPASS): opt-in gate, then a
+                # DB/UI-style prompt — type a password or leave empty to
+                # auto-generate. Runs for every local install (full + manager).
+                if [ "$REDIS_AUTOPASS" != "no" ] && [ -z "$REDIS_REQUIREPASS_LOCAL" ]; then
+                    tui_section "🔑 Redis Password"
+                    local _redis_flavor_label="${REDIS_FLAVOR:-redis}"
+                    local _redis_pw_default="yes"
+                    # Loopback-only Redis is unreachable from the network → password optional.
+                    [ "${REDIS_BIND_INPUT:-127.0.0.1}" = "127.0.0.1" ] && _redis_pw_default="no"
+                    _tui_explain "Protecting ${_redis_flavor_label} with a password (REQUIREPASS) is
+strongly recommended whenever it is reachable from the network.
+Leave the password empty to auto-generate a strong random one
+(printed at the end of install)."
+                    if tui_yesno "Redis Password" \
+                        "🔑 Protect the local ${_redis_flavor_label} server with a password?" "$_redis_pw_default"; then
+                        REDIS_AUTOPASS="yes"
+                        local _redis_pw_rc _redis_pw_confirm
+                        while true; do
+                            REDIS_REQUIREPASS_LOCAL=$(tui_password "Redis Password" \
+                                "🔑 Enter password (or leave empty to auto-generate):")
+                            _redis_pw_rc=$?
+                            if [ "$_redis_pw_rc" -ne 0 ]; then
+                                # ESC/Cancel: don't silently coerce; ask explicitly.
+                                REDIS_REQUIREPASS_LOCAL=""
+                                if tui_yesno "Redis Password" \
+                                    "Cancel password entry and auto-generate a random one instead?" "yes"; then
+                                    break
+                                fi
+                                continue
+                            fi
+                            if [ -z "$REDIS_REQUIREPASS_LOCAL" ]; then
+                                # Empty → auto-generate after the loop.
+                                break
+                            fi
+                            if ! validate_redis_password "$REDIS_REQUIREPASS_LOCAL"; then
+                                tui_msgbox "Redis Password" \
+                                    "Password must be 8+ characters with no whitespace, quotes, backslash, backtick or '#'. Try again, or leave empty to auto-generate."
+                                REDIS_REQUIREPASS_LOCAL=""
+                                continue
+                            fi
+                            _redis_pw_confirm=$(tui_password "Redis Password (confirm)" \
+                                "Re-type the password:") || _redis_pw_confirm=""
+                            if [ "$REDIS_REQUIREPASS_LOCAL" != "$_redis_pw_confirm" ]; then
+                                tui_msgbox "Redis Password" "Passwords don't match. Try again."
+                                REDIS_REQUIREPASS_LOCAL=""
+                                continue
+                            fi
+                            break
+                        done
+                        # Empty after the loop → auto-generate now (works for loopback too).
+                        if [ -z "$REDIS_REQUIREPASS_LOCAL" ]; then
+                            REDIS_REQUIREPASS_LOCAL=$(generate_secret 32)
+                            REDIS_PASSWORD_GENERATED="$REDIS_REQUIREPASS_LOCAL"
                         fi
+                    else
+                        REDIS_AUTOPASS="no"
                     fi
                 fi
 
@@ -1980,19 +3664,25 @@ Rules:
             DB_INSTALL="none"
         fi
 
-        # Build summary once, route via active TUI tier: gum panel/pager, whiptail msgbox, or stdout.
-        local _summary
-        _summary=$(_build_configuration_summary)
-        if [ "$GUM_AVAILABLE" = "yes" ]; then
-            _present_summary_gum "$_summary"
-        elif [ "$WHIPTAIL_AVAILABLE" = "yes" ]; then
-            tui_msgbox "Configuration Summary" "$_summary"
-        else
-            echo
-            print_status "Configuration summary:"
-            echo "$_summary"
-            echo
-        fi
+        present_configuration_summary
+    fi
+}
+
+# Build the config recap once and route it via the active TUI tier: gum
+# panel/pager, whiptail msgbox, or plain stdout. Shared by the Linux and Docker
+# preference flows so both show the same recap step before the confirm screen.
+present_configuration_summary() {
+    local _summary
+    _summary=$(_build_configuration_summary)
+    if [ "$GUM_AVAILABLE" = "yes" ]; then
+        _present_summary_gum "$_summary"
+    elif [ "$WHIPTAIL_AVAILABLE" = "yes" ]; then
+        tui_msgbox "Configuration Summary" "$_summary"
+    else
+        echo
+        print_status "Configuration summary:"
+        echo "$_summary"
+        echo
     fi
 }
 
@@ -2045,6 +3735,46 @@ _build_configuration_summary() {
         pad="${pad// /.}"
         out+="  ${label} ${pad} ${value}"$'\n'
     }
+
+    # Docker mode — its own recap (no host-package fields, never any secrets).
+    if [ "$DOCKER_MODE" = "yes" ]; then
+        _section "Core"
+        _field "Deployment platform" "Docker (compose stack)"
+        _field "Installation type"   "$INSTALL_TYPE"
+        _field "Image tag"           "${DOCKER_IMAGE_TAG:-$(derive_docker_image_tag "$BUNKERWEB_VERSION")}"
+        [ "$INSTALL_TYPE" = "full" ] && \
+            _field "Autoconf integration" "$([ "$DOCKER_AUTOCONF" = "yes" ] && echo "Enabled" || echo "Disabled")"
+        _field "Compose directory"   "${DOCKER_PROJECT_DIR:-$(pwd -P)}"
+
+        _section "Topology"
+        case "$INSTALL_TYPE" in
+            full)      _field "Services" "bunkerweb, bw-scheduler, bw-ui, bw-db, redis"
+                       [ "$DOCKER_AUTOCONF" = "yes" ] && _field "" "+ bw-autoconf, bw-docker"
+                       _field "Database" "MariaDB (bundled bw-db)" ;;
+            manager)   _field "Services" "bw-scheduler, bw-ui, bw-db, redis"
+                       _field "Database" "MariaDB (bundled bw-db)"
+                       _field "Worker instances" "${BUNKERWEB_INSTANCES_INPUT:-<none yet>}" ;;
+            worker)    _field "Services" "bunkerweb (ports 80/443/5000)"
+                       _field "Manager IP(s)" "${MANAGER_IP_INPUT}" ;;
+            scheduler) _field "Services" "bw-scheduler, redis"
+                       _field "Database" "external (DATABASE_URI)"
+                       _field "Worker instances" "${BUNKERWEB_INSTANCES_INPUT:-<none yet>}" ;;
+            ui)        _field "Services" "bw-ui (port 7000)"
+                       _field "Database" "external (DATABASE_URI)" ;;
+            api)       _field "Services" "bw-api (port 8888)"
+                       _field "Database" "external (DATABASE_URI)" ;;
+        esac
+
+        _section "Credentials"
+        case "$INSTALL_TYPE" in
+            full|manager|ui) _field "Web UI admin user" "${UI_ADMIN_USERNAME_INPUT:-admin}" ;;
+            api)             _field "FastAPI admin user" "${API_USERNAME_INPUT:-admin}" ;;
+        esac
+        _field "Secrets" "generated/collected — written only to the 0600 .env file"
+
+        printf '%s' "$out"
+        return 0
+    fi
 
     # ── Core ──
     _section "Core"
@@ -2154,7 +3884,15 @@ _build_configuration_summary() {
             else
                 _field "$_flavor_label" "Local, default config"
             fi
-            if [ "$REDIS_AUTOPASS" = "yes" ] && [ "${REDIS_BIND_INPUT:-127.0.0.1}" != "127.0.0.1" ]; then
+            # States: opted out / interactive auto-gen / interactive typed /
+            # non-interactive auto-gen (bind ≠ loopback, settled at apply time).
+            if [ "$REDIS_AUTOPASS" = "no" ]; then
+                _field "Redis password" "None (REQUIREPASS not set)"
+            elif [ -n "$REDIS_PASSWORD_GENERATED" ]; then
+                _field "Redis password" "Auto-generated (REQUIREPASS)"
+            elif [ -n "$REDIS_REQUIREPASS_LOCAL" ]; then
+                _field "Redis password" "Set (provided)"
+            elif [ "${REDIS_BIND_INPUT:-127.0.0.1}" != "127.0.0.1" ]; then
                 _field "Redis password" "Auto-generated (REQUIREPASS)"
             fi
             if [ -n "$REDIS_MAXMEMORY_MB" ]; then
@@ -2252,7 +3990,7 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.30.0-1~$DISTRO_CODENAME"
+            NGINX_VERSION="1.30.2-1~$DISTRO_CODENAME"
             ;;
         "ubuntu")
             if [[ "$DISTRO_VERSION" != "22.04" && "$DISTRO_VERSION" != "24.04" ]]; then
@@ -2264,43 +4002,43 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.30.0-1~$DISTRO_CODENAME"
+            NGINX_VERSION="1.30.2-1~$DISTRO_CODENAME"
             ;;
         "fedora")
-            if [[ "$DISTRO_VERSION" != "42" && "$DISTRO_VERSION" != "43" && "$DISTRO_VERSION" != "44" ]]; then
-                print_warning "Only Fedora 42, 43 and 44 are officially supported"
+            if [[ "$DISTRO_VERSION" != "43" && "$DISTRO_VERSION" != "44" ]]; then
+                print_warning "Only Fedora 43 and 44 are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
                     if ! tui_yesno "Unsupported OS" \
-                        "Only Fedora 42, 43 and 44 are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
+                        "Only Fedora 43 and 44 are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
                         exit 1
                     fi
                 fi
             fi
-            NGINX_VERSION="1.30.0"
+            NGINX_VERSION="1.30.1"
             ;;
-        "rhel"|"rocky"|"almalinux")
+        "rhel"|"rocky"|"almalinux"|"centos")
             major_version=$(echo "$DISTRO_VERSION" | cut -d. -f1)
             if [[ "$major_version" != "8" && "$major_version" != "9" && "$major_version" != "10" ]]; then
-                print_warning "Only RHEL 8, 9, and 10 are officially supported"
+                print_warning "Only RHEL, CentOS, Rocky Linux, and AlmaLinux 8, 9, and 10 are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
                     if ! tui_yesno "Unsupported OS" \
-                        "Only RHEL 8, 9, and 10 are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
+                        "Only RHEL, CentOS, Rocky Linux, and AlmaLinux 8, 9, and 10 are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
                         exit 1
                     fi
                 fi
             fi
-            NGINX_VERSION="1.30.0"
+            NGINX_VERSION="1.30.2"
             ;;
         *)
             print_error "Unsupported operating system: $DISTRO_ID"
-            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04, Fedora 42/43/44, RHEL 8/9/10, FreeBSD 13/14"
+            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04, Fedora 43/44, RHEL/CentOS/Rocky/AlmaLinux 8/9/10, FreeBSD 13/14"
             exit 1
             ;;
     esac
 }
 
 check_ports() {
-    if [[ "$INSTALL_TYPE" == "full" || "$INSTALL_TYPE" == "worker" || -z "$INSTALL_TYPE" ]]; then
+    if [[ "$INSTALL_TYPE" == "full" || "$INSTALL_TYPE" == "worker" || "$DOCKER_MODE" == "yes" || -z "$INSTALL_TYPE" ]]; then
         if command -v ss >/dev/null 2>&1; then
             local _pc_rows
             _pc_rows=$(ss -tulpn 2>/dev/null | awk '/:(80|443) /{print}' | head -3)
@@ -2317,6 +4055,136 @@ check_ports() {
                 fi
             fi
         fi
+    fi
+}
+
+# Install Docker Engine + the Compose plugin via Docker's official convenience
+# script (https://get.docker.com). Per Docker's documented good practice the
+# script is downloaded to a file first so it can be inspected, then run.
+_install_docker_convenience() {
+    print_step "🐳 Installing Docker via the official convenience script (https://get.docker.com)"
+    local script
+    script=$(mktemp /tmp/get-docker.XXXXXX.sh) || {
+        print_error "Cannot create a temporary file for the Docker install script."
+        exit 1
+    }
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL https://get.docker.com -o "$script" || {
+            rm -f "$script"
+            print_error "Failed to download the Docker convenience script from https://get.docker.com"
+            exit 1
+        }
+    elif command -v wget >/dev/null 2>&1; then
+        wget -qO "$script" https://get.docker.com || {
+            rm -f "$script"
+            print_error "Failed to download the Docker convenience script from https://get.docker.com"
+            exit 1
+        }
+    else
+        rm -f "$script"
+        print_error "Neither curl nor wget is available to download the Docker convenience script."
+        print_error "Install Docker manually: https://docs.docker.com/engine/install/"
+        exit 1
+    fi
+    print_status "Downloaded the Docker convenience script to $script (inspect it if you wish)."
+    if ! sh "$script"; then
+        rm -f "$script"
+        print_error "The Docker convenience script failed."
+        exit 1
+    fi
+    rm -f "$script"
+    # The script enables the daemon on systemd hosts; make sure it is running.
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl enable --now docker >/dev/null 2>&1 || true
+    fi
+    print_status "Docker installed."
+}
+
+# Verify an already-present Docker can run a compose stack. Hard-fails with
+# actionable hints on a v1-only compose or an unreachable daemon. Read-only —
+# safe to call before the confirm screen.
+_docker_verify_runtime() {
+    # Compose v2 is the Go plugin invoked as 'docker compose'. The standalone
+    # Python 'docker-compose' (v1) is end-of-life and unsupported here.
+    if ! docker compose version >/dev/null 2>&1; then
+        print_error "The Docker Compose v2 plugin is not available ('docker compose')."
+        if command -v docker-compose >/dev/null 2>&1; then
+            print_error "Found the legacy v1 'docker-compose' — it is end-of-life and not supported."
+        fi
+        print_error "Install the Compose v2 plugin: https://docs.docker.com/compose/install/"
+        exit 1
+    fi
+
+    # Daemon reachability — catches a stopped daemon or a permission problem.
+    if ! docker info >/dev/null 2>&1; then
+        print_error "Cannot talk to the Docker daemon."
+        print_error "Start it ('systemctl start docker') and ensure this user may reach the socket."
+        exit 1
+    fi
+
+    print_status "Docker $(docker version --format '{{.Server.Version}}' 2>/dev/null || echo '?') / $(docker compose version --short 2>/dev/null || echo 'compose v2') detected."
+
+    # The installer runs as root, but the operator usually drives 'docker compose'
+    # later as their normal user — warn if that user lacks docker-group access.
+    if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
+        if ! id -nG "$SUDO_USER" 2>/dev/null | tr ' ' '\n' | grep -qx docker; then
+            print_warning "User '$SUDO_USER' is not in the 'docker' group; they will need sudo to manage this stack."
+            print_warning "Grant access with: usermod -aG docker $SUDO_USER  (then re-login)."
+        fi
+    fi
+
+    # A host-package BunkerWeb install would fight this stack over ports 80/443.
+    if [ -f /usr/share/bunkerweb/VERSION ]; then
+        print_warning "An existing host-package BunkerWeb install was detected (/usr/share/bunkerweb/VERSION)."
+        print_warning "Stop it before starting the Docker stack: systemctl stop bunkerweb bunkerweb-scheduler bunkerweb-ui"
+    fi
+}
+
+# Early host-capability gate (runs BEFORE the confirm screen, like
+# check_supported_os). It only CHECKS and, if Docker is missing, records the
+# operator's consent to install it later — it never mutates the system here.
+# The deferred install happens in _docker_ensure_runtime() after the confirm.
+check_docker_prereqs() {
+    print_step "🐳 Checking Docker prerequisites"
+
+    if command -v docker >/dev/null 2>&1; then
+        _docker_verify_runtime
+        return 0
+    fi
+
+    # Docker missing — decide WHETHER to install it; defer the install itself.
+    if [ "$DOCKER_AUTO_INSTALL" = "yes" ]; then
+        DOCKER_NEED_INSTALL="yes"
+        print_status "Docker is not installed — it will be installed after you confirm the configuration."
+    elif [ "$INTERACTIVE_MODE" = "yes" ]; then
+        if tui_yesno "Install Docker?" \
+            "Docker is not installed.\nInstall it via Docker's official convenience script (https://get.docker.com) once you confirm the configuration?" "yes"; then
+            DOCKER_NEED_INSTALL="yes"
+        else
+            print_error "Docker is required for the Docker deployment path."
+            print_error "Install Docker Engine: https://docs.docker.com/engine/install/"
+            exit 1
+        fi
+    else
+        print_error "Docker is not installed."
+        print_error "Re-run with --install-docker to install it automatically,"
+        print_error "or install Docker Engine first: https://docs.docker.com/engine/install/"
+        exit 1
+    fi
+    # Compose/daemon checks cannot run until Docker exists — _docker_ensure_runtime().
+}
+
+# Perform any deferred Docker install, then verify the runtime. This is the
+# FIRST step of docker_install_flow(), i.e. the first thing that runs AFTER the
+# operator confirmed the configuration — no system mutation happens before it.
+_docker_ensure_runtime() {
+    if [ "$DOCKER_NEED_INSTALL" = "yes" ]; then
+        _install_docker_convenience
+        if ! command -v docker >/dev/null 2>&1; then
+            print_error "Docker is still not available after the install attempt."
+            exit 1
+        fi
+        _docker_verify_runtime
     fi
 }
 
@@ -3055,6 +4923,13 @@ gpgkey=https://nginx.org/keys/nginx_signing.key
 module_hotfixes=true
 EOF
 
+    # Remove any distro/AppStream nginx and conflicting modules first: their RPMs are
+    # pinned to the distro nginx version and block the nginx.org package install.
+    # Also disable the modular stream so AppStream filtering can't re-block the install
+    # (belt-and-suspenders alongside module_hotfixes=true in the repo above).
+    dnf -y module disable nginx >/dev/null 2>&1 || true
+    dnf remove -y nginx nginx-mod-stream nginx-mod-http-image-filter nginx-mod-http-perl nginx-mod-http-xslt-filter nginx-mod-mail 2>/dev/null || true
+
     run_cmd dnf install -y "nginx-$NGINX_VERSION"
     run_cmd dnf versionlock add nginx
 
@@ -3246,19 +5121,24 @@ install_crowdsec() {
     echo
     print_step "Installing CrowdSec security engine"
 
-    for dep in curl gnupg2 ca-certificates; do
+    # Check for the gpg binary (provided by the gnupg/gnupg2 package depending on distro);
+    # `command -v gnupg2` never resolves since gnupg2 is a package name, not an executable.
+    for dep in curl gpg; do
         if ! command -v "$dep" >/dev/null 2>&1; then
             print_status "Installing missing dependency: $dep"
             case "$DISTRO_ID" in
                 "debian"|"ubuntu")
+                    dep_pkg="$dep"; [ "$dep" = "gpg" ] && dep_pkg="gnupg"
                     run_cmd apt update
-                    run_cmd apt install -y "$dep"
+                    run_cmd apt install -y "$dep_pkg"
                     ;;
-                "fedora"|"rhel"|"rocky"|"almalinux")
-                    run_cmd dnf install -y "$dep"
+                "fedora"|"rhel"|"rocky"|"almalinux"|"centos")
+                    dep_pkg="$dep"; [ "$dep" = "gpg" ] && dep_pkg="gnupg2"
+                    run_cmd dnf install -y "$dep_pkg"
                     ;;
                 "freebsd")
-                    run_cmd pkg install -y "$dep"
+                    dep_pkg="$dep"; [ "$dep" = "gpg" ] && dep_pkg="gnupg"
+                    run_cmd pkg install -y "$dep_pkg"
                     ;;
                 *)
                     print_warning "Automatic install not supported on $DISTRO_ID"
@@ -3266,6 +5146,13 @@ install_crowdsec() {
             esac
         fi
     done
+
+    # ca-certificates has no binary, so probe the package, not `command -v`.
+    case "$DISTRO_ID" in
+        "debian"|"ubuntu") dpkg -s ca-certificates >/dev/null 2>&1 || { run_cmd apt update; run_cmd apt install -y ca-certificates; } ;;
+        "fedora"|"rhel"|"rocky"|"almalinux"|"centos") rpm -q ca-certificates >/dev/null 2>&1 || run_cmd dnf install -y ca-certificates ;;
+        "freebsd") pkg info -e ca_root_nss >/dev/null 2>&1 || run_cmd pkg install -y ca_root_nss ;;
+    esac
 
     echo -e "${YELLOW}--- Step 1: Add CrowdSec repository and install engine ---${NC}"
     print_step "Adding CrowdSec repository and installing engine"
@@ -3289,7 +5176,7 @@ install_crowdsec() {
         "debian"|"ubuntu")
             run_cmd apt install -y crowdsec
             ;;
-        "fedora"|"rhel"|"rocky"|"almalinux")
+        "fedora"|"rhel"|"rocky"|"almalinux"|"centos")
             run_cmd dnf install -y crowdsec
             ;;
         "freebsd")
@@ -3408,7 +5295,7 @@ _install_redis_package() {
                 run_cmd apt install -y redis-server
             fi
             ;;
-        "fedora"|"rhel"|"rocky"|"almalinux")
+        "fedora"|"rhel"|"rocky"|"almalinux"|"centos")
             if [ "$desired" = "valkey" ]; then
                 if dnf info valkey >/dev/null 2>&1; then
                     if dnf install -y valkey; then
@@ -3532,7 +5419,7 @@ _redis_conf_set() {
 }
 
 install_redis() {
-    local label conf service
+    local label conf service redis_started="no"
     label="${REDIS_FLAVOR:-redis}"
 
     echo
@@ -3549,19 +5436,34 @@ install_redis() {
     label="${REDIS_FLAVOR:-redis}"
 
     if [ "$DISTRO_ID" = "freebsd" ]; then
+        # FreeBSD rc service name (also used in the remediation hints below).
         if [ "$REDIS_FLAVOR" = "valkey" ]; then
+            service="valkey"
             sysrc valkey_enable=YES >/dev/null 2>&1
-            service valkey start || true
         else
+            service="redis"
             sysrc redis_enable=YES >/dev/null 2>&1
-            service redis start || true
         fi
-        print_status "${label^} service enabled and started"
+        if service "$service" start; then
+            redis_started="yes"
+            print_status "${label^} service enabled and started"
+        else
+            print_warning "${label^} service ($service) failed to start."
+        fi
     else
+        # Refresh systemd's unit view BEFORE locating the unit — the dpkg
+        # postinst may have failed to reach systemd (deb-systemd-invoke
+        # "Could not execute systemctl"), leaving the just-installed unit
+        # unregistered. Must run before _locate_redis_service, not inside
+        # start_optional_service (which is skipped when the locator fails).
+        systemctl daemon-reload 2>/dev/null || true
         service=$(_locate_redis_service || true)
         if [ -n "$service" ]; then
-            run_cmd systemctl enable --now "$service"
-            print_status "${label^} service enabled and started ($service)"
+            # Optional daemon — a start failure must not abort the install.
+            if start_optional_service "$service" "${label^}"; then
+                redis_started="yes"
+                print_status "${label^} service enabled and started ($service)"
+            fi
         else
             print_warning "${label^} service name not found; start it manually if needed."
         fi
@@ -3576,8 +5478,11 @@ install_redis() {
         bind_addr="${REDIS_BIND_INPUT:-127.0.0.1}"
 
         # Auto-gen password if user opted in and bind ≠ loopback.
+        # Non-interactive fallback only — the interactive prompt sets
+        # REDIS_REQUIREPASS_LOCAL itself (and its own REDIS_PASSWORD_GENERATED).
         if [ "$bind_addr" != "127.0.0.1" ] && [ -z "$REDIS_REQUIREPASS_LOCAL" ] && [ "$REDIS_AUTOPASS" = "yes" ]; then
             REDIS_REQUIREPASS_LOCAL=$(generate_secret 32)
+            REDIS_PASSWORD_GENERATED="$REDIS_REQUIREPASS_LOCAL"
         fi
 
         _redis_conf_set "$conf" "bind" "$bind_addr"
@@ -3601,14 +5506,22 @@ install_redis() {
 
         # Restart to pick up new bind/password.
         if [ "$DISTRO_ID" = "freebsd" ]; then
-            if [ "$REDIS_FLAVOR" = "valkey" ]; then
-                service valkey restart || true
+            if service "$service" restart; then
+                redis_started="yes"
             else
-                service redis restart || true
+                redis_started="no"
+                print_warning "${label^} service ($service) failed to restart after configuration."
             fi
         else
             if [ -n "$service" ]; then
-                run_cmd systemctl restart "$service"
+                echo -e "${BLUE}[CMD]${NC} systemctl restart $service"
+                if systemctl restart "$service"; then
+                    redis_started="yes"
+                else
+                    redis_started="no"
+                    print_warning "${label^} service ($service) failed to restart after configuration."
+                    _dump_service_diagnostics "$service"
+                fi
             fi
         fi
     fi
@@ -3630,9 +5543,29 @@ install_redis() {
     fi
 
     echo
-    echo -e "${GREEN}${label^} installed and configured successfully${NC}"
-    echo "Used by BunkerWeb to persist metrics and bans across restarts and to sync state between workers."
-    echo "See BunkerWeb docs for more: https://docs.bunkerweb.io/latest/features/#redis"
+    if [ "$redis_started" = "yes" ]; then
+        echo -e "${GREEN}${label^} installed and configured successfully${NC}"
+        echo "Used by BunkerWeb to persist metrics and bans across restarts and to sync state between workers."
+        echo "See BunkerWeb docs for more: https://docs.bunkerweb.io/latest/features/#redis"
+    else
+        # Optional daemon down — install continues. BunkerWeb still runs without
+        # Redis (in-memory only); USE_REDIS=yes points at a server not yet up.
+        print_warning "${label^} is installed and configured but the local server is NOT running."
+        print_warning "BunkerWeb is set to use it (USE_REDIS=yes), but until it is started:"
+        print_warning "  - bans and rate-limit counters are NOT shared between workers/instances"
+        print_warning "  - that state is lost on every reload/restart (no HA persistence)"
+        print_warning "Start it manually to close this gap:"
+        if [ "$DISTRO_ID" = "freebsd" ]; then
+            print_warning "  service $service status    # see why it failed"
+            print_warning "  service $service start     # start once fixed"
+        elif [ -n "$service" ]; then
+            print_warning "  systemctl status $service    # see why it failed"
+            print_warning "  journalctl -xeu $service     # full error log"
+            print_warning "  systemctl start $service     # start once fixed"
+        else
+            print_warning "  check the local ${label} service status and start it manually"
+        fi
+    fi
     echo -e "${BLUE}========================================${NC}"
 }
 
@@ -3824,7 +5757,7 @@ install_mariadb() {
             run_cmd apt update
             run_cmd apt install -y mariadb-server
             ;;
-        "fedora"|"rhel"|"rocky"|"almalinux")
+        "fedora"|"rhel"|"rocky"|"almalinux"|"centos")
             run_cmd dnf install -y mariadb-server
             ;;
         *)
@@ -3925,7 +5858,7 @@ install_postgresql() {
                 run_cmd postgresql-setup --initdb
             fi
             ;;
-        "rhel"|"rocky"|"almalinux")
+        "rhel"|"rocky"|"almalinux"|"centos")
             run_cmd dnf install -y postgresql-server postgresql-contrib
             if [ ! -d /var/lib/pgsql/data/base ]; then
                 run_cmd postgresql-setup --initdb
@@ -4124,7 +6057,7 @@ setup_ui_selfsigned_tls() {
     if ! command -v openssl >/dev/null 2>&1; then
         case "$DISTRO_ID" in
             "debian"|"ubuntu") run_cmd apt install -y openssl ;;
-            "fedora"|"rhel"|"rocky"|"almalinux") run_cmd dnf install -y openssl ;;
+            "fedora"|"rhel"|"rocky"|"almalinux"|"centos") run_cmd dnf install -y openssl ;;
             "freebsd") run_cmd pkg install -y openssl ;;
         esac
     fi
@@ -4181,11 +6114,70 @@ start_manager_ui() {
     fi
 }
 
+get_current_bunkerweb_version() {
+    local _version=""
+    if [ -f /usr/share/bunkerweb/VERSION ]; then
+        _version=$(cat /usr/share/bunkerweb/VERSION 2>/dev/null || true)
+    fi
+    printf '%s' "${_version:-${BUNKERWEB_VERSION:-unknown}}"
+}
+
+get_installed_nginx_version() {
+    local _raw="" _version=""
+    if command -v nginx >/dev/null 2>&1; then
+        _raw=$(nginx -v 2>&1 || true)
+        _version="${_raw#nginx version: nginx/}"
+        if [ -n "$_version" ] && [ "$_version" != "$_raw" ]; then
+            printf '%s' "$_version"
+            return 0
+        fi
+    fi
+
+    case "$DISTRO_ID" in
+        "debian"|"ubuntu")
+            if command -v dpkg-query >/dev/null 2>&1; then
+                _version=$(dpkg-query -W -f='${Version}' nginx 2>/dev/null || true)
+            fi
+            ;;
+        "fedora"|"rhel"|"rocky"|"almalinux"|"centos")
+            if command -v rpm >/dev/null 2>&1; then
+                if rpm -q nginx >/dev/null 2>&1; then
+                    _version=$(rpm -q --qf '%{VERSION}-%{RELEASE}' nginx 2>/dev/null || true)
+                fi
+            fi
+            ;;
+        "freebsd")
+            if command -v pkg >/dev/null 2>&1; then
+                _version=$(pkg info -q nginx 2>/dev/null || true)
+                _version="${_version#nginx-}"
+            fi
+            ;;
+    esac
+
+    printf '%s' "${_version:-unknown}"
+}
+
 show_final_info() {
+    local _current_bw_version="" _nginx_version=""
+
     echo
     echo "========================================="
-    echo -e "${GREEN}BunkerWeb Installation Complete!${NC}"
+    if [ "$UPGRADE_SCENARIO" = "yes" ]; then
+        _current_bw_version=$(get_current_bunkerweb_version)
+        _nginx_version=$(get_installed_nginx_version)
+
+        echo -e "${GREEN}BunkerWeb Upgrade Complete!${NC}"
+    else
+        echo -e "${GREEN}BunkerWeb Installation Complete!${NC}"
+    fi
     echo "========================================="
+    if [ "$UPGRADE_SCENARIO" = "yes" ]; then
+        echo
+        echo "Upgrade summary:"
+        echo "  - Previous BunkerWeb version: ${INSTALLED_VERSION:-unknown}"
+        echo "  - New BunkerWeb version: ${_current_bw_version:-unknown}"
+        echo "  - Current NGINX version: ${_nginx_version:-unknown}"
+    fi
     echo
     echo "Services status:"
 
@@ -4461,10 +6453,16 @@ show_final_info() {
 
     if [ -n "$REDIS_REQUIREPASS_LOCAL" ]; then
         {
-        echo "🔑 ${REDIS_FLAVOR:-redis} REQUIREPASS (auto-generated):"
-        echo "  Password: ${REDIS_REQUIREPASS_LOCAL}"
-        echo "  Stored in the ${REDIS_FLAVOR:-redis} config and in /etc/bunkerweb/variables.env."
-        echo "  ⚠️  Save it now and restrict port 6379 to your worker subnet."
+        echo "🔑 ${REDIS_FLAVOR:-redis} REQUIREPASS:"
+        if [ -n "$REDIS_PASSWORD_GENERATED" ]; then
+            echo "  Password: ${REDIS_PASSWORD_GENERATED}   (auto-generated)"
+            echo "  Stored in the ${REDIS_FLAVOR:-redis} config and in /etc/bunkerweb/variables.env."
+            echo "  ⚠️  Save it now and restrict port 6379 to your worker subnet."
+        else
+            echo "  Password: (the value you provided)"
+            echo "  Stored in the ${REDIS_FLAVOR:-redis} config and in /etc/bunkerweb/variables.env."
+            echo "  ⚠️  Restrict port 6379 to your worker subnet."
+        fi
         echo "       Example (ufw): sudo ufw allow from 10.0.0.0/24 to any port 6379"
         echo
         } >&"${_BW_OUT_FD:-1}"
@@ -4499,14 +6497,39 @@ usage() {
     echo "  -q, --quiet              Silent installation (suppress output; implies --yes)"
     echo "  -h, --help               Show this help message"
     echo "      --dry-run            Show what would be installed without doing it"
+    echo "      --restart-install    Discard any saved state from an interrupted run and start fresh"
     echo
-    echo "Installation types:"
+    echo "Installation types (apply to both Linux and Docker):"
     echo "  --full                   Full stack installation (default)"
     echo "  --manager                Manager installation (Scheduler + UI)"
     echo "  --worker                 Worker installation (BunkerWeb only)"
     echo "  --scheduler-only         Scheduler only installation"
     echo "  --ui-only                Web UI only installation"
     echo "  --api-only               FastAPI service only installation (port 8888)"
+    echo
+    echo "Deployment platform:"
+    echo "  --docker                 Deploy as a docker-compose stack instead of host packages"
+    echo "                           (combine with an install type, e.g. --docker --manager)"
+    echo
+    echo "Docker mode options (with --docker):"
+    echo "  --autoconf               Add the autoconf integration (full type only)"
+    echo "  --no-autoconf            Do not add the autoconf integration (default)"
+    echo "  --image-tag TAG          Docker Hub image tag (default: derived from --version)"
+    echo "  --compose-dir PATH       Directory for docker-compose.yml + .env (default: current dir)"
+    echo "  --overwrite-compose      Back up and overwrite existing compose files without prompting"
+    echo "  --install-docker         Install Docker via the official convenience script if missing"
+    echo "  --no-pull                Skip 'docker compose pull' before starting the stack"
+    echo "  --docker-wait-timeout N  Seconds to wait for the stack to become ready (default: 180)"
+    echo "  --http-port N            Host HTTP port      (default: 80;   bunkerweb)"
+    echo "  --https-port N           Host HTTPS/QUIC port (default: 443; bunkerweb)"
+    echo "  --api-port N             Host worker-API port (default: 5000; worker)"
+    echo "  --ui-port N              Host Web UI port    (default: 7000; manager/ui)"
+    echo "  --fastapi-port N         Host FastAPI port   (default: 8888; api)"
+    echo "                           (remap these to run several stacks on one host)"
+    echo "  --api-token TOKEN        Shared API token (required for non-interactive"
+    echo "                           --docker manager/worker/scheduler — same on every host)"
+    echo "  --database-uri URI       External DATABASE_URI (required for non-interactive"
+    echo "                           --docker scheduler/ui/api types)"
     echo
     echo "Security integrations:"
     echo "  --crowdsec               Install and configure CrowdSec"
@@ -4588,6 +6611,13 @@ usage() {
     echo "  $0 --crowdsec-appsec     # Full installation with CrowdSec AppSec"
     echo "  $0 --quiet --yes         # Silent non-interactive installation"
     echo "  $0 --dry-run             # Preview installation without executing"
+    echo "  $0 --docker              # Generate and run a full Docker compose stack"
+    echo "  $0 --docker --full --autoconf --yes"
+    echo "                           # Non-interactive Docker full stack with autoconf"
+    echo "  $0 --docker --manager --yes --api-token T --instances \"10.0.0.11 10.0.0.12\""
+    echo "                           # Docker manager managing two remote workers"
+    echo "  $0 --docker --worker --yes --api-token T --manager-ip 10.0.0.5"
+    echo "                           # Docker worker managed by the manager at 10.0.0.5"
     echo
 }
 
@@ -4635,6 +6665,10 @@ while [[ $# -gt 0 ]]; do
             FORCE_TYPE_CHANGE="yes"
             shift
             ;;
+        --restart-install)
+            RESTART_INSTALL="yes"
+            shift
+            ;;
         -h|--help)
             usage
             exit 0
@@ -4642,6 +6676,7 @@ while [[ $# -gt 0 ]]; do
         --full|--manager|--worker|--scheduler-only|--ui-only|--api-only)
             # All six set INSTALL_TYPE; reject duplicates like `--manager --worker`
             # (silent last-wins would let a typo install the wrong topology).
+            # These apply to BOTH platforms — pair with --docker for a container deploy.
             if [ -n "${_INSTALL_TYPE_FLAG:-}" ] && [ "$_INSTALL_TYPE_FLAG" != "$1" ]; then
                 print_error "Conflicting install-type flags: $_INSTALL_TYPE_FLAG and $1 (only one allowed)."
                 exit 1
@@ -4656,6 +6691,91 @@ while [[ $# -gt 0 ]]; do
             esac
             _INSTALL_TYPE_FLAG="$1"
             shift
+            ;;
+        --docker)
+            # Deployment platform, orthogonal to the install type — does NOT
+            # touch INSTALL_TYPE, so `--docker --manager` is valid.
+            DOCKER_MODE="yes"
+            shift
+            ;;
+        --autoconf)
+            DOCKER_AUTOCONF="yes"
+            shift
+            ;;
+        --no-autoconf)
+            DOCKER_AUTOCONF="no"
+            shift
+            ;;
+        --image-tag)
+            if [ -z "$2" ] || [[ "$2" == -* ]]; then
+                print_error "Missing tag after $1"
+                exit 1
+            fi
+            DOCKER_IMAGE_TAG="$2"
+            shift 2
+            ;;
+        --compose-dir)
+            if [ -z "$2" ] || [[ "$2" == -* ]]; then
+                print_error "Missing path after $1"
+                exit 1
+            fi
+            DOCKER_PROJECT_DIR="$2"
+            shift 2
+            ;;
+        --overwrite-compose)
+            DOCKER_OVERWRITE_EXISTING="yes"
+            shift
+            ;;
+        --install-docker)
+            DOCKER_AUTO_INSTALL="yes"
+            shift
+            ;;
+        --no-pull)
+            DOCKER_PULL="no"
+            shift
+            ;;
+        --docker-wait-timeout)
+            if [ -z "$2" ] || [[ ! "$2" =~ ^[0-9]+$ ]]; then
+                print_error "$1 requires a positive integer (seconds)"
+                exit 1
+            fi
+            DOCKER_WAIT_TIMEOUT="$2"
+            shift 2
+            ;;
+        --api-token)
+            # Shared API token for distributed docker installs (manager/worker/
+            # scheduler) — must be identical on every host of the cluster.
+            if [ -z "$2" ] || [[ "$2" == -* ]]; then
+                print_error "Missing token after $1"
+                exit 1
+            fi
+            DOCKER_API_TOKEN_GENERATED="$2"
+            shift 2
+            ;;
+        --database-uri)
+            # External DATABASE_URI for docker scheduler/ui/api types.
+            if [ -z "$2" ] || [[ "$2" == -* ]]; then
+                print_error "Missing URI after $1"
+                exit 1
+            fi
+            DOCKER_DATABASE_URI="$2"
+            shift 2
+            ;;
+        --http-port|--https-port|--api-port|--ui-port|--fastapi-port)
+            # Host ports for the generated docker stack — let several stacks
+            # (e.g. a manager + workers) co-exist on one host.
+            if [ -z "$2" ] || [[ ! "$2" =~ ^[0-9]+$ ]] || [ "$2" -lt 1 ] || [ "$2" -gt 65535 ]; then
+                print_error "$1 requires a port number between 1 and 65535"
+                exit 1
+            fi
+            case "$1" in
+                --http-port)    DOCKER_HTTP_PORT="$2"    ;;
+                --https-port)   DOCKER_HTTPS_PORT="$2"   ;;
+                --api-port)     DOCKER_API_PORT="$2"     ;;
+                --ui-port)      DOCKER_UI_PORT="$2"      ;;
+                --fastapi-port) DOCKER_FASTAPI_PORT="$2" ;;
+            esac
+            shift 2
             ;;
         --crowdsec)
             CROWDSEC_INSTALL="yes"
@@ -5055,6 +7175,13 @@ for fd in (3, 4):
     esac
 done
 
+# ---------------------------------------------------------------------------
+# Post-argv validation — Linux-package install guards. Docker mode runs its own
+# per-type validation in ask_docker_preferences, so this whole block is skipped
+# when DOCKER_MODE=yes. (Kept un-indented to keep the diff reviewable.)
+# ---------------------------------------------------------------------------
+if [ "$DOCKER_MODE" != "yes" ]; then
+
 # Force wizard off for manager installations
 if [ "$INSTALL_TYPE" = "manager" ]; then
     if [ "$ENABLE_WIZARD" = "yes" ]; then
@@ -5182,11 +7309,50 @@ if [ "$INTERACTIVE_MODE" = "no" ]; then
     fi
 fi
 
+fi  # end DOCKER_MODE != yes — Linux-package post-argv guards
+
 # Deferred --dry-run summary — after argv parse + guards. Exits 0 on success.
 if [ "$DRY_RUN" = "yes" ]; then
     # Restore operator's stdout via _BW_OUT_FD (was /dev/null under --quiet); branch exits after.
     [ -n "${_BW_OUT_FD:-}" ] && exec >&"${_BW_OUT_FD}"
     echo "Dry run mode - would install BunkerWeb $BUNKERWEB_VERSION"
+    # Docker mode: report the compose plan and exit. Skip the host-OS gate —
+    # docker mode runs on any Linux with Docker installed.
+    if [ "$DOCKER_MODE" = "yes" ]; then
+        # NOTE: top-level block — no 'local'; _dt is a throwaway global (we exit 0).
+        _dt="${INSTALL_TYPE:-full}"
+        echo "Deployment platform: docker (compose stack)"
+        echo "Installation type: ${_dt}"
+        [ "$_dt" = "full" ] && echo "Autoconf integration: ${DOCKER_AUTOCONF:-no}"
+        echo "Image tag: $(derive_docker_image_tag "${DOCKER_IMAGE_TAG:-$BUNKERWEB_VERSION}")"
+        echo "Compose directory: ${DOCKER_PROJECT_DIR:-$(pwd -P)}"
+        case "$_dt" in
+            full)      echo "Services: bunkerweb, bw-scheduler, bw-ui, bw-db, redis"
+                       [ "${DOCKER_AUTOCONF:-no}" = "yes" ] && echo "         + bw-autoconf, bw-docker"
+                       echo "Database: MariaDB (bundled bw-db container)"
+                       echo "Host ports: ${DOCKER_HTTP_PORT} (HTTP), ${DOCKER_HTTPS_PORT} (HTTPS/QUIC)" ;;
+            manager)   echo "Services: bw-scheduler, bw-ui, bw-db, redis"
+                       echo "Database: MariaDB (bundled bw-db container)"
+                       echo "Host ports: ${DOCKER_UI_PORT} (Web UI)"
+                       echo "Requires: remote worker IPs, shared API token" ;;
+            worker)    echo "Services: bunkerweb"
+                       echo "Host ports: ${DOCKER_HTTP_PORT} (HTTP), ${DOCKER_HTTPS_PORT} (HTTPS/QUIC), ${DOCKER_API_PORT} (API)"
+                       echo "Requires: manager IP(s), shared API token" ;;
+            scheduler) echo "Services: bw-scheduler, redis"
+                       echo "Database: external (DATABASE_URI required)"
+                       echo "Requires: remote worker IPs, shared API token" ;;
+            ui)        echo "Services: bw-ui"
+                       echo "Host ports: ${DOCKER_UI_PORT} (Web UI)"
+                       echo "Database: external (DATABASE_URI required)" ;;
+            api)       echo "Services: bw-api"
+                       echo "Host ports: ${DOCKER_FASTAPI_PORT} (FastAPI)"
+                       echo "Database: external (DATABASE_URI required)" ;;
+        esac
+        echo "Pull images: ${DOCKER_PULL}"
+        echo "Wait timeout: ${DOCKER_WAIT_TIMEOUT}s"
+        echo "(dry run — required flags such as --api-token / --database-uri / --manager-ip are not validated here)"
+        exit 0
+    fi
     detect_os
     check_supported_os
     echo "Installation type: ${INSTALL_TYPE:-full}"
@@ -5202,7 +7368,7 @@ if [ "$DRY_RUN" = "yes" ]; then
         if [ -n "$REDIS_BIND_INPUT" ]; then
             echo "Redis bind: $REDIS_BIND_INPUT"
         fi
-        echo "Redis auto-password: ${REDIS_AUTOPASS}"
+        echo "Redis password: ${REDIS_AUTOPASS}"
     elif [ -n "$REDIS_HOST_INPUT" ]; then
         echo "Redis: yes (existing server)"
     else
@@ -5581,7 +7747,7 @@ to /etc/bunkerweb and the database schema."
                 apt-mark unhold bunkerweb nginx >/dev/null 2>&1 || true
             fi
             ;;
-        fedora|rhel|rocky|almalinux)
+        fedora|rhel|rocky|almalinux|centos)
             if command -v dnf >/dev/null 2>&1; then
                 print_status "Removing versionlock (bunkerweb, nginx)"
                 dnf versionlock delete bunkerweb nginx >/dev/null 2>&1 || true
@@ -5609,7 +7775,7 @@ to /etc/bunkerweb and the database schema."
             run_cmd apt install -y --allow-downgrades "bunkerweb=$BUNKERWEB_VERSION"
             run_cmd apt-mark hold bunkerweb nginx
             ;;
-        fedora|rhel|rocky|almalinux)
+        fedora|rhel|rocky|almalinux|centos)
             if [ "$DISTRO_ID" = "fedora" ]; then
                 run_cmd dnf makecache || true
             else
@@ -5653,18 +7819,52 @@ main() {
     # tui_init right after $DISTRO_ID so every prompt (incl. continue-anyway guards) uses it.
     tui_init
     detect_architecture
-    check_supported_os
-    check_existing_installation
 
-    if [ "$UPGRADE_SCENARIO" = "yes" ]; then
-        upgrade_only
+    # Step 0 — deployment platform. Chosen BEFORE the host-capability gates so a
+    # distro unsupported for host packages can still pick Docker.
+    ask_deployment_platform
+
+    # Host-capability gate. Docker mode checks Docker (and can install it);
+    # Linux mode checks the host OS and the save-state/resume machinery (docker
+    # mode never checkpoints, so it skips that entirely).
+    if [ "$DOCKER_MODE" = "yes" ]; then
+        check_docker_prereqs
+    else
+        check_supported_os
+        # Resume detection — before check_existing_installation, which would
+        # otherwise early-exit "already installed" once the package phase ran.
+        _bw_state_load_and_prompt
     fi
 
-    show_rhel_database_warning
-    ask_user_preferences
-    check_ports
+    if [ "$_BW_START_OVER" = "yes" ]; then
+        # Explicit start-over: an interrupted install left partial packages on
+        # disk. Skip the "already installed" guard (check_existing_installation)
+        # — the operator asked to redo the install — but still collect fresh
+        # configuration and run every phase. A state file is only ever written
+        # by this fresh-install path (upgrade_only never checkpoints), so a
+        # discarded state file always implies an interrupted fresh install, not
+        # an upgrade; running this as a non-upgrade fresh install is correct.
+        print_status "Starting a fresh installation over the interrupted one."
+        show_rhel_database_warning
+        ask_user_preferences
+        check_ports
+    elif [ "$_BW_RESUMING" = "yes" ]; then
+        print_status "Resuming interrupted installation (completed through: ${_BW_RESUME_AFTER})."
+    else
+        # Docker mode never checkpoints, so _BW_START_OVER / _BW_RESUMING are
+        # always "no" and docker always lands in this branch.
+        [ "$DOCKER_MODE" != "yes" ] && check_existing_installation
 
-    # Env vars per install type.
+        if [ "$UPGRADE_SCENARIO" = "yes" ]; then
+            upgrade_only
+        fi
+
+        [ "$DOCKER_MODE" != "yes" ] && show_rhel_database_warning
+        ask_user_preferences
+        check_ports
+    fi
+
+    # Env vars per install type — ALWAYS runs (fresh + resume); pure variable work.
     case "$INSTALL_TYPE" in
         "manager")
             export MANAGER_MODE=yes
@@ -5702,7 +7902,8 @@ main() {
     echo
 
     # Interactive confirm — embed recap in dialog body (single confirm screen).
-    if [ "$INTERACTIVE_MODE" = "yes" ] && [ "$FORCE_INSTALL" != "yes" ]; then
+    # Skipped on resume: the configuration was already confirmed in the original run.
+    if [ "$_BW_RESUMING" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ] && [ "$FORCE_INSTALL" != "yes" ]; then
         if [ "$GUM_AVAILABLE" = "yes" ]; then
             # Recap already rendered after ask_user_preferences; show only install/cancel.
             local _rc=0
@@ -5748,75 +7949,113 @@ Install BunkerWeb $BUNKERWEB_VERSION with this configuration?"
         fi
     fi
 
+    # Docker mode: the operator has now confirmed the configuration (above) —
+    # generate the compose stack and bring it up, then exit. The Linux-package
+    # phases below are skipped entirely.
+    if [ "$DOCKER_MODE" = "yes" ]; then
+        docker_install_flow
+        exit 0
+    fi
+
+    # Gate phase complete — persists the full config snapshot used for resume.
+    [ "$_BW_RESUMING" = "yes" ] || _bw_phase_done preferences
+
     # upgrade_only() exits earlier — everything below runs only on a FRESH install.
+    # Each install phase below is checkpointed: on resume the completed phases
+    # are skipped and the interrupted one re-runs from scratch (the install
+    # functions are idempotent).
 
-    case "$DISTRO_ID" in
-        "debian"|"ubuntu")
-            install_nginx_debian
-            ;;
-        "fedora")
-            install_nginx_fedora
-            ;;
-        "rhel"|"rocky"|"almalinux")
-            install_nginx_rhel
-            ;;
-        "freebsd")
-            install_nginx_freebsd
-            ;;
-    esac
-
-    if [ "$CROWDSEC_INSTALL" = "yes" ]; then
-        install_crowdsec
+    if _bw_phase_pending nginx; then
+        case "$DISTRO_ID" in
+            "debian"|"ubuntu")
+                install_nginx_debian
+                ;;
+            "fedora")
+                install_nginx_fedora
+                ;;
+            "rhel"|"rocky"|"almalinux"|"centos")
+                install_nginx_rhel
+                ;;
+            "freebsd")
+                install_nginx_freebsd
+                ;;
+        esac
+        _bw_phase_done nginx
     fi
 
-    if [ "$REDIS_INSTALL" = "yes" ]; then
-        install_redis
+    if _bw_phase_pending crowdsec; then
+        if [ "$CROWDSEC_INSTALL" = "yes" ]; then
+            install_crowdsec
+        fi
+        _bw_phase_done crowdsec
     fi
 
-    # Wire DATABASE_URI into variables.env BEFORE postinstall runs the scheduler.
-    if [ "$DB_INSTALL" = "mariadb" ] || [ "$DB_INSTALL" = "postgresql" ] || [ "$DB_INSTALL" = "external" ]; then
-        install_database
+    if _bw_phase_pending redis; then
+        if [ "$REDIS_INSTALL" = "yes" ]; then
+            install_redis
+        fi
+        _bw_phase_done redis
     fi
 
-    # Wire UI_HOST for every UI-bearing install. Without it the default-server-http/ui.conf
-    # template is empty → /setup, /login, /logout unreachable via the BunkerWeb listener.
-    case "${INSTALL_TYPE:-full}" in
-        full|ui|"")
-            apply_ui_host_config
-            ;;
-        manager)
-            if [ "${SERVICE_UI:-yes}" != "no" ] || [ "${MANAGER_UI_DEFERRED:-no}" = "yes" ]; then
+    if _bw_phase_pending database; then
+        # Wire DATABASE_URI into variables.env BEFORE postinstall runs the scheduler.
+        if [ "$DB_INSTALL" = "mariadb" ] || [ "$DB_INSTALL" = "postgresql" ] || [ "$DB_INSTALL" = "external" ]; then
+            install_database
+        fi
+        _bw_phase_done database
+    fi
+
+    if _bw_phase_pending host_config; then
+        # Wire UI_HOST for every UI-bearing install. Without it the default-server-http/ui.conf
+        # template is empty → /setup, /login, /logout unreachable via the BunkerWeb listener.
+        case "${INSTALL_TYPE:-full}" in
+            full|ui|"")
                 apply_ui_host_config
-            fi
-            ;;
-        scheduler)
-            # Pre-create templates so postinst's minimal versions don't win (writers are idempotent).
-            write_default_variables_env_template /etc/bunkerweb/variables.env
-            write_default_scheduler_env_template /etc/bunkerweb/scheduler.env
-            # Persist --instances / --dns-resolvers / --api-https (no configure_* runs for scheduler-only).
-            set_config_kv /etc/bunkerweb/variables.env "SERVER_NAME" ""
-            if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
-                set_config_kv /etc/bunkerweb/variables.env "BUNKERWEB_INSTANCES" "$BUNKERWEB_INSTANCES_INPUT"
-            fi
-            if [ -n "$DNS_RESOLVERS_INPUT" ]; then
-                set_config_kv /etc/bunkerweb/variables.env "DNS_RESOLVERS" "$DNS_RESOLVERS_INPUT"
-            fi
-            if [ "$API_LISTEN_HTTPS_INPUT" = "yes" ]; then
-                set_config_kv /etc/bunkerweb/variables.env "API_LISTEN_HTTPS" "yes"
-            fi
-            # Redis/CrowdSec → variables.env (else `--scheduler-only --redis` would silently drop USE_REDIS).
-            apply_optional_integrations /etc/bunkerweb/variables.env
-            ;;
-        api)
-            # api.env template carries the FastAPI/biscuit/TLS commented docs the postinst's minimal file lacks.
-            write_default_variables_env_template /etc/bunkerweb/variables.env
-            write_default_api_env_template /etc/bunkerweb/api.env
-            # FastAPI rate limiter reads USE_REDIS/REDIS_HOST from variables.env.
-            apply_optional_integrations /etc/bunkerweb/variables.env
-            ;;
-    esac
+                ;;
+            manager)
+                if [ "${SERVICE_UI:-yes}" != "no" ] || [ "${MANAGER_UI_DEFERRED:-no}" = "yes" ]; then
+                    apply_ui_host_config
+                fi
+                ;;
+            scheduler)
+                # Pre-create templates so postinst's minimal versions don't win (writers are idempotent).
+                write_default_variables_env_template /etc/bunkerweb/variables.env
+                write_default_scheduler_env_template /etc/bunkerweb/scheduler.env
+                # Persist --instances / --dns-resolvers / --api-https (no configure_* runs for scheduler-only).
+                set_config_kv /etc/bunkerweb/variables.env "SERVER_NAME" ""
+                if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
+                    set_config_kv /etc/bunkerweb/variables.env "BUNKERWEB_INSTANCES" "$BUNKERWEB_INSTANCES_INPUT"
+                fi
+                if [ -n "$DNS_RESOLVERS_INPUT" ]; then
+                    set_config_kv /etc/bunkerweb/variables.env "DNS_RESOLVERS" "$DNS_RESOLVERS_INPUT"
+                fi
+                if [ "$API_LISTEN_HTTPS_INPUT" = "yes" ]; then
+                    set_config_kv /etc/bunkerweb/variables.env "API_LISTEN_HTTPS" "yes"
+                fi
+                # Redis/CrowdSec → variables.env (else `--scheduler-only --redis` would silently drop USE_REDIS).
+                apply_optional_integrations /etc/bunkerweb/variables.env
+                ;;
+            api)
+                # api.env template carries the FastAPI/biscuit/TLS commented docs the postinst's minimal file lacks.
+                write_default_variables_env_template /etc/bunkerweb/variables.env
+                write_default_api_env_template /etc/bunkerweb/api.env
+                # FastAPI rate limiter reads USE_REDIS/REDIS_HOST from variables.env.
+                apply_optional_integrations /etc/bunkerweb/variables.env
+                ;;
+        esac
+
+        # Pre-create UI admin in ui.env BEFORE bunkerweb-ui starts (gunicorn pre-fork picks it up).
+        # Manager's deferred-start path goes through start_manager_ui below. Idempotent.
+        if [ "$UI_ADMIN_CREATE" = "yes" ] \
+            && { [ "$INSTALL_TYPE" = "full" ] || [ "$INSTALL_TYPE" = "ui" ] || [ -z "$INSTALL_TYPE" ]; }; then
+            create_ui_admin_user
+        fi
+        _bw_phase_done host_config
+    fi
 
     # Prevent postinstall from starting services we still need to configure.
+    # ALWAYS runs (fresh + resume): pure SERVICE_* env derivation consumed by the
+    # package phase below; SERVICE_* values are not persisted in the state file.
     if [ "$INSTALL_TYPE" = "manager" ]; then
         export SERVICE_SCHEDULER=no
         # Defer UI start when admin creds / self-signed TLS still to provision.
@@ -5841,60 +8080,61 @@ Install BunkerWeb $BUNKERWEB_VERSION with this configuration?"
         fi
     fi
 
-    # Pre-create UI admin in ui.env BEFORE bunkerweb-ui starts (gunicorn pre-fork picks it up).
-    # Manager's deferred-start path goes through start_manager_ui below. Idempotent.
-    if [ "$UI_ADMIN_CREATE" = "yes" ] \
-        && { [ "$INSTALL_TYPE" = "full" ] || [ "$INSTALL_TYPE" = "ui" ] || [ -z "$INSTALL_TYPE" ]; }; then
-        create_ui_admin_user
+    if _bw_phase_pending package; then
+        case "$DISTRO_ID" in
+            "debian"|"ubuntu")
+                install_bunkerweb_debian
+                ;;
+            "fedora")
+                install_bunkerweb_rpm
+                ;;
+            "rhel"|"rocky"|"almalinux"|"centos")
+                install_bunkerweb_rpm
+                ;;
+            "freebsd")
+                install_bunkerweb_freebsd
+                ;;
+        esac
+        _bw_phase_done package
     fi
-
-    case "$DISTRO_ID" in
-        "debian"|"ubuntu")
-            install_bunkerweb_debian
-            ;;
-        "fedora")
-            install_bunkerweb_rpm
-            ;;
-        "rhel"|"rocky"|"almalinux")
-            install_bunkerweb_rpm
-            ;;
-        "freebsd")
-            install_bunkerweb_freebsd
-            ;;
-    esac
 
     # UI_HOST + MULTISITE already written pre-install via apply_ui_host_config;
     # postinstall.sh:189 skips its own template on populated variables.env.
 
-    if [ "$INSTALL_TYPE" = "manager" ]; then
-        configure_manager_api_defaults
-        if [ "$MANAGER_UI_DEFERRED" = "yes" ]; then
-            unset SERVICE_UI
-            start_manager_ui
-        elif [ "$UI_ADMIN_CREATE" = "yes" ] || [ "$UI_SELFSIGNED_INPUT" = "yes" ]; then
-            # Hardening opted in via flags after UI started — apply + restart.
-            start_manager_ui
+    if _bw_phase_pending configure; then
+        if [ "$INSTALL_TYPE" = "manager" ]; then
+            configure_manager_api_defaults
+            if [ "$MANAGER_UI_DEFERRED" = "yes" ]; then
+                unset SERVICE_UI
+                start_manager_ui
+            elif [ "$UI_ADMIN_CREATE" = "yes" ] || [ "$UI_SELFSIGNED_INPUT" = "yes" ]; then
+                # Hardening opted in via flags after UI started — apply + restart.
+                start_manager_ui
+            fi
+        elif [ "$INSTALL_TYPE" = "worker" ]; then
+            configure_worker_api_whitelist
+        elif [ "$INSTALL_TYPE" = "full" ] || [ -z "$INSTALL_TYPE" ]; then
+            configure_full_config
         fi
-    elif [ "$INSTALL_TYPE" = "worker" ]; then
-        configure_worker_api_whitelist
-    elif [ "$INSTALL_TYPE" = "full" ] || [ -z "$INSTALL_TYPE" ]; then
-        configure_full_config
-    fi
 
-    if [ "$CROWDSEC_INSTALL" = "yes" ]; then
-        if [ "$DISTRO_ID" = "freebsd" ]; then
-            sysrc crowdsec_enable=YES >/dev/null 2>&1
-            service crowdsec restart || service crowdsec start || print_warning "Could not start crowdsec"
-            sleep 2
-            service crowdsec status >/dev/null 2>&1 || print_warning "CrowdSec may not be running"
-        else
-            run_cmd systemctl restart crowdsec
-            sleep 2
-            systemctl status crowdsec --no-pager -l || print_warning "CrowdSec may not be running"
+        if [ "$CROWDSEC_INSTALL" = "yes" ]; then
+            if [ "$DISTRO_ID" = "freebsd" ]; then
+                sysrc crowdsec_enable=YES >/dev/null 2>&1
+                service crowdsec restart || service crowdsec start || print_warning "Could not start crowdsec"
+                sleep 2
+                service crowdsec status >/dev/null 2>&1 || print_warning "CrowdSec may not be running"
+            else
+                run_cmd systemctl restart crowdsec
+                sleep 2
+                systemctl status crowdsec --no-pager -l || print_warning "CrowdSec may not be running"
+            fi
         fi
+        _bw_phase_done configure
     fi
 
     show_final_info
+    # Install finished — wipe the (secret-bearing) state file.
+    _bw_state_clear
 }
 
 main "$@"

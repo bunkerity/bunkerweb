@@ -1,4 +1,4 @@
-FROM debian:trixie-slim@sha256:cedb1ef40439206b673ee8b33a46a03a0c9fa90bf3732f54704f99cb061d2c5a AS builder
+FROM debian:trixie-slim@sha256:b6e2a152f22a40ff69d92cb397223c906017e1391a73c952b588e51af8883bf8 AS builder
 
 # Install Nginx and dependencies
 RUN apt update && \
@@ -7,7 +7,7 @@ RUN apt update && \
 
 ENV OS=debian
 ENV OS_VERSION=13
-ENV NGINX_VERSION=1.30.0
+ENV NGINX_VERSION=1.30.2
 ENV EXPECTED_FPR=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
 
 # Install Nginx
@@ -127,7 +127,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM debian:trixie-slim@sha256:cedb1ef40439206b673ee8b33a46a03a0c9fa90bf3732f54704f99cb061d2c5a
+FROM debian:trixie-slim@sha256:b6e2a152f22a40ff69d92cb397223c906017e1391a73c952b588e51af8883bf8
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

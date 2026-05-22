@@ -4,9 +4,9 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --strip-extras requirements.in
 #
-acme==5.5.0 \
-    --hash=sha256:0c237fe013a5406e9ea8b8bb04d6b753a0ed30005df1315175cb99d9c8f2248d \
-    --hash=sha256:4a7f653952300053765c92359575992bc644f6253f4c95ff197681b2830d971e
+acme==5.6.0 \
+    --hash=sha256:23f706ef1c437fc743b2f90704b97f263a56d83198b3af1c25c7dd42c4b463e4 \
+    --hash=sha256:fbf7ee8880485f2339942a2eff9a87deb79b74a8dcac4a572c08e7e640f046cd
     # via certbot
 bcrypt==4.3.0 \
     --hash=sha256:0042b2e342e9ae3d2ed22727c1262f76cc4f345683b5c1715f0250cf4277294f \
@@ -186,9 +186,9 @@ cachelib==0.14.0 \
     --hash=sha256:4671000b032baa8fac47ad19850f4f522785cee764b4e04c5cfe8955a18d67de \
     --hash=sha256:73fedcadd0ba818fb2bb9f3c7cd5fcc2a71e86286f1842f55f28d500faee17f1
     # via flask-session
-certbot==5.5.0 \
-    --hash=sha256:921acc125fdaf3efa91b057cf5d6fcbb44d9bd511de8f9febd1260847cd40ae0 \
-    --hash=sha256:c72c813c4c8646a9658bc7a9530c757c76067503fa2f5d7eb12027e8bbf798d7
+certbot==5.6.0 \
+    --hash=sha256:81ea876500ba60022a98a3e92fe4230088c7792b9d375357bb23c58741d2b0da \
+    --hash=sha256:89052854e28cd2fcac72a8857aad6dfc6b02ba992f4b8f255062fe29c8aed3ee
     # via -r requirements.in
 certifi==2026.4.22 \
     --hash=sha256:3cb2210c8f88ba2318d29b0388d1023c8492ff72ecdde4ebdaddbb13a31b1c4a \
@@ -411,9 +411,9 @@ charset-normalizer==3.4.7 \
     --hash=sha256:fbccdc05410c9ee21bbf16a35f4c1d16123dcdeb8a1d38f33654fa21d0234f79 \
     --hash=sha256:fea24543955a6a729c45a73fe90e08c743f0b3334bbf3201e6c4bc1b0c7fa464
     # via requests
-click==8.3.3 \
-    --hash=sha256:398329ad4837b2ff7cbe1dd166a4c0f8900c3ca3a218de04466f38f6497f18a2 \
-    --hash=sha256:a2bf429bb3033c89fa4936ffb35d5cb471e3719e1f3c8a7c3fff0b8314305613
+click==8.4.0 \
+    --hash=sha256:40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81 \
+    --hash=sha256:638f1338fe1235c8f4e008e4a8a254fb5c5fbdcbb40ece3c9142ebb78e792973
     # via flask
 configargparse==1.7.5 \
     --hash=sha256:1e63fdffedf94da9cd435fc13a1cd24777e76879dd2343912c1f871d4ac8c592 \
@@ -528,9 +528,9 @@ hyperframe==6.1.0 \
     --hash=sha256:b03380493a519fce58ea5af42e4a42317bf9bd425596f7a0835ffce80f1a42e5 \
     --hash=sha256:f630908a00854a7adeabd6382b43923a4c4cd4b821fcb527e6ab9e15382a3b08
     # via h2
-idna==3.14 \
-    --hash=sha256:466d810d7a2cc1022bea9b037c39728d51ae7dad40d480fc9b7d7ecf98ba8ee3 \
-    --hash=sha256:e677eaf072e290f7b725f9acf0b3a2bd55f9fd6f7c70abe5f0e34823d0accf69
+idna==3.15 \
+    --hash=sha256:048adeaf8c2d788c40fee287673ccaa74c24ffd8dcf09ffa555a2fbb59f10ac8 \
+    --hash=sha256:ca962446ea538f7092a95e057da437618e886f4d349216d2b1e294abfdb65fdc
     # via requests
 itsdangerous==2.2.0 \
     --hash=sha256:c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef \
@@ -964,9 +964,9 @@ regex==2026.5.9 \
     --hash=sha256:fd190e88a895a8901325fad284a3f74ea52b1da8525b76cc811fa9b1edf0ce2b \
     --hash=sha256:ff8d372ac2acdc048d1c19916f27ee61bc5722728458ba6ca5052f2c72d51763
     # via -r requirements.in
-requests==2.33.1 \
-    --hash=sha256:18817f8c57c6263968bc123d237e3b8b08ac046f5456bd1e307ee8f4250d3517 \
-    --hash=sha256:4e6d1ef462f3626a1f0a0a9c42dd93c63bad33f9f1c1937509b8c5c8718ab56a
+requests==2.34.2 \
+    --hash=sha256:2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0 \
+    --hash=sha256:f288924cae4e29463698d6d60bc6a4da69c89185ad1e0bcc4104f584e960b9ed
     # via acme
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \

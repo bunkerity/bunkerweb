@@ -1,8 +1,8 @@
-FROM redhat/ubi10:10.1@sha256:9d3b5102e7ae4f82914a1791610b75acef134b93158be6005b6ae9218c163550 AS builder
+FROM redhat/ubi10:10.2@sha256:eb702361cac064da1e7fb9b09eb030562a832209ed1fb1d6765d617ed6294e61 AS builder
 
 ENV OS=rhel
 ENV OS_VERSION=10
-ENV NGINX_VERSION=1.30.0
+ENV NGINX_VERSION=1.30.2
 
 # Copy rocky repo
 COPY src/linux/rocky-10.repo /etc/yum.repos.d/rocky.repo
@@ -145,7 +145,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
   echo "Skipping HTML minification"; \
   fi
 
-FROM redhat/ubi10:10.1@sha256:9d3b5102e7ae4f82914a1791610b75acef134b93158be6005b6ae9218c163550
+FROM redhat/ubi10:10.2@sha256:eb702361cac064da1e7fb9b09eb030562a832209ed1fb1d6765d617ed6294e61
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
