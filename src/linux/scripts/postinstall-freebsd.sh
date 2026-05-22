@@ -70,6 +70,10 @@ if [ -d db/alembic/ ]; then
     chmod -R 770 db/alembic/
 fi
 
+# Retro-tighten 0644 backups left by pre-fix versions.
+chmod 0600 /var/tmp/variables.env /var/tmp/ui.env /var/tmp/scheduler.env \
+           /var/tmp/api.env /var/tmp/api.yml /var/tmp/db.sqlite3 2>/dev/null || true
+
 # Function to migrate files from old locations to new ones
 migrate_file() {
     old_path="$1"

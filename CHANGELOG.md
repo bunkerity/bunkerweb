@@ -1,6 +1,13 @@
 # Changelog
 
-## v1.6.10
+## v1.6.11~rc1 - ????/??/??
+
+- [BUGFIX] `letsencrypt` (core): fix self-propagating cache poisoning that caused fleet-wide `certbot AccountNotFound`; add CA-agnostic consistency gate (LE + ZeroSSL paths), server-scoped `select_account_id`, redacted-value `Configurator` WARN logs.
+- [SECURITY] `letsencrypt` (UI): harden delete + new heal flow — per-request scratch dir, `fcntl.flock`, `.`/`..` rejected in `cert_name`, DOMPurify + `markupsafe.escape` at every HTML sink, 500 on persistence failure; new `/letsencrypt/{orphans,accounts,cache-status,heal}` endpoints, per-row Heal button, sidebar orphan toast.
+- [FEATURE] `scheduler`: new `SCHEDULER_MAX_WORKERS` env var caps the job-executor thread pool to bound DB-pool pressure on shared MariaDB/MySQL/PostgreSQL; auto default tightened from `min(8, cpu*4)` to `min(8, max(2, cpu*2))` and a warning is emitted when the resolved value exceeds `DATABASE_POOL_SIZE` + `DATABASE_POOL_MAX_OVERFLOW`.
+- [SECURITY] `linux`: `after-remove` hooks now preserve `/var/log/bunkerweb`, `/etc/bunkerweb`, `/var/lib/bunkerweb` and `/var/tmp` upgrade backups on plain uninstall (only purge wipes configs + DB; logs and backups always kept, disposal commands printed); upgrade backups are written via `install -m 0600 -o root -g root` (atomic) and any pre-existing world-readable backups are retro-tightened, closing a local-read window on admin credentials and the SQLite DB.
+
+## v1.6.10 - 2026/05/19
 
 - [SECURITY] `nginx` : update nginx to 1.30.1 to fix various CVEs
 - [BUGFIX] `reverseproxy`: pin a `USE_UI=yes` service upstream to HTTP/1.1 so a global `REVERSE_PROXY_HTTP_VERSION=2` no longer locks out the web UI. (Fixes #3550)

@@ -1777,6 +1777,7 @@ Der Scheduler ist der Control-Plane-Worker, der Einstellungen liest, Konfigurati
 | `DISABLE_CONFIGURATION_TESTING` | Konfigtests vor dem Anwenden überspringen                                | `yes` oder `no`                                 | `no`                                  |
 | `IGNORE_FAIL_SENDING_CONFIG`    | Fortfahren, auch wenn einige Instanzen keine Konfig erhalten             | `yes` oder `no`                                 | `no`                                  |
 | `IGNORE_REGEX_CHECK`            | Regex-Validierung für Einstellungen überspringen (geteilt mit Autoconf)  | `yes` oder `no`                                 | `no`                                  |
+| `SCHEDULER_MAX_WORKERS`         | Maximale Anzahl an Worker-Threads im Job-Executor des Schedulers. Jeder laufende Thread kann eine DB-Verbindung halten, was die DB-Pool-Belastung auf Scheduler-Seite begrenzt. Beim Start wird eine Warnung ausgegeben, wenn der ermittelte Wert `DATABASE_POOL_SIZE` + `DATABASE_POOL_MAX_OVERFLOW` überschreitet. | Positive Ganzzahl                               | `min(8, max(2, cpu_count*2))`         |
 | `TZ`                            | Zeitzone für Scheduler-Logs, Cron-ähnliche Jobs, Backups und Zeitstempel | TZ-Datenbank-Name (z. B. `UTC`, `Europe/Paris`) | unset (Container-Standard, meist UTC) |
 
 ##### Datenbank

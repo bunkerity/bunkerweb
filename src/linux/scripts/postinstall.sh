@@ -56,6 +56,10 @@ find . \( -path './api' -o -path './scheduler' -o -path './ui' -o -path './cli' 
 find api/ scheduler/ ui/ cli/ lua/ core/ db/ gen/ utils/ helpers/ scripts/ deps/ -type f ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440
 chmod 770 -R db/alembic/
 
+# Retro-tighten 0644 backups left by pre-fix versions.
+chmod 0600 /var/tmp/variables.env /var/tmp/ui.env /var/tmp/scheduler.env \
+           /var/tmp/api.env /var/tmp/api.yml /var/tmp/db.sqlite3 2>/dev/null || true
+
 # Function to migrate files from old locations to new ones
 function migrate_file() {
     local old_path="$1"

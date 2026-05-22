@@ -158,3 +158,10 @@ def get_expected_acme_directory(server: str, staging: bool) -> str:
     if staging:
         return LETSENCRYPT_STAGING_DIRECTORY
     return LETSENCRYPT_PRODUCTION_DIRECTORY
+
+
+# letsencrypt_cache_consistent has been lifted to src/common/utils/letsencrypt_consistency.py
+# so the UI blueprint and the scheduler jobs share one source of truth. The previous
+# byte-identical UI copy already drifted multiple times — that bug class is closed by
+# re-exporting from a single module instead of maintaining parallel implementations.
+from letsencrypt_consistency import letsencrypt_cache_consistent  # noqa: E402,F401

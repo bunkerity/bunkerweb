@@ -1778,6 +1778,7 @@ El programador es el worker del plano de control que lee configuraciones, genera
 | `DISABLE_CONFIGURATION_TESTING` | Saltar pruebas de configuración antes de aplicar                                   | `yes` o `no`                                  | `no`                                         |
 | `IGNORE_FAIL_SENDING_CONFIG`    | Continuar incluso si algunas instancias no reciben la configuración                | `yes` o `no`                                  | `no`                                         |
 | `IGNORE_REGEX_CHECK`            | Omitir validación regex de configuraciones (compartido con autoconf)               | `yes` o `no`                                  | `no`                                         |
+| `SCHEDULER_MAX_WORKERS`         | Número máximo de hilos en el ejecutor de jobs del Scheduler. Cada hilo activo puede mantener una conexión a la BD, limitando la presión sobre el pool desde el Scheduler. Al iniciar se emite una advertencia si el valor resuelto supera `DATABASE_POOL_SIZE` + `DATABASE_POOL_MAX_OVERFLOW`. | Entero positivo                               | `min(8, max(2, cpu_count*2))`                |
 | `TZ`                            | Zona horaria para logs del programador, jobs tipo cron, backups y marcas de tiempo | Nombre en base TZ (ej. `UTC`, `Europe/Paris`) | unset (default de contenedor, suele ser UTC) |
 
 ##### Base de datos

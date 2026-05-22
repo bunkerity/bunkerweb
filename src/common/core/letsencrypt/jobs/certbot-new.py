@@ -80,6 +80,7 @@ from letsencrypt_utils import (
     ZEROSSL_BOT_SCRIPT,
     build_certbot_env,
     get_expected_acme_directory,
+    letsencrypt_cache_consistent,
     prepare_logs_dir,
     resolve_certbot_entrypoint,
 )
@@ -724,8 +725,19 @@ def certbot_new(
     else:
         command.append("--register-unsafely-without-email")
 
+    # Always scope account lookup to the target ACME server's URL.
+    # Without this, an LE account id can be passed as `--account` to a ZeroSSL
+    # certbot certonly invocation (and vice versa) — certbot then constructs the
+    # account directory from its own --server path and fails with AccountNotFound.
+    acme_server_url = str(config.get("acme_server_url") or "")
+
     if config.get("acme_server") == "letsencrypt":
-        account_id = select_account_id(paths.config_dir.joinpath("accounts"), bool(config["staging"]), str(config.get("email") or ""))
+        account_id = select_account_id(
+            paths.config_dir.joinpath("accounts"),
+            bool(config["staging"]),
+            str(config.get("email") or ""),
+            server_url=acme_server_url,
+        )
         if account_id:
             command.extend(["--account", account_id])
     else:
@@ -744,7 +756,12 @@ def certbot_new(
         if zerossl_api_key:
             cmd_env["LETS_ENCRYPT_ZEROSSL_API_KEY"] = zerossl_api_key
 
-        account_id = select_account_id(paths.config_dir.joinpath("accounts"), bool(config["staging"]), str(config.get("email") or ""))
+        account_id = select_account_id(
+            paths.config_dir.joinpath("accounts"),
+            bool(config["staging"]),
+            str(config.get("email") or ""),
+            server_url=acme_server_url,
+        )
         if account_id:
             command.extend(["--account", account_id])
 
@@ -1156,11 +1173,25 @@ try:
         elif not DATA_PATH.is_dir() or not any(DATA_PATH.glob("live/*/fullchain.pem")):
             LOGGER.warning("Skipping db cache update: no live certificates found under DATA_PATH/live/*/fullchain.pem.")
         else:
-            cached, err = JOB.cache_dir(DATA_PATH)
-            if not cached:
-                LOGGER.error(f"Error while saving data to db cache : {err}")
+            # Refuse to re-cache when renewal/ references account IDs that are missing from accounts/.
+            # That snapshot would self-propagate certbot AccountNotFound errors across every renew.
+            consistent, reason = letsencrypt_cache_consistent(DATA_PATH)
+            if not consistent:
+                LOGGER.error(
+                    "Skipping db cache update to avoid persisting an inconsistent Let's Encrypt state "
+                    f"({reason}). The DB cache row is left untouched; investigate accounts/ recovery before the next renew."
+                )
+                # If certbot itself succeeded, the fresh certs are already on disk — signal a reload
+                # (ret=1) so nginx picks them up. Persistence failure is logged separately above; do
+                # not escalate to status=2 here, otherwise JobScheduler suppresses the reload.
+                if status == 0:
+                    status = 1
             else:
-                LOGGER.info("Successfully saved data to db cache")
+                cached, err = JOB.cache_dir(DATA_PATH)
+                if not cached:
+                    LOGGER.error(f"Error while saving data to db cache : {err}")
+                else:
+                    LOGGER.info("Successfully saved data to db cache")
 except SystemExit as e:
     status = e.code
 except BaseException as e:
