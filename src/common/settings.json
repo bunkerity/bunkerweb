@@ -82,6 +82,15 @@
     "regex": "^\\d+$",
     "type": "number"
   },
+  "WORKER_SHUTDOWN_TIMEOUT": {
+    "context": "global",
+    "default": "30s",
+    "help": "Timeout for a graceful shutdown of worker processes. After this delay, old workers are forcefully terminated during a reload to prevent memory growth.",
+    "id": "worker-shutdown-timeout",
+    "label": "Worker shutdown timeout",
+    "regex": "^\\d+(ms?|[shdwMy])?$",
+    "type": "text"
+  },
   "DNS_RESOLVERS": {
     "context": "global",
     "default": "127.0.0.11",
@@ -133,7 +142,7 @@
     "help": "Size of lua_shared_dict for initialization workers",
     "id": "workerlock-memory-size",
     "label": "Initialization Workerlock memory size",
-    "regex": "^\\d+[kKmMgG]?$",
+    "regex": "^\\d+(?:[kKmMgG])?$",
     "type": "text"
   },
   "INTERNALSTORE_MEMORY_SIZE": {
@@ -142,7 +151,7 @@
     "help": "Size of the internal internalstore.",
     "id": "internalstore-memory-size",
     "label": "Internalstore memory size",
-    "regex": "^\\d+[kKmMgG]?$",
+    "regex": "^\\d+(?:[kKmMgG])?$",
     "type": "text"
   },
   "DATASTORE_MEMORY_SIZE": {
@@ -151,7 +160,16 @@
     "help": "Size of the internal datastore.",
     "id": "datastore-memory-size",
     "label": "Datastore memory size",
-    "regex": "^\\d+[kKmMgG]?$",
+    "regex": "^\\d+(?:[kKmMgG])?$",
+    "type": "text"
+  },
+  "DATASTORE_LRU_SIZE": {
+    "context": "global",
+    "default": "1k",
+    "help": "Slot count for the shared per-worker datastore LRU (used by internalstore and plugin worker-local caches). Accepts a plain integer or `k`/`m` shorthand (e.g., `1k`, `10k`, `1m`).",
+    "id": "datastore-lru-size",
+    "label": "Datastore LRU size",
+    "regex": "^\\d+[kKmM]?$",
     "type": "text"
   },
   "CACHESTORE_MEMORY_SIZE": {
@@ -160,7 +178,7 @@
     "help": "Size of the internal cachestore.",
     "id": "cachestore-memory-size",
     "label": "Cachestore memory size",
-    "regex": "^\\d+[kKmMgG]?$",
+    "regex": "^\\d+(?:[kKmMgG])?$",
     "type": "text"
   },
   "CACHESTORE_IPC_MEMORY_SIZE": {
@@ -169,7 +187,7 @@
     "help": "Size of the internal cachestore (ipc).",
     "id": "cachestore-ipc-memory-size",
     "label": "Cachestore ipc memory size",
-    "regex": "^\\d+[kKmMgG]?$",
+    "regex": "^\\d+(?:[kKmMgG])?$",
     "type": "text"
   },
   "CACHESTORE_MISS_MEMORY_SIZE": {
@@ -178,7 +196,7 @@
     "help": "Size of the internal cachestore (miss).",
     "id": "cachestore-miss-memory-size",
     "label": "Cachestore miss memory size",
-    "regex": "^\\d+[kKmMgG]?$",
+    "regex": "^\\d+(?:[kKmMgG])?$",
     "type": "text"
   },
   "CACHESTORE_LOCKS_MEMORY_SIZE": {
@@ -187,7 +205,7 @@
     "help": "Size of the internal cachestore (locks).",
     "id": "cachestore-locks-memory-size",
     "label": "Cachestore locks memory size",
-    "regex": "^\\d+[kKmMgG]?$",
+    "regex": "^\\d+(?:[kKmMgG])?$",
     "type": "text"
   },
   "USE_API": {

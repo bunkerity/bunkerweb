@@ -5,7 +5,6 @@ from json import dumps, loads
 from traceback import format_exc
 from html import escape
 from io import StringIO, BytesIO
-import csv
 from time import monotonic
 
 
@@ -15,9 +14,9 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 
 from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS
-from app.utils import LOGGER
+from app.utils import LOGGER, csv_safe, csv_writer
 
-from app.routes.utils import cors_required
+from app.routes.utils import cors_required, parse_search_panes
 
 reports = Blueprint("reports", __name__)
 REPORTS_FILTERS_CACHE_TTL_SECONDS = 5.0
@@ -127,8 +126,8 @@ def reports_fetch():
 
     # Extract DataTables parameters
     draw = int(request.form.get("draw", 1))
-    start = int(request.form.get("start", 0))
-    length = int(request.form.get("length", 10))
+    start = max(0, int(request.form.get("start", 0)))
+    length = max(1, min(int(request.form.get("length", 10)), 1000))
     search_value = request.form.get("search[value]", "").lower()
 
     # DataTables includes two leading non-data columns (details-control and select)
@@ -391,6 +390,7 @@ def reports_export_csv():
         search_value = request.args.get("search", "").lower()
         order_column = request.args.get("order_column", "date")
         order_dir = request.args.get("order_dir", "desc")
+        search_panes_str = parse_search_panes(request.args)
 
         # Get all reports (no pagination)
         if BW_INSTANCES_UTILS:
@@ -400,7 +400,7 @@ def reports_export_csv():
                 search=search_value,
                 order_column=order_column,
                 order_dir=order_dir,
-                search_panes="",
+                search_panes=search_panes_str,
                 count_only=False,
                 include_pane_counts=False,
             )
@@ -410,7 +410,7 @@ def reports_export_csv():
 
         # Create CSV in memory
         output = StringIO()
-        writer = csv.writer(output)
+        writer = csv_writer(output)
 
         # Write header
         writer.writerow(
@@ -483,6 +483,7 @@ def reports_export_excel():
         search_value = request.args.get("search", "").lower()
         order_column = request.args.get("order_column", "date")
         order_dir = request.args.get("order_dir", "desc")
+        search_panes_str = parse_search_panes(request.args)
 
         # Get all reports (no pagination)
         if BW_INSTANCES_UTILS:
@@ -492,7 +493,7 @@ def reports_export_excel():
                 search=search_value,
                 order_column=order_column,
                 order_dir=order_dir,
-                search_panes="",
+                search_panes=search_panes_str,
                 count_only=False,
                 include_pane_counts=False,
             )
@@ -545,18 +546,18 @@ def reports_export_excel():
 
             ws.append(
                 [
-                    datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A",
-                    str(report.get("id", "N/A")),
-                    str(report.get("ip", "N/A")),
-                    str(report.get("country", "N/A")),
-                    str(report.get("method", "N/A")),
-                    str(report.get("url", "N/A")),
-                    str(report.get("status", "N/A")),
-                    str(report.get("user_agent", "N/A")),
-                    str(report.get("reason", "N/A")),
-                    str(report.get("server_name", "N/A")),
-                    data_output,
-                    str(report.get("security_mode", "N/A")),
+                    csv_safe(datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A"),
+                    csv_safe(report.get("id", "N/A")),
+                    csv_safe(report.get("ip", "N/A")),
+                    csv_safe(report.get("country", "N/A")),
+                    csv_safe(report.get("method", "N/A")),
+                    csv_safe(report.get("url", "N/A")),
+                    csv_safe(report.get("status", "N/A")),
+                    csv_safe(report.get("user_agent", "N/A")),
+                    csv_safe(report.get("reason", "N/A")),
+                    csv_safe(report.get("server_name", "N/A")),
+                    csv_safe(data_output),
+                    csv_safe(report.get("security_mode", "N/A")),
                 ]
             )
 

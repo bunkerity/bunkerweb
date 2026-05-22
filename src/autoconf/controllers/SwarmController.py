@@ -67,7 +67,7 @@ class SwarmController(Controller):
             services: List[Service] = self.__client.services.list(filters={"label": label_key})
         except DockerException as e:
             self._logger.error(f"Failed to retrieve services with label '{label_key}': {e}")
-            return []
+            raise
 
         namespace_set = set(self._namespaces or [])
         valid_services = []
@@ -115,7 +115,10 @@ class SwarmController(Controller):
         self.__swarm_instances.append(controller_instance.id)
         instances = []
         instance_env = {}
-        for env in controller_instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]:
+        container_spec = controller_instance.attrs.get("Spec", {}).get("TaskTemplate", {}).get("ContainerSpec", {}) or {}
+        for env in container_spec.get("Env") or []:
+            if "=" not in env:
+                continue
             variable, value = env.split("=", 1)
             instance_env[variable] = value
 
@@ -266,7 +269,6 @@ class SwarmController(Controller):
                     self.__pending_apply = False
 
                     try:
-                        to_apply = False
                         while not applied:
                             waiting = self.have_to_wait()
                             self._update_settings()
@@ -274,14 +276,13 @@ class SwarmController(Controller):
                             self._services = self.get_services()
                             self._configs = self.get_configs()
 
-                            if not to_apply and not self.update_needed(self._instances, self._services, configs=self._configs):
+                            if not self.update_needed(self._instances, self._services, configs=self._configs):
                                 if locked:
                                     self.__internal_lock.release()
                                     locked = False
                                 applied = True
                                 continue
 
-                            to_apply = True
                             if waiting:
                                 sleep(1)
                                 continue
@@ -314,7 +315,6 @@ class SwarmController(Controller):
                     sleep(10)
 
     def process_events(self):
-        self._set_autoconf_load_db()
         event_types = ("service", "config")
         threads = [Thread(target=self.__event, args=(event_type,)) for event_type in event_types]
         for thread in threads:

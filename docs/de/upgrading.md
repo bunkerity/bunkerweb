@@ -25,16 +25,16 @@
             ```yaml
             services:
                 bunkerweb:
-                    image: bunkerity/bunkerweb:1.6.9
+                    image: bunkerity/bunkerweb:1.6.10
                     ...
                 bw-scheduler:
-                    image: bunkerity/bunkerweb-scheduler:1.6.9
+                    image: bunkerity/bunkerweb-scheduler:1.6.10
                     ...
                 bw-autoconf:
-                    image: bunkerity/bunkerweb-autoconf:1.6.9
+                    image: bunkerity/bunkerweb-autoconf:1.6.10
                     ...
                 bw-ui:
-                    image: bunkerity/bunkerweb-ui:1.6.9
+                    image: bunkerity/bunkerweb-ui:1.6.10
                     ...
             ```
 
@@ -77,6 +77,9 @@
             Laden Sie die Prüfsummendatei herunter und verwenden Sie ein Werkzeug wie `sha256sum`, um zu bestätigen, dass das Skript nicht verändert oder manipuliert wurde.
 
             Wenn die Überprüfung der Prüfsumme fehlschlägt, **führen Sie das Skript nicht aus** – es könnte unsicher sein.
+
+    !!! tip "Interaktive Upgrade-Oberfläche"
+        Der Upgrade-Ablauf verwendet dieselbe TUI wie Neuinstallationen: Inline-Eingabeaufforderungen mit [gum](https://github.com/charmbracelet/gum), mit Rückfall auf `whiptail`-Dialogboxen und schließlich auf Klartext-Eingaben, falls gum nicht bezogen werden kann. Das `gum`-Binary wird aus der offiziellen [GitHub-Release](https://github.com/charmbracelet/gum/releases) heruntergeladen (SHA256-gepinnt, cosign-verifiziert, wenn cosign installiert ist) und aus einem Temp-Verzeichnis ausgeführt, das beim Beenden entfernt wird — es wird kein Systempaket installiert und keine apt/dnf-Quelle hinzugefügt. Übergeben Sie `--no-tui` (oder setzen Sie `BW_INSTALL_TUI=no`), um alle TUI-Ebenen zu überspringen, oder `--tui`, um eine funktionierende TUI zu erzwingen. Für vollständig unbeaufsichtigte Upgrades übergeben Sie `-y` / `--yes` mit den entsprechenden Flags – Pipe-Aufrufe (`curl … | bash`) brechen mit einer klaren Fehlermeldung ab, statt jede Vorgabe stillschweigend zu übernehmen. **Air-gapped-Upgrades**: kombinieren Sie `--no-tui --yes`, damit für die TUI-Schicht kein Netzwerkaufruf ausgeführt wird.
 
     * **Wie es funktioniert**:
 
@@ -128,6 +131,8 @@
         | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
         | `-v, --version <X.Y.Z>` | Ziel-BunkerWeb-Version, auf die aktualisiert werden soll.                                                                      |
         | `-y, --yes`             | Nicht-interaktiv (geht von Upgrade-Bestätigung aus und aktiviert die automatische Sicherung, es sei denn, `--no-auto-backup`). |
+        | `--tui`                 | Erzwingt eine TUI (gum oder whiptail). Bricht ab, wenn keine installiert werden kann.            |
+        | `--no-tui`              | Überspringt alle TUI-Ebenen und verwendet Klartext-Eingaben. Entspricht `BW_INSTALL_TUI=no`.     |
         | `--backup-dir <PFAD>`   | Ziel für die automatische Pre-Upgrade-Sicherung. Wird erstellt, wenn es fehlt.                                                 |
         | `--no-auto-backup`      | Überspringt die automatische Sicherung (NICHT empfohlen). Sie müssen eine manuelle Sicherung haben.                            |
         | `-q, --quiet`           | Unterdrückt die Ausgabe (mit Protokollierung / Überwachung kombinieren).                                                       |
@@ -137,20 +142,20 @@
         Beispiele:
 
         ```bash
-        # Interaktiv auf 1.6.9 aktualisieren (fragt nach Sicherung)
-        sudo ./install-bunkerweb.sh --version 1.6.9
+        # Interaktiv auf 1.6.10 aktualisieren (fragt nach Sicherung)
+        sudo ./install-bunkerweb.sh --version 1.6.10
 
         # Nicht-interaktives Upgrade mit automatischer Sicherung in ein benutzerdefiniertes Verzeichnis
-        sudo ./install-bunkerweb.sh -v 1.6.9 --backup-dir /var/backups/bw-2025-01 -y
+        sudo ./install-bunkerweb.sh -v 1.6.10 --backup-dir /var/backups/bw-2025-01 -y
 
         # Stilles unbeaufsichtigtes Upgrade (Protokolle unterdrückt) – verlässt sich auf die standardmäßige automatische Sicherung
-        sudo ./install-bunkerweb.sh -v 1.6.9 -y -q
+        sudo ./install-bunkerweb.sh -v 1.6.10 -y -q
 
         # Einen Probelauf (Plan) durchführen, ohne Änderungen anzuwenden
-        sudo ./install-bunkerweb.sh -v 1.6.9 --dry-run
+        sudo ./install-bunkerweb.sh -v 1.6.10 --dry-run
 
         # Upgrade unter Überspringen der automatischen Sicherung (NICHT empfohlen)
-        sudo ./install-bunkerweb.sh -v 1.6.9 --no-auto-backup -y
+        sudo ./install-bunkerweb.sh -v 1.6.10 --no-auto-backup -y
         ```
 
         !!! warning "Überspringen von Sicherungen"
@@ -230,7 +235,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.9
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.10
                     ```
 
                     Um zu verhindern, dass das BunkerWeb-Paket bei der Ausführung von `apt upgrade` aktualisiert wird, können Sie den folgenden Befehl verwenden:
@@ -256,7 +261,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.9
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.10
                     ```
 
                     Um zu verhindern, dass das BunkerWeb-Paket bei der Ausführung von `dnf upgrade` aktualisiert wird, können Sie den folgenden Befehl verwenden:
@@ -653,16 +658,16 @@ Wir haben eine **Namespace**-Funktion zu den Autoconf-Integrationen hinzugefügt
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.9
+                        image: bunkerity/bunkerweb:1.6.10
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.9
+                        image: bunkerity/bunkerweb-scheduler:1.6.10
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.9
+                        image: bunkerity/bunkerweb-autoconf:1.6.10
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.9
+                        image: bunkerity/bunkerweb-ui:1.6.10
                         ...
                 ```
 
@@ -697,7 +702,7 @@ Wir haben eine **Namespace**-Funktion zu den Autoconf-Integrationen hinzugefügt
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.9
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.10
                     ```
 
                     Um zu verhindern, dass das BunkerWeb-Paket bei der Ausführung von `apt upgrade` aktualisiert wird, können Sie den folgenden Befehl verwenden:
@@ -723,7 +728,7 @@ Wir haben eine **Namespace**-Funktion zu den Autoconf-Integrationen hinzugefügt
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.9
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.10
                     ```
 
                     Um zu verhindern, dass das BunkerWeb-Paket bei der Ausführung von `dnf upgrade` aktualisiert wird, können Sie den folgenden Befehl verwenden:

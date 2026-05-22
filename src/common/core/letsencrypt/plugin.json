@@ -239,6 +239,15 @@
       "label": "Concurrent Certificate Requests",
       "regex": "^(yes|no)$",
       "type": "check"
+    },
+    "LETS_ENCRYPT_MAX_LOG_BACKUPS": {
+      "context": "global",
+      "default": "50",
+      "help": "Maximum number of rotated certbot log files to keep per job. Certbot's own default is 1000, which piles up quickly. Set to 0 to keep only the live log.",
+      "id": "lets-encrypt-max-log-backups",
+      "label": "Maximum Certbot Log Backups",
+      "regex": "^\\d+$",
+      "type": "number"
     }
   },
   "jobs": [

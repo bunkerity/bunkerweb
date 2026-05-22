@@ -16,7 +16,7 @@ from typing import Any, Dict, Literal, Optional, Tuple, Union
 from tempfile import NamedTemporaryFile
 from stat import S_IMODE
 
-from common_utils import bytes_hash, file_hash
+from common_utils import bytes_hash, file_hash, safe_tar_extractall
 
 LOCK = Lock()
 EXPIRE_TIME = {
@@ -103,10 +103,24 @@ class Job:
             self.db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI"))
         self.logger = logger or self.db.logger
 
+        # Tracks whether the most recent cache restore succeeded. Callers that subsequently
+        # re-cache their on-disk state (e.g. certbot-new / certbot-renew) MUST check this
+        # flag before overwriting the DB — otherwise a failed restore + successful re-cache
+        # silently wipes the good cached data from both disk and DB.
+        self.restore_ok = True
+
         if not deprecated:
-            db_metadata = self.db.get_metadata()
-            if not isinstance(db_metadata, str) and not db_metadata["scheduler_first_start"]:
-                self.restore_cache(manual=False)
+            try:
+                db_metadata = self.db.get_metadata()
+                if not isinstance(db_metadata, str) and not db_metadata["scheduler_first_start"]:
+                    self.restore_ok = self.restore_cache(manual=False)
+            except BaseException as e:
+                # Any unexpected failure during auto-restore must fail closed so that
+                # downstream re-caching guards still hold — a crash here would have
+                # skipped the guards entirely and left job scripts thinking restore_ok
+                # was still the default True.
+                self.restore_ok = False
+                self.logger.error(f"Exception while auto-restoring cache in Job.__init__ for plugin '{self.job_path.name}': {e}")
 
     def restore_cache(self, *, job_name: str = "", plugin_id: str = "", manual: bool = True) -> bool:
         """Restore job cache files from database."""
@@ -135,15 +149,22 @@ class Job:
                         with tar_open(fileobj=BytesIO(job_cache_file["data"]), mode="r:gz") as tar:
                             assert isinstance(tar, TarFile)
                             try:
-                                for member in tar.getmembers():
-                                    try:
-                                        tar.extract(member, path=extract_path)
-                                    except Exception as e:
-                                        self.logger.error(f"Error extracting {member.name}: {e}")
+                                # tar_filter="auto" preserves symlinks when the archive contains
+                                # them (e.g. Let's Encrypt live/* → archive/*) while still
+                                # applying the stricter "data" filter to link-free archives.
+                                safe_tar_extractall(tar, extract_path, tar_filter="auto")
                                 ignored_dirs.add(extract_path.as_posix())
                                 self.logger.debug(f"Restored cache directory {extract_path}")
                             except Exception as e:
-                                self.logger.error(f"Error extracting tar file: {e}")
+                                # NOTE: rmtree() above already wiped extract_path before we got
+                                # here. Callers MUST check self.restore_ok before re-caching
+                                # from disk, otherwise they will overwrite the good DB row with
+                                # the empty post-rmtree state.
+                                self.logger.error(
+                                    f"Error extracting tar file for job '{job_cache_file['job_name']}' "
+                                    f"(plugin '{self.job_path.name}', file '{job_cache_file['file_name']}'): {e}"
+                                )
+                                ret = False
                     continue
                 elif job_cache_file["job_name"] != job_name:
                     continue

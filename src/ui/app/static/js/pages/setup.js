@@ -1053,7 +1053,7 @@ $(document).ready(() => {
     // Don't handle clicks on the checkbox itself or its label
     if (
       $(e.target).is(
-        '#setup-subscribe-newsletter, label[for="privacyPolicyCheck"]',
+        '#setup-subscribe-newsletter, label[for="setup-subscribe-newsletter"]',
       )
     ) {
       return true;

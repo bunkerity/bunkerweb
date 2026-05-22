@@ -9,6 +9,13 @@ from subprocess import DEVNULL, PIPE, STDOUT, TimeoutExpired, run
 from tempfile import mkdtemp
 from typing import Dict, List, Optional, Set, Tuple
 
+from letsencrypt_utils import (
+    LETSENCRYPT_PRODUCTION_DIRECTORY,
+    LETSENCRYPT_STAGING_DIRECTORY,
+    ZEROSSL_DIRECTORY,
+    certbot_log_backup_flags,
+)
+
 
 @dataclass(frozen=True)
 class CertbotPaths:
@@ -84,11 +91,48 @@ def _merge_logs(src: Path, dest: Path, logger=None) -> None:
                 continue
 
 
-def _find_directory_dirs(root: Path) -> List[Path]:
-    """Recursively find all subdirectories named 'directory' under root.
+def _server_url_to_subpath(server_url: str) -> str:
+    """Map an ACME server URL to the relative path certbot uses under accounts/.
 
-    This handles both shallow paths (e.g. Let's Encrypt: accounts/<hostname>/directory/)
-    and deeply nested ones (e.g. ZeroSSL: accounts/acme.zerossl.com/v2/DV90/directory/).
+    Certbot constructs `<config-dir>/accounts/<URL minus scheme>/<account-id>` —
+    every path segment of the URL becomes a directory segment on disk:
+
+      https://acme-staging-v02.api.letsencrypt.org/directory
+        -> acme-staging-v02.api.letsencrypt.org/directory
+
+      https://acme.zerossl.com/v2/DV90
+        -> acme.zerossl.com/v2/DV90  (no `/directory` segment, comes from URL)
+    """
+    url = server_url.strip()
+    for scheme in ("https://", "http://"):
+        if url.startswith(scheme):
+            url = url.removeprefix(scheme)
+            break
+    return url.strip("/")
+
+
+def _scoped_account_root(accounts_root: Path, server_url: str) -> Optional[Path]:
+    """Return the directory that immediately contains <account-id>/ subdirs for a CA.
+
+    Returns None when the path doesn't exist (no account registered for this CA yet).
+    """
+    subpath = _server_url_to_subpath(server_url)
+    if not subpath:
+        return None
+    scoped = accounts_root.joinpath(*subpath.split("/"))
+    if not scoped.is_dir():
+        return None
+    return scoped
+
+
+def _find_directory_dirs(root: Path) -> List[Path]:
+    """Recursively find subdirectories named 'directory' under root (legacy helper).
+
+    Retained for backward compatibility with callers that still use the legacy
+    server-agnostic discovery. New code should pass `server_url` to
+    select_account_id / _account_exists and use _scoped_account_root which
+    correctly handles both Let's Encrypt 2-level paths (with /directory/) and
+    ZeroSSL 3-level paths (no /directory/).
     """
     result = []
     with suppress(OSError):
@@ -102,39 +146,54 @@ def _find_directory_dirs(root: Path) -> List[Path]:
     return result
 
 
-def select_account_id(accounts_root: Path, staging: bool, email: str) -> Optional[str]:
+def _collect_account_candidates(scoped_root: Path) -> List[Tuple[Path, str]]:
+    """Walk a CA-scoped accounts directory and collect (path, email) for each
+    account containing a regr.json file."""
+    candidates: List[Tuple[Path, str]] = []
+    with suppress(OSError):
+        for account_dir in scoped_root.iterdir():
+            if not account_dir.is_dir():
+                continue
+            if not account_dir.joinpath("regr.json").is_file():
+                continue
+            meta_email = ""
+            meta_path = account_dir.joinpath("meta.json")
+            if meta_path.is_file():
+                try:
+                    meta = loads(meta_path.read_text())
+                    if isinstance(meta, dict):
+                        meta_email = str(meta.get("email") or "")
+                except (OSError, ValueError, KeyError):
+                    # Silently skip corrupted meta.json files
+                    meta_email = ""
+            candidates.append((account_dir, meta_email))
+    return candidates
+
+
+def select_account_id(accounts_root: Path, staging: bool, email: str, server_url: str = "") -> Optional[str]:
+    """Select the best matching account id for an ACME registration request.
+
+    When `server_url` is provided, only accounts registered against that exact
+    ACME server are considered — required so a Let's Encrypt account is never
+    passed as `--account` to a ZeroSSL `certbot certonly` invocation (which
+    would fail with AccountNotFound because certbot resolves the path from
+    --server, not from the account id).
+
+    When `server_url` is empty, fall back to the legacy server-agnostic walk
+    (kept for callers that have not yet been updated).
+    """
     if not accounts_root.is_dir():
         return None
 
-    server_dirs = [path for path in accounts_root.iterdir() if path.is_dir()]
-    if not server_dirs:
-        return None
-
-    if staging:
-        preferred = [path for path in server_dirs if "staging" in path.name]
-    else:
-        preferred = [path for path in server_dirs if "staging" not in path.name]
-
-    if preferred:
-        server_dirs = preferred
-
     candidates: List[Tuple[Path, str]] = []
-    for server_dir in server_dirs:
-        for directory_dir in _find_directory_dirs(server_dir):
-            for account_dir in directory_dir.iterdir():
-                if not account_dir.is_dir():
-                    continue
-                meta_path = account_dir.joinpath("meta.json")
-                meta_email = ""
-                if meta_path.is_file():
-                    try:
-                        meta = loads(meta_path.read_text())
-                        if isinstance(meta, dict):
-                            meta_email = str(meta.get("email") or "")
-                    except (OSError, ValueError, KeyError):
-                        # Silently skip corrupted meta.json files
-                        meta_email = ""
-                candidates.append((account_dir, meta_email))
+
+    if server_url:
+        scoped = _scoped_account_root(accounts_root, server_url)
+        if scoped is None:
+            return None
+        candidates = _collect_account_candidates(scoped)
+    else:
+        candidates = _collect_account_candidates_legacy(accounts_root, staging)
 
     if not candidates:
         return None
@@ -154,40 +213,66 @@ def select_account_id(accounts_root: Path, staging: bool, email: str) -> Optiona
     return newest[0].name
 
 
-def _account_exists(accounts_root: Path, staging: bool, email: str) -> bool:
+def _collect_account_candidates_legacy(accounts_root: Path, staging: bool) -> List[Tuple[Path, str]]:
+    """Server-agnostic walk used when callers do not pass `server_url`.
+
+    Walks every `regr.json` under accounts_root (covers both LE 2-level and
+    ZeroSSL 3-level paths). Applies the legacy staging/non-staging filter on
+    the immediate server-dir name when possible. New callers should prefer
+    server_url scoping for correctness.
+    """
+    candidates: List[Tuple[Path, str]] = []
+    with suppress(OSError):
+        for regr in accounts_root.rglob("regr.json"):
+            account_dir = regr.parent
+            if not account_dir.is_dir():
+                continue
+            # Best-effort staging filter on the first segment of the relative path.
+            try:
+                first_segment = account_dir.relative_to(accounts_root).parts[0]
+            except (ValueError, IndexError):
+                first_segment = ""
+            is_staging = "staging" in first_segment
+            if staging != is_staging:
+                continue
+            meta_email = ""
+            meta_path = account_dir.joinpath("meta.json")
+            if meta_path.is_file():
+                try:
+                    meta = loads(meta_path.read_text())
+                    if isinstance(meta, dict):
+                        meta_email = str(meta.get("email") or "")
+                except (OSError, ValueError, KeyError):
+                    meta_email = ""
+            candidates.append((account_dir, meta_email))
+    return candidates
+
+
+def _account_exists(accounts_root: Path, staging: bool, email: str, server_url: str = "") -> bool:
+    """Return True if an account matching the request already exists on disk.
+
+    Server-scoped when `server_url` is provided (see select_account_id docstring).
+    """
     if not accounts_root.is_dir():
         return False
 
-    server_dirs = [path for path in accounts_root.iterdir() if path.is_dir()]
-    if not server_dirs:
-        return False
+    candidates: List[Tuple[Path, str]] = []
 
-    if staging:
-        server_dirs = [path for path in server_dirs if "staging" in path.name]
+    if server_url:
+        scoped = _scoped_account_root(accounts_root, server_url)
+        if scoped is None:
+            return False
+        candidates = _collect_account_candidates(scoped)
     else:
-        server_dirs = [path for path in server_dirs if "staging" not in path.name]
+        candidates = _collect_account_candidates_legacy(accounts_root, staging)
 
-    for server_dir in server_dirs:
-        for directory_dir in _find_directory_dirs(server_dir):
-            for account_dir in directory_dir.iterdir():
-                if not account_dir.is_dir():
-                    continue
-                meta_path = account_dir.joinpath("meta.json")
-                meta_email = ""
-                if meta_path.is_file():
-                    try:
-                        meta = loads(meta_path.read_text())
-                        if isinstance(meta, dict):
-                            meta_email = str(meta.get("email") or "")
-                    except (OSError, ValueError, KeyError):
-                        # Silently skip corrupted meta.json files
-                        meta_email = ""
-                if email:
-                    if meta_email.lower() == email.lower():
-                        return True
-                else:
-                    if not meta_email:
-                        return True
+    for _, meta_email in candidates:
+        if email:
+            if meta_email.lower() == email.lower():
+                return True
+        else:
+            if not meta_email:
+                return True
     return False
 
 
@@ -203,7 +288,8 @@ def ensure_accounts(
 ) -> None:
     accounts_root = data_path.joinpath("accounts")
     for staging, email in sorted(requests, key=itemgetter(0, 1)):
-        if _account_exists(accounts_root, staging, email):
+        server_url = LETSENCRYPT_STAGING_DIRECTORY if staging else LETSENCRYPT_PRODUCTION_DIRECTORY
+        if _account_exists(accounts_root, staging, email, server_url=server_url):
             continue
         command = [
             certbot_bin,
@@ -216,6 +302,7 @@ def ensure_accounts(
             work_dir,
             "--logs-dir",
             logs_dir,
+            *certbot_log_backup_flags(cmd_env),
         ]
         if staging:
             command.append("--staging")
@@ -266,7 +353,8 @@ def ensure_zerossl_accounts(
     """
     accounts_root = data_path.joinpath("accounts")
     for staging, email in sorted(requests, key=itemgetter(0, 1)):
-        if _account_exists(accounts_root, staging, email):
+        # ZeroSSL has no separate staging endpoint — the URL is fixed.
+        if _account_exists(accounts_root, staging, email, server_url=ZEROSSL_DIRECTORY):
             continue
         command = [
             zerossl_bot_script,
@@ -279,6 +367,7 @@ def ensure_zerossl_accounts(
             work_dir,
             "--logs-dir",
             logs_dir,
+            *certbot_log_backup_flags(cmd_env),
         ]
         if email:
             command.extend(["--email", email])

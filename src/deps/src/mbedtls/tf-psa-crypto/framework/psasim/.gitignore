@@ -1,0 +1,20 @@
+# Intermediate generated files
+/include/psa_manifest/manifest.h
+/include/psa_manifest/pid.h
+/include/psa_manifest/sid.h
+/src/psa_functions_codes.h
+/src/psa_sim_crypto_client.c
+/src/psa_sim_crypto_server.c
+/src/psa_sim_serialise.c
+/src/psa_sim_serialise.h
+
+# Build products
+/test/psa_manifest/*
+/test/client
+/test/partition
+*.so
+*psa_ff_bootstrap_*
+
+# Local files from editors and indexing tools
+*.swp
+*.DS_Store

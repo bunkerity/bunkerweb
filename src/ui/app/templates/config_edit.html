@@ -10,6 +10,12 @@
            name="selected_type"
            value="{{ type if type else "HTTP" }}">
     <input type="hidden"
+           id="use-modsecurity-global-crs"
+           value="{{ "yes" if use_modsecurity_global_crs else "no" }}">
+    <input type="hidden"
+           id="global-crs-service-scoped-modsec-crs-error"
+           value="{{ global_crs_service_scoped_modsec_crs_error }}">
+    <input type="hidden"
            id="config-is-draft"
            name="is_draft"
            data-original="{{ is_draft }}"

@@ -67,7 +67,7 @@ while IFS= read -r -d '' file; do
     if [[ "$file" != *"ansible"* ]]; then
         files+=("$file")
     fi
-done < <(find ../common ../docs ../misc -type f -name 'requirements*.in' -print0 2>/dev/null)
+done < <(find ../common ../../docs ../../misc -type f -name 'requirements*.in' -print0 2>/dev/null)
 
 # Process each file
 for file in "${files[@]}"; do

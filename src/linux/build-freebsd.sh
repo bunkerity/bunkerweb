@@ -213,6 +213,14 @@ python3.11 -m pip install --no-cache-dir --require-hashes --target "$PY_DEPS" \
   -r "$REPO_ROOT/src/common/gen/requirements.txt" \
   -r "$REPO_ROOT/src/common/db/requirements.arm.txt"
 
+# Apply BunkerWeb patches to vendored Python deps before they are tarballed
+# (DNS alias / CNAME delegation for certbot). -F0 fails the build loudly on
+# any context drift instead of fuzzing onto the wrong code.
+log "Applying BunkerWeb patches to vendored Python deps..."
+patch -p1 -F0 --dry-run -d "$PY_DEPS" < "$REPO_ROOT/src/deps/misc/certbot-dns-alias.patch"
+patch -p1 -F0 --no-backup-if-mismatch -d "$PY_DEPS" < "$REPO_ROOT/src/deps/misc/certbot-dns-alias.patch"
+grep -q '_load_domain_aliases' "$PY_DEPS/certbot/plugins/dns_common.py"
+
 log "Compressing staged dependencies (inside stage)..."
 (
   cd "$BW_DIR"

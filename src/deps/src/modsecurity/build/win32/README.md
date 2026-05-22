@@ -18,15 +18,15 @@ The Windows build of libModSecurity uses Build Tools for Visual Studio 2022 (for
         * Windows SDK
         * CMake
         * Address Sanitizer
- * [Conan package manager 2.10.2](https://github.com/conan-io/conan/releases/download/2.10.2/conan-2.10.2-windows-x86_64-installer.exe)
+ * [Conan package manager 2.27.1](https://github.com/conan-io/conan/releases/download/2.27.1/conan-2.27.1-windows-x86_64-installer.exe)
     * Install and then setup the default Conan profile to use the MSVC C++ compiler:
       1. Open a command-prompt and set the MSVC C++ compiler environment by executing: `C:\BuildTools\VC\Auxiliary\Build\vcvars64.bat`
       2. Execute: `conan profile detect --force`
- * [Git for Windows 2.44.0](https://github.com/git-for-windows/git/releases/download/v2.44.0.windows.1/Git-2.44.0-64-bit.exe)
+ * [Git for Windows 2.53.0](https://github.com/git-for-windows/git/releases/download/v2.53.0.windows.1/Git-2.53.0-64-bit.exe)
     * To clone the libModSecurity repository.
-    * NOTE: Make sure to initialize and update submodules (to get `libinjection` and regression tests)
-      * `git submodule init`
-      * `git submodule update`
+    * NOTE: Make sure to initialize and update submodules (to get `libinjection`, `mbedtls` and regression tests)
+      * `git submodule update --init --recursive`
+      * `git submodule status`
 
 ## Build
 
@@ -65,11 +65,11 @@ NOTE: When building a different configuration, it's recommended to reset:
 
 By default the following all the following features are enabled by including the associated third-party library through a Conan package:
 
- * libxml2 2.12.6 for XML processing support
- * libcurl 8.6.0 to support http requests from rules
- * libmaxminddb 1.9.1 to support reading MaxMind DB files.
- * LUA 5.4.6 to enable rules to run scripts in this language for extensibility
- * lmdb 0.9.31 in-memory database
+ * libxml2 2.15.2 for XML processing support
+ * libcurl 8.19.0 to support http requests from rules
+ * libmaxminddb 1.12.2 to support reading MaxMind DB files.
+ * LUA 5.5.0 to enable rules to run scripts in this language for extensibility
+ * lmdb 0.9.32 in-memory database
 
 Each of these can be turned off by updating the associated `HAVE_xxx` variable (setting it to zero) in the beginning of the libModSecurity section of `CMakeLists.txt`.
 

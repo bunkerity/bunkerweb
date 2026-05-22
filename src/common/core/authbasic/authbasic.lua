@@ -349,7 +349,7 @@ function authbasic:validate_credentials()
 		return false, "missing credentials"
 	end
 
-	local headers = req_get_headers()
+	local headers = req_get_headers(tonumber((utils.get_variable("MAX_HEADERS", false))) or 100)
 	local auth_header = headers["authorization"] or headers["Authorization"]
 	if not auth_header then
 		return false, "missing Authorization header"

@@ -499,7 +499,7 @@ static void trace_start(jit_State *J)
   );
   lj_record_setup(J);
 #ifdef LUA_USE_TRACE_LOGS
-  lj_log_trace_start_record(L, (unsigned) J->cur.traceno, pc, J->fn);
+  lj_log_trace_start_record(J->L, (unsigned) J->cur.traceno, pc, J->fn);
 #endif
 }
 

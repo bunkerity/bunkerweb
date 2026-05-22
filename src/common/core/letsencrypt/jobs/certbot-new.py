@@ -25,7 +25,6 @@ from certbot_concurrency import (
     select_account_id,
 )
 
-
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
@@ -77,9 +76,11 @@ from letsencrypt_utils import (
     LETSENCRYPT_JOBS_PATH as JOBS_PATH,
     LETSENCRYPT_LOGS_DIR as LOGS_DIR,
     LETSENCRYPT_WORK_DIR as WORK_DIR,
+    certbot_log_backup_flags,
     ZEROSSL_BOT_SCRIPT,
     build_certbot_env,
     get_expected_acme_directory,
+    letsencrypt_cache_consistent,
     prepare_logs_dir,
     resolve_certbot_entrypoint,
 )
@@ -652,6 +653,7 @@ def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
         WORK_DIR,
         "--logs-dir",
         LOGS_DIR,
+        *certbot_log_backup_flags(cmd_env),
     ]
 
     if LOG_LEVEL == "DEBUG":
@@ -713,6 +715,7 @@ def certbot_new(
         paths.work_dir.as_posix(),
         "--logs-dir",
         paths.logs_dir.as_posix(),
+        *certbot_log_backup_flags(cmd_env),
         "--break-my-certs",
         "--expand",
     ]
@@ -722,8 +725,19 @@ def certbot_new(
     else:
         command.append("--register-unsafely-without-email")
 
+    # Always scope account lookup to the target ACME server's URL.
+    # Without this, an LE account id can be passed as `--account` to a ZeroSSL
+    # certbot certonly invocation (and vice versa) — certbot then constructs the
+    # account directory from its own --server path and fails with AccountNotFound.
+    acme_server_url = str(config.get("acme_server_url") or "")
+
     if config.get("acme_server") == "letsencrypt":
-        account_id = select_account_id(paths.config_dir.joinpath("accounts"), bool(config["staging"]), str(config.get("email") or ""))
+        account_id = select_account_id(
+            paths.config_dir.joinpath("accounts"),
+            bool(config["staging"]),
+            str(config.get("email") or ""),
+            server_url=acme_server_url,
+        )
         if account_id:
             command.extend(["--account", account_id])
     else:
@@ -742,7 +756,12 @@ def certbot_new(
         if zerossl_api_key:
             cmd_env["LETS_ENCRYPT_ZEROSSL_API_KEY"] = zerossl_api_key
 
-        account_id = select_account_id(paths.config_dir.joinpath("accounts"), bool(config["staging"]), str(config.get("email") or ""))
+        account_id = select_account_id(
+            paths.config_dir.joinpath("accounts"),
+            bool(config["staging"]),
+            str(config.get("email") or ""),
+            server_url=acme_server_url,
+        )
         if account_id:
             command.extend(["--account", account_id])
 
@@ -903,6 +922,7 @@ try:
             WORK_DIR,
             "--logs-dir",
             LOGS_DIR,
+            *certbot_log_backup_flags(cmd_env),
         ],
         stdin=DEVNULL,
         stdout=PIPE,
@@ -1142,12 +1162,36 @@ try:
         save_zerossl_api_key_hashes(updated_zerossl_api_key_hashes)
 
         # * Save data to db cache
-        if DATA_PATH.is_dir() and list(DATA_PATH.iterdir()):
-            cached, err = JOB.cache_dir(DATA_PATH)
-            if not cached:
-                LOGGER.error(f"Error while saving data to db cache : {err}")
+        # Guards: only re-cache if the initial restore succeeded AND we actually have
+        # live certs on disk. Without these guards, a failed restore leaves DATA_PATH
+        # empty (rmtree runs before extraction in Job.restore_cache) and a blind
+        # cache_dir() call would overwrite the good DB row with empty state, losing
+        # the certs from both disk and DB.
+        if not JOB.restore_ok:
+            LOGGER.error("Skipping db cache update: initial cache restore failed, refusing to overwrite good DB state with current disk state.")
+            status = 2
+        elif not DATA_PATH.is_dir() or not any(DATA_PATH.glob("live/*/fullchain.pem")):
+            LOGGER.warning("Skipping db cache update: no live certificates found under DATA_PATH/live/*/fullchain.pem.")
+        else:
+            # Refuse to re-cache when renewal/ references account IDs that are missing from accounts/.
+            # That snapshot would self-propagate certbot AccountNotFound errors across every renew.
+            consistent, reason = letsencrypt_cache_consistent(DATA_PATH)
+            if not consistent:
+                LOGGER.error(
+                    "Skipping db cache update to avoid persisting an inconsistent Let's Encrypt state "
+                    f"({reason}). The DB cache row is left untouched; investigate accounts/ recovery before the next renew."
+                )
+                # If certbot itself succeeded, the fresh certs are already on disk — signal a reload
+                # (ret=1) so nginx picks them up. Persistence failure is logged separately above; do
+                # not escalate to status=2 here, otherwise JobScheduler suppresses the reload.
+                if status == 0:
+                    status = 1
             else:
-                LOGGER.info("Successfully saved data to db cache")
+                cached, err = JOB.cache_dir(DATA_PATH)
+                if not cached:
+                    LOGGER.error(f"Error while saving data to db cache : {err}")
+                else:
+                    LOGGER.info("Successfully saved data to db cache")
 except SystemExit as e:
     status = e.code
 except BaseException as e:

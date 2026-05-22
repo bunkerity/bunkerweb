@@ -9,6 +9,9 @@ local flag = require "crowdsec.lib.flag"
 local utils = require "crowdsec.lib.utils"
 local ban = require "crowdsec.lib.ban"
 local url = require "crowdsec.lib.url"
+-- BunkerWeb local modification: pull MAX_HEADERS from BW config so
+-- ngx.req.get_headers() does not silently truncate at 100 when operators raise it.
+local bw_utils = require "bunkerweb.utils"
 local bit
 if _VERSION == "Lua 5.1" then bit = require "bit" else bit = require "bit32" end
 
@@ -533,7 +536,7 @@ function csmod.AppSecCheck(ip)
   httpc:set_timeouts(runtime.conf["APPSEC_CONNECT_TIMEOUT"], runtime.conf["APPSEC_SEND_TIMEOUT"], runtime.conf["APPSEC_PROCESS_TIMEOUT"])
 
   local uri = ngx.var.request_uri
-  local headers = ngx.req.get_headers()
+  local headers = ngx.req.get_headers(tonumber((bw_utils.get_variable("MAX_HEADERS", false))) or 100) -- BW local mod
 
   -- overwrite headers with crowdsec appsec require headers
   headers[APPSEC_IP_HEADER] = ip
@@ -731,7 +734,7 @@ function csmod.Allow(ip)
               local uri = ngx.var.uri
               -- in case its not a GET request, we prefer to fallback on referer
               if ngx.req.get_method() ~= "GET" then
-                local headers, err = ngx.req.get_headers()
+                local headers, err = ngx.req.get_headers(tonumber((bw_utils.get_variable("MAX_HEADERS", false))) or 100) -- BW local mod
                 for k, v in pairs(headers) do
                   if k == "referer" then
                     uri = v

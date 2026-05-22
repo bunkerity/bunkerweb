@@ -83,7 +83,9 @@ fi
 export LOG_SYSLOG_TAG="${LOG_SYSLOG_TAG:-bw-ui}"
 
 # Start a temporary Gunicorn process with a special logger configuration.
-python3 -m gunicorn --logger-class utils.logger.TmpUiLogger --config utils/tmp-gunicorn.conf.py &
+# Unset LOG_FILE_PATH in the tmp-ui child env so tmp-ui falls back to its own
+# per-process default (tmp-ui.log) instead of sharing the main UI's log file.
+env -u LOG_FILE_PATH python3 -m gunicorn --logger-class utils.logger.TmpUiLogger --config utils/tmp-gunicorn.conf.py &
 
 # Start the main Gunicorn process with the standard logger configuration.
 python3 -m gunicorn --logger-class utils.logger.UiLogger --config utils/gunicorn.conf.py &

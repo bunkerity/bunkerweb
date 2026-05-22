@@ -2,9 +2,9 @@ from logging import (
     CRITICAL,
     DEBUG,
     ERROR,
+    FileHandler,
     INFO,
     WARNING,
-    FileHandler,
     Logger,
     StreamHandler,
     _nameToLevel,
@@ -49,7 +49,10 @@ if "file" in env_log_types:
     log_file_path = getenv(
         "LOG_FILE_PATH", join(sep, "var", "log", "bunkerweb", "scheduler.log") if getenv("SCHEDULER_LOG_TO_FILE", "no") == "yes" else ""
     ).strip()
-    if match(FILE_PATH_PATTERN, log_file_path):
+    # Reject path-traversal segments explicitly — the char-class regex below allows `..`
+    # between slashes, which would let an operator set `LOG_FILE_PATH=/var/log/bunkerweb/../etc/passwd`.
+    has_traversal = ".." in log_file_path.split("/")
+    if not has_traversal and match(FILE_PATH_PATTERN, log_file_path):
         log_types["file"] = {
             "handler": FileHandler(log_file_path),
             "file_path": log_file_path,

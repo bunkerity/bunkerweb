@@ -9,7 +9,7 @@
 ##! NL=$'\n'
 ##! original="$(grep -vE '^[#$]' regex-assembly/include/unix-shell-4andup.ra)"
 ##! # Exclude entries starting with `(dev/|etc/|proc/|#)` and empty lines, they are not commands
-##! source="$(grep -vEh '^(dev/|etc/|proc/|#|$)' rules/unix-{shell,shell-builtins}.data | \
+##! source="$(grep -vEh '^(dev/|etc/|proc/|#|$)' rules/unix-{shell-aliases,shell,shell-builtins}.data | \
 ##!   awk '/^[^#$]/ {split($0,x,"/"); y=x[length(x)]} length(y) > 3 {print y}' | \
 ##!   sort | uniq)"
 ##! # retain all unmodified entries in this list and skip removed ones; ignore the manually added suffixes
@@ -144,6 +144,10 @@ c89-gcc
 c99-gcc
 cancel@
 capsh@
+cargo@
+cargo-audit
+cargo-miri
+cargo-watch
 certbot
 chattr@
 chdir@
@@ -167,6 +171,7 @@ chroot@
 chsh@
 clang\+\+
 clang@
+clippy-driver
 cobc@
 cobcrun
 column@
@@ -410,6 +415,7 @@ perl5@
 perl@
 perlsh
 perms@
+piconv
 pftp@
 pgrep@
 php-cgi
@@ -468,6 +474,13 @@ ruby~
 run-mailcap
 run-parts
 runc@
+rust-analyzer
+rust-gdb
+rust-lldb
+rustc@
+rustdoc
+rustfmt
+rustup
 rview@
 rvim@
 sash@
@@ -484,6 +497,7 @@ setfacl@
 setsid
 sftp@
 sh\.distrib
+shred@
 shuf@
 shutdown@
 sleep@
@@ -549,6 +563,7 @@ tshark
 ulimit@
 uname@
 uncompress@
+uconv
 unexpand
 uniq@
 unlink@

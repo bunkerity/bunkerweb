@@ -85,13 +85,13 @@ jobs:
           endpoint: ssh://root@arm
           platforms: linux/arm64,linux/arm/v7
       - name: Login to Docker Hub
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to ghcr
         if: inputs.PUSH == true
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -105,7 +105,7 @@ jobs:
       # Build cached image
       - name: Build image
         if: inputs.CACHE == true
-        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
@@ -118,7 +118,7 @@ jobs:
       # Build non-cached image
       - name: Build image
         if: inputs.CACHE != true
-        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
@@ -127,30 +127,17 @@ jobs:
           tags: local/${{ inputs.IMAGE }}
           cache-to: type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }}-${{ inputs.CACHE_SUFFIX }},mode=max
           labels: ${{ steps.meta.outputs.labels }}
-      # Check OS vulnerabilities
-      - name: Check OS vulnerabilities
+      # Check vulnerabilities with Docker Scout
+      - name: Docker Scout CVE Analysis
         if: ${{ startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        uses: docker/scout-action@cd72f264beff1cd72735de31148b9d3244a0234a # v1.21.0
         with:
-          vuln-type: os
-          skip-dirs: /root/.cargo
-          image-ref: local/${{ inputs.IMAGE }}
-          format: table
-          exit-code: 1
-          ignore-unfixed: false
-          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
-          trivyignores: .trivyignore
-        env:
-          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
-      # - name: Docker Scout Analysis # TODO: Add back when the openssl shenanigans are fixed
-      #   if: ${{ startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
-      #   uses: docker/scout-action@aceeb83b88f2ae54376891227858dda7af647183 # v1.18.1
-      #   with:
-      #     command: cves,recommendations
-      #     image: local/${{ inputs.IMAGE }}
-      #     only-fixed: true
-      #     only-package-types: apk
-      #     exit-code: true
+          command: cves,recommendations
+          image: local/${{ inputs.IMAGE }}
+          only-package-types: apk,golang
+          only-fixed: true
+          exit-code: true
+          summary: true
       # Push image
       - name: Push image
         if: inputs.PUSH == true

@@ -1,0 +1,27 @@
+{
+  "name": "authentik",
+  "kinds": ["docker", "autoconf", "kubernetes"],
+  "timeout": 300,
+  "delay": 180,
+  "no_copy_container": true,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://auth.example.com",
+      "string": "authentik",
+      "tls": "auth.example.com"
+    },
+    {
+      "type": "string",
+      "url": "https://app1.example.com",
+      "string": "authentik",
+      "tls": "app1.example.com"
+    },
+    {
+      "type": "string",
+      "url": "https://app2.example.com",
+      "string": "authentik",
+      "tls": "app2.example.com"
+    }
+  ]
+}

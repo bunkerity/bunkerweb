@@ -3,6 +3,7 @@ from gzip import GzipFile
 from hashlib import new as new_hash
 from io import BytesIO
 from os import getenv, sched_getaffinity, sep, access, R_OK, cpu_count
+from os.path import join as path_join, normpath
 from packaging.version import InvalidVersion, Version
 from pathlib import Path
 from platform import machine
@@ -210,6 +211,11 @@ def plugin_tar_filter(tarinfo):
             return None
         if p.name in _EXCLUDED_FILE_NAMES:
             return None
+        tarinfo.mtime = 0
+        tarinfo.uid = 0
+        tarinfo.gid = 0
+        tarinfo.uname = "root"
+        tarinfo.gname = "root"
         return tarinfo
     except Exception:
         return None
@@ -237,7 +243,7 @@ def add_dir_to_tar_safely(tar: Any, dir_path: Union[str, Path], arc_root: Option
         if not plugin_tar_exclude(d):
             tar.add(d.as_posix(), arcname=arc_root, recursive=False, filter=plugin_tar_filter)
 
-    for p in d.rglob("*"):
+    for p in sorted(d.rglob("*")):
         if plugin_tar_exclude(p):
             continue
         arcname = f"{arc_root}/{p.relative_to(d).as_posix()}"
@@ -272,6 +278,82 @@ def create_plugin_tar_gz(dir_path: Union[str, Path], arc_root: Optional[str] = N
         gz.write(raw_bytes)
     result.seek(0)
     return result
+
+
+def _validate_tar_members(members, *, allow_symlinks=False):
+    """Pre-validate tar members before extraction (defense-in-depth against CVE-2025-4517).
+
+    Checks archive metadata only — no disk access — so PATH_MAX symlink chain attacks are impossible.
+    When allow_symlinks is False, all symlinks/hardlinks are rejected (matching filter="data").
+    When allow_symlinks is True, symlinks are permitted but their targets are still validated.
+    """
+    for member in members:
+        # Block absolute paths
+        if member.name.startswith("/"):
+            raise ValueError(f"Tar member {member.name!r} has absolute path")
+        # Block path traversal in member name
+        if ".." in Path(member.name).parts:
+            raise ValueError(f"Tar member {member.name!r} contains '..'")
+        # Block device files and pipes
+        if member.isdev() or member.isfifo():
+            raise ValueError(f"Tar member {member.name!r} is a device or pipe")
+        # Check symlinks/hardlinks
+        if member.issym() or member.islnk():
+            if not allow_symlinks:
+                raise ValueError(f"Tar member {member.name!r} is a symlink/hardlink (not permitted)")
+            # Even when symlinks are allowed, validate their targets
+            if Path(member.linkname).is_absolute():
+                raise ValueError(f"Tar member {member.name!r} links to absolute path {member.linkname!r}")
+            # Normalize to collapse valid .. segments, then check if any remain (= escaping)
+            normalized = normpath(path_join(str(Path(member.name).parent), member.linkname))
+            if ".." in Path(normalized).parts:
+                raise ValueError(f"Tar member {member.name!r} links outside target directory")
+
+
+def safe_tar_extractall(tar, path, *, tar_filter="data", **kwargs):
+    """Extract a tar archive safely with pre-validation and Python 3.12+ filter.
+
+    Pre-validates all members before extraction to defend against CVE-2025-4517
+    (PATH_MAX symlink chain bypass of tarfile filters). Then applies the filter
+    as additional defense-in-depth.
+
+    Use tar_filter="tar" instead of "data" when symlinks must be preserved
+    (e.g. Let's Encrypt certs). Use tar_filter="auto" to let the helper pick
+    "tar" only when the archive actually contains symlink/hardlink members,
+    and fall back to the stricter "data" filter otherwise — useful for
+    restoring trusted cache archives that may or may not contain links
+    depending on the plugin.
+    """
+    members_to_check = kwargs.get("members")
+    if members_to_check is None:
+        members_to_check = tar.getmembers()
+    if tar_filter == "auto":
+        tar_filter = "tar" if any(m.issym() or m.islnk() for m in members_to_check) else "data"
+    _validate_tar_members(members_to_check, allow_symlinks=(tar_filter != "data"))
+    try:
+        tar.extractall(path, filter=tar_filter, **kwargs)
+    except TypeError:
+        tar.extractall(path, **kwargs)
+
+
+def safe_zip_extractall(zf, path):
+    """Extract a zip archive safely, rejecting members with absolute paths or path traversal."""
+    dest = Path(path).resolve()
+    for member in zf.namelist():
+        member_path = (dest / member).resolve()
+        # Path.is_relative_to() was added in Python 3.9; fall back to relative_to()
+        # for older interpreters so this helper still raises on traversal attempts.
+        try:
+            contained = member_path.is_relative_to(dest)
+        except AttributeError:
+            try:
+                member_path.relative_to(dest)
+                contained = True
+            except ValueError:
+                contained = False
+        if not contained:
+            raise ValueError(f"Zip member {member!r} would escape target directory")
+    zf.extractall(path)
 
 
 def normalize_bunkerweb_version(version: str) -> str:

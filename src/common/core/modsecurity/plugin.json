@@ -114,6 +114,25 @@
       "label": "SecRequestBodyNoFilesLimit",
       "regex": "^[0-9]+[kKmMgG]?$",
       "type": "text"
+    },
+    "MODSECURITY_SEC_REQUEST_BODY_LIMIT": {
+      "context": "multisite",
+      "default": "",
+      "help": "SecRequestBodyLimit directive of ModSecurity. Maximum request body size that ModSecurity will inspect (supports k/m/g suffixes, e.g. 10m). Requests exceeding this limit are handled according to SecRequestBodyLimitAction (Reject by default). When empty, derived from MAX_CLIENT_SIZE. Set 0 for no limit (not recommended — may cause out-of-memory kills). NGINX enforces MAX_CLIENT_SIZE before ModSecurity, so setting this higher than MAX_CLIENT_SIZE has no effect.",
+      "id": "modsecurity-sec-request-body-limit",
+      "label": "SecRequestBodyLimit",
+      "regex": "^([0-9]+[kKmMgG]?)?$",
+      "type": "text"
+    },
+    "MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION": {
+      "context": "multisite",
+      "default": "Reject",
+      "help": "SecRequestBodyLimitAction directive of ModSecurity. Reject returns HTTP 413 for requests exceeding the body limit. ProcessPartial inspects only the portion within the limit and forwards the full request to the backend (useful for large file uploads, but reduces WAF coverage for non-file content types like JSON or form data).",
+      "id": "modsecurity-sec-request-body-limit-action",
+      "label": "SecRequestBodyLimitAction",
+      "regex": "^(Reject|ProcessPartial)$",
+      "type": "select",
+      "select": ["Reject", "ProcessPartial"]
     }
   },
   "jobs": [

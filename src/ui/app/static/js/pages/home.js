@@ -21,85 +21,58 @@ $(function () {
 
   const requestsMapData = JSON.parse($("#requests-map-data").text());
 
-  // Initialize the map
+  // Initialize the map — no tile layer, ocean is a flat brand-tinted surface
+  // sourced from --bw-map-ocean in overrides.css.
+  const baseUrl = window.location.href.split("/home")[0];
   const map = L.map("requests-map", {
     minZoom: 2,
     maxZoom: 4,
-    center: [40, 0], // Initial center
-    zoom: 2, // Initial zoom level
+    center: [30, 10],
+    zoom: 2,
+    worldCopyJump: false,
+    zoomControl: true,
+    attributionControl: false,
     maxBounds: [
-      [-85, -180], // Southwest corner of the bounding box
-      [85, 180], // Northeast corner of the bounding box
+      [-85, -180],
+      [85, 180],
     ],
-    maxBoundsViscosity: 1.0, // Controls how hard it is to drag out of bounds (1.0 = strict)
+    maxBoundsViscosity: 1.0,
   });
 
-  // Add a tile layer (OpenStreetMap)
-  const baseUrl = window.location.href.split("/home")[0];
-  L.tileLayer(`${baseUrl}/img/tiles/{z}/{x}/{y}.png`, {
-    attribution: "&copy; OpenStreetMap contributors",
-  }).addTo(map);
-
-  // Control to display country info on hover
-  const info = L.control({ position: "topright" });
-
-  info.onAdd = function () {
-    this._div = L.DomUtil.create("div", "info"); // Create a div with class "info"
-    return this._div;
+  // Read the brand-driven choropleth palette from CSS so the map flips with
+  // data-bs-theme without any JS recompute.
+  const mapCssVar = (name, fallback) => {
+    const value = getComputedStyle(document.documentElement)
+      .getPropertyValue(name)
+      .trim();
+    return value || fallback;
   };
 
-  // Method to update the control based on feature properties
-  info.update = function (props) {
-    const blockedCount = props?.blocked ?? 0;
-    const blockedCountStr = Number.isFinite(blockedCount)
-      ? new Intl.NumberFormat().format(blockedCount)
-      : "0";
+  // Palette values are mutable so a data-bs-theme flip can hot-swap them
+  // without a full page reload (see MutationObserver near the bottom).
+  let noDataColor = mapCssVar("--bw-map-land", "#d9dfe4");
+  let landBorderColor = mapCssVar("--bw-map-land-border", "#7c8890");
+  let borderColor = mapCssVar("--bw-map-border", "#ffffff");
+  let mapSteps = [
+    mapCssVar("--bw-map-step-1", "#6a8999"),
+    mapCssVar("--bw-map-step-2", "#3f6c88"),
+    mapCssVar("--bw-map-step-3", "#215778"),
+    mapCssVar("--bw-map-step-4", "#114360"),
+    mapCssVar("--bw-map-step-5", "#0b354a"),
+  ];
 
-    this._div.innerHTML = props
-      ? `
-          <div class="card shadow-none p-2 map-hover-card">
-              <div class="card-header p-1 pb-0 border-0">
-                  <h5 class="card-title mb-0">${props.ADMIN}</h5>
-              </div>
-              <div class="card-body p-1 pt-1">
-                  <p class="card-text">${t(
-                    "dashboard.map.blocked_requests",
-                  )}: <strong>${blockedCountStr}</strong></p>
-              </div>
-          </div>
-      `
-      : `
-          <div class="alert alert-primary map-hover-empty" role="alert">
-              ${t("dashboard.map.hover_info")}
-          </div>
-      `;
-  };
-
-  info.addTo(map);
-
-  // Function to adjust lightness of a base color
-  function adjustColor(hex, percent) {
-    let num = parseInt(hex.slice(1), 16),
-      amt = Math.round(2.55 * percent),
-      R = (num >> 16) + amt,
-      G = ((num >> 8) & 0x00ff) + amt,
-      B = (num & 0x0000ff) + amt;
-
-    return (
-      "#" +
-      (
-        0x1000000 +
-        (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
-        (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
-        (B < 255 ? (B < 1 ? 0 : B) : 255)
-      )
-        .toString(16)
-        .slice(1)
-    );
+  function refreshPalette() {
+    noDataColor = mapCssVar("--bw-map-land", "#d9dfe4");
+    landBorderColor = mapCssVar("--bw-map-land-border", "#7c8890");
+    borderColor = mapCssVar("--bw-map-border", "#ffffff");
+    mapSteps = [
+      mapCssVar("--bw-map-step-1", "#6a8999"),
+      mapCssVar("--bw-map-step-2", "#3f6c88"),
+      mapCssVar("--bw-map-step-3", "#215778"),
+      mapCssVar("--bw-map-step-4", "#114360"),
+      mapCssVar("--bw-map-step-5", "#0b354a"),
+    ];
   }
-
-  const baseMapColor = "#0b354a";
-  const noDataColor = "#6a6a6a";
 
   const blockedValues = Object.values(requestsMapData)
     .map((item) => parseInt(item?.blocked ?? 0, 10))
@@ -120,7 +93,7 @@ $(function () {
     }
 
     const maxValue = Math.max(...values);
-    const targetBuckets = 6;
+    const targetBuckets = 5;
     const step = Math.max(1, Math.round(niceStep(maxValue / targetBuckets)));
     const grades = [0];
 
@@ -193,24 +166,22 @@ $(function () {
       : "rgba(92, 114, 137, 0.16)";
   }
 
+  // Discrete 5-step brand ramp pulled from CSS. Bucket count tracks the grade
+  // builder (max 5 buckets), so indexing never walks off the palette.
   function buildColorRamp(steps) {
-    const lightnessStart = 40;
-    const lightnessEnd = -30;
-
-    if (steps <= 1) {
-      return [adjustColor(baseMapColor, lightnessEnd)];
-    }
-
+    if (steps <= 1) return [mapSteps[mapSteps.length - 1]];
+    if (steps >= mapSteps.length) return mapSteps.slice();
+    // Even stride across the full palette so sparse datasets still span
+    // light→dark rather than clustering at the light end.
+    const stride = (mapSteps.length - 1) / (steps - 1);
     const ramp = [];
     for (let i = 0; i < steps; i++) {
-      const percent =
-        lightnessStart + ((lightnessEnd - lightnessStart) * i) / (steps - 1);
-      ramp.push(adjustColor(baseMapColor, percent));
+      ramp.push(mapSteps[Math.round(i * stride)]);
     }
     return ramp;
   }
 
-  const colorRamp = buildColorRamp(Math.max(legendGrades.length - 1, 1));
+  let colorRamp = buildColorRamp(Math.max(legendGrades.length - 1, 1));
 
   // Function to get color based on blocked requests value
   function getColor(d) {
@@ -220,7 +191,7 @@ $(function () {
 
     for (let i = legendGrades.length - 1; i > 0; i--) {
       if (d >= legendGrades[i]) {
-        return colorRamp[Math.min(i - 1, colorRamp.length - 1)];
+        return colorRamp[Math.min(i, colorRamp.length - 1)];
       }
     }
 
@@ -230,46 +201,73 @@ $(function () {
   // Function to style each feature
   function style(feature) {
     const blockedValue = feature.properties.value;
+    const hasData = blockedValue > 0;
 
     return {
       fillColor: getColor(blockedValue),
-      weight: 1,
+      // Data countries get a bright hairline (brand border) so adjacent fills
+      // don't bleed. No-data countries get a darker land-border that carries
+      // the WCAG 1.4.11 shape cue for their subtle fill.
+      weight: hasData ? 0.6 : 0.5,
       opacity: 1,
-      color: "white",
-      dashArray: "3",
-      fillOpacity: blockedValue === 0 ? 0.2 : 0.85,
+      color: hasData ? borderColor : landBorderColor,
+      dashArray: "",
+      fillOpacity: hasData ? 0.95 : 1,
+      // No-data countries are visual-only: opt them out of Leaflet's pointer
+      // events so the cursor stays default and no listeners fire.
+      interactive: hasData,
     };
   }
 
-  // Highlight feature on hover
+  // Hover state — lift the country with a crisp brand-tinted outline rather
+  // than the previous dashed white + grey stroke combo.
   function highlightFeature(e) {
     const layer = e.target;
-
     layer.setStyle({
-      weight: 2,
-      color: "#666",
-      dashArray: "",
-      fillOpacity: 0.7,
+      weight: 1.6,
+      color: mapSteps[mapSteps.length - 1],
+      fillOpacity: 1,
     });
-
     layer.bringToFront();
-
-    info.update(layer.feature.properties);
   }
 
-  // Reset highlight
   function resetHighlight(e) {
     geojson.resetStyle(e.target);
-    info.update();
   }
 
-  // Zoom to feature on click
   function zoomToFeature(e) {
     map.fitBounds(e.target.getBounds());
   }
 
-  // Define what happens on each feature
+  // Format the per-country tooltip. Only emitted for countries with blocks —
+  // no-data countries stay silent on hover for a calmer cursor journey.
+  function tooltipHtml(props) {
+    const name = props?.ADMIN || props?.name || "—";
+    const count = props?.blocked ?? 0;
+    const countStr = Number.isFinite(count)
+      ? new Intl.NumberFormat().format(count)
+      : "0";
+    return `
+      <div class="bw-map-tooltip__name">${name}</div>
+      <div class="bw-map-tooltip__row">
+        <span class="bw-map-tooltip__label">${t("dashboard.map.blocked_requests")}</span>
+        <span class="bw-map-tooltip__value">${countStr}</span>
+      </div>`;
+  }
+
   function onEachFeature(feature, layer) {
+    // No-data countries are fully inert: no tooltip, no hover outline, no
+    // click-to-zoom — hovering them shouldn't promise interactivity that
+    // leads nowhere.
+    if ((feature.properties.blocked ?? 0) <= 0) return;
+
+    layer.bindTooltip(() => tooltipHtml(feature.properties), {
+      sticky: true,
+      direction: "top",
+      offset: L.point(0, -6),
+      className: "bw-map-tooltip",
+      opacity: 1,
+    });
     layer.on({
       mouseover: highlightFeature,
       mouseout: resetHighlight,
@@ -505,42 +503,75 @@ $(function () {
   const legend = L.control({ position: "bottomright" });
 
   legend.onAdd = function () {
-    const div = L.DomUtil.create("div", "legend map-legend shadow");
-    const gradientStops = colorRamp.join(", ");
+    const div = L.DomUtil.create("div", "legend map-legend shadow-sm");
     const grades = legendGrades;
-    const bucketLabels = [];
+    const bucketRows = [];
 
-    if (grades.length > 1) {
+    // When there's no blocked traffic the grade builder falls back to [0, 1],
+    // which would render a meaningless "1–1" bucket. Skip the buckets entirely
+    // in that case and show only the "No data" chip.
+    const hasBlockedTraffic = blockedValues.length > 0;
+
+    if (hasBlockedTraffic && grades.length > 1) {
       for (let i = 0; i < grades.length - 1; i++) {
         const from = grades[i];
         const to = grades[i + 1];
         const labelFrom = from === 0 ? 1 : from;
-        bucketLabels.push(
-          `${formatNumber(labelFrom)}${to ? "–" + formatNumber(to) : "+"}`,
-        );
+        const range = `${formatNumber(labelFrom)}–${formatNumber(to)}`;
+        const swatch = colorRamp[Math.min(i, colorRamp.length - 1)];
+        bucketRows.push(`
+          <div class="map-legend__swatch">
+            <span class="map-legend__chip" style="background:${swatch}"></span>
+            <span class="map-legend__range">${range}</span>
+          </div>
+        `);
       }
     }
 
+    // Emit data-i18n attributes so the global applyTranslations() pass
+    // resolves labels even when the legend is built before i18next is ready.
     div.innerHTML = `
-      <div class="map-legend__title">${t("dashboard.map.legend")}</div>
+      <div class="map-legend__title" data-i18n="dashboard.map.legend">${t("dashboard.map.legend")}</div>
       <div class="map-legend__swatches">
-        <div class="map-legend__swatch">
+        <div class="map-legend__swatch map-legend__swatch--muted">
           <span class="map-legend__chip" style="background:${noDataColor}"></span>
-          <span>${t("dashboard.map.no_data")}</span>
+          <span class="map-legend__range" data-i18n="dashboard.map.no_data">${t("dashboard.map.no_data")}</span>
         </div>
+        ${bucketRows.join("")}
       </div>
-      <div class="map-legend__gradient" style="background: linear-gradient(90deg, ${gradientStops});"></div>
-      <div class="map-legend__ticks">
-        <span>${formatNumber(grades[0] === 0 ? 1 : grades[0])}</span>
-        <span>${formatNumber(grades[grades.length - 1])}</span>
-      </div>
-      <div class="map-legend__ranges">${bucketLabels.join(" · ")}</div>
     `;
 
     return div;
   };
 
   legend.addTo(map);
+
+  // Re-render the legend when i18next initializes later or the user switches
+  // language — Leaflet controls don't participate in the global data-i18n walk
+  // automatically when built before translations load.
+  const rerenderLegend = () => {
+    legend.remove();
+    legend.addTo(map);
+  };
+  if (typeof i18next !== "undefined") {
+    if (!i18next.isInitialized) i18next.on("initialized", rerenderLegend);
+    i18next.on("languageChanged", rerenderLegend);
+  }
+
+  // Re-theme the map when the user toggles light/dark. SVG fills are set
+  // inline from CSS vars at build time, so a pure CSS switch leaves the paths
+  // frozen in the previous palette until the page reloads. Re-reading the
+  // tokens and calling setStyle() flushes fresh fills without a reload.
+  const applyTheme = () => {
+    refreshPalette();
+    colorRamp = buildColorRamp(Math.max(legendGrades.length - 1, 1));
+    if (geojson) geojson.setStyle(style);
+    rerenderLegend();
+  };
+  new MutationObserver(applyTheme).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-bs-theme", "class"],
+  });
 
   // Blocking timeline raw data.
   const blockingData = JSON.parse($("#requests-blocking-data").text());

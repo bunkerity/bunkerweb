@@ -35,7 +35,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
     使用已发布镜像与[快速入门](quickstart-guide.md#__tabbed_1_3)的布局启动栈，然后在浏览器完成向导。
 
     ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.9-rc1/misc/integrations/docker-compose.yml up -d
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.10-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
     访问 scheduler 主机名（如 `https://www.example.com/changeme`），运行 `/setup` 向导以配置 UI、scheduler 与实例。
@@ -52,7 +52,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.10
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.10
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.9
+        image: bunkerity/bunkerweb-ui:1.6.10
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -165,8 +165,20 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
     ```
 
     恢复码在 UI 中仅显示一次；若丢失加密密钥，将清除已存的 TOTP 秘钥。
-- 会话：默认 12 小时（`SESSION_LIFETIME_HOURS`）。绑定 IP 与 User-Agent；`CHECK_PRIVATE_IP=no` 仅对私网放宽 IP 检查。`ALWAYS_REMEMBER=yes` 始终启用持久 Cookie。
+- 会话：默认空闲时长 12 小时（`SESSION_LIFETIME_HOURS`），每次请求刷新。`SESSION_ABSOLUTE_HOURS`（默认 `168` = 7 天）设定绝对上限——无论是否活跃，超过即强制登出。可选的会话 ID 轮换（`SESSION_ROLLING_HOURS`，默认 `0` = 关闭）按该间隔重新生成会话 ID。会话绑定 IP 与 User-Agent；`CHECK_PRIVATE_IP=no` 仅对私网放宽 IP 检查。`ALWAYS_REMEMBER=yes` 始终启用持久 Cookie。
 - 若多级代理附加 `X-Forwarded-*`，请设置 `PROXY_NUMBERS`。
+
+!!! tip "预哈希管理员密码"
+    `ADMIN_PASSWORD` 接受 **bcrypt 哈希**（`$2a$`/`$2b$`/`$2y$`）并按原样存储，明文不再留在环境文件或密钥中。跳过强度策略（源密码由你负责）；成本低于 12 会记录警告。仅限环境创建和 `OVERRIDE_ADMIN_CREDS`；向导和个人资料页面仍需明文。
+
+    生成哈希：
+
+    ```bash
+    python3 -c "import bcrypt; print(bcrypt.hashpw(b'Str0ng&P@ss!', bcrypt.gensalt(rounds=13)).decode())"
+    ```
+
+!!! warning "错误的哈希会将你锁定"
+    仅在知道哈希对应的明文时才使用。首次创建时使用有效但错误的哈希不可逆，重启也无法修复；需用不同的 `ADMIN_PASSWORD` 配合 `OVERRIDE_ADMIN_CREDS=yes` 恢复。
 
 ## 配置来源与优先级
 
@@ -200,12 +212,14 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 
 | 设置                                        | 描述                                                    | 可接受值                     | 默认值         |
 | ------------------------------------------- | ------------------------------------------------------- | ---------------------------- | -------------- |
-| `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | 初始化管理员账户（执行密码策略）                        | 字符串                       | 未设           |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | 初始化管理员账户（执行密码策略；`ADMIN_PASSWORD` 也接受 bcrypt 哈希，按原样存储）                        | 字符串 / bcrypt 哈希          | 未设           |
 | `OVERRIDE_ADMIN_CREDS`                      | 强制用环境变量更新管理员凭据                            | `yes` 或 `no`                | `no`           |
 | `FLASK_SECRET`                              | 会话签名密钥（存于 `/var/lib/bunkerweb/.flask_secret`） | 十六进制/Base64/不透明字符串 | 自动生成       |
 | `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | TOTP 秘钥加密键（空格或 JSON）                          | 字符串 / JSON                | 缺失时自动生成 |
 | `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Biscuit 密钥（hex），用于 UI token                      | Hex 字符串                   | 自动生成并存储 |
-| `SESSION_LIFETIME_HOURS`                    | 会话时长                                                | 数值（小时）                 | `12`           |
+| `SESSION_LIFETIME_HOURS`                    | 会话空闲时长（滑动 TTL，每次请求刷新）                  | 数值（小时）                 | `12`           |
+| `SESSION_ABSOLUTE_HOURS`                    | 与活动无关的绝对会话上限                                | 数值（小时）                 | `168`          |
+| `SESSION_ROLLING_HOURS`                     | 会话 ID 轮换间隔（`0` 关闭轮换）                        | 数值（小时）                 | `0`            |
 | `ALWAYS_REMEMBER`                           | 总是启用 “remember me”                                  | `yes` 或 `no`                | `no`           |
 | `CHECK_PRIVATE_IP`                          | 绑定会话到 IP（`no` 时放宽私网变更）                    | `yes` 或 `no`                | `yes`          |
 | `PROXY_NUMBERS`                             | 信任的 `X-Forwarded-*` 代理层数                         | 整数                         | `1`            |

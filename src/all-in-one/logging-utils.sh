@@ -15,12 +15,21 @@ hide_service_logs_match() {
 		return 1
 	fi
 
+	# Disable pathname expansion around the word split so a crafted value like "*" can't
+	# match against files in the wrapper's working directory. Restore the previous state
+	# on every exit path.
+	local _restore_f=1
+	case $- in *f*) _restore_f=0 ;; esac
+	set -f
+
 	# shellcheck disable=SC2086 # intentional splitting for comma-separated values
 	for raw in $(printf '%s' "${HIDE_SERVICE_LOGS//,/ }"); do
 		if [ "$(normalize_log_key "$raw")" = "$match_key" ]; then
+			[ "$_restore_f" = 1 ] && set +f
 			return 0
 		fi
 	done
 
+	[ "$_restore_f" = 1 ] && set +f
 	return 1
 }

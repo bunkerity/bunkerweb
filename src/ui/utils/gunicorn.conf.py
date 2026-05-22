@@ -23,7 +23,17 @@ from logger import getLogger, log_types  # type: ignore
 
 from app.models.ui_database import UIDatabase
 from app.dependencies import reload_plugins
-from app.utils import BISCUIT_PRIVATE_KEY_FILE, BISCUIT_PUBLIC_KEY_FILE, USER_PASSWORD_RX, check_password, gen_password_hash, get_latest_stable_release
+from app.utils import (
+    BISCUIT_PRIVATE_KEY_FILE,
+    BISCUIT_PUBLIC_KEY_FILE,
+    RECOMMENDED_BCRYPT_COST,
+    USER_PASSWORD_RX,
+    bcrypt_cost,
+    check_password,
+    gen_password_hash,
+    get_latest_stable_release,
+    is_bcrypt_hash,
+)
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 TMP_UI_DIR = TMP_DIR.joinpath("ui")
@@ -50,7 +60,9 @@ BISCUIT_PRIVATE_KEY_HASH_FILE = BISCUIT_PRIVATE_KEY_FILE.with_suffix(".hash")  #
 
 MAX_WORKERS = int(getenv("MAX_WORKERS", max(effective_cpu_count() - 1, 1)))
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "info"))
-LISTEN_ADDR = getenv("UI_LISTEN_ADDR", getenv("LISTEN_ADDR", "0.0.0.0"))
+LISTEN_ADDR = getenv(
+    "UI_LISTEN_ADDR", getenv("LISTEN_ADDR", "0.0.0.0")
+)  # nosec B104 - 0.0.0.0 is the documented containerized default; operators override via UI_LISTEN_ADDR / LISTEN_ADDR.
 LISTEN_PORT = getenv("UI_LISTEN_PORT", getenv("LISTEN_PORT", "7000"))
 FORWARDED_ALLOW_IPS = getenv(
     "UI_FORWARDED_ALLOW_IPS",
@@ -95,7 +107,7 @@ daemon = False
 chdir = join(sep, "usr", "share", "bunkerweb", "ui")
 umask = 0x027
 pidfile = PID_FILE.as_posix()
-control_socket = RUN_DIR.joinpath("ui.ctl").as_posix()
+control_socket_disable = True
 SHM_TMP_DIR = Path(sep, "dev", "shm")
 UI_WORKER_TMP_DIR = Path(sep, "tmp", "bunkerweb", "ui-workers")
 worker_tmp_dir = SHM_TMP_DIR.as_posix() if SHM_TMP_DIR.is_dir() else UI_WORKER_TMP_DIR.as_posix()
@@ -468,8 +480,8 @@ def on_starting(server):
             LOGGER.debug(f"Couldn't get the admin user: {e}")
             sleep(1)
 
-    env_admin_username = getenv("ADMIN_USERNAME", "")
-    env_admin_password = getenv("ADMIN_PASSWORD", "")
+    env_admin_username = getenv("ADMIN_USERNAME", "").strip()
+    env_admin_password = getenv("ADMIN_PASSWORD", "").strip()
 
     if ADMIN_USER:
         if invalid_totp_encryption_keys:
@@ -488,7 +500,18 @@ def on_starting(server):
                     ADMIN_USER["username"] = env_admin_username
                     updated = True
 
-                if env_admin_password and not check_password(env_admin_password, ADMIN_USER["password"]):
+                if env_admin_password and is_bcrypt_hash(env_admin_password):
+                    if env_admin_password.encode("utf-8") != ADMIN_USER["password"]:
+                        cost = bcrypt_cost(env_admin_password)
+                        if cost < RECOMMENDED_BCRYPT_COST:
+                            LOGGER.warning(
+                                f"The provided bcrypt ADMIN_PASSWORD uses cost factor {cost}, below the recommended {RECOMMENDED_BCRYPT_COST}. "
+                                "Consider re-hashing with a higher cost for stronger protection against offline cracking."
+                            )
+                        ADMIN_USER["password"] = env_admin_password.encode("utf-8")
+                        updated = True
+                        LOGGER.info("ADMIN_PASSWORD provided as a bcrypt hash; storing it as-is.")
+                elif env_admin_password and not check_password(env_admin_password, ADMIN_USER["password"]):
                     if not USER_PASSWORD_RX.match(env_admin_password):
                         LOGGER.warning(
                             "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character. It will not be updated."
@@ -517,19 +540,33 @@ def on_starting(server):
     elif env_admin_username and env_admin_password:
         user_name = env_admin_username or "admin"
 
+        prehashed = is_bcrypt_hash(env_admin_password)
+
         if not DEBUG:
             if len(user_name) > 256:
                 message = "The admin username is too long. It must be less than 256 characters."
                 LOGGER.error(message)
                 ERROR_FILE.write_text(message, encoding="utf-8")
                 exit(1)
-            elif not USER_PASSWORD_RX.match(env_admin_password):
+            elif not prehashed and not USER_PASSWORD_RX.match(env_admin_password):
                 message = "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character."
                 LOGGER.error(message)
                 ERROR_FILE.write_text(message, encoding="utf-8")
                 exit(1)
 
-        ret = DB.create_ui_user(user_name, gen_password_hash(env_admin_password), ["admin"], admin=True)
+        if prehashed:
+            cost = bcrypt_cost(env_admin_password)
+            if cost < RECOMMENDED_BCRYPT_COST:
+                LOGGER.warning(
+                    f"The provided bcrypt ADMIN_PASSWORD uses cost factor {cost}, below the recommended {RECOMMENDED_BCRYPT_COST}. "
+                    "Consider re-hashing with a higher cost for stronger protection against offline cracking."
+                )
+            LOGGER.info("ADMIN_PASSWORD provided as a bcrypt hash; storing it as-is.")
+            password_hash = env_admin_password.encode("utf-8")
+        else:
+            password_hash = gen_password_hash(env_admin_password)
+
+        ret = DB.create_ui_user(user_name, password_hash, ["admin"], admin=True)
         if ret and "already exists" not in ret:
             message = f"Couldn't create the admin user in the database: {ret}"
             LOGGER.critical(message)
@@ -555,6 +592,12 @@ def on_starting(server):
     )
     set_secure_permissions(UI_DATA_FILE)
 
+    # Check if Redis is enabled via environment variable or database before closing DB
+    use_redis = getenv("USE_REDIS", "no").lower() == "yes"
+    if not use_redis:
+        db_config = DB.get_config(global_only=True, methods=False, filtered_settings=("USE_REDIS",))
+        use_redis = db_config.get("USE_REDIS", "no") == "yes"
+
     DB.close()  # Close local DB connections before fork to prevent fd leaks
 
     LOGGER.info(
@@ -564,7 +607,7 @@ def on_starting(server):
 
     UI_SESSIONS_CACHE.mkdir(parents=True, exist_ok=True)
 
-    if getenv("USE_REDIS", "no").lower() != "yes":
+    if not use_redis:
         LOGGER.warning("Using filesystem session backend — consider enabling Redis (USE_REDIS=yes) for better multi-worker stability")
 
     if TMP_PID_FILE.is_file():

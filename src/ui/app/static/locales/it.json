@@ -18,7 +18,9 @@
   "aria": {
     "label": {
       "close": "Chiudi",
-      "raw_configuration": "Configurazione Grezza"
+      "configs_dropzone": "Seleziona un file di esportazione delle configurazioni personalizzate o rilascialo qui",
+      "raw_configuration": "Configurazione Grezza",
+      "services_dropzone": "Seleziona un file di esportazione dei servizi o rilascialo qui"
     }
   },
   "badge": {
@@ -94,10 +96,8 @@
     "enable_totp": "Abilita TOTP",
     "entire_config": "Configurazione Intera",
     "export": "Esporta",
-    "export_csv_all": "CSV (Tutti)",
-    "export_csv_visible": "CSV (Visibile)",
-    "export_excel_all": "Excel (Tutti)",
-    "export_excel_visible": "Excel (Visibile)",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
     "fetch_global": "Recupera impostazioni globali",
     "filters_suffix": " Filtri",
     "follow": "Segui",
@@ -107,6 +107,7 @@
     "go_back": "Indietro",
     "hide": "Nascondi",
     "history": "Cronologia",
+    "import_configs": "Importa configurazioni personalizzate",
     "import_services": "Importa servizi",
     "login": "Accedi",
     "multiple_add": "AGGIUNGI",
@@ -474,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "Seleziona tutti i {{count}} {{entity}} corrispondenti",
+    "bulk_select_all_done": "Tutti i {{count}} {{entity}} corrispondenti sono selezionati.",
+    "bulk_select_clear": "Cancella selezione",
+    "bulk_select_page": "Tutti i {{count}} {{entity}} in questa pagina sono selezionati.",
     "info_bans": "Mostrando da {{start}} a {{end}} di {{total}} Divieti",
     "info_cache": "Mostrando da {{start}} a {{end}} di {{total}} File Cache",
     "info_configs": "Mostrando da {{start}} a {{end}} di {{total}} Configurazioni Personalizzate",
@@ -620,6 +625,8 @@
   },
   "form": {
     "checkbox": {
+      "include_attached_configs": "Includi configurazioni personalizzate allegate",
+      "overwrite_existing_configs": "Sovrascrivi le configurazioni personalizzate UI/API esistenti",
       "remember_me": "Ricordami"
     },
     "help": {
@@ -692,11 +699,11 @@
       "use_real_ip": "Usa IP Reale",
       "username": "Nome utente",
       "wildcard_certificates": "Certificati Wildcard",
-      "zerossl_api_connect_timeout": "Timeout di connessione API ZeroSSL",
       "zerossl_api_key": "Chiave API ZeroSSL",
-      "zerossl_api_max_time": "Tempo massimo API ZeroSSL",
       "zerossl_api_retry": "Tentativi API ZeroSSL",
-      "zerossl_api_retry_delay": "Ritardo tentativi API ZeroSSL"
+      "zerossl_api_retry_delay": "Ritardo tentativi API ZeroSSL",
+      "zerossl_api_connect_timeout": "Timeout di connessione API ZeroSSL",
+      "zerossl_api_max_time": "Tempo massimo API ZeroSSL"
     },
     "placeholder": {
       "2fa_code": "Inserisci codice",
@@ -789,6 +796,9 @@
       "fetch_global_settings_point_1": "Vengono aggiornate solo le impostazioni presenti in questo modello.",
       "fetch_global_settings_point_2": "I valori identici ai predefiniti vengono ignorati.",
       "fetch_global_settings_point_3": "SERVER_NAME non viene mai sovrascritto.",
+      "export_services_intro": "I servizi selezionati verranno esportati. Abilita l'opzione seguente per includere le configurazioni personalizzate allegate in un archivio .zip.",
+      "import_configs_dropzone": "Trascina qui il file di esportazione delle configurazioni personalizzate o fai clic per selezionare un file.",
+      "import_configs_warning": "Le configurazioni personalizzate create da scheduler, autoconf o templates vengono sempre conservate. Solo le configurazioni UI/API possono essere sovrascritte.",
       "import_services_dropzone": "Trascina qui il file di esportazione dei servizi o fai clic per selezionare un file.",
       "import_services_warning": "L'importazione dei servizi creerà nuovi servizi dell'interfaccia utente dal file di esportazione. I servizi esistenti vengono ignorati.",
       "instance_creation_alert": "Non è necessario fornire la porta o il nome del server; i valori di `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` e `API_SERVER_NAME` verranno utilizzati per la configurazione dell'istanza.",
@@ -823,8 +833,10 @@
       "delete_template": "Elimina modelli",
       "edit_template": "Modifica modello: {{name}}",
       "fetch_global_settings": "Applicare le impostazioni globali?",
+      "export_services": "Esporta servizi",
       "from_plugin": "da Plugin",
       "full_url": "URL Completo",
+      "import_configs": "Importa configurazioni personalizzate",
       "import_services": "Importa servizi",
       "job_history": "Ultime 10 Esecuzioni dei Processi",
       "job_history_count": "Ultime {{count}} esecuzioni del Processo",
@@ -865,7 +877,6 @@
     "misc": "Varie",
     "mode_selection": "Selezione Modalità",
     "more": "Altro...",
-    "new": "Nuovo",
     "plugin_activated": "Plugin Attivato",
     "plugin_activated_global": "Plugin Attivato Globalmente",
     "plugin_deactivated": "Plugin Disattivato",
@@ -1097,9 +1108,9 @@
       "section": {
         "custom_certificate": "Certificato Personalizzato",
         "lets_encrypt": "Let's Encrypt",
+        "zerossl": "ZeroSSL",
         "real_ip": "IP Reale",
-        "reverse_proxy": "Proxy Inverso",
-        "zerossl": "ZeroSSL"
+        "reverse_proxy": "Proxy Inverso"
       },
       "subtitle": "Configura le impostazioni specifiche della UI web.",
       "title": "Impostazioni UI"
@@ -1328,8 +1339,8 @@
       "raw_configs_title": "Importazioni di configurazione personalizzata",
       "raw_configs_upload": "Carica file di configurazione (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "Impossibile leggere uno dei file selezionati.",
-      "raw_editor_aria": "Editor JSON del modello grezzo",
       "raw_editor_drop_hint": "Rilascia un file JSON del modello (.json solo) per sostituire il contenuto attuale.",
+      "raw_editor_aria": "Editor JSON del modello grezzo",
       "raw_editor_help": "Modifica la definizione completa del modello come JSON. Il ritorno alla modalità Facile convalida e ricarica l'editor visuale.",
       "raw_editor_import_success": "JSON del modello importato con successo.",
       "raw_editor_override_body": "L'importazione di questo file sostituirà completamente il JSON del modello corrente. Le modifiche apportate nell'editor andranno perse. Vuoi continuare?",
@@ -1517,8 +1528,8 @@
     "latest_version_installed": "Stai usando l'ultima versione.",
     "lets_encrypt_custom_profile": "Il profilo personalizzato da utilizzare per Let's Encrypt (es. 'my_custom_profile').",
     "lets_encrypt_disable_public_suffixes": "Disabilita le richieste di certificati per i domini che corrispondono alla Public Suffix List (consigliato).",
-    "lets_encrypt_profile": "Il profilo da utilizzare per Let's Encrypt (classic, tlsserver, shortlived).",
     "lets_encrypt_server": "Scegli il tuo provider di certificati per mostrare impostazioni specifiche del provider.",
+    "lets_encrypt_profile": "Il profilo da utilizzare per Let's Encrypt (classic, tlsserver, shortlived).",
     "license_key": "La tua chiave di licenza BunkerWeb PRO.",
     "link": {
       "access_plugin_page": "Accedi alla Pagina {{name}}",
@@ -1530,6 +1541,7 @@
       "edit_config": "Modifica Configurazione Personalizzata {{name}}",
       "edit_service": "Modifica Servizio {{service}}",
       "edit_template": "Modifica Modello {{template}}",
+      "export_config": "Esporta configurazione personalizzata {{name}}",
       "export_service": "Esporta Configurazione Servizio {{name}}",
       "view_config": "Visualizza Configurazione Personalizzata {{name}}",
       "view_file": "Visualizza {{filename}}",
@@ -1693,11 +1705,11 @@
     "view_full_url": "Clicca per visualizzare l'URL completo",
     "wildcard_certificates": "Genera certificati wildcard (*.dominio.com). Richiede sfida DNS.",
     "wildcard_dns_only": "I certificati wildcard sono supportati solo con il tipo di sfida DNS.",
-    "zerossl_api_connect_timeout": "Timeout di connessione in secondi per le chiamate API ZeroSSL.",
     "zerossl_api_key": "Chiave API ZeroSSL opzionale usata da zerossl-bot.",
-    "zerossl_api_max_time": "Tempo totale massimo in secondi per ogni richiesta API ZeroSSL.",
     "zerossl_api_retry": "Numero di tentativi per le richieste API ZeroSSL (0 disabilita i tentativi).",
-    "zerossl_api_retry_delay": "Ritardo in secondi tra i tentativi API ZeroSSL."
+    "zerossl_api_retry_delay": "Ritardo in secondi tra i tentativi API ZeroSSL.",
+    "zerossl_api_connect_timeout": "Timeout di connessione in secondi per le chiamate API ZeroSSL.",
+    "zerossl_api_max_time": "Tempo totale massimo in secondi per ogni richiesta API ZeroSSL."
   },
   "totp": {
     "prompt": "Inserisci il tuo codice TOTP."

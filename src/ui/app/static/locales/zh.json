@@ -18,7 +18,9 @@
   "aria": {
     "label": {
       "close": "关闭",
-      "raw_configuration": "原始配置"
+      "configs_dropzone": "选择自定义配置导出文件或将其拖放到此处",
+      "raw_configuration": "原始配置",
+      "services_dropzone": "选择服务导出文件或将其拖放到此处"
     }
   },
   "badge": {
@@ -94,10 +96,8 @@
     "enable_totp": "启用 TOTP",
     "entire_config": "完整配置",
     "export": "导出",
-    "export_csv_all": "CSV（全部）",
-    "export_csv_visible": "CSV（可见）",
-    "export_excel_all": "Excel（全部）",
-    "export_excel_visible": "Excel（可见）",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
     "fetch_global": "获取全局设置",
     "filters_suffix": " 过滤器",
     "follow": "跟随",
@@ -107,6 +107,7 @@
     "go_back": "返回",
     "hide": "隐藏",
     "history": "历史记录",
+    "import_configs": "导入自定义配置",
     "import_services": "导入服务",
     "login": "登录",
     "multiple_add": "添加",
@@ -474,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "选择所有 {{count}} 个匹配的 {{entity}}",
+    "bulk_select_all_done": "所有 {{count}} 个匹配的 {{entity}} 均已选中。",
+    "bulk_select_clear": "清除选择",
+    "bulk_select_page": "此页面上的所有 {{count}} 个 {{entity}} 均已选中。",
     "info_bans": "显示 {{start}} 到 {{end}} 条，共 {{total}} 条封禁",
     "info_cache": "显示 {{start}} 到 {{end}} 条，共 {{total}} 个缓存文件",
     "info_configs": "显示 {{start}} 到 {{end}} 条，共 {{total}} 条自定义配置",
@@ -620,6 +625,8 @@
   },
   "form": {
     "checkbox": {
+      "include_attached_configs": "包含附加的自定义配置",
+      "overwrite_existing_configs": "覆盖现有 UI/API 自定义配置",
       "remember_me": "记住我"
     },
     "help": {
@@ -692,11 +699,11 @@
       "use_real_ip": "使用真实 IP",
       "username": "用户名",
       "wildcard_certificates": "通配符证书",
-      "zerossl_api_connect_timeout": "ZeroSSL API 连接超时",
       "zerossl_api_key": "ZeroSSL API 密钥",
-      "zerossl_api_max_time": "ZeroSSL API 最大时长",
       "zerossl_api_retry": "ZeroSSL API 重试次数",
-      "zerossl_api_retry_delay": "ZeroSSL API 重试延迟"
+      "zerossl_api_retry_delay": "ZeroSSL API 重试延迟",
+      "zerossl_api_connect_timeout": "ZeroSSL API 连接超时",
+      "zerossl_api_max_time": "ZeroSSL API 最大时长"
     },
     "placeholder": {
       "2fa_code": "输入代码",
@@ -789,6 +796,9 @@
       "fetch_global_settings_point_1": "仅更新本模板中存在的设置。",
       "fetch_global_settings_point_2": "与默认值相同的值会被忽略。",
       "fetch_global_settings_point_3": "SERVER_NAME 永不会被覆盖。",
+      "export_services_intro": "将导出所选服务。启用下面的选项可将其附加的自定义配置打包到 .zip 存档中。",
+      "import_configs_dropzone": "将您的自定义配置导出文件拖放到此处，或单击以选择文件。",
+      "import_configs_warning": "由 scheduler、autoconf 或 templates 创建的自定义配置始终会保留。只能覆盖 UI/API 配置。",
       "import_services_dropzone": "将您的服务导出文件拖放到此处，或单击以选择文件。",
       "import_services_warning": "导入服务将从导出文件创建新的 UI 服务。现有服务将被跳过。",
       "instance_creation_alert": "您不需要提供端口或服务器名称；`API_HTTP_PORT`、`API_LISTEN_HTTPS`、`API_HTTPS_PORT` 和 `API_SERVER_NAME` 的值将用于实例配置。",
@@ -823,8 +833,10 @@
       "delete_template": "删除模板",
       "edit_template": "编辑模板：{{name}}",
       "fetch_global_settings": "应用全局设置？",
+      "export_services": "导出服务",
       "from_plugin": "来自插件",
       "full_url": "完整 URL",
+      "import_configs": "导入自定义配置",
       "import_services": "导入服务",
       "job_history": "最近 10 次任务执行",
       "job_history_count": "任务 {{count}} 次执行",
@@ -865,7 +877,6 @@
     "misc": "杂项",
     "mode_selection": "模式选择",
     "more": "更多...",
-    "new": "新建",
     "plugin_activated": "插件已激活",
     "plugin_activated_global": "插件已全局激活",
     "plugin_deactivated": "插件已停用",
@@ -1030,7 +1041,6 @@
     "last_30d": "过去 30 天",
     "last_7d": "过去 7 天",
     "last_run": "上次运行",
-    "last_run_state": "上次运行状态",
     "last_seen": "最后出现",
     "last_update": "最后更新",
     "loading": "正在加载搜索窗格...",
@@ -1098,9 +1108,9 @@
       "section": {
         "custom_certificate": "自定义证书",
         "lets_encrypt": "Let's Encrypt",
+        "zerossl": "ZeroSSL",
         "real_ip": "真实 IP",
-        "reverse_proxy": "反向代理",
-        "zerossl": "ZeroSSL"
+        "reverse_proxy": "反向代理"
       },
       "subtitle": "配置 Web UI 特定设置。",
       "title": "UI 设置"
@@ -1329,8 +1339,8 @@
       "raw_configs_title": "自定义配置导入",
       "raw_configs_upload": "上传配置文件 (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "无法读取所选文件之一。",
-      "raw_editor_aria": "原始模板 JSON 编辑器",
       "raw_editor_drop_hint": "拖放模板 JSON 文件（仅限 .json）以替换当前内容。",
+      "raw_editor_aria": "原始模板 JSON 编辑器",
       "raw_editor_help": "将完整的模板定义编辑为 JSON。切换回简单模式会验证并重新加载可视化编辑器。",
       "raw_editor_import_success": "模板 JSON 成功导入。",
       "raw_editor_override_body": "导入此文件将完全替换当前模板 JSON。在编辑器中所做的更改将丢失。您要继续吗？",
@@ -1451,7 +1461,6 @@
     "auto_lets_encrypt": "是否自动请求 Let's Encrypt 证书。",
     "button": {
       "ban_ip": "封禁此 IP 地址",
-      "clone_template": "克隆模板 {{template}}",
       "convert_config_to_draft": "Convert Config {{name}} to Draft",
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "将服务 {{name}} 转换为草稿",
@@ -1519,8 +1528,8 @@
     "latest_version_installed": "您正在运行最新版本。",
     "lets_encrypt_custom_profile": "用于 Let's Encrypt 的自定义配置文件（例如 'my_custom_profile'）。",
     "lets_encrypt_disable_public_suffixes": "禁用针对符合公共后缀列表的域名的证书请求（推荐）。",
-    "lets_encrypt_profile": "用于 Let's Encrypt 的配置文件（classic、tlsserver、shortlived）。",
     "lets_encrypt_server": "选择您的证书提供商以显示提供商特定设置。",
+    "lets_encrypt_profile": "用于 Let's Encrypt 的配置文件（classic、tlsserver、shortlived）。",
     "license_key": "您的 BunkerWeb PRO 许可证密钥。",
     "link": {
       "access_plugin_page": "访问 {{name}} 页面",
@@ -1532,6 +1541,7 @@
       "edit_config": "编辑自定义配置 {{name}}",
       "edit_service": "编辑服务 {{service}}",
       "edit_template": "编辑模板 {{template}}",
+      "export_config": "导出自定义配置 {{name}}",
       "export_service": "导出服务 {{name}} 配置",
       "view_config": "查看自定义配置 {{name}}",
       "view_file": "查看 {{filename}}",
@@ -1695,11 +1705,11 @@
     "view_full_url": "点击查看完整 URL",
     "wildcard_certificates": "生成通配符证书 (*.domain.com)。需要 DNS 质询。",
     "wildcard_dns_only": "通配符证书仅支持 DNS 质询类型。",
-    "zerossl_api_connect_timeout": "ZeroSSL API 调用的连接超时秒数。",
     "zerossl_api_key": "由 zerossl-bot 使用的可选 ZeroSSL API 密钥。",
-    "zerossl_api_max_time": "每个 ZeroSSL API 请求的最大总时长（秒）。",
     "zerossl_api_retry": "ZeroSSL API 请求的重试次数（0 表示禁用重试）。",
-    "zerossl_api_retry_delay": "ZeroSSL API 重试之间的延迟秒数。"
+    "zerossl_api_retry_delay": "ZeroSSL API 重试之间的延迟秒数。",
+    "zerossl_api_connect_timeout": "ZeroSSL API 调用的连接超时秒数。",
+    "zerossl_api_max_time": "每个 ZeroSSL API 请求的最大总时长（秒）。"
   },
   "totp": {
     "prompt": "请输入您的 TOTP 代码。"

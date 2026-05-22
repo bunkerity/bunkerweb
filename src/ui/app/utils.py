@@ -7,16 +7,16 @@ from pathlib import Path
 from string import printable
 from subprocess import PIPE, Popen, call
 from time import sleep
-from typing import Dict, FrozenSet, Optional, Set, Union
+from typing import Any, Dict, FrozenSet, Optional, Set, Union
 from urllib.parse import unquote
 
 from bcrypt import checkpw, gensalt, hashpw
+from defusedcsv.csv import _escape as _defusedcsv_escape, writer as _defusedcsv_writer
 from flask import flash as flask_flash, session
 from regex import compile as re_compile, match
 from requests import get
 
 from logger import getLogger  # type: ignore
-
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
@@ -26,6 +26,8 @@ LOGGER = getLogger("UI")
 RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default server", ""})
 
 USER_PASSWORD_RX = re_compile(r"^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*\P{Alnum}).{8,}$")
+BCRYPT_HASH_RX = re_compile(r"^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}\Z")
+RECOMMENDED_BCRYPT_COST = 12  # below this, a supplied pre-hashed ADMIN_PASSWORD triggers a warning
 PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}$")
 
 BISCUIT_PUBLIC_KEY_FILE = LIB_DIR.joinpath(".biscuit_public_key")
@@ -239,6 +241,14 @@ def is_ui_api_method(method: Optional[str]) -> bool:
     return method in UI_API_METHODS
 
 
+def can_delete_service(service: Dict[str, Any]) -> bool:
+    """Services deletable from the UI: ui/api methods always, autoconf only when drafted."""
+    method = service.get("method")
+    if is_ui_api_method(method):
+        return True
+    return method == "autoconf" and bool(service.get("is_draft"))
+
+
 def get_filtered_settings(settings: dict, global_config: bool = False) -> Dict[str, dict]:
     multisites = {}
     for setting, data in settings.items():
@@ -266,6 +276,22 @@ def get_blacklisted_settings(global_config: bool = False) -> Set[str]:
 
 def gen_password_hash(password: str) -> bytes:
     return hashpw(password.encode("utf-8"), gensalt(rounds=13))
+
+
+def is_bcrypt_hash(value: str) -> bool:
+    """True if value is a well-formed bcrypt hash this build's bcrypt lib can verify."""
+    if not BCRYPT_HASH_RX.match(value):
+        return False
+    try:
+        checkpw(b"bunkerweb-bcrypt-probe", value.encode("utf-8"))
+    except (ValueError, TypeError):
+        return False  # prefix/format the installed bcrypt lib cannot parse -> treat as plaintext
+    return True
+
+
+def bcrypt_cost(value: str) -> int:
+    """Cost factor of a bcrypt hash. Caller must ensure value passed is_bcrypt_hash() first."""
+    return int(value[4:6])
 
 
 def check_password(password: str, hashed: bytes) -> bool:
@@ -361,3 +387,19 @@ def _sanitize_internal_next(next_url, default):
     if any(ord(c) < 32 for c in decoded):
         raise ValueError("control chars not allowed")
     return decoded or default
+
+
+def csv_writer(csvfile, *args, **kwargs):
+    """Return a ``defusedcsv`` writer that escapes spreadsheet formula payloads (CWE-1236).
+
+    Use this for all UI CSV exports instead of ``csv.writer``.
+    """
+    return _defusedcsv_writer(csvfile, *args, **kwargs)
+
+
+def csv_safe(value: Any) -> Any:
+    """Escape one cell value with ``defusedcsv`` formula-injection protection (CWE-1236).
+
+    Use this for user-controlled values written through openpyxl.
+    """
+    return _defusedcsv_escape(value)

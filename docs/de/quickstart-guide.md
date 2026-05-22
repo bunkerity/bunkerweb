@@ -18,7 +18,7 @@ Diese Schnellstart-Anleitung hilft Ihnen, BunkerWeb schnell zu installieren und 
 
 Der Schutz bestehender Webanwendungen, die bereits über das HTTP(S)-Protokoll erreichbar sind, ist das Hauptziel von BunkerWeb: Es fungiert als klassischer [Reverse-Proxy](https://de.wikipedia.org/wiki/Reverse_Proxy) mit zusätzlichen Sicherheitsfunktionen.
 
-Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples) des Repositorys finden Sie Beispiele aus der Praxis.
+Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.10/examples) des Repositorys finden Sie Beispiele aus der Praxis.
 
 ## Grundlegende Einrichtung
 
@@ -33,7 +33,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples)
       -p 80:8080/tcp \
       -p 443:8443/tcp \
       -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.9
+      bunkerity/bunkerweb-all-in-one:1.6.10
     ```
 
     Standardmäßig stellt der Container Folgendes bereit:
@@ -51,8 +51,8 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples)
 
     ```bash
     # Laden Sie das Skript und seine Prüfsumme herunter
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.9/install-bunkerweb.sh
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.9/install-bunkerweb.sh.sha256
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.10/install-bunkerweb.sh
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.10/install-bunkerweb.sh.sha256
 
     # Überprüfen Sie die Prüfsumme
     sha256sum -c install-bunkerweb.sh.sha256
@@ -68,10 +68,13 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples)
     #### Highlights des Easy-Install-Skripts
 
     - Erkennt Ihre Linux-Distribution und CPU-Architektur im Voraus und warnt, wenn Sie sich außerhalb der unterstützten Matrix befinden, bevor Änderungen vorgenommen werden.
-    - Der interaktive Ablauf lässt Sie das Installationsprofil auswählen (Full Stack, Manager, Worker usw.); im Manager-Modus wird die API immer auf `0.0.0.0` gebunden, der Setup-Assistent deaktiviert und nach der freizuschaltenden IP gefragt (in nicht-interaktiven Läufen per `--manager-ip` übergeben), während der Worker-Modus die Manager-IP(s) für seine Whitelist erzwingt.
+    - Interaktive Eingabeaufforderungen verwenden eine Inline-TUI via [gum](https://github.com/charmbracelet/gum) — Pfeiltastenmenüs mit `❯`-Cursor und maskierte Passwortfelder. Beim ersten interaktiven Lauf lädt das Skript das offizielle `gum`-Binary aus der [GitHub-Release](https://github.com/charmbracelet/gum/releases) herunter (SHA256-gepinnt, optionale cosign-Signaturprüfung, sofern cosign installiert ist), führt es aus einem Temp-Verzeichnis aus und entfernt das Temp-Verzeichnis beim Beenden — **es wird kein Systempaket installiert, keine apt/dnf-Quelle hinzugefügt und kein Binary auf dem System hinterlassen**. Kann gum nicht bezogen werden, verwendet der Installer ein bereits vorhandenes `whiptail`; ist auch das nicht verfügbar, fällt er auf einfache Texteingaben zurück.
+    - Zwei Flags steuern die TUI: `--no-tui` (oder `BW_INSTALL_TUI=no`) überspringt alle TUI-Ebenen und verwendet einfache Texteingaben; `--tui` erfordert eine funktionierende TUI und bricht ab, wenn gum nicht abgerufen werden kann und kein vorhandenes whiptail verfügbar ist.
+    - Wenn der Installer per Pipe gestartet wird (`curl … | bash`) oder stdin kein TTY ist, beendet er sich mit einer klaren Fehlermeldung, anstatt jede Vorgabe stillschweigend zu übernehmen. Verwenden Sie `--yes` zusammen mit den passenden `--*`-Flags / `*_INPUT`-Umgebungsvariablen für nicht-interaktive Installationen.
+    - Der interaktive Ablauf lässt Sie das Installationsprofil auswählen (Full Stack, Manager, Worker usw.); im Manager-Modus wird der interne API-Listener auf `0.0.0.0` gebunden, der Setup-Assistent deaktiviert und nach der freizuschaltenden IP gefragt (in nicht-interaktiven Läufen per `--manager-ip` übergeben), während der Worker-Modus die Manager-IP(s) für seine Whitelist erzwingt.
     - Manager-Installationen können weiterhin entscheiden, ob der Web-UI-Dienst gestartet werden soll, obwohl der Assistent deaktiviert bleibt.
     - Die Zusammenfassung zeigt an, ob der FastAPI-Dienst gestartet wird, sodass Sie ihn bewusst mit `--api` / `--no-api` aktivieren oder deaktivieren können.
-    - CrowdSec-Optionen stehen nur für Full-Stack-Installationen zur Verfügung; Manager-/Worker-Modi überspringen sie automatisch, damit sich der Ablauf auf die Fernverwaltung konzentriert.
+    - CrowdSec wird interaktiv nur bei Full-Stack-Installationen abgefragt. Auf der CLI sind `--crowdsec` und `--crowdsec-appsec` für Full Stack und Manager gültig; Worker-, Scheduler-only-, UI-only- und API-only-Modi lehnen sie ab.
 
     Weitere Installationsmethoden (Paketmanager, Installationstypen, nicht-interaktive Flags, CrowdSec-Integration usw.) finden Sie unter [Linux-Integration](integrations.md#linux).
 
@@ -90,7 +93,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples)
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.10
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -103,7 +106,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples)
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.10
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -120,7 +123,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples)
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.9
+        image: bunkerity/bunkerweb-ui:1.6.10
         environment:
           <<: *bw-env
         restart: "unless-stopped"
@@ -148,7 +151,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples)
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:
@@ -187,7 +190,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples)
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.10
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -203,7 +206,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples)
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.10
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -221,7 +224,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples)
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.9
+        image: bunkerity/bunkerweb-autoconf:1.6.10
         depends_on:
           - bw-docker
         environment:
@@ -244,7 +247,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples)
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.9
+        image: bunkerity/bunkerweb-ui:1.6.10
         environment:
           <<: *bw-ui-env
           TOTP_ENCRYPTION_KEYS: "mysecret" # Denken Sie daran, einen stärkeren geheimen Schlüssel festzulegen (siehe Abschnitt Voraussetzungen)
@@ -273,7 +276,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples)
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:
@@ -339,7 +342,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples)
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.10
         ports:
           - published: 80
             target: 8080
@@ -369,7 +372,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples)
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.10
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -387,7 +390,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples)
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.9
+        image: bunkerity/bunkerweb-autoconf:1.6.10
         environment:
           <<: *bw-ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -416,7 +419,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples)
               - "node.role == manager"
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.9
+        image: bunkerity/bunkerweb-ui:1.6.10
         environment:
           <<: *bw-ui-env
           TOTP_ENCRYPTION_KEYS: "mysecret" # Denken Sie daran, einen stärkeren geheimen Schlüssel festzulegen (siehe Abschnitt Voraussetzungen)
@@ -637,7 +640,7 @@ Sie können sich nun mit dem während des Einrichtungsassistenten erstellten Adm
       -e "www.example.com_REVERSE_PROXY_HOST=http://myapp:8080" \
       -e "www.example.com_REVERSE_PROXY_URL=/" \
       # --- Fügen Sie alle anderen vorhandenen Umgebungsvariablen für UI, Redis, CrowdSec usw. hinzu ---
-      bunkerity/bunkerweb-all-in-one:1.6.9
+      bunkerity/bunkerweb-all-in-one:1.6.10
     ```
 
     Ihr Anwendungscontainer (`myapp`) und der `bunkerweb-aio`-Container müssen sich im selben Docker-Netzwerk befinden, damit BunkerWeb ihn über den Hostnamen `myapp` erreichen kann.
@@ -659,7 +662,7 @@ Sie können sich nun mit dem während des Einrichtungsassistenten erstellten Adm
       -p 443:8443/tcp \
       -p 443:8443/udp \
     #   ... (alle anderen relevanten Umgebungsvariablen wie im Hauptbeispiel oben gezeigt) ...
-      bunkerity/bunkerweb-all-in-one:1.6.9
+      bunkerity/bunkerweb-all-in-one:1.6.10
     ```
 
     Stellen Sie sicher, dass Sie `myapp` durch den tatsächlichen Namen oder die IP Ihres Anwendungscontainers und `http://myapp:8080` durch dessen korrekte Adresse und Port ersetzen.

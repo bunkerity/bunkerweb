@@ -30,7 +30,7 @@ def _safe_member_path(root: Path, member_name: str) -> Optional[Path]:
         if member_name.startswith("/"):
             return None
         target = (root / member_name).resolve()
-        if not str(target).startswith(str(root.resolve())):
+        if not target.is_relative_to(root.resolve()):
             return None
         return target
     except Exception:

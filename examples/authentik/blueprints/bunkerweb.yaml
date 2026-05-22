@@ -1,0 +1,58 @@
+version: 1
+metadata:
+  name: BunkerWeb forward-auth demo
+entries:
+  - model: authentik_providers_proxy.proxyprovider
+    id: app1-provider
+    identifiers:
+      name: app1-provider
+    attrs:
+      name: app1-provider
+      mode: forward_domain
+      external_host: https://app1.example.com
+      cookie_domain: example.com
+      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+      authentication_flow: !Find [authentik_flows.flow, [slug, default-authentication-flow]]
+      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+  - model: authentik_core.application
+    identifiers:
+      slug: app1
+    attrs:
+      name: App1
+      slug: app1
+      provider: !KeyOf app1-provider
+  - model: authentik_providers_proxy.proxyprovider
+    id: app2-provider
+    identifiers:
+      name: app2-provider
+    attrs:
+      name: app2-provider
+      mode: forward_domain
+      external_host: https://app2.example.com
+      cookie_domain: example.com
+      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+      authentication_flow: !Find [authentik_flows.flow, [slug, default-authentication-flow]]
+      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+  - model: authentik_core.application
+    identifiers:
+      slug: app2
+    attrs:
+      name: App2
+      slug: app2
+      provider: !KeyOf app2-provider
+  - model: authentik_outposts.outpost
+    identifiers:
+      managed: goauthentik.io/outposts/embedded
+    attrs:
+      providers:
+        - !KeyOf app1-provider
+        - !KeyOf app2-provider
+      config:
+        authentik_host: https://auth.example.com/
+        authentik_host_insecure: true
+        authentik_host_browser: https://auth.example.com/
+        log_level: info
+        error_reporting: false
+        object_naming_template: "ak-outpost-%(name)s"
+        kubernetes_replicas: 1
+        kubernetes_namespace: default

@@ -1,13 +1,39 @@
 [
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing Disruptive actions (1/n)",
-    "expected":{
-      "debug_log": " Running action deny",
-      "http_code":403
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Disruptive actions (1/n)",
+    "client": {
+      "ip": "",
+      "port": 0
     },
-    "rules":[
+    "server": {
+      "ip": "",
+      "port": 0
+    },
+    "request": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "uri": "/",
+      "method": "GET",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "debug_log": " Running action deny",
+      "http_code": 403
+    },
+    "rules": [
       "SecRuleEngine On",
       "SecRuleEngine On",
       "SecDefaultAction \"phase:2,deny,status:404\"",
@@ -15,14 +41,40 @@
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing Disruptive actions (2/n)",
-    "expected":{
-      "debug_log": "Rule engine disabled, returning...",
-      "http_code":200
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Disruptive actions (2/n)",
+    "client": {
+      "ip": "",
+      "port": 0
     },
-    "rules":[
+    "server": {
+      "ip": "",
+      "port": 0
+    },
+    "request": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "uri": "",
+      "method": "",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "debug_log": "Rule engine disabled, returning...",
+      "http_code": 200
+    },
+    "rules": [
       "SecRuleEngine On",
       "SecRuleEngine Off",
       "SecDefaultAction \"phase:2,deny,status:404\"",
@@ -30,13 +82,39 @@
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing Disruptive actions (3/n)",
-    "expected":{
-      "http_code":200
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Disruptive actions (3/n)",
+    "client": {
+      "ip": "",
+      "port": 0
     },
-    "rules":[
+    "server": {
+      "ip": "",
+      "port": 0
+    },
+    "request": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "uri": "",
+      "method": "",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "http_code": 200
+    },
+    "rules": [
       "SecRuleEngine On",
       "SecRuleEngine DetectionOnly",
       "SecDefaultAction \"phase:2,deny,status:404\"",
@@ -44,14 +122,40 @@
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing Disruptive actions (4/n)",
-    "expected":{
-      "debug_log": "Rule engine disabled, returning...",
-      "http_code":200
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Disruptive actions (4/n)",
+    "client": {
+      "ip": "",
+      "port": 0
     },
-    "rules":[
+    "server": {
+      "ip": "",
+      "port": 0
+    },
+    "request": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "uri": "",
+      "method": "",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "debug_log": "Rule engine disabled, returning...",
+      "http_code": 200
+    },
+    "rules": [
       "SecRuleEngine On",
       "SecRuleEngine Off",
       "SecDefaultAction \"phase:2,deny,status:404\"",
@@ -59,14 +163,40 @@
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing Disruptive actions (5/n)",
-    "expected":{
-      "debug_log": "Rule engine disabled, returning...",
-      "http_code":200
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Disruptive actions (5/n)",
+    "client": {
+      "ip": "",
+      "port": 0
     },
-    "rules":[
+    "server": {
+      "ip": "",
+      "port": 0
+    },
+    "request": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "uri": "",
+      "method": "",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "debug_log": "Rule engine disabled, returning...",
+      "http_code": 200
+    },
+    "rules": [
       "SecRuleEngine On",
       "SecRuleEngine Off",
       "SecDefaultAction \"phase:2,deny,status:404\"",

@@ -13,6 +13,9 @@
     <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
         <input type="hidden" id="services_number" value="{{ services|length }}" />
         <input type="hidden" id="templates" value="{{ templates|join(' ') }}" />
+        <input type="hidden"
+               id="services_with_configs"
+               value="{{ services_with_configs|join(' ') }}" />
         <textarea type="hidden"
                   id="columns_preferences_defaults"
                   class="visually-hidden">{{ columns_preferences_defaults['services']|tojson }}</textarea>
@@ -141,7 +144,7 @@
                         <td class="service-last-update-date">{{ service['last_update'].astimezone().isoformat() }}</td>
                         <td>
                             <div class="d-flex justify-content-evenly">
-                                {% set can_delete_service = is_ui_api_method(service['method']) %}
+                                {% set can_delete = can_delete_service(service) %}
                                 <div {% if service['is_draft'] %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by draft mode" data-i18n="tooltip.disabled_draft"{% endif %}>
                                     <a role="button"
                                        class="btn btn-outline-primary btn-sm me-1{% if service['is_draft'] %} disabled{% endif %}"
@@ -191,20 +194,18 @@
                                         <i class="bx bx-transfer bx-xs"></i>
                                     </button>
                                 </div>
-                                <a role="button"
-                                   class="btn btn-outline-secondary btn-sm me-1 export-service"
-                                   href="{{ url_for("services") }}/export?services={{ service['id'] }}"
-                                   data-bs-toggle="tooltip"
-                                   data-bs-placement="bottom"
-                                   data-bs-original-title="Export service {{ service['id'] }} configuration"
-                                   data-i18n="tooltip.link.export_service"
-                                   data-i18n-options='{"name": "{{ service['id'] }}"}'
-                                   target="_blank"
-                                   rel="noreferrer">
-                                    <i class="bx bx-export bx-xs"></i>
-                                </a>
-                                {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if not can_delete_service else 'tooltip.button.delete_service')) %}
-                                {% set delete_tooltip_options = '{"method": "' ~ service['method'] ~ '"}' if not can_delete_service and not is_readonly else '{"name": "' ~ service['id'] ~ '"}' %}
+                                <button type="button"
+                                        class="btn btn-outline-secondary btn-sm me-1 export-service"
+                                        data-service-id="{{ service['id'] }}"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="bottom"
+                                        data-bs-original-title="Export service {{ service['id'] }} configuration"
+                                        data-i18n="tooltip.link.export_service"
+                                        data-i18n-options='{"service": "{{ service['id'] }}"}'>
+                                    <i class="bx bx-export bx-xs" aria-hidden="true"></i>
+                                </button>
+                                {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if not can_delete else 'tooltip.button.delete_service')) %}
+                                {% set delete_tooltip_options = '{"method": "' ~ service['method'] ~ '"}' if not can_delete and not is_readonly else '{"name": "' ~ service['id'] ~ '"}' %}
                                 <div data-bs-toggle="tooltip"
                                      data-bs-placement="bottom"
                                      data-bs-original-title="..."
@@ -212,7 +213,7 @@
                                      data-i18n-options='{{ delete_tooltip_options }}'>
                                     <button type="button"
                                             data-service-id="{{ service['id'] }}"
-                                            class="btn btn-outline-danger btn-sm me-1 delete-service{% if not can_delete_service %} disabled{% endif %}">
+                                            class="btn btn-outline-danger btn-sm me-1 delete-service{% if not can_delete %} disabled{% endif %}">
                                         <i class="bx bx-trash bx-xs"></i>
                                     </button>
                                 </div>
@@ -268,9 +269,13 @@
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                             <div role="button"
                                  id="services-drag-area"
+                                 tabindex="0"
+                                 aria-controls="services-import-file"
+                                 aria-label="Select a services export file or drop one here"
+                                 data-i18n-aria-label="aria.label.services_dropzone"
                                  class="border border-primary border-2 border-dashed rounded d-flex justify-content-center align-items-center h-px-200">
                                 <div class="text-center">
-                                    <i class="bx bx-lg bxs-cloud-upload text-primary"></i>
+                                    <i class="bx bx-lg bxs-cloud-upload text-primary" aria-hidden="true"></i>
                                     <p class="mt-3 fs-5" data-i18n="modal.body.import_services_dropzone">
                                         Drag and drop your services export file here or click to select a file.
                                     </p>
@@ -279,14 +284,26 @@
                             <input type="file"
                                    id="services-import-file"
                                    name="services_file"
-                                   accept=".env,text/plain"
+                                   accept=".env,.zip,text/plain,application/zip"
                                    class="visually-hidden"
                                    required />
                             <div id="services-import-file-list" class="mt-3"></div>
+                            <div id="services-import-configs-options" class="form-check mt-3 d-none">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="overwrite_configs"
+                                       value="yes"
+                                       id="services-import-overwrite-configs" />
+                                <label class="form-check-label"
+                                       for="services-import-overwrite-configs"
+                                       data-i18n="form.checkbox.overwrite_existing_configs">
+                                    Overwrite existing UI/API custom configurations
+                                </label>
+                            </div>
                             <div class="alert alert-warning text-center mt-3"
                                  role="alert"
                                  data-i18n="modal.body.import_services_warning">
-                                Importing services will create new UI services from the export file. Existing services are skipped.
+                                Importing services will create new UI services from the export file. Existing services are skipped. A .zip archive exported with custom configurations is also accepted.
                             </div>
                         </div>
                         <div class="modal-footer justify-content-center">
@@ -299,6 +316,51 @@
                                     data-i18n="button.cancel">Cancel</button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade"
+             id="modal-export-services"
+             data-bs-backdrop="static"
+             tabindex="-1"
+             aria-hidden="true"
+             role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" data-i18n="modal.title.export_services">Export services</h5>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                                data-i18n="aria.label.close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p data-i18n="modal.body.export_services_intro">
+                            The selected services will be exported. Enable the option below to bundle their attached custom configurations into a .zip archive.
+                        </p>
+                        <div id="selected-services-export" class="mb-3"></div>
+                        <div class="form-check">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   id="services-export-include-configs" />
+                            <label class="form-check-label"
+                                   for="services-export-include-configs"
+                                   data-i18n="form.checkbox.include_attached_configs">
+                                Include attached custom configurations
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button"
+                                id="services-export-confirm"
+                                class="btn btn-outline-primary me-2"
+                                data-i18n="button.export">Export</button>
+                        <button type="button"
+                                class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal"
+                                data-i18n="button.cancel">Cancel</button>
+                    </div>
                 </div>
             </div>
         </div>

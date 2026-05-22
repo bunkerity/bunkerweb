@@ -275,6 +275,9 @@ append:
 
     h->key = hv->key;
     h->value = *value;
+#if defined(nginx_version) && nginx_version >= 1023000
+    h->next = NULL;
+#endif
 
     h->lowcase_key = ngx_pnalloc(r->pool, h->key.len);
     if (h->lowcase_key == NULL) {

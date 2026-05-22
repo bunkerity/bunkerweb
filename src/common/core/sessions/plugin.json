@@ -23,6 +23,15 @@
       "regex": "^[a-zA-Z0-9_-]+$",
       "type": "text"
     },
+    "SESSIONS_DOMAIN": {
+      "context": "multisite",
+      "default": "",
+      "help": "Domain attribute set on the session cookie for this server (e.g. `example.com` or `.example.com`). Leave empty to keep the cookie scoped to the exact host. Set it to a parent registrable domain to share the session (and therefore antibot/challenge state) across sibling subdomains. In a multisite setup, configure this per-server so unrelated tenants never receive a cross-tenant `Domain` attribute.",
+      "id": "sessions-domain",
+      "label": "Sessions cookie domain",
+      "regex": "^(?!(?:\\d+\\.)+\\d+$)(?!\\d+$)(\\.?[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+)?$",
+      "type": "text"
+    },
     "SESSIONS_IDLING_TIMEOUT": {
       "context": "global",
       "default": "1800",

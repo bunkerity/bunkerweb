@@ -4,6 +4,14 @@ $(document).ready(function () {
   const originalService = selectedService;
   let selectedType = $("#selected-type").val().trim();
   const originalType = selectedType;
+  const useModsecurityGlobalCrs =
+    ($("#use-modsecurity-global-crs").val() || "no").trim().toLowerCase() ===
+    "yes";
+  const globalCrsServiceScopedModsecCrsError = $(
+    "#global-crs-service-scoped-modsec-crs-error",
+  )
+    .val()
+    .trim();
   const originalName = $("#config-name").val().trim();
   let isDraft =
     ($("#config-is-draft").val() || "no").trim().toLowerCase() === "yes";
@@ -87,12 +95,106 @@ $(document).ready(function () {
   );
   const $typeDropdownItems = $("#types-dropdown-menu li.nav-item");
 
+  const showFeedbackToast = (title, body, level = "warning") => {
+    const borderClass =
+      level === "error"
+        ? "border-danger"
+        : level === "warning"
+          ? "border-warning"
+          : "border-primary";
+    const textClass =
+      level === "error"
+        ? "text-danger"
+        : level === "warning"
+          ? "text-warning"
+          : "text-primary";
+    const toastId = `config-edit-feedback-${Date.now()}`;
+    const bgClass = theme === "light" ? "bg-white" : "bg-dark";
+    const toast = $(`
+      <div id="${toastId}" class="bs-toast toast fade ${bgClass} border ${borderClass}" role="alert" aria-live="polite" aria-atomic="true" data-bs-autohide="false">
+        <div class="toast-header d-flex align-items-center ${textClass}">
+          <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
+          <span class="fw-medium me-auto">${title}</span>
+          <small class="text-body-secondary">just now</small>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">${body}</div>
+      </div>
+    `);
+
+    toast.appendTo("#feedback-toast-container");
+    const instance = new bootstrap.Toast(toast[0]);
+    toast.on("hidden.bs.toast", function () {
+      $(this).remove();
+    });
+    instance.show();
+  };
+
+  const showTemporaryTooltip = ($target, message, level = "warning") => {
+    $target
+      .attr("data-bs-custom-class", `${level}-tooltip`)
+      .attr("data-bs-original-title", message)
+      .tooltip("show");
+
+    setTimeout(() => {
+      $target.tooltip("hide").attr("data-bs-original-title", "");
+    }, 2000);
+  };
+
+  const updateServiceDropdownState = (serviceName) => {
+    $serviceDropdownItems.each(function () {
+      const item = $(this);
+      const isActive =
+        String(item.data("service")).toLowerCase() === serviceName;
+      item.toggleClass("active", isActive);
+      item.attr("aria-selected", isActive ? "true" : "false");
+    });
+  };
+
   const changeTypesVisibility = () => {
     const isGlobal = selectedService.toLowerCase() === "global";
     $typeDropdownItems.each(function () {
       const item = $(this);
       item.toggle(isGlobal || item.data("context") === "multisite");
     });
+  };
+
+  const setSelectedService = (serviceName) => {
+    selectedService = serviceName;
+    const label =
+      serviceName.toLowerCase() === "global"
+        ? "Global"
+        : $serviceDropdownItems
+            .filter((_, item) => {
+              return (
+                String($(item).data("service")).toLowerCase() ===
+                serviceName.toLowerCase()
+              );
+            })
+            .first()
+            .text()
+            .trim() || serviceName;
+    $("#service-display").text(label);
+    updateServiceDropdownState(serviceName.toLowerCase());
+    changeTypesVisibility();
+  };
+
+  const enforceGlobalServiceForModsecCrs = () => {
+    if (
+      !useModsecurityGlobalCrs ||
+      selectedType !== "MODSEC_CRS" ||
+      selectedService.toLowerCase() === "global"
+    ) {
+      return false;
+    }
+
+    setSelectedService("global");
+    showFeedbackToast(
+      "Warning",
+      `${globalCrsServiceScopedModsecCrsError} The service was switched to Global.`,
+      "warning",
+    );
+    return true;
   };
 
   $("#select-service").on("click", () => $serviceSearch.focus());
@@ -132,29 +234,20 @@ $(document).ready(function () {
 
   $serviceDropdownItems.on("click", function () {
     const previousService = selectedService;
-    selectedService = $(this).data("service");
-    $("#service-display").text($(this).text().trim());
-    changeTypesVisibility();
+    const requestedService = String($(this).data("service"));
+    setSelectedService(requestedService);
+    if (enforceGlobalServiceForModsecCrs()) {
+      return;
+    }
     if (
       selectedService.toLowerCase() === "global" &&
       previousService.toLowerCase() !== "global"
     ) {
-      $("#select-type")
-        .parent()
-        .attr("data-bs-custom-class", "info-tooltip")
-        .attr(
-          "data-bs-original-title",
-          "You can now select global types for your custom config.",
-        )
-        .tooltip("show");
-
-      // Hide tooltip after 2 seconds
-      setTimeout(() => {
-        $("#select-type")
-          .parent()
-          .tooltip("hide")
-          .attr("data-bs-original-title", "");
-      }, 2000);
+      showTemporaryTooltip(
+        $("#select-type").parent(),
+        "You can now select global types for your custom config.",
+        "info",
+      );
     } else if (
       selectedService.toLowerCase() !== "global" &&
       $(`#config-type-${selectedType}`).data("context") !== "multisite"
@@ -163,22 +256,11 @@ $(document).ready(function () {
         `#types-dropdown-menu li.nav-item[data-context="multisite"]`,
       ).first();
       const newTypeName = firstMultisiteType.text().trim();
-      $("#select-type")
-        .parent()
-        .attr("data-bs-custom-class", "warning-tooltip")
-        .attr(
-          "data-bs-original-title",
-          `Switched to ${newTypeName} as ${selectedType} is not a valid multisite type.`,
-        )
-        .tooltip("show");
-
-      // Hide tooltip after 2 seconds
-      setTimeout(() => {
-        $("#select-type")
-          .parent()
-          .tooltip("hide")
-          .attr("data-bs-original-title", "");
-      }, 2000);
+      showTemporaryTooltip(
+        $("#select-type").parent(),
+        `Switched to ${newTypeName} as ${selectedType} is not a valid multisite type.`,
+        "warning",
+      );
 
       firstMultisiteType.find("button").tab("show");
       selectedType = newTypeName;
@@ -190,6 +272,7 @@ $(document).ready(function () {
     editor.session.setMode("ace/mode/nginx");
     selectedType = $(this).text().trim();
     $("#type-display").text(selectedType);
+    enforceGlobalServiceForModsecCrs();
     // if (selectedType.startsWith("CRS") || selectedType.startsWith("MODSEC")) {
     //   editor.session.setMode("ace/mode/text"); // TODO: Support ModSecurity
     // } else {

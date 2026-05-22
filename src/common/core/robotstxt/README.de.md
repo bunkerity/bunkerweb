@@ -81,15 +81,15 @@ ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
 
 **Mit Kopf- und Fußzeile**
 
-````yaml
+```yaml
 USE_ROBOTSTXT: "yes"
 ROBOTSTXT_HEADER: "# Dies ist eine benutzerdefinierte Kopfzeile"
 ROBOTSTXT_RULE: "User-agent: *"
 ROBOTSTXT_RULE_1: "Disallow: /private"
 ROBOTSTXT_FOOTER: "# Dies ist eine benutzerdefinierte Fußzeile"
-ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"```
+ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
+```
 
 ---
 
 Weitere Informationen finden Sie in der [robots.txt-Dokumentation](https://www.robotstxt.org/robotstxt.html).
-````

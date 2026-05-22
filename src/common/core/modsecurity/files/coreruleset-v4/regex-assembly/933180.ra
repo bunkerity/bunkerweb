@@ -1,0 +1,40 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! This rule detects PHP variable function calls.
+##! Examples: $func(), $$func(), $var['key'](), ${expression}()
+
+##!> define php-id-start [a-zA-Z_\x7f-\xff]
+##!> define php-id-chars [a-zA-Z0-9_\x7f-\xff]
+
+##! One or more dollar signs (PHP variable prefix)
+##!^ \$+
+
+##! Noise between variable name and function call (zero or more):
+##! whitespace, array access [...], curly braces {...},
+##! block comments /* ... */, line comments //..., hash comments #...
+##!> assemble
+  \s
+  \[.+\]
+  {.+}
+  /\*.*\*/
+  //.*
+  #.*
+  ##!=>
+  *
+  ##!=< noise
+##!<
+
+##! PHP variable name or curly brace expression,
+##! followed by optional noise, then function call
+##!> assemble
+  ##! PHP identifier (e.g., $varName, $$func, $__call)
+  {{php-id-start}}{{php-id-chars}}*
+  ##! Curly brace expression (e.g., ${expr}, ${'func'})
+  \s*{.+}
+  ##!=>
+  ##!=> noise
+  ##!=>
+  ##! Function call with optional arguments
+  \(.*\)
+##!<

@@ -51,6 +51,10 @@ stamp-h1
 src/.libs
 src/version.h
 src/teststackxss
+src/testerrorhandling
 
 src/fuzz/fuzzer
 src/fuzz/corpus
+
+src/libinjection_sqli_data.h
+src/sqlparse_data.json

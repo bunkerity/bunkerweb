@@ -18,7 +18,9 @@
   "aria": {
     "label": {
       "close": "닫기",
-      "raw_configuration": "원본 설정"
+      "configs_dropzone": "사용자 지정 설정 내보내기 파일을 선택하거나 여기에 놓으세요",
+      "raw_configuration": "원본 설정",
+      "services_dropzone": "서비스 내보내기 파일을 선택하거나 여기에 놓으세요"
     }
   },
   "badge": {
@@ -94,10 +96,8 @@
     "enable_totp": "TOTP 활성화",
     "entire_config": "전체 설정",
     "export": "내보내기",
-    "export_csv_all": "CSV (전체)",
-    "export_csv_visible": "CSV (표시된 항목)",
-    "export_excel_all": "Excel (전체)",
-    "export_excel_visible": "Excel (표시된 항목)",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
     "fetch_global": "전역 설정 가져오기",
     "filters_suffix": " 필터",
     "follow": "추적",
@@ -107,6 +107,7 @@
     "go_back": "뒤로 가기",
     "hide": "숨기기",
     "history": "기록",
+    "import_configs": "사용자 지정 설정 가져오기",
     "import_services": "서비스 가져오기",
     "login": "로그인",
     "multiple_add": "추가",
@@ -474,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "일치하는 {{entity}} {{count}}개 모두 선택",
+    "bulk_select_all_done": "일치하는 {{entity}} {{count}}개가 모두 선택되었습니다.",
+    "bulk_select_clear": "선택 지우기",
+    "bulk_select_page": "이 페이지의 {{entity}} {{count}}개가 모두 선택되었습니다.",
     "info_bans": "{{total}}개의 차단 항목 중 {{start}}~{{end}} 표시 중",
     "info_cache": "{{total}}개의 캐시 파일 중 {{start}}~{{end}} 표시 중",
     "info_configs": "{{total}}개의 사용자 정의 설정 중 {{start}}~{{end}} 표시 중",
@@ -620,6 +625,8 @@
   },
   "form": {
     "checkbox": {
+      "include_attached_configs": "첨부된 사용자 지정 설정 포함",
+      "overwrite_existing_configs": "기존 UI/API 사용자 지정 설정 덮어쓰기",
       "remember_me": "로그인 상태 유지"
     },
     "help": {
@@ -692,11 +699,11 @@
       "use_real_ip": "실제 IP 사용",
       "username": "사용자 이름",
       "wildcard_certificates": "와일드카드 인증서",
-      "zerossl_api_connect_timeout": "ZeroSSL API 연결 시간 초과",
       "zerossl_api_key": "ZeroSSL API 키",
-      "zerossl_api_max_time": "ZeroSSL API 최대 시간",
       "zerossl_api_retry": "ZeroSSL API 재시도 횟수",
-      "zerossl_api_retry_delay": "ZeroSSL API 재시도 지연"
+      "zerossl_api_retry_delay": "ZeroSSL API 재시도 지연",
+      "zerossl_api_connect_timeout": "ZeroSSL API 연결 시간 초과",
+      "zerossl_api_max_time": "ZeroSSL API 최대 시간"
     },
     "placeholder": {
       "2fa_code": "코드 입력",
@@ -789,6 +796,9 @@
       "fetch_global_settings_point_1": "이 템플릿에 존재하는 설정만 업데이트됩니다.",
       "fetch_global_settings_point_2": "기본값과 동일한 값은 무시됩니다.",
       "fetch_global_settings_point_3": "SERVER_NAME은 재정의되지 않습니다.",
+      "export_services_intro": "선택한 서비스가 내보내집니다. 아래 옵션을 활성화하면 첨부된 사용자 지정 설정을 .zip 아카이브에 함께 묶습니다.",
+      "import_configs_dropzone": "사용자 지정 설정 내보내기 파일을 여기로 끌어다 놓거나 클릭하여 파일을 선택하세요.",
+      "import_configs_warning": "scheduler, autoconf 또는 templates에서 만든 사용자 지정 설정은 항상 보존됩니다. UI/API 설정만 덮어쓸 수 있습니다.",
       "import_services_dropzone": "서비스 내보내기 파일을 이곳에 드래그 앤 드롭하거나 클릭하여 선택하세요.",
       "import_services_warning": "서비스를 가져오면 내보내기 파일로부터 새로운 UI 서비스가 생성됩니다. 이미 존재하는 서비스는 건너뜁니다.",
       "instance_creation_alert": "포트나 서버 이름을 입력할 필요가 없습니다. 인스턴스 설정에는 `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT`, `API_SERVER_NAME`의 값이 사용됩니다.",
@@ -823,8 +833,10 @@
       "delete_template": "템플릿 삭제",
       "edit_template": "템플릿 수정: {{name}}",
       "fetch_global_settings": "전역 설정을 적용하시겠습니까?",
+      "export_services": "서비스 내보내기",
       "from_plugin": "플러그인 원본:",
       "full_url": "전체 URL",
+      "import_configs": "사용자 지정 설정 가져오기",
       "import_services": "서비스 가져오기",
       "job_history": "최근 10회 작업 실행 기록",
       "job_history_count": "최근 {{count}}회 작업 실행 기록",
@@ -1031,6 +1043,7 @@
     "last_run": "마지막 실행 상태",
     "last_seen": "마지막 감지",
     "last_update": "마지막 업데이트",
+    "loading": "검색 창을 로드하는 중...",
     "method": "방식",
     "next_24h": "향후 24시간",
     "next_30d": "향후 30일",
@@ -1095,9 +1108,9 @@
       "section": {
         "custom_certificate": "사용자 정의 인증서",
         "lets_encrypt": "Let's Encrypt",
+        "zerossl": "ZeroSSL",
         "real_ip": "실제 IP",
-        "reverse_proxy": "리버스 프록시",
-        "zerossl": "ZeroSSL"
+        "reverse_proxy": "리버스 프록시"
       },
       "subtitle": "Web UI 전용 설정을 구성합니다.",
       "title": "UI 설정"
@@ -1252,9 +1265,6 @@
       "url": "URL",
       "user_agent": "User-Agent",
       "version": "버전"
-    },
-    "services": {
-      "security_mode": "서비스의 보안 모드 (차단 또는 감지)"
     }
   },
   "template": {
@@ -1329,8 +1339,8 @@
       "raw_configs_title": "사용자 정의 설정 가져오기",
       "raw_configs_upload": "설정 파일 업로드 (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "선택한 파일 중 하나를 읽을 수 없습니다.",
-      "raw_editor_aria": "원시 템플릿 JSON 편집기",
       "raw_editor_drop_hint": "현재 내용을 교체하려면 템플릿 JSON 파일(.json 전용)을 여기에 끌어다 놓으세요.",
+      "raw_editor_aria": "원시 템플릿 JSON 편집기",
       "raw_editor_help": "전체 템플릿 정의를 JSON으로 편집합니다. 간편 모드로 돌아가면 시각적 에디터가 유효성 검사 후 다시 로드됩니다.",
       "raw_editor_import_success": "템플릿 JSON을 성공적으로 가져왔습니다.",
       "raw_editor_override_body": "이 파일을 가져오면 현재 템플릿 JSON이 완전히 교체됩니다. 에디터에서 수정한 내용은 손실됩니다. 계속하시겠습니까?",
@@ -1518,8 +1528,8 @@
     "latest_version_installed": "최신 버전을 사용 중입니다.",
     "lets_encrypt_custom_profile": "Let's Encrypt에 사용할 사용자 정의 프로필입니다 (예: 'my_custom_profile').",
     "lets_encrypt_disable_public_suffixes": "공용 접미사 목록(PSL)과 일치하는 도메인에 대한 인증서 요청을 비활성화합니다(권장).",
-    "lets_encrypt_profile": "Let's Encrypt에 사용할 프로필 (classic, tlsserver, shortlived)입니다.",
     "lets_encrypt_server": "공급자별 설정을 표시하려면 인증서 공급자를 선택하세요.",
+    "lets_encrypt_profile": "Let's Encrypt에 사용할 프로필 (classic, tlsserver, shortlived)입니다.",
     "license_key": "BunkerWeb PRO 라이선스 키입니다.",
     "link": {
       "access_plugin_page": "{{name}} 페이지 접근",
@@ -1531,6 +1541,7 @@
       "edit_config": "사용자 정의 설정 {{name}} 수정",
       "edit_service": "서비스 {{service}} 수정",
       "edit_template": "템플릿 {{template}} 수정",
+      "export_config": "사용자 지정 설정 {{name}} 내보내기",
       "export_service": "서비스 {{service}} 설정 내보내기",
       "view_config": "사용자 정의 설정 {{name}} 보기",
       "view_file": "{{filename}} 보기",
@@ -1694,11 +1705,11 @@
     "view_full_url": "클릭하여 전체 URL 보기",
     "wildcard_certificates": "와일드카드 인증서(*.domain.com)를 생성합니다. DNS 챌린지가 필요합니다.",
     "wildcard_dns_only": "와일드카드 인증서는 DNS 챌린지 유형에서만 지원됩니다.",
-    "zerossl_api_connect_timeout": "ZeroSSL API 호출의 연결 시간 초과(초)입니다.",
     "zerossl_api_key": "zerossl-bot에서 사용하는 선택적 ZeroSSL API 키입니다.",
-    "zerossl_api_max_time": "각 ZeroSSL API 요청의 최대 총 시간(초)입니다.",
     "zerossl_api_retry": "ZeroSSL API 요청의 재시도 횟수입니다 (0이면 재시도를 비활성화).",
-    "zerossl_api_retry_delay": "ZeroSSL API 재시도 간 지연 시간(초)입니다."
+    "zerossl_api_retry_delay": "ZeroSSL API 재시도 간 지연 시간(초)입니다.",
+    "zerossl_api_connect_timeout": "ZeroSSL API 호출의 연결 시간 초과(초)입니다.",
+    "zerossl_api_max_time": "각 ZeroSSL API 요청의 최대 총 시간(초)입니다."
   },
   "totp": {
     "prompt": "TOTP 코드를 입력해 주세요."

@@ -11,6 +11,33 @@ $(document).ready(function () {
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   const userReadOnly = $("#user-read-only").val().trim() === "True";
 
+  // Build the server-side export URL, forwarding the current search,
+  // ordering, and any active SearchPanes selections so the file matches
+  // what the user sees in the table (all columns, all matching rows).
+  const buildBansExportUrl = (dt, format) => {
+    const params = dt.ajax.params();
+    const exportParams = {
+      csrf_token: $("#csrf_token").val(),
+      search: params.search ? params.search.value : "",
+      order_column:
+        params.order && params.order.length > 0
+          ? params.columns[params.order[0].column].data
+          : "",
+      order_dir:
+        params.order && params.order.length > 0 ? params.order[0].dir : "",
+    };
+
+    Object.keys(params).forEach((key) => {
+      if (key.startsWith("searchPanes[")) {
+        exportParams[key] = params[key];
+      }
+    });
+
+    return `${window.location.pathname}/export/${format}?${$.param(
+      exportParams,
+    )}`;
+  };
+
   const headers = [
     {
       title: "Date",
@@ -456,7 +483,7 @@ $(document).ready(function () {
     },
     bottomStart: {
       pageLength: {
-        menu: [10, 25, 50, 100, { label: "All", value: -1 }],
+        menu: [10, 25, 50, 100, 500, 1000],
       },
       info: true,
     },
@@ -515,22 +542,17 @@ $(document).ready(function () {
           },
         },
         {
-          extend: "csv",
           text: `<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV`,
-          bom: true,
-          filename: "bw_bans",
-          exportOptions: {
-            modifier: { search: "none" },
-            columns: ":not(:nth-child(-n+2)):not(:last-child)",
+          className: "buttons-csv",
+          action: function (e, dt, button, config) {
+            window.location.href = buildBansExportUrl(dt, "csv");
           },
         },
         {
-          extend: "excel",
           text: `<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel`,
-          filename: "bw_bans",
-          exportOptions: {
-            modifier: { search: "none" },
-            columns: ":not(:nth-child(-n+2)):not(:last-child)",
+          className: "buttons-excel",
+          action: function (e, dt, button, config) {
+            window.location.href = buildBansExportUrl(dt, "excel");
           },
         },
       ],
@@ -723,39 +745,45 @@ $(document).ready(function () {
 
   const getSelectedBans = () => {
     const bans = [];
-    $("tr.selected").each(function () {
-      const $row = $(this);
-      const ip = $row.find("td:eq(3)").text().trim();
-      const time_remaining = $row.find("td:eq(9)").text().trim();
-      const scopeHtml = $row.find("td:eq(6)").html();
-      const serviceHtml = $row.find("td:eq(7)").html();
+    if (!$.fn.dataTable.isDataTable("#bans")) return bans;
+    $("#bans")
+      .DataTable()
+      .rows({ selected: true })
+      .nodes()
+      .to$()
+      .each(function () {
+        const $row = $(this);
+        const ip = $row.find("td:eq(3)").text().trim();
+        const time_remaining = $row.find("td:eq(9)").text().trim();
+        const scopeHtml = $row.find("td:eq(6)").html();
+        const serviceHtml = $row.find("td:eq(7)").html();
 
-      // Extract scope text, handling potential badge structure
-      const scopeText = $(scopeHtml).find("span[data-i18n]").length
-        ? $(scopeHtml).find("span[data-i18n]").text().trim()
-        : $(scopeHtml).text().trim();
+        // Extract scope text, handling potential badge structure
+        const scopeText = $(scopeHtml).find("span[data-i18n]").length
+          ? $(scopeHtml).find("span[data-i18n]").text().trim()
+          : $(scopeHtml).text().trim();
 
-      // Extract service text, handling potential links or static text
-      const serviceText = $(serviceHtml).find("strong").length
-        ? $(serviceHtml).find("strong").text().trim()
-        : $(serviceHtml).find("span[data-i18n]").length
-          ? $(serviceHtml).find("span[data-i18n]").text().trim()
-          : $(serviceHtml).text().trim();
+        // Extract service text, handling potential links or static text
+        const serviceText = $(serviceHtml).find("strong").length
+          ? $(serviceHtml).find("strong").text().trim()
+          : $(serviceHtml).find("span[data-i18n]").length
+            ? $(serviceHtml).find("span[data-i18n]").text().trim()
+            : $(serviceHtml).text().trim();
 
-      const ban_scope =
-        scopeText === t("scope.global", "Global") ? "global" : "service";
-      const service =
-        serviceText === t("scope.all_services", "All services")
-          ? null
-          : serviceText;
+        const ban_scope =
+          scopeText === t("scope.global", "Global") ? "global" : "service";
+        const service =
+          serviceText === t("scope.all_services", "All services")
+            ? null
+            : serviceText;
 
-      bans.push({
-        ip: ip,
-        time_remaining: time_remaining,
-        ban_scope: ban_scope,
-        service: service,
+        bans.push({
+          ip: ip,
+          time_remaining: time_remaining,
+          ban_scope: ban_scope,
+          service: service,
+        });
       });
-    });
     return bans;
   };
 
@@ -1033,7 +1061,7 @@ $(document).ready(function () {
       select: {
         style: "multi+shift",
         selector: "td:nth-child(2)",
-        headerCheckbox: true,
+        headerCheckbox: "select-page",
       },
       layout: layout,
       processing: true,

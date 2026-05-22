@@ -93,8 +93,8 @@ Linux package generation can be done directly with Docker in 2 steps:
 - `ubuntu-jammy`
 - `debian-bookworm`
 - `debian-trixie`
-- `fedora-42`
 - `fedora-43`
+- `fedora-44`
 - `rhel-8`
 - `rhel-9`
 - `rhel-10`

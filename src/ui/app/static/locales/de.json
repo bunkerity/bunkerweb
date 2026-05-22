@@ -18,7 +18,9 @@
   "aria": {
     "label": {
       "close": "Schließen",
-      "raw_configuration": "Rohkonfiguration"
+      "configs_dropzone": "Eine Exportdatei für benutzerdefinierte Konfigurationen auswählen oder hier ablegen",
+      "raw_configuration": "Rohkonfiguration",
+      "services_dropzone": "Eine Dienste-Exportdatei auswählen oder hier ablegen"
     }
   },
   "badge": {
@@ -94,10 +96,8 @@
     "enable_totp": "TOTP aktivieren",
     "entire_config": "Gesamte Konfiguration",
     "export": "Exportieren",
-    "export_csv_all": "CSV (Alle)",
-    "export_csv_visible": "CSV (Sichtbar)",
-    "export_excel_all": "Excel (Alle)",
-    "export_excel_visible": "Excel (Sichtbar)",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
     "fetch_global": "Globale Einstellungen abrufen",
     "filters_suffix": " Filter",
     "follow": "Folgen",
@@ -107,6 +107,7 @@
     "go_back": "Zurück",
     "hide": "Ausblenden",
     "history": "Verlauf",
+    "import_configs": "Benutzerdefinierte Konfigurationen importieren",
     "import_services": "Dienste importieren",
     "login": "Anmelden",
     "multiple_add": "HINZUFÜGEN",
@@ -127,7 +128,7 @@
     "reset_columns": "Spalten zurücksetzen",
     "return_to_safety": "Zurück zur Sicherheit",
     "run": "Ausführen",
-    "run_selected_jobs": "Ausgewählte Aufträge ausführen",
+    "run_selected_jobs": "Ausgewählte Aufgaben ausführen",
     "save": "Speichern",
     "save_changes": "Änderungen speichern",
     "select_file": "Datei auswählen",
@@ -474,6 +475,10 @@
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "Alle {{count}} passenden {{entity}} auswählen",
+    "bulk_select_all_done": "Alle {{count}} passenden {{entity}} sind ausgewählt.",
+    "bulk_select_clear": "Auswahl löschen",
+    "bulk_select_page": "Alle {{count}} {{entity}} auf dieser Seite sind ausgewählt.",
     "info_bans": "Zeige {{start}} bis {{end}} von {{total}} Sperren",
     "info_cache": "Zeige {{start}} bis {{end}} von {{total}} Cache-Dateien",
     "info_configs": "Zeige {{start}} bis {{end}} von {{total}} benutzerdefinierten Konfigurationen",
@@ -482,7 +487,7 @@
     "info_empty_configs": "Keine benutzerdefinierten Konfigurationen verfügbar",
     "info_empty_instances": "Keine Instanzen verfügbar",
     "info_empty_items": "Keine Elemente verfügbar",
-    "info_empty_jobs": "Keine Aufträge verfügbar",
+    "info_empty_jobs": "Keine Aufgaben verfügbar",
     "info_empty_plugins": "Keine Plugins verfügbar",
     "info_empty_reports": "Keine Berichte verfügbar",
     "info_empty_services": "Keine Dienste verfügbar",
@@ -492,14 +497,14 @@
     "info_filtered_configs": "(gefiltert aus _MAX_ gesamten benutzerdefinierten Konfigurationen)",
     "info_filtered_instances": "(gefiltert aus _MAX_ gesamten Instanzen)",
     "info_filtered_items": "(gefiltert aus _MAX_ gesamten Elementen)",
-    "info_filtered_jobs": "(gefiltert aus _MAX_ gesamten Aufträgen)",
+    "info_filtered_jobs": "(gefiltert aus _MAX_ gesamten Aufgaben)",
     "info_filtered_plugins": "(gefiltert aus _MAX_ gesamten Plugins)",
     "info_filtered_reports": "(gefiltert aus _MAX_ gesamten Berichten)",
     "info_filtered_services": "(gefiltert aus _MAX_ gesamten Diensten)",
     "info_filtered_templates": "(gefiltert aus _MAX_ gesamten Vorlagen)",
     "info_instances": "Zeige {{start}} bis {{end}} von {{total}} Instanzen",
     "info_items": "Zeige {{start}} bis {{end}} von {{total}} Elementen",
-    "info_jobs": "Zeige {{start}} bis {{end}} von {{total}} Aufträgen",
+    "info_jobs": "Zeige {{start}} bis {{end}} von {{total}} Aufgaben",
     "info_plugins": "Zeige {{start}} bis {{end}} von {{total}} Plugins",
     "info_reports": "Zeige {{start}} bis {{end}} von {{total}} Berichten",
     "info_services": "Zeige {{start}} bis {{end}} von {{total}} Diensten",
@@ -510,7 +515,7 @@
     "length_menu_configs": "Zeige _MENU_ benutzerdefinierte Konfigurationen",
     "length_menu_instances": "Zeige _MENU_ Instanzen",
     "length_menu_items": "Zeige _MENU_ Elemente",
-    "length_menu_jobs": "Zeige _MENU_ Aufträge",
+    "length_menu_jobs": "Zeige _MENU_ Aufgaben",
     "length_menu_plugins": "Zeige _MENU_ Plugins",
     "length_menu_reports": "Zeige _MENU_ Berichte",
     "length_menu_services": "Zeige _MENU_ Dienste",
@@ -538,9 +543,9 @@
     "select_rows_items_0": "Keine Elemente ausgewählt",
     "select_rows_items_1": "1 Element ausgewählt",
     "select_rows_items_plural": "%d Elemente ausgewählt",
-    "select_rows_jobs_0": "Keine Aufträge ausgewählt",
+    "select_rows_jobs_0": "Keine Aufgaben ausgewählt",
     "select_rows_jobs_1": "1 Auftrag ausgewählt",
-    "select_rows_jobs_plural": "%d Aufträge ausgewählt",
+    "select_rows_jobs_plural": "%d Aufgaben ausgewählt",
     "select_rows_plugins_0": "Keine Plugins ausgewählt",
     "select_rows_plugins_1": "1 Plugin ausgewählt",
     "select_rows_plugins_plural": "%d Plugins ausgewählt",
@@ -558,7 +563,7 @@
     "zero_records_configs": "Keine übereinstimmenden benutzerdefinierten Konfigurationen gefunden",
     "zero_records_instances": "Keine übereinstimmenden Instanzen gefunden",
     "zero_records_items": "Keine übereinstimmenden Elemente gefunden",
-    "zero_records_jobs": "Keine übereinstimmenden Aufträge gefunden",
+    "zero_records_jobs": "Keine übereinstimmenden Aufgaben gefunden",
     "zero_records_plugins": "Keine übereinstimmenden Plugins gefunden",
     "zero_records_reports": "Keine übereinstimmenden Berichte gefunden",
     "zero_records_services": "Keine übereinstimmenden Dienste gefunden",
@@ -620,6 +625,8 @@
   },
   "form": {
     "checkbox": {
+      "include_attached_configs": "Angehängte benutzerdefinierte Konfigurationen einschließen",
+      "overwrite_existing_configs": "Vorhandene benutzerdefinierte UI/API-Konfigurationen überschreiben",
       "remember_me": "Angemeldet bleiben"
     },
     "help": {
@@ -692,11 +699,11 @@
       "use_real_ip": "Echte IP verwenden",
       "username": "Benutzername",
       "wildcard_certificates": "Wildcard-Zertifikate",
-      "zerossl_api_connect_timeout": "ZeroSSL-API-Verbindungs-Timeout",
       "zerossl_api_key": "ZeroSSL-API-Schlüssel",
-      "zerossl_api_max_time": "ZeroSSL-API-Maximalzeit",
       "zerossl_api_retry": "ZeroSSL-API-Wiederholungen",
-      "zerossl_api_retry_delay": "ZeroSSL-API-Wiederholungsverzögerung"
+      "zerossl_api_retry_delay": "ZeroSSL-API-Wiederholungsverzögerung",
+      "zerossl_api_connect_timeout": "ZeroSSL-API-Verbindungs-Timeout",
+      "zerossl_api_max_time": "ZeroSSL-API-Maximalzeit"
     },
     "placeholder": {
       "2fa_code": "Code eingeben",
@@ -789,6 +796,9 @@
       "fetch_global_settings_point_1": "Nur in dieser Vorlage vorhandene Einstellungen werden aktualisiert.",
       "fetch_global_settings_point_2": "Werte, die den Standardwerten entsprechen, werden ignoriert.",
       "fetch_global_settings_point_3": "SERVER_NAME wird nie überschrieben.",
+      "export_services_intro": "Die ausgewählten Dienste werden exportiert. Aktivieren Sie die Option unten, um ihre angehängten benutzerdefinierten Konfigurationen in ein .zip-Archiv zu bündeln.",
+      "import_configs_dropzone": "Ziehen Sie Ihre Exportdatei für benutzerdefinierte Konfigurationen hierher oder klicken Sie, um eine Datei auszuwählen.",
+      "import_configs_warning": "Benutzerdefinierte Konfigurationen, die von scheduler, autoconf oder templates erstellt wurden, bleiben immer erhalten. Nur UI/API-Konfigurationen können überschrieben werden.",
       "import_services_dropzone": "Ziehen Sie Ihre Dienste-Exportdatei hierher oder klicken Sie, um eine Datei auszuwählen.",
       "import_services_warning": "Durch das Importieren von Diensten werden neue UI-Dienste aus der Exportdatei erstellt. Vorhandene Dienste werden übersprungen.",
       "instance_creation_alert": "Sie müssen den Port oder den Servernamen nicht angeben; die Werte von `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` und `API_SERVER_NAME` werden für die Instanzkonfiguration verwendet.",
@@ -823,8 +833,10 @@
       "delete_template": "Vorlagen löschen",
       "edit_template": "Vorlage bearbeiten: {{name}}",
       "fetch_global_settings": "Globale Einstellungen anwenden?",
+      "export_services": "Dienste exportieren",
       "from_plugin": "von Plugin",
       "full_url": "Vollständige URL",
+      "import_configs": "Benutzerdefinierte Konfigurationen importieren",
       "import_services": "Dienste importieren",
       "job_history": "Letzte 10 Auftragsausführungen",
       "job_history_count": "Letzte {{count}} Ausführungen von Auftrag",
@@ -860,7 +872,7 @@
     "global_settings": "Globale Einstellungen",
     "home": "Startseite",
     "instances": "Instanzen",
-    "jobs": "Aufträge",
+    "jobs": "Aufgaben",
     "logs": "Logs",
     "misc": "Verschiedenes",
     "mode_selection": "Modusauswahl",
@@ -1029,7 +1041,6 @@
     "last_30d": "Letzte 30 Tage",
     "last_7d": "Letzte 7 Tage",
     "last_run": "Letzter Lauf",
-    "last_run_state": "Status des letzten Laufs",
     "last_seen": "Zuletzt gesehen",
     "last_update": "Letzte Aktualisierung",
     "loading": "Suchbereiche werden geladen...",
@@ -1097,9 +1108,9 @@
       "section": {
         "custom_certificate": "Benutzerdefiniertes Zertifikat",
         "lets_encrypt": "Let's Encrypt",
+        "zerossl": "ZeroSSL",
         "real_ip": "Echte IP",
-        "reverse_proxy": "Reverse Proxy",
-        "zerossl": "ZeroSSL"
+        "reverse_proxy": "Reverse Proxy"
       },
       "subtitle": "Konfigurieren Sie spezifische Einstellungen für die Web-UI.",
       "title": "UI-Einstellungen"
@@ -1149,7 +1160,7 @@
     "loading_custom_configs": "Benutzerdefinierte Konfigurationen werden geladen...",
     "loading_instances": "Instanzen werden geladen...",
     "loading_items": "Elemente werden geladen...",
-    "loading_jobs": "Aufträge werden geladen...",
+    "loading_jobs": "Aufgaben werden geladen...",
     "loading_logs": "Logs werden geladen...",
     "loading_plugins": "Plugins werden geladen...",
     "loading_reports": "Berichte werden geladen...",
@@ -1328,8 +1339,8 @@
       "raw_configs_title": "Benutzerdefinierte Konfigurationsimporte",
       "raw_configs_upload": "Konfigurationsdateien hochladen (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "Eine der ausgewählten Dateien konnte nicht gelesen werden.",
-      "raw_editor_aria": "Editor für rohes Vorlagen-JSON",
       "raw_editor_drop_hint": "Legen Sie eine Vorlagen-JSON-Datei (.json nur) ab, um den aktuellen Inhalt zu ersetzen.",
+      "raw_editor_aria": "Editor für rohes Vorlagen-JSON",
       "raw_editor_help": "Bearbeiten Sie die gesamte Vorlagendefinition als JSON. Das Zurückschalten in den Einfach-Modus validiert und lädt den visuellen Editor neu.",
       "raw_editor_import_success": "Vorlagen-JSON erfolgreich importiert.",
       "raw_editor_override_body": "Das Importieren dieser Datei ersetzt die aktuelle Vorlagen-JSON vollständig. Im Editor vorgenommene Änderungen gehen verloren. Möchten Sie fortfahren?",
@@ -1450,7 +1461,6 @@
     "auto_lets_encrypt": "Ob automatisch ein Let's Encrypt-Zertifikat angefordert werden soll.",
     "button": {
       "ban_ip": "Diese IP-Adresse sperren",
-      "clone_template": "Vorlage {{template}} klonen",
       "convert_config_to_draft": "Convert Config {{name}} to Draft",
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "Dienst {{name}} in Entwurf konvertieren",
@@ -1461,7 +1471,6 @@
       "delete_plugin": "Plugin {{name}} löschen",
       "delete_service": "Dienst {{name}} löschen",
       "delete_template": "Vorlage {{name}} löschen",
-      "edit_template": "Vorlage {{template}} bearbeiten",
       "force_check": "Prüfung planen; lädt nur bei verfügbaren Updates herunter.",
       "force_update": "Überspringt Prüfungen und erzwingt den Download von PRO-Plugins; behält aktuellen Zustand bei Fehler bei.",
       "ping_instance": "Instanz {{hostname}} pingen",
@@ -1472,8 +1481,7 @@
       "show_selected_only": "Nur ausgewählte anzeigen",
       "stop_instance": "Instanz {{hostname}} stoppen",
       "unban_ip": "{{ip}} entsperren",
-      "value_from_global": "Wert aus globalen Einstellungen",
-      "view_template": "Vorlage {{template}} anzeigen"
+      "value_from_global": "Wert aus globalen Einstellungen"
     },
     "cannot_delete_original_ban": "Der ursprüngliche Sperreintrag kann nicht gelöscht werden.",
     "cannot_remove_disabled": "Kann nicht entfernt werden, da eine oder mehrere Einstellungen deaktiviert sind.",
@@ -1520,8 +1528,8 @@
     "latest_version_installed": "Sie verwenden die neueste Version.",
     "lets_encrypt_custom_profile": "Das benutzerdefinierte Profil, das für Let's Encrypt verwendet werden soll (z. B. 'mein_benutzerdefiniertes_profil').",
     "lets_encrypt_disable_public_suffixes": "Zertifikatsanfragen für Domains, die mit der Public Suffix List übereinstimmen, deaktivieren (empfohlen).",
-    "lets_encrypt_profile": "Das Profil, das für Let's Encrypt verwendet werden soll (classic, tlsserver, shortlived).",
     "lets_encrypt_server": "Wählen Sie Ihren Zertifikatsanbieter, um anbieterspezifische Einstellungen anzuzeigen.",
+    "lets_encrypt_profile": "Das Profil, das für Let's Encrypt verwendet werden soll (classic, tlsserver, shortlived).",
     "license_key": "Ihr BunkerWeb PRO Lizenzschlüssel.",
     "link": {
       "access_plugin_page": "Zugriff auf Seite {{name}}",
@@ -1533,6 +1541,7 @@
       "edit_config": "Benutzerdefinierte Konfiguration {{name}} bearbeiten",
       "edit_service": "Dienst {{service}} bearbeiten",
       "edit_template": "Vorlage {{template}} bearbeiten",
+      "export_config": "Benutzerdefinierte Konfiguration {{name}} exportieren",
       "export_service": "Dienstkonfiguration {{name}} exportieren",
       "view_config": "Benutzerdefinierte Konfiguration {{name}} anzeigen",
       "view_file": "{{filename}} anzeigen",
@@ -1624,7 +1633,7 @@
         "name": "Name des Auftrags",
         "plugin": "Mit dem Auftrag verbundenes Plugin",
         "reload": "Gibt an, ob der Auftrag einen BunkerWeb-Neustart auslöst",
-        "select_all": "Alle Aufträge auswählen"
+        "select_all": "Alle Aufgaben auswählen"
       },
       "plugins": {
         "actions": "Für dieses Plugin verfügbare Aktionen",
@@ -1696,11 +1705,11 @@
     "view_full_url": "Klicken, um die vollständige URL anzuzeigen",
     "wildcard_certificates": "Wildcard-Zertifikate generieren (*.domain.com). Erfordert DNS-Challenge.",
     "wildcard_dns_only": "Wildcard-Zertifikate werden nur mit dem DNS-Challenge-Typ unterstützt.",
-    "zerossl_api_connect_timeout": "Verbindungs-Timeout in Sekunden für ZeroSSL-API-Aufrufe.",
     "zerossl_api_key": "Optionaler ZeroSSL-API-Schlüssel, der von zerossl-bot verwendet wird.",
-    "zerossl_api_max_time": "Maximale Gesamtzeit in Sekunden pro ZeroSSL-API-Anfrage.",
     "zerossl_api_retry": "Anzahl der Wiederholungen für ZeroSSL-API-Anfragen (0 deaktiviert Wiederholungen).",
-    "zerossl_api_retry_delay": "Verzögerung in Sekunden zwischen ZeroSSL-API-Wiederholungen."
+    "zerossl_api_retry_delay": "Verzögerung in Sekunden zwischen ZeroSSL-API-Wiederholungen.",
+    "zerossl_api_connect_timeout": "Verbindungs-Timeout in Sekunden für ZeroSSL-API-Aufrufe.",
+    "zerossl_api_max_time": "Maximale Gesamtzeit in Sekunden pro ZeroSSL-API-Anfrage."
   },
   "totp": {
     "prompt": "Bitte geben Sie Ihren TOTP-Code ein."

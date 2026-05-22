@@ -1,0 +1,52 @@
+{
+  "projectTitle": "BunkerWeb",
+  "description": "Next-generation open-source Web Application Firewall (WAF) based on NGINX",
+  "branch": "master",
+  "folders": [
+    "docs/",
+    "src/common/core/",
+    "src/common/db/",
+    "src/common/gen/",
+    "src/common/utils/",
+    "src/common/confs/",
+    "src/bw/",
+    "src/scheduler/",
+    "src/autoconf/",
+    "src/api/",
+    "src/ui/"
+  ],
+  "excludeFolders": [
+    "docs/assets/",
+    "docs/node_modules/",
+    "docs/overrides/",
+    "docs/misc/",
+    "docs/diagrams/",
+    "src/bw/misc/",
+    "src/ui/app/static/",
+    "src/ui/app/templates/"
+  ],
+  "rules": [
+    "All BunkerWeb settings are environment variables in UPPERCASE_WITH_UNDERSCORES format",
+    "Settings have two contexts: 'global' (applies to entire instance) and 'multisite' (can be per-server when MULTISITE=yes)",
+    "In multisite mode, prefix settings with the server name to apply per-server: www.example.com_USE_ANTIBOT=captcha",
+    "SERVER_NAME is a space-separated list of domains, not a single domain: SERVER_NAME=www.example.com api.example.com",
+    "Numbered suffixes define multiple values: REVERSE_PROXY_URL_1=/api REVERSE_PROXY_HOST_1=http://backend1 REVERSE_PROXY_URL_2=/static REVERSE_PROXY_HOST_2=http://backend2",
+    "USE_REVERSE_PROXY=yes alone does nothing; REVERSE_PROXY_HOST and REVERSE_PROXY_URL are also required",
+    "BunkerWeb is secure by default: ModSecurity WAF, rate limiting, bad behavior detection, and strict security headers are all active in block mode out of the box",
+    "SECURITY_MODE defaults to 'block' (active blocking), not 'detect' (logging only)",
+    "USE_REAL_IP defaults to 'no'; must be enabled and REAL_IP_FROM configured when behind a CDN or load balancer",
+    "API_WHITELIST_IP defaults to 127.0.0.0/8; must expand for Docker networks (e.g., add scheduler/autoconf container IPs)",
+    "Internal API requires Host: bwapi header; requests with Host: 127.0.0.1 get 444 error",
+    "Docker autoconf mode requires AUTOCONF_MODE=yes and uses bunkerweb.* labels on containers for service discovery",
+    "Docker autoconf and Kubernetes modes automatically enforce multisite; setting MULTISITE=no will fail with multiple services",
+    "Kubernetes mode acts as Ingress controller; uses Ingress resources and ConfigMap annotations with bunkerweb.io/ prefix but can also act as a Gateway API controller with Gateway resources",
+    "Each plugin has a plugin.json with id, name, version, settings (with context/type/regex/default), and optional jobs array",
+    "Plugin jobs specify 'every' (once/minute/hour/day/week) and 'reload' (boolean); exit code 1 means success+reload, exit code >=2 means failure",
+    "Lua request processing follows NGINX phases in order: set, rewrite, access, content, header_filter, body_filter, log",
+    "External plugins use the same structure as core plugins and go in /etc/bunkerweb/plugins/{name}/",
+    "DATABASE_URI is required for multi-component setups (Docker/Kubernetes); SQLite is default for single-instance",
+    "Rate limiting defaults to 2 requests/second (LIMIT_REQ_RATE) and 10 HTTP/1.1 connections per IP (LIMIT_CONN_MAX_HTTP1)",
+    "HSTS is enabled by default with max-age=63072000 (2 years), includeSubDomains, and preload",
+    "Custom NGINX configs use CUSTOM_CONF_SERVER_HTTP_myconf pattern for server block directives and have the 'multisite' context"
+  ]
+}

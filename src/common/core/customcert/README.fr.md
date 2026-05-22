@@ -9,14 +9,15 @@ Comment ça marche :
 5. Vous gardez le contrôle total sur le cycle de vie des certificats.
 
 !!! info "Surveillance automatique"
-    Avec `USE_CUSTOM_SSL: yes`, BunkerWeb surveille le certificat `CUSTOM_SSL_CERT`, détecte les changements et recharge NGINX si nécessaire.
+    Avec le paramètre `USE_CUSTOM_SSL` défini à `yes`, BunkerWeb surveille le certificat `CUSTOM_SSL_CERT`, détecte les changements et recharge NGINX si nécessaire.
 
 ### Comment l’utiliser
 
-1. Activer : `USE_CUSTOM_SSL: yes`.
+1. Activer : mettez le paramètre `USE_CUSTOM_SSL` à `yes`.
 2. Méthode : fichiers vs données, priorité via `CUSTOM_SSL_CERT_PRIORITY`.
 3. Fichiers : fournissez les chemins du certificat et de la clé privée.
 4. Données : fournissez les chaînes base64 ou PEM en clair.
+5. Laisser BunkerWeb faire le reste : une fois configuré, vos certificats personnalisés sont utilisés automatiquement pour les connexions HTTPS.
 
 !!! tip "Mode stream"
     En mode stream, configurez `LISTEN_STREAM_PORT_SSL` pour le port SSL/TLS.

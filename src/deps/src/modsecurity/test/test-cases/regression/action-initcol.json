@@ -1,30 +1,43 @@
 [
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing initcol action",
-    "expected":{
-      "debug_log": "Saving variable: IP:auth_attempt with value: "
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing initcol action",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
-        "User-Agent":"My sweet little browser"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "User-Agent": "My sweet little browser",
+        "Content-Length": "0"
       },
-      "uri":"/?key=value&key=other_value",
-      "method":"GET"
+      "uri": "/?key=value&key=other_value",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
     },
-    "rules":[
+    "expected": {
+      "debug_log": "Saving variable: IP:auth_attempt with value: ",
+      "http_code": 200
+    },
+    "rules": [
       "SecRuleEngine On",
       "SecRule REQUEST_HEADERS:User-Agent \"^(.*)$\" \"id:'900018',phase:1,t:none,t:sha1,t:hexEncode,setvar:tx.ua_hash=%{matched_var},nolog,pass\"",
       "SecRule &TX:REAL_IP \"@eq 0\" \"id:'900021',phase:1,t:none,initcol:global=global,initcol:ip=%{remote_addr}_%{tx.ua_hash},setvar:tx.real_ip=%{remote_addr},nolog,pass\"",

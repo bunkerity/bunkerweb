@@ -25,12 +25,28 @@ for deps_path in [os.path.join(os.sep, "usr", "share", "bunkerweb", *paths) for 
         sys_path.append(deps_path)
 
 from common_utils import effective_cpu_count  # type: ignore
-from Database import Database  # type: ignore
+from Database import Database, DEFAULT_POOL_MAX_OVERFLOW, DEFAULT_POOL_SIZE  # type: ignore
 from logger import getLogger  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 
 
 class JobScheduler(ApiCaller):
+    # Auto-default bounds for the job executor. Scheduler jobs are I/O bound (LE,
+    # blocklist sync, plugin downloads); ceiling caps DB-pool pressure, floor keeps a
+    # slow LE renew from serializing the loop. Override via SCHEDULER_MAX_WORKERS.
+    _SCHEDULER_WORKERS_AUTO_CEILING = 8
+    _SCHEDULER_WORKERS_AUTO_FLOOR = 2
+    _SCHEDULER_WORKERS_AUTO_MULTIPLIER = 2
+
+    @classmethod
+    def _auto_max_workers(cls) -> int:
+        """Conservative I/O-bound default for the job executor: ``min(ceiling, max(floor, cpu * mult))``."""
+        cpu = max(1, effective_cpu_count())
+        return min(
+            cls._SCHEDULER_WORKERS_AUTO_CEILING,
+            max(cls._SCHEDULER_WORKERS_AUTO_FLOOR, cpu * cls._SCHEDULER_WORKERS_AUTO_MULTIPLIER),
+        )
+
     def __init__(
         self,
         logger: Optional[Logger] = None,
@@ -47,8 +63,12 @@ class JobScheduler(ApiCaller):
         self.__lock = lock
         self.__thread_lock = Lock()
         self.__job_success = True
+        # Names of jobs that failed in the most recent run_once/run_pending batch. Exposed
+        # via the ``failed_jobs`` property so callers can log which specific jobs failed
+        # instead of only knowing that "at least one" did.
+        self.__failed_jobs: List[str] = []
         self.__job_reload = False
-        self.__executor = ThreadPoolExecutor(max_workers=min(8, effective_cpu_count() * 4))
+        self.__executor = ThreadPoolExecutor(max_workers=self.__resolve_max_workers())
         self.__compiled_regexes = self.__compile_regexes()
         self.__module_paths = set()
         self.__module_paths_lock = Lock()  # Dedicated lock for module paths
@@ -56,6 +76,49 @@ class JobScheduler(ApiCaller):
         self.__module_cache_lock = Lock()  # Lock for module cache access
         self.__cache_permissions_updated = False  # Track if permissions were updated
         self.update_jobs()
+
+    def __resolve_max_workers(self) -> int:
+        """Resolve ``SCHEDULER_MAX_WORKERS`` or fall back to :py:meth:`_auto_max_workers`.
+
+        Warns on invalid/non-positive values and on resolved > DB pool capacity
+        (``DATABASE_POOL_SIZE`` + ``DATABASE_POOL_MAX_OVERFLOW``). ``max_overflow<0``
+        is SQLAlchemy's "unlimited" sentinel and skips the cap check.
+        """
+        default = self._auto_max_workers()
+        raw = os.getenv("SCHEDULER_MAX_WORKERS", "").strip()
+        if not raw:
+            resolved = default
+        else:
+            try:
+                value = int(raw)
+            except ValueError:
+                self.__logger.warning(f"Invalid SCHEDULER_MAX_WORKERS value: {raw!r}, using default ({default})")
+                resolved = default
+            else:
+                if value <= 0:
+                    self.__logger.warning(f"SCHEDULER_MAX_WORKERS must be > 0 (got {value}), using default ({default})")
+                    resolved = default
+                else:
+                    resolved = value
+
+        # Advisory cap check vs DB pool. Reuses Database.py defaults so the two stay aligned.
+        with suppress(Exception):
+            pool_size_raw = os.getenv("DATABASE_POOL_SIZE", str(DEFAULT_POOL_SIZE)).strip() or str(DEFAULT_POOL_SIZE)
+            overflow_raw = os.getenv("DATABASE_POOL_MAX_OVERFLOW", str(DEFAULT_POOL_MAX_OVERFLOW)).strip() or str(DEFAULT_POOL_MAX_OVERFLOW)
+            pool_size = int(pool_size_raw) if pool_size_raw.isdigit() else DEFAULT_POOL_SIZE
+            try:
+                overflow = int(overflow_raw)
+            except ValueError:
+                overflow = DEFAULT_POOL_MAX_OVERFLOW
+            # SQLAlchemy QueuePool: any max_overflow < 0 means "unlimited".
+            if overflow >= 0 and resolved > pool_size + overflow:
+                self.__logger.warning(
+                    f"SCHEDULER_MAX_WORKERS={resolved} exceeds the DB pool capacity "
+                    f"(DATABASE_POOL_SIZE={pool_size} + DATABASE_POOL_MAX_OVERFLOW={overflow} = {pool_size + overflow}); "
+                    "scheduler threads may stall on pool checkout under burst."
+                )
+
+        return resolved
 
     def __compile_regexes(self):
         """Precompile regular expressions for job validation."""
@@ -200,6 +263,7 @@ class JobScheduler(ApiCaller):
 
         # Register in sys.modules to allow proper imports
         qualified_name = f"bw_job_{name}_{hash(module_key) & 0x7FFFFFFF}"
+        module.__bw_qualified_name__ = qualified_name
         sys_modules[qualified_name] = module
 
         # Execute the module
@@ -224,6 +288,7 @@ class JobScheduler(ApiCaller):
             self.__logger.error(f"Exception while executing job '{name}' from plugin '{plugin}': {e}")
             with self.__thread_lock:
                 self.__job_success = False
+                self.__failed_jobs.append(f"{plugin}/{name}")
         end_date = datetime.now().astimezone()
 
         if ret == 1:
@@ -235,6 +300,7 @@ class JobScheduler(ApiCaller):
             self.__logger.error(f"Error while executing job '{name}' from plugin '{plugin}'")
             with self.__thread_lock:
                 self.__job_success = False
+                self.__failed_jobs.append(f"{plugin}/{name}")
 
         # Use the executor to manage threads
         self.__executor.submit(self.__add_job_run, name, success, start_date, end_date)
@@ -297,7 +363,9 @@ class JobScheduler(ApiCaller):
             self.__logger.error("Database is in read-only mode, pending jobs will not be executed")
             return True
 
-        self.__job_success = True
+        with self.__thread_lock:
+            self.__job_success = True
+            self.__failed_jobs = []
         self.__job_reload = False
 
         try:
@@ -337,6 +405,9 @@ class JobScheduler(ApiCaller):
             # Reset flag for next batch
             self.__cache_permissions_updated = False
 
+            # Clean up cached modules to free memory
+            self.cleanup_modules()
+
             # Clean up module paths thread-safely
             with self.__module_paths_lock:
                 for module_path in self.__module_paths.copy():
@@ -346,12 +417,20 @@ class JobScheduler(ApiCaller):
 
             self.__update_cache_permissions()
 
+    @property
+    def failed_jobs(self) -> List[str]:
+        """Names of jobs (``plugin/name``) that failed in the most recent run batch."""
+        with self.__thread_lock:
+            return self.__failed_jobs.copy()
+
     def run_once(self, plugins: Optional[List[str]] = None, ignore_plugins: Optional[List[str]] = None) -> bool:
         if self.try_database_readonly():
             self.__logger.error("Database is in read-only mode, jobs will not be executed")
             return True
 
-        self.__job_success = True
+        with self.__thread_lock:
+            self.__job_success = True
+            self.__failed_jobs = []
         self.__job_reload = False
 
         plugins = plugins or []
@@ -388,6 +467,9 @@ class JobScheduler(ApiCaller):
         finally:
             # Reset flag for next batch
             self.__cache_permissions_updated = False
+
+            # Clean up cached modules to free memory
+            self.cleanup_modules()
 
             with self.__module_paths_lock:
                 for module_path in self.__module_paths.copy():
@@ -454,14 +536,17 @@ class JobScheduler(ApiCaller):
         """Clean up cached modules to free memory."""
         with self.__module_cache_lock:
             for module_key, module in self.__module_cache.items():
-                # Try to get the qualified name from sys.modules and remove it
-                qualified_name = f"bw_job_{getattr(module, '__name__', 'unknown')}_{hash(module_key) & 0x7FFFFFFF}"
+                # Use the stored qualified name for reliable cleanup
+                qualified_name = getattr(module, "__bw_qualified_name__", None)
+                if qualified_name is None:
+                    qualified_name = f"bw_job_{getattr(module, '__name__', 'unknown')}_{hash(module_key) & 0x7FFFFFFF}"
                 if qualified_name in sys_modules:
                     del sys_modules[qualified_name]
 
             module_count = len(self.__module_cache)
             self.__module_cache.clear()
-            self.__logger.info(f"Cleared {module_count} cached job modules")
+            if module_count > 0:
+                self.__logger.debug(f"Cleared {module_count} cached job modules")
 
     def __del__(self):
         """Destructor to clean up resources."""

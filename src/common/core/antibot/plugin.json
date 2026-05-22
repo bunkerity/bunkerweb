@@ -11,7 +11,7 @@
       "help": "Activate antibot feature.",
       "id": "use-antibot",
       "label": "Antibot challenge",
-      "regex": "^(no|cookie|javascript|captcha|recaptcha|hcaptcha|turnstile|mcaptcha)$",
+      "regex": "^(no|cookie|javascript|captcha|recaptcha|hcaptcha|turnstile|mcaptcha|capjs)$",
       "type": "select",
       "select": [
         "no",
@@ -21,7 +21,8 @@
         "recaptcha",
         "hcaptcha",
         "turnstile",
-        "mcaptcha"
+        "mcaptcha",
+        "capjs"
       ]
     },
     "ANTIBOT_URI": {
@@ -842,6 +843,42 @@
       "label": "mCaptcha domain",
       "regex": "^.*$",
       "type": "text"
+    },
+    "ANTIBOT_CAPJS_FRONTEND_URL": {
+      "context": "multisite",
+      "default": "",
+      "help": "Public origin the browser loads the Cap.js widget from (e.g. https://cap.example.com). Origin only, no path.",
+      "id": "antibot-capjs-frontend-url",
+      "label": "Cap.js frontend URL",
+      "regex": "^(https?://[A-Za-z0-9.\\-]+(:[0-9]+)?)?$",
+      "type": "text"
+    },
+    "ANTIBOT_CAPJS_BACKEND_URL": {
+      "context": "multisite",
+      "default": "",
+      "help": "Internal origin BunkerWeb calls for /siteverify (e.g. http://cap-server:3000). Origin only, no path. Falls back to the frontend URL when empty.",
+      "id": "antibot-capjs-backend-url",
+      "label": "Cap.js backend URL",
+      "regex": "^(https?://[A-Za-z0-9.\\-]+(:[0-9]+)?)?$",
+      "type": "text"
+    },
+    "ANTIBOT_CAPJS_SITEKEY": {
+      "context": "multisite",
+      "default": "",
+      "help": "Sitekey created in the Cap.js dashboard for this site.",
+      "id": "antibot-capjs-sitekey",
+      "label": "Cap.js sitekey",
+      "regex": "^[A-Za-z0-9._\\-]*$",
+      "type": "text"
+    },
+    "ANTIBOT_CAPJS_SECRET": {
+      "context": "multisite",
+      "default": "",
+      "help": "Secret paired with the sitekey, used by BunkerWeb to authenticate /siteverify calls.",
+      "id": "antibot-capjs-secret",
+      "label": "Cap.js secret",
+      "regex": "^[A-Za-z0-9._\\-]*$",
+      "type": "password"
     }
   }
 }

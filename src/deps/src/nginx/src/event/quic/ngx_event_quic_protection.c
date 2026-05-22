@@ -8,6 +8,12 @@
 #include <ngx_core.h>
 #include <ngx_event.h>
 #include <ngx_event_quic_connection.h>
+#if (NGX_QUIC_BORINGSSL_EVP_API)
+#include <openssl/hkdf.h>
+#include <openssl/chacha.h>
+#else
+#include <openssl/kdf.h>
+#endif
 
 
 /* RFC 9001, 5.4.1.  Header Protection Application: 5-byte mask */
@@ -33,7 +39,7 @@ static uint64_t ngx_quic_parse_pn(u_char **pos, ngx_int_t len, u_char *mask,
 
 static ngx_int_t ngx_quic_crypto_open(ngx_quic_secret_t *s, ngx_str_t *out,
     const u_char *nonce, ngx_str_t *in, ngx_str_t *ad, ngx_log_t *log);
-#ifndef OPENSSL_IS_BORINGSSL
+#if !(NGX_QUIC_BORINGSSL_EVP_API)
 static ngx_int_t ngx_quic_crypto_common(ngx_quic_secret_t *s, ngx_str_t *out,
     const u_char *nonce, ngx_str_t *in, ngx_str_t *ad, ngx_log_t *log);
 #endif
@@ -58,7 +64,7 @@ ngx_quic_ciphers(ngx_uint_t id, ngx_quic_ciphers_t *ciphers)
     switch (id) {
 
     case TLS1_3_CK_AES_128_GCM_SHA256:
-#ifdef OPENSSL_IS_BORINGSSL
+#if (NGX_QUIC_BORINGSSL_EVP_API)
         ciphers->c = EVP_aead_aes_128_gcm();
 #else
         ciphers->c = EVP_aes_128_gcm();
@@ -69,7 +75,7 @@ ngx_quic_ciphers(ngx_uint_t id, ngx_quic_ciphers_t *ciphers)
         break;
 
     case TLS1_3_CK_AES_256_GCM_SHA384:
-#ifdef OPENSSL_IS_BORINGSSL
+#if (NGX_QUIC_BORINGSSL_EVP_API)
         ciphers->c = EVP_aead_aes_256_gcm();
 #else
         ciphers->c = EVP_aes_256_gcm();
@@ -80,12 +86,12 @@ ngx_quic_ciphers(ngx_uint_t id, ngx_quic_ciphers_t *ciphers)
         break;
 
     case TLS1_3_CK_CHACHA20_POLY1305_SHA256:
-#ifdef OPENSSL_IS_BORINGSSL
+#if (NGX_QUIC_BORINGSSL_EVP_API)
         ciphers->c = EVP_aead_chacha20_poly1305();
 #else
         ciphers->c = EVP_chacha20_poly1305();
 #endif
-#ifdef OPENSSL_IS_BORINGSSL
+#if (NGX_QUIC_BORINGSSL_EVP_API)
         ciphers->hp = (const EVP_CIPHER *) EVP_aead_chacha20_poly1305();
 #else
         ciphers->hp = EVP_chacha20();
@@ -94,7 +100,7 @@ ngx_quic_ciphers(ngx_uint_t id, ngx_quic_ciphers_t *ciphers)
         len = 32;
         break;
 
-#ifndef OPENSSL_IS_BORINGSSL
+#if !(NGX_QUIC_BORINGSSL_EVP_API)
     case TLS1_3_CK_AES_128_CCM_SHA256:
         ciphers->c = EVP_aes_128_ccm();
         ciphers->hp = EVP_aes_128_ctr();
@@ -130,8 +136,8 @@ ngx_quic_keys_set_initial_secret(ngx_quic_keys_t *keys, ngx_str_t *secret,
         0x9a, 0xe6, 0xa4, 0xc8, 0x0c, 0xad, 0xcc, 0xbb, 0x7f, 0x0a
     };
 
-    client = &keys->secrets[ssl_encryption_initial].client;
-    server = &keys->secrets[ssl_encryption_initial].server;
+    client = &keys->secrets[NGX_QUIC_ENCRYPTION_INITIAL].client;
+    server = &keys->secrets[NGX_QUIC_ENCRYPTION_INITIAL].server;
 
     /*
      * RFC 9001, section 5.  Packet Protection
@@ -263,7 +269,7 @@ static ngx_int_t
 ngx_hkdf_expand(u_char *out_key, size_t out_len, const EVP_MD *digest,
     const uint8_t *prk, size_t prk_len, const u_char *info, size_t info_len)
 {
-#ifdef OPENSSL_IS_BORINGSSL
+#if (NGX_QUIC_BORINGSSL_EVP_API)
 
     if (HKDF_expand(out_key, out_len, digest, prk, prk_len, info, info_len)
         == 0)
@@ -325,7 +331,7 @@ ngx_hkdf_extract(u_char *out_key, size_t *out_len, const EVP_MD *digest,
     const u_char *secret, size_t secret_len, const u_char *salt,
     size_t salt_len)
 {
-#ifdef OPENSSL_IS_BORINGSSL
+#if (NGX_QUIC_BORINGSSL_EVP_API)
 
     if (HKDF_extract(out_key, out_len, digest, secret, secret_len, salt,
                      salt_len)
@@ -388,7 +394,7 @@ ngx_quic_crypto_init(const ngx_quic_cipher_t *cipher, ngx_quic_secret_t *s,
     ngx_quic_md_t *key, ngx_int_t enc, ngx_log_t *log)
 {
 
-#ifdef OPENSSL_IS_BORINGSSL
+#if (NGX_QUIC_BORINGSSL_EVP_API)
     EVP_AEAD_CTX  *ctx;
 
     ctx = EVP_AEAD_CTX_new(cipher, key->data, key->len,
@@ -448,7 +454,7 @@ static ngx_int_t
 ngx_quic_crypto_open(ngx_quic_secret_t *s, ngx_str_t *out, const u_char *nonce,
     ngx_str_t *in, ngx_str_t *ad, ngx_log_t *log)
 {
-#ifdef OPENSSL_IS_BORINGSSL
+#if (NGX_QUIC_BORINGSSL_EVP_API)
     if (EVP_AEAD_CTX_open(s->ctx, out->data, &out->len, out->len, nonce,
                           s->iv.len, in->data, in->len, ad->data, ad->len)
         != 1)
@@ -468,7 +474,7 @@ ngx_int_t
 ngx_quic_crypto_seal(ngx_quic_secret_t *s, ngx_str_t *out, const u_char *nonce,
     ngx_str_t *in, ngx_str_t *ad, ngx_log_t *log)
 {
-#ifdef OPENSSL_IS_BORINGSSL
+#if (NGX_QUIC_BORINGSSL_EVP_API)
     if (EVP_AEAD_CTX_seal(s->ctx, out->data, &out->len, out->len, nonce,
                           s->iv.len, in->data, in->len, ad->data, ad->len)
         != 1)
@@ -484,7 +490,7 @@ ngx_quic_crypto_seal(ngx_quic_secret_t *s, ngx_str_t *out, const u_char *nonce,
 }
 
 
-#ifndef OPENSSL_IS_BORINGSSL
+#if !(NGX_QUIC_BORINGSSL_EVP_API)
 
 static ngx_int_t
 ngx_quic_crypto_common(ngx_quic_secret_t *s, ngx_str_t *out,
@@ -563,7 +569,7 @@ void
 ngx_quic_crypto_cleanup(ngx_quic_secret_t *s)
 {
     if (s->ctx) {
-#ifdef OPENSSL_IS_BORINGSSL
+#if (NGX_QUIC_BORINGSSL_EVP_API)
         EVP_AEAD_CTX_free(s->ctx);
 #else
         EVP_CIPHER_CTX_free(s->ctx);
@@ -579,7 +585,7 @@ ngx_quic_crypto_hp_init(const EVP_CIPHER *cipher, ngx_quic_secret_t *s,
 {
     EVP_CIPHER_CTX  *ctx;
 
-#ifdef OPENSSL_IS_BORINGSSL
+#if (NGX_QUIC_BORINGSSL_EVP_API)
     if (cipher == (EVP_CIPHER *) EVP_aead_chacha20_poly1305()) {
         /* no EVP interface */
         s->hp_ctx = NULL;
@@ -615,7 +621,7 @@ ngx_quic_crypto_hp(ngx_quic_secret_t *s, u_char *out, u_char *in,
 
     ctx = s->hp_ctx;
 
-#ifdef OPENSSL_IS_BORINGSSL
+#if (NGX_QUIC_BORINGSSL_EVP_API)
     uint32_t         cnt;
 
     if (ctx == NULL) {
@@ -656,8 +662,8 @@ ngx_quic_crypto_hp_cleanup(ngx_quic_secret_t *s)
 
 ngx_int_t
 ngx_quic_keys_set_encryption_secret(ngx_log_t *log, ngx_uint_t is_write,
-    ngx_quic_keys_t *keys, enum ssl_encryption_level_t level,
-    const SSL_CIPHER *cipher, const uint8_t *secret, size_t secret_len)
+    ngx_quic_keys_t *keys, ngx_uint_t level, const SSL_CIPHER *cipher,
+    const uint8_t *secret, size_t secret_len)
 {
     ngx_int_t            key_len;
     ngx_str_t            secret_str;
@@ -722,8 +728,8 @@ ngx_quic_keys_set_encryption_secret(ngx_log_t *log, ngx_uint_t is_write,
 
 
 ngx_uint_t
-ngx_quic_keys_available(ngx_quic_keys_t *keys,
-    enum ssl_encryption_level_t level, ngx_uint_t is_write)
+ngx_quic_keys_available(ngx_quic_keys_t *keys, ngx_uint_t level,
+    ngx_uint_t is_write)
 {
     if (is_write == 0) {
         return keys->secrets[level].client.ctx != NULL;
@@ -734,8 +740,7 @@ ngx_quic_keys_available(ngx_quic_keys_t *keys,
 
 
 void
-ngx_quic_keys_discard(ngx_quic_keys_t *keys,
-    enum ssl_encryption_level_t level)
+ngx_quic_keys_discard(ngx_quic_keys_t *keys, ngx_uint_t level)
 {
     ngx_quic_secret_t  *client, *server;
 
@@ -765,7 +770,7 @@ ngx_quic_keys_switch(ngx_connection_t *c, ngx_quic_keys_t *keys)
 {
     ngx_quic_secrets_t  *current, *next, tmp;
 
-    current = &keys->secrets[ssl_encryption_application];
+    current = &keys->secrets[NGX_QUIC_ENCRYPTION_APPLICATION];
     next = &keys->next_key;
 
     ngx_quic_crypto_cleanup(&current->client);
@@ -794,7 +799,7 @@ ngx_quic_keys_update(ngx_event_t *ev)
     qc = ngx_quic_get_connection(c);
     keys = qc->keys;
 
-    current = &keys->secrets[ssl_encryption_application];
+    current = &keys->secrets[NGX_QUIC_ENCRYPTION_APPLICATION];
     next = &keys->next_key;
 
     ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, 0, "quic key update");
