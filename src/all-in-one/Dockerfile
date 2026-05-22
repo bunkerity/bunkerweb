@@ -1,4 +1,4 @@
-FROM nginx:1.30.1-alpine-slim@sha256:a5688ea5d06cccc298505dddac20e8e28bfe7de67b015a374006593bc23700b1  AS builder
+FROM nginx:1.30.1-alpine-slim@sha256:470297f0c1a833c3b3089542cb38d72c83a4beb2a449ef807d33267c0a063d7c  AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -163,7 +163,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM nginx:1.30.1-alpine-slim@sha256:a5688ea5d06cccc298505dddac20e8e28bfe7de67b015a374006593bc23700b1
+FROM nginx:1.30.1-alpine-slim@sha256:470297f0c1a833c3b3089542cb38d72c83a4beb2a449ef807d33267c0a063d7c
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
