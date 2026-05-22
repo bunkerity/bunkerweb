@@ -35,7 +35,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
     Utilisez les images publiées et le layout du [guide de démarrage rapide](quickstart-guide.md#__tabbed_1_3) pour monter la stack, puis terminez la configuration dans le navigateur.
 
     ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.10-rc1/misc/integrations/docker-compose.yml up -d
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.11~rc1-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
     Ouvrez le nom d’hôte du scheduler (par ex. `https://www.example.com/changeme`) et lancez l’assistant `/setup` pour configurer l’UI, le scheduler et l’instance.
@@ -52,7 +52,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.10
+        image: bunkerity/bunkerweb:1.6.11-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.10
+        image: bunkerity/bunkerweb-scheduler:1.6.11-rc1
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.10
+        image: bunkerity/bunkerweb-ui:1.6.11-rc1
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -168,6 +168,18 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 - Sessions : durée d’inactivité par défaut 12 h (`SESSION_LIFETIME_HOURS`), rafraîchie à chaque requête. Un plafond absolu est imposé par `SESSION_ABSOLUTE_HOURS` (par défaut `168` = 7 jours) — au-delà, les utilisateurs sont déconnectés quelle que soit leur activité. Rotation optionnelle de l’identifiant de session (`SESSION_ROLLING_HOURS`, par défaut `0` = désactivée) régénère le SID à cet intervalle. Sessions liées à l’IP et au User-Agent ; `CHECK_PRIVATE_IP=no` relâche le contrôle d’IP pour les plages privées uniquement. `ALWAYS_REMEMBER=yes` force les cookies persistants.
 - Pensez à régler `PROXY_NUMBERS` si plusieurs proxies ajoutent des `X-Forwarded-*`.
 
+!!! tip "Mot de passe administrateur pré-haché"
+    `ADMIN_PASSWORD` accepte un **hash bcrypt** (`$2a$`/`$2b$`/`$2y$`) et le stocke tel quel : le texte en clair ne reste pas dans vos fichiers d’environnement ni secrets. La politique de robustesse est ignorée (vous êtes responsable du mot de passe source) ; un coût inférieur à 12 émet un avertissement. Uniquement en création par environnement et `OVERRIDE_ADMIN_CREDS` ; l’assistant et le profil exigent toujours du texte en clair.
+
+    Générer un hash :
+
+    ```bash
+    python3 -c "import bcrypt; print(bcrypt.hashpw(b'Str0ng&P@ss!', bcrypt.gensalt(rounds=13)).decode())"
+    ```
+
+!!! warning "Un hash incorrect vous verrouille"
+    N’utilisez un hash que si vous connaissez son texte en clair. Un hash valide mais incorrect à la première création est irréversible et un redémarrage ne le corrige pas. Récupérez avec un `ADMIN_PASSWORD` différent et `OVERRIDE_ADMIN_CREDS=yes`.
+
 ## Sources de configuration et priorité
 
 1. Variables d’environnement (y compris `environment:` Docker/Compose)
@@ -200,7 +212,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 
 | Paramètre                                   | Description                                                                       | Valeurs acceptées         | Défaut                    |
 | ------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------- | ------------------------- |
-| `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | Initialiser le compte admin (politique de mot de passe)                           | Chaînes                   | non définis               |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | Initialiser le compte admin (politique de mot de passe ; `ADMIN_PASSWORD` accepte aussi un hash bcrypt, stocké tel quel) | Chaînes / hash bcrypt     | non définis               |
 | `OVERRIDE_ADMIN_CREDS`                      | Forcer la mise à jour des identifiants admin depuis l’env                         | `yes` ou `no`             | `no`                      |
 | `FLASK_SECRET`                              | Secret de signature de session (persisté dans `/var/lib/bunkerweb/.flask_secret`) | Chaîne hex/base64/opacité | généré automatiquement    |
 | `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | Clés de chiffrement TOTP (espaces ou map JSON)                                    | Chaînes / JSON            | générées si absent        |

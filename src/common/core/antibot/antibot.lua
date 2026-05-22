@@ -170,6 +170,9 @@ function antibot:header()
 
 	local hdr = ngx.header
 
+	-- Per-request CSP nonces and per-session challenge state must not be cached by browsers or intermediaries.
+	hdr["Cache-Control"] = "no-store"
+
 	-- Override CSP header
 	local csp_directives = {
 		["default-src"] = "'none'",
@@ -219,12 +222,17 @@ function antibot:header()
 	elseif self.session_data.type == "capjs" then
 		local capjs_url = self.variables["ANTIBOT_CAPJS_FRONTEND_URL"]
 		-- Cap.js needs: no strict-dynamic (workers do dynamic imports from capjs_url),
-		-- 'unsafe-inline' on script-src (the sandboxed instrumentation iframe's srcdoc
-		-- cannot carry a nonce; per CSP3, adding 'unsafe-inline' implies dropping the
-		-- nonce), wasm-unsafe-eval (workers execute WASM), no trusted types (widget.js
-		-- uses innerHTML). The widget's inline <style> is nonced via window.CAP_CSS_NONCE
-		-- (see capjs.html), so style-src stays strict.
-		csp_directives["script-src"] = "'unsafe-inline' " .. capjs_url .. " 'wasm-unsafe-eval'"
+		-- wasm-unsafe-eval (workers execute WASM), no trusted types (widget.js uses
+		-- innerHTML). The widget's inline <style> is nonced via window.CAP_CSS_NONCE
+		-- and its inline <script> tags (instrumentation srcdoc iframe + pako fallback)
+		-- are nonced via window.CAP_SCRIPT_NONCE -- both stamped from capjs.html -- so
+		-- both script-src and style-src stay strict (nonce-only, no 'unsafe-inline').
+		-- Requires cap.js widget >= 0.1.48 (script nonce propagation).
+		csp_directives["script-src"] = "'nonce-"
+			.. self.ctx.bw.antibot_nonce_script
+			.. "' "
+			.. capjs_url
+			.. " 'wasm-unsafe-eval'"
 		csp_directives["style-src"] = "'self' 'nonce-" .. self.ctx.bw.antibot_nonce_style .. "'"
 		csp_directives["connect-src"] = capjs_url
 		csp_directives["frame-src"] = capjs_url

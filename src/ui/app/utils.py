@@ -26,6 +26,8 @@ LOGGER = getLogger("UI")
 RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default server", ""})
 
 USER_PASSWORD_RX = re_compile(r"^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*\P{Alnum}).{8,}$")
+BCRYPT_HASH_RX = re_compile(r"^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}\Z")
+RECOMMENDED_BCRYPT_COST = 12  # below this, a supplied pre-hashed ADMIN_PASSWORD triggers a warning
 PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}$")
 
 BISCUIT_PUBLIC_KEY_FILE = LIB_DIR.joinpath(".biscuit_public_key")
@@ -274,6 +276,22 @@ def get_blacklisted_settings(global_config: bool = False) -> Set[str]:
 
 def gen_password_hash(password: str) -> bytes:
     return hashpw(password.encode("utf-8"), gensalt(rounds=13))
+
+
+def is_bcrypt_hash(value: str) -> bool:
+    """True if value is a well-formed bcrypt hash this build's bcrypt lib can verify."""
+    if not BCRYPT_HASH_RX.match(value):
+        return False
+    try:
+        checkpw(b"bunkerweb-bcrypt-probe", value.encode("utf-8"))
+    except (ValueError, TypeError):
+        return False  # prefix/format the installed bcrypt lib cannot parse -> treat as plaintext
+    return True
+
+
+def bcrypt_cost(value: str) -> int:
+    """Cost factor of a bcrypt hash. Caller must ensure value passed is_bcrypt_hash() first."""
+    return int(value[4:6])
 
 
 def check_password(password: str, hashed: bytes) -> bool:

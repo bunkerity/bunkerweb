@@ -23,7 +23,17 @@ from logger import getLogger, log_types  # type: ignore
 
 from app.models.ui_database import UIDatabase
 from app.dependencies import reload_plugins
-from app.utils import BISCUIT_PRIVATE_KEY_FILE, BISCUIT_PUBLIC_KEY_FILE, USER_PASSWORD_RX, check_password, gen_password_hash, get_latest_stable_release
+from app.utils import (
+    BISCUIT_PRIVATE_KEY_FILE,
+    BISCUIT_PUBLIC_KEY_FILE,
+    RECOMMENDED_BCRYPT_COST,
+    USER_PASSWORD_RX,
+    bcrypt_cost,
+    check_password,
+    gen_password_hash,
+    get_latest_stable_release,
+    is_bcrypt_hash,
+)
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 TMP_UI_DIR = TMP_DIR.joinpath("ui")
@@ -470,8 +480,8 @@ def on_starting(server):
             LOGGER.debug(f"Couldn't get the admin user: {e}")
             sleep(1)
 
-    env_admin_username = getenv("ADMIN_USERNAME", "")
-    env_admin_password = getenv("ADMIN_PASSWORD", "")
+    env_admin_username = getenv("ADMIN_USERNAME", "").strip()
+    env_admin_password = getenv("ADMIN_PASSWORD", "").strip()
 
     if ADMIN_USER:
         if invalid_totp_encryption_keys:
@@ -490,7 +500,18 @@ def on_starting(server):
                     ADMIN_USER["username"] = env_admin_username
                     updated = True
 
-                if env_admin_password and not check_password(env_admin_password, ADMIN_USER["password"]):
+                if env_admin_password and is_bcrypt_hash(env_admin_password):
+                    if env_admin_password.encode("utf-8") != ADMIN_USER["password"]:
+                        cost = bcrypt_cost(env_admin_password)
+                        if cost < RECOMMENDED_BCRYPT_COST:
+                            LOGGER.warning(
+                                f"The provided bcrypt ADMIN_PASSWORD uses cost factor {cost}, below the recommended {RECOMMENDED_BCRYPT_COST}. "
+                                "Consider re-hashing with a higher cost for stronger protection against offline cracking."
+                            )
+                        ADMIN_USER["password"] = env_admin_password.encode("utf-8")
+                        updated = True
+                        LOGGER.info("ADMIN_PASSWORD provided as a bcrypt hash; storing it as-is.")
+                elif env_admin_password and not check_password(env_admin_password, ADMIN_USER["password"]):
                     if not USER_PASSWORD_RX.match(env_admin_password):
                         LOGGER.warning(
                             "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character. It will not be updated."
@@ -519,19 +540,33 @@ def on_starting(server):
     elif env_admin_username and env_admin_password:
         user_name = env_admin_username or "admin"
 
+        prehashed = is_bcrypt_hash(env_admin_password)
+
         if not DEBUG:
             if len(user_name) > 256:
                 message = "The admin username is too long. It must be less than 256 characters."
                 LOGGER.error(message)
                 ERROR_FILE.write_text(message, encoding="utf-8")
                 exit(1)
-            elif not USER_PASSWORD_RX.match(env_admin_password):
+            elif not prehashed and not USER_PASSWORD_RX.match(env_admin_password):
                 message = "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character."
                 LOGGER.error(message)
                 ERROR_FILE.write_text(message, encoding="utf-8")
                 exit(1)
 
-        ret = DB.create_ui_user(user_name, gen_password_hash(env_admin_password), ["admin"], admin=True)
+        if prehashed:
+            cost = bcrypt_cost(env_admin_password)
+            if cost < RECOMMENDED_BCRYPT_COST:
+                LOGGER.warning(
+                    f"The provided bcrypt ADMIN_PASSWORD uses cost factor {cost}, below the recommended {RECOMMENDED_BCRYPT_COST}. "
+                    "Consider re-hashing with a higher cost for stronger protection against offline cracking."
+                )
+            LOGGER.info("ADMIN_PASSWORD provided as a bcrypt hash; storing it as-is.")
+            password_hash = env_admin_password.encode("utf-8")
+        else:
+            password_hash = gen_password_hash(env_admin_password)
+
+        ret = DB.create_ui_user(user_name, password_hash, ["admin"], admin=True)
         if ret and "already exists" not in ret:
             message = f"Couldn't create the admin user in the database: {ret}"
             LOGGER.critical(message)
