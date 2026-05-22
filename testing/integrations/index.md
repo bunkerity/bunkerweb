@@ -1777,6 +1777,7 @@ The scheduler is the control-plane worker that reads settings, renders configs, 
 | `DISABLE_CONFIGURATION_TESTING` | Skip config tests before applying                                     | `yes` or `no`                                  | `no`                                   |
 | `IGNORE_FAIL_SENDING_CONFIG`    | Proceed even if some instances fail to receive a config               | `yes` or `no`                                  | `no`                                   |
 | `IGNORE_REGEX_CHECK`            | Skip regex validation for settings (shared with autoconf)             | `yes` or `no`                                  | `no`                                   |
+| `SCHEDULER_MAX_WORKERS`         | Max worker threads in the scheduler's job executor. Each running thread can hold one DB connection, so this caps scheduler-side DB-pool pressure. A startup warning is emitted if the resolved value exceeds `DATABASE_POOL_SIZE` + `DATABASE_POOL_MAX_OVERFLOW`. | Positive integer                               | `min(8, max(2, cpu_count*2))`          |
 | `TZ`                            | Time zone for scheduler logs, cron-like jobs, backups, and timestamps | TZ database name (e.g., `UTC`, `Europe/Paris`) | unset (container default, usually UTC) |
 
 ##### Database
@@ -2327,7 +2328,7 @@ Depending on your installation type:
 
 ### Installation using package manager
 
-Please ensure that you have **NGINX 1.30.1 installed before installing BunkerWeb**. For all distributions, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
+Please ensure that you have **NGINX 1.30.2 installed before installing BunkerWeb**. For all distributions, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
 
 === "Debian Bookworm/Trixie"
 
@@ -2342,11 +2343,11 @@ Please ensure that you have **NGINX 1.30.1 installed before installing BunkerWeb
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.30.1:
+    You should now be able to install NGINX 1.30.2:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.1-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.2-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -2390,11 +2391,11 @@ Please ensure that you have **NGINX 1.30.1 installed before installing BunkerWeb
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.30.1:
+    You should now be able to install NGINX 1.30.2:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.1-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.2-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -2484,10 +2485,10 @@ Please ensure that you have **NGINX 1.30.1 installed before installing BunkerWeb
     module_hotfixes=true
     ```
 
-    You should now be able to install NGINX 1.30.1:
+    You should now be able to install NGINX 1.30.2:
 
     ```shell
-    sudo dnf install --allowerasing nginx-1.30.1
+    sudo dnf install --allowerasing nginx-1.30.2
     ```
 
     !!! example "Disable the setup wizard"

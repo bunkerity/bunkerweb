@@ -3013,6 +3013,7 @@ The scheduler is the control-plane worker that reads settings, renders configs, 
 | `DISABLE_CONFIGURATION_TESTING` | Skip config tests before applying                                     | `yes` or `no`                                  | `no`                                   |
 | `IGNORE_FAIL_SENDING_CONFIG`    | Proceed even if some instances fail to receive a config               | `yes` or `no`                                  | `no`                                   |
 | `IGNORE_REGEX_CHECK`            | Skip regex validation for settings (shared with autoconf)             | `yes` or `no`                                  | `no`                                   |
+| `SCHEDULER_MAX_WORKERS`         | Max worker threads in the scheduler's job executor. Each running thread can hold one DB connection, so this caps scheduler-side DB-pool pressure. A startup warning is emitted if the resolved value exceeds `DATABASE_POOL_SIZE` + `DATABASE_POOL_MAX_OVERFLOW`. | Positive integer                               | `min(8, max(2, cpu_count*2))`          |
 | `TZ`                            | Time zone for scheduler logs, cron-like jobs, backups, and timestamps | TZ database name (e.g., `UTC`, `Europe/Paris`) | unset (container default, usually UTC) |
 
 ##### Database
@@ -3563,7 +3564,7 @@ Depending on your installation type:
 
 ### Installation using package manager
 
-Please ensure that you have **NGINX 1.30.1 installed before installing BunkerWeb**. For all distributions, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
+Please ensure that you have **NGINX 1.30.2 installed before installing BunkerWeb**. For all distributions, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
 
 === "Debian Bookworm/Trixie"
 
@@ -3578,11 +3579,11 @@ Please ensure that you have **NGINX 1.30.1 installed before installing BunkerWeb
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.30.1:
+    You should now be able to install NGINX 1.30.2:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.1-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.2-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -3626,11 +3627,11 @@ Please ensure that you have **NGINX 1.30.1 installed before installing BunkerWeb
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.30.1:
+    You should now be able to install NGINX 1.30.2:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.1-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.2-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -3720,10 +3721,10 @@ Please ensure that you have **NGINX 1.30.1 installed before installing BunkerWeb
     module_hotfixes=true
     ```
 
-    You should now be able to install NGINX 1.30.1:
+    You should now be able to install NGINX 1.30.2:
 
     ```shell
-    sudo dnf install --allowerasing nginx-1.30.1
+    sudo dnf install --allowerasing nginx-1.30.2
     ```
 
     !!! example "Disable the setup wizard"
@@ -6723,6 +6724,7 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
         - Use HTTPS for `ANTIBOT_CAPJS_FRONTEND_URL` in production. The browser worker requires `crypto.subtle` in a secure context, and HTTPS prevents MITM changes to the widget.
         - Configure CORS on the Cap.js sitekey to allow the protected origin.
         - Set both `ANTIBOT_CAPJS_FRONTEND_URL` and `ANTIBOT_CAPJS_BACKEND_URL` to origins only: scheme, host, and optional port, with no path.
+        - Use the Cap.js widget **0.1.48 or later**. BunkerWeb serves a strict nonce-based CSP; earlier widgets break instrumentation challenges because the sandboxed `srcdoc` iframe's inline script does not propagate the nonce. If you self-host `tiago2/cap`, pin a recent tag (e.g. `tiago2/cap:3.1.2` or newer) or set `WIDGET_VERSION` to `0.1.48` or later.
 
     Refer to the [Common Settings](#common-settings) for additional configuration options.
 
@@ -9628,6 +9630,38 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
     LIMIT_CONN_MAX_HTTP3: "100"
     LIMIT_CONN_MAX_STREAM: "20"
     ```
+
+## Load Balancer  (PRO)
+
+<p align='center'></p>
+
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/latest/advanced/#load-balancer-pro) documentation.
+
+STREAM support :x:
+
+Provides load balancing feature to group of upstreams with optional healthchecks.
+
+| Setting                                   | Default       | Context | Multiple | Description                                                        |
+| ----------------------------------------- | ------------- | ------- | -------- | ------------------------------------------------------------------ |
+| `LOADBALANCER_HEALTHCHECK_DICT_SIZE`      | `10m`         | global  | no       | Shared dict size (datastore for all healthchecks).                 |
+| `LOADBALANCER_UPSTREAM_NAME`              |               | global  | yes      | Name of the upstream (used in REVERSE_PROXY_HOST).                 |
+| `LOADBALANCER_UPSTREAM_SERVERS`           |               | global  | yes      | List of servers/IPs in the server group.                           |
+| `LOADBALANCER_UPSTREAM_MODE`              | `round-robin` | global  | yes      | Load balancing mode (round-robin or sticky).                       |
+| `LOADBALANCER_UPSTREAM_STICKY_METHOD`     | `ip`          | global  | yes      | Sticky session method (ip or cookie).                              |
+| `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`          | global  | yes      | Dynamically resolve upstream hostnames.                            |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE`         |               | global  | yes      | Number of keepalive connections to cache per worker.               |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT` | `60s`         | global  | yes      | Keepalive timeout for upstream connections.                        |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`    | `1h`          | global  | yes      | Keepalive time for upstream connections.                           |
+| `LOADBALANCER_HEALTHCHECK_URL`            | `/status`     | global  | yes      | The healthcheck URL.                                               |
+| `LOADBALANCER_HEALTHCHECK_INTERVAL`       | `2000`        | global  | yes      | Healthcheck interval in milliseconds.                              |
+| `LOADBALANCER_HEALTHCHECK_TIMEOUT`        | `1000`        | global  | yes      | Healthcheck timeout in milliseconds.                               |
+| `LOADBALANCER_HEALTHCHECK_FALL`           | `3`           | global  | yes      | Number of failed healthchecks before marking the server as down.   |
+| `LOADBALANCER_HEALTHCHECK_RISE`           | `1`           | global  | yes      | Number of successful healthchecks before marking the server as up. |
+| `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`         | global  | yes      | HTTP status considered valid in healthchecks.                      |
+| `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`          | global  | yes      | Maximum number of concurrent healthchecks.                         |
+| `LOADBALANCER_HEALTHCHECK_TYPE`           | `http`        | global  | yes      | Type of healthcheck (http or https).                               |
+| `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`         | global  | yes      | Verify SSL certificate in healthchecks.                            |
+| `LOADBALANCER_HEALTHCHECK_HOST`           |               | global  | yes      | Host header for healthchecks (useful for HTTPS).                   |
 
 ## Metrics
 
@@ -17578,6 +17612,18 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 - Sessions: default idling lifetime is 12h (`SESSION_LIFETIME_HOURS`), refreshed on every request. A hard absolute cap is enforced by `SESSION_ABSOLUTE_HOURS` (default `168` = 7 days) — past it, users are logged out regardless of activity. Optional session ID rotation (`SESSION_ROLLING_HOURS`, default `0` = disabled) regenerates the session ID at that interval. Sessions are pinned to IP and User-Agent; `CHECK_PRIVATE_IP=no` relaxes the IP check for private ranges only. `ALWAYS_REMEMBER=yes` always sets persistent cookies.
 - Remember to set `PROXY_NUMBERS` if multiple proxies append `X-Forwarded-*` headers.
 
+!!! tip "Pre-hashed admin password"
+    `ADMIN_PASSWORD` accepts a **bcrypt hash** (`$2a$`/`$2b$`/`$2y$`) and stores it as-is, keeping the plaintext out of your env files and secrets. The strength policy is skipped (you own the source password); cost below 12 logs a warning. Env create and `OVERRIDE_ADMIN_CREDS` only; the wizard and profile page still need plaintext.
+
+    Generate a hash:
+
+    ```bash
+    python3 -c "import bcrypt; print(bcrypt.hashpw(b'Str0ng&P@ss!', bcrypt.gensalt(rounds=13)).decode())"
+    ```
+
+!!! warning "A wrong hash locks you out"
+    Use a hash only if you know its plaintext. A valid-but-wrong hash on first creation can't be reversed and a restart won't fix it. Recover with a different `ADMIN_PASSWORD` plus `OVERRIDE_ADMIN_CREDS=yes`.
+
 ## Configuration sources and precedence
 
 1. Environment variables (including Docker/Compose `environment:`)
@@ -17610,7 +17656,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
 | Setting                                     | Description                                                              | Accepted values          | Default                   |
 | ------------------------------------------- | ------------------------------------------------------------------------ | ------------------------ | ------------------------- |
-| `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | Seed admin account (password policy enforced)                            | Strings                  | unset                     |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | Seed admin account (password policy enforced; `ADMIN_PASSWORD` also accepts a bcrypt hash, stored as-is) | Strings / bcrypt hash    | unset                     |
 | `OVERRIDE_ADMIN_CREDS`                      | Force updating admin credentials from env                                | `yes` or `no`            | `no`                      |
 | `FLASK_SECRET`                              | Session signing secret (persisted to `/var/lib/bunkerweb/.flask_secret`) | Hex/base64/opaque string | auto-generated            |
 | `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | Encryption keys for TOTP secrets (space-separated or JSON map)           | Strings / JSON           | auto-generated if missing |

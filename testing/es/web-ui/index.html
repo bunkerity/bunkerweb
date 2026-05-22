@@ -1472,6 +1472,17 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 - Ajusta <code>PROXY_NUMBERS</code> si varios proxies añaden <code>X-Forwarded-*</code>.</p>
 </li>
 </ul>
+<div class="admonition tip">
+<p class="admonition-title">Contraseña de administrador pre-hasheada</p>
+<p><code>ADMIN_PASSWORD</code> acepta un <strong>hash bcrypt</strong> (<code>$2a$</code>/<code>$2b$</code>/<code>$2y$</code>) y lo almacena tal cual, manteniendo el texto plano fuera de tus archivos de entorno y secretos. Se omite la política de fortaleza (tú eres responsable de la contraseña de origen); un coste inferior a 12 registra una advertencia. Solo en creación por entorno y <code>OVERRIDE_ADMIN_CREDS</code>: el asistente y el perfil siguen requiriendo texto plano.</p>
+<p>Genera un hash:</p>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import bcrypt; print(bcrypt.hashpw(b&#39;Str0ng&amp;P@ss!&#39;, bcrypt.gensalt(rounds=13)).decode())&quot;</span>
+</code></pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Un hash incorrecto te bloquea</p>
+<p>Usa un hash solo si conoces su texto plano. Un hash válido pero incorrecto en la primera creación no se puede revertir y un reinicio no lo arregla. Recupera con un <code>ADMIN_PASSWORD</code> distinto y <code>OVERRIDE_ADMIN_CREDS=yes</code>.</p>
+</div>
 <h2 id="fuentes-de-configuracion-y-prioridad">Fuentes de configuración y prioridad</h2>
 <ol>
 <li>Variables de entorno (incl. <code>environment:</code> de Docker/Compose)</li>
@@ -1573,8 +1584,8 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <tbody>
 <tr>
 <td><code>ADMIN_USERNAME</code>, <code>ADMIN_PASSWORD</code></td>
-<td>Inicializar cuenta admin (política de contraseña)</td>
-<td>Cadenas</td>
+<td>Inicializar cuenta admin (política de contraseña; <code>ADMIN_PASSWORD</code> también acepta un hash bcrypt, almacenado tal cual)</td>
+<td>Cadenas / hash bcrypt</td>
 <td>sin definir</td>
 </tr>
 <tr>
