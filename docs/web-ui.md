@@ -189,6 +189,18 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 - Sessions: default idling lifetime is 12h (`SESSION_LIFETIME_HOURS`), refreshed on every request. A hard absolute cap is enforced by `SESSION_ABSOLUTE_HOURS` (default `168` = 7 days) — past it, users are logged out regardless of activity. Optional session ID rotation (`SESSION_ROLLING_HOURS`, default `0` = disabled) regenerates the session ID at that interval. Sessions are pinned to IP and User-Agent; `CHECK_PRIVATE_IP=no` relaxes the IP check for private ranges only. `ALWAYS_REMEMBER=yes` always sets persistent cookies.
 - Remember to set `PROXY_NUMBERS` if multiple proxies append `X-Forwarded-*` headers.
 
+!!! tip "Pre-hashed admin password"
+    `ADMIN_PASSWORD` accepts a **bcrypt hash** (`$2a$`/`$2b$`/`$2y$`) and stores it as-is, keeping the plaintext out of your env files and secrets. The strength policy is skipped (you own the source password); cost below 12 logs a warning. Env create and `OVERRIDE_ADMIN_CREDS` only; the wizard and profile page still need plaintext.
+
+    Generate a hash:
+
+    ```bash
+    python3 -c "import bcrypt; print(bcrypt.hashpw(b'Str0ng&P@ss!', bcrypt.gensalt(rounds=13)).decode())"
+    ```
+
+!!! warning "A wrong hash locks you out"
+    Use a hash only if you know its plaintext. A valid-but-wrong hash on first creation can't be reversed and a restart won't fix it. Recover with a different `ADMIN_PASSWORD` plus `OVERRIDE_ADMIN_CREDS=yes`.
+
 ## Configuration sources and precedence
 
 1. Environment variables (including Docker/Compose `environment:`)
@@ -221,7 +233,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
 | Setting                                     | Description                                                              | Accepted values          | Default                   |
 | ------------------------------------------- | ------------------------------------------------------------------------ | ------------------------ | ------------------------- |
-| `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | Seed admin account (password policy enforced)                            | Strings                  | unset                     |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | Seed admin account (password policy enforced; `ADMIN_PASSWORD` also accepts a bcrypt hash, stored as-is) | Strings / bcrypt hash    | unset                     |
 | `OVERRIDE_ADMIN_CREDS`                      | Force updating admin credentials from env                                | `yes` or `no`            | `no`                      |
 | `FLASK_SECRET`                              | Session signing secret (persisted to `/var/lib/bunkerweb/.flask_secret`) | Hex/base64/opaque string | auto-generated            |
 | `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | Encryption keys for TOTP secrets (space-separated or JSON map)           | Strings / JSON           | auto-generated if missing |
