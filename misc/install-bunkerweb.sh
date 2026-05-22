@@ -4019,10 +4019,10 @@ check_supported_os() {
         "rhel"|"rocky"|"almalinux"|"centos")
             major_version=$(echo "$DISTRO_VERSION" | cut -d. -f1)
             if [[ "$major_version" != "8" && "$major_version" != "9" && "$major_version" != "10" ]]; then
-                print_warning "Only RHEL/CentOS 8, 9, and 10 are officially supported"
+                print_warning "Only RHEL, CentOS, Rocky Linux, and AlmaLinux 8, 9, and 10 are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
                     if ! tui_yesno "Unsupported OS" \
-                        "Only RHEL/CentOS 8, 9, and 10 are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
+                        "Only RHEL, CentOS, Rocky Linux, and AlmaLinux 8, 9, and 10 are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
                         exit 1
                     fi
                 fi
@@ -4925,6 +4925,9 @@ EOF
 
     # Remove any distro/AppStream nginx and conflicting modules first: their RPMs are
     # pinned to the distro nginx version and block the nginx.org package install.
+    # Also disable the modular stream so AppStream filtering can't re-block the install
+    # (belt-and-suspenders alongside module_hotfixes=true in the repo above).
+    dnf -y module disable nginx >/dev/null 2>&1 || true
     dnf remove -y nginx nginx-mod-stream nginx-mod-http-image-filter nginx-mod-http-perl nginx-mod-http-xslt-filter nginx-mod-mail 2>/dev/null || true
 
     run_cmd dnf install -y "nginx-$NGINX_VERSION"
@@ -5120,7 +5123,7 @@ install_crowdsec() {
 
     # Check for the gpg binary (provided by the gnupg/gnupg2 package depending on distro);
     # `command -v gnupg2` never resolves since gnupg2 is a package name, not an executable.
-    for dep in curl gpg ca-certificates; do
+    for dep in curl gpg; do
         if ! command -v "$dep" >/dev/null 2>&1; then
             print_status "Installing missing dependency: $dep"
             case "$DISTRO_ID" in
@@ -5143,6 +5146,13 @@ install_crowdsec() {
             esac
         fi
     done
+
+    # ca-certificates has no binary, so probe the package, not `command -v`.
+    case "$DISTRO_ID" in
+        "debian"|"ubuntu") dpkg -s ca-certificates >/dev/null 2>&1 || { run_cmd apt update; run_cmd apt install -y ca-certificates; } ;;
+        "fedora"|"rhel"|"rocky"|"almalinux"|"centos") rpm -q ca-certificates >/dev/null 2>&1 || run_cmd dnf install -y ca-certificates ;;
+        "freebsd") pkg info -e ca_root_nss >/dev/null 2>&1 || run_cmd pkg install -y ca_root_nss ;;
+    esac
 
     echo -e "${YELLOW}--- Step 1: Add CrowdSec repository and install engine ---${NC}"
     print_step "Adding CrowdSec repository and installing engine"
