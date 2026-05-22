@@ -10,6 +10,7 @@ from os.path import join
 from pathlib import Path
 from re import MULTILINE, match, search
 from select import select
+from shutil import rmtree
 from subprocess import DEVNULL, PIPE, STDOUT, Popen, run
 from sys import exit as sys_exit, path as sys_path
 from time import monotonic, sleep
@@ -681,6 +682,24 @@ def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
     return process.returncode
 
 
+def _purge_stale_account(accounts_root: Path, account_id: str) -> None:
+    """Remove the on-disk ACME account dir whose server-side record was pruned.
+
+    Walks for the `<account_id>/regr.json` under accounts_root (CA-agnostic:
+    LE 2-level, ZeroSSL 3-level) and rmtree's its parent. Best-effort — failures
+    are logged, not raised, so the retry still proceeds.
+    """
+    if not account_id or not accounts_root.is_dir():
+        return
+    try:
+        for regr in accounts_root.rglob("regr.json"):
+            if regr.parent.name == account_id:
+                LOGGER.warning(f"Purging stale ACME account {account_id} (server reports it no longer exists) so the next attempt re-registers.")
+                rmtree(regr.parent, ignore_errors=True)
+    except OSError as e:
+        LOGGER.error(f"Failed to purge stale account {account_id}: {e}")
+
+
 def certbot_new(
     service: str,
     config: Dict[str, Union[str, bool, int, Dict[str, str]]],
@@ -730,6 +749,7 @@ def certbot_new(
     # certbot certonly invocation (and vice versa) — certbot then constructs the
     # account directory from its own --server path and fails with AccountNotFound.
     acme_server_url = str(config.get("acme_server_url") or "")
+    account_id = ""
 
     if config.get("acme_server") == "letsencrypt":
         account_id = select_account_id(
@@ -818,6 +838,13 @@ def certbot_new(
 
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
 
+    # Watch certbot output for a stale-account JWS rejection. When the ACME server
+    # has pruned the account we hold on disk (common on LE staging), it answers
+    # `Unable to validate JWS :: Account "<url>" not found`. certbot does NOT
+    # re-register when `--account` is pinned, so every retry would reuse the dead
+    # account and fail identically. Detect it, then drop the stale account dir so
+    # the next attempt (select_account_id → None) registers a fresh account.
+    stale_account_detected = False
     deadline = monotonic() + CERTBOT_TIMEOUT
     while process.poll() is None:
         if monotonic() > deadline:
@@ -829,8 +856,14 @@ def certbot_new(
             rlist, _, _ = select([process.stderr], [], [], 2)
             if rlist:
                 for line in process.stderr:
-                    LOGGER_CERTBOT.info(line.strip())
+                    stripped = line.strip()
+                    LOGGER_CERTBOT.info(stripped)
+                    if "Account" in stripped and "not found" in stripped and ("validate JWS" in stripped or "acme/acct" in stripped):
+                        stale_account_detected = True
                     break
+
+    if stale_account_detected and account_id:
+        _purge_stale_account(paths.config_dir.joinpath("accounts"), account_id)
 
     return process.returncode
 
