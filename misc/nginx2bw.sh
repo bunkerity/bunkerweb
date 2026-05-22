@@ -215,10 +215,22 @@ if [[ -e "$OUTPUT_DIR" && "$FORCE" -ne 1 ]]; then
 fi
 
 if [[ -e "$OUTPUT_DIR" && "$FORCE" -eq 1 ]]; then
-  rm -rf "$OUTPUT_DIR"
+  # Only blow away a directory THIS script created (marker file), so a typo like
+  # `--output-dir /etc --force` on a root-run can't wipe an unrelated path.
+  if [[ -f "$OUTPUT_DIR/.nginx2bw-generated" ]]; then
+    rm -rf "$OUTPUT_DIR"
+  elif [[ -d "$OUTPUT_DIR" && -z "$(ls -A "$OUTPUT_DIR" 2>/dev/null)" ]]; then
+    rmdir "$OUTPUT_DIR"
+  else
+    echo "Refusing to --force overwrite '$OUTPUT_DIR': it was not created by nginx2bw.sh" >&2
+    echo "(no .nginx2bw-generated marker). Remove it yourself or pick another --output-dir." >&2
+    exit 1
+  fi
 fi
 
 mkdir -p "$OUTPUT_DIR"/{backup,raw,snippets/server-http,snippets/http,reports,certs,project}
+# Marker so a later --force run can safely recognize and replace this output dir.
+: > "$OUTPUT_DIR/.nginx2bw-generated"
 
 echo "[1/5] Backing up source nginx config..."
 # Guard so an unreadable file (common when not run as root) warns and continues
@@ -327,10 +339,11 @@ while IFS= read -r conf_file; do
   END {
     print idx
   }' "$conf_file" > "$OUTPUT_DIR/raw/.last_idx" || { echo "[warn] awk failed parsing $conf_file — block_idx may be stale" >&2; }
+  prev_block_idx="$block_idx"
   block_idx="$(cat "$OUTPUT_DIR/raw/.last_idx")"
-  # Guard against a non-numeric idx so block numbering never restarts at 1 and
-  # overwrites earlier blocks.
-  [[ "$block_idx" =~ ^[0-9]+$ ]] || block_idx=0
+  # If awk failed and left a non-numeric idx, keep the PREVIOUS value rather than
+  # resetting to 0 — resetting would restart numbering and overwrite earlier blocks.
+  [[ "$block_idx" =~ ^[0-9]+$ ]] || block_idx="$prev_block_idx"
 done < "$OUTPUT_DIR/raw/conf-files.txt"
 
 rm -f "$OUTPUT_DIR/raw/.last_idx"
@@ -362,12 +375,13 @@ for block in "$TMP_BLOCK_DIR"/*.conf; do
     fi
   fi
 
-  # Keep first token for naming. sanitize_name leaves a leading dot for wildcard
-  # names (*.example.com -> .example.com), which would create a hidden file/dir;
-  # strip it so the output is visible to mounts and tooling.
+  # Keep first token for naming. The per-server folder name must match the
+  # SERVER_NAME token verbatim — BunkerWeb's Templator uses the server name as the
+  # config subpath unchanged — so do NOT strip the leading dot from a wildcard name
+  # (*.example.com -> .example.com): the dot must stay for the snippet to apply.
+  # (Wildcard names therefore become hidden .conf dirs; that's the correct match.)
   first_name="$(echo "$server_name" | awk '{print $1}')"
   safe_name="$(sanitize_name "${first_name:-unnamed-vhost}")"
-  safe_name="${safe_name#.}"
   safe_name="${safe_name:-unnamed-vhost}"
 
   # Scope each snippet to its own vhost via a per-server subdirectory:
