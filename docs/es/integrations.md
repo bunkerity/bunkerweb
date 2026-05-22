@@ -2340,10 +2340,10 @@ Asegúrate de tener **NGINX 1.30.2 instalado antes de instalar BunkerWeb**. Para
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora ya proporciona NGINX 1.30.2 que soportamos
+    Fedora ya proporciona NGINX 1.30.1 que soportamos
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.2
+    sudo dnf install -y --allowerasing nginx-1.30.1
     ```
 
     !!! example "Deshabilitar el asistente de configuración"
