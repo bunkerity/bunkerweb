@@ -4,7 +4,7 @@ permissions: read-all
 
 on:
   push:
-    branches: [staging]
+    branches: [staging, fix-cve]
   workflow_dispatch:
 
 jobs:
