@@ -108,7 +108,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
   ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.10"
+LABEL version="1.6.11"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="bunkerweb"
 LABEL bunkerweb.INSTANCE="bunkerweb"
