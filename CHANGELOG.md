@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.11~rc1 - ????/??/??
+## v1.6.11~rc1 - 2026/05/23
 
 - [SECURITY] `nginx`: update nginx to 1.30.2 (except for Fedora as it is not yet available) to fix CVE-2026-9256 — a heap buffer overflow in `ngx_http_rewrite_module` with overlapping captures that could lead to worker-process arbitrary code execution.
 - [SECURITY] `antibot`: Cap.js `script-src` now uses a strict per-request nonce (no more `'unsafe-inline'`); every challenge response also sends `Cache-Control: no-store`. Requires Cap.js widget `0.1.48`+.
