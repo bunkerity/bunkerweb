@@ -2462,6 +2462,13 @@ detect_os() {
         exit 1
     fi
 
+    # Normalize legacy distro ID aliases: some AlmaLinux derivatives report "alma",
+    # and the /etc/redhat-release fallback above sets "redhat" on os-release-less boxes.
+    case "$DISTRO_ID" in
+        alma) DISTRO_ID="almalinux" ;;
+        redhat) DISTRO_ID="rhel" ;;
+    esac
+
     print_status "Detected OS: $(distro_display_name "$DISTRO_ID") $DISTRO_VERSION"
 }
 
@@ -3983,7 +3990,7 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.30.1-1~$DISTRO_CODENAME"
+            NGINX_VERSION="1.30.2-1~$DISTRO_CODENAME"
             ;;
         "ubuntu")
             if [[ "$DISTRO_VERSION" != "22.04" && "$DISTRO_VERSION" != "24.04" ]]; then
@@ -3995,36 +4002,36 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.30.1-1~$DISTRO_CODENAME"
+            NGINX_VERSION="1.30.2-1~$DISTRO_CODENAME"
             ;;
         "fedora")
-            if [[ "$DISTRO_VERSION" != "42" && "$DISTRO_VERSION" != "43" && "$DISTRO_VERSION" != "44" ]]; then
-                print_warning "Only Fedora 42, 43 and 44 are officially supported"
+            if [[ "$DISTRO_VERSION" != "43" && "$DISTRO_VERSION" != "44" ]]; then
+                print_warning "Only Fedora 43 and 44 are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
                     if ! tui_yesno "Unsupported OS" \
-                        "Only Fedora 42, 43 and 44 are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
+                        "Only Fedora 43 and 44 are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
                         exit 1
                     fi
                 fi
             fi
             NGINX_VERSION="1.30.1"
             ;;
-        "rhel"|"rocky"|"almalinux")
+        "rhel"|"rocky"|"almalinux"|"centos")
             major_version=$(echo "$DISTRO_VERSION" | cut -d. -f1)
             if [[ "$major_version" != "8" && "$major_version" != "9" && "$major_version" != "10" ]]; then
-                print_warning "Only RHEL 8, 9, and 10 are officially supported"
+                print_warning "Only RHEL, CentOS, Rocky Linux, and AlmaLinux 8, 9, and 10 are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
                     if ! tui_yesno "Unsupported OS" \
-                        "Only RHEL 8, 9, and 10 are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
+                        "Only RHEL, CentOS, Rocky Linux, and AlmaLinux 8, 9, and 10 are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
                         exit 1
                     fi
                 fi
             fi
-            NGINX_VERSION="1.30.1"
+            NGINX_VERSION="1.30.2"
             ;;
         *)
             print_error "Unsupported operating system: $DISTRO_ID"
-            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04, Fedora 42/43/44, RHEL 8/9/10, FreeBSD 13/14"
+            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04, Fedora 43/44, RHEL/CentOS/Rocky/AlmaLinux 8/9/10, FreeBSD 13/14"
             exit 1
             ;;
     esac
@@ -4916,6 +4923,13 @@ gpgkey=https://nginx.org/keys/nginx_signing.key
 module_hotfixes=true
 EOF
 
+    # Remove any distro/AppStream nginx and conflicting modules first: their RPMs are
+    # pinned to the distro nginx version and block the nginx.org package install.
+    # Also disable the modular stream so AppStream filtering can't re-block the install
+    # (belt-and-suspenders alongside module_hotfixes=true in the repo above).
+    dnf -y module disable nginx >/dev/null 2>&1 || true
+    dnf remove -y nginx nginx-mod-stream nginx-mod-http-image-filter nginx-mod-http-perl nginx-mod-http-xslt-filter nginx-mod-mail 2>/dev/null || true
+
     run_cmd dnf install -y "nginx-$NGINX_VERSION"
     run_cmd dnf versionlock add nginx
 
@@ -5107,19 +5121,24 @@ install_crowdsec() {
     echo
     print_step "Installing CrowdSec security engine"
 
-    for dep in curl gnupg2 ca-certificates; do
+    # Check for the gpg binary (provided by the gnupg/gnupg2 package depending on distro);
+    # `command -v gnupg2` never resolves since gnupg2 is a package name, not an executable.
+    for dep in curl gpg; do
         if ! command -v "$dep" >/dev/null 2>&1; then
             print_status "Installing missing dependency: $dep"
             case "$DISTRO_ID" in
                 "debian"|"ubuntu")
+                    dep_pkg="$dep"; [ "$dep" = "gpg" ] && dep_pkg="gnupg"
                     run_cmd apt update
-                    run_cmd apt install -y "$dep"
+                    run_cmd apt install -y "$dep_pkg"
                     ;;
-                "fedora"|"rhel"|"rocky"|"almalinux")
-                    run_cmd dnf install -y "$dep"
+                "fedora"|"rhel"|"rocky"|"almalinux"|"centos")
+                    dep_pkg="$dep"; [ "$dep" = "gpg" ] && dep_pkg="gnupg2"
+                    run_cmd dnf install -y "$dep_pkg"
                     ;;
                 "freebsd")
-                    run_cmd pkg install -y "$dep"
+                    dep_pkg="$dep"; [ "$dep" = "gpg" ] && dep_pkg="gnupg"
+                    run_cmd pkg install -y "$dep_pkg"
                     ;;
                 *)
                     print_warning "Automatic install not supported on $DISTRO_ID"
@@ -5127,6 +5146,13 @@ install_crowdsec() {
             esac
         fi
     done
+
+    # ca-certificates has no binary, so probe the package, not `command -v`.
+    case "$DISTRO_ID" in
+        "debian"|"ubuntu") dpkg -s ca-certificates >/dev/null 2>&1 || { run_cmd apt update; run_cmd apt install -y ca-certificates; } ;;
+        "fedora"|"rhel"|"rocky"|"almalinux"|"centos") rpm -q ca-certificates >/dev/null 2>&1 || run_cmd dnf install -y ca-certificates ;;
+        "freebsd") pkg info -e ca_root_nss >/dev/null 2>&1 || run_cmd pkg install -y ca_root_nss ;;
+    esac
 
     echo -e "${YELLOW}--- Step 1: Add CrowdSec repository and install engine ---${NC}"
     print_step "Adding CrowdSec repository and installing engine"
@@ -5150,7 +5176,7 @@ install_crowdsec() {
         "debian"|"ubuntu")
             run_cmd apt install -y crowdsec
             ;;
-        "fedora"|"rhel"|"rocky"|"almalinux")
+        "fedora"|"rhel"|"rocky"|"almalinux"|"centos")
             run_cmd dnf install -y crowdsec
             ;;
         "freebsd")
@@ -5269,7 +5295,7 @@ _install_redis_package() {
                 run_cmd apt install -y redis-server
             fi
             ;;
-        "fedora"|"rhel"|"rocky"|"almalinux")
+        "fedora"|"rhel"|"rocky"|"almalinux"|"centos")
             if [ "$desired" = "valkey" ]; then
                 if dnf info valkey >/dev/null 2>&1; then
                     if dnf install -y valkey; then
@@ -5731,7 +5757,7 @@ install_mariadb() {
             run_cmd apt update
             run_cmd apt install -y mariadb-server
             ;;
-        "fedora"|"rhel"|"rocky"|"almalinux")
+        "fedora"|"rhel"|"rocky"|"almalinux"|"centos")
             run_cmd dnf install -y mariadb-server
             ;;
         *)
@@ -5832,7 +5858,7 @@ install_postgresql() {
                 run_cmd postgresql-setup --initdb
             fi
             ;;
-        "rhel"|"rocky"|"almalinux")
+        "rhel"|"rocky"|"almalinux"|"centos")
             run_cmd dnf install -y postgresql-server postgresql-contrib
             if [ ! -d /var/lib/pgsql/data/base ]; then
                 run_cmd postgresql-setup --initdb
@@ -6031,7 +6057,7 @@ setup_ui_selfsigned_tls() {
     if ! command -v openssl >/dev/null 2>&1; then
         case "$DISTRO_ID" in
             "debian"|"ubuntu") run_cmd apt install -y openssl ;;
-            "fedora"|"rhel"|"rocky"|"almalinux") run_cmd dnf install -y openssl ;;
+            "fedora"|"rhel"|"rocky"|"almalinux"|"centos") run_cmd dnf install -y openssl ;;
             "freebsd") run_cmd pkg install -y openssl ;;
         esac
     fi
@@ -6113,7 +6139,7 @@ get_installed_nginx_version() {
                 _version=$(dpkg-query -W -f='${Version}' nginx 2>/dev/null || true)
             fi
             ;;
-        "fedora"|"rhel"|"rocky"|"almalinux")
+        "fedora"|"rhel"|"rocky"|"almalinux"|"centos")
             if command -v rpm >/dev/null 2>&1; then
                 if rpm -q nginx >/dev/null 2>&1; then
                     _version=$(rpm -q --qf '%{VERSION}-%{RELEASE}' nginx 2>/dev/null || true)
@@ -7721,7 +7747,7 @@ to /etc/bunkerweb and the database schema."
                 apt-mark unhold bunkerweb nginx >/dev/null 2>&1 || true
             fi
             ;;
-        fedora|rhel|rocky|almalinux)
+        fedora|rhel|rocky|almalinux|centos)
             if command -v dnf >/dev/null 2>&1; then
                 print_status "Removing versionlock (bunkerweb, nginx)"
                 dnf versionlock delete bunkerweb nginx >/dev/null 2>&1 || true
@@ -7749,7 +7775,7 @@ to /etc/bunkerweb and the database schema."
             run_cmd apt install -y --allow-downgrades "bunkerweb=$BUNKERWEB_VERSION"
             run_cmd apt-mark hold bunkerweb nginx
             ;;
-        fedora|rhel|rocky|almalinux)
+        fedora|rhel|rocky|almalinux|centos)
             if [ "$DISTRO_ID" = "fedora" ]; then
                 run_cmd dnf makecache || true
             else
@@ -7947,7 +7973,7 @@ Install BunkerWeb $BUNKERWEB_VERSION with this configuration?"
             "fedora")
                 install_nginx_fedora
                 ;;
-            "rhel"|"rocky"|"almalinux")
+            "rhel"|"rocky"|"almalinux"|"centos")
                 install_nginx_rhel
                 ;;
             "freebsd")
@@ -8062,7 +8088,7 @@ Install BunkerWeb $BUNKERWEB_VERSION with this configuration?"
             "fedora")
                 install_bunkerweb_rpm
                 ;;
-            "rhel"|"rocky"|"almalinux")
+            "rhel"|"rocky"|"almalinux"|"centos")
                 install_bunkerweb_rpm
                 ;;
             "freebsd")
