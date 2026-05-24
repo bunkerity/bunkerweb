@@ -3434,12 +3434,6 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <td><code>no</code></td>
 </tr>
 <tr>
-<td><code>SCHEDULER_MAX_WORKERS</code></td>
-<td>调度器作业执行器的最大工作线程数。每个运行线程可占用一个数据库连接，从而限制调度器侧的连接池压力。若解析值超过 <code>DATABASE_POOL_SIZE</code> + <code>DATABASE_POOL_MAX_OVERFLOW</code>，启动时会输出警告。</td>
-<td>正整数</td>
-<td><code>min(8, max(2, cpu_count*2))</code></td>
-</tr>
-<tr>
 <td><code>TZ</code></td>
 <td>调度器日志、类 cron 任务、备份和时间戳使用的时区</td>
 <td>TZ 数据库名（如 <code>UTC</code>、<code>Europe/Paris</code>）</td>

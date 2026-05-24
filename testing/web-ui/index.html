@@ -1494,17 +1494,6 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 - Remember to set <code>PROXY_NUMBERS</code> if multiple proxies append <code>X-Forwarded-*</code> headers.</p>
 </li>
 </ul>
-<div class="admonition tip">
-<p class="admonition-title">Pre-hashed admin password</p>
-<p><code>ADMIN_PASSWORD</code> accepts a <strong>bcrypt hash</strong> (<code>$2a$</code>/<code>$2b$</code>/<code>$2y$</code>) and stores it as-is, keeping the plaintext out of your env files and secrets. The strength policy is skipped (you own the source password); cost below 12 logs a warning. Env create and <code>OVERRIDE_ADMIN_CREDS</code> only; the wizard and profile page still need plaintext.</p>
-<p>Generate a hash:</p>
-<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import bcrypt; print(bcrypt.hashpw(b&#39;Str0ng&amp;P@ss!&#39;, bcrypt.gensalt(rounds=13)).decode())&quot;</span>
-</code></pre></div>
-</div>
-<div class="admonition warning">
-<p class="admonition-title">A wrong hash locks you out</p>
-<p>Use a hash only if you know its plaintext. A valid-but-wrong hash on first creation can't be reversed and a restart won't fix it. Recover with a different <code>ADMIN_PASSWORD</code> plus <code>OVERRIDE_ADMIN_CREDS=yes</code>.</p>
-</div>
 <h2 id="configuration-sources-and-precedence">Configuration sources and precedence</h2>
 <ol>
 <li>Environment variables (including Docker/Compose <code>environment:</code>)</li>
@@ -1606,8 +1595,8 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <tbody>
 <tr>
 <td><code>ADMIN_USERNAME</code>, <code>ADMIN_PASSWORD</code></td>
-<td>Seed admin account (password policy enforced; <code>ADMIN_PASSWORD</code> also accepts a bcrypt hash, stored as-is)</td>
-<td>Strings / bcrypt hash</td>
+<td>Seed admin account (password policy enforced)</td>
+<td>Strings</td>
 <td>unset</td>
 </tr>
 <tr>

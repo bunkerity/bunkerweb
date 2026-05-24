@@ -3450,12 +3450,6 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <td><code>no</code></td>
 </tr>
 <tr>
-<td><code>SCHEDULER_MAX_WORKERS</code></td>
-<td>Max worker threads in the scheduler's job executor. Each running thread can hold one DB connection, so this caps scheduler-side DB-pool pressure. A startup warning is emitted if the resolved value exceeds <code>DATABASE_POOL_SIZE</code> + <code>DATABASE_POOL_MAX_OVERFLOW</code>.</td>
-<td>Positive integer</td>
-<td><code>min(8, max(2, cpu_count*2))</code></td>
-</tr>
-<tr>
 <td><code>TZ</code></td>
 <td>Time zone for scheduler logs, cron-like jobs, backups, and timestamps</td>
 <td>TZ database name (e.g., <code>UTC</code>, <code>Europe/Paris</code>)</td>

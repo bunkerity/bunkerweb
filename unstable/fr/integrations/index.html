@@ -3445,12 +3445,6 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <td><code>no</code></td>
 </tr>
 <tr>
-<td><code>SCHEDULER_MAX_WORKERS</code></td>
-<td>Nombre maximal de threads dans l'exécuteur de jobs du Scheduler. Chaque thread peut détenir une connexion DB, ce qui borne la pression sur le pool côté Scheduler. Un avertissement est émis au démarrage si la valeur résolue dépasse <code>DATABASE_POOL_SIZE</code> + <code>DATABASE_POOL_MAX_OVERFLOW</code>.</td>
-<td>Entier positif</td>
-<td><code>min(8, max(2, cpu_count*2))</code></td>
-</tr>
-<tr>
 <td><code>TZ</code></td>
 <td>Fuseau horaire pour les logs du Scheduler, tâches type cron, sauvegardes et dates</td>
 <td>Nom de base TZ (ex. <code>UTC</code>, <code>Europe/Paris</code>)</td>

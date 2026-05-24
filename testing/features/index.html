@@ -2245,17 +2245,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#load-balancer-pro" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Load Balancer (PRO)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#metrics" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5089,7 +5078,6 @@ For the new version, create a reCAPTCHA key in your Google Cloud project and use
 <li>Use HTTPS for <code>ANTIBOT_CAPJS_FRONTEND_URL</code> in production. The browser worker requires <code>crypto.subtle</code> in a secure context, and HTTPS prevents MITM changes to the widget.</li>
 <li>Configure CORS on the Cap.js sitekey to allow the protected origin.</li>
 <li>Set both <code>ANTIBOT_CAPJS_FRONTEND_URL</code> and <code>ANTIBOT_CAPJS_BACKEND_URL</code> to origins only: scheme, host, and optional port, with no path.</li>
-<li>Use the Cap.js widget <strong>0.1.48 or later</strong>. BunkerWeb serves a strict nonce-based CSP; earlier widgets break instrumentation challenges because the sandboxed <code>srcdoc</code> iframe's inline script does not propagate the nonce. If you self-host <code>tiago2/cap</code>, pin a recent tag (e.g. <code>tiago2/cap:3.1.2</code> or newer) or set <code>WIDGET_VERSION</code> to <code>0.1.48</code> or later.</li>
 </ul>
 </div>
 <p>Refer to the <a href="#common-settings">Common Settings</a> for additional configuration options.</p>
@@ -9825,158 +9813,6 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
-<h2 id="load-balancer-pro">Load Balancer <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
-<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag' title='Load Balancer' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
-
-<p>For a more detailed guide, see the <a href="../advanced/#load-balancer-pro">advanced usages</a> documentation.</p>
-<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
-<p>Provides load balancing feature to group of upstreams with optional healthchecks.</p>
-<table>
-<thead>
-<tr>
-<th>Setting</th>
-<th>Default</th>
-<th>Context</th>
-<th>Multiple</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>LOADBALANCER_HEALTHCHECK_DICT_SIZE</code></td>
-<td><code>10m</code></td>
-<td>global</td>
-<td>no</td>
-<td>Shared dict size (datastore for all healthchecks).</td>
-</tr>
-<tr>
-<td><code>LOADBALANCER_UPSTREAM_NAME</code></td>
-<td></td>
-<td>global</td>
-<td>yes</td>
-<td>Name of the upstream (used in REVERSE_PROXY_HOST).</td>
-</tr>
-<tr>
-<td><code>LOADBALANCER_UPSTREAM_SERVERS</code></td>
-<td></td>
-<td>global</td>
-<td>yes</td>
-<td>List of servers/IPs in the server group.</td>
-</tr>
-<tr>
-<td><code>LOADBALANCER_UPSTREAM_MODE</code></td>
-<td><code>round-robin</code></td>
-<td>global</td>
-<td>yes</td>
-<td>Load balancing mode (round-robin or sticky).</td>
-</tr>
-<tr>
-<td><code>LOADBALANCER_UPSTREAM_STICKY_METHOD</code></td>
-<td><code>ip</code></td>
-<td>global</td>
-<td>yes</td>
-<td>Sticky session method (ip or cookie).</td>
-</tr>
-<tr>
-<td><code>LOADBALANCER_UPSTREAM_RESOLVE</code></td>
-<td><code>no</code></td>
-<td>global</td>
-<td>yes</td>
-<td>Dynamically resolve upstream hostnames.</td>
-</tr>
-<tr>
-<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE</code></td>
-<td></td>
-<td>global</td>
-<td>yes</td>
-<td>Number of keepalive connections to cache per worker.</td>
-</tr>
-<tr>
-<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT</code></td>
-<td><code>60s</code></td>
-<td>global</td>
-<td>yes</td>
-<td>Keepalive timeout for upstream connections.</td>
-</tr>
-<tr>
-<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE_TIME</code></td>
-<td><code>1h</code></td>
-<td>global</td>
-<td>yes</td>
-<td>Keepalive time for upstream connections.</td>
-</tr>
-<tr>
-<td><code>LOADBALANCER_HEALTHCHECK_URL</code></td>
-<td><code>/status</code></td>
-<td>global</td>
-<td>yes</td>
-<td>The healthcheck URL.</td>
-</tr>
-<tr>
-<td><code>LOADBALANCER_HEALTHCHECK_INTERVAL</code></td>
-<td><code>2000</code></td>
-<td>global</td>
-<td>yes</td>
-<td>Healthcheck interval in milliseconds.</td>
-</tr>
-<tr>
-<td><code>LOADBALANCER_HEALTHCHECK_TIMEOUT</code></td>
-<td><code>1000</code></td>
-<td>global</td>
-<td>yes</td>
-<td>Healthcheck timeout in milliseconds.</td>
-</tr>
-<tr>
-<td><code>LOADBALANCER_HEALTHCHECK_FALL</code></td>
-<td><code>3</code></td>
-<td>global</td>
-<td>yes</td>
-<td>Number of failed healthchecks before marking the server as down.</td>
-</tr>
-<tr>
-<td><code>LOADBALANCER_HEALTHCHECK_RISE</code></td>
-<td><code>1</code></td>
-<td>global</td>
-<td>yes</td>
-<td>Number of successful healthchecks before marking the server as up.</td>
-</tr>
-<tr>
-<td><code>LOADBALANCER_HEALTHCHECK_VALID_STATUSES</code></td>
-<td><code>200</code></td>
-<td>global</td>
-<td>yes</td>
-<td>HTTP status considered valid in healthchecks.</td>
-</tr>
-<tr>
-<td><code>LOADBALANCER_HEALTHCHECK_CONCURRENCY</code></td>
-<td><code>10</code></td>
-<td>global</td>
-<td>yes</td>
-<td>Maximum number of concurrent healthchecks.</td>
-</tr>
-<tr>
-<td><code>LOADBALANCER_HEALTHCHECK_TYPE</code></td>
-<td><code>http</code></td>
-<td>global</td>
-<td>yes</td>
-<td>Type of healthcheck (http or https).</td>
-</tr>
-<tr>
-<td><code>LOADBALANCER_HEALTHCHECK_SSL_VERIFY</code></td>
-<td><code>yes</code></td>
-<td>global</td>
-<td>yes</td>
-<td>Verify SSL certificate in healthchecks.</td>
-</tr>
-<tr>
-<td><code>LOADBALANCER_HEALTHCHECK_HOST</code></td>
-<td></td>
-<td>global</td>
-<td>yes</td>
-<td>Host header for healthchecks (useful for HTTPS).</td>
-</tr>
-</tbody>
-</table>
 <h2 id="metrics">Metrics</h2>
 <p>STREAM support <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>The Metrics plugin provides comprehensive monitoring and data collection capabilities for your BunkerWeb instance. This feature enables you to track various performance indicators, security events, and system statistics, giving you valuable insights into the behavior and health of your protected websites and services.</p>

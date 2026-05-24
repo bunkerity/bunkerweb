@@ -3437,12 +3437,6 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <td><code>no</code></td>
 </tr>
 <tr>
-<td><code>SCHEDULER_MAX_WORKERS</code></td>
-<td>Número máximo de hilos en el ejecutor de jobs del Scheduler. Cada hilo activo puede mantener una conexión a la BD, limitando la presión sobre el pool desde el Scheduler. Al iniciar se emite una advertencia si el valor resuelto supera <code>DATABASE_POOL_SIZE</code> + <code>DATABASE_POOL_MAX_OVERFLOW</code>.</td>
-<td>Entero positivo</td>
-<td><code>min(8, max(2, cpu_count*2))</code></td>
-</tr>
-<tr>
 <td><code>TZ</code></td>
 <td>Zona horaria para logs del programador, jobs tipo cron, backups y marcas de tiempo</td>
 <td>Nombre en base TZ (ej. <code>UTC</code>, <code>Europe/Paris</code>)</td>
