@@ -218,7 +218,15 @@ fi
 # Set CFALGS
 export CFLAGS="$CFLAGS -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1"
 
-export CHANGE_DIR="/tmp/bunkerweb/deps/src/nginx"
+# Select the correct nginx source directory: Fedora pins nginx 1.30.1 (its
+# repos have no 1.30.2 yet) so modules must be compiled against the matching
+# source, other distros use the default nginx source.
+if [ "$OS" = "fedora" ] ; then
+	NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx-1.30.1"
+else
+	NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx"
+fi
+export CHANGE_DIR="$NGINX_SRC_DIR"
 do_and_check_cmd mv auto/configure ./
 echo '#!/bin/bash' > "${CHANGE_DIR}/configure-fix.sh"
 echo "./configure $CONFARGS --add-dynamic-module=/tmp/bunkerweb/deps/src/headers-more-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/nginx_cookie_flag_module --add-dynamic-module=/tmp/bunkerweb/deps/src/lua-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/ngx_brotli --add-dynamic-module=/tmp/bunkerweb/deps/src/ngx_devel_kit --add-dynamic-module=/tmp/bunkerweb/deps/src/stream-lua-nginx-module" --add-dynamic-module=/tmp/bunkerweb/deps/src/modsecurity-nginx --add-dynamic-module=/tmp/bunkerweb/deps/src/lua-upstream-nginx-module >> "${CHANGE_DIR}/configure-fix.sh"

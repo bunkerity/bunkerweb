@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.10
+## v1.6.11 - 2026/05/23
+
+- [SECURITY] `nginx`: update nginx to 1.30.2 (except for Fedora as it is not yet available) to fix CVE-2026-9256 — a heap buffer overflow in `ngx_http_rewrite_module` with overlapping captures that could lead to worker-process arbitrary code execution.
+
+## v1.6.10 - 2026/05/19
 
 - [SECURITY] `nginx` : update nginx to 1.30.1 to fix various CVEs
 - [BUGFIX] `reverseproxy`: pin a `USE_UI=yes` service upstream to HTTP/1.1 so a global `REVERSE_PROXY_HTTP_VERSION=2` no longer locks out the web UI. (Fixes #3550)
