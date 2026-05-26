@@ -41,6 +41,17 @@
                                    data-i18n="theme.dark">Dark</label>
                         </div>
                         <ul class="d-flex mb-0 list-unstyled">
+                            {% if current_user.is_authenticated %}
+                                <li class="me-3">
+                                    <a class="btn btn-sm btn-outline-danger fw-bold text-uppercase d-flex align-items-center h-100"
+                                       href="{{ url_for('logout') }}"
+                                       aria-label="Log Out"
+                                       data-i18n-aria-label="navbar.dropdown.logout">
+                                        <i class="bx bx-power-off me-0 me-md-2" aria-hidden="true"></i>
+                                        <span class="d-none d-md-inline" data-i18n="navbar.dropdown.logout">Log Out</span>
+                                    </a>
+                                </li>
+                            {% endif %}
                             <li class="me-3">
                                 <a role="button"
                                    class="btn btn-sm btn-outline-dark d-flex align-items-center h-100"
