@@ -83,7 +83,8 @@ RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client sqlite post
   adduser -h /usr/share/bunkerweb/ui -g ui -s /sbin/nologin -G ui -D -H -u 101 --disabled-password ui
 
 # Fix CVEs
-RUN apk add --no-cache "xz-libs>=5.8.3-r0" "mariadb-client>=11.4.11-r0"
+RUN apk add --no-cache "xz-libs>=5.8.3-r0" # CVE-2026-34743
+RUN apk add --no-cache "mariadb-client>=11.4.11-r0" # CVE-2026-44173 CVE-2026-44172 CVE-2026-44171 CVE-2026-44170 CVE-2026-44169 CVE-2026-44168
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
