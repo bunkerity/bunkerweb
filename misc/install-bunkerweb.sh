@@ -3687,12 +3687,13 @@ present_configuration_summary() {
 }
 
 # Render summary via gum. Body text inherits terminal default for cross-theme contrast.
-# Auto-paginate via `gum pager` when the styled box exceeds terminal height.
+# Print inline (no pager): the recap is informational and scrolls in the normal
+# buffer; the `gum confirm` that follows is the single interaction gate. A pager
+# here would grab the alt screen and only exit on q/esc — on consoles where input
+# never reaches bubbletea it hangs, and it reads as "stuck" even when it works.
 _present_summary_gum() {
     local _summary="$1"
-    local _summary_h _term_h _term_w _box_w
-    _summary_h=$(printf '%s\n' "$_summary" | wc -l)
-    _term_h=$(tput lines 2>/dev/null || echo 24)
+    local _term_w _box_w
     _term_w=$(tput cols  2>/dev/null || echo 80)
     _box_w=$(( _term_w > 84 ? 78 : _term_w - 6 ))
     [ "$_box_w" -lt 40 ] && _box_w=40
@@ -3707,11 +3708,7 @@ _present_summary_gum() {
         --margin "1 0" \
         "$(printf '%s\n%s' "$_title" "$_summary")")
 
-    if [ "$_summary_h" -gt $(( _term_h - 6 )) ]; then
-        printf '%s\n' "$_styled" | gum pager --show-line-numbers=false
-    else
-        printf '%s\n' "$_styled"
-    fi
+    printf '%s\n' "$_styled"
 }
 
 # Build config recap string with dot-padded fields. No I/O. UTF-8 glyphs safe — tui_init forces UTF-8.
