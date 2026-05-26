@@ -1454,6 +1454,22 @@ Si encuentras errores como este, especialmente en el programador:
 
 Necesitarás aumentar el `max_allowed_packet` en tu servidor de base de datos.
 
+El valor recomendado es `67108864` bytes (64 MiB). Cuando la base de datos se ejecuta en un contenedor, configúralo mediante la directiva `command:`:
+
+```yaml
+bw-db:
+    image: mariadb:11
+    command: --max-allowed-packet=67108864
+    ...
+```
+
+Para una base de datos instalada localmente o externa, añade en su lugar el parámetro a la configuración del servidor (por ejemplo, un archivo dedicado en `/etc/mysql/mariadb.conf.d/` o `/etc/my.cnf.d/`):
+
+```ini
+[mysqld]
+max_allowed_packet = 64M
+```
+
 ## Persistencia de bloqueos e informes {#persistence-of-bans-and-reports}
 
 Por defecto, BunkerWeb almacena los bloqueos e informes en un almacén de datos Lua local. Aunque es simple y eficiente, esta configuración significa que los datos se pierden cuando se reinicia la instancia. Para asegurar que los bloqueos e informes persistan a través de los reinicios, puedes configurar BunkerWeb para que utilice un servidor remoto [Redis](https://redis.io/) o [Valkey](https://valkey.io/).
@@ -3266,7 +3282,7 @@ También puedes especificar un bucket S3 personalizado para la copia de segurida
         ```yaml
         bw-db:
             image: mariadb:<version>
-            command: --default-authentication-plugin=mysql_native_password
+            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
             ...
         ```
 
@@ -3275,7 +3291,7 @@ También puedes especificar un bucket S3 personalizado para la copia de segurida
         ```yaml
         bw-db:
             image: mysql:<version>
-            command: --default-authentication-plugin=mysql_native_password
+            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
             ...
         ```
 
@@ -3528,7 +3544,7 @@ Este comando creará una copia de seguridad de tu base de datos y la almacenará
         ```yaml
         bw-db:
             image: mariadb:<version>
-            command: --default-authentication-plugin=mysql_native_password
+            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
             ...
         ```
 
@@ -3537,7 +3553,7 @@ Este comando creará una copia de seguridad de tu base de datos y la almacenará
         ```yaml
         bw-db:
             image: mysql:<version>
-            command: --default-authentication-plugin=mysql_native_password
+            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
             ...
         ```
 

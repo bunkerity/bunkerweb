@@ -1455,6 +1455,22 @@ If you encounter errors like this, especially on the scheduler:
 
 You will need to increase the `max_allowed_packet` on your database server.
 
+The recommended value is `67108864` bytes (64 MiB). When the database runs in a container, set it through the `command:` directive:
+
+```yaml
+bw-db:
+    image: mariadb:11
+    command: --max-allowed-packet=67108864
+    ...
+```
+
+For a locally installed or external database, add the setting to the server configuration instead (for example, a dedicated file under `/etc/mysql/mariadb.conf.d/` or `/etc/my.cnf.d/`):
+
+```ini
+[mysqld]
+max_allowed_packet = 64M
+```
+
 ## Persistence of bans and reports {#persistence-of-bans-and-reports}
 
 By default, BunkerWeb stores bans and reports in a local Lua datastore. While simple and efficient, this setup means that data is lost when the instance is restarted. To ensure that bans and reports persist across restarts, you can configure BunkerWeb to use a remote [Redis](https://redis.io/) or [Valkey](https://valkey.io/) server.
@@ -3267,7 +3283,7 @@ You can also specify a custom S3 bucket for the backup by providing the `BACKUP_
         ```yaml
         bw-db:
             image: mariadb:<version>
-            command: --default-authentication-plugin=mysql_native_password
+            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
             ...
         ```
 
@@ -3276,7 +3292,7 @@ You can also specify a custom S3 bucket for the backup by providing the `BACKUP_
         ```yaml
         bw-db:
             image: mysql:<version>
-            command: --default-authentication-plugin=mysql_native_password
+            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
             ...
         ```
 
@@ -3518,7 +3534,7 @@ This command will create a backup of your database and store it in the backup di
         ```yaml
         bw-db:
             image: mariadb:<version>
-            command: --default-authentication-plugin=mysql_native_password
+            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
             ...
         ```
 
@@ -3527,7 +3543,7 @@ This command will create a backup of your database and store it in the backup di
         ```yaml
         bw-db:
             image: mysql:<version>
-            command: --default-authentication-plugin=mysql_native_password
+            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
             ...
         ```
 
