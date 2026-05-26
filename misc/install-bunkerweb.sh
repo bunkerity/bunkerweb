@@ -2515,24 +2515,28 @@ _docker_ask_image_tag() {
     if [ -n "$DOCKER_IMAGE_TAG" ]; then
         # Flag-provided — still normalize '~' → '-'.
         DOCKER_IMAGE_TAG=$(derive_docker_image_tag "$DOCKER_IMAGE_TAG")
-        return 0
-    fi
-    if [ "$INTERACTIVE_MODE" != "yes" ]; then
+    elif [ "$INTERACTIVE_MODE" != "yes" ]; then
         DOCKER_IMAGE_TAG="$_default_tag"
-        return 0
+    else
+        tui_section "🏷️  BunkerWeb Image Tag"
+        while true; do
+            DOCKER_IMAGE_TAG=$(tui_input "Image Tag" \
+                "Docker Hub tag for the BunkerWeb images:" "$_default_tag") \
+                || DOCKER_IMAGE_TAG="$_default_tag"
+            [ -z "$DOCKER_IMAGE_TAG" ] && DOCKER_IMAGE_TAG="$_default_tag"
+            # Normalize '~' → '-' before validating so a typed Debian-style version works.
+            DOCKER_IMAGE_TAG=$(derive_docker_image_tag "$DOCKER_IMAGE_TAG")
+            validate_docker_image_tag "$DOCKER_IMAGE_TAG" && break
+            tui_msgbox "Invalid Tag" "Image tags allow letters, digits, '.', '_' and '-' only."
+            DOCKER_IMAGE_TAG=""
+        done
     fi
-    tui_section "🏷️  BunkerWeb Image Tag"
-    while true; do
-        DOCKER_IMAGE_TAG=$(tui_input "Image Tag" \
-            "Docker Hub tag for the BunkerWeb images:" "$_default_tag") \
-            || DOCKER_IMAGE_TAG="$_default_tag"
-        [ -z "$DOCKER_IMAGE_TAG" ] && DOCKER_IMAGE_TAG="$_default_tag"
-        # Normalize '~' → '-' before validating so a typed Debian-style version works.
-        DOCKER_IMAGE_TAG=$(derive_docker_image_tag "$DOCKER_IMAGE_TAG")
-        validate_docker_image_tag "$DOCKER_IMAGE_TAG" && break
-        tui_msgbox "Invalid Tag" "Image tags allow letters, digits, '.', '_' and '-' only."
-        DOCKER_IMAGE_TAG=""
-    done
+    # The 'dev' channel has no public Docker Hub image (dev CI builds are not pushed),
+    # so a derived 'dev' tag yields a compose stack that fails to pull. Warn the user.
+    if [ "$DOCKER_IMAGE_TAG" = "dev" ]; then
+        print_warning "No public 'bunkerity/bunkerweb:dev' image is published; 'docker compose' will fail to pull it."
+        print_warning "Pass --image-tag <published-tag> (e.g. latest, testing or a version), or build the dev image locally first."
+    fi
 }
 
 # Web UI admin username + password — full/manager/ui.
@@ -4947,8 +4951,12 @@ install_bunkerweb_debian() {
     print_step "Installing BunkerWeb on Debian/Ubuntu"
 
     if [[ "$BUNKERWEB_VERSION" =~ (testing|dev) ]]; then
-        print_status "Adding force-bad-version directive for testing/dev version"
-        echo "force-bad-version" >> /etc/dpkg/dpkg.cfg
+        # Idempotent: only append if the exact directive is not already present,
+        # so re-running the installer never duplicates the line.
+        if ! grep -qxF "force-bad-version" /etc/dpkg/dpkg.cfg 2>/dev/null; then
+            print_status "Adding force-bad-version directive for testing/dev version"
+            echo "force-bad-version" >> /etc/dpkg/dpkg.cfg
+        fi
     fi
 
     if [ "$ENABLE_WIZARD" = "no" ]; then
