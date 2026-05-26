@@ -1,14 +1,17 @@
 # Changelog
 
-## v1.6.11~rc1 - 2026/05/23
+## v1.6.12~rc1 - 2026/??/??
 
-- [SECURITY] `nginx`: update nginx to 1.30.2 (except for Fedora as it is not yet available) to fix CVE-2026-9256 — a heap buffer overflow in `ngx_http_rewrite_module` with overlapping captures that could lead to worker-process arbitrary code execution.
 - [SECURITY] `antibot`: Cap.js `script-src` now uses a strict per-request nonce (no more `'unsafe-inline'`); every challenge response also sends `Cache-Control: no-store`. Requires Cap.js widget `0.1.48`+.
 - [SECURITY] `letsencrypt` (UI): harden delete + new heal flow — per-request scratch dir, `fcntl.flock`, `.`/`..` rejected in `cert_name`, DOMPurify + `markupsafe.escape` at every HTML sink, 500 on persistence failure; new `/letsencrypt/{orphans,accounts,cache-status,heal}` endpoints, per-row Heal button, sidebar orphan toast.
 - [SECURITY] `linux`: `after-remove` hooks now preserve `/var/log/bunkerweb`, `/etc/bunkerweb`, `/var/lib/bunkerweb` and `/var/tmp` upgrade backups on plain uninstall (only purge wipes configs + DB; logs and backups always kept, disposal commands printed); upgrade backups are written via `install -m 0600 -o root -g root` (atomic) and any pre-existing world-readable backups are retro-tightened, closing a local-read window on admin credentials and the SQLite DB.
 - [BUGFIX] `letsencrypt` (core): fix self-propagating cache poisoning that caused fleet-wide `certbot AccountNotFound`; add CA-agnostic consistency gate (LE + ZeroSSL paths), server-scoped `select_account_id`, auto-purge + re-register when the ACME server reports a pinned `--account` as deleted (stale-account JWS recovery), redacted-value `Configurator` WARN logs.
 - [FEATURE] `scheduler`: new `SCHEDULER_MAX_WORKERS` env var caps the job-executor thread pool to bound DB-pool pressure on shared MariaDB/MySQL/PostgreSQL; auto default tightened from `min(8, cpu*4)` to `min(8, max(2, cpu*2))` and a warning is emitted when the resolved value exceeds `DATABASE_POOL_SIZE` + `DATABASE_POOL_MAX_OVERFLOW`.
 - [FEATURE] `ui`: `ADMIN_PASSWORD` now also accepts a pre-hashed bcrypt value (`$2a$`/`$2b$`/`$2y$`), stored as-is so the plaintext never lands in env files or secrets (env create + `OVERRIDE_ADMIN_CREDS` paths only; wizard and profile still take plaintext). The strength policy is skipped for a hash, a cost factor below 12 logs a warning.
+
+## v1.6.11 - 2026/05/23
+
+- [SECURITY] `nginx`: update nginx to 1.30.2 (except for Fedora as it is not yet available) to fix CVE-2026-9256 — a heap buffer overflow in `ngx_http_rewrite_module` with overlapping captures that could lead to worker-process arbitrary code execution.
 
 ## v1.6.10 - 2026/05/19
 

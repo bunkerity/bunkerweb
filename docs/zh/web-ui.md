@@ -35,7 +35,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
     使用已发布镜像与[快速入门](quickstart-guide.md#__tabbed_1_3)的布局启动栈，然后在浏览器完成向导。
 
     ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.11~rc1-rc1/misc/integrations/docker-compose.yml up -d
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.11-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
     访问 scheduler 主机名（如 `https://www.example.com/changeme`），运行 `/setup` 向导以配置 UI、scheduler 与实例。
@@ -52,7 +52,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.11-rc1
+        image: bunkerity/bunkerweb:1.6.11
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.11-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.11
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.11-rc1
+        image: bunkerity/bunkerweb-ui:1.6.11
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -210,19 +210,19 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 
 ### 认证、会话与 Cookie
 
-| 设置                                        | 描述                                                    | 可接受值                     | 默认值         |
-| ------------------------------------------- | ------------------------------------------------------- | ---------------------------- | -------------- |
-| `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | 初始化管理员账户（执行密码策略；`ADMIN_PASSWORD` 也接受 bcrypt 哈希，按原样存储）                        | 字符串 / bcrypt 哈希          | 未设           |
-| `OVERRIDE_ADMIN_CREDS`                      | 强制用环境变量更新管理员凭据                            | `yes` 或 `no`                | `no`           |
-| `FLASK_SECRET`                              | 会话签名密钥（存于 `/var/lib/bunkerweb/.flask_secret`） | 十六进制/Base64/不透明字符串 | 自动生成       |
-| `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | TOTP 秘钥加密键（空格或 JSON）                          | 字符串 / JSON                | 缺失时自动生成 |
-| `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Biscuit 密钥（hex），用于 UI token                      | Hex 字符串                   | 自动生成并存储 |
-| `SESSION_LIFETIME_HOURS`                    | 会话空闲时长（滑动 TTL，每次请求刷新）                  | 数值（小时）                 | `12`           |
-| `SESSION_ABSOLUTE_HOURS`                    | 与活动无关的绝对会话上限                                | 数值（小时）                 | `168`          |
-| `SESSION_ROLLING_HOURS`                     | 会话 ID 轮换间隔（`0` 关闭轮换）                        | 数值（小时）                 | `0`            |
-| `ALWAYS_REMEMBER`                           | 总是启用 “remember me”                                  | `yes` 或 `no`                | `no`           |
-| `CHECK_PRIVATE_IP`                          | 绑定会话到 IP（`no` 时放宽私网变更）                    | `yes` 或 `no`                | `yes`          |
-| `PROXY_NUMBERS`                             | 信任的 `X-Forwarded-*` 代理层数                         | 整数                         | `1`            |
+| 设置                                        | 描述                                                                              | 可接受值                     | 默认值         |
+| ------------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------- | -------------- |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | 初始化管理员账户（执行密码策略；`ADMIN_PASSWORD` 也接受 bcrypt 哈希，按原样存储） | 字符串 / bcrypt 哈希         | 未设           |
+| `OVERRIDE_ADMIN_CREDS`                      | 强制用环境变量更新管理员凭据                                                      | `yes` 或 `no`                | `no`           |
+| `FLASK_SECRET`                              | 会话签名密钥（存于 `/var/lib/bunkerweb/.flask_secret`）                           | 十六进制/Base64/不透明字符串 | 自动生成       |
+| `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | TOTP 秘钥加密键（空格或 JSON）                                                    | 字符串 / JSON                | 缺失时自动生成 |
+| `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Biscuit 密钥（hex），用于 UI token                                                | Hex 字符串                   | 自动生成并存储 |
+| `SESSION_LIFETIME_HOURS`                    | 会话空闲时长（滑动 TTL，每次请求刷新）                                            | 数值（小时）                 | `12`           |
+| `SESSION_ABSOLUTE_HOURS`                    | 与活动无关的绝对会话上限                                                          | 数值（小时）                 | `168`          |
+| `SESSION_ROLLING_HOURS`                     | 会话 ID 轮换间隔（`0` 关闭轮换）                                                  | 数值（小时）                 | `0`            |
+| `ALWAYS_REMEMBER`                           | 总是启用 “remember me”                                                            | `yes` 或 `no`                | `no`           |
+| `CHECK_PRIVATE_IP`                          | 绑定会话到 IP（`no` 时放宽私网变更）                                              | `yes` 或 `no`                | `yes`          |
+| `PROXY_NUMBERS`                             | 信任的 `X-Forwarded-*` 代理层数                                                   | 整数                         | `1`            |
 
 ### 日志
 

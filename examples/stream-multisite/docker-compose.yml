@@ -1,6 +1,6 @@
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.11-rc1
+    image: bunkerity/bunkerweb:1.6.11
     container_name: bunkerweb
     ports:
       - "80:8080" # required to resolve let's encrypt challenges
@@ -16,7 +16,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.11-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.11
     container_name: bunkerweb-scheduler
     depends_on:
       - bunkerweb
@@ -46,19 +46,18 @@ services:
 
   app1:
     image: istio/tcp-echo-server:1.3
-    command: [ "9000", "app1" ]
+    command: ["9000", "app1"]
     networks:
       - bw-services
 
   app2:
     image: istio/tcp-echo-server:1.3
-    command: [ "9000", "app2" ]
+    command: ["9000", "app2"]
     networks:
       - bw-services
 
 volumes:
   bw-storage:
-
 
 networks:
   bw-universe:

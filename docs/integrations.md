@@ -1275,7 +1275,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.11-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.11
 ```
 
 By default, the container exposes:
@@ -1302,7 +1302,7 @@ A named volume (or bind mount) is required to persist the SQLite database, cache
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.11-rc1
+    image: bunkerity/bunkerweb-all-in-one:1.6.11
     container_name: bunkerweb-aio
     ports:
       - "80:8080/tcp"
@@ -1374,7 +1374,7 @@ docker run -d \
   -e API_PASSWORD=StrongP@ssw0rd \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
   -p 8888:8888/tcp \
-  bunkerity/bunkerweb-all-in-one:1.6.11-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.11
 ```
 
 Recommended (behind BunkerWeb) — do not publish `8888`; reverse‑proxy it instead:
@@ -1382,7 +1382,7 @@ Recommended (behind BunkerWeb) — do not publish `8888`; reverse‑proxy it ins
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.11-rc1
+    image: bunkerity/bunkerweb-all-in-one:1.6.11
     container_name: bunkerweb-aio
     ports:
       - "80:8080/tcp"
@@ -1458,7 +1458,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.11-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.11
 ```
 
 * When `USE_CROWDSEC=yes`, the entrypoint will:
@@ -1513,7 +1513,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.11-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.11
 ```
 
 !!! info "How it works internally"
@@ -1535,7 +1535,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.11-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.11
 ```
 
 Notes:
@@ -1571,7 +1571,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.11-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.11
 ```
 
 * **Local registration** is skipped when `CROWDSEC_API` is not `127.0.0.1` or `localhost`.
@@ -1605,13 +1605,13 @@ By accessing these prebuilt images from Docker Hub, you can quickly pull and run
 Whether you're conducting tests, developing applications, or deploying BunkerWeb in production, the Docker containerization option provides flexibility and ease of use. Embracing this method empowers you to take full advantage of BunkerWeb's features while leveraging the benefits of Docker technology.
 
 ```shell
-docker pull bunkerity/bunkerweb:1.6.11-rc1
+docker pull bunkerity/bunkerweb:1.6.11
 ```
 
 Docker images are also available on [GitHub packages](https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb) and can be downloaded using the `ghcr.io` repository address:
 
 ```shell
-docker pull ghcr.io/bunkerity/bunkerweb:1.6.11-rc1
+docker pull ghcr.io/bunkerity/bunkerweb:1.6.11
 ```
 
 Key concepts for Docker integration include:
@@ -1621,7 +1621,7 @@ Key concepts for Docker integration include:
 - **Networks**: Docker networks play a vital role in the integration of BunkerWeb. These networks serve two main purposes: exposing ports to clients and connecting to upstream web services. By exposing ports, BunkerWeb can accept incoming requests from clients, allowing them to access the protected web services. Additionally, by connecting to upstream web services, BunkerWeb can efficiently route and manage traffic, providing enhanced security and performance.
 
 !!! info "Database backend"
-    Please note that our instructions assume you are using SQLite as the default database backend, as configured by the `DATABASE_URI` setting. However, other database backends are also supported. See the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.11-rc1/misc/integrations) of the repository for more information.
+    Please note that our instructions assume you are using SQLite as the default database backend, as configured by the `DATABASE_URI` setting. However, other database backends are also supported. See the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.11/misc/integrations) of the repository for more information.
 
 ### Environment variables
 
@@ -1631,7 +1631,7 @@ Settings are passed to the Scheduler using Docker environment variables:
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.11-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.11
     environment:
       - MY_SETTING=value
       - ANOTHER_SETTING=another value
@@ -1675,7 +1675,7 @@ This ensures sensitive settings are kept out of the environment and logs.
 The [scheduler](concepts.md#scheduler) runs in its own container, which is also available on Docker Hub:
 
 ```shell
-docker pull bunkerity/bunkerweb-scheduler:1.6.11-rc1
+docker pull bunkerity/bunkerweb-scheduler:1.6.11
 ```
 
 !!! info "BunkerWeb settings"
@@ -1696,7 +1696,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.11-rc1
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.11-rc1
+        image: bunkerity/bunkerweb:1.6.11
         environment:
           # This will set the API settings for the BunkerWeb container
           <<: *bw-api-env
@@ -1705,7 +1705,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.11-rc1
           - bw-universe
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.11-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.11
         environment:
           # This will set the API settings for the Scheduler container
           <<: *bw-api-env
@@ -1723,7 +1723,7 @@ A volume is needed to store the SQLite database and backups used by the schedule
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.11-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.11
     volumes:
       - bw-storage:/data
 ...
@@ -1785,15 +1785,15 @@ The scheduler is the control-plane worker that reads settings, renders configs, 
 
 ##### Runtime & safety
 
-| Setting                         | Description                                                           | Accepted values                                | Default                                |
-| ------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------- | -------------------------------------- |
-| `HEALTHCHECK_INTERVAL`          | Seconds between scheduler health checks                               | Integer seconds                                | `30`                                   |
-| `RELOAD_MIN_TIMEOUT`            | Minimum seconds between successive reloads                            | Integer seconds                                | `5`                                    |
-| `DISABLE_CONFIGURATION_TESTING` | Skip config tests before applying                                     | `yes` or `no`                                  | `no`                                   |
-| `IGNORE_FAIL_SENDING_CONFIG`    | Proceed even if some instances fail to receive a config               | `yes` or `no`                                  | `no`                                   |
-| `IGNORE_REGEX_CHECK`            | Skip regex validation for settings (shared with autoconf)             | `yes` or `no`                                  | `no`                                   |
+| Setting                         | Description                                                                                                                                                                                                                                                       | Accepted values                                | Default                                |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | -------------------------------------- |
+| `HEALTHCHECK_INTERVAL`          | Seconds between scheduler health checks                                                                                                                                                                                                                           | Integer seconds                                | `30`                                   |
+| `RELOAD_MIN_TIMEOUT`            | Minimum seconds between successive reloads                                                                                                                                                                                                                        | Integer seconds                                | `5`                                    |
+| `DISABLE_CONFIGURATION_TESTING` | Skip config tests before applying                                                                                                                                                                                                                                 | `yes` or `no`                                  | `no`                                   |
+| `IGNORE_FAIL_SENDING_CONFIG`    | Proceed even if some instances fail to receive a config                                                                                                                                                                                                           | `yes` or `no`                                  | `no`                                   |
+| `IGNORE_REGEX_CHECK`            | Skip regex validation for settings (shared with autoconf)                                                                                                                                                                                                         | `yes` or `no`                                  | `no`                                   |
 | `SCHEDULER_MAX_WORKERS`         | Max worker threads in the scheduler's job executor. Each running thread can hold one DB connection, so this caps scheduler-side DB-pool pressure. A startup warning is emitted if the resolved value exceeds `DATABASE_POOL_SIZE` + `DATABASE_POOL_MAX_OVERFLOW`. | Positive integer                               | `min(8, max(2, cpu_count*2))`          |
-| `TZ`                            | Time zone for scheduler logs, cron-like jobs, backups, and timestamps | TZ database name (e.g., `UTC`, `Europe/Paris`) | unset (container default, usually UTC) |
+| `TZ`                            | Time zone for scheduler logs, cron-like jobs, backups, and timestamps                                                                                                                                                                                             | TZ database name (e.g., `UTC`, `Europe/Paris`) | unset (container default, usually UTC) |
 
 ##### Database
 
@@ -1870,7 +1870,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.11-rc1
+    image: bunkerity/bunkerweb:1.6.11
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -1883,7 +1883,7 @@ services:
       - bw-universe
 ...
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.11-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.11
     environment:
       <<: *bw-api-env
       BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1916,7 +1916,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.11-rc1
+    image: bunkerity/bunkerweb:1.6.11
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -1929,7 +1929,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.11-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.11
     depends_on:
       - bunkerweb
     environment:
@@ -1995,8 +1995,8 @@ To get started, download the installation script and its checksum, then verify t
 
 ```bash
 # Download the script and its checksum
-curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.11-rc1/install-bunkerweb.sh
-curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.11-rc1/install-bunkerweb.sh.sha256
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.11/install-bunkerweb.sh
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.11/install-bunkerweb.sh.sha256
 
 # Verify the checksum
 sha256sum -c install-bunkerweb.sh.sha256
@@ -2074,24 +2074,24 @@ For non-interactive or automated setups, the script can be controlled with comma
 
 **General Options:**
 
-| Option                  | Description                                                           |
-| ----------------------- | --------------------------------------------------------------------- |
-| `-v, --version VERSION` | Specifies the BunkerWeb version to install (e.g., `1.6.11~rc1`).      |
-| `-w, --enable-wizard`   | Enables the setup wizard.                                             |
-| `-n, --no-wizard`       | Disables the setup wizard.                                            |
-| `-y, --yes`             | Runs in non-interactive mode using default answers for all prompts.   |
-| `--tui`                 | Require a TUI (downloaded gum or existing whiptail) and abort if no TUI tier can render. |
-| `--no-tui`              | Disable all TUI tiers and use the legacy plain-text prompts. Equivalent to `BW_INSTALL_TUI=no`. |
-| `-f, --force`           | Forces the installation to proceed even on an unsupported OS version. |
+| Option                  | Description                                                                                            |
+| ----------------------- | ------------------------------------------------------------------------------------------------------ |
+| `-v, --version VERSION` | Specifies the BunkerWeb version to install (e.g., `1.6.11`).                                           |
+| `-w, --enable-wizard`   | Enables the setup wizard.                                                                              |
+| `-n, --no-wizard`       | Disables the setup wizard.                                                                             |
+| `-y, --yes`             | Runs in non-interactive mode using default answers for all prompts.                                    |
+| `--tui`                 | Require a TUI (downloaded gum or existing whiptail) and abort if no TUI tier can render.               |
+| `--no-tui`              | Disable all TUI tiers and use the legacy plain-text prompts. Equivalent to `BW_INSTALL_TUI=no`.        |
+| `-f, --force`           | Forces the installation to proceed even on an unsupported OS version.                                  |
 | `--force-type-change`   | Allow `--<type>` to differ from the detected install type on upgrade (intentional HA migrations only). |
-| `-q, --quiet`           | Silent installation (suppress output; implies `--yes`).               |
-| `--api`, `--enable-api` | Enables the API (FastAPI) systemd service (disabled by default).      |
-| `--no-api`              | Explicitly disables the API service.                                  |
-| `--server-ip IP`        | IP printed in post-install URLs. Overrides auto-detection and can also be set with `SERVER_IP_INPUT`. |
-| `--epel`                | Install `epel-release` on RHEL-family distributions if it is missing. |
-| `--no-epel`             | Do not install `epel-release` on RHEL-family distributions.           |
-| `-h, --help`            | Displays the help message with all available options.                 |
-| `--dry-run`             | Show what would be installed without doing it.                        |
+| `-q, --quiet`           | Silent installation (suppress output; implies `--yes`).                                                |
+| `--api`, `--enable-api` | Enables the API (FastAPI) systemd service (disabled by default).                                       |
+| `--no-api`              | Explicitly disables the API service.                                                                   |
+| `--server-ip IP`        | IP printed in post-install URLs. Overrides auto-detection and can also be set with `SERVER_IP_INPUT`.  |
+| `--epel`                | Install `epel-release` on RHEL-family distributions if it is missing.                                  |
+| `--no-epel`             | Do not install `epel-release` on RHEL-family distributions.                                            |
+| `-h, --help`            | Displays the help message with all available options.                                                  |
+| `--dry-run`             | Show what would be installed without doing it.                                                         |
 
 **Installation Types:**
 
@@ -2106,67 +2106,67 @@ For non-interactive or automated setups, the script can be controlled with comma
 
 **Security Integrations:**
 
-| Option              | Description                                                         |
-| ------------------- | ------------------------------------------------------------------- |
-| `--crowdsec`        | Install and configure CrowdSec security engine.                     |
-| `--no-crowdsec`     | Skip CrowdSec installation.                                         |
-| `--crowdsec-appsec` | Install CrowdSec with AppSec component (includes WAF capabilities). |
-| `--redis`           | Install and configure Redis locally.                                |
-| `--no-redis`        | Skip Redis integration.                                             |
-| `--redis-flavor FLAVOR` | Local install flavor: `redis` (default) or `valkey`.             |
+| Option                  | Description                                                         |
+| ----------------------- | ------------------------------------------------------------------- |
+| `--crowdsec`            | Install and configure CrowdSec security engine.                     |
+| `--no-crowdsec`         | Skip CrowdSec installation.                                         |
+| `--crowdsec-appsec`     | Install CrowdSec with AppSec component (includes WAF capabilities). |
+| `--redis`               | Install and configure Redis locally.                                |
+| `--no-redis`            | Skip Redis integration.                                             |
+| `--redis-flavor FLAVOR` | Local install flavor: `redis` (default) or `valkey`.                |
 
 **Advanced Options:**
 
-| Option                      | Description                                                                         |
-| --------------------------- | ----------------------------------------------------------------------------------- |
-| `--instances "IP1 IP2"`     | Space-separated list of BunkerWeb instances (optional for manager/scheduler modes; you can add workers later). |
-| `--manager-ip IPs`          | Manager/Scheduler IPs to whitelist (required for worker in non-interactive mode).   |
-| `--dns-resolvers "IP1 IP2"` | Custom DNS resolver IPs (for full, manager, or worker installations).               |
-| `--api-https`               | Enable HTTPS for internal API communication (default: HTTP only).                   |
-| `--backup-dir PATH`         | Directory to store automatic backup before upgrade.                                 |
-| `--no-auto-backup`          | Skip automatic backup (you MUST have done it manually).                             |
-| `--redis-host HOST`         | Redis host for an existing Redis/Valkey server.                                     |
-| `--redis-port PORT`         | Redis port for an existing Redis/Valkey server.                                     |
-| `--redis-database DB`       | Redis database number.                                                              |
-| `--redis-username USER`     | Redis username (Redis 6+).                                                          |
-| `--redis-password PASS`     | Redis password.                                                                     |
-| `--redis-bind IP`           | Redis/Valkey bind address for a local Manager install (default prompt: `0.0.0.0`).  |
-| `--redis-no-password`       | Skip the auto-generated `requirepass` when binding Redis/Valkey beyond loopback.    |
-| `--redis-maxmemory MB`      | Memory cap in MB; `0` or `unlimited` keeps the distribution default.                |
-| `--redis-maxmemory-policy POLICY` | Eviction policy for local Redis/Valkey (default: `volatile-lru`).             |
-| `--redis-ssl`               | Enable SSL/TLS for Redis connection.                                                |
-| `--redis-no-ssl`            | Disable SSL/TLS for Redis connection.                                               |
-| `--redis-ssl-verify`        | Verify Redis SSL certificate.                                                       |
-| `--redis-no-ssl-verify`     | Do not verify Redis SSL certificate.                                                |
+| Option                            | Description                                                                                                    |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `--instances "IP1 IP2"`           | Space-separated list of BunkerWeb instances (optional for manager/scheduler modes; you can add workers later). |
+| `--manager-ip IPs`                | Manager/Scheduler IPs to whitelist (required for worker in non-interactive mode).                              |
+| `--dns-resolvers "IP1 IP2"`       | Custom DNS resolver IPs (for full, manager, or worker installations).                                          |
+| `--api-https`                     | Enable HTTPS for internal API communication (default: HTTP only).                                              |
+| `--backup-dir PATH`               | Directory to store automatic backup before upgrade.                                                            |
+| `--no-auto-backup`                | Skip automatic backup (you MUST have done it manually).                                                        |
+| `--redis-host HOST`               | Redis host for an existing Redis/Valkey server.                                                                |
+| `--redis-port PORT`               | Redis port for an existing Redis/Valkey server.                                                                |
+| `--redis-database DB`             | Redis database number.                                                                                         |
+| `--redis-username USER`           | Redis username (Redis 6+).                                                                                     |
+| `--redis-password PASS`           | Redis password.                                                                                                |
+| `--redis-bind IP`                 | Redis/Valkey bind address for a local Manager install (default prompt: `0.0.0.0`).                             |
+| `--redis-no-password`             | Skip the auto-generated `requirepass` when binding Redis/Valkey beyond loopback.                               |
+| `--redis-maxmemory MB`            | Memory cap in MB; `0` or `unlimited` keeps the distribution default.                                           |
+| `--redis-maxmemory-policy POLICY` | Eviction policy for local Redis/Valkey (default: `volatile-lru`).                                              |
+| `--redis-ssl`                     | Enable SSL/TLS for Redis connection.                                                                           |
+| `--redis-no-ssl`                  | Disable SSL/TLS for Redis connection.                                                                          |
+| `--redis-ssl-verify`              | Verify Redis SSL certificate.                                                                                  |
+| `--redis-no-ssl-verify`           | Do not verify Redis SSL certificate.                                                                           |
 
 **Database Options (`--full` / `--manager` only):**
 
-| Option                  | Description                                                                                                       |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `--database ENGINE`     | Strategy: `mariadb` or `postgresql` (auto-install locally), `external` (use an existing remote DB), `none` (SQLite). |
-| `--db-engine ENGINE`    | External-DB engine: `mariadb`, `mysql`, or `postgresql`. Implies `--database external` when set on its own.       |
-| `--db-host HOST`        | External DB host (FQDN or IP).                                                                                    |
-| `--db-port PORT`        | External DB TCP port (defaults: 3306 for `mariadb`/`mysql`, 5432 for `postgresql`).                               |
-| `--db-name NAME`        | Database name (default: `bw_db`).                                                                                 |
-| `--db-user USER`        | Database user (default: `bunkerweb`).                                                                             |
-| `--db-password PASS`    | Database password — required for `--database external`. Rules: 8+ chars, no quotes/backslash/backtick.            |
-| `--db-ssl`              | Use SSL/TLS for the external DB connection.                                                                       |
-| `--db-no-ssl`           | Do not use SSL/TLS for the external DB connection.                                                                |
-| `--db-ssl-verify`       | Verify the external DB server certificate.                                                                        |
-| `--db-no-ssl-verify`    | Use SSL but skip certificate verification.                                                                        |
-| `--db-skip-probe`       | Do not probe external DB connectivity from this host. Useful when the engine client is not installed locally, or when the DB is only reachable from the scheduler's network segment. |
+| Option               | Description                                                                                                                                                                          |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--database ENGINE`  | Strategy: `mariadb` or `postgresql` (auto-install locally), `external` (use an existing remote DB), `none` (SQLite).                                                                 |
+| `--db-engine ENGINE` | External-DB engine: `mariadb`, `mysql`, or `postgresql`. Implies `--database external` when set on its own.                                                                          |
+| `--db-host HOST`     | External DB host (FQDN or IP).                                                                                                                                                       |
+| `--db-port PORT`     | External DB TCP port (defaults: 3306 for `mariadb`/`mysql`, 5432 for `postgresql`).                                                                                                  |
+| `--db-name NAME`     | Database name (default: `bw_db`).                                                                                                                                                    |
+| `--db-user USER`     | Database user (default: `bunkerweb`).                                                                                                                                                |
+| `--db-password PASS` | Database password — required for `--database external`. Rules: 8+ chars, no quotes/backslash/backtick.                                                                               |
+| `--db-ssl`           | Use SSL/TLS for the external DB connection.                                                                                                                                          |
+| `--db-no-ssl`        | Do not use SSL/TLS for the external DB connection.                                                                                                                                   |
+| `--db-ssl-verify`    | Verify the external DB server certificate.                                                                                                                                           |
+| `--db-no-ssl-verify` | Use SSL but skip certificate verification.                                                                                                                                           |
+| `--db-skip-probe`    | Do not probe external DB connectivity from this host. Useful when the engine client is not installed locally, or when the DB is only reachable from the scheduler's network segment. |
 
 **Web UI Admin User (`--full` / `--manager` / `--ui-only` only):**
 
 When no UI admin flag is provided, the interactive installer offers a Web UI admin-user prompt for UI-bearing install types. The default answer flips based on wizard state: **Yes** when the wizard is disabled (manager mode always; other modes when `--no-wizard` is passed) because otherwise the UI has no initial login. **No** when the wizard is enabled because the wizard collects the admin user on first boot. Operators can still opt in to pre-create the admin even with the wizard enabled, which skips the wizard's admin step.
 
-| Option                      | Description                                                                                              |
-| --------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `--ui-admin-user NAME`      | Pre-create the first Web UI admin user with this name (skips the setup wizard for the admin step).       |
-| `--ui-admin-password PASS`  | Password for the admin user. Implies admin creation; the username defaults to `admin` if omitted. Auto-generated when omitted. Rules: 8+ chars, lower/upper/digit/special. |
-| `--no-ui-admin`             | Skip the admin-user creation prompt entirely. If the wizard is disabled, the UI remains without an initial login until credentials are configured another way. |
-| `--ui-https-selfsigned`     | (`--manager` only) Generate a self-signed cert and enable HTTPS on the Web UI listener.                  |
-| `--no-ui-https-selfsigned`  | (`--manager` only) Disable manager UI self-signed HTTPS.                                                 |
+| Option                     | Description                                                                                                                                                                |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--ui-admin-user NAME`     | Pre-create the first Web UI admin user with this name (skips the setup wizard for the admin step).                                                                         |
+| `--ui-admin-password PASS` | Password for the admin user. Implies admin creation; the username defaults to `admin` if omitted. Auto-generated when omitted. Rules: 8+ chars, lower/upper/digit/special. |
+| `--no-ui-admin`            | Skip the admin-user creation prompt entirely. If the wizard is disabled, the UI remains without an initial login until credentials are configured another way.             |
+| `--ui-https-selfsigned`    | (`--manager` only) Generate a self-signed cert and enable HTTPS on the Web UI listener.                                                                                    |
+| `--no-ui-https-selfsigned` | (`--manager` only) Disable manager UI self-signed HTTPS.                                                                                                                   |
 
 !!! warning "External database notes"
 
@@ -2188,7 +2188,7 @@ sudo ./install-bunkerweb.sh --yes
 sudo ./install-bunkerweb.sh --worker --no-wizard
 
 # Install a specific version
-sudo ./install-bunkerweb.sh --version 1.6.11~rc1
+sudo ./install-bunkerweb.sh --version 1.6.11
 
 # Manager setup with remote worker instances (optional at install time)
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
@@ -2384,12 +2384,12 @@ Please ensure that you have **NGINX 1.30.2 installed before installing BunkerWeb
         export UI_WIZARD=no
         ```
 
-    And finally install BunkerWeb 1.6.11~rc1:
+    And finally install BunkerWeb 1.6.11:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.11~rc1
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.11
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command:
@@ -2432,12 +2432,12 @@ Please ensure that you have **NGINX 1.30.2 installed before installing BunkerWeb
         export UI_WIZARD=no
         ```
 
-    And finally install BunkerWeb 1.6.11~rc1:
+    And finally install BunkerWeb 1.6.11:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.11~rc1
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.11
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command:
@@ -2468,12 +2468,12 @@ Please ensure that you have **NGINX 1.30.2 installed before installing BunkerWeb
         export UI_WIZARD=no
         ```
 
-    And finally install BunkerWeb 1.6.11~rc1:
+    And finally install BunkerWeb 1.6.11:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
   	sudo dnf makecache && \
-  	sudo -E dnf install -y --allowerasing bunkerweb-1.6.11~rc1
+  	sudo -E dnf install -y --allowerasing bunkerweb-1.6.11
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command:
@@ -2518,12 +2518,12 @@ Please ensure that you have **NGINX 1.30.2 installed before installing BunkerWeb
         export UI_WIZARD=no
         ```
 
-    And finally install BunkerWeb 1.6.11~rc1:
+    And finally install BunkerWeb 1.6.11:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
-    sudo -E dnf install -y --allowerasing bunkerweb-1.6.11~rc1
+    sudo -E dnf install -y --allowerasing bunkerweb-1.6.11
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command:
@@ -2616,7 +2616,7 @@ By adopting this approach, you can enjoy real-time reconfiguration of BunkerWeb 
     The Docker autoconf integration implies the use of **multisite mode**. Please refer to the [multisite section](concepts.md#multisite-mode) of the documentation for more information.
 
 !!! info "Database backend"
-    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.11-rc1/misc/integrations) of the repository for more information.
+    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.11/misc/integrations) of the repository for more information.
 
 To enable automated configuration updates, include an additional container called `bw-autoconf` in the stack. This container hosts the autoconf service, which manages dynamic configuration changes for BunkerWeb.
 
@@ -2630,7 +2630,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.11-rc1
+    image: bunkerity/bunkerweb:1.6.11
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -2645,7 +2645,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.11-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.11
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -2660,7 +2660,7 @@ services:
       - bw-db
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.11-rc1
+    image: bunkerity/bunkerweb-autoconf:1.6.11
     depends_on:
       - bunkerweb
       - bw-docker
@@ -2828,7 +2828,7 @@ Setting `AUTOCONF_DISABLE_CLEANUP=yes` on the `bw-autoconf` container changes th
 ```yaml
 services:
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.11-rc1
+    image: bunkerity/bunkerweb-autoconf:1.6.11
     environment:
       AUTOCONF_MODE: "yes"
       AUTOCONF_DISABLE_CLEANUP: "yes" # keep removed services as drafts
@@ -2864,13 +2864,13 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.11-rc1
+        image: bunkerity/bunkerweb:1.6.11
         labels:
           - "bunkerweb.INSTANCE=yes"
           - "bunkerweb.NAMESPACE=my-namespace" # Set the namespace for the BunkerWeb instance so the autoconf service can detect it
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.11-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.11
         environment:
           ...
           NAMESPACES: "my-namespace my-other-namespace" # Only listen to these namespaces
@@ -2930,7 +2930,7 @@ Further information about the Redis/Valkey settings can be found [here](features
     as configured by the `DATABASE_URI` setting.
     However, we understand that you may prefer to utilize alternative backends for your Docker integration.
     If that is the case, rest assured that other database backends are still possible.
-    See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.11-rc1/misc/integrations)
+    See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.11/misc/integrations)
     of the repository for more information.
 
     Clustered database backends setup are out-of-the-scope of this documentation.
@@ -3047,7 +3047,7 @@ The **BunkerWeb controller** automatically discovers pods with BunkerWeb sidecar
 ```yaml
 controller:
   enabled: true
-  tag: "1.6.11~rc1"
+  tag: "1.6.11"
 ```
 
 2. For each sidecar, add:
@@ -3140,7 +3140,7 @@ In your BunkerWeb chart `values.yaml`, configure the `BUNKERWEB_INSTANCES` envir
 
 ```yaml
 scheduler:
-  tag: "1.6.11~rc1"
+  tag: "1.6.11"
   extraEnvs:
     - name: BUNKERWEB_INSTANCES
       value: "http://app1-bunkerweb-workers.namespace.svc.cluster.local:5000 http://app2-bunkerweb-workers.namespace.svc.cluster.local:5000"
@@ -3184,7 +3184,7 @@ spec:
 
         # BunkerWeb Sidecar
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.11-rc1
+          image: bunkerity/bunkerweb:1.6.11
           ports:
             - containerPort: 8080  # Exposed HTTP port
             - containerPort: 5000  # Internal API (mandatory)
@@ -3455,7 +3455,7 @@ To add a new application protected by BunkerWeb:
 
 #### Full YAML files
 
-Instead of using the helm chart, you can also use the YAML boilerplates inside the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.11-rc1/misc/integrations) of the GitHub repository. Please note that we highly recommend to use the helm chart instead.
+Instead of using the helm chart, you can also use the YAML boilerplates inside the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.11/misc/integrations) of the GitHub repository. Please note that we highly recommend to use the helm chart instead.
 
 ### Ingress resources
 
@@ -3603,7 +3603,7 @@ metadata:
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.6.11-rc1
+              image: bunkerity/bunkerweb-autoconf:1.6.11
               imagePullPolicy: Always
               env:
                 - name: NAMESPACES
@@ -3777,11 +3777,11 @@ service:
 
 # BunkerWeb settings
 bunkerweb:
-  tag: 1.6.11~rc1
+  tag: 1.6.11
 
 # Scheduler settings
 scheduler:
-  tag: 1.6.11~rc1
+  tag: 1.6.11
   extraEnvs:
     # Enable real IP module to get real IP of clients
     - name: USE_REAL_IP
@@ -3789,11 +3789,11 @@ scheduler:
 
 # Controller settings
 controller:
-  tag: 1.6.11~rc1
+  tag: 1.6.11
 
 # UI settings
 ui:
-  tag: 1.6.11~rc1
+  tag: 1.6.11
 ```
 
 Install BunkerWeb with custom values:
@@ -4414,7 +4414,7 @@ Since multiple instances of BunkerWeb are running, a shared data store implement
 As for the database volume, the documentation does not specify a specific approach. Choosing either a shared folder or a specific driver for the database volume is dependent on your unique use-case and is left as an exercise for the reader.
 
 !!! info "Database backend"
-    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.11-rc1/misc/integrations) of the repository for more information.
+    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.11/misc/integrations) of the repository for more information.
 
     Clustered database backends setup are out-of-the-scope of this documentation.
 
@@ -4428,7 +4428,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.11-rc1
+    image: bunkerity/bunkerweb:1.6.11
     ports:
       - published: 80
         target: 8080
@@ -4457,7 +4457,7 @@ services:
         - "bunkerweb.INSTANCE=yes" # Mandatory label for the autoconf service to identify the BunkerWeb instance
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.11-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.11
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -4478,7 +4478,7 @@ services:
           - "node.role == worker"
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.11-rc1
+    image: bunkerity/bunkerweb-autoconf:1.6.11
     environment:
       SWARM_MODE: "yes"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
@@ -4630,7 +4630,7 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.11-rc1
+        image: bunkerity/bunkerweb:1.6.11
         ...
         deploy:
           mode: global
@@ -4642,7 +4642,7 @@ networks:
             - "bunkerweb.NAMESPACE=my-namespace" # Set the namespace for the BunkerWeb instance
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.11-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.11
         environment:
           NAMESPACES: "my-namespace my-other-namespace" # Only listen to these namespaces
           ...

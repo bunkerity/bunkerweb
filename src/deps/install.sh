@@ -218,9 +218,9 @@ fi
 # Set CFALGS
 export CFLAGS="$CFLAGS -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1"
 
-# Fedora ships nginx from its own repos (1.30.1), one patch release behind the
-# source-built target (1.30.2). Dynamic modules must be compiled against the
-# matching nginx source tree or they fail to load, so select the 1.30.1 tree here.
+# Select the correct nginx source directory: Fedora pins nginx 1.30.1 (its
+# repos have no 1.30.2 yet) so modules must be compiled against the matching
+# source, other distros use the default nginx source.
 if [ "$OS" = "fedora" ] ; then
 	NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx-1.30.1"
 else

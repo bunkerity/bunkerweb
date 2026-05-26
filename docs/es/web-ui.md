@@ -35,7 +35,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
     Usa las imágenes publicadas y el layout del [guía rápida](quickstart-guide.md#__tabbed_1_3) para levantar el stack, luego completa el asistente en el navegador.
 
     ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.11~rc1-rc1/misc/integrations/docker-compose.yml up -d
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.11-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
     Visita el hostname del scheduler (ej. `https://www.example.com/changeme`) y ejecuta el asistente `/setup` para configurar la UI, el scheduler y la instancia.
@@ -52,7 +52,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.11-rc1
+        image: bunkerity/bunkerweb:1.6.11
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.11-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.11
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.11-rc1
+        image: bunkerity/bunkerweb-ui:1.6.11
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -210,19 +210,19 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 
 ### Auth, sesiones y cookies
 
-| Ajuste                                      | Descripción                                                                   | Valores aceptados       | Predeterminado            |
-| ------------------------------------------- | ----------------------------------------------------------------------------- | ----------------------- | ------------------------- |
+| Ajuste                                      | Descripción                                                                                                            | Valores aceptados       | Predeterminado            |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------- | ------------------------- |
 | `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | Inicializar cuenta admin (política de contraseña; `ADMIN_PASSWORD` también acepta un hash bcrypt, almacenado tal cual) | Cadenas / hash bcrypt   | sin definir               |
-| `OVERRIDE_ADMIN_CREDS`                      | Forzar actualización de credenciales admin desde env                          | `yes` o `no`            | `no`                      |
-| `FLASK_SECRET`                              | Secreto de firma de sesión (persistido en `/var/lib/bunkerweb/.flask_secret`) | Cadena hex/base64/opaca | generado automáticamente  |
-| `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | Claves para cifrar TOTP (espacio o JSON)                                      | Cadenas / JSON          | generadas si faltan       |
-| `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Claves Biscuit (hex) para tokens de UI                                        | Cadenas hex             | autogeneradas y guardadas |
-| `SESSION_LIFETIME_HOURS`                    | Duración de inactividad de sesión (TTL deslizante, refrescada por petición)   | Número (horas)          | `12`                      |
-| `SESSION_ABSOLUTE_HOURS`                    | Límite absoluto de sesión independiente de la actividad                       | Número (horas)          | `168`                     |
-| `SESSION_ROLLING_HOURS`                     | Intervalo de rotación del ID de sesión (`0` deshabilita la rotación)          | Número (horas)          | `0`                       |
-| `ALWAYS_REMEMBER`                           | Activar siempre “remember me”                                                 | `yes` o `no`            | `no`                      |
-| `CHECK_PRIVATE_IP`                          | Ligar sesión a IP (relaja en redes privadas con `no`)                         | `yes` o `no`            | `yes`                     |
-| `PROXY_NUMBERS`                             | Saltos de proxy confiables para `X-Forwarded-*`                               | Entero                  | `1`                       |
+| `OVERRIDE_ADMIN_CREDS`                      | Forzar actualización de credenciales admin desde env                                                                   | `yes` o `no`            | `no`                      |
+| `FLASK_SECRET`                              | Secreto de firma de sesión (persistido en `/var/lib/bunkerweb/.flask_secret`)                                          | Cadena hex/base64/opaca | generado automáticamente  |
+| `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | Claves para cifrar TOTP (espacio o JSON)                                                                               | Cadenas / JSON          | generadas si faltan       |
+| `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Claves Biscuit (hex) para tokens de UI                                                                                 | Cadenas hex             | autogeneradas y guardadas |
+| `SESSION_LIFETIME_HOURS`                    | Duración de inactividad de sesión (TTL deslizante, refrescada por petición)                                            | Número (horas)          | `12`                      |
+| `SESSION_ABSOLUTE_HOURS`                    | Límite absoluto de sesión independiente de la actividad                                                                | Número (horas)          | `168`                     |
+| `SESSION_ROLLING_HOURS`                     | Intervalo de rotación del ID de sesión (`0` deshabilita la rotación)                                                   | Número (horas)          | `0`                       |
+| `ALWAYS_REMEMBER`                           | Activar siempre “remember me”                                                                                          | `yes` o `no`            | `no`                      |
+| `CHECK_PRIVATE_IP`                          | Ligar sesión a IP (relaja en redes privadas con `no`)                                                                  | `yes` o `no`            | `yes`                     |
+| `PROXY_NUMBERS`                             | Saltos de proxy confiables para `X-Forwarded-*`                                                                        | Entero                  | `1`                       |
 
 ### Logging
 

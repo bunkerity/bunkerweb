@@ -1,5 +1,5 @@
-x-bw-env: &bw-env
-  # We use an anchor to avoid repeating the same settings for both services
+x-bw-env:
+  &bw-env # We use an anchor to avoid repeating the same settings for both services
   API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Make sure to set the correct IP range so the scheduler can send the configuration to the instance (internal BunkerWeb API)
   # Optional: set an API token and mirror it in both containers (internal BunkerWeb API)
   # WARNING: Leave empty only for local development. Always set a token in production.
@@ -9,7 +9,7 @@ x-bw-env: &bw-env
 services:
   bunkerweb:
     # This is the name that will be used to identify the instance in the Scheduler
-    image: bunkerity/bunkerweb:1.6.11-rc1
+    image: bunkerity/bunkerweb:1.6.11
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -22,7 +22,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.11-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.11
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -44,7 +44,7 @@ services:
       - bw-db
 
   bw-api:
-    image: bunkerity/bunkerweb-api:1.6.11-rc1
+    image: bunkerity/bunkerweb-api:1.6.11
     environment:
       <<: *bw-env
       # API_USERNAME: "admin"

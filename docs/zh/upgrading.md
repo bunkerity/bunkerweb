@@ -25,16 +25,16 @@
             ```yaml
             services:
                 bunkerweb:
-                    image: bunkerity/bunkerweb:1.6.11-rc1
+                    image: bunkerity/bunkerweb:1.6.11
                     ...
                 bw-scheduler:
-                    image: bunkerity/bunkerweb-scheduler:1.6.11-rc1
+                    image: bunkerity/bunkerweb-scheduler:1.6.11
                     ...
                 bw-autoconf:
-                    image: bunkerity/bunkerweb-autoconf:1.6.11-rc1
+                    image: bunkerity/bunkerweb-autoconf:1.6.11
                     ...
                 bw-ui:
-                    image: bunkerity/bunkerweb-ui:1.6.11-rc1
+                    image: bunkerity/bunkerweb-ui:1.6.11
                     ...
             ```
 
@@ -135,8 +135,8 @@
         | ----------------------- | --------------------------------------------------------------------- |
         | `-v, --version <X.Y.Z>` | 要升级到的目标 BunkerWeb 版本。                                       |
         | `-y, --yes`             | 非交互式（假定升级确认并启用自动备份，除非使用 `--no-auto-backup`）。 |
-        | `--tui`                 | 强制使用 TUI（gum 或 whiptail）。若两者都无法安装则中止。                            |
-        | `--no-tui`              | 跳过所有 TUI 层级并使用纯文本提示。等同于 `BW_INSTALL_TUI=no`。                      |
+        | `--tui`                 | 强制使用 TUI（gum 或 whiptail）。若两者都无法安装则中止。             |
+        | `--no-tui`              | 跳过所有 TUI 层级并使用纯文本提示。等同于 `BW_INSTALL_TUI=no`。       |
         | `--backup-dir <PATH>`   | 自动升级前备份的目的地。如果不存在则创建。                            |
         | `--no-auto-backup`      | 跳过自动备份（不推荐）。您必须有手动备份。                            |
         | `-q, --quiet`           | 抑制输出（与日志记录/监控结合使用）。                                 |
@@ -146,20 +146,20 @@
         示例：
 
         ```bash
-        # 交互式升级到 1.6.11~rc1（会提示备份）
-        sudo ./install-bunkerweb.sh --version 1.6.11~rc1
+        # 交互式升级到 1.6.11（会提示备份）
+        sudo ./install-bunkerweb.sh --version 1.6.11
 
         # 使用自动备份到自定义目录的非交互式升级
-        sudo ./install-bunkerweb.sh -v 1.6.11~rc1 --backup-dir /var/backups/bw-2025-01 -y
+        sudo ./install-bunkerweb.sh -v 1.6.11 --backup-dir /var/backups/bw-2025-01 -y
 
         # 静默无人值守升级（抑制日志）– 依赖默认的自动备份
-        sudo ./install-bunkerweb.sh -v 1.6.11~rc1 -y -q
+        sudo ./install-bunkerweb.sh -v 1.6.11 -y -q
 
         # 执行一次空运行（计划）而不应用更改
-        sudo ./install-bunkerweb.sh -v 1.6.11~rc1 --dry-run
+        sudo ./install-bunkerweb.sh -v 1.6.11 --dry-run
 
         # 跳过自动备份进行升级（不推荐）
-        sudo ./install-bunkerweb.sh -v 1.6.11~rc1 --no-auto-backup -y
+        sudo ./install-bunkerweb.sh -v 1.6.11 --no-auto-backup -y
         ```
 
         !!! warning "跳过备份"
@@ -239,7 +239,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.11~rc1
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.11
                     ```
 
                     为了防止在执行 `apt upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -265,7 +265,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.11~rc1
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.11
                     ```
 
                     为了防止在执行 `dnf upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -662,16 +662,16 @@
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.11-rc1
+                        image: bunkerity/bunkerweb:1.6.11
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.11-rc1
+                        image: bunkerity/bunkerweb-scheduler:1.6.11
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.11-rc1
+                        image: bunkerity/bunkerweb-autoconf:1.6.11
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.11-rc1
+                        image: bunkerity/bunkerweb-ui:1.6.11
                         ...
                 ```
 
@@ -706,7 +706,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.11~rc1
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.11
                     ```
 
                     为了防止在执行 `apt upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -732,7 +732,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.11~rc1
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.11
                     ```
 
                     为了防止在执行 `dnf upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
