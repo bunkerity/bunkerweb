@@ -52,6 +52,94 @@
 
 4. **Verify the database**: Verify that the database upgrade was successful by checking the data and configurations in the new database container.
 
+#### All-In-One (AIO)
+
+The [All-In-One image](integrations.md#all-in-one-aio-image) bundles BunkerWeb, the Scheduler, the Web UI and (optionally) the API, Redis and CrowdSec in a **single container** named `bunkerweb-aio` by default. All persistent state — the SQLite database, cache, custom configs, plugins, backups, and the Redis/CrowdSec data — lives in the `/data` volume, so upgrading is a matter of replacing the container while keeping that volume.
+
+!!! warning "Downgrading is not supported yet"
+    There is no supported path to downgrade an All-In-One container to an earlier version: the database migrations applied during an upgrade are not reversible. Always take a verified backup (step 2) and validate the new version on a staging environment **before** upgrading production.
+
+1. **Prerequisites**:
+    - Note the image tag you are currently running and the name of the `/data` volume (or bind mount) so you reuse the exact same one after the upgrade.
+
+    !!! warning "Preserve the `/data` volume"
+        **Never remove the `/data` volume during an upgrade.** It holds the database, the embedded Redis and CrowdSec state, your custom configs and your backups. Replacing the container is safe; deleting the volume is not.
+
+    !!! tip "External database backends"
+        If you run the AIO with an external database (`DATABASE_URI` pointing at MySQL/MariaDB/PostgreSQL), the SQLite file under `/data` is not used — make sure you back up that external database with your usual tooling as well.
+
+2. **Backup the database**:
+    - Before proceeding with the database upgrade, ensure that you perform a complete backup of the current state of the database. The Scheduler runs inside the `bunkerweb-aio` container, so the backup command is executed there directly.
+
+    ```bash
+    docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory bunkerweb-aio bwcli plugin backup save
+    ```
+
+    ```bash
+    docker cp bunkerweb-aio:/path/to/backup/directory /path/to/backup/directory
+    ```
+
+3. **Upgrade BunkerWeb**:
+
+    === "Docker Compose"
+
+        1. **Update the Docker Compose file**: Update the Docker Compose file to use the new version of the All-In-One image.
+            ```yaml
+            services:
+                bunkerweb-aio:
+                    image: bunkerity/bunkerweb-all-in-one:1.6.11
+                    ...
+            ```
+
+        2. **Restart the container**: Restart the container to apply the changes. The `/data` volume is reattached automatically.
+            ```bash
+            docker compose down
+            docker compose up -d
+            ```
+
+    === "docker run"
+
+        1. **Stop and remove the current container** (the `/data` volume is kept):
+            ```bash
+            docker stop bunkerweb-aio
+            docker rm bunkerweb-aio
+            ```
+
+        2. **Pull the new image**:
+            ```bash
+            docker pull bunkerity/bunkerweb-all-in-one:1.6.11
+            ```
+
+        3. **Re-create the container** with the same options, reusing the same `/data` volume, ports and environment variables as before:
+            ```bash
+            docker run -d \
+              --name bunkerweb-aio \
+              -v bw-storage:/data \
+              -p 80:8080/tcp \
+              -p 443:8443/tcp \
+              -p 443:8443/udp \
+              bunkerity/bunkerweb-all-in-one:1.6.11
+            ```
+
+4. **Check the logs**: Check the container logs to ensure that the migration performed by the embedded Scheduler was successful.
+
+    ```bash
+    docker logs bunkerweb-aio
+    ```
+
+5. **Verify the upgrade**:
+    - Confirm the container is running and healthy:
+        ```bash
+        docker ps --filter name=bunkerweb-aio
+        ```
+        The `STATUS` column should report `(healthy)` once the start-up checks pass.
+    - Confirm the running version:
+        ```bash
+        docker exec bunkerweb-aio cat /usr/share/bunkerweb/VERSION
+        ```
+        The version can also be checked from the Web UI under *Support*.
+    - Verify that your services, settings and custom configurations are intact in the Web UI, and that your sites are still served over HTTP/HTTPS.
+
 #### Linux
 
 === "Easy upgrade using the install script"
