@@ -12,6 +12,7 @@
 - [BUGFIX] `ci`: the install script published to the Testing GitHub release now has its `DEFAULT_BUNKERWEB_VERSION` pinned to `testing` (rewritten before checksum generation, gated on an exactly-one-declaration check), so downloading it from the Testing release defaults to the testing channel instead of the hardcoded stable version.
 - [BUGFIX] `ui`: the Setup Wizard now shows a Log Out button when reached while already authenticated (admin created via `ADMIN_PASSWORD` but no UI service configured yet), so the user is no longer stranded on the wizard with no way to end their session.
 - [BUGFIX] `limit`: fix spurious `429` over HTTP/3 — HTTP/3 streams were counted in the low `LIMIT_CONN_MAX_HTTP1` zone because its key was keyed on `$http2` alone (empty for HTTP/3 too). Now keyed on `"$http2$http3"`, so each protocol counts against its own limit.
+- [BUGFIX] `ui`: cut `/home`, `/reports` and `/bans` load time from seconds to sub-second on Redis-backed setups by pipelining the Python Redis layer — batched `LRANGE`, `SCAN`+`MGET` instead of blocking `KEYS`, pipelined facet/metric reads, and per-request `flask.g` client caching — plus a 30s single-flight cache on home aggregates.
 
 ## v1.6.11 - 2026/05/23
 
