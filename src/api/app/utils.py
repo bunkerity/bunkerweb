@@ -12,7 +12,6 @@ from logger import getLogger  # type: ignore
 
 from Database import Database  # type: ignore
 
-
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
 

@@ -12,7 +12,6 @@ from app.models.models import UiUsers
 from app.dependencies import DATA
 from app.utils import LIB_DIR, LOGGER, stop
 
-
 # Try to load the new .totp_encryption_keys.json file first, fallback to .totp_secrets.json for backward compatibility
 encryption_keys_path = LIB_DIR.joinpath(".totp_encryption_keys.json")
 secrets_path = LIB_DIR.joinpath(".totp_secrets.json")

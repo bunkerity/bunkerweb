@@ -11,7 +11,6 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 
-
 # revision identifiers, used by Alembic.
 revision: str = "0a4144dd55d4"
 down_revision: Union[str, None] = "c9586782cd77"
@@ -47,13 +46,11 @@ def upgrade():
     op.add_column("bw_plugins", sa.Column("type", PLUGIN_TYPES_ENUM, nullable=False, server_default="core"))
 
     # Step 2: Migrate data: Set 'type' to 'external' where 'external' was true
-    op.execute(
-        """
+    op.execute("""
         UPDATE bw_plugins
         SET type = 'external'
         WHERE external = true
-    """
-    )
+    """)
 
     # Step 3: Drop the 'external' column and alter the 'stream' column to STREAM_TYPES_ENUM
     with op.batch_alter_table("bw_plugins") as batch_op:
@@ -64,8 +61,7 @@ def upgrade():
     op.add_column("bw_services", sa.Column("is_draft", sa.Boolean(), nullable=False, server_default="0"))
 
     # Update all new columns and version in a single statement
-    op.execute(
-        """
+    op.execute("""
         UPDATE bw_metadata
         SET is_pro = false,
             pro_status = 'invalid',
@@ -74,8 +70,7 @@ def upgrade():
             pro_plugins_changed = false,
             version = '1.5.6'
         WHERE id = 1
-    """
-    )
+    """)
 
 
 def downgrade():
@@ -88,13 +83,11 @@ def downgrade():
         batch_op.alter_column("stream", type_=sa.VARCHAR(length=16), existing_type=STREAM_TYPES_ENUM)
 
     # Migrate data: Set 'type' to 'external' where 'external' was true
-    op.execute(
-        """
+    op.execute("""
         UPDATE bw_plugins
         SET external = true
         WHERE type = 'external'
-    """
-    )
+    """)
 
     # Drop new columns from bw_plugins
     op.drop_column("bw_plugins", "type")
