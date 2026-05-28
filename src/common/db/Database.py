@@ -1983,6 +1983,13 @@ class Database:
                     global_config = {}
 
                     services_set = set(services)
+                    # Supplement with DB-resident, non-draft services so that
+                    # multisite-prefixed keys for services created out-of-band
+                    # (UI/API/autoconf) aren't mis-classified as global settings
+                    # when the caller's SERVER_NAME payload hasn't yet been rebuilt
+                    # to include them. Mirrors the DB-supplement done in
+                    # Configurator.get_config() (with_drafts=False).
+                    services_set.update(sid for sid, meta in db_ids.items() if not meta.get("is_draft"))
 
                     for key, value in config.items():
                         matched = False
