@@ -14,6 +14,8 @@
 - [BUGFIX] `limit`: fix spurious `429` over HTTP/3 — HTTP/3 streams were counted in the low `LIMIT_CONN_MAX_HTTP1` zone because its key was keyed on `$http2` alone (empty for HTTP/3 too). Now keyed on `"$http2$http3"`, so each protocol counts against its own limit.
 - [BUGFIX] `ui`: cut `/home`, `/reports` and `/bans` load time from seconds to sub-second on Redis-backed setups by pipelining the Python Redis layer — batched `LRANGE`, `SCAN`+`MGET` instead of blocking `KEYS`, pipelined facet/metric reads, and per-request `flask.g` client caching — plus a 30s single-flight cache on home aggregates.
 - [BUGFIX] `customcert`: drop the 24-hour expiry check — expired or soon-to-expire custom certificates are now accepted and served (operator owns cert lifecycle); the cert is still validated as a parseable X.509.
+- [BUGFIX] `database`: scheduler now overrides existing `method=ui`/`method=api` rows so env vars stop being shadowed once a setting was touched in the UI. Stuck rows self-heal on next scheduler reload. Autoconf precedence unchanged; UI→scheduler direction still blocked.
+- [BUGFIX] `ui`: form-builder no longer resubmits default-method values left untouched, so a no-op Save stops creating phantom `method=ui` rows.
 
 ## v1.6.11 - 2026/05/23
 

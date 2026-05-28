@@ -441,9 +441,11 @@ class Database:
     @staticmethod
     def _methods_are_compatible(new_method: Optional[str], current_method: Optional[str]) -> bool:
         """
-        Determine whether two configuration methods should be considered compatible for updates.
-
-        UI and API updates are treated as interchangeable, while autoconf keeps its special behavior.
+        Compatibility rules for overwriting a setting's existing method:
+        - autoconf wins over everything (and only autoconf overwrites autoconf).
+        - ui and api are interchangeable.
+        - scheduler (env-var origin) overwrites ui/api so config-as-code stays
+          authoritative; the reverse stays blocked to protect in-session UI edits.
         """
         if new_method is None:
             return True
@@ -454,6 +456,8 @@ class Database:
         if current_method == "autoconf":
             return new_method == "autoconf"
         if {new_method, current_method} <= {"ui", "api"}:
+            return True
+        if new_method == "scheduler" and current_method in ("ui", "api"):
             return True
         return new_method == current_method
 
