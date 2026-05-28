@@ -1498,18 +1498,33 @@ class InstancesUtils:
         return metrics
 
     def get_ping(self, plugin_id: str, *, instances: Optional[List[Instance]] = None):
-        """Get ping from all instances and return the first success"""
-        ping = {"status": "error"}
+        """Get ping from all instances and return the first success.
+
+        Carries the instance ``msg`` (the human-readable reason behind the
+        status) so callers can surface *why* a ping failed instead of a bare
+        "error"/"success".
+        """
+        ping = {"status": "error", "msg": ""}
         for instance in instances or self.get_instances(status="up"):
             try:
-                resp, ping_data = instance.ping(plugin_id)
-            except:
+                _, ping_data = instance.ping(plugin_id)
+            except Exception:
+                # Narrow (not bare) so code errors surface in logs instead of
+                # masquerading as an unreachable instance.
+                LOGGER.debug(f"Error pinging {instance.hostname} for {plugin_id}:\n{format_exc()}")
                 continue
 
-            if not resp:
+            # The per-instance payload (with its "msg") is returned even when the
+            # ping fails (HTTP != 200), so read it directly instead of gating on
+            # the success flag -- otherwise the failure reason is lost.
+            if not isinstance(ping_data, dict):
+                continue
+            instance_ping = ping_data.get(instance.hostname)
+            if not isinstance(instance_ping, dict):
                 continue
 
-            ping["status"] = ping_data[instance.hostname].get("status", "error")
+            ping["status"] = instance_ping.get("status", "error")
+            ping["msg"] = instance_ping.get("msg", "")
 
             if ping["status"] == "success":
                 return ping

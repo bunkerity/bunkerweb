@@ -33,6 +33,25 @@
       ? $("#base_flags_url").val().trim()
       : "";
 
+    // Secret fields (e.g. the BunkerNet instance ID) are masked by default to
+    // avoid leaking them in screenshots; the eye button toggles visibility.
+    // Delegated so it works even when the card is rendered after ready fires.
+    $(document).on("click", ".secret-toggle", function () {
+      const $field = $(this).closest("div").find(".secret-field");
+      const $icon = $(this).find("i");
+      if ($field.data("revealed")) {
+        $field.text("••••••••••••");
+        $icon.removeClass("bx-hide").addClass("bx-show");
+        $field.data("revealed", false);
+      } else {
+        // attr() (not data()) so the raw string is used verbatim -- data()
+        // would coerce a numeric/JSON-like id into a number/object.
+        $field.text($field.attr("data-secret"));
+        $icon.removeClass("bx-show").addClass("bx-hide");
+        $field.data("revealed", true);
+      }
+    });
+
     $(".date-field").each(function () {
       const $cell = $(this);
       const isoAttr = $cell.data("date-iso");
