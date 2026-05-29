@@ -81,6 +81,7 @@ from letsencrypt_utils import (
     ZEROSSL_BOT_SCRIPT,
     build_certbot_env,
     get_expected_acme_directory,
+    le_cache_write_lock,
     letsencrypt_cache_consistent,
     prepare_logs_dir,
     resolve_certbot_entrypoint,
@@ -1220,7 +1221,9 @@ try:
                 if status == 0:
                     status = 1
             else:
-                cached, err = JOB.cache_dir(DATA_PATH)
+                # Serialize against the UI heal/delete flow, which writes the same DB cache row.
+                with le_cache_write_lock():
+                    cached, err = JOB.cache_dir(DATA_PATH)
                 if not cached:
                     LOGGER.error(f"Error while saving data to db cache : {err}")
                 else:

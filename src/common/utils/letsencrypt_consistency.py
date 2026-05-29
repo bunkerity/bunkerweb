@@ -13,9 +13,34 @@ Imported by:
   - src/common/core/letsencrypt/ui/hooks.py                  (UI)
 """
 
-from contextlib import suppress
+import fcntl
+import os
+from contextlib import contextmanager, suppress
+from os.path import sep
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, Iterator, List, Tuple
+
+# Shared sentinel: UI heal/delete and scheduler renew/new both read-modify-write the same
+# LE DB cache row, so they must flock one common path or the last writer silently wins.
+# Both run as nginx and can reach /var/cache/bunkerweb/letsencrypt.
+LE_CACHE_LOCK_PATH = Path(sep, "var", "cache", "bunkerweb", "letsencrypt", ".cache-write.lock")
+
+
+@contextmanager
+def le_cache_write_lock() -> Iterator[None]:
+    """Serialize LE DB cache-row writes across the UI and scheduler processes (flock LOCK_EX).
+
+    Per-host only; multi-host UI would need DB-side optimistic concurrency (follow-up).
+    """
+    LE_CACHE_LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
+    fd = os.open(LE_CACHE_LOCK_PATH.as_posix(), os.O_CREAT | os.O_RDWR, 0o600)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        yield
+    finally:
+        with suppress(OSError):
+            fcntl.flock(fd, fcntl.LOCK_UN)
+        os.close(fd)
 
 
 def letsencrypt_cache_consistent(data_path: Path) -> Tuple[bool, str]:

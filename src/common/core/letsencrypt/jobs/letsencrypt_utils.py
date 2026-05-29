@@ -164,4 +164,4 @@ def get_expected_acme_directory(server: str, staging: bool) -> str:
 # so the UI blueprint and the scheduler jobs share one source of truth. The previous
 # byte-identical UI copy already drifted multiple times — that bug class is closed by
 # re-exporting from a single module instead of maintaining parallel implementations.
-from letsencrypt_consistency import letsencrypt_cache_consistent  # noqa: E402,F401
+from letsencrypt_consistency import le_cache_write_lock, letsencrypt_cache_consistent  # noqa: E402,F401
