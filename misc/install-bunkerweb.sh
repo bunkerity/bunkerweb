@@ -4015,7 +4015,7 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.30.1"
+            NGINX_VERSION="1.30.2"
             ;;
         "rhel"|"rocky"|"almalinux"|"centos")
             major_version=$(echo "$DISTRO_VERSION" | cut -d. -f1)

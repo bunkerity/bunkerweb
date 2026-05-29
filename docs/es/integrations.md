@@ -1968,8 +1968,8 @@ Las distribuciones de Linux compatibles con BunkerWeb (arquitecturas amd64/x86_6
 - Debian 13 "Trixie"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
-- Fedora 42, 43 y 44
-- Red Hat Enterprise Linux (RHEL) 8, 9 y 10
+- Fedora 43 y 44
+- Red Hat Enterprise Linux (RHEL), CentOS, Rocky Linux y AlmaLinux 8, 9 y 10
 
 ### Script de instalación fácil
 
@@ -2340,10 +2340,10 @@ Asegúrate de tener **NGINX 1.30.2 instalado antes de instalar BunkerWeb**. Para
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora ya proporciona NGINX 1.30.1 que soportamos
+    Fedora ya proporciona NGINX 1.30.2 que soportamos
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.1
+    sudo dnf install -y --allowerasing nginx-1.30.2
     ```
 
     !!! example "Deshabilitar el asistente de configuración"

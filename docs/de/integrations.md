@@ -1967,8 +1967,8 @@ Unterstützte Linux-Distributionen für BunkerWeb (amd64/x86_64 und arm64/aarch6
 - Debian 13 "Trixie"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
-- Fedora 42, 43 und 44
-- Red Hat Enterprise Linux (RHEL) 8, 9 und 10
+- Fedora 43 und 44
+- Red Hat Enterprise Linux (RHEL), CentOS, Rocky Linux und AlmaLinux 8, 9 und 10
 
 ### Einfaches Installationsskript
 
@@ -2339,10 +2339,10 @@ Bitte stellen Sie sicher, dass Sie **NGINX 1.30.2 installiert haben, bevor Sie B
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora stellt bereits NGINX 1.30.1 zur Verfügung, das wir unterstützen
+    Fedora stellt bereits NGINX 1.30.2 zur Verfügung, das wir unterstützen
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.1
+    sudo dnf install -y --allowerasing nginx-1.30.2
     ```
 
     !!! example "Einrichtungsassistenten deaktivieren"

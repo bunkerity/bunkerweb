@@ -23,6 +23,7 @@
 - [BUGFIX] `ui`: form-builder no longer resubmits default-method values left untouched, so a no-op Save stops creating phantom `method=ui` rows.
 - [BUGFIX] `bunkernet` (UI): replace binary "Inactive" with Connected / API unreachable / Not registered + live reason; instance ID masked with reveal toggle and redacted from messages; 5 s ping timeout, disk self-heal so a fresh registration goes Active without a reload.
 - [BUGFIX] `mtls`: new `MTLS_URL_n` regex setting enforces mTLS per path instead of site-wide; set `MTLS_VERIFY_CLIENT=optional` and the client certificate is checked in Lua only on matching URIs (invalid regex fails closed).
+- [LINUX] Updated NGINX version to v1.30.2 for Fedora 43 and 44 integration now that it is available in the repositories.
 
 ## v1.6.11 - 2026/05/23
 

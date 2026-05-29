@@ -1967,8 +1967,8 @@ docker build -t bw-ui -f src/ui/Dockerfile .
 - Debian 13 "Trixie"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
-- Fedora 42、43 和 44
-- Red Hat Enterprise Linux (RHEL) 8, 9 和 10
+- Fedora 43 和 44
+- Red Hat Enterprise Linux (RHEL)、CentOS、Rocky Linux 和 AlmaLinux 8, 9 和 10
 
 ### 简易安装脚本
 
@@ -2339,10 +2339,10 @@ sudo ./install-bunkerweb.sh --yes --api
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora 已经提供了我们支持的 NGINX 1.30.1
+    Fedora 已经提供了我们支持的 NGINX 1.30.2
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.1
+    sudo dnf install -y --allowerasing nginx-1.30.2
     ```
 
     !!! example "禁用设置向导"

@@ -271,12 +271,9 @@ List of supported Linux distros:
 - Debian 13 "Trixie"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
-- Fedora 42
 - Fedora 43
 - Fedora 44
-- RHEL 8.10
-- RHEL 9.6
-- RHEL 10.0
+- RHEL, CentOS, Rocky Linux and AlmaLinux 8, 9 and 10
 
 You will find more information in the [Linux section](https://docs.bunkerweb.io/1.5.10/integrations/?utm_campaign=self&utm_source=github#linux) of the documentation.
 
