@@ -22,6 +22,7 @@
 - [BUGFIX] `database`: `save_config` now supplements its prefix-match set with non-draft DB services, so multisite env settings for services created out-of-band (UI/API/autoconf) are no longer dropped as unknown globals.
 - [BUGFIX] `ui`: form-builder no longer resubmits default-method values left untouched, so a no-op Save stops creating phantom `method=ui` rows.
 - [BUGFIX] `bunkernet` (UI): replace binary "Inactive" with Connected / API unreachable / Not registered + live reason; instance ID masked with reveal toggle and redacted from messages; 5 s ping timeout, disk self-heal so a fresh registration goes Active without a reload.
+- [BUGFIX] `mtls`: new `MTLS_URL_n` regex setting enforces mTLS per path instead of site-wide; set `MTLS_VERIFY_CLIENT=optional` and the client certificate is checked in Lua only on matching URIs (invalid regex fails closed).
 
 ## v1.6.11 - 2026/05/23
 
