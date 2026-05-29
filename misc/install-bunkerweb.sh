@@ -7431,8 +7431,12 @@ if [ "$DRY_RUN" = "yes" ]; then
     exit 0
 fi
 
-# Infer install type from systemd unit state on upgrades. Operator's --type CLI override always wins.
-# Rules:
+# Resolve the existing install type during an upgrade. Operator's --type CLI override always wins.
+# Source of truth, in order:
+#   1. The persistent marker /usr/share/bunkerweb/INSTALL_TYPE written by the package
+#      postinstall of fixed builds — authoritative, invocation-agnostic.
+#   2. Inference from systemd unit state, for legacy hosts that predate the marker.
+# Inference rules (see _classify_install for the exact, liveness-aware matrix):
 #   bunkerweb + scheduler [+ ui]   → full
 #   scheduler + ui (no bunkerweb)  → manager
 #   bunkerweb only                 → worker
@@ -7440,7 +7444,18 @@ fi
 #   ui only                        → ui
 #   api only                       → api
 # Falls back to empty (treated as full) on ambiguous state.
+_INSTALL_TYPE_MARKER="/usr/share/bunkerweb/INSTALL_TYPE"
 detect_install_type_from_state() {
+    # Authoritative marker (fixed builds). Legacy hosts won't have it → infer below.
+    if [ -f "$_INSTALL_TYPE_MARKER" ]; then
+        local _marker
+        _marker=$(tr -d '[:space:]' < "$_INSTALL_TYPE_MARKER" 2>/dev/null || echo "")
+        case "$_marker" in
+            full|manager|worker|scheduler|ui|api)
+                _DETECTED_INSTALL_TYPE="$_marker"; return 0 ;;
+        esac
+    fi
+
     if [ "$DISTRO_ID" = "freebsd" ]; then
         # systemctl unavailable; rely on rc.d enablement (YES = present).
         local _has_bw _has_sch _has_ui _has_api
@@ -7460,46 +7475,66 @@ detect_install_type_from_state() {
     _DETECTED_INSTALL_TYPE=$(_classify_install "$_bw" "$_sch" "$_ui" "$_api")
 }
 
-# is-enabled OR is-active → "present", else "absent".
-# disabled+stopped units (e.g. leftover from prior --full now running --worker) must NOT count as present.
+# Three-valued unit liveness: "active" (running), "enabled" (enabled at boot but not
+# running), or "absent". _classify_install weights these differently: a leftover
+# scheduler/ui that is enabled-but-stopped (e.g. a prior --full host later run as a
+# --worker) must NOT alone make a running worker look like a full stack.
 _systemd_unit_state() {
     local unit="$1" _enabled _active
     _enabled=$(systemctl is-enabled "$unit" 2>/dev/null || echo "missing")
     _active=$(systemctl is-active "$unit" 2>/dev/null || echo "inactive")
-    case "$_enabled" in
-        enabled|enabled-runtime|static|alias)
-            echo "present"; return ;;
-    esac
     case "$_active" in
         active|activating|reloading)
-            echo "present"; return ;;
+            echo "active"; return ;;
+    esac
+    case "$_enabled" in
+        enabled|enabled-runtime|static|alias)
+            echo "enabled"; return ;;
     esac
     echo "absent"
 }
 
-# FreeBSD rc.d: sysrc <unit>_enable=YES OR `service status` → "present".
+# FreeBSD rc.d equivalent: running → "active", sysrc <unit>_enable=YES (not running) →
+# "enabled", else "absent".
 _freebsd_unit_state() {
     local unit="$1" _enabled _running=1
-    _enabled=$(sysrc -n "${unit}_enable" 2>/dev/null || echo "")
-    case "$_enabled" in
-        [Yy][Ee][Ss]) echo "present"; return ;;
-    esac
     if command -v service >/dev/null 2>&1; then
         service "$unit" status >/dev/null 2>&1 && _running=0
     fi
-    if [ "$_running" = 0 ]; then echo "present"; else echo "absent"; fi
+    if [ "$_running" = 0 ]; then echo "active"; return; fi
+    _enabled=$(sysrc -n "${unit}_enable" 2>/dev/null || echo "")
+    case "$_enabled" in
+        [Yy][Ee][Ss]) echo "enabled"; return ;;
+    esac
+    echo "absent"
 }
 
-# Classify install type from per-unit "present"/"absent" state. Most-specific first.
+# Classify install type from per-unit liveness ("active"/"enabled"/"absent"). Most-specific first.
 # manager-without-UI vs scheduler-only disambiguated by /etc/bunkerweb/ui.env presence
 # (manager-mode SERVICE_UI=no still provisions ui.env; scheduler-only never does).
 _classify_install() {
     local bw="$1" sch="$2" ui="$3" api="$4"
+    # present = running OR enabled-at-boot; used for the topology shape below.
     local _b _s _u _a
-    [ "$bw"  = "present" ] && _b=1 || _b=0
-    [ "$sch" = "present" ] && _s=1 || _s=0
-    [ "$ui"  = "present" ] && _u=1 || _u=0
-    [ "$api" = "present" ] && _a=1 || _a=0
+    [ "$bw"  != "absent" ] && _b=1 || _b=0
+    [ "$sch" != "absent" ] && _s=1 || _s=0
+    [ "$ui"  != "absent" ] && _u=1 || _u=0
+    [ "$api" != "absent" ] && _a=1 || _a=0
+
+    # When bunkerweb is actually RUNNING, the scheduler's liveness — not merely its
+    # enablement — decides full vs worker. A worker never runs the scheduler; a
+    # leftover scheduler that is enabled-but-stopped must not promote it to "full".
+    if [ "$bw" = "active" ]; then
+        if [ "$sch" = "active" ]; then
+            echo "full"; return
+        fi
+        # bunkerweb running, scheduler NOT running. Unless a UI is actively serving
+        # (an unusual degraded/mixed topology), treat this as a worker.
+        if [ "$ui" != "active" ]; then
+            echo "worker"; return
+        fi
+        # bunkerweb + ui running but scheduler down → ambiguous; fall through.
+    fi
 
     if [ "$_b" = 1 ] && [ "$_s" = 1 ]; then
         echo "full"; return
