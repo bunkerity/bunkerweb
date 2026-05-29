@@ -1048,6 +1048,11 @@ class InstancesUtils:
 
             redis_client = get_redis_client()
 
+        # Redis-down fallback is uncached, so the single-flight lock only serializes every
+        # /home request per worker during an outage with no benefit. Skip it.
+        if not redis_client:
+            return self._compute_home_aggregates(hours, top_ips_limit, redis_client)
+
         # Single-flight: only one thread computes a given key at a time; others
         # wait and reuse its result instead of all running the full Redis scan.
         with _HOME_AGG_LOCK:
@@ -1056,16 +1061,9 @@ class InstancesUtils:
                 return _copy_home_aggregates(hit)
 
             result = self._compute_home_aggregates(hours, top_ips_limit, redis_client)
-
-            # Cache only Redis-derived results. The instance-API fallback (taken
-            # when redis_client is falsy) is degraded; pinning it for the full
-            # TTL during a transient Redis outage would mask recovery.
-            if redis_client:
-                _HOME_AGG_CACHE[cache_key] = (monotonic(), result)
-                # Hand the caller a copy; the cached object stays private.
-                return _copy_home_aggregates(result)
-            # Fallback result is freshly built and not cached → safe to return directly.
-            return result
+            _HOME_AGG_CACHE[cache_key] = (monotonic(), result)
+            # Hand the caller a copy; the cached object stays private.
+            return _copy_home_aggregates(result)
 
     def _compute_home_aggregates(self, hours: int, top_ips_limit: int, redis_client: Any) -> dict[str, Any]:
         """Compute home aggregates from Redis (or the instance-API fallback).

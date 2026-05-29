@@ -26,6 +26,7 @@ from app.dependencies import reload_plugins
 from app.utils import (
     BISCUIT_PRIVATE_KEY_FILE,
     BISCUIT_PUBLIC_KEY_FILE,
+    MIN_BCRYPT_COST,
     RECOMMENDED_BCRYPT_COST,
     USER_PASSWORD_RX,
     bcrypt_cost,
@@ -503,14 +504,20 @@ def on_starting(server):
                 if env_admin_password and is_bcrypt_hash(env_admin_password):
                     if env_admin_password.encode("utf-8") != ADMIN_USER["password"]:
                         cost = bcrypt_cost(env_admin_password)
-                        if cost < RECOMMENDED_BCRYPT_COST:
-                            LOGGER.warning(
-                                f"The provided bcrypt ADMIN_PASSWORD uses cost factor {cost}, below the recommended {RECOMMENDED_BCRYPT_COST}. "
-                                "Consider re-hashing with a higher cost for stronger protection against offline cracking."
+                        if cost < MIN_BCRYPT_COST:
+                            LOGGER.error(
+                                f"The provided bcrypt ADMIN_PASSWORD uses cost factor {cost}, below the minimum {MIN_BCRYPT_COST}. "
+                                "Refusing to store it; the admin password was not updated."
                             )
-                        ADMIN_USER["password"] = env_admin_password.encode("utf-8")
-                        updated = True
-                        LOGGER.info("ADMIN_PASSWORD provided as a bcrypt hash; storing it as-is.")
+                        else:
+                            if cost < RECOMMENDED_BCRYPT_COST:
+                                LOGGER.warning(
+                                    f"The provided bcrypt ADMIN_PASSWORD uses cost factor {cost}, below the recommended {RECOMMENDED_BCRYPT_COST}. "
+                                    "Consider re-hashing with a higher cost for stronger protection against offline cracking."
+                                )
+                            ADMIN_USER["password"] = env_admin_password.encode("utf-8")
+                            updated = True
+                            LOGGER.info("ADMIN_PASSWORD provided as a bcrypt hash; storing it as-is.")
                 elif env_admin_password and not check_password(env_admin_password, ADMIN_USER["password"]):
                     if not USER_PASSWORD_RX.match(env_admin_password):
                         LOGGER.warning(
@@ -556,6 +563,14 @@ def on_starting(server):
 
         if prehashed:
             cost = bcrypt_cost(env_admin_password)
+            if cost < MIN_BCRYPT_COST:
+                message = (
+                    f"The provided bcrypt ADMIN_PASSWORD uses cost factor {cost}, below the minimum {MIN_BCRYPT_COST}. "
+                    "Refusing to create the admin user with a weak hash; re-hash with a higher cost."
+                )
+                LOGGER.critical(message)
+                ERROR_FILE.write_text(message, encoding="utf-8")
+                exit(1)
             if cost < RECOMMENDED_BCRYPT_COST:
                 LOGGER.warning(
                     f"The provided bcrypt ADMIN_PASSWORD uses cost factor {cost}, below the recommended {RECOMMENDED_BCRYPT_COST}. "
