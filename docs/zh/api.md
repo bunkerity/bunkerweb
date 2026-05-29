@@ -188,7 +188,22 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
   - `bans`: `ban_read`, `ban_update`, `ban_delete`, `ban_created`
   - `jobs`: `job_read`, `job_run`
 - `resource_id` 通常是第二个路径段（如 `/services/{id}`）；"*" 表示全局访问。
-- 通过 `API_ACL_BOOTSTRAP_FILE` 或挂载的 `/var/lib/bunkerweb/api_acl_bootstrap.json` 启动非管理员用户和权限。密码可为明文或 bcrypt hash。
+- 通过 `API_ACL_BOOTSTRAP_FILE` 或挂载的 `/var/lib/bunkerweb/api_acl_bootstrap.json` 启动非管理员用户和权限。每个用户可使用明文 `password` 或预先哈希的 `password_hash`/`password_bcrypt`（参见下面的提示）。
+
+!!! tip "预先哈希的启动密码"
+    通过 `password_hash`（或 `password_bcrypt`）将用户的明文 `password` 替换为 **bcrypt 哈希**，这样凭据就不会以明文形式留在文件中。该哈希必须是有效的 bcrypt 哈希（`$2a$`/`$2b$`/`$2y$`），且其成本因子至少为 `10`（建议 `12`+）。格式错误或强度过弱的哈希将**被忽略**：加载器会回退到该用户的明文 `password`（若存在）；否则，新用户会获得一个你无法得知的安全随机密码，而已存在的用户则保留其当前密码。明文 `password` 会进行强度校验（至少 8 个字符，包含大写、小写、数字和特殊字符）。管理员的 `API_PASSWORD` 环境变量仅接受明文——预先哈希仅适用于这些 ACL 用户。
+
+    生成哈希：
+
+    ```bash
+    python3 -c "import bcrypt; print(bcrypt.hashpw(b'Str0ng&P@ss!', bcrypt.gensalt(rounds=13)).decode())"
+    ```
+
+    然后在启动文件中用它代替 `password`：
+
+    ```json
+    "password_hash": "$2b$13$replace-with-the-hash-printed-above"
+    ```
 
 ??? example "最小 ACL 启动"
     ```json

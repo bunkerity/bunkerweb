@@ -46,6 +46,9 @@ def get_api_db(*, log: bool = True) -> APIDatabase:
 
 
 USER_PASSWORD_RX = re_compile(r"^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*\P{Alnum}).{8,}$")
+BCRYPT_HASH_RX = re_compile(r"^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}\Z")
+RECOMMENDED_BCRYPT_COST = 12  # below this, a supplied pre-hashed credential triggers a warning
+MIN_BCRYPT_COST = 10  # absolute floor; a supplied pre-hashed credential below this is refused
 PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}$")
 
 BISCUIT_PUBLIC_KEY_FILE = LIB_DIR.joinpath(".api_biscuit_public_key")
@@ -54,6 +57,22 @@ BISCUIT_PRIVATE_KEY_FILE = LIB_DIR.joinpath(".api_biscuit_private_key")
 
 def gen_password_hash(password: str) -> bytes:
     return hashpw(password.encode("utf-8"), gensalt(rounds=13))
+
+
+def is_bcrypt_hash(value: str) -> bool:
+    """True if value is a well-formed bcrypt hash this build's bcrypt lib can verify."""
+    if not BCRYPT_HASH_RX.match(value):
+        return False
+    try:
+        checkpw(b"bunkerweb-bcrypt-probe", value.encode("utf-8"))
+    except (ValueError, TypeError):
+        return False  # prefix/format the installed bcrypt lib cannot parse -> treat as plaintext
+    return True
+
+
+def bcrypt_cost(value: str) -> int:
+    """Cost factor of a bcrypt hash. Caller must ensure value passed is_bcrypt_hash() first."""
+    return int(value[4:6])
 
 
 def check_password(password: str, hashed: bytes) -> bool:
