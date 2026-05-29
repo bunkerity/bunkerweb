@@ -71,7 +71,12 @@ function migrate_file() {
             touch /var/tmp/bunkerweb_upgrade
         fi
         echo "Copying old file to new location: $new_path..."
-        cp "$old_path" "$new_path"
+        # Gate the copy: a failed cp must NOT delete the source, and must return non-zero so
+        # the caller's `|| migrate_file <fallback>` chain still fires (no silent backup loss).
+        if ! cp "$old_path" "$new_path"; then
+            echo "❌ Failed to copy $old_path to $new_path; leaving source intact."
+            return 1
+        fi
         echo "Removing old file..."
         do_and_check_cmd rm -f "$old_path"
         do_and_check_cmd chown root:nginx "$new_path"
@@ -83,13 +88,14 @@ function migrate_file() {
     fi
 }
 
-# Migrate configuration files from old to new locations
-migrate_file "/var/tmp/variables.env" "/etc/bunkerweb/variables.env"
-migrate_file "/var/tmp/scheduler.env" "/etc/bunkerweb/scheduler.env"
-migrate_file "/var/tmp/ui.env" "/etc/bunkerweb/ui.env"
-migrate_file "/var/tmp/api.env" "/etc/bunkerweb/api.env"
-migrate_file "/var/tmp/api.yml" "/etc/bunkerweb/api.yml"
-migrate_file "/var/tmp/db.sqlite3" "/var/lib/bunkerweb/db.sqlite3"
+# Restore upgrade backups: /var/backups/bunkerweb (current), else legacy /var/tmp
+# (upgrades coming from a pre-fix version whose postrm still wrote there).
+migrate_file "/var/backups/bunkerweb/variables.env" "/etc/bunkerweb/variables.env" || migrate_file "/var/tmp/variables.env" "/etc/bunkerweb/variables.env"
+migrate_file "/var/backups/bunkerweb/scheduler.env" "/etc/bunkerweb/scheduler.env" || migrate_file "/var/tmp/scheduler.env" "/etc/bunkerweb/scheduler.env"
+migrate_file "/var/backups/bunkerweb/ui.env" "/etc/bunkerweb/ui.env" || migrate_file "/var/tmp/ui.env" "/etc/bunkerweb/ui.env"
+migrate_file "/var/backups/bunkerweb/api.env" "/etc/bunkerweb/api.env" || migrate_file "/var/tmp/api.env" "/etc/bunkerweb/api.env"
+migrate_file "/var/backups/bunkerweb/api.yml" "/etc/bunkerweb/api.yml" || migrate_file "/var/tmp/api.yml" "/etc/bunkerweb/api.yml"
+migrate_file "/var/backups/bunkerweb/db.sqlite3" "/var/lib/bunkerweb/db.sqlite3" || migrate_file "/var/tmp/db.sqlite3" "/var/lib/bunkerweb/db.sqlite3"
 
 # Create /var/www/html if needed
 if [ ! -d /var/www/html ] ; then
@@ -106,6 +112,32 @@ systemctl daemon-reload
 # Always stop and disable nginx service
 echo "🛑 Stopping and disabling the nginx service..."
 do_and_check_cmd systemctl disable --now nginx
+
+# Resolve whether the topology was DECLARED this run — either a fresh install or an
+# explicit mode/service signal from the installer. On a bare `apt upgrade` (no signal)
+# the operator's intent is unknown, so we mutate no persistent state: we neither
+# self-heal leftover-enabled units nor stamp an install-type marker, and let the
+# upgrade-time detector keep inferring. This is the single gate behind Part A (marker)
+# and the enabled-but-stopped leg of Part C (self-heal).
+FRESH_INSTALL="no"
+[ ! -f /var/tmp/bunkerweb_upgrade ] && FRESH_INSTALL="yes"
+RESOLVED_INSTALL_TYPE=""
+EXPLICIT_TOPOLOGY="no"
+if [ "${WORKER_MODE:-no}" = "yes" ] && [ "${MANAGER_MODE:-no}" != "yes" ]; then
+    RESOLVED_INSTALL_TYPE="worker"; EXPLICIT_TOPOLOGY="yes"
+elif [ "${MANAGER_MODE:-no}" = "yes" ] && [ "${WORKER_MODE:-no}" != "yes" ]; then
+    RESOLVED_INSTALL_TYPE="manager"; EXPLICIT_TOPOLOGY="yes"
+elif [ "${SERVICE_API:-no}" = "yes" ] && [ "${SERVICE_BUNKERWEB:-yes}" = "no" ] && [ "${SERVICE_SCHEDULER:-yes}" = "no" ] && [ "${SERVICE_UI:-yes}" = "no" ]; then
+    RESOLVED_INSTALL_TYPE="api"; EXPLICIT_TOPOLOGY="yes"
+elif [ "${SERVICE_BUNKERWEB:-yes}" = "no" ] && [ "${SERVICE_SCHEDULER:-no}" = "yes" ] && [ "${SERVICE_UI:-yes}" = "no" ]; then
+    RESOLVED_INSTALL_TYPE="scheduler"; EXPLICIT_TOPOLOGY="yes"
+elif [ "${SERVICE_BUNKERWEB:-yes}" = "no" ] && [ "${SERVICE_UI:-no}" = "yes" ] && [ "${SERVICE_SCHEDULER:-yes}" = "no" ]; then
+    RESOLVED_INSTALL_TYPE="ui"; EXPLICIT_TOPOLOGY="yes"
+else
+    RESOLVED_INSTALL_TYPE="full"
+fi
+TOPOLOGY_DECLARED="no"
+{ [ "$FRESH_INSTALL" = "yes" ] || [ "$EXPLICIT_TOPOLOGY" = "yes" ]; } && TOPOLOGY_DECLARED="yes"
 
 # Manage the BunkerWeb service
 echo "Configuring BunkerWeb service..."
@@ -129,8 +161,11 @@ if {
         echo "🚀 Enabling and starting the BunkerWeb service..."
         do_and_check_cmd systemctl enable --now bunkerweb
     fi
-# Disable BunkerWeb if it shouldn't be running but is active
-elif systemctl is-active --quiet bunkerweb; then
+# Disable BunkerWeb if it shouldn't be running but is still active, or — only when the
+# topology was declared this run — enabled-but-stopped. Clearing leftovers keeps the
+# host's systemd state consistent with its real topology so upgrade-time detection
+# stays correct; we never touch enabled-but-stopped units on a bare upgrade.
+elif systemctl is-active --quiet bunkerweb || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb 2>/dev/null; }; then
     echo "🛑 Disabling and stopping the BunkerWeb service..."
     do_and_check_cmd systemctl disable --now bunkerweb
 else
@@ -165,8 +200,11 @@ if {
             do_and_check_cmd systemctl restart bunkerweb-scheduler
         fi
     fi
-# Disable scheduler if it shouldn't be running but is active
-elif systemctl is-active --quiet bunkerweb-scheduler; then
+# Disable scheduler if it shouldn't be running but is still active, or — only when the
+# topology was declared this run — enabled-but-stopped. An enabled-but-stopped scheduler
+# left over from a prior full install would otherwise make this worker look like a full
+# stack on the next upgrade; but on a bare upgrade we leave the operator's units alone.
+elif systemctl is-active --quiet bunkerweb-scheduler || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-scheduler 2>/dev/null; }; then
     echo "🛑 Disabling and stopping the BunkerWeb Scheduler service..."
     do_and_check_cmd systemctl disable --now bunkerweb-scheduler
 else
@@ -233,8 +271,9 @@ EOF
             do_and_check_cmd systemctl restart bunkerweb-ui
         fi
     fi
-# Disable UI if it shouldn't be running but is active
-elif systemctl is-active --quiet bunkerweb-ui; then
+# Disable UI if it shouldn't be running but is still active, or — only when the topology
+# was declared this run — enabled-but-stopped.
+elif systemctl is-active --quiet bunkerweb-ui || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-ui 2>/dev/null; }; then
     echo "🛑 Disabling and stopping the BunkerWeb UI service..."
     do_and_check_cmd systemctl disable --now bunkerweb-ui
 else
@@ -257,11 +296,23 @@ if [ "${SERVICE_API:-no}" = "yes" ]; then
             do_and_check_cmd systemctl restart bunkerweb-api
         fi
     fi
-elif systemctl is-active --quiet bunkerweb-api; then
+elif systemctl is-active --quiet bunkerweb-api || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-api 2>/dev/null; }; then
     echo "🛑 Disabling and stopping the BunkerWeb API service..."
     do_and_check_cmd systemctl disable --now bunkerweb-api
 else
     echo "ℹ️ BunkerWeb API service is not enabled in the current configuration."
+fi
+
+# Record the resolved install type so future upgrades detect it deterministically
+# instead of inferring from systemd unit state. Only written when the topology was
+# declared this run (fresh install, or explicit mode/service signal) — a bare
+# `apt upgrade` carries no intent, so we must NOT stamp the standalone "full" default
+# onto a legacy worker/scheduler/ui/api host and have it override inference forever.
+INSTALL_TYPE_MARKER="/usr/share/bunkerweb/INSTALL_TYPE"
+if [ "$TOPOLOGY_DECLARED" = "yes" ] && [ -n "$RESOLVED_INSTALL_TYPE" ]; then
+    echo "$RESOLVED_INSTALL_TYPE" > "$INSTALL_TYPE_MARKER" 2>/dev/null \
+        && chmod 0644 "$INSTALL_TYPE_MARKER" 2>/dev/null \
+        || echo "ℹ️ Note: could not persist install-type marker at $INSTALL_TYPE_MARKER"
 fi
 
 if [ -f /var/tmp/bunkerweb_upgrade ]; then
