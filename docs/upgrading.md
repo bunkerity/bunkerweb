@@ -25,16 +25,16 @@
             ```yaml
             services:
                 bunkerweb:
-                    image: bunkerity/bunkerweb:1.6.11
+                    image: bunkerity/bunkerweb:1.6.12-rc1
                     ...
                 bw-scheduler:
-                    image: bunkerity/bunkerweb-scheduler:1.6.11
+                    image: bunkerity/bunkerweb-scheduler:1.6.12-rc1
                     ...
                 bw-autoconf:
-                    image: bunkerity/bunkerweb-autoconf:1.6.11
+                    image: bunkerity/bunkerweb-autoconf:1.6.12-rc1
                     ...
                 bw-ui:
-                    image: bunkerity/bunkerweb-ui:1.6.11
+                    image: bunkerity/bunkerweb-ui:1.6.12-rc1
                     ...
             ```
 
@@ -87,7 +87,7 @@ The [All-In-One image](integrations.md#all-in-one-aio-image) bundles BunkerWeb, 
             ```yaml
             services:
                 bunkerweb-aio:
-                    image: bunkerity/bunkerweb-all-in-one:1.6.11
+                    image: bunkerity/bunkerweb-all-in-one:1.6.12-rc1
                     ...
             ```
 
@@ -107,7 +107,7 @@ The [All-In-One image](integrations.md#all-in-one-aio-image) bundles BunkerWeb, 
 
         2. **Pull the new image**:
             ```bash
-            docker pull bunkerity/bunkerweb-all-in-one:1.6.11
+            docker pull bunkerity/bunkerweb-all-in-one:1.6.12-rc1
             ```
 
         3. **Re-create the container** with the same options, reusing the same `/data` volume, ports and environment variables as before:
@@ -118,7 +118,7 @@ The [All-In-One image](integrations.md#all-in-one-aio-image) bundles BunkerWeb, 
               -p 80:8080/tcp \
               -p 443:8443/tcp \
               -p 443:8443/udp \
-              bunkerity/bunkerweb-all-in-one:1.6.11
+              bunkerity/bunkerweb-all-in-one:1.6.12-rc1
             ```
 
 4. **Check the logs**: Check the container logs to ensure that the migration performed by the embedded Scheduler was successful.
@@ -234,20 +234,20 @@ The [All-In-One image](integrations.md#all-in-one-aio-image) bundles BunkerWeb, 
         Examples:
 
         ```bash
-        # Upgrade to 1.6.11 interactively (will prompt for backup)
-        sudo ./install-bunkerweb.sh --version 1.6.11
+        # Upgrade to 1.6.12~rc1 interactively (will prompt for backup)
+        sudo ./install-bunkerweb.sh --version 1.6.12~rc1
 
         # Non-interactive upgrade with automatic backup to custom directory
-        sudo ./install-bunkerweb.sh -v 1.6.11 --backup-dir /var/backups/bw-2025-01 -y
+        sudo ./install-bunkerweb.sh -v 1.6.12~rc1 --backup-dir /var/backups/bw-2025-01 -y
 
         # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
-        sudo ./install-bunkerweb.sh -v 1.6.11 -y -q
+        sudo ./install-bunkerweb.sh -v 1.6.12~rc1 -y -q
 
         # Perform a dry run (plan) without applying changes
-        sudo ./install-bunkerweb.sh -v 1.6.11 --dry-run
+        sudo ./install-bunkerweb.sh -v 1.6.12~rc1 --dry-run
 
         # Upgrade skipping automatic backup (NOT recommended)
-        sudo ./install-bunkerweb.sh -v 1.6.11 --no-auto-backup -y
+        sudo ./install-bunkerweb.sh -v 1.6.12~rc1 --no-auto-backup -y
         ```
 
         !!! warning "Skipping backups"
@@ -327,7 +327,7 @@ The [All-In-One image](integrations.md#all-in-one-aio-image) bundles BunkerWeb, 
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.11
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.12~rc1
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -353,7 +353,7 @@ The [All-In-One image](integrations.md#all-in-one-aio-image) bundles BunkerWeb, 
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.11
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.12~rc1
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
@@ -750,16 +750,16 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.11
+                        image: bunkerity/bunkerweb:1.6.12-rc1
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.11
+                        image: bunkerity/bunkerweb-scheduler:1.6.12-rc1
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.11
+                        image: bunkerity/bunkerweb-autoconf:1.6.12-rc1
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.11
+                        image: bunkerity/bunkerweb-ui:1.6.12-rc1
                         ...
                 ```
 
@@ -794,7 +794,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.11
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.12~rc1
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -820,7 +820,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.11
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.12~rc1
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
