@@ -3476,6 +3476,38 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
     LIMIT_CONN_MAX_STREAM: "20"
     ```
 
+## Load Balancer  (PRO)
+
+<p align='center'></p>
+
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/latest/advanced/#load-balancer-pro) documentation.
+
+STREAM support :x:
+
+Provides load balancing feature to group of upstreams with optional healthchecks.
+
+| Setting                                   | Default       | Context | Multiple | Description                                                        |
+| ----------------------------------------- | ------------- | ------- | -------- | ------------------------------------------------------------------ |
+| `LOADBALANCER_HEALTHCHECK_DICT_SIZE`      | `10m`         | global  | no       | Shared dict size (datastore for all healthchecks).                 |
+| `LOADBALANCER_UPSTREAM_NAME`              |               | global  | yes      | Name of the upstream (used in REVERSE_PROXY_HOST).                 |
+| `LOADBALANCER_UPSTREAM_SERVERS`           |               | global  | yes      | List of servers/IPs in the server group.                           |
+| `LOADBALANCER_UPSTREAM_MODE`              | `round-robin` | global  | yes      | Load balancing mode (round-robin or sticky).                       |
+| `LOADBALANCER_UPSTREAM_STICKY_METHOD`     | `ip`          | global  | yes      | Sticky session method (ip or cookie).                              |
+| `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`          | global  | yes      | Dynamically resolve upstream hostnames.                            |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE`         |               | global  | yes      | Number of keepalive connections to cache per worker.               |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT` | `60s`         | global  | yes      | Keepalive timeout for upstream connections.                        |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`    | `1h`          | global  | yes      | Keepalive time for upstream connections.                           |
+| `LOADBALANCER_HEALTHCHECK_URL`            | `/status`     | global  | yes      | The healthcheck URL.                                               |
+| `LOADBALANCER_HEALTHCHECK_INTERVAL`       | `2000`        | global  | yes      | Healthcheck interval in milliseconds.                              |
+| `LOADBALANCER_HEALTHCHECK_TIMEOUT`        | `1000`        | global  | yes      | Healthcheck timeout in milliseconds.                               |
+| `LOADBALANCER_HEALTHCHECK_FALL`           | `3`           | global  | yes      | Number of failed healthchecks before marking the server as down.   |
+| `LOADBALANCER_HEALTHCHECK_RISE`           | `1`           | global  | yes      | Number of successful healthchecks before marking the server as up. |
+| `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`         | global  | yes      | HTTP status considered valid in healthchecks.                      |
+| `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`          | global  | yes      | Maximum number of concurrent healthchecks.                         |
+| `LOADBALANCER_HEALTHCHECK_TYPE`           | `http`        | global  | yes      | Type of healthcheck (http or https).                               |
+| `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`         | global  | yes      | Verify SSL certificate in healthchecks.                            |
+| `LOADBALANCER_HEALTHCHECK_HOST`           |               | global  | yes      | Host header for healthchecks (useful for HTTPS).                   |
+
 ## Metrics
 
 STREAM support :warning:

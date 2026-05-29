@@ -2245,6 +2245,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#load-balancer-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Load Balancer (PRO)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#metrics" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -9757,6 +9768,158 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
+<h2 id="load-balancer-pro">Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag' title='Load Balancer' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
+<p>Pour un guide plus détaillé, consultez la documentation des <a href="../advanced/#load-balancer-pro">utilisations avancées</a>.</p>
+<p>Prise en charge STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
+<p>Provides load balancing feature to group of upstreams with optional healthchecks.</p>
+<table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Valeur par défaut</th>
+<th>Contexte</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_DICT_SIZE</code></td>
+<td><code>10m</code></td>
+<td>global</td>
+<td>non</td>
+<td>Shared dict size (datastore for all healthchecks).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_NAME</code></td>
+<td></td>
+<td>global</td>
+<td>oui</td>
+<td>Name of the upstream (used in REVERSE_PROXY_HOST).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_SERVERS</code></td>
+<td></td>
+<td>global</td>
+<td>oui</td>
+<td>List of servers/IPs in the server group.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_MODE</code></td>
+<td><code>round-robin</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Load balancing mode (round-robin or sticky).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_STICKY_METHOD</code></td>
+<td><code>ip</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Sticky session method (ip or cookie).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_RESOLVE</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Dynamically resolve upstream hostnames.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE</code></td>
+<td></td>
+<td>global</td>
+<td>oui</td>
+<td>Number of keepalive connections to cache per worker.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT</code></td>
+<td><code>60s</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Keepalive timeout for upstream connections.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE_TIME</code></td>
+<td><code>1h</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Keepalive time for upstream connections.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_URL</code></td>
+<td><code>/status</code></td>
+<td>global</td>
+<td>oui</td>
+<td>The healthcheck URL.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_INTERVAL</code></td>
+<td><code>2000</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Healthcheck interval in milliseconds.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_TIMEOUT</code></td>
+<td><code>1000</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Healthcheck timeout in milliseconds.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_FALL</code></td>
+<td><code>3</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Number of failed healthchecks before marking the server as down.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_RISE</code></td>
+<td><code>1</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Number of successful healthchecks before marking the server as up.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_VALID_STATUSES</code></td>
+<td><code>200</code></td>
+<td>global</td>
+<td>oui</td>
+<td>HTTP status considered valid in healthchecks.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_CONCURRENCY</code></td>
+<td><code>10</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Maximum number of concurrent healthchecks.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_TYPE</code></td>
+<td><code>http</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Type of healthcheck (http or https).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_SSL_VERIFY</code></td>
+<td><code>yes</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Verify SSL certificate in healthchecks.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_HOST</code></td>
+<td></td>
+<td>global</td>
+<td>oui</td>
+<td>Host header for healthchecks (useful for HTTPS).</td>
+</tr>
+</tbody>
+</table>
 <h2 id="metrics">Metrics</h2>
 <p>Prise en charge STREAM <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Le plugin Metrics fournit des capacités complètes de surveillance et de collecte de données pour votre instance BunkerWeb. Cette fonctionnalité vous permet de suivre divers indicateurs de performance, événements de sécurité et statistiques système, afin d'obtenir des informations précieuses sur le comportement et l'état de santé de vos sites et services protégés.</p>
