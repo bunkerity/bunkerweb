@@ -169,7 +169,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 - Pensez à régler `PROXY_NUMBERS` si plusieurs proxies ajoutent des `X-Forwarded-*`.
 
 !!! tip "Mot de passe administrateur pré-haché"
-    `ADMIN_PASSWORD` accepte un **hash bcrypt** (`$2a$`/`$2b$`/`$2y$`) et le stocke tel quel : le texte en clair ne reste pas dans vos fichiers d’environnement ni secrets. La politique de robustesse est ignorée (vous êtes responsable du mot de passe source) ; un coût inférieur à 12 émet un avertissement. Uniquement en création par environnement et `OVERRIDE_ADMIN_CREDS` ; l’assistant et le profil exigent toujours du texte en clair.
+    `ADMIN_PASSWORD` accepte un **hash bcrypt** (`$2a$`/`$2b$`/`$2y$`) et le stocke tel quel : le texte en clair ne reste pas dans vos fichiers d’environnement ni secrets. La politique de robustesse est ignorée (vous êtes responsable du mot de passe source), mais un facteur de coût inférieur à `10` est **rejeté** ; `10`–`11` émet un avertissement (`12`+ recommandé). Uniquement en création par environnement et `OVERRIDE_ADMIN_CREDS` ; l’assistant et le profil exigent toujours du texte en clair.
 
     Générer un hash :
 

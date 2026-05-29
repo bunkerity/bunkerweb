@@ -169,7 +169,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 - Ajusta `PROXY_NUMBERS` si varios proxies añaden `X-Forwarded-*`.
 
 !!! tip "Contraseña de administrador pre-hasheada"
-    `ADMIN_PASSWORD` acepta un **hash bcrypt** (`$2a$`/`$2b$`/`$2y$`) y lo almacena tal cual, manteniendo el texto plano fuera de tus archivos de entorno y secretos. Se omite la política de fortaleza (tú eres responsable de la contraseña de origen); un coste inferior a 12 registra una advertencia. Solo en creación por entorno y `OVERRIDE_ADMIN_CREDS`: el asistente y el perfil siguen requiriendo texto plano.
+    `ADMIN_PASSWORD` acepta un **hash bcrypt** (`$2a$`/`$2b$`/`$2y$`) y lo almacena tal cual, manteniendo el texto plano fuera de tus archivos de entorno y secretos. Se omite la política de fortaleza (tú eres responsable de la contraseña de origen), pero se **rechaza** un factor de coste inferior a `10`; `10`–`11` registra una advertencia (se recomienda `12`+). Solo en creación por entorno y `OVERRIDE_ADMIN_CREDS`: el asistente y el perfil siguen requiriendo texto plano.
 
     Genera un hash:
 

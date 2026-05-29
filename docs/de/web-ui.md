@@ -169,7 +169,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
 - `PROXY_NUMBERS` setzen, wenn mehrere Proxies `X-Forwarded-*` anhängen.
 
 !!! tip "Vorgehashtes Admin-Passwort"
-    `ADMIN_PASSWORD` akzeptiert einen **bcrypt-Hash** (`$2a$`/`$2b$`/`$2y$`) und speichert ihn unverändert, sodass der Klartext aus Env-Dateien und Secrets bleibt. Die Stärke-Richtlinie entfällt (Sie verantworten das Quell-Passwort); Kosten unter 12 erzeugen eine Warnung. Nur env-Erstellung und `OVERRIDE_ADMIN_CREDS`; Wizard und Profilseite brauchen weiter Klartext.
+    `ADMIN_PASSWORD` akzeptiert einen **bcrypt-Hash** (`$2a$`/`$2b$`/`$2y$`) und speichert ihn unverändert, sodass der Klartext aus Env-Dateien und Secrets bleibt. Die Stärke-Richtlinie entfällt (Sie verantworten das Quell-Passwort); ein Kostenfaktor unter `10` wird **abgelehnt**; `10`–`11` erzeugt eine Warnung (`12`+ empfohlen). Nur env-Erstellung und `OVERRIDE_ADMIN_CREDS`; Wizard und Profilseite brauchen weiter Klartext.
 
     Hash generieren:
 
