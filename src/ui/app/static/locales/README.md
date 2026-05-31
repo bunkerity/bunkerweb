@@ -20,6 +20,7 @@ This directory contains translation files for the BunkerWeb UI. Below is a summa
 | tr.json | Manual (@wiseweb-works)       | Manual (@wiseweb-works)  |
 | tw.json | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
 | ur.json | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
+| tl.json | Manual (@Cleverguns)          | Manual (@Cleverguns)     |
 | zh.json | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
 
 **Table columns:**

@@ -16,4 +16,5 @@ SUPPORTED_LANGUAGES = [
     {"code": "tr", "name": "Türkçe", "flag": "tr.svg", "english_name": "Turkish"},
     {"code": "it", "name": "Italiano", "flag": "it.svg", "english_name": "Italian"},
     {"code": "pl", "name": "Polski", "flag": "pl.svg", "english_name": "Polish"},
+    {"code": "tl", "name": "Filipino", "flag": "ph.svg", "english_name": "Filipino"},
 ]
