@@ -3994,11 +3994,11 @@ check_supported_os() {
             NGINX_VERSION="1.30.2-1~$DISTRO_CODENAME"
             ;;
         "ubuntu")
-            if [[ "$DISTRO_VERSION" != "22.04" && "$DISTRO_VERSION" != "24.04" ]]; then
-                print_warning "Only Ubuntu 22.04 (Jammy) and 24.04 (Noble) are officially supported"
+            if [[ "$DISTRO_VERSION" != "22.04" && "$DISTRO_VERSION" != "24.04" && "$DISTRO_VERSION" != "26.04" ]]; then
+                print_warning "Only Ubuntu 22.04 (Jammy), 24.04 (Noble) and 26.04 (Resolute Raccoon) are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
                     if ! tui_yesno "Unsupported OS" \
-                        "Only Ubuntu 22.04 (Jammy) and 24.04 (Noble) are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
+                        "Only Ubuntu 22.04 (Jammy), 24.04 (Noble) and 26.04 (Resolute Raccoon) are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
                         exit 1
                     fi
                 fi
@@ -4032,7 +4032,7 @@ check_supported_os() {
             ;;
         *)
             print_error "Unsupported operating system: $DISTRO_ID"
-            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04, Fedora 43/44, RHEL/CentOS/Rocky/AlmaLinux 8/9/10, FreeBSD 13/14"
+            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04/26.04, Fedora 43/44, RHEL/CentOS/Rocky/AlmaLinux 8/9/10, FreeBSD 13/14"
             exit 1
             ;;
     esac
