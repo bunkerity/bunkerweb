@@ -26,6 +26,7 @@ from app.dependencies import reload_plugins
 from app.utils import (
     BISCUIT_PRIVATE_KEY_FILE,
     BISCUIT_PUBLIC_KEY_FILE,
+    MAX_PASSWORD_BYTES,
     MIN_BCRYPT_COST,
     RECOMMENDED_BCRYPT_COST,
     USER_PASSWORD_RX,
@@ -34,6 +35,7 @@ from app.utils import (
     gen_password_hash,
     get_latest_stable_release,
     is_bcrypt_hash,
+    password_exceeds_bcrypt_limit,
 )
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
@@ -519,7 +521,12 @@ def on_starting(server):
                             updated = True
                             LOGGER.info("ADMIN_PASSWORD provided as a bcrypt hash; storing it as-is.")
                 elif env_admin_password and not check_password(env_admin_password, ADMIN_USER["password"]):
-                    if not USER_PASSWORD_RX.match(env_admin_password):
+                    if password_exceeds_bcrypt_limit(env_admin_password):
+                        LOGGER.warning(
+                            f"The admin password is {len(env_admin_password.encode('utf-8'))} bytes, over bcrypt's "
+                            f"{MAX_PASSWORD_BYTES}-byte limit. It will not be updated."
+                        )
+                    elif not USER_PASSWORD_RX.match(env_admin_password):
                         LOGGER.warning(
                             "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character. It will not be updated."
                         )
@@ -552,6 +559,14 @@ def on_starting(server):
         if not DEBUG:
             if len(user_name) > 256:
                 message = "The admin username is too long. It must be less than 256 characters."
+                LOGGER.error(message)
+                ERROR_FILE.write_text(message, encoding="utf-8")
+                exit(1)
+            elif not prehashed and password_exceeds_bcrypt_limit(env_admin_password):
+                message = (
+                    f"The admin password is {len(env_admin_password.encode('utf-8'))} bytes, over bcrypt's "
+                    f"{MAX_PASSWORD_BYTES}-byte limit. Shorten it (accented/emoji characters count as several bytes each)."
+                )
                 LOGGER.error(message)
                 ERROR_FILE.write_text(message, encoding="utf-8")
                 exit(1)

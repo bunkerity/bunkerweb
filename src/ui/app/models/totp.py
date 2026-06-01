@@ -53,7 +53,10 @@ class Totp:
             return
 
         for i, encrypted_code in enumerate(user.list_recovery_codes):
-            if checkpw(code.encode("utf-8"), encrypted_code.encode("utf-8")):
+            # Truncate to 72 bytes: bcrypt 5.x raises ValueError past that, and generated
+            # recovery codes are far shorter, so this only stops oversized garbage input
+            # from turning an "invalid code" into a 500.
+            if checkpw(code.encode("utf-8")[:72], encrypted_code.encode("utf-8")):
                 return user.list_recovery_codes.pop(i)
 
     def verify_totp(self, token: str, *, totp_secret: Optional[str] = None, user: Optional[UiUsers] = None) -> bool:

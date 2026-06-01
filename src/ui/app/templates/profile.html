@@ -246,6 +246,7 @@
                                                    aria-label="New Password"
                                                    autocomplete="off"
                                                    required
+                                                   maxlength="72"
                                                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$"
                                                    {% if is_readonly %}disabled{% endif %} />
                                             <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
@@ -277,7 +278,7 @@
                                                data-i18n="form.label.confirm_password">Confirm Password</label>
                                         <div class="input-group input-group-merge"
                                              {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
-                                            <input class="form-control" type="password" id="new_password_confirm" name="new_password_confirm" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-label="Confirm Password" autocomplete="off" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !&quot;#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$"
+                                            <input class="form-control" type="password" id="new_password_confirm" name="new_password_confirm" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-label="Confirm Password" autocomplete="off" required maxlength="72" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !&quot;#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$"
                                             {% if is_readonly %}disabled{% endif %}
                                             />
                                             <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
