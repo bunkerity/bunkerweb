@@ -1967,6 +1967,7 @@ docker build -t bw-ui -f src/ui/Dockerfile .
 - Debian 13 "Trixie"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
+- Ubuntu 26.04 "Resolute Raccoon"
 - Fedora 43 和 44
 - Red Hat Enterprise Linux (RHEL)、CentOS、Rocky Linux 和 AlmaLinux 8, 9 和 10
 

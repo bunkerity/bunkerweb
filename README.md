@@ -271,6 +271,7 @@ List of supported Linux distros:
 - Debian 13 "Trixie"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
+- Ubuntu 26.04 "Resolute Raccoon"
 - Fedora 43
 - Fedora 44
 - RHEL, CentOS, Rocky Linux and AlmaLinux 8, 9 and 10

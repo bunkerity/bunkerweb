@@ -19,6 +19,7 @@ class LinuxTest(Test):
             "fedora-43",
             "fedora-44",
             "centos",
+            "ubuntu-noble",
             "ubuntu-jammy",
         ) and not distro.startswith("rhel"):
             raise Exception(f"unknown distro {distro}")
@@ -33,7 +34,7 @@ class LinuxTest(Test):
             proc = run(cmd, shell=True)
             if proc.returncode != 0:
                 raise Exception("docker run failed (linux stack)")
-            if distro in ("ubuntu", "debian-bookworm", "debian-trixie", "ubuntu-jammy"):
+            if distro in ("ubuntu", "debian-bookworm", "debian-trixie", "ubuntu-noble", "ubuntu-jammy"):
                 cmd = "echo force-bad-version >> /etc/dpkg/dpkg.cfg ; apt install -y /opt/\\$(ls /opt | grep deb)"
             elif distro == "centos" or distro.startswith(("rhel", "fedora")):
                 cmd = "dnf install -y /opt/\\$(ls /opt | grep rpm)"
@@ -46,14 +47,15 @@ class LinuxTest(Test):
             proc = LinuxTest.docker_exec(distro, "systemctl start bunkerweb-scheduler")
             if proc.returncode != 0:
                 raise Exception("docker exec systemctl start failed (linux stack)")
-            if distro in ("ubuntu", "debian-bookworm", "debian-trixie", "ubuntu-jammy"):
+            if distro in ("ubuntu", "debian-bookworm", "debian-trixie", "ubuntu-noble", "ubuntu-jammy"):
                 LinuxTest.docker_exec(
                     distro,
                     "DEBIAN_FRONTEND=noninteractive apt-get install -y php-fpm unzip",
                 )
                 php_versions = {
                     "debian-trixie": "8.4",
-                    "ubuntu": "8.3",
+                    "ubuntu": "8.5",
+                    "ubuntu-noble": "8.3",
                     "debian-bookworm": "8.2",
                     "ubuntu-jammy": "8.1",
                 }
