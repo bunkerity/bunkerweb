@@ -3,7 +3,12 @@ FROM ubuntu:noble@sha256:c4a8d5503dfb2a3eb8ab5f807da5bc69a85730fb49b5cfca2330194
 # Install dependencies
 RUN apt update && \
     apt install -y --no-install-recommends curl gnupg2 ca-certificates lsb-release ubuntu-keyring software-properties-common \
-    bash libssl-dev git zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre2-dev libbrotli-dev libgd-dev liblmdb-dev libfuzzy-dev cargo coreutils python3.12 python3.12-dev python3-pip -y
+    bash libssl-dev git zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre2-dev libbrotli-dev libgd-dev liblmdb-dev libfuzzy-dev cargo-1.85 coreutils python3.12 python3.12-dev python3-pip -y
+
+# noble's default cargo is 1.75; pin cargo/rustc >= 1.83 (biscuit-python's PyO3 0.28.3 MSRV) to build it from source
+RUN update-alternatives --install /usr/bin/cargo cargo /usr/bin/cargo-1.85 100 && \
+    update-alternatives --install /usr/bin/rustc rustc /usr/bin/rustc-1.85 100 && \
+    cargo --version && rustc --version
 
 ENV OS=ubuntu
 ENV NGINX_VERSION=1.30.2
