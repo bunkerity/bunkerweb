@@ -1,5 +1,5 @@
 bcrypt==5.0.0
-biscuit-python==0.4.0
+https://github.com/eclipse-biscuit/biscuit-python/archive/c0fa69824a3e601da86cf5cecde09f75ea8df4d7.zip#egg=biscuit-python # 0.4.1
 cryptography==48.0.0
 email-validator==2.3.0
 fastapi==0.136.3
