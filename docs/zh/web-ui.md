@@ -156,6 +156,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 ## 认证与会话
 
 - 管理员账户：通过向导或 `ADMIN_USERNAME` / `ADMIN_PASSWORD` 创建。密码必须包含大小写字母、数字和特殊字符。`OVERRIDE_ADMIN_CREDS=yes` 会在已有账户时强制重置。
+- 密码长度限制：bcrypt 只使用秘密的前 **72 字节**，因此所有设置密码的位置（设置向导、个人资料页面、`ADMIN_PASSWORD` / `API_PASSWORD`）都会将密码限制为 72 字节。更长的值会被拒绝，并给出明确的错误或日志，而不是静默截断。请注意，非 ASCII 字符（重音字符、emoji）每个都会占用多个字节；由这些字符组成的“72 字符”口令可能超过该限制。预哈希的 bcrypt 值不受影响（哈希本身已经编码了该限制）。
 - 角色：`admin`、`writer`、`reader` 会自动创建；账户存储在数据库。
 - 秘密：`FLASK_SECRET` 存于 `/var/lib/bunkerweb/.flask_secret`；Biscuit 密钥位于同目录，可用 `BISCUIT_PUBLIC_KEY` / `BISCUIT_PRIVATE_KEY` 提供。
 - 2FA：用 `TOTP_ENCRYPTION_KEYS`（空格分隔或 JSON）开启 TOTP。生成密钥：

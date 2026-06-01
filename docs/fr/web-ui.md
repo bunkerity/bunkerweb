@@ -156,6 +156,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 ## Authentification et sessions
 
 - Compte admin : créé via l’assistant ou via `ADMIN_USERNAME` / `ADMIN_PASSWORD`. Mot de passe requis : minuscule, majuscule, chiffre, caractère spécial. `OVERRIDE_ADMIN_CREDS=yes` force le réensemencement même si un compte existe.
+- Limite de longueur du mot de passe : bcrypt n'utilise que les **72 premiers octets** d'un secret ; les mots de passe sont donc limités à 72 octets partout où ils sont définis (assistant de configuration, page de profil, `ADMIN_PASSWORD` / `API_PASSWORD`). Une valeur plus longue est rejetée avec une erreur ou un journal explicite au lieu d'être tronquée silencieusement. Notez que les caractères non ASCII (accents, emoji) consomment plusieurs octets chacun ; une phrase secrète de "72 caractères" composée de tels caractères peut donc dépasser la limite. Les valeurs bcrypt pré-hachées sont exemptées (le hash encode déjà cette limite).
 - Rôles : `admin`, `writer` et `reader` sont créés automatiquement ; les comptes sont stockés en base.
 - Secrets : `FLASK_SECRET` est enregistré dans `/var/lib/bunkerweb/.flask_secret` ; les clés Biscuit sont à côté et peuvent être fournies via `BISCUIT_PUBLIC_KEY` / `BISCUIT_PRIVATE_KEY`.
 - 2FA : activez le TOTP avec `TOTP_ENCRYPTION_KEYS` (séparées par des espaces ou map JSON). Générer une clé :

@@ -156,6 +156,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
 ## Authentifizierung und Sessions
 
 - Admin-Konto: per Wizard oder über `ADMIN_USERNAME` / `ADMIN_PASSWORD`. Passwort muss Klein-, Großbuchstaben, Zahl und Sonderzeichen enthalten. `OVERRIDE_ADMIN_CREDS=yes` erzwingt Neu-Initialisierung auch bei bestehendem Konto.
+- Passwortlängenbegrenzung: bcrypt verwendet nur die ersten **72 Bytes** eines Secrets; Passwörter sind daher überall, wo sie gesetzt werden (Setup-Assistent, Profilseite, `ADMIN_PASSWORD` / `API_PASSWORD`), auf 72 Bytes begrenzt. Ein längerer Wert wird mit einer erklärenden Fehlermeldung oder einem Logeintrag abgelehnt, statt stillschweigend abgeschnitten zu werden. Beachten Sie, dass Nicht-ASCII-Zeichen (Akzente, Emoji) jeweils mehrere Bytes belegen; eine aus solchen Zeichen bestehende "72-Zeichen"-Passphrase kann daher die Grenze überschreiten. Vorgehashte bcrypt-Werte sind ausgenommen (der Hash kodiert die Grenze bereits).
 - Rollen: `admin`, `writer` und `reader` werden automatisch angelegt; Konten liegen in der Datenbank.
 - Secrets: `FLASK_SECRET` liegt in `/var/lib/bunkerweb/.flask_secret`; Biscuit-Keys daneben, optional per `BISCUIT_PUBLIC_KEY` / `BISCUIT_PRIVATE_KEY`.
 - 2FA: TOTP mit `TOTP_ENCRYPTION_KEYS` (leerzeichengetrennt oder JSON-Map) aktivieren. Schlüssel generieren:

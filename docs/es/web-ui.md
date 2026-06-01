@@ -156,6 +156,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 ## Autenticación y sesiones
 
 - Cuenta admin: créala con el asistente o con `ADMIN_USERNAME` / `ADMIN_PASSWORD`. La contraseña debe incluir minúsculas, mayúsculas, dígito y carácter especial. `OVERRIDE_ADMIN_CREDS=yes` fuerza la resiembra aunque ya exista.
+- Límite de longitud de contraseña: bcrypt solo usa los primeros **72 bytes** de un secreto, por lo que las contraseñas se limitan a 72 bytes en todos los lugares donde se configuran (asistente de configuración, página de perfil, `ADMIN_PASSWORD` / `API_PASSWORD`). Un valor más largo se rechaza con un error o registro explicativo en lugar de truncarse silenciosamente. Ten en cuenta que los caracteres no ASCII (acentos, emoji) consumen varios bytes cada uno; una frase de contraseña de "72 caracteres" formada por esos caracteres puede superar el límite. Los valores bcrypt pre-hasheados están exentos (el hash ya codifica el límite).
 - Roles: `admin`, `writer` y `reader` se crean automáticamente; las cuentas viven en la base de datos.
 - Secretos: `FLASK_SECRET` se guarda en `/var/lib/bunkerweb/.flask_secret`; las llaves Biscuit al lado, opcionalmente vía `BISCUIT_PUBLIC_KEY` / `BISCUIT_PRIVATE_KEY`.
 - 2FA: habilita TOTP con `TOTP_ENCRYPTION_KEYS` (separadas por espacios o JSON). Genera una llave:
