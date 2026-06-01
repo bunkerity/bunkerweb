@@ -16,6 +16,7 @@ from jobs import Job  # type: ignore
 from letsencrypt_utils import (
     CERTBOT_BIN,
     DEPS_PATH,
+    LETSENCRYPT_CACHE_PATH as CACHE_PATH,
     LETSENCRYPT_DATA_PATH as DATA_PATH,
     LETSENCRYPT_LOGS_DIR as LOGS_DIR,
     LETSENCRYPT_WORK_DIR as WORK_DIR,
@@ -23,9 +24,11 @@ from letsencrypt_utils import (
     build_certbot_env,
     certbot_log_backup_flags,
     is_zerossl_used_in_env,
+    le_cache_write_lock,
     letsencrypt_cache_consistent,
     prepare_logs_dir,
     resolve_certbot_entrypoint,
+    setup_route53_aws_config,
 )
 
 LOGGER = getLogger("LETS-ENCRYPT.RENEW")
@@ -55,6 +58,15 @@ try:
     JOB = Job(LOGGER, __file__)
 
     cmd_env = build_certbot_env(JOB, DEPS_PATH)
+
+    # route53 is the exception to certbot's persisted-credentials rule: certbot-dns-route53 has no
+    # --dns-route53-credentials flag and stores nothing in renewal/<cert>.conf — it reads AWS creds
+    # only from AWS_CONFIG_FILE. certbot-new.py sets that per-service at issuance, but `certbot renew`
+    # runs once for all certs, so re-derive the route53 credentials from the plugin settings and point
+    # AWS_CONFIG_FILE at them here. Without this, route53 certs issued with explicit access keys never
+    # auto-renew. Writes to CACHE_PATH (where issuance wrote them), not DATA_PATH.
+    setup_route53_aws_config(cmd_env, CACHE_PATH, LOGGER)
+
     acme_server = "zerossl" if is_zerossl_used_in_env() else "letsencrypt"
     certbot_entrypoint = resolve_certbot_entrypoint(
         acme_server,
@@ -131,7 +143,9 @@ try:
             if status == 0:
                 status = 1
         else:
-            cached, err = JOB.cache_dir(DATA_PATH)
+            # Serialize against the UI heal/delete flow, which writes the same DB cache row.
+            with le_cache_write_lock():
+                cached, err = JOB.cache_dir(DATA_PATH)
             if not cached:
                 LOGGER.error(f"Error while saving Let's Encrypt data to db cache : {err}")
             else:

@@ -90,7 +90,7 @@ fi
 
 # Default values
 # Hardcoded default version (immutable reference)
-DEFAULT_BUNKERWEB_VERSION="1.6.11~rc1"
+DEFAULT_BUNKERWEB_VERSION="1.6.12~rc1"
 # Mutable effective version (can be overridden by --version)
 BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 NGINX_VERSION=""
@@ -2515,24 +2515,28 @@ _docker_ask_image_tag() {
     if [ -n "$DOCKER_IMAGE_TAG" ]; then
         # Flag-provided — still normalize '~' → '-'.
         DOCKER_IMAGE_TAG=$(derive_docker_image_tag "$DOCKER_IMAGE_TAG")
-        return 0
-    fi
-    if [ "$INTERACTIVE_MODE" != "yes" ]; then
+    elif [ "$INTERACTIVE_MODE" != "yes" ]; then
         DOCKER_IMAGE_TAG="$_default_tag"
-        return 0
+    else
+        tui_section "🏷️  BunkerWeb Image Tag"
+        while true; do
+            DOCKER_IMAGE_TAG=$(tui_input "Image Tag" \
+                "Docker Hub tag for the BunkerWeb images:" "$_default_tag") \
+                || DOCKER_IMAGE_TAG="$_default_tag"
+            [ -z "$DOCKER_IMAGE_TAG" ] && DOCKER_IMAGE_TAG="$_default_tag"
+            # Normalize '~' → '-' before validating so a typed Debian-style version works.
+            DOCKER_IMAGE_TAG=$(derive_docker_image_tag "$DOCKER_IMAGE_TAG")
+            validate_docker_image_tag "$DOCKER_IMAGE_TAG" && break
+            tui_msgbox "Invalid Tag" "Image tags allow letters, digits, '.', '_' and '-' only."
+            DOCKER_IMAGE_TAG=""
+        done
     fi
-    tui_section "🏷️  BunkerWeb Image Tag"
-    while true; do
-        DOCKER_IMAGE_TAG=$(tui_input "Image Tag" \
-            "Docker Hub tag for the BunkerWeb images:" "$_default_tag") \
-            || DOCKER_IMAGE_TAG="$_default_tag"
-        [ -z "$DOCKER_IMAGE_TAG" ] && DOCKER_IMAGE_TAG="$_default_tag"
-        # Normalize '~' → '-' before validating so a typed Debian-style version works.
-        DOCKER_IMAGE_TAG=$(derive_docker_image_tag "$DOCKER_IMAGE_TAG")
-        validate_docker_image_tag "$DOCKER_IMAGE_TAG" && break
-        tui_msgbox "Invalid Tag" "Image tags allow letters, digits, '.', '_' and '-' only."
-        DOCKER_IMAGE_TAG=""
-    done
+    # The 'dev' channel has no public Docker Hub image (dev CI builds are not pushed),
+    # so a derived 'dev' tag yields a compose stack that fails to pull. Warn the user.
+    if [ "$DOCKER_IMAGE_TAG" = "dev" ]; then
+        print_warning "No public 'bunkerity/bunkerweb:dev' image is published; 'docker compose' will fail to pull it."
+        print_warning "Pass --image-tag <published-tag> (e.g. latest, testing or a version), or build the dev image locally first."
+    fi
 }
 
 # Web UI admin username + password — full/manager/ui.
@@ -3687,12 +3691,13 @@ present_configuration_summary() {
 }
 
 # Render summary via gum. Body text inherits terminal default for cross-theme contrast.
-# Auto-paginate via `gum pager` when the styled box exceeds terminal height.
+# Print inline (no pager): the recap is informational and scrolls in the normal
+# buffer; the `gum confirm` that follows is the single interaction gate. A pager
+# here would grab the alt screen and only exit on q/esc — on consoles where input
+# never reaches bubbletea it hangs, and it reads as "stuck" even when it works.
 _present_summary_gum() {
     local _summary="$1"
-    local _summary_h _term_h _term_w _box_w
-    _summary_h=$(printf '%s\n' "$_summary" | wc -l)
-    _term_h=$(tput lines 2>/dev/null || echo 24)
+    local _term_w _box_w
     _term_w=$(tput cols  2>/dev/null || echo 80)
     _box_w=$(( _term_w > 84 ? 78 : _term_w - 6 ))
     [ "$_box_w" -lt 40 ] && _box_w=40
@@ -3707,11 +3712,7 @@ _present_summary_gum() {
         --margin "1 0" \
         "$(printf '%s\n%s' "$_title" "$_summary")")
 
-    if [ "$_summary_h" -gt $(( _term_h - 6 )) ]; then
-        printf '%s\n' "$_styled" | gum pager --show-line-numbers=false
-    else
-        printf '%s\n' "$_styled"
-    fi
+    printf '%s\n' "$_styled"
 }
 
 # Build config recap string with dot-padded fields. No I/O. UTF-8 glyphs safe — tui_init forces UTF-8.
@@ -3993,11 +3994,11 @@ check_supported_os() {
             NGINX_VERSION="1.30.2-1~$DISTRO_CODENAME"
             ;;
         "ubuntu")
-            if [[ "$DISTRO_VERSION" != "22.04" && "$DISTRO_VERSION" != "24.04" ]]; then
-                print_warning "Only Ubuntu 22.04 (Jammy) and 24.04 (Noble) are officially supported"
+            if [[ "$DISTRO_VERSION" != "22.04" && "$DISTRO_VERSION" != "24.04" && "$DISTRO_VERSION" != "26.04" ]]; then
+                print_warning "Only Ubuntu 22.04 (Jammy), 24.04 (Noble) and 26.04 (Resolute Raccoon) are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
                     if ! tui_yesno "Unsupported OS" \
-                        "Only Ubuntu 22.04 (Jammy) and 24.04 (Noble) are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
+                        "Only Ubuntu 22.04 (Jammy), 24.04 (Noble) and 26.04 (Resolute Raccoon) are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
                         exit 1
                     fi
                 fi
@@ -4014,7 +4015,7 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.30.1"
+            NGINX_VERSION="1.30.2"
             ;;
         "rhel"|"rocky"|"almalinux"|"centos")
             major_version=$(echo "$DISTRO_VERSION" | cut -d. -f1)
@@ -4031,7 +4032,7 @@ check_supported_os() {
             ;;
         *)
             print_error "Unsupported operating system: $DISTRO_ID"
-            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04, Fedora 43/44, RHEL/CentOS/Rocky/AlmaLinux 8/9/10, FreeBSD 13/14"
+            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04/26.04, Fedora 43/44, RHEL/CentOS/Rocky/AlmaLinux 8/9/10, FreeBSD 13/14"
             exit 1
             ;;
     esac
@@ -4950,8 +4951,12 @@ install_bunkerweb_debian() {
     print_step "Installing BunkerWeb on Debian/Ubuntu"
 
     if [[ "$BUNKERWEB_VERSION" =~ (testing|dev) ]]; then
-        print_status "Adding force-bad-version directive for testing/dev version"
-        echo "force-bad-version" >> /etc/dpkg/dpkg.cfg
+        # Idempotent: only append if the exact directive is not already present,
+        # so re-running the installer never duplicates the line.
+        if ! grep -qxF "force-bad-version" /etc/dpkg/dpkg.cfg 2>/dev/null; then
+            print_status "Adding force-bad-version directive for testing/dev version"
+            echo "force-bad-version" >> /etc/dpkg/dpkg.cfg
+        fi
     fi
 
     if [ "$ENABLE_WIZARD" = "no" ]; then
@@ -7426,8 +7431,12 @@ if [ "$DRY_RUN" = "yes" ]; then
     exit 0
 fi
 
-# Infer install type from systemd unit state on upgrades. Operator's --type CLI override always wins.
-# Rules:
+# Resolve the existing install type during an upgrade. Operator's --type CLI override always wins.
+# Source of truth, in order:
+#   1. The persistent marker /usr/share/bunkerweb/INSTALL_TYPE written by the package
+#      postinstall of fixed builds — authoritative, invocation-agnostic.
+#   2. Inference from systemd unit state, for legacy hosts that predate the marker.
+# Inference rules (see _classify_install for the exact, liveness-aware matrix):
 #   bunkerweb + scheduler [+ ui]   → full
 #   scheduler + ui (no bunkerweb)  → manager
 #   bunkerweb only                 → worker
@@ -7435,7 +7444,18 @@ fi
 #   ui only                        → ui
 #   api only                       → api
 # Falls back to empty (treated as full) on ambiguous state.
+_INSTALL_TYPE_MARKER="/usr/share/bunkerweb/INSTALL_TYPE"
 detect_install_type_from_state() {
+    # Authoritative marker (fixed builds). Legacy hosts won't have it → infer below.
+    if [ -f "$_INSTALL_TYPE_MARKER" ]; then
+        local _marker
+        _marker=$(tr -d '[:space:]' < "$_INSTALL_TYPE_MARKER" 2>/dev/null || echo "")
+        case "$_marker" in
+            full|manager|worker|scheduler|ui|api)
+                _DETECTED_INSTALL_TYPE="$_marker"; return 0 ;;
+        esac
+    fi
+
     if [ "$DISTRO_ID" = "freebsd" ]; then
         # systemctl unavailable; rely on rc.d enablement (YES = present).
         local _has_bw _has_sch _has_ui _has_api
@@ -7455,46 +7475,66 @@ detect_install_type_from_state() {
     _DETECTED_INSTALL_TYPE=$(_classify_install "$_bw" "$_sch" "$_ui" "$_api")
 }
 
-# is-enabled OR is-active → "present", else "absent".
-# disabled+stopped units (e.g. leftover from prior --full now running --worker) must NOT count as present.
+# Three-valued unit liveness: "active" (running), "enabled" (enabled at boot but not
+# running), or "absent". _classify_install weights these differently: a leftover
+# scheduler/ui that is enabled-but-stopped (e.g. a prior --full host later run as a
+# --worker) must NOT alone make a running worker look like a full stack.
 _systemd_unit_state() {
     local unit="$1" _enabled _active
     _enabled=$(systemctl is-enabled "$unit" 2>/dev/null || echo "missing")
     _active=$(systemctl is-active "$unit" 2>/dev/null || echo "inactive")
-    case "$_enabled" in
-        enabled|enabled-runtime|static|alias)
-            echo "present"; return ;;
-    esac
     case "$_active" in
         active|activating|reloading)
-            echo "present"; return ;;
+            echo "active"; return ;;
+    esac
+    case "$_enabled" in
+        enabled|enabled-runtime|static|alias)
+            echo "enabled"; return ;;
     esac
     echo "absent"
 }
 
-# FreeBSD rc.d: sysrc <unit>_enable=YES OR `service status` → "present".
+# FreeBSD rc.d equivalent: running → "active", sysrc <unit>_enable=YES (not running) →
+# "enabled", else "absent".
 _freebsd_unit_state() {
     local unit="$1" _enabled _running=1
-    _enabled=$(sysrc -n "${unit}_enable" 2>/dev/null || echo "")
-    case "$_enabled" in
-        [Yy][Ee][Ss]) echo "present"; return ;;
-    esac
     if command -v service >/dev/null 2>&1; then
         service "$unit" status >/dev/null 2>&1 && _running=0
     fi
-    if [ "$_running" = 0 ]; then echo "present"; else echo "absent"; fi
+    if [ "$_running" = 0 ]; then echo "active"; return; fi
+    _enabled=$(sysrc -n "${unit}_enable" 2>/dev/null || echo "")
+    case "$_enabled" in
+        [Yy][Ee][Ss]) echo "enabled"; return ;;
+    esac
+    echo "absent"
 }
 
-# Classify install type from per-unit "present"/"absent" state. Most-specific first.
+# Classify install type from per-unit liveness ("active"/"enabled"/"absent"). Most-specific first.
 # manager-without-UI vs scheduler-only disambiguated by /etc/bunkerweb/ui.env presence
 # (manager-mode SERVICE_UI=no still provisions ui.env; scheduler-only never does).
 _classify_install() {
     local bw="$1" sch="$2" ui="$3" api="$4"
+    # present = running OR enabled-at-boot; used for the topology shape below.
     local _b _s _u _a
-    [ "$bw"  = "present" ] && _b=1 || _b=0
-    [ "$sch" = "present" ] && _s=1 || _s=0
-    [ "$ui"  = "present" ] && _u=1 || _u=0
-    [ "$api" = "present" ] && _a=1 || _a=0
+    [ "$bw"  != "absent" ] && _b=1 || _b=0
+    [ "$sch" != "absent" ] && _s=1 || _s=0
+    [ "$ui"  != "absent" ] && _u=1 || _u=0
+    [ "$api" != "absent" ] && _a=1 || _a=0
+
+    # When bunkerweb is actually RUNNING, the scheduler's liveness — not merely its
+    # enablement — decides full vs worker. A worker never runs the scheduler; a
+    # leftover scheduler that is enabled-but-stopped must not promote it to "full".
+    if [ "$bw" = "active" ]; then
+        if [ "$sch" = "active" ]; then
+            echo "full"; return
+        fi
+        # bunkerweb running, scheduler NOT running. Unless a UI is actively serving
+        # (an unusual degraded/mixed topology), treat this as a worker.
+        if [ "$ui" != "active" ]; then
+            echo "worker"; return
+        fi
+        # bunkerweb + ui running but scheduler down → ambiguous; fall through.
+    fi
 
     if [ "$_b" = 1 ] && [ "$_s" = 1 ]; then
         echo "full"; return

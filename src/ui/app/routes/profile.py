@@ -8,7 +8,7 @@ from user_agents import parse
 from app.models.totp import totp as TOTP
 
 from app.dependencies import DATA, DB
-from app.utils import USER_PASSWORD_RX, flash, gen_password_hash
+from app.utils import LOGGER, MAX_PASSWORD_BYTES, USER_PASSWORD_RX, flash, gen_password_hash, password_exceeds_bcrypt_limit
 
 from app.routes.utils import cors_required, handle_error, verify_data_in_form
 
@@ -268,6 +268,16 @@ def edit_profile():
         elif not USER_PASSWORD_RX.match(request.form["new_password"]):
             return handle_error(
                 "The new password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).",
+                "profile",
+            )
+        elif password_exceeds_bcrypt_limit(request.form["new_password"]):
+            LOGGER.warning(
+                f"Rejected password change for user {current_user.get_id()}: new password is "
+                f"{len(request.form['new_password'].encode('utf-8'))} bytes, over bcrypt's {MAX_PASSWORD_BYTES}-byte limit."
+            )
+            return handle_error(
+                f"The new password is too long. It must not exceed {MAX_PASSWORD_BYTES} bytes (bcrypt's hard limit); "
+                "accented or emoji characters count as several bytes each.",
                 "profile",
             )
         elif current_user.check_password(request.form["new_password"]):

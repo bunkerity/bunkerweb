@@ -28,6 +28,8 @@ RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default serve
 USER_PASSWORD_RX = re_compile(r"^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*\P{Alnum}).{8,}$")
 BCRYPT_HASH_RX = re_compile(r"^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}\Z")
 RECOMMENDED_BCRYPT_COST = 12  # below this, a supplied pre-hashed ADMIN_PASSWORD triggers a warning
+MIN_BCRYPT_COST = 10  # absolute floor; a supplied pre-hashed ADMIN_PASSWORD below this is refused
+MAX_PASSWORD_BYTES = 72  # bcrypt only consumes the first 72 bytes of a secret; 5.x raises ValueError on more
 PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}$")
 
 BISCUIT_PUBLIC_KEY_FILE = LIB_DIR.joinpath(".biscuit_public_key")
@@ -274,8 +276,27 @@ def get_blacklisted_settings(global_config: bool = False) -> Set[str]:
     return blacklisted_settings
 
 
+def _bcrypt_secret(password: str) -> bytes:
+    # bcrypt only ever consumes the first 72 bytes of a secret. bcrypt 4.x truncated
+    # longer input silently; bcrypt 5.x raises ValueError instead. Truncate explicitly
+    # so behaviour (and every already-stored hash) stays identical across both versions.
+    # Set-time flows reject >72 bytes up front (see password_exceeds_bcrypt_limit); this
+    # truncation only matters for verifying legacy hashes created before that cap existed.
+    return password.encode("utf-8")[:MAX_PASSWORD_BYTES]
+
+
+def password_exceeds_bcrypt_limit(password: str) -> bool:
+    """True if the password is longer than bcrypt's MAX_PASSWORD_BYTES-byte limit.
+
+    bcrypt 5.x raises a ValueError past 72 bytes (4.x silently truncated). Password
+    set/change flows reject overly long input with this check so nothing is silently
+    truncated going forward; verification still truncates so pre-cap hashes keep working.
+    """
+    return len(password.encode("utf-8")) > MAX_PASSWORD_BYTES
+
+
 def gen_password_hash(password: str) -> bytes:
-    return hashpw(password.encode("utf-8"), gensalt(rounds=13))
+    return hashpw(_bcrypt_secret(password), gensalt(rounds=13))
 
 
 def is_bcrypt_hash(value: str) -> bool:
@@ -295,7 +316,7 @@ def bcrypt_cost(value: str) -> int:
 
 
 def check_password(password: str, hashed: bytes) -> bool:
-    return checkpw(password.encode("utf-8"), hashed)
+    return checkpw(_bcrypt_secret(password), hashed)
 
 
 def get_printable_content(data: bytes) -> str:
@@ -389,17 +410,49 @@ def _sanitize_internal_next(next_url, default):
     return decoded or default
 
 
-def csv_writer(csvfile, *args, **kwargs):
-    """Return a ``defusedcsv`` writer that escapes spreadsheet formula payloads (CWE-1236).
+# OWASP lists \t (0x09) and \r (0x0D) as spreadsheet-injection leaders, but defusedcsv's
+# _escape only guards "@+-=|%". Prefix a quote for those two so Excel treats the cell as text.
+_CSV_INJECTION_LEADERS = ("\t", "\r")
 
+
+def _csv_escape(value: Any) -> Any:
+    """defusedcsv formula-injection escaping (CWE-1236) plus the \\t / \\r leaders it omits."""
+    escaped = _defusedcsv_escape(value)
+    if isinstance(escaped, str) and escaped[:1] in _CSV_INJECTION_LEADERS:
+        return "'" + escaped
+    return escaped
+
+
+class _CsvSafeWriter:
+    """Wrap a CSV writer so every cell is escaped via :func:`_csv_escape`.
+
+    Pre-escaping is idempotent: a value already prefixed with ``'`` is left untouched by
+    the underlying ``defusedcsv`` writer (its first char is no longer an injection leader).
+    """
+
+    def __init__(self, writer):
+        self._writer = writer
+
+    def writerow(self, row):
+        return self._writer.writerow([_csv_escape(cell) for cell in row])
+
+    def writerows(self, rows):
+        for row in rows:
+            self.writerow(row)
+
+
+def csv_writer(csvfile, *args, **kwargs):
+    """Return a CSV writer that escapes spreadsheet formula payloads (CWE-1236).
+
+    Wraps ``defusedcsv`` and additionally guards the tab/CR leaders defusedcsv omits.
     Use this for all UI CSV exports instead of ``csv.writer``.
     """
-    return _defusedcsv_writer(csvfile, *args, **kwargs)
+    return _CsvSafeWriter(_defusedcsv_writer(csvfile, *args, **kwargs))
 
 
 def csv_safe(value: Any) -> Any:
-    """Escape one cell value with ``defusedcsv`` formula-injection protection (CWE-1236).
+    """Escape one cell value with formula-injection protection (CWE-1236).
 
     Use this for user-controlled values written through openpyxl.
     """
-    return _defusedcsv_escape(value)
+    return _csv_escape(value)

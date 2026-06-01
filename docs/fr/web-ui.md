@@ -35,7 +35,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
     Utilisez les images publiées et le layout du [guide de démarrage rapide](quickstart-guide.md#__tabbed_1_3) pour monter la stack, puis terminez la configuration dans le navigateur.
 
     ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.11~rc1-rc1/misc/integrations/docker-compose.yml up -d
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.12~rc1-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
     Ouvrez le nom d’hôte du scheduler (par ex. `https://www.example.com/changeme`) et lancez l’assistant `/setup` pour configurer l’UI, le scheduler et l’instance.
@@ -52,7 +52,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.11-rc1
+        image: bunkerity/bunkerweb:1.6.12-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.11-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.12-rc1
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.11-rc1
+        image: bunkerity/bunkerweb-ui:1.6.12-rc1
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -156,6 +156,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 ## Authentification et sessions
 
 - Compte admin : créé via l’assistant ou via `ADMIN_USERNAME` / `ADMIN_PASSWORD`. Mot de passe requis : minuscule, majuscule, chiffre, caractère spécial. `OVERRIDE_ADMIN_CREDS=yes` force le réensemencement même si un compte existe.
+- Limite de longueur du mot de passe : bcrypt n'utilise que les **72 premiers octets** d'un secret ; les mots de passe sont donc limités à 72 octets partout où ils sont définis (assistant de configuration, page de profil, `ADMIN_PASSWORD` / `API_PASSWORD`). Une valeur plus longue est rejetée avec une erreur ou un journal explicite au lieu d'être tronquée silencieusement. Notez que les caractères non ASCII (accents, emoji) consomment plusieurs octets chacun ; une phrase secrète de "72 caractères" composée de tels caractères peut donc dépasser la limite. Les valeurs bcrypt pré-hachées sont exemptées (le hash encode déjà cette limite).
 - Rôles : `admin`, `writer` et `reader` sont créés automatiquement ; les comptes sont stockés en base.
 - Secrets : `FLASK_SECRET` est enregistré dans `/var/lib/bunkerweb/.flask_secret` ; les clés Biscuit sont à côté et peuvent être fournies via `BISCUIT_PUBLIC_KEY` / `BISCUIT_PRIVATE_KEY`.
 - 2FA : activez le TOTP avec `TOTP_ENCRYPTION_KEYS` (séparées par des espaces ou map JSON). Générer une clé :
@@ -169,7 +170,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 - Pensez à régler `PROXY_NUMBERS` si plusieurs proxies ajoutent des `X-Forwarded-*`.
 
 !!! tip "Mot de passe administrateur pré-haché"
-    `ADMIN_PASSWORD` accepte un **hash bcrypt** (`$2a$`/`$2b$`/`$2y$`) et le stocke tel quel : le texte en clair ne reste pas dans vos fichiers d’environnement ni secrets. La politique de robustesse est ignorée (vous êtes responsable du mot de passe source) ; un coût inférieur à 12 émet un avertissement. Uniquement en création par environnement et `OVERRIDE_ADMIN_CREDS` ; l’assistant et le profil exigent toujours du texte en clair.
+    `ADMIN_PASSWORD` accepte un **hash bcrypt** (`$2a$`/`$2b$`/`$2y$`) et le stocke tel quel : le texte en clair ne reste pas dans vos fichiers d’environnement ni secrets. La politique de robustesse est ignorée (vous êtes responsable du mot de passe source), mais un facteur de coût inférieur à `10` est **rejeté** ; `10`–`11` émet un avertissement (`12`+ recommandé). Uniquement en création par environnement et `OVERRIDE_ADMIN_CREDS` ; l’assistant et le profil exigent toujours du texte en clair.
 
     Générer un hash :
 
@@ -210,19 +211,19 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 
 ### Auth, sessions et cookies
 
-| Paramètre                                   | Description                                                                       | Valeurs acceptées         | Défaut                    |
-| ------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------- | ------------------------- |
+| Paramètre                                   | Description                                                                                                              | Valeurs acceptées         | Défaut                    |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------- | ------------------------- |
 | `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | Initialiser le compte admin (politique de mot de passe ; `ADMIN_PASSWORD` accepte aussi un hash bcrypt, stocké tel quel) | Chaînes / hash bcrypt     | non définis               |
-| `OVERRIDE_ADMIN_CREDS`                      | Forcer la mise à jour des identifiants admin depuis l’env                         | `yes` ou `no`             | `no`                      |
-| `FLASK_SECRET`                              | Secret de signature de session (persisté dans `/var/lib/bunkerweb/.flask_secret`) | Chaîne hex/base64/opacité | généré automatiquement    |
-| `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | Clés de chiffrement TOTP (espaces ou map JSON)                                    | Chaînes / JSON            | générées si absent        |
-| `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Clés Biscuit (hex) pour générer des tokens UI                                     | Chaînes hex               | auto-générées et stockées |
-| `SESSION_LIFETIME_HOURS`                    | Durée d’inactivité de session (TTL glissante, rafraîchie à chaque requête)        | Nombre (heures)           | `12`                      |
-| `SESSION_ABSOLUTE_HOURS`                    | Plafond absolu de session indépendant de l’activité                               | Nombre (heures)           | `168`                     |
-| `SESSION_ROLLING_HOURS`                     | Intervalle de rotation du SID (`0` désactive la rotation)                         | Nombre (heures)           | `0`                       |
-| `ALWAYS_REMEMBER`                           | Toujours activer le cookie “remember me”                                          | `yes` ou `no`             | `no`                      |
-| `CHECK_PRIVATE_IP`                          | Lier la session à l’IP (relâchement sur plages privées si `no`)                   | `yes` ou `no`             | `yes`                     |
-| `PROXY_NUMBERS`                             | Nombre de sauts proxy à faire confiance pour `X-Forwarded-*`                      | Entier                    | `1`                       |
+| `OVERRIDE_ADMIN_CREDS`                      | Forcer la mise à jour des identifiants admin depuis l’env                                                                | `yes` ou `no`             | `no`                      |
+| `FLASK_SECRET`                              | Secret de signature de session (persisté dans `/var/lib/bunkerweb/.flask_secret`)                                        | Chaîne hex/base64/opacité | généré automatiquement    |
+| `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | Clés de chiffrement TOTP (espaces ou map JSON)                                                                           | Chaînes / JSON            | générées si absent        |
+| `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Clés Biscuit (hex) pour générer des tokens UI                                                                            | Chaînes hex               | auto-générées et stockées |
+| `SESSION_LIFETIME_HOURS`                    | Durée d’inactivité de session (TTL glissante, rafraîchie à chaque requête)                                               | Nombre (heures)           | `12`                      |
+| `SESSION_ABSOLUTE_HOURS`                    | Plafond absolu de session indépendant de l’activité                                                                      | Nombre (heures)           | `168`                     |
+| `SESSION_ROLLING_HOURS`                     | Intervalle de rotation du SID (`0` désactive la rotation)                                                                | Nombre (heures)           | `0`                       |
+| `ALWAYS_REMEMBER`                           | Toujours activer le cookie “remember me”                                                                                 | `yes` ou `no`             | `no`                      |
+| `CHECK_PRIVATE_IP`                          | Lier la session à l’IP (relâchement sur plages privées si `no`)                                                          | `yes` ou `no`             | `yes`                     |
+| `PROXY_NUMBERS`                             | Nombre de sauts proxy à faire confiance pour `X-Forwarded-*`                                                             | Entier                    | `1`                       |
 
 ### Journalisation
 

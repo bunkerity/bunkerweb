@@ -10,7 +10,6 @@ from app.utils import get_blacklisted_settings
 
 from app.routes.utils import extract_file_setting_names, handle_error, wait_applying
 
-
 global_settings = Blueprint("global_settings", __name__)
 
 

@@ -12,7 +12,6 @@ from app.utils import flash, is_ui_api_method
 from app.models.instance import Instance
 from app.routes.utils import handle_error, verify_data_in_form
 
-
 instances = Blueprint("instances", __name__)
 
 ACTIONS = {

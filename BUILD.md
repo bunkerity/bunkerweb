@@ -90,6 +90,7 @@ Linux package generation can be done directly with Docker in 2 steps:
 ### Supported distro identifiers
 
 - `ubuntu`
+- `ubuntu-noble`
 - `ubuntu-jammy`
 - `debian-bookworm`
 - `debian-trixie`

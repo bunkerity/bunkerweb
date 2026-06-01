@@ -8,7 +8,6 @@ from ..auth.guard import guard
 from ..utils import get_db
 from ..schemas import ServiceCreateRequest, ServiceUpdateRequest
 
-
 router = APIRouter(prefix="/services", tags=["services"])
 
 

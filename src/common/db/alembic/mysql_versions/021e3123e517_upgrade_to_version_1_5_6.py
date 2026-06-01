@@ -46,13 +46,11 @@ def upgrade():
     )
 
     # Migrate data: Set 'type' to 'external' where 'external' was true
-    op.execute(
-        """
+    op.execute("""
         UPDATE bw_plugins
         SET type = 'external'
         WHERE external = true
-    """
-    )
+    """)
 
     op.drop_column("bw_plugins", "external")
 
@@ -63,8 +61,7 @@ def upgrade():
     op.drop_index("name", table_name="bw_settings")
 
     # Update all new columns and version in a single statement
-    op.execute(
-        """
+    op.execute("""
         UPDATE bw_metadata
         SET is_pro = false,
             pro_status = 'invalid',
@@ -73,8 +70,7 @@ def upgrade():
             pro_plugins_changed = false,
             version = '1.5.6'
         WHERE id = 1
-    """
-    )
+    """)
 
 
 def downgrade():
@@ -92,13 +88,11 @@ def downgrade():
     op.add_column("bw_plugins", sa.Column("external", mysql.TINYINT(display_width=1), autoincrement=False, nullable=False))
 
     # Migrate data: Set 'external' to true where 'type' was 'external'
-    op.execute(
-        """
+    op.execute("""
         UPDATE bw_plugins
         SET external = true
         WHERE type = 'external'
-    """
-    )
+    """)
 
     op.drop_column("bw_plugins", "type")
     op.alter_column(

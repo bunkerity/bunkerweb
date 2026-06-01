@@ -46,6 +46,9 @@ function buildPackage() {
     if [ "$DISTRO" = "ubuntu-jammy" ]; then
       sudo docker build -t linux-ubuntu-jammy -f src/linux/Dockerfile-ubuntu-jammy .
     fi
+    if [ "$DISTRO" = "ubuntu-noble" ]; then
+      sudo docker build -t linux-ubuntu-noble -f src/linux/Dockerfile-ubuntu-noble .
+    fi
   fi
 }
 
@@ -80,13 +83,16 @@ function createContainer() {
     if [ "$DISTRO" = "ubuntu-jammy" ]; then
       sudo docker run -v /tmp/ubuntu-jammy:/data linux-ubuntu-jammy
     fi
+    if [ "$DISTRO" = "ubuntu-noble" ]; then
+      sudo docker run -v /tmp/ubuntu-noble:/data linux-ubuntu-noble
+    fi
   fi
 }
 
 # Retrieve $DISTRO from the user
 
 function retrieveDistro() {
-  echo "Which distro do you want to use? (ubuntu, debian-bookworm, debian-trixie, fedora-43, fedora-44, rhel-8, rhel-9, rhel-10)"
+  echo "Which distro do you want to use? (ubuntu, ubuntu-noble, ubuntu-jammy, debian-bookworm, debian-trixie, fedora-43, fedora-44, rhel-8, rhel-9, rhel-10)"
   read -r DISTRO
 }
 

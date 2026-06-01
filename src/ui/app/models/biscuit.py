@@ -246,35 +246,27 @@ class BiscuitTokenFactory:
             role: The user role string (e.g., "super_admin", "admin", "writer", "reader").
         """
         if role == "super_admin":
-            builder.add_code(
-                """
+            builder.add_code("""
                 role("super_admin", ["read", "write"]);
-                """
-            )
+                """)
 
         elif role == "admin":
             # Admin role: read and write all resources
-            builder.add_code(
-                """
+            builder.add_code("""
                 role("admin", ["read", "write"]);
-                """
-            )
+                """)
 
         elif role == "writer":
             # Writer role: read and write all resources
-            builder.add_code(
-                """
+            builder.add_code("""
                 role("writer", ["read", "write"]);
-                """
-            )
+                """)
 
         elif role == "reader":
             # Reader role: read-only access to all resources
-            builder.add_code(
-                """
+            builder.add_code("""
                 role("reader", ["read"]);
-                """
-            )
+                """)
 
         else:
             raise ValueError(f"Unknown role: {role}")
@@ -290,15 +282,13 @@ class BiscuitTokenFactory:
         Returns:
             Biscuit: The generated Biscuit token.
         """
-        builder = BiscuitBuilder(
-            f"""
+        builder = BiscuitBuilder(f"""
             user("{user_id}");
             time({datetime.now(timezone.utc).isoformat()});
             client_ip("{request.remote_addr}");
             domain("{request.host}");
             version("{get_version()}");
-            """
-        )  # Start with basic user facts
+            """)  # Start with basic user facts
 
         self._apply_core_role_permissions(builder, role)  # Apply core role permissions
 

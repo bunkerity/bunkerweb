@@ -82,6 +82,9 @@ utils.get_variable = function(variable, site_search, ctx)
 			value = variables[server_name][variable]
 		end
 	end
+	if value == nil then
+		return nil, "not found"
+	end
 	return value, "success"
 end
 
