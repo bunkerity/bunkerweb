@@ -173,7 +173,8 @@ RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc+
 
 # Fix CVEs
 RUN apk add --no-cache "libpng>=1.6.58-r1" # CVE-2026-40930
-RUN apk add --no-cache "mariadb-client>=11.4.11-r0" # CVE-2026-44173 CVE-2026-44172 CVE-2026-44171 CVE-2026-44170 CVE-2026-44169 CVE-2026-44168
+RUN apk add --no-cache "mariadb-client>=11.4.12-r0" # CVE-2026-48165 CVE-2026-48163
+RUN apk add --no-cache "libxml2>=2.13.9-r1" # CVE-2026-6732
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
