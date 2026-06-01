@@ -604,19 +604,33 @@ $(document).ready(() => {
       });
   }, 1000);
 
-  // Check if there's a saved theme preference in localStorage
-  let savedTheme = localStorage.getItem("theme");
+  // The server renders the authoritative theme inline on <html> and on every
+  // theme-dependent element (logos, avatars, bg classes, toggle state). #theme
+  // mirrors that value. For logged-in users it is the DB preference (the
+  // cross-device source of truth); for anonymous pages the head pre-paint script
+  // resolves the preferred theme into window.__bwResolvedTheme.
+  //
+  // Treat the server value as the source of truth and only repaint when the
+  // desired theme genuinely differs from what was already painted -> logged-in
+  // is a pure no-op = zero flicker, and localStorage can no longer override it.
+  const serverTheme = ($("#theme").val() || "light").trim();
+  const desiredTheme =
+    typeof window.__bwResolvedTheme === "string"
+      ? window.__bwResolvedTheme
+      : serverTheme;
 
-  if (!savedTheme) {
-    // If no saved preference, use the system's preferred color scheme
-    const systemPrefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)",
-    ).matches;
-    savedTheme = systemPrefersDark ? "dark" : "light";
+  try {
+    localStorage.setItem("theme", desiredTheme); // keep cache in sync with server
+  } catch (e) {
+    // Storage unavailable (private mode / disabled): non-fatal, theme is still
+    // applied below. Must not abort the rest of this ready() handler.
   }
 
-  // Apply the saved or system-preferred theme
-  applyTheme(savedTheme);
+  if (desiredTheme !== serverTheme) {
+    // <html> was already corrected pre-paint by the head script (anon pages);
+    // this reconciles only the body-level assets (logo, avatar, bg, icon, toggle).
+    applyTheme(desiredTheme);
+  }
 
   // Toggle theme on change
   $("#dark-mode-toggle").on("change", function () {

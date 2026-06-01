@@ -25,8 +25,8 @@
 - [BUGFIX] `mtls`: new `MTLS_URL_n` regex setting enforces mTLS per path instead of site-wide; set `MTLS_VERIFY_CLIENT=optional` and the client certificate is checked in Lua only on matching URIs (invalid regex fails closed).
 - [LINUX] Updated NGINX version to v1.30.2 for Fedora 43 and 44 integration now that it is available in the repositories.
 - [LINUX] Support Ubuntu 26.04 (Resolute Raccoon): the default `ubuntu` package target now builds on Ubuntu 26.04 against Python 3.14 (`nginx = 1.30.2-1~resolute`); the previous default 24.04 Noble moves to the new `ubuntu-noble` identifier (packagecloud repo `ubuntu/noble`), and 22.04 Jammy (`ubuntu-jammy`) is unchanged.
-- [DEPS] Bumped `bcrypt` 4.3.0 → 5.0.0 (adds Python 3.14 `abi3` wheels).
 - [BUGFIX] `ui`/`api`: fix a possible login lockout under bcrypt 5.0.0, which raises a `ValueError` instead of truncating a secret over its 72-byte limit. Password verification now truncates the candidate to 72 bytes (matching how hashes are created), so accounts whose password exceeds 72 bytes — easy with multi-byte characters like accents or emoji — keep working. Setting an over-72-byte password is now rejected up front with a clear message and log across the Setup Wizard, profile page and `ADMIN_PASSWORD`/`API_PASSWORD` env vars (pre-hashed values exempt), and the set-password fields cap input at 72.
+- [BUGFIX] `ui`: fix dark/light theme flicker and wrong-theme-on-load. The client no longer re-applies a stale per-browser `localStorage` value after paint, so the server-rendered profile theme is authoritative — no flash, and consistent across devices/browsers (theme now follows the logged-in profile; last toggle wins everywhere). Anonymous pages (login/setup) resolve their theme before first paint via a nonce'd head script honoring the last choice, then the OS `prefers-color-scheme`.
 
 ## v1.6.11 - 2026/05/23
 
